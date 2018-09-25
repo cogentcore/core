@@ -194,12 +194,14 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 
 // Close requests that the dialog be closed -- it does not alter any state or send any signals
 func (dlg *Dialog) Close() {
+	if dlg == nil {
+		return
+	}
 	win := dlg.Win
 	if win != nil {
 		if DialogsSepWindow {
 			win.SetInactive() // indicates closed
 			win.OSWin.Close()
-			win.Closed()
 		} else {
 			win.ClosePopup(dlg.This)
 		}

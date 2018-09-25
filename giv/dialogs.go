@@ -236,7 +236,9 @@ func TableViewSelectDialogValue(dlg *gi.Dialog) int {
 	sv, ok := frame.ChildByName("tableview", 0)
 	if ok {
 		svv := sv.(*TableView)
-		return svv.SelectedIdx
+		rval := svv.SelectedIdx
+		dlg.Close() // done!
+		return rval
 	}
 	return -1
 }
@@ -366,7 +368,9 @@ func FileViewDialogValue(dlg *gi.Dialog) string {
 	fvk, ok := frame.ChildByName("file-view", 0)
 	if ok {
 		fv := fvk.(*FileView)
-		return fv.SelectedFile()
+		fn := fv.SelectedFile()
+		dlg.Close()
+		return fn
 	}
 	return ""
 }

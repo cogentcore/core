@@ -64,7 +64,7 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	FileViewDialog(vp, cur, ext, DlgOpts{Title: vv.Name(), Prompt: desc}, nil,
 		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
-				dlg, _ := send.(*gi.Dialog)
+				dlg, _ := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				fn := FileViewDialogValue(dlg)
 				vv.SetValue(fn)
 				vv.UpdateWidget()

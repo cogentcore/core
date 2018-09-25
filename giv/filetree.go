@@ -87,6 +87,10 @@ func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
 //////////////////////////////////////////////////////////////////////////////
 //    FileNode
 
+// FileNodeHiStyle is the default style for syntax highlighting to use for
+// file node buffers
+var FileNodeHiStyle = HiStyleName("emacs")
+
 // FileNode represents a file in the file system -- the name of the node is
 // the name of the file.  Folders have children containing further nodes.
 type FileNode struct {
@@ -269,6 +273,7 @@ func (fn *FileNode) OpenBuf() error {
 	}
 	fn.Buf = &TextBuf{}
 	fn.Buf.InitName(fn.Buf, fn.Nm)
+	fn.Buf.Hi.Style = FileNodeHiStyle
 	return fn.Buf.Open(fn.FPath)
 }
 

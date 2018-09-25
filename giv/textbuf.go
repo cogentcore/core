@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/alecthomas/chroma/lexers"
@@ -21,26 +22,30 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 )
 
-// TextBuf is a buffer of text, which can be viewed by TextView(s).  It just
-// holds the raw text lines (in original string and rune formats), and sends
-// signals for making edits to the text and coordinating those edits across
-// multiple views.  Views always only view a single buffer, so they directly
-// call methods on the buffer to drive updates, which are then broadast.  It
-// also has methods for loading and saving buffers to files.  Unlike GUI
-// Widgets, its methods are generally signaling, without an explicit Action
-// suffix.  Internally, the buffer represents new lines using \n = LF, but
-// saving and loading can deal with Windows/DOS CRLF format.
+// TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
+// the raw text lines (in original string and rune formats, and marked-up from
+// syntax highlighting), and sends signals for making edits to the text and
+// coordinating those edits across multiple views.  Views always only view a
+// single buffer, so they directly call methods on the buffer to drive
+// updates, which are then broadast.  It also has methods for loading and
+// saving buffers to files.  Unlike GUI Widgets, its methods are generally
+// signaling, without an explicit Action suffix.  Internally, the buffer
+// represents new lines using \n = LF, but saving and loading can deal with
+// Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
 	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
-	HiLang     string         `desc:"language for syntax highlighting the code"`
 	Autosave   bool           `desc:"if true, auto-save file after changes (in a separate routine)"`
 	Changed    bool           `json:"-" xml:"-" desc:"true if the text has been changed (edited) relative to the original, since last save"`
 	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Info       FileInfo       `desc:"full info about file"`
+	Hi         HiMarkup       `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines     int            `json:"-" xml:"-" desc:"number of lines"`
-	Lines      [][]rune       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line"`
+	Lines      [][]rune       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence"`
+	LineBytes  [][]byte       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line"`
+	Markup     [][]byte       `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
 	ByteOffs   []int          `json:"-" xml:"-" desc:"offset for start of each line in Txt []byte slice -- to enable more efficient updating of that via edits"`
+	MarkupMu   sync.Mutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
 	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
@@ -84,6 +89,11 @@ const (
 	// current state *after* the edit.
 	TextBufDelete
 
+	// TextBufMarkUpdt signals that the Markup text has been updated -- this
+	// signal is typically sent from a separate goroutine so should be used
+	// with a mutex
+	TextBufMarkUpdt
+
 	TextBufSignalsN
 )
 
@@ -117,16 +127,26 @@ func (tb *TextBuf) Refresh() {
 
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
+	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
-	if nlines == 1 {
-		tb.Lines[0] = []rune("")
-	}
+	tb.LineBytes = make([][]byte, nlines)
+	tb.Markup = make([][]byte, nlines)
+
 	if cap(tb.ByteOffs) >= nlines {
 		tb.ByteOffs = tb.ByteOffs[:nlines]
 	} else {
 		tb.ByteOffs = make([]int, nlines)
 	}
+
+	if nlines == 1 { // this is used for a new blank doc
+		tb.ByteOffs[0] = 0 // by definition
+		tb.Lines[0] = []rune("")
+		tb.LineBytes[0] = []byte("")
+		tb.Markup[0] = []byte("")
+	}
+
 	tb.NLines = nlines
+	tb.MarkupMu.Unlock()
 	tb.Refresh()
 }
 
@@ -142,7 +162,7 @@ func (tb *TextBuf) Stat() error {
 		lexer = lexers.Analyse(string(tb.Txt))
 	}
 	if lexer != nil {
-		tb.HiLang = lexer.Config().Name
+		tb.Hi.Lang = lexer.Config().Name
 	}
 	return nil
 }
@@ -160,65 +180,86 @@ func (tb *TextBuf) FileModCheck() {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.ViewportFromView()
-		if tb.Changed {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
-				Prompt: fmt.Sprintf("File: %v has changed on disk since being opened or saved by you, but you have already made changes -- what do you want to do?", tb.Filename)},
-				[]string{"Save To Different File", "Open From Disk, Losing Changes", "Ignore and Proceed"},
-				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						CallMethod(tb, "SaveAs", vp)
-					case 1:
-						tb.ReOpen()
-					case 2:
-						tb.FileModOk = true
-					}
-				})
-		} else {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
-				Prompt: fmt.Sprintf("File: %v has changed on disk since being opened or saved by you (and you haven't made any changes since) open from disk?", tb.Filename)},
-				[]string{"Open From Disk", "Ignore and Prodeed"},
-				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						tb.ReOpen()
-					case 1:
-						tb.FileModOk = true
-					}
-				})
-		}
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
+			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
+			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Ignore and Proceed"},
+			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					CallMethod(tb, "SaveAs", vp)
+				case 1:
+					tb.ReOpen()
+				case 2:
+					tb.FileModOk = true
+				}
+			})
 	}
 }
 
 // Open loads text from a file into the buffer
 func (tb *TextBuf) Open(filename gi.FileName) error {
-	fp, err := os.Open(string(filename))
+	err := tb.OpenFile(filename)
 	if err != nil {
 		vp := tb.ViewportFromView()
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
+		return err
+	}
+	tb.SetName(string(filename)) // todo: modify in any way?
+
+	// markup the first 100 lines
+	mxhi := gi.MinInt(100, tb.NLines-1)
+	tb.MarkupLines(0, mxhi)
+
+	// update views
+	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
+
+	// do slow full update in background
+	if tb.Hi.HasHi() {
+		go tb.MarkupAllLines() // then do all in background
+	}
+	return nil
+}
+
+// OpenFile just loads a file into the buffer -- doesn't do any markup or
+// notification -- for temp bufs
+func (tb *TextBuf) OpenFile(filename gi.FileName) error {
+	fp, err := os.Open(string(filename))
+	if err != nil {
 		return err
 	}
 	tb.Txt, err = ioutil.ReadAll(fp)
 	fp.Close()
 	tb.Filename = filename
-	tb.SetName(string(filename)) // todo: modify in any way?
 	tb.Stat()
 	tb.BytesToLines()
 	return nil
 }
 
-// ReOpen re-opens text from current file, if filename set -- returns false if not
+// ReOpen re-opens text from current file, if filename set -- returns false if
+// not -- uses an optimized diff-based update to preserve existing formatting
+// -- very fast if not very different
 func (tb *TextBuf) ReOpen() bool {
 	tb.AutoSaveDelete() // justin case
 	if tb.Filename == "" {
 		return false
 	}
-	// todo: use diff!
-	err := tb.Open(tb.Filename)
+
+	ob := &TextBuf{}
+	ob.InitName(ob, "re-open-tmp")
+	err := ob.OpenFile(tb.Filename)
 	if err != nil {
+		vp := tb.ViewportFromView()
+		if vp != nil { // only if viewing
+			gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, true, false, nil, nil)
+		}
+		log.Println(err)
 		return false
 	}
+	tb.Stat() // "own" the new file..
+	diffs := tb.DiffBufs(ob)
+	tb.PatchFromBuf(ob, diffs)
+	tb.Changed = false
 	return true
 }
 
@@ -229,24 +270,24 @@ func (tb *TextBuf) SaveAs(filename gi.FileName) error {
 	if _, err := os.Stat(string(filename)); !os.IsNotExist(err) {
 		vp := tb.ViewportFromView()
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
-			Prompt: fmt.Sprintf("File: %v already exists, overwrite?", filename)},
+			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
 			[]string{"Cancel", "Overwrite"},
 			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
 					// do nothing
 				case 1:
-					tb.SaveToFile(filename)
+					tb.SaveFile(filename)
 				}
 			})
 		return nil
 	} else {
-		return tb.SaveToFile(filename)
+		return tb.SaveFile(filename)
 	}
 }
 
-// SaveToFile writes current buffer to file, with no prompting, etc
-func (tb *TextBuf) SaveToFile(filename gi.FileName) error {
+// SaveFile writes current buffer to file, with no prompting, etc
+func (tb *TextBuf) SaveFile(filename gi.FileName) error {
 	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
@@ -265,7 +306,25 @@ func (tb *TextBuf) Save() error {
 	if tb.Filename == "" {
 		return fmt.Errorf("giv.TextBuf: filename is empty for Save")
 	}
-	return tb.SaveAs(tb.Filename)
+	tb.EditDone()
+	info, err := os.Stat(string(tb.Filename))
+	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
+		vp := tb.ViewportFromView()
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
+			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
+			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
+			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					CallMethod(tb, "SaveAs", vp)
+				case 1:
+					tb.ReOpen()
+				case 2:
+					tb.SaveFile(tb.Filename)
+				}
+			})
+	}
+	return tb.SaveFile(tb.Filename)
 }
 
 // Close closes the buffer -- prompts to save if changes, and disconnects from views
@@ -346,56 +405,51 @@ func (tb *TextBuf) AutoSaveCheck() bool {
 	return true
 }
 
-// LinesToBytes converts current Lines back to the Txt slice of bytes
-func (tb *TextBuf) LinesToBytes() {
-	if tb.Txt != nil {
-		tb.Txt = tb.Txt[:0]
-	} else {
-		tb.Txt = make([]byte, 0, tb.NLines*40)
+/////////////////////////////////////////////////////////////////////////////
+//   Appending Lines
+
+// EndPos returns the ending position at end of buffer
+func (tb *TextBuf) EndPos() TextPos {
+	if tb.NLines == 0 {
+		return TextPosZero
 	}
-	if cap(tb.ByteOffs) >= tb.NLines {
-		tb.ByteOffs = tb.ByteOffs[:tb.NLines]
-	} else {
-		tb.ByteOffs = make([]int, tb.NLines)
-	}
-	bo := 0
-	for ln, lr := range tb.Lines {
-		tb.ByteOffs[ln] = bo
-		tb.Txt = append(tb.Txt, []byte(string(lr))...)
-		tb.Txt = append(tb.Txt, '\n')
-		bo += len(lr) + 1
-	}
+	ed := TextPos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
+	return ed
 }
 
-// LinesToBytesCopy converts current Lines into a separate text byte copy --
-// e.g., for autosave or other "offline" uses of the text -- doesn't affect
-// byte offsets etc
-func (tb *TextBuf) LinesToBytesCopy() []byte {
-	b := make([]byte, 0, tb.NLines*40)
-	for _, lr := range tb.Lines {
-		b = append(b, []byte(string(lr))...)
-		b = append(b, '\n')
-	}
-	return b
+// AppendText appends new text to end of buffer, using insert, returns edit
+func (tb *TextBuf) AppendText(text []byte) *TextBufEdit {
+	ed := tb.EndPos()
+	return tb.InsertText(ed, text, true)
 }
 
-// BytesToLines converts current Txt bytes into lines, and signals that new text is available
-func (tb *TextBuf) BytesToLines() {
-	if len(tb.Txt) == 0 {
-		tb.New(1)
-		return
+// AppendTextLine appends one line of new text to end of buffer, using insert,
+// and appending a LF at the end of the line if it doesn't already have one.
+// Returns the edit region.
+func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
+	ed := tb.EndPos()
+	sz := len(text)
+	addLF := false
+	if sz > 0 {
+		if text[sz-1] != '\n' {
+			addLF = true
+		}
+	} else {
+		addLF = true
 	}
-	lns := bytes.Split(tb.Txt, []byte("\n"))
-	tb.NLines = len(lns)
-	tb.New(tb.NLines)
-	bo := 0
-	for ln, txt := range lns {
-		tb.ByteOffs[ln] = bo
-		tb.Lines[ln] = bytes.Runes(txt)
-		bo += len(txt) + 1 // lf
+	efft := text
+	if addLF {
+		tcpy := make([]byte, sz+1)
+		copy(tcpy, text)
+		tcpy[sz] = '\n'
+		efft = tcpy
 	}
-	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
+	tbe := tb.InsertText(ed, efft, true)
+	return tbe
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//   Views
 
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
 func (tb *TextBuf) AddView(vw *TextView) {
@@ -414,7 +468,83 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 	tb.TextBufSig.Disconnect(vw.This)
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
+// ViewportFromView returns Viewport from textview, if avail
+func (tb *TextBuf) ViewportFromView() *gi.Viewport2D {
+	if len(tb.Views) > 0 {
+		return tb.Views[0].Viewport
+	}
+	return nil
+}
+
+// AutoscrollViews ensures that views are always viewing the end of the buffer
+func (tb *TextBuf) AutoScrollViews() {
+	for _, tv := range tb.Views {
+		tv.CursorPos = tb.EndPos()
+		tv.ScrollCursorInView()
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//   Accessing Text
+
+// LinesToBytes converts current Lines back to the Txt slice of bytes --
+// re-uses Txt memory if possible for maximum efficiency
+func (tb *TextBuf) LinesToBytes() {
+	if tb.NLines == 0 {
+		if tb.Txt != nil {
+			tb.Txt = tb.Txt[:0]
+		}
+		return
+	}
+
+	tb.Txt = tb.LinesToBytesCopy()
+
+	// todo: byte offs are not updating properly!
+
+	// totsz := tb.ByteOffs[tb.NLines-1] + len(tb.LineBytes[tb.NLines-1]) + 1
+
+	// if cap(tb.Txt) < totsz {
+	// 	tb.Txt = make([]byte, totsz)
+	// } else {
+	// 	tb.Txt = tb.Txt[:totsz]
+	// }
+
+	// for ln := range tb.Lines {
+	// 	bo := tb.ByteOffs[ln]
+	// 	copy(tb.Txt[bo:], tb.LineBytes[ln])
+	// 	lsz := len(tb.LineBytes[ln])
+	// 	tb.Txt[bo+lsz] = '\n'
+	// }
+}
+
+// LinesToBytesCopy converts current Lines into a separate text byte copy --
+// e.g., for autosave or other "offline" uses of the text -- doesn't affect
+// byte offsets etc
+func (tb *TextBuf) LinesToBytesCopy() []byte {
+	return bytes.Join(tb.LineBytes, []byte("\n"))
+}
+
+// BytesToLines converts current Txt bytes into lines, and initializes markup with raw text
+func (tb *TextBuf) BytesToLines() {
+	tb.Hi.Init()
+	if len(tb.Txt) == 0 {
+		tb.New(1)
+		return
+	}
+	lns := bytes.Split(tb.Txt, []byte("\n"))
+	tb.NLines = len(lns)
+	tb.New(tb.NLines)
+	bo := 0
+	for ln, txt := range lns {
+		tb.ByteOffs[ln] = bo
+		tb.Lines[ln] = bytes.Runes(txt)
+		tb.LineBytes[ln] = txt
+		tb.Markup[ln] = tb.LineBytes[ln]
+		bo += len(txt) + 1 // lf
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //   Search
 
 // Search looks for a string (no regexp) within buffer, in a case-sensitive
@@ -474,7 +604,7 @@ func (tb *TextBuf) SearchCI(find string) (int, []TextPos) {
 	return cnt, matches
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 //   TextPos, TextRegion, TextBufEdit
 
 // TextPos represents line, character positions within the TextBuf and TextView
@@ -568,16 +698,8 @@ func (te *TextBufEdit) ToBytes() []byte {
 	return b
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 //   Edits
-
-func (tb *TextBuf) SaveUndo(tbe *TextBufEdit) {
-	if tb.UndoPos < len(tb.Undos) {
-		tb.Undos = tb.Undos[:tb.UndoPos]
-	}
-	tb.Undos = append(tb.Undos, tbe)
-	tb.UndoPos = len(tb.Undos)
-}
 
 // DeleteText deletes region of text between start and end positions, signaling
 // views after text lines have been updated.
@@ -598,7 +720,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 	tbe.Delete = true
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
-		// no lines to bytes for single-line ops
+		tb.LinesEdited(tbe)
 	} else {
 		// first get chars on start and end
 		stln := st.Ln + 1
@@ -615,7 +737,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
 		tb.NLines = len(tb.Lines)
-		tb.LinesToBytes()
+		tb.LinesDeleted(tbe)
 	}
 	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
 	if tb.Autosave {
@@ -643,13 +765,15 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	rs := bytes.Runes(lns[0])
 	rsz := len(rs)
 	ed := st
+	var tbe *TextBufEdit
 	if sz == 1 {
 		nt := append(tb.Lines[st.Ln], rs...) // first append to end to extend capacity
 		copy(nt[st.Ch+rsz:], nt[st.Ch:])     // move stuff to end
 		copy(nt[st.Ch:], rs)                 // copy into position
 		tb.Lines[st.Ln] = nt
 		ed.Ch += rsz
-		// no lines to bytes
+		tbe = tb.Region(st, ed)
+		tb.LinesEdited(tbe)
 	} else {
 		if tb.Lines[st.Ln] == nil {
 			tb.Lines[st.Ln] = []rune("")
@@ -677,9 +801,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 		if eost != nil {
 			tb.Lines[ed.Ln] = append(tb.Lines[ed.Ln], eost...)
 		}
-		tb.LinesToBytes()
+		tbe = tb.Region(st, ed)
+		tb.LinesInserted(tbe)
 	}
-	tbe := tb.Region(st, ed)
 	tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -733,6 +857,159 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 	return tbe
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//   Syntax Highlighting Markup
+
+// LinesInserted inserts new lines in Markup and ByteOffs corresponding to lines
+// inserted in Lines text.  Locks and unlocks the Markup mutex
+func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
+	stln := tbe.Reg.Start.Ln + 1
+	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+
+	tb.MarkupMu.Lock()
+
+	// LineBytes
+	tmplb := make([][]byte, nsz)
+	nlb := append(tb.LineBytes, tmplb...)
+	copy(nlb[stln+nsz:], nlb[stln:])
+	copy(nlb[stln:], tmplb)
+	tb.LineBytes = nlb
+
+	// Markup
+	tmpmu := make([][]byte, nsz)
+	nmu := append(tb.Markup, tmpmu...) // first append to end to extend capacity
+	copy(nmu[stln+nsz:], nmu[stln:])   // move stuff to end
+	copy(nmu[stln:], tmpmu)            // copy into position
+	tb.Markup = nmu
+
+	// ByteOffs
+	tmpof := make([]int, nsz)
+	nof := append(tb.ByteOffs, tmpof...)
+	copy(nof[stln+nsz:], nof[stln:])
+	copy(nof[stln:], tmpof)
+	tb.ByteOffs = nof
+
+	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
+	bo := tb.ByteOffs[st]
+	for ln := st; ln <= ed; ln++ {
+		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.ByteOffs[ln] = bo
+		bo += len(tb.LineBytes[ln]) + 1
+	}
+	for ln := ed + 1; ln < tb.NLines; ln++ {
+		tb.ByteOffs[ln] = bo
+		bo += len(tb.LineBytes[ln]) + 1
+	}
+	tb.MarkupLines(st, ed)
+	tb.MarkupMu.Unlock()
+
+	// todo: turn on
+	// go tb.MarkupAllLines() // always do global reformat in bg
+}
+
+// LinesDeleted deletes lines in Markup and ByteOffs corresponding to lines
+// deleted in Lines text.  Locks and unlocks the Markup mutex.
+func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
+	tb.MarkupMu.Lock()
+
+	stln := tbe.Reg.Start.Ln
+	edln := tbe.Reg.End.Ln
+
+	tb.LineBytes = append(tb.LineBytes[:stln], tb.LineBytes[edln:]...)
+	tb.Markup = append(tb.Markup[:stln], tb.Markup[edln:]...)
+	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
+
+	st := tbe.Reg.Start.Ln
+	bo := tb.ByteOffs[st]
+	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
+	tb.Markup[st] = tb.LineBytes[st]
+	bo += len(tb.Markup[st]) + 1
+	for ln := st + 1; ln < tb.NLines; ln++ {
+		tb.ByteOffs[ln] = bo
+		bo += len(tb.LineBytes[ln]) + 1
+	}
+	tb.MarkupLines(st, st)
+	tb.MarkupMu.Unlock()
+	// probably don't need to do global markup here..
+}
+
+// LinesEdited re-marks-up lines in edit (typically only 1).  Locks and
+// unlocks the Markup mutex.
+func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
+	tb.MarkupMu.Lock()
+
+	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
+	bo := tb.ByteOffs[st]
+	for ln := st; ln <= ed; ln++ {
+		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.ByteOffs[ln] = bo
+		bo += len(tb.LineBytes[ln]) + 1
+	}
+	for ln := ed + 1; ln < tb.NLines; ln++ {
+		tb.ByteOffs[ln] = bo
+		bo += len(tb.LineBytes[ln]) + 1
+	}
+	tb.MarkupLines(st, ed)
+	tb.MarkupMu.Unlock()
+	// probably don't need to do global markup here..
+}
+
+// MarkupAllLines does syntax highlighting markup for all lines in buffer,
+// calling MarkupMu mutex when setting the marked-up lines with the result --
+// designed to be called in a separate goroutine
+func (tb *TextBuf) MarkupAllLines() {
+	tb.LinesToBytes() // todo: could need another mutex here?
+	mtlns, err := tb.Hi.MarkupText(tb.Txt)
+	if err != nil {
+		return
+	}
+
+	tb.MarkupMu.Lock()
+	maxln := len(mtlns) - 1
+	for ln := 0; ln < maxln; ln++ {
+		mt := mtlns[ln]
+		tb.Markup[ln] = tb.Hi.FixMarkupLine(mt)
+	}
+	tb.MarkupMu.Unlock()
+	tb.TextBufSig.Emit(tb.This, int64(TextBufMarkUpdt), tb.Txt)
+}
+
+// MarkupLines generates markup of given range of lines. end is *inclusive*
+// line.  returns true if all lines were marked up successfully.  This does
+// NOT lock the MarkupMu mutex (done at outer loop)
+func (tb *TextBuf) MarkupLines(st, ed int) bool {
+	if !tb.Hi.HasHi() || tb.NLines == 0 {
+		return false
+	}
+	if ed >= tb.NLines {
+		ed = tb.NLines - 1
+	}
+	allgood := true
+	for ln := st; ln <= ed; ln++ {
+		mu, err := tb.Hi.MarkupLine(tb.LineBytes[ln])
+		if err == nil {
+			tb.Markup[ln] = mu
+		} else {
+			allgood = false
+		}
+	}
+	return allgood
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//   Undo
+
+// SaveUndo saves given edit to undo stack
+func (tb *TextBuf) SaveUndo(tbe *TextBufEdit) {
+	if tb.UndoPos < len(tb.Undos) {
+		tb.Undos = tb.Undos[:tb.UndoPos]
+	}
+	tb.Undos = append(tb.Undos, tbe)
+	tb.UndoPos = len(tb.Undos)
+}
+
 // Undo undoes next item on the undo stack, and returns that record -- nil if no more
 func (tb *TextBuf) Undo() *TextBufEdit {
 	if tb.UndoPos == 0 {
@@ -765,62 +1042,6 @@ func (tb *TextBuf) Redo() *TextBufEdit {
 	}
 	tb.UndoPos++
 	return tbe
-}
-
-// EndPos returns the ending position at end of buffer
-func (tb *TextBuf) EndPos() TextPos {
-	if tb.NLines == 0 {
-		return TextPosZero
-	}
-	ed := TextPos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
-	return ed
-}
-
-// AppendText appends new text to end of buffer, using insert, returns edit
-func (tb *TextBuf) AppendText(text []byte) *TextBufEdit {
-	ed := tb.EndPos()
-	return tb.InsertText(ed, text, true)
-}
-
-// AppendTextLine appends one line of new text to end of buffer, using insert,
-// and appending a LF at the end of the line if it doesn't already have one.
-// Returns the edit region.
-func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
-	ed := tb.EndPos()
-	sz := len(text)
-	addLF := false
-	if sz > 0 {
-		if text[sz-1] != '\n' {
-			addLF = true
-		}
-	} else {
-		addLF = true
-	}
-	efft := text
-	if addLF {
-		tcpy := make([]byte, sz+1)
-		copy(tcpy, text)
-		tcpy[sz] = '\n'
-		efft = tcpy
-	}
-	tbe := tb.InsertText(ed, efft, true)
-	return tbe
-}
-
-// ViewportFromView returns Viewport from textview, if avail
-func (tb *TextBuf) ViewportFromView() *gi.Viewport2D {
-	if len(tb.Views) > 0 {
-		return tb.Views[0].Viewport
-	}
-	return nil
-}
-
-// AutoscrollViews ensures that views are always viewing the end of the buffer
-func (tb *TextBuf) AutoScrollViews() {
-	for _, tv := range tb.Views {
-		tv.CursorPos = tb.EndPos()
-		tv.ScrollCursorInView()
-	}
 }
 
 // LineIndent returns the number of tabs or spaces at start of given line --
@@ -949,7 +1170,7 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //   Diffs
 
 // TextDiffs are raw differences between text, in terms of lines, reporting a
@@ -1007,10 +1228,27 @@ func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
 // PatchFromBuf patches (edits) this buffer using content from other buffer,
 // according to diff operations (e.g., as generated from DiffBufs)
 func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs) bool {
-	return false
+	mods := false
+	for _, df := range diffs {
+		switch df.Tag {
+		case 'r':
+			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false)
+			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
+			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false)
+			mods = true
+		case 'd':
+			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false)
+			mods = true
+		case 'i':
+			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
+			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false)
+			mods = true
+		}
+	}
+	return mods
 }
 
-//////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 //   TextBufList, TextBufs
 
 // TextBufList is a list of text buffers, as a ki.Node, with buffers as children

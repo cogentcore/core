@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _TextBufSignals_name = "TextBufDoneTextBufNewTextBufInsertTextBufDeleteTextBufSignalsN"
+const _TextBufSignals_name = "TextBufDoneTextBufNewTextBufInsertTextBufDeleteTextBufMarkUpdtTextBufSignalsN"
 
-var _TextBufSignals_index = [...]uint8{0, 11, 21, 34, 47, 62}
+var _TextBufSignals_index = [...]uint8{0, 11, 21, 34, 47, 62, 77}
 
 func (i TextBufSignals) String() string {
 	if i < 0 || i >= TextBufSignals(len(_TextBufSignals_index)-1) {

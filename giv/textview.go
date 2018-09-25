@@ -5,21 +5,15 @@
 package giv
 
 import (
-	"bytes"
 	"fmt"
 	"go/token"
 	"image"
 	"image/draw"
 	"log"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 	"unicode"
-
-	"github.com/alecthomas/chroma"
-	"github.com/alecthomas/chroma/formatters/html"
-	"github.com/alecthomas/chroma/lexers"
-	"github.com/alecthomas/chroma/styles"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi"
@@ -46,24 +40,20 @@ type TextViewOpts struct {
 }
 
 // TextView is a widget for editing multiple lines of text (as compared to
-// TextField for a single line).  The underlying data model is just plain
-// simple lines (ended by \n) with any number of characters per line.  These
-// lines are displayed using wrap-around text into the editor.  Currently only
-// works on in-memory strings.
+// TextField for a single line).  The View is driven by a TextBuf buffer which
+// contains all the text, and manages all the edits, sending update signals
+// out to the views -- multiple views can be attached to a given buffer.  All
+// updating in the TextView should be within a single goroutine -- it would
+// require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
 	Buf               *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
 	Placeholder       string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	Opts              TextViewOpts              `desc:"options for how text editing / viewing works"`
 	CursorWidth       units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	HiStyle           HiStyleName               `desc:"syntax highlighting style"`
-	HiCSS             gi.StyleSheet             `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
 	LineIcons         map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
 	FocusActive       bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	NLines            int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Markup            [][]byte                  `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	HasMarkup         []bool                    `json:"-" xml:"-" desc:"is markup version available?  for each line of text"`
-	MarkupMu          sync.Mutex                `json:"-" xml:"-" desc:"mutex for accessing HasMarkup -- markup routine and main routine use this to coordinate"`
 	Renders           []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs              []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
 	LineNoDigs        int                       `json:"-" xml:"-" number of line number digits needed"`
@@ -93,17 +83,12 @@ type TextView struct {
 	VisSize           image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn           bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
 	Complete          *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
-	CompleteTimer     *time.Timer               `xml:desc:"timer for delay before completion popup menu appears"`
-	// chroma highlighting
-	lastHiLang   string
-	lastHiStyle  HiStyleName
-	lexer        chroma.Lexer
-	formatter    *html.Formatter
-	style        *chroma.Style
-	reLayout     bool
-	lastRecenter int
-	lastFilename gi.FileName
-	lastWasTab   bool
+	CompleteTimer     *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
+	needsRefresh      int32                     // used in atomically safe way to indicate when refresh required
+	reLayout          bool
+	lastRecenter      int
+	lastFilename      gi.FileName
+	lastWasTab        bool
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -208,6 +193,37 @@ func (tv *TextView) Refresh() {
 	tv.RenderAllLines()
 }
 
+// NeedsRefresh checks if a refresh is required -- atomically safe for other
+// routines to set the NeedsRefresh flag
+func (tv *TextView) NeedsRefresh() bool {
+	if atomic.LoadInt32(&tv.needsRefresh) != 0 {
+		return true
+	}
+	return false
+}
+
+// SetNeedsRefresh flags that a refresh is required -- atomically safe for
+// other routines to call this
+func (tv *TextView) SetNeedsRefresh() {
+	atomic.StoreInt32(&tv.needsRefresh, 1)
+}
+
+// ClearNeedsRefresh clears needs refresh flag -- atomically safe
+func (tv *TextView) ClearNeedsRefresh() {
+	atomic.StoreInt32(&tv.needsRefresh, 0)
+}
+
+// RefreshIfNeeded re-displays everything if SetNeedsRefresh was called --
+// returns true if refrehshed
+func (tv *TextView) RefreshIfNeeded() bool {
+	if tv.NeedsRefresh() {
+		tv.Refresh()
+		tv.ClearNeedsRefresh()
+		return true
+	}
+	return false
+}
+
 func (tv *TextView) IsChanged() bool {
 	if tv.Buf != nil && tv.Buf.Changed {
 		return true
@@ -246,26 +262,10 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 	tv.UpdateSig()
 }
 
-// InsertLines inserts new lines of text and reformats them
-func (tv *TextView) InsertLines(tbe *TextBufEdit) {
-	tv.MarkupMu.Lock()
-
+// LinesInserted inserts new lines of text and reformats them
+func (tv *TextView) LinesInserted(tbe *TextBufEdit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
-
-	// Markup
-	tmpmu := make([][]byte, nsz)
-	nmu := append(tv.Markup, tmpmu...) // first append to end to extend capacity
-	copy(nmu[stln+nsz:], nmu[stln:])   // move stuff to end
-	copy(nmu[stln:], tmpmu)            // copy into position
-	tv.Markup = nmu
-
-	// HasMarkup
-	tmphm := make([]bool, nsz)
-	nhm := append(tv.HasMarkup, tmphm...)
-	copy(nhm[stln+nsz:], nhm[stln:])
-	copy(nhm[stln:], tmphm)
-	tv.HasMarkup = nhm
 
 	// Renders
 	tmprn := make([]gi.TextRender, nsz)
@@ -282,27 +282,21 @@ func (tv *TextView) InsertLines(tbe *TextBufEdit) {
 	tv.Offs = nof
 
 	tv.NLines += nsz
-	tv.MarkupMu.Unlock()
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 	tv.RenderAllLines()
 }
 
-// DeleteLines deletes lines of text and reformats remaining one
-func (tv *TextView) DeleteLines(tbe *TextBufEdit) {
-	tv.MarkupMu.Lock()
-
+// LinesDeleted deletes lines of text and reformats remaining one
+func (tv *TextView) LinesDeleted(tbe *TextBufEdit) {
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 	dsz := edln - stln
 
-	tv.Markup = append(tv.Markup[:stln], tv.Markup[edln:]...)
-	tv.HasMarkup = append(tv.HasMarkup[:stln], tv.HasMarkup[edln:]...)
 	tv.Renders = append(tv.Renders[:stln], tv.Renders[edln:]...)
 	tv.Offs = append(tv.Offs[:stln], tv.Offs[edln:]...)
 
 	tv.NLines -= dsz
-	tv.MarkupMu.Unlock()
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln, true)
 	tv.RenderAllLines()
@@ -315,7 +309,6 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.ResetState()
-		// tv.LayoutAllLines(false)
 		tv.SetFullReRender()
 		tv.UpdateSig()
 	case TextBufInsert:
@@ -325,7 +318,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tbe := data.(*TextBufEdit)
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			tv.InsertLines(tbe)
+			tv.LinesInserted(tbe)
 		} else {
 			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 			if rerend {
@@ -340,7 +333,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		}
 		tbe := data.(*TextBufEdit)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			tv.DeleteLines(tbe)
+			tv.LinesDeleted(tbe)
 		} else {
 			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, true)
 			if rerend {
@@ -349,59 +342,13 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 			}
 		}
+	case TextBufMarkUpdt:
+		tv.SetNeedsRefresh() // comes from another goroutine
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Text formatting and rendering
-
-// HasHi returns true if there are highighting parameters set
-func (tv *TextView) HasHi() bool {
-	if tv.Buf == nil {
-		return false
-	}
-	if tv.Buf.HiLang == "" || tv.HiStyle == "" {
-		return false
-	}
-	return true
-}
-
-// HiInit initializes the syntax highlighting for current Hi params
-func (tv *TextView) HiInit() {
-	if !tv.HasHi() {
-		return
-	}
-	if tv.Buf.HiLang == tv.lastHiLang && tv.HiStyle == tv.lastHiStyle {
-		return
-	}
-	tv.lexer = chroma.Coalesce(lexers.Get(tv.Buf.HiLang))
-	tv.formatter = html.New(html.WithClasses(), html.TabWidth(tv.Sty.Text.TabSize))
-	tv.style = styles.Get(string(tv.HiStyle))
-	if tv.style == nil {
-		tv.style = styles.Fallback
-	}
-	var cssBuf bytes.Buffer
-	err := tv.formatter.WriteCSS(&cssBuf, tv.style)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	csstr := cssBuf.String()
-	csstr = strings.Replace(csstr, " .chroma .", " .", -1)
-	// lnidx := strings.Index(csstr, "\n")
-	// csstr = csstr[lnidx+1:]
-	tv.HiCSS.ParseString(csstr)
-	tv.CSS = tv.HiCSS.CSSProps()
-
-	if chp, ok := ki.SubProps(tv.CSS, ".chroma"); ok {
-		for ky, vl := range chp { // apply to top level
-			tv.SetProp(ky, vl)
-		}
-	}
-
-	tv.lastHiLang = tv.Buf.HiLang
-	tv.lastHiStyle = tv.HiStyle
-}
 
 // RenderSize is the size we should pass to text rendering, based on alloc
 func (tv *TextView) RenderSize() gi.Vec2D {
@@ -436,51 +383,22 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 	return tv.RenderSz
 }
 
-// FixMarkupLine fixes the output of chroma markup
-func (tv *TextView) FixMarkupLine(mt []byte) []byte {
-	mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
-	mt = bytes.TrimPrefix(mt, []byte(`<span class="err">`))
-	mt = bytes.Replace(mt, []byte(`**</span>**`), []byte(`**</span>`), -1)
-	mt = bytes.Replace(mt, []byte(`__</span>__`), []byte(`__</span>`), -1)
-	return mt
-}
-
-// HiAllLines does highlighting of all lines, in a separate goroutine because it is slow
-func (tv *TextView) HiAllLines() {
-	var htmlBuf bytes.Buffer
-	iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Txt)) // todo: unfortunate conversion here..
-	err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
-	if err != nil {
-		log.Println(err)
+// HiStyle applies the highlighting styles from buffer markup style
+func (tv *TextView) HiStyle() {
+	if !tv.Buf.Hi.HasHi() {
 		return
 	}
-	mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
-
-	sz := tv.RenderSz
-	sty := &tv.Sty
-	fst := sty.Font
-	fst.BgColor.SetColor(nil)
-
-	// tv.MarkupMu.Lock() // todo: turn these on if using goroutine
-	maxln := len(mtlns) - 1
-	for ln := 0; ln < maxln; ln++ {
-		if len(tv.Markup) != tv.NLines { // update happend!
-			break
+	tv.CSS = tv.Buf.Hi.CSSProps
+	if chp, ok := ki.SubProps(tv.CSS, ".chroma"); ok {
+		for ky, vl := range chp { // apply to top level
+			tv.SetProp(ky, vl)
 		}
-		mt := mtlns[ln]
-		mt = tv.FixMarkupLine(mt)
-		tv.Markup[ln] = mt
-		tv.HasMarkup[ln] = true
-		tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
 	}
-	// tv.MarkupMu.Unlock()
-	// tv.UpdateSig() // turn this on if using goroutine
 }
 
-// LayoutAllLines generates TextRenders of lines from our TextBuf, using any
-// highlighter that might be present, and returns whether the current rendered
-// size is different from what it was previously
+// LayoutAllLines generates TextRenders of lines from our TextBuf, from the
+// Markup version of the source, and returns whether the current rendered size
+// is different from what it was previously
 func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if inLayout && tv.reLayout {
 		return false
@@ -494,26 +412,12 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	}
 	tv.lastFilename = tv.Buf.Filename
 
-	tv.MarkupMu.Lock() // wait for prior markup if it is still happening
-	tv.HiInit()
-
+	tv.Buf.Hi.TabSize = tv.Sty.Text.TabSize
+	tv.HiStyle()
 	// fmt.Printf("layout all: %v\n", tv.Nm)
 
 	tv.NLines = tv.Buf.NLines
 	nln := tv.NLines
-	if cap(tv.Markup) >= nln {
-		tv.Markup = tv.Markup[:nln]
-	} else {
-		tv.Markup = make([][]byte, nln)
-	}
-	if cap(tv.HasMarkup) >= nln {
-		tv.HasMarkup = tv.HasMarkup[:nln]
-		for i := range tv.HasMarkup {
-			tv.HasMarkup[i] = false
-		}
-	} else {
-		tv.HasMarkup = make([]bool, nln)
-	}
 	if cap(tv.Renders) >= nln {
 		tv.Renders = tv.Renders[:nln]
 	} else {
@@ -528,11 +432,6 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	tv.VisSizes()
 	sz := tv.RenderSz
 
-	if tv.HasHi() {
-		//		go tv.HiAllLines() // this is not sufficiently reliable right now - just do it
-		tv.HiAllLines()
-	}
-
 	// fmt.Printf("rendersize: %v\n", sz)
 	sty := &tv.Sty
 	fst := sty.Font
@@ -541,18 +440,14 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	mxwd := sz.X // always start with our render size
 
 	for ln := 0; ln < nln; ln++ {
-		if tv.HasMarkup[ln] {
-			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		} else {
-			tv.Renders[ln].SetHTMLPre([]byte(string(tv.Buf.Lines[ln])), &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		}
+		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
 		tv.Offs[ln] = off
 		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.MarkupMu.Unlock()
+
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
 	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
 	// fmt.Printf("lay lines: diff: %v  old: %v  new: %v\n", diff, tv.LinesSize, nwSz)
@@ -611,46 +506,23 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 }
 
 // LayoutLines generates render of given range of lines (including
-// highlighting). end is *inclusive* line.  if highlighter generates an error
-// on a line, or word-wrap causes lines to increase in number of spans, then
-// calls LayoutAllLines to do a full-reparse, and returns true to indicate
-// need for a full re-render -- otherwise returns false and just these lines
-// need to be re-rendered..  isDel means this is a delete and thus offsets for all
-// higher lines need to be recomputed
+// highlighting). end is *inclusive* line.  isDel means this is a delete and
+// thus offsets for all higher lines need to be recomputed.  returns true if
+// overall number of effective lines (e.g., from word-wrap) is now different
+// than before, and thus a full re-render is needed.
 func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		return false
 	}
-	// tv.MarkupMu.Lock()
 	sty := &tv.Sty
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	mxwd := float32(tv.LinesSize.X)
 	rerend := false
+
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
-		if tv.HasHi() {
-			var htmlBuf bytes.Buffer
-			iterator, err := tv.lexer.Tokenise(nil, string(tv.Buf.Lines[ln])+"\n")
-			// add \n b/c it needs to see that for comments..
-			err = tv.formatter.Format(&htmlBuf, tv.style, iterator)
-			if err != nil {
-				log.Println(err)
-				tv.Buf.LinesToBytes() // need to update buffer -- todo: redundant across views
-				tv.LayoutAllLines(false)
-				return true
-			}
-			b := htmlBuf.Bytes()
-			lfidx := bytes.Index(b, []byte("\n"))
-			if lfidx > 0 {
-				b = b[:lfidx]
-			}
-			tv.Markup[ln] = tv.FixMarkupLine(b)
-			tv.HasMarkup[ln] = true
-			tv.Renders[ln].SetHTMLPre(tv.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		} else {
-			tv.Renders[ln].SetHTMLPre([]byte(string(tv.Buf.Lines[ln])), &fst, &sty.Text, &sty.UnContext, tv.CSS)
-		}
+		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, tv.RenderSz)
 		nwspans := len(tv.Renders[ln].Spans)
 		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
@@ -658,7 +530,6 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		}
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	// tv.MarkupMu.Unlock()
 
 	// update all offsets to end of text
 	if rerend || isDel || st != ed {
@@ -2574,6 +2445,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	win := tv.ParentWindow()
 
+	tv.RefreshIfNeeded()
+
 	if gi.PopupIsCompleter(win.Popup) {
 		setprocessed := tv.Complete.KeyInput(kf)
 		if setprocessed {
@@ -2874,6 +2747,7 @@ func (tv *TextView) TextViewEvents() {
 		}
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
+		txf.RefreshIfNeeded()
 		if me.Action == mouse.Enter {
 			oswin.TheApp.Cursor().PushIfNot(cursor.IBeam)
 		} else {
@@ -2903,7 +2777,6 @@ func (tv *TextView) Init2D() {
 }
 
 func (tv *TextView) StyleTextView() {
-	tv.HiInit()
 	tv.Style2DWidget()
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextViewStatesN); i++ {

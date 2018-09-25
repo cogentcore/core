@@ -13,54 +13,6 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// HiStyleName is a highlighting style name
-type HiStyleName string
-
-// todo: currently based on https://github.com/alecthomas/chroma styles, but we should
-// impl our own structured style obj with a list of categories and
-// corresponding colors, once we do the parsing etc
-
-// HiStyles are all the available highlighting styles
-var HiStyles = []string{
-	"abap",
-	"algol",
-	"algol_nu",
-	"api",
-	"arduino",
-	"autumn",
-	"borland",
-	"bw",
-	"colorful",
-	"dracula",
-	"emacs",
-	"friendly",
-	"fruity",
-	"github",
-	"igor",
-	"lovelace",
-	"manni",
-	"monokai",
-	"monokailight",
-	"murphy",
-	"native",
-	"paraiso-dark",
-	"paraiso-light",
-	"pastie",
-	"perldoc",
-	"pygments",
-	"rainbow_dash",
-	"rrt",
-	"solarized-dark",
-	"solarized-dark256",
-	"solarized-light",
-	"swapoff",
-	"tango",
-	"trac",
-	"vim",
-	"vs",
-	"xcode",
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  HiStyleValueView
 
