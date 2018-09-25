@@ -78,12 +78,6 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 	match_end := -1
 
 	sort.Slice(completions, func(i, j int) bool {
-		if completions[i].Text < completions[j].Text {
-			return true
-		}
-		if completions[i].Text > completions[j].Text {
-			return false
-		}
 		return completions[i].Text < completions[j].Text
 	})
 
