@@ -133,6 +133,11 @@ func (fn *FileNode) SetOpen() {
 	bitflag.Set(&fn.Flag, int(FileNodeOpen))
 }
 
+// SetClosed clears the open flag
+func (fn *FileNode) SetClosed() {
+	bitflag.Clear(&fn.Flag, int(FileNodeOpen))
+}
+
 // IsChanged returns true if the file is open and has been changed (edited) since last save
 func (fn *FileNode) IsChanged() bool {
 	if fn.Buf != nil && fn.Buf.Changed {
@@ -261,12 +266,14 @@ func (fn *FileNode) UpdateNode() error {
 
 // OpenDir opens given directory node
 func (fn *FileNode) OpenDir() {
+	fn.SetOpen()
 	fn.FRoot.SetDirOpen(fn.FPath)
 	fn.UpdateNode()
 }
 
 // CloseDir closes given directory node -- updates memory state
 func (fn *FileNode) CloseDir() {
+	fn.SetClosed()
 	fn.FRoot.SetDirClosed(fn.FPath)
 	// todo: do anything with open files within directory??
 }
@@ -679,7 +686,7 @@ var fnFolderProps = ki.Props{
 func (tv *FileTreeView) Style2D() {
 	fn := tv.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
 	if fn.IsDir() {
-		if fn.IsOpen() {
+		if fn.HasChildren() {
 			tv.Icon = gi.IconName("")
 		} else {
 			tv.Icon = gi.IconName("folder")
