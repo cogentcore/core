@@ -11,6 +11,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/goki/ki/floats"
+	"github.com/goki/ki/ints"
 )
 
 // This file contains helpful functions for dealing with slices, in the reflect
@@ -58,8 +61,8 @@ func SliceDeleteAt(sl interface{}, idx int) {
 }
 
 // SliceSort sorts a slice of basic values (see StructSliceSort for sorting a
-// slice-of-struct using a specific field), trying kit.Floater Float(),
-// kit.Inter Int(), interfaces first, and then falling back on reflect.Kind
+// slice-of-struct using a specific field), trying floats.Floater Float(),
+// ints.Inter Int(), interfaces first, and then falling back on reflect.Kind
 // float, int, string conversions (first fmt.Stringer String()) and supporting
 // time.Time directly as well.
 func SliceSort(sl interface{}, ascending bool) error {
@@ -75,10 +78,10 @@ func SliceSort(sl interface{}, ascending bool) error {
 	elif := NonPtrValue(elval).Interface()
 
 	switch elif.(type) {
-	case Floater:
+	case floats.Floater:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Interface().(Floater).Float()
-			jv := NonPtrValue(svnp.Index(j)).Interface().(Floater).Float()
+			iv := NonPtrValue(svnp.Index(i)).Interface().(floats.Floater).Float()
+			jv := NonPtrValue(svnp.Index(j)).Interface().(floats.Floater).Float()
 			if ascending {
 				return iv < jv
 			} else {
@@ -86,10 +89,10 @@ func SliceSort(sl interface{}, ascending bool) error {
 			}
 		})
 		return nil
-	case Inter:
+	case ints.Inter:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
-			iv := NonPtrValue(svnp.Index(i)).Interface().(Inter).Int()
-			jv := NonPtrValue(svnp.Index(j)).Interface().(Inter).Int()
+			iv := NonPtrValue(svnp.Index(i)).Interface().(ints.Inter).Int()
+			jv := NonPtrValue(svnp.Index(j)).Interface().(ints.Inter).Int()
 			if ascending {
 				return iv < jv
 			} else {
@@ -183,7 +186,7 @@ func SliceSort(sl interface{}, ascending bool) error {
 }
 
 // StructSliceSort sorts a slice of a struct according to the given field
-// indexes and sort direction, trying kit.Floater Float(), kit.Inter Int(),
+// indexes and sort direction, trying floats.Floater Float(), ints.Inter Int(),
 // interfaces first, and then falling back on reflect.Kind float, int, string
 // conversions (first fmt.Stringer String()) and supporting time.Time directly
 // as well.  There is no direct method for checking the field indexes so those
@@ -203,12 +206,12 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 	fldIf := NonPtrValue(fldVal).Interface()
 
 	switch fldIf.(type) {
-	case Floater:
+	case floats.Floater:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(Floater).Float()
+			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(floats.Floater).Float()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(Floater).Float()
+			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(floats.Floater).Float()
 			if ascending {
 				return iv < jv
 			} else {
@@ -216,12 +219,12 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			}
 		})
 		return nil
-	case Inter:
+	case ints.Inter:
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
-			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(Inter).Int()
+			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(ints.Inter).Int()
 			jval := OnePtrValue(svnp.Index(j))
-			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(Inter).Int()
+			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(ints.Inter).Int()
 			if ascending {
 				return iv < jv
 			} else {

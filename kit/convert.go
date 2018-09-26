@@ -10,19 +10,10 @@ import (
 	"math"
 	"reflect"
 	"strconv"
+
+	"github.com/goki/ki/floats"
+	"github.com/goki/ki/ints"
 )
-
-// Floater converts a type to a float64, used in kit.ToFloat function and in
-// sorting comparisons -- tried first in sorting
-type Floater interface {
-	Float() float64
-}
-
-// Inter converts a type to an int64, used in kit.ToInt and in sorting comparisons --
-// tried second in sorting
-type Inter interface {
-	Int() int64
-}
 
 // Sel implements the "mute" function from here
 // http://blog.vladimirvivien.com/2014/03/hacking-go-filter-values-from-multi.html
@@ -120,13 +111,13 @@ func ToBool(it interface{}) (bool, bool) {
 	}
 }
 
-// ToInt robustlys converts anything to an int64 -- uses the Inter ToInt
+// ToInt robustlys converts anything to an int64 -- uses the ints.Inter ToInt
 // interface first if available
 func ToInt(it interface{}) (int64, bool) {
 	if IfaceIsNil(it) {
 		return 0, false
 	}
-	if inter, ok := it.(Inter); ok {
+	if inter, ok := it.(ints.Inter); ok {
 		return inter.Int(), true
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -156,13 +147,13 @@ func ToInt(it interface{}) (int64, bool) {
 	}
 }
 
-// ToFloat robustly converts anything to a Float64 -- uses the Floater Float()
+// ToFloat robustly converts anything to a Float64 -- uses the floats.Floater Float()
 // interface first if available
 func ToFloat(it interface{}) (float64, bool) {
 	if IfaceIsNil(it) {
 		return 0.0, false
 	}
-	if floater, ok := it.(Floater); ok {
+	if floater, ok := it.(floats.Floater); ok {
 		return floater.Float(), true
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -192,13 +183,13 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
-// ToFloat32 robustly converts anything to a Float64 -- uses the Floater Float()
+// ToFloat32 robustly converts anything to a Float64 -- uses the floats.Floater Float()
 // interface first if available
 func ToFloat32(it interface{}) (float32, bool) {
 	if IfaceIsNil(it) {
 		return float32(0.0), false
 	}
-	if floater, ok := it.(Floater); ok {
+	if floater, ok := it.(floats.Floater); ok {
 		return float32(floater.Float()), true
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
@@ -381,20 +372,6 @@ func Max32(a, b float32) float32 {
 }
 
 func Min32(a, b float32) float32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func MaxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func MinInt(a, b int) int {
 	if a < b {
 		return a
 	}
