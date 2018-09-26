@@ -440,6 +440,7 @@ func BufSearch(reader io.Reader, find []byte) (int, []TextPos) {
 			matches = append(matches, TextPos{ln, i})
 			cnt++
 		}
+		ln++
 	}
 	if err := scan.Err(); err != nil {
 		log.Printf("gide.FileSearch error: %v\n", err)
