@@ -21,6 +21,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -214,7 +215,7 @@ func (tf *TextField) CursorBackward(steps int) {
 		tf.CursorPos = 0
 	}
 	if tf.CursorPos <= tf.StartPos {
-		dec := kit.MinInt(tf.StartPos, 8)
+		dec := ints.MinInt(tf.StartPos, 8)
 		tf.StartPos -= dec
 	}
 	if tf.SelectMode {
@@ -238,7 +239,7 @@ func (tf *TextField) CursorStart() {
 	defer tf.UpdateEnd(updt)
 	tf.CursorPos = 0
 	tf.StartPos = 0
-	tf.EndPos = kit.MinInt(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
+	tf.EndPos = ints.MinInt(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
 	if tf.SelectMode {
 		tf.SelectStart = 0
 		tf.SelectUpdate()
@@ -254,7 +255,7 @@ func (tf *TextField) CursorEnd() {
 	ed := len(tf.EditTxt)
 	tf.CursorPos = ed
 	tf.EndPos = len(tf.EditTxt) // try -- display will adjust
-	tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
+	tf.StartPos = ints.MaxInt(0, tf.EndPos-tf.CharWidth)
 	if tf.SelectMode {
 		tf.SelectEnd = ed
 		tf.SelectUpdate()
@@ -771,11 +772,11 @@ func (tf *TextField) RenderSelect() {
 	if !tf.HasSelection() {
 		return
 	}
-	effst := kit.MaxInt(tf.StartPos, tf.SelectStart)
+	effst := ints.MaxInt(tf.StartPos, tf.SelectStart)
 	if effst >= tf.EndPos {
 		return
 	}
-	effed := kit.MinInt(tf.EndPos, tf.SelectEnd)
+	effed := ints.MinInt(tf.EndPos, tf.SelectEnd)
 	if effed < tf.StartPos {
 		return
 	}
@@ -815,25 +816,25 @@ func (tf *TextField) AutoScroll() {
 		tf.EndPos = sz
 	}
 	if tf.StartPos >= tf.EndPos {
-		tf.StartPos = kit.MaxInt(0, tf.EndPos-tf.CharWidth)
+		tf.StartPos = ints.MaxInt(0, tf.EndPos-tf.CharWidth)
 	}
 	tf.CursorPos = InRangeInt(tf.CursorPos, 0, sz)
 
 	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
-	inc = kit.MaxInt(4, inc)
+	inc = ints.MaxInt(4, inc)
 
 	// keep cursor in view with buffer
 	startIsAnchor := true
 	if tf.CursorPos < (tf.StartPos + inc) {
 		tf.StartPos -= inc
-		tf.StartPos = kit.MaxInt(tf.StartPos, 0)
+		tf.StartPos = ints.MaxInt(tf.StartPos, 0)
 		tf.EndPos = tf.StartPos + tf.CharWidth
-		tf.EndPos = kit.MinInt(sz, tf.EndPos)
+		tf.EndPos = ints.MinInt(sz, tf.EndPos)
 	} else if tf.CursorPos > (tf.EndPos - inc) {
 		tf.EndPos += inc
-		tf.EndPos = kit.MinInt(tf.EndPos, sz)
+		tf.EndPos = ints.MinInt(tf.EndPos, sz)
 		tf.StartPos = tf.EndPos - tf.CharWidth
-		tf.StartPos = kit.MaxInt(0, tf.StartPos)
+		tf.StartPos = ints.MaxInt(0, tf.StartPos)
 		startIsAnchor = false
 	}
 
@@ -896,7 +897,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 
 	sz := len(tf.EditTxt)
 	c := tf.StartPos + int(float64(px/st.UnContext.ToDotsFactor(units.Ch)))
-	c = kit.MinInt(c, sz)
+	c = ints.MinInt(c, sz)
 
 	w := tf.TextWidth(tf.StartPos, c)
 	if w > px {
@@ -1190,7 +1191,7 @@ func (tf *TextField) Size2D(iter int) {
 	if maxlen <= 0 {
 		maxlen = 50
 	}
-	tf.EndPos = kit.MinInt(len(tf.EditTxt), maxlen)
+	tf.EndPos = ints.MinInt(len(tf.EditTxt), maxlen)
 	tf.UpdateRenderAll()
 	tf.FontHeight = tf.RenderAll.Size.Y
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)

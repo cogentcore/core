@@ -50,6 +50,19 @@ func (tv *TabView) NTabs() int {
 	return len(fr.Kids)
 }
 
+// CurTab returns currently-selected tab, and its index -- returns false none
+func (tv *TabView) CurTab() (Node2D, int, bool) {
+	if tv.NTabs() == 0 {
+		return nil, -1, false
+	}
+	fr := tv.Frame()
+	if fr.StackTop < 0 {
+		return nil, -1, false
+	}
+	widg := fr.KnownChild(fr.StackTop).(Node2D)
+	return widg, fr.StackTop, true
+}
+
 // AddTab adds a widget as a new tab, with given tab label, and returns the
 // index of that tab
 func (tv *TabView) AddTab(widg Node2D, label string) int {

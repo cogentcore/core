@@ -26,6 +26,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	"golang.org/x/image/draw"
@@ -1109,7 +1110,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 	tr.Spans = make([]SpanRender, 1)
 	tr.Links = nil
 	curSp := &(tr.Spans[0])
-	initsz := kit.MinInt(sz, 1020)
+	initsz := ints.MinInt(sz, 1020)
 	curSp.Init(initsz)
 
 	spcstr := bytes.Join(bytes.Fields(str), []byte(" "))
@@ -1272,7 +1273,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 		return
 	}
 	curSp := &(tr.Spans[0])
-	initsz := kit.MinInt(sz, 1020)
+	initsz := ints.MinInt(sz, 1020)
 	curSp.Init(initsz)
 
 	font.OpenFont(ctxt)

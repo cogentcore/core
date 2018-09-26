@@ -25,6 +25,8 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -570,9 +572,9 @@ func (tv *TextView) ValidCursor(pos TextPos) TextPos {
 	if pos.Ln < 0 {
 		pos.Ln = 0
 	}
-	pos.Ln = gi.MinInt(pos.Ln, len(tv.Buf.Lines)-1)
+	pos.Ln = ints.MinInt(pos.Ln, len(tv.Buf.Lines)-1)
 	llen := len(tv.Buf.Lines[pos.Ln])
-	pos.Ch = gi.MinInt(pos.Ch, llen)
+	pos.Ch = ints.MinInt(pos.Ch, llen)
 	if pos.Ch < 0 {
 		pos.Ch = 0
 	}
@@ -698,7 +700,7 @@ func (tv *TextView) CursorDown(steps int) {
 				pos.Ln = tv.NLines - 1
 				break
 			}
-			mxlen := gi.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
+			mxlen := ints.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
 			if tv.CursorCol < mxlen {
 				pos.Ch = tv.CursorCol
 			} else {
@@ -723,7 +725,7 @@ func (tv *TextView) CursorPageDown(steps int) {
 		if tv.CursorPos.Ln >= tv.NLines {
 			tv.CursorPos.Ln = tv.NLines - 1
 		}
-		tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
+		tv.CursorPos.Ch = ints.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
 		tv.ScrollCursorToTop()
 		tv.RenderCursor(true)
 	}
@@ -783,7 +785,7 @@ func (tv *TextView) CursorUp(steps int) {
 				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := gi.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
+				mxlen := ints.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
 				if tv.CursorCol < mxlen {
 					pos.Ch = tv.CursorCol
 				} else {
@@ -809,7 +811,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 		if tv.CursorPos.Ln <= 0 {
 			tv.CursorPos.Ln = 0
 		}
-		tv.CursorPos.Ch = gi.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
+		tv.CursorPos.Ch = ints.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
 		tv.ScrollCursorToBottom()
 		tv.RenderCursor(true)
 	}
@@ -918,7 +920,7 @@ func (tv *TextView) CursorEndDoc() {
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
-	tv.CursorPos.Ln = gi.MaxInt(tv.NLines-1, 0)
+	tv.CursorPos.Ln = ints.MaxInt(tv.NLines-1, 0)
 	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
 	tv.CursorCol = tv.CursorPos.Ch
 	tv.SetCursor(tv.CursorPos)
@@ -1002,6 +1004,43 @@ func (tv *TextView) JumpToLine(ln int) {
 	updt := tv.Viewport.Win.UpdateStart()
 	tv.SetCursorShow(TextPos{Ln: ln})
 	tv.Viewport.Win.UpdateEnd(updt)
+}
+
+// FindNextLink finds next link after given position, returns false if no such links
+func (tv *TextView) FindNextLink(pos TextPos) (TextPos, bool) {
+	for ln := tv.CursorPos.Ln; ln < tv.NLines; ln++ {
+		if len(tv.Renders[ln].Links) == 0 {
+			pos.Ch = 0
+			pos.Ln = ln + 1
+			continue
+		}
+		rend := &tv.Renders[ln]
+		si, ri, _ := rend.RuneSpanPos(pos.Ch)
+		for ti := range rend.Links {
+			tl := &rend.Links[ti]
+			if tl.StartSpan >= si && tl.StartIdx > ri {
+				pos.Ch, _ = rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
+				return pos, true
+			}
+		}
+	}
+	return pos, false
+}
+
+// CursorNextLink moves cursor to next link -- returns true if found
+func (tv *TextView) CursorNextLink() bool {
+	tv.ValidateCursor()
+	npos, has := tv.FindNextLink(tv.CursorPos)
+	if !has {
+		npos, has = tv.FindNextLink(TextPos{}) // wraparound
+		if !has {
+			return false
+		}
+	}
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.SetCursorShow(npos)
+	return true
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1366,8 +1405,8 @@ func (tv *TextView) RenderSelectLines() {
 	if tv.PrevSelectReg == TextRegionZero {
 		tv.RenderLines(tv.SelectReg.Start.Ln, tv.SelectReg.End.Ln)
 	} else {
-		stln := gi.MinInt(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
-		edln := gi.MaxInt(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
+		stln := ints.MinInt(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
+		edln := ints.MaxInt(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
 		tv.RenderLines(stln, edln)
 	}
 	tv.PrevSelectReg = tv.SelectReg
@@ -2054,7 +2093,7 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
 		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Ch))
 	}
-	tv.LineNoDigs = gi.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
+	tv.LineNoDigs = ints.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
 	if tv.Opts.LineNos {
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Ch + spc // space for icon
 	} else {
@@ -2335,7 +2374,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	scrl := tv.WinBBox.Min.X - tv.ObjBBox.Min.X
 	sc := int(float32(pt.X+scrl) / sty.Font.Ch)
 	sc -= sc / 4
-	sc = gi.MaxInt(0, sc)
+	sc = ints.MaxInt(0, sc)
 	cch := sc
 
 	si := 0
@@ -2344,7 +2383,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	lstY := tv.CharStartPos(TextPos{Ln: cln}).Y - yoff
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
-		si = gi.MinInt(si, nspan)
+		si = ints.MinInt(si, nspan)
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text) + 1
 		}
@@ -2460,6 +2499,13 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		return
 	}
+
+	// cancelAll cancels search, completer, and..
+	cancelAll := func() {
+		tv.ISearchCancel()
+		tv.CloseCompleter()
+	}
+
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case gi.KeyFunMoveRight:
@@ -2485,14 +2531,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
 	case gi.KeyFunPageUp:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageUp(1)
 	case gi.KeyFunPageDown:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
@@ -2507,20 +2551,17 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorEndLine()
 	case gi.KeyFunDocHome:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartDoc()
 	case gi.KeyFunDocEnd:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndDoc()
 	case gi.KeyFunSelectMode:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.SelectModeToggle()
 	case gi.KeyFunCancelSelect:
@@ -2528,13 +2569,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.CloseCompleter()
 		tv.EscPressed() // generic cancel
 	case gi.KeyFunSelectAll:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.SelectAll()
 	case gi.KeyFunCopy:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.Copy(true) // reset
 	case gi.KeyFunSearch:
@@ -2548,7 +2587,21 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.JumpToLinePrompt()
 	}
-	if tv.IsInactive() || kt.IsProcessed() {
+	if tv.IsInactive() {
+		switch {
+		case kf == gi.KeyFunFocusNext: // tab
+			kt.SetProcessed()
+			tv.CursorNextLink()
+		case kf == gi.KeyFunFocusPrev: // tab
+			kt.SetProcessed()
+			// tv.CursorPrevLink()
+		case kt.Rune == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
+			kt.SetProcessed()
+			tv.OpenLinkAt(tv.CursorPos)
+		}
+		return
+	}
+	if kt.IsProcessed() {
 		return
 	}
 	switch kf {
@@ -2566,33 +2619,27 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.OfferComplete(dontforce)
 		}
 	case gi.KeyFunKill:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.CursorKill()
 	case gi.KeyFunDelete:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.CursorDelete(1)
 	case gi.KeyFunCut:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.Cut()
 	case gi.KeyFunPaste:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.Paste()
 	case gi.KeyFunUndo:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.Undo()
 	case gi.KeyFunRedo:
-		tv.ISearchCancel()
-		tv.CloseCompleter()
+		cancelAll()
 		kt.SetProcessed()
 		tv.Redo()
 	case gi.KeyFunComplete:
@@ -2615,6 +2662,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				}
 			}
 		}
+		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
 		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
@@ -2667,6 +2715,27 @@ func (tv *TextView) OpenLink(tl *gi.TextLink) {
 	tv.LinkSig.Emit(tv.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
+// OpenLinkAt opens a link at given cursor position, if one exists there..
+func (tv *TextView) OpenLinkAt(pos TextPos) bool {
+	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
+		return false
+	}
+	cpos := tv.CharStartPos(pos).ToPointCeil()
+	cpos.Y += 2
+	cpos.X += 2
+	lpos := tv.CharStartPos(TextPos{Ln: pos.Ln})
+	rend := &tv.Renders[pos.Ln]
+	for ti := range rend.Links {
+		tl := &rend.Links[ti]
+		tlb := tl.Bounds(rend, lpos)
+		if cpos.In(tlb) {
+			tv.OpenLink(tl)
+			return true
+		}
+	}
+	return false
+}
+
 // MouseEvent handles the mouse.Event
 func (tv *TextView) MouseEvent(me *mouse.Event) {
 	if !tv.IsInactive() && !tv.HasFocus() {
@@ -2682,19 +2751,9 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	case mouse.Left:
 		if me.Action == mouse.Press {
 			me.SetProcessed()
-			if newPos.Ln < len(tv.Renders) && len(tv.Renders[newPos.Ln].Links) > 0 {
-				lpos := tv.CharStartPos(TextPos{Ln: newPos.Ln})
-				rend := &tv.Renders[newPos.Ln]
-				for ti, _ := range rend.Links {
-					tl := &rend.Links[ti]
-					tlb := tl.Bounds(rend, lpos)
-					if me.Where.In(tlb) {
-						tv.OpenLink(tl)
-						return
-					}
-				}
+			if !tv.OpenLinkAt(newPos) {
+				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			}
-			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
 			// if tv.HasSelection() {
@@ -2790,7 +2849,7 @@ func (tv *TextView) StyleTextView() {
 }
 
 func (tv *TextView) Style2D() {
-	tv.SetCanFocusIfActive()
+	bitflag.Set(&tv.Flag, int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
 	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 }

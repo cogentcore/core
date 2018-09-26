@@ -442,7 +442,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		}
 		kt := d.(*key.ChordEvent)
 		kf := KeyFun(kt.Chord())
-		if kf == KeyFunEnter || kf == KeyFunAccept || kt.Rune == ' ' {
+		if kf == KeyFunEnter || kt.Rune == ' ' {
 			if !(kt.Rune == ' ' && bbb.Viewport.IsCompleter()) {
 				kt.SetProcessed()
 				bbb.ButtonPressed()

@@ -90,27 +90,6 @@ func SetMin32(a *float32, b float32) {
 	}
 }
 
-func MaxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func MinInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func AbsInt(a int) int {
-	if a < 0 {
-		return -a
-	}
-	return a
-}
-
 // MinPos returns the minimum of the two values, excluding any that are 0
 func MinPos(a, b float64) float64 {
 	if a > 0.0 && b > 0.0 {

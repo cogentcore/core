@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -72,20 +73,20 @@ func (g *Text) Render2D() {
 		}
 		pc.FontStyle.Size = orgsz
 		if len(g.CharPosX) > 0 {
-			mx := kit.MinInt(len(g.CharPosX), len(sr.Render))
+			mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
 			for i := 0; i < mx; i++ {
 				// todo: this may not be fully correct, given relativity constraints
 				sr.Render[i].RelPos.X, _ = rs.XForm.TransformVector(g.CharPosX[i], 0)
 			}
 		}
 		if len(g.CharPosY) > 0 {
-			mx := kit.MinInt(len(g.CharPosY), len(sr.Render))
+			mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
 			for i := 0; i < mx; i++ {
 				_, sr.Render[i].RelPos.Y = rs.XForm.TransformPoint(g.CharPosY[i], 0)
 			}
 		}
 		if len(g.CharPosDX) > 0 {
-			mx := kit.MinInt(len(g.CharPosDX), len(sr.Render))
+			mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
 			for i := 0; i < mx; i++ {
 				dx, _ := rs.XForm.TransformVector(g.CharPosDX[i], 0)
 				if i > 0 {
@@ -96,7 +97,7 @@ func (g *Text) Render2D() {
 			}
 		}
 		if len(g.CharPosDY) > 0 {
-			mx := kit.MinInt(len(g.CharPosDY), len(sr.Render))
+			mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
 			for i := 0; i < mx; i++ {
 				dy, _ := rs.XForm.TransformVector(g.CharPosDY[i], 0)
 				if i > 0 {

@@ -22,6 +22,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -904,7 +905,7 @@ func (tv *TableView) RowFromPos(posY int) (int, bool) {
 // ScrollToRow ensures that given row is visible by scrolling layout as needed
 // -- returns true if any scrolling was performed
 func (tv *TableView) ScrollToRow(row int) bool {
-	row = gi.MinInt(row, tv.BuiltSize-1)
+	row = ints.MinInt(row, tv.BuiltSize-1)
 	sgf := tv.SliceGrid()
 	if widg, ok := tv.RowFirstWidget(row); ok {
 		return sgf.ScrollToItem(widg)
@@ -1160,7 +1161,7 @@ func (tv *TableView) SelectAllRows() {
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
 func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
-	row = gi.MinInt(row, tv.BuiltSize-1)
+	row = ints.MinInt(row, tv.BuiltSize-1)
 	if row < 0 {
 		row = 0
 	}
@@ -1183,9 +1184,9 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 				if minIdx < 0 {
 					minIdx = r
 				} else {
-					minIdx = kit.MinInt(minIdx, r)
+					minIdx = ints.MinInt(minIdx, r)
 				}
-				maxIdx = kit.MaxInt(maxIdx, r)
+				maxIdx = ints.MaxInt(maxIdx, r)
 			}
 			cidx := row
 			tv.SelectedIdx = row

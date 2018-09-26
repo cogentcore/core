@@ -22,6 +22,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 )
@@ -469,9 +470,9 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 				if minIdx < 0 {
 					minIdx = v.ViewIdx
 				} else {
-					minIdx = kit.MinInt(minIdx, v.ViewIdx)
+					minIdx = ints.MinInt(minIdx, v.ViewIdx)
 				}
-				maxIdx = kit.MaxInt(maxIdx, v.ViewIdx)
+				maxIdx = ints.MaxInt(maxIdx, v.ViewIdx)
 			}
 			cidx := tv.ViewIdx
 			nn := tv
@@ -902,7 +903,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
 // Copy copies to clip.Board, optionally resetting the selection
 func (tv *TreeView) Copy(reset bool) {
 	sels := tv.SelectedViews()
-	nitms := kit.MaxInt(1, len(sels))
+	nitms := ints.MaxInt(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.MimeData(&md) // source is always first..
 	if nitms > 1 {
@@ -1068,7 +1069,7 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 // selected nodes as well, each as additional records in mimedata
 func (tv *TreeView) DragNDropStart() {
 	sels := tv.SelectedViews()
-	nitms := kit.MaxInt(1, len(sels))
+	nitms := ints.MaxInt(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
 	tv.MimeData(&md) // source is always first..
 	if nitms > 1 {

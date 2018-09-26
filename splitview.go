@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -79,7 +80,7 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 	updt := sv.UpdateStart()
 	sv.UpdateSplits()
 	sz := len(sv.Kids)
-	mx := kit.MinInt(sz, len(splits))
+	mx := ints.MinInt(sz, len(splits))
 	for i := 0; i < mx; i++ {
 		sv.Splits[i] = splits[i]
 	}

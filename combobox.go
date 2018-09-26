@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -245,10 +246,10 @@ func (cb *ComboBox) SortItems(ascending bool) {
 func (cb *ComboBox) SetToMaxLength(maxLen int) {
 	ml := 0
 	for _, it := range cb.Items {
-		ml = kit.MaxInt(ml, utf8.RuneCountInString(ToLabel(it)))
+		ml = ints.MaxInt(ml, utf8.RuneCountInString(ToLabel(it)))
 	}
 	if maxLen > 0 {
-		ml = kit.MinInt(ml, maxLen)
+		ml = ints.MinInt(ml, maxLen)
 	}
 	cb.MaxLength = ml
 }

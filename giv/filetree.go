@@ -21,6 +21,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -138,6 +139,15 @@ func (fn *FileNode) IsChanged() bool {
 		return true
 	}
 	return false
+}
+
+// RelPath returns the relative path from root for this node
+func (fn *FileNode) RelPath() string {
+	rpath, err := filepath.Rel(string(fn.FRoot.FPath), string(fn.FPath))
+	if err != nil {
+		log.Printf("giv.FileNode RelPath error: %v\n", err.Error())
+	}
+	return rpath
 }
 
 // ReadDir reads all the files at given directory into this directory node --
@@ -401,33 +411,52 @@ func (fn *FileNode) RenameFile(newpath string) error {
 //////////////////////////////////////////////////////////////////////////
 //  Search
 
+// FileSearchMatch records one match for search within file
+type FileSearchResult struct {
+	Reg  TextRegion `desc:"region surrounding the match"`
+	Text []byte     `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
+}
+
+// FileSearchContext is how much text to include on either side of the search match
+var FileSearchContext = 30
+
 // FileSearch looks for a string (no regexp) within a file, in a
 // case-sensitive way, returning number of occurences and specific match
-// position list -- column positions are in bytes, not runes...
-func FileSearch(filename string, find []byte) (int, []TextPos) {
+// position list -- column positions are in bytes, not runes.
+func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearchResult) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		log.Printf("gide.FileSearch file open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()
-	return BufSearch(fp, find)
+	return BufSearch(fp, find, ignoreCase)
 }
 
 // BufSearch looks for a string (no regexp) within a byte buffer, in a
 // case-sensitive way, returning number of occurences and specific match
-// position list -- column positions are in bytes, not runes...
-func BufSearch(reader io.Reader, find []byte) (int, []TextPos) {
+// position list -- column positions are in bytes, not runes.
+func BufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearchResult) {
 	fsz := len(find)
 	if fsz == 0 {
 		return 0, nil
 	}
+	if ignoreCase {
+		find = bytes.ToLower(find)
+	}
 	cnt := 0
-	var matches []TextPos
+	var matches []FileSearchResult
 	scan := bufio.NewScanner(reader)
 	ln := 0
+	mst := []byte("<mark>")
+	mstsz := len(mst)
+	med := []byte("</mark>")
+	medsz := len(med)
 	for scan.Scan() {
 		b := scan.Bytes()
+		if ignoreCase {
+			b = bytes.ToLower(b)
+		}
 		sz := len(b)
 		ci := 0
 		for ci < sz {
@@ -437,57 +466,24 @@ func BufSearch(reader io.Reader, find []byte) (int, []TextPos) {
 			}
 			i += ci
 			ci = i + fsz
-			matches = append(matches, TextPos{ln, i})
+			reg := TextRegion{Start: TextPos{Ln: ln, Ch: i}, End: TextPos{Ln: ln, Ch: ci}}
+			cist := ints.MaxInt(i-FileSearchContext, 0)
+			cied := ints.MinInt(ci+FileSearchContext, sz)
+			tlen := mstsz + medsz + cied - cist
+			txt := make([]byte, tlen)
+			copy(txt, b[cist:i])
+			ti := i - cist
+			copy(txt[ti:], mst)
+			ti += mstsz
+			copy(txt[ti:], b[i:ci])
+			ti += fsz
+			copy(txt[ti:], med)
+			ti += medsz
+			copy(txt[ti:], b[ci:cied])
+			matches = append(matches, FileSearchResult{Reg: reg, Text: txt})
 			cnt++
 		}
 		ln++
-	}
-	if err := scan.Err(); err != nil {
-		log.Printf("gide.FileSearch error: %v\n", err)
-	}
-	return cnt, matches
-}
-
-// FileSearchCI looks for a string (no regexp) within a file, in a
-// case-INsensitive way, returning number of occurences -- column positions
-// are in bytes, not runes...
-func FileSearchCI(filename string, find []byte) (int, []TextPos) {
-	fp, err := os.Open(filename)
-	if err != nil {
-		log.Printf("gide.FileSearch file open error: %v\n", err)
-		return 0, nil
-	}
-	defer fp.Close()
-	return BufSearchCI(fp, find)
-}
-
-// BufSearchCI looks for a string (no regexp) within byte stream, in a
-// case-INsensitive way, returning number of occurences -- column positions
-// are in bytes, not runes...
-func BufSearchCI(reader io.Reader, find []byte) (int, []TextPos) {
-	fsz := len(find)
-	if fsz == 0 {
-		return 0, nil
-	}
-	find = bytes.ToLower(find)
-	cnt := 0
-	var matches []TextPos
-	scan := bufio.NewScanner(reader)
-	ln := 0
-	for scan.Scan() {
-		b := bytes.ToLower(scan.Bytes())
-		sz := len(b)
-		ci := 0
-		for ci < sz {
-			i := bytes.Index(b[ci:], find)
-			if i < 0 {
-				break
-			}
-			i += ci
-			ci = i + fsz
-			matches = append(matches, TextPos{ln, i})
-			cnt++
-		}
 	}
 	if err := scan.Err(); err != nil {
 		log.Printf("gide.FileSearch error: %v\n", err)

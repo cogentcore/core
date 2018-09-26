@@ -18,6 +18,7 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/pmezard/go-difflib/difflib"
 )
@@ -208,7 +209,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.SetName(string(filename)) // todo: modify in any way?
 
 	// markup the first 100 lines
-	mxhi := gi.MinInt(100, tb.NLines-1)
+	mxhi := ints.MinInt(100, tb.NLines-1)
 	tb.MarkupLines(0, mxhi)
 
 	// update views
@@ -637,11 +638,13 @@ func (tp *TextPos) FromString(link string) bool {
 	case lidx >= 0 && cidx >= 0:
 		fmt.Sscanf(link, "L%dC%d", &tp.Ln, &tp.Ch)
 		tp.Ln-- // link is 1-based, we use 0-based
+		tp.Ch-- // ditto
 	case lidx >= 0:
 		fmt.Sscanf(link, "L%d", &tp.Ln)
 		tp.Ln-- // link is 1-based, we use 0-based
 	case cidx >= 0:
 		fmt.Sscanf(link, "C%d", &tp.Ch)
+		tp.Ch--
 	default:
 		// todo: could support other formats
 		return false
@@ -653,6 +656,18 @@ func (tp *TextPos) FromString(link string) bool {
 type TextRegion struct {
 	Start TextPos
 	End   TextPos
+}
+
+// FromString decodes text region from a string representation of form:
+// [#]LxxCxx-LxxCxx -- used in e.g., URL links -- returns true if successful
+func (tp *TextRegion) FromString(link string) bool {
+	link = strings.TrimPrefix(link, "#")
+	fmt.Sscanf(link, "L%dC%d-L%dC%d", &tp.Start.Ln, &tp.Start.Ch, &tp.End.Ln, &tp.End.Ch)
+	tp.Start.Ln--
+	tp.Start.Ch--
+	tp.End.Ln--
+	tp.End.Ch--
+	return true
 }
 
 // NewTextRegionLen makes a new TextRegion from a starting point and a length
@@ -837,8 +852,10 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 		if st.Ch > 0 {
 			ec := len(tb.Lines[st.Ln])
 			sz := ec - st.Ch
-			tbe.Text[0] = make([]rune, sz)
-			copy(tbe.Text[0][0:sz], tb.Lines[st.Ln][st.Ch:])
+			if sz > 0 {
+				tbe.Text[0] = make([]rune, sz)
+				copy(tbe.Text[0][0:sz], tb.Lines[st.Ln][st.Ch:])
+			}
 			stln++
 		}
 		edln := ed.Ln

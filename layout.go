@@ -18,6 +18,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -493,10 +494,10 @@ func (ly *Layout) GatherSizesGrid() {
 		}
 		lst := ni.Sty.Layout
 		if lst.Col > 0 {
-			cols = kit.MaxInt(cols, lst.Col+lst.ColSpan)
+			cols = ints.MaxInt(cols, lst.Col+lst.ColSpan)
 		}
 		if lst.Row > 0 {
-			rows = kit.MaxInt(rows, lst.Row+lst.RowSpan)
+			rows = ints.MaxInt(rows, lst.Row+lst.RowSpan)
 		}
 	}
 
@@ -1293,8 +1294,8 @@ func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) bool {
 	h := ly.Sty.Font.Size.Dots
 	dst := h * AutoScrollRate
 
-	mind := kit.MaxInt(0, pos-st)
-	maxd := kit.MaxInt(0, (st+int(vissz))-pos)
+	mind := ints.MaxInt(0, pos-st)
+	maxd := ints.MaxInt(0, (st+int(vissz))-pos)
 
 	if mind <= maxd {
 		pct := float32(mind) / float32(vissz)

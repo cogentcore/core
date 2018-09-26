@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -133,8 +134,8 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	stw := int(dlg.Sty.Layout.MinWidth.Dots)
 	sth := int(dlg.Sty.Layout.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
-	vpsz.X = kit.MaxInt(vpsz.X, stw)
-	vpsz.Y = kit.MaxInt(vpsz.Y, sth)
+	vpsz.X = ints.MaxInt(vpsz.X, stw)
+	vpsz.Y = ints.MaxInt(vpsz.Y, sth)
 
 	// note: LowPri allows all other events to be processed before dialog
 	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -179,8 +180,8 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 			x = win.Viewport.Geom.Size.X / 3
 			y = win.Viewport.Geom.Size.Y / 3
 		}
-		x = kit.MinInt(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
-		y = kit.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
+		x = ints.MinInt(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
+		y = ints.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
 		frame := dlg.KnownChild(0).(*Frame)
 		dlg.StylePart(Node2D(frame)) // use special styles
 		bitflag.Set(&dlg.Flag, int(VpFlagPopup))

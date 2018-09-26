@@ -20,6 +20,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -571,7 +572,7 @@ func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 // ScrollToRow ensures that given row is visible by scrolling layout as needed
 // -- returns true if any scrolling was performed
 func (sv *SliceView) ScrollToRow(row int) bool {
-	row = gi.MinInt(row, sv.BuiltSize-1)
+	row = ints.MinInt(row, sv.BuiltSize-1)
 	sg, _ := sv.SliceGrid()
 	if widg, ok := sv.RowFirstWidget(row); ok {
 		return sg.ScrollToItem(widg)
@@ -799,7 +800,7 @@ func (sv *SliceView) SelectAllRows() {
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
 func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
-	row = gi.MinInt(row, sv.BuiltSize-1)
+	row = ints.MinInt(row, sv.BuiltSize-1)
 	if row < 0 {
 		row = 0
 	}
@@ -822,9 +823,9 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 				if minIdx < 0 {
 					minIdx = r
 				} else {
-					minIdx = kit.MinInt(minIdx, r)
+					minIdx = ints.MinInt(minIdx, r)
 				}
-				maxIdx = kit.MaxInt(maxIdx, r)
+				maxIdx = ints.MaxInt(maxIdx, r)
 			}
 			cidx := row
 			sv.SelectedIdx = row

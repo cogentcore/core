@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -59,7 +60,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := kit.NonPtrValue(mv)
 
-	sz := gi.MinInt(mvnp.Len(), SliceInlineLen)
+	sz := ints.MinInt(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface())

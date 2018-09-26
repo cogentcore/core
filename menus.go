@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -356,8 +357,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
 	frame.LayData.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
-	x = kit.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = kit.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
+	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
+	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)

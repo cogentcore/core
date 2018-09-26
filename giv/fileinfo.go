@@ -346,9 +346,14 @@ var FileInfoProps = ki.Props{
 // other useful methods -- will plug into ValueView with date / time editor.
 type FileTime time.Time
 
-// Int satisfies the kit.Inter interface for sorting etc
+// Int satisfies the ints.Inter interface for sorting etc
 func (ft FileTime) Int() int64 {
 	return (time.Time(ft)).Unix()
+}
+
+// FromInt satisfies the ints.Inter interface
+func (ft *FileTime) FromInt(val int64) {
+	*ft = FileTime(time.Unix(val, 0))
 }
 
 func (ft FileTime) String() string {
@@ -384,6 +389,11 @@ type FileSize datasize.ByteSize
 // Int satisfies the kit.Inter interface for sorting etc
 func (fs FileSize) Int() int64 {
 	return int64(fs) // note: is actually uint64
+}
+
+// FromInt satisfies the ints.Inter interface
+func (fs *FileSize) FromInt(val int64) {
+	*fs = FileSize(val)
 }
 
 func (fs FileSize) String() string {
