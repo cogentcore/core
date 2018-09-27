@@ -500,7 +500,7 @@ func (tb *TextBuf) LinesToBytes() {
 
 	tb.Txt = tb.LinesToBytesCopy()
 
-	// todo: byte offs are not updating properly!
+	// todo: byte offs are not updating properly!  still..
 
 	// totsz := tb.ByteOffs[tb.NLines-1] + len(tb.LineBytes[tb.NLines-1]) + 1
 
@@ -716,12 +716,28 @@ func (te *TextBufEdit) ToBytes() []byte {
 /////////////////////////////////////////////////////////////////////////////
 //   Edits
 
+// ValidPos returns a position that is in a valid range
+func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
+	if tb.NLines == 0 {
+		return TextPosZero
+	}
+	if pos.Ln < 0 {
+		pos.Ln = 0
+	}
+	pos.Ln = ints.MinInt(pos.Ln, len(tb.Lines)-1)
+	llen := len(tb.Lines[pos.Ln])
+	pos.Ch = ints.MinInt(pos.Ch, llen)
+	if pos.Ch < 0 {
+		pos.Ch = 0
+	}
+	return pos
+}
+
 // DeleteText deletes region of text between start and end positions, signaling
 // views after text lines have been updated.
 func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
-	for ed.Ln >= len(tb.Lines) {
-		ed.Ln--
-	}
+	st = tb.ValidPos(st)
+	ed = tb.ValidPos(ed)
 	if st == ed {
 		return nil
 	}
@@ -773,6 +789,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 	if len(tb.Lines) == 0 {
 		tb.New(1)
 	}
+	st = tb.ValidPos(st)
 	tb.FileModCheck()
 	tb.Changed = true
 	lns := bytes.Split(text, []byte("\n"))
@@ -831,6 +848,8 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 
 // Region returns a TextBufEdit representation of text between start and end positions
 func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
+	st = tb.ValidPos(st)
+	ed = tb.ValidPos(ed)
 	if st == ed {
 		return nil
 	}

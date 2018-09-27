@@ -1241,19 +1241,16 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 // render the children
 func (ly *Layout) Render2DChildren() {
 	if ly.Lay == LayoutStacked {
-		for _, kid := range ly.Kids { // first mark everyone else as inactive
-			_, ni := KiToNode2D(kid)
-			if ni != nil {
-				ni.VpBBox = image.ZR  // negate
-				ni.WinBBox = image.ZR // negate
+		for i, kid := range ly.Kids {
+			if _, ni := KiToNode2D(kid); ni != nil {
+				if i == ly.StackTop {
+					ni.ClearInvisibleTree()
+				} else {
+					ni.SetInvisibleTree()
+				}
 			}
 		}
-		if sn, ok := ly.Child(ly.StackTop); ok {
-			_, ni := KiToNode2D(sn)
-			ni.VpBBox = ly.VpBBox // todo: sub space, etc
-			ni.WinBBox = ly.WinBBox
-		}
-		// note: all nodes need to render to disconnect b/c of nil VpBBox
+		// note: all nodes need to render to disconnect b/c of invisible
 	}
 	for _, kid := range ly.Kids {
 		nii, _ := KiToNode2D(kid)

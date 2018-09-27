@@ -256,6 +256,9 @@ func (nb *Node2DBase) AsWidget() *WidgetBase {
 
 func (nb *Node2DBase) Init2D() {
 	nb.Viewport = nb.ParentViewport()
+	if _, pn := KiToNode2D(nb.Par); pn != nil {
+		nb.SetInvisibleState(pn.IsInvisible())
+	}
 }
 
 func (nb *Node2DBase) Style2D() {
@@ -349,8 +352,7 @@ func (nb *Node2DBase) FindNamedElement(name string) Node2D {
 	if ce, ok := nb.Par.ChildByName(name, -1); ok {
 		return ce.(Node2D)
 	}
-	pni, _ := KiToNode2D(nb.Par)
-	if pni != nil {
+	if pni, _ := KiToNode2D(nb.Par); pni != nil {
 		return pni.FindNamedElement(name)
 	}
 	return nil

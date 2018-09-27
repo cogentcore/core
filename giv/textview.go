@@ -564,26 +564,13 @@ func (tv *TextView) CursorMovedSig() {
 	tv.TextViewSig.Emit(tv.This, int64(TextViewCursorMoved), tv.CursorPos)
 }
 
-// ValidCursor returns a cursor that is in a valid range
-func (tv *TextView) ValidCursor(pos TextPos) TextPos {
-	if tv.Buf == nil || tv.Buf.NLines == 0 {
-		return TextPosZero
-	}
-	if pos.Ln < 0 {
-		pos.Ln = 0
-	}
-	pos.Ln = ints.MinInt(pos.Ln, len(tv.Buf.Lines)-1)
-	llen := len(tv.Buf.Lines[pos.Ln])
-	pos.Ch = ints.MinInt(pos.Ch, llen)
-	if pos.Ch < 0 {
-		pos.Ch = 0
-	}
-	return pos
-}
-
 // ValidateCursor sets current cursor to a valid cursor position
 func (tv *TextView) ValidateCursor() {
-	tv.CursorPos = tv.ValidCursor(tv.CursorPos)
+	if tv.Buf != nil {
+		tv.CursorPos = tv.Buf.ValidPos(tv.CursorPos)
+	} else {
+		tv.CursorPos = TextPosZero
+	}
 }
 
 // WrappedLines returns the number of wrapped lines (spans) for given line number
@@ -606,11 +593,11 @@ func (tv *TextView) WrappedLineNo(pos TextPos) (si, ri int, ok bool) {
 
 // SetCursor sets a new cursor position, enforcing it in range
 func (tv *TextView) SetCursor(pos TextPos) {
-	if tv.NLines == 0 {
+	if tv.NLines == 0 || tv.Buf == nil {
 		tv.CursorPos = TextPosZero
 		return
 	}
-	tv.CursorPos = tv.ValidCursor(pos)
+	tv.CursorPos = tv.Buf.ValidPos(pos)
 	tv.CursorMovedSig()
 }
 
@@ -1682,8 +1669,12 @@ func (tv *TextView) ScrollInView(bbox image.Rectangle) bool {
 // ScrollCursorInView tells any parent scroll layout to scroll to get cursor
 // in view -- returns true if scrolled
 func (tv *TextView) ScrollCursorInView() bool {
-	curBBox := tv.CursorBBox(tv.CursorPos)
-	return tv.ScrollInView(curBBox)
+	if tv.InBounds() {
+		curBBox := tv.CursorBBox(tv.CursorPos)
+		return tv.ScrollInView(curBBox)
+	} else {
+		return false
+	}
 }
 
 // AutoScroll tells any parent scroll layout to scroll to do its autoscroll
@@ -2874,7 +2865,6 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tv *TextView) Render2D() {
-	// fmt.Printf("textview render: %v\n", tv.Nm)
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

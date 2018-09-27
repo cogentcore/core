@@ -70,6 +70,16 @@ const (
 	// SplitView
 	ReRenderAnchor
 
+	// Invisible means that the node has been marked as invisible by a parent
+	// that has switch-like powers (e.g., layout stacked / tabview or splitter
+	// panel that has been collapsed).  This flag is propagated down to all
+	// child nodes, and rendering or other interaction / update routines
+	// should not run when this flag is set (PushBounds does this for most
+	// cases).  However, it IS a good idea to have styling, layout etc all
+	// take place as normal, so that when the flag is cleared, rendering can
+	// proceed directly.
+	Invisible
+
 	// Inactive disables interaction with widgets or other nodes (i.e., they
 	// are read-only) -- they should indicate this inactive state in an
 	// appropriate way, and each node should interpret events appropriately
@@ -186,6 +196,27 @@ func (nb *NodeBase) SetActiveStateUpdt(act bool) {
 	if act != cur {
 		nb.UpdateSig()
 	}
+}
+
+// IsInvisible tests if this node is flagged as Invisible.  if so, do not
+// render, update, interact.
+func (nb *NodeBase) IsInvisible() bool {
+	return bitflag.Has(nb.Flag, int(Invisible))
+}
+
+// SetInvisible sets the node as invisible
+func (nb *NodeBase) SetInvisible() {
+	bitflag.Set(&nb.Flag, int(Invisible))
+}
+
+// ClearInvisible clears the node as invisible
+func (nb *NodeBase) ClearInvisible() {
+	bitflag.Clear(&nb.Flag, int(Invisible))
+}
+
+// SetInvisibleState sets flag as invisible or not based on invis arg
+func (nb *NodeBase) SetInvisibleState(invis bool) {
+	bitflag.SetState(&nb.Flag, invis, int(Invisible))
 }
 
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
@@ -333,6 +364,28 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 		return true
 	})
 	return rval
+}
+
+// note: invisible is one of the few things that transcends 2D / 3D..
+
+// SetInvisibleTree sets the Invisible flag for all nodes down the tree from
+// this node, inclusive
+func (nb *NodeBase) SetInvisibleTree() {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+		nbb := k.Embed(KiT_NodeBase).(*NodeBase)
+		nbb.SetInvisible()
+		return true
+	})
+}
+
+// ClearInvisibleTree clears the Invisible flag for all nodes down the tree from
+// this node, inclusive
+func (nb *NodeBase) ClearInvisibleTree() {
+	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+		nbb := k.Embed(KiT_NodeBase).(*NodeBase)
+		nbb.ClearInvisible()
+		return true
+	})
 }
 
 // standard css properties on nodes apply, including visible, etc.

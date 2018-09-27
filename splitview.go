@@ -296,12 +296,12 @@ func (sv *SplitView) Render2D() {
 			nii, ni := KiToNode2D(kid)
 			if nii != nil {
 				sp := sv.Splits[i]
-				if sp <= 0 {
-					ni.SetInactive()
-					continue
+				if sp <= 0.01 {
+					ni.SetInvisibleTree()
+				} else {
+					ni.ClearInvisibleTree()
 				}
-				ni.ClearInactive()
-				nii.Render2D()
+				nii.Render2D() // needs to disconnect using invisible
 			}
 		}
 		sv.Parts.Render2DTree()

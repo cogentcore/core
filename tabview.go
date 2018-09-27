@@ -72,13 +72,11 @@ func (tv *TabView) AddTab(widg Node2D, label string) int {
 	return idx
 }
 
-// InsertTab inserts a widget into given index position within list of tabs
-func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
-	fr := tv.Frame()
+// InsertTabOnlyAt inserts just the tab at given index -- after panel has
+// already been added to frame -- assumed to be wrapped in update.  Generally
+// for internal use.
+func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 	tb := tv.Tabs()
-	updt := tv.UpdateStart()
-	tv.SetFullReRender()
-	fr.InsertChild(widg, idx)
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.Tooltip = label
@@ -89,6 +87,22 @@ func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
 		tabIdx := act.Data.(int)
 		tvv.SelectTabIndex(tabIdx)
 	})
+	fr := tv.Frame()
+	if len(fr.Kids) == 1 {
+		fr.StackTop = 0
+		tab.SetSelectedState(true)
+	} else {
+		widg.AsNode2D().SetInvisibleTree() // new tab is invisible until selected
+	}
+}
+
+// InsertTab inserts a widget into given index position within list of tabs
+func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
+	fr := tv.Frame()
+	updt := tv.UpdateStart()
+	tv.SetFullReRender()
+	fr.InsertChild(widg, idx)
+	tv.InsertTabOnlyAt(widg, label, idx)
 	tv.UpdateEnd(updt)
 }
 
@@ -105,19 +119,10 @@ func (tv *TabView) AddNewTab(typ reflect.Type, label string) (Node2D, int) {
 // within list of tabs, and returns that new widget
 func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Node2D {
 	fr := tv.Frame()
-	tb := tv.Tabs()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	widg := fr.InsertNewChild(typ, idx, label).(Node2D)
-	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
-	tab.Data = idx
-	tab.SetText(label)
-	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TabView).(*TabView)
-		act := send.Embed(KiT_TabButton).(*TabButton)
-		tabIdx := act.Data.(int)
-		tvv.SelectTabIndexAction(tabIdx)
-	})
+	tv.InsertTabOnlyAt(widg, label, idx)
 	tv.UpdateEnd(updt)
 	return widg
 }
@@ -145,10 +150,14 @@ func (tv *TabView) SelectTabIndex(idx int) (Node2D, bool) {
 		return nil, false
 	}
 	fr := tv.Frame()
+	if fr.StackTop == idx {
+		return widg, true
+	}
 	updt := tv.UpdateStart()
-	tv.UnselectAllTabs()
+	tv.UnselectOtherTabs(idx)
 	tab.SetSelectedState(true)
 	fr.StackTop = idx
+	// frame  / layout will set invisible etc
 	tv.UpdateEnd(updt)
 	return widg, true
 }
@@ -321,11 +330,14 @@ func (tv *TabView) Frame() *Frame {
 	return tv.KnownChild(1).(*Frame)
 }
 
-// UnselectAllTabs turns off all the tabs
-func (tv *TabView) UnselectAllTabs() {
+// UnselectOtherTabs turns off all the tabs except given one
+func (tv *TabView) UnselectOtherTabs(idx int) {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
+		if i == idx {
+			continue
+		}
 		tb := tbs.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
 		if tb.IsSelected() {
 			tb.SetSelectedState(false)
