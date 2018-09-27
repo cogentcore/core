@@ -935,7 +935,7 @@ func (tv *TextView) CursorBackspace(steps int) {
 	tv.CursorBackward(steps)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
-	tv.Buf.DeleteText(tv.CursorPos, org, true)
+	tv.Buf.DeleteText(tv.CursorPos, org, true, true)
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -950,7 +950,7 @@ func (tv *TextView) CursorDelete(steps int) {
 	// note: no update b/c signal from buf will drive update
 	org := tv.CursorPos
 	tv.CursorForward(steps)
-	tv.Buf.DeleteText(org, tv.CursorPos, true)
+	tv.Buf.DeleteText(org, tv.CursorPos, true, true)
 	tv.SetCursorShow(org)
 }
 
@@ -965,7 +965,7 @@ func (tv *TextView) CursorKill() {
 	} else {
 		tv.CursorEndLine()
 	}
-	tv.Buf.DeleteText(org, tv.CursorPos, true)
+	tv.Buf.DeleteText(org, tv.CursorPos, true, true)
 	tv.SetCursorShow(org)
 }
 
@@ -994,7 +994,7 @@ func (tv *TextView) JumpToLine(ln int) {
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
-func (tv *TextView) FindNextLink(pos TextPos) (TextPos, bool) {
+func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 	for ln := tv.CursorPos.Ln; ln < tv.NLines; ln++ {
 		if len(tv.Renders[ln].Links) == 0 {
 			pos.Ch = 0
@@ -1005,27 +1005,91 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, bool) {
 		si, ri, _ := rend.RuneSpanPos(pos.Ch)
 		for ti := range rend.Links {
 			tl := &rend.Links[ti]
-			if tl.StartSpan >= si && tl.StartIdx > ri {
-				pos.Ch, _ = rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
-				return pos, true
+			if tl.StartSpan >= si && tl.StartIdx >= ri {
+				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
+				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: ed}}
+				pos.Ch = st + 1 // get into it so next one will go after..
+				return pos, reg, true
 			}
 		}
+		pos.Ln = ln + 1
+		pos.Ch = 0
 	}
-	return pos, false
+	return pos, TextRegion{}, false
+}
+
+// FindPrevLink finds previous link before given position, returns false if no such links
+func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
+	for ln := tv.CursorPos.Ln; ln >= 0; ln-- {
+		if len(tv.Renders[ln].Links) == 0 {
+			pos.Ln = ln - 1
+			if ln-1 >= 0 {
+				pos.Ch = len(tv.Buf.Lines[ln-1]) - 2
+			}
+			continue
+		}
+		rend := &tv.Renders[ln]
+		si, ri, _ := rend.RuneSpanPos(pos.Ch)
+		nl := len(rend.Links)
+		for ti := nl - 1; ti >= 0; ti-- {
+			tl := &rend.Links[ti]
+			if tl.StartSpan <= si && tl.StartIdx < ri {
+				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
+				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: ed}}
+				pos.Ch = st - 1
+				return pos, reg, true
+			}
+		}
+		pos.Ln = ln - 1
+		if ln-1 >= 0 {
+			pos.Ch = len(tv.Buf.Lines[ln-1]) - 2
+		}
+	}
+	return pos, TextRegion{}, false
 }
 
 // CursorNextLink moves cursor to next link -- returns true if found
 func (tv *TextView) CursorNextLink() bool {
+	if tv.NLines == 0 {
+		return false
+	}
 	tv.ValidateCursor()
-	npos, has := tv.FindNextLink(tv.CursorPos)
+	npos, reg, has := tv.FindNextLink(tv.CursorPos)
 	if !has {
-		npos, has = tv.FindNextLink(TextPos{}) // wraparound
+		npos, reg, has = tv.FindNextLink(TextPos{}) // wraparound
 		if !has {
 			return false
 		}
 	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
+	prevh := tv.Highlights
+	tv.Highlights = []TextRegion{reg}
+	tv.UpdateHighlights(prevh)
+	tv.SetCursorShow(npos)
+	return true
+}
+
+// CursorPrevLink moves cursor to previous link -- returns true if found
+func (tv *TextView) CursorPrevLink() bool {
+	if tv.NLines == 0 {
+		return false
+	}
+	tv.ValidateCursor()
+	npos, reg, has := tv.FindPrevLink(tv.CursorPos)
+	if !has {
+		npos, reg, has = tv.FindPrevLink(TextPos{}) // wraparound
+		if !has {
+			return false
+		}
+	}
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	prevh := tv.Highlights
+	tv.Highlights = []TextRegion{reg}
+	tv.UpdateHighlights(prevh)
 	tv.SetCursorShow(npos)
 	return true
 }
@@ -1418,7 +1482,7 @@ func (tv *TextView) Cut() *TextBufEdit {
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as TextBufEdit (nil if none)
 func (tv *TextView) DeleteSelection() *TextBufEdit {
-	tbe := tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, true)
+	tbe := tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, true, true)
 	tv.SelectReset()
 	return tbe
 }
@@ -1460,7 +1524,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	if tv.HasSelection() {
 		tv.Cut()
 	}
-	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true)
+	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true, true)
 	tv.SetCursorShow(tbe.Reg.End)
 	tv.SetCursorCol(tv.CursorPos)
 }
@@ -1603,7 +1667,7 @@ func (tv *TextView) CompleteText(s string) {
 
 	ns, _ := tv.Complete.EditFunc(tv.Complete.Context, tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
 	fmt.Println(ns)
-	tv.Buf.DeleteText(st, tv.CursorPos, true)
+	tv.Buf.DeleteText(st, tv.CursorPos, true, true)
 	tv.CursorPos = st
 	tv.InsertAtCursor([]byte(ns))
 	//tv.CursorForward(delta)
@@ -2007,6 +2071,17 @@ func (tv *TextView) RenderHighlights(stln, edln int) {
 			continue
 		}
 		tv.RenderRegionBox(reg, TextViewHighlight)
+	}
+}
+
+// UpdateHighlights re-renders lines from previous highlights and current
+// highlights -- assumed to be within a window update block
+func (tv *TextView) UpdateHighlights(prev []TextRegion) {
+	for _, ph := range prev {
+		tv.RenderLines(ph.Start.Ln, ph.End.Ln)
+	}
+	for _, ch := range tv.Highlights {
+		tv.RenderLines(ch.Start.Ln, ch.End.Ln)
 	}
 }
 
@@ -2585,9 +2660,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.CursorNextLink()
 		case kf == gi.KeyFunFocusPrev: // tab
 			kt.SetProcessed()
-			// tv.CursorPrevLink()
+			tv.CursorPrevLink()
 		case kt.Rune == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
 			kt.SetProcessed()
+			tv.CursorPos.Ch--
+			tv.CursorNextLink() // todo: cursorcurlink
 			tv.OpenLinkAt(tv.CursorPos)
 		}
 		return

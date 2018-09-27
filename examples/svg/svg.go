@@ -107,7 +107,7 @@ func mainrun() {
 
 	fnm := tbar.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
 	TheFile = fnm
-	fnm.SetMinPrefWidth(units.NewValue(40, units.Em))
+	fnm.SetMinPrefWidth(units.NewValue(60, units.Ch))
 
 	zmlb := tbar.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
 	zmlb.Text = "Zoom: "

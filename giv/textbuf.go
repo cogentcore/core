@@ -259,7 +259,7 @@ func (tb *TextBuf) ReOpen() bool {
 	}
 	tb.Stat() // "own" the new file..
 	diffs := tb.DiffBufs(ob)
-	tb.PatchFromBuf(ob, diffs)
+	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 	tb.Changed = false
 	return true
 }
@@ -419,15 +419,18 @@ func (tb *TextBuf) EndPos() TextPos {
 }
 
 // AppendText appends new text to end of buffer, using insert, returns edit
-func (tb *TextBuf) AppendText(text []byte) *TextBufEdit {
+func (tb *TextBuf) AppendText(text []byte, saveUndo, signal bool) *TextBufEdit {
+	if len(text) == 0 {
+		return &TextBufEdit{}
+	}
 	ed := tb.EndPos()
-	return tb.InsertText(ed, text, true)
+	return tb.InsertText(ed, text, saveUndo, signal)
 }
 
 // AppendTextLine appends one line of new text to end of buffer, using insert,
 // and appending a LF at the end of the line if it doesn't already have one.
 // Returns the edit region.
-func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
+func (tb *TextBuf) AppendTextLine(text []byte, saveUndo, signal bool) *TextBufEdit {
 	ed := tb.EndPos()
 	sz := len(text)
 	addLF := false
@@ -445,7 +448,62 @@ func (tb *TextBuf) AppendTextLine(text []byte) *TextBufEdit {
 		tcpy[sz] = '\n'
 		efft = tcpy
 	}
-	tbe := tb.InsertText(ed, efft, true)
+	tbe := tb.InsertText(ed, efft, saveUndo, signal)
+	return tbe
+}
+
+// AppendTextMarkup appends new text to end of buffer, using insert, returns
+// edit, and uses supplied markup to render it
+func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, saveUndo, signal bool) *TextBufEdit {
+	if len(text) == 0 {
+		return &TextBufEdit{}
+	}
+	ed := tb.EndPos()
+	tbe := tb.InsertText(ed, text, saveUndo, false) // no sig -- we do later
+
+	st := tbe.Reg.Start.Ln
+	el := tbe.Reg.End.Ln
+	sz := (el - st) + 1
+	msplt := bytes.Split(markup, []byte("\n"))
+	if len(msplt) != sz {
+		log.Printf("TextBuf AppendTextMarkup: markup text not same size as appended text: is: %v, should be: %v\n", len(msplt), sz)
+		el = ints.MinInt(st+len(msplt), el)
+	}
+	for ln := st; ln <= el; ln++ {
+		tb.Markup[ln] = msplt[ln-st]
+	}
+	if signal {
+		tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+	}
+	return tbe
+}
+
+// AppendTextLineMarkup appends one line of new text to end of buffer, using
+// insert, and appending a LF at the end of the line if it doesn't already
+// have one.  user-supplied markup is used.  Returns the edit region.
+func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, saveUndo, signal bool) *TextBufEdit {
+	ed := tb.EndPos()
+	sz := len(text)
+	addLF := false
+	if sz > 0 {
+		if text[sz-1] != '\n' {
+			addLF = true
+		}
+	} else {
+		addLF = true
+	}
+	efft := text
+	if addLF {
+		tcpy := make([]byte, sz+1)
+		copy(tcpy, text)
+		tcpy[sz] = '\n'
+		efft = tcpy
+	}
+	tbe := tb.InsertText(ed, efft, saveUndo, false)
+	tb.Markup[tbe.Reg.Start.Ln] = markup
+	if signal {
+		tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+	}
 	return tbe
 }
 
@@ -735,7 +793,7 @@ func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
 
 // DeleteText deletes region of text between start and end positions, signaling
 // views after text lines have been updated.
-func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
+func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
 	if st == ed {
@@ -770,7 +828,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 		tb.NLines = len(tb.Lines)
 		tb.LinesDeleted(tbe)
 	}
-	tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
+	if signal {
+		tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
+	}
 	if tb.Autosave {
 		go tb.AutoSave()
 	}
@@ -782,7 +842,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo bool) *TextBufEdit {
 
 // Insert inserts new text at given starting position, signaling views after
 // text has been inserted
-func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEdit {
+func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *TextBufEdit {
 	if len(text) == 0 {
 		return nil
 	}
@@ -836,7 +896,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo bool) *TextBufEd
 		tbe = tb.Region(st, ed)
 		tb.LinesInserted(tbe)
 	}
-	tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+	if signal {
+		tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+	}
 	if tb.Autosave {
 		go tb.AutoSave()
 	}
@@ -1057,10 +1119,10 @@ func (tb *TextBuf) Undo() *TextBufEdit {
 	tbe := tb.Undos[tb.UndoPos]
 	if tbe.Delete {
 		// fmt.Printf("undoing delete at: %v text: %v\n", tbe.Reg, string(tbe.ToBytes()))
-		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false)
+		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true)
 	} else {
 		// fmt.Printf("undoing insert at: %v text: %v\n", tbe.Reg, string(tbe.ToBytes()))
-		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false)
+		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false, true)
 	}
 	return tbe
 }
@@ -1072,9 +1134,9 @@ func (tb *TextBuf) Redo() *TextBufEdit {
 	}
 	tbe := tb.Undos[tb.UndoPos]
 	if tbe.Delete {
-		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false)
+		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false, true)
 	} else {
-		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false)
+		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true)
 	}
 	tb.UndoPos++
 	return tbe
@@ -1149,11 +1211,11 @@ func IndentCharPos(n, tabSz int, spc bool) int {
 func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 	curli, _ := tb.LineIndent(ln, tabSz)
 	if n > curli {
-		return tb.InsertText(TextPos{Ln: ln}, IndentBytes(n-curli, tabSz, spc), true)
+		return tb.InsertText(TextPos{Ln: ln}, IndentBytes(n-curli, tabSz, spc), true, true)
 	} else if n < curli {
 		spos := IndentCharPos(n, tabSz, spc)
 		cpos := IndentCharPos(curli, tabSz, spc)
-		return tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true)
+		return tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true, true)
 	}
 	return nil
 }
@@ -1262,22 +1324,24 @@ func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
 }
 
 // PatchFromBuf patches (edits) this buffer using content from other buffer,
-// according to diff operations (e.g., as generated from DiffBufs)
-func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs) bool {
+// according to diff operations (e.g., as generated from DiffBufs).  signal
+// determines whether each patch is signaled -- if an overall signal will be
+// sent at the end, then that would not be necessary (typical)
+func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool {
 	mods := false
 	for _, df := range diffs {
 		switch df.Tag {
 		case 'r':
-			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false)
+			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)
 			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
-			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false)
+			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false, signal)
 			mods = true
 		case 'd':
-			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false)
+			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)
 			mods = true
 		case 'i':
 			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
-			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false)
+			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false, signal)
 			mods = true
 		}
 	}

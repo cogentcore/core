@@ -1228,7 +1228,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
 					tl.EndSpan = len(tr.Spans) - 1
-					tl.EndIdx = len(curSp.Text) - 1
+					tl.EndIdx = len(curSp.Text)
 					curLinkIdx = -1
 				}
 			}
@@ -1327,7 +1327,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 					if curLinkIdx >= 0 {
 						tl := &tr.Links[curLinkIdx]
 						tl.EndSpan = len(tr.Spans) - 1
-						tl.EndIdx = len(curSp.Text) - 1
+						tl.EndIdx = len(curSp.Text)
 						curLinkIdx = -1
 					}
 				}
