@@ -486,13 +486,15 @@ void doGeomWindow(uintptr_t viewID, int left, int top, int width, int height) {
     NSRect crect = [view.window contentRectForFrameRect: fr ];
     // printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, b, screenH);
 
-    double frexw = fr.size.width - crect.size.width;
-    double frexh = fr.size.height - crect.size.height;
-    fr.size.width = width + frexw;
-    fr.size.height = height + frexw;
+    double frexw = (fr.size.width - crect.size.width) / pixratio;
+    double frexh = (fr.size.height - crect.size.height);
+    fr.size.width = ((double)width / pixratio) + frexw;
+    fr.size.height = ((double)height / pixratio) + frexh;
 
+    double crh = fr.size.height - frexh;
+    
     double l = (double)left / pixratio;
-    double b = (screenH - (top + fr.size.height)) * pixratio;
+    double b = (screenH - (top + crh)) * pixratio;
     fr.origin.x = l;
     fr.origin.y = b;
     dispatch_async(dispatch_get_main_queue(), ^{

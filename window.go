@@ -30,6 +30,7 @@ import (
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 
@@ -353,7 +354,7 @@ func (w *Window) SetName(name string) bool {
 		wgp := WinGeomPrefs.Pref(name, nil)
 		if wgp != nil {
 			if w.OSWin.Size() != wgp.Size || w.OSWin.Position() != wgp.Pos {
-				// fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
+				fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
 				w.OSWin.SetGeom(wgp.Pos, wgp.Size)
 			}
 		}
@@ -2565,15 +2566,20 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		scrn = oswin.TheApp.Screen(0)
 		// fmt.Printf("Pref: using scrn 0: %v\n", scrn.Name)
 	}
+	scsz := scrn.Geometry.Size()
 
 	wp, ok := wps[scrn.Name]
 	if ok {
 		if scrn.LogicalDPI == wp.LogicalDPI {
+			wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
+			wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
 			return &wp
 		} else {
 			// fmt.Printf("rescaling scrn dpi: %v saved dpi: %v\n", scrn.LogicalDPI, wp.LogicalDPI)
 			wp.Size.X = int(float32(wp.Size.X) * (scrn.LogicalDPI / wp.LogicalDPI))
 			wp.Size.Y = int(float32(wp.Size.Y) * (scrn.LogicalDPI / wp.LogicalDPI))
+			wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
+			wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
 			return &wp
 		}
 	}
@@ -2605,6 +2611,8 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	wp.Pos.Y = int(float32(wp.Pos.Y) * rescale)
 	wp.Size.X = int(float32(wp.Size.X) * rescale)
 	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
+	wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
+	wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
 	fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
 	return &wp
 }

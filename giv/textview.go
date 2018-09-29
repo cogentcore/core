@@ -2783,10 +2783,11 @@ func (tv *TextView) OpenLink(tl *gi.TextLink) {
 	tv.LinkSig.Emit(tv.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
-// OpenLinkAt opens a link at given cursor position, if one exists there..
-func (tv *TextView) OpenLinkAt(pos TextPos) bool {
+// LinkAt returns link at given cursor position, if one exists there --
+// returns true and the link if there is a link, and false otherwise
+func (tv *TextView) LinkAt(pos TextPos) (*gi.TextLink, bool) {
 	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
-		return false
+		return nil, false
 	}
 	cpos := tv.CharStartPos(pos).ToPointCeil()
 	cpos.Y += 2
@@ -2797,11 +2798,20 @@ func (tv *TextView) OpenLinkAt(pos TextPos) bool {
 		tl := &rend.Links[ti]
 		tlb := tl.Bounds(rend, lpos)
 		if cpos.In(tlb) {
-			tv.OpenLink(tl)
-			return true
+			return tl, true
 		}
 	}
-	return false
+	return nil, false
+}
+
+// OpenLinkAt opens a link at given cursor position, if one exists there --
+// returns true and the link if there is a link, and false otherwise
+func (tv *TextView) OpenLinkAt(pos TextPos) (*gi.TextLink, bool) {
+	tl, ok := tv.LinkAt(pos)
+	if ok {
+		tv.OpenLink(tl)
+	}
+	return tl, ok
 }
 
 // MouseEvent handles the mouse.Event
@@ -2819,7 +2829,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	case mouse.Left:
 		if me.Action == mouse.Press {
 			me.SetProcessed()
-			if !tv.OpenLinkAt(newPos) {
+			if _, got := tv.OpenLinkAt(newPos); !got {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			}
 		} else if me.Action == mouse.DoubleClick {
