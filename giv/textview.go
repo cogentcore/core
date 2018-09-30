@@ -995,7 +995,7 @@ func (tv *TextView) JumpToLine(ln int) {
 
 // FindNextLink finds next link after given position, returns false if no such links
 func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
-	for ln := tv.CursorPos.Ln; ln < tv.NLines; ln++ {
+	for ln := pos.Ln; ln < tv.NLines; ln++ {
 		if len(tv.Renders[ln].Links) == 0 {
 			pos.Ch = 0
 			pos.Ln = ln + 1
@@ -1021,7 +1021,7 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 
 // FindPrevLink finds previous link before given position, returns false if no such links
 func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
-	for ln := tv.CursorPos.Ln; ln >= 0; ln-- {
+	for ln := pos.Ln; ln >= 0; ln-- {
 		if len(tv.Renders[ln].Links) == 0 {
 			pos.Ln = ln - 1
 			if ln-1 >= 0 {
@@ -1050,14 +1050,18 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 	return pos, TextRegion{}, false
 }
 
-// CursorNextLink moves cursor to next link -- returns true if found
-func (tv *TextView) CursorNextLink() bool {
+// CursorNextLink moves cursor to next link. wraparound wraps around to top of
+// buffer if none found -- returns true if found
+func (tv *TextView) CursorNextLink(wraparound bool) bool {
 	if tv.NLines == 0 {
 		return false
 	}
 	tv.ValidateCursor()
 	npos, reg, has := tv.FindNextLink(tv.CursorPos)
 	if !has {
+		if !wraparound {
+			return false
+		}
 		npos, reg, has = tv.FindNextLink(TextPos{}) // wraparound
 		if !has {
 			return false
@@ -1072,14 +1076,18 @@ func (tv *TextView) CursorNextLink() bool {
 	return true
 }
 
-// CursorPrevLink moves cursor to previous link -- returns true if found
-func (tv *TextView) CursorPrevLink() bool {
+// CursorPrevLink moves cursor to previous link. wraparound wraps around to
+// bottom of buffer if none found. returns true if found
+func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 	if tv.NLines == 0 {
 		return false
 	}
 	tv.ValidateCursor()
 	npos, reg, has := tv.FindPrevLink(tv.CursorPos)
 	if !has {
+		if !wraparound {
+			return false
+		}
 		npos, reg, has = tv.FindPrevLink(TextPos{}) // wraparound
 		if !has {
 			return false
@@ -2657,14 +2665,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		switch {
 		case kf == gi.KeyFunFocusNext: // tab
 			kt.SetProcessed()
-			tv.CursorNextLink()
+			tv.CursorNextLink(true)
 		case kf == gi.KeyFunFocusPrev: // tab
 			kt.SetProcessed()
-			tv.CursorPrevLink()
+			tv.CursorPrevLink(true)
 		case kt.Rune == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
 			kt.SetProcessed()
 			tv.CursorPos.Ch--
-			tv.CursorNextLink() // todo: cursorcurlink
+			tv.CursorNextLink(true) // todo: cursorcurlink
 			tv.OpenLinkAt(tv.CursorPos)
 		}
 		return

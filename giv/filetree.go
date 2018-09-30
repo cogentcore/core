@@ -286,10 +286,13 @@ func (fn *FileNode) OpenBuf() error {
 		return err
 	}
 	if fn.Buf != nil {
-		return nil
+		if fn.Buf.Filename == fn.FPath { // close resets filename
+			return nil
+		}
+	} else {
+		fn.Buf = &TextBuf{}
+		fn.Buf.InitName(fn.Buf, fn.Nm)
 	}
-	fn.Buf = &TextBuf{}
-	fn.Buf.InitName(fn.Buf, fn.Nm)
 	fn.Buf.Hi.Style = FileNodeHiStyle
 	return fn.Buf.Open(fn.FPath)
 }

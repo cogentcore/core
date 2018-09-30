@@ -43,9 +43,10 @@ type TextBuf struct {
 	Hi         HiMarkup       `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines     int            `json:"-" xml:"-" desc:"number of lines"`
 	Lines      [][]rune       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence"`
-	LineBytes  [][]byte       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line"`
+	LineBytes  [][]byte       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line -- these are initially just pointers into source Txt bytes"`
 	Markup     [][]byte       `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	ByteOffs   []int          `json:"-" xml:"-" desc:"offset for start of each line in Txt []byte slice -- to enable more efficient updating of that via edits"`
+	ByteOffs   []int          `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
+	TotalBytes int            `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
 	MarkupMu   sync.Mutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
 	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
@@ -216,9 +217,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
 
 	// do slow full update in background
-	if tb.Hi.HasHi() {
-		go tb.MarkupAllLines() // then do all in background
-	}
+	go tb.MarkupAllLines() // then do all in background
 	return nil
 }
 
@@ -261,6 +260,7 @@ func (tb *TextBuf) ReOpen() bool {
 	diffs := tb.DiffBufs(ob)
 	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 	tb.Changed = false
+	go tb.MarkupAllLines() // always do global reformat in bg
 	return true
 }
 
@@ -366,6 +366,9 @@ func (tb *TextBuf) Close() bool {
 	for _, tve := range tb.Views {
 		tve.SetBuf(nil) // automatically disconnects signals, views
 	}
+	tb.New(1)
+	tb.Filename = ""
+	tb.Changed = false
 	return true
 }
 
@@ -546,8 +549,17 @@ func (tb *TextBuf) AutoScrollViews() {
 /////////////////////////////////////////////////////////////////////////////
 //   Accessing Text
 
-// LinesToBytes converts current Lines back to the Txt slice of bytes --
-// re-uses Txt memory if possible for maximum efficiency
+// SetByteOffs sets the byte offsets for each line into the raw text
+func (tb *TextBuf) SetByteOffs() {
+	bo := 0
+	for ln, txt := range tb.LineBytes {
+		tb.ByteOffs[ln] = bo
+		bo += len(txt) + 1 // lf
+	}
+	tb.TotalBytes = bo
+}
+
+// LinesToBytes converts current Lines back to the Txt slice of bytes.
 func (tb *TextBuf) LinesToBytes() {
 	if tb.NLines == 0 {
 		if tb.Txt != nil {
@@ -558,9 +570,9 @@ func (tb *TextBuf) LinesToBytes() {
 
 	tb.Txt = tb.LinesToBytesCopy()
 
-	// todo: byte offs are not updating properly!  still..
-
-	// totsz := tb.ByteOffs[tb.NLines-1] + len(tb.LineBytes[tb.NLines-1]) + 1
+	// the following does not work because LineBytes is just pointers into txt!
+	// tb.SetByteOffs()
+	// totsz := tb.TotalBytes
 
 	// if cap(tb.Txt) < totsz {
 	// 	tb.Txt = make([]byte, totsz)
@@ -570,8 +582,8 @@ func (tb *TextBuf) LinesToBytes() {
 
 	// for ln := range tb.Lines {
 	// 	bo := tb.ByteOffs[ln]
-	// 	copy(tb.Txt[bo:], tb.LineBytes[ln])
 	// 	lsz := len(tb.LineBytes[ln])
+	// 	copy(tb.Txt[bo:bo+lsz], tb.LineBytes[ln])
 	// 	tb.Txt[bo+lsz] = '\n'
 	// }
 }
@@ -580,10 +592,13 @@ func (tb *TextBuf) LinesToBytes() {
 // e.g., for autosave or other "offline" uses of the text -- doesn't affect
 // byte offsets etc
 func (tb *TextBuf) LinesToBytesCopy() []byte {
-	return bytes.Join(tb.LineBytes, []byte("\n"))
+	txt := bytes.Join(tb.LineBytes, []byte("\n"))
+	txt = append(txt, '\n')
+	return txt
 }
 
-// BytesToLines converts current Txt bytes into lines, and initializes markup with raw text
+// BytesToLines converts current Txt bytes into lines, and initializes markup
+// with raw text
 func (tb *TextBuf) BytesToLines() {
 	tb.Hi.Init()
 	if len(tb.Txt) == 0 {
@@ -592,6 +607,10 @@ func (tb *TextBuf) BytesToLines() {
 	}
 	lns := bytes.Split(tb.Txt, []byte("\n"))
 	tb.NLines = len(lns)
+	if len(lns[tb.NLines-1]) == 0 { // lines have lf at end typically
+		tb.NLines--
+		lns = lns[:tb.NLines]
+	}
 	tb.New(tb.NLines)
 	bo := 0
 	for ln, txt := range lns {
@@ -601,6 +620,7 @@ func (tb *TextBuf) BytesToLines() {
 		tb.Markup[ln] = tb.LineBytes[ln]
 		bo += len(txt) + 1 // lf
 	}
+	tb.TotalBytes = bo
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -958,7 +978,7 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 /////////////////////////////////////////////////////////////////////////////
 //   Syntax Highlighting Markup
 
-// LinesInserted inserts new lines in Markup and ByteOffs corresponding to lines
+// LinesInserted inserts new lines in Markup corresponding to lines
 // inserted in Lines text.  Locks and unlocks the Markup mutex
 func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	stln := tbe.Reg.Start.Ln + 1
@@ -980,7 +1000,7 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	copy(nmu[stln:], tmpmu)            // copy into position
 	tb.Markup = nmu
 
-	// ByteOffs
+	// ByteOffs -- maintain mem updt
 	tmpof := make([]int, nsz)
 	nof := append(tb.ByteOffs, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])
@@ -995,18 +1015,13 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 		tb.ByteOffs[ln] = bo
 		bo += len(tb.LineBytes[ln]) + 1
 	}
-	for ln := ed + 1; ln < tb.NLines; ln++ {
-		tb.ByteOffs[ln] = bo
-		bo += len(tb.LineBytes[ln]) + 1
-	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
 
-	// todo: turn on
-	// go tb.MarkupAllLines() // always do global reformat in bg
+	go tb.MarkupAllLines() // always do global reformat in bg
 }
 
-// LinesDeleted deletes lines in Markup and ByteOffs corresponding to lines
+// LinesDeleted deletes lines in Markup corresponding to lines
 // deleted in Lines text.  Locks and unlocks the Markup mutex.
 func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.MarkupMu.Lock()
@@ -1019,14 +1034,8 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
 
 	st := tbe.Reg.Start.Ln
-	bo := tb.ByteOffs[st]
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
 	tb.Markup[st] = tb.LineBytes[st]
-	bo += len(tb.Markup[st]) + 1
-	for ln := st + 1; ln < tb.NLines; ln++ {
-		tb.ByteOffs[ln] = bo
-		bo += len(tb.LineBytes[ln]) + 1
-	}
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
 	// probably don't need to do global markup here..
@@ -1038,16 +1047,9 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	tb.MarkupMu.Lock()
 
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
-	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
 		tb.Markup[ln] = tb.LineBytes[ln]
-		tb.ByteOffs[ln] = bo
-		bo += len(tb.LineBytes[ln]) + 1
-	}
-	for ln := ed + 1; ln < tb.NLines; ln++ {
-		tb.ByteOffs[ln] = bo
-		bo += len(tb.LineBytes[ln]) + 1
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
@@ -1058,6 +1060,9 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 // calling MarkupMu mutex when setting the marked-up lines with the result --
 // designed to be called in a separate goroutine
 func (tb *TextBuf) MarkupAllLines() {
+	if !tb.Hi.HasHi() || tb.NLines == 0 || tb.Hi.lexer == nil {
+		return
+	}
 	tb.LinesToBytes() // todo: could need another mutex here?
 	mtlns, err := tb.Hi.MarkupText(tb.Txt)
 	if err != nil {
@@ -1065,7 +1070,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	}
 
 	tb.MarkupMu.Lock()
-	maxln := len(mtlns) - 1
+	maxln := ints.MinInt(len(mtlns)-1, tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
 		mt := mtlns[ln]
 		tb.Markup[ln] = tb.Hi.FixMarkupLine(mt)

@@ -711,13 +711,11 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 // MethViewFieldValue returns a reflect.Value for the given field name,
 // checking safely (false if not found)
 func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool) {
-	typ := kit.NonPtrType(vval.Type())
-	_, ok := typ.FieldByName(field)
+	fv, ok := kit.FieldValueByPath(kit.NonPtrValue(vval).Interface(), field)
 	if !ok {
-		log.Printf("giv.MethViewFieldValue: Could not find field %v in type: %v\n", field, typ.String())
+		log.Printf("giv.MethViewFieldValue: Could not find field %v in type: %v\n", field, vval.Type().String())
 		return nil, false
 	}
-	fv := kit.NonPtrValue(vval).FieldByName(field)
 	return &fv, true
 }
 

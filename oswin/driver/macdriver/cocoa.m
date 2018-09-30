@@ -829,21 +829,33 @@ void pasteWrite(NSPasteboard* pb) {
 
 bool clipIsEmpty() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
+    if(pb == NULL) {
+        return true;
+    }
     return pasteIsEmpty(pb);
 }
 
 void clipReadText() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
+    if(pb == NULL) {
+        return;
+    }
     pasteReadText(pb);
 }
 
 void clipWrite() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
+    if(pb == NULL) {
+        return;
+    }
     pasteWrite(pb);
 }
 
 void clipClear() {
     NSPasteboard *pb = [NSPasteboard generalPasteboard];
+    if(pb == NULL) {
+        return;
+    }
     [pb clearContents];
     if(pasteWriteItems != NULL) {
         [pasteWriteItems removeAllObjects];
