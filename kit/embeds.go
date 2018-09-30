@@ -7,6 +7,7 @@ package kit
 import (
 	"log"
 	"reflect"
+	"strings"
 )
 
 // This file contains helpful functions for dealing with embedded structs, in
@@ -196,6 +197,55 @@ func FlatFieldInterfaces(stru interface{}) []interface{} {
 // reference and consistency
 func FlatFieldByName(typ reflect.Type, nm string) (reflect.StructField, bool) {
 	return typ.FieldByName(nm)
+}
+
+// FieldByPath returns field in type or embedded structs within type, by a
+// dot-separated path -- finds field by name for each level of the path, and
+// recurses.
+func FieldByPath(typ reflect.Type, path string) (reflect.StructField, bool) {
+	pels := strings.Split(path, ".")
+	ctyp := typ
+	plen := len(pels)
+	for i, pe := range pels {
+		fld, ok := ctyp.FieldByName(pe)
+		if !ok {
+			log.Printf("kit.FieldByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, ctyp.String(), path, typ.String())
+			return fld, false
+		}
+		if i == plen-1 {
+			return fld, true
+		} else {
+			ctyp = fld.Type
+		}
+	}
+	return reflect.StructField{}, false
+}
+
+// FieldValueByPath returns field interface in type or embedded structs within
+// type, by a dot-separated path -- finds field by name for each level of the
+// path, and recurses.
+func FieldValueByPath(stru interface{}, path string) (reflect.Value, bool) {
+	pels := strings.Split(path, ".")
+	sval := reflect.ValueOf(stru)
+	cval := sval
+	typ := sval.Type()
+	ctyp := typ
+	plen := len(pels)
+	for i, pe := range pels {
+		_, ok := ctyp.FieldByName(pe)
+		if !ok {
+			log.Printf("kit.FieldValueByPath: field: %v not found in type: %v, starting from path: %v, in type: %v\n", pe, cval.Type().String(), path, typ.String())
+			return cval, false
+		}
+		fval := cval.FieldByName(pe)
+		if i == plen-1 {
+			return fval, true
+		} else {
+			cval = fval
+			ctyp = fval.Type()
+		}
+	}
+	return reflect.Value{}, false
 }
 
 // FlatFieldTag returns given tag value in field in type or embedded structs

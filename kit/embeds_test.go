@@ -40,6 +40,7 @@ type C struct {
 type D struct {
 	Mbr5 string
 	Mbr6 int
+	NmdA A
 }
 
 var a = A{}
@@ -54,6 +55,13 @@ func InitC() {
 	c.Mbr4 = 4
 	c.Mbr5 = "mbr5 string"
 	c.Mbr6 = 6
+}
+
+func InitD() {
+	d.Mbr5 = "mbr5 string"
+	d.Mbr6 = 6
+	d.NmdA.Mbr1 = "a in d"
+	d.NmdA.Mbr2 = 2
 }
 
 func TestTypeEmbeds(t *testing.T) {
@@ -174,4 +182,19 @@ func TestFlatFieldsByName(t *testing.T) {
 		t.Errorf("Didn't get proper find flat field value by name: %v != %v\n", fifis, fifit)
 	}
 
+}
+
+func TestFieldPaths(t *testing.T) {
+	InitD()
+
+	fld, ok := FieldByPath(reflect.TypeOf(d), "NmdA.Mbr1")
+	if !ok {
+		t.Errorf("FieldByPath failed per err msg, fld %v\n", fld.Name)
+	}
+
+	fi, ok := FieldValueByPath(d, "NmdA.Mbr1")
+	if !ok {
+		t.Errorf("FieldValueByPath failed per err msg, fi %v\n", fi)
+	}
+	// fmt.Printf("fi: %v\n", fi)
 }
