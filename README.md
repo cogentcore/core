@@ -96,9 +96,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * text word-wrap: if it fails at any point, it gives up!  e.g., putting long file name at start of dialog prompt, caused fail to wrap.
 
-* closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
-
-* also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
+* MethodView CallMethod needs to update objs to those passed -- is relying on previously-compiled ones -- C-c C-c coming up in the wrong window!  still?
 
 * maybe fixed: getting mysterious crashes in clearClip and closewindow on mac in cocoa.m --
   once I turned off mainmenu updating -- will try to re-activate and debug..
@@ -106,13 +104,22 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * drag on textview should prevent DND -- dnd not getting "processed"
 
 * TextView:
+	+ mouse can't go to end of line -- select, etc.
+	+ newline in middle of text sets cursor to 2 in from left -- should be at 0
+	+ revert diff not working perfectly -- turn off "junk" and if that doesn't work, go back to reopen 
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ clipboard history
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
+	+ closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
+	+ also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
+	* Need to fix un-indent for } and have 2nd tab override auto-indent -- needs serious work
+	* save current cursor position from last view to move cursor in textbuf, reactivate that when switching bufs.  
+	* horiz scroll with line numbers: render needs to know about scrolling delta.
+	* cursor goes to hand for links in TextView
+
 
 * Splitview: 
 	+ gide resize textview not re-drawing  (still?)
-	+ some lowpri keyfuns for collapsing and expanding -- command 0-n..
 
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.

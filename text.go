@@ -1443,8 +1443,13 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				nb := str[bidx] // re-gets cb so it can be processed here..
 				switch nb {
 				case '<':
-					didNl = false
-					break aggloop
+					if (bidx > 0 && str[bidx-1] == '<') || sz == bidx+1 {
+						tmpbuf = append(tmpbuf, nb)
+						didNl = false
+					} else {
+						didNl = false
+						break aggloop
+					}
 				case '\n': // todo absorb other line endings
 					unestr := html.UnescapeString(string(tmpbuf))
 					curSp.AppendString(unestr, curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)

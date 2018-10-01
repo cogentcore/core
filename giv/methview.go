@@ -563,8 +563,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
 		md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
-				ddlg.Close() // done
+				// ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				MethViewCallMeth(md, args)
 			}
 		})
