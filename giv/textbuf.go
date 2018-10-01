@@ -468,9 +468,9 @@ func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, saveUndo, signal
 	el := tbe.Reg.End.Ln
 	sz := (el - st) + 1
 	msplt := bytes.Split(markup, []byte("\n"))
-	if len(msplt) != sz {
-		log.Printf("TextBuf AppendTextMarkup: markup text not same size as appended text: is: %v, should be: %v\n", len(msplt), sz)
-		el = ints.MinInt(st+len(msplt), el)
+	if len(msplt) < sz {
+		log.Printf("TextBuf AppendTextMarkup: markup text less than appended text: is: %v, should be: %v\n", len(msplt), sz)
+		el = ints.MinInt(st+len(msplt)-1, el)
 	}
 	for ln := st; ln <= el; ln++ {
 		tb.Markup[ln] = msplt[ln-st]

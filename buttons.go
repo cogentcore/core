@@ -515,7 +515,8 @@ func (bb *ButtonBase) StyleParts() {
 
 func (bb *ButtonBase) ConfigParts() {
 	bb.Parts.Lay = LayoutHoriz
-	config, icIdx, lbIdx := bb.ConfigPartsIconLabel(string(bb.Icon), bb.Text)
+	config := kit.TypeAndNameList{}
+	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, string(bb.Icon), bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := bb.Parts.ConfigChildren(config, false) // not unique names
 	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)

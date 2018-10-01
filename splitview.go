@@ -6,7 +6,11 @@ package gi
 
 import (
 	"image"
+	"strconv"
+	"strings"
 
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -61,16 +65,25 @@ func (sv *SplitView) UpdateSplits() {
 		sum += sp
 	}
 	if sum == 0 { // set default even splits
-		even := 1.0 / float32(sz)
-		for i := range sv.Splits {
-			sv.Splits[i] = even
-		}
+		sv.EvenSplits()
 		sum = 1.0
 	} else {
 		norm := 1.0 / sum
 		for i := range sv.Splits {
 			sv.Splits[i] *= norm
 		}
+	}
+}
+
+// EvenSplits splits space evenly across all panels
+func (sv *SplitView) EvenSplits() {
+	sz := len(sv.Kids)
+	if sz == 0 {
+		return
+	}
+	even := 1.0 / float32(sz)
+	for i := range sv.Splits {
+		sv.Splits[i] = even
 	}
 }
 
@@ -123,6 +136,19 @@ func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
 			sv.Splits[idx] = 0
+		}
+	}
+	sv.UpdateSplits()
+	sv.UpdateEnd(updt)
+}
+
+// RestoreChild restores given child(ren) -- does an Update
+func (sv *SplitView) RestoreChild(idxs ...int) {
+	updt := sv.UpdateStart()
+	sz := len(sv.Kids)
+	for _, idx := range idxs {
+		if idx >= 0 && idx < sz {
+			sv.Splits[idx] = 1.0 / float32(sz)
 		}
 	}
 	sv.UpdateSplits()
@@ -226,6 +252,50 @@ func (sv *SplitView) ConfigSplitters() {
 	}
 }
 
+func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
+	kc := string(kt.Chord())
+	mod := "Control+"
+	if oswin.TheApp.Platform() == oswin.MacOS {
+		mod = "Meta+"
+	}
+	if !strings.HasPrefix(kc, mod) {
+		return
+	}
+	kns := kc[len(mod):]
+
+	knc, err := strconv.ParseInt(kns, 10, 64)
+	if err != nil {
+		return
+	}
+	kn := int(knc)
+	// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
+	if kn == 0 {
+		sv.EvenSplits()
+		sv.SetFullReRender()
+		sv.UpdateSig()
+		kt.SetProcessed()
+	} else if kn <= len(sv.Kids) {
+		sv.SetFullReRender()
+		if sv.Splits[kn-1] <= 0.01 {
+			sv.RestoreChild(kn - 1)
+		} else {
+			sv.CollapseChild(true, kn-1)
+		}
+		kt.SetProcessed()
+	}
+}
+
+func (sv *SplitView) KeyChordEvent() {
+	sv.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		svv := recv.Embed(KiT_SplitView).(*SplitView)
+		svv.KeyInput(d.(*key.ChordEvent))
+	})
+}
+
+func (sv *SplitView) SplitViewEvents() {
+	sv.KeyChordEvent()
+}
+
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
 	sv.LayData.SetFromStyle(&sv.Sty.Layout)                             // also does reset
@@ -292,6 +362,7 @@ func (sv *SplitView) Render2D() {
 		return
 	}
 	if sv.PushBounds() {
+		sv.This.(Node2D).ConnectEvents2D()
 		for i, kid := range sv.Kids {
 			nii, ni := KiToNode2D(kid)
 			if nii != nil {
@@ -307,6 +378,14 @@ func (sv *SplitView) Render2D() {
 		sv.Parts.Render2DTree()
 		sv.PopBounds()
 	}
+}
+
+func (sv *SplitView) ConnectEvents2D() {
+	sv.SplitViewEvents()
+}
+
+func (sv *SplitView) HasFocus2D() bool {
+	return sv.ContainsFocus() // anyone within us gives us focus..
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

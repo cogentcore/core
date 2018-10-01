@@ -1284,6 +1284,8 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 	fstack := make([]*FontStyle, 1, 10)
 	fstack[0] = font
 
+	tagstack := make([]string, 0, 10)
+
 	tmpbuf := make([]byte, 0, 1020)
 
 	bidx := 0
@@ -1333,6 +1335,11 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				}
 				if len(fstack) > 1 { // pop at end
 					fstack = fstack[:len(fstack)-1]
+				}
+				tslen := len(tagstack)
+				if tslen > 0 {
+					curTag = tagstack[tslen-1]
+					tagstack = tagstack[:tslen-1]
 				}
 			} else { // start tag
 				parts := strings.Split(ftag, " ")
@@ -1423,6 +1430,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				}
 				fstack = append(fstack, &fs)
 				curTag = stag
+				tagstack = append(tagstack, curTag)
 			}
 		} else { // raw chars
 			// todo: deal with WhiteSpacePreLine -- trim out non-LF ws

@@ -1900,6 +1900,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	bitflag.Set(&ni.Flag, int(HasFocus))
 	w.FocusActive = true
 	// fmt.Printf("set foc: %v\n", ni.PathUnique())
+	w.ClearNonFocus() // shouldn't need this but actually sometimes do
 	nii.FocusChanged2D(FocusGot)
 	w.UpdateEnd(updt)
 	return true

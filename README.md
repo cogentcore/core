@@ -94,19 +94,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* harden dlg.Close.  seems to be ok, but just to be sure
-
 * text word-wrap: if it fails at any point, it gives up!  e.g., putting long file name at start of dialog prompt, caused fail to wrap.
-
-* focus issues in tableview: real!  but very hard to reproduce!
 
 * closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
 
 * also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
 
-* fix embedded tags in pre html parser -- just need a simple stack..
-
-* NOT getting mysterious crashes in clearClip and closewindow on mac in cocoa.m --
+* maybe fixed: getting mysterious crashes in clearClip and closewindow on mac in cocoa.m --
   once I turned off mainmenu updating -- will try to re-activate and debug..
 
 * drag on textview should prevent DND -- dnd not getting "processed"
@@ -115,7 +109,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ clipboard history
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
-	+ position history, replay
 
 * Splitview: 
 	+ gide resize textview not re-drawing  (still?)

@@ -220,7 +220,8 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 }
 
 func (ac *Action) ConfigPartsButton() {
-	config, icIdx, lbIdx := ac.ConfigPartsIconLabel(string(ac.Icon), ac.Text)
+	config := kit.TypeAndNameList{}
+	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := ac.Parts.ConfigChildren(config, false) // not unique names
 	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
@@ -236,7 +237,8 @@ func (ac *Action) ConfigPartsButton() {
 }
 
 func (ac *Action) ConfigPartsMenuItem() {
-	config, icIdx, lbIdx := ac.ConfigPartsIconLabel(string(ac.Icon), ac.Text)
+	config := kit.TypeAndNameList{}
+	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
 	if indIdx < 0 && ac.Shortcut != "" {

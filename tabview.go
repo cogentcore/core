@@ -255,6 +255,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		tab.SetIcon("plus")
 		tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
+			tvv.SetFullReRender()
 			tvv.AddNewTab(tvv.NewTabType, "New Tab")
 		})
 		return true
@@ -298,7 +299,7 @@ func (tv *TabView) InitTabView() {
 	tabs.Lay = LayoutHoriz
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
-	tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
+	// tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
 	tabs.SetProp("height", units.NewValue(1.8, units.Em))
 	tabs.SetProp("overflow", "hidden") // no scrollbars!
 	tabs.SetProp("padding", units.NewValue(0, units.Px))
@@ -408,7 +409,11 @@ type TabButton struct {
 
 var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 
+// TabButtonMinWidth is the minimum width of the tab button, in Ch units
+var TabButtonMinWidth = float32(8)
+
 var TabButtonProps = ki.Props{
+	"min-width":        units.NewValue(TabButtonMinWidth, units.Ch),
 	"border-width":     units.NewValue(0, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
 	"border-color":     &Prefs.Colors.Border,
@@ -485,10 +490,11 @@ func (tb *TabButton) TabView() *TabView {
 }
 
 func (tb *TabButton) ConfigParts() {
-	config, icIdx, lbIdx := tb.ConfigPartsIconLabel(string(tb.Icon), tb.Text)
-	config.Add(KiT_Stretch, "close-stretch")
-	clsIdx := len(config)
+	config := kit.TypeAndNameList{}
+	clsIdx := 0
 	config.Add(KiT_Action, "close")
+	config.Add(KiT_Stretch, "close-stretch")
+	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, string(tb.Icon), tb.Text)
 	mods, updt := tb.Parts.ConfigChildren(config, false) // not unique names
 	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
 	if mods {
@@ -511,4 +517,12 @@ func (tb *TabButton) ConfigParts() {
 		})
 		tb.UpdateEnd(updt)
 	}
+}
+
+func (tb *TabButton) Size2D(iter int) {
+	ppref := tb.Parts.LayData.Size.Pref // get from parts
+	spc := tb.Sty.BoxSpace()
+	tb.SetProp("width", units.NewValue(ppref.X+2*spc, units.Dot))
+	tb.SetProp("height", units.NewValue(ppref.Y+2*spc, units.Dot))
+	tb.InitLayout2D() // sets from props
 }

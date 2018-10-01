@@ -461,7 +461,8 @@ func (mb *MenuButton) ButtonAsBase() *ButtonBase {
 }
 
 func (mb *MenuButton) ConfigParts() {
-	config, icIdx, lbIdx := mb.ConfigPartsIconLabel(string(mb.Icon), mb.Text)
+	config := kit.TypeAndNameList{}
+	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, string(mb.Icon), mb.Text)
 	indIdx := mb.ConfigPartsAddIndicator(&config, true)  // default on
 	mods, updt := mb.Parts.ConfigChildren(config, false) // not unique names
 	mb.ConfigPartsSetIconLabel(string(mb.Icon), mb.Text, icIdx, lbIdx)

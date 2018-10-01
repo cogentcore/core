@@ -440,7 +440,8 @@ func (sb *SliderBase) Init2DSlider() {
 
 func (sb *SliderBase) ConfigParts() {
 	sb.Parts.Lay = LayoutNil
-	config, icIdx, lbIdx := sb.ConfigPartsIconLabel(string(sb.Icon), "")
+	config := kit.TypeAndNameList{}
+	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, string(sb.Icon), "")
 	mods, updt := sb.Parts.ConfigChildren(config, false) // not unique names
 	sb.ConfigPartsSetIconLabel(string(sb.Icon), "", icIdx, lbIdx)
 	if mods {

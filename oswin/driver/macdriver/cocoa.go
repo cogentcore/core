@@ -66,6 +66,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 
@@ -82,6 +83,9 @@ import (
 // note: this file contains all the cgo-relevant code for interfacing into cocoa
 
 var initThreadID C.uint64_t
+
+// cocoaMu is a mutex for a C. calls into cocoa to attempt to prevent conflicts
+var cocoaMu sync.Mutex
 
 func init() {
 	// Lock the goroutine responsible for initialization to an OS thread.
@@ -108,9 +112,12 @@ func newWindow(opts *oswin.NewWindowOptions) (uintptr, error) {
 	title := C.CString(opts.GetTitle())
 	defer C.free(unsafe.Pointer(title))
 
-	return uintptr(C.doNewWindow(C.int(opts.Size.X), C.int(opts.Size.Y),
+	cocoaMu.Lock()
+	wid := uintptr(C.doNewWindow(C.int(opts.Size.X), C.int(opts.Size.Y),
 		C.int(opts.Pos.X), C.int(opts.Pos.Y), title,
-		C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen))), nil
+		C.bool(dialog), C.bool(modal), C.bool(tool), C.bool(fullscreen)))
+	cocoaMu.Unlock()
+	return wid, nil
 }
 
 func initWindow(w *windowImpl) {
@@ -118,34 +125,48 @@ func initWindow(w *windowImpl) {
 }
 
 func showWindow(w *windowImpl) {
+	cocoaMu.Lock()
 	C.doShowWindow(C.uintptr_t(w.id))
+	cocoaMu.Unlock()
 }
 
 func updateTitle(w *windowImpl, titles string) {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
+	cocoaMu.Lock()
 	C.doUpdateTitle(C.uintptr_t(w.id), title)
+	cocoaMu.Unlock()
 }
 
 func resizeWindow(w *windowImpl, sz image.Point) {
+	cocoaMu.Lock()
 	C.doResizeWindow(C.uintptr_t(w.id), C.int(sz.X), C.int(sz.Y))
+	cocoaMu.Lock()
 }
 
 func posWindow(w *windowImpl, pos image.Point) {
+	cocoaMu.Lock()
 	C.doMoveWindow(C.uintptr_t(w.id), C.int(pos.X), C.int(pos.Y))
+	cocoaMu.Unlock()
 }
 
 func setGeomWindow(w *windowImpl, pos image.Point, sz image.Point) {
+	cocoaMu.Lock()
 	C.doGeomWindow(C.uintptr_t(w.id), C.int(pos.X), C.int(pos.Y), C.int(sz.X), C.int(sz.Y))
+	cocoaMu.Unlock()
 }
 
 func raiseWindow(w *windowImpl) {
+	cocoaMu.Lock()
 	C.doRaiseWindow(C.uintptr_t(w.id))
+	cocoaMu.Unlock()
 }
 
 func minimizeWindow(w *windowImpl) {
+	cocoaMu.Lock()
 	C.doMinimizeWindow(C.uintptr_t(w.id))
+	cocoaMu.Unlock()
 }
 
 func getGeometry(w *windowImpl) {
@@ -292,7 +313,9 @@ func windowCloseReq(id uintptr) bool {
 }
 
 func closeWindow(id uintptr) {
+	cocoaMu.Lock()
 	C.doCloseWindow(C.uintptr_t(id))
+	cocoaMu.Unlock()
 }
 
 //export windowClosing
@@ -563,19 +586,25 @@ func surfaceCreate() error {
 // MainMenu
 
 func (mm *mainMenuImpl) Menu() oswin.Menu {
+	cocoaMu.Lock()
 	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
+	cocoaMu.Unlock()
 	return oswin.Menu(mmen)
 }
 
 func (mm *mainMenuImpl) Reset(men oswin.Menu) {
+	cocoaMu.Lock()
 	C.doMenuReset(C.uintptr_t(men))
+	cocoaMu.Unlock()
 }
 
 func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
+	cocoaMu.Lock()
 	subid := C.doAddSubMenu(C.uintptr_t(men), title)
+	cocoaMu.Unlock()
 	return oswin.Menu(subid)
 }
 
@@ -597,28 +626,38 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
 
+	cocoaMu.Lock()
 	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
+	cocoaMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
+	cocoaMu.Lock()
 	C.doAddSeparator(C.uintptr_t(men))
+	cocoaMu.Unlock()
 }
 
 func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
+	cocoaMu.Lock()
 	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
+	cocoaMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
+	cocoaMu.Lock()
 	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
+	cocoaMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
+	cocoaMu.Lock()
 	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
+	cocoaMu.Unlock()
 }
 
 //export menuFired
@@ -645,7 +684,9 @@ var theClip = clipImpl{}
 var curMimeData *mimedata.Mimes
 
 func (ci *clipImpl) IsEmpty() bool {
+	cocoaMu.Lock()
 	ise := C.clipIsEmpty()
+	cocoaMu.Unlock()
 	return bool(ise)
 }
 
@@ -659,7 +700,9 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	wantText := mimedata.IsText(types[0])
 
 	if wantText {
+		cocoaMu.Lock()
 		C.clipReadText() // calls addMimeText
+		cocoaMu.Unlock()
 		if len(ci.data) == 0 {
 			return nil
 		}
@@ -685,7 +728,9 @@ func (ci *clipImpl) WriteText(b []byte) {
 	sz := len(b)
 	cdata := C.malloc(C.size_t(sz))
 	copy((*[1 << 30]byte)(cdata)[0:sz], b)
+	cocoaMu.Lock()
 	C.pasteWriteAddText((*C.char)(cdata), C.int(sz))
+	cocoaMu.Unlock()
 	C.free(unsafe.Pointer(cdata))
 }
 
@@ -700,12 +745,16 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 			ci.WriteText(d.Data)
 		}
 	}
+	cocoaMu.Lock()
 	C.clipWrite()
+	cocoaMu.Unlock()
 	return nil
 }
 
 func (ci *clipImpl) Clear() {
+	cocoaMu.Lock()
 	C.clipClear()
+	cocoaMu.Unlock()
 }
 
 //export addMimeText
@@ -743,17 +792,23 @@ var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
 	c.PushStack(sh)
+	cocoaMu.Lock()
 	C.pushCursor(C.int(sh))
+	cocoaMu.Unlock()
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
 	c.Cur = sh
+	cocoaMu.Lock()
 	C.setCursor(C.int(sh))
+	cocoaMu.Unlock()
 }
 
 func (c *cursorImpl) Pop() {
 	c.PopStack()
+	cocoaMu.Lock()
 	C.popCursor()
+	cocoaMu.Unlock()
 }
 
 func (c *cursorImpl) Hide() {
@@ -761,7 +816,9 @@ func (c *cursorImpl) Hide() {
 		return
 	}
 	c.Vis = false
+	cocoaMu.Lock()
 	C.hideCursor()
+	cocoaMu.Unlock()
 }
 
 func (c *cursorImpl) Show() {
@@ -769,7 +826,9 @@ func (c *cursorImpl) Show() {
 		return
 	}
 	c.Vis = true
+	cocoaMu.Lock()
 	C.showCursor()
+	cocoaMu.Unlock()
 }
 
 func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {

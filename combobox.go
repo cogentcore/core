@@ -133,17 +133,16 @@ func (cb *ComboBox) ButtonRelease() {
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
-func (cb *ComboBox) ConfigPartsIconText(icnm string) (config kit.TypeAndNameList, icIdx, txIdx int) {
+func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm string) (icIdx, txIdx int) {
 	// todo: add some styles for button layout
-	config = kit.TypeAndNameList{}
 	icIdx = -1
 	txIdx = -1
 	if IconName(icnm).IsValid() {
+		icIdx = len(*config)
 		config.Add(KiT_Icon, "icon")
-		icIdx = 0
 		config.Add(KiT_Space, "space")
 	}
-	txIdx = len(config)
+	txIdx = len(*config)
 	config.Add(KiT_TextField, "text")
 	return
 }
@@ -186,14 +185,14 @@ func (cb *ComboBox) ConfigParts() {
 	if eb, ok := cb.Prop("editable"); ok {
 		cb.Editable = eb.(bool)
 	}
-	var config kit.TypeAndNameList
+	config := kit.TypeAndNameList{}
 	var icIdx, lbIdx, txIdx int
 	if cb.Editable {
 		lbIdx = -1
-		config, icIdx, txIdx = cb.ConfigPartsIconText(string(cb.Icon))
+		icIdx, txIdx = cb.ConfigPartsIconText(&config, string(cb.Icon))
 	} else {
 		txIdx = -1
-		config, icIdx, lbIdx = cb.ConfigPartsIconLabel(string(cb.Icon), cb.Text)
+		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, string(cb.Icon), cb.Text)
 	}
 	indIdx := cb.ConfigPartsAddIndicator(&config, true)  // default on
 	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names

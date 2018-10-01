@@ -74,7 +74,9 @@ const (
 	KeyFunComplete
 	KeyFunSearch // Ctrl+S in emacs -- more interactive type of search
 	KeyFunFind   // Command+F full-dialog find
-	KeyFunJump
+	KeyFunJump   // jump to line
+	KeyFunHistPrev
+	KeyFunHistNext
 	KeyFunsN
 )
 
@@ -531,6 +533,11 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Control+S":               KeyFunSearch,
+		"Meta+F":                  KeyFunFind,
+		"Control+J":               KeyFunJump,
+		"Meta+[":                  KeyFunHistPrev,
+		"Meta+]":                  KeyFunHistNext,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -627,6 +634,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
 		"Control+J":               KeyFunJump,
+		"Meta+[":                  KeyFunHistPrev,
+		"Meta+]":                  KeyFunHistNext,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,

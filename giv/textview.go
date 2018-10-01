@@ -65,6 +65,8 @@ type TextView struct {
 	RenderSz          gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
 	CursorPos         TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol         int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	PosHistory        []TextPos                 `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+	PosHistIdx        int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
 	SelectReg         TextRegion                `json:"-" xml:"-" desc:"current selection region"`
 	PrevSelectReg     TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	Highlights        []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
@@ -312,6 +314,7 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufNew:
 		tv.ResetState()
 		tv.SetFullReRender()
+		tv.SetCursorShow(tv.CursorPos)
 		tv.UpdateSig()
 	case TextBufInsert:
 		if tv.Renders == nil { // not init yet
@@ -598,6 +601,7 @@ func (tv *TextView) SetCursor(pos TextPos) {
 		return
 	}
 	tv.CursorPos = tv.Buf.ValidPos(pos)
+	tv.SaveCursorPos(tv.CursorPos)
 	tv.CursorMovedSig()
 }
 
@@ -622,6 +626,67 @@ func (tv *TextView) SetCursorCol(pos TextPos) {
 	} else {
 		tv.CursorCol = pos.Ch
 	}
+}
+
+// SaveCursorPos saves the cursor position in history stack of cursor positions
+func (tv *TextView) SaveCursorPos(pos TextPos) {
+	if tv.PosHistory == nil {
+		tv.PosHistory = make([]TextPos, 0, 1000)
+	}
+	//	atEnd := tv.PosHistIdx >= len(tv.PosHistory)-1
+	tv.PosHistory = append(tv.PosHistory, pos)
+	// if atEnd {
+	tv.PosHistIdx = len(tv.PosHistory) - 1
+	//}
+}
+
+// CursorToHistPrev moves cursor to previous position on history list --
+// returns true if moved
+func (tv *TextView) CursorToHistPrev() bool {
+	sz := len(tv.PosHistory)
+	if sz == 0 {
+		return false
+	}
+	if tv.NLines == 0 || tv.Buf == nil {
+		tv.CursorPos = TextPosZero
+		return false
+	}
+	tv.PosHistIdx--
+	if tv.PosHistIdx < 0 {
+		tv.PosHistIdx = 0
+		return false
+	}
+	tv.PosHistIdx = ints.MinInt(sz-1, tv.PosHistIdx)
+	pos := tv.PosHistory[tv.PosHistIdx]
+	tv.CursorPos = tv.Buf.ValidPos(pos)
+	tv.CursorMovedSig()
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
+	return true
+}
+
+// CursorToHistNext moves cursor to previous position on history list --
+// returns true if moved
+func (tv *TextView) CursorToHistNext() bool {
+	sz := len(tv.PosHistory)
+	if sz == 0 {
+		return false
+	}
+	if tv.NLines == 0 || tv.Buf == nil {
+		tv.CursorPos = TextPosZero
+		return false
+	}
+	tv.PosHistIdx++
+	if tv.PosHistIdx >= sz-1 {
+		tv.PosHistIdx = sz - 1
+		return false
+	}
+	pos := tv.PosHistory[tv.PosHistIdx]
+	tv.CursorPos = tv.Buf.ValidPos(pos)
+	tv.CursorMovedSig()
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
+	return true
 }
 
 // CursorSelect updates selection based on cursor movements, given starting
@@ -2660,6 +2725,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunJump:
 		kt.SetProcessed()
 		tv.JumpToLinePrompt()
+	case gi.KeyFunHistPrev:
+		kt.SetProcessed()
+		tv.CursorToHistPrev()
+	case gi.KeyFunHistNext:
+		kt.SetProcessed()
+		tv.CursorToHistNext()
 	}
 	if tv.IsInactive() {
 		switch {

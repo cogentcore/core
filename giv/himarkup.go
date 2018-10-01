@@ -6,6 +6,7 @@ package giv
 
 import (
 	"bytes"
+	// htmlstd "html"
 	"log"
 	"strings"
 
@@ -75,7 +76,9 @@ func (hm *HiMarkup) Init() {
 // syntax highlighting settings
 func (hm *HiMarkup) MarkupText(txt []byte) ([][]byte, error) {
 	var htmlBuf bytes.Buffer
-	iterator, err := hm.lexer.Tokenise(nil, string(txt)) // todo: unfortunate conversion
+	// txtstr := htmlstd.EscapeString(string(txt)) // not getting properly uensc
+	txtstr := string(txt)
+	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	err = hm.formatter.Format(&htmlBuf, hm.style, iterator)
 	if err != nil {
 		log.Println(err)
@@ -88,7 +91,9 @@ func (hm *HiMarkup) MarkupText(txt []byte) ([][]byte, error) {
 // MarkupLine returns a marked-up version of line of text
 func (hm *HiMarkup) MarkupLine(txtln []byte) ([]byte, error) {
 	var htmlBuf bytes.Buffer
-	iterator, err := hm.lexer.Tokenise(nil, string(txtln)+"\n")
+	// txtstr := htmlstd.EscapeString(string(txtln)) + "\n" // not getting properly unesc..
+	txtstr := string(txtln) + "\n"
+	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	// adding \n b/c it needs to see that for comments..
 	err = hm.formatter.Format(&htmlBuf, hm.style, iterator)
 	if err != nil {
@@ -105,10 +110,16 @@ func (hm *HiMarkup) MarkupLine(txtln []byte) ([]byte, error) {
 
 // FixMarkupLine fixes the output of chroma markup
 func (hm *HiMarkup) FixMarkupLine(mt []byte) []byte {
-	mt = bytes.TrimPrefix(mt, []byte(`</span>`)) // leftovers
+	esp := []byte(`</span>`)
+	mt = bytes.TrimPrefix(mt, esp) // leftovers
 	mt = bytes.TrimPrefix(mt, []byte(`<span class="err">`))
 	mt = bytes.Replace(mt, []byte(`**</span>**`), []byte(`**</span>`), -1)
 	mt = bytes.Replace(mt, []byte(`__</span>__`), []byte(`__</span>`), -1)
+	mtnsp := bytes.TrimSpace(mt)
+	if bytes.HasPrefix(mtnsp, esp) {
+		idx := bytes.Index(mt, esp)
+		mt = append(mt[:idx], mt[idx+len(esp):]...)
+	}
 	return mt
 }
 

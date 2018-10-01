@@ -195,7 +195,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 
 // Close requests that the dialog be closed -- it does not alter any state or send any signals
 func (dlg *Dialog) Close() {
-	if dlg == nil {
+	if dlg == nil || dlg.This == nil || dlg.IsDestroyed() || dlg.IsDeleted() {
 		return
 	}
 	win := dlg.Win
