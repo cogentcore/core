@@ -94,6 +94,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* FileView not sorting properly by date!  is using string.
+
 * text word-wrap: if it fails at any point, it gives up!  e.g., putting long file name at start of dialog prompt, caused fail to wrap.
 
 * MethodView CallMethod needs to update objs to those passed -- is relying on previously-compiled ones -- C-c C-c coming up in the wrong window!  still?

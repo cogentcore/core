@@ -27,7 +27,7 @@ import (
 
 // CursorBlinkMSec is number of milliseconds that cursor blinks on
 // and off -- set to 0 to disable blinking
-var CursorBlinkMSec = 500
+var CursorBlinkMSec = 0 // 500
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // TextField
