@@ -75,7 +75,7 @@ func SliceSort(sl interface{}, ascending bool) error {
 	elnptyp := NonPtrType(eltyp)
 	vk := elnptyp.Kind()
 	elval := OnePtrValue(svnp.Index(0))
-	elif := NonPtrValue(elval).Interface()
+	elif := elval.Interface()
 
 	switch elif.(type) {
 	case floats.Floater:
@@ -203,7 +203,7 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 	vk := fld.Type.Kind()
 	struVal := OnePtrValue(svnp.Index(0))
 	fldVal := struVal.Elem().FieldByIndex(fldIdx)
-	fldIf := NonPtrValue(fldVal).Interface()
+	fldIf := fldVal.Interface()
 
 	switch fldIf.(type) {
 	case floats.Floater:

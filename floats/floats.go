@@ -13,10 +13,16 @@ package floats
 
 import "math"
 
-// Floater converts a type to / from a float64, used in kit.ToFloat function and in
+// Floater converts a type from a float64, used in kit.ToFloat function and in
 // sorting comparisons -- tried first in sorting
 type Floater interface {
 	Float() float64
+}
+
+// FloatSetter is Floater that also supports setting the value from a float64.
+// Satisfying this interface requires a pointer to the underlying type.
+type FloatSetter interface {
+	Floater
 	FromFloat(val float64)
 }
 

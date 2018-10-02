@@ -14,10 +14,16 @@ It also includes Max, Min, Abs for builtin int64, int32 types.
 */
 package ints
 
-// Inter bidirectionally converts a type to / from an int64, used in kit.ToInt
-// and in sorting comparisons.  See also Floater in floats package.
+// Inter converts a type from an int64, used in kit.ToInt and in sorting
+// comparisons.  See also Floater in floats package.
 type Inter interface {
 	Int() int64
+}
+
+// IntSetter is an Inter that can also be set from an int.  Satisfying this
+// interface requires a pointer to the underlying type.
+type IntSetter interface {
+	Inter
 	FromInt(val int64)
 }
 
