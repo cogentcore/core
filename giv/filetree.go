@@ -278,23 +278,24 @@ func (fn *FileNode) CloseDir() {
 	// todo: do anything with open files within directory??
 }
 
-// OpenBuf opens the file in its buffer if it is not already open
-func (fn *FileNode) OpenBuf() error {
+// OpenBuf opens the file in its buffer if it is not already open.
+// returns true if file is newly opened
+func (fn *FileNode) OpenBuf() (bool, error) {
 	if fn.IsDir() {
 		err := fmt.Errorf("giv.FileNode cannot open directory in editor: %v", fn.FPath)
 		log.Println(err.Error())
-		return err
+		return false, err
 	}
 	if fn.Buf != nil {
 		if fn.Buf.Filename == fn.FPath { // close resets filename
-			return nil
+			return false, nil
 		}
 	} else {
 		fn.Buf = &TextBuf{}
 		fn.Buf.InitName(fn.Buf, fn.Nm)
 	}
 	fn.Buf.Hi.Style = FileNodeHiStyle
-	return fn.Buf.Open(fn.FPath)
+	return true, fn.Buf.Open(fn.FPath)
 }
 
 // CloseBuf closes the file in its buffer if it is open -- returns true if closed

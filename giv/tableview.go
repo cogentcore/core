@@ -322,8 +322,8 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 
 	if sz > TableViewWaitCursorSize {
-		oswin.TheApp.Cursor().Push(cursor.Wait)
-		defer oswin.TheApp.Cursor().Pop()
+		oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Push(cursor.Wait)
+		defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
 	}
 
 	sgcfg := tv.StdSliceFrameConfig()
@@ -431,8 +431,8 @@ func (tv *TableView) ConfigSliceGridRows() {
 	sz := mvnp.Len()
 
 	if sz > TableViewWaitCursorSize {
-		oswin.TheApp.Cursor().Push(cursor.Wait)
-		defer oswin.TheApp.Cursor().Pop()
+		oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Push(cursor.Wait)
+		defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
 	}
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -602,8 +602,8 @@ func (tv *TableView) SliceDelete(idx int, reconfig bool) {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	oswin.TheApp.Cursor().Push(cursor.Wait)
-	defer oswin.TheApp.Cursor().Pop()
+	oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Push(cursor.Wait)
+	defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
 
 	sgh := tv.SliceHeader()
 	sgh.SetFullReRender()
@@ -1291,7 +1291,7 @@ func (tv *TableView) CopyRows(reset bool) {
 	for r, _ := range tv.SelectedRows {
 		tv.MimeDataRow(&md, r)
 	}
-	oswin.TheApp.ClipBoard().Write(md)
+	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(md)
 	if reset {
 		tv.UnselectAllRows()
 	}
@@ -1333,7 +1333,7 @@ func (tv *TableView) CutRows() {
 
 // Paste pastes clipboard at given row
 func (tv *TableView) Paste(row int) {
-	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	if md != nil {
 		tv.PasteAction(md, row)
 	}
@@ -1427,7 +1427,7 @@ func (tv *TableView) Duplicate() int {
 	rws := tv.SelectedRowsList(true) // descending sort -- last first
 	pasteAt := rws[0]
 	tv.CopyRows(true)
-	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	tv.PasteAtRow(md, pasteAt)
 	return pasteAt
 }
@@ -1769,9 +1769,9 @@ func (tv *TableView) TableViewEvents() {
 				de := d.(*dnd.FocusEvent)
 				switch de.Action {
 				case dnd.Enter:
-					gi.DNDSetCursor(de.Mod)
+					tv.Viewport.Win.DNDSetCursor(de.Mod)
 				case dnd.Exit:
-					gi.DNDNotCursor()
+					tv.Viewport.Win.DNDNotCursor()
 				case dnd.Hover:
 					// nothing here?
 				}

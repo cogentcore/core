@@ -115,6 +115,14 @@ func (tv *TabView) AddNewTab(typ reflect.Type, label string) (Node2D, int) {
 	return widg, idx
 }
 
+// AddNewTabAction adds a new widget as a new tab of given widget type, with given
+// tab label, and returns the new widget and its tab index -- emits TabAdded signal
+func (tv *TabView) AddNewTabAction(typ reflect.Type, label string) (Node2D, int) {
+	widg, idx := tv.AddNewTab(typ, label)
+	tv.TabViewSig.Emit(tv.This, int64(TabAdded), idx)
+	return widg, idx
+}
+
 // InsertNewTab inserts a new widget of given type into given index position
 // within list of tabs, and returns that new widget
 func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Node2D {
@@ -256,7 +264,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
 			tvv.SetFullReRender()
-			tvv.AddNewTab(tvv.NewTabType, "New Tab")
+			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
 		})
 		return true
 	} else {
@@ -274,6 +282,9 @@ type TabViewSignals int64
 const (
 	// TabSelected indicates tab was selected -- data is the tab index
 	TabSelected TabViewSignals = iota
+
+	// TabAdded indicates tab was added -- data is the tab index
+	TabAdded
 
 	// TabDeleted indicates tab was deleted -- data is the tab index
 	TabDeleted
@@ -414,6 +425,7 @@ var TabButtonMinWidth = float32(8)
 
 var TabButtonProps = ki.Props{
 	"min-width":        units.NewValue(TabButtonMinWidth, units.Ch),
+	"min-height":       units.NewValue(1.6, units.Em),
 	"border-width":     units.NewValue(0, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),
 	"border-color":     &Prefs.Colors.Border,

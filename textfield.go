@@ -27,7 +27,7 @@ import (
 
 // CursorBlinkMSec is number of milliseconds that cursor blinks on
 // and off -- set to 0 to disable blinking
-var CursorBlinkMSec = 0 // 500
+var CursorBlinkMSec = 500
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // TextField
@@ -445,7 +445,7 @@ func (tf *TextField) Cut() string {
 	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		oswin.TheApp.ClipBoard().Write(mimedata.NewText(cut))
+		oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(mimedata.NewText(cut))
 	}
 	return cut
 }
@@ -483,7 +483,7 @@ func (tf *TextField) Copy(reset bool) string {
 		return ""
 	}
 	cpy := tf.Selection()
-	oswin.TheApp.ClipBoard().Write(mimedata.NewText(cpy))
+	oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(mimedata.NewText(cpy))
 	if reset {
 		tf.SelectReset()
 	}
@@ -495,7 +495,7 @@ func (tf *TextField) Copy(reset bool) string {
 func (tf *TextField) Paste() {
 	wupdt := tf.Viewport.Win.UpdateStart()
 	defer tf.Viewport.Win.UpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard().Read([]string{mimedata.TextPlain})
+	data := oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
@@ -548,7 +548,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Paste()
 			})
-		ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
+		ac.SetInactiveState(oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).IsEmpty())
 	}
 }
 
@@ -1112,9 +1112,9 @@ func (tf *TextField) MouseFocusEvent() {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor().PushIfNot(cursor.IBeam)
+			oswin.TheApp.Cursor(tf.Viewport.Win.OSWin).PushIfNot(cursor.IBeam)
 		} else {
-			oswin.TheApp.Cursor().PopIf(cursor.IBeam)
+			oswin.TheApp.Cursor(tf.Viewport.Win.OSWin).PopIf(cursor.IBeam)
 		}
 	})
 }

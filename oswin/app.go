@@ -59,6 +59,9 @@ type App interface {
 	// input) -- could be nil if none are.
 	WindowInFocus() Window
 
+	// ContextWindow returns the window passed as context for clipboard, cursor, etc calls.
+	ContextWindow() Window
+
 	// NewWindow returns a new Window for this screen. A nil opts is valid and
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)
@@ -75,11 +78,11 @@ type App interface {
 	// Publish on window after drawing).
 	NewTexture(win Window, size image.Point) (Texture, error)
 
-	// ClipBoard returns the clip.Board handler for the system.
-	ClipBoard() clip.Board
+	// ClipBoard returns the clip.Board handler for the system, in context of given window.
+	ClipBoard(win Window) clip.Board
 
-	// Cursor returns the cursor.Cursor handler for the system.
-	Cursor() cursor.Cursor
+	// Cursor returns the cursor.Cursor handler for the system, in context of given window.
+	Cursor(win Window) cursor.Cursor
 
 	// PrefsDir returns the OS-specific preferences directory: Mac: ~/Library,
 	// Linux: ~/.config, Windows: ?

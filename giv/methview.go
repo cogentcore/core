@@ -215,8 +215,20 @@ func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 		MethViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Action -- should be!\n", method))
 		return false
 	}
+
+	MethViewSetActionData(ac, val, vp)
 	ac.Trigger()
 	return true
+}
+
+// MethViewSetActionData sets the MethViewData associated with the given action
+// with values updated from the given val and viewport
+func MethViewSetActionData(ac *gi.Action, val interface{}, vp *gi.Viewport2D) {
+	md := ac.Data.(*MethViewData)
+	md.Val = val
+	md.ValVal = reflect.ValueOf(val)
+	md.Vp = vp
+	md.MethVal = md.ValVal.MethodByName(md.Method)
 }
 
 var compileMethsOrder = []string{"CallMethods", "ToolBar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}

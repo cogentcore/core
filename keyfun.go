@@ -538,6 +538,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
+		"Control+[":               KeyFunHistPrev,
+		"Control+]":               KeyFunHistNext,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -636,6 +638,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
+		"Control+[":               KeyFunHistPrev,
+		"Control+]":               KeyFunHistNext,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,
@@ -694,6 +698,10 @@ var StdKeyMaps = KeyMaps{
 		"F5":              KeyFunRefresh,
 		"Control+L":       KeyFunRecenter,
 		"Control+.":       KeyFunComplete,
+		"Control+F":       KeyFunFind,
+		"Control+J":       KeyFunJump,
+		"Control+[":       KeyFunHistPrev,
+		"Control+]":       KeyFunHistNext,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":            KeyFunMoveUp,
@@ -781,6 +789,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
 		"Control+J":               KeyFunJump,
+		"Control+[":               KeyFunHistPrev,
+		"Control+]":               KeyFunHistNext,
 	}},
 	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,
@@ -837,6 +847,8 @@ var StdKeyMaps = KeyMaps{
 		"F5":              KeyFunRefresh,
 		"Control+L":       KeyFunRecenter,
 		"Control+.":       KeyFunComplete,
+		"Control+[":       KeyFunHistPrev,
+		"Control+]":       KeyFunHistNext,
 	}},
 	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", KeyMap{
 		"UpArrow": KeyFunMoveUp,
@@ -893,5 +905,9 @@ var StdKeyMaps = KeyMaps{
 		"F5":              KeyFunRefresh,
 		"Control+L":       KeyFunRecenter,
 		"Control+.":       KeyFunComplete,
+		"Control+F":       KeyFunFind,
+		"Control+J":       KeyFunJump,
+		"Control+[":       KeyFunHistPrev,
+		"Control+]":       KeyFunHistNext,
 	}},
 }

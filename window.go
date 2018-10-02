@@ -19,6 +19,7 @@ import (
 	"runtime/pprof"
 	"sort"
 	"sync"
+	"sync/atomic"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
@@ -112,6 +113,7 @@ type Window struct {
 	Sprites          map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
 	SpritesBg        map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
 	ActiveSprites    int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	UpMu             sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	WinTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
 	OverTexActive    bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
 	OverTex          oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
@@ -138,6 +140,7 @@ type Window struct {
 	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	GoLoop           bool                                    `json:"-" xml:"-" desc:"true if we are running from GoStartEventLoop -- requires a WinWait.Done at end"`
 	stopEventLoop    bool
+	publishing       int32 // atomic protect around publish
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -354,7 +357,7 @@ func (w *Window) SetName(name string) bool {
 		wgp := WinGeomPrefs.Pref(name, nil)
 		if wgp != nil {
 			if w.OSWin.Size() != wgp.Size || w.OSWin.Position() != wgp.Pos {
-				fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
+				// fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
 				w.OSWin.SetGeom(wgp.Pos, wgp.Size)
 			}
 		}
@@ -608,12 +611,14 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	if w.IsInactive() || w.WinTex == nil {
 		return
 	}
+	w.UpMu.Lock()
 	pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
+	w.UpMu.Unlock()
 }
 
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
@@ -622,12 +627,16 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	if w.IsInactive() || w.WinTex == nil {
 		return
 	}
+	w.UpMu.Lock()
+	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.OSImage.Bounds(), w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
+	w.UpMu.Unlock()
+	w.UpdateEnd(updt) // drives publish
 }
 
 // UploadAllViewports does a complete upload of all active viewports, in the
@@ -637,6 +646,7 @@ func (w *Window) UploadAllViewports() {
 	if w.IsInactive() || w.WinTex == nil {
 		return
 	}
+	w.UpMu.Lock()
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace {
@@ -669,7 +679,20 @@ func (w *Window) UploadAllViewports() {
 		}
 	}
 	pr.End()
+	w.UpMu.Unlock()   // need to unlock before publish
 	w.UpdateEnd(updt) // drives the publish
+}
+
+// TryPublishing checks if we are already publishing -- if so, returns false else
+// marks that we are going to publish and thus prevents others -- all atomic.
+func (w *Window) TryPublishing() bool {
+	return atomic.CompareAndSwapInt32(&w.publishing, 0, 1)
+}
+
+// ClearPublishing clears the publishing flag atomically -- shouldn't fail but
+// returns false if not actually publishing
+func (w *Window) ClearPublishing() bool {
+	return atomic.CompareAndSwapInt32(&w.publishing, 1, 0)
 }
 
 // Publish does the final step of updating of the window based on the current
@@ -679,6 +702,11 @@ func (w *Window) Publish() {
 		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		return
 	}
+	// actually, cannot prevent publishing -- will lockup!
+	// if !w.TryPublishing() {
+	// 	return
+	// }
+	w.UpMu.Lock() // block all updates while we publish
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
@@ -689,6 +717,8 @@ func (w *Window) Publish() {
 	pr2 := prof.Start("win.Publish.Publish")
 	w.OSWin.Publish()
 	pr2.End()
+	w.UpMu.Unlock()
+	// w.ClearPublishing()
 }
 
 // SignalWindowPublish is the signal receiver function that publishes the
@@ -711,6 +741,7 @@ func (w *Window) RenderOverlays() {
 		w.OverTexActive = false
 		return
 	}
+	w.UpMu.Lock()
 	updt := w.UpdateStart()
 	wsz := w.WinTex.Bounds().Size()
 	if w.OverTex == nil || w.OverTex.Bounds() != w.WinTex.Bounds() {
@@ -740,6 +771,7 @@ func (w *Window) RenderOverlays() {
 		}
 	}
 	w.OverTexActive = true
+	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives the publish
 }
 
@@ -820,6 +852,7 @@ func (w *Window) RenderSprite(sp *Viewport2D) {
 	draw.Draw(bgi, bgi.Bounds(), w.Viewport.Pixels, sp.Geom.Pos, draw.Src)
 	// draw sprite over
 	draw.Draw(bgi, bgi.Bounds(), sp.Pixels, image.ZP, draw.Over)
+	// note: already under RenderOverlays mutex protection
 	w.OverTex.Upload(sp.Geom.Pos, bg, bg.Bounds())
 }
 
@@ -2161,7 +2194,7 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 	wimg.This.SetName(src.UniqueName())
 	w.OverlayVp.AddChild(wimg.This)
 	w.DNDImage = wimg.This
-	DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
+	w.DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
 
@@ -2180,7 +2213,7 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	de.Action = dnd.Move
 	w.SendEventSignal(&de, false) // popup = false: ignore any popups
 	w.GenDNDFocusEvents(&de, false)
-	DNDUpdateCursor(de.Mod)
+	w.DNDUpdateCursor(de.Mod)
 	w.RenderOverlays()
 	e.SetProcessed()
 }
@@ -2313,21 +2346,21 @@ func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
 
 // DNDSetCursor sets the cursor based on the DND event mod -- does a
 // "PushIfNot" so safe for multiple calls.
-func DNDSetCursor(dmod dnd.DropMods) {
+func (w *Window) DNDSetCursor(dmod dnd.DropMods) {
 	dndc := DNDModCursor(dmod)
-	oswin.TheApp.Cursor().PushIfNot(dndc)
+	oswin.TheApp.Cursor(w.OSWin).PushIfNot(dndc)
 }
 
 // DNDNotCursor sets the cursor to Not = can't accept a drop
-func DNDNotCursor() {
-	oswin.TheApp.Cursor().PushIfNot(cursor.Not)
+func (w *Window) DNDNotCursor() {
+	oswin.TheApp.Cursor(w.OSWin).PushIfNot(cursor.Not)
 }
 
 // DNDUpdateCursor updates the cursor based on the curent DND event mod if
 // different from current (but no update if Not)
-func DNDUpdateCursor(dmod dnd.DropMods) bool {
+func (w *Window) DNDUpdateCursor(dmod dnd.DropMods) bool {
 	dndc := DNDModCursor(dmod)
-	curs := oswin.TheApp.Cursor()
+	curs := oswin.TheApp.Cursor(w.OSWin)
 	if !curs.IsDrag() || curs.Current() == dndc {
 		return false
 	}
@@ -2337,7 +2370,7 @@ func DNDUpdateCursor(dmod dnd.DropMods) bool {
 
 // DNDClearCursor clears any existing DND cursor that might have been set.
 func (w *Window) DNDClearCursor() {
-	curs := oswin.TheApp.Cursor()
+	curs := oswin.TheApp.Cursor(w.OSWin)
 	for curs.IsDrag() || curs.Current() == cursor.Not {
 		curs.Pop()
 	}

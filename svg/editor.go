@@ -34,7 +34,7 @@ func (svg *Editor) EditorEvents() {
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.IsDragging() {
 			if !ssvg.SetDragCursor {
-				oswin.TheApp.Cursor().Push(cursor.HandOpen)
+				oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Push(cursor.HandOpen)
 				ssvg.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
@@ -45,7 +45,7 @@ func (svg *Editor) EditorEvents() {
 			ssvg.UpdateSig()
 		} else {
 			if ssvg.SetDragCursor {
-				oswin.TheApp.Cursor().Pop()
+				oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Pop()
 				ssvg.SetDragCursor = false
 			}
 		}
@@ -56,7 +56,7 @@ func (svg *Editor) EditorEvents() {
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
-			oswin.TheApp.Cursor().Pop()
+			oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		ssvg.InitScale()
@@ -72,7 +72,7 @@ func (svg *Editor) EditorEvents() {
 		me := d.(*mouse.Event)
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
-			oswin.TheApp.Cursor().Pop()
+			oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		obj := ssvg.FirstContainingPoint(me.Where, true)

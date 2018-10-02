@@ -266,9 +266,9 @@ func (lb *Label) MouseMoveEvent() {
 				}
 			}
 			if inLink {
-				oswin.TheApp.Cursor().PushIfNot(cursor.HandPointing)
+				oswin.TheApp.Cursor(lb.Viewport.Win.OSWin).PushIfNot(cursor.HandPointing)
 			} else {
-				oswin.TheApp.Cursor().PopIf(cursor.HandPointing)
+				oswin.TheApp.Cursor(lb.Viewport.Win.OSWin).PopIf(cursor.HandPointing)
 			}
 		})
 	}

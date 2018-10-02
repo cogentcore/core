@@ -176,9 +176,7 @@ func (vp *Viewport2D) UploadToWin() {
 	if vp.Win == nil {
 		return
 	}
-	updt := vp.Win.UpdateStart()
 	vp.Win.UploadVp(vp, vp.WinBBox.Min)
-	vp.Win.UpdateEnd(updt)
 }
 
 // DrawIntoParent draws our viewport image into parent's image -- this is the
@@ -339,6 +337,9 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 // RenderViewport2D is the render action for the viewport itself -- either
 // uploads image to window or draws into parent viewport
 func (vp *Viewport2D) RenderViewport2D() {
+	if vp.IsOverlay() {
+		return
+	}
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if Render2DTrace {

@@ -53,6 +53,7 @@ type TextBuf struct {
 	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
 	UndoPos    int            `json:"-" xml:"-" desc:"undo position"`
 	FileModOk  bool           `json:"-" xml:"-" desc:"have already asked about fact that file has changed since being opened, user is ok"`
+	PosHistory []TextPos      `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
@@ -975,6 +976,15 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 	return tbe
 }
 
+// SaveCursorPos saves the cursor position in history stack of cursor positions --
+// tracks across views
+func (tb *TextBuf) SaveCursorPos(pos TextPos) {
+	if tb.PosHistory == nil {
+		tb.PosHistory = make([]TextPos, 0, 1000)
+	}
+	tb.PosHistory = append(tb.PosHistory, pos)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //   Syntax Highlighting Markup
 
@@ -1147,6 +1157,9 @@ func (tb *TextBuf) Redo() *TextBufEdit {
 	return tbe
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//   Indenting
+
 // LineIndent returns the number of tabs or spaces at start of given line --
 // if line starts with tabs, then those are counted, else spaces --
 // combinations of tabs and spaces won't produce sensible results
@@ -1225,6 +1238,21 @@ func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 	return nil
 }
 
+// PrevLineIndent returns previous line from given line that has indentation -- skips blank lines
+func (tb *TextBuf) PrevLineIndent(ln int, tabSz int) (n int, spc bool, txt string) {
+	ln--
+	for ln >= 0 {
+		if len(tb.Lines[ln]) == 0 {
+			ln--
+			continue
+		}
+		n, spc = tb.LineIndent(ln, tabSz)
+		txt = strings.TrimSpace(string(tb.Lines[ln]))
+		return
+	}
+	return 0, false, ""
+}
+
 // AutoIndent indents given line to the level of the prior line, adjusted
 // appropriately if the current line starts with one of the given un-indent
 // strings, or the prior line ends with one of the given indent strings.  Will
@@ -1233,41 +1261,29 @@ func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 // be nil), along with the auto-indented level and character position for the
 // indent of the current line.
 func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
-	prvln := ""
-	li := 0
-	if ln > 0 {
-		prvln = strings.TrimSpace(string(tb.Lines[ln-1]))
-		li, _ = tb.LineIndent(ln-1, tabSz)
-	}
+	li, _, prvln := tb.PrevLineIndent(ln, tabSz)
+	curln := strings.TrimSpace(string(tb.Lines[ln]))
 	ind := false
 	und := false
-	if prvln != "" {
-		for _, us := range unindents {
-			if strings.HasPrefix(prvln, us) {
-				und = true
-				break
-			}
+	for _, us := range unindents {
+		if strings.HasPrefix(curln, us) {
+			und = true
+			break
 		}
-		if !und {
-			for _, is := range indents {
-				if strings.HasSuffix(prvln, is) {
-					ind = true
-					break
-				}
+	}
+	if prvln != "" {
+		for _, is := range indents {
+			if strings.HasSuffix(prvln, is) {
+				ind = true
+				break
 			}
 		}
 	}
 	switch {
 	case ind:
 		return tb.IndentLine(ln, li+1, tabSz, spc), li + 1, IndentCharPos(li+1, tabSz, spc)
-	case und: // operates on previous line and current one
-		if li-1 > 0 {
-			if ln > 0 {
-				tb.IndentLine(ln-1, li-1, tabSz, spc)
-			}
-			return tb.IndentLine(ln, li-1, tabSz, spc), li - 1, IndentCharPos(li-1, tabSz, spc)
-		}
-		return nil, 0, 0
+	case und:
+		return tb.IndentLine(ln, li-1, tabSz, spc), li - 1, IndentCharPos(li-1, tabSz, spc)
 	default:
 		return tb.IndentLine(ln, li, tabSz, spc), li, IndentCharPos(li, tabSz, spc)
 	}
@@ -1300,7 +1316,7 @@ func (tb *TextBuf) DiffBufs(ob *TextBuf) TextDiffs {
 		bstr[bi] = string(bl)
 	}
 
-	m := difflib.NewMatcher(astr, bstr)
+	m := difflib.NewMatcherWithJunk(astr, bstr, false, nil) // no junk
 	return m.GetOpCodes()
 }
 

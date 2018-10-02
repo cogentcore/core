@@ -913,7 +913,7 @@ func (tv *TreeView) Copy(reset bool) {
 			}
 		}
 	}
-	oswin.TheApp.ClipBoard().Write(md)
+	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -935,7 +935,7 @@ func (tv *TreeView) Cut() {
 
 // Paste pastes clipboard at given node
 func (tv *TreeView) Paste() {
-	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	if md != nil {
 		tv.PasteAction(md)
 	}
@@ -1310,9 +1310,9 @@ func (tv *TreeView) TreeViewEvents() {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		switch de.Action {
 		case dnd.Enter:
-			gi.DNDSetCursor(de.Mod)
+			tvv.Viewport.Win.DNDSetCursor(de.Mod)
 		case dnd.Exit:
-			gi.DNDNotCursor()
+			tvv.Viewport.Win.DNDNotCursor()
 		case dnd.Hover:
 			tvv.Open()
 		}

@@ -428,47 +428,64 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	if idx >= sz {
 		idx = sz - 1
 	}
-	for idx > 0 && !unicode.IsSpace(sr.Text[idx]) {
+	stidx := idx
+	for idx > 0 && !unicode.IsSpace(sr.Text[idx-1]) {
 		idx--
 	}
 	csz := sr.RelPos.X + sr.Render[idx].RelPos.X
 	lstgoodi := -1
-	if csz <= trgSize {
+	nofit := false
+	if idx > 0 && csz <= trgSize {
 		lstgoodi = idx
+	} else {
+		nofit = true
+		lstgoodi = stidx
+		idx = stidx
 	}
 	for {
-		if csz > trgSize {
+		if csz > trgSize && !nofit {
 			for idx > 0 {
 				if unicode.IsSpace(sr.Text[idx]) {
 					csz = sr.RelPos.X + sr.Render[idx].RelPos.X
 					if csz <= trgSize {
+						idx++
+						for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
+							idx++
+						}
 						return idx
 					}
 				}
 				idx--
 			}
-			return -1 // oops.
-		} else { // too small, go up
-			for idx < sz {
-				if unicode.IsSpace(sr.Text[idx]) {
-					csz = sr.RelPos.X + sr.Render[idx].RelPos.X
-					if csz <= trgSize {
-						if csz == trgSize {
-							return idx
-						}
-						lstgoodi = idx
-					} else if lstgoodi > 0 {
-						return lstgoodi
-					} else {
-						break // go back down
-					}
-				}
-				idx++
-			}
-			return lstgoodi
+			fmt.Printf("got to nofit. idx: %v lstgoodi: %v, txt: %v\n", idx, lstgoodi, string(sr.Text))
+			nofit = true // can't find a fit, still -- shouldn't really ever get here..
+			idx = lstgoodi
 		}
+		for idx < sz {
+			if idx == sz-1 && lstgoodi > 0 {
+				return lstgoodi
+			}
+			if unicode.IsSpace(sr.Text[idx]) {
+				csz = sr.RelPos.X + sr.Render[idx].RelPos.X
+				if nofit || csz == trgSize {
+					idx++
+					for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
+						idx++
+					}
+					return idx
+				} else if csz < trgSize {
+					lstgoodi = idx + 1
+				} else if lstgoodi > 0 {
+					return lstgoodi
+				} else {
+					break // go back down
+				}
+			}
+			idx++
+		}
+		return -1
 	}
-	return -1
+	return lstgoodi
 }
 
 // ZeroPos ensures that the positions start at 0, for LR direction
@@ -549,7 +566,7 @@ func (sr *SpanRender) SplitAtLR(idx int) *SpanRender {
 	sr.Render = sr.Render[:idx]
 	sr.LastPos.X = sr.Render[idx-1].RelPosAfterLR()
 	// sr.TrimSpaceLR()
-	nsr.TrimSpaceLeftLR() // don't trim right!
+	// nsr.TrimSpaceLeftLR() // don't trim right!
 	// go back and find latest face and color -- each sr must start with valid one
 	if len(nsr.Render) > 0 {
 		nrr0 := &(nsr.Render[0])
@@ -1477,8 +1494,11 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 
 // RuneSpanPos returns the position (span, rune index within span) within a
 // sequence of spans of a given absolute rune index, starting in the first
-// span -- returns false if index is out of range.
+// span -- returns false if index is out of range (and returns the last position).
 func (tx *TextRender) RuneSpanPos(idx int) (si, ri int, ok bool) {
+	if idx < 0 || len(tx.Spans) == 0 {
+		return 0, 0, false
+	}
 	ri = idx
 	for si = range tx.Spans {
 		if ri < 0 {
@@ -1486,12 +1506,14 @@ func (tx *TextRender) RuneSpanPos(idx int) (si, ri int, ok bool) {
 		}
 		sr := &tx.Spans[si]
 		if ri >= len(sr.Render) {
-			ri -= (len(sr.Render) + 1) // account for LF
+			ri -= len(sr.Render)
 			continue
 		}
 		return si, ri, true
 	}
-	return 0, 0, false
+	si = len(tx.Spans) - 1
+	ri = len(tx.Spans[si].Render) - 1
+	return si, ri, false
 }
 
 // SpanPosToRuneIdx returns the absolute rune index for a given span, rune
@@ -1502,13 +1524,13 @@ func (tx *TextRender) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 	for i := range tx.Spans {
 		sr := &tx.Spans[i]
 		if si > i {
-			idx += len(sr.Render) + 1 // account for LF
+			idx += len(sr.Render)
 			continue
 		}
 		if ri < len(sr.Render) {
 			return idx + ri, true
 		}
-		return idx + len(sr.Render) - 1, false
+		return idx + len(sr.Render), false
 	}
 	return 0, false
 }

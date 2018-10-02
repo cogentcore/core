@@ -456,6 +456,12 @@ var fileViewResetPaths = "<i>Reset Paths</i>"
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
+	var win oswin.Window
+	if fv.Viewport != nil && fv.Viewport.Win != nil && fv.Viewport.Win.OSWin != nil {
+		win = fv.Viewport.Win.OSWin
+	} else {
+		win = oswin.TheApp.WindowInFocus()
+	}
 
 	fv.UpdatePath()
 	pf := fv.PathField()
@@ -470,8 +476,8 @@ func (fv *FileView) UpdateFiles() {
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	oswin.TheApp.Cursor().Push(cursor.Wait)
-	defer oswin.TheApp.Cursor().Pop()
+	oswin.TheApp.Cursor(win).Push(cursor.Wait)
+	defer oswin.TheApp.Cursor(win).Pop()
 
 	fv.Files = make([]*FileInfo, 0, 1000)
 	filepath.Walk(fv.DirPath, func(path string, info os.FileInfo, err error) error {

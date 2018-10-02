@@ -214,7 +214,7 @@ func (m *Menu) AddCopyCutPaste(win *Window) {
 		})
 	m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc,
 		UpdateFunc: func(ac *Action) {
-			ac.SetInactiveState(oswin.TheApp.ClipBoard().IsEmpty())
+			ac.SetInactiveState(oswin.TheApp.ClipBoard(win.OSWin).IsEmpty())
 		}}, win, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
 		ww.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu

@@ -930,7 +930,7 @@ func (sv *SliceView) CopyRows(reset bool) {
 	for r, _ := range sv.SelectedRows {
 		sv.MimeDataRow(&md, r)
 	}
-	oswin.TheApp.ClipBoard().Write(md)
+	oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Write(md)
 	if reset {
 		sv.UnselectAllRows()
 	}
@@ -972,7 +972,7 @@ func (sv *SliceView) CutRows() {
 
 // Paste pastes clipboard at given row
 func (sv *SliceView) Paste(row int) {
-	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	if md != nil {
 		sv.PasteAction(md, row)
 	}
@@ -1066,7 +1066,7 @@ func (sv *SliceView) Duplicate() int {
 	rws := sv.SelectedRowsList(true) // descending sort -- last first
 	pasteAt := rws[0]
 	sv.CopyRows(true)
-	md := oswin.TheApp.ClipBoard().Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	sv.PasteAtRow(md, pasteAt)
 	return pasteAt
 }
