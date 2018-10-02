@@ -439,6 +439,11 @@ func (w *Window) Resized(sz image.Point) {
 		// fmt.Printf("skip same resize: %v\n", curSz)
 		return
 	}
+	w.UpMu.Lock()
+	if w.IsClosed() {
+		w.UpMu.Unlock()
+		return
+	}
 	// fmt.Printf("actual resized fun: %v\n", sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
@@ -453,16 +458,19 @@ func (w *Window) Resized(sz image.Point) {
 	w.OverlayVpCleared = false
 	w.Viewport.Resize(sz)
 	WinGeomPrefs.RecordPref(w)
+	w.UpMu.Unlock()
 	w.FullReRender()
 }
 
 // Closed frees any resources after the window has been closed.
 func (w *Window) Closed() {
+	w.UpMu.Lock()
 	AllWindows.Delete(w)
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
 	WinNewCloseStamp()
-	if w.Viewport == nil {
+	if w.IsClosed() {
+		w.UpMu.Unlock()
 		return
 	}
 	if w.WinTex != nil {
@@ -484,11 +492,12 @@ func (w *Window) Closed() {
 	for _, sp := range w.SpritesBg {
 		sp.Release()
 	}
+	w.UpMu.Unlock()
 }
 
 // IsClosed reports if the window has been closed
 func (w *Window) IsClosed() bool {
-	if w.WinTex == nil || w.IsInactive() {
+	if w.WinTex == nil || w.IsInactive() || w.Viewport == nil {
 		return true
 	}
 	return false
@@ -612,6 +621,10 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		return
 	}
 	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
@@ -628,6 +641,10 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 		return
 	}
 	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
 	if Render2DTrace {
@@ -647,6 +664,10 @@ func (w *Window) UploadAllViewports() {
 		return
 	}
 	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace {
@@ -706,7 +727,11 @@ func (w *Window) Publish() {
 	// if !w.TryPublishing() {
 	// 	return
 	// }
-	w.UpMu.Lock() // block all updates while we publish
+	w.UpMu.Lock()     // block all updates while we publish
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
@@ -742,6 +767,10 @@ func (w *Window) RenderOverlays() {
 		return
 	}
 	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	updt := w.UpdateStart()
 	wsz := w.WinTex.Bounds().Size()
 	if w.OverTex == nil || w.OverTex.Bounds() != w.WinTex.Bounds() {
@@ -865,7 +894,13 @@ func (w *Window) MainMenuUpdated() {
 	if w == nil || w.MainMenu == nil {
 		return
 	}
+	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	w.MainMenu.SetMainMenu(w)
+	w.UpMu.Unlock()
 }
 
 // MainMenuUpdateActives needs to be called whenever items on the main menu
@@ -874,12 +909,23 @@ func (w *Window) MainMenuUpdateActives() {
 	if w == nil || w.MainMenu == nil {
 		return
 	}
+	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
 	w.MainMenu.MainMenuUpdateActives(w)
+	w.UpMu.Unlock()
 }
 
 // MainMenuUpdateWindows updates a Window menu with a list of active menus.
 func (w *Window) MainMenuUpdateWindows() {
 	if w == nil || w.MainMenu == nil {
+		return
+	}
+	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
 		return
 	}
 	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
@@ -890,6 +936,7 @@ func (w *Window) MainMenuUpdateWindows() {
 	men := make(Menu, 0, len(AllWindows))
 	men.AddWindowsMenu(w)
 	wmen.Menu = men
+	w.UpMu.Unlock()
 	w.MainMenuUpdated()
 }
 

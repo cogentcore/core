@@ -97,6 +97,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * major crashing: getting mysterious crashes in clearClip and closewindow on mac in cocoa.m --
   once I turned off mainmenu updating -- will try to re-activate and debug..
 		+ weird: adding a mutex for window closing causes more crashing, but seems to help clipboard
+		+ clicking on close window button seems more reliable than anything else, for window close
+			crash
 
 * drag on textview should prevent DND -- dnd not getting "processed"
 
