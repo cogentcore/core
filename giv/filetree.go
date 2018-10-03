@@ -54,13 +54,11 @@ func (ft *FileTree) UpdateNewFile(filename gi.FileName) {
 	fpath, _ := filepath.Split(string(filename))
 	fpath = filepath.Clean(fpath)
 	if fn, ok := ft.FindFile(string(filename)); ok {
-		fmt.Printf("updating node for file: %v\n", filename)
+		// fmt.Printf("updating node for file: %v\n", filename)
 		fn.UpdateNode()
 	} else if fn, ok := ft.FindFile(fpath); ok {
-		fmt.Printf("updating node for path: %v\n", fpath)
+		// fmt.Printf("updating node for path: %v\n", fpath)
 		fn.UpdateNode()
-	} else {
-		fmt.Printf("NOT updating node for file: %v\n", filename)
 	}
 }
 

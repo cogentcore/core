@@ -983,7 +983,7 @@ func (tb *TextBuf) SavePosHistory(pos TextPos) bool {
 		}
 	}
 	tb.PosHistory = append(tb.PosHistory, pos)
-	fmt.Printf("saved pos hist: %v\n", pos)
+	// fmt.Printf("saved pos hist: %v\n", pos)
 	return true
 }
 
@@ -1290,6 +1290,35 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 		return tb.IndentLine(ln, li-1, tabSz, spc), li - 1, IndentCharPos(li-1, tabSz, spc)
 	default:
 		return tb.IndentLine(ln, li, tabSz, spc), li, IndentCharPos(li, tabSz, spc)
+	}
+}
+
+// AutoIndentRegion does auto-indent over given region -- end is *exclusive*
+func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, unindents []string) {
+	for ln := st; ln < ed; ln++ {
+		if ln >= tb.NLines {
+			break
+		}
+		tb.AutoIndent(ln, spc, tabSz, indents, unindents)
+	}
+}
+
+// CommentRegion inserts comment marker on given lines -- end is *exclusive*
+func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
+	ch := 0
+	li, spc := tb.LineIndent(st, tabSz)
+	if li > 0 {
+		if spc {
+			ch = tabSz * li
+		} else {
+			ch = li
+		}
+	}
+	for ln := st; ln < ed; ln++ {
+		if ln >= tb.NLines {
+			break
+		}
+		tb.InsertText(TextPos{Ln: ln, Ch: ch}, comment, true, true)
 	}
 }
 

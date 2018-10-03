@@ -105,6 +105,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * drag on textview should prevent DND -- dnd not getting "processed"
 
 * TextView:
+	+ still some wordwrap issues with tabs.  grr.
 	+ newline in middle of text sets cursor to 1 in from left -- should be at 0 -- is initially -- seems to eliminate initial space and that is the problem.  if enter at non-space it is fine.
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ clipboard history

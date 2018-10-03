@@ -2069,7 +2069,7 @@ func (tv *TextView) StartCursor() {
 	if win != nil && !win.IsResizing() {
 		tv.RenderCursor(true)
 	}
-	fmt.Printf("set blink tv: %v\n", tv.PathUnique())
+	//	fmt.Printf("set blink tv: %v\n", tv.PathUnique())
 	BlinkingTextView = tv
 }
 
@@ -2633,8 +2633,8 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-var defaultIndentStrings = []string{"{"}
-var defaultUnindentStrings = []string{"}"}
+var DefaultIndentStrings = []string{"{"}
+var DefaultUnindentStrings = []string{"}"}
 
 // ShiftSelect activates selection mode if shift key is also pressed -- called
 // along with cursor motion keys
@@ -2838,7 +2838,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			updt := tv.Viewport.Win.UpdateStart()
 			tv.InsertAtCursor([]byte("\n"))
 			if tv.Opts.AutoIndent {
-				tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
+				tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				if tbe != nil {
 					tv.SetCursorShow(tbe.Reg.End)
 				}
@@ -2852,7 +2852,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			kt.SetProcessed()
 			updt := tv.Viewport.Win.UpdateStart()
 			if !tv.lastWasTabAI && tv.CursorPos.Ch == 0 && tv.Opts.AutoIndent { // todo: only at 1st pos now
-				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
+				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				tv.CursorPos.Ch = cpos
 				tv.RenderCursor(true)
 				gotTabAI = true
@@ -2874,7 +2874,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
 					if kt.Rune == '}' && tv.Opts.AutoIndent {
-						tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
+						tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
 							tv.SetCursorShow(tbe.Reg.End)
 						}
