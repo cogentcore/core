@@ -37,6 +37,7 @@ type appImpl struct {
 	windows       map[syscall.Handle]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
+	ctxtwin       *windowImpl
 	name          string
 	about         string
 	quitting      bool          // set to true when quitting and closing windows
@@ -302,11 +303,13 @@ func (app *appImpl) FontPaths() []string {
 	return []string{"C:\\Windows\\Fonts"}
 }
 
-func (app *appImpl) ClipBoard() clip.Board {
+func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
+	app.ctxtwin = win.(*windowImpl)
 	return &theClip
 }
 
-func (app *appImpl) Cursor() cursor.Cursor {
+func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
+	app.ctxtwin = win.(*windowImpl)
 	return &theCursor
 }
 

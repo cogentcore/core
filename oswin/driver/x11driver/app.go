@@ -87,6 +87,7 @@ type appImpl struct {
 	windows         map[xproto.Window]*windowImpl
 	winlist         []*windowImpl
 	screens         []*oswin.Screen
+	ctxtwin         *windowImpl
 	nPendingUploads int
 	completionKeys  []uint16
 	selNotifyChan   chan xproto.SelectionNotifyEvent
@@ -858,6 +859,10 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 	return nil
 }
 
+func (app *appImpl) ContextWindow() oswin.Window {
+	return app.ctxtwin
+}
+
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.LinuxX11
 }
@@ -895,11 +900,13 @@ func (app *appImpl) FontPaths() []string {
 	return []string{"/usr/share/fonts/truetype"}
 }
 
-func (app *appImpl) ClipBoard() clip.Board {
+func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
+	app.ctxtwin = win.(*windowImpl)
 	return &theClip
 }
 
-func (app *appImpl) Cursor() cursor.Cursor {
+func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
+	app.ctxtwin = win.(*windowImpl)
 	return &theCursor
 }
 

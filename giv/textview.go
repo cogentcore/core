@@ -1230,6 +1230,7 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 	matches := tv.SearchMatches
 	if len(matches) == 0 {
 		tv.Highlights = nil
+		tv.RenderAllLines()
 		return false
 	}
 	hi := make([]TextRegion, len(matches))

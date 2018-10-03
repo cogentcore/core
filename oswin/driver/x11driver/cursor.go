@@ -78,11 +78,7 @@ func (c *cursorImpl) createCursor(curid int) xproto.Cursor {
 }
 
 func (c *cursorImpl) setCursor(cur xproto.Cursor) {
-	focwin := theApp.WindowInFocus()
-	if focwin == nil {
-		return
-	}
-	fw := focwin.(*windowImpl)
+	fw := theApp.ctxtwin
 	vallist := []uint32{uint32(cur)}
 	err := xproto.ChangeWindowAttributesChecked(theApp.xc, fw.xw, xproto.CwCursor, vallist).Check()
 	if err != nil {
