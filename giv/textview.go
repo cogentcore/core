@@ -634,6 +634,9 @@ func (tv *TextView) SetCursorCol(pos TextPos) {
 
 // SaveCursorPos saves the cursor position in history stack of cursor positions
 func (tv *TextView) SaveCursorPos(pos TextPos) {
+	if tv.Buf == nil {
+		return
+	}
 	tv.Buf.SaveCursorPos(pos)
 	tv.PosHistIdx = len(tv.Buf.PosHistory) - 1
 }
