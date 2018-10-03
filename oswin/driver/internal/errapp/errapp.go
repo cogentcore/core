@@ -36,8 +36,9 @@ func (s stub) NWindows() int                                                    
 func (s stub) Window(win int) oswin.Window                                          { return nil }
 func (s stub) WindowByName(name string) oswin.Window                                { return nil }
 func (s stub) WindowInFocus() oswin.Window                                          { return nil }
-func (s stub) ClipBoard() clip.Board                                                { return nil }
-func (s stub) Cursor() cursor.Cursor                                                { return nil }
+func (s stub) ContextWindow() oswin.Window                                          { return nil }
+func (s stub) ClipBoard(win oswin.Window) clip.Board                                { return nil }
+func (s stub) Cursor(win oswin.Window) cursor.Cursor                                { return nil }
 
 func (s stub) Platform() oswin.Platforms   { return oswin.PlatformsN }
 func (s stub) Name() string                { return "" }
