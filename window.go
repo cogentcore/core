@@ -952,7 +952,7 @@ func (w *Window) EventLoop() {
 	lastEt := oswin.EventTypeN
 	var skipDelta image.Point
 	lastSkipped := false
-	lastKeyChord := key.Chord("")
+	// lastKeyChord := key.Chord("")
 
 	var startDrag *mouse.DragEvent
 	dragStarted := false
@@ -1064,17 +1064,17 @@ mainloop:
 						skippedResize = nil
 						continue
 					}
-				case oswin.KeyChordEvent:
-					ke := evi.(*key.ChordEvent)
-					ks := ke.Chord()
-					if ks == lastKeyChord && lagMs > EventSkipLagMSec {
-						// fmt.Printf("skipped %v key: %v lag %v\n", et, ks, lag)
-						lastSkipped = true
-						continue
-					} else {
-						lastKeyChord = ks
-						lastSkipped = false
-					}
+					//				case oswin.KeyChordEvent:
+					//					ke := evi.(*key.ChordEvent)
+					//					ks := ke.Chord()
+					//					if ks == lastKeyChord && lagMs > EventSkipLagMSec {
+					//						fmt.Printf("skipped %v key: %v lag %v\n", et, ks, lag)
+					//						lastSkipped = true
+					//						continue
+					//					} else {
+					//						lastKeyChord = ks
+					//						lastSkipped = false
+					//					}
 				}
 			}
 			lastSkipped = false
@@ -2210,6 +2210,15 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 			}
 		}
 	}
+}
+
+// WindowInFocus returns true if this window is the one currently in focus
+func (w *Window) IsWindowInFocus() bool {
+	fwin := oswin.TheApp.WindowInFocus()
+	if w.OSWin == fwin {
+		return true
+	}
+	return false
 }
 
 /////////////////////////////////////////////////////////////////////////////

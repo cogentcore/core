@@ -74,7 +74,7 @@ type TextView struct {
 	ISearchMode       bool                      `json:"-" xml:"-" desc:"if true, in interactive search mode"`
 	ISearchString     string                    `json:"-" xml:"-" desc:"current interactive search string"`
 	ISearchCase       bool                      `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	SearchMatches     []TextPos                 `json:"-" xml:"-" desc:"current search matches"`
+	SearchMatches     []FileSearchMatch         `json:"-" xml:"-" desc:"current search matches"`
 	SearchPos         int                       `json:"-" xml:"-" desc:"position within isearch matches"`
 	PrevISearchString string                    `json:"-" xml:"-" desc:"previous interactive search string"`
 	PrevISearchCase   bool                      `json:"-" xml:"-" desc:"prev: pay attention to case in isearch -- triggered by typing an upper-case letter"`
@@ -633,12 +633,12 @@ func (tv *TextView) SetCursorCol(pos TextPos) {
 	}
 }
 
-// SaveCursorPos saves the cursor position in history stack of cursor positions
-func (tv *TextView) SaveCursorPos(pos TextPos) {
+// SavePosHistory saves the cursor position in history stack of cursor positions
+func (tv *TextView) SavePosHistory(pos TextPos) {
 	if tv.Buf == nil {
 		return
 	}
-	tv.Buf.SaveCursorPos(pos)
+	tv.Buf.SavePosHistory(pos)
 	tv.PosHistIdx = len(tv.Buf.PosHistory) - 1
 }
 
@@ -883,7 +883,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 // between putting cursor in middle, top, and bottom of view
 func (tv *TextView) CursorRecenter() {
 	tv.ValidateCursor()
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	cur := (tv.lastRecenter + 1) % 3
 	switch cur {
 	case 0:
@@ -1065,7 +1065,7 @@ func (tv *TextView) JumpToLinePrompt() {
 func (tv *TextView) JumpToLine(ln int) {
 	updt := tv.Viewport.Win.UpdateStart()
 	tv.SetCursorShow(TextPos{Ln: ln})
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	tv.Viewport.Win.UpdateEnd(updt)
 }
 
@@ -1149,7 +1149,7 @@ func (tv *TextView) CursorNextLink(wraparound bool) bool {
 	tv.Highlights = []TextRegion{reg}
 	tv.UpdateHighlights(prevh)
 	tv.SetCursorShow(npos)
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	return true
 }
 
@@ -1176,7 +1176,7 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 	tv.Highlights = []TextRegion{reg}
 	tv.UpdateHighlights(prevh)
 	tv.SetCursorShow(npos)
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	return true
 }
 
@@ -1196,7 +1196,7 @@ func (tv *TextView) Undo() {
 		}
 	}
 	tv.ScrollCursorToCenterIfHidden()
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	tv.RenderCursor(true)
 }
 
@@ -1213,7 +1213,7 @@ func (tv *TextView) Redo() {
 		}
 	}
 	tv.ScrollCursorToCenterIfHidden()
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	tv.RenderCursor(true)
 }
 
@@ -1232,11 +1232,7 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 		tv.Highlights = nil
 		return false
 	}
-	if useCase {
-		_, tv.SearchMatches = tv.Buf.Search(find)
-	} else {
-		_, tv.SearchMatches = tv.Buf.SearchCI(find)
-	}
+	_, tv.SearchMatches = tv.Buf.Search([]byte(find), !useCase)
 	matches := tv.SearchMatches
 	if len(matches) == 0 {
 		tv.Highlights = nil
@@ -1245,7 +1241,7 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 	}
 	hi := make([]TextRegion, len(matches))
 	for i, m := range matches {
-		hi[i] = NewTextRegionLen(m, fsz)
+		hi[i] = m.Reg
 		if i > TextViewMaxFindHighlights {
 			break
 		}
@@ -1258,6 +1254,40 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 // Matches finds ISearch matches -- returns true if there are any
 func (tv *TextView) ISearchMatches() bool {
 	return tv.FindMatches(tv.ISearchString, tv.ISearchCase)
+}
+
+// ISearchNextMatch finds next match after given cursor position, and highlights
+// it, etc
+func (tv *TextView) ISearchNextMatch(cpos TextPos) bool {
+	if len(tv.SearchMatches) == 0 {
+		return false
+	}
+	got := false
+	for i, m := range tv.SearchMatches {
+		pos := m.Reg.Start
+		if pos == cpos || cpos.IsLess(pos) {
+			tv.SearchPos = i
+			got = true
+			break
+		}
+	}
+	if !got {
+		tv.SearchPos = 0
+	}
+	tv.ISearchSelectMatch(tv.SearchPos)
+	return true
+}
+
+// ISearchSelectMatch selects match at given match index (e.g., tv.SearchPos)
+func (tv *TextView) ISearchSelectMatch(midx int) {
+	m := tv.SearchMatches[midx]
+	pos := m.Reg.Start
+	tv.SelectReg = m.Reg
+	tv.SetCursor(pos)
+	tv.SavePosHistory(tv.CursorPos)
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderSelectLines()
+	tv.ISearchSig()
 }
 
 // ISearchSig sends the signal that ISearch is updated
@@ -1279,22 +1309,16 @@ func (tv *TextView) ISearch() {
 				} else {
 					tv.SearchPos = 0
 				}
-				pos := tv.SearchMatches[tv.SearchPos]
-				tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
-				tv.SetCursor(pos)
-				tv.SaveCursorPos(tv.CursorPos)
-				tv.ScrollCursorToCenterIfHidden()
-				tv.RenderSelectLines()
-				tv.ISearchSig()
+				tv.ISearchSelectMatch(tv.SearchPos)
 			}
 		} else { // restore prev
 			if tv.PrevISearchString != "" {
 				tv.ISearchString = tv.PrevISearchString
 				tv.ISearchCase = tv.PrevISearchCase
 				tv.PrevISearchString = "" // prevents future resets
-				tv.SearchPos = tv.PrevISearchPos
 				tv.ISearchMatches()
-				tv.ISearch()
+				tv.ISearchNextMatch(tv.CursorPos)
+				tv.ISearchStartPos = tv.CursorPos
 			}
 			// nothing..
 		}
@@ -1328,30 +1352,7 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 		tv.ISearchSig()
 		return
 	}
-	got := false
-	for i, pos := range tv.SearchMatches {
-		if pos == tv.CursorPos || tv.CursorPos.IsLess(pos) {
-			tv.SearchPos = i
-			tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
-			tv.SetCursor(pos)
-			tv.SaveCursorPos(tv.CursorPos)
-			tv.ScrollCursorToCenterIfHidden()
-			tv.RenderSelectLines()
-			tv.ISearchSig()
-			got = true
-			break
-		}
-	}
-	if !got {
-		tv.SearchPos = 0
-		pos := tv.SearchMatches[0]
-		tv.SelectReg = NewTextRegionLen(pos, len(tv.ISearchString))
-		tv.SetCursor(pos)
-		tv.SaveCursorPos(tv.CursorPos)
-		tv.ScrollCursorToCenterIfHidden()
-		tv.RenderSelectLines()
-		tv.ISearchSig()
-	}
+	tv.ISearchNextMatch(tv.CursorPos)
 }
 
 // ISearchBackspace gets rid of one item in search string
@@ -1379,26 +1380,7 @@ func (tv *TextView) ISearchBackspace() {
 		tv.ISearchSig()
 		return
 	}
-	got := false
-	for i, pos := range tv.SearchMatches {
-		if pos.Ln >= tv.CursorPos.Ln {
-			tv.SearchPos = i
-			tv.SetCursor(pos)
-			tv.SaveCursorPos(tv.CursorPos)
-			tv.ScrollCursorToCenterIfHidden()
-			tv.ISearchSig()
-			got = true
-			break
-		}
-	}
-	if !got {
-		tv.SearchPos = 0
-		pos := tv.SearchMatches[0]
-		tv.SetCursor(pos)
-		tv.SaveCursorPos(tv.CursorPos)
-		tv.ScrollCursorToCenterIfHidden()
-		tv.ISearchSig()
-	}
+	tv.ISearchNextMatch(tv.CursorPos)
 }
 
 // ISearchCancel cancels ISearch mode
@@ -1470,7 +1452,7 @@ func (tv *TextView) SelectModeToggle() {
 		tv.SelectStart = tv.CursorPos
 		tv.SelectRegUpdate(tv.CursorPos)
 	}
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 }
 
 // SelectAll selects all the text
@@ -1572,7 +1554,7 @@ func (tv *TextView) Cut() *TextBufEdit {
 		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cut.ToBytes()))
 	}
 	tv.SetCursorShow(org)
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	return cut
 }
 
@@ -1597,7 +1579,7 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	if reset {
 		tv.SelectReset()
 	}
-	tv.SaveCursorPos(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
 	return tbe
 }
 
@@ -1612,7 +1594,7 @@ func (tv *TextView) Paste() {
 			tv.DeleteSelection()
 		}
 		tv.InsertAtCursor(data.TypeData(mimedata.TextPlain))
-		tv.SaveCursorPos(tv.CursorPos)
+		tv.SavePosHistory(tv.CursorPos)
 	}
 }
 
@@ -2063,7 +2045,7 @@ func TextViewBlink() {
 			continue
 		}
 		win := tv.ParentWindow()
-		if win == nil || win.IsResizing() || win.IsClosed() {
+		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
 			continue
 		}
 		tv.BlinkOn = !tv.BlinkOn
@@ -2087,6 +2069,7 @@ func (tv *TextView) StartCursor() {
 	if win != nil && !win.IsResizing() {
 		tv.RenderCursor(true)
 	}
+	fmt.Printf("set blink tv: %v\n", tv.PathUnique())
 	BlinkingTextView = tv
 }
 
@@ -2852,6 +2835,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
+			updt := tv.Viewport.Win.UpdateStart()
 			tv.InsertAtCursor([]byte("\n"))
 			if tv.Opts.AutoIndent {
 				tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
@@ -2859,12 +2843,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 					tv.SetCursorShow(tbe.Reg.End)
 				}
 			}
+			tv.Viewport.Win.UpdateEnd(updt)
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
 		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
+			updt := tv.Viewport.Win.UpdateStart()
 			if !tv.lastWasTabAI && tv.CursorPos.Ch == 0 && tv.Opts.AutoIndent { // todo: only at 1st pos now
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, defaultIndentStrings, defaultUnindentStrings)
 				tv.CursorPos.Ch = cpos
@@ -2877,6 +2863,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 					tv.InsertAtCursor([]byte("\t"))
 				}
 			}
+			tv.Viewport.Win.UpdateEnd(updt)
 		}
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
@@ -2943,10 +2930,19 @@ func (tv *TextView) LinkAt(pos TextPos) (*gi.TextLink, bool) {
 }
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
-// returns true and the link if there is a link, and false otherwise
+// returns true and the link if there is a link, and false otherwise -- highlights selected link
 func (tv *TextView) OpenLinkAt(pos TextPos) (*gi.TextLink, bool) {
 	tl, ok := tv.LinkAt(pos)
 	if ok {
+		rend := &tv.Renders[pos.Ln]
+		st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
+		ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+		reg := TextRegion{Start: TextPos{Ln: pos.Ln, Ch: st}, End: TextPos{Ln: pos.Ln, Ch: ed}}
+		prevh := tv.Highlights
+		tv.Highlights = []TextRegion{reg}
+		tv.UpdateHighlights(prevh)
+		tv.SetCursorShow(pos)
+		tv.SavePosHistory(tv.CursorPos)
 		tv.OpenLink(tl)
 	}
 	return tl, ok
@@ -2968,7 +2964,6 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 		if me.Action == mouse.Press {
 			me.SetProcessed()
 			if _, got := tv.OpenLinkAt(newPos); got {
-				tv.CursorPos = newPos
 			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			}

@@ -301,13 +301,17 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
+	// if(self.mainMenu != NULL) {
+  //		[self.mainMenu release];
+  // 		self.mainMenu = NULL;
+	//}
+	//if(self.menuDel != NULL) {
+  //		[self.menuDel release];
+  //		self.menuDel = NULL;
+		//}
     windowClosing((GoUintptr)self);
-    [self.window.nextResponder release];
-    self.window.nextResponder = NULL;
-    [self.mainMenu release];
-    self.mainMenu = NULL;
-    [self.menuDel release];
-    self.menuDel = NULL;
+    // [self.window.nextResponder release];
+    // self.window.nextResponder = NULL;
 }
 
 - (NSMenu*) mainMenu {
@@ -504,6 +508,7 @@ void doGeomWindow(uintptr_t viewID, int left, int top, int width, int height) {
     
 void doCloseWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
+	printf("doCloseWindow: %d\n", viewID);
     view.reallyClose = YES;
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window performClose:view];

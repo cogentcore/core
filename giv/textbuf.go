@@ -627,57 +627,51 @@ func (tb *TextBuf) BytesToLines() {
 /////////////////////////////////////////////////////////////////////////////
 //   Search
 
-// Search looks for a string (no regexp) within buffer, in a case-sensitive
-// way, returning number of occurences and specific match position list.
+// Search looks for a string (no regexp) within buffer, with given case-sensitivity
+// returning number of occurences and specific match position list.
 // Currently ONLY returning byte char positions, not rune ones..
-func (tb *TextBuf) Search(find string) (int, []TextPos) {
+func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fsz := len(find)
 	if fsz == 0 {
 		return 0, nil
 	}
+	if ignoreCase {
+		find = bytes.ToLower(find)
+	}
 	cnt := 0
-	var matches []TextPos
-	for ln, lr := range tb.Lines {
-		lstr := string(lr)
-		sz := len(lstr)
-		ci := 0
-		for ci < sz {
-			i := strings.Index(lstr[ci:], find)
-			if i < 0 {
-				break
-			}
-			i += ci
-			ci = i + fsz
-			matches = append(matches, TextPos{ln, i})
-			cnt++
+	var matches []FileSearchMatch
+	mst := []byte("<mark>")
+	mstsz := len(mst)
+	med := []byte("</mark>")
+	medsz := len(med)
+	for ln, b := range tb.LineBytes {
+		if ignoreCase {
+			b = bytes.ToLower(b)
 		}
-	}
-	return cnt, matches
-}
-
-// SearchCI looks for a string (no regexp) within buffer, in a
-// case-INsensitive way, returning number of occurences.  Currently ONLY
-// returning byte char positions, not rune ones..
-func (tb *TextBuf) SearchCI(find string) (int, []TextPos) {
-	fsz := len(find)
-	if fsz == 0 {
-		return 0, nil
-	}
-	find = strings.ToLower(find)
-	cnt := 0
-	var matches []TextPos
-	for ln, lr := range tb.Lines {
-		lstr := strings.ToLower(string(lr))
-		sz := len(lstr)
+		sz := len(b)
 		ci := 0
 		for ci < sz {
-			i := strings.Index(lstr[ci:], find)
+			i := bytes.Index(b[ci:], find)
 			if i < 0 {
 				break
 			}
 			i += ci
 			ci = i + fsz
-			matches = append(matches, TextPos{ln, i})
+			reg := TextRegion{Start: TextPos{Ln: ln, Ch: i}, End: TextPos{Ln: ln, Ch: ci}}
+			cist := ints.MaxInt(i-FileSearchContext, 0)
+			cied := ints.MinInt(ci+FileSearchContext, sz)
+			tlen := mstsz + medsz + cied - cist
+			txt := make([]byte, tlen)
+			copy(txt, b[cist:i])
+			ti := i - cist
+			copy(txt[ti:], mst)
+			ti += mstsz
+			copy(txt[ti:], b[i:ci])
+			ti += fsz
+			copy(txt[ti:], med)
+			ti += medsz
+			copy(txt[ti:], b[ci:cied])
+			matches = append(matches, FileSearchMatch{Reg: reg, Text: txt})
 			cnt++
 		}
 	}
@@ -976,13 +970,21 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 	return tbe
 }
 
-// SaveCursorPos saves the cursor position in history stack of cursor positions --
-// tracks across views
-func (tb *TextBuf) SaveCursorPos(pos TextPos) {
+// SavePosHistory saves the cursor position in history stack of cursor positions --
+// tracks across views -- returns false if position was on same line as last one saved
+func (tb *TextBuf) SavePosHistory(pos TextPos) bool {
 	if tb.PosHistory == nil {
 		tb.PosHistory = make([]TextPos, 0, 1000)
 	}
+	sz := len(tb.PosHistory)
+	if sz > 0 {
+		if tb.PosHistory[sz-1].Ln == pos.Ln {
+			return false
+		}
+	}
 	tb.PosHistory = append(tb.PosHistory, pos)
+	fmt.Printf("saved pos hist: %v\n", pos)
+	return true
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1271,7 +1273,7 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 			break
 		}
 	}
-	if !und && prvln != "" { // unindent overrides indent
+	if prvln != "" { // unindent overrides indent
 		for _, is := range indents {
 			if strings.HasSuffix(prvln, is) {
 				ind = true
@@ -1280,6 +1282,8 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 		}
 	}
 	switch {
+	case ind && und:
+		return tb.IndentLine(ln, li, tabSz, spc), li, IndentCharPos(li, tabSz, spc)
 	case ind:
 		return tb.IndentLine(ln, li+1, tabSz, spc), li + 1, IndentCharPos(li+1, tabSz, spc)
 	case und:

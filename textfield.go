@@ -686,7 +686,7 @@ func TextFieldBlink() {
 			continue
 		}
 		win := tf.ParentWindow()
-		if win == nil || win.IsResizing() || win.IsClosed() {
+		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
 			continue
 		}
 		tf.BlinkOn = !tf.BlinkOn

@@ -311,6 +311,7 @@ func closeWindow(id uintptr) {
 	// w := theApp.windows[id]
 	// theApp.mu.Unlock()
 	// w.glctxMu.Lock()
+	fmt.Printf("closeWindow: %v\n", id)
 	C.doCloseWindow(C.uintptr_t(id))
 	// w.glctxMu.Unlock()
 }
@@ -323,6 +324,7 @@ func windowClosing(id uintptr) {
 	if w == nil {
 		return
 	}
+	fmt.Printf("windowClosing: %v\n", id)
 	// note: this is the common final path of all window closes
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()

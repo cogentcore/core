@@ -108,7 +108,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ newline in middle of text sets cursor to 1 in from left -- should be at 0 -- is initially -- seems to eliminate initial space and that is the problem.  if enter at non-space it is fine.
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ clipboard history
-	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 	+ closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
 	+ cursor goes to hand for links in TextView
 

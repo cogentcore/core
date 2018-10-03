@@ -54,9 +54,13 @@ func (ft *FileTree) UpdateNewFile(filename gi.FileName) {
 	fpath, _ := filepath.Split(string(filename))
 	fpath = filepath.Clean(fpath)
 	if fn, ok := ft.FindFile(string(filename)); ok {
+		fmt.Printf("updating node for file: %v\n", filename)
 		fn.UpdateNode()
 	} else if fn, ok := ft.FindFile(fpath); ok {
+		fmt.Printf("updating node for path: %v\n", fpath)
 		fn.UpdateNode()
+	} else {
+		fmt.Printf("NOT updating node for file: %v\n", filename)
 	}
 }
 
@@ -72,6 +76,9 @@ func (ft *FileTree) RelPath(fpath gi.FileName) string {
 // IsDirOpen returns true if given directory path is open (i.e., has been
 // opened in the view)
 func (ft *FileTree) IsDirOpen(fpath gi.FileName) bool {
+	if fpath == ft.FPath { // we are always open
+		return true
+	}
 	return ft.OpenDirs.IsOpen(ft.RelPath(fpath))
 }
 
@@ -259,6 +266,8 @@ func (fn *FileNode) UpdateNode() error {
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
+		} else {
+			fmt.Printf("not updating non-open dir: %v\n", fn.FPath)
 		}
 	}
 	return nil
@@ -423,7 +432,7 @@ func (fn *FileNode) RenameFile(newpath string) error {
 //  Search
 
 // FileSearchMatch records one match for search within file
-type FileSearchResult struct {
+type FileSearchMatch struct {
 	Reg  TextRegion `desc:"region surrounding the match"`
 	Text []byte     `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
 }
@@ -434,20 +443,20 @@ var FileSearchContext = 30
 // FileSearch looks for a string (no regexp) within a file, in a
 // case-sensitive way, returning number of occurences and specific match
 // position list -- column positions are in bytes, not runes.
-func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearchResult) {
+func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fp, err := os.Open(filename)
 	if err != nil {
 		log.Printf("gide.FileSearch file open error: %v\n", err)
 		return 0, nil
 	}
 	defer fp.Close()
-	return BufSearch(fp, find, ignoreCase)
+	return ByteBufSearch(fp, find, ignoreCase)
 }
 
-// BufSearch looks for a string (no regexp) within a byte buffer, in a
-// case-sensitive way, returning number of occurences and specific match
+// ByteBufSearch looks for a string (no regexp) within a byte buffer, with
+// given case-sensitivity, returning number of occurences and specific match
 // position list -- column positions are in bytes, not runes.
-func BufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearchResult) {
+func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fsz := len(find)
 	if fsz == 0 {
 		return 0, nil
@@ -456,7 +465,7 @@ func BufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearc
 		find = bytes.ToLower(find)
 	}
 	cnt := 0
-	var matches []FileSearchResult
+	var matches []FileSearchMatch
 	scan := bufio.NewScanner(reader)
 	ln := 0
 	mst := []byte("<mark>")
@@ -491,7 +500,7 @@ func BufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearc
 			copy(txt[ti:], med)
 			ti += medsz
 			copy(txt[ti:], b[ci:cied])
-			matches = append(matches, FileSearchResult{Reg: reg, Text: txt})
+			matches = append(matches, FileSearchMatch{Reg: reg, Text: txt})
 			cnt++
 		}
 		ln++
