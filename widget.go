@@ -134,12 +134,10 @@ func (wb *WidgetBase) Style2DWidget() {
 	} else {
 		wb.Sty.CopyFrom(wb.DefaultStyle2DWidget("", nil))
 	}
-	wb.Sty.IsSet = false // this is always first call, restart
-
+	wb.Sty.IsSet = false    // this is always first call, restart
 	if wb.Viewport == nil { // robust
 		gii.Init2D()
 	}
-
 	styprops := *wb.Properties()
 	parSty := wb.ParentStyle()
 	wb.Sty.SetStyleProps(parSty, styprops)

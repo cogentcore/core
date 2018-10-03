@@ -66,6 +66,7 @@ type TextView struct {
 	CursorPos         TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol         int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
 	PosHistIdx        int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
+	SelectStart       TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
 	SelectReg         TextRegion                `json:"-" xml:"-" desc:"current selection region"`
 	PrevSelectReg     TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	Highlights        []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
@@ -690,19 +691,25 @@ func (tv *TextView) CursorToHistNext() bool {
 	return true
 }
 
+// SelectRegUpdate updates current select region based on given cursor position
+// relative to SelectStart position
+func (tv *TextView) SelectRegUpdate(pos TextPos) {
+	if pos.IsLess(tv.SelectStart) {
+		tv.SelectReg.Start = pos
+		tv.SelectReg.End = tv.SelectStart
+	} else {
+		tv.SelectReg.Start = tv.SelectStart
+		tv.SelectReg.End = pos
+	}
+}
+
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and tv.CursorPos is current
 func (tv *TextView) CursorSelect(org TextPos) {
 	if !tv.SelectMode {
 		return
 	}
-	if org.IsLess(tv.SelectReg.Start) {
-		tv.SelectReg.Start = tv.CursorPos
-	} else if !tv.CursorPos.IsLess(tv.SelectReg.Start) { // >
-		tv.SelectReg.End = tv.CursorPos
-	} else {
-		tv.SelectReg.Start = tv.CursorPos
-	}
+	tv.SelectRegUpdate(tv.CursorPos)
 	tv.RenderSelectLines()
 }
 
@@ -1460,8 +1467,8 @@ func (tv *TextView) SelectModeToggle() {
 		tv.SelectMode = false
 	} else {
 		tv.SelectMode = true
-		tv.SelectReg.Start = tv.CursorPos
-		tv.SelectReg.End = tv.SelectReg.Start
+		tv.SelectStart = tv.CursorPos
+		tv.SelectRegUpdate(tv.CursorPos)
 	}
 	tv.SaveCursorPos(tv.CursorPos)
 }
@@ -2543,23 +2550,33 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
 		si = ints.MinInt(si, nspan)
 		for i := 0; i < si; i++ {
-			spoff += len(tv.Renders[cln].Spans[i].Text) + 1
+			spoff += len(tv.Renders[cln].Spans[i].Text)
 		}
 		// fmt.Printf("si: %v  spoff: %v\n", si, spoff)
 	}
 
-	ri := cch
+	ri := sc
 	rsz := len(tv.Renders[cln].Spans[si].Text)
+	if rsz == 0 {
+		return TextPos{Ln: cln, Ch: spoff}
+	}
+	// fmt.Printf("sc: %v  rsz: %v\n", sc, rsz)
+
+	c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rsz-1) // end
+	rsp := math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+	rep := math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
+	if int(rep) < pt.X { // end of line
+		if si == nspan-1 {
+			c++
+		}
+		return TextPos{Ln: cln, Ch: c}
+	}
 
 	tooBig := false
 	got := false
-	var rsp, rep float32
-	if cch < rsz {
+	if ri < rsz {
 		for rii := ri; rii < rsz; rii++ {
-			c, ok := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
-			if !ok {
-				fmt.Printf("tv.SpanPosToRuneIdx fail: %v, %v\n", si, rii)
-			}
+			c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
 			rsp = math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 			rep = math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 			// fmt.Printf("trying c: %v for pt: %v xoff: %v rsp: %v, rep: %v\n", c, pt, xoff, rsp, rep)
@@ -2574,21 +2591,19 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 				break
 			}
 		}
-		if !got && int(rep) < pt.X { // end of line
-			got = true
-			cch, _ = tv.Renders[cln].SpanPosToRuneIdx(si, rsz-1)
-			cch++
-		}
 	} else {
 		tooBig = true
-		cch = lnsz
 	}
-	if tooBig {
-		for c := cch; c >= 0; c-- {
+	if !got && tooBig {
+		ri = rsz - 1
+		// fmt.Printf("too big: %v\n", ri)
+		for rii := ri; rii >= 0; rii-- {
+			c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
 			rsp := math32.Floor(tv.CharStartPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 			rep := math32.Ceil(tv.CharEndPos(TextPos{Ln: cln, Ch: c}).X - xoff)
 			// fmt.Printf("too big: trying c: %v for pt: %v rsp: %v, rep: %v\n", c, pt, rsp, rep)
 			if pt.X >= int(rsp) && pt.X < int(rep) {
+				got = true
 				cch = c
 				// fmt.Printf("got cch: %v for pt: %v rsp: %v, rep: %v\n", cch, pt, rsp, rep)
 				break
@@ -2605,20 +2620,20 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 	if newPos == oldPos {
 		return
 	}
+	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.SetCursor(newPos)
 	if tv.SelectMode || selMode != mouse.NoSelectMode {
 		if !tv.SelectMode && selMode != mouse.NoSelectMode {
-			tv.SelectReg.Start = oldPos
 			tv.SelectMode = true
+			tv.SelectStart = newPos
+			tv.SelectRegUpdate(tv.CursorPos)
 		}
 		if !tv.IsDragging() && selMode == mouse.NoSelectMode {
 			tv.SelectReset()
-		} else if tv.SelectReg.Start.IsLess(tv.CursorPos) {
-			tv.SelectReg.End = tv.CursorPos
 		} else {
-			tv.SelectReg.Start = tv.CursorPos
+			tv.SelectRegUpdate(tv.CursorPos)
 		}
 		if tv.IsDragging() {
 			tv.AutoScroll(pt.Add(tv.WinBBox.Min))
@@ -2645,8 +2660,8 @@ func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
 	if hasShift {
 		if !tv.SelectMode {
 			tv.SelectMode = true
-			tv.SelectReg.Start = tv.CursorPos
-			tv.SelectReg.End = tv.CursorPos
+			tv.SelectStart = tv.CursorPos
+			tv.SelectRegUpdate(tv.CursorPos)
 		}
 	}
 }
@@ -2952,7 +2967,9 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	case mouse.Left:
 		if me.Action == mouse.Press {
 			me.SetProcessed()
-			if _, got := tv.OpenLinkAt(newPos); !got {
+			if _, got := tv.OpenLinkAt(newPos); got {
+				tv.CursorPos = newPos
+			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			}
 		} else if me.Action == mouse.DoubleClick {

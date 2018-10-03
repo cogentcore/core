@@ -1266,12 +1266,12 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 	ind := false
 	und := false
 	for _, us := range unindents {
-		if strings.HasPrefix(curln, us) {
+		if curln == us {
 			und = true
 			break
 		}
 	}
-	if prvln != "" {
+	if !und && prvln != "" { // unindent overrides indent
 		for _, is := range indents {
 			if strings.HasSuffix(prvln, is) {
 				ind = true

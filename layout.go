@@ -307,6 +307,7 @@ type Layout struct {
 	FocusName     string              `json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
 	FocusNameTime time.Time           `json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
 	FocusNameLast ki.Ki               `json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
+	ScrollsOff    bool                `json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -1056,6 +1057,7 @@ func (ly *Layout) AvailSize() Vec2D {
 
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow() {
+	ly.ScrollsOff = false
 	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
 		return
 	}
@@ -1188,6 +1190,19 @@ func (ly *Layout) RenderScrolls() {
 	for d := X; d < Dims2DN; d++ {
 		if ly.HasScroll[d] {
 			ly.Scrolls[d].Render2D()
+		}
+	}
+}
+
+// SetScrollsOff turns off the scrolls -- e.g., when layout is not visible
+func (ly *Layout) SetScrollsOff() {
+	for d := X; d < Dims2DN; d++ {
+		if ly.HasScroll[d] {
+			ly.ScrollsOff = false
+			ly.HasScroll[d] = false
+			if ly.Scrolls[d] != nil {
+				ly.DeactivateScroll(ly.Scrolls[d])
+			}
 		}
 	}
 }
@@ -1811,10 +1826,14 @@ func (ly *Layout) Render2D() {
 	}
 	if ly.PushBounds() {
 		ly.This.(Node2D).ConnectEvents2D()
+		if ly.ScrollsOff {
+			ly.ManageOverflow()
+		}
 		ly.RenderScrolls()
 		ly.Render2DChildren()
 		ly.PopBounds()
 	} else {
+		ly.SetScrollsOff()
 		ly.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }

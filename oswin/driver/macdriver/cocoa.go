@@ -309,12 +309,12 @@ func windowCloseReq(id uintptr) bool {
 }
 
 func closeWindow(id uintptr) {
-	theApp.mu.Lock()
-	w := theApp.windows[id]
-	theApp.mu.Unlock()
-	w.glctxMu.Lock()
+	// theApp.mu.Lock()
+	// w := theApp.windows[id]
+	// theApp.mu.Unlock()
+	// w.glctxMu.Lock()
 	C.doCloseWindow(C.uintptr_t(id))
-	w.glctxMu.Unlock()
+	// w.glctxMu.Unlock()
 }
 
 //export windowClosing

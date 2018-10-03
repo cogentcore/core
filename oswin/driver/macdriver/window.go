@@ -433,5 +433,5 @@ func (w *windowImpl) CloseClean() {
 }
 
 func (w *windowImpl) Close() {
-	closeWindow(w.id)
+	go closeWindow(w.id)
 }

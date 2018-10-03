@@ -108,7 +108,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ clipboard history
 	+ clipboard "registers" (C-x x <label>, C-x g <label>)
 	+ closing a buffer, and more generally sometimes, renders too-narrow box width.  init is also too narrow at start actually.
-	+ also more generally the select logic for resetting the start of select needs to be fixed to work like emacs..
 	+ cursor goes to hand for links in TextView
 
 * Splitview: 
