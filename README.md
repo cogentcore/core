@@ -95,10 +95,12 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * major crashing: getting mysterious crashes in clearClip and closewindow on mac in cocoa.m --
-  once I turned off mainmenu updating -- will try to re-activate and debug..
-		+ weird: adding a mutex for window closing causes more crashing, but seems to help clipboard
 		+ clicking on close window button seems more reliable than anything else, for window close
 			crash
+		+ clipClear could actually have been freeing something it didn't own -- now trying new strategy..
+		+ calling go closewindow to see if that helps..
+		
+* crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild
 
 * drag on textview should prevent DND -- dnd not getting "processed"
 

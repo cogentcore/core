@@ -33,9 +33,9 @@ void doShowWindow(uintptr_t id);
 void doResizeWindow(uintptr_t id, int width, int height);
 void doMoveWindow(uintptr_t id, int left, int top);
 void doGeomWindow(uintptr_t id, int left, int top, int width, int height);
-void doCloseWindow(uintptr_t id);
 void doRaiseWindow(uintptr_t id);
 void doMinimizeWindow(uintptr_t id);
+void doCloseWindow(uintptr_t id);
 void getScreens();
 uintptr_t doGetMainMenu(uintptr_t viewID);
 void doMenuReset(uintptr_t menuID);
@@ -45,7 +45,6 @@ void doAddSeparator(uintptr_t menuID);
 uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm);
 uintptr_t doMenuItemByTag(uintptr_t menuID, int tag);
 void doSetMenuItemActive(uintptr_t mitmID, bool active);
-void clipClear();
 bool clipIsEmpty();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
@@ -55,6 +54,7 @@ void popCursor();
 void setCursor(int);
 void hideCursor();
 void showCursor();
+void clipClear();
 uint64_t threadID();
 */
 import "C"
@@ -128,9 +128,7 @@ func updateTitle(w *windowImpl, titles string) {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
-	w.glctxMu.Lock()
 	C.doUpdateTitle(C.uintptr_t(w.id), title)
-	w.glctxMu.Unlock()
 }
 
 func resizeWindow(w *windowImpl, sz image.Point) {
@@ -592,18 +590,18 @@ func (mm *mainMenuImpl) Menu() oswin.Menu {
 }
 
 func (mm *mainMenuImpl) Reset(men oswin.Menu) {
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	C.doMenuReset(C.uintptr_t(men))
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 }
 
 func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	subid := C.doAddSubMenu(C.uintptr_t(men), title)
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 	return oswin.Menu(subid)
 }
 
@@ -625,38 +623,38 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
 
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	C.doAddSeparator(C.uintptr_t(men))
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 }
 
 func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
-	mm.win.glctxMu.Lock()
+	// mm.win.glctxMu.Lock()
 	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
-	mm.win.glctxMu.Unlock()
+	// mm.win.glctxMu.Unlock()
 }
 
 //export menuFired
@@ -683,10 +681,6 @@ var theClip = clipImpl{}
 var curMimeData *mimedata.Mimes
 
 func (ci *clipImpl) IsEmpty() bool {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	ise := C.clipIsEmpty()
 	return bool(ise)
 }
@@ -694,10 +688,6 @@ func (ci *clipImpl) IsEmpty() bool {
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	if len(types) == 0 {
 		return nil
-	}
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
 	}
 	ci.data = nil
 	curMimeData = &ci.data
@@ -737,10 +727,6 @@ func (ci *clipImpl) WriteText(b []byte) {
 
 func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	ci.Clear()
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	if len(data) > 1 { // multipart
 		mpd := data.ToMultipart()
 		ci.WriteText(mpd)
@@ -755,10 +741,6 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 }
 
 func (ci *clipImpl) Clear() {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	C.clipClear()
 }
 
@@ -796,37 +778,21 @@ type cursorImpl struct {
 var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	c.PushStack(sh)
 	C.pushCursor(C.int(sh))
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	c.Cur = sh
 	C.setCursor(C.int(sh))
 }
 
 func (c *cursorImpl) Pop() {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	c.PopStack()
 	C.popCursor()
 }
 
 func (c *cursorImpl) Hide() {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	if c.Vis == false {
 		return
 	}
@@ -835,10 +801,6 @@ func (c *cursorImpl) Hide() {
 }
 
 func (c *cursorImpl) Show() {
-	if theApp.ctxtwin != nil {
-		theApp.ctxtwin.glctxMu.Lock()
-		defer theApp.ctxtwin.glctxMu.Unlock()
-	}
 	if c.Vis {
 		return
 	}

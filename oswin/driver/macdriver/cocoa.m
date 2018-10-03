@@ -822,7 +822,7 @@ void pasteWrite(NSPasteboard* pb) {
         return;
     }
     [pb writeObjects: pasteWriteItems];
-    [pasteWriteItems removeAllObjects];
+    pasteWriteItems = NULL;
 }	
 
 // clip just calls paste versions with generalPasteboard
@@ -858,7 +858,7 @@ void clipClear() {
     }
     [pb clearContents];
     if(pasteWriteItems != NULL) {
-        [pasteWriteItems removeAllObjects];
+        pasteWriteItems = NULL;
     }
 }
 
