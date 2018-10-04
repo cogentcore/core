@@ -1743,8 +1743,11 @@ func (tv *TextView) CompleteText(s string) {
 
 	st := TextPos{tv.CursorPos.Ln, 0}
 	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	var tbes string
 	tbe := tv.Buf.Region(st, en)
-	tbes := string(tbe.ToBytes())
+	if (tbe != nil) {
+		tbes = string(tbe.ToBytes())
+	}
 
 	ns, _ := tv.Complete.EditFunc(tv.Complete.Context, tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
 	fmt.Println(ns)
