@@ -183,8 +183,13 @@ func ToValueView(it interface{}) ValueView {
 		v := reflect.ValueOf(it)
 		sz := v.Len()
 		eltyp := kit.SliceElType(it)
-		if eltyp.Kind() == reflect.Uint8 { // []byte
+		if _, ok := it.([]byte); ok {
 			vv := ByteSliceValueView{}
+			vv.Init(&vv)
+			return &vv
+		}
+		if _, ok := it.([]rune); ok {
+			vv := RuneSliceValueView{}
 			vv.Init(&vv)
 			return &vv
 		}

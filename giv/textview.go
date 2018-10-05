@@ -319,9 +319,11 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.ResetState()
-		tv.SetFullReRender()
-		tv.SetCursorShow(tv.CursorPos)
-		tv.UpdateSig()
+		// tv.SetFullReRender()
+		// tv.SetCursorShow(tv.CursorPos)
+		// tv.UpdateSig()
+		fmt.Printf("new text, cursor pos: %v\n", tv.CursorPos)
+		tv.Refresh()
 	case TextBufInsert:
 		if tv.Renders == nil { // not init yet
 			return
@@ -361,22 +363,33 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 ///////////////////////////////////////////////////////////////////////////////
 //  Text formatting and rendering
 
+// ParentLayout returns our parent layout -- we ensure this is our immediate parent which is necessary
+// for textview
+func (tv *TextView) ParentLayout() *gi.Layout {
+	if tv.Par == nil {
+		return nil
+	}
+	pari, _ := gi.KiToNode2D(tv.Par)
+	return pari.AsLayout2D()
+}
+
 // RenderSize is the size we should pass to text rendering, based on alloc
 func (tv *TextView) RenderSize() gi.Vec2D {
 	spc := tv.Sty.BoxSpace()
 	if tv.Par == nil {
 		return gi.Vec2DZero
 	}
-	pari, _ := gi.KiToNode2D(tv.Par)
-	parw := pari.AsLayout2D()
+	parw := tv.ParentLayout()
 	if parw == nil {
-		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", pari.Type(), tv.PathUnique())
+		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", tv.Par.Type(), tv.PathUnique())
 		return gi.Vec2DZero
 	}
 	parw.SetReRenderAnchor()
 	paloc := parw.LayData.AllocSizeOrig
 	if !paloc.IsZero() {
+		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubVal(spc * 2)
+		tv.RenderSz.X -= spc // extra space
 		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	} else {
 		sz := tv.LayData.AllocSizeOrig
@@ -387,7 +400,7 @@ func (tv *TextView) RenderSize() gi.Vec2D {
 			sz.SetSubVal(2 * spc)
 		}
 		tv.RenderSz = sz
-		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
+		// fmt.Printf("fallback rendersz: %v\n", tv.RenderSz)
 	}
 	tv.RenderSz.X -= tv.LineNoOff
 	// fmt.Printf("rendersz: %v\n", tv.RenderSz)
@@ -747,11 +760,9 @@ func (tv *TextView) CursorDown(steps int) {
 		if wln := tv.WrappedLines(pos.Ln); wln > 1 {
 			si, ri, _ := tv.WrappedLineNo(pos)
 			if si < wln-1 {
-				nwc, ok := tv.Renders[pos.Ln].SpanPosToRuneIdx(si+1, ri)
-				if ok {
-					pos.Ch = nwc
-					gotwrap = true
-				}
+				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si+1, ri)
+				pos.Ch = nwc
+				gotwrap = true
 			}
 		}
 		if !gotwrap {
@@ -828,6 +839,7 @@ func (tv *TextView) CursorUp(steps int) {
 			si, ri, _ := tv.WrappedLineNo(pos)
 			if si > 0 {
 				ri = tv.CursorCol
+				// fmt.Printf("up cursorcol: %v\n", tv.CursorCol)
 				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si-1, ri)
 				pos.Ch = nwc
 				gotwrap = true
@@ -921,6 +933,7 @@ func (tv *TextView) CursorStartLine() {
 		tv.CursorPos.Ch = 0
 		tv.CursorCol = tv.CursorPos.Ch
 	}
+	// fmt.Printf("sol cursorcol: %v\n", tv.CursorCol)
 	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToLeft()
 	tv.RenderCursor(true)
@@ -1921,7 +1934,8 @@ func (tv *TextView) ScrollToLeft(pos int) bool {
 // ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
 // at left of view to extent possible -- returns true if scrolled.
 func (tv *TextView) ScrollCursorToLeft() bool {
-	if tv.CursorPos.Ch == 0 {
+	_, ri, _ := tv.WrappedLineNo(tv.CursorPos)
+	if ri == 0 {
 		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Sty.BoxSpace()) - 2)
 	}
 	curBBox := tv.CursorBBox(tv.CursorPos)
@@ -2046,6 +2060,9 @@ func TextViewBlink() {
 		}
 		win := tv.ParentWindow()
 		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
+			continue
+		}
+		if win.IsUpdating() {
 			continue
 		}
 		tv.BlinkOn = !tv.BlinkOn
@@ -2531,7 +2548,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	lstY := tv.CharStartPos(TextPos{Ln: cln}).Y - yoff
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
-		si = ints.MinInt(si, nspan)
+		si = ints.MinInt(si, nspan-1)
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text)
 		}
@@ -3092,9 +3109,11 @@ func (tv *TextView) Render2D() {
 	}
 	tv.VisSizes()
 	if tv.NLines == 0 {
-		sz := tv.RenderSz.ToPointCeil()
-		tv.VpBBox.Max = tv.VpBBox.Min.Add(sz)
-		tv.WinBBox.Max = tv.WinBBox.Min.Add(sz)
+		ply := tv.ParentLayout()
+		if ply != nil {
+			tv.VpBBox = ply.VpBBox
+			tv.WinBBox = ply.WinBBox
+		}
 	}
 	if tv.PushBounds() {
 		tv.TextViewEvents()

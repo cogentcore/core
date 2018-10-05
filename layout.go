@@ -1057,6 +1057,7 @@ func (ly *Layout) AvailSize() Vec2D {
 
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow() {
+	wasscof := ly.ScrollsOff
 	ly.ScrollsOff = false
 	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
 		return
@@ -1073,6 +1074,9 @@ func (ly *Layout) ManageOverflow() {
 		for d := X; d < Dims2DN; d++ {
 			odim := OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
+				if wasscof {
+					fmt.Printf("overflow, setting scb: %v\n", d)
+				}
 				ly.HasScroll[d] = true
 				ly.ExtraSize.SetAddDim(odim, sbw)
 			}

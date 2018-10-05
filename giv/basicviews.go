@@ -801,3 +801,62 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	})
 	vv.UpdateWidget()
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  RuneSliceValueView
+
+// RuneSliceValueView presents a textfield of the bytes
+type RuneSliceValueView struct {
+	ValueViewBase
+}
+
+var KiT_RuneSliceValueView = kit.Types.AddType(&RuneSliceValueView{}, nil)
+
+func (vv *RuneSliceValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_TextField
+	return vv.WidgetTyp
+}
+
+func (vv *RuneSliceValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	tf := vv.Widget.(*gi.TextField)
+	npv := kit.NonPtrValue(vv.Value)
+	rv, ok := npv.Interface().([]rune)
+	if ok {
+		tf.SetText(string(rv))
+	}
+}
+
+func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	tf := vv.Widget.(*gi.TextField)
+	tf.Tooltip, _ = vv.Tag("desc")
+	tf.SetInactiveState(vv.This.(ValueView).IsInactive())
+	tf.SetStretchMaxWidth()
+	tf.SetProp("min-width", units.NewValue(16, units.Ch))
+	if widthtag, ok := vv.Tag("width"); ok {
+		width, err := strconv.ParseFloat(widthtag, 32)
+		if err == nil {
+			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ch))
+		}
+	}
+	if maxwidthtag, ok := vv.Tag("max-width"); ok {
+		width, err := strconv.ParseFloat(maxwidthtag, 32)
+		if err == nil {
+			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
+		}
+	}
+
+	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.TextFieldDone) {
+			vvv, _ := recv.Embed(KiT_RuneSliceValueView).(*RuneSliceValueView)
+			tf := send.(*gi.TextField)
+			if vvv.SetValue(tf.Text()) {
+				vvv.UpdateWidget() // always update after setting value..
+			}
+		}
+	})
+	vv.UpdateWidget()
+}

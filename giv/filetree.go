@@ -264,8 +264,6 @@ func (fn *FileNode) UpdateNode() error {
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
-		} else {
-			fmt.Printf("not updating non-open dir: %v\n", fn.FPath)
 		}
 	}
 	return nil
@@ -471,7 +469,7 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 	med := []byte("</mark>")
 	medsz := len(med)
 	for scan.Scan() {
-		b := scan.Bytes()
+		b := scan.Bytes() // note: temp -- must copy!
 		if ignoreCase {
 			b = bytes.ToLower(b)
 		}

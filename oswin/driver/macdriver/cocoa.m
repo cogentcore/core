@@ -654,22 +654,26 @@ void getScreens() {
 
 // called during expose or focus
 void menuSetAsMain(ScreenGLView* view) {
+	return;
     NSMenu* men = [view mainMenu];
     [NSApp setMainMenu: men];
 }
 
 uintptr_t doGetMainMenu(uintptr_t viewID) {
+	return (uintptr_t)0;
     ScreenGLView* view = (ScreenGLView*)viewID;
     NSMenu* men = [view mainMenu];
     return (uintptr_t)men;
 }
 
 void doMenuReset(uintptr_t menuID) {
+	return;
     NSMenu* men  = (NSMenu*)menuID;
     [men removeAllItems];
 }
 
 uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
+	return (uintptr_t)0;
     NSMenu* men  = (NSMenu*)menuID;
     NSString* title = [[NSString alloc] initWithUTF8String:mnm];
     
@@ -681,6 +685,7 @@ uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
 }
 
 uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag, bool active) {
+	return (uintptr_t)0;
     ScreenGLView* view = (ScreenGLView*)viewID;
     NSMenu* subm  = (NSMenu*)submID;
     MenuDelegate* md = [view menuDel];
@@ -715,12 +720,14 @@ uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* s
 }
 
 void doAddSeparator(uintptr_t menuID) {
+	return;
     NSMenu* menu  = (NSMenu*)menuID;
     NSMenuItem* sep = [NSMenuItem separatorItem];
     [menu addItem: sep];
 }
 
 uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm) {
+	return (uintptr_t)0;
     NSMenu* men  = (NSMenu*)menuID;
     NSString* title = [[NSString alloc] initWithUTF8String:mnm];
     NSMenuItem* mi = [men itemWithTitle:title];
@@ -728,12 +735,14 @@ uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm) {
 }
 
 uintptr_t doMenuItemByTag(uintptr_t menuID, int tag) {
+	return (uintptr_t)0;
     NSMenu* men  = (NSMenu*)menuID;
     NSMenuItem* mi = [men itemWithTag:tag];
     return (uintptr_t)mi;
 }
 
 void doSetMenuItemActive(uintptr_t mitmID, bool active) {
+	return;
     NSMenuItem* mi  = (NSMenuItem*)mitmID;
     mi.enabled = active;
 }

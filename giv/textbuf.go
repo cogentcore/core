@@ -1250,6 +1250,9 @@ func (tb *TextBuf) PrevLineIndent(ln int, tabSz int) (n int, spc bool, txt strin
 		}
 		n, spc = tb.LineIndent(ln, tabSz)
 		txt = strings.TrimSpace(string(tb.Lines[ln]))
+		if cmidx := strings.Index(txt, "// "); cmidx > 0 {
+			txt = strings.TrimSpace(txt[:cmidx])
+		}
 		return
 	}
 	return 0, false, ""

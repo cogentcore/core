@@ -1530,7 +1530,7 @@ func (tx *TextRender) SpanPosToRuneIdx(si, ri int) (idx int, ok bool) {
 		if ri < len(sr.Render) {
 			return idx + ri, true
 		}
-		return idx + len(sr.Render), false
+		return idx + (len(sr.Render) - 1), false
 	}
 	return 0, false
 }

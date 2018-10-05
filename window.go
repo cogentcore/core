@@ -140,7 +140,7 @@ type Window struct {
 	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	GoLoop           bool                                    `json:"-" xml:"-" desc:"true if we are running from GoStartEventLoop -- requires a WinWait.Done at end"`
 	stopEventLoop    bool
-	publishing       int32 // atomic protect around publish
+	updating         int32 // atomic flag around global updating -- routines can check IsUpdating and bail
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -625,12 +625,14 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		w.UpMu.Unlock()
 		return
 	}
+	w.SetUpdating()
 	pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
+	w.ClearUpdating()
 	w.UpMu.Unlock()
 }
 
@@ -645,6 +647,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 		w.UpMu.Unlock()
 		return
 	}
+	w.SetUpdating()
 	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
 	if Render2DTrace {
@@ -652,6 +655,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	}
 	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
+	w.ClearUpdating()
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives publish
 }
@@ -668,6 +672,7 @@ func (w *Window) UploadAllViewports() {
 		w.UpMu.Unlock()
 		return
 	}
+	w.SetUpdating()
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace {
@@ -700,20 +705,27 @@ func (w *Window) UploadAllViewports() {
 		}
 	}
 	pr.End()
+	w.ClearUpdating()
 	w.UpMu.Unlock()   // need to unlock before publish
 	w.UpdateEnd(updt) // drives the publish
 }
 
-// TryPublishing checks if we are already publishing -- if so, returns false else
-// marks that we are going to publish and thus prevents others -- all atomic.
-func (w *Window) TryPublishing() bool {
-	return atomic.CompareAndSwapInt32(&w.publishing, 0, 1)
+// IsUpdating checks if we are already updating
+func (w *Window) IsUpdating() bool {
+	if atomic.LoadInt32(&w.updating) > 0 {
+		return true
+	}
+	return false
 }
 
-// ClearPublishing clears the publishing flag atomically -- shouldn't fail but
-// returns false if not actually publishing
-func (w *Window) ClearPublishing() bool {
-	return atomic.CompareAndSwapInt32(&w.publishing, 1, 0)
+// SetUpdating sets the updating state to true if not already updating
+func (w *Window) SetUpdating() bool {
+	return atomic.CompareAndSwapInt32(&w.updating, 0, 1)
+}
+
+// ClearUpdating sets the updating state to false if not already updating
+func (w *Window) ClearUpdating() bool {
+	return atomic.CompareAndSwapInt32(&w.updating, 1, 0)
 }
 
 // Publish does the final step of updating of the window based on the current
@@ -732,6 +744,7 @@ func (w *Window) Publish() {
 		w.UpMu.Unlock()
 		return
 	}
+	w.SetUpdating()
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
@@ -742,8 +755,8 @@ func (w *Window) Publish() {
 	pr2 := prof.Start("win.Publish.Publish")
 	w.OSWin.Publish()
 	pr2.End()
+	w.ClearUpdating()
 	w.UpMu.Unlock()
-	// w.ClearPublishing()
 }
 
 // SignalWindowPublish is the signal receiver function that publishes the

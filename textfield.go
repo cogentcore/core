@@ -689,6 +689,9 @@ func TextFieldBlink() {
 		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
 			continue
 		}
+		if win.IsUpdating() {
+			continue
+		}
 		tf.BlinkOn = !tf.BlinkOn
 		tf.RenderCursor(tf.BlinkOn)
 	}
