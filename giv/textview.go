@@ -254,7 +254,9 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 	if buf != nil && tv.Buf == buf {
 		return
 	}
+	had := false
 	if tv.Buf != nil {
+		had = true
 		tv.Buf.DeleteView(tv)
 	}
 	tv.Buf = buf
@@ -267,9 +269,14 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 			tv.PosHistIdx = bhl - 1
 		}
 	}
-	tv.LayoutAllLines(false)
-	tv.SetFullReRender()
-	tv.UpdateSig()
+	if !had { // needs one full rebuild with a file..
+		tv.LayoutAllLines(false)
+		tv.SetFullReRender()
+		tv.UpdateSig()
+	} else {
+		tv.Refresh()
+		tv.SetCursorShow(tv.CursorPos)
+	}
 }
 
 // LinesInserted inserts new lines of text and reformats them
@@ -320,10 +327,9 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufNew:
 		tv.ResetState()
 		// tv.SetFullReRender()
-		// tv.SetCursorShow(tv.CursorPos)
 		// tv.UpdateSig()
-		fmt.Printf("new text, cursor pos: %v\n", tv.CursorPos)
 		tv.Refresh()
+		tv.SetCursorShow(tv.CursorPos)
 	case TextBufInsert:
 		if tv.Renders == nil { // not init yet
 			return
@@ -1758,7 +1764,7 @@ func (tv *TextView) CompleteText(s string) {
 	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
 	var tbes string
 	tbe := tv.Buf.Region(st, en)
-	if (tbe != nil) {
+	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
 
@@ -2696,6 +2702,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.CloseCompleter()
 	}
 
+	if kf != gi.KeyFunRecenter { // always start at centering
+		tv.lastRecenter = 0
+	}
+
 	gotTabAI := false // got auto-indent tab this time
 
 	// first all the keys that work for both inactive and active
@@ -2752,6 +2762,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndDoc()
+	case gi.KeyFunRecenter:
+		kt.SetProcessed()
+		tv.CloseCompleter()
+		tv.CursorRecenter()
 	case gi.KeyFunSelectMode:
 		cancelAll()
 		kt.SetProcessed()
@@ -2847,10 +2861,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.OfferComplete(force)
-	case gi.KeyFunRecenter:
-		kt.SetProcessed()
-		tv.CloseCompleter()
-		tv.CursorRecenter()
 	case gi.KeyFunEnter:
 		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {

@@ -473,14 +473,9 @@ func (w *Window) Closed() {
 		w.UpMu.Unlock()
 		return
 	}
-	if w.WinTex != nil {
-		w.WinTex.Release()
-		w.WinTex = nil
-	}
-	if w.OverTex != nil {
-		w.OverTex.Release()
-		w.OverTex = nil
-	}
+	// these are managed by the window itself
+	w.WinTex = nil
+	w.OverTex = nil
 	if w.OverlayVp != nil {
 		w.OverlayVp.Destroy()
 		w.OverlayVp = nil

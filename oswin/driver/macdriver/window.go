@@ -62,6 +62,10 @@ type windowImpl struct {
 	// bind to a texture's Framebuffer or when the window size changes.
 	backBufferBound bool
 
+	// textures are the textures created for this window -- they are released
+	// when the window is closed
+	textures []*textureImpl
+
 	// sizeMu protects the setting of Sz based on window resize events. If you
 	// need to hold both glctxMu and sizeMu, the lock ordering is to lock
 	// glctxMu first (and unlock it last).
@@ -433,5 +437,8 @@ func (w *windowImpl) CloseClean() {
 }
 
 func (w *windowImpl) Close() {
+	for _, t := range w.textures {
+		t.Release()
+	}
 	closeWindow(w.id)
 }

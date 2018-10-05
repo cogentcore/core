@@ -117,6 +117,8 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
 	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
+	w.textures = append(w.textures, t)
+
 	return t, nil
 }
 
