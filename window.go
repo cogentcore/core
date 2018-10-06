@@ -993,7 +993,7 @@ mainloop:
 		if lastWinMenuUpdate != WinNewCloseTime {
 			if et != oswin.WindowEvent && et != oswin.WindowResizeEvent &&
 				et != oswin.WindowPaintEvent {
-				// w.MainMenuUpdateWindows()
+				w.MainMenuUpdateWindows()
 				lastWinMenuUpdate = WinNewCloseTime
 				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 			}
