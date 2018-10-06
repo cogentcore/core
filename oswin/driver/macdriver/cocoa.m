@@ -309,9 +309,9 @@ void menuSetAsMain(ScreenGLView* view);
   //		[self.menuDel release];
   //		self.menuDel = NULL;
 		//}
+    [self.window.nextResponder release];
+    self.window.nextResponder = NULL;
     windowClosing((GoUintptr)self);
-    // [self.window.nextResponder release];
-    // self.window.nextResponder = NULL;
 }
 
 - (NSMenu*) mainMenu {
@@ -384,7 +384,8 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
             NSWindow* window = NULL;
   
             if (dialog || tool) {
-                window = [[NSPanel alloc] initWithContentRect:rect
+                // note: was NSPanel here below -- but maybe was causing crashing:
+                window = [[NSWindow alloc] initWithContentRect:rect
                                                     styleMask:NSWindowStyleMaskTitled
                                                       backing:NSBackingStoreBuffered
                                                         defer:NO];
@@ -535,7 +536,7 @@ void doMinimizeWindow(uintptr_t viewID) {
 }
 
 void startDriver() {
-    [NSAutoreleasePool new];
+ // [NSAutoreleasePool new];
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     AppDelegate* delegate = [[AppDelegate alloc] init];

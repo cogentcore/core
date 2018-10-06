@@ -103,16 +103,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * fileview keyboard shortcuts: page up / down (tableview), history prev = go up dir?  history next = go to next in history list?  or just pop up history list probably.  maybe command-uparrow = up dir?  Need something intuitive there.  also a cancel?  esc takes a few to actually cancel..
 
 * TextView:
-	+ cursor-up sometimes not going up -- gets stuck..
 	+ clipboard history
 	+ still some wordwrap issues with tabs.  grr.
-	+ newline in middle of text sets cursor to 1 in from left -- should be at 0 -- is initially -- seems to eliminate initial space and that is the problem.  if enter at non-space it is fine.
 	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ cursor goes to hand for links in TextView
 
 * Splitview: 
 	+ gide resize textview not re-drawing  (still?)
 
+* sliceinlineview -- not passing inactive onto its constituent elements.  check for other inline etc views.	
+	
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.
 

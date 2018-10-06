@@ -35,6 +35,8 @@ func (t *textureImpl) Release() {
 	t.w.glctxMu.Lock()
 	defer t.w.glctxMu.Unlock()
 
+	t.w.DeleteTexture(t)
+
 	if t.fb.Value != 0 {
 		t.w.glctx.DeleteFramebuffer(t.fb)
 		t.fb = gl.Framebuffer{}

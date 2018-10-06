@@ -25,6 +25,9 @@ import (
 //
 // When specifying a sub-Texture via Draw, a Texture's top-left pixel is always
 // (0, 0) in its own coordinate space.
+//
+// Windows keep track of all textures created for them, and will Release() them
+// if they haven't previously been released, when the window is Release()'d
 type Texture interface {
 	// Release releases the Texture's resources, after all pending uploads and
 	// draws resolve.

@@ -325,10 +325,11 @@ func windowClosing(id uintptr) {
 		return
 	}
 	fmt.Printf("windowClosing: %v\n", id)
+	// we have already done this in w.Close()
 	// note: this is the common final path of all window closes
-	w.winClose <- struct{}{} // break out of draw loop
-	w.CloseClean()
-	sendWindowEvent(w, window.Close)
+	// w.winClose <- struct{}{} // break out of draw loop
+	// w.CloseClean()
+	// sendWindowEvent(w, window.Close)
 	theApp.DeleteWin(w.id)
 	if theApp.quitting {
 		// fmt.Printf("win: %v quit closing\n", w.Nm)
