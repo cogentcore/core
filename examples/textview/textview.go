@@ -5,15 +5,16 @@
 package main
 
 import (
+	"go/token"
+	"log"
+	"os/exec"
+
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
-	"go/token"
-	"log"
-	"os/exec"
 )
 
 var samplefile gi.FileName = "sample.in"
@@ -75,7 +76,6 @@ func mainrun() {
 	txly1.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
-	txed1.HiStyle = "emacs"
 	txed1.Opts.LineNos = true
 	txed1.Opts.Completion = true
 	txed1.SetCompleter(txed1, CompleteGocode, CompleteEdit)
@@ -88,14 +88,14 @@ func mainrun() {
 	txly2.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 	txed2 := txly2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
-	txed2.HiStyle = "emacs"
 
 	txbuf := giv.NewTextBuf()
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 
+	txbuf.Hi.Lang = "Go"
+	txbuf.Hi.Style = "emacs"
 	txbuf.Open(samplefile)
-	txbuf.HiLang = "Go"
 
 	// main menu
 	appnm := oswin.TheApp.Name()

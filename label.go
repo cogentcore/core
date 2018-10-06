@@ -181,9 +181,9 @@ func (lb *Label) OpenLink(tl *TextLink) {
 			if TextLinkHandler(*tl) {
 				return
 			}
-			if URLHandler != nil {
-				URLHandler(tl.URL)
-			}
+		}
+		if URLHandler != nil {
+			URLHandler(tl.URL)
 		}
 		return
 	}

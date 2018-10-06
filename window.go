@@ -400,6 +400,9 @@ func (w *Window) ZoomDPI(steps int) {
 	cldpinet := sc.LogicalDPI
 	cldpi := cldpinet / ZoomFactor
 	nldpinet := cldpinet + float32(6*steps)
+	if nldpinet < 6 {
+		nldpinet = 6
+	}
 	ZoomFactor = nldpinet / cldpi
 	Prefs.ApplyDPI()
 	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, ZoomFactor)

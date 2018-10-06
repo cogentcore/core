@@ -184,12 +184,25 @@ var DefaultIconSet *IconSet
 // changed to whatever you want
 var CurIconSet *IconSet
 
-func (iset *IconSet) OpenDefaultIcons() error {
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
+// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
+// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
+func SrcDir(dir string) (absDir string, err error) {
+	for _, srcDir := range build.Default.SrcDirs() {
+		absDir = filepath.Join(srcDir, dir)
+		finfo, err := os.Stat(absDir)
+		if err == nil && finfo.IsDir() {
+			return absDir, nil
+		}
 	}
-	path := filepath.Join(gopath, "src/github.com/goki/gi/icons")
+	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
+}
+
+func (iset *IconSet) OpenDefaultIcons() error {
+	path, err := SrcDir("github.com/goki/gi/icons")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 	// fmt.Printf("loading default icons: %v\n", path)
 	rval := iset.OpenIconsFromPath(path)
 	// tstpath := filepath.Join(gopath, "src/github.com/goki/gi/icons_svg_test")
