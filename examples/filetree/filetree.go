@@ -168,7 +168,7 @@ func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
 // ViewFileNode sets the next text view to view file in given node (opens
 // buffer if not already opened)
 func (fb *FileBrowse) ViewFileNode(fn *giv.FileNode) {
-	if err := fn.OpenBuf(); err == nil {
+	if _, err := fn.OpenBuf(); err == nil {
 		nv, nidx := fb.NextTextView()
 		if nv.Buf != nil && nv.Buf.Changed { // todo: save current changes?
 			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buf.Filename)
