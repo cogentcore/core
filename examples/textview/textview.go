@@ -78,7 +78,7 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.Opts.LineNos = true
 	txed1.Opts.Completion = true
-	txed1.SetCompleter(txed1, CompleteGocode, CompleteEdit)
+	txed1.SetCompleter(txed1, Complete, CompleteEdit)
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
@@ -124,15 +124,15 @@ func mainrun() {
 	win.StartEventLoop()
 }
 
-// CompleteGocode uses github.com/mdempsky/gocode to do code completion
-func CompleteGocode(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+// Complete uses a combination of AST and github.com/mdempsky/gocode to do code completion
+func Complete(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
 	var txbuf *giv.TextBuf
 	switch t := data.(type) {
 	case *giv.TextView:
 		txbuf = t.Buf
 	}
 	if txbuf == nil {
-		log.Printf("complete.CompleteGocode: txbuf is nil - can't do code completion\n")
+		log.Printf("complete.Complete: txbuf is nil - can't do code completion\n")
 		return
 	}
 
@@ -143,15 +143,7 @@ func CompleteGocode(data interface{}, text string, pos token.Position) (matches 
 		textbytes = append(textbytes, []byte(string(lr))...)
 		textbytes = append(textbytes, '\n')
 	}
-
-	// check first for file level declarations, import, const, type, var, func
-	// by parsing the file to create AST - if none returned let gocode have a try
-	var results []complete.Completion
-	results = complete.FirstPassComplete(textbytes, pos)
-	if len(results) == 0 { // no, continue on with gocode parsing which doesn't handle the file level decls
-		results = complete.GetCompletions(textbytes, pos)
-	}
-
+	results := complete.Complete(textbytes, pos)
 	matches = complete.MatchSeedCompletion(results, seed)
 	return matches, seed
 }
