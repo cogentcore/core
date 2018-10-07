@@ -400,6 +400,9 @@ func (w *Window) ZoomDPI(steps int) {
 	cldpinet := sc.LogicalDPI
 	cldpi := cldpinet / ZoomFactor
 	nldpinet := cldpinet + float32(6*steps)
+	if nldpinet < 6 {
+		nldpinet = 6
+	}
 	ZoomFactor = nldpinet / cldpi
 	Prefs.ApplyDPI()
 	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, ZoomFactor)
@@ -990,7 +993,7 @@ mainloop:
 		if lastWinMenuUpdate != WinNewCloseTime {
 			if et != oswin.WindowEvent && et != oswin.WindowResizeEvent &&
 				et != oswin.WindowPaintEvent {
-				// w.MainMenuUpdateWindows()
+				w.MainMenuUpdateWindows()
 				lastWinMenuUpdate = WinNewCloseTime
 				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 			}

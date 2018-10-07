@@ -90,6 +90,9 @@ func (sv *SliceViewInline) ConfigParts() {
 		})
 		widg := sv.Parts.KnownChild(i).(gi.Node2D)
 		vv.ConfigWidget(widg)
+		if sv.IsInactive() {
+			widg.AsNode2D().SetInactive()
+		}
 	}
 	if !sv.IsArray {
 		adack, ok := sv.Parts.Children().ElemFromEnd(1)

@@ -64,9 +64,9 @@ uint64 threadID() {
     BOOL _reallyClose;
 }
 
-@property (nonatomic, assign) MenuDelegate* menuDel;
-@property (nonatomic, assign) NSMenu* mainMenu;
-@property (nonatomic, assign) BOOL reallyClose;
+@property (atomic, retain) MenuDelegate* menuDel;
+@property (atomic, retain) NSMenu* mainMenu;
+@property (atomic, assign) BOOL reallyClose;
 
 @end
 
@@ -75,8 +75,8 @@ uint64 threadID() {
     NSMenu* _mainMenu;
 }
 
-@property (nonatomic, assign) ScreenGLView *view;
-@property (nonatomic, assign) NSMenu *mainMenu;
+@property (atomic, retain) ScreenGLView *view;
+@property (atomic, retain) NSMenu *mainMenu;
 
 @end
 
@@ -302,31 +302,27 @@ void menuSetAsMain(ScreenGLView* view);
 
 - (void)windowWillClose:(NSNotification *)notification {
 	// if(self.mainMenu != NULL) {
-  //		[self.mainMenu release];
-  // 		self.mainMenu = NULL;
-	//}
-	//if(self.menuDel != NULL) {
-  //		[self.menuDel release];
-  //		self.menuDel = NULL;
-		//}
+	// 	self.mainMenu = NULL;
+	// }
+	// if(self.menuDel != NULL) {
+	// 	self.menuDel = NULL;
+	// }
+	if (self.window.nextResponder != NULL) {
+  		[self.window.nextResponder release];
+  		self.window.nextResponder = NULL;
+ 	}
     windowClosing((GoUintptr)self);
-    // [self.window.nextResponder release];
-    // self.window.nextResponder = NULL;
 }
 
-- (NSMenu*) mainMenu {
-    if (_mainMenu == NULL) {
-        _mainMenu = [[NSMenu alloc] init];
-        _menuDel = [[MenuDelegate alloc] init];
-        [_menuDel setView: self];
-        [_menuDel setMainMenu: _mainMenu];
-        [_mainMenu setAutoenablesItems:NO];
-    }
-    return _mainMenu;
-}
-
-- (void)setMainMenu: (NSMenu*) men {
-    _mainMenu = men;
+- (NSMenu*) newMainMenu {
+	NSMenu* mm = [[NSMenu alloc] init];
+	self.mainMenu = mm; // does retain
+	MenuDelegate* md = [[MenuDelegate alloc] init];
+	self.menuDel = md; // does retain
+	[md setView: self];
+ 	[md setMainMenu: mm];
+ 	[mm setAutoenablesItems:NO];
+	return mm;
 }
 
 @end
@@ -436,6 +432,7 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
             fr.origin.y = b;
             [window setFrame:fr display:YES animate:NO];
 
+			  [name release];
         });
 
     return (uintptr_t)view;
@@ -445,6 +442,7 @@ void doUpdateTitle(uintptr_t viewID, char* title) {
     NSString* nst = [[NSString alloc] initWithUTF8String:title];
     ScreenGLView* view = (ScreenGLView*)viewID;
     [view.window setTitle:nst];
+	[nst release];
 }
 
 void doShowWindow(uintptr_t viewID) {
@@ -508,7 +506,7 @@ void doGeomWindow(uintptr_t viewID, int left, int top, int width, int height) {
     
 void doCloseWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
-	 printf("doCloseWindow: %ld\n", viewID);
+	//  printf("doCloseWindow: %ld\n", viewID);
     view.reallyClose = YES;
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window performClose:view];
@@ -534,12 +532,25 @@ void doMinimizeWindow(uintptr_t viewID) {
         });
 }
 
+void monitorEvents() {
+	[NSEvent addLocalMonitorForEventsMatchingMask:
+	// (NSEventAppKitDefined | NSEventMaskSystemDefined | NSMaskCursorUpdate)
+	(NSEventMaskAny & ~(1 << NSEventTypeMouseMoved))
+	handler:^(NSEvent *incomingEvent) {
+		NSEvent *result = incomingEvent;
+		NSWindow *win = [incomingEvent window];
+		printf("ev: %ld  win: %ld  nm: %s\n",  (unsigned long)result.type, (long)win, (char*)[win.title UTF8String]);
+		return result;
+	}];
+}
+
 void startDriver() {
-    [NSAutoreleasePool new];
+ // [NSAutoreleasePool new];
     [NSApplication sharedApplication];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
     AppDelegate* delegate = [[AppDelegate alloc] init];
     [NSApp setDelegate:delegate];
+	// monitorEvents();
     [NSApp run];
 }
 
@@ -654,38 +665,40 @@ void getScreens() {
 
 // called during expose or focus
 void menuSetAsMain(ScreenGLView* view) {
-	return;
-    NSMenu* men = [view mainMenu];
-    [NSApp setMainMenu: men];
+	NSMenu* men = [view mainMenu];
+	if (men != NULL) {
+  		[NSApp setMainMenu: men];
+	}
 }
 
 uintptr_t doGetMainMenu(uintptr_t viewID) {
-	return (uintptr_t)0;
-    ScreenGLView* view = (ScreenGLView*)viewID;
-    NSMenu* men = [view mainMenu];
-    return (uintptr_t)men;
+	ScreenGLView* view = (ScreenGLView*)viewID;
+	NSMenu* men = [view mainMenu];
+	if (men == NULL) {
+		men = [view newMainMenu];
+	}
+	return (uintptr_t)men;
 }
 
 void doMenuReset(uintptr_t menuID) {
-	return;
     NSMenu* men  = (NSMenu*)menuID;
     [men removeAllItems];
 }
 
 uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
-	return (uintptr_t)0;
-    NSMenu* men  = (NSMenu*)menuID;
-    NSString* title = [[NSString alloc] initWithUTF8String:mnm];
+   NSMenu* men  = (NSMenu*)menuID;
+   NSString* title = [[NSString alloc] initWithUTF8String:mnm];
     
-    NSMenuItem* smen = [men addItemWithTitle:title action:nil keyEquivalent: @""];
-    NSMenu* ssmen = [[NSMenu alloc] initWithTitle:title];
-    smen.submenu = ssmen;
-    [ssmen setAutoenablesItems:NO];
-    return (uintptr_t)ssmen;
+   NSMenuItem* smen = [men addItemWithTitle:title action:nil keyEquivalent: @""];
+   NSMenu* ssmen = [[NSMenu alloc] initWithTitle:title];
+   smen.submenu = ssmen;
+   [ssmen setAutoenablesItems:NO];
+	[title release];
+	[ssmen release]; // really?
+   return (uintptr_t)ssmen;
 }
 
 uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag, bool active) {
-	return (uintptr_t)0;
     ScreenGLView* view = (ScreenGLView*)viewID;
     NSMenu* subm  = (NSMenu*)submID;
     MenuDelegate* md = [view menuDel];
@@ -716,33 +729,32 @@ uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* s
             mi.keyEquivalentModifierMask = NSEventModifierFlagControl;
         }
     }
+	[title release];
+	[scut release];
     return (uintptr_t)mi;
 }
 
 void doAddSeparator(uintptr_t menuID) {
-	return;
     NSMenu* menu  = (NSMenu*)menuID;
     NSMenuItem* sep = [NSMenuItem separatorItem];
     [menu addItem: sep];
 }
 
 uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm) {
-	return (uintptr_t)0;
     NSMenu* men  = (NSMenu*)menuID;
     NSString* title = [[NSString alloc] initWithUTF8String:mnm];
     NSMenuItem* mi = [men itemWithTitle:title];
+	[title release];
     return (uintptr_t)mi;
 }
 
 uintptr_t doMenuItemByTag(uintptr_t menuID, int tag) {
-	return (uintptr_t)0;
     NSMenu* men  = (NSMenu*)menuID;
     NSMenuItem* mi = [men itemWithTag:tag];
     return (uintptr_t)mi;
 }
 
 void doSetMenuItemActive(uintptr_t mitmID, bool active) {
-	return;
     NSMenuItem* mi  = (NSMenuItem*)mitmID;
     mi.enabled = active;
 }
@@ -768,6 +780,7 @@ bool pasteIsEmpty(NSPasteboard* pb) {
     NSDictionary *options = [NSDictionary dictionary];
     NSArray *classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
     bool has = [pb canReadObjectForClasses:classes options:options];
+	[classes release];
     return !has;
 }
 
@@ -787,7 +800,7 @@ void pasteReadText(NSPasteboard* pb) {
         }
     }
     [classes release];
-    [itms release];
+    // [itms release]; // we do NOT own this!
 }
 
 // not using / tested yet: just grabbed from Qt..
@@ -813,7 +826,7 @@ void pasteReadHTML(NSPasteboard* pb, char* typ, int len) {
         }
     }
     [classes release];
-    [itms release];
+    // [itms release];
 }
 
 static NSMutableArray *pasteWriteItems = NULL;
@@ -825,10 +838,12 @@ void pasteWriteAddText(char* data, int len) {
 
     if(pasteWriteItems == NULL) {
         pasteWriteItems = [NSMutableArray array];
+		 [pasteWriteItems retain];
     }
     
     ns_clip = [[NSString alloc] initWithBytes:data length:len encoding:NSUTF8StringEncoding];
     [pasteWriteItems addObject:ns_clip];
+	[ns_clip release]; // pastewrite owns
 }	
 
 void pasteWrite(NSPasteboard* pb) {
@@ -836,6 +851,7 @@ void pasteWrite(NSPasteboard* pb) {
         return;
     }
     [pb writeObjects: pasteWriteItems];
+	[pasteWriteItems release];
     pasteWriteItems = NULL;
 }	
 
@@ -872,6 +888,7 @@ void clipClear() {
     }
     [pb clearContents];
     if(pasteWriteItems != NULL) {
+		 [pasteWriteItems release];
         pasteWriteItems = NULL;
     }
 }

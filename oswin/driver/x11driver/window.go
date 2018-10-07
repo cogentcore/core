@@ -14,6 +14,7 @@ package x11driver
 // TODO: implement a back buffer.
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -47,6 +48,10 @@ type windowImpl struct {
 
 	event.Deque
 	xevents chan xgb.Event
+
+	// textures are the textures created for this window -- they are released
+	// when the window is closed
+	textures map[*textureImpl]struct{}
 
 	// This next group of variables are mutable, but are only modified in the
 	// appImpl.run goroutine.
@@ -426,32 +431,58 @@ func (w *windowImpl) CloseClean() {
 	}
 }
 
+func (w *windowImpl) AddTexture(t *textureImpl) {
+	if w.textures == nil {
+		w.textures = make(map[*textureImpl]struct{})
+	}
+	w.textures[t] = struct{}{}
+}
+
+// DeleteTexture just deletes it from our list -- does not Release -- is called during t.Release
+func (w *windowImpl) DeleteTexture(t *textureImpl) {
+	if w.textures == nil {
+		return
+	}
+	delete(w.textures, t)
+}
+
+func (w *windowImpl) closeRelease() {
+	w.CloseClean()
+	sendWindowEvent(w, window.Close)
+	render.FreePicture(w.app.xc, w.xp)
+	xproto.FreeGC(w.app.xc, w.xg)
+	if w.textures != nil {
+		for t, _ := range w.textures {
+			t.Release() // deletes from map
+		}
+	}
+}
+
 func (w *windowImpl) Close() {
 	w.mu.Lock()
 	released := w.released
 	w.released = true
 	w.mu.Unlock()
 
+	fmt.Printf("w Close(): %v  released: %v\n", w.Nm, released)
+
 	if !released {
-		render.FreePicture(w.app.xc, w.xp)
-		xproto.FreeGC(w.app.xc, w.xg)
+		w.closeRelease()
 	}
 	xproto.DestroyWindow(w.app.xc, w.xw)
 }
 
 func (w *windowImpl) closed() {
 	// note: this is the final common path for all window closes
-	w.CloseClean()
-	sendWindowEvent(w, window.Close)
-
 	w.mu.Lock()
 	released := w.released
 	w.released = true
 	w.mu.Unlock()
 
+	fmt.Printf("w closed(): %v  released: %v\n", w.Nm, released)
+
 	if !released {
-		render.FreePicture(w.app.xc, w.xp)
-		xproto.FreeGC(w.app.xc, w.xg)
+		w.closeRelease()
 	}
 
 	w.app.DeleteWin(w.xw)

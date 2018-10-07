@@ -1209,14 +1209,14 @@ func (tv *TextView) Undo() {
 	tbe := tv.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
-			tv.SetCursor(tbe.Reg.End)
+			tv.SetCursorShow(tbe.Reg.End)
 		} else {
-			tv.SetCursor(tbe.Reg.Start)
+			tv.SetCursorShow(tbe.Reg.Start)
 		}
+	} else {
+		tv.ScrollCursorToCenterIfHidden()
 	}
-	tv.ScrollCursorToCenterIfHidden()
 	tv.SavePosHistory(tv.CursorPos)
-	tv.RenderCursor(true)
 }
 
 // Redo redoes previously undone action
@@ -1226,14 +1226,14 @@ func (tv *TextView) Redo() {
 	tbe := tv.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
-			tv.SetCursor(tbe.Reg.Start)
+			tv.SetCursorShow(tbe.Reg.Start)
 		} else {
-			tv.SetCursor(tbe.Reg.End)
+			tv.SetCursorShow(tbe.Reg.End)
 		}
+	} else {
+		tv.ScrollCursorToCenterIfHidden()
 	}
-	tv.ScrollCursorToCenterIfHidden()
 	tv.SavePosHistory(tv.CursorPos)
-	tv.RenderCursor(true)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1625,7 +1625,11 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 		tv.Cut()
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true, true)
-	tv.SetCursorShow(tbe.Reg.End)
+	pos := tbe.Reg.End
+	if len(txt) == 1 && txt[0] == '\n' {
+		pos.Ch = 0 // sometimes it doesn't go to the start..
+	}
+	tv.SetCursorShow(pos)
 	tv.SetCursorCol(tv.CursorPos)
 }
 
@@ -2868,9 +2872,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			updt := tv.Viewport.Win.UpdateStart()
 			tv.InsertAtCursor([]byte("\n"))
 			if tv.Opts.AutoIndent {
-				tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				if tbe != nil {
-					tv.SetCursorShow(tbe.Reg.End)
+					tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 			}
 			tv.Viewport.Win.UpdateEnd(updt)
@@ -2904,9 +2908,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
 					if kt.Rune == '}' && tv.Opts.AutoIndent {
-						tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
-							tv.SetCursorShow(tbe.Reg.End)
+							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 						}
 					}
 				}

@@ -64,7 +64,7 @@ type windowImpl struct {
 
 	// textures are the textures created for this window -- they are released
 	// when the window is closed
-	textures []*textureImpl
+	textures map[*textureImpl]struct{}
 
 	// sizeMu protects the setting of Sz based on window resize events. If you
 	// need to hold both glctxMu and sizeMu, the lock ordering is to lock
@@ -436,9 +436,31 @@ func (w *windowImpl) CloseClean() {
 	}
 }
 
-func (w *windowImpl) Close() {
-	for _, t := range w.textures {
-		t.Release()
+func (w *windowImpl) AddTexture(t *textureImpl) {
+	if w.textures == nil {
+		w.textures = make(map[*textureImpl]struct{})
 	}
+	w.textures[t] = struct{}{}
+}
+
+// DeleteTexture just deletes it from our list -- does not Release -- is called during t.Release
+func (w *windowImpl) DeleteTexture(t *textureImpl) {
+	if w.textures == nil {
+		return
+	}
+	delete(w.textures, t)
+}
+
+func (w *windowImpl) Close() {
+	// this is actually the final common pathway for closing here
+	w.winClose <- struct{}{} // break out of draw loop
+	w.CloseClean()
+	sendWindowEvent(w, window.Close)
+	if w.textures != nil {
+		for t, _ := range w.textures {
+			t.Release() // deletes from map
+		}
+	}
+	w.textures = nil
 	closeWindow(w.id)
 }

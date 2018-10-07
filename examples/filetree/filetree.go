@@ -168,12 +168,13 @@ func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
 // ViewFileNode sets the next text view to view file in given node (opens
 // buffer if not already opened)
 func (fb *FileBrowse) ViewFileNode(fn *giv.FileNode) {
-	if err := fn.OpenBuf(); err == nil {
+	if _, err := fn.OpenBuf(); err == nil {
 		nv, nidx := fb.NextTextView()
 		if nv.Buf != nil && nv.Buf.Changed { // todo: save current changes?
 			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buf.Filename)
 		}
 		nv.SetBuf(fn.Buf)
+		fn.Buf.Hi.Style = "emacs" // todo prefs
 		fb.SetActiveTextView(nidx)
 	}
 }
@@ -335,7 +336,6 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txly.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 			txed := txly.AddNewChild(giv.KiT_TextView, fmt.Sprintf("textview-%v", i)).(*giv.TextView)
-			txed.HiStyle = "emacs"   // todo prefs
 			txed.Opts.LineNos = true // todo prefs
 			txed.Opts.AutoIndent = true
 		}

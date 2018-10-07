@@ -106,6 +106,10 @@ func (mv *MapViewInline) ConfigParts() {
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
+		if mv.IsInactive() {
+			widg.AsNode2D().SetInactive()
+			keyw.AsNode2D().SetInactive()
+		}
 	}
 	adack, ok := mv.Parts.Children().ElemFromEnd(1)
 	if ok {
