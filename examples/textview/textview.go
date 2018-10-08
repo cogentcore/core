@@ -17,8 +17,7 @@ import (
 	"github.com/goki/gi/units"
 )
 
-//var samplefile gi.FileName = "sample.in"
-var samplefile gi.FileName = "/Users/rohrlich/go/src/github.com/goki/gi/examples/textview/sample.in"
+var samplefile gi.FileName = "sample.in"
 
 func main() {
 	gimain.Main(func() {
