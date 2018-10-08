@@ -128,7 +128,7 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 		if kcc.HasFocus() && kcc.FocusActive {
 			kt := d.(*key.ChordEvent)
 			kt.SetProcessed()
-			kcc.SetTextAction(string(kt.Chord())) // that's easy!
+			kcc.SetText(string(kt.Chord())) // that's easy!
 			kcc.ChordUpdated()
 		}
 	})

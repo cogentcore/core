@@ -119,6 +119,7 @@ var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
 // SetText sets the text and updates the rendered version
 func (lb *Label) SetText(txt string) {
+	updt := lb.UpdateStart()
 	if lb.Sty.Font.Size.Val == 0 { // not yet styled
 		lb.StyleLabel()
 	}
@@ -137,6 +138,7 @@ func (lb *Label) SetText(txt string) {
 		sz.SetSubVal(2 * spc)
 	}
 	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
+	lb.UpdateEnd(updt)
 }
 
 // Label returns the display label for this node, satisfying the Labeler interface
@@ -145,12 +147,6 @@ func (lb *Label) Label() string {
 		return lb.Text
 	}
 	return lb.Nm
-}
-
-// SetTextAction sets the text and triggers an update action
-func (lb *Label) SetTextAction(txt string) {
-	lb.SetText(txt)
-	lb.UpdateSig()
 }
 
 // SetStateStyle sets the style based on the inactive, selected flags

@@ -1235,8 +1235,8 @@ func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 	} else if n < curli {
 		spos := IndentCharPos(n, tabSz, spc)
 		cpos := IndentCharPos(curli, tabSz, spc)
-		tbe := tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true, true)
-		fmt.Printf("IndentLine deleted: %v at: %v\n", string(tbe.ToBytes()), tbe.Reg)
+		tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true, true)
+		// fmt.Printf("IndentLine deleted: %v at: %v\n", string(tbe.ToBytes()), tbe.Reg)
 	}
 	return nil
 }
