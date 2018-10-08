@@ -1,14 +1,17 @@
 package complete
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
 	"golang.org/x/tools/go/ast/astutil"
 	"log"
+	"os/exec"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -176,9 +179,9 @@ func Funcs() []string {
 	return funcs
 }
 
-// FirstPassComplete handles some cases of completion that gocode either
+// FirstPass handles some cases of completion that gocode either
 // doesn't handle or doesn't do well - this will be expanded to more cases
-func FirstPassComplete(bytes []byte, pos token.Position) []Completion {
+func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 	var completions []Completion
 
 	src := string(bytes)
@@ -192,11 +195,20 @@ func FirstPassComplete(bytes []byte, pos token.Position) []Completion {
 	end := start
 	path, _ := astutil.PathEnclosingInterval(f, start, end)
 
+	var stop bool = false // suggestion to caller about continuing to try completing
 	next := true
 	for i := 0; i < len(path) && next == true; i++ {
 		n := path[i]
 		//fmt.Printf("%d\t%T\n", i, n)
 		switch n.(type) {
+		case *ast.GenDecl:
+			gd, ok := n.(*ast.GenDecl)
+			if ok {
+				// todo: for now don't complete but we could path complete
+				if gd.Tok == token.IMPORT {
+					return completions, true // return stop
+				}
+			}
 		case *ast.BadDecl:
 			//fmt.Printf("\t%T.Doc\n", n)
 			if i+1 < len(path) {
@@ -221,5 +233,69 @@ func FirstPassComplete(bytes []byte, pos token.Position) []Completion {
 			next = false
 		}
 	}
+	return completions, stop
+}
+
+type candidate struct {
+	Class string `json:"class"`
+	Name  string `json:"name"`
+	Typ   string `json:"type"`
+	Pkg   string `json:"package"`
+}
+
+// SecondPass uses the gocode server to find possible completions at the specified position
+// in the src (i.e. the byte slice passed in)
+// bytes should be the current in memory version of the file
+func SecondPass(bytes []byte, pos token.Position) []Completion {
+	var completions []Completion
+
+	offset := pos.Offset
+	offsetString := strconv.Itoa(offset)
+	cmd := exec.Command("gocode", "-f=json", "-builtin", "autocomplete", offsetString)
+	cmd.Stdin = strings.NewReader(string(bytes)) // use current state of file not disk version - may be stale
+	result, _ := cmd.Output()
+	var skip int = -1
+	for i := 0; i < len(result); i++ {
+		if result[i] == 123 { // 123 is 07b is '{'
+			skip = i - 1 // stop when '{' is found
+			break
+		}
+	}
+	if skip != -1 {
+		result = result[skip : len(result)-2] // strip off [N,[ at start (where N is some number) and trailing ]] as well
+		data := make([]candidate, 0)
+		err := json.Unmarshal(result, &data)
+		if err != nil {
+			fmt.Printf("%#v", err)
+		}
+		var icon string
+		for _, aCandidate := range data {
+			switch aCandidate.Class {
+			case "const":
+				icon = "const"
+			case "func":
+				icon = "func"
+			case "package":
+				icon = "package"
+			case "type":
+				icon = "type"
+			case "var":
+				icon = "var"
+			default:
+				icon = "blank"
+			}
+			comp := Completion{Text: aCandidate.Name, Icon: icon}
+			completions = append(completions, comp)
+		}
+	}
 	return completions
+}
+
+func Complete(bytes []byte, pos token.Position) []Completion {
+	var results []Completion
+	results, stop := FirstPass(bytes, pos)
+	if !stop && len(results) == 0 {
+		results = SecondPass(bytes, pos)
+	}
+	return results
 }
