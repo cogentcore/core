@@ -201,9 +201,14 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 		n := path[i]
 		//fmt.Printf("%d\t%T\n", i, n)
 		switch n.(type) {
-		//case *ast.GenDecl:
-		//	next = false // imports or some other case where we return nothing
-		//	stop = true
+		case *ast.GenDecl:
+			gd, ok := n.(*ast.GenDecl)
+			if ok {
+				// todo: for now don't complete but we could path complete
+				if gd.Tok == token.IMPORT {
+					return completions, true // return stop
+				}
+			}
 		case *ast.BadDecl:
 			//fmt.Printf("\t%T.Doc\n", n)
 			if i+1 < len(path) {
@@ -263,26 +268,23 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 		if err != nil {
 			fmt.Printf("%#v", err)
 		}
-		//var icon string
+		var icon string
 		for _, aCandidate := range data {
-			fmt.Println(aCandidate.Class)
-
-			//switch aCandidate.Class {
-			//case "const":
-			//	icon = "m"
-			//case "func":
-			//	icon = "func"
-			//case "package":
-			//	icon = "package"
-			//case "type":
-			//	icon = "type"
-			//case "var":
-			//	icon = "var"
-			//default:
-			//	icon = "m"
-			//}
-			comp := Completion{Text: aCandidate.Name}
-			//fmt.Println(aCandidate.Name)
+			switch aCandidate.Class {
+			case "const":
+				icon = "const"
+			case "func":
+				icon = "func"
+			case "package":
+				icon = "package"
+			case "type":
+				icon = "type"
+			case "var":
+				icon = "var"
+			default:
+				icon = "blank"
+			}
+			comp := Completion{Text: aCandidate.Name, Icon: icon}
 			completions = append(completions, comp)
 		}
 	}
