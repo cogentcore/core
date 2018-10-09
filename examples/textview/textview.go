@@ -150,6 +150,6 @@ func Complete(data interface{}, text string, pos token.Position) (matches comple
 
 // CompleteEdit uses the selected completion to edit the text
 func CompleteEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditWord(text, cursorPos, selection, seed)
+	s, delta = complete.EditCode(text, cursorPos, selection, seed)
 	return s, delta
 }
