@@ -941,6 +941,7 @@ func (w *Window) MainMenuUpdateWindows() {
 	}
 	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
 	if !ok {
+		w.UpMu.Unlock()
 		return
 	}
 	wmen := wmeni.(*Action)
