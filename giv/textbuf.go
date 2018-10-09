@@ -130,6 +130,7 @@ func (tb *TextBuf) Refresh() {
 
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
+	nlines = ints.MaxInt(nlines, 1)
 	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
 	tb.LineBytes = make([][]byte, nlines)
