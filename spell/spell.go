@@ -17,8 +17,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gospell"
-	"github.com/gospell/plaintext"
+	"github.com/client9/gospell"
+	"github.com/client9/gospell/plaintext"
 )
 
 // UnknownWord records one unknown word instance
