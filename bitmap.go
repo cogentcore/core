@@ -32,6 +32,19 @@ var BitmapProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
 }
 
+// OpenImage opens an image for the bitmap, and resizes to that size
+func (bm *Bitmap) OpenImage(filename string) error {
+	img, err := OpenImage(filename)
+	if err != nil {
+		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		return err
+	}
+	sz := img.Bounds().Size()
+	bm.Resize(sz)
+	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.ZP, draw.Src)
+	return nil
+}
+
 // GrabRenderFrom grabs the rendered image from given node -- copies the
 // vpBBox from parent viewport of node (or from viewport directly if node is a
 // viewport) -- returns success
