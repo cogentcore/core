@@ -78,7 +78,7 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.Opts.LineNos = true
 	txed1.Opts.Completion = true
-	txed1.SetCompleter(txed1, Complete, CompleteEdit)
+	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
@@ -125,7 +125,7 @@ func mainrun() {
 }
 
 // Complete uses a combination of AST and github.com/mdempsky/gocode to do code completion
-func Complete(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+func CompleteGo(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
 	var txbuf *giv.TextBuf
 	switch t := data.(type) {
 	case *giv.TextView:
@@ -143,13 +143,13 @@ func Complete(data interface{}, text string, pos token.Position) (matches comple
 		textbytes = append(textbytes, []byte(string(lr))...)
 		textbytes = append(textbytes, '\n')
 	}
-	results := complete.Complete(textbytes, pos)
+	results := complete.CompleteGo(textbytes, pos)
 	matches = complete.MatchSeedCompletion(results, seed)
 	return matches, seed
 }
 
 // CompleteEdit uses the selected completion to edit the text
-func CompleteEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditCode(text, cursorPos, selection, seed)
+func CompleteGoEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
+	s, delta = complete.EditGoCode(text, cursorPos, selection, seed)
 	return s, delta
 }

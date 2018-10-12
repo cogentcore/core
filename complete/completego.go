@@ -298,7 +298,8 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 	return completions
 }
 
-func Complete(bytes []byte, pos token.Position) []Completion {
+// CompleteGo is the function for completing Go code
+func CompleteGo(bytes []byte, pos token.Position) []Completion {
 	var results []Completion
 	results, stop := FirstPass(bytes, pos)
 	if !stop && len(results) == 0 {
@@ -307,9 +308,9 @@ func Complete(bytes []byte, pos token.Position) []Completion {
 	return results
 }
 
-// EditCode replaces the completion seed and any text up to the next whitespace or other go delimiter
+// EditGoCode replaces the completion seed and any text up to the next whitespace or other go delimiter
 // with the selected completion. delta is the change in cursor position (cp).
-func EditCode(text string, cp int, completion string, seed string) (newText string, delta int) {
+func EditGoCode(text string, cp int, completion string, seed string) (newText string, delta int) {
 	s1 := string(text[0:cp])
 	s2 := string(text[cp:])
 
