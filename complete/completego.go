@@ -191,6 +191,13 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 	//}
 
 	start := token.Pos(pos.Offset)
+	linestart := start - token.Pos(pos.Column)
+	linepretext := src[linestart:start]
+	// don't complete inside comment
+	if strings.Contains(linepretext, "//") {
+		return completions, true  // stop
+	}
+
 	end := start
 	path, _ := astutil.PathEnclosingInterval(f, start, end)
 
