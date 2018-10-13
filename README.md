@@ -92,7 +92,11 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * Please file Issues for anything that does not work (except as noted below under TODO)
 
+
+
 # TODO
+
+* diffs revert not updating all the way.. maybe one liners?  really not sure.
 
 * filenode: add a blank icon so things line up.  also ability to sort by date within directories
 

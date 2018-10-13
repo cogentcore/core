@@ -521,6 +521,9 @@ func (tb *TabButton) ConfigParts() {
 		cls.SetProp("no-focus", true)
 		cls.ActionSig.ConnectOnly(tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tbb := recv.Embed(KiT_TabButton).(*TabButton)
+			if !tbb.IsSelected() { // only process delete when already selected
+				return
+			}
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {

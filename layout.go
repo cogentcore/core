@@ -1202,7 +1202,8 @@ func (ly *Layout) RenderScrolls() {
 func (ly *Layout) SetScrollsOff() {
 	for d := X; d < Dims2DN; d++ {
 		if ly.HasScroll[d] {
-			ly.ScrollsOff = false
+			fmt.Printf("turning scroll off for :%v dim: %v\n", ly.PathUnique(), d)
+			ly.ScrollsOff = true
 			ly.HasScroll[d] = false
 			if ly.Scrolls[d] != nil {
 				ly.DeactivateScroll(ly.Scrolls[d])

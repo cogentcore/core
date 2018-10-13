@@ -35,13 +35,25 @@ var BitmapProps = ki.Props{
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
-// or the specified size -- pass 0 for width, height to use the actual image size
+// or the specified size -- pass 0 for width and/or height to use the actual image size
+// for that dimension
 func (bm *Bitmap) OpenImage(filename string, width, height float32) error {
 	img, err := OpenImage(filename)
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
 	}
+	bm.SetImage(img, width, height)
+	return nil
+}
+
+// SetImage sets an image for the bitmap, and resizes to the size of the image
+// or the specified size -- pass 0 for width and/or height to use the actual image size
+// for that dimension
+func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
+	updt := bm.UpdateStart()
+	defer bm.UpdateEnd(updt)
+
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
 		bm.Resize(sz)
@@ -64,13 +76,14 @@ func (bm *Bitmap) OpenImage(filename string, width, height float32) error {
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(bm.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
 	}
-	return nil
 }
 
 // GrabRenderFrom grabs the rendered image from given node -- copies the
 // vpBBox from parent viewport of node (or from viewport directly if node is a
 // viewport) -- returns success
 func (bm *Bitmap) GrabRenderFrom(nii Node2D) bool {
+	updt := bm.UpdateStart()
+	defer bm.UpdateEnd(updt)
 	ni := nii.AsNode2D()
 	nivp := nii.AsViewport2D()
 	if nivp != nil && nivp.Pixels != nil {
