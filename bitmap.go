@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 	"image/draw"
+	_ "image/jpeg"
 	"image/png"
 	"log"
 	"os"
