@@ -195,7 +195,7 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 	linepretext := src[linestart:start]
 	// don't complete inside comment
 	if strings.Contains(linepretext, "//") {
-		return completions, true  // stop
+		return completions, true // stop
 	}
 
 	end := start
@@ -265,7 +265,7 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 
 	offset := pos.Offset
 	offsetString := strconv.Itoa(offset)
-	cmd := exec.Command("gocode", "-f=json", "-builtin", "autocomplete", offsetString)
+	cmd := exec.Command("gocode", "-f=json", "-ignore-case", "-builtin", "autocomplete", offsetString)
 	cmd.Stdin = strings.NewReader(string(bytes)) // use current state of file not disk version - may be stale
 	result, _ := cmd.Output()
 	var skip int = -1

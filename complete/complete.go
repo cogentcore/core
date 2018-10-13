@@ -8,6 +8,7 @@
 package complete
 
 import (
+	"github.com/akutz/sortfold"
 	"go/token"
 	"sort"
 	"strings"
@@ -36,7 +37,12 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 	matches = completions[0:0]
 	match_start := -1
 	match_end := -1
-	sort.Strings(completions)
+
+	// fast case insensitive sort from Andrew Kutz
+	less := func(i, j int) bool {
+		return sortfold.CompareFold(completions[i], completions[j]) < 0
+	}
+	sort.Slice(completions, less)
 
 	if len(seed) == 0 {
 		matches = completions
@@ -47,14 +53,24 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 		if match_end > -1 {
 			break
 		}
+
+		var case_insensitive = true
+		if strings.ContainsAny(seed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+			case_insensitive = false
+		}
+		text := s
+		if case_insensitive {
+			text = strings.ToLower(s)
+		}
+
 		if match_start == -1 {
-			if strings.HasPrefix(s, seed) {
+			if strings.HasPrefix(text, seed) {
 				match_start = i // first match in sorted list
 			}
 			continue
 		}
 		if match_start > -1 {
-			if strings.HasPrefix(s, seed) == false {
+			if strings.HasPrefix(text, seed) == false {
 				match_end = i
 			}
 		}
@@ -77,27 +93,37 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 	match_start := -1
 	match_end := -1
 
-	sort.Slice(completions, func(i, j int) bool {
-		return completions[i].Text < completions[j].Text
-	})
+	// fast case insensitive sort from Andrew Kutz
+	less := func(i, j int) bool {
+		return sortfold.CompareFold(completions[i].Text, completions[j].Text) < 0
+	}
+	sort.Slice(completions, less)
 
 	if len(seed) == 0 {
 		matches = completions
 		return matches
 	}
 
+	var case_insensitive = true
+	if strings.ContainsAny(seed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+		case_insensitive = false
+	}
 	for i, c := range completions {
 		if match_end > -1 {
 			break
 		}
+		text := c.Text
+		if case_insensitive {
+			text = strings.ToLower(text)
+		}
 		if match_start == -1 {
-			if strings.HasPrefix(c.Text, seed) {
+			if strings.HasPrefix(text, seed) {
 				match_start = i // first match in sorted list
 			}
 			continue
 		}
 		if match_start > -1 {
-			if strings.HasPrefix(c.Text, seed) == false {
+			if strings.HasPrefix(text, seed) == false {
 				match_end = i
 			}
 		}
