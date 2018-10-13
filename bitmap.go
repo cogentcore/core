@@ -6,13 +6,15 @@ package gi
 
 import (
 	"image"
-	"image/draw"
+	_ "image/jpeg"
 	"image/png"
 	"log"
 	"os"
 
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"golang.org/x/image/draw"
+	"golang.org/x/image/math/f64"
 )
 
 // bitmap contains various bitmap-related elements, including the Bitmap node
@@ -32,16 +34,36 @@ var BitmapProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
 }
 
-// OpenImage opens an image for the bitmap, and resizes to that size
-func (bm *Bitmap) OpenImage(filename string) error {
+// OpenImage opens an image for the bitmap, and resizes to the size of the image
+// or the specified size -- pass 0 for width, height to use the actual image size
+func (bm *Bitmap) OpenImage(filename string, width, height float32) error {
 	img, err := OpenImage(filename)
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
 	}
 	sz := img.Bounds().Size()
-	bm.Resize(sz)
-	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.ZP, draw.Src)
+	if width <= 0 && height <= 0 {
+		bm.Resize(sz)
+		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.ZP, draw.Src)
+	} else {
+		tsz := sz
+		transformer := draw.BiLinear
+		scx := float32(1)
+		scy := float32(1)
+		if width > 0 {
+			scx = width / float32(sz.X)
+			tsz.X = int(width)
+		}
+		if height > 0 {
+			scy = height / float32(sz.Y)
+			tsz.Y = int(height)
+		}
+		bm.Resize(tsz)
+		m := Scale2D(scx, scy)
+		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
+		transformer.Transform(bm.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
+	}
 	return nil
 }
 
