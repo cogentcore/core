@@ -38,8 +38,12 @@ func (vv *StructValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	npv := kit.NonPtrValue(vv.Value)
-	txt := fmt.Sprintf("%T", npv.Interface())
-	ac.SetText(txt)
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(npv) {
+		ac.SetText("nil")
+	} else {
+		txt := fmt.Sprintf("%T", npv.Interface())
+		ac.SetText(txt)
+	}
 }
 
 func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {

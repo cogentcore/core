@@ -98,7 +98,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * diffs revert not updating all the way.. maybe one liners?  really not sure.
 
-* filenode: add a blank icon so things line up.  also ability to sort by date within directories
+* filenode: ability to sort by date within directories
 
 * crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild
 

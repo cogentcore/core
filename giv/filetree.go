@@ -151,6 +151,14 @@ func (fn *FileNode) IsChanged() bool {
 	return false
 }
 
+// IsAutoSave returns true if file is an auto-save file (starts and ends with #)
+func (fn *FileNode) IsAutoSave() bool {
+	if strings.HasPrefix(fn.Info.Name, "#") && strings.HasSuffix(fn.Info.Name, "#") {
+		return true
+	}
+	return false
+}
+
 // RelPath returns the relative path from root for this node
 func (fn *FileNode) RelPath() string {
 	rpath, err := filepath.Rel(string(fn.FRoot.FPath), string(fn.FPath))
@@ -702,13 +710,18 @@ func (tv *FileTreeView) Style2D() {
 		}
 		tv.SetProp("#branch", fnFolderProps)
 		tv.Class = "folder"
-	} else if fn.IsExec() {
-		tv.Class = "exec"
-	} else if fn.IsOpen() {
-		tv.Class = "open"
 	} else {
-		tv.Class = ""
 		tv.Icon = fn.Info.Ic
+		if tv.Icon == "" || tv.Icon == "none" {
+			tv.Icon = "blank"
+		}
+		if fn.IsExec() {
+			tv.Class = "exec"
+		} else if fn.IsOpen() {
+			tv.Class = "open"
+		} else {
+			tv.Class = ""
+		}
 	}
 	tv.StyleTreeView()
 	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset

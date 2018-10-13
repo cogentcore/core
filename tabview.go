@@ -85,7 +85,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
 		act := send.Embed(KiT_TabButton).(*TabButton)
 		tabIdx := act.Data.(int)
-		tvv.SelectTabIndex(tabIdx)
+		tvv.SelectTabIndexAction(tabIdx)
 	})
 	fr := tv.Frame()
 	if len(fr.Kids) == 1 {
@@ -521,13 +521,14 @@ func (tb *TabButton) ConfigParts() {
 		cls.SetProp("no-focus", true)
 		cls.ActionSig.ConnectOnly(tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			tbb := recv.Embed(KiT_TabButton).(*TabButton)
-			if !tbb.IsSelected() { // only process delete when already selected
-				return
-			}
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {
-				tvv.DeleteTabIndexAction(tabIdx)
+				if tbb.IsSelected() { // only process delete when already selected
+					tvv.DeleteTabIndexAction(tabIdx)
+				} else {
+					tvv.SelectTabIndexAction(tabIdx) // otherwise select
+				}
 			}
 		})
 		tb.UpdateEnd(updt)
