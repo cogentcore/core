@@ -62,7 +62,8 @@ func CheckFile(fullpath string) ([]UnknownWord, error) {
 	}
 
 	if affFile == "" {
-		return unknowns, fmt.Errorf("Unable to load %s. Download dictionaries into /usr/local/share/hunspell", dicts)
+		ur := "https://sourceforge.net/projects/hunspell/files/Spelling%20dictionaries/en_US/"
+		return unknowns, fmt.Errorf("Unable to load %s. Download en_us.zip from \n\n %v \n\n Unzip into %v", dicts, ur, dictPath)
 	}
 
 	log.Printf("Loading %s %s", affFile, dicFile)
