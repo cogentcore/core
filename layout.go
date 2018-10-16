@@ -1057,7 +1057,7 @@ func (ly *Layout) AvailSize() Vec2D {
 
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow() {
-	wasscof := ly.ScrollsOff
+	// wasscof := ly.ScrollsOff
 	ly.ScrollsOff = false
 	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
 		return
@@ -1074,9 +1074,9 @@ func (ly *Layout) ManageOverflow() {
 		for d := X; d < Dims2DN; d++ {
 			odim := OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
-				if wasscof {
-					fmt.Printf("overflow, setting scb: %v\n", d)
-				}
+				// if wasscof {
+				// 	fmt.Printf("overflow, setting scb: %v\n", d)
+				// }
 				ly.HasScroll[d] = true
 				ly.ExtraSize.SetAddDim(odim, sbw)
 			}
@@ -1125,6 +1125,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	sc.ThumbVal = avail.Dim(d) - spc
 	sc.TrackThr = sc.Step
 	sc.Value = Min32(sc.Value, sc.Max-sc.ThumbVal) // keep in range
+	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.PathUnique(), sc.Max, sc.Value)
 	sc.SliderSig.ConnectOnly(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
@@ -1198,11 +1199,19 @@ func (ly *Layout) RenderScrolls() {
 	}
 }
 
+// ReRenderScrolls re-draws the scrollbars de-novo -- can be called ad-hoc by others
+func (ly *Layout) ReRenderScrolls() {
+	if ly.PushBounds() {
+		ly.RenderScrolls()
+		ly.PopBounds()
+	}
+}
+
 // SetScrollsOff turns off the scrolls -- e.g., when layout is not visible
 func (ly *Layout) SetScrollsOff() {
 	for d := X; d < Dims2DN; d++ {
 		if ly.HasScroll[d] {
-			fmt.Printf("turning scroll off for :%v dim: %v\n", ly.PathUnique(), d)
+			// fmt.Printf("turning scroll off for :%v dim: %v\n", ly.PathUnique(), d)
 			ly.ScrollsOff = true
 			ly.HasScroll[d] = false
 			if ly.Scrolls[d] != nil {

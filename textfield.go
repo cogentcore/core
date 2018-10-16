@@ -403,7 +403,7 @@ func (tf *TextField) SelectWord() {
 			}
 			tf.SelectEnd++
 		}
-		for tf.SelectEnd < sz {
+		for tf.SelectEnd < sz { // include all trailing spaces
 			if tf.IsWordBreak(tf.EditTxt[tf.SelectEnd]) {
 				break
 			}

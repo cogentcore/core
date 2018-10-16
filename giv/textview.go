@@ -500,15 +500,19 @@ func (tv *TextView) SetSize() bool {
 	if cursz.X < 10 || cursz.Y < 10 {
 		nwsz := netsz.Max(rndsz)
 		tv.Size2DFromWH(nwsz.X, nwsz.Y)
+		tv.LayData.Size.Need = tv.LayData.AllocSize
+		tv.LayData.Size.Pref = tv.LayData.AllocSize
 		return true
 	}
-	// fmt.Printf("netsz: %v  cursz: %v rndsz: %v\n", netsz, cursz, rndsz)
-	cursz = cursz.Max(rndsz)
-	if netsz.X > cursz.X || netsz.Y > cursz.Y {
-		nwsz := netsz.Max(cursz)
-		tv.Size2DFromWH(nwsz.X, nwsz.Y)
+	nwsz := netsz.Max(rndsz)
+	alloc := tv.LayData.AllocSize
+	tv.Size2DFromWH(nwsz.X, nwsz.Y)
+	if alloc != tv.LayData.AllocSize {
+		tv.LayData.Size.Need = tv.LayData.AllocSize
+		tv.LayData.Size.Pref = tv.LayData.AllocSize
 		return true
 	}
+	// fmt.Printf("NO resize: netsz: %v  cursz: %v rndsz: %v\n", netsz, cursz, rndsz)
 	return false
 }
 
@@ -530,7 +534,9 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		tv.reLayout = true
 		ly.GatherSizes() // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
+		ly.ReRenderScrolls()
 		tv.reLayout = false
+		// fmt.Printf("resized: %v\n", tv.LayData.AllocSize)
 	}
 	return true
 }
@@ -754,6 +760,38 @@ func (tv *TextView) CursorForward(steps int) {
 	tv.CursorSelect(org)
 }
 
+// CursorForwardWord moves the cursor forward by words
+func (tv *TextView) CursorForwardWord(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.ValidateCursor()
+	org := tv.CursorPos
+	for i := 0; i < steps; i++ {
+		txt := tv.Buf.Lines[tv.CursorPos.Ln]
+		sz := len(txt)
+		if sz > 0 && tv.CursorPos.Ch < sz {
+			ch := tv.CursorPos.Ch
+			for ch < sz && tv.IsWordBreak(txt[ch]) { // if on a wb, go past
+				ch++
+			}
+			for ch < sz && !tv.IsWordBreak(txt[ch]) {
+				ch++
+			}
+			tv.CursorPos.Ch = ch
+		} else {
+			if tv.CursorPos.Ln < tv.NLines-1 {
+				tv.CursorPos.Ch = 0
+				tv.CursorPos.Ln++
+			} else {
+				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+			}
+		}
+	}
+	tv.SetCursorCol(tv.CursorPos)
+	tv.SetCursorShow(tv.CursorPos)
+	tv.CursorSelect(org)
+}
+
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
 	updt := tv.Viewport.Win.UpdateStart()
@@ -819,6 +857,38 @@ func (tv *TextView) CursorBackward(steps int) {
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch--
 		if tv.CursorPos.Ch < 0 {
+			if tv.CursorPos.Ln > 0 {
+				tv.CursorPos.Ln--
+				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+			} else {
+				tv.CursorPos.Ch = 0
+			}
+		}
+	}
+	tv.SetCursorCol(tv.CursorPos)
+	tv.SetCursorShow(tv.CursorPos)
+	tv.CursorSelect(org)
+}
+
+// CursorBackwardWord moves the cursor backward by words
+func (tv *TextView) CursorBackwardWord(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.ValidateCursor()
+	org := tv.CursorPos
+	for i := 0; i < steps; i++ {
+		txt := tv.Buf.Lines[tv.CursorPos.Ln]
+		sz := len(txt)
+		if sz > 0 && tv.CursorPos.Ch > 0 {
+			ch := ints.MinInt(tv.CursorPos.Ch, sz-1)
+			for ch > 0 && tv.IsWordBreak(txt[ch]) { // if on a wb, go past
+				ch--
+			}
+			for ch > 0 && !tv.IsWordBreak(txt[ch]) {
+				ch--
+			}
+			tv.CursorPos.Ch = ch
+		} else {
 			if tv.CursorPos.Ln > 0 {
 				tv.CursorPos.Ln--
 				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
@@ -1044,6 +1114,40 @@ func (tv *TextView) CursorDelete(steps int) {
 	// note: no update b/c signal from buf will drive update
 	org := tv.CursorPos
 	tv.CursorForward(steps)
+	tv.Buf.DeleteText(org, tv.CursorPos, true, true)
+	tv.SetCursorShow(org)
+}
+
+// CursorBackspaceWord deletes words(s) immediately before cursor
+func (tv *TextView) CursorBackspaceWord(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.ValidateCursor()
+	org := tv.CursorPos
+	if tv.HasSelection() {
+		tv.DeleteSelection()
+		tv.SetCursorShow(org)
+		return
+	}
+	// note: no update b/c signal from buf will drive update
+	tv.CursorBackwardWord(steps)
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderCursor(true)
+	tv.Buf.DeleteText(tv.CursorPos, org, true, true)
+}
+
+// CursorDeleteWord deletes word(s) immediately after the cursor
+func (tv *TextView) CursorDeleteWord(steps int) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.ValidateCursor()
+	if tv.HasSelection() {
+		tv.DeleteSelection()
+		return
+	}
+	// note: no update b/c signal from buf will drive update
+	org := tv.CursorPos
+	tv.CursorForwardWord(steps)
 	tv.Buf.DeleteText(org, tv.CursorPos, true, true)
 	tv.SetCursorShow(org)
 }
@@ -1491,48 +1595,51 @@ func (tv *TextView) IsWordBreak(r rune) bool {
 	return false
 }
 
-// SelectWord selects the word (whitespace delimited) that the cursor is on
+// SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 func (tv *TextView) SelectWord() {
-	// updt := tv.UpdateStart()
-	// defer tv.UpdateEnd(updt)
-	// sz := len(tv.EditTxt)
-	// if sz <= 3 {
-	// 	tv.SelectAll()
-	// 	return
-	// }
-	// tv.SelectReg.Start = tv.CursorPos
-	// if tv.SelectReg.Start >= sz {
-	// 	tv.SelectReg.Start = sz - 2
-	// }
-	// if !tv.IsWordBreak(tv.EditTxt[tv.SelectReg.Start]) {
-	// 	for tv.SelectReg.Start > 0 {
-	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectReg.Start-1]) {
-	// 			break
-	// 		}
-	// 		tv.SelectReg.Start--
-	// 	}
-	// 	tv.SelectReg.End = tv.CursorPos + 1
-	// 	for tv.SelectReg.End < sz {
-	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectReg.End]) {
-	// 			break
-	// 		}
-	// 		tv.SelectReg.End++
-	// 	}
-	// } else { // keep the space start -- go to next space..
-	// 	tv.SelectReg.End = tv.CursorPos + 1
-	// 	for tv.SelectReg.End < sz {
-	// 		if !tv.IsWordBreak(tv.EditTxt[tv.SelectReg.End]) {
-	// 			break
-	// 		}
-	// 		tv.SelectReg.End++
-	// 	}
-	// 	for tv.SelectReg.End < sz {
-	// 		if tv.IsWordBreak(tv.EditTxt[tv.SelectReg.End]) {
-	// 			break
-	// 		}
-	// 		tv.SelectReg.End++
-	// 	}
-	// }
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
+
+	tv.SelectReg.Start = tv.CursorPos
+	tv.SelectReg.End = tv.CursorPos
+	txt := tv.Buf.Lines[tv.CursorPos.Ln]
+	sz := len(txt)
+	if sz == 0 {
+		return
+	}
+	sch := ints.MinInt(tv.CursorPos.Ch, sz-1)
+	if !tv.IsWordBreak(txt[sch]) {
+		for sch > 0 {
+			if tv.IsWordBreak(txt[sch-1]) {
+				break
+			}
+			sch--
+		}
+		tv.SelectReg.Start.Ch = sch
+		ech := tv.CursorPos.Ch + 1
+		for ech < sz {
+			if tv.IsWordBreak(txt[ech]) {
+				break
+			}
+			ech++
+		}
+		tv.SelectReg.End.Ch = ech
+	} else { // keep the space start -- go to next space..
+		ech := tv.CursorPos.Ch + 1
+		for ech < sz {
+			if !tv.IsWordBreak(txt[ech]) {
+				break
+			}
+			ech++
+		}
+		for ech < sz {
+			if tv.IsWordBreak(txt[ech]) {
+				break
+			}
+			ech++
+		}
+		tv.SelectReg.End.Ch = ech
+	}
 }
 
 // SelectReset resets the selection
@@ -2323,11 +2430,29 @@ func (tv *TextView) RenderAllLinesInBounds() {
 		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
 			continue
 		}
+		tv.RenderLineNo(ln)
+	}
+	if tv.Opts.LineNos {
+		tbb := tv.VpBBox
+		tbb.Min.X += int(tv.LineNoOff)
+		rs.PushBounds(tbb)
+	}
+	for ln := 0; ln < tv.NLines; ln++ {
+		lst := pos.Y + tv.Offs[ln]
+		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+			continue
+		}
+		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+			continue
+		}
 		lp := pos
 		lp.Y = lst
 		lp.X += tv.LineNoOff
 		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-		tv.RenderLineNo(ln)
+	}
+	if tv.Opts.LineNos {
+		rs.PopBounds()
 	}
 }
 
@@ -2373,6 +2498,7 @@ func (tv *TextView) RenderLineNo(ln int) {
 	}
 	vp := tv.Viewport
 	sty := &tv.Sty
+	spc := sty.BoxSpace()
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	rs := &vp.Render
@@ -2383,6 +2509,7 @@ func (tv *TextView) RenderLineNo(ln int) {
 	pos := tv.RenderStartPos()
 	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Metrics().Ascent) - +gi.FixedToFloat32(sty.Font.Face.Metrics().Descent)
+	pos.X = float32(tv.VpBBox.Min.X) + spc
 	tv.LineNoRender.Render(rs, pos)
 	// if ic, ok := tv.LineIcons[ln]; ok {
 	// 	// todo: render icon!
@@ -2443,12 +2570,22 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			tv.RenderLineNosBox(visSt, visEd)
 
 			for ln := visSt; ln <= visEd; ln++ {
+				tv.RenderLineNo(ln)
+			}
+			if tv.Opts.LineNos {
+				tbb := tv.VpBBox
+				tbb.Min.X += int(tv.LineNoOff)
+				rs.PushBounds(tbb)
+			}
+			for ln := visSt; ln <= visEd; ln++ {
 				lst := pos.Y + tv.Offs[ln]
 				lp := pos
 				lp.Y = lst
 				lp.X += tv.LineNoOff
 				tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-				tv.RenderLineNo(ln)
+			}
+			if tv.Opts.LineNos {
+				rs.PopBounds()
 			}
 
 			tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
@@ -2719,11 +2856,23 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
 		tv.OfferComplete(dontforce)
+	case gi.KeyFunWordRight:
+		tv.ISearchCancel()
+		kt.SetProcessed()
+		tv.ShiftSelect(kt)
+		tv.CursorForwardWord(1)
+		tv.OfferComplete(dontforce)
 	case gi.KeyFunMoveLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
+		tv.OfferComplete(dontforce)
+	case gi.KeyFunWordLeft:
+		tv.ISearchCancel()
+		kt.SetProcessed()
+		tv.ShiftSelect(kt)
+		tv.CursorBackwardWord(1)
 		tv.OfferComplete(dontforce)
 	case gi.KeyFunMoveUp:
 		tv.ISearchCancel()
@@ -2844,6 +2993,15 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorDelete(1)
+	case gi.KeyFunBackspaceWord:
+		cancelAll()
+		kt.SetProcessed()
+		tv.CursorBackspaceWord(1)
+		tv.OfferComplete(dontforce)
+	case gi.KeyFunDeleteWord:
+		cancelAll()
+		kt.SetProcessed()
+		tv.CursorDeleteWord(1)
 	case gi.KeyFunCut:
 		cancelAll()
 		kt.SetProcessed()
@@ -2985,6 +3143,7 @@ func (tv *TextView) OpenLinkAt(pos TextPos) (*gi.TextLink, bool) {
 func (tv *TextView) MouseEvent(me *mouse.Event) {
 	if !tv.IsInactive() && !tv.HasFocus() {
 		tv.GrabFocus()
+		tv.FocusActive = true
 	}
 	me.SetProcessed()
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
@@ -3002,15 +3161,22 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			}
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
-			// if tv.HasSelection() {
-			// 	if tv.SelectReg.Start == TextPosZero && tv.SelectReg.End == tv.Buf.EndPos() {
-			// 		tv.SelectReset()
-			// 	} else {
-			// 		tv.SelectAll()
-			// 	}
-			// } else {
-			tv.SelectWord()
-			// }
+			if tv.HasSelection() {
+				if tv.SelectReg.Start.Ln == tv.SelectReg.End.Ln {
+					sz := len(tv.Buf.Lines[tv.SelectReg.Start.Ln])
+					if tv.SelectReg.Start.Ch == 0 && tv.SelectReg.End.Ch == sz {
+						tv.SelectReset()
+					} else { // assume word, go line
+						tv.SelectReg.Start.Ch = 0
+						tv.SelectReg.End.Ch = sz
+					}
+				} else {
+					tv.SelectReset()
+				}
+			} else {
+				tv.SelectWord()
+			}
+			tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 		}
 	case mouse.Middle:
 		if !tv.IsInactive() && me.Action == mouse.Press {

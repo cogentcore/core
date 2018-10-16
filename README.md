@@ -96,22 +96,20 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* diffs revert not updating all the way.. maybe one liners?  really not sure.
-
 * filenode: ability to sort by date within directories
 
 * crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild
 
-* drag on textview should prevent DND -- dnd not getting "processed"
+* drag on textfield should prevent DND -- dnd not getting "processed"
 
 * fileview keyboard shortcuts: page up / down (tableview), history prev = go up dir?  history next = go to next in history list?  or just pop up history list probably.  maybe command-uparrow = up dir?  Need something intuitive there.  also a cancel?  esc takes a few to actually cancel..
 
 * TextView:
+	+ diffs revert not updating all the way.. maybe one liners?  really not sure.
 	+ clicking back to other window textview fails to grab blinky cursor -- works for C-x p / o but not mouse clicking.
 	+ clipboard history
-	+ still some wordwrap issues with tabs.  grr.
-	+ word-level functions: forward, back, delete etc.  ctrl+ backspace is back.
 	+ cursor goes to hand for links in TextView
+	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 
 * Splitview: 
 	+ gide resize textview not re-drawing  (still?)

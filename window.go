@@ -1968,9 +1968,18 @@ func (w *Window) SetStartFocus(k ki.Ki) {
 // SetFocus sets focus to given item -- returns true if focus changed.
 func (w *Window) SetFocus(k ki.Ki) bool {
 	if w.Focus == k {
+		if k != nil {
+			_, ni := KiToNode2D(k)
+			if ni != nil && ni.This != nil {
+				bitflag.Set(&ni.Flag, int(HasFocus)) // ensure focus flag always set
+			}
+		}
 		return false
 	}
+
 	updt := w.UpdateStart()
+	defer w.UpdateEnd(updt)
+
 	if w.Focus != nil {
 		nii, ni := KiToNode2D(w.Focus)
 		if ni != nil && ni.This != nil {
@@ -1981,7 +1990,6 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	}
 	w.Focus = k
 	if k == nil {
-		w.UpdateEnd(updt)
 		return true
 	}
 	nii, ni := KiToNode2D(k)
@@ -1994,7 +2002,6 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	// fmt.Printf("set foc: %v\n", ni.PathUnique())
 	w.ClearNonFocus() // shouldn't need this but actually sometimes do
 	nii.FocusChanged2D(FocusGot)
-	w.UpdateEnd(updt)
 	return true
 }
 
@@ -2154,6 +2161,7 @@ func (w *Window) ClearNonFocus() {
 			return true
 		}
 		if ni.HasFocus() {
+			fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
 			if !updated {
 				updated = true
 				updt = w.UpdateStart()
