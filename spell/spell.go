@@ -271,7 +271,7 @@ func TextToWords(text []byte) {
 		}
 		input = append(input, trims...)
 	}
-	for _, w := range input {
-		fmt.Println(w)
-	}
+	//for _, w := range input {
+	//	fmt.Println(w)
+	//}
 }
