@@ -105,7 +105,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * fileview keyboard shortcuts: page up / down (tableview), history prev = go up dir?  history next = go to next in history list?  or just pop up history list probably.  maybe command-uparrow = up dir?  Need something intuitive there.  also a cancel?  esc takes a few to actually cancel..
 
 * TextView:
-	+ diffs revert not updating all the way.. maybe one liners?  really not sure.
+	+ diffs revert not updating all the way.. maybe one liners?  really not sure.  maybe due to autoindent
+	+ autoindent slow on Enter insert -- need to enclose in one big update
+	+ resize if needed should set a flag that scrollbars need re-rendering and that should happen within
+		later overall rerenders
 	+ clicking back to other window textview fails to grab blinky cursor -- works for C-x p / o but not mouse clicking.
 	+ clipboard history
 	+ cursor goes to hand for links in TextView

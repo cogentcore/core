@@ -534,7 +534,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		tv.reLayout = true
 		ly.GatherSizes() // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
-		ly.ReRenderScrolls()
+		ly.ReRenderScrolls() // this is essential for updating scrollbars
 		tv.reLayout = false
 		// fmt.Printf("resized: %v\n", tv.LayData.AllocSize)
 	}
