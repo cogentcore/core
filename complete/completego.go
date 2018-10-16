@@ -178,6 +178,8 @@ func Init() {
 //	return funcs
 //}
 
+var candidates []candidate
+
 // FirstPass handles some cases of completion that gocode either
 // doesn't handle or doesn't do well - this will be expanded to more cases
 func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
@@ -257,6 +259,18 @@ type candidate struct {
 	Pkg   string `json:"package"`
 }
 
+func FindCandidateString(str string) *candidate {
+	if candidates == nil {
+		return nil
+	}
+	for _, c := range candidates {
+		if c.Name == str {
+			return &c
+		}
+	}
+	return nil
+}
+
 // SecondPass uses the gocode server to find possible completions at the specified position
 // in the src (i.e. the byte slice passed in)
 // bytes should be the current in memory version of the file
@@ -298,6 +312,7 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 			default:
 				icon = "blank"
 			}
+			candidates = append(candidates, aCandidate)
 			comp := Completion{Text: aCandidate.Name, Icon: icon}
 			completions = append(completions, comp)
 		}
@@ -307,6 +322,7 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 
 // CompleteGo is the function for completing Go code
 func CompleteGo(bytes []byte, pos token.Position) []Completion {
+	candidates = candidates[:0]
 	var results []Completion
 	results, stop := FirstPass(bytes, pos)
 	if !stop && len(results) == 0 {
@@ -339,6 +355,11 @@ func EditGoCode(text string, cp int, completion string, seed string) (newText st
 			}
 		}
 	}
+
+	//c := FindCandidateString(completion)
+	//if c != nil {
+	//	fmt.Println(*c)
+	//}
 
 	s1 = strings.TrimSuffix(s1, seed)
 	s1 += completion
