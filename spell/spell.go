@@ -228,8 +228,8 @@ func CheckWord(w string) (suggests []string, known bool) {
 }
 
 // LearnWord adds a single word to the corpus
-func LearnWord() {
-
+func LearnWord(word string) {
+	model.TrainWord(word)
 }
 
 // TextToWords generates a slice of words from text
