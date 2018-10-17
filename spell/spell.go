@@ -11,6 +11,7 @@ package spell
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,6 +23,8 @@ import (
 
 	"github.com/client9/gospell"
 	"github.com/client9/gospell/plaintext"
+	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
 	"github.com/sajari/fuzzy"
 )
 
@@ -39,6 +42,7 @@ type UnknownWord struct {
 }
 
 // CheckFile makes calls on the gospell package and returns a slice of words not found in dictionary
+// Not used at this time
 func CheckFile(fullpath string) ([]UnknownWord, error) {
 	var unknowns []UnknownWord
 
@@ -134,9 +138,6 @@ func GetCorpus() []string {
 
 	gopath := os.Getenv("GOPATH")
 	bigdatapath := gopath + "/src/github.com/goki/gi/spell/big.txt"
-	fmt.Println(gopath)
-
-	//file, err := os.Open("/Users/rohrlich/go/src/github.com/goki/gi/spell/big.txt")
 	file, err := os.Open(bigdatapath)
 	if err != nil {
 		fmt.Println(err)
@@ -166,9 +167,18 @@ func GetCorpus() []string {
 
 func InitModel() {
 	model = fuzzy.NewModel()
+	pdir := oswin.TheApp.AppPrefsDir()
+	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
+	b, err := ioutil.ReadFile(openpath)
+	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could Not Open Spell File", Prompt: "Creating new default spell file."}, true, false, nil, nil)
+		log.Println(err)
+		words := GetCorpus() // use the default corpus
+		model.Train(words)
+	} else {
+		json.Unmarshal(b, model)
+	}
 	model.SetThreshold(1)
-	words := GetCorpus()
-	model.Train(words)
 }
 
 // NewSpellCheck builds the input list, i.e. the words to check
@@ -235,21 +245,7 @@ func LearnWord(word string) {
 // TextToWords generates a slice of words from text
 // removes various non-word input, trims symbols, etc
 func TextToWords(text []byte) {
-	// borrowing code from gospell
-	// remove any golang templates
-	text = plaintext.StripTemplate(text)
-
-	// extract plain text
-	//text = ext.Text(text)
-
-	// do character conversion "smart quotes" to quotes, etc
-	// as specified in the Affix file
-	//rawstring := gs.InputConversion(raw)
-
-	// zap URLS - takes string
-	s := gospell.RemoveURL(string(text))
-	// zap file paths
-	s = gospell.RemovePath(s)
+	s := string(text)
 
 	// cases like and/or, good-hearted
 	s = strings.Replace(s, "/", " ", -1)
@@ -263,7 +259,7 @@ func TextToWords(text []byte) {
 		trims = trims[:0]
 		words := strings.Split(line, " ")
 		for _, w := range words {
-			w = strings.Trim(w, "$`'*.,?[]():;\"")
+			w = strings.Trim(w, "!$`'*.,?[]():;\"")
 			if len(w) < 2 {
 				break
 			}
@@ -274,4 +270,21 @@ func TextToWords(text []byte) {
 	//for _, w := range input {
 	//	fmt.Println(w)
 	//}
+}
+
+// SaveModel saves the spelling model which includes the dictionary and parameters
+func SaveModel() error {
+	b, err := json.MarshalIndent(model, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	pdir := oswin.TheApp.AppPrefsDir()
+	savepath := filepath.Join(pdir, "spell_en_us_plain.json")
+	err = ioutil.WriteFile(savepath, b, 0644)
+	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		log.Println(err)
+	}
+	return err
 }
