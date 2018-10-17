@@ -1522,7 +1522,9 @@ func (tv *TextView) ISearchCancel() {
 	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	tv.PrevISearchString = tv.ISearchString
+	if tv.ISearchString != "" {
+		tv.PrevISearchString = tv.ISearchString
+	}
 	tv.PrevISearchCase = tv.ISearchCase
 	tv.PrevISearchPos = tv.SearchPos
 	tv.ISearchString = ""

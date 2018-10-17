@@ -107,11 +107,7 @@ type FileNode struct {
 	FRoot *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
 }
 
-var KiT_FileNode = kit.Types.AddType(&FileNode{}, nil)
-
-func init() {
-	kit.Types.SetProps(KiT_FileNode, FileNodeProps)
-}
+var KiT_FileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
 
 // IsDir returns true if file is a directory (folder)
 func (fn *FileNode) IsDir() bool {
@@ -537,23 +533,7 @@ const (
 var KiT_FileNodeFlags = kit.Enums.AddEnum(FileNodeFlagsN, true, nil) // true = bitflags
 
 var FileNodeProps = ki.Props{
-	"CtxtMenu": ki.PropSlice{
-		{"DuplicateFile", ki.Props{
-			"label": "Duplicate",
-			"updtfunc": func(fni interface{}, act *gi.Action) {
-				fn := fni.(ki.Ki).Embed(KiT_FileNode).(*FileNode)
-				act.SetInactiveStateUpdt(fn.IsDir())
-			},
-		}},
-		{"DeleteFile", ki.Props{
-			"label":   "Delete",
-			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
-			"confirm": true,
-			"updtfunc": func(fni interface{}, act *gi.Action) {
-				fn := fni.(ki.Ki).Embed(KiT_FileNode).(*FileNode)
-				act.SetInactiveStateUpdt(fn.IsDir())
-			},
-		}},
+	"CallMethods": ki.PropSlice{
 		{"RenameFile", ki.Props{
 			"label": "Rename",
 			"desc":  "Rename file to new file name",
@@ -561,14 +541,6 @@ var FileNodeProps = ki.Props{
 				{"New Name", ki.Props{
 					"default-field": "Name",
 				}},
-			},
-		}},
-		{"sep-open", ki.BlankProp{}},
-		{"OpenDir", ki.Props{
-			"desc": "open given directory to see files within",
-			"updtfunc": func(fni interface{}, act *gi.Action) {
-				fn := fni.(ki.Ki).Embed(KiT_FileNode).(*FileNode)
-				act.SetActiveStateUpdt(fn.IsDir())
 			},
 		}},
 	},
@@ -639,7 +611,57 @@ type FileTreeView struct {
 	TreeView
 }
 
-var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, FileTreeViewProps)
+var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, nil)
+
+func init() {
+	kit.Types.SetProps(KiT_FileTreeView, FileTreeViewProps)
+}
+
+// FileNode returns the SrcNode as a FileNode
+func (ft *FileTreeView) FileNode() *FileNode {
+	fn := ft.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
+	return fn
+}
+
+// DuplicateFiles calls DuplicateFile on any selected nodes
+func (ft *FileTreeView) DuplicateFiles() {
+	sels := ft.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		ftv.FileNode().DuplicateFile()
+	}
+}
+
+// DeleteFiles calls DeleteFile on any selected nodes
+func (ft *FileTreeView) DeleteFiles() {
+	sels := ft.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		ftv.FileNode().DeleteFile()
+	}
+}
+
+// RenameFiles calls RenameFile on any selected nodes
+func (ft *FileTreeView) RenameFiles() {
+	sels := ft.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		CallMethod(ftv.FileNode(), "RenameFile", ft.Viewport)
+	}
+}
+
+// OpenDirs
+func (ft *FileTreeView) OpenDirs() {
+	sels := ft.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		ftv.FileNode().OpenDir()
+	}
+}
 
 var FileTreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
@@ -693,6 +715,37 @@ var FileTreeViewProps = ki.Props{
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
 		"background-color": &gi.Prefs.Colors.Control,
 	},
+	"CtxtMenuActive": ki.PropSlice{
+		{"DuplicateFiles", ki.Props{
+			"label": "Duplicate",
+			"updtfunc": func(fni interface{}, act *gi.Action) {
+				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+				act.SetInactiveStateUpdt(fn.FileNode().IsDir())
+			},
+		}},
+		{"DeleteFiles", ki.Props{
+			"label":   "Delete",
+			"desc":    "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
+			"confirm": true,
+			"updtfunc": func(fni interface{}, act *gi.Action) {
+				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+				act.SetInactiveStateUpdt(fn.FileNode().IsDir())
+			},
+		}},
+		{"RenameFiles", ki.Props{
+			"label": "Rename",
+			"desc":  "Rename file to new file name",
+		}},
+		{"sep-open", ki.BlankProp{}},
+		{"OpenDirs", ki.Props{
+			"label": "Open Dir",
+			"desc":  "open given directory to see files within",
+			"updtfunc": func(fni interface{}, act *gi.Action) {
+				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+				act.SetInactiveStateUpdt(fn.FileNode().IsDir())
+			},
+		}},
+	},
 }
 
 var fnFolderProps = ki.Props{
@@ -701,7 +754,7 @@ var fnFolderProps = ki.Props{
 }
 
 func (tv *FileTreeView) Style2D() {
-	fn := tv.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
+	fn := tv.FileNode()
 	if fn.IsDir() {
 		if fn.HasChildren() {
 			tv.Icon = gi.IconName("")

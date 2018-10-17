@@ -444,6 +444,10 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 				md.SubMenuSlice = pv
 			}
 			bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+		case "submenu-func":
+			ac.MakeMenuFunc = MethViewSubMenuFunc
+			md.SubMenuFunc = pv.(SubMenuFunc)
+			bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
@@ -515,6 +519,9 @@ const (
 
 var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "MethView") // true = bitflags
 
+// SubMenuFunc is a function that returns a string slice of submenu items, used in submenu-func option
+type SubMenuFunc func(it interface{}, vp *gi.Viewport2D) []string
+
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
 type MethViewData struct {
@@ -530,6 +537,7 @@ type MethViewData struct {
 	UpdateFunc   func(interface{}, *gi.Action) `desc:"update function defined in properties -- called by our wrapper update function"`
 	SubMenuSlice interface{}                   `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
 	SubMenuField string                        `desc:"value for submenu generation as name of field on obj"`
+	SubMenuFunc  SubMenuFunc                   `desc:"function that will generate submenu items, as []string slice"`
 	SubMenuVal   interface{}                   `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
 	Flags        MethViewFlags
 }
@@ -734,7 +742,7 @@ func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool)
 // MethViewData.UpdateFunc from its data
 func MethViewUpdateFunc(act *gi.Action) {
 	md := act.Data.(*MethViewData)
-	if md.UpdateFunc != nil {
+	if md.UpdateFunc != nil && md.Val != nil {
 		md.UpdateFunc(md.Val, act)
 	}
 }
@@ -744,7 +752,9 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	ac := aki.(*gi.Action)
 	md := ac.Data.(*MethViewData)
 	smd := md.SubMenuSlice
-	if md.SubMenuField != "" {
+	if md.SubMenuFunc != nil {
+		smd = md.SubMenuFunc(md.Val, md.Vp)
+	} else if md.SubMenuField != "" {
 		if flv, ok := MethViewFieldValue(md.ValVal, md.SubMenuField); ok {
 			smd = flv.Interface()
 		}

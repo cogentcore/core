@@ -53,7 +53,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 func (av *ArgView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "title")
-	config.Add(gi.KiT_Frame, "struct-grid")
+	config.Add(gi.KiT_Frame, "args-grid")
 	return config
 }
 
@@ -91,7 +91,7 @@ func (av *ArgView) TitleWidget() (*gi.Label, int) {
 // ArgsGrid returns the grid layout widget, which contains all the fields
 // and values, and its index, within frame -- nil, -1 if not found
 func (av *ArgView) ArgsGrid() (*gi.Frame, int) {
-	idx, ok := av.Children().IndexByName("struct-grid", 0)
+	idx, ok := av.Children().IndexByName("args-grid", 0)
 	if !ok {
 		return nil, -1
 	}

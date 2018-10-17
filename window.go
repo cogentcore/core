@@ -469,7 +469,6 @@ func (w *Window) Resized(sz image.Point) {
 // Closed frees any resources after the window has been closed.
 func (w *Window) Closed() {
 	w.UpMu.Lock()
-	w.FocusInactivate()
 	AllWindows.Delete(w)
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
@@ -478,6 +477,8 @@ func (w *Window) Closed() {
 		w.UpMu.Unlock()
 		return
 	}
+	w.SetInactive() // marks as closed
+	w.FocusInactivate()
 	// these are managed by the window itself
 	w.WinTex = nil
 	w.OverTex = nil

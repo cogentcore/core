@@ -47,7 +47,11 @@ type TreeView struct {
 	RootView         *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
-var KiT_TreeView = kit.Types.AddType(&TreeView{}, TreeViewProps)
+var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
+
+func init() {
+	kit.Types.SetProps(KiT_TreeView, TreeViewProps)
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //    End-User API
@@ -1520,7 +1524,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Insert Before",
 			"shortcut": gi.KeyFunInsert,
 			"updtfunc": func(tvi interface{}, act *gi.Action) {
-				tv := tvi.(*TreeView)
+				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
 			},
 		}},
@@ -1528,7 +1532,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Insert After",
 			"shortcut": gi.KeyFunInsertAfter,
 			"updtfunc": func(tvi interface{}, act *gi.Action) {
-				tv := tvi.(*TreeView)
+				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
 			},
 		}},
@@ -1536,7 +1540,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Duplicate",
 			"shortcut": gi.KeyFunDuplicate,
 			"updtfunc": func(tvi interface{}, act *gi.Action) {
-				tv := tvi.(*TreeView)
+				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
 			},
 		}},
@@ -1544,7 +1548,7 @@ var TreeViewProps = ki.Props{
 			"label":    "Delete",
 			"shortcut": gi.KeyFunDelete,
 			"updtfunc": func(tvi interface{}, act *gi.Action) {
-				tv := tvi.(*TreeView)
+				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
 			},
 		}},
@@ -1560,7 +1564,7 @@ var TreeViewProps = ki.Props{
 		{"Cut", ki.Props{
 			"shortcut": gi.KeyFunCut,
 			"updtfunc": func(tvi interface{}, act *gi.Action) {
-				tv := tvi.(*TreeView)
+				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveStateUpdt(tv.IsRootOrField(""))
 			},
 		}},
