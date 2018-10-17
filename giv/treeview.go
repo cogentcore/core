@@ -1450,7 +1450,10 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 		tv.ConfigParts()
 	}
 	if lbl, ok := tv.LabelPart(); ok {
-		lbl.SetText(tv.Label())
+		ltxt := tv.Label()
+		if lbl.Text != ltxt {
+			lbl.SetText(ltxt)
+		}
 		lbl.Sty.Font.Color = tv.Sty.Font.Color
 	}
 	if tv.HasChildren() {
@@ -1732,6 +1735,7 @@ func (tv *TreeView) Render2D() {
 	// if tv.FullReRenderIfNeeded() { // custom stuff here
 	// 	return
 	// }
+	// fmt.Printf("tv rend: %v\n", tv.Nm)
 	if tv.PushBounds() {
 		if tv.IsSelected() {
 			tv.Sty = tv.StateStyles[TreeViewSel]

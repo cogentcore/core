@@ -208,6 +208,9 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 
 // ReRender2DNode re-renders a specific node
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
+	if vp.Win == nil || vp.Win.IsClosed() || vp.Win.IsResizing() { // no node-triggered updates during resize..
+		return
+	}
 	gn := gni.AsNode2D()
 	if Render2DTrace {
 		fmt.Printf("Render: vp re-render: %v node: %v\n", vp.PathUnique(), gn.PathUnique())
@@ -225,6 +228,9 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 // ReRender2DAnchor re-renders an anchor node -- the KEY diff from
 // ReRender2DNode is that it calls ReRender2DTree and not just Render2DTree!
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
+	if vp.Win == nil || vp.Win.IsClosed() || vp.Win.IsResizing() { // no node-triggered updates during resize..
+		return
+	}
 	pw := gni.AsWidget()
 	if pw == nil {
 		return
@@ -508,7 +514,6 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 				if Update2DTrace {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), ni.PathUnique())
 				}
-				ni.Style2DTree()    // restyle only from affected node downward
 				vp.ReRender2DTree() // need to re-render entirely from us
 			}
 		} else {

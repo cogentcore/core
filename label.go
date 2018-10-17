@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"reflect"
@@ -120,6 +121,9 @@ var LabelSelectors = []string{":active", ":inactive", ":selected"}
 // SetText sets the text and updates the rendered version
 func (lb *Label) SetText(txt string) {
 	updt := lb.UpdateStart()
+	if updt {
+		fmt.Printf("label is updating: %v\n", txt)
+	}
 	if lb.Sty.Font.Size.Val == 0 { // not yet styled
 		lb.StyleLabel()
 	}

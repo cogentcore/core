@@ -745,6 +745,10 @@ func (w *Window) Publish() {
 		w.UpMu.Unlock()
 		return
 	}
+
+	// note: this is key for finding redundant updates!
+	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
+
 	w.SetUpdating()
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")

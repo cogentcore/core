@@ -107,6 +107,9 @@ func (sv *StructViewInline) ConfigParts() {
 		lbl.SetProp("horizontal-align", gi.AlignLeft)
 		widg := sv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
+		if sv.IsInactive() {
+			widg.AsNode2D().SetInactive()
+		}
 	}
 	sv.Parts.UpdateEnd(updt)
 }

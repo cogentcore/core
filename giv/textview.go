@@ -3298,7 +3298,11 @@ func (tv *TextView) Size2D(iter int) {
 		return
 	} else {
 		tv.InitLayout2D()
-		tv.LayoutAllLines(true) // already sets the size
+		if tv.LinesSize == image.ZP {
+			tv.LayoutAllLines(true)
+		} else {
+			tv.SetSize()
+		}
 	}
 }
 
@@ -3308,12 +3312,16 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
-	return redo
+	if tv.LinesSize == image.ZP {
+		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
+		return redo
+	}
+	tv.SetSize()
+	return false
 }
 
 func (tv *TextView) Render2D() {
-	fmt.Printf("tv render: %v\n", tv.Nm)
+	// fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

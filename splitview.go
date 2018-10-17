@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"strconv"
 	"strings"
@@ -161,6 +160,9 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 // positions up to that point.  Splitters are updated to ensure that selected
 // position is achieved, while dividing remainder appropriately.
 func (sv *SplitView) SetSplitsAction(idx int, nwval float32) {
+	winUpdt := sv.Viewport.Win.UpdateStart()
+	defer sv.Viewport.Win.UpdateEnd(winUpdt)
+
 	updt := sv.UpdateStart()
 	sv.SetFullReRender()
 	sz := len(sv.Splits)
@@ -243,7 +245,6 @@ func (sv *SplitView) ConfigSplitters() {
 				if sig == int64(SliderReleased) {
 					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
-					fmt.Printf("split action\n")
 					spr.SetSplitsAction(spl.SplitterNo, spl.Value)
 				}
 			})

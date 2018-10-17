@@ -96,6 +96,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* focusfirst not focusing textview, likely b/c update not working when resizing = true, but attempts to fix didn't work yet..
+
 * filenode: ability to sort by date within directories
 
 * crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild
@@ -111,11 +113,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 
-* Splitview: 
-	+ gide resize textview not re-drawing  (still?)
-
-* sliceinlineview -- not passing inactive onto its constituent elements.  check for other inline etc views.	
-	
 * CSS class = x should bring in properties for that class into top-level CSS
   for all below -- not sure it does that - nested classes.  need to figure that out really.
 

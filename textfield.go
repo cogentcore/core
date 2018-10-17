@@ -1224,7 +1224,9 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tf *TextField) Render2D() {
-	tf.ScrollLayoutToCursor()
+	if tf.HasFocus() && tf.FocusActive && BlinkingTextField == tf {
+		tf.ScrollLayoutToCursor()
+	}
 	if tf.FullReRenderIfNeeded() {
 		return
 	}
@@ -1281,28 +1283,21 @@ func (tf *TextField) ConnectEvents2D() {
 }
 
 func (tf *TextField) FocusChanged2D(change FocusChanges) {
-	doUpdt := !tf.Viewport.Win.Resizing && !tf.Viewport.Win.IsClosed()
 	switch change {
 	case FocusLost:
 		tf.FocusActive = false
 		tf.EditDone()
-		if doUpdt {
-			tf.UpdateSig()
-		}
+		tf.UpdateSig()
 	case FocusGot:
 		tf.FocusActive = true
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
-		if doUpdt {
-			tf.UpdateSig()
-		}
+		tf.UpdateSig()
 	case FocusInactive:
 		tf.FocusActive = false
 		tf.EditDone()
-		if doUpdt {
-			tf.UpdateSig()
-		}
+		tf.UpdateSig()
 	case FocusActive:
 		tf.FocusActive = true
 		tf.ScrollToMe()
