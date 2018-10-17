@@ -63,7 +63,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	sz := ints.MinInt(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
-		vv := ToValueView(val.Interface())
+		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}

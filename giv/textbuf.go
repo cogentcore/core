@@ -1232,6 +1232,7 @@ func IndentCharPos(n, tabSz int, spc bool) int {
 func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 	curli, _ := tb.LineIndent(ln, tabSz)
 	if n > curli {
+		// fmt.Printf("autoindent: ins %v\n", n)
 		return tb.InsertText(TextPos{Ln: ln}, IndentBytes(n-curli, tabSz, spc), true, true)
 	} else if n < curli {
 		spos := IndentCharPos(n, tabSz, spc)

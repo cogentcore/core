@@ -244,7 +244,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 	for i := 0; i < sz; i++ {
 		ridx := i * nWidgPerRow
 		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
-		vv := ToValueView(val.Interface())
+		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}

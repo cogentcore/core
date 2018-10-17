@@ -11,7 +11,6 @@ import (
 	"image/draw"
 	"log"
 	"strings"
-	"sync/atomic"
 	"time"
 	"unicode"
 
@@ -89,8 +88,6 @@ type TextView struct {
 	BlinkOn           bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
 	Complete          *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 	CompleteTimer     *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
-	needsRefresh      int32                     // used in atomically safe way to indicate when refresh required
-	reLayout          bool
 	lastRecenter      int
 	lastFilename      gi.FileName
 	lastWasTabAI      bool
@@ -178,6 +175,18 @@ const (
 // Style selector names for the different states
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
+// these extend NodeBase NodeFlags to hold TextView state
+const (
+	// TextViewNeedsRefresh is used in atomically safe way to indicate when refresh is required
+	TextViewNeedsRefresh gi.NodeFlags = gi.NodeFlagsN + iota
+
+	// TextViewInReLayout indicates that we are currently resizing ourselves via parent layout
+	TextViewInReLayout
+
+	// TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender
+	TextViewRenderScrolls
+)
+
 // Label returns the display label for this node, satisfying the Labeler interface
 func (tv *TextView) Label() string {
 	return tv.Nm
@@ -201,21 +210,18 @@ func (tv *TextView) Refresh() {
 // NeedsRefresh checks if a refresh is required -- atomically safe for other
 // routines to set the NeedsRefresh flag
 func (tv *TextView) NeedsRefresh() bool {
-	if atomic.LoadInt32(&tv.needsRefresh) != 0 {
-		return true
-	}
-	return false
+	return bitflag.HasAtomic(&tv.Flag, int(TextViewNeedsRefresh))
 }
 
 // SetNeedsRefresh flags that a refresh is required -- atomically safe for
 // other routines to call this
 func (tv *TextView) SetNeedsRefresh() {
-	atomic.StoreInt32(&tv.needsRefresh, 1)
+	bitflag.SetAtomic(&tv.Flag, int(TextViewNeedsRefresh))
 }
 
 // ClearNeedsRefresh clears needs refresh flag -- atomically safe
 func (tv *TextView) ClearNeedsRefresh() {
-	atomic.StoreInt32(&tv.needsRefresh, 0)
+	bitflag.ClearAtomic(&tv.Flag, int(TextViewNeedsRefresh))
 }
 
 // RefreshIfNeeded re-displays everything if SetNeedsRefresh was called --
@@ -337,12 +343,15 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		tbe := data.(*TextBufEdit)
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
+			// fmt.Printf("tv %v lines insert %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
 			tv.LinesInserted(tbe)
 		} else {
 			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 			if rerend {
+				// fmt.Printf("tv %v line insert rerend %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
 				tv.RenderAllLines()
 			} else {
+				// fmt.Printf("tv %v line insert no rerend %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
 				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 			}
 		}
@@ -430,7 +439,7 @@ func (tv *TextView) HiStyle() {
 // Markup version of the source, and returns whether the current rendered size
 // is different from what it was previously
 func (tv *TextView) LayoutAllLines(inLayout bool) bool {
-	if inLayout && tv.reLayout {
+	if inLayout && bitflag.Has(tv.Flag, int(TextViewInReLayout)) {
 		return false
 	}
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
@@ -531,11 +540,11 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	}
 	ly := tv.ParentLayout()
 	if ly != nil {
-		tv.reLayout = true
+		bitflag.Set(&tv.Flag, int(TextViewInReLayout))
 		ly.GatherSizes() // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
-		ly.ReRenderScrolls() // this is essential for updating scrollbars
-		tv.reLayout = false
+		bitflag.Set(&tv.Flag, int(TextViewRenderScrolls))
+		bitflag.Clear(&tv.Flag, int(TextViewInReLayout))
 		// fmt.Printf("resized: %v\n", tv.LayData.AllocSize)
 	}
 	return true
@@ -2054,7 +2063,7 @@ func (tv *TextView) ScrollToLeft(pos int) bool {
 // at left of view to extent possible -- returns true if scrolled.
 func (tv *TextView) ScrollCursorToLeft() bool {
 	_, ri, _ := tv.WrappedLineNo(tv.CursorPos)
-	if ri == 0 {
+	if ri <= 0 {
 		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Sty.BoxSpace()) - 2)
 	}
 	curBBox := tv.CursorBBox(tv.CursorPos)
@@ -2397,6 +2406,7 @@ func (tv *TextView) RenderAllLines() {
 		tv.RenderAllLinesInBounds()
 		tv.PopBounds()
 		vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
+		tv.RenderScrolls()
 		vp.Win.UpdateEnd(updt)
 	}
 }
@@ -2421,6 +2431,8 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	tv.RenderHighlights(-1, -1) // all
 	tv.RenderSelect()
 	pos := tv.RenderStartPos()
+	stln := -1
+	edln := -1
 	for ln := 0; ln < tv.NLines; ln++ {
 		lst := pos.Y + tv.Offs[ln]
 		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
@@ -2430,29 +2442,28 @@ func (tv *TextView) RenderAllLinesInBounds() {
 		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
 			continue
 		}
+		if stln < 0 {
+			stln = ln
+		}
+		edln = ln
 		tv.RenderLineNo(ln)
 	}
-	if tv.Opts.LineNos {
-		tbb := tv.VpBBox
-		tbb.Min.X += int(tv.LineNoOff)
-		rs.PushBounds(tbb)
-	}
-	for ln := 0; ln < tv.NLines; ln++ {
-		lst := pos.Y + tv.Offs[ln]
-		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
-			continue
+	if stln >= 0 && edln >= 0 {
+		if tv.Opts.LineNos {
+			tbb := tv.VpBBox
+			tbb.Min.X += int(tv.LineNoOff)
+			rs.PushBounds(tbb)
 		}
-		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
-			continue
+		for ln := stln; ln <= edln; ln++ {
+			lst := pos.Y + tv.Offs[ln]
+			lp := pos
+			lp.Y = lst
+			lp.X += tv.LineNoOff
+			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 		}
-		lp := pos
-		lp.Y = lst
-		lp.X += tv.LineNoOff
-		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-	}
-	if tv.Opts.LineNos {
-		rs.PopBounds()
+		if tv.Opts.LineNos {
+			rs.PopBounds()
+		}
 	}
 }
 
@@ -2514,6 +2525,17 @@ func (tv *TextView) RenderLineNo(ln int) {
 	// if ic, ok := tv.LineIcons[ln]; ok {
 	// 	// todo: render icon!
 	// }
+}
+
+// RenderScrolls renders scrollbars if needed
+func (tv *TextView) RenderScrolls() {
+	if bitflag.Has(tv.Flag, int(TextViewRenderScrolls)) {
+		ly := tv.ParentLayout()
+		if ly != nil {
+			ly.ReRenderScrolls()
+		}
+		bitflag.Clear(&tv.Flag, int(TextViewRenderScrolls))
+	}
 }
 
 // RenderLines displays a specific range of lines on the screen, also painting
@@ -2595,6 +2617,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			// fmt.Printf("tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
 		}
 		tv.PopBounds()
+		tv.RenderScrolls()
 		vp.Win.UpdateEnd(updt)
 	}
 	return true
@@ -2686,7 +2709,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	}
 	xoff := float32(tv.WinBBox.Min.X)
 	scrl := tv.WinBBox.Min.X - tv.ObjBBox.Min.X
-	sc := int(float32(pt.X+scrl) / sty.Font.Ch)
+	nolno := pt.X - int(tv.LineNoOff)
+	sc := int(float32(nolno+scrl) / sty.Font.Ch)
 	sc -= sc / 4
 	sc = ints.MaxInt(0, sc)
 	cch := sc
@@ -3034,6 +3058,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 					tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 			}
+			// fmt.Printf("auto indent updt end: %v\n", updt)
 			tv.Viewport.Win.UpdateEnd(updt)
 		}
 		// todo: KeFunFocusPrev -- unindent
@@ -3065,10 +3090,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
 					if kt.Rune == '}' && tv.Opts.AutoIndent {
+						updt := tv.Viewport.Win.UpdateStart()
 						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
 							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 						}
+						tv.Viewport.Win.UpdateEnd(updt)
 					}
 				}
 				tv.OfferComplete(dontforce)
@@ -3286,6 +3313,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tv *TextView) Render2D() {
+	// fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

@@ -471,7 +471,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 		for fli := 0; fli < tv.NVisFields; fli++ {
 			field := tv.VisFields[fli]
 			fval := val.Elem().Field(field.Index[0])
-			vv := ToValueView(fval.Interface())
+			vv := ToValueView(fval.Interface(), "")
 			if vv == nil { // shouldn't happen
 				continue
 			}

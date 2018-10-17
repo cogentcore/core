@@ -66,10 +66,12 @@ type FieldValueViewer interface {
 
 // ToValueView returns the appropriate ValueView for given item, based only on
 // its type -- attempts to get the ValueViewer interface and failing that,
-// falls back on default Kind-based options -- see FieldToValueView,
-// MapToValueView, SliceToValue view for versions that take into account the
-// properties of the owner (used in those appropriate contexts)
-func ToValueView(it interface{}) ValueView {
+// falls back on default Kind-based options.  tags are optional tags, e.g.,
+// from the field in a struct, that control the view properties -- see the gi wiki
+// for details on supported tags -- these are NOT set for the view element, only
+// used for options that affect what kind of view to create.
+// See FieldToValueView for version that takes into account the properties of the owner.
+func ToValueView(it interface{}, tags string) ValueView {
 	if it == nil {
 		vv := ValueViewBase{}
 		vv.Init(&vv)
@@ -91,7 +93,6 @@ func ToValueView(it interface{}) ValueView {
 
 	typ := reflect.TypeOf(it)
 	nptyp := kit.NonPtrType(typ)
-	typrops := kit.Types.Properties(typ, false) // don't make
 	vk := typ.Kind()
 	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
 
@@ -124,6 +125,33 @@ func ToValueView(it interface{}) ValueView {
 		vv := HiStyleValueView{}
 		vv.Init(&vv)
 		return &vv
+	}
+
+	forceInline := false
+	forceNoInline := false
+
+	typrops := kit.Types.Properties(typ, false) // don't make
+	if typrops != nil {
+		inprop, ok := (*typrops)["inline"]
+		if ok {
+			forceInline, ok = kit.ToBool(inprop)
+		}
+		inprop, ok = (*typrops)["no-inline"]
+		if ok {
+			forceNoInline, ok = kit.ToBool(inprop)
+		}
+	}
+
+	if tags != "" {
+		stag := reflect.StructTag(tags)
+		if vwtag, ok := stag.Lookup("view"); ok {
+			switch vwtag {
+			case "inline":
+				forceInline = true
+			case "no-inline":
+				forceNoInline = true
+			}
+		}
 	}
 
 	switch {
@@ -173,7 +201,7 @@ func ToValueView(it interface{}) ValueView {
 		}
 		v := reflect.ValueOf(it)
 		if !kit.ValueIsZero(v) {
-			return ToValueView(v.Elem().Interface())
+			return ToValueView(v.Elem().Interface(), tags)
 		}
 	case nptyp == ki.KiT_Signal:
 		return nil
@@ -194,7 +222,7 @@ func ToValueView(it interface{}) ValueView {
 			return &vv
 		}
 		isstru := (kit.NonPtrType(eltyp).Kind() == reflect.Struct)
-		if !isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp) {
+		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
 			vv := SliceInlineValueView{}
 			vv.Init(&vv)
 			return &vv
@@ -207,7 +235,7 @@ func ToValueView(it interface{}) ValueView {
 		v := reflect.ValueOf(it)
 		sz := v.Len()
 		sz = kit.MapStructElsN(it)
-		if sz <= MapInlineLen {
+		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
 			vv := MapInlineValueView{}
 			vv.Init(&vv)
 			return &vv
@@ -223,15 +251,8 @@ func ToValueView(it interface{}) ValueView {
 			vv.Init(&vv)
 			return &vv
 		}
-		inline := false
-		if typrops != nil {
-			inprop, ok := (*typrops)["inline"]
-			if ok {
-				inline, ok = kit.ToBool(inprop)
-			}
-		}
 		nfld := kit.AllFieldsN(typ)
-		if inline || nfld <= StructInlineLen {
+		if !forceNoInline && (forceInline || nfld <= StructInlineLen) {
 			vv := StructInlineValueView{}
 			vv.Init(&vv)
 			return &vv
@@ -260,7 +281,7 @@ func ToValueView(it interface{}) ValueView {
 // ToValueView otherwise, using field value (fval)
 func FieldToValueView(it interface{}, field string, fval interface{}) ValueView {
 	if it == nil || field == "" {
-		return ToValueView(fval)
+		return ToValueView(fval, "")
 	}
 	if vv, ok := it.(FieldValueViewer); ok {
 		vvo := vv.FieldValueView(field, fval)
@@ -276,26 +297,13 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 		}
 	}
 
-	if kig, ok := it.(ki.Ki); ok {
-		typ := reflect.TypeOf(fval)
-		if typ != nil {
-			nptyp := kit.NonPtrType(typ)
-			vk := nptyp.Kind()
-
-			ft := kig.FieldTag(field, "view")
-			switch ft {
-			case "no-inline":
-				if vk == reflect.Map {
-					vv := MapValueView{}
-					vv.Init(&vv)
-					return &vv
-				}
-			}
-		}
+	typ := reflect.TypeOf(it)
+	nptyp := kit.NonPtrType(typ)
+	ftyp, ok := nptyp.FieldByName(field)
+	if ok {
+		return ToValueView(fval, string(ftyp.Tag))
 	}
-
-	// fallback
-	return ToValueView(fval)
+	return ToValueView(fval, "")
 }
 
 // ValueView is an interface for managing the GUI representation of values

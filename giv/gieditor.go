@@ -42,6 +42,7 @@ func (ge *GiEditor) Save() {
 	if ge.Filename == "" {
 		return
 	}
+
 	ge.KiRoot.SaveJSON(string(ge.Filename))
 	ge.Changed = false
 }

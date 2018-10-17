@@ -79,13 +79,13 @@ var LocalMainMenu = false
 // closed -- used to trigger updating of Window menus on each window.
 var WinNewCloseTime time.Time
 
-// mutex that protects updates to WinNewCloseTime
-var winNewCloseTimeMu sync.Mutex
+// WindowGlobalMu is a mutex for any global state associated with windows
+var WindowGlobalMu sync.Mutex
 
 func WinNewCloseStamp() {
-	winNewCloseTimeMu.Lock()
+	WindowGlobalMu.Lock()
 	WinNewCloseTime = time.Now()
-	winNewCloseTimeMu.Unlock()
+	WindowGlobalMu.Unlock()
 }
 
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
@@ -1541,6 +1541,12 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 		})
 
 		for _, rr := range rvs {
+			switch evi.(type) {
+			case *mouse.DragEvent:
+				if w.Dragging == nil {
+					bitflag.Set(rr.Recv.Flags(), int(NodeDragging)) // PROVISIONAL!
+				}
+			}
 			rr.Call(w.This, int64(et), evi)
 			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
 				switch evi.(type) { // only grab events if processed
@@ -1555,6 +1561,13 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					}
 				}
 				break
+			} else {
+				switch evi.(type) {
+				case *mouse.DragEvent:
+					if w.Dragging == nil {
+						bitflag.Clear(rr.Recv.Flags(), int(NodeDragging)) // clear provisional
+					}
+				}
 			}
 		}
 	}
@@ -2542,11 +2555,15 @@ type WindowList []*Window
 
 // Add adds a window to the list.
 func (wl *WindowList) Add(w *Window) {
+	WindowGlobalMu.Lock()
 	*wl = append(*wl, w)
+	WindowGlobalMu.Unlock()
 }
 
 // Delete removes a window from the list -- returns true if deleted.
 func (wl *WindowList) Delete(w *Window) bool {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
 	sz := len(*wl)
 	for i, wi := range *wl {
 		if wi == w {
@@ -2562,6 +2579,8 @@ func (wl *WindowList) Delete(w *Window) bool {
 // FindName finds window with given name on list (case sensitive) -- returns
 // window and true if found, nil, false otherwise
 func (wl *WindowList) FindName(name string) (*Window, bool) {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
 	for _, wi := range *wl {
 		if wi.Nm == name {
 			return wi, true
@@ -2642,6 +2661,8 @@ func (wg *WindowGeomPrefs) Save() error {
 
 // RecordPref records current state of window as preference
 func (wg *WindowGeomPrefs) RecordPref(win *Window) {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 100)
 	}
@@ -2667,6 +2688,9 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	if wg == nil {
 		return nil
 	}
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+
 	wps, ok := (*wg)[winName]
 	if !ok {
 		return nil
@@ -2731,6 +2755,9 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 // by screen, and clear current in-memory cache.  You shouldn't need to use
 // this but sometimes useful for testing.
 func (wg *WindowGeomPrefs) DeleteAll() {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
 	os.Remove(pnm)

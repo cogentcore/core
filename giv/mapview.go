@@ -163,14 +163,14 @@ func (mv *MapView) ConfigMapGrid() {
 		})
 	}
 	for _, key := range keys {
-		kv := ToValueView(key.Interface())
+		kv := ToValueView(key.Interface(), "")
 		if kv == nil { // shouldn't happen
 			continue
 		}
 		kv.SetMapKey(key, mv.Map, mv.TmpSave)
 
 		val := mpvnp.MapIndex(key)
-		vv := ToValueView(val.Interface())
+		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
