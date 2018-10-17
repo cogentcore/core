@@ -1259,6 +1259,9 @@ func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunSelectAll:
 		tf.SelectAll()
 		kt.SetProcessed()
+	case gi.KeyFunEnter:
+		tf.ToggleClose()
+		kt.SetProcessed()
 	case gi.KeyFunCopy:
 		tf.Copy(true)
 		kt.SetProcessed()

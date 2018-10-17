@@ -37,6 +37,7 @@ void doRaiseWindow(uintptr_t id);
 void doMinimizeWindow(uintptr_t id);
 void doCloseWindow(uintptr_t id);
 void getScreens();
+void doSetMainMenu(uintptr_t viewID);
 uintptr_t doGetMainMenu(uintptr_t viewID);
 void doMenuReset(uintptr_t menuID);
 uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm);

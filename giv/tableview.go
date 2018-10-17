@@ -54,6 +54,7 @@ type TableView struct {
 	Values           [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
 	ShowIndex        bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool)"`
 	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	VisRows          int                `desc:"number of rows visible in display"`
 	SelField         string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
 	SelVal           interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in SelField"`
 	SelectedIdx      int                `json:"-" xml:"-" desc:"index (row) of currently-selected item (-1 if none) -- see SelectedRows for full set of selected rows in active editing mode"`
@@ -765,6 +766,11 @@ func (tv *TableView) Render2D() {
 		return
 	}
 	if tv.PushBounds() {
+		if tv.Sty.Font.Height > 0 {
+			tv.VisRows = (tv.VpBBox.Max.Y - tv.VpBBox.Min.Y) / int(1.8*tv.Sty.Font.Height)
+		} else {
+			tv.VisRows = 10
+		}
 		tv.FrameStdRender()
 		tv.TableViewEvents()
 		tv.RenderScrolls()
@@ -1008,6 +1014,66 @@ func (tv *TableView) MoveUp(selMode mouse.SelectModes) int {
 // row
 func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveUp(selMode)
+	if nrow >= 0 {
+		tv.ScrollToRow(nrow)
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+	}
+	return nrow
+}
+
+// MovePageDown moves the selection down to next page, using given select mode
+// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+func (tv *TableView) MovePageDown(selMode mouse.SelectModes) int {
+	if selMode == mouse.NoSelectMode {
+		if tv.SelectMode {
+			selMode = mouse.ExtendContinuous
+		}
+	}
+	if tv.SelectedIdx >= tv.BuiltSize-1 {
+		tv.SelectedIdx = tv.BuiltSize - 1
+		return -1
+	}
+	tv.SelectedIdx += tv.VisRows
+	tv.SelectedIdx = ints.MinInt(tv.SelectedIdx, tv.BuiltSize-1)
+	tv.SelectRowAction(tv.SelectedIdx, selMode)
+	return tv.SelectedIdx
+}
+
+// MovePageDownAction moves the selection down to next page, using given select
+// mode (from keyboard modifiers) -- and emits select event for newly selected
+// row
+func (tv *TableView) MovePageDownAction(selMode mouse.SelectModes) int {
+	nrow := tv.MovePageDown(selMode)
+	if nrow >= 0 {
+		tv.ScrollToRow(nrow)
+		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+	}
+	return nrow
+}
+
+// MovePageUp moves the selection up to previous page, using given select mode
+// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+func (tv *TableView) MovePageUp(selMode mouse.SelectModes) int {
+	if selMode == mouse.NoSelectMode {
+		if tv.SelectMode {
+			selMode = mouse.ExtendContinuous
+		}
+	}
+	if tv.SelectedIdx <= 0 {
+		tv.SelectedIdx = 0
+		return -1
+	}
+	tv.SelectedIdx -= tv.VisRows
+	tv.SelectedIdx = ints.MaxInt(0, tv.SelectedIdx)
+	tv.SelectRowAction(tv.SelectedIdx, selMode)
+	return tv.SelectedIdx
+}
+
+// MovePageUpAction moves the selection up to previous page, using given select
+// mode (from keyboard modifiers) -- and emits select event for newly selected
+// row
+func (tv *TableView) MovePageUpAction(selMode mouse.SelectModes) int {
+	nrow := tv.MovePageUp(selMode)
 	if nrow >= 0 {
 		tv.ScrollToRow(nrow)
 		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
@@ -1647,6 +1713,12 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 	case gi.KeyFunMoveUp:
 		tv.MoveUpAction(selMode)
 		kt.SetProcessed()
+	case gi.KeyFunPageDown:
+		tv.MovePageDownAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunPageUp:
+		tv.MovePageUpAction(selMode)
+		kt.SetProcessed()
 	case gi.KeyFunSelectMode:
 		tv.SelectMode = !tv.SelectMode
 		kt.SetProcessed()
@@ -1710,6 +1782,16 @@ func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 			tv.UpdateSelect(nr, true)
 			kt.SetProcessed()
 		}
+	case kf == gi.KeyFunPageDown:
+		nr := ints.MinInt(row+tv.VisRows, tv.BuiltSize-1)
+		tv.ScrollToRow(nr)
+		tv.UpdateSelect(nr, true)
+		kt.SetProcessed()
+	case kf == gi.KeyFunPageUp:
+		nr := ints.MaxInt(row-tv.VisRows, 0)
+		tv.ScrollToRow(nr)
+		tv.UpdateSelect(nr, true)
+		kt.SetProcessed()
 	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
 		tv.TableViewSig.Emit(tv.This, int64(TableViewDoubleClicked), tv.SelectedIdx)
 		kt.SetProcessed()

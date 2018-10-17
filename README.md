@@ -96,15 +96,14 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* focusfirst not focusing textview, likely b/c update not working when resizing = true, but attempts to fix didn't work yet..
+
+* mac menu update problem: need to coordinate updating of menu -- os knows when window becomes key window but we are updating menu asynchronously..
 
 * filenode: ability to sort by date within directories
 
 * crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild
 
-* drag on textfield should prevent DND -- dnd not getting "processed"
-
-* fileview keyboard shortcuts: page up / down (tableview), history prev = go up dir?  history next = go to next in history list?  or just pop up history list probably.  maybe command-uparrow = up dir?  Need something intuitive there.  also a cancel?  esc takes a few to actually cancel..
+* fileview keyboard shortcuts: history prev = go up dir?  history next = go to next in history list?  or just pop up history list probably.  maybe command-uparrow = up dir?  Need something intuitive there.  also a cancel?  esc takes a few to actually cancel..
 
 * TextView:
 	+ diffs revert not updating all the way.. maybe one liners?  really not sure.  maybe due to autoindent

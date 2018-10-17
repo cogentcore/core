@@ -280,7 +280,7 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-    menuSetAsMain(self);
+    // menuSetAsMain(self);
     windowFocused((GoUintptr)self);
 }
 
@@ -669,6 +669,11 @@ void menuSetAsMain(ScreenGLView* view) {
 	if (men != NULL) {
   		[NSApp setMainMenu: men];
 	}
+}
+
+void doSetMainMenu(uintptr_t viewID) {
+	ScreenGLView* view = (ScreenGLView*)viewID;
+	menuSetAsMain(view);
 }
 
 uintptr_t doGetMainMenu(uintptr_t viewID) {

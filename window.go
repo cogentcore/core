@@ -602,7 +602,6 @@ func (w *Window) FullReRender() {
 	if w.IsClosed() {
 		return
 	}
-	w.FocusInactivate()
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
 		if w.StartFocus != nil {
@@ -1136,7 +1135,7 @@ mainloop:
 					}
 				}
 			}
-			if !dndStarted {
+			if w.Dragging == nil && !dndStarted {
 				if startDND == nil {
 					startDND = evi.(*mouse.DragEvent)
 				} else {
@@ -1955,6 +1954,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		e.SetProcessed()
 	case KeyFunRefresh:
 		fmt.Printf("Window: %v display refreshed\n", w.Nm)
+		w.FocusInactivate()
 		w.FullReRender()
 		// w.UploadAllViewports()
 		e.SetProcessed()
@@ -2184,7 +2184,7 @@ func (w *Window) ClearNonFocus() {
 			return true
 		}
 		if ni.HasFocus() {
-			fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
+			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
 			if !updated {
 				updated = true
 				updt = w.UpdateStart()
