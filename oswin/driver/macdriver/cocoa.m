@@ -62,11 +62,13 @@ uint64 threadID() {
     MenuDelegate* _menuDel;
     NSMenu* _mainMenu;
     BOOL _reallyClose;
+    BOOL _menuUpdtMu;
 }
 
 @property (atomic, retain) MenuDelegate* menuDel;
 @property (atomic, retain) NSMenu* mainMenu;
 @property (atomic, assign) BOOL reallyClose;
+@property (atomic, assign) BOOL menuUpdtMu;
 
 @end
 
@@ -117,6 +119,7 @@ void menuSetAsMain(ScreenGLView* view);
 @synthesize menuDel = _menuDel;
 @synthesize mainMenu = _mainMenu;
 @synthesize reallyClose = _reallyClose;
+@synthesize menuUpdtMu = _menuUpdtMu;
 
 - (void)prepareOpenGL {
     self.reallyClose = NO;
@@ -280,8 +283,8 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-    // menuSetAsMain(self);
-    windowFocused((GoUintptr)self);
+	menuSetAsMain(self);
+	windowFocused((GoUintptr)self);
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
@@ -301,12 +304,6 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
-	// if(self.mainMenu != NULL) {
-	// 	self.mainMenu = NULL;
-	// }
-	// if(self.menuDel != NULL) {
-	// 	self.menuDel = NULL;
-	// }
 	if (self.window.nextResponder != NULL) {
   		[self.window.nextResponder release];
   		self.window.nextResponder = NULL;
@@ -423,6 +420,9 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
             };
             id pixFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
             view = [[ScreenGLView alloc] initWithFrame:rect pixelFormat:pixFormat];
+			  [view newMainMenu];
+   			  view.menuUpdtMu = NO; // not locked
+												
             [window setContentView:view];
             [window setDelegate:view];
             [window makeFirstResponder:view];
@@ -665,10 +665,11 @@ void getScreens() {
 
 // called during expose or focus
 void menuSetAsMain(ScreenGLView* view) {
+	while (view.menuUpdtMu == YES) { }; // busy wait..
+   view.menuUpdtMu = YES; // locked
 	NSMenu* men = [view mainMenu];
-	if (men != NULL) {
-  		[NSApp setMainMenu: men];
-	}
+ 	[NSApp setMainMenu: men];
+   view.menuUpdtMu = NO; // unlocked
 }
 
 void doSetMainMenu(uintptr_t viewID) {
@@ -679,10 +680,20 @@ void doSetMainMenu(uintptr_t viewID) {
 uintptr_t doGetMainMenu(uintptr_t viewID) {
 	ScreenGLView* view = (ScreenGLView*)viewID;
 	NSMenu* men = [view mainMenu];
-	if (men == NULL) {
-		men = [view newMainMenu];
-	}
 	return (uintptr_t)men;
+}
+
+uintptr_t doGetMainMenuLock(uintptr_t viewID) {
+	ScreenGLView* view = (ScreenGLView*)viewID;
+	while (view.menuUpdtMu == YES) { }; // busy wait..
+   view.menuUpdtMu = YES; // locked
+	NSMenu* men = [view mainMenu];
+	return (uintptr_t)men;
+}
+
+void doMainMenuUnlock(uintptr_t viewID) {
+	ScreenGLView* view = (ScreenGLView*)viewID;
+   view.menuUpdtMu = NO; // unlocked
 }
 
 void doMenuReset(uintptr_t menuID) {

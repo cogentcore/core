@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"sync"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -170,10 +169,6 @@ func MainMenuFunc(owin oswin.Window, title string, tag int) {
 	ma.Trigger()
 }
 
-// mainMenuMu protects updating of the central main menu, which is not
-// concurrent safe and different windows run on different threads
-var mainMenuMu sync.Mutex
-
 // SetMainMenu sets this menubar as the main menu of given window -- called by
 // Window.MainMenuUpdated.
 func (mb *MenuBar) SetMainMenu(win *Window) {
@@ -182,12 +177,9 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 		return
 	}
 
-	mainMenuMu.Lock()
-	defer mainMenuMu.Unlock()
-
 	mb.UpdateActions()
 	osmm.SetFunc(MainMenuFunc)
-	mm := osmm.Menu()
+	mm := osmm.StartUpdate() // locks
 	osmm.Reset(mm)
 	mb.OSMainMenus = make(map[string]*Action, 100)
 	for _, mi := range mb.Kids {
@@ -197,6 +189,7 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 			mb.SetMainMenuSub(osmm, subm, ac)
 		}
 	}
+	osmm.EndUpdate(mm) // unlocks
 }
 
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
@@ -228,9 +221,6 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 		return
 	}
 
-	mainMenuMu.Lock()
-	defer mainMenuMu.Unlock()
-
 	mb.UpdateActions()
 	if mb.OSMainMenus == nil {
 		return
@@ -240,7 +230,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 		if !ok {
 			continue
 		}
-		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsActive())
+		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsActive()) // assuming this is threadsafe
 	}
 }
 

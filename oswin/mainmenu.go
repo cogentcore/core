@@ -25,8 +25,16 @@ type MainMenu interface {
 	// callback function set in SetFunc.
 	Triggered(win Window, title string, tag int)
 
-	// MainMenu returns the menu pointer for the main menu associated with window.
+	// Menu returns the menu pointer for the main menu associated with window.
+	// only for READ ONLY purposes -- use StartUpdate when starting to update it.
 	Menu() Menu
+
+	// StartUpdate locks the menu pointer for the main menu associated with window.
+	// only for READ ONLY purposes -- use StartUpdate when starting to update it.
+	StartUpdate() Menu
+
+	// EndUpdate unlocks the current update -- must be matched with StartUpdate
+	EndUpdate(men Menu)
 
 	// Reset resets all items on given menu -- do this before updating.
 	Reset(men Menu)

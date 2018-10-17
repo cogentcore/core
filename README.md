@@ -96,9 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-
-* mac menu update problem: need to coordinate updating of menu -- os knows when window becomes key window but we are updating menu asynchronously..
-
 * filenode: ability to sort by date within directories
 
 * crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild

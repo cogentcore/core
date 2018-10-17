@@ -39,6 +39,8 @@ void doCloseWindow(uintptr_t id);
 void getScreens();
 void doSetMainMenu(uintptr_t viewID);
 uintptr_t doGetMainMenu(uintptr_t viewID);
+uintptr_t doGetMainMenuLock(uintptr_t viewID);
+void doMainMenuUnlock(uintptr_t menuID);
 void doMenuReset(uintptr_t menuID);
 uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm);
 uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scCtrl, int tag, bool active);
@@ -581,25 +583,28 @@ func surfaceCreate() error {
 // MainMenu
 
 func (mm *mainMenuImpl) Menu() oswin.Menu {
-	mm.win.glctxMu.Lock()
 	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
-	mm.win.glctxMu.Unlock()
 	return oswin.Menu(mmen)
 }
 
+func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
+	mmen := C.doGetMainMenuLock(C.uintptr_t(mm.win.id))
+	return oswin.Menu(mmen)
+}
+
+func (mm *mainMenuImpl) EndUpdate(men oswin.Menu) {
+	C.doMainMenuUnlock(C.uintptr_t(mm.win.id))
+}
+
 func (mm *mainMenuImpl) Reset(men oswin.Menu) {
-	// mm.win.glctxMu.Lock()
 	C.doMenuReset(C.uintptr_t(men))
-	// mm.win.glctxMu.Unlock()
 }
 
 func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
-	// mm.win.glctxMu.Lock()
 	subid := C.doAddSubMenu(C.uintptr_t(men), title)
-	// mm.win.glctxMu.Unlock()
 	return oswin.Menu(subid)
 }
 
@@ -621,38 +626,28 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
 
-	// mm.win.glctxMu.Lock()
 	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
-	// mm.win.glctxMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
-	// mm.win.glctxMu.Lock()
 	C.doAddSeparator(C.uintptr_t(men))
-	// mm.win.glctxMu.Unlock()
 }
 
 func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
 	title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
-	// mm.win.glctxMu.Lock()
 	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
-	// mm.win.glctxMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
-	// mm.win.glctxMu.Lock()
 	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
-	// mm.win.glctxMu.Unlock()
 	return oswin.MenuItem(mid)
 }
 
 func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
-	// mm.win.glctxMu.Lock()
 	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
-	// mm.win.glctxMu.Unlock()
 }
 
 //export menuFired

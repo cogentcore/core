@@ -919,7 +919,7 @@ func (w *Window) MainMenuUpdated() {
 		w.UpMu.Unlock()
 		return
 	}
-	w.MainMenu.SetMainMenu(w)
+	w.MainMenu.SetMainMenu(w) // main update menu call, in bars.go for MenuBar
 	w.UpMu.Unlock()
 }
 
@@ -934,7 +934,7 @@ func (w *Window) MainMenuUpdateActives() {
 		w.UpMu.Unlock()
 		return
 	}
-	w.MainMenu.MainMenuUpdateActives(w)
+	w.MainMenu.MainMenuUpdateActives(w) // also in bars.go for MenuBar
 	w.UpMu.Unlock()
 }
 
