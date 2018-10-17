@@ -434,7 +434,7 @@ func (w *Window) IsResizing() bool {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
-	if w.IsInactive() || w.Viewport == nil {
+	if w.IsClosed() {
 		return
 	}
 	curSz := w.Viewport.Geom.Size
@@ -447,6 +447,7 @@ func (w *Window) Resized(sz image.Point) {
 		w.UpMu.Unlock()
 		return
 	}
+	w.FocusInactivate()
 	// fmt.Printf("actual resized fun: %v\n", sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
@@ -468,6 +469,7 @@ func (w *Window) Resized(sz image.Point) {
 // Closed frees any resources after the window has been closed.
 func (w *Window) Closed() {
 	w.UpMu.Lock()
+	w.FocusInactivate()
 	AllWindows.Delete(w)
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
@@ -597,9 +599,10 @@ func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 // drive an UploadAllViewports call after all the rendering is done, and
 // signal the publishing of the window after that
 func (w *Window) FullReRender() {
-	if w.IsInactive() || w.Viewport == nil {
+	if w.IsClosed() {
 		return
 	}
+	w.FocusInactivate()
 	w.Viewport.FullRender2DTree()
 	if w.Focus == nil {
 		if w.StartFocus != nil {
@@ -615,7 +618,7 @@ func (w *Window) FullReRender() {
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	if w.IsInactive() || w.WinTex == nil {
+	if w.IsClosed() {
 		return
 	}
 	w.UpMu.Lock()
@@ -637,7 +640,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
 func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
-	if w.IsInactive() || w.WinTex == nil {
+	if w.IsClosed() {
 		return
 	}
 	w.UpMu.Lock()
@@ -662,7 +665,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
-	if w.IsInactive() || w.WinTex == nil {
+	if w.IsClosed() {
 		return
 	}
 	w.UpMu.Lock()
@@ -729,7 +732,7 @@ func (w *Window) ClearUpdating() bool {
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
-	if w.IsInactive() || w.WinTex == nil || w.OSWin.IsMinimized() {
+	if w.IsClosed() || w.OSWin.IsMinimized() {
 		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		return
 	}
@@ -763,6 +766,9 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.Embed(KiT_Window).(*Window)
 	if Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+	}
+	if win.IsClosed() || win.Resizing || win.IsUpdating() {
+		return
 	}
 	win.Publish()
 }
@@ -2242,6 +2248,18 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 				nii.FocusChanged2D(FocusInactive)
 			}
 		}
+	}
+}
+
+// FocusInactivate inactivates the current focus element
+func (w *Window) FocusInactivate() {
+	if w.Focus == nil || !w.FocusActive {
+		return
+	}
+	nii, ni := KiToNode2D(w.Focus)
+	if ni != nil && ni.This != nil {
+		w.FocusActive = false
+		nii.FocusChanged2D(FocusInactive)
 	}
 }
 

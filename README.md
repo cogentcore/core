@@ -127,8 +127,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * windows: arialuni.ttf  https://docs.microsoft.com/en-us/typography/font-list/arial-unicode-ms
 
-* textfield should scroll layout so that *cursor* is always in view, when editing..
-
 * fileview should add extension to filename if only one extension provided, if
   user types in a new filename.. 
 

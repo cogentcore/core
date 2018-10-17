@@ -48,6 +48,7 @@ type TextField struct {
 	CharWidth    int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
 	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
 	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
+	SelectInit   int                     `xml:"-" desc:"initial selection position -- where it started"`
 	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
@@ -193,14 +194,7 @@ func (tf *TextField) CursorForward(steps int) {
 		tf.EndPos += inc
 	}
 	if tf.SelectMode {
-		if tf.CursorPos-steps < tf.SelectStart {
-			tf.SelectStart = tf.CursorPos
-		} else if tf.CursorPos > tf.SelectStart {
-			tf.SelectEnd = tf.CursorPos
-		} else {
-			tf.SelectStart = tf.CursorPos
-		}
-		tf.SelectUpdate()
+		tf.SelectRegUpdate(tf.CursorPos)
 	}
 }
 
@@ -219,14 +213,7 @@ func (tf *TextField) CursorBackward(steps int) {
 		tf.StartPos -= dec
 	}
 	if tf.SelectMode {
-		if tf.CursorPos+steps < tf.SelectStart {
-			tf.SelectStart = tf.CursorPos
-		} else if tf.CursorPos > tf.SelectStart {
-			tf.SelectEnd = tf.CursorPos
-		} else {
-			tf.SelectStart = tf.CursorPos
-		}
-		tf.SelectUpdate()
+		tf.SelectRegUpdate(tf.CursorPos)
 	}
 }
 
@@ -241,8 +228,7 @@ func (tf *TextField) CursorStart() {
 	tf.StartPos = 0
 	tf.EndPos = ints.MinInt(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
 	if tf.SelectMode {
-		tf.SelectStart = 0
-		tf.SelectUpdate()
+		tf.SelectRegUpdate(tf.CursorPos)
 	}
 }
 
@@ -257,8 +243,7 @@ func (tf *TextField) CursorEnd() {
 	tf.EndPos = len(tf.EditTxt) // try -- display will adjust
 	tf.StartPos = ints.MaxInt(0, tf.EndPos-tf.CharWidth)
 	if tf.SelectMode {
-		tf.SelectEnd = ed
-		tf.SelectUpdate()
+		tf.SelectRegUpdate(tf.CursorPos)
 	}
 }
 
@@ -347,15 +332,30 @@ func (tf *TextField) SelectModeToggle() {
 		tf.SelectMode = false
 	} else {
 		tf.SelectMode = true
+		tf.SelectInit = tf.CursorPos
 		tf.SelectStart = tf.CursorPos
 		tf.SelectEnd = tf.SelectStart
 	}
+}
+
+// SelectRegUpdate updates current select region based on given cursor position
+// relative to SelectStart position
+func (tf *TextField) SelectRegUpdate(pos int) {
+	if pos < tf.SelectInit {
+		tf.SelectStart = pos
+		tf.SelectEnd = tf.SelectInit
+	} else {
+		tf.SelectStart = tf.SelectInit
+		tf.SelectEnd = pos
+	}
+	tf.SelectUpdate()
 }
 
 // SelectAll selects all the text
 func (tf *TextField) SelectAll() {
 	updt := tf.UpdateStart()
 	tf.SelectStart = 0
+	tf.SelectInit = 0
 	tf.SelectEnd = len(tf.EditTxt)
 	tf.UpdateEnd(updt)
 }
@@ -410,6 +410,7 @@ func (tf *TextField) SelectWord() {
 			tf.SelectEnd++
 		}
 	}
+	tf.SelectInit = tf.SelectStart
 }
 
 // SelectReset resets the selection
@@ -748,6 +749,18 @@ func (tf *TextField) RenderCursor(on bool) {
 	}
 }
 
+// ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view
+func (tf *TextField) ScrollLayoutToCursor() bool {
+	ly := tf.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	cpos := tf.CharStartPos(tf.CursorPos).ToPointFloor()
+	bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
+	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
+	return ly.ScrollToBox(bbox)
+}
+
 // CursorSprite returns the sprite Viewport2D that holds the cursor (which is
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status)
@@ -942,12 +955,10 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 			tf.SelectStart = oldPos
 			tf.SelectMode = true
 		}
-		if !tf.IsDragging() && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+		if !tf.IsDragging() && selMode == mouse.NoSelectMode { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.SelectReset()
-		} else if tf.CursorPos > tf.SelectStart {
-			tf.SelectEnd = tf.CursorPos
 		} else {
-			tf.SelectStart = tf.CursorPos
+			tf.SelectRegUpdate(tf.CursorPos)
 		}
 		tf.SelectUpdate()
 	} else if tf.HasSelection() {
@@ -1213,6 +1224,7 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tf *TextField) Render2D() {
+	tf.ScrollLayoutToCursor()
 	if tf.FullReRenderIfNeeded() {
 		return
 	}
@@ -1269,21 +1281,28 @@ func (tf *TextField) ConnectEvents2D() {
 }
 
 func (tf *TextField) FocusChanged2D(change FocusChanges) {
+	doUpdt := !tf.Viewport.Win.Resizing && !tf.Viewport.Win.IsClosed()
 	switch change {
 	case FocusLost:
 		tf.FocusActive = false
 		tf.EditDone()
-		tf.UpdateSig()
+		if doUpdt {
+			tf.UpdateSig()
+		}
 	case FocusGot:
 		tf.FocusActive = true
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
-		tf.UpdateSig()
+		if doUpdt {
+			tf.UpdateSig()
+		}
 	case FocusInactive:
 		tf.FocusActive = false
 		tf.EditDone()
-		tf.UpdateSig()
+		if doUpdt {
+			tf.UpdateSig()
+		}
 	case FocusActive:
 		tf.FocusActive = true
 		tf.ScrollToMe()

@@ -1649,6 +1649,7 @@ func (tv *TextView) SelectWord() {
 		}
 		tv.SelectReg.End.Ch = ech
 	}
+	tv.SelectStart = tv.SelectReg.Start
 }
 
 // SelectReset resets the selection
@@ -2227,10 +2228,9 @@ func (tv *TextView) StopCursor() {
 
 // CursorBBox returns a bounding-box for a cursor at given position
 func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
-	st := &tv.Sty
 	cpos := tv.CharStartPos(pos)
-	cbmin := cpos.SubVal(st.Border.Width.Dots)
-	cbmax := cpos.AddVal(st.Border.Width.Dots)
+	cbmin := cpos.SubVal(tv.CursorWidth.Dots)
+	cbmax := cpos.AddVal(tv.CursorWidth.Dots)
 	cbmax.Y += tv.FontHeight
 	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
 	return curBBox
@@ -3313,7 +3313,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tv *TextView) Render2D() {
-	// fmt.Printf("tv render: %v\n", tv.Nm)
+	fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

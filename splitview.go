@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"strconv"
 	"strings"
@@ -242,6 +243,7 @@ func (sv *SplitView) ConfigSplitters() {
 				if sig == int64(SliderReleased) {
 					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
+					fmt.Printf("split action\n")
 					spr.SetSplitsAction(spl.SplitterNo, spl.Value)
 				}
 			})
