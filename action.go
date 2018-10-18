@@ -17,8 +17,8 @@ import (
 // and / or a keyboard shortcut -- this is what is put in menus, menubars, and
 // toolbars, and also for any standalone simple action.  The default styling
 // differs depending on whether it is in a Menu versus a MenuBar or ToolBar --
-// this is controlled by the Class which is automatically set to menu-action
-// or bar-action.
+// this is controlled by the Class which is automatically set to
+// menu, menubar, or toolbar
 type Action struct {
 	ButtonBase
 	Data       interface{}       `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
@@ -103,10 +103,38 @@ var ActionProps = ki.Props{
 			"background-color": &Prefs.Colors.Select,
 		},
 	},
-	".bar-action": ki.Props{ // class of actions as bar items (MenuBar, ToolBar)
-		"padding":   units.NewValue(4, units.Px), // we go to edge of bar
-		"margin":    units.NewValue(0, units.Px),
-		"indicator": "none",
+	".menubar-action": ki.Props{ // class of actions in MenuBar
+		"padding":      units.NewValue(4, units.Px), // we go to edge of bar
+		"margin":       units.NewValue(0, units.Px),
+		"indicator":    "none",
+		"border-width": units.NewValue(0, units.Px),
+		ButtonSelectors[ButtonActive]: ki.Props{
+			"background-color": "linear-gradient(lighter-0, highlight-10)",
+		},
+		ButtonSelectors[ButtonInactive]: ki.Props{
+			"border-color": "lighter-50",
+			"color":        "lighter-50",
+		},
+		ButtonSelectors[ButtonHover]: ki.Props{
+			"background-color": "linear-gradient(highlight-10, highlight-10)",
+		},
+		ButtonSelectors[ButtonFocus]: ki.Props{
+			"border-width":     units.NewValue(2, units.Px),
+			"background-color": "linear-gradient(samelight-50, highlight-10)",
+		},
+		ButtonSelectors[ButtonDown]: ki.Props{
+			"color":            "lighter-90",
+			"background-color": "linear-gradient(highlight-30, highlight-10)",
+		},
+		ButtonSelectors[ButtonSelected]: ki.Props{
+			"background-color": "linear-gradient(pref(Select), highlight-10)",
+		},
+	},
+	".toolbar-action": ki.Props{ // class of actions in ToolBar
+		"padding":      units.NewValue(4, units.Px), // we go to edge of bar
+		"margin":       units.NewValue(0, units.Px),
+		"indicator":    "none",
+		"border-width": units.NewValue(1, units.Px),
 		ButtonSelectors[ButtonActive]: ki.Props{
 			"background-color": "linear-gradient(lighter-0, highlight-10)",
 		},
@@ -267,10 +295,13 @@ func (ac *Action) ConfigParts() {
 	switch {
 	case ismbar:
 		ac.Indicator = "none" // menu-bar specifically
-		fallthrough
+		if ac.Class == "" {
+			ac.Class = "menubar-action"
+		}
+		ac.ConfigPartsButton()
 	case istbar:
 		if ac.Class == "" {
-			ac.Class = "bar-action"
+			ac.Class = "toolbar-action"
 		}
 		ac.ConfigPartsButton()
 	case ac.IsMenu():
