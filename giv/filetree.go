@@ -742,7 +742,7 @@ var FileTreeViewProps = ki.Props{
 			"desc":  "open given directory to see files within",
 			"updtfunc": func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetInactiveStateUpdt(fn.FileNode().IsDir())
+				act.SetActiveStateUpdt(fn.FileNode().IsDir())
 			},
 		}},
 	},

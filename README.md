@@ -104,7 +104,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * TextView:
 	+ diffs revert not updating all the way.. maybe one liners?  really not sure.  maybe due to autoindent
-	+ clicking back to other window textview fails to grab blinky cursor -- works for C-x p / o but not mouse clicking.
+	+ clicking back to other window textview fails to grab blinky cursor -- works for C-x p / o but not mouse clicking. -- double-click works but not single click.  hmm.
 	+ clipboard history
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
