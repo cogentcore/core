@@ -2770,7 +2770,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
 	wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
 	wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
-	fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
+	// fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
 	return &wp
 }
 

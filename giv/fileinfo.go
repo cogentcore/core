@@ -314,7 +314,7 @@ var FileInfoProps = ki.Props{
 		{"Duplicate", ki.Props{
 			"updtfunc": func(fii interface{}, act *gi.Action) {
 				fi := fii.(*FileInfo)
-				act.SetInactiveStateUpdt(fi.IsDir())
+				act.SetInactiveState(fi.IsDir())
 			},
 		}},
 		{"Delete", ki.Props{
@@ -322,7 +322,7 @@ var FileInfoProps = ki.Props{
 			"confirm": true,
 			"updtfunc": func(fii interface{}, act *gi.Action) {
 				fi := fii.(*FileInfo)
-				act.SetInactiveStateUpdt(fi.IsDir())
+				act.SetInactiveState(fi.IsDir())
 			},
 		}},
 		{"Rename", ki.Props{

@@ -63,6 +63,8 @@ func (ft *FileTree) UpdateNewFile(filename gi.FileName) {
 	} else if fn, ok := ft.FindFile(fpath); ok {
 		// fmt.Printf("updating node for path: %v\n", fpath)
 		fn.UpdateNode()
+	} else {
+		fmt.Printf("FileTree UpdateNewFile: no node found for path to update: %v\n", filename)
 	}
 }
 
@@ -429,6 +431,7 @@ func (fn *FileNode) NewFile(filename string) {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
 		return
 	}
+	fn.FRoot.UpdateNewFile(gi.FileName(np))
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -745,7 +748,7 @@ var FileTreeViewProps = ki.Props{
 			"label": "Duplicate",
 			"updtfunc": func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetInactiveStateUpdt(fn.FileNode().IsDir())
+				act.SetInactiveState(fn.FileNode().IsDir())
 			},
 		}},
 		{"DeleteFiles", ki.Props{
@@ -754,7 +757,7 @@ var FileTreeViewProps = ki.Props{
 			"confirm": true,
 			"updtfunc": func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetInactiveStateUpdt(fn.FileNode().IsDir())
+				act.SetInactiveState(fn.FileNode().IsDir())
 			},
 		}},
 		{"RenameFiles", ki.Props{
@@ -767,7 +770,7 @@ var FileTreeViewProps = ki.Props{
 			"desc":  "open given folder to see files within",
 			"updtfunc": func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetActiveStateUpdt(fn.FileNode().IsDir())
+				act.SetActiveState(fn.FileNode().IsDir())
 			},
 		}},
 		{"NewFile", ki.Props{
@@ -777,7 +780,7 @@ var FileTreeViewProps = ki.Props{
 				ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 				fn := ft.FileNode()
 				if fn != nil {
-					act.SetActiveStateUpdt(fn.IsDir())
+					act.SetActiveState(fn.IsDir())
 				}
 			},
 			"Args": ki.PropSlice{

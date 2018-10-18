@@ -1394,15 +1394,19 @@ func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool 
 		switch df.Tag {
 		case 'r':
 			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)
+			// fmt.Printf("patch rep del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
 			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false, signal)
+			// fmt.Printf("patch rep ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'd':
 			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)
+			// fmt.Printf("patch del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'i':
 			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
 			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false, signal)
+			// fmt.Printf("patch ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		}
 	}

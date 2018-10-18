@@ -336,6 +336,18 @@ func HasMainMenuView(val interface{}) bool {
 	return true
 }
 
+// MethViewNoUpdateAfterProp returns true if given val has a top-level "MethViewNoUpdateAfter"
+// type property registered -- some types generically want that and it is much easier to
+// just specify once instead of every time..
+func MethViewNoUpdateAfterProp(val interface{}) bool {
+	tpp, _, ok := MethViewTypeProps(val)
+	if !ok {
+		return false
+	}
+	_, nua := tpp["MethViewNoUpdateAfter"]
+	return nua
+}
+
 // This is the name of the property that holds cached map of compiled callable methods
 var MethodViewCallMethsProp = "__MethViewCallMeths"
 
@@ -406,6 +418,11 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	rval := true
 	md := &MethViewData{Val: val, ValVal: valval, Vp: vp, Method: methNm, MethVal: methVal, MethTyp: methTyp}
 	ac.Data = md
+
+	if MethViewNoUpdateAfterProp(val) {
+		bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+	}
+
 	if props == nil {
 		ac.ActionSig.Connect(vp.This, MethViewCall)
 		return true
@@ -431,6 +448,8 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			bitflag.Set32((*int32)(&md.Flags), int(MethViewShowReturn))
 		case "no-update-after":
 			bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+		case "update-after": // if MethViewNoUpdateAfterProp was set above
+			bitflag.Clear32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
 		case "updtfunc":
 			if uf, ok := pv.(func(interface{}, *gi.Action)); ok {
 				md.UpdateFunc = uf
