@@ -198,10 +198,7 @@ func NextUnknownWord() (unknown string, suggests []string) {
 		}
 		var known = false
 		suggests, known = CheckWord(w)
-		if suggests != nil && !known {
-			for _, s := range suggests {
-				fmt.Println(s)
-			}
+		if !known {
 			break
 		}
 	}
@@ -245,27 +242,24 @@ func LearnWord(word string) {
 // TextToWords generates a slice of words from text
 // removes various non-word input, trims symbols, etc
 func TextToWords(text []byte) {
-	s := string(text)
+	r, err := regexp.Compile(`\W`)
+	if err != nil {
+		panic(err)
+	}
 
-	// cases like and/or, good-hearted
-	s = strings.Replace(s, "/", " ", -1)
-	s = strings.Replace(s, "-", " ", -1)
-	s = strings.Replace(s, "=", " ", -1)
+	textstr := string(text)
 
-	var trims []string
-	for _, line := range strings.Split(s, "\n") {
-		// now get words
-		//words := gs.Split(line)
-		trims = trims[:0]
-		words := strings.Split(line, " ")
-		for _, w := range words {
-			w = strings.Trim(w, "!$`'*.,?[]():;\"")
-			if len(w) < 2 {
-				break
+	var words []string
+	for _, line := range strings.Split(textstr, "\n") {
+		line = r.ReplaceAllString(line, " ")
+		words = words[:0] // reset for new line
+		splits := strings.Split(line, " ")
+		for _, w := range splits {
+			if len(w) > 1 {
+				words = append(words, w)
 			}
-			trims = append(trims, w)
 		}
-		input = append(input, trims...)
+		input = append(input, words...)
 	}
 	//for _, w := range input {
 	//	fmt.Println(w)
