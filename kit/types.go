@@ -40,6 +40,7 @@ import (
 	"log"
 	"path"
 	"reflect"
+	"sync"
 )
 
 // TypeRegistry is a map from type name (package path + "." + type name) to
@@ -83,6 +84,10 @@ func FullTypeName(typ reflect.Type) string {
 	}
 	return typ.PkgPath() + "." + typ.Name()
 }
+
+// TypesMu protects updating of the type registry maps -- main Addtype etc all
+// happens at startup and does not need protection, but property access does
+var TypesMu sync.Mutex
 
 // AddType adds a given type to the registry -- requires an empty object to
 // grab type info from (which is then stored in Insts) -- must be passed as a
@@ -134,6 +139,9 @@ func (tr *TypeRegistry) Inst(typ reflect.Type) interface{} {
 // if not already made -- can use this to register properties for types that
 // are not registered
 func (tr *TypeRegistry) PropsByName(typeName string, makeNew bool) *map[string]interface{} {
+	TypesMu.Lock()
+	defer TypesMu.Unlock()
+
 	tp, ok := tr.Props[typeName]
 	if !ok {
 		if !makeNew {
@@ -156,6 +164,9 @@ func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) *map[string]i
 // PropByName safely finds a type property from type name and property key --
 // returns false if not found
 func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool) {
+	TypesMu.Lock()
+	defer TypesMu.Unlock()
+
 	tp, ok := tr.Props[typeName]
 	if !ok {
 		// fmt.Printf("no props for type: %v\n", typeName)
@@ -174,6 +185,9 @@ func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) (interface{}, boo
 
 // SetProps sets the type props for given type
 func (tr *TypeRegistry) SetProps(typ reflect.Type, props map[string]interface{}) {
+	TypesMu.Lock()
+	defer TypesMu.Unlock()
+
 	typeName := FullTypeName(typ)
 	tr.Props[typeName] = props
 }
