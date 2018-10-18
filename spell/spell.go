@@ -31,7 +31,7 @@ import (
 ///////////////////////////////////////////////////////////////////////////////
 //  spell check (no suggestions) github.com/client9/gospell
 
-// UnknownWord records one unknown word instance
+// UnknownWord is an unknown word instance - used with the gospell implementation
 type UnknownWord struct {
 	Filename    string   `desc:"filename only, no path"` // gospell.Diff.Filename
 	Path        string   `desc:"path only, no filename"` // gospell.Diff.Path
@@ -129,8 +129,15 @@ func CheckFile(fullpath string) ([]UnknownWord, error) {
 ///////////////////////////////////////////////////////////////////////////////
 //  spell check returning suggestions using github.com/sajari/fuzzy
 
+// TextWord represents one word of the input text - used with fuzzy implementation
+type TextWord struct {
+	Word string
+	Line int `desc:"the line number"`
+	Char int `desc:"the character position"`
+}
+
 var model *fuzzy.Model
-var input []string
+var input []TextWord
 var inputidx int = 0
 
 func GetCorpus() []string {
@@ -208,9 +215,9 @@ func NextUnknownWord() (unknown string, suggests []string) {
 // returns the next word of the input words
 func NextWord() string {
 	if inputidx < len(input) {
-		w := input[inputidx]
+		tw := input[inputidx]
 		inputidx += 1
-		return w
+		return tw.Word
 	}
 	return ""
 }
@@ -249,14 +256,15 @@ func TextToWords(text []byte) {
 
 	textstr := string(text)
 
-	var words []string
-	for _, line := range strings.Split(textstr, "\n") {
+	var words []TextWord
+	for l, line := range strings.Split(textstr, "\n") {
 		line = r.ReplaceAllString(line, " ")
 		words = words[:0] // reset for new line
 		splits := strings.Split(line, " ")
 		for _, w := range splits {
 			if len(w) > 1 {
-				words = append(words, w)
+				tw := TextWord{Word: w, Line: l}
+				words = append(words, tw)
 			}
 		}
 		input = append(input, words...)
