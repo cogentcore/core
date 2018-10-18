@@ -184,6 +184,8 @@ func (fn *FileNode) ReadDir(path string) error {
 	fn.SetOpen()
 
 	typ := fn.NodeType()
+	// fmt.Printf("dir %v childtype: %v\n", fn.Nm, typ.String())
+
 	config := fn.ConfigOfFiles(path)
 	mods, updt := fn.ConfigChildren(config, true) // unique names
 	// always go through kids, regardless of mods
@@ -204,7 +206,9 @@ func (fn *FileNode) ReadDir(path string) error {
 // NodeTree to seed this -- otherwise always FileNode
 func (fn *FileNode) NodeType() reflect.Type {
 	if ntp, ok := fn.Prop("ChildType"); ok {
-		return ntp.(reflect.Type)
+		typ := ntp.(reflect.Type)
+		// fmt.Printf("%v childtype: %v\n", fn.Nm, typ.String())
+		return typ
 	}
 	return KiT_FileNode
 }
