@@ -31,8 +31,9 @@ import (
 // interface into it.
 type FileTree struct {
 	FileNode
-	OpenDirs  OpenDirMap `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
-	DirsOnTop bool       `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
+	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
+	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
+	NodeType  reflect.Type `desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
 }
 
 var KiT_FileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
@@ -44,6 +45,9 @@ var FileTreeProps = ki.Props{}
 // already stored about files.  Only paths listed in OpenDirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
+	if ft.NodeType == nil {
+		ft.NodeType = KiT_FileNode
+	}
 	ft.OpenDirs.ClearFlags()
 	ft.ReadDir(path)
 }
@@ -183,16 +187,12 @@ func (fn *FileNode) ReadDir(path string) error {
 	}
 	fn.SetOpen()
 
-	typ := fn.NodeType()
-	// fmt.Printf("dir %v childtype: %v\n", fn.Nm, typ.String())
-
 	config := fn.ConfigOfFiles(path)
 	mods, updt := fn.ConfigChildren(config, true) // unique names
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := sfk.Embed(KiT_FileNode).(*FileNode)
 		sf.FRoot = fn.FRoot
-		sf.SetChildType(typ) // propagate
 		fp := filepath.Join(path, sf.Nm)
 		sf.SetNodePath(fp)
 	}
@@ -202,23 +202,12 @@ func (fn *FileNode) ReadDir(path string) error {
 	return nil
 }
 
-// NodeType returns the type of nodes to create -- set ChildType property on
-// NodeTree to seed this -- otherwise always FileNode
-func (fn *FileNode) NodeType() reflect.Type {
-	if ntp, ok := fn.Prop("ChildType"); ok {
-		typ := ntp.(reflect.Type)
-		// fmt.Printf("%v childtype: %v\n", fn.Nm, typ.String())
-		return typ
-	}
-	return KiT_FileNode
-}
-
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
 // files immediately within given path
 func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 	config1 := kit.TypeAndNameList{}
 	config2 := kit.TypeAndNameList{}
-	typ := fn.NodeType()
+	typ := fn.FRoot.NodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("giv.FileNode ConfigFilesIn Path %q: Error: %v", path, err)
@@ -432,6 +421,16 @@ func (fn *FileNode) RenameFile(newpath string) error {
 	return err
 }
 
+// NewFile makes a new file in given selected directory node
+func (fn *FileNode) NewFile(filename string) {
+	np := filepath.Join(string(fn.FPath), filename)
+	_, err := os.Create(np)
+	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
+		return
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Search
 
@@ -539,12 +538,19 @@ var KiT_FileNodeFlags = kit.Enums.AddEnum(FileNodeFlagsN, true, nil) // true = b
 var FileNodeProps = ki.Props{
 	"CallMethods": ki.PropSlice{
 		{"RenameFile", ki.Props{
-			"label": "Rename",
+			"label": "Rename...",
 			"desc":  "Rename file to new file name",
 			"Args": ki.PropSlice{
 				{"New Name", ki.Props{
 					"default-field": "Name",
 				}},
+			},
+		}},
+		{"NewFile", ki.Props{
+			"label": "New File...",
+			"desc":  "Create a new file in this folder",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{}},
 			},
 		}},
 	},
@@ -667,6 +673,21 @@ func (ft *FileTreeView) OpenDirs() {
 	}
 }
 
+// NewFile makes a new file in given selected directory node
+func (ft *FileTreeView) NewFile(filename string) {
+	sels := ft.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	sn := sels[sz-1]
+	ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		fn.NewFile(filename)
+	}
+}
+
 var FileTreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
 	"spacing":          units.NewValue(.5, units.Ch),
@@ -743,10 +764,26 @@ var FileTreeViewProps = ki.Props{
 		{"sep-open", ki.BlankProp{}},
 		{"OpenDirs", ki.Props{
 			"label": "Open Dir",
-			"desc":  "open given directory to see files within",
+			"desc":  "open given folder to see files within",
 			"updtfunc": func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 				act.SetActiveStateUpdt(fn.FileNode().IsDir())
+			},
+		}},
+		{"NewFile", ki.Props{
+			"label": "New File...",
+			"desc":  "make a new file in this folder",
+			"updtfunc": func(fni interface{}, act *gi.Action) {
+				ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+				fn := ft.FileNode()
+				if fn != nil {
+					act.SetActiveStateUpdt(fn.IsDir())
+				}
+			},
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"width": 60,
+				}},
 			},
 		}},
 	},

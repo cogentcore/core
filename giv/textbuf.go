@@ -192,7 +192,7 @@ func (tb *TextBuf) FileModCheck() {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
 				case 1:
-					tb.ReOpen()
+					tb.Revert()
 				case 2:
 					tb.FileModOk = true
 				}
@@ -238,17 +238,17 @@ func (tb *TextBuf) OpenFile(filename gi.FileName) error {
 	return nil
 }
 
-// ReOpen re-opens text from current file, if filename set -- returns false if
+// Revert re-opens text from current file, if filename set -- returns false if
 // not -- uses an optimized diff-based update to preserve existing formatting
 // -- very fast if not very different
-func (tb *TextBuf) ReOpen() bool {
+func (tb *TextBuf) Revert() bool {
 	tb.AutoSaveDelete() // justin case
 	if tb.Filename == "" {
 		return false
 	}
 
 	ob := &TextBuf{}
-	ob.InitName(ob, "re-open-tmp")
+	ob.InitName(ob, "revert-tmp")
 	err := ob.OpenFile(tb.Filename)
 	if err != nil {
 		vp := tb.ViewportFromView()
@@ -321,7 +321,7 @@ func (tb *TextBuf) Save() error {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
 				case 1:
-					tb.ReOpen()
+					tb.Revert()
 				case 2:
 					tb.SaveFile(tb.Filename)
 				}
@@ -618,7 +618,8 @@ func (tb *TextBuf) BytesToLines() {
 	for ln, txt := range lns {
 		tb.ByteOffs[ln] = bo
 		tb.Lines[ln] = bytes.Runes(txt)
-		tb.LineBytes[ln] = txt
+		tb.LineBytes[ln] = make([]byte, len(txt))
+		copy(tb.LineBytes[ln], txt)
 		tb.Markup[ln] = tb.LineBytes[ln]
 		bo += len(txt) + 1 // lf
 	}

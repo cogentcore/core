@@ -110,10 +110,10 @@ var TextViewProps = ki.Props{
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
 	TextViewSelectors[TextViewActive]: ki.Props{
-		"background-color": "lighter-0",
+		"background-color": "highlight-10",
 	},
 	TextViewSelectors[TextViewFocus]: ki.Props{
-		"background-color": "samelight-80",
+		"background-color": "lighter-0",
 	},
 	TextViewSelectors[TextViewInactive]: ki.Props{
 		"background-color": "highlight-20",
@@ -1548,6 +1548,9 @@ func (tv *TextView) EscPressed() {
 		tv.SetCursorShow(tv.ISearchStartPos)
 	case tv.HasSelection():
 		tv.SelectReset()
+	default:
+		tv.Highlights = nil
+		tv.RenderAllLines()
 	}
 }
 

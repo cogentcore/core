@@ -319,6 +319,8 @@ void menuSetAsMain(ScreenGLView* view);
 	[md setView: self];
  	[md setMainMenu: mm];
  	[mm setAutoenablesItems:NO];
+	uintptr_t sm = doAddSubMenu((uintptr_t)mm, "app");
+	doAddMenuItem((uintptr_t)self, sm, "app", "", false, false, false, false, 0, false);
 	return mm;
 }
 
@@ -441,8 +443,10 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
 void doUpdateTitle(uintptr_t viewID, char* title) {
     NSString* nst = [[NSString alloc] initWithUTF8String:title];
     ScreenGLView* view = (ScreenGLView*)viewID;
-    [view.window setTitle:nst];
-	[nst release];
+    dispatch_async(dispatch_get_main_queue(), ^{
+	    [view.window setTitle:nst];
+		});
+	// [nst release];
 }
 
 void doShowWindow(uintptr_t viewID) {
