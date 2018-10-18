@@ -3349,11 +3349,11 @@ func (tv *TextView) Render2D() {
 		} else if tv.NLines == 0 {
 			tv.Sty = tv.StateStyles[TextViewInactive]
 		} else if tv.HasFocus() {
-			if tv.FocusActive {
-				tv.Sty = tv.StateStyles[TextViewFocus]
-			} else {
-				tv.Sty = tv.StateStyles[TextViewActive]
-			}
+			// if tv.FocusActive {
+			tv.Sty = tv.StateStyles[TextViewFocus]
+			// } else {
+			// 	tv.Sty = tv.StateStyles[TextViewActive]
+			// }
 		} else if tv.IsSelected() {
 			tv.Sty = tv.StateStyles[TextViewSel]
 		} else {
@@ -3387,7 +3387,7 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 	case gi.FocusInactive:
 		tv.FocusActive = false
 		// tv.EditDone()
-		tv.UpdateSig()
+		// tv.UpdateSig()
 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 	case gi.FocusActive:
 		// fmt.Printf("focus active: %v\n", tv.Nm)
