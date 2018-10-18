@@ -3173,10 +3173,10 @@ func (tv *TextView) OpenLinkAt(pos TextPos) (*gi.TextLink, bool) {
 
 // MouseEvent handles the mouse.Event
 func (tv *TextView) MouseEvent(me *mouse.Event) {
-	if !tv.IsInactive() && !tv.HasFocus() {
+	if !tv.HasFocus() {
 		tv.GrabFocus()
-		tv.FocusActive = true
 	}
+	tv.FocusActive = true
 	me.SetProcessed()
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		return
@@ -3378,15 +3378,19 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		tv.FocusActive = false
 		// tv.EditDone()
 		tv.UpdateSig()
+		// fmt.Printf("lost focus: %v\n", tv.Nm)
 	case gi.FocusGot:
 		tv.FocusActive = true
 		tv.EmitFocusedSignal()
 		tv.UpdateSig()
+		// fmt.Printf("got focus: %v\n", tv.Nm)
 	case gi.FocusInactive:
 		tv.FocusActive = false
 		// tv.EditDone()
 		tv.UpdateSig()
+		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 	case gi.FocusActive:
+		// fmt.Printf("focus active: %v\n", tv.Nm)
 		tv.FocusActive = true
 		// tv.UpdateSig()
 		// todo: see about cursor
