@@ -373,28 +373,40 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
 
-	nval := reflect.New(kit.NonPtrType(sltyp)) // make the concrete el
-	if !slptr {
-		nval = nval.Elem() // use concrete value
-	}
-	sz := svnp.Len()
-	svnp = reflect.Append(svnp, nval)
-	if idx >= 0 && idx < sz {
-		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval)
-	}
-	svl.Elem().Set(svnp)
-
 	if iski && sv.SliceValView != nil {
-		if nvki, ok := nval.Interface().(ki.Ki); ok {
-			nvki.Init(nvki)
-			vvb := sv.SliceValView.AsValueViewBase()
-			if vvb.Owner != nil {
-				if ownki, ok := vvb.Owner.(ki.Ki); ok {
-					nvki.SetParent(ownki)
-				}
+		vvb := sv.SliceValView.AsValueViewBase()
+		if vvb.Owner != nil {
+			if ownki, ok := vvb.Owner.(ki.Ki); ok {
+				gi.NewKiDialog(sv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
+					sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						if sig == int64(gi.DialogAccepted) {
+							// svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
+							dlg, _ := send.(*gi.Dialog)
+							n, typ := gi.NewKiDialogValues(dlg)
+							updt := ownki.UpdateStart()
+							for i := 0; i < n; i++ {
+								nm := fmt.Sprintf("New%v%v", typ.Name(), idx+1+i)
+								ownki.InsertNewChild(typ, idx+1+i, nm)
+							}
+							sv.SetChanged()
+							ownki.UpdateEnd(updt)
+						}
+					})
 			}
 		}
+	} else {
+		nval := reflect.New(kit.NonPtrType(sltyp)) // make the concrete el
+		if !slptr {
+			nval = nval.Elem() // use concrete value
+		}
+		sz := svnp.Len()
+		svnp = reflect.Append(svnp, nval)
+		if idx >= 0 && idx < sz {
+			reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
+			svnp.Index(idx).Set(nval)
+		}
+		svl.Elem().Set(svnp)
 	}
 
 	if sv.TmpSave != nil {

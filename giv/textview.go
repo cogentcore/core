@@ -2333,7 +2333,6 @@ func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
 	sty := &tv.StateStyles[state]
 	spc := sty.BoxSpace()
 
-	ed.Ch-- // end is exclusive
 	rst := tv.RenderStartPos()
 	ex := float32(tv.VpBBox.Max.X) - spc
 	sx := rst.X + tv.LineNoOff

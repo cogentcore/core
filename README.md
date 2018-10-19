@@ -104,10 +104,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 
-* slice of ki: do proper add so it works directly by editing children --
-  requires accessing owner info from valueview recs -- that is what the
-  ki.Slice by itself does not have
-
 * see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
 
 * windows: arialuni.ttf  https://docs.microsoft.com/en-us/typography/font-list/arial-unicode-ms
