@@ -9,6 +9,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 // Type provides JSON, XML marshal / unmarshal with encoding of underlying
@@ -115,4 +116,23 @@ func (k *Type) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		return fmt.Errorf("Type UnmarshalXML: Token: %+v is not expected EndElement", et)
 	}
 	return fmt.Errorf("Type UnmarshalXML: Token: %+v is not expected EndElement", ct)
+}
+
+// StructTags returns a map[string]string of the tag string from a reflect.StructTag value
+// e.g., from StructField.Tag
+func StructTags(tags reflect.StructTag) map[string]string {
+	if len(tags) == 0 {
+		return nil
+	}
+	flds := strings.Fields(string(tags))
+	smap := make(map[string]string, len(flds))
+	for _, fld := range flds {
+		cli := strings.Index(fld, ":")
+		if cli < 0 {
+			continue
+		}
+		vl := strings.TrimSuffix(fld[cli+2:], `"`)
+		smap[fld[:cli]] = vl
+	}
+	return smap
 }
