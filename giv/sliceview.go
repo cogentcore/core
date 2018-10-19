@@ -34,6 +34,7 @@ import (
 type SliceView struct {
 	gi.Frame
 	Slice            interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	SliceValView     ValueView          `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	IsArray          bool               `desc:"whether the slice is actually an array -- no modifications"`
 	StyleFunc        SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	ShowViewCtxtMenu bool               `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
@@ -366,6 +367,7 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	defer sv.UpdateEnd(updt)
 
 	sltyp := kit.SliceElType(sv.Slice) // has pointer if it is there
+	iski := ki.IsKi(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)
@@ -382,6 +384,19 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 		svnp.Index(idx).Set(nval)
 	}
 	svl.Elem().Set(svnp)
+
+	if iski && sv.SliceValView != nil {
+		if nvki, ok := nval.Interface().(ki.Ki); ok {
+			nvki.Init(nvki)
+			vvb := sv.SliceValView.AsValueViewBase()
+			if vvb.Owner != nil {
+				if ownki, ok := vvb.Owner.(ki.Ki); ok {
+					nvki.SetParent(ownki)
+				}
+			}
+		}
+	}
+
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}

@@ -439,7 +439,7 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	curSz := w.Viewport.Geom.Size
 	if curSz == sz {
-		fmt.Printf("win: %v skip same resize: %v\n", w.Nm, curSz)
+		// fmt.Printf("win: %v skip same resize: %v\n", w.Nm, curSz)
 		return
 	}
 	w.UpMu.Lock()
@@ -448,7 +448,7 @@ func (w *Window) Resized(sz image.Point) {
 		return
 	}
 	w.FocusInactivate()
-	fmt.Printf("win: %v actual resized fun: %v\n", w.Nm, sz)
+	// fmt.Printf("win: %v actual resized fun: %v\n", w.Nm, sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
@@ -1231,7 +1231,7 @@ mainloop:
 				w.Closed()
 				break mainloop
 			case window.Paint:
-				fmt.Printf("got paint event for window %v \n", w.Nm)
+				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				w.GotPaint = true
 				if w.DoFullRender {
 					w.DoFullRender = false
@@ -1250,11 +1250,11 @@ mainloop:
 					WinGeomPrefs.RecordPref(w)
 				}
 			case window.Focus:
-				fmt.Printf("win foc: %v\n", w.Nm)
+				// fmt.Printf("win foc: %v\n", w.Nm)
 				if lastWinMenuUpdate != WinNewCloseTime {
 					w.MainMenuUpdateWindows()
 					lastWinMenuUpdate = WinNewCloseTime
-					fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+					// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 				}
 				if w.Focus == nil && w.StartFocus != nil {
 					w.FocusOnOrNext(w.StartFocus)
@@ -1293,7 +1293,7 @@ mainloop:
 			if lastWinMenuUpdate != WinNewCloseTime {
 				w.MainMenuUpdateWindows()
 				lastWinMenuUpdate = WinNewCloseTime
-				fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
 			}
 			if w.Focus == nil && w.StartFocus != nil {
 				w.FocusOnOrNext(w.StartFocus)

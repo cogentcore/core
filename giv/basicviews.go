@@ -186,6 +186,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
 			sv := svk.(*TableView)
+			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
@@ -198,6 +199,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
 			sv := svk.(*SliceView)
+			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
@@ -234,6 +236,7 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
+	sv.SliceValView = vv
 	// npv := vv.Value.Elem()
 	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sv.SetSlice(vv.Value.Interface(), vv.TmpSave)

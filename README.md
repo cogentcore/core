@@ -99,17 +99,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * filenode:
 	+ ability to sort by date within directories
 
-* crash in + for element of split array -- in spinbox -- "up"'s .This is nil in spinbox -- is a result of fullrebuild
-
-* fileview keyboard shortcuts: history prev = go up dir?  history next = go to next in history list?  or just pop up history list probably.  maybe command-uparrow = up dir?  Need something intuitive there.  also a cancel?  esc takes a few to actually cancel..
-
 * TextView:
 	+ clipboard history
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
-
-* CSS class = x should bring in properties for that class into top-level CSS
-  for all below -- not sure it does that - nested classes.  need to figure that out really.
 
 * slice of ki: do proper add so it works directly by editing children --
   requires accessing owner info from valueview recs -- that is what the
