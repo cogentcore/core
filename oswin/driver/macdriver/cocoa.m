@@ -283,8 +283,8 @@ void menuSetAsMain(ScreenGLView* view);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification {
-	menuSetAsMain(self);
-	windowFocused((GoUintptr)self);
+	// menuSetAsMain(self); // this is a recipe for crashing!
+	windowFocused((GoUintptr)self); // instead do in response to focus event..
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification {
@@ -435,6 +435,7 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
             [window setFrame:fr display:YES animate:NO];
 
 			  [name release];
+			  [pixFormat release];
         });
 
     return (uintptr_t)view;
@@ -524,6 +525,7 @@ void doWindowShouldClose(uintptr_t viewID) {
 
 void doRaiseWindow(uintptr_t viewID) {
     ScreenGLView* view = (ScreenGLView*)viewID;
+	//  windowFocused((GoUintptr)self); // not getting sent otherwise apparently
     dispatch_sync(dispatch_get_main_queue(), ^{
             [view.window makeKeyAndOrderFront:view];
         });

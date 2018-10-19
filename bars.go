@@ -169,9 +169,9 @@ func MainMenuFunc(owin oswin.Window, title string, tag int) {
 	ma.Trigger()
 }
 
-// SetMainMenu sets this menubar as the main menu of given window -- called by
-// Window.MainMenuUpdated.
-func (mb *MenuBar) SetMainMenu(win *Window) {
+// UpdateMainMenu updates the OS-specific, separate main menu of given window based
+// on this MenuBar -- called by Window.MainMenuUpdated.
+func (mb *MenuBar) UpdateMainMenu(win *Window) {
 	osmm := win.OSWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
@@ -190,6 +190,24 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 		}
 	}
 	osmm.EndUpdate(mm) // unlocks
+}
+
+// SetMainMenu sets this menu as the current OS-specific, separate main menu
+// for given window -- only should be called in window.Focus event.
+// Does nothing if menu is empty.
+func (mb *MenuBar) SetMainMenu(win *Window) {
+	osmm := win.OSWin.MainMenu()
+	if osmm == nil { // no OS main menu
+		return
+	}
+	if len(mb.Kids) == 0 {
+		return
+	}
+
+	if mb.OSMainMenus == nil {
+		mb.UpdateMainMenu(win)
+	}
+	osmm.SetMenu()
 }
 
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.

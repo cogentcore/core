@@ -623,7 +623,7 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 	return nil
 }
 
-// MoveUpAction moves the selection down to next element in the tree, using given
+// MoveUpAction moves the selection up to previous element in the tree, using given
 // select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MoveUpAction(selMode mouse.SelectModes) *TreeView {
 	nn := tv.MoveUp(selMode)
@@ -633,6 +633,47 @@ func (tv *TreeView) MoveUpAction(selMode mouse.SelectModes) *TreeView {
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
 	}
 	return nn
+}
+
+// TreeViewPageSteps is the number of steps to take in PageUp / Down events
+var TreeViewPageSteps = 10
+
+// MovePageUpAction moves the selection up to previous TreeViewPageSteps elements in the tree,
+// using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
+func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
+	fnn := tv.MoveUp(selMode)
+	if fnn != nil && fnn != tv {
+		for i := 1; i < TreeViewPageSteps; i++ {
+			nn := tv.MoveUp(selMode)
+			if nn == nil || nn == tv || nn == fnn {
+				break
+			}
+			fnn = nn
+		}
+		fnn.GrabFocus()
+		fnn.ScrollToMe()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), fnn.This)
+	}
+	return fnn
+}
+
+// MovePageDownAction moves the selection up to previous TreeViewPageSteps elements in the tree,
+// using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
+func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
+	fnn := tv.MoveDown(selMode)
+	if fnn != nil && fnn != tv {
+		for i := 1; i < TreeViewPageSteps; i++ {
+			nn := tv.MoveDown(selMode)
+			if nn == nil || nn == tv || nn == fnn {
+				break
+			}
+			fnn = nn
+		}
+		fnn.GrabFocus()
+		fnn.ScrollToMe()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), fnn.This)
+	}
+	return fnn
 }
 
 // MoveToLastChild moves to the last child under me, using given select mode
@@ -1256,6 +1297,12 @@ func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case gi.KeyFunMoveUp:
 		tf.MoveUpAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunPageUp:
+		tf.MovePageUpAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunPageDown:
+		tf.MovePageDownAction(selMode)
 		kt.SetProcessed()
 	case gi.KeyFunSelectMode:
 		tf.SelectModeToggle()

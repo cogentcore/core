@@ -374,6 +374,7 @@ var PreferencesProps = ki.Props{
 			}},
 			{"sep-color", ki.BlankProp{}},
 			{"OpenColors", ki.Props{
+				"desc": "open set of colors from a json-formatted file",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -382,6 +383,7 @@ var PreferencesProps = ki.Props{
 				},
 			}},
 			{"SaveColors", ki.Props{
+				"desc": "save set of colors to a json-formatted file, for sharing",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -426,6 +428,7 @@ var PreferencesProps = ki.Props{
 		{"Colors", ki.PropSlice{ // sub-menu
 			{"OpenColors", ki.Props{
 				"icon": "file-open",
+				"desc": "open set of colors from a json-formatted file",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",
@@ -435,6 +438,7 @@ var PreferencesProps = ki.Props{
 			}},
 			{"SaveColors", ki.Props{
 				"icon": "file-save",
+				"desc": "save set of colors to a json-formatted file, for sharing",
 				"Args": ki.PropSlice{
 					{"Color File Name", ki.Props{
 						"default-field": "ColorFilename",

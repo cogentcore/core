@@ -273,6 +273,7 @@ var GiEditorProps = ki.Props{
 		{"Open", ki.Props{
 			"label": "Open",
 			"icon":  "file-open",
+			"desc":  "Open a json-formatted Ki tree structure",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -282,6 +283,7 @@ var GiEditorProps = ki.Props{
 		}},
 		{"Save", ki.Props{
 			"icon": "file-save",
+			"desc": "Save json-formatted Ki tree structure to existing filename",
 			"updtfunc": func(gei interface{}, act *gi.Action) {
 				ge := gei.(*GiEditor)
 				act.SetActiveStateUpdt(ge.Changed && ge.Filename != "")
@@ -290,10 +292,7 @@ var GiEditorProps = ki.Props{
 		{"SaveAs", ki.Props{
 			"label": "Save As...",
 			"icon":  "file-save",
-			"updtfunc": func(gei interface{}, act *gi.Action) {
-				ge := gei.(*GiEditor)
-				act.SetActiveStateUpdt(ge.Changed)
-			},
+			"desc":  "Save as a json-formatted Ki tree structure",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
@@ -315,6 +314,7 @@ var GiEditorProps = ki.Props{
 			{"sep-file", ki.BlankProp{}},
 			{"Open", ki.Props{
 				"shortcut": "Command+O",
+				"desc":     "Open a json-formatted Ki tree structure",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"default-field": "Filename",
@@ -324,6 +324,7 @@ var GiEditorProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": "Command+S",
+				"desc":     "Save json-formatted Ki tree structure to existing filename",
 				"updtfunc": func(gei interface{}, act *gi.Action) {
 					ge := gei.(*GiEditor)
 					act.SetActiveState(ge.Changed && ge.Filename != "")
@@ -332,10 +333,7 @@ var GiEditorProps = ki.Props{
 			{"SaveAs", ki.Props{
 				"shortcut": "Shift+Command+S",
 				"label":    "Save As...",
-				"updtfunc": func(gei interface{}, act *gi.Action) {
-					ge := gei.(*GiEditor)
-					act.SetActiveState(ge.Changed)
-				},
+				"desc":     "Save as a json-formatted Ki tree structure",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"default-field": "Filename",

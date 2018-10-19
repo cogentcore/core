@@ -59,19 +59,20 @@
               "UniqueNm": "widgets",
               "Props": null,
               "Kids": null,
-              "Class": "bar-action",
+              "Class": "menubar-action",
               "CSS": null,
               "Tooltip": "",
               "Text": "widgets",
               "Icon": "",
               "Indicator": "none",
+              "Shortcut": "",
               "Menu": [
                 {
                   "n": 4,
                   "type": "gi.Action",
                   "name": "About widgets",
                   "type": "gi.Action",
-                  "name": "GoGi Preferences",
+                  "name": "GoGi Preferences...",
                   "type": "gi.Separator",
                   "name": "sepq",
                   "type": "gi.Action",
@@ -81,7 +82,7 @@
                   "Nm": "About widgets",
                   "UniqueNm": "About widgets",
                   "Props": {
-                    "__OSMainMenuItemID": 89736912
+                    "__OSMainMenuItemID": 99730048
                   },
                   "Kids": null,
                   "Class": "",
@@ -90,24 +91,24 @@
                   "Text": "About widgets",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": ""
+                  "Shortcut": "",
+                  "Menu": null
                 },
                 {
-                  "Nm": "GoGi Preferences",
-                  "UniqueNm": "GoGi Preferences",
+                  "Nm": "GoGi Preferences...",
+                  "UniqueNm": "GoGi Preferences...",
                   "Props": {
-                    "__OSMainMenuItemID": 89737536
+                    "__OSMainMenuItemID": 100166240
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "GoGi Preferences",
+                  "Text": "GoGi Preferences...",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+P"
+                  "Shortcut": "Meta+P",
+                  "Menu": null
                 },
                 {
                   "Nm": "sepq",
@@ -123,7 +124,7 @@
                   "Nm": "Quit",
                   "UniqueNm": "Quit",
                   "Props": {
-                    "__OSMainMenuItemID": 89738128
+                    "__OSMainMenuItemID": 100103200
                   },
                   "Kids": null,
                   "Class": "",
@@ -132,23 +133,23 @@
                   "Text": "Quit",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+Q"
+                  "Shortcut": "Meta+Q",
+                  "Menu": null
                 }
-              ],
-              "Shortcut": ""
+              ]
             },
             {
               "Nm": "File",
               "UniqueNm": "File",
               "Props": null,
               "Kids": null,
-              "Class": "bar-action",
+              "Class": "menubar-action",
               "CSS": null,
               "Tooltip": "",
               "Text": "File",
               "Icon": "",
               "Indicator": "none",
+              "Shortcut": "",
               "Menu": [
                 {
                   "n": 6,
@@ -169,7 +170,7 @@
                   "Nm": "New",
                   "UniqueNm": "New",
                   "Props": {
-                    "__OSMainMenuItemID": 89738800
+                    "__OSMainMenuItemID": 99920800
                   },
                   "Kids": null,
                   "Class": "",
@@ -178,14 +179,14 @@
                   "Text": "New",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+N"
+                  "Shortcut": "Meta+N",
+                  "Menu": null
                 },
                 {
                   "Nm": "Open",
                   "UniqueNm": "Open",
                   "Props": {
-                    "__OSMainMenuItemID": 89739296
+                    "__OSMainMenuItemID": 99904352
                   },
                   "Kids": null,
                   "Class": "",
@@ -194,14 +195,14 @@
                   "Text": "Open",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+O"
+                  "Shortcut": "Meta+O",
+                  "Menu": null
                 },
                 {
                   "Nm": "Save",
                   "UniqueNm": "Save",
                   "Props": {
-                    "__OSMainMenuItemID": 89739568
+                    "__OSMainMenuItemID": 100080848
                   },
                   "Kids": null,
                   "Class": "",
@@ -210,14 +211,14 @@
                   "Text": "Save",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+S"
+                  "Shortcut": "Meta+S",
+                  "Menu": null
                 },
                 {
                   "Nm": "Save As..",
                   "UniqueNm": "Save As..",
                   "Props": {
-                    "__OSMainMenuItemID": 89739872
+                    "__OSMainMenuItemID": 100096592
                   },
                   "Kids": null,
                   "Class": "",
@@ -226,8 +227,8 @@
                   "Text": "Save As..",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Shift+Meta+S"
+                  "Shortcut": "Shift+Meta+S",
+                  "Menu": null
                 },
                 {
                   "Nm": "csep",
@@ -243,7 +244,7 @@
                   "Nm": "Close Window",
                   "UniqueNm": "Close Window",
                   "Props": {
-                    "__OSMainMenuItemID": 89797248
+                    "__OSMainMenuItemID": 99633648
                   },
                   "Kids": null,
                   "Class": "",
@@ -252,23 +253,23 @@
                   "Text": "Close Window",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+W"
+                  "Shortcut": "Meta+W",
+                  "Menu": null
                 }
-              ],
-              "Shortcut": ""
+              ]
             },
             {
               "Nm": "Edit",
               "UniqueNm": "Edit",
               "Props": null,
               "Kids": null,
-              "Class": "bar-action",
+              "Class": "menubar-action",
               "CSS": null,
               "Tooltip": "",
               "Text": "Edit",
               "Icon": "",
               "Indicator": "none",
+              "Shortcut": "",
               "Menu": [
                 {
                   "n": 3,
@@ -283,67 +284,67 @@
                   "Nm": "Copy",
                   "UniqueNm": "Copy",
                   "Props": {
-                    "__OSMainMenuItemID": 89797920
+                    "__OSMainMenuItemID": 99792608
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "Copy",
-                  "Icon": "copy",
+                  "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Alt+W"
+                  "Shortcut": "Alt+∑",
+                  "Menu": null
                 },
                 {
                   "Nm": "Cut",
                   "UniqueNm": "Cut",
                   "Props": {
-                    "__OSMainMenuItemID": 89804688
+                    "__OSMainMenuItemID": 99963504
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "Cut",
-                  "Icon": "cut",
+                  "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Meta+X"
+                  "Shortcut": "Meta+X",
+                  "Menu": null
                 },
                 {
                   "Nm": "Paste",
                   "UniqueNm": "Paste",
                   "Props": {
-                    "__OSMainMenuItemID": 89804960
+                    "__OSMainMenuItemID": 100066128
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "Paste",
-                  "Icon": "paste",
+                  "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": "Control+Y"
+                  "Shortcut": "Meta+V",
+                  "Menu": null
                 }
-              ],
-              "Shortcut": ""
+              ]
             },
             {
               "Nm": "Window",
               "UniqueNm": "Window",
               "Props": null,
               "Kids": null,
-              "Class": "bar-action",
+              "Class": "menubar-action",
               "CSS": null,
               "Tooltip": "",
               "Text": "Window",
               "Icon": "",
               "Indicator": "none",
+              "Shortcut": "",
               "Menu": [
                 {
-                  "n": 4,
+                  "n": 6,
                   "type": "gi.Action",
                   "name": "Minimize",
                   "type": "gi.Separator",
@@ -351,13 +352,17 @@
                   "type": "gi.Action",
                   "name": "GoGi Widgets Demo",
                   "type": "gi.Action",
-                  "name": "GoGi Editor"
+                  "name": "GoGi Editor: WinVp",
+                  "type": "gi.Separator",
+                  "name": "sepw",
+                  "type": "gi.Action",
+                  "name": "File Name"
                 },
                 {
                   "Nm": "Minimize",
                   "UniqueNm": "Minimize",
                   "Props": {
-                    "__OSMainMenuItemID": 89805712
+                    "__OSMainMenuItemID": 100083104
                   },
                   "Kids": null,
                   "Class": "",
@@ -366,8 +371,8 @@
                   "Text": "Minimize",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": ""
+                  "Shortcut": "",
+                  "Menu": null
                 },
                 {
                   "Nm": "sepa",
@@ -383,7 +388,7 @@
                   "Nm": "GoGi Widgets Demo",
                   "UniqueNm": "GoGi Widgets Demo",
                   "Props": {
-                    "__OSMainMenuItemID": 89806560
+                    "__OSMainMenuItemID": 100091856
                   },
                   "Kids": null,
                   "Class": "",
@@ -392,27 +397,52 @@
                   "Text": "GoGi Widgets Demo",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": ""
+                  "Shortcut": "",
+                  "Menu": null
                 },
                 {
-                  "Nm": "GoGi Editor",
-                  "UniqueNm": "GoGi Editor",
+                  "Nm": "GoGi Editor: WinVp",
+                  "UniqueNm": "GoGi Editor: WinVp",
                   "Props": {
-                    "__OSMainMenuItemID": 89808608
+                    "__OSMainMenuItemID": 100131104
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "GoGi Editor",
+                  "Text": "GoGi Editor: WinVp",
                   "Icon": "",
                   "Indicator": "",
-                  "Menu": null,
-                  "Shortcut": ""
+                  "Shortcut": "",
+                  "Menu": null
+                },
+                {
+                  "Nm": "sepw",
+                  "UniqueNm": "sepw",
+                  "Props": null,
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Horiz": true
+                },
+                {
+                  "Nm": "File Name",
+                  "UniqueNm": "File Name",
+                  "Props": {
+                    "__OSMainMenuItemID": 100174128
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "File Name",
+                  "Icon": "",
+                  "Indicator": "",
+                  "Shortcut": "",
+                  "Menu": null
                 }
-              ],
-              "Shortcut": ""
+              ]
             },
             {
               "Nm": "menstr",
@@ -455,7 +485,7 @@
             "__type:spacing": "units.Value",
             "spacing": {
               "Val": 1,
-              "Un": "Px",
+              "Un": "Ex",
               "Dots": 0
             }
           },
@@ -504,6 +534,14 @@
                   "Nm": "title",
                   "UniqueNm": "title",
                   "Props": {
+                    "__type:max-height": "units.Value",
+                    "max-height": {
+                      "Val": -1,
+                      "Un": "Px",
+                      "Dots": 0
+                    },
+                    "white-space": "__enum:(gi.WhiteSpaces)WhiteSpaceNormal",
+                    "text-align": "__enum:(gi.Align)AlignCenter",
                     "vertical-align": "__enum:(gi.Align)AlignCenter",
                     "font-family": "Times New Roman, serif",
                     "font-size": "x-large",
@@ -513,20 +551,13 @@
                       "Val": -1,
                       "Un": "Px",
                       "Dots": 0
-                    },
-                    "__type:max-height": "units.Value",
-                    "max-height": {
-                      "Val": -1,
-                      "Un": "Px",
-                      "Dots": 0
-                    },
-                    "text-align": "__enum:(gi.Align)AlignCenter"
+                    }
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ca href=\"https://github.com/goki/gi\"\u003eGoGi\u003c/a\u003e \u003ci\u003eWidgets\u003c/i\u003e\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eMeta+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eControl+Alt+I\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e\u003cbr\u003e\nSee \u003ca href=\"https://github.com/goki/gi/blob/master/examples/widgets/README.md\"\u003eREADME\u003c/a\u003e for detailed info and things to try.",
+                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ca href=\"https://github.com/goki/gi\"\u003eGoGi\u003c/a\u003e \u003ci\u003eWidgets\u003c/i\u003e\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eControl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eShift+Control+I\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e\u003cbr\u003e\nSee \u003ca href=\"https://github.com/goki/gi/blob/master/examples/widgets/README.md\"\u003eREADME\u003c/a\u003e for detailed info and things to try.",
                   "Selectable": false,
                   "Redrawable": false
                 }
@@ -564,9 +595,7 @@
                 {
                   "Nm": "blab",
                   "UniqueNm": "blab",
-                  "Props": {
-                    "font-family": "Arial Unicode"
-                  },
+                  "Props": null,
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
@@ -591,19 +620,19 @@
               "Nm": "brow",
               "UniqueNm": "brow",
               "Props": {
-                "__type:max-width": "units.Value",
-                "max-width": {
-                  "Val": -1,
-                  "Un": "Px",
-                  "Dots": 0
-                },
                 "__type:spacing": "units.Value",
                 "spacing": {
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
                 },
-                "horizontal-align": "__enum:(gi.Align)AlignLeft"
+                "horizontal-align": "__enum:(gi.Align)AlignLeft",
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                }
               },
               "Kids": [
                 {
@@ -710,8 +739,8 @@
                       "Text": "Menu Item 1",
                       "Icon": "",
                       "Indicator": "",
-                      "Menu": null,
-                      "Shortcut": "Shift+Control+1"
+                      "Shortcut": "Shift+Control+1",
+                      "Menu": null
                     },
                     {
                       "Nm": "Menu Item 2",
@@ -724,6 +753,7 @@
                       "Text": "Menu Item 2",
                       "Icon": "",
                       "Indicator": "",
+                      "Shortcut": "",
                       "Menu": [
                         {
                           "n": 1,
@@ -741,11 +771,10 @@
                           "Text": "Sub Menu Item 2",
                           "Icon": "",
                           "Indicator": "",
-                          "Menu": null,
-                          "Shortcut": ""
+                          "Shortcut": "",
+                          "Menu": null
                         }
-                      ],
-                      "Shortcut": ""
+                      ]
                     },
                     {
                       "Nm": "sep1",
@@ -768,8 +797,8 @@
                       "Text": "Menu Item 3",
                       "Icon": "",
                       "Indicator": "",
-                      "Menu": null,
-                      "Shortcut": "Control+3"
+                      "Shortcut": "Control+3",
+                      "Menu": null
                     }
                   ]
                 }
@@ -781,7 +810,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 16
+                "Dots": 16.96875
               },
               "StackTop": 0
             },
@@ -832,19 +861,19 @@
               "Nm": "srow",
               "UniqueNm": "srow",
               "Props": {
-                "__type:max-width": "units.Value",
-                "max-width": {
-                  "Val": -1,
-                  "Un": "Px",
-                  "Dots": 0
-                },
                 "__type:spacing": "units.Value",
                 "spacing": {
                   "Val": 2,
                   "Un": "Ex",
                   "Dots": 0
                 },
-                "horizontal-align": "left"
+                "horizontal-align": "left",
+                "__type:max-width": "units.Value",
+                "max-width": {
+                  "Val": -1,
+                  "Un": "Px",
+                  "Dots": 0
+                }
               },
               "Kids": [
                 {
@@ -862,6 +891,12 @@
                   "Nm": "slider1",
                   "UniqueNm": "slider1",
                   "Props": {
+                    "__type:width": "units.Value",
+                    "width": {
+                      "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
                     "__type:min-width": "units.Value",
                     "min-width": {
                       "Val": 20,
@@ -877,12 +912,6 @@
                     "__type:min-height": "units.Value",
                     "min-height": {
                       "Val": 2,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:width": "units.Value",
-                    "width": {
-                      "Val": 20,
                       "Un": "Em",
                       "Dots": 0
                     }
@@ -918,11 +947,11 @@
                   "OrigWinBBox": {
                     "Min": {
                       "X": 6,
-                      "Y": 371
+                      "Y": 412
                     },
                     "Max": {
                       "X": 326,
-                      "Y": 405
+                      "Y": 446
                     }
                   }
                 },
@@ -992,11 +1021,11 @@
                   "OrigWinBBox": {
                     "Min": {
                       "X": 342,
-                      "Y": 308
+                      "Y": 349
                     },
                     "Max": {
                       "X": 376,
-                      "Y": 468
+                      "Y": 509
                     }
                   }
                 },
@@ -1004,18 +1033,6 @@
                   "Nm": "scrollbar1",
                   "UniqueNm": "scrollbar1",
                   "Props": {
-                    "__type:height": "units.Value",
-                    "height": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-height": "units.Value",
-                    "min-height": {
-                      "Val": 1,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
                     "__type:width": "units.Value",
                     "width": {
                       "Val": 20,
@@ -1025,6 +1042,18 @@
                     "__type:min-width": "units.Value",
                     "min-width": {
                       "Val": 20,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:height": "units.Value",
+                    "height": {
+                      "Val": 1,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 1,
                       "Un": "Em",
                       "Dots": 0
                     }
@@ -1044,7 +1073,7 @@
                   "ThumbSize": {
                     "Val": 1,
                     "Un": "Ex",
-                    "Dots": 8
+                    "Dots": 8.484375
                   },
                   "Prec": 9,
                   "Icon": "",
@@ -1059,12 +1088,12 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 392,
-                      "Y": 380
+                      "X": 393,
+                      "Y": 421
                     },
                     "Max": {
-                      "X": 712,
-                      "Y": 396
+                      "X": 713,
+                      "Y": 437
                     }
                   }
                 },
@@ -1118,7 +1147,7 @@
                   "ThumbSize": {
                     "Val": 1,
                     "Un": "Ex",
-                    "Dots": 8
+                    "Dots": 8.484375
                   },
                   "Prec": 9,
                   "Icon": "",
@@ -1133,12 +1162,12 @@
                   "Snap": false,
                   "OrigWinBBox": {
                     "Min": {
-                      "X": 728,
-                      "Y": 308
+                      "X": 730,
+                      "Y": 349
                     },
                     "Max": {
-                      "X": 744,
-                      "Y": 468
+                      "X": 746,
+                      "Y": 509
                     }
                   }
                 }
@@ -1150,7 +1179,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 16
+                "Dots": 16.96875
               },
               "StackTop": 0
             },
@@ -1234,6 +1263,11 @@
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
+                  "CursorWidth": {
+                    "Val": 3,
+                    "Un": "Px",
+                    "Dots": 3
+                  },
                   "MaxWidthReq": 0,
                   "StartPos": 0,
                   "EndPos": 0,
@@ -1241,6 +1275,7 @@
                   "CharWidth": 0,
                   "SelectStart": 0,
                   "SelectEnd": 0,
+                  "SelectInit": 0,
                   "SelectMode": false
                 },
                 {
@@ -1286,7 +1321,7 @@
               "Spacing": {
                 "Val": 2,
                 "Un": "Ex",
-                "Dots": 16
+                "Dots": 16.96875
               },
               "StackTop": 0
             }
@@ -1297,8 +1332,8 @@
           "Lay": "LayoutVert",
           "Spacing": {
             "Val": 1,
-            "Un": "Px",
-            "Dots": 1
+            "Un": "Ex",
+            "Dots": 8.484375
           },
           "StackTop": 0,
           "Stripes": "NoStripes"
@@ -1318,18 +1353,6 @@
   ],
   "Class": "",
   "CSS": {
-    ".hslides": {
-      "__type:background-color": "gi.Color",
-      "background-color": {
-        "R": 240,
-        "G": 225,
-        "B": 255,
-        "A": 255
-      }
-    },
-    "kbd": {
-      "color": "blue"
-    },
     "button": {
       "__type:background-color": "gi.Color",
       "background-color": {
@@ -1347,6 +1370,18 @@
         "B": 240,
         "A": 255
       }
+    },
+    ".hslides": {
+      "__type:background-color": "gi.Color",
+      "background-color": {
+        "R": 240,
+        "G": 225,
+        "B": 255,
+        "A": 255
+      }
+    },
+    "kbd": {
+      "color": "blue"
     }
   },
   "Tooltip": "",
@@ -1357,8 +1392,8 @@
       "Y": 0
     },
     "Size": {
-      "X": 945,
-      "Y": 794
+      "X": 872,
+      "Y": 705
     }
   }
 }

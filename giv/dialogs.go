@@ -13,7 +13,7 @@ import (
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
 // provides a named, optional way to specify these args
 type DlgOpts struct {
-	Title   string    `desc:"generally should be provided -- will also be used for setting name of dialog and associated window"`
+	Title   string    `desc:"generally should be provided -- used for setting name of dialog and associated window"`
 	Prompt  string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
 	CSS     ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`

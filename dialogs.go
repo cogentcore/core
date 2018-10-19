@@ -59,7 +59,7 @@ var StdDialogVSpaceUnits = units.Value{Val: StdDialogVSpace, Un: units.Ex, Dots:
 // be rendered in a separate window or on top of an existing one.
 type Dialog struct {
 	Viewport2D
-	Title     string      `desc:"title text displayed at the top row of the dialog"`
+	Title     string      `desc:"title text displayed as the window title for the dialog"`
 	Prompt    string      `desc:"a prompt string displayed below the title"`
 	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`
 	State     DialogState `desc:"state of the dialog"`
@@ -257,6 +257,7 @@ var DialogProps = ki.Props{
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
+		"font-size":        "large",
 	},
 	"#prompt": ki.Props{
 		"white-space":      WhiteSpaceNormal, // wrap etc
@@ -401,7 +402,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	dlg.SigVal = -1
 	frame := dlg.SetFrame()
 	if title != "" {
-		dlg.SetTitle(title, frame)
+		dlg.SetTitle(title, nil) // frame) // don't set title element
 	}
 	if prompt != "" {
 		dlg.SetPrompt(prompt, frame)

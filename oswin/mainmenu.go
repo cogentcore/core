@@ -29,6 +29,10 @@ type MainMenu interface {
 	// only for READ ONLY purposes -- use StartUpdate when starting to update it.
 	Menu() Menu
 
+	// SetMenu sets the menu as the main menu for the window -- generally call this
+	// in response to a window.FocusEvent, after building the menu
+	SetMenu()
+
 	// StartUpdate locks the menu pointer for the main menu associated with window.
 	// only for READ ONLY purposes -- use StartUpdate when starting to update it.
 	StartUpdate() Menu

@@ -587,6 +587,10 @@ func (mm *mainMenuImpl) Menu() oswin.Menu {
 	return oswin.Menu(mmen)
 }
 
+func (mm *mainMenuImpl) SetMenu() {
+	C.doSetMainMenu(C.uintptr_t(mm.win.id))
+}
+
 func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
 	mmen := C.doGetMainMenuLock(C.uintptr_t(mm.win.id))
 	return oswin.Menu(mmen)

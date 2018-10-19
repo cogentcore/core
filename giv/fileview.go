@@ -686,7 +686,7 @@ func (fv *FileView) ConnectEvents2D() {
 }
 
 func (fv *FileView) FileViewEvents() {
-	fv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	fv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		fvv := recv.Embed(KiT_FileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)
@@ -696,7 +696,7 @@ func (fv *FileView) FileViewEvents() {
 func (fv *FileView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	switch {
-	case kf == gi.KeyFunPageUp:
+	case kf == gi.KeyFunWordLeft:
 		fv.DirPathUp()
 		kt.SetProcessed()
 	case kf == gi.KeyFunHistPrev:
