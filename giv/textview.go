@@ -3339,7 +3339,7 @@ func (tv *TextView) Render2D() {
 		}
 	}
 	if tv.PushBounds() {
-		tv.TextViewEvents()
+		tv.This.(gi.Node2D).ConnectEvents2D()
 		if tv.IsInactive() {
 			if tv.IsSelected() {
 				tv.Sty = tv.StateStyles[TextViewSel]
@@ -3370,6 +3370,10 @@ func (tv *TextView) Render2D() {
 	} else {
 		tv.DisconnectAllEvents(gi.RegPri)
 	}
+}
+
+func (tv *TextView) ConnectEvents2D() {
+	tv.TextViewEvents()
 }
 
 func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {

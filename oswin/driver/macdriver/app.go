@@ -13,6 +13,7 @@ package macdriver
 
 import (
 	"fmt"
+	"go/build"
 	"image"
 	"log"
 	"os"
@@ -265,6 +266,19 @@ func (app *appImpl) AppPrefsDir() string {
 	pdir := filepath.Join(app.PrefsDir(), app.Name())
 	os.MkdirAll(pdir, 0755)
 	return pdir
+}
+
+// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
+// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
+func SrcDir(dir string) (absDir string, err error) {
+	for _, srcDir := range build.Default.SrcDirs() {
+		absDir = filepath.Join(srcDir, dir)
+		finfo, err := os.Stat(absDir)
+		if err == nil && finfo.IsDir() {
+			return absDir, nil
+		}
+	}
+	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
 func (app *appImpl) FontPaths() []string {

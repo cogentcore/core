@@ -772,7 +772,7 @@ func (tv *TableView) Render2D() {
 			tv.VisRows = 10
 		}
 		tv.FrameStdRender()
-		tv.TableViewEvents()
+		tv.This.(gi.Node2D).ConnectEvents2D()
 		tv.RenderScrolls()
 		tv.Render2DChildren()
 		tv.PopBounds()
@@ -782,6 +782,10 @@ func (tv *TableView) Render2D() {
 	} else {
 		tv.DisconnectAllEvents(gi.AllPris)
 	}
+}
+
+func (tv *TableView) ConnectEvents2D() {
+	tv.TableViewEvents()
 }
 
 func (tv *TableView) HasFocus2D() bool {

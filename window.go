@@ -439,7 +439,7 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	curSz := w.Viewport.Geom.Size
 	if curSz == sz {
-		// fmt.Printf("skip same resize: %v\n", curSz)
+		fmt.Printf("win: %v skip same resize: %v\n", w.Nm, curSz)
 		return
 	}
 	w.UpMu.Lock()
@@ -448,7 +448,7 @@ func (w *Window) Resized(sz image.Point) {
 		return
 	}
 	w.FocusInactivate()
-	// fmt.Printf("actual resized fun: %v\n", sz)
+	fmt.Printf("win: %v actual resized fun: %v\n", w.Nm, sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
@@ -1001,18 +1001,6 @@ mainloop:
 			break
 		}
 		et := evi.Type()
-		if lastWinMenuUpdate != WinNewCloseTime {
-			if et != oswin.WindowEvent && et != oswin.WindowResizeEvent &&
-				et != oswin.WindowPaintEvent {
-				w.MainMenuUpdateWindows()
-				lastWinMenuUpdate = WinNewCloseTime
-				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-			}
-		}
-		if w.Focus == nil && w.StartFocus != nil {
-			w.FocusOnOrNext(w.StartFocus)
-		}
-
 		delPop := false                      // if true, delete this popup after event loop
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
@@ -1237,13 +1225,13 @@ mainloop:
 		switch e := evi.(type) {
 		case *window.Event:
 			switch e.Action {
-			// case window.Resize: // note: already handleed earlier in lag process
+			// case window.Resize: // note: already handled earlier in lag process
 			case window.Close:
 				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()
 				break mainloop
 			case window.Paint:
-				// fmt.Printf("got paint event for window %v \n", w.Nm)
+				fmt.Printf("got paint event for window %v \n", w.Nm)
 				w.GotPaint = true
 				if w.DoFullRender {
 					w.DoFullRender = false
@@ -1260,6 +1248,16 @@ mainloop:
 				if w.GotPaint { // moves before paint are not accurate on X11
 					// fmt.Printf("win move: %v\n", w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
+				}
+			case window.Focus:
+				fmt.Printf("win foc: %v\n", w.Nm)
+				if lastWinMenuUpdate != WinNewCloseTime {
+					w.MainMenuUpdateWindows()
+					lastWinMenuUpdate = WinNewCloseTime
+					fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+				}
+				if w.Focus == nil && w.StartFocus != nil {
+					w.FocusOnOrNext(w.StartFocus)
 				}
 			}
 			continue
@@ -1291,6 +1289,14 @@ mainloop:
 				} else {
 					w.FullReRender()
 				}
+			}
+			if lastWinMenuUpdate != WinNewCloseTime {
+				w.MainMenuUpdateWindows()
+				lastWinMenuUpdate = WinNewCloseTime
+				fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+			}
+			if w.Focus == nil && w.StartFocus != nil {
+				w.FocusOnOrNext(w.StartFocus)
 			}
 		case *key.ChordEvent:
 			keyDelPop := w.KeyChordEventHiPri(e)

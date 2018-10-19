@@ -465,7 +465,7 @@ func (sv *SliceView) Render2D() {
 	}
 	if sv.PushBounds() {
 		sv.FrameStdRender()
-		sv.SliceViewEvents()
+		sv.This.(gi.Node2D).ConnectEvents2D()
 		sv.RenderScrolls()
 		sv.Render2DChildren()
 		sv.PopBounds()
@@ -475,6 +475,10 @@ func (sv *SliceView) Render2D() {
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
 	}
+}
+
+func (sv *SliceView) ConnectEvents2D() {
+	sv.SliceViewEvents()
 }
 
 func (sv *SliceView) HasFocus2D() bool {

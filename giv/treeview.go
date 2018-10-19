@@ -1752,7 +1752,7 @@ func (tv *TreeView) Render2D() {
 			tv.Sty = tv.StateStyles[TreeViewActive]
 		}
 		tv.ConfigPartsIfNeeded()
-		tv.TreeViewEvents()
+		tv.This.(gi.Node2D).ConnectEvents2D()
 
 		// note: this is std except using WidgetSize instead of AllocSize
 		rs := &tv.Viewport.Render
@@ -1773,6 +1773,10 @@ func (tv *TreeView) Render2D() {
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
 	tv.Render2DChildren()
+}
+
+func (tv *TreeView) ConnectEvents2D() {
+	tv.TreeViewEvents()
 }
 
 func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
