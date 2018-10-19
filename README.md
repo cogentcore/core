@@ -96,6 +96,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* fileview deal with symlinks.
+
 * filenode:
 	+ ability to sort by date within directories
 

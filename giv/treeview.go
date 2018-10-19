@@ -449,24 +449,22 @@ func (tv *TreeView) SelectAll() {
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewAllSelected), tv.This)
 }
 
-// SelectAction is called when a select action has been received (e.g., a
-// mouse click) -- translates into selection updates -- gets selection mode
-// from mouse event (ExtendContinuous, ExtendOne) -- only multiple sibling
-// nodes can be selected -- otherwise the paste / drop implications don't make
-// sense
-func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
+// SelectUpdate updates selection to include this node, using selectmode
+// from mouse event (ExtendContinuous, ExtendOne).  Returns true if this node selected
+func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 	win := tv.Viewport.Win
 	updt := false
 	if win != nil {
 		updt = win.UpdateStart()
 	}
+	sel := false
 	switch mode {
 	case mouse.ExtendContinuous:
 		sl := tv.SelectedViews()
 		if len(sl) == 0 {
 			tv.Select()
 			tv.GrabFocus()
-			tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+			sel = true
 		} else {
 			minIdx := -1
 			maxIdx := 0
@@ -499,7 +497,7 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 		} else {
 			tv.Select()
 			tv.GrabFocus()
-			tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+			sel = true
 		}
 	case mouse.NoSelectMode:
 		if tv.IsSelected() {
@@ -508,20 +506,33 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) {
 				tv.UnselectAll()
 				tv.Select()
 				tv.GrabFocus()
-				tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+				sel = true
 			}
 		} else {
 			tv.UnselectAll()
 			tv.Select()
 			tv.GrabFocus()
-			tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+			sel = true
 		}
 	default: // anything else
 		tv.Select()
+		// not sel -- no signal..
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
+	return sel
+}
+
+// SelectAction updates selection to include this node, using selectmode
+// from mouse event (ExtendContinuous, ExtendOne), and emits selection signal
+// returns true if signal emitted
+func (tv *TreeView) SelectAction(mode mouse.SelectModes) bool {
+	sel := tv.SelectUpdate(mode)
+	if sel {
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+	}
+	return sel
 }
 
 // UnselectAction unselects this node (if selected) -- and emits a signal
@@ -552,7 +563,7 @@ func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 		if tv.HasChildren() {
 			nn := tv.KnownChild(0).Embed(KiT_TreeView).(*TreeView)
 			if nn != nil {
-				nn.SelectAction(selMode)
+				nn.SelectUpdate(selMode)
 				return nn
 			}
 		}
@@ -585,7 +596,7 @@ func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
 	if ok && myidx < len(*tv.Par.Children())-1 {
 		nn := tv.Par.KnownChild(myidx + 1).Embed(KiT_TreeView).(*TreeView)
 		if nn != nil {
-			nn.SelectAction(selMode)
+			nn.SelectUpdate(selMode)
 			return nn
 		}
 	} else {
@@ -615,7 +626,7 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 		if tv.Par != nil {
 			nn := tv.Par.Embed(KiT_TreeView).(*TreeView)
 			if nn != nil {
-				nn.SelectAction(selMode)
+				nn.SelectUpdate(selMode)
 				return nn
 			}
 		}
@@ -644,8 +655,8 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 	fnn := tv.MoveUp(selMode)
 	if fnn != nil && fnn != tv {
 		for i := 1; i < TreeViewPageSteps; i++ {
-			nn := tv.MoveUp(selMode)
-			if nn == nil || nn == tv || nn == fnn {
+			nn := fnn.MoveUp(selMode)
+			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
@@ -663,8 +674,8 @@ func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 	fnn := tv.MoveDown(selMode)
 	if fnn != nil && fnn != tv {
 		for i := 1; i < TreeViewPageSteps; i++ {
-			nn := tv.MoveDown(selMode)
-			if nn == nil || nn == tv || nn == fnn {
+			nn := fnn.MoveDown(selMode)
+			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
@@ -689,7 +700,7 @@ func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 			return nn.MoveToLastChild(selMode)
 		}
 	} else {
-		tv.SelectAction(selMode)
+		tv.SelectUpdate(selMode)
 		return tv
 	}
 	return nil
