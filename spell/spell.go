@@ -10,7 +10,6 @@ package spell
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -19,10 +18,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
-	"github.com/client9/gospell"
-	"github.com/client9/gospell/plaintext"
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/sajari/fuzzy"
@@ -43,88 +39,88 @@ type UnknownWord struct {
 
 // CheckFile makes calls on the gospell package and returns a slice of words not found in dictionary
 // Not used at this time
-func CheckFile(fullpath string) ([]UnknownWord, error) {
-	var unknowns []UnknownWord
-
-	path, filename := filepath.Split(fullpath)
-
-	// TODO: comment from gospell authoer -  based on OS (Windows vs. Linux)
-	//dictPath := flag.String("path", ".:/usr/local/share/hunspell:/usr/share/hunspell", "Search path for dictionaries")
-	dictPath := "/usr/local/share/hunspell"
-
-	// TODO : comment from gospell authoer -  based on environment variable settings
-	//dicts := flag.String("d", "en_US", "dictionaries to load")
-	dicts := "en_US"
-
-	//personalDict := flag.String("p", "", "personal wordlist file")
-	personalDict := ""
-
-	affFile := ""
-	dicFile := ""
-	for _, base := range filepath.SplitList(dictPath) {
-		affFile = filepath.Join(base, dicts+".aff")
-		dicFile = filepath.Join(base, dicts+".dic")
-		//log.Printf("Trying %s", affFile)
-		_, err1 := os.Stat(affFile)
-		_, err2 := os.Stat(dicFile)
-		if err1 == nil && err2 == nil {
-			break
-		}
-		affFile = ""
-		dicFile = ""
-	}
-
-	if affFile == "" {
-		ur := "https://sourceforge.net/projects/hunspell/files/Spelling%20dictionaries/en_US/"
-		return unknowns, fmt.Errorf("Unable to load %s. Download en_us.zip from \n\n %v \n\n Unzip into %v", dicts, ur, dictPath)
-	}
-
-	log.Printf("Loading %s %s", affFile, dicFile)
-	timeStart := time.Now()
-	h, err := gospell.NewGoSpell(affFile, dicFile)
-	timeEnd := time.Now()
-
-	// note: 10x too slow
-	log.Printf("Loaded in %v", timeEnd.Sub(timeStart))
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-
-	if personalDict != "" {
-		raw, err := ioutil.ReadFile(personalDict)
-		if err != nil {
-			log.Fatalf("Unable to load personal dictionary %s: %s", personalDict, err)
-		}
-		duplicates, err := h.AddWordList(bytes.NewReader(raw))
-		if err != nil {
-			log.Fatalf("Unable to process personal dictionary %s: %s", personalDict, err)
-		}
-		if len(duplicates) > 0 {
-			for _, word := range duplicates {
-				log.Printf("Word %q in personal dictionary already exists in main dictionary", word)
-			}
-		}
-	}
-
-	// todo: this will read what is on disk - do we want to pass in the bytes rather than the filename?
-	raw, err := ioutil.ReadFile(fullpath)
-	if err != nil {
-		log.Fatalf("Unable to read Stdin: %s", err)
-	}
-	pt, _ := plaintext.NewIdentity()
-	results := gospell.SpellFile(h, pt, raw)
-	for _, diff := range results {
-		unknown := UnknownWord{
-			Filename: filename,
-			Path:     path,
-			Text:     diff.Line,
-			LineNo:   diff.LineNum,
-			Word:     diff.Original,
-		}
-		unknowns = append(unknowns, unknown)
-	}
-	return unknowns, nil
-}
+//func CheckFile(fullpath string) ([]UnknownWord, error) {
+//	var unknowns []UnknownWord
+//
+//	path, filename := filepath.Split(fullpath)
+//
+//	// TODO: comment from gospell authoer -  based on OS (Windows vs. Linux)
+//	//dictPath := flag.String("path", ".:/usr/local/share/hunspell:/usr/share/hunspell", "Search path for dictionaries")
+//	dictPath := "/usr/local/share/hunspell"
+//
+//	// TODO : comment from gospell authoer -  based on environment variable settings
+//	//dicts := flag.String("d", "en_US", "dictionaries to load")
+//	dicts := "en_US"
+//
+//	//personalDict := flag.String("p", "", "personal wordlist file")
+//	personalDict := ""
+//
+//	affFile := ""
+//	dicFile := ""
+//	for _, base := range filepath.SplitList(dictPath) {
+//		affFile = filepath.Join(base, dicts+".aff")
+//		dicFile = filepath.Join(base, dicts+".dic")
+//		//log.Printf("Trying %s", affFile)
+//		_, err1 := os.Stat(affFile)
+//		_, err2 := os.Stat(dicFile)
+//		if err1 == nil && err2 == nil {
+//			break
+//		}
+//		affFile = ""
+//		dicFile = ""
+//	}
+//
+//	if affFile == "" {
+//		ur := "https://sourceforge.net/projects/hunspell/files/Spelling%20dictionaries/en_US/"
+//		return unknowns, fmt.Errorf("Unable to load %s. Download en_us.zip from \n\n %v \n\n Unzip into %v", dicts, ur, dictPath)
+//	}
+//
+//	log.Printf("Loading %s %s", affFile, dicFile)
+//	timeStart := time.Now()
+//	h, err := gospell.NewGoSpell(affFile, dicFile)
+//	timeEnd := time.Now()
+//
+//	// note: 10x too slow
+//	log.Printf("Loaded in %v", timeEnd.Sub(timeStart))
+//	if err != nil {
+//		log.Fatalf("%s", err)
+//	}
+//
+//	if personalDict != "" {
+//		raw, err := ioutil.ReadFile(personalDict)
+//		if err != nil {
+//			log.Fatalf("Unable to load personal dictionary %s: %s", personalDict, err)
+//		}
+//		duplicates, err := h.AddWordList(bytes.NewReader(raw))
+//		if err != nil {
+//			log.Fatalf("Unable to process personal dictionary %s: %s", personalDict, err)
+//		}
+//		if len(duplicates) > 0 {
+//			for _, word := range duplicates {
+//				log.Printf("Word %q in personal dictionary already exists in main dictionary", word)
+//			}
+//		}
+//	}
+//
+//	// todo: this will read what is on disk - do we want to pass in the bytes rather than the filename?
+//	raw, err := ioutil.ReadFile(fullpath)
+//	if err != nil {
+//		log.Fatalf("Unable to read Stdin: %s", err)
+//	}
+//	pt, _ := plaintext.NewIdentity()
+//	results := gospell.SpellFile(h, pt, raw)
+//	for _, diff := range results {
+//		unknown := UnknownWord{
+//			Filename: filename,
+//			Path:     path,
+//			Text:     diff.Line,
+//			LineNo:   diff.LineNum,
+//			Word:     diff.Original,
+//		}
+//		unknowns = append(unknowns, unknown)
+//	}
+//	return unknowns, nil
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 //  spell check returning suggestions using github.com/sajari/fuzzy
@@ -147,6 +143,7 @@ func GetCorpus() []string {
 	bigdatapath := gopath + "/src/github.com/goki/gi/spell/big.txt"
 	file, err := os.Open(bigdatapath)
 	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could Not Open Spell File", Prompt: "Creating new default spell file."}, true, false, nil, nil)
 		fmt.Println(err)
 		return out
 	}
