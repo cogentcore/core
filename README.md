@@ -96,24 +96,22 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* tableview (e.g., langs chooser) not rendering icons on first show.  does later, just not at start..  not a big thing but would be good to fix.
+
 * fileview deal with symlinks.
+* fileview should add extension to filename if only one extension provided, if
+  user types in a new filename.. 
 
 * filenode:
 	+ ability to sort by date within directories
 
 * TextView:
-	+ clipboard history
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 
 * see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
 
 * windows: arialuni.ttf  https://docs.microsoft.com/en-us/typography/font-list/arial-unicode-ms
-
-* fileview should add extension to filename if only one extension provided, if
-  user types in a new filename.. 
-
-* fix text scrolling-off-top rendering finally
 
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.  in mapview proximally.
 

@@ -48,49 +48,47 @@ type TextViewOpts struct {
 // require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
-	Buf               *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder       string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Opts              TextViewOpts              `desc:"options for how text editing / viewing works"`
-	CursorWidth       units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	LineIcons         map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
-	FocusActive       bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	NLines            int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Renders           []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs              []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs        int                       `json:"-" xml:"-" number of line number digits needed"`
-	LineNoOff         float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
-	LineNoRender      gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
-	LinesSize         image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz          gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos         TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol         int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	PosHistIdx        int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
-	SelectStart       TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
-	SelectReg         TextRegion                `json:"-" xml:"-" desc:"current selection region"`
-	PrevSelectReg     TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	Highlights        []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
-	SelectMode        bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-	ISearchMode       bool                      `json:"-" xml:"-" desc:"if true, in interactive search mode"`
-	ISearchString     string                    `json:"-" xml:"-" desc:"current interactive search string"`
-	ISearchCase       bool                      `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	SearchMatches     []FileSearchMatch         `json:"-" xml:"-" desc:"current search matches"`
-	SearchPos         int                       `json:"-" xml:"-" desc:"position within isearch matches"`
-	PrevISearchString string                    `json:"-" xml:"-" desc:"previous interactive search string"`
-	PrevISearchCase   bool                      `json:"-" xml:"-" desc:"prev: pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	PrevISearchPos    int                       `json:"-" xml:"-" desc:"position in search list from previous search"`
-	ISearchStartPos   TextPos                   `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
-	TextViewSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
-	LinkSig           ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles       [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight        float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight        float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize           image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn           bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete          *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
-	CompleteTimer     *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
-	lastRecenter      int
-	lastFilename      gi.FileName
-	lastWasTabAI      bool
+	Buf             *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder     string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Opts            TextViewOpts              `desc:"options for how text editing / viewing works"`
+	CursorWidth     units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	LineIcons       map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
+	FocusActive     bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	NLines          int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	Renders         []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs            []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LineNoDigs      int                       `json:"-" xml:"-" number of line number digits needed"`
+	LineNoOff       float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoRender    gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
+	LinesSize       image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz        gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
+	CursorPos       TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
+	CursorCol       int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	PosHistIdx      int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
+	SelectStart     TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+	SelectReg       TextRegion                `json:"-" xml:"-" desc:"current selection region"`
+	PrevSelectReg   TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	Highlights      []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
+	SelectMode      bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	ISearchMode     bool                      `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	ISearchString   string                    `json:"-" xml:"-" desc:"current interactive search string"`
+	ISearchCase     bool                      `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	SearchMatches   []FileSearchMatch         `json:"-" xml:"-" desc:"current search matches"`
+	SearchPos       int                       `json:"-" xml:"-" desc:"position within isearch matches"`
+	PrevISearchPos  int                       `json:"-" xml:"-" desc:"position in search list from previous search"`
+	ISearchStartPos TextPos                   `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	TextViewSig     ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	LinkSig         ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	StateStyles     [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight      float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight      float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize         image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn         bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete        *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	CompleteTimer   *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
+	lastRecenter    int
+	lastFilename    gi.FileName
+	lastWasTabAI    bool
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -1355,6 +1353,12 @@ func (tv *TextView) Redo() {
 // TextViewMaxFindHighlights is the maximum number of regions to highlight on find
 var TextViewMaxFindHighlights = 1000
 
+// PrevISearchString is the previous ISearch string
+var PrevISearchString string
+
+// PrevISearchCase is the previous case matching state for ISearch
+var PrevISearchCase bool
+
 // FindMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
@@ -1444,10 +1448,10 @@ func (tv *TextView) ISearch() {
 				tv.ISearchSelectMatch(tv.SearchPos)
 			}
 		} else { // restore prev
-			if tv.PrevISearchString != "" {
-				tv.ISearchString = tv.PrevISearchString
-				tv.ISearchCase = tv.PrevISearchCase
-				tv.PrevISearchString = "" // prevents future resets
+			if PrevISearchString != "" {
+				tv.ISearchString = PrevISearchString
+				tv.ISearchCase = PrevISearchCase
+				PrevISearchString = "" // prevents future resets
 				tv.ISearchMatches()
 				tv.ISearchNextMatch(tv.CursorPos)
 				tv.ISearchStartPos = tv.CursorPos
@@ -1470,7 +1474,7 @@ func (tv *TextView) ISearch() {
 func (tv *TextView) ISearchKeyInput(r rune) {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	if tv.ISearchString == tv.PrevISearchString { // undo starting point
+	if tv.ISearchString == PrevISearchString { // undo starting point
 		tv.ISearchString = ""
 	}
 	if unicode.IsUpper(r) { // todo: more complex
@@ -1491,7 +1495,7 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 func (tv *TextView) ISearchBackspace() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	if tv.ISearchString == tv.PrevISearchString { // undo starting point
+	if tv.ISearchString == PrevISearchString { // undo starting point
 		tv.ISearchString = ""
 		tv.SearchMatches = nil
 		tv.SelectReset()
@@ -1523,9 +1527,9 @@ func (tv *TextView) ISearchCancel() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.ISearchString != "" {
-		tv.PrevISearchString = tv.ISearchString
+		PrevISearchString = tv.ISearchString
 	}
-	tv.PrevISearchCase = tv.ISearchCase
+	PrevISearchCase = tv.ISearchCase
 	tv.PrevISearchPos = tv.SearchPos
 	tv.ISearchString = ""
 	tv.ISearchCase = false
@@ -1533,6 +1537,7 @@ func (tv *TextView) ISearchCancel() {
 	tv.SearchPos = -1
 	tv.SearchMatches = nil
 	tv.Highlights = nil
+	tv.SavePosHistory(tv.CursorPos)
 	tv.RenderAllLines()
 	tv.SelectReset()
 	tv.ISearchSig()
@@ -1685,6 +1690,76 @@ func (tv *TextView) RenderSelectLines() {
 ///////////////////////////////////////////////////////////////////////////////
 //    Cut / Copy / Paste
 
+// TextViewClipHistory is the text view clipboard history -- everything that has been copied
+var TextViewClipHistory [][]byte
+
+// Maximum amount of clipboard history to retain
+var TextViewClipHistMax = 100
+
+// TextViewClipHistAdd adds the given clipboard bytes to top of history stack
+func TextViewClipHistAdd(clip []byte) {
+	if TextViewClipHistory == nil {
+		TextViewClipHistory = make([][]byte, 0, 1000)
+	}
+
+	ch := &TextViewClipHistory
+	max := TextViewClipHistMax
+
+	sz := len(*ch)
+	if sz > max {
+		*ch = (*ch)[:max]
+	}
+	if sz >= max {
+		copy((*ch)[1:max], (*ch)[0:max-1])
+		(*ch)[0] = clip
+	} else {
+		*ch = append(*ch, nil)
+		if sz > 0 {
+			copy((*ch)[1:], (*ch)[0:sz])
+		}
+		(*ch)[0] = clip
+	}
+}
+
+// TextViewClipHistChooseLen is the max length of clip history to show in chooser
+var TextViewClipHistChooseLen = 40
+
+// TextViewClipHistChooseList returns a string slice of length-limited clip history, for chooser
+func TextViewClipHistChooseList() []string {
+	cl := make([]string, len(TextViewClipHistory))
+	for i, hc := range TextViewClipHistory {
+		szl := len(hc)
+		if szl > TextViewClipHistChooseLen {
+			cl[i] = string(hc[:TextViewClipHistChooseLen])
+		} else {
+			cl[i] = string(hc)
+		}
+	}
+	return cl
+}
+
+// PasteHist presents a chooser of clip history items, pastes into text if selected
+func (tv *TextView) PasteHist() {
+	if TextViewClipHistory == nil {
+		return
+	}
+	cl := TextViewClipHistChooseList()
+	gi.StringsChooserPopup(cl, "", tv, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac := send.(*gi.Action)
+		idx := ac.Data.(int)
+		clip := TextViewClipHistory[idx]
+		if clip != nil {
+			updt := tv.Viewport.Win.UpdateStart()
+			defer tv.Viewport.Win.UpdateEnd(updt)
+			if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
+				tv.DeleteSelection()
+			}
+			tv.InsertAtCursor(clip)
+			tv.SavePosHistory(tv.CursorPos)
+		}
+	})
+}
+
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
 func (tv *TextView) Cut() *TextBufEdit {
 	updt := tv.Viewport.Win.UpdateStart()
@@ -1692,7 +1767,9 @@ func (tv *TextView) Cut() *TextBufEdit {
 	org := tv.SelectReg.Start
 	cut := tv.DeleteSelection()
 	if cut != nil {
-		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cut.ToBytes()))
+		cb := cut.ToBytes()
+		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
 	tv.SavePosHistory(tv.CursorPos)
@@ -1716,7 +1793,9 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	if tbe == nil {
 		return nil
 	}
-	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(tbe.ToBytes()))
+	cb := tbe.ToBytes()
+	TextViewClipHistAdd(cb)
+	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -3038,6 +3117,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.Paste()
+	case gi.KeyFunPasteHist:
+		cancelAll()
+		kt.SetProcessed()
+		tv.PasteHist()
 	case gi.KeyFunUndo:
 		cancelAll()
 		kt.SetProcessed()
@@ -3094,12 +3177,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
 					if kt.Rune == '}' && tv.Opts.AutoIndent {
-						updt := tv.Viewport.Win.UpdateStart()
 						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
 							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+							tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 						}
-						tv.Viewport.Win.UpdateEnd(updt)
 					}
 				}
 				tv.OfferComplete(dontforce)

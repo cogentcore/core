@@ -778,7 +778,11 @@ func (te *TextBufEdit) ToBytes() []byte {
 	if sz == 1 {
 		return []byte(string(te.Text[0]))
 	}
-	var b []byte
+	tsz := 0
+	for i := range te.Text {
+		tsz += len(te.Text[i]) + 10 // don't bother converting to runes, just extra slack
+	}
+	b := make([]byte, 0, tsz)
 	for i := range te.Text {
 		b = append(b, []byte(string(te.Text[i]))...)
 		if i < sz-1 {

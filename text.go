@@ -765,9 +765,17 @@ func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
 				// fmt.Printf("not ok rendering rune: %v\n", string(r))
 				continue
 			}
-			idr := dr.Intersect(rs.Bounds)
-			soff := idr.Min.Sub(dr.Min)
 			if rr.RotRad == 0 && (rr.ScaleX == 0 || rr.ScaleX == 1) {
+				idr := dr.Intersect(rs.Bounds)
+				soff := image.ZP
+				if dr.Min.X < rs.Bounds.Min.X {
+					soff.X = rs.Bounds.Min.X - dr.Min.X
+					maskp.X += rs.Bounds.Min.X - dr.Min.X
+				}
+				if dr.Min.Y < rs.Bounds.Min.Y {
+					soff.Y = rs.Bounds.Min.Y - dr.Min.Y
+					maskp.Y += rs.Bounds.Min.Y - dr.Min.Y
+				}
 				draw.DrawMask(d.Dst, idr, d.Src, soff, mask, maskp, draw.Over)
 			} else {
 				srect := dr.Sub(dr.Min)
