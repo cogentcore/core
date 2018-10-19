@@ -6,7 +6,6 @@ package svg
 
 import (
 	"fmt"
-	"go/build"
 	"image"
 	"image/color"
 	"log"
@@ -184,21 +183,8 @@ var DefaultIconSet *IconSet
 // changed to whatever you want
 var CurIconSet *IconSet
 
-// SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
-// full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
-func SrcDir(dir string) (absDir string, err error) {
-	for _, srcDir := range build.Default.SrcDirs() {
-		absDir = filepath.Join(srcDir, dir)
-		finfo, err := os.Stat(absDir)
-		if err == nil && finfo.IsDir() {
-			return absDir, nil
-		}
-	}
-	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
-}
-
 func (iset *IconSet) OpenDefaultIcons() error {
-	path, err := SrcDir("github.com/goki/gi/icons")
+	path, err := kit.GoSrcDir("github.com/goki/gi/icons")
 	if err != nil {
 		log.Println(err)
 		return err
