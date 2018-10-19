@@ -25,6 +25,7 @@ import (
 	"github.com/client9/gospell/plaintext"
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/ki/kit"
 	"github.com/sajari/fuzzy"
 )
 
@@ -136,9 +137,13 @@ var inputidx int = 0
 func GetCorpus() []string {
 	var out []string
 
-	gopath := os.Getenv("GOPATH")
-	bigdatapath := gopath + "/src/github.com/goki/gi/spell/big.txt"
-	file, err := os.Open(bigdatapath)
+	bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
+	if err != nil {
+		log.Println(err)
+		return out
+	}
+	bigdatafile := filepath.Join(bigdatapath, "big.txt")
+	file, err := os.Open(bigdatafile)
 	if err != nil {
 		fmt.Println(err)
 		return out
