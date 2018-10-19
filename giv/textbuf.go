@@ -18,6 +18,7 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/pmezard/go-difflib/difflib"
@@ -101,6 +102,12 @@ const (
 )
 
 //go:generate stringer -type=TextBufSignals
+
+// these extend NodeBase NodeFlags to hold TextBuf state
+const (
+	// TextBufAutoSaving is used in atomically safe way to protect autosaving
+	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
+)
 
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
@@ -262,6 +269,7 @@ func (tb *TextBuf) Revert() bool {
 	diffs := tb.DiffBufs(ob)
 	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 	tb.Changed = false
+	tb.AutoSaveDelete()
 	go tb.MarkupAllLines() // always do global reformat in bg
 	return true
 }
@@ -374,6 +382,23 @@ func (tb *TextBuf) Close() bool {
 	return true
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//		AutoSave
+
+// AutoSaveOff turns off autosave and returns the prior state of Autosave flag --
+// call AutoSaveRestore with rval when done -- good idea to turn autosave off
+// for anything that does a block of updates
+func (tb *TextBuf) AutoSaveOff() bool {
+	asv := tb.Autosave
+	tb.Autosave = false
+	return asv
+}
+
+// AutoSaveRestore restores prior Autosave setting, from AutoSaveOff()
+func (tb *TextBuf) AutoSaveRestore(asv bool) {
+	tb.Autosave = asv
+}
+
 // AutoSaveFilename returns the autosave filename
 func (tb *TextBuf) AutoSaveFilename() string {
 	path, fn := filepath.Split(string(tb.Filename))
@@ -386,12 +411,17 @@ func (tb *TextBuf) AutoSaveFilename() string {
 
 // AutoSave does the autosave -- safe to call in a separate goroutine
 func (tb *TextBuf) AutoSave() error {
+	if bitflag.HasAtomic(&tb.Flag, int(TextBufAutoSaving)) {
+		return nil
+	}
+	bitflag.SetAtomic(&tb.Flag, int(TextBufAutoSaving))
 	asfn := tb.AutoSaveFilename()
 	b := tb.LinesToBytesCopy()
 	err := ioutil.WriteFile(asfn, b, 0644)
 	if err != nil {
 		log.Printf("giv.TextBuf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
+	bitflag.ClearAtomic(&tb.Flag, int(TextBufAutoSaving))
 	return err
 }
 
@@ -546,6 +576,34 @@ func (tb *TextBuf) AutoScrollViews() {
 		tv.CursorPos = tb.EndPos()
 		tv.ScrollCursorInView()
 	}
+}
+
+// BatchUpdateStart call this when starting a batch of updates to the buffer --
+// it blocks the window updates for views until all the updates are done,
+// and calls AutoSaveOff -- returns win updt and autosave restore state.
+// must call BatchUpdateEnd at end with the result of this call.
+func (tb *TextBuf) BatchUpdateStart() (winUpdt, autoSave bool) {
+	autoSave = tb.AutoSaveOff()
+	winUpdt = false
+	vp := tb.ViewportFromView()
+	if vp == nil || vp.Win == nil {
+		return
+	}
+	winUpdt = vp.Win.UpdateStart()
+	return
+}
+
+// BatchUpdateEnd call to complete BatchUpdateStart
+func (tb *TextBuf) BatchUpdateEnd(winUpdt, autoSave bool) {
+	tb.AutoSaveRestore(autoSave)
+	if !winUpdt {
+		return
+	}
+	vp := tb.ViewportFromView()
+	if vp == nil || vp.Win == nil {
+		return
+	}
+	vp.Win.UpdateEnd(winUpdt)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1235,6 +1293,9 @@ func IndentCharPos(n, tabSz int, spc bool) int {
 // for given tab size (if using spaces) -- either inserts or deletes to reach
 // target
 func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
+	asv := tb.AutoSaveOff()
+	defer tb.AutoSaveRestore(asv)
+
 	curli, _ := tb.LineIndent(ln, tabSz)
 	if n > curli {
 		// fmt.Printf("autoindent: ins %v\n", n)
@@ -1306,6 +1367,9 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 
 // AutoIndentRegion does auto-indent over given region -- end is *exclusive*
 func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, unindents []string) {
+	winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(winUpdt, autoSave)
+
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break
@@ -1316,6 +1380,9 @@ func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, un
 
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*
 func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
+	winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(winUpdt, autoSave)
+
 	ch := 0
 	li, spc := tb.LineIndent(st, tabSz)
 	if li > 0 {
@@ -1393,6 +1460,9 @@ func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
 // determines whether each patch is signaled -- if an overall signal will be
 // sent at the end, then that would not be necessary (typical)
 func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool {
+	winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(winUpdt, autoSave)
+
 	mods := false
 	for _, df := range diffs {
 		switch df.Tag {

@@ -106,6 +106,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ ability to sort by date within directories
 
 * TextView:
+	+ isearch restore prev not 100% reliable and sometimes seems to get reset randomly..
+	+ redo not quite working it seems, and impl emacs undo option
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 
