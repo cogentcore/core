@@ -26,23 +26,43 @@ import (
 // can grab the image of another vp and show that
 type Bitmap struct {
 	Viewport2D
+	Filename FileName `desc:"file name of image loaded -- set by OpenImage"`
 }
 
 var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
 
 var BitmapProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
+	"ToolBar": ki.PropSlice{
+		{"OpenImage", ki.Props{
+			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
+			"icon": "file-open",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+					"ext":           ".png,.jpg",
+				}},
+				{"Width", ki.Props{
+					"desc": "width in raw display dots -- use image size if 0",
+				}},
+				{"Height", ki.Props{
+					"desc": "height in raw display dots -- use image size if 0",
+				}},
+			},
+		}},
+	},
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
-func (bm *Bitmap) OpenImage(filename string, width, height float32) error {
-	img, err := OpenImage(filename)
+func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
+	img, err := OpenImage(string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
 	}
+	bm.Filename = filename
 	bm.SetImage(img, width, height)
 	return nil
 }

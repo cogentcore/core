@@ -137,6 +137,7 @@ type Window struct {
 	DoFullRender     bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing         bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	GotPaint         bool                                    `json:"-" xml:"-" desc:"have we received our first paint event yet?  ignore other window events before this point"`
+	GotFocus         bool                                    `json:"-" xml:"-" desc:"have we received our first focus event yet?"`
 	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	GoLoop           bool                                    `json:"-" xml:"-" desc:"true if we are running from GoStartEventLoop -- requires a WinWait.Done at end"`
 	stopEventLoop    bool
@@ -439,7 +440,7 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	curSz := w.Viewport.Geom.Size
 	if curSz == sz {
-		// fmt.Printf("skip same resize: %v\n", curSz)
+		// fmt.Printf("win: %v skip same resize: %v\n", w.Nm, curSz)
 		return
 	}
 	w.UpMu.Lock()
@@ -448,7 +449,7 @@ func (w *Window) Resized(sz image.Point) {
 		return
 	}
 	w.FocusInactivate()
-	// fmt.Printf("actual resized fun: %v\n", sz)
+	// fmt.Printf("win: %v actual resized fun: %v\n", w.Nm, sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
@@ -920,7 +921,21 @@ func (w *Window) MainMenuUpdated() {
 		w.UpMu.Unlock()
 		return
 	}
-	w.MainMenu.SetMainMenu(w) // main update menu call, in bars.go for MenuBar
+	w.MainMenu.UpdateMainMenu(w) // main update menu call, in bars.go for MenuBar
+	w.UpMu.Unlock()
+}
+
+// MainMenuSet sets the main menu for the window, during window.Focus event
+func (w *Window) MainMenuSet() {
+	if w == nil || w.MainMenu == nil {
+		return
+	}
+	w.UpMu.Lock()
+	if w.IsClosed() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
+	w.MainMenu.SetMainMenu(w) // set main menu call, in bars.go for MenuBar
 	w.UpMu.Unlock()
 }
 
@@ -1001,18 +1016,6 @@ mainloop:
 			break
 		}
 		et := evi.Type()
-		if lastWinMenuUpdate != WinNewCloseTime {
-			if et != oswin.WindowEvent && et != oswin.WindowResizeEvent &&
-				et != oswin.WindowPaintEvent {
-				w.MainMenuUpdateWindows()
-				lastWinMenuUpdate = WinNewCloseTime
-				// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-			}
-		}
-		if w.Focus == nil && w.StartFocus != nil {
-			w.FocusOnOrNext(w.StartFocus)
-		}
-
 		delPop := false                      // if true, delete this popup after event loop
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			continue
@@ -1237,7 +1240,7 @@ mainloop:
 		switch e := evi.(type) {
 		case *window.Event:
 			switch e.Action {
-			// case window.Resize: // note: already handleed earlier in lag process
+			// case window.Resize: // note: already handled earlier in lag process
 			case window.Close:
 				// fmt.Printf("got close event for window %v \n", w.Nm)
 				w.Closed()
@@ -1261,10 +1264,27 @@ mainloop:
 					// fmt.Printf("win move: %v\n", w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
 				}
+			case window.Focus:
+				if !w.GotFocus {
+					w.GotFocus = true
+				} else {
+					// fmt.Printf("win foc: %v\n", w.Nm)
+					if lastWinMenuUpdate != WinNewCloseTime {
+						w.MainMenuUpdateWindows()
+						lastWinMenuUpdate = WinNewCloseTime
+						w.MainMenuSet()
+						// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+					} else {
+						w.MainMenuSet()
+					}
+				}
 			}
-			continue
+			continue // don't do anything else!
 		case *mouse.DragEvent:
 			w.LastModBits = e.Modifiers
+			if w.Focus == nil && w.StartFocus != nil {
+				w.FocusOnOrNext(w.StartFocus)
+			}
 			w.LastSelMode = e.SelectMode()
 			if w.DNDData != nil {
 				w.DNDMoveEvent(e)
@@ -1283,13 +1303,25 @@ mainloop:
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
-			if w.DoFullRender { // if we are getting mouse input, and still haven't done this, do it..
-				w.DoFullRender = false
-				// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
-				if w.Viewport.Geom.Size != w.OSWin.Size() {
-					w.Resized(w.OSWin.Size())
-				} else {
-					w.FullReRender()
+			if w.GotPaint && w.GotFocus {
+				if w.DoFullRender {
+					// if we are getting mouse input, and still haven't done this, do it..
+					w.DoFullRender = false
+					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
+					if w.Viewport.Geom.Size != w.OSWin.Size() {
+						w.Resized(w.OSWin.Size())
+					} else {
+						w.FullReRender()
+					}
+				}
+				if lastWinMenuUpdate != WinNewCloseTime {
+					w.MainMenuUpdateWindows()
+					lastWinMenuUpdate = WinNewCloseTime
+					// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+					w.MainMenuSet()
+				}
+				if w.Focus == nil && w.StartFocus != nil {
+					w.FocusOnOrNext(w.StartFocus)
 				}
 			}
 		case *key.ChordEvent:

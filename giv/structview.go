@@ -19,13 +19,14 @@ import (
 // each field, within an overall frame.
 type StructView struct {
 	gi.Frame
-	Struct      interface{}    `desc:"the struct that we are a view onto"`
-	Changed     bool           `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
-	ChangeFlag  *reflect.Value `json:"-" xml:"-" desc:"ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
-	FieldViews  []ValueView    `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave     ValueView      `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig     ki.Signal      `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ToolbarStru interface{}    `desc:"the struct that we successfully set a toolbar for"`
+	Struct        interface{}    `desc:"the struct that we are a view onto"`
+	StructValView ValueView      `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
+	Changed       bool           `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
+	ChangeFlag    *reflect.Value `json:"-" xml:"-" desc:"ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
+	FieldViews    []ValueView    `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave       ValueView      `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig       ki.Signal      `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ToolbarStru   interface{}    `desc:"the struct that we successfully set a toolbar for"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)

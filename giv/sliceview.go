@@ -34,6 +34,7 @@ import (
 type SliceView struct {
 	gi.Frame
 	Slice            interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	SliceValView     ValueView          `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	IsArray          bool               `desc:"whether the slice is actually an array -- no modifications"`
 	StyleFunc        SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	ShowViewCtxtMenu bool               `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
@@ -366,22 +367,48 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	defer sv.UpdateEnd(updt)
 
 	sltyp := kit.SliceElType(sv.Slice) // has pointer if it is there
+	iski := ki.IsKi(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := kit.NonPtrValue(svl)
 
-	nval := reflect.New(kit.NonPtrType(sltyp)) // make the concrete el
-	if !slptr {
-		nval = nval.Elem() // use concrete value
+	if iski && sv.SliceValView != nil {
+		vvb := sv.SliceValView.AsValueViewBase()
+		if vvb.Owner != nil {
+			if ownki, ok := vvb.Owner.(ki.Ki); ok {
+				gi.NewKiDialog(sv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
+					sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						if sig == int64(gi.DialogAccepted) {
+							// svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
+							dlg, _ := send.(*gi.Dialog)
+							n, typ := gi.NewKiDialogValues(dlg)
+							updt := ownki.UpdateStart()
+							for i := 0; i < n; i++ {
+								nm := fmt.Sprintf("New%v%v", typ.Name(), idx+1+i)
+								ownki.InsertNewChild(typ, idx+1+i, nm)
+							}
+							sv.SetChanged()
+							ownki.UpdateEnd(updt)
+						}
+					})
+			}
+		}
+	} else {
+		nval := reflect.New(kit.NonPtrType(sltyp)) // make the concrete el
+		if !slptr {
+			nval = nval.Elem() // use concrete value
+		}
+		sz := svnp.Len()
+		svnp = reflect.Append(svnp, nval)
+		if idx >= 0 && idx < sz {
+			reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
+			svnp.Index(idx).Set(nval)
+		}
+		svl.Elem().Set(svnp)
 	}
-	sz := svnp.Len()
-	svnp = reflect.Append(svnp, nval)
-	if idx >= 0 && idx < sz {
-		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval)
-	}
-	svl.Elem().Set(svnp)
+
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
@@ -465,7 +492,7 @@ func (sv *SliceView) Render2D() {
 	}
 	if sv.PushBounds() {
 		sv.FrameStdRender()
-		sv.SliceViewEvents()
+		sv.This.(gi.Node2D).ConnectEvents2D()
 		sv.RenderScrolls()
 		sv.Render2DChildren()
 		sv.PopBounds()
@@ -475,6 +502,10 @@ func (sv *SliceView) Render2D() {
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
 	}
+}
+
+func (sv *SliceView) ConnectEvents2D() {
+	sv.SliceViewEvents()
 }
 
 func (sv *SliceView) HasFocus2D() bool {

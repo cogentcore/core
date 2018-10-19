@@ -21,6 +21,7 @@ import (
 type MapView struct {
 	gi.Frame
 	Map        interface{} `desc:"the map that we are a view onto"`
+	MapValView ValueView   `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`
 	Changed    bool        `desc:"has the map been edited?"`
 	Keys       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
 	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`

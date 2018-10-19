@@ -19,6 +19,7 @@ import (
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -559,6 +560,18 @@ func (fv *FileView) DirPathUp() {
 	fv.UpdateFilesAction()
 }
 
+// PathFieldHistPrev goes to the previous path in history
+func (fv *FileView) PathFieldHistPrev() {
+	pf := fv.PathField()
+	pf.SelectItem(1) // todo: this doesn't quite work more than once, as history will update.
+}
+
+// PathFieldHistNext goes to the next path in history
+func (fv *FileView) PathFieldHistNext() {
+	pf := fv.PathField()
+	pf.SelectItem(1) // todo: this doesn't work at all..
+}
+
 // NewFolder creates a new folder in current directory
 func (fv *FileView) NewFolder() {
 	dp := fv.DirPath
@@ -666,6 +679,37 @@ func (fv *FileView) Style2D() {
 	if fv.Viewport != nil && fv.Viewport.IsDoingFullRender() {
 		fv.UpdateFiles()
 	}
+}
+
+func (fv *FileView) ConnectEvents2D() {
+	fv.FileViewEvents()
+}
+
+func (fv *FileView) FileViewEvents() {
+	fv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		fvv := recv.Embed(KiT_FileView).(*FileView)
+		kt := d.(*key.ChordEvent)
+		fvv.KeyInput(kt)
+	})
+}
+
+func (fv *FileView) KeyInput(kt *key.ChordEvent) {
+	kf := gi.KeyFun(kt.Chord())
+	switch {
+	case kf == gi.KeyFunWordLeft:
+		fv.DirPathUp()
+		kt.SetProcessed()
+	case kf == gi.KeyFunHistPrev:
+		fv.PathFieldHistPrev()
+		kt.SetProcessed()
+	case kf == gi.KeyFunHistNext:
+		fv.PathFieldHistNext()
+		kt.SetProcessed()
+	}
+}
+
+func (fv *FileView) HasFocus2D() bool {
+	return true // always.. we're typically a dialog anyway
 }
 
 ////////////////////////////////////////////////////////////////////////////////

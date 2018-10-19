@@ -48,6 +48,7 @@ var TableViewWaitCursorSize = 5000
 type TableView struct {
 	gi.Frame
 	Slice            interface{}        `view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	SliceValView     ValueView          `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	StyleFunc        TableViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	ShowViewCtxtMenu bool               `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
 	Changed          bool               `desc:"has the table been edited?"`
@@ -772,7 +773,7 @@ func (tv *TableView) Render2D() {
 			tv.VisRows = 10
 		}
 		tv.FrameStdRender()
-		tv.TableViewEvents()
+		tv.This.(gi.Node2D).ConnectEvents2D()
 		tv.RenderScrolls()
 		tv.Render2DChildren()
 		tv.PopBounds()
@@ -782,6 +783,10 @@ func (tv *TableView) Render2D() {
 	} else {
 		tv.DisconnectAllEvents(gi.AllPris)
 	}
+}
+
+func (tv *TableView) ConnectEvents2D() {
+	tv.TableViewEvents()
 }
 
 func (tv *TableView) HasFocus2D() bool {

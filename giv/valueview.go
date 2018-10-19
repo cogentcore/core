@@ -400,6 +400,10 @@ type ValueView interface {
 	// struct -- returns false if tag was not set.
 	Tag(tag string) (string, bool)
 
+	// AllTags returns all the tags for this value view, from structfield or set
+	// specifically using SetTag* methods
+	AllTags() map[string]string
+
 	// SaveTmp saves a temporary copy of a struct to a map -- map values must
 	// be explicitly re-saved and cannot be directly written to by the value
 	// elements -- each ValueView has a pointer to any parent ValueView that
@@ -660,6 +664,23 @@ func (vv *ValueViewBase) Tag(tag string) (string, bool) {
 		return "", false
 	}
 	return vv.Field.Tag.Lookup(tag)
+}
+
+func (vv *ValueViewBase) AllTags() map[string]string {
+	rvt := make(map[string]string)
+	if vv.Tags != nil {
+		for key, val := range vv.Tags {
+			rvt[key] = val
+		}
+	}
+	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+		return rvt
+	}
+	smap := kit.StructTags(vv.Field.Tag)
+	for key, val := range smap {
+		rvt[key] = val
+	}
+	return rvt
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

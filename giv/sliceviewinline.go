@@ -20,12 +20,14 @@ import (
 // show the key names and editor vals for each value.
 type SliceViewInline struct {
 	gi.PartsWidgetBase
-	Slice   interface{} `desc:"the slice that we are a view onto"`
-	IsArray bool        `desc:"whether the slice is actually an array -- no modifications"`
-	Changed bool        `desc:"has the slice been edited?"`
-	Values  []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Slice        interface{} `desc:"the slice that we are a view onto"`
+	SliceValView ValueView   `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
+	IsArray      bool        `desc:"whether the slice is actually an array -- no modifications"`
+	IsFixedLen   bool        `desc:"whether the slice has a fixed-len flag on it"`
+	Changed      bool        `desc:"has the slice been edited?"`
+	Values       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig      ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 }
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
@@ -37,6 +39,10 @@ func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
 		sv.IsArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+		sv.IsFixedLen = false
+		if sv.SliceValView != nil {
+			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
+		}
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
@@ -74,7 +80,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		config.Add(vtyp, valnm)
 		sv.Values = append(sv.Values, vv)
 	}
-	if !sv.IsArray {
+	if !sv.IsArray && !sv.IsFixedLen {
 		config.Add(gi.KiT_Action, "add-action")
 	}
 	config.Add(gi.KiT_Action, "edit-action")
@@ -89,12 +95,15 @@ func (sv *SliceViewInline) ConfigParts() {
 			svv.SetChanged()
 		})
 		widg := sv.Parts.KnownChild(i).(gi.Node2D)
+		if sv.SliceValView != nil {
+			vv.SetTags(sv.SliceValView.AllTags())
+		}
 		vv.ConfigWidget(widg)
 		if sv.IsInactive() {
 			widg.AsNode2D().SetInactive()
 		}
 	}
-	if !sv.IsArray {
+	if !sv.IsArray && !sv.IsFixedLen {
 		adack, ok := sv.Parts.Children().ElemFromEnd(1)
 		if ok {
 			adac := adack.(*gi.Action)
@@ -119,6 +128,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {
 				svvv := svvvk.(*SliceView)
+				svvv.SliceValView = svv.SliceValView
 				svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					svvvv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 					svvvv.ViewSig.Emit(svvvv.This, 0, nil)
@@ -141,7 +151,7 @@ func (sv *SliceViewInline) SetChanged() {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (sv *SliceViewInline) SliceNewAt(idx int, reconfig bool) {
-	if sv.IsArray {
+	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
 

@@ -71,6 +71,12 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	desc, _ := vv.Tag("desc")
 	dlg := StructViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+	svk, ok := dlg.Frame().Children().ElemByType(KiT_StructView, true, 2)
+	if ok {
+		sv := svk.(*StructView)
+		sv.StructValView = vv
+		// no need to connect ViewSig
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +106,7 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	sv := vv.Widget.(*StructViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
+	sv.StructValView = vv
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
 	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -186,6 +193,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
 			sv := svk.(*TableView)
+			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
@@ -198,6 +206,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
 			sv := svk.(*SliceView)
+			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
@@ -234,6 +243,7 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
+	sv.SliceValView = vv
 	// npv := vv.Value.Elem()
 	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sv.SetSlice(vv.Value.Interface(), vv.TmpSave)
@@ -307,6 +317,7 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 	if ok {
 		mv := mvk.(*MapView)
+		mv.MapValView = vv
 		mv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			vv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 			vv.UpdateWidget()
@@ -342,6 +353,7 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	sv := vv.Widget.(*MapViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
+	sv.MapValView = vv
 	// npv := vv.Value.Elem()
 	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
 	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
