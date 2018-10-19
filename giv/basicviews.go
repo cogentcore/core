@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
@@ -543,21 +542,21 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 		sb.SetMin(0)
 	}
 	if mintag, ok := vv.Tag("min"); ok {
-		min, err := strconv.ParseFloat(mintag, 32)
-		if err == nil {
-			sb.SetMin(float32(min))
+		minv, ok := kit.ToFloat32(mintag)
+		if ok {
+			sb.SetMin(minv)
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
-		max, err := strconv.ParseFloat(maxtag, 32)
-		if err == nil {
-			sb.SetMax(float32(max))
+		maxv, ok := kit.ToFloat32(maxtag)
+		if ok {
+			sb.SetMax(maxv)
 		}
 	}
 	if steptag, ok := vv.Tag("step"); ok {
-		step, err := strconv.ParseFloat(steptag, 32)
-		if err == nil {
-			sb.Step = float32(step)
+		step, ok := kit.ToFloat32(steptag)
+		if ok {
+			sb.Step = step
 		}
 	}
 	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -606,23 +605,23 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
-		min, err := strconv.ParseFloat(mintag, 32)
-		if err == nil {
+		minv, ok := kit.ToFloat32(mintag)
+		if ok {
 			sb.HasMin = true
-			sb.Min = float32(min)
+			sb.Min = minv
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
-		max, err := strconv.ParseFloat(maxtag, 32)
-		if err == nil {
+		maxv, ok := kit.ToFloat32(maxtag)
+		if ok {
 			sb.HasMax = true
-			sb.Max = float32(max)
+			sb.Max = maxv
 		}
 	}
 	if steptag, ok := vv.Tag("step"); ok {
-		step, err := strconv.ParseFloat(steptag, 32)
-		if err == nil {
-			sb.Step = float32(step)
+		step, ok := kit.ToFloat32(steptag)
+		if ok {
+			sb.Step = step
 		}
 	}
 
@@ -794,15 +793,15 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag, ok := vv.Tag("width"); ok {
-		width, err := strconv.ParseFloat(widthtag, 32)
-		if err == nil {
-			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ch))
+		width, ok := kit.ToFloat32(widthtag)
+		if ok {
+			tf.SetMinPrefWidth(units.NewValue(width, units.Ch))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, err := strconv.ParseFloat(maxwidthtag, 32)
-		if err == nil {
-			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
+		width, ok := kit.ToFloat32(maxwidthtag)
+		if ok {
+			tf.SetProp("max-width", units.NewValue(width, units.Ch))
 		}
 	}
 
@@ -853,15 +852,15 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag, ok := vv.Tag("width"); ok {
-		width, err := strconv.ParseFloat(widthtag, 32)
-		if err == nil {
-			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ch))
+		width, ok := kit.ToFloat32(widthtag)
+		if ok {
+			tf.SetMinPrefWidth(units.NewValue(width, units.Ch))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, err := strconv.ParseFloat(maxwidthtag, 32)
-		if err == nil {
-			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
+		width, ok := kit.ToFloat32(maxwidthtag)
+		if ok {
+			tf.SetProp("max-width", units.NewValue(width, units.Ch))
 		}
 	}
 

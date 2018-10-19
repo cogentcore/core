@@ -545,7 +545,8 @@ var FileNodeProps = ki.Props{
 			"desc":  "Rename file to new file name",
 			"Args": ki.PropSlice{
 				{"New Name", ki.Props{
-					"default-field": "Name",
+					"width":         60,
+					"default-field": "Nm",
 				}},
 			},
 		}},
@@ -553,7 +554,9 @@ var FileNodeProps = ki.Props{
 			"label": "New File...",
 			"desc":  "Create a new file in this folder",
 			"Args": ki.PropSlice{
-				{"File Name", ki.Props{}},
+				{"File Name", ki.Props{
+					"width": 60,
+				}},
 			},
 		}},
 	},

@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/goki/gi"
@@ -714,15 +713,15 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.SetInactiveState(vv.This.(ValueView).IsInactive())
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag, ok := vv.Tag("width"); ok {
-		width, err := strconv.ParseFloat(widthtag, 32)
-		if err == nil {
-			tf.SetMinPrefWidth(units.NewValue(float32(width), units.Ch))
+		width, ok := kit.ToFloat32(widthtag)
+		if ok {
+			tf.SetMinPrefWidth(units.NewValue(width, units.Ch))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, err := strconv.ParseFloat(maxwidthtag, 32)
-		if err == nil {
-			tf.SetProp("max-width", units.NewValue(float32(width), units.Ch))
+		width, ok := kit.ToFloat32(maxwidthtag)
+		if ok {
+			tf.SetProp("max-width", units.NewValue(width, units.Ch))
 		}
 	}
 	if completetag, ok := vv.Tag("complete"); ok {

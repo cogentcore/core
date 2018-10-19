@@ -402,15 +402,24 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		return true
 	}
 
+	// other special cases based on props
+	nometh := false // set to true if doesn't have an actual method to call, e.g., keyfun
+	for pk, _ := range props {
+		switch pk {
+		case "keyfun":
+			nometh = true
+		}
+	}
+
 	methNm := ac.Nm
 	methTyp, hasmeth := vtyp.MethodByName(methNm)
-	if !hasmeth {
+	if !nometh && !hasmeth {
 		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- not found in type", methNm))
 		return false
 	}
 	valval := reflect.ValueOf(val)
 	methVal := valval.MethodByName(methNm)
-	if kit.ValueIsZero(methVal) || methVal.IsNil() {
+	if !nometh && (kit.ValueIsZero(methVal) || methVal.IsNil()) {
 		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- method value not valid", methNm))
 		return false
 	}
@@ -434,6 +443,12 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 				ac.Shortcut = gi.ActiveKeyMap.ChordForFun(kf).OSShortcut()
 			} else {
 				ac.Shortcut = key.Chord(kit.ToString(pv)).OSShortcut()
+			}
+		case "keyfun":
+			if kf, ok := pv.(gi.KeyFuns); ok {
+				ac.Shortcut = gi.ActiveKeyMap.ChordForFun(kf).OSShortcut()
+				md.KeyFun = kf
+				bitflag.Set32((*int32)(&md.Flags), int(MethViewKeyFun))
 			}
 		case "label":
 			ac.Text = kit.ToString(pv)
@@ -531,6 +546,9 @@ const (
 	// and the SubMenuVal has the selected value
 	MethViewHasSubMenuVal
 
+	// MethViewKeyFun means this action's only function is to emit the key fun
+	MethViewKeyFun
+
 	MethViewFlagsN
 )
 
@@ -558,6 +576,7 @@ type MethViewData struct {
 	SubMenuField string                        `desc:"value for submenu generation as name of field on obj"`
 	SubMenuFunc  SubMenuFunc                   `desc:"function that will generate submenu items, as []string slice"`
 	SubMenuVal   interface{}                   `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+	KeyFun       gi.KeyFuns                    `desc:"key function that we emit, if MethViewKeyFun type"`
 	Flags        MethViewFlags
 }
 
@@ -612,6 +631,12 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 // prompting otherwise of the user for arg values -- checks for Confirm case
 // or otherwise directly calls method
 func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Value) {
+	if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
+		if md.Vp != nil && md.Vp.Win != nil {
+			md.Vp.Win.SendKeyFunEvent(md.KeyFun, false)
+		}
+		return
+	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
 		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, true, true,
 			md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -734,9 +759,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 						ad.SetHasDef()
 					}
 				default:
-					if str, ok := pv.(string); ok {
-						ad.View.SetTag(pk, str)
-					}
+					ad.View.SetTag(pk, kit.ToString(pv))
 				}
 			}
 		}
