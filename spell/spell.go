@@ -199,38 +199,40 @@ func NewSpellCheck(text []byte) {
 }
 
 // returns the next word not found in corpus
-func NextUnknownWord() (unknown string, suggests []string) {
-	var w string
+func NextUnknownWord() (unknown TextWord, suggests []string) {
+	var tw TextWord
 	for {
-		w = NextWord()
-		if w == "" { // we're done!
+		tw = NextWord()
+		if tw.Word == "" { // we're done!
 			break
 		}
 		var known = false
-		suggests, known = CheckWord(w)
+		suggests, known = CheckWord(tw)
 		if !known {
 			break
 		}
 	}
-	return w, suggests
+	return tw, suggests
 }
 
 // returns the next word of the input words
-func NextWord() string {
+func NextWord() TextWord {
+	tw := TextWord{}
 	if inputidx < len(input) {
-		tw := input[inputidx]
+		tw = input[inputidx]
 		inputidx += 1
-		return tw.Word
+		return tw
 	}
-	return ""
+	return tw
 }
 
 // CheckWord checks a single word and returns suggestions if word is unknown
-func CheckWord(w string) (suggests []string, known bool) {
+func CheckWord(tw TextWord) (suggests []string, known bool) {
 	if model == nil {
 		InitModel()
 	}
 
+	w := tw.Word
 	known = false
 	w = strings.Trim(w, "`'*.,?[]():;")
 	w = strings.ToLower(w)
