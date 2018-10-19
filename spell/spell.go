@@ -128,9 +128,10 @@ type UnknownWord struct {
 
 // TextWord represents one word of the input text - used with fuzzy implementation
 type TextWord struct {
-	Word string
-	Line int `desc:"the line number"`
-	Char int `desc:"the character position"`
+	Word     string
+	Line     int `desc:"the line number"`
+	StartPos int `desc:"the starting character position"`
+	EndPos   int `desc:"the ending character position"`
 }
 
 var model *fuzzy.Model
@@ -251,7 +252,14 @@ func LearnWord(word string) {
 // TextToWords generates a slice of words from text
 // removes various non-word input, trims symbols, etc
 func TextToWords(text []byte) {
-	r, err := regexp.Compile(`\W`)
+	//notwordchar, err := regexp.Compile(`\W`)
+	notwordchar, err := regexp.Compile(`[^0-9A-Za-z]`)
+
+	if err != nil {
+		panic(err)
+	}
+
+	wordbounds, err := regexp.Compile(`\b`)
 	if err != nil {
 		panic(err)
 	}
@@ -260,12 +268,15 @@ func TextToWords(text []byte) {
 
 	var words []TextWord
 	for l, line := range strings.Split(textstr, "\n") {
-		line = r.ReplaceAllString(line, " ")
+		line = notwordchar.ReplaceAllString(line, " ")
+		bounds := wordbounds.FindAllStringIndex(line, -1)
+		//fmt.Println(line)
+		//fmt.Println(bounds)
 		words = words[:0] // reset for new line
-		splits := strings.Split(line, " ")
-		for _, w := range splits {
+		splits := strings.Fields(line)
+		for i, w := range splits {
 			if len(w) > 1 {
-				tw := TextWord{Word: w, Line: l}
+				tw := TextWord{Word: w, Line: l, StartPos: bounds[i*2][0], EndPos: bounds[i*2+1][0]}
 				words = append(words, tw)
 			}
 		}
