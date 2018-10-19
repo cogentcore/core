@@ -652,6 +652,11 @@ var TreeViewPageSteps = 10
 // MovePageUpAction moves the selection up to previous TreeViewPageSteps elements in the tree,
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
 	fnn := tv.MoveUp(selMode)
 	if fnn != nil && fnn != tv {
 		for i := 1; i < TreeViewPageSteps; i++ {
@@ -665,12 +670,20 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), fnn.This)
 	}
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
 	return fnn
 }
 
 // MovePageDownAction moves the selection up to previous TreeViewPageSteps elements in the tree,
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
 	fnn := tv.MoveDown(selMode)
 	if fnn != nil && fnn != tv {
 		for i := 1; i < TreeViewPageSteps; i++ {
@@ -683,6 +696,9 @@ func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 		fnn.GrabFocus()
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), fnn.This)
+	}
+	if win != nil {
+		win.UpdateEnd(updt)
 	}
 	return fnn
 }
@@ -1296,6 +1312,7 @@ func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
 	switch kf {
 	case gi.KeyFunCancelSelect:
 		tf.UnselectAll()
+		tf.SetSelectMode(false)
 		kt.SetProcessed()
 	case gi.KeyFunMoveRight:
 		tf.Open()
