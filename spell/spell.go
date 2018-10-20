@@ -291,17 +291,20 @@ func TextToWords(text []byte) {
 
 // SaveModel saves the spelling model which includes the dictionary and parameters
 func SaveModel() error {
-	b, err := json.MarshalIndent(model, "", "  ")
-	if err != nil {
-		log.Println(err) // unlikely
+	if model != nil {
+		b, err := json.MarshalIndent(model, "", "  ")
+		if err != nil {
+			log.Println(err) // unlikely
+			return err
+		}
+		pdir := oswin.TheApp.AppPrefsDir()
+		savepath := filepath.Join(pdir, "spell_en_us_plain.json")
+		err = ioutil.WriteFile(savepath, b, 0644)
+		if err != nil {
+			gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+			log.Println(err)
+		}
 		return err
 	}
-	pdir := oswin.TheApp.AppPrefsDir()
-	savepath := filepath.Join(pdir, "spell_en_us_plain.json")
-	err = ioutil.WriteFile(savepath, b, 0644)
-	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
-		log.Println(err)
-	}
-	return err
+	return nil
 }
