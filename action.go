@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/goki/gi/units"
@@ -134,7 +133,7 @@ var ActionProps = ki.Props{
 		"padding":      units.NewValue(4, units.Px), // we go to edge of bar
 		"margin":       units.NewValue(0, units.Px),
 		"indicator":    "none",
-		"border-width": units.NewValue(1, units.Px),
+		"border-width": units.NewValue(.5, units.Px),
 		ButtonSelectors[ButtonActive]: ki.Props{
 			"background-color": "linear-gradient(lighter-0, highlight-10)",
 		},
@@ -254,11 +253,6 @@ func (ac *Action) ConfigPartsButton() {
 	mods, updt := ac.Parts.ConfigChildren(config, false) // not unique names
 	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
-	if ac.Tooltip == "" {
-		if ac.Shortcut != "" {
-			ac.Tooltip = fmt.Sprintf("Shortcut: %v", ac.Shortcut)
-		}
-	}
 	if mods {
 		ac.UpdateEnd(updt)
 	}

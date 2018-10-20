@@ -695,8 +695,9 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 	if fsz == 0 {
 		return 0, nil
 	}
+	findeff := find
 	if ignoreCase {
-		find = bytes.ToLower(find)
+		findeff = bytes.ToLower(find)
 	}
 	cnt := 0
 	var matches []FileSearchMatch
@@ -705,13 +706,14 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 	med := []byte("</mark>")
 	medsz := len(med)
 	for ln, b := range tb.LineBytes {
+		bo := b
 		if ignoreCase {
 			b = bytes.ToLower(b)
 		}
 		sz := len(b)
 		ci := 0
 		for ci < sz {
-			i := bytes.Index(b[ci:], find)
+			i := bytes.Index(b[ci:], findeff)
 			if i < 0 {
 				break
 			}
@@ -722,15 +724,15 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 			cied := ints.MinInt(ci+FileSearchContext, sz)
 			tlen := mstsz + medsz + cied - cist
 			txt := make([]byte, tlen)
-			copy(txt, b[cist:i])
+			copy(txt, bo[cist:i])
 			ti := i - cist
 			copy(txt[ti:], mst)
 			ti += mstsz
-			copy(txt[ti:], b[i:ci])
+			copy(txt[ti:], bo[i:ci])
 			ti += fsz
 			copy(txt[ti:], med)
 			ti += medsz
-			copy(txt[ti:], b[ci:cied])
+			copy(txt[ti:], bo[ci:cied])
 			matches = append(matches, FileSearchMatch{Reg: reg, Text: txt})
 			cnt++
 		}

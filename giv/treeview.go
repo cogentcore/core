@@ -1598,34 +1598,34 @@ var TreeViewProps = ki.Props{
 		{"SrcInsertBefore", ki.Props{
 			"label":    "Insert Before",
 			"shortcut": gi.KeyFunInsert,
-			"updtfunc": func(tvi interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi interface{}, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
-			},
+			}),
 		}},
 		{"SrcInsertAfter", ki.Props{
 			"label":    "Insert After",
 			"shortcut": gi.KeyFunInsertAfter,
-			"updtfunc": func(tvi interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi interface{}, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
-			},
+			}),
 		}},
 		{"SrcDuplicate", ki.Props{
 			"label":    "Duplicate",
 			"shortcut": gi.KeyFunDuplicate,
-			"updtfunc": func(tvi interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi interface{}, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
-			},
+			}),
 		}},
 		{"SrcDelete", ki.Props{
 			"label":    "Delete",
 			"shortcut": gi.KeyFunDelete,
-			"updtfunc": func(tvi interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi interface{}, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
-			},
+			}),
 		}},
 		{"sep-edit", ki.BlankProp{}},
 		{"Copy", ki.Props{
@@ -1638,10 +1638,10 @@ var TreeViewProps = ki.Props{
 		}},
 		{"Cut", ki.Props{
 			"shortcut": gi.KeyFunCut,
-			"updtfunc": func(tvi interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi interface{}, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 				act.SetInactiveState(tv.IsRootOrField(""))
-			},
+			}),
 		}},
 		{"Paste", ki.Props{
 			"shortcut": gi.KeyFunPaste,

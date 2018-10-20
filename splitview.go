@@ -111,9 +111,7 @@ func (sv *SplitView) SaveSplits() {
 	if sv.SavedSplits == nil || len(sv.SavedSplits) != sz {
 		sv.SavedSplits = make([]float32, sz)
 	}
-	for i, sp := range sv.Splits {
-		sv.SavedSplits[i] = sp
-	}
+	copy(sv.SavedSplits, sv.Splits)
 }
 
 // RestoreSplits restores a previously-saved set of splits (if it exists), does an update

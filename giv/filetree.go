@@ -467,8 +467,9 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 	if fsz == 0 {
 		return 0, nil
 	}
+	findeff := find
 	if ignoreCase {
-		find = bytes.ToLower(find)
+		findeff = bytes.ToLower(find)
 	}
 	cnt := 0
 	var matches []FileSearchMatch
@@ -479,14 +480,15 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 	med := []byte("</mark>")
 	medsz := len(med)
 	for scan.Scan() {
-		b := scan.Bytes() // note: temp -- must copy!
+		bo := scan.Bytes() // note: temp -- must copy!
+		b := bo
 		if ignoreCase {
-			b = bytes.ToLower(b)
+			b = bytes.ToLower(bo)
 		}
 		sz := len(b)
 		ci := 0
 		for ci < sz {
-			i := bytes.Index(b[ci:], find)
+			i := bytes.Index(b[ci:], findeff)
 			if i < 0 {
 				break
 			}
@@ -497,15 +499,15 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 			cied := ints.MinInt(ci+FileSearchContext, sz)
 			tlen := mstsz + medsz + cied - cist
 			txt := make([]byte, tlen)
-			copy(txt, b[cist:i])
+			copy(txt, bo[cist:i])
 			ti := i - cist
 			copy(txt[ti:], mst)
 			ti += mstsz
-			copy(txt[ti:], b[i:ci])
+			copy(txt[ti:], bo[i:ci])
 			ti += fsz
 			copy(txt[ti:], med)
 			ti += medsz
-			copy(txt[ti:], b[ci:cied])
+			copy(txt[ti:], bo[ci:cied])
 			matches = append(matches, FileSearchMatch{Reg: reg, Text: txt})
 			cnt++
 		}
@@ -749,19 +751,19 @@ var FileTreeViewProps = ki.Props{
 	"CtxtMenuActive": ki.PropSlice{
 		{"DuplicateFiles", ki.Props{
 			"label": "Duplicate",
-			"updtfunc": func(fni interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 				act.SetInactiveState(fn.FileNode().IsDir())
-			},
+			}),
 		}},
 		{"DeleteFiles", ki.Props{
 			"label":   "Delete",
 			"desc":    "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
-			"updtfunc": func(fni interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 				act.SetInactiveState(fn.FileNode().IsDir())
-			},
+			}),
 		}},
 		{"RenameFiles", ki.Props{
 			"label": "Rename",
@@ -771,21 +773,21 @@ var FileTreeViewProps = ki.Props{
 		{"OpenDirs", ki.Props{
 			"label": "Open Dir",
 			"desc":  "open given folder to see files within",
-			"updtfunc": func(fni interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 				act.SetActiveState(fn.FileNode().IsDir())
-			},
+			}),
 		}},
 		{"NewFile", ki.Props{
 			"label": "New File...",
 			"desc":  "make a new file in this folder",
-			"updtfunc": func(fni interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 				ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 				fn := ft.FileNode()
 				if fn != nil {
 					act.SetActiveState(fn.IsDir())
 				}
-			},
+			}),
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"width": 60,

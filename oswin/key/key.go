@@ -175,20 +175,20 @@ func (ch Chord) Decode() (r rune, mods int32, err error) {
 
 // Shortcut transforms chord string into short form suitable for display to users
 func (ch Chord) Shortcut() string {
-	cs := strings.Replace(string(ch), "Control+", "^", 1) // ⌃ doesn't look as good
+	cs := strings.Replace(string(ch), "Control+", "^", -1) // ⌃ doesn't look as good
 	switch oswin.TheApp.Platform() {
 	case oswin.MacOS:
-		cs = strings.Replace(cs, "Shift+", "⇧", 1)
-		cs = strings.Replace(cs, "Meta+", "⌘", 1)
-		cs = strings.Replace(cs, "Alt+", "⌥", 1)
+		cs = strings.Replace(cs, "Shift+", "⇧", -1)
+		cs = strings.Replace(cs, "Meta+", "⌘", -1)
+		cs = strings.Replace(cs, "Alt+", "⌥", -1)
 	case oswin.Windows:
-		cs = strings.Replace(cs, "Shift+", "↑", 1)
-		cs = strings.Replace(cs, "Meta+", "Win+", 1) // todo: actual windows key
+		cs = strings.Replace(cs, "Shift+", "↑", -1)
+		cs = strings.Replace(cs, "Meta+", "Win+", -1) // todo: actual windows key
 	default:
 		cs = strings.Replace(cs, "Meta+", "", 1)
 	}
-	cs = strings.Replace(cs, "DeleteBackspace", "⌫", 1)
-	cs = strings.Replace(cs, "DeleteForward", "⌦", 1)
+	cs = strings.Replace(cs, "DeleteBackspace", "⌫", -1)
+	cs = strings.Replace(cs, "DeleteForward", "⌦", -1)
 	return cs
 }
 

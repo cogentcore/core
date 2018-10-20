@@ -135,7 +135,7 @@ func (pf *ColorPrefs) PrefColor(clrName string) *Color {
 func (pf *ParamPrefs) Defaults() {
 	pf.DoubleClickMSec = 500
 	pf.ScrollWheelRate = 20
-	pf.LocalMainMenu = false
+	pf.LocalMainMenu = true // much better
 }
 
 func (pf *Preferences) Defaults() {

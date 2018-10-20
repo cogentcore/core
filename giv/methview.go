@@ -444,6 +444,14 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			} else {
 				ac.Shortcut = key.Chord(kit.ToString(pv)).OSShortcut()
 			}
+		case "shortcut-func":
+			if sf, ok := pv.(ShortcutFunc); ok {
+				ac.Shortcut = sf(md.Val, ac)
+			} else if sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord); ok {
+				ac.Shortcut = sf(md.Val, ac)
+			} else {
+				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
+			}
 		case "keyfun":
 			if kf, ok := pv.(gi.KeyFuns); ok {
 				ac.Shortcut = gi.ActiveKeyMap.ChordForFun(kf).OSShortcut()
@@ -466,9 +474,14 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		case "update-after": // if MethViewNoUpdateAfterProp was set above
 			bitflag.Clear32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
 		case "updtfunc":
-			if uf, ok := pv.(func(interface{}, *gi.Action)); ok {
+			if uf, ok := pv.(ActionUpdateFunc); ok {
 				md.UpdateFunc = uf
 				ac.UpdateFunc = MethViewUpdateFunc
+			} else if uf, ok := pv.(func(it interface{}, act *gi.Action)); ok {
+				md.UpdateFunc = ActionUpdateFunc(uf)
+				ac.UpdateFunc = MethViewUpdateFunc
+			} else {
+				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, updtfunc must be of type ActionUpdateFunc", methNm))
 			}
 		case "submenu":
 			ac.MakeMenuFunc = MethViewSubMenuFunc
@@ -479,9 +492,17 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			}
 			bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
 		case "submenu-func":
-			ac.MakeMenuFunc = MethViewSubMenuFunc
-			md.SubMenuFunc = pv.(SubMenuFunc)
-			bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			if sf, ok := pv.(SubMenuFunc); ok {
+				ac.MakeMenuFunc = MethViewSubMenuFunc
+				md.SubMenuFunc = sf
+				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			} else if sf, ok := pv.(func(it interface{}, vp *gi.Viewport2D) []string); ok {
+				ac.MakeMenuFunc = MethViewSubMenuFunc
+				md.SubMenuFunc = SubMenuFunc(sf)
+				bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			} else {
+				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, submenu-func must be of type SubMenuFunc", methNm))
+			}
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
@@ -556,8 +577,19 @@ const (
 
 var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "MethView") // true = bitflags
 
-// SubMenuFunc is a function that returns a string slice of submenu items, used in submenu-func option
+// SubMenuFunc is a function that returns a string slice of submenu items
+// used in MethView submenu-func option
+// first argument is the object on which the method is defined (receiver)
 type SubMenuFunc func(it interface{}, vp *gi.Viewport2D) []string
+
+// ShortcutFunc is a function that returns a key.Chord string for a shortcut
+// used in MethView shortcut-func option
+// first argument is the object on which the method is defined (receiver)
+type ShortcutFunc func(it interface{}, act *gi.Action) key.Chord
+
+// ActionUpdateFunc is a function that updates method active / inactive status
+// first argument is the object on which the method is defined (receiver)
+type ActionUpdateFunc func(it interface{}, act *gi.Action)
 
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
@@ -568,15 +600,15 @@ type MethViewData struct {
 	Method       string
 	MethVal      reflect.Value
 	MethTyp      reflect.Method
-	ArgProps     ki.PropSlice                  `desc:"names and other properties of args, in one-to-one with method args"`
-	SpecProps    ki.Props                      `desc:"props for special action types, e.g., FileView"`
-	Desc         string                        `desc:"prompt shown in arg dialog or confirm prompt dialog"`
-	UpdateFunc   func(interface{}, *gi.Action) `desc:"update function defined in properties -- called by our wrapper update function"`
-	SubMenuSlice interface{}                   `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
-	SubMenuField string                        `desc:"value for submenu generation as name of field on obj"`
-	SubMenuFunc  SubMenuFunc                   `desc:"function that will generate submenu items, as []string slice"`
-	SubMenuVal   interface{}                   `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
-	KeyFun       gi.KeyFuns                    `desc:"key function that we emit, if MethViewKeyFun type"`
+	ArgProps     ki.PropSlice     `desc:"names and other properties of args, in one-to-one with method args"`
+	SpecProps    ki.Props         `desc:"props for special action types, e.g., FileView"`
+	Desc         string           `desc:"prompt shown in arg dialog or confirm prompt dialog"`
+	UpdateFunc   ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
+	SubMenuSlice interface{}      `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
+	SubMenuField string           `desc:"value for submenu generation as name of field on obj"`
+	SubMenuFunc  SubMenuFunc      `desc:"function that will generate submenu items, as []string slice"`
+	SubMenuVal   interface{}      `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+	KeyFun       gi.KeyFuns       `desc:"key function that we emit, if MethViewKeyFun type"`
 	Flags        MethViewFlags
 }
 

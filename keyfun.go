@@ -20,6 +20,7 @@ import (
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
+// https://www.cs.colorado.edu/~main/cs1300/lab/emacs.html
 
 // KeyFuns are functions that keyboard events can perform in the GUI --
 // seems possible to keep this flat and consistent across different contexts,

@@ -27,7 +27,7 @@ type ButtonBase struct {
 	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
 	Icon         IconName             `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    IconName             `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
-	Shortcut     key.Chord            `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform"`
+	Shortcut     key.Chord            `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
 	ButtonSig    ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
@@ -448,6 +448,23 @@ func (bb *ButtonBase) KeyChordEvent() {
 				bbb.ButtonPressed()
 				bw.ButtonRelease()
 			}
+		}
+	})
+}
+
+func (bb *ButtonBase) HoverTooltipEvent() {
+	bb.ConnectEvent(oswin.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.HoverEvent)
+		wbb := recv.Embed(KiT_ButtonBase).(*ButtonBase)
+		tt := wbb.Tooltip
+		if wbb.Shortcut != "" {
+			tt = "[ " + wbb.Shortcut.Shortcut() + " ]: " + tt
+		}
+		if tt != "" {
+			me.SetProcessed()
+			pos := wbb.WinBBox.Max
+			pos.X -= 20
+			PopupTooltip(tt, pos.X, pos.Y, wbb.Viewport, wbb.Nm)
 		}
 	})
 }

@@ -568,7 +568,7 @@ func (wb *WidgetBase) HoverTooltipEvent() {
 			me.SetProcessed()
 			pos := wbb.WinBBox.Max
 			pos.X -= 20
-			PopupTooltip(wbb.Tooltip, pos.X, pos.Y, wb.Viewport, wbb.Nm)
+			PopupTooltip(wbb.Tooltip, pos.X, pos.Y, wbb.Viewport, wbb.Nm)
 		}
 	})
 }
