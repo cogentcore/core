@@ -42,26 +42,26 @@ import (
 
 // LayoutStyle contains style preferences on the layout of the element.
 type LayoutStyle struct {
-	ZIndex         int         `xml:"z-index" desc:"ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH         Align       `xml:"horizontal-align" desc:"horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV         Align       `xml:"vertical-align" desc:"vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX           units.Value `xml:"x" desc:"horizontal position -- often superceded by layout but otherwise used"`
-	PosY           units.Value `xml:"y" desc:"vertical position -- often superceded by layout but otherwise used"`
-	Width          units.Value `xml:"width" desc:"specified size of element -- 0 if not specified"`
-	Height         units.Value `xml:"height" desc:"specified size of element -- 0 if not specified"`
-	MaxWidth       units.Value `xml:"max-width" desc:"specified maximum size of element -- 0  means just use other values, negative means stretch"`
-	MaxHeight      units.Value `xml:"max-height" desc:"specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth       units.Value `xml:"min-width" desc:"specified mimimum size of element -- 0 if not specified"`
-	MinHeight      units.Value `xml:"min-height" desc:"specified mimimum size of element -- 0 if not specified"`
-	Margin         units.Value `xml:"margin" desc:"outer-most transparent space around box element -- todo: can be specified per side"`
-	Padding        units.Value `xml:"padding" desc:"transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
-	Overflow       Overflow    `xml:"overflow" desc:"what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
-	Columns        int         `xml:"columns" alt:"grid-cols" desc:"number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
-	Row            int         `xml:"row" desc:"specifies the row that this element should appear within a grid layout"`
-	Col            int         `xml:"col" desc:"specifies the column that this element should appear within a grid layout"`
-	RowSpan        int         `xml:"row-span" desc:"specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
-	ColSpan        int         `xml:"col-span" desc:"specifies the number of sequential columns that this element should occupy within a grid layout"`
-	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"width of a layout scrollbar"`
+	ZIndex         int         `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	AlignH         Align       `xml:"horizontal-align" desc:"prop: horizontal-align = horizontal alignment -- for widget layouts -- not a standard css property"`
+	AlignV         Align       `xml:"vertical-align" desc:"prop: vertical-align = vertical alignment -- for widget layouts -- not a standard css property"`
+	PosX           units.Value `xml:"x" desc:"prop: x = horizontal position -- often superceded by layout but otherwise used"`
+	PosY           units.Value `xml:"y" desc:"prop: y = vertical position -- often superceded by layout but otherwise used"`
+	Width          units.Value `xml:"width" desc:"prop: width = specified size of element -- 0 if not specified"`
+	Height         units.Value `xml:"height" desc:"prop: height = specified size of element -- 0 if not specified"`
+	MaxWidth       units.Value `xml:"max-width" desc:"prop: max-width = specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxHeight      units.Value `xml:"max-height" desc:"prop: max-height = specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MinWidth       units.Value `xml:"min-width" desc:"prop: min-width = specified mimimum size of element -- 0 if not specified"`
+	MinHeight      units.Value `xml:"min-height" desc:"prop: min-height = specified mimimum size of element -- 0 if not specified"`
+	Margin         units.Value `xml:"margin" desc:"prop: margin = outer-most transparent space around box element -- todo: can be specified per side"`
+	Padding        units.Value `xml:"padding" desc:"prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
+	Overflow       Overflow    `xml:"overflow" desc:"prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	Columns        int         `xml:"columns" alt:"grid-cols" desc:"prop: columns = number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
+	Row            int         `xml:"row" desc:"prop: row = specifies the row that this element should appear within a grid layout"`
+	Col            int         `xml:"col" desc:"prop: col = specifies the column that this element should appear within a grid layout"`
+	RowSpan        int         `xml:"row-span" desc:"prop: row-span = specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
+	ColSpan        int         `xml:"col-span" desc:"prop: col-span = specifies the number of sequential columns that this element should occupy within a grid layout"`
+	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"prop: scrollbar-width = width of a layout scrollbar"`
 }
 
 func (ls *LayoutStyle) Defaults() {

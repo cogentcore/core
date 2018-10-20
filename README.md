@@ -98,6 +98,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * completion: timing and other issue..
 
+* major issues with keymaps -- key fun move up has no key mapping over and over again when trying chrome std on mac..
+
 * tableview (e.g., langs chooser) not rendering icons on first show.  does later, just not at start..  not a big thing but would be good to fix.
 
 * fileview deal with symlinks.

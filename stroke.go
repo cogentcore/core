@@ -60,14 +60,14 @@ func (ev *LineJoin) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON
 // StrokeStyle contains all the properties for painting a line
 type StrokeStyle struct {
 	On         bool        `desc:"is stroke active -- if property is none then false"`
-	Color      ColorSpec   `xml:"stroke" desc:"stroke color specification"`
-	Opacity    float32     `xml:"stroke-opacity" desc:"global alpha opacity / transparency factor"`
-	Width      units.Value `xml:"stroke-width" desc:"line width"`
-	MinWidth   units.Value `xml:"stroke-min-width" desc:"minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard"`
-	Dashes     []float64   `xml:"stroke-dasharray" desc:"dash pattern"`
-	Cap        LineCap     `xml:"stroke-linecap" desc:"how to draw the end cap of lines"`
-	Join       LineJoin    `xml:"stroke-linejoin" desc:"how to join line segments"`
-	MiterLimit float32     `xml:"stroke-miterlimit" min:"1" desc:"limit of how far to miter -- must be 1 or larger"`
+	Color      ColorSpec   `xml:"stroke" desc:"prop: stroke = stroke color specification"`
+	Opacity    float32     `xml:"stroke-opacity" desc:"prop: stroke-opacity = global alpha opacity / transparency factor"`
+	Width      units.Value `xml:"stroke-width" desc:"prop: stroke-width = line width"`
+	MinWidth   units.Value `xml:"stroke-min-width" desc:"prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard"`
+	Dashes     []float64   `xml:"stroke-dasharray" desc:"prop: stroke-dasharray = dash pattern"`
+	Cap        LineCap     `xml:"stroke-linecap" desc:"prop: stroke-linecap = how to draw the end cap of lines"`
+	Join       LineJoin    `xml:"stroke-linejoin" desc:"prop: stroke-linejoin = how to join line segments"`
+	MiterLimit float32     `xml:"stroke-miterlimit" min:"1" desc:"prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger"`
 }
 
 // Defaults initializes default values for paint stroke

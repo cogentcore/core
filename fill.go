@@ -29,9 +29,9 @@ func (ev *FillRule) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON
 // FillStyle contains all the properties for filling a region
 type FillStyle struct {
 	On      bool      `desc:"is fill active -- if property is none then false"`
-	Color   ColorSpec `xml:"fill" desc:"fill color specification"`
-	Opacity float32   `xml:"fill-opacity" desc:"global alpha opacity / transparency factor"`
-	Rule    FillRule  `xml:"fill-rule" desc:"rule for how to fill more complex shapes with crossing lines"`
+	Color   ColorSpec `xml:"fill" desc:"prop: fill = fill color specification"`
+	Opacity float32   `xml:"fill-opacity" desc:"prop: fill-opacity = global alpha opacity / transparency factor"`
+	Rule    FillRule  `xml:"fill-rule" desc:"prop: fill-rule = rule for how to fill more complex shapes with crossing lines"`
 }
 
 // Defaults initializes default values for paint fill

@@ -691,9 +691,10 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+V": KeyFunPasteHist,
 		"Control+M":       KeyFunDuplicate,
 		"Control+Z":       KeyFunUndo,
+		"Control+Y":       KeyFunRedo,
 		"Shift+Control+Z": KeyFunRedo,
-		// "Control+I":       KeyFunInsert, // Italic
-		// "Control+O":       KeyFunInsertAfter, // Open
+		"Control+Alt+I":   KeyFunInsert,
+		"Control+Alt+O":   KeyFunInsertAfter,
 		"Shift+Control+I": KeyFunGoGiEditor,
 		"Control+=":       KeyFunZoomIn,
 		"Shift+Control++": KeyFunZoomIn,
@@ -843,8 +844,11 @@ var StdKeyMaps = KeyMaps{
 		"Control+V":       KeyFunPaste,
 		"Shift+Control+V": KeyFunPasteHist,
 		"Control+M":       KeyFunDuplicate,
-		// "Control+I":       KeyFunInsert, // Italic
-		// "Control+O":       KeyFunInsertAfter, // Open
+		"Control+Z":       KeyFunUndo,
+		"Control+Y":       KeyFunRedo,
+		"Shift+Control+Z": KeyFunRedo,
+		"Control+Alt+I":   KeyFunInsert,
+		"Control+Alt+O":   KeyFunInsertAfter,
 		"Shift+Control+I": KeyFunGoGiEditor,
 		"Control+=":       KeyFunZoomIn,
 		"Shift+Control++": KeyFunZoomIn,
@@ -902,8 +906,11 @@ var StdKeyMaps = KeyMaps{
 		"Control+V":       KeyFunPaste,
 		"Shift+Control+V": KeyFunPasteHist,
 		"Control+M":       KeyFunDuplicate,
-		// "Control+I":       KeyFunInsert, // Italic
-		// "Control+O":       KeyFunInsertAfter, // Open
+		"Control+Z":       KeyFunUndo,
+		"Shift+Control+Z": KeyFunRedo,
+		"Control+Y":       KeyFunRedo,
+		"Control+Alt+I":   KeyFunInsert,
+		"Control+Alt+O":   KeyFunInsertAfter,
 		"Shift+Control+I": KeyFunGoGiEditor,
 		"Control+=":       KeyFunZoomIn,
 		"Shift+Control++": KeyFunZoomIn,

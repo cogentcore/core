@@ -1593,21 +1593,21 @@ func (tx *TextRender) RuneEndPos(idx int) (pos Vec2D, si, ri int, ok bool) {
 // FontStyle contains all the lower-level text rendering info used in SVG --
 // most of these are inherited
 type TextStyle struct {
-	Align            Align          `xml:"text-align" inherit:"true" desc:"how to align text, horizontally"`
-	AlignV           Align          `xml:"-" json:"-" desc:"vertical alignment of text -- copied from layout style AlignV"`
-	Anchor           TextAnchors    `xml:"text-anchor" inherit:"true" desc:"for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
-	LetterSpacing    units.Value    `xml:"letter-spacing" desc:"spacing between characters and lines"`
-	WordSpacing      units.Value    `xml:"word-spacing" inherit:"true" desc:"extra space to add between words"`
-	LineHeight       float32        `xml:"line-height" inherit:"true" desc:"specified height of a line of text, in proportion to default font height, 0 = 1 = normal (todo: specific values such as pixels are not supported, in order to properly support percentage) -- text is centered within the overall lineheight"`
-	WhiteSpace       WhiteSpaces    `xml:"white-space" inherit:"true" desc:"specifies how white space is processed, and how lines are wrapped"`
-	UnicodeBidi      UnicodeBidi    `xml:"unicode-bidi" inherit:"true" desc:"determines how to treat unicode bidirectional information"`
-	Direction        TextDirections `xml:"direction" inherit:"true" desc:"direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements"`
-	WritingMode      TextDirections `xml:"writing-mode" inherit:"true" desc:"overall writing mode -- only for text elements, not tspan"`
-	OrientationVert  float32        `xml:"glyph-orientation-vertical" inherit:"true" desc:"for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
-	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
-	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"how much to indent the first line in a paragraph"`
-	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directy with para-spacing"`
-	TabSize          int            `xml:"tab-size" inherit:"true" desc:"tab size, in number of characters"`
+	Align            Align          `xml:"text-align" inherit:"true" desc:"prop: text-align = how to align text, horizontally"`
+	AlignV           Align          `xml:"-" json:"-" desc:"prop: vertical-align = vertical alignment of text -- copied from layout style AlignV"`
+	Anchor           TextAnchors    `xml:"text-anchor" inherit:"true" desc:"prop: text-anchor = for svg rendering only: determines the alignment relative to text position coordinate: for RTL start is right, not left, and start is top for TB"`
+	LetterSpacing    units.Value    `xml:"letter-spacing" desc:"prop: letter-spacing = spacing between characters and lines"`
+	WordSpacing      units.Value    `xml:"word-spacing" inherit:"true" desc:"prop: word-spacing = extra space to add between words"`
+	LineHeight       float32        `xml:"line-height" inherit:"true" desc:"prop: line-height = specified height of a line of text, in proportion to default font height, 0 = 1 = normal (todo: specific values such as pixels are not supported, in order to properly support percentage) -- text is centered within the overall lineheight"`
+	WhiteSpace       WhiteSpaces    `xml:"white-space" inherit:"true" desc:"prop: white-space = specifies how white space is processed, and how lines are wrapped"`
+	UnicodeBidi      UnicodeBidi    `xml:"unicode-bidi" inherit:"true" desc:"prop: unicode-bidi = determines how to treat unicode bidirectional information"`
+	Direction        TextDirections `xml:"direction" inherit:"true" desc:"prop: direction = direction of text -- only applicable for unicode-bidi = bidi-override or embed -- applies to all text elements"`
+	WritingMode      TextDirections `xml:"writing-mode" inherit:"true" desc:"prop: writing-mode = overall writing mode -- only for text elements, not tspan"`
+	OrientationVert  float32        `xml:"glyph-orientation-vertical" inherit:"true" desc:"prop: glyph-orientation-vertical = for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
+	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"prop: glyph-orientation-horizontal = for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
+	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"prop: text-indent = how much to indent the first line in a paragraph"`
+	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"prop: para-spacing = extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directy with para-spacing"`
+	TabSize          int            `xml:"tab-size" inherit:"true" desc:"prop: tab-size = tab size, in number of characters"`
 	// todo:
 	// page-break options
 	// text-justify  inherit:"true" -- how to justify text

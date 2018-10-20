@@ -35,11 +35,11 @@ type Style struct {
 	Inactive      bool          `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
 	Layout        LayoutStyle   `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle   `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`
-	BoxShadow     ShadowStyle   `xml:"box-shadow" desc:"type of shadow to render around box"`
+	BoxShadow     ShadowStyle   `xml:"box-shadow" desc:"prop: box-shadow = type of shadow to render around box"`
 	Font          FontStyle     `desc:"font parameters -- no xml prefix -- also has color, background-color"`
 	Text          TextStyle     `desc:"text parameters -- no xml prefix"`
-	Outline       BorderStyle   `xml:"outline" desc:"draw an outline around an element -- mostly same styles as border -- default to none"`
-	PointerEvents bool          `xml:"pointer-events" desc:"does this element respond to pointer events -- default is true"`
+	Outline       BorderStyle   `xml:"outline" desc:"prop: outline = draw an outline around an element -- mostly same styles as border -- default to none"`
+	PointerEvents bool          `xml:"pointer-events" desc:"prop: pointer-events = does this element respond to pointer events -- default is true"`
 	UnContext     units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
 	IsSet         bool          `desc:"has this style been set from object values yet?"`
 	PropsNil      bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
@@ -176,20 +176,20 @@ func (ev *BorderDrawStyle) UnmarshalJSON(b []byte) error { return kit.EnumUnmars
 
 // BorderStyle contains style parameters for borders
 type BorderStyle struct {
-	Style  BorderDrawStyle `xml:"style" desc:"how to draw the border"`
-	Width  units.Value     `xml:"width" desc:"width of the border"`
-	Radius units.Value     `xml:"radius" desc:"rounding of the corners"`
-	Color  Color           `xml:"color" desc:"color of the border"`
+	Style  BorderDrawStyle `xml:"style" desc:"prop: border-style = how to draw the border"`
+	Width  units.Value     `xml:"width" desc:"prop: border-width = width of the border"`
+	Radius units.Value     `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
+	Color  Color           `xml:"color" desc:"prop: border-color = color of the border"`
 }
 
 // style parameters for shadows
 type ShadowStyle struct {
-	HOffset units.Value `xml:".h-offset" desc:"horizontal offset of shadow -- positive = right side, negative = left side"`
-	VOffset units.Value `xml:".v-offset" desc:"vertical offset of shadow -- positive = below, negative = above"`
-	Blur    units.Value `xml:".blur" desc:"blur radius -- higher numbers = more blurry"`
-	Spread  units.Value `xml:".spread" desc:"spread radius -- positive number increases size of shadow, negative descreases size"`
-	Color   Color       `xml:".color" desc:"color of the shadow"`
-	Inset   bool        `xml:".inset" desc:"shadow is inset within box instead of outset outside of box"`
+	HOffset units.Value `xml:".h-offset" desc:"prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side"`
+	VOffset units.Value `xml:".v-offset" desc:"prop: .v-offset = vertical offset of shadow -- positive = below, negative = above"`
+	Blur    units.Value `xml:".blur" desc:"prop: .blur = blur radius -- higher numbers = more blurry"`
+	Spread  units.Value `xml:".spread" desc:"prop: .spread = spread radius -- positive number increases size of shadow, negative descreases size"`
+	Color   Color       `xml:".color" desc:"prop: .color = color of the shadow"`
+	Inset   bool        `xml:".inset" desc:"prop: .inset = shadow is inset within box instead of outset outside of box"`
 }
 
 func (s *ShadowStyle) HasShadow() bool {

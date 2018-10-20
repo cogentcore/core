@@ -54,17 +54,17 @@ type FontName string
 // is used in SVG text rendering -- used in Paint and in Style. Most of font
 // information is inherited.
 type FontStyle struct {
-	Color    Color           `xml:"color" inherit:"true" desc:"text color -- also defines the currentColor variable value"`
-	BgColor  ColorSpec       `xml:"background-color" desc:"background color -- not inherited, transparent by default"`
-	Opacity  float32         `xml:"opacity" desc:"alpha value to apply to all elements"`
-	Size     units.Value     `xml:"font-size" desc:"size of font to render -- convert to points when getting font to use"`
-	Family   string          `xml:"font-family" inherit:"true" desc:"font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
-	Style    FontStyles      `xml:"font-style" inherit:"true" desc:"style -- normal, italic, etc"`
-	Weight   FontWeights     `xml:"font-weight" inherit:"true" desc:"weight: normal, bold, etc"`
-	Stretch  FontStretch     `xml:"font-stretch" inherit:"true" desc:"font stretch / condense options"`
-	Variant  FontVariants    `xml:"font-variant" inherit:"true" desc:"normal or small caps"`
-	Deco     TextDecorations `xml:"text-decoration" desc:"underline, line-through, etc -- not inherited"`
-	Shift    BaselineShifts  `xml:"baseline-shift" desc:"super / sub script -- not inherited"`
+	Color    Color           `xml:"color" inherit:"true" desc:"prop: color = text color -- also defines the currentColor variable value"`
+	BgColor  ColorSpec       `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	Opacity  float32         `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`
+	Size     units.Value     `xml:"font-size" desc:"prop: font-size = size of font to render -- convert to points when getting font to use"`
+	Family   string          `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
+	Style    FontStyles      `xml:"font-style" inherit:"true" desc:"prop: font-style = style -- normal, italic, etc"`
+	Weight   FontWeights     `xml:"font-weight" inherit:"true" desc:"prop: font-weight = weight: normal, bold, etc"`
+	Stretch  FontStretch     `xml:"font-stretch" inherit:"true" desc:"prop: font-stretch = font stretch / condense options"`
+	Variant  FontVariants    `xml:"font-variant" inherit:"true" desc:"prop: font-variant = normal or small caps"`
+	Deco     TextDecorations `xml:"text-decoration" desc:"prop: text-decoration = underline, line-through, etc -- not inherited"`
+	Shift    BaselineShifts  `xml:"baseline-shift" desc:"prop: baseline-shift = super / sub script -- not inherited"`
 	Face     font.Face       `view:"-" desc:"actual font codes for drawing text -- just a pointer into FontLibrary of loaded fonts"`
 	Height   float32         `desc:"reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing"`
 	Em       float32         `desc:"Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font"`
