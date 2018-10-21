@@ -2311,7 +2311,7 @@ func (tv *TextView) AutoScroll(pos image.Point) bool {
 func (tv *TextView) ScrollCursorToCenterIfHidden() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	did := false
-	if (curBBox.Max.Y+int(tv.LineHeight)) < tv.VpBBox.Min.Y || (curBBox.Min.Y-int(tv.LineHeight)) > tv.VpBBox.Max.Y {
+	if (curBBox.Min.Y-int(tv.LineHeight)) < tv.VpBBox.Min.Y || (curBBox.Max.Y+int(tv.LineHeight)) > tv.VpBBox.Max.Y {
 		did = tv.ScrollCursorToVertCenter()
 	}
 	if curBBox.Max.X < tv.VpBBox.Min.X || curBBox.Min.X > tv.VpBBox.Max.X {
