@@ -254,13 +254,14 @@ func LearnWord(word string) {
 // TextToWords generates a slice of words from text
 // removes various non-word input, trims symbols, etc
 func TextToWords(text []byte) {
-	//notwordchar, err := regexp.Compile(`\W`)
 	notwordchar, err := regexp.Compile(`[^0-9A-Za-z]`)
-
 	if err != nil {
 		panic(err)
 	}
-
+	allnum, err := regexp.Compile(`^[0-9]*$`)
+	if err != nil {
+		panic(err)
+	}
 	wordbounds, err := regexp.Compile(`\b`)
 	if err != nil {
 		panic(err)
@@ -272,11 +273,12 @@ func TextToWords(text []byte) {
 	for l, line := range strings.Split(textstr, "\n") {
 		line = notwordchar.ReplaceAllString(line, " ")
 		bounds := wordbounds.FindAllStringIndex(line, -1)
-		//fmt.Println(line)
-		//fmt.Println(bounds)
 		words = words[:0] // reset for new line
 		splits := strings.Fields(line)
 		for i, w := range splits {
+			if allnum.MatchString(w) {
+				break
+			}
 			if len(w) > 1 {
 				tw := TextWord{Word: w, Line: l, StartPos: bounds[i*2][0], EndPos: bounds[i*2+1][0]}
 				words = append(words, tw)
