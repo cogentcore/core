@@ -585,7 +585,7 @@ func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpt
 	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
-	tf.SetMinPrefWidth(units.NewValue(20, units.Em))
+	tf.SetMinPrefWidth(units.NewValue(40, units.Ch))
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -595,7 +595,7 @@ func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpt
 	return dlg
 }
 
-// StringPromptValue gets the string value the user set.
+// StringPromptDialogValue gets the string value the user set.
 func StringPromptDialogValue(dlg *Dialog) string {
 	frame := dlg.Frame()
 	tf := frame.KnownChildByName("str-field", 0).(*TextField)

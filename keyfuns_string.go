@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunsN"
+const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunsN"
 
-var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 151, 163, 178, 192, 207, 222, 233, 245, 263, 279, 294, 305, 319, 329, 338, 349, 364, 383, 395, 411, 421, 436, 446, 456, 468, 485, 501, 514, 526, 537, 550, 564, 578, 590, 600, 610, 624, 638, 646}
+var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 151, 163, 178, 192, 207, 222, 233, 245, 263, 279, 294, 305, 319, 329, 338, 349, 364, 379, 398, 410, 426, 436, 451, 461, 471, 483, 500, 516, 529, 541, 552, 565, 579, 593, 605, 615, 628, 638, 652, 666, 674}
 
 func (i KeyFuns) String() string {
 	if i < 0 || i >= KeyFuns(len(_KeyFuns_index)-1) {

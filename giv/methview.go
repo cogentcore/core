@@ -802,6 +802,34 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 	return
 }
 
+// MethViewArgDefaultVal returns the default value of the given argument index
+func MethViewArgDefaultVal(md *MethViewData, ai int) (interface{}, bool) {
+	aps := &md.ArgProps[ai]
+	var def interface{}
+	got := false
+	switch apv := aps.Value.(type) {
+	case ki.BlankProp:
+	case ki.Props:
+		for pk, pv := range apv {
+			switch pk {
+			case "default":
+				def = pv
+				got = true
+			case "value":
+				def = pv
+				got = true
+			case "default-field":
+				field := pv.(string)
+				if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
+					def = flv.Interface()
+					got = true
+				}
+			}
+		}
+	}
+	return def, got
+}
+
 // MethViewFieldValue returns a reflect.Value for the given field name,
 // checking safely (false if not found)
 func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool) {
@@ -842,6 +870,13 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		log.Printf("giv.MethViewSubMenuFunc: submenu data must be a slice or array, not: %v\n", sltp.String())
 		return
 	}
+
+	def, gotDef := MethViewArgDefaultVal(md, 0) // assume first
+	defstr := ""
+	if gotDef {
+		defstr = kit.ToString(def)
+	}
+
 	mv := reflect.ValueOf(smd)
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
@@ -856,6 +891,12 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		nac.ActionSig.Connect(md.Vp.This, MethViewCall)
 		nd := *md // copy
 		nd.SubMenuVal = val
+		if gotDef {
+			vi := val.Interface()
+			if kit.ToString(vi) == defstr {
+				nac.SetSelected()
+			}
+		}
 		bitflag.Set32((*int32)(&nd.Flags), int(MethViewHasSubMenuVal))
 		nac.Data = &nd
 		(*m)[i] = nac

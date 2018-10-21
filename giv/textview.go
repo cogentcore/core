@@ -32,14 +32,6 @@ import (
 const force = true
 const dontforce = false
 
-// TextViewOpts contains options for TextView editing
-type TextViewOpts struct {
-	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
-	AutoIndent  bool `desc:"auto-indent on newline (enter) or tab"`
-	LineNos     bool `desc:"show line numbers at left end of editor"`
-	Completion  bool `desc:"use the completion system to suggest options while typing"`
-}
-
 // TextView is a widget for editing multiple lines of text (as compared to
 // TextField for a single line).  The View is driven by a TextBuf buffer which
 // contains all the text, and manages all the edits, sending update signals
@@ -48,47 +40,40 @@ type TextViewOpts struct {
 // require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
-	Buf             *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder     string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	Opts            TextViewOpts              `desc:"options for how text editing / viewing works"`
-	CursorWidth     units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	LineIcons       map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
-	FocusActive     bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-	NLines          int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Renders         []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs            []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs      int                       `json:"-" xml:"-" number of line number digits needed"`
-	LineNoOff       float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
-	LineNoRender    gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
-	LinesSize       image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz        gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos       TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol       int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	PosHistIdx      int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
-	SelectStart     TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
-	SelectReg       TextRegion                `json:"-" xml:"-" desc:"current selection region"`
-	PrevSelectReg   TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	Highlights      []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
-	SelectMode      bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-	ISearchMode     bool                      `json:"-" xml:"-" desc:"if true, in interactive search mode"`
-	ISearchString   string                    `json:"-" xml:"-" desc:"current interactive search string"`
-	ISearchCase     bool                      `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	SearchMatches   []FileSearchMatch         `json:"-" xml:"-" desc:"current search matches"`
-	SearchPos       int                       `json:"-" xml:"-" desc:"position within isearch matches"`
-	PrevISearchPos  int                       `json:"-" xml:"-" desc:"position in search list from previous search"`
-	ISearchStartPos TextPos                   `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
-	TextViewSig     ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
-	LinkSig         ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles     [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight      float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight      float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize         image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn         bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete        *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
-	CompleteTimer   *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
-	lastRecenter    int
-	lastFilename    gi.FileName
-	lastWasTabAI    bool
+	Buf           *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
+	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LineNoDigs    int                       `json:"-" xml:"-" number of line number digits needed"`
+	LineNoOff     float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoRender  gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
+	LinesSize     image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz      gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
+	CursorPos     TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
+	CursorCol     int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	PosHistIdx    int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
+	SelectStart   TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+	SelectReg     TextRegion                `json:"-" xml:"-" desc:"current selection region"`
+	PrevSelectReg TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	Highlights    []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
+	SelectMode    bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	ISearch       ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
+	QReplace      QReplace                  `json:"-" xml:"-" desc:"query replace data"`
+	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	LinkSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	StateStyles   [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	CompleteTimer *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
+	lastRecenter  int
+	lastFilename  gi.FileName
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -138,8 +123,12 @@ const (
 	TextViewCursorMoved
 
 	// ISearch emitted for every update of interactive search process -- see
-	// ISearch* members for current state
+	// ISearch.* members for current state
 	TextViewISearch
+
+	// QReplace emitted for every update of query-replace process -- see
+	// QReplace.* members for current state
+	TextViewQReplace
 
 	TextViewSignalsN
 )
@@ -183,6 +172,15 @@ const (
 
 	// TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender
 	TextViewRenderScrolls
+
+	// TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)
+	TextViewHasLineNos
+
+	// TextViewLastWasTabAI indicates that last key was a Tab auto-indent
+	TextViewLastWasTabAI
+
+	// TextViewLastWasUndo indicates that last key was an undo
+	TextViewLastWasUndo
 )
 
 // Label returns the display label for this node, satisfying the Labeler interface
@@ -233,11 +231,17 @@ func (tv *TextView) RefreshIfNeeded() bool {
 	return false
 }
 
+// IsChanged returns true if buffer was changed (edited)
 func (tv *TextView) IsChanged() bool {
 	if tv.Buf != nil && tv.Buf.Changed {
 		return true
 	}
 	return false
+}
+
+// HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
+func (tv *TextView) HasLineNos() bool {
+	return bitflag.Has(tv.Flag, int(TextViewHasLineNos))
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -247,7 +251,8 @@ func (tv *TextView) IsChanged() bool {
 func (tv *TextView) ResetState() {
 	tv.SelectReset()
 	tv.Highlights = nil
-	tv.ISearchMode = false
+	tv.ISearch.On = false
+	tv.QReplace.On = false
 	if tv.Buf == nil || tv.lastFilename != tv.Buf.Filename { // don't reset if reopening..
 		tv.CursorPos = TextPos{}
 	}
@@ -258,9 +263,9 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 	if buf != nil && tv.Buf == buf {
 		return
 	}
-	had := false
+	// had := false
 	if tv.Buf != nil {
-		had = true
+		// had = true
 		tv.Buf.DeleteView(tv)
 	}
 	tv.Buf = buf
@@ -273,14 +278,10 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 			tv.PosHistIdx = bhl - 1
 		}
 	}
-	if !had { // needs one full rebuild with a file..
-		tv.LayoutAllLines(false)
-		tv.SetFullReRender()
-		tv.UpdateSig()
-	} else {
-		tv.Refresh()
-		tv.SetCursorShow(tv.CursorPos)
-	}
+	tv.LayoutAllLines(false)
+	tv.SetFullReRender()
+	tv.UpdateSig()
+	tv.SetCursorShow(tv.CursorPos)
 }
 
 // LinesInserted inserts new lines of text and reformats them
@@ -1350,30 +1351,20 @@ func (tv *TextView) Redo() {
 ///////////////////////////////////////////////////////////////////////////////
 //    Search / Find
 
-// TextViewMaxFindHighlights is the maximum number of regions to highlight on find
-var TextViewMaxFindHighlights = 1000
-
-// PrevISearchString is the previous ISearch string
-var PrevISearchString string
-
-// PrevISearchCase is the previous case matching state for ISearch
-var PrevISearchCase bool
-
 // FindMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
-func (tv *TextView) FindMatches(find string, useCase bool) bool {
+func (tv *TextView) FindMatches(find string, useCase bool) ([]FileSearchMatch, bool) {
 	fsz := len(find)
 	if fsz == 0 {
 		tv.Highlights = nil
-		return false
+		return nil, false
 	}
-	_, tv.SearchMatches = tv.Buf.Search([]byte(find), !useCase)
-	matches := tv.SearchMatches
+	_, matches := tv.Buf.Search([]byte(find), !useCase)
 	if len(matches) == 0 {
 		tv.Highlights = nil
 		tv.RenderAllLines()
-		return false
+		return matches, false
 	}
 	hi := make([]TextRegion, len(matches))
 	for i, m := range matches {
@@ -1384,39 +1375,72 @@ func (tv *TextView) FindMatches(find string, useCase bool) bool {
 	}
 	tv.Highlights = hi
 	tv.RenderAllLines()
-	return true
+	return matches, true
 }
 
-// Matches finds ISearch matches -- returns true if there are any
+// MatchFromPos finds the match at or after the given text position -- returns 0, false if none
+func (tv *TextView) MatchFromPos(matches []FileSearchMatch, cpos TextPos) (int, bool) {
+	for i, m := range matches {
+		pos := m.Reg.Start
+		if pos == cpos || cpos.IsLess(pos) {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+// ISearch holds all the interactive search data
+type ISearch struct {
+	On       bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	Find     string            `json:"-" xml:"-" desc:"current interactive search string"`
+	UseCase  bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	Matches  []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
+	Pos      int               `json:"-" xml:"-" desc:"position within isearch matches"`
+	PrevPos  int               `json:"-" xml:"-" desc:"position in search list from previous search"`
+	StartPos TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+}
+
+// TextViewMaxFindHighlights is the maximum number of regions to highlight on find
+var TextViewMaxFindHighlights = 1000
+
+// PrevISearchString is the previous ISearch string
+var PrevISearchString string
+
+// HasUpperCase returns true if string has an upper-case letter
+func HasUpperCase(str string) bool {
+	for _, r := range str {
+		if unicode.IsUpper(r) {
+			return true
+		}
+	}
+	return false
+}
+
+// ISearchMatches finds ISearch matches -- returns true if there are any
 func (tv *TextView) ISearchMatches() bool {
-	return tv.FindMatches(tv.ISearchString, tv.ISearchCase)
+	got := false
+	tv.ISearch.Matches, got = tv.FindMatches(tv.ISearch.Find, tv.ISearch.UseCase)
+	return got
 }
 
 // ISearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
 func (tv *TextView) ISearchNextMatch(cpos TextPos) bool {
-	if len(tv.SearchMatches) == 0 {
+	if len(tv.ISearch.Matches) == 0 {
 		return false
 	}
-	got := false
-	for i, m := range tv.SearchMatches {
-		pos := m.Reg.Start
-		if pos == cpos || cpos.IsLess(pos) {
-			tv.SearchPos = i
-			got = true
-			break
-		}
-	}
-	if !got {
-		tv.SearchPos = 0
-	}
-	tv.ISearchSelectMatch(tv.SearchPos)
+	tv.ISearch.Pos, _ = tv.MatchFromPos(tv.ISearch.Matches, cpos)
+	tv.ISearchSelectMatch(tv.ISearch.Pos)
 	return true
 }
 
-// ISearchSelectMatch selects match at given match index (e.g., tv.SearchPos)
+// ISearchSelectMatch selects match at given match index (e.g., tv.ISearch.Pos)
 func (tv *TextView) ISearchSelectMatch(midx int) {
-	m := tv.SearchMatches[midx]
+	nm := len(tv.ISearch.Matches)
+	if midx >= nm {
+		return
+	}
+	m := tv.ISearch.Matches[midx]
 	pos := m.Reg.Start
 	tv.SelectReg = m.Reg
 	tv.SetCursor(pos)
@@ -1431,60 +1455,61 @@ func (tv *TextView) ISearchSig() {
 	tv.TextViewSig.Emit(tv.This, int64(TextViewISearch), tv.CursorPos)
 }
 
-// ISearch is an emacs-style interactive search mode -- this is called when
+// ISearchStart is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
-func (tv *TextView) ISearch() {
+func (tv *TextView) ISearchStart() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	if tv.ISearchMode {
-		if tv.ISearchString != "" { // already searching -- find next
-			sz := len(tv.SearchMatches)
+	if tv.ISearch.On {
+		if tv.ISearch.Find != "" { // already searching -- find next
+			sz := len(tv.ISearch.Matches)
 			if sz > 0 {
-				if tv.SearchPos < sz-1 {
-					tv.SearchPos++
+				if tv.ISearch.Pos < sz-1 {
+					tv.ISearch.Pos++
 				} else {
-					tv.SearchPos = 0
+					tv.ISearch.Pos = 0
 				}
-				tv.ISearchSelectMatch(tv.SearchPos)
+				tv.ISearchSelectMatch(tv.ISearch.Pos)
 			}
 		} else { // restore prev
 			if PrevISearchString != "" {
-				tv.ISearchString = PrevISearchString
-				tv.ISearchCase = PrevISearchCase
-				PrevISearchString = "" // prevents future resets
+				tv.ISearch.Find = PrevISearchString
+				tv.ISearch.UseCase = HasUpperCase(tv.ISearch.Find)
 				tv.ISearchMatches()
 				tv.ISearchNextMatch(tv.CursorPos)
-				tv.ISearchStartPos = tv.CursorPos
+				tv.ISearch.StartPos = tv.CursorPos
 			}
 			// nothing..
 		}
 	} else {
-		tv.ISearchMode = true
-		tv.ISearchStartPos = tv.CursorPos
-		tv.ISearchCase = false
-		tv.SearchMatches = nil
+		tv.ISearch.On = true
+		tv.ISearch.Find = ""
+		tv.ISearch.StartPos = tv.CursorPos
+		tv.ISearch.UseCase = false
+		tv.ISearch.Matches = nil
 		tv.SelectReset()
-		tv.SearchPos = -1
+		tv.ISearch.Pos = -1
 		tv.ISearchSig()
 	}
 }
 
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *TextView) ISearchKeyInput(r rune) {
+func (tv *TextView) ISearchKeyInput(kt *key.ChordEvent) {
+	r := kt.Rune
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	if tv.ISearchString == PrevISearchString { // undo starting point
-		tv.ISearchString = ""
-	}
+	// if tv.ISearch.Find == PrevISearchString { // undo starting point
+	// 	tv.ISearch.Find = ""
+	// }
 	if unicode.IsUpper(r) { // todo: more complex
-		tv.ISearchCase = true
+		tv.ISearch.UseCase = true
 	}
-	tv.ISearchString += string(r)
+	tv.ISearch.Find += string(r)
 	tv.ISearchMatches()
-	sz := len(tv.SearchMatches)
+	sz := len(tv.ISearch.Matches)
 	if sz == 0 {
-		tv.SearchPos = -1
+		tv.ISearch.Pos = -1
 		tv.ISearchSig()
 		return
 	}
@@ -1495,24 +1520,26 @@ func (tv *TextView) ISearchKeyInput(r rune) {
 func (tv *TextView) ISearchBackspace() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	if tv.ISearchString == PrevISearchString { // undo starting point
-		tv.ISearchString = ""
-		tv.SearchMatches = nil
+	if tv.ISearch.Find == PrevISearchString { // undo starting point
+		tv.ISearch.Find = ""
+		tv.ISearch.UseCase = false
+		tv.ISearch.Matches = nil
 		tv.SelectReset()
-		tv.SearchPos = -1
+		tv.ISearch.Pos = -1
 		tv.ISearchSig()
-	}
-	if len(tv.ISearchString) <= 1 {
-		tv.SelectReset()
-		tv.ISearchString = ""
-		tv.ISearchCase = false
 		return
 	}
-	tv.ISearchString = tv.ISearchString[:len(tv.ISearchString)-1]
+	if len(tv.ISearch.Find) <= 1 {
+		tv.SelectReset()
+		tv.ISearch.Find = ""
+		tv.ISearch.UseCase = false
+		return
+	}
+	tv.ISearch.Find = tv.ISearch.Find[:len(tv.ISearch.Find)-1]
 	tv.ISearchMatches()
-	sz := len(tv.SearchMatches)
+	sz := len(tv.ISearch.Matches)
 	if sz == 0 {
-		tv.SearchPos = -1
+		tv.ISearch.Pos = -1
 		tv.ISearchSig()
 		return
 	}
@@ -1521,21 +1548,20 @@ func (tv *TextView) ISearchBackspace() {
 
 // ISearchCancel cancels ISearch mode
 func (tv *TextView) ISearchCancel() {
-	if !tv.ISearchMode {
+	if !tv.ISearch.On {
 		return
 	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	if tv.ISearchString != "" {
-		PrevISearchString = tv.ISearchString
+	if tv.ISearch.Find != "" {
+		PrevISearchString = tv.ISearch.Find
 	}
-	PrevISearchCase = tv.ISearchCase
-	tv.PrevISearchPos = tv.SearchPos
-	tv.ISearchString = ""
-	tv.ISearchCase = false
-	tv.ISearchMode = false
-	tv.SearchPos = -1
-	tv.SearchMatches = nil
+	tv.ISearch.PrevPos = tv.ISearch.Pos
+	tv.ISearch.Find = ""
+	tv.ISearch.UseCase = false
+	tv.ISearch.On = false
+	tv.ISearch.Pos = -1
+	tv.ISearch.Matches = nil
 	tv.Highlights = nil
 	tv.SavePosHistory(tv.CursorPos)
 	tv.RenderAllLines()
@@ -1543,14 +1569,236 @@ func (tv *TextView) ISearchCancel() {
 	tv.ISearchSig()
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//    Query-Replace
+
+// QReplace holds all the query-replace data
+type QReplace struct {
+	On       bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	Find     string            `json:"-" xml:"-" desc:"current interactive search string"`
+	Replace  string            `json:"-" xml:"-" desc:"current interactive search string"`
+	UseCase  bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	Matches  []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
+	Pos      int               `json:"-" xml:"-" desc:"position within isearch matches"`
+	PrevPos  int               `json:"-" xml:"-" desc:"position in search list from previous search"`
+	StartPos TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+}
+
+// PrevQReplaceFinds are the previous QReplace strings
+var PrevQReplaceFinds []string
+
+// PrevQReplaceRepls are the previous QReplace strings
+var PrevQReplaceRepls []string
+
+// QReplaceSig sends the signal that QReplace is updated
+func (tv *TextView) QReplaceSig() {
+	tv.TextViewSig.Emit(tv.This, int64(TextViewQReplace), tv.CursorPos)
+}
+
+// QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
+func QReplaceDialog(avp *gi.Viewport2D, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+	dlg := gi.NewStdDialog(opts, true, true)
+	dlg.Modal = true
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+	tff := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+1, "find").(*gi.ComboBox)
+	tff.Editable = true
+	tff.SetStretchMaxWidth()
+	tff.SetMinPrefWidth(units.NewValue(60, units.Ch))
+	tff.ConfigParts()
+	nfind := len(PrevQReplaceFinds)
+	if nfind > 0 {
+		tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
+	}
+
+	tfr := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+2, "repl").(*gi.ComboBox)
+	tfr.Editable = true
+	tfr.SetStretchMaxWidth()
+	tfr.SetMinPrefWidth(units.NewValue(60, units.Ch))
+	tfr.ConfigParts()
+	nrepl := len(PrevQReplaceRepls)
+	if nrepl > 0 {
+		tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
+	}
+
+	if recv != nil && fun != nil {
+		dlg.DialogSig.Connect(recv, fun)
+	}
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp, nil)
+	return dlg
+}
+
+// QReplaceDialogValues gets the string values
+func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string) {
+	frame := dlg.Frame()
+	tff := frame.KnownChildByName("find", 1).(*gi.ComboBox)
+	tf, found := tff.TextField()
+	if found {
+		find = tf.Text()
+	}
+	tfr := frame.KnownChildByName("repl", 2).(*gi.ComboBox)
+	tf, found = tfr.TextField()
+	if found {
+		repl = tf.Text()
+	}
+	return
+}
+
+// QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
+// user for items to search etc
+func (tv *TextView) QReplacePrompt() {
+	QReplaceDialog(tv.Viewport, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings to find and replace -- press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		dlg := send.(*gi.Dialog)
+		if sig == int64(gi.DialogAccepted) {
+			find, repl := QReplaceDialogValues(dlg)
+			tv.QReplaceStart(find, repl)
+		}
+	})
+}
+
+// QReplaceStart starts query-replace using given find, replace strings
+func (tv *TextView) QReplaceStart(find, repl string) {
+	tv.QReplace.On = true
+	tv.QReplace.Find = find
+	tv.QReplace.Replace = repl
+	tv.QReplace.StartPos = tv.CursorPos
+	tv.QReplace.UseCase = HasUpperCase(find)
+	tv.QReplace.Matches = nil
+	tv.QReplace.Pos = -1
+
+	nfind := len(PrevQReplaceFinds)
+	if nfind == 0 || PrevQReplaceFinds[nfind-1] != find {
+		PrevQReplaceFinds = append(PrevQReplaceFinds, find)
+	}
+	nrepl := len(PrevQReplaceRepls)
+	if nrepl == 0 || PrevQReplaceRepls[nrepl-1] != repl {
+		PrevQReplaceRepls = append(PrevQReplaceRepls, repl)
+	}
+
+	tv.QReplaceMatches()
+	tv.QReplace.Pos, _ = tv.MatchFromPos(tv.QReplace.Matches, tv.CursorPos)
+	tv.QReplaceSelectMatch(tv.QReplace.Pos)
+	tv.QReplaceSig()
+}
+
+// QReplaceMatches finds QReplace matches -- returns true if there are any
+func (tv *TextView) QReplaceMatches() bool {
+	got := false
+	tv.QReplace.Matches, got = tv.FindMatches(tv.QReplace.Find, tv.QReplace.UseCase)
+	return got
+}
+
+// QReplaceNextMatch finds next match using, QReplace.Pos and highlights it, etc
+func (tv *TextView) QReplaceNextMatch() bool {
+	nm := len(tv.QReplace.Matches)
+	if nm == 0 {
+		return false
+	}
+	tv.QReplace.Pos++
+	if tv.QReplace.Pos >= nm {
+		return false
+	}
+	tv.QReplaceSelectMatch(tv.QReplace.Pos)
+	return true
+}
+
+// QReplaceSelectMatch selects match at given match index (e.g., tv.QReplace.Pos)
+func (tv *TextView) QReplaceSelectMatch(midx int) {
+	nm := len(tv.QReplace.Matches)
+	if midx >= nm {
+		return
+	}
+	m := tv.QReplace.Matches[midx]
+	pos := m.Reg.Start
+	tv.SelectReg = m.Reg
+	tv.SetCursor(pos)
+	tv.SavePosHistory(tv.CursorPos)
+	tv.ScrollCursorToCenterIfHidden()
+	tv.RenderSelectLines()
+	tv.QReplaceSig()
+}
+
+// QReplaceReplace replaces at given match index (e.g., tv.QReplace.Pos)
+func (tv *TextView) QReplaceReplace(midx int) {
+	nm := len(tv.QReplace.Matches)
+	if midx >= nm {
+		return
+	}
+	m := tv.QReplace.Matches[midx]
+	pos := m.Reg.Start
+	tv.Buf.DeleteText(m.Reg.Start, m.Reg.End, true, true)
+	// todo: do special case munging logic here!
+	tv.Buf.InsertText(pos, []byte(tv.QReplace.Replace), true, true)
+	tv.SetCursor(pos)
+	tv.SavePosHistory(tv.CursorPos)
+	tv.ScrollCursorToCenterIfHidden()
+	tv.QReplaceSig()
+}
+
+// QReplaceReplaceAll replaces all remaining from index
+func (tv *TextView) QReplaceReplaceAll(midx int) {
+	nm := len(tv.QReplace.Matches)
+	if midx >= nm {
+		return
+	}
+	for mi := midx; mi < nm; mi++ {
+		tv.QReplaceReplace(mi)
+	}
+}
+
+// QReplaceKeyInput is an emacs-style interactive search mode -- this is called
+// when keys are typed while in search mode
+func (tv *TextView) QReplaceKeyInput(kt *key.ChordEvent) {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+
+	switch {
+	case kt.Rune == 'y':
+		tv.QReplaceReplace(tv.QReplace.Pos)
+		if !tv.QReplaceNextMatch() {
+			tv.QReplaceCancel()
+		}
+	case kt.Rune == 'n':
+		if !tv.QReplaceNextMatch() {
+			tv.QReplaceCancel()
+		}
+	case kt.Rune == 'q' || kt.Chord() == "ReturnEnter":
+		tv.QReplaceCancel()
+	case kt.Rune == '!':
+		tv.QReplaceReplaceAll(tv.QReplace.Pos)
+	}
+}
+
+// QReplaceCancel cancels QReplace mode
+func (tv *TextView) QReplaceCancel() {
+	if !tv.QReplace.On {
+		return
+	}
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.QReplace.On = false
+	tv.QReplace.Pos = -1
+	tv.QReplace.Matches = nil
+	tv.Highlights = nil
+	tv.SavePosHistory(tv.CursorPos)
+	tv.RenderAllLines()
+	tv.SelectReset()
+	tv.QReplaceSig()
+}
+
 // EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
 func (tv *TextView) EscPressed() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	switch {
-	case tv.ISearchMode:
+	case tv.ISearch.On:
 		tv.ISearchCancel()
-		tv.SetCursorShow(tv.ISearchStartPos)
+		tv.SetCursorShow(tv.ISearch.StartPos)
+	case tv.QReplace.On:
+		tv.QReplaceCancel()
+		tv.SetCursorShow(tv.ISearch.StartPos)
 	case tv.HasSelection():
 		tv.SelectReset()
 	default:
@@ -1870,10 +2118,10 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 //		tv.CompleteTimer.Stop()
 //	}
 //
-//	if tv.Complete == nil || tv.ISearchMode {
+//	if tv.Complete == nil || tv.ISearch.On {
 //		return
 //	}
-//	if !tv.Opts.Completion && !forcecomplete {
+//	if !tv.Buf.Opts.Completion && !forcecomplete {
 //		return
 //	}
 //	win := tv.ParentWindow()
@@ -1925,10 +2173,10 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete(forcecomplete bool) {
-	if tv.Complete == nil || tv.ISearchMode {
+	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On {
 		return
 	}
-	if !tv.Opts.Completion && !forcecomplete {
+	if !tv.Buf.Opts.Completion && !forcecomplete {
 		return
 	}
 	win := tv.ParentWindow()
@@ -2063,7 +2311,7 @@ func (tv *TextView) AutoScroll(pos image.Point) bool {
 func (tv *TextView) ScrollCursorToCenterIfHidden() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	did := false
-	if curBBox.Max.Y < tv.VpBBox.Min.Y || curBBox.Min.Y > tv.VpBBox.Max.Y {
+	if (curBBox.Max.Y+int(tv.LineHeight)) < tv.VpBBox.Min.Y || (curBBox.Min.Y-int(tv.LineHeight)) > tv.VpBBox.Max.Y {
 		did = tv.ScrollCursorToVertCenter()
 	}
 	if curBBox.Max.X < tv.VpBBox.Min.X || curBBox.Min.X > tv.VpBBox.Max.X {
@@ -2470,9 +2718,11 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Ch))
 	}
 	tv.LineNoDigs = ints.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
-	if tv.Opts.LineNos {
+	if tv.Buf != nil && tv.Buf.Opts.LineNos {
+		bitflag.Set(&tv.Flag, int(TextViewHasLineNos))
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Ch + spc // space for icon
 	} else {
+		bitflag.Clear(&tv.Flag, int(TextViewHasLineNos))
 		tv.LineNoOff = 0
 	}
 	tv.RenderSize()
@@ -2532,7 +2782,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 		tv.RenderLineNo(ln)
 	}
 	if stln >= 0 && edln >= 0 {
-		if tv.Opts.LineNos {
+		if tv.HasLineNos() {
 			tbb := tv.VpBBox
 			tbb.Min.X += int(tv.LineNoOff)
 			rs.PushBounds(tbb)
@@ -2544,7 +2794,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 			lp.X += tv.LineNoOff
 			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 		}
-		if tv.Opts.LineNos {
+		if tv.HasLineNos() {
 			rs.PopBounds()
 		}
 	}
@@ -2552,7 +2802,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 
 // RenderLineNosBoxAll renders the background for the line numbers in a darker shade
 func (tv *TextView) RenderLineNosBoxAll() {
-	if !tv.Opts.LineNos {
+	if !tv.HasLineNos() {
 		return
 	}
 	rs := &tv.Viewport.Render
@@ -2568,7 +2818,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 
 // RenderLineNosBox renders the background for the line numbers in given range, in a darker shade
 func (tv *TextView) RenderLineNosBox(st, ed int) {
-	if !tv.Opts.LineNos {
+	if !tv.HasLineNos() {
 		return
 	}
 	rs := &tv.Viewport.Render
@@ -2587,7 +2837,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 
 // RenderLineNo renders given line number -- called within context of other render
 func (tv *TextView) RenderLineNo(ln int) {
-	if !tv.Opts.LineNos {
+	if !tv.HasLineNos() {
 		return
 	}
 	vp := tv.Viewport
@@ -2677,7 +2927,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			for ln := visSt; ln <= visEd; ln++ {
 				tv.RenderLineNo(ln)
 			}
-			if tv.Opts.LineNos {
+			if tv.HasLineNos() {
 				tbb := tv.VpBBox
 				tbb.Min.X += int(tv.LineNoOff)
 				rs.PushBounds(tbb)
@@ -2689,7 +2939,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 				lp.X += tv.LineNoOff
 				tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 			}
-			if tv.Opts.LineNos {
+			if tv.HasLineNos() {
 				rs.PopBounds()
 			}
 
@@ -2953,6 +3203,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.lastRecenter = 0
 	}
 
+	if kf != gi.KeyFunUndo && bitflag.Has(tv.Flag, int(TextViewLastWasUndo)) {
+		tv.Buf.EmacsUndoSave()
+		bitflag.Clear(&tv.Flag, int(TextViewLastWasUndo))
+	}
+
 	gotTabAI := false // got auto-indent tab this time
 
 	// first all the keys that work for both inactive and active
@@ -3044,7 +3299,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunSearch:
 		kt.SetProcessed()
 		tv.CloseCompleter()
-		tv.ISearch()
+		tv.ISearchStart()
+	case gi.KeyFunReplace:
+		kt.SetProcessed()
+		tv.CloseCompleter()
+		tv.QReplacePrompt()
 	case gi.KeyFunAbort:
 		kt.SetProcessed()
 		tv.EscPressed()
@@ -3075,7 +3334,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	if kt.IsProcessed() {
-		tv.lastWasTabAI = gotTabAI
+		bitflag.SetState(&tv.Flag, gotTabAI, int(TextViewLastWasTabAI))
 		return
 	}
 	switch kf {
@@ -3085,7 +3344,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.FocusNext()
 	case gi.KeyFunBackspace:
-		if tv.ISearchMode {
+		if tv.ISearch.On {
 			tv.ISearchBackspace()
 		} else {
 			kt.SetProcessed()
@@ -3125,6 +3384,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.Undo()
+		bitflag.Set(&tv.Flag, int(TextViewLastWasUndo))
 	case gi.KeyFunRedo:
 		cancelAll()
 		kt.SetProcessed()
@@ -3139,8 +3399,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			kt.SetProcessed()
 			updt := tv.Viewport.Win.UpdateStart()
 			tv.InsertAtCursor([]byte("\n"))
-			if tv.Opts.AutoIndent {
-				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+			if tv.Buf.Opts.AutoIndent {
+				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				if tbe != nil {
 					tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
@@ -3154,13 +3414,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			updt := tv.Viewport.Win.UpdateStart()
-			if !tv.lastWasTabAI && tv.CursorPos.Ch == 0 && tv.Opts.AutoIndent { // todo: only at 1st pos now
-				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+			lasttab := bitflag.Has(tv.Flag, int(TextViewLastWasTabAI))
+			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
+				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				tv.CursorPos.Ch = cpos
 				tv.RenderCursor(true)
 				gotTabAI = true
 			} else {
-				if tv.Opts.SpaceIndent {
+				if tv.Buf.Opts.SpaceIndent {
 					tv.InsertAtCursor(IndentBytes(1, tv.Sty.Text.TabSize, true))
 				} else {
 					tv.InsertAtCursor([]byte("\t"))
@@ -3172,12 +3433,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
-				if tv.ISearchMode { // todo: need this in inactive mode
-					tv.ISearchKeyInput(kt.Rune)
+				if tv.ISearch.On { // todo: need this in inactive mode
+					tv.ISearchKeyInput(kt)
+				} else if tv.QReplace.On { // todo: need this in inactive mode
+					tv.QReplaceKeyInput(kt)
 				} else {
 					tv.InsertAtCursor([]byte(string(kt.Rune)))
-					if kt.Rune == '}' && tv.Opts.AutoIndent {
-						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+					if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
+						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
 							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 							tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
@@ -3188,7 +3451,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			}
 		}
 	}
-	tv.lastWasTabAI = gotTabAI
+	bitflag.SetState(&tv.Flag, gotTabAI, int(TextViewLastWasTabAI))
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are

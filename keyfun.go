@@ -76,7 +76,8 @@ const (
 	KeyFunComplete
 	KeyFunSearch // Ctrl+S in emacs -- more interactive type of search
 	KeyFunFind   // Command+F full-dialog find
-	KeyFunJump   // jump to line
+	KeyFunReplace
+	KeyFunJump // jump to line
 	KeyFunHistPrev
 	KeyFunHistNext
 	KeyFunsN
@@ -538,6 +539,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+.":               KeyFunComplete,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
+		"Meta+R":                  KeyFunReplace,
 		"Control+J":               KeyFunJump,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
@@ -640,6 +642,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+.":               KeyFunComplete,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
+		"Meta+R":                  KeyFunReplace,
+		"Control+R":               KeyFunReplace,
 		"Control+J":               KeyFunJump,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
@@ -796,6 +800,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+.":               KeyFunComplete,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
+		"Control+R":               KeyFunReplace,
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
@@ -859,6 +864,9 @@ var StdKeyMaps = KeyMaps{
 		"F5":              KeyFunRefresh,
 		"Control+L":       KeyFunRecenter,
 		"Control+.":       KeyFunComplete,
+		"Control+F":       KeyFunFind,
+		"Control+H":       KeyFunReplace,
+		"Control+J":       KeyFunJump,
 		"Control+[":       KeyFunHistPrev,
 		"Control+]":       KeyFunHistNext,
 	}},
@@ -922,6 +930,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+L":       KeyFunRecenter,
 		"Control+.":       KeyFunComplete,
 		"Control+F":       KeyFunFind,
+		"Control+H":       KeyFunReplace,
 		"Control+J":       KeyFunJump,
 		"Control+[":       KeyFunHistPrev,
 		"Control+]":       KeyFunHistNext,

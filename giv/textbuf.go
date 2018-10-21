@@ -24,6 +24,15 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 )
 
+// TextBufOpts contains options for TextBufs
+type TextBufOpts struct {
+	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
+	AutoIndent  bool `desc:"auto-indent on newline (enter) or tab"`
+	LineNos     bool `desc:"show line numbers at left end of editor"`
+	Completion  bool `desc:"use the completion system to suggest options while typing"`
+	EmacsUndo   bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+}
+
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
 // the raw text lines (in original string and rune formats, and marked-up from
 // syntax highlighting), and sends signals for making edits to the text and
@@ -38,6 +47,7 @@ type TextBuf struct {
 	ki.Node
 	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
 	Autosave   bool           `desc:"if true, auto-save file after changes (in a separate routine)"`
+	Opts       TextBufOpts    `desc:"options for how text editing / viewing works"`
 	Changed    bool           `json:"-" xml:"-" desc:"true if the text has been changed (edited) relative to the original, since last save"`
 	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Info       FileInfo       `desc:"full info about file"`
@@ -52,8 +62,8 @@ type TextBuf struct {
 	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
+	UndoUndos  []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of *undo* edits -- added to "`
 	UndoPos    int            `json:"-" xml:"-" desc:"undo position"`
-	FileModOk  bool           `json:"-" xml:"-" desc:"have already asked about fact that file has changed since being opened, user is ok"`
 	PosHistory []TextPos      `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 }
 
@@ -107,6 +117,9 @@ const (
 const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
 	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
+
+	// TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok
+	TextBufFileModOk
 )
 
 // EditDone finalizes any current editing, sends signal
@@ -163,7 +176,7 @@ func (tb *TextBuf) New(nlines int) {
 
 // Stat gets info about the file, including highlighting language
 func (tb *TextBuf) Stat() error {
-	tb.FileModOk = false
+	bitflag.Clear(&tb.Flag, int(TextBufFileModOk))
 	err := tb.Info.InitFile(string(tb.Filename))
 	if err != nil {
 		return err
@@ -182,7 +195,7 @@ func (tb *TextBuf) Stat() error {
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
 // that this is OK
 func (tb *TextBuf) FileModCheck() {
-	if tb.FileModOk {
+	if bitflag.Has(tb.Flag, int(TextBufFileModOk)) {
 		return
 	}
 	info, err := os.Stat(string(tb.Filename))
@@ -201,7 +214,7 @@ func (tb *TextBuf) FileModCheck() {
 				case 1:
 					tb.Revert()
 				case 2:
-					tb.FileModOk = true
+					bitflag.Set(&tb.Flag, int(TextBufFileModOk))
 				}
 			})
 	}
@@ -1185,8 +1198,10 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 // SaveUndo saves given edit to undo stack
 func (tb *TextBuf) SaveUndo(tbe *TextBufEdit) {
 	if tb.UndoPos < len(tb.Undos) {
+		// fmt.Printf("undo resetting to pos: %v len was: %v\n", tb.UndoPos, len(tb.Undos))
 		tb.Undos = tb.Undos[:tb.UndoPos]
 	}
+	// fmt.Printf("save undo pos: %v: %v\n", tb.UndoPos, string(tbe.ToBytes()))
 	tb.Undos = append(tb.Undos, tbe)
 	tb.UndoPos = len(tb.Undos)
 }
@@ -1201,13 +1216,33 @@ func (tb *TextBuf) Undo() *TextBufEdit {
 	tb.UndoPos--
 	tbe := tb.Undos[tb.UndoPos]
 	if tbe.Delete {
-		// fmt.Printf("undoing delete at: %v text: %v\n", tbe.Reg, string(tbe.ToBytes()))
-		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true)
+		// fmt.Printf("undo pos: %v undoing delete at: %v text: %v\n", tb.UndoPos, tbe.Reg, string(tbe.ToBytes()))
+		tbe := tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true) // don't save to reg und
+		if tb.Opts.EmacsUndo {
+			tb.UndoUndos = append(tb.UndoUndos, tbe)
+		}
 	} else {
-		// fmt.Printf("undoing insert at: %v text: %v\n", tbe.Reg, string(tbe.ToBytes()))
-		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false, true)
+		// fmt.Printf("undo pos: %v undoing insert at: %v text: %v\n", tb.UndoPos, tbe.Reg, string(tbe.ToBytes()))
+		tbe := tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false, true)
+		if tb.Opts.EmacsUndo {
+			tb.UndoUndos = append(tb.UndoUndos, tbe)
+		}
 	}
 	return tbe
+}
+
+// EmacsUndoSave if EmacsUndo mode is active, saves the UndoUndos to the regular Undo stack
+// at the end, and moves undo to the very end -- undo is a constant stream..
+func (tb *TextBuf) EmacsUndoSave() {
+	if !tb.Opts.EmacsUndo || len(tb.UndoUndos) == 0 {
+		return
+	}
+	for _, utbe := range tb.UndoUndos {
+		tb.Undos = append(tb.Undos, utbe)
+	}
+	tb.UndoPos = len(tb.Undos)
+	// fmt.Printf("emacs undo save new pos: %v\n", tb.UndoPos)
+	tb.UndoUndos = nil
 }
 
 // Redo redoes next item on the undo stack, and returns that record, nil if no more

@@ -225,10 +225,7 @@ func (fv *FileView) ConfigPathRow() {
 		pft, found := pf.TextField()
 		if found {
 			pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-		}
-		tf, ok := pf.TextField()
-		if ok {
-			tf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			pft.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.TextFieldDone) {
 					fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 					pff, _ := send.(*gi.TextField)
