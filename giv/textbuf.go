@@ -279,8 +279,15 @@ func (tb *TextBuf) Revert() bool {
 		return false
 	}
 	tb.Stat() // "own" the new file..
-	diffs := tb.DiffBufs(ob)
-	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
+	for itr := 0; itr < 3; itr++ {
+		diffs := tb.DiffBufs(ob)
+		tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
+		if itr > 0 && len(diffs) == 1 {
+			break
+		} else if itr > 0 {
+			fmt.Printf("TextBuf revert iter: %v diffs: %v\n", itr, len(diffs))
+		}
+	}
 	tb.Changed = false
 	tb.AutoSaveDelete()
 	go tb.MarkupAllLines() // always do global reformat in bg
@@ -1500,8 +1507,10 @@ func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool 
 	winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(winUpdt, autoSave)
 
+	sz := len(diffs)
 	mods := false
-	for _, df := range diffs {
+	for i := sz - 1; i >= 0; i-- { // go in reverse so changes are valid!
+		df := diffs[i]
 		switch df.Tag {
 		case 'r':
 			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)

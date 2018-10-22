@@ -1342,10 +1342,15 @@ mainloop:
 				} else {
 					// fmt.Printf("win foc: %v\n", w.Nm)
 					if lastWinMenuUpdate != WinNewCloseTime {
-						w.MainMenuUpdateWindows()
+						if WinEventTrace {
+							fmt.Printf("Win: %v start updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+						}
 						lastWinMenuUpdate = WinNewCloseTime
+						w.MainMenuUpdateWindows()
 						w.MainMenuSet()
-						// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+						if WinEventTrace {
+							fmt.Printf("Win: %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+						}
 					} else {
 						w.MainMenuSet()
 					}
@@ -1387,10 +1392,15 @@ mainloop:
 					}
 				}
 				if lastWinMenuUpdate != WinNewCloseTime {
-					w.MainMenuUpdateWindows()
+					if WinEventTrace {
+						fmt.Printf("Win: %v start updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+					}
 					lastWinMenuUpdate = WinNewCloseTime
-					// fmt.Printf("Win %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+					w.MainMenuUpdateWindows()
 					w.MainMenuSet()
+					if WinEventTrace {
+						fmt.Printf("Win: %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
+					}
 				}
 				if w.Focus == nil && w.StartFocus != nil {
 					w.FocusOnOrNext(w.StartFocus)
@@ -2694,15 +2704,18 @@ func (wl *WindowList) Delete(w *Window) bool {
 	WindowGlobalMu.Lock()
 	defer WindowGlobalMu.Unlock()
 	sz := len(*wl)
-	for i, wi := range *wl {
+	got := false
+	for i := sz - 1; i >= 0; i-- {
+		wi := (*wl)[i]
 		if wi == w {
 			copy((*wl)[i:], (*wl)[i+1:])
 			(*wl)[sz-1] = nil
 			(*wl) = (*wl)[:sz-1]
-			return true
+			sz = len(*wl)
+			got = true
 		}
 	}
-	return false
+	return got
 }
 
 // FindName finds window with given name on list (case sensitive) -- returns
