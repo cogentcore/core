@@ -26,7 +26,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 //  FileView
 
 // todo:
@@ -101,6 +101,21 @@ func (fv *FileView) SelectedFileInfo() (*FileInfo, bool) {
 		return nil, false
 	}
 	return fv.Files[fv.SelectedIdx], true
+}
+
+// SelectFile selects the current file -- if a directory it opens
+// the directory; if a file it selects the file and closes dialog
+func (fv *FileView) SelectFile() {
+	if fi, ok := fv.SelectedFileInfo(); ok {
+		if fi.IsDir() {
+			fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
+			fv.SelFile = ""
+			fv.SelectedIdx = -1
+			fv.UpdateFilesAction()
+			return
+		}
+		fv.FileSig.Emit(fv.This, int64(FileViewDoubleClicked), fv.SelectedFile())
+	}
 }
 
 // UpdateFromPath will update view based on current DirPath
@@ -343,16 +358,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.TableViewSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(TableViewDoubleClicked) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-			if fi, ok := fvv.SelectedFileInfo(); ok {
-				if fi.IsDir() {
-					fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
-					fv.SelFile = ""
-					fv.SelectedIdx = -1
-					fv.UpdateFilesAction()
-					return
-				}
-				fv.FileSig.Emit(fv.This, int64(FileViewDoubleClicked), fv.SelectedFile())
-			}
+			fvv.SelectFile()
 		}
 	})
 }
@@ -694,14 +700,20 @@ func (fv *FileView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	switch {
 	case kf == gi.KeyFunWordLeft:
+		kt.SetProcessed()
 		fv.DirPathUp()
-		kt.SetProcessed()
 	case kf == gi.KeyFunHistPrev:
+		kt.SetProcessed()
 		fv.PathFieldHistPrev()
-		kt.SetProcessed()
 	case kf == gi.KeyFunHistNext:
-		fv.PathFieldHistNext()
 		kt.SetProcessed()
+		fv.PathFieldHistNext()
+	case kf == gi.KeyFunInsert:
+		kt.SetProcessed()
+		fv.SelectFile()
+	case kf == gi.KeyFunMenuOpen:
+		kt.SetProcessed()
+		fv.SelectFile()
 	}
 }
 

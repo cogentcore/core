@@ -5,6 +5,7 @@
 package oswin
 
 import (
+	"fmt"
 	"image"
 	"time"
 
@@ -115,8 +116,11 @@ const (
 
 var KiT_EventType = kit.Enums.AddEnum(EventTypeN, false, nil)
 
-// interface for GUI events
+// Event is the interface for oswin GUI events.  also includes Stringer
+// to get a string description of the event
 type Event interface {
+	fmt.Stringer
+
 	// Type returns the type of event associated with given event
 	Type() EventType
 
@@ -181,6 +185,10 @@ func (ev EventBase) IsProcessed() bool {
 
 func (ev *EventBase) SetProcessed() {
 	ev.Processed = true
+}
+
+func (ev EventBase) String() string {
+	return fmt.Sprintf("Event at Time: %v", ev.Time())
 }
 
 // EventDeque is an infinitely buffered double-ended queue of events.

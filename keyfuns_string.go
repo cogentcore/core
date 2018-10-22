@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunsN"
+const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunPageRightKeyFunPageLeftKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunEditItemKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunMenuNewKeyFunMenuNewAlt1KeyFunMenuNewAlt2KeyFunMenuOpenKeyFunMenuOpenAlt1KeyFunMenuOpenAlt2KeyFunMenuSaveKeyFunMenuSaveAsKeyFunMenuSaveAltKeyFunMenuCloseKeyFunMenuCloseAlt1KeyFunMenuCloseAlt2KeyFunsN"
 
-var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 151, 163, 178, 192, 207, 222, 233, 245, 263, 279, 294, 305, 319, 329, 338, 349, 364, 379, 398, 410, 426, 436, 451, 461, 471, 483, 500, 516, 529, 541, 552, 565, 579, 593, 605, 615, 628, 638, 652, 666, 674}
+var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 105, 119, 129, 138, 151, 163, 178, 192, 207, 222, 233, 245, 263, 279, 294, 305, 319, 329, 338, 349, 364, 379, 398, 410, 426, 436, 451, 461, 471, 483, 500, 516, 529, 541, 552, 565, 579, 593, 605, 615, 628, 638, 652, 666, 679, 696, 713, 727, 745, 763, 777, 793, 810, 825, 844, 863, 871}
 
 func (i KeyFuns) String() string {
 	if i < 0 || i >= KeyFuns(len(_KeyFuns_index)-1) {

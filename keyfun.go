@@ -80,6 +80,20 @@ const (
 	KeyFunJump // jump to line
 	KeyFunHistPrev
 	KeyFunHistNext
+	// Below are menu specific functions -- use these as shortcuts for menu actions
+	// allows uniqueness of mapping and easy customization of all key actions
+	KeyFunMenuNew
+	KeyFunMenuNewAlt1 // alternative version (e.g., shift)
+	KeyFunMenuNewAlt2 // alternative version (e.g., alt)
+	KeyFunMenuOpen
+	KeyFunMenuOpenAlt1 // alternative version (e.g., shift)
+	KeyFunMenuOpenAlt2 // alternative version (e.g., alt)
+	KeyFunMenuSave
+	KeyFunMenuSaveAs
+	KeyFunMenuSaveAlt // another alt (e.g., alt)
+	KeyFunMenuClose
+	KeyFunMenuCloseAlt1 // alternative version (e.g., shift)
+	KeyFunMenuCloseAlt2 // alternative version (e.g., alt)
 	KeyFunsN
 )
 
@@ -366,7 +380,7 @@ var KeyMapsProps = ki.Props{
 		{"File", ki.PropSlice{
 			{"OpenPrefs", ki.Props{}},
 			{"SavePrefs", ki.Props{
-				"shortcut": "Command+S",
+				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(kmi interface{}, act *Action) {
 					act.SetActiveState(AvailKeyMapsChanged)
 				},
@@ -375,7 +389,7 @@ var KeyMapsProps = ki.Props{
 			{"OpenJSON", ki.Props{
 				"label":    "Open from file",
 				"desc":     "You can save and open key maps to / from files to share, experiment, transfer, etc",
-				"shortcut": "Command+O",
+				"shortcut": KeyFunMenuOpen,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".json",
@@ -383,8 +397,9 @@ var KeyMapsProps = ki.Props{
 				},
 			}},
 			{"SaveJSON", ki.Props{
-				"label": "Save to file",
-				"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
+				"label":    "Save to file",
+				"desc":     "You can save and open key maps to / from files to share, experiment, transfer, etc",
+				"shortcut": KeyFunMenuSaveAs,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".json",
@@ -441,6 +456,7 @@ var KeyMapsProps = ki.Props{
 	},
 }
 
+// order is: Shift, Control, Alt, Meta
 // note: shift and meta modifiers for navigation keys do select + move
 
 // note: where multiple shortcuts exist for a given function, any shortcut
@@ -545,6 +561,18 @@ var StdKeyMaps = KeyMaps{
 		"Meta+]":                  KeyFunHistNext,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"Meta+N":                  KeyFunMenuNew,
+		"Shift+Meta+N":            KeyFunMenuNewAlt1,
+		"Alt+Meta+N":              KeyFunMenuNewAlt2,
+		"Meta+O":                  KeyFunMenuOpen,
+		"Shift+Meta+O":            KeyFunMenuOpenAlt1,
+		"Alt+Meta+O":              KeyFunMenuOpenAlt2,
+		"Meta+S":                  KeyFunMenuSave,
+		"Shift+Meta+S":            KeyFunMenuSaveAs,
+		"Alt+Meta+S":              KeyFunMenuSaveAlt,
+		"Meta+W":                  KeyFunMenuClose,
+		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
+		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -649,70 +677,18 @@ var StdKeyMaps = KeyMaps{
 		"Meta+]":                  KeyFunHistNext,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
-	}},
-	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
-		"UpArrow": KeyFunMoveUp,
-		// "Control+P":           KeyFunMoveUp, // Print
-		"Shift+UpArrow": KeyFunMoveUp,
-		"DownArrow":     KeyFunMoveDown,
-		// "Control+N":           KeyFunMoveDown, // New
-		"Shift+DownArrow":  KeyFunMoveDown,
-		"RightArrow":       KeyFunMoveRight,
-		"Shift+RightArrow": KeyFunMoveRight,
-		// "Control+F":           KeyFunMoveRight, // Find
-		"LeftArrow":       KeyFunMoveLeft,
-		"Shift+LeftArrow": KeyFunMoveLeft,
-		// "Control+B":           KeyFunMoveLeft, // bold
-		"Control+UpArrow": KeyFunPageUp,
-		// "Control+U":           KeyFunPageUp, // Underline
-		"Control+DownArrow":  KeyFunPageDown,
-		"Control+RightArrow": KeyFunWordRight,
-		"Control+LeftArrow":  KeyFunWordLeft,
-		"Home":               KeyFunHome,
-		"Alt+LeftArrow":      KeyFunHome,
-		"End":                KeyFunEnd,
-		// "Control+E":           KeyFunEnd, // Search Google
-		"Alt+RightArrow":  KeyFunEnd,
-		"Tab":             KeyFunFocusNext,
-		"Shift+Tab":       KeyFunFocusPrev,
-		"ReturnEnter":     KeyFunEnter,
-		"KeypadEnter":     KeyFunEnter,
-		"Control+A":       KeyFunSelectAll,
-		"Shift+Control+A": KeyFunCancelSelect,
-		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
-		"Control+ReturnEnter":     KeyFunAccept,
-		"Escape":                  KeyFunAbort,
-		"DeleteBackspace":         KeyFunBackspace,
-		"Control+DeleteBackspace": KeyFunBackspaceWord,
-		"DeleteForward":           KeyFunDelete,
-		// "Control+D":           KeyFunDelete, // Bookmark
-		// "Control+H":       KeyFunBackspace, // Help
-		"Control+K": KeyFunKill,
-		"Control+C": KeyFunCopy,
-		// "Control+W":       KeyFunCut, // Close Current Tab
-		"Control+X":       KeyFunCut,
-		"Control+V":       KeyFunPaste,
-		"Shift+Control+V": KeyFunPasteHist,
-		"Control+M":       KeyFunDuplicate,
-		"Control+Z":       KeyFunUndo,
-		"Control+Y":       KeyFunRedo,
-		"Shift+Control+Z": KeyFunRedo,
-		"Control+Alt+I":   KeyFunInsert,
-		"Control+Alt+O":   KeyFunInsertAfter,
-		"Shift+Control+I": KeyFunGoGiEditor,
-		"Control+=":       KeyFunZoomIn,
-		"Shift+Control++": KeyFunZoomIn,
-		"Control+-":       KeyFunZoomOut,
-		"Shift+Control+_": KeyFunZoomOut,
-		"Shift+Control+P": KeyFunPrefs,
-		"Control+Alt+P":   KeyFunPrefs,
-		"F5":              KeyFunRefresh,
-		"Control+L":       KeyFunRecenter,
-		"Control+.":       KeyFunComplete,
-		"Control+F":       KeyFunFind,
-		"Control+J":       KeyFunJump,
-		"Control+[":       KeyFunHistPrev,
-		"Control+]":       KeyFunHistNext,
+		"Meta+N":                  KeyFunMenuNew,
+		"Shift+Meta+N":            KeyFunMenuNewAlt1,
+		"Alt+Meta+N":              KeyFunMenuNewAlt2,
+		"Meta+O":                  KeyFunMenuOpen,
+		"Shift+Meta+O":            KeyFunMenuOpenAlt1,
+		"Alt+Meta+O":              KeyFunMenuOpenAlt2,
+		"Meta+S":                  KeyFunMenuSave,
+		"Shift+Meta+S":            KeyFunMenuSaveAs,
+		"Alt+Meta+S":              KeyFunMenuSaveAlt,
+		"Meta+W":                  KeyFunMenuClose,
+		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
+		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -804,6 +780,94 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"Meta+N":                  KeyFunMenuNew, // ctrl keys conflict..
+		"Shift+Meta+N":            KeyFunMenuNewAlt1,
+		"Alt+Meta+N":              KeyFunMenuNewAlt2,
+		"Meta+O":                  KeyFunMenuOpen,
+		"Shift+Meta+O":            KeyFunMenuOpenAlt1,
+		"Alt+Meta+O":              KeyFunMenuOpenAlt2,
+		"Meta+S":                  KeyFunMenuSave,
+		"Shift+Meta+S":            KeyFunMenuSaveAs,
+		"Alt+Meta+S":              KeyFunMenuSaveAlt,
+		"Meta+W":                  KeyFunMenuClose,
+		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
+		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
+	}},
+	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
+		"UpArrow": KeyFunMoveUp,
+		// "Control+P":           KeyFunMoveUp, // Print
+		"Shift+UpArrow": KeyFunMoveUp,
+		"DownArrow":     KeyFunMoveDown,
+		// "Control+N":           KeyFunMoveDown, // New
+		"Shift+DownArrow":  KeyFunMoveDown,
+		"RightArrow":       KeyFunMoveRight,
+		"Shift+RightArrow": KeyFunMoveRight,
+		// "Control+F":           KeyFunMoveRight, // Find
+		"LeftArrow":       KeyFunMoveLeft,
+		"Shift+LeftArrow": KeyFunMoveLeft,
+		// "Control+B":           KeyFunMoveLeft, // bold
+		"Control+UpArrow": KeyFunPageUp,
+		// "Control+U":           KeyFunPageUp, // Underline
+		"Control+DownArrow":  KeyFunPageDown,
+		"Control+RightArrow": KeyFunWordRight,
+		"Control+LeftArrow":  KeyFunWordLeft,
+		"Home":               KeyFunHome,
+		"Alt+LeftArrow":      KeyFunHome,
+		"End":                KeyFunEnd,
+		// "Control+E":           KeyFunEnd, // Search Google
+		"Alt+RightArrow":  KeyFunEnd,
+		"Tab":             KeyFunFocusNext,
+		"Shift+Tab":       KeyFunFocusPrev,
+		"ReturnEnter":     KeyFunEnter,
+		"KeypadEnter":     KeyFunEnter,
+		"Control+A":       KeyFunSelectAll,
+		"Shift+Control+A": KeyFunCancelSelect,
+		//"Control+Spacebar":    KeyFunSelectMode, // change input method / keyboard
+		"Control+ReturnEnter":     KeyFunAccept,
+		"Escape":                  KeyFunAbort,
+		"DeleteBackspace":         KeyFunBackspace,
+		"Control+DeleteBackspace": KeyFunBackspaceWord,
+		"DeleteForward":           KeyFunDelete,
+		// "Control+D":           KeyFunDelete, // Bookmark
+		// "Control+H":       KeyFunBackspace, // Help
+		"Control+K": KeyFunKill,
+		"Control+C": KeyFunCopy,
+		// "Control+W":       KeyFunCut, // Close Current Tab
+		"Control+X":       KeyFunCut,
+		"Control+V":       KeyFunPaste,
+		"Shift+Control+V": KeyFunPasteHist,
+		"Control+M":       KeyFunDuplicate,
+		"Control+Z":       KeyFunUndo,
+		"Control+Y":       KeyFunRedo,
+		"Shift+Control+Z": KeyFunRedo,
+		"Control+Alt+I":   KeyFunInsert,
+		"Control+Alt+O":   KeyFunInsertAfter,
+		"Shift+Control+I": KeyFunGoGiEditor,
+		"Control+=":       KeyFunZoomIn,
+		"Shift+Control++": KeyFunZoomIn,
+		"Control+-":       KeyFunZoomOut,
+		"Shift+Control+_": KeyFunZoomOut,
+		"Shift+Control+P": KeyFunPrefs,
+		"Control+Alt+P":   KeyFunPrefs,
+		"F5":              KeyFunRefresh,
+		"Control+L":       KeyFunRecenter,
+		"Control+.":       KeyFunComplete,
+		"Control+F":       KeyFunFind,
+		"Control+J":       KeyFunJump,
+		"Control+[":       KeyFunHistPrev,
+		"Control+]":       KeyFunHistNext,
+		"Control+N":       KeyFunMenuNew,
+		"Shift+Control+N": KeyFunMenuNewAlt1,
+		"Control+Alt+N":   KeyFunMenuNewAlt2,
+		"Control+O":       KeyFunMenuOpen,
+		"Shift+Control+O": KeyFunMenuOpenAlt1,
+		// "Control+Alt+O":   KeyFunMenuOpenAlt2,
+		"Control+S":       KeyFunMenuSave,
+		"Shift+Control+S": KeyFunMenuSaveAs,
+		"Control+Alt+S":   KeyFunMenuSaveAlt,
+		"Control+W":       KeyFunMenuClose,
+		"Shift+Control+W": KeyFunMenuCloseAlt1,
+		"Control+Alt+W":   KeyFunMenuCloseAlt2,
 	}},
 	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
 		"UpArrow": KeyFunMoveUp,
@@ -869,6 +933,18 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":       KeyFunJump,
 		"Control+[":       KeyFunHistPrev,
 		"Control+]":       KeyFunHistNext,
+		"Control+N":       KeyFunMenuNew,
+		"Shift+Control+N": KeyFunMenuNewAlt1,
+		"Control+Alt+N":   KeyFunMenuNewAlt2,
+		"Control+O":       KeyFunMenuOpen,
+		"Shift+Control+O": KeyFunMenuOpenAlt1,
+		// "Control+Alt+O":   KeyFunMenuOpenAlt2,
+		"Control+S":       KeyFunMenuSave,
+		"Shift+Control+S": KeyFunMenuSaveAs,
+		"Control+Alt+S":   KeyFunMenuSaveAlt,
+		"Control+W":       KeyFunMenuClose,
+		"Shift+Control+W": KeyFunMenuCloseAlt1,
+		"Control+Alt+W":   KeyFunMenuCloseAlt2,
 	}},
 	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", KeyMap{
 		"UpArrow": KeyFunMoveUp,
@@ -934,5 +1010,17 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":       KeyFunJump,
 		"Control+[":       KeyFunHistPrev,
 		"Control+]":       KeyFunHistNext,
+		"Control+N":       KeyFunMenuNew,
+		"Shift+Control+N": KeyFunMenuNewAlt1,
+		"Control+Alt+N":   KeyFunMenuNewAlt2,
+		"Control+O":       KeyFunMenuOpen,
+		"Shift+Control+O": KeyFunMenuOpenAlt1,
+		// "Control+Alt+O":   KeyFunMenuOpenAlt2,
+		"Control+S":       KeyFunMenuSave,
+		"Shift+Control+S": KeyFunMenuSaveAs,
+		"Control+Alt+S":   KeyFunMenuSaveAlt,
+		"Control+W":       KeyFunMenuClose,
+		"Shift+Control+W": KeyFunMenuCloseAlt1,
+		"Control+Alt+W":   KeyFunMenuCloseAlt2,
 	}},
 }

@@ -764,3 +764,25 @@ func (vi *ViewIFace) PrefsView(prefs *gi.Preferences) {
 func (vi *ViewIFace) KeyMapsView(maps *gi.KeyMaps) {
 	KeyMapsView(maps)
 }
+
+func (vi *ViewIFace) PrefsDetView(prefs *gi.PrefsDetailed) {
+	PrefsDetView(prefs)
+}
+
+func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
+	pf.TextViewClipHistMax = TextViewClipHistMax
+	pf.MapInlineLen = MapInlineLen
+	pf.StructInlineLen = StructInlineLen
+	pf.SliceInlineLen = SliceInlineLen
+}
+
+func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
+	TextViewClipHistMax = pf.TextViewClipHistMax
+	MapInlineLen = pf.MapInlineLen
+	StructInlineLen = pf.StructInlineLen
+	SliceInlineLen = pf.SliceInlineLen
+}
+
+func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
+	PrefsDbgView(prefs)
+}

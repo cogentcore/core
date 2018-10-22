@@ -75,6 +75,15 @@ var HoverMaxPix = 5
 // variable.
 var LocalMainMenu = false
 
+// WinEventTrace can be set to true to obtain a trace of window events
+// can be set in PrefsDebug from prefs gui
+// excludes mouse move events
+var WinEventTrace = false
+
+// KeyEventTrace can be set to true to obtain a trace of keyboard events
+// can be set in PrefsDebug from prefs gui
+var KeyEventTrace = false
+
 // WinNewCloseTime records last time a new window was opened or another
 // closed -- used to trigger updating of Window menus on each window.
 var WinNewCloseTime time.Time
@@ -474,6 +483,7 @@ func (w *Window) Closed() {
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
 	WinNewCloseStamp()
+	fmt.Printf("closed win: %v\n", w.Nm)
 	if w.IsClosed() {
 		w.UpMu.Unlock()
 		return
@@ -511,6 +521,8 @@ func (w *Window) IsClosed() bool {
 func Init() {
 	if Prefs.LogicalDPIScale == 0 {
 		Prefs.Defaults()
+		PrefsDet.Defaults()
+		PrefsDbg.Connect()
 		Prefs.Open()
 		Prefs.Apply()
 		WinGeomPrefs.Open()
@@ -1027,8 +1039,10 @@ mainloop:
 		now := time.Now()
 		lag := now.Sub(evi.Time())
 		lagMs := int(lag / time.Millisecond)
-		if et != oswin.MouseMoveEvent {
-			// fmt.Printf("et %v lag %v\n", et, lag)
+		if WinEventTrace {
+			if et != oswin.MouseMoveEvent {
+				fmt.Printf("Win %v event: %v lag: %v\n", evi.String(), lag)
+			}
 		}
 
 		if et != oswin.KeyEvent {

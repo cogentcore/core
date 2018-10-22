@@ -70,15 +70,15 @@ var Node2DBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
-// Update2DTrace can be set to true to obtain a trace of updates that trigger re-rendering
+// Update2DTrace can be set to true to obtain a trace of updates that trigger re-rendering -- can be set in PrefsDebug from prefs gui
 var Update2DTrace bool = false
 
 // Render2DTrace can be set to true to obtain a trace of the nodes rendering
-// (just printfs to stdout)
+// (just printfs to stdout) -- can be set in PrefsDebug from prefs gui
 var Render2DTrace bool = false
 
 // Layout2DTrace can be set to true to obtain a trace of all layouts (just
-// printfs to stdout)
+// printfs to stdout) -- can be set in PrefsDebug from prefs gui
 var Layout2DTrace bool = false
 
 // Node2D is the interface for all 2D nodes -- defines the stages of building

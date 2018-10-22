@@ -305,7 +305,6 @@ var GiEditorProps = ki.Props{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
 			{"Update", ki.Props{
-				"shortcut": "Command+U",
 				"updtfunc": ActionUpdateFunc(func(gei interface{}, act *gi.Action) {
 					ge := gei.(*GiEditor)
 					act.SetActiveState(ge.Changed)
@@ -313,7 +312,7 @@ var GiEditorProps = ki.Props{
 			}},
 			{"sep-file", ki.BlankProp{}},
 			{"Open", ki.Props{
-				"shortcut": "Command+O",
+				"shortcut": gi.KeyFunMenuOpen,
 				"desc":     "Open a json-formatted Ki tree structure",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
@@ -323,7 +322,7 @@ var GiEditorProps = ki.Props{
 				},
 			}},
 			{"Save", ki.Props{
-				"shortcut": "Command+S",
+				"shortcut": gi.KeyFunMenuSave,
 				"desc":     "Save json-formatted Ki tree structure to existing filename",
 				"updtfunc": ActionUpdateFunc(func(gei interface{}, act *gi.Action) {
 					ge := gei.(*GiEditor)
@@ -331,7 +330,7 @@ var GiEditorProps = ki.Props{
 				}),
 			}},
 			{"SaveAs", ki.Props{
-				"shortcut": "Shift+Command+S",
+				"shortcut": gi.KeyFunMenuSaveAs,
 				"label":    "Save As...",
 				"desc":     "Save as a json-formatted Ki tree structure",
 				"Args": ki.PropSlice{

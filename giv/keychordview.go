@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -129,6 +130,7 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 			kt := d.(*key.ChordEvent)
 			kt.SetProcessed()
 			kcc.SetText(string(kt.Chord())) // that's easy!
+			oswin.TheApp.ClipBoard(kc.Viewport.Win.OSWin).Write(mimedata.NewText(string(kt.Chord())))
 			kcc.ChordUpdated()
 		}
 	})

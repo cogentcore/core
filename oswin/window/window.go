@@ -14,6 +14,7 @@
 package window
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/goki/gi/oswin"
@@ -94,6 +95,10 @@ func (ev Event) Pos() image.Point {
 
 func (ev Event) OnFocus() bool {
 	return false
+}
+
+func (ev Event) String() string {
+	return fmt.Sprintf("Type: %v Action: %v  Time: %v", ev.Type(), ev.Action, ev.Time())
 }
 
 // check for interface implementation

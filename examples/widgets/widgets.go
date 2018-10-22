@@ -288,28 +288,29 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	amen.Menu = make(gi.Menu, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
-	// note: Command in shortcuts is automatically translated into Control for
+	// note: use KeyFunMenu* for standard shortcuts
+	// Command in shortcuts is automatically translated into Control for
 	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
-	fmen.Menu.AddAction(gi.ActOpts{Label: "New", Shortcut: "Command+N"},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			fmt.Printf("File:New menu action triggered\n")
 		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
 		rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			fmt.Printf("File:Open menu action triggered\n")
 		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", Shortcut: "Command+S"},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
 		rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			fmt.Printf("File:Save menu action triggered\n")
 		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", Shortcut: "Shift+Command+S"},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
 		rec.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			fmt.Printf("File:SaveAs menu action triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", Shortcut: "Command+W"},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunMenuClose},
 		win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			win.OSWin.CloseReq()
 		})

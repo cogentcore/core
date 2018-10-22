@@ -22,8 +22,7 @@ import (
 
 // DialogsSepWindow determines if dialog windows open in a separate OS-level
 // window, or do they open within the same parent window.  If only within
-// parent window, then they are always effectively modal. This is also in
-// gi.Prefs and updated from there.
+// parent window, then they are always effectively modal.
 var DialogsSepWindow = true
 
 // DialogState indicates the state of the dialog.
@@ -201,7 +200,6 @@ func (dlg *Dialog) Close() {
 	win := dlg.Win
 	if win != nil {
 		if DialogsSepWindow {
-			win.SetInactive() // indicates closed
 			win.OSWin.Close()
 		} else {
 			win.ClosePopup(dlg.This)

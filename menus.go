@@ -39,12 +39,13 @@ type MakeMenuFunc func(obj ki.Ki, m *Menu)
 
 // ActOpts provides named and partial parameters for AddAction method
 type ActOpts struct {
-	Label      string
-	Icon       string
-	Tooltip    string
-	Shortcut   key.Chord
-	Data       interface{}
-	UpdateFunc func(act *Action)
+	Label       string
+	Icon        string
+	Tooltip     string
+	Shortcut    key.Chord
+	ShortcutKey KeyFuns
+	Data        interface{}
+	UpdateFunc  func(act *Action)
 }
 
 // SetAction sets properties of given action
@@ -58,6 +59,10 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 	ac.Tooltip = opts.Tooltip
 	ac.Icon = IconName(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
+	if opts.ShortcutKey != KeyFunNil {
+		ac.Shortcut = ActiveKeyMap.ChordForFun(opts.ShortcutKey).OSShortcut()
+		// todo: need a flag for menu-based?
+	}
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	ac.SetAsMenu()

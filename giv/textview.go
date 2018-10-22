@@ -3403,6 +3403,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				if tbe != nil {
 					tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+					tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				}
 			}
 			// fmt.Printf("auto indent updt end: %v\n", updt)
@@ -3426,6 +3427,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else {
 					tv.InsertAtCursor([]byte("\t"))
 				}
+				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
 			tv.Viewport.Win.UpdateEnd(updt)
 		}
@@ -3661,7 +3663,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	if tv.LinesSize == image.ZP {
+	if tv.LinesSize == image.ZP || gi.RebuildDefaultStyles {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
 	}

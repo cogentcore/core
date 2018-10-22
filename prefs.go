@@ -70,22 +70,23 @@ type User struct {
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
 // the GoGi user preferences directory -- see oswin/App for further info.
 type Preferences struct {
-	LogicalDPIScale float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
-	ScreenPrefs     map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-	Colors          ColorPrefs             `desc:"color preferences"`
-	Params          ParamPrefs             `desc:"parameters controlling GUI behavior"`
-	KeyMap          KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
-	SaveKeyMaps     bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
-	PrefsOverride   bool                   `desc:"if true my custom style preferences override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
-	CustomStyles    ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	FontFamily      FontName               `desc:"default font family when otherwise not specified"`
-	FontPaths       []string               `desc:"extra font paths, beyond system defaults -- searched first"`
-	User            User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
-	FavPaths        FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
-	SavedPathsMax   int                    `desc:"maximum number of saved paths to save in FileView"`
-	FileViewSort    string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
-	ColorFilename   FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
-	Changed         bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
+	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
+	Colors               ColorPrefs             `desc:"color preferences"`
+	Params               ParamPrefs             `desc:"parameters controlling GUI behavior"`
+	KeyMap               KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
+	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
+	SaveDetailed         bool                   `desc:"if set, the detailed preferences are saved and loaded at startup -- only "`
+	CustomStyles         ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
+	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
+	FontFamily           FontName               `desc:"default font family when otherwise not specified"`
+	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`
+	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
+	FavPaths             FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
+	SavedPathsMax        int                    `desc:"maximum number of saved paths to save in FileView"`
+	FileViewSort         string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
+	ColorFilename        FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
+	Changed              bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
 var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
@@ -165,6 +166,9 @@ func (pf *Preferences) Open() error {
 	if pf.SaveKeyMaps {
 		AvailKeyMaps.OpenPrefs()
 	}
+	if pf.SaveDetailed {
+		PrefsDet.Open()
+	}
 
 	if pf.User.Username == "" {
 		pf.UpdateUser()
@@ -189,6 +193,9 @@ func (pf *Preferences) Save() error {
 	}
 	if pf.SaveKeyMaps {
 		AvailKeyMaps.SavePrefs()
+	}
+	if pf.SaveDetailed {
+		PrefsDet.Save()
 	}
 	pf.Changed = false
 	return err
@@ -226,6 +233,9 @@ func (pf *Preferences) Apply() {
 
 	if pf.KeyMap != "" {
 		SetActiveKeyMapName(pf.KeyMap) // fills in missing pieces
+	}
+	if pf.SaveDetailed {
+		PrefsDet.Apply()
 	}
 	if pf.FontPaths != nil {
 		paths := append(pf.FontPaths, oswin.TheApp.FontPaths()...)
@@ -320,6 +330,18 @@ func (pf *Preferences) EditKeyMaps() {
 	TheViewIFace.KeyMapsView(&AvailKeyMaps)
 }
 
+// EditDetailed opens the PrefsDetView editor to edit detailed params
+func (pf *Preferences) EditDetailed() {
+	pf.SaveDetailed = true
+	pf.Changed = true
+	TheViewIFace.PrefsDetView(&PrefsDet)
+}
+
+// EditDebug opens the PrefsDbgView editor to edit debugging params
+func (pf *Preferences) EditDebug() {
+	TheViewIFace.PrefsDbgView(&PrefsDbg)
+}
+
 // UpdateUser gets the user info from the OS
 func (pf *Preferences) UpdateUser() {
 	usr, err := user.Current()
@@ -359,14 +381,12 @@ var PreferencesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
-			{"Update", ki.Props{
-				"shortcut": "Command+U",
-			}},
+			{"Update", ki.Props{}},
 			{"Open", ki.Props{
-				"shortcut": "Command+O",
+				"shortcut": KeyFunMenuOpen,
 			}},
 			{"Save", ki.Props{
-				"shortcut": "Command+S",
+				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(pfi interface{}, act *Action) {
 					pf := pfi.(*Preferences)
 					act.SetActiveState(pf.Changed)
@@ -467,10 +487,18 @@ var PreferencesProps = ki.Props{
 			"icon": "keyboard",
 			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
 		}},
+		{"EditDetailed", ki.Props{
+			"icon": "file-binary",
+			"desc": "opens the PrefsDetView editor to edit detailed params that are not typically user-modified, but can be if you really care..  Turns on the SaveDetailed flag so these will be saved and loaded automatically -- can toggle that back off if you don't actually want to.",
+		}},
+		{"EditDebug", ki.Props{
+			"icon": "file-binary",
+			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
+		}},
 	},
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 //  FavoritePaths
 
 // FavPathItem represents one item in a favorite path list, for display of
@@ -510,7 +538,7 @@ var DefaultPaths = FavPaths{
 	{"computer", "root", "/"},
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 //  FilePaths
 
 type FilePaths []string
@@ -590,4 +618,181 @@ func OpenPaths() {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.OpenJSON(pnm)
+}
+
+//////////////////////////////////////////////////////////////////
+//  PrefsDetailed
+
+// PrefsDetailed are more detailed params not usually customized, but
+// available for those who really care..
+type PrefsDetailed struct {
+	EventSkipLagMSec           int `min:"0" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
+	DragStartMSec              int `min:"0" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
+	DragStartPix               int `min:"0" max:"100" step:"1" desc:"Default: 4 the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
+	DNDStartMSec               int `min:"0" max:"1000" step:"5" desc:"Default: 200 the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
+	DNDStartPix                int `min:"0" max:"100" step:"1" desc:"Default: 20 the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
+	HoverStartMSec             int `min:"0" max:"1000" step:"5" desc:"Default: 1500 the number of milliseconds to wait before initiating a hover event"`
+	HoverMaxPix                int `min:"0" max:"1000" step:"5" desc:"Default = 5 the maximum number of pixels that mouse can move and still register a Hover event"`
+	CursorBlinkMSec            int `min:"0" max:"1000" step:"5" desc:"Default: 500 number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
+	TextViewClipHistMax        int `min:"0" max:"1000" step:"5" desc:"Default: 100 Maximum amount of clipboard history to retain"`
+	LayoutFocusNameTimeoutMSec int `min:"0" max:"5000" step:"20" desc:"Default: 500 the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over
+after this delay."`
+	LayoutFocusNameTabMSec int  `min:"0" max:"10000" step:"100" desc:"Default: 2000 the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`
+	MapInlineLen           int  `min:"0" max:"1000" step:"5" desc:"Default: 3 the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`
+	StructInlineLen        int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`
+	SliceInlineLen         int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of slice elements below which inline will be used"`
+	Changed                bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+}
+
+var KiT_PrefsDetailed = kit.Types.AddType(&PrefsDetailed{}, PrefsDetailedProps)
+
+// PrefsDet are the overall detailed preferences
+var PrefsDet = PrefsDetailed{}
+
+// PrefsDetailedFileName is the name of the detailed preferences file in GoGi prefs directory
+var PrefsDetailedFileName = "prefs_det.json"
+
+// Open detailed preferences from GoGi standard prefs directory
+func (pf *PrefsDetailed) Open() error {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, PrefsDetailedFileName)
+	b, err := ioutil.ReadFile(pnm)
+	if err != nil {
+		// log.Println(err) // ok to be non-existant
+		return err
+	}
+	err = json.Unmarshal(b, pf)
+	pf.Changed = false
+	return err
+}
+
+// Save detailed prefs to GoGi standard prefs directory
+func (pf *PrefsDetailed) Save() error {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, PrefsDetailedFileName)
+	b, err := json.MarshalIndent(pf, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = ioutil.WriteFile(pnm, b, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	pf.Changed = false
+	return err
+}
+
+// Defaults gets current values of parameters, which are effectively
+// defaults
+func (pf *PrefsDetailed) Defaults() {
+	pf.EventSkipLagMSec = EventSkipLagMSec
+	pf.DragStartMSec = DragStartMSec
+	pf.DragStartPix = DragStartPix
+	pf.DNDStartMSec = DNDStartMSec
+	pf.DNDStartPix = DNDStartPix
+	pf.HoverStartMSec = HoverStartMSec
+	pf.HoverMaxPix = HoverMaxPix
+	pf.CursorBlinkMSec = CursorBlinkMSec
+	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
+	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
+	TheViewIFace.PrefsDetDefaults(pf)
+	// in giv:
+	// TextViewClipHistMax
+	// MapInlineLen
+	// StructInlineLen
+	// SliceInlineLen
+}
+
+// Apply detailed preferences to all the relevant settings.
+func (pf *PrefsDetailed) Apply() {
+	EventSkipLagMSec = pf.EventSkipLagMSec
+	DragStartMSec = pf.DragStartMSec
+	DragStartPix = pf.DragStartPix
+	DNDStartMSec = pf.DNDStartMSec
+	DNDStartPix = pf.DNDStartPix
+	HoverStartMSec = pf.HoverStartMSec
+	HoverMaxPix = pf.HoverMaxPix
+	CursorBlinkMSec = pf.CursorBlinkMSec
+	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
+	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
+	TheViewIFace.PrefsDetApply(pf)
+	// in giv:
+	// TextViewClipHistMax = pf.TextViewClipHistMax
+	// MapInlineLen
+	// StructInlineLen
+	// SliceInlineLen
+}
+
+// PrefsDetailedProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
+var PrefsDetailedProps = ki.Props{
+	"MainMenu": ki.PropSlice{
+		{"AppMenu", ki.BlankProp{}},
+		{"File", ki.PropSlice{
+			{"Apply", ki.Props{}},
+			{"Open", ki.Props{
+				"shortcut": KeyFunMenuOpen,
+			}},
+			{"Save", ki.Props{
+				"shortcut": KeyFunMenuSave,
+				"updtfunc": func(pfi interface{}, act *Action) {
+					pf := pfi.(*PrefsDetailed)
+					act.SetActiveState(pf.Changed)
+				},
+			}},
+			{"Close Window", ki.BlankProp{}},
+		}},
+		{"Edit", "Copy Cut Paste"},
+		{"Window", "Windows"},
+	},
+	"ToolBar": ki.PropSlice{
+		{"Apply", ki.Props{
+			"desc": "Apply parameters to affect actual behavior.",
+			"icon": "update",
+		}},
+		{"sep-file", ki.BlankProp{}},
+		{"Save", ki.Props{
+			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
+			"icon": "file-save",
+			"updtfunc": func(pfi interface{}, act *Action) {
+				pf := pfi.(*PrefsDetailed)
+				act.SetActiveStateUpdt(pf.Changed)
+			},
+		}},
+	},
+}
+
+//////////////////////////////////////////////////////////////////
+//  PrefsDebug
+
+// PrefsDebug are debugging params
+type PrefsDebug struct {
+	Update2DTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"`
+
+	Render2DTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"`
+
+	Layout2DTrace *bool `desc:"reports trace of all layouts (printfs to stdout)"`
+
+	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"`
+
+	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"`
+
+	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+}
+
+var KiT_PrefsDebug = kit.Types.AddType(&PrefsDebug{}, PrefsDebugProps)
+
+// PrefsDbg are the overall debugging preferences
+var PrefsDbg = PrefsDebug{}
+
+// PrefsDebugProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
+var PrefsDebugProps = ki.Props{}
+
+// Connect connects debug fields with actual variables controlling debugging
+func (pf *PrefsDebug) Connect() {
+	pf.Update2DTrace = &Update2DTrace
+	pf.Render2DTrace = &Render2DTrace
+	pf.Layout2DTrace = &Layout2DTrace
+	pf.WinEventTrace = &WinEventTrace
+	pf.KeyEventTrace = &KeyEventTrace
 }
