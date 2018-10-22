@@ -270,7 +270,7 @@ func SetRobust(to, from interface{}) bool {
 		return false
 	}
 	typ := vnp.Type()
-	vp := PtrValue(v)
+	vp := OnePtrValue(vnp)
 	vk := vnp.Kind()
 	if !vp.Elem().CanSet() {
 		log.Printf("ki.SetRobust 'to' cannot be set -- must be a variable or field, not a const or tmp or other value that cannot be set.  Value info: %v\n", vp)
