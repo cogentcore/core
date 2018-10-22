@@ -74,11 +74,11 @@ type ChordEvent struct {
 	Event
 }
 
-func (e Event) String() string {
-	if e.Rune >= 0 {
-		return fmt.Sprintf("key.Event{%q (%v), %v, %v}", e.Rune, e.Code, e.Modifiers, e.Action)
+func (ev Event) String() string {
+	if ev.Rune >= 0 {
+		return fmt.Sprintf("Type: %v  Action: %v  Chord: %v  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Chord(), ModsString(ev.Modifiers), ev.Time())
 	}
-	return fmt.Sprintf("key.Event{(%v), %v, %v}", e.Code, e.Modifiers, e.Action)
+	return fmt.Sprintf("Type: %v  Action: %v  Code: %v  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Code, ModsString(ev.Modifiers), ev.Time())
 }
 
 // SetModifierBits sets the bitflags based on a list of key.Modifiers
@@ -133,12 +133,7 @@ type Chord string
 // non-printable ones are converted to their corresponding code names without
 // the "Code" prefix.
 func (e *Event) Chord() Chord {
-	modstr := ""
-	for m := Shift; m < ModifiersN; m++ {
-		if e.Modifiers&(1<<uint32(m)) != 0 {
-			modstr += interface{}(m).(fmt.Stringer).String() + "+"
-		}
-	}
+	modstr := ModsString(e.Modifiers)
 	if modstr != "" && e.Code == CodeSpacebar { // modified space is not regular space
 		return Chord(modstr + "Spacebar")
 	}
@@ -157,13 +152,7 @@ func (e *Event) Chord() Chord {
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
 func (ch Chord) Decode() (r rune, mods int32, err error) {
 	cs := string(ch)
-	for m := Shift; m < ModifiersN; m++ {
-		mstr := interface{}(m).(fmt.Stringer).String() + "+"
-		if strings.HasPrefix(cs, mstr) {
-			mods |= (1 << uint32(m))
-			cs = strings.TrimPrefix(cs, mstr)
-		}
-	}
+	mods, cs = ModsFmString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {
 		r = rs[0]
@@ -242,6 +231,31 @@ const (
 //go:generate stringer -type=Modifiers
 
 var KiT_Modifiers = kit.Enums.AddEnum(ModifiersN, true, nil) // true = bitflag
+
+// ModsString returns the string representation of the modifiers
+func ModsString(mods int32) string {
+	modstr := ""
+	for m := Shift; m < ModifiersN; m++ {
+		if mods&(1<<uint32(m)) != 0 {
+			modstr += interface{}(m).(fmt.Stringer).String() + "+"
+		}
+	}
+	return modstr
+}
+
+// ModsFmString returns the modifiers corresponding to given string
+// and the remainder of the string after modifiers have been stripped
+func ModsFmString(cs string) (int32, string) {
+	var mods int32
+	for m := Shift; m < ModifiersN; m++ {
+		mstr := interface{}(m).(fmt.Stringer).String() + "+"
+		if strings.HasPrefix(cs, mstr) {
+			mods |= (1 << uint32(m))
+			cs = strings.TrimPrefix(cs, mstr)
+		}
+	}
+	return mods, cs
+}
 
 // Codes is the identity of a key relative to a notional "standard" keyboard.
 type Codes uint32

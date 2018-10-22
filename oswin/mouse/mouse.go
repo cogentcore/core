@@ -15,6 +15,7 @@
 package mouse
 
 import (
+	"fmt"
 	"image"
 	"time"
 
@@ -96,6 +97,10 @@ func SelectModeBits(modBits int32) SelectModes {
 // SelectMode returns the selection mode based on given modifiers on event
 func (e *Event) SelectMode() SelectModes {
 	return SelectModeBits(e.Modifiers)
+}
+
+func (ev Event) String() string {
+	return fmt.Sprintf("Type: %v Button: %v Action: %v  Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Action, ev.Where, key.ModsString(ev.Modifiers), ev.Time())
 }
 
 /////////////////////////////////////////////////////////////////

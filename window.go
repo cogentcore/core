@@ -19,7 +19,6 @@ import (
 	"runtime/pprof"
 	"sort"
 	"sync"
-	"sync/atomic"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
@@ -111,46 +110,38 @@ func WinNewCloseStamp() {
 // typically not directly visible, and instead updates the overall menubar.
 type Window struct {
 	NodeBase
-	Title            string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin            oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	HasGeomPrefs     bool                                    `desc:"did this window have WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied"`
-	Viewport         *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
-	MasterVLay       *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
-	MainMenu         *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	OverlayVp        *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	OverlayVpCleared bool                                    `json:"-" xml:"-" desc:"true if OverlayVp has no kids and has already been cleared -- no need to keep clearing."`
-	Sprites          map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
-	SpritesBg        map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
-	ActiveSprites    int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
-	UpMu             sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
-	WinTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	OverTexActive    bool                                    `json:"-" xml:"-" desc:"is the overlay texture active and should be uploaded to window?"`
-	OverTex          oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	LastModBits      int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-	LastSelMode      mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	Focus            ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	FocusActive      bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
-	StartFocus       ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
-	Shortcuts        Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-	DNDData          mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource        ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent    *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
-	Scrolling        ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
-	Popup            ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack       []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack       []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup        ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	PopupFocus       ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
-	DoFullRender     bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
-	Resizing         bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
-	GotPaint         bool                                    `json:"-" xml:"-" desc:"have we received our first paint event yet?  ignore other window events before this point"`
-	GotFocus         bool                                    `json:"-" xml:"-" desc:"have we received our first focus event yet?"`
-	EventSigs        [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
-	GoLoop           bool                                    `json:"-" xml:"-" desc:"true if we are running from GoStartEventLoop -- requires a WinWait.Done at end"`
-	stopEventLoop    bool
-	updating         int32 // atomic flag around global updating -- routines can check IsUpdating and bail
+	Title         string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin         oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	Viewport      *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay    *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu      *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	OverlayVp     *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	Sprites       map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
+	SpritesBg     map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
+	ActiveSprites int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	UpMu          sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
+	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	LastModBits   int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	FocusActive   bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
+	StartFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
+	Shortcuts     Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	Scrolling     ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
+	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	PopupFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
+	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
+	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -181,6 +172,47 @@ const (
 )
 
 //go:generate stringer -type=EventPris
+
+// these extend NodeBase NodeFlags to hold Window state
+const (
+	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied
+	WinFlagHasGeomPrefs NodeFlags = NodeFlagsN + iota
+
+	// WinFlagUpdating is atomic flag around global updating -- routines can check IsUpdating and bail
+	WinFlagUpdating
+
+	// WinFlagIsClosing is atomic flag indicating window is closing
+	WinFlagIsClosing
+
+	// WinFlagOverlayVpCleared true if OverlayVp has no kids and has already been cleared -- no need to keep clearing.
+	WinFlagOverlayVpCleared
+
+	// WinFlagOverTexActive is the overlay texture active and should be uploaded to window?
+	WinFlagOverTexActive
+
+	// WinFlagGotPaint have we received our first paint event yet?  ignore other window events before this point
+	WinFlagGotPaint
+
+	// WinFlagGotFocus have we received our first focus event yet?
+	WinFlagGotFocus
+
+	// WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end
+	WinFlagGoLoop
+
+	// WinFlagStopEventLoop is set when event loop stop is requested
+	WinFlagStopEventLoop
+)
+
+// HasGeomPrefs returns true if geometry prefs were set already
+func (w *Window) HasGeomPrefs() bool {
+	return bitflag.Has(w.Flag, int(WinFlagHasGeomPrefs))
+}
+
+// IsClosing returns true if window has requested to close -- don't
+// attempt to update it any further
+func (w *Window) IsClosing() bool {
+	return bitflag.HasAtomic(&w.Flag, int(WinFlagIsClosing))
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //                   New Windows and Init
@@ -238,7 +270,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 		return nil
 	}
 	if wgp != nil {
-		win.HasGeomPrefs = true
+		bitflag.Set(&win.Flag, int(WinFlagHasGeomPrefs))
 	}
 	AllWindows.Add(win)
 	MainWindows.Add(win)
@@ -277,7 +309,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 		return nil
 	}
 	if wgp != nil {
-		win.HasGeomPrefs = true
+		bitflag.Set(&win.Flag, int(WinFlagHasGeomPrefs))
 	}
 	AllWindows.Add(win)
 	DialogWindows.Add(win)
@@ -444,21 +476,28 @@ func (w *Window) IsResizing() bool {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
-	if w.IsClosed() {
+	if w.IsClosed() || w.IsClosing() {
 		return
 	}
 	curSz := w.Viewport.Geom.Size
 	if curSz == sz {
-		// fmt.Printf("win: %v skip same resize: %v\n", w.Nm, curSz)
+		if WinEventTrace {
+			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Nm, curSz)
+		}
 		return
 	}
 	w.UpMu.Lock()
 	if w.IsClosed() {
+		if WinEventTrace {
+			fmt.Printf("Win: %v Resized already closed\n", w.Nm)
+		}
 		w.UpMu.Unlock()
 		return
 	}
+	if WinEventTrace {
+		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
+	}
 	w.FocusInactivate()
-	// fmt.Printf("win: %v actual resized fun: %v\n", w.Nm, sz)
 	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
@@ -468,12 +507,27 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.OverTex = nil // dynamically allocated when needed
-	w.OverTexActive = false
-	w.OverlayVpCleared = false
+	bitflag.Clear(&w.Flag, int(WinFlagOverTexActive))
+	bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
 	w.Viewport.Resize(sz)
 	WinGeomPrefs.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
+}
+
+// Close closes the window -- this is not a request -- it means:
+// definitely close it -- flags window as such -- check IsClosing()
+func (w *Window) Close() {
+	if w.IsClosing() {
+		return
+	}
+	bitflag.SetAtomic(&w.Flag, int(WinFlagIsClosing))
+	w.OSWin.Close()
+}
+
+// CloseReq requests that the window be closed -- could be rejected
+func (w *Window) CloseReq() {
+	w.OSWin.CloseReq()
 }
 
 // Closed frees any resources after the window has been closed.
@@ -483,8 +537,13 @@ func (w *Window) Closed() {
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
 	WinNewCloseStamp()
-	fmt.Printf("closed win: %v\n", w.Nm)
+	if WinEventTrace {
+		fmt.Printf("Win: %v Closed\n", w.Nm)
+	}
 	if w.IsClosed() {
+		if WinEventTrace {
+			fmt.Printf("Win: %v Already Closed\n", w.Nm)
+		}
 		w.UpMu.Unlock()
 		return
 	}
@@ -554,13 +613,13 @@ func (w *Window) StartEventLoop() {
 func (w *Window) GoStartEventLoop() {
 	WinWait.Add(1)
 	w.DoFullRender = true
-	w.GoLoop = true
+	bitflag.Set(&w.Flag, int(WinFlagGoLoop))
 	go w.EventLoop()
 }
 
 // StopEventLoop tells the event loop to stop running when the next event arrives.
 func (w *Window) StopEventLoop() {
-	w.stopEventLoop = true
+	bitflag.Set(&w.Flag, int(WinFlagStopEventLoop))
 }
 
 // ConnectEvent adds a Signal connection for given event type and
@@ -613,7 +672,7 @@ func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 // drive an UploadAllViewports call after all the rendering is done, and
 // signal the publishing of the window after that
 func (w *Window) FullReRender() {
-	if w.IsClosed() {
+	if w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.Viewport.FullRender2DTree()
@@ -631,11 +690,11 @@ func (w *Window) FullReRender() {
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	if w.IsClosed() {
+	if w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -653,11 +712,11 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
 func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
-	if w.IsClosed() {
+	if w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -678,11 +737,11 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
-	if w.IsClosed() {
+	if w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -726,20 +785,17 @@ func (w *Window) UploadAllViewports() {
 
 // IsUpdating checks if we are already updating
 func (w *Window) IsUpdating() bool {
-	if atomic.LoadInt32(&w.updating) > 0 {
-		return true
-	}
-	return false
+	return bitflag.HasAtomic(&w.Flag, int(WinFlagUpdating))
 }
 
 // SetUpdating sets the updating state to true if not already updating
-func (w *Window) SetUpdating() bool {
-	return atomic.CompareAndSwapInt32(&w.updating, 0, 1)
+func (w *Window) SetUpdating() {
+	bitflag.SetAtomic(&w.Flag, int(WinFlagUpdating))
 }
 
 // ClearUpdating sets the updating state to false if not already updating
-func (w *Window) ClearUpdating() bool {
-	return atomic.CompareAndSwapInt32(&w.updating, 1, 0)
+func (w *Window) ClearUpdating() {
+	bitflag.ClearAtomic(&w.Flag, int(WinFlagUpdating))
 }
 
 // Publish does the final step of updating of the window based on the current
@@ -766,7 +822,7 @@ func (w *Window) Publish() {
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
-	if w.OverTex != nil && w.OverTexActive {
+	if w.OverTex != nil && bitflag.Has(w.Flag, int(WinFlagOverTexActive)) {
 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
 	}
 	pr.End()
@@ -784,7 +840,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	if Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	if win.IsClosed() || win.Resizing || win.IsUpdating() {
+	if win.IsClosed() || win.IsClosing() || win.Resizing || win.IsUpdating() {
 		return
 	}
 	win.Publish()
@@ -797,7 +853,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
 	if w.OverlayVp == nil || !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
-		w.OverTexActive = false
+		bitflag.Clear(&w.Flag, int(WinFlagOverTexActive))
 		return
 	}
 	w.UpMu.Lock()
@@ -816,15 +872,15 @@ func (w *Window) RenderOverlays() {
 	w.OverlayVp.Win = w
 	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
 	if len(w.OverlayVp.Kids) == 0 {
-		if !w.OverlayVpCleared {
+		if !bitflag.Has(w.Flag, int(WinFlagOverlayVpCleared)) {
 			vp := w.OverlayVp
 			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
-			w.OverlayVpCleared = true
+			bitflag.Set(&w.Flag, int(WinFlagOverlayVpCleared))
 		}
-	} else {
-		w.OverlayVpCleared = false
+		bitflag.Set(&w.Flag, int(WinFlagOverlayVpCleared))
+		bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
 	}
-	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+	bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
 	if w.ActiveSprites > 0 {
 		for _, sp := range w.Sprites {
 			if sp.IsInactive() {
@@ -833,7 +889,7 @@ func (w *Window) RenderOverlays() {
 			w.RenderSprite(sp)
 		}
 	}
-	w.OverTexActive = true
+	bitflag.Set(&w.Flag, int(WinFlagOverTexActive))
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives the publish
 }
@@ -925,11 +981,11 @@ func (w *Window) RenderSprite(sp *Viewport2D) {
 // MainMenuUpdated needs to be called whenever the main menu for this window
 // is updated in terms of items added or removed.
 func (w *Window) MainMenuUpdated() {
-	if w == nil || w.MainMenu == nil {
+	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -939,11 +995,11 @@ func (w *Window) MainMenuUpdated() {
 
 // MainMenuSet sets the main menu for the window, during window.Focus event
 func (w *Window) MainMenuSet() {
-	if w == nil || w.MainMenu == nil {
+	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -954,11 +1010,11 @@ func (w *Window) MainMenuSet() {
 // MainMenuUpdateActives needs to be called whenever items on the main menu
 // for this window have their IsActive status updated.
 func (w *Window) MainMenuUpdateActives() {
-	if w == nil || w.MainMenu == nil {
+	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -968,11 +1024,11 @@ func (w *Window) MainMenuUpdateActives() {
 
 // MainMenuUpdateWindows updates a Window menu with a list of active menus.
 func (w *Window) MainMenuUpdateWindows() {
-	if w == nil || w.MainMenu == nil {
+	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() { // could have closed while we waited for lock
+	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -1022,14 +1078,15 @@ func (w *Window) EventLoop() {
 mainloop:
 	for {
 		evi := w.OSWin.NextEvent()
-		if w.stopEventLoop {
-			w.stopEventLoop = false
+		if bitflag.Has(w.Flag, int(WinFlagStopEventLoop)) {
+			bitflag.Clear(&w.Flag, int(WinFlagStopEventLoop))
 			fmt.Println("stop event loop")
 			break
 		}
 		et := evi.Type()
 		delPop := false                      // if true, delete this popup after event loop
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
+			fmt.Printf("Win: %v got out-of-range event: %v\n", w.Nm, et)
 			continue
 		}
 
@@ -1041,15 +1098,15 @@ mainloop:
 		lagMs := int(lag / time.Millisecond)
 		if WinEventTrace {
 			if et != oswin.MouseMoveEvent {
-				fmt.Printf("Win %v event: %v lag: %v\n", evi.String(), lag)
+				fmt.Printf("Win: %v Event: %v  Lag: %v\n", w.Nm, evi.String(), lag)
 			}
 		}
 
 		if et != oswin.KeyEvent {
-			if w.GotPaint && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
+			if bitflag.Has(w.Flag, int(WinFlagGotPaint)) && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
 				// fmt.Printf("skipping paint after resize\n")
 				w.Publish() // this is essential on mac for any paint event
-				w.GotPaint = true
+				bitflag.Set(&w.Flag, int(WinFlagGotPaint))
 				continue // X11 always sends a paint after a resize -- we just use resize
 			}
 			if et == lastEt || lastEt == oswin.WindowResizeEvent {
@@ -1261,7 +1318,7 @@ mainloop:
 				break mainloop
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
-				w.GotPaint = true
+				bitflag.Set(&w.Flag, int(WinFlagGotPaint))
 				if w.DoFullRender {
 					w.DoFullRender = false
 					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
@@ -1274,13 +1331,13 @@ mainloop:
 				w.Publish()
 			case window.Move:
 				e.SetProcessed()
-				if w.GotPaint { // moves before paint are not accurate on X11
+				if bitflag.Has(w.Flag, int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
 					// fmt.Printf("win move: %v\n", w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
 				}
 			case window.Focus:
-				if !w.GotFocus {
-					w.GotFocus = true
+				if !bitflag.Has(w.Flag, int(WinFlagGotFocus)) {
+					bitflag.Set(&w.Flag, int(WinFlagGotFocus))
 				} else {
 					// fmt.Printf("win foc: %v\n", w.Nm)
 					if lastWinMenuUpdate != WinNewCloseTime {
@@ -1317,7 +1374,7 @@ mainloop:
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
-			if w.GotPaint && w.GotFocus {
+			if bitflag.HasAll(w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 				if w.DoFullRender {
 					// if we are getting mouse input, and still haven't done this, do it..
 					w.DoFullRender = false
@@ -1429,8 +1486,10 @@ mainloop:
 			w.NextPopup = nil
 		}
 	}
-	// fmt.Println("end of event loop")
-	if w.GoLoop {
+	if WinEventTrace {
+		fmt.Printf("Win: %v out of event loop\n", w.Nm)
+	}
+	if bitflag.Has(w.Flag, int(WinFlagGoLoop)) {
 		WinWait.Done()
 	}
 	// our last act must be self destruction!

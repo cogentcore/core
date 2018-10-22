@@ -397,7 +397,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	case "Close Window":
 		ac.Shortcut = gi.ActiveKeyMap.ChordForFun(gi.KeyFunMenuClose).OSShortcut()
 		ac.ActionSig.Connect(vp.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			vp.Win.OSWin.CloseReq()
+			vp.Win.CloseReq()
 		})
 		return true
 	}

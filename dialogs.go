@@ -170,7 +170,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)
 		// fmt.Printf("setsz: %v\n", vpsz)
-		if !win.HasGeomPrefs {
+		if !win.HasGeomPrefs() {
 			win.SetSize(vpsz)
 		}
 		win.GoStartEventLoop()
@@ -200,7 +200,7 @@ func (dlg *Dialog) Close() {
 	win := dlg.Win
 	if win != nil {
 		if DialogsSepWindow {
-			win.OSWin.Close()
+			win.Close()
 		} else {
 			win.ClosePopup(dlg.This)
 		}
