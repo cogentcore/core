@@ -876,11 +876,12 @@ func (w *Window) RenderOverlays() {
 			vp := w.OverlayVp
 			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
 			bitflag.Set(&w.Flag, int(WinFlagOverlayVpCleared))
+		} else {
+			bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
 		}
-		bitflag.Set(&w.Flag, int(WinFlagOverlayVpCleared))
-		bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
 	}
-	bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
+	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+
 	if w.ActiveSprites > 0 {
 		for _, sp := range w.Sprites {
 			if sp.IsInactive() {
