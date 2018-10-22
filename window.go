@@ -19,6 +19,7 @@ import (
 	"runtime/pprof"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
@@ -33,8 +34,6 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
-
-	"time"
 )
 
 // EventSkipLagMSec is the number of milliseconds of lag between the time the
@@ -1342,15 +1341,9 @@ mainloop:
 				} else {
 					// fmt.Printf("win foc: %v\n", w.Nm)
 					if lastWinMenuUpdate != WinNewCloseTime {
-						if WinEventTrace {
-							fmt.Printf("Win: %v start updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-						}
 						lastWinMenuUpdate = WinNewCloseTime
 						w.MainMenuUpdateWindows()
 						w.MainMenuSet()
-						if WinEventTrace {
-							fmt.Printf("Win: %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-						}
 					} else {
 						w.MainMenuSet()
 					}
@@ -1392,15 +1385,9 @@ mainloop:
 					}
 				}
 				if lastWinMenuUpdate != WinNewCloseTime {
-					if WinEventTrace {
-						fmt.Printf("Win: %v start updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-					}
 					lastWinMenuUpdate = WinNewCloseTime
 					w.MainMenuUpdateWindows()
 					w.MainMenuSet()
-					if WinEventTrace {
-						fmt.Printf("Win: %v updt win menu at %v\n", w.Nm, lastWinMenuUpdate)
-					}
 				}
 				if w.Focus == nil && w.StartFocus != nil {
 					w.FocusOnOrNext(w.StartFocus)
@@ -2078,13 +2065,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	}
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
-		if prof.Profiling {
-			w.EndTargProfile()
-			w.EndCPUMemProfile()
-		} else {
-			w.StartTargProfile()
-			w.StartCPUMemProfile()
-		}
+		ProfileToggle()
 		e.SetProcessed()
 	case "Control+Alt+F":
 		w.BenchmarkFullRender()
@@ -2607,8 +2588,19 @@ func (w *Window) DNDClearCursor() {
 /////////////////////////////////////////////////////////////////////////////
 //                   Profiling and Benchmarking, controlled by hot-keys
 
+// ProfileToggle turns profiling on or off
+func ProfileToggle() {
+	if prof.Profiling {
+		EndTargProfile()
+		EndCPUMemProfile()
+	} else {
+		StartTargProfile()
+		StartCPUMemProfile()
+	}
+}
+
 // StartCPUMemProfile starts the standard Go cpu and memory profiling.
-func (w *Window) StartCPUMemProfile() {
+func StartCPUMemProfile() {
 	fmt.Println("Starting Std CPU / Mem Profiling")
 	f, err := os.Create("cpu.prof")
 	if err != nil {
@@ -2620,7 +2612,7 @@ func (w *Window) StartCPUMemProfile() {
 }
 
 // EndCPUMemProfile ends the standard Go cpu and memory profiling.
-func (w *Window) EndCPUMemProfile() {
+func EndCPUMemProfile() {
 	fmt.Println("Ending Std CPU / Mem Profiling")
 	pprof.StopCPUProfile()
 	f, err := os.Create("mem.prof")
@@ -2635,21 +2627,25 @@ func (w *Window) EndCPUMemProfile() {
 }
 
 // StartTargProfile starts targeted profiling using goki prof package.
-func (w *Window) StartTargProfile() {
-	nn := 0
-	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
-		nn++
-		return true
-	})
-	fmt.Printf("Starting Targeted Profiling, window has %v nodes\n", nn)
+func StartTargProfile() {
+	fmt.Printf("Starting Targeted Profiling\n")
 	prof.Reset()
 	prof.Profiling = true
 }
 
 // EndTargProfile ends targeted profiling and prints report.
-func (w *Window) EndTargProfile() {
+func EndTargProfile() {
 	prof.Report(time.Millisecond)
 	prof.Profiling = false
+}
+
+func (w *Window) ReportWinNodes() {
+	nn := 0
+	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+		nn++
+		return true
+	})
+	fmt.Printf("Window: %v has: %v nodes\n", w.Nm, nn)
 }
 
 // BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
@@ -2657,8 +2653,9 @@ func (w *Window) EndTargProfile() {
 // Go cpu.prof and mem.prof outputs.
 func (w *Window) BenchmarkFullRender() {
 	fmt.Println("Starting BenchmarkFullRender")
-	w.StartCPUMemProfile()
-	w.StartTargProfile()
+	w.ReportWinNodes()
+	StartCPUMemProfile()
+	StartTargProfile()
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
@@ -2666,8 +2663,8 @@ func (w *Window) BenchmarkFullRender() {
 	}
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	w.EndTargProfile()
-	w.EndCPUMemProfile()
+	EndTargProfile()
+	EndCPUMemProfile()
 }
 
 // BenchmarkReRender runs benchmark of 50 re-render-only updates of display
@@ -2675,7 +2672,8 @@ func (w *Window) BenchmarkFullRender() {
 // results and generating standard Go cpu.prof and mem.prof outputs.
 func (w *Window) BenchmarkReRender() {
 	fmt.Println("Starting BenchmarkReRender")
-	w.StartTargProfile()
+	w.ReportWinNodes()
+	StartTargProfile()
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
@@ -2683,7 +2681,7 @@ func (w *Window) BenchmarkReRender() {
 	}
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	w.EndTargProfile()
+	EndTargProfile()
 }
 
 //////////////////////////////////////////////////////////////////////////////////

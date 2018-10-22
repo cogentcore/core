@@ -724,7 +724,7 @@ func (pf *PrefsDetailed) Apply() {
 	// SliceInlineLen
 }
 
-// PrefsDetailedProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
+// PrefsDetailedProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsDetView
 var PrefsDetailedProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
@@ -785,8 +785,15 @@ var KiT_PrefsDebug = kit.Types.AddType(&PrefsDebug{}, PrefsDebugProps)
 // PrefsDbg are the overall debugging preferences
 var PrefsDbg = PrefsDebug{}
 
-// PrefsDebugProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
-var PrefsDebugProps = ki.Props{}
+// PrefsDebugProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsDbgView
+var PrefsDebugProps = ki.Props{
+	"ToolBar": ki.PropSlice{
+		{"Profile", ki.Props{
+			"desc": "Toggle profiling of program on or off -- does both targeted and global CPU and Memory profiling.",
+			"icon": "update",
+		}},
+	},
+}
 
 // Connect connects debug fields with actual variables controlling debugging
 func (pf *PrefsDebug) Connect() {
@@ -795,4 +802,9 @@ func (pf *PrefsDebug) Connect() {
 	pf.Layout2DTrace = &Layout2DTrace
 	pf.WinEventTrace = &WinEventTrace
 	pf.KeyEventTrace = &KeyEventTrace
+}
+
+// Profile toggles profiling on / off
+func (pf *PrefsDebug) Profile() {
+	ProfileToggle()
 }
