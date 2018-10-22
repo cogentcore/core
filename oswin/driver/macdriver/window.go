@@ -12,7 +12,6 @@
 package macdriver
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -456,7 +455,7 @@ func (w *windowImpl) Close() {
 	// this is actually the final common pathway for closing here
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
-	fmt.Printf("sending close event to window: %v\n", w.Nm)
+	// fmt.Printf("sending close event to window: %v\n", w.Nm)
 	sendWindowEvent(w, window.Close)
 	if w.textures != nil {
 		for t, _ := range w.textures {
