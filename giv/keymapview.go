@@ -58,18 +58,18 @@ func KeyMapsView(km *gi.KeyMaps) {
 					case 0:
 						km.SavePrefs()
 						fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
-						w.Close()
+						win.Close()
 					case 1:
 						if km == &gi.AvailKeyMaps {
 							km.OpenPrefs() // revert
 						}
-						w.Close()
+						win.Close()
 					case 2:
 						// default is to do nothing, i.e., cancel
 					}
 				})
 		} else {
-			w.Close()
+			win.Close()
 		}
 	})
 

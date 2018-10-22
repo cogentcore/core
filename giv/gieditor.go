@@ -386,13 +386,13 @@ func GoGiEditorDialog(obj ki.Ki) (*GiEditor, *gi.Window) {
 				win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 					switch sig {
 					case 0:
-						w.Close()
+						win.Close()
 					case 1:
 						// default is to do nothing, i.e., cancel
 					}
 				})
 		} else {
-			w.Close()
+			win.Close()
 		}
 	})
 

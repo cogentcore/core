@@ -96,11 +96,16 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* fix combobox with editable: textfield needs to take up full width
+* and focus on first for qreplace.
+
+* test new menu shortcut stuff and use in gide etc.
+
 * completion: timing and other issue..
 
 * major issues with keymaps -- key fun move up has no key mapping over and over again when trying chrome std on mac..
 
-* window menu not updating for dialogs -- sticking around
+* window menu not updating for dialogs -- sticking around -- fixed for widgets demo but still a problem in gide.
 
 * fileview deal with symlinks.
 * fileview should add extension to filename if only one extension provided, if
