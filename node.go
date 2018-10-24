@@ -907,9 +907,12 @@ func (n *Node) Fields() []uintptr {
 	// we store the offsets for the fields in type properties
 	tprops := kit.Types.Properties(n.Type(), true) // true = makeNew
 	pnm := "__FieldOffs"
+	kit.TypesMu.Lock()
 	if foff, ok := (*tprops)[pnm]; ok {
+		kit.TypesMu.Unlock()
 		return foff.([]uintptr)
 	}
+	kit.TypesMu.Unlock()
 	foff := make([]uintptr, 0)
 	kitype := KiType()
 	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
@@ -918,7 +921,9 @@ func (n *Node) Fields() []uintptr {
 		}
 		return true
 	})
+	kit.TypesMu.Lock()
 	(*tprops)[pnm] = foff
+	kit.TypesMu.Unlock()
 	return foff
 }
 

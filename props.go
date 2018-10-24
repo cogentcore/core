@@ -39,6 +39,20 @@ func SubProps(pr map[string]interface{}, key string) (Props, bool) {
 	return nil, false
 }
 
+// SubTypeProps returns a value that contains another props, or nil and false if
+// it doesn't exist or isn't a Props -- for TypeProps, uses locking
+func SubTypeProps(pr map[string]interface{}, key string) (Props, bool) {
+	sp, ok := kit.TypeProp(pr, key)
+	if !ok {
+		return nil, false
+	}
+	spp, ok := sp.(Props)
+	if ok {
+		return spp, true
+	}
+	return nil, false
+}
+
 // special key prefix indicating type info
 var struTypeKey = "__type:"
 
@@ -72,6 +86,87 @@ func SliceProps(pr map[string]interface{}, key string) (PropSlice, bool) {
 		return spp, true
 	}
 	return nil, false
+}
+
+// SliceTypeProps returns a value that contains a PropSlice, or nil and false if it doesn't
+// exist or isn't a PropSlice -- for TypeProps, uses locking
+func SliceTypeProps(pr map[string]interface{}, key string) (PropSlice, bool) {
+	sp, ok := kit.TypeProp(pr, key)
+	if !ok {
+		return nil, false
+	}
+	spp, ok := sp.(PropSlice)
+	if ok {
+		return spp, true
+	}
+	return nil, false
+}
+
+// CopyProps copies properties from source to destination map.  If copySubProps
+// is true, then any values that are Props or PropSlice are copied too
+// *dest can be nil, in which case it is created.
+func CopyProps(dest *map[string]interface{}, src map[string]interface{}, copySubProps bool) {
+	if *dest == nil {
+		*dest = make(Props, len(src))
+	}
+	for key, val := range src {
+		if copySubProps {
+			if pv, ok := val.(map[string]interface{}); ok {
+				var nval Props
+				nval.CopyFrom(pv, copySubProps)
+				(*dest)[key] = nval
+				continue
+			} else if pv, ok := val.(Props); ok {
+				var nval Props
+				nval.CopyFrom(pv, copySubProps)
+				(*dest)[key] = nval
+				continue
+			} else if pv, ok := val.(PropSlice); ok {
+				var nval PropSlice
+				nval.CopyFrom(pv, copySubProps)
+				(*dest)[key] = nval
+				continue
+			}
+		}
+		(*dest)[key] = val
+	}
+}
+
+// CopyFrom copies properties from source to receiver destination map.  If copySubProps
+// is true, then any values that are Props or PropSlice are copied too
+// *dest can be nil, in which case it is created.
+func (dest *Props) CopyFrom(src map[string]interface{}, copySubProps bool) {
+	CopyProps((*map[string]interface{})(dest), src, copySubProps)
+}
+
+// CopyFrom copies properties from source to destination propslice.  If copySubProps
+// is true, then any values that are Props or PropSlice are copied too
+// *dest can be nil, in which case it is created.
+func (dest *PropSlice) CopyFrom(src PropSlice, copySubProps bool) {
+	if *dest == nil {
+		*dest = make(PropSlice, len(src))
+	}
+	for i, val := range src {
+		if copySubProps {
+			if pv, ok := val.Value.(map[string]interface{}); ok {
+				var nval Props
+				CopyProps((*map[string]interface{})(&nval), pv, copySubProps)
+				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
+				continue
+			} else if pv, ok := val.Value.(Props); ok {
+				var nval Props
+				CopyProps((*map[string]interface{})(&nval), pv, copySubProps)
+				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
+				continue
+			} else if pv, ok := val.Value.(PropSlice); ok {
+				var nval PropSlice
+				nval.CopyFrom(pv, copySubProps)
+				(*dest)[i] = PropStruct{Name: val.Name, Value: nval}
+				continue
+			}
+		}
+		(*dest)[i] = src[i]
+	}
 }
 
 // MarshalJSON saves the type information for each struct used in props, as a

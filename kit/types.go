@@ -161,6 +161,25 @@ func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) *map[string]i
 	return tr.PropsByName(typeName, makeNew)
 }
 
+// TypeProp provides safe (mutex protected) access to property map
+// returned by Properties method -- must use this for all Properties
+// access!
+func TypeProp(props map[string]interface{}, key string) (interface{}, bool) {
+	TypesMu.Lock()
+	val, ok := props[key]
+	TypesMu.Unlock()
+	return val, ok
+}
+
+// SetTypeProp provides safe (mutex protected) setting of property map
+// returned by Properties method -- must use this for all Properties
+// access!
+func SetTypeProp(props map[string]interface{}, key string, val interface{}) {
+	TypesMu.Lock()
+	props[key] = val
+	TypesMu.Unlock()
+}
+
 // PropByName safely finds a type property from type name and property key --
 // returns false if not found
 func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool) {
