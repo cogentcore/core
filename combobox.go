@@ -58,6 +58,7 @@ var ComboBoxProps = ki.Props{
 		"margin":    units.NewValue(0, units.Px),
 		"padding":   units.NewValue(0, units.Px),
 		"max-width": -1,
+		"width":     units.NewValue(12, units.Ch),
 	},
 	"#indicator": ki.Props{
 		"width":          units.NewValue(1.5, units.Ex),
@@ -172,7 +173,6 @@ func (cb *ComboBox) ConfigPartsIfNeeded() {
 		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), "") && ok {
 			return
 		}
-
 	} else {
 		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), cb.Text) {
 			return
@@ -190,6 +190,7 @@ func (cb *ComboBox) ConfigParts() {
 	if cb.Editable {
 		lbIdx = -1
 		icIdx, txIdx = cb.ConfigPartsIconText(&config, string(cb.Icon))
+		cb.SetProp("no-focus", true)
 	} else {
 		txIdx = -1
 		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, string(cb.Icon), cb.Text)

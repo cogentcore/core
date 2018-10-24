@@ -775,6 +775,8 @@ type PrefsDebug struct {
 
 	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"`
 
+	WinPublishTrace *bool `desc:reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
+
 	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"`
 
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
@@ -801,6 +803,7 @@ func (pf *PrefsDebug) Connect() {
 	pf.Render2DTrace = &Render2DTrace
 	pf.Layout2DTrace = &Layout2DTrace
 	pf.WinEventTrace = &WinEventTrace
+	pf.WinPublishTrace = &WinPublishTrace
 	pf.KeyEventTrace = &KeyEventTrace
 }
 

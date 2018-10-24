@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"runtime/debug"
 	"runtime/pprof"
 	"sort"
 	"sync"
@@ -73,12 +74,18 @@ var HoverMaxPix = 5
 // variable.
 var LocalMainMenu = false
 
-// WinEventTrace can be set to true to obtain a trace of window events
+// WinEventTrace reports a trace of window events to stdout
 // can be set in PrefsDebug from prefs gui
 // excludes mouse move events
 var WinEventTrace = false
 
-// KeyEventTrace can be set to true to obtain a trace of keyboard events
+// WinPublishTrace reports the stack trace leading up to win publish events
+// which are expensive -- wrap multiple updates in UpdateStart / End
+// to prevent
+// can be set in PrefsDebug from prefs gui
+var WinPublishTrace = false
+
+// KeyEventTrace reports a trace of keyboard events to stdout
 // can be set in PrefsDebug from prefs gui
 var KeyEventTrace = false
 
@@ -815,7 +822,9 @@ func (w *Window) Publish() {
 	}
 
 	// note: this is key for finding redundant updates!
-	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
+	if WinPublishTrace {
+		fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
+	}
 
 	w.SetUpdating()
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
@@ -1394,6 +1403,10 @@ mainloop:
 				}
 			}
 		case *key.ChordEvent:
+			if KeyEventTrace {
+				kf := KeyFun(e.Chord())
+				fmt.Printf("Key: %v  keyfun: %v\n", e.String(), kf)
+			}
 			keyDelPop := w.KeyChordEventHiPri(e)
 			if keyDelPop {
 				delPop = true

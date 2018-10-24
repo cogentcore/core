@@ -812,9 +812,20 @@ func (tv *TextView) CursorDown(steps int) {
 		if wln := tv.WrappedLines(pos.Ln); wln > 1 {
 			si, ri, _ := tv.WrappedLineNo(pos)
 			if si < wln-1 {
-				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si+1, ri)
+				si++
+				mxlen := ints.MinInt(len(tv.Renders[pos.Ln].Spans[si].Text), tv.CursorCol)
+				if tv.CursorCol < mxlen {
+					ri = tv.CursorCol
+				} else {
+					ri = mxlen
+				}
+				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
+				if si == wln-1 && ri == mxlen {
+					nwc++
+				}
 				pos.Ch = nwc
 				gotwrap = true
+
 			}
 		}
 		if !gotwrap {
@@ -835,7 +846,7 @@ func (tv *TextView) CursorDown(steps int) {
 	tv.CursorSelect(org)
 }
 
-// CursorPageDown moves the cursor down page(s), where a page is defined
+// CursorPageDown moves the cursor down page(s), where a page is defined abcdef
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageDown(steps int) {
 	updt := tv.Viewport.Win.UpdateStart()
@@ -1596,7 +1607,7 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(avp *gi.Viewport2D, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog(opts, true, true)
 	dlg.Modal = true
 
@@ -1610,6 +1621,9 @@ func QReplaceDialog(avp *gi.Viewport2D, opts gi.DlgOpts, recv ki.Ki, fun ki.Recv
 	nfind := len(PrevQReplaceFinds)
 	if nfind > 0 {
 		tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
+	}
+	if find != "" {
+		tff.SetCurVal(find)
 	}
 
 	tfr := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+2, "repl").(*gi.ComboBox)
@@ -1634,13 +1648,11 @@ func QReplaceDialog(avp *gi.Viewport2D, opts gi.DlgOpts, recv ki.Ki, fun ki.Recv
 func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string) {
 	frame := dlg.Frame()
 	tff := frame.KnownChildByName("find", 1).(*gi.ComboBox)
-	tf, found := tff.TextField()
-	if found {
+	if tf, found := tff.TextField(); found {
 		find = tf.Text()
 	}
 	tfr := frame.KnownChildByName("repl", 2).(*gi.ComboBox)
-	tf, found = tfr.TextField()
-	if found {
+	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}
 	return
@@ -1649,7 +1661,11 @@ func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string) {
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
 // user for items to search etc
 func (tv *TextView) QReplacePrompt() {
-	QReplaceDialog(tv.Viewport, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings to find and replace -- press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	find := ""
+	if tv.HasSelection() {
+		find = string(tv.Selection().ToBytes())
+	}
+	QReplaceDialog(tv.Viewport, find, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings to find and replace -- press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		dlg := send.(*gi.Dialog)
 		if sig == int64(gi.DialogAccepted) {
 			find, repl := QReplaceDialogValues(dlg)
