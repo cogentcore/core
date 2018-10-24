@@ -36,7 +36,7 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 	if !ok {
 		return false
 	}
-	mp, ok := ki.SliceProps(tpp, "MainMenu")
+	mp, ok := ki.SliceTypeProps(tpp, "MainMenu")
 	if !ok {
 		return false
 	}
@@ -95,7 +95,7 @@ func HasToolBarView(val interface{}) bool {
 	if !ok {
 		return false
 	}
-	_, ok = ki.SliceProps(tpp, "ToolBar")
+	_, ok = ki.SliceTypeProps(tpp, "ToolBar")
 	if !ok {
 		return false
 	}
@@ -113,7 +113,7 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	if !ok {
 		return false
 	}
-	tp, ok := ki.SliceProps(tpp, "ToolBar")
+	tp, ok := ki.SliceTypeProps(tpp, "ToolBar")
 	if !ok {
 		return false
 	}
@@ -156,12 +156,12 @@ func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Me
 	var tp ki.PropSlice
 	got := false
 	if inactive {
-		tp, got = ki.SliceProps(tpp, "CtxtMenuInactive")
+		tp, got = ki.SliceTypeProps(tpp, "CtxtMenuInactive")
 	} else {
-		tp, got = ki.SliceProps(tpp, "CtxtMenuActive")
+		tp, got = ki.SliceTypeProps(tpp, "CtxtMenuActive")
 	}
 	if !got {
-		tp, got = ki.SliceProps(tpp, "CtxtMenu")
+		tp, got = ki.SliceTypeProps(tpp, "CtxtMenu")
 	}
 	if !got {
 		return false
@@ -200,7 +200,7 @@ func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 	if !ok {
 		return false
 	}
-	cmp, ok := ki.SubProps(tpp, MethodViewCallMethsProp)
+	cmp, ok := ki.SubTypeProps(tpp, MethodViewCallMethsProp)
 	if !ok {
 		cmp = MethViewCompileMeths(val, vp)
 	}
@@ -243,13 +243,13 @@ func MethViewCompileMeths(val interface{}, vp *gi.Viewport2D) ki.Props {
 	}
 	var cmp ki.Props = make(ki.Props)
 	for _, lst := range compileMethsOrder {
-		tp, got := ki.SliceProps(tpp, lst)
+		tp, got := ki.SliceTypeProps(tpp, lst)
 		if !got {
 			continue
 		}
 		MethViewCompileActions(cmp, val, vtyp, vp, "", tp)
 	}
-	tpp[MethodViewCallMethsProp] = cmp
+	kit.SetTypeProp(tpp, MethodViewCallMethsProp, cmp)
 	return cmp
 }
 
@@ -329,7 +329,7 @@ func HasMainMenuView(val interface{}) bool {
 	if !ok {
 		return false
 	}
-	_, ok = ki.SliceProps(tpp, "MainMenu")
+	_, ok = ki.SliceTypeProps(tpp, "MainMenu")
 	if !ok {
 		return false
 	}
@@ -344,7 +344,7 @@ func MethViewNoUpdateAfterProp(val interface{}) bool {
 	if !ok {
 		return false
 	}
-	_, nua := tpp["MethViewNoUpdateAfter"]
+	_, nua := kit.TypeProp(tpp, "MethViewNoUpdateAfter")
 	return nua
 }
 

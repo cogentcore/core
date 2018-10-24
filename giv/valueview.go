@@ -129,14 +129,12 @@ func ToValueView(it interface{}, tags string) ValueView {
 	forceInline := false
 	forceNoInline := false
 
-	typrops := kit.Types.Properties(typ, false) // don't make
-	if typrops != nil {
-		inprop, ok := (*typrops)["inline"]
-		if ok {
+	tprops := kit.Types.Properties(typ, false) // don't make
+	if tprops != nil {
+		if inprop, ok := kit.TypeProp(*tprops, "inline"); ok {
 			forceInline, ok = kit.ToBool(inprop)
 		}
-		inprop, ok = (*typrops)["no-inline"]
-		if ok {
+		if inprop, ok := kit.TypeProp(*tprops, "no-inline"); ok {
 			forceNoInline, ok = kit.ToBool(inprop)
 		}
 	}

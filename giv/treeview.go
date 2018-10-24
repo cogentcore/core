@@ -1498,8 +1498,8 @@ func (tv *TreeView) ConfigParts() {
 					wb.SetIconProps(pr)
 				}
 			} else {
-				tprops := kit.Types.Properties(tv.Type(), true) // true = makeNew
-				if bprpi, ok := (*tprops)[gi.WidgetDefPropsKey+"#branch"]; ok {
+				tprops := *kit.Types.Properties(tv.Type(), true) // true = makeNew
+				if bprpi, ok := kit.TypeProp(tprops, gi.WidgetDefPropsKey+"#branch"); ok {
 					switch pr := bprpi.(type) {
 					case map[string]interface{}:
 						wb.SetIconProps(ki.Props(pr))

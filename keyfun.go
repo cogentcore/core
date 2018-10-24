@@ -152,7 +152,9 @@ func KeyFun(chord key.Chord) KeyFuns {
 	kf := KeyFunNil
 	if chord != "" {
 		kf = (*ActiveKeyMap)[chord]
-		// fmt.Printf("chord: %v = %v\n", chord, kf)
+		if KeyEventTrace {
+			fmt.Printf("gi.KeyFun chord: %v = %v\n", chord, kf)
+		}
 	}
 	return kf
 }
@@ -195,7 +197,6 @@ func (km *KeyMap) Update(kmName KeyMapName) {
 		}
 	}
 	kms := km.ToSlice()
-
 	addkm := make([]KeyMapItem, 0)
 
 	sort.Slice(kms, func(i, j int) bool {
@@ -209,7 +210,7 @@ func (km *KeyMap) Update(kmName KeyMapName) {
 			del := fun - lfun
 			if del > 1 {
 				for mi := lfun + 1; mi < fun; mi++ {
-					fmt.Printf("KeyMap: %v is missing a key for function: %v\n", kmName, mi)
+					fmt.Printf("gi.KeyMap: %v is missing a key for function: %v\n", kmName, mi)
 					s := mi.String()
 					s = strings.TrimPrefix(s, "KeyFun")
 					s = "- Not Set - " + s

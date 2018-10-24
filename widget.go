@@ -82,7 +82,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
 	styprops := tprops
 	if selector != "" {
-		sp, ok := tprops[selector]
+		sp, ok := kit.TypeProp(tprops, selector)
 		if !ok {
 			// log.Printf("gi.DefaultStyle2DWidget: did not find props for style selector: %v for node type: %v\n", selector, wb.Type().Name())
 		} else {
@@ -100,7 +100,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 	var dsty *Style
 	stKey := WidgetDefStyleKey + selector
 	prKey := WidgetDefPropsKey + selector
-	dstyi, ok := tprops[stKey]
+	dstyi, ok := kit.TypeProp(tprops, stKey)
 	if !ok || RebuildDefaultStyles {
 		dsty = &Style{}
 		dsty.Defaults()
@@ -113,10 +113,12 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			}
 			*dsty = *baseStyle
 		}
+		kit.TypesMu.Lock()
 		dsty.SetStyleProps(parSty, styprops)
 		dsty.IsSet = false // keep as non-set
 		tprops[stKey] = dsty
 		tprops[prKey] = styprops
+		kit.TypesMu.Unlock()
 	} else {
 		dsty, _ = dstyi.(*Style)
 	}
@@ -144,11 +146,13 @@ func (wb *WidgetBase) Style2DWidget() {
 
 	// look for class-specific style sheets among defaults -- have to do these
 	// dynamically now -- cannot compile into default which is type-general
-	tprops := kit.Types.Properties(wb.Type(), true) // true = makeNew
+	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
+	kit.TypesMu.Lock()
 	clsty := "." + wb.Class
-	if sp, ok := ki.SubProps(*tprops, clsty); ok {
+	if sp, ok := ki.SubProps(tprops, clsty); ok {
 		wb.Sty.SetStyleProps(parSty, sp)
 	}
+	kit.TypesMu.Unlock()
 
 	pagg := wb.ParentCSSAgg()
 	if pagg != nil {

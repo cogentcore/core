@@ -98,6 +98,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * test new menu shortcut stuff and use in gide etc.
 
+* kill to end of line should delete NEXT lf if line is empty
+
 * completion: timing and other issue..
 
 * major issues with keymaps -- key fun move up has no key mapping over and over again when trying chrome std on mac..

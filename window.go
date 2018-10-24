@@ -1106,9 +1106,9 @@ mainloop:
 		lag := now.Sub(evi.Time())
 		lagMs := int(lag / time.Millisecond)
 		if WinEventTrace {
-			// if et != oswin.MouseMoveEvent {
-			fmt.Printf("Win: %v Event: %v  Lag: %v\n", w.Nm, evi.String(), lag)
-			// }
+			if et != oswin.MouseMoveEvent {
+				fmt.Printf("Win: %v Event: %v  Lag: %v\n", w.Nm, evi.String(), lag)
+			}
 		}
 
 		if et != oswin.KeyEvent {
