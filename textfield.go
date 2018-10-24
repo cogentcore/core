@@ -719,6 +719,9 @@ func (tf *TextField) StartCursor() {
 
 // ClearCursor turns off cursor and stops it from blinking
 func (tf *TextField) ClearCursor() {
+	if tf.IsInactive() {
+		return
+	}
 	tf.StopCursor()
 	tf.RenderCursor(false)
 }
@@ -1266,10 +1269,12 @@ func (tf *TextField) Render2D() {
 			tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 			tf.RenderVis.RenderTopPos(rs, pos)
 		}
-		if tf.HasFocus() && tf.FocusActive {
-			tf.StartCursor()
-		} else {
-			tf.StopCursor()
+		if tf.IsActive() {
+			if tf.HasFocus() && tf.FocusActive {
+				tf.StartCursor()
+			} else {
+				tf.StopCursor()
+			}
 		}
 		tf.Render2DChildren()
 		tf.PopBounds()
