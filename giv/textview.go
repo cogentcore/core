@@ -1777,7 +1777,6 @@ func (tv *TextView) QReplaceReplace(midx int) {
 	m := tv.QReplace.Matches[midx]
 	pos := m.Reg.Start
 	tv.Buf.DeleteText(m.Reg.Start, m.Reg.End, true, true)
-	// todo: do special case munging logic here!
 	tv.Buf.InsertText(pos, []byte(tv.QReplace.Replace), true, true)
 	offset := len(tv.QReplace.Replace) - len(tv.QReplace.Find)
 	tv.Highlights[midx].Start.Ch = 0 // don't highlight replace text
