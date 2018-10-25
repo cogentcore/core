@@ -1282,6 +1282,14 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 	return pos, TextRegion{}, false
 }
 
+// HighlightRegion creates a new highlighted region, and renders it,
+// un-drawing any prior highlights
+func (tv *TextView) HighlightRegion(reg TextRegion) {
+	prevh := tv.Highlights
+	tv.Highlights = []TextRegion{reg}
+	tv.UpdateHighlights(prevh)
+}
+
 // CursorNextLink moves cursor to next link. wraparound wraps around to top of
 // buffer if none found -- returns true if found
 func (tv *TextView) CursorNextLink(wraparound bool) bool {
@@ -1301,9 +1309,7 @@ func (tv *TextView) CursorNextLink(wraparound bool) bool {
 	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	prevh := tv.Highlights
-	tv.Highlights = []TextRegion{reg}
-	tv.UpdateHighlights(prevh)
+	tv.HighlightRegion(reg)
 	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
 	return true

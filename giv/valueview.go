@@ -537,10 +537,11 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 		case reflect.Map:
 			ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
 			if vv.IsMapKey {
-				nv := reflect.ValueOf(val)  // new key value
-				cv := ov.MapIndex(vv.Value) // get current value
-				curnv := ov.MapIndex(nv)    // see if new value there already
-				if val != vv.Value.Interface() && !kit.ValueIsZero(curnv) {
+				nv := kit.NonPtrValue(reflect.ValueOf(val)) // new key value
+				kv := kit.NonPtrValue(vv.Value)
+				cv := ov.MapIndex(kv)    // get current value
+				curnv := ov.MapIndex(nv) // see if new value there already
+				if val != kv.Interface() && !kit.ValueIsZero(curnv) {
 					var vp *gi.Viewport2D
 					if vv.Widget != nil {
 						widg := vv.Widget.AsNode2D()
@@ -557,10 +558,10 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 									vp.FullRender2DTree()
 								}
 							case 1:
-								cv := ov.MapIndex(vv.Value)               // get current value
-								ov.SetMapIndex(vv.Value, reflect.Value{}) // delete old key
-								ov.SetMapIndex(nv, cv)                    // set new key to current value
-								vv.Value = nv                             // update value to new key
+								cv := ov.MapIndex(kv)               // get current value
+								ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+								ov.SetMapIndex(nv, cv)              // set new key to current value
+								vv.Value = nv                       // update value to new key
 								vv.This.(ValueView).SaveTmp()
 								vv.ViewSig.Emit(vv.This, 0, nil)
 								if vp != nil {
@@ -570,17 +571,17 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 						})
 					return false // abort this action right now
 				}
-				ov.SetMapIndex(vv.Value, reflect.Value{}) // delete old key
-				ov.SetMapIndex(nv, cv)                    // set new key to current value
-				vv.Value = nv                             // update value to new key
+				ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+				ov.SetMapIndex(nv, cv)              // set new key to current value
+				vv.Value = nv                       // update value to new key
 				rval = true
 			} else {
 				vv.Value = reflect.ValueOf(val)
 				if vv.KeyView != nil {
-					ck := vv.KeyView.Val() // current key value
+					ck := kit.NonPtrValue(vv.KeyView.Val()) // current key value
 					ov.SetMapIndex(ck, vv.Value)
 				} else { // static, key not editable?
-					ov.SetMapIndex(reflect.ValueOf(vv.Key), vv.Value)
+					ov.SetMapIndex(kit.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value)
 				}
 				rval = true
 			}
@@ -608,11 +609,11 @@ func (vv *ValueViewBase) SaveTmp() {
 			if kit.NonPtrValue(vv.Value).Kind() == reflect.Struct {
 				ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
 				if vv.KeyView != nil {
-					ck := vv.KeyView.Val()
+					ck := kit.NonPtrValue(vv.KeyView.Val())
 					ov.SetMapIndex(ck, kit.NonPtrValue(vv.Value))
 					// fmt.Printf("save tmp of struct value in key: %v\n", ck.Interface())
 				} else {
-					ov.SetMapIndex(reflect.ValueOf(vv.Key), kit.NonPtrValue(vv.Value))
+					ov.SetMapIndex(kit.NonPtrValue(reflect.ValueOf(vv.Key)), kit.NonPtrValue(vv.Value))
 					// fmt.Printf("save tmp of struct value in key: %v\n", vv.Key)
 				}
 			}

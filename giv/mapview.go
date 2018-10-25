@@ -264,7 +264,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 	defer mv.UpdateEnd(updt)
 
 	keyv := mv.Keys[idx]
-	ck := keyv.Val() // current key value
+	ck := kit.NonPtrValue(keyv.Val()) // current key value
 	valv := mv.Values[idx]
 	cv := kit.NonPtrValue(valv.Val()) // current val value
 
@@ -316,7 +316,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	kit.MapDeleteValue(mv.Map, key)
+	kit.MapDeleteValue(mv.Map, kit.NonPtrValue(key))
 
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()

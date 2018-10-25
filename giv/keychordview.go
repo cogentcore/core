@@ -50,6 +50,7 @@ func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
 		if vvv.SetValue(key.Chord(kcc.Text)) {
 			vvv.UpdateWidget()
 		}
+		vvv.ViewSig.Emit(vvv.This, 0, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -98,6 +99,15 @@ var KeyChordEditProps = ki.Props{
 // ChordUpdated emits KeyChordSig when a new chord has been entered
 func (kc *KeyChordEdit) ChordUpdated() {
 	kc.KeyChordSig.Emit(kc.This, 0, kc.Text)
+}
+
+func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
+	m.AddAction(gi.ActOpts{Label: "Clear"},
+		kc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			kcc := recv.Embed(KiT_KeyChordEdit).(*KeyChordEdit)
+			kcc.SetText("")
+			kcc.ChordUpdated()
+		})
 }
 
 func (kc *KeyChordEdit) MouseEvent() {
