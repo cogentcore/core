@@ -1585,14 +1585,17 @@ func (tv *TextView) ISearchCancel() {
 
 // QReplace holds all the query-replace data
 type QReplace struct {
-	On       bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
-	Find     string            `json:"-" xml:"-" desc:"current interactive search string"`
-	Replace  string            `json:"-" xml:"-" desc:"current interactive search string"`
-	UseCase  bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	Matches  []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
-	Pos      int               `json:"-" xml:"-" desc:"position within isearch matches"`
-	PrevPos  int               `json:"-" xml:"-" desc:"position in search list from previous search"`
-	StartPos TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	On           bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	Find         string            `json:"-" xml:"-" desc:"current interactive search string"`
+	Replace      string            `json:"-" xml:"-" desc:"current interactive search string"`
+	UseCase      bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	Matches      []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
+	Pos          int               `json:"-" xml:"-" desc:"position within isearch matches"`
+	PrevPos      int               `json:"-" xml:"-" desc:"position in search list from previous search"`
+	StartPos     TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	ChangeOffset int               `json:"-" xml:"-" desc:"compensation for change word length different than original word"`
+	PreviousLine int               `json:"-" xml:"-" desc:"line of previous replace"`
+	CurrentLine  int               `json:"-" xml:"-" desc:"line of current replace"`
 }
 
 // PrevQReplaceFinds are the previous QReplace strings
@@ -1683,6 +1686,8 @@ func (tv *TextView) QReplaceStart(find, repl string) {
 	tv.QReplace.UseCase = HasUpperCase(find)
 	tv.QReplace.Matches = nil
 	tv.QReplace.Pos = -1
+	tv.QReplace.ChangeOffset = 0
+	tv.QReplace.PreviousLine = tv.QReplace.CurrentLine
 
 	nfind := len(PrevQReplaceFinds)
 	if nfind == 0 || PrevQReplaceFinds[nfind-1] != find {
@@ -1726,6 +1731,13 @@ func (tv *TextView) QReplaceSelectMatch(midx int) {
 	if midx >= nm {
 		return
 	}
+	tv.QReplace.CurrentLine = tv.QReplace.Matches[midx].Reg.Start.Ln
+	if tv.QReplace.CurrentLine == tv.QReplace.PreviousLine {
+		tv.QReplace.Matches[midx].Reg.Start.Ch += tv.QReplace.ChangeOffset
+		tv.QReplace.Matches[midx].Reg.End.Ch += tv.QReplace.ChangeOffset
+	} else {
+		tv.QReplace.ChangeOffset = 0
+	}
 	m := tv.QReplace.Matches[midx]
 	pos := m.Reg.Start
 	tv.SelectReg = m.Reg
@@ -1747,6 +1759,8 @@ func (tv *TextView) QReplaceReplace(midx int) {
 	tv.Buf.DeleteText(m.Reg.Start, m.Reg.End, true, true)
 	// todo: do special case munging logic here!
 	tv.Buf.InsertText(pos, []byte(tv.QReplace.Replace), true, true)
+	tv.QReplace.ChangeOffset += len(tv.QReplace.Replace) - len(tv.QReplace.Find)
+	tv.QReplace.PreviousLine = tv.QReplace.CurrentLine
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
