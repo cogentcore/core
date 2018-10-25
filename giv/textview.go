@@ -1779,7 +1779,11 @@ func (tv *TextView) QReplaceReplace(midx int) {
 	tv.Buf.DeleteText(m.Reg.Start, m.Reg.End, true, true)
 	// todo: do special case munging logic here!
 	tv.Buf.InsertText(pos, []byte(tv.QReplace.Replace), true, true)
-	tv.QReplace.ChangeOffset += len(tv.QReplace.Replace) - len(tv.QReplace.Find)
+	offset := len(tv.QReplace.Replace) - len(tv.QReplace.Find)
+	tv.Highlights[midx].Start.Ch = 0 // don't highlight replace text
+	tv.Highlights[midx].End.Ch = 0   // don't highlight replace text
+	tv.UpdateQReplaceHighlights(midx, offset)
+	tv.QReplace.ChangeOffset += offset
 	tv.QReplace.PreviousLine = tv.QReplace.CurrentLine
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -1794,6 +1798,13 @@ func (tv *TextView) QReplaceReplaceAll(midx int) {
 		return
 	}
 	for mi := midx; mi < nm; mi++ {
+		tv.QReplace.CurrentLine = tv.QReplace.Matches[mi].Reg.Start.Ln
+		if tv.QReplace.CurrentLine == tv.QReplace.PreviousLine {
+			tv.QReplace.Matches[mi].Reg.Start.Ch += tv.QReplace.ChangeOffset
+			tv.QReplace.Matches[mi].Reg.End.Ch += tv.QReplace.ChangeOffset
+		} else {
+			tv.QReplace.ChangeOffset = 0
+		}
 		tv.QReplaceReplace(mi)
 	}
 }
@@ -2694,6 +2705,20 @@ func (tv *TextView) UpdateHighlights(prev []TextRegion) {
 	}
 	for _, ch := range tv.Highlights {
 		tv.RenderLines(ch.Start.Ln, ch.End.Ln)
+	}
+}
+
+// UpdateQReplaceHighlights updates highlight regions for QReplace finds further ahead
+// of the last replace that are on the same line of text
+func (tv *TextView) UpdateQReplaceHighlights(si int, offset int) {
+	l := tv.Highlights[si].Start.Ln
+	for i := si + 1; i < len(tv.Highlights); i++ {
+		if tv.Highlights[i].Start.Ln == l {
+			tv.Highlights[i].Start.Ch += offset
+			tv.Highlights[i].End.Ch += offset
+		} else {
+			break
+		}
 	}
 }
 
