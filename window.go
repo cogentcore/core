@@ -1113,7 +1113,9 @@ mainloop:
 
 		if et != oswin.KeyEvent {
 			if bitflag.Has(w.Flag, int(WinFlagGotPaint)) && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
-				// fmt.Printf("skipping paint after resize\n")
+				if WinEventTrace {
+					fmt.Printf("Win: %v skipping paint after resize\n", w.Nm)
+				}
 				w.Publish() // this is essential on mac for any paint event
 				bitflag.Set(&w.Flag, int(WinFlagGotPaint))
 				continue // X11 always sends a paint after a resize -- we just use resize
@@ -1157,7 +1159,9 @@ mainloop:
 					we := evi.(*window.Event)
 					// fmt.Printf("resize\n")
 					if lagMs > EventSkipLagMSec {
-						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						if WinEventTrace {
+							fmt.Printf("Win: %v skipped et %v lag %v size: %v\n", w.Nm, et, lag, w.OSWin.Size())
+						}
 						lastSkipped = true
 						skippedResize = we
 						continue
@@ -1186,7 +1190,7 @@ mainloop:
 			lastEt = et
 		}
 
-		if skippedResize != nil {
+		if skippedResize != nil || w.Viewport.Geom.Size != w.OSWin.Size() {
 			w.Resized(w.OSWin.Size())
 			skippedResize = nil
 		}
