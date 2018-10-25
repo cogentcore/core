@@ -1850,7 +1850,9 @@ func (w *Window) AddShortcut(chord key.Chord, act *Action) {
 // triggered, and false otherwise.  Also elminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
 func (w *Window) TriggerShortcut(chord key.Chord) bool {
-	// fmt.Printf("attempting shortcut chord: %v\n", chord)
+	if KeyEventTrace {
+		fmt.Printf("Shortcut chord: %v -- looking for action\n", chord)
+	}
 	if w.Shortcuts == nil {
 		return false
 	}
@@ -1863,9 +1865,15 @@ func (w *Window) TriggerShortcut(chord key.Chord) bool {
 		return false
 	}
 	if sa.IsInactive() {
+		if KeyEventTrace {
+			fmt.Printf("Shortcut chord: %v, action: %v -- is inactive, not fired\n", chord, sa.Text)
+		}
 		return false
 	}
-	// fmt.Printf("triggering shortcut chord: %v as action: %v\n", chord, sa.Text)
+
+	if KeyEventTrace {
+		fmt.Printf("Shortcut chord: %v, action: %v triggered\n", chord, sa.Text)
+	}
 	sa.Trigger()
 	return true
 }

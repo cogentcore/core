@@ -312,15 +312,15 @@ func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
 	case KeyFunPageUp:
 		sb.SetValueAction(sb.Value - sb.PageStep)
 		kt.SetProcessed()
-	case KeyFunPageLeft:
-		sb.SetValueAction(sb.Value - sb.PageStep)
-		kt.SetProcessed()
+	// case KeyFunPageLeft:
+	// 	sb.SetValueAction(sb.Value - sb.PageStep)
+	// 	kt.SetProcessed()
 	case KeyFunPageDown:
 		sb.SetValueAction(sb.Value + sb.PageStep)
 		kt.SetProcessed()
-	case KeyFunPageRight:
-		sb.SetValueAction(sb.Value + sb.PageStep)
-		kt.SetProcessed()
+	// case KeyFunPageRight:
+	// 	sb.SetValueAction(sb.Value + sb.PageStep)
+	// 	kt.SetProcessed()
 	case KeyFunHome:
 		sb.SetValueAction(sb.Min)
 		kt.SetProcessed()

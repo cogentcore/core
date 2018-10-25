@@ -122,6 +122,13 @@ const (
 	TextBufFileModOk
 )
 
+// SetText sets the text to given bytes
+func (tb *TextBuf) SetText(txt []byte) {
+	tb.Txt = txt
+	tb.BytesToLines()
+	tb.Refresh()
+}
+
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
 	if tb.Changed {
@@ -286,6 +293,7 @@ func (tb *TextBuf) Revert() bool {
 			break
 		} else if itr > 0 {
 			fmt.Printf("TextBuf revert iter: %v diffs: %v\n", itr, len(diffs))
+			PrintDiffs(diffs)
 		}
 	}
 	tb.Changed = false
@@ -1486,10 +1494,10 @@ func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
 	bstr := make([]string, ob.NLines)
 
 	for ai, al := range tb.Lines {
-		astr[ai] = string(al)
+		astr[ai] = string(al) + "\n"
 	}
 	for bi, bl := range ob.Lines {
-		bstr[bi] = string(bl)
+		bstr[bi] = string(bl) + "\n"
 	}
 
 	ud := difflib.UnifiedDiff{A: astr, FromFile: string(tb.Filename), FromDate: tb.Info.ModTime.String(),
@@ -1497,6 +1505,20 @@ func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
 	var buf bytes.Buffer
 	difflib.WriteUnifiedDiff(&buf, ud)
 	return buf.Bytes()
+}
+
+// PrintDiffs prints out the diffs
+func PrintDiffs(diffs TextDiffs) {
+	for _, df := range diffs {
+		switch df.Tag {
+		case 'r':
+			fmt.Printf("delete lines: %v - %v, insert lines: %v - %v\n", df.I1, df.I2, df.J1, df.J2)
+		case 'd':
+			fmt.Printf("delete lines: %v - %v\n", df.I1, df.I2)
+		case 'i':
+			fmt.Printf("insert lines at %v: %v - %v\n", df.I1, df.J1, df.J2)
+		}
+	}
 }
 
 // PatchFromBuf patches (edits) this buffer using content from other buffer,

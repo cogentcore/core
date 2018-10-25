@@ -2090,6 +2090,9 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 		tv.Cut()
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true, true)
+	if tbe == nil {
+		return
+	}
 	pos := tbe.Reg.End
 	if len(txt) == 1 && txt[0] == '\n' {
 		pos.Ch = 0 // sometimes it doesn't go to the start..
