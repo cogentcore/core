@@ -1668,7 +1668,7 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv.Viewport, find, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings to find and replace -- press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	QReplaceDialog(tv.Viewport, find, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 		dlg := send.(*gi.Dialog)
 		if sig == int64(gi.DialogAccepted) {
 			find, repl := QReplaceDialogValues(dlg)
