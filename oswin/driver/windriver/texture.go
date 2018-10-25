@@ -19,6 +19,7 @@ import (
 )
 
 type textureImpl struct {
+	w      *windowImpl
 	size   image.Point
 	dc     syscall.Handle
 	bitmap syscall.Handle
@@ -36,17 +37,21 @@ type handleCreateTextureParams struct {
 
 var msgCreateTexture = AddAppMsg(handleCreateTexture)
 
-func newTexture(size image.Point) (oswin.Texture, error) {
+func newTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
 	p := handleCreateTextureParams{size: size}
 	SendAppMessage(msgCreateTexture, 0, uintptr(unsafe.Pointer(&p)))
 	if p.err != nil {
 		return nil, p.err
 	}
-	return &textureImpl{
+	w := win.(*windowImpl)
+	nt := &textureImpl{
+		w:      w,
 		size:   size,
 		dc:     p.dc,
 		bitmap: p.bitmap,
-	}, nil
+	}
+	w.AddTexture(nt)
+	return nt, nil
 }
 
 func handleCreateTexture(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) {
@@ -106,6 +111,8 @@ func (t *textureImpl) Release() {
 func (t *textureImpl) release() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
+
+	t.w.DeleteTexture(t)
 
 	if t.released {
 		return nil

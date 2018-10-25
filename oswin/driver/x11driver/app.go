@@ -468,12 +468,17 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 		Height: uint16(h),
 	}})
 
-	return &textureImpl{
+	ww := win.(*windowImpl)
+
+	nt := &textureImpl{
+		w:    ww,
 		app:  app,
 		size: size,
 		xm:   xm,
 		xp:   xp,
-	}, nil
+	}
+	ww.AddTexture(nt)
+	return nt, nil
 }
 
 // borderwidth doesn't seem to actually do anything in ubuntu or xfce

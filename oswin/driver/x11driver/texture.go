@@ -28,6 +28,7 @@ import (
 const textureDepth = 32
 
 type textureImpl struct {
+	w   *windowImpl
 	app *appImpl
 
 	size image.Point
@@ -53,6 +54,7 @@ func (t *textureImpl) Release() {
 	t.releasedMu.Lock()
 	released := t.released
 	t.released = true
+	t.w.DeleteTexture(t)
 	t.releasedMu.Unlock()
 
 	if released || t.degenerate() {

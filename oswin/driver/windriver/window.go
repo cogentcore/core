@@ -32,6 +32,10 @@ type windowImpl struct {
 
 	event.Deque
 
+	// textures are the textures created for this window -- they are released
+	// when the window is closed
+	textures map[*textureImpl]struct{}
+
 	closeReqFunc   func(win oswin.Window)
 	closeCleanFunc func(win oswin.Window)
 }
@@ -221,6 +225,21 @@ func (w *windowImpl) Raise() {
 
 func (w *windowImpl) Minimize() {
 	_ShowWindow(w.hwnd, _SW_MINIMIZE)
+}
+
+func (w *windowImpl) AddTexture(t *textureImpl) {
+	if w.textures == nil {
+		w.textures = make(map[*textureImpl]struct{})
+	}
+	w.textures[t] = struct{}{}
+}
+
+// DeleteTexture just deletes it from our list -- does not Release -- is called during t.Release
+func (w *windowImpl) DeleteTexture(t *textureImpl) {
+	if w.textures == nil {
+		return
+	}
+	delete(w.textures, t)
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
@@ -608,6 +627,12 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	// note: this is the final common path for all window closes
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
+	if w.textures != nil {
+		for t, _ := range w.textures {
+			t.Release() // deletes from map
+		}
+	}
+	w.textures = nil
 	theApp.DeleteWin(w.hwnd)
 
 	if theApp.quitting {

@@ -606,6 +606,13 @@ func (tb *TextBuf) AutoScrollViews() {
 	}
 }
 
+// RefreshViews does a refresh draw on all views
+func (tb *TextBuf) RefreshViews() {
+	for _, tv := range tb.Views {
+		tv.Refresh()
+	}
+}
+
 // BatchUpdateStart call this when starting a batch of updates to the buffer --
 // it blocks the window updates for views until all the updates are done,
 // and calls AutoSaveOff -- returns win updt and autosave restore state.

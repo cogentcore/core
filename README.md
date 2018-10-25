@@ -106,7 +106,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ ability to sort by date within directories
 
 * TextView:
-	+ isearch restore prev not 100% reliable and sometimes seems to get reset randomly..
+	+ isearch not saving to previous if no matches
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 

@@ -14,7 +14,6 @@ package x11driver
 // TODO: implement a back buffer.
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -405,6 +404,21 @@ func (w *windowImpl) Minimize() {
 	xproto.SendEvent(w.app.xc, true, w.xw, uint32(mask), string(minmsg.Bytes()))
 }
 
+func (w *windowImpl) AddTexture(t *textureImpl) {
+	if w.textures == nil {
+		w.textures = make(map[*textureImpl]struct{})
+	}
+	w.textures[t] = struct{}{}
+}
+
+// DeleteTexture just deletes it from our list -- does not Release -- is called during t.Release
+func (w *windowImpl) DeleteTexture(t *textureImpl) {
+	if w.textures == nil {
+		return
+	}
+	delete(w.textures, t)
+}
+
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
 	w.closeReqFunc = fun
 }
@@ -431,21 +445,6 @@ func (w *windowImpl) CloseClean() {
 	}
 }
 
-func (w *windowImpl) AddTexture(t *textureImpl) {
-	if w.textures == nil {
-		w.textures = make(map[*textureImpl]struct{})
-	}
-	w.textures[t] = struct{}{}
-}
-
-// DeleteTexture just deletes it from our list -- does not Release -- is called during t.Release
-func (w *windowImpl) DeleteTexture(t *textureImpl) {
-	if w.textures == nil {
-		return
-	}
-	delete(w.textures, t)
-}
-
 func (w *windowImpl) closeRelease() {
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
@@ -464,7 +463,7 @@ func (w *windowImpl) Close() {
 	w.released = true
 	w.mu.Unlock()
 
-	fmt.Printf("w Close(): %v  released: %v\n", w.Nm, released)
+	// fmt.Printf("w Close(): %v  released: %v\n", w.Nm, released)
 
 	if !released {
 		w.closeRelease()
@@ -479,7 +478,7 @@ func (w *windowImpl) closed() {
 	w.released = true
 	w.mu.Unlock()
 
-	fmt.Printf("w closed(): %v  released: %v\n", w.Nm, released)
+	// fmt.Printf("w closed(): %v  released: %v\n", w.Nm, released)
 
 	if !released {
 		w.closeRelease()

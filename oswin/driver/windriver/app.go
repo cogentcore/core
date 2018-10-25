@@ -78,7 +78,7 @@ func (*appImpl) NewImage(size image.Point) (oswin.Image, error) {
 }
 
 func (*appImpl) NewTexture(w oswin.Window, size image.Point) (oswin.Texture, error) {
-	return newTexture(size)
+	return newTexture(w, size)
 }
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
