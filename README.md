@@ -106,6 +106,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ ability to sort by date within directories
 
 * TextView:
+	+ weird auto-indent dissappearing text thing is likely due to markup refresh!!  put in a 
+		guard but may need a flag or something to indicate a batch of updates -- best logic
+		is to follow the window update flag for batched changes.. want to only re-markup after
+		last.  probably just want to add a batch flag like we have in textbuf (could just be that)
 	+ isearch not saving to previous if no matches
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.

@@ -201,6 +201,7 @@ func (tv *TextView) EditDone() {
 func (tv *TextView) Refresh() {
 	tv.LayoutAllLines(false)
 	tv.RenderAllLines()
+	tv.ClearNeedsRefresh()
 }
 
 // NeedsRefresh checks if a refresh is required -- atomically safe for other
@@ -225,7 +226,6 @@ func (tv *TextView) ClearNeedsRefresh() {
 func (tv *TextView) RefreshIfNeeded() bool {
 	if tv.NeedsRefresh() {
 		tv.Refresh()
-		tv.ClearNeedsRefresh()
 		return true
 	}
 	return false
