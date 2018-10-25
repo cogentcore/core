@@ -96,8 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* test new menu shortcut stuff and use in gide etc.
-
 * kill to end of line should delete NEXT lf if line is empty
 
 * completion: timing and other issue..

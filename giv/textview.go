@@ -1177,7 +1177,21 @@ func (tv *TextView) CursorKill() {
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
-	if tv.CursorPos.Ch == 0 && len(tv.Buf.Lines[tv.CursorPos.Ln]) == 0 {
+	pos := tv.CursorPos
+
+	atEnd := false
+	if wln := tv.WrappedLines(pos.Ln); wln > 1 {
+		si, ri, _ := tv.WrappedLineNo(pos)
+		llen := len(tv.Renders[pos.Ln].Spans[si].Text)
+		if si == wln-1 {
+			llen--
+		}
+		atEnd = (ri == llen)
+	} else {
+		llen := len(tv.Buf.Lines[pos.Ln])
+		atEnd = (tv.CursorPos.Ch == llen)
+	}
+	if atEnd {
 		tv.CursorForward(1)
 	} else {
 		tv.CursorEndLine()

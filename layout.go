@@ -1459,8 +1459,8 @@ func (ly *Layout) ScrollDimToEnd(dim Dims2D, pos int) bool {
 		vpMin = ly.VpBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
-	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
-	vissz := sc.ThumbVal            // amount visible
+	scrange := sc.Max - sc.ThumbVal                // amount that can be scrolled
+	vissz := (sc.ThumbVal - ly.ExtraSize.Dim(dim)) // amount visible
 	vpMax := vpMin + int(vissz)
 	if pos == vpMax { // already at max
 		return false
