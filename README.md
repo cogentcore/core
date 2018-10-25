@@ -96,11 +96,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* kill to end of line should delete NEXT lf if line is empty
-
 * completion: timing and other issue..
-
-* major issues with keymaps -- key fun move up has no key mapping over and over again when trying chrome std on mac..
 
 * fileview deal with symlinks.
 * fileview should add extension to filename if only one extension provided, if
