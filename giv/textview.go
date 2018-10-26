@@ -204,6 +204,16 @@ func (tv *TextView) Refresh() {
 	tv.ClearNeedsRefresh()
 }
 
+// Remarkup triggers a complete re-markup of the entire text --
+// can do this when needed if the markup gets off due to multi-line
+// formatting issues -- via Recenter key
+func (tv *TextView) ReMarkup() {
+	if tv.Buf == nil {
+		return
+	}
+	tv.Buf.ReMarkup()
+}
+
 // NeedsRefresh checks if a refresh is required -- atomically safe for other
 // routines to set the NeedsRefresh flag
 func (tv *TextView) NeedsRefresh() bool {
@@ -477,6 +487,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
+	tv.Buf.MarkupMu.Lock()
 	for ln := 0; ln < nln; ln++ {
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
@@ -485,6 +496,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
+	tv.Buf.MarkupMu.Unlock()
 
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
 	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
@@ -564,6 +576,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 	mxwd := float32(tv.LinesSize.X)
 	rerend := false
 
+	tv.Buf.MarkupMu.Lock()
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
@@ -574,6 +587,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		}
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
+	tv.Buf.MarkupMu.Unlock()
 
 	// update all offsets to end of text
 	if rerend || isDel || st != ed {
@@ -3132,6 +3146,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
 		si = ints.MinInt(si, nspan-1)
+		si = ints.MaxInt(si, 0)
 		for i := 0; i < si; i++ {
 			spoff += len(tv.Renders[cln].Spans[i].Text)
 		}
@@ -3356,6 +3371,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunRecenter:
 		kt.SetProcessed()
 		tv.CloseCompleter()
+		tv.ReMarkup()
 		tv.CursorRecenter()
 	case gi.KeyFunSelectMode:
 		cancelAll()
@@ -3474,17 +3490,18 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ISearchCancel()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
-			updt := tv.Viewport.Win.UpdateStart()
-			tv.InsertAtCursor([]byte("\n"))
 			if tv.Buf.Opts.AutoIndent {
+				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
+				tv.InsertAtCursor([]byte("\n"))
 				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				if tbe != nil {
+					tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln+1)
 					tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
-					tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				}
+				tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+			} else {
+				tv.InsertAtCursor([]byte("\n"))
 			}
-			// fmt.Printf("auto indent updt end: %v\n", updt)
-			tv.Viewport.Win.UpdateEnd(updt)
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
@@ -3496,6 +3513,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				tv.CursorPos.Ch = cpos
+				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.RenderCursor(true)
 				gotTabAI = true
 			} else {
@@ -3517,13 +3535,17 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				} else if tv.QReplace.On { // todo: need this in inactive mode
 					tv.QReplaceKeyInput(kt)
 				} else {
-					tv.InsertAtCursor([]byte(string(kt.Rune)))
 					if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
+						bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
+						tv.InsertAtCursor([]byte(string(kt.Rune)))
 						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
-							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 							tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 						}
+						tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+					} else {
+						tv.InsertAtCursor([]byte(string(kt.Rune)))
 					}
 				}
 				tv.OfferComplete(dontforce)

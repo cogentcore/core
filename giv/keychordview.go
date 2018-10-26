@@ -84,6 +84,7 @@ var KeyChordEditProps = ki.Props{
 	"border-color":     &gi.Prefs.Colors.Border,
 	"border-style":     gi.BorderSolid,
 	"height":           units.NewValue(1, units.Em),
+	"width":            units.NewValue(20, units.Ch),
 	"max-width":        -1,
 	gi.LabelSelectors[gi.LabelActive]: ki.Props{
 		"background-color": "lighter-0",

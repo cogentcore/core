@@ -118,28 +118,12 @@ const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
 	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
 
-	// TextBufAutoFullMarkup whether to do a full re-markup in separate routine when new text is inserted
-	// good for edited program files with complex multi-line markup but not for e.g., text output
-	// or self-markup files..
-	TextBufAutoFullMarkup
-
 	// TextBufMarkingUp atomic flag to indicate current markup operation in progress -- don't redo
 	TextBufMarkingUp
 
 	// TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok
 	TextBufFileModOk
 )
-
-// SetAutoFullMarkup sets this buffer to do a full markup in separate routine whenever text is added
-// good for edited program files with complex multi-line markup but not for e.g., text output
-func (tb *TextBuf) SetAutoFullMarkup() {
-	bitflag.Set(&tb.Flag, int(TextBufAutoFullMarkup))
-}
-
-// HasAutoFullMarkup indicates AutoFullMarkup in effect
-func (tb *TextBuf) HasAutoFullMarkup() bool {
-	return bitflag.Has(tb.Flag, int(TextBufAutoFullMarkup))
-}
 
 // SetText sets the text to given bytes
 func (tb *TextBuf) SetText(txt []byte) {
@@ -265,7 +249,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
 
 	// do slow full update in background
-	go tb.MarkupAllLines() // then do all in background
+	tb.ReMarkup()
 	return nil
 }
 
@@ -317,7 +301,7 @@ func (tb *TextBuf) Revert() bool {
 	}
 	tb.Changed = false
 	tb.AutoSaveDelete()
-	go tb.MarkupAllLines() // always do global reformat in bg
+	tb.ReMarkup()
 	return true
 }
 
@@ -634,9 +618,11 @@ func (tb *TextBuf) RefreshViews() {
 
 // BatchUpdateStart call this when starting a batch of updates to the buffer --
 // it blocks the window updates for views until all the updates are done,
-// and calls AutoSaveOff -- returns win updt and autosave restore state.
-// must call BatchUpdateEnd at end with the result of this call.
-func (tb *TextBuf) BatchUpdateStart() (winUpdt, autoSave bool) {
+// and calls AutoSaveOff.  Calls UpdateStart on Buf too.
+// Returns buf updt, win updt and autosave restore state.
+// Must call BatchUpdateEnd at end with the result of this call.
+func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
+	bufUpdt = tb.UpdateStart()
 	autoSave = tb.AutoSaveOff()
 	winUpdt = false
 	vp := tb.ViewportFromView()
@@ -648,16 +634,15 @@ func (tb *TextBuf) BatchUpdateStart() (winUpdt, autoSave bool) {
 }
 
 // BatchUpdateEnd call to complete BatchUpdateStart
-func (tb *TextBuf) BatchUpdateEnd(winUpdt, autoSave bool) {
+func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 	tb.AutoSaveRestore(autoSave)
-	if !winUpdt {
-		return
+	if winUpdt {
+		vp := tb.ViewportFromView()
+		if vp != nil && vp.Win != nil {
+			vp.Win.UpdateEnd(winUpdt)
+		}
 	}
-	vp := tb.ViewportFromView()
-	if vp == nil || vp.Win == nil {
-		return
-	}
-	vp.Win.UpdateEnd(winUpdt)
+	tb.UpdateEnd(bufUpdt) // nobody listening probably, but flag avail for testing
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1149,10 +1134,6 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
-
-	if tb.HasAutoFullMarkup() {
-		go tb.MarkupAllLines() // always do global reformat in bg
-	}
 }
 
 // LinesDeleted deletes lines in Markup corresponding to lines
@@ -1195,6 +1176,17 @@ func (tb *TextBuf) IsMarkingUp() bool {
 	return bitflag.HasAtomic(&tb.Flag, int(TextBufMarkingUp))
 }
 
+// ReMarkup runs re-markup on text in background
+func (tb *TextBuf) ReMarkup() {
+	if !tb.Hi.HasHi() || tb.NLines == 0 || tb.Hi.lexer == nil {
+		return
+	}
+	if tb.IsMarkingUp() {
+		return
+	}
+	go tb.MarkupAllLines()
+}
+
 // MarkupAllLines does syntax highlighting markup for all lines in buffer,
 // calling MarkupMu mutex when setting the marked-up lines with the result --
 // designed to be called in a separate goroutine
@@ -1207,7 +1199,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	}
 	bitflag.SetAtomic(&tb.Flag, int(TextBufMarkingUp))
 
-	tb.LinesToBytes() // todo: could need another mutex here?
+	tb.LinesToBytes()
 	mtlns, err := tb.Hi.MarkupText(tb.Txt)
 	if err != nil {
 		bitflag.ClearAtomic(&tb.Flag, int(TextBufMarkingUp))
@@ -1459,8 +1451,8 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 
 // AutoIndentRegion does auto-indent over given region -- end is *exclusive*
 func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, unindents []string) {
-	winUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(winUpdt, autoSave)
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
@@ -1472,8 +1464,8 @@ func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, un
 
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*
 func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
-	winUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(winUpdt, autoSave)
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
 	ch := 0
 	li, spc := tb.LineIndent(st, tabSz)
@@ -1502,13 +1494,13 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
 		if ln >= tb.NLines {
 			break
 		}
-		if docomment{
+		if docomment {
 			tb.InsertText(TextPos{Ln: ln, Ch: ch}, comment, true, true)
 		} else {
 			s := string(tb.LineBytes[ln])
 			idx := strings.Index(s, string(comment))
 			if idx > -1 {
-				tb.DeleteText(TextPos{Ln:ln, Ch:idx}, TextPos{Ln: ln, Ch: idx+3}, true, true)
+				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + 3}, true, true)
 			}
 		}
 	}
@@ -1588,8 +1580,8 @@ func PrintDiffs(diffs TextDiffs) {
 // determines whether each patch is signaled -- if an overall signal will be
 // sent at the end, then that would not be necessary (typical)
 func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool {
-	winUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(winUpdt, autoSave)
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
 	sz := len(diffs)
 	mods := false

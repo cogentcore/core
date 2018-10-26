@@ -96,6 +96,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* resize commit dialog = hang (on windows, linux) -- mac?
+
 * completion: timing and other issue..
 
 * fileview deal with symlinks.
@@ -106,15 +108,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ ability to sort by date within directories
 
 * TextView:
-	+ weird auto-indent dissappearing text thing is likely due to markup refresh!!  put in a 
-		guard but may need a flag or something to indicate a batch of updates -- best logic
-		is to follow the window update flag for batched changes.. want to only re-markup after
-		last.  probably just want to add a batch flag like we have in textbuf (could just be that)
 	+ isearch not saving to previous if no matches
 	+ cursor goes to hand for links in TextView
 	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
-
-* tableview (e.g., langs chooser) not rendering icons on first show.  does later, just not at start..  not a big thing but would be good to fix.
 
 * see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
 
