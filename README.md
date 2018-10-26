@@ -96,7 +96,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* completion: timing and other issue..
+* mac hidpi setpos is not right from prefs -- works from init win create.
+
+* completion: ?
 
 * fileview should add extension to filename if only one extension provided, if
   user types in a new filename.. 

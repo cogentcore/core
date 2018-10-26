@@ -8,11 +8,12 @@
 package complete
 
 import (
-	"github.com/akutz/sortfold"
 	"go/token"
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/akutz/sortfold"
 )
 
 type Completion struct {
@@ -55,7 +56,7 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 		}
 
 		var case_insensitive = true
-		if strings.ContainsAny(seed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+		if HasUpperCase(seed) {
 			case_insensitive = false
 		}
 		text := s
@@ -105,7 +106,7 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 	}
 
 	var case_insensitive = true
-	if strings.ContainsAny(seed, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+	if HasUpperCase(seed) {
 		case_insensitive = false
 	}
 	for i, c := range completions {
@@ -242,4 +243,14 @@ func EditWord(text string, cp int, completion string, seed string) (newText stri
 	t := s1 + s2
 	delta = len(completion) - len(seed)
 	return t, delta
+}
+
+// HasUpperCase returns true if string has an upper-case letter
+func HasUpperCase(str string) bool {
+	for _, r := range str {
+		if unicode.IsUpper(r) {
+			return true
+		}
+	}
+	return false
 }

@@ -71,7 +71,6 @@ type TextView struct {
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
 	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
-	CompleteTimer *time.Timer               `json:"-" xml:"-" desc:"timer for delay before completion popup menu appears"`
 	lastRecenter  int
 	lastFilename  gi.FileName
 }
@@ -2187,66 +2186,6 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //    Complete
-
-// OfferComplete pops up a menu of possible completions
-//func (tv *TextView) OfferComplete(forcecomplete bool) {
-//	//fmt.Println("offer complete")
-//	if tv.CompleteTimer != nil {
-//		tv.CompleteTimer.Stop()
-//	}
-//
-//	if tv.Complete == nil || tv.ISearch.On {
-//		return
-//	}
-//	if !tv.Buf.Opts.Completion && !forcecomplete {
-//		return
-//	}
-//	win := tv.ParentWindow()
-//	if gi.PopupIsCompleter(win.Popup) {
-//		win.ClosePopup(win.Popup)
-//	}
-//
-//	st := TextPos{tv.CursorPos.Ln, 0}
-//	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
-//	tbe := tv.Buf.Region(st, en)
-//	var s string
-//	if tbe != nil {
-//		s = string(tbe.ToBytes())
-//		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
-//	}
-//	if len(s) == 0 && !forcecomplete {
-//		return
-//	}
-//
-//	tv.CompleteTimer = time.AfterFunc(200*time.Millisecond, tv.DoOfferComplete)
-//}
-
-// DoOfferComplete pops up a menu of possible completions
-// *** Should only be called by OfferComplete which has a timer to keep this function
-// from being called during rapid typing
-//func (tv *TextView) DoOfferComplete() {
-//	//fmt.Println("DO offer complete")
-//
-//	st := TextPos{tv.CursorPos.Ln, 0}
-//	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
-//	tbe := tv.Buf.Region(st, en)
-//	var s string
-//	if tbe != nil {
-//		s = string(tbe.ToBytes())
-//		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
-//	}
-//
-//	tpos := token.Position{} // text position
-//	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
-//	tpos.Line = tv.CursorPos.Ln
-//	tpos.Column = tv.CursorPos.Ch
-//	tpos.Offset = count
-//	tpos.Filename = ""
-//	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
-//	cpos.X += 5
-//	cpos.Y += 10
-//	tv.Complete.ShowCompletions(s, tpos, tv.Viewport, cpos)
-//}
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete(forcecomplete bool) {

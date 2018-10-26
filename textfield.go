@@ -599,11 +599,6 @@ func (tf *TextField) OfferComplete() {
 	if tf.Complete == nil {
 		return
 	}
-	win := tf.ParentWindow()
-	if PopupIsCompleter(win.Popup) {
-		win.ClosePopup(win.Popup)
-	}
-
 	s := string(tf.EditTxt[0:tf.CursorPos])
 	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 	cpos.X += 5

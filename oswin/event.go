@@ -108,6 +108,9 @@ const (
 	// DNDFocusEvent is for Enter / Exit events of the DND into / out of a given widget
 	DNDFocusEvent
 
+	// CustomEventType is a user-defined event with a data interface{} field
+	CustomEventType
+
 	// number of event types
 	EventTypeN
 )
@@ -148,6 +151,9 @@ type Event interface {
 	// SetTime sets the event time to Now
 	SetTime()
 }
+
+//////////////////////////////////////////////////////////////////////
+// EventBase
 
 // EventBase is the base type for events -- records time and whether event has
 // been processed by a receiver of the event -- in which case it is skipped
@@ -191,6 +197,52 @@ func (ev EventBase) String() string {
 	return fmt.Sprintf("Event at Time: %v", ev.Time())
 }
 
+//////////////////////////////////////////////////////////////////////
+// CustomEvent
+
+// CustomEvent is a user-specified event that can be sent and received
+// as needed, and contains a Data field for arbitrary data, and
+// optional position and focus parameters
+type CustomEvent struct {
+	EventBase
+	Data     interface{}
+	PosAvail bool        `desc:"set to true if position is available"`
+	Where    image.Point `desc:"position info if relevant -- set PosAvail"`
+	Focus    bool        `desc:"set to true if this event should be sent to widget in focus"`
+}
+
+func (ce CustomEvent) Type() EventType {
+	return CustomEventType
+}
+
+func (ce CustomEvent) String() string {
+	return fmt.Sprintf("Type: %v Data: %v  Time: %v", ce.Type(), ce.Data, ce.Time())
+}
+
+func (ce CustomEvent) HasPos() bool {
+	return ce.PosAvail
+}
+
+func (ce CustomEvent) Pos() image.Point {
+	return ce.Where
+}
+
+func (ce CustomEvent) OnFocus() bool {
+	return ce.Focus
+}
+
+// SendCustomEvent sends a new custom event to given window, with
+// given data -- constructs the event and sends it. For other params
+// you can follow these steps yourself..
+func SendCustomEvent(win Window, data interface{}) {
+	ce := &CustomEvent{Data: data}
+	ce.Init()
+	win.Send(ce)
+}
+
+//////////////////////////////////////////////////////////////////////
+// EventDeque
+
 // EventDeque is an infinitely buffered double-ended queue of events.
 type EventDeque interface {
 	// Send adds an event to the end of the deque. They are returned by
@@ -204,9 +256,4 @@ type EventDeque interface {
 	// NextEvent returns the next event in the deque. It blocks until such an
 	// event has been sent.
 	NextEvent() Event
-
-	// TODO: LatestLifecycleEvent? Is that still worth it if the
-	// lifecycle.Event struct type loses its DrawContext field?
-
-	// TODO: LatestSizeEvent?
 }

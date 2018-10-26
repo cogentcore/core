@@ -5,12 +5,15 @@
 package gi
 
 import (
+	"go/token"
+	"image"
+	"time"
+
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
-	"go/token"
-	"image"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +30,7 @@ type Complete struct {
 	Seed        string    `desc:"current completion seed"`
 	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
 	Completion  string    `desc:"the user's completion selection'"`
+	DelayTimer  *time.Timer
 }
 
 var KiT_Complete = kit.Types.AddType(&Complete{}, nil)
@@ -45,11 +49,38 @@ const (
 
 //go:generate stringer -type=CompleteSignals
 
-// ShowCompletions calls MatchFunc to get a list of completions and builds the
-// completion popup menu
+// CompleteWaitMSec is the number of milliseconds to wait before
+// showing the completion menu
+var CompleteWaitMSec = 500
+
+// ShowCompletions is the main call for listing completions.
+// Has a builtin delay timer so completions are only shown after
+// a delay, which resets every time it is called.
+// After delay, Calls ShowCompletionsNow, which calls MatchFunc
+// to get a list of completions and builds the completion popup menu
 func (c *Complete) ShowCompletions(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
 	if c.MatchFunc == nil {
 		return
+	}
+	if c.DelayTimer != nil {
+		c.DelayTimer.Stop()
+	}
+	c.DelayTimer = time.AfterFunc(time.Duration(CompleteWaitMSec)*time.Millisecond,
+		func() {
+			c.ShowCompletionsNow(text, pos, vp, pt)
+			c.DelayTimer = nil
+		})
+}
+
+// ShowCompletionsNow actually calls MatchFunc to get a list of completions and builds the
+// completion popup menu
+func (c *Complete) ShowCompletionsNow(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
+		return
+	}
+
+	if PopupIsCompleter(vp.Win.Popup) {
+		vp.Win.ClosePopup(vp.Win.Popup)
 	}
 
 	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
@@ -68,9 +99,10 @@ func (c *Complete) ShowCompletions(text string, pos token.Position, vp *Viewport
 					tff.Complete(data.(string))
 				})
 		}
-		vp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-		bitflag.Set(&vp.Flag, int(VpFlagCompleter))
-		vp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+		bitflag.Set(&pvp.Flag, int(VpFlagCompleter))
+		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+		oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 	}
 }
 
