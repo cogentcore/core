@@ -34,7 +34,7 @@ var CursorBlinkMSec = 500
 
 // TextField is a widget for editing a line of text
 type TextField struct {
-	WidgetBase
+	PartsWidgetBase
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	CursorWidth  units.Value             `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
@@ -71,6 +71,17 @@ var TextFieldProps = ki.Props{
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
+	"indicator":        "clear",
+	"#clear-stretch": ki.Props{
+		"width": units.NewValue(1, units.Ch),
+	},
+	"#clear": ki.Props{
+		"width":          units.NewValue(.5, units.Ex),
+		"height":         units.NewValue(.5, units.Ex),
+		"margin":         units.NewValue(0, units.Px),
+		"padding":        units.NewValue(0, units.Px),
+		"vertical-align": AlignBottom,
+	},
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
@@ -1173,6 +1184,7 @@ func (tf *TextField) Init2D() {
 	tf.Init2DWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
+	tf.ConfigParts()
 }
 
 func (tf *TextField) StyleTextField() {
@@ -1315,4 +1327,26 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}
+}
+
+func (tf *TextField) ConfigParts() {
+	tf.Parts.Lay = LayoutHoriz
+	config := kit.TypeAndNameList{}
+	config.Add(KiT_Action, "clear")
+	_, updt := tf.Parts.ConfigChildren(config, false) // not unique names
+	//if updt {
+	cls := tf.Parts.KnownChild(0).(*Action)
+	tf.StylePart(Node2D(cls))
+	icnm := string("close.svg")
+	cls.SetIcon(icnm)
+	cls.Indicator = "close.svg"
+	cls.SetProp("no-focus", true)
+	cls.ActionSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tff := recv.Embed(KiT_TextField).(*TextField)
+		if tff != nil {
+			fmt.Println("clear me")
+		}
+	})
+	tf.UpdateEnd(updt)
+	//}
 }
