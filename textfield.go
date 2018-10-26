@@ -746,10 +746,10 @@ func (tf *TextField) StopCursor() {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tf *TextField) RenderCursor(on bool) {
-	win := tf.Viewport.Win
-	if win == nil {
+	if tf.Viewport == nil || tf.Viewport.Win == nil {
 		return
 	}
+	win := tf.Viewport.Win
 	if tf.InBounds() {
 		sp := tf.CursorSprite()
 		if on {
