@@ -947,6 +947,9 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 // WinBBox of text field, and sets current cursor to it, updating selection as
 // well
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
+	if tf.Viewport == nil || tf.Viewport.Win == nil {
+		return
+	}
 	wupdt := tf.Viewport.Win.UpdateStart()
 	defer tf.Viewport.Win.UpdateEnd(wupdt)
 	updt := tf.UpdateStart()
@@ -1056,6 +1059,9 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 
 // HandleMouseEvent handles the mouse.Event
 func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
+	if tf.Viewport == nil || tf.Viewport.Win == nil {
+		return
+	}
 	if !tf.IsInactive() && !tf.HasFocus() {
 		tf.GrabFocus()
 	}

@@ -3762,7 +3762,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	if tv.LinesSize == image.ZP || gi.RebuildDefaultStyles {
+	if tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
 	}

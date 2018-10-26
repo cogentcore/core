@@ -88,7 +88,8 @@ func (sv *SplitView) EvenSplits() {
 }
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a
-// child entirely -- does an Update
+// child entirely -- just does the basic local update start / end
+// use SetSplitsAction to trigger full rebuild which is typically required
 func (sv *SplitView) SetSplits(splits ...float32) {
 	updt := sv.UpdateStart()
 	sv.UpdateSplits()
@@ -98,8 +99,14 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 		sv.Splits[i] = splits[i]
 	}
 	sv.UpdateSplits()
-	sv.SetFullReRender()
 	sv.UpdateEnd(updt)
+}
+
+// SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
+// child entirely -- does full rebuild at level of viewport
+func (sv *SplitView) SetSplitsAction(splits ...float32) {
+	sv.SetSplits(splits...)
+	sv.Viewport.FullRender2DTree()
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -153,16 +160,11 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 	sv.UpdateEnd(updt)
 }
 
-// SetSplitsAction sets the new splitter value, for given splitter -- new
+// SetSplitAction sets the new splitter value, for given splitter -- new
 // value is 0..1 value of position of that splitter -- it is a sum of all the
 // positions up to that point.  Splitters are updated to ensure that selected
 // position is achieved, while dividing remainder appropriately.
-func (sv *SplitView) SetSplitsAction(idx int, nwval float32) {
-	winUpdt := sv.Viewport.Win.UpdateStart()
-	defer sv.Viewport.Win.UpdateEnd(winUpdt)
-
-	updt := sv.UpdateStart()
-	sv.SetFullReRender()
+func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	sz := len(sv.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
@@ -197,7 +199,7 @@ func (sv *SplitView) SetSplitsAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sv.Splits)
 	sv.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sv.Splits)
-	sv.UpdateEnd(updt)
+	sv.Viewport.FullRender2DTree() // splits typically require full rebuild
 }
 
 func (sv *SplitView) Init2D() {
@@ -243,7 +245,7 @@ func (sv *SplitView) ConfigSplitters() {
 				if sig == int64(SliderReleased) {
 					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
-					spr.SetSplitsAction(spl.SplitterNo, spl.Value)
+					spr.SetSplitAction(spl.SplitterNo, spl.Value)
 				}
 			})
 		}
