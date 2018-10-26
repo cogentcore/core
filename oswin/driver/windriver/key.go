@@ -363,8 +363,6 @@ func DecodeKeyEvent(r rune, hwnd syscall.Handle, uMsg uint32, wParam, lParam uin
 	return
 }
 
-
-
 // Precondition: this is called in immediate response to the message that triggered the event (so not after w.Send).
 func keyModifiers() int32 {
 	var m key.Modifiers
@@ -411,13 +409,12 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 	r, c, mod := DecodeKeyEvent(rr, hwnd, uMsg, wParam, lParam)
 	var act key.Actions
 	switch uMsg {
+	case _WM_SYSKEYDOWN:
+		fallthrough
 	case _WM_KEYDOWN:
-		const prevMask = 1 << 30
-		if repeat := lParam&prevMask == prevMask; repeat {
-			act = key.Press
-		} else {
-			act = key.Press
-		}
+		act = key.Press
+	case _WM_SYSKEYUP:
+		fallthrough
 	case _WM_KEYUP:
 		act = key.Release
 	default:
