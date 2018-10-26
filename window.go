@@ -1191,6 +1191,7 @@ mainloop:
 		}
 
 		if skippedResize != nil || w.Viewport.Geom.Size != w.OSWin.Size() {
+			w.Resizing = true
 			w.Resized(w.OSWin.Size())
 			skippedResize = nil
 		}
