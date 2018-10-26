@@ -1451,11 +1451,33 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
 			ch = li
 		}
 	}
+
+	var docomment = false
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break
 		}
-		tb.InsertText(TextPos{Ln: ln, Ch: ch}, comment, true, true)
+		s := string(tb.LineBytes[ln])
+		s = strings.TrimSpace(s)
+		// if any line is uncommented - comment all
+		if !strings.HasPrefix(s, string(comment)) {
+			docomment = true
+		}
+	}
+
+	for ln := st; ln < ed; ln++ {
+		if ln >= tb.NLines {
+			break
+		}
+		if docomment{
+			tb.InsertText(TextPos{Ln: ln, Ch: ch}, comment, true, true)
+		} else {
+			s := string(tb.LineBytes[ln])
+			idx := strings.Index(s, string(comment))
+			if idx > -1 {
+				tb.DeleteText(TextPos{Ln:ln, Ch:idx}, TextPos{Ln: ln, Ch: idx+3}, true, true)
+			}
+		}
 	}
 }
 
