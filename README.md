@@ -96,8 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* resize commit dialog = hang (on windows, linux) -- mac?
-
 * completion: timing and other issue..
 
 * fileview deal with symlinks.
