@@ -336,8 +336,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txly.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 			txed := txly.AddNewChild(giv.KiT_TextView, fmt.Sprintf("textview-%v", i)).(*giv.TextView)
-			txed.Opts.LineNos = true // todo prefs
-			txed.Opts.AutoIndent = true
+			txed.Viewport = fb.Viewport
 		}
 
 		ft.TreeViewSig.Connect(fb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
