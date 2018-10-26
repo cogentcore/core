@@ -261,6 +261,10 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 	return nil
 }
 
+func (app *appImpl) ContextWindow() oswin.Window {
+	return app.ctxtwin
+}
+
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.Windows
 }

@@ -118,9 +118,28 @@ const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
 	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
 
+	// TextBufAutoFullMarkup whether to do a full re-markup in separate routine when new text is inserted
+	// good for edited program files with complex multi-line markup but not for e.g., text output
+	// or self-markup files..
+	TextBufAutoFullMarkup
+
+	// TextBufMarkingUp atomic flag to indicate current markup operation in progress -- don't redo
+	TextBufMarkingUp
+
 	// TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok
 	TextBufFileModOk
 )
+
+// SetAutoFullMarkup sets this buffer to do a full markup in separate routine whenever text is added
+// good for edited program files with complex multi-line markup but not for e.g., text output
+func (tb *TextBuf) SetAutoFullMarkup() {
+	bitflag.Set(&tb.Flag, int(TextBufAutoFullMarkup))
+}
+
+// HasAutoFullMarkup indicates AutoFullMarkup in effect
+func (tb *TextBuf) HasAutoFullMarkup() bool {
+	return bitflag.Has(tb.Flag, int(TextBufAutoFullMarkup))
+}
 
 // SetText sets the text to given bytes
 func (tb *TextBuf) SetText(txt []byte) {
@@ -1131,7 +1150,9 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
 
-	go tb.MarkupAllLines() // always do global reformat in bg
+	if tb.HasAutoFullMarkup() {
+		go tb.MarkupAllLines() // always do global reformat in bg
+	}
 }
 
 // LinesDeleted deletes lines in Markup corresponding to lines
@@ -1169,6 +1190,11 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	// probably don't need to do global markup here..
 }
 
+// IsMarkingUp is true if the MarkupAllLines process is currently running
+func (tb *TextBuf) IsMarkingUp() bool {
+	return bitflag.HasAtomic(&tb.Flag, int(TextBufMarkingUp))
+}
+
 // MarkupAllLines does syntax highlighting markup for all lines in buffer,
 // calling MarkupMu mutex when setting the marked-up lines with the result --
 // designed to be called in a separate goroutine
@@ -1176,9 +1202,15 @@ func (tb *TextBuf) MarkupAllLines() {
 	if !tb.Hi.HasHi() || tb.NLines == 0 || tb.Hi.lexer == nil {
 		return
 	}
+	if tb.IsMarkingUp() {
+		return
+	}
+	bitflag.SetAtomic(&tb.Flag, int(TextBufMarkingUp))
+
 	tb.LinesToBytes() // todo: could need another mutex here?
 	mtlns, err := tb.Hi.MarkupText(tb.Txt)
 	if err != nil {
+		bitflag.ClearAtomic(&tb.Flag, int(TextBufMarkingUp))
 		return
 	}
 
@@ -1189,6 +1221,7 @@ func (tb *TextBuf) MarkupAllLines() {
 		tb.Markup[ln] = tb.Hi.FixMarkupLine(mt)
 	}
 	tb.MarkupMu.Unlock()
+	bitflag.ClearAtomic(&tb.Flag, int(TextBufMarkingUp))
 	tb.TextBufSig.Emit(tb.This, int64(TextBufMarkUpdt), tb.Txt)
 }
 

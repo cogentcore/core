@@ -313,9 +313,10 @@ func convVirtualKeyCode(vKey uint32) key.Codes {
 	return key.CodeUnknown
 }
 
-func DecodeKeyEvent(r rune, hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (c key.Codes, mod int32) {
+func DecodeKeyEvent(r rune, hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (ro rune, c key.Codes, mod int32) {
 	c = convVirtualKeyCode(uint32(wParam))
 	mod = int32(keyModifiers())
+	ro = r
 
 	// these keys are fooled by presence of some modifiers -- restore
 	if r == -1 {
@@ -323,44 +324,46 @@ func DecodeKeyEvent(r rune, hwnd syscall.Handle, uMsg uint32, wParam, lParam uin
 		switch c {
 		case key.CodeEqualSign:
 			if shft {
-				r = '+'
+				ro = '+'
 			} else {
-				r = '='
+				ro = '='
 			}
 		case key.CodeHyphenMinus:
 			if shft {
-				r = '_'
+				ro = '_'
 			} else {
-				r = '-'
+				ro = '-'
 			}
 		case key.CodeLeftSquareBracket:
 			if shft {
-				r = '{'
+				ro = '{'
 			} else {
-				r = '['
+				ro = '['
 			}
 		case key.CodeRightSquareBracket:
 			if shft {
-				r = '}'
+				ro = '}'
 			} else {
-				r = ']'
+				ro = ']'
 			}
 		case key.CodeBackslash:
 			if shft {
-				r = '|'
+				ro = '|'
 			} else {
-				r = '\\'
+				ro = '\\'
 			}
 		case key.CodeGraveAccent:
 			if shft {
-				r = '~'
+				ro = '~'
 			} else {
-				r = '`'
+				ro = '`'
 			}
 		}
 	}
 	return
 }
+
+
 
 // Precondition: this is called in immediate response to the message that triggered the event (so not after w.Send).
 func keyModifiers() int32 {
@@ -403,14 +406,15 @@ func readRune(vKey uint32, scanCode uint8) rune {
 }
 
 func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	r := readRune(uint32(wParam), uint8(lParam>>16))
-	c, mod := DecodeKeyEvent(r, hwnd, uMsg, wParam, lParam)
+	rpt := int(lParam & 0xFFFF)
+	rr := readRune(uint32(wParam), uint8(lParam>>16))
+	r, c, mod := DecodeKeyEvent(rr, hwnd, uMsg, wParam, lParam)
 	var act key.Actions
 	switch uMsg {
 	case _WM_KEYDOWN:
 		const prevMask = 1 << 30
 		if repeat := lParam&prevMask == prevMask; repeat {
-			act = key.None
+			act = key.Press
 		} else {
 			act = key.Press
 		}
@@ -427,14 +431,16 @@ func sendKeyEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lRe
 		Action:    act,
 	}
 
-	sendEvent(hwnd, event)
+	for i := 0; i < rpt; i++ {
+		sendEvent(hwnd, event)
 
-	// do ChordEvent -- only for non-modifier key presses -- call
-	// key.ChordString to convert the event into a parsable string for GUI
-	// events
-	if act == key.Press && !key.CodeIsModifier(c) {
-		che := &key.ChordEvent{Event: *event}
-		sendEvent(hwnd, che)
+		// do ChordEvent -- only for non-modifier key presses -- call
+		// key.ChordString to convert the event into a parsable string for GUI
+		// events
+		if act == key.Press && !key.CodeIsModifier(c) {
+			che := &key.ChordEvent{Event: *event}
+			sendEvent(hwnd, che)
+		}
 	}
 	return 0
 }
