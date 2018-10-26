@@ -3266,6 +3266,9 @@ func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
 
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tv *TextView) KeyInput(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("TextView KeyInput: %v\n", tv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	win := tv.ParentWindow()
 
@@ -3635,6 +3638,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			if _, got := tv.OpenLinkAt(newPos); got {
 			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
+				tv.SavePosHistory(tv.CursorPos)
 			}
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
@@ -3659,6 +3663,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 		if !tv.IsInactive() && me.Action == mouse.Press {
 			me.SetProcessed()
 			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
+			tv.SavePosHistory(tv.CursorPos)
 			tv.Paste()
 		}
 	case mouse.Right:

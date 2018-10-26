@@ -379,6 +379,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
+	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v to go up to parent folder; %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v / %v for prev / next history item", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
@@ -451,6 +452,8 @@ func (fv *FileView) UpdateFilesAction() {
 	fv.FileSig.Emit(fv.This, int64(FileViewWillUpdate), fv.DirPath)
 	fv.SetFullReRender()
 	fv.UpdateFiles()
+	sf := fv.SelField()
+	sf.GrabFocus()
 	fv.FileSig.Emit(fv.This, int64(FileViewUpdated), fv.DirPath)
 }
 
@@ -483,10 +486,26 @@ func (fv *FileView) UpdateFiles() {
 	oswin.TheApp.Cursor(win).Push(cursor.Wait)
 	defer oswin.TheApp.Cursor(win).Pop()
 
-	fv.Files = make([]*FileInfo, 0, 1000)
-	filepath.Walk(fv.DirPath, func(path string, info os.FileInfo, err error) error {
+	effpath := fv.DirPath
+	dpinfo, err := os.Lstat(effpath)
+	if err != nil {
+		log.Printf("gi.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
+		return
+	}
+	if dpinfo.Mode()&os.ModeSymlink != 0 {
+		path, _ := filepath.Split(effpath)
+		effpath, err = os.Readlink(effpath)
 		if err != nil {
-			emsg := fmt.Sprintf("Path %q: Error: %v", fv.DirPath, err)
+			log.Printf("gi.FileView Symbolic link path: %v could not be opened -- error: %v\n", effpath, err)
+			return
+		}
+		effpath = filepath.Join(path, effpath)
+	}
+
+	fv.Files = make([]*FileInfo, 0, 1000)
+	filepath.Walk(effpath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
 			// if fv.Viewport != nil {
 			// 	gi.PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, true, false, nil, nil)
 			// } else {
@@ -494,7 +513,7 @@ func (fv *FileView) UpdateFiles() {
 			// }
 			return nil // ignore
 		}
-		if path == fv.DirPath { // proceed..
+		if path == effpath { // proceed..
 			return nil
 		}
 		fi, ferr := NewFileInfo(path)
@@ -697,6 +716,9 @@ func (fv *FileView) FileViewEvents() {
 }
 
 func (fv *FileView) KeyInput(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("FileView KeyInput: %v\n", fv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	switch {
 	case kf == gi.KeyFunWordLeft:

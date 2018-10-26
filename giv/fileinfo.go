@@ -98,6 +98,11 @@ func (fi *FileInfo) IsExec() bool {
 	return fi.Mode&0111 != 0
 }
 
+// IsSymLink returns true if file is a symbolic link
+func (fi *FileInfo) IsSymlink() bool {
+	return fi.Mode&os.ModeSymlink != 0
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    File ops
 

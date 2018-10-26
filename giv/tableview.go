@@ -1704,6 +1704,9 @@ func (tv *TableView) ItemCtxtMenu(row int) {
 }
 
 func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("TableView KeyInput: %v\n", tv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 	row := tv.SelectedIdx
@@ -1770,6 +1773,9 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 }
 
 func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("TableView Inactive KeyInput: %v\n", tv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	row := tv.SelectedIdx
 	switch {

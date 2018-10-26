@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/chewxy/math32"
@@ -295,6 +296,9 @@ func (sb *SliderBase) UpdateThumbValSize() {
 }
 
 func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
+	if KeyEventTrace {
+		fmt.Printf("SliderBase KeyInput: %v\n", sb.PathUnique())
+	}
 	kf := KeyFun(kt.Chord())
 	switch kf {
 	case KeyFunMoveUp:

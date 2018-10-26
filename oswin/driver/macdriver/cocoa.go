@@ -537,10 +537,10 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 
 //export keyEvent
 func keyEvent(id uintptr, runeVal rune, act uint8, code uint16, flags uint32) {
-	er := cocoaRune(runeVal)
-	ea := key.Actions(act)
-	ec := cocoaKeyCode(code)
 	em := cocoaMods(flags)
+	ec := cocoaKeyCode(code)
+	er := cocoaRune(runeVal, ec, em)
+	ea := key.Actions(act)
 
 	event := &key.Event{
 		Rune:      er,
@@ -1086,9 +1086,15 @@ func cocoaKeyCode(vkcode uint16) key.Codes {
 // a non-unicode key event to -1, used for Rune in the key package.
 //
 // http://www.unicode.org/Public/MAPPINGS/VENDORS/APPLE/CORPCHAR.TXT
-func cocoaRune(r rune) rune {
+func cocoaRune(r rune, c key.Codes, m int32) rune {
 	if '\uE000' <= r && r <= '\uF8FF' {
 		return -1
+	}
+	switch {
+	case r == 27 && c == key.CodeLeftSquareBracket:
+		return '['
+	case r == 29 && c == key.CodeRightSquareBracket:
+		return ']'
 	}
 	return r
 }

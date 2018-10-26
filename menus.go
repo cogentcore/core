@@ -60,7 +60,7 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 	ac.Icon = IconName(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {
-		ac.Shortcut = ActiveKeyMap.ChordForFun(opts.ShortcutKey).OSShortcut()
+		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)
 		// todo: need a flag for menu-based?
 	}
 	ac.Data = opts.Data

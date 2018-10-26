@@ -395,7 +395,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
-		ac.Shortcut = gi.ActiveKeyMap.ChordForFun(gi.KeyFunMenuClose).OSShortcut()
+		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunMenuClose)
 		ac.ActionSig.Connect(vp.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
 			vp.Win.CloseReq()
 		})
@@ -440,7 +440,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		switch pk {
 		case "shortcut":
 			if kf, ok := pv.(gi.KeyFuns); ok {
-				ac.Shortcut = gi.ActiveKeyMap.ChordForFun(kf).OSShortcut()
+				ac.Shortcut = gi.ShortcutForFun(kf)
 			} else {
 				ac.Shortcut = key.Chord(kit.ToString(pv)).OSShortcut()
 			}
@@ -454,7 +454,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			}
 		case "keyfun":
 			if kf, ok := pv.(gi.KeyFuns); ok {
-				ac.Shortcut = gi.ActiveKeyMap.ChordForFun(kf).OSShortcut()
+				ac.Shortcut = gi.ShortcutForFun(kf)
 				md.KeyFun = kf
 				bitflag.Set32((*int32)(&md.Flags), int(MethViewKeyFun))
 			}

@@ -186,6 +186,18 @@ func (km *KeyMap) ChordForFun(kf KeyFuns) key.Chord {
 	return ""
 }
 
+// ShortcutForFun returns OS-specific formatted shortcut for first key chord
+// trigger for given KeyFun in map
+func (km *KeyMap) ShortcutForFun(kf KeyFuns) key.Chord {
+	return km.ChordForFun(kf).OSShortcut()
+}
+
+// ShortcutForFun returns OS-specific formatted shortcut for first key chord
+// trigger for given KeyFun in the current active map
+func ShortcutForFun(kf KeyFuns) key.Chord {
+	return ActiveKeyMap.ShortcutForFun(kf)
+}
+
 // Update ensures that the given keymap has at least one entry for every
 // defined KeyFun, grabbing ones from the default map if not, and also
 // eliminates any Nil entries which might reflect out-of-date functions

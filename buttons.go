@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"strings"
@@ -441,6 +442,9 @@ func (bb *ButtonBase) KeyChordEvent() {
 			return
 		}
 		kt := d.(*key.ChordEvent)
+		if KeyEventTrace {
+			fmt.Printf("Button KeyChordEvent: %v\n", bbb.PathUnique())
+		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
 			if !(kt.Rune == ' ' && bbb.Viewport.IsCompleter()) {

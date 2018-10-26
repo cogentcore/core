@@ -1408,10 +1408,6 @@ mainloop:
 				}
 			}
 		case *key.ChordEvent:
-			if KeyEventTrace {
-				kf := KeyFun(e.Chord())
-				fmt.Printf("Key: %v  keyfun: %v\n", e.String(), kf)
-			}
 			keyDelPop := w.KeyChordEventHiPri(e)
 			if keyDelPop {
 				delPop = true
@@ -2027,6 +2023,9 @@ func (w *Window) PopPopup(pop ki.Ki) {
 func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	delPop := false
 	cs := e.Chord()
+	if KeyEventTrace {
+		fmt.Printf("Window HiPri KeyInput: %v event: %v\n", w.PathUnique(), e.String())
+	}
 	kf := KeyFun(cs)
 	w.LastModBits = e.Modifiers
 	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
@@ -2057,6 +2056,9 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	delPop := false
 	cs := e.Chord()
+	if KeyEventTrace {
+		fmt.Printf("Window LowPri KeyInput: %v\n", w.PathUnique())
+	}
 	kf := KeyFun(cs)
 	w.LastModBits = e.Modifiers
 	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)

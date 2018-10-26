@@ -98,12 +98,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * completion: timing and other issue..
 
-* fileview deal with symlinks.
 * fileview should add extension to filename if only one extension provided, if
   user types in a new filename.. 
-
-* filenode:
-	+ ability to sort by date within directories
 
 * TextView:
 	+ isearch not saving to previous if no matches

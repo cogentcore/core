@@ -76,7 +76,7 @@ type ChordEvent struct {
 
 func (ev Event) String() string {
 	if ev.Rune >= 0 {
-		return fmt.Sprintf("Type: %v  Action: %v  Chord: %v  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Chord(), ModsString(ev.Modifiers), ev.Time())
+		return fmt.Sprintf("Type: %v  Action: %v  Chord: %v  Rune: %d hex: %X  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Chord(), ev.Rune, ev.Rune, ModsString(ev.Modifiers), ev.Time())
 	}
 	return fmt.Sprintf("Type: %v  Action: %v  Code: %v  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Code, ModsString(ev.Modifiers), ev.Time())
 }
@@ -141,7 +141,7 @@ func (e *Event) Chord() Chord {
 		if len(modstr) > 0 {
 			return Chord(modstr + string(unicode.ToUpper(e.Rune))) // all modded keys are uppercase!
 		} else {
-			return Chord(modstr + string(e.Rune))
+			return Chord(string(e.Rune))
 		}
 	}
 	// now convert code

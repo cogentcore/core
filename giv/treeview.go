@@ -1304,66 +1304,69 @@ func (tv *TreeView) RootTreeView() *TreeView {
 	return rn
 }
 
-func (tf *TreeView) KeyInput(kt *key.ChordEvent) {
+func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("TreeView KeyInput: %v\n", tv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 
 	// first all the keys that work for inactive and active
 	switch kf {
 	case gi.KeyFunCancelSelect:
-		tf.UnselectAll()
-		tf.SetSelectMode(false)
+		tv.UnselectAll()
+		tv.SetSelectMode(false)
 		kt.SetProcessed()
 	case gi.KeyFunMoveRight:
-		tf.Open()
+		tv.Open()
 		kt.SetProcessed()
 	case gi.KeyFunMoveLeft:
-		tf.Close()
+		tv.Close()
 		kt.SetProcessed()
 	case gi.KeyFunMoveDown:
-		tf.MoveDownAction(selMode)
+		tv.MoveDownAction(selMode)
 		kt.SetProcessed()
 	case gi.KeyFunMoveUp:
-		tf.MoveUpAction(selMode)
+		tv.MoveUpAction(selMode)
 		kt.SetProcessed()
 	case gi.KeyFunPageUp:
-		tf.MovePageUpAction(selMode)
+		tv.MovePageUpAction(selMode)
 		kt.SetProcessed()
 	case gi.KeyFunPageDown:
-		tf.MovePageDownAction(selMode)
+		tv.MovePageDownAction(selMode)
 		kt.SetProcessed()
 	case gi.KeyFunSelectMode:
-		tf.SelectModeToggle()
+		tv.SelectModeToggle()
 		kt.SetProcessed()
 	case gi.KeyFunSelectAll:
-		tf.SelectAll()
+		tv.SelectAll()
 		kt.SetProcessed()
 	case gi.KeyFunEnter:
-		tf.ToggleClose()
+		tv.ToggleClose()
 		kt.SetProcessed()
 	case gi.KeyFunCopy:
-		tf.Copy(true)
+		tv.Copy(true)
 		kt.SetProcessed()
 	}
-	if !tf.IsInactive() && !kt.IsProcessed() {
+	if !tv.IsInactive() && !kt.IsProcessed() {
 		switch kf {
 		case gi.KeyFunDelete:
-			tf.SrcDelete()
+			tv.SrcDelete()
 			kt.SetProcessed()
 		case gi.KeyFunDuplicate:
-			tf.SrcDuplicate()
+			tv.SrcDuplicate()
 			kt.SetProcessed()
 		case gi.KeyFunInsert:
-			tf.SrcInsertBefore()
+			tv.SrcInsertBefore()
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter:
-			tf.SrcInsertAfter()
+			tv.SrcInsertAfter()
 			kt.SetProcessed()
 		case gi.KeyFunCut:
-			tf.Cut()
+			tv.Cut()
 			kt.SetProcessed()
 		case gi.KeyFunPaste:
-			tf.Paste()
+			tv.Paste()
 			kt.SetProcessed()
 		}
 	}

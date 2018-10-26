@@ -1303,6 +1303,9 @@ func (sv *SliceView) ItemCtxtMenu(row int) {
 }
 
 func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("SliceView KeyInput: %v\n", sv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 	row := sv.SelectedIdx
@@ -1363,6 +1366,9 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 }
 
 func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("SliceView Inactive KeyInput: %v\n", sv.PathUnique())
+	}
 	kf := gi.KeyFun(kt.Chord())
 	row := sv.SelectedIdx
 	switch kf {
