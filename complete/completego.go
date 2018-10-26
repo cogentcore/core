@@ -193,8 +193,8 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 	//}
 
 	start := token.Pos(pos.Offset)
-	linestart := start - token.Pos(pos.Column)
-	linepretext := src[linestart:start]
+	ls := start - token.Pos(pos.Column)
+	linepretext := src[ls:start]
 	// don't complete inside comment
 	if strings.Contains(linepretext, "//") {
 		return completions, true // stop
@@ -204,7 +204,7 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 	path, _ := astutil.PathEnclosingInterval(f, start, end)
 
 	var stop bool = false // suggestion to caller about continuing to try completing
-	var inblock = false   // are we in a block (i.e. within braces)
+	var inBlock = false   // are we in a block (i.e. within braces)
 	next := true
 	for i := 0; i < len(path) && next == true; i++ {
 		n := path[i]
@@ -213,7 +213,7 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 		case *ast.BlockStmt:
 			_, ok := n.(*ast.BlockStmt)
 			if ok {
-				inblock = true // return stop
+				inBlock = true // return stop
 			}
 		case *ast.GenDecl:
 			gd, ok := n.(*ast.GenDecl)
@@ -238,7 +238,7 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 			next = false
 		case *ast.File:
 			//fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-			if !inblock {
+			if !inBlock {
 				for _, aCandidate := range decls {
 					comp := Completion{Text: aCandidate}
 					completions = append(completions, comp)
