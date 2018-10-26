@@ -76,8 +76,7 @@ func mainrun() {
 	txly1.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
-	txed1.Opts.LineNos = true
-	txed1.Opts.Completion = true
+	txed1.Viewport = vp
 	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
 
 	// generally need to put text view within its own layout for scrolling
@@ -88,6 +87,7 @@ func mainrun() {
 	txly2.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 	txed2 := txly2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
+	txed2.Viewport = vp
 
 	txbuf := giv.NewTextBuf()
 	txed1.SetBuf(txbuf)
