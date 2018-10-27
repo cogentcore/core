@@ -58,7 +58,7 @@ type TextBuf struct {
 	Markup     [][]byte       `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
 	ByteOffs   []int          `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes int            `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
-	MarkupMu   sync.Mutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
+	MarkupMu   sync.RWMutex   `json:"-" xml:"-" desc:"mutex for updating markup"`
 	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`

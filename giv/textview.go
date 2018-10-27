@@ -486,7 +486,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
-	tv.Buf.MarkupMu.Lock()
+	tv.Buf.MarkupMu.RLock()
 	for ln := 0; ln < nln; ln++ {
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
@@ -495,7 +495,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.Buf.MarkupMu.Unlock()
+	tv.Buf.MarkupMu.RUnlock()
 
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
 	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
@@ -575,7 +575,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 	mxwd := float32(tv.LinesSize.X)
 	rerend := false
 
-	tv.Buf.MarkupMu.Lock()
+	tv.Buf.MarkupMu.RLock()
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
@@ -586,7 +586,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		}
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.Buf.MarkupMu.Unlock()
+	tv.Buf.MarkupMu.RUnlock()
 
 	// update all offsets to end of text
 	if rerend || isDel || st != ed {
