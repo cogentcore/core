@@ -134,156 +134,9 @@ type TextWord struct {
 	EndPos   int `desc:"the ending character position"`
 }
 
-type Spell struct {
-	Model      *fuzzy.Model
-	Input      []TextWord
-	InputIndex int
-}
-
-func NewSpeller() *Spell {
-	sp := new(Spell)
-	sp.InitModel()
-	return sp
-}
-
-func (sp *Spell) InitModel() {
-	sp.Model = fuzzy.NewModel()
-	pdir := oswin.TheApp.AppPrefsDir()
-	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
-	b, err := ioutil.ReadFile(openpath)
-	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could Not Open Spell File", Prompt: "Creating new default spell file."}, true, false, nil, nil)
-		log.Println(err)
-		words := GetCorpus() // use the default corpus
-		sp.Model.Train(words)
-	} else {
-		json.Unmarshal(b, sp.Model)
-	}
-	sp.Model.SetThreshold(1)
-}
-
-// NewSpellCheck builds the input list, i.e. the words to check
-func (sp *Spell) NewSpellCheck(text []byte) {
-	sp.Input = sp.Input[:0] // clear past input
-	sp.InputIndex = 0
-	sp.Input = TextToWords(text)
-}
-
-// returns the next word not found in corpus
-func (sp *Spell) NextUnknownWord() (unknown TextWord, suggests []string) {
-	var tw TextWord
-	for {
-		tw = sp.NextWord()
-		if tw.Word == "" { // we're done!
-			break
-		}
-		var known = false
-		suggests, known = sp.CheckWord(tw)
-		if !known {
-			break
-		}
-	}
-	return tw, suggests
-}
-
-// returns the next word of the input words
-func (sp *Spell) NextWord() TextWord {
-	tw := TextWord{}
-	if sp.InputIndex < len(sp.Input) {
-		tw = sp.Input[sp.InputIndex]
-		sp.InputIndex += 1
-		return tw
-	}
-	return tw
-}
-
-// CheckWord checks a single word and returns suggestions if word is unknown
-func (sp *Spell) CheckWord(tw TextWord) (suggests []string, known bool) {
-	if sp.Model == nil {
-		sp.InitModel()
-	}
-
-	w := tw.Word
-	known = false
-	w = strings.Trim(w, "`'*.,?[]():;")
-	w = strings.ToLower(w)
-	suggests = sp.Model.SpellCheckSuggestions(w, 2)
-	if suggests == nil {
-		return nil, known // known is false
-	}
-	if len(suggests) > 0 && suggests[0] == w {
-		known = true
-	}
-	return suggests[1:], known
-}
-
-// LearnWord adds a single word to the corpus
-func (sp *Spell) LearnWord(word string) {
-	sp.Model.TrainWord(word)
-}
-
-// SaveModel saves the spelling Model which includes the dictionary and parameters
-func (sp *Spell) SaveModel() error {
-	if sp.Model != nil {
-		b, err := json.MarshalIndent(sp.Model, "", "  ")
-		if err != nil {
-			log.Println(err) // unlikely
-			return err
-		}
-		pdir := oswin.TheApp.AppPrefsDir()
-		savepath := filepath.Join(pdir, "spell_en_us_plain.json")
-		err = ioutil.WriteFile(savepath, b, 0644)
-		if err != nil {
-			gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
-			log.Println(err)
-		}
-		return err
-	}
-	return nil
-}
-
-// TextToWords generates a slice of words from text
-// removes various non-word input, trims symbols, etc
-func TextToWords(text []byte) []TextWord {
-	var allwords []TextWord
-
-	notwordchar, err := regexp.Compile(`[^0-9A-Za-z]`)
-	if err != nil {
-		panic(err)
-	}
-	allnum, err := regexp.Compile(`^[0-9]*$`)
-	if err != nil {
-		panic(err)
-	}
-	wordbounds, err := regexp.Compile(`\b`)
-	if err != nil {
-		panic(err)
-	}
-
-	textstr := string(text)
-
-	var words []TextWord
-	for l, line := range strings.Split(textstr, "\n") {
-		line = notwordchar.ReplaceAllString(line, " ")
-		bounds := wordbounds.FindAllStringIndex(line, -1)
-		words = words[:0] // reset for new line
-		splits := strings.Fields(line)
-		for i, w := range splits {
-			if allnum.MatchString(w) {
-				break
-			}
-			if len(w) > 1 {
-				tw := TextWord{Word: w, Line: l, StartPos: bounds[i*2][0], EndPos: bounds[i*2+1][0]}
-				words = append(words, tw)
-			}
-		}
-		allwords = append(allwords, words...)
-	}
-	//for _, w := range allwords {
-	//	fmt.Println(w)
-	//}
-	return allwords
-}
+var model *fuzzy.Model
+var input []TextWord
+var inputidx int = 0
 
 func GetCorpus() []string {
 	var out []string
@@ -320,4 +173,140 @@ func GetCorpus() []string {
 	}
 
 	return out
+}
+
+func InitModel() {
+	model = fuzzy.NewModel()
+	pdir := oswin.TheApp.AppPrefsDir()
+	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
+	b, err := ioutil.ReadFile(openpath)
+	if err != nil {
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could Not Open Spell File", Prompt: "Creating new default spell file."}, true, false, nil, nil)
+		log.Println(err)
+		words := GetCorpus() // use the default corpus
+		model.Train(words)
+	} else {
+		json.Unmarshal(b, model)
+	}
+	model.SetThreshold(1)
+}
+
+// NewSpellCheck builds the input list, i.e. the words to check
+func NewSpellCheck(text []byte) {
+	input = input[:0] // clear past input
+	inputidx = 0
+	TextToWords(text)
+}
+
+// returns the next word not found in corpus
+func NextUnknownWord() (unknown TextWord, suggests []string) {
+	var tw TextWord
+	for {
+		tw = NextWord()
+		if tw.Word == "" { // we're done!
+			break
+		}
+		var known = false
+		suggests, known = CheckWord(tw)
+		if !known {
+			break
+		}
+	}
+	return tw, suggests
+}
+
+// returns the next word of the input words
+func NextWord() TextWord {
+	tw := TextWord{}
+	if inputidx < len(input) {
+		tw = input[inputidx]
+		inputidx += 1
+		return tw
+	}
+	return tw
+}
+
+// CheckWord checks a single word and returns suggestions if word is unknown
+func CheckWord(tw TextWord) (suggests []string, known bool) {
+	if model == nil {
+		InitModel()
+	}
+
+	w := tw.Word
+	known = false
+	w = strings.Trim(w, "`'*.,?[]():;")
+	w = strings.ToLower(w)
+	suggests = model.SpellCheckSuggestions(w, 2)
+	if suggests == nil {
+		return nil, known // known is false
+	}
+	if len(suggests) > 0 && suggests[0] == w {
+		known = true
+	}
+	return suggests[1:], known
+}
+
+// LearnWord adds a single word to the corpus
+func LearnWord(word string) {
+	model.TrainWord(word)
+}
+
+// TextToWords generates a slice of words from text
+// removes various non-word input, trims symbols, etc
+func TextToWords(text []byte) {
+	notwordchar, err := regexp.Compile(`[^0-9A-Za-z]`)
+	if err != nil {
+		panic(err)
+	}
+	allnum, err := regexp.Compile(`^[0-9]*$`)
+	if err != nil {
+		panic(err)
+	}
+	wordbounds, err := regexp.Compile(`\b`)
+	if err != nil {
+		panic(err)
+	}
+
+	textstr := string(text)
+
+	var words []TextWord
+	for l, line := range strings.Split(textstr, "\n") {
+		line = notwordchar.ReplaceAllString(line, " ")
+		bounds := wordbounds.FindAllStringIndex(line, -1)
+		words = words[:0] // reset for new line
+		splits := strings.Fields(line)
+		for i, w := range splits {
+			if allnum.MatchString(w) {
+				break
+			}
+			if len(w) > 1 {
+				tw := TextWord{Word: w, Line: l, StartPos: bounds[i*2][0], EndPos: bounds[i*2+1][0]}
+				words = append(words, tw)
+			}
+		}
+		input = append(input, words...)
+	}
+	//for _, w := range input {
+	//	fmt.Println(w)
+	//}
+}
+
+// SaveModel saves the spelling model which includes the dictionary and parameters
+func SaveModel() error {
+	if model != nil {
+		b, err := json.MarshalIndent(model, "", "  ")
+		if err != nil {
+			log.Println(err) // unlikely
+			return err
+		}
+		pdir := oswin.TheApp.AppPrefsDir()
+		savepath := filepath.Join(pdir, "spell_en_us_plain.json")
+		err = ioutil.WriteFile(savepath, b, 0644)
+		if err != nil {
+			gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+			log.Println(err)
+		}
+		return err
+	}
+	return nil
 }

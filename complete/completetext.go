@@ -8,16 +8,16 @@ import (
 )
 
 // Complete Tex is the function for completing .tex files
-func CompleteTex(bytes []byte, pos token.Position) []Completion {
+func CompleteText(bytes []byte, pos token.Position) []Completion {
 	var results []Completion
 
-	fmt.Println("Completion for tex files not implemented")
+	fmt.Println("Completion for text files not implemented")
 	return results
 }
 
 // EditTex replaces the completion seed and any text up to the next whitespace or other go delimiter
 // with the selected completion. delta is the change in cursor position (cp).
-func EditTex(text string, cp int, completion string, seed string) (newText string, delta int) {
+func EditText(text string, cp int, completion string, seed string) (newText string, delta int) {
 	s1 := string(text[0:cp])
 	s2 := string(text[cp:])
 
