@@ -23,6 +23,7 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
+	"github.com/goki/prof"
 )
 
 // CursorBlinkMSec is number of milliseconds that cursor blinks on
@@ -604,13 +605,21 @@ func (tf *TextField) OfferComplete() {
 	cpos.X += 5
 	cpos.Y += 10
 	position := token.Position{}
-	tf.Complete.ShowCompletions(s, position, tf.Viewport, cpos)
+	tf.Complete.Show(s, position, tf.Viewport, cpos)
+}
+
+// CancelComplete cancels any pending completion -- call this when new events
+// have moved beyond any prior completion scenario
+func (tf *TextField) CancelComplete() {
+	if tf.Complete == nil {
+		return
+	}
+	tf.Complete.Cancel(tf.Viewport)
 }
 
 // CompleteText edits the text field using the string chosen from the completion menu
 func (tf *TextField) CompleteText(s string) {
-	win := tf.ParentWindow()
-	win.ClosePopup(win.Popup)
+	tf.Complete.Cancel(tf.Viewport)
 	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
 	ns, delta := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, s, tf.Complete.Seed)
 	tf.EditTxt = []rune(ns)
@@ -620,8 +629,7 @@ func (tf *TextField) CompleteText(s string) {
 // CompleteExtend inserts the extended seed at the current cursor position
 func (tf *TextField) CompleteExtend(s string) {
 	if s != "" {
-		win := tf.ParentWindow()
-		win.ClosePopup(win.Popup)
+		tf.Complete.Cancel(tf.Viewport)
 		tf.InsertAtCursor(s)
 		tf.OfferComplete()
 	}
@@ -1005,21 +1013,27 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.OfferComplete()
 	case KeyFunHome:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.CursorStart()
 	case KeyFunEnd:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.CursorEnd()
 	case KeyFunSelectMode:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.SelectModeToggle()
 	case KeyFunCancelSelect:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.SelectReset()
 	case KeyFunSelectAll:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.SelectAll()
 	case KeyFunCopy:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.Copy(true) // reset
 	}
 	if tf.IsInactive() || kt.IsProcessed() {
@@ -1029,12 +1043,14 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunEnter:
 		fallthrough
 	case KeyFunAccept: // ctrl+enter
-		tf.EditDone()
 		kt.SetProcessed()
+		tf.CancelComplete()
+		tf.EditDone()
 		tf.FocusNext()
 	case KeyFunAbort: // esc
-		tf.Revert()
 		kt.SetProcessed()
+		tf.CancelComplete()
+		tf.Revert()
 		tf.FocusNext()
 	case KeyFunBackspace:
 		kt.SetProcessed()
@@ -1042,15 +1058,18 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.OfferComplete()
 	case KeyFunKill:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.CursorKill()
 	case KeyFunDelete:
 		kt.SetProcessed()
 		tf.CursorDelete(1)
 	case KeyFunCut:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.Cut()
 	case KeyFunPaste:
 		kt.SetProcessed()
+		tf.CancelComplete()
 		tf.Paste()
 	case KeyFunComplete:
 		kt.SetProcessed()
@@ -1060,7 +1079,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
 				tf.InsertAtCursor(string(kt.Rune))
-				tf.OfferComplete()
+				if kt.Rune == ' ' {
+					tf.CancelComplete()
+				} else {
+					tf.OfferComplete()
+				}
 			}
 		}
 	}
@@ -1186,6 +1209,7 @@ func (tf *TextField) Init2D() {
 }
 
 func (tf *TextField) StyleTextField() {
+	pr := prof.Start("TextField.Style2D")
 	tf.SetCanFocusIfActive()
 	tf.Style2DWidget()
 	pst := &(tf.Par.(Node2D).AsWidget().Sty)
@@ -1197,6 +1221,7 @@ func (tf *TextField) StyleTextField() {
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This, true, true) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
+	pr.End()
 }
 
 func (tf *TextField) Style2D() {

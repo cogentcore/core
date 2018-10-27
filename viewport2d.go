@@ -254,6 +254,7 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 // children are destroyed
 func (vp *Viewport2D) DeletePopup() {
 	vp.Par = nil // disconnect from window -- it never actually owned us as a child
+	vp.Win = nil
 	if !bitflag.Has(vp.Flag, int(VpFlagPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {

@@ -2189,15 +2189,11 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete(forcecomplete bool) {
-	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On {
+	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return
 	}
 	if !tv.Buf.Opts.Completion && !forcecomplete {
 		return
-	}
-	win := tv.ParentWindow()
-	if gi.PopupIsCompleter(win.Popup) {
-		win.ClosePopup(win.Popup)
 	}
 
 	st := TextPos{tv.CursorPos.Ln, 0}
@@ -2221,13 +2217,12 @@ func (tv *TextView) OfferComplete(forcecomplete bool) {
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	tv.Complete.ShowCompletions(s, tpos, tv.Viewport, cpos)
+	tv.Complete.Show(s, tpos, tv.Viewport, cpos)
 }
 
 // CompleteText edits the text using the string chosen from the completion menu
 func (tv *TextView) CompleteText(s string) {
-	win := tv.ParentWindow()
-	win.ClosePopup(win.Popup)
+	tv.Complete.Cancel(tv.Viewport)
 
 	st := TextPos{tv.CursorPos.Ln, 0}
 	en := TextPos{tv.CursorPos.Ln, len(tv.Buf.Lines[tv.CursorPos.Ln])}
@@ -2242,6 +2237,27 @@ func (tv *TextView) CompleteText(s string) {
 	tv.Buf.DeleteText(st, en, true, true)
 	tv.CursorPos = st
 	tv.InsertAtCursor([]byte(ns))
+}
+
+// CompleteExtend inserts the extended seed at the current cursor position
+func (tv *TextView) CompleteExtend(s string) {
+	if s != "" {
+		tv.Complete.Cancel(tv.Viewport)
+		tv.InsertAtCursor([]byte(s))
+		tv.OfferComplete(dontforce)
+	}
+}
+
+// CancelComplete cancels any pending completion -- call this when new events
+// have moved beyond any prior completion scenario
+func (tv *TextView) CancelComplete() {
+	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On {
+		return
+	}
+	if !tv.Buf.Opts.Completion {
+		return
+	}
+	tv.Complete.Cancel(tv.Viewport)
 }
 
 // SetCompleter sets completion functions so that completions will
@@ -2269,23 +2285,6 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 			tvf.CompleteExtend(data.(string)) // always use data
 		}
 	})
-}
-
-// CompleteExtend inserts the extended seed at the current cursor position
-func (tv *TextView) CompleteExtend(s string) {
-	if s != "" {
-		win := tv.ParentWindow()
-		win.ClosePopup(win.Popup)
-		tv.InsertAtCursor([]byte(s))
-		tv.OfferComplete(dontforce)
-	}
-}
-
-func (tv *TextView) CloseCompleter() {
-	win := tv.ParentWindow()
-	if gi.PopupIsCompleter(win.Popup) {
-		win.ClosePopup(win.Popup)
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3229,8 +3228,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	// cancelAll cancels search, completer, and..
 	cancelAll := func() {
+		tv.CancelComplete()
 		tv.ISearchCancel()
-		tv.CloseCompleter()
+		tv.QReplaceCancel()
 	}
 
 	if kf != gi.KeyFunRecenter { // always start at centering
@@ -3271,12 +3271,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.CursorBackwardWord(1)
 		tv.OfferComplete(dontforce)
 	case gi.KeyFunMoveUp:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorUp(1)
 	case gi.KeyFunMoveDown:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
@@ -3291,12 +3291,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
 	case gi.KeyFunHome:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartLine()
 	case gi.KeyFunEnd:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndLine()
@@ -3311,8 +3311,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorEndDoc()
 	case gi.KeyFunRecenter:
+		cancelAll()
 		kt.SetProcessed()
-		tv.CloseCompleter()
 		tv.ReMarkup()
 		tv.CursorRecenter()
 	case gi.KeyFunSelectMode:
@@ -3320,8 +3320,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.SelectModeToggle()
 	case gi.KeyFunCancelSelect:
+		tv.CancelComplete()
 		kt.SetProcessed()
-		tv.CloseCompleter()
 		tv.EscPressed() // generic cancel
 	case gi.KeyFunSelectAll:
 		cancelAll()
@@ -3333,22 +3333,28 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.Copy(true) // reset
 	case gi.KeyFunSearch:
 		kt.SetProcessed()
-		tv.CloseCompleter()
+		tv.QReplaceCancel()
+		tv.CancelComplete()
 		tv.ISearchStart()
 	case gi.KeyFunReplace:
 		kt.SetProcessed()
-		tv.CloseCompleter()
+		tv.CancelComplete()
+		tv.ISearchCancel()
 		tv.QReplacePrompt()
 	case gi.KeyFunAbort:
 		kt.SetProcessed()
+		tv.CancelComplete()
 		tv.EscPressed()
 	case gi.KeyFunJump:
 		kt.SetProcessed()
+		cancelAll()
 		tv.JumpToLinePrompt()
 	case gi.KeyFunHistPrev:
+		cancelAll()
 		kt.SetProcessed()
 		tv.CursorToHistPrev()
 	case gi.KeyFunHistNext:
+		cancelAll()
 		kt.SetProcessed()
 		tv.CursorToHistNext()
 	}
@@ -3375,10 +3381,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	switch kf {
 	case gi.KeyFunAccept: // ctrl+enter
 		tv.ISearchCancel()
-		// tv.EditDone()
+		tv.QReplaceCancel()
 		kt.SetProcessed()
 		tv.FocusNext()
 	case gi.KeyFunBackspace:
+		// todo: previous item in qreplace
 		if tv.ISearch.On {
 			tv.ISearchBackspace()
 		} else {
@@ -3429,7 +3436,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.OfferComplete(force)
 	case gi.KeyFunEnter:
-		tv.ISearchCancel()
+		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			if tv.Buf.Opts.AutoIndent {
@@ -3447,7 +3454,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
-		tv.ISearchCancel()
+		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			updt := tv.Viewport.Win.UpdateStart()
@@ -3473,11 +3480,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				kt.SetProcessed()
 				if tv.ISearch.On { // todo: need this in inactive mode
+					tv.CancelComplete()
 					tv.ISearchKeyInput(kt)
 				} else if tv.QReplace.On { // todo: need this in inactive mode
+					tv.CancelComplete()
 					tv.QReplaceKeyInput(kt)
 				} else {
 					if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
+						tv.CancelComplete()
 						bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 						tv.InsertAtCursor([]byte(string(kt.Rune)))
 						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
@@ -3488,9 +3498,13 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 						tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 					} else {
 						tv.InsertAtCursor([]byte(string(kt.Rune)))
+						if kt.Rune == ' ' {
+							tv.CancelComplete()
+						} else {
+							tv.OfferComplete(dontforce)
+						}
 					}
 				}
-				tv.OfferComplete(dontforce)
 			}
 		}
 	}

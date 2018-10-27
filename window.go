@@ -144,7 +144,9 @@ type Window struct {
 	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
 	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DelPopup      ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle"`
 	PopupFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
+	PopMu         sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects popup updating"`
 	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
@@ -670,6 +672,15 @@ func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
 	}
 }
 
+// SendCustomEvent sends a custom event with given data to this window -- widgets can connect
+// to receive CustomEventType events to receive them.  Sometimes it is useful
+// to send a custom event just to trigger a pass through the event loop, even
+// if nobody is listening (e.g., if a popup is posted without a surrounding
+// event, as in Complete.ShowCompletions
+func (w *Window) SendCustomEvent(data interface{}) {
+	oswin.SendCustomEvent(w.OSWin, data)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //                   Rendering
 
@@ -759,6 +770,8 @@ func (w *Window) UploadAllViewports() {
 	}
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
+	w.PopMu.Lock()
+	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
 			gii, _ := KiToNode2D(pop)
@@ -783,6 +796,8 @@ func (w *Window) UploadAllViewports() {
 			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
+	w.PopMu.Unlock()
+	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	pr.End()
 	w.ClearUpdating()
 	w.UpMu.Unlock()   // need to unlock before publish
@@ -1097,6 +1112,15 @@ mainloop:
 		if et > oswin.EventTypeN || et < 0 { // we don't handle other types of events here
 			fmt.Printf("Win: %v got out-of-range event: %v\n", w.Nm, et)
 			continue
+		}
+
+		if w.DelPopup != nil {
+			if w.DelPopup == w.Popup {
+				// fmt.Printf("closing popup: %v  cur: %v\n", w.DelPopup.Name(), w.Popup.Name())
+				w.ClosePopup(w.DelPopup)
+			} else {
+				fmt.Printf("zombie popup: %v  cur: %v\n", w.DelPopup.Name(), w.Popup.Name())
+			}
 		}
 
 		////////////////////////////////////////////////////////////////////////////
@@ -1453,6 +1477,8 @@ mainloop:
 		////////////////////////////////////////////////////////////////////////////
 		// Delete popup?
 
+		w.PopMu.Lock()
+		// fmt.Printf("win pop checks pop locked: %v\n", w.Nm)
 		if w.Popup != nil && !delPop {
 			if PopupIsTooltip(w.Popup) {
 				if et != oswin.MouseMoveEvent {
@@ -1460,22 +1486,24 @@ mainloop:
 				}
 			} else if me, ok := evi.(*mouse.Event); ok {
 				if me.Action == mouse.Release {
-					if w.DeletePopupMenu(w.Popup, me) {
+					if w.ShouldDeletePopupMenu(w.Popup, me) {
 						delPop = true
 					}
 				}
 			}
 
 			if PopupIsCompleter(w.Popup) {
-				if et == oswin.KeyChordEvent {
+				fsz := len(w.FocusStack)
+				// fmt.Printf("focus stack: %v\n", fsz)
+				if fsz > 0 && et == oswin.KeyChordEvent {
 					for pri := HiPri; pri < EventPrisN; pri++ {
-						if len(w.FocusStack) > 0 {
-							w.EventSigs[et][pri].SendSig(w.FocusStack[0], w.Popup, int64(et), evi)
-						}
+						w.EventSigs[et][pri].SendSig(w.FocusStack[fsz-1], w.Popup, int64(et), evi)
 					}
 				}
 			}
 		}
+		w.PopMu.Unlock()
+		// fmt.Printf("win pop checks pop unlocked: %v\n", w.Nm)
 
 		////////////////////////////////////////////////////////////////////////////
 		// Shortcuts come last as lowest priority relative to more specific cases
@@ -1490,12 +1518,13 @@ mainloop:
 		// Actually delete popup and push a new one
 
 		if delPop {
-			w.PopPopup(w.Popup)
+			w.ClosePopup(w.Popup)
 		}
 
 		if w.NextPopup != nil {
-			w.PushPopup(w.NextPopup)
+			pu := w.NextPopup
 			w.NextPopup = nil
+			w.PushPopup(pu)
 		}
 	}
 	if WinEventTrace {
@@ -1933,8 +1962,8 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	return false
 }
 
-// DeletePopupMenu returns true if the given popup item should be deleted
-func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
+// ShouldDeletePopupMenu returns true if the given popup item should be deleted
+func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	if !PopupIsMenu(pop) {
 		return false
 	}
@@ -1949,6 +1978,9 @@ func (w *Window) DeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 
 // PushPopup pushes current popup onto stack and set new popup.
 func (w *Window) PushPopup(pop ki.Ki) {
+	w.PopMu.Lock()
+	// fmt.Printf("pushpop locked: %v\n", w.Nm)
+
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
@@ -1965,13 +1997,14 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	} else {
 		w.PushFocus(pop)
 	}
+	w.PopMu.Unlock()
+	// fmt.Printf("pushpop unlocked: %v\n", w.Nm)
 }
 
 // DisconnectPopup disconnects given popup -- typically the current one.
 func (w *Window) DisconnectPopup(pop ki.Ki) {
 	w.DisconnectAllEvents(pop, AllPris)
 	pop.SetParent(nil) // don't redraw the popup anymore
-	w.Viewport.UploadToWin()
 }
 
 // ClosePopup close given popup -- must be the current one -- returns false if not.
@@ -1979,13 +2012,23 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 	if pop != w.Popup {
 		return false
 	}
+	w.PopMu.Lock()
+	// fmt.Printf("closepop locked: %v\n", w.Nm)
+	if w.Popup == w.DelPopup {
+		w.DelPopup = nil
+	}
 	w.DisconnectPopup(pop)
 	w.PopPopup(pop)
+	w.PopMu.Unlock()
+	// fmt.Printf("closepop unlocked: %v\n", w.Nm)
+	// w.Viewport.UploadToWin()
+	w.UploadAllViewports()
 	return true
 }
 
 // PopPopup pops current popup off the popup stack and set to current popup.
-func (w *Window) PopPopup(pop ki.Ki) {
+// returns true if was actually popped
+func (w *Window) PopPopup(pop ki.Ki) bool {
 	nii, ok := pop.(Node2D)
 	if ok {
 		pvp := nii.AsViewport2D()
@@ -2002,6 +2045,7 @@ func (w *Window) PopPopup(pop ki.Ki) {
 			w.PopupStack = w.PopupStack[:sz-1]
 		}
 		w.PopFocus()
+		return true
 	} else {
 		for i := sz - 1; i >= 0; i-- {
 			pp := w.PopupStack[i]
@@ -2012,7 +2056,7 @@ func (w *Window) PopPopup(pop ki.Ki) {
 		}
 		// do nothing
 	}
-	w.UploadAllViewports()
+	return false
 }
 
 /////////////////////////////////////////////////////////////////////////////

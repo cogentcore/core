@@ -53,36 +53,38 @@ const (
 // showing the completion menu
 var CompleteWaitMSec = 500
 
-// ShowCompletions is the main call for listing completions.
+// Show is the main call for listing completions.
 // Has a builtin delay timer so completions are only shown after
 // a delay, which resets every time it is called.
-// After delay, Calls ShowCompletionsNow, which calls MatchFunc
+// After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) ShowCompletions(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
-	if c.MatchFunc == nil {
+func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
+	}
+	if PopupIsCompleter(vp.Win.Popup) {
+		vp.Win.DelPopup = vp.Win.Popup
 	}
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 	}
 	c.DelayTimer = time.AfterFunc(time.Duration(CompleteWaitMSec)*time.Millisecond,
 		func() {
-			c.ShowCompletionsNow(text, pos, vp, pt)
+			c.ShowNow(text, pos, vp, pt)
 			c.DelayTimer = nil
 		})
 }
 
-// ShowCompletionsNow actually calls MatchFunc to get a list of completions and builds the
+// ShowNow actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu
-func (c *Complete) ShowCompletionsNow(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
 
 	if PopupIsCompleter(vp.Win.Popup) {
-		vp.Win.ClosePopup(vp.Win.Popup)
+		vp.Win.DelPopup = vp.Win.Popup
 	}
-
 	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
 	count := len(c.Completions)
 	if count > 0 {
@@ -104,6 +106,23 @@ func (c *Complete) ShowCompletionsNow(text string, pos token.Position, vp *Viewp
 		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 		oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 	}
+}
+
+// Cancel cancels any pending completion -- call when new events nullify prior completions
+// returns true if canceled
+func (c *Complete) Cancel(vp *Viewport2D) bool {
+	if vp == nil || vp.Win == nil {
+		return false
+	}
+	if PopupIsCompleter(vp.Win.Popup) {
+		vp.Win.DelPopup = vp.Win.Popup
+	}
+	if c.DelayTimer != nil {
+		c.DelayTimer.Stop()
+		c.DelayTimer = nil
+		return true
+	}
+	return false
 }
 
 // Complete emits a signal to let subscribers know that the user has made a

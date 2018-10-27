@@ -622,7 +622,16 @@ func (fv *FileView) NewFolder() {
 func (fv *FileView) SetSelFileAction(sel string) {
 	fv.SelFile = sel
 	sv := fv.FilesView()
-	sv.SelectFieldVal("Name", fv.SelFile)
+	ef := fv.ExtField()
+	exts := ef.Text()
+	if !sv.SelectFieldVal("Name", fv.SelFile) { // not found
+		extl := strings.Split(exts, ",")
+		if len(extl) == 1 {
+			if !strings.HasSuffix(fv.SelFile, extl[0]) {
+				fv.SelFile += extl[0]
+			}
+		}
+	}
 	fv.SelectedIdx = sv.SelectedIdx
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
