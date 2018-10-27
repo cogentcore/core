@@ -2204,9 +2204,6 @@ func (tv *TextView) OfferComplete(forcecomplete bool) {
 		s = string(tbe.ToBytes())
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 	}
-	if len(s) == 0 && !forcecomplete {
-		return
-	}
 
 	tpos := token.Position{} // text position
 	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch

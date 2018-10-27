@@ -194,9 +194,9 @@ func FirstPass(bytes []byte, pos token.Position) ([]Completion, bool) {
 
 	start := token.Pos(pos.Offset)
 	ls := start - token.Pos(pos.Column)
-	linepretext := src[ls:start]
+	lpt := src[ls:start]
 	// don't complete inside comment
-	if strings.Contains(linepretext, "//") {
+	if strings.Contains(lpt, "//") {
 		return completions, true // stop
 	}
 

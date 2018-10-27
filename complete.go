@@ -68,6 +68,9 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 	}
+	if text == "" {
+		return
+	}
 	c.DelayTimer = time.AfterFunc(time.Duration(CompleteWaitMSec)*time.Millisecond,
 		func() {
 			c.ShowNow(text, pos, vp, pt)
