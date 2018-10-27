@@ -113,7 +113,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			}
 			*dsty = *baseStyle
 		}
-		kit.TypesMu.Lock()
+		kit.TypesMu.Lock() // write lock
 		dsty.SetStyleProps(parSty, styprops)
 		dsty.IsSet = false // keep as non-set
 		tprops[stKey] = dsty
@@ -147,12 +147,12 @@ func (wb *WidgetBase) Style2DWidget() {
 	// look for class-specific style sheets among defaults -- have to do these
 	// dynamically now -- cannot compile into default which is type-general
 	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
-	kit.TypesMu.Lock()
+	kit.TypesMu.RLock()
 	clsty := "." + wb.Class
 	if sp, ok := ki.SubProps(tprops, clsty); ok {
 		wb.Sty.SetStyleProps(parSty, sp)
 	}
-	kit.TypesMu.Unlock()
+	kit.TypesMu.RUnlock()
 
 	pagg := wb.ParentCSSAgg()
 	if pagg != nil {

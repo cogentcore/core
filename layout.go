@@ -1764,9 +1764,9 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 func (ly *Layout) StyleLayout() {
 	ly.Style2DWidget()
 	tprops := *kit.Types.Properties(ly.Type(), true) // true = makeNew
-	kit.TypesMu.Lock()
+	kit.TypesMu.RLock()
 	LayoutFields.Style(ly, nil, tprops)
-	kit.TypesMu.Unlock()
+	kit.TypesMu.RUnlock()
 	LayoutFields.Style(ly, nil, ly.Props)
 	LayoutFields.ToDots(ly, &ly.Sty.UnContext)
 }
