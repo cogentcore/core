@@ -39,7 +39,7 @@ import (
 // -- Ki makes extensive use of such tags.
 type Node struct {
 	Nm       string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm string `copy:"-" view:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	UniqueNm string `copy:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
 	Flag     int64  `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
 	Props    Props  `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
 	Par      Ki     `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
@@ -139,7 +139,7 @@ func (n *Node) SetName(name string) bool {
 		return false
 	}
 	n.Nm = name
-	n.UniqueNm = name
+	n.SetUniqueName(name)
 	if n.Par != nil {
 		n.Par.UniquifyNames()
 	}
@@ -151,7 +151,7 @@ func (n *Node) SetNameRaw(name string) {
 }
 
 func (n *Node) SetUniqueName(name string) {
-	n.UniqueNm = name
+	n.UniqueNm = strings.Replace(strings.Replace(name, ".", "_", -1), "/", "_", -1)
 }
 
 // UniquifyPreserveNameLimit is the number of children below which a more
@@ -384,12 +384,12 @@ func (n *Node) PathFrom(par Ki) string {
 func (n *Node) PathFromUnique(par Ki) string {
 	if n.Par != nil && n.Par != par {
 		if n.IsField() {
-			return n.Par.PathFromUnique(par) + "." + n.Nm
+			return n.Par.PathFromUnique(par) + "." + n.UniqueNm
 		} else {
-			return n.Par.PathFromUnique(par) + "/" + n.Nm
+			return n.Par.PathFromUnique(par) + "/" + n.UniqueNm
 		}
 	}
-	return "/" + n.Nm
+	return "/" + n.UniqueNm
 }
 
 func (n *Node) FindPathUnique(path string) (Ki, bool) {
