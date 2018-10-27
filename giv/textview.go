@@ -1233,7 +1233,7 @@ func (tv *TextView) JumpToLinePrompt() {
 // JumpToLine jumps to given line number (minus 1)
 func (tv *TextView) JumpToLine(ln int) {
 	updt := tv.Viewport.Win.UpdateStart()
-	tv.SetCursorShow(TextPos{Ln: ln})
+	tv.SetCursorShow(TextPos{Ln: ln - 1})
 	tv.SavePosHistory(tv.CursorPos)
 	tv.Viewport.Win.UpdateEnd(updt)
 }
