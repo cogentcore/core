@@ -146,7 +146,7 @@ type Window struct {
 	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
 	DelPopup      ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle"`
 	PopupFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
-	PopMu         sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects popup updating"`
+	PopMu         sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating"`
 	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
@@ -770,7 +770,7 @@ func (w *Window) UploadAllViewports() {
 	}
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
-	w.PopMu.Lock()
+	w.PopMu.RLock()
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
@@ -796,7 +796,7 @@ func (w *Window) UploadAllViewports() {
 			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
-	w.PopMu.Unlock()
+	w.PopMu.RUnlock()
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	pr.End()
 	w.ClearUpdating()
@@ -1477,8 +1477,7 @@ mainloop:
 		////////////////////////////////////////////////////////////////////////////
 		// Delete popup?
 
-		w.PopMu.Lock()
-		// fmt.Printf("win pop checks pop locked: %v\n", w.Nm)
+		w.PopMu.RLock()
 		if w.Popup != nil && !delPop {
 			if PopupIsTooltip(w.Popup) {
 				if et != oswin.MouseMoveEvent {
@@ -1494,7 +1493,6 @@ mainloop:
 
 			if PopupIsCompleter(w.Popup) {
 				fsz := len(w.FocusStack)
-				// fmt.Printf("focus stack: %v\n", fsz)
 				if fsz > 0 && et == oswin.KeyChordEvent {
 					for pri := HiPri; pri < EventPrisN; pri++ {
 						w.EventSigs[et][pri].SendSig(w.FocusStack[fsz-1], w.Popup, int64(et), evi)
@@ -1502,8 +1500,7 @@ mainloop:
 				}
 			}
 		}
-		w.PopMu.Unlock()
-		// fmt.Printf("win pop checks pop unlocked: %v\n", w.Nm)
+		w.PopMu.RUnlock()
 
 		////////////////////////////////////////////////////////////////////////////
 		// Shortcuts come last as lowest priority relative to more specific cases
