@@ -945,8 +945,9 @@ func (tv *TreeView) SrcGoGiEditor() {
 // MimeData adds mimedata for this node: a text/plain of the PathUnique, and
 // an application/json of the source node
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
+	sroot := tv.RootView.SrcNode.Ptr
 	src := tv.SrcNode.Ptr
-	*md = append(*md, mimedata.NewTextData(src.PathUnique()))
+	*md = append(*md, mimedata.NewTextData(src.PathFromUnique(sroot)))
 	var buf bytes.Buffer
 	err := src.WriteJSON(&buf, true) // true = pretty for clipboard..
 	if err == nil {
@@ -973,6 +974,7 @@ func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
 }
 
 // Copy copies to clip.Board, optionally resetting the selection
+// satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Copy(reset bool) {
 	sels := tv.SelectedViews()
 	nitms := ints.MaxInt(1, len(sels))
@@ -991,7 +993,17 @@ func (tv *TreeView) Copy(reset bool) {
 	}
 }
 
+// CopyAction copies to clip.Board, optionally resetting the selection-- calls Clipper copy
+func (tv *TreeView) CopyAction(reset bool) {
+	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+		cpr.Copy(reset)
+	} else {
+		tv.Copy(reset)
+	}
+}
+
 // Cut copies to clip.Board and deletes selected items
+// satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Cut() {
 	if tv.IsRootOrField("Cut") {
 		return
@@ -1005,11 +1017,30 @@ func (tv *TreeView) Cut() {
 	tv.SetChanged()
 }
 
+// CutAction copies to clip.Board and deletes selected items -- calls Clipper cut
+func (tv *TreeView) CutAction() {
+	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+		cpr.Cut()
+	} else {
+		tv.Cut()
+	}
+}
+
 // Paste pastes clipboard at given node
+// satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
 	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	if md != nil {
-		tv.PasteAction(md)
+		tv.PasteMenu(md)
+	}
+}
+
+// PasteAction pastes clipboard at given node -- calls Clipper paste
+func (tv *TreeView) PasteAction() {
+	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+		cpr.Paste()
+	} else {
+		tv.Paste()
 	}
 }
 
@@ -1041,9 +1072,9 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 	// todo: compare, etc..
 }
 
-// PasteAction performs a paste from the clipboard using given data -- pops up
+// PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
-func (tv *TreeView) PasteAction(md mimedata.Mimes) {
+func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
 	var men gi.Menu
 	tv.MakePasteMenu(&men, md)
@@ -1165,7 +1196,11 @@ func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
 	de.SetProcessed()
-	tv.DropAction(de.Data, de.Mod)
+	if dpr, ok := tv.This.(gi.DragNDropper); ok {
+		dpr.Drop(de.Data, de.Mod)
+	} else {
+		tv.Drop(de.Data, de.Mod)
+	}
 }
 
 // DragNDropFinalize is called to finalize actions on the Source node prior to
@@ -1176,9 +1211,10 @@ func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
 	tv.Viewport.Win.FinalizeDragNDrop(mod)
 }
 
-// DragNDropSource is called after target accepts the drop -- we just remove
+// Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
-func (tv *TreeView) DragNDropSource(de *dnd.Event) {
+// satisfies gi.DragNDropper interface and can be overridden by subtypes
+func (tv *TreeView) Dragged(de *dnd.Event) {
 	if de.Mod != dnd.DropMove {
 		return
 	}
@@ -1192,6 +1228,17 @@ func (tv *TreeView) DragNDropSource(de *dnd.Event) {
 				sn.Delete(true)
 			}
 		}
+	}
+}
+
+// DragNDropSource is called after target accepts the drop -- we just remove
+// elements that were moved
+func (tv *TreeView) DragNDropSource(de *dnd.Event) {
+	// fmt.Printf("tv src: %v\n", tv.PathUnique())
+	if dpr, ok := tv.This.(gi.DragNDropper); ok {
+		dpr.Dragged(de)
+	} else {
+		tv.Dragged(de)
 	}
 }
 
@@ -1233,8 +1280,9 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 	// todo: compare, etc..
 }
 
-// DropAction pops up a menu to determine what specifically to do with dropped items
-func (tv *TreeView) DropAction(md mimedata.Mimes, mod dnd.DropMods) {
+// Drop pops up a menu to determine what specifically to do with dropped items
+// satisfies gi.DragNDropper interface and can be overridden by subtypes
+func (tv *TreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
 	tv.MakeDropMenu(&men, md, mod)
 	pos := tv.ContextMenuPos()
@@ -1345,7 +1393,7 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 		tv.ToggleClose()
 		kt.SetProcessed()
 	case gi.KeyFunCopy:
-		tv.Copy(true)
+		tv.CopyAction(true)
 		kt.SetProcessed()
 	}
 	if !tv.IsInactive() && !kt.IsProcessed() {
@@ -1363,10 +1411,10 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 			tv.SrcInsertAfter()
 			kt.SetProcessed()
 		case gi.KeyFunCut:
-			tv.Cut()
+			tv.CutAction()
 			kt.SetProcessed()
 		case gi.KeyFunPaste:
-			tv.Paste()
+			tv.PasteAction()
 			kt.SetProcessed()
 		}
 	}

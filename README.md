@@ -96,15 +96,13 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* mac hidpi setpos is not right from prefs -- works from init win create.
+* fileview is too slow to load -- is it icons?  not mainly textviews..
 
-* fileview should add extension to filename if only one extension provided, if
-  user types in a new filename.. 
+* mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:
 	+ isearch not saving to previous if no matches
 	+ cursor goes to hand for links in TextView
-	+ getting some cruft in very left margin with no line numbers, when horizontal scrolling.
 
 * see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
 

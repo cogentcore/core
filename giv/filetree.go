@@ -18,6 +18,9 @@ import (
 	"strings"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/dnd"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/bitflag"
@@ -190,7 +193,7 @@ func (fn *FileNode) ReadDir(path string) error {
 	fn.SetOpen()
 
 	config := fn.ConfigOfFiles(path)
-	mods, updt := fn.ConfigChildren(config, true) // unique names
+	mods, updt := fn.ConfigChildren(config, false) // NOT unique names
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := sfk.Embed(KiT_FileNode).(*FileNode)
@@ -434,6 +437,57 @@ func (fn *FileNode) NewFile(filename string) {
 	fn.FRoot.UpdateNewFile(gi.FileName(np))
 }
 
+// NewFolder makes a new folder (directory) in given selected directory node
+func (fn *FileNode) NewFolder(foldername string) {
+	np := filepath.Join(string(fn.FPath), foldername)
+	err := os.MkdirAll(np, 0775)
+	if err != nil {
+		emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", fn.FPath, err)
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg}, true, false, nil, nil)
+		return
+	}
+	fn.FRoot.UpdateNewFile(fn.FPath)
+}
+
+// CopyFileToDir copies given file path into node that is a directory
+// prompts before overwriting any existing
+func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
+	_, sfn := filepath.Split(filename)
+	tpath := filepath.Join(string(fn.FPath), sfn)
+	if _, err := os.Stat(tpath); os.IsNotExist(err) {
+		CopyFile(tpath, filename, perm)
+	} else {
+		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File Exists, Overwrite?",
+			Prompt: fmt.Sprintf("File: %v exists, do you want to overwrite it with: %v?", tpath, filename)},
+			[]string{"No, Cancel", "Yes, Overwrite"},
+			fn.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					// cancel
+				case 1:
+					CopyFile(tpath, filename, perm)
+				}
+			})
+	}
+}
+
+// CopyFileToFile copies given file path into node that is an existing file
+// prompts before doing so
+func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
+	tpath := string(fn.FPath)
+	gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
+		Prompt: fmt.Sprintf("Are you sure you want to overwrite file: %v with: %v?", tpath, filename)},
+		[]string{"No, Cancel", "Yes, Overwrite"},
+		fn.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			switch sig {
+			case 0:
+			// cancel
+			case 1:
+				CopyFile(tpath, filename, perm)
+			}
+		})
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Search
 
@@ -557,6 +611,15 @@ var FileNodeProps = ki.Props{
 			"desc":  "Create a new file in this folder",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
+					"width": 60,
+				}},
+			},
+		}},
+		{"NewFolder", ki.Props{
+			"label": "New Folder...",
+			"desc":  "Create a new folder within this folder",
+			"Args": ki.PropSlice{
+				{"Folder Name", ki.Props{
 					"width": 60,
 				}},
 			},
@@ -696,6 +759,137 @@ func (ft *FileTreeView) NewFile(filename string) {
 	}
 }
 
+// NewFolder makes a new file in given selected directory node
+func (ft *FileTreeView) NewFolder(foldername string) {
+	sels := ft.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	sn := sels[sz-1]
+	ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		fn.NewFolder(foldername)
+	}
+}
+
+// Cut copies to clip.Board and deletes selected items
+// satisfies gi.Clipper interface and can be overridden by subtypes
+func (ft *FileTreeView) Cut() {
+	if ft.IsRootOrField("Cut") {
+		return
+	}
+	ft.Copy(false)
+	// todo: in the future, move files somewhere temporary, then use those temps for paste..
+	gi.PromptDialog(ft.Viewport, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, true, false, nil, nil)
+}
+
+// Paste pastes clipboard at given node
+// satisfies gi.Clipper interface and can be overridden by subtypes
+func (ft *FileTreeView) Paste() {
+	md := oswin.TheApp.ClipBoard(ft.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
+	if md != nil {
+		ft.PasteMime(md)
+	}
+}
+
+// Drop pops up a menu to determine what specifically to do with dropped items
+// satisfies gi.DragNDropper interface and can be overridden by subtypes
+func (ft *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
+	ft.PasteMime(md)
+	ft.DragNDropFinalize(mod)
+}
+
+// PasteMime applies a paste / drop of mime data onto this node
+// always does a copy of files into / onto target
+func (ft *FileTreeView) PasteMime(md mimedata.Mimes) {
+	sroot := ft.RootView.SrcNode.Ptr
+	tfn := ft.FileNode()
+	if tfn == nil {
+		return
+	}
+	if !tfn.IsDir() {
+		if len(md) != 2 {
+			gi.PromptDialog(ft.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name, len(md)/2)}, true, false, nil, nil)
+			return
+		}
+	}
+	for _, d := range md {
+		if d.Type != mimedata.TextPlain {
+			continue
+		}
+		// todo: process file:/// kinds of paths..
+		path := string(d.Data)
+		sfni, ok := sroot.FindPathUnique(path)
+		if !ok {
+			fmt.Printf("giv.FileTreeView: could not find filenode at path: %v\n", path)
+			continue
+		}
+		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
+		if sfn == nil {
+			continue
+		}
+		if tfn.IsDir() {
+			tfn.CopyFileToDir(string(sfn.FPath), sfn.Info.Mode)
+		} else {
+			tfn.CopyFileToFile(string(sfn.FPath), sfn.Info.Mode)
+		}
+	}
+	tfn.UpdateNode()
+}
+
+// Dragged is called after target accepts the drop -- we just remove
+// elements that were moved
+// satisfies gi.DragNDropper interface and can be overridden by subtypes
+func (ft *FileTreeView) Dragged(de *dnd.Event) {
+	// fmt.Printf("ft dragged: %v\n", ft.PathUnique())
+	if de.Mod != dnd.DropMove {
+		return
+	}
+	sroot := ft.RootView.SrcNode.Ptr
+	tfn := ft.FileNode()
+	if tfn == nil {
+		return
+	}
+	md := de.Data
+	for _, d := range md {
+		if d.Type != mimedata.TextPlain {
+			continue
+		}
+		path := string(d.Data)
+		sfni, ok := sroot.FindPathUnique(path)
+		if !ok {
+			fmt.Printf("giv.FileTreeView: could not find filenode at path: %v\n", path)
+			continue
+		}
+		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
+		if sfn == nil {
+			continue
+		}
+		// fmt.Printf("deleting: %v  path: %v\n", sfn.PathUnique(), sfn.FPath)
+		sfn.DeleteFile()
+	}
+}
+
+// FileTreeInactiveDirFunc is an ActionUpdateFunc that inactivates action if node is a dir
+var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ft.FileNode()
+	if fn != nil {
+		act.SetInactiveState(fn.IsDir())
+	}
+})
+
+// FileTreeActiveDirFunc is an ActionUpdateFunc that activates action if node is a dir
+var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ft.FileNode()
+	if fn != nil {
+		act.SetActiveState(fn.IsDir())
+	}
+})
+
 var FileTreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
 	"spacing":          units.NewValue(.5, units.Ch),
@@ -750,20 +944,14 @@ var FileTreeViewProps = ki.Props{
 	},
 	"CtxtMenuActive": ki.PropSlice{
 		{"DuplicateFiles", ki.Props{
-			"label": "Duplicate",
-			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
-				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetInactiveState(fn.FileNode().IsDir())
-			}),
+			"label":    "Duplicate",
+			"updtfunc": FileTreeInactiveDirFunc,
 		}},
 		{"DeleteFiles", ki.Props{
-			"label":   "Delete",
-			"desc":    "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
-			"confirm": true,
-			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
-				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetInactiveState(fn.FileNode().IsDir())
-			}),
+			"label":    "Delete",
+			"desc":     "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
+			"confirm":  true,
+			"updtfunc": FileTreeInactiveDirFunc,
 		}},
 		{"RenameFiles", ki.Props{
 			"label": "Rename",
@@ -771,25 +959,26 @@ var FileTreeViewProps = ki.Props{
 		}},
 		{"sep-open", ki.BlankProp{}},
 		{"OpenDirs", ki.Props{
-			"label": "Open Dir",
-			"desc":  "open given folder to see files within",
-			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
-				fn := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				act.SetActiveState(fn.FileNode().IsDir())
-			}),
+			"label":    "Open Dir",
+			"desc":     "open given folder to see files within",
+			"updtfunc": FileTreeActiveDirFunc,
 		}},
 		{"NewFile", ki.Props{
-			"label": "New File...",
-			"desc":  "make a new file in this folder",
-			"updtfunc": ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
-				ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-				fn := ft.FileNode()
-				if fn != nil {
-					act.SetActiveState(fn.IsDir())
-				}
-			}),
+			"label":    "New File...",
+			"desc":     "make a new file in this folder",
+			"updtfunc": FileTreeActiveDirFunc,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
+					"width": 60,
+				}},
+			},
+		}},
+		{"NewFolder", ki.Props{
+			"label":    "New Folder...",
+			"desc":     "make a new folder within this folder",
+			"updtfunc": FileTreeActiveDirFunc,
+			"Args": ki.PropSlice{
+				{"Folder Name", ki.Props{
 					"width": 60,
 				}},
 			},
@@ -802,29 +991,29 @@ var fnFolderProps = ki.Props{
 	"icon-off": "folder",
 }
 
-func (tv *FileTreeView) Style2D() {
-	fn := tv.FileNode()
+func (ft *FileTreeView) Style2D() {
+	fn := ft.FileNode()
 	if fn.IsDir() {
 		if fn.HasChildren() {
-			tv.Icon = gi.IconName("")
+			ft.Icon = gi.IconName("")
 		} else {
-			tv.Icon = gi.IconName("folder")
+			ft.Icon = gi.IconName("folder")
 		}
-		tv.SetProp("#branch", fnFolderProps)
-		tv.Class = "folder"
+		ft.SetProp("#branch", fnFolderProps)
+		ft.Class = "folder"
 	} else {
-		tv.Icon = fn.Info.Ic
-		if tv.Icon == "" || tv.Icon == "none" {
-			tv.Icon = "blank"
+		ft.Icon = fn.Info.Ic
+		if ft.Icon == "" || ft.Icon == "none" {
+			ft.Icon = "blank"
 		}
 		if fn.IsExec() {
-			tv.Class = "exec"
+			ft.Class = "exec"
 		} else if fn.IsOpen() {
-			tv.Class = "open"
+			ft.Class = "open"
 		} else {
-			tv.Class = ""
+			ft.Class = ""
 		}
 	}
-	tv.StyleTreeView()
-	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
+	ft.StyleTreeView()
+	ft.LayData.SetFromStyle(&ft.Sty.Layout) // also does reset
 }

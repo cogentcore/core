@@ -2778,18 +2778,13 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	pc := &rs.Paint
 	sty := &tv.Sty
 	tv.VisSizes()
-	if tv.NLines == 0 {
-		pos := tv.RenderStartPos()
-		pos.X += tv.LineNoOff
-		epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
-		pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
-	} else {
-		tv.RenderStdBox(sty)
-	}
+	pos := gi.NewVec2DFmPoint(tv.VpBBox.Min)
+	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
+	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
 	tv.RenderLineNosBoxAll()
 	tv.RenderHighlights(-1, -1) // all
 	tv.RenderSelect()
-	pos := tv.RenderStartPos()
+	pos = tv.RenderStartPos()
 	stln := -1
 	edln := -1
 	for ln := 0; ln < tv.NLines; ln++ {
@@ -2836,7 +2831,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
 	clr := sty.Font.BgColor.Color.Highlight(10)
-	spos := gi.NewVec2DFmPoint(tv.VpBBox.Min).AddVal(spc)
+	spos := gi.NewVec2DFmPoint(tv.VpBBox.Min)
 	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
 	epos.X = spos.X + tv.LineNoOff - spc
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
@@ -2853,7 +2848,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	spc := sty.BoxSpace()
 	clr := sty.Font.BgColor.Color.Highlight(10)
 	spos := tv.CharStartPos(TextPos{Ln: st})
-	spos.X = float32(tv.VpBBox.Min.X) + spc
+	spos.X = float32(tv.VpBBox.Min.X)
 	epos := tv.CharEndPos(TextPos{Ln: ed + 1})
 	epos.Y -= tv.LineHeight
 	epos.X = spos.X + tv.LineNoOff - spc
@@ -2942,6 +2937,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		}
 		if visSt < 0 && visEd < 0 {
 		} else {
+			boxMin.X = float32(tv.VpBBox.Min.X) // go all the way
 			boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
 			pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
 			// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
@@ -3717,7 +3713,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	if tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() {
+	if !tv.Viewport.Win.Resizing && (tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
 	}
@@ -3749,11 +3745,7 @@ func (tv *TextView) Render2D() {
 		} else if tv.NLines == 0 {
 			tv.Sty = tv.StateStyles[TextViewInactive]
 		} else if tv.HasFocus() {
-			// if tv.FocusActive {
 			tv.Sty = tv.StateStyles[TextViewFocus]
-			// } else {
-			// 	tv.Sty = tv.StateStyles[TextViewActive]
-			// }
 		} else if tv.IsSelected() {
 			tv.Sty = tv.StateStyles[TextViewSel]
 		} else {

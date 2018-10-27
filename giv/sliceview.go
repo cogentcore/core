@@ -54,6 +54,7 @@ type SliceView struct {
 	BuiltSize        int
 	ToolbarSlice     interface{} `desc:"the slice that we successfully set a toolbar for"`
 	inFocusGrab      bool
+	curRow           int // temp row variable used e.g., in Drop method
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -951,8 +952,9 @@ func (sv *SliceView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
 	return sl
 }
 
-// CopyRows copies selected rows to clip.Board, optionally resetting the selection
-func (sv *SliceView) CopyRows(reset bool) {
+// Copy copies selected rows to clip.Board, optionally resetting the selection
+// satisfies gi.Clipper interface and can be overridden by subtypes
+func (sv *SliceView) Copy(reset bool) {
 	nitms := len(sv.SelectedRows)
 	if nitms == 0 {
 		return
@@ -964,6 +966,15 @@ func (sv *SliceView) CopyRows(reset bool) {
 	oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Write(md)
 	if reset {
 		sv.UnselectAllRows()
+	}
+}
+
+// CopyRows copies selected rows to clip.Board, optionally resetting the selection
+func (sv *SliceView) CopyRows(reset bool) {
+	if cpr, ok := sv.This.(gi.Clipper); ok { // should always be true, but justin case..
+		cpr.Copy(reset)
+	} else {
+		sv.Copy(reset)
 	}
 }
 
@@ -982,8 +993,9 @@ func (sv *SliceView) DeleteRows() {
 	sv.UpdateEnd(updt)
 }
 
-// CutRows copies selected rows to clip.Board and deletes selected rows
-func (sv *SliceView) CutRows() {
+// Cut copies selected rows to clip.Board and deletes selected rows
+// satisfies gi.Clipper interface and can be overridden by subtypes
+func (sv *SliceView) Cut() {
 	if len(sv.SelectedRows) == 0 {
 		return
 	}
@@ -1001,11 +1013,31 @@ func (sv *SliceView) CutRows() {
 	sv.SelectRowAction(row, mouse.NoSelectMode)
 }
 
+// CutRows copies selected rows to clip.Board and deletes selected rows
+func (sv *SliceView) CutRows() {
+	if cpr, ok := sv.This.(gi.Clipper); ok { // should always be true, but justin case..
+		cpr.Cut()
+	} else {
+		sv.Cut()
+	}
+}
+
 // Paste pastes clipboard at given row
-func (sv *SliceView) Paste(row int) {
+// satisfies gi.Clipper interface and can be overridden by subtypes
+func (sv *SliceView) Paste() {
 	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
 	if md != nil {
-		sv.PasteAction(md, row)
+		sv.PasteMenu(md, sv.curRow)
+	}
+}
+
+// PasteRow pastes clipboard at given row
+func (sv *SliceView) PasteRow(row int) {
+	sv.curRow = row
+	if cpr, ok := sv.This.(gi.Clipper); ok { // should always be true, but justin case..
+		cpr.Paste()
+	} else {
+		sv.Paste()
 	}
 }
 
@@ -1030,9 +1062,9 @@ func (sv *SliceView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 	})
 }
 
-// PasteAction performs a paste from the clipboard using given data -- pops up
+// PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
-func (sv *SliceView) PasteAction(md mimedata.Mimes, row int) {
+func (sv *SliceView) PasteMenu(md mimedata.Mimes, row int) {
 	sv.UnselectAllRows()
 	var men gi.Menu
 	sv.MakePasteMenu(&men, md, row)
@@ -1135,7 +1167,12 @@ func (sv *SliceView) DragNDropTarget(de *dnd.Event) {
 	row, ok := sv.RowFromPos(de.Where.Y)
 	if ok {
 		de.SetProcessed()
-		sv.DropAction(de.Data, de.Mod, row)
+		sv.curRow = row
+		if dpr, ok := sv.This.(gi.DragNDropper); ok {
+			dpr.Drop(de.Data, de.Mod)
+		} else {
+			sv.Drop(de.Data, de.Mod)
+		}
 	}
 }
 
@@ -1170,11 +1207,12 @@ func (sv *SliceView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 	})
 }
 
-// DropAction pops up a menu to determine what specifically to do with dropped items
-func (sv *SliceView) DropAction(md mimedata.Mimes, mod dnd.DropMods, row int) {
+// Drop pops up a menu to determine what specifically to do with dropped items
+// this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
+func (sv *SliceView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
-	sv.MakeDropMenu(&men, md, mod, row)
-	pos := sv.RowPos(row)
+	sv.MakeDropMenu(&men, md, mod, sv.curRow)
+	pos := sv.RowPos(sv.curRow)
 	gi.PopupMenu(men, pos.X, pos.Y, sv.Viewport, "tvDropMenu")
 }
 
@@ -1261,22 +1299,22 @@ func (sv *SliceView) StdCtxtMenu(m *gi.Menu, row int) {
 	}
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},
 		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.CopyRows(true)
 		})
 	m.AddAction(gi.ActOpts{Label: "Cut", Data: row},
 		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.CutRows()
 		})
 	m.AddAction(gi.ActOpts{Label: "Paste", Data: row},
 		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			tvv.Paste(data.(int))
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
+			tvv.PasteRow(data.(int))
 		})
 	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: row},
 		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
+			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.Duplicate()
 		})
 }
@@ -1359,7 +1397,7 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 		sv.SelectMode = false
 		kt.SetProcessed()
 	case gi.KeyFunPaste:
-		sv.Paste(sv.SelectedIdx)
+		sv.PasteRow(sv.SelectedIdx)
 		sv.SelectMode = false
 		kt.SetProcessed()
 	}

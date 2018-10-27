@@ -295,7 +295,7 @@ func (tb *TextBuf) Revert() bool {
 		if itr > 0 && len(diffs) == 1 {
 			break
 		} else if itr > 0 {
-			fmt.Printf("TextBuf revert iter: %v diffs: %v\n", itr, len(diffs))
+			fmt.Printf("TextBuf: %v revert iter: %v diffs: %v\n", tb.Filename, itr, len(diffs))
 			PrintDiffs(diffs)
 		}
 	}

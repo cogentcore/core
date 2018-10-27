@@ -45,11 +45,11 @@ func (fb *FileBrowse) IsEmpty() bool {
 	return fb.ProjRoot == ""
 }
 
-// NewBrowser opens a new browser viewer at given path, which can either be a
+// OpenPath opens a new browser viewer at given path, which can either be a
 // specific file or a directory containing multiple files of interest -- opens
 // in current FileBrowse object if it is empty, or otherwise opens a new
 // window.
-func (fb *FileBrowse) NewBrowser(path gi.FileName) {
+func (fb *FileBrowse) OpenPath(path gi.FileName) {
 	if !fb.IsEmpty() {
 		NewFileBrowser(string(path))
 		return
@@ -426,11 +426,11 @@ var FileBrowseProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
-			{"NewBrowser", ki.Props{
-				"shortcut":        "Command+N",
+			{"OpenPath", ki.Props{
+				"shortcut":        gi.KeyFunMenuOpen,
 				"no-update-after": true,
 				"Args": ki.PropSlice{
-					{"Proj Dir", ki.Props{
+					{"Path", ki.Props{
 						"dirs-only": true, // todo: support
 					}},
 				},
@@ -465,7 +465,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 	fb := mfr.AddNewChild(KiT_FileBrowse, "browser").(*FileBrowse)
 	fb.Viewport = vp
 
-	fb.NewBrowser(gi.FileName(path))
+	fb.OpenPath(gi.FileName(path))
 
 	mmen := win.MainMenu
 	giv.MainMenuView(fb, win, mmen)

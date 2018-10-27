@@ -604,13 +604,7 @@ func (fv *FileView) NewFolder() {
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
 		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
-		if fv.Viewport != nil {
-			gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, true, false, nil, nil)
-		} else {
-			log.Printf("gi.FileView NewFolder error: %v\n", emsg)
-		}
-	} else {
-		fmt.Printf("gi.FileView made new folder: %v\n", np)
+		gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, true, false, nil, nil)
 	}
 	fv.FileSig.Emit(fv.This, int64(FileViewNewFolder), fv.DirPath)
 	fv.UpdateFilesAction()
