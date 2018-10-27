@@ -86,8 +86,10 @@ func FullTypeName(typ reflect.Type) string {
 }
 
 // TypesMu protects updating of the type registry maps -- main Addtype etc all
-// happens at startup and does not need protection, but property access does
-var TypesMu sync.Mutex
+// happens at startup and does not need protection, but property access does.
+// use RLock for read-access to properties, and Lock for write access when
+// adding or changing key / value.
+var TypesMu sync.RWMutex
 
 // AddType adds a given type to the registry -- requires an empty object to
 // grab type info from (which is then stored in Insts) -- must be passed as a
@@ -161,17 +163,17 @@ func (tr *TypeRegistry) Properties(typ reflect.Type, makeNew bool) *map[string]i
 	return tr.PropsByName(typeName, makeNew)
 }
 
-// TypeProp provides safe (mutex protected) access to property map
+// TypeProp provides safe (mutex protected) read access to property map
 // returned by Properties method -- must use this for all Properties
 // access!
 func TypeProp(props map[string]interface{}, key string) (interface{}, bool) {
-	TypesMu.Lock()
+	TypesMu.RLock()
 	val, ok := props[key]
-	TypesMu.Unlock()
+	TypesMu.RUnlock()
 	return val, ok
 }
 
-// SetTypeProp provides safe (mutex protected) setting of property map
+// SetTypeProp provides safe (mutex protected) write setting of property map
 // returned by Properties method -- must use this for all Properties
 // access!
 func SetTypeProp(props map[string]interface{}, key string, val interface{}) {
@@ -183,8 +185,8 @@ func SetTypeProp(props map[string]interface{}, key string, val interface{}) {
 // PropByName safely finds a type property from type name and property key --
 // returns false if not found
 func (tr *TypeRegistry) PropByName(typeName, propKey string) (interface{}, bool) {
-	TypesMu.Lock()
-	defer TypesMu.Unlock()
+	TypesMu.RLock()
+	defer TypesMu.RUnlock()
 
 	tp, ok := tr.Props[typeName]
 	if !ok {
@@ -202,7 +204,7 @@ func (tr *TypeRegistry) Prop(typ reflect.Type, propKey string) (interface{}, boo
 	return tr.PropByName(typeName, propKey)
 }
 
-// SetProps sets the type props for given type
+// SetProps sets the type props for given type, uses write mutex lock
 func (tr *TypeRegistry) SetProps(typ reflect.Type, props map[string]interface{}) {
 	TypesMu.Lock()
 	defer TypesMu.Unlock()

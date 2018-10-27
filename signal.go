@@ -100,7 +100,7 @@ type RecvFunc func(recv, send Ki, sig int64, data interface{})
 // converting as such is fine)
 type Signal struct {
 	Cons map[Ki]RecvFunc `view:"-" json:"-" xml:"-" desc:"map of receivers and their functions"`
-	Mu   sync.Mutex      `view:"-" json:"-" xml:"-" desc:"mutex that protects signal map access"`
+	Mu   sync.RWMutex    `view:"-" json:"-" xml:"-" desc:"read-write mutex that protects Cons map access -- use RLock for all Cons reads, Lock for all writes"`
 }
 
 var KiT_Signal = kit.Types.AddType(&Signal{}, nil)
@@ -156,18 +156,18 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	if SignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
-	s.Mu.Lock()
+	s.Mu.RLock()
 	for recv, fun := range s.Cons {
 		if recv.IsDestroyed() {
 			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
 			delete(s.Cons, recv)
 			continue
 		}
-		s.Mu.Unlock()
+		s.Mu.RUnlock()
 		fun(recv, sender, sig, data)
-		s.Mu.Lock()
+		s.Mu.RLock()
 	}
-	s.Mu.Unlock()
+	s.Mu.RUnlock()
 }
 
 // EmitGo is the concurrent version of Emit -- sends the signal across all the
@@ -179,18 +179,18 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	if SignalTrace {
 		s.EmitTrace(sender, sig, data)
 	}
-	s.Mu.Lock()
+	s.Mu.RLock()
 	for recv, fun := range s.Cons {
 		if recv.IsDestroyed() {
 			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
 			delete(s.Cons, recv)
 			continue
 		}
-		s.Mu.Unlock()
+		s.Mu.RUnlock()
 		go fun(recv, sender, sig, data)
-		s.Mu.Lock()
+		s.Mu.RLock()
 	}
-	s.Mu.Unlock()
+	s.Mu.RUnlock()
 }
 
 // SignalFilterFunc is the function type for filtering signals before they are
@@ -200,48 +200,48 @@ type SignalFilterFunc func(recv Ki) bool
 // EmitFiltered calls function on each potential receiver, and only sends
 // signal if function returns true
 func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
-	s.Mu.Lock()
+	s.Mu.RLock()
 	for recv, fun := range s.Cons {
 		if recv.IsDestroyed() {
 			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
 			delete(s.Cons, recv)
 			continue
 		}
-		s.Mu.Unlock()
+		s.Mu.RUnlock()
 		if filtFun(recv) {
 			fun(recv, sender, sig, data)
 		}
-		s.Mu.Lock()
+		s.Mu.RLock()
 	}
-	s.Mu.Unlock()
+	s.Mu.RUnlock()
 }
 
 // EmitGoFiltered is the concurrent version of EmitFiltered -- calls function
 // on each potential receiver, and only sends signal if function returns true
 // (filtering is sequential iteration over receivers)
 func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
-	s.Mu.Lock()
+	s.Mu.RLock()
 	for recv, fun := range s.Cons {
 		if recv.IsDestroyed() {
 			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
 			delete(s.Cons, recv)
 			continue
 		}
-		s.Mu.Unlock()
+		s.Mu.RUnlock()
 		if filtFun(recv) {
 			go fun(recv, sender, sig, data)
 		}
-		s.Mu.Lock()
+		s.Mu.RLock()
 	}
-	s.Mu.Unlock()
+	s.Mu.RUnlock()
 }
 
 // SendSig sends a signal to one given receiver -- receiver must already be
 // connected so that its receiving function is available
 func (s *Signal) SendSig(recv, sender Ki, sig int64, data interface{}) {
-	s.Mu.Lock()
+	s.Mu.RLock()
 	fun := s.Cons[recv]
-	s.Mu.Unlock()
+	s.Mu.RUnlock()
 	if fun != nil {
 		fun(recv, sender, sig, data)
 	}
