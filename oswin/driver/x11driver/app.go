@@ -279,8 +279,10 @@ mainloop:
 
 		case xproto.FocusInEvent:
 			if w := app.findWindow(ev.Event); w != nil {
+				w.mu.Lock()
 				bitflag.Clear(&w.Flag, int(oswin.Minimized))
 				bitflag.Set(&w.Flag, int(oswin.Focus))
+				w.mu.Unlock()
 				// fmt.Printf("focused %v\n", w.Name())
 				sendWindowEvent(w, window.Focus)
 			} else {
@@ -289,7 +291,9 @@ mainloop:
 
 		case xproto.FocusOutEvent:
 			if w := app.findWindow(ev.Event); w != nil {
+				w.mu.Lock()
 				bitflag.Clear(&w.Flag, int(oswin.Focus))
+				w.mu.Unlock()
 				// fmt.Printf("defocused %v\n", w.Name())
 				sendWindowEvent(w, window.DeFocus)
 			} else {

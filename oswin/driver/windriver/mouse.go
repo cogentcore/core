@@ -15,15 +15,12 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 )
 
-var lastMouseClickEvent oswin.Event
-var lastMouseEvent oswin.Event
+var lastMouseClickTime time.Time
+var lastMousePos image.Point
 
 func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
 	where := image.Point{int(_GET_X_LPARAM(lParam)), int(_GET_Y_LPARAM(lParam))}
-	from := image.ZP
-	if lastMouseEvent != nil {
-		from = lastMouseEvent.Pos()
-	}
+	from := lastMousePos
 	mods := keyModifiers()
 
 	button := mouse.NoButton
@@ -72,12 +69,10 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 		}
 	case _WM_LBUTTONDOWN, _WM_MBUTTONDOWN, _WM_RBUTTONDOWN:
 		act := mouse.Press
-		if lastMouseClickEvent != nil {
-			interval := time.Now().Sub(lastMouseClickEvent.Time())
-			// fmt.Printf("interval: %v\n", interval)
-			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
-				act = mouse.DoubleClick
-			}
+		interval := time.Now().Sub(lastMouseClickTime)
+		// fmt.Printf("interval: %v\n", interval)
+		if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
+			act = mouse.DoubleClick
 		}
 		event = &mouse.Event{
 			Where:     where,
@@ -86,7 +81,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 			Modifiers: mods,
 		}
 		event.SetTime()
-		lastMouseClickEvent = event
+		lastMouseClickTime = event.Time()
 	case _WM_LBUTTONUP, _WM_MBUTTONUP, _WM_RBUTTONUP:
 		event = &mouse.Event{
 			Where:     where,
@@ -121,7 +116,7 @@ func sendMouseEvent(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (l
 	}
 
 	event.Init()
-	lastMouseEvent = event
+	lastMousePos = event.Pos()
 	sendEvent(hwnd, event)
 
 	return 0

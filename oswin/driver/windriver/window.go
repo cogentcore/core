@@ -15,6 +15,7 @@ import (
 	"image/draw"
 	"log"
 	"math"
+	"sync"
 	"syscall"
 	"unsafe"
 
@@ -36,6 +37,7 @@ type windowImpl struct {
 	// when the window is closed
 	textures map[*textureImpl]struct{}
 
+	mu             sync.Mutex
 	closeReqFunc   func(win oswin.Window)
 	closeCleanFunc func(win oswin.Window)
 }
@@ -187,6 +189,47 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 func (w *windowImpl) Publish() oswin.PublishResult {
 	// TODO
 	return oswin.PublishResult{}
+}
+
+func (w *windowImpl) Screen() *oswin.Screen {
+	w.mu.Lock()
+	sc := w.Scrn
+	w.mu.Unlock()
+	return sc
+}
+
+func (w *windowImpl) Size() image.Point {
+	w.mu.Lock()
+	sz := w.Sz
+	w.mu.Unlock()
+	return sz
+}
+
+func (w *windowImpl) Position() image.Point {
+	w.mu.Lock()
+	ps := w.Pos
+	w.mu.Unlock()
+	return ps
+}
+
+func (w *windowImpl) PhysicalDPI() float32 {
+	w.mu.Lock()
+	dpi := w.PhysDPI
+	w.mu.Unlock()
+	return dpi
+}
+
+func (w *windowImpl) LogicalDPI() float32 {
+	w.mu.Lock()
+	dpi := w.LogDPI
+	w.mu.Unlock()
+	return dpi
+}
+
+func (w *windowImpl) SetLogicalDPI(dpi float32) {
+	w.mu.Lock()
+	w.LogDPI = dpi
+	w.mu.Unlock()
 }
 
 func (w *windowImpl) SetTitle(title string) {
@@ -565,6 +608,7 @@ func sendSize(hwnd syscall.Handle) {
 		return
 	}
 
+	w.mu.Lock()
 	width := int(r.Right - r.Left)
 	height := int(r.Bottom - r.Top)
 
@@ -587,6 +631,7 @@ func sendSize(hwnd syscall.Handle) {
 	w.PhysDPI = sc.PhysicalDPI
 	w.LogDPI = ldpi
 	w.Scrn = sc
+	w.mu.Unlock()
 	// fmt.Printf("sending window event: %v: sz: %v pos: %v\n", act, sz, ps)
 	sendWindowEvent(w, act)
 }
@@ -601,9 +646,10 @@ func sendMove(hwnd syscall.Handle) {
 		log.Println(err)
 		return
 	}
-
+	w.mu.Lock()
 	ps := image.Point{int(wr.Left), int(wr.Top)}
 	w.Pos = ps
+	w.mu.Unlock()
 	// fmt.Printf("sending window move: %v\n", ps)
 	sendWindowEvent(w, window.Move)
 }

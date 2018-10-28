@@ -214,7 +214,9 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 }
 
 func (w *windowImpl) handleExpose() {
+	w.mu.Lock()
 	bitflag.Clear(&w.Flag, int(oswin.Minimized))
+	w.mu.Unlock()
 	sendWindowEvent(w, window.Paint)
 }
 
@@ -240,15 +242,12 @@ func (w *windowImpl) handleKey(detail xproto.Keycode, state uint16, act key.Acti
 
 }
 
-var lastMouseClickEvent oswin.Event
-var lastMouseEvent oswin.Event
+var lastMouseClickTime time.Time
+var lastMousePos image.Point
 
 func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16, dir mouse.Actions) {
 	where := image.Point{int(x), int(y)}
-	from := image.ZP
-	if lastMouseEvent != nil {
-		from = lastMouseEvent.Pos()
-	}
+	from := lastMousePos
 	mods := KeyModifiers(state)
 	stb := mouse.Buttons(ButtonFromState(state))
 
@@ -280,8 +279,8 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 		}
 	case button < 4: // regular click
 		act := mouse.Actions(dir)
-		if act == mouse.Press && lastMouseClickEvent != nil {
-			interval := time.Now().Sub(lastMouseClickEvent.Time())
+		if act == mouse.Press {
+			interval := time.Now().Sub(lastMouseClickTime)
 			// fmt.Printf("interval: %v\n", interval)
 			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
 				act = mouse.DoubleClick
@@ -295,7 +294,7 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 		}
 		if act == mouse.Press {
 			event.SetTime()
-			lastMouseClickEvent = event
+			lastMouseClickTime = event.Time()
 		}
 	default: // scroll wheel, 4-7
 		if dir != mouse.Press { // only care about these for scrolling
@@ -323,7 +322,7 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 		}
 	}
 	event.Init()
-	lastMouseEvent = event
+	lastMousePos = event.Pos()
 	w.Send(event)
 }
 

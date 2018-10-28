@@ -494,6 +494,7 @@ func (w *Window) Resized(sz image.Point) {
 		return
 	}
 	w.InactivateAllSprites()
+	w.FocusInactivate()
 	w.UpMu.Lock()
 	if w.IsClosed() {
 		if WinEventTrace {
@@ -505,7 +506,6 @@ func (w *Window) Resized(sz image.Point) {
 	if WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
-	w.FocusInactivate()
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
