@@ -1088,7 +1088,7 @@ func (n *Node) UpdateStart() bool {
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			if !k.IsUpdating() {
-				bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
+				bitflag.ClearMaskAtomic(k.Flags(), int64(UpdateFlagsMask))
 				k.SetFlag(int(Updating))
 				return true // keep going down
 			} else {

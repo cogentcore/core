@@ -29,7 +29,7 @@ func SetMask(bits *int64, mask int64) {
 // using atomic compare-and-swap loop, safe for concurrent access
 func SetMaskAtomic(bits *int64, mask int64) {
 	for {
-		cr := *bits
+		cr := atomic.LoadInt64(bits)
 		nw := cr | mask
 		if atomic.CompareAndSwapInt64(bits, cr, nw) {
 			break
@@ -46,7 +46,7 @@ func ClearMask(bits *int64, mask int64) {
 // using atomic compare-and-swap loop, safe for concurrent access
 func ClearMaskAtomic(bits *int64, mask int64) {
 	for {
-		cr := *bits
+		cr := atomic.LoadInt64(bits)
 		nw := cr & ^mask
 		if atomic.CompareAndSwapInt64(bits, cr, nw) {
 			break
@@ -198,7 +198,7 @@ func SetMask32(bits *int32, mask int32) {
 // using atomic compare-and-swap loop, safe for concurrent access
 func SetMaskAtomic32(bits *int32, mask int32) {
 	for {
-		cr := *bits
+		cr := atomic.LoadInt32(bits)
 		nw := cr | mask
 		if atomic.CompareAndSwapInt32(bits, cr, nw) {
 			break
@@ -215,7 +215,7 @@ func ClearMask32(bits *int32, mask int32) {
 // using atomic compare-and-swap loop, safe for concurrent access
 func ClearMaskAtomic32(bits *int32, mask int32) {
 	for {
-		cr := *bits
+		cr := atomic.LoadInt32(bits)
 		nw := cr & ^mask
 		if atomic.CompareAndSwapInt32(bits, cr, nw) {
 			break

@@ -15,7 +15,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -400,7 +399,7 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, up
 			sl.Insert(nkid, i)
 			if n != nil {
 				nkid.SetParent(n)
-				bitflag.Set(n.Flags(), int(ChildAdded))
+				n.SetFlag(int(ChildAdded))
 			}
 			if uniqNm {
 				nkid.SetNameRaw(tn.Name)
@@ -428,10 +427,10 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 		*mods = true
 		if n != nil {
 			*updt = n.UpdateStart()
-			bitflag.Set(n.Flags(), int(ChildDeleted))
+			n.SetFlag(int(ChildDeleted))
 		}
 	}
-	bitflag.Set(kid.Flags(), int(NodeDeleted))
+	kid.SetFlag(int(NodeDeleted))
 	kid.NodeSignal().Emit(kid, int64(NodeSignalDeleting), nil)
 	kid.SetParent(nil)
 	DelMgr.Add(kid)
