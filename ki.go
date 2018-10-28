@@ -335,20 +335,27 @@ type Ki interface {
 
 	// Flag returns the bit flags for this node -- use bitflag package to
 	// manipulate flags -- see Flags type for standard values used in Ki Node
-	// -- can be extended from FlagsN up to 64 bit capacity.
+	// -- can be extended from FlagsN up to 64 bit capacity.  Always use
+	// Atomic access as *some* things need to be atomic, and with bits, that
+	// means that *all* access needs to be atomic, as you cannot atomically
+	// update just a single bit.
 	Flags() *int64
 
-	// SetFlagAtomic sets the given flags using atomic operation safe for
-	// concurrent access.
-	SetFlagAtomic(flag ...int)
+	// HasFlag checks if flag is set -- we are always using atomic operation safe
+	// for concurrent access, because *some* likely need it, thus *all* must use
+	HasFlag(flag int) bool
 
-	// SetFlagStateAtomic sets the given flags to given state using atomic
+	// SetFlag sets the given flag(s) -- we are always using atomic operation safe
+	// for concurrent access, because *some* likely need it, thus *all* must use
+	SetFlag(flag ...int)
+
+	// SetFlagState sets the given flag(s) to given state, using atomic
 	// operation safe for concurrent access.
-	SetFlagStateAtomic(on bool, flag ...int)
+	SetFlagState(on bool, flag ...int)
 
-	// ClearFlagAtomic clears the given flags using atomic operation safe for
+	// ClearFlag clears the given flag(s) using atomic operation safe for
 	// concurrent access.
-	ClearFlagAtomic(flag ...int)
+	ClearFlag(flag ...int)
 
 	// IsField checks if this is a field on a parent struct (via IsField
 	// Flag), as opposed to a child in Children -- Ki nodes can be added as
@@ -360,10 +367,6 @@ type Ki interface {
 
 	// IsUpdating checks if node is currently updating.
 	IsUpdating() bool
-
-	// IsUpdatingAtomic checks if node is currently updating, protected by
-	// atomic flag.
-	IsUpdatingAtomic() bool
 
 	// OnlySelfUpdate checks if this node only applies UpdateStart / End logic
 	// to itself, not its children (which is the default) (via Flag of same

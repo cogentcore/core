@@ -65,7 +65,7 @@ func (n Node) String() string {
 
 func (n *Node) Init(this Ki) {
 	kitype := KiType()
-	bitflag.ClearMask(n.Flags(), int64(UpdateFlagsMask))
+	bitflag.ClearMaskAtomic(&n.Flag, int64(UpdateFlagsMask))
 	if n.This != this {
 		n.This = this
 		// we need to call this directly instead of FuncFields because we need the field name
@@ -73,7 +73,7 @@ func (n *Node) Init(this Ki) {
 			if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 				fk := kit.PtrValue(fieldVal).Interface().(Ki)
 				if fk != nil {
-					bitflag.Set(fk.Flags(), int(IsField))
+					fk.SetFlag(int(IsField))
 					fk.InitName(fk, field.Name)
 					fk.SetParent(n.This)
 				}
@@ -214,7 +214,7 @@ func (n *Node) SetParent(parent Ki) {
 	if parent != nil && !parent.OnlySelfUpdate() {
 		parup := parent.IsUpdating()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			bitflag.SetState(k.Flags(), parup, int(Updating))
+			k.SetFlagState(parup, int(Updating))
 			return true
 		})
 	}
@@ -466,9 +466,9 @@ func (n *Node) addChildImplPost(kid Ki) {
 	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
 	if oldPar != nil {
 		oldPar.DeleteChild(kid, false)
-		bitflag.Set(kid.Flags(), int(ChildMoved))
+		kid.SetFlag(int(ChildMoved))
 	} else {
-		bitflag.Set(kid.Flags(), int(ChildAdded))
+		kid.SetFlag(int(ChildAdded))
 	}
 }
 
@@ -502,7 +502,7 @@ func (n *Node) AddChild(kid Ki) error {
 	updt := n.UpdateStart()
 	err := n.AddChildImpl(kid)
 	if err == nil {
-		bitflag.Set(&n.Flag, int(ChildAdded))
+		n.SetFlag(int(ChildAdded))
 		if kid.UniqueName() == "" {
 			kid.SetUniqueName(kid.Name())
 		}
@@ -516,7 +516,7 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 	updt := n.UpdateStart()
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
-		bitflag.Set(&n.Flag, int(ChildAdded))
+		n.SetFlag(int(ChildAdded))
 		if kid.UniqueName() == "" {
 			kid.SetUniqueName(kid.Name())
 		}
@@ -552,7 +552,7 @@ func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
 	err := n.AddChildImpl(kid)
 	if err == nil {
 		kid.SetName(name)
-		bitflag.Set(&n.Flag, int(ChildAdded))
+		n.SetFlag(int(ChildAdded))
 	}
 	n.UpdateEnd(updt)
 	return kid
@@ -564,7 +564,7 @@ func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
 	err := n.InsertChildImpl(kid, at)
 	if err == nil {
 		kid.SetName(name)
-		bitflag.Set(&n.Flag, int(ChildAdded))
+		n.SetFlag(int(ChildAdded))
 	}
 	n.UpdateEnd(updt)
 	return kid
@@ -577,7 +577,7 @@ func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 	if err == nil {
 		kid.SetNameRaw(name)
 		kid.SetUniqueName(name)
-		bitflag.Set(&n.Flag, int(ChildAdded))
+		n.SetFlag(int(ChildAdded))
 	}
 	n.UpdateEnd(updt)
 	return kid
@@ -601,7 +601,7 @@ func (n *Node) MoveChild(from, to int) bool {
 	updt := n.UpdateStart()
 	ok := n.Kids.Move(from, to)
 	if ok {
-		bitflag.Set(&n.Flag, int(ChildMoved))
+		n.SetFlag(int(ChildMoved))
 	}
 	n.UpdateEnd(updt)
 	return ok
@@ -646,14 +646,14 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
 		return false
 	}
 	updt := n.UpdateStart()
-	bitflag.Set(&n.Flag, int(ChildDeleted))
+	n.SetFlag(int(ChildDeleted))
 	if child.Parent() == n.This {
 		// only deleting if we are still parent -- change parent first to
 		// signal move delete is always sent live to affected node without
 		// update blocking note: children of child etc will not send a signal
 		// at this point -- only later at destroy -- up to this parent to
 		// manage all that
-		bitflag.Set(child.Flags(), int(NodeDeleted))
+		child.SetFlag(int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 	}
@@ -686,9 +686,9 @@ func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, bool) {
 
 func (n *Node) DeleteChildren(destroy bool) {
 	updt := n.UpdateStart()
-	bitflag.Set(&n.Flag, int(ChildrenDeleted))
+	n.SetFlag(int(ChildrenDeleted))
 	for _, child := range n.Kids {
-		bitflag.Set(child.Flags(), int(NodeDeleted))
+		child.SetFlag(int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
 		child.UpdateReset()
@@ -716,7 +716,7 @@ func (n *Node) Destroy() {
 		return
 	}
 	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
-	bitflag.Set(&n.Flag, int(NodeDestroyed))
+	n.SetFlag(int(NodeDestroyed))
 	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
 	// and destroy all my fields
@@ -743,45 +743,44 @@ func (n *Node) Flags() *int64 {
 	return &n.Flag
 }
 
-func (n *Node) SetFlagAtomic(flag ...int) {
+func (n *Node) HasFlag(flag int) bool {
+	return bitflag.HasAtomic(&n.Flag, flag)
+}
+
+func (n *Node) SetFlag(flag ...int) {
 	bitflag.SetAtomic(&n.Flag, flag...)
 }
 
-func (n *Node) SetFlagStateAtomic(on bool, flag ...int) {
+func (n *Node) SetFlagState(on bool, flag ...int) {
 	bitflag.SetStateAtomic(&n.Flag, on, flag...)
 }
 
-func (n *Node) ClearFlagAtomic(flag ...int) {
+func (n *Node) ClearFlag(flag ...int) {
 	bitflag.ClearAtomic(&n.Flag, flag...)
 }
 
-func (n *Node) IsUpdatingAtomic() bool {
-	rval := bitflag.HasAtomic(&n.Flag, int(Updating))
-	return rval
-}
-
 func (n *Node) IsUpdating() bool {
-	return bitflag.Has(n.Flag, int(Updating))
+	return bitflag.HasAtomic(&n.Flag, int(Updating))
 }
 
 func (n *Node) IsField() bool {
-	return bitflag.Has(n.Flag, int(IsField))
+	return bitflag.HasAtomic(&n.Flag, int(IsField))
 }
 
 func (n *Node) OnlySelfUpdate() bool {
-	return bitflag.Has(n.Flag, int(OnlySelfUpdate))
+	return bitflag.HasAtomic(&n.Flag, int(OnlySelfUpdate))
 }
 
 func (n *Node) SetOnlySelfUpdate() {
-	bitflag.Set(&n.Flag, int(OnlySelfUpdate))
+	n.SetFlag(int(OnlySelfUpdate))
 }
 
 func (n *Node) IsDeleted() bool {
-	return bitflag.Has(n.Flag, int(NodeDeleted))
+	return bitflag.HasAtomic(&n.Flag, int(NodeDeleted))
 }
 
 func (n *Node) IsDestroyed() bool {
-	return bitflag.Has(n.Flag, int(NodeDestroyed))
+	return bitflag.HasAtomic(&n.Flag, int(NodeDestroyed))
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -806,13 +805,13 @@ func (n *Node) SetProps(props Props, update bool) {
 		n.Props[key] = val
 	}
 	if update {
-		bitflag.Set(n.Flags(), int(PropUpdated))
+		n.SetFlag(int(PropUpdated))
 		n.UpdateSig()
 	}
 }
 
 func (n *Node) SetPropUpdate(key string, val interface{}) {
-	bitflag.Set(n.Flags(), int(PropUpdated))
+	n.SetFlag(int(PropUpdated))
 	n.SetProp(key, val)
 	n.UpdateSig()
 }
@@ -1081,19 +1080,16 @@ func (n *Node) NodeSignal() *Signal {
 }
 
 func (n *Node) UpdateStart() bool {
-	if n.IsUpdatingAtomic() {
-		return false
-	}
-	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
+	if n.IsUpdating() || n.IsDestroyed() {
 		return false
 	}
 	if n.OnlySelfUpdate() {
-		n.SetFlagAtomic(int(Updating))
+		n.SetFlag(int(Updating))
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			if !k.IsUpdating() {
 				bitflag.ClearMask(k.Flags(), int64(UpdateFlagsMask))
-				k.SetFlagAtomic(int(Updating))
+				k.SetFlag(int(Updating))
 				return true // keep going down
 			} else {
 				return false // bail -- already updating
@@ -1110,15 +1106,15 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	if bitflag.HasAny(n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
+	if bitflag.HasAnyAtomic(&n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
-		n.ClearFlagAtomic(int(Updating))
+		n.ClearFlag(int(Updating))
 		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlagAtomic(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
 		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
@@ -1132,15 +1128,15 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	if bitflag.HasAny(n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
+	if bitflag.HasAnyAtomic(&n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
-		n.ClearFlagAtomic(int(Updating))
+		n.ClearFlag(int(Updating))
 		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlagAtomic(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
 		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
@@ -1148,10 +1144,7 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 }
 
 func (n *Node) UpdateSig() bool {
-	if n.IsUpdatingAtomic() {
-		return false
-	}
-	if bitflag.Has(n.Flag, int(NodeDestroyed)) {
+	if n.IsUpdating() || n.IsDestroyed() {
 		return false
 	}
 	n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
@@ -1160,10 +1153,10 @@ func (n *Node) UpdateSig() bool {
 
 func (n *Node) UpdateReset() {
 	if n.OnlySelfUpdate() {
-		n.ClearFlagAtomic(int(Updating))
+		n.ClearFlag(int(Updating))
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlagAtomic(int(Updating))
+			k.ClearFlag(int(Updating))
 			return true
 		})
 	}
@@ -1212,7 +1205,7 @@ func (n *Node) SetField(field string, val interface{}) bool {
 	updt := n.UpdateStart()
 	ok := kit.SetRobust(kit.PtrValue(fv).Interface(), val)
 	if ok {
-		bitflag.Set(n.Flags(), int(FieldUpdated))
+		n.SetFlag(int(FieldUpdated))
 	}
 	n.UpdateEnd(updt)
 	return ok
@@ -1264,7 +1257,7 @@ func (n *Node) CopyFrom(from Ki) error {
 		return err
 	}
 	updt := n.UpdateStart()
-	bitflag.Set(&n.Flag, int(NodeCopied))
+	n.SetFlag(int(NodeCopied))
 	sameTree := (n.Root() == from.Root())
 	from.GetPtrPaths()
 	err := n.CopyFromRaw(from)
@@ -1498,7 +1491,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	if err == nil {
 		n.UnmarshalPost()
 	}
-	bitflag.Set(&n.Flag, int(ChildAdded)) // this might not be set..
+	n.SetFlag(int(ChildAdded)) // this might not be set..
 	n.UpdateEnd(updt)
 	return err
 }
@@ -1538,7 +1531,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		if err == nil {
 			root.UnmarshalPost()
 		}
-		bitflag.Set(root.Flags(), int(ChildAdded)) // this might not be set..
+		root.SetFlag(int(ChildAdded)) // this might not be set..
 		root.UpdateEnd(updt)
 		return root, nil
 	} else {
