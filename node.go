@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -122,34 +121,34 @@ var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 
 // HasNoLayout checks if the current node is flagged as not needing layout
 func (nb *NodeBase) HasNoLayout() bool {
-	return bitflag.Has(nb.Flag, int(NoLayout))
+	return nb.HasFlag(int(NoLayout))
 }
 
 // CanFocus checks if this node can recieve keyboard focus
 func (nb *NodeBase) CanFocus() bool {
-	return bitflag.Has(nb.Flag, int(CanFocus))
+	return nb.HasFlag(int(CanFocus))
 }
 
 // HasFocus checks if the current node is flagged as having keyboard focus
 func (nb *NodeBase) HasFocus() bool {
-	return bitflag.Has(nb.Flag, int(HasFocus))
+	return nb.HasFlag(int(HasFocus))
 }
 
 // IsDragging tests if the current node is currently flagged as receiving
 // dragging events -- flag set by window
 func (nb *NodeBase) IsDragging() bool {
-	return bitflag.Has(nb.Flag, int(NodeDragging))
+	return nb.HasFlag(int(NodeDragging))
 }
 
 // IsInstaDrag tests if the current node has InstaDrag property set
 func (nb *NodeBase) IsInstaDrag() bool {
-	return bitflag.Has(nb.Flag, int(InstaDrag))
+	return nb.HasFlag(int(InstaDrag))
 }
 
 // IsInactive tests if this node is flagged as Inactive.  if so, behave (e.g.,
 // ignore events except select, context menu) and style appropriately
 func (nb *NodeBase) IsInactive() bool {
-	return bitflag.Has(nb.Flag, int(Inactive))
+	return nb.HasFlag(int(Inactive))
 }
 
 // IsActive tests if this node is NOT flagged as Inactive.
@@ -159,30 +158,30 @@ func (nb *NodeBase) IsActive() bool {
 
 // SetInactive sets the node as inactive
 func (nb *NodeBase) SetInactive() {
-	bitflag.Set(&nb.Flag, int(Inactive))
+	nb.SetFlag(int(Inactive))
 }
 
 // ClearInactive clears the node as inactive
 func (nb *NodeBase) ClearInactive() {
-	bitflag.Clear(&nb.Flag, int(Inactive))
+	nb.ClearFlag(int(Inactive))
 }
 
 // SetInactiveState sets flag as inactive or not based on inact arg
 func (nb *NodeBase) SetInactiveState(inact bool) {
-	bitflag.SetState(&nb.Flag, inact, int(Inactive))
+	nb.SetFlagState(inact, int(Inactive))
 }
 
 // SetActiveState sets flag as active or not based on act arg -- positive logic
 // is easier to understand.
 func (nb *NodeBase) SetActiveState(act bool) {
-	bitflag.SetState(&nb.Flag, !act, int(Inactive))
+	nb.SetFlagState(!act, int(Inactive))
 }
 
 // SetInactiveStateUpdt sets flag as inactive or not based on inact arg, and
 // does UpdateSig if state changed.
 func (nb *NodeBase) SetInactiveStateUpdt(inact bool) {
 	cur := nb.IsInactive()
-	bitflag.SetState(&nb.Flag, inact, int(Inactive))
+	nb.SetFlagState(inact, int(Inactive))
 	if inact != cur {
 		nb.UpdateSig()
 	}
@@ -192,7 +191,7 @@ func (nb *NodeBase) SetInactiveStateUpdt(inact bool) {
 // is easier to understand -- does UpdateSig if state changed.
 func (nb *NodeBase) SetActiveStateUpdt(act bool) {
 	cur := nb.IsActive()
-	bitflag.SetState(&nb.Flag, !act, int(Inactive))
+	nb.SetFlagState(!act, int(Inactive))
 	if act != cur {
 		nb.UpdateSig()
 	}
@@ -201,85 +200,85 @@ func (nb *NodeBase) SetActiveStateUpdt(act bool) {
 // IsInvisible tests if this node is flagged as Invisible.  if so, do not
 // render, update, interact.
 func (nb *NodeBase) IsInvisible() bool {
-	return bitflag.Has(nb.Flag, int(Invisible))
+	return nb.HasFlag(int(Invisible))
 }
 
 // SetInvisible sets the node as invisible
 func (nb *NodeBase) SetInvisible() {
-	bitflag.Set(&nb.Flag, int(Invisible))
+	nb.SetFlag(int(Invisible))
 }
 
 // ClearInvisible clears the node as invisible
 func (nb *NodeBase) ClearInvisible() {
-	bitflag.Clear(&nb.Flag, int(Invisible))
+	nb.ClearFlag(int(Invisible))
 }
 
 // SetInvisibleState sets flag as invisible or not based on invis arg
 func (nb *NodeBase) SetInvisibleState(invis bool) {
-	bitflag.SetState(&nb.Flag, invis, int(Invisible))
+	nb.SetFlagState(invis, int(Invisible))
 }
 
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (nb *NodeBase) SetCanFocusIfActive() {
-	bitflag.SetState(&nb.Flag, !nb.IsInactive(), int(CanFocus))
+	nb.SetFlagState(!nb.IsInactive(), int(CanFocus))
 }
 
 // IsSelected tests if this node is flagged as Selected
 func (nb *NodeBase) IsSelected() bool {
-	return bitflag.Has(nb.Flag, int(Selected))
+	return nb.HasFlag(int(Selected))
 }
 
 // SetSelected sets the node as selected
 func (nb *NodeBase) SetSelected() {
-	bitflag.Set(&nb.Flag, int(Selected))
+	nb.SetFlag(int(Selected))
 }
 
 // ClearSelected sets the node as not selected
 func (nb *NodeBase) ClearSelected() {
-	bitflag.Clear(&nb.Flag, int(Selected))
+	nb.ClearFlag(int(Selected))
 }
 
 // SetSelectedState set flag as selected or not based on sel arg
 func (nb *NodeBase) SetSelectedState(sel bool) {
-	bitflag.SetState(&nb.Flag, sel, int(Selected))
+	nb.SetFlagState(sel, int(Selected))
 }
 
 // NeedsFullReRender checks if node has said it needs full re-render
 func (nb *NodeBase) NeedsFullReRender() bool {
-	return bitflag.Has(nb.Flag, int(FullReRender))
+	return nb.HasFlag(int(FullReRender))
 }
 
 // SetFullReRender sets node as needing a full ReRender
 func (nb *NodeBase) SetFullReRender() {
-	bitflag.Set(&nb.Flag, int(FullReRender))
+	nb.SetFlag(int(FullReRender))
 }
 
 // ClearFullReRender clears node as needing a full ReRender
 func (nb *NodeBase) ClearFullReRender() {
-	bitflag.Clear(&nb.Flag, int(FullReRender))
+	nb.ClearFlag(int(FullReRender))
 }
 
 // IsReRenderAnchor returns whethers the current node is a ReRenderAnchor
 func (nb *NodeBase) IsReRenderAnchor() bool {
-	return bitflag.Has(nb.Flag, int(ReRenderAnchor))
+	return nb.HasFlag(int(ReRenderAnchor))
 }
 
 // SetReRenderAnchor sets node as a ReRenderAnchor
 func (nb *NodeBase) SetReRenderAnchor() {
-	bitflag.Set(&nb.Flag, int(ReRenderAnchor))
+	nb.SetFlag(int(ReRenderAnchor))
 }
 
 // IsOverlay returns whether node is an overlay -- lives in special viewport
 // and renders without bounds
 func (nb *NodeBase) IsOverlay() bool {
-	return bitflag.Has(nb.Flag, int(Overlay))
+	return nb.HasFlag(int(Overlay))
 }
 
 // SetOverlay flags this node as an overlay -- lives in special viewport and
 // renders without bounds
 func (nb *NodeBase) SetAsOverlay() {
-	bitflag.Set(&nb.Flag, int(Overlay))
+	nb.SetFlag(int(Overlay))
 }
 
 // translate a point in global pixel coords into relative position within node

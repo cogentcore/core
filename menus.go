@@ -12,7 +12,6 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -336,8 +335,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	updt := pvp.UpdateStart()
 	pvp.SetProp("color", &Prefs.Colors.Font)
 	pvp.Fill = true
-	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
-	bitflag.Set(&pvp.Flag, int(VpFlagMenu))
+	pvp.SetFlag(int(VpFlagPopup))
+	pvp.SetFlag(int(VpFlagMenu))
 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact

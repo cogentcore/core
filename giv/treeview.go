@@ -164,10 +164,10 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 		if gi.Update2DTrace {
 			fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(*send.Flags(), ki.FlagsN))
 		}
-		if bitflag.HasMask(dflags, int64(ki.StruUpdateFlagsMask)) {
+		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
 			tvIdx := tv.ViewIdx
 			tv.SyncToSrc(&tvIdx)
-		} else if bitflag.HasMask(dflags, int64(ki.ValUpdateFlagsMask)) {
+		} else if bitflag.HasAnyMask(dflags, int64(ki.ValUpdateFlagsMask)) {
 			tv.UpdateSig()
 		}
 	}
@@ -175,30 +175,30 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 
 // IsClosed returns whether this node itself closed?
 func (tv *TreeView) IsClosed() bool {
-	return bitflag.Has(tv.Flag, int(TreeViewFlagClosed))
+	return tv.HasFlag(int(TreeViewFlagClosed))
 }
 
 // SetClosed sets the closed flag for this node -- call Close() method to
 // close a node and update view
 func (tv *TreeView) SetClosed() {
-	bitflag.Set(&tv.Flag, int(TreeViewFlagClosed))
+	tv.SetFlag(int(TreeViewFlagClosed))
 }
 
 // SetOpen clears the closed flag for this node -- call Open() method to open
 // a node and update view
 func (tv *TreeView) SetOpen() {
-	bitflag.Clear(&tv.Flag, int(TreeViewFlagClosed))
+	tv.ClearFlag(int(TreeViewFlagClosed))
 }
 
 // SetClosedState sets the closed state based on arg
 func (tv *TreeView) SetClosedState(closed bool) {
-	bitflag.SetState(&tv.Flag, closed, int(TreeViewFlagClosed))
+	tv.SetFlagState(closed, int(TreeViewFlagClosed))
 }
 
 // IsChanged returns whether this node has the changed flag set?  Only updated
 // on the root note by GUI actions.
 func (tv *TreeView) IsChanged() bool {
-	return bitflag.Has(tv.Flag, int(TreeViewFlagChanged))
+	return tv.HasFlag(int(TreeViewFlagChanged))
 }
 
 // SetChanged is called whenever a gui action updates the tree -- sets Changed
@@ -207,7 +207,7 @@ func (tv *TreeView) SetChanged() {
 	if tv.RootView == nil {
 		return
 	}
-	bitflag.Set(&tv.RootView.Flag, int(TreeViewFlagChanged))
+	tv.RootView.SetFlag(int(TreeViewFlagChanged))
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewChanged), tv.This)
 }
 
@@ -221,7 +221,7 @@ func (tv *TreeView) HasClosedParent() bool {
 		}
 		if pg.TypeEmbeds(KiT_TreeView) {
 			// nw := pg.Embed(KiT_TreeView).(*TreeView)
-			if bitflag.Has(pg.Flag, int(TreeViewFlagClosed)) {
+			if pg.HasFlag(int(TreeViewFlagClosed)) {
 				pcol = true
 				return false
 			}
@@ -1741,7 +1741,7 @@ func (tv *TreeView) StyleTreeView() {
 		tv.SetClosed()
 	}
 	if tv.HasClosedParent() {
-		bitflag.Clear(&tv.Flag, int(gi.CanFocus))
+		tv.ClearFlag(int(gi.CanFocus))
 		return
 	}
 	tv.SetCanFocusIfActive()

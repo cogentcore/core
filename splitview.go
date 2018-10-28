@@ -13,7 +13,6 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -451,7 +450,7 @@ func (sr *Splitter) Defaults() {
 	sr.Max = 1.0
 	sr.Snap = false
 	sr.Prec = 4
-	bitflag.Set(&sr.Flag, int(InstaDrag))
+	sr.SetFlag(int(InstaDrag))
 }
 
 func (sr *Splitter) Init2D() {
@@ -488,7 +487,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 }
 
 func (sr *Splitter) Style2D() {
-	bitflag.Clear(&sr.Flag, int(CanFocus))
+	sr.ClearFlag(int(CanFocus))
 	sr.Style2DWidget()
 	sr.LayData.SetFromStyle(&sr.Sty.Layout) // also does reset
 	pst := &(sr.Par.(Node2D).AsWidget().Sty)

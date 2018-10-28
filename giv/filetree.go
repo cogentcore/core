@@ -23,7 +23,6 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -125,7 +124,7 @@ func (fn *FileNode) IsDir() bool {
 
 // IsSymLink returns true if file is a symlink
 func (fn *FileNode) IsSymLink() bool {
-	return bitflag.Has(fn.Flag, int(FileNodeSymLink))
+	return fn.HasFlag(int(FileNodeSymLink))
 }
 
 // IsExec returns true if file is an executable file
@@ -135,17 +134,17 @@ func (fn *FileNode) IsExec() bool {
 
 // IsOpen returns true if file is flagged as open
 func (fn *FileNode) IsOpen() bool {
-	return bitflag.Has(fn.Flag, int(FileNodeOpen))
+	return fn.HasFlag(int(FileNodeOpen))
 }
 
 // SetOpen sets the open flag
 func (fn *FileNode) SetOpen() {
-	bitflag.Set(&fn.Flag, int(FileNodeOpen))
+	fn.SetFlag(int(FileNodeOpen))
 }
 
 // SetClosed clears the open flag
 func (fn *FileNode) SetClosed() {
-	bitflag.Clear(&fn.Flag, int(FileNodeOpen))
+	fn.ClearFlag(int(FileNodeOpen))
 }
 
 // IsChanged returns true if the file is open and has been changed (edited) since last save

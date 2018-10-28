@@ -18,7 +18,6 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/pmezard/go-difflib/difflib"
@@ -58,7 +57,7 @@ type TextBuf struct {
 	Markup     [][]byte       `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
 	ByteOffs   []int          `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes int            `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
-	MarkupMu   sync.Mutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
+	MarkupMu   sync.RWMutex   `json:"-" xml:"-" desc:"mutex for updating markup"`
 	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
@@ -186,7 +185,7 @@ func (tb *TextBuf) New(nlines int) {
 
 // Stat gets info about the file, including highlighting language
 func (tb *TextBuf) Stat() error {
-	bitflag.Clear(&tb.Flag, int(TextBufFileModOk))
+	tb.ClearFlag(int(TextBufFileModOk))
 	err := tb.Info.InitFile(string(tb.Filename))
 	if err != nil {
 		return err
@@ -205,7 +204,7 @@ func (tb *TextBuf) Stat() error {
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
 // that this is OK
 func (tb *TextBuf) FileModCheck() {
-	if bitflag.Has(tb.Flag, int(TextBufFileModOk)) {
+	if tb.HasFlag(int(TextBufFileModOk)) {
 		return
 	}
 	info, err := os.Stat(string(tb.Filename))
@@ -224,7 +223,7 @@ func (tb *TextBuf) FileModCheck() {
 				case 1:
 					tb.Revert()
 				case 2:
-					bitflag.Set(&tb.Flag, int(TextBufFileModOk))
+					tb.SetFlag(int(TextBufFileModOk))
 				}
 			})
 	}
@@ -442,17 +441,17 @@ func (tb *TextBuf) AutoSaveFilename() string {
 
 // AutoSave does the autosave -- safe to call in a separate goroutine
 func (tb *TextBuf) AutoSave() error {
-	if bitflag.HasAtomic(&tb.Flag, int(TextBufAutoSaving)) {
+	if tb.HasFlag(int(TextBufAutoSaving)) {
 		return nil
 	}
-	bitflag.SetAtomic(&tb.Flag, int(TextBufAutoSaving))
+	tb.SetFlag(int(TextBufAutoSaving))
 	asfn := tb.AutoSaveFilename()
 	b := tb.LinesToBytesCopy()
 	err := ioutil.WriteFile(asfn, b, 0644)
 	if err != nil {
 		log.Printf("giv.TextBuf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
-	bitflag.ClearAtomic(&tb.Flag, int(TextBufAutoSaving))
+	tb.ClearFlag(int(TextBufAutoSaving))
 	return err
 }
 
@@ -1173,7 +1172,7 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 
 // IsMarkingUp is true if the MarkupAllLines process is currently running
 func (tb *TextBuf) IsMarkingUp() bool {
-	return bitflag.HasAtomic(&tb.Flag, int(TextBufMarkingUp))
+	return tb.HasFlag(int(TextBufMarkingUp))
 }
 
 // ReMarkup runs re-markup on text in background
@@ -1197,12 +1196,12 @@ func (tb *TextBuf) MarkupAllLines() {
 	if tb.IsMarkingUp() {
 		return
 	}
-	bitflag.SetAtomic(&tb.Flag, int(TextBufMarkingUp))
+	tb.SetFlag(int(TextBufMarkingUp))
 
 	tb.LinesToBytes()
 	mtlns, err := tb.Hi.MarkupText(tb.Txt)
 	if err != nil {
-		bitflag.ClearAtomic(&tb.Flag, int(TextBufMarkingUp))
+		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
 
@@ -1213,7 +1212,7 @@ func (tb *TextBuf) MarkupAllLines() {
 		tb.Markup[ln] = tb.Hi.FixMarkupLine(mt)
 	}
 	tb.MarkupMu.Unlock()
-	bitflag.ClearAtomic(&tb.Flag, int(TextBufMarkingUp))
+	tb.ClearFlag(int(TextBufMarkingUp))
 	tb.TextBufSig.Emit(tb.This, int64(TextBufMarkUpdt), tb.Txt)
 }
 

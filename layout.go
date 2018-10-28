@@ -1132,7 +1132,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		}
 		li, _ := KiToNode2D(recv)
 		ls := li.AsLayout2D()
-		if !ls.IsUpdatingAtomic() {
+		if !ls.IsUpdating() {
 			wupdt := ls.Viewport.Win.UpdateStart()
 			ls.Move2DTree()
 			ls.Viewport.ReRender2DNode(li)
@@ -1764,9 +1764,9 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 func (ly *Layout) StyleLayout() {
 	ly.Style2DWidget()
 	tprops := *kit.Types.Properties(ly.Type(), true) // true = makeNew
-	kit.TypesMu.Lock()
+	kit.TypesMu.RLock()
 	LayoutFields.Style(ly, nil, tprops)
-	kit.TypesMu.Unlock()
+	kit.TypesMu.RUnlock()
 	LayoutFields.Style(ly, nil, ly.Props)
 	LayoutFields.ToDots(ly, &ly.Sty.UnContext)
 }

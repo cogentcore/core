@@ -24,7 +24,6 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -216,18 +215,18 @@ func (tv *TextView) ReMarkup() {
 // NeedsRefresh checks if a refresh is required -- atomically safe for other
 // routines to set the NeedsRefresh flag
 func (tv *TextView) NeedsRefresh() bool {
-	return bitflag.HasAtomic(&tv.Flag, int(TextViewNeedsRefresh))
+	return tv.HasFlag(int(TextViewNeedsRefresh))
 }
 
 // SetNeedsRefresh flags that a refresh is required -- atomically safe for
 // other routines to call this
 func (tv *TextView) SetNeedsRefresh() {
-	bitflag.SetAtomic(&tv.Flag, int(TextViewNeedsRefresh))
+	tv.SetFlag(int(TextViewNeedsRefresh))
 }
 
 // ClearNeedsRefresh clears needs refresh flag -- atomically safe
 func (tv *TextView) ClearNeedsRefresh() {
-	bitflag.ClearAtomic(&tv.Flag, int(TextViewNeedsRefresh))
+	tv.ClearFlag(int(TextViewNeedsRefresh))
 }
 
 // RefreshIfNeeded re-displays everything if SetNeedsRefresh was called --
@@ -250,7 +249,7 @@ func (tv *TextView) IsChanged() bool {
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
 func (tv *TextView) HasLineNos() bool {
-	return bitflag.Has(tv.Flag, int(TextViewHasLineNos))
+	return tv.HasFlag(int(TextViewHasLineNos))
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -447,7 +446,7 @@ func (tv *TextView) HiStyle() {
 // Markup version of the source, and returns whether the current rendered size
 // is different from what it was previously
 func (tv *TextView) LayoutAllLines(inLayout bool) bool {
-	if inLayout && bitflag.Has(tv.Flag, int(TextViewInReLayout)) {
+	if inLayout && tv.HasFlag(int(TextViewInReLayout)) {
 		return false
 	}
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
@@ -486,7 +485,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
-	tv.Buf.MarkupMu.Lock()
+	tv.Buf.MarkupMu.RLock()
 	for ln := 0; ln < nln; ln++ {
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
@@ -495,7 +494,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		off += lsz
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.Buf.MarkupMu.Unlock()
+	tv.Buf.MarkupMu.RUnlock()
 
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
 	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
@@ -550,11 +549,11 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	}
 	ly := tv.ParentLayout()
 	if ly != nil {
-		bitflag.Set(&tv.Flag, int(TextViewInReLayout))
+		tv.SetFlag(int(TextViewInReLayout))
 		ly.GatherSizes() // can't call Size2D b/c that resets layout
 		ly.Layout2DTree()
-		bitflag.Set(&tv.Flag, int(TextViewRenderScrolls))
-		bitflag.Clear(&tv.Flag, int(TextViewInReLayout))
+		tv.SetFlag(int(TextViewRenderScrolls))
+		tv.ClearFlag(int(TextViewInReLayout))
 		// fmt.Printf("resized: %v\n", tv.LayData.AllocSize)
 	}
 	return true
@@ -575,7 +574,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 	mxwd := float32(tv.LinesSize.X)
 	rerend := false
 
-	tv.Buf.MarkupMu.Lock()
+	tv.Buf.MarkupMu.RLock()
 	for ln := st; ln <= ed; ln++ {
 		curspans := len(tv.Renders[ln].Spans)
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
@@ -586,7 +585,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		}
 		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
 	}
-	tv.Buf.MarkupMu.Unlock()
+	tv.Buf.MarkupMu.RUnlock()
 
 	// update all offsets to end of text
 	if rerend || isDel || st != ed {
@@ -2745,10 +2744,10 @@ func (tv *TextView) VisSizes() {
 	}
 	tv.LineNoDigs = ints.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
 	if tv.Buf != nil && tv.Buf.Opts.LineNos {
-		bitflag.Set(&tv.Flag, int(TextViewHasLineNos))
+		tv.SetFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Ch + spc // space for icon
 	} else {
-		bitflag.Clear(&tv.Flag, int(TextViewHasLineNos))
+		tv.ClearFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = 0
 	}
 	tv.RenderSize()
@@ -2883,12 +2882,12 @@ func (tv *TextView) RenderLineNo(ln int) {
 
 // RenderScrolls renders scrollbars if needed
 func (tv *TextView) RenderScrolls() {
-	if bitflag.Has(tv.Flag, int(TextViewRenderScrolls)) {
+	if tv.HasFlag(int(TextViewRenderScrolls)) {
 		ly := tv.ParentLayout()
 		if ly != nil {
 			ly.ReRenderScrolls()
 		}
-		bitflag.Clear(&tv.Flag, int(TextViewRenderScrolls))
+		tv.ClearFlag(int(TextViewRenderScrolls))
 	}
 }
 
@@ -3230,9 +3229,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.lastRecenter = 0
 	}
 
-	if kf != gi.KeyFunUndo && bitflag.Has(tv.Flag, int(TextViewLastWasUndo)) {
+	if kf != gi.KeyFunUndo && tv.HasFlag(int(TextViewLastWasUndo)) {
 		tv.Buf.EmacsUndoSave()
-		bitflag.Clear(&tv.Flag, int(TextViewLastWasUndo))
+		tv.ClearFlag(int(TextViewLastWasUndo))
 	}
 
 	gotTabAI := false // got auto-indent tab this time
@@ -3368,7 +3367,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	if kt.IsProcessed() {
-		bitflag.SetState(&tv.Flag, gotTabAI, int(TextViewLastWasTabAI))
+		tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
 		return
 	}
 	switch kf {
@@ -3419,7 +3418,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.Undo()
-		bitflag.Set(&tv.Flag, int(TextViewLastWasUndo))
+		tv.SetFlag(int(TextViewLastWasUndo))
 	case gi.KeyFunRedo:
 		cancelAll()
 		kt.SetProcessed()
@@ -3451,7 +3450,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
 			updt := tv.Viewport.Win.UpdateStart()
-			lasttab := bitflag.Has(tv.Flag, int(TextViewLastWasTabAI))
+			lasttab := tv.HasFlag(int(TextViewLastWasTabAI))
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
 				tv.CursorPos.Ch = cpos
@@ -3501,7 +3500,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			}
 		}
 	}
-	bitflag.SetState(&tv.Flag, gotTabAI, int(TextViewLastWasTabAI))
+	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
@@ -3689,7 +3688,7 @@ func (tv *TextView) StyleTextView() {
 }
 
 func (tv *TextView) Style2D() {
-	bitflag.Set(&tv.Flag, int(gi.CanFocus)) // always focusable
+	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
 	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 }

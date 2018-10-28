@@ -12,7 +12,6 @@ import (
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -105,7 +104,7 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 				})
 		}
 		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-		bitflag.Set(&pvp.Flag, int(VpFlagCompleter))
+		pvp.SetFlag(int(VpFlagCompleter))
 		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 		oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 	}

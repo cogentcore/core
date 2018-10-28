@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/goki/gi"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -69,7 +68,7 @@ func (svg *SVG) SetDPIXForm() {
 
 func (svg *SVG) Init2D() {
 	svg.Viewport2D.Init2D()
-	bitflag.Set(&svg.Flag, int(gi.VpFlagSVG)) // we are an svg type
+	svg.SetFlag(int(gi.VpFlagSVG)) // we are an svg type
 	svg.Pnt.Defaults()
 	svg.Pnt.FontStyle.BgColor.SetColor(color.White)
 }
