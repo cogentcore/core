@@ -194,10 +194,14 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 }
 
 func (app *appImpl) NWindows() int {
+	app.mu.Lock()
+	defer app.mu.Unlock()
 	return len(app.winlist)
 }
 
 func (app *appImpl) Window(win int) oswin.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
 	sz := len(app.winlist)
 	if win < sz {
 		return app.winlist[win]
@@ -206,6 +210,8 @@ func (app *appImpl) Window(win int) oswin.Window {
 }
 
 func (app *appImpl) WindowByName(name string) oswin.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
 	for _, win := range app.winlist {
 		if win.Name() == name {
 			return win
@@ -215,6 +221,8 @@ func (app *appImpl) WindowByName(name string) oswin.Window {
 }
 
 func (app *appImpl) WindowInFocus() oswin.Window {
+	app.mu.Lock()
+	defer app.mu.Unlock()
 	for _, win := range app.winlist {
 		if win.IsFocus() {
 			return win
@@ -328,11 +336,13 @@ func (app *appImpl) QuitClean() {
 	if app.quitCleanFunc != nil {
 		app.quitCleanFunc()
 	}
+	app.mu.Lock()
 	nwin := len(app.winlist)
 	for i := nwin - 1; i >= 0; i-- {
 		win := app.winlist[i]
 		go win.Close()
 	}
+	app.mu.Unlock()
 	for i := 0; i < nwin; i++ {
 		<-app.quitCloseCnt
 		// fmt.Printf("win closed: %v\n", i)

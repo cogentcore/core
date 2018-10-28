@@ -173,6 +173,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	sz := image.Point{int(ev.Width), int(ev.Height)}
 	ps := image.Point{int(ev.X), int(ev.Y)}
 
+	w.mu.Lock()
 	frext := w.getFrameSizes() // l,r,t,b
 	ps.Y -= frext[2]
 	ps.X -= frext[0]
@@ -206,6 +207,7 @@ func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
 	// if scrno > 0 && len(theApp.screens) > int(scrno) {
 	w.Scrn = sc
 	// }
+	w.mu.Unlock()
 
 	// fmt.Printf("sending window event: %v: sz: %v pos: %v\n", act, sz, ps)
 	sendWindowEvent(w, act)
@@ -323,6 +325,47 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 	event.Init()
 	lastMouseEvent = event
 	w.Send(event)
+}
+
+func (w *windowImpl) Screen() *oswin.Screen {
+	w.mu.Lock()
+	sc := w.Scrn
+	w.mu.Unlock()
+	return sc
+}
+
+func (w *windowImpl) Size() image.Point {
+	w.mu.Lock()
+	sz := w.Sz
+	w.mu.Unlock()
+	return sz
+}
+
+func (w *windowImpl) Position() image.Point {
+	w.mu.Lock()
+	ps := w.Pos
+	w.mu.Unlock()
+	return ps
+}
+
+func (w *windowImpl) PhysicalDPI() float32 {
+	w.mu.Lock()
+	dpi := w.PhysDPI
+	w.mu.Unlock()
+	return dpi
+}
+
+func (w *windowImpl) LogicalDPI() float32 {
+	w.mu.Lock()
+	dpi := w.LogDPI
+	w.mu.Unlock()
+	return dpi
+}
+
+func (w *windowImpl) SetLogicalDPI(dpi float32) {
+	w.mu.Lock()
+	w.LogDPI = dpi
+	w.mu.Unlock()
 }
 
 func (w *windowImpl) SetTitle(title string) {

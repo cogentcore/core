@@ -1086,6 +1086,7 @@ func (w *Window) MainMenuUpdateWindows() {
 		w.UpMu.Unlock()
 		return
 	}
+	WindowGlobalMu.Lock()
 	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
 	if !ok {
 		w.UpMu.Unlock()
@@ -1095,6 +1096,7 @@ func (w *Window) MainMenuUpdateWindows() {
 	men := make(Menu, 0, len(AllWindows))
 	men.AddWindowsMenu(w)
 	wmen.Menu = men
+	WindowGlobalMu.Unlock()
 	w.UpMu.Unlock()
 	w.MainMenuUpdated()
 }

@@ -66,10 +66,9 @@ type windowImpl struct {
 	// when the window is closed
 	textures map[*textureImpl]struct{}
 
-	// sizeMu protects the setting of Sz based on window resize events. If you
-	// need to hold both glctxMu and sizeMu, the lock ordering is to lock
-	// glctxMu first (and unlock it last).
-	sizeMu sync.Mutex
+	// mu is general state mutex. If you need to hold both glctxMu and mu,
+	// the lock ordering is to lock glctxMu first (and unlock it last).
+	mu sync.Mutex
 
 	// mainMenu is the main menu associated with window, if applicable.
 	mainMenu oswin.MainMenu
@@ -135,9 +134,9 @@ func useOp(glctx gl.Context, op draw.Op) {
 }
 
 func (w *windowImpl) bindBackBuffer() {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	size := w.Sz
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 
 	w.backBufferBound = true
 	w.glctx.BindFramebuffer(gl.FRAMEBUFFER, gl.Framebuffer{Value: 0})
@@ -315,9 +314,9 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 }
 
 func (w *windowImpl) mvp(tlx, tly, trx, try, blx, bly float64) f64.Aff3 {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	size := w.Sz
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 
 	return calcMVP(size.X, size.Y, tlx, tly, trx, try, blx, bly)
 }
@@ -378,50 +377,50 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	return res
 }
 
-func (w *windowImpl) SetTitle(title string) {
-	w.Titl = title
-	updateTitle(w, title)
-}
-
 func (w *windowImpl) Screen() *oswin.Screen {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	sc := w.Scrn
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 	return sc
 }
 
 func (w *windowImpl) Size() image.Point {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	sz := w.Sz
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 	return sz
 }
 
 func (w *windowImpl) Position() image.Point {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	ps := w.Pos
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 	return ps
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	dpi := w.PhysDPI
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 	return dpi
 }
 
 func (w *windowImpl) LogicalDPI() float32 {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	dpi := w.LogDPI
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 	return dpi
 }
 
 func (w *windowImpl) SetLogicalDPI(dpi float32) {
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	w.LogDPI = dpi
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
+}
+
+func (w *windowImpl) SetTitle(title string) {
+	w.Titl = title
+	updateTitle(w, title)
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {

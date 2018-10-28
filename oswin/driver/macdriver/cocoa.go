@@ -278,7 +278,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 		act = window.Resize // todo: for now safer to default to resize -- to catch the filtering
 	}
 
-	w.sizeMu.Lock()
+	w.mu.Lock()
 	w.Sz = sz
 	w.Pos = ps
 	w.PhysDPI = dpi
@@ -288,7 +288,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 		w.Scrn = theApp.screens[scrno]
 	}
 
-	w.sizeMu.Unlock()
+	w.mu.Unlock()
 
 	sendWindowEvent(w, act)
 }
