@@ -521,7 +521,7 @@ func (vv *ValueViewBase) Val() reflect.Value {
 }
 
 func (vv *ValueViewBase) SetValue(val interface{}) bool {
-	if vv.This.(ValueView).IsInactive() {
+	if vv.This().(ValueView).IsInactive() {
 		return false
 	}
 	rval := false
@@ -551,7 +551,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 					gi.ChoiceDialog(vp,
 						gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
 						[]string{"Cancel Change", "Overwrite"},
-						vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+						vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 							switch sig {
 							case 0:
 								if vp != nil {
@@ -562,8 +562,8 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 								ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 								ov.SetMapIndex(nv, cv)              // set new key to current value
 								vv.Value = nv                       // update value to new key
-								vv.This.(ValueView).SaveTmp()
-								vv.ViewSig.Emit(vv.This, 0, nil)
+								vv.This().(ValueView).SaveTmp()
+								vv.ViewSig.Emit(vv.This(), 0, nil)
 								if vp != nil {
 									vp.FullRender2DTree()
 								}
@@ -592,10 +592,10 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 		rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 	}
 	if rval {
-		vv.This.(ValueView).SaveTmp()
+		vv.This().(ValueView).SaveTmp()
 	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This, val)
-	vv.ViewSig.Emit(vv.This, 0, nil)
+	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
+	vv.ViewSig.Emit(vv.This(), 0, nil)
 	return rval
 }
 
@@ -603,7 +603,7 @@ func (vv *ValueViewBase) SaveTmp() {
 	if vv.TmpSave == nil {
 		return
 	}
-	if vv.TmpSave == vv.This.(ValueView) {
+	if vv.TmpSave == vv.This().(ValueView) {
 		// if we are a map value, of a struct value, we save our value
 		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.IsMapKey {
 			if kit.NonPtrValue(vv.Value).Kind() == reflect.Struct {
@@ -625,7 +625,7 @@ func (vv *ValueViewBase) SaveTmp() {
 
 func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
 	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
-		vv.TmpSave = vv.This.(ValueView) // we are it!
+		vv.TmpSave = vv.This().(ValueView) // we are it!
 		vtyp := reflect.TypeOf(vv.Value.Interface())
 		vtp := reflect.New(vtyp)
 		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
@@ -709,7 +709,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This.(ValueView).IsInactive())
+	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := kit.ToFloat32(widthtag)
@@ -729,7 +729,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 		reflect.ValueOf(vv.Owner).MethodByName("SetCompleter").Call(in)
 	}
 
-	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			vvv, _ := recv.Embed(KiT_ValueViewBase).(*ValueViewBase)
 			tf := send.(*gi.TextField)

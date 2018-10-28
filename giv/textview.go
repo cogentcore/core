@@ -623,7 +623,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 
 // CursorMovedSig sends the signal that cursor has moved
 func (tv *TextView) CursorMovedSig() {
-	tv.TextViewSig.Emit(tv.This, int64(TextViewCursorMoved), tv.CursorPos)
+	tv.TextViewSig.Emit(tv.This(), int64(TextViewCursorMoved), tv.CursorPos)
 }
 
 // ValidateCursor sets current cursor to a valid cursor position
@@ -1224,7 +1224,7 @@ func (tv *TextView) CursorKill() {
 func (tv *TextView) JumpToLinePrompt() {
 	gi.StringPromptDialog(tv.Viewport, "", "Line no..",
 		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			dlg := send.(*gi.Dialog)
 			if sig == int64(gi.DialogAccepted) {
 				val := gi.StringPromptDialogValue(dlg)
@@ -1503,7 +1503,7 @@ func (tv *TextView) ISearchSelectMatch(midx int) {
 
 // ISearchSig sends the signal that ISearch is updated
 func (tv *TextView) ISearchSig() {
-	tv.TextViewSig.Emit(tv.This, int64(TextViewISearch), tv.CursorPos)
+	tv.TextViewSig.Emit(tv.This(), int64(TextViewISearch), tv.CursorPos)
 }
 
 // ISearchStart is an emacs-style interactive search mode -- this is called when
@@ -1646,7 +1646,7 @@ var PrevQReplaceRepls []string
 
 // QReplaceSig sends the signal that QReplace is updated
 func (tv *TextView) QReplaceSig() {
-	tv.TextViewSig.Emit(tv.This, int64(TextViewQReplace), tv.CursorPos)
+	tv.TextViewSig.Emit(tv.This(), int64(TextViewQReplace), tv.CursorPos)
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
@@ -1708,7 +1708,7 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv.Viewport, find, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	QReplaceDialog(tv.Viewport, find, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		dlg := send.(*gi.Dialog)
 		if sig == int64(gi.DialogAccepted) {
 			find, repl := QReplaceDialogValues(dlg)
@@ -2168,7 +2168,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
 	ac := m.AddAction(gi.ActOpts{Label: "Copy", Shortcut: cpsc},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			txf := recv.Embed(KiT_TextView).(*TextView)
 			txf.Copy(true)
 		})
@@ -2177,13 +2177,13 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 		ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
 		ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
 		ac = m.AddAction(gi.ActOpts{Label: "Cut", Shortcut: ctsc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Cut()
 			})
 		ac.SetActiveState(tv.HasSelection())
 		ac = m.AddAction(gi.ActOpts{Label: "Paste", Shortcut: ptsc},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Paste()
 			})
@@ -2269,7 +2269,7 @@ func (tv *TextView) CancelComplete() {
 func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		if tv.Complete != nil {
-			tv.Complete.CompleteSig.Disconnect(tv.This)
+			tv.Complete.CompleteSig.Disconnect(tv.This())
 		}
 		tv.Complete.Destroy()
 		tv.Complete = nil
@@ -2281,7 +2281,7 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 	tv.Complete.MatchFunc = matchFun
 	tv.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tv.Complete.CompleteSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.Complete.CompleteSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
 		if sig == int64(gi.CompleteSelect) {
 			tvf.CompleteText(data.(string)) // always use data
@@ -3545,7 +3545,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (tv *TextView) OpenLink(tl *gi.TextLink) {
-	tl.Widget = tv.This.(gi.Node2D)
+	tl.Widget = tv.This().(gi.Node2D)
 	// fmt.Printf("opening link: %v\n", tl.URL)
 	if len(tv.LinkSig.Cons) == 0 {
 		if gi.TextLinkHandler != nil {
@@ -3558,7 +3558,7 @@ func (tv *TextView) OpenLink(tl *gi.TextLink) {
 		}
 		return
 	}
-	tv.LinkSig.Emit(tv.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	tv.LinkSig.Emit(tv.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
 // LinkAt returns link at given cursor position, if one exists there --
@@ -3652,7 +3652,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 		if me.Action == mouse.Press {
 			me.SetProcessed()
 			tv.EmitContextMenuSignal()
-			tv.This.(gi.Node2D).ContextMenu()
+			tv.This().(gi.Node2D).ContextMenu()
 		}
 	}
 }
@@ -3694,8 +3694,8 @@ func (tv *TextView) TextViewEvents() {
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
-	if dlg, ok := tv.Viewport.This.(*gi.Dialog); ok {
-		dlg.DialogSig.Connect(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	if dlg, ok := tv.Viewport.This().(*gi.Dialog); ok {
+		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			txf, _ := recv.Embed(KiT_TextView).(*TextView)
 			if sig == int64(gi.DialogAccepted) {
 				txf.EditDone()
@@ -3717,10 +3717,10 @@ func (tv *TextView) StyleTextView() {
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]))
-		tv.StateStyles[i].StyleCSS(tv.This.(gi.Node2D), tv.CSSAgg, TextViewSelectors[i])
+		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i])
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This, true, true) // inherit and get type defaults
+	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), true, true) // inherit and get type defaults
 	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
 }
 
@@ -3771,7 +3771,7 @@ func (tv *TextView) Render2D() {
 		}
 	}
 	if tv.PushBounds() {
-		tv.This.(gi.Node2D).ConnectEvents2D()
+		tv.This().(gi.Node2D).ConnectEvents2D()
 		if tv.IsInactive() {
 			if tv.IsSelected() {
 				tv.Sty = tv.StateStyles[TextViewSel]

@@ -395,7 +395,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		if dsc != "" {
 			hdr.Tooltip += ": " + dsc
 		}
-		hdr.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			act := send.(*gi.Action)
 			fldIdx := act.Data.(int)
@@ -461,7 +461,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			idxlab.Text = idxtxt
 			idxlab.SetProp("tv-index", i)
 			idxlab.Selectable = true
-			idxlab.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
 					idx := wbb.KnownProp("tv-index").(int)
@@ -495,7 +495,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			if wb != nil {
 				wb.SetProp("tv-index", i)
 				wb.ClearSelected()
-				wb.WidgetSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
 						idx := wbb.KnownProp("tv-index").(int)
@@ -510,7 +510,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				widg.AsNode2D().SetInactive()
 			} else {
 				vvb := vv.AsValueViewBase()
-				vvb.ViewSig.ConnectOnly(tv.This, // todo: do we need this?
+				vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
 					func(recv, send ki.Ki, sig int64, data interface{}) {
 						tvv, _ := recv.Embed(KiT_TableView).(*TableView)
 						tvv.SetChanged()
@@ -526,7 +526,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				addact.SetIcon("plus")
 				addact.Tooltip = "insert a new element at this index"
 				addact.Data = i
-				addact.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.SliceNewAt(act.Data.(int)+1, true)
@@ -534,7 +534,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				delact.SetIcon("minus")
 				delact.Tooltip = "delete this element"
 				delact.Data = i
-				delact.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.SliceDelete(act.Data.(int), true)
@@ -559,7 +559,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 // types of changes, so this is just generic.
 func (tv *TableView) SetChanged() {
 	tv.Changed = true
-	tv.ViewSig.Emit(tv.This, 0, nil)
+	tv.ViewSig.Emit(tv.This(), 0, nil)
 	tv.ToolBar().UpdateActions() // nil safe
 }
 
@@ -578,7 +578,7 @@ func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
 	if reconfig {
 		tv.ConfigSliceGrid(true)
 	}
-	tv.ViewSig.Emit(tv.This, 0, nil)
+	tv.ViewSig.Emit(tv.This(), 0, nil)
 }
 
 // SliceDelete deletes element at given index from slice -- reconfig means
@@ -599,7 +599,7 @@ func (tv *TableView) SliceDelete(idx int, reconfig bool) {
 	if reconfig {
 		tv.ConfigSliceGrid(true)
 	}
-	tv.ViewSig.Emit(tv.This, 0, nil)
+	tv.ViewSig.Emit(tv.This(), 0, nil)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
@@ -658,7 +658,7 @@ func (tv *TableView) ConfigToolbar() {
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
-			tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.SliceNewAt(-1, true)
 			})
@@ -774,7 +774,7 @@ func (tv *TableView) Render2D() {
 			tv.VisRows = 10
 		}
 		tv.FrameStdRender()
-		tv.This.(gi.Node2D).ConnectEvents2D()
+		tv.This().(gi.Node2D).ConnectEvents2D()
 		tv.RenderScrolls()
 		tv.Render2DChildren()
 		tv.PopBounds()
@@ -993,7 +993,7 @@ func (tv *TableView) MoveDownAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveDown(selMode)
 	if nrow >= 0 {
 		tv.ScrollToRow(nrow)
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
 }
@@ -1022,7 +1022,7 @@ func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 	nrow := tv.MoveUp(selMode)
 	if nrow >= 0 {
 		tv.ScrollToRow(nrow)
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
 }
@@ -1052,7 +1052,7 @@ func (tv *TableView) MovePageDownAction(selMode mouse.SelectModes) int {
 	nrow := tv.MovePageDown(selMode)
 	if nrow >= 0 {
 		tv.ScrollToRow(nrow)
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
 }
@@ -1082,7 +1082,7 @@ func (tv *TableView) MovePageUpAction(selMode mouse.SelectModes) int {
 	nrow := tv.MovePageUp(selMode)
 	if nrow >= 0 {
 		tv.ScrollToRow(nrow)
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), nrow)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
 }
@@ -1141,7 +1141,7 @@ func (tv *TableView) UpdateSelect(idx int, sel bool) {
 			tv.SelectedIdx = idx
 			tv.SelectRowWidgets(tv.SelectedIdx, true)
 		}
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 	} else {
 		selMode := mouse.NoSelectMode
 		win := tv.Viewport.Win
@@ -1248,7 +1248,7 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 			tv.SelectedIdx = row
 			tv.SelectRow(row)
 			tv.RowGrabFocus(row)
-			tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
@@ -1275,7 +1275,7 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 				}
 			}
 			tv.RowGrabFocus(row)
-			tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 		}
 	case mouse.ExtendOne:
 		if tv.RowIsSelected(row) {
@@ -1284,7 +1284,7 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 			tv.SelectedIdx = row
 			tv.SelectRow(row)
 			tv.RowGrabFocus(row)
-			tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 		}
 	case mouse.NoSelectMode:
 		if tv.RowIsSelected(row) {
@@ -1300,12 +1300,12 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 			tv.SelectRow(row)
 			tv.RowGrabFocus(row)
 		}
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 	default: // anything else
 		tv.SelectedIdx = row
 		tv.SelectRow(row)
 		tv.RowGrabFocus(row)
-		tv.WidgetSig.Emit(tv.This, int64(gi.WidgetSelected), tv.SelectedIdx)
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -1372,7 +1372,7 @@ func (tv *TableView) Copy(reset bool) {
 
 // CopyRows copies selected rows to clip.Board, optionally resetting the selection
 func (tv *TableView) CopyRows(reset bool) {
-	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Copy(reset)
 	} else {
 		tv.Copy(reset)
@@ -1416,7 +1416,7 @@ func (tv *TableView) Cut() {
 
 // CutRows copies selected rows to clip.Board and deletes selected rows
 func (tv *TableView) CutRows() {
-	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Cut()
 	} else {
 		tv.Cut()
@@ -1435,7 +1435,7 @@ func (tv *TableView) Paste() {
 // PasteRow pastes clipboard at given row
 func (tv *TableView) PasteRow(row int) {
 	tv.curRow = row
-	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Paste()
 	} else {
 		tv.Paste()
@@ -1447,19 +1447,19 @@ func (tv *TableView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.PasteAssign(data.(mimedata.Mimes), row)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row+1)
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
 }
 
@@ -1558,13 +1558,13 @@ func (tv *TableView) DragNDropStart() {
 			return
 		}
 		gi.ImageClearer(bi.Pixels, 50.0)
-		tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+		tv.Viewport.Win.StartDragNDrop(tv.This(), md, bi)
 	}
 }
 
 // DragNDropTarget handles a drag-n-drop drop
 func (tv *TableView) DragNDropTarget(de *dnd.Event) {
-	de.Target = tv.This
+	de.Target = tv.This()
 	if de.Mod == dnd.DropLink {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
@@ -1572,7 +1572,7 @@ func (tv *TableView) DragNDropTarget(de *dnd.Event) {
 	if ok {
 		de.SetProcessed()
 		tv.curRow = row
-		if dpr, ok := tv.This.(gi.DragNDropper); ok {
+		if dpr, ok := tv.This().(gi.DragNDropper); ok {
 			dpr.Drop(de.Data, de.Mod)
 		} else {
 			tv.Drop(de.Data, de.Mod)
@@ -1592,20 +1592,20 @@ func (tv *TableView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.DropAssign(data.(mimedata.Mimes), row)
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.DropBefore(data.(mimedata.Mimes), mod, row) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.DropAfter(data.(mimedata.Mimes), mod, row) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TableView).(*TableView)
 		tvv.DropCancel()
 	})
@@ -1699,22 +1699,22 @@ func (tv *TableView) DropCancel() {
 
 func (tv *TableView) StdCtxtMenu(m *gi.Menu, row int) {
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.CopyRows(true)
 		})
 	m.AddAction(gi.ActOpts{Label: "Cut", Data: row},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.CutRows()
 		})
 	m.AddAction(gi.ActOpts{Label: "Paste", Data: row},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.PasteRow(data.(int))
 		})
 	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: row},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			tvv.Duplicate()
 		})
@@ -1842,7 +1842,7 @@ func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 		tv.UpdateSelect(nr, true)
 		kt.SetProcessed()
 	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
-		tv.TableViewSig.Emit(tv.This, int64(TableViewDoubleClicked), tv.SelectedIdx)
+		tv.TableViewSig.Emit(tv.This(), int64(TableViewDoubleClicked), tv.SelectedIdx)
 		kt.SetProcessed()
 	}
 }
@@ -1860,7 +1860,7 @@ func (tv *TableView) TableViewEvents() {
 			me := d.(*mouse.Event)
 			tvv := recv.Embed(KiT_TableView).(*TableView)
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-				tvv.TableViewSig.Emit(tvv.This, int64(TableViewDoubleClicked), tvv.SelectedIdx)
+				tvv.TableViewSig.Emit(tvv.This(), int64(TableViewDoubleClicked), tvv.SelectedIdx)
 				me.SetProcessed()
 			}
 			if me.Button == mouse.Right && me.Action == mouse.Release {

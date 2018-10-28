@@ -94,7 +94,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 
 	svg.DeleteAll()
 
-	curPar := svg.This.(gi.Node2D) // current parent node into which elements are created
+	curPar := svg.This().(gi.Node2D) // current parent node into which elements are created
 	curSvg := svg
 	inTitle := false
 	inDesc := false
@@ -128,7 +128,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			nm := se.Name.Local
 			switch {
 			case nm == "svg":
-				if curPar != svg.This {
+				if curPar != svg.This() {
 					curPar = curPar.AddNewChild(KiT_SVG, "svg").(gi.Node2D)
 				}
 				csvg := curPar.Embed(KiT_SVG).(*SVG)
@@ -659,14 +659,14 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case "linearGradient":
 			case "radialGradient":
 			default:
-				if curPar == svg.This {
+				if curPar == svg.This() {
 					break
 				}
 				if curPar.Parent() == nil {
 					break
 				}
 				curPar = curPar.Parent().(gi.Node2D)
-				if curPar == svg.This {
+				if curPar == svg.This() {
 					break
 				}
 				curSvgk, ok := curPar.ParentByType(KiT_SVG, true)

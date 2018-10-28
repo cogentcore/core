@@ -148,7 +148,7 @@ func (sb *SliderBase) SliderPressed(pos float32) {
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderDown)
 	sb.SetSliderPos(pos)
-	sb.SliderSig.Emit(sb.This, int64(SliderPressed), sb.Value)
+	sb.SliderSig.Emit(sb.This(), int64(SliderPressed), sb.Value)
 	// bitflasb.Set(&sb.Flag, int(SliderFlagDragging))
 	sb.UpdateEnd(updt)
 }
@@ -160,9 +160,9 @@ func (sb *SliderBase) SliderReleased() {
 	wasPressed := (sb.State == SliderDown)
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderActive)
-	sb.SliderSig.Emit(sb.This, int64(SliderReleased), sb.Value)
+	sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
 	if wasPressed && sb.Value != sb.EmitValue {
-		sb.SliderSig.Emit(sb.This, int64(SliderValueChanged), sb.Value)
+		sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
 		sb.EmitValue = sb.Value
 	}
 	sb.UpdateEnd(updt)
@@ -225,7 +225,7 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 	}
 	if sb.Tracking && sb.Value != sb.EmitValue {
 		if math32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
-			sb.SliderSig.Emit(sb.This, int64(SliderValueChanged), sb.Value)
+			sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
 			sb.EmitValue = sb.Value
 		}
 	}
@@ -273,7 +273,7 @@ func (sb *SliderBase) SetValueAction(val float32) {
 		return
 	}
 	sb.SetValue(val)
-	sb.SliderSig.Emit(sb.This, int64(SliderValueChanged), sb.Value)
+	sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
 }
 
 // SetThumValue sets the thumb value to given value and updates the thumb size
@@ -612,7 +612,7 @@ func (sr *Slider) Render2D() {
 		return
 	}
 	if sr.PushBounds() {
-		sr.This.(Node2D).ConnectEvents2D()
+		sr.This().(Node2D).ConnectEvents2D()
 		sr.Render2DDefaultStyle()
 		sr.Render2DChildren()
 		sr.PopBounds()
@@ -800,7 +800,7 @@ func (sb *ScrollBar) Render2D() {
 		return
 	}
 	if sb.PushBounds() {
-		sb.This.(Node2D).ConnectEvents2D()
+		sb.This().(Node2D).ConnectEvents2D()
 		sb.Render2DDefaultStyle()
 		sb.Render2DChildren()
 		sb.PopBounds()

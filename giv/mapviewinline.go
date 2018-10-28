@@ -98,7 +98,7 @@ func (mv *MapViewInline) ConfigParts() {
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			mvv.SetChanged()
 		})
@@ -117,7 +117,7 @@ func (mv *MapViewInline) ConfigParts() {
 		adac := adack.(*gi.Action)
 		adac.SetIcon("plus")
 		adac.Tooltip = "add an entry to the map"
-		adac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			mvv.MapAdd()
 		})
@@ -127,7 +127,7 @@ func (mv *MapViewInline) ConfigParts() {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("edit")
 		edac.Tooltip = "map edit dialog"
-		edac.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			tmptyp := kit.NonPtrType(reflect.TypeOf(mvv.Map))
 			tynm := tmptyp.Name()
@@ -138,9 +138,9 @@ func (mv *MapViewInline) ConfigParts() {
 			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 			if ok {
 				mvvv := mvvvk.(*MapView)
-				mvvv.ViewSig.ConnectOnly(mvv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					mvvvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
-					mvvvv.ViewSig.Emit(mvvvv.This, 0, nil)
+					mvvvv.ViewSig.Emit(mvvvv.This(), 0, nil)
 				})
 			}
 		})
@@ -154,7 +154,7 @@ func (mv *MapViewInline) ConfigParts() {
 // types of changes, so this is just generic.
 func (mv *MapViewInline) SetChanged() {
 	mv.Changed = true
-	mv.ViewSig.Emit(mv.This, 0, nil)
+	mv.ViewSig.Emit(mv.This(), 0, nil)
 }
 
 // MapAdd adds a new entry to the map

@@ -144,7 +144,7 @@ func (c *Complete) Cancel(vp *Viewport2D) bool {
 // selection from the list of possible completions
 func (c *Complete) Complete(s string) {
 	c.Completion = s
-	c.CompleteSig.Emit(c.This, int64(CompleteSelect), s)
+	c.CompleteSig.Emit(c.This(), int64(CompleteSelect), s)
 }
 
 // KeyInput is the opportunity for completion to act on specific key inputs
@@ -157,7 +157,7 @@ func (c *Complete) KeyInput(kf KeyFuns) bool { // true - caller should set key p
 				c.Complete(c.Completions[0].Text)
 			} else { // try to extend the seed
 				s := complete.ExtendSeed(c.Completions, c.Seed)
-				c.CompleteSig.Emit(c.This, int64(CompleteExtend), s)
+				c.CompleteSig.Emit(c.This(), int64(CompleteExtend), s)
 			}
 			return true
 		}

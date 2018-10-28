@@ -177,13 +177,13 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewValue(20, units.Ch))
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
-	sl.SliderSig.ConnectOnly(cv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
 			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 			slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
 			updt := cvv.UpdateStart()
 			cvv.SetRGBValue(slv.Value, rgb)
-			cvv.ViewSig.Emit(cvv.This, 0, nil)
+			cvv.ViewSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
 		}
 	})
@@ -227,13 +227,13 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewValue(20, units.Ch))
 	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
-	sl.SliderSig.ConnectOnly(cv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
 			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 			slv := send.Embed(gi.KiT_Slider).(*gi.Slider)
 			updt := cvv.UpdateStart()
 			cvv.SetHSLValue(slv.Value, hsl)
-			cvv.ViewSig.Emit(cvv.This, 0, nil)
+			cvv.ViewSig.Emit(cvv.This(), 0, nil)
 			cvv.UpdateEnd(updt)
 		}
 	})
@@ -311,10 +311,10 @@ func (cv *ColorView) NumLayConfig() {
 	widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
 	cv.NumView.ConfigWidget(widg)
 	vvb := cv.NumView.AsValueViewBase()
-	vvb.ViewSig.ConnectOnly(cv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
 		cvv.UpdateSliderGrid()
-		cvv.ViewSig.Emit(cvv.This, 0, nil)
+		cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	})
 	nl.UpdateEnd(updt)
 }
@@ -438,15 +438,15 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("color")
 		edac.Tooltip = "color selection dialog"
-		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 			vv.Activate(svv.Viewport, nil, nil)
 		})
 	}
-	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_ColorValueView).(*ColorValueView)
 		vvv.UpdateWidget() // necessary in this case!
-		vvv.ViewSig.Emit(vvv.This, 0, nil)
+		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -466,7 +466,7 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 		dclr = *clr
 	}
 	ColorViewDialog(vp, dclr, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave},
-		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				cclr := ColorViewDialogValue(ddlg)

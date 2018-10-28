@@ -43,7 +43,7 @@ func (vv *FontValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewValue(4, units.Px))
-	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_FontValueView).(*FontValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -62,7 +62,7 @@ func (vv *FontValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	// cur := gi.FontName(kit.ToString(vvv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
 	FontChooserDialog(vp, DlgOpts{Title: "Select a Font", Prompt: desc},
-		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)

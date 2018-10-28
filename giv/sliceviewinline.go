@@ -90,7 +90,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	}
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			svv.SetChanged()
 		})
@@ -109,7 +109,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			adac := adack.(*gi.Action)
 			adac.SetIcon("plus")
 			adac.Tooltip = "add an element to the slice"
-			adac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 				svv.SliceNewAt(-1, true)
 			})
@@ -120,7 +120,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("edit")
 		edac.Tooltip = "edit slice in a dialog window"
-		edac.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
 			tynm := "Slice of " + kit.NonPtrType(elType).Name()
@@ -129,9 +129,9 @@ func (sv *SliceViewInline) ConfigParts() {
 			if ok {
 				svvv := svvvk.(*SliceView)
 				svvv.SliceValView = svv.SliceValView
-				svvv.ViewSig.ConnectOnly(svv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					svvvv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
-					svvvv.ViewSig.Emit(svvvv.This, 0, nil)
+					svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
 				})
 			}
 		})
@@ -145,7 +145,7 @@ func (sv *SliceViewInline) ConfigParts() {
 // types of changes, so this is just generic.
 func (sv *SliceViewInline) SetChanged() {
 	sv.Changed = true
-	sv.ViewSig.Emit(sv.This, 0, nil)
+	sv.ViewSig.Emit(sv.This(), 0, nil)
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1

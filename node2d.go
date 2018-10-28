@@ -302,7 +302,7 @@ func (nb *Node2DBase) HasFocus2D() bool {
 func (nb *Node2DBase) GrabFocus() {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.SetFocus(nb.This)
+		win.SetFocus(nb.This())
 	}
 }
 
@@ -318,7 +318,7 @@ func (nb *Node2DBase) FocusNext() {
 func (nb *Node2DBase) StartFocus() {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.SetStartFocus(nb.This)
+		win.SetStartFocus(nb.This())
 	}
 }
 
@@ -332,10 +332,10 @@ func (nb *Node2DBase) ContainsFocus() bool {
 	if win.Focus == nil {
 		return false
 	}
-	if win.Focus == nb.This {
+	if win.Focus == nb.This() {
 		return true
 	}
-	plev := win.Focus.ParentLevel(nb.This)
+	plev := win.Focus.ParentLevel(nb.This())
 	if plev < 0 {
 		return false
 	}
@@ -344,7 +344,7 @@ func (nb *Node2DBase) ContainsFocus() bool {
 
 func (nb *Node2DBase) FindNamedElement(name string) Node2D {
 	if nb.Nm == name {
-		return nb.This.(Node2D)
+		return nb.This().(Node2D)
 	}
 	if nb.Par == nil {
 		return nil
@@ -369,11 +369,11 @@ func (nb *Node2DBase) ContextMenuPos() (pos image.Point) {
 
 func (nb *Node2DBase) ContextMenu() {
 	var men Menu
-	nb.This.(Node2D).MakeContextMenu(&men)
+	nb.This().(Node2D).MakeContextMenu(&men)
 	if len(men) == 0 {
 		return
 	}
-	pos := nb.This.(Node2D).ContextMenuPos()
+	pos := nb.This().(Node2D).ContextMenuPos()
 	PopupMenu(men, pos.X, pos.Y, nb.Viewport, nb.Nm+"-menu")
 }
 
@@ -404,7 +404,7 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.ConnectEvent(nb.This, et, pri, fun)
+		win.ConnectEvent(nb.This(), et, pri, fun)
 	}
 }
 
@@ -414,7 +414,7 @@ func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.Rec
 func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.DisconnectEvent(nb.This, et, pri)
+		win.DisconnectEvent(nb.This(), et, pri)
 	}
 }
 
@@ -423,7 +423,7 @@ func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
 func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.DisconnectAllEvents(nb.This, pri)
+		win.DisconnectAllEvents(nb.This(), pri)
 	}
 }
 
@@ -431,12 +431,12 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 // from all events -- call for to-be-destroyed nodes (will happen in Ki
 // destroy anyway, but more efficient here)
 func (nb *Node2DBase) DisconnectAllEventsTree(win *Window) {
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil {
 			return false // going into a different type of thing, bail
 		}
-		win.DisconnectAllEvents(ni.This, AllPris)
+		win.DisconnectAllEvents(ni.This(), AllPris)
 		ni.NodeSig.DisconnectAll()
 		return true
 	})
@@ -448,7 +448,7 @@ func (nb *Node2DBase) DisconnectAllEventsTree(win *Window) {
 // disconnected with DisconnectAllEvents, so it only occurs for rendered nodes
 func (nb *Node2DBase) ConnectToViewport() {
 	if nb.Viewport != nil {
-		nb.NodeSig.Connect(nb.Viewport.This, SignalViewport2D)
+		nb.NodeSig.Connect(nb.Viewport.This(), SignalViewport2D)
 	}
 }
 
@@ -489,11 +489,11 @@ func (nb *Node2DBase) FullRender2DTree() {
 // necessary -- needed after structural updates to ensure all nodes are
 // updated
 func (nb *Node2DBase) Init2DTree() {
-	if nb.This == nil {
+	if nb.This() == nil {
 		return
 	}
 	pr := prof.Start("Node2D.Init2DTree")
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
 			return false
@@ -507,11 +507,11 @@ func (nb *Node2DBase) Init2DTree() {
 // Style2DTree styles scene graph tree from node it is called on -- only needs
 // to be done after a structural update in case inherited options changed
 func (nb *Node2DBase) Style2DTree() {
-	if nb.This == nil {
+	if nb.This() == nil {
 		return
 	}
 	pr := prof.Start("Node2D.Style2DTree")
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
 			return false
@@ -524,11 +524,11 @@ func (nb *Node2DBase) Style2DTree() {
 
 // Size2DTree does the sizing as a depth-first pass
 func (nb *Node2DBase) Size2DTree(iter int) {
-	if nb.This == nil {
+	if nb.This() == nil {
 		return
 	}
 	pr := prof.Start("Node2D.Size2DTree")
-	nb.FuncDownDepthFirst(0, nb.This,
+	nb.FuncDownDepthFirst(0, nb.This(),
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
 			if nii == nil {
@@ -555,7 +555,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 // maximum control -- this starts with parent VpBBox -- can be called de novo.
 // Handles multiple iterations if needed.
 func (nb *Node2DBase) Layout2DTree() {
-	if nb.This == nil || nb.HasNoLayout() {
+	if nb.This() == nil || nb.HasNoLayout() {
 		return
 	}
 	pr := prof.Start("Node2D.Layout2DTree")
@@ -564,7 +564,7 @@ func (nb *Node2DBase) Layout2DTree() {
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
 	}
-	nbi := nb.This.(Node2D)
+	nbi := nb.This().(Node2D)
 	redo := nbi.Layout2D(parBBox, 0) // important to use interface version to get interface!
 	if redo {
 		wb := nbi.AsWidget()
@@ -584,11 +584,11 @@ func (nb *Node2DBase) Layout2DTree() {
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
 func (nb *Node2DBase) Render2DTree() {
-	if nb.This == nil {
+	if nb.This() == nil {
 		return
 	}
 	pr := prof.Start("Node2D.Render2DTree")
-	nb.This.(Node2D).Render2D() // important to use interface version to get interface!
+	nb.This().(Node2D).Render2D() // important to use interface version to get interface!
 	pr.End()
 }
 
@@ -598,7 +598,7 @@ func (nb *Node2DBase) Render2DTree() {
 // this.
 func (nb *Node2DBase) Layout2DChildren(iter int) bool {
 	redo := false
-	cbb := nb.This.(Node2D).ChildrenBBox2D()
+	cbb := nb.This().(Node2D).ChildrenBBox2D()
 	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
@@ -613,7 +613,7 @@ func (nb *Node2DBase) Layout2DChildren(iter int) bool {
 // Move2dChildren moves all of node's children, giving them the ChildrenBBox2D
 // -- default call at end of Move2D
 func (nb *Node2DBase) Move2DChildren(delta image.Point) {
-	cbb := nb.This.(Node2D).ChildrenBBox2D()
+	cbb := nb.This().(Node2D).ChildrenBBox2D()
 	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
@@ -635,7 +635,7 @@ func (nb *Node2DBase) Render2DChildren() {
 // BBoxReport reports on all the bboxes for everything in the tree
 func (nb *Node2DBase) BBoxReport() string {
 	rpt := ""
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
 			return false
@@ -662,7 +662,7 @@ func (nb *Node2DBase) ParentWindow() *Window {
 // Node2D interface
 func (nb *Node2DBase) ParentViewport() *Viewport2D {
 	var parVp *Viewport2D
-	nb.FuncUpParent(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
 			return false // don't keep going up
@@ -703,7 +703,7 @@ func (nb *Node2DBase) ParentPaint() *Paint {
 // optimized re-rendering
 func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
-	nb.FuncUpParent(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
 			return false // don't keep going up
@@ -746,7 +746,7 @@ func (nb *Node2DBase) ScrollToMe() bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollToItem(nb.This.(Node2D))
+	return ly.ScrollToItem(nb.This().(Node2D))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

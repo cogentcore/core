@@ -137,7 +137,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	vpsz.Y = ints.MaxInt(vpsz.Y, sth)
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
@@ -150,7 +150,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 			kt.SetProcessed()
 		}
 	})
-	win.ConnectEvent(dlg.This, oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
@@ -164,7 +164,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		}
 	})
 	// this is not a good idea
-	// win.ConnectEvent(dlg.This, oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// win.ConnectEvent(dlg.This(), oswin.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 	// 	me := d.(*mouse.Event)
 	// 	ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
@@ -193,14 +193,14 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
 		dlg.UpdateEndNoSig(updt)
-		win.SetNextPopup(dlg.This, nil)
+		win.SetNextPopup(dlg.This(), nil)
 	}
 	return true
 }
 
 // Close requests that the dialog be closed -- it does not alter any state or send any signals
 func (dlg *Dialog) Close() {
-	if dlg == nil || dlg.This == nil || dlg.IsDestroyed() || dlg.IsDeleted() {
+	if dlg == nil || dlg.This() == nil || dlg.IsDestroyed() || dlg.IsDeleted() {
 		return
 	}
 	win := dlg.Win
@@ -208,7 +208,7 @@ func (dlg *Dialog) Close() {
 		if DialogsSepWindow {
 			win.Close()
 		} else {
-			win.ClosePopup(dlg.This)
+			win.ClosePopup(dlg.This())
 		}
 	}
 }
@@ -220,9 +220,9 @@ func (dlg *Dialog) Accept() {
 	}
 	dlg.State = DialogAccepted
 	if dlg.SigVal >= 0 {
-		dlg.DialogSig.Emit(dlg.This, dlg.SigVal, nil)
+		dlg.DialogSig.Emit(dlg.This(), dlg.SigVal, nil)
 	} else {
-		dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
+		dlg.DialogSig.Emit(dlg.This(), int64(dlg.State), nil)
 	}
 	dlg.Close()
 }
@@ -234,9 +234,9 @@ func (dlg *Dialog) Cancel() {
 	}
 	dlg.State = DialogCanceled
 	if dlg.SigVal >= 0 {
-		dlg.DialogSig.Emit(dlg.This, dlg.SigVal, nil)
+		dlg.DialogSig.Emit(dlg.This(), dlg.SigVal, nil)
 	} else {
-		dlg.DialogSig.Emit(dlg.This, int64(dlg.State), nil)
+		dlg.DialogSig.Emit(dlg.This(), int64(dlg.State), nil)
 	}
 	dlg.Close()
 }
@@ -381,7 +381,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
 		okb := bb.KnownChildByName("ok", 0).Embed(KiT_Button).(*Button)
 		okb.SetText("Ok")
-		okb.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(KiT_Dialog).(*Dialog)
 				dlg.Accept()
@@ -391,7 +391,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if cancel {
 		canb := bb.KnownChildByName("cancel", 0).Embed(KiT_Button).(*Button)
 		canb.SetText("Cancel")
-		canb.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
 				dlg := recv.Embed(KiT_Dialog).(*Dialog)
 				dlg.Cancel()
@@ -495,7 +495,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 		b.SetProp("__cdSigVal", int64(i))
 		b.SetText(ch)
 		if chnm == "cancel" {
-			b.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(ButtonClicked) {
 					tb := send.Embed(KiT_Button).(*Button)
 					dlg := recv.Embed(KiT_Dialog).(*Dialog)
@@ -504,7 +504,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 				}
 			})
 		} else {
-			b.ButtonSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(ButtonClicked) {
 					tb := send.Embed(KiT_Button).(*Button)
 					dlg := recv.Embed(KiT_Dialog).(*Dialog)

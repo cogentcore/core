@@ -155,11 +155,11 @@ func mainrun() {
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
 
-	loads.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	loads.ActionSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		FileViewOpenSVG(vp)
 	})
 
-	fnm.TextFieldSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			tf := send.(*gi.TextField)
 			fn, _ := homedir.Expand(tf.Text())
@@ -167,23 +167,23 @@ func mainrun() {
 		}
 	})
 
-	zoomin.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	zoomin.ActionSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		SetZoom(svge.Scale * 1.1)
 		win.FullReRender()
 	})
 
-	zoomout.ActionSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	zoomout.ActionSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		SetZoom(svge.Scale * 0.9)
 		win.FullReRender()
 	})
 
-	zoom.SpinBoxSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		sp := send.(*gi.SpinBox)
 		SetZoom(sp.Value)
 		win.FullReRender()
 	})
 
-	svge.NodeSig.Connect(win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	svge.NodeSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		ssvg := send.Embed(svg.KiT_Editor).(*svg.Editor)
 		SetZoom(ssvg.Scale)
 		SetTrans(ssvg.Trans.X, ssvg.Trans.Y)
@@ -209,12 +209,12 @@ func mainrun() {
 	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
-		win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			FileViewOpenSVG(vp)
 		})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", Shortcut: "Command+W"},
-		win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			win.OSWin.Close()
 		})
 

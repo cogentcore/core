@@ -171,7 +171,7 @@ func (bb *ButtonBase) SetText(txt string) {
 		bb.SetFullReRender() // needed for resize
 		bb.Text = txt
 	}
-	bb.This.(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts()
 	bb.UpdateEnd(updt)
 }
 
@@ -194,7 +194,7 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 		bb.SetFullReRender()
 	}
 	bb.Icon = IconName(iconName)
-	bb.This.(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts()
 	bb.UpdateEnd(updt)
 }
 
@@ -245,7 +245,7 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 		}
 	}
 	bb.Sty = bb.StateStyles[bb.State]
-	bb.This.(ButtonWidget).ConfigPartsIfNeeded()
+	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender
 		return true
@@ -267,7 +267,7 @@ func (bb *ButtonBase) ButtonPressed() {
 		}
 	} else {
 		bb.SetButtonState(ButtonDown)
-		bb.ButtonSig.Emit(bb.This, int64(ButtonPressed), nil)
+		bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
 	}
 	bb.UpdateEnd(updt)
 }
@@ -282,14 +282,14 @@ func (bb *ButtonBase) ButtonReleased() {
 	wasPressed := (bb.State == ButtonDown)
 	updt := bb.UpdateStart()
 	bb.SetButtonState(ButtonActive)
-	bb.ButtonSig.Emit(bb.This, int64(ButtonReleased), nil)
+	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
 	if wasPressed {
-		bb.ButtonSig.Emit(bb.This, int64(ButtonClicked), nil)
+		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
 		bb.OpenMenu()
 
 		if bb.IsCheckable() {
 			bb.ToggleChecked()
-			bb.ButtonSig.Emit(bb.This, int64(ButtonToggled), nil)
+			bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
 		}
 	}
 	bb.UpdateEnd(updt)
@@ -313,7 +313,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 		return false
 	}
 	if bb.MakeMenuFunc != nil {
-		bb.MakeMenuFunc(bb.This, &bb.Menu)
+		bb.MakeMenuFunc(bb.This(), &bb.Menu)
 	}
 	pos := bb.WinBBox.Max
 	if pos.X == 0 && pos.Y == 0 { // offscreen
@@ -515,7 +515,7 @@ func (bb *ButtonBase) ButtonAsBase() *ButtonBase {
 
 func (bb *ButtonBase) Init2D() {
 	bb.Init2DWidget()
-	bb.This.(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts()
 }
 
 func (bb *ButtonBase) ButtonRelease() {
@@ -550,12 +550,12 @@ func (bb *ButtonBase) ConfigPartsIfNeeded() {
 	if !bb.PartsNeedUpdateIconLabel(string(bb.Icon), bb.Text) {
 		return
 	}
-	bb.This.(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts()
 }
 
 func (bb *ButtonBase) StyleButton() {
 	bb.Style2DWidget()
-	bb.This.(ButtonWidget).StyleParts()
+	bb.This().(ButtonWidget).StyleParts()
 	if nf, ok := bb.Prop("no-focus"); ok {
 		bb.SetFlagState(!bb.IsInactive() && !nf.(bool), int(CanFocus))
 	} else {
@@ -582,7 +582,7 @@ func (bb *ButtonBase) StyleButton() {
 func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
 	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
-	bb.This.(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts()
 	bb.SetButtonState(ButtonActive) // initial default
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())
@@ -590,7 +590,7 @@ func (bb *ButtonBase) Style2D() {
 }
 
 func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
-	bb.This.(ButtonWidget).ConfigPartsIfNeeded()
+	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	bb.Layout2DBase(parBBox, true, iter) // init style
 	bb.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(ButtonStatesN); i++ {
@@ -604,7 +604,7 @@ func (bb *ButtonBase) Render2D() {
 		return
 	}
 	if bb.PushBounds() {
-		bb.This.(Node2D).ConnectEvents2D()
+		bb.This().(Node2D).ConnectEvents2D()
 		bb.UpdateButtonStyle()
 		st := &bb.Sty
 		rs := &bb.Viewport.Render
@@ -807,7 +807,7 @@ func (cb *CheckBox) SetIcons(icOn, icOff string) {
 	updt := cb.UpdateStart()
 	cb.Icon = IconName(icOn)
 	cb.IconOff = IconName(icOff)
-	cb.This.(ButtonWidget).ConfigParts()
+	cb.This().(ButtonWidget).ConfigParts()
 	cb.UpdateEnd(updt)
 }
 
@@ -825,7 +825,7 @@ func (cb *CheckBox) SetIconProps(props ki.Props) {
 func (cb *CheckBox) Init2D() {
 	cb.SetCheckable(true)
 	cb.Init2DWidget()
-	cb.This.(ButtonWidget).ConfigParts()
+	cb.This().(ButtonWidget).ConfigParts()
 }
 
 func (cb *CheckBox) StyleParts() {
@@ -887,7 +887,7 @@ func (cb *CheckBox) ConfigParts() {
 
 func (cb *CheckBox) ConfigPartsIfNeeded() {
 	if !cb.Parts.HasChildren() {
-		cb.This.(ButtonWidget).ConfigParts()
+		cb.This().(ButtonWidget).ConfigParts()
 	}
 	icIdx := 0 // always there
 	ist := cb.Parts.KnownChild(icIdx).(*Layout)

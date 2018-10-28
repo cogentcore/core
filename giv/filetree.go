@@ -459,7 +459,7 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File: %v exists, do you want to overwrite it with: %v?", tpath, filename)},
 			[]string{"No, Cancel", "Yes, Overwrite"},
-			fn.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
 					// cancel
@@ -477,7 +477,7 @@ func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
 	gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 		Prompt: fmt.Sprintf("Are you sure you want to overwrite file: %v with: %v?", tpath, filename)},
 		[]string{"No, Cancel", "Yes, Overwrite"},
-		fn.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
 			// cancel

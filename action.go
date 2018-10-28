@@ -193,7 +193,7 @@ func (ac *Action) Trigger() {
 	if ac.IsInactive() {
 		return
 	}
-	ac.ActionSig.Emit(ac.This, 0, ac.Data)
+	ac.ActionSig.Emit(ac.This(), 0, ac.Data)
 }
 
 // trigger action signal
@@ -204,11 +204,11 @@ func (ac *Action) ButtonRelease() {
 	wasPressed := (ac.State == ButtonDown)
 	updt := ac.UpdateStart()
 	ac.SetButtonState(ButtonActive)
-	ac.ButtonSig.Emit(ac.This, int64(ButtonReleased), nil)
+	ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
 	menOpen := false
 	if wasPressed {
-		ac.ActionSig.Emit(ac.This, 0, ac.Data)
-		ac.ButtonSig.Emit(ac.This, int64(ButtonClicked), ac.Data)
+		ac.ActionSig.Emit(ac.This(), 0, ac.Data)
+		ac.ButtonSig.Emit(ac.This(), int64(ButtonClicked), ac.Data)
 		menOpen = ac.OpenMenu()
 	}
 	if !menOpen && ac.IsMenu() && ac.Viewport != nil {

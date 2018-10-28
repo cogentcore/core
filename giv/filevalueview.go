@@ -42,7 +42,7 @@ func (vv *FileValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewValue(4, units.Px))
-	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_FileValueView).(*FileValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -62,7 +62,7 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	ext, _ := vv.Tag("ext")
 	desc, _ := vv.Tag("desc")
 	FileViewDialog(vp, cur, ext, DlgOpts{Title: vv.Name(), Prompt: desc}, nil,
-		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				dlg, _ := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				fn := FileViewDialogValue(dlg)

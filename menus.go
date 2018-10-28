@@ -81,7 +81,7 @@ func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	}
 	ac := &Action{}
 	m.SetAction(ac, opts, sigTo, fun)
-	*m = append(*m, ac.This.(Node2D))
+	*m = append(*m, ac.This().(Node2D))
 	return ac
 }
 
@@ -96,7 +96,7 @@ func (m *Menu) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun 
 	if idx, got := ki.SliceIndexByName(sl, before, 0); got {
 		ac := &Action{}
 		m.SetAction(ac, opts, sigTo, fun)
-		ki.SliceInsert(sl, ac.This, idx)
+		ki.SliceInsert(sl, ac.This(), idx)
 		return ac
 	} else {
 		return m.AddAction(opts, sigTo, fun)
@@ -114,7 +114,7 @@ func (m *Menu) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun ki
 	if idx, got := ki.SliceIndexByName(sl, after, 0); got {
 		ac := &Action{}
 		m.SetAction(ac, opts, sigTo, fun)
-		ki.SliceInsert(sl, ac.This, idx+1)
+		ki.SliceInsert(sl, ac.This(), idx+1)
 		return ac
 	} else {
 		return m.AddAction(opts, sigTo, fun)
@@ -133,7 +133,7 @@ func (m *Menu) AddSeparator(name string) *Separator {
 	}
 	sp.InitName(&sp, name)
 	sp.Horiz = true
-	*m = append(*m, sp.This.(Node2D))
+	*m = append(*m, sp.This().(Node2D))
 	return &sp
 }
 
@@ -146,7 +146,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	lb.InitName(&lb, lbl)
 	lb.SetText(lbl)
 	lb.SetProp("background-color", &Prefs.Colors.Control)
-	*m = append(*m, lb.This.(Node2D))
+	*m = append(*m, lb.This().(Node2D))
 	return &lb
 }
 
@@ -366,7 +366,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
-	win.SetNextPopup(pvp.This, focus)
+	win.SetNextPopup(pvp.This(), focus)
 	return &pvp
 }
 

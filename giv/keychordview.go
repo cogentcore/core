@@ -44,13 +44,13 @@ func (vv *KeyChordValueView) UpdateWidget() {
 func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	kc := vv.Widget.(*KeyChordEdit)
-	kc.KeyChordSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	kc.KeyChordSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_KeyChordValueView).(*KeyChordValueView)
 		kcc := vvv.Widget.(*KeyChordEdit)
 		if vvv.SetValue(key.Chord(kcc.Text)) {
 			vvv.UpdateWidget()
 		}
-		vvv.ViewSig.Emit(vvv.This, 0, nil)
+		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -99,7 +99,7 @@ var KeyChordEditProps = ki.Props{
 
 // ChordUpdated emits KeyChordSig when a new chord has been entered
 func (kc *KeyChordEdit) ChordUpdated() {
-	kc.KeyChordSig.Emit(kc.This, 0, kc.Text)
+	kc.KeyChordSig.Emit(kc.This(), 0, kc.Text)
 }
 
 func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
@@ -129,7 +129,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
 			kcc.EmitContextMenuSignal()
-			kcc.This.(gi.Node2D).ContextMenu()
+			kcc.This().(gi.Node2D).ContextMenu()
 		}
 	})
 }

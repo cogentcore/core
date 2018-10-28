@@ -81,7 +81,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.SetText(label)
-	tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
 		act := send.Embed(KiT_TabButton).(*TabButton)
 		tabIdx := act.Data.(int)
@@ -119,7 +119,7 @@ func (tv *TabView) AddNewTab(typ reflect.Type, label string) (Node2D, int) {
 // tab label, and returns the new widget and its tab index -- emits TabAdded signal
 func (tv *TabView) AddNewTabAction(typ reflect.Type, label string) (Node2D, int) {
 	widg, idx := tv.AddNewTab(typ, label)
-	tv.TabViewSig.Emit(tv.This, int64(TabAdded), idx)
+	tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
 	return widg, idx
 }
 
@@ -176,7 +176,7 @@ func (tv *TabView) SelectTabIndex(idx int) (Node2D, bool) {
 func (tv *TabView) SelectTabIndexAction(idx int) {
 	_, ok := tv.SelectTabIndex(idx)
 	if ok {
-		tv.TabViewSig.Emit(tv.This, int64(TabSelected), idx)
+		tv.TabViewSig.Emit(tv.This(), int64(TabSelected), idx)
 	}
 }
 
@@ -242,7 +242,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, bool) {
 func (tv *TabView) DeleteTabIndexAction(idx int) {
 	_, ok := tv.DeleteTabIndex(idx, true)
 	if ok {
-		tv.TabViewSig.Emit(tv.This, int64(TabDeleted), idx)
+		tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), idx)
 	}
 }
 
@@ -261,7 +261,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		tab := tb.InsertNewChild(KiT_Action, ntb, "new-tab").(*Action)
 		tab.Data = -1
 		tab.SetIcon("plus")
-		tab.ActionSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TabView).(*TabView)
 			tvv.SetFullReRender()
 			tvv.AddNewTabAction(tvv.NewTabType, "New Tab")
@@ -399,7 +399,7 @@ func (tv *TabView) Render2D() {
 		return
 	}
 	if tv.PushBounds() {
-		tv.This.(Node2D).ConnectEvents2D()
+		tv.This().(Node2D).ConnectEvents2D()
 		tv.RenderScrolls()
 		tv.Render2DChildren()
 		tv.RenderTabSeps()
@@ -519,7 +519,7 @@ func (tb *TabButton) ConfigParts() {
 		icnm := string(tb.Indicator)
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
-		cls.ActionSig.ConnectOnly(tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tbb := recv.Embed(KiT_TabButton).(*TabButton)
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()

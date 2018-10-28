@@ -200,7 +200,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
 			mvv.SetChanged()
 		})
@@ -208,7 +208,7 @@ func (mv *MapView) ConfigMapGrid() {
 		widg := sg.KnownChild(i*ncol + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kvb := kv.AsValueViewBase()
-		kvb.ViewSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
 			mvv.SetChanged()
 		})
@@ -223,7 +223,7 @@ func (mv *MapView) ConfigMapGrid() {
 			}
 			typw.SetCurVal(vtyp)
 			typw.SetProp("mapview-index", i)
-			typw.ComboSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			typw.ComboSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				cb := send.(*gi.ComboBox)
 				typ := cb.CurVal.(reflect.Type)
 				idx := cb.KnownProp("mapview-index").(int)
@@ -235,7 +235,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete item"
 		delact.Data = kv
-		delact.ActionSig.ConnectOnly(mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*gi.Action)
 			mvv := recv.Embed(KiT_MapView).(*MapView)
 			mvv.MapDelete(act.Data.(ValueView).Val())
@@ -250,7 +250,7 @@ func (mv *MapView) ConfigMapGrid() {
 // types of changes, so this is just generic.
 func (mv *MapView) SetChanged() {
 	mv.Changed = true
-	mv.ViewSig.Emit(mv.This, 0, nil)
+	mv.ViewSig.Emit(mv.This(), 0, nil)
 	mv.ToolBar().UpdateActions() // nil safe
 }
 
@@ -340,12 +340,12 @@ func (mv *MapView) ConfigToolbar() {
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
-			mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.MapAdd()
 			})
 		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: "update", Tooltip: "Switch between sorting by the keys vs. the values"},
-			mv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.ToggleSort()
 			})

@@ -244,8 +244,8 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 		return nil
 	}
 	win.OSWin.SetName(title)
-	win.OSWin.SetParent(win.This)
-	win.NodeSig.Connect(win.This, SignalWindowPublish)
+	win.OSWin.SetParent(win.This())
+	win.NodeSig.Connect(win.This(), SignalWindowPublish)
 	win.OverlayVp = &Viewport2D{}
 	win.OverlayVp.InitName(win.OverlayVp, "overlay-vp")
 	return win
@@ -1594,13 +1594,13 @@ func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 	if cpop == nil {
 		return true
 	}
-	if ni.This == cpop {
+	if ni.This() == cpop {
 		return popup
 	}
 	if ni.Viewport == nil {
 		return false
 	}
-	if ni.Viewport.This == cpop {
+	if ni.Viewport.This() == cpop {
 		return popup
 	}
 	return !popup
@@ -1634,7 +1634,7 @@ func (wl *WinEventRecvList) Add(recv ki.Ki, fun ki.RecvFunc, data int) {
 }
 
 func (wl *WinEventRecvList) AddDepth(recv ki.Ki, fun ki.RecvFunc, w *Window) {
-	wl.Add(recv, fun, recv.ParentLevel(w.This))
+	wl.Add(recv, fun, recv.ParentLevel(w.This()))
 }
 
 // SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
@@ -1659,7 +1659,7 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 			switch evi.(type) {
 			case *mouse.DragEvent:
 				if w.Dragging != nil {
-					if w.Dragging == ni.This {
+					if w.Dragging == ni.This() {
 						rvs.Add(recv, fun, 10000)
 						return false
 					} else {
@@ -1674,7 +1674,7 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 				}
 			case *mouse.ScrollEvent:
 				if w.Scrolling != nil {
-					if w.Scrolling == ni.This {
+					if w.Scrolling == ni.This() {
 						rvs.Add(recv, fun, 10000)
 					} else {
 						return true
@@ -1687,7 +1687,7 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 					return true
 				}
 			default:
-				if w.Dragging == ni.This { // dragger always gets it
+				if w.Dragging == ni.This() { // dragger always gets it
 					rvs.Add(recv, fun, 10000) // top priority -- can't steal!
 					return false
 				}
@@ -1767,7 +1767,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					rr.Recv.SetFlag(int(NodeDragging)) // PROVISIONAL!
 				}
 			}
-			rr.Call(w.This, int64(et), evi)
+			rr.Call(w.This(), int64(et), evi)
 			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
 				switch evi.(type) { // only grab events if processed
 				case *mouse.DragEvent:
@@ -1804,7 +1804,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 	updated := false
 	updt := false
 	for pri := HiPri; pri < EventPrisN; pri++ {
-		w.EventSigs[ftyp][pri].EmitFiltered(w.This, int64(ftyp), &fe, func(k ki.Ki) bool {
+		w.EventSigs[ftyp][pri].EmitFiltered(w.This(), int64(ftyp), &fe, func(k ki.Ki) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
 				return false
 			}
@@ -1873,7 +1873,7 @@ func (w *Window) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 				pos := me.Pos()
 				if pos.In(ni.WinBBox) {
 					if ni.IsInstaDrag() {
-						w.Dragging = ni.This
+						w.Dragging = ni.This()
 						ni.SetFlag(int(NodeDragging))
 						return true
 					}
@@ -2081,7 +2081,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
-	pop.SetParent(w.This) // popup has parent as window -- draws directly in to assoc vp
+	pop.SetParent(w.This()) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
 	w.Popup = pop
 	_, ni := KiToNode2D(pop)
@@ -2210,7 +2210,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		w.FocusPrev(w.Focus)
 		e.SetProcessed()
 	case KeyFunGoGiEditor:
-		TheViewIFace.GoGiEditor(w.Viewport.This)
+		TheViewIFace.GoGiEditor(w.Viewport.This())
 		e.SetProcessed()
 	case KeyFunZoomIn:
 		w.ZoomDPI(1)
@@ -2256,7 +2256,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	if w.Focus == k {
 		if k != nil {
 			_, ni := KiToNode2D(k)
-			if ni != nil && ni.This != nil {
+			if ni != nil && ni.This() != nil {
 				ni.SetFlag(int(HasFocus)) // ensure focus flag always set
 			}
 		}
@@ -2268,7 +2268,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 
 	if w.Focus != nil {
 		nii, ni := KiToNode2D(w.Focus)
-		if ni != nil && ni.This != nil {
+		if ni != nil && ni.This() != nil {
 			ni.ClearFlag(int(HasFocus))
 			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
 			nii.FocusChanged2D(FocusLost)
@@ -2279,7 +2279,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		return true
 	}
 	nii, ni := KiToNode2D(k)
-	if ni == nil || ni.This == nil { // only 2d for now
+	if ni == nil || ni.This() == nil { // only 2d for now
 		w.Focus = nil
 		return false
 	}
@@ -2300,7 +2300,7 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 		focusNext = true
 	}
 
-	focRoot := w.Viewport.This
+	focRoot := w.Viewport.This()
 	cpop := w.CurPopup()
 	if cpop != nil {
 		focRoot = cpop
@@ -2312,7 +2312,7 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 				return false
 			}
 			_, ni := KiToNode2D(k)
-			if ni == nil || ni.This == nil {
+			if ni == nil || ni.This() == nil {
 				return true
 			}
 			if foc == k { // current focus can be a non-can-focus item
@@ -2344,7 +2344,7 @@ func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
 		return true
 	}
 	_, ni := KiToNode2D(foc)
-	if ni == nil || ni.This == nil {
+	if ni == nil || ni.This() == nil {
 		return false
 	}
 	if ni.CanFocus() {
@@ -2364,7 +2364,7 @@ func (w *Window) FocusPrev(foc ki.Ki) bool {
 	gotFocus := false
 	var prevItem ki.Ki
 
-	focRoot := w.Viewport.This
+	focRoot := w.Viewport.This()
 	cpop := w.CurPopup()
 	if cpop != nil {
 		focRoot = cpop
@@ -2376,7 +2376,7 @@ func (w *Window) FocusPrev(foc ki.Ki) bool {
 		}
 		// todo: see about 3D guys
 		_, ni := KiToNode2D(k)
-		if ni == nil || ni.This == nil {
+		if ni == nil || ni.This() == nil {
 			return true
 		}
 		if foc == k {
@@ -2402,7 +2402,7 @@ func (w *Window) FocusPrev(foc ki.Ki) bool {
 func (w *Window) FocusLast() bool {
 	var lastItem ki.Ki
 
-	focRoot := w.Viewport.This
+	focRoot := w.Viewport.This()
 	cpop := w.CurPopup()
 	if cpop != nil {
 		focRoot = cpop
@@ -2411,7 +2411,7 @@ func (w *Window) FocusLast() bool {
 	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
 		// todo: see about 3D guys
 		_, ni := KiToNode2D(k)
-		if ni == nil || ni.This == nil {
+		if ni == nil || ni.This() == nil {
 			return true
 		}
 		if !ni.CanFocus() {
@@ -2429,7 +2429,7 @@ func (w *Window) FocusLast() bool {
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
 func (w *Window) ClearNonFocus() {
-	focRoot := w.Viewport.This
+	focRoot := w.Viewport.This()
 	cpop := w.CurPopup()
 	if cpop != nil {
 		focRoot = cpop
@@ -2444,7 +2444,7 @@ func (w *Window) ClearNonFocus() {
 		}
 		// todo: see about 3D guys
 		nii, ni := KiToNode2D(k)
-		if ni == nil || ni.This == nil {
+		if ni == nil || ni.This() == nil {
 			return true
 		}
 		if w.Focus == k {
@@ -2486,7 +2486,7 @@ func (w *Window) PopFocus() {
 	w.Focus = nil
 	nxtf := w.FocusStack[sz-1]
 	_, ni := KiToNode2D(nxtf)
-	if ni != nil && ni.This != nil {
+	if ni != nil && ni.This() != nil {
 		w.SetFocus(nxtf)
 	}
 	w.FocusStack = w.FocusStack[:sz-1]
@@ -2503,7 +2503,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 		return
 	}
 	nii, ni := KiToNode2D(w.Focus)
-	if ni != nil && ni.This != nil {
+	if ni != nil && ni.This() != nil {
 		if e.Pos().In(ni.WinBBox) {
 			if !w.FocusActive {
 				w.FocusActive = true
@@ -2529,7 +2529,7 @@ func (w *Window) FocusInactivate() {
 		return
 	}
 	nii, ni := KiToNode2D(w.Focus)
-	if ni != nil && ni.This != nil {
+	if ni != nil && ni.This() != nil {
 		w.FocusActive = false
 		nii.FocusChanged2D(FocusInactive)
 	}
@@ -2570,9 +2570,9 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 			wimg.LayData.AllocPos.SetPoint(sw.LayData.AllocPos.ToPoint())
 		}
 	}
-	wimg.This.SetName(src.UniqueName())
-	w.OverlayVp.AddChild(wimg.This)
-	w.DNDImage = wimg.This
+	wimg.This().SetName(src.UniqueName())
+	w.OverlayVp.AddChild(wimg.This())
+	w.DNDImage = wimg.This()
 	w.DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
@@ -2643,11 +2643,11 @@ func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 		// now send all the exits before the enters..
 		fe.Action = dnd.Exit
 		for i := range outs {
-			outs[i].Call(w.This, int64(ftyp), &fe)
+			outs[i].Call(w.This(), int64(ftyp), &fe)
 		}
 		fe.Action = dnd.Enter
 		for i := range ins {
-			ins[i].Call(w.This, int64(ftyp), &fe)
+			ins[i].Call(w.This(), int64(ftyp), &fe)
 		}
 		w.UpdateEnd(updt)
 		return true

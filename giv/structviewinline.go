@@ -37,11 +37,11 @@ func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 		updt = sv.UpdateStart()
 		sv.Struct = st
 		if k, ok := st.(ki.Ki); ok {
-			k.NodeSignal().Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 				svv.UpdateFields()
 				fmt.Printf("struct view inline ki update values\n")
-				svv.ViewSig.Emit(svv.This, 0, k)
+				svv.ViewSig.Emit(svv.This(), 0, k)
 			})
 		}
 	}
@@ -92,10 +92,10 @@ func (sv *StructViewInline) ConfigParts() {
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Parts.KnownChild(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
 			// note: updating here is redundant
-			svv.ViewSig.Emit(svv.This, 0, nil)
+			svv.ViewSig.Emit(svv.This(), 0, nil)
 		})
 		lbltag := vvb.Field.Tag.Get("label")
 		if lbltag != "" {

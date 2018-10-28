@@ -279,7 +279,7 @@ func (vp *Viewport2D) Init2D() {
 	vp.Init2DWidget()
 	vp.SetCurWin()
 	// we update oursleves whenever any node update event happens
-	vp.NodeSig.Connect(vp.This, func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
+	vp.NodeSig.Connect(vp.This(), func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
 		rvp := rvpi.AsViewport2D()
 		if Update2DTrace {

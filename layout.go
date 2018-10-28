@@ -636,7 +636,7 @@ func (ly *Layout) AllocFromParent() {
 	if ly.Par == nil || ly.Viewport == nil || !ly.LayData.AllocSize.IsZero() {
 		return
 	}
-	if ly.Par != ly.Viewport.This {
+	if ly.Par != ly.Viewport.This() {
 		// note: zero alloc size happens all the time with non-visible tabs!
 		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayData)
 		return
@@ -644,7 +644,7 @@ func (ly *Layout) AllocFromParent() {
 	pni, _ := KiToNode2D(ly.Par)
 	lyp := pni.AsLayout2D()
 	if lyp == nil {
-		ly.FuncUpParent(0, ly.This, func(k ki.Ki, level int, d interface{}) bool {
+		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d interface{}) bool {
 			pni, _ := KiToNode2D(k)
 			if pni == nil {
 				return false
@@ -1101,7 +1101,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		ly.Scrolls[d] = &ScrollBar{}
 		sc := ly.Scrolls[d]
 		sc.InitName(sc, fmt.Sprintf("Scroll%v", d))
-		sc.SetParent(ly.This)
+		sc.SetParent(ly.This())
 		sc.Dim = d
 		sc.Init2D()
 		sc.Defaults()
@@ -1126,7 +1126,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	sc.TrackThr = sc.Step
 	sc.Value = Min32(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.PathUnique(), sc.Max, sc.Value)
-	sc.SliderSig.ConnectOnly(ly.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sc.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
@@ -1290,7 +1290,7 @@ func (ly *Layout) Render2DChildren() {
 }
 
 func (ly *Layout) Move2DChildren(delta image.Point) {
-	cbb := ly.This.(Node2D).ChildrenBBox2D()
+	cbb := ly.This().(Node2D).ChildrenBBox2D()
 	if ly.Lay == LayoutStacked {
 		sn, ok := ly.Child(ly.StackTop)
 		if !ok {
@@ -1847,7 +1847,7 @@ func (ly *Layout) Render2D() {
 		return
 	}
 	if ly.PushBounds() {
-		ly.This.(Node2D).ConnectEvents2D()
+		ly.This().(Node2D).ConnectEvents2D()
 		if ly.ScrollsOff {
 			ly.ManageOverflow()
 		}

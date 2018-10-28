@@ -80,7 +80,7 @@ func (mb *MenuBar) Render2D() {
 	}
 	if mb.PushBounds() {
 		mb.MenuBarStdRender()
-		mb.This.(Node2D).ConnectEvents2D()
+		mb.This().(Node2D).ConnectEvents2D()
 		mb.RenderScrolls()
 		mb.Render2DChildren()
 		mb.PopBounds()
@@ -315,7 +315,7 @@ func (tb *ToolBar) Render2D() {
 	}
 	if tb.PushBounds() {
 		tb.ToolBarStdRender()
-		tb.This.(Node2D).ConnectEvents2D()
+		tb.This().(Node2D).ConnectEvents2D()
 		tb.RenderScrolls()
 		tb.Render2DChildren()
 		tb.PopBounds()

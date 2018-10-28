@@ -268,7 +268,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			idxlab.Text = idxtxt
 			idxlab.SetProp("slv-index", i)
 			idxlab.Selectable = true
-			idxlab.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
 					idx := wbb.KnownProp("slv-index").(int)
@@ -293,7 +293,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			if wb != nil {
 				wb.SetProp("slv-index", i)
 				wb.ClearSelected()
-				wb.WidgetSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
 						idx := wbb.KnownProp("slv-index").(int)
@@ -304,7 +304,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			}
 		} else {
 			vvb := vv.AsValueViewBase()
-			vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.SetChanged()
 			})
@@ -319,7 +319,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				addact.SetIcon("plus")
 				addact.Tooltip = "insert a new element at this index"
 				addact.Data = i
-				addact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					svv := recv.Embed(KiT_SliceView).(*SliceView)
 					svv.SliceNewAt(act.Data.(int)+1, true)
@@ -327,7 +327,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				delact.SetIcon("minus")
 				delact.Tooltip = "delete this element"
 				delact.Data = i
-				delact.ActionSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					svv := recv.Embed(KiT_SliceView).(*SliceView)
 					svv.SliceDeleteAt(act.Data.(int), true)
@@ -353,7 +353,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 // types of changes, so this is just generic.
 func (sv *SliceView) SetChanged() {
 	sv.Changed = true
-	sv.ViewSig.Emit(sv.This, 0, nil)
+	sv.ViewSig.Emit(sv.This(), 0, nil)
 	sv.ToolBar().UpdateActions() // nil safe
 }
 
@@ -380,7 +380,7 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
 				gi.NewKiDialog(sv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
 					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
-					sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+					sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						if sig == int64(gi.DialogAccepted) {
 							// svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
 							dlg, _ := send.(*gi.Dialog)
@@ -455,7 +455,7 @@ func (sv *SliceView) ConfigToolbar() {
 	if len(*tb.Children()) < nact {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
-			sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.SliceNewAt(-1, true)
 			})
@@ -493,7 +493,7 @@ func (sv *SliceView) Render2D() {
 	}
 	if sv.PushBounds() {
 		sv.FrameStdRender()
-		sv.This.(gi.Node2D).ConnectEvents2D()
+		sv.This().(gi.Node2D).ConnectEvents2D()
 		sv.RenderScrolls()
 		sv.Render2DChildren()
 		sv.PopBounds()
@@ -670,7 +670,7 @@ func (sv *SliceView) MoveDownAction(selMode mouse.SelectModes) int {
 	nrow := sv.MoveDown(selMode)
 	if nrow >= 0 {
 		sv.ScrollToRow(nrow)
-		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), nrow)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
 }
@@ -699,7 +699,7 @@ func (sv *SliceView) MoveUpAction(selMode mouse.SelectModes) int {
 	nrow := sv.MoveUp(selMode)
 	if nrow >= 0 {
 		sv.ScrollToRow(nrow)
-		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), nrow)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nrow)
 	}
 	return nrow
 }
@@ -740,7 +740,7 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 			sv.SelectedIdx = idx
 			sv.SelectRowWidgets(sv.SelectedIdx, true)
 		}
-		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {
 		selMode := mouse.NoSelectMode
 		win := sv.Viewport.Win
@@ -847,7 +847,7 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 			sv.SelectedIdx = row
 			sv.SelectRow(row)
 			sv.RowGrabFocus(row)
-			sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
+			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
@@ -874,7 +874,7 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 				}
 			}
 			sv.RowGrabFocus(row)
-			sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
+			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		}
 	case mouse.ExtendOne:
 		if sv.RowIsSelected(row) {
@@ -883,7 +883,7 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 			sv.SelectedIdx = row
 			sv.SelectRow(row)
 			sv.RowGrabFocus(row)
-			sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
+			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		}
 	case mouse.NoSelectMode:
 		if sv.RowIsSelected(row) {
@@ -899,12 +899,12 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 			sv.SelectRow(row)
 			sv.RowGrabFocus(row)
 		}
-		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	default: // anything else
 		sv.SelectedIdx = row
 		sv.SelectRow(row)
 		sv.RowGrabFocus(row)
-		sv.WidgetSig.Emit(sv.This, int64(gi.WidgetSelected), sv.SelectedIdx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -971,7 +971,7 @@ func (sv *SliceView) Copy(reset bool) {
 
 // CopyRows copies selected rows to clip.Board, optionally resetting the selection
 func (sv *SliceView) CopyRows(reset bool) {
-	if cpr, ok := sv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Copy(reset)
 	} else {
 		sv.Copy(reset)
@@ -1015,7 +1015,7 @@ func (sv *SliceView) Cut() {
 
 // CutRows copies selected rows to clip.Board and deletes selected rows
 func (sv *SliceView) CutRows() {
-	if cpr, ok := sv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Cut()
 	} else {
 		sv.Cut()
@@ -1034,7 +1034,7 @@ func (sv *SliceView) Paste() {
 // PasteRow pastes clipboard at given row
 func (sv *SliceView) PasteRow(row int) {
 	sv.curRow = row
-	if cpr, ok := sv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Paste()
 	} else {
 		sv.Paste()
@@ -1046,19 +1046,19 @@ func (sv *SliceView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.PasteAssign(data.(mimedata.Mimes), row)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.PasteAtRow(data.(mimedata.Mimes), row+1)
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
 }
 
@@ -1154,13 +1154,13 @@ func (sv *SliceView) DragNDropStart() {
 		bi.InitName(bi, sv.UniqueName())
 		bi.GrabRenderFrom(widg)
 		gi.ImageClearer(bi.Pixels, 50.0)
-		sv.Viewport.Win.StartDragNDrop(sv.This, md, bi)
+		sv.Viewport.Win.StartDragNDrop(sv.This(), md, bi)
 	}
 }
 
 // DragNDropTarget handles a drag-n-drop drop
 func (sv *SliceView) DragNDropTarget(de *dnd.Event) {
-	de.Target = sv.This
+	de.Target = sv.This()
 	if de.Mod == dnd.DropLink {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
@@ -1168,7 +1168,7 @@ func (sv *SliceView) DragNDropTarget(de *dnd.Event) {
 	if ok {
 		de.SetProcessed()
 		sv.curRow = row
-		if dpr, ok := sv.This.(gi.DragNDropper); ok {
+		if dpr, ok := sv.This().(gi.DragNDropper); ok {
 			dpr.Drop(de.Data, de.Mod)
 		} else {
 			sv.Drop(de.Data, de.Mod)
@@ -1188,20 +1188,20 @@ func (sv *SliceView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.DropAssign(data.(mimedata.Mimes), row)
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.DropBefore(data.(mimedata.Mimes), mod, row) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.DropAfter(data.(mimedata.Mimes), mod, row) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_SliceView).(*SliceView)
 		tvv.DropCancel()
 	})
@@ -1298,22 +1298,22 @@ func (sv *SliceView) StdCtxtMenu(m *gi.Menu, row int) {
 		return
 	}
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},
-		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.CopyRows(true)
 		})
 	m.AddAction(gi.ActOpts{Label: "Cut", Data: row},
-		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.CutRows()
 		})
 	m.AddAction(gi.ActOpts{Label: "Paste", Data: row},
-		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.PasteRow(data.(int))
 		})
 	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: row},
-		sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_SliceView).(*SliceView)
 			tvv.Duplicate()
 		})
@@ -1440,7 +1440,7 @@ func (sv *SliceView) SliceViewEvents() {
 			me := d.(*mouse.Event)
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-				svv.SliceViewSig.Emit(svv.This, int64(SliceViewDoubleClicked), svv.SelectedIdx)
+				svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), svv.SelectedIdx)
 				me.SetProcessed()
 			}
 			if me.Button == mouse.Right && me.Action == mouse.Release {

@@ -122,7 +122,7 @@ func (sb *SpinBox) SetValue(val float32) {
 // SetValueAction calls SetValue and also emits the signal
 func (sb *SpinBox) SetValueAction(val float32) {
 	sb.SetValue(val)
-	sb.SpinBoxSig.Emit(sb.This, 0, sb.Value)
+	sb.SpinBoxSig.Emit(sb.This(), 0, sb.Value)
 }
 
 // IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
@@ -167,7 +167,7 @@ func (sb *SpinBox) ConfigParts() {
 		up.Icon = sb.UpIcon
 		sb.StylePart(Node2D(up))
 		if !sb.IsInactive() {
-			up.ActionSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sbb.IncrValue(1.0)
 			})
@@ -180,7 +180,7 @@ func (sb *SpinBox) ConfigParts() {
 		dn.Icon = sb.DownIcon
 		sb.StylePart(Node2D(dn))
 		if !sb.IsInactive() {
-			dn.ActionSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sbb.IncrValue(-1.0)
 			})
@@ -193,7 +193,7 @@ func (sb *SpinBox) ConfigParts() {
 		sb.StylePart(Node2D(tf))
 		tf.Txt = fmt.Sprintf("%g", sb.Value)
 		if !sb.IsInactive() {
-			tf.TextFieldSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(TextFieldDone) {
 					sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
@@ -233,12 +233,12 @@ func (sb *SpinBox) MouseScrollEvent() {
 
 func (sb *SpinBox) TextFieldEvent() {
 	tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
-	tf.WidgetSig.ConnectOnly(sb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
 			sbb.SetSelectedState(!sbb.IsSelected())
 		}
-		sbb.WidgetSig.Emit(sbb.This, sig, data) // passthrough
+		sbb.WidgetSig.Emit(sbb.This(), sig, data) // passthrough
 	})
 }
 
@@ -283,7 +283,7 @@ func (sb *SpinBox) Render2D() {
 		return
 	}
 	if sb.PushBounds() {
-		sb.This.(Node2D).ConnectEvents2D()
+		sb.This().(Node2D).ConnectEvents2D()
 		// sb.Sty = sb.StateStyles[sb.State] // get current styles
 		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
 		tf.SetSelectedState(sb.IsSelected())

@@ -344,8 +344,8 @@ func (nb *NodeBase) SetStdXMLAttr(name, val string) bool {
 // nodes (leaves, terminal nodes) will be considered
 func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
-		if k == nb.This {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == nb.This() {
 			return true
 		}
 		if leavesOnly && k.HasChildren() {
@@ -357,7 +357,7 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 			return false
 		}
 		if pt.In(ni.WinBBox) {
-			rval = ni.This
+			rval = ni.This()
 			return false
 		}
 		return true
@@ -370,7 +370,7 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 // SetInvisibleTree sets the Invisible flag for all nodes down the tree from
 // this node, inclusive
 func (nb *NodeBase) SetInvisibleTree() {
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nbb := k.Embed(KiT_NodeBase).(*NodeBase)
 		nbb.SetInvisible()
 		return true
@@ -380,7 +380,7 @@ func (nb *NodeBase) SetInvisibleTree() {
 // ClearInvisibleTree clears the Invisible flag for all nodes down the tree from
 // this node, inclusive
 func (nb *NodeBase) ClearInvisibleTree() {
-	nb.FuncDownMeFirst(0, nb.This, func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nbb := k.Embed(KiT_NodeBase).(*NodeBase)
 		nbb.ClearInvisible()
 		return true

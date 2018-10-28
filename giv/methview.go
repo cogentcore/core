@@ -369,7 +369,7 @@ func ActionsView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, pa *gi.A
 				nac := &gi.Action{}
 				nac.InitName(nac, mm.Name)
 				nac.SetAsMenu()
-				pa.Menu = append(pa.Menu, nac.This.(gi.Node2D))
+				pa.Menu = append(pa.Menu, nac.This().(gi.Node2D))
 				rv := ActionsView(val, vtyp, vp, nac, mm.Value)
 				if !rv {
 					rval = false
@@ -396,7 +396,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	switch ac.Nm {
 	case "Close Window":
 		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunMenuClose)
-		ac.ActionSig.Connect(vp.Win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			vp.Win.CloseReq()
 		})
 		return true
@@ -433,7 +433,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	}
 
 	if props == nil {
-		ac.ActionSig.Connect(vp.This, MethViewCall)
+		ac.ActionSig.Connect(vp.This(), MethViewCall)
 		return true
 	}
 	for pk, pv := range props {
@@ -521,7 +521,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		return false
 	}
 	if !bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) {
-		ac.ActionSig.Connect(vp.This, MethViewCall)
+		ac.ActionSig.Connect(vp.This(), MethViewCall)
 	}
 	return true
 }
@@ -651,7 +651,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 	}
 
 	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
-		md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		md.Vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				// ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				MethViewCallMeth(md, args)
@@ -671,7 +671,7 @@ func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Val
 	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
 		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, true, true,
-			md.Vp.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			md.Vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, args)
 				}
@@ -894,7 +894,7 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		nac.InitName(nac, nm)
 		nac.Text = nm
 		nac.SetAsMenu()
-		nac.ActionSig.Connect(md.Vp.This, MethViewCall)
+		nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
 		nd := *md // copy
 		nd.SubMenuVal = val
 		if gotDef {

@@ -53,7 +53,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
 	ac.SetProp("border-radius", units.NewValue(4, units.Px))
-	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -69,7 +69,7 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
 	desc, _ := vv.Tag("desc")
 	dlg := StructViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
-	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 	svk, ok := dlg.Frame().Children().ElemByType(KiT_StructView, true, 2)
 	if ok {
 		sv := svk.(*StructView)
@@ -108,10 +108,10 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.StructValView = vv
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
-	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructInlineValueView).(*StructInlineValueView)
 		// vvv.UpdateWidget() // prob not necc..
-		vvv.ViewSig.Emit(vvv.This, 0, nil)
+		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -164,7 +164,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
 	ac.SetProp("border-radius", units.NewValue(4, units.Px))
-	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -188,28 +188,28 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	slci := vv.Value.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
 		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
-		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
 		if ok {
 			sv := svk.(*TableView)
 			sv.SliceValView = vv
-			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
-				vv.ViewSig.Emit(vv.This, 0, nil)
+				vv.ViewSig.Emit(vv.This(), 0, nil)
 			})
 		}
 	} else {
 		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
-		dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 		if ok {
 			sv := svk.(*SliceView)
 			sv.SliceValView = vv
-			sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				vv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 				vv.UpdateWidget()
-				vv.ViewSig.Emit(vv.This, 0, nil)
+				vv.ViewSig.Emit(vv.This(), 0, nil)
 			})
 		}
 	}
@@ -244,12 +244,12 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.SliceValView = vv
 	// npv := vv.Value.Elem()
-	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
+	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
 	sv.SetSlice(vv.Value.Interface(), vv.TmpSave)
-	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceInlineValueView).(*SliceInlineValueView)
 		vvv.UpdateWidget()
-		vvv.ViewSig.Emit(vvv.This, 0, nil)
+		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
 }
 
@@ -291,7 +291,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("padding", units.NewValue(2, units.Px))
 	ac.SetProp("margin", units.NewValue(2, units.Px))
 	ac.SetProp("border-radius", units.NewValue(4, units.Px))
-	ac.ActionSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Viewport, nil, nil)
@@ -312,15 +312,15 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 		tynm = tmptyp.String()
 	}
 	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
-	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 	if ok {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
-		mv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		mv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			vv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 			vv.UpdateWidget()
-			vv.ViewSig.Emit(vv.This, 0, nil)
+			vv.ViewSig.Emit(vv.This(), 0, nil)
 		})
 	}
 }
@@ -354,12 +354,12 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.MapValView = vv
 	// npv := vv.Value.Elem()
-	sv.SetInactiveState(vv.This.(ValueView).IsInactive())
+	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
 	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
-	sv.ViewSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapInlineValueView).(*MapInlineValueView)
 		vvv.UpdateWidget()
-		vvv.ViewSig.Emit(vvv.This, 0, nil)
+		vvv.ViewSig.Emit(vvv.This(), 0, nil)
 	})
 }
 
@@ -423,7 +423,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	mb.SetProp("margin", units.NewValue(2, units.Px))
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
-		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 			k := vvv.KiStruct()
 			if k != nil {
@@ -432,7 +432,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			}
 		})
 	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"},
-		vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			vvv, _ := recv.Embed(KiT_KiPtrValueView).(*KiPtrValueView)
 			k := vvv.KiStruct()
 			if k != nil {
@@ -454,7 +454,7 @@ func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	desc, _ := vv.Tag("desc")
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
 	dlg := StructViewDialog(vp, k, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
-	dlg.SetInactiveState(vv.This.(ValueView).IsInactive())
+	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -486,8 +486,8 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.CheckBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
-	cb.ButtonSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonToggled) {
 			vvv, _ := recv.Embed(KiT_BoolValueView).(*BoolValueView)
 			cbb := vvv.Widget.(*gi.CheckBox)
@@ -530,7 +530,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
-	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
+	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -559,7 +559,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 			sb.Step = step
 		}
 	}
-	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_IntValueView).(*IntValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
@@ -600,7 +600,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
-	sb.SetInactiveState(vv.This.(ValueView).IsInactive())
+	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
 	sb.Defaults()
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -625,7 +625,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 
-	sb.SpinBoxSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_FloatValueView).(*FloatValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
 		if vvv.SetValue(sbb.Value) {
@@ -679,13 +679,13 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
+	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
 	cb.SetProp("padding", units.NewValue(2, units.Px))
 	cb.SetProp("margin", units.NewValue(2, units.Px))
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
-	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_EnumValueView).(*EnumValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
 		eval := cbb.CurVal.(kit.EnumValue)
@@ -727,7 +727,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetInactiveState(vv.This.(ValueView).IsInactive())
+	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
 
 	typEmbeds := ki.KiT_Node
 	if kiv, ok := vv.Owner.(ki.Ki); ok {
@@ -747,7 +747,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	tl := kit.Types.AllEmbedsOf(typEmbeds, true, false)
 	cb.ItemsFromTypes(tl, false, true, 50)
 
-	cb.ComboSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_TypeValueView).(*TypeValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
 		tval := cbb.CurVal.(reflect.Type)
@@ -789,7 +789,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This.(ValueView).IsInactive())
+	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag, ok := vv.Tag("width"); ok {
@@ -805,7 +805,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 
-	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			vvv, _ := recv.Embed(KiT_ByteSliceValueView).(*ByteSliceValueView)
 			tf := send.(*gi.TextField)
@@ -848,7 +848,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetInactiveState(vv.This.(ValueView).IsInactive())
+	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
 	tf.SetProp("min-width", units.NewValue(16, units.Ch))
 	if widthtag, ok := vv.Tag("width"); ok {
@@ -864,7 +864,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 
-	tf.TextFieldSig.ConnectOnly(vv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			vvv, _ := recv.Embed(KiT_RuneSliceValueView).(*RuneSliceValueView)
 			tf := send.(*gi.TextField)

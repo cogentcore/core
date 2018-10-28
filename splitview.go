@@ -240,7 +240,7 @@ func (sv *SplitView) ConfigSplitters() {
 		sp.SetProp("thumb-size", sv.HandleSize)
 		sp.ThumbSize = sv.HandleSize
 		if mods {
-			sp.SliderSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(SliderReleased) {
 					spr, _ := recv.Embed(KiT_SplitView).(*SplitView)
 					spl := send.(*Splitter)
@@ -300,8 +300,8 @@ func (sv *SplitView) SplitViewEvents() {
 
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
-	sv.LayData.SetFromStyle(&sv.Sty.Layout)                             // also does reset
-	sv.HandleSize.SetFmInheritProp("handle-size", sv.This, false, true) // no inherit, yes type defaults
+	sv.LayData.SetFromStyle(&sv.Sty.Layout)                               // also does reset
+	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), false, true) // no inherit, yes type defaults
 	sv.HandleSize.ToDots(&sv.Sty.UnContext)
 }
 
@@ -364,7 +364,7 @@ func (sv *SplitView) Render2D() {
 		return
 	}
 	if sv.PushBounds() {
-		sv.This.(Node2D).ConnectEvents2D()
+		sv.This().(Node2D).ConnectEvents2D()
 		for i, kid := range sv.Kids {
 			nii, ni := KiToNode2D(kid)
 			if nii != nil {
@@ -549,7 +549,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 func (sr *Splitter) Render2D() {
 	vp := sr.Viewport
 	win := vp.Win
-	sr.This.(Node2D).ConnectEvents2D()
+	sr.This().(Node2D).ConnectEvents2D()
 	if sr.IsDragging() {
 		// spc := sr.Sty.BoxSpace()
 		// odim := OtherDim(sr.Dim)
@@ -568,7 +568,7 @@ func (sr *Splitter) Render2D() {
 			ovb = &Bitmap{}
 			ovb.SetName(sr.UniqueName())
 			win.OverlayVp.AddChild(ovb)
-			ovk = ovb.This
+			ovk = ovb.This()
 		}
 		ovb = ovk.(*Bitmap)
 		ovb.GrabRenderFrom(icvp.(Node2D))

@@ -130,7 +130,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 	sv.SelVal = curVal
 	sv.SetSlice(slice, nil)
 
-	sv.SliceViewSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(SliceViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()
@@ -213,7 +213,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 	sv.SelectedIdx = initRow
 	sv.SetSlice(slcOfStru, nil)
 
-	sv.TableViewSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.TableViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(TableViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()
@@ -344,7 +344,7 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filt
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 
-	fv.FileSig.Connect(dlg.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(FileViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()

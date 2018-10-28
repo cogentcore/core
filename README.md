@@ -97,6 +97,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 # TODO
 
 * more race condition fixes..
+	+ need to protect node.This -- gets reset to nil during destroy. use atomic pointer set.
 
 * fix clear x on textfield.
 
@@ -107,6 +108,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:
+	+ word wrapping is going long unnecessarily -- is target size correct??
 	+ isearch not saving to previous if no matches
 	+ query replace reverse-order of find / replace lists
 	+ cursor goes to hand for links in TextView

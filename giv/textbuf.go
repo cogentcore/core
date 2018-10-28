@@ -137,7 +137,7 @@ func (tb *TextBuf) EditDone() {
 		tb.AutoSaveDelete()
 		tb.Changed = false
 		tb.LinesToBytes()
-		tb.TextBufSig.Emit(tb.This, int64(TextBufDone), tb.Txt)
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
 	}
 }
 
@@ -151,7 +151,7 @@ func (tb *TextBuf) Text() []byte {
 
 // Refresh signals any views to refresh views
 func (tb *TextBuf) Refresh() {
-	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
 }
 
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
@@ -216,7 +216,7 @@ func (tb *TextBuf) FileModCheck() {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
 			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
 			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Ignore and Proceed"},
-			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
@@ -245,7 +245,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.MarkupLines(0, mxhi)
 
 	// update views
-	tb.TextBufSig.Emit(tb.This, int64(TextBufNew), tb.Txt)
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
 
 	// do slow full update in background
 	tb.ReMarkup()
@@ -313,7 +313,7 @@ func (tb *TextBuf) SaveAs(filename gi.FileName) error {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
 			[]string{"Cancel", "Overwrite"},
-			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
 					// do nothing
@@ -354,7 +354,7 @@ func (tb *TextBuf) Save() error {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
 			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
 			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
-			tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
@@ -376,7 +376,7 @@ func (tb *TextBuf) Close() bool {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
 				[]string{"Save", "Close Without Saving", "Cancel"},
-				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					switch sig {
 					case 0:
 						tb.Save()
@@ -391,7 +391,7 @@ func (tb *TextBuf) Close() bool {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
 				[]string{"Close Without Saving", "Cancel"},
-				tb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					switch sig {
 					case 0:
 						tb.Changed = false
@@ -538,7 +538,7 @@ func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, saveUndo, signal
 		tb.Markup[ln] = msplt[ln-st]
 	}
 	if signal {
-		tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 	}
 	return tbe
 }
@@ -567,7 +567,7 @@ func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, saveUndo, si
 	tbe := tb.InsertText(ed, efft, saveUndo, false)
 	tb.Markup[tbe.Reg.Start.Ln] = markup
 	if signal {
-		tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 	}
 	return tbe
 }
@@ -578,7 +578,7 @@ func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, saveUndo, si
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
 func (tb *TextBuf) AddView(vw *TextView) {
 	tb.Views = append(tb.Views, vw)
-	tb.TextBufSig.Connect(vw.This, TextViewBufSigRecv)
+	tb.TextBufSig.Connect(vw.This(), TextViewBufSigRecv)
 }
 
 // DeleteView removes given viewer from our buffer
@@ -589,7 +589,7 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 			break
 		}
 	}
-	tb.TextBufSig.Disconnect(vw.This)
+	tb.TextBufSig.Disconnect(vw.This())
 }
 
 // ViewportFromView returns Viewport from textview, if avail
@@ -948,7 +948,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 		tb.LinesDeleted(tbe)
 	}
 	if signal {
-		tb.TextBufSig.Emit(tb.This, int64(TextBufDelete), tbe)
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1016,7 +1016,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 		tb.LinesInserted(tbe)
 	}
 	if signal {
-		tb.TextBufSig.Emit(tb.This, int64(TextBufInsert), tbe)
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1213,7 +1213,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
-	tb.TextBufSig.Emit(tb.This, int64(TextBufMarkUpdt), tb.Txt)
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
 }
 
 // MarkupLines generates markup of given range of lines. end is *inclusive*

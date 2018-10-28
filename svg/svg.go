@@ -21,6 +21,7 @@ import (
 type SVG struct {
 	gi.Viewport2D
 	ViewBox ViewBox  `desc:"viewbox defines the coordinate system for the drawing"`
+	Norm    bool     `desc:"install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
 	Pnt     gi.Paint `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
 	Defs    Group    `desc:"all defs defined elements go here (gradients, symbols, etc)"`
 	Title   string   `xml:"title" desc:"the title of the svg"`
@@ -54,7 +55,7 @@ func (svg *SVG) SetNormXForm() {
 		// todo: deal with all the other options!
 		vpsX := float32(svg.Geom.Size.X) / svg.ViewBox.Size.X
 		vpsY := float32(svg.Geom.Size.Y) / svg.ViewBox.Size.Y
-		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY)
+		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY).Translate(svg.ViewBox.Min.X, svg.ViewBox.Min.Y)
 	}
 }
 
@@ -84,7 +85,7 @@ func (svg *SVG) Size2D(iter int) {
 func (svg *SVG) StyleSVG() {
 	svg.Style2DWidget()
 	svg.Pnt.Defaults()
-	StyleSVG(svg.This.(gi.Node2D))
+	StyleSVG(svg.This().(gi.Node2D))
 	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
 }
 
@@ -122,7 +123,7 @@ func (svg *SVG) FindNamedElement(name string) gi.Node2D {
 		return nil
 	}
 	if svg.Nm == name {
-		return svg.This.(gi.Node2D)
+		return svg.This().(gi.Node2D)
 	}
 
 	def, ok := svg.Defs.ChildByName(name, 0)

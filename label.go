@@ -174,7 +174,7 @@ func (lb *Label) SetStateStyle() {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (lb *Label) OpenLink(tl *TextLink) {
-	tl.Widget = lb.This.(Node2D)
+	tl.Widget = lb.This().(Node2D)
 	if len(lb.LinkSig.Cons) == 0 {
 		if TextLinkHandler != nil {
 			if TextLinkHandler(*tl) {
@@ -186,7 +186,7 @@ func (lb *Label) OpenLink(tl *TextLink) {
 		}
 		return
 	}
-	lb.LinkSig.Emit(lb.This, 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
 func (lb *Label) HoverEvent() {
@@ -244,7 +244,7 @@ func (lb *Label) MouseEvent() {
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
 			llb.EmitContextMenuSignal()
-			llb.This.(Node2D).ContextMenu()
+			llb.This().(Node2D).ContextMenu()
 		}
 	})
 }
@@ -378,7 +378,7 @@ func (lb *Label) Render2D() {
 		return
 	}
 	if lb.PushBounds() {
-		lb.This.(Node2D).ConnectEvents2D()
+		lb.This().(Node2D).ConnectEvents2D()
 		rs := &lb.Viewport.Render
 		rs.Lock()
 		lb.GrabCurBgColor()

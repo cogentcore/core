@@ -127,7 +127,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 // Style2DWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes
 func (wb *WidgetBase) Style2DWidget() {
-	gii, _ := wb.This.(Node2D)
+	gii, _ := wb.This().(Node2D)
 	SetCurStyleNode2D(gii)
 	defer SetCurStyleNode2D(nil)
 	if !RebuildDefaultStyles && wb.DefStyle != nil {
@@ -262,7 +262,7 @@ func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 
 // Layout2DBase provides basic Layout2D functions -- good for most cases
 func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter int) {
-	nii, _ := wb.This.(Node2D)
+	nii, _ := wb.This().(Node2D)
 	if wb.Viewport == nil { // robust
 		if nii.AsViewport2D() == nil {
 			nii.Init2D()
@@ -322,7 +322,7 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 
 // InBounds returns true if our VpBBox is non-empty (and other stuff is non-nil)
 func (wb *WidgetBase) InBounds() bool {
-	if wb.This == nil || wb.Viewport == nil {
+	if wb.This() == nil || wb.Viewport == nil {
 		return false
 	}
 	if wb.IsInvisible() {
@@ -336,7 +336,7 @@ func (wb *WidgetBase) InBounds() bool {
 // be called as first step in Render2D returns whether the new bounds are
 // empty or not -- if empty then don't render!
 func (wb *WidgetBase) PushBounds() bool {
-	if wb.This == nil || wb.Viewport == nil {
+	if wb.This() == nil || wb.Viewport == nil {
 		return false
 	}
 	if wb.IsInvisible() {
@@ -367,7 +367,7 @@ func (wb *WidgetBase) PushBounds() bool {
 // rendering children
 func (wb *WidgetBase) PopBounds() {
 	wb.ClearFullReRender()
-	if wb.This == nil || wb.Viewport == nil {
+	if wb.This() == nil || wb.Viewport == nil {
 		return
 	}
 	rs := &wb.Viewport.Render
@@ -379,7 +379,7 @@ func (wb *WidgetBase) Render2D() {
 		return
 	}
 	if wb.PushBounds() {
-		wb.This.(Node2D).ConnectEvents2D()
+		wb.This().(Node2D).ConnectEvents2D()
 		wb.Render2DChildren()
 		wb.PopBounds()
 	} else {
@@ -414,7 +414,7 @@ func (wb *WidgetBase) ReRender2DTree() {
 // Move2DBase does the basic move on this node
 func (wb *WidgetBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
 	wb.LayData.AllocPos = wb.LayData.AllocPosOrig.Add(NewVec2DFmPoint(delta))
-	wb.This.(Node2D).ComputeBBox2D(parBBox, delta)
+	wb.This().(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
 func (wb *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
@@ -435,13 +435,13 @@ func (wb *WidgetBase) Move2DTree() {
 		parBBox = pnii.ChildrenBBox2D()
 	}
 	delta := wb.LayData.AllocPos.Sub(wb.LayData.AllocPosOrig).ToPoint()
-	wb.This.(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
+	wb.This().(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
 }
 
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Layout {
 	var parLy *Layout
-	wb.FuncUpParent(0, wb.This, func(k ki.Ki, level int, d interface{}) bool {
+	wb.FuncUpParent(0, wb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
 			return false // don't keep going up
@@ -462,9 +462,9 @@ type CtxtMenuFunc func(g Node2D, m *Menu)
 func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	// derived types put native menu code here
 	if wb.CtxtMenuFunc != nil {
-		wb.CtxtMenuFunc(wb.This.(Node2D), m)
+		wb.CtxtMenuFunc(wb.This().(Node2D), m)
 	}
-	TheViewIFace.CtxtMenuView(wb.This, wb.IsInactive(), wb.Viewport, m)
+	TheViewIFace.CtxtMenuView(wb.This(), wb.IsInactive(), wb.Viewport, m)
 }
 
 var TooltipFrameProps = ki.Props{
@@ -517,7 +517,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
 
-	win.PushPopup(pvp.This)
+	win.PushPopup(pvp.This())
 	return &pvp
 }
 
@@ -548,17 +548,17 @@ const (
 
 // EmitSelectedSignal emits the WidgetSelected signal for this widget
 func (wb *WidgetBase) EmitSelectedSignal() {
-	wb.WidgetSig.Emit(wb.This, int64(WidgetSelected), nil)
+	wb.WidgetSig.Emit(wb.This(), int64(WidgetSelected), nil)
 }
 
 // EmitFocusedSignal emits the WidgetFocused signal for this widget
 func (wb *WidgetBase) EmitFocusedSignal() {
-	wb.WidgetSig.Emit(wb.This, int64(WidgetFocused), nil)
+	wb.WidgetSig.Emit(wb.This(), int64(WidgetFocused), nil)
 }
 
 // EmitContextMenuSignal emits the WidgetContextMenu signal for this widget
 func (wb *WidgetBase) EmitContextMenuSignal() {
-	wb.WidgetSig.Emit(wb.This, int64(WidgetContextMenu), nil)
+	wb.WidgetSig.Emit(wb.This(), int64(WidgetContextMenu), nil)
 }
 
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
@@ -606,7 +606,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 				me.SetProcessed()
 				wbb := recv.Embed(KiT_WidgetBase).(*WidgetBase)
 				wbb.EmitContextMenuSignal()
-				wbb.This.(Node2D).ContextMenu()
+				wbb.This().(Node2D).ContextMenu()
 			}
 		}
 	})
@@ -774,7 +774,7 @@ func (wb *PartsWidgetBase) Size2D(iter int) {
 
 func (wb *PartsWidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBox2DBase(parBBox, delta)
-	wb.Parts.This.(Node2D).ComputeBBox2D(parBBox, delta)
+	wb.Parts.This().(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
 func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
@@ -800,7 +800,7 @@ func (wb *PartsWidgetBase) Render2DParts() {
 
 func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	wb.Move2DBase(delta, parBBox)
-	wb.Parts.This.(Node2D).Move2D(delta, parBBox)
+	wb.Parts.This().(Node2D).Move2D(delta, parBBox)
 	wb.Move2DChildren(delta)
 }
 

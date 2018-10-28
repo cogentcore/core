@@ -135,7 +135,7 @@ func StyleCSS(node gi.Node2D, css ki.Props) {
 }
 
 func (g *NodeBase) Style2D() {
-	StyleSVG(g.This.(gi.Node2D))
+	StyleSVG(g.This().(gi.Node2D))
 }
 
 // ParentSVG returns the parent SVG viewport
@@ -143,7 +143,7 @@ func (g *NodeBase) ParentSVG() *SVG {
 	pvp := g.ParentViewport()
 	for pvp != nil {
 		if pvp.IsSVG() {
-			return pvp.This.Embed(KiT_SVG).(*SVG)
+			return pvp.This().Embed(KiT_SVG).(*SVG)
 		}
 		pvp = pvp.ParentViewport()
 	}
@@ -173,7 +173,7 @@ func (g *NodeBase) ChildrenBBox2D() image.Rectangle {
 // gui interaction -- can only be done in rendering because that is when all
 // the proper xforms are all in place -- VpBBox is intersected with parent SVG
 func (g *NodeBase) ComputeBBoxSVG() {
-	g.BBox = g.This.(gi.Node2D).BBox2D()
+	g.BBox = g.This().(gi.Node2D).BBox2D()
 	g.ObjBBox = g.BBox // no diff
 	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
 	g.SetWinBBox()

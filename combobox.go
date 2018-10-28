@@ -110,9 +110,9 @@ func (cb *ComboBox) ButtonRelease() {
 	updt := cb.UpdateStart()
 	cb.MakeItemsMenu()
 	cb.SetButtonState(ButtonActive)
-	cb.ButtonSig.Emit(cb.This, int64(ButtonReleased), nil)
+	cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
 	if wasPressed {
-		cb.ButtonSig.Emit(cb.This, int64(ButtonClicked), nil)
+		cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
 	}
 	cb.UpdateEnd(updt)
 	pos := cb.WinBBox.Max
@@ -178,7 +178,7 @@ func (cb *ComboBox) ConfigPartsIfNeeded() {
 			return
 		}
 	}
-	cb.This.(ButtonWidget).ConfigParts()
+	cb.This().(ButtonWidget).ConfigParts()
 }
 
 func (cb *ComboBox) ConfigParts() {
@@ -371,7 +371,7 @@ func (cb *ComboBox) SetCurIndex(idx int) interface{} {
 func (cb *ComboBox) SelectItem(idx int) {
 	updt := cb.UpdateStart()
 	cb.SetCurIndex(idx)
-	cb.ComboSig.Emit(cb.This, int64(cb.CurIndex), cb.CurVal)
+	cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
 	cb.UpdateEnd(updt)
 }
 
@@ -392,7 +392,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 		} else {
 			ac = &Action{}
 			ac.Init(ac)
-			cb.ItemsMenu = append(cb.ItemsMenu, ac.This.(Node2D))
+			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Node2D))
 		}
 		txt := ToLabel(it)
 		nm := fmt.Sprintf("Item_%v", i)
@@ -401,7 +401,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 		ac.Data = i // index is the data
 		ac.SetSelectedState(i == cb.CurIndex)
 		ac.SetAsMenu()
-		ac.ActionSig.ConnectOnly(cb.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			idx := data.(int)
 			cb := recv.(*ComboBox)
 			cb.SelectItem(idx)

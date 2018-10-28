@@ -114,7 +114,7 @@ func (fv *FileView) SelectFile() {
 			fv.UpdateFilesAction()
 			return
 		}
-		fv.FileSig.Emit(fv.This, int64(FileViewDoubleClicked), fv.SelectedFile())
+		fv.FileSig.Emit(fv.This(), int64(FileViewDoubleClicked), fv.SelectedFile())
 	}
 }
 
@@ -240,7 +240,7 @@ func (fv *FileView) ConfigPathRow() {
 		pft, found := pf.TextField()
 		if found {
 			pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-			pft.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.TextFieldDone) {
 					fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 					pff, _ := send.(*gi.TextField)
@@ -249,7 +249,7 @@ func (fv *FileView) ConfigPathRow() {
 				}
 			})
 		}
-		pf.ComboSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
 			sp := data.(string)
@@ -266,7 +266,7 @@ func (fv *FileView) ConfigPathRow() {
 		pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
 		pu.Icon = gi.IconName("widget-wedge-up")
 		pu.Tooltip = "go up one level into the parent folder"
-		pu.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		pu.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.DirPathUp()
 		})
@@ -274,7 +274,7 @@ func (fv *FileView) ConfigPathRow() {
 		prf := pr.KnownChildByName("path-ref", 0).(*gi.Action)
 		prf.Icon = gi.IconName("update")
 		prf.Tooltip = "Update directory view -- in case files might have changed"
-		prf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		prf.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.UpdateFilesAction()
 		})
@@ -282,7 +282,7 @@ func (fv *FileView) ConfigPathRow() {
 		pfv := pr.KnownChildByName("path-fav", 0).(*gi.Action)
 		pfv.Icon = gi.IconName("heart")
 		pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
-		pfv.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		pfv.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.AddPathToFavs()
 		})
@@ -290,7 +290,7 @@ func (fv *FileView) ConfigPathRow() {
 		nf := pr.KnownChildByName("new-folder", 0).(*gi.Action)
 		nf.Icon = gi.IconName("folder-plus")
 		nf.Tooltip = "Create a new folder in this folder"
-		nf.ActionSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		nf.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.NewFolder()
 		})
@@ -323,7 +323,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetInactive()                   // select only
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths, nil)
-	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
@@ -348,14 +348,14 @@ func (fv *FileView) ConfigFilesRow() {
 	if gi.Prefs.FileViewSort != "" {
 		sv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
-	sv.WidgetSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			svv, _ := send.(*TableView)
 			fvv.FileSelectAction(svv.SelectedIdx)
 		}
 	})
-	sv.TableViewSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sv.TableViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(TableViewDoubleClicked) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.SelectFile()
@@ -384,7 +384,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf.SetMinPrefWidth(units.NewValue(60.0, units.Ch))
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
-	sf.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
@@ -398,7 +398,7 @@ func (fv *FileView) ConfigSelRow() {
 	ef := fv.ExtField()
 	ef.SetText(fv.Ext)
 	ef.SetMinPrefWidth(units.NewValue(10.0, units.Ch))
-	ef.TextFieldSig.Connect(fv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
@@ -449,12 +449,12 @@ func (fv *FileView) UpdatePath() {
 // UpdateFilesAction updates list of files and other views for current path,
 // emitting FileSig signals around it -- this is for gui-generated actions only.
 func (fv *FileView) UpdateFilesAction() {
-	fv.FileSig.Emit(fv.This, int64(FileViewWillUpdate), fv.DirPath)
+	fv.FileSig.Emit(fv.This(), int64(FileViewWillUpdate), fv.DirPath)
 	fv.SetFullReRender()
 	fv.UpdateFiles()
 	sf := fv.SelField()
 	sf.GrabFocus()
-	fv.FileSig.Emit(fv.This, int64(FileViewUpdated), fv.DirPath)
+	fv.FileSig.Emit(fv.This(), int64(FileViewUpdated), fv.DirPath)
 }
 
 var fileViewResetPaths = "<i>Reset Paths</i>"
@@ -568,7 +568,7 @@ func (fv *FileView) AddPathToFavs() {
 	fi := gi.FavPathItem{"folder", fnm, dp}
 	gi.Prefs.FavPaths = append(gi.Prefs.FavPaths, fi)
 	gi.Prefs.Save()
-	fv.FileSig.Emit(fv.This, int64(FileViewFavAdded), fi)
+	fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
 	fv.UpdateFavs()
 }
 
@@ -606,7 +606,7 @@ func (fv *FileView) NewFolder() {
 		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
 		gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, true, false, nil, nil)
 	}
-	fv.FileSig.Emit(fv.This, int64(FileViewNewFolder), fv.DirPath)
+	fv.FileSig.Emit(fv.This(), int64(FileViewNewFolder), fv.DirPath)
 	fv.UpdateFilesAction()
 }
 
@@ -629,7 +629,7 @@ func (fv *FileView) SetSelFileAction(sel string) {
 	fv.SelectedIdx = sv.SelectedIdx
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	fv.WidgetSig.Emit(fv.This, int64(gi.WidgetSelected), fv.SelectedFile())
+	fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
 // FileSelectAction updates selection with given selected file and emits
@@ -644,7 +644,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	fv.WidgetSig.Emit(fv.This, int64(gi.WidgetSelected), fv.SelectedFile())
+	fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
 // SetExt updates the ext to given (list of, comma separated) extensions

@@ -141,10 +141,10 @@ func (av *ArgView) ConfigArgsGrid() {
 		}
 		lbl := sg.KnownChild(i * 2).(*gi.Label)
 		vvb := ad.View.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(av.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			avv, _ := recv.Embed(KiT_ArgView).(*ArgView)
 			// note: updating here is redundant -- relevant field will have already updated
-			avv.ViewSig.Emit(avv.This, 0, nil)
+			avv.ViewSig.Emit(avv.This(), 0, nil)
 		})
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc

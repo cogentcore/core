@@ -63,7 +63,7 @@ func (tv *TreeView) SetRootNode(sk ki.Ki) {
 	if tv.SrcNode.Ptr != sk {
 		updt = tv.UpdateStart()
 		tv.SrcNode.Ptr = sk
-		sk.NodeSignal().Connect(tv.This, SrcNodeSignal) // we recv signals from source
+		sk.NodeSignal().Connect(tv.This(), SrcNodeSignal) // we recv signals from source
 	}
 	tv.RootView = tv
 	tvIdx := 0
@@ -77,7 +77,7 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
 	if tv.SrcNode.Ptr != sk {
 		updt = tv.UpdateStart()
 		tv.SrcNode.Ptr = sk
-		sk.NodeSignal().Connect(tv.This, SrcNodeSignal) // we recv signals from source
+		sk.NodeSignal().Connect(tv.This(), SrcNodeSignal) // we recv signals from source
 	}
 	tv.SyncToSrc(tvIdx)
 	tv.UpdateEnd(updt)
@@ -100,7 +100,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	vcprop := "view-closed"
 	skids := *sk.Children()
 	tnl := make(kit.TypeAndNameList, 0, len(skids))
-	typ := tv.This.Type() // always make our type
+	typ := tv.This().Type() // always make our type
 	flds := make([]ki.Ki, 0)
 	fldClosed := make([]bool, 0)
 	sk.FuncFields(0, nil, func(k ki.Ki, level int, d interface{}) bool {
@@ -208,13 +208,13 @@ func (tv *TreeView) SetChanged() {
 		return
 	}
 	tv.RootView.SetFlag(int(TreeViewFlagChanged))
-	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewChanged), tv.This)
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewChanged), tv.This())
 }
 
 // HasClosedParent returns whether this node have a closed parent? if so, don't render!
 func (tv *TreeView) HasClosedParent() bool {
 	pcol := false
-	tv.FuncUpParent(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
+	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := gi.KiToNode2D(k)
 		if pg == nil {
 			return false
@@ -427,7 +427,7 @@ func (tv *TreeView) UnselectAll() {
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
-	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewAllUnselected), tv.This)
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewAllUnselected), tv.This())
 }
 
 // SelectAll all items in view
@@ -446,7 +446,7 @@ func (tv *TreeView) SelectAll() {
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
-	tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewAllSelected), tv.This)
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewAllSelected), tv.This())
 }
 
 // SelectUpdate updates selection to include this node, using selectmode
@@ -530,7 +530,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 func (tv *TreeView) SelectAction(mode mouse.SelectModes) bool {
 	sel := tv.SelectUpdate(mode)
 	if sel {
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), tv.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), tv.This())
 	}
 	return sel
 }
@@ -539,7 +539,7 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) bool {
 func (tv *TreeView) UnselectAction() {
 	if tv.IsSelected() {
 		tv.Unselect()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewUnselected), tv.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewUnselected), tv.This())
 	}
 }
 
@@ -578,7 +578,7 @@ func (tv *TreeView) MoveDownAction(selMode mouse.SelectModes) *TreeView {
 	if nn != nil && nn != tv {
 		nn.GrabFocus()
 		nn.ScrollToMe()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), nn.This())
 	}
 	return nn
 }
@@ -641,7 +641,7 @@ func (tv *TreeView) MoveUpAction(selMode mouse.SelectModes) *TreeView {
 	if nn != nil && nn != tv {
 		nn.GrabFocus()
 		nn.ScrollToMe()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), nn.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), nn.This())
 	}
 	return nn
 }
@@ -668,7 +668,7 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 		}
 		fnn.GrabFocus()
 		fnn.ScrollToMe()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), fnn.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -695,7 +695,7 @@ func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 		}
 		fnn.GrabFocus()
 		fnn.ScrollToMe()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewSelected), fnn.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -730,7 +730,7 @@ func (tv *TreeView) Close() {
 			tv.SetFullReRender()
 		}
 		tv.SetClosed()
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewClosed), tv.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewClosed), tv.This())
 		tv.UpdateEnd(updt)
 	}
 }
@@ -746,7 +746,7 @@ func (tv *TreeView) Open() {
 			tv.SetClosedState(false)
 		}
 		// send signal in any case -- dynamic trees can open a node here!
-		tv.RootView.TreeViewSig.Emit(tv.RootView.This, int64(TreeViewOpened), tv.This)
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
 		tv.UpdateEnd(updt)
 	}
 }
@@ -772,15 +772,15 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	// derived types put native menu code here
 	if tv.CtxtMenuFunc != nil {
-		tv.CtxtMenuFunc(tv.This.(gi.Node2D), m)
+		tv.CtxtMenuFunc(tv.This().(gi.Node2D), m)
 	}
 	if CtxtMenuView(tv.SrcNode.Ptr, tv.IsInactive(), tv.Viewport, m) { // our viewed obj's menu
 		if tv.ShowViewCtxtMenu {
 			m.AddSeparator("sep-tvmenu")
-			CtxtMenuView(tv.This, tv.IsInactive(), tv.Viewport, m)
+			CtxtMenuView(tv.This(), tv.IsInactive(), tv.Viewport, m)
 		}
 	} else {
-		CtxtMenuView(tv.This, tv.IsInactive(), tv.Viewport, m)
+		CtxtMenuView(tv.This(), tv.IsInactive(), tv.Viewport, m)
 	}
 }
 
@@ -797,7 +797,7 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 		}
 		return true
 	}
-	if tv.This == tv.RootView.This {
+	if tv.This() == tv.RootView.This() {
 		if op != "" {
 			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, true, false, nil, nil)
 		}
@@ -820,7 +820,7 @@ func (tv *TreeView) SrcInsertAfter() {
 	}
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
 				sk := tv.SrcNode.Ptr
@@ -852,7 +852,7 @@ func (tv *TreeView) SrcInsertBefore() {
 	}
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
 				sk := tv.SrcNode.Ptr
@@ -876,7 +876,7 @@ func (tv *TreeView) SrcAddChild() {
 	ttl := "Add Child"
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
-		tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
 				sk := tv.SrcNode.Ptr
@@ -982,7 +982,7 @@ func (tv *TreeView) Copy(reset bool) {
 	tv.MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
-			if sn.This != tv.This {
+			if sn.This() != tv.This() {
 				sn.MimeData(&md)
 			}
 		}
@@ -995,7 +995,7 @@ func (tv *TreeView) Copy(reset bool) {
 
 // CopyAction copies to clip.Board, optionally resetting the selection-- calls Clipper copy
 func (tv *TreeView) CopyAction(reset bool) {
-	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Copy(reset)
 	} else {
 		tv.Copy(reset)
@@ -1019,7 +1019,7 @@ func (tv *TreeView) Cut() {
 
 // CutAction copies to clip.Board and deletes selected items -- calls Clipper cut
 func (tv *TreeView) CutAction() {
-	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Cut()
 	} else {
 		tv.Cut()
@@ -1037,7 +1037,7 @@ func (tv *TreeView) Paste() {
 
 // PasteAction pastes clipboard at given node -- calls Clipper paste
 func (tv *TreeView) PasteAction() {
-	if cpr, ok := tv.This.(gi.Clipper); ok { // should always be true, but justin case..
+	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Paste()
 	} else {
 		tv.Paste()
@@ -1049,25 +1049,25 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteAssign(data.(mimedata.Mimes))
 	})
-	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
 	})
-	if !tv.IsRootOrField("") && tv.RootView.This != tv.This {
-		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
+		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
 		})
-		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.PasteAfter(data.(mimedata.Mimes), dnd.DropCopy)
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
 	// todo: compare, etc..
 }
@@ -1177,7 +1177,7 @@ func (tv *TreeView) DragNDropStart() {
 	tv.MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
-			if sn.This != tv.This {
+			if sn.This() != tv.This() {
 				sn.MimeData(&md)
 			}
 		}
@@ -1186,17 +1186,17 @@ func (tv *TreeView) DragNDropStart() {
 	bi.InitName(bi, tv.UniqueName())
 	bi.GrabRenderFrom(tv) // todo: show number of items?
 	gi.ImageClearer(bi.Pixels, 50.0)
-	tv.Viewport.Win.StartDragNDrop(tv.This, md, bi)
+	tv.Viewport.Win.StartDragNDrop(tv.This(), md, bi)
 }
 
 // DragNDropTarget handles a drag-n-drop onto this node
 func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
-	de.Target = tv.This
+	de.Target = tv.This()
 	if de.Mod == dnd.DropLink {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
 	de.SetProcessed()
-	if dpr, ok := tv.This.(gi.DragNDropper); ok {
+	if dpr, ok := tv.This().(gi.DragNDropper); ok {
 		dpr.Drop(de.Data, de.Mod)
 	} else {
 		tv.Drop(de.Data, de.Mod)
@@ -1235,7 +1235,7 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 // elements that were moved
 func (tv *TreeView) DragNDropSource(de *dnd.Event) {
 	// fmt.Printf("tv src: %v\n", tv.PathUnique())
-	if dpr, ok := tv.This.(gi.DragNDropper); ok {
+	if dpr, ok := tv.This().(gi.DragNDropper); ok {
 		dpr.Dragged(de)
 	} else {
 		tv.Dragged(de)
@@ -1254,26 +1254,26 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods)
 		m.AddLabel("Move:")
 	}
 	if mod == dnd.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropAssign(data.(mimedata.Mimes))
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
-	if !tv.IsRootOrField("") && tv.RootView.This != tv.This {
-		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
+		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
 		})
-		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tvv := recv.Embed(KiT_TreeView).(*TreeView)
 			tvv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		tvv.DropCancel()
 	})
@@ -1337,7 +1337,7 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 // for the overall view are stored there -- cached..
 func (tv *TreeView) RootTreeView() *TreeView {
 	rn := tv
-	tv.FuncUp(0, tv.This, func(k ki.Ki, level int, d interface{}) bool {
+	tv.FuncUp(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, pg := gi.KiToNode2D(k)
 		if pg == nil {
 			return false
@@ -1452,7 +1452,7 @@ func (tv *TreeView) TreeViewEvents() {
 	})
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
-			wb.ButtonSig.ConnectOnly(tv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			wb.ButtonSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.ButtonToggled) {
 					tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
 					tvv.ToggleClose()
@@ -1479,7 +1479,7 @@ func (tv *TreeView) TreeViewEvents() {
 			case mouse.Right:
 				if me.Action == mouse.Release {
 					me.SetProcessed()
-					tvv.This.(gi.Node2D).ContextMenu()
+					tvv.This().(gi.Node2D).ContextMenu()
 				}
 			}
 		})
@@ -1753,7 +1753,7 @@ func (tv *TreeView) StyleTreeView() {
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	tv.Indent.SetFmInheritProp("indent", tv.This, false, true) // no inherit, yes type defaults
+	tv.Indent.SetFmInheritProp("indent", tv.This(), false, true) // no inherit, yes type defaults
 	tv.Indent.ToDots(&tv.Sty.UnContext)
 	if spc, ok := tv.PropInherit("spacing", false, true); ok { // no inherit, yes type
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
@@ -1820,8 +1820,8 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	tv.BBox = tv.This.(gi.Node2D).BBox2D() // only compute once, at this point
-	tv.This.(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
+	tv.BBox = tv.This().(gi.Node2D).BBox2D() // only compute once, at this point
+	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
 
 	if gi.Layout2DTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.PathUnique(), tv.WidgetSize.X, rn.LayData.AllocSize.X, tv.LayData.AllocPos.X, rn.LayData.AllocPos.X)
@@ -1878,7 +1878,7 @@ func (tv *TreeView) Render2D() {
 			tv.Sty = tv.StateStyles[TreeViewActive]
 		}
 		tv.ConfigPartsIfNeeded()
-		tv.This.(gi.Node2D).ConnectEvents2D()
+		tv.This().(gi.Node2D).ConnectEvents2D()
 
 		// note: this is std except using WidgetSize instead of AllocSize
 		rs := &tv.Viewport.Render

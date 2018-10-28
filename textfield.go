@@ -182,7 +182,7 @@ func (tf *TextField) EditDone() {
 	if tf.Edited {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
-		tf.TextFieldSig.Emit(tf.This, int64(TextFieldDone), tf.Txt)
+		tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDone), tf.Txt)
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
@@ -553,7 +553,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
-		tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
 			tff.Copy(true)
 		})
@@ -562,13 +562,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
-			tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Cut()
 			})
 		ac.SetActiveState(tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
-			tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.Paste()
 			})
@@ -584,7 +584,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		if tf.Complete != nil {
-			tf.Complete.CompleteSig.Disconnect(tf.This)
+			tf.Complete.CompleteSig.Disconnect(tf.This())
 			tf.Complete.Destroy()
 		}
 		tf.Complete = nil
@@ -596,7 +596,7 @@ func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc,
 	tf.Complete.MatchFunc = matchFun
 	tf.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tf.Complete.CompleteSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tff, _ := recv.Embed(KiT_TextField).(*TextField)
 		if sig == int64(CompleteSelect) {
 			tff.CompleteText(data.(string)) // always use data
@@ -1163,7 +1163,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 		if me.Action == mouse.Press {
 			me.SetProcessed()
 			tf.EmitContextMenuSignal()
-			tf.This.(Node2D).ContextMenu()
+			tf.This().(Node2D).ContextMenu()
 		}
 	}
 }
@@ -1211,8 +1211,8 @@ func (tf *TextField) KeyChordEvent() {
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})
-	if dlg, ok := tf.Viewport.This.(*Dialog); ok {
-		dlg.DialogSig.Connect(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	if dlg, ok := tf.Viewport.This().(*Dialog); ok {
+		dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff, _ := recv.Embed(KiT_TextField).(*TextField)
 			if sig == int64(DialogAccepted) {
 				tff.EditDone()
@@ -1247,10 +1247,10 @@ func (tf *TextField) StyleTextField() {
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyFrom(&tf.Sty)
 		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]))
-		tf.StateStyles[i].StyleCSS(tf.This.(Node2D), tf.CSSAgg, TextFieldSelectors[i])
+		tf.StateStyles[i].StyleCSS(tf.This().(Node2D), tf.CSSAgg, TextFieldSelectors[i])
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
-	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This, true, true) // get type defaults
+	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), true, true) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
 	pr.End()
 }
@@ -1306,7 +1306,7 @@ func (tf *TextField) Render2D() {
 		return
 	}
 	if tf.PushBounds() {
-		tf.This.(Node2D).ConnectEvents2D()
+		tf.This().(Node2D).ConnectEvents2D()
 		rs := &tf.Viewport.Render
 		rs.Lock()
 		tf.AutoScroll() // inits paint with our style
@@ -1397,7 +1397,7 @@ func (tf *TextField) ConfigParts() {
 	cls.SetIcon(icnm)
 	cls.Indicator = "close.svg"
 	cls.SetProp("no-focus", true)
-	cls.ActionSig.ConnectOnly(tf.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+	cls.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tff := recv.Embed(KiT_TextField).(*TextField)
 		if tff != nil {
 			fmt.Println("clear me")

@@ -47,11 +47,11 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 		updt = sv.UpdateStart()
 		sv.Struct = st
 		if k, ok := st.(ki.Ki); ok {
-			k.NodeSignal().Connect(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				// todo: check for delete??
 				svv, _ := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()
-				svv.ViewSig.Emit(svv.This, 0, nil)
+				svv.ViewSig.Emit(svv.This(), 0, nil)
 			})
 		}
 	}
@@ -198,7 +198,7 @@ func (sv *StructView) ConfigStructGrid() {
 	for i, vv := range sv.FieldViews {
 		lbl := sg.KnownChild(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructView).(*StructView)
 			// note: updating vv here is redundant -- relevant field will have already updated
 			svv.Changed = true
@@ -209,7 +209,7 @@ func (sv *StructView) ConfigStructGrid() {
 			if tb != nil {
 				tb.UpdateActions()
 			}
-			svv.ViewSig.Emit(svv.This, 0, nil)
+			svv.ViewSig.Emit(svv.This(), 0, nil)
 			// vvv, _ := send.Embed(KiT_ValueViewBase).(*ValueViewBase)
 			// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
 		})

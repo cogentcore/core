@@ -84,7 +84,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // // GetAllUpdates connects to all nodes in the tree to receive notification of changes
 // func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
 // 	ge.KiRoot.FuncDownMeFirst(0, ge, func(k ki.Ki, level int, d interface{}) bool {
-// 		k.NodeSignal().Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+// 		k.NodeSignal().Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 // 			gee := recv.Embed(KiT_GiEditor).(*GiEditor)
 // 			if !gee.Changed {
 // 				fmt.Printf("GiEditor: Tree changed with signal: %v\n", ki.NodeSignals(sig))
@@ -211,7 +211,7 @@ func (ge *GiEditor) ConfigSplitView() {
 		tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
 		tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
 		sv := split.AddNewChild(KiT_StructView, "sv").(*StructView)
-		tv.TreeViewSig.Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if data == nil {
 				return
 			}
@@ -224,7 +224,7 @@ func (ge *GiEditor) ConfigSplitView() {
 				gee.SetChanged()
 			}
 		})
-		sv.ViewSig.Connect(ge.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+		sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			gee, _ := recv.Embed(KiT_GiEditor).(*GiEditor)
 			gee.SetChanged()
 		})
@@ -383,7 +383,7 @@ func GoGiEditorDialog(obj ki.Ki) (*GiEditor, *gi.Window) {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 				[]string{"Close Without Saving", "Cancel"},
-				win.This, func(recv, send ki.Ki, sig int64, data interface{}) {
+				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					switch sig {
 					case 0:
 						win.Close()
