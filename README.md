@@ -96,7 +96,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* Textview query replace reverse-order of find / replace lists
+* more race condition fixes..
 
 * fix clear x on textfield.
 
@@ -108,7 +108,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * TextView:
 	+ isearch not saving to previous if no matches
+	+ query replace reverse-order of find / replace lists
 	+ cursor goes to hand for links in TextView
+	+ parens / brackets match highlighter..
 
 * see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
 
