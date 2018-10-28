@@ -115,8 +115,8 @@ func (svg *Editor) SetTransform() {
 
 func (svg *Editor) Render2D() {
 	if svg.PushBounds() {
-		svg.EditorEvents()
 		rs := &svg.Render
+		svg.EditorEvents()
 		if svg.Fill {
 			svg.FillViewport()
 		}

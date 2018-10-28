@@ -21,10 +21,14 @@ var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 func (g *Circle) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
+	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
+
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
-	rs.PopXForm()
+
+	rs.PopXFormLock()
 }

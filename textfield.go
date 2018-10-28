@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"image"
 	"image/draw"
+	"sync"
 	"time"
 	"unicode"
 
@@ -40,7 +41,6 @@ type TextField struct {
 	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	CursorWidth  units.Value             `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	FocusActive  bool                    `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
@@ -136,6 +136,17 @@ const (
 
 // Style selector names for the different states
 var TextFieldSelectors = []string{":active", ":focus", ":inactive", ":selected"}
+
+// these extend NodeBase NodeFlags to hold TextField state
+const (
+	// TextFieldFocusActive indicates that the focus is active in this field
+	TextFieldFocusActive NodeFlags = NodeFlagsN + iota
+)
+
+// IsFocusActive returns true if we have active focus for keyboard input
+func (tf *TextField) IsFocusActive() bool {
+	return tf.HasFlag(int(TextFieldFocusActive))
+}
 
 // Text returns the current text -- applies any unapplied changes first, and
 // sends a signal if so -- this is the end-user method to get the current
@@ -671,6 +682,9 @@ func (tf *TextField) CharStartPos(charidx int) Vec2D {
 	return Vec2D{pos.X + cpos, pos.Y}
 }
 
+// TextFieldBlinkMu is mutex protecting TextFieldBlink updating and access
+var TextFieldBlinkMu sync.Mutex
+
 // TextFieldBlinker is the time.Ticker for blinking cursors for text fields,
 // only one of which can be active at at a time
 var TextFieldBlinker *time.Ticker
@@ -684,31 +698,41 @@ var TextFieldSpriteName = "gi.TextField.Cursor"
 // TextFieldBlink is function that blinks text field cursor
 func TextFieldBlink() {
 	for {
+		TextFieldBlinkMu.Lock()
 		if TextFieldBlinker == nil {
+			TextFieldBlinkMu.Unlock()
 			return // shutdown..
 		}
+		TextFieldBlinkMu.Unlock()
 		<-TextFieldBlinker.C
+		TextFieldBlinkMu.Lock()
 		if BlinkingTextField == nil {
+			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		if BlinkingTextField.IsDestroyed() || BlinkingTextField.IsDeleted() {
 			BlinkingTextField = nil
+			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Viewport == nil || !tf.HasFocus() || !tf.FocusActive || tf.VpBBox == image.ZR {
+		if tf.Viewport == nil || !tf.HasFocus() || !tf.IsFocusActive() || tf.VpBBox == image.ZR {
 			BlinkingTextField = nil
+			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		win := tf.ParentWindow()
 		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
+			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		if win.IsUpdating() {
+			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		tf.BlinkOn = !tf.BlinkOn
 		tf.RenderCursor(tf.BlinkOn)
+		TextFieldBlinkMu.Unlock()
 	}
 }
 
@@ -719,6 +743,7 @@ func (tf *TextField) StartCursor() {
 		tf.RenderCursor(true)
 		return
 	}
+	TextFieldBlinkMu.Lock()
 	if TextFieldBlinker == nil {
 		TextFieldBlinker = time.NewTicker(time.Duration(CursorBlinkMSec) * time.Millisecond)
 		go TextFieldBlink()
@@ -729,6 +754,7 @@ func (tf *TextField) StartCursor() {
 		tf.RenderCursor(true)
 	}
 	BlinkingTextField = tf
+	TextFieldBlinkMu.Unlock()
 }
 
 // ClearCursor turns off cursor and stops it from blinking
@@ -742,9 +768,11 @@ func (tf *TextField) ClearCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tf *TextField) StopCursor() {
+	TextFieldBlinkMu.Lock()
 	if BlinkingTextField == tf {
 		BlinkingTextField = nil
 	}
+	TextFieldBlinkMu.Unlock()
 }
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
@@ -997,8 +1025,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	kf := KeyFun(kt.Chord())
 	win := tf.ParentWindow()
 
-	if tf.Complete != nil && PopupIsCompleter(win.Popup) {
-		tf.Complete.KeyInput(kf)
+	if tf.Complete != nil {
+		cpop := win.CurPopup()
+		if PopupIsCompleter(cpop) {
+			tf.Complete.KeyInput(kf)
+		}
 	}
 
 	// first all the keys that work for both inactive and active
@@ -1268,7 +1299,7 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (tf *TextField) Render2D() {
-	if tf.HasFocus() && tf.FocusActive && BlinkingTextField == tf {
+	if tf.HasFocus() && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
 	if tf.FullReRenderIfNeeded() {
@@ -1276,6 +1307,8 @@ func (tf *TextField) Render2D() {
 	}
 	if tf.PushBounds() {
 		tf.This.(Node2D).ConnectEvents2D()
+		rs := &tf.Viewport.Render
+		rs.Lock()
 		tf.AutoScroll() // inits paint with our style
 		if tf.IsInactive() {
 			if tf.IsSelected() {
@@ -1284,7 +1317,7 @@ func (tf *TextField) Render2D() {
 				tf.Sty = tf.StateStyles[TextFieldInactive]
 			}
 		} else if tf.HasFocus() {
-			if tf.FocusActive {
+			if tf.IsFocusActive() {
 				tf.Sty = tf.StateStyles[TextFieldFocus]
 			} else {
 				tf.Sty = tf.StateStyles[TextFieldActive]
@@ -1294,7 +1327,6 @@ func (tf *TextField) Render2D() {
 		} else {
 			tf.Sty = tf.StateStyles[TextFieldActive]
 		}
-		rs := &tf.Viewport.Render
 		st := &tf.Sty
 		st.Font.OpenFont(&st.UnContext)
 		tf.RenderStdBox(st)
@@ -1310,8 +1342,9 @@ func (tf *TextField) Render2D() {
 			tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 			tf.RenderVis.RenderTopPos(rs, pos)
 		}
+		rs.Unlock()
 		if tf.IsActive() {
-			if tf.HasFocus() && tf.FocusActive {
+			if tf.HasFocus() && tf.IsFocusActive() {
 				tf.StartCursor()
 			} else {
 				tf.StopCursor()
@@ -1331,21 +1364,21 @@ func (tf *TextField) ConnectEvents2D() {
 func (tf *TextField) FocusChanged2D(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		tf.FocusActive = false
+		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDone()
 		tf.UpdateSig()
 	case FocusGot:
-		tf.FocusActive = true
+		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
 		tf.UpdateSig()
 	case FocusInactive:
-		tf.FocusActive = false
+		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDone()
 		tf.UpdateSig()
 	case FocusActive:
-		tf.FocusActive = true
+		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
 		// tf.UpdateSig()
 		// todo: see about cursor

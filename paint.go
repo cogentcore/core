@@ -241,6 +241,7 @@ type RenderState struct {
 	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
 	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
 	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
+	RenderMu       sync.Mutex        `desc:"mutex for overall rendering"`
 	RasterMu       sync.Mutex        `desc:"mutex for final rasterx rendering -- only one at a time"`
 }
 
@@ -258,6 +259,7 @@ func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 }
 
 // PushXForm pushes current xform onto stack and apply new xform on top of it
+// must protect within render mutex lock (see Lock version)
 func (rs *RenderState) PushXForm(xf Matrix2D) {
 	if rs.XFormStack == nil {
 		rs.XFormStack = make([]Matrix2D, 0, 100)
@@ -266,7 +268,16 @@ func (rs *RenderState) PushXForm(xf Matrix2D) {
 	rs.XForm = xf.Multiply(rs.XForm)
 }
 
+// PushXFormLock pushes current xform onto stack and apply new xform on top of it
+// protects within render mutex lock
+func (rs *RenderState) PushXFormLock(xf Matrix2D) {
+	rs.RenderMu.Lock()
+	rs.PushXForm(xf)
+	rs.RenderMu.Unlock()
+}
+
 // PopXForm pops xform off the stack and set to current xform
+// must protect within render mutex lock (see Lock version)
 func (rs *RenderState) PopXForm() {
 	sz := len(rs.XFormStack)
 	if sz == 0 {
@@ -278,8 +289,22 @@ func (rs *RenderState) PopXForm() {
 	rs.XFormStack = rs.XFormStack[:sz-1]
 }
 
+// PopXFormLock pops xform off the stack and set to current xform
+// protects within render mutex lock (see Lock version)
+func (rs *RenderState) PopXFormLock() {
+	rs.RenderMu.Lock()
+	rs.PopXForm()
+	rs.RenderMu.Unlock()
+}
+
 // PushBounds pushes current bounds onto stack and set new bounds
+// this is the essential first step in rendering!
+// any further actual rendering should always be surrounded
+// by Lock() / Unlock() calls
 func (rs *RenderState) PushBounds(b image.Rectangle) {
+	rs.RenderMu.Lock()
+	defer rs.RenderMu.Unlock()
+
 	if rs.BoundsStack == nil {
 		rs.BoundsStack = make([]image.Rectangle, 0, 100)
 	}
@@ -292,8 +317,23 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 	rs.Bounds = b
 }
 
+// Lock locks the render mutex -- must lock prior to rendering!
+func (rs *RenderState) Lock() {
+	rs.RenderMu.Lock()
+}
+
+// Unlock unlocks the render mutex, locked with PushBounds --
+// call this prior to children rendering etc.
+func (rs *RenderState) Unlock() {
+	rs.RenderMu.Unlock()
+}
+
 // PopBounds pops bounds off the stack and set to current bounds
+// must be equally balanced with corresponding PushBounds
 func (rs *RenderState) PopBounds() {
+	rs.RenderMu.Lock()
+	defer rs.RenderMu.Unlock()
+
 	sz := len(rs.BoundsStack)
 	if sz == 0 {
 		log.Printf("gi.RenderState PopBounds: stack is empty -- programmer error\n")

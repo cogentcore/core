@@ -21,10 +21,14 @@ var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 func (g *Ellipse) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
+	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
+
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
-	rs.PopXForm()
+
+	rs.PopXFormLock()
 }

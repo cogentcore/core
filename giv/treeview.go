@@ -1882,6 +1882,7 @@ func (tv *TreeView) Render2D() {
 
 		// note: this is std except using WidgetSize instead of AllocSize
 		rs := &tv.Viewport.Render
+		rs.Lock()
 		pc := &rs.Paint
 		st := &tv.Sty
 		pc.FontStyle = st.Font
@@ -1892,6 +1893,7 @@ func (tv *TreeView) Render2D() {
 		pos := tv.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
 		sz := tv.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
 		tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+		rs.Unlock()
 		tv.Render2DParts()
 		tv.PopBounds()
 	} else {

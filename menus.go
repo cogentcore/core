@@ -366,9 +366,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
-
-	win.NextPopup = pvp.This
-	win.PopupFocus = focus
+	win.SetNextPopup(pvp.This, focus)
 	return &pvp
 }
 
@@ -512,6 +510,7 @@ func (sp *Separator) Style2D() {
 func (sp *Separator) Render2D() {
 	if sp.PushBounds() {
 		rs := &sp.Viewport.Render
+		rs.Lock()
 		pc := &rs.Paint
 		st := &sp.Sty
 
@@ -530,6 +529,7 @@ func (sp *Separator) Render2D() {
 			pc.DrawLine(rs, pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
 		}
 		pc.FillStrokeClear(rs)
+		rs.Unlock()
 		sp.Render2DChildren()
 		sp.PopBounds()
 	}

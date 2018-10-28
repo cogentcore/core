@@ -625,6 +625,7 @@ func (sr *Slider) Render2D() {
 func (sr *Slider) Render2DDefaultStyle() {
 	st := &sr.Sty
 	rs := &sr.Viewport.Render
+	rs.Lock()
 	pc := &rs.Paint
 
 	sr.ConfigPartsIfNeeded(true)
@@ -669,10 +670,12 @@ func (sr *Slider) Render2DDefaultStyle() {
 	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
 	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+		rs.Unlock()
 		sr.Parts.Render2DTree()
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
+		rs.Unlock()
 	}
 }
 
@@ -810,6 +813,7 @@ func (sb *ScrollBar) Render2D() {
 func (sb *ScrollBar) Render2DDefaultStyle() {
 	st := &sb.Sty
 	rs := &sb.Viewport.Render
+	rs.Lock()
 	pc := &rs.Paint
 
 	// overall fill box
@@ -829,6 +833,7 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	sz.SetDim(sb.Dim, sb.ThSize)
 	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].Font.BgColor)
 	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+	rs.Unlock()
 }
 
 func (sb *ScrollBar) ConnectEvents2D() {

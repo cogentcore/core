@@ -193,7 +193,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
 		dlg.UpdateEndNoSig(updt)
-		win.NextPopup = dlg.This
+		win.SetNextPopup(dlg.This, nil)
 	}
 	return true
 }

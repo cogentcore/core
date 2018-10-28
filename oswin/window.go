@@ -187,30 +187,6 @@ func (w WindowBase) Title() string {
 	return w.Titl
 }
 
-func (w WindowBase) Size() image.Point {
-	return w.Sz
-}
-
-func (w WindowBase) Position() image.Point {
-	return w.Pos
-}
-
-func (w WindowBase) PhysicalDPI() float32 {
-	return w.PhysDPI
-}
-
-func (w WindowBase) LogicalDPI() float32 {
-	return w.LogDPI
-}
-
-func (w *WindowBase) SetLogicalDPI(dpi float32) {
-	w.LogDPI = dpi
-}
-
-func (w WindowBase) Screen() *Screen {
-	return w.Scrn
-}
-
 func (w WindowBase) Parent() interface{} {
 	return w.Par
 }

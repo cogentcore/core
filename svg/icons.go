@@ -91,22 +91,22 @@ func (ic *Icon) Render2D() {
 		ic.FullRender2DTree()
 		return
 	}
-	if ic.PushBounds() {
-		if ic.NeedsReRender() {
+	if ic.NeedsReRender() {
+		if ic.PushBounds() {
 			rs := &ic.Render
 			if ic.Fill {
 				ic.FillViewport()
 			}
 			ic.SetNormXForm()
-			rs.PushXForm(ic.Pnt.XForm)
+			rs.PushXFormLock(ic.Pnt.XForm)
 			ic.Render2DChildren() // we must do children first, then us!
-			rs.PopXForm()
+			rs.PopXFormLock()
 			ic.Rendered = true
 			ic.RendSize = ic.Geom.Size
+			ic.PopBounds()
 		}
-		ic.RenderViewport2D() // update our parent image
-		ic.PopBounds()
 	}
+	ic.RenderViewport2D() // update our parent image
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

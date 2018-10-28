@@ -11,6 +11,7 @@ import (
 	"image/draw"
 	"log"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -43,7 +44,6 @@ type TextView struct {
 	Placeholder   string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	CursorWidth   units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 	LineIcons     map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
-	FocusActive   bool                      `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
 	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
@@ -162,7 +162,7 @@ var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", 
 
 // these extend NodeBase NodeFlags to hold TextView state
 const (
-	// TextViewNeedsRefresh is used in atomically safe way to indicate when refresh is required
+	// TextViewNeedsRefresh indicates when refresh is required
 	TextViewNeedsRefresh gi.NodeFlags = gi.NodeFlagsN + iota
 
 	// TextViewInReLayout indicates that we are currently resizing ourselves via parent layout
@@ -170,6 +170,9 @@ const (
 
 	// TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender
 	TextViewRenderScrolls
+
+	// TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes
+	TextViewFocusActive
 
 	// TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)
 	TextViewHasLineNos
@@ -180,6 +183,11 @@ const (
 	// TextViewLastWasUndo indicates that last key was an undo
 	TextViewLastWasUndo
 )
+
+// IsFocusActive returns true if we have active focus for keyboard input
+func (tf *TextView) IsFocusActive() bool {
+	return tf.HasFlag(int(TextViewFocusActive))
+}
 
 // Label returns the display label for this node, satisfying the Labeler interface
 func (tv *TextView) Label() string {
@@ -2501,6 +2509,9 @@ func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 	return spos
 }
 
+// TextViewBlinkMu is mutex protecting TextViewBlink updating and access
+var TextViewBlinkMu sync.Mutex
+
 // TextViewBlinker is the time.Ticker for blinking cursors for text fields,
 // only one of which can be active at at a time
 var TextViewBlinker *time.Ticker
@@ -2514,31 +2525,41 @@ var TextViewSpriteName = "giv.TextView.Cursor"
 // TextViewBlink is function that blinks text field cursor
 func TextViewBlink() {
 	for {
+		TextViewBlinkMu.Lock()
 		if TextViewBlinker == nil {
+			TextViewBlinkMu.Unlock()
 			return // shutdown..
 		}
+		TextViewBlinkMu.Unlock()
 		<-TextViewBlinker.C
+		TextViewBlinkMu.Lock()
 		if BlinkingTextView == nil {
+			TextViewBlinkMu.Unlock()
 			continue
 		}
 		if BlinkingTextView.IsDestroyed() || BlinkingTextView.IsDeleted() {
 			BlinkingTextView = nil
+			TextViewBlinkMu.Unlock()
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Viewport == nil || !tv.HasFocus() || !tv.FocusActive || tv.VpBBox == image.ZR {
+		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || tv.VpBBox == image.ZR {
 			BlinkingTextView = nil
+			TextViewBlinkMu.Unlock()
 			continue
 		}
 		win := tv.ParentWindow()
 		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
+			TextViewBlinkMu.Unlock()
 			continue
 		}
 		if win.IsUpdating() {
+			TextViewBlinkMu.Unlock()
 			continue
 		}
 		tv.BlinkOn = !tv.BlinkOn
 		tv.RenderCursor(tv.BlinkOn)
+		TextViewBlinkMu.Unlock()
 	}
 }
 
@@ -2549,6 +2570,7 @@ func (tv *TextView) StartCursor() {
 		tv.RenderCursor(true)
 		return
 	}
+	TextViewBlinkMu.Lock()
 	if TextViewBlinker == nil {
 		TextViewBlinker = time.NewTicker(time.Duration(gi.CursorBlinkMSec) * time.Millisecond)
 		go TextViewBlink()
@@ -2560,13 +2582,16 @@ func (tv *TextView) StartCursor() {
 	}
 	//	fmt.Printf("set blink tv: %v\n", tv.PathUnique())
 	BlinkingTextView = tv
+	TextViewBlinkMu.Unlock()
 }
 
 // StopCursor stops the cursor from blinking
 func (tv *TextView) StopCursor() {
+	TextViewBlinkMu.Lock()
 	if BlinkingTextView == tv {
 		BlinkingTextView = nil
 	}
+	TextViewBlinkMu.Unlock()
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
@@ -2774,6 +2799,7 @@ func (tv *TextView) RenderAllLines() {
 func (tv *TextView) RenderAllLinesInBounds() {
 	// fmt.Printf("render all: %v\n", tv.Nm)
 	rs := &tv.Viewport.Render
+	rs.Lock()
 	pc := &rs.Paint
 	sty := &tv.Sty
 	tv.VisSizes()
@@ -2805,7 +2831,9 @@ func (tv *TextView) RenderAllLinesInBounds() {
 		if tv.HasLineNos() {
 			tbb := tv.VpBBox
 			tbb.Min.X += int(tv.LineNoOff)
+			rs.Unlock()
 			rs.PushBounds(tbb)
+			rs.Lock()
 		}
 		for ln := stln; ln <= edln; ln++ {
 			lst := pos.Y + tv.Offs[ln]
@@ -2814,9 +2842,12 @@ func (tv *TextView) RenderAllLinesInBounds() {
 			lp.X += tv.LineNoOff
 			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
 		}
+		rs.Unlock()
 		if tv.HasLineNos() {
 			rs.PopBounds()
 		}
+	} else {
+		rs.Unlock()
 	}
 }
 
@@ -2903,77 +2934,81 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	if st > ed {
 		return false
 	}
-	if tv.InBounds() {
-		vp := tv.Viewport
-		updt := vp.Win.UpdateStart()
-		sty := &tv.Sty
-		rs := &vp.Render
-		pc := &rs.Paint
-		pos := tv.RenderStartPos()
-		var boxMin, boxMax gi.Vec2D
-		rs.PushBounds(tv.VpBBox)
-		// first get the box to fill
-		visSt := -1
-		visEd := -1
-		for ln := st; ln <= ed; ln++ {
-			lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-			led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-			if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
-				continue
-			}
-			if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
-				continue
-			}
-			lp := pos
-			if visSt < 0 {
-				visSt = ln
-				lp.Y = lst
-				boxMin = lp
-			}
-			visEd = ln // just keep updating
-			lp.Y = led
-			boxMax = lp
-		}
-		if visSt < 0 && visEd < 0 {
-		} else {
-			boxMin.X = float32(tv.VpBBox.Min.X) // go all the way
-			boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
-			pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
-			// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
-
-			tv.RenderHighlights(visSt, visEd)
-			tv.RenderSelect()
-			tv.RenderLineNosBox(visSt, visEd)
-
-			for ln := visSt; ln <= visEd; ln++ {
-				tv.RenderLineNo(ln)
-			}
-			if tv.HasLineNos() {
-				tbb := tv.VpBBox
-				tbb.Min.X += int(tv.LineNoOff)
-				rs.PushBounds(tbb)
-			}
-			for ln := visSt; ln <= visEd; ln++ {
-				lst := pos.Y + tv.Offs[ln]
-				lp := pos
-				lp.Y = lst
-				lp.X += tv.LineNoOff
-				tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
-			}
-			if tv.HasLineNos() {
-				rs.PopBounds()
-			}
-
-			tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-			vprel := tBBox.Min.Sub(tv.VpBBox.Min)
-			tWinBBox := tv.WinBBox.Add(vprel)
-			vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
-			// fmt.Printf("tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
-		}
-		tv.PopBounds()
-		tv.RenderScrolls()
-		vp.Win.UpdateEnd(updt)
+	if !tv.InBounds() {
+		return false
 	}
+	vp := tv.Viewport
+	updt := vp.Win.UpdateStart()
+	sty := &tv.Sty
+	rs := &vp.Render
+	pc := &rs.Paint
+	pos := tv.RenderStartPos()
+	var boxMin, boxMax gi.Vec2D
+	rs.PushBounds(tv.VpBBox)
+	// first get the box to fill
+	visSt := -1
+	visEd := -1
+	for ln := st; ln <= ed; ln++ {
+		lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
+		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+			continue
+		}
+		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+			continue
+		}
+		lp := pos
+		if visSt < 0 {
+			visSt = ln
+			lp.Y = lst
+			boxMin = lp
+		}
+		visEd = ln // just keep updating
+		lp.Y = led
+		boxMax = lp
+	}
+	if !(visSt < 0 && visEd < 0) {
+		rs.Lock()
+		boxMin.X = float32(tv.VpBBox.Min.X) // go all the way
+		boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
+		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
+		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
+
+		tv.RenderHighlights(visSt, visEd)
+		tv.RenderSelect()
+		tv.RenderLineNosBox(visSt, visEd)
+
+		for ln := visSt; ln <= visEd; ln++ {
+			tv.RenderLineNo(ln)
+		}
+		if tv.HasLineNos() {
+			tbb := tv.VpBBox
+			tbb.Min.X += int(tv.LineNoOff)
+			rs.Unlock()
+			rs.PushBounds(tbb)
+			rs.Lock()
+		}
+		for ln := visSt; ln <= visEd; ln++ {
+			lst := pos.Y + tv.Offs[ln]
+			lp := pos
+			lp.Y = lst
+			lp.X += tv.LineNoOff
+			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+		}
+		rs.Unlock()
+		if tv.HasLineNos() {
+			rs.PopBounds()
+		}
+
+		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
+		vprel := tBBox.Min.Sub(tv.VpBBox.Min)
+		tWinBBox := tv.WinBBox.Add(vprel)
+		vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
+		// fmt.Printf("tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
+	}
+	tv.PopBounds()
+	tv.RenderScrolls()
+	vp.Win.UpdateEnd(updt)
 	return true
 }
 
@@ -3204,7 +3239,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	tv.RefreshIfNeeded()
 
-	if gi.PopupIsCompleter(win.Popup) {
+	cpop := win.CurPopup()
+	if gi.PopupIsCompleter(cpop) {
+		win.SetDelPopup(cpop)
 		setprocessed := tv.Complete.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
@@ -3569,7 +3606,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	if !tv.HasFocus() {
 		tv.GrabFocus()
 	}
-	tv.FocusActive = true
+	tv.SetFlag(int(TextViewFocusActive))
 	me.SetProcessed()
 	if tv.Buf == nil || tv.Buf.NLines == 0 {
 		return
@@ -3712,7 +3749,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	if !tv.Viewport.Win.Resizing && (tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender()) {
+	if !tv.Viewport.Win.IsResizing() && (tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
 	}
@@ -3751,7 +3788,7 @@ func (tv *TextView) Render2D() {
 			tv.Sty = tv.StateStyles[TextViewActive]
 		}
 		tv.RenderAllLinesInBounds()
-		if tv.HasFocus() && tv.FocusActive {
+		if tv.HasFocus() && tv.IsFocusActive() {
 			tv.StartCursor()
 		} else {
 			tv.StopCursor()
@@ -3770,23 +3807,23 @@ func (tv *TextView) ConnectEvents2D() {
 func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
-		tv.FocusActive = false
+		tv.ClearFlag(int(TextViewFocusActive))
 		// tv.EditDone()
 		tv.UpdateSig()
 		// fmt.Printf("lost focus: %v\n", tv.Nm)
 	case gi.FocusGot:
-		tv.FocusActive = true
+		tv.SetFlag(int(TextViewFocusActive))
 		tv.EmitFocusedSignal()
 		tv.UpdateSig()
 		// fmt.Printf("got focus: %v\n", tv.Nm)
 	case gi.FocusInactive:
-		tv.FocusActive = false
+		tv.ClearFlag(int(TextViewFocusActive))
 		// tv.EditDone()
 		// tv.UpdateSig()
 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 	case gi.FocusActive:
 		// fmt.Printf("focus active: %v\n", tv.Nm)
-		tv.FocusActive = true
+		tv.SetFlag(int(TextViewFocusActive))
 		// tv.UpdateSig()
 		// todo: see about cursor
 	}

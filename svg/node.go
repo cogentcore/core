@@ -182,11 +182,11 @@ func (g *NodeBase) ComputeBBoxSVG() {
 func (g *NodeBase) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	rs.PushXForm(pc.XForm)
+	rs.PushXFormLock(pc.XForm)
 	// render path elements, then compute bbox, then fill / stroke
 	g.ComputeBBoxSVG()
 	g.Render2DChildren()
-	rs.PopXForm()
+	rs.PopXFormLock()
 }
 
 func (g *NodeBase) Move2D(delta image.Point, parBBox image.Rectangle) {

@@ -47,9 +47,12 @@ func (g *Path) Render2D() {
 	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
+	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	PathDataRender(g.Data, pc, rs)
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
+
 	g.ComputeBBoxSVG()
 
 	if mrk := g.Marker("marker-start"); mrk != nil {
@@ -81,8 +84,9 @@ func (g *Path) Render2D() {
 			return true
 		})
 	}
+
 	g.Render2DChildren()
-	rs.PopXForm()
+	rs.PopXFormLock()
 }
 
 // PathCmds are the commands within the path SVG drawing data type

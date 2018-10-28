@@ -96,12 +96,6 @@ var WinNewCloseTime time.Time
 // WindowGlobalMu is a mutex for any global state associated with windows
 var WindowGlobalMu sync.Mutex
 
-func WinNewCloseStamp() {
-	WindowGlobalMu.Lock()
-	WinNewCloseTime = time.Now()
-	WindowGlobalMu.Unlock()
-}
-
 // notes: oswin/Image is the thing that a Vp should have uploader uploads the
 // buffer/image to the window -- can also render directly onto window using
 // textures using the drawer interface, but..
@@ -116,41 +110,42 @@ func WinNewCloseStamp() {
 // typically not directly visible, and instead updates the overall menubar.
 type Window struct {
 	NodeBase
-	Title         string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	OSWin         oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	Viewport      *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
-	MasterVLay    *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
-	MainMenu      *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	OverTex       oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	OverlayVp     *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	Sprites       map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
-	SpritesBg     map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
-	ActiveSprites int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
-	UpMu          sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
-	WinTex        oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
-	LastModBits   int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-	LastSelMode   mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	Focus         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	FocusActive   bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
-	StartFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
-	Shortcuts     Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-	DNDData       mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource     ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage      ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
-	DNDFinalEvent *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging      ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
-	Scrolling     ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
-	Popup         ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack    []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup     ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DelPopup      ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle"`
-	PopupFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
-	PopMu         sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating"`
-	TimerMu       sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AferFunc's)"`
-	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
-	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
-	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
+	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	OSWin             oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	Viewport          *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay        *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu          *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	WinTex            oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
+	EventSigs         [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
+	EventMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects event sending"`
+	OverTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
+	OverlayVp         *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
+	Sprites           map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
+	SpritesBg         map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
+	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
+	LastModBits       int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastSelMode       mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	Focus             ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
+	FocusActive       bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
+	StartFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
+	Shortcuts         Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	DNDData           mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
+	DNDImage          ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
+	DNDFinalEvent     *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Dragging          ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	Scrolling         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
+	Popup             ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack        []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
+	FocusStack        []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
+	NextPopup         ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
+	DelPopup          ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle"`
+	PopupFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
+	PopMu             sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating"`
+	TimerMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AferFunc's)"`
+	DoFullRender      bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
+	lastWinMenuUpdate time.Time
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, nil)
@@ -192,6 +187,9 @@ const (
 
 	// WinFlagIsClosing is atomic flag indicating window is closing
 	WinFlagIsClosing
+
+	// WinFlagIsResizing is atomic flag indicating window is resizing
+	WinFlagIsResizing
 
 	// WinFlagOverlayVpCleared true if OverlayVp has no kids and has already been cleared -- no need to keep clearing.
 	WinFlagOverlayVpCleared
@@ -477,10 +475,10 @@ func (w *Window) SetSize(sz image.Point) {
 	w.OSWin.SetSize(sz)
 }
 
-// Is resizing means the window is actively being resized by user -- don't try
+// IsResizing means the window is actively being resized by user -- don't try
 // to update otherwise
 func (w *Window) IsResizing() bool {
-	return w.Resizing
+	return w.HasFlag(int(WinFlagIsResizing))
 }
 
 // Resized updates internal buffers after a window has been resized.
@@ -495,6 +493,7 @@ func (w *Window) Resized(sz image.Point) {
 		}
 		return
 	}
+	w.InactivateAllSprites()
 	w.UpMu.Lock()
 	if w.IsClosed() {
 		if WinEventTrace {
@@ -507,7 +506,6 @@ func (w *Window) Resized(sz image.Point) {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
 	w.FocusInactivate()
-	w.InactivateAllSprites()
 	if w.WinTex != nil {
 		w.WinTex.Release()
 	}
@@ -580,6 +578,25 @@ func (w *Window) IsClosed() bool {
 		return true
 	}
 	return false
+}
+
+// WinNewCloseStamp updates the global WinNewCloseTime timestamp for updating windows menus
+func WinNewCloseStamp() {
+	WindowGlobalMu.Lock()
+	WinNewCloseTime = time.Now()
+	WindowGlobalMu.Unlock()
+}
+
+// NeedWinMenuUpdate returns true if our lastWinMenuUpdate is != WinNewCloseTime
+func (w *Window) NeedWinMenuUpdate() bool {
+	WindowGlobalMu.Lock()
+	updt := false
+	if w.lastWinMenuUpdate != WinNewCloseTime {
+		w.lastWinMenuUpdate = WinNewCloseTime
+		updt = true
+	}
+	WindowGlobalMu.Unlock()
+	return updt
 }
 
 // Init performs overall initialization of the gogi system: loading prefs, etc
@@ -863,7 +880,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	if Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	if win.IsClosed() || win.IsClosing() || win.Resizing || win.IsWinUpdating() {
+	if win.IsClosed() || win.IsClosing() || win.IsResizing() || win.IsWinUpdating() {
 		return
 	}
 	win.Publish()
@@ -875,11 +892,12 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
+	w.UpMu.Lock()
 	if w.OverlayVp == nil || !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
 		w.ClearFlag(int(WinFlagOverTexActive))
+		w.UpMu.Unlock()
 		return
 	}
-	w.UpMu.Lock()
 	if w.IsClosed() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
@@ -923,6 +941,9 @@ func (w *Window) RenderOverlays() {
 // -- prefix with package and type name to ensure uniqueness.  Starts out in
 // inactive state -- must call ActivateSprite.
 func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport2D {
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+
 	if w.Sprites == nil {
 		w.Sprites = make(map[string]*Viewport2D)
 		w.SpritesBg = make(map[string]oswin.Image)
@@ -945,6 +966,9 @@ func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport
 // ActivateSprite clears the Inactive flag on the sprite, and increments
 // ActiveSprites, so that it will actualy be rendered
 func (w *Window) ActivateSprite(nm string) {
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+
 	sp, ok := w.Sprites[nm]
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
@@ -958,6 +982,9 @@ func (w *Window) ActivateSprite(nm string) {
 // InactivateSprite sets the Inactive flag on the sprite, and decrements
 // ActiveSprites, so that it will not be rendered
 func (w *Window) InactivateSprite(nm string) {
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+
 	sp, ok := w.Sprites[nm]
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
@@ -970,6 +997,9 @@ func (w *Window) InactivateSprite(nm string) {
 
 // InactivateAllSprites inactivates all sprites
 func (w *Window) InactivateAllSprites() {
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+
 	for _, sp := range w.Sprites {
 		if sp.IsActive() {
 			sp.SetInactive()
@@ -978,7 +1008,7 @@ func (w *Window) InactivateAllSprites() {
 	}
 }
 
-// RenderSprite renders the sprite onto OverTex
+// RenderSprite renders the sprite onto OverTex -- must be called within UpMu mutex lock
 func (w *Window) RenderSprite(sp *Viewport2D) {
 	sp.Render2D()
 	bg, ok := w.SpritesBg[sp.Nm]
@@ -1097,8 +1127,6 @@ func (w *Window) EventLoop() {
 	dndHoverStarted := false
 	var dndHoverTimer *time.Timer
 
-	var lastWinMenuUpdate time.Time
-
 mainloop:
 	for {
 		evi := w.OSWin.NextEvent()
@@ -1114,12 +1142,17 @@ mainloop:
 			continue
 		}
 
-		if w.DelPopup != nil {
-			if w.DelPopup == w.Popup {
-				// fmt.Printf("closing popup: %v  cur: %v\n", w.DelPopup.Name(), w.Popup.Name())
-				w.ClosePopup(w.DelPopup)
-			} else {
-				fmt.Printf("zombie popup: %v  cur: %v\n", w.DelPopup.Name(), w.Popup.Name())
+		{ // popup delete check
+			w.PopMu.RLock()
+			dpop := w.DelPopup
+			cpop := w.Popup
+			w.PopMu.RUnlock()
+			if dpop != nil {
+				if dpop == cpop {
+					w.ClosePopup(dpop)
+				} else {
+					fmt.Printf("zombie popup: %v  cur: %v\n", dpop.Name(), cpop.Name())
+				}
 			}
 		}
 
@@ -1179,7 +1212,7 @@ mainloop:
 						lastSkipped = false
 					}
 				case oswin.WindowResizeEvent:
-					w.Resizing = true
+					w.SetFlag(int(WinFlagIsResizing))
 					we := evi.(*window.Event)
 					// fmt.Printf("resize\n")
 					if lagMs > EventSkipLagMSec {
@@ -1215,13 +1248,13 @@ mainloop:
 		}
 
 		if skippedResize != nil || w.Viewport.Geom.Size != w.OSWin.Size() {
-			w.Resizing = true
+			w.SetFlag(int(WinFlagIsResizing))
 			w.Resized(w.OSWin.Size())
 			skippedResize = nil
 		}
 
 		if et != oswin.WindowResizeEvent && et != oswin.WindowPaintEvent {
-			w.Resizing = false
+			w.ClearFlag(int(WinFlagIsResizing))
 		}
 
 		////////////////////////////////////////////////////////////////////////////
@@ -1233,7 +1266,7 @@ mainloop:
 				if startDrag == nil {
 					startDrag = evi.(*mouse.DragEvent)
 				} else {
-					if w.DoInstaDrag(startDrag, !PopupIsTooltip(w.Popup)) {
+					if w.DoInstaDrag(startDrag, !w.CurPopupIsTooltip()) {
 						dragStarted = true
 						startDrag = nil
 					} else {
@@ -1337,7 +1370,7 @@ mainloop:
 					startHover = nil
 					hoverTimer = nil
 					w.PopMu.RLock()
-					if w.Popup != nil && PopupIsTooltip(w.Popup) {
+					if w.CurPopupIsTooltip() {
 						delPop = true
 					}
 					w.PopMu.RUnlock()
@@ -1394,13 +1427,10 @@ mainloop:
 					w.SetFlag(int(WinFlagGotFocus))
 				} else {
 					// fmt.Printf("win foc: %v\n", w.Nm)
-					if lastWinMenuUpdate != WinNewCloseTime {
-						lastWinMenuUpdate = WinNewCloseTime
+					if w.NeedWinMenuUpdate() {
 						w.MainMenuUpdateWindows()
-						w.MainMenuSet()
-					} else {
-						w.MainMenuSet()
 					}
+					w.MainMenuSet()
 				}
 			}
 			continue // don't do anything else!
@@ -1438,8 +1468,7 @@ mainloop:
 						w.FullReRender()
 					}
 				}
-				if lastWinMenuUpdate != WinNewCloseTime {
-					lastWinMenuUpdate = WinNewCloseTime
+				if w.NeedWinMenuUpdate() {
 					w.MainMenuUpdateWindows()
 					w.MainMenuSet()
 				}
@@ -1458,11 +1487,11 @@ mainloop:
 		// Send Events to Widgets
 
 		if !evi.IsProcessed() {
-			evToPopup := !PopupIsTooltip(w.Popup) // don't send events to tooltips!
+			evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 			w.SendEventSignal(evi, evToPopup)
 			if !delPop && et == oswin.MouseMoveEvent {
 				didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
-				if didFocus && w.Popup != nil && PopupIsTooltip(w.Popup) {
+				if didFocus && w.CurPopupIsTooltip() {
 					delPop = true
 				}
 			}
@@ -1493,30 +1522,31 @@ mainloop:
 		////////////////////////////////////////////////////////////////////////////
 		// Delete popup?
 
-		w.PopMu.RLock()
-		if w.Popup != nil && !delPop {
-			if PopupIsTooltip(w.Popup) {
-				if et != oswin.MouseMoveEvent {
-					delPop = true
-				}
-			} else if me, ok := evi.(*mouse.Event); ok {
-				if me.Action == mouse.Release {
-					if w.ShouldDeletePopupMenu(w.Popup, me) {
+		{
+			cpop := w.CurPopup()
+			if cpop != nil && !delPop {
+				if PopupIsTooltip(cpop) {
+					if et != oswin.MouseMoveEvent {
 						delPop = true
 					}
+				} else if me, ok := evi.(*mouse.Event); ok {
+					if me.Action == mouse.Release {
+						if w.ShouldDeletePopupMenu(cpop, me) {
+							delPop = true
+						}
+					}
 				}
-			}
 
-			if PopupIsCompleter(w.Popup) {
-				fsz := len(w.FocusStack)
-				if fsz > 0 && et == oswin.KeyChordEvent {
-					for pri := HiPri; pri < EventPrisN; pri++ {
-						w.EventSigs[et][pri].SendSig(w.FocusStack[fsz-1], w.Popup, int64(et), evi)
+				if PopupIsCompleter(cpop) {
+					fsz := len(w.FocusStack)
+					if fsz > 0 && et == oswin.KeyChordEvent {
+						for pri := HiPri; pri < EventPrisN; pri++ {
+							w.EventSigs[et][pri].SendSig(w.FocusStack[fsz-1], cpop, int64(et), evi)
+						}
 					}
 				}
 			}
 		}
-		w.PopMu.RUnlock()
 
 		////////////////////////////////////////////////////////////////////////////
 		// Shortcuts come last as lowest priority relative to more specific cases
@@ -1531,13 +1561,14 @@ mainloop:
 		// Actually delete popup and push a new one
 
 		if delPop {
-			w.ClosePopup(w.Popup)
+			w.ClosePopup(w.CurPopup())
 		}
 
-		if w.NextPopup != nil {
-			pu := w.NextPopup
-			w.NextPopup = nil
-			w.PushPopup(pu)
+		w.PopMu.RLock()
+		npop := w.NextPopup
+		w.PopMu.RUnlock()
+		if npop != nil {
+			w.PushPopup(npop)
 		}
 	}
 	if WinEventTrace {
@@ -1557,16 +1588,17 @@ mainloop:
 // If popup is true, then only items on popup are in scope, otherwise
 // items NOT on popup are in scope (if no popup, everything is in scope).
 func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
-	if w.Popup == nil {
+	cpop := w.CurPopup()
+	if cpop == nil {
 		return true
 	}
-	if ni.This == w.Popup {
+	if ni.This == cpop {
 		return popup
 	}
 	if ni.Viewport == nil {
 		return false
 	}
-	if ni.Viewport.This == w.Popup {
+	if ni.Viewport.This == cpop {
 		return popup
 	}
 	return !popup
@@ -1683,6 +1715,9 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 
+	w.EventMu.Lock()
+	defer w.EventMu.Unlock()
+
 	// fmt.Printf("got event type: %v\n", et)
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
@@ -1693,7 +1728,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 		// dispatch to inner-most one first
 		rvs := make(WinEventRecvList, 0, 10)
 
-		esig := w.EventSigs[et][pri]
+		esig := &w.EventSigs[et][pri]
 
 		esig.Mu.RLock()
 		for recv, fun := range esig.Cons {
@@ -1940,6 +1975,9 @@ func (w *Window) TriggerShortcut(chord key.Chord) bool {
 
 // PopupIsMenu returns true if the given popup item is a menu
 func PopupIsMenu(pop ki.Ki) bool {
+	if pop == nil {
+		return false
+	}
 	nii, ni := KiToNode2D(pop)
 	if ni == nil {
 		return false
@@ -1956,6 +1994,9 @@ func PopupIsMenu(pop ki.Ki) bool {
 
 // PopupIsTooltip returns true if the given popup item is a menu
 func PopupIsTooltip(pop ki.Ki) bool {
+	if pop == nil {
+		return false
+	}
 	nii, ni := KiToNode2D(pop)
 	if ni == nil {
 		return false
@@ -1989,6 +2030,34 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	return false
 }
 
+// CurPopup returns the current popup, protected with read mutex
+func (w *Window) CurPopup() ki.Ki {
+	w.PopMu.RLock()
+	cpop := w.Popup
+	w.PopMu.RUnlock()
+	return cpop
+}
+
+// CurPopupIsTooltip returns true if current popup is a tooltip
+func (w *Window) CurPopupIsTooltip() bool {
+	return PopupIsTooltip(w.CurPopup())
+}
+
+// SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
+func (w *Window) SetNextPopup(pop, focus ki.Ki) {
+	w.PopMu.Lock()
+	w.NextPopup = pop
+	w.PopupFocus = focus
+	w.PopMu.Unlock()
+}
+
+// SetDelPopup sets the popup to delete next time through event loop
+func (w *Window) SetDelPopup(pop ki.Ki) {
+	w.PopMu.Lock()
+	w.DelPopup = pop
+	w.PopMu.Unlock()
+}
+
 // ShouldDeletePopupMenu returns true if the given popup item should be deleted
 func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	if !PopupIsMenu(pop) {
@@ -2006,8 +2075,7 @@ func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 // PushPopup pushes current popup onto stack and set new popup.
 func (w *Window) PushPopup(pop ki.Ki) {
 	w.PopMu.Lock()
-	// fmt.Printf("pushpop locked: %v\n", w.Nm)
-
+	w.NextPopup = nil
 	if w.PopupStack == nil {
 		w.PopupStack = make([]ki.Ki, 0, 50)
 	}
@@ -2018,14 +2086,14 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	if ni != nil {
 		ni.FullRender2DTree()
 	}
-	if w.PopupFocus != nil {
-		w.PushFocus(w.PopupFocus)
-		w.PopupFocus = nil
+	pfoc := w.PopupFocus
+	w.PopupFocus = nil
+	w.PopMu.Unlock()
+	if pfoc != nil {
+		w.PushFocus(pfoc)
 	} else {
 		w.PushFocus(pop)
 	}
-	w.PopMu.Unlock()
-	// fmt.Printf("pushpop unlocked: %v\n", w.Nm)
 }
 
 // DisconnectPopup disconnects given popup -- typically the current one.
@@ -2036,25 +2104,25 @@ func (w *Window) DisconnectPopup(pop ki.Ki) {
 
 // ClosePopup close given popup -- must be the current one -- returns false if not.
 func (w *Window) ClosePopup(pop ki.Ki) bool {
-	if pop != w.Popup {
+	if pop != w.CurPopup() {
 		return false
 	}
 	w.PopMu.Lock()
-	// fmt.Printf("closepop locked: %v\n", w.Nm)
 	if w.Popup == w.DelPopup {
 		w.DelPopup = nil
 	}
 	w.DisconnectPopup(pop)
-	w.PopPopup(pop)
+	popped := w.PopPopup(pop)
 	w.PopMu.Unlock()
-	// fmt.Printf("closepop unlocked: %v\n", w.Nm)
-	// w.Viewport.UploadToWin()
+	if popped {
+		w.PopFocus()
+	}
 	w.UploadAllViewports()
 	return true
 }
 
 // PopPopup pops current popup off the popup stack and set to current popup.
-// returns true if was actually popped
+// returns true if was actually popped.  MUST be called within PopMu.Lock scope!
 func (w *Window) PopPopup(pop ki.Ki) bool {
 	nii, ok := pop.(Node2D)
 	if ok {
@@ -2071,7 +2139,6 @@ func (w *Window) PopPopup(pop ki.Ki) bool {
 			w.Popup = w.PopupStack[sz-1]
 			w.PopupStack = w.PopupStack[:sz-1]
 		}
-		w.PopFocus()
 		return true
 	} else {
 		for i := sz - 1; i >= 0; i-- {
@@ -2103,19 +2170,16 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	if e.IsProcessed() {
 		return false
 	}
+	cpop := w.CurPopup()
 	switch kf {
 	case KeyFunAbort:
-		if w.Popup != nil {
-			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-				delPop = true
-				e.SetProcessed()
-			}
+		if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
+			delPop = true
+			e.SetProcessed()
 		}
 	case KeyFunAccept:
-		if w.Popup != nil {
-			if PopupIsMenu(w.Popup) || PopupIsTooltip(w.Popup) {
-				delPop = true
-			}
+		if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
+			delPop = true
 		}
 	}
 	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.Chord())
@@ -2235,8 +2299,9 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 	}
 
 	focRoot := w.Viewport.This
-	if w.Popup != nil {
-		focRoot = w.Popup
+	cpop := w.CurPopup()
+	if cpop != nil {
+		focRoot = cpop
 	}
 
 	for i := 0; i < 2; i++ {
@@ -2298,8 +2363,9 @@ func (w *Window) FocusPrev(foc ki.Ki) bool {
 	var prevItem ki.Ki
 
 	focRoot := w.Viewport.This
-	if w.Popup != nil {
-		focRoot = w.Popup
+	cpop := w.CurPopup()
+	if cpop != nil {
+		focRoot = cpop
 	}
 
 	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
@@ -2335,8 +2401,9 @@ func (w *Window) FocusLast() bool {
 	var lastItem ki.Ki
 
 	focRoot := w.Viewport.This
-	if w.Popup != nil {
-		focRoot = w.Popup
+	cpop := w.CurPopup()
+	if cpop != nil {
+		focRoot = cpop
 	}
 
 	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
@@ -2361,8 +2428,9 @@ func (w *Window) FocusLast() bool {
 // ClearNonFocus clears the focus of any non-w.Focus item.
 func (w *Window) ClearNonFocus() {
 	focRoot := w.Viewport.This
-	if w.Popup != nil {
-		focRoot = w.Popup
+	cpop := w.CurPopup()
+	if cpop != nil {
+		focRoot = cpop
 	}
 
 	updated := false
@@ -2428,7 +2496,8 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 	if w.Focus == nil || e.Button != mouse.Left || e.Action != mouse.Press {
 		return
 	}
-	if w.Popup != nil { // no updating on popus
+	cpop := w.CurPopup()
+	if cpop != nil { // no updating on popus
 		return
 	}
 	nii, ni := KiToNode2D(w.Focus)

@@ -202,7 +202,6 @@ func drawgl(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
 	sendWindowEvent(w, window.Paint)
 	<-w.drawDone
 }
@@ -445,17 +444,14 @@ func cocoaMouseButton(button int32) mouse.Buttons {
 	}
 }
 
-var lastMouseClickEvent oswin.Event
-var lastMouseEvent oswin.Event
+var lastMouseClickTime time.Time
+var lastMousePos image.Point
 
 //export mouseEvent
 func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32) {
 	cmButton := cocoaMouseButton(button)
 	where := image.Point{int(x), int(y)}
-	from := image.ZP
-	if lastMouseEvent != nil {
-		from = lastMouseEvent.Pos()
-	}
+	from := lastMousePos
 	mods := cocoaMods(flags)
 	var event oswin.Event
 	switch ty {
@@ -507,13 +503,8 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 	default:
 		act := cocoaMouseAct(ty)
 
-		// todo: process DoubleClickWait option -- requires caching the
-		// event and delivering conditional on a global timer... probably
-		// don't want to delay things here.. some kind of go routine with a
-		// timer delay on it or something like that
-
-		if act == mouse.Press && lastMouseClickEvent != nil {
-			interval := time.Now().Sub(lastMouseClickEvent.Time())
+		if act == mouse.Press {
+			interval := time.Now().Sub(lastMouseClickTime)
 			// fmt.Printf("interval: %v\n", interval)
 			if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
 				act = mouse.DoubleClick
@@ -527,11 +518,11 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 		}
 		if act == mouse.Press {
 			event.SetTime()
-			lastMouseClickEvent = event
+			lastMouseClickTime = event.Time()
 		}
 	}
 	event.SetTime()
-	lastMouseEvent = event
+	lastMousePos = event.Pos()
 	sendEvent(id, event)
 }
 

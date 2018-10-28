@@ -53,6 +53,7 @@ func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 func (fr *Frame) FrameStdRender() {
 	st := &fr.Sty
 	rs := &fr.Viewport.Render
+	rs.Lock()
 	pc := &rs.Paint
 	// first draw a background rectangle in our full area
 
@@ -90,6 +91,7 @@ func (fr *Frame) FrameStdRender() {
 		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
 	}
 	pc.FillStrokeClear(rs)
+	rs.Unlock()
 }
 
 func (fr *Frame) RenderStripes() {

@@ -43,8 +43,10 @@ func (g *Group) BBox2D() image.Rectangle {
 func (g *Group) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
-	rs.PushXForm(pc.XForm)
+	rs.PushXFormLock(pc.XForm)
+
 	g.Render2DChildren()
 	g.ComputeBBoxSVG()
-	rs.PopXForm()
+
+	rs.PopXFormLock()
 }

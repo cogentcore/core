@@ -40,11 +40,12 @@ var MenuBarProps = ki.Props{
 func (mb *MenuBar) MenuBarStdRender() {
 	st := &mb.Sty
 	rs := &mb.Viewport.Render
+	rs.Lock()
 	pc := &rs.Paint
-
 	pos := mb.LayData.AllocPos
 	sz := mb.LayData.AllocSize
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	rs.Unlock()
 }
 
 func (mb *MenuBar) ShowMenuBar() bool {
@@ -297,11 +298,12 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 func (tb *ToolBar) ToolBarStdRender() {
 	st := &tb.Sty
 	rs := &tb.Viewport.Render
+	rs.Lock()
 	pc := &rs.Paint
-
 	pos := tb.LayData.AllocPos
 	sz := tb.LayData.AllocSize
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	rs.Unlock()
 }
 
 func (tb *ToolBar) Render2D() {

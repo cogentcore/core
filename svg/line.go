@@ -22,6 +22,7 @@ var KiT_Line = kit.Types.AddType(&Line{}, nil)
 func (g *Line) Render2D() {
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
+	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)
 	pc.Stroke(rs)
@@ -35,7 +36,8 @@ func (g *Line) Render2D() {
 		ang := math32.Atan2(g.End.Y-g.Start.Y, g.End.X-g.Start.X)
 		mrk.RenderMarker(g.End, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
+	rs.Unlock()
 
 	g.Render2DChildren()
-	rs.PopXForm()
+	rs.PopXFormLock()
 }

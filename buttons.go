@@ -607,7 +607,10 @@ func (bb *ButtonBase) Render2D() {
 		bb.This.(Node2D).ConnectEvents2D()
 		bb.UpdateButtonStyle()
 		st := &bb.Sty
+		rs := &bb.Viewport.Render
+		rs.Lock()
 		bb.RenderStdBox(st)
+		rs.Unlock()
 		bb.Render2DParts()
 		bb.Render2DChildren()
 		bb.PopBounds()

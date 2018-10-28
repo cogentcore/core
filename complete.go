@@ -7,6 +7,7 @@ package gi
 import (
 	"go/token"
 	"image"
+	"sync"
 	"time"
 
 	"github.com/goki/gi/complete"
@@ -30,6 +31,7 @@ type Complete struct {
 	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
 	Completion  string    `desc:"the user's completion selection'"`
 	DelayTimer  *time.Timer
+	DelayMu     sync.Mutex
 }
 
 var KiT_Complete = kit.Types.AddType(&Complete{}, nil)
@@ -61,20 +63,26 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
-	if PopupIsCompleter(vp.Win.Popup) {
-		vp.Win.DelPopup = vp.Win.Popup
+	cpop := vp.Win.CurPopup()
+	if PopupIsCompleter(cpop) {
+		vp.Win.SetDelPopup(cpop)
 	}
+	c.DelayMu.Lock()
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 	}
 	if text == "" {
+		c.DelayMu.Unlock()
 		return
 	}
 	c.DelayTimer = time.AfterFunc(time.Duration(CompleteWaitMSec)*time.Millisecond,
 		func() {
 			c.ShowNow(text, pos, vp, pt)
+			c.DelayMu.Lock()
 			c.DelayTimer = nil
+			c.DelayMu.Unlock()
 		})
+	c.DelayMu.Unlock()
 }
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
@@ -84,8 +92,9 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 		return
 	}
 
-	if PopupIsCompleter(vp.Win.Popup) {
-		vp.Win.DelPopup = vp.Win.Popup
+	cpop := vp.Win.CurPopup()
+	if PopupIsCompleter(cpop) {
+		vp.Win.SetDelPopup(cpop)
 	}
 	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
 	count := len(c.Completions)
@@ -116,14 +125,18 @@ func (c *Complete) Cancel(vp *Viewport2D) bool {
 	if vp == nil || vp.Win == nil {
 		return false
 	}
-	if PopupIsCompleter(vp.Win.Popup) {
-		vp.Win.DelPopup = vp.Win.Popup
+	cpop := vp.Win.CurPopup()
+	if PopupIsCompleter(cpop) {
+		vp.Win.SetDelPopup(cpop)
 	}
+	c.DelayMu.Lock()
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 		c.DelayTimer = nil
+		c.DelayMu.Unlock()
 		return true
 	}
+	c.DelayMu.Unlock()
 	return false
 }
 

@@ -383,6 +383,47 @@ func (w *windowImpl) SetTitle(title string) {
 	updateTitle(w, title)
 }
 
+func (w *windowImpl) Screen() *oswin.Screen {
+	w.sizeMu.Lock()
+	sc := w.Scrn
+	w.sizeMu.Unlock()
+	return sc
+}
+
+func (w *windowImpl) Size() image.Point {
+	w.sizeMu.Lock()
+	sz := w.Sz
+	w.sizeMu.Unlock()
+	return sz
+}
+
+func (w *windowImpl) Position() image.Point {
+	w.sizeMu.Lock()
+	ps := w.Pos
+	w.sizeMu.Unlock()
+	return ps
+}
+
+func (w *windowImpl) PhysicalDPI() float32 {
+	w.sizeMu.Lock()
+	dpi := w.PhysDPI
+	w.sizeMu.Unlock()
+	return dpi
+}
+
+func (w *windowImpl) LogicalDPI() float32 {
+	w.sizeMu.Lock()
+	dpi := w.LogDPI
+	w.sizeMu.Unlock()
+	return dpi
+}
+
+func (w *windowImpl) SetLogicalDPI(dpi float32) {
+	w.sizeMu.Lock()
+	w.LogDPI = dpi
+	w.sizeMu.Unlock()
+}
+
 func (w *windowImpl) SetSize(sz image.Point) {
 	resizeWindow(w, sz)
 }

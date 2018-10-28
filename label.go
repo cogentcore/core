@@ -379,13 +379,15 @@ func (lb *Label) Render2D() {
 	}
 	if lb.PushBounds() {
 		lb.This.(Node2D).ConnectEvents2D()
+		rs := &lb.Viewport.Render
+		rs.Lock()
 		lb.GrabCurBgColor()
 		lb.SetStateStyle()
 		st := &lb.Sty
-		rs := &lb.Viewport.Render
 		lb.RenderPos = lb.TextPos()
 		lb.RenderStdBox(st)
 		lb.Render.Render(rs, lb.RenderPos)
+		rs.Unlock()
 		lb.Render2DChildren()
 		lb.PopBounds()
 	} else {
