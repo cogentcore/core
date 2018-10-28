@@ -46,7 +46,7 @@ type Node struct {
 	Par      Ki     `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
 	Kids     Slice  `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
 	NodeSig  Signal `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	This     Ki     `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary"`
+	Ths      Ki     `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
 	index    int    `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method"`
 }
 
@@ -64,19 +64,26 @@ func (n Node) String() string {
 //////////////////////////////////////////////////////////////////////////
 //  Basic Ki fields
 
+func (n *Node) This() Ki {
+	if n == nil || n.IsDestroyed() {
+		return nil
+	}
+	return n.Ths
+}
+
 func (n *Node) Init(this Ki) {
 	kitype := KiType()
 	n.ClearFlagMask(int64(UpdateFlagsMask))
-	if n.This != this {
-		n.This = this
+	if n.Ths != this {
+		n.Ths = this
 		// we need to call this directly instead of FuncFields because we need the field name
-		FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		FlatFieldsValueFunc(this, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 				fk := kit.PtrValue(fieldVal).Interface().(Ki)
 				if fk != nil {
 					fk.SetFlag(int(IsField))
 					fk.InitName(fk, field.Name)
-					fk.SetParent(n.This)
+					fk.SetParent(this)
 				}
 			}
 			return true
@@ -90,7 +97,7 @@ func (n *Node) InitName(k Ki, name string) {
 }
 
 func (n *Node) ThisCheck() error {
-	if n.This == nil {
+	if n.This() == nil {
 		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", n.PathUnique())
 		log.Print(err)
 		return err
@@ -98,12 +105,8 @@ func (n *Node) ThisCheck() error {
 	return nil
 }
 
-func (n *Node) ThisOk() bool {
-	return n.This != nil
-}
-
 func (n *Node) Type() reflect.Type {
-	return reflect.TypeOf(n.This).Elem()
+	return reflect.TypeOf(n.This()).Elem()
 }
 
 func (n *Node) TypeEmbeds(t reflect.Type) bool {
@@ -114,7 +117,7 @@ func (n *Node) Embed(t reflect.Type) Ki {
 	if n == nil {
 		return nil
 	}
-	es := kit.Embed(n.This, t)
+	es := kit.Embed(n.This(), t)
 	if es != nil {
 		k, ok := es.(Ki)
 		if ok {
@@ -222,12 +225,15 @@ func (n *Node) SetParent(parent Ki) {
 }
 
 func (n *Node) IsRoot() bool {
-	return (n.Par == nil || !n.Par.ThisOk() || n.This == nil) // extra safe
+	if n.This() == nil || n.Par == nil || n.Par.This() == nil {
+		return true
+	}
+	return false
 }
 
 func (n *Node) Root() Ki {
 	if n.IsRoot() {
-		return n.This
+		return n.This()
 	}
 	return n.Par.Root()
 }
@@ -257,7 +263,7 @@ func (n *Node) IndexInParent() (int, bool) {
 		return -1, false
 	}
 	var ok bool
-	n.index, ok = n.Par.Children().IndexOf(n.This, n.index) // very fast if index is close..
+	n.index, ok = n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
 	return n.index, ok
 }
 
@@ -304,7 +310,7 @@ func (n *Node) ParentByType(t reflect.Type, embeds bool) (Ki, bool) {
 }
 
 func (n *Node) KiFieldByName(name string) (Ki, bool) {
-	v := reflect.ValueOf(n.This).Elem()
+	v := reflect.ValueOf(n.This()).Elem()
 	f := v.FieldByName(name)
 	if !f.IsValid() {
 		return nil, false
@@ -464,7 +470,7 @@ func (n *Node) AddChildCheck(kid Ki) error {
 // after adding child -- signals etc
 func (n *Node) addChildImplPost(kid Ki) {
 	oldPar := kid.Parent()
-	kid.SetParent(n.This) // key to set new parent before deleting: indicates move instead of delete
+	kid.SetParent(n.This()) // key to set new parent before deleting: indicates move instead of delete
 	if oldPar != nil {
 		oldPar.DeleteChild(kid, false)
 		kid.SetFlag(int(ChildMoved))
@@ -594,7 +600,7 @@ func (n *Node) SetChild(kid Ki, idx int, name string) error {
 		kid.Init(kid)
 	}
 	n.Kids[idx] = kid
-	kid.SetParent(n.This)
+	kid.SetParent(n.This())
 	return nil
 }
 
@@ -635,7 +641,7 @@ func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, 
 }
 
 func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
-	return n.Kids.Config(n.This, config, uniqNm)
+	return n.Kids.Config(n.This(), config, uniqNm)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -648,7 +654,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
 	}
 	updt := n.UpdateStart()
 	n.SetFlag(int(ChildDeleted))
-	if child.Parent() == n.This {
+	if child.Parent() == n.This() {
 		// only deleting if we are still parent -- change parent first to
 		// signal move delete is always sent live to affected node without
 		// update blocking note: children of child etc will not send a signal
@@ -707,16 +713,16 @@ func (n *Node) Delete(destroy bool) {
 			n.Destroy()
 		}
 	} else {
-		n.Par.DeleteChild(n.This, destroy)
+		n.Par.DeleteChild(n.This(), destroy)
 	}
 }
 
 func (n *Node) Destroy() {
-	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.PathUnique(), n.This, n.This, len(n.Kids))
-	if n.This == nil { // already dead!
+	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.PathUnique(), n.This(), n.This(), len(n.Kids))
+	if n.This() == nil { // already dead!
 		return
 	}
-	n.NodeSig.Emit(n.This, int64(NodeSignalDestroying), nil)
+	n.NodeSig.Emit(n.This(), int64(NodeSignalDestroying), nil)
 	n.SetFlag(int(NodeDestroyed))
 	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
@@ -728,13 +734,14 @@ func (n *Node) Destroy() {
 	DelMgr.DestroyDeleted() // then destroy all those kids
 	// extra step to delete all the slices and maps -- super friendly to GC :)
 	// note: not safe at this point!
-	// FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	// FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 	// 	if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
 	// 		fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
 	// 	}
 	// 	return true
 	// })
-	n.This = nil // last gasp: lose our own sense of self..
+	n.Ths = nil // last gasp: lose our own sense of self..
+	// note: above is thread-safe because This() accessor checks Destroyed
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -928,7 +935,7 @@ func (n *Node) Fields() []uintptr {
 	}
 	foff := make([]uintptr, 0)
 	kitype := KiType()
-	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
 			foff = append(foff, field.Offset)
 		}
@@ -972,29 +979,35 @@ func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflec
 }
 
 func (n *Node) FuncFields(level int, data interface{}, fun Func) {
-	op := reflect.ValueOf(n.This).Pointer()
+	if n.This() == nil {
+		return
+	}
+	op := reflect.ValueOf(n.This()).Pointer()
 	foffs := n.Fields()
 	for _, fo := range foffs {
 		fn := (*Node)(unsafe.Pointer(op + fo))
-		fun(fn.This, level, data)
+		fun(fn.This(), level, data)
 	}
 }
 
 func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
-	op := reflect.ValueOf(n.This).Pointer()
+	if n.This() == nil {
+		return
+	}
+	op := reflect.ValueOf(n.This()).Pointer()
 	foffs := n.Fields()
 	for _, fo := range foffs {
 		fn := (*Node)(unsafe.Pointer(op + fo))
-		go fun(fn.This, level, data)
+		go fun(fn.This(), level, data)
 	}
 }
 
 func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
-	if !fun(n.This, level, data) { // false return means stop
+	if !fun(n.This(), level, data) { // false return means stop
 		return false
 	}
 	level++
-	if n.Parent() != nil && n.Parent() != n.This { // prevent loops
+	if n.Parent() != nil && n.Parent() != n.This() { // prevent loops
 		return n.Parent().FuncUp(level, data, fun)
 	}
 	return true
@@ -1012,7 +1025,10 @@ func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
 }
 
 func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
-	if !fun(n.This, level, data) { // false return means stop
+	if n.This() == nil {
+		return false
+	}
+	if !fun(n.This(), level, data) { // false return means stop
 		return false
 	}
 	level++
@@ -1027,28 +1043,39 @@ func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
 }
 
 func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc Func, fun Func) {
+	if n.This() == nil {
+		return
+	}
 	level++
 	for _, child := range *n.Children() {
-		if doChildTestFunc(n.This, level, data) { // test if we should run on this child
-			child.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
+		if child.This() != nil {
+			if doChildTestFunc(child.This(), level, data) { // test if we should run on this child
+				child.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
+			}
 		}
 	}
 	n.FuncFields(level, data, func(k Ki, level int, d interface{}) bool {
-		if doChildTestFunc(k, level, data) { // test if we should run on this child
-			k.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
+		if k.This() != nil {
+			if doChildTestFunc(k, level, data) { // test if we should run on this child
+				k.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
+			}
+			fun(k, level, data)
 		}
-		fun(k, level, data)
 		return true
 	})
 	level--
-	fun(n.This, level, data) // can't use the return value at this point
+	fun(n.This(), level, data) // can't use the return value at this point
 }
 
 func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
+	if n.This() == nil {
+		return
+	}
 	dontMap := make(map[int]struct{}) // map of who NOT to process further -- default is false for map so reverse
 	level++
 	for i, child := range *n.Children() {
-		if !fun(child, level, data) { // false return means stop
+		if child.This() == nil || !fun(child, level, data) {
+			// false return means stop
 			dontMap[i] = struct{}{}
 		} else {
 			child.FuncFields(level+1, data, func(k Ki, level int, d interface{}) bool {
@@ -1067,7 +1094,10 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 }
 
 func (n *Node) GoFuncDown(level int, data interface{}, fun Func) {
-	go fun(n.This, level, data)
+	if n.This() == nil {
+		return
+	}
+	go fun(n.This(), level, data)
 	level++
 	n.GoFuncFields(level, data, fun)
 	for _, child := range *n.Children() {
@@ -1075,15 +1105,18 @@ func (n *Node) GoFuncDown(level int, data interface{}, fun Func) {
 	}
 }
 
-func (n *Node) GoFuncDownWait(level int, data interface{}, fun Func) {
-	// todo: use channel or something to wait
-	go fun(n.This, level, data)
-	level++
-	n.GoFuncFields(level, data, fun)
-	for _, child := range *n.Children() {
-		child.GoFuncDown(level, data, fun)
-	}
-}
+// func (n *Node) GoFuncDownWait(level int, data interface{}, fun Func) {
+// if n.This() == nil {
+// 	return
+// }
+// 	// todo: use channel or something to wait
+// 	go fun(n.This(), level, data)
+// 	level++
+// 	n.GoFuncFields(level, data, fun)
+// 	for _, child := range *n.Children() {
+// 		child.GoFuncDown(level, data, fun)
+// 	}
+// }
 
 //////////////////////////////////////////////////////////////////////////
 //  State update signaling -- automatically consolidates all changes across
@@ -1128,13 +1161,13 @@ func (n *Node) UpdateEnd(updt bool) {
 	}
 	if n.OnlySelfUpdate() {
 		n.ClearFlag(int(Updating))
-		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
+		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
+		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	}
 }
 
@@ -1150,13 +1183,13 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 	}
 	if n.OnlySelfUpdate() {
 		n.ClearFlag(int(Updating))
-		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
+		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
+		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	}
 }
 
@@ -1164,7 +1197,7 @@ func (n *Node) UpdateSig() bool {
 	if n.IsUpdating() || n.IsDestroyed() {
 		return false
 	}
-	n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
+	n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	return true
 }
 
@@ -1181,7 +1214,7 @@ func (n *Node) UpdateReset() {
 
 func (n *Node) Disconnect() {
 	n.NodeSig.DisconnectAll()
-	FlatFieldsValueFunc(n.This, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		switch {
 		case fieldVal.Kind() == reflect.Interface:
 			if field.Name != "This" { // reserve that for last step in Destroy
@@ -1191,7 +1224,7 @@ func (n *Node) Disconnect() {
 			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
 		case fieldVal.Type() == KiT_Signal:
 			if fs, ok := kit.PtrValue(fieldVal).Interface().(*Signal); ok {
-				// fmt.Printf("ki.Node: %v Type: %T Disconnecting signal field: %v\n", n.Name(), n.This, field.Name)
+				// fmt.Printf("ki.Node: %v Type: %T Disconnecting signal field: %v\n", n.Name(), n.This(), field.Name)
 				fs.DisconnectAll()
 			}
 		case fieldVal.Type() == KiT_Ptr:
@@ -1214,7 +1247,7 @@ func (n *Node) DisconnectAll() {
 //  Field Value setting with notification
 
 func (n *Node) SetField(field string, val interface{}) bool {
-	fv := kit.FlatFieldValueByName(n.This, field)
+	fv := kit.FlatFieldValueByName(n.This(), field)
 	if !fv.IsValid() {
 		log.Printf("ki.SetField, could not find field %v on node %v\n", field, n.PathUnique())
 		return false
@@ -1247,7 +1280,7 @@ func (n *Node) SetFieldUp(field string, val interface{}) {
 }
 
 func (n *Node) FieldByName(field string) interface{} {
-	return kit.FlatFieldInterfaceByName(n.This, field)
+	return kit.FlatFieldInterfaceByName(n.This(), field)
 }
 
 func (n *Node) FieldTag(field, tag string) string {
@@ -1294,7 +1327,7 @@ func (n *Node) CopyFrom(from Ki) error {
 func (n *Node) Clone() Ki {
 	nki := n.NewOfType(n.Type())
 	nki.InitName(nki, n.Nm)
-	nki.CopyFrom(n.This)
+	nki.CopyFrom(n.This())
 	return nki
 }
 
@@ -1366,7 +1399,7 @@ func (n *Node) CopyFromRaw(from Ki) error {
 	n.CopyMakeChildrenFrom(from)
 	n.DeleteAllProps(len(*from.Properties())) // start off fresh, allocated to size of from
 	n.CopyPropsFrom(from, false)              // use shallow props copy by default
-	n.CopyFieldsFrom(n.This, from)
+	n.CopyFieldsFrom(n.This(), from)
 	for i, kid := range n.Kids {
 		fmk := (*(from.Children()))[i]
 		kid.CopyFromRaw(fmk)
@@ -1375,7 +1408,7 @@ func (n *Node) CopyFromRaw(from Ki) error {
 }
 
 func (n *Node) GetPtrPaths() {
-	root := n.This
+	root := n.This()
 	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
 		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 			if fieldVal.CanInterface() {
@@ -1453,9 +1486,9 @@ func (n *Node) WriteJSON(writer io.Writer, indent bool) error {
 	}
 	var b []byte
 	if indent {
-		b, err = json.MarshalIndent(n.This, "", "  ")
+		b, err = json.MarshalIndent(n.This(), "", "  ")
 	} else {
-		b, err = json.Marshal(n.This)
+		b, err = json.Marshal(n.This())
 	}
 	if err != nil {
 		log.Println(err)
@@ -1504,7 +1537,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	if bytes.HasPrefix(b, JSONTypePrefix) { // skip type
 		stidx = bytes.Index(b, JSONTypeSuffix) + len(JSONTypeSuffix)
 	}
-	err = json.Unmarshal(b[stidx:], n.This) // key use of this!
+	err = json.Unmarshal(b[stidx:], n.This()) // key use of this!
 	if err == nil {
 		n.UnmarshalPost()
 	}
@@ -1576,9 +1609,9 @@ func (n *Node) WriteXML(writer io.Writer, indent bool) error {
 	}
 	var b []byte
 	if indent {
-		b, err = xml.MarshalIndent(n.This, "", "  ")
+		b, err = xml.MarshalIndent(n.This(), "", "  ")
 	} else {
-		b, err = xml.Marshal(n.This)
+		b, err = xml.Marshal(n.This())
 	}
 	if err != nil {
 		log.Println(err)
@@ -1604,7 +1637,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 		return err
 	}
 	updt := n.UpdateStart()
-	err = xml.Unmarshal(b, n.This) // key use of this!
+	err = xml.Unmarshal(b, n.This()) // key use of this!
 	if err == nil {
 		n.UnmarshalPost()
 	}

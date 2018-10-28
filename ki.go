@@ -41,15 +41,16 @@ type Ki interface {
 	// happens in Add, Insert Child).
 	InitName(this Ki, name string)
 
+	// This returns the Ki interface that guarantees access to the Ki
+	// interface in a way that always reveals the underlying type
+	// (e.g., in reflect calls).  Returns nil if node is nil,
+	// has been destroyed, or is improperly constructed.
+	This() Ki
+
 	// ThisCheck checks that the This pointer is set and issues a warning to
 	// log if not -- returns error if not set -- called when nodes are added
 	// and inserted.
 	ThisCheck() error
-
-	// ThisOk -- a simpler check for parent access routines where the parent
-	// .This pointer may be validly not set yet -- returns false if .This is
-	// nil.
-	ThisOk() bool
 
 	// Type returns the underlying struct type of this node
 	// (reflect.TypeOf(This).Elem()).
@@ -517,10 +518,10 @@ type Ki interface {
 	// of the go routines -- returns immediately.
 	GoFuncDown(level int, data interface{}, fun Func)
 
-	// GoFuncDownWait calls concurrent goroutine function on given node and
+	// todo: GoFuncDownWait calls concurrent goroutine function on given node and
 	// all the way down to its children, and so on -- does wait for the
 	// completion of the go routines before returning.
-	GoFuncDownWait(level int, data interface{}, fun Func)
+	// GoFuncDownWait(level int, data interface{}, fun Func)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  State update signaling -- automatically consolidates all changes across
