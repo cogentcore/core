@@ -219,15 +219,13 @@ mainloop:
 		// fmt.Printf("wait..\n")
 		ev, err := app.xc.WaitForEvent()
 		// fmt.Printf("got..\n")
+		if app.quitEndRun {
+			break mainloop
+		}
 		if err != nil {
 			log.Printf("x11driver: xproto.WaitForEvent: %v", err)
 			continue
 		}
-
-		if app.quitEndRun {
-			break mainloop
-		}
-
 		noWindowFound := false
 		switch ev := ev.(type) {
 		case xproto.DestroyNotifyEvent:
