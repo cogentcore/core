@@ -11,7 +11,6 @@ import (
 
 	"github.com/goki/gi"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -46,7 +45,7 @@ func (g *NodeBase) Init2DBase() {
 
 func (g *NodeBase) Init2D() {
 	g.Init2DBase()
-	bitflag.Set(&g.Flag, int(gi.NoLayout))
+	g.SetFlag(int(gi.NoLayout))
 }
 
 // StyleSVG styles the Paint values directly from node properties -- no

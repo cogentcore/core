@@ -147,6 +147,7 @@ type Window struct {
 	DelPopup      ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle"`
 	PopupFocus    ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
 	PopMu         sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating"`
+	TimerMu       sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AferFunc's)"`
 	DoFullRender  bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	Resizing      bool                                    `json:"-" xml:"-" desc:"flag set when window is actively being resized"`
 	EventSigs     [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
@@ -186,7 +187,7 @@ const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied
 	WinFlagHasGeomPrefs NodeFlags = NodeFlagsN + iota
 
-	// WinFlagUpdating is atomic flag around global updating -- routines can check IsUpdating and bail
+	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
 	WinFlagUpdating
 
 	// WinFlagIsClosing is atomic flag indicating window is closing
@@ -213,13 +214,13 @@ const (
 
 // HasGeomPrefs returns true if geometry prefs were set already
 func (w *Window) HasGeomPrefs() bool {
-	return bitflag.Has(w.Flag, int(WinFlagHasGeomPrefs))
+	return w.HasFlag(int(WinFlagHasGeomPrefs))
 }
 
 // IsClosing returns true if window has requested to close -- don't
 // attempt to update it any further
 func (w *Window) IsClosing() bool {
-	return bitflag.HasAtomic(&w.Flag, int(WinFlagIsClosing))
+	return w.HasFlag(int(WinFlagIsClosing))
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -278,7 +279,7 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 		return nil
 	}
 	if wgp != nil {
-		bitflag.Set(&win.Flag, int(WinFlagHasGeomPrefs))
+		win.SetFlag(int(WinFlagHasGeomPrefs))
 	}
 	AllWindows.Add(win)
 	MainWindows.Add(win)
@@ -317,7 +318,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 		return nil
 	}
 	if wgp != nil {
-		bitflag.Set(&win.Flag, int(WinFlagHasGeomPrefs))
+		win.SetFlag(int(WinFlagHasGeomPrefs))
 	}
 	AllWindows.Add(win)
 	DialogWindows.Add(win)
@@ -515,8 +516,7 @@ func (w *Window) Resized(sz image.Point) {
 	}
 	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.OverTex = nil // dynamically allocated when needed
-	bitflag.Clear(&w.Flag, int(WinFlagOverTexActive))
-	bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
+	w.ClearFlag(int(WinFlagOverTexActive), int(WinFlagOverlayVpCleared))
 	w.Viewport.Resize(sz)
 	WinGeomPrefs.RecordPref(w)
 	w.UpMu.Unlock()
@@ -529,7 +529,7 @@ func (w *Window) Close() {
 	if w.IsClosing() {
 		return
 	}
-	bitflag.SetAtomic(&w.Flag, int(WinFlagIsClosing))
+	w.SetFlag(int(WinFlagIsClosing))
 	w.OSWin.Close()
 }
 
@@ -621,13 +621,13 @@ func (w *Window) StartEventLoop() {
 func (w *Window) GoStartEventLoop() {
 	WinWait.Add(1)
 	w.DoFullRender = true
-	bitflag.Set(&w.Flag, int(WinFlagGoLoop))
+	w.SetFlag(int(WinFlagGoLoop))
 	go w.EventLoop()
 }
 
 // StopEventLoop tells the event loop to stop running when the next event arrives.
 func (w *Window) StopEventLoop() {
-	bitflag.Set(&w.Flag, int(WinFlagStopEventLoop))
+	w.SetFlag(int(WinFlagStopEventLoop))
 }
 
 // ConnectEvent adds a Signal connection for given event type and
@@ -715,14 +715,14 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		w.UpMu.Unlock()
 		return
 	}
-	w.SetUpdating()
+	w.SetWinUpdating()
 	pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
-	w.ClearUpdating()
+	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 }
 
@@ -737,7 +737,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 		w.UpMu.Unlock()
 		return
 	}
-	w.SetUpdating()
+	w.SetWinUpdating()
 	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
 	if Render2DTrace {
@@ -745,7 +745,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	}
 	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
-	w.ClearUpdating()
+	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives publish
 }
@@ -762,7 +762,7 @@ func (w *Window) UploadAllViewports() {
 		w.UpMu.Unlock()
 		return
 	}
-	w.SetUpdating()
+	w.SetWinUpdating()
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace {
@@ -799,24 +799,24 @@ func (w *Window) UploadAllViewports() {
 	w.PopMu.RUnlock()
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	pr.End()
-	w.ClearUpdating()
+	w.ClearWinUpdating()
 	w.UpMu.Unlock()   // need to unlock before publish
 	w.UpdateEnd(updt) // drives the publish
 }
 
-// IsUpdating checks if we are already updating
-func (w *Window) IsUpdating() bool {
-	return bitflag.HasAtomic(&w.Flag, int(WinFlagUpdating))
+// IsWinUpdating checks if we are already updating window
+func (w *Window) IsWinUpdating() bool {
+	return w.HasFlag(int(WinFlagUpdating))
 }
 
-// SetUpdating sets the updating state to true if not already updating
-func (w *Window) SetUpdating() {
-	bitflag.SetAtomic(&w.Flag, int(WinFlagUpdating))
+// SetWinUpdating sets the window updating state to true if not already updating
+func (w *Window) SetWinUpdating() {
+	w.SetFlag(int(WinFlagUpdating))
 }
 
-// ClearUpdating sets the updating state to false if not already updating
-func (w *Window) ClearUpdating() {
-	bitflag.ClearAtomic(&w.Flag, int(WinFlagUpdating))
+// ClearWinUpdating sets the window updating state to false if not already updating
+func (w *Window) ClearWinUpdating() {
+	w.ClearFlag(int(WinFlagUpdating))
 }
 
 // Publish does the final step of updating of the window based on the current
@@ -841,18 +841,18 @@ func (w *Window) Publish() {
 		fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
 	}
 
-	w.SetUpdating()
+	w.SetWinUpdating()
 	// fmt.Printf("Win %v doing publish\n", w.Nm)
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
-	if w.OverTex != nil && bitflag.Has(w.Flag, int(WinFlagOverTexActive)) {
+	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
 	}
 	pr.End()
 	pr2 := prof.Start("win.Publish.Publish")
 	w.OSWin.Publish()
 	pr2.End()
-	w.ClearUpdating()
+	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 }
 
@@ -863,7 +863,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	if Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	if win.IsClosed() || win.IsClosing() || win.Resizing || win.IsUpdating() {
+	if win.IsClosed() || win.IsClosing() || win.Resizing || win.IsWinUpdating() {
 		return
 	}
 	win.Publish()
@@ -876,7 +876,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
 	if w.OverlayVp == nil || !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
-		bitflag.Clear(&w.Flag, int(WinFlagOverTexActive))
+		w.ClearFlag(int(WinFlagOverTexActive))
 		return
 	}
 	w.UpMu.Lock()
@@ -895,12 +895,12 @@ func (w *Window) RenderOverlays() {
 	w.OverlayVp.Win = w
 	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
 	if len(w.OverlayVp.Kids) == 0 {
-		if !bitflag.Has(w.Flag, int(WinFlagOverlayVpCleared)) {
+		if !w.HasFlag(int(WinFlagOverlayVpCleared)) {
 			vp := w.OverlayVp
 			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
-			bitflag.Set(&w.Flag, int(WinFlagOverlayVpCleared))
+			w.SetFlag(int(WinFlagOverlayVpCleared))
 		} else {
-			bitflag.Clear(&w.Flag, int(WinFlagOverlayVpCleared))
+			w.ClearFlag(int(WinFlagOverlayVpCleared))
 		}
 	}
 	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
@@ -913,7 +913,7 @@ func (w *Window) RenderOverlays() {
 			w.RenderSprite(sp)
 		}
 	}
-	bitflag.Set(&w.Flag, int(WinFlagOverTexActive))
+	w.SetFlag(int(WinFlagOverTexActive))
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives the publish
 }
@@ -1102,8 +1102,8 @@ func (w *Window) EventLoop() {
 mainloop:
 	for {
 		evi := w.OSWin.NextEvent()
-		if bitflag.Has(w.Flag, int(WinFlagStopEventLoop)) {
-			bitflag.Clear(&w.Flag, int(WinFlagStopEventLoop))
+		if w.HasFlag(int(WinFlagStopEventLoop)) {
+			w.ClearFlag(int(WinFlagStopEventLoop))
 			fmt.Println("stop event loop")
 			break
 		}
@@ -1136,12 +1136,12 @@ mainloop:
 		}
 
 		if et != oswin.KeyEvent {
-			if bitflag.Has(w.Flag, int(WinFlagGotPaint)) && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
+			if w.HasFlag(int(WinFlagGotPaint)) && et == oswin.WindowPaintEvent && lastEt == oswin.WindowResizeEvent {
 				if WinEventTrace {
 					fmt.Printf("Win: %v skipping paint after resize\n", w.Nm)
 				}
 				w.Publish() // this is essential on mac for any paint event
-				bitflag.Set(&w.Flag, int(WinFlagGotPaint))
+				w.SetFlag(int(WinFlagGotPaint))
 				continue // X11 always sends a paint after a resize -- we just use resize
 			}
 			if et == lastEt || lastEt == oswin.WindowResizeEvent {
@@ -1263,28 +1263,33 @@ mainloop:
 					}
 				}
 			} else { // dndStarted
+				w.TimerMu.Lock()
 				if !dndHoverStarted {
 					dndHoverStarted = true
 					startDNDHover = evi.(*mouse.DragEvent)
 					curDNDHover = startDNDHover
 					dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
-						w.SendDNDHoverEvent(curDNDHover)
+						w.TimerMu.Lock()
+						hoe := curDNDHover
 						dndHoverStarted = false
 						startDNDHover = nil
 						curDNDHover = nil
 						dndHoverTimer = nil
+						w.TimerMu.Unlock()
+						w.SendDNDHoverEvent(hoe)
 					})
 				} else {
 					dst := int(math32.Hypot(float32(startDNDHover.Where.X-evi.Pos().X), float32(startDNDHover.Where.Y-evi.Pos().Y)))
 					if dst > HoverMaxPix {
+						dndHoverTimer.Stop()
 						dndHoverStarted = false
 						startDNDHover = nil
-						dndHoverTimer.Stop()
 						dndHoverTimer = nil
 					} else {
 						curDNDHover = evi.(*mouse.DragEvent)
 					}
 				}
+				w.TimerMu.Unlock()
 			}
 		} else {
 			if et != oswin.KeyEvent { // allow modifier keypress
@@ -1293,6 +1298,7 @@ mainloop:
 				dndStarted = false
 				startDND = nil
 
+				w.TimerMu.Lock()
 				dndHoverStarted = false
 				startDNDHover = nil
 				curDNDHover = nil
@@ -1300,6 +1306,7 @@ mainloop:
 					dndHoverTimer.Stop()
 					dndHoverTimer = nil
 				}
+				w.TimerMu.Unlock()
 			}
 		}
 
@@ -1307,32 +1314,40 @@ mainloop:
 		// Detect hover event -- requires delay timing
 
 		if et == oswin.MouseMoveEvent {
+			w.TimerMu.Lock()
 			if !hoverStarted {
 				hoverStarted = true
 				startHover = evi.(*mouse.MoveEvent)
 				curHover = startHover
 				hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
-					w.SendHoverEvent(curHover)
+					w.TimerMu.Lock()
+					hoe := curHover
 					hoverStarted = false
 					startHover = nil
 					curHover = nil
 					hoverTimer = nil
+					w.TimerMu.Unlock()
+					w.SendHoverEvent(hoe)
 				})
 			} else {
 				dst := int(math32.Hypot(float32(startHover.Where.X-evi.Pos().X), float32(startHover.Where.Y-evi.Pos().Y)))
 				if dst > HoverMaxPix {
+					hoverTimer.Stop()
 					hoverStarted = false
 					startHover = nil
-					hoverTimer.Stop()
 					hoverTimer = nil
+					w.PopMu.RLock()
 					if w.Popup != nil && PopupIsTooltip(w.Popup) {
 						delPop = true
 					}
+					w.PopMu.RUnlock()
 				} else {
 					curHover = evi.(*mouse.MoveEvent)
 				}
 			}
+			w.TimerMu.Unlock()
 		} else {
+			w.TimerMu.Lock()
 			hoverStarted = false
 			startHover = nil
 			curHover = nil
@@ -1340,6 +1355,7 @@ mainloop:
 				hoverTimer.Stop()
 				hoverTimer = nil
 			}
+			w.TimerMu.Unlock()
 		}
 
 		////////////////////////////////////////////////////////////////////////////
@@ -1356,7 +1372,7 @@ mainloop:
 				break mainloop
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
-				bitflag.Set(&w.Flag, int(WinFlagGotPaint))
+				w.SetFlag(int(WinFlagGotPaint))
 				if w.DoFullRender {
 					w.DoFullRender = false
 					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
@@ -1369,13 +1385,13 @@ mainloop:
 				w.Publish()
 			case window.Move:
 				e.SetProcessed()
-				if bitflag.Has(w.Flag, int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
+				if w.HasFlag(int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
 					// fmt.Printf("win move: %v\n", w.OSWin.Position())
 					WinGeomPrefs.RecordPref(w)
 				}
 			case window.Focus:
-				if !bitflag.Has(w.Flag, int(WinFlagGotFocus)) {
-					bitflag.Set(&w.Flag, int(WinFlagGotFocus))
+				if !w.HasFlag(int(WinFlagGotFocus)) {
+					w.SetFlag(int(WinFlagGotFocus))
 				} else {
 					// fmt.Printf("win foc: %v\n", w.Nm)
 					if lastWinMenuUpdate != WinNewCloseTime {
@@ -1411,7 +1427,7 @@ mainloop:
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
-			if bitflag.HasAll(w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
+			if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 				if w.DoFullRender {
 					// if we are getting mouse input, and still haven't done this, do it..
 					w.DoFullRender = false
@@ -1467,7 +1483,7 @@ mainloop:
 
 		// reset "catch" events (Dragging, Scrolling)
 		if w.Dragging != nil && et != oswin.MouseDragEvent {
-			bitflag.Clear(w.Dragging.Flags(), int(NodeDragging))
+			w.Dragging.ClearFlag(int(NodeDragging))
 			w.Dragging = nil
 		}
 		if w.Scrolling != nil && et != oswin.MouseScrollEvent {
@@ -1527,7 +1543,7 @@ mainloop:
 	if WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Nm)
 	}
-	if bitflag.Has(w.Flag, int(WinFlagGoLoop)) {
+	if w.HasFlag(int(WinFlagGoLoop)) {
 		WinWait.Done()
 	}
 	// our last act must be self destruction!
@@ -1587,6 +1603,73 @@ func (wl *WinEventRecvList) AddDepth(recv ki.Ki, fun ki.RecvFunc, w *Window) {
 	wl.Add(recv, fun, recv.ParentLevel(w.This))
 }
 
+// SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
+// map iterator locking logic in a cleaner way.  Returns true to continue, false to break
+func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventRecvList, recv ki.Ki, fun ki.RecvFunc) bool {
+	nii, ni := KiToNode2D(recv)
+	if ni != nil {
+		if !w.IsInScope(ni, popup) {
+			return true
+		}
+		if evi.OnFocus() {
+			if !nii.HasFocus2D() {
+				return true
+			}
+			if !w.FocusActive { // reactivate on keyboard input
+				w.FocusActive = true
+				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
+				nii.FocusChanged2D(FocusActive)
+			}
+		} else if evi.HasPos() {
+			pos := evi.Pos()
+			switch evi.(type) {
+			case *mouse.DragEvent:
+				if w.Dragging != nil {
+					if w.Dragging == ni.This {
+						rvs.Add(recv, fun, 10000)
+						return false
+					} else {
+						return true
+					}
+				} else {
+					if pos.In(ni.WinBBox) {
+						rvs.AddDepth(recv, fun, w)
+						return false
+					}
+					return true
+				}
+			case *mouse.ScrollEvent:
+				if w.Scrolling != nil {
+					if w.Scrolling == ni.This {
+						rvs.Add(recv, fun, 10000)
+					} else {
+						return true
+					}
+				} else {
+					if pos.In(ni.WinBBox) {
+						rvs.AddDepth(recv, fun, w)
+						return false
+					}
+					return true
+				}
+			default:
+				if w.Dragging == ni.This { // dragger always gets it
+					rvs.Add(recv, fun, 10000) // top priority -- can't steal!
+					return false
+				}
+				if !pos.In(ni.WinBBox) {
+					return true
+				}
+			}
+		}
+		rvs.AddDepth(recv, fun, w)
+		return true
+	} else {
+		// todo: get a 3D
+		return true
+	}
+}
+
 // SendEventSignal sends given event signal to all receivers that want it --
 // note that because there is a different EventSig for each event type, we are
 // ONLY looking at nodes that have registered to receive that type of event --
@@ -1612,6 +1695,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 
 		esig := w.EventSigs[et][pri]
 
+		esig.Mu.RLock()
 		for recv, fun := range esig.Cons {
 			if recv.IsDestroyed() {
 				// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
@@ -1621,69 +1705,15 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 			if recv.IsDeleted() {
 				continue
 			}
-			nii, ni := KiToNode2D(recv)
-			if ni != nil {
-				if !w.IsInScope(ni, popup) {
-					continue
-				}
-				if evi.OnFocus() {
-					if !nii.HasFocus2D() {
-						continue
-					}
-					if !w.FocusActive { // reactivate on keyboard input
-						w.FocusActive = true
-						// fmt.Printf("set foc active: %v\n", ni.PathUnique())
-						nii.FocusChanged2D(FocusActive)
-					}
-				} else if evi.HasPos() {
-					pos := evi.Pos()
-					switch evi.(type) {
-					case *mouse.DragEvent:
-						if w.Dragging != nil {
-							if w.Dragging == ni.This {
-								rvs.Add(recv, fun, 10000)
-								break
-							} else {
-								continue
-							}
-						} else {
-							if pos.In(ni.WinBBox) {
-								rvs.AddDepth(recv, fun, w)
-								break
-							}
-							continue
-						}
-					case *mouse.ScrollEvent:
-						if w.Scrolling != nil {
-							if w.Scrolling == ni.This {
-								rvs.Add(recv, fun, 10000)
-							} else {
-								continue
-							}
-						} else {
-							if pos.In(ni.WinBBox) {
-								rvs.AddDepth(recv, fun, w)
-								break
-							}
-							continue
-						}
-					default:
-						if w.Dragging == ni.This { // dragger always gets it
-							rvs.Add(recv, fun, 10000) // top priority -- can't steal!
-							break
-						}
-						if !pos.In(ni.WinBBox) {
-							continue
-						}
-					}
-				}
-				rvs.AddDepth(recv, fun, w)
-				continue
-			} else {
-				// todo: get a 3D
-				continue
+			esig.Mu.RUnlock()
+			cont := w.SendEventSignalFunc(evi, popup, &rvs, recv, fun)
+			esig.Mu.RLock()
+			if !cont {
+				break
 			}
 		}
+		esig.Mu.RUnlock()
+
 		if len(rvs) == 0 {
 			continue
 		}
@@ -1697,7 +1727,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 			switch evi.(type) {
 			case *mouse.DragEvent:
 				if w.Dragging == nil {
-					bitflag.Set(rr.Recv.Flags(), int(NodeDragging)) // PROVISIONAL!
+					rr.Recv.SetFlag(int(NodeDragging)) // PROVISIONAL!
 				}
 			}
 			rr.Call(w.This, int64(et), evi)
@@ -1706,7 +1736,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 				case *mouse.DragEvent:
 					if w.Dragging == nil {
 						w.Dragging = rr.Recv
-						bitflag.Set(rr.Recv.Flags(), int(NodeDragging))
+						rr.Recv.SetFlag(int(NodeDragging))
 					}
 				case *mouse.ScrollEvent:
 					if w.Scrolling == nil {
@@ -1718,7 +1748,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 				switch evi.(type) {
 				case *mouse.DragEvent:
 					if w.Dragging == nil {
-						bitflag.Clear(rr.Recv.Flags(), int(NodeDragging)) // clear provisional
+						rr.Recv.ClearFlag(int(NodeDragging)) // clear provisional
 					}
 				}
 			}
@@ -1748,9 +1778,9 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 				}
 				in := pos.In(ni.WinBBox)
 				if in {
-					if !bitflag.Has(ni.Flag, int(MouseHasEntered)) {
+					if !ni.HasFlag(int(MouseHasEntered)) {
 						fe.Action = mouse.Enter
-						bitflag.Set(&ni.Flag, int(MouseHasEntered))
+						ni.SetFlag(int(MouseHasEntered))
 						if !updated {
 							updt = w.UpdateStart()
 							updated = true
@@ -1760,9 +1790,9 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 						return false // already in
 					}
 				} else { // mouse not in object
-					if bitflag.Has(ni.Flag, int(MouseHasEntered)) {
+					if ni.HasFlag(int(MouseHasEntered)) {
 						fe.Action = mouse.Exit
-						bitflag.Clear(&ni.Flag, int(MouseHasEntered))
+						ni.ClearFlag(int(MouseHasEntered))
 						if !updated {
 							updt = w.UpdateStart()
 							updated = true
@@ -1807,7 +1837,7 @@ func (w *Window) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 				if pos.In(ni.WinBBox) {
 					if ni.IsInstaDrag() {
 						w.Dragging = ni.This
-						bitflag.Set(ni.Flags(), int(NodeDragging))
+						ni.SetFlag(int(NodeDragging))
 						return true
 					}
 				}
@@ -2161,7 +2191,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		if k != nil {
 			_, ni := KiToNode2D(k)
 			if ni != nil && ni.This != nil {
-				bitflag.Set(&ni.Flag, int(HasFocus)) // ensure focus flag always set
+				ni.SetFlag(int(HasFocus)) // ensure focus flag always set
 			}
 		}
 		return false
@@ -2173,7 +2203,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	if w.Focus != nil {
 		nii, ni := KiToNode2D(w.Focus)
 		if ni != nil && ni.This != nil {
-			bitflag.Clear(&ni.Flag, int(HasFocus))
+			ni.ClearFlag(int(HasFocus))
 			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
 			nii.FocusChanged2D(FocusLost)
 		}
@@ -2187,7 +2217,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		w.Focus = nil
 		return false
 	}
-	bitflag.Set(&ni.Flag, int(HasFocus))
+	ni.SetFlag(int(HasFocus))
 	w.FocusActive = true
 	// fmt.Printf("set foc: %v\n", ni.PathUnique())
 	w.ClearNonFocus() // shouldn't need this but actually sometimes do
@@ -2356,7 +2386,7 @@ func (w *Window) ClearNonFocus() {
 				updated = true
 				updt = w.UpdateStart()
 			}
-			bitflag.Clear(&ni.Flag, int(HasFocus))
+			ni.ClearFlag(int(HasFocus))
 			nii.FocusChanged2D(FocusLost)
 		}
 		return true
@@ -2522,13 +2552,13 @@ func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 				}
 				in := pos.In(ni.WinBBox)
 				if in {
-					if !bitflag.Has(ni.Flag, int(DNDHasEntered)) {
-						bitflag.Set(&ni.Flag, int(DNDHasEntered))
+					if !ni.HasFlag(int(DNDHasEntered)) {
+						ni.SetFlag(int(DNDHasEntered))
 						ins.Add(recv, fun, 0)
 					}
 				} else { // mouse not in object
-					if bitflag.Has(ni.Flag, int(DNDHasEntered)) {
-						bitflag.Clear(&ni.Flag, int(DNDHasEntered))
+					if ni.HasFlag(int(DNDHasEntered)) {
+						ni.ClearFlag(int(DNDHasEntered))
 						outs.Add(recv, fun, 0)
 					}
 				}
@@ -2570,7 +2600,7 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 	de.Action = dnd.DropOnTarget
 	de.Data = w.DNDData
 	de.Source = w.DNDSource
-	bitflag.Clear(w.DNDSource.Flags(), int(NodeDragging))
+	w.DNDSource.ClearFlag(int(NodeDragging))
 	w.Dragging = nil
 	w.SendEventSignal(&de, false) // popup = false: ignore any popups
 	w.DNDFinalEvent = &de

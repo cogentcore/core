@@ -125,27 +125,27 @@ const (
 )
 
 func (vp *Viewport2D) IsPopup() bool {
-	return bitflag.Has(vp.Flag, int(VpFlagPopup))
+	return vp.HasFlag(int(VpFlagPopup))
 }
 
 func (vp *Viewport2D) IsMenu() bool {
-	return bitflag.Has(vp.Flag, int(VpFlagMenu))
+	return vp.HasFlag(int(VpFlagMenu))
 }
 
 func (vp *Viewport2D) IsCompleter() bool {
-	return bitflag.Has(vp.Flag, int(VpFlagCompleter))
+	return vp.HasFlag(int(VpFlagCompleter))
 }
 
 func (vp *Viewport2D) IsTooltip() bool {
-	return bitflag.Has(vp.Flag, int(VpFlagTooltip))
+	return vp.HasFlag(int(VpFlagTooltip))
 }
 
 func (vp *Viewport2D) IsSVG() bool {
-	return bitflag.Has(vp.Flag, int(VpFlagSVG))
+	return vp.HasFlag(int(VpFlagSVG))
 }
 
 func (vp *Viewport2D) IsDoingFullRender() bool {
-	return bitflag.Has(vp.Flag, int(VpFlagDoingFullRender))
+	return vp.HasFlag(int(VpFlagDoingFullRender))
 }
 
 // set our window pointer to point to the current window we are under
@@ -255,7 +255,7 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 func (vp *Viewport2D) DeletePopup() {
 	vp.Par = nil // disconnect from window -- it never actually owned us as a child
 	vp.Win = nil
-	if !bitflag.Has(vp.Flag, int(VpFlagPopupDestroyAll)) {
+	if !vp.HasFlag(int(VpFlagPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {
 			cli, _ := KiToNode2D(vp.KnownChild(0))
@@ -371,15 +371,15 @@ func (vp *Viewport2D) RenderViewport2D() {
 // anyone else) can do a deep re-build that is typically not otherwise needed
 // (e.g., after non-signaling structs have updated)
 func (vp *Viewport2D) FullRender2DTree() {
-	if vp.IsUpdatingAtomic() { // already in process!
+	if vp.IsUpdating() { // already in process!
 		return
 	}
-	bitflag.Set(&vp.Flag, int(VpFlagDoingFullRender))
+	vp.SetFlag(int(VpFlagDoingFullRender))
 	if Render2DTrace {
 		fmt.Printf("Render: %v doing full render\n", vp.PathUnique())
 	}
 	vp.WidgetBase.FullRender2DTree()
-	bitflag.Clear(&vp.Flag, int(VpFlagDoingFullRender))
+	vp.ClearFlag(int(VpFlagDoingFullRender))
 }
 
 // we use our own render for these -- Viewport member is our parent!
@@ -469,7 +469,7 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	if ni.IsDeleted() || ni.IsDestroyed() { // skip these for sure
 		return
 	}
-	if ni.IsUpdatingAtomic() {
+	if ni.IsUpdating() {
 		log.Printf("ERROR SignalViewport2D updating node %v with Updating flag set\n", ni.PathUnique())
 		return
 	}
@@ -481,8 +481,8 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	fullRend := false
 	if sig == int64(ki.NodeSignalUpdated) {
 		dflags := data.(int64)
-		vlupdt := bitflag.HasMask(dflags, ki.ValUpdateFlagsMask)
-		strupdt := bitflag.HasMask(dflags, ki.StruUpdateFlagsMask)
+		vlupdt := bitflag.HasAnyMask(dflags, ki.ValUpdateFlagsMask)
+		strupdt := bitflag.HasAnyMask(dflags, ki.StruUpdateFlagsMask)
 		if vlupdt && !strupdt {
 			fullRend = false
 		} else if strupdt {

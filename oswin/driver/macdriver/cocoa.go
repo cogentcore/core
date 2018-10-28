@@ -202,7 +202,7 @@ func drawgl(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.Clear(&w.Flag, int(oswin.Minimized))
+	bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
 	sendWindowEvent(w, window.Paint)
 	<-w.drawDone
 }
@@ -283,7 +283,7 @@ func setGeom(id uintptr, scrno int, dpi float32, widthPx, heightPx, leftPx, topP
 	w.Sz = sz
 	w.Pos = ps
 	w.PhysDPI = dpi
-	bitflag.Clear(&w.Flag, int(oswin.Minimized))
+	bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
 
 	if scrno > 0 && len(theApp.screens) > scrno {
 		w.Scrn = theApp.screens[scrno]
@@ -342,8 +342,8 @@ func windowMinimized(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.Set(&w.Flag, int(oswin.Minimized))
-	bitflag.Clear(&w.Flag, int(oswin.Focus))
+	bitflag.SetAtomic(&w.Flag, int(oswin.Minimized))
+	bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 	sendWindowEvent(w, window.Minimize)
 }
 
@@ -355,8 +355,8 @@ func windowFocused(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.Clear(&w.Flag, int(oswin.Minimized))
-	bitflag.Set(&w.Flag, int(oswin.Focus))
+	bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+	bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
 	sendWindowEvent(w, window.Focus)
 }
 
@@ -368,7 +368,7 @@ func windowDeFocused(id uintptr) {
 	if w == nil {
 		return
 	}
-	bitflag.Clear(&w.Flag, int(oswin.Focus))
+	bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 	sendWindowEvent(w, window.DeFocus)
 }
 

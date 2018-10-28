@@ -16,7 +16,6 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -190,7 +189,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		y = ints.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
 		frame := dlg.KnownChild(0).(*Frame)
 		dlg.StylePart(Node2D(frame)) // use special styles
-		bitflag.Set(&dlg.Flag, int(VpFlagPopup))
+		dlg.SetFlag(int(VpFlagPopup))
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
 		dlg.UpdateEndNoSig(updt)
@@ -416,7 +415,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
 	mods, updt := bb.ConfigChildren(bbc, false)   // not unique names
 	dlg.StdButtonConnect(ok, cancel, bb)
-	bitflag.Set(&dlg.Flag, int(VpFlagPopupDestroyAll)) // std is disposable
+	dlg.SetFlag(int(VpFlagPopupDestroyAll)) // std is disposable
 	if mods {
 		bb.UpdateEnd(updt)
 	}

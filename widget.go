@@ -14,7 +14,6 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -490,11 +489,11 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	updt := pvp.UpdateStart()
 	pvp.SetProp("color", &Prefs.Colors.Font)
 	pvp.Fill = false
-	bitflag.Set(&pvp.Flag, int(VpFlagPopup))
-	bitflag.Set(&pvp.Flag, int(VpFlagTooltip))
+	pvp.SetFlag(int(VpFlagPopup))
+	pvp.SetFlag(int(VpFlagTooltip))
 
 	pvp.Geom.Pos = image.Point{x, y}
-	bitflag.Set(&pvp.Flag, int(VpFlagPopupDestroyAll)) // nuke it all
+	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutVert
 	frame.SetProps(TooltipFrameProps, false)

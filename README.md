@@ -96,6 +96,8 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* Textview query replace reverse-order of find / replace lists
+
 * fix clear x on textfield.
 
 * gui for spell options.

@@ -1132,7 +1132,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		}
 		li, _ := KiToNode2D(recv)
 		ls := li.AsLayout2D()
-		if !ls.IsUpdatingAtomic() {
+		if !ls.IsUpdating() {
 			wupdt := ls.Viewport.Win.UpdateStart()
 			ls.Move2DTree()
 			ls.Viewport.ReRender2DNode(li)

@@ -224,27 +224,27 @@ func (w *WindowBase) Flags() int64 {
 }
 
 func (w *WindowBase) IsDialog() bool {
-	return bitflag.Has(w.Flag, int(Dialog))
+	return bitflag.HasAtomic(&w.Flag, int(Dialog))
 }
 
 func (w *WindowBase) IsModal() bool {
-	return bitflag.Has(w.Flag, int(Modal))
+	return bitflag.HasAtomic(&w.Flag, int(Modal))
 }
 
 func (w *WindowBase) IsTool() bool {
-	return bitflag.Has(w.Flag, int(Tool))
+	return bitflag.HasAtomic(&w.Flag, int(Tool))
 }
 
 func (w *WindowBase) IsFullscreen() bool {
-	return bitflag.Has(w.Flag, int(Fullscreen))
+	return bitflag.HasAtomic(&w.Flag, int(Fullscreen))
 }
 
 func (w *WindowBase) IsMinimized() bool {
-	return bitflag.Has(w.Flag, int(Minimized))
+	return bitflag.HasAtomic(&w.Flag, int(Minimized))
 }
 
 func (w *WindowBase) IsFocus() bool {
-	return bitflag.Has(w.Flag, int(Focus))
+	return bitflag.HasAtomic(&w.Flag, int(Focus))
 }
 
 ////////////////////////////////////////////////////////////////////////////

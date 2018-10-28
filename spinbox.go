@@ -14,7 +14,6 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -164,7 +163,7 @@ func (sb *SpinBox) ConfigParts() {
 		up.SetName("up")
 		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
 		// not compiled into style prop
-		bitflag.SetState(up.Flags(), sb.IsInactive(), int(Inactive))
+		up.SetFlagState(sb.IsInactive(), int(Inactive))
 		up.Icon = sb.UpIcon
 		sb.StylePart(Node2D(up))
 		if !sb.IsInactive() {
@@ -175,7 +174,7 @@ func (sb *SpinBox) ConfigParts() {
 		}
 		// dn
 		dn := buts.KnownChild(1).(*Action)
-		bitflag.SetState(dn.Flags(), sb.IsInactive(), int(Inactive))
+		dn.SetFlagState(sb.IsInactive(), int(Inactive))
 		dn.SetName("down")
 		dn.SetProp("no-focus", true)
 		dn.Icon = sb.DownIcon
@@ -190,7 +189,7 @@ func (sb *SpinBox) ConfigParts() {
 		sb.StylePart(sb.Parts.KnownChild(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
 		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
-		bitflag.SetState(tf.Flags(), sb.IsInactive(), int(Inactive))
+		sb.SetFlagState(sb.IsInactive(), int(Inactive))
 		sb.StylePart(Node2D(tf))
 		tf.Txt = fmt.Sprintf("%g", sb.Value)
 		if !sb.IsInactive() {

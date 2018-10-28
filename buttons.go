@@ -15,7 +15,6 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
 )
 
@@ -124,25 +123,25 @@ var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":dow
 // IsCheckable returns if is this button checkable -- the Checked state is
 // independent of the generic widget selection state
 func (bb *ButtonBase) IsCheckable() bool {
-	return bitflag.Has(bb.Flag, int(ButtonFlagCheckable))
+	return bb.HasFlag(int(ButtonFlagCheckable))
 }
 
 // SetCheckable sets whether this button is checkable -- emits ButtonToggled
 // signals if so -- the Checked state is independent of the generic widget
 // selection state
 func (bb *ButtonBase) SetCheckable(checkable bool) {
-	bitflag.SetState(&bb.Flag, checkable, int(ButtonFlagCheckable))
+	bb.SetFlagState(checkable, int(ButtonFlagCheckable))
 }
 
 // IsChecked checks if button is checked
 func (bb *ButtonBase) IsChecked() bool {
-	return bitflag.Has(bb.Flag, int(ButtonFlagChecked))
+	return bb.HasFlag(int(ButtonFlagChecked))
 }
 
 // SetChecked sets the checked state of this button -- does not emit signal or
 // update
 func (bb *ButtonBase) SetChecked(chk bool) {
-	bitflag.SetState(&bb.Flag, chk, int(ButtonFlagChecked))
+	bb.SetFlagState(chk, int(ButtonFlagChecked))
 }
 
 // ToggleChecked toggles the checked state of this button -- does not emit
@@ -153,13 +152,13 @@ func (bb *ButtonBase) ToggleChecked() {
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
 func (bb *ButtonBase) SetAsMenu() {
-	bitflag.Set(&bb.Flag, int(ButtonFlagMenu))
+	bb.SetFlag(int(ButtonFlagMenu))
 }
 
 // SetAsButton clears the explicit ButtonFlagMenu -- if there are menu items
 // or a menu function then it will still behave as a menu
 func (bb *ButtonBase) SetAsButton() {
-	bitflag.Clear(&bb.Flag, int(ButtonFlagMenu))
+	bb.ClearFlag(int(ButtonFlagMenu))
 }
 
 // SetText sets the text and updates the button
@@ -298,7 +297,7 @@ func (bb *ButtonBase) ButtonReleased() {
 
 // IsMenu returns true this button is on a menu -- it is a menu item
 func (bb *ButtonBase) IsMenu() bool {
-	return bitflag.Has(bb.Flag, int(ButtonFlagMenu))
+	return bb.HasFlag(int(ButtonFlagMenu))
 }
 
 // HasMenu returns true if there is a menu or menu-making function set, or the
@@ -558,9 +557,9 @@ func (bb *ButtonBase) StyleButton() {
 	bb.Style2DWidget()
 	bb.This.(ButtonWidget).StyleParts()
 	if nf, ok := bb.Prop("no-focus"); ok {
-		bitflag.SetState(&bb.Flag, !bb.IsInactive() && !nf.(bool), int(CanFocus))
+		bb.SetFlagState(!bb.IsInactive() && !nf.(bool), int(CanFocus))
 	} else {
-		bitflag.SetState(&bb.Flag, !bb.IsInactive(), int(CanFocus))
+		bb.SetFlagState(!bb.IsInactive(), int(CanFocus))
 	}
 	pst := bb.ParentStyle()
 	clsty := "." + bb.Class
