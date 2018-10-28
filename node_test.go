@@ -483,7 +483,7 @@ func TestNodeUpdate(t *testing.T) {
 	res := make([]string, 0, 10)
 	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d interface{}) {
 		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig),
-			kit.BitFlagsToString(*(s.Flags()), FlagsN)))
+			kit.BitFlagsToString((s.Flags()), FlagsN)))
 	})
 	// child1 :=
 	parent.AddNewChild(nil, "child1")

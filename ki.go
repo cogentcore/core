@@ -333,29 +333,46 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Flags
 
-	// Flag returns the bit flags for this node -- use bitflag package to
-	// manipulate flags -- see Flags type for standard values used in Ki Node
-	// -- can be extended from FlagsN up to 64 bit capacity.  Always use
-	// Atomic access as *some* things need to be atomic, and with bits, that
-	// means that *all* access needs to be atomic, as you cannot atomically
-	// update just a single bit.
-	Flags() *int64
+	// Flag returns an atomically safe copy of the bit flags for this node --
+	// can use bitflag package to check lags.
+	// See Flags type for standard values used in Ki Node --
+	// can be extended from FlagsN up to 64 bit capacity.
+	// Note that we must always use atomic access as *some* things need to be atomic,
+	// and with bits, that means that *all* access needs to be atomic,
+	// as you cannot atomically update just a single bit.
+	Flags() int64
 
-	// HasFlag checks if flag is set -- we are always using atomic operation safe
-	// for concurrent access, because *some* likely need it, thus *all* must use
+	// HasFlag checks if flag is set
+	// using atomic, safe for concurrent access
 	HasFlag(flag int) bool
 
-	// SetFlag sets the given flag(s) -- we are always using atomic operation safe
-	// for concurrent access, because *some* likely need it, thus *all* must use
+	// HasAnyFlag checks if *any* of a set of flags is set (logical OR)
+	// using atomic, safe for concurrent access
+	HasAnyFlag(flag ...int) bool
+
+	// HasAllFlags checks if *all* of a set of flags is set (logical AND)
+	// using atomic, safe for concurrent access
+	HasAllFlags(flag ...int) bool
+
+	// SetFlag sets the given flag(s)
+	// using atomic, safe for concurrent access
 	SetFlag(flag ...int)
 
-	// SetFlagState sets the given flag(s) to given state, using atomic
-	// operation safe for concurrent access.
+	// SetFlagState sets the given flag(s) to given state
+	// using atomic, safe for concurrent access
 	SetFlagState(on bool, flag ...int)
 
-	// ClearFlag clears the given flag(s) using atomic operation safe for
-	// concurrent access.
+	// SetFlagMask sets the given flags as a mask
+	// using atomic, safe for concurrent access
+	SetFlagMask(mask int64)
+
+	// ClearFlag clears the given flag(s)
+	// using atomic, safe for concurrent access
 	ClearFlag(flag ...int)
+
+	// ClearFlagMask clears the given flags as a bitmask
+	// using atomic, safe for concurrent access
+	ClearFlagMask(mask int64)
 
 	// IsField checks if this is a field on a parent struct (via IsField
 	// Flag), as opposed to a child in Children -- Ki nodes can be added as

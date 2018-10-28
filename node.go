@@ -17,6 +17,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sync"
+	"sync/atomic"
 	"unsafe"
 
 	"log"
@@ -65,7 +66,7 @@ func (n Node) String() string {
 
 func (n *Node) Init(this Ki) {
 	kitype := KiType()
-	bitflag.ClearMaskAtomic(&n.Flag, int64(UpdateFlagsMask))
+	n.ClearFlagMask(int64(UpdateFlagsMask))
 	if n.This != this {
 		n.This = this
 		// we need to call this directly instead of FuncFields because we need the field name
@@ -739,12 +740,20 @@ func (n *Node) Destroy() {
 //////////////////////////////////////////////////////////////////////////
 //  Flags
 
-func (n *Node) Flags() *int64 {
-	return &n.Flag
+func (n *Node) Flags() int64 {
+	return atomic.LoadInt64(&n.Flag)
 }
 
 func (n *Node) HasFlag(flag int) bool {
 	return bitflag.HasAtomic(&n.Flag, flag)
+}
+
+func (n *Node) HasAnyFlag(flag ...int) bool {
+	return bitflag.HasAnyAtomic(&n.Flag, flag...)
+}
+
+func (n *Node) HasAllFlags(flag ...int) bool {
+	return bitflag.HasAllAtomic(&n.Flag, flag...)
 }
 
 func (n *Node) SetFlag(flag ...int) {
@@ -755,8 +764,16 @@ func (n *Node) SetFlagState(on bool, flag ...int) {
 	bitflag.SetStateAtomic(&n.Flag, on, flag...)
 }
 
+func (n *Node) SetFlagMask(mask int64) {
+	bitflag.SetMaskAtomic(&n.Flag, mask)
+}
+
 func (n *Node) ClearFlag(flag ...int) {
 	bitflag.ClearAtomic(&n.Flag, flag...)
+}
+
+func (n *Node) ClearFlagMask(mask int64) {
+	bitflag.ClearMaskAtomic(&n.Flag, mask)
 }
 
 func (n *Node) IsUpdating() bool {
@@ -1088,7 +1105,7 @@ func (n *Node) UpdateStart() bool {
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			if !k.IsUpdating() {
-				bitflag.ClearMaskAtomic(k.Flags(), int64(UpdateFlagsMask))
+				k.ClearFlagMask(int64(UpdateFlagsMask))
 				k.SetFlag(int(Updating))
 				return true // keep going down
 			} else {
@@ -1106,18 +1123,18 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	if bitflag.HasAnyAtomic(&n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
+	if n.HasAnyFlag(int(ChildDeleted), int(ChildrenDeleted)) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
 		n.ClearFlag(int(Updating))
-		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
+		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
+		n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
 	}
 }
 
@@ -1128,18 +1145,18 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 	if n.IsDestroyed() || n.IsDeleted() {
 		return
 	}
-	if bitflag.HasAnyAtomic(&n.Flag, int(ChildDeleted), int(ChildrenDeleted)) {
+	if n.HasAnyFlag(int(ChildDeleted), int(ChildrenDeleted)) {
 		DelMgr.DestroyDeleted()
 	}
 	if n.OnlySelfUpdate() {
 		n.ClearFlag(int(Updating))
-		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
+		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
+		// n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
 	}
 }
 
@@ -1147,7 +1164,7 @@ func (n *Node) UpdateSig() bool {
 	if n.IsUpdating() || n.IsDestroyed() {
 		return false
 	}
-	n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flag)
+	n.NodeSignal().Emit(n.This, int64(NodeSignalUpdated), n.Flags())
 	return true
 }
 
