@@ -1311,7 +1311,7 @@ func (n *Node) CopyFrom(from Ki) error {
 	sameTree := (n.Root() == from.Root())
 	from.GetPtrPaths()
 	err := n.CopyFromRaw(from)
-	DelMgr.DestroyDeleted() // in case we deleted some kiddos
+	// DelMgr.DestroyDeleted() // in case we deleted some kiddos
 	if err != nil {
 		n.UpdateEnd(updt)
 		return err
