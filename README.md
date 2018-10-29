@@ -110,10 +110,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 	+ cursor goes to hand for links in TextView
 	+ parens / brackets match highlighter..
 
-* see if ubuntu and windows have a decent unicode fallback font https://unix.stackexchange.com/questions/14027/what-fonts-are-good-for-unicode-glyphs
-
-* windows: arialuni.ttf  https://docs.microsoft.com/en-us/typography/font-list/arial-unicode-ms
-
 * fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.  in mapview proximally.
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
