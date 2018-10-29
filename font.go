@@ -409,7 +409,7 @@ func (fs *FontStyle) SetUnitContext(ctxt *units.Context) {
 
 // Style CSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context) bool {
+func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context, vp *Viewport2D) bool {
 	if cssAgg == nil {
 		return false
 	}
@@ -421,7 +421,7 @@ func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context) 
 	if !ok {
 		return false
 	}
-	fs.SetStyleProps(nil, pmap)
+	fs.SetStyleProps(nil, pmap, vp)
 	fs.OpenFont(ctxt)
 	return true
 }
@@ -429,12 +429,12 @@ func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context) 
 // SetStyleProps sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting
-func (fs *FontStyle) SetStyleProps(parent *FontStyle, props ki.Props) {
+func (fs *FontStyle) SetStyleProps(parent *FontStyle, props ki.Props, vp *Viewport2D) {
 	// direct font styling is used only for special cases -- don't do this:
 	// if !fs.StyleSet && parent != nil { // first time
 	// 	FontStyleFields.Inherit(fs, parent)
 	// }
-	FontStyleFields.Style(fs, parent, props)
+	FontStyleFields.Style(fs, parent, props, vp)
 	fs.SetStylePost(props)
 }
 

@@ -466,6 +466,7 @@ func (nb *Node2DBase) SetWinBBox() {
 func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
 	nb.ObjBBox = nb.BBox.Add(delta)
 	nb.VpBBox = parBBox.Intersect(nb.ObjBBox)
+	nb.SetInvisibleState(nb.VpBBox == image.ZR)
 	nb.SetWinBBox()
 }
 

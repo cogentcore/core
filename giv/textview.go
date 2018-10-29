@@ -2543,7 +2543,7 @@ func TextViewBlink() {
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || tv.VpBBox == image.ZR {
+		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || tv.IsInvisible() {
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
 			continue
@@ -3716,8 +3716,8 @@ func (tv *TextView) StyleTextView() {
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
-		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]))
-		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i])
+		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]), tv.Viewport)
+		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i], tv.Viewport)
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), true, true) // inherit and get type defaults

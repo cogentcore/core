@@ -323,7 +323,7 @@ func (lb *Label) StyleLabel() {
 	pst := lb.ParentStyle()
 	for i := 0; i < int(LabelStatesN); i++ {
 		lb.StateStyles[i].CopyFrom(&lb.Sty)
-		lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]))
+		lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
 		lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
 	}
 }

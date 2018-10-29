@@ -572,10 +572,10 @@ func (bb *ButtonBase) StyleButton() {
 	}
 	for i := 0; i < int(ButtonStatesN); i++ {
 		bb.StateStyles[i].CopyFrom(&bb.Sty)
-		bb.StateStyles[i].SetStyleProps(pst, bb.StyleProps(ButtonSelectors[i]))
+		bb.StateStyles[i].SetStyleProps(pst, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
 		if clsp != nil {
 			if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
-				bb.StateStyles[i].SetStyleProps(pst, stclsp)
+				bb.StateStyles[i].SetStyleProps(pst, stclsp, bb.Viewport)
 			}
 		}
 		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)

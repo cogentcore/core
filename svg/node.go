@@ -63,17 +63,17 @@ func StyleSVG(gii gi.Node2D) {
 	}
 	pc := pntr.Paint()
 
-	gi.SetCurStyleNode2D(gii)
-	defer gi.SetCurStyleNode2D(nil)
+	g.Viewport.SetCurStyleNode(gii)
+	defer g.Viewport.SetCurStyleNode(nil)
 
 	pc.StyleSet = false // this is always first call, restart
 
 	pp := g.ParentPaint()
 	if pp != nil {
 		pc.CopyStyleFrom(pp)
-		pc.SetStyleProps(pp, *gii.Properties())
+		pc.SetStyleProps(pp, *gii.Properties(), g.Viewport)
 	} else {
-		pc.SetStyleProps(nil, *gii.Properties())
+		pc.SetStyleProps(nil, *gii.Properties(), g.Viewport)
 	}
 	// pc.SetUnitContext(g.Viewport, gi.Vec2DZero)
 	pc.ToDots() // we always inherit parent's unit context -- SVG sets it once-and-for-all
@@ -108,17 +108,17 @@ func ApplyCSSSVG(node gi.Node2D, key string, css ki.Props) bool {
 	if !ok {
 		return false
 	}
-
+	nb := node.AsNode2D()
 	pc := pntr.Paint()
 
 	if pgi, _ := gi.KiToNode2D(node.Parent()); pgi != nil {
 		if pp, ok := pgi.(gi.Painter); ok {
-			pc.SetStyleProps(pp.Paint(), pmap)
+			pc.SetStyleProps(pp.Paint(), pmap, nb.Viewport)
 		} else {
-			pc.SetStyleProps(nil, pmap)
+			pc.SetStyleProps(nil, pmap, nb.Viewport)
 		}
 	} else {
-		pc.SetStyleProps(nil, pmap)
+		pc.SetStyleProps(nil, pmap, nb.Viewport)
 	}
 	return true
 }

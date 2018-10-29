@@ -12,6 +12,7 @@ import (
 	"image/png"
 	"io"
 	"log"
+	"sync"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
@@ -31,12 +32,15 @@ import (
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
 	WidgetBase
-	Fill    bool        `desc:"fill the viewport with background-color from style"`
-	Geom    Geom2DInt   `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Render  RenderState `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
-	Pixels  *image.RGBA `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage oswin.Image `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
-	Win     *Window     `json:"-" xml:"-" desc:"our parent window that we render into"`
+	Fill         bool         `desc:"fill the viewport with background-color from style"`
+	Geom         Geom2DInt    `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Render       RenderState  `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	Pixels       *image.RGBA  `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
+	OSImage      oswin.Image  `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
+	Win          *Window      `json:"-" xml:"-" desc:"our parent window that we render into"`
+	CurStyleNode Node2D       `json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
+	CurColor     Color        `json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
+	StyleMu      sync.RWMutex `json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
@@ -556,6 +560,56 @@ func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 			nii.Render2D()
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//  Style state
+
+// SetCurStyleNode sets the current styling node to given node, and nil to clear
+func (vp *Viewport2D) SetCurStyleNode(node Node2D) {
+	if vp == nil {
+		return
+	}
+	vp.StyleMu.Lock()
+	vp.CurStyleNode = node
+	vp.StyleMu.Unlock()
+}
+
+// CurStyleNodeNamedEl finds element of given name (using FindNamedElement method)
+// in current style node, if set -- returns nil if not set or not found.
+func (vp *Viewport2D) CurStyleNodeNamedEl(name string) Node2D {
+	if vp == nil {
+		return nil
+	}
+	vp.StyleMu.RLock()
+	defer vp.StyleMu.RUnlock()
+
+	if vp.CurStyleNode == nil {
+		return nil
+	}
+	ne := vp.CurStyleNode.FindNamedElement(name)
+	return ne
+}
+
+// SetCurrentColor sets the current color in concurrent-safe way
+func (vp *Viewport2D) SetCurrentColor(clr Color) {
+	if vp == nil {
+		return
+	}
+	vp.StyleMu.Lock()
+	vp.CurColor = clr
+	vp.StyleMu.Unlock()
+}
+
+// CurrentColor gets the current color in concurrent-safe way
+func (vp *Viewport2D) CurrentColor() Color {
+	if vp == nil {
+		return Color{}
+	}
+	vp.StyleMu.RLock()
+	clr := vp.CurColor
+	vp.StyleMu.RUnlock()
+	return clr
 }
 
 //////////////////////////////////////////////////////////////////////////////////

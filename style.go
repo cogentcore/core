@@ -10,7 +10,6 @@ import (
 	"log"
 	"reflect"
 	"strings"
-	"sync"
 	"unsafe"
 
 	"github.com/goki/gi/units"
@@ -71,52 +70,6 @@ type Style struct {
 // RebuildDefaultStyles is a global state var used by Prefs to trigger rebuild
 // of all the default styles, which are otherwise compiled and not updated
 var RebuildDefaultStyles bool
-
-// CurStyleNode2D is always set to the current node that is being styled --
-// used for finding url references -- only active during a Style pass
-var CurStyleNode2D Node2D
-
-// StyleMu is RW mutex protecting access to Style-related global vars
-var StyleMu sync.RWMutex
-
-// SetCurStyleNode2D sets the current styling node to given node, or nil when done
-func SetCurStyleNode2D(node Node2D) {
-	StyleMu.Lock()
-	CurStyleNode2D = node
-	StyleMu.Unlock()
-}
-
-// CurStyleNode2DNamedEl finds element of given name (using FindNamedElement method)
-// in current style node, if set -- returns nil if not set or not found.
-func CurStyleNode2DNamedEl(name string) Node2D {
-	StyleMu.RLock()
-	if CurStyleNode2D == nil {
-		return nil
-	}
-	ne := CurStyleNode2D.FindNamedElement(name)
-	StyleMu.RUnlock()
-	return ne
-}
-
-// CurColor is automatically updated from the Color setting of a Style and
-// accessible as a color name in any other style as "currentcolor"
-// use accessor routines for concurrent-safe access
-var CurColor Color
-
-// SetCurrentColor sets the current color in concurrent-safe way
-func SetCurrentColor(clr Color) {
-	StyleMu.Lock()
-	CurColor = clr
-	StyleMu.Unlock()
-}
-
-// CurrentColor gets the current color in concurrent-safe way
-func CurrentColor() Color {
-	StyleMu.RLock()
-	clr := CurColor
-	StyleMu.RUnlock()
-	return clr
-}
 
 // StylePropProps should be set as type props for any enum (not struct types,
 // which must have their own props) that is useful as a styling property --
@@ -274,12 +227,12 @@ func (s *Style) InheritFields(par *Style) {
 
 // SetStyleProps sets style values based on given property map (name: value pairs),
 // inheriting elements as appropriate from parent
-func (s *Style) SetStyleProps(par *Style, props ki.Props) {
+func (s *Style) SetStyleProps(par *Style, props ki.Props, vp *Viewport2D) {
 	if !s.IsSet && par != nil { // first time
 		// StyleFields.Inherit(s, par) // very slow for some mysterious reason
 		s.InheritFields(par)
 	}
-	StyleFields.Style(s, par, props)
+	StyleFields.Style(s, par, props, vp)
 	s.Text.AlignV = s.Layout.AlignV
 	if s.Layout.Margin.Val > 0 && s.Text.ParaSpacing.Val == 0 {
 		s.Text.ParaSpacing = s.Layout.Margin
@@ -296,8 +249,8 @@ func (s *Style) SetStyleProps(par *Style, props ki.Props) {
 // particular rendering steps, but some settings also impact global variables,
 // such as CurrentColor -- this is automatically called for a successful
 // PushBounds in Node2DBase
-func (s *Style) Use() {
-	SetCurrentColor(s.Font.Color)
+func (s *Style) Use(vp *Viewport2D) {
+	vp.SetCurrentColor(s.Font.Color)
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent
@@ -362,7 +315,7 @@ func (s *Style) BoxSpace() float32 {
 // ApplyCSS applies css styles for given node, using key to select sub-props
 // from overall properties list, and optional selector to select a further
 // :name selector within that key
-func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string) bool {
+func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, vp *Viewport2D) bool {
 	pp, got := css[key]
 	if !got {
 		return false
@@ -378,20 +331,20 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string) bool {
 		}
 	}
 	parSty := node.AsNode2D().ParentStyle()
-	s.SetStyleProps(parSty, pmap)
+	s.SetStyleProps(parSty, pmap, vp)
 	return true
 }
 
 // StyleCSS applies css style properties to given Widget node, parsing out
 // type, .class, and #name selectors, along with optional sub-selector
 // (:hover, :active etc)
-func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string) {
+func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string, vp *Viewport2D) {
 	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	s.ApplyCSS(node, css, tyn, selector)
+	s.ApplyCSS(node, css, tyn, selector, vp)
 	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	s.ApplyCSS(node, css, cln, selector)
+	s.ApplyCSS(node, css, cln, selector, vp)
 	idnm := "#" + strings.ToLower(node.Name()) // then name
-	s.ApplyCSS(node, css, idnm, selector)
+	s.ApplyCSS(node, css, idnm, selector, vp)
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling
@@ -548,7 +501,7 @@ func (sf *StyledFields) CompileFields(def interface{}) {
 // Inherit copies all the values from par to obj for fields marked as
 // "inherit" -- inherited by default.  NOTE: No longer using this -- doing it
 // manually -- much faster
-func (sf *StyledFields) Inherit(obj, par interface{}) {
+func (sf *StyledFields) Inherit(obj, par interface{}, vp *Viewport2D) {
 	// pr := prof.Start("StyleFields.Inherit")
 	objptr := reflect.ValueOf(obj).Pointer()
 	hasPar := !kit.IfaceIsNil(par)
@@ -558,14 +511,14 @@ func (sf *StyledFields) Inherit(obj, par interface{}) {
 	}
 	for _, fld := range sf.Inherits {
 		pfi := fld.FieldIface(parptr)
-		fld.FromProps(sf.Fields, objptr, parptr, pfi, hasPar)
+		fld.FromProps(sf.Fields, objptr, parptr, pfi, hasPar, vp)
 		// fmt.Printf("inh: %v\n", fld.Field.Name)
 	}
 	// pr.End()
 }
 
 // Style applies styles to the fields from given properties for given object
-func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
+func (sf *StyledFields) Style(obj, par interface{}, props ki.Props, vp *Viewport2D) {
 	if props == nil {
 		return
 	}
@@ -590,7 +543,7 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 				if vfld, nok := sf.Fields[nkey]; nok {
 					nval := vfld.FieldIface(objptr)
 					if fld, fok := sf.Fields[key]; fok {
-						fld.FromProps(sf.Fields, objptr, parptr, nval, hasPar)
+						fld.FromProps(sf.Fields, objptr, parptr, nval, hasPar, vp)
 						continue
 					}
 				}
@@ -604,7 +557,7 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props) {
 			// log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
 			continue
 		}
-		fld.FromProps(sf.Fields, objptr, parptr, val, hasPar)
+		fld.FromProps(sf.Fields, objptr, parptr, val, hasPar, vp)
 	}
 	pr.End()
 }
@@ -677,7 +630,7 @@ func (sf *StyledField) UnitsValue(objptr uintptr) *units.Value {
 }
 
 // FromProps styles given field from property value val, with optional parent object obj
-func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr uintptr, val interface{}, hasPar bool) {
+func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr uintptr, val interface{}, hasPar bool, vp *Viewport2D) {
 	errstr := "gi.StyledField FromProps: Field:"
 	fi := fld.FieldIface(objptr)
 	if kit.IfaceIsNil(fi) {
@@ -709,7 +662,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 	case *ColorSpec:
 		switch valv := val.(type) {
 		case string:
-			fiv.SetString(valv)
+			fiv.SetString(valv, vp)
 		case *Color:
 			fiv.SetColor(*valv)
 		case *ColorSpec:
@@ -731,7 +684,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 					}
 				}
 			}
-			err := fiv.SetString(valv, nil)
+			err := fiv.SetStringStyle(valv, nil, vp)
 			if err != nil {
 				log.Printf("StyleField: %v\n", err)
 			}

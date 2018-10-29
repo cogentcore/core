@@ -1765,9 +1765,9 @@ func (ly *Layout) StyleLayout() {
 	ly.Style2DWidget()
 	tprops := *kit.Types.Properties(ly.Type(), true) // true = makeNew
 	kit.TypesMu.RLock()
-	LayoutFields.Style(ly, nil, tprops)
+	LayoutFields.Style(ly, nil, tprops, ly.Viewport)
 	kit.TypesMu.RUnlock()
-	LayoutFields.Style(ly, nil, ly.Props)
+	LayoutFields.Style(ly, nil, ly.Props, ly.Viewport)
 	LayoutFields.ToDots(ly, &ly.Sty.UnContext)
 }
 
