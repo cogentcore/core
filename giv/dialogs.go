@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"image"
+
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -356,6 +358,7 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filt
 	}
 	dlg.SetProp("min-width", units.NewValue(60, units.Em))
 	dlg.SetProp("min-height", units.NewValue(35, units.Em))
+	dlg.DefSize = image.Point{600, 400} // avoids expensive computation
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg

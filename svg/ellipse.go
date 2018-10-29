@@ -19,6 +19,9 @@ type Ellipse struct {
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
 
 func (g *Ellipse) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.Lock()

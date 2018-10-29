@@ -20,6 +20,9 @@ type Rect struct {
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
 
 func (g *Rect) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXForm(pc.XForm)

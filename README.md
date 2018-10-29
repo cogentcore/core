@@ -96,14 +96,9 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* more race condition fixes..
-	+ need to protect node.This -- gets reset to nil during destroy. use atomic pointer set.
-
 * fix clear x on textfield.
 
 * gui for spell options.
-
-* fileview is too slow to load -- is it icons?  not mainly textviews.. more debugging..
 
 * mac hidpi setpos is not right from prefs -- works from init win create.
 

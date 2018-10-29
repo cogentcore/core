@@ -41,6 +41,9 @@ func (g *Path) SetData(data string) error {
 }
 
 func (g *Path) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	sz := len(g.Data)
 	if sz < 2 {
 		return

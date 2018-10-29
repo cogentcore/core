@@ -510,6 +510,7 @@ func (nb *Node2DBase) Style2DTree() {
 	if nb.This() == nil {
 		return
 	}
+	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
 	pr := prof.Start("Node2D.Style2DTree")
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)

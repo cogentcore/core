@@ -20,6 +20,9 @@ type Line struct {
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
 
 func (g *Line) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.Lock()

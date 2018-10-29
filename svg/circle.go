@@ -19,6 +19,9 @@ type Circle struct {
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
 
 func (g *Circle) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.Lock()

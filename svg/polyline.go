@@ -19,6 +19,9 @@ type Polyline struct {
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
 
 func (g *Polyline) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	sz := len(g.Points)
 	if sz < 2 {
 		return

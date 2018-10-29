@@ -61,6 +61,7 @@ type Dialog struct {
 	Title     string      `desc:"title text displayed as the window title for the dialog"`
 	Prompt    string      `desc:"a prompt string displayed below the title"`
 	Modal     bool        `desc:"open the dialog in a modal state, blocking all other input"`
+	DefSize   image.Point `desc:"default size -- if non-zero, then this is used instead of doing an initial size computation -- can save a lot of time for complex dialogs -- sizes are remembered and used after first use anyway"`
 	State     DialogState `desc:"state of the dialog"`
 	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
 	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
@@ -115,19 +116,23 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		cfgFunc()
 	}
 
-	dlg.Init2DTree()
-	dlg.Style2DTree()                                      // sufficient to get sizes
-	dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
-	dlg.Size2DTree(0)                                      // collect sizes
+	if dlg.DefSize != image.ZP {
+		dlg.Init2DTree()
+		dlg.Style2DTree()                                      // sufficient to get sizes
+		dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
+		dlg.Size2DTree(0)                                      // collect sizes
+	}
 	dlg.Win = nil
 
 	frame := dlg.KnownChildByName("frame", 0).(*Frame)
-	var vpsz image.Point
+	vpsz := dlg.DefSize
 
-	if DialogsSepWindow {
-		vpsz = frame.LayData.Size.Pref.ToPoint()
-	} else {
-		vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
+	if dlg.DefSize == image.ZP {
+		if DialogsSepWindow {
+			vpsz = frame.LayData.Size.Pref.ToPoint()
+		} else {
+			vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
+		}
 	}
 
 	stw := int(dlg.Sty.Layout.MinWidth.Dots)

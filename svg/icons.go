@@ -80,7 +80,7 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 // NeedsReRender tests whether the last render parameters (size, color) have changed or not
 func (ic *Icon) NeedsReRender() bool {
-	if ic.FullReRenderIfNeeded() || !ic.Rendered || ic.RendSize != ic.Geom.Size {
+	if ic.NeedsFullReRender() || !ic.Rendered || ic.RendSize != ic.Geom.Size {
 		return true
 	}
 	return false

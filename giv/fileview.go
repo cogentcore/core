@@ -701,9 +701,9 @@ func (fv *FileView) Style2D() {
 	fv.Frame.Style2D()
 	sf := fv.SelField()
 	sf.StartFocus() // need to call this when window is actually active
-	if fv.Viewport != nil && fv.Viewport.IsDoingFullRender() {
-		fv.UpdateFiles()
-	}
+	// if fv.Viewport != nil && fv.Viewport.IsDoingFullRender() {
+	// 	fv.UpdateFiles()
+	// }
 }
 
 func (fv *FileView) ConnectEvents2D() {

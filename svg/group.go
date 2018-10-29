@@ -41,6 +41,9 @@ func (g *Group) BBox2D() image.Rectangle {
 }
 
 func (g *Group) Render2D() {
+	if g.Viewport == nil {
+		g.This().(gi.Node2D).Init2D()
+	}
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.PushXFormLock(pc.XForm)
