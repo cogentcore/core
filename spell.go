@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,10 +36,9 @@ func InitSpell() error {
 	if spell.Initialized() {
 		return nil
 	}
-
-	spell.Init()
 	err := LoadModel()
 	if err != nil {
+		// oh well, try creating a new model from corpus
 		err = ModelFromCorpus()
 		if err != nil {
 			return err
@@ -49,18 +47,16 @@ func InitSpell() error {
 	return nil
 }
 
+// LoadModel loads a saved spelling model
 func LoadModel() error {
 	pdir := oswin.TheApp.AppPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
-	b, err := ioutil.ReadFile(openpath)
-	if err == nil {
-		err = spell.LoadModel(b)
-	}
+	err := spell.Load(openpath)
 	return err
 }
 
+// ModelFromCorpus builds a spelling from text
 func ModelFromCorpus() error {
-	// oh well, try creating a new model from corpus
 	bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
 	if err != nil {
 		log.Printf("Error getting path to corpus directory: %v.\n", err)
@@ -82,11 +78,11 @@ func ModelFromCorpus() error {
 	return nil
 }
 
-// SaveSpell saves the spelling model which includes the data and parameters
-func SaveSpell() error {
+// SaveModel saves the spelling model which includes the data and parameters
+func SaveModel() error {
 	pdir := oswin.TheApp.AppPrefsDir()
 	path := filepath.Join(pdir, "spell_en_us_plain.json")
-	err := spell.SaveModel(path)
+	err := spell.Save(path)
 	if err != nil {
 		log.Printf("Could not save spelling model to file: %v.\n", err)
 	}

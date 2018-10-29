@@ -10,9 +10,7 @@ package spell
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -27,25 +25,20 @@ import (
 var inited bool
 var model *fuzzy.Model
 
+// Initialized returns true if the model has been loaded or created anew
 func Initialized() bool {
 	return inited
 }
 
-func Init() {
-	model = fuzzy.NewModel()
-	model.SetThreshold(4)
+// Load loads the saved model stored in json format
+func Load(path string) (err error) {
+	model, err = fuzzy.Load(path)
+	return err
 }
 
-// Load Model loads the save model stored in json format
-func LoadModel(b []byte) error {
-	err := json.Unmarshal(b, model)
-	if err == nil {
-		inited = true
-		return err
-	} else {
-		log.Printf("Failed loading model from saved json: %v.\n", err)
-		return err
-	}
+// Save saves the spelling model which includes the data and parameters
+func Save(filename string) error {
+	return model.Save(filename)
 }
 
 // ModelFromCorpus builds a new fuzzy.model from a text file
@@ -68,10 +61,12 @@ func ModelFromCorpus(file os.File) error {
 			}
 		}
 	}
+
 	if err := scanner.Err(); err != nil {
 		log.Println(os.Stderr, "reading input: ", err)
 		return err
 	}
+	model = fuzzy.NewModel()
 	model.Train(out)
 	inited = true
 	return err
@@ -103,23 +98,7 @@ func LearnWord(word string) {
 	model.TrainWord(word)
 }
 
-// SaveModel saves the spelling model which includes the data and parameters
-func SaveModel(path string) error {
-	if model != nil {
-		b, err := json.MarshalIndent(model, "", "  ")
-		if err != nil {
-			log.Println(err) // unlikely
-			return err
-		}
-		err = ioutil.WriteFile(path, b, 0644)
-		if err != nil {
-			log.Printf("Could not save spelling model to file: %v.\n", err)
-		}
-		return err
-	}
-	return nil
-}
-
+// Complete finds possible completions based on the prefix s
 func Complete(s string) (result []string, err error) {
 	if model == nil {
 		return result, errors.New("Model is nil")
