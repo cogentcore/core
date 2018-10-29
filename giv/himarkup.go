@@ -21,10 +21,14 @@ import (
 // HiStyleName is a highlighting style name
 type HiStyleName string
 
+// HiStyleDefault is the default highlighting style name -- can set this to whatever you want
+var HiStyleDefault = HiStyleName("emacs")
+
 // HiMarkup manages the syntax highlighting state for TextBuf
 type HiMarkup struct {
 	Lang      string        `desc:"language for syntax highlighting the code"`
 	Style     HiStyleName   `desc:"syntax highlighting style"`
+	Has       bool          `desc:"true if both lang and style are set"`
 	TabSize   int           `desc:"tab size, in chars"`
 	CSSheet   gi.StyleSheet `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
 	CSSProps  ki.Props      `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
@@ -35,19 +39,18 @@ type HiMarkup struct {
 	style     *chroma.Style
 }
 
-// HasHi returns true if there are highighting parameters set
+// HasHi returns true if there are highighting parameters set (only valid after Init)
 func (hm *HiMarkup) HasHi() bool {
-	if hm.Lang == "" || hm.Style == "" {
-		return false
-	}
-	return true
+	return hm.Has
 }
 
 // Init initializes the syntax highlighting for current params
 func (hm *HiMarkup) Init() {
-	if !hm.HasHi() {
+	if hm.Lang == "" || hm.Style == "" {
+		hm.Has = false
 		return
 	}
+	hm.Has = true
 	if hm.Lang == hm.lastLang && hm.Style == hm.lastStyle {
 		return
 	}

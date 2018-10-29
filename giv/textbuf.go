@@ -126,6 +126,7 @@ const (
 
 // SetText sets the text to given bytes
 func (tb *TextBuf) SetText(txt []byte) {
+	tb.Defaults()
 	tb.Txt = txt
 	tb.BytesToLines()
 	tb.Refresh()
@@ -149,6 +150,23 @@ func (tb *TextBuf) Text() []byte {
 	return tb.Txt
 }
 
+// SetHiStyle sets the highlighting style -- needs to be protected by mutex
+func (tb *TextBuf) SetHiStyle(style HiStyleName) {
+	tb.MarkupMu.Lock()
+	tb.Hi.Style = style
+	tb.MarkupMu.Unlock()
+}
+
+// Defaults sets default parameters if they haven't been yet --
+// if Hi.Style is empty, then it considers it to not have been set
+func (tb *TextBuf) Defaults() {
+	if tb.Hi.Style != "" {
+		return
+	}
+	tb.SetHiStyle(HiStyleDefault)
+	tb.Opts.AutoIndent = true
+}
+
 // Refresh signals any views to refresh views
 func (tb *TextBuf) Refresh() {
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
@@ -159,6 +177,7 @@ func (tb *TextBuf) Refresh() {
 
 // New initializes a new buffer with n blank lines
 func (tb *TextBuf) New(nlines int) {
+	tb.Defaults()
 	nlines = ints.MaxInt(nlines, 1)
 	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
@@ -195,7 +214,9 @@ func (tb *TextBuf) Stat() error {
 		lexer = lexers.Analyse(string(tb.Txt))
 	}
 	if lexer != nil {
+		tb.MarkupMu.Lock()
 		tb.Hi.Lang = lexer.Config().Name
+		tb.MarkupMu.Unlock()
 	}
 	return nil
 }
@@ -231,6 +252,7 @@ func (tb *TextBuf) FileModCheck() {
 
 // Open loads text from a file into the buffer
 func (tb *TextBuf) Open(filename gi.FileName) error {
+	tb.Defaults()
 	err := tb.OpenFile(filename)
 	if err != nil {
 		vp := tb.ViewportFromView()

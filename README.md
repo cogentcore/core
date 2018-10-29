@@ -108,6 +108,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:
+	+ on yank from history, push to clipboard
 	+ word wrapping is going long unnecessarily -- is target size correct??
 	+ isearch not saving to previous if no matches
 	+ query replace reverse-order of find / replace lists

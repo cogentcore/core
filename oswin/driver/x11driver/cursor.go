@@ -8,6 +8,7 @@ package x11driver
 
 import (
 	"log"
+	"sync"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/goki/gi/oswin/cursor"
@@ -40,6 +41,7 @@ type cursorImpl struct {
 	cursor.CursorBase
 	cursors  map[cursor.Shapes]xproto.Cursor
 	cursFont xproto.Font
+	mu       sync.Mutex
 }
 
 var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
@@ -87,6 +89,7 @@ func (c *cursorImpl) setCursor(cur xproto.Cursor) {
 }
 
 func (c *cursorImpl) cursorHandle(sh cursor.Shapes) xproto.Cursor {
+	c.mu.Lock()
 	if c.cursors == nil {
 		c.cursors = make(map[cursor.Shapes]xproto.Cursor, cursor.ShapesN)
 		c.openCursorFont()
@@ -97,6 +100,7 @@ func (c *cursorImpl) cursorHandle(sh cursor.Shapes) xproto.Cursor {
 		ch = c.createCursor(curid)
 		c.cursors[sh] = ch
 	}
+	c.mu.Unlock()
 	return ch
 }
 
@@ -105,48 +109,66 @@ func (c *cursorImpl) setImpl(sh cursor.Shapes) {
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
+	c.mu.Lock()
 	c.Cur = sh
+	c.mu.Unlock()
 	c.setImpl(sh)
 }
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
+	c.mu.Lock()
 	c.PushStack(sh)
+	c.mu.Unlock()
 	c.setImpl(sh)
 }
 
 func (c *cursorImpl) Pop() {
+	c.mu.Lock()
 	sh, _ := c.PopStack()
+	c.mu.Unlock()
 	c.setImpl(sh)
 }
 
 func (c *cursorImpl) Hide() {
+	c.mu.Lock()
 	if c.Vis == false {
+		c.mu.Unlock()
 		return
 	}
 	c.Vis = false
+	c.mu.Unlock()
 	// _ShowCursor(false) // todo: create blank cursor
 }
 
 func (c *cursorImpl) Show() {
+	c.mu.Lock()
 	if c.Vis {
+		c.mu.Unlock()
 		return
 	}
+	c.mu.Unlock()
 	c.Vis = true
 	// _ShowCursor(true)
 }
 
 func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
+	c.mu.Lock()
 	if c.Cur == sh {
+		c.mu.Unlock()
 		return false
 	}
+	c.mu.Unlock()
 	c.Push(sh)
 	return true
 }
 
 func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
+	c.mu.Lock()
 	if c.Cur == sh {
+		c.mu.Unlock()
 		c.Pop()
 		return true
 	}
+	c.mu.Unlock()
 	return false
 }

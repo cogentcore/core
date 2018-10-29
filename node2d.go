@@ -382,7 +382,7 @@ func (nb *Node2DBase) ContextMenu() {
 
 // KiToNode2D converts Ki to a Node2D interface and a Node2DBase obj -- nil if not.
 func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
-	if k == nil {
+	if k == nil || k.This() == nil { // this also checks for destroyed
 		return nil, nil
 	}
 	nii, ok := k.(Node2D)

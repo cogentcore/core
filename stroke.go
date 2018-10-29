@@ -108,7 +108,7 @@ func (ps *StrokeStyle) SetColorSpec(cl *ColorSpec) {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.Color = *cl
+		ps.Color.CopyFrom(cl)
 	}
 }
 

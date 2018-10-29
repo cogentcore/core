@@ -69,6 +69,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 	"unsafe"
 
@@ -761,54 +762,73 @@ func addMimeData(ctyp *C.char, typlen C.int, cdata *C.char, datalen C.int) {
 
 type cursorImpl struct {
 	cursor.CursorBase
+	mu sync.Mutex
 }
 
 var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
+	c.mu.Lock()
 	c.PushStack(sh)
+	c.mu.Unlock()
 	C.pushCursor(C.int(sh))
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
+	c.mu.Lock()
 	c.Cur = sh
+	c.mu.Unlock()
 	C.setCursor(C.int(sh))
 }
 
 func (c *cursorImpl) Pop() {
+	c.mu.Lock()
 	c.PopStack()
+	c.mu.Unlock()
 	C.popCursor()
 }
 
 func (c *cursorImpl) Hide() {
+	c.mu.Lock()
 	if c.Vis == false {
+		c.mu.Unlock()
 		return
 	}
 	c.Vis = false
+	c.mu.Unlock()
 	C.hideCursor()
 }
 
 func (c *cursorImpl) Show() {
+	c.mu.Lock()
 	if c.Vis {
+		c.mu.Unlock()
 		return
 	}
 	c.Vis = true
+	c.mu.Unlock()
 	C.showCursor()
 }
 
 func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
+	c.mu.Lock()
 	if c.Cur == sh {
+		c.mu.Unlock()
 		return false
 	}
+	c.mu.Unlock()
 	c.Push(sh)
 	return true
 }
 
 func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
+	c.mu.Lock()
 	if c.Cur == sh {
+		c.mu.Unlock()
 		c.Pop()
 		return true
 	}
+	c.mu.Unlock()
 	return false
 }
 

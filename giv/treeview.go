@@ -1464,7 +1464,11 @@ func (tv *TreeView) TreeViewEvents() {
 		// HiPri is needed to override label's native processing
 		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*gi.Label)
-			tvv := lb.Parent().Parent().Embed(KiT_TreeView).(*TreeView)
+			tvvi := lb.Parent().Parent()
+			if tvvi == nil { // deleted
+				return
+			}
+			tvv := tvvi.Embed(KiT_TreeView).(*TreeView)
 			me := d.(*mouse.Event)
 			switch me.Button {
 			case mouse.Left:

@@ -867,7 +867,10 @@ func (app *appImpl) WindowInFocus() oswin.Window {
 }
 
 func (app *appImpl) ContextWindow() oswin.Window {
-	return app.ctxtwin
+	app.mu.Lock()
+	cw := app.ctxtwin
+	app.mu.Unlock()
+	return cw
 }
 
 func (app *appImpl) Platform() oswin.Platforms {
@@ -908,12 +911,16 @@ func (app *appImpl) FontPaths() []string {
 }
 
 func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {
+	app.mu.Lock()
 	app.ctxtwin = win.(*windowImpl)
+	app.mu.Unlock()
 	return &theClip
 }
 
 func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
+	app.mu.Lock()
 	app.ctxtwin = win.(*windowImpl)
+	app.mu.Unlock()
 	return &theCursor
 }
 

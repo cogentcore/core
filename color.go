@@ -447,7 +447,7 @@ func (c *Color) SetString(str string, base color.Color) error {
 			c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
 			return nil
 		case "currentcolor":
-			*c = CurrentColor // current style.Color value
+			*c = CurrentColor() // current style.Color value
 			// fmt.Printf("cur col: %v\n", *c)
 			return nil
 		default:

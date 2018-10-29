@@ -129,6 +129,7 @@ type Window struct {
 	Focus             ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
 	FocusActive       bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
 	StartFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
+	FocusMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
 	Shortcuts         Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	DNDData           mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
@@ -710,12 +711,20 @@ func (w *Window) FullReRender() {
 		return
 	}
 	w.Viewport.FullRender2DTree()
+	w.FocusMu.Lock()
 	if w.Focus == nil {
 		if w.StartFocus != nil {
-			w.FocusOnOrNext(w.StartFocus)
+			sf := w.StartFocus
+			w.StartFocus = nil
+			w.FocusMu.Unlock()
+			w.FocusOnOrNext(sf)
 		} else {
-			w.FocusNext(w.Focus)
+			foc := w.Focus
+			w.FocusMu.Unlock()
+			w.FocusNext(foc)
 		}
+	} else {
+		w.FocusMu.Unlock()
 	}
 }
 
@@ -1089,6 +1098,7 @@ func (w *Window) MainMenuUpdateWindows() {
 	WindowGlobalMu.Lock()
 	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
 	if !ok {
+		WindowGlobalMu.Unlock()
 		w.UpMu.Unlock()
 		return
 	}
@@ -1438,8 +1448,14 @@ mainloop:
 			continue // don't do anything else!
 		case *mouse.DragEvent:
 			w.LastModBits = e.Modifiers
-			if w.Focus == nil && w.StartFocus != nil {
-				w.FocusOnOrNext(w.StartFocus)
+			w.FocusMu.Lock()
+			if w.Focus == nil && w.StartFocus != nil { // why is this here in drag event???
+				sf := w.StartFocus
+				w.StartFocus = nil
+				w.FocusMu.Unlock()
+				w.FocusOnOrNext(sf)
+			} else {
+				w.FocusMu.Unlock()
 			}
 			w.LastSelMode = e.SelectMode()
 			if w.DNDData != nil {
@@ -1474,8 +1490,14 @@ mainloop:
 					w.MainMenuUpdateWindows()
 					w.MainMenuSet()
 				}
+				w.FocusMu.Lock()
 				if w.Focus == nil && w.StartFocus != nil {
-					w.FocusOnOrNext(w.StartFocus)
+					sf := w.StartFocus
+					w.StartFocus = nil
+					w.FocusMu.Unlock()
+					w.FocusOnOrNext(sf)
+				} else {
+					w.FocusMu.Unlock()
 				}
 			}
 		case *key.ChordEvent:
@@ -1488,7 +1510,7 @@ mainloop:
 		////////////////////////////////////////////////////////////////////////////
 		// Send Events to Widgets
 
-		if !evi.IsProcessed() {
+		if !evi.IsProcessed() && w.HasFlag(int(WinFlagGotFocus)) {
 			evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 			w.SendEventSignal(evi, evToPopup)
 			if !delPop && et == oswin.MouseMoveEvent {
@@ -1649,11 +1671,13 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 			if !nii.HasFocus2D() {
 				return true
 			}
+			w.FocusMu.Lock()
 			if !w.FocusActive { // reactivate on keyboard input
 				w.FocusActive = true
 				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
 				nii.FocusChanged2D(FocusActive)
 			}
+			w.FocusMu.Unlock()
 		} else if evi.HasPos() {
 			pos := evi.Pos()
 			switch evi.(type) {
@@ -2248,11 +2272,14 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 
 // SetStartFocus sets the given item to be first focus when window opens.
 func (w *Window) SetStartFocus(k ki.Ki) {
+	w.FocusMu.Lock()
 	w.StartFocus = k
+	w.FocusMu.Unlock()
 }
 
 // SetFocus sets focus to given item -- returns true if focus changed.
 func (w *Window) SetFocus(k ki.Ki) bool {
+	w.FocusMu.Lock()
 	if w.Focus == k {
 		if k != nil {
 			_, ni := KiToNode2D(k)
@@ -2260,6 +2287,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 				ni.SetFlag(int(HasFocus)) // ensure focus flag always set
 			}
 		}
+		w.FocusMu.Unlock()
 		return false
 	}
 
@@ -2286,7 +2314,8 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	ni.SetFlag(int(HasFocus))
 	w.FocusActive = true
 	// fmt.Printf("set foc: %v\n", ni.PathUnique())
-	w.ClearNonFocus() // shouldn't need this but actually sometimes do
+	w.ClearNonFocus(w.Focus) // shouldn't need this but actually sometimes do
+	w.FocusMu.Unlock()
 	nii.FocusChanged2D(FocusGot)
 	return true
 }
@@ -2340,9 +2369,12 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 // FocusOnOrNext sets the focus on the given item, or the next one that can
 // accept focus -- returns true if a new focus item found.
 func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
+	w.FocusMu.Lock()
 	if w.Focus == foc {
+		w.FocusMu.Unlock()
 		return true
 	}
+	w.FocusMu.Unlock()
 	_, ni := KiToNode2D(foc)
 	if ni == nil || ni.This() == nil {
 		return false
@@ -2428,7 +2460,7 @@ func (w *Window) FocusLast() bool {
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
-func (w *Window) ClearNonFocus() {
+func (w *Window) ClearNonFocus(foc ki.Ki) {
 	focRoot := w.Viewport.This()
 	cpop := w.CurPopup()
 	if cpop != nil {
@@ -2447,7 +2479,7 @@ func (w *Window) ClearNonFocus() {
 		if ni == nil || ni.This() == nil {
 			return true
 		}
-		if w.Focus == k {
+		if foc == k {
 			return true
 		}
 		if ni.HasFocus() {
@@ -2468,16 +2500,19 @@ func (w *Window) ClearNonFocus() {
 
 // PushFocus pushes current focus onto stack and sets new focus.
 func (w *Window) PushFocus(p ki.Ki) {
+	w.FocusMu.Lock()
 	if w.FocusStack == nil {
 		w.FocusStack = make([]ki.Ki, 0, 50)
 	}
 	w.FocusStack = append(w.FocusStack, w.Focus)
 	w.Focus = nil // don't un-focus on prior item when pushing
+	w.FocusMu.Unlock()
 	w.FocusOnOrNext(p)
 }
 
 // PopFocus pops off the focus stack and sets prev to current focus.
 func (w *Window) PopFocus() {
+	w.FocusMu.Lock()
 	if w.FocusStack == nil || len(w.FocusStack) == 0 {
 		w.Focus = nil
 		return
@@ -2487,14 +2522,19 @@ func (w *Window) PopFocus() {
 	nxtf := w.FocusStack[sz-1]
 	_, ni := KiToNode2D(nxtf)
 	if ni != nil && ni.This() != nil {
+		w.FocusMu.Unlock()
 		w.SetFocus(nxtf)
+		w.FocusMu.Lock()
 	}
 	w.FocusStack = w.FocusStack[:sz-1]
+	w.FocusMu.Unlock()
 }
 
 // FocusActiveClick updates the FocusActive status based on mouse clicks in
 // or out of the focused item
 func (w *Window) FocusActiveClick(e *mouse.Event) {
+	w.FocusMu.Lock()
+	defer w.FocusMu.Unlock()
 	if w.Focus == nil || e.Button != mouse.Left || e.Action != mouse.Press {
 		return
 	}
@@ -2525,6 +2565,8 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 
 // FocusInactivate inactivates the current focus element
 func (w *Window) FocusInactivate() {
+	w.FocusMu.Lock()
+	defer w.FocusMu.Unlock()
 	if w.Focus == nil || !w.FocusActive {
 		return
 	}
@@ -2931,8 +2973,14 @@ type WindowGeomPrefs map[string]map[string]WindowGeom
 // WinGeomPrefsFileName is the name of the preferences file in GoGi prefs directory
 var WinGeomPrefsFileName = "win_geom_prefs.json"
 
+// WinGeomPrefsMu is read-write mutex that protects updating of WinGeomPrefs
+var WinGeomPrefsMu sync.RWMutex
+
 // Open Window Geom preferences from GoGi standard prefs directory
 func (wg *WindowGeomPrefs) Open() error {
+	WinGeomPrefsMu.Lock()
+	defer WinGeomPrefsMu.Unlock()
+
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 1000)
 	}
@@ -2955,6 +3003,8 @@ func (wg *WindowGeomPrefs) Save() error {
 	if wg == nil {
 		return nil
 	}
+	WinGeomPrefsMu.Lock()
+	defer WinGeomPrefsMu.Unlock()
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
 	b, err := json.MarshalIndent(wg, "", "  ")
@@ -2971,8 +3021,7 @@ func (wg *WindowGeomPrefs) Save() error {
 
 // RecordPref records current state of window as preference
 func (wg *WindowGeomPrefs) RecordPref(win *Window) {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
+	WinGeomPrefsMu.Lock()
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 100)
 	}
@@ -2988,6 +3037,7 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 		(*wg)[win.Nm] = make(map[string]WindowGeom, 10)
 	}
 	(*wg)[win.Nm][sc.Name] = wgr
+	WinGeomPrefsMu.Unlock()
 	wg.Save()
 }
 
@@ -2998,8 +3048,8 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	if wg == nil {
 		return nil
 	}
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
+	WinGeomPrefsMu.RLock()
+	defer WinGeomPrefsMu.RUnlock()
 
 	wps, ok := (*wg)[winName]
 	if !ok {
@@ -3065,8 +3115,8 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 // by screen, and clear current in-memory cache.  You shouldn't need to use
 // this but sometimes useful for testing.
 func (wg *WindowGeomPrefs) DeleteAll() {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
+	WinGeomPrefsMu.RLock()
+	defer WinGeomPrefsMu.RUnlock()
 
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName)

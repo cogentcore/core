@@ -10,6 +10,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"sync"
 	"unsafe"
 
 	"github.com/goki/gi/units"
@@ -75,9 +76,46 @@ var RebuildDefaultStyles bool
 // used for finding url references -- only active during a Style pass
 var CurStyleNode2D Node2D
 
+// StyleMu is RW mutex protecting access to Style-related global vars
+var StyleMu sync.RWMutex
+
 // SetCurStyleNode2D sets the current styling node to given node, or nil when done
 func SetCurStyleNode2D(node Node2D) {
+	StyleMu.Lock()
 	CurStyleNode2D = node
+	StyleMu.Unlock()
+}
+
+// CurStyleNode2DNamedEl finds element of given name (using FindNamedElement method)
+// in current style node, if set -- returns nil if not set or not found.
+func CurStyleNode2DNamedEl(name string) Node2D {
+	StyleMu.RLock()
+	if CurStyleNode2D == nil {
+		return nil
+	}
+	ne := CurStyleNode2D.FindNamedElement(name)
+	StyleMu.RUnlock()
+	return ne
+}
+
+// CurColor is automatically updated from the Color setting of a Style and
+// accessible as a color name in any other style as "currentcolor"
+// use accessor routines for concurrent-safe access
+var CurColor Color
+
+// SetCurrentColor sets the current color in concurrent-safe way
+func SetCurrentColor(clr Color) {
+	StyleMu.Lock()
+	CurColor = clr
+	StyleMu.Unlock()
+}
+
+// CurrentColor gets the current color in concurrent-safe way
+func CurrentColor() Color {
+	StyleMu.RLock()
+	clr := CurColor
+	StyleMu.RUnlock()
+	return clr
 }
 
 // StylePropProps should be set as type props for any enum (not struct types,
@@ -196,10 +234,6 @@ func (s *ShadowStyle) HasShadow() bool {
 	return (s.HOffset.Dots > 0 || s.VOffset.Dots > 0)
 }
 
-// CurrentColor is automatically updated from the Color setting of a Style and
-// accessible as a color name in any other style as currentColor
-var CurrentColor Color
-
 func (s *Style) Defaults() {
 	// mostly all the defaults are 0 initial values, except these..
 	s.IsSet = false
@@ -263,7 +297,7 @@ func (s *Style) SetStyleProps(par *Style, props ki.Props) {
 // such as CurrentColor -- this is automatically called for a successful
 // PushBounds in Node2DBase
 func (s *Style) Use() {
-	CurrentColor = s.Font.Color
+	SetCurrentColor(s.Font.Color)
 }
 
 // SetUnitContext sets the unit context based on size of viewport and parent

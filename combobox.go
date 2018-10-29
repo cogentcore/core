@@ -369,6 +369,9 @@ func (cb *ComboBox) SetCurIndex(idx int) interface{} {
 // SelectItem selects a given item and emits the index as the ComboSig signal
 // and the selected item as the data
 func (cb *ComboBox) SelectItem(idx int) {
+	if cb.This() == nil {
+		return
+	}
 	updt := cb.UpdateStart()
 	cb.SetCurIndex(idx)
 	cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)

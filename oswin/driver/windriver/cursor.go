@@ -7,6 +7,7 @@
 package windriver
 
 import (
+	"sync"
 	"syscall"
 
 	"github.com/goki/gi/oswin/cursor"
@@ -35,11 +36,13 @@ var cursorMap = map[cursor.Shapes]int{
 type cursorImpl struct {
 	cursor.CursorBase
 	cursors map[cursor.Shapes]syscall.Handle
+	mu      sync.Mutex
 }
 
 var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
 
 func (c *cursorImpl) cursorHandle(sh cursor.Shapes) syscall.Handle {
+	c.mu.Lock()
 	if c.cursors == nil {
 		c.cursors = make(map[cursor.Shapes]syscall.Handle, cursor.ShapesN)
 	}
@@ -49,6 +52,7 @@ func (c *cursorImpl) cursorHandle(sh cursor.Shapes) syscall.Handle {
 		ch = _LoadCursor(0, uintptr(idc))
 		c.cursors[sh] = ch
 	}
+	c.mu.Unlock()
 	return ch
 }
 
@@ -57,17 +61,23 @@ func (c *cursorImpl) setImpl(sh cursor.Shapes) {
 }
 
 func (c *cursorImpl) Set(sh cursor.Shapes) {
+	c.mu.Lock()
 	c.Cur = sh
+	c.mu.Unlock()
 	c.setImpl(sh)
 }
 
 func (c *cursorImpl) Push(sh cursor.Shapes) {
+	c.mu.Lock()
 	c.PushStack(sh)
+	c.mu.Unlock()
 	c.setImpl(sh)
 }
 
 func (c *cursorImpl) Pop() {
+	c.mu.Lock()
 	sh, _ := c.PopStack()
+	c.mu.Ulock()
 	c.setImpl(sh)
 }
 
@@ -75,7 +85,9 @@ func (c *cursorImpl) Hide() {
 	if c.Vis == false {
 		return
 	}
+	c.mu.Lock()
 	c.Vis = false
+	c.mu.Unlock()
 	_ShowCursor(false)
 }
 
@@ -83,32 +95,44 @@ func (c *cursorImpl) Show() {
 	if c.Vis {
 		return
 	}
+	c.mu.Lock()
 	c.Vis = true
+	c.mu.Unlock()
 	_ShowCursor(true)
 }
 
 func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
+	c.mu.Lock()
 	if c.Cur == sh {
+		c.mu.Unlock()
 		return false
 	}
+	c.mu.Unlock()
 	c.Push(sh)
 	return true
 }
 
 func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
+	c.mu.Lock()
 	if c.Cur == sh {
+		c.mu.Unlock()
 		c.Pop()
 		return true
 	}
+	c.mu.Unlock()
 	return false
 }
 
 // silly windows resets the cursor every time the mouse moves.. convince it to
 // not do so
 func resetCursor(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
+	c.mu.Lock()
 	if theCursor.Cur != cursor.Arrow {
-		theCursor.setImpl(theCursor.Cur)
+		cc := theCursor.Cur
+		c.mu.Unlock()
+		theCursor.setImpl(cc)
 		return 1
 	}
+	c.mu.Unlock()
 	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }

@@ -68,6 +68,6 @@ func (pf *FillStyle) SetColorSpec(cl *ColorSpec) {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color = *cl
+		pf.Color.CopyFrom(cl)
 	}
 }

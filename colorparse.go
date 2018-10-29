@@ -43,13 +43,11 @@ func (cs *ColorSpec) SetString(clrstr string) bool {
 	if strings.HasPrefix(clrstr, "url(") {
 		val := clrstr[4:]
 		val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
-		if CurStyleNode2D != nil {
-			ne := CurStyleNode2D.FindNamedElement(val)
-			if ne != nil {
-				if grad, ok := ne.(*Gradient); ok {
-					*cs = grad.Grad
-					return true
-				}
+		ne := CurStyleNode2DNamedEl(val)
+		if ne != nil {
+			if grad, ok := ne.(*Gradient); ok {
+				*cs = grad.Grad
+				return true
 			}
 		}
 		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", val)

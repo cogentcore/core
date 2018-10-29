@@ -163,6 +163,9 @@ func (bb *ButtonBase) SetAsButton() {
 
 // SetText sets the text and updates the button
 func (bb *ButtonBase) SetText(txt string) {
+	if bb.This() == nil {
+		return
+	}
 	updt := bb.UpdateStart()
 	if bb.Sty.Font.Size.Val == 0 { // not yet styled
 		bb.StyleButton()
