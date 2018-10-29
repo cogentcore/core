@@ -33,36 +33,53 @@ var inputidx int = 0
 
 // InitSpell tries to load the saved fuzzy.spell model.
 // If unsuccessful tries to create a new model from a text file used as input
-func InitSpell() {
+func InitSpell() error {
 	if spell.Initialized() {
-		return
+		return nil
 	}
+
+	spell.Init()
+	err := LoadModel()
+	if err != nil {
+		err = ModelFromCorpus()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func LoadModel() error {
 	pdir := oswin.TheApp.AppPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
 	b, err := ioutil.ReadFile(openpath)
 	if err == nil {
-		loaded := spell.LoadModel(b)
-		if !loaded {
-			// try creating a new model from corpus
-			bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
-			if err != nil {
-				log.Printf("Error getting path to corpus directory: %v.\n", err)
-			}
-			bigdatafile := filepath.Join(bigdatapath, "big.txt")
-			file, err := os.Open(bigdatafile)
-			if err == nil {
-				err := spell.ModelFromCorpus(*file)
-				if err != nil {
-					log.Printf("Failed building model from corpus file: %v. This file is used to create the spelling model.\n", err)
-				}
-			} else {
-				log.Printf("Could not open corpus file: %v. This file is used to create the spelling model.\n", err)
-
-			}
-		}
-	} else {
-		log.Printf("Could not open spelling model file: %v. Creating new default spell model.\n", err)
+		err = spell.LoadModel(b)
 	}
+	return err
+}
+
+func ModelFromCorpus() error {
+	// oh well, try creating a new model from corpus
+	bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
+	if err != nil {
+		log.Printf("Error getting path to corpus directory: %v.\n", err)
+		return err
+	}
+
+	bigdatafile := filepath.Join(bigdatapath, "big.txt")
+	file, err := os.Open(bigdatafile)
+	if err != nil {
+		log.Printf("Could not open corpus file: %v. This file is used to create the spelling model.\n", err)
+		return err
+	}
+
+	err = spell.ModelFromCorpus(*file)
+	if err != nil {
+		log.Printf("Failed building model from corpus file: %v.\n", err)
+		return err
+	}
+	return nil
 }
 
 // SaveSpell saves the spelling model which includes the data and parameters

@@ -31,17 +31,20 @@ func Initialized() bool {
 	return inited
 }
 
-// Load Model loads the save model stored in json format
-func LoadModel(b []byte) bool {
+func Init() {
 	model = fuzzy.NewModel()
+	model.SetThreshold(4)
+}
+
+// Load Model loads the save model stored in json format
+func LoadModel(b []byte) error {
 	err := json.Unmarshal(b, model)
 	if err == nil {
-		model.SetThreshold(1)
 		inited = true
-		return true
+		return err
 	} else {
 		log.Printf("Failed loading model from saved json: %v.\n", err)
-		return false
+		return err
 	}
 }
 
@@ -69,9 +72,7 @@ func ModelFromCorpus(file os.File) error {
 		log.Println(os.Stderr, "reading input: ", err)
 		return err
 	}
-
 	model.Train(out)
-	model.SetThreshold(1)
 	inited = true
 	return err
 }
@@ -119,13 +120,10 @@ func SaveModel(path string) error {
 	return nil
 }
 
-//func Complete(s string) []string {
-//	if model == nil {
-//		Init()
-//	}
-//	results, err := model.Autocomplete(s)
-//	if err == nil {
-//		fmt.Println(results)
-//	}
-//	return results
-//}
+func Complete(s string) (result []string, err error) {
+	if model == nil {
+		return result, errors.New("Model is nil")
+	}
+	result, err = model.Autocomplete(s)
+	return result, err
+}
