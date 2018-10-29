@@ -77,7 +77,7 @@ func (c *cursorImpl) Push(sh cursor.Shapes) {
 func (c *cursorImpl) Pop() {
 	c.mu.Lock()
 	sh, _ := c.PopStack()
-	c.mu.Ulock()
+	c.mu.Unlock()
 	c.setImpl(sh)
 }
 
@@ -126,13 +126,13 @@ func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
 // silly windows resets the cursor every time the mouse moves.. convince it to
 // not do so
 func resetCursor(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult uintptr) {
-	c.mu.Lock()
+	theCursor.mu.Lock()
 	if theCursor.Cur != cursor.Arrow {
 		cc := theCursor.Cur
-		c.mu.Unlock()
+		theCursor.mu.Unlock()
 		theCursor.setImpl(cc)
 		return 1
 	}
-	c.mu.Unlock()
+	theCursor.mu.Unlock()
 	return _DefWindowProc(hwnd, uMsg, wParam, lParam)
 }
