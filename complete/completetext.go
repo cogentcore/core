@@ -1,18 +1,15 @@
 package complete
 
 import (
-	"fmt"
-	"go/token"
+	"github.com/goki/gi/spell"
 	"strings"
 	"unicode"
 )
 
 // Complete Tex is the function for completing .tex files
-func CompleteText(bytes []byte, pos token.Position) []Completion {
-	var results []Completion
-
-	fmt.Println("Completion for text files not implemented")
-	return results
+func CompleteText(s string) (result []string, err error) {
+	result, err = spell.Complete(s)
+	return result, err
 }
 
 // EditTex replaces the completion seed and any text up to the next whitespace or other go delimiter
