@@ -513,7 +513,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 	// })
 
 	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		if len(gi.MainWindows) <= 1 {
+		if gi.MainWindows.Len() <= 1 {
 			go oswin.TheApp.Quit() // once main window is closed, quit
 		}
 	})

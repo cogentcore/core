@@ -75,11 +75,11 @@ func ValidViewport(avp *Viewport2D) *Viewport2D {
 	if avp != nil {
 		return avp
 	}
-	if len(AllWindows) == 0 {
-		log.Printf("No gi.AllWindows to get viewport from!\n")
-		return nil
+	if fwin := AllWindows.Win(0); fwin != nil {
+		return fwin.Viewport
 	}
-	return AllWindows[0].Viewport
+	log.Printf("gi.ValidViewport: No gi.AllWindows to get viewport from!\n")
+	return nil
 }
 
 // Open this dialog, in given location (0 = middle of window), finding window
