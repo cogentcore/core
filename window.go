@@ -493,8 +493,8 @@ func (w *Window) Resized(sz image.Point) {
 		}
 		return
 	}
-	w.InactivateAllSprites()
 	w.FocusInactivate()
+	w.InactivateAllSprites()
 	w.UpMu.Lock()
 	if w.IsClosed() {
 		if WinEventTrace {

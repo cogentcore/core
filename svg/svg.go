@@ -55,7 +55,7 @@ func (svg *SVG) SetNormXForm() {
 		// todo: deal with all the other options!
 		vpsX := float32(svg.Geom.Size.X) / svg.ViewBox.Size.X
 		vpsY := float32(svg.Geom.Size.Y) / svg.ViewBox.Size.Y
-		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY).Translate(svg.ViewBox.Min.X, svg.ViewBox.Min.Y)
+		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY).Translate(-svg.ViewBox.Min.X, -svg.ViewBox.Min.Y)
 	}
 }
 
