@@ -131,12 +131,12 @@ func (pc *Paint) InheritFields(par *Paint) {
 // SetStyleProps sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProps(par *Paint, props ki.Props) {
+func (pc *Paint) SetStyleProps(par *Paint, props ki.Props, vp *Viewport2D) {
 	if !pc.StyleSet && par != nil { // first time
 		// PaintFields.Inherit(pc, par) // very slow..
 		pc.InheritFields(par)
 	}
-	PaintFields.Style(pc, par, props)
+	PaintFields.Style(pc, par, props, vp)
 	pc.StrokeStyle.SetStylePost(props)
 	pc.FillStyle.SetStylePost(props)
 	pc.FontStyle.SetStylePost(props)

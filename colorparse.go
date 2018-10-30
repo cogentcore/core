@@ -38,16 +38,18 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 // SetString sets the color spec from a standard CSS-formatted string -- see
 // https://www.w3schools.com/css/css3_gradients.asp -- see UnmarshalXML for
 // XML-based version
-func (cs *ColorSpec) SetString(clrstr string) bool {
+func (cs *ColorSpec) SetString(clrstr string, vp *Viewport2D) bool {
 	clrstr = strings.TrimSpace(clrstr)
 	if strings.HasPrefix(clrstr, "url(") {
 		val := clrstr[4:]
 		val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
-		ne := CurStyleNode2DNamedEl(val)
-		if ne != nil {
-			if grad, ok := ne.(*Gradient); ok {
-				*cs = grad.Grad
-				return true
+		if vp != nil {
+			ne := vp.CurStyleNodeNamedEl(val)
+			if ne != nil {
+				if grad, ok := ne.(*Gradient); ok {
+					*cs = grad.Grad
+					return true
+				}
 			}
 		}
 		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", val)

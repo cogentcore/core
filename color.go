@@ -108,7 +108,7 @@ func (cs *ColorSpec) SetShadowGradient(cl color.Color, dir string) {
 	if dir == "" {
 		dir = "to down"
 	}
-	cs.SetString(fmt.Sprintf("linear-gradient(%v, lighter-0, transparent)", dir))
+	cs.SetString(fmt.Sprintf("linear-gradient(%v, lighter-0, transparent)", dir), nil)
 	cs.Source = LinearGradient
 }
 
@@ -314,10 +314,10 @@ func cvtPctStringErr(gotpct bool, pctstr string) {
 // * saturate-PCT or pastel-PCT: manipulates the saturation level in HSL by PCT
 // * clearer-PCT or opaquer-PCT: manipulates the alpha level by PCT
 // * blend-PCT-color: blends given percent of given color name relative to base (or current)
-//
 func (c *Color) SetString(str string, base color.Color) error {
 	if len(str) == 0 { // consider it null
 		c.SetToNil()
+		return nil
 	}
 	low := strings.ToLower(str)
 	switch {
@@ -427,7 +427,7 @@ func (c *Color) SetString(str string, base color.Color) error {
 				}
 				clridx := strings.Index(pctstr, "-")
 				if clridx < 0 {
-					err := fmt.Errorf("gi.Color.SetString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v\n", low, pctstr)
+					err := fmt.Errorf("gi.Color.SetString -- blend color spec not found -- format is: blend-PCT-color, got: %v -- PCT-color is: %v", low, pctstr)
 					return err
 				}
 				pctstr = low[hidx+1 : clridx]
@@ -446,10 +446,6 @@ func (c *Color) SetString(str string, base color.Color) error {
 		case "transparent":
 			c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
 			return nil
-		case "currentcolor":
-			*c = CurrentColor() // current style.Color value
-			// fmt.Printf("cur col: %v\n", *c)
-			return nil
 		default:
 			nc, ok := colornames.Map[low]
 			if !ok {
@@ -462,6 +458,28 @@ func (c *Color) SetString(str string, base color.Color) error {
 		}
 	}
 	return nil
+}
+
+// SetStringStyle is the version of SetString used for styling widgets
+// it includes the Viewport is needed for contextual names such as "currentcolor"
+func (c *Color) SetStringStyle(str string, base color.Color, vp *Viewport2D) error {
+	if len(str) == 0 { // consider it null
+		c.SetToNil()
+		return nil
+	}
+	low := strings.ToLower(str)
+	switch low {
+	case "currentcolor":
+		if vp != nil {
+			*c = vp.CurrentColor() // current style.Color value
+			return nil
+		} else {
+			err := fmt.Errorf("gi.Color.SetStringStyle -- attempt to use currentcolor with nil viewport")
+			return err
+		}
+	default:
+		return c.SetString(str, base)
+	}
 }
 
 // ColorFromString returns a new color set from given string and optional base

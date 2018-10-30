@@ -716,7 +716,7 @@ func TextFieldBlink() {
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Viewport == nil || !tf.HasFocus() || !tf.IsFocusActive() || tf.VpBBox == image.ZR {
+		if tf.Viewport == nil || !tf.HasFocus() || !tf.IsFocusActive() || tf.IsInvisible() {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
@@ -1246,8 +1246,8 @@ func (tf *TextField) StyleTextField() {
 	pst := &(tf.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyFrom(&tf.Sty)
-		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]))
-		tf.StateStyles[i].StyleCSS(tf.This().(Node2D), tf.CSSAgg, TextFieldSelectors[i])
+		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]), tf.Viewport)
+		tf.StateStyles[i].StyleCSS(tf.This().(Node2D), tf.CSSAgg, TextFieldSelectors[i], tf.Viewport)
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), true, true) // get type defaults

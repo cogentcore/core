@@ -38,6 +38,9 @@ func Load(path string) (err error) {
 
 // Save saves the spelling model which includes the data and parameters
 func Save(filename string) error {
+	if model == nil {
+		return nil
+	}
 	return model.Save(filename)
 }
 

@@ -1754,7 +1754,7 @@ func (tv *TreeView) StyleTreeView() {
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
-		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]))
+		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]), tv.Viewport)
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Indent.SetFmInheritProp("indent", tv.This(), false, true) // no inherit, yes type defaults

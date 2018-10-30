@@ -2941,6 +2941,23 @@ func (wl *WindowList) FindName(name string) (*Window, bool) {
 	return nil, false
 }
 
+// Len() returns the length of the list, concurrent-safe
+func (wl *WindowList) Len() int {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+	return len(*wl)
+}
+
+// Win gets window at given index, concurrent-safe
+func (wl *WindowList) Win(idx int) *Window {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+	if idx >= len(*wl) || idx < 0 {
+		return nil
+	}
+	return (*wl)[idx]
+}
+
 // AllWindows is the list of all windows that have been created (dialogs, main
 // windows, etc).
 var AllWindows WindowList

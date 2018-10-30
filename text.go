@@ -1222,7 +1222,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 						if cssAgg != nil {
 							clnm := "." + attr.Value
 							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
-								fs.SetStyleProps(nil, aggp)
+								fs.SetStyleProps(nil, aggp, nil)
 								fs.OpenFont(ctxt)
 							}
 						}
@@ -1230,11 +1230,11 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 						sprop[attr.Name.Local] = attr.Value
 					}
 				}
-				fs.SetStyleProps(nil, sprop)
+				fs.SetStyleProps(nil, sprop, nil)
 				fs.OpenFont(ctxt)
 			}
 			if cssAgg != nil {
-				fs.StyleCSS(nm, cssAgg, ctxt)
+				fs.StyleCSS(nm, cssAgg, ctxt, nil)
 			}
 			fstack = append(fstack, &fs)
 		case xml.EndElement:
@@ -1439,7 +1439,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 							if cssAgg != nil {
 								clnm := "." + vl
 								if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
-									fs.SetStyleProps(nil, aggp)
+									fs.SetStyleProps(nil, aggp, nil)
 									fs.OpenFont(ctxt)
 								}
 							}
@@ -1447,11 +1447,11 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 							sprop[nm] = vl
 						}
 					}
-					fs.SetStyleProps(nil, sprop)
+					fs.SetStyleProps(nil, sprop, nil)
 					fs.OpenFont(ctxt)
 				}
 				if cssAgg != nil {
-					fs.StyleCSS(stag, cssAgg, ctxt)
+					fs.StyleCSS(stag, cssAgg, ctxt, nil)
 				}
 				fstack = append(fstack, &fs)
 				curTag = stag

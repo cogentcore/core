@@ -457,7 +457,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if inLayout && tv.HasFlag(int(TextViewInReLayout)) {
 		return false
 	}
-	if tv.Buf == nil || tv.Buf.NLines == 0 {
+	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		tv.NLines = 0
 		return tv.ResizeIfNeeded(image.ZP)
 	}
@@ -470,7 +470,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	tv.HiStyle()
 	// fmt.Printf("layout all: %v\n", tv.Nm)
 
-	tv.NLines = tv.Buf.NLines
+	tv.NLines = tv.Buf.NumLines()
 	nln := tv.NLines
 	if cap(tv.Renders) >= nln {
 		tv.Renders = tv.Renders[:nln]
@@ -573,7 +573,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 // overall number of effective lines (e.g., from word-wrap) is now different
 // than before, and thus a full re-render is needed.
 func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
-	if tv.Buf == nil || tv.Buf.NLines == 0 {
+	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return false
 	}
 	sty := &tv.Sty
@@ -774,12 +774,12 @@ func (tv *TextView) CursorForward(steps int) {
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
 		tv.CursorPos.Ch++
-		if tv.CursorPos.Ch > len(tv.Buf.Lines[tv.CursorPos.Ln]) {
+		if tv.CursorPos.Ch > tv.Buf.LineLen(tv.CursorPos.Ln) {
 			if tv.CursorPos.Ln < tv.NLines-1 {
 				tv.CursorPos.Ch = 0
 				tv.CursorPos.Ln++
 			} else {
-				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+				tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 			}
 		}
 	}
@@ -795,7 +795,7 @@ func (tv *TextView) CursorForwardWord(steps int) {
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
-		txt := tv.Buf.Lines[tv.CursorPos.Ln]
+		txt := tv.Buf.Line(tv.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && tv.CursorPos.Ch < sz {
 			ch := tv.CursorPos.Ch
@@ -811,7 +811,7 @@ func (tv *TextView) CursorForwardWord(steps int) {
 				tv.CursorPos.Ch = 0
 				tv.CursorPos.Ln++
 			} else {
-				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+				tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 			}
 		}
 	}
@@ -854,7 +854,7 @@ func (tv *TextView) CursorDown(steps int) {
 				pos.Ln = tv.NLines - 1
 				break
 			}
-			mxlen := ints.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
+			mxlen := ints.MinInt(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
 			if tv.CursorCol < mxlen {
 				pos.Ch = tv.CursorCol
 			} else {
@@ -879,7 +879,7 @@ func (tv *TextView) CursorPageDown(steps int) {
 		if tv.CursorPos.Ln >= tv.NLines {
 			tv.CursorPos.Ln = tv.NLines - 1
 		}
-		tv.CursorPos.Ch = ints.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
+		tv.CursorPos.Ch = ints.MinInt(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
 		tv.ScrollCursorToTop()
 		tv.RenderCursor(true)
 	}
@@ -898,7 +898,7 @@ func (tv *TextView) CursorBackward(steps int) {
 		if tv.CursorPos.Ch < 0 {
 			if tv.CursorPos.Ln > 0 {
 				tv.CursorPos.Ln--
-				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+				tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 			} else {
 				tv.CursorPos.Ch = 0
 			}
@@ -916,7 +916,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
-		txt := tv.Buf.Lines[tv.CursorPos.Ln]
+		txt := tv.Buf.Line(tv.CursorPos.Ln)
 		sz := len(txt)
 		if sz > 0 && tv.CursorPos.Ch > 0 {
 			ch := ints.MinInt(tv.CursorPos.Ch, sz-1)
@@ -930,7 +930,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 		} else {
 			if tv.CursorPos.Ln > 0 {
 				tv.CursorPos.Ln--
-				tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+				tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 			} else {
 				tv.CursorPos.Ch = 0
 			}
@@ -972,7 +972,7 @@ func (tv *TextView) CursorUp(steps int) {
 				nwc, _ := tv.Renders[pos.Ln].SpanPosToRuneIdx(si, ri)
 				pos.Ch = nwc
 			} else {
-				mxlen := ints.MinInt(len(tv.Buf.Lines[pos.Ln]), tv.CursorCol)
+				mxlen := ints.MinInt(tv.Buf.LineLen(pos.Ln), tv.CursorCol)
 				if tv.CursorCol < mxlen {
 					pos.Ch = tv.CursorCol
 				} else {
@@ -998,7 +998,7 @@ func (tv *TextView) CursorPageUp(steps int) {
 		if tv.CursorPos.Ln <= 0 {
 			tv.CursorPos.Ln = 0
 		}
-		tv.CursorPos.Ch = ints.MinInt(len(tv.Buf.Lines[tv.CursorPos.Ln]), tv.CursorCol)
+		tv.CursorPos.Ch = ints.MinInt(tv.Buf.LineLen(tv.CursorPos.Ln), tv.CursorCol)
 		tv.ScrollCursorToBottom()
 		tv.RenderCursor(true)
 	}
@@ -1094,7 +1094,7 @@ func (tv *TextView) CursorEndLine() {
 		gotwrap = true
 	}
 	if !gotwrap {
-		tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+		tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 		tv.CursorCol = tv.CursorPos.Ch
 	}
 	tv.SetCursor(tv.CursorPos)
@@ -1111,7 +1111,7 @@ func (tv *TextView) CursorEndDoc() {
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = ints.MaxInt(tv.NLines-1, 0)
-	tv.CursorPos.Ch = len(tv.Buf.Lines[tv.CursorPos.Ln])
+	tv.CursorPos.Ch = tv.Buf.LineLen(tv.CursorPos.Ln)
 	tv.CursorCol = tv.CursorPos.Ch
 	tv.SetCursor(tv.CursorPos)
 	tv.ScrollCursorToBottom()
@@ -1208,7 +1208,7 @@ func (tv *TextView) CursorKill() {
 		}
 		atEnd = (ri == llen)
 	} else {
-		llen := len(tv.Buf.Lines[pos.Ln])
+		llen := tv.Buf.LineLen(pos.Ln)
 		atEnd = (tv.CursorPos.Ch == llen)
 	}
 	if atEnd {
@@ -1277,7 +1277,7 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 		if len(tv.Renders[ln].Links) == 0 {
 			pos.Ln = ln - 1
 			if ln-1 >= 0 {
-				pos.Ch = len(tv.Buf.Lines[ln-1]) - 2
+				pos.Ch = tv.Buf.LineLen(ln-1) - 2
 			}
 			continue
 		}
@@ -1296,7 +1296,7 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 		}
 		pos.Ln = ln - 1
 		if ln-1 >= 0 {
-			pos.Ch = len(tv.Buf.Lines[ln-1]) - 2
+			pos.Ch = tv.Buf.LineLen(ln-1) - 2
 		}
 	}
 	return pos, TextRegion{}, false
@@ -1478,6 +1478,7 @@ func (tv *TextView) ISearchMatches() bool {
 // it, etc
 func (tv *TextView) ISearchNextMatch(cpos TextPos) bool {
 	if len(tv.ISearch.Matches) == 0 {
+		tv.ISearchSig()
 		return false
 	}
 	tv.ISearch.Pos, _ = tv.MatchFromPos(tv.ISearch.Matches, cpos)
@@ -1489,6 +1490,7 @@ func (tv *TextView) ISearchNextMatch(cpos TextPos) bool {
 func (tv *TextView) ISearchSelectMatch(midx int) {
 	nm := len(tv.ISearch.Matches)
 	if midx >= nm {
+		tv.ISearchSig()
 		return
 	}
 	m := tv.ISearch.Matches[midx]
@@ -1949,7 +1951,7 @@ func (tv *TextView) SelectWord() {
 
 	tv.SelectReg.Start = tv.CursorPos
 	tv.SelectReg.End = tv.CursorPos
-	txt := tv.Buf.Lines[tv.CursorPos.Ln]
+	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return
@@ -2229,7 +2231,7 @@ func (tv *TextView) CompleteText(s string) {
 	tv.Complete.Cancel(tv.Viewport)
 
 	st := TextPos{tv.CursorPos.Ln, 0}
-	en := TextPos{tv.CursorPos.Ln, len(tv.Buf.Lines[tv.CursorPos.Ln])}
+	en := TextPos{tv.CursorPos.Ln, tv.Buf.LineLen(tv.CursorPos.Ln)}
 	var tbes string
 	tbe := tv.Buf.Region(st, en)
 	if tbe != nil {
@@ -2543,7 +2545,7 @@ func TextViewBlink() {
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || tv.VpBBox == image.ZR {
+		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || tv.IsInvisible() {
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
 			continue
@@ -3092,7 +3094,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 		}
 	}
 	// fmt.Printf("cln: %v  pt: %v\n", cln, pt)
-	lnsz := len(tv.Buf.Lines[cln])
+	lnsz := tv.Buf.LineLen(cln)
 	if lnsz == 0 {
 		return TextPos{Ln: cln, Ch: 0}
 	}
@@ -3251,7 +3253,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	if kt.IsProcessed() {
 		return
 	}
-	if tv.Buf == nil || tv.Buf.NLines == 0 {
+	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return
 	}
 
@@ -3608,7 +3610,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	}
 	tv.SetFlag(int(TextViewFocusActive))
 	me.SetProcessed()
-	if tv.Buf == nil || tv.Buf.NLines == 0 {
+	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return
 	}
 	pt := tv.PointToRelPos(me.Pos())
@@ -3626,7 +3628,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			me.SetProcessed()
 			if tv.HasSelection() {
 				if tv.SelectReg.Start.Ln == tv.SelectReg.End.Ln {
-					sz := len(tv.Buf.Lines[tv.SelectReg.Start.Ln])
+					sz := tv.Buf.LineLen(tv.SelectReg.Start.Ln)
 					if tv.SelectReg.Start.Ch == 0 && tv.SelectReg.End.Ch == sz {
 						tv.SelectReset()
 					} else { // assume word, go line
@@ -3716,8 +3718,8 @@ func (tv *TextView) StyleTextView() {
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
-		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]))
-		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i])
+		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]), tv.Viewport)
+		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i], tv.Viewport)
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), true, true) // inherit and get type defaults

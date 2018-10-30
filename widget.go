@@ -113,7 +113,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 			*dsty = *baseStyle
 		}
 		kit.TypesMu.Lock() // write lock
-		dsty.SetStyleProps(parSty, styprops)
+		dsty.SetStyleProps(parSty, styprops, wb.Viewport)
 		dsty.IsSet = false // keep as non-set
 		tprops[stKey] = dsty
 		tprops[prKey] = styprops
@@ -128,8 +128,9 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 // base-level defaults -- for Widget-style nodes
 func (wb *WidgetBase) Style2DWidget() {
 	gii, _ := wb.This().(Node2D)
-	SetCurStyleNode2D(gii)
-	defer SetCurStyleNode2D(nil)
+	wb.Viewport.SetCurStyleNode(gii)
+	defer wb.Viewport.SetCurStyleNode(nil)
+
 	if !RebuildDefaultStyles && wb.DefStyle != nil {
 		wb.Sty.CopyFrom(wb.DefStyle)
 	} else {
@@ -141,7 +142,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	}
 	styprops := *wb.Properties()
 	parSty := wb.ParentStyle()
-	wb.Sty.SetStyleProps(parSty, styprops)
+	wb.Sty.SetStyleProps(parSty, styprops, wb.Viewport)
 
 	// look for class-specific style sheets among defaults -- have to do these
 	// dynamically now -- cannot compile into default which is type-general
@@ -149,7 +150,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	kit.TypesMu.RLock()
 	clsty := "." + wb.Class
 	if sp, ok := ki.SubProps(tprops, clsty); ok {
-		wb.Sty.SetStyleProps(parSty, sp)
+		wb.Sty.SetStyleProps(parSty, sp, wb.Viewport)
 	}
 	kit.TypesMu.RUnlock()
 
@@ -160,13 +161,13 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.CSSAgg = nil // restart
 	}
 	AggCSS(&wb.CSSAgg, wb.CSS)
-	wb.Sty.StyleCSS(gii, wb.CSSAgg, "")
+	wb.Sty.StyleCSS(gii, wb.CSSAgg, "", wb.Viewport)
 
 	wb.Sty.SetUnitContext(wb.Viewport, Vec2DZero) // todo: test for use of el-relative
 	if wb.Sty.Inactive {                          // inactive can only set, not clear
 		wb.SetInactive()
 	}
-	wb.Sty.Use() // activates currentColor etc
+	wb.Sty.Use(wb.Viewport) // activates currentColor etc
 }
 
 // StylePart sets the style properties for a child in parts (or any other

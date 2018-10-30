@@ -57,6 +57,7 @@ type TextBuf struct {
 	Markup     [][]byte       `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
 	ByteOffs   []int          `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes int            `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
+	LinesMu    sync.RWMutex   `json:"-" xml:"-" desc:"mutex for updating lines"`
 	MarkupMu   sync.RWMutex   `json:"-" xml:"-" desc:"mutex for updating markup"`
 	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
@@ -150,6 +151,43 @@ func (tb *TextBuf) Text() []byte {
 	return tb.Txt
 }
 
+// NumLines is the concurrent-safe accessor to NLines
+func (tb *TextBuf) NumLines() int {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return tb.NLines
+}
+
+// Line is the concurrent-safe accessor to specific Line of Lines runes
+func (tb *TextBuf) Line(ln int) []rune {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	if ln >= tb.NLines || ln < 0 {
+		return nil
+	}
+	return tb.Lines[ln]
+}
+
+// LineLen is the concurrent-safe accessor to length of specific Line of Lines runes
+func (tb *TextBuf) LineLen(ln int) int {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	if ln >= tb.NLines || ln < 0 {
+		return 0
+	}
+	return len(tb.Lines[ln])
+}
+
+// BytesLine is the concurrent-safe accessor to specific Line of LineBytes
+func (tb *TextBuf) BytesLine(ln int) []byte {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	if ln >= tb.NLines || ln < 0 {
+		return nil
+	}
+	return tb.LineBytes[ln]
+}
+
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
 func (tb *TextBuf) SetHiStyle(style HiStyleName) {
 	tb.MarkupMu.Lock()
@@ -179,6 +217,7 @@ func (tb *TextBuf) Refresh() {
 func (tb *TextBuf) New(nlines int) {
 	tb.Defaults()
 	nlines = ints.MaxInt(nlines, 1)
+	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
 	tb.LineBytes = make([][]byte, nlines)
@@ -199,6 +238,7 @@ func (tb *TextBuf) New(nlines int) {
 
 	tb.NLines = nlines
 	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 	tb.Refresh()
 }
 
@@ -223,14 +263,14 @@ func (tb *TextBuf) Stat() error {
 
 // FileModCheck checks if the underlying file has been modified since last
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
-// that this is OK
-func (tb *TextBuf) FileModCheck() {
+// that this is OK.  returns true if file was modified
+func (tb *TextBuf) FileModCheck() bool {
 	if tb.HasFlag(int(TextBufFileModOk)) {
-		return
+		return false
 	}
 	info, err := os.Stat(string(tb.Filename))
 	if err != nil {
-		return
+		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.ViewportFromView()
@@ -247,7 +287,9 @@ func (tb *TextBuf) FileModCheck() {
 					tb.SetFlag(int(TextBufFileModOk))
 				}
 			})
+		return true
 	}
+	return false
 }
 
 // Open loads text from a file into the buffer
@@ -498,6 +540,9 @@ func (tb *TextBuf) AutoSaveCheck() bool {
 
 // EndPos returns the ending position at end of buffer
 func (tb *TextBuf) EndPos() TextPos {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+
 	if tb.NLines == 0 {
 		return TextPosZero
 	}
@@ -712,6 +757,9 @@ func (tb *TextBuf) LinesToBytes() {
 // e.g., for autosave or other "offline" uses of the text -- doesn't affect
 // byte offsets etc
 func (tb *TextBuf) LinesToBytesCopy() []byte {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+
 	txt := bytes.Join(tb.LineBytes, []byte("\n"))
 	txt = append(txt, '\n')
 	return txt
@@ -725,13 +773,16 @@ func (tb *TextBuf) BytesToLines() {
 		tb.New(1)
 		return
 	}
+	tb.LinesMu.Lock()
 	lns := bytes.Split(tb.Txt, []byte("\n"))
 	tb.NLines = len(lns)
 	if len(lns[tb.NLines-1]) == 0 { // lines have lf at end typically
 		tb.NLines--
 		lns = lns[:tb.NLines]
 	}
+	tb.LinesMu.Unlock()
 	tb.New(tb.NLines)
+	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
 		tb.ByteOffs[ln] = bo
@@ -742,6 +793,7 @@ func (tb *TextBuf) BytesToLines() {
 		bo += len(txt) + 1 // lf
 	}
 	tb.TotalBytes = bo
+	tb.LinesMu.Unlock()
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -755,6 +807,8 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 	if fsz == 0 {
 		return 0, nil
 	}
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
 	findeff := find
 	if ignoreCase {
 		findeff = bytes.ToLower(find)
@@ -917,6 +971,9 @@ func (te *TextBufEdit) ToBytes() []byte {
 
 // ValidPos returns a position that is in a valid range
 func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+
 	if tb.NLines == 0 {
 		return TextPosZero
 	}
@@ -944,12 +1001,14 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 		log.Printf("giv.TextBuf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tb.FileModCheck()
-	tb.Changed = true
+	tb.FileModCheck() // note: could bail if modified but not clear that is better?
 	tbe := tb.Region(st, ed)
+	tb.Changed = true
+	tb.LinesMu.Lock()
 	tbe.Delete = true
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
+		tb.LinesMu.Unlock()
 		tb.LinesEdited(tbe)
 	} else {
 		// first get chars on start and end
@@ -967,8 +1026,10 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
 		tb.NLines = len(tb.Lines)
+		tb.LinesMu.Unlock()
 		tb.LinesDeleted(tbe)
 	}
+
 	if signal {
 		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
 	}
@@ -992,6 +1053,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 	}
 	st = tb.ValidPos(st)
 	tb.FileModCheck()
+	tb.LinesMu.Lock()
 	tb.Changed = true
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
@@ -1005,6 +1067,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 		copy(nt[st.Ch:], rs)                 // copy into position
 		tb.Lines[st.Ln] = nt
 		ed.Ch += rsz
+		tb.LinesMu.Unlock()
 		tbe = tb.Region(st, ed)
 		tb.LinesEdited(tbe)
 	} else {
@@ -1034,6 +1097,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 		if eost != nil {
 			tb.Lines[ed.Ln] = append(tb.Lines[ed.Ln], eost...)
 		}
+		tb.LinesMu.Unlock()
 		tbe = tb.Region(st, ed)
 		tb.LinesInserted(tbe)
 	}
@@ -1061,6 +1125,8 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 		return nil
 	}
 	tbe := &TextBufEdit{Reg: TextRegion{Start: st, End: ed}}
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
 	if ed.Ln == st.Ln {
 		sz := ed.Ch - st.Ch
 		tbe.Text = make([][]rune, 1)
@@ -1122,6 +1188,7 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 
+	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
 	// LineBytes
@@ -1155,11 +1222,13 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 }
 
 // LinesDeleted deletes lines in Markup corresponding to lines
 // deleted in Lines text.  Locks and unlocks the Markup mutex.
 func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
+	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
 	stln := tbe.Reg.Start.Ln
@@ -1174,12 +1243,14 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.Markup[st] = tb.LineBytes[st]
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 	// probably don't need to do global markup here..
 }
 
 // LinesEdited re-marks-up lines in edit (typically only 1).  Locks and
 // unlocks the Markup mutex.
 func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
+	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
@@ -1189,6 +1260,7 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 	// probably don't need to do global markup here..
 }
 
@@ -1335,6 +1407,9 @@ func (tb *TextBuf) Redo() *TextBufEdit {
 // if line starts with tabs, then those are counted, else spaces --
 // combinations of tabs and spaces won't produce sensible results
 func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, spc bool) {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+
 	sz := len(tb.Lines[ln])
 	if sz == 0 {
 		return
@@ -1416,6 +1491,8 @@ func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 
 // PrevLineIndent returns previous line from given line that has indentation -- skips blank lines
 func (tb *TextBuf) PrevLineIndent(ln int, tabSz int) (n int, spc bool, txt string) {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
 	ln--
 	for ln >= 0 {
 		if len(tb.Lines[ln]) == 0 {
@@ -1441,7 +1518,9 @@ func (tb *TextBuf) PrevLineIndent(ln int, tabSz int) (n int, spc bool, txt strin
 // indent of the current line.
 func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
 	li, _, prvln := tb.PrevLineIndent(ln, tabSz)
+	tb.LinesMu.RLock()
 	curln := strings.TrimSpace(string(tb.Lines[ln]))
+	tb.LinesMu.RUnlock()
 	ind := false
 	und := false
 	for _, us := range unindents {
@@ -1498,7 +1577,8 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
 		}
 	}
 
-	var docomment = false
+	tb.LinesMu.RLock()
+	var doCom = false
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break
@@ -1507,18 +1587,23 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
 		s = strings.TrimSpace(s)
 		// if any line is uncommented - comment all
 		if !strings.HasPrefix(s, string(comment)) {
-			docomment = true
-		}
-	}
-
-	for ln := st; ln < ed; ln++ {
-		if ln >= tb.NLines {
+			doCom = true
 			break
 		}
-		if docomment {
+	}
+	tb.LinesMu.RUnlock()
+
+	for ln := st; ln < ed; ln++ {
+		if ln >= tb.NumLines() {
+			break
+		}
+
+		if doCom {
 			tb.InsertText(TextPos{Ln: ln, Ch: ch}, comment, true, true)
 		} else {
+			tb.LinesMu.RLock()
 			s := string(tb.LineBytes[ln])
+			tb.LinesMu.RUnlock()
 			idx := strings.Index(s, string(comment))
 			if idx > -1 {
 				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + 3}, true, true)
@@ -1541,6 +1626,10 @@ type TextDiffs []difflib.OpCode
 // the other buffer (b).  Each operation is either an 'r' (replace), 'd'
 // (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
 func (tb *TextBuf) DiffBufs(ob *TextBuf) TextDiffs {
+	tb.LinesMu.RLock()
+	ob.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	defer ob.LinesMu.RUnlock()
 	if tb.NLines == 0 || ob.NLines == 0 {
 		return nil
 	}
@@ -1562,6 +1651,10 @@ func (tb *TextBuf) DiffBufs(ob *TextBuf) TextDiffs {
 // returning a unified diff with given amount of context (default of 3 will be
 // used if -1)
 func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
+	tb.LinesMu.RLock()
+	ob.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	defer ob.LinesMu.RUnlock()
 	if tb.NLines == 0 || ob.NLines == 0 {
 		return nil
 	}
