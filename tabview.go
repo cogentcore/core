@@ -193,6 +193,16 @@ func (tv *TabView) TabByName(label string) (Node2D, int, bool) {
 	return widg, idx, true
 }
 
+// TabName returns tab name at given index
+func (tv *TabView) TabName(idx int) string {
+	tb := tv.Tabs()
+	tbut, ok := tb.Child(idx)
+	if !ok {
+		return ""
+	}
+	return tbut.Name()
+}
+
 // SelectTabName selects tab by name, returning it -- returns false if not
 // found
 func (tv *TabView) SelectTabByName(label string) (Node2D, int, bool) {
@@ -204,12 +214,13 @@ func (tv *TabView) SelectTabByName(label string) (Node2D, int, bool) {
 }
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
-// tab contents -- returns widget if destroy == false and bool success
-func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, bool) {
+// tab contents -- returns widget if destroy == false, tab name, and bool success
+func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) {
 	widg, _, ok := tv.TabAtIndex(idx)
 	if !ok {
-		return nil, false
+		return nil, "", false
 	}
+	tnm := tv.TabName(idx)
 	fr := tv.Frame()
 	sz := len(*fr.Children())
 	tb := tv.Tabs()
@@ -231,18 +242,19 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, bool) {
 	}
 	tv.UpdateEnd(updt)
 	if destroy {
-		return nil, true
+		return nil, tnm, true
 	} else {
-		return widg, true
+		return widg, tnm, true
 	}
 }
 
 // DeleteTabIndexAction deletes tab at given index using destroy flag, and
-// emits TabDeleted signal -- this is called by the delete button on the tab
+// emits TabDeleted signal with name of deleted tab
+// this is called by the delete button on the tab
 func (tv *TabView) DeleteTabIndexAction(idx int) {
-	_, ok := tv.DeleteTabIndex(idx, true)
+	_, tnm, ok := tv.DeleteTabIndex(idx, true)
 	if ok {
-		tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), idx)
+		tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), tnm)
 	}
 }
 
@@ -286,7 +298,7 @@ const (
 	// TabAdded indicates tab was added -- data is the tab index
 	TabAdded
 
-	// TabDeleted indicates tab was deleted -- data is the tab index
+	// TabDeleted indicates tab was deleted -- data is the tab name
 	TabDeleted
 
 	TabViewSignalsN

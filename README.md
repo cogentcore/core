@@ -96,11 +96,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* fix the style-props context -- need an overall prop on objects -- in type presumably.
-  completer needs to know about this too.  in mapview proximally.
-	+ have PropTag now in ki.  need to hook it into mapview from struct somehow.  look
-	into sliceview for how we access the ki parent of slice -- do that..
-
 * closing multiple windows creates data races, and hangs, in gide at least..
 
 * gui for spell options.
