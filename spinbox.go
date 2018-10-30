@@ -67,6 +67,7 @@ var SpinBoxProps = ki.Props{
 		"width":     units.NewValue(8, units.Ch),
 		"margin":    units.NewValue(2, units.Px),
 		"padding":   units.NewValue(2, units.Px),
+		"clear-act": false,
 	},
 }
 
@@ -190,6 +191,9 @@ func (sb *SpinBox) ConfigParts() {
 		// text-field
 		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
 		sb.SetFlagState(sb.IsInactive(), int(Inactive))
+		// todo: see TreeView for extra steps needed to generally support styling of parts..
+		// doing it manually for now..
+		tf.SetProp("clear-act", false)
 		sb.StylePart(Node2D(tf))
 		tf.Txt = fmt.Sprintf("%g", sb.Value)
 		if !sb.IsInactive() {

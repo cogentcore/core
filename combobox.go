@@ -153,7 +153,7 @@ func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm string
 
 // ConfigPartsSetText sets part style props, using given props if not set in
 // object props
-func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx int) {
+func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
 		tx := cb.Parts.KnownChild(txIdx).(*TextField)
 		tx.SetText(txt)
@@ -166,8 +166,26 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx int) {
 			if cb.MaxLength > 0 {
 				tx.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ch))
 			}
+			if indIdx > 0 {
+				ispc := cb.Parts.KnownChild(indIdx - 1).(Node2D)
+				ispc.SetProp("max-width", 0)
+			}
 		}
 	}
+}
+
+// ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
+// for editable combobox, where textfield then takes up the rest of the space
+func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *kit.TypeAndNameList, defOn bool) int {
+	needInd := (bb.HasMenu() || defOn) && bb.Indicator != "none"
+	if !needInd {
+		return -1
+	}
+	indIdx := -1
+	config.Add(KiT_Space, "ind-stretch")
+	indIdx = len(*config)
+	config.Add(KiT_Icon, "indicator")
+	return indIdx
 }
 
 func (cb *ComboBox) ConfigPartsIfNeeded() {
@@ -189,22 +207,23 @@ func (cb *ComboBox) ConfigParts() {
 		cb.Editable = eb.(bool)
 	}
 	config := kit.TypeAndNameList{}
-	var icIdx, lbIdx, txIdx int
+	var icIdx, lbIdx, txIdx, indIdx int
 	if cb.Editable {
 		lbIdx = -1
 		icIdx, txIdx = cb.ConfigPartsIconText(&config, string(cb.Icon))
 		cb.SetProp("no-focus", true)
+		indIdx = cb.ConfigPartsAddIndicatorSpace(&config, true) // use space instead of stretch
 	} else {
 		txIdx = -1
 		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, string(cb.Icon), cb.Text)
+		indIdx = cb.ConfigPartsAddIndicator(&config, true) // default on
 	}
-	indIdx := cb.ConfigPartsAddIndicator(&config, true)  // default on
 	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names
 	cb.ConfigPartsSetIconLabel(string(cb.Icon), cb.Text, icIdx, lbIdx)
-	if txIdx >= 0 {
-		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx)
-	}
 	cb.ConfigPartsIndicator(indIdx)
+	if txIdx >= 0 {
+		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx, indIdx)
+	}
 	if cb.MaxLength > 0 && lbIdx >= 0 {
 		lbl := cb.Parts.KnownChild(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ch))

@@ -107,8 +107,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * TextView:
 	+ on yank from history, push to clipboard
 	+ word wrapping is going long unnecessarily -- is target size correct??
-	+ isearch not saving to previous if no matches
-	+ query replace reverse-order of find / replace lists
 	+ cursor goes to hand for links in TextView
 	+ parens / brackets match highlighter..
 

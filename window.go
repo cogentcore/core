@@ -1963,7 +1963,7 @@ func (w *Window) AddShortcut(chord key.Chord, act *Action) {
 		w.Shortcuts = make(Shortcuts, 100)
 	}
 	sa, exists := w.Shortcuts[chord]
-	if exists && sa != act {
+	if exists && sa != act && sa.Text != act.Text {
 		log.Printf("gi.Window shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
 	}
 	w.Shortcuts[chord] = act

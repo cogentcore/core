@@ -39,10 +39,12 @@ type TextField struct {
 	PartsWidgetBase
 	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
 	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	ClearAct     bool                    `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
 	CursorWidth  units.Value             `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	EffSize      Vec2D                   `xml:"-" desc:"effective size, subtracting the close widget"`
 	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
 	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
 	CursorPos    int                     `xml:"-" desc:"current cursor position"`
@@ -72,16 +74,13 @@ var TextFieldProps = ki.Props{
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
-	"indicator":        "clear",
-	"#clear-stretch": ki.Props{
-		"width": units.NewValue(1, units.Ch),
-	},
+	"clear-act":        true,
 	"#clear": ki.Props{
 		"width":          units.NewValue(.5, units.Ex),
 		"height":         units.NewValue(.5, units.Ex),
 		"margin":         units.NewValue(0, units.Px),
 		"padding":        units.NewValue(0, units.Px),
-		"vertical-align": AlignBottom,
+		"vertical-align": AlignMiddle,
 	},
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -196,6 +195,17 @@ func (tf *TextField) Revert() {
 	tf.Edited = false
 	tf.StartPos = 0
 	tf.EndPos = tf.CharWidth
+	tf.SelectReset()
+}
+
+// Clear clears any existing text
+func (tf *TextField) Clear() {
+	updt := tf.UpdateStart()
+	defer tf.UpdateEnd(updt)
+	tf.Edited = true
+	tf.EditTxt = tf.EditTxt[:0]
+	tf.StartPos = 0
+	tf.EndPos = 0
 	tf.SelectReset()
 }
 
@@ -869,7 +879,7 @@ func (tf *TextField) AutoScroll() {
 		return
 	}
 	spc := st.BoxSpace()
-	maxw := tf.LayData.AllocSize.X - 2.0*spc
+	maxw := tf.EffSize.X - 2.0*spc
 	tf.CharWidth = int(maxw / st.UnContext.ToDotsFactor(units.Ch)) // rough guess in chars
 
 	// first rationalize all the values
@@ -1229,6 +1239,31 @@ func (tf *TextField) TextFieldEvents() {
 	tf.KeyChordEvent()
 }
 
+func (tf *TextField) ConfigParts() {
+	tf.Parts.Lay = LayoutHoriz
+	if !tf.ClearAct || tf.IsInactive() {
+		tf.Parts.DeleteChildren(true)
+		return
+	}
+	config := kit.TypeAndNameList{}
+	config.Add(KiT_Stretch, "clr-str")
+	config.Add(KiT_Action, "clear")
+	mods, updt := tf.Parts.ConfigChildren(config, false) // not unique names
+	if mods {
+		clr := tf.Parts.KnownChild(1).(*Action)
+		tf.StylePart(Node2D(clr))
+		clr.SetIcon("close")
+		clr.SetProp("no-focus", true)
+		clr.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			tff := recv.Embed(KiT_TextField).(*TextField)
+			if tff != nil {
+				tff.Clear()
+			}
+		})
+		tf.UpdateEnd(updt)
+	}
+}
+
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
@@ -1252,6 +1287,12 @@ func (tf *TextField) StyleTextField() {
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), true, true) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
+	pv, ok := tf.PropInherit("clear-act", true, true)
+	if ok {
+		bv, _ := kit.ToBool(pv)
+		tf.ClearAct = bv
+	}
+	tf.ConfigParts()
 	pr.End()
 }
 
@@ -1292,10 +1333,18 @@ func (tf *TextField) Size2D(iter int) {
 
 func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tf.Layout2DBase(parBBox, true, iter) // init style
+	tf.Layout2DParts(parBBox, iter)
 	for i := 0; i < int(TextFieldStatesN); i++ {
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
-	return tf.Layout2DChildren(iter)
+	redo := tf.Layout2DChildren(iter)
+	sz := tf.LayData.AllocSize
+	if tf.ClearAct && len(*tf.Parts.Children()) == 2 {
+		clr := tf.Parts.KnownChild(1).(*Action)
+		sz.X -= clr.LayData.AllocSize.X
+	}
+	tf.EffSize = sz
+	return redo
 }
 
 func (tf *TextField) Render2D() {
@@ -1350,6 +1399,7 @@ func (tf *TextField) Render2D() {
 				tf.StopCursor()
 			}
 		}
+		tf.Render2DParts()
 		tf.Render2DChildren()
 		tf.PopBounds()
 	} else {
@@ -1383,26 +1433,4 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}
-}
-
-func (tf *TextField) ConfigParts() {
-	tf.Parts.Lay = LayoutHoriz
-	config := kit.TypeAndNameList{}
-	config.Add(KiT_Action, "clear")
-	_, updt := tf.Parts.ConfigChildren(config, false) // not unique names
-	//if updt {
-	cls := tf.Parts.KnownChild(0).(*Action)
-	tf.StylePart(Node2D(cls))
-	icnm := string("close.svg")
-	cls.SetIcon(icnm)
-	cls.Indicator = "close.svg"
-	cls.SetProp("no-focus", true)
-	cls.ActionSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tff := recv.Embed(KiT_TextField).(*TextField)
-		if tff != nil {
-			fmt.Println("clear me")
-		}
-	})
-	tf.UpdateEnd(updt)
-	//}
 }
