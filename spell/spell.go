@@ -33,6 +33,9 @@ func Initialized() bool {
 // Load loads the saved model stored in json format
 func Load(path string) (err error) {
 	model, err = fuzzy.Load(path)
+	if err == nil {
+		inited = true
+	}
 	return err
 }
 
@@ -93,7 +96,7 @@ func CheckWord(w string) (suggests []string, known bool, err error) {
 	if len(suggests) > 0 && suggests[0] == w {
 		known = true
 	}
-	return suggests[1:], known, err
+	return suggests, known, err
 }
 
 // LearnWord adds a single word to the corpus
