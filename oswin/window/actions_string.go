@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-const _Actions_name = "CloseMinimizeResizeMoveFocusDeFocusPaintActionsN"
+const _Actions_name = "CloseMinimizeResizeMoveFocusDeFocusPaintShowActionsN"
 
-var _Actions_index = [...]uint8{0, 5, 13, 19, 23, 28, 35, 40, 48}
+var _Actions_index = [...]uint8{0, 5, 13, 19, 23, 28, 35, 40, 44, 52}
 
 func (i Actions) String() string {
 	if i < 0 || i >= Actions(len(_Actions_index)-1) {

@@ -145,7 +145,6 @@ type Window struct {
 	PopupFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
 	PopMu             sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating"`
 	TimerMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AferFunc's)"`
-	DoFullRender      bool                                    `json:"-" xml:"-" desc:"triggers a full re-render of the window within the event loop -- cleared once done"`
 	lastWinMenuUpdate time.Time
 }
 
@@ -192,23 +191,32 @@ const (
 	// WinFlagIsResizing is atomic flag indicating window is resizing
 	WinFlagIsResizing
 
-	// WinFlagOverlayVpCleared true if OverlayVp has no kids and has already been cleared -- no need to keep clearing.
+	// WinFlagOverlayVpCleared true if OverlayVp has no kids and has already been cleared
+	// no need to keep clearing.
 	WinFlagOverlayVpCleared
 
 	// WinFlagOverTexActive is the overlay texture active and should be uploaded to window?
 	WinFlagOverTexActive
 
-	// WinFlagGotPaint have we received our first paint event yet?  ignore other window events before this point
+	// WinFlagGotPaint have we received our first paint event yet?
+	// ignore other window events before this point
 	WinFlagGotPaint
 
 	// WinFlagGotFocus indicates that have we received OSWin focus
 	WinFlagGotFocus
+
+	// WinFlagSentShow have we sent the show event yet?  Only ever sent ONCE
+	WinFlagSentShow
 
 	// WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end
 	WinFlagGoLoop
 
 	// WinFlagStopEventLoop is set when event loop stop is requested
 	WinFlagStopEventLoop
+
+	// WinFlagDoFullRender is set at event loop startup to trigger a full render once the window
+	// is properly shown
+	WinFlagDoFullRender
 )
 
 // HasGeomPrefs returns true if geometry prefs were set already
@@ -629,7 +637,7 @@ var WinWait sync.WaitGroup
 // window is closed -- see GoStartEventLoop for a version that starts in a
 // separate goroutine and returns immediately.
 func (w *Window) StartEventLoop() {
-	w.DoFullRender = true
+	w.SetFlag(int(WinFlagDoFullRender))
 	w.EventLoop()
 }
 
@@ -638,8 +646,7 @@ func (w *Window) StartEventLoop() {
 // thread can wait on that for all windows to close.
 func (w *Window) GoStartEventLoop() {
 	WinWait.Add(1)
-	w.DoFullRender = true
-	w.SetFlag(int(WinFlagGoLoop))
+	w.SetFlag(int(WinFlagDoFullRender), int(WinFlagGoLoop))
 	go w.EventLoop()
 }
 
@@ -701,6 +708,18 @@ func (w *Window) SendCustomEvent(data interface{}) {
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Rendering
+
+// SendShowEvent sends the WindowShowEvent to anyone listening -- only sent once..
+func (w *Window) SendShowEvent() {
+	if w.HasFlag(int(WinFlagSentShow)) {
+		return
+	}
+	w.SetFlag(int(WinFlagSentShow))
+	se := window.ShowEvent{}
+	se.Action = window.Show
+	se.Init()
+	w.SendEventSignal(&se, true) // popup = true by default
+}
 
 // FullReRender performs a full re-render of the window -- each node renders
 // into its viewport, aggregating into the main window viewport, which will
@@ -1237,22 +1256,10 @@ mainloop:
 					} else {
 						we.SetProcessed()
 						w.Resized(w.OSWin.Size())
-						// w.DoFullRender = true
 						lastSkipped = false
 						skippedResize = nil
 						continue
 					}
-					//				case oswin.KeyChordEvent:
-					//					ke := evi.(*key.ChordEvent)
-					//					ks := ke.Chord()
-					//					if ks == lastKeyChord && lagMs > EventSkipLagMSec {
-					//						fmt.Printf("skipped %v key: %v lag %v\n", et, ks, lag)
-					//						lastSkipped = true
-					//						continue
-					//					} else {
-					//						lastKeyChord = ks
-					//						lastSkipped = false
-					//					}
 				}
 			}
 			lastSkipped = false
@@ -1418,14 +1425,15 @@ mainloop:
 			case window.Paint:
 				// fmt.Printf("got paint event for window %v \n", w.Nm)
 				w.SetFlag(int(WinFlagGotPaint))
-				if w.DoFullRender {
-					w.DoFullRender = false
+				if w.HasFlag(int(WinFlagDoFullRender)) {
+					w.ClearFlag(int(WinFlagDoFullRender))
 					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
 					if w.Viewport.Geom.Size != w.OSWin.Size() {
 						w.Resized(w.OSWin.Size())
 					} else {
 						w.FullReRender()
 					}
+					w.SendShowEvent() // happens AFTER full render
 				}
 				w.Publish()
 			case window.Move:
@@ -1480,15 +1488,16 @@ mainloop:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
 			if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
-				if w.DoFullRender {
+				if w.HasFlag(int(WinFlagDoFullRender)) {
+					w.ClearFlag(int(WinFlagDoFullRender))
 					// if we are getting mouse input, and still haven't done this, do it..
-					w.DoFullRender = false
 					// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
 					if w.Viewport.Geom.Size != w.OSWin.Size() {
 						w.Resized(w.OSWin.Size())
 					} else {
 						w.FullReRender()
 					}
+					w.SendShowEvent() // happens AFTER full render
 				}
 				if w.NeedWinMenuUpdate() {
 					// fmt.Printf("win menu updt: %v\n", w.Nm)

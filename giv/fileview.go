@@ -78,7 +78,8 @@ func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
 func (fv *FileView) SetFilename(filename, ext string) {
 	fv.DirPath, fv.SelFile = filepath.Split(filename)
 	fv.SetExt(ext)
-	fv.UpdateFromPath()
+	// fv.UpdateFromPath()
+	fv.DoStdConfig()
 }
 
 // SetPathFile sets the path, initial select file (or "") and intializes the view
@@ -86,7 +87,8 @@ func (fv *FileView) SetPathFile(path, file, ext string) {
 	fv.DirPath = path
 	fv.SelFile = file
 	fv.SetExt(ext)
-	fv.UpdateFromPath()
+	fv.DoStdConfig()
+	// fv.UpdateFromPath()
 }
 
 // SelectedFile returns the full path to selected file
@@ -214,6 +216,14 @@ func (fv *FileView) StdConfig() (mods, updt bool) {
 		fv.ConfigSelRow()
 	}
 	return
+}
+
+// DoStdConfig does the standard configuration, but does not update files
+func (fv *FileView) DoStdConfig() {
+	mods, updt := fv.StdConfig()
+	if mods {
+		fv.UpdateEnd(updt)
+	}
 }
 
 func (fv *FileView) ConfigPathRow() {
@@ -715,6 +725,10 @@ func (fv *FileView) FileViewEvents() {
 		fvv := recv.Embed(KiT_FileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)
+	})
+	fv.ConnectEvent(oswin.WindowShowEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		fvv := recv.Embed(KiT_FileView).(*FileView)
+		fvv.UpdateFilesAction()
 	})
 }
 

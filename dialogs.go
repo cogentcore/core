@@ -75,6 +75,9 @@ func ValidViewport(avp *Viewport2D) *Viewport2D {
 	if avp != nil {
 		return avp
 	}
+	if fwin, _ := AllWindows.Focused(); fwin != nil {
+		return fwin.Viewport
+	}
 	if fwin := AllWindows.Win(0); fwin != nil {
 		return fwin.Viewport
 	}

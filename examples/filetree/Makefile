@@ -11,6 +11,8 @@ all: build
 
 build: 
 	$(GOBUILD) -v
+dbg-build:
+	$(GOBUILD) -v -gcflags=all="-N -l" -tags debug
 test: 
 	$(GOTEST) -v ./...
 clean: 
