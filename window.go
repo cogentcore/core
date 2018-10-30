@@ -3022,11 +3022,12 @@ func (wg *WindowGeomPrefs) Open() error {
 
 // Save Window Geom Preferences to GoGi standard prefs directory
 func (wg *WindowGeomPrefs) Save() error {
+	WinGeomPrefsMu.Lock()
+	defer WinGeomPrefsMu.Unlock()
+
 	if wg == nil {
 		return nil
 	}
-	WinGeomPrefsMu.Lock()
-	defer WinGeomPrefsMu.Unlock()
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
 	b, err := json.MarshalIndent(wg, "", "  ")
@@ -3052,6 +3053,7 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	wgr.Pos = win.OSWin.Position()
 	wgr.Size = win.OSWin.Size()
 	if wgr.Size == image.ZP {
+		WinGeomPrefsMu.Unlock()
 		// fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", win.Nm, sc.Name)
 		return
 	}
@@ -3067,12 +3069,12 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 // to given screen if only records are on a different screen -- if scrn is nil
 // then default (first) screen is used from oswin.TheApp
 func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom {
-	if wg == nil {
-		return nil
-	}
 	WinGeomPrefsMu.RLock()
 	defer WinGeomPrefsMu.RUnlock()
 
+	if wg == nil {
+		return nil
+	}
 	wps, ok := (*wg)[winName]
 	if !ok {
 		return nil

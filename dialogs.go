@@ -116,7 +116,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		cfgFunc()
 	}
 
-	if dlg.DefSize != image.ZP {
+	if dlg.DefSize == image.ZP {
 		dlg.Init2DTree()
 		dlg.Style2DTree()                                      // sufficient to get sizes
 		dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
