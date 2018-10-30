@@ -36,10 +36,10 @@ func InitSpell() error {
 	if spell.Initialized() {
 		return nil
 	}
-	err := LoadModel()
+	err := LoadSpellModel()
 	if err != nil {
 		// oh well, try creating a new model from corpus
-		err = ModelFromCorpus()
+		err = SpellModelFromCorpus()
 		if err != nil {
 			return err
 		}
@@ -47,16 +47,16 @@ func InitSpell() error {
 	return nil
 }
 
-// LoadModel loads a saved spelling model
-func LoadModel() error {
+// LoadSpellModel loads a saved spelling model
+func LoadSpellModel() error {
 	pdir := oswin.TheApp.AppPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
 	err := spell.Load(openpath)
 	return err
 }
 
-// ModelFromCorpus builds a spelling from text
-func ModelFromCorpus() error {
+// SpellModelFromCorpus builds a spelling from text
+func SpellModelFromCorpus() error {
 	bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
 	if err != nil {
 		log.Printf("Error getting path to corpus directory: %v.\n", err)
@@ -78,8 +78,8 @@ func ModelFromCorpus() error {
 	return nil
 }
 
-// SaveModel saves the spelling model which includes the data and parameters
-func SaveModel() error {
+// SaveSpellModel saves the spelling model which includes the data and parameters
+func SaveSpellModel() error {
 	pdir := oswin.TheApp.AppPrefsDir()
 	path := filepath.Join(pdir, "spell_en_us_plain.json")
 	err := spell.Save(path)
@@ -89,8 +89,8 @@ func SaveModel() error {
 	return err
 }
 
-// InitNewCheck builds the input list, i.e. the words to check
-func InitNewCheck(text []byte) {
+// InitNewSpellCheck builds the input list, i.e. the words to check
+func InitNewSpellCheck(text []byte) {
 	input = input[:0] // clear past input
 	inputidx = 0
 	TextToWords(text)
