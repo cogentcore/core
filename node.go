@@ -723,7 +723,6 @@ func (n *Node) Destroy() {
 		return
 	}
 	n.NodeSig.Emit(n.This(), int64(NodeSignalDestroying), nil)
-	n.SetFlag(int(NodeDestroyed))
 	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
 	// and destroy all my fields
@@ -740,6 +739,7 @@ func (n *Node) Destroy() {
 	// 	}
 	// 	return true
 	// })
+	n.SetFlag(int(NodeDestroyed))
 	n.Ths = nil // last gasp: lose our own sense of self..
 	// note: above is thread-safe because This() accessor checks Destroyed
 }

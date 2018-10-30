@@ -419,6 +419,7 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, up
 			}
 		}
 	}
+	DelMgr.DestroyDeleted()
 	return
 }
 
