@@ -3232,7 +3232,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	cpop := win.CurPopup()
 	if gi.PopupIsCompleter(cpop) {
-		win.SetDelPopup(cpop)
+		// win.SetDelPopup(cpop)
 		setprocessed := tv.Complete.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
