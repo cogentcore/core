@@ -324,7 +324,8 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 func CompleteGo(bytes []byte, pos token.Position) []Completion {
 	candidates = candidates[:0]
 	var results []Completion
-	results, stop := FirstPass(bytes, pos)
+	var stop = false
+	//results, stop = FirstPass(bytes, pos)
 	if !stop && len(results) == 0 {
 		results = SecondPass(bytes, pos)
 	}
