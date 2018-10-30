@@ -93,7 +93,7 @@ func CheckWord(w string) (suggests []string, known bool, err error) {
 	if len(suggests) > 0 && suggests[0] == w {
 		known = true
 	}
-	return suggests[1:], known, err
+	return suggests, known, err
 }
 
 // LearnWord adds a single word to the corpus
