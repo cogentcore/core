@@ -923,6 +923,10 @@ func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
 	return nil
 }
 
+func (n *Node) PropTag() string {
+	return ""
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 

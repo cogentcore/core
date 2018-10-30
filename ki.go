@@ -463,6 +463,12 @@ type Ki interface {
 	// usually not needed).
 	CopyPropsFrom(from Ki, deep bool) error
 
+	// PropTag returns the name to look for in type properties, for types
+	// that are valid options for values that can be set in Props.  For example
+	// in GoGi, it is "style-props" which is then set for all types that can
+	// be used in a style (colors, enum options, etc)
+	PropTag() string
+
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths
 	//   note: always put functions last -- looks better for inline functions
