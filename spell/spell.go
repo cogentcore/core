@@ -33,6 +33,9 @@ func Initialized() bool {
 // Load loads the saved model stored in json format
 func Load(path string) (err error) {
 	model, err = fuzzy.Load(path)
+	if err == nil {
+		inited = true
+	}
 	return err
 }
 
