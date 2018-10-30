@@ -94,6 +94,7 @@ const (
 	KeyFunMenuClose
 	KeyFunMenuCloseAlt1 // alternative version (e.g., shift)
 	KeyFunMenuCloseAlt2 // alternative version (e.g., alt)
+	KeyFunWindowCycle
 	KeyFunsN
 )
 
@@ -581,6 +582,7 @@ var StdKeyMaps = KeyMaps{
 		"Meta+W":                  KeyFunMenuClose,
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
+		"Meta+`":                  KeyFunWindowCycle,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -704,6 +706,7 @@ var StdKeyMaps = KeyMaps{
 		"Meta+W":                  KeyFunMenuClose,
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
+		"Meta+`":                  KeyFunWindowCycle,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,

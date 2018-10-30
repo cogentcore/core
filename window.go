@@ -2251,6 +2251,25 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		w.FullReRender()
 		// w.UploadAllViewports()
 		e.SetProcessed()
+	case KeyFunWindowCycle:
+		var nw *Window
+		var idx = -1
+
+		w.FocusMu.Lock()
+		for i, fw := range AllWindows {
+			if fw.HasFocus() {
+				idx = i + 1
+				break
+			}
+		}
+		if idx >= len(AllWindows) {
+			idx = 0
+		}
+		if idx >= 0 && idx < len(AllWindows) {
+			nw.OSWin.Raise()
+		}
+		w.FocusMu.Unlock()
+
 	}
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
