@@ -1465,7 +1465,7 @@ func (tv *TreeView) TreeViewEvents() {
 		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			lb, _ := recv.(*gi.Label)
 			tvvi := lb.Parent().Parent()
-			if tvvi == nil { // deleted
+			if tvvi == nil || tvvi.This() == nil { // deleted
 				return
 			}
 			tvv := tvvi.Embed(KiT_TreeView).(*TreeView)
@@ -1787,7 +1787,7 @@ func (tv *TreeView) Size2D(iter int) {
 		// we layout children under us
 		for _, kid := range tv.Kids {
 			gis := kid.(gi.Node2D).AsWidget()
-			if gis == nil {
+			if gis == nil || gis.This() == nil {
 				continue
 			}
 			h += math32.Ceil(gis.LayData.AllocSize.Y)
@@ -1836,6 +1836,9 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	h := math32.Ceil(tv.WidgetSize.Y)
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
+			if kid == nil || kid.This() == nil {
+				continue
+			}
 			ni := kid.(gi.Node2D).AsWidget()
 			if ni == nil {
 				continue

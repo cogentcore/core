@@ -272,11 +272,16 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 }
 
 // AddWindowsMenu adds menu items for current main and dialog windows.
+// must be called under WindowGlobalMu mutex lock!
 func (m *Menu) AddWindowsMenu(win *Window) {
 	m.AddAction(ActOpts{Label: "Minimize"},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.OSWin.Minimize()
+		})
+	m.AddAction(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
+		win, func(recv, send ki.Ki, sig int64, data interface{}) {
+			AllWindows.FocusNext()
 		})
 	m.AddSeparator("sepa")
 	for _, w := range MainWindows {

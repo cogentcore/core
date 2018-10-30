@@ -369,25 +369,33 @@ func (tb *TextBuf) Revert() bool {
 }
 
 // SaveAs saves the current text into given file -- does an EditDone first to save edits
-func (tb *TextBuf) SaveAs(filename gi.FileName) error {
+// and checks for an existing file -- if it does exist then prompts to overwrite or not.
+// if afterFun is non-nil, then it is called with the status of the user action
+func (tb *TextBuf) SaveAs(filename gi.FileName, afterFun func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
-	if _, err := os.Stat(string(filename)); !os.IsNotExist(err) {
+	if _, err := os.Stat(string(filename)); os.IsNotExist(err) {
+		tb.SaveFile(filename)
+		if afterFun != nil {
+			afterFun(false)
+		}
+	} else {
 		vp := tb.ViewportFromView()
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
 			[]string{"Cancel", "Overwrite"},
 			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				cancel := false
 				switch sig {
 				case 0:
-					// do nothing
+					cancel = true
 				case 1:
 					tb.SaveFile(filename)
 				}
+				if afterFun != nil {
+					afterFun(cancel)
+				}
 			})
-		return nil
-	} else {
-		return tb.SaveFile(filename)
 	}
 }
 

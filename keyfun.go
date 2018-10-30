@@ -21,6 +21,7 @@ import (
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
 // https://www.cs.colorado.edu/~main/cs1300/lab/emacs.html
+// https://help.ubuntu.com/community/KeyboardShortcuts
 
 // KeyFuns are functions that keyboard events can perform in the GUI --
 // seems possible to keep this flat and consistent across different contexts,
@@ -80,6 +81,7 @@ const (
 	KeyFunJump // jump to line
 	KeyFunHistPrev
 	KeyFunHistNext
+	KeyFunWinFocusNext
 	// Below are menu specific functions -- use these as shortcuts for menu actions
 	// allows uniqueness of mapping and easy customization of all key actions
 	KeyFunMenuNew
@@ -94,7 +96,6 @@ const (
 	KeyFunMenuClose
 	KeyFunMenuCloseAlt1 // alternative version (e.g., shift)
 	KeyFunMenuCloseAlt2 // alternative version (e.g., alt)
-	KeyFunWindowCycle
 	KeyFunsN
 )
 
@@ -570,6 +571,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+]":               KeyFunHistNext,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
+		"Meta+`":                  KeyFunWinFocusNext,
 		"Meta+N":                  KeyFunMenuNew,
 		"Shift+Meta+N":            KeyFunMenuNewAlt1,
 		"Alt+Meta+N":              KeyFunMenuNewAlt2,
@@ -582,7 +584,6 @@ var StdKeyMaps = KeyMaps{
 		"Meta+W":                  KeyFunMenuClose,
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
-		"Meta+`":                  KeyFunWindowCycle,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -694,6 +695,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+]":               KeyFunHistNext,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
+		"Meta+`":                  KeyFunWinFocusNext,
 		"Meta+N":                  KeyFunMenuNew,
 		"Shift+Meta+N":            KeyFunMenuNewAlt1,
 		"Alt+Meta+N":              KeyFunMenuNewAlt2,
@@ -706,7 +708,6 @@ var StdKeyMaps = KeyMaps{
 		"Meta+W":                  KeyFunMenuClose,
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
-		"Meta+`":                  KeyFunWindowCycle,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
@@ -807,6 +808,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"Alt+F6":                  KeyFunWinFocusNext,
 		"Alt+N":                   KeyFunMenuNew, // ctrl keys conflict..
 		"Shift+Alt+N":             KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
@@ -889,6 +891,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
 		"Control+N":               KeyFunMenuNew,
+		"Alt+F6":                  KeyFunWinFocusNext,
 		"Shift+Control+N":         KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
 		"Control+O":               KeyFunMenuOpen,
@@ -969,6 +972,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"Alt+F6":                  KeyFunWinFocusNext,
 		"Control+N":               KeyFunMenuNew,
 		"Shift+Control+N":         KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
@@ -1050,6 +1054,7 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"Alt+F6":                  KeyFunWinFocusNext,
 		"Control+N":               KeyFunMenuNew,
 		"Shift+Control+N":         KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,

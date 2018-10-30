@@ -2256,25 +2256,9 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		w.FullReRender()
 		// w.UploadAllViewports()
 		e.SetProcessed()
-	case KeyFunWindowCycle:
-		var nw *Window
-		var idx = -1
-
-		w.FocusMu.Lock()
-		for i, fw := range AllWindows {
-			if fw.HasFocus() {
-				idx = i + 1
-				break
-			}
-		}
-		if idx >= len(AllWindows) {
-			idx = 0
-		}
-		if idx >= 0 && idx < len(AllWindows) {
-			nw.OSWin.Raise()
-		}
-		w.FocusMu.Unlock()
-
+	case KeyFunWinFocusNext:
+		e.SetProcessed()
+		AllWindows.FocusNext()
 	}
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
@@ -2980,6 +2964,42 @@ func (wl *WindowList) Win(idx int) *Window {
 		return nil
 	}
 	return (*wl)[idx]
+}
+
+// Focused returns the (first) window in this list that has the WinFlagGotFocus flag set
+// and the index in the list (nil, -1 if not present)
+func (wl *WindowList) Focused() (*Window, int) {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+
+	for i, fw := range *wl {
+		if fw.HasFlag(int(WinFlagGotFocus)) {
+			return fw, i
+		}
+	}
+	return nil, -1
+}
+
+// FocusNext focuses on the next window in the list, after the current Focused() one
+func (wl *WindowList) FocusNext() (*Window, int) {
+	fw, i := wl.Focused()
+	if fw == nil {
+		return nil, -1
+	}
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+	sz := len(*wl)
+	if sz == 1 {
+		return nil, -1
+	}
+	if i == sz-1 {
+		i = 0
+	} else {
+		i++
+	}
+	fw = (*wl)[i]
+	fw.OSWin.Raise()
+	return fw, i
 }
 
 // AllWindows is the list of all windows that have been created (dialogs, main
