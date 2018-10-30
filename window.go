@@ -201,7 +201,7 @@ const (
 	// WinFlagGotPaint have we received our first paint event yet?  ignore other window events before this point
 	WinFlagGotPaint
 
-	// WinFlagGotFocus have we received our first focus event yet?
+	// WinFlagGotFocus indicates that have we received OSWin focus
 	WinFlagGotFocus
 
 	// WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end
@@ -1056,7 +1056,7 @@ func (w *Window) MainMenuUpdated() {
 	w.UpMu.Unlock()
 }
 
-// MainMenuSet sets the main menu for the window, during window.Focus event
+// MainMenuSet sets the main menu for the window, after window.Focus event
 func (w *Window) MainMenuSet() {
 	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
 		return
@@ -1437,13 +1437,17 @@ mainloop:
 			case window.Focus:
 				if !w.HasFlag(int(WinFlagGotFocus)) {
 					w.SetFlag(int(WinFlagGotFocus))
-				} else {
 					// fmt.Printf("win foc: %v\n", w.Nm)
+				} else {
+					// fmt.Printf("win extra foc: %v\n", w.Nm)
 					if w.NeedWinMenuUpdate() {
 						w.MainMenuUpdateWindows()
 					}
 					w.MainMenuSet()
 				}
+			case window.DeFocus:
+				// fmt.Printf("win de-foc: %v\n", w.Nm)
+				w.ClearFlag(int(WinFlagGotFocus))
 			}
 			continue // don't do anything else!
 		case *mouse.DragEvent:
@@ -1487,6 +1491,7 @@ mainloop:
 					}
 				}
 				if w.NeedWinMenuUpdate() {
+					// fmt.Printf("win menu updt: %v\n", w.Nm)
 					w.MainMenuUpdateWindows()
 					w.MainMenuSet()
 				}

@@ -107,8 +107,11 @@ func (cb *ComboBox) ButtonRelease() {
 		return
 	}
 	wasPressed := (cb.State == ButtonDown)
-	updt := cb.UpdateStart()
 	cb.MakeItemsMenu()
+	if len(cb.ItemsMenu) == 0 {
+		return
+	}
+	updt := cb.UpdateStart()
 	cb.SetButtonState(ButtonActive)
 	cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
 	if wasPressed {
@@ -261,6 +264,9 @@ func (cb *ComboBox) SetToMaxLength(maxLen int) {
 // contents, with the given upper limit
 func (cb *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
 	sz := len(tl)
+	if sz == 0 {
+		return
+	}
 	cb.Items = make([]interface{}, sz)
 	for i, typ := range tl {
 		cb.Items[i] = typ
@@ -282,6 +288,9 @@ func (cb *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLe
 // limit
 func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
 	sz := len(el)
+	if sz == 0 {
+		return
+	}
 	cb.Items = make([]interface{}, sz)
 	for i, str := range el {
 		cb.Items[i] = str
@@ -300,6 +309,9 @@ func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) 
 // contents, with the given upper limit
 func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
 	sz := len(el)
+	if sz == 0 {
+		return
+	}
 	cb.Items = make([]interface{}, sz)
 	for i, enum := range el {
 		cb.Items[i] = enum

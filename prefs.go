@@ -574,33 +574,7 @@ func (pf *FilePaths) SaveJSON(filename string) error {
 // AddPath inserts a path to the file paths (at the start), subject to max
 // length -- if path is already on the list then it is moved to the start.
 func (pf *FilePaths) AddPath(path string, max int) {
-	sz := len(*pf)
-
-	if sz > max {
-		*pf = (*pf)[:max]
-	}
-
-	for i, s := range *pf {
-		if s == path {
-			if i == 0 {
-				return
-			}
-			copy((*pf)[1:i+1], (*pf)[0:i])
-			(*pf)[0] = path
-			return
-		}
-	}
-
-	if sz >= max {
-		copy((*pf)[1:max], (*pf)[0:max-1])
-		(*pf)[0] = path
-	} else {
-		*pf = append(*pf, "")
-		if sz > 0 {
-			copy((*pf)[1:], (*pf)[0:sz])
-		}
-		(*pf)[0] = path
-	}
+	StringsInsertFirstUnique((*[]string)(pf), path, max)
 }
 
 // SavedPathsFileName is the name of the saved file paths file in GoGi prefs directory

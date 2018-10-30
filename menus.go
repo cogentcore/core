@@ -391,6 +391,63 @@ func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvF
 	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
 
+// StringsInsertFirst inserts the given string at start of a string slice,
+// while keeping overall length to given max value
+// useful for a "recents" kind of string list
+func StringsInsertFirst(strs *[]string, str string, max int) {
+	if strs == nil {
+		*strs = make([]string, 0, max)
+	}
+	sz := len(*strs)
+	if sz > max {
+		*strs = (*strs)[:max]
+	}
+	if sz >= max {
+		copy((*strs)[1:max], (*strs)[0:max-1])
+		(*strs)[0] = str
+	} else {
+		*strs = append(*strs, "")
+		if sz > 0 {
+			copy((*strs)[1:], (*strs)[0:sz])
+		}
+		(*strs)[0] = str
+	}
+}
+
+// StringsInsertFirstUnique inserts the given string at start of a string slice,
+// while keeping overall length to given max value.
+// if item is already on the list, then it is moved to the top and not re-added (unique items only)
+// useful for a "recents" kind of string list
+func StringsInsertFirstUnique(strs *[]string, str string, max int) {
+	if strs == nil {
+		*strs = make([]string, 0, max)
+	}
+	sz := len(*strs)
+	if sz > max {
+		*strs = (*strs)[:max]
+	}
+	for i, s := range *strs {
+		if s == str {
+			if i == 0 {
+				return
+			}
+			copy((*strs)[1:i+1], (*strs)[0:i])
+			(*strs)[0] = str
+			return
+		}
+	}
+	if sz >= max {
+		copy((*strs)[1:max], (*strs)[0:max-1])
+		(*strs)[0] = str
+	} else {
+		*strs = append(*strs, "")
+		if sz > 0 {
+			copy((*strs)[1:], (*strs)[0:sz])
+		}
+		(*strs)[0] = str
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // MenuButton pops up a menu, has an indicator by default
 

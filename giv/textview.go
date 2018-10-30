@@ -1663,10 +1663,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.NewValue(60, units.Ch))
 	tff.ConfigParts()
-	nfind := len(PrevQReplaceFinds)
-	if nfind > 0 {
-		tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
-	}
+	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
 	if find != "" {
 		tff.SetCurVal(find)
 	}
@@ -1676,10 +1673,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.NewValue(60, units.Ch))
 	tfr.ConfigParts()
-	nrepl := len(PrevQReplaceRepls)
-	if nrepl > 0 {
-		tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
-	}
+	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -1731,14 +1725,8 @@ func (tv *TextView) QReplaceStart(find, repl string) {
 	tv.QReplace.ChangeOffset = 0
 	tv.QReplace.PreviousLine = tv.QReplace.CurrentLine
 
-	nfind := len(PrevQReplaceFinds)
-	if nfind == 0 || PrevQReplaceFinds[nfind-1] != find {
-		PrevQReplaceFinds = append(PrevQReplaceFinds, find)
-	}
-	nrepl := len(PrevQReplaceRepls)
-	if nrepl == 0 || PrevQReplaceRepls[nrepl-1] != repl {
-		PrevQReplaceRepls = append(PrevQReplaceRepls, repl)
-	}
+	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.Prefs.SavedPathsMax)
+	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.Prefs.SavedPathsMax)
 
 	tv.QReplaceMatches()
 	tv.QReplace.Pos, _ = tv.MatchFromPos(tv.QReplace.Matches, tv.CursorPos)
@@ -2028,12 +2016,12 @@ var TextViewClipHistMax = 100
 
 // TextViewClipHistAdd adds the given clipboard bytes to top of history stack
 func TextViewClipHistAdd(clip []byte) {
+	max := TextViewClipHistMax
 	if TextViewClipHistory == nil {
-		TextViewClipHistory = make([][]byte, 0, 1000)
+		TextViewClipHistory = make([][]byte, 0, max)
 	}
 
 	ch := &TextViewClipHistory
-	max := TextViewClipHistMax
 
 	sz := len(*ch)
 	if sz > max {
