@@ -96,21 +96,21 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* closing multiple windows creates data races, and hangs, in gide at least..
+* fix the style-props context -- need an overall prop on objects -- in type presumably.
+  completer needs to know about this too.  in mapview proximally.
+	+ have PropTag now in ki.  need to hook it into mapview from struct somehow.  look
+	into sliceview for how we access the ki parent of slice -- do that..
 
-* fix clear x on textfield.
+* closing multiple windows creates data races, and hangs, in gide at least..
 
 * gui for spell options.
 
 * mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:
-	+ on yank from history, push to clipboard
 	+ word wrapping is going long unnecessarily -- is target size correct??
 	+ cursor goes to hand for links in TextView
 	+ parens / brackets match highlighter..
-
-* fix the style-props context -- need an overall prop on objects -- in type presumably.  completer needs to know about this too.  in mapview proximally.
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..

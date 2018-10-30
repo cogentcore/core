@@ -105,6 +105,23 @@ func (mv *MapView) ToolBar() *gi.ToolBar {
 	return mv.KnownChild(idx).(*gi.ToolBar)
 }
 
+// KiPropTag returns the PropTag value from Ki owner of this map, if it is..
+func (mv *MapView) KiPropTag() string {
+	if mv.MapValView == nil {
+		return ""
+	}
+	vvb := mv.MapValView.AsValueViewBase()
+	if vvb.Owner == nil {
+		return ""
+	}
+	if ownki, ok := vvb.Owner.(ki.Ki); ok {
+		pt := ownki.PropTag()
+		// fmt.Printf("got prop tag: %v\n", pt)
+		return pt
+	}
+	return ""
+}
+
 // ConfigMapGrid configures the MapGrid for the current map
 func (mv *MapView) ConfigMapGrid() {
 	if kit.IfaceIsNil(mv.Map) {
@@ -136,7 +153,8 @@ func (mv *MapView) ConfigMapGrid() {
 	if valtyp.Kind() == reflect.Interface && valtyp.String() == "interface {}" {
 		ifaceType = true
 		ncol = 4
-		typeTag = "style-prop" // todo: need some way of setting & getting
+		typeTag = mv.KiPropTag()
+		// todo: need some way of setting & getting
 		// this for given domain mapview could have a structview parent and
 		// the source node of that struct, if a Ki, could have a property --
 		// unlike inline case, plain mapview is not a child of struct view

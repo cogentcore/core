@@ -238,6 +238,10 @@ const (
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D impl for Node2DBase (nil)
 
+func (nb *Node2DBase) PropTag() string {
+	return "style-prop" // everything that can be a style value is tagged with this
+}
+
 func (nb *Node2DBase) AsNode2D() *Node2DBase {
 	return nb
 }

@@ -138,6 +138,7 @@ func (mv *MapViewInline) ConfigParts() {
 			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 			if ok {
 				mvvv := mvvvk.(*MapView)
+				mvvv.MapValView = mvv.MapValView
 				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					mvvvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 					mvvvv.ViewSig.Emit(mvvvv.This(), 0, nil)
