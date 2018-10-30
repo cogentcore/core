@@ -90,16 +90,25 @@ const (
 	RotateEvent
 
 	// WindowEvent reports any changes in the window size, orientation,
-	// iconify, close, open, paint
+	// iconify, close, open, paint -- these are all "internal" events
+	// from OS to GUI system, and not sent to widgets
 	WindowEvent
 
 	// WindowResizeEvent is specifically for window resize events which need
-	// special treatment
+	// special treatment -- this is an internal event not sent to widgets
 	WindowResizeEvent
 
 	// WindowPaintEvent is specifically for window paint events which need
-	// special treatment
+	// special treatment -- this is an internal event not sent to widgets
 	WindowPaintEvent
+
+	// WindowShowEvent is a synthetic event sent to widget consumers,
+	// sent *only once* when window is shown for the very first time
+	WindowShowEvent
+
+	// WindowFocusEvent is a synthetic event sent to widget consumers,
+	// sent when window focus changes (action is Focus / DeFocus)
+	WindowFocusEvent
 
 	// DNDEvent is for the Drag-n-Drop (DND) drop event
 	DNDEvent

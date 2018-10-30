@@ -1042,6 +1042,10 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		}
 	}
 
+	if !tf.IsFocusActive() && kf == KeyFunAbort {
+		return
+	}
+
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case KeyFunMoveRight:
@@ -1092,7 +1096,8 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tf.CancelComplete()
 		tf.Revert()
-		tf.FocusNext()
+		tf.FocusChanged2D(FocusInactive)
+		// tf.FocusNext()
 	case KeyFunBackspace:
 		kt.SetProcessed()
 		tf.CursorBackspace(1)

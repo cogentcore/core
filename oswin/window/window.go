@@ -65,6 +65,9 @@ const (
 	// Paint indicates a request to repaint the window.
 	Paint
 
+	// Show is for the WindowShow event
+	Show
+
 	ActionsN
 )
 
@@ -101,5 +104,24 @@ func (ev Event) String() string {
 	return fmt.Sprintf("Type: %v Action: %v  Time: %v", ev.Type(), ev.Action, ev.Time())
 }
 
-// check for interface implementation
-var _ oswin.Event = &Event{}
+// window.ShowEvent is for synthetic window show event that is sent to widget consumers
+// sent only once when window is first created.
+// all other window events go from OS to window consumer but are not forwarded.
+type ShowEvent struct {
+	Event
+}
+
+func (ev ShowEvent) Type() oswin.EventType {
+	return oswin.WindowShowEvent
+}
+
+// window.FocusEvent is for synthetic window focus event that is sent to widget consumers
+// sent when user focus on window changes (action is Focus or DeFocus)
+// all other window events go from OS to window consumer but are not forwarded.
+type FocusEvent struct {
+	Event
+}
+
+func (ev FocusEvent) Type() oswin.EventType {
+	return oswin.WindowFocusEvent
+}

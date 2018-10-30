@@ -806,7 +806,7 @@ func (tv *TableView) RowStruct(row int) interface{} {
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
 	if row < 0 || row >= sz {
-		fmt.Printf("giv.TableView: row index out of range: %v\n", row)
+		// fmt.Printf("giv.TableView: row index out of range: %v\n", row)
 		return nil
 	}
 	val := kit.OnePtrValue(mvnp.Index(row)) // deal with pointer lists
