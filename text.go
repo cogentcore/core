@@ -428,64 +428,52 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 	if idx >= sz {
 		idx = sz - 1
 	}
-	stidx := idx
+	// find starting index that is just within size
+	csz := sr.RelPos.X + sr.Render[idx].RelPos.X
+	if csz > trgSize {
+		for idx > 0 {
+			csz = sr.RelPos.X + sr.Render[idx].RelPos.X
+			if csz <= trgSize {
+				break
+			}
+			idx--
+		}
+	} else {
+		for idx < sz-1 {
+			nsz := sr.RelPos.X + sr.Render[idx+1].RelPos.X
+			if nsz > trgSize {
+				break
+			}
+			csz = nsz
+			idx++
+		}
+	}
+	if unicode.IsSpace(sr.Text[idx]) {
+		idx++
+		for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
+			idx++
+		}
+		return idx
+	}
+	// find earlier space
 	for idx > 0 && !unicode.IsSpace(sr.Text[idx-1]) {
 		idx--
 	}
-	csz := sr.RelPos.X + sr.Render[idx].RelPos.X
-	lstgoodi := -1
-	nofit := false
-	if idx > 0 && csz <= trgSize {
-		lstgoodi = idx
-	} else {
-		nofit = true
-		lstgoodi = stidx
-		idx = stidx
+	if idx > 0 {
+		return idx
 	}
-	for {
-		if csz > trgSize && !nofit {
-			for idx > 0 {
-				if unicode.IsSpace(sr.Text[idx]) {
-					csz = sr.RelPos.X + sr.Render[idx].RelPos.X
-					if csz <= trgSize {
-						idx++
-						for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
-							idx++
-						}
-						return idx
-					}
-				}
-				idx--
-			}
-			fmt.Printf("got to nofit. idx: %v lstgoodi: %v, txt: %v\n", idx, lstgoodi, string(sr.Text))
-			nofit = true // can't find a fit, still -- shouldn't really ever get here..
-			idx = lstgoodi
-		}
-		for idx < sz {
-			if idx == sz-1 && lstgoodi > 0 {
-				return lstgoodi
-			}
-			if unicode.IsSpace(sr.Text[idx]) {
-				csz = sr.RelPos.X + sr.Render[idx].RelPos.X
-				if nofit || csz == trgSize {
-					idx++
-					for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
-						idx++
-					}
-					return idx
-				} else if csz < trgSize {
-					lstgoodi = idx + 1
-				} else if lstgoodi > 0 {
-					return lstgoodi
-				} else {
-					break // go back down
-				}
-			}
-			idx++
-		}
+	// no spaces within size -- find next break going up
+	for idx < sz && !unicode.IsSpace(sr.Text[idx]) {
+		idx++
+	}
+	if idx == sz-1 { // unbreakable
 		return -1
 	}
-	return lstgoodi
+	idx++
+	for idx < sz && unicode.IsSpace(sr.Text[idx]) { // break at END of whitespace
+		idx++
+	}
+	return idx
 }
 
 // ZeroPos ensures that the positions start at 0, for LR direction

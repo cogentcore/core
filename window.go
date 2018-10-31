@@ -1673,7 +1673,7 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 			}
 			if !w.HasFlag(int(WinFlagFocusActive)) { // reactivate on keyboard input
 				w.SetFlag(int(WinFlagFocusActive))
-				fmt.Printf("set foc active: %v\n", ni.PathUnique())
+				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
 				nii.FocusChanged2D(FocusActive)
 			}
 		} else if evi.HasPos() {
