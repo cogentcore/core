@@ -2597,6 +2597,9 @@ func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tv *TextView) RenderCursor(on bool) {
+	if tv.Viewport == nil {
+		return
+	}
 	win := tv.Viewport.Win
 	if win == nil {
 		return

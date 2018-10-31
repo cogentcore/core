@@ -352,16 +352,8 @@ func (tb *TextBuf) Revert() bool {
 		return false
 	}
 	tb.Stat() // "own" the new file..
-	for itr := 0; itr < 3; itr++ {
-		diffs := tb.DiffBufs(ob)
-		tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
-		if itr > 0 && len(diffs) == 1 {
-			break
-		} else if itr > 0 {
-			fmt.Printf("TextBuf: %v revert iter: %v diffs: %v\n", tb.Filename, itr, len(diffs))
-			PrintDiffs(diffs)
-		}
-	}
+	diffs := tb.DiffBufs(ob)
+	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 	tb.Changed = false
 	tb.AutoSaveDelete()
 	tb.ReMarkup()
@@ -953,6 +945,9 @@ type TextBufEdit struct {
 // ToBytes returns the Text of this edit record to a byte string, with
 // newlines at end of each line -- nil if Text is empty
 func (te *TextBufEdit) ToBytes() []byte {
+	if te == nil {
+		return nil
+	}
 	sz := len(te.Text)
 	if sz == 0 {
 		return nil
@@ -1363,6 +1358,9 @@ func (tb *TextBuf) Undo() *TextBufEdit {
 	}
 	tb.UndoPos--
 	tbe := tb.Undos[tb.UndoPos]
+	if tbe == nil {
+		return nil
+	}
 	if tbe.Delete {
 		// fmt.Printf("undo pos: %v undoing delete at: %v text: %v\n", tb.UndoPos, tbe.Reg, string(tbe.ToBytes()))
 		tbe := tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true) // don't save to reg und
