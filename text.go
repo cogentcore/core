@@ -1282,6 +1282,9 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 	}
 }
 
+// note: adding print / log statements to following when inside gide will cause
+// an infinite loop because the console redirection uses this very same code!
+
 // SetHTMLPre sets preformatted HTML-styled text by decoding all standard
 // inline HTML text style formatting tags in the string and sets the
 // per-character font information appropriately, using given font style info.
@@ -1289,7 +1292,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
 func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle, ctxt *units.Context, cssAgg ki.Props) {
-	errstr := "gi.TextRender SetHTMLPre"
+	// errstr := "gi.TextRender SetHTMLPre"
 
 	sz := len(str)
 	tr.Spans = make([]SpanRender, 1)
@@ -1337,7 +1340,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 					continue // ignore
 				}
 				if etag != curTag {
-					log.Printf("%v end tag: %v doesn't match current tag: %v for string\n%v\n", errstr, etag, curTag, string(str))
+					// log.Printf("%v end tag: %v doesn't match current tag: %v for string\n%v\n", errstr, etag, curTag, string(str))
 				}
 				switch etag {
 				// case "p":
@@ -1362,9 +1365,12 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 					fstack = fstack[:len(fstack)-1]
 				}
 				tslen := len(tagstack)
-				if tslen > 0 {
-					curTag = tagstack[tslen-1]
+				if tslen > 1 {
+					curTag = tagstack[tslen-2]
 					tagstack = tagstack[:tslen-1]
+				} else if tslen == 1 {
+					curTag = ""
+					tagstack = tagstack[:0]
 				}
 			} else { // start tag
 				parts := strings.Split(ftag, " ")

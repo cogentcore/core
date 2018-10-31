@@ -867,7 +867,7 @@ func (w *Window) ClearWinUpdating() {
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
-	if w.IsClosed() || w.OSWin.IsMinimized() {
+	if w.IsClosed() || w.IsClosing() || w.OSWin.IsMinimized() {
 		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		return
 	}
