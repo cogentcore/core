@@ -97,6 +97,7 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 		vp.Win.SetDelPopup(cpop)
 	}
 	c.ShowMu.Lock()
+	defer c.ShowMu.Unlock()
 	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
 	count := len(c.Completions)
 	if count > 0 {
@@ -118,7 +119,6 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 		oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 	}
-	c.ShowMu.Unlock()
 }
 
 // Cancel cancels any pending completion -- call when new events nullify prior completions
