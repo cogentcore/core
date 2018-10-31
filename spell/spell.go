@@ -47,8 +47,7 @@ func Save(filename string) error {
 	return model.Save(filename)
 }
 
-// ModelFromCorpus builds a new fuzzy.model from a text file
-func ModelFromCorpus(file os.File) error {
+func Train(file os.File, new bool) error {
 	var out []string
 	var err error
 
@@ -72,7 +71,9 @@ func ModelFromCorpus(file os.File) error {
 		log.Println(os.Stderr, "reading input: ", err)
 		return err
 	}
-	model = fuzzy.NewModel()
+	if new {
+		model = fuzzy.NewModel()
+	}
 	model.Train(out)
 	inited = true
 	return err

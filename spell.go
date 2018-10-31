@@ -39,7 +39,7 @@ func InitSpell() error {
 	err := LoadSpellModel()
 	if err != nil {
 		// oh well, try creating a new model from corpus
-		err = SpellModelFromCorpus()
+		err = NewSpellModelFromText()
 		if err != nil {
 			return err
 		}
@@ -55,14 +55,15 @@ func LoadSpellModel() error {
 	return err
 }
 
-// SpellModelFromCorpus builds a spelling from text
-func SpellModelFromCorpus() error {
+// NewSpellModelFromText builds a NEW spelling model from text
+func NewSpellModelFromText() error {
 	bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
 	if err != nil {
 		log.Printf("Error getting path to corpus directory: %v.\n", err)
 		return err
 	}
 
+	// todo: if bigdata is not found offer file dialog for user to pick/find
 	bigdatafile := filepath.Join(bigdatapath, "big.txt")
 	file, err := os.Open(bigdatafile)
 	if err != nil {
@@ -70,9 +71,25 @@ func SpellModelFromCorpus() error {
 		return err
 	}
 
-	err = spell.ModelFromCorpus(*file)
+	err = spell.Train(*file, true) // true - create a NEW spelling model
 	if err != nil {
 		log.Printf("Failed building model from corpus file: %v.\n", err)
+		return err
+	}
+	return nil
+}
+
+// AddToSpellModel trains on additional text - extends model
+func AddToSpellModel(filepath string) error {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Printf("Could not open corpus file: %v. This file is used to create the spelling model.\n", err)
+		return err
+	}
+
+	err = spell.Train(*file, false) // false - append rather than create new
+	if err != nil {
+		log.Printf("Failed appending to spell model: %v.\n", err)
 		return err
 	}
 	return nil
