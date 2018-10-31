@@ -120,7 +120,7 @@ const (
 // UpdateFromSlice performs overall configuration for given slice
 func (sv *SliceView) UpdateFromSlice() {
 	mods, updt := sv.StdConfig()
-	sv.ConfigSliceGrid(false)
+	sv.ConfigSliceGrid(true)
 	sv.ConfigToolbar()
 	if mods {
 		sv.SetFullReRender()
