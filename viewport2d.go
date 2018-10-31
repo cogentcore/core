@@ -126,6 +126,8 @@ const (
 	// full render -- can be used by elements to drive deep rebuild in case
 	// underlying data has changed.
 	VpFlagDoingFullRender
+
+	VpFlagN
 )
 
 func (vp *Viewport2D) IsPopup() bool {

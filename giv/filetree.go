@@ -55,28 +55,21 @@ func (ft *FileTree) OpenPath(path string) {
 }
 
 // UpdateNewFile should be called with path to a new file that has just been
-// created -- will update view to show that file.
-func (ft *FileTree) UpdateNewFile(filename gi.FileName) {
-	fpath, _ := filepath.Split(string(filename))
+// created -- will update view to show that file, and if that file doesn't
+// exist, it updates the directory containing that file
+func (ft *FileTree) UpdateNewFile(filename string) {
+	ft.OpenDirsTo(filename)
+	fpath, _ := filepath.Split(filename)
 	fpath = filepath.Clean(fpath)
-	if fn, ok := ft.FindFile(string(filename)); ok {
+	if fn, ok := ft.FindFile(filename); ok {
 		// fmt.Printf("updating node for file: %v\n", filename)
 		fn.UpdateNode()
 	} else if fn, ok := ft.FindFile(fpath); ok {
 		// fmt.Printf("updating node for path: %v\n", fpath)
 		fn.UpdateNode()
 	} else {
-		fmt.Printf("FileTree UpdateNewFile: no node found for path to update: %v\n", filename)
+		log.Printf("giv.FileTree UpdateNewFile: no node found for path to update: %v\n", filename)
 	}
-}
-
-// RelPath returns the relative path from root for given full path
-func (ft *FileTree) RelPath(fpath gi.FileName) string {
-	rpath, err := filepath.Rel(string(ft.FPath), string(fpath))
-	if err != nil {
-		log.Printf("giv.FileTree RelPath error: %v\n", err.Error())
-	}
-	return rpath
 }
 
 // IsDirOpen returns true if given directory path is open (i.e., has been
@@ -163,8 +156,8 @@ func (fn *FileNode) IsAutoSave() bool {
 	return false
 }
 
-// RelPath returns the relative path from root for this node
-func (fn *FileNode) RelPath() string {
+// MyRelPath returns the relative path from root for this node
+func (fn *FileNode) MyRelPath() string {
 	rpath, err := filepath.Rel(string(fn.FRoot.FPath), string(fn.FPath))
 	if err != nil {
 		log.Printf("giv.FileNode RelPath error: %v\n", err.Error())
@@ -314,17 +307,92 @@ func (fn *FileNode) CloseBuf() bool {
 	return true
 }
 
+// RelPath returns the relative path from node for given full path
+func (fn *FileNode) RelPath(fpath gi.FileName) string {
+	rpath, err := filepath.Rel(string(fn.FPath), string(fpath))
+	if err != nil {
+		log.Printf("giv.FileNode RelPath error: %v\n", err.Error())
+		return ""
+	}
+	return rpath
+}
+
+// OpenDirsTo opens all the directories above the given filename, and returns the node
+// for element at given path (can be a file or directory itself -- not opened -- just returned)
+func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
+	pth, err := filepath.Abs(path)
+	if err != nil {
+		log.Printf("giv.FileNode OpenDirsTo path %v could not be turned into an absolute path: %v\n", path, err)
+		return nil, err
+	}
+	rpath := fn.RelPath(gi.FileName(pth))
+	if rpath == "." {
+		return fn, nil
+	}
+	if rpath == "" {
+		err := fmt.Errorf("giv.FileNode OpenDirsTo path %v is not within file tree path: %v", pth, fn.FPath)
+		log.Println(err)
+		return nil, err
+	}
+	dirs := strings.Split(rpath, string(filepath.Separator))
+	cfn := fn
+	sz := len(dirs)
+	for i := 0; i < sz; i++ {
+		dr := dirs[i]
+		sfni, ok := cfn.ChildByName(dr, 0)
+		if !ok {
+			err := fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
+			log.Println(err)
+			return nil, err
+		}
+		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
+		if sfn.IsDir() || i == sz-1 {
+			if i < sz-1 && !sfn.IsOpen() {
+				sfn.OpenDir()
+			}
+		} else {
+			err := fmt.Errorf("giv.FileNode non-terminal node %v is not a directory in: %v", dr, cfn.FPath)
+			log.Println(err)
+			return nil, err
+		}
+		cfn = sfn
+	}
+	return cfn, nil
+}
+
 // FindFile finds first node representing given file (false if not found) --
 // looks for full path names that have the given string as their suffix, so
 // you can include as much of the path (including whole thing) as is relevant
 // to disambiguate.  See FilesMatching for a list of files that match a given
 // string.
 func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
+	if fnm == "" {
+		return nil, false
+	}
+	fneff := fnm
+	if fneff[:2] == ".." { // relative path -- get rid of it and just look for relative part
+		dirs := strings.Split(fneff, string(filepath.Separator))
+		for i, dr := range dirs {
+			if dr != ".." {
+				fneff = filepath.Join(dirs[i:]...)
+				break
+			}
+		}
+	}
+
+	if strings.HasPrefix(fneff, string(fn.FPath)) { // full path
+		ffn, err := fn.OpenDirsTo(fneff)
+		if err == nil {
+			return ffn, true
+		}
+		return nil, false
+	}
+
 	var ffn *FileNode
 	found := false
 	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
-		if strings.HasSuffix(string(sfn.FPath), fnm) {
+		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
 			found = true
 			return false
@@ -433,7 +501,7 @@ func (fn *FileNode) NewFile(filename string) {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
 		return
 	}
-	fn.FRoot.UpdateNewFile(gi.FileName(np))
+	fn.FRoot.UpdateNewFile(np)
 }
 
 // NewFolder makes a new folder (directory) in given selected directory node
@@ -445,7 +513,7 @@ func (fn *FileNode) NewFolder(foldername string) {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg}, true, false, nil, nil)
 		return
 	}
-	fn.FRoot.UpdateNewFile(fn.FPath)
+	fn.FRoot.UpdateNewFile(string(fn.FPath))
 }
 
 // CopyFileToDir copies given file path into node that is a directory

@@ -98,8 +98,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * closing multiple windows creates data races, and hangs, in gide at least..
 
-* gui for spell options.
-
 * mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:

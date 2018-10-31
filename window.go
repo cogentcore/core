@@ -107,7 +107,13 @@ var WindowGlobalMu sync.Mutex
 // other popups), there is a master vertical layout under the Viewport
 // (MasterVLay), whose first element is the MainMenu for the window (which can
 // be empty, in which case it is not displayed).  On MacOS, this main menu is
-// typically not directly visible, and instead updates the overall menubar.
+// updates the overall menubar, and also can show the local menu (on by default).
+//
+// Widgets should always use methods to access / set state, and generally should
+// not do much directly with the window.  Almost everything here needs to be
+// guarded by various mutexes.  Leaving everything accessible so expert outside
+// access is still possible in a pinch, but again don't use it unless you know
+// what you're doing (and it might change over time too..)
 type Window struct {
 	NodeBase
 	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
@@ -122,14 +128,13 @@ type Window struct {
 	OverlayVp         *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
 	Sprites           map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
 	SpritesBg         map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
-	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currentlyactive sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
 	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	LastModBits       int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
 	LastSelMode       mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	Focus             ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events"`
-	FocusActive       bool                                    `json:"-" xml:"-" desc:"is the focused node active, or have other things been clicked in the meantime?"`
-	StartFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet"`
-	FocusMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
+	Focus             ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+	StartFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+	FocusMu           sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
 	Shortcuts         Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	DNDData           mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
@@ -140,10 +145,10 @@ type Window struct {
 	Popup             ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack        []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
 	FocusStack        []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
-	NextPopup         ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle"`
-	DelPopup          ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle"`
-	PopupFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated"`
-	PopMu             sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating"`
+	NextPopup         ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
+	PopupFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
+	DelPopup          ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+	PopMu             sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
 	TimerMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AferFunc's)"`
 	lastWinMenuUpdate time.Time
 }
@@ -217,6 +222,11 @@ const (
 	// WinFlagDoFullRender is set at event loop startup to trigger a full render once the window
 	// is properly shown
 	WinFlagDoFullRender
+
+	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
+	WinFlagFocusActive
+
+	WinFlagN
 )
 
 // HasGeomPrefs returns true if geometry prefs were set already
@@ -730,20 +740,10 @@ func (w *Window) FullReRender() {
 		return
 	}
 	w.Viewport.FullRender2DTree()
-	w.FocusMu.Lock()
-	if w.Focus == nil {
-		if w.StartFocus != nil {
-			sf := w.StartFocus
-			w.StartFocus = nil
-			w.FocusMu.Unlock()
-			w.FocusOnOrNext(sf)
-		} else {
-			foc := w.Focus
-			w.FocusMu.Unlock()
-			w.FocusNext(foc)
+	if w.CurFocus() == nil {
+		if !w.ActivateStartFocus() {
+			w.FocusNext(w.CurFocus())
 		}
-	} else {
-		w.FocusMu.Unlock()
 	}
 }
 
@@ -1459,16 +1459,8 @@ mainloop:
 			}
 			continue // don't do anything else!
 		case *mouse.DragEvent:
+			// note: used to have ActivateStartFocus() here -- not sure why tho..
 			w.LastModBits = e.Modifiers
-			w.FocusMu.Lock()
-			if w.Focus == nil && w.StartFocus != nil { // why is this here in drag event???
-				sf := w.StartFocus
-				w.StartFocus = nil
-				w.FocusMu.Unlock()
-				w.FocusOnOrNext(sf)
-			} else {
-				w.FocusMu.Unlock()
-			}
 			w.LastSelMode = e.SelectMode()
 			if w.DNDData != nil {
 				w.DNDMoveEvent(e)
@@ -1504,14 +1496,8 @@ mainloop:
 					w.MainMenuUpdateWindows()
 					w.MainMenuSet()
 				}
-				w.FocusMu.Lock()
-				if w.Focus == nil && w.StartFocus != nil {
-					sf := w.StartFocus
-					w.StartFocus = nil
-					w.FocusMu.Unlock()
-					w.FocusOnOrNext(sf)
-				} else {
-					w.FocusMu.Unlock()
+				if w.CurFocus() == nil {
+					w.ActivateStartFocus()
 				}
 			}
 		case *key.ChordEvent:
@@ -1685,13 +1671,11 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 			if !nii.HasFocus2D() {
 				return true
 			}
-			w.FocusMu.Lock()
-			if !w.FocusActive { // reactivate on keyboard input
-				w.FocusActive = true
-				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
+			if !w.HasFlag(int(WinFlagFocusActive)) { // reactivate on keyboard input
+				w.SetFlag(int(WinFlagFocusActive))
+				fmt.Printf("set foc active: %v\n", ni.PathUnique())
 				nii.FocusChanged2D(FocusActive)
 			}
-			w.FocusMu.Unlock()
 		} else if evi.HasPos() {
 			pos := evi.Pos()
 			switch evi.(type) {
@@ -2242,10 +2226,10 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	}
 	switch kf {
 	case KeyFunFocusNext:
-		w.FocusNext(w.Focus)
+		w.FocusNext(w.CurFocus())
 		e.SetProcessed()
 	case KeyFunFocusPrev:
-		w.FocusPrev(w.Focus)
+		w.FocusPrev(w.CurFocus())
 		e.SetProcessed()
 	case KeyFunGoGiEditor:
 		TheViewIFace.GoGiEditor(w.Viewport.This())
@@ -2294,45 +2278,75 @@ func (w *Window) SetStartFocus(k ki.Ki) {
 	w.FocusMu.Unlock()
 }
 
+// CurFocus gets the current focus node under mutex protection
+func (w *Window) CurFocus() ki.Ki {
+	w.FocusMu.RLock()
+	defer w.FocusMu.RUnlock()
+	return w.Focus
+}
+
+// ActivateStartFocus activates start focus if there is no current focus
+// and StartFocus is set -- returns true if activated
+func (w *Window) ActivateStartFocus() bool {
+	w.FocusMu.RLock()
+	if w.StartFocus == nil {
+		w.FocusMu.RUnlock()
+		return false
+	}
+	w.FocusMu.RUnlock()
+	w.FocusMu.Lock()
+	sf := w.StartFocus
+	w.StartFocus = nil
+	w.FocusMu.Unlock()
+	w.FocusOnOrNext(sf)
+	return true
+}
+
+// setFocusPtr JUST sets the focus pointer under mutex protection --
+// use SetFocus for end-user setting of focus
+func (w *Window) setFocusPtr(k ki.Ki) {
+	w.FocusMu.Lock()
+	w.Focus = k
+	w.FocusMu.Unlock()
+}
+
 // SetFocus sets focus to given item -- returns true if focus changed.
 func (w *Window) SetFocus(k ki.Ki) bool {
-	w.FocusMu.Lock()
-	if w.Focus == k {
+	cfoc := w.CurFocus()
+	if cfoc == k {
 		if k != nil {
 			_, ni := KiToNode2D(k)
 			if ni != nil && ni.This() != nil {
 				ni.SetFlag(int(HasFocus)) // ensure focus flag always set
 			}
 		}
-		w.FocusMu.Unlock()
 		return false
 	}
 
 	updt := w.UpdateStart()
 	defer w.UpdateEnd(updt)
 
-	if w.Focus != nil {
-		nii, ni := KiToNode2D(w.Focus)
+	if cfoc != nil {
+		nii, ni := KiToNode2D(cfoc)
 		if ni != nil && ni.This() != nil {
 			ni.ClearFlag(int(HasFocus))
 			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
 			nii.FocusChanged2D(FocusLost)
 		}
 	}
-	w.Focus = k
+	w.setFocusPtr(k)
 	if k == nil {
 		return true
 	}
 	nii, ni := KiToNode2D(k)
 	if ni == nil || ni.This() == nil { // only 2d for now
-		w.Focus = nil
+		w.setFocusPtr(nil)
 		return false
 	}
 	ni.SetFlag(int(HasFocus))
-	w.FocusActive = true
+	w.SetFlag(int(WinFlagFocusActive))
 	// fmt.Printf("set foc: %v\n", ni.PathUnique())
-	w.ClearNonFocus(w.Focus) // shouldn't need this but actually sometimes do
-	w.FocusMu.Unlock()
+	w.ClearNonFocus(k) // shouldn't need this but actually sometimes do
 	nii.FocusChanged2D(FocusGot)
 	return true
 }
@@ -2386,12 +2400,10 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 // FocusOnOrNext sets the focus on the given item, or the next one that can
 // accept focus -- returns true if a new focus item found.
 func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
-	w.FocusMu.Lock()
-	if w.Focus == foc {
-		w.FocusMu.Unlock()
+	cfoc := w.CurFocus()
+	if cfoc == foc {
 		return true
 	}
-	w.FocusMu.Unlock()
 	_, ni := KiToNode2D(foc)
 	if ni == nil || ni.This() == nil {
 		return false
@@ -2550,20 +2562,19 @@ func (w *Window) PopFocus() {
 // FocusActiveClick updates the FocusActive status based on mouse clicks in
 // or out of the focused item
 func (w *Window) FocusActiveClick(e *mouse.Event) {
-	w.FocusMu.Lock()
-	defer w.FocusMu.Unlock()
-	if w.Focus == nil || e.Button != mouse.Left || e.Action != mouse.Press {
+	cfoc := w.CurFocus()
+	if cfoc == nil || e.Button != mouse.Left || e.Action != mouse.Press {
 		return
 	}
 	cpop := w.CurPopup()
 	if cpop != nil { // no updating on popus
 		return
 	}
-	nii, ni := KiToNode2D(w.Focus)
+	nii, ni := KiToNode2D(cfoc)
 	if ni != nil && ni.This() != nil {
 		if e.Pos().In(ni.WinBBox) {
-			if !w.FocusActive {
-				w.FocusActive = true
+			if !w.HasFlag(int(WinFlagFocusActive)) {
+				w.SetFlag(int(WinFlagFocusActive))
 				nii.FocusChanged2D(FocusActive)
 			}
 		} else {
@@ -2572,8 +2583,8 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 					return
 				}
 			}
-			if w.FocusActive {
-				w.FocusActive = false
+			if w.HasFlag(int(WinFlagFocusActive)) {
+				w.ClearFlag(int(WinFlagFocusActive))
 				nii.FocusChanged2D(FocusInactive)
 			}
 		}
@@ -2582,14 +2593,13 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 
 // FocusInactivate inactivates the current focus element
 func (w *Window) FocusInactivate() {
-	w.FocusMu.Lock()
-	defer w.FocusMu.Unlock()
-	if w.Focus == nil || !w.FocusActive {
+	cfoc := w.CurFocus()
+	if cfoc == nil || !w.HasFlag(int(WinFlagFocusActive)) {
 		return
 	}
-	nii, ni := KiToNode2D(w.Focus)
+	nii, ni := KiToNode2D(cfoc)
 	if ni != nil && ni.This() != nil {
-		w.FocusActive = false
+		w.ClearFlag(int(WinFlagFocusActive))
 		nii.FocusChanged2D(FocusInactive)
 	}
 }

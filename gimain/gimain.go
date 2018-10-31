@@ -21,6 +21,8 @@ var dummSvg svg.Line
 var dummyVV giv.ValueViewBase
 
 func Main(mainrun func()) {
+	DebugEnumSizes()
+
 	driver.Main(func(app oswin.App) {
 		mainrun()
 	})
