@@ -101,7 +101,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 * mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:
-	+ word wrapping is going long unnecessarily -- is target size correct??
 	+ cursor goes to hand for links in TextView
 	+ parens / brackets match highlighter..
 
