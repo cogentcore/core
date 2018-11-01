@@ -608,6 +608,7 @@ type PrefsDetailed struct {
 	HoverStartMSec             int `min:"10" max:"10000" step:"10" desc:"Default: 1000 the number of milliseconds to wait before initiating a hover event"`
 	HoverMaxPix                int `min:"0" max:"1000" step:"5" desc:"Default = 5 the maximum number of pixels that mouse can move and still register a Hover event"`
 	CompleteWaitMSec           int `min:"10" max:"10000" step:"10" desc:"Default: 500 the number of milliseconds to wait before offering completions"`
+	CompleteMaxItems           int `min:"0" max:"100" step:"5" desc:"Default: 25 the maximum number of completions offered in popup"`
 	CursorBlinkMSec            int `min:"0" max:"1000" step:"5" desc:"Default: 500 number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
 	TextViewClipHistMax        int `min:"0" max:"1000" step:"5" desc:"Default: 100 Maximum amount of clipboard history to retain"`
 	LayoutFocusNameTimeoutMSec int `min:"0" max:"5000" step:"20" desc:"Default: 500 the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over
@@ -669,6 +670,7 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.HoverStartMSec = HoverStartMSec
 	pf.HoverMaxPix = HoverMaxPix
 	pf.CompleteWaitMSec = CompleteWaitMSec
+	pf.CompleteMaxItems = CompleteMaxItems
 	pf.CursorBlinkMSec = CursorBlinkMSec
 	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
 	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
@@ -690,6 +692,7 @@ func (pf *PrefsDetailed) Apply() {
 	HoverStartMSec = pf.HoverStartMSec
 	HoverMaxPix = pf.HoverMaxPix
 	CompleteWaitMSec = pf.CompleteWaitMSec
+	CompleteMaxItems = pf.CompleteMaxItems
 	CursorBlinkMSec = pf.CursorBlinkMSec
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec

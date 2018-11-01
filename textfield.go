@@ -27,6 +27,9 @@ import (
 	"github.com/goki/prof"
 )
 
+const force = true
+const dontForce = false
+
 // CursorBlinkMSec is number of milliseconds that cursor blinks on
 // and off -- set to 0 to disable blinking
 var CursorBlinkMSec = 500
@@ -617,7 +620,7 @@ func (tf *TextField) SetCompleter(data interface{}, matchFun complete.MatchFunc,
 }
 
 // OfferComplete pops up a menu of possible completions
-func (tf *TextField) OfferComplete() {
+func (tf *TextField) OfferComplete(forceComplete bool) {
 	if tf.Complete == nil {
 		return
 	}
@@ -626,7 +629,7 @@ func (tf *TextField) OfferComplete() {
 	cpos.X += 5
 	cpos.Y += 10
 	position := token.Position{}
-	tf.Complete.Show(s, position, tf.Viewport, cpos)
+	tf.Complete.Show(s, position, tf.Viewport, cpos, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -652,7 +655,7 @@ func (tf *TextField) CompleteExtend(s string) {
 	if s != "" {
 		tf.Complete.Cancel(tf.Viewport)
 		tf.InsertAtCursor(s)
-		tf.OfferComplete()
+		tf.OfferComplete(dontForce)
 	}
 }
 
@@ -1051,11 +1054,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunMoveRight:
 		kt.SetProcessed()
 		tf.CursorForward(1)
-		tf.OfferComplete()
+		tf.OfferComplete(dontForce)
 	case KeyFunMoveLeft:
 		kt.SetProcessed()
 		tf.CursorBackward(1)
-		tf.OfferComplete()
+		tf.OfferComplete(dontForce)
 	case KeyFunHome:
 		kt.SetProcessed()
 		tf.CancelComplete()
@@ -1101,7 +1104,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunBackspace:
 		kt.SetProcessed()
 		tf.CursorBackspace(1)
-		tf.OfferComplete()
+		tf.OfferComplete(dontForce)
 	case KeyFunKill:
 		kt.SetProcessed()
 		tf.CancelComplete()
@@ -1119,7 +1122,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		tf.Paste()
 	case KeyFunComplete:
 		kt.SetProcessed()
-		tf.OfferComplete()
+		tf.OfferComplete(force)
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
@@ -1128,7 +1131,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 				if kt.Rune == ' ' {
 					tf.CancelComplete()
 				} else {
-					tf.OfferComplete()
+					tf.OfferComplete(dontForce)
 				}
 			}
 		}

@@ -55,12 +55,15 @@ const (
 // showing the completion menu
 var CompleteWaitMSec = 500
 
+// CompleteMaxItems is the max number of items to display in completer popup
+var CompleteMaxItems = 25
+
 // Show is the main call for listing completions.
 // Has a builtin delay timer so completions are only shown after
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point, force bool) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -78,7 +81,7 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 	}
 	c.DelayTimer = time.AfterFunc(time.Duration(CompleteWaitMSec)*time.Millisecond,
 		func() {
-			c.ShowNow(text, pos, vp, pt)
+			c.ShowNow(text, pos, vp, pt, force)
 			c.DelayMu.Lock()
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
@@ -88,7 +91,7 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu
-func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt image.Point, force bool) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -104,15 +107,24 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 		if count == 1 && c.Completions[0].Text == c.Seed {
 			return
 		}
+
 		var m Menu
-		for i := 0; i < count; i++ {
-			text := c.Completions[i].Text
-			icon := c.Completions[i].Icon
+		if count <= CompleteMaxItems || force {
+			for i := 0; i < count; i++ {
+				text := c.Completions[i].Text
+				icon := c.Completions[i].Icon
+				m.AddAction(ActOpts{Icon: icon, Label: text, Data: text},
+					c, func(recv, send ki.Ki, sig int64, data interface{}) {
+						tff := recv.Embed(KiT_Complete).(*Complete)
+						tff.Complete(data.(string))
+					})
+			}
+		} else {
+			chord := ShortcutForFun(KeyFunComplete)
+			text := "Too many items; Type to narrow; " + string(chord) + " to view all."
+			icon := ""
 			m.AddAction(ActOpts{Icon: icon, Label: text, Data: text},
-				c, func(recv, send ki.Ki, sig int64, data interface{}) {
-					tff := recv.Embed(KiT_Complete).(*Complete)
-					tff.Complete(data.(string))
-				})
+				c, func(recv, send ki.Ki, sig int64, data interface{}) {})
 		}
 		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
 		pvp.SetFlag(int(VpFlagCompleter))

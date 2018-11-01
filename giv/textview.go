@@ -30,7 +30,7 @@ import (
 )
 
 const force = true
-const dontforce = false
+const dontForce = false
 
 // TextView is a widget for editing multiple lines of text (as compared to
 // TextField for a single line).  The View is driven by a TextBuf buffer which
@@ -2186,11 +2186,11 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 //    Complete
 
 // OfferComplete pops up a menu of possible completions
-func (tv *TextView) OfferComplete(forcecomplete bool) {
+func (tv *TextView) OfferComplete(forceComplete bool) {
 	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return
 	}
-	if !tv.Buf.Opts.Completion && !forcecomplete {
+	if !tv.Buf.Opts.Completion && !forceComplete {
 		return
 	}
 
@@ -2212,7 +2212,7 @@ func (tv *TextView) OfferComplete(forcecomplete bool) {
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	tv.Complete.Show(s, tpos, tv.Viewport, cpos)
+	tv.Complete.Show(s, tpos, tv.Viewport, cpos, forceComplete)
 }
 
 // CompleteText edits the text using the string chosen from the completion menu
@@ -2239,7 +2239,7 @@ func (tv *TextView) CompleteExtend(s string) {
 	if s != "" {
 		tv.Complete.Cancel(tv.Viewport)
 		tv.InsertAtCursor([]byte(s))
-		tv.OfferComplete(dontforce)
+		tv.OfferComplete(dontForce)
 	}
 }
 
@@ -3274,25 +3274,25 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
-		tv.OfferComplete(dontforce)
+		tv.OfferComplete(dontForce)
 	case gi.KeyFunWordRight:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForwardWord(1)
-		tv.OfferComplete(dontforce)
+		tv.OfferComplete(dontForce)
 	case gi.KeyFunMoveLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
-		tv.OfferComplete(dontforce)
+		tv.OfferComplete(dontForce)
 	case gi.KeyFunWordLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackwardWord(1)
-		tv.OfferComplete(dontforce)
+		tv.OfferComplete(dontForce)
 	case gi.KeyFunMoveUp:
 		cancelAll()
 		kt.SetProcessed()
@@ -3414,7 +3414,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		} else {
 			kt.SetProcessed()
 			tv.CursorBackspace(1)
-			tv.OfferComplete(dontforce)
+			tv.OfferComplete(dontForce)
 		}
 	case gi.KeyFunKill:
 		cancelAll()
@@ -3428,7 +3428,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorBackspaceWord(1)
-		tv.OfferComplete(dontforce)
+		tv.OfferComplete(dontForce)
 	case gi.KeyFunDeleteWord:
 		cancelAll()
 		kt.SetProcessed()
@@ -3524,7 +3524,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 						if kt.Rune == ' ' {
 							tv.CancelComplete()
 						} else {
-							tv.OfferComplete(dontforce)
+							tv.OfferComplete(dontForce)
 						}
 					}
 				}
