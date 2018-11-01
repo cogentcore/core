@@ -3466,7 +3466,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if tv.Buf.Opts.AutoIndent {
 				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 				tv.InsertAtCursor([]byte("\n"))
-				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
 				if tbe != nil {
 					tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln+1)
 					tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
@@ -3484,7 +3484,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			updt := tv.Viewport.Win.UpdateStart()
 			lasttab := tv.HasFlag(int(TextViewLastWasTabAI))
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
-				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
 				tv.CursorPos.Ch = cpos
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.RenderCursor(true)
@@ -3514,7 +3514,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 						tv.CancelComplete()
 						bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 						tv.InsertAtCursor([]byte(string(kt.Rune)))
-						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, tv.Buf.Opts.SpaceIndent, tv.Sty.Text.TabSize, DefaultIndentStrings, DefaultUnindentStrings)
+						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
 						if tbe != nil {
 							tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})

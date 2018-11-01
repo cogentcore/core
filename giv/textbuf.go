@@ -26,6 +26,7 @@ import (
 // TextBufOpts contains options for TextBufs
 type TextBufOpts struct {
 	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
+	TabSize     int  `desc:"size of a tab, in chars -- also determines indent level for space indent"`
 	AutoIndent  bool `desc:"auto-indent on newline (enter) or tab"`
 	LineNos     bool `desc:"show line numbers at left end of editor"`
 	Completion  bool `desc:"use the completion system to suggest options while typing"`
@@ -223,6 +224,7 @@ func (tb *TextBuf) Defaults() {
 	}
 	tb.SetHiStyle(HiStyleDefault)
 	tb.Opts.AutoIndent = true
+	tb.Opts.TabSize = 4
 }
 
 // Refresh signals any views to refresh views
@@ -1454,6 +1456,7 @@ func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, spc bool) {
 			if txt[i] == ' ' {
 				n++
 			} else {
+				n /= tabSz
 				return
 			}
 		}
@@ -1475,7 +1478,7 @@ func IndentBytes(n, tabSz int, spc bool) []byte {
 	if spc {
 		b := make([]byte, n*tabSz)
 		for i := 0; i < n*tabSz; i++ {
-			b[i] = '\t'
+			b[i] = ' '
 		}
 		return b
 	} else {
@@ -1498,9 +1501,12 @@ func IndentCharPos(n, tabSz int, spc bool) int {
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces) -- either inserts or deletes to reach
 // target
-func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
+func (tb *TextBuf) IndentLine(ln, n int) *TextBufEdit {
 	asv := tb.AutoSaveOff()
 	defer tb.AutoSaveRestore(asv)
+
+	tabSz := tb.Opts.TabSize
+	spc := tb.Opts.SpaceIndent
 
 	curli, _ := tb.LineIndent(ln, tabSz)
 	if n > curli {
@@ -1516,7 +1522,8 @@ func (tb *TextBuf) IndentLine(ln int, n, tabSz int, spc bool) *TextBufEdit {
 }
 
 // PrevLineIndent returns previous line from given line that has indentation -- skips blank lines
-func (tb *TextBuf) PrevLineIndent(ln int, tabSz int) (n int, spc bool, txt string) {
+func (tb *TextBuf) PrevLineIndent(ln int) (n int, spc bool, txt string) {
+	tabSz := tb.Opts.TabSize
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	ln--
@@ -1542,8 +1549,11 @@ func (tb *TextBuf) PrevLineIndent(ln int, tabSz int) (n int, spc bool, txt strin
 // unindent but this will do for now.  Returns any edit that took place (could
 // be nil), along with the auto-indented level and character position for the
 // indent of the current line.
-func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
-	li, _, prvln := tb.PrevLineIndent(ln, tabSz)
+func (tb *TextBuf) AutoIndent(ln int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
+	tabSz := tb.Opts.TabSize
+	spc := tb.Opts.SpaceIndent
+
+	li, _, prvln := tb.PrevLineIndent(ln)
 	tb.LinesMu.RLock()
 	curln := strings.TrimSpace(string(tb.Lines[ln]))
 	tb.LinesMu.RUnlock()
@@ -1565,18 +1575,18 @@ func (tb *TextBuf) AutoIndent(ln int, spc bool, tabSz int, indents, unindents []
 	}
 	switch {
 	case ind && und:
-		return tb.IndentLine(ln, li, tabSz, spc), li, IndentCharPos(li, tabSz, spc)
+		return tb.IndentLine(ln, li), li, IndentCharPos(li, tabSz, spc)
 	case ind:
-		return tb.IndentLine(ln, li+1, tabSz, spc), li + 1, IndentCharPos(li+1, tabSz, spc)
+		return tb.IndentLine(ln, li+1), li + 1, IndentCharPos(li+1, tabSz, spc)
 	case und:
-		return tb.IndentLine(ln, li-1, tabSz, spc), li - 1, IndentCharPos(li-1, tabSz, spc)
+		return tb.IndentLine(ln, li-1), li - 1, IndentCharPos(li-1, tabSz, spc)
 	default:
-		return tb.IndentLine(ln, li, tabSz, spc), li, IndentCharPos(li, tabSz, spc)
+		return tb.IndentLine(ln, li), li, IndentCharPos(li, tabSz, spc)
 	}
 }
 
 // AutoIndentRegion does auto-indent over given region -- end is *exclusive*
-func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, unindents []string) {
+func (tb *TextBuf) AutoIndentRegion(st, ed int, indents, unindents []string) {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
@@ -1584,20 +1594,20 @@ func (tb *TextBuf) AutoIndentRegion(st, ed int, spc bool, tabSz int, indents, un
 		if ln >= tb.NLines {
 			break
 		}
-		tb.AutoIndent(ln, spc, tabSz, indents, unindents)
+		tb.AutoIndent(ln, indents, unindents)
 	}
 }
 
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*
-func (tb *TextBuf) CommentRegion(st, ed int, comment []byte, tabSz int) {
+func (tb *TextBuf) CommentRegion(st, ed int, comment []byte) {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
 	ch := 0
-	li, spc := tb.LineIndent(st, tabSz)
+	li, _ := tb.LineIndent(st, tb.Opts.TabSize)
 	if li > 0 {
-		if spc {
-			ch = tabSz * li
+		if tb.Opts.SpaceIndent {
+			ch = tb.Opts.TabSize * li
 		} else {
 			ch = li
 		}
