@@ -119,17 +119,11 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 						tff.Complete(data.(string))
 					})
 			}
-		} else {
-			chord := ShortcutForFun(KeyFunComplete)
-			text := "Too many items; Type to narrow; " + string(chord) + " to view all."
-			icon := ""
-			m.AddAction(ActOpts{Icon: icon, Label: text, Data: text},
-				c, func(recv, send ki.Ki, sig int64, data interface{}) {})
+			pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+			pvp.SetFlag(int(VpFlagCompleter))
+			pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+			oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 		}
-		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-		pvp.SetFlag(int(VpFlagCompleter))
-		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-		oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 	}
 }
 
