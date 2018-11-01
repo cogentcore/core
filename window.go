@@ -502,7 +502,7 @@ func (w *Window) IsResizing() bool {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *Window) Resized(sz image.Point) {
-	if w.IsClosed() || w.IsClosing() {
+	if !w.IsVisible() {
 		return
 	}
 	curSz := w.Viewport.Geom.Size
@@ -515,7 +515,7 @@ func (w *Window) Resized(sz image.Point) {
 	w.FocusInactivate()
 	w.InactivateAllSprites()
 	w.UpMu.Lock()
-	if w.IsClosed() {
+	if !w.IsVisible() {
 		if WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Nm)
 		}
@@ -597,6 +597,14 @@ func (w *Window) IsClosed() bool {
 		return true
 	}
 	return false
+}
+
+// IsVisible is the main visibility check -- don't do any window updates if not visible!
+func (w *Window) IsVisible() bool {
+	if w == nil || w.This() == nil || w.OSWin == nil || w.IsClosed() || w.IsClosing() || w.OSWin.IsMinimized() {
+		return false
+	}
+	return true
 }
 
 // WinNewCloseStamp updates the global WinNewCloseTime timestamp for updating windows menus
@@ -736,7 +744,7 @@ func (w *Window) SendShowEvent() {
 // drive an UploadAllViewports call after all the rendering is done, and
 // signal the publishing of the window after that
 func (w *Window) FullReRender() {
-	if w.IsClosed() || w.IsClosing() {
+	if !w.IsVisible() {
 		return
 	}
 	w.Viewport.FullRender2DTree()
@@ -752,11 +760,11 @@ func (w *Window) FullReRender() {
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
 func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
-	if w.IsClosed() || w.IsClosing() {
+	if !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -774,11 +782,11 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
 func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
-	if w.IsClosed() || w.IsClosing() {
+	if !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -799,11 +807,11 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
 func (w *Window) UploadAllViewports() {
-	if w.IsClosed() || w.IsClosing() {
+	if !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -867,16 +875,12 @@ func (w *Window) ClearWinUpdating() {
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
-	if w.IsClosed() || w.IsClosing() || w.OSWin.IsMinimized() {
+	if !w.IsVisible() || w.OSWin.IsMinimized() {
 		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		return
 	}
-	// actually, cannot prevent publishing -- will lockup!
-	// if !w.TryPublishing() {
-	// 	return
-	// }
-	w.UpMu.Lock()     // block all updates while we publish
-	if w.IsClosed() { // could have closed while we waited for lock
+	w.UpMu.Lock()       // block all updates while we publish
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -908,7 +912,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	if Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	if win.IsClosed() || win.IsClosing() || win.IsResizing() || win.IsWinUpdating() {
+	if !win.IsVisible() || win.IsResizing() || win.IsWinUpdating() {
 		return
 	}
 	win.Publish()
@@ -920,13 +924,16 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
+	if !w.IsVisible() {
+		return
+	}
 	w.UpMu.Lock()
 	if w.OverlayVp == nil || !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
 		w.ClearFlag(int(WinFlagOverTexActive))
 		w.UpMu.Unlock()
 		return
 	}
-	if w.IsClosed() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -1063,11 +1070,11 @@ func (w *Window) RenderSprite(sp *Viewport2D) {
 // MainMenuUpdated needs to be called whenever the main menu for this window
 // is updated in terms of items added or removed.
 func (w *Window) MainMenuUpdated() {
-	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
+	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -1077,11 +1084,11 @@ func (w *Window) MainMenuUpdated() {
 
 // MainMenuSet sets the main menu for the window, after window.Focus event
 func (w *Window) MainMenuSet() {
-	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
+	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -1092,11 +1099,11 @@ func (w *Window) MainMenuSet() {
 // MainMenuUpdateActives needs to be called whenever items on the main menu
 // for this window have their IsActive status updated.
 func (w *Window) MainMenuUpdateActives() {
-	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
+	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -1106,11 +1113,11 @@ func (w *Window) MainMenuUpdateActives() {
 
 // MainMenuUpdateWindows updates a Window menu with a list of active menus.
 func (w *Window) MainMenuUpdateWindows() {
-	if w == nil || w.MainMenu == nil || w.IsClosed() || w.IsClosing() {
+	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.IsClosed() || w.IsClosing() { // could have closed while we waited for lock
+	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
@@ -1740,7 +1747,6 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 	}
 
 	w.EventMu.Lock()
-	defer w.EventMu.Unlock()
 
 	// fmt.Printf("got event type: %v\n", et)
 	for pri := HiPri; pri < EventPrisN; pri++ {
@@ -1789,7 +1795,9 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 					rr.Recv.SetFlag(int(NodeDragging)) // PROVISIONAL!
 				}
 			}
-			rr.Call(w.This(), int64(et), evi)
+			w.EventMu.Unlock()
+			rr.Call(w.This(), int64(et), evi) // could call further event loops..
+			w.EventMu.Lock()
 			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
 				switch evi.(type) { // only grab events if processed
 				case *mouse.DragEvent:
@@ -1813,6 +1821,7 @@ func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
 			}
 		}
 	}
+	w.EventMu.Unlock()
 }
 
 // GenMouseFocusEvents processes mouse.MoveEvent to generate mouse.FocusEvent

@@ -70,6 +70,7 @@ type TextView struct {
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
 	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	CursorMu      sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
 	lastRecenter  int
 	lastFilename  gi.FileName
 }
@@ -205,6 +206,9 @@ func (tv *TextView) EditDone() {
 
 // Refresh re-displays everything anew from the buffer
 func (tv *TextView) Refresh() {
+	if !tv.IsVisible() {
+		return
+	}
 	tv.LayoutAllLines(false)
 	tv.RenderAllLines()
 	tv.ClearNeedsRefresh()
@@ -249,7 +253,7 @@ func (tv *TextView) RefreshIfNeeded() bool {
 
 // IsChanged returns true if buffer was changed (edited)
 func (tv *TextView) IsChanged() bool {
-	if tv.Buf != nil && tv.Buf.Changed {
+	if tv.Buf != nil && tv.Buf.IsChanged() {
 		return true
 	}
 	return false
@@ -347,8 +351,6 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone:
 	case TextBufNew:
 		tv.ResetState()
-		// tv.SetFullReRender()
-		// tv.UpdateSig()
 		tv.Refresh()
 		tv.SetCursorShow(tv.CursorPos)
 	case TextBufInsert:
@@ -2298,7 +2300,7 @@ func (tv *TextView) ScrollInView(bbox image.Rectangle) bool {
 // ScrollCursorInView tells any parent scroll layout to scroll to get cursor
 // in view -- returns true if scrolled
 func (tv *TextView) ScrollCursorInView() bool {
-	if tv.InBounds() {
+	if tv.IsVisible() {
 		curBBox := tv.CursorBBox(tv.CursorPos)
 		return tv.ScrollInView(curBBox)
 	} else {
@@ -2597,27 +2599,25 @@ func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tv *TextView) RenderCursor(on bool) {
-	if tv.Viewport == nil {
-		return
-	}
-	win := tv.Viewport.Win
-	if win == nil {
+	if !tv.IsVisible() {
 		return
 	}
 	if tv.Renders == nil {
 		return
 	}
-	if tv.InBounds() {
-		sp := tv.CursorSprite()
-		if on {
-			win.ActivateSprite(sp.Nm)
-		} else {
-			win.InactivateSprite(sp.Nm)
-		}
-		sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
-		win.RenderOverlays() // needs an explicit call!
-		win.UpdateSig()      // publish
+	tv.CursorMu.Lock()
+	defer tv.CursorMu.Unlock()
+
+	win := tv.Viewport.Win
+	sp := tv.CursorSprite()
+	if on {
+		win.ActivateSprite(sp.Nm)
+	} else {
+		win.InactivateSprite(sp.Nm)
 	}
+	sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
+	win.RenderOverlays() // needs an explicit call!
+	win.UpdateSig()      // publish
 }
 
 // CursorSprite returns the sprite Viewport2D that holds the cursor (which is
@@ -2775,17 +2775,18 @@ func (tv *TextView) VisSizes() {
 // RenderAllLines displays all the visible lines on the screen -- this is
 // called outside of update process and has its own bounds check and updating
 func (tv *TextView) RenderAllLines() {
-	if tv.InBounds() {
-		rs := &tv.Viewport.Render
-		rs.PushBounds(tv.VpBBox)
-		vp := tv.Viewport
-		updt := vp.Win.UpdateStart()
-		tv.RenderAllLinesInBounds()
-		tv.PopBounds()
-		vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
-		tv.RenderScrolls()
-		vp.Win.UpdateEnd(updt)
+	if !tv.IsVisible() {
+		return
 	}
+	rs := &tv.Viewport.Render
+	rs.PushBounds(tv.VpBBox)
+	vp := tv.Viewport
+	updt := vp.Win.UpdateStart()
+	tv.RenderAllLinesInBounds()
+	tv.PopBounds()
+	vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
+	tv.RenderScrolls()
+	vp.Win.UpdateEnd(updt)
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
@@ -2919,6 +2920,9 @@ func (tv *TextView) RenderScrolls() {
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *TextView) RenderLines(st, ed int) bool {
+	if !tv.IsVisible() {
+		return false
+	}
 	if st >= tv.NLines {
 		st = tv.NLines - 1
 	}
@@ -2926,9 +2930,6 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		ed = tv.NLines - 1
 	}
 	if st > ed {
-		return false
-	}
-	if !tv.InBounds() {
 		return false
 	}
 	vp := tv.Viewport

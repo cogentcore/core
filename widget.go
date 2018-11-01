@@ -310,7 +310,7 @@ func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
 // so, calls ReRender2DTree and returns true -- call this at start of each
 // Render2D
 func (wb *WidgetBase) FullReRenderIfNeeded() bool {
-	if wb.InBounds() && wb.NeedsFullReRender() && !wb.Viewport.IsDoingFullRender() {
+	if wb.IsVisible() && wb.NeedsFullReRender() && !wb.Viewport.IsDoingFullRender() {
 		if Render2DTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.PathUnique(), wb.VpBBox)
 		}
@@ -319,17 +319,6 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 		return true
 	}
 	return false
-}
-
-// InBounds returns true if our VpBBox is non-empty (and other stuff is non-nil)
-func (wb *WidgetBase) InBounds() bool {
-	if wb.This() == nil || wb.Viewport == nil {
-		return false
-	}
-	if wb.IsInvisible() {
-		return false
-	}
-	return !wb.VpBBox.Empty()
 }
 
 // PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty

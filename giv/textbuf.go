@@ -47,7 +47,6 @@ type TextBuf struct {
 	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
 	Autosave   bool           `desc:"if true, auto-save file after changes (in a separate routine)"`
 	Opts       TextBufOpts    `desc:"options for how text editing / viewing works"`
-	Changed    bool           `json:"-" xml:"-" desc:"true if the text has been changed (edited) relative to the original, since last save"`
 	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Info       FileInfo       `desc:"full info about file"`
 	Hi         HiMarkup       `desc:"syntax highlighting markup parameters (language, style, etc)"`
@@ -118,12 +117,33 @@ const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
 	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
 
-	// TextBufMarkingUp atomic flag to indicate current markup operation in progress -- don't redo
+	// TextBufMarkingUp indicates current markup operation in progress -- don't redo
 	TextBufMarkingUp
 
-	// TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok
+	// TextBufChanged indicates if the text has been changed (edited) relative to the
+	// original, since last save
+	TextBufChanged
+
+	// TextBufFileModOk have already asked about fact that file has changed since being
+	// opened, user is ok
 	TextBufFileModOk
 )
+
+// IsChanged indicates if the text has been changed (edited) relative to
+// the original, since last save
+func (tb *TextBuf) IsChanged() bool {
+	return tb.HasFlag(int(TextBufChanged))
+}
+
+// SetChanged marks buffer as changed
+func (tb *TextBuf) SetChanged() {
+	tb.SetFlag(int(TextBufChanged))
+}
+
+// ClearChanged marks buffer as un-changed
+func (tb *TextBuf) ClearChanged() {
+	tb.ClearFlag(int(TextBufChanged))
+}
 
 // SetText sets the text to given bytes
 func (tb *TextBuf) SetText(txt []byte) {
@@ -135,9 +155,9 @@ func (tb *TextBuf) SetText(txt []byte) {
 
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
-	if tb.Changed {
+	if tb.IsChanged() {
 		tb.AutoSaveDelete()
-		tb.Changed = false
+		tb.ClearChanged()
 		tb.LinesToBytes()
 		tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
 	}
@@ -354,7 +374,7 @@ func (tb *TextBuf) Revert() bool {
 	tb.Stat() // "own" the new file..
 	diffs := tb.DiffBufs(ob)
 	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
-	tb.Changed = false
+	tb.ClearChanged()
 	tb.AutoSaveDelete()
 	tb.ReMarkup()
 	return true
@@ -434,7 +454,7 @@ func (tb *TextBuf) Save() error {
 
 // Close closes the buffer -- prompts to save if changes, and disconnects from views
 func (tb *TextBuf) Close() bool {
-	if tb.Changed {
+	if tb.IsChanged() {
 		vp := tb.ViewportFromView()
 		if tb.Filename != "" {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
@@ -446,7 +466,7 @@ func (tb *TextBuf) Close() bool {
 						tb.Save()
 						tb.Close() // 2nd time through won't prompt
 					case 1:
-						tb.Changed = false
+						tb.ClearChanged()
 						tb.AutoSaveDelete()
 						tb.Close()
 					}
@@ -458,7 +478,7 @@ func (tb *TextBuf) Close() bool {
 				tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					switch sig {
 					case 0:
-						tb.Changed = false
+						tb.ClearChanged()
 						tb.AutoSaveDelete()
 						tb.Close()
 					case 1:
@@ -472,7 +492,7 @@ func (tb *TextBuf) Close() bool {
 	}
 	tb.New(1)
 	tb.Filename = ""
-	tb.Changed = false
+	tb.ClearChanged()
 	return true
 }
 
@@ -1006,7 +1026,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 	}
 	tb.FileModCheck() // note: could bail if modified but not clear that is better?
 	tbe := tb.Region(st, ed)
-	tb.Changed = true
+	tb.SetChanged()
 	tb.LinesMu.Lock()
 	tbe.Delete = true
 	if ed.Ln == st.Ln {
@@ -1057,7 +1077,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 	st = tb.ValidPos(st)
 	tb.FileModCheck()
 	tb.LinesMu.Lock()
-	tb.Changed = true
+	tb.SetChanged()
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
 	rs := bytes.Runes(lns[0])
@@ -1352,7 +1372,7 @@ func (tb *TextBuf) SaveUndo(tbe *TextBufEdit) {
 // Undo undoes next item on the undo stack, and returns that record -- nil if no more
 func (tb *TextBuf) Undo() *TextBufEdit {
 	if tb.UndoPos == 0 {
-		tb.Changed = false // should be!
+		tb.ClearChanged()
 		tb.AutoSaveDelete()
 		return nil
 	}

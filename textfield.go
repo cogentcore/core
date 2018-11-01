@@ -790,21 +790,19 @@ func (tf *TextField) StopCursor() {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tf *TextField) RenderCursor(on bool) {
-	if tf.Viewport == nil || tf.Viewport.Win == nil {
+	if !tf.IsVisible() {
 		return
 	}
 	win := tf.Viewport.Win
-	if tf.InBounds() {
-		sp := tf.CursorSprite()
-		if on {
-			win.ActivateSprite(sp.Nm)
-		} else {
-			win.InactivateSprite(sp.Nm)
-		}
-		sp.Geom.Pos = tf.CharStartPos(tf.CursorPos).ToPointFloor()
-		win.RenderOverlays() // needs an explicit call!
-		win.UpdateSig()      // publish
+	sp := tf.CursorSprite()
+	if on {
+		win.ActivateSprite(sp.Nm)
+	} else {
+		win.InactivateSprite(sp.Nm)
 	}
+	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos).ToPointFloor()
+	win.RenderOverlays() // needs an explicit call!
+	win.UpdateSig()      // publish
 }
 
 // ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view

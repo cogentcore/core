@@ -7,6 +7,7 @@ package gi
 import (
 	"log"
 	"reflect"
+	"sync"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -26,6 +27,7 @@ type TabView struct {
 	TabViewSig   ki.Signal    `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 	NewTabButton bool         `desc:"show a new tab button at right of list of tabs"`
 	NewTabType   reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
+	Mu           sync.Mutex   `json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 
 var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
@@ -55,6 +57,8 @@ func (tv *TabView) CurTab() (Node2D, int, bool) {
 	if tv.NTabs() == 0 {
 		return nil, -1, false
 	}
+	tv.Mu.Lock()
+	defer tv.Mu.Unlock()
 	fr := tv.Frame()
 	if fr.StackTop < 0 {
 		return nil, -1, false
@@ -98,11 +102,13 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 
 // InsertTab inserts a widget into given index position within list of tabs
 func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
+	tv.Mu.Lock()
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	fr.InsertChild(widg, idx)
 	tv.InsertTabOnlyAt(widg, label, idx)
+	tv.Mu.Unlock()
 	tv.UpdateEnd(updt)
 }
 
@@ -138,6 +144,9 @@ func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Node2D 
 // TabAtIndex returns content widget and tab button at given index, false if
 // index out of range (emits log message)
 func (tv *TabView) TabAtIndex(idx int) (Node2D, *TabButton, bool) {
+	tv.Mu.Lock()
+	defer tv.Mu.Unlock()
+
 	fr := tv.Frame()
 	tb := tv.Tabs()
 	sz := len(*fr.Children())
@@ -161,11 +170,14 @@ func (tv *TabView) SelectTabIndex(idx int) (Node2D, bool) {
 	if fr.StackTop == idx {
 		return widg, true
 	}
+	tv.Mu.Lock()
 	updt := tv.UpdateStart()
 	tv.UnselectOtherTabs(idx)
 	tab.SetSelectedState(true)
 	fr.StackTop = idx
+	widg.AsNode2D().SetFullReRender()
 	// frame  / layout will set invisible etc
+	tv.Mu.Unlock()
 	tv.UpdateEnd(updt)
 	return widg, true
 }
@@ -183,6 +195,9 @@ func (tv *TabView) SelectTabIndexAction(idx int) {
 // TabByName returns tab with given name, and its index -- returns false if
 // not found
 func (tv *TabView) TabByName(label string) (Node2D, int, bool) {
+	tv.Mu.Lock()
+	defer tv.Mu.Unlock()
+
 	tb := tv.Tabs()
 	idx, ok := tb.Children().IndexByName(label, 0)
 	if !ok {
@@ -195,6 +210,9 @@ func (tv *TabView) TabByName(label string) (Node2D, int, bool) {
 
 // TabName returns tab name at given index
 func (tv *TabView) TabName(idx int) string {
+	tv.Mu.Lock()
+	defer tv.Mu.Unlock()
+
 	tb := tv.Tabs()
 	tbut, ok := tb.Child(idx)
 	if !ok {
@@ -220,6 +238,8 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) 
 	if !ok {
 		return nil, "", false
 	}
+	tv.Mu.Lock()
+
 	tnm := tv.TabName(idx)
 	fr := tv.Frame()
 	sz := len(*fr.Children())
@@ -240,6 +260,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) 
 	if nxtidx >= 0 {
 		tv.SelectTabIndex(nxtidx)
 	}
+	tv.Mu.Unlock()
 	tv.UpdateEnd(updt)
 	if destroy {
 		return nil, tnm, true

@@ -154,6 +154,13 @@ func (vp *Viewport2D) IsDoingFullRender() bool {
 	return vp.HasFlag(int(VpFlagDoingFullRender))
 }
 
+func (vp *Viewport2D) IsVisible() bool {
+	if vp == nil || vp.This() == nil || vp.IsInvisible() || vp.Win == nil {
+		return false
+	}
+	return vp.Win.IsVisible()
+}
+
 // set our window pointer to point to the current window we are under
 func (vp *Viewport2D) SetCurWin() {
 	pwin := vp.ParentWindow()

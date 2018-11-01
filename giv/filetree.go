@@ -142,7 +142,7 @@ func (fn *FileNode) SetClosed() {
 
 // IsChanged returns true if the file is open and has been changed (edited) since last save
 func (fn *FileNode) IsChanged() bool {
-	if fn.Buf != nil && fn.Buf.Changed {
+	if fn.Buf != nil && fn.Buf.IsChanged() {
 		return true
 	}
 	return false

@@ -600,6 +600,7 @@ func OpenPaths() {
 // PrefsDetailed are more detailed params not usually customized, but
 // available for those who really care..
 type PrefsDetailed struct {
+	MenuMaxHeight              int `min:"0" max:"100" step:"5" desc:"Default: 30 the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
 	EventSkipLagMSec           int `min:"5" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
 	DragStartMSec              int `min:"5" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
 	DragStartPix               int `min:"0" max:"100" step:"1" desc:"Default: 4 the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
@@ -662,6 +663,7 @@ func (pf *PrefsDetailed) Save() error {
 // Defaults gets current values of parameters, which are effectively
 // defaults
 func (pf *PrefsDetailed) Defaults() {
+	pf.MenuMaxHeight = MenuMaxHeight
 	pf.EventSkipLagMSec = EventSkipLagMSec
 	pf.DragStartMSec = DragStartMSec
 	pf.DragStartPix = DragStartPix
@@ -684,6 +686,7 @@ func (pf *PrefsDetailed) Defaults() {
 
 // Apply detailed preferences to all the relevant settings.
 func (pf *PrefsDetailed) Apply() {
+	MenuMaxHeight = pf.MenuMaxHeight
 	EventSkipLagMSec = pf.EventSkipLagMSec
 	DragStartMSec = pf.DragStartMSec
 	DragStartPix = pf.DragStartPix

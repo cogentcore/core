@@ -203,6 +203,17 @@ type Node2D interface {
 	// (later) via the action signals.  Calls MakeContextMenu and
 	// ContextMenuPos.
 	ContextMenu()
+
+	// IsVisible provides the definitive answer as to whether a given node
+	// is currently visible.  It is only entirely valid after a render pass
+	// for widgets in a visible window, but it checks the window and viewport
+	// for their visibility status as well, which is available always.
+	// Non-visible nodes are automatically not rendered and not connected to
+	// window events.  The Invisible flag is one key element of the IsVisible
+	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
+	// set if a widget is entirely out of render range.  But again, use
+	// IsVisible as the main end-user method.
+	IsVisible() bool
 }
 
 // FocusChanges are the kinds of changes that can be reported via
@@ -379,6 +390,13 @@ func (nb *Node2DBase) ContextMenu() {
 	}
 	pos := nb.This().(Node2D).ContextMenuPos()
 	PopupMenu(men, pos.X, pos.Y, nb.Viewport, nb.Nm+"-menu")
+}
+
+func (nb *Node2DBase) IsVisible() bool {
+	if nb == nil || nb.This() == nil || nb.IsInvisible() || nb.Viewport == nil {
+		return false
+	}
+	return nb.Viewport.IsVisible()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

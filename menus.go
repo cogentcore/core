@@ -321,6 +321,10 @@ var MenuFrameProps = ki.Props{
 	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
+// MenuMaxHeight is the maximum height of any menu popup panel in units of font height
+// scroll bars are enforced beyond that size.
+var MenuMaxHeight = 30
+
 // PopupMenu pops up a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
@@ -366,6 +370,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
 	frame.LayData.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
+	maxht := int(32 * frame.Sty.Font.Height)
+	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
 	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
