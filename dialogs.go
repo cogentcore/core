@@ -134,7 +134,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		if DialogsSepWindow {
 			vpsz = frame.LayData.Size.Pref.ToPoint()
 		} else {
-			vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize).ToPoint()
+			vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize.MulVal(.9)).ToPoint()
 		}
 	}
 

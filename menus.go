@@ -369,7 +369,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Win = nil
 	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
 	frame.LayData.Size.Pref.X += scextra // make room for scrollbar..
-	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
+	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize.MulVal(.9)).ToPoint()
 	maxht := int(32 * frame.Sty.Font.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
