@@ -1980,6 +1980,7 @@ func (tv *TextView) SelectWord() {
 		tv.SelectReg.End.Ch = ech
 	}
 	tv.SelectStart = tv.SelectReg.Start
+	tv.CursorPos.Ch = tv.SelectStart.Ch
 }
 
 // SelectReset resets the selection
