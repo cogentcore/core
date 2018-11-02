@@ -429,10 +429,10 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 		idx = sz - 1
 	}
 	// find starting index that is just within size
-	csz := sr.RelPos.X + sr.Render[idx].RelPos.X
+	csz := sr.RelPos.X + sr.Render[idx].RelPosAfterLR()
 	if csz > trgSize {
 		for idx > 0 {
-			csz = sr.RelPos.X + sr.Render[idx].RelPos.X
+			csz = sr.RelPos.X + sr.Render[idx].RelPosAfterLR()
 			if csz <= trgSize {
 				break
 			}
@@ -440,7 +440,7 @@ func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
 		}
 	} else {
 		for idx < sz-1 {
-			nsz := sr.RelPos.X + sr.Render[idx+1].RelPos.X
+			nsz := sr.RelPos.X + sr.Render[idx+1].RelPosAfterLR()
 			if nsz > trgSize {
 				break
 			}

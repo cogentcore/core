@@ -62,6 +62,7 @@ type TextField struct {
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
 	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
+	CursorMu     sync.Mutex              `json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
 	Complete     *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
@@ -793,6 +794,10 @@ func (tf *TextField) RenderCursor(on bool) {
 	if !tf.IsVisible() {
 		return
 	}
+
+	tf.CursorMu.Lock()
+	defer tf.CursorMu.Unlock()
+
 	win := tf.Viewport.Win
 	sp := tf.CursorSprite()
 	if on {

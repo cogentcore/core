@@ -78,7 +78,7 @@ type Preferences struct {
 	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
 	SaveDetailed         bool                   `desc:"if set, the detailed preferences are saved and loaded at startup -- only "`
 	CustomStyles         ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling -- otherwise they provide defaults that can be overriden by app-specific styling"`
+	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overriden by app-specific styling (i.e, they come first)."`
 	FontFamily           FontName               `desc:"default font family when otherwise not specified"`
 	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
@@ -311,7 +311,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	} else {
 		pf.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
-	pf.Changed = true
+	pf.Save()
 }
 
 // DeleteSavedWindowGeoms deletes the file that saves the position and size of
@@ -606,7 +606,7 @@ type PrefsDetailed struct {
 	DragStartPix               int `min:"0" max:"100" step:"1" desc:"Default: 4 the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
 	DNDStartMSec               int `min:"5" max:"1000" step:"5" desc:"Default: 200 the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 	DNDStartPix                int `min:"0" max:"100" step:"1" desc:"Default: 20 the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
-	HoverStartMSec             int `min:"10" max:"10000" step:"10" desc:"Default: 1000 the number of milliseconds to wait before initiating a hover event"`
+	HoverStartMSec             int `min:"10" max:"10000" step:"10" desc:"Default: 1000 the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
 	HoverMaxPix                int `min:"0" max:"1000" step:"5" desc:"Default = 5 the maximum number of pixels that mouse can move and still register a Hover event"`
 	CompleteWaitMSec           int `min:"10" max:"10000" step:"10" desc:"Default: 500 the number of milliseconds to wait before offering completions"`
 	CompleteMaxItems           int `min:"0" max:"100" step:"5" desc:"Default: 25 the maximum number of completions offered in popup"`

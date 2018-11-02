@@ -59,8 +59,8 @@ var DNDStartMSec = 200
 var DNDStartPix = 20
 
 // HoverStartMSec is the number of milliseconds to wait before initiating a
-// hover event
-var HoverStartMSec = 1500
+// hover event (e.g., for opening a tooltip)
+var HoverStartMSec = 1000
 
 // HoverMaxPix is the maximum number of pixels that mouse can move and still
 // register a Hover event
@@ -735,6 +735,14 @@ func (w *Window) SendShowEvent() {
 	w.SetFlag(int(WinFlagSentShow))
 	se := window.ShowEvent{}
 	se.Action = window.Show
+	se.Init()
+	w.SendEventSignal(&se, true) // popup = true by default
+}
+
+// SendWinFocusEvent sends the WindowFocusEvent to widgets
+func (w *Window) SendWinFocusEvent(act window.Actions) {
+	se := window.FocusEvent{}
+	se.Action = act
 	se.Init()
 	w.SendEventSignal(&se, true) // popup = true by default
 }
@@ -1452,6 +1460,7 @@ mainloop:
 			case window.Focus:
 				if !w.HasFlag(int(WinFlagGotFocus)) {
 					w.SetFlag(int(WinFlagGotFocus))
+					w.SendWinFocusEvent(window.Focus)
 					// fmt.Printf("win foc: %v\n", w.Nm)
 				} else {
 					// fmt.Printf("win extra foc: %v\n", w.Nm)
@@ -1463,6 +1472,7 @@ mainloop:
 			case window.DeFocus:
 				// fmt.Printf("win de-foc: %v\n", w.Nm)
 				w.ClearFlag(int(WinFlagGotFocus))
+				w.SendWinFocusEvent(window.DeFocus)
 			}
 			continue // don't do anything else!
 		case *mouse.DragEvent:
@@ -3206,8 +3216,8 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 // by screen, and clear current in-memory cache.  You shouldn't need to use
 // this but sometimes useful for testing.
 func (wg *WindowGeomPrefs) DeleteAll() {
-	WinGeomPrefsMu.RLock()
-	defer WinGeomPrefsMu.RUnlock()
+	WinGeomPrefsMu.Lock()
+	defer WinGeomPrefsMu.Unlock()
 
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName)

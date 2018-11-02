@@ -35,6 +35,9 @@ func (vv *FileValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	txt := kit.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "(click to open file chooser)"
+	}
 	ac.SetText(txt)
 }
 
