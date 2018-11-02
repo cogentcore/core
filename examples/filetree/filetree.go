@@ -160,8 +160,9 @@ func (fb *FileBrowse) SaveActiveView() {
 func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
 	tv := fb.ActiveTextView()
 	if tv.Buf != nil {
-		tv.Buf.SaveAs(filename)
-		fb.Files.UpdateNewFile(filename)
+		tv.Buf.SaveAs(filename, func(canceled bool) {
+			fb.Files.UpdateNewFile(string(filename))
+		})
 	}
 }
 
@@ -170,7 +171,7 @@ func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
 func (fb *FileBrowse) ViewFileNode(fn *giv.FileNode) {
 	if _, err := fn.OpenBuf(); err == nil {
 		nv, nidx := fb.NextTextView()
-		if nv.Buf != nil && nv.Buf.Changed { // todo: save current changes?
+		if nv.Buf != nil && nv.Buf.IsChanged() { // todo: save current changes?
 			fmt.Printf("Changes not saved in file: %v before switching view there to new file\n", nv.Buf.Filename)
 		}
 		nv.SetBuf(fn.Buf)

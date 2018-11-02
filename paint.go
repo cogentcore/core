@@ -6,7 +6,6 @@ package gi
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -16,6 +15,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	// "github.com/rcoreilly/rasterx"
@@ -315,6 +315,7 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 	// note: this does not fix the ghost trace from rendering..
 	// bp1 := image.Rectangle{Min: image.Point{X: b.Min.X - 1, Y: b.Min.Y - 1}, Max: image.Point{X: b.Max.X + 1, Y: b.Max.Y + 1}}
 	rs.Bounds = b
+	rs.Bounds.Min.Y = ints.MaxInt(rs.Bounds.Min.Y, 1) // 0 crashes!
 }
 
 // Lock locks the render mutex -- must lock prior to rendering!
@@ -551,20 +552,25 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 func (pc *Paint) stroke(rs *RenderState) {
 	pr := prof.Start("Paint.stroke")
 
+	rs.RasterMu.Lock()
+	defer rs.RasterMu.Unlock()
+
 	dash := pc.StrokeStyle.Dashes
 	if dash != nil {
 		scx, scy := rs.XForm.ExtractScale()
 		sc := 0.5 * (math.Abs(float64(scx)) + math.Abs(float64(scy)))
-		if sc != 0 {
-			for i := range dash {
-				dash[i] *= sc
+		hasZero := false
+		for i := range dash {
+			dash[i] *= sc
+			if dash[i] < 1 {
+				hasZero = true
+				break
 			}
-		} else {
-			fmt.Printf("scale is zero\n")
+		}
+		if hasZero {
+			dash = nil
 		}
 	}
-	rs.RasterMu.Lock()
-	defer rs.RasterMu.Unlock()
 
 	rs.Raster.SetStroke(
 		Float32ToFixed(pc.StrokeWidth(rs)),

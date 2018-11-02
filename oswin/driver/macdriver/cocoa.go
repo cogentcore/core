@@ -648,7 +648,13 @@ func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
 
 //export menuFired
 func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
+	theApp.mu.Lock()
 	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+
 	tit := C.GoStringN(title, tilen)
 	osmm := w.MainMenu()
 	if osmm == nil {
