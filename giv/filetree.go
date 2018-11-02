@@ -337,21 +337,24 @@ func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
 	dirs := strings.Split(rpath, string(filepath.Separator))
 	cfn := fn
 	sz := len(dirs)
-	if sz <= 1 {
-		return cfn, nil
-	}
 	for i := 0; i < sz; i++ {
 		dr := dirs[i]
 		sfni, ok := cfn.ChildByName(dr, 0)
 		if !ok {
-			err := fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
-			log.Println(err)
-			return nil, err
+			if i == sz-1 { // ok for terminal -- might not exist yet
+				return cfn, nil
+			} else {
+				err := fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
+				log.Println(err)
+				return nil, err
+			}
 		}
 		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
 		if sfn.IsDir() || i == sz-1 {
 			if i < sz-1 && !sfn.IsOpen() {
 				sfn.OpenDir()
+			} else {
+				cfn = sfn
 			}
 		} else {
 			err := fmt.Errorf("giv.FileNode non-terminal node %v is not a directory in: %v", dr, cfn.FPath)

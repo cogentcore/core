@@ -238,9 +238,9 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) 
 	if !ok {
 		return nil, "", false
 	}
-	tv.Mu.Lock()
 
 	tnm := tv.TabName(idx)
+	tv.Mu.Lock()
 	fr := tv.Frame()
 	sz := len(*fr.Children())
 	tb := tv.Tabs()
@@ -257,10 +257,10 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) 
 	fr.DeleteChildAtIndex(idx, destroy)
 	tb.DeleteChildAtIndex(idx, true) // always destroy -- we manage
 	tv.RenumberTabs()
+	tv.Mu.Unlock()
 	if nxtidx >= 0 {
 		tv.SelectTabIndex(nxtidx)
 	}
-	tv.Mu.Unlock()
 	tv.UpdateEnd(updt)
 	if destroy {
 		return nil, tnm, true
