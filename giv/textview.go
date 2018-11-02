@@ -1130,9 +1130,9 @@ func (tv *TextView) CursorBackspace(steps int) {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.ValidateCursor()
-	//org := tv.SelectStart
 	org := tv.CursorPos
 	if tv.HasSelection() {
+		org = tv.SelectReg.Start
 		tv.DeleteSelection()
 		tv.SetCursorShow(org)
 		return
