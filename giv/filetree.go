@@ -337,6 +337,9 @@ func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
 	dirs := strings.Split(rpath, string(filepath.Separator))
 	cfn := fn
 	sz := len(dirs)
+	if sz <= 1 {
+		return cfn, nil
+	}
 	for i := 0; i < sz; i++ {
 		dr := dirs[i]
 		sfni, ok := cfn.ChildByName(dr, 0)
