@@ -105,7 +105,13 @@ func MapStructElsValueFun(mp interface{}, fun func(mp interface{}, typ reflect.T
 		for _, key := range keys {
 			val := v.MapIndex(key)
 			vali := val.Interface()
+			if IfaceIsNil(vali) {
+				continue
+			}
 			vt := reflect.TypeOf(vali)
+			if vt == nil {
+				continue
+			}
 			vtk := vt.Kind()
 			switch vtk {
 			case reflect.Map:
