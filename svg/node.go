@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"strings"
@@ -175,8 +176,13 @@ func (g *NodeBase) ChildrenBBox2D() image.Rectangle {
 func (g *NodeBase) ComputeBBoxSVG() {
 	g.BBox = g.This().(gi.Node2D).BBox2D()
 	g.ObjBBox = g.BBox // no diff
-	g.VpBBox = g.Viewport.VpBBox.Intersect(g.ObjBBox)
+	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()
+	g.VpBBox = pbbox.Intersect(g.ObjBBox)
 	g.SetWinBBox()
+
+	if gi.Render2DTrace {
+		fmt.Printf("Render: %v at %v\n", g.PathUnique(), g.VpBBox)
+	}
 }
 
 func (g *NodeBase) Render2D() {

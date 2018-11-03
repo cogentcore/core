@@ -299,7 +299,11 @@ func (vp *Viewport2D) Init2D() {
 			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
 		}
 		if !vp.IsDeleted() && !vp.IsDestroyed() {
-			rvp.FullRender2DTree()
+			if vp.Viewport == nil {
+				rvp.FullRender2DTree()
+			} else {
+				rvp.ReRender2DTree()
+			}
 		}
 	})
 }
@@ -328,30 +332,52 @@ func (vp *Viewport2D) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 func (vp *Viewport2D) BBox2D() image.Rectangle {
-	// viewport ignores any parent parent bbox info!
-	if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
-		if !vp.LayData.AllocSize.IsZero() {
-			asz := vp.LayData.AllocSize.ToPointCeil()
-			vp.Resize(asz)
-		} else if vp.Pixels == nil {
-			vp.Resize(image.Point{64, 64}) // gotta have something..
+	if vp.Viewport == nil || vp.IsPopup() { // top level viewport
+		// viewport ignores any parent parent bbox info!
+		if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
+			if !vp.LayData.AllocSize.IsZero() {
+				asz := vp.LayData.AllocSize.ToPointCeil()
+				vp.Resize(asz)
+			} else if vp.Pixels == nil {
+				vp.Resize(image.Point{64, 64}) // gotta have something..
+			}
 		}
+		return vp.Pixels.Bounds()
+	} else {
+		bb := vp.BBoxFromAlloc()
+		sz := bb.Size()
+		if sz != image.ZP {
+			vp.Resize(sz)
+		} else {
+			if vp.Pixels == nil {
+				vp.Resize(image.Point{64, 64}) // gotta have something..
+			}
+			bb.Max = bb.Min.Add(vp.Pixels.Bounds().Size())
+		}
+		return bb
 	}
-	return vp.Pixels.Bounds()
 }
 
 func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	vp.VpBBox = vp.Pixels.Bounds()
-	vp.SetWinBBox()    // this adds all PARENT offsets
+	// vp.VpBBox = vp.Pixels.Bounds()
+	// vp.SetWinBBox()    // this adds all PARENT offsets
+	if vp.Viewport != nil {
+		vp.ComputeBBox2DBase(parBBox, delta)
+	} else {
+		vp.VpBBox = vp.Pixels.Bounds()
+		vp.SetWinBBox() // should be same as VpBBox
+	}
 	if !vp.IsPopup() { // non-popups use allocated positions
 		vp.Geom.Pos = vp.LayData.AllocPos.ToPointFloor()
 	}
-	vp.WinBBox = vp.WinBBox.Add(vp.Geom.Pos)
+	if vp.Viewport == nil {
+		vp.WinBBox = vp.WinBBox.Add(vp.Geom.Pos)
+	}
 	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.PathUnique(), vp.BBox, vp.VpBBox, vp.WinBBox)
 }
 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
-	return vp.VpBBox
+	return vp.Pixels.Bounds() // vp.VpBBox -- this is where we transition to new coordinates!
 }
 
 // RenderViewport2D is the render action for the viewport itself -- either
@@ -415,9 +441,10 @@ func (vp *Viewport2D) PushBounds() bool {
 		}
 	}
 	rs := &vp.Render
-	rs.PushBounds(vp.VpBBox)
+	bb := vp.Pixels.Bounds() // our bounds.. not vp.VpBBox)
+	rs.PushBounds(bb)
 	if Render2DTrace {
-		fmt.Printf("Render: %v at %v\n", vp.PathUnique(), vp.VpBBox)
+		fmt.Printf("Render: %v at %v\n", vp.PathUnique(), bb)
 	}
 	return true
 }

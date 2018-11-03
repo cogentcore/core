@@ -48,6 +48,7 @@ func (g *Path) Render2D() {
 	if sz < 2 {
 		return
 	}
+
 	pc := &g.Pnt
 	rs := &g.Viewport.Render
 	rs.Lock()
