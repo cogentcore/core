@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"time"
 
@@ -726,7 +727,12 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	if completetag, ok := vv.Tag("complete"); ok {
 		in := []reflect.Value{reflect.ValueOf(tf)}
 		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
-		reflect.ValueOf(vv.Owner).MethodByName("SetCompleter").Call(in)
+		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")
+		if kit.ValueIsZero(cmpfv) {
+			log.Printf("giv.ValueViewBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
+		} else {
+			cmpfv.Call(in)
+		}
 	}
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

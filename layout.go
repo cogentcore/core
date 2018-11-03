@@ -1587,6 +1587,9 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	return true
 }
 
+// LayoutPageSteps is the number of steps to take in PageUp / Down events
+var LayoutPageSteps = 10
+
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 	if KeyEventTrace {
@@ -1616,6 +1619,30 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 			return
 		case KeyFunMoveUp:
 			if ly.FocusPrevChild(true) {
+				kt.SetProcessed()
+			}
+			return
+		case KeyFunPageDown:
+			proc := false
+			for st := 0; st < LayoutPageSteps; st++ {
+				if !ly.FocusNextChild(true) {
+					break
+				}
+				proc = true
+			}
+			if proc {
+				kt.SetProcessed()
+			}
+			return
+		case KeyFunPageUp:
+			proc := false
+			for st := 0; st < LayoutPageSteps; st++ {
+				if !ly.FocusPrevChild(true) {
+					break
+				}
+				proc = true
+			}
+			if proc {
 				kt.SetProcessed()
 			}
 			return
