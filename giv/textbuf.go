@@ -25,12 +25,13 @@ import (
 
 // TextBufOpts contains options for TextBufs
 type TextBufOpts struct {
-	SpaceIndent bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
-	TabSize     int  `desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	AutoIndent  bool `desc:"auto-indent on newline (enter) or tab"`
-	LineNos     bool `desc:"show line numbers at left end of editor"`
-	Completion  bool `desc:"use the completion system to suggest options while typing"`
-	EmacsUndo   bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+	SpaceIndent  bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
+	TabSize      int  `desc:"size of a tab, in chars -- also determines indent level for space indent"`
+	AutoIndent   bool `desc:"auto-indent on newline (enter) or tab"`
+	LineNos      bool `desc:"show line numbers at left end of editor"`
+	Completion   bool `desc:"use the completion system to suggest options while typing"`
+	SpellCorrect bool `desc:"use spell checking to suggest corrections while typing"`
+	EmacsUndo    bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
 }
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds

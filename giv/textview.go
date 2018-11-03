@@ -23,6 +23,7 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/spell"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
@@ -69,7 +70,8 @@ type TextView struct {
 	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for text completion"`
+	SpellCorrect  *gi.SpellCorrect          `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 	CursorMu      sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
 	lastRecenter  int
 	lastFilename  gi.FileName
@@ -2231,7 +2233,6 @@ func (tv *TextView) CompleteText(s string) {
 		tbes = string(tbe.ToBytes())
 	}
 	ns, _ := tv.Complete.EditFunc(tv.Complete.Context, tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
-	//fmt.Println(ns)
 	tv.SetCursor(TextPos{tv.CursorPos.Ln, len(ns) - 1})
 	tv.Buf.DeleteText(st, en, true, true)
 	tv.CursorPos = st
@@ -2282,6 +2283,81 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 			tvf.CompleteText(data.(string)) // always use data
 		} else if sig == int64(gi.CompleteExtend) {
 			tvf.CompleteExtend(data.(string)) // always use data
+		}
+	})
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Spell
+
+// OfferCorrect pops up a menu of possible spelling corrections
+func (tv *TextView) OfferCorrect() {
+	if tv.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+		return
+	}
+
+	st := TextPos{tv.CursorPos.Ln, 0}
+	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	tbe := tv.Buf.Region(st, en)
+	var s string
+	if tbe != nil {
+		s = string(tbe.ToBytes())
+		smod := strings.TrimRight(s, " \t") // trim ' ' and '\t'
+		en.Ch -= len(s) - len(smod)
+		tbe = tv.Buf.Region(st, en)
+	}
+
+	tpos := token.Position{} // text position
+	tpos.Column = en.Ch
+	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
+	tpos.Line = tv.CursorPos.Ln
+	tpos.Column = tv.CursorPos.Ch
+	tpos.Offset = count
+	tpos.Filename = ""
+	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
+	cpos.X += 5
+	cpos.Y += 10
+	tv.SpellCorrect.Show(s, tpos, tv.Viewport, cpos)
+}
+
+// CorrectText edits the text using the string chosen from the correction menu
+func (tv *TextView) CorrectText(s string) {
+	cp := tv.CursorPos
+	st := TextPos{tv.CursorPos.Ln, 0}
+	en := TextPos{tv.CursorPos.Ln, tv.Buf.LineLen(tv.CursorPos.Ln)}
+	var tbes string
+	tbe := tv.Buf.Region(st, en)
+	if tbe != nil {
+		tbes = string(tbe.ToBytes())
+	}
+	ns, delta := tv.SpellCorrect.EditFunc(tv.SpellCorrect.Context, tbes, tv.CursorPos.Ch, s, tv.SpellCorrect.Word)
+	tv.Buf.DeleteText(st, en, true, true)
+	tv.InsertAtCursor([]byte(ns))
+	cp.Ch = cp.Ch + delta
+	tv.CursorPos = cp
+}
+
+// SetSpellCorrect sets spell correct functions so that spell correct will
+// automatically be offered as the user types
+func (tv *TextView) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
+	if editFun == nil {
+		if tv.SpellCorrect != nil {
+			tv.SpellCorrect.SpellSig.Disconnect(tv.This())
+		}
+		tv.SpellCorrect.Destroy()
+		tv.SpellCorrect = nil
+		return
+	}
+	gi.InitSpell()
+	tv.SpellCorrect = &gi.SpellCorrect{}
+	tv.SpellCorrect.InitName(tv.SpellCorrect, "tv-spellcorrect") // needed for standalone Ki's
+	tv.SpellCorrect.Context = data
+	tv.SpellCorrect.EditFunc = editFun
+	// note: only need to connect once..
+	tv.SpellCorrect.SpellSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
+		if sig == int64(gi.SpellSelect) {
+			tvf.CorrectText(data.(string)) // always use data
 		}
 	})
 }
@@ -3245,6 +3321,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		}
 	}
 
+	if gi.PopupIsCorrector(cpop) {
+		// win.SetDelPopup(cpop)
+		setprocessed := tv.SpellCorrect.KeyInput(kf)
+		if setprocessed {
+			kt.SetProcessed()
+		}
+	}
+
 	if kt.IsProcessed() {
 		return
 	}
@@ -3532,6 +3616,29 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 					}
 				}
 			}
+		}
+		if tv.SpellCorrect != nil {
+			//if tv.Buf.Opts.SpellCorrect && tv.SpellCorrect != nil {
+			if unicode.IsSpace(kt.Rune) {
+				st := TextPos{tv.CursorPos.Ln, 0}
+				en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+				tbe := tv.Buf.Region(st, en)
+				if tbe != nil {
+					s := string(tbe.ToBytes())
+					ws := strings.Fields(s)
+					if len(ws) > 0 {
+						w := ws[len(ws)-1]
+						gi.InitSpell()
+						sugs, knwn, err := tv.SpellCorrect.CheckWordInline(w)
+						tv.SpellCorrect.Suggestions = sugs
+						tv.SpellCorrect.Word = w
+						if !knwn && err == nil {
+							tv.OfferCorrect() // the unrecognized word and the suggestions
+						}
+					}
+				}
+			}
+			//}
 		}
 	}
 	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))

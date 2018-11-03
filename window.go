@@ -2073,6 +2073,25 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	return false
 }
 
+// PopupIsCorrector returns true if the given popup item is a menu and a spell corrector
+func PopupIsCorrector(pop ki.Ki) bool {
+	if !PopupIsMenu(pop) {
+		return false
+	}
+	nii, ni := KiToNode2D(pop)
+	if ni == nil {
+		return false
+	}
+	vp := nii.AsViewport2D()
+	if vp == nil {
+		return false
+	}
+	if vp.IsCorrector() {
+		return true
+	}
+	return false
+}
+
 // CurPopup returns the current popup, protected with read mutex
 func (w *Window) CurPopup() ki.Ki {
 	w.PopMu.RLock()

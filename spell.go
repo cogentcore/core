@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"image"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,7 +14,9 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/spell"
+	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"go/token"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -182,12 +185,135 @@ func NextWord() TextWord {
 	return tw
 }
 
-// CheckWord calls the implementation so the app isn't tied to a particular implementation
-func CheckWord(w string) (suggests []string, known bool, err error) {
-	return spell.CheckWord(w)
-}
-
 // LearnWord calls the implementation so the app isn't tied to a particular implementation
 func LearnWord(w string) {
 	spell.LearnWord(w)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// SpellCorrect
+
+// SpellCorrect
+type SpellCorrect struct {
+	ki.Node
+	EditFunc    spell.EditFunc `desc:"function to edit text using the selected spell correction"`
+	Context     interface{}    `desc:"the object that implements spell.Func"`
+	Suggestions []string
+	Word        string    `desc:"word being checked"`
+	SpellSig    ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for SpellCorrect -- see SpellSignals for the types"`
+	Suggestion  string    `desc:"the user's correction selection'"`
+	Ignore      []string  `desc:"a list of words to ignore - is not saved with project - use "learn" for permanent ignore"`
+}
+
+var KiT_SpellCorrect = kit.Types.AddType(&SpellCorrect{}, nil)
+
+// SpellSignals are signals that are sent by SpellCorrect
+type SpellSignals int64
+
+const (
+	// SpellSelect means the user chose one of the possible corrections
+	SpellSelect SpellSignals = iota
+)
+
+//go:generate stringer -type=SpellSignals
+
+func (sc *SpellCorrect) CheckWordInline(word string) (sugs []string, knwn bool, err error) {
+	sugs, knwn, err = spell.CheckWord(word)
+	if err != nil {
+		return sugs, knwn, err
+	}
+	if !knwn {
+		for _, w := range sc.Ignore {
+			if w == word {
+				knwn = true
+				break
+			}
+		}
+	}
+	return sugs, knwn, err
+}
+
+// Show is the main call for listing spelling corrections.
+// Calls ShowNow which the correction popup menu
+// Similar to completion.Show but does not use a timer
+// Displays popup immediately for any unknown word
+func (sc *SpellCorrect) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+	if vp == nil || vp.Win == nil {
+		return
+	}
+	cpop := vp.Win.CurPopup()
+	if PopupIsCorrector(cpop) {
+		vp.Win.SetDelPopup(cpop)
+	}
+	sc.ShowNow(text, pos, vp, pt)
+}
+
+// ShowNow actually calls builds the correction popup menu
+func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D, pt image.Point) {
+	if vp == nil || vp.Win == nil {
+		return
+	}
+	cpop := vp.Win.CurPopup()
+	if PopupIsCorrector(cpop) {
+		vp.Win.SetDelPopup(cpop)
+	}
+	count := len(sc.Suggestions)
+	if count > 0 {
+		if count == 1 && sc.Suggestions[0] == word {
+			return
+		}
+		var m Menu
+		var text string
+		for i := 0; i < count; i++ {
+			text = sc.Suggestions[i]
+			m.AddAction(ActOpts{Label: text, Data: text},
+				sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+					scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
+					scf.SpellCorrect(data.(string))
+				})
+		}
+		text = "*learn*"
+		m.AddAction(ActOpts{Label: text, Data: text},
+			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+				scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
+				scf.LearnWordInline()
+			})
+		text = "*ignore all*"
+		m.AddAction(ActOpts{Label: text, Data: text},
+			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+				scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
+				scf.IgnoreAllInline()
+			})
+		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
+		pvp.SetFlag(int(VpFlagCorrector))
+		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	}
+}
+
+// SpellCorrect emits a signal to let subscribers know that the user has made a
+// selection from the list of possible corrections
+func (sc *SpellCorrect) SpellCorrect(s string) {
+	sc.Suggestion = s
+	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), s)
+}
+
+// KeyInput is the opportunity for the spelling correction popup to act on specific key inputs
+func (sc *SpellCorrect) KeyInput(kf KeyFuns) bool { // true - caller should set key processed
+	switch kf {
+	case KeyFunMoveDown:
+		return true
+	case KeyFunMoveUp:
+		return true
+	}
+	return false
+}
+
+// LearnWordInline gets the misspelled/unknown word and passes to LearnWord
+func (sc *SpellCorrect) LearnWordInline() {
+	LearnWord(sc.Word)
+}
+
+// IgnoreAllInline adds the word to the ignore list
+func (sc *SpellCorrect) IgnoreAllInline() {
+	sc.Ignore = append(sc.Ignore, sc.Word)
 }

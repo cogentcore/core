@@ -22,6 +22,9 @@ import (
 ///////////////////////////////////////////////////////////////////////////////
 //  spell check returning suggestions using github.com/sajari/fuzzy
 
+// EditFunc is passed the current text and the selected correction for text editing.
+type EditFunc func(data interface{}, text string, cursorPos int, correction string, unknown string) (newText string, delta int)
+
 var inited bool
 var model *fuzzy.Model
 
@@ -112,4 +115,20 @@ func Complete(s string) (result []string, err error) {
 	}
 	result, err = model.Autocomplete(s)
 	return result, err
+}
+
+// EditTex replaces the old unknown word with the new word chosen from the list of corrections
+// delta is the change in cursor position (cp).
+func CorrectText(text string, cp int, old string, new string) (newText string, delta int) {
+	s1 := string(text[0:cp])
+	s2 := string(text[cp:])
+
+	// do a replace from end
+	last := strings.LastIndex(text, old)
+	s1a := s1[0:last]
+	s1c := s1[last+len(old) : len(s1)]
+	s1new := s1a + new + s1c
+	t := s1new + s2
+	delta = len(s1new) - len(s1)
+	return t, delta
 }
