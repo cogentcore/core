@@ -806,7 +806,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	}
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(KiT_ByteSliceValueView).(*ByteSliceValueView)
 			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {
@@ -865,7 +865,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	}
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(KiT_RuneSliceValueView).(*RuneSliceValueView)
 			tf := send.(*gi.TextField)
 			if vvv.SetValue(tf.Text()) {

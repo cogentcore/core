@@ -1541,7 +1541,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 		return false
 	}
 	win := ly.ParentWindow()
-	cur := win.Focus
+	cur := win.CurFocus()
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
 		nxti = idx + ly.Sty.Layout.Columns
@@ -1552,7 +1552,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	} else {
 		did = win.FocusOnOrNext(ly.KnownChild(0))
 	}
-	if !did || win.Focus == cur {
+	if !did || win.CurFocus() == cur {
 		return false
 	}
 	return true
@@ -1570,7 +1570,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 		return false
 	}
 	win := ly.ParentWindow()
-	cur := win.Focus
+	cur := win.CurFocus()
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
 		nxti = idx - ly.Sty.Layout.Columns
@@ -1581,7 +1581,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	} else {
 		did = win.FocusOnOrNext(ly.KnownChild(sz - 1))
 	}
-	if !did || win.Focus == cur {
+	if !did || win.CurFocus() == cur {
 		return false
 	}
 	return true

@@ -105,10 +105,21 @@ var TextFieldProps = ki.Props{
 type TextFieldSignals int64
 
 const (
-	// main signal -- return was pressed and an edit was completed -- data is the text
+	// TextFieldDone is main signal -- return or tab was pressed and the edit was
+	// intentionally completed.  data is the text.
 	TextFieldDone TextFieldSignals = iota
 
-	// some text was selected (for Inactive state, selection is via WidgetSig)
+	// TextFieldDeFocused means that the user has transitioned focus away from
+	// the text field due to interactions elsewhere, and any ongoing changes have been
+	// applied and the editor is no longer active.  data is the text.
+	// If you have a button that performs the same action as pressing enter in a textfield,
+	// then pressing that button will trigger a TextFieldDeFocused event, for any active
+	// edits.  Otherwise, you probably want to respond to both TextFieldDone and
+	// TextFieldDeFocused as "apply" events that trigger actions associated with the field.
+	TextFieldDeFocused
+
+	// TextFieldSelected means that some text was selected (for Inactive state,
+	// selection is via WidgetSig)
 	TextFieldSelected
 
 	TextFieldSignalsN
@@ -186,6 +197,18 @@ func (tf *TextField) EditDone() {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
 		tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDone), tf.Txt)
+	}
+	tf.ClearSelected()
+	tf.ClearCursor()
+}
+
+// EditDeFocused completes editing and copies the active edited text to the text --
+// called when field is made inactive due to interactions elsewhere.
+func (tf *TextField) EditDeFocused() {
+	if tf.Edited {
+		tf.Edited = false
+		tf.Txt = string(tf.EditTxt)
+		tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDeFocused), tf.Txt)
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
@@ -1093,17 +1116,23 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	switch kf {
 	case KeyFunEnter:
 		fallthrough
+	case KeyFunFocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
+		fallthrough
 	case KeyFunAccept: // ctrl+enter
 		kt.SetProcessed()
 		tf.CancelComplete()
 		tf.EditDone()
 		tf.FocusNext()
+	case KeyFunFocusPrev:
+		kt.SetProcessed()
+		tf.CancelComplete()
+		tf.EditDone()
+		tf.FocusPrev()
 	case KeyFunAbort: // esc
 		kt.SetProcessed()
 		tf.CancelComplete()
 		tf.Revert()
 		tf.FocusChanged2D(FocusInactive)
-		// tf.FocusNext()
 	case KeyFunBackspace:
 		kt.SetProcessed()
 		tf.CursorBackspace(1)
@@ -1436,7 +1465,7 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		tf.UpdateSig()
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
-		tf.EditDone()
+		tf.EditDeFocused()
 		tf.UpdateSig()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))

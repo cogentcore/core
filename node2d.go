@@ -325,7 +325,15 @@ func (nb *Node2DBase) GrabFocus() {
 func (nb *Node2DBase) FocusNext() {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.FocusNext(win.Focus)
+		win.FocusNext(win.CurFocus())
+	}
+}
+
+// FocusPrev moves the focus onto the previous item
+func (nb *Node2DBase) FocusPrev() {
+	win := nb.ParentWindow()
+	if win != nil {
+		win.FocusPrev(win.CurFocus())
 	}
 }
 
@@ -344,13 +352,14 @@ func (nb *Node2DBase) ContainsFocus() bool {
 	if win == nil {
 		return false
 	}
-	if win.Focus == nil {
+	cur := win.CurFocus()
+	if cur == nil {
 		return false
 	}
-	if win.Focus == nb.This() {
+	if cur == nb.This() {
 		return true
 	}
-	plev := win.Focus.ParentLevel(nb.This())
+	plev := cur.ParentLevel(nb.This())
 	if plev < 0 {
 		return false
 	}

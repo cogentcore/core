@@ -2244,10 +2244,10 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		return false
 	}
 	switch kf {
-	case KeyFunFocusNext:
+	case KeyFunFocusNext: // tab
 		w.FocusNext(w.CurFocus())
 		e.SetProcessed()
-	case KeyFunFocusPrev:
+	case KeyFunFocusPrev: // shift-tab
 		w.FocusPrev(w.CurFocus())
 		e.SetProcessed()
 	case KeyFunGoGiEditor:

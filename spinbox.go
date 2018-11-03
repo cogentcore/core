@@ -198,7 +198,7 @@ func (sb *SpinBox) ConfigParts() {
 		tf.Txt = fmt.Sprintf("%g", sb.Value)
 		if !sb.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(TextFieldDone) {
+				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
 					sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
 					vl, err := strconv.ParseFloat(tf.Text(), 32)
