@@ -2167,9 +2167,9 @@ func (tv *TextView) Paste() {
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
 	if data != nil {
-		if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
-			tv.DeleteSelection()
-		}
+		// if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
+		tv.DeleteSelection() // insert will delete it anyway!
+		// }
 		tv.InsertAtCursor(data.TypeData(mimedata.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
 	}
@@ -2180,7 +2180,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.HasSelection() {
-		tv.Cut()
+		tv.DeleteSelection()
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true, true)
 	if tbe == nil {
