@@ -1382,6 +1382,7 @@ func (tv *TextView) Undo() {
 			tv.SetCursorShow(tbe.Reg.Start)
 		}
 	} else {
+		tv.CursorMovedSig() // updates status..
 		tv.ScrollCursorToCenterIfHidden()
 	}
 	tv.SavePosHistory(tv.CursorPos)

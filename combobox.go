@@ -204,7 +204,7 @@ func (cb *ComboBox) ConfigPartsIfNeeded() {
 
 func (cb *ComboBox) ConfigParts() {
 	if eb, ok := cb.Prop("editable"); ok {
-		cb.Editable = eb.(bool)
+		cb.Editable, _ = kit.ToBool(eb)
 	}
 	config := kit.TypeAndNameList{}
 	var icIdx, lbIdx, txIdx, indIdx int

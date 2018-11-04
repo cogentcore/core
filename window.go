@@ -6,6 +6,7 @@ package gi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -636,6 +637,7 @@ func Init() {
 		PrefsDbg.Connect()
 		Prefs.Open()
 		Prefs.Apply()
+		WinGeomPrefs.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
 		WinGeomPrefs.Open()
 	}
 }
@@ -2417,15 +2419,15 @@ func (w *Window) FocusNext(foc ki.Ki) bool {
 				focusNext = true
 				return true
 			}
+			if !focusNext {
+				return true
+			}
 			if !ni.CanFocus() {
 				return true
 			}
-			if focusNext {
-				w.SetFocus(k)
-				gotFocus = true
-				return false // done
-			}
-			return true
+			w.SetFocus(k)
+			gotFocus = true
+			return false // done
 		})
 		if gotFocus {
 			return true
@@ -2550,7 +2552,7 @@ func (w *Window) ClearNonFocus(foc ki.Ki) {
 			return true
 		}
 		if ni.HasFocus() {
-			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
+			fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
 			if !updated {
 				updated = true
 				updt = w.UpdateStart()
@@ -3088,22 +3090,105 @@ type WindowGeom struct {
 // looks up the info automatically for new windows and saves persistently
 type WindowGeomPrefs map[string]map[string]WindowGeom
 
-// WinGeomPrefsFileName is the name of the preferences file in GoGi prefs directory
-var WinGeomPrefsFileName = "win_geom_prefs.json"
+// WinGeomPrefsFileName is the base name of the preferences file in GoGi prefs directory
+var WinGeomPrefsFileName = "win_geom_prefs"
+
+// WinGeomPrefsLastSave is when prefs were last saved -- if we weren't the last to save
+// then we need to re-open before modifying
+var WinGeomPrefsLastSave time.Time
 
 // WinGeomPrefsMu is read-write mutex that protects updating of WinGeomPrefs
 var WinGeomPrefsMu sync.RWMutex
 
-// Open Window Geom preferences from GoGi standard prefs directory
-func (wg *WindowGeomPrefs) Open() error {
-	WinGeomPrefsMu.Lock()
-	defer WinGeomPrefsMu.Unlock()
+var WinGeomPrefsLockSleep = 100 * time.Millisecond
 
+var WinGeomNoLockErr = errors.New("WinGeom could not lock lock file")
+
+// LockFile attempts to create the win_geom_prefs lock file
+func (wg *WindowGeomPrefs) LockFile() error {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".lck")
+	for rep := 0; rep < 10; rep++ {
+		if _, err := os.Stat(pnm); os.IsNotExist(err) {
+			b, _ := time.Now().MarshalJSON()
+			err = ioutil.WriteFile(pnm, b, 0644)
+			if err == nil {
+				return nil
+			}
+		}
+		b, err := ioutil.ReadFile(pnm)
+		if err != nil {
+			time.Sleep(WinGeomPrefsLockSleep)
+			continue
+		}
+		var lts time.Time
+		err = lts.UnmarshalJSON(b)
+		if err != nil {
+			time.Sleep(WinGeomPrefsLockSleep)
+			continue
+		}
+		if time.Now().Sub(lts) > 1*time.Second {
+			// log.Printf("WinGeomPrefs: lock file stale: %v\n", lts.String())
+			os.Remove(pnm)
+			continue
+		}
+		// log.Printf("WinGeomPrefs: waiting for lock file: %v\n", lts.String())
+		time.Sleep(WinGeomPrefsLockSleep)
+	}
+	// log.Printf("WinGeomPrefs: failed to lock file: %v\n", pnm)
+	return WinGeomNoLockErr
+}
+
+// UnLockFile unlocks the win_geom_prefs lock file (just removes it)
+func (wg *WindowGeomPrefs) UnlockFile() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".lck")
+	os.Remove(pnm)
+}
+
+// NeedToReload returns true if the last save time of prefs file is more recent than
+// when we last saved
+func (wg *WindowGeomPrefs) NeedToReload() bool {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".lst")
+	if _, err := os.Stat(pnm); os.IsNotExist(err) {
+		return false
+	}
+	var lts time.Time
+	b, err := ioutil.ReadFile(pnm)
+	if err != nil {
+		return false
+	}
+	err = lts.UnmarshalJSON(b)
+	if err != nil {
+		return false
+	}
+	eq := lts.Equal(WinGeomPrefsLastSave)
+	if !eq {
+		// fmt.Printf("prefs file saved more recently: %v than our last save: %v\n", lts.String(),
+		// 	WinGeomPrefsLastSave.String())
+		WinGeomPrefsLastSave = lts
+	}
+	return !eq
+}
+
+// SaveLastSave saves timestamp (now) of last save to win geom
+func (wg *WindowGeomPrefs) SaveLastSave() {
+	pdir := oswin.TheApp.GoGiPrefsDir()
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".lst")
+	WinGeomPrefsLastSave = time.Now()
+	b, _ := WinGeomPrefsLastSave.MarshalJSON()
+	ioutil.WriteFile(pnm, b, 0644)
+}
+
+// Open Window Geom preferences from GoGi standard prefs directory
+// called under mutex or at start
+func (wg *WindowGeomPrefs) Open() error {
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 1000)
 	}
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".json")
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
 		log.Println(err)
@@ -3117,15 +3202,13 @@ func (wg *WindowGeomPrefs) Open() error {
 }
 
 // Save Window Geom Preferences to GoGi standard prefs directory
+// assumed to be under mutex and lock still
 func (wg *WindowGeomPrefs) Save() error {
-	WinGeomPrefsMu.Lock()
-	defer WinGeomPrefsMu.Unlock()
-
 	if wg == nil {
 		return nil
 	}
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".json")
 	b, err := json.MarshalIndent(wg, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -3134,6 +3217,8 @@ func (wg *WindowGeomPrefs) Save() error {
 	err = ioutil.WriteFile(pnm, b, 0644)
 	if err != nil {
 		log.Println(err)
+	} else {
+		wg.SaveLastSave()
 	}
 	return err
 }
@@ -3153,12 +3238,19 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 		// fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", win.Nm, sc.Name)
 		return
 	}
+
+	wg.LockFile() // not going to change our behavior if we can't lock!
+	if wg.NeedToReload() {
+		wg.Open()
+	}
+
 	if (*wg)[win.Nm] == nil {
 		(*wg)[win.Nm] = make(map[string]WindowGeom, 10)
 	}
 	(*wg)[win.Nm][sc.Name] = wgr
-	WinGeomPrefsMu.Unlock()
 	wg.Save()
+	wg.UnlockFile()
+	WinGeomPrefsMu.Unlock()
 }
 
 // Pref returns an existing preference for given window name, or one adapted
@@ -3239,7 +3331,7 @@ func (wg *WindowGeomPrefs) DeleteAll() {
 	defer WinGeomPrefsMu.Unlock()
 
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	pnm := filepath.Join(pdir, WinGeomPrefsFileName)
+	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".json")
 	os.Remove(pnm)
 	*wg = make(WindowGeomPrefs, 1000)
 }

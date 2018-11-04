@@ -1327,10 +1327,8 @@ func (tf *TextField) StyleTextField() {
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), true, true) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
-	pv, ok := tf.PropInherit("clear-act", true, true)
-	if ok {
-		bv, _ := kit.ToBool(pv)
-		tf.ClearAct = bv
+	if pv, ok := tf.PropInherit("clear-act", true, true); ok {
+		tf.ClearAct, _ = kit.ToBool(pv)
 	}
 	tf.ConfigParts()
 	pr.End()

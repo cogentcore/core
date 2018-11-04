@@ -21,7 +21,8 @@ import (
 type SVG struct {
 	gi.Viewport2D
 	ViewBox ViewBox  `desc:"viewbox defines the coordinate system for the drawing"`
-	Norm    bool     `desc:"install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
+	Norm    bool     `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
+	InvertY bool     `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
 	Pnt     gi.Paint `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
 	Defs    Group    `desc:"all defs defined elements go here (gradients, symbols, etc)"`
 	Title   string   `xml:"title" desc:"the title of the svg"`
@@ -55,7 +56,13 @@ func (svg *SVG) SetNormXForm() {
 		// todo: deal with all the other options!
 		vpsX := float32(svg.Geom.Size.X) / svg.ViewBox.Size.X
 		vpsY := float32(svg.Geom.Size.Y) / svg.ViewBox.Size.Y
+		if svg.InvertY {
+			vpsY *= -1
+		}
 		svg.Pnt.XForm = svg.Pnt.XForm.Scale(vpsX, vpsY).Translate(-svg.ViewBox.Min.X, -svg.ViewBox.Min.Y)
+		if svg.InvertY {
+			svg.Pnt.XForm.Y0 = -svg.Pnt.XForm.Y0
+		}
 	}
 }
 
@@ -92,6 +99,12 @@ func (svg *SVG) StyleSVG() {
 func (svg *SVG) Style2D() {
 	svg.StyleSVG()
 	svg.LayData.SetFromStyle(&svg.Sty.Layout) // also does reset
+	if nv, ok := svg.Prop("norm"); ok {
+		svg.Norm, _ = kit.ToBool(nv)
+	}
+	if iv, ok := svg.Prop("invert-y"); ok {
+		svg.InvertY, _ = kit.ToBool(iv)
+	}
 }
 
 func (svg *SVG) Layout2D(parBBox image.Rectangle, iter int) bool {

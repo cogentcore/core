@@ -1290,10 +1290,10 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 		if tv.RowIsSelected(row) {
 			if len(tv.SelectedRows) > 1 {
 				tv.UnselectAllRows()
+				tv.SelectRow(row)
+				tv.RowGrabFocus(row)
 			}
 			tv.SelectedIdx = row
-			tv.SelectRow(row)
-			tv.RowGrabFocus(row)
 		} else {
 			tv.UnselectAllRows()
 			tv.SelectedIdx = row
