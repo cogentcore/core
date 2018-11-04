@@ -93,7 +93,7 @@ func CheckWord(w string) (suggests []string, known bool, err error) {
 	known = false
 	w = strings.Trim(w, "`'*.,?[]():;")
 	w = strings.ToLower(w)
-	suggests = model.SpellCheckSuggestions(w, 2)
+	suggests = model.SpellCheckSuggestions(w, 10)
 	if suggests == nil {
 		return nil, known, err // known is false
 	}

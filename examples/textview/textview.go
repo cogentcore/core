@@ -5,10 +5,12 @@
 package main
 
 import (
-	"github.com/goki/gi/spell"
 	"go/token"
 	"log"
 	"os/exec"
+	"strings"
+
+	"github.com/goki/gi/spell"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
@@ -79,7 +81,9 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.Viewport = vp
 	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
-	txed1.SetSpellCorrect(txed1, SpellCorrectEdit)
+	if strings.HasSuffix(string(samplefile), ".md") {
+		txed1.SetSpellCorrect(txed1, SpellCorrectEdit)
+	}
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
