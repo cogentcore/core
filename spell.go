@@ -12,11 +12,12 @@ import (
 	"regexp"
 	"strings"
 
+	"go/token"
+
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
-	"go/token"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -190,6 +191,16 @@ func LearnWord(w string) {
 	spell.LearnWord(w)
 }
 
+// IgnoreWord adds the word to the ignore list
+func IgnoreWord(w string) {
+	spell.IgnoreWord(w)
+}
+
+// DoIgnore returns true if word is on ignore list
+func DoIgnore(w string) bool {
+	return spell.DoIgnore(w)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // SpellCorrect
 
@@ -202,7 +213,6 @@ type SpellCorrect struct {
 	Word        string    `desc:"word being checked"`
 	SpellSig    ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for SpellCorrect -- see SpellSignals for the types"`
 	Suggestion  string    `desc:"the user's correction selection'"`
-	Ignore      []string  `desc:"a list of words to ignore - is not saved with project - use "learn" for permanent ignore"`
 }
 
 var KiT_SpellCorrect = kit.Types.AddType(&SpellCorrect{}, nil)
@@ -217,18 +227,15 @@ const (
 
 //go:generate stringer -type=SpellSignals
 
+// CheckWordInLine checks the model to determine if the word is known,
+// if not known also check the ignore list
 func (sc *SpellCorrect) CheckWordInline(word string) (sugs []string, knwn bool, err error) {
 	sugs, knwn, err = spell.CheckWord(word)
 	if err != nil {
 		return sugs, knwn, err
 	}
 	if !knwn {
-		for _, w := range sc.Ignore {
-			if w == word {
-				knwn = true
-				break
-			}
-		}
+		knwn = spell.DoIgnore(word)
 	}
 	return sugs, knwn, err
 }
@@ -248,7 +255,7 @@ func (sc *SpellCorrect) Show(text string, pos token.Position, vp *Viewport2D, pt
 	sc.ShowNow(text, pos, vp, pt)
 }
 
-// ShowNow actually calls builds the correction popup menu
+// ShowNow actually builds the correction popup menu
 func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D, pt image.Point) {
 	if vp == nil || vp.Win == nil {
 		return
@@ -278,7 +285,7 @@ func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D,
 				scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
 				scf.LearnWordInline()
 			})
-		text = "*ignore all*"
+		text = "*ignore*"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
 				scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
@@ -315,7 +322,7 @@ func (sc *SpellCorrect) LearnWordInline() {
 
 // IgnoreAllInline adds the word to the ignore list
 func (sc *SpellCorrect) IgnoreAllInline() {
-	sc.Ignore = append(sc.Ignore, sc.Word)
+	IgnoreWord(sc.Word)
 }
 
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction

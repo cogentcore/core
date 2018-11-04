@@ -27,6 +27,7 @@ type EditFunc func(data interface{}, text string, cursorPos int, correction stri
 
 var inited bool
 var model *fuzzy.Model
+var Ignore []string
 
 // Initialized returns true if the model has been loaded or created anew
 func Initialized() bool {
@@ -131,4 +132,19 @@ func CorrectText(text string, cp int, old string, new string) (newText string, d
 	t := s1new + s2
 	delta = len(s1new) - len(s1)
 	return t, delta
+}
+
+// IgnoreWord adds the word to the Ignore list
+func IgnoreWord(word string) {
+	Ignore = append(Ignore, word)
+}
+
+// DoIgnore returns true if the word is found in the Ignore list
+func DoIgnore(word string) bool {
+	for _, w := range Ignore {
+		if w == word {
+			return true
+		}
+	}
+	return false
 }
