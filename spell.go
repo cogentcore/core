@@ -317,3 +317,17 @@ func (sc *SpellCorrect) LearnWordInline() {
 func (sc *SpellCorrect) IgnoreAllInline() {
 	sc.Ignore = append(sc.Ignore, sc.Word)
 }
+
+// Cancel cancels any pending spell correction -- call when new events nullify prior correction
+// returns true if canceled
+func (c *SpellCorrect) Cancel(vp *Viewport2D) bool {
+	if vp == nil || vp.Win == nil {
+		return false
+	}
+	cpop := vp.Win.CurPopup()
+	if PopupIsCorrector(cpop) {
+		vp.Win.SetDelPopup(cpop)
+		return true
+	}
+	return false
+}

@@ -1937,6 +1937,38 @@ func (tv *TextView) IsWordBreak(r rune) bool {
 	return false
 }
 
+// WordBefore returns the word before the cursor position using IsWordBreak
+// to determine the bounds of the word
+func (tv *TextView) WordBefore() string {
+	txt := tv.Buf.Line(tv.CursorPos.Ln)
+	ch := tv.CursorPos.Ch
+	var runes []rune
+	var haveEnd = false
+	for i := ch - 1; i >= 0; i-- {
+		r := txt[i]
+		if haveEnd == false {
+			if tv.IsWordBreak(r) {
+				continue
+			} else {
+				runes = append(runes, r)
+				haveEnd = true
+			}
+		} else {
+			if tv.IsWordBreak(r) {
+				break
+			} else {
+				runes = append(runes, r)
+			}
+		}
+	}
+	// now reverse it :)
+	var rvs string
+	for i := len(runes) - 1; i >= 0; i-- {
+		rvs += string(runes[i])
+	}
+	return rvs
+}
+
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 func (tv *TextView) SelectWord() {
 	updt := tv.UpdateStart()
@@ -2290,6 +2322,31 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 ///////////////////////////////////////////////////////////////////////////////
 //    Spell
 
+// SpellCheck offers spelling corrections if we are at a word break and
+// the word before the break is unknown
+func (tv *TextView) SpellCheck(r rune) {
+	if tv.SpellCorrect != nil {
+		//if tv.Buf.Opts.SpellCorrect && tv.SpellCorrect != nil {
+		if unicode.IsSpace(r) {
+			st := TextPos{tv.CursorPos.Ln, 0}
+			en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+			tbe := tv.Buf.Region(st, en)
+			if tbe != nil {
+				wb := tv.WordBefore()
+				if len(wb) > 0 {
+					sugs, knwn, err := tv.SpellCorrect.CheckWordInline(wb)
+					tv.SpellCorrect.Suggestions = sugs
+					tv.SpellCorrect.Word = wb
+					if !knwn && err == nil {
+						tv.OfferCorrect() // the unrecognized word and the suggestions
+					}
+				}
+			}
+		}
+		//}
+	}
+}
+
 // OfferCorrect pops up a menu of possible spelling corrections
 func (tv *TextView) OfferCorrect() {
 	if tv.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
@@ -2335,6 +2392,18 @@ func (tv *TextView) CorrectText(s string) {
 	tv.InsertAtCursor([]byte(ns))
 	cp.Ch = cp.Ch + delta
 	tv.CursorPos = cp
+}
+
+// CancelCorrect cancels any pending spell correction -- call this when new events
+// have moved beyond any prior correction scenario
+func (tv *TextView) CancelCorrect() {
+	if tv.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On {
+		return
+	}
+	if !tv.Buf.Opts.SpellCorrect {
+		return
+	}
+	tv.SpellCorrect.Cancel(tv.Viewport)
 }
 
 // SetSpellCorrect sets spell correct functions so that spell correct will
@@ -3339,6 +3408,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	// cancelAll cancels search, completer, and..
 	cancelAll := func() {
 		tv.CancelComplete()
+		tv.CancelCorrect()
 		tv.ISearchCancel()
 		tv.QReplaceCancel()
 	}
@@ -3561,6 +3631,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			} else {
 				tv.InsertAtCursor([]byte("\n"))
 			}
+			tv.SpellCheck(kt.Rune)
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
@@ -3584,6 +3655,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
 			tv.Viewport.Win.UpdateEnd(updt)
+			tv.SpellCheck(kt.Rune)
 		}
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
@@ -3617,29 +3689,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				}
 			}
 		}
-		if tv.SpellCorrect != nil {
-			//if tv.Buf.Opts.SpellCorrect && tv.SpellCorrect != nil {
-			if unicode.IsSpace(kt.Rune) {
-				st := TextPos{tv.CursorPos.Ln, 0}
-				en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
-				tbe := tv.Buf.Region(st, en)
-				if tbe != nil {
-					s := string(tbe.ToBytes())
-					ws := strings.Fields(s)
-					if len(ws) > 0 {
-						w := ws[len(ws)-1]
-						gi.InitSpell()
-						sugs, knwn, err := tv.SpellCorrect.CheckWordInline(w)
-						tv.SpellCorrect.Suggestions = sugs
-						tv.SpellCorrect.Word = w
-						if !knwn && err == nil {
-							tv.OfferCorrect() // the unrecognized word and the suggestions
-						}
-					}
-				}
-			}
-			//}
-		}
+		tv.SpellCheck(kt.Rune)
 	}
 	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
 }
