@@ -133,7 +133,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	sg.Lay = gi.LayoutGrid
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sg.SetMinPrefHeight(units.NewValue(1.5, units.Em))
 	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too

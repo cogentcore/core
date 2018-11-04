@@ -497,7 +497,7 @@ var TabButtonProps = ki.Props{
 		"padding": units.NewValue(0, units.Px),
 	},
 	"#sc-stretch": ki.Props{
-		"min-width": units.NewValue(2, units.Em),
+		"min-width": units.NewValue(2, units.Ch),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
