@@ -395,7 +395,7 @@ func (fv *FileView) ConfigSelRow() {
 	sf.SetStretchMaxWidth()
 	sf.SetText(fv.SelFile)
 	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
 			fvv.SetSelFileAction(pff.Text())
@@ -409,7 +409,7 @@ func (fv *FileView) ConfigSelRow() {
 	ef.SetText(fv.Ext)
 	ef.SetMinPrefWidth(units.NewValue(10.0, units.Ch))
 	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.TextFieldDone) {
+		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff, _ := send.(*gi.TextField)
 			fvv.SetExtAction(pff.Text())
