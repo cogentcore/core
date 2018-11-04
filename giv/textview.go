@@ -2251,6 +2251,7 @@ func (tv *TextView) OfferComplete(forceComplete bool) {
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
+	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	tv.Complete.Show(s, tpos, tv.Viewport, cpos, forceComplete)
 }
 
