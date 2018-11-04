@@ -8,6 +8,9 @@ import (
 	"go/token"
 	"log"
 	"os/exec"
+	"strings"
+
+	"github.com/goki/gi/spell"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
@@ -78,6 +81,9 @@ func mainrun() {
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.Viewport = vp
 	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
+	if strings.HasSuffix(string(samplefile), ".md") {
+		txed1.SetSpellCorrect(txed1, SpellCorrectEdit)
+	}
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
@@ -151,5 +157,11 @@ func CompleteGo(data interface{}, text string, pos token.Position) (matches comp
 // CompleteEdit uses the selected completion to edit the text
 func CompleteGoEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
 	s, delta = complete.EditGoCode(text, cursorPos, selection, seed)
+	return s, delta
+}
+
+// SpellCorrectEdit uses the selected correction to edit the text
+func SpellCorrectEdit(data interface{}, text string, cursorPos int, new string, old string) (s string, delta int) {
+	s, delta = spell.CorrectText(text, cursorPos, old, new)
 	return s, delta
 }

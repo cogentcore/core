@@ -109,6 +109,10 @@ const (
 	// only applies if the VpFlagMenu is also set
 	VpFlagCompleter
 
+	// VpFlagCorrector means viewport is serving as a popup menu for spelling correction --
+	// only applies if the VpFlagMenu is also set
+	VpFlagCorrector
+
 	// VpFlagTooltip means viewport is serving as a tooltip
 	VpFlagTooltip
 
@@ -140,6 +144,10 @@ func (vp *Viewport2D) IsMenu() bool {
 
 func (vp *Viewport2D) IsCompleter() bool {
 	return vp.HasFlag(int(VpFlagCompleter))
+}
+
+func (vp *Viewport2D) IsCorrector() bool {
+	return vp.HasFlag(int(VpFlagCorrector))
 }
 
 func (vp *Viewport2D) IsTooltip() bool {
