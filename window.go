@@ -2552,7 +2552,7 @@ func (w *Window) ClearNonFocus(foc ki.Ki) {
 			return true
 		}
 		if ni.HasFocus() {
-			fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
+			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
 			if !updated {
 				updated = true
 				updt = w.UpdateStart()
