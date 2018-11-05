@@ -241,7 +241,7 @@ func (sc *SpellCorrect) CheckWordInline(word string) (sugs []string, knwn bool, 
 }
 
 // Show is the main call for listing spelling corrections.
-// Calls ShowNow which the correction popup menu
+// Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
 func (sc *SpellCorrect) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
@@ -264,13 +264,19 @@ func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D,
 	if PopupIsCorrector(cpop) {
 		vp.Win.SetDelPopup(cpop)
 	}
+
+	var m Menu
+	var text string
 	count := len(sc.Suggestions)
-	if count > 0 {
-		if count == 1 && sc.Suggestions[0] == word {
-			return
-		}
-		var m Menu
-		var text string
+	if count == 1 && sc.Suggestions[0] == word {
+		return
+	}
+	if count == 0 {
+		text = "no suggestion"
+		m.AddAction(ActOpts{Label: text, Data: text},
+			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			})
+	} else {
 		for i := 0; i < count; i++ {
 			text = sc.Suggestions[i]
 			m.AddAction(ActOpts{Label: text, Data: text},
@@ -279,22 +285,23 @@ func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D,
 					scf.SpellCorrect(data.(string))
 				})
 		}
-		text = "*learn*"
-		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
-				scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
-				scf.LearnWordInline()
-			})
-		text = "*ignore*"
-		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
-				scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
-				scf.IgnoreAllInline()
-			})
-		pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
-		pvp.SetFlag(int(VpFlagCorrector))
-		pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	}
+	m.AddSeparator("")
+	text = "learn"
+	m.AddAction(ActOpts{Label: text, Data: text},
+		sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
+			scf.LearnWordInline()
+		})
+	text = "ignore"
+	m.AddAction(ActOpts{Label: text, Data: text},
+		sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+			scf := recv.Embed(KiT_SpellCorrect).(*SpellCorrect)
+			scf.IgnoreAllInline()
+		})
+	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
+	pvp.SetFlag(int(VpFlagCorrector))
+	pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 }
 
 // SpellCorrect emits a signal to let subscribers know that the user has made a

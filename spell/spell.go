@@ -11,12 +11,11 @@ package spell
 import (
 	"bufio"
 	"errors"
+	"github.com/sajari/fuzzy"
 	"log"
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/sajari/fuzzy"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,6 +122,25 @@ func Complete(s string) (result []string, err error) {
 func CorrectText(text string, cp int, old string, new string) (newText string, delta int) {
 	s1 := string(text[0:cp])
 	s2 := string(text[cp:])
+
+	// do what is possible to keep the casing of old string
+	oldlc := strings.ToLower(old)
+	min := len(old)
+	if len(new) < len(old) {
+		min = len(new)
+	}
+	var new2 []byte
+	var i int
+	for i = 0; i < min; i++ {
+		if oldlc[i] != new[i] {
+			break
+		}
+		new2 = append(new2, byte(old[i]))
+	}
+	for j := i; j < len(new); j++ {
+		new2 = append(new2, byte(new[j]))
+	}
+	new = string(new2)
 
 	// do a replace from end
 	last := strings.LastIndex(text, old)
