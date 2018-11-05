@@ -34,6 +34,11 @@ type TextWord struct {
 var input []TextWord
 var inputidx int = 0
 
+var notWordChar *regexp.Regexp
+var allNum *regexp.Regexp
+var wordBounds *regexp.Regexp
+var isLetter *regexp.Regexp
+
 // InitSpell tries to load the saved fuzzy.spell model.
 // If unsuccessful tries to create a new model from a text file used as input
 func InitSpell() error {
@@ -47,6 +52,23 @@ func InitSpell() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	notWordChar, err = regexp.Compile(`[^0-9A-Za-z]`)
+	if err != nil {
+		log.Printf("Could not complie regular expression: %v. \n", err)
+	}
+	allNum, err = regexp.Compile(`^[0-9]*$`)
+	if err != nil {
+		log.Printf("Could not complie regular expression: %v. \n", err)
+	}
+	wordBounds, err = regexp.Compile(`\b`)
+	if err != nil {
+		log.Printf("Could not complie regular expression: %v. \n", err)
+	}
+	isLetter, err = regexp.Compile(`^[a-zA-Z]+$`)
+	if err != nil {
+		log.Printf("Could not complie regular expression: %v. \n", err)
 	}
 	return nil
 }
@@ -120,29 +142,16 @@ func InitNewSpellCheck(text []byte) {
 // TextToWords generates a slice of words from text
 // removes various non-word input, trims symbols, etc
 func TextToWords(text []byte) {
-	notwordchar, err := regexp.Compile(`[^0-9A-Za-z]`)
-	if err != nil {
-		panic(err)
-	}
-	allnum, err := regexp.Compile(`^[0-9]*$`)
-	if err != nil {
-		panic(err)
-	}
-	wordbounds, err := regexp.Compile(`\b`)
-	if err != nil {
-		panic(err)
-	}
-
 	textstr := string(text)
 
 	var words []TextWord
 	for l, line := range strings.Split(textstr, "\n") {
-		line = notwordchar.ReplaceAllString(line, " ")
-		bounds := wordbounds.FindAllStringIndex(line, -1)
+		line = notWordChar.ReplaceAllString(line, " ")
+		bounds := wordBounds.FindAllStringIndex(line, -1)
 		words = words[:0] // reset for new line
 		splits := strings.Fields(line)
 		for i, w := range splits {
-			if allnum.MatchString(w) {
+			if allNum.MatchString(w) {
 				break
 			}
 			if len(w) > 1 {
@@ -152,9 +161,11 @@ func TextToWords(text []byte) {
 		}
 		input = append(input, words...)
 	}
-	//for _, w := range input {
-	//	fmt.Println(w)
-	//}
+}
+
+// IsWord returns true if the string follows rules to accept as word
+func IsWord(word string) bool {
+	return isLetter.MatchString(word)
 }
 
 // NextUnknownWord returns the next unknown word, i.e. not found in corpus

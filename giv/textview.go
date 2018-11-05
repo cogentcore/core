@@ -2342,7 +2342,7 @@ func (tv *TextView) SpellCheck(r rune) {
 	tbe := tv.Buf.Region(st, en)
 	if tbe != nil {
 		wb := tv.WordBefore()
-		if len(wb) > 0 {
+		if len(wb) > 2 && gi.IsWord(wb) {
 			sugs, knwn, err := tv.SpellCorrect.CheckWordInline(wb)
 			tv.SpellCorrect.Suggestions = sugs
 			tv.SpellCorrect.Word = wb

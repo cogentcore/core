@@ -105,7 +105,7 @@ func CheckWord(w string) (suggests []string, known bool, err error) {
 
 // LearnWord adds a single word to the corpus
 func LearnWord(word string) {
-	model.TrainWord(word)
+	model.TrainWord(strings.ToLower(word))
 }
 
 // Complete finds possible completions based on the prefix s
