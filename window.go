@@ -3040,6 +3040,7 @@ func (wl *WindowList) Focused() (*Window, int) {
 }
 
 // FocusNext focuses on the next window in the list, after the current Focused() one
+// skips minimized windows
 func (wl *WindowList) FocusNext() (*Window, int) {
 	fw, i := wl.Focused()
 	if fw == nil {
@@ -3051,13 +3052,19 @@ func (wl *WindowList) FocusNext() (*Window, int) {
 	if sz == 1 {
 		return nil, -1
 	}
-	if i == sz-1 {
-		i = 0
-	} else {
-		i++
+
+	for j := 0; j < sz - 1; j++ {
+		if i == sz-1 {
+			i = 0
+		} else {
+			i++
+		}
+		fw = (*wl)[i]
+		if !fw.OSWin.IsMinimized() {
+			fw.OSWin.Raise()
+			break
+		}
 	}
-	fw = (*wl)[i]
-	fw.OSWin.Raise()
 	return fw, i
 }
 
