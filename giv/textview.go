@@ -2168,9 +2168,7 @@ func (tv *TextView) Paste() {
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
 	if data != nil {
-		// if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
 		tv.DeleteSelection() // insert will delete it anyway!
-		// }
 		tv.InsertAtCursor(data.TypeData(mimedata.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
 	}
@@ -2181,7 +2179,16 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.HasSelection() {
+		mvpos := false
+		pos := tv.CursorPos
+		if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
+			mvpos = true
+			pos = tv.SelectReg.Start
+		}
 		tv.DeleteSelection()
+		if mvpos {
+			tv.SetCursor(pos)
+		}
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true, true)
 	if tbe == nil {
@@ -2327,25 +2334,22 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 // SpellCheck offers spelling corrections if we are at a word break and
 // the word before the break is unknown
 func (tv *TextView) SpellCheck(r rune) {
-	if tv.SpellCorrect != nil {
-		//if tv.Buf.Opts.SpellCorrect && tv.SpellCorrect != nil {
-		if unicode.IsSpace(r) {
-			st := TextPos{tv.CursorPos.Ln, 0}
-			en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
-			tbe := tv.Buf.Region(st, en)
-			if tbe != nil {
-				wb := tv.WordBefore()
-				if len(wb) > 0 {
-					sugs, knwn, err := tv.SpellCorrect.CheckWordInline(wb)
-					tv.SpellCorrect.Suggestions = sugs
-					tv.SpellCorrect.Word = wb
-					if !knwn && err == nil {
-						tv.OfferCorrect() // the unrecognized word and the suggestions
-					}
-				}
+	if tv.SpellCorrect == nil || !unicode.IsSpace(r) {
+		return
+	}
+	st := TextPos{tv.CursorPos.Ln, 0}
+	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	tbe := tv.Buf.Region(st, en)
+	if tbe != nil {
+		wb := tv.WordBefore()
+		if len(wb) > 0 {
+			sugs, knwn, err := tv.SpellCorrect.CheckWordInline(wb)
+			tv.SpellCorrect.Suggestions = sugs
+			tv.SpellCorrect.Word = wb
+			if !knwn && err == nil {
+				tv.OfferCorrect() // the unrecognized word and the suggestions
 			}
 		}
-		//}
 	}
 }
 
