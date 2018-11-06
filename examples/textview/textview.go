@@ -20,7 +20,7 @@ import (
 	"github.com/goki/gi/units"
 )
 
-var samplefile gi.FileName = "sample.in"
+var samplefile gi.FileName = "sample.go"
 
 func main() {
 	gimain.Main(func() {
@@ -80,10 +80,6 @@ func mainrun() {
 
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.Viewport = vp
-	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
-	if strings.HasSuffix(string(samplefile), ".md") {
-		txed1.SetSpellCorrect(txed1, SpellCorrectEdit)
-	}
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
@@ -102,6 +98,11 @@ func mainrun() {
 	txbuf.Hi.Lang = "Go"
 	txbuf.Hi.Style = "emacs"
 	txbuf.Open(samplefile)
+
+	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
+	if strings.HasSuffix(string(samplefile), ".md") {
+		txed1.SetSpellCorrect(txed1, SpellCorrectEdit)
+	}
 
 	// main menu
 	appnm := oswin.TheApp.Name()
@@ -143,15 +144,14 @@ func CompleteGo(data interface{}, text string, pos token.Position) (matches comp
 	}
 
 	seed = complete.SeedGolang(text)
-
 	textbytes := make([]byte, 0, txbuf.NLines*40)
 	for _, lr := range txbuf.Lines {
 		textbytes = append(textbytes, []byte(string(lr))...)
 		textbytes = append(textbytes, '\n')
 	}
 	results := complete.CompleteGo(textbytes, pos)
-	matches = complete.MatchSeedCompletion(results, seed)
-	return matches, seed
+	//matches = complete.MatchSeedCompletion(results, seed)
+	return results, seed
 }
 
 // CompleteEdit uses the selected completion to edit the text
