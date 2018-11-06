@@ -2282,6 +2282,9 @@ func (tv *TextView) CompleteText(s string) {
 func (tv *TextView) CompleteExtend(s string) {
 	if s != "" {
 		tv.Buf.Complete.Cancel(tv.Viewport)
+		pos := tv.CursorPos
+		pos.Ch -= len(tv.Buf.Complete.Seed)
+		tv.Buf.DeleteText(pos, tv.CursorPos, true, false)
 		tv.InsertAtCursor([]byte(s))
 		tv.OfferComplete()
 	}

@@ -143,7 +143,7 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 // ExtendSeed tries to extend the current seed checking possible completions for a longer common seed
 // e.g. if the current seed is "ab" and the completions are "abcde" and "abcdf" then Extend returns "cd"
 // but if the possible completions are "abcde" and "abz" then Extend returns ""
-func ExtendSeed(matches Completions, seed string) (extension string) {
+func ExtendSeed(matches Completions, seed string) string {
 	keep_looking := true
 	new_seed := seed
 	potential_seed := new_seed
@@ -165,8 +165,7 @@ func ExtendSeed(matches Completions, seed string) (extension string) {
 			new_seed = potential_seed
 		}
 	}
-	ext := strings.TrimPrefix(new_seed, seed) // only return the new portion
-	return ext
+	return new_seed
 }
 
 // SeedWhiteSpace returns the text after the last whitespace
