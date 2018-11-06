@@ -55,6 +55,7 @@ type TextView struct {
 	RenderSz      gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
 	CursorPos     TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol     int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	CorrectPos    TextPos                   `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
 	PosHistIdx    int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
 	SelectStart   TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
 	SelectReg     TextRegion                `json:"-" xml:"-" desc:"current selection region"`
@@ -1936,11 +1937,12 @@ func (tv *TextView) IsWordBreak(r rune) bool {
 	return false
 }
 
-// WordBefore returns the word before the cursor position using IsWordBreak
-// to determine the bounds of the word
-func (tv *TextView) WordBefore() string {
-	txt := tv.Buf.Line(tv.CursorPos.Ln)
-	ch := tv.CursorPos.Ch
+// WordBefore returns the word before the TextPos
+// uses IsWordBreak to determine the bounds of the word
+// todo: is breaking words that are contractions into 2 words - need to fix
+func (tv *TextView) WordBefore(tp TextPos) string {
+	txt := tv.Buf.Line(tp.Ln)
+	ch := tp.Ch
 	var runes []rune
 	var haveEnd = false
 	for i := ch - 1; i >= 0; i-- {
@@ -2335,17 +2337,32 @@ func (tv *TextView) SpellCheck(r rune) {
 	if tv.Buf.SpellCorrect == nil || !unicode.IsSpace(r) {
 		return
 	}
+	eol := false
 	st := TextPos{tv.CursorPos.Ln, 0}
 	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	if en.Ch == 0 {
+		eol = true
+		st.Ln += -1
+		en.Ln += -1
+		en.Ch += tv.Buf.LineLen(en.Ln)
+	}
 	tbe := tv.Buf.Region(st, en)
 	if tbe != nil {
-		wb := tv.WordBefore()
+		wb := tv.WordBefore(en)
 		if len(wb) > 2 && gi.IsWord(wb) {
 			sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
 			tv.Buf.SpellCorrect.Suggestions = sugs
 			tv.Buf.SpellCorrect.Word = wb
 			if !knwn && err == nil {
-				tv.OfferCorrect() // the unrecognized word and the suggestions
+				tv.CorrectPos = en // position for correction - same as CursorPos unless eol
+				if eol {           // misspelled word is before "\n"
+					cp := tv.CursorPos
+					tv.SetCursor(en)
+					tv.OfferCorrect() // the unrecognized word and the suggestions
+					tv.SetCursor(cp)
+				} else {
+					tv.OfferCorrect()
+				}
 			}
 		}
 	}
@@ -2384,13 +2401,16 @@ func (tv *TextView) OfferCorrect() {
 // CorrectText edits the text using the string chosen from the correction menu
 func (tv *TextView) CorrectText(s string) {
 	cp := tv.CursorPos
+	tv.CursorPos = tv.CorrectPos
 	st := TextPos{tv.CursorPos.Ln, 0}
 	en := TextPos{tv.CursorPos.Ln, tv.Buf.LineLen(tv.CursorPos.Ln)}
 	var tbes string
 	tbe := tv.Buf.Region(st, en)
-	if tbe != nil {
-		tbes = string(tbe.ToBytes())
+	if tbe == nil {
+		tv.CursorPos = cp
+		return
 	}
+	tbes = string(tbe.ToBytes())
 	ns, delta := tv.Buf.SpellCorrect.EditFunc(tv.Buf.SpellCorrect.Context, tbes, tv.CursorPos.Ch, s, tv.Buf.SpellCorrect.Word)
 	tv.Buf.DeleteText(st, en, true, true)
 	tv.InsertAtCursor([]byte(ns))
