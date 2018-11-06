@@ -165,7 +165,8 @@ func ExtendSeed(matches Completions, seed string) (extension string) {
 			new_seed = potential_seed
 		}
 	}
-	return strings.Replace(new_seed, seed, "", 1) // only return the seed extension
+	ext := strings.TrimPrefix(new_seed, seed) // only return the new portion
+	return ext
 }
 
 // SeedWhiteSpace returns the text after the last whitespace
