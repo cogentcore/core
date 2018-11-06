@@ -70,8 +70,6 @@ type TextView struct {
 	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
-	Complete      *gi.Complete              `json:"-" xml:"-" desc:"functions and data for text completion"`
-	SpellCorrect  *gi.SpellCorrect          `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 	CursorMu      sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
 	lastRecenter  int
 	lastFilename  gi.FileName
@@ -2233,7 +2231,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 
 // OfferComplete pops up a menu of possible completions
 func (tv *TextView) OfferComplete(forceComplete bool) {
-	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return
 	}
 	if !tv.Buf.Opts.Completion && !forceComplete {
@@ -2259,12 +2257,12 @@ func (tv *TextView) OfferComplete(forceComplete bool) {
 	cpos.X += 5
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
-	tv.Complete.Show(s, tpos, tv.Viewport, cpos, forceComplete)
+	tv.Buf.Complete.Show(s, tpos, tv.Viewport, cpos, forceComplete)
 }
 
 // CompleteText edits the text using the string chosen from the completion menu
 func (tv *TextView) CompleteText(s string) {
-	tv.Complete.Cancel(tv.Viewport)
+	tv.Buf.Complete.Cancel(tv.Viewport)
 
 	st := TextPos{tv.CursorPos.Ln, 0}
 	en := TextPos{tv.CursorPos.Ln, tv.Buf.LineLen(tv.CursorPos.Ln)}
@@ -2273,7 +2271,7 @@ func (tv *TextView) CompleteText(s string) {
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
-	ns, _ := tv.Complete.EditFunc(tv.Complete.Context, tbes, tv.CursorPos.Ch, s, tv.Complete.Seed)
+	ns, _ := tv.Buf.Complete.EditFunc(tv.Buf.Complete.Context, tbes, tv.CursorPos.Ch, s, tv.Buf.Complete.Seed)
 	tv.SetCursor(TextPos{tv.CursorPos.Ln, len(ns) - 1})
 	tv.Buf.DeleteText(st, en, true, true)
 	tv.CursorPos = st
@@ -2283,7 +2281,7 @@ func (tv *TextView) CompleteText(s string) {
 // CompleteExtend inserts the extended seed at the current cursor position
 func (tv *TextView) CompleteExtend(s string) {
 	if s != "" {
-		tv.Complete.Cancel(tv.Viewport)
+		tv.Buf.Complete.Cancel(tv.Viewport)
 		tv.InsertAtCursor([]byte(s))
 		tv.OfferComplete(dontForce)
 	}
@@ -2292,33 +2290,33 @@ func (tv *TextView) CompleteExtend(s string) {
 // CancelComplete cancels any pending completion -- call this when new events
 // have moved beyond any prior completion scenario
 func (tv *TextView) CancelComplete() {
-	if tv.Complete == nil || tv.ISearch.On || tv.QReplace.On {
+	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On {
 		return
 	}
 	if !tv.Buf.Opts.Completion {
 		return
 	}
-	tv.Complete.Cancel(tv.Viewport)
+	tv.Buf.Complete.Cancel(tv.Viewport)
 }
 
 // SetCompleter sets completion functions so that completions will
 // automatically be offered as the user types
 func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
-		if tv.Complete != nil {
-			tv.Complete.CompleteSig.Disconnect(tv.This())
+		if tv.Buf.Complete != nil {
+			tv.Buf.Complete.CompleteSig.Disconnect(tv.This())
 		}
-		tv.Complete.Destroy()
-		tv.Complete = nil
+		tv.Buf.Complete.Destroy()
+		tv.Buf.Complete = nil
 		return
 	}
-	tv.Complete = &gi.Complete{}
-	tv.Complete.InitName(tv.Complete, "tv-completion") // needed for standalone Ki's
-	tv.Complete.Context = data
-	tv.Complete.MatchFunc = matchFun
-	tv.Complete.EditFunc = editFun
+	tv.Buf.Complete = &gi.Complete{}
+	tv.Buf.Complete.InitName(tv.Buf.Complete, "tv-completion") // needed for standalone Ki's
+	tv.Buf.Complete.Context = data
+	tv.Buf.Complete.MatchFunc = matchFun
+	tv.Buf.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tv.Complete.CompleteSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.Buf.Complete.CompleteSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
 		if sig == int64(gi.CompleteSelect) {
 			tvf.CompleteText(data.(string)) // always use data
@@ -2334,7 +2332,7 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 // SpellCheck offers spelling corrections if we are at a word break and
 // the word before the break is unknown
 func (tv *TextView) SpellCheck(r rune) {
-	if tv.SpellCorrect == nil || !unicode.IsSpace(r) {
+	if tv.Buf.SpellCorrect == nil || !unicode.IsSpace(r) {
 		return
 	}
 	st := TextPos{tv.CursorPos.Ln, 0}
@@ -2343,9 +2341,9 @@ func (tv *TextView) SpellCheck(r rune) {
 	if tbe != nil {
 		wb := tv.WordBefore()
 		if len(wb) > 2 && gi.IsWord(wb) {
-			sugs, knwn, err := tv.SpellCorrect.CheckWordInline(wb)
-			tv.SpellCorrect.Suggestions = sugs
-			tv.SpellCorrect.Word = wb
+			sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
+			tv.Buf.SpellCorrect.Suggestions = sugs
+			tv.Buf.SpellCorrect.Word = wb
 			if !knwn && err == nil {
 				tv.OfferCorrect() // the unrecognized word and the suggestions
 			}
@@ -2355,7 +2353,7 @@ func (tv *TextView) SpellCheck(r rune) {
 
 // OfferCorrect pops up a menu of possible spelling corrections
 func (tv *TextView) OfferCorrect() {
-	if tv.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+	if tv.Buf.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return
 	}
 
@@ -2380,7 +2378,7 @@ func (tv *TextView) OfferCorrect() {
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
-	tv.SpellCorrect.Show(s, tpos, tv.Viewport, cpos)
+	tv.Buf.SpellCorrect.Show(s, tpos, tv.Viewport, cpos)
 }
 
 // CorrectText edits the text using the string chosen from the correction menu
@@ -2393,7 +2391,7 @@ func (tv *TextView) CorrectText(s string) {
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
-	ns, delta := tv.SpellCorrect.EditFunc(tv.SpellCorrect.Context, tbes, tv.CursorPos.Ch, s, tv.SpellCorrect.Word)
+	ns, delta := tv.Buf.SpellCorrect.EditFunc(tv.Buf.SpellCorrect.Context, tbes, tv.CursorPos.Ch, s, tv.Buf.SpellCorrect.Word)
 	tv.Buf.DeleteText(st, en, true, true)
 	tv.InsertAtCursor([]byte(ns))
 	cp.Ch = cp.Ch + delta
@@ -2403,33 +2401,33 @@ func (tv *TextView) CorrectText(s string) {
 // CancelCorrect cancels any pending spell correction -- call this when new events
 // have moved beyond any prior correction scenario
 func (tv *TextView) CancelCorrect() {
-	if tv.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On {
+	if tv.Buf.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On {
 		return
 	}
 	if !tv.Buf.Opts.SpellCorrect {
 		return
 	}
-	tv.SpellCorrect.Cancel(tv.Viewport)
+	tv.Buf.SpellCorrect.Cancel(tv.Viewport)
 }
 
 // SetSpellCorrect sets spell correct functions so that spell correct will
 // automatically be offered as the user types
 func (tv *TextView) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
 	if editFun == nil {
-		if tv.SpellCorrect != nil {
-			tv.SpellCorrect.SpellSig.Disconnect(tv.This())
+		if tv.Buf.SpellCorrect != nil {
+			tv.Buf.SpellCorrect.SpellSig.Disconnect(tv.This())
 		}
-		tv.SpellCorrect.Destroy()
-		tv.SpellCorrect = nil
+		tv.Buf.SpellCorrect.Destroy()
+		tv.Buf.SpellCorrect = nil
 		return
 	}
 	gi.InitSpell()
-	tv.SpellCorrect = &gi.SpellCorrect{}
-	tv.SpellCorrect.InitName(tv.SpellCorrect, "tv-spellcorrect") // needed for standalone Ki's
-	tv.SpellCorrect.Context = data
-	tv.SpellCorrect.EditFunc = editFun
+	tv.Buf.SpellCorrect = &gi.SpellCorrect{}
+	tv.Buf.SpellCorrect.InitName(tv.Buf.SpellCorrect, "tv-spellcorrect") // needed for standalone Ki's
+	tv.Buf.SpellCorrect.Context = data
+	tv.Buf.SpellCorrect.EditFunc = editFun
 	// note: only need to connect once..
-	tv.SpellCorrect.SpellSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tv.Buf.SpellCorrect.SpellSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvf, _ := recv.Embed(KiT_TextView).(*TextView)
 		if sig == int64(gi.SpellSelect) {
 			tvf.CorrectText(data.(string)) // always use data
@@ -3390,7 +3388,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	cpop := win.CurPopup()
 	if gi.PopupIsCompleter(cpop) {
 		// win.SetDelPopup(cpop)
-		setprocessed := tv.Complete.KeyInput(kf)
+		setprocessed := tv.Buf.Complete.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
 		}
@@ -3398,7 +3396,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	if gi.PopupIsCorrector(cpop) {
 		// win.SetDelPopup(cpop)
-		setprocessed := tv.SpellCorrect.KeyInput(kf)
+		setprocessed := tv.Buf.SpellCorrect.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
 		}

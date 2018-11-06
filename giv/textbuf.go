@@ -46,26 +46,28 @@ type TextBufOpts struct {
 // Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
-	Txt        []byte         `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
-	Autosave   bool           `desc:"if true, auto-save file after changes (in a separate routine)"`
-	Opts       TextBufOpts    `desc:"options for how text editing / viewing works"`
-	Filename   gi.FileName    `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
-	Info       FileInfo       `desc:"full info about file"`
-	Hi         HiMarkup       `desc:"syntax highlighting markup parameters (language, style, etc)"`
-	NLines     int            `json:"-" xml:"-" desc:"number of lines"`
-	Lines      [][]rune       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence"`
-	LineBytes  [][]byte       `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line -- these are initially just pointers into source Txt bytes"`
-	Markup     [][]byte       `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
-	ByteOffs   []int          `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
-	TotalBytes int            `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
-	LinesMu    sync.RWMutex   `json:"-" xml:"-" desc:"mutex for updating lines"`
-	MarkupMu   sync.RWMutex   `json:"-" xml:"-" desc:"mutex for updating markup"`
-	TextBufSig ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
-	Views      []*TextView    `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
-	Undos      []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of edits"`
-	UndoUndos  []*TextBufEdit `json:"-" xml:"-" desc:"undo stack of *undo* edits -- added to "`
-	UndoPos    int            `json:"-" xml:"-" desc:"undo position"`
-	PosHistory []TextPos      `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+	Txt          []byte           `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
+	Autosave     bool             `desc:"if true, auto-save file after changes (in a separate routine)"`
+	Opts         TextBufOpts      `desc:"options for how text editing / viewing works"`
+	Filename     gi.FileName      `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
+	Info         FileInfo         `desc:"full info about file"`
+	Hi           HiMarkup         `desc:"syntax highlighting markup parameters (language, style, etc)"`
+	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
+	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence"`
+	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line -- these are initially just pointers into source Txt bytes"`
+	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
+	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
+	LinesMu      sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating lines"`
+	MarkupMu     sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
+	TextBufSig   ki.Signal        `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
+	Views        []*TextView      `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
+	Undos        []*TextBufEdit   `json:"-" xml:"-" desc:"undo stack of edits"`
+	UndoUndos    []*TextBufEdit   `json:"-" xml:"-" desc:"undo stack of *undo* edits -- added to "`
+	UndoPos      int              `json:"-" xml:"-" desc:"undo position"`
+	PosHistory   []TextPos        `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+	Complete     *gi.Complete     `json:"-" xml:"-" desc:"functions and data for text completion"`
+	SpellCorrect *gi.SpellCorrect `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
