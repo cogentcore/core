@@ -144,6 +144,10 @@ func CorrectText(text string, cp int, old string, new string) (newText string, d
 
 	// do a replace from end
 	last := strings.LastIndex(text, old)
+	if last == -1 {
+		log.Println(os.Stderr, "Error in spell.go: substring not found.")
+		return newText, delta
+	}
 	s1a := s1[0:last]
 	s1c := s1[last+len(old) : len(s1)]
 	s1new := s1a + new + s1c

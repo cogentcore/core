@@ -79,7 +79,11 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 		c.DelayMu.Unlock()
 		return
 	}
-	c.DelayTimer = time.AfterFunc(time.Duration(CompleteWaitMSec)*time.Millisecond,
+	waitMSec := CompleteWaitMSec
+	if force {
+		waitMSec = 0
+	}
+	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
 		func() {
 			c.ShowNow(text, pos, vp, pt, force)
 			c.DelayMu.Lock()

@@ -30,9 +30,6 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-const force = true
-const dontForce = false
-
 // TextView is a widget for editing multiple lines of text (as compared to
 // TextField for a single line).  The View is driven by a TextBuf buffer which
 // contains all the text, and manages all the edits, sending update signals
@@ -62,6 +59,7 @@ type TextView struct {
 	PrevSelectReg TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	Highlights    []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
 	SelectMode    bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	ForceComplete bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
 	ISearch       ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
 	QReplace      QReplace                  `json:"-" xml:"-" desc:"query replace data"`
 	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
@@ -2232,11 +2230,11 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 //    Complete
 
 // OfferComplete pops up a menu of possible completions
-func (tv *TextView) OfferComplete(forceComplete bool) {
+func (tv *TextView) OfferComplete() {
 	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return
 	}
-	if !tv.Buf.Opts.Completion && !forceComplete {
+	if !tv.Buf.Opts.Completion && !tv.ForceComplete {
 		return
 	}
 
@@ -2259,7 +2257,7 @@ func (tv *TextView) OfferComplete(forceComplete bool) {
 	cpos.X += 5
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
-	tv.Buf.Complete.Show(s, tpos, tv.Viewport, cpos, forceComplete)
+	tv.Buf.Complete.Show(s, tpos, tv.Viewport, cpos, tv.ForceComplete)
 }
 
 // CompleteText edits the text using the string chosen from the completion menu
@@ -2285,13 +2283,14 @@ func (tv *TextView) CompleteExtend(s string) {
 	if s != "" {
 		tv.Buf.Complete.Cancel(tv.Viewport)
 		tv.InsertAtCursor([]byte(s))
-		tv.OfferComplete(dontForce)
+		tv.OfferComplete()
 	}
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
 // have moved beyond any prior completion scenario
 func (tv *TextView) CancelComplete() {
+	tv.ForceComplete = false
 	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On {
 		return
 	}
@@ -2310,6 +2309,7 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 		}
 		tv.Buf.Complete.Destroy()
 		tv.Buf.Complete = nil
+		tv.ForceComplete = false
 		return
 	}
 	tv.Buf.Complete = &gi.Complete{}
@@ -2326,6 +2326,7 @@ func (tv *TextView) SetCompleter(data interface{}, matchFun complete.MatchFunc, 
 			tvf.CompleteExtend(data.(string)) // always use data
 		}
 	})
+	tv.ForceComplete = false
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3407,7 +3408,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 
 	cpop := win.CurPopup()
 	if gi.PopupIsCompleter(cpop) {
-		// win.SetDelPopup(cpop)
 		setprocessed := tv.Buf.Complete.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
@@ -3415,7 +3415,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	}
 
 	if gi.PopupIsCorrector(cpop) {
-		// win.SetDelPopup(cpop)
 		setprocessed := tv.Buf.SpellCorrect.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
@@ -3455,25 +3454,25 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
-		tv.OfferComplete(dontForce)
+		tv.OfferComplete()
 	case gi.KeyFunWordRight:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForwardWord(1)
-		tv.OfferComplete(dontForce)
+		tv.OfferComplete()
 	case gi.KeyFunMoveLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
-		tv.OfferComplete(dontForce)
+		tv.OfferComplete()
 	case gi.KeyFunWordLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackwardWord(1)
-		tv.OfferComplete(dontForce)
+		tv.OfferComplete()
 	case gi.KeyFunMoveUp:
 		cancelAll()
 		kt.SetProcessed()
@@ -3595,7 +3594,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		} else {
 			kt.SetProcessed()
 			tv.CursorBackspace(1)
-			tv.OfferComplete(dontForce)
+			tv.OfferComplete()
 		}
 	case gi.KeyFunKill:
 		cancelAll()
@@ -3609,7 +3608,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorBackspaceWord(1)
-		tv.OfferComplete(dontForce)
+		tv.OfferComplete()
 	case gi.KeyFunDeleteWord:
 		cancelAll()
 		kt.SetProcessed()
@@ -3638,7 +3637,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunComplete:
 		tv.ISearchCancel()
 		kt.SetProcessed()
-		tv.OfferComplete(force)
+		tv.ForceComplete = true
+		tv.OfferComplete()
 	case gi.KeyFunEnter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
@@ -3707,11 +3707,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 						if kt.Rune == ' ' {
 							tv.CancelComplete()
 						} else {
-							tv.OfferComplete(dontForce)
+							tv.OfferComplete()
 						}
 					}
 				}
 			}
+		}
+		if unicode.IsSpace(kt.Rune) {
+			tv.ForceComplete = false
 		}
 		tv.SpellCheck(kt.Rune)
 	}
