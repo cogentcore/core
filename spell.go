@@ -174,6 +174,9 @@ func NextUnknownWord() (unknown TextWord, suggests []string, err error) {
 
 	for {
 		tw = NextWord()
+		if DoIgnore(tw.Word) {
+			continue
+		}
 		if tw.Word == "" { // we're done!
 			break
 		}
