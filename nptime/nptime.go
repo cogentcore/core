@@ -11,6 +11,9 @@ package nptime
 
 import "time"
 
+// Time represents the value of time.Time without using any pointers for the
+// location information, so it is more memory efficient when lots of time
+// values are being stored
 type Time struct {
 	Sec  int64
 	NSec int64
