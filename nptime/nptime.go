@@ -29,3 +29,8 @@ func (t *Time) SetTime(tt time.Time) {
 	t.Sec = tt.Unix()
 	t.NSec = tt.UnixNano()
 }
+
+// Now sets the time value to time.Now()
+func (t *Time) Now() {
+	t.SetTime(time.Now())
+}
