@@ -13,11 +13,15 @@ import "time"
 
 // Time represents the value of time.Time without using any pointers for the
 // location information, so it is more memory efficient when lots of time
-// values are being stored
+// values are being stored.
 type Time struct {
 	Sec  int64
 	NSec int64
 }
+
+// TimeZero is the uninitialized zero time value -- use to check whether
+// time has been set or not
+var TimeZero Time
 
 // Time returns the time.Time value for this nptime.Time value
 func (t Time) Time() time.Time {
