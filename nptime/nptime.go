@@ -23,6 +23,11 @@ type Time struct {
 // time has been set or not
 var TimeZero Time
 
+// IsZero returns true if the time is zero and has not been initialized
+func (t Time) IsZero() bool {
+	return t == TimeZero
+}
+
 // Time returns the time.Time value for this nptime.Time value
 func (t Time) Time() time.Time {
 	return time.Unix(t.Sec, t.NSec)
