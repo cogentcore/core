@@ -775,6 +775,9 @@ func TextFieldBlink() {
 
 // StartCursor starts the cursor blinking and renders it
 func (tf *TextField) StartCursor() {
+	if !tf.IsVisible() {
+		return
+	}
 	tf.BlinkOn = true
 	if CursorBlinkMSec == 0 {
 		tf.RenderCursor(true)
@@ -805,6 +808,9 @@ func (tf *TextField) ClearCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tf *TextField) StopCursor() {
+	if !tf.IsVisible() {
+		return
+	}
 	TextFieldBlinkMu.Lock()
 	if BlinkingTextField == tf {
 		BlinkingTextField = nil

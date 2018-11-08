@@ -6,8 +6,10 @@ package giv
 
 import (
 	"bytes"
-	// htmlstd "html"
+	"fmt"
+	htmlstd "html"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/alecthomas/chroma"
@@ -16,6 +18,97 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
+)
+
+// TagRegion defines a region of a line of text that has a given markup tag
+// region is only defined in terms of character positions -- line is implicit
+type TagRegion struct {
+	Tag chroma.TokenType `desc:"tag for this region of text"`
+	St  int              `desc:"starting character position"`
+	Ed  int              `desc:"ending character position -- exclusive (after last char)"`
+}
+
+// TagRegionsMerge merges the two tag regions into a combined list
+// properly ordered by sequence of tags within the line.
+// returns true if there are no conflicts between the two sets of tags
+// and false if there are conflicts
+func TagRegionsMerge(t1, t2 []TagRegion) ([]TagRegion, bool) {
+	if len(t1) == 0 {
+		return t2, true
+	}
+	if len(t2) == 0 {
+		return t1, true
+	}
+	sz1 := len(t1)
+	sz2 := len(t2)
+	tsz := sz1 + sz2
+	tl := make([]TagRegion, 0, tsz)
+	i1 := 0
+	i2 := 0
+	ok := true
+	for i := 0; i < tsz; i++ {
+		c1 := t1[i1]
+		c2 := t2[i2]
+		if c1.St < c2.St && c1.Ed < c2.St {
+			tl = append(tl, c1)
+			i1++
+			if i1 >= sz1 {
+				t1 = append(tl, t2[i2:sz2]...)
+				break
+			}
+		} else if c2.St < c1.St && c2.Ed < c1.St {
+			tl = append(tl, c2)
+			i2++
+			if i2 >= sz2 {
+				t1 = append(tl, t1[i1:sz1]...)
+				break
+			}
+		} else {
+			ok = false
+			fmt.Printf("conflicting tags: %v  vs  %v\n", c1, c2)
+			i1++
+			i2++
+			if i1 >= sz1 {
+				t1 = append(tl, t2[i2:sz2]...)
+				break
+			}
+			if i2 >= sz2 {
+				t1 = append(tl, t1[i1:sz1]...)
+				break
+			}
+		}
+	}
+	return tl, ok
+}
+
+// TagRegionsAdd adds a new tag region in sorted order to list
+func TagRegionsAdd(tl *[]TagRegion, tr TagRegion) {
+	for i, t := range *tl {
+		if t.St < tr.St {
+			continue
+		}
+		if t == tr { // dupe
+			return
+		}
+		*tl = append(*tl, tr)
+		copy((*tl)[i+1:], (*tl)[i:])
+		(*tl)[i] = tr
+		return
+	}
+	*tl = append(*tl, tr)
+}
+
+// TagRegionsSort sorts the tags by starting pos
+func TagRegionsSort(tags []TagRegion) {
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i].St < tags[j].St
+	})
+}
+
+// CustomGeneric tokens -- this is where we put anything not in chroma
+const (
+	// spelling error
+	GenericSpellErr chroma.TokenType = 7900 + iota
 )
 
 // HiStyleName is a highlighting style name
@@ -75,55 +168,102 @@ func (hm *HiMarkup) Init() {
 	hm.lastStyle = hm.Style
 }
 
-// MarkupText returns a line-wise split of marked-up text according to current
+// MarkupTags returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupText(txt []byte) ([][]byte, error) {
-	var htmlBuf bytes.Buffer
-	// txtstr := htmlstd.EscapeString(string(txt)) // not getting properly uensc
+func (hm *HiMarkup) MarkupTags(txt []byte) ([][]TagRegion, error) {
 	txtstr := string(txt)
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
-	err = hm.formatter.Format(&htmlBuf, hm.style, iterator)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	mtlns := bytes.Split(htmlBuf.Bytes(), []byte("\n"))
-	return mtlns, nil
+	lines := chroma.SplitTokensIntoLines(iterator.Tokens())
+	sz := len(lines)
+	tags := make([][]TagRegion, sz)
+	for li, lt := range lines {
+		cp := 0
+		for _, tok := range lt {
+			str := strings.TrimSuffix(tok.Value, "\n")
+			slen := len(str)
+			if slen == 0 {
+				continue
+			}
+			ep := cp + slen
+			if tok.Type < chroma.Text {
+				nt := TagRegion{Tag: tok.Type, St: cp, Ed: ep}
+				tags[li] = append(tags[li], nt)
+			}
+			cp = ep
+		}
+	}
+	return tags, nil
 }
 
-// MarkupLine returns a marked-up version of line of text
-func (hm *HiMarkup) MarkupLine(txtln []byte) ([]byte, error) {
-	var htmlBuf bytes.Buffer
-	// txtstr := htmlstd.EscapeString(string(txtln)) + "\n" // not getting properly unesc..
-	txtstr := string(txtln) + "\n"
+// MarkupTagsLine returns tags for one line according to current
+// syntax highlighting settings
+func (hm *HiMarkup) MarkupTagsLine(txt []byte) ([]TagRegion, error) {
+	txtstr := string(txt) + "\n"
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
-	// adding \n b/c it needs to see that for comments..
-	err = hm.formatter.Format(&htmlBuf, hm.style, iterator)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	b := htmlBuf.Bytes()
-	lfidx := bytes.Index(b, []byte("\n"))
-	if lfidx > 0 {
-		b = b[:lfidx]
+	var tags []TagRegion
+	cp := 0
+	toks := iterator.Tokens()
+	for _, tok := range toks {
+		str := strings.TrimSuffix(tok.Value, "\n")
+		slen := len(str)
+		if slen == 0 {
+			continue
+		}
+		if tok.Type == chroma.None { // always a parsing err AFAIK
+			// fmt.Printf("type: %v  st: %v  ed: %v  txt: %v\n", tok.Type, cp, ep, str)
+			continue
+		}
+		ep := cp + slen
+		if tok.Type < chroma.Text {
+			nt := TagRegion{Tag: tok.Type, St: cp, Ed: ep}
+			tags = append(tags, nt)
+		}
+		cp = ep
 	}
-	return hm.FixMarkupLine(b), nil
+	return tags, nil
 }
 
-// FixMarkupLine fixes the output of chroma markup
-func (hm *HiMarkup) FixMarkupLine(mt []byte) []byte {
-	esp := []byte(`</span>`)
-	mt = bytes.TrimPrefix(mt, esp) // leftovers
-	mt = bytes.TrimPrefix(mt, []byte(`<span class="err">`))
-	mt = bytes.Replace(mt, []byte(`**</span>**`), []byte(`**</span>`), -1)
-	mt = bytes.Replace(mt, []byte(`__</span>__`), []byte(`__</span>`), -1)
-	mtnsp := bytes.TrimSpace(mt)
-	if bytes.HasPrefix(mtnsp, esp) {
-		idx := bytes.Index(mt, esp)
-		mt = append(mt[:idx], mt[idx+len(esp):]...)
+// MarkupLine returns the line with html class tags added for each tag
+// takes both the hi tags and extra tags
+func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
+	ttags, _ := TagRegionsMerge(hitags, tags)
+	if len(ttags) == 0 {
+		return txt
 	}
-	return mt
+	sps := []byte(`<span class="`)
+	sps2 := []byte(`">`)
+	spe := []byte(`</span>`)
+	taglen := len(sps) + len(sps2) + len(spe) + 2
+	sz := len(txt)
+	musz := sz + len(ttags)*taglen
+	mu := make([]byte, 0, musz)
+	cp := 0
+	for _, tr := range ttags {
+		if tr.St >= sz || tr.Ed > sz {
+			break
+		}
+		if tr.St > cp {
+			mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:tr.St])))...)
+		}
+		mu = append(mu, sps...)
+		mu = append(mu, []byte(chroma.StandardTypes[tr.Tag])...)
+		mu = append(mu, sps2...)
+		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:tr.Ed])))...)
+		mu = append(mu, spe...)
+		cp = tr.Ed
+	}
+	if sz > cp {
+		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:sz])))...)
+	}
+	return mu
 }
 
 // todo: currently based on https://github.com/alecthomas/chroma styles, but we should

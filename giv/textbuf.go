@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
@@ -56,7 +57,9 @@ type TextBuf struct {
 	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
 	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence"`
 	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line -- these are initially just pointers into source Txt bytes"`
-	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process -- this is what is actually rendered"`
+	Tags         [][]TagRegion    `json:"extra custom tagged regions for each line"`
+	HiTags       [][]TagRegion    `json:"syntax highlighting tags -- auto-generated"`
+	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
 	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
 	LinesMu      sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating lines"`
@@ -183,6 +186,18 @@ func (tb *TextBuf) NumLines() int {
 	return tb.NLines
 }
 
+// IsValidLine returns true if given line is in range
+func (tb *TextBuf) IsValidLine(ln int) bool {
+	if ln < 0 {
+		return false
+	}
+	nln := tb.NumLines()
+	if ln >= nln {
+		return false
+	}
+	return true
+}
+
 // Line is the concurrent-safe accessor to specific Line of Lines runes
 func (tb *TextBuf) Line(ln int) []rune {
 	tb.LinesMu.RLock()
@@ -247,6 +262,8 @@ func (tb *TextBuf) New(nlines int) {
 	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
 	tb.LineBytes = make([][]byte, nlines)
+	tb.Tags = make([][]TagRegion, nlines)
+	tb.HiTags = make([][]TagRegion, nlines)
 	tb.Markup = make([][]byte, nlines)
 
 	if cap(tb.ByteOffs) >= nlines {
@@ -1383,6 +1400,20 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	copy(nmu[stln:], tmpmu)            // copy into position
 	tb.Markup = nmu
 
+	// Tags
+	tmptg := make([][]TagRegion, nsz)
+	ntg := append(tb.Tags, tmptg...)
+	copy(ntg[stln+nsz:], ntg[stln:])
+	copy(ntg[stln:], tmptg)
+	tb.Tags = ntg
+
+	// HiTags
+	tmpht := make([][]TagRegion, nsz)
+	nht := append(tb.HiTags, tmpht...)
+	copy(nht[stln+nsz:], nht[stln:])
+	copy(nht[stln:], tmpht)
+	tb.HiTags = nht
+
 	// ByteOffs -- maintain mem updt
 	tmpof := make([]int, nsz)
 	nof := append(tb.ByteOffs, tmpof...)
@@ -1414,6 +1445,8 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 
 	tb.LineBytes = append(tb.LineBytes[:stln], tb.LineBytes[edln:]...)
 	tb.Markup = append(tb.Markup[:stln], tb.Markup[edln:]...)
+	tb.Tags = append(tb.Tags[:stln], tb.Tags[edln:]...)
+	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
 
 	st := tbe.Reg.Start.Ln
@@ -1471,17 +1504,18 @@ func (tb *TextBuf) MarkupAllLines() {
 	tb.SetFlag(int(TextBufMarkingUp))
 
 	tb.LinesToBytes()
-	mtlns, err := tb.Hi.MarkupText(tb.Txt)
+	mtags, err := tb.Hi.MarkupTags(tb.Txt)
 	if err != nil {
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
 
 	tb.MarkupMu.Lock()
-	maxln := ints.MinInt(len(mtlns)-1, tb.NLines)
+	maxln := ints.MinInt(len(mtags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
-		mt := mtlns[ln]
-		tb.Markup[ln] = tb.Hi.FixMarkupLine(mt)
+		mt := mtags[ln]
+		tb.HiTags[ln] = mt
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], mt, tb.Tags[ln])
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
@@ -1500,10 +1534,13 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 	}
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
-		mu, err := tb.Hi.MarkupLine(tb.LineBytes[ln])
+		ltxt := tb.LineBytes[ln]
+		mt, err := tb.Hi.MarkupTagsLine(ltxt)
 		if err == nil {
-			tb.Markup[ln] = mu
+			tb.HiTags[ln] = mt
+			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.Tags[ln])
 		} else {
+			tb.Markup[ln] = ltxt
 			allgood = false
 		}
 	}
@@ -1607,6 +1644,60 @@ func (tb *TextBuf) AdjustReg(reg TextRegion) TextRegion {
 		}
 	}
 	return reg
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//   Tags
+
+// AddTag adds a new custom tag for given line, at given position
+func (tb *TextBuf) AddTag(ln, st, ed int, tag chroma.TokenType) {
+	if !tb.IsValidLine(ln) {
+		return
+	}
+	tr := TagRegion{Tag: tag, St: st, Ed: ed}
+	if len(tb.Tags[ln]) == 0 {
+		tb.Tags[ln] = append(tb.Tags[ln], tr)
+	} else {
+		TagRegionsAdd(&tb.Tags[ln], tr)
+	}
+	tb.MarkupLines(ln, ln)
+}
+
+// AddTagEdit adds a new custom tag for given line, using TextBufEdit for location
+func (tb *TextBuf) AddTagEdit(tbe *TextBufEdit, tag chroma.TokenType) {
+	tb.AddTag(tbe.Reg.Start.Ln, tbe.Reg.Start.Ch, tbe.Reg.End.Ch, tag)
+}
+
+// TagAt returns tag at given text position, if one exists -- returns false if not
+func (tb *TextBuf) TagAt(pos TextPos) (reg TagRegion, ok bool) {
+	if !tb.IsValidLine(pos.Ln) {
+		return
+	}
+	for _, t := range tb.Tags[pos.Ln] {
+		if t.St >= pos.Ch && t.Ed < pos.Ch {
+			return t, true
+		}
+	}
+	return
+}
+
+// RemoveTag removes tag at given position if it exists -- returns tag
+func (tb *TextBuf) RemoveTag(pos TextPos) (reg TagRegion, ok bool) {
+	if !tb.IsValidLine(pos.Ln) {
+		return
+	}
+	for i, t := range tb.Tags[pos.Ln] {
+		if t.St >= pos.Ch && t.Ed < pos.Ch {
+			tb.Tags[pos.Ln] = append(tb.Tags[pos.Ln][:i], tb.Tags[pos.Ln][i+1:]...)
+			reg = t
+			ok = true
+			break
+		}
+	}
+	if ok {
+		tb.MarkupLines(pos.Ln, pos.Ln)
+	}
+	return
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1810,8 +1901,9 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte) {
 	}
 	tb.LinesMu.RUnlock()
 
+	nln := tb.NumLines()
 	for ln := st; ln < ed; ln++ {
-		if ln >= tb.NumLines() {
+		if ln >= nln {
 			break
 		}
 

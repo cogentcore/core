@@ -15,6 +15,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/alecthomas/chroma"
 	"github.com/chewxy/math32"
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
@@ -1915,34 +1916,21 @@ func (tv *TextView) IsWordBreak(r rune) bool {
 // WordBefore returns the word before the TextPos
 // uses IsWordBreak to determine the bounds of the word
 // todo: is breaking words that are contractions into 2 words - need to fix
-func (tv *TextView) WordBefore(tp TextPos) string {
+func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
-	var runes []rune
-	var haveEnd = false
+	st := ch
 	for i := ch - 1; i >= 0; i-- {
 		r := txt[i]
-		if haveEnd == false {
-			if tv.IsWordBreak(r) {
-				continue
-			} else {
-				runes = append(runes, r)
-				haveEnd = true
-			}
-		} else {
-			if tv.IsWordBreak(r) {
-				break
-			} else {
-				runes = append(runes, r)
-			}
+		if tv.IsWordBreak(r) {
+			st = i + 1
+			break
 		}
 	}
-	// now reverse it :)
-	var rvs string
-	for i := len(runes) - 1; i >= 0; i-- {
-		rvs += string(runes[i])
+	if st != ch {
+		return tv.Buf.Region(TextPos{Ln: tp.Ln, Ch: st}, tp)
 	}
-	return rvs
+	return nil
 }
 
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
@@ -2305,34 +2293,27 @@ func (tv *TextView) SpellCheck(r rune) {
 	if tv.Buf.SpellCorrect == nil || !unicode.IsSpace(r) {
 		return
 	}
-	eol := false
-	st := TextPos{tv.CursorPos.Ln, 0}
-	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
-	if en.Ch == 0 {
-		eol = true
-		st.Ln += -1
-		en.Ln += -1
-		en.Ch += tv.Buf.LineLen(en.Ln)
+	cp := tv.CursorPos
+	cp.Ch--
+	if cp.Ch < 0 {
+		cp.Ln--
+		cp.Ch = tv.Buf.LineLen(cp.Ln) - 1
 	}
-	tbe := tv.Buf.Region(st, en)
-	if tbe != nil {
-		wb := tv.WordBefore(en)
-		if len(wb) > 2 && gi.IsWord(wb) {
-			sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
-			tv.Buf.SpellCorrect.Suggestions = sugs
-			tv.Buf.SpellCorrect.Word = wb
-			if !knwn && err == nil {
-				tv.CorrectPos = en // position for correction - same as CursorPos unless eol
-				if eol {           // misspelled word is before "\n"
-					cp := tv.CursorPos
-					tv.SetCursor(en)
-					tv.OfferCorrect() // the unrecognized word and the suggestions
-					tv.SetCursor(cp)
-				} else {
-					tv.OfferCorrect()
-				}
-			}
-		}
+	tbw := tv.WordBefore(cp)
+	if tbw == nil {
+		return
+	}
+	wb := string(tbw.ToBytes())
+	if len(wb) <= 2 || !gi.IsWord(wb) {
+		return
+	}
+	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
+	if !knwn && err == nil {
+		tv.Buf.SpellCorrect.Suggestions = sugs
+		tv.Buf.SpellCorrect.Word = wb
+		tv.Buf.AddTagEdit(tbw, chroma.GenericUnderline)
+		ln := tbw.Reg.Start.Ln
+		tv.RenderLines(ln, ln)
 	}
 }
 
@@ -2697,6 +2678,9 @@ func TextViewBlink() {
 
 // StartCursor starts the cursor blinking and renders it
 func (tv *TextView) StartCursor() {
+	if !tv.IsVisible() {
+		return
+	}
 	tv.BlinkOn = true
 	if gi.CursorBlinkMSec == 0 {
 		tv.RenderCursor(true)
@@ -2719,6 +2703,9 @@ func (tv *TextView) StartCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tv *TextView) StopCursor() {
+	if !tv.IsVisible() {
+		return
+	}
 	TextViewBlinkMu.Lock()
 	if BlinkingTextView == tv {
 		BlinkingTextView = nil
