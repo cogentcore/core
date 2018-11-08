@@ -16,7 +16,7 @@ import "time"
 // values are being stored.
 type Time struct {
 	Sec  int64
-	NSec int64
+	NSec uint32
 }
 
 // TimeZero is the uninitialized zero time value -- use to check whether
@@ -30,13 +30,13 @@ func (t Time) IsZero() bool {
 
 // Time returns the time.Time value for this nptime.Time value
 func (t Time) Time() time.Time {
-	return time.Unix(t.Sec, t.NSec)
+	return time.Unix(t.Sec, int64(t.NSec))
 }
 
 // SetTime sets the nptime.Time value based on the time.Time value
 func (t *Time) SetTime(tt time.Time) {
 	t.Sec = tt.Unix()
-	t.NSec = tt.UnixNano()
+	t.NSec = uint32(tt.Nanosecond())
 }
 
 // Now sets the time value to time.Now()
