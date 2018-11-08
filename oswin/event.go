@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/goki/ki/kit"
+	"github.com/goki/ki/nptime"
 )
 
 // GoGi event structure is dervied from go.wde and golang/x/mobile/event
@@ -167,12 +168,9 @@ type Event interface {
 // EventBase is the base type for events -- records time and whether event has
 // been processed by a receiver of the event -- in which case it is skipped
 type EventBase struct {
-	// GenTime records the time when the event was first generated, as seconds
-	// and nanoseconds instead of the default Time struct, to avoid having the
-	// location pointer per this:
-	// https://segment.com/blog/allocation-efficiency-in-high-performance-go-services/
-	GenTimeSec  int64
-	GenTimeNSec uint32
+	// GenTime records the time when the event was first generated, using more
+	// efficient nptime struct
+	GenTime nptime.Time
 
 	// Processed indicates if the event has been processed by an end receiver,
 	// and thus should no longer be processed by other possible receivers
@@ -181,9 +179,7 @@ type EventBase struct {
 
 // SetTime sets the event time to Now
 func (ev *EventBase) SetTime() {
-	t := time.Now()
-	ev.GenTimeSec = t.Unix()
-	ev.GenTimeNSec = uint32(t.Nanosecond())
+	ev.GenTime.Now()
 }
 
 func (ev *EventBase) Init() {
@@ -191,7 +187,7 @@ func (ev *EventBase) Init() {
 }
 
 func (ev EventBase) Time() time.Time {
-	return time.Unix(ev.GenTimeSec, int64(ev.GenTimeNSec))
+	return ev.GenTime.Time()
 }
 
 func (ev EventBase) IsProcessed() bool {

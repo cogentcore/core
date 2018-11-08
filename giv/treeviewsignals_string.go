@@ -3,9 +3,11 @@
 package giv
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _TreeViewSignals_name = "TreeViewSelectedTreeViewUnselectedTreeViewAllSelectedTreeViewAllUnselectedTreeViewOpenedTreeViewClosedTreeViewChangedTreeViewSignalsN"
 
@@ -25,5 +27,5 @@ func (i *TreeViewSignals) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type TreeViewSignals", s)
+	return errors.New("String: " + s + " is not a valid option for type: TreeViewSignals")
 }

@@ -3,13 +3,15 @@
 package giv
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _TextViewSignals_name = "TextViewDoneTextViewSelectedTextViewCursorMovedTextViewISearchTextViewSignalsN"
+var _ = errors.New("dummy error")
 
-var _TextViewSignals_index = [...]uint8{0, 12, 28, 47, 62, 78}
+const _TextViewSignals_name = "TextViewDoneTextViewSelectedTextViewCursorMovedTextViewISearchTextViewQReplaceTextViewSignalsN"
+
+var _TextViewSignals_index = [...]uint8{0, 12, 28, 47, 62, 78, 94}
 
 func (i TextViewSignals) String() string {
 	if i < 0 || i >= TextViewSignals(len(_TextViewSignals_index)-1) {
@@ -25,5 +27,5 @@ func (i *TextViewSignals) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type TextViewSignals", s)
+	return errors.New("String: " + s + " is not a valid option for type: TextViewSignals")
 }

@@ -3,9 +3,11 @@
 package giv
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _FileNodeFlags_name = "FileNodeOpenFileNodeSymLinkFileNodeFlagsN"
 
@@ -25,5 +27,5 @@ func StringToFileNodeFlags(s string) (FileNodeFlags, error) {
 			return FileNodeFlags(i + 14), nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type FileNodeFlags", s)
+	return 0, errors.New("String: " + s + " is not a valid option for type: FileNodeFlags")
 }

@@ -302,7 +302,7 @@ func (fn *FileNode) CloseBuf() bool {
 	if fn.Buf == nil {
 		return false
 	}
-	fn.Buf.Close()
+	fn.Buf.Close(nil)
 	fn.Buf = nil
 	return true
 }
@@ -621,7 +621,7 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 			}
 			i += ci
 			ci = i + fsz
-			reg := TextRegion{Start: TextPos{Ln: ln, Ch: i}, End: TextPos{Ln: ln, Ch: ci}}
+			reg := NewTextRegion(ln, i, ln, ci)
 			cist := ints.MaxInt(i-FileSearchContext, 0)
 			cied := ints.MinInt(ci+FileSearchContext, sz)
 			tlen := mstsz + medsz + cied - cist

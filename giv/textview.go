@@ -1262,7 +1262,7 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 			if tl.StartSpan >= si && tl.StartIdx >= ri {
 				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
 				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
-				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: ed}}
+				reg := NewTextRegion(ln, st, ln, ed)
 				pos.Ch = st + 1 // get into it so next one will go after..
 				return pos, reg, true
 			}
@@ -1270,7 +1270,7 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 		pos.Ln = ln + 1
 		pos.Ch = 0
 	}
-	return pos, TextRegion{}, false
+	return pos, TextRegionNil, false
 }
 
 // FindPrevLink finds previous link before given position, returns false if no such links
@@ -1291,7 +1291,7 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 			if tl.StartSpan <= si && tl.StartIdx < ri {
 				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
 				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
-				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: ed}}
+				reg := NewTextRegion(ln, st, ln, ed)
 				pos.Ch = st - 1
 				return pos, reg, true
 			}
@@ -1301,7 +1301,7 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 			pos.Ch = tv.Buf.LineLen(ln-1) - 2
 		}
 	}
-	return pos, TextRegion{}, false
+	return pos, TextRegionNil, false
 }
 
 // HighlightRegion creates a new highlighted region, and renders it,
@@ -1356,9 +1356,7 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	prevh := tv.Highlights
-	tv.Highlights = []TextRegion{reg}
-	tv.UpdateHighlights(prevh)
+	tv.HighlightRegion(reg)
 	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
 	return true
@@ -1435,8 +1433,8 @@ func (tv *TextView) FindMatches(find string, useCase bool) ([]FileSearchMatch, b
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
 func (tv *TextView) MatchFromPos(matches []FileSearchMatch, cpos TextPos) (int, bool) {
 	for i, m := range matches {
-		pos := m.Reg.Start
-		if pos == cpos || cpos.IsLess(pos) {
+		reg := tv.Buf.AdjustReg(m.Reg)
+		if reg.Start == cpos || cpos.IsLess(reg.Start) {
 			return i, true
 		}
 	}
@@ -1497,8 +1495,9 @@ func (tv *TextView) ISearchSelectMatch(midx int) {
 		return
 	}
 	m := tv.ISearch.Matches[midx]
-	pos := m.Reg.Start
-	tv.SelectReg = m.Reg
+	reg := tv.Buf.AdjustReg(m.Reg)
+	pos := reg.Start
+	tv.SelectReg = reg
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
@@ -1630,17 +1629,14 @@ func (tv *TextView) ISearchCancel() {
 
 // QReplace holds all the query-replace data
 type QReplace struct {
-	On           bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
-	Find         string            `json:"-" xml:"-" desc:"current interactive search string"`
-	Replace      string            `json:"-" xml:"-" desc:"current interactive search string"`
-	UseCase      bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
-	Matches      []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
-	Pos          int               `json:"-" xml:"-" desc:"position within isearch matches"`
-	PrevPos      int               `json:"-" xml:"-" desc:"position in search list from previous search"`
-	StartPos     TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
-	ChangeOffset int               `json:"-" xml:"-" desc:"compensation for change word length different than original word"`
-	PreviousLine int               `json:"-" xml:"-" desc:"line of previous replace"`
-	CurrentLine  int               `json:"-" xml:"-" desc:"line of current replace"`
+	On       bool              `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	Find     string            `json:"-" xml:"-" desc:"current interactive search string"`
+	Replace  string            `json:"-" xml:"-" desc:"current interactive search string"`
+	UseCase  bool              `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	Matches  []FileSearchMatch `json:"-" xml:"-" desc:"current search matches"`
+	Pos      int               `json:"-" xml:"-" desc:"position within isearch matches"`
+	PrevPos  int               `json:"-" xml:"-" desc:"position in search list from previous search"`
+	StartPos TextPos           `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // PrevQReplaceFinds are the previous QReplace strings
@@ -1725,8 +1721,6 @@ func (tv *TextView) QReplaceStart(find, repl string) {
 	tv.QReplace.UseCase = HasUpperCase(find)
 	tv.QReplace.Matches = nil
 	tv.QReplace.Pos = -1
-	tv.QReplace.ChangeOffset = 0
-	tv.QReplace.PreviousLine = tv.QReplace.CurrentLine
 
 	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.Prefs.SavedPathsMax)
 	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.Prefs.SavedPathsMax)
@@ -1764,16 +1758,10 @@ func (tv *TextView) QReplaceSelectMatch(midx int) {
 	if midx >= nm {
 		return
 	}
-	tv.QReplace.CurrentLine = tv.QReplace.Matches[midx].Reg.Start.Ln
-	if tv.QReplace.CurrentLine == tv.QReplace.PreviousLine {
-		tv.QReplace.Matches[midx].Reg.Start.Ch += tv.QReplace.ChangeOffset
-		tv.QReplace.Matches[midx].Reg.End.Ch += tv.QReplace.ChangeOffset
-	} else {
-		tv.QReplace.ChangeOffset = 0
-	}
 	m := tv.QReplace.Matches[midx]
-	pos := m.Reg.Start
-	tv.SelectReg = m.Reg
+	reg := tv.Buf.AdjustReg(m.Reg)
+	pos := reg.Start
+	tv.SelectReg = reg
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
@@ -1788,15 +1776,11 @@ func (tv *TextView) QReplaceReplace(midx int) {
 		return
 	}
 	m := tv.QReplace.Matches[midx]
-	pos := m.Reg.Start
-	tv.Buf.DeleteText(m.Reg.Start, m.Reg.End, true, true)
+	reg := tv.Buf.AdjustReg(m.Reg)
+	pos := reg.Start
+	tv.Buf.DeleteText(reg.Start, reg.End, true, true)
 	tv.Buf.InsertText(pos, []byte(tv.QReplace.Replace), true, true)
-	offset := len(tv.QReplace.Replace) - len(tv.QReplace.Find)
-	tv.Highlights[midx].Start.Ch = 0 // don't highlight replace text
-	tv.Highlights[midx].End.Ch = 0   // don't highlight replace text
-	tv.UpdateQReplaceHighlights(midx, offset)
-	tv.QReplace.ChangeOffset += offset
-	tv.QReplace.PreviousLine = tv.QReplace.CurrentLine
+	tv.Highlights[midx] = TextRegionNil
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
@@ -1810,13 +1794,6 @@ func (tv *TextView) QReplaceReplaceAll(midx int) {
 		return
 	}
 	for mi := midx; mi < nm; mi++ {
-		tv.QReplace.CurrentLine = tv.QReplace.Matches[mi].Reg.Start.Ln
-		if tv.QReplace.CurrentLine == tv.QReplace.PreviousLine {
-			tv.QReplace.Matches[mi].Reg.Start.Ch += tv.QReplace.ChangeOffset
-			tv.QReplace.Matches[mi].Reg.End.Ch += tv.QReplace.ChangeOffset
-		} else {
-			tv.QReplace.ChangeOffset = 0
-		}
 		tv.QReplaceReplace(mi)
 	}
 }
@@ -2025,14 +2002,14 @@ func (tv *TextView) SelectReset() {
 	}
 	stln := tv.SelectReg.Start.Ln
 	edln := tv.SelectReg.End.Ln
-	tv.SelectReg = TextRegionZero
-	tv.PrevSelectReg = TextRegionZero
+	tv.SelectReg = TextRegionNil
+	tv.PrevSelectReg = TextRegionNil
 	tv.RenderLines(stln, edln)
 }
 
 // RenderSelectLines renders the lines within the current selection region
 func (tv *TextView) RenderSelectLines() {
-	if tv.PrevSelectReg == TextRegionZero {
+	if tv.PrevSelectReg == TextRegionNil {
 		tv.RenderLines(tv.SelectReg.Start.Ln, tv.SelectReg.End.Ln)
 	} else {
 		stln := ints.MinInt(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
@@ -2106,9 +2083,6 @@ func (tv *TextView) PasteHist() {
 		if clip != nil {
 			updt := tv.Viewport.Win.UpdateStart()
 			defer tv.Viewport.Win.UpdateEnd(updt)
-			if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
-				tv.DeleteSelection()
-			}
 			oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
@@ -2159,14 +2133,12 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	return tbe
 }
 
-// Paste inserts text from the clipboard at current cursor position -- if
-// cursor is within a current selection, that selection is
+// Paste inserts text from the clipboard at current cursor position
 func (tv *TextView) Paste() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
 	if data != nil {
-		tv.DeleteSelection() // insert will delete it anyway!
 		tv.InsertAtCursor(data.TypeData(mimedata.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
 	}
@@ -2177,16 +2149,8 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	if tv.HasSelection() {
-		mvpos := false
-		pos := tv.CursorPos
-		if tv.SelectReg.Start.IsLess(tv.CursorPos) && tv.CursorPos.IsLess(tv.SelectReg.End) {
-			mvpos = true
-			pos = tv.SelectReg.Start
-		}
-		tv.DeleteSelection()
-		if mvpos {
-			tv.SetCursor(pos)
-		}
+		tbe := tv.DeleteSelection()
+		tv.CursorPos = tbe.AdjustPos(tv.CursorPos, AdjustPosDelStart) // move to start if in reg
 	}
 	tbe := tv.Buf.InsertText(tv.CursorPos, txt, true, true)
 	if tbe == nil {
@@ -2831,7 +2795,8 @@ func (tv *TextView) RenderSelect() {
 // RenderAllLines
 func (tv *TextView) RenderHighlights(stln, edln int) {
 	for _, reg := range tv.Highlights {
-		if stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln) {
+		reg := tv.Buf.AdjustReg(reg)
+		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
 			continue
 		}
 		tv.RenderRegionBox(reg, TextViewHighlight)
@@ -2842,24 +2807,12 @@ func (tv *TextView) RenderHighlights(stln, edln int) {
 // highlights -- assumed to be within a window update block
 func (tv *TextView) UpdateHighlights(prev []TextRegion) {
 	for _, ph := range prev {
+		ph := tv.Buf.AdjustReg(ph)
 		tv.RenderLines(ph.Start.Ln, ph.End.Ln)
 	}
 	for _, ch := range tv.Highlights {
+		ch := tv.Buf.AdjustReg(ch)
 		tv.RenderLines(ch.Start.Ln, ch.End.Ln)
-	}
-}
-
-// UpdateQReplaceHighlights updates highlight regions for QReplace finds further ahead
-// of the last replace that are on the same line of text
-func (tv *TextView) UpdateQReplaceHighlights(si int, offset int) {
-	l := tv.Highlights[si].Start.Ln
-	for i := si + 1; i < len(tv.Highlights); i++ {
-		if tv.Highlights[i].Start.Ln == l {
-			tv.Highlights[i].Start.Ch += offset
-			tv.Highlights[i].End.Ch += offset
-		} else {
-			break
-		}
 	}
 }
 
@@ -3774,10 +3727,8 @@ func (tv *TextView) OpenLinkAt(pos TextPos) (*gi.TextLink, bool) {
 		rend := &tv.Renders[pos.Ln]
 		st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
 		ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
-		reg := TextRegion{Start: TextPos{Ln: pos.Ln, Ch: st}, End: TextPos{Ln: pos.Ln, Ch: ed}}
-		prevh := tv.Highlights
-		tv.Highlights = []TextRegion{reg}
-		tv.UpdateHighlights(prevh)
+		reg := NewTextRegion(pos.Ln, st, pos.Ln, ed)
+		tv.HighlightRegion(reg)
 		tv.SetCursorShow(pos)
 		tv.SavePosHistory(tv.CursorPos)
 		tv.OpenLink(tl)

@@ -20,6 +20,7 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
+	"github.com/goki/ki/nptime"
 	"github.com/pmezard/go-difflib/difflib"
 )
 
@@ -458,7 +459,8 @@ func (tb *TextBuf) Save() error {
 }
 
 // Close closes the buffer -- prompts to save if changes, and disconnects from views
-func (tb *TextBuf) Close() bool {
+// if afterFun is non-nil, then it is called with the status of the user action
+func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
 		vp := tb.ViewportFromView()
 		if tb.Filename != "" {
@@ -469,11 +471,15 @@ func (tb *TextBuf) Close() bool {
 					switch sig {
 					case 0:
 						tb.Save()
-						tb.Close() // 2nd time through won't prompt
+						tb.Close(afterFun) // 2nd time through won't prompt
 					case 1:
 						tb.ClearChanged()
 						tb.AutoSaveDelete()
-						tb.Close()
+						tb.Close(afterFun)
+					case 2:
+						if afterFun != nil {
+							afterFun(true)
+						}
 					}
 				})
 		} else {
@@ -485,8 +491,11 @@ func (tb *TextBuf) Close() bool {
 					case 0:
 						tb.ClearChanged()
 						tb.AutoSaveDelete()
-						tb.Close()
+						tb.Close(afterFun)
 					case 1:
+						if afterFun != nil {
+							afterFun(true)
+						}
 					}
 				})
 		}
@@ -498,6 +507,9 @@ func (tb *TextBuf) Close() bool {
 	tb.New(1)
 	tb.Filename = ""
 	tb.ClearChanged()
+	if afterFun != nil {
+		afterFun(false)
+	}
 	return true
 }
 
@@ -858,7 +870,7 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 			}
 			i += ci
 			ci = i + fsz
-			reg := TextRegion{Start: TextPos{Ln: ln, Ch: i}, End: TextPos{Ln: ln, Ch: ci}}
+			reg := NewTextRegion(ln, i, ln, ci)
 			cist := ints.MaxInt(i-FileSearchContext, 0)
 			cied := ints.MinInt(ci+FileSearchContext, sz)
 			tlen := mstsz + medsz + cied - cist
@@ -887,7 +899,13 @@ type TextPos struct {
 	Ln, Ch int
 }
 
+// TextPosZero is the uninitialized zero text position (which is
+// still a valid position)
 var TextPosZero = TextPos{}
+
+// TextPosErr represents an error text position (-1 for both line and char)
+// used as a return value for cases where error positions are possible
+var TextPosErr = TextPos{-1, -1}
 
 // IsLess returns true if receiver position is less than given comparison
 func (tp *TextPos) IsLess(cmp TextPos) bool {
@@ -926,21 +944,64 @@ func (tp *TextPos) FromString(link string) bool {
 	return true
 }
 
-// TextRegion represents a text region as a start / end position
+// TextRegion represents a text region as a start / end position, and includes
+// a Time stamp for when the region was created as valid positions into the TextBuf.
+// The character end position is an *exclusive* position (i.e., the region ends at
+// the character just prior to that character) but the lines are always *inclusive*
+// (i.e., it is the actual line, not the next line).
 type TextRegion struct {
 	Start TextPos
 	End   TextPos
+	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+}
+
+// TextRegionNil is the empty (zero) text region -- all zeros
+var TextRegionNil TextRegion
+
+// IsNil checks if the region is empty, because the start is after or equal to the end
+func (tr *TextRegion) IsNil() bool {
+	return !tr.Start.IsLess(tr.End)
+}
+
+// TimeNow grabs the current time as the edit time
+func (tr *TextRegion) TimeNow() {
+	tr.Time.Now()
+}
+
+// NewTextRegion creates a new text region using separate line and char
+// values for start and end, and also sets the time stamp to now
+func NewTextRegion(stLn, stCh, edLn, edCh int) TextRegion {
+	tr := TextRegion{Start: TextPos{Ln: stLn, Ch: stCh}, End: TextPos{Ln: edLn, Ch: edCh}}
+	tr.TimeNow()
+	return tr
+}
+
+// NewTextRegionPos creates a new text region using position values
+// and also sets the time stamp to now
+func NewTextRegionPos(st, ed TextPos) TextRegion {
+	tr := TextRegion{Start: st, End: ed}
+	tr.TimeNow()
+	return tr
+}
+
+// IsAfterTime reports if this region's time stamp is after given time value
+// if region Time stamp has not been set, it always returns true
+func (tr *TextRegion) IsAfterTime(t time.Time) bool {
+	if tr.Time.IsZero() {
+		return true
+	}
+	return tr.Time.Time().After(t)
 }
 
 // FromString decodes text region from a string representation of form:
 // [#]LxxCxx-LxxCxx -- used in e.g., URL links -- returns true if successful
-func (tp *TextRegion) FromString(link string) bool {
+func (tr *TextRegion) FromString(link string) bool {
 	link = strings.TrimPrefix(link, "#")
-	fmt.Sscanf(link, "L%dC%d-L%dC%d", &tp.Start.Ln, &tp.Start.Ch, &tp.End.Ln, &tp.End.Ch)
-	tp.Start.Ln--
-	tp.Start.Ch--
-	tp.End.Ln--
-	tp.End.Ch--
+	fmt.Sscanf(link, "L%dC%d-L%dC%d", &tr.Start.Ln, &tr.Start.Ch, &tr.End.Ln, &tr.End.Ch)
+	tr.Start.Ln--
+	tr.Start.Ch--
+	tr.End.Ln--
+	tr.End.Ch--
 	return true
 }
 
@@ -954,15 +1015,13 @@ func NewTextRegionLen(start TextPos, len int) TextRegion {
 	return reg
 }
 
-var TextRegionZero = TextRegion{}
-
 // TextBufEdit describes an edit action to a buffer -- this is the data passed
 // via signals to viewers of the buffer.  Actions are only deletions and
 // insertions (a change is a sequence of those, given normal editing
 // processes).  The TextBuf always reflects the current state *after* the
 // edit.
 type TextBufEdit struct {
-	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert"`
+	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit."`
 	Delete bool       `desc:"action is either a deletion or an insertion"`
 	Text   [][]rune   `desc:"text to be inserted"`
 }
@@ -994,6 +1053,95 @@ func (te *TextBufEdit) ToBytes() []byte {
 	return b
 }
 
+// AdjustPosDel determines what to do with positions within deleted region
+type AdjustPosDel int
+
+// these are options for what to do with positions within deleted region
+// for the AdjustPos function
+const (
+	// AdjustPosDelErr means return a TextPosErr when in deleted region
+	AdjustPosDelErr AdjustPosDel = iota
+
+	// AdjustPosDelStart means return start of deleted region
+	AdjustPosDelStart
+
+	// AdjustPosDelEnd means return end of deleted region
+	AdjustPosDelEnd
+)
+
+// AdjustPos adjusts the given text position as a function of the edit.
+// if the position was within a deleted region of text, del determines
+// what is returned
+func (te *TextBufEdit) AdjustPos(pos TextPos, del AdjustPosDel) TextPos {
+	if pos.IsLess(te.Reg.Start) || pos == te.Reg.Start {
+		return pos
+	}
+	dl := te.Reg.End.Ln - te.Reg.Start.Ln
+	if pos.Ln > te.Reg.End.Ln {
+		if te.Delete {
+			pos.Ln -= dl
+		} else {
+			pos.Ln += dl
+		}
+		return pos
+	}
+	if te.Delete {
+		if pos.Ln < te.Reg.End.Ln || pos.Ch < te.Reg.End.Ch {
+			switch del {
+			case AdjustPosDelStart:
+				return te.Reg.Start
+			case AdjustPosDelEnd:
+				return te.Reg.End
+			case AdjustPosDelErr:
+				return TextPosErr
+			}
+		}
+		// this means pos.Ln == te.Reg.End.Ln, Ch >= end
+		if dl == 0 {
+			pos.Ch -= (te.Reg.End.Ch - te.Reg.Start.Ch)
+		} else {
+			pos.Ch -= te.Reg.End.Ch
+		}
+	} else {
+		if dl == 0 {
+			pos.Ch += (te.Reg.End.Ch - te.Reg.Start.Ch)
+		} else {
+			pos.Ln += dl
+		}
+	}
+	return pos
+}
+
+// AdjustPosIfAfterTime checks the time stamp and IfAfterTime,
+// it adjusts the given text position as a function of the edit
+// del determines what to do with positions within a deleted region
+// either move to start or end of the region, or return an error.
+func (te *TextBufEdit) AdjustPosIfAfterTime(pos TextPos, t time.Time, del AdjustPosDel) TextPos {
+	if te.Reg.IsAfterTime(t) {
+		return te.AdjustPos(pos, del)
+	}
+	return pos
+}
+
+// AdjustReg adjusts the given text region as a function of the edit, including
+// checking that the timestamp on the region is after the edit time, if
+// the region has a valid Time stamp (otherwise always does adjustment).
+// If the starting position is within a deleted region, it is moved to the
+// end of the deleted region, and if the ending position was within a deleted
+// region, it is moved to the start.  If the region becomes empty, TextRegionNil
+// will be returned.
+func (te *TextBufEdit) AdjustReg(reg TextRegion) TextRegion {
+	if !reg.Time.IsZero() && !te.Reg.IsAfterTime(reg.Time.Time()) {
+		return reg
+	}
+	reg.Start = te.AdjustPos(reg.Start, AdjustPosDelEnd)
+	reg.End = te.AdjustPos(reg.End, AdjustPosDelStart)
+	if reg.IsNil() {
+		return TextRegionNil
+	}
+	return reg
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //   Edits
 
@@ -1018,7 +1166,8 @@ func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
 }
 
 // DeleteText deletes region of text between start and end positions, signaling
-// views after text lines have been updated.
+// views after text lines have been updated.  Sets the timestamp on resulting TextBufEdit
+// to now
 func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
@@ -1071,7 +1220,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 }
 
 // Insert inserts new text at given starting position, signaling views after
-// text has been inserted
+// text has been inserted.  Sets the timestamp on resutling TextBufEdit to now
 func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *TextBufEdit {
 	if len(text) == 0 {
 		return nil
@@ -1142,6 +1291,7 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 }
 
 // Region returns a TextBufEdit representation of text between start and end positions
+// returns nil if not a valid region.  sets the timestamp on the TextBufEdit to now
 func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
@@ -1149,10 +1299,10 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.TextBuf TextRegion: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("giv.TextBuf : starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tbe := &TextBufEdit{Reg: TextRegion{Start: st, End: ed}}
+	tbe := &TextBufEdit{Reg: NewTextRegionPos(st, ed)}
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	if ed.Ln == st.Ln {
@@ -1429,6 +1579,34 @@ func (tb *TextBuf) Redo() *TextBufEdit {
 	}
 	tb.UndoPos++
 	return tbe
+}
+
+// AdjustPos adjusts given text position, which was recorded at given time
+// for any edits that have taken place since that time (using the Undo stack).
+// del determines what to do with positions within a deleted region -- either move
+// to start or end of the region, or return an error
+func (tb *TextBuf) AdjustPos(pos TextPos, t time.Time, del AdjustPosDel) TextPos {
+	for _, utbe := range tb.Undos {
+		pos = utbe.AdjustPosIfAfterTime(pos, t, del)
+		if pos == TextPosErr {
+			return pos
+		}
+	}
+	return pos
+}
+
+// AdjustReg adjusts given text region for any edits that
+// have taken place since time stamp on region (using the Undo stack)
+// If region was wholly within a deleted region, then TextRegionNil will be
+// returned -- otherwise it is clipped appropriately as function of deletes.
+func (tb *TextBuf) AdjustReg(reg TextRegion) TextRegion {
+	for _, utbe := range tb.Undos {
+		reg = utbe.AdjustReg(reg)
+		if reg == TextRegionNil {
+			return reg
+		}
+	}
+	return reg
 }
 
 /////////////////////////////////////////////////////////////////////////////
