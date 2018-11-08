@@ -15,8 +15,8 @@ import "time"
 // location information, so it is more memory efficient when lots of time
 // values are being stored.
 type Time struct {
-	Sec  int64
-	NSec uint32
+	Sec  int64  `desc:"time.Time.Unix() seconds since 1970"`
+	NSec uint32 `desc:"time.Time.Nanosecond() -- nanosecond offset within second, *not* UnixNano()"`
 }
 
 // TimeZero is the uninitialized zero time value -- use to check whether
