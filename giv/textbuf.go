@@ -1491,6 +1491,24 @@ func (tb *TextBuf) ReMarkup() {
 	go tb.MarkupAllLines()
 }
 
+// AdjustedTags updates tag positions for edits
+func (tb *TextBuf) AdjustedTags(ln int) []TagRegion {
+	sz := len(tb.Tags[ln])
+	if sz == 0 {
+		return tb.Tags[ln]
+	}
+	ntags := make([]TagRegion, sz)
+	for i, tg := range tb.Tags[ln] {
+		reg := TextRegion{Start: TextPos{Ln: ln, Ch: tg.St}, End: TextPos{Ln: ln, Ch: tg.Ed}}
+		reg.Time = tg.Time
+		reg = tb.AdjustReg(reg)
+		ntr := TagRegion{Tag: tg.Tag, St: reg.Start.Ch, Ed: reg.End.Ch}
+		ntr.Time.Now()
+		ntags[i] = ntr
+	}
+	return ntags
+}
+
 // MarkupAllLines does syntax highlighting markup for all lines in buffer,
 // calling MarkupMu mutex when setting the marked-up lines with the result --
 // designed to be called in a separate goroutine
@@ -1515,7 +1533,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	for ln := 0; ln < maxln; ln++ {
 		mt := mtags[ln]
 		tb.HiTags[ln] = mt
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], mt, tb.Tags[ln])
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], mt, tb.AdjustedTags(ln))
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
@@ -1538,7 +1556,7 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 		mt, err := tb.Hi.MarkupTagsLine(ltxt)
 		if err == nil {
 			tb.HiTags[ln] = mt
-			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.Tags[ln])
+			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.AdjustedTags(ln))
 		} else {
 			tb.Markup[ln] = ltxt
 			allgood = false
@@ -1655,9 +1673,11 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag chroma.TokenType) {
 		return
 	}
 	tr := TagRegion{Tag: tag, St: st, Ed: ed}
+	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
 		tb.Tags[ln] = append(tb.Tags[ln], tr)
 	} else {
+		tb.Tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
 		TagRegionsAdd(&tb.Tags[ln], tr)
 	}
 	tb.MarkupLines(ln, ln)

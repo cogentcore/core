@@ -18,14 +18,16 @@ import (
 	"github.com/alecthomas/chroma/styles"
 	"github.com/goki/gi"
 	"github.com/goki/ki"
+	"github.com/goki/ki/nptime"
 )
 
 // TagRegion defines a region of a line of text that has a given markup tag
 // region is only defined in terms of character positions -- line is implicit
 type TagRegion struct {
-	Tag chroma.TokenType `desc:"tag for this region of text"`
-	St  int              `desc:"starting character position"`
-	Ed  int              `desc:"ending character position -- exclusive (after last char)"`
+	Tag  chroma.TokenType `desc:"tag for this region of text"`
+	St   int              `desc:"starting character position"`
+	Ed   int              `desc:"ending character position -- exclusive (after last char)"`
+	Time nptime.Time      `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
 // TagRegionsMerge merges the two tag regions into a combined list
