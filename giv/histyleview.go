@@ -60,13 +60,13 @@ func (vv *HiStyleValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc k
 	}
 	cur := kit.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	SliceViewSelectDialog(vp, &HiStyles, cur, DlgOpts{Title: "Select a HiStyle Highlighting Style", Prompt: desc}, nil,
+	SliceViewSelectDialog(vp, &HiStyleNames, cur, DlgOpts{Title: "Select a HiStyle Highlighting Style", Prompt: desc}, nil,
 		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg, _ := send.(*gi.Dialog)
 				si := SliceViewSelectDialogValue(ddlg)
 				if si >= 0 {
-					hs := HiStyles[si]
+					hs := HiStyleNames[si]
 					vv.SetValue(hs)
 					vv.UpdateWidget()
 				}
