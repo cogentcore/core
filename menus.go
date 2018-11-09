@@ -203,20 +203,17 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 // corresponding keyboard shortcut.  Paste is automatically enabled by
 // clipboard having something in it.
 func (m *Menu) AddCopyCutPaste(win *Window) {
-	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
-	ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-	m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
+	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 		})
-	m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
+	m.AddAction(ActOpts{Label: "Cut", ShortcutKey: KeyFunCut},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
 			ww.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 		})
-	m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc,
+	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
 			ac.SetInactiveState(oswin.TheApp.ClipBoard(win.OSWin).IsEmpty())
 		}}, win, func(recv, send ki.Ki, sig int64, data interface{}) {

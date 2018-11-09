@@ -6,7 +6,6 @@ package giv
 
 import (
 	"bytes"
-	"fmt"
 	htmlstd "html"
 	"log"
 	"sort"
@@ -30,10 +29,28 @@ type TagRegion struct {
 	Time nptime.Time      `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
+// OverlapsReg returns true if the two regions overlap
+func (tr *TagRegion) OverlapsReg(or TagRegion) bool {
+	// start overlaps
+	if (tr.St >= or.St && tr.St < or.Ed) || (or.St >= tr.St && or.St < tr.Ed) {
+		return true
+	}
+	// end overlaps
+	if (tr.Ed > or.St && tr.Ed <= or.Ed) || (or.Ed > tr.St && or.Ed <= tr.Ed) {
+		return true
+	}
+	return false
+}
+
+// ContainsPos returns true if the region contains the given point
+func (tr *TagRegion) ContainsPos(pos int) bool {
+	return pos >= tr.St && pos < tr.Ed
+}
+
 // TagRegionsMerge merges the two tag regions into a combined list
 // properly ordered by sequence of tags within the line.
 // returns true if there are no conflicts between the two sets of tags
-// and false if there are conflicts
+// and false if there are conflicts -- t1 wins any conflicts!
 func TagRegionsMerge(t1, t2 []TagRegion) ([]TagRegion, bool) {
 	if len(t1) == 0 {
 		return t2, true
@@ -67,7 +84,8 @@ func TagRegionsMerge(t1, t2 []TagRegion) ([]TagRegion, bool) {
 			}
 		} else {
 			ok = false
-			fmt.Printf("conflicting tags: %v  vs  %v\n", c1, c2)
+			// fmt.Printf("conflicting tags: %v  vs  %v\n", c1, c2)
+			tl = append(tl, c1) // tl wins
 			i1++
 			i2++
 			if i1 >= sz1 {
@@ -89,7 +107,7 @@ func TagRegionsAdd(tl *[]TagRegion, tr TagRegion) {
 		if t.St < tr.St {
 			continue
 		}
-		if t == tr { // dupe
+		if t.OverlapsReg(tr) { // can't have any overlap!
 			return
 		}
 		*tl = append(*tl, tr)
@@ -100,6 +118,21 @@ func TagRegionsAdd(tl *[]TagRegion, tr TagRegion) {
 	*tl = append(*tl, tr)
 }
 
+// TagRegionsCleanup removes any overlapping regions in tag regions
+func TagRegionsCleanup(tl *[]TagRegion) {
+	sz := len(*tl)
+	if sz <= 1 {
+		return
+	}
+	for i := sz - 1; i > 0; i-- {
+		ct := (*tl)[i]
+		pt := (*tl)[i-1]
+		if ct.OverlapsReg(pt) {
+			*tl = append((*tl)[:i], (*tl)[i+1:]...)
+		}
+	}
+}
+
 // TagRegionsSort sorts the tags by starting pos
 func TagRegionsSort(tags []TagRegion) {
 	sort.Slice(tags, func(i, j int) bool {
@@ -107,11 +140,27 @@ func TagRegionsSort(tags []TagRegion) {
 	})
 }
 
-// CustomGeneric tokens -- this is where we put anything not in chroma
+// HiCustom tag token types -- this is where we put anything not in chroma
 const (
-	// spelling error
-	GenericSpellErr chroma.TokenType = 7900 + iota
+	// HiCustomTag is our starting tag -- anything above this is custom..
+	HiCustomTag chroma.TokenType = 10000 + iota
+
+	// HiTagSpellErr tags a spelling error
+	HiTagSpellErr
 )
+
+// HiCustomTagNames are our names for HiCustom tags
+// need to ensure CSS exists for these
+var HiCustomTagNames = map[chroma.TokenType]string{
+	HiTagSpellErr: "cse",
+}
+
+// HiCustomTagProps are default properties for each custom tag
+var HiCustomTagProps = map[chroma.TokenType]ki.Props{
+	HiTagSpellErr: ki.Props{
+		"text-decoration": "dottedunderline",
+	},
+}
 
 // HiStyleName is a highlighting style name
 type HiStyleName string
@@ -165,6 +214,11 @@ func (hm *HiMarkup) Init() {
 	csstr = strings.Replace(csstr, " .chroma .", " .", -1)
 	hm.CSSheet.ParseString(csstr)
 	hm.CSSProps = hm.CSSheet.CSSProps()
+
+	// add custom props here:
+	for tag, tagnm := range HiCustomTagNames {
+		hm.CSSProps["."+tagnm] = HiCustomTagProps[tag]
+	}
 
 	hm.lastLang = hm.Lang
 	hm.lastStyle = hm.Style
@@ -256,7 +310,13 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
 			mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:tr.St])))...)
 		}
 		mu = append(mu, sps...)
-		mu = append(mu, []byte(chroma.StandardTypes[tr.Tag])...)
+		clsnm := ""
+		if tr.Tag >= HiCustomTag {
+			clsnm = HiCustomTagNames[tr.Tag]
+		} else {
+			clsnm = chroma.StandardTypes[tr.Tag]
+		}
+		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
 		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:tr.Ed])))...)
 		mu = append(mu, spe...)

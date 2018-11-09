@@ -23,13 +23,16 @@ import (
 // the list of possible completions and for editing text after a completion is selected
 type Complete struct {
 	ki.Node
-	MatchFunc   complete.MatchFunc `desc:"function to get the list of possible completions"`
-	EditFunc    complete.EditFunc  `desc:"function to edit text using the selected completion"`
-	Context     interface{}        `desc:"the object that implements complete.Func"`
-	Completions complete.Completions
-	Seed        string    `desc:"current completion seed"`
-	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
-	Completion  string    `desc:"the user's completion selection'"`
+	MatchFunc   complete.MatchFunc   `desc:"function to get the list of possible completions"`
+	EditFunc    complete.EditFunc    `desc:"function to edit text using the selected completion"`
+	Context     interface{}          `desc:"the object that implements complete.Func"`
+	SrcLn       int                  `desc:"line number in source that completion is operating on, if relevant"`
+	SrcCh       int                  `desc:"character position in source that completion is operating on"`
+	Completions complete.Completions `desc:"the list of potential completions"`
+	Seed        string               `desc:"current completion seed"`
+	CompleteSig ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
+	Completion  string               `desc:"the user's completion selection'"`
+	Vp          *Viewport2D          `desc:"the viewport where the current popup menu is presented"`
 	DelayTimer  *time.Timer
 	DelayMu     sync.Mutex
 	ShowMu      sync.Mutex
@@ -105,6 +108,7 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
+	c.Vp = nil
 	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
 	count := len(c.Completions)
 	if count > 0 {
@@ -123,6 +127,7 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 						tff.Complete(data.(string))
 					})
 			}
+			c.Vp = vp
 			pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
 			pvp.SetFlag(int(VpFlagCompleter))
 			pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
@@ -133,15 +138,16 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 
 // Cancel cancels any pending completion -- call when new events nullify prior completions
 // returns true if canceled
-func (c *Complete) Cancel(vp *Viewport2D) bool {
-	if vp == nil || vp.Win == nil {
+func (c *Complete) Cancel() bool {
+	if c.Vp == nil || c.Vp.Win == nil {
 		return false
 	}
-	cpop := vp.Win.CurPopup()
+	cpop := c.Vp.Win.CurPopup()
 	if PopupIsCompleter(cpop) {
-		vp.Win.SetDelPopup(cpop)
+		c.Vp.Win.SetDelPopup(cpop)
 	}
 	c.DelayMu.Lock()
+	c.Vp = nil
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 		c.DelayTimer = nil
@@ -155,6 +161,7 @@ func (c *Complete) Cancel(vp *Viewport2D) bool {
 // Complete emits a signal to let subscribers know that the user has made a
 // selection from the list of possible completions
 func (c *Complete) Complete(s string) {
+	c.Cancel()
 	c.Completion = s
 	c.CompleteSig.Emit(c.This(), int64(CompleteSelect), s)
 }

@@ -18,6 +18,8 @@ import (
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
+	"github.com/goki/gi/complete"
+	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
@@ -72,6 +74,7 @@ type TextBuf struct {
 	PosHistory   []TextPos        `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 	Complete     *gi.Complete     `json:"-" xml:"-" desc:"functions and data for text completion"`
 	SpellCorrect *gi.SpellCorrect `json:"-" xml:"-" desc:"functions and data for spelling correction"`
+	CurView      *TextView        `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
@@ -1203,6 +1206,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
 		tb.LinesMu.Unlock()
+		if saveUndo {
+			tb.SaveUndo(tbe)
+		}
 		tb.LinesEdited(tbe)
 	} else {
 		// first get chars on start and end
@@ -1221,6 +1227,9 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 		}
 		tb.NLines = len(tb.Lines)
 		tb.LinesMu.Unlock()
+		if saveUndo {
+			tb.SaveUndo(tbe)
+		}
 		tb.LinesDeleted(tbe)
 	}
 
@@ -1229,9 +1238,6 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
-	}
-	if saveUndo {
-		tb.SaveUndo(tbe)
 	}
 	return tbe
 }
@@ -1263,6 +1269,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 		ed.Ch += rsz
 		tb.LinesMu.Unlock()
 		tbe = tb.Region(st, ed)
+		if saveUndo {
+			tb.SaveUndo(tbe)
+		}
 		tb.LinesEdited(tbe)
 	} else {
 		if tb.Lines[st.Ln] == nil {
@@ -1293,6 +1302,9 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 		}
 		tb.LinesMu.Unlock()
 		tbe = tb.Region(st, ed)
+		if saveUndo {
+			tb.SaveUndo(tbe)
+		}
 		tb.LinesInserted(tbe)
 	}
 	if signal {
@@ -1300,9 +1312,6 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
-	}
-	if saveUndo {
-		tb.SaveUndo(tbe)
 	}
 	return tbe
 }
@@ -1497,15 +1506,18 @@ func (tb *TextBuf) AdjustedTags(ln int) []TagRegion {
 	if sz == 0 {
 		return tb.Tags[ln]
 	}
-	ntags := make([]TagRegion, sz)
-	for i, tg := range tb.Tags[ln] {
+	ntags := make([]TagRegion, 0, sz)
+	for _, tg := range tb.Tags[ln] {
 		reg := TextRegion{Start: TextPos{Ln: ln, Ch: tg.St}, End: TextPos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
 		reg = tb.AdjustReg(reg)
-		ntr := TagRegion{Tag: tg.Tag, St: reg.Start.Ch, Ed: reg.End.Ch}
-		ntr.Time.Now()
-		ntags[i] = ntr
+		if !reg.IsNil() {
+			ntr := TagRegion{Tag: tg.Tag, St: reg.Start.Ch, Ed: reg.End.Ch}
+			ntr.Time.Now()
+			ntags = append(ntags, ntr)
+		}
 	}
+	TagRegionsCleanup(&ntags)
 	return ntags
 }
 
@@ -1533,7 +1545,8 @@ func (tb *TextBuf) MarkupAllLines() {
 	for ln := 0; ln < maxln; ln++ {
 		mt := mtags[ln]
 		tb.HiTags[ln] = mt
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], mt, tb.AdjustedTags(ln))
+		tb.Tags[ln] = tb.AdjustedTags(ln)
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], mt, tb.Tags[ln])
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
@@ -1693,6 +1706,7 @@ func (tb *TextBuf) TagAt(pos TextPos) (reg TagRegion, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
+	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for _, t := range tb.Tags[pos.Ln] {
 		if t.St >= pos.Ch && t.Ed < pos.Ch {
 			return t, true
@@ -1701,13 +1715,17 @@ func (tb *TextBuf) TagAt(pos TextPos) (reg TagRegion, ok bool) {
 	return
 }
 
-// RemoveTag removes tag at given position if it exists -- returns tag
-func (tb *TextBuf) RemoveTag(pos TextPos) (reg TagRegion, ok bool) {
+// RemoveTag removes tag (optionally only given tag if non-zero) at given position if it exists -- returns tag
+func (tb *TextBuf) RemoveTag(pos TextPos, tag chroma.TokenType) (reg TagRegion, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
+	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range tb.Tags[pos.Ln] {
-		if t.St >= pos.Ch && t.Ed < pos.Ch {
+		if t.ContainsPos(pos.Ch) {
+			if tag > 0 && t.Tag != tag {
+				continue
+			}
 			tb.Tags[pos.Ln] = append(tb.Tags[pos.Ln][:i], tb.Tags[pos.Ln][i+1:]...)
 			reg = t
 			ok = true
@@ -1938,6 +1956,131 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte) {
 				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + 3}, true, true)
 			}
 		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//    Complete and Spell
+
+// SetCompleter sets completion functions so that completions will
+// automatically be offered as the user types
+func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+	if matchFun == nil || editFun == nil {
+		if tb.Complete != nil {
+			tb.Complete.CompleteSig.Disconnect(tb.This())
+		}
+		tb.Complete.Destroy()
+		tb.Complete = nil
+		return
+	}
+	if tb.Complete != nil {
+		if tb.Complete.Context == data {
+			tb.Complete.MatchFunc = matchFun
+			tb.Complete.EditFunc = editFun
+			return
+		}
+	}
+	tb.Complete = &gi.Complete{}
+	tb.Complete.InitName(tb.Complete, "tb-completion") // needed for standalone Ki's
+	tb.Complete.Context = data
+	tb.Complete.MatchFunc = matchFun
+	tb.Complete.EditFunc = editFun
+	// note: only need to connect once..
+	tb.Complete.CompleteSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
+		if sig == int64(gi.CompleteSelect) {
+			tbf.CompleteText(data.(string)) // always use data
+		} else if sig == int64(gi.CompleteExtend) {
+			tbf.CompleteExtend(data.(string)) // always use data
+		}
+	})
+}
+
+// CompleteText edits the text using the string chosen from the completion menu
+func (tb *TextBuf) CompleteText(s string) {
+	st := TextPos{tb.Complete.SrcLn, 0}
+	en := TextPos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
+	var tbes string
+	tbe := tb.Region(st, en)
+	if tbe != nil {
+		tbes = string(tbe.ToBytes())
+	}
+	ns, delta := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, s, tb.Complete.Seed)
+	// todo: would be much cleaner to JUST delete and insert the changed text
+	// instead of rewriting the entire line!!
+	tb.DeleteText(st, en, true, true)
+	tb.InsertText(st, []byte(ns), true, true)
+	if tb.CurView != nil {
+		ep := st
+		ep.Ch = tb.Complete.SrcCh + delta
+		tb.CurView.SetCursorShow(ep)
+		tb.CurView = nil
+	}
+}
+
+// CompleteExtend inserts the extended seed at the current cursor position
+func (tb *TextBuf) CompleteExtend(s string) {
+	if s == "" {
+		return
+	}
+	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	st := pos
+	st.Ch -= len(tb.Complete.Seed)
+	tb.DeleteText(st, pos, true, false)
+	tb.InsertText(st, []byte(s), true, true)
+	if tb.CurView != nil {
+		ep := st
+		ep.Ch += len(s)
+		tb.CurView.SetCursorShow(ep)
+		tb.CurView = nil
+	}
+}
+
+// SetSpellCorrect sets spell correct functions so that spell correct will
+// automatically be offered as the user types
+func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
+	if editFun == nil {
+		if tb.SpellCorrect != nil {
+			tb.SpellCorrect.SpellSig.Disconnect(tb.This())
+		}
+		tb.SpellCorrect.Destroy()
+		tb.SpellCorrect = nil
+		return
+	}
+	if tb.SpellCorrect != nil {
+		if tb.SpellCorrect.Context == data {
+			tb.SpellCorrect.EditFunc = editFun
+			return
+		}
+	}
+	gi.InitSpell()
+	tb.SpellCorrect = &gi.SpellCorrect{}
+	tb.SpellCorrect.InitName(tb.SpellCorrect, "tb-spellcorrect") // needed for standalone Ki's
+	tb.SpellCorrect.Context = data
+	tb.SpellCorrect.EditFunc = editFun
+	// note: only need to connect once..
+	tb.SpellCorrect.SpellSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.SpellSelect) {
+			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
+			tbf.CorrectText(data.(string)) // always use data
+		}
+	})
+}
+
+// CorrectText edits the text using the string chosen from the correction menu
+func (tb *TextBuf) CorrectText(s string) {
+	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
+	tb.RemoveTag(st, HiTagSpellErr)                             // chroma.GenericUnderline)
+	oend := st
+	oend.Ch += len(tb.SpellCorrect.Word)
+	ns, _ := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)
+	tb.DeleteText(st, oend, true, true)
+	tb.InsertText(st, []byte(ns), true, true)
+	if tb.CurView != nil {
+		ep := st
+		ep.Ch += len(ns)
+		tb.CurView.SetCursorShow(ep)
+		tb.CurView = nil
 	}
 }
 

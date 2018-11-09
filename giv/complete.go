@@ -16,6 +16,8 @@ func CompleteGo(data interface{}, text string, pos token.Position) (matches comp
 	switch t := data.(type) {
 	case *TextView:
 		txbuf = t.Buf
+	case *TextBuf:
+		txbuf = t
 	}
 	if txbuf == nil {
 		log.Printf("complete.Complete: txbuf is nil - can't complete\n")

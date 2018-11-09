@@ -133,6 +133,7 @@ type Window struct {
 	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	LastModBits       int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
 	LastSelMode       mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	LastMousePos      image.Point                             `json:"-" xml:"-" desc:"Last mouse position from most recent Mouse events"`
 	Focus             ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
 	StartFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
 	FocusMu           sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
@@ -1481,6 +1482,7 @@ mainloop:
 			// note: used to have ActivateStartFocus() here -- not sure why tho..
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
+			w.LastMousePos = e.Pos()
 			if w.DNDData != nil {
 				w.DNDMoveEvent(e)
 			} else {
@@ -1491,6 +1493,7 @@ mainloop:
 		case *mouse.Event:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
+			w.LastMousePos = e.Pos()
 			if w.DNDData != nil && e.Action == mouse.Release {
 				w.DNDDropEvent(e)
 			}
@@ -1498,6 +1501,7 @@ mainloop:
 		case *mouse.MoveEvent:
 			w.LastModBits = e.Modifiers
 			w.LastSelMode = e.SelectMode()
+			w.LastMousePos = e.Pos()
 			if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 				if w.HasFlag(int(WinFlagDoFullRender)) {
 					w.ClearFlag(int(WinFlagDoFullRender))
@@ -3053,7 +3057,7 @@ func (wl *WindowList) FocusNext() (*Window, int) {
 		return nil, -1
 	}
 
-	for j := 0; j < sz - 1; j++ {
+	for j := 0; j < sz-1; j++ {
 		if i == sz-1 {
 			i = 0
 		} else {

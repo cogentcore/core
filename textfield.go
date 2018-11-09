@@ -666,12 +666,11 @@ func (tf *TextField) CancelComplete() {
 	if tf.Complete == nil {
 		return
 	}
-	tf.Complete.Cancel(tf.Viewport)
+	tf.Complete.Cancel()
 }
 
 // CompleteText edits the text field using the string chosen from the completion menu
 func (tf *TextField) CompleteText(s string) {
-	tf.Complete.Cancel(tf.Viewport)
 	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
 	ns, delta := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, s, tf.Complete.Seed)
 	tf.EditTxt = []rune(ns)
@@ -680,11 +679,11 @@ func (tf *TextField) CompleteText(s string) {
 
 // CompleteExtend inserts the extended seed at the current cursor position
 func (tf *TextField) CompleteExtend(s string) {
-	if s != "" {
-		tf.Complete.Cancel(tf.Viewport)
-		tf.InsertAtCursor(s)
-		tf.OfferComplete(dontForce)
+	if s == "" {
+		return
 	}
+	tf.InsertAtCursor(s)
+	tf.OfferComplete(dontForce)
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -5,24 +5,24 @@
 /*
 	Package spell provides functions for spell check and correction
 */
-
 package spell
 
 import (
 	"bufio"
 	"errors"
-	"github.com/sajari/fuzzy"
 	"log"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/sajari/fuzzy"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
 //  spell check returning suggestions using github.com/sajari/fuzzy
 
-// EditFunc is passed the current text and the selected correction for text editing.
-type EditFunc func(data interface{}, text string, cursorPos int, correction string, unknown string) (newText string, delta int)
+// EditFunc is passed the current word and the selected correction for text editing.
+type EditFunc func(data interface{}, new string, old string) (newText string, delta int)
 
 var inited bool
 var model *fuzzy.Model
@@ -117,12 +117,9 @@ func Complete(s string) (result []string, err error) {
 	return result, err
 }
 
-// EditTex replaces the old unknown word with the new word chosen from the list of corrections
+// CorrectText replaces the old unknown word with the new word chosen from the list of corrections
 // delta is the change in cursor position (cp).
-func CorrectText(text string, cp int, old string, new string) (newText string, delta int) {
-	s1 := string(text[0:cp])
-	s2 := string(text[cp:])
-
+func CorrectText(old string, new string) (newText string, delta int) {
 	// do what is possible to keep the casing of old string
 	oldlc := strings.ToLower(old)
 	min := len(old)
@@ -140,20 +137,9 @@ func CorrectText(text string, cp int, old string, new string) (newText string, d
 	for j := i; j < len(new); j++ {
 		new2 = append(new2, byte(new[j]))
 	}
-	new = string(new2)
-
-	// do a replace from end
-	last := strings.LastIndex(text, old)
-	if last == -1 {
-		log.Println(os.Stderr, "Error in spell.go: substring not found.")
-		return newText, delta
-	}
-	s1a := s1[0:last]
-	s1c := s1[last+len(old) : len(s1)]
-	s1new := s1a + new + s1c
-	t := s1new + s2
-	delta = len(s1new) - len(s1)
-	return t, delta
+	newText = string(new2)
+	delta = len(new) - len(old)
+	return
 }
 
 // IgnoreWord adds the word to the Ignore list

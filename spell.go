@@ -12,8 +12,6 @@ import (
 	"regexp"
 	"strings"
 
-	"go/token"
-
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
@@ -223,10 +221,13 @@ type SpellCorrect struct {
 	ki.Node
 	EditFunc    spell.EditFunc `desc:"function to edit text using the selected spell correction"`
 	Context     interface{}    `desc:"the object that implements spell.Func"`
-	Suggestions []string
-	Word        string    `desc:"word being checked"`
-	SpellSig    ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for SpellCorrect -- see SpellSignals for the types"`
-	Suggestion  string    `desc:"the user's correction selection'"`
+	SrcLn       int            `desc:"line number in source that spelling is operating on, if relevant"`
+	SrcCh       int            `desc:"character position in source that spelling is operating on (start of word to be corrected)"`
+	Suggestions []string       `desc:"list of suggested corrections"`
+	Word        string         `desc:"word being checked"`
+	SpellSig    ki.Signal      `json:"-" xml:"-" view:"-" desc:"signal for SpellCorrect -- see SpellSignals for the types"`
+	Correction  string         `desc:"the user's correction selection'"`
+	Vp          *Viewport2D    `desc:"the viewport where the current popup menu is presented"`
 }
 
 var KiT_SpellCorrect = kit.Types.AddType(&SpellCorrect{}, nil)
@@ -258,7 +259,7 @@ func (sc *SpellCorrect) CheckWordInline(word string) (sugs []string, knwn bool, 
 // Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
-func (sc *SpellCorrect) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point) {
+func (sc *SpellCorrect) Show(text string, vp *Viewport2D, pt image.Point) {
 	if vp == nil || vp.Win == nil {
 		return
 	}
@@ -266,11 +267,11 @@ func (sc *SpellCorrect) Show(text string, pos token.Position, vp *Viewport2D, pt
 	if PopupIsCorrector(cpop) {
 		vp.Win.SetDelPopup(cpop)
 	}
-	sc.ShowNow(text, pos, vp, pt)
+	sc.ShowNow(text, vp, pt)
 }
 
 // ShowNow actually builds the correction popup menu
-func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D, pt image.Point) {
+func (sc *SpellCorrect) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 	if vp == nil || vp.Win == nil {
 		return
 	}
@@ -321,7 +322,8 @@ func (sc *SpellCorrect) ShowNow(word string, pos token.Position, vp *Viewport2D,
 // SpellCorrect emits a signal to let subscribers know that the user has made a
 // selection from the list of possible corrections
 func (sc *SpellCorrect) SpellCorrect(s string) {
-	sc.Suggestion = s
+	sc.Cancel()
+	sc.Correction = s
 	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), s)
 }
 
@@ -348,14 +350,16 @@ func (sc *SpellCorrect) IgnoreAllInline() {
 
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction
 // returns true if canceled
-func (c *SpellCorrect) Cancel(vp *Viewport2D) bool {
-	if vp == nil || vp.Win == nil {
+func (c *SpellCorrect) Cancel() bool {
+	if c.Vp == nil || c.Vp.Win == nil {
 		return false
 	}
-	cpop := vp.Win.CurPopup()
+	cpop := c.Vp.Win.CurPopup()
+	did := false
 	if PopupIsCorrector(cpop) {
-		vp.Win.SetDelPopup(cpop)
-		return true
+		did = true
+		c.Vp.Win.SetDelPopup(cpop)
 	}
-	return false
+	c.Vp = nil
+	return did
 }

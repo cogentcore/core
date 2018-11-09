@@ -631,6 +631,7 @@ var StdKeyMaps = KeyMaps{
 		"Meta+Home":               KeyFunDocHome,
 		"Shift+Home":              KeyFunDocHome,
 		"Meta+H":                  KeyFunDocHome,
+		"Control+H":               KeyFunDocHome,
 		"Control+Alt+A":           KeyFunDocHome,
 		"Meta+End":                KeyFunDocEnd,
 		"Shift+End":               KeyFunDocEnd,

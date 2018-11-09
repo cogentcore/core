@@ -877,7 +877,7 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos Vec2D) {
 			pc.StrokeStyle.Color.SetColor(curColor)
 		}
 		if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
-			pc.StrokeStyle.Dashes = []float64{float64(dw), float64(dw)}
+			pc.StrokeStyle.Dashes = []float64{2, 2}
 		}
 		sp := rp.Add(tx.TransformVectorVec2D(Vec2D{0, 2 * dw}))
 		ep := rp.Add(tx.TransformVectorVec2D(Vec2D{rr.Size.X, 2 * dw}))
