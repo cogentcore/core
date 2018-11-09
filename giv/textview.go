@@ -2803,6 +2803,13 @@ func (tv *TextView) UpdateHighlights(prev []TextRegion) {
 	}
 }
 
+func (tv *TextView) ClearHighlights() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.Highlights = tv.Highlights[:0]
+	tv.RenderAllLines()
+}
+
 // RenderRegionBox renders a region in background color according to given state style
 func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
 	st := reg.Start
