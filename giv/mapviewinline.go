@@ -131,6 +131,12 @@ func (mv *MapViewInline) ConfigParts() {
 			if tynm == "" {
 				tynm = tmptyp.String()
 			}
+			if mv.MapValView != nil {
+				olbl := mv.MapValView.AsValueViewBase().OwnerLabel()
+				if olbl != "" {
+					tynm += ": " + olbl
+				}
+			}
 			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: tynm, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave}, nil, nil)
 			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
 			if ok {

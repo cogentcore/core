@@ -50,6 +50,14 @@ func ToLabel(it interface{}) string {
 	return lbler.Label()
 }
 
+// ToLabeler returns the Labeler label ONLY if it was defined, else ""
+func ToLabeler(it interface{}) string {
+	if lbler, ok := it.(Labeler); ok {
+		return lbler.Label()
+	}
+	return ""
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Label
 

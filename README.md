@@ -82,21 +82,16 @@ The best way to see how the system works are in the `examples` directory, and by
 
 # Status
 
-Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come back in a few weeks after announcement on go-nuts email list).
-
-* Major push underway to get to the following target for a **beta** level release:
+Currently at a **beta** level:
 
 * All major functionality is in place, and API is stable and only very minor changes will be allowed going forward.  The system is now ready for wider adoption.
 
 * Everything has been thoroughly tested, but generally only by a small number of core developers / users.
 
-* Please file Issues for anything that does not work (except as noted below under TODO)
-
+* Please file [Issues](https://github.com/goki/gi/issues) for anything that does not work.
 
 
 # TODO
-
-* markdown not getting marked up properly!
 
 * tabs not selecting / isvisible not working
 
@@ -104,7 +99,6 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 * TextView:
 	+ cursor goes to hand for links in TextView
-	+ parens / brackets match highlighter..
 
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..

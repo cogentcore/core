@@ -683,6 +683,34 @@ func (vv *ValueViewBase) AllTags() map[string]string {
 	return rvt
 }
 
+// OwnerLabel returns some extra info about the owner of this value view
+// which is useful to put in title of our object
+func (vv *ValueViewBase) OwnerLabel() string {
+	switch vv.OwnKind {
+	case reflect.Struct:
+		olbl := gi.ToLabeler(vv.Owner)
+		if olbl != "" {
+			return olbl + "." + vv.Field.Name
+		}
+		return vv.Field.Name
+	case reflect.Map:
+		if vv.IsMapKey {
+			kv := kit.NonPtrValue(vv.Value)
+			return kit.ToString(kv.Interface())
+		} else {
+			if vv.KeyView != nil {
+				ck := kit.NonPtrValue(vv.KeyView.Val()) // current key value
+				return kit.ToString(ck.Interface())
+			} else {
+				return kit.ToString(vv.Key)
+			}
+		}
+	case reflect.Slice:
+		return kit.ToString(kit.PtrValue(vv.Value).Interface())
+	}
+	return ""
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Base Widget Functions -- these are typically redefined in ValueView subtypes
 

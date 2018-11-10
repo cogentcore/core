@@ -20,6 +20,7 @@ import (
 	"runtime/debug"
 	"runtime/pprof"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -3267,13 +3268,19 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 100)
 	}
+
+	winName := win.Nm
+	// only use the part of window name prior to colon -- that is the general "class" of window
+	if ci := strings.Index(winName, ":"); ci > 0 {
+		winName = winName[:ci]
+	}
 	sc := win.OSWin.Screen()
-	wgr := WindowGeom{WinName: win.Nm, Screen: sc.Name, LogicalDPI: win.LogicalDPI()}
+	wgr := WindowGeom{WinName: winName, Screen: sc.Name, LogicalDPI: win.LogicalDPI()}
 	wgr.Pos = win.OSWin.Position()
 	wgr.Size = win.OSWin.Size()
 	if wgr.Size == image.ZP {
 		WinGeomPrefsMu.Unlock()
-		// fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", win.Nm, sc.Name)
+		// fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", winName, sc.Name)
 		return
 	}
 
@@ -3282,10 +3289,10 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 		wg.Open()
 	}
 
-	if (*wg)[win.Nm] == nil {
-		(*wg)[win.Nm] = make(map[string]WindowGeom, 10)
+	if (*wg)[winName] == nil {
+		(*wg)[winName] = make(map[string]WindowGeom, 10)
 	}
-	(*wg)[win.Nm][sc.Name] = wgr
+	(*wg)[winName][sc.Name] = wgr
 	wg.Save()
 	wg.UnlockFile()
 	WinGeomPrefsMu.Unlock()
@@ -3294,12 +3301,17 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 // Pref returns an existing preference for given window name, or one adapted
 // to given screen if only records are on a different screen -- if scrn is nil
 // then default (first) screen is used from oswin.TheApp
+// if the window name has a colon, only the part prior to the colon is used
 func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom {
 	WinGeomPrefsMu.RLock()
 	defer WinGeomPrefsMu.RUnlock()
 
 	if wg == nil {
 		return nil
+	}
+	// only use the part of window name prior to colon -- that is the general "class" of window
+	if ci := strings.Index(winName, ":"); ci > 0 {
+		winName = winName[:ci]
 	}
 	wps, ok := (*wg)[winName]
 	if !ok {

@@ -67,6 +67,10 @@ func (vv *StructValueView) HasAction() bool {
 
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
+	olbl := vv.OwnerLabel()
+	if olbl != "" {
+		tynm += ": " + olbl
+	}
 	desc, _ := vv.Tag("desc")
 	dlg := StructViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -184,6 +188,10 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		tynm = "Slice of "
 	}
 	tynm += kit.NonPtrType(vv.ElType).String()
+	olbl := vv.OwnerLabel()
+	if olbl != "" {
+		tynm += ": " + olbl
+	}
 	desc, _ := vv.Tag("desc")
 	slci := vv.Value.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
@@ -310,6 +318,10 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	tynm := tmptyp.Name()
 	if tynm == "" {
 		tynm = tmptyp.String()
+	}
+	olbl := vv.OwnerLabel()
+	if olbl != "" {
+		tynm += ": " + olbl
 	}
 	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -453,6 +465,10 @@ func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	}
 	desc, _ := vv.Tag("desc")
 	tynm := kit.NonPtrType(vv.Value.Type()).Name()
+	olbl := vv.OwnerLabel()
+	if olbl != "" {
+		tynm += ": " + olbl
+	}
 	dlg := StructViewDialog(vp, k, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 }

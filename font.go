@@ -688,6 +688,11 @@ type FontInfo struct {
 	Example string      `desc:"example text -- styled according to font params in chooser"`
 }
 
+// Label satisfies the Labeler interface
+func (fi FontInfo) Label() string {
+	return fi.Name
+}
+
 // FontLib holds the fonts available in a font library.  The font name is
 // regularized so that the base "Regular" font is the root term of a sequence
 // of other font names that describe the stretch, weight, and style, e.g.,

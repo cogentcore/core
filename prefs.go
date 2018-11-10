@@ -510,6 +510,11 @@ type FavPathItem struct {
 	Path string   `tableview:"-select"`
 }
 
+// Label satisfies the Labeler interface
+func (fi FavPathItem) Label() string {
+	return fi.Name
+}
+
 // FavPaths is a list (slice) of favorite path items
 type FavPaths []FavPathItem
 

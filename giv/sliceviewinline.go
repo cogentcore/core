@@ -124,6 +124,12 @@ func (sv *SliceViewInline) ConfigParts() {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
 			tynm := "Slice of " + kit.NonPtrType(elType).Name()
+			if sv.SliceValView != nil {
+				olbl := sv.SliceValView.AsValueViewBase().OwnerLabel()
+				if olbl != "" {
+					tynm += ": " + olbl
+				}
+			}
 			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: tynm, TmpSave: svv.TmpSave}, nil, nil, nil)
 			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
 			if ok {

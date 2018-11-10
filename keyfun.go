@@ -274,6 +274,11 @@ type KeyMapsItem struct {
 	Map  KeyMap `desc:"to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu"`
 }
 
+// Label satisfies the Labeler interface
+func (km KeyMapsItem) Label() string {
+	return km.Name
+}
+
 // KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create
 // a custom one, just duplicate an existing map, rename, and customize
 type KeyMaps []KeyMapsItem
