@@ -350,12 +350,10 @@ func EditGoCode(text string, cp int, completion string, seed string) (newText st
 				r = rune(c)
 				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') {
 					s2 = s2[0:i]
-					fmt.Println(s2)
 					break
 				}
 				// might be last word
 				if i == count-1 {
-					fmt.Println(s2)
 					break
 				}
 			}
