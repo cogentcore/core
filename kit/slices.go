@@ -328,3 +328,123 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 	log.Println(err)
 	return err
 }
+
+// ValueSliceSort sorts a slice of reflect.Values using basic types where possible
+func ValueSliceSort(sl []reflect.Value, ascending bool) error {
+	if len(sl) == 0 {
+		return nil
+	}
+	felval := sl[0] // reflect.Value
+	eltyp := felval.Type()
+	elnptyp := NonPtrType(eltyp)
+	vk := elnptyp.Kind()
+	elval := OnePtrValue(felval)
+	elif := elval.Interface()
+
+	switch elif.(type) {
+	case floats.Floater:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Interface().(floats.Floater).Float()
+			jv := NonPtrValue(sl[j]).Interface().(floats.Floater).Float()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case ints.Inter:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Interface().(ints.Inter).Int()
+			jv := NonPtrValue(sl[j]).Interface().(ints.Inter).Int()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	}
+
+	// try all the numeric types first!
+
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Int()
+			jv := NonPtrValue(sl[j]).Int()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Uint()
+			jv := NonPtrValue(sl[j]).Uint()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Float()
+			jv := NonPtrValue(sl[j]).Float()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case vk == reflect.Struct && FullTypeName(elnptyp) == "time.Time":
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Interface().(time.Time)
+			jv := NonPtrValue(sl[j]).Interface().(time.Time)
+			if ascending {
+				return iv.Before(jv)
+			} else {
+				return jv.Before(iv)
+			}
+		})
+	}
+
+	// this stringer case will likely pick up most of the rest
+	switch elif.(type) {
+	case fmt.Stringer:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).Interface().(fmt.Stringer).String()
+			jv := NonPtrValue(sl[j]).Interface().(fmt.Stringer).String()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	}
+
+	// last resort!
+	switch {
+	case vk == reflect.String:
+		sort.Slice(sl, func(i, j int) bool {
+			iv := NonPtrValue(sl[i]).String()
+			jv := NonPtrValue(sl[j]).String()
+			if ascending {
+				return strings.ToLower(iv) < strings.ToLower(jv)
+			} else {
+				return strings.ToLower(iv) > strings.ToLower(jv)
+			}
+		})
+		return nil
+	}
+
+	err := fmt.Errorf("ValueSliceSort: unable to sort elements of type: %v", eltyp.String())
+	log.Println(err)
+	return err
+}

@@ -5,8 +5,15 @@
 package kit
 
 import (
+	"fmt"
 	"log"
 	"reflect"
+	"sort"
+	"strings"
+	"time"
+
+	"github.com/goki/ki/floats"
+	"github.com/goki/ki/ints"
 )
 
 // This file contains helpful functions for dealing with maps, in the reflect
@@ -214,4 +221,139 @@ func MapDeleteValue(mv interface{}, key reflect.Value) {
 	mpv := reflect.ValueOf(mv)
 	mpvnp := NonPtrValue(mpv)
 	mpvnp.SetMapIndex(key, reflect.Value{}) // delete
+}
+
+// MapSort sorts keys of map either by key or by value, returns those keys as
+// a slice of reflect.Value, as returned by reflect.Value.MapKeys() method
+func MapSort(mp interface{}, byKey, ascending bool) []reflect.Value {
+	mpv := reflect.ValueOf(mp)
+	mpvnp := NonPtrValue(mpv)
+	keys := mpvnp.MapKeys() // note: this is a slice of reflect.Value!
+	if byKey {
+		ValueSliceSort(keys, ascending)
+	} else {
+		MapValueSort(mpvnp, keys, ascending)
+	}
+	return keys
+}
+
+// MapValueSort sorts keys of map by values
+func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) error {
+	if len(keys) == 0 {
+		return nil
+	}
+	keyval := keys[0]
+	felval := mpvnp.MapIndex(keyval)
+	eltyp := felval.Type()
+	elnptyp := NonPtrType(eltyp)
+	vk := elnptyp.Kind()
+	elval := OnePtrValue(felval)
+	elif := elval.Interface()
+
+	switch elif.(type) {
+	case floats.Floater:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Interface().(floats.Floater).Float()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(floats.Floater).Float()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case ints.Inter:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Interface().(ints.Inter).Int()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(ints.Inter).Int()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	}
+
+	// try all the numeric types first!
+
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Int()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Int()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Uint()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Uint()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Float()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Float()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	case vk == reflect.Struct && FullTypeName(elnptyp) == "time.Time":
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Interface().(time.Time)
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(time.Time)
+			if ascending {
+				return iv.Before(jv)
+			} else {
+				return jv.Before(iv)
+			}
+		})
+	}
+
+	// this stringer case will likely pick up most of the rest
+	switch elif.(type) {
+	case fmt.Stringer:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Interface().(fmt.Stringer).String()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(fmt.Stringer).String()
+			if ascending {
+				return iv < jv
+			} else {
+				return iv > jv
+			}
+		})
+		return nil
+	}
+
+	// last resort!
+	switch {
+	case vk == reflect.String:
+		sort.Slice(keys, func(i, j int) bool {
+			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).String()
+			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).String()
+			if ascending {
+				return strings.ToLower(iv) < strings.ToLower(jv)
+			} else {
+				return strings.ToLower(iv) > strings.ToLower(jv)
+			}
+		})
+		return nil
+	}
+
+	err := fmt.Errorf("MapValueSort: unable to sort elements of type: %v", eltyp.String())
+	log.Println(err)
+	return err
 }

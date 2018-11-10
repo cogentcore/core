@@ -65,7 +65,7 @@ func NonPtrValue(v reflect.Value) reflect.Value {
 // PtrValue returns the pointer version (Addr()) of the underlying value if
 // the value is not already a Ptr
 func PtrValue(v reflect.Value) reflect.Value {
-	if v.Kind() != reflect.Ptr {
+	if v.CanAddr() && v.Kind() != reflect.Ptr {
 		v = v.Addr()
 	}
 	return v
@@ -74,7 +74,9 @@ func PtrValue(v reflect.Value) reflect.Value {
 // OnePtrValue returns a value that is exactly one pointer away from a non-pointer type
 func OnePtrValue(v reflect.Value) reflect.Value {
 	if v.Kind() != reflect.Ptr {
-		v = v.Addr()
+		if v.CanAddr() {
+			v = v.Addr()
+		}
 	} else {
 		for v.Elem().Kind() == reflect.Ptr {
 			v = v.Elem()
