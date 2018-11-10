@@ -1919,6 +1919,10 @@ func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 	ch := tp.Ch
 	st := ch
 	for i := ch - 1; i >= 0; i-- {
+		if i == 0 { // start of line
+			st = 0
+			break
+		}
 		r := txt[i]
 		if tv.IsWordBreak(r) {
 			st = i + 1
@@ -2243,9 +2247,9 @@ func (tv *TextView) SpellCheck(r rune) bool {
 	}
 	cp := tv.CursorPos
 	cp.Ch--
-	if cp.Ch < 0 {
+	if cp.Ch < 0 { // end of line case
 		cp.Ln--
-		cp.Ch = tv.Buf.LineLen(cp.Ln) - 1
+		cp.Ch = tv.Buf.LineLen(cp.Ln)
 	}
 	tbw := tv.WordBefore(cp)
 	if tbw == nil {

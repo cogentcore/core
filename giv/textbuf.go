@@ -2007,21 +2007,17 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 
 // CompleteText edits the text using the string chosen from the completion menu
 func (tb *TextBuf) CompleteText(s string) {
-	st := TextPos{tb.Complete.SrcLn, 0}
-	en := TextPos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
-	var tbes string
-	tbe := tb.Region(st, en)
-	if tbe != nil {
-		tbes = string(tbe.ToBytes())
+	if s == "" {
+		return
 	}
-	ns, delta := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, s, tb.Complete.Seed)
-	// todo: would be much cleaner to JUST delete and insert the changed text
-	// instead of rewriting the entire line!!
-	tb.DeleteText(st, en, true, true)
-	tb.InsertText(st, []byte(ns), true, true)
+	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	st := pos
+	st.Ch -= len(tb.Complete.Seed)
+	tb.DeleteText(st, pos, true, false)
+	tb.InsertText(st, []byte(s), true, true)
 	if tb.CurView != nil {
 		ep := st
-		ep.Ch = tb.Complete.SrcCh + delta
+		ep.Ch += len(s)
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
 	}
