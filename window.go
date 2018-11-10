@@ -354,7 +354,7 @@ func (w *Window) ConfigVLay() {
 	if !vp.HasChildren() {
 		vp.AddNewChild(KiT_Layout, "main-vlay")
 	}
-	w.MasterVLay = vp.KnownChild(0).(*Layout)
+	w.MasterVLay = vp.KnownChild(0).Embed(KiT_Layout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
 		w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu")
 	}
@@ -362,6 +362,33 @@ func (w *Window) ConfigVLay() {
 	w.MainMenu = w.MasterVLay.KnownChild(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
+}
+
+// AddMainMenu installs MainMenu as first element of main layout
+// used for dialogs that don't always have a main menu -- returns
+// menubar -- safe to call even if there is a menubar
+func (w *Window) AddMainMenu() *MenuBar {
+	vp := w.Viewport
+	updt := vp.UpdateStart()
+	defer vp.UpdateEnd(updt)
+	if !vp.HasChildren() {
+		vp.AddNewChild(KiT_Layout, "main-vlay")
+	}
+	w.MasterVLay = vp.KnownChild(0).Embed(KiT_Layout).(*Layout)
+	if !w.MasterVLay.HasChildren() {
+		w.MainMenu = w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu").(*MenuBar)
+	} else {
+		mmi, has := w.MasterVLay.ChildByName("main-menu", 0)
+		if has {
+			mm := mmi.(*MenuBar)
+			w.MainMenu = mm
+			return mm
+		}
+	}
+	w.MainMenu = w.MasterVLay.InsertNewChild(KiT_MenuBar, 0, "main-menu").(*MenuBar)
+	w.MainMenu.MainMenu = true
+	w.MainMenu.SetStretchMaxWidth()
+	return w.MainMenu
 }
 
 // SetMainWidget sets given widget as the main widget for the window -- adds

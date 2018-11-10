@@ -3,9 +3,11 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _Dims2D_name = "XYDims2DN"
 
@@ -25,5 +27,5 @@ func (i *Dims2D) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Dims2D", s)
+	return errors.New("String: " + s + " is not a valid option for type: Dims2D")
 }

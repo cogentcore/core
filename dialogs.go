@@ -110,6 +110,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		win = NewDialogWin(dlg.Nm, dlg.Title, 100, 100, dlg.Modal)
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
+		win.MasterVLay = dlg.Frame().Embed(KiT_Layout).(*Layout)
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
 	}
 

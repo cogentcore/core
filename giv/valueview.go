@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
@@ -121,7 +122,7 @@ func ToValueView(it interface{}, tags string) ValueView {
 		vv.Init(&vv)
 		return &vv
 	}
-	if nptyp == reflect.TypeOf(HiStyleName("")) {
+	if nptyp == reflect.TypeOf(histyle.StyleName("")) {
 		vv := HiStyleValueView{}
 		vv.Init(&vv)
 		return &vv
@@ -772,6 +773,10 @@ func (vi *ViewIFace) KeyMapsView(maps *gi.KeyMaps) {
 
 func (vi *ViewIFace) PrefsDetView(prefs *gi.PrefsDetailed) {
 	PrefsDetView(prefs)
+}
+
+func (vi *ViewIFace) HiStylesView(styles interface{}) {
+	HiStylesView(styles.(*histyle.Styles))
 }
 
 func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {

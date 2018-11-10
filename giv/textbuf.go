@@ -15,10 +15,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
@@ -232,7 +232,7 @@ func (tb *TextBuf) BytesLine(ln int) []byte {
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
-func (tb *TextBuf) SetHiStyle(style HiStyleName) {
+func (tb *TextBuf) SetHiStyle(style histyle.StyleName) {
 	tb.MarkupMu.Lock()
 	tb.Hi.Style = style
 	tb.MarkupMu.Unlock()
@@ -244,7 +244,7 @@ func (tb *TextBuf) Defaults() {
 	if tb.Hi.Style != "" {
 		return
 	}
-	tb.SetHiStyle(HiStyleDefault)
+	tb.SetHiStyle(histyle.StyleDefault)
 	tb.Opts.AutoIndent = true
 	tb.Opts.TabSize = 4
 }
@@ -1093,6 +1093,9 @@ const (
 // if the position was within a deleted region of text, del determines
 // what is returned
 func (te *TextBufEdit) AdjustPos(pos TextPos, del AdjustPosDel) TextPos {
+	if te == nil {
+		return pos
+	}
 	if pos.IsLess(te.Reg.Start) || pos == te.Reg.Start {
 		return pos
 	}
@@ -1137,6 +1140,9 @@ func (te *TextBufEdit) AdjustPos(pos TextPos, del AdjustPosDel) TextPos {
 // del determines what to do with positions within a deleted region
 // either move to start or end of the region, or return an error.
 func (te *TextBufEdit) AdjustPosIfAfterTime(pos TextPos, t time.Time, del AdjustPosDel) TextPos {
+	if te == nil {
+		return pos
+	}
 	if te.Reg.IsAfterTime(t) {
 		return te.AdjustPos(pos, del)
 	}
@@ -1151,6 +1157,9 @@ func (te *TextBufEdit) AdjustPosIfAfterTime(pos TextPos, t time.Time, del Adjust
 // region, it is moved to the start.  If the region becomes empty, TextRegionNil
 // will be returned.
 func (te *TextBufEdit) AdjustReg(reg TextRegion) TextRegion {
+	if te == nil {
+		return reg
+	}
 	if !reg.Time.IsZero() && !te.Reg.IsAfterTime(reg.Time.Time()) {
 		return reg
 	}
@@ -1681,7 +1690,7 @@ func (tb *TextBuf) AdjustReg(reg TextRegion) TextRegion {
 //   Tags
 
 // AddTag adds a new custom tag for given line, at given position
-func (tb *TextBuf) AddTag(ln, st, ed int, tag chroma.TokenType) {
+func (tb *TextBuf) AddTag(ln, st, ed int, tag histyle.HiTags) {
 	if !tb.IsValidLine(ln) {
 		return
 	}
@@ -1697,7 +1706,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag chroma.TokenType) {
 }
 
 // AddTagEdit adds a new custom tag for given line, using TextBufEdit for location
-func (tb *TextBuf) AddTagEdit(tbe *TextBufEdit, tag chroma.TokenType) {
+func (tb *TextBuf) AddTagEdit(tbe *TextBufEdit, tag histyle.HiTags) {
 	tb.AddTag(tbe.Reg.Start.Ln, tbe.Reg.Start.Ch, tbe.Reg.End.Ch, tag)
 }
 
@@ -1716,7 +1725,7 @@ func (tb *TextBuf) TagAt(pos TextPos) (reg TagRegion, ok bool) {
 }
 
 // RemoveTag removes tag (optionally only given tag if non-zero) at given position if it exists -- returns tag
-func (tb *TextBuf) RemoveTag(pos TextPos, tag chroma.TokenType) (reg TagRegion, ok bool) {
+func (tb *TextBuf) RemoveTag(pos TextPos, tag histyle.HiTags) (reg TagRegion, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
@@ -2070,7 +2079,7 @@ func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *TextBuf) CorrectText(s string) {
 	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
-	tb.RemoveTag(st, HiTagSpellErr)                             // chroma.GenericUnderline)
+	tb.RemoveTag(st, histyle.SpellErr)
 	oend := st
 	oend.Ch += len(tb.SpellCorrect.Word)
 	ns, _ := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)

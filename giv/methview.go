@@ -41,6 +41,13 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 		return false
 	}
 
+	if win == nil {
+		return false
+	}
+	if mbar == nil {
+		mbar = win.AddMainMenu()
+	}
+
 	mnms := make([]string, len(mp))
 	for mmi, mm := range mp {
 		if mm.Name == "AppMenu" {

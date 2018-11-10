@@ -96,6 +96,10 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
+* add not working for histyle.Styles
+
+* tabs not selecting / isvisible not working
+
 * mac hidpi setpos is not right from prefs -- works from init win create.
 
 * TextView:

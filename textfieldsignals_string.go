@@ -3,13 +3,15 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _TextFieldSignals_name = "TextFieldDoneTextFieldDeFocusedTextFieldSelectedTextFieldSignalsN"
+var _ = errors.New("dummy error")
 
-var _TextFieldSignals_index = [...]uint8{0, 13, 31, 48, 65}
+const _TextFieldSignals_name = "TextFieldDoneTextFieldDeFocusedTextFieldSelectedTextFieldClearTextFieldSignalsN"
+
+var _TextFieldSignals_index = [...]uint8{0, 13, 31, 48, 62, 79}
 
 func (i TextFieldSignals) String() string {
 	if i < 0 || i >= TextFieldSignals(len(_TextFieldSignals_index)-1) {
@@ -25,5 +27,5 @@ func (i *TextFieldSignals) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type TextFieldSignals", s)
+	return errors.New("String: " + s + " is not a valid option for type: TextFieldSignals")
 }

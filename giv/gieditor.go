@@ -378,22 +378,28 @@ func GoGiEditorDialog(obj ki.Ki) (*GiEditor, *gi.Window) {
 	tb := ge.ToolBar()
 	tb.UpdateActions()
 
+	inClosePrompt := false
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		if ge.Changed {
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
-				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
-				[]string{"Close Without Saving", "Cancel"},
-				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						win.Close()
-					case 1:
-						// default is to do nothing, i.e., cancel
-					}
-				})
-		} else {
+		if !ge.Changed {
 			win.Close()
+			return
 		}
+		if inClosePrompt {
+			return
+		}
+		inClosePrompt = true
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
+			Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
+			[]string{"Close Without Saving", "Cancel"},
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					win.Close()
+				case 1:
+					// default is to do nothing, i.e., cancel
+					inClosePrompt = false
+				}
+			})
 	})
 
 	vp.UpdateEndNoSig(updt)

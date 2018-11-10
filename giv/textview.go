@@ -17,6 +17,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi"
+	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -2256,13 +2257,13 @@ func (tv *TextView) SpellCheck(r rune) bool {
 	}
 	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
 	if knwn || err != nil {
-		tv.Buf.RemoveTag(tbw.Reg.Start, HiTagSpellErr) // chroma.GenericUnderline)
+		tv.Buf.RemoveTag(tbw.Reg.Start, histyle.SpellErr)
 		return false
 	}
 	tv.Buf.SpellCorrect.Suggestions = sugs
 	tv.Buf.SpellCorrect.Word = wb
-	tv.Buf.RemoveTag(tbw.Reg.Start, HiTagSpellErr) // chroma.GenericUnderline)
-	tv.Buf.AddTagEdit(tbw, HiTagSpellErr)          // chroma.GenericUnderline) // HiTagSpellErr)
+	tv.Buf.RemoveTag(tbw.Reg.Start, histyle.SpellErr)
+	tv.Buf.AddTagEdit(tbw, histyle.SpellErr)
 	ln := tbw.Reg.Start.Ln
 	tv.LayoutLines(ln, ln, false)
 	tv.RenderLines(ln, ln)

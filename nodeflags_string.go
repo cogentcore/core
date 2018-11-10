@@ -3,13 +3,15 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleInactiveSelectedMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragOverlayButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagPopupDestroyAllVpFlagSVGVpFlagDoingFullRenderVpFlagNWinFlagSentShowWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagN"
+var _ = errors.New("dummy error")
 
-var _NodeFlags_index = [...]uint16{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 105, 118, 130, 139, 146, 165, 182, 196, 208, 229, 238, 259, 266, 281, 294, 314, 333, 351, 359}
+const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleInactiveSelectedMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragOverlayButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagDoingFullRenderVpFlagNWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagN"
+
+var _NodeFlags_index = [...]uint16{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 105, 118, 130, 139, 146, 165, 182, 196, 208, 221, 242, 251, 272, 279, 292, 312, 331, 349, 357}
 
 func (i NodeFlags) String() string {
 	i -= 14
@@ -25,5 +27,5 @@ func StringToNodeFlags(s string) (NodeFlags, error) {
 			return NodeFlags(i + 14), nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type NodeFlags", s)
+	return 0, errors.New("String: " + s + " is not a valid option for type: NodeFlags")
 }

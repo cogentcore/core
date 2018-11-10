@@ -108,6 +108,9 @@ func (mb *MenuBar) UpdateActions() {
 // element (for AddAction items, this is the same as Label or Icon (if Label
 // is empty)) -- returns false if not found
 func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
+	if m == nil {
+		return nil, false
+	}
 	for _, mi := range m.Kids {
 		if mi.TypeEmbeds(KiT_Action) {
 			ac := mi.Embed(KiT_Action).(*Action)
@@ -128,6 +131,9 @@ func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
 // names, which function as the main menu panels for the menu bar (File, Edit,
 // etc).  Access the resulting menus as .KnownChildByName("name").(*Action).
 func (mb *MenuBar) ConfigMenus(menus []string) {
+	if mb == nil {
+		return
+	}
 	sz := len(menus)
 	tnl := make(kit.TypeAndNameList, sz+1)
 	typ := KiT_Action // note: could pass in action type to make it more flexible, but..

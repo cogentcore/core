@@ -321,18 +321,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	inQuitPrompt := false
 	oswin.TheApp.SetQuitReqFunc(func() {
-		if !inQuitPrompt {
-			inQuitPrompt = true
-			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-				Prompt: "Are you <i>sure</i> you want to quit?"}, true, true,
-				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.DialogAccepted) {
-						oswin.TheApp.Quit()
-					} else {
-						inQuitPrompt = false
-					}
-				})
+		if inQuitPrompt {
+			return
 		}
+		inQuitPrompt = true
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
+			Prompt: "Are you <i>sure</i> you want to quit?"}, true, true,
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.DialogAccepted) {
+					oswin.TheApp.Quit()
+				} else {
+					inQuitPrompt = false
+				}
+			})
 	})
 
 	oswin.TheApp.SetQuitCleanFunc(func() {
@@ -341,18 +342,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	inClosePrompt := false
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		if !inClosePrompt {
-			inClosePrompt = true
-			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close Window?",
-				Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, true, true,
-				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.DialogAccepted) {
-						oswin.TheApp.Quit()
-					} else {
-						inClosePrompt = false
-					}
-				})
+		if inClosePrompt {
+			return
 		}
+		inClosePrompt = true
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close Window?",
+			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, true, true,
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.DialogAccepted) {
+					oswin.TheApp.Quit()
+				} else {
+					inClosePrompt = false
+				}
+			})
 	})
 
 	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {

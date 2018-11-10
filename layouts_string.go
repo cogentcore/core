@@ -3,9 +3,11 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _Layouts_name = "LayoutHorizLayoutVertLayoutGridLayoutHorizFlowLayoutVertFlowLayoutStackedLayoutNilLayoutsN"
 
@@ -25,5 +27,5 @@ func (i *Layouts) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Layouts", s)
+	return errors.New("String: " + s + " is not a valid option for type: Layouts")
 }

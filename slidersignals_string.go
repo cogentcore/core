@@ -3,9 +3,11 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _SliderSignals_name = "SliderValueChangedSliderPressedSliderReleasedSliderMovedSliderSignalsN"
 
@@ -25,5 +27,5 @@ func (i *SliderSignals) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type SliderSignals", s)
+	return errors.New("String: " + s + " is not a valid option for type: SliderSignals")
 }

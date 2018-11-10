@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"bytes"
 	htmlstd "html"
 	"log"
 	"sort"
@@ -14,8 +13,7 @@ import (
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
-	"github.com/alecthomas/chroma/styles"
-	"github.com/goki/gi"
+	"github.com/goki/gi/histyle"
 	"github.com/goki/ki"
 	"github.com/goki/ki/nptime"
 )
@@ -23,10 +21,10 @@ import (
 // TagRegion defines a region of a line of text that has a given markup tag
 // region is only defined in terms of character positions -- line is implicit
 type TagRegion struct {
-	Tag  chroma.TokenType `desc:"tag for this region of text"`
-	St   int              `desc:"starting character position"`
-	Ed   int              `desc:"ending character position -- exclusive (after last char)"`
-	Time nptime.Time      `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+	Tag  histyle.HiTags `desc:"tag for this region of text"`
+	St   int            `desc:"starting character position"`
+	Ed   int            `desc:"ending character position -- exclusive (after last char)"`
+	Time nptime.Time    `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
 // OverlapsReg returns true if the two regions overlap
@@ -140,47 +138,18 @@ func TagRegionsSort(tags []TagRegion) {
 	})
 }
 
-// HiCustom tag token types -- this is where we put anything not in chroma
-const (
-	// HiCustomTag is our starting tag -- anything above this is custom..
-	HiCustomTag chroma.TokenType = 10000 + iota
-
-	// HiTagSpellErr tags a spelling error
-	HiTagSpellErr
-)
-
-// HiCustomTagNames are our names for HiCustom tags
-// need to ensure CSS exists for these
-var HiCustomTagNames = map[chroma.TokenType]string{
-	HiTagSpellErr: "cse",
-}
-
-// HiCustomTagProps are default properties for each custom tag
-var HiCustomTagProps = map[chroma.TokenType]ki.Props{
-	HiTagSpellErr: ki.Props{
-		"text-decoration": "dottedunderline",
-	},
-}
-
-// HiStyleName is a highlighting style name
-type HiStyleName string
-
-// HiStyleDefault is the default highlighting style name -- can set this to whatever you want
-var HiStyleDefault = HiStyleName("emacs")
-
 // HiMarkup manages the syntax highlighting state for TextBuf
 type HiMarkup struct {
-	Lang      string        `desc:"language for syntax highlighting the code"`
-	Style     HiStyleName   `desc:"syntax highlighting style"`
-	Has       bool          `desc:"true if both lang and style are set"`
-	TabSize   int           `desc:"tab size, in chars"`
-	CSSheet   gi.StyleSheet `json:"-" xml:"-" desc:"CSS StyleSheet for given highlighting style"`
-	CSSProps  ki.Props      `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
+	Lang      string            `desc:"language for syntax highlighting the code"`
+	Style     histyle.StyleName `desc:"syntax highlighting style"`
+	Has       bool              `desc:"true if both lang and style are set"`
+	TabSize   int               `desc:"tab size, in chars"`
+	CSSProps  ki.Props          `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
 	lastLang  string
-	lastStyle HiStyleName
+	lastStyle histyle.StyleName
 	lexer     chroma.Lexer
 	formatter *html.Formatter
-	style     *chroma.Style
+	style     *histyle.Style
 }
 
 // HasHi returns true if there are highighting parameters set (only valid after Init)
@@ -200,25 +169,9 @@ func (hm *HiMarkup) Init() {
 	}
 	hm.lexer = chroma.Coalesce(lexers.Get(hm.Lang))
 	hm.formatter = html.New(html.WithClasses(), html.TabWidth(hm.TabSize))
-	hm.style = styles.Get(string(hm.Style))
-	if hm.style == nil {
-		hm.style = styles.Fallback
-	}
-	var cssBuf bytes.Buffer
-	err := hm.formatter.WriteCSS(&cssBuf, hm.style)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	csstr := cssBuf.String()
-	csstr = strings.Replace(csstr, " .chroma .", " .", -1)
-	hm.CSSheet.ParseString(csstr)
-	hm.CSSProps = hm.CSSheet.CSSProps()
+	hm.style = histyle.AvailStyle(hm.Style)
 
-	// add custom props here:
-	for tag, tagnm := range HiCustomTagNames {
-		hm.CSSProps["."+tagnm] = HiCustomTagProps[tag]
-	}
+	hm.CSSProps = hm.style.ToProps()
 
 	hm.lastLang = hm.Lang
 	hm.lastStyle = hm.Style
@@ -245,8 +198,9 @@ func (hm *HiMarkup) MarkupTags(txt []byte) ([][]TagRegion, error) {
 				continue
 			}
 			ep := cp + slen
-			if tok.Type < chroma.Text {
-				nt := TagRegion{Tag: tok.Type, St: cp, Ed: ep}
+			if tok.Type < chroma.Text { // only tag if not normal baseline
+				ht := histyle.HiTagFromChroma(tok.Type)
+				nt := TagRegion{Tag: ht, St: cp, Ed: ep}
 				tags[li] = append(tags[li], nt)
 			}
 			cp = ep
@@ -279,7 +233,8 @@ func (hm *HiMarkup) MarkupTagsLine(txt []byte) ([]TagRegion, error) {
 		}
 		ep := cp + slen
 		if tok.Type < chroma.Text {
-			nt := TagRegion{Tag: tok.Type, St: cp, Ed: ep}
+			ht := histyle.HiTagFromChroma(tok.Type)
+			nt := TagRegion{Tag: ht, St: cp, Ed: ep}
 			tags = append(tags, nt)
 		}
 		cp = ep
@@ -310,12 +265,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
 			mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:tr.St])))...)
 		}
 		mu = append(mu, sps...)
-		clsnm := ""
-		if tr.Tag >= HiCustomTag {
-			clsnm = HiCustomTagNames[tr.Tag]
-		} else {
-			clsnm = chroma.StandardTypes[tr.Tag]
-		}
+		clsnm := tr.Tag.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
 		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:tr.Ed])))...)

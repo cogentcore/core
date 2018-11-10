@@ -48,29 +48,35 @@ func KeyMapsView(km *gi.KeyMaps) {
 	mmen := win.MainMenu
 	MainMenuView(km, win, mmen)
 
+	inClosePrompt := false
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
-		if gi.AvailKeyMapsChanged { // only for main avail map..
-			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
-				Prompt: "Do you want to save any changes to std preferences to std keymaps file before closing, or Cancel the close and do a Save to a different file?"},
-				[]string{"Save and Close", "Discard and Close", "Cancel"},
-				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						km.SavePrefs()
-						fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
-						win.Close()
-					case 1:
-						if km == &gi.AvailKeyMaps {
-							km.OpenPrefs() // revert
-						}
-						win.Close()
-					case 2:
-						// default is to do nothing, i.e., cancel
-					}
-				})
-		} else {
+		if !gi.AvailKeyMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
 			win.Close()
+			return
 		}
+		if inClosePrompt {
+			return
+		}
+		inClosePrompt = true
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
+			Prompt: "Do you want to save any changes to std preferences keymaps file before closing, or Cancel the close and do a Save to a different file?"},
+			[]string{"Save and Close", "Discard and Close", "Cancel"},
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					km.SavePrefs()
+					fmt.Printf("Preferences Saved to %v\n", gi.PrefsKeyMapsFileName)
+					win.Close()
+				case 1:
+					if km == &gi.AvailKeyMaps {
+						km.OpenPrefs() // revert
+					}
+					win.Close()
+				case 2:
+					inClosePrompt = false
+					// default is to do nothing, i.e., cancel
+				}
+			})
 	})
 
 	win.MainMenuUpdated()

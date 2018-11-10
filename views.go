@@ -8,7 +8,7 @@ import "github.com/goki/ki"
 
 // ViewIFace is an interface into the View GUI types in giv subpackage,
 // allowing it to be a sub-package with just this narrow set of dependencies
-// of gi on giv.
+// of gi on giv. The one impl is in giv/valueview.go.
 type ViewIFace interface {
 	// CtxtMenuView configures a popup context menu according to the
 	// "CtxtMenu" properties registered on the type for given value element,
@@ -33,6 +33,10 @@ type ViewIFace interface {
 
 	// PrefsDetView opens an interactive view of given detailed preferences object
 	PrefsDetView(prefs *PrefsDetailed)
+
+	// HiStylesView opens an interactive view of given highlighting styles
+	// (pased as interface due to package inclusion issues)
+	HiStylesView(styles interface{})
 
 	// PrefsDetDefaults gets current detailed prefs values as defaults
 	PrefsDetDefaults(prefs *PrefsDetailed)

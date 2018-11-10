@@ -3,9 +3,11 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _FontStretch_name = "FontStrNormalFontStrUltraCondensedFontStrExtraCondensedFontStrSemiCondensedFontStrSemiExpandedFontStrExtraExpandedFontStrUltraExpandedFontStrCondensedFontStrExpandedFontStrNarrowerFontStrWiderFontStretchN"
 
@@ -25,5 +27,5 @@ func (i *FontStretch) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type FontStretch", s)
+	return errors.New("String: " + s + " is not a valid option for type: FontStretch")
 }

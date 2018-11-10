@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi"
+	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/mimedata"
@@ -96,7 +97,7 @@ func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
 
 // FileNodeHiStyle is the default style for syntax highlighting to use for
 // file node buffers
-var FileNodeHiStyle = HiStyleName("emacs")
+var FileNodeHiStyle = histyle.StyleDefault
 
 // FileNode represents a file in the file system -- the name of the node is
 // the name of the file.  Folders have children containing further nodes.

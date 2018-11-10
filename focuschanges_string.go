@@ -3,9 +3,11 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _FocusChanges_name = "FocusLostFocusGotFocusInactiveFocusActiveFocusChangesN"
 
@@ -25,5 +27,5 @@ func (i *FocusChanges) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type FocusChanges", s)
+	return errors.New("String: " + s + " is not a valid option for type: FocusChanges")
 }

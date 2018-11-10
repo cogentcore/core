@@ -3,9 +3,11 @@
 package gi
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _EventPris_name = "AllPrisHiPriRegPriLowPriLowRawPriEventPrisN"
 
@@ -25,5 +27,5 @@ func StringToEventPris(s string) (EventPris, error) {
 			return EventPris(i + -1), nil
 		}
 	}
-	return 0, fmt.Errorf("String %v is not a valid option for type EventPris", s)
+	return 0, errors.New("String: " + s + " is not a valid option for type: EventPris")
 }
