@@ -123,7 +123,7 @@ const (
 	TextFieldSelected
 
 	// TextFieldCleared means the clear button was clicked
-	TextFieldClear
+	TextFieldCleared
 
 	TextFieldSignalsN
 )
@@ -237,7 +237,7 @@ func (tf *TextField) Clear() {
 	tf.StartPos = 0
 	tf.EndPos = 0
 	tf.SelectReset()
-	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldClear), tf.Txt)
+	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldCleared), tf.Txt)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

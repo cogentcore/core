@@ -23,6 +23,10 @@ var KiT_HiTags = kit.Enums.AddEnumAltLower(HiTagsN, false, nil, "")
 func (ev HiTags) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *HiTags) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
+// map keys require text marshaling:
+func (ev HiTags) MarshalText() ([]byte, error)  { return kit.EnumMarshalText(ev) }
+func (ev *HiTags) UnmarshalText(b []byte) error { return kit.EnumUnmarshalText(ev, b) }
+
 // HiTagNames is the complete mapping from a HiTags tag to the css style name
 // most are 2 letters -- populated from chroma.StandardTypes plus custom
 var HiTagNames map[HiTags]string

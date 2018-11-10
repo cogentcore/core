@@ -6,6 +6,7 @@ package histyle
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -19,7 +20,7 @@ import (
 )
 
 // Styles is a collection of styles
-type Styles map[string]*Style
+type Styles map[string]Style
 
 var KiT_Styles = kit.Types.AddType(&Styles{}, StylesProps)
 
@@ -43,7 +44,7 @@ var StyleNames []string
 
 // AvailStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
-func AvailStyle(nm StyleName) *Style {
+func AvailStyle(nm StyleName) Style {
 	if AvailStyles == nil {
 		Init()
 	}
@@ -53,13 +54,21 @@ func AvailStyle(nm StyleName) *Style {
 	return AvailStyles[string(StyleDefault)]
 }
 
+// Add adds a new style to the list
+func (hs *Styles) Add() Style {
+	hse := Style{}
+	nm := fmt.Sprintf("NewStyle_%v", len(*hs))
+	(*hs)[nm] = hse
+	return hse
+}
+
 // FromChroma copies styles from chroma
 func (hs *Styles) FromChroma(cs map[string]*chroma.Style) {
 	if *hs == nil {
 		*hs = make(Styles, len(cs))
 	}
 	for nm, cse := range cs {
-		hse := &Style{}
+		hse := Style{}
 		hse.FromChroma(cse)
 		(*hs)[nm] = hse
 	}
@@ -157,7 +166,7 @@ func Init() {
 	StdStyles.FromChroma(styles.Registry)
 	CustomStyles.OpenPrefs()
 	if len(CustomStyles) == 0 {
-		cs := &Style{}
+		cs := Style{}
 		cs.CopyFrom(StdStyles[string(StyleDefault)])
 		CustomStyles["custom-sample"] = cs
 	}
@@ -173,7 +182,7 @@ var StylesProps = ki.Props{
 			{"SavePrefs", ki.Props{
 				"shortcut": gi.KeyFunMenuSave,
 				"updtfunc": func(sti interface{}, act *gi.Action) {
-					act.SetActiveState(StylesChanged)
+					act.SetActiveStateUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
 				},
 			}},
 			{"sep-file", ki.BlankProp{}},
@@ -202,6 +211,13 @@ var StylesProps = ki.Props{
 		{"Window", "Windows"},
 	},
 	"ToolBar": ki.PropSlice{
+		{"Add", ki.Props{ // note: overrides default Add
+			"desc": "Add a new style to the list.",
+			"icon": "plus",
+			"updtfunc": func(sti interface{}, act *gi.Action) {
+				act.SetActiveStateUpdt(sti.(*Styles) == &CustomStyles)
+			},
+		}},
 		{"SavePrefs", ki.Props{
 			"desc": "saves styles to app prefs directory, in file hi_styles.json, which will be loaded automatically at startup into your CustomStyles.",
 			"icon": "file-save",
@@ -234,6 +250,9 @@ var StylesProps = ki.Props{
 		{"ViewStd", ki.Props{
 			"desc":    `Shows the standard styles that are compiled into the program (from <a href="https://github.com/alecthomas/chroma">github.com/alecthomas/chroma</a>).  Save a style from there and load it into custom as a starting point for creating a variant of an existing style.`,
 			"confirm": true,
+			"updtfunc": func(sti interface{}, act *gi.Action) {
+				act.SetActiveStateUpdt(sti.(*Styles) != &StdStyles)
+			},
 		}},
 	},
 }

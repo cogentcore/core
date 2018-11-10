@@ -149,7 +149,7 @@ type HiMarkup struct {
 	lastStyle histyle.StyleName
 	lexer     chroma.Lexer
 	formatter *html.Formatter
-	style     *histyle.Style
+	style     histyle.Style
 }
 
 // HasHi returns true if there are highighting parameters set (only valid after Init)

@@ -55,8 +55,8 @@ var ComboBoxProps = ki.Props{
 		"padding": units.NewValue(0, units.Px),
 	},
 	"#text": ki.Props{
-		"margin":    units.NewValue(0, units.Px),
-		"padding":   units.NewValue(0, units.Px),
+		"margin":    units.NewValue(1, units.Px),
+		"padding":   units.NewValue(1, units.Px),
 		"max-width": -1,
 		"width":     units.NewValue(12, units.Ch),
 	},

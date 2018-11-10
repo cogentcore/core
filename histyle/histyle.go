@@ -231,9 +231,9 @@ type Style map[HiTags]StyleEntry
 var KiT_Style = kit.Types.AddType(&Style{}, StyleProps)
 
 // CopyFrom copies a style from source style
-func (hs *Style) CopyFrom(ss *Style) {
-	*hs = make(Style, len(*ss))
-	for k, v := range *ss {
+func (hs *Style) CopyFrom(ss Style) {
+	*hs = make(Style, len(ss))
+	for k, v := range ss {
 		(*hs)[k] = v
 	}
 }
@@ -256,17 +256,17 @@ func (hs *Style) FromChroma(cs *chroma.Style) {
 
 // TagRaw returns a StyleEntry for given tag without any inheritance of anything
 // will be IsZero if not defined for this style
-func (hs *Style) TagRaw(tag HiTags) StyleEntry {
-	if *hs == nil {
+func (hs Style) TagRaw(tag HiTags) StyleEntry {
+	if len(hs) == 0 {
 		return StyleEntry{}
 	}
-	return (*hs)[tag]
+	return hs[tag]
 }
 
 // Tag returns a StyleEntry for given Tag.
 // Will try sub-category or category if an exact match is not found.
 // does NOT add the background properties -- those are always kept separate.
-func (hs *Style) Tag(tag HiTags) StyleEntry {
+func (hs Style) Tag(tag HiTags) StyleEntry {
 	se := hs.TagRaw(tag).Inherit(
 		hs.TagRaw(Text),
 		hs.TagRaw(tag.Category()),
@@ -275,7 +275,7 @@ func (hs *Style) Tag(tag HiTags) StyleEntry {
 }
 
 // ToCSS generates a CSS style sheet for this style, by HiTags tag
-func (hs *Style) ToCSS() map[HiTags]string {
+func (hs Style) ToCSS() map[HiTags]string {
 	css := map[HiTags]string{}
 	for ht, _ := range HiTagNames {
 		entry := hs.Tag(ht)
@@ -288,7 +288,7 @@ func (hs *Style) ToCSS() map[HiTags]string {
 }
 
 // ToProps generates list of ki.Props for this style
-func (hs *Style) ToProps() ki.Props {
+func (hs Style) ToProps() ki.Props {
 	pr := ki.Props{}
 	for ht, nm := range HiTagNames {
 		entry := hs.Tag(ht)
@@ -304,18 +304,18 @@ func (hs *Style) ToProps() ki.Props {
 }
 
 // Open hi style from a JSON-formatted file.
-func (hs *Style) OpenJSON(filename gi.FileName) error {
+func (hs Style) OpenJSON(filename gi.FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
 		log.Println(err)
 		return err
 	}
-	return json.Unmarshal(b, hs)
+	return json.Unmarshal(b, &hs)
 }
 
 // Save hi style to a JSON-formatted file.
-func (hs *Style) SaveJSON(filename gi.FileName) error {
+func (hs Style) SaveJSON(filename gi.FileName) error {
 	b, err := json.MarshalIndent(hs, "", "  ")
 	if err != nil {
 		log.Println(err) // unlikely

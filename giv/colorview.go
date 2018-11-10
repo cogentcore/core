@@ -149,10 +149,15 @@ func (cv *ColorView) StdSliderConfig() kit.TypeAndNameList {
 	config.Add(gi.KiT_Slider, "blue")
 	config.Add(gi.KiT_Label, "llab")
 	config.Add(gi.KiT_Slider, "light")
+	config.Add(gi.KiT_Label, "alab")
+	config.Add(gi.KiT_Slider, "alpha")
 	return config
 }
 
 func (cv *ColorView) SetRGBValue(val float32, rgb int) {
+	if val > 0 && cv.Color.IsNil() { // starting out with dummy color
+		cv.Color.A = 255
+	}
 	switch rgb {
 	case 0:
 		cv.Color.R = uint8(val)
@@ -160,6 +165,8 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 		cv.Color.G = uint8(val)
 	case 2:
 		cv.Color.B = uint8(val)
+	case 3:
+		cv.Color.A = uint8(val)
 	}
 	if cv.TmpSave != nil {
 		cv.TmpSave.SaveTmp()
@@ -197,6 +204,8 @@ func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
 		sl.SetValue(float32(cv.Color.G))
 	case 2:
 		sl.SetValue(float32(cv.Color.B))
+	case 3:
+		sl.SetValue(float32(cv.Color.A))
 	}
 }
 
@@ -273,10 +282,12 @@ func (cv *ColorView) ConfigSliderGrid() {
 		cv.ConfigLabel(sg.KnownChildByName("hlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Hue:")
 		cv.ConfigLabel(sg.KnownChildByName("slab", 0).Embed(gi.KiT_Label).(*gi.Label), "Sat:")
 		cv.ConfigLabel(sg.KnownChildByName("llab", 0).Embed(gi.KiT_Label).(*gi.Label), "Light:")
+		cv.ConfigLabel(sg.KnownChildByName("alab", 0).Embed(gi.KiT_Label).(*gi.Label), "Alpha:")
 
 		cv.ConfigRGBSlider(sg.KnownChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
 		cv.ConfigRGBSlider(sg.KnownChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
 		cv.ConfigRGBSlider(sg.KnownChildByName("blue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
+		cv.ConfigRGBSlider(sg.KnownChildByName("alpha", 0).Embed(gi.KiT_Slider).(*gi.Slider), 3)
 		cv.ConfigHSLSlider(sg.KnownChildByName("hue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
 		cv.ConfigHSLSlider(sg.KnownChildByName("sat", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
 		cv.ConfigHSLSlider(sg.KnownChildByName("light", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
@@ -295,6 +306,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 	cv.UpdateRGBSlider(sg.KnownChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
 	cv.UpdateRGBSlider(sg.KnownChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
 	cv.UpdateRGBSlider(sg.KnownChildByName("blue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
+	cv.UpdateRGBSlider(sg.KnownChildByName("alpha", 0).Embed(gi.KiT_Slider).(*gi.Slider), 3)
 	cv.UpdateHSLSlider(sg.KnownChildByName("hue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
 	cv.UpdateHSLSlider(sg.KnownChildByName("sat", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
 	cv.UpdateHSLSlider(sg.KnownChildByName("light", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)

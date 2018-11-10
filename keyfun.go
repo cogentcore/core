@@ -384,7 +384,7 @@ var KeyMapsProps = ki.Props{
 			{"SavePrefs", ki.Props{
 				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(kmi interface{}, act *Action) {
-					act.SetActiveState(AvailKeyMapsChanged)
+					act.SetActiveState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 				},
 			}},
 			{"sep-file", ki.BlankProp{}},
@@ -421,7 +421,7 @@ var KeyMapsProps = ki.Props{
 			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
 			"icon": "file-save",
 			"updtfunc": func(kmi interface{}, act *Action) {
-				act.SetActiveStateUpdt(AvailKeyMapsChanged)
+				act.SetActiveState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 			},
 		}},
 		{"sep-file", ki.BlankProp{}},
@@ -449,11 +449,17 @@ var KeyMapsProps = ki.Props{
 		{"ViewStd", ki.Props{
 			"desc":    "Shows the standard maps that are compiled into the program and have all the lastest key functions bound to standard key chords.  Useful for comparing against custom maps.",
 			"confirm": true,
+			"updtfunc": func(kmi interface{}, act *Action) {
+				act.SetActiveStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
+			},
 		}},
 		{"RevertToStd", ki.Props{
 			"icon":    "update",
 			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
 			"confirm": true,
+			"updtfunc": func(kmi interface{}, act *Action) {
+				act.SetActiveStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
+			},
 		}},
 	},
 }

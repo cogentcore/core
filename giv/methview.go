@@ -137,7 +137,13 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 			sep.Horiz = false
 			continue
 		}
-		ac := tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)
+		var ac *gi.Action
+		if aci, has := tb.ChildByName(te.Name, 0); has { // allows overriding of defaults etc
+			ac = aci.(*gi.Action)
+			ac.ActionSig.DisconnectAll()
+		} else {
+			ac = tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)
+		}
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
 			rval = false
