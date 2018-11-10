@@ -386,8 +386,8 @@ func Complete(data interface{}, text string, pos token.Position) (matches comple
 	return matches, seed
 }
 
-func CompleteEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditWord(text, cursorPos, selection, seed)
+func CompleteEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (s string, delta int) {
+	s, delta = complete.EditWord(text, cursorPos, completion.Text, seed)
 	return s, delta
 }
 

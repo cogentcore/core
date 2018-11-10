@@ -817,14 +817,14 @@ func (fv *FileView) PathComplete(data interface{}, path string, pos token.Positi
 	return matches, seed
 }
 
-func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, completion string, seed string) (path string, delta int) {
-	path, delta = complete.EditBasic(text, cursorPos, completion, seed)
+func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (path string, delta int) {
+	path, delta = complete.EditBasic(text, cursorPos, c.Text, seed)
 	path = path + string(filepath.Separator)
 	delta += 1
 	return path, delta
 }
 
-func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, completion string, seed string) (file string, delta int) {
-	file, delta = complete.EditWord(text, cursorPos, completion, seed)
+func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (file string, delta int) {
+	file, delta = complete.EditWord(text, cursorPos, c.Text, seed)
 	return file, delta
 }

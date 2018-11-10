@@ -17,9 +17,10 @@ import (
 )
 
 type Completion struct {
-	Text string // completion text
-	Icon string // icon name
-	Desc string // possible extra information, e.g. type, arguments, etc. - not currently used
+	Text  string            // completion text
+	Icon  string            // icon name
+	Desc  string            // possible extra information, e.g. type, arguments, etc. - not currently used
+	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
 }
 
 type Completions []Completion
@@ -30,7 +31,7 @@ type MatchFunc func(data interface{}, text string, pos token.Position) (matches 
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
-type EditFunc func(data interface{}, text string, cursorPos int, completion string, seed string) (newText string, delta int)
+type EditFunc func(data interface{}, text string, cursorPos int, completion Completion, seed string) (newText string, delta int)
 
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The seed is basically a prefix.

@@ -2020,7 +2020,8 @@ func (tb *TextBuf) CompleteText(s string) {
 		tbes = string(tbe.ToBytes())
 	}
 	var delta int // the number of runes past cursor to delete
-	s, delta = tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, s, tb.Complete.Seed)
+	c := tb.Complete.GetCompletion(s)
+	s, delta = tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
 	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	delEn := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh + delta}
 	tb.DeleteText(pos, delEn, true, false)

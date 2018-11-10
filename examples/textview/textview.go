@@ -99,9 +99,9 @@ func mainrun() {
 	txbuf.Hi.Style = "emacs"
 	txbuf.Open(samplefile)
 
-	txed1.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
+	txbuf.SetCompleter(txed1, CompleteGo, CompleteGoEdit)
 	if strings.HasSuffix(string(samplefile), ".md") {
-		txed1.SetSpellCorrect(txed1, SpellCorrectEdit)
+		txbuf.SetSpellCorrect(txed1, SpellCorrectEdit)
 	}
 
 	// main menu
@@ -155,13 +155,13 @@ func CompleteGo(data interface{}, text string, pos token.Position) (matches comp
 }
 
 // CompleteEdit uses the selected completion to edit the text
-func CompleteGoEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditGoCode(text, cursorPos, selection, seed)
+func CompleteGoEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (s string, delta int) {
+	s, delta = complete.EditGoCode(text, cursorPos, completion, seed)
 	return s, delta
 }
 
 // SpellCorrectEdit uses the selected correction to edit the text
-func SpellCorrectEdit(data interface{}, text string, cursorPos int, new string, old string) (s string, delta int) {
-	s, delta = spell.CorrectText(text, cursorPos, old, new)
+func SpellCorrectEdit(data interface{}, new string, old string) (s string, delta int) {
+	s, delta = spell.CorrectText(old, new)
 	return s, delta
 }

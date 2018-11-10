@@ -35,8 +35,8 @@ func CompleteGo(data interface{}, text string, pos token.Position) (matches comp
 }
 
 // CompleteGoEdit uses the selected completion to edit the text
-func CompleteGoEdit(data interface{}, text string, cursorPos int, selection string, seed string) (s string, delta int) {
-	s, delta = complete.EditGoCode(text, cursorPos, selection, seed)
+func CompleteGoEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (s string, delta int) {
+	s, delta = complete.EditGoCode(text, cursorPos, completion, seed)
 	return s, delta
 }
 

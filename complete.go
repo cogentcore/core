@@ -191,3 +191,12 @@ func (c *Complete) KeyInput(kf KeyFuns) bool { // true - caller should set key p
 	}
 	return false
 }
+
+func (c *Complete) GetCompletion(s string) complete.Completion {
+	for _, cc := range c.Completions {
+		if s == cc.Text {
+			return cc
+		}
+	}
+	return complete.Completion{}
+}

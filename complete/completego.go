@@ -313,8 +313,12 @@ func SecondPass(bytes []byte, pos token.Position) []Completion {
 				icon = "blank"
 			}
 			candidates = append(candidates, aCandidate)
-			comp := Completion{Text: aCandidate.Name, Icon: icon}
-			completions = append(completions, comp)
+			c := Completion{Text: aCandidate.Name, Icon: icon}
+			c.Extra = make(map[string]string)
+			c.Extra["class"] = aCandidate.Class
+			c.Extra["type"] = aCandidate.Typ
+			c.Extra["pkg"] = aCandidate.Pkg
+			completions = append(completions, c)
 		}
 	}
 	return completions
@@ -333,7 +337,7 @@ func CompleteGo(bytes []byte, pos token.Position) []Completion {
 }
 
 // EditGoCode is a chance to modify the completion selection before it is inserted
-func EditGoCode(text string, cp int, completion string, seed string) (newText string, delta int) {
+func EditGoCode(text string, cp int, completion Completion, seed string) (newText string, delta int) {
 	// todo: this is the place to add parens for functions and other code specific changes
 	// to the completion -- will need completion information to do this
 
@@ -359,6 +363,12 @@ func EditGoCode(text string, cp int, completion string, seed string) (newText st
 			}
 		}
 	}
+
+	var new = completion.Text
+	class, ok := completion.Extra["class"]
+	if ok && class == "func" {
+		new = new + "()"
+	}
 	delta = len(s2)
-	return completion, delta
+	return new, delta
 }
