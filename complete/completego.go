@@ -332,12 +332,15 @@ func CompleteGo(bytes []byte, pos token.Position) []Completion {
 	return results
 }
 
-// EditGoCode replaces the completion seed and any text up to the next whitespace or other go delimiter
-// with the selected completion. delta is the change in cursor position (cp).
+// EditGoCode is a chance to modify the completion selection before it is inserted
 func EditGoCode(text string, cp int, completion string, seed string) (newText string, delta int) {
-	s1 := string(text[0:cp])
-	s2 := string(text[cp:])
+	// todo: this is the place to add parens for functions and other code specific changes
+	// to the completion -- will need completion information to do this
 
+	// if the original is ChildByName() and the cursor is between d and B and the completion is Children,
+	// then delete the portion after "Child" and return the new completion and the number or runes past
+	// the cursor to delete
+	s2 := text[cp:]
 	if len(s2) > 0 {
 		r := rune(s2[0])
 		// find the next whitespace or end of text
@@ -346,25 +349,16 @@ func EditGoCode(text string, cp int, completion string, seed string) (newText st
 			for i, c := range s2 {
 				r = rune(c)
 				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') {
-					s2 = s2[i:]
+					s2 = s2[0:i]
 					break
 				}
 				// might be last word
 				if i == count-1 {
-					s2 = ""
+					break
 				}
 			}
 		}
 	}
-
-	//c := FindCandidateString(completion)
-	//if c != nil {
-	//	fmt.Println(*c)
-	//}
-
-	s1 = strings.TrimSuffix(s1, seed)
-	s1 += completion
-	t := s1 + s2
-	delta = len(completion) - len(seed)
-	return t, delta
+	delta = len(s2)
+	return completion, delta
 }
