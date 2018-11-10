@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"golang.org/x/tools/go/ast/astutil"
 )
@@ -333,44 +334,33 @@ func CompleteGo(bytes []byte, pos token.Position) []Completion {
 
 // EditGoCode is a chance to modify the completion selection before it is inserted
 func EditGoCode(text string, cp int, completion string, seed string) (newText string, delta int) {
-	// todo: if the original is ChildByName and the cursor is between d and B and the completion is Children,
-	// then delete the portion after "Child" and return the new completion
+	// todo: this is the place to add parens for functions and other code specific changes
+	// to the completion -- will need completion information to do this
 
-	// todo: this is the place to add parens for functions and other code specific changes to the completion
-	// will need completion information to do this
-
-	//s1 := string(text[0:cp])
-	//s2 := string(text[cp:])
-	//
-	//if len(s2) > 0 {
-	//	r := rune(s2[0])
-	//	// find the next whitespace or end of text
-	//	if !(unicode.IsSpace(r)) {
-	//		count := len(s2)
-	//		for i, c := range s2 {
-	//			r = rune(c)
-	//			if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') {
-	//				s2 = s2[i:]
-	//				break
-	//			}
-	//			// might be last word
-	//			if i == count-1 {
-	//				s2 = ""
-	//			}
-	//		}
-	//	}
-	//}
-	//
-	////c := FindCandidateString(completion)
-	////if c != nil {
-	////	fmt.Println(*c)
-	////}
-	//
-	//s1 = strings.TrimSuffix(s1, seed)
-	//s1 += completion
-	//t := s1 + s2
-	//delta = len(completion) - len(seed)
-	//return t, delta
-
-	return completion, 0
+	// if the original is ChildByName() and the cursor is between d and B and the completion is Children,
+	// then delete the portion after "Child" and return the new completion and the number or runes past
+	// the cursor to delete
+	s2 := text[cp:]
+	if len(s2) > 0 {
+		r := rune(s2[0])
+		// find the next whitespace or end of text
+		if !(unicode.IsSpace(r)) {
+			count := len(s2)
+			for i, c := range s2 {
+				r = rune(c)
+				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') {
+					s2 = s2[0:i]
+					fmt.Println(s2)
+					break
+				}
+				// might be last word
+				if i == count-1 {
+					fmt.Println(s2)
+					break
+				}
+			}
+		}
+	}
+	delta = len(s2)
+	return completion, delta
 }

@@ -2010,7 +2010,8 @@ func (tb *TextBuf) CompleteText(s string) {
 	if s == "" {
 		return
 	}
-	// give the completer a chance to edit string before insert
+	// give the completer a chance to edit the completion before insert,
+	// also it return a number of runes past the cursor to delete
 	st := TextPos{tb.Complete.SrcLn, 0}
 	en := TextPos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
 	var tbes string
@@ -2018,9 +2019,13 @@ func (tb *TextBuf) CompleteText(s string) {
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
-	s, _ = tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, s, tb.Complete.Seed)
-
+	var delta int // the number of runes past cursor to delete
+	s, delta = tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, s, tb.Complete.Seed)
 	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	delEn := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh + delta}
+	tb.DeleteText(pos, delEn, true, false)
+
+	// now the normal completion insertion
 	st = pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.DeleteText(st, pos, true, false)
