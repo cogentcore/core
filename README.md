@@ -41,7 +41,7 @@ GoGi uses the GoKi tree infrastructure to implement a simple, elegant GUI framew
 * `geom2d.go` -- `Vec2D` is main geom type used for 2D, plus transform `Matrix2D`.
 * `paint.go` -- `Paint` struct that does all the direct rendering, uses `gg`-based API but now uses the `srwiley/renderx` rendering system which supports SVG 2.0, and is very fast.
 	+ `stroke.go`, `fill.go` -- `StrokeStyle` and `FillStyle` structs for stroke, fill settings
-	+ `color.go` -- `ColorSpec` for full gradient support, `Color` is basic `color.Color` compatible RGBA type with many additional useful methods, including support for `HSL` colorspace -- see [Wiki Color](https://github.com/goki/gi/wikiColor) for more info.
+	+ `color.go` -- `ColorSpec` for full gradient support, `Color` is basic `color.Color` compatibale RGBA type with many additional useful methods, including support for `HSL` colorspace -- see [Wiki Color](https://github.com/goki/gi/wikiColor) for more info.
 * `style.go` -- `Style` and associated structs for CSS-based `Widget` styling.
 * `viewport2d.go` -- `Viewport2D` that has an `Image.RGBA` that `Paint` renders onto.
 * `window.go` -- `Window` is the top-level window that manages an OS-specific `oswin.Window` and handles the event loop.
@@ -96,7 +96,7 @@ Currently at a **pre-beta** level (**DON'T RECOMMEND USING RIGHT NOW** -- come b
 
 # TODO
 
-* add not working for histyle.Styles
+* markdown not getting marked up properly!
 
 * tabs not selecting / isvisible not working
 

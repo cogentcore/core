@@ -51,17 +51,20 @@ func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // StyleEntry is one value in the map of highilight style values
 type StyleEntry struct {
-	Color      gi.Color
-	Background gi.Color
-	Border     gi.Color
-
-	Bold      Trilean
-	Italic    Trilean
-	Underline Trilean
-	NoInherit bool
+	Color      gi.Color `desc:"text color"`
+	Background gi.Color `desc:"background color"`
+	Border     gi.Color `view:"-" desc:"border color? not sure what this is -- not really used"`
+	Bold       Trilean  `desc:"bold font"`
+	Italic     Trilean  `desc:"italic font"`
+	Underline  Trilean  `desc:"underline"`
+	NoInherit  bool     `desc:"don't inherit these settings from sub-category or category levels -- otherwise everthing with a Pass is inherited"`
 }
 
-var KiT_StyleEntry = kit.Types.AddType(&StyleEntry{}, nil)
+var KiT_StyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)
+
+var StyleEntryProps = ki.Props{
+	"inline": true,
+}
 
 // FromChroma copies styles from chroma
 func (he *StyleEntry) FromChroma(ce chroma.StyleEntry) {
@@ -249,7 +252,10 @@ func (hs *Style) FromChroma(cs *chroma.Style) {
 	for _, ct := range cstags {
 		ce := csb.Get(ct) // direct copy of style entry, from builder
 		ht := HiTagFromChroma(ct)
-		he := StyleEntryFromChroma(ce.Sub(bg))
+		if ht != Background {
+			ce = ce.Sub(bg)
+		}
+		he := StyleEntryFromChroma(ce)
 		(*hs)[ht] = he
 	}
 }

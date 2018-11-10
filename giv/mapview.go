@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"reflect"
-	"sort"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
@@ -168,19 +167,7 @@ func (mv *MapView) ConfigMapGrid() {
 
 	sg.SetProp("columns", ncol)
 
-	keys := mpvnp.MapKeys() // note: this is a slice of reflect.Value!
-	// todo: add these methods to kit.maps.go and use slice.go logic to sort..
-	if mv.SortVals {
-		sort.Slice(keys, func(i, j int) bool {
-			vi := mpvnp.MapIndex(keys[i])
-			vj := mpvnp.MapIndex(keys[j])
-			return kit.ToString(vi.Interface()) < kit.ToString(vj.Interface())
-		})
-	} else {
-		sort.Slice(keys, func(i, j int) bool {
-			return kit.ToString(keys[i]) < kit.ToString(keys[j])
-		})
-	}
+	keys := kit.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
 	for _, key := range keys {
 		kv := ToValueView(key.Interface(), "")
 		if kv == nil { // shouldn't happen

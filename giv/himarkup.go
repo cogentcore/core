@@ -177,9 +177,45 @@ func (hm *HiMarkup) Init() {
 	hm.lastStyle = hm.Style
 }
 
-// MarkupTags returns all the markup tags according to current
+// TagsForLine adds the tags for one line
+func (hm *HiMarkup) TagsForLine(tags *[]TagRegion, toks []chroma.Token) {
+	cp := 0
+	sz := len(toks)
+	for i, tok := range toks {
+		str := strings.TrimSuffix(tok.Value, "\n")
+		slen := len(str)
+		if slen == 0 {
+			continue
+		}
+		if tok.Type == chroma.None { // always a parsing err AFAIK
+			// fmt.Printf("type: %v  st: %v  ed: %v  txt: %v\n", tok.Type, cp, ep, str)
+			continue
+		}
+		ep := cp + slen
+		if tok.Type < chroma.Text {
+			ht := histyle.HiTagFromChroma(tok.Type)
+			nt := TagRegion{Tag: ht, St: cp, Ed: ep}
+			if ht == histyle.GenericHeading || ht == histyle.GenericSubheading {
+				// extend heading for full line
+				if i == 0 && sz == 2 {
+					st2 := strings.TrimSuffix(toks[1].Value, "\n")
+					nt.Ed = cp + slen + len(st2)
+				} else if i == 1 && sz == 3 {
+					st2 := strings.TrimSuffix(toks[2].Value, "\n")
+					nt.Ed = cp + slen + len(st2)
+					// } else {
+					// 	fmt.Printf("generic heading: sz: %v i: %v\n", sz, i)
+				}
+			}
+			*tags = append(*tags, nt)
+		}
+		cp = ep
+	}
+}
+
+// MarkupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTags(txt []byte) ([][]TagRegion, error) {
+func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([][]TagRegion, error) {
 	txtstr := string(txt)
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
@@ -190,21 +226,7 @@ func (hm *HiMarkup) MarkupTags(txt []byte) ([][]TagRegion, error) {
 	sz := len(lines)
 	tags := make([][]TagRegion, sz)
 	for li, lt := range lines {
-		cp := 0
-		for _, tok := range lt {
-			str := strings.TrimSuffix(tok.Value, "\n")
-			slen := len(str)
-			if slen == 0 {
-				continue
-			}
-			ep := cp + slen
-			if tok.Type < chroma.Text { // only tag if not normal baseline
-				ht := histyle.HiTagFromChroma(tok.Type)
-				nt := TagRegion{Tag: ht, St: cp, Ed: ep}
-				tags[li] = append(tags[li], nt)
-			}
-			cp = ep
-		}
+		hm.TagsForLine(&tags[li], lt)
 	}
 	return tags, nil
 }
@@ -219,26 +241,8 @@ func (hm *HiMarkup) MarkupTagsLine(txt []byte) ([]TagRegion, error) {
 		return nil, err
 	}
 	var tags []TagRegion
-	cp := 0
 	toks := iterator.Tokens()
-	for _, tok := range toks {
-		str := strings.TrimSuffix(tok.Value, "\n")
-		slen := len(str)
-		if slen == 0 {
-			continue
-		}
-		if tok.Type == chroma.None { // always a parsing err AFAIK
-			// fmt.Printf("type: %v  st: %v  ed: %v  txt: %v\n", tok.Type, cp, ep, str)
-			continue
-		}
-		ep := cp + slen
-		if tok.Type < chroma.Text {
-			ht := histyle.HiTagFromChroma(tok.Type)
-			nt := TagRegion{Tag: ht, St: cp, Ed: ep}
-			tags = append(tags, nt)
-		}
-		cp = ep
-	}
+	hm.TagsForLine(&tags, toks)
 	return tags, nil
 }
 

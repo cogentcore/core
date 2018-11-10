@@ -7,7 +7,6 @@ package giv
 import (
 	"fmt"
 	"reflect"
-	"sort"
 
 	"github.com/goki/gi"
 	"github.com/goki/gi/units"
@@ -60,10 +59,8 @@ func (mv *MapViewInline) ConfigParts() {
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := kit.NonPtrValue(mpv)
 
-	keys := mpvnp.MapKeys()
-	sort.Slice(keys, func(i, j int) bool {
-		return kit.ToString(keys[i]) < kit.ToString(keys[j])
-	})
+	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
+	kit.ValueSliceSort(keys, true)
 	for i, key := range keys {
 		if i >= MapInlineLen {
 			break

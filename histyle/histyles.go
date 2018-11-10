@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"sort"
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/styles"
@@ -150,6 +151,7 @@ func (hs *Styles) Names() []string {
 		nms[idx] = nm
 		idx++
 	}
+	sort.StringSlice(nms).Sort()
 	return nms
 }
 

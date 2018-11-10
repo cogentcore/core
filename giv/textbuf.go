@@ -1543,7 +1543,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	tb.SetFlag(int(TextBufMarkingUp))
 
 	tb.LinesToBytes()
-	mtags, err := tb.Hi.MarkupTags(tb.Txt)
+	mtags, err := tb.Hi.MarkupTagsAll(tb.Txt)
 	if err != nil {
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
