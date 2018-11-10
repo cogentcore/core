@@ -66,6 +66,11 @@ import (
 //     func (ev TestFlags) MarshalJSON() ([]byte, error) { return kit.EnumMarshalJSON(ev) }
 //     func (ev *TestFlags) UnmarshalJSON() ([]byte, error) { return kit.EnumUnmarshalJSON(ev) }
 //
+// And any value that will be used as a key in a map must define Text versions (which don't use quotes)
+//
+//     func (ev TestFlags) MarshalText() ([]byte, error) { return kit.EnumMarshalText(ev) }
+//     func (ev *TestFlags) UnmarshalText() ([]byte, error) { return kit.EnumUnmarshalText(ev) }
+//
 type EnumRegistry struct {
 	Enums map[string]reflect.Type
 	// Props contains properties that can be associated with each enum type -- e.g., "BitFlag": true  --  "AltStrings" : map[int64]string, or other custom settings
@@ -568,7 +573,7 @@ func (tr *EnumRegistry) AllTagged(key string) []reflect.Type {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//  JSON Marshal
+//  JSON, Text Marshal
 
 func EnumMarshalJSON(eval interface{}) ([]byte, error) {
 	et := reflect.TypeOf(eval)
@@ -586,6 +591,32 @@ func EnumMarshalJSON(eval interface{}) ([]byte, error) {
 func EnumUnmarshalJSON(eval interface{}, b []byte) error {
 	et := reflect.TypeOf(eval)
 	noq := string(bytes.Trim(b, "\""))
+	if Enums.IsBitFlag(et) {
+		bf := int64(0)
+		err := BitFlagsTypeFromString(&bf, noq, et, int(Enums.NVals(eval)))
+		if err == nil {
+			return SetEnumIfaceFromInt64(eval, bf, et)
+		}
+		return err
+	} else {
+		return SetEnumIfaceFromString(eval, noq)
+	}
+}
+
+func EnumMarshalText(eval interface{}) ([]byte, error) {
+	et := reflect.TypeOf(eval)
+	b := make([]byte, 0, 50)
+	if Enums.IsBitFlag(et) {
+		b = append(b, []byte(BitFlagsToString(EnumIfaceToInt64(eval), eval))...)
+	} else {
+		b = append(b, []byte(EnumIfaceToString(eval))...)
+	}
+	return b, nil
+}
+
+func EnumUnmarshalText(eval interface{}, b []byte) error {
+	et := reflect.TypeOf(eval)
+	noq := string(b)
 	if Enums.IsBitFlag(et) {
 		bf := int64(0)
 		err := BitFlagsTypeFromString(&bf, noq, et, int(Enums.NVals(eval)))
