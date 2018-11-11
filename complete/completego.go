@@ -233,7 +233,7 @@ func EditGoCode(text string, cp int, completion Completion, seed string) (ed Edi
 			count := len(s2)
 			for i, c := range s2 {
 				r = rune(c)
-				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') {
+				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') || r == rune('&') || r == rune('*') {
 					s2 = s2[0:i]
 					break
 				}
