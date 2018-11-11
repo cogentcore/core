@@ -2098,12 +2098,12 @@ func (tb *TextBuf) CorrectText(s string) {
 	tb.RemoveTag(st, histyle.SpellErr)
 	oend := st
 	oend.Ch += len(tb.SpellCorrect.Word)
-	ns, _ := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)
+	ed := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)
 	tb.DeleteText(st, oend, true, true)
-	tb.InsertText(st, []byte(ns), true, true)
+	tb.InsertText(st, []byte(ed.NewText), true, true)
 	if tb.CurView != nil {
 		ep := st
-		ep.Ch += len(ns)
+		ep.Ch += len(ed.NewText)
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
 	}
