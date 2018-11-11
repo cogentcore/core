@@ -44,7 +44,7 @@ func CompleteGoEdit(data interface{}, text string, cursorPos int, completion com
 func CompleteText(data interface{}, text string, pos token.Position) (md complete.MatchData) {
 	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
-		fmt.Println("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
+		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
 		return md
 	}
 
@@ -54,7 +54,7 @@ func CompleteText(data interface{}, text string, pos token.Position) (md complet
 	}
 	result, err := complete.CompleteText(md.Seed)
 	if err != nil {
-		fmt.Println("Error completing text: %v", err)
+		fmt.Printf("Error completing text: %v", err)
 		return md
 	}
 	possibles := complete.MatchSeedString(result, md.Seed)

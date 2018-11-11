@@ -605,25 +605,24 @@ func OpenPaths() {
 // PrefsDetailed are more detailed params not usually customized, but
 // available for those who really care..
 type PrefsDetailed struct {
-	MenuMaxHeight              int `min:"0" max:"100" step:"5" desc:"Default: 30 the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
-	EventSkipLagMSec           int `min:"5" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
-	DragStartMSec              int `min:"5" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
-	DragStartPix               int `min:"0" max:"100" step:"1" desc:"Default: 4 the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
-	DNDStartMSec               int `min:"5" max:"1000" step:"5" desc:"Default: 200 the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
-	DNDStartPix                int `min:"0" max:"100" step:"1" desc:"Default: 20 the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
-	HoverStartMSec             int `min:"10" max:"10000" step:"10" desc:"Default: 1000 the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
-	HoverMaxPix                int `min:"0" max:"1000" step:"5" desc:"Default = 5 the maximum number of pixels that mouse can move and still register a Hover event"`
-	CompleteWaitMSec           int `min:"10" max:"10000" step:"10" desc:"Default: 500 the number of milliseconds to wait before offering completions"`
-	CompleteMaxItems           int `min:"0" max:"100" step:"5" desc:"Default: 25 the maximum number of completions offered in popup"`
-	CursorBlinkMSec            int `min:"0" max:"1000" step:"5" desc:"Default: 500 number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
-	TextViewClipHistMax        int `min:"0" max:"1000" step:"5" desc:"Default: 100 Maximum amount of clipboard history to retain"`
-	LayoutFocusNameTimeoutMSec int `min:"0" max:"5000" step:"20" desc:"Default: 500 the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over
-after this delay."`
-	LayoutFocusNameTabMSec int  `min:"10" max:"10000" step:"100" desc:"Default: 2000 the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`
-	MapInlineLen           int  `min:"0" max:"1000" step:"5" desc:"Default: 3 the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`
-	StructInlineLen        int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`
-	SliceInlineLen         int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of slice elements below which inline will be used"`
-	Changed                bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
+	MenuMaxHeight              int  `min:"0" max:"100" step:"5" desc:"Default: 30 the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
+	EventSkipLagMSec           int  `min:"5" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
+	DragStartMSec              int  `min:"5" max:"1000" step:"5" desc:"Default: 50 the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
+	DragStartPix               int  `min:"0" max:"100" step:"1" desc:"Default: 4 the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
+	DNDStartMSec               int  `min:"5" max:"1000" step:"5" desc:"Default: 200 the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
+	DNDStartPix                int  `min:"0" max:"100" step:"1" desc:"Default: 20 the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
+	HoverStartMSec             int  `min:"10" max:"10000" step:"10" desc:"Default: 1000 the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
+	HoverMaxPix                int  `min:"0" max:"1000" step:"5" desc:"Default = 5 the maximum number of pixels that mouse can move and still register a Hover event"`
+	CompleteWaitMSec           int  `min:"10" max:"10000" step:"10" desc:"Default: 500 the number of milliseconds to wait before offering completions"`
+	CompleteMaxItems           int  `min:"0" max:"100" step:"5" desc:"Default: 25 the maximum number of completions offered in popup"`
+	CursorBlinkMSec            int  `min:"0" max:"1000" step:"5" desc:"Default: 500 number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
+	TextViewClipHistMax        int  `min:"0" max:"1000" step:"5" desc:"Default: 100 Maximum amount of clipboard history to retain"`
+	LayoutFocusNameTimeoutMSec int  `min:"0" max:"5000" step:"20" desc:"Default: 500 the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay"`
+	LayoutFocusNameTabMSec     int  `min:"10" max:"10000" step:"100" desc:"Default: 2000 the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`
+	MapInlineLen               int  `min:"0" max:"1000" step:"5" desc:"Default: 3 the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`
+	StructInlineLen            int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`
+	SliceInlineLen             int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of slice elements below which inline will be used"`
+	Changed                    bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
 var KiT_PrefsDetailed = kit.Types.AddType(&PrefsDetailed{}, PrefsDetailedProps)
@@ -763,7 +762,7 @@ type PrefsDebug struct {
 
 	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"`
 
-	WinPublishTrace *bool `desc:reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
+	WinPublishTrace *bool `desc:"reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
 
 	KeyEventTrace *bool `desc:"reports trace of keyboard events (printfs to stdout)"`
 

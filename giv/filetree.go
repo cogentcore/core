@@ -900,7 +900,7 @@ func (ft *FileTreeView) PasteMime(md mimedata.Mimes) {
 	}
 	if !tfn.IsDir() {
 		if len(md) != 2 {
-			gi.PromptDialog(ft.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name, len(md)/2)}, true, false, nil, nil)
+			gi.PromptDialog(ft.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/2)}, true, false, nil, nil)
 			return
 		}
 	}

@@ -53,8 +53,8 @@ type TableView struct {
 	ShowViewCtxtMenu bool               `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
 	Changed          bool               `desc:"has the table been edited?"`
 	Values           [][]ValueView      `json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	ShowIndex        bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from "index" property (bool)"`
-	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	ShowIndex        bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from 'index' property (bool)"`
+	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 	VisRows          int                `desc:"number of rows visible in display"`
 	SelField         string             `view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
 	SelVal           interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in SelField"`

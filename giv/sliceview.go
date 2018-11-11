@@ -40,8 +40,8 @@ type SliceView struct {
 	ShowViewCtxtMenu bool               `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
 	Changed          bool               `desc:"has the slice been edited?"`
 	Values           []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
-	ShowIndex        bool               `xml:"index" desc:"whether to show index or not -- updated from "index" property (bool)"`
-	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from "intact-key-nav" property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
+	ShowIndex        bool               `xml:"index" desc:"whether to show index or not -- updated from 'index' property (bool)"`
+	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
 	SelVal           interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
 	SelectedIdx      int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	SelectMode       bool               `desc:"editing-mode select rows mode"`

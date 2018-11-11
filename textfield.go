@@ -62,7 +62,7 @@ type TextField struct {
 	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	BlinkOn      bool                    `json:"-" xml:"-" oscillates between on and off for blinking"`
+	BlinkOn      bool                    `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
 	CursorMu     sync.Mutex              `json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
 	Complete     *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }

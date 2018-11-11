@@ -1931,7 +1931,7 @@ func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 func (w *Window) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 	et := me.Type()
 	for pri := HiPri; pri < EventPrisN; pri++ {
-		esig := w.EventSigs[et][pri]
+		esig := &w.EventSigs[et][pri]
 		for recv, _ := range esig.Cons {
 			if recv.IsDestroyed() {
 				delete(esig.Cons, recv)
@@ -2752,7 +2752,7 @@ func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 	var ins, outs WinEventRecvList
 
 	for pri := HiPri; pri < EventPrisN; pri++ {
-		esig := w.EventSigs[ftyp][pri]
+		esig := &w.EventSigs[ftyp][pri]
 		for recv, fun := range esig.Cons {
 			if recv.IsDeleted() { // destroyed is filtered upstream
 				continue

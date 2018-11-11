@@ -44,7 +44,7 @@ type TextView struct {
 	NLines        int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
 	Renders       []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs          []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs    int                       `json:"-" xml:"-" number of line number digits needed"`
+	LineNoDigs    int                       `json:"-" xml:"-" desc:"number of line number digits needed"`
 	LineNoOff     float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
 	LineNoRender  gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
 	LinesSize     image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
@@ -67,7 +67,7 @@ type TextView struct {
 	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
 	LineHeight    float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
+	BlinkOn       bool                      `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
 	CursorMu      sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
 	HasLinks      bool                      `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
 	lastRecenter  int
