@@ -274,10 +274,6 @@ func (nb *Node2DBase) AsWidget() *WidgetBase {
 }
 
 func (nb *Node2DBase) Init2D() {
-	nb.Viewport = nb.ParentViewport()
-	if _, pn := KiToNode2D(nb.Par); pn != nil {
-		nb.SetInvisibleState(pn.IsInvisible())
-	}
 }
 
 func (nb *Node2DBase) Style2D() {

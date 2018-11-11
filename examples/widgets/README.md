@@ -1,10 +1,10 @@
 # GoGi Widgets Demo
 
-This is the main demo.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+I` or hit the button with the `GoGi Editor` on it.  Also try changing the preferences using `Control+Alt+P` (also avail in the widgets menu).
+This demo shows all the main widgets in GoGi.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+I` or hit the button with the `GoGi Editor` on it.  Also try changing the preferences using `Control+Alt+P` (also avail in the widgets menu).
 
 ## Installation
 
-For Go newbies.. 
+The usual Go install procedure will work -- this is the easiest way to install GoGi and get all of its various dependencies:
 
 ``` bash
 > go get github.com/goki/gi

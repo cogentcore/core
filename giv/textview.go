@@ -204,7 +204,7 @@ func (tv *TextView) EditDone() {
 
 // Refresh re-displays everything anew from the buffer
 func (tv *TextView) Refresh() {
-	if !tv.IsVisible() {
+	if !tv.This().(gi.Node2D).IsVisible() {
 		return
 	}
 	tv.LayoutAllLines(false)
@@ -2339,7 +2339,7 @@ func (tv *TextView) ScrollInView(bbox image.Rectangle) bool {
 // ScrollCursorInView tells any parent scroll layout to scroll to get cursor
 // in view -- returns true if scrolled
 func (tv *TextView) ScrollCursorInView() bool {
-	if tv.IsVisible() {
+	if tv.This().(gi.Node2D).IsVisible() {
 		curBBox := tv.CursorBBox(tv.CursorPos)
 		return tv.ScrollInView(curBBox)
 	} else {
@@ -2575,7 +2575,7 @@ func TextViewBlink() {
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || tv.IsInvisible() {
+		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
 			continue
@@ -2597,7 +2597,7 @@ func TextViewBlink() {
 
 // StartCursor starts the cursor blinking and renders it
 func (tv *TextView) StartCursor() {
-	if !tv.IsVisible() {
+	if !tv.This().(gi.Node2D).IsVisible() {
 		return
 	}
 	tv.BlinkOn = true
@@ -2622,7 +2622,7 @@ func (tv *TextView) StartCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tv *TextView) StopCursor() {
-	if !tv.IsVisible() {
+	if !tv.This().(gi.Node2D).IsVisible() {
 		return
 	}
 	TextViewBlinkMu.Lock()
@@ -2644,7 +2644,7 @@ func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tv *TextView) RenderCursor(on bool) {
-	if !tv.IsVisible() {
+	if !tv.This().(gi.Node2D).IsVisible() {
 		return
 	}
 	if tv.Renders == nil {
@@ -2816,7 +2816,7 @@ func (tv *TextView) VisSizes() {
 // RenderAllLines displays all the visible lines on the screen -- this is
 // called outside of update process and has its own bounds check and updating
 func (tv *TextView) RenderAllLines() {
-	if !tv.IsVisible() {
+	if !tv.This().(gi.Node2D).IsVisible() {
 		return
 	}
 	rs := &tv.Viewport.Render
@@ -2961,7 +2961,7 @@ func (tv *TextView) RenderScrolls() {
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *TextView) RenderLines(st, ed int) bool {
-	if !tv.IsVisible() {
+	if !tv.This().(gi.Node2D).IsVisible() {
 		return false
 	}
 	if st >= tv.NLines {

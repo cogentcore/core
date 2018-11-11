@@ -1867,6 +1867,19 @@ func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 	return ar
 }
 
+func (tv *TreeView) IsVisible() bool {
+	if tv == nil || tv.This() == nil || tv.IsInvisible() || tv.Viewport == nil {
+		return false
+	}
+	if tv.RootView == nil || tv.RootView.This() == nil {
+		return false
+	}
+	if tv.RootView.Par == nil || tv.RootView.Par.This() == nil {
+		return false
+	}
+	return tv.RootView.Par.This().(gi.Node2D).IsVisible()
+}
+
 func (tv *TreeView) Render2D() {
 	if tv.HasClosedParent() {
 		tv.DisconnectAllEvents(gi.AllPris)
