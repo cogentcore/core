@@ -93,10 +93,6 @@ Currently at a **beta** level:
 
 # TODO
 
-* tabs not selecting / isvisible not working
-
-* mac hidpi setpos is not right from prefs -- works from init win create.
-
 * TextView:
 	+ cursor goes to hand for links in TextView
 

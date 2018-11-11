@@ -65,7 +65,7 @@ var ChromaTagNames = map[chroma.TokenType]string{
 // but otherwise we use these as a fallback -- typically not overridden
 var HiTagsProps = map[HiTags]ki.Props{
 	SpellErr: ki.Props{
-		"text-decoration": gi.DecoDottedUnderline,
+		"text-decoration": 1 << uint32(gi.DecoDottedUnderline), // bitflag!
 	},
 }
 
