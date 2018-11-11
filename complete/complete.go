@@ -212,20 +212,6 @@ func SeedGolang(text string) string {
 	return seed
 }
 
-// EditBasic replaces the completion seed with the completion
-func EditBasic(text string, cp int, completion string, seed string) (ed EditData) {
-	s1 := string(text[0:cp])
-	s2 := string(text[cp:])
-	s1 = strings.TrimSuffix(s1, seed)
-	s1 += completion
-	t := s1 + s2
-	ed.NewText = t
-	ed.CursorAdjust = len(completion) - len(seed)
-	return ed
-	//ed.NewText = completion
-	//return ed
-}
-
 // EditWord replaces the completion seed and any text up to the next whitespace with completion
 func EditWord(text string, cp int, completion string, seed string) (ed EditData) {
 	s2 := string(text[cp:])

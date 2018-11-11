@@ -819,7 +819,7 @@ func (fv *FileView) PathComplete(data interface{}, path string, pos token.Positi
 }
 
 func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
-	ed = complete.EditBasic(text, cursorPos, c.Text, seed)
+	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	path := ed.NewText + string(filepath.Separator)
 	ed.NewText = path
 	ed.CursorAdjust += 1
