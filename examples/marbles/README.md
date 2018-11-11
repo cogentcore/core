@@ -24,5 +24,14 @@ Play with the parameters at the top -- they take effect immediately.  The bounce
 
 The graph area is -10..+10 in both axes.
 
-Pay attention to the tooltip for the equation field for special constraints.
+Pay attention to the tooltip for the equation field for special constraints -- must start numbers with a 0 for example.
+
+Extra points to anyone who can figure out what is causing the balls to occasionally quantum tunnel their way out of things!  Not sure we want to fix it, but would be good to at least know why it is happening :)
+
+## Implementational notes
+
+All drawing is done using SVG nodes -- look in `graph.go` for details, e.g., `UpdateMarbles` is the main update for the marbles -- just wraps the SvgGraph in `UpdateStart` and `UpdateEnd` calls and updates the positions of the marble `svg.Circle` nodes.
+
+The app takes good advantage of the `ValueView` elements so the GUI code in `main.go` is really minimal -- everything is handled by the `giv.StructView` and `giv.TableView` view elements.  The main toolbar for the app generated from the type properties on `Graph` object: `GraphProps` in `graph.go`.  See  [Views](https://github.com/goki/gi/wiki/Views) for more details.
+
 
