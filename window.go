@@ -960,6 +960,14 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Overlays and Sprites
 
+// AddOverlay adds the given node as an overlay to be rendered on top of the
+// main window viewport -- node must already be initialized as a Ki element
+// (e.g., call ki.InitName) -- typically it is a Bitmap and should have
+// the bitmap pixels set already
+func (w *Window) AddOverlay(nii Node2D) {
+	w.OverlayVp.AddOverlay(nii)
+}
+
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
@@ -2712,7 +2720,7 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
 		}
 	}
 	wimg.This().SetName(src.UniqueName())
-	w.OverlayVp.AddChild(wimg.This())
+	w.AddOverlay(img)
 	w.DNDImage = wimg.This()
 	w.DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
 	// fmt.Printf("starting dnd: %v\n", src.Name())
