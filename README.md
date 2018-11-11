@@ -16,7 +16,7 @@ The goal of GoKi is to create a minimalist, elegant, and powerful environment (l
 
 For example, GoKi provides functions that traverse the tree in all the relevant ways ("natural" me-first, breadth-first, depth-first, etc) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a very transparent and self-contained manner, like this:
 
-``` go
+```go
 func (n *MyNode) DoSomethingOnMyTree() {
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		mn := KiToMyNode(k)
@@ -39,9 +39,9 @@ In addition, Ki nodes support a general-purpose `Props` property `map`, and the 
 
 Ki Nodes can be used as fields in a struct -- they function much like pre-defined Children elements, and all the standard FuncDown* iterators traverse the fields automatically.  The Ki Init function automatically names these structs with their field names, and sets the parent to the parent struct.
 
-## GoGi Graphical Interface
+## GoGi Graphical Interface and Gide IDE App
 
-The first and most important application of GoKi is the `GoGi` graphical interface system, in the `gi` package.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in perhaps the fewest lines of code of any such system.  Part of this is the natural elegance of Go, but GoKi enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it (will) provide a lightweight, transparent, good-enough-for-many-apps native web browser.  This (will) provide an potential alternative to chromium / electron for universal web-app deployment. 
+The first and most important application of GoKi is the [GoGi](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of GoGi.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in perhaps the fewest lines of code of any such system.  Part of this is the natural elegance of Go, but GoKi enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it (will) provide a lightweight, transparent, good-enough-for-many-apps native web browser.  This (will) provide an potential alternative to chromium / electron for universal web-app deployment. 
 
 
 # Code Map
@@ -62,11 +62,6 @@ The first and most important application of GoKi is the `GoGi` graphical interfa
 
 # Status and TODO
 
-Status: Stable and feature-complete.  Just a few improvements on the todo list:
-
-* what about Kind == reflect.Interface fields in structs -- should they be set to zero?  probably..
-* XML IO -- first pass done, but more should be in attr instead of full elements
-* FindChildRecursive functions?
-* port to better logging for buried errors, with debug mode: https://github.com/sirupsen/logrus
+Status: as of 11/2018, it is stable and feature-complete, supporting the full Gide app!
 
 
