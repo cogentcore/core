@@ -213,6 +213,10 @@ type Node2D interface {
 	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
 	// set if a widget is entirely out of render range.  But again, use
 	// IsVisible as the main end-user method.
+	// For robustness, it recursively calls the parent -- this is typically
+	// a short path -- propagating the Invisible flag properly can be
+	// very challenging without mistakenly overwriting invisibility at various
+	// levels.
 	IsVisible() bool
 }
 
@@ -405,7 +409,10 @@ func (nb *Node2DBase) IsVisible() bool {
 	if nb == nil || nb.This() == nil || nb.IsInvisible() || nb.Viewport == nil {
 		return false
 	}
-	return nb.Viewport.IsVisible()
+	if nb.Par == nil || nb.Par.This() == nil {
+		return false
+	}
+	return nb.Par.This().(Node2D).IsVisible()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

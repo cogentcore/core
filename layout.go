@@ -1273,9 +1273,9 @@ func (ly *Layout) Render2DChildren() {
 		for i, kid := range ly.Kids {
 			if _, ni := KiToNode2D(kid); ni != nil {
 				if i == ly.StackTop {
-					ni.ClearInvisibleTree()
+					ni.ClearInvisible()
 				} else {
-					ni.SetInvisibleTree()
+					ni.SetInvisible()
 				}
 			}
 		}

@@ -774,6 +774,9 @@ func init() {
 
 // FileNode returns the SrcNode as a FileNode
 func (ft *FileTreeView) FileNode() *FileNode {
+	if ft.This() == nil {
+		return nil
+	}
 	fn := ft.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
 	return fn
 }
@@ -784,7 +787,10 @@ func (ft *FileTreeView) DuplicateFiles() {
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
 		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		ftv.FileNode().DuplicateFile()
+		fn := ftv.FileNode()
+		if fn != nil {
+			fn.DuplicateFile()
+		}
 	}
 }
 
@@ -794,7 +800,10 @@ func (ft *FileTreeView) DeleteFiles() {
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
 		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		ftv.FileNode().DeleteFile()
+		fn := ftv.FileNode()
+		if fn != nil {
+			fn.DeleteFile()
+		}
 	}
 }
 
@@ -804,7 +813,10 @@ func (ft *FileTreeView) RenameFiles() {
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
 		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		CallMethod(ftv.FileNode(), "RenameFile", ft.Viewport)
+		fn := ftv.FileNode()
+		if fn != nil {
+			CallMethod(fn, "RenameFile", ft.Viewport)
+		}
 	}
 }
 
@@ -814,7 +826,10 @@ func (ft *FileTreeView) OpenDirs() {
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
 		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		ftv.FileNode().OpenDir()
+		fn := ftv.FileNode()
+		if fn != nil {
+			fn.OpenDir()
+		}
 	}
 }
 
@@ -1067,25 +1082,27 @@ var fnFolderProps = ki.Props{
 
 func (ft *FileTreeView) Style2D() {
 	fn := ft.FileNode()
-	if fn.IsDir() {
-		if fn.HasChildren() {
-			ft.Icon = gi.IconName("")
+	if fn != nil {
+		if fn.IsDir() {
+			if fn.HasChildren() {
+				ft.Icon = gi.IconName("")
+			} else {
+				ft.Icon = gi.IconName("folder")
+			}
+			ft.SetProp("#branch", fnFolderProps)
+			ft.Class = "folder"
 		} else {
-			ft.Icon = gi.IconName("folder")
-		}
-		ft.SetProp("#branch", fnFolderProps)
-		ft.Class = "folder"
-	} else {
-		ft.Icon = fn.Info.Ic
-		if ft.Icon == "" || ft.Icon == "none" {
-			ft.Icon = "blank"
-		}
-		if fn.IsExec() {
-			ft.Class = "exec"
-		} else if fn.IsOpen() {
-			ft.Class = "open"
-		} else {
-			ft.Class = ""
+			ft.Icon = fn.Info.Ic
+			if ft.Icon == "" || ft.Icon == "none" {
+				ft.Icon = "blank"
+			}
+			if fn.IsExec() {
+				ft.Class = "exec"
+			} else if fn.IsOpen() {
+				ft.Class = "open"
+			} else {
+				ft.Class = ""
+			}
 		}
 	}
 	ft.StyleTreeView()

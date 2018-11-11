@@ -365,28 +365,6 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 	return rval
 }
 
-// note: invisible is one of the few things that transcends 2D / 3D..
-
-// SetInvisibleTree sets the Invisible flag for all nodes down the tree from
-// this node, inclusive
-func (nb *NodeBase) SetInvisibleTree() {
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
-		nbb := k.Embed(KiT_NodeBase).(*NodeBase)
-		nbb.SetInvisible()
-		return true
-	})
-}
-
-// ClearInvisibleTree clears the Invisible flag for all nodes down the tree from
-// this node, inclusive
-func (nb *NodeBase) ClearInvisibleTree() {
-	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
-		nbb := k.Embed(KiT_NodeBase).(*NodeBase)
-		nbb.ClearInvisible()
-		return true
-	})
-}
-
 // standard css properties on nodes apply, including visible, etc.
 
 // see node2d.go for 2d node

@@ -370,9 +370,9 @@ func (sv *SplitView) Render2D() {
 			if nii != nil {
 				sp := sv.Splits[i]
 				if sp <= 0.01 {
-					ni.SetInvisibleTree()
+					ni.SetInvisible()
 				} else {
-					ni.ClearInvisibleTree()
+					ni.ClearInvisible()
 				}
 				nii.Render2D() // needs to disconnect using invisible
 			}

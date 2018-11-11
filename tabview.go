@@ -96,7 +96,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 		fr.StackTop = 0
 		tab.SetSelectedState(true)
 	} else {
-		widg.AsNode2D().SetInvisibleTree() // new tab is invisible until selected
+		widg.AsNode2D().SetInvisible() // new tab is invisible until selected
 	}
 }
 
