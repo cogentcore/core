@@ -763,7 +763,7 @@ func (fv *FileView) HasFocus2D() bool {
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion
 
-func (fv *FileView) FileComplete(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+func (fv *FileView) FileComplete(data interface{}, text string, pos token.Position) (md complete.MatchData) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -772,29 +772,30 @@ func (fv *FileView) FileComplete(data interface{}, text string, pos token.Positi
 			break
 		}
 	}
-	seed = text[seedStart:]
+	md.Seed = text[seedStart:]
 
 	var files = []string{}
 	for _, f := range fv.Files {
 		files = append(files, f.Name)
 	}
 
-	if len(seed) > 0 { // return all directories
-		files = complete.MatchSeedString(files, seed)
+	if len(md.Seed) > 0 { // return all directories
+		files = complete.MatchSeedString(files, md.Seed)
 	}
 
 	for _, d := range files {
 		m := complete.Completion{Text: d}
-		matches = append(matches, m)
+		md.Matches = append(md.Matches, m)
 	}
-	return matches, seed
+	return md
 }
 
-func (fv *FileView) PathComplete(data interface{}, path string, pos token.Position) (matches complete.Completions, seed string) {
+func (fv *FileView) PathComplete(data interface{}, path string, pos token.Position) (md complete.MatchData) {
 	dir, seed := filepath.Split(path)
+	md.Seed = seed
 	d, err := os.Open(dir)
 	if err != nil {
-		return matches, seed
+		return md
 	}
 	defer d.Close()
 
@@ -806,25 +807,26 @@ func (fv *FileView) PathComplete(data interface{}, path string, pos token.Positi
 		}
 	}
 
-	if len(seed) > 0 { // return all directories
-		dirs = complete.MatchSeedString(dirs, seed)
+	if len(md.Seed) > 0 { // return all directories
+		dirs = complete.MatchSeedString(dirs, md.Seed)
 	}
 
 	for _, d := range dirs {
 		m := complete.Completion{Text: d}
-		matches = append(matches, m)
+		md.Matches = append(md.Matches, m)
 	}
-	return matches, seed
+	return md
 }
 
-func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (path string, delta int) {
-	path, delta = complete.EditBasic(text, cursorPos, c.Text, seed)
-	path = path + string(filepath.Separator)
-	delta += 1
-	return path, delta
+func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
+	ed = complete.EditBasic(text, cursorPos, c.Text, seed)
+	path := ed.NewText + string(filepath.Separator)
+	ed.NewText = path
+	ed.CursorAdjust += 1
+	return ed
 }
 
-func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (file string, delta int) {
-	file, delta = complete.EditWord(text, cursorPos, c.Text, seed)
-	return file, delta
+func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
+	ed = complete.EditWord(text, cursorPos, c.Text, seed)
+	return ed
 }

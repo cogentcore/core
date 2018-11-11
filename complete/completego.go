@@ -62,122 +62,6 @@ func Init() {
 	v.funcs = make(map[string]int)
 }
 
-//func CompleteGo(bytes []byte, pos token.Position) (matches []string, seed string) {
-//	Init()
-//	src := string(bytes)
-//	matches = matches[:0]
-//	fs := token.NewFileSet()
-//	f, err := parser.ParseFile(fs, "src.go", src, parser.AllErrors)
-//	if err != nil {
-//		log.Printf("could not parse %s: %v\n", f, err)
-//	}
-//
-//	ast.Walk(v, f)
-//	start := token.Pos(pos.Offset)
-//	end := start
-//	path, _ := astutil.PathEnclosingInterval(f, start, end)
-//	lineUpToPos := src[pos.Offset-pos.Column : pos.Offset]
-//
-//	next := true
-//	for i := 0; i < len(path) && next == true; i++ {
-//		n := path[i]
-//		//fmt.Printf("%d\t%T\n", i, n)
-//		switch n := n.(type) {
-//		case *ast.BadDecl:
-//			fmt.Printf("\t%T.Doc\n", n)
-//			if i+1 < len(path) {
-//				n2 := path[i+1]
-//				switch n2.(type) {
-//				case *ast.File:
-//					matches = append(matches, decls...)
-//					next = false
-//				}
-//			}
-//			if strings.Contains(lineUpToPos, ":=") { // must be a better way
-//				matches = append(matches, Locals()...)
-//				matches = append(matches, Funcs()...)
-//				next = false
-//			}
-//
-//		case *ast.Ident:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Name)
-//			matches = append(matches, Locals()...)
-//			matches = append(matches, Funcs()...)
-//			next = false
-//		case *ast.Field:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//		case *ast.ImportSpec:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//		case *ast.ValueSpec:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//		case *ast.GenDecl:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//			if n.Tok == token.IMPORT {
-//				next = false
-//			}
-//		case *ast.TypeSpec:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//		case *ast.FuncDecl:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//			if !strings.HasPrefix(lineUpToPos, "func") { // can't guess name of new function
-//				matches = append(matches, Locals()...)
-//				matches = append(matches, Funcs()...)
-//			}
-//			next = false
-//		case *ast.SelectorExpr:
-//			path, _ := astutil.PathEnclosingInterval(f, start-1, end)
-//			n2 := path[0]
-//			fmt.Printf("\t%T.Doc: %q\n", n2)
-//			zType := reflect.TypeOf(n2)
-//			switch zType.Kind() {
-//			case reflect.Struct:
-//				fmt.Println("dog")
-//			}
-//		case *ast.File:
-//			fmt.Printf("\t%T.Doc: %q\n", n, n.Doc.Text())
-//			matches = append(matches, decls...)
-//			next = false
-//		case *ast.BasicLit:
-//			fmt.Printf("\t%T.Value: %q\n", n, n.Value)
-//			if i+1 < len(path) {
-//				n2 := path[i+1]
-//				switch n2.(type) {
-//				case *ast.ImportSpec:
-//					fmt.Printf("\ttodo: package/filename completion for imports\n")
-//				}
-//			}
-//			next = false
-//		case *ast.AssignStmt:
-//			fmt.Printf("\t%T.LHS: %q\n", n, n.Lhs)
-//			fmt.Printf("\t%T.RHS: %q\n", n, n.Rhs)
-//		}
-//	}
-//	seed = SeedWhiteSpace(lineUpToPos)
-//	return matches, seed
-//}
-//
-//func Locals() []string {
-//	keys := reflect.ValueOf(v.locals).MapKeys()
-//	locals := make([]string, len(keys))
-//	for i := 0; i < len(keys); i++ {
-//		locals[i] = keys[i].String()
-//		//fmt.Println(locals[i])
-//	}
-//	sort.Strings(locals)
-//	return locals
-//}
-//
-//func Funcs() []string {
-//	keys := reflect.ValueOf(v.funcs).MapKeys()
-//	funcs := make([]string, len(keys))
-//	for i := 0; i < len(keys); i++ {
-//		funcs[i] = keys[i].String()
-//		//fmt.Println(funcs[i])
-//	}
-//	sort.Strings(funcs)
-//	return funcs
-//}
-
 var candidates []candidate
 
 // FirstPass handles some cases of completion that gocode either
@@ -337,10 +221,7 @@ func CompleteGo(bytes []byte, pos token.Position) []Completion {
 }
 
 // EditGoCode is a chance to modify the completion selection before it is inserted
-func EditGoCode(text string, cp int, completion Completion, seed string) (newText string, delta int) {
-	// todo: this is the place to add parens for functions and other code specific changes
-	// to the completion -- will need completion information to do this
-
+func EditGoCode(text string, cp int, completion Completion, seed string) (ed EditData) {
 	// if the original is ChildByName() and the cursor is between d and B and the completion is Children,
 	// then delete the portion after "Child" and return the new completion and the number or runes past
 	// the cursor to delete
@@ -365,10 +246,12 @@ func EditGoCode(text string, cp int, completion Completion, seed string) (newTex
 	}
 
 	var new = completion.Text
-	class, ok := completion.Extra["class"]
-	if ok && class == "func" {
-		new = new + "()"
-	}
-	delta = len(s2)
-	return new, delta
+	// todo: only do if parens not already there
+	//class, ok := completion.Extra["class"]
+	//if ok && class == "func" {
+	//	new = new + "()"
+	//}
+	ed.NewText = new
+	ed.ForwardDelete = len(s2)
+	return ed
 }

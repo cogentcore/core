@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"image"
 	"image/draw"
+	"strings"
 	"sync"
 	"time"
 	"unicode"
@@ -673,9 +674,9 @@ func (tf *TextField) CancelComplete() {
 func (tf *TextField) CompleteText(s string) {
 	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
 	c := tf.Complete.GetCompletion(s)
-	ns, delta := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, c, tf.Complete.Seed)
-	tf.EditTxt = []rune(ns)
-	tf.CursorForward(delta)
+	ed := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, c, tf.Complete.Seed)
+	tf.EditTxt = []rune(ed.NewText)
+	tf.CursorForward(len(ed.NewText) - len(tf.Complete.Seed) + ed.CursorAdjust)
 }
 
 // CompleteExtend inserts the extended seed at the current cursor position
@@ -683,7 +684,8 @@ func (tf *TextField) CompleteExtend(s string) {
 	if s == "" {
 		return
 	}
-	tf.InsertAtCursor(s)
+	addon := strings.TrimPrefix(s, tf.Complete.Seed)
+	tf.InsertAtCursor(addon)
 	tf.OfferComplete(dontForce)
 }
 

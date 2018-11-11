@@ -17,21 +17,32 @@ import (
 )
 
 type Completion struct {
-	Text  string            // completion text
-	Icon  string            // icon name
-	Desc  string            // possible extra information, e.g. type, arguments, etc. - not currently used
+	Text  string            `desc:"completion text"`
+	Icon  string            `desc:"icon name"`
+	Desc  string            `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"	`
 	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
 }
 
 type Completions []Completion
 
+type MatchData struct {
+	Matches Completions `desc:"the matches based on seed"`
+	Seed    string      `desc:"seed is the prefix we use to find possible completions"`
+}
+
+type EditData struct {
+	NewText       string `desc:"completion text after special edits"`
+	ForwardDelete int    `desc:"number of runes, past the cursor, to delete, if any"`
+	CursorAdjust  int    `desc:"cursor adjustment if cursor should be placed in a location other than at end of newText"`
+}
+
 // MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type MatchFunc func(data interface{}, text string, pos token.Position) (matches Completions, seed string)
+type MatchFunc func(data interface{}, text string, pos token.Position) MatchData
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
-type EditFunc func(data interface{}, text string, cursorPos int, completion Completion, seed string) (newText string, delta int)
+type EditFunc func(data interface{}, text string, cursorPos int, completion Completion, seed string) EditData
 
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The seed is basically a prefix.
@@ -203,20 +214,19 @@ func SeedGolang(text string) string {
 }
 
 // EditBasic replaces the completion seed with the completion
-// delta is the change in cursor position (cp)
-func EditBasic(text string, cp int, completion string, seed string) (newText string, delta int) {
+func EditBasic(text string, cp int, completion string, seed string) (ed EditData) {
 	s1 := string(text[0:cp])
 	s2 := string(text[cp:])
 	s1 = strings.TrimSuffix(s1, seed)
 	s1 += completion
 	t := s1 + s2
-	delta = len(completion) - len(seed)
-	return t, delta
+	ed.NewText = t
+	ed.CursorAdjust = len(completion) - len(seed)
+	return ed
 }
 
 // EditWord replaces the completion seed and any text up to the next whitespace with completion
-// delta is the change in cursor position (cp)
-func EditWord(text string, cp int, completion string, seed string) (newText string, delta int) {
+func EditWord(text string, cp int, completion string, seed string) (ed EditData) {
 	s1 := string(text[0:cp])
 	s2 := string(text[cp:])
 
@@ -242,8 +252,9 @@ func EditWord(text string, cp int, completion string, seed string) (newText stri
 	s1 = strings.TrimSuffix(s1, seed)
 	s1 += completion
 	t := s1 + s2
-	delta = len(completion) - len(seed)
-	return t, delta
+	ed.NewText = t
+	ed.CursorAdjust = 0
+	return ed
 }
 
 // HasUpperCase returns true if string has an upper-case letter

@@ -132,7 +132,7 @@ func mainrun() {
 }
 
 // Complete uses a combination of AST and github.com/mdempsky/gocode to do code completion
-func CompleteGo(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
+func CompleteGo(data interface{}, text string, pos token.Position) (md complete.MatchData) {
 	var txbuf *giv.TextBuf
 	switch t := data.(type) {
 	case *giv.TextView:
@@ -143,21 +143,20 @@ func CompleteGo(data interface{}, text string, pos token.Position) (matches comp
 		return
 	}
 
-	seed = complete.SeedGolang(text)
+	md.Seed = complete.SeedGolang(text)
 	textbytes := make([]byte, 0, txbuf.NLines*40)
 	for _, lr := range txbuf.Lines {
 		textbytes = append(textbytes, []byte(string(lr))...)
 		textbytes = append(textbytes, '\n')
 	}
-	results := complete.CompleteGo(textbytes, pos)
-	//matches = complete.MatchSeedCompletion(results, seed)
-	return results, seed
+	md.Matches = complete.CompleteGo(textbytes, pos)
+	return md
 }
 
 // CompleteEdit uses the selected completion to edit the text
-func CompleteGoEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (s string, delta int) {
-	s, delta = complete.EditGoCode(text, cursorPos, completion, seed)
-	return s, delta
+func CompleteGoEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.EditData) {
+	ed = complete.EditGoCode(text, cursorPos, completion, seed)
+	return ed
 }
 
 // SpellCorrectEdit uses the selected correction to edit the text
