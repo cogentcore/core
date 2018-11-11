@@ -727,15 +727,19 @@ func (tb *TextBuf) ViewportFromView() *gi.Viewport2D {
 // AutoscrollViews ensures that views are always viewing the end of the buffer
 func (tb *TextBuf) AutoScrollViews() {
 	for _, tv := range tb.Views {
-		tv.CursorPos = tb.EndPos()
-		tv.ScrollCursorInView()
+		if tv != nil && tv.This() != nil {
+			tv.CursorPos = tb.EndPos()
+			tv.ScrollCursorInView()
+		}
 	}
 }
 
 // RefreshViews does a refresh draw on all views
 func (tb *TextBuf) RefreshViews() {
 	for _, tv := range tb.Views {
-		tv.Refresh()
+		if tv != nil && tv.This() != nil {
+			tv.Refresh()
+		}
 	}
 }
 

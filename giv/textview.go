@@ -69,6 +69,7 @@ type TextView struct {
 	VisSize       image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
 	BlinkOn       bool                      `json:"-" xml:"-" oscillates between on and off for blinking"`
 	CursorMu      sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
+	HasLinks      bool                      `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
 	lastRecenter  int
 	lastFilename  gi.FileName
 }
@@ -345,6 +346,9 @@ func (tv *TextView) LinesDeleted(tbe *TextBufEdit) {
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
 func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	tv := rvwki.Embed(KiT_TextView).(*TextView)
+	if !tv.This().(gi.Node2D).IsVisible() {
+		return
+	}
 	switch TextBufSignals(sig) {
 	case TextBufDone:
 	case TextBufNew:
@@ -494,9 +498,13 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	mxwd := sz.X // always start with our render size
 
 	tv.Buf.MarkupMu.RLock()
+	tv.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, sz)
+		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
+			tv.HasLinks = true
+		}
 		tv.Offs[ln] = off
 		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
 		off += lsz
@@ -587,6 +595,9 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		curspans := len(tv.Renders[ln].Spans)
 		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], &fst, &sty.Text, &sty.UnContext, tv.CSS)
 		tv.Renders[ln].LayoutStdLR(&sty.Text, &sty.Font, &sty.UnContext, tv.RenderSz)
+		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
+			tv.HasLinks = true
+		}
 		nwspans := len(tv.Renders[ln].Spans)
 		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
 			rerend = true
@@ -3709,8 +3720,43 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	}
 }
 
+func (tv *TextView) MouseMoveEvent() {
+	if !tv.HasLinks {
+		return
+	}
+	tv.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.MoveEvent)
+		me.SetProcessed()
+		tvv := recv.Embed(KiT_TextView).(*TextView)
+		pt := tv.PointToRelPos(me.Pos())
+		mpos := tvv.PixelToCursor(pt)
+		if mpos.Ln >= tvv.NLines {
+			return
+		}
+		pos := tv.RenderStartPos()
+		pos.Y += tv.Offs[mpos.Ln]
+		pos.X += tv.LineNoOff
+		rend := &tvv.Renders[mpos.Ln]
+		inLink := false
+		for _, tl := range rend.Links {
+			tlb := tl.Bounds(rend, pos)
+			if me.Where.In(tlb) {
+				inLink = true
+				break
+			}
+		}
+		if inLink {
+			oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).PushIfNot(cursor.HandPointing)
+		} else {
+			oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).PopIf(cursor.HandPointing)
+		}
+
+	})
+}
+
 func (tv *TextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
+	tv.MouseMoveEvent()
 	tv.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()

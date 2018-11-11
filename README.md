@@ -93,9 +93,6 @@ Currently at a **beta** level:
 
 # TODO
 
-* TextView:
-	+ cursor goes to hand for links in TextView
-
 * update gi/doc.go with final readme notes etc!  add docs to this README about
   "what can you do with demos?" kind of thing..
 

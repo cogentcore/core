@@ -259,26 +259,28 @@ func (lb *Label) MouseEvent() {
 
 func (lb *Label) MouseMoveEvent() {
 	hasLinks := len(lb.Render.Links) > 0
-	if hasLinks {
-		lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.MoveEvent)
-			me.SetProcessed()
-			llb := recv.Embed(KiT_Label).(*Label)
-			pos := llb.RenderPos
-			inLink := false
-			for _, tl := range llb.Render.Links {
-				tlb := tl.Bounds(&llb.Render, pos)
-				if me.Where.In(tlb) {
-					inLink = true
-				}
-			}
-			if inLink {
-				oswin.TheApp.Cursor(lb.Viewport.Win.OSWin).PushIfNot(cursor.HandPointing)
-			} else {
-				oswin.TheApp.Cursor(lb.Viewport.Win.OSWin).PopIf(cursor.HandPointing)
-			}
-		})
+	if !hasLinks {
+		return
 	}
+	lb.ConnectEvent(oswin.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.MoveEvent)
+		me.SetProcessed()
+		llb := recv.Embed(KiT_Label).(*Label)
+		pos := llb.RenderPos
+		inLink := false
+		for _, tl := range llb.Render.Links {
+			tlb := tl.Bounds(&llb.Render, pos)
+			if me.Where.In(tlb) {
+				inLink = true
+				break
+			}
+		}
+		if inLink {
+			oswin.TheApp.Cursor(lb.Viewport.Win.OSWin).PushIfNot(cursor.HandPointing)
+		} else {
+			oswin.TheApp.Cursor(lb.Viewport.Win.OSWin).PopIf(cursor.HandPointing)
+		}
+	})
 }
 
 func (lb *Label) LabelEvents() {

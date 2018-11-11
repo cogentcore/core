@@ -175,7 +175,7 @@ void menuSetAsMain(ScreenGLView* view);
     NSRect crect = [self.window contentRectForFrameRect: p ];
     int l = p.origin.x * pixratio;
     int t = (screenH - (p.origin.y + crect.size.height)) * pixratio;
-    // printf("res: pixratio: %g  frame origin: %g, %g, l,t: %d, %d\n", pixratio, p.origin.x, p.origin.y, l, t);
+//  	printf("res: pixratio: %g  frame origin: %g, %g, l,t: %d, %d\n", pixratio, p.origin.x, p.origin.y, l, t);
 
     setGeom((GoUintptr)self, scrno, dpi, w, h, l, t);
 }
@@ -475,10 +475,10 @@ void doMoveWindow(uintptr_t viewID, int left, int top) {
     NSRect fr = [view.window frame];
     NSRect crect = [view.window contentRectForFrameRect: fr ];
     double l = (double)left / pixratio;
-    double b = (screenH - (top + crect.size.height)) * pixratio;
-    // printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, b, screenH);
+	 double y = screenH - crect.size.height - top / pixratio;
+ //    printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, y, screenH);
     fr.origin.x = l;
-    fr.origin.y = b;
+    fr.origin.y = y;
     dispatch_async(dispatch_get_main_queue(), ^{
             [view.window setFrame:fr display:YES animate:NO];
     });
@@ -491,19 +491,19 @@ void doGeomWindow(uintptr_t viewID, int left, int top, int width, int height) {
     double screenH = [screen frame].size.height;
     NSRect fr = [view.window frame];
     NSRect crect = [view.window contentRectForFrameRect: fr ];
-    // printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, b, screenH);
-
     double frexw = (fr.size.width - crect.size.width) / pixratio;
     double frexh = (fr.size.height - crect.size.height);
     fr.size.width = ((double)width / pixratio) + frexw;
     fr.size.height = ((double)height / pixratio) + frexh;
 
     double crh = fr.size.height - frexh;
-    
     double l = (double)left / pixratio;
-    double b = (screenH - (top + crh)) * pixratio;
+	// t = (screenH - (p.origin.y + crect.size.height)) * pixratio;	
+	// t / pix = scH - y - crh;  t/p + crh -sch = -y;   y = sch - crh - t/p
+	 double y = screenH - crh - top / pixratio;
     fr.origin.x = l;
-    fr.origin.y = b;
+    fr.origin.y = y;
+//  	 printf("new: pixratio: %g  left, top: %d, %d, l,b: %g, %g  screenH: %g\n", pixratio, left, top, l, y, screenH);
     dispatch_async(dispatch_get_main_queue(), ^{
             [view.window setFrame:fr display:YES animate:NO];
     });

@@ -23,7 +23,7 @@ organizing widgets / elements within the constraints of the display.
 Typically start with a vertical LayoutVert in the viewport, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
-	win := gi.NewWindow2D("test window", width, height)
+	win := gi.NewWindow2D("test-window", "Test Window", width, height, true)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
@@ -71,15 +71,18 @@ Controlling the layout involves the following style properties:
 Signals
 
 All widgets send appropriate signals about user actions -- Connect to those
-and check the signal type to determine the type of event.
+and check the signal type to determine the type of event.  Only one connection
+per receiver -- handle all the different signal types in one function.
 
 Views
 
 Views are Widgets that automatically display and interact with standard Go
 data, including structs, maps, slices, and the primitive data elements
-(string, int, etc).  This implements a form of model / view separation between data and GUI representation thereof, where the models are the Go data elements themselves.
+(string, int, etc).  This implements a form of model / view separation between
+data and GUI representation thereof, where the models are the Go data elements
+themselves.
 
-This provides automatic, powerful GUI access to essentially any data in any
+Views provide automatic, powerful GUI access to essentially any data in any
 other Go package.  Furthermore, the ValueView framework allows for easy
 customization and extension of the GUI representation, based on the classic Go
 "Stringer"-like interface paradigm -- simply define a ValueView() method on
@@ -91,7 +94,8 @@ See giv sub-package for all the View elements
 SVG for Icons, Displays, etc
 
 SVG (Structured Vector Graphics) is used icons, and for rendering any kind of
-graphical output (drawing a graph, dial, etc).  See svg sub-package.
+graphical output (drawing a graph, dial, etc).  See svg sub-package, and
+examples/svg for an svg viewer, and examples/marbles for an svg animation.
 
 Overlay
 
