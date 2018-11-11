@@ -1,6 +1,6 @@
 # GoGi Widgets Demo
 
-This demo shows all the main widgets in GoGi.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+I` or hit the button with the `GoGi Editor` on it.  Also try changing the preferences using `Control+Alt+P` (also avail in the widgets menu).
+This demo shows all the main widgets in GoGi.  You can try each of the widgets.  The most advanced features are available when you do `Control+Alt+I` or hit the button with the `Open GoGiEditor` on it.  Also try changing the Preferences using the option in the `widgets` "app" menu).
 
 ## Installation
 
@@ -24,29 +24,33 @@ This editor demonstrates the `ValueView` framework that manages the mapping of a
 
 Here are some fun things to try:
 
-* The `WinVp` node defines some `CSS` style properties.  you can edit the colors directly, or click on the various `...` buttons to pull up editor dialogs, including a color configuration dialog using sliders (that is the first ... button after each set of RGB values).
+* The `WinVp` node defines some `CSS` style properties.  you can edit the colors directly, or click on the various `Map: ki.Props` buttons to pull up editor dialogs, including a color configuration dialog using sliders (click on the colored "pencil" edit button after each set of RGB values).  Hit the `Update` button in the GoGi Editor for the changes to take effect in the original Widgets demo window.
 
 * You can define all manner of different types of style settings -- try adding some new ones, and changing the type from `string` to some of the other appropriate types -- using specific types gives you a better editing experience -- e.g., by providing choosers for "enum" constant values.  These are all parsed directly from the Go code and made available through the `fmt.Stringer` kinds of mechanisms, augmented with the `kit.Enums` enum registry.
 
 * Hit the `Update` button to cause your changes to be reflected in the original Widgets window -- some changes take effect immediately but others require a more extensive rebuild..
 
-* Try clicking on the `edit` node, toward the end of the tree.  Then go over to the Widgets window and start editing in the "Edit this text" text field -- you'll see the under-the-hood updates to the various fields for the widget, as you type!  This automatic updating is driven automatically by the fact that the tree node connects directly to its "source" widget and receives its update signals.
+* Try clicking on the `edit1` node, toward the bpttom of the tree.  Then go over to the Widgets window and start editing in the "Enter text here..." text field -- you'll see the under-the-hood updates to the various fields for the widget, as you type!  This automatic updating is driven automatically by the fact that the tree node connects directly to its "source" widget and receives its update signals.
 
-* Add some new widgets!  The `...` button in the tree view has a menu for adding and deleting items.  You can choose the type to add, etc.  The types are all automatically registered through the `kit.Types` registry.
+* Add some new widgets!  The context menu (right mouse button, two-finger click, etc) in the tree view has a menu for adding and deleting items.  You can choose the type to add, etc.  The types are all automatically registered through the `kit.Types` registry.
 
-* Try making an SVG box, and adding some SVG elements to it -- it is a good idea to turn on the `Fill` toggle for the SVG box, and then set the `fill` property of the objects you add to be something different than white -- just go to `Props/Edit Map` and `Add` and enter fill / red or whatever.  You'll need to set the `min-width` and `min-height` properties on the SVG box to give it a specific size..  As you can see, creating a drawing editor should be relatively easy from here..
+* Drag-n-drop items around in the tree view to move them around in the window -- holding the `Shift` key does a move, and otherwise it does a copy.
 
-* Save your design, then close the app, and restart it -- you can do `Delete` on the `vlay` node just below `WinVp` (the main window viewport, which can not be deleted as it is the root of the hierarchy), and then do Load JSON to see it reload.  By default it does the minimal changes when loading over an existing tree, so you can also try loading on top of the existing Widgets and see your changes get applied.
+* Try making an SVG box, and adding some SVG elements to it.  You can enter a size in the `ViewBox` size field.  It is also a good idea to turn on the `Fill` toggle for the SVG box, and then set the `fill` property of the objects you add to be something different than white -- just click the add action on `Properties` enter fill / red or whatever.  You could also set the `min-width` and `min-height` properties on the SVG box to give it a specific size.
+
+* Save your design, then close the app, and restart it -- you can do `Delete` on the `main-vlay` node just below `WinVp` (the main window viewport, which can not be deleted as it is the root of the hierarchy), and then do `Open` to see it reload.  By default it does the minimal changes when loading over an existing tree, so you can also try loading on top of the existing Widgets and see your changes get applied.
 
 ## Preferences
 
-Hitting `Control+Alt+P` opens the preferences editor.  Hit the `Update` button to have changes apply.  You can easily change the default color scheme, and save the changes -- the prefs are automatically loaded for each app.
+The `GoGi Preferences` menu item has may settings that you can change, including Key maps, color schemes, etc.  Hit the `Update` button to have changes apply to any open windows.
 
-* Do `Default Key Map` and then you can edit the keymap and test out your changes -- you can see that the default map has emacs keys built in..
+* Try `Colors/Open Colors` and choose one of the `ColorPrefs_*` files, then hit `Update` to see the different schemes.  
+
+* You can select a Key Map -- to see the actual key mappings, do `Edit Key Maps` click on one of the maps.  If you toggle the `Sort` button you can see the items sorted either by the key or the functions. Click into one of the shortcut fields and enter a key sequence on your keyboard and it should show up there.  The context menu also lets you clear it.
 
 ## Zooming
 
-Because everything is just rendered directly, it is easy to adjust the scale. Use the standard `Command+` and `-` keys to zoom in and out.  You can save a default zoom level and will in the future have support for different zoom levels for different screens..
+Because everything is just rendered directly, it is easy to adjust the scale. Use the standard `Command +` or `-` keys to zoom in and out.  You can save a default zoom level and will in the future have support for different zoom levels -- the `for current screen only` option means that it will save the zoom level by the name of the current screen (e.g., if you have different external monitors for your laptop).
 
 ## Summary
 

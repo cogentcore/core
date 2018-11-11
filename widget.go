@@ -326,6 +326,9 @@ func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 // be called as first step in Render2D returns whether the new bounds are
 // empty or not -- if empty then don't render!
 func (wb *WidgetBase) PushBounds() bool {
+	if wb == nil || wb.This() == nil {
+		return false
+	}
 	if !wb.This().(Node2D).IsVisible() {
 		return false
 	}

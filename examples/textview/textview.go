@@ -97,6 +97,7 @@ func mainrun() {
 
 	txbuf.Hi.Lang = "Go"
 	txbuf.Hi.Style = "emacs"
+	txbuf.Opts.LineNos = true
 	txbuf.Open(samplefile)
 
 	txbuf.SetCompleter(txed1, CompleteGo, CompleteGoEdit)

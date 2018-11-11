@@ -749,7 +749,7 @@ func TextFieldBlink() {
 		TextFieldBlinkMu.Unlock()
 		<-TextFieldBlinker.C
 		TextFieldBlinkMu.Lock()
-		if BlinkingTextField == nil {
+		if BlinkingTextField == nil || BlinkingTextField.This() == nil {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
@@ -781,6 +781,9 @@ func TextFieldBlink() {
 
 // StartCursor starts the cursor blinking and renders it
 func (tf *TextField) StartCursor() {
+	if tf == nil || tf.This() == nil {
+		return
+	}
 	if !tf.This().(Node2D).IsVisible() {
 		return
 	}
@@ -814,6 +817,9 @@ func (tf *TextField) ClearCursor() {
 
 // StopCursor stops the cursor from blinking
 func (tf *TextField) StopCursor() {
+	if tf == nil || tf.This() == nil {
+		return
+	}
 	if !tf.This().(Node2D).IsVisible() {
 		return
 	}
@@ -826,6 +832,9 @@ func (tf *TextField) StopCursor() {
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
 func (tf *TextField) RenderCursor(on bool) {
+	if tf == nil || tf.This() == nil {
+		return
+	}
 	if !tf.This().(Node2D).IsVisible() {
 		return
 	}

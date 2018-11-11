@@ -72,7 +72,7 @@
                   "type": "gi.Action",
                   "name": "About widgets",
                   "type": "gi.Action",
-                  "name": "GoGi Preferences...",
+                  "name": "GoGi Preferences___",
                   "type": "gi.Separator",
                   "name": "sepq",
                   "type": "gi.Action",
@@ -82,7 +82,7 @@
                   "Nm": "About widgets",
                   "UniqueNm": "About widgets",
                   "Props": {
-                    "__OSMainMenuItemID": 99730048
+                    "__OSMainMenuItemID": 98191360
                   },
                   "Kids": null,
                   "Class": "",
@@ -96,9 +96,9 @@
                 },
                 {
                   "Nm": "GoGi Preferences...",
-                  "UniqueNm": "GoGi Preferences...",
+                  "UniqueNm": "GoGi Preferences___",
                   "Props": {
-                    "__OSMainMenuItemID": 100166240
+                    "__OSMainMenuItemID": 98200720
                   },
                   "Kids": null,
                   "Class": "",
@@ -124,7 +124,7 @@
                   "Nm": "Quit",
                   "UniqueNm": "Quit",
                   "Props": {
-                    "__OSMainMenuItemID": 100103200
+                    "__OSMainMenuItemID": 98201280
                   },
                   "Kids": null,
                   "Class": "",
@@ -160,7 +160,7 @@
                   "type": "gi.Action",
                   "name": "Save",
                   "type": "gi.Action",
-                  "name": "Save As..",
+                  "name": "Save As__",
                   "type": "gi.Separator",
                   "name": "csep",
                   "type": "gi.Action",
@@ -170,7 +170,7 @@
                   "Nm": "New",
                   "UniqueNm": "New",
                   "Props": {
-                    "__OSMainMenuItemID": 99920800
+                    "__OSMainMenuItemID": 98206944
                   },
                   "Kids": null,
                   "Class": "",
@@ -186,7 +186,7 @@
                   "Nm": "Open",
                   "UniqueNm": "Open",
                   "Props": {
-                    "__OSMainMenuItemID": 99904352
+                    "__OSMainMenuItemID": 98207280
                   },
                   "Kids": null,
                   "Class": "",
@@ -202,7 +202,7 @@
                   "Nm": "Save",
                   "UniqueNm": "Save",
                   "Props": {
-                    "__OSMainMenuItemID": 100080848
+                    "__OSMainMenuItemID": 98207616
                   },
                   "Kids": null,
                   "Class": "",
@@ -216,9 +216,9 @@
                 },
                 {
                   "Nm": "Save As..",
-                  "UniqueNm": "Save As..",
+                  "UniqueNm": "Save As__",
                   "Props": {
-                    "__OSMainMenuItemID": 100096592
+                    "__OSMainMenuItemID": 98207984
                   },
                   "Kids": null,
                   "Class": "",
@@ -244,7 +244,7 @@
                   "Nm": "Close Window",
                   "UniqueNm": "Close Window",
                   "Props": {
-                    "__OSMainMenuItemID": 99633648
+                    "__OSMainMenuItemID": 98208720
                   },
                   "Kids": null,
                   "Class": "",
@@ -284,7 +284,7 @@
                   "Nm": "Copy",
                   "UniqueNm": "Copy",
                   "Props": {
-                    "__OSMainMenuItemID": 99792608
+                    "__OSMainMenuItemID": 98212960
                   },
                   "Kids": null,
                   "Class": "",
@@ -300,7 +300,7 @@
                   "Nm": "Cut",
                   "UniqueNm": "Cut",
                   "Props": {
-                    "__OSMainMenuItemID": 99963504
+                    "__OSMainMenuItemID": 98213328
                   },
                   "Kids": null,
                   "Class": "",
@@ -316,7 +316,7 @@
                   "Nm": "Paste",
                   "UniqueNm": "Paste",
                   "Props": {
-                    "__OSMainMenuItemID": 100066128
+                    "__OSMainMenuItemID": 98213664
                   },
                   "Kids": null,
                   "Class": "",
@@ -325,7 +325,7 @@
                   "Text": "Paste",
                   "Icon": "",
                   "Indicator": "",
-                  "Shortcut": "Meta+V",
+                  "Shortcut": "Control+Y",
                   "Menu": null
                 }
               ]
@@ -344,25 +344,23 @@
               "Shortcut": "",
               "Menu": [
                 {
-                  "n": 6,
+                  "n": 5,
                   "type": "gi.Action",
                   "name": "Minimize",
+                  "type": "gi.Action",
+                  "name": "Focus Next",
                   "type": "gi.Separator",
                   "name": "sepa",
                   "type": "gi.Action",
                   "name": "GoGi Widgets Demo",
                   "type": "gi.Action",
-                  "name": "GoGi Editor: WinVp",
-                  "type": "gi.Separator",
-                  "name": "sepw",
-                  "type": "gi.Action",
-                  "name": "File Name"
+                  "name": "GoGi Editor: WinVp"
                 },
                 {
                   "Nm": "Minimize",
                   "UniqueNm": "Minimize",
                   "Props": {
-                    "__OSMainMenuItemID": 100083104
+                    "__OSMainMenuItemID": 98218384
                   },
                   "Kids": null,
                   "Class": "",
@@ -372,6 +370,22 @@
                   "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
+                  "Menu": null
+                },
+                {
+                  "Nm": "Focus Next",
+                  "UniqueNm": "Focus Next",
+                  "Props": {
+                    "__OSMainMenuItemID": 98218672
+                  },
+                  "Kids": null,
+                  "Class": "",
+                  "CSS": null,
+                  "Tooltip": "",
+                  "Text": "Focus Next",
+                  "Icon": "",
+                  "Indicator": "",
+                  "Shortcut": "Meta+`",
                   "Menu": null
                 },
                 {
@@ -388,7 +402,7 @@
                   "Nm": "GoGi Widgets Demo",
                   "UniqueNm": "GoGi Widgets Demo",
                   "Props": {
-                    "__OSMainMenuItemID": 100091856
+                    "__OSMainMenuItemID": 98219392
                   },
                   "Kids": null,
                   "Class": "",
@@ -404,39 +418,13 @@
                   "Nm": "GoGi Editor: WinVp",
                   "UniqueNm": "GoGi Editor: WinVp",
                   "Props": {
-                    "__OSMainMenuItemID": 100131104
+                    "__OSMainMenuItemID": 98219712
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
                   "Text": "GoGi Editor: WinVp",
-                  "Icon": "",
-                  "Indicator": "",
-                  "Shortcut": "",
-                  "Menu": null
-                },
-                {
-                  "Nm": "sepw",
-                  "UniqueNm": "sepw",
-                  "Props": null,
-                  "Kids": null,
-                  "Class": "",
-                  "CSS": null,
-                  "Tooltip": "",
-                  "Horiz": true
-                },
-                {
-                  "Nm": "File Name",
-                  "UniqueNm": "File Name",
-                  "Props": {
-                    "__OSMainMenuItemID": 100174128
-                  },
-                  "Kids": null,
-                  "Class": "",
-                  "CSS": null,
-                  "Tooltip": "",
-                  "Text": "File Name",
                   "Icon": "",
                   "Indicator": "",
                   "Shortcut": "",
@@ -534,6 +522,14 @@
                   "Nm": "title",
                   "UniqueNm": "title",
                   "Props": {
+                    "font-size": "x-large",
+                    "line-height": 1.5,
+                    "__type:max-width": "units.Value",
+                    "max-width": {
+                      "Val": -1,
+                      "Un": "Px",
+                      "Dots": 0
+                    },
                     "__type:max-height": "units.Value",
                     "max-height": {
                       "Val": -1,
@@ -543,21 +539,13 @@
                     "white-space": "__enum:(gi.WhiteSpaces)WhiteSpaceNormal",
                     "text-align": "__enum:(gi.Align)AlignCenter",
                     "vertical-align": "__enum:(gi.Align)AlignCenter",
-                    "font-family": "Times New Roman, serif",
-                    "font-size": "x-large",
-                    "line-height": 1.5,
-                    "__type:max-width": "units.Value",
-                    "max-width": {
-                      "Val": -1,
-                      "Un": "Px",
-                      "Dots": 0
-                    }
+                    "font-family": "Times New Roman, serif"
                   },
                   "Kids": null,
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
-                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ca href=\"https://github.com/goki/gi\"\u003eGoGi\u003c/a\u003e \u003ci\u003eWidgets\u003c/i\u003e\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eControl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eShift+Control+I\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e\u003cbr\u003e\nSee \u003ca href=\"https://github.com/goki/gi/blob/master/examples/widgets/README.md\"\u003eREADME\u003c/a\u003e for detailed info and things to try.",
+                  "Text": "This is a \u003cb\u003edemonstration\u003c/b\u003e of the\n\u003cspan style=\"color:red\"\u003evarious\u003c/span\u003e \u003ca href=\"https://github.com/goki/gi\"\u003eGoGi\u003c/a\u003e \u003ci\u003eWidgets\u003c/i\u003e\u003cbr\u003e\n\u003clarge\u003eShortcuts: \u003ckbd\u003eControl+Alt+P\u003c/kbd\u003e = Preferences,\n\u003ckbd\u003eControl+Alt+I\u003c/kbd\u003e = Editor, \u003ckbd\u003eCtrl/Cmd +/-\u003c/kbd\u003e = zoom\u003c/large\u003e\u003cbr\u003e\nSee \u003ca href=\"https://github.com/goki/gi/blob/master/examples/widgets/README.md\"\u003eREADME\u003c/a\u003e for detailed info and things to try.",
                   "Selectable": false,
                   "Redrawable": false
                 }
@@ -861,17 +849,17 @@
               "Nm": "srow",
               "UniqueNm": "srow",
               "Props": {
-                "__type:spacing": "units.Value",
-                "spacing": {
-                  "Val": 2,
-                  "Un": "Ex",
-                  "Dots": 0
-                },
                 "horizontal-align": "left",
                 "__type:max-width": "units.Value",
                 "max-width": {
                   "Val": -1,
                   "Un": "Px",
+                  "Dots": 0
+                },
+                "__type:spacing": "units.Value",
+                "spacing": {
+                  "Val": 2,
+                  "Un": "Ex",
                   "Dots": 0
                 }
               },
@@ -891,6 +879,12 @@
                   "Nm": "slider1",
                   "UniqueNm": "slider1",
                   "Props": {
+                    "__type:min-height": "units.Value",
+                    "min-height": {
+                      "Val": 2,
+                      "Un": "Em",
+                      "Dots": 0
+                    },
                     "__type:width": "units.Value",
                     "width": {
                       "Val": 20,
@@ -905,12 +899,6 @@
                     },
                     "__type:height": "units.Value",
                     "height": {
-                      "Val": 2,
-                      "Un": "Em",
-                      "Dots": 0
-                    },
-                    "__type:min-height": "units.Value",
-                    "min-height": {
                       "Val": 2,
                       "Un": "Em",
                       "Dots": 0
@@ -1263,12 +1251,17 @@
                   "Class": "",
                   "CSS": null,
                   "Tooltip": "",
+                  "ClearAct": true,
                   "CursorWidth": {
                     "Val": 3,
                     "Un": "Px",
                     "Dots": 3
                   },
                   "MaxWidthReq": 0,
+                  "EffSize": {
+                    "X": 304,
+                    "Y": 30.5
+                  },
                   "StartPos": 0,
                   "EndPos": 0,
                   "CursorPos": 0,
@@ -1356,9 +1349,9 @@
     "button": {
       "__type:background-color": "gi.Color",
       "background-color": {
-        "R": 186,
-        "G": 222,
-        "B": 222,
+        "R": 238,
+        "G": 238,
+        "B": 255,
         "A": 255
       }
     },
@@ -1392,8 +1385,8 @@
       "Y": 0
     },
     "Size": {
-      "X": 872,
-      "Y": 705
+      "X": 844,
+      "Y": 922
     }
   }
 }
