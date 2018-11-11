@@ -25,7 +25,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 * CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc), and even include links.
 
-* Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and is **fully Go-native with no cgo dependency** on Linux and Windows, and minimal cgo (necessary) on MacOS.  *This is the only complete Go GUI framework that is entirely Go-based, without dependency on other C-based code.*
+* Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and is **fully Go-native with no cgo dependency** on Linux and Windows, and minimal cgo (necessary) on MacOS.  *This is the only complete Go GUI framework that is entirely Go-based, without dependency on other C-based toolkits.*
 
 * Fully self-contained -- does *not* use OS-specific native widgets -- results in simple, elegant, consistent code across platforms, and is fully `HiDPI` capable and scalable using standard `Ctrl/Cmd+Plus or Minus` key, and in `Preferences`.
 
@@ -36,7 +36,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 ![Screenshot of Widgets demo](screenshot.png?raw=true "Screenshot of Widgets demo")
 
-![Screenshot of Widgets demo](screenshot_dark.png?raw=true "Screenshot of Widgets demo, Darker Colors")
+![Screenshot of Widgets demo, Darker](screenshot_dark.png?raw=true "Screenshot of Widgets demo, Darker Colors")
 
 # Code Overview
 
@@ -59,7 +59,7 @@ The best way to see how the system works are in the `examples` directory, and by
 
 # Status
 
-Currently at a **beta** level:
+As of 11/2018 it is now at a **beta** level:
 
 * All major functionality is in place, and API is stable and only very minor changes are anticipated going forward.  The system is now ready for wider adoption.
 
