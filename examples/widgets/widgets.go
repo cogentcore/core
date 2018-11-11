@@ -373,22 +373,22 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(data interface{}, text string, pos token.Position) (matches complete.Completions, seed string) {
-	seed = complete.SeedWhiteSpace(text)
-	if seed == "" {
-		return nil, seed
+func Complete(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+	md.Seed = complete.SeedWhiteSpace(text)
+	if md.Seed == "" {
+		return md
 	}
-	possibles := complete.MatchSeedString(words, seed)
+	possibles := complete.MatchSeedString(words, md.Seed)
 	for _, p := range possibles {
 		m := complete.Completion{Text: p, Icon: ""}
-		matches = append(matches, m)
+		md.Matches = append(md.Matches, m)
 	}
-	return matches, seed
+	return md
 }
 
-func CompleteEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (s string, delta int) {
-	s, delta = complete.EditWord(text, cursorPos, completion.Text, seed)
-	return s, delta
+func CompleteEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.EditData) {
+	ed = complete.EditWord(text, cursorPos, completion.Text, seed)
+	return ed
 }
 
 var words = []string{"a", "able", "about", "above", "act", "add", "afraid", "after", "again", "against", "age", "ago", "agree", "air", "all",

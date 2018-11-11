@@ -109,7 +109,9 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
 	c.Vp = nil
-	c.Completions, c.Seed = c.MatchFunc(c.Context, text, pos)
+	md := c.MatchFunc(c.Context, text, pos)
+	c.Completions = md.Matches
+	c.Seed = md.Seed
 	count := len(c.Completions)
 	if count > 0 {
 		if count == 1 && c.Completions[0].Text == c.Seed {

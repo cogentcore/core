@@ -2019,21 +2019,21 @@ func (tb *TextBuf) CompleteText(s string) {
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
-	var delta int // the number of runes past cursor to delete
 	c := tb.Complete.GetCompletion(s)
-	s, delta = tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
 	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
-	delEn := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh + delta}
-	tb.DeleteText(pos, delEn, true, false)
-
+	ed := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
+	if ed.ForwardDelete > 0 {
+		delEn := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
+		tb.DeleteText(pos, delEn, true, false)
+	}
 	// now the normal completion insertion
 	st = pos
 	st.Ch -= len(tb.Complete.Seed)
 	tb.DeleteText(st, pos, true, false)
-	tb.InsertText(st, []byte(s), true, true)
+	tb.InsertText(st, []byte(ed.NewText), true, true)
 	if tb.CurView != nil {
 		ep := st
-		ep.Ch += len(s)
+		ep.Ch += len(ed.NewText) + ed.CursorAdjust
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
 	}
