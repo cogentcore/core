@@ -675,8 +675,10 @@ func (tf *TextField) CompleteText(s string) {
 	txt := string(tf.EditTxt) // Reminder: do NOT call tf.Text() in an active editing context!!!
 	c := tf.Complete.GetCompletion(s)
 	ed := tf.Complete.EditFunc(tf.Complete.Context, txt, tf.CursorPos, c, tf.Complete.Seed)
-	tf.EditTxt = []rune(ed.NewText)
-	tf.CursorForward(len(ed.NewText) - len(tf.Complete.Seed) + ed.CursorAdjust)
+	st := tf.CursorPos - len(tf.Complete.Seed)
+	tf.CursorPos = st
+	tf.CursorDelete(ed.ForwardDelete)
+	tf.InsertAtCursor(ed.NewText)
 }
 
 // CompleteExtend inserts the extended seed at the current cursor position
