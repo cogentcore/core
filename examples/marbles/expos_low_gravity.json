@@ -26,7 +26,7 @@
       "MinX": -2,
       "MaxX": 2.5,
       "Color": "blue",
-      "Bounce": 0.98
+      "Bounce": 1.01
     },
     {
       "Eq": "-6",
