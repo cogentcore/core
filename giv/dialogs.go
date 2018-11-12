@@ -7,7 +7,7 @@ package giv
 import (
 	"image"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 )

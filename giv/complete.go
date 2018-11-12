@@ -5,8 +5,8 @@ import (
 	"go/token"
 	"log"
 
-	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/gi"
 )
 
 // CompleteGo uses github.com/mdempsky/gocode to do code completion

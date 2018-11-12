@@ -18,7 +18,7 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/c2h5oh/datasize"
 	//	"github.com/gabriel-vasile/mimetype" // too slow.
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/h2non/filetype"

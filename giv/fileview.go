@@ -15,8 +15,8 @@ import (
 
 	"unicode"
 
-	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"

@@ -11,7 +11,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"

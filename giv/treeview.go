@@ -13,7 +13,7 @@ import (
 	"reflect"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"

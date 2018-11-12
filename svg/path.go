@@ -12,7 +12,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki/kit"
 )
 

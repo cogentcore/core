@@ -16,7 +16,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"

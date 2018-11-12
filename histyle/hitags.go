@@ -6,7 +6,7 @@ package histyle
 
 import (
 	"github.com/alecthomas/chroma"
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 )

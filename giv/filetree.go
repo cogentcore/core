@@ -17,7 +17,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"

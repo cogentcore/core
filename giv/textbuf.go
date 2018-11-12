@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/alecthomas/chroma/lexers"
-	"github.com/goki/gi"
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"

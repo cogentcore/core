@@ -12,7 +12,7 @@ import (
 
 	"github.com/fatih/camelcase"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki"

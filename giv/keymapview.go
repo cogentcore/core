@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"

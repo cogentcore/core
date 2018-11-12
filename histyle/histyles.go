@@ -14,7 +14,7 @@ import (
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/styles"
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
