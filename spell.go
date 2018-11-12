@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/mvdan/xurls"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -36,6 +37,7 @@ var notWordChar *regexp.Regexp
 var allNum *regexp.Regexp
 var wordBounds *regexp.Regexp
 var isLetter *regexp.Regexp
+var isUrl *regexp.Regexp
 
 // InitSpell tries to load the saved fuzzy.spell model.
 // If unsuccessful tries to create a new model from a text file used as input
@@ -68,6 +70,7 @@ func InitSpell() error {
 	if err != nil {
 		log.Printf("Could not complie regular expression: %v. \n", err)
 	}
+	isUrl = xurls.Relaxed()  // does not return an error
 	return nil
 }
 
@@ -141,9 +144,16 @@ func InitNewSpellCheck(text []byte) {
 // removes various non-word input, trims symbols, etc
 func TextToWords(text []byte) {
 	textstr := string(text)
-
 	var words []TextWord
 	for l, line := range strings.Split(textstr, "\n") {
+		// replace urls with whitespace
+		urls := isUrl.FindAllString(line, -1)
+		if urls != nil {
+			for _, url := range urls {
+				ns := string(make([]byte, len(url)))
+				line = strings.Replace(line, url, ns, 1)
+			}
+		}
 		line = notWordChar.ReplaceAllString(line, " ")
 		bounds := wordBounds.FindAllStringIndex(line, -1)
 		words = words[:0] // reset for new line
