@@ -551,8 +551,6 @@ func (sr *Splitter) Render2D() {
 	win := vp.Win
 	sr.This().(Node2D).ConnectEvents2D()
 	if sr.IsDragging() {
-		// spc := sr.Sty.BoxSpace()
-		// odim := OtherDim(sr.Dim)
 		ick, ok := sr.Parts.Children().ElemByType(KiT_Icon, true, 0)
 		if !ok {
 			return
@@ -566,14 +564,13 @@ func (sr *Splitter) Render2D() {
 		var ovb *Bitmap
 		if !ok {
 			ovb = &Bitmap{}
-			ovb.SetName(sr.UniqueName())
-			win.OverlayVp.AddChild(ovb)
+			ovb.InitName(ovb, sr.UniqueName())
+			ovb.GrabRenderFrom(icvp.(Node2D))
 			ovk = ovb.This()
+			win.AddOverlay(ovk.(Node2D))
 		}
 		ovb = ovk.(*Bitmap)
-		ovb.GrabRenderFrom(icvp.(Node2D))
 		ovb.LayData = ic.LayData // copy
-		// ovb.LayData.AllocPos.SetDim(odim, ovb.LayData.AllocPos.Dim(odim)+spc)
 		sr.UpdateSplitterPos()
 		ovb.LayData.AllocPos.SetPoint(sr.VpBBox.Min)
 		win.RenderOverlays()

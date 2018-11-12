@@ -580,6 +580,17 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Overlay rendering
 
+// AddOverlay adds the given node as an overlay to be rendered on top of the
+// main window viewport -- node must already be initialized as a Ki element
+// (e.g., call ki.InitName) -- typically it is a Bitmap and should have
+// the bitmap pixels set already.  Sets overlay flag and calls init and style
+func (vp *Viewport2D) AddOverlay(nii Node2D) {
+	nii.AsNode2D().SetAsOverlay()
+	vp.AddChild(nii)
+	nii.Init2D()
+	nii.Style2D()
+}
+
 // RenderOverlays is main call from window for OverlayVp to render overlay nodes within it
 func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
 	vp.SetAsOverlay()

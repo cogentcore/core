@@ -199,7 +199,7 @@ func SeedGolang(text string) string {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
-		if unicode.IsSpace(r) || r == '.' {
+		if unicode.IsSpace(r) || r == '.' || r == '(' || r == '[' || r == '{' {
 			seedStart = i + 1
 			break
 		}
@@ -209,50 +209,27 @@ func SeedGolang(text string) string {
 		seed = strings.TrimPrefix(seed, "[]")
 		return seed
 	}
-
 	return seed
-}
-
-// EditBasic replaces the completion seed with the completion
-func EditBasic(text string, cp int, completion string, seed string) (ed EditData) {
-	s1 := string(text[0:cp])
-	s2 := string(text[cp:])
-	s1 = strings.TrimSuffix(s1, seed)
-	s1 += completion
-	t := s1 + s2
-	ed.NewText = t
-	ed.CursorAdjust = len(completion) - len(seed)
-	return ed
 }
 
 // EditWord replaces the completion seed and any text up to the next whitespace with completion
 func EditWord(text string, cp int, completion string, seed string) (ed EditData) {
-	s1 := string(text[0:cp])
 	s2 := string(text[cp:])
 
+	var fd = 0 // number of characters past seed in word to be deleted (forward delete)]
+	var r rune
 	if len(s2) > 0 {
-		r := rune(s2[0])
-		// find the next whitespace or end of text
-		if !(unicode.IsSpace(r)) {
-			count := len(s2)
-			for i, c := range s2 {
-				r = rune(c)
-				if unicode.IsSpace(r) {
-					s2 = s2[i:]
-					break
-				}
-				// might be last word
-				if i == count-1 {
-					s2 = ""
-				}
+		for fd, r = range s2 {
+			if unicode.IsSpace(r) {
+				break
 			}
 		}
 	}
-
-	s1 = strings.TrimSuffix(s1, seed)
-	s1 += completion
-	t := s1 + s2
-	ed.NewText = t
+	if fd == len(s2)-1 { // last word case
+		fd += 1
+	}
+	ed.NewText = completion
+	ed.ForwardDelete = fd + len(seed)
 	ed.CursorAdjust = 0
 	return ed
 }
