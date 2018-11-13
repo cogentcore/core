@@ -2167,9 +2167,11 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 }
 
 func (tv *TextView) ContextMenu() {
-	if tv.Buf.SpellCorrect != nil {
-		if tv.OfferCorrect() {
-			return
+	if !tv.HasSelection() {
+		if tv.Buf.SpellCorrect != nil {
+			if tv.OfferCorrect() {
+				return
+			}
 		}
 	}
 	tv.WidgetBase.ContextMenu()

@@ -4,15 +4,7 @@ This demo shows all the main widgets in GoGi.  You can try each of the widgets. 
 
 ## Installation
 
-The usual Go install procedure will work -- this is the easiest way to install GoGi and get all of its various dependencies:
-
-``` bash
-> go get github.com/goki/gi
-> cd ~/go/src/github.com/goki/gi/examples/widgets
-> go get ...
-> go build
-> ./widgets
-```
+The usual Go install procedure will work -- see [Install](https://github.com/goki/gi/wiki/Install) for details.
 
 ## GoGi Editor
 
