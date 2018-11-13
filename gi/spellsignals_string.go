@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _SpellSignals_name = "SpellSelect"
+const _SpellSignals_name = "SpellSelectSpellIgnore"
 
-var _SpellSignals_index = [...]uint8{0, 11}
+var _SpellSignals_index = [...]uint8{0, 11, 22}
 
 func (i SpellSignals) String() string {
 	if i < 0 || i >= SpellSignals(len(_SpellSignals_index)-1) {

@@ -70,7 +70,7 @@ func InitSpell() error {
 	if err != nil {
 		log.Printf("Could not complie regular expression: %v. \n", err)
 	}
-	isUrl = xurls.Relaxed()  // does not return an error
+	isUrl = xurls.Relaxed() // does not return an error
 	return nil
 }
 
@@ -248,6 +248,9 @@ type SpellSignals int64
 const (
 	// SpellSelect means the user chose one of the possible corrections
 	SpellSelect SpellSignals = iota
+
+	// SpellClear signals the user chose learn or ignore so clear the tag
+	SpellIgnore
 )
 
 //go:generate stringer -type=SpellSignals
@@ -351,25 +354,27 @@ func (sc *SpellCorrect) KeyInput(kf KeyFuns) bool { // true - caller should set 
 // LearnWordInline gets the misspelled/unknown word and passes to LearnWord
 func (sc *SpellCorrect) LearnWordInline() {
 	LearnWord(sc.Word)
+	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), sc.Word)
 }
 
 // IgnoreAllInline adds the word to the ignore list
 func (sc *SpellCorrect) IgnoreAllInline() {
 	IgnoreWord(sc.Word)
+	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), sc.Word)
 }
 
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction
 // returns true if canceled
-func (c *SpellCorrect) Cancel() bool {
-	if c.Vp == nil || c.Vp.Win == nil {
+func (sc *SpellCorrect) Cancel() bool {
+	if sc.Vp == nil || sc.Vp.Win == nil {
 		return false
 	}
-	cpop := c.Vp.Win.CurPopup()
+	cpop := sc.Vp.Win.CurPopup()
 	did := false
 	if PopupIsCorrector(cpop) {
 		did = true
-		c.Vp.Win.SetDelPopup(cpop)
+		sc.Vp.Win.SetDelPopup(cpop)
 	}
-	c.Vp = nil
+	sc.Vp = nil
 	return did
 }

@@ -2088,6 +2088,9 @@ func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
 		if sig == int64(gi.SpellSelect) {
 			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
 			tbf.CorrectText(data.(string)) // always use data
+		} else if sig == int64(gi.SpellIgnore) {
+			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
+			tbf.CorrectText(data.(string)) // always use data
 		}
 	})
 }
@@ -2107,6 +2110,11 @@ func (tb *TextBuf) CorrectText(s string) {
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
 	}
+}
+
+func (tb *TextBuf) CorrectClear(s string) {
+	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
+	tb.RemoveTag(st, histyle.SpellErr)
 }
 
 ////////////////////////////////////////////////////////////////////////////
