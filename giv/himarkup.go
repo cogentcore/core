@@ -221,28 +221,35 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
 	if nt == 0 {
 		return txt
 	}
+	sz := len(txt)
+	if sz == 0 {
+		return txt
+	}
 	sps := []byte(`<span class="`)
 	sps2 := []byte(`">`)
 	spe := []byte(`</span>`)
 	taglen := len(sps) + len(sps2) + len(spe) + 2
 
-	sz := len(txt)
 	musz := sz + len(ttags)*taglen
 	mu := make([]byte, 0, musz)
 
 	cp := 0
 	var tstack []int // stack of tags indexes that remain to be completed, sorted soonest at end
 	for i, tr := range ttags {
+		if cp >= sz {
+			break
+		}
 		for si := len(tstack) - 1; si >= 0; si-- {
 			ts := ttags[tstack[si]]
 			if ts.Ed <= tr.St {
-				mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:ts.Ed])))...)
+				ep := ints.MinInt(sz, ts.Ed)
+				mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:ep])))...)
 				mu = append(mu, spe...)
 				tstack = append(tstack[:si], tstack[si+1:]...)
-				cp = ts.Ed
+				cp = ep
 			}
 		}
-		if tr.St >= sz {
+		if cp >= sz || tr.St >= sz {
 			break
 		}
 		if tr.St > cp {

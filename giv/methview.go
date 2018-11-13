@@ -140,6 +140,7 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 		var ac *gi.Action
 		if aci, has := tb.ChildByName(te.Name, 0); has { // allows overriding of defaults etc
 			ac = aci.(*gi.Action)
+			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
 			ac = tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)
@@ -211,6 +212,7 @@ func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Me
 func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
+		MethViewErr(vtyp, fmt.Sprintf("Type: %v properties not found for CallMethod -- need to register type using kit.AddType\n", vtyp.String()))
 		return false
 	}
 	cmp, ok := ki.SubTypeProps(tpp, MethodViewCallMethsProp)
@@ -242,6 +244,10 @@ func MethViewSetActionData(ac *gi.Action, val interface{}, vp *gi.Viewport2D) {
 	md.ValVal = reflect.ValueOf(val)
 	md.Vp = vp
 	md.MethVal = md.ValVal.MethodByName(md.Method)
+	if len(ac.ActionSig.Cons) == 0 {
+		fmt.Printf("giv.MethView CallMethod had no connections: %v\n", ac.Nm)
+		ac.ActionSig.Connect(vp.This(), MethViewCall)
+	}
 }
 
 var compileMethsOrder = []string{"CallMethods", "ToolBar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}
