@@ -2256,7 +2256,7 @@ func (tv *TextView) CancelComplete() {
 // SpellCheck offers spelling corrections if we are at a word break and
 // the word before the break is unknown -- returns true if misspelled word found
 func (tv *TextView) SpellCheck(r rune) bool {
-	if tv.Buf.SpellCorrect == nil || !unicode.IsSpace(r) {
+	if tv.Buf.SpellCorrect == nil || (!unicode.IsSpace(r) && !unicode.IsPunct(r)) {
 		return false
 	}
 	cp := tv.CursorPos
