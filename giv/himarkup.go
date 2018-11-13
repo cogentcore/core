@@ -15,6 +15,7 @@ import (
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/nptime"
 )
 
@@ -47,56 +48,24 @@ func (tr *TagRegion) ContainsPos(pos int) bool {
 
 // TagRegionsMerge merges the two tag regions into a combined list
 // properly ordered by sequence of tags within the line.
-// returns true if there are no conflicts between the two sets of tags
-// and false if there are conflicts -- t1 wins any conflicts!
-func TagRegionsMerge(t1, t2 []TagRegion) ([]TagRegion, bool) {
+func TagRegionsMerge(t1, t2 []TagRegion) []TagRegion {
 	if len(t1) == 0 {
-		return t2, true
+		return t2
 	}
 	if len(t2) == 0 {
-		return t1, true
+		return t1
 	}
 	sz1 := len(t1)
 	sz2 := len(t2)
 	tsz := sz1 + sz2
 	tl := make([]TagRegion, 0, tsz)
-	i1 := 0
-	i2 := 0
-	ok := true
-	for i := 0; i < tsz; i++ {
-		c1 := t1[i1]
-		c2 := t2[i2]
-		if c1.St < c2.St && c1.Ed < c2.St {
-			tl = append(tl, c1)
-			i1++
-			if i1 >= sz1 {
-				t1 = append(tl, t2[i2:sz2]...)
-				break
-			}
-		} else if c2.St < c1.St && c2.Ed < c1.St {
-			tl = append(tl, c2)
-			i2++
-			if i2 >= sz2 {
-				t1 = append(tl, t1[i1:sz1]...)
-				break
-			}
-		} else {
-			ok = false
-			// fmt.Printf("conflicting tags: %v  vs  %v\n", c1, c2)
-			tl = append(tl, c1) // tl wins
-			i1++
-			i2++
-			if i1 >= sz1 {
-				t1 = append(tl, t2[i2:sz2]...)
-				break
-			}
-			if i2 >= sz2 {
-				t1 = append(tl, t1[i1:sz1]...)
-				break
-			}
-		}
+	for i := 0; i < sz1; i++ {
+		tl = append(tl, t1[i])
 	}
-	return tl, ok
+	for i := 0; i < sz2; i++ {
+		TagRegionsAdd(&tl, t2[i])
+	}
+	return tl
 }
 
 // TagRegionsAdd adds a new tag region in sorted order to list
@@ -104,9 +73,6 @@ func TagRegionsAdd(tl *[]TagRegion, tr TagRegion) {
 	for i, t := range *tl {
 		if t.St < tr.St {
 			continue
-		}
-		if t.OverlapsReg(tr) { // can't have any overlap!
-			return
 		}
 		*tl = append(*tl, tr)
 		copy((*tl)[i+1:], (*tl)[i:])
@@ -116,8 +82,8 @@ func TagRegionsAdd(tl *[]TagRegion, tr TagRegion) {
 	*tl = append(*tl, tr)
 }
 
-// TagRegionsCleanup removes any overlapping regions in tag regions
-func TagRegionsCleanup(tl *[]TagRegion) {
+// TagRegionsDeOverlap removes any overlapping regions in tag regions
+func TagRegionsDeOverlap(tl *[]TagRegion) {
 	sz := len(*tl)
 	if sz <= 1 {
 		return
@@ -247,22 +213,36 @@ func (hm *HiMarkup) MarkupTagsLine(txt []byte) ([]TagRegion, error) {
 }
 
 // MarkupLine returns the line with html class tags added for each tag
-// takes both the hi tags and extra tags
+// takes both the hi tags and extra tags.  Only fully nested tags are supported --
+// any dangling ends are truncated.
 func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
-	ttags, _ := TagRegionsMerge(hitags, tags)
-	if len(ttags) == 0 {
+	ttags := TagRegionsMerge(hitags, tags)
+	nt := len(ttags)
+	if nt == 0 {
 		return txt
 	}
 	sps := []byte(`<span class="`)
 	sps2 := []byte(`">`)
 	spe := []byte(`</span>`)
 	taglen := len(sps) + len(sps2) + len(spe) + 2
+
 	sz := len(txt)
 	musz := sz + len(ttags)*taglen
 	mu := make([]byte, 0, musz)
+
 	cp := 0
-	for _, tr := range ttags {
-		if tr.St >= sz || tr.Ed > sz {
+	var tstack []int // stack of tags indexes that remain to be completed, sorted soonest at end
+	for i, tr := range ttags {
+		for si := len(tstack) - 1; si >= 0; si-- {
+			ts := ttags[tstack[si]]
+			if ts.Ed <= tr.St {
+				mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:ts.Ed])))...)
+				mu = append(mu, spe...)
+				tstack = append(tstack[:si], tstack[si+1:]...)
+				cp = ts.Ed
+			}
+		}
+		if tr.St >= sz {
 			break
 		}
 		if tr.St > cp {
@@ -272,12 +252,41 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
 		clsnm := tr.Tag.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
-		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:tr.Ed])))...)
-		mu = append(mu, spe...)
-		cp = tr.Ed
+		ep := tr.Ed
+		addEnd := true
+		if i < nt-1 {
+			if ttags[i+1].St < tr.Ed { // next one starts before we end, add to stack
+				addEnd = false
+				ep = ttags[i+1].St
+				if len(tstack) == 0 {
+					tstack = append(tstack, i)
+				} else {
+					for si := len(tstack) - 1; si >= 0; si-- {
+						ts := ttags[tstack[si]]
+						if tr.Ed <= ts.Ed {
+							ni := si + 1 // new index in stack -- right after current
+							tstack = append(tstack, i)
+							copy(tstack[ni+1:], tstack[ni:])
+							tstack[ni] = i
+						}
+					}
+				}
+			}
+		} else {
+			ep = ints.MinInt(sz, ep)
+		}
+		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:ep])))...)
+		if addEnd {
+			mu = append(mu, spe...)
+		}
+		cp = ep
 	}
 	if sz > cp {
 		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:sz])))...)
+	}
+	// pop any left on stack..
+	for si := len(tstack) - 1; si >= 0; si-- {
+		mu = append(mu, spe...)
 	}
 	return mu
 }

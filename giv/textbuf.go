@@ -1530,7 +1530,7 @@ func (tb *TextBuf) AdjustedTags(ln int) []TagRegion {
 			ntags = append(ntags, ntr)
 		}
 	}
-	TagRegionsCleanup(&ntags)
+	// TagRegionsCleanup(&ntags)
 	return ntags
 }
 
