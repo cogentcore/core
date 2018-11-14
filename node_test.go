@@ -663,6 +663,8 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 256
 ki.Signal Emit from: child12 sig: NodeSignalDestroying data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
+ki.Signal Emit from: subchild12 sig: NodeSignalUpdated data: 2048
+ki.Signal Emit from: child12 sig: NodeSignalUpdated data: 2048
 ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 1024
 `
 
