@@ -243,10 +243,12 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
 			ts := ttags[tstack[si]]
 			if ts.Ed <= tr.St {
 				ep := ints.MinInt(sz, ts.Ed)
-				mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:ep])))...)
+				if cp < ep {
+					mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:ep])))...)
+					cp = ep
+				}
 				mu = append(mu, spe...)
 				tstack = append(tstack[:si], tstack[si+1:]...)
-				cp = ep
 			}
 		}
 		if cp >= sz || tr.St >= sz {
