@@ -32,6 +32,8 @@ github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044 h1:0AuiEhikbU6v3yzqU
 github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044/go.mod h1:wfqRWLHRBsRgkp5dmbG56SA0DmVtwrF5N3oPdI8t+Aw=
 github.com/goki/ki v0.0.0-20181114100935-afe681d9f5ba h1:gcKj90X+2fwshtnxuuKRAB66jwCp3OyHIqNvevXfVK4=
 github.com/goki/ki v0.0.0-20181114100935-afe681d9f5ba/go.mod h1:usRS9xwgAOBaVf/dKYRqyaTJ7UdlT60KquqtM3CTp4M=
+github.com/goki/ki v0.0.0-20181114212707-0361bfbc13db h1:Xc/NNgXSA7amlDPKyCq+Tkkq2BCg8nfLuIanUcf+ndU=
+github.com/goki/ki v0.0.0-20181114212707-0361bfbc13db/go.mod h1:8PA5euf9o8LdaDc0C/jLA3950FmBUYXLDQlaVJlXGkU=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/gorilla/css v1.0.0 h1:BQqNyPTi50JCFMTw/b67hByjMVXZRwGha6wxVGkeihY=
@@ -70,6 +72,8 @@ golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20181113200934-7e59e591a261 h1:LdQH38TFLoVnhEgui05nOnHKFlNqRIzctBnmqNOvYsk=
 golang.org/x/tools v0.0.0-20181113200934-7e59e591a261/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20181114190951-94339b83286c h1:QZLE57XoVOJ9ZpZeXZye1XqMIJffHCo5nQP/cBwQDOY=
+golang.org/x/tools v0.0.0-20181114190951-94339b83286c/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/h2non/filetype.v1 v1.0.5 h1:CC1jjJjoEhNVbMhXYalmGBhOBK2V70Q1N850wt/98/Y=
 gopkg.in/h2non/filetype.v1 v1.0.5/go.mod h1:M0yem4rwSX5lLVrkEuRRp2/NinFMD5vgJ4DlAhZcfNo=
 mvdan.cc/xurls/v2 v2.0.0 h1:r1zSOSNS/kqtpmATyMMMvaZ4/djsesbYz5kr0+qMRWc=

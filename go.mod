@@ -17,12 +17,11 @@ require (
 	github.com/fatih/camelcase v1.0.0
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
 	github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044
-	github.com/goki/ki v0.0.0-20181114100935-afe681d9f5ba
+	github.com/goki/ki v0.0.0-20181114212707-0361bfbc13db
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.0.5
 	github.com/iancoleman/strcase v0.0.0-20180726023541-3605ed457bf7
-	github.com/jinzhu/copier v0.0.0-20180308034124-7e38e58719c3 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/pmezard/go-difflib v1.0.0
@@ -36,7 +35,7 @@ require (
 	golang.org/x/net v0.0.0-20181113165502-88d92db4c548
 	golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8
 	golang.org/x/text v0.3.0 // indirect
-	golang.org/x/tools v0.0.0-20181113200934-7e59e591a261
+	golang.org/x/tools v0.0.0-20181114190951-94339b83286c
 	gopkg.in/h2non/filetype.v1 v1.0.5 // indirect
 	mvdan.cc/xurls/v2 v2.0.0
 )
