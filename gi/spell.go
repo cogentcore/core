@@ -16,7 +16,7 @@ import (
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/mvdan/xurls"
+	"mvdan.cc/xurls/v2"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
