@@ -387,7 +387,7 @@ func sendQuit(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResult
 }
 
 //////////////////////////////////////////////////////////////////
-//   Windows utilties
+//   Windows utilities
 
 ////////////////////////////////////////////////////////
 // appWND is the handle to the "AppWindow".  The window encapsulates all

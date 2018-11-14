@@ -333,7 +333,7 @@ func (sr *SpanRender) SetString(str string, sty *FontStyle, ctxt *units.Context,
 }
 
 // SetRunes initializes to given plain rune string, with given default style
-// arameters that are set for the first render element -- constructs Render
+// parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
 func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = str
@@ -342,7 +342,7 @@ func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, ctxt *units.Context, 
 
 // TextFontRenderMu mutex is required because multiple different goroutines
 // associated with different windows can (and often will be) call font stuff
-// at the same time (curFace.GyphAdvance, rendering font) at the same time, on
+// at the same time (curFace.GlyphAdvance, rendering font) at the same time, on
 // the same font face -- and that turns out not to work!
 var TextFontRenderMu sync.Mutex
 
@@ -599,7 +599,7 @@ func (sr *SpanRender) LastFont() (face font.Face, color color.Color) {
 type TextLink struct {
 	Label     string   `desc:"text label for the link"`
 	URL       string   `desc:"full URL for the link"`
-	Props     ki.Props `desc:"proerties defined for the link"`
+	Props     ki.Props `desc:"properties defined for the link"`
 	StartSpan int      `desc:"span index where link starts"`
 	StartIdx  int      `desc:"index in StartSpan where link starts"`
 	EndSpan   int      `desc:"span index where link ends (can be same as EndSpan)"`
@@ -1600,7 +1600,7 @@ type TextStyle struct {
 	OrientationVert  float32        `xml:"glyph-orientation-vertical" inherit:"true" desc:"prop: glyph-orientation-vertical = for TBRL writing mode (only), determines orientation of alphabetic characters -- 90 is default (rotated) -- 0 means keep upright"`
 	OrientationHoriz float32        `xml:"glyph-orientation-horizontal" inherit:"true" desc:"prop: glyph-orientation-horizontal = for horizontal LR/RL writing mode (only), determines orientation of all characters -- 0 is default (upright)"`
 	Indent           units.Value    `xml:"text-indent" inherit:"true" desc:"prop: text-indent = how much to indent the first line in a paragraph"`
-	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"prop: para-spacing = extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directy with para-spacing"`
+	ParaSpacing      units.Value    `xml:"para-spacing" inherit:"true" desc:"prop: para-spacing = extra spacing between paragraphs -- copied from Style.Layout.Margin per CSS spec if that is non-zero, else can be set directly with para-spacing"`
 	TabSize          int            `xml:"tab-size" inherit:"true" desc:"prop: tab-size = tab size, in number of characters"`
 	// todo:
 	// page-break options

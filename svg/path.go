@@ -137,7 +137,7 @@ const (
 	PcZ
 	// close path
 	Pcz
-	// errror -- invalid command
+	// error -- invalid command
 	PcErr
 )
 

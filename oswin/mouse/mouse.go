@@ -220,7 +220,7 @@ const (
 	// select a continuous region of selected items, with no gaps
 	ExtendContinuous
 
-	// ExtendOne, activated by Control or Meta / Commmand, extends the
+	// ExtendOne, activated by Control or Meta / Command, extends the
 	// selection by adding the one additional item just clicked on, creating a
 	// potentially discontinuous set of selected items
 	ExtendOne

@@ -56,7 +56,7 @@ type Window interface {
 	// is the only supported mechanism for de-iconifying.
 	Raise()
 
-	// Minimize requests that the window be iconfied, making it no longer
+	// Minimize requests that the window be iconified, making it no longer
 	// visible or active -- rendering should not occur for minimized windows.
 	Minimize()
 
@@ -118,12 +118,12 @@ type Window interface {
 	// input etc).
 	IsFocus() bool
 
-	// SetCloseReqFunc sets the function that is called whenver there is a
+	// SetCloseReqFunc sets the function that is called whenever there is a
 	// request to close the window (via a OS or a call to CloseReq() method).  That
 	// function can then adjudicate whether and when to actually call Close.
 	SetCloseReqFunc(fun func(win Window))
 
-	// SetCloseCleanFunc sets the function that is called whenver window is
+	// SetCloseCleanFunc sets the function that is called whenever window is
 	// actually about to close (irrevocably) -- can do any necessary
 	// last-minute cleanup here.
 	SetCloseCleanFunc(fun func(win Window))

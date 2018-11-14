@@ -56,12 +56,12 @@ type TextView struct {
 	SelectStart   TextPos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
 	SelectReg     TextRegion                `json:"-" xml:"-" desc:"current selection region"`
 	PrevSelectReg TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	Highlights    []TextRegion              `json:"-" xml:"-" desc:"highlighed regions, e.g., for search results"`
+	Highlights    []TextRegion              `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
 	SelectMode    bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
 	ForceComplete bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
 	ISearch       ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
 	QReplace      QReplace                  `json:"-" xml:"-" desc:"query replace data"`
-	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text viewt -- see TextViewSignals for the types"`
+	TextViewSig   ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
 	LinkSig       ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles   [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight    float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
@@ -244,7 +244,7 @@ func (tv *TextView) ClearNeedsRefresh() {
 }
 
 // RefreshIfNeeded re-displays everything if SetNeedsRefresh was called --
-// returns true if refrehshed
+// returns true if refreshed
 func (tv *TextView) RefreshIfNeeded() bool {
 	if tv.NeedsRefresh() {
 		tv.Refresh()
@@ -2199,7 +2199,7 @@ func (tv *TextView) DeleteSelection() *TextBufEdit {
 }
 
 // Copy copies any selected text to the clipboard, and returns that text,
-// optionaly resetting the current selection
+// optionally resetting the current selection
 func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)

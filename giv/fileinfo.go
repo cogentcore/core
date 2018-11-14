@@ -208,7 +208,7 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	return "", ext, fmt.Errorf("giv.MimeFromFile could not find mime type for ext: %v file: %v", ext, fname)
 }
 
-// FileKindFromMime returns simplfied Kind description based on the given full
+// FileKindFromMime returns simplified Kind description based on the given full
 // mime type string.  Strips out application/ prefix, and converts all the
 // chroma-based mime-types to their basic names
 func FileKindFromMime(mime string) string {

@@ -118,7 +118,7 @@ type HiMarkup struct {
 	style     histyle.Style
 }
 
-// HasHi returns true if there are highighting parameters set (only valid after Init)
+// HasHi returns true if there are highlighting parameters set (only valid after Init)
 func (hm *HiMarkup) HasHi() bool {
 	return hm.Has
 }

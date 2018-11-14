@@ -13,7 +13,7 @@ import (
 	"github.com/goki/ki/nptime"
 )
 
-// GoGi event structure is dervied from go.wde and golang/x/mobile/event
+// GoGi event structure is derived from go.wde and golang/x/mobile/event
 //
 // GoGi requires event type enum for widgets to request what events to
 // receive, and we add an overall interface with base support for time and

@@ -490,7 +490,7 @@ func ColorFromString(str string, base color.Color) (Color, error) {
 	return c, err
 }
 
-// parse Hex color -- this is from fogelman/gg I think..
+// parse Hex color -- this is from fogleman/gg I think..
 func (c *Color) ParseHex(x string) error {
 	x = strings.TrimPrefix(x, "#")
 	var r, g, b, a int

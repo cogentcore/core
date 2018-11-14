@@ -43,7 +43,7 @@ type SliderBase struct {
 	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
 	Dim         Dims2D               `desc:"dimension along which the slider slides"`
-	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see ThrackThr for a threshold on amount of change"`
+	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
 	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
@@ -276,7 +276,7 @@ func (sb *SliderBase) SetValueAction(val float32) {
 	sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
 }
 
-// SetThumValue sets the thumb value to given value and updates the thumb size
+// SetThumbValue sets the thumb value to given value and updates the thumb size
 // -- for scrollbar-style sliders where the thumb size represents visible range
 func (sb *SliderBase) SetThumbValue(val float32) {
 	updt := sb.UpdateStart()

@@ -45,7 +45,7 @@ const (
 type ViewBoxMeetOrSlice int32
 
 const (
-	// Mett means the entire ViewBox is visible within Viewport, and it is
+	// Meet means the entire ViewBox is visible within Viewport, and it is
 	// scaled up as much as possible to meet the align constraints
 	Meet ViewBoxMeetOrSlice = iota
 

@@ -566,7 +566,7 @@ func (wb *WidgetBase) HoverTooltipEvent() {
 	})
 }
 
-// WidgetMouseEvents connects to eiher or both mouse events -- IMPORTANT: if
+// WidgetMouseEvents connects to either or both mouse events -- IMPORTANT: if
 // you need to also connect to other mouse events, you must copy this code --
 // all processing of a mouse event must happen within one function b/c there
 // can only be one registered per receiver and event type.  sel = Left button
@@ -728,7 +728,7 @@ func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 // PartsWidgetBase
 
 // PartsWidgetBase is the base type for all Widget Node2D elements that manage
-// a set of constitutent parts
+// a set of constituent parts
 type PartsWidgetBase struct {
 	WidgetBase
 	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
@@ -740,7 +740,7 @@ var PartsWidgetBaseProps = ki.Props{
 	"base-type": true,
 }
 
-// standard FunDownMeFirst etc operate automaticaly on Field structs such as
+// standard FunDownMeFirst etc operate automatically on Field structs such as
 // Parts -- custom calls only needed for manually-recursive traversal in
 // Layout and Render
 

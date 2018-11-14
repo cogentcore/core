@@ -66,7 +66,7 @@ const (
 	// Pressed means button pushed down but not yet up
 	ButtonPressed
 
-	// Released means mose button was released - typically look at
+	// Released means mouse button was released - typically look at
 	// ButtonClicked instead of this one
 	ButtonReleased
 
@@ -496,7 +496,7 @@ type ButtonWidget interface {
 	// actually differ in functionality.
 	ButtonRelease()
 
-	// StyleParts is called during Style2D to handle stying associated with
+	// StyleParts is called during Style2D to handle styling associated with
 	// parts -- icons mainly.
 	StyleParts()
 

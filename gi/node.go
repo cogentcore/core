@@ -124,7 +124,7 @@ func (nb *NodeBase) HasNoLayout() bool {
 	return nb.HasFlag(int(NoLayout))
 }
 
-// CanFocus checks if this node can recieve keyboard focus
+// CanFocus checks if this node can receive keyboard focus
 func (nb *NodeBase) CanFocus() bool {
 	return nb.HasFlag(int(CanFocus))
 }

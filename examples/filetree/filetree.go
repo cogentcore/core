@@ -40,7 +40,7 @@ func (fb *FileBrowse) UpdateFiles() {
 	fb.Files.OpenPath(string(fb.ProjRoot))
 }
 
-// IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valide path
+// IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
 func (fb *FileBrowse) IsEmpty() bool {
 	return fb.ProjRoot == ""
 }

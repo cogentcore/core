@@ -151,7 +151,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	checkbox := brow.AddNewChild(gi.KiT_CheckBox, "checkbox").(*gi.CheckBox)
 	checkbox.Text = "Toggle"
 
-	// note: receiver for menut items with shortcuts must be a Node2D or Window
+	// note: receiver for menu items with shortcuts must be a Node2D or Window
 	mb1 := brow.AddNewChild(gi.KiT_MenuButton, "menubutton1").(*gi.MenuButton)
 	mb1.SetText("Menu Button")
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},

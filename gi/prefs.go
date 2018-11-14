@@ -20,7 +20,7 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// FileName is used to specify an filename (including path) -- automtically
+// FileName is used to specify an filename (including path) -- automatically
 // opens the FileView dialog using ValueView system.  Use this for any method
 // args that are filenames to trigger use of FileViewDialog under MethView
 // automatic method calling.
@@ -78,7 +78,7 @@ type Preferences struct {
 	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
 	SaveDetailed         bool                   `desc:"if set, the detailed preferences are saved and loaded at startup -- only "`
 	CustomStyles         ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
-	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overriden by app-specific styling (i.e, they come first)."`
+	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first)."`
 	FontFamily           FontName               `desc:"default font family when otherwise not specified"`
 	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
@@ -129,7 +129,7 @@ func (pf *ColorPrefs) PrefColor(clrName string) *Color {
 	case "link":
 		return &pf.Link
 	}
-	log.Printf("Preference color %v (simlified to: %v) not found\n", clrName, lc)
+	log.Printf("Preference color %v (simplified to: %v) not found\n", clrName, lc)
 	return nil
 }
 

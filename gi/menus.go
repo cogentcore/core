@@ -345,7 +345,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.SetFlag(int(VpFlagMenu))
 
 	pvp.Geom.Pos = image.Point{x, y}
-	// note: not setting VpFlagPopopDestroyAll -- we keep the menu list intact
+	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
 	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
 	frame.Lay = LayoutVert
 	frame.SetProps(MenuFrameProps, false)

@@ -56,7 +56,7 @@ var (
 	TextXML = "text/xml"
 
 	ImageAny  = "image/*"
-	ImageJPEG = "image/jepg"
+	ImageJPEG = "image/jpeg"
 	ImagePNG  = "image/png"
 	ImageGIF  = "image/gif"
 	ImageTIFF = "image/tiff"

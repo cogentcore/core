@@ -42,7 +42,7 @@ var KiT_MarkerUnits = kit.Enums.AddEnumAltLower(MarkerUnitsN, false, gi.StylePro
 func (ev MarkerUnits) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *MarkerUnits) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// RenderMarker renders the marker using given vertex postion, angle (in
+// RenderMarker renders the marker using given vertex position, angle (in
 // radians), and stroke width
 func (mrk *Marker) RenderMarker(vertexPos gi.Vec2D, vertexAng, strokeWidth float32) {
 	mrk.VertexPos = vertexPos

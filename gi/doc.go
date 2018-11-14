@@ -13,7 +13,7 @@ The 2D scenegraph supports:
 	* Widget nodes for GUI actions (Buttons, Menus etc) -- render directly via Paint
 	* Layouts for placing widgets, which are also container nodes
 	* CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
-	* svg sub-package with SVG Viewport and shapes, paths, etc -- full SVG suport
+	* svg sub-package with SVG Viewport and shapes, paths, etc -- full SVG support
 	* Icon is a wrapper around an SVG -- any SVG icon can be used
 
 Layout Logic
@@ -52,7 +52,7 @@ Controlling the layout involves the following style properties:
       any available space.  The preferred size of the item is used to
       determine how much of the space is used by each stretchable element, so
       you can set that to achieve different proportional spacing.  By default
-      the Stretch is just the minumum 1em in preferred size.
+      the Stretch is just the minimum 1em in preferred size.
 
 	* align-horiz / align-vert: for the other dimension in a Layout (e.g., for
       LayoutHoriz, the vertical dimension) this specifies how the items are
@@ -87,7 +87,7 @@ other Go package.  Furthermore, the ValueView framework allows for easy
 customization and extension of the GUI representation, based on the classic Go
 "Stringer"-like interface paradigm -- simply define a ValueView() method on
 any type, returning giv.ValueView that manages the interface between data
-structures and GUI represnetations.
+structures and GUI representations.
 
 See giv sub-package for all the View elements
 

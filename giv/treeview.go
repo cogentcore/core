@@ -807,7 +807,7 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 }
 
 // SrcInsertAfter inserts a new node in the source tree after this node, at
-// the same (sibling) level, propmting for the type of node to insert
+// the same (sibling) level, prompting for the type of node to insert
 func (tv *TreeView) SrcInsertAfter() {
 	ttl := "Insert After"
 	if tv.IsRootOrField(ttl) {
@@ -871,7 +871,7 @@ func (tv *TreeView) SrcInsertBefore() {
 }
 
 // SrcAddChild adds a new child node to this one in the source tree,
-// propmpting the user for the type of node to add
+// prompting the user for the type of node to add
 func (tv *TreeView) SrcAddChild() {
 	ttl := "Add Child"
 	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),

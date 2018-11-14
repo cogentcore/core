@@ -252,7 +252,7 @@ func (km *KeyMap) Update(kmName KeyMapName) {
 // the local widget's key event processing, with the shortcut only operating
 // when no conflicting widgets are in focus.  Shortcuts are always window-wide
 // and are intended for global window / toolbar actions.  Widget-specific key
-// functions should be be handeled directly within widget key event
+// functions should be handled directly within widget key event
 // processing.
 type Shortcuts map[key.Chord]*Action
 

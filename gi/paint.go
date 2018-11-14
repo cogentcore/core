@@ -67,7 +67,7 @@ type Paint struct {
 	FillStyle   FillStyle
 	FontStyle   FontStyle    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	TextStyle   TextStyle    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
-	VecEff      VectorEffect `xml:"vector-effect" desc:"prop: vector-effet = various rendering special effects settings"`
+	VecEff      VectorEffect `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
 	XForm       Matrix2D     `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
 	dotsSet     bool
 	lastUnCtxt  units.Context
@@ -630,13 +630,13 @@ func (pc *Paint) Stroke(rs *RenderState) {
 }
 
 // FillPreserve fills the current path with the current color. Open subpaths
-// are implicity closed. The path is preserved after this operation.
+// are implicitly closed. The path is preserved after this operation.
 func (pc *Paint) FillPreserve(rs *RenderState) {
 	pc.fill(rs)
 }
 
 // Fill fills the current path with the current color. Open subpaths
-// are implicity closed. The path is cleared after this operation.
+// are implicitly closed. The path is cleared after this operation.
 func (pc *Paint) Fill(rs *RenderState) {
 	pc.FillPreserve(rs)
 	pc.ClearPath(rs)
@@ -788,7 +788,7 @@ func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float32) {
 	pc.ClosePath(rs)
 }
 
-// DrawElllipticalArc draws arc between angle1 and angle2 along an ellipse,
+// DrawEllipticalArc draws arc between angle1 and angle2 along an ellipse,
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with
 // radii rx, ry -- see DrawEllipticalArcPath for a version compatible with SVG
 // A/a path drawing, which uses previous position instead of two angles
@@ -820,7 +820,7 @@ func (pc *Paint) DrawEllipticalArc(rs *RenderState, cx, cy, rx, ry, angle1, angl
 // in ellipse parametric when approximating an off-axis ellipse.
 const MaxDx float32 = math.Pi / 8
 
-// ellipsePrime gives tangent vectors for parameterized elipse; a, b, radii,
+// ellipsePrime gives tangent vectors for parameterized ellipse; a, b, radii,
 // eta parameter, center cx, cy
 func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
 	bCosEta := b * math32.Cos(eta)
@@ -830,7 +830,7 @@ func ellipsePrime(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32
 	return
 }
 
-// ellipsePointAt gives points for parameterized elipse; a, b, radii, eta
+// ellipsePointAt gives points for parameterized ellipse; a, b, radii, eta
 // parameter, center cx, cy
 func ellipsePointAt(a, b, sinTheta, cosTheta, eta, cx, cy float32) (px, py float32) {
 	aCosEta := a * math32.Cos(eta)
@@ -896,13 +896,13 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 // returns in lx, ly the last points which are then set to the current cx, cy
 // for the path drawer
 func (pc *Paint) DrawEllipticalArcPath(rs *RenderState, cx, cy, ocx, ocy, pcx, pcy, rx, ry, angle float32, largeArc, sweep bool) (lx, ly float32) {
-	rotX := angle * math.Pi / 180 // Convert degress to radians
+	rotX := angle * math.Pi / 180 // Convert degrees to radians
 	startAngle := math32.Atan2(pcy-cy, pcx-cx) - rotX
 	endAngle := math32.Atan2(ocy-cy, ocx-cx) - rotX
 	deltaTheta := endAngle - startAngle
 	arcBig := math32.Abs(deltaTheta) > math.Pi
 
-	// Approximate ellipse using cubic bezeir splines
+	// Approximate ellipse using cubic bezier splines
 	etaStart := math32.Atan2(math32.Sin(startAngle)/ry, math32.Cos(startAngle)/rx)
 	etaEnd := math32.Atan2(math32.Sin(endAngle)/ry, math32.Cos(endAngle)/rx)
 	deltaEta := etaEnd - etaStart
@@ -913,7 +913,7 @@ func (pc *Paint) DrawEllipticalArcPath(rs *RenderState, cx, cy, ocx, ocy, pcx, p
 			deltaEta -= math.Pi * 2
 		}
 	}
-	// This check might be needed if the center point of the elipse is
+	// This check might be needed if the center point of the ellipse is
 	// at the midpoint of the start and end lines.
 	if deltaEta < 0 && sweep {
 		deltaEta += math.Pi * 2
@@ -927,7 +927,7 @@ func (pc *Paint) DrawEllipticalArcPath(rs *RenderState, cx, cy, ocx, ocy, pcx, p
 	// Approximate the ellipse using a set of cubic bezier curves by the method of
 	// L. Maisonobe, "Drawing an elliptical arc using polylines, quadratic
 	// or cubic Bezier curves", 2003
-	// https://www.spaceroots.org/documents/elllipse/elliptical-arc.pdf
+	// https://www.spaceroots.org/documents/ellipse/elliptical-arc.pdf
 	tde := math32.Tan(dEta / 2)
 	alpha := math32.Sin(dEta) * (math32.Sqrt(4+3*tde*tde) - 1) / 3 // Math is fun!
 	lx, ly = pcx, pcy

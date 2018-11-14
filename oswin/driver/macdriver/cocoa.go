@@ -489,7 +489,7 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 		// can produce wheel events in opposite directions, but the
 		// direction matches what other programs on the OS do.
 		//
-		// If we wanted to expose the phsyical device motion in the
+		// If we wanted to expose the physical device motion in the
 		// event we could use [NSEvent isDirectionInvertedFromDevice]
 		// to know if "natural scrolling" is enabled.
 		event = &mouse.ScrollEvent{
