@@ -1949,6 +1949,88 @@ func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 	return nil
 }
 
+// IsWordStart returns true if the cursor is just before the start of a word
+// word is a string of characters none of which are classified as a word break
+func (tv *TextView) IsWordStart() bool {
+	tp := tv.CursorPos
+	txt := tv.Buf.Line(tv.CursorPos.Ln)
+	sz := len(txt)
+	if sz == 0 {
+		return false
+	}
+	if tp.Ch == len(txt) { // end of line
+		return false
+	}
+	if tp.Ch == 0 { // start of line
+		r := txt[0]
+		if tv.IsWordBreak(r) {
+			return false
+		}
+		return true
+	}
+	r1 := txt[tp.Ch-1]
+	r2 := txt[tp.Ch]
+	if tv.IsWordBreak(r1) && !tv.IsWordBreak(r2) {
+		return true
+	}
+	return false
+}
+
+// IsWordEnd returns true if the cursor is just past the last letter of a word
+// word is a string of characters none of which are classified as a word break
+func (tv *TextView) IsWordEnd() bool {
+	tp := tv.CursorPos
+	txt := tv.Buf.Line(tv.CursorPos.Ln)
+	sz := len(txt)
+	if sz == 0 {
+		return false
+	}
+	if tp.Ch == len(txt) { // end of line
+		r := txt[tp.Ch-1]
+		if tv.IsWordBreak(r) {
+			return true
+		}
+		return false
+	}
+	if tp.Ch == 0 { // start of line
+		r := txt[0]
+		if tv.IsWordBreak(r) {
+			return false
+		}
+		return true
+	}
+	r1 := txt[tp.Ch-1]
+	r2 := txt[tp.Ch]
+	if !tv.IsWordBreak(r1) && tv.IsWordBreak(r2) {
+		return true
+	}
+	return false
+}
+
+// IsWordMiddle - returns true if the cursor is anywhere inside a word,
+// i.e. the character before the cursor and the one after the cursor
+// are not classified as word break characters
+func (tv *TextView) IsWordMiddle() bool {
+	tp := tv.CursorPos
+	txt := tv.Buf.Line(tv.CursorPos.Ln)
+	sz := len(txt)
+	if sz < 2 {
+		return false
+	}
+	if tp.Ch == len(txt) { // end of line
+		return false
+	}
+	if tp.Ch == 0 { // start of line
+		return false
+	}
+	r1 := txt[tp.Ch-1]
+	r2 := txt[tp.Ch]
+	if !tv.IsWordBreak(r1) && !tv.IsWordBreak(r2) {
+		return true
+	}
+	return false
+}
+
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 // returns true if word selected
 func (tv *TextView) SelectWord() bool {
@@ -2257,8 +2339,8 @@ func (tv *TextView) CancelComplete() {
 
 // SpellCheck offers spelling corrections if we are at a word break or other word termination
 // and the word before the break is unknown -- returns true if misspelled word found
-func (tv *TextView) SpellCheck(r rune) bool {
-	if tv.Buf.SpellCorrect == nil || (!unicode.IsSpace(r) && !unicode.IsPunct(r)) {
+func (tv *TextView) SpellCheck() bool {
+	if tv.Buf.SpellCorrect == nil {
 		return false
 	}
 	cp := tv.CursorPos
@@ -2278,6 +2360,9 @@ func (tv *TextView) SpellCheck(r rune) bool {
 	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
 	if knwn || err != nil {
 		tv.Buf.RemoveTag(tbw.Reg.Start, histyle.SpellErr)
+		ln := tbw.Reg.Start.Ln
+		tv.LayoutLines(ln, ln, false)
+		tv.RenderLines(ln, ln)
 		return false
 	}
 	tv.Buf.SpellCorrect.Suggestions = sugs
@@ -3560,7 +3645,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			} else {
 				tv.InsertAtCursor([]byte("\n"))
 			}
-			tv.SpellCheck(kt.Rune)
+			tv.SpellCheck()
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
@@ -3584,7 +3669,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
 			tv.Viewport.Win.UpdateEnd(updt)
-			tv.SpellCheck(kt.Rune)
+			tv.SpellCheck()
 		}
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
@@ -3621,7 +3706,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		if unicode.IsSpace(kt.Rune) {
 			tv.ForceComplete = false
 		}
-		tv.SpellCheck(kt.Rune)
+		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) {
+			tv.SpellCheck()
+		}
 	}
 	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
 }
