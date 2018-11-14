@@ -294,6 +294,12 @@ func (pf *Preferences) ScreenInfo() string {
 	return scinfo
 }
 
+// VersionInfo returns GoGi version information
+func (pf *Preferences) VersionInfo() string {
+	vinfo := VersionLong + " versioned on: " + VersionDate
+	return vinfo
+}
+
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
@@ -479,6 +485,11 @@ var PreferencesProps = ki.Props{
 		}},
 		{"ScreenInfo", ki.Props{
 			"desc":        "shows parameters about all the active screens",
+			"icon":        "info",
+			"show-return": true,
+		}},
+		{"VersionInfo", ki.Props{
+			"desc":        "shows current GoGi version information",
 			"icon":        "info",
 			"show-return": true,
 		}},
