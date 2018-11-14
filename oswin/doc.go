@@ -14,9 +14,9 @@
 // The App interface provides a top-level, single-instance struct that knows
 // about specific hardware, and can create new Window, Image, and Texture
 // objects that are hardware-specific and provide the primary GUI interface.
-// It is aways available as oswin.TheApp.
+// It is always available as oswin.TheApp.
 //
-// Events are commuinicated through the Window -- see EventType and Event in
+// Events are communicated through the Window -- see EventType and Event in
 // event.go for all the different types.
 //
 // The driver package creates the App, via its Main function, which is

@@ -328,7 +328,7 @@ func ColorViewDialogValue(dlg *gi.Dialog) gi.Color {
 }
 
 // FileViewDialog is for selecting / manipulating files -- ext is one or more
-// (comma separated) extensions -- files with those will be highighted
+// (comma separated) extensions -- files with those will be highlighted
 // (include the . at the start of the extension).  recv and dlgFunc connect to the
 // dialog signal: if signal value is gi.DialogAccepted use FileViewDialogValue
 // to get the resulting selected file.  The optional filterFunc can filter

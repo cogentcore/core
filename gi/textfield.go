@@ -540,7 +540,7 @@ func (tf *TextField) DeleteSelection() string {
 }
 
 // Copy copies any selected text to the clipboard, and returns that text,
-// optionaly resetting the current selection
+// optionally resetting the current selection
 func (tf *TextField) Copy(reset bool) string {
 	wupdt := tf.Viewport.Win.UpdateStart()
 	defer tf.Viewport.Win.UpdateEnd(wupdt)

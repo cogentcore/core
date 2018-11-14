@@ -13,7 +13,7 @@ import (
 )
 
 // IconName is used to specify an icon -- currently just the unique name of
-// the icon -- automtically provides a chooser menu for icons using ValueView
+// the icon -- automatically provides a chooser menu for icons using ValueView
 // system
 type IconName string
 

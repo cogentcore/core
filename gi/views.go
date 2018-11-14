@@ -35,7 +35,7 @@ type ViewIFace interface {
 	PrefsDetView(prefs *PrefsDetailed)
 
 	// HiStylesView opens an interactive view of given highlighting styles
-	// (pased as interface due to package inclusion issues)
+	// (passed as interface due to package inclusion issues)
 	HiStylesView(styles interface{})
 
 	// PrefsDetDefaults gets current detailed prefs values as defaults
@@ -48,5 +48,5 @@ type ViewIFace interface {
 	PrefsDbgView(prefs *PrefsDebug)
 }
 
-// TheViewIFace is the implemenation of the interface, defined in giv package
+// TheViewIFace is the implementation of the interface, defined in giv package
 var TheViewIFace ViewIFace

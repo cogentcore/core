@@ -147,7 +147,7 @@ func (gr *Graph) Reset() {
 // Line represents one line with an equation etc
 type Line struct {
 	Eq     string                         `width:"60" desc:"equation: use 'x' for the x value, and must use * for multiplication, and start with 0 for decimal numbers (0.01 instead of .01)"`
-	MinX   float32                        `step:"1" desc:"Mininum x value for this line."`
+	MinX   float32                        `step:"1" desc:"Minimum x value for this line."`
 	MaxX   float32                        `step:"1" desc:"Maximum x value for this line."`
 	Color  string                         `desc:"color to draw the line in"`
 	Bounce float32                        `min:"0" max:"2" step:".05" desc:"how bouncy the line is -- 1 = perfectly bouncy, 0 = no bounce at all"`
@@ -340,7 +340,7 @@ type Params struct {
 	NSteps     int     `min:"100" max:"10000" step:"10" desc:"number of steps to take when running"`
 	StartSpeed float32 `min:"0" max:"2" step:".05" desc:"Coordinates per unit of time"`
 	UpdtRate   float32 `min:"0.001" max:"1" step:".01" desc:"how fast to move along velocity vector -- lower = smoother, more slow-mo"`
-	Gravity    float32 `min:"0" max:"2" step:".01" desc:"how fast it accellerates down"`
+	Gravity    float32 `min:"0" max:"2" step:".01" desc:"how fast it accelerates down"`
 }
 
 func (pr *Params) Defaults() {

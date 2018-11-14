@@ -23,10 +23,10 @@ import (
 // SplitView allocates a fixed proportion of space to each child, along given
 // dimension, always using only the available space given to it by its parent
 // (i.e., it will force its children, which should be layouts (typically
-// Frame's), to have their own scroll bars as necesssary).  It should
+// Frame's), to have their own scroll bars as necessary).  It should
 // generally be used as a main outer-level structure within a window,
 // providing a framework for inner elements -- it allows individual child
-// elements to update indpendently and thus is important for speeding update
+// elements to update independently and thus is important for speeding update
 // performance.  It uses the Widget Parts to hold the splitter widgets
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.

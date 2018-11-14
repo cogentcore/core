@@ -47,7 +47,7 @@ var IconProps = ki.Props{
 }
 
 // CopyFromIcon copies from a source icon, typically one from a library --
-// preserves all the exisiting render state etc for the current icon, so that
+// preserves all the existing render state etc for the current icon, so that
 // only a new render is required
 func (ic *Icon) CopyFromIcon(cp *Icon) {
 	if cp == nil {

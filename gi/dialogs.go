@@ -384,7 +384,7 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 	return config
 }
 
-// StdButtonConnnect connects standard buttons in given button box layout to
+// StdButtonConnect connects standard buttons in given button box layout to
 // Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {

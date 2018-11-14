@@ -46,7 +46,7 @@ type ValueViewer interface {
 	ValueView() ValueView
 }
 
-// example implementation of ValueViewer interface -- can't implment on
+// example implementation of ValueViewer interface -- can't implement on
 // non-local types, so all the basic types are handled separately:
 //
 // func (s string) ValueView() ValueView {
@@ -309,7 +309,7 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 // (e.g., fields, map values, slice values) in Views (StructView, MapView,
 // etc).  The different types of ValueView are for different Kinds of values
 // (bool, float, etc) -- which can have different Kinds of owners.  The
-// ValueVuewBase class supports all the basic fields for managing the owner
+// ValueViewBase class supports all the basic fields for managing the owner
 // kinds.
 type ValueView interface {
 	ki.Ki

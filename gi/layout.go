@@ -45,14 +45,14 @@ type LayoutStyle struct {
 	ZIndex         int         `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
 	AlignH         Align       `xml:"horizontal-align" desc:"prop: horizontal-align = horizontal alignment -- for widget layouts -- not a standard css property"`
 	AlignV         Align       `xml:"vertical-align" desc:"prop: vertical-align = vertical alignment -- for widget layouts -- not a standard css property"`
-	PosX           units.Value `xml:"x" desc:"prop: x = horizontal position -- often superceded by layout but otherwise used"`
-	PosY           units.Value `xml:"y" desc:"prop: y = vertical position -- often superceded by layout but otherwise used"`
+	PosX           units.Value `xml:"x" desc:"prop: x = horizontal position -- often superseded by layout but otherwise used"`
+	PosY           units.Value `xml:"y" desc:"prop: y = vertical position -- often superseded by layout but otherwise used"`
 	Width          units.Value `xml:"width" desc:"prop: width = specified size of element -- 0 if not specified"`
 	Height         units.Value `xml:"height" desc:"prop: height = specified size of element -- 0 if not specified"`
 	MaxWidth       units.Value `xml:"max-width" desc:"prop: max-width = specified maximum size of element -- 0  means just use other values, negative means stretch"`
 	MaxHeight      units.Value `xml:"max-height" desc:"prop: max-height = specified maximum size of element -- 0 means just use other values, negative means stretch"`
-	MinWidth       units.Value `xml:"min-width" desc:"prop: min-width = specified mimimum size of element -- 0 if not specified"`
-	MinHeight      units.Value `xml:"min-height" desc:"prop: min-height = specified mimimum size of element -- 0 if not specified"`
+	MinWidth       units.Value `xml:"min-width" desc:"prop: min-width = specified minimum size of element -- 0 if not specified"`
+	MinHeight      units.Value `xml:"min-height" desc:"prop: min-height = specified minimum size of element -- 0 if not specified"`
 	Margin         units.Value `xml:"margin" desc:"prop: margin = outer-most transparent space around box element -- todo: can be specified per side"`
 	Padding        units.Value `xml:"padding" desc:"prop: padding = transparent space around central content of box -- todo: if 4 values it is top, right, bottom, left; 3 is top, right&left, bottom; 2 is top & bottom, right and left"`
 	Overflow       Overflow    `xml:"overflow" desc:"prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
@@ -487,7 +487,7 @@ func (ly *Layout) GatherSizesGrid() {
 	rows := 0
 
 	sz := len(ly.Kids)
-	// collect overal size
+	// collect overall size
 	for _, c := range ly.Kids {
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {

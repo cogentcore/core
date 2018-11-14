@@ -46,7 +46,7 @@ import (
 // font library.  see text.go for rendering code
 
 // FontName is used to specify an font -- just the unique name of the font
-// family -- automtically provides a chooser menu for fonts using ValueView
+// family -- automatically provides a chooser menu for fonts using ValueView
 // system
 type FontName string
 
@@ -675,7 +675,7 @@ func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshal
 //////////////////////////////////////////////////////////////////////////////////
 // Font library
 
-// loadFontMu protects the font loading calls, which are not concurent-safe
+// loadFontMu protects the font loading calls, which are not concurrent-safe
 var loadFontMu sync.Mutex
 
 // FontInfo contains basic font information for choosing a given font --

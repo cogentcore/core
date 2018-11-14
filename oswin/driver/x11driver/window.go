@@ -166,7 +166,7 @@ func AbsInt(a int) int {
 }
 
 func (w *windowImpl) handleConfigureNotify(ev xproto.ConfigureNotifyEvent) {
-	// todo: support multple screens
+	// todo: support multiple screens
 	sc := oswin.TheApp.Screen(0)
 	dpi := sc.PhysicalDPI
 

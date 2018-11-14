@@ -222,7 +222,7 @@ func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 
 	acp, has := cmp[method]
 	if !has {
-		MethViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type propertis -- add to CallMethods to make available for CallMethod\n", method))
+		MethViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type properties -- add to CallMethods to make available for CallMethod\n", method))
 		return false
 	}
 	ac, ok := acp.(*gi.Action)

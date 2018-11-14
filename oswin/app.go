@@ -67,7 +67,7 @@ type App interface {
 	NewWindow(opts *NewWindowOptions) (Window, error)
 
 	// NewImage returns a new Image for this screen.  Images can be drawn upon
-	// directly using image and other packages, and have an accessable []byte
+	// directly using image and other packages, and have an accessible []byte
 	// slice holding the image data.
 	NewImage(size image.Point) (Image, error)
 
@@ -111,12 +111,12 @@ type App interface {
 	// xdg-open command.
 	OpenURL(url string)
 
-	// SetQuitReqFunc sets the function that is called whenver there is a
+	// SetQuitReqFunc sets the function that is called whenever there is a
 	// request to quit the app (via a OS or a call to QuitReq() method).  That
 	// function can then adjudicate whether and when to actually call Quit.
 	SetQuitReqFunc(fun func())
 
-	// SetQuitCleanFunc sets the function that is called whenver app is
+	// SetQuitCleanFunc sets the function that is called whenever app is
 	// actually about to quit (irrevocably) -- can do any necessary
 	// last-minute cleanup here.
 	SetQuitCleanFunc(fun func())

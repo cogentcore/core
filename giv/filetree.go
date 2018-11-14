@@ -575,7 +575,7 @@ type FileSearchMatch struct {
 var FileSearchContext = 30
 
 // FileSearch looks for a string (no regexp) within a file, in a
-// case-sensitive way, returning number of occurences and specific match
+// case-sensitive way, returning number of occurrences and specific match
 // position list -- column positions are in bytes, not runes.
 func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fp, err := os.Open(filename)
@@ -588,7 +588,7 @@ func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearc
 }
 
 // ByteBufSearch looks for a string (no regexp) within a byte buffer, with
-// given case-sensitivity, returning number of occurences and specific match
+// given case-sensitivity, returning number of occurrences and specific match
 // position list -- column positions are in bytes, not runes.
 func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fsz := len(find)

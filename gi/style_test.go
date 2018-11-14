@@ -34,7 +34,7 @@ func TestStyle(t *testing.T) {
 
 	fmt.Printf("style width: %v\n", s.Layout.Width)
 	fmt.Printf("style height: %v\n", s.Layout.Height)
-	fmt.Printf("style box-shaodw.h-offset: %v\n", s.BoxShadow.HOffset)
-	fmt.Printf("style box-shaodw.v-offset: %v\n", s.BoxShadow.VOffset)
+	fmt.Printf("style box-shadow.h-offset: %v\n", s.BoxShadow.HOffset)
+	fmt.Printf("style box-shadow.v-offset: %v\n", s.BoxShadow.VOffset)
 	fmt.Printf("style border-style: %v\n", s.Border.Style)
 }

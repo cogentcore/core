@@ -49,7 +49,7 @@ var KiT_Trilean = kit.Enums.AddEnumAltLower(TrileanN, false, nil, "")
 func (ev Trilean) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// StyleEntry is one value in the map of highilight style values
+// StyleEntry is one value in the map of highlight style values
 type StyleEntry struct {
 	Color      gi.Color `desc:"text color"`
 	Background gi.Color `desc:"background color"`
@@ -57,7 +57,7 @@ type StyleEntry struct {
 	Bold       Trilean  `desc:"bold font"`
 	Italic     Trilean  `desc:"italic font"`
 	Underline  Trilean  `desc:"underline"`
-	NoInherit  bool     `desc:"don't inherit these settings from sub-category or category levels -- otherwise everthing with a Pass is inherited"`
+	NoInherit  bool     `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
 }
 
 var KiT_StyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)

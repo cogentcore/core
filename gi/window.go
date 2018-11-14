@@ -145,14 +145,14 @@ type Window struct {
 	DNDFinalEvent     *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
 	Dragging          ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
 	Scrolling         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
-	Popup             ki.Ki                                   `jsom:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack        []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of popups"`
-	FocusStack        []ki.Ki                                 `jsom:"-" xml:"-" desc:"stack of focus"`
+	Popup             ki.Ki                                   `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack        []ki.Ki                                 `json:"-" xml:"-" desc:"stack of popups"`
+	FocusStack        []ki.Ki                                 `json:"-" xml:"-" desc:"stack of focus"`
 	NextPopup         ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
 	PopupFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
 	DelPopup          ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 	PopMu             sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
-	TimerMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AferFunc's)"`
+	TimerMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
 	lastWinMenuUpdate time.Time
 }
 
@@ -187,7 +187,7 @@ const (
 
 // these extend NodeBase NodeFlags to hold Window state
 const (
-	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other defauld geom should be applied
+	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied
 	WinFlagHasGeomPrefs NodeFlags = NodeFlagsN + iota
 
 	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
@@ -705,7 +705,7 @@ func (w *Window) StopEventLoop() {
 }
 
 // ConnectEvent adds a Signal connection for given event type and
-// prioritiy to given receiver
+// priority to given receiver
 func (w *Window) ConnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
 	if et >= oswin.EventTypeN {
 		log.Printf("Window ConnectEvent type: %v is not a known event type\n", et)
@@ -1046,7 +1046,7 @@ func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport
 }
 
 // ActivateSprite clears the Inactive flag on the sprite, and increments
-// ActiveSprites, so that it will actualy be rendered
+// ActiveSprites, so that it will actually be rendered
 func (w *Window) ActivateSprite(nm string) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
@@ -2024,7 +2024,7 @@ func (w *Window) AddShortcut(chord key.Chord, act *Action) {
 }
 
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
-// triggered, and false otherwise.  Also elminates any shortcuts with deleted
+// triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
 func (w *Window) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
@@ -2167,7 +2167,7 @@ func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	if !PopupIsMenu(pop) {
 		return false
 	}
-	if w.NextPopup != nil && PopupIsMenu(w.NextPopup) { // poping up another menu
+	if w.NextPopup != nil && PopupIsMenu(w.NextPopup) { // popping up another menu
 		return false
 	}
 	if me.Button != mouse.Left && w.Dragging == nil { // probably menu activation in first place
@@ -2647,7 +2647,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 		return
 	}
 	cpop := w.CurPopup()
-	if cpop != nil { // no updating on popus
+	if cpop != nil { // no updating on popups
 		return
 	}
 	nii, ni := KiToNode2D(cfoc)
@@ -2884,7 +2884,7 @@ func (w *Window) DNDNotCursor() {
 	oswin.TheApp.Cursor(w.OSWin).PushIfNot(cursor.Not)
 }
 
-// DNDUpdateCursor updates the cursor based on the curent DND event mod if
+// DNDUpdateCursor updates the cursor based on the current DND event mod if
 // different from current (but no update if Not)
 func (w *Window) DNDUpdateCursor(dmod dnd.DropMods) bool {
 	dndc := DNDModCursor(dmod)

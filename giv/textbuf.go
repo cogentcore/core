@@ -43,7 +43,7 @@ type TextBufOpts struct {
 // syntax highlighting), and sends signals for making edits to the text and
 // coordinating those edits across multiple views.  Views always only view a
 // single buffer, so they directly call methods on the buffer to drive
-// updates, which are then broadast.  It also has methods for loading and
+// updates, which are then broadcast.  It also has methods for loading and
 // saving buffers to files.  Unlike GUI Widgets, its methods are generally
 // signaling, without an explicit Action suffix.  Internally, the buffer
 // represents new lines using \n = LF, but saving and loading can deal with
@@ -861,7 +861,7 @@ func (tb *TextBuf) BytesToLines() {
 //   Search
 
 // Search looks for a string (no regexp) within buffer, with given case-sensitivity
-// returning number of occurences and specific match position list.
+// returning number of occurrences and specific match position list.
 // Currently ONLY returning byte char positions, not rune ones..
 func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fsz := len(find)
@@ -1256,7 +1256,7 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 }
 
 // Insert inserts new text at given starting position, signaling views after
-// text has been inserted.  Sets the timestamp on resutling TextBufEdit to now
+// text has been inserted.  Sets the timestamp on resulting TextBufEdit to now
 func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *TextBufEdit {
 	if len(text) == 0 {
 		return nil

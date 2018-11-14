@@ -51,7 +51,7 @@ var Viewport2DProps = ki.Props{
 }
 
 // NewViewport2D creates a new OSImage with the specified width and height,
-// and intializes the renderer etc
+// and initializes the renderer etc
 func NewViewport2D(width, height int) *Viewport2D {
 	sz := image.Point{width, height}
 	vp := &Viewport2D{
@@ -172,7 +172,7 @@ func (vp *Viewport2D) IsVisible() bool {
 // set our window pointer to point to the current window we are under
 func (vp *Viewport2D) SetCurWin() {
 	pwin := vp.ParentWindow()
-	if pwin != nil { // ony update if non-nil -- otherwise we could be setting
+	if pwin != nil { // only update if non-nil -- otherwise we could be setting
 		// temporarily to give access to DPI etc
 		vp.Win = pwin
 	}
@@ -299,7 +299,7 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 func (vp *Viewport2D) Init2D() {
 	vp.Init2DWidget()
 	vp.SetCurWin()
-	// we update oursleves whenever any node update event happens
+	// we update ourselves whenever any node update event happens
 	vp.NodeSig.Connect(vp.This(), func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
 		rvpi, _ := KiToNode2D(recvp)
 		rvp := rvpi.AsViewport2D()

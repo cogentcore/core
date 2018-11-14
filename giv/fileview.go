@@ -82,7 +82,7 @@ func (fv *FileView) SetFilename(filename, ext string) {
 	fv.DoStdConfig()
 }
 
-// SetPathFile sets the path, initial select file (or "") and intializes the view
+// SetPathFile sets the path, initial select file (or "") and initializes the view
 func (fv *FileView) SetPathFile(path, file, ext string) {
 	fv.DirPath = path
 	fv.SelFile = file

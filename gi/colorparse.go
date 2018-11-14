@@ -319,7 +319,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 			if err == io.EOF {
 				break
 			}
-			log.Printf("gi.ColorSpec.UmarshalXML color parsing error: %v\n", err)
+			log.Printf("gi.ColorSpec.UnmarshalXML color parsing error: %v\n", err)
 			return err
 		}
 		switch se := t.(type) {
@@ -433,7 +433,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
 				}
 			default:
-				errStr := "gi.GolorSpec Cannot process svg element " + se.Name.Local
+				errStr := "gi.ColorSpec Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
 			}
 		case xml.EndElement:

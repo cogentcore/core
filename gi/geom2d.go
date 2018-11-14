@@ -885,7 +885,7 @@ func (gm *Geom2DInt) SetRect(r image.Rectangle) {
 }
 
 ///////////////////////////////////////////////////////////
-// utlities
+// utilities
 
 func Radians(degrees float32) float32 {
 	return degrees * math32.Pi / 180

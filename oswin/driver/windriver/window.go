@@ -344,7 +344,7 @@ var msgCmd = AddWindowMsg(handleCmd)
 func (w *windowImpl) execCmd(c *cmd) {
 	SendMessage(w.hwnd, msgCmd, 0, uintptr(unsafe.Pointer(c)))
 	if c.err != nil {
-		panic(fmt.Sprintf("execCmd faild for cmd.id=%d: %v", c.id, c.err)) // TODO handle errors
+		panic(fmt.Sprintf("execCmd failed for cmd.id=%d: %v", c.id, c.err)) // TODO handle errors
 	}
 }
 

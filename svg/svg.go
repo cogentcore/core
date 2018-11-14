@@ -16,7 +16,7 @@ import (
 
 // see io.go for IO input / output methods
 
-// SVG is a viewport for containing SVG drawing objects, correponding to the
+// SVG is a viewport for containing SVG drawing objects, corresponding to the
 // svg tag in html -- it provides its own bitmap for drawing into
 type SVG struct {
 	gi.Viewport2D
