@@ -95,7 +95,14 @@ func (fi *FileInfo) IsDir() bool {
 
 // IsExec returns true if file is an executable file
 func (fi *FileInfo) IsExec() bool {
-	return fi.Mode&0111 != 0
+	if fi.Mode&0111 != 0 {
+		return true
+	}
+	ext := filepath.Ext(fi.Path)
+	if ext == ".exe" {
+		return true
+	}
+	return false
 }
 
 // IsSymLink returns true if file is a symbolic link
