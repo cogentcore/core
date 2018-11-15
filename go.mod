@@ -17,7 +17,7 @@ require (
 	github.com/fatih/camelcase v1.0.0
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
 	github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044
-	github.com/goki/ki v0.0.0-20181114212707-0361bfbc13db
+	github.com/goki/ki v0.9.3
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/filetype v1.0.5
@@ -32,10 +32,10 @@ require (
 	github.com/stretchr/testify v1.2.2 // indirect
 	golang.org/x/image v0.0.0-20181109232246-249dc8530c0e
 	golang.org/x/mobile v0.0.0-20181026062114-a27dd33d354d
-	golang.org/x/net v0.0.0-20181113165502-88d92db4c548
+	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a
 	golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8
 	golang.org/x/text v0.3.0 // indirect
-	golang.org/x/tools v0.0.0-20181114190951-94339b83286c
+	golang.org/x/tools v0.0.0-20181115011154-2a3f5192be2e
 	gopkg.in/h2non/filetype.v1 v1.0.5 // indirect
 	mvdan.cc/xurls/v2 v2.0.0
 )
