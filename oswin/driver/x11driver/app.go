@@ -152,6 +152,10 @@ func newAppImpl(xc *xgb.Conn) (*appImpl, error) {
 	render.CreateSolidFill(app.xc, app.uniformP, render.Color{})
 
 	nsc := len(app.xsi.Roots)
+	if nsc == 0 {
+		log.Printf("X11 startup: No Root screens found\n")
+		nsc = 1
+	}
 
 	// note: putting default screen first, but this then makes rest of screens out of order
 	// relative to xwindows's list.
