@@ -296,7 +296,7 @@ func (pf *Preferences) ScreenInfo() string {
 
 // VersionInfo returns GoGi version information
 func (pf *Preferences) VersionInfo() string {
-	vinfo := VersionLong + " versioned on: " + VersionDate
+	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
 	return vinfo
 }
 

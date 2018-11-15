@@ -36,6 +36,10 @@ github.com/goki/ki v0.0.0-20181114212707-0361bfbc13db h1:Xc/NNgXSA7amlDPKyCq+Tkk
 github.com/goki/ki v0.0.0-20181114212707-0361bfbc13db/go.mod h1:8PA5euf9o8LdaDc0C/jLA3950FmBUYXLDQlaVJlXGkU=
 github.com/goki/ki v0.9.1 h1:BWRaL8paUEgmmfdAkKDL/WIPix8bzXT2fIwvCNACQLc=
 github.com/goki/ki v0.9.1/go.mod h1:8PA5euf9o8LdaDc0C/jLA3950FmBUYXLDQlaVJlXGkU=
+github.com/goki/ki v0.9.2 h1:9LdmM0NIh1ig5u1fXq0DwrRbqMf24AADXHGXpzdb28c=
+github.com/goki/ki v0.9.2/go.mod h1:8PA5euf9o8LdaDc0C/jLA3950FmBUYXLDQlaVJlXGkU=
+github.com/goki/ki v0.9.3 h1:TLqGbi0RUAjVFm6Sx7Bl7+/QAva+cHZ7w4un3epoIw4=
+github.com/goki/ki v0.9.3/go.mod h1:8PA5euf9o8LdaDc0C/jLA3950FmBUYXLDQlaVJlXGkU=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/gorilla/css v1.0.0 h1:BQqNyPTi50JCFMTw/b67hByjMVXZRwGha6wxVGkeihY=
@@ -78,6 +82,10 @@ golang.org/x/tools v0.0.0-20181113200934-7e59e591a261 h1:LdQH38TFLoVnhEgui05nOnH
 golang.org/x/tools v0.0.0-20181113200934-7e59e591a261/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20181114190951-94339b83286c h1:QZLE57XoVOJ9ZpZeXZye1XqMIJffHCo5nQP/cBwQDOY=
 golang.org/x/tools v0.0.0-20181114190951-94339b83286c/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20181115011115-cd212e53e13d h1:hCx5qjmzooJuaG5A4G37bSKcJpM1kLoJaWLZMwuTpS0=
+golang.org/x/tools v0.0.0-20181115011115-cd212e53e13d/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20181115011154-2a3f5192be2e h1:C6Dd9cORPM5l1agULNKGE7TsHE1f4fKb6u/C03xjFxo=
+golang.org/x/tools v0.0.0-20181115011154-2a3f5192be2e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/h2non/filetype.v1 v1.0.5 h1:CC1jjJjoEhNVbMhXYalmGBhOBK2V70Q1N850wt/98/Y=
 gopkg.in/h2non/filetype.v1 v1.0.5/go.mod h1:M0yem4rwSX5lLVrkEuRRp2/NinFMD5vgJ4DlAhZcfNo=
 mvdan.cc/xurls/v2 v2.0.0 h1:r1zSOSNS/kqtpmATyMMMvaZ4/djsesbYz5kr0+qMRWc=
