@@ -3445,18 +3445,25 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
 		tv.OfferComplete()
+		cp := tv.CursorPos
 		if tv.IsWordEnd() {
-			region := tv.WordBefore(tv.CursorPos)
+			region := tv.WordBefore(cp)
 			tv.SpellCheck(region)
-		} else {
-			txt := tv.Buf.Line(tv.CursorPos.Ln)
-			r := txt[tv.CursorPos.Ch]
-			if tv.IsWordBreak(r) {
-				cp := tv.CursorPos
-				cp.Ch -= 1 // we are one past the end of word
-				region := tv.WordBefore(cp)
-				tv.SpellCheck(region)
-			}
+			break
+		}
+		if cp.Ch == 0 { // end of line
+			cp.Ln--
+			cp.Ch = tv.Buf.LineLen(cp.Ln)
+			region := tv.WordBefore(cp)
+			tv.SpellCheck(region)
+			break
+		}
+		txt := tv.Buf.Line(cp.Ln)
+		r := txt[cp.Ch]
+		if tv.IsWordBreak(r) {
+			cp.Ch -= 1 // we are one past the end of word
+			region := tv.WordBefore(cp)
+			tv.SpellCheck(region)
 		}
 	case gi.KeyFunWordRight:
 		tv.ISearchCancel()
