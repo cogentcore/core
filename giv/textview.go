@@ -2383,8 +2383,14 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 			break
 		}
 		txt := tv.Buf.Line(cp.Ln)
-		r := txt[cp.Ch]
-		if tv.IsWordBreak(r) {
+		var r rune
+		atend := false
+		if cp.Ch >= len(txt) {
+			atend = true
+		} else {
+			r = txt[cp.Ch]
+		}
+		if atend || tv.IsWordBreak(r) {
 			cp.Ch -= 1 // we are one past the end of word
 			region := tv.WordBefore(cp)
 			tv.SpellCheck(region)
