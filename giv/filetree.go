@@ -24,7 +24,6 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
-	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
 
@@ -565,15 +564,6 @@ func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
 //////////////////////////////////////////////////////////////////////////
 //  Search
 
-// FileSearchMatch records one match for search within file
-type FileSearchMatch struct {
-	Reg  TextRegion `desc:"region surrounding the match"`
-	Text []byte     `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
-}
-
-// FileSearchContext is how much text to include on either side of the search match
-var FileSearchContext = 30
-
 // FileSearch looks for a string (no regexp) within a file, in a
 // case-sensitive way, returning number of occurrences and specific match
 // position list -- column positions are in bytes, not runes.
@@ -589,54 +579,30 @@ func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearc
 
 // ByteBufSearch looks for a string (no regexp) within a byte buffer, with
 // given case-sensitivity, returning number of occurrences and specific match
-// position list -- column positions are in bytes, not runes.
+// position list -- column positions are in runes
 func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
 	fsz := len(find)
 	if fsz == 0 {
 		return 0, nil
 	}
-	findeff := find
-	if ignoreCase {
-		findeff = bytes.ToLower(find)
-	}
+	fr := bytes.Runes(find)
 	cnt := 0
 	var matches []FileSearchMatch
 	scan := bufio.NewScanner(reader)
 	ln := 0
-	mst := []byte("<mark>")
-	mstsz := len(mst)
-	med := []byte("</mark>")
-	medsz := len(med)
 	for scan.Scan() {
-		bo := scan.Bytes() // note: temp -- must copy!
-		b := bo
-		if ignoreCase {
-			b = bytes.ToLower(bo)
-		}
-		sz := len(b)
+		rn := bytes.Runes(scan.Bytes()) // note: temp -- must copy -- convert to runes anyway
+		sz := len(rn)
 		ci := 0
 		for ci < sz {
-			i := bytes.Index(b[ci:], findeff)
+			i := RuneIndexFold(rn[ci:], fr)
 			if i < 0 {
 				break
 			}
 			i += ci
 			ci = i + fsz
-			reg := NewTextRegion(ln, i, ln, ci)
-			cist := ints.MaxInt(i-FileSearchContext, 0)
-			cied := ints.MinInt(ci+FileSearchContext, sz)
-			tlen := mstsz + medsz + cied - cist
-			txt := make([]byte, tlen)
-			copy(txt, bo[cist:i])
-			ti := i - cist
-			copy(txt[ti:], mst)
-			ti += mstsz
-			copy(txt[ti:], bo[i:ci])
-			ti += fsz
-			copy(txt[ti:], med)
-			ti += medsz
-			copy(txt[ti:], bo[ci:cied])
-			matches = append(matches, FileSearchMatch{Reg: reg, Text: txt})
+			mat := NewFileSearchMatch(rn, i, ci, ln)
+			matches = append(matches, mat)
 			cnt++
 		}
 		ln++

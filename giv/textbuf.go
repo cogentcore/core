@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi/complete"
@@ -27,15 +29,31 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 )
 
-// TextBufOpts contains options for TextBufs
+// TextBufOpts contains options for TextBufs -- contains everything necessary to
+// conditionalize editing of a given text file
 type TextBufOpts struct {
-	SpaceIndent  bool `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
-	TabSize      int  `desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	AutoIndent   bool `desc:"auto-indent on newline (enter) or tab"`
-	LineNos      bool `desc:"show line numbers at left end of editor"`
-	Completion   bool `desc:"use the completion system to suggest options while typing"`
-	SpellCorrect bool `desc:"use spell checking to suggest corrections while typing"`
-	EmacsUndo    bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+	SpaceIndent  bool   `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
+	TabSize      int    `desc:"size of a tab, in chars -- also determines indent level for space indent"`
+	AutoIndent   bool   `desc:"auto-indent on newline (enter) or tab"`
+	LineNos      bool   `desc:"show line numbers at left end of editor"`
+	Completion   bool   `desc:"use the completion system to suggest options while typing"`
+	SpellCorrect bool   `desc:"use spell checking to suggest corrections while typing"`
+	EmacsUndo    bool   `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+	IsDoc        bool   `desc:"this is a document-like file, such as LaTeX, Markdown, or HTML, as compared to a program-like file -- affects how spell checking is performed for example"`
+	CommentLn    string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+	CommentSt    string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+}
+
+// CommentStrs returns the comment start and end strings, using line-based CommentLn first if set
+// and falling back on multi-line / general purpose start / end syntax
+func (tb *TextBufOpts) CommentStrs() (comst, comed string) {
+	comst = tb.CommentLn
+	if comst == "" {
+		comst = tb.CommentSt
+		comed = tb.CommentEd
+	}
+	return
 }
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
@@ -57,8 +75,8 @@ type TextBuf struct {
 	Info         FileInfo         `desc:"full info about file"`
 	Hi           HiMarkup         `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
-	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence"`
-	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line -- these are initially just pointers into source Txt bytes"`
+	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
+	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
 	Tags         [][]TagRegion    `json:"extra custom tagged regions for each line"`
 	HiTags       [][]TagRegion    `json:"syntax highlighting tags -- auto-generated"`
 	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
@@ -229,6 +247,84 @@ func (tb *TextBuf) BytesLine(ln int) []byte {
 		return nil
 	}
 	return tb.LineBytes[ln]
+}
+
+// todo: move these Rune methods to kit
+
+// RuneEqualFold reports whether s and t are equal under Unicode case-folding.
+// copied from strings.EqualFold
+func RuneEqualFold(s, t []rune) bool {
+	for len(s) > 0 && len(t) > 0 {
+		// Extract first rune from each string.
+		var sr, tr rune
+		sr, s = s[0], s[1:]
+		tr, t = t[0], t[1:]
+		// If they match, keep going; if not, return false.
+
+		// Easy case.
+		if tr == sr {
+			continue
+		}
+
+		// Make sr < tr to simplify what follows.
+		if tr < sr {
+			tr, sr = sr, tr
+		}
+		// Fast check for ASCII.
+		if tr < utf8.RuneSelf {
+			// ASCII only, sr/tr must be upper/lower case
+			if 'A' <= sr && sr <= 'Z' && tr == sr+'a'-'A' {
+				continue
+			}
+			return false
+		}
+
+		// General case. SimpleFold(x) returns the next equivalent rune > x
+		// or wraps around to smaller values.
+		r := unicode.SimpleFold(sr)
+		for r != sr && r < tr {
+			r = unicode.SimpleFold(r)
+		}
+		if r == tr {
+			continue
+		}
+		return false
+	}
+
+	// One string is empty. Are both?
+	return len(s) == len(t)
+}
+
+// RuneIndex returns the index of given rune string in the text -- this MUST be used for
+// computing the TextPos Ch position of anything, because these positions are in runes,
+// not in bytes!
+func RuneIndex(txt, find []rune) int {
+	for i := range txt {
+		found := true
+		for j := range find {
+			if txt[i+j] != find[j] {
+				found = false
+				break
+			}
+		}
+		if found {
+			return i
+		}
+	}
+	return -1
+}
+
+// RuneIndexFold returns the index of given rune string in the text, using case folding
+// (i.e., case insensitive matching)
+// This MUST be used for computing the TextPos Ch position of anything, because these positions
+// are in runes, not in bytes!
+func RuneIndexFold(txt, find []rune) int {
+	for i := range txt {
+		if RuneEqualFold(txt[i:], find) {
+			return i
+		}
+	}
+	return -1
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
@@ -860,55 +956,69 @@ func (tb *TextBuf) BytesToLines() {
 /////////////////////////////////////////////////////////////////////////////
 //   Search
 
+// FileSearchMatch records one match for search within file
+type FileSearchMatch struct {
+	Reg  TextRegion `desc:"region surrounding the match"`
+	Text []byte     `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
+}
+
+// FileSearchContext is how much text to include on either side of the search match
+var FileSearchContext = 30
+
+var mst = []byte("<mark>")
+var mstsz = len(mst)
+var med = []byte("</mark>")
+var medsz = len(med)
+
+// NewFileSearchMatch returns a new FileSearchMatch entry for given rune line with match starting
+// at st and ending before ed, on given line
+func NewFileSearchMatch(rn []rune, st, ed, ln int) FileSearchMatch {
+	sz := len(rn)
+	reg := NewTextRegion(ln, st, ln, ed)
+	cist := ints.MaxInt(st-FileSearchContext, 0)
+	cied := ints.MinInt(ed+FileSearchContext, sz)
+	sctx := []byte(string(rn[cist:st]))
+	fstr := []byte(string(rn[st:ed]))
+	ectx := []byte(string(rn[ed:cied]))
+	tlen := mstsz + medsz + len(sctx) + len(fstr) + len(ectx)
+	txt := make([]byte, tlen)
+	copy(txt, sctx)
+	ti := st - cist
+	copy(txt[ti:], mst)
+	ti += mstsz
+	copy(txt[ti:], fstr)
+	ti += len(fstr)
+	copy(txt[ti:], med)
+	ti += medsz
+	copy(txt[ti:], ectx)
+	return FileSearchMatch{Reg: reg, Text: txt}
+}
+
 // Search looks for a string (no regexp) within buffer, with given case-sensitivity
 // returning number of occurrences and specific match position list.
-// Currently ONLY returning byte char positions, not rune ones..
+// column positions are in runes
 func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch) {
-	fsz := len(find)
+	fr := bytes.Runes(find)
+	fsz := len(fr)
 	if fsz == 0 {
 		return 0, nil
 	}
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	findeff := find
-	if ignoreCase {
-		findeff = bytes.ToLower(find)
-	}
 	cnt := 0
 	var matches []FileSearchMatch
-	mst := []byte("<mark>")
-	mstsz := len(mst)
-	med := []byte("</mark>")
-	medsz := len(med)
-	for ln, b := range tb.LineBytes {
-		bo := b
-		if ignoreCase {
-			b = bytes.ToLower(b)
-		}
-		sz := len(b)
+	for ln, rn := range tb.Lines {
+		sz := len(rn)
 		ci := 0
 		for ci < sz {
-			i := bytes.Index(b[ci:], findeff)
+			i := RuneIndexFold(rn[ci:], fr)
 			if i < 0 {
 				break
 			}
 			i += ci
 			ci = i + fsz
-			reg := NewTextRegion(ln, i, ln, ci)
-			cist := ints.MaxInt(i-FileSearchContext, 0)
-			cied := ints.MinInt(ci+FileSearchContext, sz)
-			tlen := mstsz + medsz + cied - cist
-			txt := make([]byte, tlen)
-			copy(txt, bo[cist:i])
-			ti := i - cist
-			copy(txt[ti:], mst)
-			ti += mstsz
-			copy(txt[ti:], bo[i:ci])
-			ti += fsz
-			copy(txt[ti:], med)
-			ti += medsz
-			copy(txt[ti:], bo[ci:cied])
-			matches = append(matches, FileSearchMatch{Reg: reg, Text: txt})
+			mat := NewFileSearchMatch(rn, i, ci, ln)
+			matches = append(matches, mat)
 			cnt++
 		}
 	}
@@ -919,6 +1029,7 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 //   TextPos, TextRegion, TextBufEdit
 
 // TextPos represents line, character positions within the TextBuf and TextView
+// the Ch character position is in *runes* not bytes!
 type TextPos struct {
 	Ln, Ch int
 }
@@ -1921,8 +2032,37 @@ func (tb *TextBuf) AutoIndentRegion(st, ed int, indents, unindents []string) {
 	}
 }
 
+// CommentStart returns the char index where the comment starts on given line, -1 if no comment
+func (tb *TextBuf) CommentStart(ln int) int {
+	if !tb.IsValidLine(ln) {
+		return -1
+	}
+	comst, _ := tb.Opts.CommentStrs()
+	if comst == "" {
+		return -1
+	}
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return RuneIndexFold(tb.Line(ln), []rune(comst))
+}
+
+// InComment returns true if the given text position is within a commented region
+func (tb *TextBuf) InComment(pos TextPos) bool {
+	return pos.Ch > tb.CommentStart(pos.Ln)
+}
+
+// LineCommented returns true if the given line is a full-comment line (i.e., starts with a comment)
+func (tb *TextBuf) LineCommented(ln int) bool {
+	cs := tb.CommentStart(ln)
+	if cs < 0 {
+		return false
+	}
+	li, _ := tb.LineIndent(ln, tb.Opts.TabSize)
+	return cs == li
+}
+
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*
-func (tb *TextBuf) CommentRegion(st, ed int, comment []byte) {
+func (tb *TextBuf) CommentRegion(st, ed int) {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
@@ -1936,37 +2076,44 @@ func (tb *TextBuf) CommentRegion(st, ed int, comment []byte) {
 		}
 	}
 
-	tb.LinesMu.RLock()
-	var doCom = false
-	for ln := st; ln < ed; ln++ {
-		if ln >= tb.NLines {
-			break
-		}
-		s := string(tb.LineBytes[ln])
-		s = strings.TrimSpace(s)
-		// if any line is uncommented - comment all
-		if !strings.HasPrefix(s, string(comment)) {
-			doCom = true
-			break
-		}
+	comst, comed := tb.Opts.CommentStrs()
+	if comst == "" {
+		fmt.Printf("giv.TextBuf: %v attempt to comment region without any comment syntax defined\n", tb.Nm)
+		return
 	}
-	tb.LinesMu.RUnlock()
 
 	nln := tb.NumLines()
+	doCom := false
 	for ln := st; ln < ed; ln++ {
 		if ln >= nln {
 			break
 		}
+		if !tb.LineCommented(ln) {
+			doCom = true
+			break
+		}
+	}
 
+	for ln := st; ln < ed; ln++ {
+		if ln >= nln {
+			break
+		}
 		if doCom {
-			tb.InsertText(TextPos{Ln: ln, Ch: ch}, comment, true, true)
+			tb.InsertText(TextPos{Ln: ln, Ch: ch}, []byte(comst), true, true)
+			if comed != "" {
+				lln := len(tb.Lines[ln])
+				tb.InsertText(TextPos{Ln: ln, Ch: lln}, []byte(comed), true, true)
+			}
 		} else {
-			tb.LinesMu.RLock()
-			s := string(tb.LineBytes[ln])
-			tb.LinesMu.RUnlock()
-			idx := strings.Index(s, string(comment))
-			if idx > -1 {
-				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + 3}, true, true)
+			idx := tb.CommentStart(ln)
+			if idx >= 0 {
+				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + len(comst)}, true, true)
+			}
+			if comed != "" {
+				idx := RuneIndexFold(tb.Line(ln), []rune(comed))
+				if idx >= 0 {
+					tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + len(comed)}, true, true)
+				}
 			}
 		}
 	}

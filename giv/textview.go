@@ -2352,18 +2352,10 @@ func (tv *TextView) CancelComplete() {
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
 func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
-	// todo: langs are in gide - need to a way to get the comment string for the language of the file
-	// spell check comment lines
-	cmt := []byte("// ")
-	//ls := LangsForFilename(string(tv.Buf.Filename))
-	//if len(ls) == 1 {
-	//	cmt = []byte(ls[0].Comment)
-	//}
-	ln := tv.CursorPos.Ln
-	s := string(tv.Buf.LineBytes[ln])
-	s = strings.TrimSpace(s)
-	if !strings.HasPrefix(s, string(cmt)) {
-		return
+	if !tv.Buf.Opts.IsDoc {
+		if !tv.Buf.InComment(tv.CursorPos) {
+			return
+		}
 	}
 
 	kf := gi.KeyFun(kt.Chord())
