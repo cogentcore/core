@@ -595,7 +595,12 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 		sz := len(rn)
 		ci := 0
 		for ci < sz {
-			i := RuneIndexFold(rn[ci:], fr)
+			var i int
+			if ignoreCase {
+				i = RuneIndexFold(rn[ci:], fr)
+			} else {
+				i = RuneIndex(rn[ci:], fr)
+			}
 			if i < 0 {
 				break
 			}

@@ -299,7 +299,16 @@ func RuneEqualFold(s, t []rune) bool {
 // computing the TextPos Ch position of anything, because these positions are in runes,
 // not in bytes!
 func RuneIndex(txt, find []rune) int {
-	for i := range txt {
+	fsz := len(find)
+	if fsz == 0 {
+		return -1
+	}
+	tsz := len(txt)
+	if tsz < fsz {
+		return -1
+	}
+	mn := tsz - fsz
+	for i := 0; i <= mn; i++ {
 		found := true
 		for j := range find {
 			if txt[i+j] != find[j] {
@@ -319,8 +328,17 @@ func RuneIndex(txt, find []rune) int {
 // This MUST be used for computing the TextPos Ch position of anything, because these positions
 // are in runes, not in bytes!
 func RuneIndexFold(txt, find []rune) int {
-	for i := range txt {
-		if RuneEqualFold(txt[i:], find) {
+	fsz := len(find)
+	if fsz == 0 {
+		return -1
+	}
+	tsz := len(txt)
+	if tsz < fsz {
+		return -1
+	}
+	mn := tsz - fsz
+	for i := 0; i <= mn; i++ {
+		if RuneEqualFold(txt[i:i+fsz], find) {
 			return i
 		}
 	}
@@ -1011,7 +1029,12 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 		sz := len(rn)
 		ci := 0
 		for ci < sz {
-			i := RuneIndexFold(rn[ci:], fr)
+			var i int
+			if ignoreCase {
+				i = RuneIndexFold(rn[ci:], fr)
+			} else {
+				i = RuneIndex(rn[ci:], fr)
+			}
 			if i < 0 {
 				break
 			}
@@ -1958,6 +1981,7 @@ func (tb *TextBuf) IndentLine(ln, n int) *TextBufEdit {
 // PrevLineIndent returns previous line from given line that has indentation -- skips blank lines
 func (tb *TextBuf) PrevLineIndent(ln int) (n int, spc bool, txt string) {
 	tabSz := tb.Opts.TabSize
+	comst, _ := tb.Opts.CommentStrs()
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	ln--
@@ -1968,7 +1992,7 @@ func (tb *TextBuf) PrevLineIndent(ln int) (n int, spc bool, txt string) {
 		}
 		n, spc = tb.LineIndent(ln, tabSz)
 		txt = strings.TrimSpace(string(tb.Lines[ln]))
-		if cmidx := strings.Index(txt, "// "); cmidx > 0 {
+		if cmidx := strings.Index(txt, comst); cmidx > 0 {
 			txt = strings.TrimSpace(txt[:cmidx])
 		}
 		return
@@ -2043,7 +2067,7 @@ func (tb *TextBuf) CommentStart(ln int) int {
 	}
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return RuneIndexFold(tb.Line(ln), []rune(comst))
+	return RuneIndex(tb.Line(ln), []rune(comst))
 }
 
 // InComment returns true if the given text position is within a commented region
