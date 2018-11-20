@@ -9,7 +9,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"mime"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,11 +16,10 @@ import (
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/c2h5oh/datasize"
-	//	"github.com/gabriel-vasile/mimetype" // too slow.
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/h2non/filetype"
 )
 
 // FileInfo represents the information about a given file / directory,
@@ -30,8 +28,9 @@ type FileInfo struct {
 	Ic      gi.IconName `tableview:"no-header" desc:"icon for file"` // tableview:"no-header"
 	Name    string      `width:"40" desc:"name of the file, without any path"`
 	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type"`
+	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
 	Mime    string      `tableview:"-" desc:"full official mime type of the contents"`
+	Cat     filecat.Cat `tableview:"-" desc:"functional category of the file, based on mime data etc"`
 	Mode    os.FileMode `desc:"file mode bits"`
 	ModTime FileTime    `desc:"time that contents (only) were last modified"`
 	Path    string      `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
@@ -75,12 +74,24 @@ func (fi *FileInfo) Stat() error {
 	fi.Mode = info.Mode()
 	fi.ModTime = FileTime(info.ModTime())
 	if info.IsDir() {
-		fi.Kind = "folder"
+		fi.Kind = "Folder"
+		fi.Cat = filecat.Folder
 	} else {
-		mtyp, _, err := MimeFromFile(fi.Path)
+		fi.Cat = filecat.Unknown
+		fi.Kind = ""
+		mtyp, _, err := filecat.MimeFromFile(fi.Path)
 		if err == nil {
 			fi.Mime = mtyp
-			fi.Kind = FileKindFromMime(fi.Mime)
+			fi.Cat = filecat.CatFromMime(fi.Mime)
+			if fi.Cat != filecat.Unknown {
+				fi.Kind = fi.Cat.String() + ": "
+			}
+			fi.Kind += FileKindFromMime(fi.Mime)
+		}
+		if fi.Cat == filecat.Unknown {
+			if fi.IsExec() {
+				fi.Cat = filecat.Exe
+			}
 		}
 	}
 	icn, _ := fi.FindIcon()
@@ -163,58 +174,6 @@ func (fi *FileInfo) Rename(newpath string) error {
 	return err
 }
 
-// MimeFromFile gets mime type from file, using Gabriel Vasile's mimetype
-// package, mime.TypeByExtension, the chroma syntax highlighter,
-// CustomExtMimeMap, and finally FileExtMimeMap.  Use the mimetype package's
-// extension mechanism to add further content-based matchers as needed, and
-// set CustomExtMimeMap to your own map or call AddCustomExtMime for
-// extension-based ones.
-func MimeFromFile(fname string) (mtype, ext string, err error) {
-	//	mtyp, ext, err := mimetype.DetectFile(fname) // too slow
-	mtypt, err := filetype.MatchFile(fname)
-	ptyp := ""
-	isplain := false
-	if err == nil {
-		mtyp := mtypt.MIME.Value
-		ext = mtypt.Extension
-		if strings.HasPrefix(mtyp, "text/plain") {
-			isplain = true
-			ptyp = mtyp
-		} else if mtyp != "" {
-			return mtyp, ext, err
-		}
-	}
-	ext = filepath.Ext(fname)
-	mtyp := mime.TypeByExtension(ext)
-	if mtyp != "" {
-		return mtyp, strings.ToLower(ext), nil
-	}
-	lexer := lexers.Match(fname) // todo: could get start of file and pass to
-	// Analyze, but might be too slow..
-	if lexer != nil {
-		config := lexer.Config()
-		if len(config.MimeTypes) > 0 {
-			mtyp = config.MimeTypes[0]
-			return mtyp, ext, nil
-		}
-		mtyp := "application/" + strings.ToLower(config.Name)
-		return mtyp, ext, nil
-	}
-	ext = strings.ToLower(ext)
-	if CustomExtMimeMap != nil {
-		if mtyp, ok := CustomExtMimeMap[ext]; ok {
-			return mtyp, ext, nil
-		}
-	}
-	if mtyp, ok := FileExtMimeMap[ext]; ok {
-		return mtyp, ext, nil
-	}
-	if isplain {
-		return ptyp, ext, nil
-	}
-	return "", ext, fmt.Errorf("giv.MimeFromFile could not find mime type for ext: %v file: %v", ext, fname)
-}
-
 // FileKindFromMime returns simplified Kind description based on the given full
 // mime type string.  Strips out application/ prefix, and converts all the
 // chroma-based mime-types to their basic names
@@ -224,17 +183,20 @@ func FileKindFromMime(mime string) string {
 			return kind
 		}
 	}
+	if csidx := strings.Index(mime, ";"); csidx > 0 {
+		mime = mime[:csidx]
+	}
+	if mt, has := filecat.AvailMimes[mime]; has {
+		if mt.Support != filecat.NoSupport {
+			return mt.Support.String()
+		}
+	}
 	MimeToKindMapInit()
 	if kind, ok := MimeToKindMap[mime]; ok {
 		return kind
 	}
-	// todo: get rid of charset
-	if csidx := strings.Index(mime, "; charset="); csidx > 0 {
-		mime = mime[:csidx]
-	}
-	switch {
-	case strings.HasPrefix(mime, "application/"):
-		return strings.TrimPrefix(mime, "application/")
+	if sidx := strings.Index(mime, "/"); sidx > 0 {
+		mime = mime[sidx+1:]
 	}
 	return mime
 }
@@ -450,25 +412,7 @@ func CopyFile(dst, src string, perm os.FileMode) error {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//    Mime type / Icon name maps
-
-// FileExtMimeMap is the builtin map of extensions (lowercase) to mime types
-// -- used as a last resort when everything else fails!
-var FileExtMimeMap = map[string]string{
-	".gide": "application/gide",
-	".dmg":  "application/x-apple-diskimage",
-}
-
-// CustomExtMimeMap can be set to your own map of extensions (lowercase) to
-// mime types to cover any special cases needed for your app, not otherwise
-// covered
-var CustomExtMimeMap map[string]string
-
-// AddCustomExtMime adds given extension (lowercase), mime to the
-// FileExtMimeMap -- see also CustomExtMimeMap to install a full map.
-func AddCustomExtMime(ext, mime string) {
-	FileExtMimeMap[ext] = mime
-}
+//    Kind, Icon Maps
 
 // MimeToKindMap maps from mime type names to kind names.  Add any standard
 // manual cases to InitMimeToKindMap, which will be used here along with the
