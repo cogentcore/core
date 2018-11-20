@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alecthomas/chroma/lexers"
 	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
@@ -25,15 +24,16 @@ import (
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
 type FileInfo struct {
-	Ic      gi.IconName `tableview:"no-header" desc:"icon for file"` // tableview:"no-header"
-	Name    string      `width:"40" desc:"name of the file, without any path"`
-	Size    FileSize    `desc:"size of the file in bytes"`
-	Kind    string      `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
-	Mime    string      `tableview:"-" desc:"full official mime type of the contents"`
-	Cat     filecat.Cat `tableview:"-" desc:"functional category of the file, based on mime data etc"`
-	Mode    os.FileMode `desc:"file mode bits"`
-	ModTime FileTime    `desc:"time that contents (only) were last modified"`
-	Path    string      `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
+	Ic      gi.IconName     `tableview:"no-header" desc:"icon for file"` // tableview:"no-header"
+	Name    string          `width:"40" desc:"name of the file, without any path"`
+	Size    FileSize        `desc:"size of the file in bytes"`
+	Kind    string          `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
+	Mime    string          `tableview:"-" desc:"full official mime type of the contents"`
+	Cat     filecat.Cat     `tableview:"-" desc:"functional category of the file, based on mime data etc"`
+	Support filecat.Support `tableview:"-" desc:"supported file type"`
+	Mode    os.FileMode     `desc:"file mode bits"`
+	ModTime FileTime        `desc:"time that contents (only) were last modified"`
+	Path    string          `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
 }
 
 var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
@@ -76,17 +76,24 @@ func (fi *FileInfo) Stat() error {
 	if info.IsDir() {
 		fi.Kind = "Folder"
 		fi.Cat = filecat.Folder
+		fi.Support = filecat.SupFolder
 	} else {
 		fi.Cat = filecat.Unknown
+		fi.Support = filecat.NoSupport
 		fi.Kind = ""
 		mtyp, _, err := filecat.MimeFromFile(fi.Path)
 		if err == nil {
 			fi.Mime = mtyp
 			fi.Cat = filecat.CatFromMime(fi.Mime)
+			fi.Support = filecat.MimeSupport(fi.Mime)
 			if fi.Cat != filecat.Unknown {
 				fi.Kind = fi.Cat.String() + ": "
 			}
-			fi.Kind += FileKindFromMime(fi.Mime)
+			if fi.Support != filecat.NoSupport {
+				fi.Kind += fi.Support.String()
+			} else {
+				fi.Kind += filecat.MimeSub(fi.Mime)
+			}
 		}
 		if fi.Cat == filecat.Unknown {
 			if fi.IsExec() {
@@ -174,112 +181,45 @@ func (fi *FileInfo) Rename(newpath string) error {
 	return err
 }
 
-// FileKindFromMime returns simplified Kind description based on the given full
-// mime type string.  Strips out application/ prefix, and converts all the
-// chroma-based mime-types to their basic names
-func FileKindFromMime(mime string) string {
-	if CustomMimeToKindMap != nil {
-		if kind, ok := CustomMimeToKindMap[mime]; ok {
-			return kind
-		}
-	}
-	if csidx := strings.Index(mime, ";"); csidx > 0 {
-		mime = mime[:csidx]
-	}
-	if mt, has := filecat.AvailMimes[mime]; has {
-		if mt.Support != filecat.NoSupport {
-			return mt.Support.String()
-		}
-	}
-	MimeToKindMapInit()
-	if kind, ok := MimeToKindMap[mime]; ok {
-		return kind
-	}
-	if sidx := strings.Index(mime, "/"); sidx > 0 {
-		mime = mime[sidx+1:]
-	}
-	return mime
-}
-
-// MimeToKindMapInit makes sure the MimeToKindMap is initialized from
-// InitMimeToKindMap plus chroma lexer types.
-func MimeToKindMapInit() {
-	if MimeToKindMap != nil {
-		return
-	}
-	MimeToKindMap = InitMimeToKindMap
-	for _, l := range lexers.Registry.Lexers {
-		config := l.Config()
-		nm := strings.ToLower(config.Name)
-		if len(config.MimeTypes) > 0 {
-			mtyp := config.MimeTypes[0]
-			MimeToKindMap[mtyp] = nm
-		} else {
-			MimeToKindMap["application/"+nm] = nm
-		}
-	}
-}
-
 // FindIcon uses file info to find an appropriate icon for this file -- uses
 // Kind string first to find a correspondingly-named icon, and then tries the
 // extension.  Returns true on success.
 func (fi *FileInfo) FindIcon() (gi.IconName, bool) {
-	kind := fi.Kind
-	icn := gi.IconName(kind)
-	if icn.IsValid() {
-		return icn, true
-	}
-	kind = strings.ToLower(kind)
-	icn = gi.IconName(kind)
-	if icn.IsValid() {
-		return icn, true
-	}
 	if fi.IsDir() {
 		return gi.IconName("folder"), true
 	}
-	if icn = "file-" + gi.IconName(kind); icn.IsValid() {
-		return icn, true
-	}
-	if ms, ok := KindToIconMap[kind]; ok {
-		if icn = gi.IconName(ms); icn.IsValid() {
+	if fi.Support != filecat.NoSupport {
+		snm := strings.ToLower(fi.Support.String())
+		if icn := gi.IconName(snm); icn.IsValid() {
+			return icn, true
+		}
+		if icn := gi.IconName("file-" + snm); icn.IsValid() {
 			return icn, true
 		}
 	}
-	if strings.Contains(kind, "/") {
-		si := strings.IndexByte(kind, '/')
-		typ := kind[:si]
-		subtyp := kind[si+1:]
-		if icn = "file-" + gi.IconName(subtyp); icn.IsValid() {
+	subt := strings.ToLower(filecat.MimeSub(fi.Mime))
+	if subt != "" {
+		if icn := gi.IconName(subt); icn.IsValid() {
 			return icn, true
 		}
-		if icn = gi.IconName(subtyp); icn.IsValid() {
+	}
+	if fi.Cat != filecat.Unknown {
+		cat := strings.ToLower(fi.Cat.String())
+		if icn := gi.IconName(cat); icn.IsValid() {
 			return icn, true
 		}
-		if ms, ok := KindToIconMap[string(subtyp)]; ok {
-			if icn = gi.IconName(ms); icn.IsValid() {
-				return icn, true
-			}
-		}
-		if icn = "file-" + gi.IconName(typ); icn.IsValid() {
+		if icn := gi.IconName("file-" + cat); icn.IsValid() {
 			return icn, true
-		}
-		if icn = gi.IconName(typ); icn.IsValid() {
-			return icn, true
-		}
-		if ms, ok := KindToIconMap[string(typ)]; ok {
-			if icn = gi.IconName(ms); icn.IsValid() {
-				return icn, true
-			}
 		}
 	}
 	ext := filepath.Ext(fi.Name)
 	if ext != "" {
-		if icn = gi.IconName(ext[1:]); icn.IsValid() {
+		if icn := gi.IconName(ext[1:]); icn.IsValid() {
 			return icn, true
 		}
 	}
 
-	icn = gi.IconName("none")
+	icn := gi.IconName("none")
 	return icn, false
 }
 
@@ -409,34 +349,4 @@ func CopyFile(dst, src string, perm os.FileMode) error {
 		return err
 	}
 	return os.Rename(tmp.Name(), dst)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//    Kind, Icon Maps
-
-// MimeToKindMap maps from mime type names to kind names.  Add any standard
-// manual cases to InitMimeToKindMap, which will be used here along with the
-// chroma lexer mime to name mapping.
-var MimeToKindMap map[string]string
-
-// InitMimeToKindMap maps from mime type names to kind names.  Add any
-// standard manual cases here -- will be used as start of MimeToKindMap, which
-// is kept empty as trigger for initialization.
-var InitMimeToKindMap = map[string]string{}
-
-// CustomMimeToKindMap maps from mime type names to kind names, and can be set
-// by user for any special cases.  This is used before the standard one.
-var CustomMimeToKindMap map[string]string
-
-// KindToIconMap has special cases for mapping mime type to icon, for those
-// that basic string doesn't work
-var KindToIconMap = map[string]string{
-	"svg+xml":           "svg",
-	"msword":            "file-word",
-	"postscript":        "file-pdf",
-	"vnd.ms-excel":      "file-excel",
-	"vnd.ms-powerpoint": "file-powerpoint",
-	"x-apple-diskimage": "file-zip",
-	"octet-stream":      "file-binary",
-	"gzip":              "file-zip",
 }

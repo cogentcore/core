@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
@@ -2233,9 +2234,9 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 func (tv *TextView) Paste() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
+	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
-		tv.InsertAtCursor(data.TypeData(mimedata.TextPlain))
+		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
 	}
 }

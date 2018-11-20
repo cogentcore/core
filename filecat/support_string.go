@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _Support_name = "NoSupportTarZipGZipSevenZXzDmgSharAdaBashCCshCSharpDDiffEiffelErlangForthFortranFSharpGoHaskellJavaJavaScriptLuaMakefileMathematicaMatlabObjCOCamlPascalPerlPhpPrologPythonRRubyScalaTclBibtexTexTexinfoTroffHtmlCssMarkdownRtfMSWordOpenTextOpenPresMSPowerpointMSExcelOpenSheetCsvJsonXmlProtobufIniTsvPlainTextICalVCalVCardPdfPostscriptGimpGraphVisGifJpegPngSvgTiffPnmPbmPgmPpmXbmXpmVrmlX3dFlacMp3OggMidiWavMpegMp4MovOgvWmvAviSupportN"
+const _Support_name = "NoSupportSupFolderMultipartTarZipGZipSevenZXzBZipDmgSharTrashAdaBashCCshCSharpDDiffEiffelErlangForthFortranFSharpGoHaskellJavaJavaScriptLuaMakefileMathematicaMatlabObjCOCamlPascalPerlPhpPrologPythonRRubyScalaTclBibtexTexTexinfoTroffHtmlCssMarkdownRtfMSWordOpenTextOpenPresMSPowerpointEBookEPubMSExcelOpenSheetCsvJsonXmlProtobufIniTsvUriColorGoGiPlainTextICalVCalVCardPdfPostscriptGimpGraphVisGifJpegPngSvgTiffPnmPbmPgmPpmXbmXpmVrmlX3dAacFlacMp3OggMidiWavMpegMp4MovOgvWmvAviTrueTypeWebOpenFontSupportN"
 
-var _Support_index = [...]uint16{0, 9, 12, 15, 19, 25, 27, 30, 34, 37, 41, 42, 45, 51, 52, 56, 62, 68, 73, 80, 86, 88, 95, 99, 109, 112, 120, 131, 137, 141, 146, 152, 156, 159, 165, 171, 172, 176, 181, 184, 190, 193, 200, 205, 209, 212, 220, 223, 229, 237, 245, 257, 264, 273, 276, 280, 283, 291, 294, 297, 306, 310, 314, 319, 322, 332, 336, 344, 347, 351, 354, 357, 361, 364, 367, 370, 373, 376, 379, 383, 386, 390, 393, 396, 400, 403, 407, 410, 413, 416, 419, 422, 430}
+var _Support_index = [...]uint16{0, 9, 18, 27, 30, 33, 37, 43, 45, 49, 52, 56, 61, 64, 68, 69, 72, 78, 79, 83, 89, 95, 100, 107, 113, 115, 122, 126, 136, 139, 147, 158, 164, 168, 173, 179, 183, 186, 192, 198, 199, 203, 208, 211, 217, 220, 227, 232, 236, 239, 247, 250, 256, 264, 272, 284, 289, 293, 300, 309, 312, 316, 319, 327, 330, 333, 336, 341, 345, 354, 358, 362, 367, 370, 380, 384, 392, 395, 399, 402, 405, 409, 412, 415, 418, 421, 424, 427, 431, 434, 437, 441, 444, 447, 451, 454, 458, 461, 464, 467, 470, 473, 481, 492, 500}
 
 func (i Support) String() string {
 	if i < 0 || i >= Support(len(_Support_index)-1) {

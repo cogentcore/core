@@ -13,6 +13,7 @@ import (
 	"reflect"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -951,7 +952,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	var buf bytes.Buffer
 	err := src.WriteJSON(&buf, true) // true = pretty for clipboard..
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: mimedata.AppJSON, Data: buf.Bytes()})
+		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: buf.Bytes()})
 	} else {
 		log.Printf("gi.TreeView MimeData SaveJSON error: %v\n", err)
 	}
@@ -961,7 +962,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) ki.Slice {
 	sl := make(ki.Slice, 0, len(md)/2)
 	for _, d := range md {
-		if d.Type == mimedata.AppJSON {
+		if d.Type == filecat.DataJson {
 			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
 			if err == nil {
 				sl = append(sl, nki)
@@ -1029,7 +1030,7 @@ func (tv *TreeView) CutAction() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1221,7 +1222,7 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 	sroot := tv.RootView.SrcNode.Ptr
 	md := de.Data
 	for _, d := range md {
-		if d.Type == mimedata.TextPlain { // link
+		if d.Type == filecat.TextPlain { // link
 			path := string(d.Data)
 			sn, ok := sroot.FindPathUnique(path)
 			if ok {

@@ -73,6 +73,7 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -743,11 +744,11 @@ func (ci *clipImpl) Clear() {
 func addMimeText(cdata *C.char, datalen C.int) {
 	if *curMimeData == nil {
 		*curMimeData = make(mimedata.Mimes, 1)
-		(*curMimeData)[0] = &mimedata.Data{Type: mimedata.TextPlain}
+		(*curMimeData)[0] = &mimedata.Data{Type: filecat.TextPlain}
 	}
 	md := (*curMimeData)[0]
 	if len(md.Type) == 0 {
-		md.Type = mimedata.TextPlain
+		md.Type = filecat.TextPlain
 	}
 	data := C.GoBytes(unsafe.Pointer(cdata), datalen)
 	md.Data = append(md.Data, data...)

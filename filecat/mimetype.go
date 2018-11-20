@@ -15,6 +15,34 @@ import (
 	"github.com/h2non/filetype"
 )
 
+// MimeNoChar returns the mime string without any charset
+// encoding information, or anything else after a ;
+func MimeNoChar(mime string) string {
+	if sidx := strings.Index(mime, ";"); sidx > 0 {
+		return strings.TrimSpace(mime[:sidx])
+	}
+	return mime
+}
+
+// MimeTop returns the top-level main type category from mime type
+// i.e., the thing before the /  -- returns empty if no /
+func MimeTop(mime string) string {
+	if sidx := strings.Index(mime, "/"); sidx > 0 {
+		return mime[:sidx]
+	}
+	return ""
+}
+
+// MimeSub returns the sub-level subtype category from mime type
+// i.e., the thing after the /  -- returns empty if no /
+// also trims off any charset encoding stuff
+func MimeSub(mime string) string {
+	if sidx := strings.Index(MimeNoChar(mime), "/"); sidx > 0 {
+		return mime[sidx+1:]
+	}
+	return ""
+}
+
 // MimeFromFile gets mime type from file, using Gabriel Vasile's mimetype
 // package, mime.TypeByExtension, the chroma syntax highlighter,
 // CustomExtMimeMap, and finally FileExtMimeMap.  Use the mimetype package's
@@ -25,6 +53,11 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	ext = filepath.Ext(fname)
 	if mtyp, has := ExtMimeMap[ext]; has { // use our map first: very fast!
 		return mtyp, ext, nil
+	}
+	fc := fname[0]
+	lc := fname[len(fname)-1]
+	if fc == '~' || fc == '%' || fc == '#' || lc == '~' || lc == '%' || lc == '#' {
+		return MimeString(Trash), ext, nil
 	}
 	mtypt, err := filetype.MatchFile(fname) // h2non next -- has good coverage
 	ptyp := ""
@@ -66,6 +99,27 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 	return "", ext, fmt.Errorf("filecat.MimeFromFile could not find mime type for ext: %v file: %v", ext, fname)
 }
 
+// todo: use this to check against mime types!
+
+// MimeToKindMapInit makes sure the MimeToKindMap is initialized from
+// InitMimeToKindMap plus chroma lexer types.
+// func MimeToKindMapInit() {
+// 	if MimeToKindMap != nil {
+// 		return
+// 	}
+// 	MimeToKindMap = InitMimeToKindMap
+// 	for _, l := range lexers.Registry.Lexers {
+// 		config := l.Config()
+// 		nm := strings.ToLower(config.Name)
+// 		if len(config.MimeTypes) > 0 {
+// 			mtyp := config.MimeTypes[0]
+// 			MimeToKindMap[mtyp] = nm
+// 		} else {
+// 			MimeToKindMap["application/"+nm] = nm
+// 		}
+// 	}
+// }
+
 //////////////////////////////////////////////////////////////////////////////
 //    Mime types
 
@@ -89,6 +143,16 @@ var CustomMimes []MimeType
 // built from StdMimes (compiled in) and then CustomMimes can override
 var AvailMimes map[string]MimeType
 
+// MimeSupport returns the support type for given mime key, NoSupport if not found or not
+// a supported file type
+func MimeSupport(mime string) Support {
+	mt, has := AvailMimes[MimeNoChar(mime)]
+	if !has {
+		return NoSupport
+	}
+	return mt.Support
+}
+
 // MergeAvailMimes merges the StdMimes and CustomMimes into AvailMimes
 // if CustomMimes is updated, then this should be called -- initially
 // it just has StdMimes.
@@ -108,6 +172,9 @@ func MergeAvailMimes() {
 	for _, mt := range AvailMimes {
 		if len(mt.Exts) > 0 { // first pass add only ext guys to support
 			for _, ex := range mt.Exts {
+				if ex[0] != '.' {
+					fmt.Printf("filecat.MergeAvailMimes: ext: %v does not start with a . in type: %v\n", ex, mt.Mime)
+				}
 				if pmt, has := ExtMimeMap[ex]; has {
 					fmt.Printf("filecat.MergeAvailMimes: non-unique ext: %v assigned to mime type: %v AND %v\n", ex, pmt, mt.Mime)
 				} else {
@@ -137,9 +204,11 @@ func init() {
 	MergeAvailMimes()
 }
 
+// http://www.iana.org/assignments/media-types/media-types.xhtml
 // https://github.com/mirage/ocaml-magic-mime/blob/master/x-mime.types
 // https://www.apt-browse.org/browse/debian/stretch/main/all/mime-support/3.60/file/etc/mime.types
 // https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
 
 // StdMimes is the full list of standard mime types compiled into our code
 // various other maps etc are constructed from it.
@@ -150,6 +219,7 @@ var StdMimes = []MimeType{
 	{"text/directory", nil, Folder, NoSupport},
 
 	// Archive
+	{"multipart/mixed", nil, Archive, Multipart},
 	{"application/tar", []string{".tar", ".tar.gz", ".tgz", ".taz", ".taZ", ".tar.bz2", ".tz2", ".tbz2", ".tbz", ".tar.lz", ".tar.lzma", ".tlz", ".tar.lzop", ".tar.xz"}, Archive, Tar},
 	{"application/x-gtar", nil, Archive, Tar},
 	{"application/x-gtar-compressed", nil, Archive, Tar},
@@ -159,6 +229,8 @@ var StdMimes = []MimeType{
 	{"application/gzip", []string{".gz"}, Archive, GZip},
 	{"application/x-7z-compressed", []string{".7z"}, Archive, SevenZ},
 	{"application/x-xz", []string{".xz"}, Archive, Xz},
+	{"application/x-bzip", []string{".bz", ".bz2"}, Archive, BZip},
+	{"application/x-bzip2", nil, Archive, BZip},
 
 	{"application/x-apple-diskimage", []string{".dmg"}, Archive, Dmg},
 	{"application/x-shar", []string{".shar"}, Archive, Shar},
@@ -174,155 +246,159 @@ var StdMimes = []MimeType{
 	{"text/x-rpm-spec", nil, Archive, NoSupport},
 
 	// Backup
-	{"application/x-trash", []string{"~", "%", "#", ".bak", ".old", ".sik"}, Backup, NoSupport},
+	{"application/x-trash", []string{".bak", ".old", ".sik"}, Backup, Trash}, // also "~", "%", "#",
 
-	// Program -- use text/ as main instead of application as there are more text
-	{"text/x-ada", []string{".adb", ".ads", ".ada"}, Program, Ada},
-	{"text/x-asp", []string{".aspx", ".asax", ".ascx", ".ashx", ".asmx", ".axd"}, Program, NoSupport},
+	// Code -- use text/ as main instead of application as there are more text
+	{"text/x-ada", []string{".adb", ".ads", ".ada"}, Code, Ada},
+	{"text/x-asp", []string{".aspx", ".asax", ".ascx", ".ashx", ".asmx", ".axd"}, Code, NoSupport},
 
-	{"text/x-sh", []string{".bash", ".sh"}, Program, Bash},
-	{"application/x-sh", nil, Program, Bash},
+	{"text/x-sh", []string{".bash", ".sh"}, Code, Bash},
+	{"application/x-sh", nil, Code, Bash},
 
-	{"text/x-c", []string{".c", ".C", "c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh"}, Program, C},
-	{"text/x-csrc", nil, Program, C},
-	{"text/x-chdr", nil, Program, C},
-	{"text/x-c++hdr", nil, Program, C},
-	{"text/x-c++src", nil, Program, C},
-	{"text/x-chdr", nil, Program, C},
-	{"text/x-cpp", nil, Program, C},
+	{"text/x-c", []string{".c", ".C", ".c++", ".cpp", ".cxx", ".cc", ".h", ".h++", ".hpp", ".hxx", ".hh"}, Code, C},
+	{"text/x-csrc", nil, Code, C},
+	{"text/x-chdr", nil, Code, C},
+	{"text/x-c++hdr", nil, Code, C},
+	{"text/x-c++src", nil, Code, C},
+	{"text/x-chdr", nil, Code, C},
+	{"text/x-cpp", nil, Code, C},
 
-	{"text/x-csh", []string{".csh"}, Program, Csh},
-	{"application/x-csh", nil, Program, Csh},
+	{"text/x-csh", []string{".csh"}, Code, Csh},
+	{"application/x-csh", nil, Code, Csh},
 
-	{"text/x-csharp", []string{".cs"}, Program, CSharp},
-	{"text/x-dsrc", []string{".d"}, Program, D},
-	{"text/x-diff", []string{".diff", ".patch"}, Program, Diff},
-	{"text/x-eiffel", []string{".e"}, Program, Eiffel},
-	{"text/x-erlang", []string{".erl", ".hrl", ".escript"}, Program, Erlang}, // note: ".es" conflicts with ecmascript
-	{"text/x-forth", []string{".frt"}, Program, Forth},                       // note: ".fs" conflicts with fsharp
-	{"text/x-fortran", []string{".f", ".F"}, Program, Fortran},
-	{"text/x-fsharp", []string{".fs", ".fsi"}, Program, FSharp},
-	{"text/x-gosrc", []string{".go"}, Program, Go},
-	{"text/x-haskell", []string{".hs", ".lhs"}, Program, Haskell},
-	{"text/x-literate-haskell", nil, Program, Haskell}, // todo: not sure if same or not
+	{"text/x-csharp", []string{".cs"}, Code, CSharp},
+	{"text/x-dsrc", []string{".d"}, Code, D},
+	{"text/x-diff", []string{".diff", ".patch"}, Code, Diff},
+	{"text/x-eiffel", []string{".e"}, Code, Eiffel},
+	{"text/x-erlang", []string{".erl", ".hrl", ".escript"}, Code, Erlang}, // note: ".es" conflicts with ecmascript
+	{"text/x-forth", []string{".frt"}, Code, Forth},                       // note: ".fs" conflicts with fsharp
+	{"text/x-fortran", []string{".f", ".F"}, Code, Fortran},
+	{"text/x-fsharp", []string{".fs", ".fsi"}, Code, FSharp},
+	{"text/x-gosrc", []string{".go"}, Code, Go},
+	{"text/x-haskell", []string{".hs", ".lhs"}, Code, Haskell},
+	{"text/x-literate-haskell", nil, Code, Haskell}, // todo: not sure if same or not
 
-	{"text/x-java", []string{".java", ".jar"}, Program, Java},
-	{"application/java-archive", nil, Program, Java},
-	{"application/javascript", []string{".js"}, Program, JavaScript},
-	{"application/ecmascript", []string{".es"}, Program, NoSupport},
+	{"text/x-java", []string{".java", ".jar"}, Code, Java},
+	{"application/java-archive", nil, Code, Java},
+	{"application/javascript", []string{".js"}, Code, JavaScript},
+	{"application/ecmascript", []string{".es"}, Code, NoSupport},
 
-	{"text/x-lua", []string{".lua", ".wlua"}, Program, Lua},
+	{"text/x-lua", []string{".lua", ".wlua"}, Code, Lua},
 
-	{"text/x-makefile", nil, Program, Makefile},
-	{"text/x-autoconf", nil, Program, Makefile},
+	{"text/x-makefile", nil, Code, Makefile},
+	{"text/x-autoconf", nil, Code, Makefile},
 
-	{"text/x-moc", []string{".moc"}, Program, NoSupport},
+	{"text/x-moc", []string{".moc"}, Code, NoSupport},
 
-	{"application/mathematica", []string{".nb", ".nbp"}, Program, Mathematica},
+	{"application/mathematica", []string{".nb", ".nbp"}, Code, Mathematica},
 
-	{"text/x-matlab", nil, Program, Matlab}, // ext conflict: []string{".m"} with objcsrc
-	{"text/matlab", nil, Program, Matlab},
-	{"text/octave", nil, Program, Matlab},
-	{"text/scilab", []string{".sci", ".sce", ".tst"}, Program, NoSupport},
+	{"text/x-matlab", nil, Code, Matlab}, // ext conflict: []string{".m"} with objcsrc
+	{"text/matlab", nil, Code, Matlab},
+	{"text/octave", nil, Code, Matlab},
+	{"text/scilab", []string{".sci", ".sce", ".tst"}, Code, NoSupport},
 
-	{"text/x-modelica", []string{".mo"}, Program, NoSupport},
-	{"text/x-nemerle", []string{".n"}, Program, NoSupport},
+	{"text/x-modelica", []string{".mo"}, Code, NoSupport},
+	{"text/x-nemerle", []string{".n"}, Code, NoSupport},
 
-	{"text/x-objcsrc", nil, Program, ObjC}, // ext conflict: []string{".m"} with matlab
-	{"text/x-objective-j", nil, Program, NoSupport},
+	{"text/x-objcsrc", nil, Code, ObjC}, // ext conflict: []string{".m"} with matlab
+	{"text/x-objective-j", nil, Code, NoSupport},
 
-	{"text/x-ocaml", []string{".ml", ".mli", ".mll", ".mly"}, Program, OCaml},
-	{"text/x-pascal", []string{".p", ".pas"}, Program, Pascal},
-	{"text/x-perl", []string{".pl", ".pm"}, Program, Perl},
-	{"text/x-php", []string{".php", ".php3", ".php4", ".php5", ".inc"}, Program, Php},
-	{"text/x-prolog", []string{".ecl", ".prolog", ".pro"}, Program, Prolog}, // note: ".pl" conflicts
+	{"text/x-ocaml", []string{".ml", ".mli", ".mll", ".mly"}, Code, OCaml},
+	{"text/x-pascal", []string{".p", ".pas"}, Code, Pascal},
+	{"text/x-perl", []string{".pl", ".pm"}, Code, Perl},
+	{"text/x-php", []string{".php", ".php3", ".php4", ".php5", ".inc"}, Code, Php},
+	{"text/x-prolog", []string{".ecl", ".prolog", ".pro"}, Code, Prolog}, // note: ".pl" conflicts
 
-	{"text/x-python", []string{".py", ".pyc", ".pyo", ".pyw"}, Program, Python},
-	{"application/x-python-code", nil, Program, Python},
+	{"text/x-python", []string{".py", ".pyc", ".pyo", ".pyw"}, Code, Python},
+	{"application/x-python-code", nil, Code, Python},
 
-	{"text/x-r", []string{".r", ".S", ".R", ".Rhistory", ".Rprofile", ".Renviron"}, Program, R},
-	{"text/x-R", nil, Program, R},
-	{"text/S-Plus", nil, Program, R},
-	{"text/S", nil, Program, R},
-	{"text/x-r-source", nil, Program, R},
-	{"text/x-r-history", nil, Program, R},
-	{"text/x-r-profile", nil, Program, R},
+	{"text/x-r", []string{".r", ".S", ".R", ".Rhistory", ".Rprofile", ".Renviron"}, Code, R},
+	{"text/x-R", nil, Code, R},
+	{"text/S-Plus", nil, Code, R},
+	{"text/S", nil, Code, R},
+	{"text/x-r-source", nil, Code, R},
+	{"text/x-r-history", nil, Code, R},
+	{"text/x-r-profile", nil, Code, R},
 
-	{"text/x-ruby", []string{".rb"}, Program, Ruby},
-	{"application/x-ruby", nil, Program, Ruby},
-	{"text/x-scala", []string{".scala"}, Program, Scala},
-	{"text/x-tcl", []string{".tcl", ".tk"}, Program, Tcl},
-	{"application/x-tcl", nil, Program, Tcl},
+	{"text/x-ruby", []string{".rb"}, Code, Ruby},
+	{"application/x-ruby", nil, Code, Ruby},
+	{"text/x-scala", []string{".scala"}, Code, Scala},
+	{"text/x-tcl", []string{".tcl", ".tk"}, Code, Tcl},
+	{"application/x-tcl", nil, Code, Tcl},
 
-	// Document
-	{"text/x-bibtex", []string{".bib"}, Document, Bibtex},
-	{"text/x-tex", []string{".tex", ".ltx", ".sty", ".cls", ".latex"}, Document, Tex},
-	{"application/x-latex", nil, Document, Tex},
+	// Doc
+	{"text/x-bibtex", []string{".bib"}, Doc, Bibtex},
+	{"text/x-tex", []string{".tex", ".ltx", ".sty", ".cls", ".latex"}, Doc, Tex},
+	{"application/x-latex", nil, Doc, Tex},
 
-	{"application/x-texinfo", []string{".texinfo", ".texi"}, Document, Texinfo},
+	{"application/x-texinfo", []string{".texinfo", ".texi"}, Doc, Texinfo},
 
-	{"application/x-troff", []string{".t", ".tr", ".roff", ".man", ".me", ".ms"}, Document, Troff},
-	{"application/x-troff-man", nil, Document, Troff},
-	{"application/x-troff-me", nil, Document, Troff},
-	{"application/x-troff-ms", nil, Document, Troff},
+	{"application/x-troff", []string{".t", ".tr", ".roff", ".man", ".me", ".ms"}, Doc, Troff},
+	{"application/x-troff-man", nil, Doc, Troff},
+	{"application/x-troff-me", nil, Doc, Troff},
+	{"application/x-troff-ms", nil, Doc, Troff},
 
-	{"text/html", []string{".html", ".htm", ".shtml"}, Document, Html},
-	{"text/mathml", []string{".mml"}, Document, NoSupport},
-	{"text/css", []string{".css"}, Document, Css},
+	{"text/html", []string{".html", ".htm", ".shtml", ".xhtml", ".xht"}, Doc, Html},
+	{"application/xhtml+xml", nil, Doc, Html},
+	{"text/mathml", []string{".mml"}, Doc, NoSupport},
+	{"text/css", []string{".css"}, Doc, Css},
 
-	{"text/markdown", []string{".md", ".markdown"}, Document, Markdown},
-	{"text/x-markdown", nil, Document, Markdown},
+	{"text/markdown", []string{".md", ".markdown"}, Doc, Markdown},
+	{"text/x-markdown", nil, Doc, Markdown},
 
-	{"application/rtf", []string{".rtf"}, Document, Rtf},
-	{"text/richtext", []string{".rtx"}, Document, NoSupport},
+	{"application/rtf", []string{".rtf"}, Doc, Rtf},
+	{"text/richtext", []string{".rtx"}, Doc, NoSupport},
 
-	{"application/mbox", []string{".mbox"}, Document, NoSupport},
-	{"application/x-rss+xml", []string{".rss"}, Document, NoSupport},
+	{"application/mbox", []string{".mbox"}, Doc, NoSupport},
+	{"application/x-rss+xml", []string{".rss"}, Doc, NoSupport},
 
-	{"application/msword", []string{".doc", ".dot", ".docx", ".dotx"}, Document, MSWord},
-	{"application/vnd.ms-word", nil, Document, MSWord},
-	{"application/vnd.openxmlformats-officedocument.wordprocessingml.document", nil, Document, MSWord},
-	{"application/vnd.openxmlformats-officedocument.wordprocessingml.template", nil, Document, MSWord},
+	{"application/msword", []string{".doc", ".dot", ".docx", ".dotx"}, Doc, MSWord},
+	{"application/vnd.ms-word", nil, Doc, MSWord},
+	{"application/vnd.openxmlformats-officedocument.wordprocessingml.document", nil, Doc, MSWord},
+	{"application/vnd.openxmlformats-officedocument.wordprocessingml.template", nil, Doc, MSWord},
 
-	{"application/vnd.oasis.opendocument.text", []string{".odt", ".odm", ".ott", ".oth", ".sxw", ".sxg", ".stw", ".sxm"}, Document, OpenText},
-	{"application/vnd.oasis.opendocument.text-master", nil, Document, OpenText},
-	{"application/vnd.oasis.opendocument.text-template", nil, Document, OpenText},
-	{"application/vnd.oasis.opendocument.text-web", nil, Document, OpenText},
-	{"application/vnd.sun.xml.writer", nil, Document, OpenText},
-	{"application/vnd.sun.xml.writer.global", nil, Document, OpenText},
-	{"application/vnd.sun.xml.writer.template", nil, Document, OpenText},
-	{"application/vnd.sun.xml.math", nil, Document, OpenText},
+	{"application/vnd.oasis.opendocument.text", []string{".odt", ".odm", ".ott", ".oth", ".sxw", ".sxg", ".stw", ".sxm"}, Doc, OpenText},
+	{"application/vnd.oasis.opendocument.text-master", nil, Doc, OpenText},
+	{"application/vnd.oasis.opendocument.text-template", nil, Doc, OpenText},
+	{"application/vnd.oasis.opendocument.text-web", nil, Doc, OpenText},
+	{"application/vnd.sun.xml.writer", nil, Doc, OpenText},
+	{"application/vnd.sun.xml.writer.global", nil, Doc, OpenText},
+	{"application/vnd.sun.xml.writer.template", nil, Doc, OpenText},
+	{"application/vnd.sun.xml.math", nil, Doc, OpenText},
 
-	{"application/vnd.oasis.opendocument.presentation", []string{".odp", ".otp", ".sxi", ".sti"}, Document, OpenPres},
-	{"application/vnd.oasis.opendocument.presentation-template", nil, Document, OpenPres},
-	{"application/vnd.sun.xml.impress", nil, Document, OpenPres},
-	{"application/vnd.sun.xml.impress.template", nil, Document, OpenPres},
+	{"application/vnd.oasis.opendocument.presentation", []string{".odp", ".otp", ".sxi", ".sti"}, Doc, OpenPres},
+	{"application/vnd.oasis.opendocument.presentation-template", nil, Doc, OpenPres},
+	{"application/vnd.sun.xml.impress", nil, Doc, OpenPres},
+	{"application/vnd.sun.xml.impress.template", nil, Doc, OpenPres},
 
-	{"application/vnd.ms-powerpoint", []string{".ppt", ".pps", ".pptx", ".sldx", ".ppsx", ".potx"}, Document, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.presentation", nil, Document, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.slide", nil, Document, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.slideshow", nil, Document, MSPowerpoint},
-	{"application/vnd.openxmlformats-officedocument.presentationml.template", nil, Document, MSPowerpoint},
+	{"application/vnd.ms-powerpoint", []string{".ppt", ".pps", ".pptx", ".sldx", ".ppsx", ".potx"}, Doc, MSPowerpoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.presentation", nil, Doc, MSPowerpoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.slide", nil, Doc, MSPowerpoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.slideshow", nil, Doc, MSPowerpoint},
+	{"application/vnd.openxmlformats-officedocument.presentationml.template", nil, Doc, MSPowerpoint},
 
-	{"application/ms-tnef", nil, Document, NoSupport},
-	{"application/vnd.ms-tnef", nil, Document, NoSupport},
+	{"application/ms-tnef", nil, Doc, NoSupport},
+	{"application/vnd.ms-tnef", nil, Doc, NoSupport},
 
-	{"application/onenote", []string{".one", ".onetoc2", ".onetmp", ".onepkg"}, Document, NoSupport},
+	{"application/onenote", []string{".one", ".onetoc2", ".onetmp", ".onepkg"}, Doc, NoSupport},
 
-	{"application/pgp-encrypted", []string{".pgp"}, Document, NoSupport},
-	{"application/pgp-keys", []string{".key"}, Document, NoSupport},
-	{"application/pgp-signature", []string{".sig"}, Document, NoSupport},
+	{"application/pgp-encrypted", []string{".pgp"}, Doc, NoSupport},
+	{"application/pgp-keys", []string{".key"}, Doc, NoSupport},
+	{"application/pgp-signature", []string{".sig"}, Doc, NoSupport},
 
-	// Spreadsheet
-	{"application/vnd.ms-excel", []string{".xls", ".xlb", ".xlt", ".xlsx", ".xltx"}, Spreadsheet, MSExcel},
-	{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", nil, Spreadsheet, MSExcel},
-	{"application/vnd.openxmlformats-officedocument.spreadsheetml.template", nil, Spreadsheet, MSExcel},
+	{"application/vnd.amazon.ebook", []string{".azw"}, Doc, EBook},
+	{"application/epub+zip", []string{".epub"}, Doc, EPub},
 
-	{"application/vnd.oasis.opendocument.spreadsheet", []string{".ods", ".ots", ".sxc", ".stc", ".odf"}, Spreadsheet, OpenSheet},
-	{"application/vnd.oasis.opendocument.spreadsheet-template", nil, Spreadsheet, OpenSheet},
-	{"application/vnd.oasis.opendocument.formula", nil, Spreadsheet, OpenSheet}, // todo: could be separate
-	{"application/vnd.sun.xml.calc", nil, Spreadsheet, OpenSheet},
-	{"application/vnd.sun.xml.calc.template", nil, Spreadsheet, OpenSheet},
+	// Sheet
+	{"application/vnd.ms-excel", []string{".xls", ".xlb", ".xlt", ".xlsx", ".xltx"}, Sheet, MSExcel},
+	{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", nil, Sheet, MSExcel},
+	{"application/vnd.openxmlformats-officedocument.spreadsheetml.template", nil, Sheet, MSExcel},
+
+	{"application/vnd.oasis.opendocument.spreadsheet", []string{".ods", ".ots", ".sxc", ".stc", ".odf"}, Sheet, OpenSheet},
+	{"application/vnd.oasis.opendocument.spreadsheet-template", nil, Sheet, OpenSheet},
+	{"application/vnd.oasis.opendocument.formula", nil, Sheet, OpenSheet}, // todo: could be separate
+	{"application/vnd.sun.xml.calc", nil, Sheet, OpenSheet},
+	{"application/vnd.sun.xml.calc.template", nil, Sheet, OpenSheet},
 
 	// Data
 	{"text/csv", []string{".csv"}, Data, Csv},
@@ -332,14 +408,18 @@ var StdMimes = []MimeType{
 	{"text/x-protobuf", []string{".proto"}, Data, Protobuf},
 	{"text/x-ini", []string{".ini", ".cfg", ".inf"}, Data, Ini},
 	{"text/x-ini-file", nil, Data, Ini},
+	{"text/uri-list", nil, Data, Uri},
+	{"application/x-color", nil, Data, Color},
 
 	{"application/rdf+xml", []string{".rdf"}, Data, NoSupport},
-	{"application/msaccess", []string{"mdb"}, Data, NoSupport},
+	{"application/msaccess", []string{".mdb"}, Data, NoSupport},
 	{"application/vnd.oasis.opendocument.database", []string{".odb"}, Data, NoSupport},
 	{"text/tab-separated-values", []string{".tsv"}, Data, Tsv},
 	{"application/vnd.google-earth.kml+xml", []string{".kml", ".kmz"}, Data, NoSupport},
 	{"application/vnd.google-earth.kmz", nil, Data, NoSupport},
 	{"application/x-sql", []string{".sql"}, Data, NoSupport},
+
+	{"application/vnd.gogi", nil, Data, GoGi}, // our own special unregistered type..
 
 	// Text
 	{"text/plain", []string{".asc", ".txt", ".text", ".pot", ".brf", ".srt"}, Text, PlainText},
@@ -407,6 +487,7 @@ var StdMimes = []MimeType{
 	{"model/x3d+binary", nil, Model, X3d},
 
 	// Audio
+	{"audio/aac", []string{".aac"}, Audio, Aac},
 	{"audio/flac", []string{".flac"}, Audio, Flac},
 	{"audio/mpeg", []string{".mpga", ".mpega", ".mp2", ".mp3", ".m4a"}, Audio, Mp3},
 	{"audio/mpegurl", []string{".m3u"}, Audio, NoSupport},
@@ -436,6 +517,7 @@ var StdMimes = []MimeType{
 	{"video/dv", []string{".dif", ".dv"}, Video, NoSupport},
 	{"video/fli", []string{".fli"}, Video, NoSupport},
 	{"video/gl", []string{".gl"}, Video, NoSupport},
+	{"video/h264", nil, Video, NoSupport},
 	{"video/mpeg", []string{".mpeg", ".mpg", ".mpe"}, Video, Mpeg},
 	{"video/MP2T", []string{".ts"}, Video, NoSupport},
 	{"video/mp4", []string{".mp4"}, Video, Mp4},
@@ -454,19 +536,30 @@ var StdMimes = []MimeType{
 	{"video/x-msvideo", []string{".avi"}, Video, Avi},
 	{"video/x-sgi-movie", []string{".movie"}, Video, NoSupport},
 	{"video/x-matroska", []string{".mpv", ".mkv"}, Video, NoSupport},
+	{"application/x-shockwave-flash", []string{".swf"}, Video, NoSupport},
 
 	// Font
+	{"font/ttf", []string{".otf", ".ttf", ".ttc"}, Font, TrueType},
+	{"font/otf", nil, Font, TrueType},
+	{"application/font-sfnt", nil, Font, TrueType},
+	{"application/x-font-ttf", nil, Font, TrueType},
+
 	{"application/x-font", []string{".pfa", ".pfb", ".gsf", ".pcf", ".pcf.Z"}, Font, NoSupport},
 	{"application/x-font-pcf", nil, Font, NoSupport},
+	{"application/vnd.ms-fontobject", []string{".eot"}, Font, NoSupport},
+
+	{"font/woff", []string{".woff", ".woff2"}, Font, WebOpenFont},
+	{"font/woff2", nil, Font, WebOpenFont},
+	{"application/font-woff", nil, Font, WebOpenFont},
 
 	// Exe
 	{"application/x-executable", nil, Exe, NoSupport},
 	{"application/x-msdos-program", []string{".com", ".exe", ".bat", ".dll"}, Exe, NoSupport},
 
 	// Binary
-	{"application/octet-stream", []string{".bin"}, Binary, NoSupport},
-	{"application/x-object", []string{".o"}, Binary, NoSupport},
-	{"text/x-libtool", nil, Binary, NoSupport},
+	{"application/octet-stream", []string{".bin"}, Bin, NoSupport},
+	{"application/x-object", []string{".o"}, Bin, NoSupport},
+	{"text/x-libtool", nil, Bin, NoSupport},
 }
 
 // below are entries from official /etc/mime.types that we don't recognize
@@ -499,9 +592,7 @@ var StdMimes = []MimeType{
 // application/edi-x12
 // application/edifact
 // application/eshop
-// application/font-sfntotf ttf
 // application/font-tdpfrpfr
-// application/font-woffwoff
 // application/futuresplashspl
 // application/ghostview
 // application/htahta
@@ -564,7 +655,6 @@ var StdMimes = []MimeType{
 // application/whoispp-response
 // application/wita
 // application/x400-bp
-// application/xhtml+xmlxhtml xht
 // application/xml-dtd
 // application/xml-external-parsed-entity
 // application/xslt+xmlxsl xslt
@@ -1037,7 +1127,6 @@ var StdMimes = []MimeType{
 // text/t140
 // text/texmacstm
 // text/turtlettl
-// text/uri-list
 // text/vnd.abc
 // text/vnd.curl
 // text/vnd.debian.copyright

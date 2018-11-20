@@ -4,7 +4,11 @@
 
 package filecat
 
-import "github.com/goki/ki/kit"
+import (
+	"log"
+
+	"github.com/goki/ki/kit"
+)
 
 // filecat.Support are file types that are specifically supported by GoGi
 // and can be processed in one way or another, plus various others
@@ -17,21 +21,47 @@ type Support int
 // and have extensions defined
 var SupportMimes map[Support]MimeType
 
+// MimeString gives the string representation of the canonical mime type
+// associated with given supported mime type.
+func MimeString(sup Support) string {
+	mt, has := SupportMimes[sup]
+	if !has {
+		log.Printf("filecat.MimeString called with unrecognized 'Supported' type: %v\n", sup)
+		return ""
+	}
+	return mt.Mime
+}
+
+// These are the super high-frequency used mime types, to have very quick const level support
+const (
+	TextPlain = "text/plain"
+	DataJson  = "application/json"
+	DataXml   = "application/xml"
+)
+
 // These are the supported file types, organized by category
 const (
 	// NoSupport = a non-supported file type
 	NoSupport Support = iota
 
+	// Folder is a folder / directory
+	SupFolder
+
 	// Archive is a collection of files, e.g., zip tar
+	Multipart
 	Tar
 	Zip
 	GZip
 	SevenZ
 	Xz
+	BZip
 	Dmg
 	Shar
 
-	// Program is a programming language file
+	// Backup files
+	Trash
+
+	// Code is a programming language file
 	Ada
 	Bash
 	C // includes C++
@@ -64,7 +94,7 @@ const (
 	Scala
 	Tcl
 
-	// Document is an editable word processing file including latex, markdown, html, css, etc
+	// Doc is an editable word processing file including latex, markdown, html, css, etc
 	Bibtex
 	Tex
 	Texinfo
@@ -79,7 +109,10 @@ const (
 	OpenPres
 	MSPowerpoint
 
-	// Spreadsheet is a spreadsheet file (.xls etc)
+	EBook
+	EPub
+
+	// Sheet is a spreadsheet file (.xls etc)
 	MSExcel
 	OpenSheet
 
@@ -90,6 +123,9 @@ const (
 	Protobuf
 	Ini
 	Tsv
+	Uri
+	Color
+	GoGi
 
 	// Text is some other kind of text file
 	PlainText // text/plain mimetype -- used for clipboard
@@ -119,6 +155,7 @@ const (
 	X3d
 
 	// Audio is an audio file
+	Aac
 	Flac
 	Mp3
 	Ogg
@@ -134,10 +171,12 @@ const (
 	Avi
 
 	// Font is a font file
+	TrueType
+	WebOpenFont
 
 	// Exe is a binary executable file
 
-	// Binary is some other unrecognized binary type
+	// Bin is some other unrecognized binary type
 
 	SupportN
 )

@@ -10,22 +10,21 @@
 // seems mainly to have paid registrations in application/ category,
 // and doesn't have any of the main programming languages etc.
 //
-// The official go std library support depends on different platform
+// The official Go std library support depends on different platform
 // libraries and mac doesn't have one, so it has very limited support
 //
-// We are using both of the main go packages developed by others:
+// So we sucked it up and made a full list of all the major file types
+// that we really care about and also provide a broader category-level organization
+// that is useful for functionally organizing / operating on files.
+//
+// As fallback, we are using both of the main go packages developed by others:
 // github.com/gabriel-vasile/mimetype
 // github.com/h2non/filetype
+// (which constrained our package name to not be either of those two)
 //
-// and have some additional tables that try to provide reliable support
-// for the set of file types that we really care about
-// and also provide a broader category-level organization that is useful
-// for functionally organizing files.
 package filecat
 
 import (
-	"strings"
-
 	"github.com/goki/ki/kit"
 )
 
@@ -45,7 +44,7 @@ const (
 	// Unknown is an unknown file category
 	Unknown Cat = iota
 
-	// CatFolder is a folder / directory
+	// Folder is a folder / directory
 	Folder
 
 	// Archive is a collection of files, e.g., zip tar
@@ -54,14 +53,14 @@ const (
 	// Backup is a backup file (# ~ etc)
 	Backup
 
-	// Program is a programming language file
-	Program
+	// Code is a programming language file
+	Code
 
-	// Document is an editable word processing file including latex, markdown, html, css, etc
-	Document
+	// Doc is an editable word processing file including latex, markdown, html, css, etc
+	Doc
 
-	// Spreadsheet is a spreadsheet file (.xls etc)
-	Spreadsheet
+	// Sheet is a spreadsheet file (.xls etc)
+	Sheet
 
 	// Data is some kind of data format (csv, json, database, etc)
 	Data
@@ -84,11 +83,11 @@ const (
 	// Font is a font file
 	Font
 
-	// Exe is a binary executable file
+	// Exe is a binary executable file (scripts go in Code)
 	Exe
 
-	// Binary is some other unrecognized binary type
-	Binary
+	// Bin is some other type of binary (object files, libraries, etc)
+	Bin
 
 	CatN
 )
@@ -110,18 +109,16 @@ func CatFromMime(mime string) Cat {
 	if mime == "" {
 		return Unknown
 	}
-	if cidx := strings.Index(mime, ";"); cidx > 0 {
-		mime = mime[:cidx]
-	}
+	mime = MimeNoChar(mime)
 	if mt, has := AvailMimes[mime]; has {
 		return mt.Cat // must be set!
 	}
 	// try from type:
-	ms := strings.Split(mime, "/")
-	if len(ms) < 2 {
+	ms := MimeTop(mime)
+	if ms == "" {
 		return Unknown
 	}
-	switch ms[0] {
+	switch ms {
 	case "image":
 		return Image
 	case "audio":
@@ -133,7 +130,7 @@ func CatFromMime(mime string) Cat {
 	case "model":
 		return Model
 	}
-	if ms[0] == "text" {
+	if ms == "text" {
 		return Text
 	}
 	return Unknown

@@ -16,6 +16,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -561,12 +562,12 @@ func (tf *TextField) Copy(reset bool) string {
 func (tf *TextField) Paste() {
 	wupdt := tf.Viewport.Win.UpdateStart()
 	defer tf.Viewport.Win.UpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
+	data := oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
 		}
-		tf.InsertAtCursor(data.Text(mimedata.TextPlain))
+		tf.InsertAtCursor(data.Text(filecat.TextPlain))
 	}
 }
 

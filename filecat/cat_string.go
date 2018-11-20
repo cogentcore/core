@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _Cat_name = "UnknownFolderArchiveBackupProgramDocumentSpreadsheetDataTextImageModelAudioVideoFontExeBinaryCatN"
+const _Cat_name = "UnknownFolderArchiveBackupCodeDocSheetDataTextImageModelAudioVideoFontExeBinCatN"
 
-var _Cat_index = [...]uint8{0, 7, 13, 20, 26, 33, 41, 52, 56, 60, 65, 70, 75, 80, 84, 87, 93, 97}
+var _Cat_index = [...]uint8{0, 7, 13, 20, 26, 30, 33, 38, 42, 46, 51, 56, 61, 66, 70, 73, 76, 80}
 
 func (i Cat) String() string {
 	if i < 0 || i >= Cat(len(_Cat_index)-1) {

@@ -6,7 +6,10 @@
 // drag-and-drop functions in the GoGi GUI.  mimedata.Data struct contains
 // format and []byte data, and multiple representations of the same data are
 // encoded in mimedata.Mimes which is just a []mimedata.Data slice -- it can
-// be encoded / decoded from mime multipart
+// be encoded / decoded from mime multipart.
+//
+// see filecat package for known mimetypes
+//
 package mimedata
 
 import (
@@ -20,6 +23,8 @@ import (
 	"mime/multipart"
 	"net/textproto"
 	"strings"
+
+	"github.com/goki/gi/filecat"
 )
 
 const (
@@ -41,64 +46,16 @@ type Data struct {
 	Data []byte
 }
 
-// various standard MIME types -- see http://www.iana.org/assignments/media-types/media-types.xhtml for a big list
-var (
-	// for ALL text formats, Go standard utf8 encoding is assumed -- standard for most?
-	TextPlain = "text/plain"
-	TextHTML  = "text/html"
-	TextURL   = "text/uri-list"
-	TextCSS   = "text/css"
-	TextCSV   = "text/csv"
-	// .ics calendar entry
-	TextCalendar = "text/calendar"
-	// text version of XML is for human-readable xml
-	TextXML = "text/xml"
-
-	ImageJPEG = "image/jpeg"
-	ImagePNG  = "image/png"
-	ImageGIF  = "image/gif"
-	ImageTIFF = "image/tiff"
-	ImageSVG  = "image/svg+xml"
-
-	AudioWAV  = "audio/wav"
-	AudioMIDI = "audio/midi"
-	AudioOGG  = "audio/ogg"
-	AudioAAC  = "audio/aac"
-	AudioMPEG = "audio/mpeg"
-	AudioMP4  = "audio/mp4"
-
-	VideoMPEG      = "video/mpeg"
-	VideoAVI       = "video/x-msvideo"
-	VideoOGG       = "video/ogg"
-	VideoMP4       = "video/mp4"
-	VideoH264      = "video/h264"
-	VideoQuicktime = "video/quicktime"
-
-	FontTTF = "font/ttf"
-
-	AppRTF  = "application/rtf"
-	AppPDF  = "application/pdf"
-	AppJSON = "application/json"
-	// app version of XML is for non-human-readable xml content
-	AppXML        = "application/xml"
-	AppColor      = "application/x-color"
-	AppJavaScript = "application/javascript"
-	AppGo         = "text/x-gosrc"
-
-	// use this as a prefix for any GoGi-specific elements (e.g., AppGoGi + ".treeview")
-	AppGoGi = "application/vnd.gogi"
-)
-
 // NewTextData returns a Data representation of the string -- good idea to
 // always have a text/plain representation of everything on clipboard /
 // drag-n-drop
 func NewTextData(text string) *Data {
-	return &Data{TextPlain, []byte(text)}
+	return &Data{filecat.TextPlain, []byte(text)}
 }
 
 // NewTextDataBytes returns a Data representation of the bytes string
 func NewTextDataBytes(text []byte) *Data {
-	return &Data{TextPlain, text}
+	return &Data{filecat.TextPlain, text}
 }
 
 // IsText returns true if type is any of the text/ types (literally looks for that at start of Type) or is another known text type (e.g., AppJSON, XML)
@@ -106,7 +63,7 @@ func IsText(typ string) bool {
 	if strings.HasPrefix(typ, "text/") {
 		return true
 	}
-	if typ == AppJSON || typ == AppXML || typ == AppRTF {
+	if typ == filecat.DataJson || typ == filecat.DataXml {
 		return true
 	}
 	return false

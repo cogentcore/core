@@ -23,7 +23,7 @@ type Clipper interface {
 	Cut()
 
 	// Paste pastes from clipboard to item, e.g.,
-	// md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
+	// md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	// reads mime-encoded data from the clipboard, in this case in the JSON format
 	Paste()
 }

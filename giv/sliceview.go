@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -926,7 +927,7 @@ func (sv *SliceView) MimeDataRow(md *mimedata.Mimes, row int) {
 	val := sv.RowVal(row)
 	b, err := json.MarshalIndent(val, "", "  ")
 	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: mimedata.AppJSON, Data: b})
+		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: b})
 	} else {
 		log.Printf("gi.SliceView MimeData JSON Marshall error: %v\n", err)
 	}
@@ -939,7 +940,7 @@ func (sv *SliceView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
 	tvtyp := tvnp.Type()
 	sl := make([]interface{}, 0, len(md))
 	for _, d := range md {
-		if d.Type == mimedata.AppJSON {
+		if d.Type == filecat.DataJson {
 			nval := reflect.New(tvtyp.Elem()).Interface()
 			err := json.Unmarshal(d.Data, nval)
 			if err == nil {
@@ -1025,7 +1026,7 @@ func (sv *SliceView) CutRows() {
 // Paste pastes clipboard at given row
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceView) Paste() {
-	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		sv.PasteMenu(md, sv.curRow)
 	}
@@ -1129,7 +1130,7 @@ func (sv *SliceView) Duplicate() int {
 	rws := sv.SelectedRowsList(true) // descending sort -- last first
 	pasteAt := rws[0]
 	sv.CopyRows(true)
-	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{mimedata.AppJSON})
+	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	sv.PasteAtRow(md, pasteAt)
 	return pasteAt
 }

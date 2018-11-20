@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
@@ -848,7 +849,7 @@ func (ft *FileTreeView) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ft *FileTreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(ft.Viewport.Win.OSWin).Read([]string{mimedata.TextPlain})
+	md := oswin.TheApp.ClipBoard(ft.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
 	if md != nil {
 		ft.PasteMime(md)
 	}
@@ -876,7 +877,7 @@ func (ft *FileTreeView) PasteMime(md mimedata.Mimes) {
 		}
 	}
 	for _, d := range md {
-		if d.Type != mimedata.TextPlain {
+		if d.Type != filecat.TextPlain {
 			continue
 		}
 		// todo: process file:/// kinds of paths..
@@ -914,7 +915,7 @@ func (ft *FileTreeView) Dragged(de *dnd.Event) {
 	}
 	md := de.Data
 	for _, d := range md {
-		if d.Type != mimedata.TextPlain {
+		if d.Type != filecat.TextPlain {
 			continue
 		}
 		path := string(d.Data)
