@@ -2079,7 +2079,11 @@ func (tb *TextBuf) CommentStart(ln int) int {
 
 // InComment returns true if the given text position is within a commented region
 func (tb *TextBuf) InComment(pos TextPos) bool {
-	return pos.Ch > tb.CommentStart(pos.Ln)
+	cs := tb.CommentStart(pos.Ln)
+	if cs < 0 {
+		return false
+	}
+	return pos.Ch > cs
 }
 
 // LineCommented returns true if the given line is a full-comment line (i.e., starts with a comment)
