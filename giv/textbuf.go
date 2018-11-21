@@ -19,6 +19,7 @@ import (
 
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi/complete"
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
@@ -39,7 +40,6 @@ type TextBufOpts struct {
 	Completion   bool   `desc:"use the completion system to suggest options while typing"`
 	SpellCorrect bool   `desc:"use spell checking to suggest corrections while typing"`
 	EmacsUndo    bool   `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
-	IsDoc        bool   `desc:"this is a document-like file, such as LaTeX, Markdown, or HTML, as compared to a program-like file -- affects how spell checking is performed for example"`
 	CommentLn    string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
 	CommentSt    string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
 	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
@@ -408,6 +408,13 @@ func (tb *TextBuf) Stat() error {
 	err := tb.Info.InitFile(string(tb.Filename))
 	if err != nil {
 		return err
+	}
+	if tb.Info.Sup != filecat.NoSupport {
+		if lp, ok := filecat.StdLangProps[tb.Info.Sup]; ok {
+			tb.Opts.CommentLn = lp.CommentLn
+			tb.Opts.CommentSt = lp.CommentSt
+			tb.Opts.CommentEd = lp.CommentEd
+		}
 	}
 	lexer := lexers.Match(tb.Info.Name)
 	if lexer == nil && tb.NLines > 0 {
@@ -2229,6 +2236,23 @@ func (tb *TextBuf) CompleteExtend(s string) {
 		ep.Ch += len(s)
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
+	}
+}
+
+// IsSpellCorrectEnabled returns true if spelling correction is enabled,
+// taking into account given position in text if it is relevant for cases
+// where it is only conditionally enabled
+func (tb *TextBuf) IsSpellCorrectEnabled(pos TextPos) bool {
+	if tb.SpellCorrect == nil || !tb.Opts.SpellCorrect {
+		return false
+	}
+	switch tb.Info.Cat {
+	case filecat.Doc: // always
+		return true
+	case filecat.Code:
+		return tb.InComment(pos)
+	default:
+		return false
 	}
 }
 

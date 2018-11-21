@@ -2353,10 +2353,8 @@ func (tv *TextView) CancelComplete() {
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
 func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
-	if !tv.Buf.Opts.IsDoc {
-		if !tv.Buf.InComment(tv.CursorPos) {
-			return
-		}
+	if !tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
+		return
 	}
 
 	kf := gi.KeyFun(kt.Chord())

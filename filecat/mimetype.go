@@ -128,10 +128,10 @@ var ExtMimeMap = map[string]string{}
 
 // MimeType contains all the information associated with a given mime type
 type MimeType struct {
-	Mime    string   `desc:"mimetype string: type/subtype"`
-	Exts    []string `desc:"file extensions associated with this file type"`
-	Cat     Cat      `desc:"category of file"`
-	Support Support  `desc:"if supported, the name of the supported file type, else NoSupport"`
+	Mime string    `desc:"mimetype string: type/subtype"`
+	Exts []string  `desc:"file extensions associated with this file type"`
+	Cat  Cat       `desc:"category of file"`
+	Sup  Supported `desc:"if supported, the name of the supported file type, else NoSupport"`
 }
 
 // CustomMimes can be set by other apps to contain custom mime types that
@@ -143,21 +143,35 @@ var CustomMimes []MimeType
 // built from StdMimes (compiled in) and then CustomMimes can override
 var AvailMimes map[string]MimeType
 
-// MimeSupport returns the support type for given mime key, NoSupport if not found or not
-// a supported file type
-func MimeSupport(mime string) Support {
+// MimeSupported returns the supported type for given mime key,
+// or NoSupport if not found or not a supported file type
+func MimeSupported(mime string) Supported {
 	mt, has := AvailMimes[MimeNoChar(mime)]
 	if !has {
 		return NoSupport
 	}
-	return mt.Support
+	return mt.Sup
+}
+
+// ExtSupported returns the supported type for given file extension,
+// or NoSupport if not found or not a supported file type
+func ExtSupported(ext string) Supported {
+	mime, has := ExtMimeMap[ext]
+	if !has {
+		return NoSupport
+	}
+	mt, has := AvailMimes[mime]
+	if !has {
+		return NoSupport
+	}
+	return mt.Sup
 }
 
 // MergeAvailMimes merges the StdMimes and CustomMimes into AvailMimes
 // if CustomMimes is updated, then this should be called -- initially
 // it just has StdMimes.
 // It also builds the ExtMimeMap to map from extension to mime type
-// and SupportMimes map of supported file types onto their full
+// and SupportedMimes map of supported file types onto their full
 // mime type entry
 func MergeAvailMimes() {
 	AvailMimes = make(map[string]MimeType, len(StdMimes)+len(CustomMimes))
@@ -168,7 +182,7 @@ func MergeAvailMimes() {
 		AvailMimes[mt.Mime] = mt // overwrite automatically
 	}
 	ExtMimeMap = make(map[string]string) // start over
-	SupportMimes = make(map[Support]MimeType)
+	SupportedMimes = make(map[Supported]MimeType)
 	for _, mt := range AvailMimes {
 		if len(mt.Exts) > 0 { // first pass add only ext guys to support
 			for _, ex := range mt.Exts {
@@ -181,20 +195,20 @@ func MergeAvailMimes() {
 					ExtMimeMap[ex] = mt.Mime
 				}
 			}
-			if mt.Support != NoSupport {
-				if hsp, has := SupportMimes[mt.Support]; has {
-					fmt.Printf("filecat.MergeAvailMimes: more-than-one mimetype has extensions for same supported file type: %v -- one: %v other %v\n", mt.Support, hsp.Mime, mt.Mime)
+			if mt.Sup != NoSupport {
+				if hsp, has := SupportedMimes[mt.Sup]; has {
+					fmt.Printf("filecat.MergeAvailMimes: more-than-one mimetype has extensions for same supported file type: %v -- one: %v other %v\n", mt.Sup, hsp.Mime, mt.Mime)
 				} else {
-					SupportMimes[mt.Support] = mt
+					SupportedMimes[mt.Sup] = mt
 				}
 			}
 		}
 	}
 	// second pass to get any supported guys that don't have exts
 	for _, mt := range AvailMimes {
-		if mt.Support != NoSupport {
-			if _, has := SupportMimes[mt.Support]; !has {
-				SupportMimes[mt.Support] = mt
+		if mt.Sup != NoSupport {
+			if _, has := SupportedMimes[mt.Sup]; !has {
+				SupportedMimes[mt.Sup] = mt
 			}
 		}
 	}
@@ -283,6 +297,11 @@ var StdMimes = []MimeType{
 	{"application/javascript", []string{".js"}, Code, JavaScript},
 	{"application/ecmascript", []string{".es"}, Code, NoSupport},
 
+	{"text/x-common-lisp", []string{".lisp", ".cl", ".el"}, Code, Lisp},
+	{"text/elisp", nil, Code, Lisp},
+	{"text/x-elisp", nil, Code, Lisp},
+	{"application/emacs-lisp", nil, Code, Lisp},
+
 	{"text/x-lua", []string{".lua", ".wlua"}, Code, Lua},
 
 	{"text/x-makefile", nil, Code, Makefile},
@@ -312,6 +331,9 @@ var StdMimes = []MimeType{
 	{"text/x-python", []string{".py", ".pyc", ".pyo", ".pyw"}, Code, Python},
 	{"application/x-python-code", nil, Code, Python},
 
+	{"text/x-rust", []string{".rs"}, Code, Rust},
+	{"text/rust", nil, Code, Rust},
+
 	{"text/x-r", []string{".r", ".S", ".R", ".Rhistory", ".Rprofile", ".Renviron"}, Code, R},
 	{"text/x-R", nil, Code, R},
 	{"text/S-Plus", nil, Code, R},
@@ -327,9 +349,9 @@ var StdMimes = []MimeType{
 	{"application/x-tcl", nil, Code, Tcl},
 
 	// Doc
-	{"text/x-bibtex", []string{".bib"}, Doc, Bibtex},
-	{"text/x-tex", []string{".tex", ".ltx", ".sty", ".cls", ".latex"}, Doc, Tex},
-	{"application/x-latex", nil, Doc, Tex},
+	{"text/x-bibtex", []string{".bib"}, Doc, BibTeX},
+	{"text/x-tex", []string{".tex", ".ltx", ".sty", ".cls", ".latex"}, Doc, TeX},
+	{"application/x-latex", nil, Doc, TeX},
 
 	{"application/x-texinfo", []string{".texinfo", ".texi"}, Doc, Texinfo},
 

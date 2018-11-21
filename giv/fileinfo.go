@@ -24,16 +24,16 @@ import (
 // FileInfo represents the information about a given file / directory,
 // including icon, mimetype, etc
 type FileInfo struct {
-	Ic      gi.IconName     `tableview:"no-header" desc:"icon for file"` // tableview:"no-header"
-	Name    string          `width:"40" desc:"name of the file, without any path"`
-	Size    FileSize        `desc:"size of the file in bytes"`
-	Kind    string          `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
-	Mime    string          `tableview:"-" desc:"full official mime type of the contents"`
-	Cat     filecat.Cat     `tableview:"-" desc:"functional category of the file, based on mime data etc"`
-	Support filecat.Support `tableview:"-" desc:"supported file type"`
-	Mode    os.FileMode     `desc:"file mode bits"`
-	ModTime FileTime        `desc:"time that contents (only) were last modified"`
-	Path    string          `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
+	Ic      gi.IconName       `tableview:"no-header" desc:"icon for file"` // tableview:"no-header"
+	Name    string            `width:"40" desc:"name of the file, without any path"`
+	Size    FileSize          `desc:"size of the file in bytes"`
+	Kind    string            `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
+	Mime    string            `tableview:"-" desc:"full official mime type of the contents"`
+	Cat     filecat.Cat       `tableview:"-" desc:"functional category of the file, based on mime data etc"`
+	Sup     filecat.Supported `tableview:"-" desc:"supported file type"`
+	Mode    os.FileMode       `desc:"file mode bits"`
+	ModTime FileTime          `desc:"time that contents (only) were last modified"`
+	Path    string            `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
 }
 
 var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
@@ -76,21 +76,21 @@ func (fi *FileInfo) Stat() error {
 	if info.IsDir() {
 		fi.Kind = "Folder"
 		fi.Cat = filecat.Folder
-		fi.Support = filecat.SupFolder
+		fi.Sup = filecat.AnyFolder
 	} else {
 		fi.Cat = filecat.Unknown
-		fi.Support = filecat.NoSupport
+		fi.Sup = filecat.NoSupport
 		fi.Kind = ""
 		mtyp, _, err := filecat.MimeFromFile(fi.Path)
 		if err == nil {
 			fi.Mime = mtyp
 			fi.Cat = filecat.CatFromMime(fi.Mime)
-			fi.Support = filecat.MimeSupport(fi.Mime)
+			fi.Sup = filecat.MimeSupported(fi.Mime)
 			if fi.Cat != filecat.Unknown {
 				fi.Kind = fi.Cat.String() + ": "
 			}
-			if fi.Support != filecat.NoSupport {
-				fi.Kind += fi.Support.String()
+			if fi.Sup != filecat.NoSupport {
+				fi.Kind += fi.Sup.String()
 			} else {
 				fi.Kind += filecat.MimeSub(fi.Mime)
 			}
@@ -188,8 +188,8 @@ func (fi *FileInfo) FindIcon() (gi.IconName, bool) {
 	if fi.IsDir() {
 		return gi.IconName("folder"), true
 	}
-	if fi.Support != filecat.NoSupport {
-		snm := strings.ToLower(fi.Support.String())
+	if fi.Sup != filecat.NoSupport {
+		snm := strings.ToLower(fi.Sup.String())
 		if icn := gi.IconName(snm); icn.IsValid() {
 			return icn, true
 		}
