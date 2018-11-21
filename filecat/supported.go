@@ -34,6 +34,9 @@ func MimeString(sup Supported) string {
 
 // SupportedCat returns the Cat category for given supported file type
 func SupportedCat(sup Supported) Cat {
+	if sup == NoSupport {
+		return Unknown
+	}
 	mt, has := SupportedMimes[sup]
 	if !has {
 		log.Printf("filecat.SupportedCat called with unrecognized 'Supported' type: %v\n", sup)
