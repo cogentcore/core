@@ -66,7 +66,7 @@ func InitSpell() error {
 	if err != nil {
 		log.Printf("Could not complie regular expression: %v. \n", err)
 	}
-	isLetter, err = regexp.Compile(`^[a-zA-Z]+$`)
+	isLetter, err = regexp.Compile(`^[a-zA-Z\']+$`)
 	if err != nil {
 		log.Printf("Could not complie regular expression: %v. \n", err)
 	}

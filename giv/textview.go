@@ -814,11 +814,31 @@ func (tv *TextView) CursorForwardWord(steps int) {
 		sz := len(txt)
 		if sz > 0 && tv.CursorPos.Ch < sz {
 			ch := tv.CursorPos.Ch
-			for ch < sz && tv.IsWordBreak(txt[ch]) { // if on a wb, go past
-				ch++
+			var done = false
+			for ch < sz && !done { // if on a wb, go past
+				r1 := txt[ch]
+				r2 := rune(-1)
+				if ch < sz-1 {
+					r2 = txt[ch+1]
+				}
+				if tv.IsWordBreak(r1, r2) {
+					ch++
+				} else {
+					done =true
+				}
 			}
-			for ch < sz && !tv.IsWordBreak(txt[ch]) {
-				ch++
+			done = false
+			for ch < sz && !done {
+				r1 := txt[ch]
+				r2 := rune(-1)
+				if ch < sz-1 {
+					r2 = txt[ch+1]
+				}
+				if !tv.IsWordBreak(r1, r2) {
+					ch++
+				} else {
+					done =true
+				}
 			}
 			tv.CursorPos.Ch = ch
 		} else {
@@ -935,11 +955,31 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 		sz := len(txt)
 		if sz > 0 && tv.CursorPos.Ch > 0 {
 			ch := ints.MinInt(tv.CursorPos.Ch, sz-1)
-			for ch > 0 && tv.IsWordBreak(txt[ch]) { // if on a wb, go past
-				ch--
+			var done = false
+			for ch < sz && !done { // if on a wb, go past
+				r1 := txt[ch]
+				r2 := rune(-1)
+				if ch > 0 {
+					r2 = txt[ch-1]
+				}
+				if tv.IsWordBreak(r1, r2) {
+					ch--
+				} else {
+					done =true
+				}
 			}
-			for ch > 0 && !tv.IsWordBreak(txt[ch]) {
-				ch--
+			done = false
+			for ch < sz && !done {
+				r1 := txt[ch]
+				r2 := rune(-1)
+				if ch > 0 {
+					r2 = txt[ch-1]
+				}
+				if !tv.IsWordBreak(r1, r2) {
+					ch--
+				} else {
+					done = true
+				}
 			}
 			tv.CursorPos.Ch = ch
 		} else {
@@ -1919,16 +1959,32 @@ func (tv *TextView) SelectAll() {
 }
 
 // IsWordBreak defines what counts as a word break for the purposes of selecting words
-func (tv *TextView) IsWordBreak(r rune) bool {
-	if unicode.IsSpace(r) || unicode.IsSymbol(r) || unicode.IsPunct(r) {
+// r1 is the rune in question, r2 is the rune past r1 in the direction you are moving
+// Pass rune(-1) for r2 if there is no rune past r1
+func (tv *TextView) IsWordBreak(r1, r2 rune) bool {
+	if r2 == rune(-1) {
+		if unicode.IsSpace(r1) || unicode.IsSymbol(r1) || unicode.IsPunct(r1) {
+			return true
+		}
+		return false
+	}
+	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
 		return true
+	}
+	if unicode.IsPunct(r1) && r1 != rune('\'') {
+		return true
+	}
+	if unicode.IsPunct(r1) && r1 == rune('\'') {
+		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
+			return true
+		}
+		return false
 	}
 	return false
 }
 
 // WordBefore returns the word before the TextPos
 // uses IsWordBreak to determine the bounds of the word
-// todo: is breaking words that are contractions into 2 words - need to fix
 func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
@@ -1938,9 +1994,10 @@ func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 			st = 0
 			break
 		}
-		r := txt[i]
-		if tv.IsWordBreak(r) {
-			st = i + 1
+		r1 := txt[i]
+		r2 := txt[i-1]
+		if tv.IsWordBreak(r1, r2) {
+			st = i+1
 			break
 		}
 	}
@@ -1952,8 +2009,7 @@ func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *TextView) IsWordStart() bool {
-	tp := tv.CursorPos
+func (tv *TextView) IsWordStart(tp TextPos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -1964,14 +2020,14 @@ func (tv *TextView) IsWordStart() bool {
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if tv.IsWordBreak(r) {
+		if tv.IsWordBreak(r, rune(-1)) {
 			return false
 		}
 		return true
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if tv.IsWordBreak(r1) && !tv.IsWordBreak(r2) {
+	if tv.IsWordBreak(r1, rune(-1)) && !tv.IsWordBreak(r2, rune(-1)) {
 		return true
 	}
 	return false
@@ -1979,8 +2035,7 @@ func (tv *TextView) IsWordStart() bool {
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *TextView) IsWordEnd() bool {
-	tp := tv.CursorPos
+func (tv *TextView) IsWordEnd(tp TextPos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -1988,21 +2043,21 @@ func (tv *TextView) IsWordEnd() bool {
 	}
 	if tp.Ch == len(txt) { // end of line
 		r := txt[tp.Ch-1]
-		if tv.IsWordBreak(r) {
+		if tv.IsWordBreak(r, rune(-1)) {
 			return true
 		}
 		return false
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if tv.IsWordBreak(r) {
+		if tv.IsWordBreak(r, rune(-1)) {
 			return false
 		}
 		return true
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if !tv.IsWordBreak(r1) && tv.IsWordBreak(r2) {
+	if !tv.IsWordBreak(r1, rune(-1)) && tv.IsWordBreak(r2, rune(-1)) {
 		return true
 	}
 	return false
@@ -2011,8 +2066,7 @@ func (tv *TextView) IsWordEnd() bool {
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (tv *TextView) IsWordMiddle() bool {
-	tp := tv.CursorPos
+func (tv *TextView) IsWordMiddle(tp TextPos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
@@ -2026,7 +2080,7 @@ func (tv *TextView) IsWordMiddle() bool {
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if !tv.IsWordBreak(r1) && !tv.IsWordBreak(r2) {
+	if !tv.IsWordBreak(r1, rune(-1)) && !tv.IsWordBreak(r2, rune(-1)) {
 		return true
 	}
 	return false
@@ -2056,9 +2110,13 @@ func (tv *TextView) WordAt() (region TextRegion) {
 		return region
 	}
 	sch := ints.MinInt(tv.CursorPos.Ch, sz-1)
-	if !tv.IsWordBreak(txt[sch]) {
+	if !tv.IsWordBreak(txt[sch], rune(-1)) {
 		for sch > 0 {
-			if tv.IsWordBreak(txt[sch-1]) {
+			r2 := rune(-1)
+			if sch-2 >= 0 {
+				r2 = txt[sch-2]
+			}
+			if tv.IsWordBreak(txt[sch-1], r2) {
 				break
 			}
 			sch--
@@ -2066,7 +2124,11 @@ func (tv *TextView) WordAt() (region TextRegion) {
 		region.Start.Ch = sch
 		ech := tv.CursorPos.Ch + 1
 		for ech < sz {
-			if tv.IsWordBreak(txt[ech]) {
+			r2 := rune(-1)
+			if ech < sz-1 {
+				r2 = rune(txt[ech+1])
+			}
+			if tv.IsWordBreak(txt[ech], r2) {
 				break
 			}
 			ech++
@@ -2075,13 +2137,17 @@ func (tv *TextView) WordAt() (region TextRegion) {
 	} else { // keep the space start -- go to next space..
 		ech := tv.CursorPos.Ch + 1
 		for ech < sz {
-			if !tv.IsWordBreak(txt[ech]) {
+			if !tv.IsWordBreak(txt[ech], rune(-1)) {
 				break
 			}
 			ech++
 		}
 		for ech < sz {
-			if tv.IsWordBreak(txt[ech]) {
+			r2 := rune(-1)
+			if ech < sz-1 {
+				r2 = rune(txt[ech+1])
+			}
+			if tv.IsWordBreak(txt[ech], r2) {
 				break
 			}
 			ech++
@@ -2360,30 +2426,30 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	switch kf {
 	case gi.KeyFunMoveRight:
-		cp := tv.CursorPos
-		if tv.IsWordEnd() {
-			region := tv.WordBefore(cp)
+		tp := tv.CursorPos
+		if tv.IsWordEnd(tp) {
+			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
 			break
 		}
-		if cp.Ch == 0 { // end of line
-			cp.Ln--
-			cp.Ch = tv.Buf.LineLen(cp.Ln)
-			region := tv.WordBefore(cp)
+		if tp.Ch == 0 { // end of line
+			tp.Ln--
+			tp.Ch = tv.Buf.LineLen(tp.Ln)
+			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
 			break
 		}
-		txt := tv.Buf.Line(cp.Ln)
+		txt := tv.Buf.Line(tp.Ln)
 		var r rune
 		atend := false
-		if cp.Ch >= len(txt) {
+		if tp.Ch >= len(txt) {
 			atend = true
 		} else {
-			r = txt[cp.Ch]
+			r = txt[tp.Ch]
 		}
-		if atend || tv.IsWordBreak(r) {
-			cp.Ch -= 1 // we are one past the end of word
-			region := tv.WordBefore(cp)
+		if atend || tv.IsWordBreak(r, rune(-1)) {
+			tp.Ch -= 1 // we are one past the end of word
+			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
 		}
 	case gi.KeyFunEnter:
@@ -2398,13 +2464,13 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		region := tv.WordBefore(cp)
 		tv.SpellCheck(region)
 	case gi.KeyFunNil:
-		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) {
+		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) && kt.Rune != '\'' { // contractions!
 			cp := tv.CursorPos
 			cp.Ch -= 1 // we are one past the end of word
 			region := tv.WordBefore(cp)
 			tv.SpellCheck(region)
 		} else {
-			if tv.IsWordMiddle() {
+			if tv.IsWordMiddle(tv.CursorPos) {
 				region := tv.WordAt()
 				tv.SpellCheck(tv.Buf.Region(region.Start, region.End))
 			}
