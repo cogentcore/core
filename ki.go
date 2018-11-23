@@ -66,6 +66,12 @@ type Ki interface {
 	// kit.Embed for a generic interface{} version.
 	Embed(t reflect.Type) Ki
 
+	// BaseIface returns the 	base interface type for all elements within this tree
+	// used e.g., for determining what types of children can be created.
+	// To get the proper reflect type for an interface, use this construct:
+	// reflect.TypeOf((*<interface_type_name>)(nil)).Elem()
+	BaseIface() reflect.Type
+
 	// Name returns the user-defined name of the object (Node.Nm), for finding
 	// elements, generating paths, IO, etc -- allows generic GUI / Text / Path
 	// / etc representation of Trees.

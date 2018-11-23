@@ -129,6 +129,10 @@ func (n *Node) Embed(t reflect.Type) Ki {
 	return nil
 }
 
+func (n *Node) BaseIface() reflect.Type {
+	return KiType()
+}
+
 func (n *Node) Name() string {
 	return n.Nm
 }
