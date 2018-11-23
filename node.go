@@ -1261,9 +1261,16 @@ func (n *Node) SetField(field string, val interface{}) bool {
 		return false
 	}
 	updt := n.UpdateStart()
-	ok := kit.SetRobust(kit.PtrValue(fv).Interface(), val)
-	if ok {
+	ok := false
+	if field == "Nm" {
+		n.SetName(kit.ToString(val))
 		n.SetFlag(int(FieldUpdated))
+		ok = true
+	} else {
+		ok = kit.SetRobust(kit.PtrValue(fv).Interface(), val)
+		if ok {
+			n.SetFlag(int(FieldUpdated))
+		}
 	}
 	n.UpdateEnd(updt)
 	return ok
