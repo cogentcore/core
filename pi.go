@@ -2,23 +2,73 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package pi provides the main interactive parser structure for running the parse
+// The piv sub-package provides the GUI for constructing and testing a parser
 package pi
 
-// todo: use filebrowser example to setup gui with:
-// top row for interactive test parsing with:
-// * step, play, FF, stop toolbar actions, with toggle for lexing vs. parsing
-// * line textfield
-// * lexline label
-// * parseline label
-//
-// then splitview with:
-// * lex rules treeview
-// * parse rules treeview
-// * text buf
-// * parse tree output
-//
-// need to have textview using our style tokens so we can see the thing getting styled
-// directly from the lexer as it proceeds!  replace histyle tags with tokens.Tokens
-//
-// save all existing chroma styles, then load back in -- names should then transfer!
-// need to just add background style name
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+
+	"github.com/goki/pi/lex"
+	"github.com/goki/pi/parse"
+	"github.com/goki/pi/src"
+)
+
+// VersionInfo returns Pi version information
+func VersionInfo() string {
+	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
+	return vinfo
+}
+
+// Parser is the overall parser for managing the parsing
+type Parser struct {
+	Lexer    lex.Rule   `desc:"lexer rules for first pass of lexing file"`
+	Parser   parse.Rule `desc:"parser rules for second pass of parsing lexed tokens"`
+	Src      src.File   `json:"-" xml:"-" desc:"the source to be parsed"`
+	LexState lex.State  `json:"_" xml:"-" desc:"state for lexing"`
+	Ast      parse.Ast  `json:"_" xml:"-" desc:"abstract syntax tree output from parsing"`
+	Filename string     `desc:"file name for overall parser"`
+}
+
+func (pr *Parser) Init() {
+	pr.Lexer.InitName(&pr.Lexer, "Lexer")
+	pr.Parser.InitName(&pr.Parser, "Parser")
+	pr.Ast.InitName(&pr.Ast, "Ast")
+	pr.LexState.Init()
+}
+
+// SetSrc sets source to be parsed
+func (pr *Parser) SetSrc(src [][]rune) {
+	if len(src) == 0 {
+		pr.Init()
+		return
+	}
+	pr.Src.SetSrc(src)
+	pr.LexState.Init()
+	pr.LexState.SetLine(src[0])
+}
+
+// OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
+func (pr *Parser) OpenJSON(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, pr)
+}
+
+// SaveJSON saves lexer and parser rules, in a standard JSON-formatted file
+func (pr *Parser) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(pr, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(filename, b, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}

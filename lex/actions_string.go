@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _Actions_name = "NextNumberStringQuoteStringDblQuoteStringBacktickEOLPushStatePopStateActionsN"
+const _Actions_name = "NextNameNumberStringQuoteStringDblQuoteStringBacktickEOLPushStatePopStateActionsN"
 
-var _Actions_index = [...]uint8{0, 4, 10, 21, 35, 49, 52, 61, 69, 77}
+var _Actions_index = [...]uint8{0, 4, 8, 14, 25, 39, 53, 56, 65, 73, 81}
 
 func (i Actions) String() string {
 	if i < 0 || i >= Actions(len(_Actions_index)-1) {

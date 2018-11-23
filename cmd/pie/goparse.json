@@ -1,0 +1,109 @@
+{
+  "Lexer": {
+    "Nm": "Lexer",
+    "UniqueNm": "Lexer",
+    "Props": null,
+    "Kids": [
+      {
+        "n": 4,
+        "type": "lex.Rule",
+        "name": "SkipWhite",
+        "type": "lex.Rule",
+        "name": "Letter",
+        "type": "lex.Rule",
+        "name": "Number",
+        "type": "lex.Rule",
+        "name": "Dot"
+      },
+      {
+        "Nm": "SkipWhite",
+        "UniqueNm": "SkipWhite",
+        "Props": null,
+        "Kids": null,
+        "Token": "TextWhitespace",
+        "Match": "WhiteSpace",
+        "Off": 0,
+        "String": "",
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "Letter",
+        "UniqueNm": "Letter",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "lex.Rule",
+            "name": "if"
+          },
+          {
+            "Nm": "if",
+            "UniqueNm": "if",
+            "Props": null,
+            "Kids": null,
+            "Token": "Keyword",
+            "Match": "String",
+            "Off": 0,
+            "String": "if",
+            "Acts": [
+              "Next",
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Token": "None",
+        "Match": "Letter",
+        "Off": 0,
+        "String": "",
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "Number",
+        "UniqueNm": "Number",
+        "Props": null,
+        "Kids": null,
+        "Token": "LitNum",
+        "Match": "Digit",
+        "Off": 0,
+        "String": "",
+        "Acts": [
+          "Number"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "Dot",
+        "UniqueNm": "Dot",
+        "Props": null,
+        "Kids": null,
+        "Token": "None",
+        "Match": "String",
+        "Off": 0,
+        "String": ".",
+        "Acts": null,
+        "PushState": ""
+      }
+    ],
+    "Token": "None",
+    "Match": "String",
+    "Off": 0,
+    "String": "",
+    "Acts": null,
+    "PushState": ""
+  },
+  "Parser": {
+    "Nm": "Parser",
+    "UniqueNm": "Parser",
+    "Props": null,
+    "Kids": null,
+    "Off": 0,
+    "String": "",
+    "PushState": ""
+  },
+  "Filename": ""
+}
