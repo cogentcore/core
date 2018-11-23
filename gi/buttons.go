@@ -55,7 +55,7 @@ const (
 	ButtonFlagsN
 )
 
-// signals that buttons can send
+// ButtonSignals are signals that buttons can send
 type ButtonSignals int64
 
 const (

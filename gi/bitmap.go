@@ -6,7 +6,7 @@ package gi
 
 import (
 	"image"
-	_ "image/jpeg"
+	_ "image/jpeg" // force include of jpeg decoder
 	"image/png"
 	"log"
 	"os"

@@ -2684,7 +2684,7 @@ func (w *Window) FocusInactivate() {
 	}
 }
 
-// WindowInFocus returns true if this window is the one currently in focus
+// IsWindowInFocus returns true if this window is the one currently in focus
 func (w *Window) IsWindowInFocus() bool {
 	fwin := oswin.TheApp.WindowInFocus()
 	if w.OSWin == fwin {
@@ -2958,6 +2958,7 @@ func EndTargProfile() {
 	prof.Profiling = false
 }
 
+// ReportWinNodes reports the number of nodes in this window
 func (w *Window) ReportWinNodes() {
 	nn := 0
 	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {

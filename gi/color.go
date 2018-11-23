@@ -707,10 +707,10 @@ func HSLtoRGBf32(h, s, l float32) (r, g, b float32) {
 
 func hueToRGBf32(p, q, t float32) float32 {
 	if t < 0 {
-		t += 1
+		t++
 	}
 	if t > 1 {
-		t -= 1
+		t--
 	}
 	if t < 1.0/6.0 {
 		return p + (q-p)*6.0*t
