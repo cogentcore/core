@@ -676,7 +676,7 @@ var StdKeyMaps = KeyMaps{
 		"Meta+V":                  KeyFunPaste,
 		"Shift+Meta+V":            KeyFunPasteHist,
 		"Shift+Control+Y":         KeyFunPasteHist,
-		"Alt+D":                   KeyFunDuplicate,
+		"Alt+∂":                   KeyFunDuplicate,
 		"Control+Z":               KeyFunUndo,
 		"Meta+Z":                  KeyFunUndo,
 		"Control+/":               KeyFunUndo,
