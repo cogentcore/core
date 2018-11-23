@@ -160,7 +160,7 @@ func TestNodeFindName(t *testing.T) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
 	}
 	for i, nm := range names {
-		for st, _ := range names { // test all starting indexes
+		for st := range names { // test all starting indexes
 			idx, ok := parent.Children().IndexByName(nm, st)
 			if !ok || idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
@@ -180,7 +180,7 @@ func TestNodeFindNameUnique(t *testing.T) {
 		t.Errorf("Children length != n, was %d", len(parent.Kids))
 	}
 	for i, nm := range names {
-		for st, _ := range names { // test all starting indexes
+		for st := range names { // test all starting indexes
 			idx, ok := parent.Children().IndexByUniqueName(nm, st)
 			if !ok || idx != i {
 				t.Errorf("find index was not correct val of %d, was %d", i, idx)
@@ -215,7 +215,7 @@ func TestNodeMove(t *testing.T) {
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.AddNewChild(nil, "child0")
-	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
+	var child2 = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChild(nil, "child2")
 	//schild2 :=
@@ -264,7 +264,7 @@ func TestNodeConfig(t *testing.T) {
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.AddNewChild(nil, "child0")
-	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
+	var child2 = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChild(nil, "child2")
 	//schild2 :=
@@ -336,7 +336,7 @@ func TestNodeJSonSave(t *testing.T) {
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.AddNewChild(nil, "child1")
-	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
+	var child2 = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
 	schild2 := child2.AddNewChild(nil, "subchild1")
@@ -395,7 +395,7 @@ func TestNodeXMLSave(t *testing.T) {
 	parent.Mbr2 = 32
 	// child1 :=
 	parent.AddNewChild(nil, "child1")
-	var child2 *NodeEmbed = parent.AddNewChild(nil, "child1").(*NodeEmbed)
+	var child2 = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
 	schild2 := child2.AddNewChild(nil, "subchild1")

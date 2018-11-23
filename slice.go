@@ -320,7 +320,7 @@ func (sl *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
 	return tn
 }
 
-// NameToINdexMap returns a Name to Index map for faster lookup when needing to
+// NameToIndexMap returns a Name to Index map for faster lookup when needing to
 // do a lot of name lookups on same fixed slice.
 func (sl *Slice) NameToIndexMap() map[string]int {
 	if len(*sl) == 0 {
@@ -605,7 +605,7 @@ func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-// read a start element token
+// DecodeXMLStartEl reads a start element token
 func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
 	for {
 		var t xml.Token
@@ -621,8 +621,8 @@ func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
 		case xml.CharData: // actually passes the spaces and everything through here
 			continue
 		case xml.EndElement:
-			err = fmt.Errorf("ki.DecodeXMLStartEl: got unexpected EndElement\n")
-			log.Printf("%v", err)
+			err = fmt.Errorf("ki.DecodeXMLStartEl: got unexpected EndElement")
+			log.Println(err)
 			return
 		default:
 			continue
@@ -630,7 +630,7 @@ func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
 	}
 }
 
-// read an end element
+// DecodeXMLEndEl reads an end element
 func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
 	for {
 		t, err := d.Token()
@@ -642,15 +642,15 @@ func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
 		case xml.EndElement:
 			if tv.Name != start.Name {
 				err = fmt.Errorf("ki.DecodeXMLEndEl: EndElement: %v does not match StartElement: %v", tv.Name, start.Name)
-				log.Printf("%v", err)
+				log.Println(err)
 				return err
 			}
 			return nil
 		case xml.CharData: // actually passes the spaces and everything through here
 			continue
 		case xml.StartElement:
-			err = fmt.Errorf("ki.DecodeXMLEndEl: got unexpected StartElement: %v\n", tv.Name)
-			log.Printf("%v", err)
+			err = fmt.Errorf("ki.DecodeXMLEndEl: got unexpected StartElement: %v", tv.Name)
+			log.Println(err)
 			return err
 		default:
 			continue
@@ -658,7 +658,7 @@ func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
 	}
 }
 
-// read char data..
+// DecodeXMLCharData reads char data..
 func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
 	for {
 		var t xml.Token
@@ -672,18 +672,18 @@ func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
 			val = string([]byte(tv))
 			return
 		case xml.StartElement:
-			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected StartElement: %v\n", tv.Name)
-			log.Printf("%v", err)
+			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected StartElement: %v", tv.Name)
+			log.Println(err)
 			return
 		case xml.EndElement:
-			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected EndElement: %v\n", tv.Name)
-			log.Printf("%v", err)
+			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected EndElement: %v", tv.Name)
+			log.Println(err)
 			return
 		}
 	}
 }
 
-// read a start / chardata / end sequence of 3 elements, returning name, val
+// DecodeXMLCharEl reads a start / chardata / end sequence of 3 elements, returning name, val
 func DecodeXMLCharEl(d *xml.Decoder) (name, val string, err error) {
 	var st xml.StartElement
 	st, err = DecodeXMLStartEl(d)
@@ -702,7 +702,7 @@ func DecodeXMLCharEl(d *xml.Decoder) (name, val string, err error) {
 	return
 }
 
-// UnmarshalJSON parses the length and type information for each object in the
+// UnmarshalXML parses the length and type information for each object in the
 // slice, creates the new slice with those elements, and then loads based on
 // the remaining bytes which represent each element
 func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {

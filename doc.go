@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package Ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and
+Package ki provides the base element of GoKi Trees: Ki = Tree in Japanese, and
 "Key" in English -- powerful tree structures supporting scenegraphs, programs,
 parsing, etc.
 

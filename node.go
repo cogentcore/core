@@ -458,8 +458,8 @@ func (n *Node) AddChildCheck(kid Ki) error {
 	var err error
 	n.FuncUp(0, n, func(k Ki, level int, d interface{}) bool {
 		if k == kid {
-			err = fmt.Errorf("Ki Node Attempt to add child to node %v that is my own parent -- no cycles permitted!\n", (d.(Ki)).PathUnique())
-			log.Printf("%v", err)
+			err = fmt.Errorf("ki.Node Attempt to add child to node %v that is my own parent -- no cycles permitted", (d.(Ki)).PathUnique())
+			log.Println(err)
 			return false
 		}
 		return true
@@ -592,7 +592,7 @@ func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 
 func (n *Node) SetChild(kid Ki, idx int, name string) error {
 	if !n.Kids.IsValidIndex(idx) {
-		return fmt.Errorf("ki.SetChild for node: %v index invalid: %v -- size: %v\n", n.PathUnique(), idx, len(n.Kids))
+		return fmt.Errorf("ki.SetChild for node: %v index invalid: %v -- size: %v", n.PathUnique(), idx, len(n.Kids))
 	}
 	if name != "" {
 		kid.InitName(kid, name)
@@ -1299,15 +1299,15 @@ func (n *Node) FieldTag(field, tag string) string {
 
 func (n *Node) CopyFrom(from Ki) error {
 	if from == nil {
-		err := fmt.Errorf("Ki Node CopyFrom into %v -- null 'from' source\n", n.PathUnique())
-		log.Print(err)
+		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.PathUnique())
+		log.Println(err)
 		return err
 	}
 	mypath := n.PathUnique()
 	fmpath := from.PathUnique()
 	if n.Type() != from.Type() {
-		err := fmt.Errorf("Ki Node Copy to %v from %v -- must have same types, but %v != %v\n", mypath, fmpath, n.Type().Name(), from.Type().Name())
-		log.Print(err)
+		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", mypath, fmpath, n.Type().Name(), from.Type().Name())
+		log.Println(err)
 		return err
 	}
 	updt := n.UpdateStart()
@@ -1335,7 +1335,7 @@ func (n *Node) Clone() Ki {
 	return nki
 }
 
-// use ConfigChildren to recreate source children
+// CopyMakeChildrenFrom uses ConfigChildren to recreate source children
 func (n *Node) CopyMakeChildrenFrom(from Ki) {
 	sz := len(*from.Children())
 	if sz > 0 {
@@ -1357,7 +1357,8 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 	}
 }
 
-// copy from primary fields of from to to, recursively following anonymous embedded structs
+// CopyFieldsFrom copies from primary fields of source object,
+// recursively following anonymous embedded structs
 func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 	kitype := KiType()
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
@@ -1589,7 +1590,7 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		root.UpdateEnd(updt)
 		return root, nil
 	} else {
-		return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree\n")
+		return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 	}
 }
 
