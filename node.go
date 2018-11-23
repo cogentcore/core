@@ -78,7 +78,7 @@ func (n *Node) Init(this Ki) {
 		n.Ths = this
 		// we need to call this directly instead of FuncFields because we need the field name
 		FlatFieldsValueFunc(this, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
+			if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
 				fk := kit.PtrValue(fieldVal).Interface().(Ki)
 				if fk != nil {
 					fk.SetFlag(int(IsField))
@@ -319,7 +319,7 @@ func (n *Node) KiFieldByName(name string) (Ki, bool) {
 	if !f.IsValid() {
 		return nil, false
 	}
-	if !kit.EmbeddedTypeImplements(f.Type(), KiType()) {
+	if !kit.EmbedImplements(f.Type(), KiType()) {
 		return nil, false
 	}
 	return kit.PtrValue(f).Interface().(Ki), true
@@ -944,7 +944,7 @@ func (n *Node) Fields() []uintptr {
 	foff := make([]uintptr, 0)
 	kitype := KiType()
 	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(field.Type, kitype) {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
 			foff = append(foff, field.Offset)
 		}
 		return true
@@ -1392,7 +1392,7 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 			n.CopyFieldsFrom(tfpi, sfpi)
 		} else {
 			switch {
-			case sf.Kind() == reflect.Struct && kit.EmbeddedTypeImplements(sf.Type(), kitype):
+			case sf.Kind() == reflect.Struct && kit.EmbedImplements(sf.Type(), kitype):
 				sfk := sfpi.(Ki)
 				tfk := tfpi.(Ki)
 				if tfk != nil && sfk != nil {

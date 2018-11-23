@@ -236,7 +236,7 @@ func (tr *TypeRegistry) AllImplementersOf(iface reflect.Type, includeBases bool)
 		if nptyp.Kind() != reflect.Struct {
 			continue
 		}
-		if EmbeddedTypeImplements(typ, iface) {
+		if EmbedImplements(typ, iface) {
 			tl = append(tl, typ)
 		}
 	}

@@ -329,12 +329,12 @@ func Embed(stru interface{}, embed reflect.Type) interface{} {
 	return nil
 }
 
-// EmbeddedTypeImplements checks if given type implements given interface, or
+// EmbedImplements checks if given type implements given interface, or
 // it embeds a type that does so -- must pass a type constructed like this:
-// reflect.TypeOf((*gi.Node2D)(nil)).Elem()
-func EmbeddedTypeImplements(typ, iface reflect.Type) bool {
+// reflect.TypeOf((*gi.Node2D)(nil)).Elem() or just reflect.TypeOf(ki.BaseIface())
+func EmbedImplements(typ, iface reflect.Type) bool {
 	if iface.Kind() != reflect.Interface {
-		log.Printf("kit.TypeRegistry EmbeddedTypeImplements -- type is not an interface: %v\n", iface)
+		log.Printf("kit.TypeRegistry EmbedImplements -- type is not an interface: %v\n", iface)
 		return false
 	}
 	if typ.Implements(iface) {
@@ -353,7 +353,7 @@ func EmbeddedTypeImplements(typ, iface reflect.Type) bool {
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			rv := EmbeddedTypeImplements(f.Type, iface)
+			rv := EmbedImplements(f.Type, iface)
 			if rv {
 				return true
 			}

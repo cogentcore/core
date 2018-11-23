@@ -84,10 +84,10 @@ func TestTypeEmbeds(t *testing.T) {
 	// note: MUST use pointer for checking implements for pointer receivers!
 	// fmt.Printf("a implements Aif %v\n", reflect.TypeOf(&a).Implements(aiftype))
 
-	aif_in_c := EmbeddedTypeImplements(reflect.TypeOf(c), aiftype)
+	aif_in_c := EmbedImplements(reflect.TypeOf(c), aiftype)
 	// fmt.Printf("C implements AIf: %v\n", aif_in_c)
 
-	aif_in_d := EmbeddedTypeImplements(reflect.TypeOf(d), aiftype)
+	aif_in_d := EmbedImplements(reflect.TypeOf(d), aiftype)
 	// fmt.Printf("D implements AIf: %v\n", aif_in_d)
 
 	if a_in_a != true || b_in_a != false || a_in_b != true || a_in_c != true || aif_in_c != true || aif_in_d != false {

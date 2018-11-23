@@ -66,10 +66,10 @@ type Ki interface {
 	// kit.Embed for a generic interface{} version.
 	Embed(t reflect.Type) Ki
 
-	// BaseIface returns the 	base interface type for all elements within this tree
-	// used e.g., for determining what types of children can be created.
-	// To get the proper reflect type for an interface, use this construct:
-	// reflect.TypeOf((*<interface_type_name>)(nil)).Elem()
+	// BaseIface returns the 	base interface type for all elements
+	// within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
+	// Used e.g., for determining what types of children
+	// can be created (see kit.EmbedImplements for test method)
 	BaseIface() reflect.Type
 
 	// Name returns the user-defined name of the object (Node.Nm), for finding
@@ -731,7 +731,7 @@ func IsKi(typ reflect.Type) bool {
 	if typ == nil {
 		return false
 	}
-	return kit.EmbeddedTypeImplements(typ, KiType())
+	return kit.EmbedImplements(typ, KiType())
 }
 
 // NewOfType makes a new Ki struct of given type -- must be a Ki type -- will
