@@ -35,10 +35,6 @@ type Labeler interface {
 func ToLabel(it interface{}) string {
 	lbler, ok := it.(Labeler)
 	if !ok {
-		// typ := reflect.TypeOf(it)
-		// if kit.EmbeddedTypeImplements(typ, reflect.TypeOf((*reflect.Type)(nil)).Elem()) {
-		// 	to, ok :=
-		// }
 		switch v := it.(type) {
 		case reflect.Type:
 			return v.Name()

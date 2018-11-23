@@ -43,6 +43,7 @@ func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 		if sv.SliceValView != nil {
 			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
 		}
+		sv.SetFullReRender()
 	}
 	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
