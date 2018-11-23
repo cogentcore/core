@@ -122,12 +122,10 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 		ls.ReadName()
 	case Number:
 		lr.TokEff = ls.ReadNumber()
-	case StringQuote:
-		ls.ReadString()
-	case StringDblQuote:
-		ls.ReadString()
-	case StringBacktick:
-		ls.ReadString() // todo: multi-line
+	case Quoted:
+		ls.ReadQuoted()
+	case QuotedRaw:
+		ls.ReadQuoted() // todo: raw!
 	case EOL:
 		ls.Pos = len(ls.Src)
 	case PushState:

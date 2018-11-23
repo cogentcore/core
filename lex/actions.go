@@ -24,23 +24,24 @@ const (
 	Next Actions = iota
 
 	// Name means read in an entire name, which is letters, _ and digits after first letter
+	// position will be advanced to just after
 	Name
 
 	// Number means read in an entire number -- the token type will automatically be
 	// set to the actual type of number that was read in, and position advanced to just after
 	Number
 
-	// StringQuote means read in an entire string enclosed in single-quotes,
-	// with proper skipping of escaped, position advanced to just after
-	StringQuote
+	// Quoted means read in an entire string enclosed in quote delimeter
+	// that is present at current position, with proper skipping of escaped.
+	// Position advanced to just after
+	Quoted
 
-	// StringDblQuote means read in an entire string enclosed in double-quotes,
-	// with proper skipping of escaped, position advanced to just after
-	StringDblQuote
-
-	// StringBacktick means read in an entire string enclosed in backtick's
-	// with proper skipping of escaped, position advanced to just after
-	StringBacktick
+	// QuotedRaw means read in an entire string enclosed in quote delimeter
+	// that is present at start position, with proper skipping of escaped.
+	// Position advanced to just after.
+	// Raw version supports multi-line and includes CR etc at end of lines (e.g., back-tick
+	// in various languages)
+	QuotedRaw
 
 	// EOL means read till the end of the line (e.g., for single-line comments)
 	EOL

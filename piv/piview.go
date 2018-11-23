@@ -38,8 +38,10 @@ const (
 type PiView struct {
 	gi.Frame
 	Parser   pi.Parser   `desc:"the parser we are viewing"`
+	TestFile gi.FileName `desc:"the file for testing"`
 	Filename gi.FileName `desc:"filename for saving parser"`
 	Changed  bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	Buf      giv.TextBuf `json:"-" desc:"test file buffer"`
 }
 
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
@@ -81,6 +83,34 @@ func (pi *PiView) Open(filename gi.FileName) {
 	pi.InitView()
 }
 
+// OpenTest opens test file
+func (pi *PiView) OpenTest(filename gi.FileName) {
+	pi.Buf.OpenFile(filename)
+	pi.TestFile = filename
+}
+
+// SaveTestAs saves the test file as..
+func (pi *PiView) SaveTestAs(filename gi.FileName) {
+	pi.Buf.SaveFile(filename)
+	pi.TestFile = filename
+}
+
+// LexInit initializes / restarts lexing process for current test file
+func (pi *PiView) LexInit() {
+	pi.Parser.SetSrc(pi.Buf.Lines)
+}
+
+// LexNext does next step of lexing
+func (pi *PiView) LexNext() {
+	ok := pi.Parser.LexNext()
+	if !ok {
+		gi.PromptDialog(pi.Viewport, gi.DlgOpts{Title: "Lex at End",
+			Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
+	} else {
+		pi.LexLine().SetText(pi.Parser.LexLineOut())
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 //   GUI configs
 
@@ -89,7 +119,6 @@ func (pi *PiView) Open(filename gi.FileName) {
 func (pi *PiView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_TextField, "test-line")
 	config.Add(gi.KiT_Label, "lex-line")
 	config.Add(gi.KiT_Label, "parse-line")
 	config.Add(gi.KiT_SplitView, "splitview")
@@ -104,9 +133,6 @@ func (pi *PiView) StdConfig() (mods, updt bool) {
 	config := pi.StdFrameConfig()
 	mods, updt = pi.ConfigChildren(config, false)
 	if mods {
-		tl := pi.TestLine()
-		tl.SetStretchMaxWidth()
-		tl.Placeholder = "Enter code here to test the lexer and parser line-by-line..."
 		ll := pi.LexLine()
 		ll.SetStretchMaxWidth()
 		ll.Redrawable = true
@@ -115,15 +141,6 @@ func (pi *PiView) StdConfig() (mods, updt bool) {
 		pl.Redrawable = true
 	}
 	return
-}
-
-// TestLine returns the test line textfield
-func (pi *PiView) TestLine() *gi.TextField {
-	idx, ok := pi.Children().IndexByName("test-line", 1)
-	if !ok {
-		return nil
-	}
-	return pi.KnownChild(idx).(*gi.TextField)
 }
 
 // LexLine returns the lex line label
@@ -256,6 +273,7 @@ func (pi *PiView) ConfigSplitView() {
 
 		txed := txly.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
 		txed.Viewport = pi.Viewport
+		txed.SetBuf(&pi.Buf)
 
 		split.SetSplits(.15, .15, .25, .15, .3)
 		split.UpdateEnd(updt)
@@ -336,7 +354,6 @@ var PiViewProps = ki.Props{
 		"vertical-align":   gi.AlignTop,
 	},
 	"ToolBar": ki.PropSlice{
-		{"sep-file", ki.BlankProp{}},
 		{"Open", ki.Props{
 			"label": "Open",
 			"icon":  "file-open",
@@ -366,6 +383,36 @@ var PiViewProps = ki.Props{
 					"ext":           ".json",
 				}},
 			},
+		}},
+		{"sep-file", ki.BlankProp{}},
+		{"OpenTest", ki.Props{
+			"label": "Open Test",
+			"icon":  "file-open",
+			"desc":  "Open test file",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "TestFile",
+				}},
+			},
+		}},
+		{"SaveTestAs", ki.Props{
+			"label": "Save Test As",
+			"icon":  "file-save",
+			"desc":  "Save current test file as",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "TestFile",
+				}},
+			},
+		}},
+		{"sep-ctrl", ki.BlankProp{}},
+		{"LexInit", ki.Props{
+			"icon": "update",
+			"desc": "Init / restart lexer",
+		}},
+		{"LexNext", ki.Props{
+			"icon": "play",
+			"desc": "do next step of lexing",
 		}},
 	},
 	"MainMenu": ki.PropSlice{

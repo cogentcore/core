@@ -50,6 +50,36 @@ func (pr *Parser) SetSrc(src [][]rune) {
 	pr.LexState.SetLine(src[0])
 }
 
+// LexNext does next step of lexing -- returns false if at end of source input
+func (pr *Parser) LexNext() bool {
+	if pr.LexState.Ln >= pr.Src.NLines() {
+		return false
+	}
+	if pr.LexState.AtEol() {
+		pr.Src.SetLexs(pr.LexState.Ln, pr.LexState.Lex)
+		pr.LexState.Ln++
+		if pr.LexState.Ln >= pr.Src.NLines() {
+			return false
+		}
+		pr.LexState.SetLine(pr.Src.Lines[pr.LexState.Ln])
+	}
+	return pr.Lexer.Lex(&pr.LexState)
+}
+
+// LexAll does all the lexing
+func (pr *Parser) LexAll() {
+	for {
+		if !pr.LexNext() {
+			break
+		}
+	}
+}
+
+// LexLineOut returns the current lexing output for the current line
+func (pr *Parser) LexLineOut() string {
+	return pr.LexState.LineOut()
+}
+
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
 func (pr *Parser) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)

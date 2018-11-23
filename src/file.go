@@ -32,3 +32,13 @@ func (fl *File) SetSrc(src [][]rune) {
 	fl.Lines = src
 	fl.Lexs = make([]lex.Line, len(src))
 }
+
+// NLines returns the number of lines in source
+func (fl *File) NLines() int {
+	return len(fl.Lines)
+}
+
+// SetLexs sets the lex output for given line -- does a copy
+func (fl *File) SetLexs(ln int, lexs lex.Line) {
+	fl.Lexs[ln] = lexs.Clone()
+}

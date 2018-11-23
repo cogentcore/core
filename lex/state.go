@@ -36,6 +36,17 @@ func (ls *State) SetLine(src []rune) {
 	ls.Pos = 0
 }
 
+// LineOut returns the current lex output as tagged source
+func (ls *State) LineOut() string {
+	return fmt.Sprintf("[%v,%v]: %v", ls.Ln, ls.Pos, ls.Lex.TagSrc(ls.Src))
+}
+
+// AtEol returns true if current position is at end of line
+func (ls *State) AtEol() bool {
+	sz := len(ls.Src)
+	return ls.Pos >= sz
+}
+
 // String gets the string at given offset and length from current position, returns false if out of range
 func (ls *State) String(off, sz int) (string, bool) {
 	idx := ls.Pos + off
@@ -209,7 +220,7 @@ func (ls *State) ScanMantissa(base int) {
 	}
 }
 
-func (ls *State) ReadString() {
+func (ls *State) ReadQuoted() {
 	delim, _ := ls.Rune(0)
 	offs := ls.Pos
 	ls.NextRune()
