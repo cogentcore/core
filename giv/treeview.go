@@ -10,7 +10,6 @@ import (
 	"image"
 	"image/color"
 	"log"
-	"reflect"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/filecat"
@@ -819,7 +818,7 @@ func (tv *TreeView) SrcInsertAfter() {
 	if !ok {
 		return
 	}
-	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
@@ -851,7 +850,7 @@ func (tv *TreeView) SrcInsertBefore() {
 	if !ok {
 		return
 	}
-	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
@@ -875,7 +874,8 @@ func (tv *TreeView) SrcInsertBefore() {
 // prompting the user for the type of node to add
 func (tv *TreeView) SrcAddChild() {
 	ttl := "Add Child"
-	gi.NewKiDialog(tv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+	sk := tv.SrcNode.Ptr
+	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {

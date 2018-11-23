@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"reflect"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
@@ -255,6 +256,10 @@ const (
 
 func (nb *Node2DBase) PropTag() string {
 	return "style-prop" // everything that can be a style value is tagged with this
+}
+
+func (n *Node2DBase) BaseIface() reflect.Type {
+	return reflect.TypeOf((*Node2D)(nil)).Elem()
 }
 
 func (nb *Node2DBase) AsNode2D() *Node2DBase {

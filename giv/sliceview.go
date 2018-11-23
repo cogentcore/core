@@ -379,7 +379,7 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 		vvb := sv.SliceValView.AsValueViewBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				gi.NewKiDialog(sv.Viewport, reflect.TypeOf((*gi.Node2D)(nil)).Elem(),
+				gi.NewKiDialog(sv.Viewport, ownki.BaseIface(),
 					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
 					sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						if sig == int64(gi.DialogAccepted) {

@@ -529,8 +529,8 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 }
 
 // NewKiDialog prompts for creating new item(s) of a given type, showing types
-// that implement given interface -- use construct of form:
-// reflect.TypeOf((*gi.Node2D)(nil)).Elem() to get the interface type.
+// that implement given interface -- typically use ki.BaseIface for that,
+// else, use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem()
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
