@@ -3922,6 +3922,25 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 				tv.SavePosHistory(tv.CursorPos)
+				txt := tv.Buf.Line(tv.CursorPos.Ln)
+				ch := tv.CursorPos.Ch
+				if ch < len(txt){
+					r := txt[ch]
+					if r == '{' || r == '}' || r == '(' || r == ')' {
+						tp := tv.FindScopeMatch(txt[ch], newPos)
+						tv.ClearHighlights()
+						if (tp.Ln > -1) {
+							// todo: use a different highlight and clear on first mouse click or key stroke
+							tv.Highlights = append(tv.Highlights, NewTextRegionPos(newPos, TextPos{newPos.Ln, newPos.Ch+1}))
+							tv.Highlights = append(tv.Highlights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch+1}))
+							if newPos.Ln < tp.Ln {
+								tv.RenderLines(newPos.Ln, tp.Ln)
+							} else {
+								tv.RenderLines(tp.Ln, newPos.Ln,)
+							}
+						}
+					}
+				}
 			}
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
@@ -4040,6 +4059,79 @@ func (tv *TextView) TextViewEvents() {
 			}
 		})
 	}
+}
+
+// FindScopeMatch finds the brace or parenthesis that is the partner of the one passed to function
+func (tv *TextView) FindScopeMatch(r rune, st TextPos) (en TextPos) {
+	en.Ln = -1
+	var left int
+	var right int
+	var match rune
+	switch r {
+	case '{':
+		left++
+		match = '}'
+	case '}':
+		right++
+		match = '{'
+	case '(':
+		left++
+		match = ')'
+	case ')':
+		right++
+		match = '('
+	}
+	ch := st.Ch
+	ln := st.Ln
+	txt := tv.Buf.Line(ln)
+	if left > right {
+		for l := ln; l < tv.Buf.NLines; l++ {
+			for i := ch + 1; i < len(txt); i++ {
+				if txt[i] == r {
+					left++
+					continue
+				}
+				if txt[i] == match {
+					right++
+					if left == right {
+						en.Ln = l
+						en.Ch = i
+						break
+					}
+				}
+			}
+			if en.Ln >= 0 {
+				break
+			}
+			ln++
+			txt = tv.Buf.Line(ln)
+			ch = -1
+		}
+	} else {
+		for l := ln; l >= 0; l-- {
+			for i := ch - 1; i >= 0; i-- {
+				if txt[i] == r {
+					right++
+					continue
+				}
+				if txt[i] == match {
+					left++
+					if left == right {
+						en.Ln = l
+						en.Ch = i
+						break
+					}
+				}
+			}
+			if en.Ln >= 0 {
+				break
+			}
+			ln--
+			txt = tv.Buf.Line(ln)
+			ch = len(txt)
+		}
+	}
+	return en
 }
 
 ////////////////////////////////////////////////////
