@@ -39,14 +39,15 @@ func (pr *Parser) Init() {
 	pr.LexState.Init()
 }
 
-// SetSrc sets source to be parsed
-func (pr *Parser) SetSrc(src [][]rune) {
+// SetSrc sets source to be parsed, and filename it came from
+func (pr *Parser) SetSrc(src [][]rune, fname string) {
 	if len(src) == 0 {
 		pr.Init()
 		return
 	}
 	pr.Src.SetSrc(src)
 	pr.LexState.Init()
+	pr.LexState.Filename = fname
 	pr.LexState.SetLine(src[0])
 	pr.Lexer.Validate()
 }

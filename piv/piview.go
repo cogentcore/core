@@ -92,29 +92,54 @@ func (pv *PiView) OpenTest(filename gi.FileName) {
 
 // SaveTestAs saves the test file as..
 func (pv *PiView) SaveTestAs(filename gi.FileName) {
+	pv.Buf.EditDone()
 	pv.Buf.SaveFile(filename)
 	pv.TestFile = filename
 }
 
 // LexInit initializes / restarts lexing process for current test file
 func (pv *PiView) LexInit() {
-	pv.Parser.SetSrc(pv.Buf.Lines)
+	pv.Parser.SetSrc(pv.Buf.Lines, string(pv.Buf.Filename))
+}
+
+// LexStopped tells the user why the lexer stopped
+func (pv *PiView) LexStopped() {
+	if pv.Parser.LexAtEnd() {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex At End",
+			Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
+	} else {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
+			Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexState.Errs.AllString()}, true, false, nil, nil)
+	}
 }
 
 // LexNext does next step of lexing
-func (pv *PiView) LexNext() {
+func (pv *PiView) LexNext() *lex.Rule {
 	mrule := pv.Parser.LexNext()
 	if mrule == nil {
-		if pv.Parser.LexAtEnd() {
-			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex At End",
-				Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
-		} else {
-			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-				Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexState.Errs.AllString()}, true, false, nil, nil)
-		}
+		pv.LexStopped()
 	} else {
 		pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
 		pv.SelectLexRule(mrule)
+	}
+	return mrule
+}
+
+// LexAll does all remaining lexing until end or error
+func (pv *PiView) LexAll() {
+	ntok := 0
+	for {
+		mrule := pv.Parser.LexNext()
+		if mrule == nil {
+			pv.LexStopped()
+			break
+		}
+		nntok := len(pv.Parser.LexState.Lex)
+		if nntok != ntok {
+			pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
+			pv.SelectLexRule(mrule)
+			ntok = nntok
+		}
 	}
 }
 
@@ -298,6 +323,12 @@ func (pv *PiView) ConfigSplitView() {
 		txed := txly.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
 		txed.Viewport = pv.Viewport
 		txed.SetBuf(&pv.Buf)
+		pv.Buf.SetHiStyle("emacs")
+		pv.Buf.Opts.LineNos = true
+		pv.Buf.Opts.TabSize = 4
+		txed.SetProp("white-space", gi.WhiteSpacePreWrap)
+		txed.SetProp("tab-size", 4)
+		txed.SetProp("font-family", "Go Mono")
 
 		split.SetSplits(.15, .15, .25, .15, .3)
 		split.UpdateEnd(updt)
@@ -385,7 +416,7 @@ var PiViewProps = ki.Props{
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
-					"ext":           ".json",
+					"ext":           ".pi",
 				}},
 			},
 		}},
@@ -404,7 +435,7 @@ var PiViewProps = ki.Props{
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
-					"ext":           ".json",
+					"ext":           ".pi",
 				}},
 			},
 		}},
@@ -438,6 +469,10 @@ var PiViewProps = ki.Props{
 			"icon": "play",
 			"desc": "do next step of lexing",
 		}},
+		{"LexAll", ki.Props{
+			"icon": "fast-fwd",
+			"desc": "do all remaining lexing",
+		}},
 	},
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
@@ -448,7 +483,7 @@ var PiViewProps = ki.Props{
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"default-field": "Filename",
-						"ext":           ".json",
+						"ext":           ".pi",
 					}},
 				},
 			}},
@@ -467,7 +502,7 @@ var PiViewProps = ki.Props{
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"default-field": "Filename",
-						"ext":           ".json",
+						"ext":           ".pi",
 					}},
 				},
 			}},

@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _Matches_name = "StringLetterDigitWhiteSpaceCurStateMatchesN"
+const _Matches_name = "StringLetterDigitWhiteSpaceCurStateAnyRuneMatchesN"
 
-var _Matches_index = [...]uint8{0, 6, 12, 17, 27, 35, 43}
+var _Matches_index = [...]uint8{0, 6, 12, 17, 27, 35, 42, 50}
 
 func (i Matches) String() string {
 	if i < 0 || i >= Matches(len(_Matches_index)-1) {

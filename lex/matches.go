@@ -36,7 +36,13 @@ const (
 	WhiteSpace
 
 	// CurState means match current state value set by a PushState action, using String value in rule
+	// all CurState cases must generally be first in list of rules so they can preempt
+	// other rules when the state is active
 	CurState
+
+	// AnyRune means match any rune -- use this as the last condition where other terminators
+	// come first!
+	AnyRune
 
 	MatchesN
 )

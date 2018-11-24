@@ -39,10 +39,11 @@ type Lexer interface {
 // leave the more complex things for the parsing step.
 type Rule struct {
 	ki.Node
+	Desc      string       `desc:"description / comments about this rule"`
 	Token     token.Tokens `desc:"the token value that this rule generates -- use None for non-terminals"`
 	Match     Matches      `desc:"the lexical match that we look for to engage this rule"`
-	Off       int          `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
 	String    string       `desc:"if action is LexMatch, this is the string we match"`
+	Off       int          `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
 	Acts      []Actions    `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
 	PushState string       `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
 	TokEff    token.Tokens `view:"-" json:"-" desc:"effective token based on input -- e.g., for number is the type of number"`
@@ -76,6 +77,12 @@ func (lr *Rule) Validate() bool {
 					hasErr = true
 					fmt.Printf("lex.Rule: match = CurState cannot have Action = Next -- no src match, in: %v\n", lr.PathUnique())
 				}
+			}
+			if len(lr.String) == 0 {
+				fmt.Printf("lex.Rule: match = CurState must have state to match in String -- is empty, in: %v\n", lr.PathUnique())
+			}
+			if len(lr.PushState) > 0 {
+				fmt.Printf("lex.Rule: match = CurState has non-empty PushState -- must have state to match in String instead, in: %v\n", lr.PathUnique())
 			}
 		}
 	}
@@ -155,7 +162,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if str != lr.String {
 			return false
 		}
-		lr.MatchLen = sz
+		lr.MatchLen = lr.Off + sz
 		return true
 	case Letter:
 		rn, ok := ls.Rune(lr.Off)
@@ -163,7 +170,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsLetter(rn) {
-			lr.MatchLen = 1
+			lr.MatchLen = lr.Off + 1
 			return true
 		}
 		return false
@@ -173,7 +180,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsDigit(rn) {
-			lr.MatchLen = 1
+			lr.MatchLen = lr.Off + 1
 			return true
 		}
 		return false
@@ -183,7 +190,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsWhiteSpace(rn) {
-			lr.MatchLen = 1
+			lr.MatchLen = lr.Off + 1
 			return true
 		}
 		return false
@@ -193,6 +200,13 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return true
 		}
 		return false
+	case AnyRune:
+		_, ok := ls.Rune(lr.Off)
+		if !ok {
+			return false
+		}
+		lr.MatchLen = lr.Off + 1
+		return true
 	}
 	return false
 }

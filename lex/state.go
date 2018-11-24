@@ -96,8 +96,16 @@ func (ls *State) NextRune() bool {
 	return true
 }
 
-// Add adds a lex token for given region
+// Add adds a lex token for given region -- merges with prior if same
 func (ls *State) Add(tok token.Tokens, st, ed int) {
+	sz := len(ls.Lex)
+	if sz > 0 {
+		lst := &ls.Lex[sz-1]
+		if lst.Token == tok && lst.Ed == st {
+			lst.Ed = ed
+			return
+		}
+	}
 	ls.Lex.Add(Lex{tok, st, ed})
 }
 
@@ -234,15 +242,15 @@ func (ls *State) ReadQuoted() {
 			ls.Error(offs, "string literal not terminated")
 			break
 		}
-		if !ls.NextRune() {
-			ls.Error(offs, "string literal not terminated")
-			break
-		}
 		if ch == delim {
 			break
 		}
 		if ch == '\\' {
 			ls.ReadEscape(delim)
+		}
+		if !ls.NextRune() {
+			ls.Error(offs, "string literal not terminated")
+			break
 		}
 	}
 }
