@@ -18,8 +18,12 @@ import (
 type Lexer interface {
 	ki.Ki
 
+	// Validate checks for any errors in the rules and issues warnings,
+	// returns true if valid (no err) and false if invalid (errs)
+	Validate() bool
+
 	// Lex tries to apply rule to given input state, returns true if matched, false if not
-	Lex(ls *State) bool
+	Lex(ls *State) *Rule
 
 	// AsLexRule returns object as a lex.Rule
 	AsLexRule() *Rule
@@ -55,8 +59,8 @@ func (lr *Rule) AsLexRule() *Rule {
 	return lr.This().Embed(KiT_Rule).(*Rule)
 }
 
-// Validate checks for any errors in the rules and issues warnings, returns true if valid (no err)
-// and false if invalid (errs)
+// Validate checks for any errors in the rules and issues warnings,
+// returns true if valid (no err) and false if invalid (errs)
 func (lr *Rule) Validate() bool {
 	hasErr := false
 	if !lr.IsRoot() {
@@ -126,6 +130,13 @@ func (lr *Rule) Lex(ls *State) *Rule {
 			return mrule
 		}
 	}
+
+	// if kids don't match and we don't have any actions, we are just a grouper
+	// and thus we depend entirely on kids matching
+	if len(lr.Acts) == 0 {
+		return nil
+	}
+
 	return lr
 }
 

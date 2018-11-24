@@ -8,12 +8,12 @@ package pi
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
-	"github.com/goki/pi/src"
 )
 
 // VersionInfo returns Pi version information
@@ -26,7 +26,7 @@ func VersionInfo() string {
 type Parser struct {
 	Lexer    lex.Rule   `desc:"lexer rules for first pass of lexing file"`
 	Parser   parse.Rule `desc:"parser rules for second pass of parsing lexed tokens"`
-	Src      src.File   `json:"-" xml:"-" desc:"the source to be parsed"`
+	Src      lex.File   `json:"-" xml:"-" desc:"the source to be parsed"`
 	LexState lex.State  `json:"_" xml:"-" desc:"state for lexing"`
 	Ast      parse.Ast  `json:"_" xml:"-" desc:"abstract syntax tree output from parsing"`
 	Filename string     `desc:"file name for overall parser"`
@@ -51,21 +51,37 @@ func (pr *Parser) SetSrc(src [][]rune) {
 	pr.Lexer.Validate()
 }
 
+// LexAtEnd returns true if lexing state is now at end of source
+func (pr *Parser) LexAtEnd() bool {
+	return pr.LexState.Ln >= pr.Src.NLines()
+}
+
 // LexNext does next step of lexing -- returns lowest-level rule that
 // matched, and nil none or at end of source input
 func (pr *Parser) LexNext() *lex.Rule {
 	if pr.LexState.Ln >= pr.Src.NLines() {
 		return nil
 	}
-	if pr.LexState.AtEol() {
-		pr.Src.SetLexs(pr.LexState.Ln, pr.LexState.Lex)
-		pr.LexState.Ln++
-		if pr.LexState.Ln >= pr.Src.NLines() {
+	for {
+		if pr.LexState.AtEol() {
+			pr.Src.SetLexs(pr.LexState.Ln, pr.LexState.Lex)
+			pr.LexState.Ln++
+			if pr.LexState.Ln >= pr.Src.NLines() {
+				return nil
+			}
+			pr.LexState.SetLine(pr.Src.Lines[pr.LexState.Ln])
+		}
+		cpos := pr.LexState.Pos
+		rval := pr.Lexer.Lex(&pr.LexState)
+		if !pr.LexState.AtEol() && cpos == pr.LexState.Pos {
+			msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
+			pr.LexState.Error(cpos, msg)
 			return nil
 		}
-		pr.LexState.SetLine(pr.Src.Lines[pr.LexState.Ln])
+		if rval != nil {
+			return rval
+		}
 	}
-	return pr.Lexer.Lex(&pr.LexState)
 }
 
 // LexAll does all the lexing

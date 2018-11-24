@@ -48,73 +48,78 @@ type PiView struct {
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
 
 // InitView initializes the viewer / editor
-func (pi *PiView) InitView() {
-	pi.Parser.Init()
-	mods, updt := pi.StdConfig()
+func (pv *PiView) InitView() {
+	pv.Parser.Init()
+	mods, updt := pv.StdConfig()
 	if !mods {
-		updt = pi.UpdateStart()
+		updt = pv.UpdateStart()
 	}
-	pi.ConfigSplitView()
-	pi.ConfigToolbar()
-	pi.UpdateEnd(updt)
+	pv.ConfigSplitView()
+	pv.ConfigToolbar()
+	pv.UpdateEnd(updt)
 }
 
 // Save saves lexer and parser rules to current filename, in a standard JSON-formatted file
-func (pi *PiView) Save() {
-	if pi.Filename == "" {
+func (pv *PiView) Save() {
+	if pv.Filename == "" {
 		return
 	}
-	pi.Parser.SaveJSON(string(pi.Filename))
-	pi.Changed = false
-	pi.UpdateSig() // notify our editor
+	pv.Parser.SaveJSON(string(pv.Filename))
+	pv.Changed = false
+	pv.UpdateSig() // notify our editor
 }
 
 // SaveAs saves lexer and parser rules to current filename, in a standard JSON-formatted file
-func (pi *PiView) SaveAs(filename gi.FileName) {
-	pi.Parser.SaveJSON(string(filename))
-	pi.Changed = false
-	pi.Filename = filename
-	pi.UpdateSig() // notify our editor
+func (pv *PiView) SaveAs(filename gi.FileName) {
+	pv.Parser.SaveJSON(string(filename))
+	pv.Changed = false
+	pv.Filename = filename
+	pv.UpdateSig() // notify our editor
 }
 
 // Open opens lexer and parser rules to current filename, in a standard JSON-formatted file
-func (pi *PiView) Open(filename gi.FileName) {
-	pi.Parser.OpenJSON(string(filename))
-	pi.Filename = filename
-	pi.InitView()
+func (pv *PiView) Open(filename gi.FileName) {
+	pv.Parser.OpenJSON(string(filename))
+	pv.Filename = filename
+	pv.InitView()
 }
 
 // OpenTest opens test file
-func (pi *PiView) OpenTest(filename gi.FileName) {
-	pi.Buf.OpenFile(filename)
-	pi.TestFile = filename
+func (pv *PiView) OpenTest(filename gi.FileName) {
+	pv.Buf.OpenFile(filename)
+	pv.TestFile = filename
 }
 
 // SaveTestAs saves the test file as..
-func (pi *PiView) SaveTestAs(filename gi.FileName) {
-	pi.Buf.SaveFile(filename)
-	pi.TestFile = filename
+func (pv *PiView) SaveTestAs(filename gi.FileName) {
+	pv.Buf.SaveFile(filename)
+	pv.TestFile = filename
 }
 
 // LexInit initializes / restarts lexing process for current test file
-func (pi *PiView) LexInit() {
-	pi.Parser.SetSrc(pi.Buf.Lines)
+func (pv *PiView) LexInit() {
+	pv.Parser.SetSrc(pv.Buf.Lines)
 }
 
 // LexNext does next step of lexing
-func (pi *PiView) LexNext() {
-	mrule := pi.Parser.LexNext()
+func (pv *PiView) LexNext() {
+	mrule := pv.Parser.LexNext()
 	if mrule == nil {
-		gi.PromptDialog(pi.Viewport, gi.DlgOpts{Title: "Lex at End",
-			Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
+		if pv.Parser.LexAtEnd() {
+			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex At End",
+				Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
+		} else {
+			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
+				Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexState.Errs.AllString()}, true, false, nil, nil)
+		}
 	} else {
-		pi.LexLine().SetText(mrule.Nm + ": " + pi.Parser.LexLineOut())
-		pi.SelectLexRule(mrule)
+		pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
+		pv.SelectLexRule(mrule)
 	}
 }
 
-func (pi *PiView) SelectLexRule(rule *lex.Rule) {
-	lt := pi.LexTree()
+func (pv *PiView) SelectLexRule(rule *lex.Rule) {
+	lt := pv.LexTree()
 	lt.UnselectAll()
 	lt.FuncDownMeFirst(0, lt.This(), func(k ki.Ki, level int, d interface{}) bool {
 		lnt := k.Embed(giv.KiT_TreeView)
@@ -135,7 +140,7 @@ func (pi *PiView) SelectLexRule(rule *lex.Rule) {
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (pi *PiView) StdFrameConfig() kit.TypeAndNameList {
+func (pv *PiView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Label, "lex-line")
@@ -146,16 +151,16 @@ func (pi *PiView) StdFrameConfig() kit.TypeAndNameList {
 
 // StdConfig configures a standard setup of the overall Frame -- returns mods,
 // updt from ConfigChildren and does NOT call UpdateEnd
-func (pi *PiView) StdConfig() (mods, updt bool) {
-	pi.Lay = gi.LayoutVert
-	pi.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := pi.StdFrameConfig()
-	mods, updt = pi.ConfigChildren(config, false)
+func (pv *PiView) StdConfig() (mods, updt bool) {
+	pv.Lay = gi.LayoutVert
+	pv.SetProp("spacing", gi.StdDialogVSpaceUnits)
+	config := pv.StdFrameConfig()
+	mods, updt = pv.ConfigChildren(config, false)
 	if mods {
-		ll := pi.LexLine()
+		ll := pv.LexLine()
 		ll.SetStretchMaxWidth()
 		ll.Redrawable = true
-		pl := pi.ParseLine()
+		pl := pv.ParseLine()
 		pl.SetStretchMaxWidth()
 		pl.Redrawable = true
 	}
@@ -163,35 +168,35 @@ func (pi *PiView) StdConfig() (mods, updt bool) {
 }
 
 // LexLine returns the lex line label
-func (pi *PiView) LexLine() *gi.Label {
-	idx, ok := pi.Children().IndexByName("lex-line", 2)
+func (pv *PiView) LexLine() *gi.Label {
+	idx, ok := pv.Children().IndexByName("lex-line", 2)
 	if !ok {
 		return nil
 	}
-	return pi.KnownChild(idx).(*gi.Label)
+	return pv.KnownChild(idx).(*gi.Label)
 }
 
 // ParseLine returns the parse line label
-func (pi *PiView) ParseLine() *gi.Label {
-	idx, ok := pi.Children().IndexByName("parse-line", 3)
+func (pv *PiView) ParseLine() *gi.Label {
+	idx, ok := pv.Children().IndexByName("parse-line", 3)
 	if !ok {
 		return nil
 	}
-	return pi.KnownChild(idx).(*gi.Label)
+	return pv.KnownChild(idx).(*gi.Label)
 }
 
 // SplitView returns the main SplitView
-func (pi *PiView) SplitView() (*gi.SplitView, int) {
-	idx, ok := pi.Children().IndexByName("splitview", 4)
+func (pv *PiView) SplitView() (*gi.SplitView, int) {
+	idx, ok := pv.Children().IndexByName("splitview", 4)
 	if !ok {
 		return nil, -1
 	}
-	return pi.KnownChild(idx).(*gi.SplitView), idx
+	return pv.KnownChild(idx).(*gi.SplitView), idx
 }
 
 // LexTree returns the lex rules tree view
-func (pi *PiView) LexTree() *giv.TreeView {
-	split, _ := pi.SplitView()
+func (pv *PiView) LexTree() *giv.TreeView {
+	split, _ := pv.SplitView()
 	if split != nil {
 		tv := split.KnownChild(LexRulesIdx).KnownChild(0).(*giv.TreeView)
 		return tv
@@ -200,8 +205,8 @@ func (pi *PiView) LexTree() *giv.TreeView {
 }
 
 // ParseTree returns the parse rules tree view
-func (pi *PiView) ParseTree() *giv.TreeView {
-	split, _ := pi.SplitView()
+func (pv *PiView) ParseTree() *giv.TreeView {
+	split, _ := pv.SplitView()
 	if split != nil {
 		tv := split.KnownChild(ParseRulesIdx).KnownChild(0).(*giv.TreeView)
 		return tv
@@ -210,8 +215,8 @@ func (pi *PiView) ParseTree() *giv.TreeView {
 }
 
 // AstTree returns the Ast output tree view
-func (pi *PiView) AstTree() *giv.TreeView {
-	split, _ := pi.SplitView()
+func (pv *PiView) AstTree() *giv.TreeView {
+	split, _ := pv.SplitView()
 	if split != nil {
 		tv := split.KnownChild(AstOutIdx).KnownChild(0).(*giv.TreeView)
 		return tv
@@ -220,8 +225,8 @@ func (pi *PiView) AstTree() *giv.TreeView {
 }
 
 // StructView returns the StructView for editing rules
-func (pi *PiView) StructView() *giv.StructView {
-	split, _ := pi.SplitView()
+func (pv *PiView) StructView() *giv.StructView {
+	split, _ := pv.SplitView()
 	if split != nil {
 		return split.KnownChild(StructViewIdx).(*giv.StructView)
 	}
@@ -229,26 +234,26 @@ func (pi *PiView) StructView() *giv.StructView {
 }
 
 // ToolBar returns the toolbar widget
-func (pi *PiView) ToolBar() *gi.ToolBar {
-	idx, ok := pi.Children().IndexByName("toolbar", 0)
+func (pv *PiView) ToolBar() *gi.ToolBar {
+	idx, ok := pv.Children().IndexByName("toolbar", 0)
 	if !ok {
 		return nil
 	}
-	return pi.KnownChild(idx).(*gi.ToolBar)
+	return pv.KnownChild(idx).(*gi.ToolBar)
 }
 
 // ConfigToolbar adds a PiView toolbar.
-func (pi *PiView) ConfigToolbar() {
-	tb := pi.ToolBar()
+func (pv *PiView) ConfigToolbar() {
+	tb := pv.ToolBar()
 	if tb.HasChildren() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	giv.ToolBarView(pi, pi.Viewport, tb)
+	giv.ToolBarView(pv, pv.Viewport, tb)
 }
 
 // SplitViewConfig returns a TypeAndNameList for configuring the SplitView
-func (pi *PiView) SplitViewConfig() kit.TypeAndNameList {
+func (pv *PiView) SplitViewConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Frame, "lex-tree-fr")
 	config.Add(gi.KiT_Frame, "parse-tree-fr")
@@ -259,8 +264,8 @@ func (pi *PiView) SplitViewConfig() kit.TypeAndNameList {
 }
 
 // ConfigSplitView configures the SplitView.
-func (pi *PiView) ConfigSplitView() {
-	split, _ := pi.SplitView()
+func (pv *PiView) ConfigSplitView() {
+	split, _ := pv.SplitView()
 	if split == nil {
 		return
 	}
@@ -269,20 +274,20 @@ func (pi *PiView) ConfigSplitView() {
 	split.SetProp("white-space", gi.WhiteSpacePreWrap)
 	split.SetProp("tab-size", 4)
 
-	config := pi.SplitViewConfig()
+	config := pv.SplitViewConfig()
 	mods, updt := split.ConfigChildren(config, true)
 	if mods {
 		lxfr := split.KnownChild(LexRulesIdx).(*gi.Frame)
 		lxt := lxfr.AddNewChild(giv.KiT_TreeView, "lex-tree").(*giv.TreeView)
-		lxt.SetRootNode(&pi.Parser.Lexer)
+		lxt.SetRootNode(&pv.Parser.Lexer)
 
 		prfr := split.KnownChild(ParseRulesIdx).(*gi.Frame)
 		prt := prfr.AddNewChild(giv.KiT_TreeView, "parse-tree").(*giv.TreeView)
-		prt.SetRootNode(&pi.Parser.Parser)
+		prt.SetRootNode(&pv.Parser.Parser)
 
 		astfr := split.KnownChild(AstOutIdx).(*gi.Frame)
 		astt := astfr.AddNewChild(giv.KiT_TreeView, "ast-tree").(*giv.TreeView)
-		astt.SetRootNode(&pi.Parser.Ast)
+		astt.SetRootNode(&pv.Parser.Ast)
 
 		txly := split.KnownChild(TextViewIdx).(*gi.Layout)
 		txly.SetStretchMaxWidth()
@@ -291,51 +296,51 @@ func (pi *PiView) ConfigSplitView() {
 		txly.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
 		txed := txly.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
-		txed.Viewport = pi.Viewport
-		txed.SetBuf(&pi.Buf)
+		txed.Viewport = pv.Viewport
+		txed.SetBuf(&pv.Buf)
 
 		split.SetSplits(.15, .15, .25, .15, .3)
 		split.UpdateEnd(updt)
 	} else {
-		pi.LexTree().SetRootNode(&pi.Parser.Lexer)
-		pi.LexTree().Open()
-		pi.ParseTree().SetRootNode(&pi.Parser.Parser)
-		pi.ParseTree().Open()
-		pi.AstTree().SetRootNode(&pi.Parser.Ast)
-		pi.AstTree().Open()
-		pi.StructView().SetStruct(&pi.Parser.Lexer, nil)
+		pv.LexTree().SetRootNode(&pv.Parser.Lexer)
+		pv.LexTree().Open()
+		pv.ParseTree().SetRootNode(&pv.Parser.Parser)
+		pv.ParseTree().Open()
+		pv.AstTree().SetRootNode(&pv.Parser.Ast)
+		pv.AstTree().Open()
+		pv.StructView().SetStruct(&pv.Parser.Lexer, nil)
 	}
 
-	pi.LexTree().TreeViewSig.Connect(pi.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	pv.LexTree().TreeViewSig.Connect(pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {
 			return
 		}
 		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
-		pib, _ := recv.Embed(KiT_PiView).(*PiView)
+		pvb, _ := recv.Embed(KiT_PiView).(*PiView)
 		switch sig {
 		case int64(giv.TreeViewSelected):
-			pib.ViewNode(tvn)
+			pvb.ViewNode(tvn)
 		case int64(giv.TreeViewChanged):
-			pib.SetChanged()
+			pvb.SetChanged()
 		}
 	})
 
 }
 
 // ViewNode sets the StructView view to src node for given treeview
-func (pi *PiView) ViewNode(tv *giv.TreeView) {
-	sv := pi.StructView()
+func (pv *PiView) ViewNode(tv *giv.TreeView) {
+	sv := pv.StructView()
 	if sv != nil {
 		sv.SetStruct(tv.SrcNode.Ptr, nil)
 	}
 }
 
-func (pi *PiView) SetChanged() {
-	pi.Changed = true
-	pi.ToolBar().UpdateActions() // nil safe
+func (pv *PiView) SetChanged() {
+	pv.Changed = true
+	pv.ToolBar().UpdateActions() // nil safe
 }
 
-func (pi *PiView) FileNodeOpened(fn *giv.FileNode, tvn *giv.FileTreeView) {
+func (pv *PiView) FileNodeOpened(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	if fn.IsDir() {
 		if !fn.IsOpen() {
 			tvn.SetOpen()
@@ -344,7 +349,7 @@ func (pi *PiView) FileNodeOpened(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	}
 }
 
-func (pi *PiView) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
+func (pv *PiView) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	if fn.IsDir() {
 		if fn.IsOpen() {
 			fn.CloseDir()
@@ -352,14 +357,14 @@ func (pi *PiView) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	}
 }
 
-func (pi *PiView) Render2D() {
-	pi.ToolBar().UpdateActions()
-	if win := pi.ParentWindow(); win != nil {
+func (pv *PiView) Render2D() {
+	pv.ToolBar().UpdateActions()
+	if win := pv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
 	}
-	pi.Frame.Render2D()
+	pv.Frame.Render2D()
 }
 
 var PiViewProps = ki.Props{
@@ -387,9 +392,9 @@ var PiViewProps = ki.Props{
 		{"Save", ki.Props{
 			"icon": "file-save",
 			"desc": "Save lexer and parser rules from file standard JSON-formatted file",
-			"updtfunc": giv.ActionUpdateFunc(func(pii interface{}, act *gi.Action) {
-				pi := pii.(*PiView)
-				act.SetActiveStateUpdt( /* pi.Changed && */ pi.Filename != "")
+			"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
+				pv := pvi.(*PiView)
+				act.SetActiveStateUpdt( /* pv.Changed && */ pv.Filename != "")
 			}),
 		}},
 		{"SaveAs", ki.Props{
@@ -450,9 +455,9 @@ var PiViewProps = ki.Props{
 			{"Save", ki.Props{
 				"shortcut": gi.KeyFunMenuSave,
 				"desc":     "Save lexer and parser rules from file standard JSON-formatted file",
-				"updtfunc": giv.ActionUpdateFunc(func(pii interface{}, act *gi.Action) {
-					pi := pii.(*PiView)
-					act.SetActiveState( /* pi.Changed && */ pi.Filename != "")
+				"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
+					pv := pvi.(*PiView)
+					act.SetActiveState( /* pv.Changed && */ pv.Filename != "")
 				}),
 			}},
 			{"SaveAs", ki.Props{
@@ -491,17 +496,17 @@ func NewPiView() (*gi.Window, *PiView) {
 
 	mfr := win.SetMainFrame()
 
-	pi := mfr.AddNewChild(KiT_PiView, "piview").(*PiView)
-	pi.Viewport = vp
+	pv := mfr.AddNewChild(KiT_PiView, "piview").(*PiView)
+	pv.Viewport = vp
 
 	mmen := win.MainMenu
-	giv.MainMenuView(pi, win, mmen)
+	giv.MainMenuView(pv, win, mmen)
 
 	inClosePrompt := false
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		if !inClosePrompt {
 			inClosePrompt = true
-			if pi.Changed {
+			if pv.Changed {
 				gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 					Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 					[]string{"Close Without Saving", "Cancel"},
@@ -547,10 +552,10 @@ func NewPiView() (*gi.Window, *PiView) {
 
 	win.MainMenuUpdated()
 
-	pi.InitView()
+	pv.InitView()
 
 	vp.UpdateEndNoSig(updt)
 
 	win.GoStartEventLoop()
-	return win, pi
+	return win, pv
 }

@@ -5,7 +5,7 @@
     "Props": null,
     "Kids": [
       {
-        "n": 6,
+        "n": 7,
         "type": "lex.Rule",
         "name": "SkipWhite",
         "type": "lex.Rule",
@@ -17,7 +17,9 @@
         "type": "lex.Rule",
         "name": "LitStrDouble",
         "type": "lex.Rule",
-        "name": "LitStrSingle"
+        "name": "LitStrSingle",
+        "type": "lex.Rule",
+        "name": "CommentLine"
       },
       {
         "Nm": "SkipWhite",
@@ -39,19 +41,437 @@
         "Props": null,
         "Kids": [
           {
-            "n": 1,
+            "n": 2,
             "type": "lex.Rule",
-            "name": "if"
+            "name": "keyword",
+            "type": "lex.Rule",
+            "name": "ident"
           },
           {
-            "Nm": "if",
-            "UniqueNm": "if",
+            "Nm": "keyword",
+            "UniqueNm": "keyword",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 25,
+                "type": "lex.Rule",
+                "name": "break",
+                "type": "lex.Rule",
+                "name": "case",
+                "type": "lex.Rule",
+                "name": "chan",
+                "type": "lex.Rule",
+                "name": "const",
+                "type": "lex.Rule",
+                "name": "continue",
+                "type": "lex.Rule",
+                "name": "default",
+                "type": "lex.Rule",
+                "name": "defer",
+                "type": "lex.Rule",
+                "name": "else",
+                "type": "lex.Rule",
+                "name": "fallthrough",
+                "type": "lex.Rule",
+                "name": "for",
+                "type": "lex.Rule",
+                "name": "func",
+                "type": "lex.Rule",
+                "name": "go",
+                "type": "lex.Rule",
+                "name": "goto",
+                "type": "lex.Rule",
+                "name": "if",
+                "type": "lex.Rule",
+                "name": "import",
+                "type": "lex.Rule",
+                "name": "interface",
+                "type": "lex.Rule",
+                "name": "map",
+                "type": "lex.Rule",
+                "name": "package",
+                "type": "lex.Rule",
+                "name": "range",
+                "type": "lex.Rule",
+                "name": "return",
+                "type": "lex.Rule",
+                "name": "select",
+                "type": "lex.Rule",
+                "name": "struct",
+                "type": "lex.Rule",
+                "name": "switch",
+                "type": "lex.Rule",
+                "name": "type",
+                "type": "lex.Rule",
+                "name": "var"
+              },
+              {
+                "Nm": "break",
+                "UniqueNm": "break",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "break",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "case",
+                "UniqueNm": "case",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "case",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "chan",
+                "UniqueNm": "chan",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "chan",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "const",
+                "UniqueNm": "const",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "const",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "continue",
+                "UniqueNm": "continue",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "continue",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "default",
+                "UniqueNm": "default",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "default",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "defer",
+                "UniqueNm": "defer",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "defer",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "else",
+                "UniqueNm": "else",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "else",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "fallthrough",
+                "UniqueNm": "fallthrough",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "fallthrough",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "for",
+                "UniqueNm": "for",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "for",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "func",
+                "UniqueNm": "func",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "func",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "go",
+                "UniqueNm": "go",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "go",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "goto",
+                "UniqueNm": "goto",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "goto",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "if",
+                "UniqueNm": "if",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "if",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "import",
+                "UniqueNm": "import",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "import",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "interface",
+                "UniqueNm": "interface",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "interface",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "map",
+                "UniqueNm": "map",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "map",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "package",
+                "UniqueNm": "package",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "package",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "range",
+                "UniqueNm": "range",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "range",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "return",
+                "UniqueNm": "return",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "return",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "select",
+                "UniqueNm": "select",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "select",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "struct",
+                "UniqueNm": "struct",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "struct",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "switch",
+                "UniqueNm": "switch",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "switch",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "type",
+                "UniqueNm": "type",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "type",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "var",
+                "UniqueNm": "var",
+                "Props": null,
+                "Kids": null,
+                "Token": "Keyword",
+                "Match": "String",
+                "Off": 0,
+                "String": "var",
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              }
+            ],
+            "Token": "None",
+            "Match": "Letter",
+            "Off": 0,
+            "String": "",
+            "Acts": null,
+            "PushState": ""
+          },
+          {
+            "Nm": "ident",
+            "UniqueNm": "ident",
             "Props": null,
             "Kids": null,
-            "Token": "Keyword",
-            "Match": "String",
+            "Token": "Name",
+            "Match": "Letter",
             "Off": 0,
-            "String": "if",
+            "String": "",
             "Acts": [
               "Name"
             ],
@@ -115,7 +535,21 @@
         "Off": 0,
         "String": "'",
         "Acts": [
-          "Quoted"
+          "EOL"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "CommentLine",
+        "UniqueNm": "CommentLine",
+        "Props": null,
+        "Kids": null,
+        "Token": "Comment",
+        "Match": "String",
+        "Off": 0,
+        "String": "//",
+        "Acts": [
+          "EOL"
         ],
         "PushState": ""
       }

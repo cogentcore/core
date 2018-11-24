@@ -6,7 +6,6 @@ package lex
 
 import (
 	"fmt"
-	"log"
 	"unicode"
 
 	"github.com/goki/pi/token"
@@ -14,12 +13,14 @@ import (
 
 // State is the state maintained for lexing
 type State struct {
-	Src   []rune   `desc:"the current line of source being processed"`
-	Lex   Line     `desc:"the lex output for this line"`
-	Pos   int      `desc:"the current position within the line"`
-	Ln    int      `desc:"the line within overall source that we're operating on (0 indexed)"`
-	Ch    rune     `desc:"the current rune read by NextRune"`
-	State []string `desc:"state stack"`
+	Filename string    `desc:"the current file being lex'd"`
+	Src      []rune    `desc:"the current line of source being processed"`
+	Lex      Line      `desc:"the lex output for this line"`
+	Pos      int       `desc:"the current position within the line"`
+	Ln       int       `desc:"the line within overall source that we're operating on (0 indexed)"`
+	Ch       rune      `desc:"the current rune read by NextRune"`
+	State    []string  `desc:"state stack"`
+	Errs     ErrorList `desc:"any error messages accumulated"`
 }
 
 // Init initializes the state at start of parsing
@@ -27,6 +28,7 @@ func (ls *State) Init() {
 	ls.State = nil
 	ls.Ln = 0
 	ls.SetLine(nil)
+	ls.Errs.Reset()
 }
 
 // SetLine sets a new line for parsing and initializes the lex output and pos
@@ -39,6 +41,11 @@ func (ls *State) SetLine(src []rune) {
 // LineOut returns the current lex output as tagged source
 func (ls *State) LineOut() string {
 	return fmt.Sprintf("[%v,%v]: %v", ls.Ln, ls.Pos, ls.Lex.TagSrc(ls.Src))
+}
+
+// Error adds a lexing error at given position
+func (ls *State) Error(pos int, msg string) {
+	ls.Errs.Add(Pos{ls.Ln, pos}, ls.Filename, "Lexer: "+msg)
 }
 
 // AtEol returns true if current position is at end of line
@@ -116,10 +123,6 @@ func (ls *State) PopState() string {
 	return st
 }
 
-func (ls *State) Error(pos int, msg string) {
-	log.Printf("lexer scanning error at %v: %v\n", pos, msg)
-}
-
 func (ls *State) ReadName() {
 	sz := len(ls.Src)
 	for ls.Pos < sz {
@@ -135,6 +138,7 @@ func (ls *State) ReadName() {
 func (ls *State) ReadNumber() token.Tokens {
 	offs := ls.Pos
 	tok := token.LitNumInteger
+	ls.NextRune()
 
 	if ls.Ch == '0' {
 		// int or float
