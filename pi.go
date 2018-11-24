@@ -48,18 +48,20 @@ func (pr *Parser) SetSrc(src [][]rune) {
 	pr.Src.SetSrc(src)
 	pr.LexState.Init()
 	pr.LexState.SetLine(src[0])
+	pr.Lexer.Validate()
 }
 
-// LexNext does next step of lexing -- returns false if at end of source input
-func (pr *Parser) LexNext() bool {
+// LexNext does next step of lexing -- returns lowest-level rule that
+// matched, and nil none or at end of source input
+func (pr *Parser) LexNext() *lex.Rule {
 	if pr.LexState.Ln >= pr.Src.NLines() {
-		return false
+		return nil
 	}
 	if pr.LexState.AtEol() {
 		pr.Src.SetLexs(pr.LexState.Ln, pr.LexState.Lex)
 		pr.LexState.Ln++
 		if pr.LexState.Ln >= pr.Src.NLines() {
-			return false
+			return nil
 		}
 		pr.LexState.SetLine(pr.Src.Lines[pr.LexState.Ln])
 	}
@@ -69,7 +71,7 @@ func (pr *Parser) LexNext() bool {
 // LexAll does all the lexing
 func (pr *Parser) LexAll() {
 	for {
-		if !pr.LexNext() {
+		if pr.LexNext() == nil {
 			break
 		}
 	}
@@ -86,7 +88,12 @@ func (pr *Parser) OpenJSON(filename string) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(b, pr)
+	err = json.Unmarshal(b, pr)
+	if err == nil {
+		pr.Lexer.UnmarshalPost()
+		pr.Parser.UnmarshalPost()
+	}
+	return err
 }
 
 // SaveJSON saves lexer and parser rules, in a standard JSON-formatted file

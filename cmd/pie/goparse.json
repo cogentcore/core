@@ -5,7 +5,7 @@
     "Props": null,
     "Kids": [
       {
-        "n": 5,
+        "n": 6,
         "type": "lex.Rule",
         "name": "SkipWhite",
         "type": "lex.Rule",
@@ -15,7 +15,9 @@
         "type": "lex.Rule",
         "name": "Dot",
         "type": "lex.Rule",
-        "name": "DoubleQuoteString"
+        "name": "LitStrDouble",
+        "type": "lex.Rule",
+        "name": "LitStrSingle"
       },
       {
         "Nm": "SkipWhite",
@@ -90,14 +92,28 @@
         "PushState": ""
       },
       {
-        "Nm": "DoubleQuoteString",
-        "UniqueNm": "DoubleQuoteString",
+        "Nm": "LitStrDouble",
+        "UniqueNm": "LitStrDouble",
         "Props": null,
         "Kids": null,
         "Token": "LitStrDouble",
         "Match": "String",
         "Off": 0,
         "String": "\"",
+        "Acts": [
+          "Quoted"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "LitStrSingle",
+        "UniqueNm": "LitStrSingle",
+        "Props": null,
+        "Kids": null,
+        "Token": "LitStrSingle",
+        "Match": "String",
+        "Off": 0,
+        "String": "'",
         "Acts": [
           "Quoted"
         ],

@@ -5,6 +5,7 @@
 package lex
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/goki/ki"
@@ -16,8 +17,12 @@ import (
 // for defining the BaseIface for gui in making new nodes
 type Lexer interface {
 	ki.Ki
+
 	// Lex tries to apply rule to given input state, returns true if matched, false if not
 	Lex(ls *State) bool
+
+	// AsLexRule returns object as a lex.Rule
+	AsLexRule() *Rule
 }
 
 // lex.Rule operates on the text input to produce the lexical tokens
@@ -31,12 +36,13 @@ type Lexer interface {
 type Rule struct {
 	ki.Node
 	Token     token.Tokens `desc:"the token value that this rule generates -- use None for non-terminals"`
-	TokEff    token.Tokens `view:"-" json:"-" desc:"effective token based on input -- e.g., for number is the type of number"`
 	Match     Matches      `desc:"the lexical match that we look for to engage this rule"`
 	Off       int          `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
 	String    string       `desc:"if action is LexMatch, this is the string we match"`
 	Acts      []Actions    `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
 	PushState string       `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
+	TokEff    token.Tokens `view:"-" json:"-" desc:"effective token based on input -- e.g., for number is the type of number"`
+	MatchLen  int          `view:"-" json:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
 }
 
 var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
@@ -45,10 +51,60 @@ func (lr *Rule) BaseIface() reflect.Type {
 	return reflect.TypeOf((*Lexer)(nil)).Elem()
 }
 
-// Lex tries to apply rule to given input state, returns true if matched, false if not
-func (lr *Rule) Lex(ls *State) bool {
+func (lr *Rule) AsLexRule() *Rule {
+	return lr.This().Embed(KiT_Rule).(*Rule)
+}
+
+// Validate checks for any errors in the rules and issues warnings, returns true if valid (no err)
+// and false if invalid (errs)
+func (lr *Rule) Validate() bool {
+	hasErr := false
+	if !lr.IsRoot() {
+		switch lr.Match {
+		case String:
+			if len(lr.String) == 0 {
+				hasErr = true
+				fmt.Printf("lex.Rule: match = String but String is empty, in: %v\n", lr.PathUnique())
+			}
+		case CurState:
+			for _, act := range lr.Acts {
+				if act == Next {
+					hasErr = true
+					fmt.Printf("lex.Rule: match = CurState cannot have Action = Next -- no src match, in: %v\n", lr.PathUnique())
+				}
+			}
+		}
+	}
+
+	if !lr.HasChildren() && len(lr.Acts) == 0 {
+		hasErr = true
+		fmt.Printf("lex.Rule: has no children and no action -- does nothing, in: %v\n", lr.PathUnique())
+	}
+
+	hasPos := false
+	for _, act := range lr.Acts {
+		if act >= Name && act <= EOL {
+			hasPos = true
+		}
+		if act == Next && hasPos {
+			hasErr = true
+			fmt.Printf("lex.Rule: action = Next incompatible with action that reads item such as Name, Number, Quoted, in: %v\n", lr.PathUnique())
+		}
+	}
+	// now we iterate over our kids
+	for _, klri := range lr.Kids {
+		klr := klri.Embed(KiT_Rule).(*Rule)
+		if !klr.Validate() {
+			hasErr = true
+		}
+	}
+	return hasErr
+}
+
+// Lex tries to apply rule to given input state, returns lowest-level rule that matched, nil if none
+func (lr *Rule) Lex(ls *State) *Rule {
 	if !lr.IsMatch(ls) {
-		return false
+		return nil
 	}
 	st := ls.Pos // starting pos that we're consuming
 	lr.TokEff = lr.Token
@@ -60,17 +116,17 @@ func (lr *Rule) Lex(ls *State) bool {
 		ls.Add(lr.TokEff, st, ed)
 	}
 	if !lr.HasChildren() {
-		return true
+		return lr
 	}
 
 	// now we iterate over our kids
 	for _, klri := range lr.Kids {
 		klr := klri.Embed(KiT_Rule).(*Rule)
-		if klr.Lex(ls) { // first to match takes it -- order matters!
-			break
+		if mrule := klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
+			return mrule
 		}
 	}
-	return true // regardless of kids, we matched
+	return lr
 }
 
 // IsMatch tests if the rule matches for current input state, returns true if so, false if not
@@ -88,27 +144,44 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if str != lr.String {
 			return false
 		}
+		lr.MatchLen = sz
 		return true
 	case Letter:
 		rn, ok := ls.Rune(lr.Off)
 		if !ok {
 			return false
 		}
-		return IsLetter(rn)
+		if IsLetter(rn) {
+			lr.MatchLen = 1
+			return true
+		}
+		return false
 	case Digit:
 		rn, ok := ls.Rune(lr.Off)
 		if !ok {
 			return false
 		}
-		return IsDigit(rn)
+		if IsDigit(rn) {
+			lr.MatchLen = 1
+			return true
+		}
+		return false
 	case WhiteSpace:
 		rn, ok := ls.Rune(lr.Off)
 		if !ok {
 			return false
 		}
-		return IsWhiteSpace(rn)
+		if IsWhiteSpace(rn) {
+			lr.MatchLen = 1
+			return true
+		}
+		return false
 	case CurState:
-		return ls.CurState() == lr.String
+		if ls.CurState() == lr.String {
+			lr.MatchLen = 0
+			return true
+		}
+		return false
 	}
 	return false
 }
@@ -117,7 +190,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 func (lr *Rule) DoAct(ls *State, act Actions) {
 	switch act {
 	case Next:
-		ls.Next(len(lr.String))
+		ls.Next(lr.MatchLen)
 	case Name:
 		ls.ReadName()
 	case Number:

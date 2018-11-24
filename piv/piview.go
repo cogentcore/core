@@ -14,6 +14,7 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi"
+	"github.com/goki/pi/lex"
 )
 
 // todo:
@@ -102,13 +103,31 @@ func (pi *PiView) LexInit() {
 
 // LexNext does next step of lexing
 func (pi *PiView) LexNext() {
-	ok := pi.Parser.LexNext()
-	if !ok {
+	mrule := pi.Parser.LexNext()
+	if mrule == nil {
 		gi.PromptDialog(pi.Viewport, gi.DlgOpts{Title: "Lex at End",
 			Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
 	} else {
-		pi.LexLine().SetText(pi.Parser.LexLineOut())
+		pi.LexLine().SetText(mrule.Nm + ": " + pi.Parser.LexLineOut())
+		pi.SelectLexRule(mrule)
 	}
+}
+
+func (pi *PiView) SelectLexRule(rule *lex.Rule) {
+	lt := pi.LexTree()
+	lt.UnselectAll()
+	lt.FuncDownMeFirst(0, lt.This(), func(k ki.Ki, level int, d interface{}) bool {
+		lnt := k.Embed(giv.KiT_TreeView)
+		if lnt == nil {
+			return true
+		}
+		ln := lnt.(*giv.TreeView)
+		if ln.SrcNode.Ptr == rule.This() {
+			ln.Select()
+			return false
+		}
+		return true
+	})
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
