@@ -791,6 +791,10 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 // for context menu UpdateFunc).
 func (tv *TreeView) IsRootOrField(op string) bool {
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView IsRootOrField nil SrcNode in: %v\n", tv.PathUnique())
+		return false
+	}
 	if sk.IsField() {
 		if op != "" {
 			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, true, false, nil, nil)
@@ -814,6 +818,10 @@ func (tv *TreeView) SrcInsertAfter() {
 		return
 	}
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
@@ -846,6 +854,10 @@ func (tv *TreeView) SrcInsertBefore() {
 		return
 	}
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
@@ -875,6 +887,10 @@ func (tv *TreeView) SrcInsertBefore() {
 func (tv *TreeView) SrcAddChild() {
 	ttl := "Add Child"
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -904,6 +920,10 @@ func (tv *TreeView) SrcDelete() {
 		tv.MoveUp(mouse.NoSelectMode)
 	}
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	sk.Delete(true)
 	tv.SetChanged()
 }
@@ -917,6 +937,10 @@ func (tv *TreeView) SrcDuplicate() {
 		return
 	}
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	par := sk.Parent()
 	myidx, ok := sk.IndexInParent()
 	if !ok {
@@ -931,12 +955,20 @@ func (tv *TreeView) SrcDuplicate() {
 
 // SrcEdit pulls up a StructViewDialog window on the source object viewed by this node
 func (tv *TreeView) SrcEdit() {
+	if tv.SrcNode.Ptr == nil {
+		log.Printf("TreeView SrcEdit nil SrcNode in: %v\n", tv.PathUnique())
+		return
+	}
 	tynm := kit.NonPtrType(tv.SrcNode.Ptr.Type()).Name()
 	StructViewDialog(tv.Viewport, tv.SrcNode.Ptr, DlgOpts{Title: tynm}, nil, nil)
 }
 
 // SrcGoGiEditor pulls up a new GoGiEditor window on the source object viewed by this node
 func (tv *TreeView) SrcGoGiEditor() {
+	if tv.SrcNode.Ptr == nil {
+		log.Printf("TreeView SrcGoGiEditor nil SrcNode in: %v\n", tv.PathUnique())
+		return
+	}
 	GoGiEditorDialog(tv.SrcNode.Ptr)
 }
 
@@ -1077,6 +1109,10 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 // a menu to determine what specifically to do
 func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
+	if tv.SrcNode.Ptr == nil {
+		log.Printf("TreeView PasteMenu nil SrcNode in: %v\n", tv.PathUnique())
+		return
+	}
 	var men gi.Menu
 	tv.MakePasteMenu(&men, md)
 	pos := tv.ContextMenuPos()
@@ -1090,6 +1126,10 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 		return
 	}
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView PasteAssign nil SrcNode in: %v\n", tv.PathUnique())
+		return
+	}
 	sk.CopyFrom(sl[0])
 	tv.SetChanged()
 }
@@ -1101,6 +1141,10 @@ func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
 	sl := tv.NodesFromMimeData(md)
 
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	par := sk.Parent()
 	if par == nil {
 		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before the root of the tree"}, true, false, nil, nil)
@@ -1128,6 +1172,10 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 	sl := tv.NodesFromMimeData(md)
 
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		return
+	}
 	par := sk.Parent()
 	if par == nil {
 		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
@@ -1155,6 +1203,10 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	sl := tv.NodesFromMimeData(md)
 
 	sk := tv.SrcNode.Ptr
+	if sk == nil {
+		log.Printf("TreeView PasteChildren nil SrcNode in: %v\n", tv.PathUnique())
+		return
+	}
 	updt := sk.UpdateStart()
 	for _, ns := range sl {
 		if mod == dnd.DropCopy {

@@ -60,6 +60,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		return
 	}
 	sv.Parts.Lay = gi.LayoutHoriz
+	sv.Parts.SetProp("overflow", "hidden") // no scrollbars!
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
