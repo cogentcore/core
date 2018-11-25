@@ -19,9 +19,16 @@ type Ast struct {
 	ki.Node
 	TokReg lex.Reg `desc:"region in source lexical tokens corresponding to this Ast node -- Ch = index in lex lines"`
 	SrcReg lex.Reg `desc:"region in source file corresponding to this Ast node"`
+	Src    string  `desc:"source code corresponding to this Ast node"`
 }
 
 var KiT_Ast = kit.Types.AddType(&Ast{}, AstProps)
+
+func (ast *Ast) SetTokReg(reg lex.Reg, src *lex.File) {
+	ast.TokReg = reg
+	ast.SrcReg = src.TokenSrcReg(reg)
+	ast.Src = src.RegSrc(ast.SrcReg)
+}
 
 var AstProps = ki.Props{
 	// "CallMethods": ki.PropSlice{

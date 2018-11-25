@@ -20,7 +20,7 @@ type Lexer interface {
 
 	// Validate checks for any errors in the rules and issues warnings,
 	// returns true if valid (no err) and false if invalid (errs)
-	Validate() bool
+	Validate(ls *State) bool
 
 	// Lex tries to apply rule to given input state, returns true if matched, false if not
 	Lex(ls *State) *Rule
@@ -62,34 +62,34 @@ func (lr *Rule) AsLexRule() *Rule {
 
 // Validate checks for any errors in the rules and issues warnings,
 // returns true if valid (no err) and false if invalid (errs)
-func (lr *Rule) Validate() bool {
-	hasErr := false
+func (lr *Rule) Validate(ls *State) bool {
+	valid := true
 	if !lr.IsRoot() {
 		switch lr.Match {
 		case String:
 			if len(lr.String) == 0 {
-				hasErr = true
-				fmt.Printf("lex.Rule: match = String but String is empty, in: %v\n", lr.PathUnique())
+				valid = false
+				ls.Error(0, fmt.Sprintf("lex.Rule: match = String but String is empty, in: %v\n", lr.PathUnique()))
 			}
 		case CurState:
 			for _, act := range lr.Acts {
 				if act == Next {
-					hasErr = true
-					fmt.Printf("lex.Rule: match = CurState cannot have Action = Next -- no src match, in: %v\n", lr.PathUnique())
+					valid = false
+					ls.Error(0, fmt.Sprintf("lex.Rule: match = CurState cannot have Action = Next -- no src match, in: %v\n", lr.PathUnique()))
 				}
 			}
 			if len(lr.String) == 0 {
-				fmt.Printf("lex.Rule: match = CurState must have state to match in String -- is empty, in: %v\n", lr.PathUnique())
+				ls.Error(0, fmt.Sprintf("lex.Rule: match = CurState must have state to match in String -- is empty, in: %v\n", lr.PathUnique()))
 			}
 			if len(lr.PushState) > 0 {
-				fmt.Printf("lex.Rule: match = CurState has non-empty PushState -- must have state to match in String instead, in: %v\n", lr.PathUnique())
+				ls.Error(0, fmt.Sprintf("lex.Rule: match = CurState has non-empty PushState -- must have state to match in String instead, in: %v\n", lr.PathUnique()))
 			}
 		}
 	}
 
 	if !lr.HasChildren() && len(lr.Acts) == 0 {
-		hasErr = true
-		fmt.Printf("lex.Rule: has no children and no action -- does nothing, in: %v\n", lr.PathUnique())
+		valid = false
+		ls.Error(0, fmt.Sprintf("lex.Rule: has no children and no action -- does nothing, in: %v\n", lr.PathUnique()))
 	}
 
 	hasPos := false
@@ -98,18 +98,18 @@ func (lr *Rule) Validate() bool {
 			hasPos = true
 		}
 		if act == Next && hasPos {
-			hasErr = true
-			fmt.Printf("lex.Rule: action = Next incompatible with action that reads item such as Name, Number, Quoted, in: %v\n", lr.PathUnique())
+			valid = false
+			ls.Error(0, fmt.Sprintf("lex.Rule: action = Next incompatible with action that reads item such as Name, Number, Quoted, in: %v\n", lr.PathUnique()))
 		}
 	}
 	// now we iterate over our kids
 	for _, klri := range lr.Kids {
 		klr := klri.Embed(KiT_Rule).(*Rule)
-		if !klr.Validate() {
-			hasErr = true
+		if !klr.Validate(ls) {
+			valid = false
 		}
 	}
-	return hasErr
+	return valid
 }
 
 // Lex tries to apply rule to given input state, returns lowest-level rule that matched, nil if none

@@ -7,11 +7,13 @@ package lex
 
 import (
 	"fmt"
+
+	"github.com/goki/pi/token"
 )
 
 // Pos is a position within the source file -- it is recorded always in 0, 0
 // offset positions, but is converted into 1,1 offset for public consumption
-// Ch positions are always in runes, not bytes
+// Ch positions are always in runes, not bytes.  Also used for lex token indexes.
 type Pos struct {
 	Ln int
 	Ch int
@@ -24,6 +26,26 @@ func (ps Pos) String() string {
 		s += fmt.Sprintf(":%d", ps.Ch)
 	}
 	return s
+}
+
+// PosZero is the uninitialized zero text position (which is
+// still a valid position)
+var PosZero = Pos{}
+
+// PosErr represents an error text position (-1 for both line and char)
+// used as a return value for cases where error positions are possible
+var PosErr = Pos{-1, -1}
+
+// IsLess returns true if receiver position is less than given comparison
+func (ps *Pos) IsLess(cmp Pos) bool {
+	switch {
+	case ps.Ln < cmp.Ln:
+		return true
+	case ps.Ln == cmp.Ln:
+		return ps.Ch < cmp.Ch
+	default:
+		return false
+	}
 }
 
 // Reg is a contiguous region within the source file
@@ -56,6 +78,86 @@ func (fl *File) NLines() int {
 // SetLexs sets the lex output for given line -- does a copy
 func (fl *File) SetLexs(ln int, lexs Line) {
 	fl.Lexs[ln] = lexs.Clone()
+}
+
+// NTokens returns number of lex tokens for given line
+func (fl *File) NTokens(ln int) int {
+	return len(fl.Lexs[ln])
+}
+
+// ValidTokenPos returns the next valid token position starting at given point,
+// false if at end of tokens
+func (fl *File) ValidTokenPos(pos Pos) (Pos, bool) {
+	for pos.Ch >= fl.NTokens(pos.Ln) {
+		pos.Ln++
+		pos.Ch = 0
+		if pos.Ln >= fl.NLines() {
+			pos.Ln = fl.NLines() - 1 // make valid
+			return pos, false
+		}
+	}
+	return pos, true
+}
+
+// NextTokenPos returns the next token position, false if at end of tokens
+func (fl *File) NextTokenPos(pos Pos) (Pos, bool) {
+	pos.Ch++
+	return fl.ValidTokenPos(pos)
+}
+
+// PrevTokenPos returns the previous token position, false if at end of tokens
+func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
+	pos.Ch--
+	if pos.Ch < 0 {
+		pos.Ln--
+		for fl.NTokens(pos.Ln) == 0 {
+			if pos.Ln < 0 {
+				pos.Ln = 0
+				pos.Ch = 0
+				return pos, false
+			}
+		}
+		pos.Ch = fl.NTokens(pos.Ln) - 1
+	}
+	return pos, true
+}
+
+// Token gets lex token at given Pos (Ch = token index)
+func (fl *File) Token(pos Pos) token.Tokens {
+	return fl.Lexs[pos.Ln][pos.Ch].Token
+}
+
+// TokenSrc gets source runes for given token position
+func (fl *File) TokenSrc(pos Pos) []rune {
+	lx := fl.Lexs[pos.Ln][pos.Ch]
+	return fl.Lines[pos.Ln][lx.St:lx.Ed]
+}
+
+// TokenSrcPos returns source reg associated with lex token at given token position
+func (fl *File) TokenSrcPos(pos Pos) Reg {
+	lx := fl.Lexs[pos.Ln][pos.Ch]
+	return Reg{St: Pos{pos.Ln, lx.St}, Ed: Pos{pos.Ln, lx.Ed}}
+}
+
+// TokenSrcReg translates a region of tokens into a region of source
+func (fl *File) TokenSrcReg(reg Reg) Reg {
+	st := fl.Lexs[reg.St.Ln][reg.St.Ch].St
+	ep, _ := fl.PrevTokenPos(reg.Ed) // ed is exclusive -- go to prev
+	ed := fl.Lexs[ep.Ln][ep.Ch].Ed
+	return Reg{St: Pos{reg.St.Ln, st}, Ed: Pos{ep.Ln, ed}}
+}
+
+// RegSrc returns the source (as a string) for given region
+func (fl *File) RegSrc(reg Reg) string {
+	if reg.Ed.Ln == reg.St.Ln {
+		return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
+	}
+	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
+	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
+		src += "<br>" + string(fl.Lines[ln])
+	}
+	src += "<br>" + string(fl.Lines[reg.Ed.Ln][:reg.Ed.Ch])
+	return src
 }
 
 // LexTagSrcLn returns the lex'd tagged source line for given line

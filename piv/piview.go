@@ -15,6 +15,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/parse"
 )
 
 // todo:
@@ -104,6 +105,10 @@ func (pv *PiView) SaveTestAs(filename gi.FileName) {
 // LexInit initializes / restarts lexing process for current test file
 func (pv *PiView) LexInit() {
 	pv.Parser.SetSrc(pv.TestBuf.Lines, string(pv.TestBuf.Filename))
+	if pv.Parser.LexHasErrs() {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
+			Prompt: "The Lexer validation has errors\n" + pv.Parser.LexErrString()}, true, false, nil, nil)
+	}
 }
 
 // LexStopped tells the user why the lexer stopped
@@ -113,7 +118,7 @@ func (pv *PiView) LexStopped() {
 			Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
 	} else {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-			Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexState.Errs.AllString()}, true, false, nil, nil)
+			Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexErrString()}, true, false, nil, nil)
 	}
 }
 
@@ -206,8 +211,78 @@ func (pv *PiView) Eosify() {
 	pv.Parser.Eosify()
 	if pv.Parser.Eoser.HasErrs() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Eoser Error",
-			Prompt: "The Eoser had the following errors\n" + pv.Parser.Eoser.ErrString()}, true, false, nil, nil)
+			Prompt: "The Eoser had the following errors\n" + pv.Parser.EoserErrString()}, true, false, nil, nil)
 	}
+}
+
+// ParseInit initializes / restarts lexing process for current test file
+func (pv *PiView) ParseInit() {
+	pv.LexInit()
+	pv.Parser.LexAll()
+	pv.Parser.Eosify()
+	pv.Parser.ParserInit()
+	if pv.Parser.ParseHasErrs() {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
+			Prompt: "The Parser validation has errors\n" + pv.Parser.ParseErrString()}, true, false, nil, nil)
+	}
+}
+
+// ParseStopped tells the user why the lexer stopped
+func (pv *PiView) ParseStopped() {
+	if pv.Parser.ParseAtEnd() {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse At End",
+			Prompt: "The Parser is now at the end of available text"}, true, false, nil, nil)
+	} else {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
+			Prompt: "The Parser has stopped due to errors\n" + pv.Parser.ParseErrString()}, true, false, nil, nil)
+	}
+}
+
+// ParseNext does next step of lexing
+func (pv *PiView) ParseNext() *parse.Rule {
+	mrule := pv.Parser.ParseNext()
+	pv.AstTree().Open()
+	if mrule == nil {
+		pv.ParseStopped()
+	} else {
+		pv.SelectParseRule(mrule)
+	}
+	return mrule
+}
+
+// ParseAll does all remaining lexing until end or error -- if animate is true, then
+// it updates the display -- otherwise proceeds silently
+func (pv *PiView) ParseAll(animate bool) {
+	for {
+		mrule := pv.Parser.ParseNext()
+		if mrule == nil {
+			if !pv.Parser.ParseAtEnd() {
+				pv.ParseStopped()
+			}
+			break
+		}
+		if animate {
+			pv.SelectParseRule(mrule)
+		}
+	}
+}
+
+// SelectParseRule selects given lex rule in Parser
+func (pv *PiView) SelectParseRule(rule *parse.Rule) {
+	lt := pv.ParseTree()
+	lt.UnselectAll()
+	lt.FuncDownMeFirst(0, lt.This(), func(k ki.Ki, level int, d interface{}) bool {
+		lnt := k.Embed(giv.KiT_TreeView)
+		if lnt == nil {
+			return true
+		}
+		ln := lnt.(*giv.TreeView)
+		if ln.SrcNode.Ptr == rule.This() {
+			ln.Select()
+			return false
+		}
+		return true
+	})
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -435,6 +510,20 @@ func (pv *PiView) ConfigSplitView() {
 		}
 	})
 
+	pv.AstTree().TreeViewSig.Connect(pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if data == nil {
+			return
+		}
+		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
+		pvb, _ := recv.Embed(KiT_PiView).(*PiView)
+		switch sig {
+		case int64(giv.TreeViewSelected):
+			pvb.ViewNode(tvn)
+		case int64(giv.TreeViewChanged):
+			pvb.SetChanged()
+		}
+	})
+
 }
 
 // ViewNode sets the StructView view to src node for given treeview
@@ -567,6 +656,21 @@ var PiViewProps = ki.Props{
 		{"Eosify", ki.Props{
 			"icon": "play",
 			"desc": "perform eosing",
+		}},
+		{"ParseInit", ki.Props{
+			"icon": "update",
+			"desc": "initialize parser -- this also performs lexing, eosing, assuming that is all working",
+		}},
+		{"ParseNext", ki.Props{
+			"icon": "play",
+			"desc": "do next step of parsing",
+		}},
+		{"ParseAll", ki.Props{
+			"icon": "fast-fwd",
+			"desc": "do remaining parsing",
+			"Args": ki.PropSlice{
+				{"Animate", ki.Props{}},
+			},
 		}},
 	},
 	"MainMenu": ki.PropSlice{

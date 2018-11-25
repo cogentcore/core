@@ -163,6 +163,7 @@ const (
 	OpBit
 	OpBitAnd        // &
 	OpBitOr         // |
+	OpBitNot        // ~
 	OpBitXor        // ^
 	OpBitShiftLeft  // <<
 	OpBitShiftRight // >>
@@ -346,4 +347,71 @@ func InitSubCatMap() {
 			}
 		}
 	}
+}
+
+// OpPunctMap provides a lookup of operators and punctuation tokens by their usual
+// string representation
+var OpPunctMap = map[string]Tokens{
+	"+": OpMathAdd,
+	"-": OpMathSub,
+	"*": OpMathMul,
+	"/": OpMathDiv,
+	"%": OpMathRem,
+
+	"&":  OpBitAnd,
+	"|":  OpBitOr,
+	"~":  OpBitNot,
+	"^":  OpBitXor,
+	"<<": OpBitShiftLeft,
+	">>": OpBitShiftRight,
+	"&^": OpBitAndNot,
+
+	"=":  OpAsgnAssign,
+	"++": OpAsgnInc,
+	"--": OpAsgnDec,
+	"<-": OpAsgnArrow,
+	":=": OpAsgnDefine,
+
+	"+=": OpMathAsgnAdd,
+	"-=": OpMathAsgnSub,
+	"*=": OpMathAsgnMul,
+	"/=": OpMathAsgnDiv,
+	"%=": OpMathAsgnRem,
+
+	"&=":  OpBitAsgnAnd,
+	"|=":  OpBitAsgnOr,
+	"^=":  OpBitAsgnXor,
+	"<<=": OpBitAsgnShiftLeft,
+	">>=": OpBitAsgnShiftRight,
+	"&^=": OpBitAsgnAndNot,
+
+	"&&": OpLogAnd,
+	"||": OpLogOr,
+	"!":  OpLogNot,
+
+	"==": OpRelEqual,
+	"!=": OpRelNotEqual,
+	"<":  OpRelLess,
+	">":  OpRelGreater,
+	"<=": OpRelLtEq,
+	">=": OpRelGtEq,
+
+	"...": OpListEllipsis,
+
+	"(": PunctGpLParen,
+	")": PunctGpRParen,
+	"[": PunctGpLBrack,
+	"]": PunctGpRBrack,
+	"{": PunctGpLBrace,
+	"}": PunctGpRBrace,
+
+	",": PunctSepComma,
+	".": PunctSepPeriod,
+	";": PunctSepSemicolon,
+	":": PunctSepColon,
+
+	"\"": PunctStrDblQuote,
+	"'":  PunctStrQuote,
+	"`":  PunctStrBacktick,
+	"\\": PunctStrEsc,
 }

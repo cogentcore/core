@@ -24,13 +24,14 @@ func VersionInfo() string {
 
 // Parser is the overall parser for managing the parsing
 type Parser struct {
-	Lexer    lex.Rule    `desc:"lexer rules for first pass of lexing file"`
-	Eoser    parse.Eoser `desc:"end-of-statement finder -- step after lexing before parsing"`
-	Parser   parse.Rule  `desc:"parser rules for second pass of parsing lexed tokens"`
-	Src      lex.File    `json:"-" xml:"-" desc:"the source to be parsed"`
-	LexState lex.State   `json:"_" xml:"-" desc:"state for lexing"`
-	Ast      parse.Ast   `json:"_" xml:"-" desc:"abstract syntax tree output from parsing"`
-	Filename string      `desc:"file name for overall parser"`
+	Lexer      lex.Rule    `desc:"lexer rules for first pass of lexing file"`
+	Eoser      parse.Eoser `desc:"end-of-statement finder -- step after lexing before parsing"`
+	Parser     parse.Rule  `desc:"parser rules for second pass of parsing lexed tokens"`
+	Src        lex.File    `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
+	LexState   lex.State   `json:"_" xml:"-" desc:"state for lexing"`
+	ParseState parse.State `json:"_" xml:"-" desc:"state for parsing"`
+	Ast        parse.Ast   `json:"_" xml:"-" desc:"ast output tree from parsing"`
+	Filename   string      `desc:"file name for overall parser"`
 }
 
 func (pr *Parser) Init() {
@@ -50,7 +51,8 @@ func (pr *Parser) SetSrc(src [][]rune, fname string) {
 	pr.LexState.Init()
 	pr.LexState.Filename = fname
 	pr.LexState.SetLine(src[0])
-	pr.Lexer.Validate()
+	pr.Lexer.Validate(&pr.LexState)
+	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.Eoser.State.EosPos)
 }
 
 // LexAtEnd returns true if lexing state is now at end of source
@@ -59,7 +61,7 @@ func (pr *Parser) LexAtEnd() bool {
 }
 
 // LexNext does next step of lexing -- returns lowest-level rule that
-// matched, and nil none or at end of source input
+// matched, and nil when nomatch err or at end of source input
 func (pr *Parser) LexNext() *lex.Rule {
 	if pr.LexState.Ln >= pr.Src.NLines() {
 		return nil
@@ -100,11 +102,64 @@ func (pr *Parser) LexLineOut() string {
 	return pr.LexState.LineOut()
 }
 
+// LexHasErrs returns true if there were errors from lexing
+func (pr *Parser) LexHasErrs() bool {
+	return len(pr.LexState.Errs) > 0
+}
+
+// LexErrString returns all the lexing errors as a string
+func (pr *Parser) LexErrString() string {
+	return pr.LexState.Errs.AllString()
+}
+
 // Eosify does all the finding of EOS end-of-statements, if supported for this grammar
 func (pr *Parser) Eosify() {
 	if pr.Eoser.Do {
 		pr.Eoser.Eosify(&pr.Src)
 	}
+}
+
+// EoserHasErrs returns true if there were errors from eosifying
+func (pr *Parser) EoserHasErrs() bool {
+	return len(pr.Eoser.State.Errs) > 0
+}
+
+// EoserErrString returns all the eoser errors as a string
+func (pr *Parser) EoserErrString() string {
+	return pr.Eoser.State.Errs.AllString()
+}
+
+// ParserInit initializes the parser prior to running
+func (pr *Parser) ParserInit() bool {
+	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.Eoser.State.EosPos)
+	ok := pr.Parser.CompileAll(&pr.ParseState)
+	if !ok {
+		return false
+	}
+	ok = pr.Parser.Validate(&pr.ParseState)
+	return ok
+}
+
+// ParseNext does next step of parsing -- returns lowest-level rule that matched
+// or nil if no match error or at end
+func (pr *Parser) ParseNext() *parse.Rule {
+	mrule := pr.Parser.Parse(&pr.ParseState, nil, nil)
+	return mrule
+}
+
+// ParseAtEnd returns true if parsing state is now at end of source
+func (pr *Parser) ParseAtEnd() bool {
+	return pr.ParseState.AtEof()
+}
+
+// ParseHasErrs returns true if there were errors from parsing
+func (pr *Parser) ParseHasErrs() bool {
+	return len(pr.ParseState.Errs) > 0
+}
+
+// ParseErrString returns all the parsing errors as a string
+func (pr *Parser) ParseErrString() string {
+	return pr.ParseState.Errs.AllString()
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file

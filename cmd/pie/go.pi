@@ -1928,12 +1928,61 @@
     "Nm": "Parser",
     "UniqueNm": "Parser",
     "Props": null,
-    "Kids": null,
+    "Kids": [
+      {
+        "n": 2,
+        "type": "parse.Rule",
+        "name": "file",
+        "type": "parse.Rule",
+        "name": "imports"
+      },
+      {
+        "Nm": "file",
+        "UniqueNm": "file",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "parse.Rule",
+            "name": "package",
+            "type": "parse.Rule",
+            "name": "import"
+          },
+          {
+            "Nm": "package",
+            "UniqueNm": "package",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:package' 'Name' 'EOS'",
+            "PushState": ""
+          },
+          {
+            "Nm": "import",
+            "UniqueNm": "import",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:import' '(' imports ')' 'EOS'",
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Rule": "",
+        "PushState": ""
+      },
+      {
+        "Nm": "imports",
+        "UniqueNm": "imports",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Rule": "'LitStr' imports",
+        "PushState": ""
+      }
+    ],
     "Desc": "",
     "Rule": "",
-    "Rules": null,
-    "KeyTok": "None",
-    "Keyword": "",
     "PushState": ""
   },
   "Filename": ""
