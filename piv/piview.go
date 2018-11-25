@@ -42,7 +42,8 @@ type PiView struct {
 	TestFile gi.FileName `desc:"the file for testing"`
 	Filename gi.FileName `desc:"filename for saving parser"`
 	Changed  bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
-	Buf      giv.TextBuf `json:"-" desc:"test file buffer"`
+	TestBuf  giv.TextBuf `json:"-" desc:"test file buffer"`
+	LexBuf   giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
 }
 
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
@@ -86,20 +87,23 @@ func (pv *PiView) Open(filename gi.FileName) {
 
 // OpenTest opens test file
 func (pv *PiView) OpenTest(filename gi.FileName) {
-	pv.Buf.OpenFile(filename)
+	pv.TestBuf.OpenFile(filename)
 	pv.TestFile = filename
 }
 
 // SaveTestAs saves the test file as..
 func (pv *PiView) SaveTestAs(filename gi.FileName) {
-	pv.Buf.EditDone()
-	pv.Buf.SaveFile(filename)
+	pv.TestBuf.EditDone()
+	pv.TestBuf.SaveFile(filename)
 	pv.TestFile = filename
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//  Lexing
+
 // LexInit initializes / restarts lexing process for current test file
 func (pv *PiView) LexInit() {
-	pv.Parser.SetSrc(pv.Buf.Lines, string(pv.Buf.Filename))
+	pv.Parser.SetSrc(pv.TestBuf.Lines, string(pv.TestBuf.Filename))
 }
 
 // LexStopped tells the user why the lexer stopped
@@ -125,24 +129,30 @@ func (pv *PiView) LexNext() *lex.Rule {
 	return mrule
 }
 
-// LexAll does all remaining lexing until end or error
-func (pv *PiView) LexAll() {
+// LexAll does all remaining lexing until end or error -- if animate is true, then
+// it updates the display -- otherwise proceeds silently
+func (pv *PiView) LexAll(animate bool) {
 	ntok := 0
 	for {
 		mrule := pv.Parser.LexNext()
 		if mrule == nil {
-			pv.LexStopped()
+			if !pv.Parser.LexAtEnd() {
+				pv.LexStopped()
+			}
 			break
 		}
-		nntok := len(pv.Parser.LexState.Lex)
-		if nntok != ntok {
-			pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
-			pv.SelectLexRule(mrule)
-			ntok = nntok
+		if animate {
+			nntok := len(pv.Parser.LexState.Lex)
+			if nntok != ntok {
+				pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
+				pv.SelectLexRule(mrule)
+				ntok = nntok
+			}
 		}
 	}
 }
 
+// SelectLexRule selects given lex rule in Lexer
 func (pv *PiView) SelectLexRule(rule *lex.Rule) {
 	lt := pv.LexTree()
 	lt.UnselectAll()
@@ -158,6 +168,42 @@ func (pv *PiView) SelectLexRule(rule *lex.Rule) {
 		}
 		return true
 	})
+}
+
+// UpdtLexBuf sets the LexBuf to current lex content
+func (pv *PiView) UpdtLexBuf() {
+	txt := pv.Parser.Src.LexTagSrc()
+	pv.LexBuf.SetText([]byte(txt))
+}
+
+// ToggleLexView switches the textview between the lexer output and the test src file
+func (pv *PiView) ToggleLexView() {
+	tv := pv.TextView()
+	if tv == nil {
+		return
+	}
+	if tv.Buf == &pv.TestBuf {
+		pv.UpdtLexBuf()
+		tv.SetBuf(&pv.LexBuf)
+	} else {
+		tv.SetBuf(&pv.TestBuf)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Parsing
+
+// EditEoser shows the Eoser settings to edit -- finds the EOS end-of-statements
+func (pv *PiView) EditEoser() {
+	sv := pv.StructView()
+	if sv != nil {
+		sv.SetStruct(&pv.Parser.Eoser, nil)
+	}
+}
+
+// Eosify does the eosification per current settings
+func (pv *PiView) Eosify() {
+	pv.Parser.Eosify()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -258,6 +304,16 @@ func (pv *PiView) StructView() *giv.StructView {
 	return nil
 }
 
+// TextView returns the TextView
+func (pv *PiView) TextView() *giv.TextView {
+	split, _ := pv.SplitView()
+	if split != nil {
+		tly := split.KnownChild(TextViewIdx).(*gi.Layout)
+		return tly.KnownChild(0).(*giv.TextView)
+	}
+	return nil
+}
+
 // ToolBar returns the toolbar widget
 func (pv *PiView) ToolBar() *gi.ToolBar {
 	idx, ok := pv.Children().IndexByName("toolbar", 0)
@@ -320,12 +376,17 @@ func (pv *PiView) ConfigSplitView() {
 		txly.SetMinPrefWidth(units.NewValue(20, units.Ch))
 		txly.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
+		pv.TestBuf.SetHiStyle("emacs")
+		pv.TestBuf.Opts.LineNos = true
+		pv.TestBuf.Opts.TabSize = 4
+
+		pv.LexBuf.SetHiStyle("emacs")
+		pv.LexBuf.Opts.LineNos = true
+		pv.LexBuf.Opts.TabSize = 4
+
 		txed := txly.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
 		txed.Viewport = pv.Viewport
-		txed.SetBuf(&pv.Buf)
-		pv.Buf.SetHiStyle("emacs")
-		pv.Buf.Opts.LineNos = true
-		pv.Buf.Opts.TabSize = 4
+		txed.SetBuf(&pv.TestBuf)
 		txed.SetProp("white-space", gi.WhiteSpacePreWrap)
 		txed.SetProp("tab-size", 4)
 		txed.SetProp("font-family", "Go Mono")
@@ -343,6 +404,20 @@ func (pv *PiView) ConfigSplitView() {
 	}
 
 	pv.LexTree().TreeViewSig.Connect(pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if data == nil {
+			return
+		}
+		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
+		pvb, _ := recv.Embed(KiT_PiView).(*PiView)
+		switch sig {
+		case int64(giv.TreeViewSelected):
+			pvb.ViewNode(tvn)
+		case int64(giv.TreeViewChanged):
+			pvb.SetChanged()
+		}
+	})
+
+	pv.ParseTree().TreeViewSig.Connect(pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {
 			return
 		}
@@ -460,7 +535,7 @@ var PiViewProps = ki.Props{
 				}},
 			},
 		}},
-		{"sep-ctrl", ki.BlankProp{}},
+		{"sep-lex", ki.BlankProp{}},
 		{"LexInit", ki.Props{
 			"icon": "update",
 			"desc": "Init / restart lexer",
@@ -472,6 +547,22 @@ var PiViewProps = ki.Props{
 		{"LexAll", ki.Props{
 			"icon": "fast-fwd",
 			"desc": "do all remaining lexing",
+			"Args": ki.PropSlice{
+				{"Animate", ki.Props{}},
+			},
+		}},
+		{"ToggleLexView", ki.Props{
+			"icon": "update",
+			"desc": "toggle textview to view either source file or lexer output of source file",
+		}},
+		{"sep-parse", ki.BlankProp{}},
+		{"EditEoser", ki.Props{
+			"icon": "edit",
+			"desc": "edit the settings of the eoser -- step after lexing",
+		}},
+		{"Eosify", ki.Props{
+			"icon": "play",
+			"desc": "perform eosing",
 		}},
 	},
 	"MainMenu": ki.PropSlice{

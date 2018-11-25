@@ -14,13 +14,14 @@ import (
 // State is the state maintained for lexing
 type State struct {
 	Filename string    `desc:"the current file being lex'd"`
+	KeepWS   bool      `desc:"if true, record whitespace tokens -- else ignore"`
 	Src      []rune    `desc:"the current line of source being processed"`
 	Lex      Line      `desc:"the lex output for this line"`
 	Pos      int       `desc:"the current position within the line"`
 	Ln       int       `desc:"the line within overall source that we're operating on (0 indexed)"`
 	Ch       rune      `desc:"the current rune read by NextRune"`
 	State    []string  `desc:"state stack"`
-	Errs     ErrorList `desc:"any error messages accumulated"`
+	Errs     ErrorList `desc:"any error messages accumulated during lexing specifically"`
 }
 
 // Init initializes the state at start of parsing
@@ -96,10 +97,24 @@ func (ls *State) NextRune() bool {
 	return true
 }
 
+// CurRune reads the current rune into Ch and returns false if at end of line
+func (ls *State) CurRune() bool {
+	sz := len(ls.Src)
+	if ls.Pos >= sz {
+		ls.Pos = sz
+		return false
+	}
+	ls.Ch = ls.Src[ls.Pos]
+	return true
+}
+
 // Add adds a lex token for given region -- merges with prior if same
 func (ls *State) Add(tok token.Tokens, st, ed int) {
+	if tok == token.TextWhitespace && !ls.KeepWS {
+		return
+	}
 	sz := len(ls.Lex)
-	if sz > 0 {
+	if sz > 0 && tok.CombineRepeats() {
 		lst := &ls.Lex[sz-1]
 		if lst.Token == tok && lst.Ed == st {
 			lst.Ed = ed
@@ -146,8 +161,7 @@ func (ls *State) ReadName() {
 func (ls *State) ReadNumber() token.Tokens {
 	offs := ls.Pos
 	tok := token.LitNumInteger
-	ls.NextRune()
-
+	ls.CurRune()
 	if ls.Ch == '0' {
 		// int or float
 		offs := ls.Pos
@@ -243,6 +257,7 @@ func (ls *State) ReadQuoted() {
 			break
 		}
 		if ch == delim {
+			ls.NextRune() // move past
 			break
 		}
 		if ch == '\\' {

@@ -903,7 +903,7 @@
         "Props": null,
         "Kids": null,
         "Desc": "",
-        "Token": "PunctGpRparen",
+        "Token": "PunctGpRParen",
         "Match": "String",
         "String": ")",
         "Off": 0,
@@ -920,7 +920,7 @@
         "Desc": "",
         "Token": "PunctGpLBrack",
         "Match": "String",
-        "String": "{",
+        "String": "[",
         "Off": 0,
         "Acts": [
           "Next"
@@ -935,7 +935,7 @@
         "Desc": "",
         "Token": "PunctGpRBrack",
         "Match": "String",
-        "String": "}",
+        "String": "]",
         "Off": 0,
         "Acts": [
           "Next"
@@ -950,7 +950,7 @@
         "Desc": "",
         "Token": "PunctGpLBrace",
         "Match": "String",
-        "String": "[",
+        "String": "{",
         "Off": 0,
         "Acts": [
           "Next"
@@ -963,9 +963,9 @@
         "Props": null,
         "Kids": null,
         "Desc": "",
-        "Token": "PunctGpRRrace",
+        "Token": "PunctGpRBrace",
         "Match": "String",
-        "String": "]",
+        "String": "}",
         "Off": 0,
         "Acts": [
           "Next"
@@ -1918,13 +1918,22 @@
     "Acts": null,
     "PushState": ""
   },
+  "Eoser": {
+    "Do": true,
+    "Eol": true,
+    "Semi": true,
+    "Backslash": false
+  },
   "Parser": {
     "Nm": "Parser",
     "UniqueNm": "Parser",
     "Props": null,
     "Kids": null,
-    "Off": 0,
-    "String": "",
+    "Desc": "",
+    "Rule": "",
+    "Rules": null,
+    "KeyTok": "None",
+    "Keyword": "",
     "PushState": ""
   },
   "Filename": ""

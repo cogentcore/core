@@ -36,6 +36,16 @@ func (ll *Line) Add(lx Lex) {
 	*ll = append(*ll, lx)
 }
 
+// Insert inserts one element to the lex line at given point
+func (ll *Line) Insert(idx int, lx Lex) {
+	sz := len(*ll)
+	*ll = append(*ll, lx)
+	if idx < sz {
+		copy((*ll)[idx+1:], (*ll)[idx:sz])
+		(*ll)[idx] = lx
+	}
+}
+
 // Clone returns a new copy of the line
 func (ll *Line) Clone() Line {
 	cp := make(Line, len(*ll))

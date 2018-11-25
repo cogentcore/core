@@ -36,12 +36,14 @@ type Reg struct {
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
 type File struct {
-	Lines [][]rune `desc:"contents of the file as lines of runes"`
-	Lexs  []Line   `desc:"lex'd version of the lines -- allocated to size of Lines"`
+	Filename string   `desc:"the current file being lex'd"`
+	Lines    [][]rune `desc:"contents of the file as lines of runes"`
+	Lexs     []Line   `desc:"lex'd version of the lines -- allocated to size of Lines"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs
-func (fl *File) SetSrc(src [][]rune) {
+func (fl *File) SetSrc(src [][]rune, fname string) {
+	fl.Filename = fname
 	fl.Lines = src
 	fl.Lexs = make([]Line, len(src))
 }
@@ -54,4 +56,19 @@ func (fl *File) NLines() int {
 // SetLexs sets the lex output for given line -- does a copy
 func (fl *File) SetLexs(ln int, lexs Line) {
 	fl.Lexs[ln] = lexs.Clone()
+}
+
+// LexTagSrcLn returns the lex'd tagged source line for given line
+func (fl *File) LexTagSrcLn(ln int) string {
+	return fl.Lexs[ln].TagSrc(fl.Lines[ln])
+}
+
+// LexTagSrc returns the lex'd tagged source for entire source
+func (fl *File) LexTagSrc() string {
+	txt := ""
+	nlines := fl.NLines()
+	for ln := 0; ln < nlines; ln++ {
+		txt += fl.LexTagSrcLn(ln) + "\n"
+	}
+	return txt
 }

@@ -24,12 +24,13 @@ func VersionInfo() string {
 
 // Parser is the overall parser for managing the parsing
 type Parser struct {
-	Lexer    lex.Rule   `desc:"lexer rules for first pass of lexing file"`
-	Parser   parse.Rule `desc:"parser rules for second pass of parsing lexed tokens"`
-	Src      lex.File   `json:"-" xml:"-" desc:"the source to be parsed"`
-	LexState lex.State  `json:"_" xml:"-" desc:"state for lexing"`
-	Ast      parse.Ast  `json:"_" xml:"-" desc:"abstract syntax tree output from parsing"`
-	Filename string     `desc:"file name for overall parser"`
+	Lexer    lex.Rule    `desc:"lexer rules for first pass of lexing file"`
+	Eoser    parse.Eoser `desc:"end-of-statement finder -- step after lexing before parsing"`
+	Parser   parse.Rule  `desc:"parser rules for second pass of parsing lexed tokens"`
+	Src      lex.File    `json:"-" xml:"-" desc:"the source to be parsed"`
+	LexState lex.State   `json:"_" xml:"-" desc:"state for lexing"`
+	Ast      parse.Ast   `json:"_" xml:"-" desc:"abstract syntax tree output from parsing"`
+	Filename string      `desc:"file name for overall parser"`
 }
 
 func (pr *Parser) Init() {
@@ -45,7 +46,7 @@ func (pr *Parser) SetSrc(src [][]rune, fname string) {
 		pr.Init()
 		return
 	}
-	pr.Src.SetSrc(src)
+	pr.Src.SetSrc(src, fname)
 	pr.LexState.Init()
 	pr.LexState.Filename = fname
 	pr.LexState.SetLine(src[0])
@@ -97,6 +98,13 @@ func (pr *Parser) LexAll() {
 // LexLineOut returns the current lexing output for the current line
 func (pr *Parser) LexLineOut() string {
 	return pr.LexState.LineOut()
+}
+
+// Eosify does all the finding of EOS end-of-statements, if supported for this grammar
+func (pr *Parser) Eosify() {
+	if pr.Eoser.Do {
+		pr.Eoser.Eosify(&pr.Src)
+	}
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
