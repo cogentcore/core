@@ -204,6 +204,10 @@ func (pv *PiView) EditEoser() {
 // Eosify does the eosification per current settings
 func (pv *PiView) Eosify() {
 	pv.Parser.Eosify()
+	if pv.Parser.Eoser.HasErrs() {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Eoser Error",
+			Prompt: "The Eoser had the following errors\n" + pv.Parser.Eoser.ErrString()}, true, false, nil, nil)
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

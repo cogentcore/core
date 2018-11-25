@@ -86,6 +86,11 @@ func (pr *Rule) AsParseRule() *Rule {
 	return pr.This().Embed(KiT_Rule).(*Rule)
 }
 
+// Compile compiles string rules into their runnable elements
+func (pr *Rule) Compile() bool {
+	return true
+}
+
 // Validate checks for any errors in the rules and issues warnings,
 // returns true if valid (no err) and false if invalid (errs)
 func (pr *Rule) Validate() bool {

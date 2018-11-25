@@ -48,6 +48,32 @@ func (es *EosState) LexAt(idx int) lex.Lex {
 	return lx
 }
 
+// LexAtSafe returns the Lex item at given position in current line, or last lex item if beyond end
+func (es *EosState) LexAtSafe(ln, idx int) lex.Lex {
+	nln := es.Src.NLines()
+	if nln == 0 {
+		return lex.Lex{}
+	}
+	if ln >= nln {
+		ln = nln - 1
+	}
+	sz := len(es.Src.Lexs[ln])
+	if sz == 0 {
+		if ln > 0 {
+			ln--
+			return es.LexAtSafe(ln, idx)
+		}
+		return lex.Lex{}
+	}
+	if idx < 0 {
+		idx = 0
+	}
+	if idx >= sz {
+		idx = sz - 1
+	}
+	return es.Src.Lexs[ln][idx]
+}
+
 // Token returns the current token
 func (es *EosState) Token() token.Tokens {
 	lx := es.LexAt(es.Li)
@@ -67,10 +93,49 @@ func (es *EosState) InsertEOS(at int) {
 	es.EosPos = append(es.EosPos, lex.Pos{es.Ln, at})
 }
 
+// ReplaceEOS replaces given token with an EOS
+func (es *EosState) ReplaceEOS(at int) {
+	clex := es.LexAt(at)
+	clex.Token = token.EOS
+	es.Src.Lexs[es.Ln][at] = clex
+}
+
+// Error adds an eosing error at current position
+func (es *EosState) Error(msg string) {
+	clex := es.LexAtSafe(es.Ln, es.Li-1)
+	es.Errs.Add(lex.Pos{es.Ln, clex.St}, es.Src.Filename, "Eoser: "+msg)
+}
+
+// TokStackStr returns the token stack as strings
+func (es *EosState) TokStackStr() string {
+	str := ""
+	for _, tok := range es.TokStack {
+		switch tok {
+		case token.PunctGpLParen:
+			str += "paren ( "
+		case token.PunctGpLBrack:
+			str += "bracket [ "
+		}
+	}
+	return str
+}
+
+/////////////////////////////////////////////////////////////////////
+//  Eoser
+
 // Error adds an eosing error at given position
 func (eo *Eoser) Error(msg string) {
-	clex := eo.State.LexAt(eo.State.Li - 1)
-	eo.State.Errs.Add(lex.Pos{eo.State.Ln, clex.St}, eo.State.Src.Filename, "Eoser: "+msg)
+	eo.State.Error(msg)
+}
+
+// HasErrs reports if there are errors in eosing process
+func (eo *Eoser) HasErrs() bool {
+	return len(eo.State.Errs) > 0
+}
+
+// ErrString returns the errors as a single string
+func (eo *Eoser) ErrString() string {
+	return eo.State.Errs.AllString()
 }
 
 // PushToken pushes a paren or bracket onto token stack
@@ -136,12 +201,16 @@ func (eo *Eoser) Eosify(src *lex.File) {
 		case tok == token.PunctGpRParen || tok == token.PunctGpRBrack:
 			eo.PopToken(tok)
 			continue
-		case eo.Semi && tok == token.PunctSepSemicolon:
-			eo.State.InsertEOS(eo.State.Li)
+		case eo.Semi && tok == token.PunctSepSemicolon: // don't keep the semi otherwise need a rule for two..
+			eo.State.ReplaceEOS(eo.State.Li - 1)
 			continue
 		case eo.Backslash && tok == token.PunctStrEsc && eo.State.Li >= sz:
 			eo.State.NextLine() // prevent from marking as EOS
 			continue
 		}
+	}
+	stsz := len(eo.State.TokStack)
+	if stsz > 0 {
+		eo.Error("mismatched grouping -- EOS finding ended with these left unmatched: " + eo.State.TokStackStr())
 	}
 }
