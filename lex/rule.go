@@ -66,10 +66,12 @@ func (lr *Rule) Validate(ls *State) bool {
 	valid := true
 	if !lr.IsRoot() {
 		switch lr.Match {
+		case StrName:
+			fallthrough
 		case String:
 			if len(lr.String) == 0 {
 				valid = false
-				ls.Error(0, fmt.Sprintf("lex.Rule: match = String but String is empty, in: %v\n", lr.PathUnique()))
+				ls.Error(0, fmt.Sprintf("lex.Rule: match = String or StrName but String is empty, in: %v\n", lr.PathUnique()))
 			}
 		case CurState:
 			for _, act := range lr.Acts {
@@ -102,6 +104,12 @@ func (lr *Rule) Validate(ls *State) bool {
 			ls.Error(0, fmt.Sprintf("lex.Rule: action = Next incompatible with action that reads item such as Name, Number, Quoted, in: %v\n", lr.PathUnique()))
 		}
 	}
+
+	if lr.Token.Cat() == token.Keyword && lr.Match != StrName {
+		valid = false
+		ls.Error(0, fmt.Sprintf("lex.Rule: Keyword token must use StrName to match entire name, in: %v\n", lr.PathUnique()))
+	}
+
 	// now we iterate over our kids
 	for _, klri := range lr.Kids {
 		klr := klri.Embed(KiT_Rule).(*Rule)
@@ -159,6 +167,24 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if !ok {
 			return false
 		}
+		if str != lr.String {
+			return false
+		}
+		lr.MatchLen = lr.Off + sz
+		return true
+	case StrName:
+		cp := ls.Pos
+		ls.Pos += lr.Off
+		st := ls.Pos
+		ls.ReadName()
+		ed := ls.Pos
+		ls.Pos = cp
+		nsz := ed - st
+		sz := len(lr.String)
+		if nsz != sz {
+			return false
+		}
+		str := string(ls.Src[st:ed])
 		if str != lr.String {
 			return false
 		}

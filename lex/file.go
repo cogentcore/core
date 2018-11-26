@@ -54,6 +54,11 @@ type Reg struct {
 	Ed Pos `desc:"ending position of region"`
 }
 
+// IsNil checks if the region is empty, because the start is after or equal to the end
+func (tr Reg) IsNil() bool {
+	return !tr.St.IsLess(tr.Ed)
+}
+
 // File contains the contents of the file being parsed -- all kept in
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
@@ -116,6 +121,7 @@ func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
 				pos.Ch = 0
 				return pos, false
 			}
+			pos.Ln--
 		}
 		pos.Ch = fl.NTokens(pos.Ln) - 1
 	}

@@ -24,7 +24,15 @@ func (ev *Matches) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 // Matching rules
 const (
 	// String means match a specific string as given in the rule
+	// Note: this only looks for the string with no constraints on
+	// what happens after this string -- use StrName to match entire names
 	String Matches = iota
+
+	// StrName means match a specific string that is a complete alpha-numeric
+	// string (including underbar _) with some other char at the end
+	// must use this for all keyword matches to ensure that it isn't just
+	// the start of a longer name
+	StrName
 
 	// Match any letter, including underscore
 	Letter

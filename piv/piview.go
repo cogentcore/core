@@ -246,6 +246,9 @@ func (pv *PiView) ParseNext() *parse.Rule {
 		pv.ParseStopped()
 	} else {
 		pv.SelectParseRule(mrule)
+		if pv.Parser.ParseHasErrs() { // can have errs even when matching..
+			pv.ParseStopped()
+		}
 	}
 	return mrule
 }

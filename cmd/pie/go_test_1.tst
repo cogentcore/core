@@ -6,14 +6,30 @@ license that can be found in the LICENSE file. */
 
 package main
 
+import "github.com/goki/gi/gi"
+
 import (
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
+	main "github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gide/gide"
+	gogide "github.com/goki/gide/gide"
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
+
+const Freddo = 3.14
+
+// The lexical acts
+const (
+	// Next means advance input position to the next character(s) after the matched characters
+	Next Actions = 4.92
+
+	// Name means read in an entire name, which is letters, _ and digits after first letter
+	// position will be advanced to just after
+	Name
+)
+
+var Peachy int
 
 func main() {
 	gimain.Main(func() {

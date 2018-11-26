@@ -5,20 +5,22 @@
 package parse
 
 import (
+	"fmt"
+
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
 
 // parse.State is the state maintained for parsing
 type State struct {
-	Src      *lex.File     `desc:"source and lexed version of source we're parsing"`
-	Ast      *Ast          `desc:"root of the Ast abstract syntax tree we're updating"`
-	EosPos   []lex.Pos     `desc:"positions *in token coordinates* of the EOS markers generated"`
-	EosIdx   int           `desc:"index in list of Eos tokens that we're currently on"`
-	Pos      lex.Pos       `desc:"the current lex token position"`
-	RegStack []lex.Reg     `desc:"region *in token coordinates* of start / end positions for looking for tokens"`
-	State    []string      `desc:"state stack"`
-	Errs     lex.ErrorList `desc:"any error messages accumulated during parsing specifically"`
+	Src        *lex.File     `desc:"source and lexed version of source we're parsing"`
+	Ast        *Ast          `desc:"root of the Ast abstract syntax tree we're updating"`
+	EosPos     []lex.Pos     `desc:"positions *in token coordinates* of the EOS markers generated"`
+	EosIdx     int           `desc:"index in list of Eos tokens that we're currently on"`
+	Pos        lex.Pos       `desc:"the current lex token position"`
+	ScopeStack []lex.Reg     `desc:"scope stack  *in token coordinates* of regions for looking for tokens"`
+	State      []string      `desc:"state stack"`
+	Errs       lex.ErrorList `desc:"any error messages accumulated during parsing specifically"`
 }
 
 // Init initializes the state at start of parsing
@@ -39,6 +41,7 @@ func (ps *State) Error(pos lex.Pos, msg string) {
 		pos = ps.Src.TokenSrcPos(pos).St
 	}
 	ps.Errs.Add(pos, ps.Src.Filename, "Parser: "+msg)
+	fmt.Println("ERROR: " + ps.Errs[len(ps.Errs)-1].Error())
 }
 
 // AtEof returns true if current position is at end of file
@@ -76,23 +79,30 @@ func (ps *State) FindToken(tok token.Tokens, keyword string, reg lex.Reg) (lex.P
 	return cp, false
 }
 
-// AddAst adds a child Ast node to given Ast parent node -- if nil uses global parent
-func (ps *State) AddAst(ast *Ast, par *Rule, rule string, reg lex.Reg) (parAst, chAst *Ast) {
-	if ast == nil || ast.Name() != par.Name() {
-		parAst = ps.Ast.AddNewChild(KiT_Ast, par.Name()).(*Ast)
-		parAst.SetTokReg(reg, ps.Src)
-		chAst = parAst.AddNewChild(KiT_Ast, rule).(*Ast)
-		chAst.SetTokReg(reg, ps.Src)
-		return
+// MatchToken returns true if token matches at given position -- must be
+// a valid position!
+func (ps *State) MatchToken(tok token.Tokens, keyword string, pos lex.Pos) bool {
+	isCat := tok.Cat() == tok
+	isSubCat := tok.SubCat() == tok
+	tk := ps.Src.Token(pos)
+	if tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok) {
+		if keyword != "" {
+			tksrc := string(ps.Src.TokenSrc(pos))
+			if tksrc == keyword {
+				return true
+			}
+		} else {
+			return true
+		}
 	}
-	if ast.Name() == rule { // recursive
-		parAst = ast.Par.(*Ast)
-	} else {
-		parAst = ast
-	}
-	chAst = parAst.AddNewChild(KiT_Ast, rule).(*Ast)
+	return false
+}
+
+// AddAst adds a child Ast node to given parent Ast node
+func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
+	chAst := parAst.AddNewChild(KiT_Ast, rule).(*Ast)
 	chAst.SetTokReg(reg, ps.Src)
-	return
+	return chAst
 }
 
 func (ps *State) PushState(st string) {
@@ -117,24 +127,24 @@ func (ps *State) PopState() string {
 	return st
 }
 
-func (ps *State) PushReg(reg lex.Reg) {
-	ps.RegStack = append(ps.RegStack, reg)
+func (ps *State) PushScope(reg lex.Reg) {
+	ps.ScopeStack = append(ps.ScopeStack, reg)
 }
 
-func (ps *State) CurReg() (lex.Reg, bool) {
-	sz := len(ps.RegStack)
+func (ps *State) CurScope() (lex.Reg, bool) {
+	sz := len(ps.ScopeStack)
 	if sz == 0 {
 		return lex.Reg{}, false
 	}
-	return ps.RegStack[sz-1], true
+	return ps.ScopeStack[sz-1], true
 }
 
-func (ps *State) PopReg() (lex.Reg, bool) {
-	sz := len(ps.RegStack)
+func (ps *State) PopScope() (lex.Reg, bool) {
+	sz := len(ps.ScopeStack)
 	if sz == 0 {
 		return lex.Reg{}, false
 	}
-	st, _ := ps.CurReg()
-	ps.RegStack = ps.RegStack[:sz-1]
+	st, _ := ps.CurScope()
+	ps.ScopeStack = ps.ScopeStack[:sz-1]
 	return st, true
 }

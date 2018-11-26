@@ -290,7 +290,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 25,
+                "n": 26,
                 "type": "lex.Rule",
                 "name": "break",
                 "type": "lex.Rule",
@@ -324,6 +324,8 @@
                 "type": "lex.Rule",
                 "name": "interface",
                 "type": "lex.Rule",
+                "name": "iota",
+                "type": "lex.Rule",
                 "name": "map",
                 "type": "lex.Rule",
                 "name": "package",
@@ -349,7 +351,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "break",
                 "Off": 0,
                 "Acts": [
@@ -364,7 +366,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "case",
                 "Off": 0,
                 "Acts": [
@@ -379,7 +381,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "chan",
                 "Off": 0,
                 "Acts": [
@@ -394,7 +396,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "const",
                 "Off": 0,
                 "Acts": [
@@ -409,7 +411,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "continue",
                 "Off": 0,
                 "Acts": [
@@ -424,7 +426,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "default",
                 "Off": 0,
                 "Acts": [
@@ -439,7 +441,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "defer",
                 "Off": 0,
                 "Acts": [
@@ -454,7 +456,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "else",
                 "Off": 0,
                 "Acts": [
@@ -469,7 +471,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "fallthrough",
                 "Off": 0,
                 "Acts": [
@@ -484,7 +486,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "for",
                 "Off": 0,
                 "Acts": [
@@ -499,7 +501,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "func",
                 "Off": 0,
                 "Acts": [
@@ -514,7 +516,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "go",
                 "Off": 0,
                 "Acts": [
@@ -529,7 +531,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "goto",
                 "Off": 0,
                 "Acts": [
@@ -544,7 +546,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "if",
                 "Off": 0,
                 "Acts": [
@@ -559,7 +561,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "import",
                 "Off": 0,
                 "Acts": [
@@ -574,8 +576,23 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "interface",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "iota",
+                "UniqueNm": "iota",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "Keyword",
+                "Match": "StrName",
+                "String": "iota",
                 "Off": 0,
                 "Acts": [
                   "Name"
@@ -589,7 +606,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "map",
                 "Off": 0,
                 "Acts": [
@@ -604,7 +621,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "package",
                 "Off": 0,
                 "Acts": [
@@ -619,7 +636,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "range",
                 "Off": 0,
                 "Acts": [
@@ -634,7 +651,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "return",
                 "Off": 0,
                 "Acts": [
@@ -649,7 +666,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "select",
                 "Off": 0,
                 "Acts": [
@@ -664,7 +681,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "struct",
                 "Off": 0,
                 "Acts": [
@@ -679,7 +696,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "switch",
                 "Off": 0,
                 "Acts": [
@@ -694,7 +711,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "type",
                 "Off": 0,
                 "Acts": [
@@ -709,7 +726,7 @@
                 "Kids": null,
                 "Desc": "",
                 "Token": "Keyword",
-                "Match": "String",
+                "Match": "StrName",
                 "String": "var",
                 "Off": 0,
                 "Acts": [
@@ -1930,59 +1947,392 @@
     "Props": null,
     "Kids": [
       {
-        "n": 2,
+        "n": 4,
         "type": "parse.Rule",
-        "name": "file",
+        "name": "File",
         "type": "parse.Rule",
-        "name": "imports"
+        "name": "ExprRules",
+        "type": "parse.Rule",
+        "name": "ImportRules",
+        "type": "parse.Rule",
+        "name": "ConstRules"
       },
       {
-        "Nm": "file",
-        "UniqueNm": "file",
+        "Nm": "File",
+        "UniqueNm": "File",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "parse.Rule",
+            "name": "PackageSpec",
+            "type": "parse.Rule",
+            "name": "Imports",
+            "type": "parse.Rule",
+            "name": "Consts"
+          },
+          {
+            "Nm": "PackageSpec",
+            "UniqueNm": "PackageSpec",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:package' 'Name' 'EOS'",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Imports",
+            "UniqueNm": "Imports",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:import' ImportN 'EOS'",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Consts",
+            "UniqueNm": "Consts",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:const' ConstN 'EOS'",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          }
+        ],
+        "Desc": "only rules in this first group are used as top-level rules -- all others must be referenced from here",
+        "Rule": "",
+        "Ast": "NoAst",
+        "PushState": ""
+      },
+      {
+        "Nm": "ExprRules",
+        "UniqueNm": "ExprRules",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 4,
+            "type": "parse.Rule",
+            "name": "QualName",
+            "type": "parse.Rule",
+            "name": "NameList",
+            "type": "parse.Rule",
+            "name": "ExprList",
+            "type": "parse.Rule",
+            "name": "Type"
+          },
+          {
+            "Nm": "QualName",
+            "UniqueNm": "QualName",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "FullName",
+                "type": "parse.Rule",
+                "name": "ShortName"
+              },
+              {
+                "Nm": "FullName",
+                "UniqueNm": "FullName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "* means dot . is key token -- fullname is package-qualified",
+                "Rule": "'Name' *'.' 'Name'",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ShortName",
+                "UniqueNm": "ShortName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "short name = without package scope",
+                "Rule": "'Name'",
+                "Ast": "AddAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "name that is either a full package-qualified name or short plain name",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "NameList",
+            "UniqueNm": "NameList",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "NameListMulti",
+                "type": "parse.Rule",
+                "name": "Name"
+              },
+              {
+                "Nm": "NameListMulti",
+                "UniqueNm": "NameListMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "* means that , is key token for matching",
+                "Rule": "'Name' *',' NameList",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "Name",
+                "UniqueNm": "Name",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'Name'",
+                "Ast": "AddAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "one or more plain names, separated by , -- for var names",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "ExprList",
+            "UniqueNm": "ExprList",
+            "Props": null,
+            "Kids": null,
+            "Desc": "The full set of possible expressions",
+            "Rule": "'LitNum'",
+            "Ast": "AddAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Type",
+            "UniqueNm": "Type",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "parse.Rule",
+                "name": "TypeName"
+              },
+              {
+                "Nm": "TypeName",
+                "UniqueNm": "TypeName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "QualName",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "type specifies a type either as a type name or type expression",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          }
+        ],
+        "Desc": "many different rules here that go into expressions etc",
+        "Rule": "",
+        "Ast": "NoAst",
+        "PushState": ""
+      },
+      {
+        "Nm": "ImportRules",
+        "UniqueNm": "ImportRules",
         "Props": null,
         "Kids": [
           {
             "n": 2,
             "type": "parse.Rule",
-            "name": "package",
+            "name": "ImportN",
             "type": "parse.Rule",
-            "name": "import"
+            "name": "ImportList"
           },
           {
-            "Nm": "package",
-            "UniqueNm": "package",
+            "Nm": "ImportN",
+            "UniqueNm": "ImportN",
             "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Rule": "'key:package' 'Name' 'EOS'",
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ImportMulti",
+                "type": "parse.Rule",
+                "name": "ImportOne"
+              },
+              {
+                "Nm": "ImportMulti",
+                "UniqueNm": "ImportMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "multiple imports",
+                "Rule": "'(' ImportList ')'",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ImportOne",
+                "UniqueNm": "ImportOne",
+                "Props": null,
+                "Kids": null,
+                "Desc": "single import -- ImportList also allows diff options",
+                "Rule": "ImportList",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "N = number switch (One vs. Multi)",
+            "Rule": "",
+            "Ast": "NoAst",
             "PushState": ""
           },
           {
-            "Nm": "import",
-            "UniqueNm": "import",
+            "Nm": "ImportList",
+            "UniqueNm": "ImportList",
             "Props": null,
-            "Kids": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ImportSpecAlias",
+                "type": "parse.Rule",
+                "name": "ImportSpec"
+              },
+              {
+                "Nm": "ImportSpecAlias",
+                "UniqueNm": "ImportSpecAlias",
+                "Props": null,
+                "Kids": null,
+                "Desc": "put more specialized rules first",
+                "Rule": "'Name' 'LitStr' ?ImportList",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ImportSpec",
+                "UniqueNm": "ImportSpec",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'LitStr' ?ImportList",
+                "Ast": "AddAst",
+                "PushState": ""
+              }
+            ],
             "Desc": "",
-            "Rule": "'key:import' '(' imports ')' 'EOS'",
+            "Rule": "",
+            "Ast": "NoAst",
             "PushState": ""
           }
         ],
         "Desc": "",
         "Rule": "",
+        "Ast": "NoAst",
         "PushState": ""
       },
       {
-        "Nm": "imports",
-        "UniqueNm": "imports",
+        "Nm": "ConstRules",
+        "UniqueNm": "ConstRules",
         "Props": null,
-        "Kids": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "parse.Rule",
+            "name": "ConstN",
+            "type": "parse.Rule",
+            "name": "ConstList"
+          },
+          {
+            "Nm": "ConstN",
+            "UniqueNm": "ConstN",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ConstMulti",
+                "type": "parse.Rule",
+                "name": "ConstOpts"
+              },
+              {
+                "Nm": "ConstMulti",
+                "UniqueNm": "ConstMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' ConstList ')'",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ConstOpts",
+                "UniqueNm": "ConstOpts",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 2,
+                    "type": "parse.Rule",
+                    "name": "ConstSpec",
+                    "type": "parse.Rule",
+                    "name": "ConstSpecName"
+                  },
+                  {
+                    "Nm": "ConstSpec",
+                    "UniqueNm": "ConstSpec",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Rule": "NameList ?Type '=' ExprList",
+                    "Ast": "AnchorAst",
+                    "PushState": ""
+                  },
+                  {
+                    "Nm": "ConstSpecName",
+                    "UniqueNm": "ConstSpecName",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "only a name, no expression",
+                    "Rule": "NameList",
+                    "Ast": "AnchorAst",
+                    "PushState": ""
+                  }
+                ],
+                "Desc": "different types of const expressions",
+                "Rule": "",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "N = switch between 1 or multi",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "ConstList",
+            "UniqueNm": "ConstList",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "ConstOpts ?ConstList",
+            "Ast": "NoAst",
+            "PushState": ""
+          }
+        ],
         "Desc": "",
-        "Rule": "'LitStr' imports",
+        "Rule": "",
+        "Ast": "NoAst",
         "PushState": ""
       }
     ],
     "Desc": "",
     "Rule": "",
+    "Ast": "NoAst",
     "PushState": ""
   },
   "Filename": ""

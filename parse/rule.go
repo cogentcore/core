@@ -42,6 +42,7 @@ type RuleEl struct {
 	Rule    *Rule        `desc:"rule -- nil if token"`
 	Token   token.Tokens `desc:"token, None if rule"`
 	Keyword string       `desc:"if keyword, this it"`
+	Opt     bool         `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
 }
 
 func (re RuleEl) IsRule() bool {
@@ -84,6 +85,7 @@ type Rule struct {
 	ki.Node
 	Desc      string       `desc:"description / comments about this rule"`
 	Rule      string       `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names) -- each rule must have at least one token, and if there are multiple, and the first one should NOT be the key matching token, flag that one with a * -- for keywords use 'key:keyword'"`
+	Ast       AstActs      `desc:"what action should be take for this node when it matches"`
 	Rules     RuleList     `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
 	KeyTok    token.Tokens `json:"-" xml:"-" desc:"the key token value that this rule matches -- all rules must have one"`
 	KeyTokIdx int          `json:"-" xml:"-" desc:"index in rules for the key token"`
@@ -101,12 +103,21 @@ func (pr *Rule) AsParseRule() *Rule {
 	return pr.This().Embed(KiT_Rule).(*Rule)
 }
 
+// IsGroup returns true if this node is a group, else it should have rules
+func (pr *Rule) IsGroup() bool {
+	return pr.HasChildren()
+}
+
 // SetRuleMap is called on the top-level Rule and initializes the RuleMap
-func (pr *Rule) SetRuleMap() {
+func (pr *Rule) SetRuleMap(ps *State) {
 	RuleMap = map[string]*Rule{}
 	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
 		pri := k.Embed(KiT_Rule).(*Rule)
-		RuleMap[pri.Nm] = pri
+		if epr, has := RuleMap[pri.Nm]; has {
+			ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: multiple rules with same name: %v and %v", pri.PathUnique(), epr.PathUnique()))
+		} else {
+			RuleMap[pri.Nm] = pri
+		}
 		return true
 	})
 }
@@ -115,7 +126,7 @@ func (pr *Rule) SetRuleMap() {
 // it calls SetRuleMap first
 // returns true if everything is ok, false if there were compile errors
 func (pr *Rule) CompileAll(ps *State) bool {
-	pr.SetRuleMap()
+	pr.SetRuleMap(ps)
 	allok := true
 	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
 		pri := k.Embed(KiT_Rule).(*Rule)
@@ -138,6 +149,9 @@ func (pr *Rule) Compile(ps *State) bool {
 	rs := strings.Split(pr.Rule, " ")
 	pr.Rules = make(RuleList, len(rs))
 	gotTok := false
+	pr.KeyTok = token.None
+	pr.KeyTokIdx = -1
+	pr.Keyword = ""
 	for i := range rs {
 		rn := rs[i]
 		re := &pr.Rules[i]
@@ -157,7 +171,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				} else {
 					err := re.Token.FromString(tn)
 					if err != nil {
-						ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: rule %v: %v", pr.Nm, err.Error()))
+						ps.Error(lex.PosZero, fmt.Sprintf("Compile: rule %v: %v", pr.Nm, err.Error()))
 						valid = false
 					}
 				}
@@ -169,18 +183,19 @@ func (pr *Rule) Compile(ps *State) bool {
 				gotTok = true
 			}
 		} else {
-			rp, ok := RuleMap[rn]
+			st := 0
+			if rn[0] == '?' {
+				st = 1
+				re.Opt = true
+			}
+			rp, ok := RuleMap[rn[st:]]
 			if !ok {
-				ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: rule %v: refers to rule %v not found", pr.Nm, rn))
+				ps.Error(lex.PosZero, fmt.Sprintf("Compile: rule %v: refers to rule %v not found", pr.Nm, rn))
 				valid = false
 			} else {
 				re.Rule = rp
 			}
 		}
-	}
-	if !gotTok {
-		ps.Error(lex.PosZero, fmt.Sprintf("Parser Compile: rule %v: first token not found -- all rules must have at least one token in single quotes -- use token.Tokens names", pr.Nm))
-		valid = false
 	}
 	return valid
 }
@@ -190,11 +205,11 @@ func (pr *Rule) Compile(ps *State) bool {
 func (pr *Rule) Validate(ps *State) bool {
 	valid := true
 	if len(pr.Rules) == 0 && !pr.HasChildren() {
-		ps.Error(lex.PosZero, fmt.Sprintf("Parser Validate: rule %v: has no rules and no children", pr.Nm))
+		ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: has no rules and no children", pr.Nm))
 		valid = false
 	}
 	if len(pr.Rules) > 0 && pr.HasChildren() {
-		ps.Error(lex.PosZero, fmt.Sprintf("Parser Validate: rule %v: has both rules and children -- should be either-or", pr.Nm))
+		ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: has both rules and children -- should be either-or", pr.Nm))
 		valid = false
 	}
 	// now we iterate over our kids
@@ -210,24 +225,26 @@ func (pr *Rule) Validate(ps *State) bool {
 // Parse tries to apply rule to given input state, returns rule that matched or nil
 // par is the parent rule that we're being called from
 // ast is the current ast node that we add to
-func (pr *Rule) Parse(ps *State, par *Rule, ast *Ast) *Rule {
+func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast) *Rule {
 	if pr.IsRoot() {
 		kpr := pr.Kids[0].Embed(KiT_Rule).(*Rule) // first rule is special set of valid top-level matches
 		if ps.Ast.HasChildren() {
-			ast = ps.Ast.KnownChild(0).(*Ast)
+			parAst = ps.Ast.KnownChild(0).(*Ast)
+		} else {
+			parAst = ps.Ast.AddNewChild(KiT_Ast, kpr.Name()).(*Ast)
 		}
-		return kpr.Parse(ps, par, ast)
+		return kpr.Parse(ps, par, parAst)
 	}
 
 	nr := len(pr.Rules)
 	if nr > 0 {
-		return pr.ParseRules(ps, par, ast)
+		return pr.ParseRules(ps, par, parAst)
 	}
 
-	// now we iterate over our kids
+	// pure group types just iterate over kids
 	for _, kpri := range pr.Kids {
 		kpr := kpri.Embed(KiT_Rule).(*Rule)
-		if mrule := kpr.Parse(ps, pr, ast); mrule != nil {
+		if mrule := kpr.Parse(ps, pr, parAst); mrule != nil {
 			return mrule
 		}
 	}
@@ -235,108 +252,202 @@ func (pr *Rule) Parse(ps *State, par *Rule, ast *Ast) *Rule {
 }
 
 // ParseRules parses rules and returns this rule if it matches, nil if not
-func (pr *Rule) ParseRules(ps *State, par *Rule, ast *Ast) *Rule {
-	nr := len(pr.Rules)
-	er := pr.Rules[nr-1]
-	reg := lex.Reg{}
-	reg.St = ps.Pos
-	gotEos := false
-	if er.IsToken() && er.Token == token.EOS && len(ps.EosPos) > 0 {
-		if ps.EosIdx < len(ps.EosPos) {
-			reg.Ed = ps.EosPos[ps.EosIdx]
-			gotEos = true
-		}
-	}
-	if !gotEos {
-		ok := true
-		reg, ok = ps.CurReg()
-		if !ok {
-			ps.Error(reg.St, fmt.Sprintf("Parser rule %v: no current region -- parent must push a region on stack", pr.Nm))
-			return nil
-		}
-	}
-
-	mp, got := ps.FindToken(pr.KeyTok, pr.Keyword, reg)
-	if !got {
+func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast) *Rule {
+	scope, ok := pr.Scope(ps)
+	if !ok {
 		return nil
 	}
+	match, mpos := pr.Match(ps, scope)
+	if !match {
+		return nil
+	}
+	if par.Ast != NoAst && par.IsGroup() {
+		if parAst.Nm != par.Nm {
+			newAst := ps.AddAst(parAst, par.Name(), scope)
+			if par.Ast == AnchorAst {
+				parAst = newAst
+			}
+		}
+	}
+	pr.DoRules(ps, par, parAst, scope, mpos) // returns validity but we don't care..
+	return pr
+}
 
-	// we match, add Ast node, do sub-nodes
-	parAst, ourAst := ps.AddAst(ast, par, pr.Name(), reg)
-	fmt.Printf("matched: %v new ast: %v par ast %v\n", pr.Name(), ourAst.PathUnique(), parAst.PathUnique())
+// HasEos returns true if our rule ends in EOS token
+func (pr *Rule) HasEos(ps *State) bool {
+	nr := len(pr.Rules)
+	er := pr.Rules[nr-1]
+	if er.IsToken() && er.Token == token.EOS && len(ps.EosPos) > ps.EosIdx {
+		return true
+	}
+	return false
+}
 
+// Scope finds the potential scope region for looking for tokens -- either from
+// EOS position or State ScopeStack pushed from parents.
+// returns false if no valid scope found
+func (pr *Rule) Scope(ps *State) (lex.Reg, bool) {
+	scope := lex.Reg{}
+	scope.St = ps.Pos
 	ok := false
-	creg := reg
-	lastPos := ps.Pos
+	if pr.HasEos(ps) {
+		scope.Ed = ps.EosPos[ps.EosIdx]
+	} else {
+		scope, ok = ps.CurScope()
+		if !ok {
+			ps.Error(scope.St, fmt.Sprintf("rule %v: no current scope -- parent must push a scope on stack", pr.Nm))
+			return scope, false
+		}
+	}
+
+	scope.St, ok = ps.Src.ValidTokenPos(scope.St)
+	ps.Pos = scope.St
+	if !ok {
+		return scope, false
+	}
+	return scope, true
+}
+
+// Match attempts to match the rule, returns true if it matches, and the
+// match position
+func (pr *Rule) Match(ps *State, scope lex.Reg) (bool, lex.Pos) {
+	mpos := lex.Pos{} // match pos
+
+	nr := len(pr.Rules)
+	if nr == 0 {
+		for _, kpri := range pr.Kids {
+			kpr := kpri.Embed(KiT_Rule).(*Rule)
+			match, mpos := kpr.Match(ps, scope)
+			if match {
+				fmt.Printf("\trule %v: matched based on kid: %v at: %v\n", pr.Name(), kpr.Name(), mpos)
+				return true, mpos
+			}
+		}
+		return false, mpos
+	}
+
+	if pr.KeyTok == token.None { // no tokens, use first one to match
+		rr := pr.Rules[0]
+		if rr.IsRule() {
+			match, mpos := rr.Rule.Match(ps, scope)
+			if match {
+				fmt.Printf("\trule %v: matched based on first rule: %v at: %v\n", pr.Name(), rr.Rule.Name(), mpos)
+			} else {
+				fmt.Printf("\trule %v: failed to match based on first rule: %v\n", pr.Name(), rr.Rule.Name())
+			}
+			return match, mpos
+		}
+		// else already flagged in compile
+		return false, mpos
+	}
+
+	if pr.KeyTokIdx == 0 { // key constraint: must be at start
+		if !ps.MatchToken(pr.KeyTok, pr.Keyword, scope.St) {
+			return false, mpos
+		}
+		mpos = scope.St
+	} else {
+		got := false
+		mpos, got = ps.FindToken(pr.KeyTok, pr.Keyword, scope)
+		if !got {
+			return false, mpos
+		}
+	}
+	fmt.Printf("\trule %v: matched based on key token: %v at: %v\n", pr.Name(), pr.KeyTok, mpos)
+	return true, mpos
+}
+
+// DoRules after we have matched, goes through rest of the rules -- returns false if
+// there were any issues encountered
+func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos lex.Pos) bool {
+	var ourAst *Ast
+	if pr.Ast != NoAst {
+		ourAst = ps.AddAst(parAst, pr.Name(), scope)
+		fmt.Printf("rule: %v doing with new ast: %v par ast %v\n", pr.Name(), ourAst.PathUnique(), parAst.PathUnique())
+	} else {
+		fmt.Printf("rule: %v no new ast, par ast %v\n", pr.Name(), parAst.PathUnique())
+	}
+
+	nr := len(pr.Rules)
+	valid := true
+	ok := false
+	creg := scope
 	for i := 0; i < nr; i++ {
+		rr := pr.Rules[i]
+		creg.St = ps.Pos
 		if i < pr.KeyTokIdx {
-			creg.Ed = mp // only look before token
+			creg.Ed = mpos // only look before token
 		} else if i == pr.KeyTokIdx {
-			creg.St, ok = ps.Src.NextTokenPos(mp)
+			ps.Pos, ok = ps.Src.NextTokenPos(mpos)
 			if !ok {
 				if nr > i+1 {
-					ps.Error(mp, fmt.Sprintf("Parser rule %v: end-of-tokens with more to match", pr.Nm))
+					ps.Error(mpos, fmt.Sprintf("rule %v: end-of-tokens with more to match", pr.Nm))
+					valid = false
 					break
 				}
 			}
-			creg.Ed = reg.Ed // full scope
-			ps.Pos = creg.St
-			lastPos = ps.Pos
+			creg.Ed = scope.Ed // full scope
+			fmt.Printf("\trule %v: matched token: %v %v at: %v advanced pos to: %v\n", pr.Nm, rr.Token, rr.Keyword, mpos, ps.Pos)
+			if ourAst != nil {
+				ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
+			}
 			continue
 		}
-		rr := pr.Rules[i]
 		if rr.IsToken() {
 			if i == nr-1 && rr.Token == token.EOS {
 				break
 			}
 			tp, got := ps.FindToken(rr.Token, rr.Keyword, creg)
 			if !got {
-				ps.Error(creg.St, fmt.Sprintf("Parser rule %v: required token %v %v not found", pr.Nm, rr.Token, rr.Keyword))
+				ps.Error(creg.St, fmt.Sprintf("rule %v: required token %v %v not found", pr.Nm, rr.Token, rr.Keyword))
+				valid = false
 			} else {
-				creg.St, ok = ps.Src.NextTokenPos(tp)
+				ps.Pos, ok = ps.Src.NextTokenPos(tp)
 				if !ok {
 					if nr > i+1 {
-						ps.Error(mp, fmt.Sprintf("Parser rule %v: end-of-tokens with more to match", pr.Nm))
+						ps.Error(mpos, fmt.Sprintf("rule %v: end-of-tokens with more to match", pr.Nm))
+						valid = false
 						break
 					}
 				}
-				ps.Pos = creg.St
-				lastPos = ps.Pos
+				fmt.Printf("\trule %v: matched token: %v %v at: %v advanced pos to: %v\n", pr.Nm, rr.Token, rr.Keyword, tp, ps.Pos)
+				if ourAst != nil {
+					ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
+				}
 			}
 		} else {
-			ps.PushReg(creg)
-			if rr.Rule == pr { // recursive
-				nreg := ourAst.TokReg
-				nreg.Ed = lastPos
-				ourAst.SetTokReg(nreg, ps.Src)
-			}
-			subm := rr.Rule.Parse(ps, pr, ourAst)
-			ps.PopReg()
-			if subm == nil {
-				ps.Error(creg.St, fmt.Sprintf("Parser rule %v: required sub-rule %v not matched", pr.Nm, rr.Rule.Name()))
-			} else {
-				nkids := len(ourAst.Kids)
-				if nkids > 0 { // should..
-					lstk := ourAst.Kids[nkids-1].(*Ast)
-					creg.St, ok = ps.Src.NextTokenPos(lstk.TokReg.Ed)
-					if !ok {
-						if nr > i+1 {
-							ps.Error(mp, fmt.Sprintf("Parser rule %v: end-of-tokens with more to match", pr.Nm))
-							break
-						}
-					}
-					ps.Pos = creg.St
-					lastPos = ps.Pos
+			if creg.IsNil() { // no tokens left..
+				if rr.Opt {
+					continue
 				}
+				ps.Error(creg.St, fmt.Sprintf("rule %v: non-optional rule element has no tokens", pr.Nm, rr.Rule.Name()))
+				valid = false
+				continue
+			}
+			useAst := parAst
+			if pr.Ast == AnchorAst {
+				useAst = ourAst
+			}
+			fmt.Printf("\trule %v: trying sub-rule: %v within region: %v\n", pr.Nm, rr.Rule.Name(), creg)
+			ps.PushScope(creg)
+			subm := rr.Rule.Parse(ps, pr, useAst)
+			ps.PopScope()
+			if subm == nil {
+				if !rr.Opt {
+					ps.Error(creg.St, fmt.Sprintf("rule %v: required sub-rule %v not matched", pr.Nm, rr.Rule.Name()))
+					valid = false
+				}
+			}
+			if !rr.Opt && ourAst != nil {
+				ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to include non-optional elements
 			}
 		}
 	}
-
-	if gotEos {
+	if pr.HasEos(ps) {
 		ps.EosIdx++
-		ps.Pos, _ = ps.Src.NextTokenPos(reg.Ed)
+		ps.Pos, _ = ps.Src.NextTokenPos(scope.Ed)
 	}
-	return pr
+	return valid
 }
 
 var RuleProps = ki.Props{

@@ -24,9 +24,18 @@ type Ast struct {
 
 var KiT_Ast = kit.Types.AddType(&Ast{}, AstProps)
 
+// SetTokReg sets the token region for this rule to given region
 func (ast *Ast) SetTokReg(reg lex.Reg, src *lex.File) {
 	ast.TokReg = reg
-	ast.SrcReg = src.TokenSrcReg(reg)
+	ast.SrcReg = src.TokenSrcReg(ast.TokReg)
+	ast.Src = src.RegSrc(ast.SrcReg)
+}
+
+// SetTokRegEnd updates the ending token region to given position --
+// token regions are typically over-extended and get narrowed as tokens actually match
+func (ast *Ast) SetTokRegEnd(pos lex.Pos, src *lex.File) {
+	ast.TokReg.Ed = pos
+	ast.SrcReg = src.TokenSrcReg(ast.TokReg)
 	ast.Src = src.RegSrc(ast.SrcReg)
 }
 
