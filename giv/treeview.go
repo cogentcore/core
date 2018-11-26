@@ -1654,7 +1654,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 }
 
 var TreeViewProps = ki.Props{
-	"indent":           units.NewValue(2, units.Ch),
+	"indent":           units.NewValue(4, units.Ch),
 	"spacing":          units.NewValue(.5, units.Ch),
 	"border-width":     units.NewValue(0, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),

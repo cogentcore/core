@@ -1341,8 +1341,19 @@ func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) bool {
 	return false
 }
 
+var LayoutLastAutoScroll time.Time
+
+// LayoutAutoScrollDelayMSec is amount of time to wait (in Milliseconds) before
+// trying to autoscroll again
+var LayoutAutoScrollDelayMSec = 25
+
 // AutoScroll scrolls the layout based on mouse position, when appropriate (DND, menus)
 func (ly *Layout) AutoScroll(pos image.Point) bool {
+	now := time.Now()
+	lagMs := int(now.Sub(LayoutLastAutoScroll) / time.Millisecond)
+	if lagMs < LayoutAutoScrollDelayMSec {
+		return false
+	}
 	did := false
 	if ly.HasScroll[Y] && ly.HasScroll[X] {
 		did = ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
@@ -1351,6 +1362,9 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 		did = ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
 	} else if ly.HasScroll[X] {
 		did = ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
+	}
+	if did {
+		LayoutLastAutoScroll = time.Now()
 	}
 	return did
 }
