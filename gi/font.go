@@ -676,7 +676,7 @@ func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshal
 // Font library
 
 // loadFontMu protects the font loading calls, which are not concurrent-safe
-var loadFontMu sync.Mutex
+var loadFontMu sync.RWMutex
 
 // FontInfo contains basic font information for choosing a given font --
 // displayed in the font chooser dialog.
@@ -711,6 +711,9 @@ var FontLibrary FontLib
 
 // FontAvail determines if a given font name is available (case insensitive)
 func (fl *FontLib) FontAvail(fontnm string) bool {
+	loadFontMu.RLock()
+	defer loadFontMu.RUnlock()
+
 	fontnm = strings.ToLower(fontnm)
 	_, ok := FontLibrary.FontsAvail[fontnm]
 	return ok
@@ -728,7 +731,11 @@ func (fl *FontLib) Init() {
 		fl.FontInfo = make([]FontInfo, 0, 1000)
 		fl.Faces = make(map[string]map[int]font.Face)
 		loadFontMu.Unlock()
-	} else if len(fl.FontsAvail) == 0 {
+	}
+	loadFontMu.RLock()
+	sz := len(fl.FontsAvail)
+	loadFontMu.RUnlock()
+	if sz == 0 {
 		// fmt.Printf("updating fonts avail in %v\n", fl.FontPaths)
 		fl.UpdateFontsAvail()
 	}
@@ -740,18 +747,21 @@ func (fl *FontLib) Init() {
 func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
 	fontnm = strings.ToLower(fontnm)
 	fl.Init()
+	loadFontMu.RLock()
 	if facemap := fl.Faces[fontnm]; facemap != nil {
 		if face := facemap[size]; face != nil {
 			// fmt.Printf("Got font face from cache: %v %v\n", fontnm, size)
+			loadFontMu.RUnlock()
 			return face, nil
 		}
 	}
 	if path := fl.FontsAvail[fontnm]; path != "" {
+		loadFontMu.RUnlock()
 		loadFontMu.Lock()
-		defer loadFontMu.Unlock()
 		face, err := OpenFontFace(path, size, 0)
 		if err != nil {
 			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
+			loadFontMu.Unlock()
 			fl.DeleteFont(fontnm)
 			return nil, err
 		}
@@ -762,12 +772,17 @@ func (fl *FontLib) Font(fontnm string, size int) (font.Face, error) {
 		}
 		facemap[size] = face
 		// fmt.Printf("Opened font face: %v %v\n", fontnm, size)
+		loadFontMu.Unlock()
 		return face, nil
 	}
+	loadFontMu.RUnlock()
 	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
 }
 
+// DeleteFont removes given font from list of available fonts -- if not supported etc
 func (fl *FontLib) DeleteFont(fontnm string) {
+	loadFontMu.Lock()
+	defer loadFontMu.Unlock()
 	delete(fl.FontsAvail, fontnm)
 	for i, fi := range fl.FontInfo {
 		if strings.ToLower(fi.Name) == fontnm {

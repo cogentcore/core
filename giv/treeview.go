@@ -123,7 +123,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	for _, skid := range skids {
 		tnl.Add(typ, "tv_"+skid.UniqueName())
 	}
-	mods, updt := tv.ConfigChildren(tnl, false)
+	mods, updt := tv.ConfigChildren(tnl, false) // false = don't use unique names -- needs to!
 	if mods {
 		tv.SetFullReRender()
 		// fmt.Printf("got mod on %v\n", tv.PathUnique())
@@ -758,6 +758,28 @@ func (tv *TreeView) ToggleClose() {
 	} else {
 		tv.Close()
 	}
+}
+
+// OpenAll opens the given node and all of its sub-nodes
+func (tv *TreeView) OpenAll() {
+	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
+		tvki := k.Embed(KiT_TreeView)
+		if tvki != nil {
+			tvki.(*TreeView).Open()
+		}
+		return true
+	})
+}
+
+// CloseAll closes the given node and all of its sub-nodes
+func (tv *TreeView) CloseAll() {
+	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
+		tvki := k.Embed(KiT_TreeView)
+		if tvki != nil {
+			tvki.(*TreeView).Close()
+		}
+		return true
+	})
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1761,6 +1783,9 @@ var TreeViewProps = ki.Props{
 		{"SrcGoGiEditor", ki.Props{
 			"label": "GoGi Editor",
 		}},
+		{"sep-open", ki.BlankProp{}},
+		{"OpenAll", ki.Props{}},
+		{"CloseAll", ki.Props{}},
 	},
 	"CtxtMenuInactive": ki.PropSlice{
 		{"Copy", ki.Props{
