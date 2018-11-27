@@ -2125,7 +2125,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "-'(' Expr ')'",
+                "Rule": "'(' Expr ')'",
                 "Ast": "AnchorAst",
                 "PushState": ""
               },

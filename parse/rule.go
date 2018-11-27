@@ -227,10 +227,6 @@ func (pr *Rule) Compile(ps *State) bool {
 	}
 	if pr.Reverse {
 		pr.Ast = AnchorAst // must be
-		if pr.EndTok != token.None {
-			pr.KeyTok, pr.EndTok = pr.EndTok, pr.KeyTok // switch
-			pr.KeyTokIdx = nr - 1
-		}
 	}
 	return valid
 }
@@ -247,16 +243,16 @@ func (pr *Rule) Validate(ps *State) bool {
 		ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: has both rules and children -- should be either-or", pr.Nm))
 		valid = false
 	}
-	// if pr.Reverse {
-	// 	if len(pr.Rules) != 3 {
-	// 		ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: is a Reverse (-) rule: must have 3 children -- for binary operator expressions only", pr.Nm))
-	// 		valid = false
-	// 	} else {
-	// 		if pr.KeyTokIdx != 1 {
-	// 			ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: is a Reverse (-) rule: must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr.Nm))
-	// 		}
-	// 	}
-	// }
+	if pr.Reverse {
+		if len(pr.Rules) != 3 {
+			ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: is a Reverse (-) rule: must have 3 children -- for binary operator expressions only", pr.Nm))
+			valid = false
+		} else {
+			if pr.KeyTokIdx != 1 {
+				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: is a Reverse (-) rule: must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr.Nm))
+			}
+		}
+	}
 	// now we iterate over our kids
 	for _, kpri := range pr.Kids {
 		kpr := kpri.Embed(KiT_Rule).(*Rule)
@@ -302,7 +298,9 @@ func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast) *Rule {
 	if !ok {
 		return nil
 	}
-	match, mpos, scope := pr.Match(ps, scope)
+	mpos := lex.Pos{}
+	match := false
+	match, mpos, scope = pr.Match(ps, scope)
 	if !match {
 		return nil
 	}
@@ -354,9 +352,6 @@ func (pr *Rule) Scope(ps *State) (lex.Reg, bool) {
 // Match attempts to match the rule, returns true if it matches, and the
 // match position, along with any update to the scope
 func (pr *Rule) Match(ps *State, scope lex.Reg) (bool, lex.Pos, lex.Reg) {
-	if pr.Reverse && pr.EndTok != token.None {
-		return pr.MatchRevGpToks(ps, scope)
-	}
 	mpos := lex.Pos{} // match pos
 	nr := len(pr.Rules)
 	if nr == 0 {
@@ -411,15 +406,16 @@ func (pr *Rule) Match(ps *State, scope lex.Reg) (bool, lex.Pos, lex.Reg) {
 	}
 
 	if pr.EndTok != token.None && pr.EndTok != token.EOS {
-		ep, got := ps.Src.FindPunctGpMatch(pr.EndTok.PunctGpMatch(), lex.Reg{St: mpos, Ed: scope.Ed})
-		if !got {
-			ps.Error(scope.St, fmt.Sprintf("rule %v: failed to find ending token: %v", pr.Nm, pr.EndTok))
-		} else {
-			scope.Ed = ep
-			if Trace {
-				fmt.Printf("\trule %v: found ending token %v at %v\n", pr.Name(), pr.EndTok, ep)
-			}
+		// end MUST match exactly with the scope we have -- that is our matching criterion
+		trgep, ok := ps.Src.PrevTokenPos(scope.Ed)
+		ep, ok := ps.Src.FindPunctGpMatch(pr.EndTok.PunctGpMatch(), lex.Reg{St: mpos, Ed: scope.Ed})
+		if !ok || trgep != ep {
+			return false, mpos, scope
 		}
+		if Trace {
+			fmt.Printf("\trule %v: matched ending token %v at %v\n", pr.Name(), pr.EndTok, ep)
+		}
+		scope.Ed = ep // regular rule does not have logic to restrict end to before end tok..
 	}
 
 	if Trace {
@@ -467,11 +463,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos l
 	}
 
 	if pr.Reverse {
-		if pr.EndTok != token.None {
-			return pr.DoRulesRevGpToks(ps, par, parAst, scope, mpos, ourAst)
-		} else {
-			return pr.DoRulesRevBinExp(ps, par, parAst, scope, mpos, ourAst)
-		}
+		return pr.DoRulesRevBinExp(ps, par, parAst, scope, mpos, ourAst)
 	}
 
 	nr := len(pr.Rules)
@@ -505,8 +497,12 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos l
 			if i == nr-1 && pr.EndTok != token.None { // already matched
 				if pr.HasEos(ps) {
 					ps.EosIdx++
+				} else {
+					ps.Pos, _ = ps.Src.NextTokenPos(scope.Ed) // consume end  -- todo for EOS not so clear
 				}
-				ps.Pos, _ = ps.Src.NextTokenPos(scope.Ed) // consume it
+				if ourAst != nil {
+					ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
+				}
 				break
 			}
 			tp, got := ps.FindToken(rr.Token, rr.Keyword, creg)
@@ -618,12 +614,12 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 					valid = false
 				}
 			}
-			if i == nr-1 {
-				epos = ps.Pos // this is where the "last" sub-rule got to -- we end here
-				if ourAst != nil {
-					ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end
-				}
-			}
+			// if i == nr-1 {
+			// 	// epos = ps.Pos // this is where the "last" sub-rule got to -- we end here
+			// 	// if ourAst != nil {
+			// 	// 	ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end
+			// 	// }
+			// }
 		}
 	}
 	// our AST is now backwards -- need to swap them
@@ -641,43 +637,6 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 	}
 
 	ps.Pos = epos
-	return valid
-}
-
-// DoRulesRevGpToks reverse version of do rules for grouping tokens (has EndTok and Reverse)
-func (pr *Rule) DoRulesRevGpToks(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos lex.Pos, ourAst *Ast) bool {
-	nr := len(pr.Rules)
-	valid := true
-	creg := scope
-
-	// has tokens at start / end -- run rule(s) in middle
-	for i := nr - 2; i > 0; i-- {
-		rr := pr.Rules[i]
-		if rr.IsRule() { // non-key tokens ignored
-			if creg.IsNil() { // no tokens left..
-				ps.Error(creg.St, fmt.Sprintf("rule %v: non-optional rule element has no tokens", pr.Nm, rr.Rule.Name()))
-				valid = false
-				continue
-			}
-			useAst := parAst
-			if pr.Ast == AnchorAst {
-				useAst = ourAst
-			}
-			if Trace {
-				fmt.Printf("\trule %v: trying sub-rule: %v within region: %v\n", pr.Nm, rr.Rule.Name(), creg)
-			}
-			ps.PushScope(creg)
-			subm := rr.Rule.Parse(ps, pr, useAst)
-			ps.PopScope()
-			if subm == nil {
-				if !rr.Opt {
-					ps.Error(creg.St, fmt.Sprintf("rule %v: required sub-rule %v not matched", pr.Nm, rr.Rule.Name()))
-					valid = false
-				}
-			}
-		}
-	}
-	ps.Pos, _ = ps.Src.NextTokenPos(scope.Ed) // go after scope
 	return valid
 }
 

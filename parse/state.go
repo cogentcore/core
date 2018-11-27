@@ -58,9 +58,15 @@ func (ps *State) FindToken(tok token.Tokens, keyword string, reg lex.Reg) (lex.P
 	}
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
+	depth := 0
 	for cp.IsLess(reg.Ed) {
 		tk := ps.Src.Token(cp)
-		if tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok) {
+		if tk.IsPunctGpLeft() {
+			depth++
+		} else if tk.IsPunctGpRight() {
+			depth--
+		}
+		if depth == 0 && (tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok)) {
 			if keyword != "" {
 				tksrc := string(ps.Src.TokenSrc(cp))
 				if tksrc == keyword {
@@ -112,9 +118,15 @@ func (ps *State) FindTokenReverse(tok token.Tokens, keyword string, reg lex.Reg)
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
+	depth := 0
 	for reg.St.IsLess(cp) {
 		tk := ps.Src.Token(cp)
-		if tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok) {
+		if tk.IsPunctGpRight() {
+			depth++
+		} else if tk.IsPunctGpLeft() {
+			depth--
+		}
+		if depth == 0 && (tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok)) {
 			if keyword != "" { // not usually true but whatever
 				tksrc := string(ps.Src.TokenSrc(cp))
 				if tksrc == keyword {
