@@ -58,6 +58,7 @@ type TextView struct {
 	SelectReg     TextRegion                `json:"-" xml:"-" desc:"current selection region"`
 	PrevSelectReg TextRegion                `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	Highlights    []TextRegion              `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
+	Scopelights   []TextRegion              `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
 	SelectMode    bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
 	ForceComplete bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
 	ISearch       ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
@@ -674,20 +675,18 @@ func (tv *TextView) SetCursor(pos TextPos) {
 		tv.CursorPos = TextPosZero
 		return
 	}
+	tv.ClearScopelights()
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	tv.CursorMovedSig()
-
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	ch := tv.CursorPos.Ch
 	if ch < len(txt) {
 		r := txt[ch]
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
 			tp := tv.FindScopeMatch(txt[ch], tv.CursorPos)
-			tv.ClearHighlights()
 			if tp.Ln > -1 {
-				// todo: use a different highlight and clear on first mouse click or key stroke
-				tv.Highlights = append(tv.Highlights, NewTextRegionPos(tv.CursorPos, TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch + 1}))
-				tv.Highlights = append(tv.Highlights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
+				tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tv.CursorPos, TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch + 1}))
+				tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
 				if tv.CursorPos.Ln < tp.Ln {
 					tv.RenderLines(tv.CursorPos.Ln, tp.Ln)
 				} else {
@@ -2973,6 +2972,19 @@ func (tv *TextView) RenderHighlights(stln, edln int) {
 	}
 }
 
+// RenderScopelights renders a highlight background color for regions
+// in the Scopelights list
+// -- always called within context of outer RenderLines or RenderAllLines
+func (tv *TextView) RenderScopelights(stln, edln int) {
+	for _, reg := range tv.Scopelights {
+		reg := tv.Buf.AdjustReg(reg)
+		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
+			continue
+		}
+		tv.RenderRegionBox(reg, TextViewHighlight)
+	}
+}
+
 // UpdateHighlights re-renders lines from previous highlights and current
 // highlights -- assumed to be within a window update block
 func (tv *TextView) UpdateHighlights(prev []TextRegion) {
@@ -2986,10 +2998,19 @@ func (tv *TextView) UpdateHighlights(prev []TextRegion) {
 	}
 }
 
+// ClearHighlights clears the Highlights slice of all regions
 func (tv *TextView) ClearHighlights() {
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.Highlights = tv.Highlights[:0]
+	tv.RenderAllLines()
+}
+
+// ClearScopelights clears the Highlights slice of all regions
+func (tv *TextView) ClearScopelights() {
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
+	tv.Scopelights = tv.Scopelights[:0]
 	tv.RenderAllLines()
 }
 
@@ -3281,6 +3302,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
 		tv.RenderHighlights(visSt, visEd)
+		tv.RenderScopelights(visSt, visEd)
 		tv.RenderSelect()
 		tv.RenderLineNosBox(visSt, visEd)
 
@@ -3542,6 +3564,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	}
 	kf := gi.KeyFun(kt.Chord())
 	win := tv.ParentWindow()
+	tv.ClearScopelights()
 
 	tv.RefreshIfNeeded()
 
@@ -3857,10 +3880,9 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 						np := cp
 						np.Ch--
 						tp := tv.FindScopeMatch(kt.Rune, np)
-						tv.ClearHighlights()
 						if tp.Ln > -1 {
-							tv.Highlights = append(tv.Highlights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
-							tv.Highlights = append(tv.Highlights, NewTextRegionPos(np, TextPos{cp.Ln, cp.Ch}))
+							tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
+							tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(np, TextPos{cp.Ln, cp.Ch}))
 							if tv.CursorPos.Ln < tp.Ln {
 								tv.RenderLines(cp.Ln, tp.Ln)
 							} else {
