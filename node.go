@@ -618,6 +618,16 @@ func (n *Node) MoveChild(from, to int) bool {
 	return ok
 }
 
+func (n *Node) SwapChildren(i, j int) bool {
+	updt := n.UpdateStart()
+	ok := n.Kids.Swap(i, j)
+	if ok {
+		n.SetFlag(int(ChildMoved))
+	}
+	n.UpdateEnd(updt)
+	return ok
+}
+
 func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, updt bool) {
 	mods, updt = false, false
 	sz := len(n.Kids)

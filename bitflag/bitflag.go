@@ -39,7 +39,7 @@ func SetMaskAtomic(bits *int64, mask int64) {
 
 // ClearMask clears all of the bits in the mask
 func ClearMask(bits *int64, mask int64) {
-	*bits = *bits & ^mask
+	*bits &^= mask
 }
 
 // ClearMaskAtomic clears all of the bits in the mask
@@ -47,7 +47,7 @@ func ClearMask(bits *int64, mask int64) {
 func ClearMaskAtomic(bits *int64, mask int64) {
 	for {
 		cr := atomic.LoadInt64(bits)
-		nw := cr & ^mask
+		nw := cr &^ mask
 		if atomic.CompareAndSwapInt64(bits, cr, nw) {
 			break
 		}
@@ -208,7 +208,7 @@ func SetMaskAtomic32(bits *int32, mask int32) {
 
 // ClearMask32 clears all of the bits in the mask
 func ClearMask32(bits *int32, mask int32) {
-	*bits = *bits & ^mask
+	*bits &^= mask
 }
 
 // ClearMaskAtomic32 clears all of the bits in the mask
@@ -216,7 +216,7 @@ func ClearMask32(bits *int32, mask int32) {
 func ClearMaskAtomic32(bits *int32, mask int32) {
 	for {
 		cr := atomic.LoadInt32(bits)
-		nw := cr & ^mask
+		nw := cr &^ mask
 		if atomic.CompareAndSwapInt32(bits, cr, nw) {
 			break
 		}

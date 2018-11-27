@@ -294,6 +294,23 @@ func (sl *Slice) Move(from, to int) bool {
 	return SliceMove((*[]Ki)(sl), from, to)
 }
 
+// SliceSwap swaps elements between positions.  Returns false if either index is invalid
+func SliceSwap(sl *[]Ki, i, j int) bool {
+	if !SliceIsValidIndex(sl, i) || !SliceIsValidIndex(sl, j) {
+		return false
+	}
+	if i == j {
+		return false
+	}
+	(*sl)[j], (*sl)[i] = (*sl)[i], (*sl)[j]
+	return false
+}
+
+// Swap elements between positions.  Returns false if either index is invalid
+func (sl *Slice) Swap(i, j int) bool {
+	return SliceSwap((*[]Ki)(sl), i, j)
+}
+
 // TypeAndNames returns a kit.TypeAndNameList of elements in the slice --
 // useful for Ki ConfigChildren.
 func (sl *Slice) TypeAndNames() kit.TypeAndNameList {

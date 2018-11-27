@@ -266,9 +266,14 @@ type Ki interface {
 	SetChild(kid Ki, idx int, name string) error
 
 	// MoveChild moves child from one position to another in the list of
-	// children (see also corresponding Slice method).  Returns false if
-	// either index is invalid.
+	// children (see also corresponding Slice method, which does not
+	// signal, like this one does).  Returns false if either index is invalid.
 	MoveChild(from, to int) bool
+
+	// SwapChildren swaps children between positions (see also corresponding
+	// Slice method which does not signal like this one does).  Returns false if
+	// either index is invalid.
+	SwapChildren(i, j int) bool
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using AddNewChild with given type and
