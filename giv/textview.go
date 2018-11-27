@@ -683,8 +683,8 @@ func (tv *TextView) SetCursor(pos TextPos) {
 	if ch < len(txt) {
 		r := txt[ch]
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
-			tp := tv.FindScopeMatch(txt[ch], tv.CursorPos)
-			if tp.Ln > -1 {
+			tp, found := tv.Buf.FindScopeMatch(txt[ch], tv.CursorPos)
+			if found {
 				tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tv.CursorPos, TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch + 1}))
 				tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
 				if tv.CursorPos.Ln < tp.Ln {
@@ -3879,8 +3879,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 						cp := tv.CursorPos
 						np := cp
 						np.Ch--
-						tp := tv.FindScopeMatch(kt.Rune, np)
-						if tp.Ln > -1 {
+						tp, found := tv.Buf.FindScopeMatch(kt.Rune, np)
+						if found {
 							tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
 							tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(np, TextPos{cp.Ln, cp.Ch}))
 							if tv.CursorPos.Ln < tp.Ln {
@@ -4098,85 +4098,6 @@ func (tv *TextView) TextViewEvents() {
 			}
 		})
 	}
-}
-
-// FindScopeMatch finds the brace or parenthesis that is the partner of the one passed to function
-func (tv *TextView) FindScopeMatch(r rune, st TextPos) (en TextPos) {
-	en.Ln = -1
-	var left int
-	var right int
-	var match rune
-	switch r {
-	case '{':
-		left++
-		match = '}'
-	case '}':
-		right++
-		match = '{'
-	case '(':
-		left++
-		match = ')'
-	case ')':
-		right++
-		match = '('
-	case '[':
-		left++
-		match = ']'
-	case ']':
-		right++
-		match = '['
-	}
-	ch := st.Ch
-	ln := st.Ln
-	txt := tv.Buf.Line(ln)
-	if left > right {
-		for l := ln; l < tv.Buf.NLines; l++ {
-			for i := ch + 1; i < len(txt); i++ {
-				if txt[i] == r {
-					left++
-					continue
-				}
-				if txt[i] == match {
-					right++
-					if left == right {
-						en.Ln = l
-						en.Ch = i
-						break
-					}
-				}
-			}
-			if en.Ln >= 0 {
-				break
-			}
-			ln++
-			txt = tv.Buf.Line(ln)
-			ch = -1
-		}
-	} else {
-		for l := ln; l >= 0; l-- {
-			for i := ch - 1; i >= 0; i-- {
-				if txt[i] == r {
-					right++
-					continue
-				}
-				if txt[i] == match {
-					left++
-					if left == right {
-						en.Ln = l
-						en.Ch = i
-						break
-					}
-				}
-			}
-			if en.Ln >= 0 {
-				break
-			}
-			ln--
-			txt = tv.Buf.Line(ln)
-			ch = len(txt)
-		}
-	}
-	return en
 }
 
 ////////////////////////////////////////////////////

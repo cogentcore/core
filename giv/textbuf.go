@@ -1316,6 +1316,91 @@ func (te *TextBufEdit) AdjustReg(reg TextRegion) TextRegion {
 	return reg
 }
 
+// FindScopeMatch finds the brace or parenthesis that is the partner of the one passed to function
+func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+
+	en.Ln = -1
+	found = false
+	var left int
+	var right int
+	var match rune
+	switch r {
+	case '{':
+		left++
+		match = '}'
+	case '}':
+		right++
+		match = '{'
+	case '(':
+		left++
+		match = ')'
+	case ')':
+		right++
+		match = '('
+	case '[':
+		left++
+		match = ']'
+	case ']':
+		right++
+		match = '['
+	}
+	ch := st.Ch
+	ln := st.Ln
+	txt := tb.Line(ln)
+	if left > right {
+		for l := ln; l < tb.NLines; l++ {
+			for i := ch + 1; i < len(txt); i++ {
+				if txt[i] == r {
+					left++
+					continue
+				}
+				if txt[i] == match {
+					right++
+					if left == right {
+						en.Ln = l
+						en.Ch = i
+						break
+					}
+				}
+			}
+			if en.Ln >= 0 {
+				found = true
+				break
+			}
+			ln++
+			txt = tb.Line(ln)
+			ch = -1
+		}
+	} else {
+		for l := ln; l >= 0; l-- {
+			for i := ch - 1; i >= 0; i-- {
+				if txt[i] == r {
+					right++
+					continue
+				}
+				if txt[i] == match {
+					left++
+					if left == right {
+						en.Ln = l
+						en.Ch = i
+						break
+					}
+				}
+			}
+			if en.Ln >= 0 {
+				found = true
+				break
+			}
+			ln--
+			txt = tb.Line(ln)
+			ch = len(txt)
+		}
+	}
+	return en, found
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //   Edits
 
