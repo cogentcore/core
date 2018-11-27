@@ -676,6 +676,26 @@ func (tv *TextView) SetCursor(pos TextPos) {
 	}
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	tv.CursorMovedSig()
+
+	txt := tv.Buf.Line(tv.CursorPos.Ln)
+	ch := tv.CursorPos.Ch
+	if ch < len(txt) {
+		r := txt[ch]
+		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
+			tp := tv.FindScopeMatch(txt[ch], tv.CursorPos)
+			tv.ClearHighlights()
+			if tp.Ln > -1 {
+				// todo: use a different highlight and clear on first mouse click or key stroke
+				tv.Highlights = append(tv.Highlights, NewTextRegionPos(tv.CursorPos, TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch + 1}))
+				tv.Highlights = append(tv.Highlights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
+				if tv.CursorPos.Ln < tp.Ln {
+					tv.RenderLines(tv.CursorPos.Ln, tp.Ln)
+				} else {
+					tv.RenderLines(tp.Ln, tv.CursorPos.Ln)
+				}
+			}
+		}
+	}
 }
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
@@ -824,7 +844,7 @@ func (tv *TextView) CursorForwardWord(steps int) {
 				if tv.IsWordBreak(r1, r2) {
 					ch++
 				} else {
-					done =true
+					done = true
 				}
 			}
 			done = false
@@ -837,7 +857,7 @@ func (tv *TextView) CursorForwardWord(steps int) {
 				if !tv.IsWordBreak(r1, r2) {
 					ch++
 				} else {
-					done =true
+					done = true
 				}
 			}
 			tv.CursorPos.Ch = ch
@@ -965,7 +985,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 				if tv.IsWordBreak(r1, r2) {
 					ch--
 				} else {
-					done =true
+					done = true
 				}
 			}
 			done = false
@@ -1997,7 +2017,7 @@ func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 		r1 := txt[i]
 		r2 := txt[i-1]
 		if tv.IsWordBreak(r1, r2) {
-			st = i+1
+			st = i + 1
 			break
 		}
 	}
@@ -3832,6 +3852,22 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 							tv.OfferComplete()
 						}
 					}
+					if kt.Rune == '}' || kt.Rune == ')' || kt.Rune == ']' {
+						cp := tv.CursorPos
+						np := cp
+						np.Ch--
+						tp := tv.FindScopeMatch(kt.Rune, np)
+						tv.ClearHighlights()
+						if tp.Ln > -1 {
+							tv.Highlights = append(tv.Highlights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
+							tv.Highlights = append(tv.Highlights, NewTextRegionPos(np, TextPos{cp.Ln, cp.Ch}))
+							if tv.CursorPos.Ln < tp.Ln {
+								tv.RenderLines(cp.Ln, tp.Ln)
+							} else {
+								tv.RenderLines(tp.Ln, cp.Ln)
+							}
+						}
+					}
 				}
 			}
 		}
@@ -3922,25 +3958,6 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 				tv.SavePosHistory(tv.CursorPos)
-				txt := tv.Buf.Line(tv.CursorPos.Ln)
-				ch := tv.CursorPos.Ch
-				if ch < len(txt){
-					r := txt[ch]
-					if r == '{' || r == '}' || r == '(' || r == ')' {
-						tp := tv.FindScopeMatch(txt[ch], newPos)
-						tv.ClearHighlights()
-						if (tp.Ln > -1) {
-							// todo: use a different highlight and clear on first mouse click or key stroke
-							tv.Highlights = append(tv.Highlights, NewTextRegionPos(newPos, TextPos{newPos.Ln, newPos.Ch+1}))
-							tv.Highlights = append(tv.Highlights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch+1}))
-							if newPos.Ln < tp.Ln {
-								tv.RenderLines(newPos.Ln, tp.Ln)
-							} else {
-								tv.RenderLines(tp.Ln, newPos.Ln,)
-							}
-						}
-					}
-				}
 			}
 		} else if me.Action == mouse.DoubleClick {
 			me.SetProcessed()
@@ -4080,6 +4097,12 @@ func (tv *TextView) FindScopeMatch(r rune, st TextPos) (en TextPos) {
 	case ')':
 		right++
 		match = '('
+	case '[':
+		left++
+		match = ']'
+	case ']':
+		right++
+		match = '['
 	}
 	ch := st.Ch
 	ln := st.Ln
