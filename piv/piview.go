@@ -51,6 +51,7 @@ var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
 
 // InitView initializes the viewer / editor
 func (pv *PiView) InitView() {
+	parse.GuiActive = true
 	pv.Parser.Init()
 	mods, updt := pv.StdConfig()
 	if !mods {
@@ -241,7 +242,7 @@ func (pv *PiView) ParseStopped() {
 // ParseNext does next step of lexing
 func (pv *PiView) ParseNext() *parse.Rule {
 	mrule := pv.Parser.ParseNext()
-	pv.AstTree().Open()
+	pv.AstTree().OpenAll()
 	if mrule == nil {
 		pv.ParseStopped()
 	} else {

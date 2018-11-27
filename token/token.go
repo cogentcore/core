@@ -54,6 +54,42 @@ func (tk Tokens) SubCat() Tokens {
 	return SubCatMap[tk]
 }
 
+// IsPunctGpLeft returns true if token is a PunctGpL token -- left paren, brace, bracket
+func (tk Tokens) IsPunctGpLeft() bool {
+	return (tk == PunctGpLParen || tk == PunctGpLBrack || tk == PunctGpLBrace)
+}
+
+// IsPunctGpRight returns true if token is a PunctGpR token -- right paren, brace, bracket
+func (tk Tokens) IsPunctGpRight() bool {
+	return (tk == PunctGpRParen || tk == PunctGpRBrack || tk == PunctGpRBrace)
+}
+
+// PunctGpMatch returns the matching token for given PunctGp token
+func (tk Tokens) PunctGpMatch() Tokens {
+	switch tk {
+	case PunctGpLParen:
+		return PunctGpRParen
+	case PunctGpRParen:
+		return PunctGpLParen
+	case PunctGpLBrack:
+		return PunctGpRBrack
+	case PunctGpRBrack:
+		return PunctGpLBrack
+	case PunctGpLBrace:
+		return PunctGpRBrace
+	case PunctGpRBrace:
+		return PunctGpLBrace
+	}
+	return None
+}
+
+// IsAmbigUnaryOp returns true if this token is an operator that could either be
+// a Unary or Binary operator -- need special matching for this.
+// includes * and & which are used for address operations in C-like languages
+func (tk Tokens) IsAmbigUnaryOp() bool {
+	return (tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd)
+}
+
 // CombineRepeats are token types where repeated tokens of the same type should
 // be combined together -- literals, comments, text
 func (tk Tokens) CombineRepeats() bool {

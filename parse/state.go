@@ -49,8 +49,8 @@ func (ps *State) AtEof() bool {
 	return ps.Pos.Ln >= ps.Src.NLines()
 }
 
-// FindToken looks for token in given region, returns position where found, false if not
-// all positions in token indexes
+// FindToken looks for token in given region, returns position where found, false if not.
+// All positions in token indexes
 func (ps *State) FindToken(tok token.Tokens, keyword string, reg lex.Reg) (lex.Pos, bool) {
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
 	if !ok {
@@ -96,6 +96,54 @@ func (ps *State) MatchToken(tok token.Tokens, keyword string, pos lex.Pos) bool 
 		}
 	}
 	return false
+}
+
+// FindTokenReverse looks *backwards* for token in given region,
+// returns position where found, false if not.
+// Automatically deals with possible confusion with unary operators -- if there are two
+// ambiguous operators in a row, automatically gets the first one.  This is mainly / only used for
+// binary operator expressions (mathematical binary operators).
+// All positions are in token indexes
+func (ps *State) FindTokenReverse(tok token.Tokens, keyword string, reg lex.Reg) (lex.Pos, bool) {
+	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
+	if !ok {
+		return cp, false
+	}
+	isCat := tok.Cat() == tok
+	isSubCat := tok.SubCat() == tok
+	isAmbigUnary := tok.IsAmbigUnaryOp()
+	for reg.St.IsLess(cp) {
+		tk := ps.Src.Token(cp)
+		if tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok) {
+			if keyword != "" { // not usually true but whatever
+				tksrc := string(ps.Src.TokenSrc(cp))
+				if tksrc == keyword {
+					return cp, true
+				}
+			} else {
+				if isAmbigUnary { // make sure immed prior is not also!
+					pp, ok := ps.Src.PrevTokenPos(cp)
+					if ok {
+						pt := ps.Src.Token(pp)
+						if !pt.IsAmbigUnaryOp() {
+							return cp, true
+						}
+						// otherwise we don't match -- cannot match second opr
+					} else {
+						return cp, true
+					}
+				} else {
+					return cp, true // generally not true for reverse, but whatever
+				}
+			}
+		}
+		ok := false
+		cp, ok = ps.Src.PrevTokenPos(cp)
+		if !ok {
+			return cp, false
+		}
+	}
+	return cp, false
 }
 
 // AddAst adds a child Ast node to given parent Ast node

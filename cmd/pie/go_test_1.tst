@@ -4,7 +4,7 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-package main
+/* package main
 
 import "github.com/goki/gi/gi"
 
@@ -16,8 +16,10 @@ import (
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
+*/
 
-const Freddo = 3.14
+const Precedence1 = (3.14++ + -2 + 4) > 2 - 5 * 3
+const Precedence2 = -(3.14 + 2 * 4)
 
 // The lexical acts
 const (

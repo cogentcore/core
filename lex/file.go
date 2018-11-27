@@ -87,6 +87,9 @@ func (fl *File) SetLexs(ln int, lexs Line) {
 
 // NTokens returns number of lex tokens for given line
 func (fl *File) NTokens(ln int) int {
+	if fl.Lexs == nil {
+		return 0
+	}
 	return len(fl.Lexs[ln])
 }
 
@@ -179,4 +182,47 @@ func (fl *File) LexTagSrc() string {
 		txt += fl.LexTagSrcLn(ln) + "\n"
 	}
 	return txt
+}
+
+// FindPunctGpMatch finds the PunctGp (brace or parenthesis) token that is the partner
+// of the one passed to function, within given region.  Positions are *token* positions.
+// if token is left ( then it starts at reg.St and searches to reg.Ed,
+// and if it is left ) then starts at reg.Ed and searches to reg.St
+func (fl *File) FindPunctGpMatch(tk token.Tokens, reg Reg) (Pos, bool) {
+	if tk.SubCat() != token.PunctGp {
+		return Pos{}, false
+	}
+	left := tk.IsPunctGpLeft()
+	match := tk.PunctGpMatch()
+	cnt := 1
+	if left {
+		cp, ok := fl.NextTokenPos(reg.St)
+		for ok && cp.IsLess(reg.Ed) {
+			ct := fl.Token(cp)
+			if ct == tk {
+				cnt++
+			} else if ct == match {
+				cnt--
+				if cnt == 0 {
+					return cp, true
+				}
+			}
+			cp, ok = fl.NextTokenPos(cp)
+		}
+	} else {
+		cp, ok := fl.PrevTokenPos(reg.Ed)
+		for ok && (reg.St.IsLess(cp) || reg.St == cp) {
+			ct := fl.Token(cp)
+			if ct == tk {
+				cnt++
+			} else if ct == match {
+				cnt--
+				if cnt == 0 {
+					return cp, true
+				}
+			}
+			cp, ok = fl.PrevTokenPos(cp)
+		}
+	}
+	return Pos{}, false
 }
