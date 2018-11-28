@@ -3000,6 +3000,9 @@ func (tv *TextView) UpdateHighlights(prev []TextRegion) {
 
 // ClearHighlights clears the Highlights slice of all regions
 func (tv *TextView) ClearHighlights() {
+	if len(tv.Highlights) == 0 {
+		return
+	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.Highlights = tv.Highlights[:0]
@@ -3008,6 +3011,9 @@ func (tv *TextView) ClearHighlights() {
 
 // ClearScopelights clears the Highlights slice of all regions
 func (tv *TextView) ClearScopelights() {
+	if len(tv.Scopelights) == 0 {
+		return
+	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.Scopelights = tv.Scopelights[:0]
