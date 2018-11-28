@@ -3132,6 +3132,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
 	tv.RenderLineNosBoxAll()
 	tv.RenderHighlights(-1, -1) // all
+	tv.RenderScopelights(-1, -1)
 	tv.RenderSelect()
 	pos = tv.RenderStartPos()
 	stln := -1
