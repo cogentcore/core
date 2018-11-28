@@ -633,6 +633,7 @@ type PrefsDetailed struct {
 	MapInlineLen               int  `min:"0" max:"1000" step:"5" desc:"Default: 3 the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props"`
 	StructInlineLen            int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs"`
 	SliceInlineLen             int  `min:"0" max:"1000" step:"5" desc:"Default: 6 the number of slice elements below which inline will be used"`
+	MaxScopeLines              int  `min:"10" max:"1000" step:"10" desc:"Default: 100 the number lines that will be seached (forward or backward for a scope marker, e.g. '{'"`
 	Changed                    bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
@@ -697,6 +698,7 @@ func (pf *PrefsDetailed) Defaults() {
 	// MapInlineLen
 	// StructInlineLen
 	// SliceInlineLen
+	// MaxScopeLines
 }
 
 // Apply detailed preferences to all the relevant settings.
@@ -720,6 +722,7 @@ func (pf *PrefsDetailed) Apply() {
 	// MapInlineLen
 	// StructInlineLen
 	// SliceInlineLen
+	// MaxScopeLines
 }
 
 // PrefsDetailedProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsDetView
