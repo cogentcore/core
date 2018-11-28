@@ -22,7 +22,7 @@ type Lex struct {
 
 // String satisfies the fmt.Stringer interface
 func (lx Lex) String() string {
-	return fmt.Sprintf("[%v:%v:+%d:%v]", lx.St, lx.Ed, lx.Depth, lx.Tok.String())
+	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Depth, lx.St, lx.Ed, lx.Tok.String())
 }
 
 // ContainsPos returns true if the Lex element contains given character position

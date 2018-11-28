@@ -49,8 +49,23 @@ func (ps *State) AtEof() bool {
 	return ps.Pos.Ln >= ps.Src.NLines()
 }
 
+// MatchLex is our optimized matcher method
+func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool, stdepth int, cp lex.Pos) bool {
+	if lx.Depth != stdepth {
+		return false
+	}
+	if !(lx.Tok == tkey.Tok || (isCat && lx.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Tok.SubCat() == tkey.Tok)) {
+		return false
+	}
+	if tkey.Key == "" {
+		return true
+	}
+	return tkey.Key == string(ps.Src.TokenSrc(cp))
+}
+
 // FindToken looks for token in given region, returns position where found, false if not.
-// All positions in token indexes
+// Only matches when depth is same as at reg.St start at the start of the search.
+// All positions in token indexes.
 func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
 	if !ok {
@@ -59,25 +74,12 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
-	depth := 0
+	stlx := ps.Src.LexAt(cp)
 	for cp.IsLess(reg.Ed) {
-		tk := ps.Src.Token(cp)
-		if depth == 0 && (tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok)) {
-			if tkey.Key != "" {
-				tksrc := string(ps.Src.TokenSrc(cp))
-				if tksrc == tkey.Key {
-					return cp, true
-				}
-			} else {
-				return cp, true
-			}
+		lx := ps.Src.LexAt(cp)
+		if ps.MatchLex(lx, tkey, isCat, isSubCat, stlx.Depth, cp) {
+			return cp, true
 		}
-		if tk.IsPunctGpLeft() {
-			depth++
-		} else if tk.IsPunctGpRight() {
-			depth--
-		}
-		ok := false
 		cp, ok = ps.Src.NextTokenPos(cp)
 		if !ok {
 			return cp, false
@@ -92,26 +94,16 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
-	tk := ps.Src.Token(pos)
-	if tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok) {
-		if tkey.Key != "" {
-			tksrc := string(ps.Src.TokenSrc(pos))
-			if tksrc == tkey.Key {
-				return true
-			}
-		} else {
-			return true
-		}
-	}
-	return false
+	lx := ps.Src.LexAt(pos)
+	return ps.MatchLex(lx, tkey, isCat, isSubCat, lx.Depth, pos)
 }
 
-// FindTokenReverse looks *backwards* for token in given region,
-// returns position where found, false if not.
+// FindTokenReverse looks *backwards* for token in given region, with same depth as reg.Ed-1 end
+// where the search starts. Returns position where found, false if not.
 // Automatically deals with possible confusion with unary operators -- if there are two
 // ambiguous operators in a row, automatically gets the first one.  This is mainly / only used for
 // binary operator expressions (mathematical binary operators).
-// All positions are in token indexes
+// All positions are in token indexes.
 func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
 	if !ok {
@@ -121,36 +113,24 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
-	depth := 0
+	stlx := ps.Src.LexAt(cp)
 	for reg.St.IsLess(cp) {
-		tk := ps.Src.Token(cp)
-		if depth == 0 && (tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok)) {
-			if tkey.Key != "" { // not usually true but whatever
-				tksrc := string(ps.Src.TokenSrc(cp))
-				if tksrc == tkey.Key {
+		lx := ps.Src.LexAt(cp)
+		if ps.MatchLex(lx, tkey, isCat, isSubCat, stlx.Depth, cp) {
+			if isAmbigUnary { // make sure immed prior is not also!
+				pp, ok := ps.Src.PrevTokenPos(cp)
+				if ok {
+					pt := ps.Src.Token(pp)
+					if !pt.IsAmbigUnaryOp() {
+						return cp, true
+					}
+					// otherwise we don't match -- cannot match second opr
+				} else {
 					return cp, true
 				}
 			} else {
-				if isAmbigUnary { // make sure immed prior is not also!
-					pp, ok := ps.Src.PrevTokenPos(cp)
-					if ok {
-						pt := ps.Src.Token(pp)
-						if !pt.IsAmbigUnaryOp() {
-							return cp, true
-						}
-						// otherwise we don't match -- cannot match second opr
-					} else {
-						return cp, true
-					}
-				} else {
-					return cp, true // generally not true for reverse, but whatever
-				}
+				return cp, true
 			}
-		}
-		if tk.IsPunctGpRight() {
-			depth++
-		} else if tk.IsPunctGpLeft() {
-			depth--
 		}
 		ok := false
 		cp, ok = ps.Src.PrevTokenPos(cp)
