@@ -774,7 +774,22 @@ func (ft *FileTreeView) DeleteFiles() {
 		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := ftv.FileNode()
 		if fn != nil {
-			fn.DeleteFile()
+			if fn.Buf != nil {
+				gi.ChoiceDialog(ft.Viewport, gi.DlgOpts{Title: "File open for editing, Delete?",
+					Prompt: fmt.Sprintf("The file %v is open for editing: Close and delete?", fn.Nm)},
+					[]string{"Delete", "Cancel"},
+					ft.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						switch sig {
+						case 0:
+							fn.CloseBuf()
+							fn.DeleteFile()
+						case 1:
+							// do nothing
+						}
+					})
+			} else {
+				fn.DeleteFile()
+			}
 		}
 	}
 }
