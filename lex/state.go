@@ -120,12 +120,12 @@ func (ls *State) Add(tok token.Tokens, st, ed int) {
 	sz := len(ls.Lex)
 	if sz > 0 && tok.CombineRepeats() {
 		lst := &ls.Lex[sz-1]
-		if lst.Token == tok && lst.Ed == st {
+		if lst.Tok == tok && lst.Ed == st {
 			lst.Ed = ed
 			return
 		}
 	}
-	ls.Lex.Add(Lex{tok, st, ed})
+	ls.Lex.Add(Lex{tok, 0, st, ed})
 }
 
 func (ls *State) PushState(st string) {

@@ -24,14 +24,15 @@ func VersionInfo() string {
 
 // Parser is the overall parser for managing the parsing
 type Parser struct {
-	Lexer      lex.Rule    `desc:"lexer rules for first pass of lexing file"`
-	Eoser      parse.Eoser `desc:"end-of-statement finder -- step after lexing before parsing"`
-	Parser     parse.Rule  `desc:"parser rules for second pass of parsing lexed tokens"`
-	Src        lex.File    `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
-	LexState   lex.State   `json:"_" xml:"-" desc:"state for lexing"`
-	ParseState parse.State `json:"_" xml:"-" desc:"state for parsing"`
-	Ast        parse.Ast   `json:"_" xml:"-" desc:"ast output tree from parsing"`
-	Filename   string      `desc:"file name for overall parser"`
+	Lexer      lex.Rule     `desc:"lexer rules for first pass of lexing file"`
+	PassTwo    lex.PassTwo  `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
+	Parser     parse.Rule   `desc:"parser rules for parsing lexed tokens"`
+	Src        lex.File     `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
+	LexState   lex.State    `json:"_" xml:"-" desc:"state for lexing"`
+	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
+	ParseState parse.State  `json:"_" xml:"-" desc:"state for parsing"`
+	Ast        parse.Ast    `json:"_" xml:"-" desc:"ast output tree from parsing"`
+	Filename   string       `desc:"file name for overall parser"`
 }
 
 func (pr *Parser) Init() {
@@ -52,7 +53,8 @@ func (pr *Parser) SetSrc(src [][]rune, fname string) {
 	pr.LexState.Filename = fname
 	pr.LexState.SetLine(src[0])
 	pr.Lexer.Validate(&pr.LexState)
-	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.Eoser.State.EosPos)
+	pr.TwoState.Init()
+	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.TwoState.EosPos)
 }
 
 // LexAtEnd returns true if lexing state is now at end of source
@@ -112,26 +114,28 @@ func (pr *Parser) LexErrString() string {
 	return pr.LexState.Errs.AllString()
 }
 
-// Eosify does all the finding of EOS end-of-statements, if supported for this grammar
-func (pr *Parser) Eosify() {
-	if pr.Eoser.Do {
-		pr.Eoser.Eosify(&pr.Src)
+// DoPassTwo does the second pass after lexing
+func (pr *Parser) DoPassTwo() {
+	pr.TwoState.SetSrc(&pr.Src)
+	pr.PassTwo.NestDepth(&pr.TwoState)
+	if pr.PassTwo.DoEos {
+		pr.PassTwo.EosDetect(&pr.TwoState)
 	}
 }
 
-// EoserHasErrs returns true if there were errors from eosifying
-func (pr *Parser) EoserHasErrs() bool {
-	return len(pr.Eoser.State.Errs) > 0
+// PassTwoHasErrs returns true if there were errors from pass two processing
+func (pr *Parser) PassTwoHasErrs() bool {
+	return len(pr.TwoState.Errs) > 0
 }
 
-// EoserErrString returns all the eoser errors as a string
-func (pr *Parser) EoserErrString() string {
-	return pr.Eoser.State.Errs.AllString()
+// PassTwoErrString returns all the pass two errors as a string
+func (pr *Parser) PassTwoErrString() string {
+	return pr.TwoState.Errs.AllString()
 }
 
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit() bool {
-	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.Eoser.State.EosPos)
+	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.TwoState.EosPos)
 	ok := pr.Parser.CompileAll(&pr.ParseState)
 	if !ok {
 		return false

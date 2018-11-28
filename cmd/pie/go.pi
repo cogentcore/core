@@ -1935,11 +1935,57 @@
     "Acts": null,
     "PushState": ""
   },
-  "Eoser": {
-    "Do": true,
-    "Eol": true,
+  "PassTwo": {
+    "DoEos": true,
+    "Eol": false,
     "Semi": true,
-    "Backslash": false
+    "Backslash": false,
+    "EolToks": [
+      {
+        "Tok": "Name",
+        "Key": ""
+      },
+      {
+        "Tok": "Literal",
+        "Key": ""
+      },
+      {
+        "Tok": "OpAsgnInc",
+        "Key": ""
+      },
+      {
+        "Tok": "OpAsgnDec",
+        "Key": ""
+      },
+      {
+        "Tok": "PunctGpRParen",
+        "Key": ""
+      },
+      {
+        "Tok": "PunctGpRBrack",
+        "Key": ""
+      },
+      {
+        "Tok": "PunctGpRBrace",
+        "Key": ""
+      },
+      {
+        "Tok": "Keyword",
+        "Key": "break"
+      },
+      {
+        "Tok": "Keyword",
+        "Key": "continue"
+      },
+      {
+        "Tok": "Keyword",
+        "Key": "fallthrough"
+      },
+      {
+        "Tok": "Keyword",
+        "Key": "return"
+      }
+    ]
   },
   "Parser": {
     "Nm": "Parser",
@@ -1947,11 +1993,13 @@
     "Props": null,
     "Kids": [
       {
-        "n": 4,
+        "n": 5,
         "type": "parse.Rule",
         "name": "File",
         "type": "parse.Rule",
         "name": "ExprRules",
+        "type": "parse.Rule",
+        "name": "TypeRules",
         "type": "parse.Rule",
         "name": "ImportRules",
         "type": "parse.Rule",
@@ -1963,13 +2011,15 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 4,
             "type": "parse.Rule",
             "name": "PackageSpec",
             "type": "parse.Rule",
             "name": "Imports",
             "type": "parse.Rule",
-            "name": "Consts"
+            "name": "Consts",
+            "type": "parse.Rule",
+            "name": "Types"
           },
           {
             "Nm": "PackageSpec",
@@ -2000,6 +2050,16 @@
             "Rule": "'key:const' ConstN 'EOS'",
             "Ast": "AnchorAst",
             "PushState": ""
+          },
+          {
+            "Nm": "Types",
+            "UniqueNm": "Types",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:type' TypeDeclN 'EOS'",
+            "Ast": "AnchorAst",
+            "PushState": ""
           }
         ],
         "Desc": "only rules in this first group are used as top-level rules -- all others must be referenced from here",
@@ -2013,7 +2073,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 6,
+            "n": 13,
             "type": "parse.Rule",
             "name": "QualName",
             "type": "parse.Rule",
@@ -2025,7 +2085,21 @@
             "type": "parse.Rule",
             "name": "BinaryExpr",
             "type": "parse.Rule",
-            "name": "Type"
+            "name": "PrimaryExpr",
+            "type": "parse.Rule",
+            "name": "Operand",
+            "type": "parse.Rule",
+            "name": "Literal",
+            "type": "parse.Rule",
+            "name": "BasicLit",
+            "type": "parse.Rule",
+            "name": "LiteralType",
+            "type": "parse.Rule",
+            "name": "LiteralValue",
+            "type": "parse.Rule",
+            "name": "ElementList",
+            "type": "parse.Rule",
+            "name": "Key"
           },
           {
             "Nm": "QualName",
@@ -2117,7 +2191,7 @@
                 "type": "parse.Rule",
                 "name": "UnryExpr",
                 "type": "parse.Rule",
-                "name": "LitNum"
+                "name": "PrimExpr"
               },
               {
                 "Nm": "ParenExpr",
@@ -2150,13 +2224,13 @@
                 "PushState": ""
               },
               {
-                "Nm": "LitNum",
-                "UniqueNm": "LitNum",
+                "Nm": "PrimExpr",
+                "UniqueNm": "PrimExpr",
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "'LitNum'",
-                "Ast": "AddAst",
+                "Rule": "PrimaryExpr",
+                "Ast": "NoAst",
                 "PushState": ""
               }
             ],
@@ -2482,14 +2556,476 @@
             "PushState": ""
           },
           {
-            "Nm": "Type",
-            "UniqueNm": "Type",
+            "Nm": "PrimaryExpr",
+            "UniqueNm": "PrimaryExpr",
             "Props": null,
             "Kids": [
               {
                 "n": 1,
                 "type": "parse.Rule",
-                "name": "TypeName"
+                "name": "Oper"
+              },
+              {
+                "Nm": "Oper",
+                "UniqueNm": "Oper",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Operand",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Operand",
+            "UniqueNm": "Operand",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "parse.Rule",
+                "name": "Lit"
+              },
+              {
+                "Nm": "Lit",
+                "UniqueNm": "Lit",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Literal",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Literal",
+            "UniqueNm": "Literal",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "BasicLiteral",
+                "type": "parse.Rule",
+                "name": "CompositeLit"
+              },
+              {
+                "Nm": "BasicLiteral",
+                "UniqueNm": "BasicLiteral",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "BasicLit",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "CompositeLit",
+                "UniqueNm": "CompositeLit",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "LiteralType LiteralValue",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "BasicLit",
+            "UniqueNm": "BasicLit",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 5,
+                "type": "parse.Rule",
+                "name": "LitNumInteger",
+                "type": "parse.Rule",
+                "name": "LitNumFloat",
+                "type": "parse.Rule",
+                "name": "LitNumImag",
+                "type": "parse.Rule",
+                "name": "LitRune",
+                "type": "parse.Rule",
+                "name": "LitString"
+              },
+              {
+                "Nm": "LitNumInteger",
+                "UniqueNm": "LitNumInteger",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'LitNumInteger'",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitNumFloat",
+                "UniqueNm": "LitNumFloat",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'LitNumFloat'",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitNumImag",
+                "UniqueNm": "LitNumImag",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'LitNumImag'",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitRune",
+                "UniqueNm": "LitRune",
+                "Props": null,
+                "Kids": null,
+                "Desc": "rune",
+                "Rule": "'LitStrSingle'",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitString",
+                "UniqueNm": "LitString",
+                "Props": null,
+                "Kids": null,
+                "Desc": "rune",
+                "Rule": "'LitStr'",
+                "Ast": "AddAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "LiteralType",
+            "UniqueNm": "LiteralType",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 6,
+                "type": "parse.Rule",
+                "name": "LitStructType",
+                "type": "parse.Rule",
+                "name": "LitArrayType",
+                "type": "parse.Rule",
+                "name": "LitElType",
+                "type": "parse.Rule",
+                "name": "LitSliceType",
+                "type": "parse.Rule",
+                "name": "LitMapType",
+                "type": "parse.Rule",
+                "name": "LitTypeName"
+              },
+              {
+                "Nm": "LitStructType",
+                "UniqueNm": "LitStructType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "StructType",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitArrayType",
+                "UniqueNm": "LitArrayType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "ArrayType",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitElType",
+                "UniqueNm": "LitElType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'[' '...' ']' Type",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitSliceType",
+                "UniqueNm": "LitSliceType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "SliceType",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitMapType",
+                "UniqueNm": "LitMapType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "MapType",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "LitTypeName",
+                "UniqueNm": "LitTypeName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "TypeName",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "LiteralValue",
+            "UniqueNm": "LiteralValue",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'{' ElementList '}'",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "ElementList",
+            "UniqueNm": "ElementList",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ElementListMulti",
+                "type": "parse.Rule",
+                "name": "KeyedElement"
+              },
+              {
+                "Nm": "ElementListMulti",
+                "UniqueNm": "ElementListMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "KeyedElement ',' ElementList",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "KeyedElement",
+                "UniqueNm": "KeyedElement",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 2,
+                    "type": "parse.Rule",
+                    "name": "KeyElement",
+                    "type": "parse.Rule",
+                    "name": "Element"
+                  },
+                  {
+                    "Nm": "KeyElement",
+                    "UniqueNm": "KeyElement",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Rule": "Key ':' Element",
+                    "Ast": "NoAst",
+                    "PushState": ""
+                  },
+                  {
+                    "Nm": "Element",
+                    "UniqueNm": "Element",
+                    "Props": null,
+                    "Kids": [
+                      {
+                        "n": 2,
+                        "type": "parse.Rule",
+                        "name": "ElExpr",
+                        "type": "parse.Rule",
+                        "name": "ElLitVal"
+                      },
+                      {
+                        "Nm": "ElExpr",
+                        "UniqueNm": "ElExpr",
+                        "Props": null,
+                        "Kids": null,
+                        "Desc": "",
+                        "Rule": "Expr",
+                        "Ast": "NoAst",
+                        "PushState": ""
+                      },
+                      {
+                        "Nm": "ElLitVal",
+                        "UniqueNm": "ElLitVal",
+                        "Props": null,
+                        "Kids": null,
+                        "Desc": "",
+                        "Rule": "LiteralValue",
+                        "Ast": "NoAst",
+                        "PushState": ""
+                      }
+                    ],
+                    "Desc": "",
+                    "Rule": "",
+                    "Ast": "NoAst",
+                    "PushState": ""
+                  }
+                ],
+                "Desc": "",
+                "Rule": "",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Key",
+            "UniqueNm": "Key",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "KeyName",
+                "type": "parse.Rule",
+                "name": "KeyLitVal",
+                "type": "parse.Rule",
+                "name": "KeyExpr"
+              },
+              {
+                "Nm": "KeyName",
+                "UniqueNm": "KeyName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'Name'",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "KeyLitVal",
+                "UniqueNm": "KeyLitVal",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "LiteralValue",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "KeyExpr",
+                "UniqueNm": "KeyExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Expr",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          }
+        ],
+        "Desc": "many different rules here that go into expressions etc",
+        "Rule": "",
+        "Ast": "NoAst",
+        "PushState": ""
+      },
+      {
+        "Nm": "TypeRules",
+        "UniqueNm": "TypeRules",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 15,
+            "type": "parse.Rule",
+            "name": "Type",
+            "type": "parse.Rule",
+            "name": "PtrOrTypeName",
+            "type": "parse.Rule",
+            "name": "TypeLit",
+            "type": "parse.Rule",
+            "name": "FieldDecls",
+            "type": "parse.Rule",
+            "name": "FieldDecl",
+            "type": "parse.Rule",
+            "name": "FieldTag",
+            "type": "parse.Rule",
+            "name": "Signature",
+            "type": "parse.Rule",
+            "name": "Params",
+            "type": "parse.Rule",
+            "name": "ParamsList",
+            "type": "parse.Rule",
+            "name": "Param",
+            "type": "parse.Rule",
+            "name": "Result",
+            "type": "parse.Rule",
+            "name": "MethodSpecs",
+            "type": "parse.Rule",
+            "name": "MethodSpec",
+            "type": "parse.Rule",
+            "name": "TypeDeclN",
+            "type": "parse.Rule",
+            "name": "TypeDecls"
+          },
+          {
+            "Nm": "Type",
+            "UniqueNm": "Type",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "ParenType",
+                "type": "parse.Rule",
+                "name": "TypeName",
+                "type": "parse.Rule",
+                "name": "TypeLiteral"
+              },
+              {
+                "Nm": "ParenType",
+                "UniqueNm": "ParenType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' Type ')'",
+                "Ast": "NoAst",
+                "PushState": ""
               },
               {
                 "Nm": "TypeName",
@@ -2500,15 +3036,553 @@
                 "Rule": "QualName",
                 "Ast": "AnchorAst",
                 "PushState": ""
+              },
+              {
+                "Nm": "TypeLiteral",
+                "UniqueNm": "TypeLiteral",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "TypeLit",
+                "Ast": "NoAst",
+                "PushState": ""
               }
             ],
             "Desc": "type specifies a type either as a type name or type expression",
             "Rule": "",
             "Ast": "NoAst",
             "PushState": ""
+          },
+          {
+            "Nm": "PtrOrTypeName",
+            "UniqueNm": "PtrOrTypeName",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "PtrTypeName",
+                "type": "parse.Rule",
+                "name": "NoPtrTypeName"
+              },
+              {
+                "Nm": "PtrTypeName",
+                "UniqueNm": "PtrTypeName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'*' TypeName",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "NoPtrTypeName",
+                "UniqueNm": "NoPtrTypeName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "TypeName",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "regular type name or pointer to type name",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "TypeLit",
+            "UniqueNm": "TypeLit",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 8,
+                "type": "parse.Rule",
+                "name": "ArrayType",
+                "type": "parse.Rule",
+                "name": "StructType",
+                "type": "parse.Rule",
+                "name": "PointerType",
+                "type": "parse.Rule",
+                "name": "FunctionType",
+                "type": "parse.Rule",
+                "name": "InterfaceType",
+                "type": "parse.Rule",
+                "name": "SliceType",
+                "type": "parse.Rule",
+                "name": "MapType",
+                "type": "parse.Rule",
+                "name": "ChannelType"
+              },
+              {
+                "Nm": "ArrayType",
+                "UniqueNm": "ArrayType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'[' Expr ']' Type",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "StructType",
+                "UniqueNm": "StructType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'key:struct' '{' FieldDecls '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "PointerType",
+                "UniqueNm": "PointerType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'*' Type",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "FunctionType",
+                "UniqueNm": "FunctionType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'key:func' Signature",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "InterfaceType",
+                "UniqueNm": "InterfaceType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'key:interface' '{' MethodSpecs '}'",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "SliceType",
+                "UniqueNm": "SliceType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'[' ']' Type",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "MapType",
+                "UniqueNm": "MapType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'key:map' '[' Type ']' Type",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ChannelType",
+                "UniqueNm": "ChannelType",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 3,
+                    "type": "parse.Rule",
+                    "name": "RecvChanType",
+                    "type": "parse.Rule",
+                    "name": "SendChanType",
+                    "type": "parse.Rule",
+                    "name": "SRChanType"
+                  },
+                  {
+                    "Nm": "RecvChanType",
+                    "UniqueNm": "RecvChanType",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Rule": "'key:chan' '\u003c-' Type",
+                    "Ast": "AnchorAst",
+                    "PushState": ""
+                  },
+                  {
+                    "Nm": "SendChanType",
+                    "UniqueNm": "SendChanType",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Rule": "'\u003c-' 'key:chan' Type",
+                    "Ast": "AnchorAst",
+                    "PushState": ""
+                  },
+                  {
+                    "Nm": "SRChanType",
+                    "UniqueNm": "SRChanType",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Rule": "'key:chan' Type",
+                    "Ast": "AnchorAst",
+                    "PushState": ""
+                  }
+                ],
+                "Desc": "",
+                "Rule": "",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "FieldDecls",
+            "UniqueNm": "FieldDecls",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "FieldDecl ?FieldDecls",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "FieldDecl",
+            "UniqueNm": "FieldDecl",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "NamedField",
+                "type": "parse.Rule",
+                "name": "AnonField"
+              },
+              {
+                "Nm": "NamedField",
+                "UniqueNm": "NamedField",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "NameList Type ?FieldTag",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "AnonField",
+                "UniqueNm": "AnonField",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "PtrOrTypeName ?FieldTag",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "FieldTag",
+            "UniqueNm": "FieldTag",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'LitStr'",
+            "Ast": "AddAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Signature",
+            "UniqueNm": "Signature",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ParamsResult",
+                "type": "parse.Rule",
+                "name": "ParamsOnly"
+              },
+              {
+                "Nm": "ParamsResult",
+                "UniqueNm": "ParamsResult",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Params Result",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ParamsOnly",
+                "UniqueNm": "ParamsOnly",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Params",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Params",
+            "UniqueNm": "Params",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'(' ParamsList ')'",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "ParamsList",
+            "UniqueNm": "ParamsList",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ParamsMulti",
+                "type": "parse.Rule",
+                "name": "ParamsOne"
+              },
+              {
+                "Nm": "ParamsMulti",
+                "UniqueNm": "ParamsMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Param ',' ParamsList",
+                "Ast": "AddAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ParamsOne",
+                "UniqueNm": "ParamsOne",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Param",
+                "Ast": "AddAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Param",
+            "UniqueNm": "Param",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 4,
+                "type": "parse.Rule",
+                "name": "ParamNameEllipsis",
+                "type": "parse.Rule",
+                "name": "ParamName",
+                "type": "parse.Rule",
+                "name": "AnonParamEllipsis",
+                "type": "parse.Rule",
+                "name": "AnonParam"
+              },
+              {
+                "Nm": "ParamNameEllipsis",
+                "UniqueNm": "ParamNameEllipsis",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "NameList '...' Type",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ParamName",
+                "UniqueNm": "ParamName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "NameList Type",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "AnonParamEllipsis",
+                "UniqueNm": "AnonParamEllipsis",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'...' Type",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "AnonParam",
+                "UniqueNm": "AnonParam",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Type",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "Result",
+            "UniqueNm": "Result",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "Results",
+                "type": "parse.Rule",
+                "name": "ResultOne"
+              },
+              {
+                "Nm": "Results",
+                "UniqueNm": "Results",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Params",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "ResultOne",
+                "UniqueNm": "ResultOne",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Type",
+                "Ast": "NoAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "AnchorAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "MethodSpecs",
+            "UniqueNm": "MethodSpecs",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "MethodSpec ?MethodSpecs",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "MethodSpec",
+            "UniqueNm": "MethodSpec",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "MethSpecName",
+                "type": "parse.Rule",
+                "name": "MethSpecAnon"
+              },
+              {
+                "Nm": "MethSpecName",
+                "UniqueNm": "MethSpecName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'Name' Params ?Result 'EOS'",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "MethSpecAnon",
+                "UniqueNm": "MethSpecAnon",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "TypeName",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "TypeDeclN",
+            "UniqueNm": "TypeDeclN",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "TypeDeclMulti",
+                "type": "parse.Rule",
+                "name": "TypeDecl"
+              },
+              {
+                "Nm": "TypeDeclMulti",
+                "UniqueNm": "TypeDeclMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' TypeDecls ')'",
+                "Ast": "NoAst",
+                "PushState": ""
+              },
+              {
+                "Nm": "TypeDecl",
+                "UniqueNm": "TypeDecl",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'Name' Type 'EOS'",
+                "Ast": "AnchorAst",
+                "PushState": ""
+              }
+            ],
+            "Desc": "N = switch between 1 or multi",
+            "Rule": "",
+            "Ast": "NoAst",
+            "PushState": ""
+          },
+          {
+            "Nm": "TypeDecls",
+            "UniqueNm": "TypeDecls",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "TypeDecl ?TypeDecls",
+            "Ast": "NoAst",
+            "PushState": ""
           }
         ],
-        "Desc": "many different rules here that go into expressions etc",
+        "Desc": "",
         "Rule": "",
         "Ast": "NoAst",
         "PushState": ""

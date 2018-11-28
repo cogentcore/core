@@ -51,10 +51,9 @@ type Parser interface {
 
 // RuleEl is an element of a parsing rule -- either a pointer to another rule or a token
 type RuleEl struct {
-	Rule    *Rule        `desc:"rule -- nil if token"`
-	Token   token.Tokens `desc:"token, None if rule"`
-	Keyword string       `desc:"if keyword, this it"`
-	Opt     bool         `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
+	Rule  *Rule          `desc:"rule -- nil if token"`
+	Token token.KeyToken `desc:"token, None if rule"`
+	Opt   bool           `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
 }
 
 func (re RuleEl) IsRule() bool {
@@ -95,16 +94,15 @@ var RuleMap map[string]*Rule
 // Precedence is encoded directly in the ordering of the children.
 type Rule struct {
 	ki.Node
-	Desc      string       `desc:"description / comments about this rule"`
-	Rule      string       `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names) -- each rule must have at least one token, and if there are multiple, and the first one should NOT be the key matching token, flag that one with a * -- for keywords use 'key:keyword'"`
-	Ast       AstActs      `desc:"what action should be take for this node when it matches"`
-	Rules     RuleList     `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
-	KeyTok    token.Tokens `json:"-" xml:"-" desc:"the key token value that this rule matches -- all rules must have one"`
-	KeyTokIdx int          `json:"-" xml:"-" desc:"index in rules for the key token"`
-	Keyword   string       `json:"-" xml:"-" desc:"if the token is Keyword, this is the specific token we match"`
-	Reverse   bool         `json:"-" xml:"-" desc:"use a reverse parsing direction for binary operator expressions -- this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser, triggered by a '-' at the start of the rule -- only for rules of form: Expr '+' Expr -- two sub-rules with a token operator in the middle"`
-	EndTok    token.Tokens `json:"-" xml:"-" desc:"ending token -- if rule ends with an EOS, paren, brace or bracket token then we first search for it to establish the scope of our rule -- automatically deals with embedded ones"`
-	PushState string       `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
+	Desc      string         `desc:"description / comments about this rule"`
+	Rule      string         `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names) -- each rule must have at least one token, and if there are multiple, and the first one should NOT be the key matching token, flag that one with a * -- for keywords use 'key:keyword'"`
+	Ast       AstActs        `desc:"what action should be take for this node when it matches"`
+	Rules     RuleList       `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
+	KeyTok    token.KeyToken `json:"-" xml:"-" desc:"the key token value that this rule matches -- all rules must have one"`
+	KeyTokIdx int            `json:"-" xml:"-" desc:"index in rules for the key token"`
+	Reverse   bool           `json:"-" xml:"-" desc:"use a reverse parsing direction for binary operator expressions -- this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser, triggered by a '-' at the start of the rule -- only for rules of form: Expr '+' Expr -- two sub-rules with a token operator in the middle"`
+	EndTok    token.KeyToken `json:"-" xml:"-" desc:"ending token -- if rule ends with an EOS, paren, brace or bracket token then we first search for it to establish the scope of our rule -- automatically deals with embedded ones"`
+	PushState string         `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
 }
 
 var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
@@ -170,13 +168,17 @@ func (pr *Rule) Compile(ps *State) bool {
 	rs := strings.Split(rstr, " ")
 	pr.Rules = make(RuleList, len(rs))
 	gotTok := false
-	pr.KeyTok = token.None
+	pr.KeyTok = token.KeyTokenZero
 	pr.KeyTokIdx = -1
-	pr.Keyword = ""
-	pr.EndTok = token.None
+	pr.EndTok = token.KeyTokenZero
 	nr := len(rs)
 	for i := range rs {
 		rn := strings.TrimSpace(rs[i])
+		if len(rn) == 0 {
+			ps.Error(lex.PosZero, fmt.Sprintf("Compile: rule %v: empty string -- make sure there is only one space between rule elements", pr.Nm))
+			valid = false
+			break
+		}
 		re := &pr.Rules[i]
 		if rn[0] == '\'' || rn[0] == '*' {
 			sz := len(rn)
@@ -186,13 +188,13 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			tn := rn[st : sz-1]
 			if len(tn) > 4 && tn[:4] == "key:" {
-				re.Token = token.Keyword
-				re.Keyword = tn[4:]
+				re.Token.Tok = token.Keyword
+				re.Token.Key = tn[4:]
 			} else {
 				if pmt, has := token.OpPunctMap[tn]; has {
-					re.Token = pmt
+					re.Token.Tok = pmt
 				} else {
-					err := re.Token.FromString(tn)
+					err := re.Token.Tok.FromString(tn)
 					if err != nil {
 						ps.Error(lex.PosZero, fmt.Sprintf("Compile: rule %v: %v", pr.Nm, err.Error()))
 						valid = false
@@ -201,12 +203,11 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 			if !gotTok || st == 2 {
 				pr.KeyTok = re.Token
-				pr.Keyword = re.Keyword
 				pr.KeyTokIdx = i
 				gotTok = true
 			}
 			if i == nr-1 && pr.KeyTokIdx != i {
-				if re.Token.SubCat() == token.PunctGp || re.Token == token.EOS {
+				if re.Token.Tok.SubCat() == token.PunctGp || re.Token.Tok == token.EOS {
 					pr.EndTok = re.Token // scoping end token
 				}
 			}
@@ -318,7 +319,7 @@ func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast) *Rule {
 
 // HasEos returns true if our rule ends in EOS token and there are Eos tokens left in input
 func (pr *Rule) HasEos(ps *State) bool {
-	if pr.EndTok == token.EOS && len(ps.EosPos) > ps.EosIdx {
+	if pr.EndTok.Tok == token.EOS && len(ps.EosPos) > ps.EosIdx {
 		return true
 	}
 	return false
@@ -368,7 +369,7 @@ func (pr *Rule) Match(ps *State, scope lex.Reg) (bool, lex.Pos, lex.Reg) {
 		return false, mpos, scope
 	}
 
-	if pr.KeyTok == token.None { // no tokens, use first one to match
+	if pr.KeyTok.Tok == token.None { // no tokens, use first one to match
 		rr := pr.Rules[0]
 		if pr.Reverse {
 			rr = pr.Rules[nr-1]
@@ -389,26 +390,26 @@ func (pr *Rule) Match(ps *State, scope lex.Reg) (bool, lex.Pos, lex.Reg) {
 	}
 
 	if pr.KeyTokIdx == 0 { // key constraint: must be at start
-		if !ps.MatchToken(pr.KeyTok, pr.Keyword, scope.St) {
+		if !ps.MatchToken(pr.KeyTok, scope.St) {
 			return false, mpos, scope
 		}
 		mpos = scope.St
 	} else {
 		got := false
 		if pr.Reverse {
-			mpos, got = ps.FindTokenReverse(pr.KeyTok, pr.Keyword, scope)
+			mpos, got = ps.FindTokenReverse(pr.KeyTok, scope)
 		} else {
-			mpos, got = ps.FindToken(pr.KeyTok, pr.Keyword, scope)
+			mpos, got = ps.FindToken(pr.KeyTok, scope)
 		}
 		if !got {
 			return false, mpos, scope
 		}
 	}
 
-	if pr.EndTok != token.None && pr.EndTok != token.EOS {
+	if pr.EndTok.Tok != token.None && pr.EndTok.Tok != token.EOS {
 		// end MUST match exactly with the scope we have -- that is our matching criterion
 		trgep, ok := ps.Src.PrevTokenPos(scope.Ed)
-		ep, ok := ps.Src.FindPunctGpMatch(pr.EndTok.PunctGpMatch(), lex.Reg{St: mpos, Ed: scope.Ed})
+		ep, ok := ps.Src.FindPunctGpMatch(pr.EndTok.Tok.PunctGpMatch(), lex.Reg{St: mpos, Ed: scope.Ed})
 		if !ok || trgep != ep {
 			return false, mpos, scope
 		}
@@ -428,11 +429,11 @@ func (pr *Rule) Match(ps *State, scope lex.Reg) (bool, lex.Pos, lex.Reg) {
 func (pr *Rule) MatchRevGpToks(ps *State, scope lex.Reg) (bool, lex.Pos, lex.Reg) {
 	// match key token at end of scope..
 	mpos, ok := ps.Src.PrevTokenPos(scope.Ed)
-	if !ok || !ps.MatchToken(pr.KeyTok, pr.Keyword, mpos) {
+	if !ok || !ps.MatchToken(pr.KeyTok, mpos) {
 		return false, mpos, scope
 	}
 	scope.Ed = mpos
-	ep, ok := ps.Src.FindPunctGpMatch(pr.EndTok.PunctGpMatch(), lex.Reg{St: scope.St, Ed: mpos})
+	ep, ok := ps.Src.FindPunctGpMatch(pr.EndTok.Tok.PunctGpMatch(), lex.Reg{St: scope.St, Ed: mpos})
 	if !ok {
 		ps.Error(scope.St, fmt.Sprintf("rule %v: failed to find ending token: %v", pr.Nm, pr.EndTok))
 	} else {
@@ -486,7 +487,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos l
 			}
 			creg.Ed = scope.Ed // full scope
 			if Trace {
-				fmt.Printf("\trule %v: matched key token: %v %v at: %v advanced pos to: %v\n", pr.Nm, rr.Token, rr.Keyword, mpos, ps.Pos)
+				fmt.Printf("\trule %v: matched key token: %v %v at: %v advanced pos to: %v\n", pr.Nm, rr.Token, mpos, ps.Pos)
 			}
 			if ourAst != nil {
 				ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
@@ -494,20 +495,19 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos l
 			continue
 		}
 		if rr.IsToken() {
-			if i == nr-1 && pr.EndTok != token.None { // already matched
+			if i == nr-1 && pr.EndTok.Tok != token.None { // already matched
 				if pr.HasEos(ps) {
 					ps.EosIdx++
-				} else {
-					ps.Pos, _ = ps.Src.NextTokenPos(scope.Ed) // consume end  -- todo for EOS not so clear
 				}
+				ps.Pos, _ = ps.Src.NextTokenPos(scope.Ed) // consume end  -- todo for EOS not so clear
 				if ourAst != nil {
 					ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
 				}
 				break
 			}
-			tp, got := ps.FindToken(rr.Token, rr.Keyword, creg)
+			tp, got := ps.FindToken(rr.Token, creg)
 			if !got {
-				ps.Error(creg.St, fmt.Sprintf("rule %v: required token %v %v not found", pr.Nm, rr.Token, rr.Keyword))
+				ps.Error(creg.St, fmt.Sprintf("rule %v: required token %v %v not found", pr.Nm, rr.Token))
 				valid = false
 			} else {
 				ps.Pos, ok = ps.Src.NextTokenPos(tp)
@@ -519,7 +519,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos l
 					}
 				}
 				if Trace {
-					fmt.Printf("\trule %v: matched token: %v %v at: %v advanced pos to: %v\n", pr.Nm, rr.Token, rr.Keyword, tp, ps.Pos)
+					fmt.Printf("\trule %v: matched token: %v %v at: %v advanced pos to: %v\n", pr.Nm, rr.Token, tp, ps.Pos)
 				}
 				if ourAst != nil {
 					ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
@@ -584,7 +584,7 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 			creg.Ed = scope.Ed
 		} else if i == pr.KeyTokIdx {
 			if Trace {
-				fmt.Printf("\trule %v: matched key token: %v %v at: %v", pr.Nm, rr.Token, rr.Keyword, mpos)
+				fmt.Printf("\trule %v: matched key token: %v %v at: %v", pr.Nm, rr.Token, mpos)
 			}
 			continue
 		} else { // start

@@ -199,20 +199,20 @@ func (pv *PiView) ToggleLexView() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Parsing
 
-// EditEoser shows the Eoser settings to edit -- finds the EOS end-of-statements
-func (pv *PiView) EditEoser() {
+// EditPassTwo shows the PassTwo settings to edit -- does nest depth and finds the EOS end-of-statements
+func (pv *PiView) EditPassTwo() {
 	sv := pv.StructView()
 	if sv != nil {
-		sv.SetStruct(&pv.Parser.Eoser, nil)
+		sv.SetStruct(&pv.Parser.PassTwo, nil)
 	}
 }
 
-// Eosify does the eosification per current settings
-func (pv *PiView) Eosify() {
-	pv.Parser.Eosify()
-	if pv.Parser.Eoser.HasErrs() {
-		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Eoser Error",
-			Prompt: "The Eoser had the following errors\n" + pv.Parser.EoserErrString()}, true, false, nil, nil)
+// PassTwo does the second pass after lexing, per current settings
+func (pv *PiView) PassTwo() {
+	pv.Parser.DoPassTwo()
+	if pv.Parser.PassTwoHasErrs() {
+		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "PassTwo Error",
+			Prompt: "The PassTwo had the following errors\n" + pv.Parser.PassTwoErrString()}, true, false, nil, nil)
 	}
 }
 
@@ -220,7 +220,7 @@ func (pv *PiView) Eosify() {
 func (pv *PiView) ParseInit() {
 	pv.LexInit()
 	pv.Parser.LexAll()
-	pv.Parser.Eosify()
+	pv.Parser.DoPassTwo()
 	pv.Parser.ParserInit()
 	if pv.Parser.ParseHasErrs() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
@@ -653,17 +653,17 @@ var PiViewProps = ki.Props{
 			"desc": "toggle textview to view either source file or lexer output of source file",
 		}},
 		{"sep-parse", ki.BlankProp{}},
-		{"EditEoser", ki.Props{
+		{"EditPassTwo", ki.Props{
 			"icon": "edit",
-			"desc": "edit the settings of the eoser -- step after lexing",
+			"desc": "edit the settings of the PassTwo -- second pass after lexing",
 		}},
-		{"Eosify", ki.Props{
+		{"PassTwo", ki.Props{
 			"icon": "play",
-			"desc": "perform eosing",
+			"desc": "perform second pass after lexing -- computes nesting depth globally and finds EOS tokens",
 		}},
 		{"ParseInit", ki.Props{
 			"icon": "update",
-			"desc": "initialize parser -- this also performs lexing, eosing, assuming that is all working",
+			"desc": "initialize parser -- this also performs lexing, PassTwo, assuming that is all working",
 		}},
 		{"ParseNext", ki.Props{
 			"icon": "play",

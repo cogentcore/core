@@ -51,30 +51,31 @@ func (ps *State) AtEof() bool {
 
 // FindToken looks for token in given region, returns position where found, false if not.
 // All positions in token indexes
-func (ps *State) FindToken(tok token.Tokens, keyword string, reg lex.Reg) (lex.Pos, bool) {
+func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
 	if !ok {
 		return cp, false
 	}
+	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	depth := 0
 	for cp.IsLess(reg.Ed) {
 		tk := ps.Src.Token(cp)
-		if tk.IsPunctGpLeft() {
-			depth++
-		} else if tk.IsPunctGpRight() {
-			depth--
-		}
 		if depth == 0 && (tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok)) {
-			if keyword != "" {
+			if tkey.Key != "" {
 				tksrc := string(ps.Src.TokenSrc(cp))
-				if tksrc == keyword {
+				if tksrc == tkey.Key {
 					return cp, true
 				}
 			} else {
 				return cp, true
 			}
+		}
+		if tk.IsPunctGpLeft() {
+			depth++
+		} else if tk.IsPunctGpRight() {
+			depth--
 		}
 		ok := false
 		cp, ok = ps.Src.NextTokenPos(cp)
@@ -87,14 +88,15 @@ func (ps *State) FindToken(tok token.Tokens, keyword string, reg lex.Reg) (lex.P
 
 // MatchToken returns true if token matches at given position -- must be
 // a valid position!
-func (ps *State) MatchToken(tok token.Tokens, keyword string, pos lex.Pos) bool {
+func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
+	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	tk := ps.Src.Token(pos)
 	if tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok) {
-		if keyword != "" {
+		if tkey.Key != "" {
 			tksrc := string(ps.Src.TokenSrc(pos))
-			if tksrc == keyword {
+			if tksrc == tkey.Key {
 				return true
 			}
 		} else {
@@ -110,26 +112,22 @@ func (ps *State) MatchToken(tok token.Tokens, keyword string, pos lex.Pos) bool 
 // ambiguous operators in a row, automatically gets the first one.  This is mainly / only used for
 // binary operator expressions (mathematical binary operators).
 // All positions are in token indexes
-func (ps *State) FindTokenReverse(tok token.Tokens, keyword string, reg lex.Reg) (lex.Pos, bool) {
+func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
 	if !ok {
 		return cp, false
 	}
+	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
 	depth := 0
 	for reg.St.IsLess(cp) {
 		tk := ps.Src.Token(cp)
-		if tk.IsPunctGpRight() {
-			depth++
-		} else if tk.IsPunctGpLeft() {
-			depth--
-		}
 		if depth == 0 && (tk == tok || (isCat && tk.Cat() == tok) || (isSubCat && tk.SubCat() == tok)) {
-			if keyword != "" { // not usually true but whatever
+			if tkey.Key != "" { // not usually true but whatever
 				tksrc := string(ps.Src.TokenSrc(cp))
-				if tksrc == keyword {
+				if tksrc == tkey.Key {
 					return cp, true
 				}
 			} else {
@@ -148,6 +146,11 @@ func (ps *State) FindTokenReverse(tok token.Tokens, keyword string, reg lex.Reg)
 					return cp, true // generally not true for reverse, but whatever
 				}
 			}
+		}
+		if tk.IsPunctGpRight() {
+			depth++
+		} else if tk.IsPunctGpLeft() {
+			depth--
 		}
 		ok := false
 		cp, ok = ps.Src.PrevTokenPos(cp)

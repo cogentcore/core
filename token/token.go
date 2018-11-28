@@ -54,6 +54,27 @@ func (tk Tokens) SubCat() Tokens {
 	return SubCatMap[tk]
 }
 
+// IsKeyword returns true if this in the Keyword category
+func (tk Tokens) IsKeyword() bool {
+	return tk.Cat() == Keyword
+}
+
+// Match returns true if the two tokens match, in a category / subcategory sensitive manner:
+// if receiver token is a category, then it matches other token if it is the same category
+// and likewise for subcategory
+func (tk Tokens) Match(otk Tokens) bool {
+	if tk == otk {
+		return true
+	}
+	if tk.Cat() == tk && otk.Cat() == tk {
+		return true
+	}
+	if tk.SubCat() == tk && otk.SubCat() == tk {
+		return true
+	}
+	return false
+}
+
 // IsPunctGpLeft returns true if token is a PunctGpL token -- left paren, brace, bracket
 func (tk Tokens) IsPunctGpLeft() bool {
 	return (tk == PunctGpLParen || tk == PunctGpLBrack || tk == PunctGpLBrace)
@@ -96,6 +117,61 @@ func (tk Tokens) CombineRepeats() bool {
 	cat := tk.Cat()
 	return (cat == Literal || cat == Comment || cat == Text)
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//  KeyToken -- keyword + token
+
+// KeyToken combines a token and an optional keyword name for Keyword token types
+// if Tok is in Keyword category, then Key string can be used to check for same keyword
+type KeyToken struct {
+	Tok Tokens
+	Key string
+}
+
+var KeyTokenZero = KeyToken{}
+
+func (kt KeyToken) String() string {
+	if kt.Key != "" {
+		return kt.Tok.String() + ": " + kt.Key
+	}
+	return kt.Tok.String()
+}
+
+// Equal compares equality of two tokens including keywords if token is in Keyword category.
+// See also Match for version that uses category / subcategory matching
+func (kt KeyToken) Equal(okt KeyToken) bool {
+	if kt.Tok.IsKeyword() {
+		return kt.Tok == okt.Tok && kt.Key == okt.Key
+	}
+	return kt.Tok == okt.Tok
+}
+
+// Match compares equality of two tokens including keywords if token is in Keyword category.
+// returns true if the two tokens match, in a category / subcategory sensitive manner:
+// if receiver token is a category, then it matches other token if it is the same category
+// and likewise for subcategory
+func (kt KeyToken) Match(okt KeyToken) bool {
+	if kt.Tok.IsKeyword() {
+		return kt.Tok.Match(okt.Tok) && kt.Key == okt.Key
+	}
+	return kt.Tok.Match(okt.Tok)
+}
+
+// KeyTokenList is a list (slice) of KeyTokens
+type KeyTokenList []KeyToken
+
+// Match returns true if given keytoken matches any of the items on the list
+func (kl KeyTokenList) Match(okt KeyToken) bool {
+	for _, kt := range kl {
+		if kt.Match(okt) {
+			return true
+		}
+	}
+	return false
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//  Tokens
 
 // The list of tokens
 const (

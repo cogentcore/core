@@ -18,8 +18,19 @@ import (
 )
 */
 
+/*
 const Precedence1 = 25 / (3.14 + -(2 + 4)) > (2 - 5) * 3
-const Precedence2 = -(3.14 + 2 * 4)
+// const Precedence2 = -(3.14 + 2 * 4)
+
+type MyFloat float64
+*/
+
+type AStruct struct {
+	AField int
+	TField float64 `desc:"tagged"`
+	AField []string
+	MField map[string]int
+}
 
 // The lexical acts
 const (

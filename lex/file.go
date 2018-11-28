@@ -93,6 +93,37 @@ func (fl *File) NTokens(ln int) int {
 	return len(fl.Lexs[ln])
 }
 
+// LexAt returns Lex item at given position, with no checking
+func (fl *File) LexAt(cp Pos) *Lex {
+	return &fl.Lexs[cp.Ln][cp.Ch]
+}
+
+// LexAtSafe returns the Lex item at given position, or last lex item if beyond end
+func (fl *File) LexAtSafe(cp Pos) Lex {
+	nln := fl.NLines()
+	if nln == 0 {
+		return Lex{}
+	}
+	if cp.Ln >= nln {
+		cp.Ln = nln - 1
+	}
+	sz := len(fl.Lexs[cp.Ln])
+	if sz == 0 {
+		if cp.Ln > 0 {
+			cp.Ln--
+			return fl.LexAtSafe(cp)
+		}
+		return Lex{}
+	}
+	if cp.Ch < 0 {
+		cp.Ch = 0
+	}
+	if cp.Ch >= sz {
+		cp.Ch = sz - 1
+	}
+	return *fl.LexAt(cp)
+}
+
 // ValidTokenPos returns the next valid token position starting at given point,
 // false if at end of tokens
 func (fl *File) ValidTokenPos(pos Pos) (Pos, bool) {
@@ -133,7 +164,7 @@ func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
 
 // Token gets lex token at given Pos (Ch = token index)
 func (fl *File) Token(pos Pos) token.Tokens {
-	return fl.Lexs[pos.Ln][pos.Ch].Token
+	return fl.Lexs[pos.Ln][pos.Ch].Tok
 }
 
 // TokenSrc gets source runes for given token position

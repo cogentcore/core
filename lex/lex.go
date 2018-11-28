@@ -11,16 +11,18 @@ import (
 )
 
 // Lex represents a single lexical element, with a token, and start and end rune positions
-// within a line of a file
+// within a line of a file.  Critically it also contains the nesting depth computed from
+// all the parens, brackets, braces.  Todo: also support XML < > </ > tag depth.
 type Lex struct {
-	Token token.Tokens
-	St    int
-	Ed    int
+	Tok   token.Tokens `desc:"token"`
+	Depth int          `desc:"nesting depth, starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement.  Coloring background according to this depth shoudl give direct information about mismatches etc.  Is computed once and used extensively in parsing."`
+	St    int          `desc:"start rune index within original source line for this token"`
+	Ed    int          `desc:"end rune index within original source line for this token (exclusive -- ends one before this)"`
 }
 
 // String satisfies the fmt.Stringer interface
 func (lx Lex) String() string {
-	return fmt.Sprintf("[%v:%v:%v]", lx.St, lx.Ed, lx.Token.String())
+	return fmt.Sprintf("[%v:%v:+%d:%v]", lx.St, lx.Ed, lx.Depth, lx.Tok.String())
 }
 
 // ContainsPos returns true if the Lex element contains given character position
