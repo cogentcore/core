@@ -213,17 +213,18 @@ func (sv *StructView) ConfigStructGrid() {
 			// vvv, _ := send.Embed(KiT_ValueViewBase).(*ValueViewBase)
 			// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
 		})
-		lbltag := vvb.Field.Tag.Get("label")
-		if lbltag != "" {
+		if lbltag, has := vvb.Tag("label"); has {
 			lbl.Text = lbltag
 		} else {
 			lbl.Text = vvb.Field.Name
 		}
 		lbl.Redrawable = true
-		lbl.Tooltip = vvb.Field.Tag.Get("desc")
+		if ttip, has := vvb.Tag("desc"); has {
+			lbl.Tooltip = ttip
+		}
 		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
-		if sv.IsInactive() {
+		if _, has := vvb.Tag("inactive"); sv.IsInactive() || has {
 			widg.AsNode2D().SetInactive()
 		}
 		vv.ConfigWidget(widg)
