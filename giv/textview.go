@@ -268,6 +268,14 @@ func (tv *TextView) HasLineNos() bool {
 	return tv.HasFlag(int(TextViewHasLineNos))
 }
 
+// Clear resets all the text in the buffer for this view
+func (tv *TextView) Clear() {
+	if tv.Buf == nil {
+		return
+	}
+	tv.Buf.New(0)
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Buffer communication
 
@@ -2381,6 +2389,12 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 				txf.Paste()
 			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).IsEmpty())
+	} else {
+		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
+			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				txf := recv.Embed(KiT_TextView).(*TextView)
+				txf.Clear()
+			})
 	}
 }
 
@@ -3022,8 +3036,8 @@ func (tv *TextView) ClearScopelights() {
 	l1 := tv.Scopelights[0].Start.Ln
 	l2 := tv.Scopelights[1].Start.Ln
 	tv.Scopelights = tv.Scopelights[:0]
-	tv.RenderLines(l1,l1)
-	tv.RenderLines(l2,l2)
+	tv.RenderLines(l1, l1)
+	tv.RenderLines(l2, l2)
 }
 
 // RenderRegionBox renders a region in background color according to given state style
