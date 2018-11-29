@@ -93,6 +93,18 @@ func (fl *File) NTokens(ln int) int {
 	return len(fl.Lexs[ln])
 }
 
+// IsLexPosValid returns true if given lexical token position is valid
+func (fl *File) IsLexPosValid(pos Pos) bool {
+	if pos.Ln < 0 || pos.Ln >= fl.NLines() {
+		return false
+	}
+	nt := fl.NTokens(pos.Ln)
+	if pos.Ch < 0 || pos.Ch >= nt {
+		return false
+	}
+	return true
+}
+
 // LexAt returns Lex item at given position, with no checking
 func (fl *File) LexAt(cp Pos) *Lex {
 	return &fl.Lexs[cp.Ln][cp.Ch]
@@ -162,6 +174,18 @@ func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
 	return pos, true
 }
 
+// TokenDepth returns proper depth for given token at position
+func (fl *File) TokenDepth(tok token.Tokens, pos Pos) int {
+	lx := fl.LexAt(pos)
+	if tok.SubCat() == token.PunctGp {
+		return lx.Depth
+	}
+	if lx.Tok.SubCat() == token.PunctGp {
+		return lx.Depth - 1
+	}
+	return lx.Depth
+}
+
 // Token gets lex token at given Pos (Ch = token index)
 func (fl *File) Token(pos Pos) token.Tokens {
 	return fl.Lexs[pos.Ln][pos.Ch].Tok
@@ -169,18 +193,27 @@ func (fl *File) Token(pos Pos) token.Tokens {
 
 // TokenSrc gets source runes for given token position
 func (fl *File) TokenSrc(pos Pos) []rune {
+	if !fl.IsLexPosValid(pos) {
+		return nil
+	}
 	lx := fl.Lexs[pos.Ln][pos.Ch]
 	return fl.Lines[pos.Ln][lx.St:lx.Ed]
 }
 
 // TokenSrcPos returns source reg associated with lex token at given token position
 func (fl *File) TokenSrcPos(pos Pos) Reg {
+	if !fl.IsLexPosValid(pos) {
+		return Reg{}
+	}
 	lx := fl.Lexs[pos.Ln][pos.Ch]
 	return Reg{St: Pos{pos.Ln, lx.St}, Ed: Pos{pos.Ln, lx.Ed}}
 }
 
 // TokenSrcReg translates a region of tokens into a region of source
 func (fl *File) TokenSrcReg(reg Reg) Reg {
+	if !fl.IsLexPosValid(reg.St) {
+		return Reg{}
+	}
 	st := fl.Lexs[reg.St.Ln][reg.St.Ch].St
 	ep, _ := fl.PrevTokenPos(reg.Ed) // ed is exclusive -- go to prev
 	ed := fl.Lexs[ep.Ln][ep.Ch].Ed
@@ -194,10 +227,19 @@ func (fl *File) RegSrc(reg Reg) string {
 	}
 	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
-		src += "<br>" + string(fl.Lines[ln])
+		src += "|" + string(fl.Lines[ln])
 	}
-	src += "<br>" + string(fl.Lines[reg.Ed.Ln][:reg.Ed.Ch])
+	src += "|" + string(fl.Lines[reg.Ed.Ln][:reg.Ed.Ch])
 	return src
+}
+
+// TokenRegSrc returns the source code associated with the given token region
+func (fl *File) TokenRegSrc(reg Reg) string {
+	if !fl.IsLexPosValid(reg.St) {
+		return ""
+	}
+	srcreg := fl.TokenSrcReg(reg)
+	return fl.RegSrc(srcreg)
 }
 
 // LexTagSrcLn returns the lex'd tagged source line for given line
@@ -213,47 +255,4 @@ func (fl *File) LexTagSrc() string {
 		txt += fl.LexTagSrcLn(ln) + "\n"
 	}
 	return txt
-}
-
-// FindPunctGpMatch finds the PunctGp (brace or parenthesis) token that is the partner
-// of the one passed to function, within given region.  Positions are *token* positions.
-// if token is left ( then it starts at reg.St and searches to reg.Ed,
-// and if it is left ) then starts at reg.Ed and searches to reg.St
-func (fl *File) FindPunctGpMatch(tk token.Tokens, reg Reg) (Pos, bool) {
-	if tk.SubCat() != token.PunctGp {
-		return Pos{}, false
-	}
-	left := tk.IsPunctGpLeft()
-	match := tk.PunctGpMatch()
-	cnt := 1
-	if left {
-		cp, ok := fl.NextTokenPos(reg.St)
-		for ok && cp.IsLess(reg.Ed) {
-			ct := fl.Token(cp)
-			if ct == tk {
-				cnt++
-			} else if ct == match {
-				cnt--
-				if cnt == 0 {
-					return cp, true
-				}
-			}
-			cp, ok = fl.NextTokenPos(cp)
-		}
-	} else {
-		cp, ok := fl.PrevTokenPos(reg.Ed)
-		for ok && (reg.St.IsLess(cp) || reg.St == cp) {
-			ct := fl.Token(cp)
-			if ct == tk {
-				cnt++
-			} else if ct == match {
-				cnt--
-				if cnt == 0 {
-					return cp, true
-				}
-			}
-			cp, ok = fl.PrevTokenPos(cp)
-		}
-	}
-	return Pos{}, false
 }

@@ -29,6 +29,7 @@ Version: ` + pi.VersionInfo())
 	// 	fmt.Printf("Doing final Quit cleanup here..\n")
 	// })
 
+	gide.InitPrefs()
 	// pi.InitPrefs()
 
 	// var path string
@@ -59,7 +60,7 @@ Version: ` + pi.VersionInfo())
 	oswin.TheApp.SetQuitReqFunc(func() {
 		if !inQuitPrompt {
 			inQuitPrompt = true
-			if gide.QuitReq() {
+			if piv.QuitReq() {
 				oswin.TheApp.Quit()
 			} else {
 				inQuitPrompt = false

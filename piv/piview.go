@@ -7,10 +7,16 @@
 package piv
 
 import (
+	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
+	"github.com/goki/gide/gide"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi"
@@ -32,7 +38,7 @@ const (
 	ParseRulesIdx
 	StructViewIdx
 	AstOutIdx
-	TextViewIdx
+	MainTabsIdx
 )
 
 // PiView provides the interactive GUI view for constructing and testing the
@@ -45,6 +51,7 @@ type PiView struct {
 	Changed  bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
 	TestBuf  giv.TextBuf `json:"-" desc:"test file buffer"`
 	LexBuf   giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
+	KeySeq1  key.Chord   `desc:"first key in sequence if needs2 key pressed"`
 }
 
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
@@ -58,6 +65,7 @@ func (pv *PiView) InitView() {
 		updt = pv.UpdateStart()
 	}
 	pv.ConfigSplitView()
+	pv.ConfigStatusBar()
 	pv.ConfigToolbar()
 	pv.UpdateEnd(updt)
 }
@@ -100,6 +108,43 @@ func (pv *PiView) SaveTestAs(filename gi.FileName) {
 	pv.TestFile = filename
 }
 
+// SetStatus updates the statusbar label with given message, along with other status info
+func (pv *PiView) SetStatus(msg string) {
+	sb := pv.StatusBar()
+	if sb == nil {
+		return
+	}
+	// pv.UpdtMu.Lock()
+	// defer pv.UpdtMu.Unlock()
+
+	updt := sb.UpdateStart()
+	lbl := pv.StatusLabel()
+	fnm := ""
+	ln := 0
+	ch := 0
+	// tv := pv.ActiveTextView()
+	// if tv != nil {
+	// 	ln = tv.CursorPos.Ln + 1
+	// 	ch = tv.CursorPos.Ch
+	// 	if tv.Buf != nil {
+	// 		fnm = pv.Files.RelPath(tv.Buf.Filename)
+	// 		if tv.Buf.IsChanged() {
+	// 			fnm += "*"
+	// 		}
+	// 	}
+	// 	if tv.ISearch.On {
+	// 		msg = fmt.Sprintf("\tISearch: %v (n=%v)\t%v", tv.ISearch.Find, len(tv.ISearch.Matches), msg)
+	// 	}
+	// 	if tv.QReplace.On {
+	// 		msg = fmt.Sprintf("\tQReplace: %v -> %v (n=%v)\t%v", tv.QReplace.Find, tv.QReplace.Replace, len(tv.QReplace.Matches), msg)
+	// 	}
+	// }
+
+	str := fmt.Sprintf("%v\t<b>%v:</b>\t(%v,%v)\t%v", pv.Nm, fnm, ln, ch, msg)
+	lbl.SetText(str)
+	sb.UpdateEnd(updt)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Lexing
 
@@ -115,9 +160,9 @@ func (pv *PiView) LexInit() {
 // LexStopped tells the user why the lexer stopped
 func (pv *PiView) LexStopped() {
 	if pv.Parser.LexAtEnd() {
-		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex At End",
-			Prompt: "The Lexer is now at the end of available text"}, true, false, nil, nil)
+		pv.SetStatus("The Lexer is now at the end of available text")
 	} else {
+		pv.SetStatus("Lexer Errors!")
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
 			Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexErrString()}, true, false, nil, nil)
 	}
@@ -129,9 +174,10 @@ func (pv *PiView) LexNext() *lex.Rule {
 	if mrule == nil {
 		pv.LexStopped()
 	} else {
-		pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
+		pv.SetStatus(mrule.Nm + ": " + pv.Parser.LexLineOut())
 		pv.SelectLexRule(mrule)
 	}
+	pv.UpdtLexBuf()
 	return mrule
 }
 
@@ -150,12 +196,13 @@ func (pv *PiView) LexAll(animate bool) {
 		if animate {
 			nntok := len(pv.Parser.LexState.Lex)
 			if nntok != ntok {
-				pv.LexLine().SetText(mrule.Nm + ": " + pv.Parser.LexLineOut())
+				pv.SetStatus(mrule.Nm + ": " + pv.Parser.LexLineOut())
 				pv.SelectLexRule(mrule)
 				ntok = nntok
 			}
 		}
 	}
+	pv.UpdtLexBuf()
 }
 
 // SelectLexRule selects given lex rule in Lexer
@@ -182,22 +229,8 @@ func (pv *PiView) UpdtLexBuf() {
 	pv.LexBuf.SetText([]byte(txt))
 }
 
-// ToggleLexView switches the textview between the lexer output and the test src file
-func (pv *PiView) ToggleLexView() {
-	tv := pv.TextView()
-	if tv == nil {
-		return
-	}
-	if tv.Buf == &pv.TestBuf {
-		pv.UpdtLexBuf()
-		tv.SetBuf(&pv.LexBuf)
-	} else {
-		tv.SetBuf(&pv.TestBuf)
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
-//  Parsing
+//  PassTwo
 
 // EditPassTwo shows the PassTwo settings to edit -- does nest depth and finds the EOS end-of-statements
 func (pv *PiView) EditPassTwo() {
@@ -216,12 +249,24 @@ func (pv *PiView) PassTwo() {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////////////////
+//  Parsing
+
+// EditTrace shows the parse.Trace options for detailed tracing output
+func (pv *PiView) EditTrace() {
+	sv := pv.StructView()
+	if sv != nil {
+		sv.SetStruct(&parse.Trace, nil)
+	}
+}
+
 // ParseInit initializes / restarts lexing process for current test file
 func (pv *PiView) ParseInit() {
 	pv.LexInit()
 	pv.Parser.LexAll()
 	pv.Parser.DoPassTwo()
 	pv.Parser.ParserInit()
+	pv.UpdtLexBuf()
 	if pv.Parser.ParseHasErrs() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
 			Prompt: "The Parser validation has errors\n" + pv.Parser.ParseErrString()}, true, false, nil, nil)
@@ -231,9 +276,9 @@ func (pv *PiView) ParseInit() {
 // ParseStopped tells the user why the lexer stopped
 func (pv *PiView) ParseStopped() {
 	if pv.Parser.ParseAtEnd() {
-		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse At End",
-			Prompt: "The Parser is now at the end of available text"}, true, false, nil, nil)
+		pv.SetStatus("The Parser is now at the end of available text")
 	} else {
+		pv.SetStatus("Parse Error!")
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
 			Prompt: "The Parser has stopped due to errors\n" + pv.Parser.ParseErrString()}, true, false, nil, nil)
 	}
@@ -290,6 +335,185 @@ func (pv *PiView) SelectParseRule(rule *parse.Rule) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+//   Panels
+
+// CurPanel returns the splitter panel that currently has keyboard focus
+func (pv *PiView) CurPanel() int {
+	sv := pv.SplitView()
+	if sv == nil {
+		return -1
+	}
+	for i, ski := range sv.Kids {
+		_, sk := gi.KiToNode2D(ski)
+		if sk.ContainsFocus() {
+			return i
+		}
+	}
+	return -1 // nobody
+}
+
+// FocusOnPanel moves keyboard focus to given panel -- returns false if nothing at that tab
+func (pv *PiView) FocusOnPanel(panel int) bool {
+	sv := pv.SplitView()
+	if sv == nil {
+		return false
+	}
+	win := pv.ParentWindow()
+	ski := sv.Kids[panel]
+	win.FocusNext(ski)
+	return true
+}
+
+// FocusNextPanel moves the keyboard focus to the next panel to the right
+func (pv *PiView) FocusNextPanel() {
+	sv := pv.SplitView()
+	if sv == nil {
+		return
+	}
+	cp := pv.CurPanel()
+	cp++
+	np := len(sv.Kids)
+	if cp >= np {
+		cp = 0
+	}
+	for sv.Splits[cp] <= 0.01 {
+		cp++
+		if cp >= np {
+			cp = 0
+		}
+	}
+	pv.FocusOnPanel(cp)
+}
+
+// FocusPrevPanel moves the keyboard focus to the previous panel to the left
+func (pv *PiView) FocusPrevPanel() {
+	sv := pv.SplitView()
+	if sv == nil {
+		return
+	}
+	cp := pv.CurPanel()
+	cp--
+	np := len(sv.Kids)
+	if cp < 0 {
+		cp = np - 1
+	}
+	for sv.Splits[cp] <= 0.01 {
+		cp--
+		if cp < 0 {
+			cp = np - 1
+		}
+	}
+	pv.FocusOnPanel(cp)
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+//   Tabs
+
+// MainTabByName returns a MainTabs (first set of tabs) tab with given name,
+// and its index -- returns false if not found
+func (pv *PiView) MainTabByName(label string) (gi.Node2D, int, bool) {
+	tv := pv.MainTabs()
+	return tv.TabByName(label)
+}
+
+// SelectMainTabByName Selects given main tab, and returns all of its contents as well.
+func (pv *PiView) SelectMainTabByName(label string) (gi.Node2D, int, bool) {
+	tv := pv.MainTabs()
+	widg, idx, ok := pv.MainTabByName(label)
+	if ok {
+		tv.SelectTabIndex(idx)
+	}
+	return widg, idx, ok
+}
+
+// FindOrMakeMainTab returns a MainTabs (first set of tabs) tab with given
+// name, first by looking for an existing one, and if not found, making a new
+// one with widget of given type.  if sel, then select it.  returns widget and tab index.
+func (pv *PiView) FindOrMakeMainTab(label string, typ reflect.Type, sel bool) (gi.Node2D, int) {
+	tv := pv.MainTabs()
+	widg, idx, ok := pv.MainTabByName(label)
+	if ok {
+		if sel {
+			tv.SelectTabIndex(idx)
+		}
+		return widg, idx
+	}
+	widg, idx = tv.AddNewTab(typ, label)
+	if sel {
+		tv.SelectTabIndex(idx)
+	}
+	return widg, idx
+}
+
+// ConfigTextView configures text view
+func (pv *PiView) ConfigTextView(ly *gi.Layout, out bool) *giv.TextView {
+	ly.Lay = gi.LayoutVert
+	ly.SetStretchMaxWidth()
+	ly.SetStretchMaxHeight()
+	ly.SetMinPrefWidth(units.NewValue(20, units.Ch))
+	ly.SetMinPrefHeight(units.NewValue(10, units.Ch))
+	var tv *giv.TextView
+	if ly.HasChildren() {
+		tv = ly.KnownChild(0).Embed(giv.KiT_TextView).(*giv.TextView)
+	} else {
+		tv = ly.AddNewChild(giv.KiT_TextView, ly.Nm).(*giv.TextView)
+	}
+
+	if gide.Prefs.Editor.WordWrap {
+		tv.SetProp("white-space", gi.WhiteSpacePreWrap)
+	} else {
+		tv.SetProp("white-space", gi.WhiteSpacePre)
+	}
+	tv.SetProp("tab-size", 4)
+	tv.SetProp("font-family", gide.Prefs.FontFamily)
+	if out {
+		tv.SetInactive()
+	}
+	return tv
+}
+
+// FindOrMakeMainTabTextView returns a MainTabs (first set of tabs) tab with given
+// name, first by looking for an existing one, and if not found, making a new
+// one with a Layout and then a TextView in it.  if sel, then select it.
+// returns widget and tab index.
+func (pv *PiView) FindOrMakeMainTabTextView(label string, sel bool, out bool) (*giv.TextView, int) {
+	lyk, idx := pv.FindOrMakeMainTab(label, gi.KiT_Layout, sel)
+	ly := lyk.Embed(gi.KiT_Layout).(*gi.Layout)
+	tv := pv.ConfigTextView(ly, out)
+	return tv, idx
+}
+
+// OpenConsoleTab opens a main tab displaying console output (stdout, stderr)
+func (pv *PiView) OpenConsoleTab() {
+	ctv, _ := pv.FindOrMakeMainTabTextView("Console", true, true)
+	ctv.SetInactive()
+	ctv.SetProp("white-space", gi.WhiteSpacePre) // no word wrap
+	if ctv.Buf == nil || ctv.Buf != gide.TheConsole.Buf {
+		ctv.SetBuf(gide.TheConsole.Buf)
+		gide.TheConsole.Buf.TextBufSig.Connect(pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			pve, _ := recv.Embed(KiT_PiView).(*PiView)
+			pve.SelectMainTabByName("Console")
+		})
+	}
+}
+
+// OpenTestTextTab opens a main tab displaying test text
+func (pv *PiView) OpenTestTextTab() {
+	ctv, _ := pv.FindOrMakeMainTabTextView("TestText", true, false)
+	if ctv.Buf == nil || ctv.Buf != &pv.TestBuf {
+		ctv.SetBuf(&pv.TestBuf)
+	}
+}
+
+// OpenLexTab opens a main tab displaying lexer output
+func (pv *PiView) OpenLexTab() {
+	ctv, _ := pv.FindOrMakeMainTabTextView("LexOut", true, true)
+	if ctv.Buf == nil || ctv.Buf != &pv.LexBuf {
+		ctv.SetBuf(&pv.LexBuf)
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
 //   GUI configs
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
@@ -297,9 +521,8 @@ func (pv *PiView) SelectParseRule(rule *parse.Rule) {
 func (pv *PiView) StdFrameConfig() kit.TypeAndNameList {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Label, "lex-line")
-	config.Add(gi.KiT_Label, "parse-line")
 	config.Add(gi.KiT_SplitView, "splitview")
+	config.Add(gi.KiT_Frame, "statusbar")
 	return config
 }
 
@@ -310,47 +533,21 @@ func (pv *PiView) StdConfig() (mods, updt bool) {
 	pv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := pv.StdFrameConfig()
 	mods, updt = pv.ConfigChildren(config, false)
-	if mods {
-		ll := pv.LexLine()
-		ll.SetStretchMaxWidth()
-		ll.Redrawable = true
-		pl := pv.ParseLine()
-		pl.SetStretchMaxWidth()
-		pl.Redrawable = true
-	}
 	return
 }
 
-// LexLine returns the lex line label
-func (pv *PiView) LexLine() *gi.Label {
-	idx, ok := pv.Children().IndexByName("lex-line", 2)
-	if !ok {
-		return nil
-	}
-	return pv.KnownChild(idx).(*gi.Label)
-}
-
-// ParseLine returns the parse line label
-func (pv *PiView) ParseLine() *gi.Label {
-	idx, ok := pv.Children().IndexByName("parse-line", 3)
-	if !ok {
-		return nil
-	}
-	return pv.KnownChild(idx).(*gi.Label)
-}
-
 // SplitView returns the main SplitView
-func (pv *PiView) SplitView() (*gi.SplitView, int) {
+func (pv *PiView) SplitView() *gi.SplitView {
 	idx, ok := pv.Children().IndexByName("splitview", 4)
 	if !ok {
-		return nil, -1
+		return nil
 	}
-	return pv.KnownChild(idx).(*gi.SplitView), idx
+	return pv.KnownChild(idx).(*gi.SplitView)
 }
 
 // LexTree returns the lex rules tree view
 func (pv *PiView) LexTree() *giv.TreeView {
-	split, _ := pv.SplitView()
+	split := pv.SplitView()
 	if split != nil {
 		tv := split.KnownChild(LexRulesIdx).KnownChild(0).(*giv.TreeView)
 		return tv
@@ -360,7 +557,7 @@ func (pv *PiView) LexTree() *giv.TreeView {
 
 // ParseTree returns the parse rules tree view
 func (pv *PiView) ParseTree() *giv.TreeView {
-	split, _ := pv.SplitView()
+	split := pv.SplitView()
 	if split != nil {
 		tv := split.KnownChild(ParseRulesIdx).KnownChild(0).(*giv.TreeView)
 		return tv
@@ -370,7 +567,7 @@ func (pv *PiView) ParseTree() *giv.TreeView {
 
 // AstTree returns the Ast output tree view
 func (pv *PiView) AstTree() *giv.TreeView {
-	split, _ := pv.SplitView()
+	split := pv.SplitView()
 	if split != nil {
 		tv := split.KnownChild(AstOutIdx).KnownChild(0).(*giv.TreeView)
 		return tv
@@ -380,21 +577,59 @@ func (pv *PiView) AstTree() *giv.TreeView {
 
 // StructView returns the StructView for editing rules
 func (pv *PiView) StructView() *giv.StructView {
-	split, _ := pv.SplitView()
+	split := pv.SplitView()
 	if split != nil {
 		return split.KnownChild(StructViewIdx).(*giv.StructView)
 	}
 	return nil
 }
 
-// TextView returns the TextView
-func (pv *PiView) TextView() *giv.TextView {
-	split, _ := pv.SplitView()
+// MainTabs returns the main TabView
+func (pv *PiView) MainTabs() *gi.TabView {
+	split := pv.SplitView()
 	if split != nil {
-		tly := split.KnownChild(TextViewIdx).(*gi.Layout)
-		return tly.KnownChild(0).(*giv.TextView)
+		tv := split.KnownChild(MainTabsIdx).Embed(gi.KiT_TabView).(*gi.TabView)
+		return tv
 	}
 	return nil
+}
+
+// StatusBar returns the statusbar widget
+func (pv *PiView) StatusBar() *gi.Frame {
+	tbi, ok := pv.ChildByName("statusbar", 2)
+	if !ok {
+		return nil
+	}
+	return tbi.(*gi.Frame)
+}
+
+// StatusLabel returns the statusbar label widget
+func (pv *PiView) StatusLabel() *gi.Label {
+	sb := pv.StatusBar()
+	if sb != nil {
+		return sb.KnownChild(0).Embed(gi.KiT_Label).(*gi.Label)
+	}
+	return nil
+}
+
+// ConfigStatusBar configures statusbar with label
+func (pv *PiView) ConfigStatusBar() {
+	sb := pv.StatusBar()
+	if sb == nil || sb.HasChildren() {
+		return
+	}
+	sb.SetStretchMaxWidth()
+	sb.SetMinPrefHeight(units.NewValue(1.2, units.Em))
+	sb.SetProp("overflow", "hidden") // no scrollbars!
+	sb.SetProp("margin", 0)
+	sb.SetProp("padding", 0)
+	lbl := sb.AddNewChild(gi.KiT_Label, "sb-lbl").(*gi.Label)
+	lbl.SetStretchMaxWidth()
+	lbl.SetMinPrefHeight(units.NewValue(1, units.Em))
+	lbl.SetProp("vertical-align", gi.AlignTop)
+	lbl.SetProp("margin", 0)
+	lbl.SetProp("padding", 0)
+	lbl.SetProp("tab-size", 4)
 }
 
 // ToolBar returns the toolbar widget
@@ -423,13 +658,13 @@ func (pv *PiView) SplitViewConfig() kit.TypeAndNameList {
 	config.Add(gi.KiT_Frame, "parse-tree-fr")
 	config.Add(giv.KiT_StructView, "struct-view")
 	config.Add(gi.KiT_Frame, "ast-tree-fr")
-	config.Add(gi.KiT_Layout, "textview-lay")
+	config.Add(gi.KiT_TabView, "main-tabs")
 	return config
 }
 
 // ConfigSplitView configures the SplitView.
 func (pv *PiView) ConfigSplitView() {
-	split, _ := pv.SplitView()
+	split := pv.SplitView()
 	if split == nil {
 		return
 	}
@@ -453,12 +688,6 @@ func (pv *PiView) ConfigSplitView() {
 		astt := astfr.AddNewChild(giv.KiT_TreeView, "ast-tree").(*giv.TreeView)
 		astt.SetRootNode(&pv.Parser.Ast)
 
-		txly := split.KnownChild(TextViewIdx).(*gi.Layout)
-		txly.SetStretchMaxWidth()
-		txly.SetStretchMaxHeight()
-		txly.SetMinPrefWidth(units.NewValue(20, units.Ch))
-		txly.SetMinPrefHeight(units.NewValue(10, units.Ch))
-
 		pv.TestBuf.SetHiStyle("emacs")
 		pv.TestBuf.Opts.LineNos = true
 		pv.TestBuf.Opts.TabSize = 4
@@ -467,15 +696,13 @@ func (pv *PiView) ConfigSplitView() {
 		pv.LexBuf.Opts.LineNos = true
 		pv.LexBuf.Opts.TabSize = 4
 
-		txed := txly.AddNewChild(giv.KiT_TextView, "textview").(*giv.TextView)
-		txed.Viewport = pv.Viewport
-		txed.SetBuf(&pv.TestBuf)
-		txed.SetProp("white-space", gi.WhiteSpacePreWrap)
-		txed.SetProp("tab-size", 4)
-		txed.SetProp("font-family", "Go Mono")
-
 		split.SetSplits(.15, .15, .25, .15, .3)
 		split.UpdateEnd(updt)
+
+		pv.OpenConsoleTab()
+		pv.OpenTestTextTab()
+		pv.OpenLexTab()
+
 	} else {
 		pv.LexTree().SetRootNode(&pv.Parser.Lexer)
 		pv.LexTree().Open()
@@ -558,6 +785,120 @@ func (pv *PiView) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 			fn.CloseDir()
 		}
 	}
+}
+
+func (ge *PiView) PiViewKeys(kt *key.ChordEvent) {
+	var kf gide.KeyFuns
+	kc := kt.Chord()
+	if gi.KeyEventTrace {
+		fmt.Printf("PiView KeyInput: %v\n", ge.PathUnique())
+	}
+	// gkf := gi.KeyFun(kc)
+	if ge.KeySeq1 != "" {
+		kf = gide.KeyFun(ge.KeySeq1, kc)
+		seqstr := string(ge.KeySeq1) + " " + string(kc)
+		if kf == gide.KeyFunNil || kc == "Escape" {
+			if gi.KeyEventTrace {
+				fmt.Printf("gide.KeyFun sequence: %v aborted\n", seqstr)
+			}
+			ge.SetStatus(seqstr + " -- aborted")
+			kt.SetProcessed() // abort key sequence, don't send esc to anyone else
+			ge.KeySeq1 = ""
+			return
+		}
+		ge.SetStatus(seqstr)
+		ge.KeySeq1 = ""
+		// gkf = gi.KeyFunNil // override!
+	} else {
+		kf = gide.KeyFun(kc, "")
+		if kf == gide.KeyFunNeeds2 {
+			kt.SetProcessed()
+			ge.KeySeq1 = kt.Chord()
+			ge.SetStatus(string(ge.KeySeq1))
+			if gi.KeyEventTrace {
+				fmt.Printf("gide.KeyFun sequence needs 2 after: %v\n", ge.KeySeq1)
+			}
+			return
+		} else if kf != gide.KeyFunNil {
+			if gi.KeyEventTrace {
+				fmt.Printf("gide.KeyFun got in one: %v = %v\n", ge.KeySeq1, kf)
+			}
+			// gkf = gi.KeyFunNil // override!
+		}
+	}
+
+	// switch gkf {
+	// case gi.KeyFunFind:
+	// 	kt.SetProcessed()
+	// 	tv := ge.ActiveTextView()
+	// 	if tv.HasSelection() {
+	// 		ge.Prefs.Find.Find = string(tv.Selection().ToBytes())
+	// 	}
+	// 	giv.CallMethod(ge, "Find", ge.Viewport)
+	// }
+	// if kt.IsProcessed() {
+	// 	return
+	// }
+	switch kf {
+	case gide.KeyFunNextPanel:
+		kt.SetProcessed()
+		ge.FocusNextPanel()
+	case gide.KeyFunPrevPanel:
+		kt.SetProcessed()
+		ge.FocusPrevPanel()
+	case gide.KeyFunFileOpen:
+		kt.SetProcessed()
+		giv.CallMethod(ge, "OpenTest", ge.Viewport)
+	// case gide.KeyFunBufSelect:
+	// 	kt.SetProcessed()
+	// 	ge.SelectOpenNode()
+	// case gide.KeyFunBufClone:
+	// 	kt.SetProcessed()
+	// 	ge.CloneActiveView()
+	case gide.KeyFunBufSave:
+		kt.SetProcessed()
+		giv.CallMethod(ge, "SaveTestAs", ge.Viewport)
+	case gide.KeyFunBufSaveAs:
+		kt.SetProcessed()
+		giv.CallMethod(ge, "SaveActiveViewAs", ge.Viewport)
+		// case gide.KeyFunBufClose:
+		// 	kt.SetProcessed()
+		// 	ge.CloseActiveView()
+		// case gide.KeyFunExecCmd:
+		// 	kt.SetProcessed()
+		// 	giv.CallMethod(ge, "ExecCmd", ge.Viewport)
+		// case gide.KeyFunCommentOut:
+		// 	kt.SetProcessed()
+		// 	ge.CommentOut()
+		// case gide.KeyFunIndent:
+		// 	kt.SetProcessed()
+		// 	ge.Indent()
+		// case gide.KeyFunSetSplit:
+		// 	kt.SetProcessed()
+		// 	giv.CallMethod(ge, "SplitsSetView", ge.Viewport)
+		// case gide.KeyFunBuildProj:
+		// 	kt.SetProcessed()
+		// 	ge.Build()
+		// case gide.KeyFunRunProj:
+		// 	kt.SetProcessed()
+		// 	ge.Run()
+	}
+}
+
+func (ge *PiView) KeyChordEvent() {
+	// need hipri to prevent 2-seq guys from being captured by others
+	ge.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		gee := recv.Embed(KiT_PiView).(*PiView)
+		kt := d.(*key.ChordEvent)
+		gee.PiViewKeys(kt)
+	})
+}
+
+func (ge *PiView) ConnectEvents2D() {
+	if ge.HasAnyScroll() {
+		ge.LayoutScrollEvents()
+	}
+	ge.KeyChordEvent()
 }
 
 func (pv *PiView) Render2D() {
@@ -648,11 +989,7 @@ var PiViewProps = ki.Props{
 				{"Animate", ki.Props{}},
 			},
 		}},
-		{"ToggleLexView", ki.Props{
-			"icon": "update",
-			"desc": "toggle textview to view either source file or lexer output of source file",
-		}},
-		{"sep-parse", ki.BlankProp{}},
+		{"sep-passtwo", ki.BlankProp{}},
 		{"EditPassTwo", ki.Props{
 			"icon": "edit",
 			"desc": "edit the settings of the PassTwo -- second pass after lexing",
@@ -660,6 +997,11 @@ var PiViewProps = ki.Props{
 		{"PassTwo", ki.Props{
 			"icon": "play",
 			"desc": "perform second pass after lexing -- computes nesting depth globally and finds EOS tokens",
+		}},
+		{"sep-parse", ki.BlankProp{}},
+		{"EditTrace", ki.Props{
+			"icon": "edit",
+			"desc": "edit the parse tracing options for seeing how the parsing process is working",
 		}},
 		{"ParseInit", ki.Props{
 			"icon": "update",
@@ -711,6 +1053,7 @@ var PiViewProps = ki.Props{
 			}},
 			{"sep-close", ki.BlankProp{}},
 			{"Close Window", ki.BlankProp{}},
+			{"OpenConsoleTab", ki.Props{}},
 		}},
 		{"Edit", "Copy Cut Paste"},
 		{"Window", "Windows"},
@@ -719,6 +1062,54 @@ var PiViewProps = ki.Props{
 
 //////////////////////////////////////////////////////////////////////////////////////
 //   Project window
+
+// CloseWindowReq is called when user tries to close window -- we
+// automatically save the project if it already exists (no harm), and prompt
+// to save open files -- if this returns true, then it is OK to close --
+// otherwise not
+func (pv *PiView) CloseWindowReq() bool {
+	if !pv.Changed {
+		return true
+	}
+	gi.ChoiceDialog(pv.Viewport, gi.DlgOpts{Title: "Close Project: There are Unsaved Changes",
+		Prompt: fmt.Sprintf("In Project: %v There are <b>unsaved changes</b> -- do you want to save or cancel closing this project and review?", pv.Nm)},
+		[]string{"Cancel", "Save Parser", "Close Without Saving"},
+		pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			switch sig {
+			case 0:
+				// do nothing, will have returned false already
+			case 1:
+				pv.Save()
+			case 2:
+				pv.ParentWindow().OSWin.Close() // will not be prompted again!
+			}
+		})
+	return false // not yet
+}
+
+// QuitReq is called when user tries to quit the app -- we go through all open
+// main windows and look for gide windows and call their CloseWindowReq
+// functions!
+func QuitReq() bool {
+	for _, win := range gi.MainWindows {
+		if !strings.HasPrefix(win.Nm, "Pie") {
+			continue
+		}
+		mfr, ok := win.MainWidget()
+		if !ok {
+			continue
+		}
+		gek, ok := mfr.ChildByName("piview", 0)
+		if !ok {
+			continue
+		}
+		ge := gek.Embed(KiT_PiView).(*PiView)
+		if !ge.CloseWindowReq() {
+			return false
+		}
+	}
+	return true
+}
 
 // NewPiView creates a new PiView window
 func NewPiView() (*gi.Window, *PiView) {

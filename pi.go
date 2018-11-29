@@ -136,6 +136,7 @@ func (pr *Parser) PassTwoErrString() string {
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit() bool {
 	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.TwoState.EosPos)
+	parse.Trace.Init()
 	ok := pr.Parser.CompileAll(&pr.ParseState)
 	if !ok {
 		return false

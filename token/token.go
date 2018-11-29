@@ -7,7 +7,11 @@
 // plus all the more detailed tokens needed for actually parsing languages
 package token
 
-import "github.com/goki/ki/kit"
+import (
+	"fmt"
+
+	"github.com/goki/ki/kit"
+)
 
 // Tokens is a complete set of lexical tokens that encompasses all programming and text
 // markup languages.  It includes everything in alecthomas/chroma (pygments) and
@@ -122,19 +126,25 @@ func (tk Tokens) CombineRepeats() bool {
 //  KeyToken -- keyword + token
 
 // KeyToken combines a token and an optional keyword name for Keyword token types
-// if Tok is in Keyword category, then Key string can be used to check for same keyword
+// if Tok is in Keyword category, then Key string can be used to check for same keyword.
+// Also has a Depth for matching against a particular nesting depth
 type KeyToken struct {
-	Tok Tokens
-	Key string
+	Tok   Tokens
+	Key   string
+	Depth int
 }
 
 var KeyTokenZero = KeyToken{}
 
 func (kt KeyToken) String() string {
-	if kt.Key != "" {
-		return kt.Tok.String() + ": " + kt.Key
+	ds := ""
+	if kt.Depth != 0 {
+		ds = fmt.Sprintf("+%d:", kt.Depth)
 	}
-	return kt.Tok.String()
+	if kt.Key != "" {
+		return ds + kt.Tok.String() + ": " + kt.Key
+	}
+	return ds + kt.Tok.String()
 }
 
 // Equal compares equality of two tokens including keywords if token is in Keyword category.
@@ -155,6 +165,15 @@ func (kt KeyToken) Match(okt KeyToken) bool {
 		return kt.Tok.Match(okt.Tok) && kt.Key == okt.Key
 	}
 	return kt.Tok.Match(okt.Tok)
+}
+
+// MatchDepth compares equality of two tokens including depth -- see Match for other matching
+// criteria
+func (kt KeyToken) MatchDepth(okt KeyToken) bool {
+	if kt.Depth != okt.Depth {
+		return false
+	}
+	return kt.Match(okt)
 }
 
 // KeyTokenList is a list (slice) of KeyTokens

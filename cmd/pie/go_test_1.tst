@@ -4,7 +4,8 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-/* package main
+/*
+package main
 
 import "github.com/goki/gi/gi"
 
@@ -19,16 +20,19 @@ import (
 */
 
 /*
-const Precedence1 = 25 / (3.14 + -(2 + 4)) > (2 - 5) * 3
-// const Precedence2 = -(3.14 + 2 * 4)
+const parn = 1 + (2 + 3)
+
+const Precedence1 = 25 / (3.14 + -(2 + 4)) > ((2 - 5) * 3)
+
+const Precedence2 = -(3.14 + 2 * 4)
 
 type MyFloat float64
 */
 
 type AStruct struct {
 	AField int
-	TField float64 `desc:"tagged"`
-	AField []string
+	TField gi.float64 `desc:"tagged"`
+	AField [20]string
 	MField map[string]int
 }
 

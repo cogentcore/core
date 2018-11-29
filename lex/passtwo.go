@@ -53,7 +53,11 @@ func (ts *TwoState) NextLine() {
 func (ts *TwoState) InsertEOS(cp Pos) {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := ts.Src.LexAt(cp)
-	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{token.EOS, elx.Depth, elx.Ed, elx.Ed})
+	depth := elx.Depth
+	if elx.Tok.IsPunctGpRight() {
+		depth--
+	}
+	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{token.EOS, depth, elx.Ed, elx.Ed})
 	ts.EosPos = append(ts.EosPos, np)
 }
 

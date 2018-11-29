@@ -16,7 +16,6 @@ type State struct {
 	Src        *lex.File     `desc:"source and lexed version of source we're parsing"`
 	Ast        *Ast          `desc:"root of the Ast abstract syntax tree we're updating"`
 	EosPos     []lex.Pos     `desc:"positions *in token coordinates* of the EOS markers generated"`
-	EosIdx     int           `desc:"index in list of Eos tokens that we're currently on"`
 	Pos        lex.Pos       `desc:"the current lex token position"`
 	ScopeStack []lex.Reg     `desc:"scope stack  *in token coordinates* of regions for looking for tokens"`
 	State      []string      `desc:"state stack"`
@@ -31,7 +30,6 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos []lex.Pos) {
 	ps.EosPos = eospos
 	ps.State = nil
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
-	ps.EosIdx = 0
 	ps.Errs.Reset()
 }
 
@@ -49,9 +47,9 @@ func (ps *State) AtEof() bool {
 	return ps.Pos.Ln >= ps.Src.NLines()
 }
 
-// MatchLex is our optimized matcher method
-func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool, stdepth int, cp lex.Pos) bool {
-	if lx.Depth != stdepth {
+// MatchLex is our optimized matcher method, matching tkey depth as well
+func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp lex.Pos) bool {
+	if lx.Depth != tkey.Depth {
 		return false
 	}
 	if !(lx.Tok == tkey.Tok || (isCat && lx.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Tok.SubCat() == tkey.Tok)) {
@@ -74,10 +72,10 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
-	stlx := ps.Src.LexAt(cp)
+	tkey.Depth = ps.Src.TokenDepth(tok, cp)
 	for cp.IsLess(reg.Ed) {
 		lx := ps.Src.LexAt(cp)
-		if ps.MatchLex(lx, tkey, isCat, isSubCat, stlx.Depth, cp) {
+		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {
 			return cp, true
 		}
 		cp, ok = ps.Src.NextTokenPos(cp)
@@ -95,7 +93,8 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	lx := ps.Src.LexAt(pos)
-	return ps.MatchLex(lx, tkey, isCat, isSubCat, lx.Depth, pos)
+	tkey.Depth = lx.Depth
+	return ps.MatchLex(lx, tkey, isCat, isSubCat, pos)
 }
 
 // FindTokenReverse looks *backwards* for token in given region, with same depth as reg.Ed-1 end
@@ -113,10 +112,10 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
-	stlx := ps.Src.LexAt(cp)
+	tkey.Depth = ps.Src.TokenDepth(tok, cp)
 	for reg.St.IsLess(cp) {
 		lx := ps.Src.LexAt(cp)
-		if ps.MatchLex(lx, tkey, isCat, isSubCat, stlx.Depth, cp) {
+		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {
 			if isAmbigUnary { // make sure immed prior is not also!
 				pp, ok := ps.Src.PrevTokenPos(cp)
 				if ok {
@@ -139,6 +138,22 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 		}
 	}
 	return cp, false
+}
+
+// FindEos finds the next EOS position at given depth
+func (ps *State) FindEos(stpos lex.Pos, depth int) (lex.Pos, int) {
+	sz := len(ps.EosPos)
+	for i := 0; i < sz; i++ {
+		ep := ps.EosPos[i]
+		if ep.IsLess(stpos) {
+			continue
+		}
+		lx := ps.Src.LexAt(ep)
+		if lx.Depth == depth {
+			return ep, i
+		}
+	}
+	return lex.Pos{}, -1
 }
 
 // AddAst adds a child Ast node to given parent Ast node
