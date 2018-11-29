@@ -45,6 +45,9 @@ type TextBufOpts struct {
 	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
 }
 
+// MaxScopeLines	 is the maximum lines to search for a scope marker, e.g. '}'
+var MaxScopeLines = 100
+
 // CommentStrs returns the comment start and end strings, using line-based CommentLn first if set
 // and falling back on multi-line / general purpose start / end syntax
 func (tb *TextBufOpts) CommentStrs() (comst, comed string) {
@@ -1348,9 +1351,13 @@ func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
 	}
 	ch := st.Ch
 	ln := st.Ln
+	max := tb.NLines - ln
+	if MaxScopeLines < tb.NLines {
+		max = ln + MaxScopeLines
+	}
 	txt := tb.Line(ln)
 	if left > right {
-		for l := ln; l < tb.NLines; l++ {
+		for l := ln; l < max; l++ {
 			for i := ch + 1; i < len(txt); i++ {
 				if txt[i] == r {
 					left++
