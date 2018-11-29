@@ -4025,6 +4025,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	case mouse.Right:
 		if me.Action == mouse.Press {
 			me.SetProcessed()
+			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.EmitContextMenuSignal()
 			tv.This().(gi.Node2D).ContextMenu()
 		}
