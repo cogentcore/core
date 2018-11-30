@@ -512,6 +512,9 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 				act = mouse.DoubleClick
 			}
 		}
+		if (mods&2<<uint32(key.Control) != 0) {
+			cmButton = mouse.Right
+		}
 		event = &mouse.Event{
 			Where:     where,
 			Button:    cmButton,
@@ -616,9 +619,9 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	}
 
 	scShift := (mods&1<<uint32(key.Shift) != 0)
-	scCommand := (mods&1<<uint32(key.Meta) != 0)
-	scAlt := (mods&1<<uint32(key.Alt) != 0)
-	scControl := (mods&1<<uint32(key.Control) != 0)
+	scControl := (mods&2<<uint32(key.Control) != 0)
+	scAlt := (mods&4<<uint32(key.Alt) != 0)
+	scCommand := (mods&8<<uint32(key.Meta) != 0)
 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
