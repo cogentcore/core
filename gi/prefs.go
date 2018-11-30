@@ -566,7 +566,7 @@ func (pf *FilePaths) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
-		log.Println(err)
+		// log.Println(err)
 		return err
 	}
 	return json.Unmarshal(b, pf)

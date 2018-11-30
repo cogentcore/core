@@ -762,6 +762,11 @@ func (tv *TreeView) ToggleClose() {
 
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		tvki := k.Embed(KiT_TreeView)
 		if tvki != nil {
@@ -769,10 +774,18 @@ func (tv *TreeView) OpenAll() {
 		}
 		return true
 	})
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
 }
 
 // CloseAll closes the given node and all of its sub-nodes
 func (tv *TreeView) CloseAll() {
+	win := tv.Viewport.Win
+	updt := false
+	if win != nil {
+		updt = win.UpdateStart()
+	}
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		tvki := k.Embed(KiT_TreeView)
 		if tvki != nil {
@@ -780,6 +793,9 @@ func (tv *TreeView) CloseAll() {
 		}
 		return true
 	})
+	if win != nil {
+		win.UpdateEnd(updt)
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
