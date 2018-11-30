@@ -851,49 +851,24 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 // SrcInsertAfter inserts a new node in the source tree after this node, at
 // the same (sibling) level, prompting for the type of node to insert
 func (tv *TreeView) SrcInsertAfter() {
-	ttl := "Insert After"
-	if tv.IsRootOrField(ttl) {
-		return
-	}
-	sk := tv.SrcNode.Ptr
-	if sk == nil {
-		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
-		return
-	}
-	myidx, ok := sk.IndexInParent()
-	if !ok {
-		return
-	}
-	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
-		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			if sig == int64(gi.DialogAccepted) {
-				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-				sk := tv.SrcNode.Ptr
-				par := sk.Parent()
-				dlg, _ := send.(*gi.Dialog)
-				n, typ := gi.NewKiDialogValues(dlg)
-				updt := par.UpdateStart()
-				for i := 0; i < n; i++ {
-					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+1+i)
-					par.InsertNewChild(typ, myidx+1+i, nm)
-				}
-				tv.SetChanged()
-				par.UpdateEnd(updt)
-			}
-		})
+	tv.SrcInsertAt(1, "Insert After")
 }
 
 // SrcInsertBefore inserts a new node in the source tree before this node, at
 // the same (sibling) level, prompting for the type of node to insert
 func (tv *TreeView) SrcInsertBefore() {
-	ttl := "Insert Before"
-	if tv.IsRootOrField(ttl) {
+	tv.SrcInsertAt(0, "Insert Before")
+}
+
+// SrcInsertAt inserts a new node in the source tree at given relative offset
+// from this node, at the same (sibling) level, prompting for the type of node to insert
+func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
+	if tv.IsRootOrField(actNm) {
 		return
 	}
 	sk := tv.SrcNode.Ptr
 	if sk == nil {
-		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		log.Printf("TreeView %v nil SrcNode in: %v\n", actNm, tv.PathUnique())
 		return
 	}
 	myidx, ok := sk.IndexInParent()
@@ -901,21 +876,30 @@ func (tv *TreeView) SrcInsertBefore() {
 		return
 	}
 	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
-		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Insert:"},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		gi.DlgOpts{Title: actNm, Prompt: "Number and Type of Items to Insert:"},
+		tv.Par.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
-				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-				sk := tv.SrcNode.Ptr
-				par := sk.Parent()
+				tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				par := tvv.SrcNode.Ptr
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := par.UpdateStart()
+				var ski ki.Ki
 				for i := 0; i < n; i++ {
-					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+i)
-					par.InsertNewChild(typ, myidx+i, nm)
+					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+rel+i)
+					nki := par.InsertNewChild(typ, myidx+1+i, nm)
+					if i == n-1 {
+						ski = nki
+					}
 				}
-				tv.SetChanged()
+				tvv.SetChanged()
 				par.UpdateEnd(updt)
+				if ski != nil {
+					if tvk, got := tvv.ChildByName("tv_"+ski.Name(), 0); got {
+						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+						stv.SelectAction(mouse.NoSelectMode)
+					}
+				}
 			}
 		})
 }
@@ -933,17 +917,28 @@ func (tv *TreeView) SrcAddChild() {
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
-				tv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-				sk := tv.SrcNode.Ptr
+				tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
+				sk := tvv.SrcNode.Ptr
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := sk.UpdateStart()
+				var ski ki.Ki
 				for i := 0; i < n; i++ {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), i)
-					sk.AddNewChild(typ, nm)
+					nki := sk.AddNewChild(typ, nm)
+					if i == n-1 {
+						ski = nki
+					}
 				}
-				tv.SetChanged()
+				tvv.SetChanged()
 				sk.UpdateEnd(updt)
+				if ski != nil {
+					tvv.Open()
+					if tvk, got := tvv.ChildByName("tv_"+ski.Name(), 0); got {
+						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+						stv.SelectAction(mouse.NoSelectMode)
+					}
+				}
 			}
 		})
 }
@@ -979,16 +974,28 @@ func (tv *TreeView) SrcDuplicate() {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
 		return
 	}
-	par := sk.Parent()
+	if tv.Par == nil {
+		return
+	}
+	tvpar := tv.Par.Embed(KiT_TreeView).(*TreeView)
+	par := tvpar.SrcNode.Ptr
+	if par == nil {
+		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tvpar.PathUnique())
+		return
+	}
 	myidx, ok := sk.IndexInParent()
 	if !ok {
 		return
 	}
-	nm := fmt.Sprintf("%vCopy", sk.Name())
+	nm := fmt.Sprintf("%v_Copy", sk.Name())
 	nwkid := sk.Clone()
 	nwkid.SetName(nm)
 	par.InsertChild(nwkid, myidx+1)
-	tv.SetChanged()
+	tvpar.SetChanged()
+	if tvk, got := tvpar.ChildByName("tv_"+nm, 0); got {
+		stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+		stv.SelectAction(mouse.NoSelectMode)
+	}
 }
 
 // SrcEdit pulls up a StructViewDialog window on the source object viewed by this node
@@ -1172,51 +1179,38 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	tv.SetChanged()
 }
 
-// PasteBefore inserts object(s) from mime data before this node -- mod =
-// DropCopy will append _Copy on the name of the inserted object
+// PasteBefore inserts object(s) from mime data before this node.
+// If another item with the same name already exists, it will
+// append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
-	ttl := "Paste Before"
-	sl := tv.NodesFromMimeData(md)
-
-	sk := tv.SrcNode.Ptr
-	if sk == nil {
-		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
-		return
-	}
-	par := sk.Parent()
-	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert before the root of the tree"}, true, false, nil, nil)
-		return
-	}
-	myidx, ok := sk.IndexInParent()
-	if !ok {
-		return
-	}
-	updt := par.UpdateStart()
-	for i, ns := range sl {
-		if mod == dnd.DropCopy {
-			ns.SetName(ns.Name() + "_Copy")
-		}
-		par.InsertChild(ns, myidx+i)
-	}
-	par.UpdateEnd(updt)
-	tv.SetChanged()
+	tv.PasteAt(md, mod, 0, "Paste Before")
 }
 
-// PasteAfter inserts object(s) from mime data after this node -- mod =
-// DropCopy will append _Copy on the name of the inserted objects
+// PasteAfter inserts object(s) from mime data after this node.
+// If another item with the same name already exists, it will
+// append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
-	ttl := "Paste After"
+	tv.PasteAt(md, mod, 1, "Paste After")
+}
+
+// PasteAt inserts object(s) from mime data at rel position to this node.
+// If another item with the same name already exists, it will
+// append _Copy on the name of the inserted objects
+func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm string) {
 	sl := tv.NodesFromMimeData(md)
 
+	if tv.Par == nil {
+		return
+	}
+	tvpar := tv.Par.Embed(KiT_TreeView).(*TreeView)
 	sk := tv.SrcNode.Ptr
 	if sk == nil {
-		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
+		log.Printf("TreeView %v nil SrcNode in: %v\n", actNm, tv.PathUnique())
 		return
 	}
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: ttl, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
@@ -1224,19 +1218,29 @@ func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
 		return
 	}
 	updt := par.UpdateStart()
+	sz := len(sl)
+	var ski ki.Ki
 	for i, ns := range sl {
-		if mod == dnd.DropCopy {
+		if _, has := par.ChildByName(ns.Name(), 0); has {
 			ns.SetName(ns.Name() + "_Copy")
 		}
-		par.InsertChild(ns, myidx+1+i)
+		par.InsertChild(ns, myidx+rel+i)
+		if i == sz-1 {
+			ski = ns
+		}
 	}
 	par.UpdateEnd(updt)
-	tv.SetChanged()
+	tvpar.SetChanged()
+	if ski != nil {
+		if tvk, got := tvpar.ChildByName("tv_"+ski.Name(), 0); got {
+			stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
+			stv.SelectAction(mouse.NoSelectMode)
+		}
+	}
 }
 
 // PasteChildren inserts object(s) from mime data at end of children of this
-// node -- mod = DropCopy will append _Copy on the name of the inserted
-// objects
+// node
 func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	sl := tv.NodesFromMimeData(md)
 
@@ -1247,9 +1251,6 @@ func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	}
 	updt := sk.UpdateStart()
 	for _, ns := range sl {
-		if mod == dnd.DropCopy {
-			ns.SetName(ns.Name() + "_Copy")
-		}
 		sk.AddChild(ns)
 	}
 	sk.UpdateEnd(updt)
@@ -2026,6 +2027,16 @@ func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
 	case gi.FocusLost:
 		tv.UpdateSig()
 	case gi.FocusGot:
+		if tv.This() == tv.RootView.This() {
+			sl := tv.SelectedViews()
+			if len(sl) > 0 {
+				fsl := sl[0]
+				if fsl != tv {
+					fsl.GrabFocus()
+					return
+				}
+			}
+		}
 		tv.ScrollToMe()
 		tv.EmitFocusedSignal()
 		tv.UpdateSig()
