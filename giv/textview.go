@@ -3549,7 +3549,11 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 			tv.SelectRegUpdate(tv.CursorPos)
 		}
 		if !tv.IsDragging() && selMode == mouse.NoSelectMode {
-			tv.SelectReset()
+			ln := tv.CursorPos.Ln
+			ch := tv.CursorPos.Ch
+			if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
+				tv.SelectReset()
+			}
 		} else {
 			tv.SelectRegUpdate(tv.CursorPos)
 		}
@@ -3560,7 +3564,11 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 		}
 		tv.RenderSelectLines()
 	} else if tv.HasSelection() {
-		tv.SelectReset()
+		ln := tv.CursorPos.Ln
+		ch := tv.CursorPos.Ch
+		if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
+			tv.SelectReset()
+		}
 	}
 	tv.RenderCursor(true)
 }
@@ -4039,7 +4047,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	case mouse.Right:
 		if me.Action == mouse.Press {
 			me.SetProcessed()
-			//tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
+			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.EmitContextMenuSignal()
 			tv.This().(gi.Node2D).ContextMenu()
 		}
