@@ -30,7 +30,7 @@ Version: ` + pi.VersionInfo())
 	// })
 
 	gide.InitPrefs()
-	// pi.InitPrefs()
+	piv.InitPrefs()
 
 	// var path string
 	// var proj string

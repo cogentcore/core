@@ -96,8 +96,9 @@ type Rule struct {
 	Rule      string         `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). If there are multiple tokens, and the first one should NOT be the key matching token, flag the key one with a star *. For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token."`
 	Ast       AstActs        `desc:"what action should be take for this node when it matches"`
 	Rules     RuleList       `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
-	KeyTok    token.KeyToken `inactive:"+" json:"-" xml:"-" desc:"the key token value that this rule matches -- all rules must have one"`
-	KeyTokIdx int            `inactive:"+" json:"-" xml:"-" desc:"index in rules for the key token"`
+	KeyTok    token.KeyToken `inactive:"+" json:"-" xml:"-" desc:"the first key token value that this rule matches"`
+	KeyTokIdx int            `inactive:"+" json:"-" xml:"-" desc:"starting index in rules for the key token"`
+	KeyTokN   int            `inactive:"+" json:"-" xml:"-" desc:"number of key tokens starting at KeyTokIdx -- 0 if none"`
 	Reverse   bool           `inactive:"+" json:"-" xml:"-" desc:"use a reverse parsing direction for binary operator expressions -- this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser, triggered by a '-' at the start of the rule -- only for rules of form: Expr '+' Expr -- two sub-rules with a token operator in the middle"`
 	EndTok    token.KeyToken `inactive:"+" json:"-" xml:"-" desc:"ending token -- if rule ends with an EOS, paren, brace or bracket token then we first search for it to establish the scope of our rule.  Depth here is *relative* depth compared to starting depth,"`
 }
@@ -167,6 +168,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	gotTok := false
 	pr.KeyTok = token.KeyTokenZero
 	pr.KeyTokIdx = -1
+	pr.KeyTokN = 0
 	pr.EndTok = token.KeyTokenZero
 	nr := len(rs)
 	for i := range rs {
@@ -202,15 +204,20 @@ func (pr *Rule) Compile(ps *State) bool {
 					}
 				}
 			}
-			if !gotTok || rn[0] == '*' {
-				pr.KeyTok = re.Token
-				pr.KeyTokIdx = i
-				gotTok = true
-			}
 			if i == nr-1 && pr.KeyTokIdx != i {
 				if re.Token.Tok.SubCat() == token.PunctGp || re.Token.Tok == token.EOS {
 					pr.EndTok = re.Token // scoping end token
+					continue
 				}
+			} else if gotTok && i == pr.KeyTokIdx+pr.KeyTokN { // next
+				pr.KeyTokN++
+			}
+
+			if !gotTok || rn[0] == '*' {
+				pr.KeyTok = re.Token
+				pr.KeyTokIdx = i
+				pr.KeyTokN = 1
+				gotTok = true
 			}
 		} else {
 			st := 0
@@ -252,6 +259,12 @@ func (pr *Rule) Validate(ps *State) bool {
 		} else {
 			if pr.KeyTokIdx != 1 {
 				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: is a Reverse (-) rule: must have a token to be recognized in the middle of two rules -- for binary operator expressions only", pr.Nm))
+			}
+		}
+	} else {
+		if len(pr.Rules) == 3 && pr.KeyTokIdx == 1 && pr.KeyTokN == 1 {
+			if pr.KeyTok.Tok.Cat() == token.Operator && pr.KeyTok.Tok.SubCat() != token.OpList {
+				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: is a binary operator expression -- should use reverse - operation order to produce correct associativity", pr.Nm))
 			}
 		}
 	}
@@ -390,6 +403,7 @@ func (pr *Rule) Match(ps *State, scope lex.Reg, parAst *Ast) (bool, lex.Pos, lex
 	slx := ps.Src.LexAt(scope.St)
 	kt := pr.KeyTok
 	kt.Depth = slx.Depth
+	ok := false
 	if pr.KeyTokIdx == 0 { // key constraint: must be at start
 		if !ps.MatchToken(kt, scope.St) {
 			Trace.Out(ps, pr, NoMatch, scope.St, scope, parAst, fmt.Sprintf("key token %v at: 0, was: %v", kt.String(), slx.String()))
@@ -409,6 +423,24 @@ func (pr *Rule) Match(ps *State, scope lex.Reg, parAst *Ast) (bool, lex.Pos, lex
 			return false, mpos, scope
 		}
 		Trace.Out(ps, pr, Match, mpos, scope, parAst, fmt.Sprintf("key token: %v at: %v", kt, pr.KeyTokIdx))
+	}
+
+	if pr.KeyTokN > 1 { // next ones must match too..
+		npos := mpos
+		for nt := 1; nt < pr.KeyTokN; nt++ {
+			npos, ok = ps.Src.NextTokenPos(npos)
+			if !ok {
+				ps.Error(npos, fmt.Sprintf("rule %v: end-of-tokens with more to match", pr.Nm))
+				return false, mpos, scope
+			}
+			kt = pr.Rules[pr.KeyTokIdx+nt].Token
+			kt.Depth = ps.Src.TokenDepth(kt.Tok, npos)
+			if !ps.MatchToken(kt, npos) {
+				Trace.Out(ps, pr, NoMatch, npos, scope, parAst, fmt.Sprintf("%v key token %v at: 0, was: %v", nt, kt.String(), slx.String()))
+				return false, npos, scope
+			}
+			Trace.Out(ps, pr, Match, scope.St, scope, parAst, fmt.Sprintf("%v key token: %v at: 0", nt, kt.String()))
+		}
 	}
 
 	if pr.EndTok.Tok != token.None && pr.EndTok.Tok != token.EOS {

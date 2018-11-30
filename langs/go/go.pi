@@ -3453,7 +3453,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "'Name' Type 'EOS'",
+                "Rule": "Name Type 'EOS'",
                 "Ast": "AnchorAst"
               }
             ],
@@ -3613,7 +3613,7 @@
                     "Props": null,
                     "Kids": null,
                     "Desc": "",
-                    "Rule": "NameList ?Type '=' Expr",
+                    "Rule": "NameList ?Type '=' Expr 'EOS'",
                     "Ast": "AnchorAst"
                   },
                   {
@@ -3622,7 +3622,7 @@
                     "Props": null,
                     "Kids": null,
                     "Desc": "only a name, no expression",
-                    "Rule": "NameList",
+                    "Rule": "NameList 'EOS'",
                     "Ast": "AnchorAst"
                   }
                 ],

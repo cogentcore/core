@@ -45,13 +45,12 @@ const (
 // lexer and parser
 type PiView struct {
 	gi.Frame
-	Parser   pi.Parser   `desc:"the parser we are viewing"`
-	TestFile gi.FileName `desc:"the file for testing"`
-	Filename gi.FileName `desc:"filename for saving parser"`
-	Changed  bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
-	TestBuf  giv.TextBuf `json:"-" desc:"test file buffer"`
-	LexBuf   giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
-	KeySeq1  key.Chord   `desc:"first key in sequence if needs2 key pressed"`
+	Parser  pi.Parser   `desc:"the parser we are viewing"`
+	Prefs   ProjPrefs   `desc:"project preferences -- this IS the project file"`
+	Changed bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	TestBuf giv.TextBuf `json:"-" desc:"test file buffer"`
+	LexBuf  giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
+	KeySeq1 key.Chord   `desc:"first key in sequence if needs2 key pressed"`
 }
 
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
@@ -70,42 +69,117 @@ func (pv *PiView) InitView() {
 	pv.UpdateEnd(updt)
 }
 
-// Save saves lexer and parser rules to current filename, in a standard JSON-formatted file
-func (pv *PiView) Save() {
-	if pv.Filename == "" {
+// IsEmpty returns true if current project is empty
+func (pv *PiView) IsEmpty() bool {
+	return (!pv.Parser.Lexer.HasChildren() && !pv.Parser.Parser.HasChildren())
+}
+
+// OpenRecent opens a recently-used project
+func (pv *PiView) OpenRecent(filename gi.FileName) {
+	pv.OpenProj(filename)
+}
+
+// OpenProj opens lexer and parser rules to current filename, in a standard JSON-formatted file
+// if current is not empty, opens in a new window
+func (pv *PiView) OpenProj(filename gi.FileName) *PiView {
+	if !pv.IsEmpty() {
+		_, nprj := NewPiView()
+		nprj.OpenProj(filename)
+		return nprj
+	}
+	pv.Prefs.OpenJSON(filename)
+	pv.InitView()
+	pv.ApplyPrefs()
+	SavedPaths.AddPath(string(filename), gi.Prefs.SavedPathsMax)
+	SavePaths()
+	return pv
+}
+
+// NewProj makes a new project in a new window
+func (pv *PiView) NewProj() (*gi.Window, *PiView) {
+	return NewPiView()
+}
+
+// SaveProj saves project prefs to current filename, in a standard JSON-formatted file
+// also saves the current parser
+func (pv *PiView) SaveProj() {
+	if pv.Prefs.ProjFile == "" {
 		return
 	}
-	pv.Parser.SaveJSON(string(pv.Filename))
+	pv.SaveParser()
+	pv.GetPrefs()
+	pv.Prefs.SaveJSON(pv.Prefs.ProjFile)
 	pv.Changed = false
 	pv.UpdateSig() // notify our editor
 }
 
-// SaveAs saves lexer and parser rules to current filename, in a standard JSON-formatted file
-func (pv *PiView) SaveAs(filename gi.FileName) {
+// SaveProjAs saves lexer and parser rules to current filename, in a standard JSON-formatted file
+// also saves the current parser
+func (pv *PiView) SaveProjAs(filename gi.FileName) {
+	SavedPaths.AddPath(string(filename), gi.Prefs.SavedPathsMax)
+	SavePaths()
+	pv.SaveParser()
+	pv.GetPrefs()
+	pv.Prefs.SaveJSON(filename)
+	pv.Changed = false
+	pv.UpdateSig() // notify our editor
+}
+
+// ApplyPrefs applies project-level prefs (e.g., after opening)
+func (pv *PiView) ApplyPrefs() {
+	parse.Trace = pv.Prefs.TraceOpts
+	if pv.Prefs.ParserFile != "" {
+		pv.OpenParser(pv.Prefs.ParserFile)
+	}
+	if pv.Prefs.TestFile != "" {
+		pv.OpenTest(pv.Prefs.TestFile)
+	}
+}
+
+// GetPrefs gets the current values of things for prefs
+func (pv *PiView) GetPrefs() {
+	pv.Prefs.TraceOpts = parse.Trace
+}
+
+/////////////////////////////////////////////////////////////////////////
+//  other IO
+
+// OpenParser opens lexer and parser rules to current filename, in a standard JSON-formatted file
+func (pv *PiView) OpenParser(filename gi.FileName) {
+	pv.Parser.OpenJSON(string(filename))
+	pv.Prefs.ParserFile = filename
+	pv.InitView()
+}
+
+// SaveParser saves lexer and parser rules to current filename, in a standard JSON-formatted file
+func (pv *PiView) SaveParser() {
+	if pv.Prefs.ParserFile == "" {
+		return
+	}
+	pv.Parser.SaveJSON(string(pv.Prefs.ParserFile))
+	pv.Changed = false
+	pv.UpdateSig() // notify our editor
+}
+
+// SaveParserAs saves lexer and parser rules to current filename, in a standard JSON-formatted file
+func (pv *PiView) SaveParserAs(filename gi.FileName) {
 	pv.Parser.SaveJSON(string(filename))
 	pv.Changed = false
-	pv.Filename = filename
+	pv.Prefs.ParserFile = filename
 	pv.UpdateSig() // notify our editor
-}
-
-// Open opens lexer and parser rules to current filename, in a standard JSON-formatted file
-func (pv *PiView) Open(filename gi.FileName) {
-	pv.Parser.OpenJSON(string(filename))
-	pv.Filename = filename
-	pv.InitView()
 }
 
 // OpenTest opens test file
 func (pv *PiView) OpenTest(filename gi.FileName) {
 	pv.TestBuf.OpenFile(filename)
-	pv.TestFile = filename
+	pv.Prefs.TestFile = filename
 }
 
 // SaveTestAs saves the test file as..
 func (pv *PiView) SaveTestAs(filename gi.FileName) {
 	pv.TestBuf.EditDone()
 	pv.TestBuf.SaveFile(filename)
-	pv.TestFile = filename
+	pv.Prefs.TestFile = filename
 }
 
 // SetStatus updates the statusbar label with given message, along with other status info
@@ -922,32 +996,42 @@ var PiViewProps = ki.Props{
 		"vertical-align":   gi.AlignTop,
 	},
 	"ToolBar": ki.PropSlice{
-		{"Open", ki.Props{
-			"label": "Open",
+		{"SaveProj", ki.Props{
+			"shortcut": gi.KeyFunMenuSave,
+			"label":    "Save Project",
+			"desc":     "Save GoPi project file to standard JSON-formatted file",
+			"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
+				pv := pvi.(*PiView)
+				act.SetActiveState( /* pv.Changed && */ pv.Prefs.ProjFile != "")
+			}),
+		}},
+		{"sep-parse", ki.BlankProp{}},
+		{"OpenParser", ki.Props{
+			"label": "Open Parser...",
 			"icon":  "file-open",
 			"desc":  "Open lexer and parser rules from standard JSON-formatted file",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
-					"default-field": "Filename",
+					"default-field": "Prefs.ParserFile",
 					"ext":           ".pi",
 				}},
 			},
 		}},
-		{"Save", ki.Props{
+		{"SaveParser", ki.Props{
 			"icon": "file-save",
 			"desc": "Save lexer and parser rules from file standard JSON-formatted file",
 			"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
 				pv := pvi.(*PiView)
-				act.SetActiveStateUpdt( /* pv.Changed && */ pv.Filename != "")
+				act.SetActiveStateUpdt( /* pv.Changed && */ pv.Prefs.ParserFile != "")
 			}),
 		}},
-		{"SaveAs", ki.Props{
-			"label": "Save As...",
+		{"SaveParserAs", ki.Props{
+			"label": "Save Parser As...",
 			"icon":  "file-save",
 			"desc":  "Save As lexer and parser rules from file standard JSON-formatted file",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
-					"default-field": "Filename",
+					"default-field": "Prefs.ParserFile",
 					"ext":           ".pi",
 				}},
 			},
@@ -959,7 +1043,7 @@ var PiViewProps = ki.Props{
 			"desc":  "Open test file",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
-					"default-field": "TestFile",
+					"default-field": "Prefs.TestFile",
 				}},
 			},
 		}},
@@ -969,7 +1053,7 @@ var PiViewProps = ki.Props{
 			"desc":  "Save current test file as",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
-					"default-field": "TestFile",
+					"default-field": "Prefs.TestFile",
 				}},
 			},
 		}},
@@ -1022,31 +1106,74 @@ var PiViewProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
-			{"Open", ki.Props{
+			{"OpenRecent", ki.Props{
+				"submenu": &SavedPaths,
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{}},
+				},
+			}},
+			{"OpenProj", ki.Props{
 				"shortcut": gi.KeyFunMenuOpen,
+				"label":    "Open Project...",
+				"desc":     "open a GoPi project that has full settings",
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{
+						"default-field": "Prefs.ProjFile",
+						"ext":           ".pip",
+					}},
+				},
+			}},
+			{"NewProj", ki.Props{
+				"shortcut": gi.KeyFunMenuNew,
+				"label":    "New Project...",
+				"desc":     "create a new project",
+			}},
+			{"SaveProj", ki.Props{
+				"shortcut": gi.KeyFunMenuSave,
+				"label":    "Save Project",
+				"desc":     "Save GoPi project file to standard JSON-formatted file",
+				"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
+					pv := pvi.(*PiView)
+					act.SetActiveState( /* pv.Changed && */ pv.Prefs.ProjFile != "")
+				}),
+			}},
+			{"SaveProjAs", ki.Props{
+				"shortcut": gi.KeyFunMenuSaveAs,
+				"label":    "Save Project As...",
+				"desc":     "Save GoPi project to file standard JSON-formatted file",
+				"Args": ki.PropSlice{
+					{"File Name", ki.Props{
+						"default-field": "Prefs.ProjFile",
+						"ext":           ".pip",
+					}},
+				},
+			}},
+			{"sep-parse", ki.BlankProp{}},
+			{"OpenParser", ki.Props{
+				"shortcut": gi.KeyFunMenuOpenAlt1,
+				"label":    "Open Parser...",
 				"desc":     "Open lexer and parser rules from standard JSON-formatted file",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
-						"default-field": "Filename",
+						"default-field": "Prefs.ParserFile",
 						"ext":           ".pi",
 					}},
 				},
 			}},
-			{"Save", ki.Props{
-				"shortcut": gi.KeyFunMenuSave,
-				"desc":     "Save lexer and parser rules from file standard JSON-formatted file",
+			{"SaveParser", ki.Props{
+				"shortcut": gi.KeyFunMenuSaveAlt,
+				"desc":     "Save lexer and parser rules to file standard JSON-formatted file",
 				"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
 					pv := pvi.(*PiView)
-					act.SetActiveState( /* pv.Changed && */ pv.Filename != "")
+					act.SetActiveState( /* pv.Changed && */ pv.Prefs.ParserFile != "")
 				}),
 			}},
-			{"SaveAs", ki.Props{
-				"shortcut": gi.KeyFunMenuSaveAs,
-				"label":    "Save As...",
-				"desc":     "Save As lexer and parser rules from file standard JSON-formatted file",
+			{"SaveParserAs", ki.Props{
+				"label": "Save Parser As...",
+				"desc":  "Save As lexer and parser rules to file standard JSON-formatted file",
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
-						"default-field": "Filename",
+						"default-field": "Prefs.ParserFile",
 						"ext":           ".pi",
 					}},
 				},
@@ -1073,13 +1200,13 @@ func (pv *PiView) CloseWindowReq() bool {
 	}
 	gi.ChoiceDialog(pv.Viewport, gi.DlgOpts{Title: "Close Project: There are Unsaved Changes",
 		Prompt: fmt.Sprintf("In Project: %v There are <b>unsaved changes</b> -- do you want to save or cancel closing this project and review?", pv.Nm)},
-		[]string{"Cancel", "Save Parser", "Close Without Saving"},
+		[]string{"Cancel", "Save Proj", "Close Without Saving"},
 		pv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
 				// do nothing, will have returned false already
 			case 1:
-				pv.Save()
+				pv.SaveProj()
 			case 2:
 				pv.ParentWindow().OSWin.Close() // will not be prompted again!
 			}
