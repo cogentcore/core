@@ -2558,6 +2558,10 @@ func (tv *TextView) OfferCorrect() bool {
 	}
 	tv.SelectReg = sel
 	wb := string(tbe.ToBytes())
+	wbn := strings.TrimLeft(wb, " \t")
+	if len(wb) != len(wbn) {
+		return false // SelectWord captures leading whitespace - don't offer if there is leading whitespace
+	}
 	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
 	if knwn || err != nil {
 		return false
