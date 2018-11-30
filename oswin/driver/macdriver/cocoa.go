@@ -619,9 +619,9 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	}
 
 	scShift := (mods&1<<uint32(key.Shift) != 0)
-	scControl := (mods&2<<uint32(key.Control) != 0)
-	scAlt := (mods&4<<uint32(key.Alt) != 0)
-	scCommand := (mods&8<<uint32(key.Meta) != 0)
+	scControl := (mods&1<<uint32(key.Control) != 0)
+	scAlt := (mods&1<<uint32(key.Alt) != 0)
+	scCommand := (mods&1<<uint32(key.Meta) != 0)
 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
