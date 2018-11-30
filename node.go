@@ -72,7 +72,7 @@ func (n *Node) This() Ki {
 }
 
 func (n *Node) Init(this Ki) {
-	kitype := KiType()
+	kitype := KiType
 	n.ClearFlagMask(int64(UpdateFlagsMask))
 	if n.Ths != this {
 		n.Ths = this
@@ -130,7 +130,7 @@ func (n *Node) Embed(t reflect.Type) Ki {
 }
 
 func (n *Node) BaseIface() reflect.Type {
-	return KiType()
+	return KiType
 }
 
 func (n *Node) Name() string {
@@ -319,7 +319,7 @@ func (n *Node) KiFieldByName(name string) (Ki, bool) {
 	if !f.IsValid() {
 		return nil, false
 	}
-	if !kit.EmbedImplements(f.Type(), KiType()) {
+	if !kit.EmbedImplements(f.Type(), KiType) {
 		return nil, false
 	}
 	return kit.PtrValue(f).Interface().(Ki), true
@@ -952,7 +952,7 @@ func (n *Node) Fields() []uintptr {
 		return foff.([]uintptr)
 	}
 	foff := make([]uintptr, 0)
-	kitype := KiType()
+	kitype := KiType
 	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
 			foff = append(foff, field.Offset)
@@ -1381,7 +1381,7 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 // CopyFieldsFrom copies from primary fields of source object,
 // recursively following anonymous embedded structs
 func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
-	kitype := KiType()
+	kitype := KiType
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
 	sv := kit.NonPtrValue(reflect.ValueOf(from))
 	typ := tv.Type()
