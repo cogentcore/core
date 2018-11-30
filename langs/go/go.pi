@@ -2014,7 +2014,7 @@
         "type": "parse.Rule",
         "name": "ImportRules",
         "type": "parse.Rule",
-        "name": "ConstRules"
+        "name": "DeclRules"
       },
       {
         "Nm": "File",
@@ -2022,7 +2022,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 4,
+            "n": 5,
             "type": "parse.Rule",
             "name": "PackageSpec",
             "type": "parse.Rule",
@@ -2030,7 +2030,9 @@
             "type": "parse.Rule",
             "name": "Consts",
             "type": "parse.Rule",
-            "name": "Types"
+            "name": "Types",
+            "type": "parse.Rule",
+            "name": "Vars"
           },
           {
             "Nm": "PackageSpec",
@@ -2056,7 +2058,7 @@
             "Props": null,
             "Kids": null,
             "Desc": "",
-            "Rule": "'key:const' ConstN 'EOS'",
+            "Rule": "'key:const' ConstDeclN 'EOS'",
             "Ast": "AnchorAst"
           },
           {
@@ -2066,6 +2068,15 @@
             "Kids": null,
             "Desc": "",
             "Rule": "'key:type' TypeDeclN 'EOS'",
+            "Ast": "AnchorAst"
+          },
+          {
+            "Nm": "Vars",
+            "UniqueNm": "Vars",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "'key:var' VarDeclN 'EOS'",
             "Ast": "AnchorAst"
           }
         ],
@@ -2760,7 +2771,7 @@
             "Props": null,
             "Kids": null,
             "Desc": "",
-            "Rule": "'{' ElementList '}'",
+            "Rule": "'{' ElementList '}' 'EOS'",
             "Ast": "AnchorAst"
           },
           {
@@ -2781,7 +2792,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "KeyedElement ',' ElementList",
+                "Rule": "KeyedElement ',' ?ElementList",
                 "Ast": "NoAst"
               },
               {
@@ -3563,20 +3574,24 @@
         "Ast": "NoAst"
       },
       {
-        "Nm": "ConstRules",
-        "UniqueNm": "ConstRules",
+        "Nm": "DeclRules",
+        "UniqueNm": "DeclRules",
         "Props": null,
         "Kids": [
           {
-            "n": 2,
+            "n": 4,
             "type": "parse.Rule",
-            "name": "ConstN",
+            "name": "ConstDeclN",
             "type": "parse.Rule",
-            "name": "ConstList"
+            "name": "ConstList",
+            "type": "parse.Rule",
+            "name": "VarDeclN",
+            "type": "parse.Rule",
+            "name": "VarList"
           },
           {
-            "Nm": "ConstN",
-            "UniqueNm": "ConstN",
+            "Nm": "ConstDeclN",
+            "UniqueNm": "ConstDeclN",
             "Props": null,
             "Kids": [
               {
@@ -3642,6 +3657,76 @@
             "Kids": null,
             "Desc": "",
             "Rule": "ConstOpts ?ConstList",
+            "Ast": "NoAst"
+          },
+          {
+            "Nm": "VarDeclN",
+            "UniqueNm": "VarDeclN",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "VarMulti",
+                "type": "parse.Rule",
+                "name": "VarOpts"
+              },
+              {
+                "Nm": "VarMulti",
+                "UniqueNm": "VarMulti",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' ConstList ')'",
+                "Ast": "NoAst"
+              },
+              {
+                "Nm": "VarOpts",
+                "UniqueNm": "VarOpts",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 2,
+                    "type": "parse.Rule",
+                    "name": "VarSpecExpr",
+                    "type": "parse.Rule",
+                    "name": "VarSpec"
+                  },
+                  {
+                    "Nm": "VarSpecExpr",
+                    "UniqueNm": "VarSpecExpr",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Rule": "NameList ?Type '=' Expr 'EOS'",
+                    "Ast": "AnchorAst"
+                  },
+                  {
+                    "Nm": "VarSpec",
+                    "UniqueNm": "VarSpec",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "only a name and type, no expression",
+                    "Rule": "NameList Type 'EOS'",
+                    "Ast": "AnchorAst"
+                  }
+                ],
+                "Desc": "different types of var expressions",
+                "Rule": "",
+                "Ast": "NoAst"
+              }
+            ],
+            "Desc": "N = switch between 1 or multi",
+            "Rule": "",
+            "Ast": "NoAst"
+          },
+          {
+            "Nm": "VarList",
+            "UniqueNm": "VarList",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Rule": "VarOpts ?VarList",
             "Ast": "NoAst"
           }
         ],

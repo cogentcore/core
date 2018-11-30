@@ -18,7 +18,7 @@ import (
 	"github.com/goki/pi/piv"
 )
 */
-
+/*
 const parn = 1 + (2 + 3)
 
 const Precedence1 = 25 / (3.14 + -(2 + 4)) > ((2 - 5) * 3)
@@ -44,8 +44,17 @@ const (
 	// position will be advanced to just after
 	Name
 )
+*/
 
-var Peachy int
+var Typeo int
+
+var ExprVar = "testofit"
+
+var ExprTypeVar map[string]string 
+
+var ExprInitMap = map[string]string{
+	"does": {Val: "this work?", Bad: "dkfa"},
+}
 
 func main() {
 	gimain.Main(func() {
