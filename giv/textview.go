@@ -3028,16 +3028,15 @@ func (tv *TextView) ClearScopelights() {
 	if len(tv.Scopelights) == 0 {
 		return
 	}
-	if len(tv.Scopelights) > 2 {
-		fmt.Println("programmer error: tv.ScopeLights > 2")
-	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
-	l1 := tv.Scopelights[0].Start.Ln
-	l2 := tv.Scopelights[1].Start.Ln
+	sl := make([]TextRegion, len(tv.Scopelights))
+	copy(sl, tv.Scopelights)
 	tv.Scopelights = tv.Scopelights[:0]
-	tv.RenderLines(l1, l1)
-	tv.RenderLines(l2, l2)
+	for _, si := range sl {
+		ln := si.Start.Ln
+		tv.RenderLines(ln, ln)
+	}
 }
 
 // RenderRegionBox renders a region in background color according to given state style

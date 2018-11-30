@@ -722,6 +722,7 @@ func (fl *FontLib) FontAvail(fontnm string) bool {
 // FontInfoExample is example text to demonstrate fonts -- from Inkscape plus extra
 var FontInfoExample = "AaBbCcIiPpQq12369$€¢?.:/()àáâãäåæç日本中国⇧⌘"
 
+// Init initializes the font library if it hasn't been yet
 func (fl *FontLib) Init() {
 	if fl.FontPaths == nil {
 		loadFontMu.Lock()
@@ -731,6 +732,7 @@ func (fl *FontLib) Init() {
 		fl.FontInfo = make([]FontInfo, 0, 1000)
 		fl.Faces = make(map[string]map[int]font.Face)
 		loadFontMu.Unlock()
+		return // no paths to load from yet
 	}
 	loadFontMu.RLock()
 	sz := len(fl.FontsAvail)
