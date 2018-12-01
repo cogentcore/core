@@ -875,6 +875,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 	if !ok {
 		return
 	}
+	myidx += rel
 	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
 		gi.DlgOpts{Title: actNm, Prompt: "Number and Type of Items to Insert:"},
 		tv.Par.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -887,7 +888,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				var ski ki.Ki
 				for i := 0; i < n; i++ {
 					nm := fmt.Sprintf("New%v%v", typ.Name(), myidx+rel+i)
-					nki := par.InsertNewChild(typ, myidx+1+i, nm)
+					nki := par.InsertNewChild(typ, myidx+i, nm)
 					if i == n-1 {
 						ski = nki
 					}
@@ -1217,6 +1218,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	if !ok {
 		return
 	}
+	myidx += rel
 	updt := par.UpdateStart()
 	sz := len(sl)
 	var ski ki.Ki
@@ -1224,7 +1226,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 		if _, has := par.ChildByName(ns.Name(), 0); has {
 			ns.SetName(ns.Name() + "_Copy")
 		}
-		par.InsertChild(ns, myidx+rel+i)
+		par.InsertChild(ns, myidx+i)
 		if i == sz-1 {
 			ski = ns
 		}

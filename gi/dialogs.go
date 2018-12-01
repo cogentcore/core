@@ -580,7 +580,12 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	n := int(ntf.Value)
 	trow := frame.KnownChildByName("t-row", 0).(*Layout)
 	typs := trow.KnownChildByName("types", 0).(*ComboBox)
-	typ := typs.CurVal.(reflect.Type)
+	var typ reflect.Type
+	if typs.CurVal != nil {
+		typ = typs.CurVal.(reflect.Type)
+	} else {
+		log.Printf("gi.NewKiDialogValues: type is nil\n")
+	}
 	return n, typ
 }
 
