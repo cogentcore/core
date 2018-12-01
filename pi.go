@@ -148,7 +148,7 @@ func (pr *Parser) ParserInit() bool {
 // ParseNext does next step of parsing -- returns lowest-level rule that matched
 // or nil if no match error or at end
 func (pr *Parser) ParseNext() *parse.Rule {
-	mrule := pr.Parser.Parse(&pr.ParseState, nil, nil)
+	mrule := pr.Parser.StartParse(&pr.ParseState)
 	return mrule
 }
 

@@ -19,14 +19,18 @@ import (
 )
 */
 /*
-const parn = 1 + (2 + 3)
+const Prec1 = ((2-1) * 3)
 
-const Precedence1 = 25 / (3.14 + -(2 + 4)) > ((2 - 5) * 3)
+const (
+	parn = 1 + (2 + 3)
+	PrecedenceS2 = 25 / (3.14 + -(2 + 4)) > ((2 - 5) * 3)
+)
 
 const Precedence2 = -(3.14 + 2 * 4)
+*/
 
+/*
 type MyFloat float64
-
 
 type AStruct struct {
 	AField int
@@ -44,7 +48,6 @@ const (
 	// position will be advanced to just after
 	Name
 )
-*/
 
 var Typeo int
 
@@ -55,6 +58,7 @@ var ExprTypeVar map[string]string
 var ExprInitMap = map[string]string{
 	"does": {Val: "this work?", Bad: "dkfa"},
 }
+*/
 
 func main() {
 	gimain.Main(func() {

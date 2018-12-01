@@ -13,13 +13,11 @@ import (
 
 // parse.State is the state maintained for parsing
 type State struct {
-	Src        *lex.File     `desc:"source and lexed version of source we're parsing"`
-	Ast        *Ast          `desc:"root of the Ast abstract syntax tree we're updating"`
-	EosPos     []lex.Pos     `desc:"positions *in token coordinates* of the EOS markers generated"`
-	Pos        lex.Pos       `desc:"the current lex token position"`
-	ScopeStack []lex.Reg     `desc:"scope stack  *in token coordinates* of regions for looking for tokens"`
-	State      []string      `desc:"state stack"`
-	Errs       lex.ErrorList `desc:"any error messages accumulated during parsing specifically"`
+	Src    *lex.File     `desc:"source and lexed version of source we're parsing"`
+	Ast    *Ast          `desc:"root of the Ast abstract syntax tree we're updating"`
+	EosPos []lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
+	Pos    lex.Pos       `desc:"the current lex token position"`
+	Errs   lex.ErrorList `desc:"any error messages accumulated during parsing specifically"`
 }
 
 // Init initializes the state at start of parsing
@@ -28,7 +26,6 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos []lex.Pos) {
 	ps.Ast = ast
 	ps.Ast.DeleteChildren(true)
 	ps.EosPos = eospos
-	ps.State = nil
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
 	ps.Errs.Reset()
 }
@@ -161,48 +158,4 @@ func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
 	chAst := parAst.AddNewChild(KiT_Ast, rule).(*Ast)
 	chAst.SetTokReg(reg, ps.Src)
 	return chAst
-}
-
-func (ps *State) PushState(st string) {
-	ps.State = append(ps.State, st)
-}
-
-func (ps *State) CurState() string {
-	sz := len(ps.State)
-	if sz == 0 {
-		return ""
-	}
-	return ps.State[sz-1]
-}
-
-func (ps *State) PopState() string {
-	sz := len(ps.State)
-	if sz == 0 {
-		return ""
-	}
-	st := ps.CurState()
-	ps.State = ps.State[:sz-1]
-	return st
-}
-
-func (ps *State) PushScope(reg lex.Reg) {
-	ps.ScopeStack = append(ps.ScopeStack, reg)
-}
-
-func (ps *State) CurScope() (lex.Reg, bool) {
-	sz := len(ps.ScopeStack)
-	if sz == 0 {
-		return lex.Reg{}, false
-	}
-	return ps.ScopeStack[sz-1], true
-}
-
-func (ps *State) PopScope() (lex.Reg, bool) {
-	sz := len(ps.ScopeStack)
-	if sz == 0 {
-		return lex.Reg{}, false
-	}
-	st, _ := ps.CurScope()
-	ps.ScopeStack = ps.ScopeStack[:sz-1]
-	return st, true
 }

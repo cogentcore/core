@@ -3,10 +3,10 @@
   "ParserFile": "/Users/oreilly/goki/pi/langs/go/go.pi",
   "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
   "TraceOpts": {
-    "On": false,
-    "Rules": "SliceType",
+    "On": true,
+    "Rules": "",
     "Match": true,
-    "NoMatch": true,
+    "NoMatch": false,
     "Run": true,
     "ScopeSrc": true
   }

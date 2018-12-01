@@ -770,7 +770,7 @@ func (pv *PiView) ConfigSplitView() {
 		pv.LexBuf.Opts.LineNos = true
 		pv.LexBuf.Opts.TabSize = 4
 
-		split.SetSplits(.15, .15, .25, .15, .3)
+		split.SetSplits(.15, .15, .15, .15, .4)
 		split.UpdateEnd(updt)
 
 		pv.OpenConsoleTab()

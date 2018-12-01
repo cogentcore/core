@@ -28,7 +28,11 @@ var Trace TraceOpts
 
 // Init intializes tracer after any changes
 func (pt *TraceOpts) Init() {
-	pt.RulesList = strings.Split(pt.Rules, " ")
+	if pt.Rules == "" {
+		pt.RulesList = nil
+	} else {
+		pt.RulesList = strings.Split(pt.Rules, " ")
+	}
 }
 
 // CheckRule checks if given rule should be traced
