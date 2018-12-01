@@ -110,6 +110,7 @@ func (pv *PiView) SaveProj() {
 	pv.GetPrefs()
 	pv.Prefs.SaveJSON(pv.Prefs.ProjFile)
 	pv.Changed = false
+	pv.SetStatus(fmt.Sprintf("Project Saved to: %v", pv.Prefs.ProjFile))
 	pv.UpdateSig() // notify our editor
 }
 
@@ -122,6 +123,7 @@ func (pv *PiView) SaveProjAs(filename gi.FileName) {
 	pv.GetPrefs()
 	pv.Prefs.SaveJSON(filename)
 	pv.Changed = false
+	pv.SetStatus(fmt.Sprintf("Project Saved to: %v", pv.Prefs.ProjFile))
 	pv.UpdateSig() // notify our editor
 }
 
@@ -158,6 +160,7 @@ func (pv *PiView) SaveParser() {
 	}
 	pv.Parser.SaveJSON(string(pv.Prefs.ParserFile))
 	pv.Changed = false
+	pv.SetStatus(fmt.Sprintf("Parser Saved to: %v", pv.Prefs.ParserFile))
 	pv.UpdateSig() // notify our editor
 }
 
@@ -166,6 +169,7 @@ func (pv *PiView) SaveParserAs(filename gi.FileName) {
 	pv.Parser.SaveJSON(string(filename))
 	pv.Changed = false
 	pv.Prefs.ParserFile = filename
+	pv.SetStatus(fmt.Sprintf("Parser Saved to: %v", pv.Prefs.ParserFile))
 	pv.UpdateSig() // notify our editor
 }
 
@@ -180,6 +184,7 @@ func (pv *PiView) SaveTestAs(filename gi.FileName) {
 	pv.TestBuf.EditDone()
 	pv.TestBuf.SaveFile(filename)
 	pv.Prefs.TestFile = filename
+	pv.SetStatus(fmt.Sprintf("TestFile Saved to: %v", pv.Prefs.TestFile))
 }
 
 // SetStatus updates the statusbar label with given message, along with other status info
@@ -353,8 +358,14 @@ func (pv *PiView) ParseStopped() {
 		pv.SetStatus("The Parser is now at the end of available text")
 	} else {
 		pv.SetStatus("Parse Error!")
-		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-			Prompt: "The Parser has stopped due to errors\n" + pv.Parser.ParseErrString()}, true, false, nil, nil)
+		errs := pv.Parser.ParseErrString()
+		if errs != "" {
+			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
+				Prompt: "The Parser has stopped due to errors\n" + errs}, true, false, nil, nil)
+		} else {
+			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
+				Prompt: "The Parser has stopped because it cannot process the source at this point\n" + pv.Parser.ParseNextSrcLine()}, true, false, nil, nil)
+		}
 	}
 }
 
@@ -365,7 +376,7 @@ func (pv *PiView) ParseNext() *parse.Rule {
 	if mrule == nil {
 		pv.ParseStopped()
 	} else {
-		pv.SelectParseRule(mrule)
+		// pv.SelectParseRule(mrule) // not that informative
 		if pv.Parser.ParseHasErrs() { // can have errs even when matching..
 			pv.ParseStopped()
 		}

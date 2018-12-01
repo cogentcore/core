@@ -4,7 +4,6 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-/*
 package main
 
 import "github.com/goki/gi/gi"
@@ -17,7 +16,6 @@ import (
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
-*/
 
 const Prec1 = ((2-1) * 3)
 
@@ -29,7 +27,6 @@ const (
 const Precedence2 = -(3.14 + 2 * 4)
 
 
-/*
 type MyFloat float64
 
 type AStruct struct {
@@ -58,12 +55,14 @@ var ExprTypeVar map[string]string
 var ExprInitMap = map[string]string{
 	"does": {Val: "this work?", Bad: "dkfa"},
 }
-*/
+
 
 func main() {
-	gimain.Main(func() {
-		mainrun()
-	})
+//	a <- b
+//	c++
+	c[3] = 42 * 17
+//	bf := a * b + c[32]
+//	d += funcall(a, b, c...)
 }
 
 func mainrun() {

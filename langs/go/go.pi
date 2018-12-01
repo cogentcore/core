@@ -2112,7 +2112,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 14,
+            "n": 18,
             "type": "parse.Rule",
             "name": "QualName",
             "type": "parse.Rule",
@@ -2140,7 +2140,15 @@
             "type": "parse.Rule",
             "name": "ElementList",
             "type": "parse.Rule",
-            "name": "Key"
+            "name": "Key",
+            "type": "parse.Rule",
+            "name": "RecvType",
+            "type": "parse.Rule",
+            "name": "SliceExpr",
+            "type": "parse.Rule",
+            "name": "ArgsExpr",
+            "type": "parse.Rule",
+            "name": "ArgsList"
           },
           {
             "Nm": "QualName",
@@ -2262,25 +2270,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 4,
-                "type": "parse.Rule",
-                "name": "ParenExpr",
+                "n": 2,
                 "type": "parse.Rule",
                 "name": "BinExpr",
                 "type": "parse.Rule",
-                "name": "UnryExpr",
-                "type": "parse.Rule",
-                "name": "PrimExpr"
-              },
-              {
-                "Nm": "ParenExpr",
-                "UniqueNm": "ParenExpr",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Rule": "'(' Expr ')'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
+                "name": "UnryExpr"
               },
               {
                 "Nm": "BinExpr",
@@ -2301,16 +2295,6 @@
                 "Rule": "UnaryExpr",
                 "Ast": "NoAst",
                 "OptTokMap": false
-              },
-              {
-                "Nm": "PrimExpr",
-                "UniqueNm": "PrimExpr",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Rule": "PrimaryExpr",
-                "Ast": "NoAst",
-                "OptTokMap": false
               }
             ],
             "Desc": "The full set of possible expressions",
@@ -2324,7 +2308,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 4,
+                "n": 7,
                 "type": "parse.Rule",
                 "name": "PosExpr",
                 "type": "parse.Rule",
@@ -2332,7 +2316,13 @@
                 "type": "parse.Rule",
                 "name": "UnaryXorExpr",
                 "type": "parse.Rule",
-                "name": "NotExpr"
+                "name": "NotExpr",
+                "type": "parse.Rule",
+                "name": "DePtrExpr",
+                "type": "parse.Rule",
+                "name": "AddrExpr",
+                "type": "parse.Rule",
+                "name": "PrimExpr"
               },
               {
                 "Nm": "PosExpr",
@@ -2340,7 +2330,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "'+' Expr",
+                "Rule": "'+' UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2350,7 +2340,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "'-' Expr",
+                "Rule": "'-' UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2360,7 +2350,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "'^' Expr",
+                "Rule": "'^' UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2370,8 +2360,38 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "'!' Expr",
+                "Rule": "'!' UnaryExpr",
                 "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "DePtrExpr",
+                "UniqueNm": "DePtrExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'*' UnaryExpr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "AddrExpr",
+                "UniqueNm": "AddrExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'\u0026' UnaryExpr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "PrimExpr",
+                "UniqueNm": "PrimExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "PrimaryExpr",
+                "Ast": "NoAst",
                 "OptTokMap": false
               }
             ],
@@ -2616,9 +2636,81 @@
             "Props": null,
             "Kids": [
               {
-                "n": 1,
+                "n": 7,
+                "type": "parse.Rule",
+                "name": "ParenExpr",
+                "type": "parse.Rule",
+                "name": "Conversion",
+                "type": "parse.Rule",
+                "name": "TypeAssert",
+                "type": "parse.Rule",
+                "name": "Selector",
+                "type": "parse.Rule",
+                "name": "Slice",
+                "type": "parse.Rule",
+                "name": "FunCall",
                 "type": "parse.Rule",
                 "name": "Oper"
+              },
+              {
+                "Nm": "ParenExpr",
+                "UniqueNm": "ParenExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' Expr ')'",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Conversion",
+                "UniqueNm": "Conversion",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Type '(' Expr ?',' ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "TypeAssert",
+                "UniqueNm": "TypeAssert",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "PrimaryExpr '.' '(' Type ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Selector",
+                "UniqueNm": "Selector",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "PrimaryExpr '.' Name",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Slice",
+                "UniqueNm": "Slice",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "PrimaryExpr '[' SliceExpr ']'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "FunCall",
+                "UniqueNm": "FunCall",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "PrimaryExpr '(' ArgsExpr ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
               },
               {
                 "Nm": "Oper",
@@ -2642,9 +2734,23 @@
             "Props": null,
             "Kids": [
               {
-                "n": 1,
+                "n": 3,
                 "type": "parse.Rule",
-                "name": "Lit"
+                "name": "OpName",
+                "type": "parse.Rule",
+                "name": "Lit",
+                "type": "parse.Rule",
+                "name": "MethodExpr"
+              },
+              {
+                "Nm": "OpName",
+                "UniqueNm": "OpName",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "QualName",
+                "Ast": "NoAst",
+                "OptTokMap": false
               },
               {
                 "Nm": "Lit",
@@ -2654,6 +2760,16 @@
                 "Desc": "",
                 "Rule": "Literal",
                 "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "MethodExpr",
+                "UniqueNm": "MethodExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "RecvType '.' Name",
+                "Ast": "AnchorAst",
                 "OptTokMap": false
               }
             ],
@@ -3012,6 +3128,194 @@
             "Desc": "",
             "Rule": "",
             "Ast": "AnchorAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "RecvType",
+            "UniqueNm": "RecvType",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "RecvPtrType",
+                "type": "parse.Rule",
+                "name": "ParenRecvType",
+                "type": "parse.Rule",
+                "name": "RecvTp"
+              },
+              {
+                "Nm": "RecvPtrType",
+                "UniqueNm": "RecvPtrType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' '*' TypeName ')'",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ParenRecvType",
+                "UniqueNm": "ParenRecvType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "'(' RecvType ')'",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "RecvTp",
+                "UniqueNm": "RecvTp",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "TypeName",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "SliceExpr",
+            "UniqueNm": "SliceExpr",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "SliceThree",
+                "type": "parse.Rule",
+                "name": "SliceTwo",
+                "type": "parse.Rule",
+                "name": "SliceOne"
+              },
+              {
+                "Nm": "SliceThree",
+                "UniqueNm": "SliceThree",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "?Expr ':' Expr ':' Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SliceTwo",
+                "UniqueNm": "SliceTwo",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "?Expr ':' ?Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SliceOne",
+                "UniqueNm": "SliceOne",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "ArgsExpr",
+            "UniqueNm": "ArgsExpr",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ArgsEllipsis",
+                "type": "parse.Rule",
+                "name": "Args"
+              },
+              {
+                "Nm": "ArgsEllipsis",
+                "UniqueNm": "ArgsEllipsis",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "ArgsList '...' ?','",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Args",
+                "UniqueNm": "Args",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "?ArgsList ?','",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "ArgsList",
+            "UniqueNm": "ArgsList",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "ArgTypeExpr",
+                "type": "parse.Rule",
+                "name": "ArgType",
+                "type": "parse.Rule",
+                "name": "ArgsExprs"
+              },
+              {
+                "Nm": "ArgTypeExpr",
+                "UniqueNm": "ArgTypeExpr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Type ',' ExprList",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ArgType",
+                "UniqueNm": "ArgType",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "Type",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ArgsExprs",
+                "UniqueNm": "ArgsExprs",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Rule": "ExprList",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              }
+            ],
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
             "OptTokMap": false
           }
         ],
@@ -3432,37 +3736,9 @@
             "Nm": "Signature",
             "UniqueNm": "Signature",
             "Props": null,
-            "Kids": [
-              {
-                "n": 2,
-                "type": "parse.Rule",
-                "name": "ParamsResult",
-                "type": "parse.Rule",
-                "name": "ParamsOnly"
-              },
-              {
-                "Nm": "ParamsResult",
-                "UniqueNm": "ParamsResult",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Rule": "Params Result",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "ParamsOnly",
-                "UniqueNm": "ParamsOnly",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Rule": "Params",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              }
-            ],
+            "Kids": null,
             "Desc": "",
-            "Rule": "",
+            "Rule": "Params ?Result",
             "Ast": "NoAst",
             "OptTokMap": false
           },
@@ -3558,15 +3834,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 4,
+                "n": 2,
                 "type": "parse.Rule",
                 "name": "ParamNameEllipsis",
                 "type": "parse.Rule",
-                "name": "ParamName",
-                "type": "parse.Rule",
-                "name": "AnonParamEllipsis",
-                "type": "parse.Rule",
-                "name": "AnonParam"
+                "name": "ParamName"
               },
               {
                 "Nm": "ParamNameEllipsis",
@@ -3574,7 +3846,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "NameList '...' Type",
+                "Rule": "?NameList '...' Type",
                 "Ast": "NoAst",
                 "OptTokMap": false
               },
@@ -3584,27 +3856,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "NameList Type",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "AnonParamEllipsis",
-                "UniqueNm": "AnonParamEllipsis",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Rule": "'...' Type",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "AnonParam",
-                "UniqueNm": "AnonParam",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Rule": "Type",
+                "Rule": "?NameList Type",
                 "Ast": "NoAst",
                 "OptTokMap": false
               }
@@ -3658,7 +3910,7 @@
             "Props": null,
             "Kids": null,
             "Desc": "",
-            "Rule": "'(' ParamsList ')'",
+            "Rule": "'(' ?ParamsList ')'",
             "Ast": "AnchorAst",
             "OptTokMap": false
           }
@@ -3704,8 +3956,8 @@
             "Props": null,
             "Kids": null,
             "Desc": "",
-            "Rule": "'{' StmtList '}' 'EOS'",
-            "Ast": "NoAst",
+            "Rule": "'{' ?StmtList '}'",
+            "Ast": "AnchorAst",
             "OptTokMap": false
           },
           {
@@ -3936,7 +4188,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "-ExprList '=' ExprList",
+                "Rule": "ExprList '=' ExprList",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3946,7 +4198,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "-ExprList ':=' ExprList",
+                "Rule": "ExprList ':=' ExprList",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3956,7 +4208,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "-ExprList 'OpMathAsgn' ExprList",
+                "Rule": "ExprList 'OpMathAsgn' ExprList",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3966,7 +4218,7 @@
                 "Props": null,
                 "Kids": null,
                 "Desc": "",
-                "Rule": "-ExprList 'OpBitAsgn' ExprList",
+                "Rule": "ExprList 'OpBitAsgn' ExprList",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               }

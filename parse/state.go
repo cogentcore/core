@@ -36,12 +36,35 @@ func (ps *State) Error(pos lex.Pos, msg string) {
 		pos = ps.Src.TokenSrcPos(pos).St
 	}
 	ps.Errs.Add(pos, ps.Src.Filename, "Parser: "+msg)
-	fmt.Println("ERROR: " + ps.Errs[len(ps.Errs)-1].Error())
+	if GuiActive {
+		fmt.Println("ERROR: " + ps.Errs[len(ps.Errs)-1].Error())
+	} else {
+		fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
+	}
 }
 
 // AtEof returns true if current position is at end of file
 func (ps *State) AtEof() bool {
 	return ps.Pos.Ln >= ps.Src.NLines()
+}
+
+// NextSrcLine returns the next line of text
+func (ps *State) NextSrcLine() string {
+	sp, ok := ps.Src.ValidTokenPos(ps.Pos)
+	if !ok {
+		return ""
+	}
+	ep := sp
+	ep.Ch = ps.Src.NTokens(ep.Ln)
+	if ep.Ch == sp.Ch+1 { // only one
+		nep, ok := ps.Src.ValidTokenPos(ep)
+		if ok {
+			ep = nep
+			ep.Ch = ps.Src.NTokens(ep.Ln)
+		}
+	}
+	reg := lex.Reg{St: sp, Ed: ep}
+	return ps.Src.TokenRegSrc(reg)
 }
 
 // MatchLex is our optimized matcher method, matching tkey depth as well
@@ -110,7 +133,7 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
 	tkey.Depth = ps.Src.TokenDepth(tok, cp)
-	for reg.St.IsLess(cp) {
+	for reg.St.IsLess(cp) || cp == reg.St {
 		lx := ps.Src.LexAt(cp)
 		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {
 			if isAmbigUnary { // make sure immed prior is not also!

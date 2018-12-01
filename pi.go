@@ -157,6 +157,11 @@ func (pr *Parser) ParseAtEnd() bool {
 	return pr.ParseState.AtEof()
 }
 
+// ParseNextSrcLine returns the next line of source that the parser is currently at
+func (pr *Parser) ParseNextSrcLine() string {
+	return pr.ParseState.NextSrcLine()
+}
+
 // ParseHasErrs returns true if there were errors from parsing
 func (pr *Parser) ParseHasErrs() bool {
 	return len(pr.ParseState.Errs) > 0
