@@ -113,23 +113,24 @@ var TextViewProps = ki.Props{
 type TextViewSignals int64
 
 const (
-	// return was pressed and an edit was completed -- data is the text
+	// TextViewDone signal indicates return was pressed and an edit was completed -- data is the text
 	TextViewDone TextViewSignals = iota
 
-	// some text was selected (for Inactive state, selection is via WidgetSig)
+	// TextViewSelected signal indicates some text was selected (for Inactive state, selection is via WidgetSig)
 	TextViewSelected
 
-	// cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos
+	// TextViewCursorMoved signal indicates cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos
 	TextViewCursorMoved
 
-	// ISearch emitted for every update of interactive search process -- see
+	// TextViewISearch is emitted for every update of interactive search process -- see
 	// ISearch.* members for current state
 	TextViewISearch
 
-	// QReplace emitted for every update of query-replace process -- see
+	// TextViewQReplace is emitted for every update of query-replace process -- see
 	// QReplace.* members for current state
 	TextViewQReplace
 
+	// TextViewSignalsN is the number of TextViewSignals
 	TextViewSignalsN
 )
 
@@ -139,21 +140,22 @@ const (
 type TextViewStates int32
 
 const (
-	// normal state -- there but not being interacted with
+	// TextViewActive is the normal state -- there but not being interacted with
 	TextViewActive TextViewStates = iota
 
-	// textfield is the focus -- will respond to keyboard input
+	// TextViewFocus states means textvieww is the focus -- will respond to keyboard input
 	TextViewFocus
 
-	// inactive -- not editable
+	// TextViewInactive means the textview is inactive -- not editable
 	TextViewInactive
 
-	// selected
+	// TextViewSel means the text region is selected
 	TextViewSel
 
-	// highlighted
+	// TextViewHighlight means the text region is highlighted
 	TextViewHighlight
 
+	// TextViewStatesN is the number of textview states
 	TextViewStatesN
 )
 
@@ -187,8 +189,8 @@ const (
 )
 
 // IsFocusActive returns true if we have active focus for keyboard input
-func (tf *TextView) IsFocusActive() bool {
-	return tf.HasFlag(int(TextViewFocusActive))
+func (tv *TextView) IsFocusActive() bool {
+	return tv.HasFlag(int(TextViewFocusActive))
 }
 
 // Label returns the display label for this node, satisfying the Labeler interface
@@ -531,9 +533,8 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if inLayout {
 		tv.LinesSize = nwSz
 		return tv.SetSize()
-	} else {
-		return tv.ResizeIfNeeded(nwSz)
 	}
+	return tv.ResizeIfNeeded(nwSz)
 }
 
 // SetSize updates our size only if larger than our allocation
@@ -2354,6 +2355,7 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	tv.SetCursorCol(tv.CursorPos)
 }
 
+// ContextMenu displays the context menu with options dependent on situation
 func (tv *TextView) ContextMenu() {
 	if !tv.HasSelection() && tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
 		if tv.Buf.SpellCorrect != nil {
@@ -2365,10 +2367,12 @@ func (tv *TextView) ContextMenu() {
 	tv.WidgetBase.ContextMenu()
 }
 
+// ContextMenuPos returns the position of the context menu
 func (tv *TextView) ContextMenuPos() (pos image.Point) {
 	return tv.Viewport.Win.LastMousePos
 }
 
+// MakeContextMenu builds the textview context menu
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy},
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -2481,7 +2485,7 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 			r = txt[tp.Ch]
 		}
 		if atend || tv.IsWordBreak(r, rune(-1)) {
-			tp.Ch -= 1 // we are one past the end of word
+			tp.Ch-- // we are one past the end of word
 			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
 		}
@@ -2493,13 +2497,13 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		tv.SpellCheck(region)
 	case gi.KeyFunFocusNext:
 		cp := tv.CursorPos
-		cp.Ch -= 1 // we are one past the end of word
+		cp.Ch-- // we are one past the end of word
 		region := tv.WordBefore(cp)
 		tv.SpellCheck(region)
 	case gi.KeyFunNil:
 		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) && kt.Rune != '\'' { // contractions!
 			cp := tv.CursorPos
-			cp.Ch -= 1 // we are one past the end of word
+			cp.Ch-- // we are one past the end of word
 			region := tv.WordBefore(cp)
 			tv.SpellCheck(region)
 		} else {
@@ -2614,9 +2618,8 @@ func (tv *TextView) ScrollCursorInView() bool {
 	if tv.This().(gi.Node2D).IsVisible() {
 		curBBox := tv.CursorBBox(tv.CursorPos)
 		return tv.ScrollInView(curBBox)
-	} else {
-		return false
 	}
+	return false
 }
 
 // AutoScroll tells any parent scroll layout to scroll to do its autoscroll
@@ -4057,6 +4060,7 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	}
 }
 
+// MouseMoveEvent
 func (tv *TextView) MouseMoveEvent() {
 	if !tv.HasLinks {
 		return
@@ -4091,6 +4095,7 @@ func (tv *TextView) MouseMoveEvent() {
 	})
 }
 
+// TextViewEvents sets connections between mouse and key events and actions
 func (tv *TextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
@@ -4142,10 +4147,12 @@ func (tv *TextView) TextViewEvents() {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
+// Init2D calls Init on widget
 func (tv *TextView) Init2D() {
 	tv.Init2DWidget()
 }
 
+// StyleTextView sets the style of widget
 func (tv *TextView) StyleTextView() {
 	tv.Style2DWidget()
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
@@ -4159,25 +4166,27 @@ func (tv *TextView) StyleTextView() {
 	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
 }
 
+// Style2D calls StyleTextView and sets the style
 func (tv *TextView) Style2D() {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
 	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
 }
 
+// Size2D
 func (tv *TextView) Size2D(iter int) {
 	if iter > 0 {
 		return
+	}
+	tv.InitLayout2D()
+	if tv.LinesSize == image.ZP {
+		tv.LayoutAllLines(true)
 	} else {
-		tv.InitLayout2D()
-		if tv.LinesSize == image.ZP {
-			tv.LayoutAllLines(true)
-		} else {
-			tv.SetSize()
-		}
+		tv.SetSize()
 	}
 }
 
+// Layout2Dn
 func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.Layout2DBase(parBBox, true, iter) // init style
 	for i := 0; i < int(TextViewStatesN); i++ {
@@ -4194,6 +4203,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return false
 }
 
+// Render2D does some preliminary work and then calls render on children
 func (tv *TextView) Render2D() {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.FullReRenderIfNeeded() {
@@ -4242,10 +4252,12 @@ func (tv *TextView) Render2D() {
 	}
 }
 
+// ConnectEvents2D indirectly sets connections between mouse and key events and actions
 func (tv *TextView) ConnectEvents2D() {
 	tv.TextViewEvents()
 }
 
+// FocusChanged2D appropriate actions for various types of focus changes
 func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
