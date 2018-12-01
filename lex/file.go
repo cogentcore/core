@@ -62,6 +62,20 @@ func (tr Reg) IsNil() bool {
 	return !tr.St.IsLess(tr.Ed)
 }
 
+// TokenMap is a token map, for optimizing token exclusion
+type TokenMap map[token.Tokens]struct{}
+
+// Set sets map for given token
+func (tm TokenMap) Set(tok token.Tokens) {
+	tm[tok] = struct{}{}
+}
+
+// Has returns true if given token is in the map
+func (tm TokenMap) Has(tok token.Tokens) bool {
+	_, has := tm[tok]
+	return has
+}
+
 // File contains the contents of the file being parsed -- all kept in
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
@@ -195,6 +209,28 @@ func (fl *File) TokenDepth(tok token.Tokens, pos Pos) int {
 // Token gets lex token at given Pos (Ch = token index)
 func (fl *File) Token(pos Pos) token.Tokens {
 	return fl.Lexs[pos.Ln][pos.Ch].Tok
+}
+
+// TokenMapReg creates a TokenMap of tokens in region, including their
+// Cat and SubCat levels -- err's on side of inclusiveness -- used
+// for optimizing token matching
+func (fl *File) TokenMapReg(reg Reg) TokenMap {
+	m := make(TokenMap)
+	cp, ok := fl.ValidTokenPos(reg.St)
+	for ok && cp.IsLess(reg.Ed) {
+		tok := fl.Token(cp)
+		m.Set(tok)
+		subc := tok.SubCat()
+		if subc != tok {
+			m.Set(subc)
+		}
+		cat := tok.Cat()
+		if cat != tok {
+			m.Set(cat)
+		}
+		cp, ok = fl.NextTokenPos(cp)
+	}
+	return m
 }
 
 // TokenSrc gets source runes for given token position

@@ -18,7 +18,7 @@ import (
 	"github.com/goki/pi/piv"
 )
 */
-/*
+
 const Prec1 = ((2-1) * 3)
 
 const (
@@ -27,7 +27,7 @@ const (
 )
 
 const Precedence2 = -(3.14 + 2 * 4)
-*/
+
 
 /*
 type MyFloat float64
