@@ -91,7 +91,7 @@ func SelectModeBits(modBits int32) SelectModes {
 	if key.HasAnyModifierBits(modBits, key.Meta) {
 		return ExtendOne
 	}
-	return NoSelectMode
+	return SelectOne
 }
 
 // SelectMode returns the selection mode based on given modifiers on event
@@ -210,11 +210,14 @@ const (
 var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
 
 // SelectModes interprets the modifier keys to determine what type of selection mode to use
+// This is also used for selection actions and has modes not directly activated by
+// modifier keys
 type SelectModes int32
 
 const (
-	// NoSelectMode means no modifier was pressed -- use the standard selection behavior
-	NoSelectMode SelectModes = iota
+	// SelectOne selects a single item, and is the default when no modifier key
+	// is pressed
+	SelectOne SelectModes = iota
 
 	// ExtendContinuous, activated by Shift key, extends the selection to
 	// select a continuous region of selected items, with no gaps
@@ -224,6 +227,23 @@ const (
 	// selection by adding the one additional item just clicked on, creating a
 	// potentially discontinuous set of selected items
 	ExtendOne
+
+	// NoSelect means do not update selection -- this is used programmatically
+	// and not available via modifier key
+	NoSelect
+
+	// Unselect means unselect items -- this is used programmatically
+	// and not available via modifier key -- typically ExtendOne will
+	// unselect if already selected
+	Unselect
+
+	// SelectQuiet means select without doing other updates or signals -- for
+	// bulk updates with a final update at the end -- used programmatically
+	SelectQuiet
+
+	// UnselectQuiet means unselect without doing other updates or signals -- for
+	// bulk updates with a final update at the end -- used programmatically
+	UnselectQuiet
 
 	SelectModesN
 )

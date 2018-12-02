@@ -441,7 +441,7 @@ func (tv *TreeView) SelectAll() {
 	nn := tv.RootView
 	nn.Select()
 	for nn != nil {
-		nn = nn.MoveDown(mouse.SelectModesN) // just select
+		nn = nn.MoveDown(mouse.SelectQuiet)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -452,6 +452,9 @@ func (tv *TreeView) SelectAll() {
 // SelectUpdate updates selection to include this node, using selectmode
 // from mouse event (ExtendContinuous, ExtendOne).  Returns true if this node selected
 func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
+	if mode == mouse.NoSelect {
+		return false
+	}
 	win := tv.Viewport.Win
 	updt := false
 	if win != nil {
@@ -459,6 +462,21 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 	}
 	sel := false
 	switch mode {
+	case mouse.SelectOne:
+		if tv.IsSelected() {
+			sl := tv.SelectedViews()
+			if len(sl) > 1 {
+				tv.UnselectAll()
+				tv.Select()
+				tv.GrabFocus()
+				sel = true
+			}
+		} else {
+			tv.UnselectAll()
+			tv.Select()
+			tv.GrabFocus()
+			sel = true
+		}
 	case mouse.ExtendContinuous:
 		sl := tv.SelectedViews()
 		if len(sl) == 0 {
@@ -481,12 +499,12 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 			tv.Select()
 			if tv.ViewIdx < minIdx {
 				for cidx < minIdx {
-					nn = nn.MoveDown(mouse.SelectModesN) // just select
+					nn = nn.MoveDown(mouse.SelectQuiet) // just select
 					cidx = nn.ViewIdx
 				}
 			} else if tv.ViewIdx > maxIdx {
 				for cidx > maxIdx {
-					nn = nn.MoveUp(mouse.SelectModesN) // just select
+					nn = nn.MoveUp(mouse.SelectQuiet) // just select
 					cidx = nn.ViewIdx
 				}
 			}
@@ -499,23 +517,11 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 			tv.GrabFocus()
 			sel = true
 		}
-	case mouse.NoSelectMode:
-		if tv.IsSelected() {
-			sl := tv.SelectedViews()
-			if len(sl) > 1 {
-				tv.UnselectAll()
-				tv.Select()
-				tv.GrabFocus()
-				sel = true
-			}
-		} else {
-			tv.UnselectAll()
-			tv.Select()
-			tv.GrabFocus()
-			sel = true
-		}
-	default: // anything else
+	case mouse.SelectQuiet:
 		tv.Select()
+		// not sel -- no signal..
+	case mouse.UnselectQuiet:
+		tv.Unselect()
 		// not sel -- no signal..
 	}
 	if win != nil {
@@ -551,11 +557,6 @@ func (tv *TreeView) UnselectAction() {
 func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 	if tv.Par == nil {
 		return nil
-	}
-	if selMode == mouse.NoSelectMode {
-		if tv.SelectMode() {
-			selMode = mouse.ExtendContinuous
-		}
 	}
 	if tv.IsClosed() || !tv.HasChildren() { // next sibling
 		return tv.MoveDownSibling(selMode)
@@ -611,11 +612,6 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 	if tv.Par == nil || tv == tv.RootView {
 		return nil
 	}
-	if selMode == mouse.NoSelectMode {
-		if tv.SelectMode() {
-			selMode = mouse.ExtendContinuous
-		}
-	}
 	myidx, ok := tv.IndexInParent()
 	if ok && myidx > 0 {
 		nn := tv.Par.KnownChild(myidx - 1).Embed(KiT_TreeView).(*TreeView)
@@ -653,25 +649,34 @@ var TreeViewPageSteps = 10
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 	win := tv.Viewport.Win
-	updt := false
+	winUpdt := false
 	if win != nil {
-		updt = win.UpdateStart()
+		winUpdt = win.UpdateStart()
 	}
-	fnn := tv.MoveUp(selMode)
+	mvMode := selMode
+	if selMode == mouse.SelectOne {
+		mvMode = mouse.NoSelect
+	} else if selMode == mouse.ExtendContinuous || selMode == mouse.ExtendOne {
+		mvMode = mouse.SelectQuiet
+	}
+	fnn := tv.MoveUp(mvMode)
 	if fnn != nil && fnn != tv {
 		for i := 1; i < TreeViewPageSteps; i++ {
-			nn := fnn.MoveUp(selMode)
+			nn := fnn.MoveUp(mvMode)
 			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
+		}
+		if selMode == mouse.SelectOne {
+			fnn.SelectUpdate(selMode)
 		}
 		fnn.GrabFocus()
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
 	if win != nil {
-		win.UpdateEnd(updt)
+		win.UpdateEnd(winUpdt)
 	}
 	return fnn
 }
@@ -680,25 +685,34 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 	win := tv.Viewport.Win
-	updt := false
+	winUpdt := false
 	if win != nil {
-		updt = win.UpdateStart()
+		winUpdt = win.UpdateStart()
 	}
-	fnn := tv.MoveDown(selMode)
+	mvMode := selMode
+	if selMode == mouse.SelectOne {
+		mvMode = mouse.NoSelect
+	} else if selMode == mouse.ExtendContinuous || selMode == mouse.ExtendOne {
+		mvMode = mouse.SelectQuiet
+	}
+	fnn := tv.MoveDown(mvMode)
 	if fnn != nil && fnn != tv {
 		for i := 1; i < TreeViewPageSteps; i++ {
-			nn := fnn.MoveDown(selMode)
+			nn := fnn.MoveDown(mvMode)
 			if nn == nil || nn == fnn {
 				break
 			}
 			fnn = nn
+		}
+		if selMode == mouse.SelectOne {
+			fnn.SelectUpdate(selMode)
 		}
 		fnn.GrabFocus()
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
 	if win != nil {
-		win.UpdateEnd(updt)
+		win.UpdateEnd(winUpdt)
 	}
 	return fnn
 }
@@ -720,6 +734,54 @@ func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 		return tv
 	}
 	return nil
+}
+
+// MoveHomeAction moves the selection up to top of the tree,
+// using given select mode (from keyboard modifiers)
+// and emits select event for newly selected item
+func (tv *TreeView) MoveHomeAction(selMode mouse.SelectModes) *TreeView {
+	tv.RootView.SelectUpdate(selMode)
+	tv.RootView.GrabFocus()
+	tv.RootView.ScrollToMe()
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), tv.RootView.This())
+	return tv.RootView
+}
+
+// MoveEndAction moves the selection to the very last node in the tree
+// using given select mode (from keyboard modifiers) -- and emits select event
+// for newly selected item
+func (tv *TreeView) MoveEndAction(selMode mouse.SelectModes) *TreeView {
+	win := tv.Viewport.Win
+	winUpdt := false
+	if win != nil {
+		winUpdt = win.UpdateStart()
+	}
+	mvMode := selMode
+	if selMode == mouse.SelectOne {
+		mvMode = mouse.NoSelect
+	} else if selMode == mouse.ExtendContinuous || selMode == mouse.ExtendOne {
+		mvMode = mouse.SelectQuiet
+	}
+	fnn := tv.MoveDown(mvMode)
+	if fnn != nil && fnn != tv {
+		for {
+			nn := fnn.MoveDown(mvMode)
+			if nn == nil || nn == fnn {
+				break
+			}
+			fnn = nn
+		}
+		if selMode == mouse.SelectOne {
+			fnn.SelectUpdate(selMode)
+		}
+		fnn.GrabFocus()
+		fnn.ScrollToMe()
+		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
+	}
+	if win != nil {
+		win.UpdateEnd(winUpdt)
+	}
+	return fnn
 }
 
 // Close closes the given node and updates the view accordingly (if it is not already closed)
@@ -763,38 +825,46 @@ func (tv *TreeView) ToggleClose() {
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() {
 	win := tv.Viewport.Win
-	updt := false
+	winUpdt := false
 	if win != nil {
-		updt = win.UpdateStart()
+		winUpdt = win.UpdateStart()
 	}
+	updt := tv.UpdateStart()
+	tv.SetFullReRender()
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		tvki := k.Embed(KiT_TreeView)
 		if tvki != nil {
-			tvki.(*TreeView).Open()
+			tvki.(*TreeView).SetClosedState(false)
 		}
 		return true
 	})
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
+	tv.UpdateEnd(updt)
 	if win != nil {
-		win.UpdateEnd(updt)
+		win.UpdateEnd(winUpdt)
 	}
 }
 
 // CloseAll closes the given node and all of its sub-nodes
 func (tv *TreeView) CloseAll() {
 	win := tv.Viewport.Win
-	updt := false
+	winUpdt := false
 	if win != nil {
-		updt = win.UpdateStart()
+		winUpdt = win.UpdateStart()
 	}
+	updt := tv.UpdateStart()
+	tv.SetFullReRender()
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
 		tvki := k.Embed(KiT_TreeView)
 		if tvki != nil {
-			tvki.(*TreeView).Close()
+			tvki.(*TreeView).SetClosedState(true)
 		}
 		return true
 	})
+	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewClosed), tv.This())
+	tv.UpdateEnd(updt)
 	if win != nil {
-		win.UpdateEnd(updt)
+		win.UpdateEnd(winUpdt)
 	}
 }
 
@@ -898,7 +968,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				if ski != nil {
 					if tvk, got := tvv.ChildByName("tv_"+ski.Name(), 0); got {
 						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
-						stv.SelectAction(mouse.NoSelectMode)
+						stv.SelectAction(mouse.SelectOne)
 					}
 				}
 			}
@@ -937,7 +1007,7 @@ func (tv *TreeView) SrcAddChild() {
 					tvv.Open()
 					if tvk, got := tvv.ChildByName("tv_"+ski.Name(), 0); got {
 						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
-						stv.SelectAction(mouse.NoSelectMode)
+						stv.SelectAction(mouse.SelectOne)
 					}
 				}
 			}
@@ -950,8 +1020,8 @@ func (tv *TreeView) SrcDelete() {
 	if tv.IsRootOrField(ttl) {
 		return
 	}
-	if tv.MoveDown(mouse.NoSelectMode) == nil {
-		tv.MoveUp(mouse.NoSelectMode)
+	if tv.MoveDown(mouse.SelectOne) == nil {
+		tv.MoveUp(mouse.SelectOne)
 	}
 	sk := tv.SrcNode.Ptr
 	if sk == nil {
@@ -995,7 +1065,7 @@ func (tv *TreeView) SrcDuplicate() {
 	tvpar.SetChanged()
 	if tvk, got := tvpar.ChildByName("tv_"+nm, 0); got {
 		stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
-		stv.SelectAction(mouse.NoSelectMode)
+		stv.SelectAction(mouse.SelectOne)
 	}
 }
 
@@ -1236,7 +1306,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	if ski != nil {
 		if tvk, got := tvpar.ChildByName("tv_"+ski.Name(), 0); got {
 			stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
-			stv.SelectAction(mouse.NoSelectMode)
+			stv.SelectAction(mouse.SelectOne)
 		}
 	}
 }
@@ -1453,6 +1523,12 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 
+	if selMode == mouse.SelectOne {
+		if tv.SelectMode() {
+			selMode = mouse.ExtendContinuous
+		}
+	}
+
 	// first all the keys that work for inactive and active
 	switch kf {
 	case gi.KeyFunCancelSelect:
@@ -1476,6 +1552,12 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case gi.KeyFunPageDown:
 		tv.MovePageDownAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunHome:
+		tv.MoveHomeAction(selMode)
+		kt.SetProcessed()
+	case gi.KeyFunEnd:
+		tv.MoveEndAction(selMode)
 		kt.SetProcessed()
 	case gi.KeyFunSelectMode:
 		tv.SelectModeToggle()

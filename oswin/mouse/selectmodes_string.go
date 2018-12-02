@@ -3,13 +3,15 @@
 package mouse
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _SelectModes_name = "NoSelectModeExtendContinuousExtendOneSelectModesN"
+var _ = errors.New("dummy error")
 
-var _SelectModes_index = [...]uint8{0, 12, 28, 37, 49}
+const _SelectModes_name = "SelectOneExtendContinuousExtendOneNoSelectUnselectSelectQuietUnselectQuietSelectModesN"
+
+var _SelectModes_index = [...]uint8{0, 9, 25, 34, 42, 50, 61, 74, 86}
 
 func (i SelectModes) String() string {
 	if i < 0 || i >= SelectModes(len(_SelectModes_index)-1) {
@@ -25,5 +27,5 @@ func (i *SelectModes) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type SelectModes", s)
+	return errors.New("String: " + s + " is not a valid option for type: SelectModes")
 }

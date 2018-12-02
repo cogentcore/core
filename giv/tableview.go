@@ -973,11 +973,6 @@ func StructSliceRowByValue(struSlice interface{}, fldName string, fldVal interfa
 // MoveDown moves the selection down to next row, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (tv *TableView) MoveDown(selMode mouse.SelectModes) int {
-	if selMode == mouse.NoSelectMode {
-		if tv.SelectMode {
-			selMode = mouse.ExtendContinuous
-		}
-	}
 	if tv.SelectedIdx >= tv.BuiltSize-1 {
 		tv.SelectedIdx = tv.BuiltSize - 1
 		return -1
@@ -1002,11 +997,6 @@ func (tv *TableView) MoveDownAction(selMode mouse.SelectModes) int {
 // MoveUp moves the selection up to previous row, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (tv *TableView) MoveUp(selMode mouse.SelectModes) int {
-	if selMode == mouse.NoSelectMode {
-		if tv.SelectMode {
-			selMode = mouse.ExtendContinuous
-		}
-	}
 	if tv.SelectedIdx <= 0 {
 		tv.SelectedIdx = 0
 		return -1
@@ -1031,11 +1021,6 @@ func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
 // MovePageDown moves the selection down to next page, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (tv *TableView) MovePageDown(selMode mouse.SelectModes) int {
-	if selMode == mouse.NoSelectMode {
-		if tv.SelectMode {
-			selMode = mouse.ExtendContinuous
-		}
-	}
 	if tv.SelectedIdx >= tv.BuiltSize-1 {
 		tv.SelectedIdx = tv.BuiltSize - 1
 		return -1
@@ -1061,11 +1046,6 @@ func (tv *TableView) MovePageDownAction(selMode mouse.SelectModes) int {
 // MovePageUp moves the selection up to previous page, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (tv *TableView) MovePageUp(selMode mouse.SelectModes) int {
-	if selMode == mouse.NoSelectMode {
-		if tv.SelectMode {
-			selMode = mouse.ExtendContinuous
-		}
-	}
 	if tv.SelectedIdx <= 0 {
 		tv.SelectedIdx = 0
 		return -1
@@ -1144,7 +1124,7 @@ func (tv *TableView) UpdateSelect(idx int, sel bool) {
 		}
 		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 	} else {
-		selMode := mouse.NoSelectMode
+		selMode := mouse.SelectOne
 		win := tv.Viewport.Win
 		if win != nil {
 			selMode = win.LastSelMode
@@ -1234,6 +1214,9 @@ func (tv *TableView) SelectAllRows() {
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
 func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
+	if mode == mouse.NoSelect {
+		return
+	}
 	row = ints.MinInt(row, tv.BuiltSize-1)
 	if row < 0 {
 		row = 0
@@ -1244,6 +1227,21 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 		updt = win.UpdateStart()
 	}
 	switch mode {
+	case mouse.SelectOne:
+		if tv.RowIsSelected(row) {
+			if len(tv.SelectedRows) > 1 {
+				tv.UnselectAllRows()
+				tv.SelectRow(row)
+				tv.RowGrabFocus(row)
+			}
+			tv.SelectedIdx = row
+		} else {
+			tv.UnselectAllRows()
+			tv.SelectedIdx = row
+			tv.SelectRow(row)
+			tv.RowGrabFocus(row)
+		}
+		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 	case mouse.ExtendContinuous:
 		if len(tv.SelectedRows) == 0 {
 			tv.SelectedIdx = row
@@ -1266,12 +1264,12 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 			tv.SelectRow(row)
 			if row < minIdx {
 				for cidx < minIdx {
-					r := tv.MoveDown(mouse.SelectModesN) // just select
+					r := tv.MoveDown(mouse.SelectQuiet) // just select
 					cidx = r
 				}
 			} else if row > maxIdx {
 				for cidx > maxIdx {
-					r := tv.MoveUp(mouse.SelectModesN) // just select
+					r := tv.MoveUp(mouse.SelectQuiet) // just select
 					cidx = r
 				}
 			}
@@ -1287,26 +1285,15 @@ func (tv *TableView) SelectRowAction(row int, mode mouse.SelectModes) {
 			tv.RowGrabFocus(row)
 			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
 		}
-	case mouse.NoSelectMode:
-		if tv.RowIsSelected(row) {
-			if len(tv.SelectedRows) > 1 {
-				tv.UnselectAllRows()
-				tv.SelectRow(row)
-				tv.RowGrabFocus(row)
-			}
-			tv.SelectedIdx = row
-		} else {
-			tv.UnselectAllRows()
-			tv.SelectedIdx = row
-			tv.SelectRow(row)
-			tv.RowGrabFocus(row)
-		}
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
-	default: // anything else
+	case mouse.Unselect:
+		tv.SelectedIdx = row
+		tv.UnselectRowAction(row)
+	case mouse.SelectQuiet:
 		tv.SelectedIdx = row
 		tv.SelectRow(row)
-		tv.RowGrabFocus(row)
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
+	case mouse.UnselectQuiet:
+		tv.SelectedIdx = row
+		tv.UnselectRow(row)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
@@ -1412,7 +1399,7 @@ func (tv *TableView) Cut() {
 	tv.SetChanged()
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
-	tv.SelectRowAction(row, mouse.NoSelectMode)
+	tv.SelectRowAction(row, mouse.SelectOne)
 }
 
 // CutRows copies selected rows to clip.Board and deletes selected rows
@@ -1518,7 +1505,7 @@ func (tv *TableView) PasteAtRow(md mimedata.Mimes, row int) {
 	tv.SetChanged()
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
-	tv.SelectRowAction(row, mouse.NoSelectMode)
+	tv.SelectRowAction(row, mouse.SelectOne)
 }
 
 // Duplicate copies selected items and inserts them after current selection --
@@ -1653,7 +1640,7 @@ func (tv *TableView) DragNDropSource(de *dnd.Event) {
 	tv.DraggedRows = nil
 	tv.ConfigSliceGrid(true)
 	tv.UpdateEnd(updt)
-	tv.SelectRowAction(row, mouse.NoSelectMode)
+	tv.SelectRowAction(row, mouse.SelectOne)
 }
 
 // SaveDraggedRows saves selectedrows into dragged rows taking into account insertion at rows
@@ -1748,6 +1735,11 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 	}
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
+	if selMode == mouse.SelectOne {
+		if tv.SelectMode {
+			selMode = mouse.ExtendContinuous
+		}
+	}
 	row := tv.SelectedIdx
 	switch kf {
 	case gi.KeyFunCancelSelect:
@@ -1776,29 +1768,29 @@ func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
 	case gi.KeyFunDelete:
 		tv.SliceDelete(tv.SelectedIdx, true)
 		tv.SelectMode = false
-		tv.SelectRowAction(row, mouse.NoSelectMode)
+		tv.SelectRowAction(row, mouse.SelectOne)
 		kt.SetProcessed()
 	case gi.KeyFunDuplicate:
 		nrow := tv.Duplicate()
 		tv.SelectMode = false
 		if nrow >= 0 {
-			tv.SelectRowAction(nrow, mouse.NoSelectMode)
+			tv.SelectRowAction(nrow, mouse.SelectOne)
 		}
 		kt.SetProcessed()
 	case gi.KeyFunInsert:
 		tv.SliceNewAt(row, true)
 		tv.SelectMode = false
-		tv.SelectRowAction(row+1, mouse.NoSelectMode) // todo: somehow nrow not working
+		tv.SelectRowAction(row+1, mouse.SelectOne) // todo: somehow nrow not working
 		kt.SetProcessed()
 	case gi.KeyFunInsertAfter:
 		tv.SliceNewAt(row+1, true)
 		tv.SelectMode = false
-		tv.SelectRowAction(row+1, mouse.NoSelectMode)
+		tv.SelectRowAction(row+1, mouse.SelectOne)
 		kt.SetProcessed()
 	case gi.KeyFunCopy:
 		tv.CopyRows(true)
 		tv.SelectMode = false
-		tv.SelectRowAction(row, mouse.NoSelectMode)
+		tv.SelectRowAction(row, mouse.SelectOne)
 		kt.SetProcessed()
 	case gi.KeyFunCut:
 		tv.CutRows()

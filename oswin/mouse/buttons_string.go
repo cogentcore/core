@@ -3,9 +3,11 @@
 package mouse
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
 
 const _Buttons_name = "NoButtonLeftMiddleRightButtonsN"
 
@@ -25,5 +27,5 @@ func (i *Buttons) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Buttons", s)
+	return errors.New("String: " + s + " is not a valid option for type: Buttons")
 }

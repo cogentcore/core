@@ -1061,12 +1061,12 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 	defer tf.UpdateEnd(updt)
 	oldPos := tf.CursorPos
 	tf.CursorPos = tf.PixelToCursor(pixOff)
-	if tf.SelectMode || selMode != mouse.NoSelectMode {
-		if !tf.SelectMode && selMode != mouse.NoSelectMode {
+	if tf.SelectMode || selMode != mouse.SelectOne {
+		if !tf.SelectMode && selMode != mouse.SelectOne {
 			tf.SelectStart = oldPos
 			tf.SelectMode = true
 		}
-		if !tf.IsDragging() && selMode == mouse.NoSelectMode { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+		if !tf.IsDragging() && selMode == mouse.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.SelectReset()
 		} else {
 			tf.SelectRegUpdate(tf.CursorPos)
@@ -1251,7 +1251,7 @@ func (tf *TextField) MouseDragEvent() {
 			tff.SelectModeToggle()
 		}
 		pt := tff.PointToRelPos(me.Pos())
-		tff.SetCursorFromPixel(float32(pt.X), mouse.NoSelectMode)
+		tff.SetCursorFromPixel(float32(pt.X), mouse.SelectOne)
 	})
 }
 

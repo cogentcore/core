@@ -821,7 +821,7 @@ func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 	StructInlineLen = pf.StructInlineLen
 	SliceInlineLen = pf.SliceInlineLen
 	MaxScopeLines = pf.MaxScopeLines
-	}
+}
 
 func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 	PrefsDbgView(prefs)

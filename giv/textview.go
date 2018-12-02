@@ -3548,13 +3548,13 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	tv.SetCursor(newPos)
-	if tv.SelectMode || selMode != mouse.NoSelectMode {
-		if !tv.SelectMode && selMode != mouse.NoSelectMode {
+	if tv.SelectMode || selMode != mouse.SelectOne {
+		if !tv.SelectMode && selMode != mouse.SelectOne {
 			tv.SelectMode = true
 			tv.SelectStart = newPos
 			tv.SelectRegUpdate(tv.CursorPos)
 		}
-		if !tv.IsDragging() && selMode == mouse.NoSelectMode {
+		if !tv.IsDragging() && selMode == mouse.SelectOne {
 			ln := tv.CursorPos.Ln
 			ch := tv.CursorPos.Ch
 			if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
@@ -4108,7 +4108,7 @@ func (tv *TextView) TextViewEvents() {
 		}
 		pt := txf.PointToRelPos(me.Pos())
 		newPos := txf.PixelToCursor(pt)
-		txf.SetCursorFromMouse(pt, newPos, mouse.NoSelectMode)
+		txf.SetCursorFromMouse(pt, newPos, mouse.SelectOne)
 	})
 	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
