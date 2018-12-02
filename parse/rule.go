@@ -186,6 +186,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	nmatch := 0
 	ntok := 0
 	curStInc := 0
+	eoses := 0
 	for i := range rs {
 		rn := strings.TrimSpace(rs[i])
 		if len(rn) == 0 {
@@ -225,11 +226,12 @@ func (pr *Rule) Compile(ps *State) bool {
 					}
 				}
 			}
-			// if i == nr-1 && pr.KeyTokIdx != i {
-			// 	if re.Tok.Tok.SubCat() == token.PunctGp || re.Tok.Tok == token.EOS {
-			// 		pr.EndTok = re.Tok // scoping end token
-			// 		continue
-			// 	}
+			if re.Tok.Tok == token.EOS {
+				eoses++
+				if i == nr-1 {
+					re.StInc = eoses // records the number of eoses for final EOS
+				}
+			}
 		} else {
 			st := 0
 			if rn[0] == '?' {
@@ -389,24 +391,29 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 	lr := pr.Rules.Last()
 	if scope == lex.RegZero {
 		scope.St = ps.Pos
-	} else {
-		return scope, true // if already scoped, stick with it.
 	}
 	scope.St, ok = ps.Src.ValidTokenPos(scope.St) // should have been done, but just in case
 	if !ok {
 		return scope, false
 	}
 	nscope := scope
+	creg := scope
 	if lr.Tok.Tok == token.EOS {
-		stlx := ps.Src.LexAt(scope.St)
-		ep, eosIdx := ps.FindEos(scope.St, stlx.Depth+lr.Tok.Depth)
-		if eosIdx < 0 {
-			ps.Error(scope.St, fmt.Sprintf("rule %v: could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr.Nm))
-			return nscope, false
+		for ei := 0; ei < lr.StInc; ei++ {
+			stlx := ps.Src.LexAt(creg.St)
+			ep, eosIdx := ps.FindEos(creg.St, stlx.Depth+lr.Tok.Depth)
+			if eosIdx < 0 {
+				ps.Error(creg.St, fmt.Sprintf("rule %v: could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr.Nm))
+				return nscope, false
+			}
+			if ei == lr.StInc-1 {
+				nscope.Ed = ep
+				Trace.Out(ps, pr, Match, nscope.St, nscope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
+			} else {
+				creg.St, _ = ps.Src.NextTokenPos(ep) // advance
+			}
 		}
-		nscope.Ed = ep
-		// Trace.Out(ps, pr, Match, scope.St, scope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
-	} else { // note: could conceivably have mode whre non-EOS tokens are used, but very expensive..
+	} else { // note: could conceivably have mode where non-EOS tokens are used, but very expensive..
 		if scope.IsNil() {
 			ps.Error(scope.St, fmt.Sprintf("rule %v: scope is empty and no EOS in rule -- invalid rules -- must all start with EOS", pr.Nm))
 			return nscope, false

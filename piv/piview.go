@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/gide/gide"
 	"github.com/goki/ki"
@@ -374,6 +375,7 @@ func (pv *PiView) ParseStopped() {
 func (pv *PiView) ParseNext() *parse.Rule {
 	mrule := pv.Parser.ParseNext()
 	pv.AstTree().OpenAll()
+	pv.AstTreeToEnd()
 	if mrule == nil {
 		pv.ParseStopped()
 	} else {
@@ -418,6 +420,12 @@ func (pv *PiView) SelectParseRule(rule *parse.Rule) {
 		}
 		return true
 	})
+}
+
+// AstTreeToEnd
+func (pv *PiView) AstTreeToEnd() {
+	lt := pv.AstTree()
+	lt.MoveEndAction(mouse.SelectOne)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

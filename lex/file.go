@@ -241,7 +241,7 @@ func (fl *File) TokenSrcPos(pos Pos) Reg {
 
 // TokenSrcReg translates a region of tokens into a region of source
 func (fl *File) TokenSrcReg(reg Reg) Reg {
-	if !fl.IsLexPosValid(reg.St) {
+	if !fl.IsLexPosValid(reg.St) || reg.IsNil() {
 		return Reg{}
 	}
 	st := fl.Lexs[reg.St.Ln][reg.St.Ch].St
