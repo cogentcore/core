@@ -11,7 +11,7 @@ func main() {
 	}
 }
 
-/*
+
 package main
 
 import "github.com/goki/gi/gi"
@@ -24,8 +24,7 @@ import (
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
-*/
-/*
+
 const neg = -1
 
 const neg2 = -(2+2)
@@ -48,8 +47,7 @@ const (
 	// position will be advanced to just after
 	Name
 )
-*/
-/*
+
 type MyFloat float64
 
 type AStruct struct {
@@ -60,9 +58,7 @@ type AStruct struct {
 }
 
 var Typeo int
-*/
 
-/*
 var ExprVar = "testofit"
 
 var ExprTypeVar map[string]string 
@@ -70,9 +66,7 @@ var ExprTypeVar map[string]string
 var ExprInitMap = map[string]string{
 	"does": {Val: "this work?", Bad: "dkfa"},
 }
-*/
 
-/*
 var ExprSlice = abc[20]
 
 var ExprSlice2 = abc[20:30]
@@ -80,9 +74,7 @@ var ExprSlice2 = abc[20:30]
 var ExprSlice3 = abc[20:30] + abc[:] + abc[20:] + abc[:30] + abc[20:30:2]
 
 var ExprSelect = abc.Def
-*/
 
-/*
 var ExprTypeAssert = absfr.(cheeze)
 
 var ExprTypeAssertPtr = absfr.(*cheeze)
@@ -92,19 +84,16 @@ var ExprCvt = int(abc) // parses as a method because it doesn't know from type n
 var TypPtr *Fred
 
 var ExprCvt2 = map[string]string(ab)
-*/
-/*
+
 var tree = map[token.Tokens]struct{}(optMap)
 
 var tree = (map[token.Tokens]struct{})(optMap)
 
 var partyp = (*int)(tree)
-*/
 
-//var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
+var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
 
-/*
-// var ExprMeth = abc.meth(c)
+var ExprMeth = abc.meth(c)
 
 var ExprMethLong = long.abc.meth(c)
 
@@ -123,22 +112,16 @@ func main() {
 	bf := a * b + c[32]
 	d += funcall(a, b, c...)
 }
-*/
 
-//func mainrun() {
-/*
+func mainrun() {
 	oswin.TheApp.SetName("pie")
 	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki/pi">Gide on GitHub</a> and <a href="https://github.com/goki/pi/wiki">Gide wiki</a> for documentation.<br>
 <br>
 Version: ` + pi.VersionInfo())
-*/
-/*
 	if peas++; this > that {
 		fmt.Printf("test")
 		break
 	}
-*/
-/*
 	if this > that {
 		fmt.Printf("test")
 		break
@@ -152,9 +135,8 @@ Version: ` + pi.VersionInfo())
 	} else if something == other {
 		continue
 	}
-*/
 
-/*	oswin.TheApp.SetQuitCleanFunc(func() {
+	oswin.TheApp.SetQuitCleanFunc(func() {
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 
@@ -209,5 +191,5 @@ Version: ` + pi.VersionInfo())
 
 	// above NewGideProj calls will have added to WinWait..
 	gi.WinWait.Wait()
-*/
-// }
+}
+

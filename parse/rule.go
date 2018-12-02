@@ -389,6 +389,8 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 	lr := pr.Rules.Last()
 	if scope == lex.RegZero {
 		scope.St = ps.Pos
+	} else {
+		return scope, true // if already scoped, stick with it.
 	}
 	scope.St, ok = ps.Src.ValidTokenPos(scope.St) // should have been done, but just in case
 	if !ok {
@@ -403,7 +405,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 			return nscope, false
 		}
 		nscope.Ed = ep
-		Trace.Out(ps, pr, Match, scope.St, scope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
+		// Trace.Out(ps, pr, Match, scope.St, scope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
 	} else { // note: could conceivably have mode whre non-EOS tokens are used, but very expensive..
 		if scope.IsNil() {
 			ps.Error(scope.St, fmt.Sprintf("rule %v: scope is empty and no EOS in rule -- invalid rules -- must all start with EOS", pr.Nm))
