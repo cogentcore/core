@@ -341,6 +341,7 @@ func (pv *PiView) EditTrace() {
 
 // ParseInit initializes / restarts lexing process for current test file
 func (pv *PiView) ParseInit() {
+	gide.TheConsole.Buf.New(0)
 	pv.LexInit()
 	pv.Parser.LexAll()
 	pv.Parser.DoPassTwo()

@@ -92,7 +92,6 @@ func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
 	tok := tkey.Tok
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
-	tkey.Depth = ps.Src.TokenDepth(tok, cp)
 	for cp.IsLess(reg.Ed) {
 		lx := ps.Src.LexAt(cp)
 		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {
@@ -132,7 +131,6 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	isAmbigUnary := tok.IsAmbigUnaryOp()
-	tkey.Depth = ps.Src.TokenDepth(tok, cp)
 	for reg.St.IsLess(cp) || cp == reg.St {
 		lx := ps.Src.LexAt(cp)
 		if ps.MatchLex(lx, tkey, isCat, isSubCat, cp) {

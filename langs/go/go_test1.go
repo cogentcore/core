@@ -4,6 +4,14 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
+func main() {
+	if peas++; this > that {
+		fmt.Printf("test")
+		break
+	}
+}
+
+/*
 package main
 
 import "github.com/goki/gi/gi"
@@ -16,6 +24,11 @@ import (
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
+*/
+/*
+const neg = -1
+
+const neg2 = -(2+2)
 
 const Prec1 = ((2-1) * 3)
 
@@ -26,16 +39,6 @@ const (
 
 const Precedence2 = -(3.14 + 2 * 4)
 
-
-type MyFloat float64
-
-type AStruct struct {
-	AField int
-	TField gi.float64 `desc:"tagged"`
-	AField []string
-	MField map[string]int
-}
-
 // The lexical acts
 const (
 	// Next means advance input position to the next character(s) after the matched characters
@@ -45,9 +48,21 @@ const (
 	// position will be advanced to just after
 	Name
 )
+*/
+/*
+type MyFloat float64
+
+type AStruct struct {
+	AField int
+	TField gi.float64 `desc:"tagged"`
+	AField []string
+	MField map[string]int
+}
 
 var Typeo int
+*/
 
+/*
 var ExprVar = "testofit"
 
 var ExprTypeVar map[string]string 
@@ -55,23 +70,91 @@ var ExprTypeVar map[string]string
 var ExprInitMap = map[string]string{
 	"does": {Val: "this work?", Bad: "dkfa"},
 }
+*/
 
+/*
+var ExprSlice = abc[20]
+
+var ExprSlice2 = abc[20:30]
+
+var ExprSlice3 = abc[20:30] + abc[:] + abc[20:] + abc[:30] + abc[20:30:2]
+
+var ExprSelect = abc.Def
+*/
+
+/*
+var ExprTypeAssert = absfr.(cheeze)
+
+var ExprTypeAssertPtr = absfr.(*cheeze)
+
+var ExprCvt = int(abc) // parses as a method because it doesn't know from type names
+
+var TypPtr *Fred
+
+var ExprCvt2 = map[string]string(ab)
+*/
+/*
+var tree = map[token.Tokens]struct{}(optMap)
+
+var tree = (map[token.Tokens]struct{})(optMap)
+
+var partyp = (*int)(tree)
+*/
+
+//var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
+
+/*
+// var ExprMeth = abc.meth(c)
+
+var ExprMethLong = long.abc.meth(c)
+
+var ExprFunNil = fun()
+
+var ExprFun = meth(2 + 2)
+
+var ExprFun = meth(2 + 2, fslaf)
+
+var ExprFunElip = meth(2 + 2, fslaf...)
 
 func main() {
-//	a <- b
-//	c++
+	a <- b
+	c++
 	c[3] = 42 * 17
-//	bf := a * b + c[32]
-//	d += funcall(a, b, c...)
+	bf := a * b + c[32]
+	d += funcall(a, b, c...)
 }
+*/
 
-func mainrun() {
+//func mainrun() {
+/*
 	oswin.TheApp.SetName("pie")
 	oswin.TheApp.SetAbout(`<code>Pie</code> is the interactive parser (pi) editor written in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki/pi">Gide on GitHub</a> and <a href="https://github.com/goki/pi/wiki">Gide wiki</a> for documentation.<br>
 <br>
 Version: ` + pi.VersionInfo())
+*/
+/*
+	if peas++; this > that {
+		fmt.Printf("test")
+		break
+	}
+*/
+/*
+	if this > that {
+		fmt.Printf("test")
+		break
+	} else {
+		continue
+	}
 
-	oswin.TheApp.SetQuitCleanFunc(func() {
+	if this > that {
+		fmt.Printf("test")
+		break
+	} else if something == other {
+		continue
+	}
+*/
+
+/*	oswin.TheApp.SetQuitCleanFunc(func() {
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 
@@ -126,4 +209,5 @@ Version: ` + pi.VersionInfo())
 
 	// above NewGideProj calls will have added to WinWait..
 	gi.WinWait.Wait()
-}
+*/
+// }

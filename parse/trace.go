@@ -15,7 +15,7 @@ import (
 // TraceOpts provides options for debugging / monitoring the rule matching and execution process
 type TraceOpts struct {
 	On        bool     `desc:"perform tracing"`
-	Rules     string   `width:"60" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
+	Rules     string   `width:"50" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
 	Match     bool     `desc:"trace matches -- why a rule matches"`
 	NoMatch   bool     `desc:"trace non-matches -- why a rule doesn't match (can be a lot of info)"`
 	Run       bool     `desc:"trace progress runing through each of the sub-rules when a rule has matched and is 'running'"`

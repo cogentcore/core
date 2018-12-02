@@ -55,12 +55,14 @@ var GuiActive = false
 //
 type Rule struct {
 	ki.Node
+	Off       bool     `desc:"disable this rule -- useful for testing"`
 	Desc      string   `desc:"description / comments about this rule"`
 	Rule      string   `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that."`
 	Ast       AstActs  `desc:"what action should be take for this node when it matches"`
 	OptTokMap bool     `desc:"for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens"`
 	Rules     RuleList `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
 	Reverse   bool     `inactive:"+" json:"-" xml:"-" desc:"use a reverse parsing direction for binary operator expressions -- this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser, triggered by a '-' at the start of the rule -- only for rules of form: Expr '+' Expr -- two sub-rules with a token operator in the middle"`
+	NoToks    bool     `json:"-" xml:"-" desc:"no tokens in this rule -- operates by diff rules"`
 }
 
 var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
@@ -92,6 +94,7 @@ type RuleEl struct {
 	Tok   token.KeyToken `desc:"token, None if rule"`
 	Match bool           `desc:"if true, this rule must match for rule to fire -- by default only tokens and, failing that, the first sub-rule is used for matching -- use @ to require a match"`
 	Opt   bool           `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
+	StInc int            `desc:"start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching"`
 }
 
 func (re RuleEl) IsRule() bool {
@@ -182,6 +185,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	pr.Rules = make(RuleList, nr)
 	nmatch := 0
 	ntok := 0
+	curStInc := 0
 	for i := range rs {
 		rn := strings.TrimSpace(rs[i])
 		if len(rn) == 0 {
@@ -195,9 +199,11 @@ func (pr *Rule) Compile(ps *State) bool {
 			if rn[0] == '?' {
 				re.Opt = true
 			} else {
+				re.StInc = curStInc
 				re.Match = true // all tokens match by default
 				nmatch++
 				ntok++
+				curStInc = 0
 			}
 			sz := len(rn)
 			if rn[0] == '+' {
@@ -233,6 +239,8 @@ func (pr *Rule) Compile(ps *State) bool {
 				st = 1
 				re.Match = true
 				nmatch++
+			} else {
+				curStInc++
 			}
 			rp, ok := RuleMap[rn[st:]]
 			if !ok {
@@ -248,6 +256,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	}
 	if ntok == 0 {
 		pr.Rules[0].Match = true
+		pr.NoToks = true
 	}
 	return valid
 }
@@ -326,6 +335,10 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 // scope is the region to search within, defined by parent or EOS if we have a terminal
 // one
 func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap) *Rule {
+	if pr.Off {
+		return nil
+	}
+
 	nr := len(pr.Rules)
 	if nr > 0 {
 		return pr.ParseRules(ps, par, parAst, scope, optMap)
@@ -390,6 +403,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 			return nscope, false
 		}
 		nscope.Ed = ep
+		Trace.Out(ps, pr, Match, scope.St, scope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
 	} else { // note: could conceivably have mode whre non-EOS tokens are used, but very expensive..
 		if scope.IsNil() {
 			ps.Error(scope.St, fmt.Sprintf("rule %v: scope is empty and no EOS in rule -- invalid rules -- must all start with EOS", pr.Nm))
@@ -404,6 +418,10 @@ var DepthLimit = 100
 // Match attempts to match the rule, returns true if it matches, and the
 // match positions, along with any update to the scope
 func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap lex.TokenMap) (bool, lex.Reg, Matches) {
+	if pr.Off {
+		return false, scope, nil
+	}
+
 	if depth > DepthLimit {
 		ps.Error(scope.St, fmt.Sprintf("rule %v: depth limit exceeded", pr.Nm))
 		return false, scope, nil
@@ -424,6 +442,11 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 
 	mpos := make(Matches, len(pr.Rules))
 
+	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
+	scstDepth := scstlx.Depth
+
+	Trace.Out(ps, pr, Match, scope.St, scope, parAst, fmt.Sprintf("Starting match"))
+
 	ok := false
 	creg := scope
 	lmnpos := lex.PosZero // last match next-pos
@@ -439,6 +462,12 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		if lmnpos != lex.PosZero {
 			creg.St = lmnpos
 		}
+		for stinc := 0; stinc < rr.StInc; stinc++ {
+			creg.St, ok = ps.Src.NextTokenPos(creg.St)
+			if !ok {
+				Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v ran out of tokens", i))
+			}
+		}
 		if i == nr-1 && rr.Tok.Tok == token.EOS {
 			mpos[i] = scope.Ed
 			break
@@ -449,8 +478,8 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		if rr.IsToken() {
 			slx := ps.Src.LexAt(creg.St)
 			kt := rr.Tok
-			kt.Depth = slx.Depth
-			if i == 0 { // start token must be right here
+			kt.Depth += scstDepth // always use starting scope depth
+			if i == 0 {           // start token must be right here
 				if !ps.MatchToken(kt, scope.St) {
 					Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v, was: %v", i, kt.String(), slx.String()))
 					return false, scope, nil
@@ -461,7 +490,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 				if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
 					return false, scope, nil
 				}
-				if pr.Reverse || i == nr-1 { // this is key to look in reverse for last item!
+				if pr.Reverse { // || i == nr-1  this is key to look in reverse for last item!
 					pos, ok = ps.FindTokenReverse(kt, creg)
 				} else {
 					pos, ok = ps.FindToken(kt, creg)
@@ -472,17 +501,6 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 				}
 				Trace.Out(ps, pr, Match, pos, creg, parAst, fmt.Sprintf("%v token: %v", i, kt))
 				mpos[i] = pos
-				// note: used to use this code to enforce match at end of scope for last token:
-				// if ever run into an issue, this is here..  todo: deleteme at some point!
-				// et.Depth = slx.Depth
-				// ep, _ := ps.Src.PrevTokenPos(scope.Ed)
-				// elx := ps.Src.LexAt(ep)
-				// if slx.Depth != elx.Depth || elx.Tok != pr.EndTok.Tok {
-				// 	Trace.Out(ps, pr, NoMatch, ep, scope, parAst, fmt.Sprintf("end token: %v, was: %v", et.String(), elx.String()))
-				// 	return false, mpos, scope
-				// }
-				// Trace.Out(ps, pr, Match, ep, scope, parAst, fmt.Sprintf("end token: %v", et.String()))
-				// scope.Ed = ep // regular rule does not have logic to restrict end to before end tok..
 			}
 			lmnpos, ok = ps.Src.NextTokenPos(mpos[i])
 			if !ok {
@@ -505,7 +523,11 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 					lpos = mp
 				}
 			}
-			mpos[i] = fpos // can use this during rule exec to start at right place
+			if pr.NoToks { // just an alias rule
+				mpos = smpos // pass it up
+			} else {
+				mpos[i] = fpos // can use this during rule exec to start at right place
+			}
 			Trace.Out(ps, pr, Match, fpos, creg, parAst, fmt.Sprintf("%v rule: %v", i, rr.Rule.Name()))
 			lmnpos, ok = ps.Src.NextTokenPos(lpos)
 			if !ok {
@@ -548,10 +570,12 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 		creg.St = ps.Pos
 		creg.Ed = scope.Ed
-		for mi := i + 1; mi < nr; mi++ {
-			if mpos[mi] != lex.PosZero {
-				creg.Ed = mpos[mi] // only look up to point of next matching token
-				break
+		if !pr.NoToks {
+			for mi := i + 1; mi < nr; mi++ {
+				if mpos[mi] != lex.PosZero {
+					creg.Ed = mpos[mi] // only look up to point of next matching token
+					break
+				}
 			}
 		}
 		if rr.IsToken() { // opt by definition here
@@ -561,7 +585,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 			}
 			slx := ps.Src.LexAt(creg.St)
 			kt := rr.Tok
-			kt.Depth = slx.Depth
+			kt.Depth += slx.Depth
 			pos, ok := ps.FindToken(kt, creg)
 			if !ok {
 				Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v token: %v", i, kt.String()))

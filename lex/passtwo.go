@@ -54,9 +54,6 @@ func (ts *TwoState) InsertEOS(cp Pos) {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := ts.Src.LexAt(cp)
 	depth := elx.Depth
-	if elx.Tok.IsPunctGpRight() {
-		depth--
-	}
 	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{token.EOS, depth, elx.Ed, elx.Ed})
 	ts.EosPos = append(ts.EosPos, np)
 }
@@ -154,11 +151,11 @@ func (pt *PassTwo) NestDepth(ts *TwoState) {
 		lx := ts.Src.LexAt(ts.Pos)
 		tok := lx.Tok
 		if tok.IsPunctGpLeft() {
+			lx.Depth = len(ts.NestStack) // depth increments AFTER -- this turns out to be ESSENTIAL!
 			pt.PushNest(ts, tok)
-			lx.Depth = len(ts.NestStack) // depth increments for start
 		} else if tok.IsPunctGpRight() {
-			lx.Depth = len(ts.NestStack) // end has same depth as start
 			pt.PopNest(ts, tok)
+			lx.Depth = len(ts.NestStack) // end has same depth as start, which is same as SURROUND
 		} else {
 			lx.Depth = len(ts.NestStack)
 		}

@@ -194,18 +194,6 @@ func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
 	return pos, true
 }
 
-// TokenDepth returns proper depth for given token at position
-func (fl *File) TokenDepth(tok token.Tokens, pos Pos) int {
-	lx := fl.LexAt(pos)
-	if tok.SubCat() == token.PunctGp {
-		return lx.Depth
-	}
-	if lx.Tok.SubCat() == token.PunctGp {
-		return lx.Depth - 1
-	}
-	return lx.Depth
-}
-
 // Token gets lex token at given Pos (Ch = token index)
 func (fl *File) Token(pos Pos) token.Tokens {
 	return fl.Lexs[pos.Ln][pos.Ch].Tok
@@ -265,7 +253,11 @@ func (fl *File) TokenSrcReg(reg Reg) Reg {
 // RegSrc returns the source (as a string) for given region
 func (fl *File) RegSrc(reg Reg) string {
 	if reg.Ed.Ln == reg.St.Ln {
-		return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
+		if reg.Ed.Ch > reg.St.Ch {
+			return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
+		} else {
+			return ""
+		}
 	}
 	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
