@@ -191,6 +191,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	rs := strings.Split(rstr, " ")
 	nr := len(rs)
 	pr.Rules = make(RuleList, nr)
+	pr.NoToks = false
 	nmatch := 0
 	ntok := 0
 	curStInc := 0

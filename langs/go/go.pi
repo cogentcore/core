@@ -4485,7 +4485,7 @@
             "Kids": null,
             "Off": false,
             "Desc": "",
-            "Rule": "Stmt ?StmtList",
+            "Rule": "Stmt 'EOS' ?StmtList",
             "Ast": "NoAst",
             "OptTokMap": false
           },
