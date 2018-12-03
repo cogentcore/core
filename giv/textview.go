@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"github.com/goki/gi/oswin/cursor"
 	"go/token"
 	"image"
 	"image/draw"
@@ -20,7 +21,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
@@ -3586,17 +3586,27 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 var DefaultIndentStrings = []string{"{"}
 var DefaultUnindentStrings = []string{"}"}
 
-// ShiftSelect activates selection mode if shift key is also pressed -- called
-// along with cursor motion keys
+// ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
+// If the shift key has been released the select region is set to TextRegionNil
 func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		if !tv.SelectMode {
-			tv.SelectMode = true
+		if tv.SelectReg == TextRegionNil {
 			tv.SelectStart = tv.CursorPos
-			tv.SelectRegUpdate(tv.CursorPos)
 		}
+	} else {
+		tv.SelectReg = TextRegionNil
 	}
+}
+
+// ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
+// If the shift key is not down the previously selected text is rerendered to clear the highlight
+func (tv *TextView) ShiftSelectExtend(kt *key.ChordEvent) {
+	hasShift := kt.HasAnyModifier(key.Shift)
+	if hasShift {
+		tv.SelectRegUpdate(tv.CursorPos)
+	}
+	tv.RenderSelectLines()
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
@@ -3658,6 +3668,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
+		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
 		tv.ISpellKeyInput(kt)
 	case gi.KeyFunWordRight:
@@ -3665,59 +3676,70 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForwardWord(1)
+		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
 	case gi.KeyFunMoveLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
+		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
 	case gi.KeyFunWordLeft:
 		tv.ISearchCancel()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackwardWord(1)
+		tv.ShiftSelectExtend(kt)
 		tv.OfferComplete()
 	case gi.KeyFunMoveUp:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorUp(1)
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunMoveDown:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunPageUp:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageUp(1)
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunPageDown:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorPageDown(1)
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunHome:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartLine()
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunEnd:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndLine()
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunDocHome:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorStartDoc()
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunDocEnd:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorEndDoc()
+		tv.ShiftSelectExtend(kt)
 	case gi.KeyFunRecenter:
 		cancelAll()
 		kt.SetProcessed()
