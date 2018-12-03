@@ -4,14 +4,21 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-/*
+
 func main() {
-	if peas++; this > that {
+	if pos, ok := rr.Rule.Match(ps, parAst, depth+1); ok || something.other() {
 		fmt.Printf("test")
 		break
+	} else if a > b {
+		so++
+		be--
+		it := 20
+	} else {
+		fmt.Printf("long one")
 	}
 }
 
+/*
 package main
 
 import "github.com/goki/gi/gi"
@@ -107,11 +114,12 @@ var ExprFunElip = meth(2 + 2, fslaf...)
 */
 
 func main() {
-//	a <- b
+	a <- b
 	c++
 	c[3] = 42 * 17
-// 	bf := a * b + c[32]
-//	d += funcall(a, b, c...)
+ 	bf := a * b + c[32]
+	d += funcall(a, b, c...)
+	fmt.Printf("this is ok", gi.CallMe(a.(tree) + b.(*tree) + int(22) * string(17)))
 }
 
 func mainrun() {

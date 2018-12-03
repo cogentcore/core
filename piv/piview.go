@@ -384,8 +384,11 @@ func (pv *PiView) ParseStopped() {
 
 // ParseNext does next step of lexing
 func (pv *PiView) ParseNext() *parse.Rule {
+	at := pv.AstTree()
+	updt := at.UpdateStart()
 	mrule := pv.Parser.ParseNext()
-	pv.AstTree().OpenAll()
+	at.UpdateEnd(updt)
+	at.OpenAll()
 	pv.AstTreeToEnd()
 	if mrule == nil {
 		pv.ParseStopped()

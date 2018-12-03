@@ -4642,26 +4642,15 @@
               {
                 "n": 5,
                 "type": "parse.Rule",
-                "name": "AsgnStmt",
-                "type": "parse.Rule",
                 "name": "SendStmt",
                 "type": "parse.Rule",
                 "name": "IncrStmt",
                 "type": "parse.Rule",
                 "name": "DecrStmt",
                 "type": "parse.Rule",
+                "name": "AsgnStmt",
+                "type": "parse.Rule",
                 "name": "ExprStmt"
-              },
-              {
-                "Nm": "AsgnStmt",
-                "UniqueNm": "AsgnStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Asgn",
-                "Ast": "NoAst",
-                "OptTokMap": false
               },
               {
                 "Nm": "SendStmt",
@@ -4694,6 +4683,17 @@
                 "Desc": "",
                 "Rule": "Expr '--' 'EOS'",
                 "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "AsgnStmt",
+                "UniqueNm": "AsgnStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Asgn",
+                "Ast": "NoAst",
                 "OptTokMap": false
               },
               {

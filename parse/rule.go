@@ -547,10 +547,6 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 					lpos = mp.Ed
 				}
 			}
-			if !lpos.IsLess(creg.Ed) {
-				fmt.Printf("rule: %v sub-rule: %v lpos: %v not within creg: %v\n", pr.Nm, rr.Rule.Name(), lpos, creg)
-				lpos = creg.Ed
-			}
 			if pr.NoToks { // just an alias rule
 				mpos = smpos // pass it up
 			} else {
