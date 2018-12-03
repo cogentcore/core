@@ -8,6 +8,7 @@ package piv
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -160,6 +161,11 @@ func (pv *PiView) SaveParser() {
 		return
 	}
 	pv.Parser.SaveJSON(string(pv.Prefs.ParserFile))
+
+	ext := filepath.Ext(string(pv.Prefs.ParserFile))
+	pigfn := strings.TrimSuffix(string(pv.Prefs.ParserFile), ext) + ".pig"
+	pv.Parser.SaveGrammar(pigfn)
+
 	pv.Changed = false
 	pv.SetStatus(fmt.Sprintf("Parser Saved to: %v", pv.Prefs.ParserFile))
 	pv.UpdateSig() // notify our editor
@@ -168,6 +174,11 @@ func (pv *PiView) SaveParser() {
 // SaveParserAs saves lexer and parser rules to current filename, in a standard JSON-formatted file
 func (pv *PiView) SaveParserAs(filename gi.FileName) {
 	pv.Parser.SaveJSON(string(filename))
+
+	ext := filepath.Ext(string(pv.Prefs.ParserFile))
+	pigfn := strings.TrimSuffix(string(pv.Prefs.ParserFile), ext) + ".pig"
+	pv.Parser.SaveGrammar(pigfn)
+
 	pv.Changed = false
 	pv.Prefs.ParserFile = filename
 	pv.SetStatus(fmt.Sprintf("Parser Saved to: %v", pv.Prefs.ParserFile))

@@ -278,15 +278,17 @@
         "Props": null,
         "Kids": [
           {
-            "n": 2,
+            "n": 3,
             "type": "lex.Rule",
-            "name": "keyword",
+            "name": "Keyword",
             "type": "lex.Rule",
-            "name": "name"
+            "name": "Type",
+            "type": "lex.Rule",
+            "name": "Name"
           },
           {
-            "Nm": "keyword",
-            "UniqueNm": "keyword",
+            "Nm": "Keyword",
+            "UniqueNm": "Keyword",
             "Props": null,
             "Kids": [
               {
@@ -735,7 +737,7 @@
                 "PushState": ""
               }
             ],
-            "Desc": "",
+            "Desc": "this group should contain all reserved keywords",
             "Token": "None",
             "Match": "Letter",
             "String": "",
@@ -744,8 +746,348 @@
             "PushState": ""
           },
           {
-            "Nm": "name",
-            "UniqueNm": "name",
+            "Nm": "Type",
+            "UniqueNm": "Type",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 19,
+                "type": "lex.Rule",
+                "name": "bool",
+                "type": "lex.Rule",
+                "name": "string",
+                "type": "lex.Rule",
+                "name": "int",
+                "type": "lex.Rule",
+                "name": "int8",
+                "type": "lex.Rule",
+                "name": "int16",
+                "type": "lex.Rule",
+                "name": "int32",
+                "type": "lex.Rule",
+                "name": "int64",
+                "type": "lex.Rule",
+                "name": "uint",
+                "type": "lex.Rule",
+                "name": "uint8",
+                "type": "lex.Rule",
+                "name": "uint16",
+                "type": "lex.Rule",
+                "name": "uint32",
+                "type": "lex.Rule",
+                "name": "uint64",
+                "type": "lex.Rule",
+                "name": "uintptr",
+                "type": "lex.Rule",
+                "name": "byte",
+                "type": "lex.Rule",
+                "name": "rune",
+                "type": "lex.Rule",
+                "name": "float32",
+                "type": "lex.Rule",
+                "name": "float64",
+                "type": "lex.Rule",
+                "name": "complex64",
+                "type": "lex.Rule",
+                "name": "complex128"
+              },
+              {
+                "Nm": "bool",
+                "UniqueNm": "bool",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "bool",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "string",
+                "UniqueNm": "string",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "string",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "int",
+                "UniqueNm": "int",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "int",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "int8",
+                "UniqueNm": "int8",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "int8",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "int16",
+                "UniqueNm": "int16",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "int16",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "int32",
+                "UniqueNm": "int32",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "int32",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "int64",
+                "UniqueNm": "int64",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "int64",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "uint",
+                "UniqueNm": "uint",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "uint",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "uint8",
+                "UniqueNm": "uint8",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "uint8",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "uint16",
+                "UniqueNm": "uint16",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "uint16",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "uint32",
+                "UniqueNm": "uint32",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "uint32",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "uint64",
+                "UniqueNm": "uint64",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "uint64",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "uintptr",
+                "UniqueNm": "uintptr",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "uintptr",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "byte",
+                "UniqueNm": "byte",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "byte",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "rune",
+                "UniqueNm": "rune",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "rune",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "float32",
+                "UniqueNm": "float32",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "float32",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "float64",
+                "UniqueNm": "float64",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "float64",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "complex64",
+                "UniqueNm": "complex64",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "complex64",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "complex128",
+                "UniqueNm": "complex128",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "String": "complex128",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              }
+            ],
+            "Desc": "this group should contain all basic types, and no types that are not built into the language",
+            "Token": "None",
+            "Match": "Letter",
+            "String": "",
+            "Off": 0,
+            "Acts": null,
+            "PushState": ""
+          },
+          {
+            "Nm": "Name",
+            "UniqueNm": "Name",
             "Props": null,
             "Kids": null,
             "Desc": "",
@@ -1995,6 +2337,11 @@
         "Tok": "Keyword",
         "Key": "return",
         "Depth": 0
+      },
+      {
+        "Tok": "KeywordType",
+        "Key": "string",
+        "Depth": 0
       }
     ]
   },
@@ -2121,7 +2468,7 @@
           {
             "n": 16,
             "type": "parse.Rule",
-            "name": "QualName",
+            "name": "FullName",
             "type": "parse.Rule",
             "name": "NameList",
             "type": "parse.Rule",
@@ -2154,24 +2501,24 @@
             "name": "ArgsExpr"
           },
           {
-            "Nm": "QualName",
-            "UniqueNm": "QualName",
+            "Nm": "FullName",
+            "UniqueNm": "FullName",
             "Props": null,
             "Kids": [
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "FullName",
+                "name": "QualName",
                 "type": "parse.Rule",
                 "name": "Name"
               },
               {
-                "Nm": "FullName",
-                "UniqueNm": "FullName",
+                "Nm": "QualName",
+                "UniqueNm": "QualName",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "fullname is package qualified",
+                "Desc": "package-qualified name",
                 "Rule": "'Name' '.' 'Name'",
                 "Ast": "AddAst",
                 "OptTokMap": false
@@ -2182,7 +2529,7 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "short name = without package scope",
+                "Desc": "just a name without package scope",
                 "Rule": "'Name'",
                 "Ast": "AddAst",
                 "OptTokMap": false
@@ -2346,7 +2693,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'+' UnaryExpr",
+                "Rule": "'+' @UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2357,7 +2704,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'-' UnaryExpr",
+                "Rule": "'-' @UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2368,7 +2715,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'^' UnaryExpr",
+                "Rule": "'^' @UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2379,7 +2726,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'!' UnaryExpr",
+                "Rule": "'!' @UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2390,7 +2737,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'*' UnaryExpr",
+                "Rule": "'*' @UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2401,7 +2748,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'\u0026' UnaryExpr",
+                "Rule": "'\u0026' @UnaryExpr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2678,15 +3025,17 @@
             "Props": null,
             "Kids": [
               {
-                "n": 11,
+                "n": 12,
                 "type": "parse.Rule",
                 "name": "BasicLit",
                 "type": "parse.Rule",
                 "name": "CompositeLit",
                 "type": "parse.Rule",
-                "name": "Convert",
+                "name": "ConvertBasic",
                 "type": "parse.Rule",
                 "name": "ConvertParens",
+                "type": "parse.Rule",
+                "name": "Convert",
                 "type": "parse.Rule",
                 "name": "ParenExpr",
                 "type": "parse.Rule",
@@ -2725,13 +3074,13 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "Convert",
-                "UniqueNm": "Convert",
+                "Nm": "ConvertBasic",
+                "UniqueNm": "ConvertBasic",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "note: a regular type(expr) will be a FunCall",
-                "Rule": "@TypeLiteral '(' Expr ?',' ')'",
+                "Desc": "only works with basic builtin types -- others will get taken by FunCall",
+                "Rule": "@BasicType '(' @Expr ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2742,7 +3091,18 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'(' Type ')' '(' Expr ?',' ')'",
+                "Rule": "'(' @Type ')' '(' @Expr ?',' ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Convert",
+                "UniqueNm": "Convert",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "note: a regular type(expr) will be a FunCall",
+                "Rule": "@TypeLiteral '(' Expr ?',' ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2773,9 +3133,9 @@
                 "UniqueNm": "TypeAssert",
                 "Props": null,
                 "Kids": null,
-                "Off": true,
+                "Off": false,
                 "Desc": "must be before FunCall to get . match",
-                "Rule": "PrimaryExpr '.' '(' Type ')'",
+                "Rule": "PrimaryExpr '.' '(' @Type ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2785,7 +3145,7 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "must be after parens, before conversion",
+                "Desc": "must be after parens",
                 "Rule": "PrimaryExpr '(' ?ArgsExpr ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
@@ -2819,7 +3179,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "this is the least selective and must be at the end",
-                "Rule": "QualName",
+                "Rule": "FullName",
                 "Ast": "NoAst",
                 "OptTokMap": false
               }
@@ -3034,7 +3394,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "KeyedElement ',' ?ElementList",
-                "Ast": "NoAst",
+                "Ast": "AnchorAst",
                 "OptTokMap": false
               },
               {
@@ -3385,9 +3745,11 @@
         "Props": null,
         "Kids": [
           {
-            "n": 8,
+            "n": 9,
             "type": "parse.Rule",
             "name": "Type",
+            "type": "parse.Rule",
+            "name": "TypeName",
             "type": "parse.Rule",
             "name": "PtrOrTypeName",
             "type": "parse.Rule",
@@ -3413,30 +3775,19 @@
                 "type": "parse.Rule",
                 "name": "ParenType",
                 "type": "parse.Rule",
-                "name": "TypeName",
+                "name": "TypeLit",
                 "type": "parse.Rule",
-                "name": "TypeLit"
+                "name": "TypeNms"
               },
               {
                 "Nm": "ParenType",
                 "UniqueNm": "ParenType",
                 "Props": null,
                 "Kids": null,
-                "Off": true,
-                "Desc": "",
-                "Rule": "'(' Type ')'",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "TypeName",
-                "UniqueNm": "TypeName",
-                "Props": null,
-                "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "QualName",
-                "Ast": "AnchorAst",
+                "Rule": "'(' @Type ')'",
+                "Ast": "NoAst",
                 "OptTokMap": false
               },
               {
@@ -3449,10 +3800,75 @@
                 "Rule": "TypeLiteral",
                 "Ast": "NoAst",
                 "OptTokMap": false
+              },
+              {
+                "Nm": "TypeNms",
+                "UniqueNm": "TypeNms",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "TypeName",
+                "Ast": "NoAst",
+                "OptTokMap": false
               }
             ],
             "Off": false,
             "Desc": "type specifies a type either as a type name or type expression",
+            "Rule": "",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "TypeName",
+            "UniqueNm": "TypeName",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "BasicType",
+                "type": "parse.Rule",
+                "name": "QualType",
+                "type": "parse.Rule",
+                "name": "TypeNm"
+              },
+              {
+                "Nm": "BasicType",
+                "UniqueNm": "BasicType",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "recognizes builtin types",
+                "Rule": "'KeywordType'",
+                "Ast": "AddAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "QualType",
+                "UniqueNm": "QualType",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "type equivalent to QualName",
+                "Rule": "'Name' '.' 'Name'",
+                "Ast": "AddAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "TypeNm",
+                "UniqueNm": "TypeNm",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "local unqualified type name",
+                "Rule": "'Name'",
+                "Ast": "AddAst",
+                "OptTokMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
             "OptTokMap": false
@@ -3528,8 +3944,8 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "todo: need to match on sequence",
-                "Rule": "'[' ']' Type",
+                "Desc": "",
+                "Rule": "'[' ']' @Type",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3540,7 +3956,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "array must be after slice b/c slice matches on sequence of tokens",
-                "Rule": "'[' ?Expr ']' Type",
+                "Rule": "'[' @Expr ']' @Type",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3562,7 +3978,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'*' Type",
+                "Rule": "'*' @Type",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3573,7 +3989,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:func' Signature",
+                "Rule": "'key:func' @Signature",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3595,7 +4011,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:map' '[' Type ']' Type",
+                "Rule": "'key:map' '[' @Type ']' @Type",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3620,7 +4036,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:chan' '\u003c-' Type",
+                    "Rule": "'key:chan' '\u003c-' @Type",
                     "Ast": "AnchorAst",
                     "OptTokMap": false
                   },
@@ -3631,7 +4047,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'\u003c-' 'key:chan' Type",
+                    "Rule": "'\u003c-' 'key:chan' @Type",
                     "Ast": "AnchorAst",
                     "OptTokMap": false
                   },
@@ -3642,7 +4058,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:chan' Type",
+                    "Rule": "'key:chan' @Type",
                     "Ast": "AnchorAst",
                     "OptTokMap": false
                   }

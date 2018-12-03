@@ -6,9 +6,13 @@ package lex
 
 import (
 	"fmt"
+	"io"
 	"reflect"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/goki/ki"
+	"github.com/goki/ki/indent"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/token"
 )
@@ -256,6 +260,71 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 		ls.PushState(lr.PushState)
 	case PopState:
 		ls.PopState()
+	}
+}
+
+///////////////////////////////////////////////////////////////////////
+//  Non-lexing functions
+
+// Find looks for rules in the tree that contain given string in String or Name fields
+func (lr *Rule) Find(find string) []*Rule {
+	var res []*Rule
+	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d interface{}) bool {
+		lri := k.Embed(KiT_Rule).(*Rule)
+		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
+			res = append(res, lri)
+		}
+		return true
+	})
+	return res
+}
+
+// WriteGrammar outputs the lexer rules as a formatted grammar in a BNF-like format
+// it is called recursively
+func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
+	if lr.IsRoot() {
+		for _, k := range lr.Kids {
+			lri := k.Embed(KiT_Rule).(*Rule)
+			lri.WriteGrammar(writer, depth)
+		}
+	} else {
+		ind := indent.Tabs(depth)
+		gpstr := ""
+		if lr.HasChildren() {
+			gpstr = " {"
+		}
+		offstr := ""
+		if lr.Off > 0 {
+			offstr = fmt.Sprintf("+%d:", lr.Off)
+		}
+		actstr := ""
+		if len(lr.Acts) > 0 {
+			actstr = "\t do: "
+			for _, ac := range lr.Acts {
+				if ac == PushState {
+					actstr += ac.String() + ": " + lr.PushState + "; "
+				} else {
+					actstr += ac.String() + "; "
+				}
+			}
+		}
+		if lr.Desc != "" {
+			fmt.Fprintf(writer, "%v// %v %v \n", ind, lr.Nm, lr.Desc)
+		}
+		if (lr.Match >= Letter && lr.Match <= WhiteSpace) || lr.Match == AnyRune {
+			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v%v%v\n", ind, lr.Nm, lr.Token, offstr, lr.Match, actstr, gpstr)
+		} else {
+			fmt.Fprintf(writer, "%v%v:\t\t %v\t\t if %v%v == \"%v\"%v%v\n", ind, lr.Nm, lr.Token, offstr, lr.Match, lr.String, actstr, gpstr)
+		}
+		if lr.HasChildren() {
+			w := tabwriter.NewWriter(writer, 4, 4, 2, ' ', 0)
+			for _, k := range lr.Kids {
+				lri := k.Embed(KiT_Rule).(*Rule)
+				lri.WriteGrammar(w, depth+1)
+			}
+			w.Flush()
+			fmt.Fprintf(writer, "%v}\n", ind)
+		}
 	}
 }
 

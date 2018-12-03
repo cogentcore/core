@@ -4,6 +4,7 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
+/*
 func main() {
 	if peas++; this > that {
 		fmt.Printf("test")
@@ -11,14 +12,13 @@ func main() {
 	}
 }
 
-
 package main
 
 import "github.com/goki/gi/gi"
 
 import (
-	"github.com/goki/gi/gi"
-	main "github.com/goki/gi/gimain"
+	gi "github.com/goki/gi/gi"
+	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	gogide "github.com/goki/gide/gide"
 	"github.com/goki/pi"
@@ -75,11 +75,7 @@ var ExprSlice3 = abc[20:30] + abc[:] + abc[20:] + abc[:30] + abc[20:30:2]
 
 var ExprSelect = abc.Def
 
-var ExprTypeAssert = absfr.(cheeze)
-
-var ExprTypeAssertPtr = absfr.(*cheeze)
-
-var ExprCvt = int(abc) // parses as a method because it doesn't know from type names
+var ExprCvt = int(abc) // works with basic type names -- others are FunCall
 
 var TypPtr *Fred
 
@@ -90,6 +86,10 @@ var tree = map[token.Tokens]struct{}(optMap)
 var tree = (map[token.Tokens]struct{})(optMap)
 
 var partyp = (*int)(tree)
+
+var ExprTypeAssert = absfr.(gi.TreeView)
+
+var ExprTypeAssertPtr = absfr.(*gi.TreeView)
 
 var methexpr = abc.meth(a-b * 2 + bf.Meth(22 + 55) / long.meth.Call(tree))
 
@@ -104,13 +104,14 @@ var ExprFun = meth(2 + 2)
 var ExprFun = meth(2 + 2, fslaf)
 
 var ExprFunElip = meth(2 + 2, fslaf...)
+*/
 
 func main() {
-	a <- b
+//	a <- b
 	c++
 	c[3] = 42 * 17
-	bf := a * b + c[32]
-	d += funcall(a, b, c...)
+// 	bf := a * b + c[32]
+//	d += funcall(a, b, c...)
 }
 
 func mainrun() {

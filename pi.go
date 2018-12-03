@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
@@ -198,4 +199,18 @@ func (pr *Parser) SaveJSON(filename string) error {
 		log.Println(err)
 	}
 	return err
+}
+
+// SaveGrammar saves lexer and parser grammar rules to BNF-like .pig file
+func (pr *Parser) SaveGrammar(filename string) error {
+	ofl, err := os.Create(filename)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	fmt.Fprintf(ofl, "// %v Lexer\n\n", filename)
+	pr.Lexer.WriteGrammar(ofl, 0)
+	fmt.Fprintf(ofl, "\n\n///////////////////////////////////////////////////\n// %v Parser\n\n", filename)
+	pr.Parser.WriteGrammar(ofl, 0)
+	return ofl.Close()
 }

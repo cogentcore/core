@@ -161,7 +161,7 @@ func (kt KeyToken) Equal(okt KeyToken) bool {
 // if receiver token is a category, then it matches other token if it is the same category
 // and likewise for subcategory
 func (kt KeyToken) Match(okt KeyToken) bool {
-	if kt.Tok.IsKeyword() {
+	if kt.Tok.IsKeyword() && kt.Key != "" {
 		return kt.Tok.Match(okt.Tok) && kt.Key == okt.Key
 	}
 	return kt.Tok.Match(okt.Tok)

@@ -3,10 +3,10 @@
   "ParserFile": "/Users/oreilly/goki/pi/langs/go/go.pi",
   "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
   "TraceOpts": {
-    "On": false,
-    "Rules": "",
+    "On": true,
+    "Rules": "Block IncrStmt AsgnExisting Slice MultExpr Asgn AsgnStmt",
     "Match": true,
-    "NoMatch": false,
+    "NoMatch": true,
     "Run": true,
     "ScopeSrc": true
   }
