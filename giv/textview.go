@@ -993,12 +993,15 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 				}
 				if tv.IsWordBreak(r1, r2) {
 					ch--
+					if ch == -1 {
+						done = true
+					}
 				} else {
 					done = true
 				}
 			}
 			done = false
-			for ch < sz && !done {
+			for ch < sz && ch >= 0 && !done {
 				r1 := txt[ch]
 				r2 := rune(-1)
 				if ch > 0 {
