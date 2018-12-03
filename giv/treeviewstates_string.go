@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _TreeViewStates_name = "TreeViewActiveTreeViewSelTreeViewFocusTreeViewStatesN"
+const _TreeViewStates_name = "TreeViewActiveTreeViewSelTreeViewFocusTreeViewInactiveTreeViewStatesN"
 
-var _TreeViewStates_index = [...]uint8{0, 14, 25, 38, 53}
+var _TreeViewStates_index = [...]uint8{0, 14, 25, 38, 54, 69}
 
 func (i TreeViewStates) String() string {
 	if i < 0 || i >= TreeViewStates(len(_TreeViewStates_index)-1) {

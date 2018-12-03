@@ -15,6 +15,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.1.6 // indirect
 	github.com/fatih/camelcase v1.0.0
+	github.com/gabriel-vasile/mimetype v0.0.0-20181202175247-077d38b2e891
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
 	github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044
 	github.com/goki/ki v0.9.3
@@ -24,6 +25,7 @@ require (
 	github.com/iancoleman/strcase v0.0.0-20180726023541-3605ed457bf7
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/go-homedir v1.0.0
+	github.com/mvdan/xurls v1.1.0
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/sajari/fuzzy v1.0.0
 	github.com/sergi/go-diff v1.0.0 // indirect
@@ -37,5 +39,4 @@ require (
 	golang.org/x/text v0.3.0 // indirect
 	golang.org/x/tools v0.0.0-20181115011154-2a3f5192be2e
 	gopkg.in/h2non/filetype.v1 v1.0.5 // indirect
-	mvdan.cc/xurls/v2 v2.0.0
 )

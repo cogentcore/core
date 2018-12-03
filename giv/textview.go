@@ -26,6 +26,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 )
@@ -3877,11 +3878,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				tv.RenderCursor(true)
 				gotTabAI = true
 			} else {
-				if tv.Buf.Opts.SpaceIndent {
-					tv.InsertAtCursor(IndentBytes(1, tv.Sty.Text.TabSize, true))
-				} else {
-					tv.InsertAtCursor([]byte("\t"))
-				}
+				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Sty.Text.TabSize))
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
 			tv.Viewport.Win.UpdateEnd(updt)

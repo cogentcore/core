@@ -236,6 +236,22 @@ func (tv *TreeView) Label() string {
 	return tv.SrcNode.Ptr.Name()
 }
 
+// UpdateInactive updates the Inactive state based on SrcNode -- returns true if
+// inactive
+func (tv *TreeView) UpdateInactive() bool {
+	tv.ClearInactive()
+	if tv.SrcNode.Ptr == nil {
+		tv.SetInactive()
+	} else {
+		if inact, has := tv.SrcNode.Ptr.Prop("inactive"); has {
+			if bo, ok := kit.ToBool(inact); bo && ok {
+				tv.SetInactive()
+			}
+		}
+	}
+	return tv.IsInactive()
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    Signals etc
 
@@ -288,14 +304,18 @@ const (
 type TreeViewStates int32
 
 const (
-	// normal state -- there but not being interacted with
+	// TreeViewActive is normal state -- there but not being interacted with
 	TreeViewActive TreeViewStates = iota
 
-	// selected
+	// TreeViewSel is selected
 	TreeViewSel
 
-	// in focus -- will respond to keyboard input
+	// TreeViewFocus is in focus -- will respond to keyboard input
 	TreeViewFocus
+
+	// TreeViewInactive is inactive -- if SrcNode.Ptr is nil, or source has "inactive" property
+	// set, or treeview node has inactive property set directly
+	TreeViewInactive
 
 	TreeViewStatesN
 )
@@ -303,7 +323,7 @@ const (
 //go:generate stringer -type=TreeViewStates
 
 // TreeViewSelectors are Style selector names for the different states:
-var TreeViewSelectors = []string{":active", ":selected", ":focus"}
+var TreeViewSelectors = []string{":active", ":selected", ":focus", ":inactive"}
 
 // These are special properties established on the RootView for maintaining
 // overall tree state
@@ -1822,6 +1842,9 @@ var TreeViewProps = ki.Props{
 	TreeViewSelectors[TreeViewFocus]: ki.Props{
 		"background-color": &gi.Prefs.Colors.Control,
 	},
+	TreeViewSelectors[TreeViewInactive]: ki.Props{
+		"background-color": "highlight-10",
+	},
 	"CtxtMenuActive": ki.PropSlice{
 		{"SrcAddChild", ki.Props{
 			"label": "Add Child",
@@ -1920,6 +1943,7 @@ func (tv *TreeView) Init2D() {
 }
 
 func (tv *TreeView) StyleTreeView() {
+	tv.UpdateInactive()
 	if !tv.HasChildren() {
 		tv.SetClosed()
 	}
@@ -2069,10 +2093,13 @@ func (tv *TreeView) Render2D() {
 	// }
 	// fmt.Printf("tv rend: %v\n", tv.Nm)
 	if tv.PushBounds() {
+		tv.UpdateInactive()
 		if tv.IsSelected() {
 			tv.Sty = tv.StateStyles[TreeViewSel]
 		} else if tv.HasFocus() {
 			tv.Sty = tv.StateStyles[TreeViewFocus]
+		} else if tv.IsInactive() {
+			tv.Sty = tv.StateStyles[TreeViewInactive]
 		} else {
 			tv.Sty = tv.StateStyles[TreeViewActive]
 		}

@@ -24,6 +24,7 @@ import (
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
+	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
@@ -57,6 +58,14 @@ func (tb *TextBufOpts) CommentStrs() (comst, comed string) {
 		comed = tb.CommentEd
 	}
 	return
+}
+
+// IndentChar returns the indent character based on SpaceIndent option
+func (tb *TextBufOpts) IndentChar() indent.Char {
+	if tb.SpaceIndent {
+		return indent.Space
+	}
+	return indent.Tab
 }
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
@@ -1990,24 +1999,25 @@ func (tb *TextBuf) RemoveTag(pos TextPos, tag histyle.HiTags) (reg TagRegion, ok
 // LineIndent returns the number of tabs or spaces at start of given line --
 // if line starts with tabs, then those are counted, else spaces --
 // combinations of tabs and spaces won't produce sensible results
-func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, spc bool) {
+func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, ichr indent.Char) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
+	ichr = indent.Tab
 	sz := len(tb.Lines[ln])
 	if sz == 0 {
 		return
 	}
 	txt := tb.Lines[ln]
 	if txt[0] == ' ' {
-		spc = true
+		ichr = indent.Space
 		n = 1
 	} else if txt[0] != '\t' {
 		return
 	} else {
 		n = 1
 	}
-	if spc {
+	if ichr == indent.Space {
 		for i := 1; i < sz; i++ {
 			if txt[i] == ' ' {
 				n++
@@ -2028,32 +2038,6 @@ func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, spc bool) {
 	return
 }
 
-// IndentBytes returns an indentation string of given number of tab stops,
-// using tabs or spaces, for given tab size (if using spaces)
-func IndentBytes(n, tabSz int, spc bool) []byte {
-	if spc {
-		b := make([]byte, n*tabSz)
-		for i := 0; i < n*tabSz; i++ {
-			b[i] = ' '
-		}
-		return b
-	} else {
-		b := make([]byte, n)
-		for i := 0; i < n; i++ {
-			b[i] = '\t'
-		}
-		return b
-	}
-}
-
-// IndentCharPos returns character position for given level of indentation
-func IndentCharPos(n, tabSz int, spc bool) int {
-	if spc {
-		return n * tabSz
-	}
-	return n
-}
-
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces) -- either inserts or deletes to reach
 // target
@@ -2062,15 +2046,18 @@ func (tb *TextBuf) IndentLine(ln, n int) *TextBufEdit {
 	defer tb.AutoSaveRestore(asv)
 
 	tabSz := tb.Opts.TabSize
-	spc := tb.Opts.SpaceIndent
+	ichr := indent.Tab
+	if tb.Opts.SpaceIndent {
+		ichr = indent.Space
+	}
 
 	curli, _ := tb.LineIndent(ln, tabSz)
 	if n > curli {
 		// fmt.Printf("autoindent: ins %v\n", n)
-		return tb.InsertText(TextPos{Ln: ln}, IndentBytes(n-curli, tabSz, spc), true, true)
+		return tb.InsertText(TextPos{Ln: ln}, indent.Bytes(ichr, n-curli, tabSz), true, true)
 	} else if n < curli {
-		spos := IndentCharPos(n, tabSz, spc)
-		cpos := IndentCharPos(curli, tabSz, spc)
+		spos := indent.Len(ichr, n, tabSz)
+		cpos := indent.Len(ichr, curli, tabSz)
 		tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true, true)
 		// fmt.Printf("IndentLine deleted: %v at: %v\n", string(tbe.ToBytes()), tbe.Reg)
 	}
@@ -2078,7 +2065,8 @@ func (tb *TextBuf) IndentLine(ln, n int) *TextBufEdit {
 }
 
 // PrevLineIndent returns previous line from given line that has indentation -- skips blank lines
-func (tb *TextBuf) PrevLineIndent(ln int) (n int, spc bool, txt string) {
+func (tb *TextBuf) PrevLineIndent(ln int) (n int, ichr indent.Char, txt string) {
+	ichr = tb.Opts.IndentChar()
 	tabSz := tb.Opts.TabSize
 	comst, _ := tb.Opts.CommentStrs()
 	tb.LinesMu.RLock()
@@ -2089,14 +2077,15 @@ func (tb *TextBuf) PrevLineIndent(ln int) (n int, spc bool, txt string) {
 			ln--
 			continue
 		}
-		n, spc = tb.LineIndent(ln, tabSz)
+		n, ichr = tb.LineIndent(ln, tabSz)
 		txt = strings.TrimSpace(string(tb.Lines[ln]))
 		if cmidx := strings.Index(txt, comst); cmidx > 0 {
 			txt = strings.TrimSpace(txt[:cmidx])
 		}
 		return
 	}
-	return 0, false, ""
+	n = 0
+	return
 }
 
 // AutoIndent indents given line to the level of the prior line, adjusted
@@ -2108,7 +2097,7 @@ func (tb *TextBuf) PrevLineIndent(ln int) (n int, spc bool, txt string) {
 // indent of the current line.
 func (tb *TextBuf) AutoIndent(ln int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
 	tabSz := tb.Opts.TabSize
-	spc := tb.Opts.SpaceIndent
+	ichr := tb.Opts.IndentChar()
 
 	li, _, prvln := tb.PrevLineIndent(ln)
 	tb.LinesMu.RLock()
@@ -2132,13 +2121,13 @@ func (tb *TextBuf) AutoIndent(ln int, indents, unindents []string) (tbe *TextBuf
 	}
 	switch {
 	case ind && und:
-		return tb.IndentLine(ln, li), li, IndentCharPos(li, tabSz, spc)
+		return tb.IndentLine(ln, li), li, indent.Len(ichr, li, tabSz)
 	case ind:
-		return tb.IndentLine(ln, li+1), li + 1, IndentCharPos(li+1, tabSz, spc)
+		return tb.IndentLine(ln, li+1), li + 1, indent.Len(ichr, li+1, tabSz)
 	case und:
-		return tb.IndentLine(ln, li-1), li - 1, IndentCharPos(li-1, tabSz, spc)
+		return tb.IndentLine(ln, li-1), li - 1, indent.Len(ichr, li-1, tabSz)
 	default:
-		return tb.IndentLine(ln, li), li, IndentCharPos(li, tabSz, spc)
+		return tb.IndentLine(ln, li), li, indent.Len(ichr, li, tabSz)
 	}
 }
 
