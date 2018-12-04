@@ -2449,7 +2449,7 @@
             "Kids": null,
             "Off": false,
             "Desc": "",
-            "Rule": "FuncDecl 'EOS'",
+            "Rule": "FunDecl 'EOS'",
             "Ast": "NoAst",
             "OptTokMap": false
           }
@@ -2559,8 +2559,8 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "* means that , is key token for matching",
-                "Rule": "'Name' *',' NameList",
+                "Desc": "",
+                "Rule": "'Name' ',' NameList",
                 "Ast": "AddAst",
                 "OptTokMap": false
               },
@@ -3930,7 +3930,7 @@
                 "type": "parse.Rule",
                 "name": "PointerType",
                 "type": "parse.Rule",
-                "name": "FunctionType",
+                "name": "FuncType",
                 "type": "parse.Rule",
                 "name": "InterfaceType",
                 "type": "parse.Rule",
@@ -3983,8 +3983,8 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "FunctionType",
-                "UniqueNm": "FunctionType",
+                "Nm": "FuncType",
+                "UniqueNm": "FuncType",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -4206,7 +4206,7 @@
           {
             "n": 8,
             "type": "parse.Rule",
-            "name": "FuncDecl",
+            "name": "FunDecl",
             "type": "parse.Rule",
             "name": "Signature",
             "type": "parse.Rule",
@@ -4223,13 +4223,43 @@
             "name": "Params"
           },
           {
-            "Nm": "FuncDecl",
-            "UniqueNm": "FuncDecl",
+            "Nm": "FunDecl",
+            "UniqueNm": "FunDecl",
             "Props": null,
-            "Kids": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "MethDecl",
+                "type": "parse.Rule",
+                "name": "FuncDecl"
+              },
+              {
+                "Nm": "MethDecl",
+                "UniqueNm": "MethDecl",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:func' '(' Name Type ')' Name Signature ?Block 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "FuncDecl",
+                "UniqueNm": "FuncDecl",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:func' Name Signature ?Block 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              }
+            ],
             "Off": false,
             "Desc": "",
-            "Rule": "'key:func' Name Signature ?Block 'EOS'",
+            "Rule": "",
             "Ast": "AnchorAst",
             "OptTokMap": false
           },
@@ -4280,7 +4310,7 @@
               }
             ],
             "Off": false,
-            "Desc": "",
+            "Desc": "for interfaces only -- interface methods",
             "Rule": "",
             "Ast": "NoAst",
             "OptTokMap": false
@@ -4315,7 +4345,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "Params",
+                "Rule": "'(' ParamsList ')'",
                 "Ast": "NoAst",
                 "OptTokMap": false
               },
@@ -4343,11 +4373,9 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 1,
                 "type": "parse.Rule",
-                "name": "ParamNameEllipsis",
-                "type": "parse.Rule",
-                "name": "ParamName"
+                "name": "ParamNameEllipsis"
               },
               {
                 "Nm": "ParamNameEllipsis",
@@ -4357,17 +4385,6 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "?NameList '...' Type",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "ParamName",
-                "UniqueNm": "ParamName",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "?NameList Type",
                 "Ast": "NoAst",
                 "OptTokMap": false
               }
@@ -4384,32 +4401,45 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
                 "type": "parse.Rule",
-                "name": "ParamsMulti",
+                "name": "ParName",
                 "type": "parse.Rule",
-                "name": "ParamsOne"
+                "name": "ParNames",
+                "type": "parse.Rule",
+                "name": "ParType"
               },
               {
-                "Nm": "ParamsMulti",
-                "UniqueNm": "ParamsMulti",
+                "Nm": "ParName",
+                "UniqueNm": "ParName",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "Param ',' ParamsList",
+                "Rule": "@Name @Type ?',' ?ParamsList",
                 "Ast": "AddAst",
                 "OptTokMap": false
               },
               {
-                "Nm": "ParamsOne",
-                "UniqueNm": "ParamsOne",
+                "Nm": "ParNames",
+                "UniqueNm": "ParNames",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
+                "Rule": "Name ',' @NameList @Type ?',' ?ParamsList",
+                "Ast": "AddAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ParType",
+                "UniqueNm": "ParType",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "Param",
-                "Ast": "AddAst",
+                "Rule": "@Type ?',' ?ParamsList",
+                "Ast": "NoAst",
                 "OptTokMap": false
               }
             ],
@@ -4443,40 +4473,19 @@
         "Props": null,
         "Kids": [
           {
-            "n": 11,
-            "type": "parse.Rule",
-            "name": "Block",
+            "n": 6,
             "type": "parse.Rule",
             "name": "StmtList",
+            "type": "parse.Rule",
+            "name": "BlockList",
             "type": "parse.Rule",
             "name": "Stmt",
             "type": "parse.Rule",
             "name": "SimpleStmt",
             "type": "parse.Rule",
-            "name": "SimpleStNoEos",
-            "type": "parse.Rule",
             "name": "Asgn",
             "type": "parse.Rule",
-            "name": "Elses",
-            "type": "parse.Rule",
-            "name": "SwitchStmt",
-            "type": "parse.Rule",
-            "name": "Cases",
-            "type": "parse.Rule",
-            "name": "CaseList",
-            "type": "parse.Rule",
-            "name": "Case"
-          },
-          {
-            "Nm": "Block",
-            "UniqueNm": "Block",
-            "Props": null,
-            "Kids": null,
-            "Off": false,
-            "Desc": "",
-            "Rule": "'{' ?StmtList '}'",
-            "Ast": "AnchorAst",
-            "OptTokMap": false
+            "name": "Elses"
           },
           {
             "Nm": "StmtList",
@@ -4490,14 +4499,23 @@
             "OptTokMap": false
           },
           {
+            "Nm": "BlockList",
+            "UniqueNm": "BlockList",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "StmtList",
+            "Ast": "AnchorAst",
+            "OptTokMap": false
+          },
+          {
             "Nm": "Stmt",
             "UniqueNm": "Stmt",
             "Props": null,
             "Kids": [
               {
-                "n": 10,
-                "type": "parse.Rule",
-                "name": "LabeledStmt",
+                "n": 19,
                 "type": "parse.Rule",
                 "name": "ReturnStmt",
                 "type": "parse.Rule",
@@ -4515,18 +4533,27 @@
                 "type": "parse.Rule",
                 "name": "IfStmtExpr",
                 "type": "parse.Rule",
+                "name": "ForClauseStmt",
+                "type": "parse.Rule",
+                "name": "ForRangeExisting",
+                "type": "parse.Rule",
+                "name": "ForRangeNew",
+                "type": "parse.Rule",
+                "name": "ForExpr",
+                "type": "parse.Rule",
+                "name": "SwitchInit",
+                "type": "parse.Rule",
+                "name": "SwitchExpr",
+                "type": "parse.Rule",
+                "name": "CaseStmt",
+                "type": "parse.Rule",
+                "name": "DefaultStmt",
+                "type": "parse.Rule",
+                "name": "LabeledStmt",
+                "type": "parse.Rule",
+                "name": "Block",
+                "type": "parse.Rule",
                 "name": "SimpleSt"
-              },
-              {
-                "Nm": "LabeledStmt",
-                "UniqueNm": "LabeledStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Name ':' Stmt",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
               },
               {
                 "Nm": "ReturnStmt",
@@ -4601,7 +4628,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:if' SimpleStNoEos 'EOS' Expr '{' ?StmtList '}' ?Elses 'EOS'",
+                "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4612,7 +4639,117 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:if' Expr '{' StmtList '}' ?Elses 'EOS'",
+                "Rule": "'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ForClauseStmt",
+                "UniqueNm": "ForClauseStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
+                "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ForRangeExisting",
+                "UniqueNm": "ForRangeExisting",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ForRangeNew",
+                "UniqueNm": "ForRangeNew",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ForExpr",
+                "UniqueNm": "ForExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "most general at end",
+                "Rule": "'key:for' ?Expr '{' ?BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchInit",
+                "UniqueNm": "SwitchInit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchExpr",
+                "UniqueNm": "SwitchExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' ?Expr '{' BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "CaseStmt",
+                "UniqueNm": "CaseStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                "Rule": "'key:case' ExprList ':' ?Stmt",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "DefaultStmt",
+                "UniqueNm": "DefaultStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:default' ':' ?Stmt",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LabeledStmt",
+                "UniqueNm": "LabeledStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Name ':' Stmt",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Block",
+                "UniqueNm": "Block",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'{' ?StmtList '}' 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4715,86 +4852,6 @@
             "OptTokMap": false
           },
           {
-            "Nm": "SimpleStNoEos",
-            "UniqueNm": "SimpleStNoEos",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 5,
-                "type": "parse.Rule",
-                "name": "AsgnStmtNoEos",
-                "type": "parse.Rule",
-                "name": "SendStmtNoEos",
-                "type": "parse.Rule",
-                "name": "IncrStmtNoEos",
-                "type": "parse.Rule",
-                "name": "DecrStmtNoEos",
-                "type": "parse.Rule",
-                "name": "ExprStmtNoEos"
-              },
-              {
-                "Nm": "AsgnStmtNoEos",
-                "UniqueNm": "AsgnStmtNoEos",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Asgn",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "SendStmtNoEos",
-                "UniqueNm": "SendStmtNoEos",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '\u003c-' Expr 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "IncrStmtNoEos",
-                "UniqueNm": "IncrStmtNoEos",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '++'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "DecrStmtNoEos",
-                "UniqueNm": "DecrStmtNoEos",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '--' 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "ExprStmtNoEos",
-                "UniqueNm": "ExprStmtNoEos",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "",
-            "Rule": "",
-            "Ast": "NoAst",
-            "OptTokMap": false
-          },
-          {
             "Nm": "Asgn",
             "UniqueNm": "Asgn",
             "Props": null,
@@ -4880,7 +4937,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:else' 'key:if' Expr '{' ?StmtList '}' ?Elses 'EOS'",
+                "Rule": "'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4891,112 +4948,8 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:else' '{' ?StmtList '}' 'EOS'",
+                "Rule": "'key:else' '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
-                "OptTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "",
-            "Rule": "",
-            "Ast": "NoAst",
-            "OptTokMap": false
-          },
-          {
-            "Nm": "SwitchStmt",
-            "UniqueNm": "SwitchStmt",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 2,
-                "type": "parse.Rule",
-                "name": "SwitchInit",
-                "type": "parse.Rule",
-                "name": "SwitchExpr"
-              },
-              {
-                "Nm": "SwitchInit",
-                "UniqueNm": "SwitchInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr Cases",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "SwitchExpr",
-                "UniqueNm": "SwitchExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' ?Expr Cases",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "",
-            "Rule": "",
-            "Ast": "NoAst",
-            "OptTokMap": false
-          },
-          {
-            "Nm": "Cases",
-            "UniqueNm": "Cases",
-            "Props": null,
-            "Kids": null,
-            "Off": false,
-            "Desc": "",
-            "Rule": "'{' CaseList '}' 'EOS'",
-            "Ast": "NoAst",
-            "OptTokMap": false
-          },
-          {
-            "Nm": "CaseList",
-            "UniqueNm": "CaseList",
-            "Props": null,
-            "Kids": null,
-            "Off": false,
-            "Desc": "",
-            "Rule": "Case ?CaseList",
-            "Ast": "NoAst",
-            "OptTokMap": false
-          },
-          {
-            "Nm": "Case",
-            "UniqueNm": "Case",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 2,
-                "type": "parse.Rule",
-                "name": "CaseStmt",
-                "type": "parse.Rule",
-                "name": "DefaultStmt"
-              },
-              {
-                "Nm": "CaseStmt",
-                "UniqueNm": "CaseStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:case' ExprList ':' StmtList",
-                "Ast": "NoAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "DefaultStmt",
-                "UniqueNm": "DefaultStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:default' ':' StmtList",
-                "Ast": "NoAst",
                 "OptTokMap": false
               }
             ],

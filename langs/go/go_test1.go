@@ -4,17 +4,83 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
+func (pr *Parser) Init() {
+	pr.Lexer.InitName(&pr.Lexer, "Lexer")
+}
+
+func (pr *Parser) Init2(a int, fname string, amap map[string]string) bool {
+	pr.Parser.InitName(&pr.Parser, "Parser")
+}
+
+func (pr *Parser) Init3(a, b int, fname string) (bool, string) {
+	pr.Ast.InitName(&pr.Ast, "Ast")
+}
+
+func (pr *Parser) Init4(a, b int, fname string) (ok bool, name string) {
+	pr.LexState.Init()
+}
+
+// SetSrc sets source to be parsed, and filename it came from
+func (pr *Parser) SetSrc(src [][]rune, fname string) {
+}
 
 func main() {
-	if pos, ok := rr.Rule.Match(ps, parAst, depth+1); ok || something.other() {
+
+	if a := b; b == a {
 		fmt.Printf("test")
 		break
+	}
+
+	if a > b {
+		b++
+	}
+
+	switch vvv := av; nm {
+	case "baby":
+		nm = "maybe"
+		a++
+	case "not":
+		i++
+		p := a * i
+	default:
+		non := "anon"
+	}
+
+	for i := 0; i < 100; i++ {
+		fmt.Printf("%v %v", a, i)
+		a++
+		p := a * i
+	}
+
+	for a, i := range names {
+		for i < 100 {
+			for {
+				fmt.Printf("%v %v", a, i)
+			}
+		}
+	}
+
+	fmt.Printf("starting test")
+	defer my.Widget.UpdateEnd(updt)
+	goto bypass
+
+	if a == b {
+		fmt.Printf("equal")
 	} else if a > b {
 		so++
 		be--
 		it := 20
 	} else {
 		fmt.Printf("long one")
+	}
+
+bypass:
+	fmt.Printf("here")
+	return
+	return something
+	{
+		nvar := 22
+		nvar += function(of + some + others)
 	}
 }
 

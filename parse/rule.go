@@ -238,7 +238,7 @@ func (pr *Rule) Compile(ps *State) bool {
 			if re.Tok.Tok == token.EOS {
 				eoses++
 				if i == nr-1 {
-					re.StInc = eoses // records the number of eoses for final EOS
+					re.StInc = eoses
 				}
 			}
 		} else {
@@ -589,8 +589,31 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 	for i := 0; i < nr; i++ {
 		rr := &pr.Rules[i]
 		if rr.IsToken() && !rr.Opt {
-			ps.Pos, _ = ps.Src.NextTokenPos(mpos[i].St) // already matched -- move past
-			Trace.Out(ps, pr, Run, mpos[i].St, scope, trcAst, fmt.Sprintf("%v: token: %v", i, rr.Tok))
+			psr := ""
+			if i > 0 {
+				if pr.Rules[i-1].IsRule() { // should be
+					psr = pr.Rules[i-1].Rule.Name()
+				}
+			}
+			mp := mpos[i].St
+			if mp == ps.Pos {
+				ps.Pos, _ = ps.Src.NextTokenPos(ps.Pos) // already matched -- move past
+				Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: token at expected pos: %v", i, rr.Tok))
+			} else if mp.IsLess(ps.Pos) {
+				// ps.Pos has moved beyond our expected token -- sub-rule has eaten more than expected!
+				if rr.Tok.Tok == token.EOS {
+					Trace.Out(ps, pr, Run, mp, scope, trcAst, fmt.Sprintf("%v: EOS token consumed by sub-rule: %v", i, rr.Tok))
+				} else {
+					exreg := lex.Reg{mp, ps.Pos}
+					exsrc := ps.Src.TokenRegSrc(exreg)
+					ps.Error(creg.St, fmt.Sprintf("rule %v: non-EOS token: %v at index: %v was consumed by prior sub-rule(s): %v\n\treg: %v src: %v scope: %v", pr.Nm, rr.Tok, i, psr, exreg, exsrc, creg))
+				}
+			} else if !(i == nr-1 && rr.Tok.Tok == token.EOS) {
+				exreg := lex.Reg{ps.Pos, mp}
+				exsrc := ps.Src.TokenRegSrc(exreg)
+				ps.Error(creg.St, fmt.Sprintf("rule %v: token: %v at index: %v has extra tokens (prev rule: %v)\n\treg: %v src: %v scope: %v", pr.Nm, rr.Tok, i, psr, exreg, exsrc, creg))
+				ps.Pos, _ = ps.Src.NextTokenPos(mp) // move to token for more robustness
+			}
 			if ourAst != nil {
 				ourAst.SetTokRegEnd(ps.Pos, ps.Src) // update our end to any tokens that match
 			}
