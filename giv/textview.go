@@ -3551,6 +3551,18 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
+
+	if !tv.SelectMode && selMode == mouse.ExtendContinuous {
+		if tv.SelectReg == TextRegionNil {
+			tv.SelectStart = tv.CursorPos
+		}
+		tv.SetCursor(newPos)
+		tv.SelectRegUpdate(tv.CursorPos)
+		tv.RenderSelectLines()
+		tv.RenderCursor(true)
+		return
+	}
+
 	tv.SetCursor(newPos)
 	if tv.SelectMode || selMode != mouse.SelectOne {
 		if !tv.SelectMode && selMode != mouse.SelectOne {
