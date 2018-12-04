@@ -196,7 +196,7 @@ func (ac *Action) Trigger() {
 	ac.ActionSig.Emit(ac.This(), 0, ac.Data)
 }
 
-// trigger action signal
+// ButtonRelease triggers action signal
 func (ac *Action) ButtonRelease() {
 	if ac.IsInactive() {
 		return
@@ -220,6 +220,7 @@ func (ac *Action) ButtonRelease() {
 	ac.UpdateEnd(updt)
 }
 
+// Init2D calls functions to initialize widget and parts
 func (ac *Action) Init2D() {
 	ac.Init2DWidget()
 	ac.ConfigParts()
@@ -233,6 +234,7 @@ func (ac *Action) ConfigPartsAddShortcut(config *kit.TypeAndNameList) int {
 	return scIdx
 }
 
+// ConfigPartsShortcut sets the shortcut
 func (ac *Action) ConfigPartsShortcut(scIdx int) {
 	if scIdx < 0 {
 		return
@@ -246,6 +248,7 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 	}
 }
 
+// ConfigPartsButton sets the label, icon etc for the button
 func (ac *Action) ConfigPartsButton() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
@@ -258,6 +261,7 @@ func (ac *Action) ConfigPartsButton() {
 	}
 }
 
+// ConfigPartsMenuItem sets the label, icon, etc for action menu item
 func (ac *Action) ConfigPartsMenuItem() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
@@ -279,6 +283,7 @@ func (ac *Action) ConfigPartsMenuItem() {
 	}
 }
 
+// ConfigParts switches on part type on calls specific config
 func (ac *Action) ConfigParts() {
 	ismbar := false
 	istbar := false
