@@ -142,6 +142,13 @@ func (pt *PassTwo) PopNest(ts *TwoState, tok token.Tokens) {
 func (pt *PassTwo) NestDepth(ts *TwoState) {
 	ts.Init()
 	nlines := ts.Src.NLines()
+	if nlines == 0 {
+		return
+	}
+	if len(ts.Src.Lexs[nlines-1]) > 0 { // last line ends with tokens -- parser needs empty last line..
+		ts.Src.Lexs = append(ts.Src.Lexs, Line{})
+		ts.Src.Lines = append(ts.Src.Lines, []rune{})
+	}
 	for ts.Pos.Ln < nlines {
 		sz := len(ts.Src.Lexs[ts.Pos.Ln])
 		if sz == 0 {

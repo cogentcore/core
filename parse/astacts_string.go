@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _AstActs_name = "NoAstAddAstAnchorAstAstActsN"
+const _AstActs_name = "NoAstAddAstSubAstAnchorAstAnchorFirstAstAstActsN"
 
-var _AstActs_index = [...]uint8{0, 5, 11, 20, 28}
+var _AstActs_index = [...]uint8{0, 5, 11, 17, 26, 40, 48}
 
 func (i AstActs) String() string {
 	if i < 0 || i >= AstActs(len(_AstActs_index)-1) {

@@ -35,7 +35,6 @@ Letter:		 None		 if Letter {
         if:                Keyword       if StrName == "if"            do: Name; 
         import:            Keyword       if StrName == "import"        do: Name; 
         interface:         Keyword       if StrName == "interface"     do: Name; 
-        iota:              Keyword       if StrName == "iota"          do: Name; 
         map:               Keyword       if StrName == "map"           do: Name; 
         package:           Keyword       if StrName == "package"       do: Name; 
         range:             Keyword       if StrName == "range"         do: Name; 
@@ -145,7 +144,7 @@ Equals:		 None		 if String == "=" {
 }
 Not:		 None		 if String == "!" {
     NotEqual:       OpRelNotEqual       if +1:String == "="   do: Next; 
-    Not:            OpAsgnAssign        if String == "!"      do: Next; 
+    Not:            OpLogNot            if String == "!"      do: Next; 
 }
 And:		 None		 if String == "&" {
     AsgnAnd:       OpBitAsgnAnd       if +1:String == "="   do: Next; 
@@ -168,30 +167,33 @@ Or:		 None		 if String == "|" {
 
 // File only rules in this first group are used as top-level rules -- all others must be referenced from here 
 File {
-    PackageSpec:  'key:package' Name 'EOS'      
-    Imports:      'key:import' ImportN 'EOS'    
-    Consts:       'key:const' ConstDeclN 'EOS'  
-    Types:        'key:type' TypeDeclN 'EOS'    
-    Vars:         'key:var' VarDeclN 'EOS'      
-    Funcs:        FunDecl 'EOS'                 
+    PackageSpec:  'key:package' Name 'EOS'    >Ast
+    Imports:      'key:import' ImportN 'EOS'  >Ast
+    // Consts same as ConstDecl 
+    Consts:  'key:const' ConstDeclN 'EOS'  >Ast
+    // Types same as TypeDecl 
+    Types:  'key:type' TypeDeclN 'EOS'  >Ast
+    // Vars same as VarDecl 
+    Vars:   'key:var' VarDeclN 'EOS'  >Ast
+    Funcs:  FunDecl 'EOS'             
 }
 // ExprRules many different rules here that go into expressions etc 
 ExprRules {
     // FullName name that is either a full package-qualified name or short plain name 
     FullName {
         // QualName package-qualified name 
-        QualName:  'Name' '.' 'Name'  
+        QualName:  'Name' '.' 'Name'  +Ast
         // Name just a name without package scope 
-        Name:  'Name'  
+        Name:  'Name'  +Ast
     }
     // NameList one or more plain names, separated by , -- for var names 
     NameList {
-        NameListMulti:  'Name' ',' NameList  
-        NameOne:        'Name'               
+        NameListEls:  'Name' ',' NameList  >1Ast
+        NameListEl:   'Name'               +Ast
     }
     ExprList {
-        ExprListMulti:  Expr ',' ExprList  
-        ExprOne:        Expr               
+        ExprListEls:  Expr ',' ExprList  
+        ExprListEl:   Expr               
     }
     // Expr The full set of possible expressions 
     Expr {
@@ -199,64 +201,66 @@ ExprRules {
         UnryExpr:  UnaryExpr   
     }
     UnaryExpr {
-        PosExpr:       '+' @UnaryExpr  
-        NegExpr:       '-' @UnaryExpr  
-        UnaryXorExpr:  '^' @UnaryExpr  
-        NotExpr:       '!' @UnaryExpr  
-        DePtrExpr:     '*' @UnaryExpr  
-        AddrExpr:      '&' @UnaryExpr  
+        PosExpr:       '+' @UnaryExpr  >Ast
+        NegExpr:       '-' @UnaryExpr  >Ast
+        UnaryXorExpr:  '^' @UnaryExpr  >Ast
+        NotExpr:       '!' @UnaryExpr  >Ast
+        DePtrExpr:     '*' @UnaryExpr  >Ast
+        AddrExpr:      '&' @UnaryExpr  >Ast
         // PrimExpr essential that this is LAST in unary list, so that distinctive first-position unary tokens match instead of more general cases in primary 
         PrimExpr:  PrimaryExpr  
     }
     // BinaryExpr due to top-down nature of parser, *lowest* precedence is *first* -- all rules *must* have - first = reverse order to get associativity right 
     BinaryExpr {
-        LogOrExpr:       -Expr '||' Expr  
-        LogAndExpr:      -Expr '&&' Expr  
-        BitOrExpr:       -Expr '|' Expr   
-        BitXorExpr:      -Expr '^' Expr   
-        BitAndExpr:      -Expr '&' Expr   
-        NotEqExpr:       -Expr '!=' Expr  
-        EqExpr:          -Expr '==' Expr  
-        GtEqExpr:        -Expr '>=' Expr  
-        GreaterExpr:     -Expr '>' Expr   
-        LtEqExpr:        -Expr '<=' Expr  
-        LessExpr:        -Expr '<' Expr   
-        ShiftRightExpr:  -Expr '>>' Expr  
-        ShiftLeftExpr:   -Expr '<<' Expr  
-        SubExpr:         -Expr '-' Expr   
-        AddExpr:         -Expr '+' Expr   
-        RemExpr:         -Expr '%' Expr   
-        DivExpr:         -Expr '/' Expr   
-        MultExpr:        -Expr '*' Expr   
+        LogOrExpr:       Expr '||' Expr   >Ast
+        LogAndExpr:      Expr '&&' Expr   >Ast
+        BitOrExpr:       -Expr '|' Expr   >Ast
+        BitXorExpr:      -Expr '^' Expr   >Ast
+        BitAndExpr:      -Expr '&' Expr   >Ast
+        NotEqExpr:       Expr '!=' Expr   >Ast
+        EqExpr:          Expr '==' Expr   >Ast
+        GtEqExpr:        Expr '>=' Expr   >Ast
+        GreaterExpr:     Expr '>' Expr    >Ast
+        LtEqExpr:        Expr '<=' Expr   >Ast
+        LessExpr:        Expr '<' Expr    >Ast
+        ShiftRightExpr:  -Expr '>>' Expr  >Ast
+        ShiftLeftExpr:   -Expr '<<' Expr  >Ast
+        SubExpr:         -Expr '-' Expr   >Ast
+        AddExpr:         -Expr '+' Expr   >Ast
+        RemExpr:         -Expr '%' Expr   >Ast
+        DivExpr:         -Expr '/' Expr   >Ast
+        MultExpr:        -Expr '*' Expr   >Ast
     }
     PrimaryExpr {
         BasicLit:  BasicLiteral  
-        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice 
-        CompositeLit:  LiteralType '{' ElementList '}' 'EOS'  
+        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
+        CompositeLit:  @LiteralType '{' ?ElementList '}'  >Ast
+        FuncLit:       'key:func' Signature Block         >Ast
         // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
-        ConvertBasic:   @BasicType '(' @Expr ')'          
-        ConvertParens:  '(' @Type ')' '(' @Expr ?',' ')'  
+        ConvertBasic:   @BasicType '(' @Expr ')'          >Ast
+        ConvertParens:  '(' @Type ')' '(' @Expr ?',' ')'  >Ast
         // Convert note: a regular type(expr) will be a FunCall 
-        Convert:    @TypeLiteral '(' Expr ?',' ')'        
-        ParenExpr:  '(' Expr ')'                          
-        MethCall:   @RecvType '.' Name '(' ?ArgsExpr ')'  
+        Convert:    @TypeLiteral '(' Expr ?',' ')'  >Ast
+        ParenExpr:  '(' Expr ')'                    
         // TypeAssert must be before FunCall to get . match 
-        TypeAssert:  PrimaryExpr '.' '(' @Type ')'  
+        TypeAssert:  PrimaryExpr '.' '(' @Type ')'  >Ast
         // FuncCall must be after parens 
-        FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'  
-        Selector:  PrimaryExpr '.' Name           
-        Slice:     PrimaryExpr '[' SliceExpr ']'  
+        FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'         >Ast
+        MethCall:  @RecvType '.' Name '(' ?ArgsExpr ')'  >Ast
+        Slice:     PrimaryExpr '[' SliceExpr ']'         >Ast
+        // Selector must be after funcall 
+        Selector:  PrimaryExpr '.' Selectors  >Ast
         // OpName this is the least selective and must be at the end 
         OpName:  FullName  
     }
     BasicLiteral {
-        LitNumInteger:  'LitNumInteger'  
-        LitNumFloat:    'LitNumFloat'    
-        LitNumImag:     'LitNumImag'     
+        LitNumInteger:  'LitNumInteger'  +Ast
+        LitNumFloat:    'LitNumFloat'    +Ast
+        LitNumImag:     'LitNumImag'     +Ast
         // LitRune rune 
-        LitRune:  'LitStrSingle'  
+        LitRune:  'LitStrSingle'  +Ast
         // LitString rune 
-        LitString:  'LitStr'  
+        LitString:  'LitStr'  +Ast
     }
     LiteralType {
         LitStructType:  StructType  
@@ -270,9 +274,9 @@ ExprRules {
     }
     LiteralValue:  '{' ElementList '}' 'EOS'  
     ElementList {
-        ElementListMulti:  KeyedElement ',' ?ElementList  
-        KeyedElement {
-            KeyElement:  Key ':' Element  
+        ElementListEls:  KeyedEl ',' ?ElementList  
+        KeyedEl {
+            KeyEl:  Key ':' Element  >Ast
             Element {
                 ElExpr:    Expr          
                 ElLitVal:  LiteralValue  
@@ -289,19 +293,23 @@ ExprRules {
         ParenRecvType:  '(' RecvType ')'      
         RecvTp:         TypeName              
     }
+    Selectors {
+        Sels:  @Name '.' @Selectors  
+        Sel:   Name                  
+    }
     SliceExpr {
-        SliceThree:  ?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3  
-        SliceTwo:    ?SliceIdx1 ':' ?SliceIdx2               
-        SliceOne:    Expr                                    
+        SliceThree:  ?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3  >Ast
+        SliceTwo:    ?SliceIdx1 ':' ?SliceIdx2               >Ast
+        SliceOne:    Expr                                    >Ast
     }
     SliceIdxs {
-        SliceIdx1:  Expr  
-        SliceIdx2:  Expr  
-        SliceIdx3:  Expr  
+        SliceIdx1:  Expr  >Ast
+        SliceIdx2:  Expr  >Ast
+        SliceIdx3:  Expr  >Ast
     }
     ArgsExpr {
-        ArgsEllipsis:  ExprList '...'  
-        Args:          ExprList        
+        ArgsEllipsis:  ExprList '...'  >Ast
+        Args:          ExprList        >Ast
     }
 }
 TypeRules {
@@ -313,11 +321,11 @@ TypeRules {
     }
     TypeName {
         // BasicType recognizes builtin types 
-        BasicType:  'KeywordType'  
+        BasicType:  'KeywordType'  +Ast
         // QualType type equivalent to QualName 
-        QualType:  'Name' '.' 'Name'  
+        QualType:  'Name' '.' 'Name'  +Ast
         // TypeNm local unqualified type name 
-        TypeNm:  'Name'  
+        TypeNm:  'Name'  +Ast
     }
     // PtrOrTypeName regular type name or pointer to type name 
     PtrOrTypeName {
@@ -325,43 +333,47 @@ TypeRules {
         NoPtrTypeName:  TypeName      
     }
     TypeLiteral {
-        SliceType:  '[' ']' @Type  
+        SliceType:  '[' ']' @Type  >Ast
         // ArrayType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayType:      '[' @Expr ']' @Type                      
-        StructType:     'key:struct' '{' ?FieldDecls '}' ?'EOS'  
-        PointerType:    '*' @Type                                
-        FuncType:       'key:func' @Signature                    
-        InterfaceType:  'key:interface' '{' MethodSpecs '}'      
-        MapType:        'key:map' '[' @Type ']' @Type            
+        ArrayType:      '[' @Expr ']' @Type                      >Ast
+        StructType:     'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
+        PointerType:    '*' @Type                                >Ast
+        FuncType:       'key:func' @Signature                    >Ast
+        InterfaceType:  'key:interface' '{' MethodSpecs '}'      >Ast
+        MapType:        'key:map' '[' @Type ']' @Type            >Ast
         ChannelType {
-            RecvChanType:  'key:chan' '<-' @Type  
-            SendChanType:  '<-' 'key:chan' @Type  
-            SRChanType:    'key:chan' @Type       
+            RecvChanType:  'key:chan' '<-' @Type  >Ast
+            SendChanType:  '<-' 'key:chan' @Type  >Ast
+            SRChanType:    'key:chan' @Type       >Ast
         }
     }
     FieldDecls:  FieldDecl ?FieldDecls  
     FieldDecl {
-        NamedField:  NameList Type ?FieldTag 'EOS'  
-        AnonField:   PtrOrTypeName ?FieldTag 'EOS'  
+        AnonQualField:  'Name' '.' 'Name' ?FieldTag 'EOS'  >Ast
+        NamedField:     NameList ?Type ?FieldTag 'EOS'     >Ast
     }
-    FieldTag:  'LitStr'  
+    FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
     TypeDeclN {
         TypeDeclMulti:  '(' TypeDecls ')'  
-        TypeDecl:       Name Type 'EOS'    
+        TypeDeclEl:     Name Type 'EOS'    >Ast
     }
-    TypeDecls:  TypeDecl ?TypeDecls  
+    TypeDecls:  TypeDeclEl ?TypeDecls  
+    TypeList {
+        TypeListEls:  Type ',' TypeList  >1Ast
+        TypeListEl:   Type               
+    }
 }
 FuncRules {
     FunDecl {
-        MethDecl:  'key:func' '(' Name Type ')' Name Signature ?Block 'EOS'  
-        FuncDecl:  'key:func' Name Signature ?Block 'EOS'                    
+        MethDecl:  'key:func' '(' Name Type ')' Name Signature ?Block 'EOS'  >Ast
+        FuncDecl:  'key:func' Name Signature ?Block 'EOS'                    >Ast
     }
     Signature:  Params ?Result  
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {
-        MethSpecName:  'Name' Params ?Result 'EOS'  
-        MethSpecAnon:  TypeName                     
+        MethSpecAnon:  'Name' '.' 'Name' 'EOS'      >Ast
+        MethSpecName:  'Name' Params ?Result 'EOS'  >Ast
     }
     MethodSpecs:  MethodSpec ?MethodSpecs  
     Result {
@@ -372,56 +384,73 @@ FuncRules {
         ParamNameEllipsis:  ?NameList '...' Type  
     }
     ParamsList {
-        ParName:  @Name @Type ?',' ?ParamsList  
+        ParName:  @Name @Type ?',' ?ParamsList  _Ast
         // ParNames need the explicit ',' in here to absorb so later one goes to paramslist 
-        ParNames:  Name ',' @NameList @Type ?',' ?ParamsList  
-        ParType:   @Type ?',' ?ParamsList                     
+        ParNames:  Name ',' @NameList @Type ?',' ?ParamsList  _Ast
+        ParType:   @Type ?',' ?ParamsList                     _Ast
     }
-    Params:  '(' ?ParamsList ')'  
+    Params:  '(' ?ParamsList ')'  >Ast
 }
 StmtRules {
     StmtList:   Stmt 'EOS' ?StmtList  
-    BlockList:  StmtList              
+    BlockList:  StmtList              >Ast
     Stmt {
-        ReturnStmt:       'key:return' ?ExprList 'EOS'                                    
-        BreakStmt:        'key:break' ?Name 'EOS'                                         
-        ContStmt:         'key:continue' ?Name 'EOS'                                      
-        GotoStmt:         'key:goto' Name 'EOS'                                           
-        FallthroughStmt:  'key:fallthrough' 'EOS'                                         
-        DeferStmt:        'key:defer' Expr 'EOS'                                          
-        IfStmtInit:       'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'  
-        IfStmtExpr:       'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                   
-        // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
-        ForClauseStmt:     'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'  
-        ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'              
-        ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'             
+        ConstDeclStmt:     ConstDecl                                                          
+        TypeDeclStmt:      TypeDecl                                                           
+        VarDeclStmt:       VarDecl                                                            
+        ReturnStmt:        'key:return' ?ExprList 'EOS'                                       >Ast
+        BreakStmt:         'key:break' ?Name 'EOS'                                            >Ast
+        ContStmt:          'key:continue' ?Name 'EOS'                                         >Ast
+        GotoStmt:          'key:goto' Name 'EOS'                                              >Ast
+        FallthroughStmt:   'key:fallthrough' 'EOS'                                            >Ast
+        DeferStmt:         'key:defer' Expr 'EOS'                                             >Ast
+        IfStmtExpr:        'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                      >Ast
+        ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
+        ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
         // ForExpr most general at end 
-        ForExpr:     'key:for' ?Expr '{' ?BlockList '}' 'EOS'                     
-        SwitchInit:  'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'  
-        SwitchExpr:  'key:switch' ?Expr '{' BlockList '}' 'EOS'                   
+        ForExpr:         'key:for' ?Expr '{' ?BlockList '}' 'EOS'                                       >Ast
+        SwitchInit:      'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                    >Ast
+        SwitchExpr:      'key:switch' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
+        SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
+        SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
         // CaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
-        CaseStmt:     'key:case' ExprList ':' ?Stmt  
-        DefaultStmt:  'key:default' ':' ?Stmt        
-        LabeledStmt:  Name ':' Stmt                  
-        Block:        '{' ?StmtList '}' 'EOS'        
-        SimpleSt:     SimpleStmt                     
+        CaseStmt:  'key:case' ExprList ':' ?Stmt  >Ast
+        // TypeCaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+        TypeCaseStmt:  'key:case' TypeList ':' ?Stmt  >Ast
+        // SelCaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+        SelCaseStmt:  'key:case' CommStmt 'EOS' ?Stmt  >Ast
+        DefaultStmt:  'key:default' ':' ?Stmt          >Ast
+        LabeledStmt:  Name ':' Stmt                    >Ast
+        // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
+        ForClauseStmt:       'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'                    >Ast
+        IfStmtInit:          'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'                                  >Ast
+        SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
+        SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
+        Block:               '{' ?StmtList '}' 'EOS'                                                                         >Ast
+        SimpleSt:            SimpleStmt                                                                                      
     }
     SimpleStmt {
-        SendStmt:  Expr '<-' Expr 'EOS'  
-        IncrStmt:  Expr '++' 'EOS'       
-        DecrStmt:  Expr '--' 'EOS'       
+        SendStmt:  Expr '<-' Expr 'EOS'  >Ast
+        IncrStmt:  Expr '++' 'EOS'       >Ast
+        DecrStmt:  Expr '--' 'EOS'       >Ast
         AsgnStmt:  Asgn                  
-        ExprStmt:  Expr 'EOS'            
+        ExprStmt:  Expr 'EOS'            >Ast
     }
     Asgn {
-        AsgnExisting:  ExprList '=' ExprList 'EOS'           
-        AsgnNew:       ExprList ':=' ExprList 'EOS'          
-        AsgnMath:      ExprList 'OpMathAsgn' ExprList 'EOS'  
-        AsgnBit:       ExprList 'OpBitAsgn' ExprList 'EOS'   
+        AsgnExisting:  ExprList '=' ExprList 'EOS'           >Ast
+        AsgnNew:       ExprList ':=' ExprList 'EOS'          >Ast
+        AsgnMath:      ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
+        AsgnBit:       ExprList 'OpBitAsgn' ExprList 'EOS'   >Ast
     }
     Elses {
-        ElseIfStmt:  'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'  
-        ElseStmt:    'key:else' '{' ?BlockList '}' 'EOS'                       
+        ElseIfStmt:  'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'  >Ast
+        ElseStmt:    'key:else' '{' ?BlockList '}' 'EOS'                       >Ast
+    }
+    // CommStmt communication stmt: send or recv 
+    CommStmt {
+        CommSend:      SendStmt                  
+        RecvExisting:  ExprList '=' Expr 'EOS'   >Ast
+        RecvNew:       NameList ':=' Expr 'EOS'  >Ast
     }
 }
 ImportRules {
@@ -433,20 +462,23 @@ ImportRules {
         ImportOne:  ImportList  
     }
     ImportList {
-        // ImportSpecAlias put more specialized rules first 
-        ImportSpecAlias:  'Name' 'LitStr' ?'EOS' ?ImportList  
-        ImportSpec:       'LitStr' ?'EOS' ?ImportList         
+        // ImportAlias put more specialized rules first 
+        ImportAlias:  'Name' 'LitStr' ?'EOS' ?ImportList  +Ast
+        Import:       'LitStr' ?'EOS' ?ImportList         +Ast
     }
 }
 DeclRules {
+    TypeDecl:   'key:type' TypeDeclN 'EOS'    >Ast
+    ConstDecl:  'key:const' ConstDeclN 'EOS'  
+    VarDecl:    'key:var' VarDeclN 'EOS'      
     // ConstDeclN N = switch between 1 or multi 
     ConstDeclN {
         ConstMulti:  '(' ConstList ')'  
         // ConstOpts different types of const expressions 
         ConstOpts {
-            ConstSpec:  NameList ?Type '=' Expr 'EOS'  
+            ConstSpec:  NameList ?Type '=' Expr 'EOS'  >Ast
             // ConstSpecName only a name, no expression 
-            ConstSpecName:  NameList 'EOS'  
+            ConstSpecName:  NameList 'EOS'  >Ast
         }
     }
     ConstList:  ConstOpts ?ConstList  
@@ -455,9 +487,9 @@ DeclRules {
         VarMulti:  '(' VarList ')'  
         // VarOpts different types of var expressions 
         VarOpts {
-            VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  
+            VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  >Ast
             // VarSpec only a name and type, no expression 
-            VarSpec:  NameList Type 'EOS'  
+            VarSpec:  NameList Type 'EOS'  >Ast
         }
     }
     VarList:  VarOpts ?VarList  

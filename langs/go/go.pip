@@ -4,7 +4,7 @@
   "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
   "TraceOpts": {
     "On": false,
-    "Rules": "IfStmtInit ExprStmt Block LogOrExp AsgnNew StmtList Stmt",
+    "Rules": "AnonField TypeName FieldDecl NamedField",
     "Match": true,
     "NoMatch": false,
     "Run": true,

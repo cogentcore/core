@@ -4,6 +4,62 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
+/*
+var a,b,c,d = 32
+var e = 22
+*/
+
+type Rule struct {
+	ki.Node
+	Off       bool     `desc:"disable this rule -- useful for testing"`
+}
+
+func (pr *Rule) BaseIface() reflect.Type {
+	return reflect.TypeOf((*Parser)(nil)).Elem()
+}
+
+func (pr *Rule) AsParseRule() *Rule {
+	return pr.This().Embed(KiT_Rule).(*Rule)
+}
+
+func tst() {
+	oswin.TheApp.SetQuitCleanFunc(func() {
+		fmt.Printf("Doing final Quit cleanup here..\n")
+	})
+}
+
+func (pr *Parser) LexErrString() string {
+	return pr.LexState.Errs.AllString()
+}
+
+func tst() {
+	a = !pr.LexState.AtEol()
+
+	pr.LexState.Filename = !pr.LexState.AtEol()
+
+	if !pr.Sub.LexState.AtEol() && cpos == pr.LexState.Pos {
+		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
+		pr.LexState.Error(cpos, msg)
+		return nil
+	}
+}
+
+var ext = strings.ToLower(filepath.Ext(flag.Arg(0)))
+
+func tst() {
+		if path == "" && proj == "" {
+			if flag.NArg() > 0 {
+	 			ext := strings.ToLower(filepath.Ext(flag.Arg(0)))
+				if ext == ".gide" {
+	 				proj = flag.Arg(0)
+				} else {
+	 				path = flag.Arg(0)
+	 			}
+	 		}
+		}
+	recv := gi.Node2DBase{}
+}
+
 func (pr *Parser) Init() {
 	pr.Lexer.InitName(&pr.Lexer, "Lexer")
 }
@@ -26,9 +82,28 @@ func (pr *Parser) SetSrc(src [][]rune, fname string) {
 
 func main() {
 
+	if this > that {
+		break
+	} else {
+		continue
+	}
+
+	if peas++; this > that {
+		fmt.Printf("test")
+		break
+	}
+
+	if this > that {
+		break
+	} else if something == other {
+		continue
+	}
+
 	if a := b; b == a {
 		fmt.Printf("test")
 		break
+	} else {
+		continue
 	}
 
 	if a > b {
@@ -52,7 +127,7 @@ func main() {
 		p := a * i
 	}
 
-	for a, i := range names {
+	for a, i, j, k := range names {
 		for i < 100 {
 			for {
 				fmt.Printf("%v %v", a, i)
@@ -84,7 +159,6 @@ bypass:
 	}
 }
 
-/*
 package main
 
 import "github.com/goki/gi/gi"
@@ -125,7 +199,7 @@ type MyFloat float64
 
 type AStruct struct {
 	AField int
-	TField gi.float64 `desc:"tagged"`
+	TField gi.Widget `desc:"tagged"`
 	AField []string
 	MField map[string]int
 }
@@ -177,7 +251,7 @@ var ExprFun = meth(2 + 2)
 var ExprFun = meth(2 + 2, fslaf)
 
 var ExprFunElip = meth(2 + 2, fslaf...)
-*/
+
 
 func main() {
 	a <- b
@@ -227,9 +301,9 @@ Version: ` + pi.VersionInfo())
 		flag.Parse()
 		if path == "" && proj == "" {
 			if flag.NArg() > 0 {
-	 			ext := strings.ToLower(filepath.Ext(flag.Arg(0)))
+	 			ext = strings.ToLower(filepath.Ext(flag.Arg(0)))
 				if ext == ".gide" {
- 				proj = flag.Arg(0)
+	 				proj = flag.Arg(0)
 				} else {
 	 				path = flag.Arg(0)
 	 			}
@@ -267,4 +341,6 @@ Version: ` + pi.VersionInfo())
 	// above NewGideProj calls will have added to WinWait..
 	gi.WinWait.Wait()
 }
+
+var someother int
 

@@ -374,7 +374,7 @@ func (pv *PiView) ParseStopped() {
 		errs := pv.Parser.ParseErrString()
 		if errs != "" {
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-				Prompt: "The Parser has stopped due to errors\n" + errs}, true, false, nil, nil)
+				Prompt: "The Parser has stopped due to errors<br>\n" + errs}, true, false, nil, nil)
 		} else {
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
 				Prompt: "The Parser has stopped because it cannot process the source at this point\n" + pv.Parser.ParseNextSrcLine()}, true, false, nil, nil)
@@ -401,20 +401,21 @@ func (pv *PiView) ParseNext() *parse.Rule {
 	return mrule
 }
 
-// ParseAll does all remaining lexing until end or error -- if animate is true, then
-// it updates the display -- otherwise proceeds silently
-func (pv *PiView) ParseAll(animate bool) {
+// ParseAll does all remaining lexing until end or error
+func (pv *PiView) ParseAll() {
+	at := pv.AstTree()
+	updt := at.UpdateStart()
 	for {
 		mrule := pv.Parser.ParseNext()
 		if mrule == nil {
-			if !pv.Parser.ParseAtEnd() {
-				pv.ParseStopped()
-			}
 			break
 		}
-		if animate {
-			pv.SelectParseRule(mrule)
-		}
+	}
+	at.UpdateEnd(updt)
+	at.OpenAll()
+	pv.AstTreeToEnd()
+	if !pv.Parser.ParseAtEnd() {
+		pv.ParseStopped()
 	}
 }
 
@@ -1132,9 +1133,6 @@ var PiViewProps = ki.Props{
 		{"ParseAll", ki.Props{
 			"icon": "fast-fwd",
 			"desc": "do remaining parsing",
-			"Args": ki.PropSlice{
-				{"Animate", ki.Props{}},
-			},
 		}},
 	},
 	"MainMenu": ki.PropSlice{

@@ -292,7 +292,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 26,
+                "n": 25,
                 "type": "lex.Rule",
                 "name": "break",
                 "type": "lex.Rule",
@@ -325,8 +325,6 @@
                 "name": "import",
                 "type": "lex.Rule",
                 "name": "interface",
-                "type": "lex.Rule",
-                "name": "iota",
                 "type": "lex.Rule",
                 "name": "map",
                 "type": "lex.Rule",
@@ -580,21 +578,6 @@
                 "Token": "Keyword",
                 "Match": "StrName",
                 "String": "interface",
-                "Off": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": ""
-              },
-              {
-                "Nm": "iota",
-                "UniqueNm": "iota",
-                "Props": null,
-                "Kids": null,
-                "Desc": "",
-                "Token": "Keyword",
-                "Match": "StrName",
-                "String": "iota",
                 "Off": 0,
                 "Acts": [
                   "Name"
@@ -2061,7 +2044,7 @@
             "Props": null,
             "Kids": null,
             "Desc": "",
-            "Token": "OpAsgnAssign",
+            "Token": "OpLogNot",
             "Match": "String",
             "String": "!",
             "Off": 0,
@@ -2340,7 +2323,7 @@
       },
       {
         "Tok": "KeywordType",
-        "Key": "string",
+        "Key": "",
         "Depth": 0
       }
     ]
@@ -2415,7 +2398,7 @@
             "Props": null,
             "Kids": null,
             "Off": false,
-            "Desc": "",
+            "Desc": "same as ConstDecl",
             "Rule": "'key:const' ConstDeclN 'EOS'",
             "Ast": "AnchorAst",
             "OptTokMap": false
@@ -2426,7 +2409,7 @@
             "Props": null,
             "Kids": null,
             "Off": false,
-            "Desc": "",
+            "Desc": "same as TypeDecl",
             "Rule": "'key:type' TypeDeclN 'EOS'",
             "Ast": "AnchorAst",
             "OptTokMap": false
@@ -2437,7 +2420,7 @@
             "Props": null,
             "Kids": null,
             "Off": false,
-            "Desc": "",
+            "Desc": "same as VarDecl",
             "Rule": "'key:var' VarDeclN 'EOS'",
             "Ast": "AnchorAst",
             "OptTokMap": false
@@ -2466,7 +2449,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 16,
+            "n": 17,
             "type": "parse.Rule",
             "name": "FullName",
             "type": "parse.Rule",
@@ -2493,6 +2476,8 @@
             "name": "Key",
             "type": "parse.Rule",
             "name": "RecvType",
+            "type": "parse.Rule",
+            "name": "Selectors",
             "type": "parse.Rule",
             "name": "SliceExpr",
             "type": "parse.Rule",
@@ -2549,24 +2534,24 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "NameListMulti",
+                "name": "NameListEls",
                 "type": "parse.Rule",
-                "name": "NameOne"
+                "name": "NameListEl"
               },
               {
-                "Nm": "NameListMulti",
-                "UniqueNm": "NameListMulti",
+                "Nm": "NameListEls",
+                "UniqueNm": "NameListEls",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' ',' NameList",
-                "Ast": "AddAst",
+                "Ast": "AnchorFirstAst",
                 "OptTokMap": false
               },
               {
-                "Nm": "NameOne",
-                "UniqueNm": "NameOne",
+                "Nm": "NameListEl",
+                "UniqueNm": "NameListEl",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -2590,13 +2575,13 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "ExprListMulti",
+                "name": "ExprListEls",
                 "type": "parse.Rule",
-                "name": "ExprOne"
+                "name": "ExprListEl"
               },
               {
-                "Nm": "ExprListMulti",
-                "UniqueNm": "ExprListMulti",
+                "Nm": "ExprListEls",
+                "UniqueNm": "ExprListEls",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -2606,8 +2591,8 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "ExprOne",
-                "UniqueNm": "ExprOne",
+                "Nm": "ExprListEl",
+                "UniqueNm": "ExprListEl",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -2821,7 +2806,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '||' Expr",
+                "Rule": "Expr '||' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2832,7 +2817,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '\u0026\u0026' Expr",
+                "Rule": "Expr '\u0026\u0026' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2876,7 +2861,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '!=' Expr",
+                "Rule": "Expr '!=' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2887,7 +2872,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '==' Expr",
+                "Rule": "Expr '==' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2898,7 +2883,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '\u003e=' Expr",
+                "Rule": "Expr '\u003e=' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2909,7 +2894,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '\u003e' Expr",
+                "Rule": "Expr '\u003e' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2920,7 +2905,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '\u003c=' Expr",
+                "Rule": "Expr '\u003c=' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -2931,7 +2916,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "-Expr '\u003c' Expr",
+                "Rule": "Expr '\u003c' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3025,11 +3010,13 @@
             "Props": null,
             "Kids": [
               {
-                "n": 12,
+                "n": 13,
                 "type": "parse.Rule",
                 "name": "BasicLit",
                 "type": "parse.Rule",
                 "name": "CompositeLit",
+                "type": "parse.Rule",
+                "name": "FuncLit",
                 "type": "parse.Rule",
                 "name": "ConvertBasic",
                 "type": "parse.Rule",
@@ -3039,15 +3026,15 @@
                 "type": "parse.Rule",
                 "name": "ParenExpr",
                 "type": "parse.Rule",
-                "name": "MethCall",
-                "type": "parse.Rule",
                 "name": "TypeAssert",
                 "type": "parse.Rule",
                 "name": "FuncCall",
                 "type": "parse.Rule",
-                "name": "Selector",
+                "name": "MethCall",
                 "type": "parse.Rule",
                 "name": "Slice",
+                "type": "parse.Rule",
+                "name": "Selector",
                 "type": "parse.Rule",
                 "name": "OpName"
               },
@@ -3068,8 +3055,19 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice",
-                "Rule": "LiteralType '{' ElementList '}' 'EOS'",
+                "Desc": "important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed?",
+                "Rule": "@LiteralType '{' ?ElementList '}'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "FuncLit",
+                "UniqueNm": "FuncLit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:func' Signature Block",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3118,17 +3116,6 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "MethCall",
-                "UniqueNm": "MethCall",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "@RecvType '.' Name '(' ?ArgsExpr ')'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
                 "Nm": "TypeAssert",
                 "UniqueNm": "TypeAssert",
                 "Props": null,
@@ -3151,13 +3138,13 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "Selector",
-                "UniqueNm": "Selector",
+                "Nm": "MethCall",
+                "UniqueNm": "MethCall",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "PrimaryExpr '.' Name",
+                "Rule": "@RecvType '.' Name '(' ?ArgsExpr ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3169,6 +3156,17 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "PrimaryExpr '[' SliceExpr ']'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Selector",
+                "UniqueNm": "Selector",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "must be after funcall",
+                "Rule": "PrimaryExpr '.' Selectors",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3382,42 +3380,42 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "ElementListMulti",
+                "name": "ElementListEls",
                 "type": "parse.Rule",
-                "name": "KeyedElement"
+                "name": "KeyedEl"
               },
               {
-                "Nm": "ElementListMulti",
-                "UniqueNm": "ElementListMulti",
+                "Nm": "ElementListEls",
+                "UniqueNm": "ElementListEls",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "KeyedElement ',' ?ElementList",
-                "Ast": "AnchorAst",
+                "Rule": "KeyedEl ',' ?ElementList",
+                "Ast": "NoAst",
                 "OptTokMap": false
               },
               {
-                "Nm": "KeyedElement",
-                "UniqueNm": "KeyedElement",
+                "Nm": "KeyedEl",
+                "UniqueNm": "KeyedEl",
                 "Props": null,
                 "Kids": [
                   {
                     "n": 2,
                     "type": "parse.Rule",
-                    "name": "KeyElement",
+                    "name": "KeyEl",
                     "type": "parse.Rule",
                     "name": "Element"
                   },
                   {
-                    "Nm": "KeyElement",
-                    "UniqueNm": "KeyElement",
+                    "Nm": "KeyEl",
+                    "UniqueNm": "KeyEl",
                     "Props": null,
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
                     "Rule": "Key ':' Element",
-                    "Ast": "NoAst",
+                    "Ast": "AnchorAst",
                     "OptTokMap": false
                   },
                   {
@@ -3573,6 +3571,47 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "TypeName",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "Selectors",
+            "UniqueNm": "Selectors",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "Sels",
+                "type": "parse.Rule",
+                "name": "Sel"
+              },
+              {
+                "Nm": "Sels",
+                "UniqueNm": "Sels",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "@Name '.' @Selectors",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Sel",
+                "UniqueNm": "Sel",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Name",
                 "Ast": "NoAst",
                 "OptTokMap": false
               }
@@ -3745,7 +3784,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 9,
+            "n": 10,
             "type": "parse.Rule",
             "name": "Type",
             "type": "parse.Rule",
@@ -3763,7 +3802,9 @@
             "type": "parse.Rule",
             "name": "TypeDeclN",
             "type": "parse.Rule",
-            "name": "TypeDecls"
+            "name": "TypeDecls",
+            "type": "parse.Rule",
+            "name": "TypeList"
           },
           {
             "Nm": "Type",
@@ -4095,9 +4136,20 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "NamedField",
+                "name": "AnonQualField",
                 "type": "parse.Rule",
-                "name": "AnonField"
+                "name": "NamedField"
+              },
+              {
+                "Nm": "AnonQualField",
+                "UniqueNm": "AnonQualField",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'Name' '.' 'Name' ?FieldTag 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
               },
               {
                 "Nm": "NamedField",
@@ -4106,18 +4158,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "NameList Type ?FieldTag 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "AnonField",
-                "UniqueNm": "AnonField",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "PtrOrTypeName ?FieldTag 'EOS'",
+                "Rule": "NameList ?Type ?FieldTag 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               }
@@ -4149,7 +4190,7 @@
                 "type": "parse.Rule",
                 "name": "TypeDeclMulti",
                 "type": "parse.Rule",
-                "name": "TypeDecl"
+                "name": "TypeDeclEl"
               },
               {
                 "Nm": "TypeDeclMulti",
@@ -4163,8 +4204,8 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "TypeDecl",
-                "UniqueNm": "TypeDecl",
+                "Nm": "TypeDeclEl",
+                "UniqueNm": "TypeDeclEl",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -4187,7 +4228,48 @@
             "Kids": null,
             "Off": false,
             "Desc": "",
-            "Rule": "TypeDecl ?TypeDecls",
+            "Rule": "TypeDeclEl ?TypeDecls",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "TypeList",
+            "UniqueNm": "TypeList",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "TypeListEls",
+                "type": "parse.Rule",
+                "name": "TypeListEl"
+              },
+              {
+                "Nm": "TypeListEls",
+                "UniqueNm": "TypeListEls",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Type ',' TypeList",
+                "Ast": "AnchorFirstAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "TypeListEl",
+                "UniqueNm": "TypeListEl",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Type",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Rule": "",
             "Ast": "NoAst",
             "OptTokMap": false
           }
@@ -4260,7 +4342,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
-            "Ast": "AnchorAst",
+            "Ast": "NoAst",
             "OptTokMap": false
           },
           {
@@ -4282,9 +4364,20 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "MethSpecName",
+                "name": "MethSpecAnon",
                 "type": "parse.Rule",
-                "name": "MethSpecAnon"
+                "name": "MethSpecName"
+              },
+              {
+                "Nm": "MethSpecAnon",
+                "UniqueNm": "MethSpecAnon",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'Name' '.' 'Name' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
               },
               {
                 "Nm": "MethSpecName",
@@ -4294,17 +4387,6 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' Params ?Result 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "MethSpecAnon",
-                "UniqueNm": "MethSpecAnon",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "TypeName",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               }
@@ -4417,7 +4499,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "@Name @Type ?',' ?ParamsList",
-                "Ast": "AddAst",
+                "Ast": "SubAst",
                 "OptTokMap": false
               },
               {
@@ -4428,7 +4510,7 @@
                 "Off": false,
                 "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
                 "Rule": "Name ',' @NameList @Type ?',' ?ParamsList",
-                "Ast": "AddAst",
+                "Ast": "SubAst",
                 "OptTokMap": false
               },
               {
@@ -4439,7 +4521,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "@Type ?',' ?ParamsList",
-                "Ast": "NoAst",
+                "Ast": "SubAst",
                 "OptTokMap": false
               }
             ],
@@ -4473,7 +4555,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 6,
+            "n": 7,
             "type": "parse.Rule",
             "name": "StmtList",
             "type": "parse.Rule",
@@ -4485,7 +4567,9 @@
             "type": "parse.Rule",
             "name": "Asgn",
             "type": "parse.Rule",
-            "name": "Elses"
+            "name": "Elses",
+            "type": "parse.Rule",
+            "name": "CommStmt"
           },
           {
             "Nm": "StmtList",
@@ -4515,7 +4599,13 @@
             "Props": null,
             "Kids": [
               {
-                "n": 19,
+                "n": 28,
+                "type": "parse.Rule",
+                "name": "ConstDeclStmt",
+                "type": "parse.Rule",
+                "name": "TypeDeclStmt",
+                "type": "parse.Rule",
+                "name": "VarDeclStmt",
                 "type": "parse.Rule",
                 "name": "ReturnStmt",
                 "type": "parse.Rule",
@@ -4529,11 +4619,7 @@
                 "type": "parse.Rule",
                 "name": "DeferStmt",
                 "type": "parse.Rule",
-                "name": "IfStmtInit",
-                "type": "parse.Rule",
                 "name": "IfStmtExpr",
-                "type": "parse.Rule",
-                "name": "ForClauseStmt",
                 "type": "parse.Rule",
                 "name": "ForRangeExisting",
                 "type": "parse.Rule",
@@ -4545,15 +4631,64 @@
                 "type": "parse.Rule",
                 "name": "SwitchExpr",
                 "type": "parse.Rule",
+                "name": "SwitchTypeName",
+                "type": "parse.Rule",
+                "name": "SwitchTypeAnon",
+                "type": "parse.Rule",
                 "name": "CaseStmt",
+                "type": "parse.Rule",
+                "name": "TypeCaseStmt",
+                "type": "parse.Rule",
+                "name": "SelCaseStmt",
                 "type": "parse.Rule",
                 "name": "DefaultStmt",
                 "type": "parse.Rule",
                 "name": "LabeledStmt",
                 "type": "parse.Rule",
+                "name": "ForClauseStmt",
+                "type": "parse.Rule",
+                "name": "IfStmtInit",
+                "type": "parse.Rule",
+                "name": "SwitchTypeNameInit",
+                "type": "parse.Rule",
+                "name": "SwitchTypeAnonInit",
+                "type": "parse.Rule",
                 "name": "Block",
                 "type": "parse.Rule",
                 "name": "SimpleSt"
+              },
+              {
+                "Nm": "ConstDeclStmt",
+                "UniqueNm": "ConstDeclStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "ConstDecl",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "TypeDeclStmt",
+                "UniqueNm": "TypeDeclStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "TypeDecl",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "VarDeclStmt",
+                "UniqueNm": "VarDeclStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "VarDecl",
+                "Ast": "NoAst",
+                "OptTokMap": false
               },
               {
                 "Nm": "ReturnStmt",
@@ -4622,17 +4757,6 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "IfStmtInit",
-                "UniqueNm": "IfStmtInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
                 "Nm": "IfStmtExpr",
                 "UniqueNm": "IfStmtExpr",
                 "Props": null,
@@ -4640,17 +4764,6 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "ForClauseStmt",
-                "UniqueNm": "ForClauseStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
-                "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4710,6 +4823,28 @@
                 "OptTokMap": false
               },
               {
+                "Nm": "SwitchTypeName",
+                "UniqueNm": "SwitchTypeName",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchTypeAnon",
+                "UniqueNm": "SwitchTypeAnon",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
                 "Nm": "CaseStmt",
                 "UniqueNm": "CaseStmt",
                 "Props": null,
@@ -4717,6 +4852,28 @@
                 "Off": false,
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
                 "Rule": "'key:case' ExprList ':' ?Stmt",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "TypeCaseStmt",
+                "UniqueNm": "TypeCaseStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                "Rule": "'key:case' TypeList ':' ?Stmt",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SelCaseStmt",
+                "UniqueNm": "SelCaseStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                "Rule": "'key:case' CommStmt 'EOS' ?Stmt",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4739,6 +4896,50 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Name ':' Stmt",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ForClauseStmt",
+                "UniqueNm": "ForClauseStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
+                "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "IfStmtInit",
+                "UniqueNm": "IfStmtInit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchTypeNameInit",
+                "UniqueNm": "SwitchTypeNameInit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchTypeAnonInit",
+                "UniqueNm": "SwitchTypeAnonInit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4958,6 +5159,60 @@
             "Rule": "",
             "Ast": "NoAst",
             "OptTokMap": false
+          },
+          {
+            "Nm": "CommStmt",
+            "UniqueNm": "CommStmt",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "CommSend",
+                "type": "parse.Rule",
+                "name": "RecvExisting",
+                "type": "parse.Rule",
+                "name": "RecvNew"
+              },
+              {
+                "Nm": "CommSend",
+                "UniqueNm": "CommSend",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "SendStmt",
+                "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "RecvExisting",
+                "UniqueNm": "RecvExisting",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "ExprList '=' Expr 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "RecvNew",
+                "UniqueNm": "RecvNew",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "NameList ':=' Expr 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "communication stmt: send or recv",
+            "Rule": "",
+            "Ast": "NoAst",
+            "OptTokMap": false
           }
         ],
         "Off": false,
@@ -5027,13 +5282,13 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "ImportSpecAlias",
+                "name": "ImportAlias",
                 "type": "parse.Rule",
-                "name": "ImportSpec"
+                "name": "Import"
               },
               {
-                "Nm": "ImportSpecAlias",
-                "UniqueNm": "ImportSpecAlias",
+                "Nm": "ImportAlias",
+                "UniqueNm": "ImportAlias",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -5043,8 +5298,8 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "ImportSpec",
-                "UniqueNm": "ImportSpec",
+                "Nm": "Import",
+                "UniqueNm": "Import",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -5073,7 +5328,13 @@
         "Props": null,
         "Kids": [
           {
-            "n": 4,
+            "n": 7,
+            "type": "parse.Rule",
+            "name": "TypeDecl",
+            "type": "parse.Rule",
+            "name": "ConstDecl",
+            "type": "parse.Rule",
+            "name": "VarDecl",
             "type": "parse.Rule",
             "name": "ConstDeclN",
             "type": "parse.Rule",
@@ -5082,6 +5343,39 @@
             "name": "VarDeclN",
             "type": "parse.Rule",
             "name": "VarList"
+          },
+          {
+            "Nm": "TypeDecl",
+            "UniqueNm": "TypeDecl",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "'key:type' TypeDeclN 'EOS'",
+            "Ast": "AnchorAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "ConstDecl",
+            "UniqueNm": "ConstDecl",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "'key:const' ConstDeclN 'EOS'",
+            "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "VarDecl",
+            "UniqueNm": "VarDecl",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "'key:var' VarDeclN 'EOS'",
+            "Ast": "NoAst",
+            "OptTokMap": false
           },
           {
             "Nm": "ConstDeclN",
