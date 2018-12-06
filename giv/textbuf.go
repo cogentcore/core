@@ -539,16 +539,16 @@ func (tb *TextBuf) Revert() bool {
 	return true
 }
 
-// SaveAs saves the current text into given file -- does an EditDone first to save edits
+// SaveAsFunc saves the current text into given file -- does an EditDone first to save edits
 // and checks for an existing file -- if it does exist then prompts to overwrite or not.
-// if afterFun is non-nil, then it is called with the status of the user action
-func (tb *TextBuf) SaveAs(filename gi.FileName, afterFun func(canceled bool)) {
+// If afterFunc is non-nil, then it is called with the status of the user action.
+func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool)) {
 	// todo: filemodcheck!
 	tb.EditDone()
 	if _, err := os.Stat(string(filename)); os.IsNotExist(err) {
 		tb.SaveFile(filename)
-		if afterFun != nil {
-			afterFun(false)
+		if afterFunc != nil {
+			afterFunc(false)
 		}
 	} else {
 		vp := tb.ViewportFromView()
@@ -563,11 +563,17 @@ func (tb *TextBuf) SaveAs(filename gi.FileName, afterFun func(canceled bool)) {
 				case 1:
 					tb.SaveFile(filename)
 				}
-				if afterFun != nil {
-					afterFun(cancel)
+				if afterFunc != nil {
+					afterFunc(cancel)
 				}
 			})
 	}
+}
+
+// SaveAs saves the current text into given file -- does an EditDone first to save edits
+// and checks for an existing file -- if it does exist then prompts to overwrite or not.
+func (tb *TextBuf) SaveAs(filename gi.FileName) {
+	tb.SaveAsFunc(filename, nil)
 }
 
 // SaveFile writes current buffer to file, with no prompting, etc
