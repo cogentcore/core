@@ -37,6 +37,8 @@ type SliceView struct {
 	Slice            interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	SliceValView     ValueView          `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	IsArray          bool               `desc:"whether the slice is actually an array -- no modifications"`
+	AddOnly          bool               `desc:"can the user delete elements of the slice"`
+	DeleteOnly       bool               `desc:"can the user add elements to the slice"`
 	StyleFunc        SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
 	ShowViewCtxtMenu bool               `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
 	Changed          bool               `desc:"has the slice been edited?"`
@@ -181,7 +183,12 @@ func (sv *SliceView) ToolBar() *gi.ToolBar {
 func (sv *SliceView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
 	if !sv.IsInactive() && !sv.IsArray {
-		nWidgPerRow += 2
+		if !sv.AddOnly {
+			nWidgPerRow += 1
+		}
+		if !sv.DeleteOnly {
+			nWidgPerRow += 1
+		}
 	}
 	idxOff = 1
 	if !sv.ShowIndex {
@@ -311,29 +318,38 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				svv.SetChanged()
 			})
 			if !sv.IsArray {
-				addnm := fmt.Sprintf("add-%v", idxtxt)
-				delnm := fmt.Sprintf("del-%v", idxtxt)
-				addact := gi.Action{}
-				delact := gi.Action{}
-				sg.SetChild(&addact, ridx+idxOff+1, addnm)
-				sg.SetChild(&delact, ridx+idxOff+2, delnm)
+				cidx := ridx + idxOff
+				if !sv.DeleteOnly {
+					addnm := fmt.Sprintf("add-%v", idxtxt)
+					addact := gi.Action{}
+					cidx += 1
+					sg.SetChild(&addact, cidx, addnm)
 
-				addact.SetIcon("plus")
-				addact.Tooltip = "insert a new element at this index"
-				addact.Data = i
-				addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					act := send.(*gi.Action)
-					svv := recv.Embed(KiT_SliceView).(*SliceView)
-					svv.SliceNewAt(act.Data.(int)+1, true)
-				})
-				delact.SetIcon("minus")
-				delact.Tooltip = "delete this element"
-				delact.Data = i
-				delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					act := send.(*gi.Action)
-					svv := recv.Embed(KiT_SliceView).(*SliceView)
-					svv.SliceDeleteAt(act.Data.(int), true)
-				})
+					addact.SetIcon("plus")
+					addact.Tooltip = "insert a new element at this index"
+					addact.Data = i
+					addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						act := send.(*gi.Action)
+						svv := recv.Embed(KiT_SliceView).(*SliceView)
+						svv.SliceNewAt(act.Data.(int)+1, true)
+					})
+				}
+
+				if !sv.AddOnly {
+					delnm := fmt.Sprintf("del-%v", idxtxt)
+					delact := gi.Action{}
+					cidx += 1
+					sg.SetChild(&delact, cidx, delnm)
+
+					delact.SetIcon("minus")
+					delact.Tooltip = "delete this element"
+					delact.Data = i
+					delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						act := send.(*gi.Action)
+						svv := recv.Embed(KiT_SliceView).(*SliceView)
+						svv.SliceDeleteAt(act.Data.(int), true)
+					})
+				}
 			}
 		}
 		if sv.StyleFunc != nil {
@@ -456,11 +472,14 @@ func (sv *SliceView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < nact {
 		tb.SetStretchMaxWidth()
+		// todo: this doesn't work because this code ran before these variables are set - discuss with Randy
+		//if !sv.IsArray && !sv.DeleteOnly {
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.SliceNewAt(-1, true)
 			})
+		//}
 	}
 	sz := len(*tb.Children())
 	if sz > nact {
