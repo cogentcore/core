@@ -7,7 +7,7 @@
     "Rules": "",
     "Match": true,
     "SubMatch": false,
-    "NoMatch": false,
+    "NoMatch": true,
     "Run": true,
     "ScopeSrc": true,
     "FullStackOut": false

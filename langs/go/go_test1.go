@@ -9,12 +9,31 @@ var a,b,c,d = 32
 var e = 22
 */
 
+func tst() {
+	tokSrc := pos.String() + `"` + string(ps.Src.TokenSrc(pos)) + `"`
+}
+
+var ifa interface{}
+
+func tst() {
+	Trace.Out(ps, pr, Run, creg.St, creg, trcAst, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
+}
+
 // this is Go's "most vexing parse" from a top-down perspective:
 
-var MultSlice = p[2]*Rule 
-//var SliceAry = [25]*Rule
+// var MultSlice = p[2]*Rule
+
+var SliceAr1 = []Rule{}
+
+var SliceAry = [25]*Rule{}
+
+// var SliceAry = []*Rule{} // todo: ? not excluding here
+
+// var MakeSlice = make([]Rule, 100) // this is not even working -- typelit is not a valid arg in general..  maybe it should be.
+
 //var MakeSlice = make([][][]*Rule, 100) // sheesh
-//var RuleMap = map[string]*Rule // looks like binary *
+
+var RuleMap map[string]*Rule // looks like binary *
 
 // exclude rule -- two rules fwd and back:
 // ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name
@@ -24,12 +43,9 @@ var MultSlice = p[2]*Rule
 // start at *, 
 // backtrack: if a given parse fails... nah, way too complicated..
 
-/* 
 var unaryptr = 25 * *(ptr+2)  // directly to rhs or depth sub of it
 var multexpr = 25 * (ptr + 2)
 var multex = 25 * ptr + 25 * *ptr // 
-*/
-
 
 func (pr *Rule) BaseIface() reflect.Type {
 	return reflect.TypeOf((*Parser)(nil)).Elem()

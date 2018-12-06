@@ -3302,9 +3302,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 6,
+                "n": 7,
                 "type": "parse.Rule",
                 "name": "LitStructType",
+                "type": "parse.Rule",
+                "name": "LitIFaceType",
                 "type": "parse.Rule",
                 "name": "LitSliceType",
                 "type": "parse.Rule",
@@ -3325,6 +3327,17 @@
                 "Desc": "",
                 "Rule": "StructType",
                 "Ast": "NoAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LitIFaceType",
+                "UniqueNm": "LitIFaceType",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:interface' '{' '}'",
+                "Ast": "AddAst",
                 "OptTokMap": false
               },
               {
@@ -4069,7 +4082,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:interface' '{' MethodSpecs '}'",
+                "Rule": "'key:interface' '{' ?MethodSpecs '}'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },

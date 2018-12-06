@@ -30,7 +30,7 @@ import (
 var GuiActive = false
 
 // DepthLimit is the infinite recursion prevention cutoff
-var DepthLimit = 100
+var DepthLimit = 1000
 
 // parse.Rule operates on the lexically-tokenized input, not the raw source.
 //
@@ -304,18 +304,26 @@ func (pr *Rule) Compile(ps *State) bool {
 }
 
 // CompileExcl compiles exclusionary rules starting at given point
+// currently only working for single-token matching rule
 func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 	valid := true
 	nr := len(rs)
 	var ktok token.KeyToken
 
+	ktoki := -1
 	for ri := 0; ri < rist; ri++ {
 		rr := &pr.Rules[ri]
 		if !rr.IsToken() {
 			continue
 		}
 		ktok = rr.Tok
+		ktoki = ri
 		break
+	}
+
+	if ktoki < 0 {
+		ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: rule %v: no token found for matching exclusion rules", pr.Nm))
+		return false
 	}
 
 	pr.ExclRev = make(RuleList, nr-rist)
@@ -348,7 +356,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 			} else {
 				err := rr.Tok.Tok.FromString(tn)
 				if err != nil {
-					ps.Error(lex.PosZero, fmt.Sprintf("Compile: rule %v: %v", pr.Nm, err.Error()))
+					ps.Error(lex.PosZero, fmt.Sprintf("CompileExcl: rule %v: %v", pr.Nm, err.Error()))
 					valid = false
 				}
 			}
@@ -362,7 +370,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 		valid = false
 		return valid
 	}
-	pr.ExclKeyIdx = ki
+	pr.ExclKeyIdx = ktoki
 	pr.ExclFwd = pr.ExclRev[ki+1-rist:]
 	pr.ExclRev = pr.ExclRev[:ki-rist]
 	return valid
@@ -701,10 +709,131 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		lastMatch = true
 	}
 
+	if len(pr.ExclFwd) > 0 || len(pr.ExclRev) > 0 {
+		if pr.MatchExclude(ps, scope, mpos, depth, optMap) {
+			Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, "Exclude critera matched")
+			ps.AddNonMatch(scope, pr)
+			return false, scope, nil
+		}
+	}
+
 	mreg := mpos.StartEnd()
 	ps.AddMatch(pr, scope, mpos, depth)
 	Trace.Out(ps, pr, Match, mreg.St, scope, parAst, fmt.Sprintf("Full Match reg: %v", mreg))
 	return true, scope, mpos
+}
+
+// MatchExclude looks for matches of exclusion tokens -- if found, they exclude this rule
+// return is true if exclude matches and rule should be excluded
+func (pr *Rule) MatchExclude(ps *State, scope lex.Reg, mpos Matches, depth int, optMap lex.TokenMap) bool {
+	ktpos := mpos[pr.ExclKeyIdx]
+	nf := len(pr.ExclFwd)
+	nr := len(pr.ExclRev)
+	scstlx := ps.Src.LexAt(scope.St) // scope starting lex
+	scstDepth := scstlx.Depth
+	if nf > 0 {
+		cp, ok := ps.Src.NextTokenPos(ktpos.St)
+		if !ok {
+			return false
+		}
+		prevAny := false
+		for ri := 0; ri < nf; ri++ {
+			rr := pr.ExclFwd[ri]
+			kt := rr.Tok
+			kt.Depth += scstDepth // always use starting scope depth
+			if kt.Tok == token.None {
+				prevAny = true // wild card
+				continue
+			}
+			if prevAny {
+				creg := scope
+				creg.St = cp
+				pos, ok := ps.FindToken(kt, creg)
+				if !ok {
+					return false
+				}
+				cp = pos
+			} else {
+				if !ps.MatchToken(kt, cp) {
+					if !rr.Opt {
+						return false
+					}
+					lx := ps.Src.LexAt(cp)
+					if lx.Depth != kt.Depth {
+						break
+					}
+					// ok, keep going -- no info..
+				}
+			}
+			cp, ok = ps.Src.NextTokenPos(cp)
+			if !ok && ri < nf-1 {
+				return false
+			}
+			if scope.Ed == cp || scope.Ed.IsLess(cp) { // out of scope -- if non-opt left, nomatch
+				ri++
+				for ; ri < nf; ri++ {
+					rr := pr.ExclFwd[ri]
+					if !rr.Opt {
+						return false
+					}
+				}
+				break
+			}
+			prevAny = false
+		}
+	}
+	if nr > 0 {
+		cp, ok := ps.Src.PrevTokenPos(ktpos.St)
+		if !ok {
+			return false
+		}
+		prevAny := false
+		for ri := nr - 1; ri >= 0; ri-- {
+			rr := pr.ExclRev[ri]
+			kt := rr.Tok
+			kt.Depth += scstDepth // always use starting scope depth
+			if kt.Tok == token.None {
+				prevAny = true // wild card
+				continue
+			}
+			if prevAny {
+				creg := scope
+				creg.Ed = cp
+				pos, ok := ps.FindTokenReverse(kt, creg)
+				if !ok {
+					return false
+				}
+				cp = pos
+			} else {
+				if !ps.MatchToken(kt, cp) {
+					if !rr.Opt {
+						return false
+					}
+					lx := ps.Src.LexAt(cp)
+					if lx.Depth != kt.Depth {
+						break
+					}
+					// ok, keep going -- no info..
+				}
+			}
+			cp, ok = ps.Src.PrevTokenPos(cp)
+			if !ok && ri > 0 {
+				return false
+			}
+			if cp.IsLess(scope.St) {
+				ri--
+				for ; ri >= 0; ri-- {
+					rr := pr.ExclRev[ri]
+					if !rr.Opt {
+						return false
+					}
+				}
+				break
+			}
+			prevAny = false
+		}
+	}
+	return true
 }
 
 // DoRules after we have matched, goes through rest of the rules -- returns false if

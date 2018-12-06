@@ -265,7 +265,8 @@ ExprRules {
         LitString:  'LitStr'        +Ast
     }
     LiteralType {
-        LitStructType:  StructType  
+        LitStructType:  StructType               
+        LitIFaceType:   'key:interface' '{' '}'  +Ast
         // LitSliceType slice must come before array 
         LitSliceType:  SliceType           
         LitArrayType:  ArrayType           
@@ -341,7 +342,7 @@ TypeRules {
         StructType:     'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
         PointerType:    '*' @Type                                >Ast
         FuncType:       'key:func' @Signature                    >Ast
-        InterfaceType:  'key:interface' '{' MethodSpecs '}'      >Ast
+        InterfaceType:  'key:interface' '{' ?MethodSpecs '}'     >Ast
         MapType:        'key:map' '[' @Type ']' @Type            >Ast
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
