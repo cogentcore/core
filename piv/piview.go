@@ -47,12 +47,13 @@ const (
 // lexer and parser
 type PiView struct {
 	gi.Frame
-	Parser  pi.Parser   `desc:"the parser we are viewing"`
-	Prefs   ProjPrefs   `desc:"project preferences -- this IS the project file"`
-	Changed bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
-	TestBuf giv.TextBuf `json:"-" desc:"test file buffer"`
-	LexBuf  giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
-	KeySeq1 key.Chord   `desc:"first key in sequence if needs2 key pressed"`
+	Parser   pi.Parser   `desc:"the parser we are viewing"`
+	Prefs    ProjPrefs   `desc:"project preferences -- this IS the project file"`
+	Changed  bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	TestBuf  giv.TextBuf `json:"-" desc:"test file buffer"`
+	LexBuf   giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
+	ParseBuf giv.TextBuf `json:"-" desc:"buffer of parse info"`
+	KeySeq1  key.Chord   `desc:"first key in sequence if needs2 key pressed"`
 }
 
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
@@ -390,6 +391,7 @@ func (pv *PiView) ParseNext() *parse.Rule {
 	at.UpdateEnd(updt)
 	at.OpenAll()
 	pv.AstTreeToEnd()
+	pv.UpdtParseBuf()
 	if mrule == nil {
 		pv.ParseStopped()
 	} else {
@@ -414,6 +416,7 @@ func (pv *PiView) ParseAll() {
 	at.UpdateEnd(updt)
 	at.OpenAll()
 	pv.AstTreeToEnd()
+	pv.UpdtParseBuf()
 	if !pv.Parser.ParseAtEnd() {
 		pv.ParseStopped()
 	}
@@ -441,6 +444,12 @@ func (pv *PiView) SelectParseRule(rule *parse.Rule) {
 func (pv *PiView) AstTreeToEnd() {
 	lt := pv.AstTree()
 	lt.MoveEndAction(mouse.SelectOne)
+}
+
+// UpdtParseBuf sets the ParseBuf to current parse rule output
+func (pv *PiView) UpdtParseBuf() {
+	txt := pv.Parser.ParseRuleString(parse.Trace.FullStackOut)
+	pv.ParseBuf.SetText([]byte(txt))
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -619,6 +628,14 @@ func (pv *PiView) OpenLexTab() {
 	ctv, _ := pv.FindOrMakeMainTabTextView("LexOut", true, true)
 	if ctv.Buf == nil || ctv.Buf != &pv.LexBuf {
 		ctv.SetBuf(&pv.LexBuf)
+	}
+}
+
+// OpenParseTab opens a main tab displaying parser output
+func (pv *PiView) OpenParseTab() {
+	ctv, _ := pv.FindOrMakeMainTabTextView("ParseOut", true, true)
+	if ctv.Buf == nil || ctv.Buf != &pv.ParseBuf {
+		ctv.SetBuf(&pv.ParseBuf)
 	}
 }
 
@@ -805,12 +822,17 @@ func (pv *PiView) ConfigSplitView() {
 		pv.LexBuf.Opts.LineNos = true
 		pv.LexBuf.Opts.TabSize = 4
 
+		pv.ParseBuf.SetHiStyle("emacs")
+		pv.ParseBuf.Opts.LineNos = true
+		pv.ParseBuf.Opts.TabSize = 4
+
 		split.SetSplits(.15, .15, .15, .15, .4)
 		split.UpdateEnd(updt)
 
 		pv.OpenConsoleTab()
 		pv.OpenTestTextTab()
 		pv.OpenLexTab()
+		pv.OpenParseTab()
 
 	} else {
 		pv.LexTree().SetRootNode(&pv.Parser.Lexer)

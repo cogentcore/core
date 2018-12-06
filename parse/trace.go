@@ -14,13 +14,15 @@ import (
 
 // TraceOpts provides options for debugging / monitoring the rule matching and execution process
 type TraceOpts struct {
-	On        bool     `desc:"perform tracing"`
-	Rules     string   `width:"50" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
-	Match     bool     `desc:"trace matches -- why a rule matches"`
-	NoMatch   bool     `desc:"trace non-matches -- why a rule doesn't match (can be a lot of info)"`
-	Run       bool     `desc:"trace progress runing through each of the sub-rules when a rule has matched and is 'running'"`
-	ScopeSrc  bool     `desc:"if true, shows the full scope source for every trace statement"`
-	RulesList []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
+	On           bool     `desc:"perform tracing"`
+	Rules        string   `width:"50" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
+	Match        bool     `desc:"trace full rule matches -- when a rule fully matches"`
+	SubMatch     bool     `desc:"trace sub-rule matches -- when the parts of each rule match"`
+	NoMatch      bool     `desc:"trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)"`
+	Run          bool     `desc:"trace progress runing through each of the sub-rules when a rule has matched and is 'running'"`
+	ScopeSrc     bool     `desc:"if true, shows the full scope source for every trace statement"`
+	FullStackOut bool     `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
+	RulesList    []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
 }
 
 // parse.Trace controls the tracing options for debugging / monitoring the rule matching and execution process
@@ -68,6 +70,10 @@ func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex
 		if !pt.Match {
 			return false
 		}
+	case SubMatch:
+		if !pt.SubMatch {
+			return false
+		}
 	case NoMatch:
 		if !pt.NoMatch {
 			return false
@@ -106,7 +112,11 @@ const (
 	// Match happens when a rule matches
 	Match Steps = iota
 
-	// NoMatch is when the rule fails to match
+	// SubMatch is when a sub-rule within a rule matches
+	SubMatch
+
+	// NoMatch is when the rule fails to match (recorded at first non-match, which terminates
+	// matching process
 	NoMatch
 
 	// Run is when the rule is running and iterating through its sub-rules

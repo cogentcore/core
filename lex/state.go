@@ -125,7 +125,7 @@ func (ls *State) Add(tok token.Tokens, st, ed int) {
 			return
 		}
 	}
-	ls.Lex.Add(Lex{tok, 0, st, ed})
+	ls.Lex.Add(Lex{Tok: tok, Depth: 0, St: st, Ed: ed})
 }
 
 func (ls *State) PushState(st string) {

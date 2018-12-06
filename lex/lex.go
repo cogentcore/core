@@ -18,6 +18,7 @@ type Lex struct {
 	Depth int          `desc:"nesting depth, starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement.  Coloring background according to this depth shoudl give direct information about mismatches etc.  Is computed once and used extensively in parsing."`
 	St    int          `desc:"start rune index within original source line for this token"`
 	Ed    int          `desc:"end rune index within original source line for this token (exclusive -- ends one before this)"`
+	Err   Error        `desc:"if non-nil, there was an error associated with this token, either in lexing or in subsequent parsing, and this is the message"`
 }
 
 // String satisfies the fmt.Stringer interface
@@ -85,7 +86,7 @@ func (ll *Line) TagSrc(src []rune) string {
 	str := ""
 	for _, t := range *ll {
 		s := src[t.St:t.Ed]
-		str += t.String() + string(s) + " "
+		str += t.String() + `"` + string(s) + `"` + " "
 	}
 	return str
 }

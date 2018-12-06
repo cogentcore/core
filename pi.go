@@ -173,6 +173,13 @@ func (pr *Parser) ParseErrString() string {
 	return pr.ParseState.Errs.AllString()
 }
 
+// RuleString returns the rule info for entire source -- if full
+// then it includes the full stack at each point -- otherwise just the top
+// of stack
+func (pr *Parser) ParseRuleString(full bool) string {
+	return pr.ParseState.RuleString(full)
+}
+
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
 func (pr *Parser) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)

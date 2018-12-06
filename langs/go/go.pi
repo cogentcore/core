@@ -1205,7 +1205,7 @@
         "String": "'",
         "Off": 0,
         "Acts": [
-          "EOL"
+          "QuotedRaw"
         ],
         "PushState": ""
       },
@@ -2614,11 +2614,26 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "Selectr",
                 "type": "parse.Rule",
                 "name": "BinExpr",
                 "type": "parse.Rule",
                 "name": "UnryExpr"
+              },
+              {
+                "Nm": "Selectr",
+                "UniqueNm": "Selectr",
+                "Props": {
+                  "inactive": true
+                },
+                "Kids": null,
+                "Off": true,
+                "Desc": "must be after funcall",
+                "Rule": "PrimaryExpr '.' Selectors",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
               },
               {
                 "Nm": "BinExpr",
@@ -2761,7 +2776,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 18,
+                "n": 19,
                 "type": "parse.Rule",
                 "name": "LogOrExpr",
                 "type": "parse.Rule",
@@ -2797,7 +2812,9 @@
                 "type": "parse.Rule",
                 "name": "DivExpr",
                 "type": "parse.Rule",
-                "name": "MultExpr"
+                "name": "MultExpr",
+                "type": "parse.Rule",
+                "name": "SelectExpr"
               },
               {
                 "Nm": "LogOrExpr",
@@ -2992,9 +3009,20 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "",
-                "Rule": "-Expr '*' Expr",
+                "Desc": "! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice",
+                "Rule": "-Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'",
                 "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SelectExpr",
+                "UniqueNm": "SelectExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '.' Expr",
+                "Ast": "SubAst",
                 "OptTokMap": false
               }
             ],
@@ -3165,7 +3193,7 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "must be after funcall",
+                "Desc": "",
                 "Rule": "PrimaryExpr '.' Selectors",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
@@ -3256,7 +3284,7 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "rune",
+                "Desc": "",
                 "Rule": "'LitStr'",
                 "Ast": "AddAst",
                 "OptTokMap": false
@@ -4286,9 +4314,11 @@
         "Props": null,
         "Kids": [
           {
-            "n": 8,
+            "n": 9,
             "type": "parse.Rule",
             "name": "FunDecl",
+            "type": "parse.Rule",
+            "name": "MethRecv",
             "type": "parse.Rule",
             "name": "Signature",
             "type": "parse.Rule",
@@ -4323,7 +4353,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:func' '(' Name Type ')' Name Signature ?Block 'EOS'",
+                "Rule": "'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -4343,6 +4373,17 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "MethRecv",
+            "UniqueNm": "MethRecv",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "Name Type",
+            "Ast": "AnchorAst",
             "OptTokMap": false
           },
           {

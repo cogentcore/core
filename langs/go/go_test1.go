@@ -9,17 +9,70 @@ var a,b,c,d = 32
 var e = 22
 */
 
-type Rule struct {
-	ki.Node
-	Off       bool     `desc:"disable this rule -- useful for testing"`
-}
+// this is Go's "most vexing parse" from a top-down perspective:
+
+var MultSlice = p[2]*Rule 
+//var SliceAry = [25]*Rule
+//var MakeSlice = make([][][]*Rule, 100) // sheesh
+//var RuleMap = map[string]*Rule // looks like binary *
+
+// exclude rule -- two rules fwd and back:
+// ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name
+//  + start at ', go forward to match name, pkg.name -- exclude if no match
+//  + go back.. 
+// range is 
+// start at *, 
+// backtrack: if a given parse fails... nah, way too complicated..
+
+/* 
+var unaryptr = 25 * *(ptr+2)  // directly to rhs or depth sub of it
+var multexpr = 25 * (ptr + 2)
+var multex = 25 * ptr + 25 * *ptr // 
+*/
+
 
 func (pr *Rule) BaseIface() reflect.Type {
 	return reflect.TypeOf((*Parser)(nil)).Elem()
 }
 
+
 func (pr *Rule) AsParseRule() *Rule {
 	return pr.This().Embed(KiT_Rule).(*Rule)
+}
+
+/*
+func test() {
+	RuleMap = map[string]*Rule{}
+}
+
+// interface{} here not working
+func (pr *Rule) CompileAll(ps *State) bool {
+	pr.SetRuleMap(ps)
+	allok := true
+	pr.FuncDownMeFirst(0, pr.This(), func(k ki.Ki, level int, d interface{}) bool {
+		pri := k.Embed(KiT_Rule).(*Rule)
+		ok := pri.Compile(ps)
+		if !ok {
+			allok = false
+		}
+		return true
+	})
+	return allok
+}
+*/
+
+func test() {
+	if pr.Rule[0] == '-' {
+		rstr = rstr[1:]
+		pr.Reverse = true
+	} else {
+		pr.Reverse = false
+	}
+}
+
+type Rule struct {
+	ki.Node
+	Off       bool     `desc:"disable this rule -- useful for testing"`
 }
 
 func tst() {
@@ -38,7 +91,7 @@ func tst() {
 	pr.LexState.Filename = !pr.LexState.AtEol()
 
 	if !pr.Sub.LexState.AtEol() && cpos == pr.LexState.Pos {
-		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
+//		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
 		pr.LexState.Error(cpos, msg)
 		return nil
 	}

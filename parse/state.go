@@ -13,11 +13,13 @@ import (
 
 // parse.State is the state maintained for parsing
 type State struct {
-	Src    *lex.File     `desc:"source and lexed version of source we're parsing"`
-	Ast    *Ast          `desc:"root of the Ast abstract syntax tree we're updating"`
-	EosPos []lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
-	Pos    lex.Pos       `desc:"the current lex token position"`
-	Errs   lex.ErrorList `desc:"any error messages accumulated during parsing specifically"`
+	Src        *lex.File      `desc:"source and lexed version of source we're parsing"`
+	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
+	EosPos     []lex.Pos      `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
+	Pos        lex.Pos        `desc:"the current lex token position"`
+	Errs       lex.ErrorList  `desc:"any error messages accumulated during parsing specifically"`
+	Matches    [][]MatchStack `desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
+	NonMatches ScopeRuleSet   `desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
 }
 
 // Init initializes the state at start of parsing
@@ -28,6 +30,22 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos []lex.Pos) {
 	ps.EosPos = eospos
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
 	ps.Errs.Reset()
+	ps.AllocRules()
+}
+
+// AllocRules allocate the match, nonmatch rule state in correspondence with the src state
+func (ps *State) AllocRules() {
+	nlines := ps.Src.NLines()
+	ps.Matches = make([][]MatchStack, nlines)
+	ntot := 0
+	for ln := 0; ln < nlines; ln++ {
+		sz := len(ps.Src.Lexs[ln])
+		if sz > 0 {
+			ps.Matches[ln] = make([]MatchStack, sz)
+			ntot += sz
+		}
+	}
+	ps.NonMatches = make(ScopeRuleSet, ntot*10)
 }
 
 // Error adds a parsing error at given lex token position
@@ -179,4 +197,138 @@ func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
 	chAst := parAst.AddNewChild(KiT_Ast, rule).(*Ast)
 	chAst.SetTokReg(reg, ps.Src)
 	return chAst
+}
+
+///////////////////////////////////////////////////////////////////////////
+//  Match State, Stack
+
+// MatchState holds state info for rules that matched, recorded at starting position of match
+type MatchState struct {
+	Rule  *Rule   `desc:"rule that either matched or ran here"`
+	Scope lex.Reg `desc:"scope for match"`
+	Regs  Matches `desc:"regions of match for each sub-region"`
+	Depth int     `desc:"parsing depth at which it matched -- matching depth is given by actual depth of stack"`
+	Ran   bool    `desc:"if false, then it is just a match at this point"`
+}
+
+// String is fmt.Stringer
+func (rs MatchState) String() string {
+	if rs.Rule == nil {
+		return ""
+	}
+	rstr := "-"
+	if rs.Ran {
+		rstr = "+"
+	}
+	return fmt.Sprintf("%v%v%v+%v", rstr, rs.Rule.Name(), rs.Scope, rs.Depth)
+}
+
+// MatchStack is the stack of rules that matched or ran for each token point
+type MatchStack []MatchState
+
+// Add given rule to stack
+func (rs *MatchStack) Add(pr *Rule, scope lex.Reg, regs Matches, depth int) {
+	*rs = append(*rs, MatchState{Rule: pr, Scope: scope, Regs: regs, Depth: depth})
+}
+
+// Find looks for given rule and scope on the stack
+func (rs *MatchStack) Find(pr *Rule, scope lex.Reg) (*MatchState, bool) {
+	for i := range *rs {
+		r := &(*rs)[i]
+		if r.Rule == pr && r.Scope == scope {
+			return r, true
+		}
+	}
+	return nil, false
+}
+
+// AddMatch adds given rule to rule stack at given scope
+func (ps *State) AddMatch(pr *Rule, scope lex.Reg, regs Matches, depth int) {
+	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
+	rs.Add(pr, scope, regs, depth)
+}
+
+// IsMatch looks for rule at given scope in list of matches, if found
+// returns match state info
+func (ps *State) IsMatch(pr *Rule, scope lex.Reg) (*MatchState, bool) {
+	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
+	sz := len(*rs)
+	if sz == 0 {
+		return nil, false
+	}
+	return rs.Find(pr, scope)
+}
+
+// RuleString returns the rule info for entire source -- if full
+// then it includes the full stack at each point -- otherwise just the top
+// of stack
+func (ps *State) RuleString(full bool) string {
+	txt := ""
+	nlines := ps.Src.NLines()
+	for ln := 0; ln < nlines; ln++ {
+		sz := len(ps.Matches[ln])
+		if sz == 0 {
+			txt += "\n"
+		} else {
+			for ch := 0; ch < sz; ch++ {
+				rs := ps.Matches[ln][ch]
+				sd := len(rs)
+				txt += ` "` + string(ps.Src.TokenSrc(lex.Pos{ln, ch})) + `"`
+				if sd == 0 {
+					txt += "-"
+				} else {
+					if !full {
+						txt += rs[sd-1].String()
+					} else {
+						txt += fmt.Sprintf("[%v: ", sd)
+						for i := 0; i < sd; i++ {
+							txt += rs[i].String()
+						}
+						txt += "]"
+					}
+				}
+			}
+			txt += "\n"
+		}
+	}
+	return txt
+}
+
+///////////////////////////////////////////////////////////////////////////
+//  ScopeRuleSet and NonMatch
+
+// RuleSet is a map for representing binary presence of a rule
+type RuleSet map[*Rule]struct{}
+
+// ScopeRuleSet is a map by scope of RuleSets, for non-matching rules
+type ScopeRuleSet map[lex.Reg]RuleSet
+
+// Add a rule to scope set, with auto-alloc
+func (rs ScopeRuleSet) Add(scope lex.Reg, pr *Rule) {
+	rm, has := rs[scope]
+	if !has {
+		rm = make(RuleSet)
+		rs[scope] = rm
+	}
+	rm[pr] = struct{}{}
+}
+
+// Has checks if scope rule set has given scope, rule
+func (rs ScopeRuleSet) Has(scope lex.Reg, pr *Rule) bool {
+	rm, has := rs[scope]
+	if !has {
+		return false
+	}
+	_, has = rm[pr]
+	return has
+}
+
+// AddNonMatch adds given rule to non-matching rule set for this scope
+func (ps *State) AddNonMatch(scope lex.Reg, pr *Rule) {
+	ps.NonMatches.Add(scope, pr)
+}
+
+// IsNonMatch looks for rule in nonmatch list at given scope
+func (ps *State) IsNonMatch(scope lex.Reg, pr *Rule) bool {
+	return ps.NonMatches.Has(scope, pr)
 }

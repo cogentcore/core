@@ -80,7 +80,7 @@ Dot:		 None		 if String == "." {
     // Period default is just a plain . 
     Period:       PunctSepPeriod       if String == "."   do: Next; 
 }
-LitStrSingle:		 LitStrSingle		 if String == "'"	 do: EOL; 
+LitStrSingle:		 LitStrSingle		 if String == "'"	 do: QuotedRaw; 
 LitStrDouble:		 LitStrDouble		 if String == """	 do: QuotedRaw; 
 LParen:		 PunctGpLParen		 if String == "("	 do: Next; 
 RParen:		 PunctGpRParen		 if String == ")"	 do: Next; 
@@ -197,8 +197,10 @@ ExprRules {
     }
     // Expr The full set of possible expressions 
     Expr {
-        BinExpr:   BinaryExpr  
-        UnryExpr:  UnaryExpr   
+        // // OFF: Selectr must be after funcall 
+        // OFF: Selectr:  PrimaryExpr '.' Selectors  >Ast
+        BinExpr:          BinaryExpr                 
+        UnryExpr:         UnaryExpr                  
     }
     UnaryExpr {
         PosExpr:       '+' @UnaryExpr  >Ast
@@ -229,7 +231,9 @@ ExprRules {
         AddExpr:         -Expr '+' Expr   >Ast
         RemExpr:         -Expr '%' Expr   >Ast
         DivExpr:         -Expr '/' Expr   >Ast
-        MultExpr:        -Expr '*' Expr   >Ast
+        // MultExpr ! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice 
+        MultExpr:    -Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'  >Ast
+        SelectExpr:  Expr '.' Expr                                                  _Ast
     }
     PrimaryExpr {
         BasicLit:  BasicLiteral  
@@ -248,8 +252,7 @@ ExprRules {
         FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'         >Ast
         MethCall:  @RecvType '.' Name '(' ?ArgsExpr ')'  >Ast
         Slice:     PrimaryExpr '[' SliceExpr ']'         >Ast
-        // Selector must be after funcall 
-        Selector:  PrimaryExpr '.' Selectors  >Ast
+        Selector:  PrimaryExpr '.' Selectors             >Ast
         // OpName this is the least selective and must be at the end 
         OpName:  FullName  
     }
@@ -258,9 +261,8 @@ ExprRules {
         LitNumFloat:    'LitNumFloat'    +Ast
         LitNumImag:     'LitNumImag'     +Ast
         // LitRune rune 
-        LitRune:  'LitStrSingle'  +Ast
-        // LitString rune 
-        LitString:  'LitStr'  +Ast
+        LitRune:    'LitStrSingle'  +Ast
+        LitString:  'LitStr'        +Ast
     }
     LiteralType {
         LitStructType:  StructType  
@@ -366,9 +368,10 @@ TypeRules {
 }
 FuncRules {
     FunDecl {
-        MethDecl:  'key:func' '(' Name Type ')' Name Signature ?Block 'EOS'  >Ast
-        FuncDecl:  'key:func' Name Signature ?Block 'EOS'                    >Ast
+        MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
+        FuncDecl:  'key:func' Name Signature ?Block 'EOS'                   >Ast
     }
+    MethRecv:   Name Type       >Ast
     Signature:  Params ?Result  
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {

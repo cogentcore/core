@@ -150,7 +150,7 @@ func (kt KeyToken) String() string {
 // Equal compares equality of two tokens including keywords if token is in Keyword category.
 // See also Match for version that uses category / subcategory matching
 func (kt KeyToken) Equal(okt KeyToken) bool {
-	if kt.Tok.IsKeyword() {
+	if kt.Tok.IsKeyword() && kt.Key != "" {
 		return kt.Tok == okt.Tok && kt.Key == okt.Key
 	}
 	return kt.Tok == okt.Tok

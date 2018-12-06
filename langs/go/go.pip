@@ -4,10 +4,12 @@
   "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
   "TraceOpts": {
     "On": false,
-    "Rules": "AnonField TypeName FieldDecl NamedField",
+    "Rules": "",
     "Match": true,
+    "SubMatch": false,
     "NoMatch": false,
     "Run": true,
-    "ScopeSrc": true
+    "ScopeSrc": true,
+    "FullStackOut": false
   }
 }

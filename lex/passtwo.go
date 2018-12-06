@@ -54,7 +54,7 @@ func (ts *TwoState) InsertEOS(cp Pos) {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := ts.Src.LexAt(cp)
 	depth := elx.Depth
-	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{token.EOS, depth, elx.Ed, elx.Ed})
+	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.EOS, Depth: depth, St: elx.Ed, Ed: elx.Ed})
 	ts.EosPos = append(ts.EosPos, np)
 }
 
