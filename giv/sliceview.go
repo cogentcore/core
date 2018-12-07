@@ -36,7 +36,7 @@ type SliceView struct {
 	gi.Frame
 	Slice            interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	SliceValView     ValueView          `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
-	IsArray          bool               `desc:"whether the slice is actually an array -- no modifications"`
+	isArray          bool               `desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
 	AddOnly          bool               `desc:"can the user delete elements of the slice"`
 	DeleteOnly       bool               `desc:"can the user add elements to the slice"`
 	StyleFunc        SliceViewStyleFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
@@ -77,7 +77,7 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
-		sv.IsArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+		sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		if !sv.IsInactive() {
 			sv.SelectedIdx = -1
 		}
@@ -182,7 +182,7 @@ func (sv *SliceView) ToolBar() *gi.ToolBar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (sv *SliceView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
-	if !sv.IsInactive() && !sv.IsArray {
+	if !sv.IsInactive() && !sv.isArray {
 		if !sv.AddOnly {
 			nWidgPerRow += 1
 		}
@@ -317,7 +317,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
 				svv.SetChanged()
 			})
-			if !sv.IsArray {
+			if !sv.isArray {
 				cidx := ridx + idxOff
 				if !sv.DeleteOnly {
 					addnm := fmt.Sprintf("add-%v", idxtxt)
@@ -378,7 +378,7 @@ func (sv *SliceView) SetChanged() {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
-	if sv.IsArray {
+	if sv.isArray {
 		return
 	}
 
@@ -439,7 +439,7 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 
 // SliceDeleteAt deletes element at given index from slice
 func (sv *SliceView) SliceDeleteAt(idx int, reconfig bool) {
-	if sv.IsArray {
+	if sv.isArray {
 		return
 	}
 
@@ -467,19 +467,18 @@ func (sv *SliceView) ConfigToolbar() {
 	}
 	tb := sv.ToolBar()
 	nact := 1
-	if sv.IsArray || sv.IsInactive() {
+	if sv.isArray || sv.IsInactive() {
 		nact = 0
 	}
 	if len(*tb.Children()) < nact {
 		tb.SetStretchMaxWidth()
-		// todo: this doesn't work because this code ran before these variables are set - discuss with Randy
-		//if !sv.IsArray && !sv.DeleteOnly {
-		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
-			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				svv := recv.Embed(KiT_SliceView).(*SliceView)
-				svv.SliceNewAt(-1, true)
-			})
-		//}
+		if !sv.isArray && !sv.DeleteOnly {
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
+				sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					svv := recv.Embed(KiT_SliceView).(*SliceView)
+					svv.SliceNewAt(-1, true)
+				})
+		}
 	}
 	sz := len(*tb.Children())
 	if sz > nact {
@@ -1367,7 +1366,7 @@ func (sv *SliceView) DropCancel() {
 //    Events
 
 func (sv *SliceView) StdCtxtMenu(m *gi.Menu, row int) {
-	if sv.IsArray {
+	if sv.isArray {
 		return
 	}
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},

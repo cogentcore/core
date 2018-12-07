@@ -15,12 +15,14 @@ import (
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
 // provides a named, optional way to specify these args
 type DlgOpts struct {
-	Title   string    `desc:"generally should be provided -- used for setting name of dialog and associated window"`
-	Prompt  string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
-	CSS     ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
-	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	Ok      bool      `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
-	Cancel  bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	Title      string    `desc:"generally should be provided -- used for setting name of dialog and associated window"`
+	Prompt     string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
+	CSS        ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+	TmpSave    ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	Ok         bool      `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	Cancel     bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	AddOnly    bool      `desc:"can the user delete elements of the slice"`
+	DeleteOnly bool      `desc:"can the user add elements to the slice"`
 }
 
 // ToGiOpts converts giv opts to gi opts
@@ -92,6 +94,8 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	sv.SetInactiveState(false)
 	sv.StyleFunc = styleFunc
+	sv.DeleteOnly = opts.DeleteOnly
+	sv.AddOnly = opts.AddOnly
 	sv.SetSlice(slice, opts.TmpSave)
 
 	if recv != nil && dlgFunc != nil {
