@@ -603,11 +603,17 @@ func SavePaths() {
 	SavedPaths.SaveJSON(pnm)
 }
 
+var FileViewResetPaths = "<i>Reset Paths</i>"
+var FileViewEditPaths = "<i>Edit Paths...</i>"
+
 // OpenPaths loads the active SavedPaths from prefs dir
 func OpenPaths() {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, SavedPathsFileName)
 	SavedPaths.OpenJSON(pnm)
+
+	StringsAppendIfUnique((*[]string)(&SavedPaths), FileViewResetPaths, Prefs.SavedPathsMax)
+	StringsAppendIfUnique((*[]string)(&SavedPaths), FileViewEditPaths, Prefs.SavedPathsMax)
 }
 
 //////////////////////////////////////////////////////////////////

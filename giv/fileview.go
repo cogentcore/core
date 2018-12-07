@@ -263,9 +263,15 @@ func (fv *FileView) ConfigPathRow() {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
 			sp := data.(string)
-			if sp == fileViewResetPaths {
+			if sp == gi.FileViewResetPaths {
 				gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.SavedPathsMax)
 				gi.SavedPaths[0] = fvv.DirPath
+				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+				gi.SavedPaths = append(gi.SavedPaths, gi.FileViewResetPaths)
+				gi.SavedPaths = append(gi.SavedPaths, gi.FileViewEditPaths)
+				fv.UpdateFiles()
+			} else if sp == gi.FileViewEditPaths {
+				fv.EditPaths()
 				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
 			} else {
 				fvv.DirPath = sp
@@ -467,8 +473,6 @@ func (fv *FileView) UpdateFilesAction() {
 	fv.FileSig.Emit(fv.This(), int64(FileViewUpdated), fv.DirPath)
 }
 
-var fileViewResetPaths = "<i>Reset Paths</i>"
-
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
@@ -488,7 +492,6 @@ func (fv *FileView) UpdateFiles() {
 	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.SavedPathsMax)
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
-	sp = append(sp, fileViewResetPaths)
 	pf.ItemsFromStringList(sp, true, 0)
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
@@ -763,6 +766,7 @@ func (fv *FileView) HasFocus2D() bool {
 ////////////////////////////////////////////////////////////////////////////////
 //  Completion
 
+// FileComplete finds the possible completions for the file field
 func (fv *FileView) FileComplete(data interface{}, text string, pos token.Position) (md complete.MatchData) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
@@ -790,6 +794,7 @@ func (fv *FileView) FileComplete(data interface{}, text string, pos token.Positi
 	return md
 }
 
+// PathComplete finds the possible completions for the path field
 func (fv *FileView) PathComplete(data interface{}, path string, pos token.Position) (md complete.MatchData) {
 	dir, seed := filepath.Split(path)
 	md.Seed = seed
@@ -818,6 +823,7 @@ func (fv *FileView) PathComplete(data interface{}, path string, pos token.Positi
 	return md
 }
 
+// PathCompleteEdit is the editing function called when inserting the completion selection in the path field
 func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	path := ed.NewText + string(filepath.Separator)
@@ -826,7 +832,28 @@ func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos in
 	return ed
 }
 
+// FileCompleteEdit is the editing function called when inserting the completion selection in the file field
 func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	return ed
+}
+
+// EditPaths displays a dialog allowing user to delete paths from the path list
+func (fv *FileView) EditPaths() {
+	// drop the reset/edit items from editable slice
+	tmp := make([]string, len(gi.SavedPaths)-2)
+	copy(tmp, gi.SavedPaths)
+	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, DeleteOnly: true}
+	SliceViewDialog(fv.Viewport, &tmp, opts,
+		nil, fv, func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				gi.SavedPaths = nil
+				gi.SavedPaths = append(gi.SavedPaths, tmp...)
+				// add back the reset/edit menu items
+				gi.StringsAppendIfUnique((*[]string)(&gi.SavedPaths), gi.FileViewResetPaths, gi.Prefs.SavedPathsMax)
+				gi.StringsAppendIfUnique((*[]string)(&gi.SavedPaths), gi.FileViewEditPaths, gi.Prefs.SavedPathsMax)
+				gi.SavePaths()
+				fv.UpdateFiles()
+			}
+		})
 }

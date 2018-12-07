@@ -456,6 +456,19 @@ func StringsInsertFirstUnique(strs *[]string, str string, max int) {
 	}
 }
 
+// StringsAppendIfUnique append str to strs if not already in slice
+func StringsAppendIfUnique(strs *[]string, str string, max int) {
+	if strs == nil {
+		*strs = make([]string, 0, max)
+	}
+	for _, s := range *strs {
+		if s == str {
+			return
+		}
+	}
+	*strs = append(*strs, str)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // MenuButton pops up a menu, has an indicator by default
 
