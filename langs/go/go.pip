@@ -4,9 +4,9 @@
   "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
   "TraceOpts": {
     "On": false,
-    "Rules": "",
+    "Rules": "Slice SelectExpr AddExpr",
     "Match": true,
-    "SubMatch": false,
+    "SubMatch": true,
     "NoMatch": true,
     "Run": true,
     "ScopeSrc": true,

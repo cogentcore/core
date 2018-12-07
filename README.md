@@ -38,4 +38,50 @@ Also, for RD parsing, to deal properly with the [order of operations](https://en
 
 * order matters!
 
+### Generative Expression Subdomains
+
+There are certain subdomains that have very open-ended combinatorial "generative" expressive power.  These are particular challenges for any parser, and there are a few critical issues and tips for the Pi parser.
+
+#### Arithmetic with Binary and Unary Operators
+
+You can create arbitrarily long expressions by stringing together sequences of binary and unary mathematical / logical operators.  From the top-down parser's perspective, here are the key points:
+
+1. Each operator must be uniquely recognizable from the soup of tokens, and this critically includes distinguishing unary from binary: e.g., correctly recognizing the binary and unary - signs here: `a - b * -c`  
+
+2. The operators must be organized in *reverse* order of priority, so that the lowest priority operations are factored out first, creating the highest-level, broadest splits of the overall expression (in the Ast tree), and then progressively finer, tighter, inner steps are parsed out.  Thus, for example in this expression:
+
+```Go
+if a + b * 2 / 7 - 42 > c * d + e / 72 {
+```
+
+The broadest, first split is into the two sides of the `>` operator, and then each of those sides is progressively organized first into an addition operator, then the `*` and `/`.  
+
+3. The binary operators provide the recursive generativity for the expression.  E.g., Addition is specified as:
+
+```Go
+AddExpr: Expr '+' Expr
+```
+
+so it just finds the + token and then descends recursively to unpack each of those `Expr` chunks on either side, until there are no more tokens left there.
+
+One particularly vexing situation arises if you have the possibility of mixing multiplication with de-pointering, both of which are indicated by the `*` symbol.  In Go, this is particularly challenging because of the frequent use of type literals, including those with pointer types, in general expressions.  We had to add the ability to specify an "exclusion" expression that detects this alternate use and excludes it for the general multiplication case (because multiplication is broader than de-pointer and thus comes first in the matching hierarchy).
+
+#### Path-wise Operators
+
+Another generative domain are the path-wise operators, principally the "selector" operator `.` and the slice operator `'[' SliceExpr ']'`, which can be combined with method calls and other kinds of primary expressions in a very open-ended way, e.g.,:
+
+```Go
+ps.Errs[len(ps.Errs)-1].Error()[0][1].String()
+````
+
+In the top-down parser, it is essential to create this open-ended scenario by including pre-and-post expressions surrounding the `Slice` and `Selector` operators, which then act like the Expr groups surrounding the AddExpr operator to support recursive chaining.  For Selector, the two Expr's are required, but for Slice, they are optional - that works fine:
+
+```Go
+Slice: ?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr
+```
+
+Without those optional exprs on either side, the top-down parser would just stop after getting either side of that expression.
+
+As with the arithmetic case, order matters and in the same inverse way, where you want to match the broader items first.  Also, those cases that are more specific and would otherwise be absorbed by a more general expression (e.g., 
+
 

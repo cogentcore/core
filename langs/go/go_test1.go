@@ -4,34 +4,142 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
+package main
+
+import "github.com/goki/gi/gi"
+
+import (
+	gi "github.com/goki/gi/gi"
+	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/oswin"
+	gogide "github.com/goki/gide/gide"
+	"github.com/goki/pi"
+	"github.com/goki/pi/piv"
+)
+
 /*
-var a,b,c,d = 32
-var e = 22
+func tst() {
+	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+		if !inClosePrompt {
+			inClosePrompt = true
+			if pv.Changed {
+				gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
+					Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
+					[]string{"Close Without Saving", "Cancel"},
+					win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						switch sig {
+						case 0:
+							w.Close()
+						case 1:
+							// default is to do nothing, i.e., cancel
+						}
+					})
+			} else {
+				w.Close()
+			}
+		}
+	})
+}
 */
 
 func tst() {
-	tokSrc := pos.String() + `"` + string(ps.Src.TokenSrc(pos)) + `"`
+	txt += rs[sd-1].String()
+	txt += rs[i].String()
+	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
+}	
+
+func tst() {
+	r := &(*rs)[i]
+}	
+
+func tst() {
+	rs := &ps.Matches[abc]
+}
+
+func tst() {
+	rs := Matches[scope][scope]
+}	
+
+func tst() {
+	if !inClosePrompt {
+		if pv.Changed {
+			ChoiceDialog(func(ab int) {
+				break
+				return
+				})
+		} else {
+			w.Close()
+		}
+	}
+}
+
+
+func tst() {
+   SetCloseReqFunc(func(w win) {
+ 		if !inClosePrompt {
+			if pv.Changed {
+				ChoiceDialog(func(ab int) {
+					break
+					return
+					})
+			} else {
+				w.Close()
+			}
+		}
+	})
+}
+
+
+func (pv *PiView) ConfigSplitView() {
+	Connect(func(sig int64) {
+		switch sig {
+		case int64(TreeViewSelected):
+			break
+		}
+	})
+}
+
+var MakeSlice = make([]Rule, 100) // make and new require special rules b/c take type args
+
+var MakeSlice = make([][][]*Rule, 100)
+
+func (pv *PiView) OpenTestTextTab() {
+	if ctv.Buf != &pv.TestBuf {
+		ctv.SetBuf(&pv.TestBuf)
+	}
+}
+
+func (ev Steps) MarshalJSON() ([]byte, error)  {
+	return kit.EnumMarshalJSON(ev)
+}
+
+func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b)
+}
+
+// todo: not dealing with all-in-one-line case -- needs to insert EOS before } 
+//func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+func tst() {
+	tokSrc := string(ps.TokenSrc(pos))
 }
 
 var ifa interface{}
 
 func tst() {
+	pv.SaveParser()
+	pv.GetPrefs()
 	Trace.Out(ps, pr, Run, creg.St, creg, trcAst, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
 }
 
 // this is Go's "most vexing parse" from a top-down perspective:
 
-// var MultSlice = p[2]*Rule
+//var MultSlice = p[2]*Rule // todo: not working
 
 var SliceAr1 = []Rule{}
 
 var SliceAry = [25]*Rule{}
 
-// var SliceAry = []*Rule{} // todo: ? not excluding here
-
-// var MakeSlice = make([]Rule, 100) // this is not even working -- typelit is not a valid arg in general..  maybe it should be.
-
-//var MakeSlice = make([][][]*Rule, 100) // sheesh
+//var SliceAry = []*Rule{} // todo: ? not excluding here
 
 var RuleMap map[string]*Rule // looks like binary *
 
@@ -46,6 +154,7 @@ var RuleMap map[string]*Rule // looks like binary *
 var unaryptr = 25 * *(ptr+2)  // directly to rhs or depth sub of it
 var multexpr = 25 * (ptr + 2)
 var multex = 25 * ptr + 25 * *ptr // 
+var a,b,c,d = 32
 
 func (pr *Rule) BaseIface() reflect.Type {
 	return reflect.TypeOf((*Parser)(nil)).Elem()
@@ -56,7 +165,7 @@ func (pr *Rule) AsParseRule() *Rule {
 	return pr.This().Embed(KiT_Rule).(*Rule)
 }
 
-/*
+
 func test() {
 	RuleMap = map[string]*Rule{}
 }
@@ -75,7 +184,6 @@ func (pr *Rule) CompileAll(ps *State) bool {
 	})
 	return allok
 }
-*/
 
 func test() {
 	if pr.Rule[0] == '-' {
@@ -107,7 +215,7 @@ func tst() {
 	pr.LexState.Filename = !pr.LexState.AtEol()
 
 	if !pr.Sub.LexState.AtEol() && cpos == pr.LexState.Pos {
-//		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
+		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
 		pr.LexState.Error(cpos, msg)
 		return nil
 	}
@@ -227,19 +335,6 @@ bypass:
 		nvar += function(of + some + others)
 	}
 }
-
-package main
-
-import "github.com/goki/gi/gi"
-
-import (
-	gi "github.com/goki/gi/gi"
-	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/oswin"
-	gogide "github.com/goki/gide/gide"
-	"github.com/goki/pi"
-	"github.com/goki/pi/piv"
-)
 
 const neg = -1
 

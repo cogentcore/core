@@ -36,6 +36,8 @@ Letter:		 None		 if Letter {
         import:            Keyword       if StrName == "import"        do: Name; 
         interface:         Keyword       if StrName == "interface"     do: Name; 
         map:               Keyword       if StrName == "map"           do: Name; 
+        make:              Keyword       if StrName == "make"          do: Name; 
+        new:               Keyword       if StrName == "new"           do: Name; 
         package:           Keyword       if StrName == "package"       do: Name; 
         range:             Keyword       if StrName == "range"         do: Name; 
         return:            Keyword       if StrName == "return"        do: Name; 
@@ -197,10 +199,8 @@ ExprRules {
     }
     // Expr The full set of possible expressions 
     Expr {
-        // // OFF: Selectr must be after funcall 
-        // OFF: Selectr:  PrimaryExpr '.' Selectors  >Ast
-        BinExpr:          BinaryExpr                 
-        UnryExpr:         UnaryExpr                  
+        BinExpr:   BinaryExpr  
+        UnryExpr:  UnaryExpr   
     }
     UnaryExpr {
         PosExpr:       '+' @UnaryExpr  >Ast
@@ -214,17 +214,17 @@ ExprRules {
     }
     // BinaryExpr due to top-down nature of parser, *lowest* precedence is *first* -- all rules *must* have - first = reverse order to get associativity right 
     BinaryExpr {
-        LogOrExpr:       Expr '||' Expr   >Ast
-        LogAndExpr:      Expr '&&' Expr   >Ast
-        BitOrExpr:       -Expr '|' Expr   >Ast
-        BitXorExpr:      -Expr '^' Expr   >Ast
-        BitAndExpr:      -Expr '&' Expr   >Ast
         NotEqExpr:       Expr '!=' Expr   >Ast
         EqExpr:          Expr '==' Expr   >Ast
         GtEqExpr:        Expr '>=' Expr   >Ast
         GreaterExpr:     Expr '>' Expr    >Ast
         LtEqExpr:        Expr '<=' Expr   >Ast
         LessExpr:        Expr '<' Expr    >Ast
+        LogOrExpr:       Expr '||' Expr   >Ast
+        LogAndExpr:      Expr '&&' Expr   >Ast
+        BitOrExpr:       -Expr '|' Expr   >Ast
+        BitXorExpr:      -Expr '^' Expr   >Ast
+        BitAndExpr:      -Expr '&' Expr   >Ast
         ShiftRightExpr:  -Expr '>>' Expr  >Ast
         ShiftLeftExpr:   -Expr '<<' Expr  >Ast
         SubExpr:         -Expr '-' Expr   >Ast
@@ -232,27 +232,34 @@ ExprRules {
         RemExpr:         -Expr '%' Expr   >Ast
         DivExpr:         -Expr '/' Expr   >Ast
         // MultExpr ! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice 
-        MultExpr:    -Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'  >Ast
-        SelectExpr:  Expr '.' Expr                                                  _Ast
+        MultExpr:  -Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'  >Ast
     }
     PrimaryExpr {
         BasicLit:  BasicLiteral  
         // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
-        CompositeLit:  @LiteralType '{' ?ElementList '}'  >Ast
-        FuncLit:       'key:func' Signature Block         >Ast
+        CompositeLit:  @LiteralType '{' ?ElementList '}'        >Ast
+        FuncLit:       'key:func' Signature '{' ?BlockList '}'  >Ast
         // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
-        ConvertBasic:   @BasicType '(' @Expr ')'          >Ast
-        ConvertParens:  '(' @Type ')' '(' @Expr ?',' ')'  >Ast
+        ConvertBasic:   @BasicType '(' Expr ')'          >Ast
+        ConvertParens:  '(' @Type ')' '(' Expr ?',' ')'  >Ast
         // Convert note: a regular type(expr) will be a FunCall 
-        Convert:    @TypeLiteral '(' Expr ?',' ')'  >Ast
-        ParenExpr:  '(' Expr ')'                    
+        Convert:  @TypeLiteral '(' Expr ?',' ')'  >Ast
+        // Slice this needs further right recursion to keep matching more slices 
+        Slice:      ?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr  _Ast
+        ParenExpr:  '(' Expr ')'                                 
         // TypeAssert must be before FunCall to get . match 
         TypeAssert:  PrimaryExpr '.' '(' @Type ')'  >Ast
+        // MakeCall takes type arg 
+        MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'  >Ast
+        // NewCall takes type arg 
+        NewCall:  'key:new' '(' Type ')'  >Ast
+        // Selector This must be after unary expr esp addr, DePtr 
+        Selector:  PrimaryExpr '.' PrimaryExpr              _Ast
+        MethCall:  ?PrimaryExpr '.' Name '(' ?ArgsExpr ')'  >Ast
         // FuncCall must be after parens 
-        FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'         >Ast
-        MethCall:  @RecvType '.' Name '(' ?ArgsExpr ')'  >Ast
-        Slice:     PrimaryExpr '[' SliceExpr ']'         >Ast
-        Selector:  PrimaryExpr '.' Selectors             >Ast
+        FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'  >Ast
+        // // OFF: TypeMethCall don't think this is needed.. todo: test more 
+        // OFF: TypeMethCall:  @RecvType '.' Name '(' ?ArgsExpr ')'  >Ast
         // OpName this is the least selective and must be at the end 
         OpName:  FullName  
     }
@@ -300,6 +307,7 @@ ExprRules {
         Sels:  @Name '.' @Selectors  
         Sel:   Name                  
     }
+    SubSlice:  '[' SliceExpr ']' ?SubSlice  _Ast
     SliceExpr {
         SliceThree:  ?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3  >Ast
         SliceTwo:    ?SliceIdx1 ':' ?SliceIdx2               >Ast
@@ -413,7 +421,6 @@ StmtRules {
         ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
         // ForExpr most general at end 
         ForExpr:         'key:for' ?Expr '{' ?BlockList '}' 'EOS'                                       >Ast
-        SwitchInit:      'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                    >Ast
         SwitchExpr:      'key:switch' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
         SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
         SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
@@ -428,6 +435,7 @@ StmtRules {
         // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
         ForClauseStmt:       'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'                    >Ast
         IfStmtInit:          'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'                                  >Ast
+        SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
         SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
         SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
         Block:               '{' ?StmtList '}' 'EOS'                                                                         >Ast

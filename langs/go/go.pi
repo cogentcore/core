@@ -292,7 +292,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 25,
+                "n": 27,
                 "type": "lex.Rule",
                 "name": "break",
                 "type": "lex.Rule",
@@ -327,6 +327,10 @@
                 "name": "interface",
                 "type": "lex.Rule",
                 "name": "map",
+                "type": "lex.Rule",
+                "name": "make",
+                "type": "lex.Rule",
+                "name": "new",
                 "type": "lex.Rule",
                 "name": "package",
                 "type": "lex.Rule",
@@ -593,6 +597,36 @@
                 "Token": "Keyword",
                 "Match": "StrName",
                 "String": "map",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "make",
+                "UniqueNm": "make",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "Keyword",
+                "Match": "StrName",
+                "String": "make",
+                "Off": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": ""
+              },
+              {
+                "Nm": "new",
+                "UniqueNm": "new",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "Keyword",
+                "Match": "StrName",
+                "String": "new",
                 "Off": 0,
                 "Acts": [
                   "Name"
@@ -2449,7 +2483,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 17,
+            "n": 18,
             "type": "parse.Rule",
             "name": "FullName",
             "type": "parse.Rule",
@@ -2478,6 +2512,8 @@
             "name": "RecvType",
             "type": "parse.Rule",
             "name": "Selectors",
+            "type": "parse.Rule",
+            "name": "SubSlice",
             "type": "parse.Rule",
             "name": "SliceExpr",
             "type": "parse.Rule",
@@ -2614,26 +2650,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 3,
-                "type": "parse.Rule",
-                "name": "Selectr",
+                "n": 2,
                 "type": "parse.Rule",
                 "name": "BinExpr",
                 "type": "parse.Rule",
                 "name": "UnryExpr"
-              },
-              {
-                "Nm": "Selectr",
-                "UniqueNm": "Selectr",
-                "Props": {
-                  "inactive": true
-                },
-                "Kids": null,
-                "Off": true,
-                "Desc": "must be after funcall",
-                "Rule": "PrimaryExpr '.' Selectors",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
               },
               {
                 "Nm": "BinExpr",
@@ -2776,17 +2797,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 19,
-                "type": "parse.Rule",
-                "name": "LogOrExpr",
-                "type": "parse.Rule",
-                "name": "LogAndExpr",
-                "type": "parse.Rule",
-                "name": "BitOrExpr",
-                "type": "parse.Rule",
-                "name": "BitXorExpr",
-                "type": "parse.Rule",
-                "name": "BitAndExpr",
+                "n": 18,
                 "type": "parse.Rule",
                 "name": "NotEqExpr",
                 "type": "parse.Rule",
@@ -2800,6 +2811,16 @@
                 "type": "parse.Rule",
                 "name": "LessExpr",
                 "type": "parse.Rule",
+                "name": "LogOrExpr",
+                "type": "parse.Rule",
+                "name": "LogAndExpr",
+                "type": "parse.Rule",
+                "name": "BitOrExpr",
+                "type": "parse.Rule",
+                "name": "BitXorExpr",
+                "type": "parse.Rule",
+                "name": "BitAndExpr",
+                "type": "parse.Rule",
                 "name": "ShiftRightExpr",
                 "type": "parse.Rule",
                 "name": "ShiftLeftExpr",
@@ -2812,64 +2833,7 @@
                 "type": "parse.Rule",
                 "name": "DivExpr",
                 "type": "parse.Rule",
-                "name": "MultExpr",
-                "type": "parse.Rule",
-                "name": "SelectExpr"
-              },
-              {
-                "Nm": "LogOrExpr",
-                "UniqueNm": "LogOrExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '||' Expr",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "LogAndExpr",
-                "UniqueNm": "LogAndExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '\u0026\u0026' Expr",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "BitOrExpr",
-                "UniqueNm": "BitOrExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "-Expr '|' Expr",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "BitXorExpr",
-                "UniqueNm": "BitXorExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "-Expr '^' Expr",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "BitAndExpr",
-                "UniqueNm": "BitAndExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "-Expr '\u0026' Expr",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
+                "name": "MultExpr"
               },
               {
                 "Nm": "NotEqExpr",
@@ -2934,6 +2898,61 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '\u003c' Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LogOrExpr",
+                "UniqueNm": "LogOrExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '||' Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LogAndExpr",
+                "UniqueNm": "LogAndExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '\u0026\u0026' Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "BitOrExpr",
+                "UniqueNm": "BitOrExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "-Expr '|' Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "BitXorExpr",
+                "UniqueNm": "BitXorExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "-Expr '^' Expr",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "BitAndExpr",
+                "UniqueNm": "BitAndExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "-Expr '\u0026' Expr",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3013,17 +3032,6 @@
                 "Rule": "-Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
-              },
-              {
-                "Nm": "SelectExpr",
-                "UniqueNm": "SelectExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '.' Expr",
-                "Ast": "SubAst",
-                "OptTokMap": false
               }
             ],
             "Off": false,
@@ -3038,7 +3046,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 13,
+                "n": 16,
                 "type": "parse.Rule",
                 "name": "BasicLit",
                 "type": "parse.Rule",
@@ -3052,17 +3060,23 @@
                 "type": "parse.Rule",
                 "name": "Convert",
                 "type": "parse.Rule",
+                "name": "Slice",
+                "type": "parse.Rule",
                 "name": "ParenExpr",
                 "type": "parse.Rule",
                 "name": "TypeAssert",
                 "type": "parse.Rule",
-                "name": "FuncCall",
+                "name": "MakeCall",
+                "type": "parse.Rule",
+                "name": "NewCall",
+                "type": "parse.Rule",
+                "name": "Selector",
                 "type": "parse.Rule",
                 "name": "MethCall",
                 "type": "parse.Rule",
-                "name": "Slice",
+                "name": "FuncCall",
                 "type": "parse.Rule",
-                "name": "Selector",
+                "name": "TypeMethCall",
                 "type": "parse.Rule",
                 "name": "OpName"
               },
@@ -3095,7 +3109,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:func' Signature Block",
+                "Rule": "'key:func' Signature '{' ?BlockList '}'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3106,7 +3120,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "only works with basic builtin types -- others will get taken by FunCall",
-                "Rule": "@BasicType '(' @Expr ')'",
+                "Rule": "@BasicType '(' Expr ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3117,7 +3131,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'(' @Type ')' '(' @Expr ?',' ')'",
+                "Rule": "'(' @Type ')' '(' Expr ?',' ')'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3130,6 +3144,17 @@
                 "Desc": "note: a regular type(expr) will be a FunCall",
                 "Rule": "@TypeLiteral '(' Expr ?',' ')'",
                 "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Slice",
+                "UniqueNm": "Slice",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "this needs further right recursion to keep matching more slices",
+                "Rule": "?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr",
+                "Ast": "SubAst",
                 "OptTokMap": false
               },
               {
@@ -3155,6 +3180,50 @@
                 "OptTokMap": false
               },
               {
+                "Nm": "MakeCall",
+                "UniqueNm": "MakeCall",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "takes type arg",
+                "Rule": "'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "NewCall",
+                "UniqueNm": "NewCall",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "takes type arg",
+                "Rule": "'key:new' '(' Type ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "Selector",
+                "UniqueNm": "Selector",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "This must be after unary expr esp addr, DePtr",
+                "Rule": "PrimaryExpr '.' PrimaryExpr",
+                "Ast": "SubAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "MethCall",
+                "UniqueNm": "MethCall",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "?PrimaryExpr '.' Name '(' ?ArgsExpr ')'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
                 "Nm": "FuncCall",
                 "UniqueNm": "FuncCall",
                 "Props": null,
@@ -3166,35 +3235,15 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "MethCall",
-                "UniqueNm": "MethCall",
-                "Props": null,
+                "Nm": "TypeMethCall",
+                "UniqueNm": "TypeMethCall",
+                "Props": {
+                  "inactive": true
+                },
                 "Kids": null,
-                "Off": false,
-                "Desc": "",
+                "Off": true,
+                "Desc": "don't think this is needed.. todo: test more",
                 "Rule": "@RecvType '.' Name '(' ?ArgsExpr ')'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "Slice",
-                "UniqueNm": "Slice",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "PrimaryExpr '[' SliceExpr ']'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
-                "Nm": "Selector",
-                "UniqueNm": "Selector",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "PrimaryExpr '.' Selectors",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },
@@ -3661,6 +3710,17 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "OptTokMap": false
+          },
+          {
+            "Nm": "SubSlice",
+            "UniqueNm": "SubSlice",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "'[' SliceExpr ']' ?SubSlice",
+            "Ast": "SubAst",
             "OptTokMap": false
           },
           {
@@ -4681,8 +4741,6 @@
                 "type": "parse.Rule",
                 "name": "ForExpr",
                 "type": "parse.Rule",
-                "name": "SwitchInit",
-                "type": "parse.Rule",
                 "name": "SwitchExpr",
                 "type": "parse.Rule",
                 "name": "SwitchTypeName",
@@ -4702,6 +4760,8 @@
                 "name": "ForClauseStmt",
                 "type": "parse.Rule",
                 "name": "IfStmtInit",
+                "type": "parse.Rule",
+                "name": "SwitchInit",
                 "type": "parse.Rule",
                 "name": "SwitchTypeNameInit",
                 "type": "parse.Rule",
@@ -4855,17 +4915,6 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "SwitchInit",
-                "UniqueNm": "SwitchInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
-                "Ast": "AnchorAst",
-                "OptTokMap": false
-              },
-              {
                 "Nm": "SwitchExpr",
                 "UniqueNm": "SwitchExpr",
                 "Props": null,
@@ -4972,6 +5021,17 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "Ast": "AnchorAst",
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchInit",
+                "UniqueNm": "SwitchInit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
                 "OptTokMap": false
               },

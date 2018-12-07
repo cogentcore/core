@@ -535,7 +535,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 			}
 			if ei == lr.StInc-1 {
 				nscope.Ed = ep
-				Trace.Out(ps, pr, Match, nscope.St, nscope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
+				Trace.Out(ps, pr, SubMatch, nscope.St, nscope, parAst, fmt.Sprintf("from EOS: starting scope: %v new scope: %v end pos: %v depth: %v", scope, nscope, ep, stlx.Depth+lr.Tok.Depth))
 			} else {
 				creg.St, ok = ps.Src.NextTokenPos(ep) // advance
 				if !ok {
