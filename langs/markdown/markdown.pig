@@ -1,41 +1,34 @@
 // /Users/oreilly/goki/pi/langs/markdown/markdown.pig Lexer
 
 InCode:		 None		 if CurState == "Code" {
-    CodeEnd:         LitStrBacktick       if String == "```"   do: PopState; Next; 
-    SkipWhite:       TextWhitespace       if WhiteSpace        do: Next; 
-    AnyCode:         LitStrBacktick       if AnyRune           do: Next; 
+    CodeEnd:       LitStrBacktick       if String == "```"   do: PopState; Next; 
+    AnyCode:       LitStrBacktick       if AnyRune           do: Next; 
 }
 InLinkAddr:		 None		 if CurState == "LinkAddr" {
-    EndLinkAddr:       NameAttribute        if String == ")"   do: PopState; Next; 
-    SkipWhite:         TextWhitespace       if WhiteSpace      do: Next; 
-    AnyLinkAddr:       NameAttribute        if AnyRune         do: Next; 
+    EndLinkAddr:       NameAttribute       if String == ")"   do: PopState; Next; 
+    AnyLinkAddr:       NameAttribute       if AnyRune         do: Next; 
 }
 InLinkTag:		 None		 if CurState == "LinkTag" {
     LinkAddr:       NameAttribute       if +1:String == "("   do: PopState; PushState: LinkAddr; Next; 
     // EndLinkTag for a plain tag with no addr 
-    EndLinkTag:       NameTag              if String == "]"   do: PopState; Next; 
-    SkipWhite:        TextWhitespace       if WhiteSpace      do: Next; 
-    AnyLinkTag:       NameTag              if AnyRune         do: Next; 
+    EndLinkTag:       NameTag       if String == "]"   do: PopState; Next; 
+    AnyLinkTag:       NameTag       if AnyRune         do: Next; 
 }
 InBoldStars:		 None		 if CurState == "BoldStars" {
     EndBoldStars:       TextStyleStrong       if String == "**"   do: PopState; Next; 
-    SkipWhite:          TextWhitespace        if WhiteSpace       do: Next; 
     AnyBoldStars:       TextStyleStrong       if AnyRune          do: Next; 
 }
 InBoldUnders:		 None		 if CurState == "BoldUnders" {
     EndBoldUnders:       TextStyleStrong       if String == "__"   do: PopState; Next; 
-    SkipWhite:           TextWhitespace        if WhiteSpace       do: Next; 
     AnyBoldUnders:       TextStyleStrong       if AnyRune          do: Next; 
 }
 InEmphStar:		 None		 if CurState == "EmphStar" {
-    EndEmphStar:       TextStyleEmph        if String == "*"   do: PopState; Next; 
-    SkipWhite:         TextWhitespace       if WhiteSpace      do: Next; 
-    AnyEmphStar:       TextStyleEmph        if AnyRune         do: Next; 
+    EndEmphStar:       TextStyleEmph       if String == "*"   do: PopState; Next; 
+    AnyEmphStar:       TextStyleEmph       if AnyRune         do: Next; 
 }
 InEmphUnder:		 None		 if CurState == "EmphUnder" {
-    EndEmphUnder:       TextStyleEmph        if String == "_"   do: PopState; Next; 
-    SkipWhite:          TextWhitespace       if WhiteSpace      do: Next; 
-    AnyEmphUnder:       TextStyleEmph        if AnyRune         do: Next; 
+    EndEmphUnder:       TextStyleEmph       if String == "_"   do: PopState; Next; 
+    AnyEmphUnder:       TextStyleEmph       if AnyRune         do: Next; 
 }
 CodeStart:		 LitStrBacktick		 if String == "```"	 do: PushState: Code; Next; 
 HeadPound:		 None		 if String == "#" {

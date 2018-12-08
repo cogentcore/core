@@ -380,7 +380,7 @@ func (pr *Rule) CompileExcl(ps *State, rs []string, rist int) bool {
 // returns true if valid (no err) and false if invalid (errs)
 func (pr *Rule) Validate(ps *State) bool {
 	valid := true
-	if len(pr.Rules) == 0 && !pr.HasChildren() {
+	if len(pr.Rules) == 0 && !pr.HasChildren() && !pr.IsRoot() {
 		ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule %v: has no rules and no children", pr.Nm))
 		valid = false
 	}

@@ -65,11 +65,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 2,
             "type": "lex.Rule",
             "name": "CodeEnd",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyCode"
           },
@@ -86,22 +84,6 @@
             "Off": 0,
             "Acts": [
               "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
               "Next"
             ],
             "PushState": ""
@@ -138,11 +120,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 2,
             "type": "lex.Rule",
             "name": "EndLinkAddr",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyLinkAddr"
           },
@@ -159,22 +139,6 @@
             "Off": 0,
             "Acts": [
               "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
               "Next"
             ],
             "PushState": ""
@@ -211,13 +175,11 @@
         "Props": null,
         "Kids": [
           {
-            "n": 4,
+            "n": 3,
             "type": "lex.Rule",
             "name": "LinkAddr",
             "type": "lex.Rule",
             "name": "EndLinkTag",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyLinkTag"
           },
@@ -257,22 +219,6 @@
             "PushState": ""
           },
           {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
             "Nm": "AnyLinkTag",
             "UniqueNm": "AnyLinkTag",
             "Props": null,
@@ -304,11 +250,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 2,
             "type": "lex.Rule",
             "name": "EndBoldStars",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyBoldStars"
           },
@@ -325,22 +269,6 @@
             "Off": 0,
             "Acts": [
               "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
               "Next"
             ],
             "PushState": ""
@@ -377,11 +305,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 2,
             "type": "lex.Rule",
             "name": "EndBoldUnders",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyBoldUnders"
           },
@@ -398,22 +324,6 @@
             "Off": 0,
             "Acts": [
               "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
               "Next"
             ],
             "PushState": ""
@@ -450,11 +360,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 2,
             "type": "lex.Rule",
             "name": "EndEmphStar",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyEmphStar"
           },
@@ -471,22 +379,6 @@
             "Off": 0,
             "Acts": [
               "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
               "Next"
             ],
             "PushState": ""
@@ -523,11 +415,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 3,
+            "n": 2,
             "type": "lex.Rule",
             "name": "EndEmphUnder",
-            "type": "lex.Rule",
-            "name": "SkipWhite",
             "type": "lex.Rule",
             "name": "AnyEmphUnder"
           },
@@ -544,22 +434,6 @@
             "Off": 0,
             "Acts": [
               "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "SkipWhite",
-            "UniqueNm": "SkipWhite",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextWhitespace",
-            "Match": "WhiteSpace",
-            "Pos": "AnyPos",
-            "String": "",
-            "Off": 0,
-            "Acts": [
               "Next"
             ],
             "PushState": ""
