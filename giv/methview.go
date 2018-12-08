@@ -912,8 +912,12 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		nac := &gi.Action{}
 		nac.InitName(nac, nm)
 		nac.Text = nm
-		nac.SetAsMenu()
-		nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
+		if nm == gi.MenuTextSeparator {
+			nac.Text = gi.MenuTextSeparator
+		} else {
+			nac.SetAsMenu()
+			nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
+		}
 		nd := *md // copy
 		nd.SubMenuVal = val
 		if gotDef {

@@ -267,8 +267,7 @@ func (fv *FileView) ConfigPathRow() {
 				gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.SavedPathsMax)
 				gi.SavedPaths[0] = fvv.DirPath
 				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
-				gi.SavedPaths = append(gi.SavedPaths, gi.FileViewResetPaths)
-				gi.SavedPaths = append(gi.SavedPaths, gi.FileViewEditPaths)
+				gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
 				fv.UpdateFiles()
 			} else if sp == gi.FileViewEditPaths {
 				fv.EditPaths()
@@ -840,9 +839,9 @@ func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos in
 
 // EditPaths displays a dialog allowing user to delete paths from the path list
 func (fv *FileView) EditPaths() {
-	// drop the reset/edit items from editable slice
-	tmp := make([]string, len(gi.SavedPaths)-2)
+	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
+	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
 	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, DeleteOnly: true}
 	SliceViewDialog(fv.Viewport, &tmp, opts,
 		nil, fv, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -850,8 +849,7 @@ func (fv *FileView) EditPaths() {
 				gi.SavedPaths = nil
 				gi.SavedPaths = append(gi.SavedPaths, tmp...)
 				// add back the reset/edit menu items
-				gi.StringsAppendIfUnique((*[]string)(&gi.SavedPaths), gi.FileViewResetPaths, gi.Prefs.SavedPathsMax)
-				gi.StringsAppendIfUnique((*[]string)(&gi.SavedPaths), gi.FileViewEditPaths, gi.Prefs.SavedPathsMax)
+				gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
 				gi.SavePaths()
 				fv.UpdateFiles()
 			}

@@ -469,6 +469,25 @@ func StringsAppendIfUnique(strs *[]string, str string, max int) {
 	*strs = append(*strs, str)
 }
 
+// StringsAddExtras is a generic function for appending a slice to a slice used to add items to menus
+func StringsAddExtras(items *[]string, extras []string) {
+	*items = append(*items, extras...)
+}
+
+// StringsRemoveExtras is a generic function for removing items of a slice from another slice
+func StringsRemoveExtras(items *[]string, extras []string) {
+	for _, extra := range extras {
+		i := 0
+		for _, item := range *items {
+			if item != extra {
+				(*items)[i] = item
+				i++
+			}
+		}
+		*items = (*items)[:i]
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // MenuButton pops up a menu, has an indicator by default
 
@@ -554,6 +573,9 @@ func (mb *MenuButton) ConfigParts() {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Separator
+
+// Separator defines a string to indicate a menu separator item
+var MenuTextSeparator = "-------------"
 
 // Separator draws a vertical or horizontal line
 type Separator struct {
