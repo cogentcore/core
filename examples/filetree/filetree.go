@@ -160,9 +160,7 @@ func (fb *FileBrowse) SaveActiveView() {
 func (fb *FileBrowse) SaveActiveViewAs(filename gi.FileName) {
 	tv := fb.ActiveTextView()
 	if tv.Buf != nil {
-		tv.Buf.SaveAs(filename, func(canceled bool) {
-			fb.Files.UpdateNewFile(string(filename))
-		})
+		tv.Buf.SaveAs(filename)
 	}
 }
 
