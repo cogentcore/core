@@ -140,7 +140,7 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 		var ac *gi.Action
 		if aci, has := tb.ChildByName(te.Name, 0); has { // allows overriding of defaults etc
 			ac = aci.(*gi.Action)
-			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
+			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
 			ac = tb.AddNewChild(gi.KiT_Action, te.Name).(*gi.Action)

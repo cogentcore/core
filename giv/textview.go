@@ -6,8 +6,7 @@ package giv
 
 import (
 	"fmt"
-	"github.com/goki/gi/oswin/cursor"
-	"go/token"
+	gotoken "go/token"
 	"image"
 	"image/draw"
 	"log"
@@ -16,10 +15,11 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/goki/gi/oswin/cursor"
+
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
@@ -29,6 +29,7 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/token"
 )
 
 // TextView is a widget for editing multiple lines of text (as compared to
@@ -2429,7 +2430,7 @@ func (tv *TextView) OfferComplete() {
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 	}
 
-	tpos := token.Position{} // text position
+	tpos := gotoken.Position{} // text position
 	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
 	tpos.Line = tv.CursorPos.Ln
 	tpos.Column = tv.CursorPos.Ch
@@ -2531,7 +2532,7 @@ func (tv *TextView) SpellCheck(region *TextBufEdit) bool {
 	}
 	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
 	if knwn || err != nil {
-		tv.Buf.RemoveTag(region.Reg.Start, histyle.SpellErr)
+		tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
 		ln := region.Reg.Start.Ln
 		tv.LayoutLines(ln, ln, false)
 		tv.RenderLines(ln, ln)
@@ -2539,8 +2540,8 @@ func (tv *TextView) SpellCheck(region *TextBufEdit) bool {
 	}
 	tv.Buf.SpellCorrect.Suggestions = sugs
 	tv.Buf.SpellCorrect.Word = wb
-	tv.Buf.RemoveTag(region.Reg.Start, histyle.SpellErr)
-	tv.Buf.AddTagEdit(region, histyle.SpellErr)
+	tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
+	tv.Buf.AddTagEdit(region, token.TextSpellErr)
 	ln := region.Reg.Start.Ln
 	tv.LayoutLines(ln, ln, false)
 	tv.RenderLines(ln, ln)

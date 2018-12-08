@@ -12,12 +12,11 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/alecthomas/chroma"
-	"github.com/alecthomas/chroma/styles"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi"
 )
 
 // Styles is a collection of styles
@@ -61,18 +60,6 @@ func (hs *Styles) Add() Style {
 	nm := fmt.Sprintf("NewStyle_%v", len(*hs))
 	(*hs)[nm] = hse
 	return hse
-}
-
-// FromChroma copies styles from chroma
-func (hs *Styles) FromChroma(cs map[string]*chroma.Style) {
-	if *hs == nil {
-		*hs = make(Styles, len(cs))
-	}
-	for nm, cse := range cs {
-		hse := Style{}
-		hse.FromChroma(cse)
-		(*hs)[nm] = hse
-	}
 }
 
 // CopyFrom copies styles from another collection
@@ -143,6 +130,29 @@ func (hs *Styles) SavePrefs() error {
 	return hs.SaveJSON(gi.FileName(pnm))
 }
 
+// SaveAll saves all styles individually to chosen directory
+func (hs *Styles) SaveAll(dir gi.FileName) {
+	for nm, st := range *hs {
+		fnm := filepath.Join(string(dir), nm+".histy")
+		st.SaveJSON(gi.FileName(fnm))
+	}
+}
+
+// OpenDefaults opens the default highlighting styles (from chroma originally)
+func (hs *Styles) OpenDefaults() error {
+	path, err := kit.GoSrcDir("github.com/goki/gi/histyle")
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	dfnm := filepath.Join(path, "defaults.histys")
+	// fmt.Printf("loading default icons: %v\n", path)
+	rval := hs.OpenJSON(gi.FileName(dfnm))
+	// tstpath := filepath.Join(gopath, "src/github.com/goki/gi/icons_svg_test")
+	// rval = iset.OpenIconsFromPath(tstpath)
+	return rval
+}
+
 // Names outputs names of styles in collection
 func (hs *Styles) Names() []string {
 	nms := make([]string, len(*hs))
@@ -164,8 +174,8 @@ func (hs *Styles) ViewStd() {
 // Init must be called to initialize the hi styles -- post startup
 // so chroma stuff is all in place, and loads custom styles
 func Init() {
-	InitHiTagNames()
-	StdStyles.FromChroma(styles.Registry)
+	pi.OpenStdParsers()
+	StdStyles.OpenDefaults()
 	CustomStyles.OpenPrefs()
 	if len(CustomStyles) == 0 {
 		cs := Style{}
@@ -189,7 +199,7 @@ var StylesProps = ki.Props{
 			}},
 			{"sep-file", ki.BlankProp{}},
 			{"OpenJSON", ki.Props{
-				"label":    "Open from file",
+				"label":    "Open...",
 				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
 				"shortcut": gi.KeyFunMenuOpen,
 				"Args": ki.PropSlice{
@@ -199,13 +209,20 @@ var StylesProps = ki.Props{
 				},
 			}},
 			{"SaveJSON", ki.Props{
-				"label":    "Save to file",
+				"label":    "Save As...",
 				"desc":     "You can save and open styles to / from files to share, experiment, transfer, etc",
 				"shortcut": gi.KeyFunMenuSaveAs,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
 						"ext": ".json",
 					}},
+				},
+			}},
+			{"SaveAll", ki.Props{
+				"label": "Save All...",
+				"desc":  "Saves each style individually to selected directory (be sure to select a dir only!)",
+				"Args": ki.PropSlice{
+					{"Dir Name", ki.Props{}},
 				},
 			}},
 		}},

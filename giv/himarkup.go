@@ -7,115 +7,42 @@ package giv
 import (
 	htmlstd "html"
 	"log"
-	"sort"
 	"strings"
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
-	"github.com/goki/ki/nptime"
+	"github.com/goki/pi"
+	"github.com/goki/pi/lex"
 )
 
-// TagRegion defines a region of a line of text that has a given markup tag
-// region is only defined in terms of character positions -- line is implicit
-type TagRegion struct {
-	Tag  histyle.HiTags `desc:"tag for this region of text"`
-	St   int            `desc:"starting character position"`
-	Ed   int            `desc:"ending character position -- exclusive (after last char)"`
-	Time nptime.Time    `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
-}
-
-// OverlapsReg returns true if the two regions overlap
-func (tr *TagRegion) OverlapsReg(or TagRegion) bool {
-	// start overlaps
-	if (tr.St >= or.St && tr.St < or.Ed) || (or.St >= tr.St && or.St < tr.Ed) {
-		return true
-	}
-	// end overlaps
-	if (tr.Ed > or.St && tr.Ed <= or.Ed) || (or.Ed > tr.St && or.Ed <= tr.Ed) {
-		return true
-	}
-	return false
-}
-
-// ContainsPos returns true if the region contains the given point
-func (tr *TagRegion) ContainsPos(pos int) bool {
-	return pos >= tr.St && pos < tr.Ed
-}
-
-// TagRegionsMerge merges the two tag regions into a combined list
-// properly ordered by sequence of tags within the line.
-func TagRegionsMerge(t1, t2 []TagRegion) []TagRegion {
-	if len(t1) == 0 {
-		return t2
-	}
-	if len(t2) == 0 {
-		return t1
-	}
-	sz1 := len(t1)
-	sz2 := len(t2)
-	tsz := sz1 + sz2
-	tl := make([]TagRegion, 0, tsz)
-	for i := 0; i < sz1; i++ {
-		tl = append(tl, t1[i])
-	}
-	for i := 0; i < sz2; i++ {
-		TagRegionsAdd(&tl, t2[i])
-	}
-	return tl
-}
-
-// TagRegionsAdd adds a new tag region in sorted order to list
-func TagRegionsAdd(tl *[]TagRegion, tr TagRegion) {
-	for i, t := range *tl {
-		if t.St < tr.St {
-			continue
-		}
-		*tl = append(*tl, tr)
-		copy((*tl)[i+1:], (*tl)[i:])
-		(*tl)[i] = tr
-		return
-	}
-	*tl = append(*tl, tr)
-}
-
-// TagRegionsDeOverlap removes any overlapping regions in tag regions
-func TagRegionsDeOverlap(tl *[]TagRegion) {
-	sz := len(*tl)
-	if sz <= 1 {
-		return
-	}
-	for i := sz - 1; i > 0; i-- {
-		ct := (*tl)[i]
-		pt := (*tl)[i-1]
-		if ct.OverlapsReg(pt) {
-			*tl = append((*tl)[:i], (*tl)[i+1:]...)
-		}
-	}
-}
-
-// TagRegionsSort sorts the tags by starting pos
-func TagRegionsSort(tags []TagRegion) {
-	sort.Slice(tags, func(i, j int) bool {
-		return tags[i].St < tags[j].St
-	})
-}
+// Overall Strategy:
+// * separate syntax highlighting markup from deeper semantic analysis (full parsing)
+// 		+ use chroma as a fallback for highlighting
+// 		+ and the client-server-based system for fallback semantics
+// * issue is that these are linked in Pi so how to also keep them separate?
+//		+ just assume that hi pass has happened already I guess?
 
 // HiMarkup manages the syntax highlighting state for TextBuf
+// it uses Pi if available, otherwise falls back on chroma
 type HiMarkup struct {
-	Lang      string            `desc:"language for syntax highlighting the code"`
+	Info      *FileInfo         `desc:"full info about the file including category etc"`
 	Style     histyle.StyleName `desc:"syntax highlighting style"`
+	Lang      string            `desc:"chroma-based language name for syntax highlighting the code"`
 	Has       bool              `desc:"true if both lang and style are set"`
 	TabSize   int               `desc:"tab size, in chars"`
 	CSSProps  ki.Props          `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
+	PiState   *pi.FileState     `desc:"pi parser state info"`
+	PiParser  *pi.Parser        `desc:"if supported, this is the pi parser"`
+	HiStyle   histyle.Style     `desc:"current highlighting style"`
 	lastLang  string
 	lastStyle histyle.StyleName
 	lexer     chroma.Lexer
 	formatter *html.Formatter
-	style     histyle.Style
 }
 
 // HasHi returns true if there are highlighting parameters set (only valid after Init)
@@ -124,30 +51,82 @@ func (hm *HiMarkup) HasHi() bool {
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init() {
-	if hm.Lang == "" || hm.Style == "" {
+func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
+	hm.Info = info
+	hm.PiState = pist
+
+	if hm.Info.Sup != filecat.NoSupport {
+		if lp, ok := pi.StdLangProps[hm.Info.Sup]; ok {
+			if lp.Parser != nil {
+				hm.lexer = nil
+				if hm.PiParser != lp.Parser {
+					hm.PiParser = lp.Parser
+					hm.PiParser.InitAll(hm.PiState)
+				}
+			} else {
+				hm.PiParser = nil
+			}
+		}
+	}
+
+	if hm.PiParser == nil {
+		lexer := lexers.Match(hm.Info.Name)
+		// if lexer == nil && len(pist.Src.Lines) > 0 {
+		// 	lexer = lexers.Analyse(string(tb.Txt))
+		// }
+		if lexer != nil {
+			hm.Lang = lexer.Config().Name
+			hm.lexer = lexer
+		}
+	}
+
+	if hm.Style == "" || (hm.PiParser == nil && hm.lexer == nil) {
 		hm.Has = false
 		return
 	}
 	hm.Has = true
-	if hm.Lang == hm.lastLang && hm.Style == hm.lastStyle {
-		return
+
+	if hm.Style != hm.lastStyle {
+		hm.HiStyle = histyle.AvailStyle(hm.Style)
+		hm.CSSProps = hm.HiStyle.ToProps()
+		hm.lastStyle = hm.Style
 	}
-	hm.lexer = chroma.Coalesce(lexers.Get(hm.Lang))
-	hm.formatter = html.New(html.WithClasses(), html.TabWidth(hm.TabSize))
-	hm.style = histyle.AvailStyle(hm.Style)
 
-	hm.CSSProps = hm.style.ToProps()
-
-	hm.lastLang = hm.Lang
-	hm.lastStyle = hm.Style
+	if hm.lexer != nil && hm.Lang != hm.lastLang {
+		hm.lexer = chroma.Coalesce(lexers.Get(hm.Lang))
+		hm.formatter = html.New(html.WithClasses(), html.TabWidth(hm.TabSize))
+		hm.lastLang = hm.Lang
+	}
 }
 
-// TagsForLine adds the tags for one line
-func (hm *HiMarkup) TagsForLine(tags *[]TagRegion, toks []chroma.Token) {
+// MarkupTagsAll returns all the markup tags according to current
+// syntax highlighting settings
+func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
+	if hm.PiParser != nil {
+		hm.PiParser.LexAll(hm.PiState)
+		return hm.PiState.Src.Lexs, nil
+	} else if hm.lexer != nil {
+		return hm.ChromaTagsAll(txt)
+	}
+	return nil, nil
+}
+
+// MarkupTagsLine returns tags for one line according to current
+// syntax highlighting settings
+func (hm *HiMarkup) MarkupTagsLine(ln int, txt []byte) (lex.Line, error) {
+	if hm.PiParser != nil {
+		ll := hm.PiParser.LexLine(hm.PiState, ln)
+		return ll, nil
+	} else if hm.lexer != nil {
+		return hm.ChromaTagsLine(txt)
+	}
+	return nil, nil
+}
+
+// ChromaTagsForLine generates the chroma tags for one line of chroma tokens
+func (hm *HiMarkup) ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
 	cp := 0
-	sz := len(toks)
-	for i, tok := range toks {
+	for _, tok := range toks {
 		str := strings.TrimSuffix(tok.Value, "\n")
 		slen := len(str)
 		if slen == 0 {
@@ -159,29 +138,16 @@ func (hm *HiMarkup) TagsForLine(tags *[]TagRegion, toks []chroma.Token) {
 		}
 		ep := cp + slen
 		if tok.Type < chroma.Text {
-			ht := histyle.HiTagFromChroma(tok.Type)
-			nt := TagRegion{Tag: ht, St: cp, Ed: ep}
-			if ht == histyle.GenericHeading || ht == histyle.GenericSubheading {
-				// extend heading for full line
-				if i == 0 && sz == 2 {
-					st2 := strings.TrimSuffix(toks[1].Value, "\n")
-					nt.Ed = cp + slen + len(st2)
-				} else if i == 1 && sz == 3 {
-					st2 := strings.TrimSuffix(toks[2].Value, "\n")
-					nt.Ed = cp + slen + len(st2)
-					// } else {
-					// 	fmt.Printf("generic heading: sz: %v i: %v\n", sz, i)
-				}
-			}
-			*tags = append(*tags, nt)
+			ht := histyle.TokenFromChroma(tok.Type)
+			tags.AddLex(ht, cp, ep)
 		}
 		cp = ep
 	}
 }
 
-// MarkupTagsAll returns all the markup tags according to current
+// ChromaTagsAll returns all the markup tags according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([][]TagRegion, error) {
+func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 	txtstr := string(txt)
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
@@ -190,33 +156,33 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([][]TagRegion, error) {
 	}
 	lines := chroma.SplitTokensIntoLines(iterator.Tokens())
 	sz := len(lines)
-	tags := make([][]TagRegion, sz)
+	tags := make([]lex.Line, sz)
 	for li, lt := range lines {
-		hm.TagsForLine(&tags[li], lt)
+		hm.ChromaTagsForLine(&tags[li], lt)
 	}
 	return tags, nil
 }
 
-// MarkupTagsLine returns tags for one line according to current
+// ChromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsLine(txt []byte) ([]TagRegion, error) {
+func (hm *HiMarkup) ChromaTagsLine(txt []byte) (lex.Line, error) {
 	txtstr := string(txt) + "\n"
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	var tags []TagRegion
+	var tags lex.Line
 	toks := iterator.Tokens()
-	hm.TagsForLine(&tags, toks)
+	hm.ChromaTagsForLine(&tags, toks)
 	return tags, nil
 }
 
 // MarkupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
-func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
-	ttags := TagRegionsMerge(hitags, tags)
+func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
+	ttags := lex.MergeLines(hitags, tags)
 	nt := len(ttags)
 	if nt == 0 {
 		return txt
@@ -258,7 +224,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags []TagRegion) []byte {
 			mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:tr.St])))...)
 		}
 		mu = append(mu, sps...)
-		clsnm := tr.Tag.StyleName()
+		clsnm := tr.Tok.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
 		ep := tr.Ed

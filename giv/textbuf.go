@@ -17,7 +17,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/alecthomas/chroma/lexers"
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
@@ -28,6 +27,9 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
+	"github.com/goki/pi"
+	"github.com/goki/pi/lex"
+	"github.com/goki/pi/token"
 	"github.com/pmezard/go-difflib/difflib"
 )
 
@@ -85,12 +87,13 @@ type TextBuf struct {
 	Opts         TextBufOpts      `desc:"options for how text editing / viewing works"`
 	Filename     gi.FileName      `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Info         FileInfo         `desc:"full info about file"`
+	PiState      pi.FileState     `desc:"Pi parsing state info for file"`
 	Hi           HiMarkup         `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
 	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
 	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
-	Tags         [][]TagRegion    `json:"extra custom tagged regions for each line"`
-	HiTags       [][]TagRegion    `json:"syntax highlighting tags -- auto-generated"`
+	Tags         []lex.Line       `json:"extra custom tagged regions for each line"`
+	HiTags       []lex.Line       `json:"syntax highlighting tags -- auto-generated"`
 	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
 	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
@@ -391,8 +394,8 @@ func (tb *TextBuf) New(nlines int) {
 	tb.MarkupMu.Lock()
 	tb.Lines = make([][]rune, nlines)
 	tb.LineBytes = make([][]byte, nlines)
-	tb.Tags = make([][]TagRegion, nlines)
-	tb.HiTags = make([][]TagRegion, nlines)
+	tb.Tags = make([]lex.Line, nlines)
+	tb.HiTags = make([]lex.Line, nlines)
 	tb.Markup = make([][]byte, nlines)
 
 	if cap(tb.ByteOffs) >= nlines {
@@ -409,6 +412,10 @@ func (tb *TextBuf) New(nlines int) {
 	}
 
 	tb.NLines = nlines
+
+	tb.PiState.SetSrc(tb.Lines, string(tb.Filename))
+	tb.Hi.Init(&tb.Info, &tb.PiState)
+
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
 	tb.Refresh()
@@ -422,20 +429,11 @@ func (tb *TextBuf) Stat() error {
 		return err
 	}
 	if tb.Info.Sup != filecat.NoSupport {
-		if lp, ok := filecat.StdLangProps[tb.Info.Sup]; ok {
+		if lp, ok := pi.StdLangProps[tb.Info.Sup]; ok {
 			tb.Opts.CommentLn = lp.CommentLn
 			tb.Opts.CommentSt = lp.CommentSt
 			tb.Opts.CommentEd = lp.CommentEd
 		}
-	}
-	lexer := lexers.Match(tb.Info.Name)
-	if lexer == nil && tb.NLines > 0 {
-		lexer = lexers.Analyse(string(tb.Txt))
-	}
-	if lexer != nil {
-		tb.MarkupMu.Lock()
-		tb.Hi.Lang = lexer.Config().Name
-		tb.MarkupMu.Unlock()
 	}
 	return nil
 }
@@ -968,7 +966,6 @@ func (tb *TextBuf) LinesToBytesCopy() []byte {
 // BytesToLines converts current Txt bytes into lines, and initializes markup
 // with raw text
 func (tb *TextBuf) BytesToLines() {
-	tb.Hi.Init()
 	if len(tb.Txt) == 0 {
 		tb.New(1)
 		return
@@ -1671,14 +1668,14 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	tb.Markup = nmu
 
 	// Tags
-	tmptg := make([][]TagRegion, nsz)
+	tmptg := make([]lex.Line, nsz)
 	ntg := append(tb.Tags, tmptg...)
 	copy(ntg[stln+nsz:], ntg[stln:])
 	copy(ntg[stln:], tmptg)
 	tb.Tags = ntg
 
 	// HiTags
-	tmpht := make([][]TagRegion, nsz)
+	tmpht := make([]lex.Line, nsz)
 	nht := append(tb.HiTags, tmpht...)
 	copy(nht[stln+nsz:], nht[stln:])
 	copy(nht[stln:], tmpht)
@@ -1762,23 +1759,22 @@ func (tb *TextBuf) ReMarkup() {
 }
 
 // AdjustedTags updates tag positions for edits
-func (tb *TextBuf) AdjustedTags(ln int) []TagRegion {
+func (tb *TextBuf) AdjustedTags(ln int) lex.Line {
 	sz := len(tb.Tags[ln])
 	if sz == 0 {
 		return tb.Tags[ln]
 	}
-	ntags := make([]TagRegion, 0, sz)
+	ntags := make(lex.Line, 0, sz)
 	for _, tg := range tb.Tags[ln] {
 		reg := TextRegion{Start: TextPos{Ln: ln, Ch: tg.St}, End: TextPos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
 		reg = tb.AdjustReg(reg)
 		if !reg.IsNil() {
-			ntr := TagRegion{Tag: tg.Tag, St: reg.Start.Ch, Ed: reg.End.Ch}
+			ntr := ntags.AddLex(tg.Tok, reg.Start.Ch, reg.End.Ch)
 			ntr.Time.Now()
-			ntags = append(ntags, ntr)
 		}
 	}
-	// TagRegionsCleanup(&ntags)
+	// lex.LexsCleanup(&ntags)
 	return ntags
 }
 
@@ -1827,7 +1823,7 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
 		ltxt := tb.LineBytes[ln]
-		mt, err := tb.Hi.MarkupTagsLine(ltxt)
+		mt, err := tb.Hi.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			tb.HiTags[ln] = mt
 			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.AdjustedTags(ln))
@@ -1942,28 +1938,28 @@ func (tb *TextBuf) AdjustReg(reg TextRegion) TextRegion {
 //   Tags
 
 // AddTag adds a new custom tag for given line, at given position
-func (tb *TextBuf) AddTag(ln, st, ed int, tag histyle.HiTags) {
+func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 	if !tb.IsValidLine(ln) {
 		return
 	}
-	tr := TagRegion{Tag: tag, St: st, Ed: ed}
+	tr := lex.NewLex(tag, st, ed)
 	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
 		tb.Tags[ln] = append(tb.Tags[ln], tr)
 	} else {
 		tb.Tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
-		TagRegionsAdd(&tb.Tags[ln], tr)
+		tb.Tags[ln].AddSort(tr)
 	}
 	tb.MarkupLines(ln, ln)
 }
 
 // AddTagEdit adds a new custom tag for given line, using TextBufEdit for location
-func (tb *TextBuf) AddTagEdit(tbe *TextBufEdit, tag histyle.HiTags) {
+func (tb *TextBuf) AddTagEdit(tbe *TextBufEdit, tag token.Tokens) {
 	tb.AddTag(tbe.Reg.Start.Ln, tbe.Reg.Start.Ch, tbe.Reg.End.Ch, tag)
 }
 
 // TagAt returns tag at given text position, if one exists -- returns false if not
-func (tb *TextBuf) TagAt(pos TextPos) (reg TagRegion, ok bool) {
+func (tb *TextBuf) TagAt(pos TextPos) (reg lex.Lex, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
@@ -1976,15 +1972,16 @@ func (tb *TextBuf) TagAt(pos TextPos) (reg TagRegion, ok bool) {
 	return
 }
 
-// RemoveTag removes tag (optionally only given tag if non-zero) at given position if it exists -- returns tag
-func (tb *TextBuf) RemoveTag(pos TextPos, tag histyle.HiTags) (reg TagRegion, ok bool) {
+// RemoveTag removes tag (optionally only given tag if non-zero) at given position
+// if it exists -- returns tag
+func (tb *TextBuf) RemoveTag(pos TextPos, tag token.Tokens) (reg lex.Lex, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
 	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range tb.Tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
-			if tag > 0 && t.Tag != tag {
+			if tag > 0 && t.Tok != tag {
 				continue
 			}
 			tb.Tags[pos.Ln] = append(tb.Tags[pos.Ln][:i], tb.Tags[pos.Ln][i+1:]...)
@@ -2384,7 +2381,7 @@ func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *TextBuf) CorrectText(s string) {
 	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
-	tb.RemoveTag(st, histyle.SpellErr)
+	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Ch += len(tb.SpellCorrect.Word)
 	ed := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)
@@ -2400,7 +2397,7 @@ func (tb *TextBuf) CorrectText(s string) {
 
 func (tb *TextBuf) CorrectClear(s string) {
 	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
-	tb.RemoveTag(st, histyle.SpellErr)
+	tb.RemoveTag(st, token.TextSpellErr)
 }
 
 ////////////////////////////////////////////////////////////////////////////

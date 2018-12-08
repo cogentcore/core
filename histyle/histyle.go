@@ -3,10 +3,10 @@
 // license that can be found in the LICENSE file.
 
 /*
-package histyle provides syntax highlighting styles -- it interoperates with
-github.com/alecthomas/chroma which in turn interoperates with the python
-pygments package.  Note that this package depends on goki/gi and cannot
-be imported there -- is imported into goki/gi/giv
+package histyle provides syntax highlighting styles -- it is based on
+github.com/alecthomas/chroma which in turn was based on the python
+pygments package.  Note that this package depends on goki/gi and goki /pi
+and cannot be imported there -- is imported into goki/gi/giv
 */
 package histyle
 
@@ -16,10 +16,10 @@ import (
 	"log"
 	"strings"
 
-	"github.com/alecthomas/chroma"
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/token"
 )
 
 // Trilean value for StyleEntry value inheritance.
@@ -66,36 +66,36 @@ var StyleEntryProps = ki.Props{
 	"inline": true,
 }
 
-// FromChroma copies styles from chroma
-func (he *StyleEntry) FromChroma(ce chroma.StyleEntry) {
-	if ce.Colour.IsSet() {
-		he.Color.SetString(ce.Colour.String(), nil)
-	} else {
-		he.Color.SetToNil()
-	}
-	if ce.Background.IsSet() {
-		he.Background.SetString(ce.Background.String(), nil)
-	} else {
-		he.Background.SetToNil()
-	}
-	if ce.Border.IsSet() {
-		he.Border.SetString(ce.Border.String(), nil)
-	} else {
-		he.Border.SetToNil()
-	}
-	he.Bold = Trilean(ce.Bold)
-	he.Italic = Trilean(ce.Italic)
-	he.Underline = Trilean(ce.Underline)
-	he.NoInherit = ce.NoInherit
-}
-
-// StyleEntryFromChroma returns a new style entry from corresponding chroma version
-func StyleEntryFromChroma(ce chroma.StyleEntry) StyleEntry {
-	he := StyleEntry{}
-	he.FromChroma(ce)
-	return he
-}
-
+// // FromChroma copies styles from chroma
+// func (he *StyleEntry) FromChroma(ce chroma.StyleEntry) {
+// 	if ce.Colour.IsSet() {
+// 		he.Color.SetString(ce.Colour.String(), nil)
+// 	} else {
+// 		he.Color.SetToNil()
+// 	}
+// 	if ce.Background.IsSet() {
+// 		he.Background.SetString(ce.Background.String(), nil)
+// 	} else {
+// 		he.Background.SetToNil()
+// 	}
+// 	if ce.Border.IsSet() {
+// 		he.Border.SetString(ce.Border.String(), nil)
+// 	} else {
+// 		he.Border.SetToNil()
+// 	}
+// 	he.Bold = Trilean(ce.Bold)
+// 	he.Italic = Trilean(ce.Italic)
+// 	he.Underline = Trilean(ce.Underline)
+// 	he.NoInherit = ce.NoInherit
+// }
+//
+// // StyleEntryFromChroma returns a new style entry from corresponding chroma version
+// func StyleEntryFromChroma(ce chroma.StyleEntry) StyleEntry {
+// 	he := StyleEntry{}
+// 	he.FromChroma(ce)
+// 	return he
+// }
+//
 func (se StyleEntry) String() string {
 	out := []string{}
 	if se.Bold != Pass {
@@ -228,8 +228,8 @@ func (s StyleEntry) IsZero() bool {
 ///////////////////////////////////////////////////////////////////////////////////
 //  Style
 
-// Style is a full style map of styles for different HiTags tag values
-type Style map[HiTags]StyleEntry
+// Style is a full style map of styles for different token.Tokens tag values
+type Style map[token.Tokens]StyleEntry
 
 var KiT_Style = kit.Types.AddType(&Style{}, StyleProps)
 
@@ -241,28 +241,9 @@ func (hs *Style) CopyFrom(ss Style) {
 	}
 }
 
-// FromChroma copies styles from chroma
-func (hs *Style) FromChroma(cs *chroma.Style) {
-	csb := cs.Builder() // builder version provides direct access
-	cstags := cs.Types()
-	if *hs == nil {
-		*hs = make(Style, 40)
-	}
-	bg := csb.Get(chroma.Background)
-	for _, ct := range cstags {
-		ce := csb.Get(ct) // direct copy of style entry, from builder
-		ht := HiTagFromChroma(ct)
-		if ht != Background {
-			ce = ce.Sub(bg)
-		}
-		he := StyleEntryFromChroma(ce)
-		(*hs)[ht] = he
-	}
-}
-
 // TagRaw returns a StyleEntry for given tag without any inheritance of anything
 // will be IsZero if not defined for this style
-func (hs Style) TagRaw(tag HiTags) StyleEntry {
+func (hs Style) TagRaw(tag token.Tokens) StyleEntry {
 	if len(hs) == 0 {
 		return StyleEntry{}
 	}
@@ -272,18 +253,18 @@ func (hs Style) TagRaw(tag HiTags) StyleEntry {
 // Tag returns a StyleEntry for given Tag.
 // Will try sub-category or category if an exact match is not found.
 // does NOT add the background properties -- those are always kept separate.
-func (hs Style) Tag(tag HiTags) StyleEntry {
+func (hs Style) Tag(tag token.Tokens) StyleEntry {
 	se := hs.TagRaw(tag).Inherit(
-		hs.TagRaw(Text),
-		hs.TagRaw(tag.Category()),
-		hs.TagRaw(tag.SubCategory()))
+		hs.TagRaw(token.Text),
+		hs.TagRaw(tag.Cat()),
+		hs.TagRaw(tag.SubCat()))
 	return se
 }
 
-// ToCSS generates a CSS style sheet for this style, by HiTags tag
-func (hs Style) ToCSS() map[HiTags]string {
-	css := map[HiTags]string{}
-	for ht, _ := range HiTagNames {
+// ToCSS generates a CSS style sheet for this style, by token.Tokens tag
+func (hs Style) ToCSS() map[token.Tokens]string {
+	css := map[token.Tokens]string{}
+	for ht, _ := range token.Names {
 		entry := hs.Tag(ht)
 		if entry.IsZero() {
 			continue
@@ -296,10 +277,10 @@ func (hs Style) ToCSS() map[HiTags]string {
 // ToProps generates list of ki.Props for this style
 func (hs Style) ToProps() ki.Props {
 	pr := ki.Props{}
-	for ht, nm := range HiTagNames {
+	for ht, nm := range token.Names {
 		entry := hs.Tag(ht)
 		if entry.IsZero() {
-			if tp, ok := HiTagsProps[ht]; ok {
+			if tp, ok := Props[ht]; ok {
 				pr["."+nm] = tp
 			}
 			continue
@@ -335,6 +316,14 @@ func (hs Style) SaveJSON(filename gi.FileName) error {
 	return err
 }
 
+// TagsProps are default properties for custom tags (tokens) -- if set in style then used
+// there but otherwise we use these as a fallback -- typically not overridden
+var Props = map[token.Tokens]ki.Props{
+	token.TextSpellErr: ki.Props{
+		"text-decoration": 1 << uint32(gi.DecoDottedUnderline), // bitflag!
+	},
+}
+
 // StyleProps define the ToolBar and MenuBar for view
 var StyleProps = ki.Props{
 	"MainMenu": ki.PropSlice{
@@ -346,7 +335,7 @@ var StyleProps = ki.Props{
 				"shortcut": gi.KeyFunMenuOpen,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
-						"ext": ".json",
+						"ext": ".histy",
 					}},
 				},
 			}},
@@ -356,7 +345,7 @@ var StyleProps = ki.Props{
 				"shortcut": gi.KeyFunMenuSaveAs,
 				"Args": ki.PropSlice{
 					{"File Name", ki.Props{
-						"ext": ".json",
+						"ext": ".histy",
 					}},
 				},
 			}},
@@ -371,7 +360,7 @@ var StyleProps = ki.Props{
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
-					"ext": ".json",
+					"ext": ".histy",
 				}},
 			},
 		}},
@@ -381,7 +370,7 @@ var StyleProps = ki.Props{
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
-					"ext": ".json",
+					"ext": ".histy",
 				}},
 			},
 		}},
