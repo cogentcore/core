@@ -145,10 +145,10 @@ func (pt *PassTwo) NestDepth(ts *TwoState) {
 	if nlines == 0 {
 		return
 	}
-	if len(ts.Src.Lexs[nlines-1]) > 0 { // last line ends with tokens -- parser needs empty last line..
-		ts.Src.Lexs = append(ts.Src.Lexs, Line{})
-		ts.Src.Lines = append(ts.Src.Lines, []rune{})
-	}
+	// if len(ts.Src.Lexs[nlines-1]) > 0 { // last line ends with tokens -- parser needs empty last line..
+	// 	ts.Src.Lexs = append(ts.Src.Lexs, Line{})
+	// 	*ts.Src.Lines = append(*ts.Src.Lines, []rune{})
+	// }
 	for ts.Pos.Ln < nlines {
 		sz := len(ts.Src.Lexs[ts.Pos.Ln])
 		if sz == 0 {
@@ -174,6 +174,29 @@ func (pt *PassTwo) NestDepth(ts *TwoState) {
 	stsz := len(ts.NestStack)
 	if stsz > 0 {
 		pt.Error(ts, "mismatched grouping -- end of file with these left unmatched: "+ts.NestStackStr())
+	}
+}
+
+// Perform nesting depth computation on only one line, starting at
+// given initial depth -- updates the given line
+func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
+	sz := len(line)
+	if sz == 0 {
+		return
+	}
+	depth := initDepth
+	for i := 0; i < sz; i++ {
+		lx := &line[i]
+		tok := lx.Tok
+		if tok.IsPunctGpLeft() {
+			lx.Depth = depth
+			depth++
+		} else if tok.IsPunctGpRight() {
+			depth--
+			lx.Depth = depth
+		} else {
+			lx.Depth = depth
+		}
 	}
 }
 

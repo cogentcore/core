@@ -2,104 +2,83 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package src provides source file structures
 package lex
 
 import (
-	"fmt"
-
 	"github.com/goki/pi/token"
 )
-
-// Pos is a position within the source file -- it is recorded always in 0, 0
-// offset positions, but is converted into 1,1 offset for public consumption
-// Ch positions are always in runes, not bytes.  Also used for lex token indexes.
-type Pos struct {
-	Ln int
-	Ch int
-}
-
-// String satisfies the fmt.Stringer interferace
-func (ps Pos) String() string {
-	s := fmt.Sprintf("%d", ps.Ln+1)
-	if ps.Ch != 0 {
-		s += fmt.Sprintf(":%d", ps.Ch)
-	}
-	return s
-}
-
-// PosZero is the uninitialized zero text position (which is
-// still a valid position)
-var PosZero = Pos{}
-
-// PosErr represents an error text position (-1 for both line and char)
-// used as a return value for cases where error positions are possible
-var PosErr = Pos{-1, -1}
-
-// IsLess returns true if receiver position is less than given comparison
-func (ps *Pos) IsLess(cmp Pos) bool {
-	switch {
-	case ps.Ln < cmp.Ln:
-		return true
-	case ps.Ln == cmp.Ln:
-		return ps.Ch < cmp.Ch
-	default:
-		return false
-	}
-}
-
-// Reg is a contiguous region within the source file
-type Reg struct {
-	St Pos `desc:"starting position of region"`
-	Ed Pos `desc:"ending position of region"`
-}
-
-// RegZero is the zero region
-var RegZero = Reg{}
-
-// IsNil checks if the region is empty, because the start is after or equal to the end
-func (tr Reg) IsNil() bool {
-	return !tr.St.IsLess(tr.Ed)
-}
-
-// TokenMap is a token map, for optimizing token exclusion
-type TokenMap map[token.Tokens]struct{}
-
-// Set sets map for given token
-func (tm TokenMap) Set(tok token.Tokens) {
-	tm[tok] = struct{}{}
-}
-
-// Has returns true if given token is in the map
-func (tm TokenMap) Has(tok token.Tokens) bool {
-	_, has := tm[tok]
-	return has
-}
 
 // File contains the contents of the file being parsed -- all kept in
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
 type File struct {
-	Filename string   `desc:"the current file being lex'd"`
-	Lines    [][]rune `desc:"contents of the file as lines of runes"`
-	Lexs     []Line   `desc:"lex'd version of the lines -- allocated to size of Lines"`
+	Filename string    `desc:"the current file being lex'd"`
+	Lines    *[][]rune `desc:"contents of the file as lines of runes"`
+	Lexs     []Line    `desc:"lex'd version of the lines -- allocated to size of Lines"`
+	Comments []Line    `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs
-func (fl *File) SetSrc(src [][]rune, fname string) {
+func (fl *File) SetSrc(src *[][]rune, fname string) {
 	fl.Filename = fname
 	fl.Lines = src
-	fl.Lexs = make([]Line, len(src))
+	fl.AllocLexs()
+}
+
+// AllocLexs allocates the lexs output lines
+func (fl *File) AllocLexs() {
+	if fl.Lines == nil {
+		return
+	}
+	nlines := fl.NLines()
+	if fl.Lexs != nil {
+		if cap(fl.Lexs) >= nlines {
+			fl.Lexs = fl.Lexs[:nlines]
+		} else {
+			fl.Lexs = make([]Line, nlines)
+		}
+	} else {
+		fl.Lexs = make([]Line, nlines)
+	}
+	if fl.Comments != nil {
+		if cap(fl.Comments) >= nlines {
+			fl.Comments = fl.Comments[:nlines]
+		} else {
+			fl.Comments = make([]Line, nlines)
+		}
+	} else {
+		fl.Comments = make([]Line, nlines)
+	}
 }
 
 // NLines returns the number of lines in source
 func (fl *File) NLines() int {
-	return len(fl.Lines)
+	if fl.Lines == nil {
+		return 0
+	}
+	return len(*fl.Lines)
 }
 
 // SetLexs sets the lex output for given line -- does a copy
-func (fl *File) SetLexs(ln int, lexs Line) {
+func (fl *File) SetLexs(ln int, lexs, comments Line) {
+	if len(fl.Lexs) <= ln {
+		fl.AllocLexs()
+	}
+	if len(fl.Lexs) <= ln {
+		return
+	}
 	fl.Lexs[ln] = lexs.Clone()
+	fl.Comments[ln] = comments.Clone()
+}
+
+// LexLine returns the lexing output for given line, combining comments and all other tokens
+// and allocating new memory using clone
+func (fl *File) LexLine(ln int) Line {
+	if len(fl.Lexs) <= ln {
+		return nil
+	}
+	merge := MergeLines(fl.Lexs[ln], fl.Comments[ln])
+	return merge.Clone()
 }
 
 // NTokens returns number of lex tokens for given line
@@ -199,6 +178,16 @@ func (fl *File) Token(pos Pos) token.Tokens {
 	return fl.Lexs[pos.Ln][pos.Ch].Tok
 }
 
+// PrevDepth returns the depth of the token immediately prior to given line
+func (fl *File) PrevDepth(ln int) int {
+	pos := Pos{ln, 0}
+	pos, ok := fl.PrevTokenPos(pos)
+	if !ok {
+		return 0
+	}
+	return fl.LexAt(pos).Depth
+}
+
 // TokenMapReg creates a TokenMap of tokens in region, including their
 // Cat and SubCat levels -- err's on side of inclusiveness -- used
 // for optimizing token matching
@@ -227,7 +216,7 @@ func (fl *File) TokenSrc(pos Pos) []rune {
 		return nil
 	}
 	lx := fl.Lexs[pos.Ln][pos.Ch]
-	return fl.Lines[pos.Ln][lx.St:lx.Ed]
+	return (*fl.Lines)[pos.Ln][lx.St:lx.Ed]
 }
 
 // TokenSrcPos returns source reg associated with lex token at given token position
@@ -254,16 +243,16 @@ func (fl *File) TokenSrcReg(reg Reg) Reg {
 func (fl *File) RegSrc(reg Reg) string {
 	if reg.Ed.Ln == reg.St.Ln {
 		if reg.Ed.Ch > reg.St.Ch {
-			return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
+			return string((*fl.Lines)[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
 		} else {
 			return ""
 		}
 	}
-	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
+	src := string((*fl.Lines)[reg.St.Ln][reg.St.Ch:])
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
-		src += "|" + string(fl.Lines[ln])
+		src += "|" + string((*fl.Lines)[ln])
 	}
-	src += "|" + string(fl.Lines[reg.Ed.Ln][:reg.Ed.Ch])
+	src += "|" + string((*fl.Lines)[reg.Ed.Ln][:reg.Ed.Ch])
 	return src
 }
 
@@ -278,7 +267,7 @@ func (fl *File) TokenRegSrc(reg Reg) string {
 
 // LexTagSrcLn returns the lex'd tagged source line for given line
 func (fl *File) LexTagSrcLn(ln int) string {
-	return fl.Lexs[ln].TagSrc(fl.Lines[ln])
+	return fl.Lexs[ln].TagSrc((*fl.Lines)[ln])
 }
 
 // LexTagSrc returns the lex'd tagged source for entire source

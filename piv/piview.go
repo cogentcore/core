@@ -214,23 +214,16 @@ func (pv *PiView) SetStatus(msg string) {
 	fnm := ""
 	ln := 0
 	ch := 0
-	// tv := pv.ActiveTextView()
-	// if tv != nil {
-	// 	ln = tv.CursorPos.Ln + 1
-	// 	ch = tv.CursorPos.Ch
-	// 	if tv.Buf != nil {
-	// 		fnm = pv.Files.RelPath(tv.Buf.Filename)
-	// 		if tv.Buf.IsChanged() {
-	// 			fnm += "*"
-	// 		}
-	// 	}
-	// 	if tv.ISearch.On {
-	// 		msg = fmt.Sprintf("\tISearch: %v (n=%v)\t%v", tv.ISearch.Find, len(tv.ISearch.Matches), msg)
-	// 	}
-	// 	if tv.QReplace.On {
-	// 		msg = fmt.Sprintf("\tQReplace: %v -> %v (n=%v)\t%v", tv.QReplace.Find, tv.QReplace.Replace, len(tv.QReplace.Matches), msg)
-	// 	}
-	// }
+	if tv, ok := pv.TestTextView(); ok {
+		ln = tv.CursorPos.Ln + 1
+		ch = tv.CursorPos.Ch
+		if tv.ISearch.On {
+			msg = fmt.Sprintf("\tISearch: %v (n=%v)\t%v", tv.ISearch.Find, len(tv.ISearch.Matches), msg)
+		}
+		if tv.QReplace.On {
+			msg = fmt.Sprintf("\tQReplace: %v -> %v (n=%v)\t%v", tv.QReplace.Find, tv.QReplace.Replace, len(tv.QReplace.Matches), msg)
+		}
+	}
 
 	str := fmt.Sprintf("%v\t<b>%v:</b>\t(%v,%v)\t%v", pv.Nm, fnm, ln, ch, msg)
 	lbl.SetText(str)
@@ -242,31 +235,36 @@ func (pv *PiView) SetStatus(msg string) {
 
 // LexInit initializes / restarts lexing process for current test file
 func (pv *PiView) LexInit() {
-	pv.Parser.SetSrc(pv.TestBuf.Lines, string(pv.TestBuf.Filename))
-	if pv.Parser.LexHasErrs() {
+	fs := &pv.TestBuf.PiState
+	fs.SetSrc(&pv.TestBuf.Lines, string(pv.TestBuf.Filename))
+	// pv.Hi.SetParser(&pv.Parser)
+	pv.Parser.LexInit(fs)
+	if fs.LexHasErrs() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-			Prompt: "The Lexer validation has errors\n" + pv.Parser.LexErrString()}, true, false, nil, nil)
+			Prompt: "The Lexer validation has errors\n" + fs.LexErrString()}, true, false, nil, nil)
 	}
 }
 
 // LexStopped tells the user why the lexer stopped
 func (pv *PiView) LexStopped() {
-	if pv.Parser.LexAtEnd() {
+	fs := &pv.TestBuf.PiState
+	if fs.LexAtEnd() {
 		pv.SetStatus("The Lexer is now at the end of available text")
 	} else {
 		pv.SetStatus("Lexer Errors!")
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-			Prompt: "The Lexer has stopped due to errors\n" + pv.Parser.LexErrString()}, true, false, nil, nil)
+			Prompt: "The Lexer has stopped due to errors\n" + fs.LexErrString()}, true, false, nil, nil)
 	}
 }
 
 // LexNext does next step of lexing
 func (pv *PiView) LexNext() *lex.Rule {
-	mrule := pv.Parser.LexNext()
+	fs := &pv.TestBuf.PiState
+	mrule := pv.Parser.LexNext(fs)
 	if mrule == nil {
 		pv.LexStopped()
 	} else {
-		pv.SetStatus(mrule.Nm + ": " + pv.Parser.LexLineOut())
+		pv.SetStatus(mrule.Nm + ": " + fs.LexLineString())
 		pv.SelectLexRule(mrule)
 	}
 	pv.UpdtLexBuf()
@@ -276,19 +274,20 @@ func (pv *PiView) LexNext() *lex.Rule {
 // LexAll does all remaining lexing until end or error -- if animate is true, then
 // it updates the display -- otherwise proceeds silently
 func (pv *PiView) LexAll(animate bool) {
+	fs := &pv.TestBuf.PiState
 	ntok := 0
 	for {
-		mrule := pv.Parser.LexNext()
+		mrule := pv.Parser.LexNext(fs)
 		if mrule == nil {
-			if !pv.Parser.LexAtEnd() {
+			if !fs.LexAtEnd() {
 				pv.LexStopped()
 			}
 			break
 		}
 		if animate {
-			nntok := len(pv.Parser.LexState.Lex)
+			nntok := len(fs.LexState.Lex)
 			if nntok != ntok {
-				pv.SetStatus(mrule.Nm + ": " + pv.Parser.LexLineOut())
+				pv.SetStatus(mrule.Nm + ": " + fs.LexLineString())
 				pv.SelectLexRule(mrule)
 				ntok = nntok
 			}
@@ -317,8 +316,12 @@ func (pv *PiView) SelectLexRule(rule *lex.Rule) {
 
 // UpdtLexBuf sets the LexBuf to current lex content
 func (pv *PiView) UpdtLexBuf() {
-	txt := pv.Parser.Src.LexTagSrc()
+	fs := &pv.TestBuf.PiState
+	txt := fs.Src.LexTagSrc()
 	pv.LexBuf.SetText([]byte(txt))
+	pv.TestBuf.HiTags = fs.Src.Lexs
+	pv.TestBuf.MarkupFromTags()
+	pv.TestBuf.Refresh()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -334,10 +337,11 @@ func (pv *PiView) EditPassTwo() {
 
 // PassTwo does the second pass after lexing, per current settings
 func (pv *PiView) PassTwo() {
-	pv.Parser.DoPassTwo()
-	if pv.Parser.PassTwoHasErrs() {
+	fs := &pv.TestBuf.PiState
+	pv.Parser.DoPassTwo(fs)
+	if fs.PassTwoHasErrs() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "PassTwo Error",
-			Prompt: "The PassTwo had the following errors\n" + pv.Parser.PassTwoErrString()}, true, false, nil, nil)
+			Prompt: "The PassTwo had the following errors\n" + fs.PassTwoErrString()}, true, false, nil, nil)
 	}
 }
 
@@ -354,40 +358,42 @@ func (pv *PiView) EditTrace() {
 
 // ParseInit initializes / restarts lexing process for current test file
 func (pv *PiView) ParseInit() {
+	fs := &pv.TestBuf.PiState
 	gide.TheConsole.Buf.New(0)
 	pv.LexInit()
-	pv.Parser.LexAll()
-	pv.Parser.DoPassTwo()
-	pv.Parser.ParserInit()
+	pv.Parser.LexAll(fs)
+	pv.Parser.ParserInit(fs)
 	pv.UpdtLexBuf()
-	if pv.Parser.ParseHasErrs() {
+	if fs.ParseHasErrs() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-			Prompt: "The Parser validation has errors\n" + pv.Parser.ParseErrString()}, true, false, nil, nil)
+			Prompt: "The Parser validation has errors\n" + fs.ParseErrString()}, true, false, nil, nil)
 	}
 }
 
 // ParseStopped tells the user why the lexer stopped
 func (pv *PiView) ParseStopped() {
-	if pv.Parser.ParseAtEnd() {
+	fs := &pv.TestBuf.PiState
+	if fs.ParseAtEnd() {
 		pv.SetStatus("The Parser is now at the end of available text")
 	} else {
 		pv.SetStatus("Parse Error!")
-		errs := pv.Parser.ParseErrString()
+		errs := fs.ParseErrString()
 		if errs != "" {
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
 				Prompt: "The Parser has stopped due to errors<br>\n" + errs}, true, false, nil, nil)
 		} else {
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-				Prompt: "The Parser has stopped because it cannot process the source at this point\n" + pv.Parser.ParseNextSrcLine()}, true, false, nil, nil)
+				Prompt: "The Parser has stopped because it cannot process the source at this point\n" + fs.ParseNextSrcLine()}, true, false, nil, nil)
 		}
 	}
 }
 
 // ParseNext does next step of lexing
 func (pv *PiView) ParseNext() *parse.Rule {
+	fs := &pv.TestBuf.PiState
 	at := pv.AstTree()
 	updt := at.UpdateStart()
-	mrule := pv.Parser.ParseNext()
+	mrule := pv.Parser.ParseNext(fs)
 	at.UpdateEnd(updt)
 	at.OpenAll()
 	pv.AstTreeToEnd()
@@ -396,7 +402,7 @@ func (pv *PiView) ParseNext() *parse.Rule {
 		pv.ParseStopped()
 	} else {
 		// pv.SelectParseRule(mrule) // not that informative
-		if pv.Parser.ParseHasErrs() { // can have errs even when matching..
+		if fs.ParseHasErrs() { // can have errs even when matching..
 			pv.ParseStopped()
 		}
 	}
@@ -405,10 +411,11 @@ func (pv *PiView) ParseNext() *parse.Rule {
 
 // ParseAll does all remaining lexing until end or error
 func (pv *PiView) ParseAll() {
+	fs := &pv.TestBuf.PiState
 	at := pv.AstTree()
 	updt := at.UpdateStart()
 	for {
-		mrule := pv.Parser.ParseNext()
+		mrule := pv.Parser.ParseNext(fs)
 		if mrule == nil {
 			break
 		}
@@ -417,7 +424,7 @@ func (pv *PiView) ParseAll() {
 	at.OpenAll()
 	pv.AstTreeToEnd()
 	pv.UpdtParseBuf()
-	if !pv.Parser.ParseAtEnd() {
+	if !fs.ParseAtEnd() {
 		pv.ParseStopped()
 	}
 }
@@ -448,7 +455,8 @@ func (pv *PiView) AstTreeToEnd() {
 
 // UpdtParseBuf sets the ParseBuf to current parse rule output
 func (pv *PiView) UpdtParseBuf() {
-	txt := pv.Parser.ParseRuleString(parse.Trace.FullStackOut)
+	fs := &pv.TestBuf.PiState
+	txt := fs.ParseRuleString(parse.Trace.FullStackOut)
 	pv.ParseBuf.SetText([]byte(txt))
 }
 
@@ -599,6 +607,21 @@ func (pv *PiView) FindOrMakeMainTabTextView(label string, sel bool, out bool) (*
 	ly := lyk.Embed(gi.KiT_Layout).(*gi.Layout)
 	tv := pv.ConfigTextView(ly, out)
 	return tv, idx
+}
+
+// MainTabTextViewByName returns the textview for given main tab, if it exists
+func (pv *PiView) MainTabTextViewByName(tabnm string) (*giv.TextView, bool) {
+	lyk, _, got := pv.MainTabByName(tabnm)
+	if !got {
+		return nil, false
+	}
+	ctv := lyk.KnownChild(0).Embed(giv.KiT_TextView).(*giv.TextView)
+	return ctv, true
+}
+
+// TextTextView returns the textview for TestBuf TextView
+func (pv *PiView) TestTextView() (*giv.TextView, bool) {
+	return pv.MainTabTextViewByName("TestText")
 }
 
 // OpenConsoleTab opens a main tab displaying console output (stdout, stderr)
@@ -790,6 +813,7 @@ func (pv *PiView) SplitViewConfig() kit.TypeAndNameList {
 
 // ConfigSplitView configures the SplitView.
 func (pv *PiView) ConfigSplitView() {
+	fs := &pv.TestBuf.PiState
 	split := pv.SplitView()
 	if split == nil {
 		return
@@ -812,19 +836,16 @@ func (pv *PiView) ConfigSplitView() {
 
 		astfr := split.KnownChild(AstOutIdx).(*gi.Frame)
 		astt := astfr.AddNewChild(giv.KiT_TreeView, "ast-tree").(*giv.TreeView)
-		astt.SetRootNode(&pv.Parser.Ast)
+		astt.SetRootNode(&fs.Ast)
 
-		pv.TestBuf.SetHiStyle("emacs")
-		pv.TestBuf.Opts.LineNos = true
-		pv.TestBuf.Opts.TabSize = 4
+		pv.TestBuf.SetHiStyle(gide.Prefs.HiStyle)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.TestBuf.Opts)
 
-		pv.LexBuf.SetHiStyle("emacs")
-		pv.LexBuf.Opts.LineNos = true
-		pv.LexBuf.Opts.TabSize = 4
+		pv.LexBuf.SetHiStyle(gide.Prefs.HiStyle)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.LexBuf.Opts)
 
-		pv.ParseBuf.SetHiStyle("emacs")
-		pv.ParseBuf.Opts.LineNos = true
-		pv.ParseBuf.Opts.TabSize = 4
+		pv.ParseBuf.SetHiStyle(gide.Prefs.HiStyle)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.ParseBuf.Opts)
 
 		split.SetSplits(.15, .15, .15, .15, .4)
 		split.UpdateEnd(updt)
@@ -839,7 +860,7 @@ func (pv *PiView) ConfigSplitView() {
 		pv.LexTree().Open()
 		pv.ParseTree().SetRootNode(&pv.Parser.Parser)
 		pv.ParseTree().Open()
-		pv.AstTree().SetRootNode(&pv.Parser.Ast)
+		pv.AstTree().SetRootNode(&fs.Ast)
 		pv.AstTree().Open()
 		pv.StructView().SetStruct(&pv.Parser.Lexer, nil)
 	}

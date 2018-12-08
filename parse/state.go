@@ -15,7 +15,7 @@ import (
 type State struct {
 	Src        *lex.File      `desc:"source and lexed version of source we're parsing"`
 	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
-	EosPos     []lex.Pos      `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
+	EosPos     *[]lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
 	Errs       lex.ErrorList  `desc:"any error messages accumulated during parsing specifically"`
 	Matches    [][]MatchStack `desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
@@ -23,7 +23,7 @@ type State struct {
 }
 
 // Init initializes the state at start of parsing
-func (ps *State) Init(src *lex.File, ast *Ast, eospos []lex.Pos) {
+func (ps *State) Init(src *lex.File, ast *Ast, eospos *[]lex.Pos) {
 	ps.Src = src
 	ps.Ast = ast
 	ps.Ast.DeleteChildren(true)
@@ -36,6 +36,12 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos []lex.Pos) {
 // AllocRules allocate the match, nonmatch rule state in correspondence with the src state
 func (ps *State) AllocRules() {
 	nlines := ps.Src.NLines()
+	if nlines == 0 {
+		return
+	}
+	if len(ps.Src.Lexs) != nlines {
+		return
+	}
 	ps.Matches = make([][]MatchStack, nlines)
 	ntot := 0
 	for ln := 0; ln < nlines; ln++ {
@@ -178,9 +184,9 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 
 // FindEos finds the next EOS position at given depth
 func (ps *State) FindEos(stpos lex.Pos, depth int) (lex.Pos, int) {
-	sz := len(ps.EosPos)
+	sz := len(*ps.EosPos)
 	for i := 0; i < sz; i++ {
-		ep := ps.EosPos[i]
+		ep := (*ps.EosPos)[i]
 		if ep.IsLess(stpos) {
 			continue
 		}

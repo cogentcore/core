@@ -124,6 +124,18 @@ func (lr *Rule) Validate(ls *State) bool {
 	return valid
 }
 
+// LexStart is called on the top-level lex node to start lexing process for one step
+func (lr *Rule) LexStart(ls *State) *Rule {
+	cpos := ls.Pos
+	rval := lr.Lex(ls)
+	if !ls.AtEol() && cpos == ls.Pos {
+		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(ls.Src[cpos:]))
+		ls.Error(cpos, msg)
+		return nil
+	}
+	return rval
+}
+
 // Lex tries to apply rule to given input state, returns lowest-level rule that matched, nil if none
 func (lr *Rule) Lex(ls *State) *Rule {
 	if !lr.IsMatch(ls) {

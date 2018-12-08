@@ -25,159 +25,132 @@ func VersionInfo() string {
 
 // Parser is the overall parser for managing the parsing
 type Parser struct {
-	Lexer      lex.Rule     `desc:"lexer rules for first pass of lexing file"`
-	PassTwo    lex.PassTwo  `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
-	Parser     parse.Rule   `desc:"parser rules for parsing lexed tokens"`
-	Src        lex.File     `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
-	LexState   lex.State    `json:"_" xml:"-" desc:"state for lexing"`
-	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
-	ParseState parse.State  `json:"_" xml:"-" desc:"state for parsing"`
-	Ast        parse.Ast    `json:"_" xml:"-" desc:"ast output tree from parsing"`
-	Filename   string       `desc:"file name for overall parser"`
+	Lexer    lex.Rule    `desc:"lexer rules for first pass of lexing file"`
+	PassTwo  lex.PassTwo `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
+	Parser   parse.Rule  `desc:"parser rules for parsing lexed tokens"`
+	Filename string      `desc:"file name for overall parser"`
 }
 
+// Init initializes the parser -- must be called after creation
 func (pr *Parser) Init() {
 	pr.Lexer.InitName(&pr.Lexer, "Lexer")
 	pr.Parser.InitName(&pr.Parser, "Parser")
-	pr.Ast.InitName(&pr.Ast, "Ast")
-	pr.LexState.Init()
 }
 
-// SetSrc sets source to be parsed, and filename it came from
-func (pr *Parser) SetSrc(src [][]rune, fname string) {
-	if len(src) == 0 {
-		pr.Init()
-		return
+// NewParser returns a new initialized parser
+func NewParser() *Parser {
+	pr := &Parser{}
+	pr.Init()
+	return pr
+}
+
+// InitAll initializes everything about the parser -- call this when setting up a new
+// parser after it has been loaded etc
+func (pr *Parser) InitAll(fs *FileState) {
+	fs.Src.AllocLexs()
+	pr.LexInit(fs)
+	pr.ParserInit(fs)
+}
+
+// LexInit gets the lexer ready to start lexing
+func (pr *Parser) LexInit(fs *FileState) {
+	fs.LexState.Init()
+	fs.LexState.Time.Now()
+	fs.TwoState.Init()
+	if fs.Src.NLines() > 0 {
+		fs.LexState.SetLine((*fs.Src.Lines)[0])
 	}
-	pr.Src.SetSrc(src, fname)
-	pr.LexState.Init()
-	pr.LexState.Filename = fname
-	pr.LexState.SetLine(src[0])
-	pr.Lexer.Validate(&pr.LexState)
-	pr.TwoState.Init()
-	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.TwoState.EosPos)
-}
-
-// LexAtEnd returns true if lexing state is now at end of source
-func (pr *Parser) LexAtEnd() bool {
-	return pr.LexState.Ln >= pr.Src.NLines()
 }
 
 // LexNext does next step of lexing -- returns lowest-level rule that
 // matched, and nil when nomatch err or at end of source input
-func (pr *Parser) LexNext() *lex.Rule {
-	if pr.LexState.Ln >= pr.Src.NLines() {
+func (pr *Parser) LexNext(fs *FileState) *lex.Rule {
+	if fs.LexState.Ln >= fs.Src.NLines() {
 		return nil
 	}
 	for {
-		if pr.LexState.AtEol() {
-			pr.Src.SetLexs(pr.LexState.Ln, pr.LexState.Lex)
-			pr.LexState.Ln++
-			if pr.LexState.Ln >= pr.Src.NLines() {
+		if fs.LexState.AtEol() {
+			fs.Src.SetLexs(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments)
+			fs.LexState.Ln++
+			if fs.LexState.Ln >= fs.Src.NLines() {
 				return nil
 			}
-			pr.LexState.SetLine(pr.Src.Lines[pr.LexState.Ln])
+			fs.LexState.SetLine((*fs.Src.Lines)[fs.LexState.Ln])
 		}
-		cpos := pr.LexState.Pos
-		rval := pr.Lexer.Lex(&pr.LexState)
-		if !pr.LexState.AtEol() && cpos == pr.LexState.Pos {
-			msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(pr.LexState.Src[cpos:]))
-			pr.LexState.Error(cpos, msg)
-			return nil
-		}
+		rval := pr.Lexer.LexStart(&fs.LexState)
 		if rval != nil {
 			return rval
 		}
 	}
 }
 
-// LexAll does all the lexing
-func (pr *Parser) LexAll() {
+// LexRun keeps running LextNext until it stops
+func (pr *Parser) LexRun(fs *FileState) {
 	for {
-		if pr.LexNext() == nil {
+		if pr.LexNext(fs) == nil {
 			break
 		}
 	}
 }
 
-// LexLineOut returns the current lexing output for the current line
-func (pr *Parser) LexLineOut() string {
-	return pr.LexState.LineOut()
-}
-
-// LexHasErrs returns true if there were errors from lexing
-func (pr *Parser) LexHasErrs() bool {
-	return len(pr.LexState.Errs) > 0
-}
-
-// LexErrString returns all the lexing errors as a string
-func (pr *Parser) LexErrString() string {
-	return pr.LexState.Errs.AllString()
+// LexLine runs lexer for given single line of source, returns merged
+// regular and token comment lines, cloned and ready for use
+func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
+	nlines := fs.Src.NLines()
+	if ln > nlines || ln < 0 {
+		return nil
+	}
+	fs.LexState.SetLine((*fs.Src.Lines)[ln])
+	for !fs.LexState.AtEol() {
+		rval := pr.Lexer.LexStart(&fs.LexState)
+		if rval == nil {
+			break
+		}
+	}
+	initDepth := fs.Src.PrevDepth(ln)
+	pr.PassTwo.NestDepthLine(fs.LexState.Lex, initDepth)      // important to set this one's depth
+	fs.Src.SetLexs(ln, fs.LexState.Lex, fs.LexState.Comments) // before saving here
+	merge := lex.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
+	mc := merge.Clone()
+	if len(fs.LexState.Comments) > 0 {
+		pr.PassTwo.NestDepthLine(mc, initDepth)
+	}
+	return mc
 }
 
 // DoPassTwo does the second pass after lexing
-func (pr *Parser) DoPassTwo() {
-	pr.TwoState.SetSrc(&pr.Src)
-	pr.PassTwo.NestDepth(&pr.TwoState)
+func (pr *Parser) DoPassTwo(fs *FileState) {
+	fs.TwoState.SetSrc(&fs.Src)
+	pr.PassTwo.NestDepth(&fs.TwoState)
 	if pr.PassTwo.DoEos {
-		pr.PassTwo.EosDetect(&pr.TwoState)
+		pr.PassTwo.EosDetect(&fs.TwoState)
 	}
 }
 
-// PassTwoHasErrs returns true if there were errors from pass two processing
-func (pr *Parser) PassTwoHasErrs() bool {
-	return len(pr.TwoState.Errs) > 0
-}
-
-// PassTwoErrString returns all the pass two errors as a string
-func (pr *Parser) PassTwoErrString() string {
-	return pr.TwoState.Errs.AllString()
+// LexAll runs a complete pass of the lexer and pass two, on current state
+func (pr *Parser) LexAll(fs *FileState) {
+	pr.LexInit(fs)
+	pr.LexRun(fs)
+	pr.DoPassTwo(fs)
 }
 
 // ParserInit initializes the parser prior to running
-func (pr *Parser) ParserInit() bool {
-	pr.ParseState.Init(&pr.Src, &pr.Ast, pr.TwoState.EosPos)
+func (pr *Parser) ParserInit(fs *FileState) bool {
+	fs.ParseState.Init(&fs.Src, &fs.Ast, &fs.TwoState.EosPos)
 	parse.Trace.Init()
-	ok := pr.Parser.CompileAll(&pr.ParseState)
+	ok := pr.Parser.CompileAll(&fs.ParseState)
 	if !ok {
 		return false
 	}
-	ok = pr.Parser.Validate(&pr.ParseState)
+	ok = pr.Parser.Validate(&fs.ParseState)
 	return ok
 }
 
 // ParseNext does next step of parsing -- returns lowest-level rule that matched
 // or nil if no match error or at end
-func (pr *Parser) ParseNext() *parse.Rule {
-	mrule := pr.Parser.StartParse(&pr.ParseState)
+func (pr *Parser) ParseNext(fs *FileState) *parse.Rule {
+	mrule := pr.Parser.StartParse(&fs.ParseState)
 	return mrule
-}
-
-// ParseAtEnd returns true if parsing state is now at end of source
-func (pr *Parser) ParseAtEnd() bool {
-	return pr.ParseState.AtEof()
-}
-
-// ParseNextSrcLine returns the next line of source that the parser is currently at
-func (pr *Parser) ParseNextSrcLine() string {
-	return pr.ParseState.NextSrcLine()
-}
-
-// ParseHasErrs returns true if there were errors from parsing
-func (pr *Parser) ParseHasErrs() bool {
-	return len(pr.ParseState.Errs) > 0
-}
-
-// ParseErrString returns all the parsing errors as a string
-func (pr *Parser) ParseErrString() string {
-	return pr.ParseState.Errs.AllString()
-}
-
-// RuleString returns the rule info for entire source -- if full
-// then it includes the full stack at each point -- otherwise just the top
-// of stack
-func (pr *Parser) ParseRuleString(full bool) string {
-	return pr.ParseState.RuleString(full)
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
@@ -220,4 +193,101 @@ func (pr *Parser) SaveGrammar(filename string) error {
 	fmt.Fprintf(ofl, "\n\n///////////////////////////////////////////////////\n// %v Parser\n\n", filename)
 	pr.Parser.WriteGrammar(ofl, 0)
 	return ofl.Close()
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//	FileState
+
+// FileState is the parsing state information for a given file
+type FileState struct {
+	Src        lex.File     `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
+	LexState   lex.State    `json:"_" xml:"-" desc:"state for lexing"`
+	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
+	ParseState parse.State  `json:"_" xml:"-" desc:"state for parsing"`
+	Ast        parse.Ast    `json:"_" xml:"-" desc:"ast output tree from parsing"`
+}
+
+// Init initializes the file state
+func (fs *FileState) Init() {
+	fs.Ast.InitName(&fs.Ast, "Ast")
+	fs.LexState.Init()
+	fs.TwoState.Init()
+	fs.ParseState.Init(&fs.Src, &fs.Ast, &fs.TwoState.EosPos)
+}
+
+// NewFileState returns a new initialized file state
+func NewFileState() *FileState {
+	fs := &FileState{}
+	fs.Init()
+	return fs
+}
+
+// SetSrc sets source to be parsed, and filename it came from
+func (fs *FileState) SetSrc(src *[][]rune, fname string) {
+	fs.Init()
+	fs.Src.SetSrc(src, fname)
+	fs.LexState.Filename = fname
+}
+
+// LexAtEnd returns true if lexing state is now at end of source
+func (fs *FileState) LexAtEnd() bool {
+	return fs.LexState.Ln >= fs.Src.NLines()
+}
+
+// LexLine returns the lexing output for given line, combining comments and all other tokens
+// and allocating new memory using clone
+func (fs *FileState) LexLine(ln int) lex.Line {
+	return fs.Src.LexLine(ln)
+}
+
+// LexLineString returns a string rep of the current lexing output for the current line
+func (fs *FileState) LexLineString() string {
+	return fs.LexState.LineString()
+}
+
+// LexHasErrs returns true if there were errors from lexing
+func (fs *FileState) LexHasErrs() bool {
+	return len(fs.LexState.Errs) > 0
+}
+
+// LexErrString returns all the lexing errors as a string
+func (fs *FileState) LexErrString() string {
+	return fs.LexState.Errs.AllString()
+}
+
+// PassTwoHasErrs returns true if there were errors from pass two processing
+func (fs *FileState) PassTwoHasErrs() bool {
+	return len(fs.TwoState.Errs) > 0
+}
+
+// PassTwoErrString returns all the pass two errors as a string
+func (fs *FileState) PassTwoErrString() string {
+	return fs.TwoState.Errs.AllString()
+}
+
+// ParseAtEnd returns true if parsing state is now at end of source
+func (fs *FileState) ParseAtEnd() bool {
+	return fs.ParseState.AtEof()
+}
+
+// ParseNextSrcLine returns the next line of source that the parser is currently at
+func (fs *FileState) ParseNextSrcLine() string {
+	return fs.ParseState.NextSrcLine()
+}
+
+// ParseHasErrs returns true if there were errors from parsing
+func (fs *FileState) ParseHasErrs() bool {
+	return len(fs.ParseState.Errs) > 0
+}
+
+// ParseErrString returns all the parsing errors as a string
+func (fs *FileState) ParseErrString() string {
+	return fs.ParseState.Errs.AllString()
+}
+
+// RuleString returns the rule info for entire source -- if full
+// then it includes the full stack at each point -- otherwise just the top
+// of stack
+func (fs *FileState) ParseRuleString(full bool) string {
+	return fs.ParseState.RuleString(full)
 }

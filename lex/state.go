@@ -8,21 +8,23 @@ import (
 	"fmt"
 	"unicode"
 
+	"github.com/goki/ki/nptime"
 	"github.com/goki/pi/token"
 )
 
 // lex.State is the state maintained for lexing
 type State struct {
-	Filename     string    `desc:"the current file being lex'd"`
-	KeepWS       bool      `desc:"if true, record whitespace tokens -- else ignore"`
-	KeepComments bool      `desc:"if true, record comment tokens -- else ignore"`
-	Src          []rune    `desc:"the current line of source being processed"`
-	Lex          Line      `desc:"the lex output for this line"`
-	Pos          int       `desc:"the current rune char position within the line"`
-	Ln           int       `desc:"the line within overall source that we're operating on (0 indexed)"`
-	Ch           rune      `desc:"the current rune read by NextRune"`
-	State        []string  `desc:"state stack"`
-	Errs         ErrorList `desc:"any error messages accumulated during lexing specifically"`
+	Filename string      `desc:"the current file being lex'd"`
+	KeepWS   bool        `desc:"if true, record whitespace tokens -- else ignore"`
+	Src      []rune      `desc:"the current line of source being processed"`
+	Lex      Line        `desc:"the lex output for this line"`
+	Comments Line        `desc:"the comments output for this line -- kept separately"`
+	Pos      int         `desc:"the current rune char position within the line"`
+	Ln       int         `desc:"the line within overall source that we're operating on (0 indexed)"`
+	Ch       rune        `desc:"the current rune read by NextRune"`
+	State    []string    `desc:"state stack"`
+	Time     nptime.Time `desc:"time stamp for lexing -- set at start of new lex process"`
+	Errs     ErrorList   `desc:"any error messages accumulated during lexing specifically"`
 }
 
 // Init initializes the state at start of parsing
@@ -37,11 +39,12 @@ func (ls *State) Init() {
 func (ls *State) SetLine(src []rune) {
 	ls.Src = src
 	ls.Lex = nil
+	ls.Comments = nil
 	ls.Pos = 0
 }
 
-// LineOut returns the current lex output as tagged source
-func (ls *State) LineOut() string {
+// LineString returns the current lex output as tagged source
+func (ls *State) LineString() string {
 	return fmt.Sprintf("[%v,%v]: %v", ls.Ln, ls.Pos, ls.Lex.TagSrc(ls.Src))
 }
 
@@ -114,18 +117,20 @@ func (ls *State) Add(tok token.Tokens, st, ed int) {
 	if tok == token.TextWhitespace && !ls.KeepWS {
 		return
 	}
-	if tok.Cat() == token.Comment && !ls.KeepComments {
-		return
+	lxl := &ls.Lex
+	if tok.Cat() == token.Comment {
+		lxl = &ls.Comments
 	}
-	sz := len(ls.Lex)
+	sz := len(*lxl)
 	if sz > 0 && tok.CombineRepeats() {
-		lst := &ls.Lex[sz-1]
+		lst := &(*lxl)[sz-1]
 		if lst.Tok == tok && lst.Ed == st {
 			lst.Ed = ed
 			return
 		}
 	}
-	ls.Lex.Add(Lex{Tok: tok, Depth: 0, St: st, Ed: ed})
+	lx := (*lxl).AddLex(tok, st, ed)
+	lx.Time = ls.Time
 }
 
 func (ls *State) PushState(st string) {

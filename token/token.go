@@ -58,9 +58,35 @@ func (tk Tokens) SubCat() Tokens {
 	return SubCatMap[tk]
 }
 
+// IsCat returns true if this is a category-level token
+func (tk Tokens) IsCat() bool {
+	return tk.Cat() == tk
+}
+
+// IsSubCat returns true if this is a sub-category-level token
+func (tk Tokens) IsSubCat() bool {
+	return tk.SubCat() == tk
+}
+
+func (tk Tokens) InCat(other Tokens) bool {
+	return tk.Cat() == other.Cat()
+}
+
+func (tk Tokens) InSubCat(other Tokens) bool {
+	return tk.SubCat() == other.SubCat()
+}
+
 // IsKeyword returns true if this in the Keyword category
 func (tk Tokens) IsKeyword() bool {
 	return tk.Cat() == Keyword
+}
+
+// Parent returns the closest parent-level of this token (subcat or cat)
+func (tk Tokens) Parent() Tokens {
+	if tk.IsSubCat() {
+		return tk.Cat()
+	}
+	return tk.SubCat()
 }
 
 // Match returns true if the two tokens match, in a category / subcategory sensitive manner:
@@ -70,10 +96,10 @@ func (tk Tokens) Match(otk Tokens) bool {
 	if tk == otk {
 		return true
 	}
-	if tk.Cat() == tk && otk.Cat() == tk {
+	if tk.IsCat() && otk.Cat() == tk {
 		return true
 	}
-	if tk.SubCat() == tk && otk.SubCat() == tk {
+	if tk.IsSubCat() && otk.SubCat() == tk {
 		return true
 	}
 	return false
@@ -120,6 +146,17 @@ func (tk Tokens) IsAmbigUnaryOp() bool {
 func (tk Tokens) CombineRepeats() bool {
 	cat := tk.Cat()
 	return (cat == Literal || cat == Comment || cat == Text)
+}
+
+// StyleName returns the abbreviated 2-3 letter style name of the tag
+func (tk Tokens) StyleName() string {
+	return Names[tk]
+}
+
+// ClassName returns the . prefixed CSS classname of the tag style
+// for styling, a CSS property should exist with this name
+func (tk Tokens) ClassName() string {
+	return "." + tk.StyleName()
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -196,38 +233,45 @@ func (kl KeyTokenList) Match(okt KeyToken) bool {
 const (
 	// None is the nil token value -- for non-terminal cases or TBD
 	None Tokens = iota
+
 	// Error is an input that could not be tokenized due to syntax error etc
 	Error
-	// end of file
+
+	// EOF is end of file
 	EOF
-	// end of line (typically implicit -- used for rule matching)
+
+	// EOL is end of line (typically implicit -- used for rule matching)
 	EOL
-	// end of statement is a key meta-token -- in C it is ;, in Go it is either ; or EOL
+
+	// EOS is end of statement -- a key meta-token -- in C it is ;, in Go it is either ; or EOL
 	EOS
+
+	// Background is for syntax highlight styles based on these tokens
+	Background
 
 	// Cat: Keywords (actual keyword is just the string)
 	Keyword
 	KeywordConstant
 	KeywordDeclaration
-	KeywordNamespace
+	KeywordNamespace // incl package, import
 	KeywordPseudo
 	KeywordReserved
 	KeywordType
 
 	// Cat: Names.
 	Name
-	NameAttribute
-	NameBuiltin
-	NameBuiltinPseudo
+	NameAttribute     // e.g., HTML attr
+	NameBuiltin       // not keyword?
+	NameBuiltinPseudo // e.g., this, self
 	NameClass
+	NameType
 	NameConstant
 	NameDecorator
 	NameEntity
 	NameException
 	NameFunction
-	NameFunctionMagic
-	NameKeyword
-	NameLabel
+	NameFunctionMagic // e.g., __init__ in python
+	NameLabel         // e.g., goto label
 	NameNamespace
 	NameOperator
 	NameOther
@@ -276,7 +320,6 @@ const (
 	LitNumIntegerLong
 	LitNumOct
 	LitNumImag
-	LitNumComplex
 
 	// Cat: Operators.
 	Operator
@@ -545,4 +588,127 @@ var OpPunctMap = map[string]Tokens{
 	"'":  PunctStrQuote,
 	"`":  PunctStrBacktick,
 	"\\": PunctStrEsc,
+}
+
+// Names are the short tag names for each token, used e.g., for syntax highlighting
+// These are based on alecthomas/chroma / pygments
+var Names = map[Tokens]string{
+	None:       "",
+	Error:      "err",
+	EOF:        "EOF",
+	EOL:        "EOL",
+	EOS:        "EOS",
+	Background: "bg",
+
+	Keyword:            "k",
+	KeywordConstant:    "kc",
+	KeywordDeclaration: "kd",
+	KeywordNamespace:   "kn",
+	KeywordPseudo:      "kp",
+	KeywordReserved:    "kr",
+	KeywordType:        "kt",
+
+	Name:              "n",
+	NameAttribute:     "na",
+	NameBuiltin:       "nb",
+	NameBuiltinPseudo: "bp",
+	NameClass:         "nc",
+	NameType:          "nt",
+	NameConstant:      "no",
+	NameDecorator:     "nd",
+	NameEntity:        "ni",
+	NameException:     "ne",
+	NameFunction:      "nf",
+	NameFunctionMagic: "fm",
+	NameLabel:         "nl",
+	NameNamespace:     "nn",
+	NameOperator:      "np",
+	NameOther:         "nx",
+	NameProperty:      "py",
+	NameTag:           "ng",
+
+	NameVar:          "nv",
+	NameVarAnonymous: "ay",
+	NameVarClass:     "vc",
+	NameVarGlobal:    "vg",
+	NameVarInstance:  "vi",
+	NameVarMagic:     "vm",
+
+	Literal:      "l",
+	LiteralDate:  "ld",
+	LiteralOther: "lo",
+
+	LitStr:          "s",
+	LitStrAffix:     "sa",
+	LitStrAtom:      "st",
+	LitStrBacktick:  "sb",
+	LitStrBoolean:   "so",
+	LitStrChar:      "sc",
+	LitStrDelimiter: "dl",
+	LitStrDoc:       "sd",
+	LitStrDouble:    "s2",
+	LitStrEscape:    "se",
+	LitStrHeredoc:   "sh",
+	LitStrInterpol:  "si",
+	LitStrName:      "sn",
+	LitStrOther:     "sx",
+	LitStrRegex:     "sr",
+	LitStrSingle:    "s1",
+	LitStrSymbol:    "ss",
+
+	LitNum:            "m",
+	LitNumBin:         "mb",
+	LitNumFloat:       "mf",
+	LitNumHex:         "mh",
+	LitNumInteger:     "mi",
+	LitNumIntegerLong: "il",
+	LitNumOct:         "mo",
+	LitNumImag:        "mj",
+
+	Operator:     "o",
+	OperatorWord: "ow",
+
+	// don't really need these -- only have at sub-categ level
+	OpMath:     "om",
+	OpBit:      "ob",
+	OpAsgn:     "oa",
+	OpMathAsgn: "pa",
+	OpBitAsgn:  "ba",
+	OpLog:      "ol",
+	OpRel:      "or",
+	OpList:     "oi",
+
+	Punctuation: "p",
+	PunctGp:     "pg",
+	PunctSep:    "ps",
+	PunctStr:    "pr",
+
+	Comment:          "c",
+	CommentHashbang:  "ch",
+	CommentMultiline: "cm",
+	CommentSingle:    "c1",
+	CommentSpecial:   "cs",
+
+	CommentPreproc:     "cp",
+	CommentPreprocFile: "cpf",
+
+	Text:            "",
+	TextWhitespace:  "w",
+	TextSymbol:      "ts",
+	TextPunctuation: "tp",
+	TextSpellErr:    "te",
+
+	TextStyle:           "g",
+	TextStyleDeleted:    "gd",
+	TextStyleEmph:       "ge",
+	TextStyleError:      "gr",
+	TextStyleHeading:    "gh",
+	TextStyleInserted:   "gi",
+	TextStyleOutput:     "go",
+	TextStylePrompt:     "gp",
+	TextStyleStrong:     "gs",
+	TextStyleSubheading: "gu",
+	TextStyleTraceback:  "gt",
+	TextStyleUnderline:  "gl",
+	TextStyleLink:       "ga",
 }
