@@ -77,11 +77,40 @@ func (pr *Parser) LexNext(fs *FileState) *lex.Rule {
 			}
 			fs.LexState.SetLine((*fs.Src.Lines)[fs.LexState.Ln])
 		}
-		rval := pr.Lexer.LexStart(&fs.LexState)
-		if rval != nil {
-			return rval
+		mrule := pr.Lexer.LexStart(&fs.LexState)
+		if mrule != nil {
+			return mrule
+		}
+		if !fs.LexState.AtEol() { // err
+			break
 		}
 	}
+	return nil
+}
+
+// LexNextLine does next line of lexing -- returns lowest-level rule that
+// matched at end, and nil when nomatch err or at end of source input
+func (pr *Parser) LexNextLine(fs *FileState) *lex.Rule {
+	if fs.LexState.Ln >= fs.Src.NLines() {
+		return nil
+	}
+	var mrule *lex.Rule
+	for {
+		if fs.LexState.AtEol() {
+			fs.Src.SetLexs(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments)
+			fs.LexState.Ln++
+			if fs.LexState.Ln >= fs.Src.NLines() {
+				return nil
+			}
+			fs.LexState.SetLine((*fs.Src.Lines)[fs.LexState.Ln])
+			return mrule
+		}
+		mrule = pr.Lexer.LexStart(&fs.LexState)
+		if mrule == nil {
+			return nil
+		}
+	}
+	return mrule
 }
 
 // LexRun keeps running LextNext until it stops
@@ -243,6 +272,11 @@ func (fs *FileState) LexLine(ln int) lex.Line {
 // LexLineString returns a string rep of the current lexing output for the current line
 func (fs *FileState) LexLineString() string {
 	return fs.LexState.LineString()
+}
+
+// LexNextSrcLine returns the next line of source that the lexer is currently at
+func (fs *FileState) LexNextSrcLine() string {
+	return fs.LexState.NextSrcLine()
 }
 
 // LexHasErrs returns true if there were errors from lexing

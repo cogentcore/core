@@ -46,6 +46,7 @@ type Rule struct {
 	Desc      string       `desc:"description / comments about this rule"`
 	Token     token.Tokens `desc:"the token value that this rule generates -- use None for non-terminals"`
 	Match     Matches      `desc:"the lexical match that we look for to engage this rule"`
+	Pos       MatchPos     `desc:"position where match can occur"`
 	String    string       `desc:"if action is LexMatch, this is the string we match"`
 	Off       int          `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
 	Acts      []Actions    `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
@@ -176,6 +177,11 @@ func (lr *Rule) IsMatch(ls *State) bool {
 	if lr.IsRoot() { // root always matches
 		return true
 	}
+
+	if !lr.IsMatchPos(ls) {
+		return false
+	}
+
 	switch lr.Match {
 	case String:
 		sz := len(lr.String)
@@ -251,6 +257,53 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		return true
 	}
 	return false
+}
+
+// IsMatchPos tests if the rule matches position
+func (lr *Rule) IsMatchPos(ls *State) bool {
+	if lr.IsRoot() { // root always matches
+		return true
+	}
+	switch lr.Pos {
+	case AnyPos:
+		return true
+	case StartOfLine:
+		return ls.Pos == 0
+	case EndOfLine:
+		tsz := lr.TargetLen(ls)
+		lsz := len(ls.Src)
+		return ls.Pos == lsz-1-tsz
+	case MiddleOfLine:
+		if ls.Pos == 0 {
+			return false
+		}
+		tsz := lr.TargetLen(ls)
+		lsz := len(ls.Src)
+		return ls.Pos != lsz-1-tsz
+	}
+	return true
+}
+
+// TargetLen returns the length of the target including offset
+func (lr *Rule) TargetLen(ls *State) int {
+	switch lr.Match {
+	case StrName:
+		fallthrough
+	case String:
+		sz := len(lr.String)
+		return lr.Off + sz
+	case Letter:
+		return lr.Off + 1
+	case Digit:
+		return lr.Off + 1
+	case WhiteSpace:
+		return lr.Off + 1
+	case AnyRune:
+		return lr.Off + 1
+	case CurState:
+		return 0
+	}
+	return 0
 }
 
 // DoAct performs given action

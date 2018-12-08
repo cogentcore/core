@@ -86,6 +86,9 @@ func (fl *File) NTokens(ln int) int {
 	if fl.Lexs == nil {
 		return 0
 	}
+	if len(fl.Lexs) <= ln {
+		return 0
+	}
 	return len(fl.Lexs[ln])
 }
 

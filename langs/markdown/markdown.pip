@@ -1,0 +1,15 @@
+{
+  "ProjFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.pip",
+  "ParserFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.pi",
+  "TestFile": "/Users/oreilly/goki/pi/langs/markdown/markdown_test.md",
+  "TraceOpts": {
+    "On": false,
+    "Rules": "Slice SelectExpr AddExpr",
+    "Match": true,
+    "SubMatch": true,
+    "NoMatch": true,
+    "Run": true,
+    "ScopeSrc": true,
+    "FullStackOut": false
+  }
+}

@@ -167,6 +167,14 @@ func (ls *State) ReadName() {
 	}
 }
 
+// NextSrcLine returns the next line of text
+func (ls *State) NextSrcLine() string {
+	if ls.AtEol() {
+		return "EOL"
+	}
+	return string(ls.Src[ls.Pos:])
+}
+
 func (ls *State) ReadNumber() token.Tokens {
 	offs := ls.Pos
 	tok := token.LitNumInteger

@@ -243,6 +243,7 @@ func (pv *PiView) LexInit() {
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
 			Prompt: "The Lexer validation has errors\n" + fs.LexErrString()}, true, false, nil, nil)
 	}
+	pv.UpdtLexBuf()
 }
 
 // LexStopped tells the user why the lexer stopped
@@ -251,9 +252,16 @@ func (pv *PiView) LexStopped() {
 	if fs.LexAtEnd() {
 		pv.SetStatus("The Lexer is now at the end of available text")
 	} else {
-		pv.SetStatus("Lexer Errors!")
-		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-			Prompt: "The Lexer has stopped due to errors\n" + fs.LexErrString()}, true, false, nil, nil)
+		errs := fs.LexErrString()
+		if errs != "" {
+			pv.SetStatus("Lexer Errors!")
+			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
+				Prompt: "The Lexer has stopped due to errors\n" + errs}, true, false, nil, nil)
+		} else {
+			pv.SetStatus("Lexer Missing Rules!")
+			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
+				Prompt: "The Lexer has stopped because it cannot process the source at this point:<br>\n" + fs.LexNextSrcLine()}, true, false, nil, nil)
+		}
 	}
 }
 
@@ -264,6 +272,20 @@ func (pv *PiView) LexNext() *lex.Rule {
 	if mrule == nil {
 		pv.LexStopped()
 	} else {
+		pv.SetStatus(mrule.Nm + ": " + fs.LexLineString())
+		pv.SelectLexRule(mrule)
+	}
+	pv.UpdtLexBuf()
+	return mrule
+}
+
+// LexLine does next line of lexing
+func (pv *PiView) LexNextLine() *lex.Rule {
+	fs := &pv.TestBuf.PiState
+	mrule := pv.Parser.LexNextLine(fs)
+	if mrule == nil && fs.LexHasErrs() {
+		pv.LexStopped()
+	} else if mrule != nil {
 		pv.SetStatus(mrule.Nm + ": " + fs.LexLineString())
 		pv.SelectLexRule(mrule)
 	}
@@ -376,14 +398,15 @@ func (pv *PiView) ParseStopped() {
 	if fs.ParseAtEnd() {
 		pv.SetStatus("The Parser is now at the end of available text")
 	} else {
-		pv.SetStatus("Parse Error!")
 		errs := fs.ParseErrString()
 		if errs != "" {
+			pv.SetStatus("Parse Error!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
 				Prompt: "The Parser has stopped due to errors<br>\n" + errs}, true, false, nil, nil)
 		} else {
+			pv.SetStatus("Parse Missing Rules!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-				Prompt: "The Parser has stopped because it cannot process the source at this point\n" + fs.ParseNextSrcLine()}, true, false, nil, nil)
+				Prompt: "The Parser has stopped because it cannot process the source at this point:<br>\n" + fs.ParseNextSrcLine()}, true, false, nil, nil)
 		}
 	}
 }
@@ -847,7 +870,7 @@ func (pv *PiView) ConfigSplitView() {
 		pv.ParseBuf.SetHiStyle(gide.Prefs.HiStyle)
 		gide.Prefs.Editor.ConfigTextBuf(&pv.ParseBuf.Opts)
 
-		split.SetSplits(.15, .15, .15, .15, .4)
+		split.SetSplits(.15, .15, .2, .15, .35)
 		split.UpdateEnd(updt)
 
 		pv.OpenConsoleTab()
@@ -1142,7 +1165,11 @@ var PiViewProps = ki.Props{
 		}},
 		{"LexNext", ki.Props{
 			"icon": "play",
-			"desc": "do next step of lexing",
+			"desc": "do next single step of lexing",
+		}},
+		{"LexNextLine", ki.Props{
+			"icon": "play",
+			"desc": "do next line of lexing",
 		}},
 		{"LexAll", ki.Props{
 			"icon": "fast-fwd",

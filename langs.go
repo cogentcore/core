@@ -14,6 +14,30 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+// LangFlags are special properties of a given language
+type LangFlags int
+
+//go:generate stringer -type=LangFlags
+
+var KiT_LangFlags = kit.Enums.AddEnum(LangFlagsN, false, nil)
+
+func (ev LangFlags) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *LangFlags) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// LangFlags
+const (
+	// NoFlags = nothing special
+	NoFlags LangFlags = iota
+
+	// IndentSpace means that spaces must be used for this language
+	IndentSpace
+
+	// IndentTab means that tabs must be used for this language
+	IndentTab
+
+	LangFlagsN
+)
+
 // LangProps contains properties of languages supported by the Pi parser
 // framework
 type LangProps struct {
@@ -21,39 +45,40 @@ type LangProps struct {
 	CommentLn string            `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
 	CommentSt string            `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
 	CommentEd string            `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+	Flags     []LangFlags       `desc:"special properties for this language"`
 	Parser    *Parser           `json:"-" xml:"-" desc:"parser for this language"`
 }
 
 // StdLangProps is the standard compiled-in set of langauge properties
 var StdLangProps = map[filecat.Supported]LangProps{
-	filecat.Ada:        {filecat.Ada, "--", "", "", nil},
-	filecat.Bash:       {filecat.Bash, "# ", "", "", nil},
-	filecat.Csh:        {filecat.Csh, "# ", "", "", nil},
-	filecat.C:          {filecat.C, "// ", "/* ", " */", nil},
-	filecat.CSharp:     {filecat.CSharp, "// ", "/* ", " */", nil},
-	filecat.D:          {filecat.D, "// ", "/* ", " */", nil},
-	filecat.ObjC:       {filecat.ObjC, "// ", "/* ", " */", nil},
-	filecat.Go:         {filecat.Go, "// ", "/* ", " */", nil},
-	filecat.Java:       {filecat.Java, "// ", "/* ", " */", nil},
-	filecat.JavaScript: {filecat.JavaScript, "// ", "/* ", " */", nil},
-	filecat.Eiffel:     {filecat.Eiffel, "--", "", "", nil},
-	filecat.Haskell:    {filecat.Haskell, "--", "{- ", "-}", nil},
-	filecat.Lisp:       {filecat.Lisp, "; ", "", "", nil},
-	filecat.Lua:        {filecat.Lua, "--", "---[[ ", "--]]", nil},
-	filecat.Makefile:   {filecat.Makefile, "# ", "", "", nil},
-	filecat.Matlab:     {filecat.Matlab, "% ", "%{ ", " %}", nil},
-	filecat.OCaml:      {filecat.OCaml, "", "(* ", " *)", nil},
-	filecat.Pascal:     {filecat.Pascal, "// ", " ", " }", nil},
-	filecat.Perl:       {filecat.Perl, "# ", "", "", nil},
-	filecat.Python:     {filecat.Python, "# ", "", "", nil},
-	filecat.Php:        {filecat.Php, "// ", "/* ", " */", nil},
-	filecat.R:          {filecat.R, "# ", "", "", nil},
-	filecat.Ruby:       {filecat.Ruby, "# ", "", "", nil},
-	filecat.Rust:       {filecat.Rust, "// ", "/* ", " */", nil},
-	filecat.Scala:      {filecat.Scala, "// ", "/* ", " */", nil},
-	filecat.Html:       {filecat.Html, "", "<!-- ", " -->", nil},
-	filecat.TeX:        {filecat.TeX, "% ", "", "", nil},
-	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", nil},
+	filecat.Ada:        {filecat.Ada, "--", "", "", nil, nil},
+	filecat.Bash:       {filecat.Bash, "# ", "", "", nil, nil},
+	filecat.Csh:        {filecat.Csh, "# ", "", "", nil, nil},
+	filecat.C:          {filecat.C, "// ", "/* ", " */", nil, nil},
+	filecat.CSharp:     {filecat.CSharp, "// ", "/* ", " */", nil, nil},
+	filecat.D:          {filecat.D, "// ", "/* ", " */", nil, nil},
+	filecat.ObjC:       {filecat.ObjC, "// ", "/* ", " */", nil, nil},
+	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil},
+	filecat.Java:       {filecat.Java, "// ", "/* ", " */", nil, nil},
+	filecat.JavaScript: {filecat.JavaScript, "// ", "/* ", " */", nil, nil},
+	filecat.Eiffel:     {filecat.Eiffel, "--", "", "", nil, nil},
+	filecat.Haskell:    {filecat.Haskell, "--", "{- ", "-}", nil, nil},
+	filecat.Lisp:       {filecat.Lisp, "; ", "", "", nil, nil},
+	filecat.Lua:        {filecat.Lua, "--", "---[[ ", "--]]", nil, nil},
+	filecat.Makefile:   {filecat.Makefile, "# ", "", "", []LangFlags{IndentTab}, nil},
+	filecat.Matlab:     {filecat.Matlab, "% ", "%{ ", " %}", nil, nil},
+	filecat.OCaml:      {filecat.OCaml, "", "(* ", " *)", nil, nil},
+	filecat.Pascal:     {filecat.Pascal, "// ", " ", " }", nil, nil},
+	filecat.Perl:       {filecat.Perl, "# ", "", "", nil, nil},
+	filecat.Python:     {filecat.Python, "# ", "", "", []LangFlags{IndentSpace}, nil},
+	filecat.Php:        {filecat.Php, "// ", "/* ", " */", nil, nil},
+	filecat.R:          {filecat.R, "# ", "", "", nil, nil},
+	filecat.Ruby:       {filecat.Ruby, "# ", "", "", nil, nil},
+	filecat.Rust:       {filecat.Rust, "// ", "/* ", " */", nil, nil},
+	filecat.Scala:      {filecat.Scala, "// ", "/* ", " */", nil, nil},
+	filecat.Html:       {filecat.Html, "", "<!-- ", " -->", nil, nil},
+	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, nil},
+	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil},
 }
 
 // OpenStdParsers opens all the standard parsers for languages, from the langs/ directory

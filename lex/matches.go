@@ -55,8 +55,35 @@ const (
 	MatchesN
 )
 
+// MatchPos are special positions for a match to occur
+type MatchPos int
+
+//go:generate stringer -type=MatchPos
+
+var KiT_MatchPos = kit.Enums.AddEnum(MatchPosN, false, nil)
+
+func (ev MatchPos) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *MatchPos) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// Matching rules
+const (
+	// AnyPos matches at any position
+	AnyPos MatchPos = iota
+
+	// StartOfLine matches at start of line
+	StartOfLine
+
+	// EndOfLine matches at end of line
+	EndOfLine
+
+	// MiddleOfLine matches not at the start or end
+	MiddleOfLine
+
+	MatchPosN
+)
+
 //////////////////////////////////////////////////////////////////////////////
-// Match functions
+// Match functions -- see also state for more complex ones
 
 func IsLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch)

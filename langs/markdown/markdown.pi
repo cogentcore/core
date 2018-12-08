@@ -1,0 +1,1104 @@
+{
+  "Lexer": {
+    "Nm": "Lexer",
+    "UniqueNm": "Lexer",
+    "Props": null,
+    "Kids": [
+      {
+        "n": 26,
+        "type": "lex.Rule",
+        "name": "InCode",
+        "type": "lex.Rule",
+        "name": "InLinkAddr",
+        "type": "lex.Rule",
+        "name": "InLinkTag",
+        "type": "lex.Rule",
+        "name": "InBoldStars",
+        "type": "lex.Rule",
+        "name": "InBoldUnders",
+        "type": "lex.Rule",
+        "name": "InEmphStar",
+        "type": "lex.Rule",
+        "name": "InEmphUnder",
+        "type": "lex.Rule",
+        "name": "CodeStart",
+        "type": "lex.Rule",
+        "name": "HeadPound",
+        "type": "lex.Rule",
+        "name": "ItemCheck",
+        "type": "lex.Rule",
+        "name": "ItemStar",
+        "type": "lex.Rule",
+        "name": "ItemPlus",
+        "type": "lex.Rule",
+        "name": "ItemMinus",
+        "type": "lex.Rule",
+        "name": "BoldStars",
+        "type": "lex.Rule",
+        "name": "BoldUnders",
+        "type": "lex.Rule",
+        "name": "ItemStarSub",
+        "type": "lex.Rule",
+        "name": "ItemPlusSub",
+        "type": "lex.Rule",
+        "name": "ItemMinusSub",
+        "type": "lex.Rule",
+        "name": "LinkTag",
+        "type": "lex.Rule",
+        "name": "BacktickCode",
+        "type": "lex.Rule",
+        "name": "Quote",
+        "type": "lex.Rule",
+        "name": "Apostrophe",
+        "type": "lex.Rule",
+        "name": "EmphStar",
+        "type": "lex.Rule",
+        "name": "EmphUnder",
+        "type": "lex.Rule",
+        "name": "SkipWhite",
+        "type": "lex.Rule",
+        "name": "AnyText"
+      },
+      {
+        "Nm": "InCode",
+        "UniqueNm": "InCode",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "CodeEnd",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyCode"
+          },
+          {
+            "Nm": "CodeEnd",
+            "UniqueNm": "CodeEnd",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "LitStrBacktick",
+            "Match": "String",
+            "Pos": "StartOfLine",
+            "String": "```",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyCode",
+            "UniqueNm": "AnyCode",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "LitStrBacktick",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "Code",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InLinkAddr",
+        "UniqueNm": "InLinkAddr",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "EndLinkAddr",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyLinkAddr"
+          },
+          {
+            "Nm": "EndLinkAddr",
+            "UniqueNm": "EndLinkAddr",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": ")",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyLinkAddr",
+            "UniqueNm": "AnyLinkAddr",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "LinkAddr",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InLinkTag",
+        "UniqueNm": "InLinkTag",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 4,
+            "type": "lex.Rule",
+            "name": "LinkAddr",
+            "type": "lex.Rule",
+            "name": "EndLinkTag",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyLinkTag"
+          },
+          {
+            "Nm": "LinkAddr",
+            "UniqueNm": "LinkAddr",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "(",
+            "Off": 1,
+            "Acts": [
+              "PopState",
+              "PushState",
+              "Next"
+            ],
+            "PushState": "LinkAddr"
+          },
+          {
+            "Nm": "EndLinkTag",
+            "UniqueNm": "EndLinkTag",
+            "Props": null,
+            "Kids": null,
+            "Desc": "for a plain tag with no addr",
+            "Token": "NameTag",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "]",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyLinkTag",
+            "UniqueNm": "AnyLinkTag",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameTag",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "LinkTag",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InBoldStars",
+        "UniqueNm": "InBoldStars",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "EndBoldStars",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyBoldStars"
+          },
+          {
+            "Nm": "EndBoldStars",
+            "UniqueNm": "EndBoldStars",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "**",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyBoldStars",
+            "UniqueNm": "AnyBoldStars",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "BoldStars",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InBoldUnders",
+        "UniqueNm": "InBoldUnders",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "EndBoldUnders",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyBoldUnders"
+          },
+          {
+            "Nm": "EndBoldUnders",
+            "UniqueNm": "EndBoldUnders",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "__",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyBoldUnders",
+            "UniqueNm": "AnyBoldUnders",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "BoldUnders",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InEmphStar",
+        "UniqueNm": "InEmphStar",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "EndEmphStar",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyEmphStar"
+          },
+          {
+            "Nm": "EndEmphStar",
+            "UniqueNm": "EndEmphStar",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "*",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyEmphStar",
+            "UniqueNm": "AnyEmphStar",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "EmphStar",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InEmphUnder",
+        "UniqueNm": "InEmphUnder",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "EndEmphUnder",
+            "type": "lex.Rule",
+            "name": "SkipWhite",
+            "type": "lex.Rule",
+            "name": "AnyEmphUnder"
+          },
+          {
+            "Nm": "EndEmphUnder",
+            "UniqueNm": "EndEmphUnder",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "_",
+            "Off": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "SkipWhite",
+            "UniqueNm": "SkipWhite",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextWhitespace",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyEmphUnder",
+            "UniqueNm": "AnyEmphUnder",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "EmphUnder",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "CodeStart",
+        "UniqueNm": "CodeStart",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "LitStrBacktick",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "```",
+        "Off": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "Code"
+      },
+      {
+        "Nm": "HeadPound",
+        "UniqueNm": "HeadPound",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "lex.Rule",
+            "name": "HeadPound2",
+            "type": "lex.Rule",
+            "name": "Heading"
+          },
+          {
+            "Nm": "HeadPound2",
+            "UniqueNm": "HeadPound2",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "lex.Rule",
+                "name": "HeadPound3",
+                "type": "lex.Rule",
+                "name": "SubHeading"
+              },
+              {
+                "Nm": "HeadPound3",
+                "UniqueNm": "HeadPound3",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 1,
+                    "type": "lex.Rule",
+                    "name": "SubSubHeading"
+                  },
+                  {
+                    "Nm": "SubSubHeading",
+                    "UniqueNm": "SubSubHeading",
+                    "Props": null,
+                    "Kids": null,
+                    "Desc": "",
+                    "Token": "TextStyleSubheading",
+                    "Match": "AnyRune",
+                    "Pos": "AnyPos",
+                    "String": "",
+                    "Off": 3,
+                    "Acts": [
+                      "EOL"
+                    ],
+                    "PushState": ""
+                  }
+                ],
+                "Desc": "",
+                "Token": "None",
+                "Match": "String",
+                "Pos": "AnyPos",
+                "String": "#",
+                "Off": 2,
+                "Acts": null,
+                "PushState": ""
+              },
+              {
+                "Nm": "SubHeading",
+                "UniqueNm": "SubHeading",
+                "Props": null,
+                "Kids": null,
+                "Desc": "",
+                "Token": "TextStyleSubheading",
+                "Match": "WhiteSpace",
+                "Pos": "AnyPos",
+                "String": "",
+                "Off": 2,
+                "Acts": [
+                  "EOL"
+                ],
+                "PushState": ""
+              }
+            ],
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "#",
+            "Off": 1,
+            "Acts": null,
+            "PushState": ""
+          },
+          {
+            "Nm": "Heading",
+            "UniqueNm": "Heading",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "TextStyleHeading",
+            "Match": "WhiteSpace",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 1,
+            "Acts": [
+              "EOL"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "#",
+        "Off": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "ItemCheck",
+        "UniqueNm": "ItemCheck",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "lex.Rule",
+            "name": "ItemCheckDone",
+            "type": "lex.Rule",
+            "name": "ItemCheckTodo"
+          },
+          {
+            "Nm": "ItemCheckDone",
+            "UniqueNm": "ItemCheckDone",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "KeywordType",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "- [x] ",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "ItemCheckTodo",
+            "UniqueNm": "ItemCheckTodo",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameException",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "- [ ] ",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "KeywordType",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "- [",
+        "Off": 0,
+        "Acts": [],
+        "PushState": ""
+      },
+      {
+        "Nm": "ItemStar",
+        "UniqueNm": "ItemStar",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "*",
+        "Off": 0,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "ItemPlus",
+        "UniqueNm": "ItemPlus",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "+",
+        "Off": 0,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "ItemMinus",
+        "UniqueNm": "ItemMinus",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "-",
+        "Off": 0,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "BoldStars",
+        "UniqueNm": "BoldStars",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "TextStyleStrong",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "**",
+        "Off": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "BoldStars"
+      },
+      {
+        "Nm": "BoldUnders",
+        "UniqueNm": "BoldUnders",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "TextStyleStrong",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "__",
+        "Off": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "BoldUnders"
+      },
+      {
+        "Nm": "ItemStarSub",
+        "UniqueNm": "ItemStarSub",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "*",
+        "Off": 4,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "ItemPlusSub",
+        "UniqueNm": "ItemPlusSub",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "+",
+        "Off": 4,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "ItemMinusSub",
+        "UniqueNm": "ItemMinusSub",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "-",
+        "Off": 4,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "LinkTag",
+        "UniqueNm": "LinkTag",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "NameTag",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "[",
+        "Off": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "LinkTag"
+      },
+      {
+        "Nm": "BacktickCode",
+        "UniqueNm": "BacktickCode",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "LitStrBacktick",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "`",
+        "Off": 0,
+        "Acts": [
+          "QuotedRaw"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "Quote",
+        "UniqueNm": "Quote",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "LitStrDouble",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\"",
+        "Off": 0,
+        "Acts": [
+          "QuotedRaw"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "Apostrophe",
+        "UniqueNm": "Apostrophe",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "lex.Rule",
+            "name": "QuoteSingle",
+            "type": "lex.Rule",
+            "name": "Apost"
+          },
+          {
+            "Nm": "QuoteSingle",
+            "UniqueNm": "QuoteSingle",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "LitStrSingle",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "'",
+            "Off": 2,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "Apost",
+            "UniqueNm": "Apost",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "'",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "LitStrSingle",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "'",
+        "Off": 0,
+        "Acts": [],
+        "PushState": ""
+      },
+      {
+        "Nm": "EmphStar",
+        "UniqueNm": "EmphStar",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "TextStyleEmph",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "*",
+        "Off": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "EmphStar"
+      },
+      {
+        "Nm": "EmphUnder",
+        "UniqueNm": "EmphUnder",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "TextStyleEmph",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "_",
+        "Off": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "EmphUnder"
+      },
+      {
+        "Nm": "SkipWhite",
+        "UniqueNm": "SkipWhite",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "TextWhitespace",
+        "Match": "WhiteSpace",
+        "Pos": "AnyPos",
+        "String": "",
+        "Off": 0,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "AnyText",
+        "UniqueNm": "AnyText",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Text",
+        "Match": "AnyRune",
+        "Pos": "AnyPos",
+        "String": "",
+        "Off": 0,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      }
+    ],
+    "Desc": "",
+    "Token": "None",
+    "Match": "String",
+    "Pos": "AnyPos",
+    "String": "",
+    "Off": 0,
+    "Acts": null,
+    "PushState": ""
+  },
+  "PassTwo": {
+    "DoEos": false,
+    "Eol": false,
+    "Semi": false,
+    "Backslash": false,
+    "EolToks": null
+  },
+  "Parser": {
+    "Nm": "Parser",
+    "UniqueNm": "Parser",
+    "Props": null,
+    "Kids": null,
+    "Off": false,
+    "Desc": "",
+    "Rule": "",
+    "Ast": "NoAst",
+    "OptTokMap": false
+  },
+  "Filename": ""
+}
