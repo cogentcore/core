@@ -50,6 +50,12 @@ func (hm *HiMarkup) HasHi() bool {
 	return hm.Has
 }
 
+// UsingPi returns true if markup is using GoPi lexer / parser -- affects
+// use of results
+func (hm *HiMarkup) UsingPi() bool {
+	return hm.PiParser != nil
+}
+
 // Init initializes the syntax highlighting for current params
 func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
 	hm.Info = info
@@ -99,10 +105,18 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
 	}
 }
 
+// SetParser sets given parser directly
+func (hm *HiMarkup) SetParser(pr *pi.Parser) {
+	hm.lexer = nil
+	hm.PiParser = pr
+	hm.PiParser.InitAll(hm.PiState)
+}
+
 // MarkupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
 func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 	if hm.PiParser != nil {
+		hm.PiParser.InitAll(hm.PiState)
 		hm.PiParser.LexAll(hm.PiState)
 		return hm.PiState.Src.Lexs, nil
 	} else if hm.lexer != nil {
@@ -247,9 +261,8 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 					}
 				}
 			}
-		} else {
-			ep = ints.MinInt(sz, ep)
 		}
+		ep = ints.MinInt(sz, ep)
 		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:ep])))...)
 		if addEnd {
 			mu = append(mu, spe...)

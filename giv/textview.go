@@ -2976,6 +2976,71 @@ func (tv *TextView) CursorSprite() *gi.Viewport2D {
 	return sp
 }
 
+var TextViewDepthColors = []gi.Color{
+	{255, 255, 255, 255},
+	{250, 250, 255, 255},
+	{240, 240, 255, 255},
+	{250, 240, 255, 255},
+	{255, 240, 255, 255},
+	{255, 240, 240, 255},
+	{255, 240, 240, 255},
+	{255, 250, 240, 255},
+	{255, 255, 240, 255},
+}
+
+// var TextViewDepthColors = []gi.Color{
+// 	{255, 255, 255, 255},
+// 	{250, 250, 255, 255},
+// 	{245, 245, 255, 255},
+// 	{240, 240, 255, 255},
+// 	{245, 240, 255, 255},
+// 	{250, 240, 255, 255},
+// 	{255, 240, 255, 255},
+// 	{255, 240, 250, 255},
+// 	{255, 240, 245, 255},
+// 	{255, 240, 240, 255},
+// 	{255, 240, 240, 255},
+// 	{255, 245, 240, 255},
+// 	{255, 250, 240, 255},
+// 	{255, 255, 240, 255},
+// }
+
+// RenderDepthBg renders the depth background color
+func (tv *TextView) RenderDepthBg(stln, edln int) {
+	if !tv.Buf.Opts.DepthColor || tv.IsInactive() || !tv.HasFocus() || !tv.IsFocusActive() {
+		return
+	}
+	sty := &tv.Sty
+	cspec := sty.Font.BgColor
+	lstdp := 0
+	for ln := stln; ln <= edln; ln++ {
+		lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
+		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
+			continue
+		}
+		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+			continue
+		}
+		ht := tv.Buf.HiTags[ln]
+		lsted := 0
+		for ti := range ht {
+			lx := &ht[ti]
+			if lx.Depth > 0 {
+				cspec.Color = TextViewDepthColors[lx.Depth%len(TextViewDepthColors)]
+				st := ints.MinInt(lsted, lx.St)
+				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: lx.Ed}}
+				lsted = lx.Ed
+				lstdp = lx.Depth
+				tv.RenderRegionBoxSty(reg, sty, &cspec)
+			}
+		}
+		if lstdp > 0 {
+			tv.RenderRegionToEnd(TextPos{Ln: ln, Ch: lsted}, sty, &cspec)
+		}
+	}
+}
+
 // RenderSelect renders the selection region as a selected background color
 // -- always called within context of outer RenderLines or RenderAllLines
 func (tv *TextView) RenderSelect() {
@@ -3053,6 +3118,12 @@ func (tv *TextView) ClearScopelights() {
 
 // RenderRegionBox renders a region in background color according to given state style
 func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
+	sty := &tv.StateStyles[state]
+	tv.RenderRegionBoxSty(reg, sty, &sty.Font.BgColor)
+}
+
+// RenderRegionBoxSty renders a region in given style and background color
+func (tv *TextView) RenderRegionBoxSty(reg TextRegion, sty *gi.Style, bgclr *gi.ColorSpec) {
 	st := reg.Start
 	ed := reg.End
 	spos := tv.CharStartPos(st)
@@ -3064,7 +3135,6 @@ func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
 
 	rs := &tv.Viewport.Render
 	pc := &rs.Paint
-	sty := &tv.StateStyles[state]
 	spc := sty.BoxSpace()
 
 	rst := tv.RenderStartPos()
@@ -3076,26 +3146,42 @@ func (tv *TextView) RenderRegionBox(reg TextRegion, state TextViewStates) {
 	stsi, _, _ := tv.WrappedLineNo(st)
 	edsi, _, _ := tv.WrappedLineNo(ed)
 	if st.Ln == ed.Ln && stsi == edsi {
-		pc.FillBox(rs, spos, epos.Sub(spos), &sty.Font.BgColor) // same line, done
+		pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
 		return
 	}
 	// on diff lines: fill to end of stln
 	seb := spos
 	seb.Y += tv.LineHeight
 	seb.X = ex
-	pc.FillBox(rs, spos, seb.Sub(spos), &sty.Font.BgColor)
+	pc.FillBox(rs, spos, seb.Sub(spos), bgclr)
 	sfb := seb
 	sfb.X = sx
 	if sfb.Y < epos.Y { // has some full box
 		efb := epos
 		efb.Y -= tv.LineHeight
 		efb.X = ex
-		pc.FillBox(rs, sfb, efb.Sub(sfb), &sty.Font.BgColor)
+		pc.FillBox(rs, sfb, efb.Sub(sfb), bgclr)
 	}
 	sed := epos
 	sed.Y -= tv.LineHeight
 	sed.X = sx
-	pc.FillBox(rs, sed, epos.Sub(sed), &sty.Font.BgColor)
+	pc.FillBox(rs, sed, epos.Sub(sed), bgclr)
+}
+
+// RenderRegionToEnd renders a region in given style and background color, to end of line from start
+func (tv *TextView) RenderRegionToEnd(st TextPos, sty *gi.Style, bgclr *gi.ColorSpec) {
+	spos := tv.CharStartPos(st)
+	epos := spos
+	epos.Y += tv.LineHeight
+	epos.X = float32(tv.VpBBox.Max.X)
+	if int(math32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(math32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
+		return
+	}
+
+	rs := &tv.Viewport.Render
+	pc := &rs.Paint
+
+	pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
 }
 
 // RenderStartPos is absolute rendering start position from our allocpos
@@ -3166,11 +3252,6 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	tv.VisSizes()
 	pos := gi.NewVec2DFmPoint(tv.VpBBox.Min)
 	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
-	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
-	tv.RenderLineNosBoxAll()
-	tv.RenderHighlights(-1, -1) // all
-	tv.RenderScopelights(-1, -1)
-	tv.RenderSelect()
 	pos = tv.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -3187,29 +3268,44 @@ func (tv *TextView) RenderAllLinesInBounds() {
 			stln = ln
 		}
 		edln = ln
-		tv.RenderLineNo(ln)
 	}
-	if stln >= 0 && edln >= 0 {
-		if tv.HasLineNos() {
-			tbb := tv.VpBBox
-			tbb.Min.X += int(tv.LineNoOff)
-			rs.Unlock()
-			rs.PushBounds(tbb)
-			rs.Lock()
-		}
+
+	if stln < 0 || edln < 0 { // shouldn't happen.
+		rs.Unlock()
+		return
+	}
+
+	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
+
+	if tv.HasLineNos() {
+		tv.RenderLineNosBoxAll()
+
 		for ln := stln; ln <= edln; ln++ {
-			lst := pos.Y + tv.Offs[ln]
-			lp := pos
-			lp.Y = lst
-			lp.X += tv.LineNoOff
-			tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+			tv.RenderLineNo(ln)
 		}
+	}
+
+	tv.RenderDepthBg(stln, edln)
+	tv.RenderHighlights(stln, edln)
+	tv.RenderScopelights(stln, edln)
+	tv.RenderSelect()
+	if tv.HasLineNos() {
+		tbb := tv.VpBBox
+		tbb.Min.X += int(tv.LineNoOff)
 		rs.Unlock()
-		if tv.HasLineNos() {
-			rs.PopBounds()
-		}
-	} else {
-		rs.Unlock()
+		rs.PushBounds(tbb)
+		rs.Lock()
+	}
+	for ln := stln; ln <= edln; ln++ {
+		lst := pos.Y + tv.Offs[ln]
+		lp := pos
+		lp.Y = lst
+		lp.X += tv.LineNoOff
+		tv.Renders[ln].Render(rs, lp) // not top pos -- already has baseline offset
+	}
+	rs.Unlock()
+	if tv.HasLineNos() {
+		rs.PopBounds()
 	}
 }
 
@@ -3339,15 +3435,16 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.Font.BgColor)
 		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
+		tv.RenderDepthBg(visSt, visEd)
 		tv.RenderHighlights(visSt, visEd)
 		tv.RenderScopelights(visSt, visEd)
 		tv.RenderSelect()
 		tv.RenderLineNosBox(visSt, visEd)
 
-		for ln := visSt; ln <= visEd; ln++ {
-			tv.RenderLineNo(ln)
-		}
 		if tv.HasLineNos() {
+			for ln := visSt; ln <= visEd; ln++ {
+				tv.RenderLineNo(ln)
+			}
 			tbb := tv.VpBBox
 			tbb.Min.X += int(tv.LineNoOff)
 			rs.Unlock()
@@ -3925,48 +4022,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
-				kt.SetProcessed()
-				if tv.ISearch.On { // todo: need this in inactive mode
-					tv.CancelComplete()
-					tv.ISearchKeyInput(kt)
-				} else if tv.QReplace.On { // todo: need this in inactive mode
-					tv.CancelComplete()
-					tv.QReplaceKeyInput(kt)
-				} else {
-					if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
-						tv.CancelComplete()
-						bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
-						tv.InsertAtCursor([]byte(string(kt.Rune)))
-						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
-						if tbe != nil {
-							tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
-							tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
-						}
-						tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
-					} else {
-						tv.InsertAtCursor([]byte(string(kt.Rune)))
-						if kt.Rune == ' ' {
-							tv.CancelComplete()
-						} else {
-							tv.OfferComplete()
-						}
-					}
-					if kt.Rune == '}' || kt.Rune == ')' || kt.Rune == ']' {
-						cp := tv.CursorPos
-						np := cp
-						np.Ch--
-						tp, found := tv.Buf.FindScopeMatch(kt.Rune, np)
-						if found {
-							tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
-							tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(np, TextPos{cp.Ln, cp.Ch}))
-							if tv.CursorPos.Ln < tp.Ln {
-								tv.RenderLines(cp.Ln, tp.Ln)
-							} else {
-								tv.RenderLines(tp.Ln, cp.Ln)
-							}
-						}
-					}
-				}
+				tv.KeyInputInsertRune(kt)
 			}
 		}
 		if unicode.IsSpace(kt.Rune) {
@@ -3975,6 +4031,61 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ISpellKeyInput(kt)
 	}
 	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
+}
+
+// KeyInputInsertRune handles the insertion of a typed character
+func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
+	kt.SetProcessed()
+	if tv.ISearch.On { // todo: need this in inactive mode
+		tv.CancelComplete()
+		tv.ISearchKeyInput(kt)
+	} else if tv.QReplace.On { // todo: need this in inactive mode
+		tv.CancelComplete()
+		tv.QReplaceKeyInput(kt)
+	} else {
+		if kt.Rune == '{' || kt.Rune == '(' || kt.Rune == '[' {
+			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
+			pos := tv.CursorPos
+			pos.Ch++
+			match, _ := PunctGpMatch(kt.Rune)
+			tv.InsertAtCursor([]byte(string(kt.Rune) + string(match)))
+			tv.SetCursorShow(pos)
+			tv.SetCursorCol(tv.CursorPos)
+			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+		} else if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
+			tv.CancelComplete()
+			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
+			tv.InsertAtCursor([]byte(string(kt.Rune)))
+			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
+			if tbe != nil {
+				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+				tv.SetCursorShow(TextPos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+			}
+			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+		} else {
+			tv.InsertAtCursor([]byte(string(kt.Rune)))
+			if kt.Rune == ' ' {
+				tv.CancelComplete()
+			} else {
+				tv.OfferComplete()
+			}
+		}
+		if kt.Rune == '}' || kt.Rune == ')' || kt.Rune == ']' {
+			cp := tv.CursorPos
+			np := cp
+			np.Ch--
+			tp, found := tv.Buf.FindScopeMatch(kt.Rune, np)
+			if found {
+				tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(tp, TextPos{tp.Ln, tp.Ch + 1}))
+				tv.Scopelights = append(tv.Scopelights, NewTextRegionPos(np, TextPos{cp.Ln, cp.Ch}))
+				if tv.CursorPos.Ln < tp.Ln {
+					tv.RenderLines(cp.Ln, tp.Ln)
+				} else {
+					tv.RenderLines(tp.Ln, cp.Ln)
+				}
+			}
+		}
+	}
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are

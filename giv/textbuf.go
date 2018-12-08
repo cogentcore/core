@@ -43,6 +43,7 @@ type TextBufOpts struct {
 	Completion   bool   `desc:"use the completion system to suggest options while typing"`
 	SpellCorrect bool   `desc:"use spell checking to suggest corrections while typing"`
 	EmacsUndo    bool   `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+	DepthColor   bool   `desc:"colorize the background according to nesting depth"`
 	CommentLn    string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
 	CommentSt    string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
 	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
@@ -413,7 +414,7 @@ func (tb *TextBuf) New(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(tb.Lines, string(tb.Filename))
+	tb.PiState.SetSrc(&tb.Lines, string(tb.Filename))
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 
 	tb.MarkupMu.Unlock()
@@ -1331,6 +1332,30 @@ func (te *TextBufEdit) AdjustReg(reg TextRegion) TextRegion {
 	return reg
 }
 
+// PunctGpMatch returns the matching grouping punctuation for given rune, which must be
+// a left or right brace {}, bracket [] or paren () -- also returns true if it is *right*
+func PunctGpMatch(r rune) (match rune, right bool) {
+	right = false
+	switch r {
+	case '{':
+		match = '}'
+	case '}':
+		right = true
+		match = '{'
+	case '(':
+		match = ')'
+	case ')':
+		right = true
+		match = '('
+	case '[':
+		match = ']'
+	case ']':
+		right = true
+		match = '['
+	}
+	return
+}
+
 // FindScopeMatch finds the brace or parenthesis that is the partner of the one passed to function
 func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
 	tb.LinesMu.RLock()
@@ -1338,28 +1363,13 @@ func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
 
 	en.Ln = -1
 	found = false
+	match, rt := PunctGpMatch(r)
 	var left int
 	var right int
-	var match rune
-	switch r {
-	case '{':
-		left++
-		match = '}'
-	case '}':
+	if rt {
 		right++
-		match = '{'
-	case '(':
+	} else {
 		left++
-		match = ')'
-	case ')':
-		right++
-		match = '('
-	case '[':
-		left++
-		match = ']'
-	case ']':
-		right++
-		match = '['
 	}
 	ch := st.Ch
 	ln := st.Ln
@@ -1749,7 +1759,7 @@ func (tb *TextBuf) IsMarkingUp() bool {
 
 // ReMarkup runs re-markup on text in background
 func (tb *TextBuf) ReMarkup() {
-	if !tb.Hi.HasHi() || tb.NLines == 0 || tb.Hi.lexer == nil {
+	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
 	if tb.IsMarkingUp() {
@@ -1782,7 +1792,7 @@ func (tb *TextBuf) AdjustedTags(ln int) lex.Line {
 // calling MarkupMu mutex when setting the marked-up lines with the result --
 // designed to be called in a separate goroutine
 func (tb *TextBuf) MarkupAllLines() {
-	if !tb.Hi.HasHi() || tb.NLines == 0 || tb.Hi.lexer == nil {
+	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
 	if tb.IsMarkingUp() {
@@ -1791,19 +1801,43 @@ func (tb *TextBuf) MarkupAllLines() {
 	tb.SetFlag(int(TextBufMarkingUp))
 
 	tb.LinesToBytes()
+	tb.MarkupMu.Lock()
 	mtags, err := tb.Hi.MarkupTagsAll(tb.Txt)
 	if err != nil {
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
 
-	tb.MarkupMu.Lock()
 	maxln := ints.MinInt(len(mtags), tb.NLines)
+	if tb.Hi.UsingPi() {
+		for ln := 0; ln < maxln; ln++ {
+			tb.HiTags[ln] = tb.PiState.LexLine(ln) // does clone, combines comments too
+		}
+	} else {
+		for ln := 0; ln < maxln; ln++ {
+			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
+		}
+	}
 	for ln := 0; ln < maxln; ln++ {
-		mt := mtags[ln]
-		tb.HiTags[ln] = mt
 		tb.Tags[ln] = tb.AdjustedTags(ln)
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], mt, tb.Tags[ln])
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], tb.HiTags[ln], tb.Tags[ln])
+	}
+	tb.MarkupMu.Unlock()
+	tb.ClearFlag(int(TextBufMarkingUp))
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
+}
+
+// MarkupFromTags does syntax highlighting markup using existing HiTags without
+// running new tagging -- for special case where tagging is under external
+// control
+func (tb *TextBuf) MarkupFromTags() {
+	tb.MarkupMu.Lock()
+	// getting the lock means we are in control of the flag
+	tb.SetFlag(int(TextBufMarkingUp))
+
+	maxln := ints.MinInt(len(tb.HiTags), tb.NLines)
+	for ln := 0; ln < maxln; ln++ {
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], tb.HiTags[ln], nil)
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
