@@ -378,7 +378,9 @@ uintptr_t doNewWindow(int width, int height, int left, int top, char* title, boo
 		
             NSWindow* window = NULL;
   
-            if (dialog || tool) {
+			// dialog windows on mac are actually pretty annoying -- can't see them between
+			// two apps as it causes them to disappear entire when switching
+            if (false) { // dialog || tool) {
                 window = [[NSPanel alloc] initWithContentRect:rect
                                                     styleMask:NSWindowStyleMaskTitled
                                                       backing:NSBackingStoreBuffered

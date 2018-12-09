@@ -1,5 +1,3 @@
-# gi
-
 ![alt tag](logo/gogi_logo.png)
 
 GoGi is part of the GoKi Go language (golang) full strength tree structure system (ki = tree in Japanese)
@@ -13,7 +11,7 @@ NOTE: Requires Go version `1.10+` due to use of `math.Round`.
 
 See the [Wiki](https://github.com/goki/gi/wiki) for more docs, discussion, etc.  [Install](https://github.com/goki/gi/wiki/Install) instructions (just standard `go get ...`).
 
-GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a simple, elegant GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers, supporting MacOS, Linux, and Windows).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile.
+GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a simple, elegant GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers, supporting MacOS, Linux, and Windows).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile. 
 
 See [Gide](https://github.com/goki/gide) for a complete, complex application written in GoGi (an IDE), and the various examples in this repository for lots of useful demonstrations -- start with the  [Widgets](https://github.com/goki/gi/tree/master/examples/widgets) example which has a bit of a tutorial introduction.
 
@@ -32,7 +30,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 * `SVG` element (in `svg` sub-package) supports full SVG rendering -- used for Icons internally and available for advanced graphics displays -- see `gi/examples/svg` for viewer and start on editor, along with a number of test .svg files.
 
 * Advanced **Model / View** paradigm with `reflect`ion-based view elements that display and manipulate all the standard Go types (in `giv` sub-package), from individual types (e.g., int, float display in a `SpinBox`, "enum" const int types in a `ComboBox` chooser) to composite data structures, including `StructView` editor of `struct` fields, `MapView` and `SliceView` displays of `map` and `slice` elements (including full editing / adding / deleting of elements), and full-featured `TableView` for a `slice`-of-`struct` and `TreeView` for GoKi trees.
-	+ `TreeView` enables a built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+I` in any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
+    + `TreeView` enables a built-in GUI editor / inspector for designing gui elements themselves.  Just press `Control+Alt+I` in any window to pull up this editor / inspector.  Scene graphs can be automatically saved / loaded from JSON files, to provide a basic GUI designer framework -- just load and add appropriate connections..
 
 ![Screenshot of Widgets demo](screenshot.png?raw=true "Screenshot of Widgets demo")
 
@@ -43,8 +41,8 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 There are three main types of 2D nodes:
 
 * `Viewport2D` nodes that manage their own `oswin.Image` bitmap and can upload that directly to the `oswin.Texture` that then uploads directly to the `oswin.Window`.  The parent `Window` has a master `Viewport2D` that backs the entire window, and is what most `Widget`'s render into.
-		+ Popup `Dialog` and `Menu`'s have their own viewports that are layered on top of the main window viewport.
-		+ `SVG` and its subclass `Icon` are containers for SVG-rendering nodes.
+    + Popup `Dialog` and `Menu`'s have their own viewports that are layered on top of the main window viewport.
+    + `SVG` and its subclass `Icon` are containers for SVG-rendering nodes.
 
 * `Widget` nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a `Layout` -- they use `units` system with arbitrary DPI to transform sizes into actual rendered `dots` (term for actual raw resolution-dependent pixels -- "pixel" has been effectively co-opted as a 96dpi display-independent unit at this point).  Widgets have non-overlapping bounding boxes (`BBox` -- cached for all relevant reference frames).
 

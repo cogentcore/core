@@ -39,6 +39,7 @@ type HiMarkup struct {
 	PiState   *pi.FileState     `desc:"pi parser state info"`
 	PiParser  *pi.Parser        `desc:"if supported, this is the pi parser"`
 	HiStyle   histyle.Style     `desc:"current highlighting style"`
+	Off       bool              `desc:"external toggle to turn off automatic highlighting"`
 	lastLang  string
 	lastStyle histyle.StyleName
 	lexer     chroma.Lexer
@@ -115,6 +116,9 @@ func (hm *HiMarkup) SetParser(pr *pi.Parser) {
 // MarkupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
 func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
+	if hm.Off {
+		return nil, nil
+	}
 	if hm.PiParser != nil {
 		hm.PiParser.InitAll(hm.PiState)
 		hm.PiParser.LexAll(hm.PiState)
@@ -128,6 +132,9 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 // MarkupTagsLine returns tags for one line according to current
 // syntax highlighting settings
 func (hm *HiMarkup) MarkupTagsLine(ln int, txt []byte) (lex.Line, error) {
+	if hm.Off {
+		return nil, nil
+	}
 	if hm.PiParser != nil {
 		ll := hm.PiParser.LexLine(hm.PiState, ln)
 		return ll, nil

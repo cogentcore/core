@@ -5,7 +5,9 @@
 package filecat
 
 import (
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/goki/ki/kit"
 )
@@ -105,6 +107,23 @@ func IsMatchList(targs []Supported, typ Supported) bool {
 		}
 	}
 	return false
+}
+
+// SupportedByName looks up supported file type by caps or lowercase name
+func SupportedByName(name string) (Supported, error) {
+	var sup Supported
+	err := sup.FromString(name)
+	if err != nil {
+		if err != nil {
+			name = strings.ToLower(name)
+			err = kit.Enums.SetEnumIfaceFromAltString(&sup, name) // alts = lowercase
+			if err != nil {
+				err = fmt.Errorf("filecat.SupportedByName: doesn't look like that is a supported file type: %v", name)
+				return sup, err
+			}
+		}
+	}
+	return sup, nil
 }
 
 // These are the super high-frequency used mime types, to have very quick const level support
@@ -282,7 +301,7 @@ const (
 
 //go:generate stringer -type=Supported
 
-var KiT_Supported = kit.Enums.AddEnum(SupportedN, false, nil)
+var KiT_Supported = kit.Enums.AddEnumAltLower(SupportedN, false, nil, "")
 
 func (kf Supported) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
 func (kf *Supported) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }

@@ -3252,6 +3252,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	tv.VisSizes()
 	pos := gi.NewVec2DFmPoint(tv.VpBBox.Min)
 	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
+	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
 	pos = tv.RenderStartPos()
 	stln := -1
 	edln := -1
@@ -3274,8 +3275,6 @@ func (tv *TextView) RenderAllLinesInBounds() {
 		rs.Unlock()
 		return
 	}
-
-	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
 
 	if tv.HasLineNos() {
 		tv.RenderLineNosBoxAll()

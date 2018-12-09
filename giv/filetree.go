@@ -26,6 +26,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/ki/runes"
 )
 
 // FileTree is the root of a tree representing files in a given directory (and
@@ -598,9 +599,9 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 		for ci < sz {
 			var i int
 			if ignoreCase {
-				i = RuneIndexFold(rn[ci:], fr)
+				i = runes.IndexFold(rn[ci:], fr)
 			} else {
-				i = RuneIndex(rn[ci:], fr)
+				i = runes.Index(rn[ci:], fr)
 			}
 			if i < 0 {
 				break

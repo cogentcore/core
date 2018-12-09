@@ -14,8 +14,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/filecat"
@@ -27,6 +25,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
+	"github.com/goki/ki/runes"
 	"github.com/goki/pi"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
@@ -69,6 +68,30 @@ func (tb *TextBufOpts) IndentChar() indent.Char {
 		return indent.Space
 	}
 	return indent.Tab
+}
+
+// ConfigSupported configures options based on the supported language info in GoPi
+// returns true if supported
+func (tb *TextBufOpts) ConfigSupported(sup filecat.Supported) bool {
+	if sup == filecat.NoSupport {
+		return false
+	}
+	lp, ok := pi.StdLangProps[sup]
+	if !ok {
+		return false
+	}
+	tb.CommentLn = lp.CommentLn
+	tb.CommentSt = lp.CommentSt
+	tb.CommentEd = lp.CommentEd
+	for _, flg := range lp.Flags {
+		switch flg {
+		case pi.IndentSpace:
+			tb.SpaceIndent = true
+		case pi.IndentTab:
+			tb.SpaceIndent = false
+		}
+	}
+	return true
 }
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
@@ -265,102 +288,6 @@ func (tb *TextBuf) BytesLine(ln int) []byte {
 	return tb.LineBytes[ln]
 }
 
-// todo: move these Rune methods to kit
-
-// RuneEqualFold reports whether s and t are equal under Unicode case-folding.
-// copied from strings.EqualFold
-func RuneEqualFold(s, t []rune) bool {
-	for len(s) > 0 && len(t) > 0 {
-		// Extract first rune from each string.
-		var sr, tr rune
-		sr, s = s[0], s[1:]
-		tr, t = t[0], t[1:]
-		// If they match, keep going; if not, return false.
-
-		// Easy case.
-		if tr == sr {
-			continue
-		}
-
-		// Make sr < tr to simplify what follows.
-		if tr < sr {
-			tr, sr = sr, tr
-		}
-		// Fast check for ASCII.
-		if tr < utf8.RuneSelf {
-			// ASCII only, sr/tr must be upper/lower case
-			if 'A' <= sr && sr <= 'Z' && tr == sr+'a'-'A' {
-				continue
-			}
-			return false
-		}
-
-		// General case. SimpleFold(x) returns the next equivalent rune > x
-		// or wraps around to smaller values.
-		r := unicode.SimpleFold(sr)
-		for r != sr && r < tr {
-			r = unicode.SimpleFold(r)
-		}
-		if r == tr {
-			continue
-		}
-		return false
-	}
-
-	// One string is empty. Are both?
-	return len(s) == len(t)
-}
-
-// RuneIndex returns the index of given rune string in the text -- this MUST be used for
-// computing the TextPos Ch position of anything, because these positions are in runes,
-// not in bytes!
-func RuneIndex(txt, find []rune) int {
-	fsz := len(find)
-	if fsz == 0 {
-		return -1
-	}
-	tsz := len(txt)
-	if tsz < fsz {
-		return -1
-	}
-	mn := tsz - fsz
-	for i := 0; i <= mn; i++ {
-		found := true
-		for j := range find {
-			if txt[i+j] != find[j] {
-				found = false
-				break
-			}
-		}
-		if found {
-			return i
-		}
-	}
-	return -1
-}
-
-// RuneIndexFold returns the index of given rune string in the text, using case folding
-// (i.e., case insensitive matching)
-// This MUST be used for computing the TextPos Ch position of anything, because these positions
-// are in runes, not in bytes!
-func RuneIndexFold(txt, find []rune) int {
-	fsz := len(find)
-	if fsz == 0 {
-		return -1
-	}
-	tsz := len(txt)
-	if tsz < fsz {
-		return -1
-	}
-	mn := tsz - fsz
-	for i := 0; i <= mn; i++ {
-		if RuneEqualFold(txt[i:i+fsz], find) {
-			return i
-		}
-	}
-	return -1
-}
-
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
 func (tb *TextBuf) SetHiStyle(style histyle.StyleName) {
 	tb.MarkupMu.Lock()
@@ -429,14 +356,17 @@ func (tb *TextBuf) Stat() error {
 	if err != nil {
 		return err
 	}
-	if tb.Info.Sup != filecat.NoSupport {
-		if lp, ok := pi.StdLangProps[tb.Info.Sup]; ok {
-			tb.Opts.CommentLn = lp.CommentLn
-			tb.Opts.CommentSt = lp.CommentSt
-			tb.Opts.CommentEd = lp.CommentEd
-		}
-	}
+	tb.ConfigSupported()
 	return nil
+}
+
+// ConfigSupported configures options based on the supported language info in GoPi
+// returns true if supported
+func (tb *TextBuf) ConfigSupported() bool {
+	if tb.Info.Sup != filecat.NoSupport {
+		return tb.Opts.ConfigSupported(tb.Info.Sup)
+	}
+	return false
 }
 
 // FileModCheck checks if the underlying file has been modified since last
@@ -1054,9 +984,9 @@ func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch)
 		for ci < sz {
 			var i int
 			if ignoreCase {
-				i = RuneIndexFold(rn[ci:], fr)
+				i = runes.IndexFold(rn[ci:], fr)
 			} else {
-				i = RuneIndex(rn[ci:], fr)
+				i = runes.Index(rn[ci:], fr)
 			}
 			if i < 0 {
 				break
@@ -1698,6 +1628,8 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	copy(nof[stln:], tmpof)
 	tb.ByteOffs = nof
 
+	tb.PiState.Src.LinesInserted(stln, nsz)
+
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
@@ -1725,6 +1657,8 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.Tags = append(tb.Tags[:stln], tb.Tags[edln:]...)
 	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
+
+	tb.PiState.Src.LinesDeleted(stln, edln)
 
 	st := tbe.Reg.Start.Ln
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
@@ -2192,7 +2126,7 @@ func (tb *TextBuf) CommentStart(ln int) int {
 	}
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return RuneIndex(tb.Line(ln), []rune(comst))
+	return runes.Index(tb.Line(ln), []rune(comst))
 }
 
 // InComment returns true if the given text position is within a commented region
@@ -2263,7 +2197,7 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + len(comst)}, true, true)
 			}
 			if comed != "" {
-				idx := RuneIndexFold(tb.Line(ln), []rune(comed))
+				idx := runes.IndexFold(tb.Line(ln), []rune(comed))
 				if idx >= 0 {
 					tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + len(comed)}, true, true)
 				}
