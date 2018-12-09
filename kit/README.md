@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/ki/kit)](https://goreportcard.com/report/github.com/goki/ki/kit)
 [![GoDoc](https://godoc.org/github.com/goki/ki/kit?status.svg)](http://godoc.org/github.com/goki/ki/kit)
 
-Package `kit1 provides various reflect type functions for GoKi system, including:
+Package `kit` provides various reflect type functions for GoKi system (KiType = KiT = kit -- also a bit of a "kit" collection of low-level system functions), including:
 
 * `kit.TypeRegistry (types.go)` for associating string names with
 `reflect.Type` values, to allow dynamic marshaling of structs, and also
@@ -12,11 +12,11 @@ by the GoKi ki system, hence the kit (ki types) name.
 
 To register a new type, add:
 
-``` go
+```Go
 var KiT_TypeName = kit.Types.AddType(&TypeName{}, [props|nil])
 ```
 
-where the props is a map[string]interface{} of optional properties that can
+where the props is a `map[string]interface{}` of optional properties that can
 be associated with the type -- this is used in the GoGi graphical interface
 system for example to color objects of different types using the
 background-color property.  KiT_TypeName variable can be conveniently used
