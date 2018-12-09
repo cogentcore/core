@@ -863,6 +863,7 @@ func (pv *PiView) ConfigSplitView() {
 
 		pv.TestBuf.SetHiStyle(gide.Prefs.HiStyle)
 		gide.Prefs.Editor.ConfigTextBuf(&pv.TestBuf)
+		pv.TestBuf.Hi.Off = true // prevent auto-hi
 
 		pv.LexBuf.SetHiStyle(gide.Prefs.HiStyle)
 		gide.Prefs.Editor.ConfigTextBuf(&pv.LexBuf)

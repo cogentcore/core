@@ -25,27 +25,29 @@ var TheLangLexer LangLexer
 
 // lex.State is the state maintained for lexing
 type State struct {
-	Filename string      `desc:"the current file being lex'd"`
-	KeepWS   bool        `desc:"if true, record whitespace tokens -- else ignore"`
-	GuestLex *Rule       `desc:"a guest lexer that can be installed for managing a different language type, e.g., quoted text in markdown files"`
-	Src      []rune      `desc:"the current line of source being processed"`
-	Lex      Line        `desc:"the lex output for this line"`
-	Comments Line        `desc:"the comments output for this line -- kept separately"`
-	Pos      int         `desc:"the current rune char position within the line"`
-	Ln       int         `desc:"the line within overall source that we're operating on (0 indexed)"`
-	Ch       rune        `desc:"the current rune read by NextRune"`
-	State    []string    `desc:"state stack"`
-	LastName string      `desc:"the last name that was read"`
-	Time     nptime.Time `desc:"time stamp for lexing -- set at start of new lex process"`
-	Errs     ErrorList   `desc:"any error messages accumulated during lexing specifically"`
+	Filename  string      `desc:"the current file being lex'd"`
+	KeepWS    bool        `desc:"if true, record whitespace tokens -- else ignore"`
+	Src       []rune      `desc:"the current line of source being processed"`
+	Lex       Line        `desc:"the lex output for this line"`
+	Comments  Line        `desc:"the comments output for this line -- kept separately"`
+	Pos       int         `desc:"the current rune char position within the line"`
+	Ln        int         `desc:"the line within overall source that we're operating on (0 indexed)"`
+	Ch        rune        `desc:"the current rune read by NextRune"`
+	Stack     Stack       `desc:"state stack"`
+	LastName  string      `desc:"the last name that was read"`
+	GuestLex  *Rule       `desc:"a guest lexer that can be installed for managing a different language type, e.g., quoted text in markdown files"`
+	SaveStack Stack       `desc:"copy of stack at point when guest lexer was installed -- restore when popped"`
+	Time      nptime.Time `desc:"time stamp for lexing -- set at start of new lex process"`
+	Errs      ErrorList   `desc:"any error messages accumulated during lexing specifically"`
 }
 
 // Init initializes the state at start of parsing
 func (ls *State) Init() {
 	ls.GuestLex = nil
-	ls.State = nil
+	ls.Stack = nil
 	ls.Ln = 0
 	ls.SetLine(nil)
+	ls.SaveStack = nil
 	ls.Errs.Reset()
 }
 
@@ -147,26 +149,19 @@ func (ls *State) Add(tok token.Tokens, st, ed int) {
 	lx.Time = ls.Time
 }
 
+// PushState pushes state onto stack
 func (ls *State) PushState(st string) {
-	ls.State = append(ls.State, st)
+	ls.Stack.Push(st)
 }
 
+// CurState returns the current state
 func (ls *State) CurState() string {
-	sz := len(ls.State)
-	if sz == 0 {
-		return ""
-	}
-	return ls.State[sz-1]
+	return ls.Stack.Top()
 }
 
+// PopState pops state off of stack
 func (ls *State) PopState() string {
-	sz := len(ls.State)
-	if sz == 0 {
-		return ""
-	}
-	st := ls.CurState()
-	ls.State = ls.State[:sz-1]
-	return st
+	return ls.Stack.Pop()
 }
 
 func (ls *State) ReadName() {

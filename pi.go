@@ -47,7 +47,7 @@ func NewParser() *Parser {
 // InitAll initializes everything about the parser -- call this when setting up a new
 // parser after it has been loaded etc
 func (pr *Parser) InitAll(fs *FileState) {
-	fs.Src.AllocLexs()
+	fs.Src.AllocLines()
 	pr.LexInit(fs)
 	pr.ParserInit(fs)
 }
@@ -70,7 +70,7 @@ func (pr *Parser) LexNext(fs *FileState) *lex.Rule {
 	}
 	for {
 		if fs.LexState.AtEol() {
-			fs.Src.SetLexs(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments)
+			fs.Src.SetLine(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
 			fs.LexState.Ln++
 			if fs.LexState.Ln >= fs.Src.NLines() {
 				return nil
@@ -97,7 +97,7 @@ func (pr *Parser) LexNextLine(fs *FileState) *lex.Rule {
 	var mrule *lex.Rule
 	for {
 		if fs.LexState.AtEol() {
-			fs.Src.SetLexs(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments)
+			fs.Src.SetLine(fs.LexState.Ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack)
 			fs.LexState.Ln++
 			if fs.LexState.Ln >= fs.Src.NLines() {
 				return nil
@@ -130,6 +130,8 @@ func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
 		return nil
 	}
 	fs.LexState.SetLine((*fs.Src.Lines)[ln])
+	pst := fs.Src.PrevStack(ln)
+	fs.LexState.Stack = pst.Clone()
 	for !fs.LexState.AtEol() {
 		mrule := pr.Lexer.LexStart(&fs.LexState)
 		if mrule == nil {
@@ -137,8 +139,8 @@ func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
 		}
 	}
 	initDepth := fs.Src.PrevDepth(ln)
-	pr.PassTwo.NestDepthLine(fs.LexState.Lex, initDepth)      // important to set this one's depth
-	fs.Src.SetLexs(ln, fs.LexState.Lex, fs.LexState.Comments) // before saving here
+	pr.PassTwo.NestDepthLine(fs.LexState.Lex, initDepth)                         // important to set this one's depth
+	fs.Src.SetLine(ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack) // before saving here
 	merge := lex.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
 	mc := merge.Clone()
 	if len(fs.LexState.Comments) > 0 {

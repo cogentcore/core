@@ -12,43 +12,63 @@ import (
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
 type File struct {
-	Filename string    `desc:"the current file being lex'd"`
-	Lines    *[][]rune `desc:"contents of the file as lines of runes"`
-	Lexs     []Line    `desc:"lex'd version of the lines -- allocated to size of Lines"`
-	Comments []Line    `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
+	Filename   string    `desc:"the current file being lex'd"`
+	Lines      *[][]rune `desc:"contents of the file as lines of runes"`
+	Lexs       []Line    `desc:"lex'd version of the lines -- allocated to size of Lines"`
+	Comments   []Line    `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
+	LastStacks []Stack   `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs
 func (fl *File) SetSrc(src *[][]rune, fname string) {
 	fl.Filename = fname
 	fl.Lines = src
-	fl.AllocLexs()
+	fl.AllocLines()
 }
 
-// AllocLexs allocates the lexs output lines
-func (fl *File) AllocLexs() {
+// AllocLines allocates the data per line: lex outputs and stack.
+// We reset state so stale state is not hanging around.
+func (fl *File) AllocLines() {
 	if fl.Lines == nil {
 		return
 	}
 	nlines := fl.NLines()
-	if fl.Lexs != nil {
-		if cap(fl.Lexs) >= nlines {
-			fl.Lexs = fl.Lexs[:nlines]
-		} else {
-			fl.Lexs = make([]Line, nlines)
-		}
-	} else {
-		fl.Lexs = make([]Line, nlines)
-	}
-	if fl.Comments != nil {
-		if cap(fl.Comments) >= nlines {
-			fl.Comments = fl.Comments[:nlines]
-		} else {
-			fl.Comments = make([]Line, nlines)
-		}
-	} else {
-		fl.Comments = make([]Line, nlines)
-	}
+	fl.Lexs = make([]Line, nlines)
+	fl.Comments = make([]Line, nlines)
+	fl.LastStacks = make([]Stack, nlines)
+}
+
+// LinesInserted inserts new lines -- called e.g., by giv.TextBuf to sync
+// the markup with ongoing edits
+func (fl *File) LinesInserted(stln, nsz int) {
+	// Lexs
+	tmplx := make([]Line, nsz)
+	nlx := append(fl.Lexs, tmplx...)
+	copy(nlx[stln+nsz:], nlx[stln:])
+	copy(nlx[stln:], tmplx)
+	fl.Lexs = nlx
+
+	// Comments
+	tmpcm := make([]Line, nsz)
+	ncm := append(fl.Comments, tmpcm...)
+	copy(ncm[stln+nsz:], ncm[stln:])
+	copy(ncm[stln:], tmpcm)
+	fl.Comments = ncm
+
+	// LastStacks
+	tmpls := make([]Stack, nsz)
+	nls := append(fl.LastStacks, tmpls...)
+	copy(nls[stln+nsz:], nls[stln:])
+	copy(nls[stln:], tmpls)
+	fl.LastStacks = nls
+}
+
+// LinesDeleted deletes lines -- called e.g., by giv.TextBuf to sync
+// the markup with ongoing edits
+func (fl *File) LinesDeleted(stln, edln int) {
+	fl.Lexs = append(fl.Lexs[:stln], fl.Lexs[edln:]...)
+	fl.Comments = append(fl.Comments[:stln], fl.Comments[edln:]...)
+	fl.LastStacks = append(fl.LastStacks[:stln], fl.LastStacks[edln:]...)
 }
 
 // NLines returns the number of lines in source
@@ -59,16 +79,17 @@ func (fl *File) NLines() int {
 	return len(*fl.Lines)
 }
 
-// SetLexs sets the lex output for given line -- does a copy
-func (fl *File) SetLexs(ln int, lexs, comments Line) {
+// SetLine sets the line data from the lexer -- does a clone to keep the copy
+func (fl *File) SetLine(ln int, lexs, comments Line, stack Stack) {
 	if len(fl.Lexs) <= ln {
-		fl.AllocLexs()
+		fl.AllocLines()
 	}
 	if len(fl.Lexs) <= ln {
 		return
 	}
 	fl.Lexs[ln] = lexs.Clone()
 	fl.Comments[ln] = comments.Clone()
+	fl.LastStacks[ln] = stack.Clone()
 }
 
 // LexLine returns the lexing output for given line, combining comments and all other tokens
@@ -189,6 +210,17 @@ func (fl *File) PrevDepth(ln int) int {
 		return 0
 	}
 	return fl.LexAt(pos).Depth
+}
+
+// PrevStack returns the stack from the previous line
+func (fl *File) PrevStack(ln int) Stack {
+	if ln <= 0 {
+		return nil
+	}
+	if len(fl.LastStacks) <= ln {
+		return nil
+	}
+	return fl.LastStacks[ln-1]
 }
 
 // TokenMapReg creates a TokenMap of tokens in region, including their

@@ -1,7 +1,12 @@
 # GoPi = Interactive Parser in GoKi / GoGi Framework
 
 ```Go
-if a + b * 2 / 7 - 42 > c * d + e / 72 {
+if a + b * 2 / 7 - 42 > c * d + e / 72 
+for a := 0; a < 10; a++ {
+    switch a {
+    case 1:
+    }
+}
 ```
 
 The `pi` *package* __allows__ regular **users** to **create** things __parsers *and nested* __ using _the_ GoGi graphical interface system.  [link tag](and addresses) are parsed as expected.  Including plain [tags] without any addresses.  https://wikipedia.com should work too once we plug in url recognizer.
@@ -74,7 +79,7 @@ You can create arbitrarily long expressions by stringing together sequences of b
 2. The operators must be organized in *reverse* order of priority, so that the lowest priority operations are factored out first, creating the highest-level, broadest splits of the overall expression (in the Ast tree), and then progressively finer, tighter, inner steps are parsed out.  Thus, for example in this expression:
 
 ```Go
-if a + b * 2 / 7 - 42 > c * d + e / 72 {
+if a + b * 2 / 7 - 42 > c * d + e / 72
 ```
 
 The broadest, first split is into the two sides of the `>` operator, and then each of those sides is progressively organized first into an addition operator, then the `*` and `/`.  

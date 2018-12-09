@@ -145,7 +145,6 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 			ls.Lex = nil
 		}
 		mrule = ls.GuestLex.LexStart(ls)
-
 	}
 	return mrule
 }
@@ -345,9 +344,14 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 			lx := TheLangLexer.Lexer(ls.LastName)
 			if lx != nil {
 				ls.GuestLex = lx
+				ls.SaveStack = ls.Stack.Clone()
 			}
 		}
 	case PopGuestLex:
+		if ls.SaveStack != nil {
+			ls.Stack = ls.SaveStack
+			ls.SaveStack = nil
+		}
 		ls.GuestLex = nil
 	}
 }

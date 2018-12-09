@@ -14,9 +14,9 @@ Specifically, there are three distinct passes through the source file, each crea
 
 * **StepTwo** -- this is a critical second pass through the lexical tokens, performing two important things:
 
- 	+ **Nesting Depth** -- all programming languages use some form of parens `( )` brackets `[ ]` and braces `{ }` to group elements, and parsing must be sensitive to these.  Instead of dealing with these issues locally at every step, we do a single pass through the entire tokenized version of the source and compute the depth of every token.  Then, the token matching in parsing only needs to compare relative depth values, without having to constantly re-compute that.
+    + **Nesting Depth** -- all programming languages use some form of parens `( )` brackets `[ ]` and braces `{ }` to group elements, and parsing must be sensitive to these.  Instead of dealing with these issues locally at every step, we do a single pass through the entire tokenized version of the source and compute the depth of every token.  Then, the token matching in parsing only needs to compare relative depth values, without having to constantly re-compute that.
 	
-	+ **EOS Detection** -- This step detects *end of statement* tokens, which provide an essential first-pass rough-cut chunking of the source into *statements*.  In C / C++ / Go these are the *semicolons* `;` (in Go, semicolons are mostly automatically computed from tokens that appear at the end of lines -- Pi supports this as well).  In Python, this is the end of line itself, unless it is not at the same nesting depth as at the start of the line.
+    + **EOS Detection** -- This step detects *end of statement* tokens, which provide an essential first-pass rough-cut chunking of the source into *statements*.  In C / C++ / Go these are the *semicolons* `;` (in Go, semicolons are mostly automatically computed from tokens that appear at the end of lines -- Pi supports this as well).  In Python, this is the end of line itself, unless it is not at the same nesting depth as at the start of the line.
 	
 * **Parsing** -- finally we parse the tokenized source using rules that match patterns of tokens.  Instead of using bottom-up local token-sequence driven parsing, as is done in tools like `yacc` and `bison`, we use the much more robust recursive descent technique, which starts in our case with those rough-cut statement chunks produced in StepTwo, and proceeds by recognizing the type of each statement, and then further carving each one into its appropriate sub-parts, again in a top-down, progressively-narrowing fashion, until everything has been categorized to the lowest level.  At each step, nodes in an __Abstract Syntax Tree (AST)__ are created, representing this same top-down broad-to-narrow parsing of the source.  Thus, the highest nodes are statement-level nodes, each of which then contain the organized elements of each statement.  These nodes are all in the natural *functional* hierarchical ordering, *not* in the raw left-to-right order of the source, and directly correspond to the way that the parsing proceeds.  Thus, building the AST at the same time as parsing is very natural in the top-down RD framework, unlike traditional bottom-up approaches, and is a major reason that hand-coded parsers use this technique.
 
@@ -30,9 +30,19 @@ One major problem with RD parsing is that it gets the [associativity](https://en
 
 Also, for RD parsing, to deal properly with the [order of operations](https://en.wikipedia.org/wiki/Order_of_operations), you have to order the rules in the *reverse* order of precedence.  Thus, it matches the *lowest* priority items first, and those become the "outer branch" of the AST, which then proceeds to fill in so that the highest-priority items are in the "leaves" of the tree, which are what gets processed first.
 
+# Lexing and Parsing Rules
+
+## Principle of Preemptive Specificity
+
+A common principle across lexing and parsing rules is the *principle of preemptive specificity* -- all of the different rule options are arranged in order, and the *first to match* preempts consideration of any of the remaining rules.  This is how a `switch` rule works in Go or C.  This is a particularly simple way of dealing with many potential rules and conflicts therefrom.  The overall strategy as a user is to *put the most specific items first* so that they will get considered, and then the general "default" cases are down at the bottom.  This is hopefully very intuitive and easy to use.
+
+In the Lexer, this is particularly important for the `State` elements: when you enter a different context that continues across multiple chars or lines, you push that context onto the State Stack, and then it is critical that all the rules matching those different states are at the top of the list, so they preempt any non-state-specific alternatives. 
+
 ## Lexing Rules
 
-* order matters! and state matters!
+Lexing is all about the ordering -- follow the above principle of preemptive specificity.
+
+Another common situation is resolving the ambiguity about multi-character constructs, such as `:=` vs just `:` or `=`.  In this case, you have an outer rule that matches `:`, and then within that, child rules that do a one-step lookahead for a `=` at `Off=1` -- if that matches, then it is `:=` -- you need to put that rule first, and then the default is just the plain `:`.
 
 ## Parsing Rules
 
@@ -51,7 +61,7 @@ You can create arbitrarily long expressions by stringing together sequences of b
 2. The operators must be organized in *reverse* order of priority, so that the lowest priority operations are factored out first, creating the highest-level, broadest splits of the overall expression (in the Ast tree), and then progressively finer, tighter, inner steps are parsed out.  Thus, for example in this expression:
 
 ```Go
-if a + b * 2 / 7 - 42 > c * d + e / 72 {
+if a + b * 2 / 7 - 42 > c * d + e / 72
 ```
 
 The broadest, first split is into the two sides of the `>` operator, and then each of those sides is progressively organized first into an addition operator, then the `*` and `/`.  
@@ -72,7 +82,7 @@ Another generative domain are the path-wise operators, principally the "selector
 
 ```Go
 ps.Errs[len(ps.Errs)-1].Error()[0][1].String()
-````
+```
 
 In the top-down parser, it is essential to create this open-ended scenario by including pre-and-post expressions surrounding the `Slice` and `Selector` operators, which then act like the Expr groups surrounding the AddExpr operator to support recursive chaining.  For Selector, the two Expr's are required, but for Slice, they are optional - that works fine:
 

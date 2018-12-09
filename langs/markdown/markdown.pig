@@ -1,7 +1,7 @@
 // /Users/oreilly/goki/pi/langs/markdown/markdown.pig Lexer
 
 InCode:		 None		 if CurState == "Code" {
-    CodeEnd:       LitStrBacktick       if String == "```"   do: PopState; PopGuestLex; Next; 
+    CodeEnd:       LitStrBacktick       if String == "```"   do: PopGuestLex; PopState; Next; 
     AnyCode:       LitStrBacktick       if AnyRune           do: Next; 
 }
 InLinkAddr:		 None		 if CurState == "LinkAddr" {
