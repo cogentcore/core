@@ -12,10 +12,22 @@ import (
 	"github.com/goki/pi/token"
 )
 
+// LangLexer looks up lexer for given language -- impl in parent pi package
+// so we need the interface
+type LangLexer interface {
+	// Lexer returns the top-level lex.Rule for given language (case invariant lookup)
+	Lexer(lang string) *Rule
+}
+
+// TheLangLexer is the instance of LangLexer interface used to lookup lexers
+// for languages -- is set in pi/langs.go
+var TheLangLexer LangLexer
+
 // lex.State is the state maintained for lexing
 type State struct {
 	Filename string      `desc:"the current file being lex'd"`
 	KeepWS   bool        `desc:"if true, record whitespace tokens -- else ignore"`
+	GuestLex *Rule       `desc:"a guest lexer that can be installed for managing a different language type, e.g., quoted text in markdown files"`
 	Src      []rune      `desc:"the current line of source being processed"`
 	Lex      Line        `desc:"the lex output for this line"`
 	Comments Line        `desc:"the comments output for this line -- kept separately"`
@@ -23,12 +35,14 @@ type State struct {
 	Ln       int         `desc:"the line within overall source that we're operating on (0 indexed)"`
 	Ch       rune        `desc:"the current rune read by NextRune"`
 	State    []string    `desc:"state stack"`
+	LastName string      `desc:"the last name that was read"`
 	Time     nptime.Time `desc:"time stamp for lexing -- set at start of new lex process"`
 	Errs     ErrorList   `desc:"any error messages accumulated during lexing specifically"`
 }
 
 // Init initializes the state at start of parsing
 func (ls *State) Init() {
+	ls.GuestLex = nil
 	ls.State = nil
 	ls.Ln = 0
 	ls.SetLine(nil)
@@ -156,15 +170,18 @@ func (ls *State) PopState() string {
 }
 
 func (ls *State) ReadName() {
+	str := ""
 	sz := len(ls.Src)
 	for ls.Pos < sz {
 		rn := ls.Src[ls.Pos]
 		if IsLetter(rn) || IsDigit(rn) {
+			str += string(rn)
 			ls.Pos++
 		} else {
 			break
 		}
 	}
+	ls.LastName = str
 }
 
 // NextSrcLine returns the next line of text

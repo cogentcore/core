@@ -5,6 +5,7 @@
 package pi
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/goki/gi/filecat"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/lex"
 )
 
 // LangFlags are special properties of a given language
@@ -83,6 +85,8 @@ var StdLangProps = map[filecat.Supported]LangProps{
 
 // OpenStdParsers opens all the standard parsers for languages, from the langs/ directory
 func OpenStdParsers() error {
+	lex.TheLangLexer = &TheLangSupport
+
 	path, err := kit.GoSrcDir("github.com/goki/pi/langs")
 	if err != nil {
 		log.Println(err)
@@ -101,4 +105,44 @@ func OpenStdParsers() error {
 		StdLangProps[sl] = lp
 	}
 	return nil
+}
+
+// LangSupport provides general support for supported languages.
+// e.g., looking up lexers and parsers by name.
+// Implements the lex.LangLexer interface to provide access to other
+// Guest Lexers
+type LangSupport struct {
+}
+
+var TheLangSupport = LangSupport{}
+
+// LangProps looks up language properties by string name of language
+// (with case-insensitive fallback). Returns false if not supported.
+func (ll *LangSupport) LangProps(lang string) (*LangProps, error) {
+	sup, err := filecat.SupportedByName(lang)
+	if err != nil {
+		// log.Println(err.Error()) // don't want output during lexing..
+		return nil, err
+	}
+	lp, has := StdLangProps[sup]
+	if !has {
+		err = fmt.Errorf("gi.LangProps: no specific language support for language: %v", sup)
+		//		log.Println(err.Error()) // don't want output
+		return nil, err
+	}
+	return &lp, nil
+}
+
+// Lexer looks up Lexer for given language, using robust case sensitive and insensitive
+// search
+func (ll *LangSupport) Lexer(lang string) *lex.Rule {
+	lp, err := ll.LangProps(lang)
+	if err != nil {
+		return nil
+	}
+	if lp.Parser == nil {
+		// log.Printf("gi.LangSupport: no lexer / parser support for language: %v\n", lang)
+		return nil
+	}
+	return &lp.Parser.Lexer
 }

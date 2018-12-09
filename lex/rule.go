@@ -127,14 +127,27 @@ func (lr *Rule) Validate(ls *State) bool {
 
 // LexStart is called on the top-level lex node to start lexing process for one step
 func (lr *Rule) LexStart(ls *State) *Rule {
+	hasGuest := ls.GuestLex != nil
 	cpos := ls.Pos
-	rval := lr.Lex(ls)
+	lxsz := len(ls.Lex)
+	mrule := lr.Lex(ls)
 	if !ls.AtEol() && cpos == ls.Pos {
 		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(ls.Src[cpos:]))
 		ls.Error(cpos, msg)
 		return nil
 	}
-	return rval
+	if hasGuest && ls.GuestLex != nil && lr != ls.GuestLex {
+		ls.Pos = cpos // backup and undo what the standard rule did, and redo with guest..
+		// this is necessary to allow main lex to detect when to turn OFF the guest!
+		if lxsz > 0 {
+			ls.Lex = ls.Lex[:lxsz]
+		} else {
+			ls.Lex = nil
+		}
+		mrule = ls.GuestLex.LexStart(ls)
+
+	}
+	return mrule
 }
 
 // Lex tries to apply rule to given input state, returns lowest-level rule that matched, nil if none
@@ -325,6 +338,17 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 		ls.PushState(lr.PushState)
 	case PopState:
 		ls.PopState()
+	case SetGuestLex:
+		if ls.LastName == "" {
+			ls.Error(0, fmt.Sprintf("lex.Rule: SetGuestLex action requires prior Name action -- name is empty, in: %v\n", lr.PathUnique()))
+		} else {
+			lx := TheLangLexer.Lexer(ls.LastName)
+			if lx != nil {
+				ls.GuestLex = lx
+			}
+		}
+	case PopGuestLex:
+		ls.GuestLex = nil
 	}
 }
 

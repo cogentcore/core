@@ -52,5 +52,13 @@ const (
 	// PopState means pop given state value off the state stack
 	PopState
 
+	// SetGuestLex means install the Name (must be a prior action) as the guest
+	// lexer -- it will take over lexing until PopGuestLex is called
+	SetGuestLex
+
+	// PopGuestLex removes the current guest lexer and returns to the original
+	// language lexer
+	PopGuestLex
+
 	ActionsN
 )

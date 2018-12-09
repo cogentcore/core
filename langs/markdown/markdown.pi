@@ -84,6 +84,7 @@
             "Off": 0,
             "Acts": [
               "PopState",
+              "PopGuestLex",
               "Next"
             ],
             "PushState": ""
@@ -468,7 +469,48 @@
         "Nm": "CodeStart",
         "UniqueNm": "CodeStart",
         "Props": null,
-        "Kids": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "lex.Rule",
+            "name": "CodeLang",
+            "type": "lex.Rule",
+            "name": "CodePlain"
+          },
+          {
+            "Nm": "CodeLang",
+            "UniqueNm": "CodeLang",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "KeywordNamespace",
+            "Match": "Letter",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Name",
+              "SetGuestLex"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "CodePlain",
+            "UniqueNm": "CodePlain",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "LitStrBacktick",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
         "Desc": "",
         "Token": "LitStrBacktick",
         "Match": "String",
@@ -476,8 +518,8 @@
         "String": "```",
         "Off": 0,
         "Acts": [
-          "PushState",
-          "Next"
+          "Next",
+          "PushState"
         ],
         "PushState": "Code"
       },

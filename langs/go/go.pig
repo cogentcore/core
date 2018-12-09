@@ -162,6 +162,8 @@ Or:		 None		 if String == "|" {
     LogOr:        OpLogOr           if +1:String == "|"   do: Next; 
     BitOr:        OpBitOr           if String == "|"      do: Next; 
 }
+// AnyText all lexers should end with a default AnyRune rule so lexing is robust 
+AnyText:		 Text		 if AnyRune	 do: Next; 
 
 
 ///////////////////////////////////////////////////

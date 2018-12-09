@@ -1,7 +1,7 @@
 // /Users/oreilly/goki/pi/langs/markdown/markdown.pig Lexer
 
 InCode:		 None		 if CurState == "Code" {
-    CodeEnd:       LitStrBacktick       if String == "```"   do: PopState; Next; 
+    CodeEnd:       LitStrBacktick       if String == "```"   do: PopState; PopGuestLex; Next; 
     AnyCode:       LitStrBacktick       if AnyRune           do: Next; 
 }
 InLinkAddr:		 None		 if CurState == "LinkAddr" {
@@ -30,7 +30,10 @@ InEmphUnder:		 None		 if CurState == "EmphUnder" {
     EndEmphUnder:       TextStyleEmph       if String == "_"   do: PopState; Next; 
     AnyEmphUnder:       TextStyleEmph       if AnyRune         do: Next; 
 }
-CodeStart:		 LitStrBacktick		 if String == "```"	 do: PushState: Code; Next; 
+CodeStart:		 LitStrBacktick		 if String == "```"	 do: Next; PushState: Code;  {
+    CodeLang:        KeywordNamespace       if Letter    do: Name; SetGuestLex; 
+    CodePlain:       LitStrBacktick         if AnyRune   do: Next; 
+}
 HeadPound:		 None		 if String == "#" {
     HeadPound2:       None       if +1:String == "#" {
         HeadPound3:       None       if +2:String == "#" {

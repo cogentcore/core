@@ -131,8 +131,8 @@ func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
 	}
 	fs.LexState.SetLine((*fs.Src.Lines)[ln])
 	for !fs.LexState.AtEol() {
-		rval := pr.Lexer.LexStart(&fs.LexState)
-		if rval == nil {
+		mrule := pr.Lexer.LexStart(&fs.LexState)
+		if mrule == nil {
 			break
 		}
 	}

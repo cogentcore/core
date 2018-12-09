@@ -862,13 +862,13 @@ func (pv *PiView) ConfigSplitView() {
 		astt.SetRootNode(&fs.Ast)
 
 		pv.TestBuf.SetHiStyle(gide.Prefs.HiStyle)
-		gide.Prefs.Editor.ConfigTextBuf(&pv.TestBuf.Opts)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.TestBuf)
 
 		pv.LexBuf.SetHiStyle(gide.Prefs.HiStyle)
-		gide.Prefs.Editor.ConfigTextBuf(&pv.LexBuf.Opts)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.LexBuf)
 
 		pv.ParseBuf.SetHiStyle(gide.Prefs.HiStyle)
-		gide.Prefs.Editor.ConfigTextBuf(&pv.ParseBuf.Opts)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.ParseBuf)
 
 		split.SetSplits(.15, .15, .2, .15, .35)
 		split.UpdateEnd(updt)

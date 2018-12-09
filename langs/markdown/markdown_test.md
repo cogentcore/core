@@ -1,5 +1,9 @@
 # GoPi = Interactive Parser in GoKi / GoGi Framework
 
+```Go
+if a + b * 2 / 7 - 42 > c * d + e / 72 {
+```
+
 The `pi` *package* __allows__ regular **users** to **create** things __parsers *and nested* __ using _the_ GoGi graphical interface system.  [link tag](and addresses) are parsed as expected.  Including plain [tags] without any addresses.  https://wikipedia.com should work too once we plug in url recognizer.
 
 This is not a # heading
@@ -91,7 +95,7 @@ Another generative domain are the path-wise operators, principally the "selector
 
 ```Go
 ps.Errs[len(ps.Errs)-1].Error()[0][1].String()
-````
+```
 
 In the top-down parser, it is essential to create this open-ended scenario by including pre-and-post expressions surrounding the `Slice` and `Selector` operators, which then act like the Expr groups surrounding the AddExpr operator to support recursive chaining.  For Selector, the two Expr's are required, but for Slice, they are optional - that works fine:
 

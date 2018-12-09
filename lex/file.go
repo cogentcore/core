@@ -83,7 +83,7 @@ func (fl *File) LexLine(ln int) Line {
 
 // NTokens returns number of lex tokens for given line
 func (fl *File) NTokens(ln int) int {
-	if fl.Lexs == nil {
+	if fl == nil || fl.Lexs == nil {
 		return 0
 	}
 	if len(fl.Lexs) <= ln {
