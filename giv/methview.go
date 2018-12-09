@@ -909,15 +909,18 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	for i := 0; i < sz; i++ {
 		val := mvnp.Index(i)
 		nm := kit.ToString(val)
+		if nm == gi.MenuTextSeparator {
+			sp := &gi.Separator{}
+			sp.InitName(sp, "sep")
+			sp.Horiz = true
+			(*m)[i] = sp
+			continue
+		}
 		nac := &gi.Action{}
 		nac.InitName(nac, nm)
 		nac.Text = nm
-		if nm == gi.MenuTextSeparator {
-			nac.Text = gi.MenuTextSeparator
-		} else {
-			nac.SetAsMenu()
-			nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
-		}
+		nac.SetAsMenu()
+		nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
 		nd := *md // copy
 		nd.SubMenuVal = val
 		if gotDef {

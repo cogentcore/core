@@ -127,14 +127,14 @@ func (m *Menu) AddSeparator(name string) *Separator {
 	if m == nil {
 		*m = make(Menu, 0, 10)
 	}
-	sp := Separator{}
+	sp := &Separator{}
 	if name == "" {
 		name = "sep"
 	}
-	sp.InitName(&sp, name)
+	sp.InitName(sp, name)
 	sp.Horiz = true
 	*m = append(*m, sp.This().(Node2D))
-	return &sp
+	return sp
 }
 
 // AddLabel adds a label to the menu
@@ -142,12 +142,12 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	if m == nil {
 		*m = make(Menu, 0, 10)
 	}
-	lb := Label{}
-	lb.InitName(&lb, lbl)
+	lb := &Label{}
+	lb.InitName(lb, lbl)
 	lb.SetText(lbl)
 	lb.SetProp("background-color", &Prefs.Colors.Control)
 	*m = append(*m, lb.This().(Node2D))
-	return &lb
+	return lb
 }
 
 // SetShortcuts sets the shortcuts to given window -- call when the menu has
