@@ -22,7 +22,9 @@ import (
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
@@ -746,21 +748,134 @@ func init() {
 }
 
 // FileNode returns the SrcNode as a FileNode
-func (ft *FileTreeView) FileNode() *FileNode {
-	if ft.This() == nil {
+func (ftv *FileTreeView) FileNode() *FileNode {
+	if ftv.This() == nil {
 		return nil
 	}
-	fn := ft.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
+	fn := ftv.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
 	return fn
 }
 
+func (ftv *FileTreeView) ConnectEvents2D() {
+	ftv.FileTreeViewEvents()
+}
+
+func (ftv *FileTreeView) FileTreeViewEvents() {
+	ftv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		tvv := recv.Embed(KiT_FileTreeView).(*FileTreeView)
+		kt := d.(*key.ChordEvent)
+		tvv.KeyInput(kt)
+	})
+	ftv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		de := d.(*dnd.Event)
+		tvv := recv.Embed(KiT_FileTreeView).(*FileTreeView)
+		switch de.Action {
+		case dnd.Start:
+			tvv.DragNDropStart()
+		case dnd.DropOnTarget:
+			tvv.DragNDropTarget(de)
+		case dnd.DropFmSource:
+			tvv.DragNDropSource(de)
+		}
+	})
+	ftv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		de := d.(*dnd.FocusEvent)
+		tvv := recv.Embed(KiT_FileTreeView).(*FileTreeView)
+		switch de.Action {
+		case dnd.Enter:
+			tvv.Viewport.Win.DNDSetCursor(de.Mod)
+		case dnd.Exit:
+			tvv.Viewport.Win.DNDNotCursor()
+		case dnd.Hover:
+			tvv.Open()
+		}
+	})
+	if ftv.HasChildren() {
+		if wb, ok := ftv.BranchPart(); ok {
+			wb.ButtonSig.ConnectOnly(ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.ButtonToggled) {
+					ftvv, _ := recv.Embed(KiT_FileTreeView).(*FileTreeView)
+					ftvv.ToggleClose()
+				}
+			})
+		}
+	}
+	if lbl, ok := ftv.LabelPart(); ok {
+		// HiPri is needed to override label's native processing
+		lbl.ConnectEvent(oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			lb, _ := recv.(*gi.Label)
+			ftvvi := lb.Parent().Parent()
+			if ftvvi == nil || ftvvi.This() == nil { // deleted
+				return
+			}
+			ftvv := ftvvi.Embed(KiT_FileTreeView).(*FileTreeView)
+			me := d.(*mouse.Event)
+			switch me.Button {
+			case mouse.Left:
+				switch me.Action {
+				case mouse.DoubleClick:
+					ftvv.ToggleClose()
+					me.SetProcessed()
+				case mouse.Release:
+					ftvv.SelectAction(me.SelectMode())
+					me.SetProcessed()
+				}
+			case mouse.Right:
+				if me.Action == mouse.Release {
+					me.SetProcessed()
+					ftvv.This().(gi.Node2D).ContextMenu()
+				}
+			}
+		})
+	}
+}
+
+func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("TreeView KeyInput: %v\n", ftv.PathUnique())
+	}
+	kf := gi.KeyFun(kt.Chord())
+	selMode := mouse.SelectModeBits(kt.Modifiers)
+
+	if selMode == mouse.SelectOne {
+		if ftv.SelectMode() {
+			selMode = mouse.ExtendContinuous
+		}
+	}
+
+	// first all the keys that work for inactive and active
+	if !ftv.IsInactive() && !kt.IsProcessed() {
+		switch kf {
+		case gi.KeyFunDelete:
+			ftv.DeleteFiles()
+			kt.SetProcessed()
+			// todo: remove when gi issue 237 is resolved
+		case gi.KeyFunBackspace:
+			ftv.DeleteFiles()
+			kt.SetProcessed()
+		case gi.KeyFunDuplicate:
+			ftv.DuplicateFiles()
+			kt.SetProcessed()
+		case gi.KeyFunInsert: // New File
+			ftv.NewFile("")
+			kt.SetProcessed()
+		case gi.KeyFunInsertAfter: // New Folder
+			ftv.NewFile("")
+			kt.SetProcessed()
+		}
+	}
+	if !kt.IsProcessed() {
+		ftv.TreeView.KeyInput(kt)
+	}
+}
+
 // DuplicateFiles calls DuplicateFile on any selected nodes
-func (ft *FileTreeView) DuplicateFiles() {
-	sels := ft.SelectedViews()
+func (ftv *FileTreeView) DuplicateFiles() {
+	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
-		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		fn := ftv.FileNode()
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
 		if fn != nil {
 			fn.DuplicateFile()
 		}
@@ -768,18 +883,18 @@ func (ft *FileTreeView) DuplicateFiles() {
 }
 
 // DeleteFiles calls DeleteFile on any selected nodes
-func (ft *FileTreeView) DeleteFiles() {
-	sels := ft.SelectedViews()
+func (ftv *FileTreeView) DeleteFiles() {
+	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
-		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		fn := ftv.FileNode()
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
 		if fn != nil {
 			if fn.Buf != nil {
-				gi.ChoiceDialog(ft.Viewport, gi.DlgOpts{Title: "File open for editing, Delete?",
+				gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "File open for editing, Delete?",
 					Prompt: fmt.Sprintf("The file %v is open for editing: Close and delete?", fn.Nm)},
 					[]string{"Delete", "Cancel"},
-					ft.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						switch sig {
 						case 0:
 							fn.CloseBuf()
@@ -796,25 +911,25 @@ func (ft *FileTreeView) DeleteFiles() {
 }
 
 // RenameFiles calls RenameFile on any selected nodes
-func (ft *FileTreeView) RenameFiles() {
-	sels := ft.SelectedViews()
+func (ftv *FileTreeView) RenameFiles() {
+	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
-		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		fn := ftv.FileNode()
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
 		if fn != nil {
-			CallMethod(fn, "RenameFile", ft.Viewport)
+			CallMethod(fn, "RenameFile", ftv.Viewport)
 		}
 	}
 }
 
 // OpenDirs
-func (ft *FileTreeView) OpenDirs() {
-	sels := ft.SelectedViews()
+func (ftv *FileTreeView) OpenDirs() {
+	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
-		ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		fn := ftv.FileNode()
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
 		if fn != nil {
 			fn.OpenDir()
 		}
@@ -822,30 +937,30 @@ func (ft *FileTreeView) OpenDirs() {
 }
 
 // NewFile makes a new file in given selected directory node
-func (ft *FileTreeView) NewFile(filename string) {
-	sels := ft.SelectedViews()
+func (ftv *FileTreeView) NewFile(filename string) {
+	sels := ftv.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
 		return
 	}
 	sn := sels[sz-1]
-	ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ftv.FileNode()
+	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftvv.FileNode()
 	if fn != nil {
 		fn.NewFile(filename)
 	}
 }
 
 // NewFolder makes a new file in given selected directory node
-func (ft *FileTreeView) NewFolder(foldername string) {
-	sels := ft.SelectedViews()
+func (ftv *FileTreeView) NewFolder(foldername string) {
+	sels := ftv.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
 		return
 	}
 	sn := sels[sz-1]
-	ftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ftv.FileNode()
+	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftvv.FileNode()
 	if fn != nil {
 		fn.NewFolder(foldername)
 	}
@@ -853,42 +968,42 @@ func (ft *FileTreeView) NewFolder(foldername string) {
 
 // Cut copies to clip.Board and deletes selected items
 // satisfies gi.Clipper interface and can be overridden by subtypes
-func (ft *FileTreeView) Cut() {
-	if ft.IsRootOrField("Cut") {
+func (ftv *FileTreeView) Cut() {
+	if ftv.IsRootOrField("Cut") {
 		return
 	}
-	ft.Copy(false)
+	ftv.Copy(false)
 	// todo: in the future, move files somewhere temporary, then use those temps for paste..
-	gi.PromptDialog(ft.Viewport, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, true, false, nil, nil)
+	gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, true, false, nil, nil)
 }
 
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
-func (ft *FileTreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(ft.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
+func (ftv *FileTreeView) Paste() {
+	md := oswin.TheApp.ClipBoard(ftv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
 	if md != nil {
-		ft.PasteMime(md)
+		ftv.PasteMime(md)
 	}
 }
 
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (ft *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
-	ft.PasteMime(md)
-	ft.DragNDropFinalize(mod)
+func (ftv *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
+	ftv.PasteMime(md)
+	ftv.DragNDropFinalize(mod)
 }
 
 // PasteMime applies a paste / drop of mime data onto this node
 // always does a copy of files into / onto target
-func (ft *FileTreeView) PasteMime(md mimedata.Mimes) {
-	sroot := ft.RootView.SrcNode.Ptr
-	tfn := ft.FileNode()
+func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
+	sroot := ftv.RootView.SrcNode.Ptr
+	tfn := ftv.FileNode()
 	if tfn == nil {
 		return
 	}
 	if !tfn.IsDir() {
 		if len(md) != 2 {
-			gi.PromptDialog(ft.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/2)}, true, false, nil, nil)
+			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/2)}, true, false, nil, nil)
 			return
 		}
 	}
@@ -919,13 +1034,13 @@ func (ft *FileTreeView) PasteMime(md mimedata.Mimes) {
 // Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (ft *FileTreeView) Dragged(de *dnd.Event) {
-	// fmt.Printf("ft dragged: %v\n", ft.PathUnique())
+func (ftv *FileTreeView) Dragged(de *dnd.Event) {
+	// fmt.Printf("ftv dragged: %v\n", ftv.PathUnique())
 	if de.Mod != dnd.DropMove {
 		return
 	}
-	sroot := ft.RootView.SrcNode.Ptr
-	tfn := ft.FileNode()
+	sroot := ftv.RootView.SrcNode.Ptr
+	tfn := ftv.FileNode()
 	if tfn == nil {
 		return
 	}
@@ -951,8 +1066,8 @@ func (ft *FileTreeView) Dragged(de *dnd.Event) {
 
 // FileTreeInactiveDirFunc is an ActionUpdateFunc that inactivates action if node is a dir
 var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
-	ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ft.FileNode()
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
 	if fn != nil {
 		act.SetInactiveState(fn.IsDir())
 	}
@@ -960,8 +1075,8 @@ var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 
 // FileTreeActiveDirFunc is an ActionUpdateFunc that activates action if node is a dir
 var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
-	ft := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ft.FileNode()
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
 	if fn != nil {
 		act.SetActiveState(fn.IsDir())
 	}
@@ -1023,10 +1138,12 @@ var FileTreeViewProps = ki.Props{
 		{"DuplicateFiles", ki.Props{
 			"label":    "Duplicate",
 			"updtfunc": FileTreeInactiveDirFunc,
+			"shortcut": gi.KeyFunDuplicate,
 		}},
 		{"DeleteFiles", ki.Props{
 			"label":    "Delete",
 			"desc":     "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
+			"shortcut": gi.KeyFunDelete,
 			"confirm":  true,
 			"updtfunc": FileTreeInactiveDirFunc,
 		}},
@@ -1043,6 +1160,7 @@ var FileTreeViewProps = ki.Props{
 		{"NewFile", ki.Props{
 			"label":    "New File...",
 			"desc":     "make a new file in this folder",
+			"shortcut": gi.KeyFunInsert,
 			"updtfunc": FileTreeActiveDirFunc,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -1053,6 +1171,7 @@ var FileTreeViewProps = ki.Props{
 		{"NewFolder", ki.Props{
 			"label":    "New Folder...",
 			"desc":     "make a new folder within this folder",
+			"shortcut": gi.KeyFunInsertAfter,
 			"updtfunc": FileTreeActiveDirFunc,
 			"Args": ki.PropSlice{
 				{"Folder Name", ki.Props{
