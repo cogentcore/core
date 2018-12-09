@@ -145,7 +145,7 @@ func (tk Tokens) IsAmbigUnaryOp() bool {
 // be combined together -- literals, comments, text
 func (tk Tokens) CombineRepeats() bool {
 	cat := tk.Cat()
-	return (cat == Literal || cat == Comment || cat == Text)
+	return (cat == Literal || cat == Comment || cat == Text || cat == Name)
 }
 
 // StyleName returns the abbreviated 2-3 letter style name of the tag

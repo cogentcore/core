@@ -25,6 +25,8 @@
         "type": "lex.Rule",
         "name": "InEmphUnder",
         "type": "lex.Rule",
+        "name": "LetterText",
+        "type": "lex.Rule",
         "name": "CodeStart",
         "type": "lex.Rule",
         "name": "HeadPound",
@@ -64,8 +66,6 @@
         "name": "EmphStar",
         "type": "lex.Rule",
         "name": "EmphUnder",
-        "type": "lex.Rule",
-        "name": "SkipWhite",
         "type": "lex.Rule",
         "name": "AnyText"
       },
@@ -632,6 +632,23 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "LetterText",
+        "UniqueNm": "LetterText",
+        "Props": null,
+        "Kids": null,
+        "Desc": "optimization for plain letters which are always text",
+        "Token": "Text",
+        "Match": "Letter",
+        "Pos": "AnyPos",
+        "String": "",
+        "Off": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
         "PushState": ""
       },
       {
@@ -1204,23 +1221,6 @@
           "Next"
         ],
         "PushState": "EmphUnder"
-      },
-      {
-        "Nm": "SkipWhite",
-        "UniqueNm": "SkipWhite",
-        "Props": null,
-        "Kids": null,
-        "Desc": "",
-        "Token": "TextWhitespace",
-        "Match": "WhiteSpace",
-        "Pos": "AnyPos",
-        "String": "",
-        "Off": 0,
-        "SizeAdj": 0,
-        "Acts": [
-          "Next"
-        ],
-        "PushState": ""
       },
       {
         "Nm": "AnyText",

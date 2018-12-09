@@ -40,6 +40,8 @@ InEmphUnder:		 None		 if CurState == "EmphUnder" {
     EndEmphUnder:       TextStyleEmph       if String == "_"   do: PopState; Next; 
     AnyEmphUnder:       TextStyleEmph       if AnyRune         do: Next; 
 }
+// LetterText optimization for plain letters which are always text 
+LetterText:		 Text		 if Letter	 do: Next; 
 CodeStart:		 LitStrBacktick		 if String == "```"	 do: Next; PushState: Code;  {
     CodeLang:        KeywordNamespace       if Letter    do: Name; SetGuestLex; 
     CodePlain:       LitStrBacktick         if AnyRune   do: Next; 
@@ -79,7 +81,6 @@ Apostrophe:		 LitStrSingle		 if String == "'" {
 }
 EmphStar:		 TextStyleEmph		 if String == " *"	 do: PushState: EmphStar; Next; 
 EmphUnder:		 TextStyleEmph		 if String == " _"	 do: PushState: EmphUnder; Next; 
-SkipWhite:		 TextWhitespace		 if WhiteSpace	 do: Next; 
 AnyText:		 Text		 if AnyRune	 do: Next; 
 
 
