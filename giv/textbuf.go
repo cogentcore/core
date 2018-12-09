@@ -71,6 +71,30 @@ func (tb *TextBufOpts) IndentChar() indent.Char {
 	return indent.Tab
 }
 
+// ConfigSupported configures options based on the supported language info in GoPi
+// returns true if supported
+func (tb *TextBufOpts) ConfigSupported(sup filecat.Supported) bool {
+	if sup == filecat.NoSupport {
+		return false
+	}
+	lp, ok := pi.StdLangProps[sup]
+	if !ok {
+		return false
+	}
+	tb.CommentLn = lp.CommentLn
+	tb.CommentSt = lp.CommentSt
+	tb.CommentEd = lp.CommentEd
+	for _, flg := range lp.Flags {
+		switch flg {
+		case pi.IndentSpace:
+			tb.SpaceIndent = true
+		case pi.IndentTab:
+			tb.SpaceIndent = false
+		}
+	}
+	return true
+}
+
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
 // the raw text lines (in original string and rune formats, and marked-up from
 // syntax highlighting), and sends signals for making edits to the text and
@@ -429,14 +453,17 @@ func (tb *TextBuf) Stat() error {
 	if err != nil {
 		return err
 	}
-	if tb.Info.Sup != filecat.NoSupport {
-		if lp, ok := pi.StdLangProps[tb.Info.Sup]; ok {
-			tb.Opts.CommentLn = lp.CommentLn
-			tb.Opts.CommentSt = lp.CommentSt
-			tb.Opts.CommentEd = lp.CommentEd
-		}
-	}
+	tb.ConfigSupported()
 	return nil
+}
+
+// ConfigSupported configures options based on the supported language info in GoPi
+// returns true if supported
+func (tb *TextBuf) ConfigSupported() bool {
+	if tb.Info.Sup != filecat.NoSupport {
+		return tb.Opts.ConfigSupported(tb.Info.Sup)
+	}
+	return false
 }
 
 // FileModCheck checks if the underlying file has been modified since last
