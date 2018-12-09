@@ -1,5 +1,11 @@
 # GoPi = Interactive Parser in GoKi / GoGi Framework
 
+* **bold at start** is not a problem now
+
+> quote para -- what is it doing?
+
+![figure](some text){ width=30% }
+
 ```Go
 if a + b * 2 / 7 - 42 > c * d + e / 72 
 for a := 0; a < 10; a++ {

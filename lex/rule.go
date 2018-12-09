@@ -49,6 +49,7 @@ type Rule struct {
 	Pos       MatchPos     `desc:"position where match can occur"`
 	String    string       `desc:"if action is LexMatch, this is the string we match"`
 	Off       int          `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
+	SizeAdj   int          `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
 	Acts      []Actions    `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
 	PushState string       `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
 	TokEff    token.Tokens `view:"-" json:"-" desc:"effective token based on input -- e.g., for number is the type of number"`
@@ -204,7 +205,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if str != lr.String {
 			return false
 		}
-		lr.MatchLen = lr.Off + sz
+		lr.MatchLen = lr.Off + sz + lr.SizeAdj
 		return true
 	case StrName:
 		cp := ls.Pos
@@ -222,7 +223,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if str != lr.String {
 			return false
 		}
-		lr.MatchLen = lr.Off + sz
+		lr.MatchLen = lr.Off + sz + lr.SizeAdj
 		return true
 	case Letter:
 		rn, ok := ls.Rune(lr.Off)
@@ -230,7 +231,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsLetter(rn) {
-			lr.MatchLen = lr.Off + 1
+			lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 			return true
 		}
 		return false
@@ -240,7 +241,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsDigit(rn) {
-			lr.MatchLen = lr.Off + 1
+			lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 			return true
 		}
 		return false
@@ -250,13 +251,13 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsWhiteSpace(rn) {
-			lr.MatchLen = lr.Off + 1
+			lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 			return true
 		}
 		return false
 	case CurState:
 		if ls.CurState() == lr.String {
-			lr.MatchLen = 0
+			lr.MatchLen = lr.SizeAdj
 			return true
 		}
 		return false
@@ -265,7 +266,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if !ok {
 			return false
 		}
-		lr.MatchLen = lr.Off + 1
+		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 		return true
 	}
 	return false

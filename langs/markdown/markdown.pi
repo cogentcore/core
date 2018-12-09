@@ -5,9 +5,13 @@
     "Props": null,
     "Kids": [
       {
-        "n": 26,
+        "n": 31,
+        "type": "lex.Rule",
+        "name": "InComment",
         "type": "lex.Rule",
         "name": "InCode",
+        "type": "lex.Rule",
+        "name": "InLinkAttr",
         "type": "lex.Rule",
         "name": "InLinkAddr",
         "type": "lex.Rule",
@@ -33,6 +37,12 @@
         "type": "lex.Rule",
         "name": "ItemMinus",
         "type": "lex.Rule",
+        "name": "NumList",
+        "type": "lex.Rule",
+        "name": "CommentStart",
+        "type": "lex.Rule",
+        "name": "QuotePara",
+        "type": "lex.Rule",
         "name": "BoldStars",
         "type": "lex.Rule",
         "name": "BoldUnders",
@@ -47,7 +57,7 @@
         "type": "lex.Rule",
         "name": "BacktickCode",
         "type": "lex.Rule",
-        "name": "Quote",
+        "name": "Quote_021",
         "type": "lex.Rule",
         "name": "Apostrophe",
         "type": "lex.Rule",
@@ -58,6 +68,64 @@
         "name": "SkipWhite",
         "type": "lex.Rule",
         "name": "AnyText"
+      },
+      {
+        "Nm": "InComment",
+        "UniqueNm": "InComment",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "lex.Rule",
+            "name": "CommentEnd",
+            "type": "lex.Rule",
+            "name": "AnyComment"
+          },
+          {
+            "Nm": "CommentEnd",
+            "UniqueNm": "CommentEnd",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "Comment",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "--\u003e",
+            "Off": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyComment",
+            "UniqueNm": "AnyComment",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "Comment",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "Comment",
+        "Off": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "PushState": ""
       },
       {
         "Nm": "InCode",
@@ -82,6 +150,7 @@
             "Pos": "StartOfLine",
             "String": "```",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopGuestLex",
               "PopState",
@@ -100,6 +169,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -112,6 +182,65 @@
         "Pos": "AnyPos",
         "String": "Code",
         "Off": 0,
+        "SizeAdj": 0,
+        "Acts": null,
+        "PushState": ""
+      },
+      {
+        "Nm": "InLinkAttr",
+        "UniqueNm": "InLinkAttr",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 2,
+            "type": "lex.Rule",
+            "name": "EndLinkAttr",
+            "type": "lex.Rule",
+            "name": "AnyLinkAttr"
+          },
+          {
+            "Nm": "EndLinkAttr",
+            "UniqueNm": "EndLinkAttr",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameVar",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "}",
+            "Off": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "PopState",
+              "Next"
+            ],
+            "PushState": ""
+          },
+          {
+            "Nm": "AnyLinkAttr",
+            "UniqueNm": "AnyLinkAttr",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameVar",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Off": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "PushState": ""
+          }
+        ],
+        "Desc": "",
+        "Token": "None",
+        "Match": "CurState",
+        "Pos": "AnyPos",
+        "String": "LinkAttr",
+        "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -121,11 +250,32 @@
         "Props": null,
         "Kids": [
           {
-            "n": 2,
+            "n": 3,
+            "type": "lex.Rule",
+            "name": "LinkAttr",
             "type": "lex.Rule",
             "name": "EndLinkAddr",
             "type": "lex.Rule",
             "name": "AnyLinkAddr"
+          },
+          {
+            "Nm": "LinkAttr",
+            "UniqueNm": "LinkAttr",
+            "Props": null,
+            "Kids": null,
+            "Desc": "",
+            "Token": "NameAttribute",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "){",
+            "Off": 0,
+            "SizeAdj": -1,
+            "Acts": [
+              "PopState",
+              "PushState",
+              "Next"
+            ],
+            "PushState": "LinkAttr"
           },
           {
             "Nm": "EndLinkAddr",
@@ -138,6 +288,7 @@
             "Pos": "AnyPos",
             "String": ")",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -155,6 +306,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -167,6 +319,7 @@
         "Pos": "AnyPos",
         "String": "LinkAddr",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -190,11 +343,12 @@
             "Props": null,
             "Kids": null,
             "Desc": "",
-            "Token": "NameAttribute",
+            "Token": "NameTag",
             "Match": "String",
             "Pos": "AnyPos",
-            "String": "(",
-            "Off": 1,
+            "String": "](",
+            "Off": 0,
+            "SizeAdj": -1,
             "Acts": [
               "PopState",
               "PushState",
@@ -213,6 +367,7 @@
             "Pos": "AnyPos",
             "String": "]",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -230,6 +385,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -242,6 +398,7 @@
         "Pos": "AnyPos",
         "String": "LinkTag",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -268,6 +425,7 @@
             "Pos": "AnyPos",
             "String": "**",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -285,6 +443,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -297,6 +456,7 @@
         "Pos": "AnyPos",
         "String": "BoldStars",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -323,6 +483,7 @@
             "Pos": "AnyPos",
             "String": "__",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -340,6 +501,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -352,6 +514,7 @@
         "Pos": "AnyPos",
         "String": "BoldUnders",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -378,6 +541,7 @@
             "Pos": "AnyPos",
             "String": "*",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -395,6 +559,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -407,6 +572,7 @@
         "Pos": "AnyPos",
         "String": "EmphStar",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -427,12 +593,13 @@
             "UniqueNm": "EndEmphUnder",
             "Props": null,
             "Kids": null,
-            "Desc": "",
+            "Desc": "todo: in theory should be followed by whitespace or punct",
             "Token": "TextStyleEmph",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "_",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -450,6 +617,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -462,6 +630,7 @@
         "Pos": "AnyPos",
         "String": "EmphUnder",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -488,6 +657,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Name",
               "SetGuestLex"
@@ -505,6 +675,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -517,6 +688,7 @@
         "Pos": "StartOfLine",
         "String": "```",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next",
           "PushState"
@@ -568,6 +740,7 @@
                     "Pos": "AnyPos",
                     "String": "",
                     "Off": 3,
+                    "SizeAdj": 0,
                     "Acts": [
                       "EOL"
                     ],
@@ -580,6 +753,7 @@
                 "Pos": "AnyPos",
                 "String": "#",
                 "Off": 2,
+                "SizeAdj": 0,
                 "Acts": null,
                 "PushState": ""
               },
@@ -594,6 +768,7 @@
                 "Pos": "AnyPos",
                 "String": "",
                 "Off": 2,
+                "SizeAdj": 0,
                 "Acts": [
                   "EOL"
                 ],
@@ -606,6 +781,7 @@
             "Pos": "AnyPos",
             "String": "#",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": null,
             "PushState": ""
           },
@@ -620,6 +796,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "EOL"
             ],
@@ -632,6 +809,7 @@
         "Pos": "StartOfLine",
         "String": "#",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -658,6 +836,7 @@
             "Pos": "AnyPos",
             "String": "- [x] ",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -674,6 +853,7 @@
             "Pos": "AnyPos",
             "String": "- [ ] ",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -686,6 +866,7 @@
         "Pos": "StartOfLine",
         "String": "- [",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -694,12 +875,13 @@
         "UniqueNm": "ItemStar",
         "Props": null,
         "Kids": null,
-        "Desc": "",
+        "Desc": "note: these all have a space after them!",
         "Token": "Keyword",
         "Match": "String",
         "Pos": "StartOfLine",
-        "String": "*",
+        "String": "* ",
         "Off": 0,
+        "SizeAdj": -1,
         "Acts": [
           "Next"
         ],
@@ -714,8 +896,9 @@
         "Token": "Keyword",
         "Match": "String",
         "Pos": "StartOfLine",
-        "String": "+",
+        "String": "+ ",
         "Off": 0,
+        "SizeAdj": -1,
         "Acts": [
           "Next"
         ],
@@ -730,10 +913,63 @@
         "Token": "Keyword",
         "Match": "String",
         "Pos": "StartOfLine",
-        "String": "-",
+        "String": "- ",
         "Off": 0,
+        "SizeAdj": -1,
         "Acts": [
           "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "NumList",
+        "UniqueNm": "NumList",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Keyword",
+        "Match": "Digit",
+        "Pos": "StartOfLine",
+        "String": "",
+        "Off": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "PushState": ""
+      },
+      {
+        "Nm": "CommentStart",
+        "UniqueNm": "CommentStart",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "Comment",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\u003c!---",
+        "Off": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "PushState",
+          "Next"
+        ],
+        "PushState": "Comment"
+      },
+      {
+        "Nm": "QuotePara",
+        "UniqueNm": "QuotePara",
+        "Props": null,
+        "Kids": null,
+        "Desc": "",
+        "Token": "TextStyleUnderline",
+        "Match": "String",
+        "Pos": "StartOfLine",
+        "String": "\u003e ",
+        "Off": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "EOL"
         ],
         "PushState": ""
       },
@@ -746,8 +982,9 @@
         "Token": "TextStyleStrong",
         "Match": "String",
         "Pos": "AnyPos",
-        "String": "**",
+        "String": " **",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -763,8 +1000,9 @@
         "Token": "TextStyleStrong",
         "Match": "String",
         "Pos": "AnyPos",
-        "String": "__",
+        "String": " __",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -776,12 +1014,13 @@
         "UniqueNm": "ItemStarSub",
         "Props": null,
         "Kids": null,
-        "Desc": "",
+        "Desc": "note all have space after",
         "Token": "Keyword",
         "Match": "String",
         "Pos": "StartOfLine",
-        "String": "*",
+        "String": "* ",
         "Off": 4,
+        "SizeAdj": -1,
         "Acts": [
           "Next"
         ],
@@ -796,8 +1035,9 @@
         "Token": "Keyword",
         "Match": "String",
         "Pos": "StartOfLine",
-        "String": "+",
+        "String": "+ ",
         "Off": 4,
+        "SizeAdj": -1,
         "Acts": [
           "Next"
         ],
@@ -812,8 +1052,9 @@
         "Token": "Keyword",
         "Match": "String",
         "Pos": "StartOfLine",
-        "String": "-",
+        "String": "- ",
         "Off": 4,
+        "SizeAdj": -1,
         "Acts": [
           "Next"
         ],
@@ -830,6 +1071,7 @@
         "Pos": "AnyPos",
         "String": "[",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -847,6 +1089,7 @@
         "Pos": "AnyPos",
         "String": "`",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "QuotedRaw"
         ],
@@ -854,7 +1097,7 @@
       },
       {
         "Nm": "Quote",
-        "UniqueNm": "Quote",
+        "UniqueNm": "Quote_021",
         "Props": null,
         "Kids": null,
         "Desc": "",
@@ -863,6 +1106,7 @@
         "Pos": "AnyPos",
         "String": "\"",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "QuotedRaw"
         ],
@@ -891,6 +1135,7 @@
             "Pos": "AnyPos",
             "String": "'",
             "Off": 2,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -907,6 +1152,7 @@
             "Pos": "AnyPos",
             "String": "'",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -919,6 +1165,7 @@
         "Pos": "AnyPos",
         "String": "'",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -931,8 +1178,9 @@
         "Token": "TextStyleEmph",
         "Match": "String",
         "Pos": "AnyPos",
-        "String": "*",
+        "String": " *",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -948,8 +1196,9 @@
         "Token": "TextStyleEmph",
         "Match": "String",
         "Pos": "AnyPos",
-        "String": "_",
+        "String": " _",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -967,6 +1216,7 @@
         "Pos": "AnyPos",
         "String": "",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -983,6 +1233,7 @@
         "Pos": "AnyPos",
         "String": "",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -995,6 +1246,7 @@
     "Pos": "AnyPos",
     "String": "",
     "Off": 0,
+    "SizeAdj": 0,
     "Acts": null,
     "PushState": ""
   },
