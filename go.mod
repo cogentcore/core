@@ -18,7 +18,7 @@ require (
 	github.com/gabriel-vasile/mimetype v0.0.0-20181202175247-077d38b2e891
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
 	github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044
-	github.com/goki/ki v0.9.3
+	github.com/goki/ki v0.9.4
 	github.com/goki/pi v0.0.0-20181209081140-be35559297c6
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
