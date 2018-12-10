@@ -23,6 +23,7 @@ type DlgOpts struct {
 	Cancel     bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
 	AddOnly    bool      `desc:"can the user delete elements of the slice"`
 	DeleteOnly bool      `desc:"can the user add elements to the slice"`
+	Inactive   bool      `desc:"if true all fields will be inactive"`
 }
 
 // ToGiOpts converts giv opts to gi opts
@@ -41,6 +42,9 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 
 	sv := frame.InsertNewChild(KiT_StructView, prIdx+1, "struct-view").(*StructView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	if opts.Inactive {
+		sv.SetInactive()
+	}
 	sv.SetStruct(stru, opts.TmpSave)
 
 	if recv != nil && dlgFunc != nil {

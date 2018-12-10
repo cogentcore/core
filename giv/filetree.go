@@ -877,7 +877,7 @@ func (ftv *FileTreeView) ShowFileInfo() {
 		fftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			StructViewDialog(ftv.Viewport, &fn.Info, DlgOpts{Title: "File Info"}, nil, nil)
+			StructViewDialog(ftv.Viewport, &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
 		}
 	}
 }

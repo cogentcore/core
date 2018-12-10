@@ -224,7 +224,12 @@ func (sv *StructView) ConfigStructGrid() {
 		}
 		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
-		if _, has := vvb.Tag("inactive"); sv.IsInactive() || has {
+
+		_, has := vvb.Tag("inactive")
+		if !has && sv.IsInactive() {
+			vv.SetTag("inactive", "true")
+		}
+		if has {
 			widg.AsNode2D().SetInactive()
 		}
 		vv.ConfigWidget(widg)
