@@ -18,9 +18,11 @@ package difflib
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
+	"unicode"
 )
 
 func min(a, b int) int {
@@ -42,6 +44,14 @@ func calculateRatio(matches, length int) float64 {
 		return 2.0 * float64(matches) / float64(length)
 	}
 	return 1.0
+}
+
+func listifyString(str string) (lst []string) {
+	lst = make([]string, len(str))
+	for i, c := range str {
+		lst[i] = string(c)
+	}
+	return lst
 }
 
 type Match struct {
@@ -509,6 +519,227 @@ func (m *SequenceMatcher) QuickRatio() float64 {
 func (m *SequenceMatcher) RealQuickRatio() float64 {
 	la, lb := len(m.a), len(m.b)
 	return calculateRatio(min(la, lb), la+lb)
+}
+
+func count_leading(line string, ch byte) (count int) {
+	// Return number of `ch` characters at the start of `line`.
+	count = 0
+	n := len(line)
+	for (count < n) && (line[count] == ch) {
+		count++
+	}
+	return count
+}
+
+type Differ struct {
+	Linejunk func(string) bool
+	Charjunk func(string) bool
+}
+
+func NewDiffer() *Differ {
+	return &Differ{}
+}
+
+func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
+	// Compare two sequences of lines; generate the resulting delta.
+
+	// Each sequence must contain individual single-line strings ending with
+	// newlines. Such sequences can be obtained from the `readlines()` method
+	// of file-like objects.  The delta generated also consists of newline-
+	// terminated strings, ready to be printed as-is via the writeline()
+	// method of a file-like object.
+	diffs = []string{}
+	cruncher := NewMatcherWithJunk(a, b, true, d.Linejunk)
+	opcodes := cruncher.GetOpCodes()
+	for _, current := range opcodes {
+		alo := current.I1
+		ahi := current.I2
+		blo := current.J1
+		bhi := current.J2
+		var g []string
+		if current.Tag == 'r' {
+			g, _ = d.FancyReplace(a, alo, ahi, b, blo, bhi)
+		} else if current.Tag == 'd' {
+			g = d.Dump("-", a, alo, ahi)
+		} else if current.Tag == 'i' {
+			g = d.Dump("+", b, blo, bhi)
+		} else if current.Tag == 'e' {
+			g = d.Dump(" ", a, alo, ahi)
+		} else {
+			return nil, errors.New(fmt.Sprintf("unknown tag %q", current.Tag))
+		}
+		diffs = append(diffs, g...)
+	}
+	return diffs, nil
+}
+
+func (d *Differ) Dump(tag string, x []string, lo int, hi int) (out []string) {
+	// Generate comparison results for a same-tagged range.
+	out = []string{}
+	for i := lo; i < hi; i++ {
+		out = append(out, fmt.Sprintf("%s %s", tag, x[i]))
+	}
+	return out
+}
+
+func (d *Differ) PlainReplace(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string, err error) {
+	if !(alo < ahi) || !(blo < bhi) { // assertion
+		return nil, errors.New("low greater than or equal to high")
+	}
+	// dump the shorter block first -- reduces the burden on short-term
+	// memory if the blocks are of very different sizes
+	if bhi-blo < ahi-alo {
+		out = d.Dump("+", b, blo, bhi)
+		out = append(out, d.Dump("-", a, alo, ahi)...)
+	} else {
+		out = d.Dump("-", a, alo, ahi)
+		out = append(out, d.Dump("+", b, blo, bhi)...)
+	}
+	return out, nil
+}
+
+func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string, err error) {
+	// When replacing one block of lines with another, search the blocks
+	// for *similar* lines; the best-matching pair (if any) is used as a
+	// synch point, and intraline difference marking is done on the
+	// similar pair. Lots of work, but often worth it.
+
+	// don't synch up unless the lines have a similarity score of at
+	// least cutoff; best_ratio tracks the best score seen so far
+	best_ratio := 0.74
+	cutoff := 0.75
+	cruncher := NewMatcherWithJunk(a, b, true, d.Charjunk)
+	eqi := -1 // 1st indices of equal lines (if any)
+	eqj := -1
+	out = []string{}
+
+	// search for the pair that matches best without being identical
+	// (identical lines must be junk lines, & we don't want to synch up
+	// on junk -- unless we have to)
+	var best_i, best_j int
+	for j := blo; j < bhi; j++ {
+		bj := b[j]
+		cruncher.SetSeq2(listifyString(bj))
+		for i := alo; i < ahi; i++ {
+			ai := a[i]
+			if ai == bj {
+				if eqi == -1 {
+					eqi = i
+					eqj = j
+				}
+				continue
+			}
+			cruncher.SetSeq1(listifyString(ai))
+			// computing similarity is expensive, so use the quick
+			// upper bounds first -- have seen this speed up messy
+			// compares by a factor of 3.
+			// note that ratio() is only expensive to compute the first
+			// time it's called on a sequence pair; the expensive part
+			// of the computation is cached by cruncher
+			if cruncher.RealQuickRatio() > best_ratio &&
+				cruncher.QuickRatio() > best_ratio &&
+				cruncher.Ratio() > best_ratio {
+				best_ratio = cruncher.Ratio()
+				best_i = i
+				best_j = j
+			}
+		}
+	}
+	if best_ratio < cutoff {
+		// no non-identical "pretty close" pair
+		if eqi == -1 {
+			// no identical pair either -- treat it as a straight replace
+			out, _ = d.PlainReplace(a, alo, ahi, b, blo, bhi)
+			return out, nil
+		}
+		// no close pair, but an identical pair -- synch up on that
+		best_i = eqi
+		best_j = eqj
+		best_ratio = 1.0
+	} else {
+		// there's a close pair, so forget the identical pair (if any)
+		eqi = -1
+	}
+	// a[best_i] very similar to b[best_j]; eqi is None iff they're not
+	// identical
+
+	// pump out diffs from before the synch point
+	out = append(out, d.fancyHelper(a, alo, best_i, b, blo, best_j)...)
+
+	// do intraline marking on the synch pair
+	aelt, belt := a[best_i], b[best_j]
+	if eqi == -1 {
+		// pump out a '-', '?', '+', '?' quad for the synched lines
+		var atags, btags string
+		cruncher.SetSeqs(listifyString(aelt), listifyString(belt))
+		opcodes := cruncher.GetOpCodes()
+		for _, current := range opcodes {
+			ai1 := current.I1
+			ai2 := current.I2
+			bj1 := current.J1
+			bj2 := current.J2
+			la, lb := ai2-ai1, bj2-bj1
+			if current.Tag == 'r' {
+				atags += strings.Repeat("^", la)
+				btags += strings.Repeat("^", lb)
+			} else if current.Tag == 'd' {
+				atags += strings.Repeat("-", la)
+			} else if current.Tag == 'i' {
+				btags += strings.Repeat("+", lb)
+			} else if current.Tag == 'e' {
+				atags += strings.Repeat(" ", la)
+				btags += strings.Repeat(" ", lb)
+			} else {
+				return nil, errors.New(fmt.Sprintf("unknown tag %q",
+					current.Tag))
+			}
+		}
+		out = append(out, d.QFormat(aelt, belt, atags, btags)...)
+	} else {
+		// the synch pair is identical
+		out = append(out, "  "+aelt)
+	}
+	// pump out diffs from after the synch point
+	out = append(out, d.fancyHelper(a, best_i+1, ahi, b, best_j+1, bhi)...)
+	return out, nil
+}
+
+func (d *Differ) fancyHelper(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string) {
+	if alo < ahi {
+		if blo < bhi {
+			out, _ = d.FancyReplace(a, alo, ahi, b, blo, bhi)
+		} else {
+			out = d.Dump("-", a, alo, ahi)
+		}
+	} else if blo < bhi {
+		out = d.Dump("+", b, blo, bhi)
+	} else {
+		out = []string{}
+	}
+	return out
+}
+
+func (d *Differ) QFormat(aline string, bline string, atags string, btags string) (out []string) {
+	// Format "?" output and deal with leading tabs.
+
+	// Can hurt, but will probably help most of the time.
+	common := min(count_leading(aline, '\t'), count_leading(bline, '\t'))
+	common = min(common, count_leading(atags[:common], ' '))
+	common = min(common, count_leading(btags[:common], ' '))
+	atags = strings.TrimRightFunc(atags[common:], unicode.IsSpace)
+	btags = strings.TrimRightFunc(btags[common:], unicode.IsSpace)
+
+	out = []string{"- " + aline}
+	if len(atags) > 0 {
+		out = append(out, fmt.Sprintf("? %s%s\n",
+			strings.Repeat("\t", common), atags))
+	}
+	out = append(out, "+ "+bline)
+	if len(btags) > 0 {
+		out = append(out, fmt.Sprintf("? %s%s\n",
+			strings.Repeat("\t", common), btags))
+	}
+	return out
 }
 
 // Convert range to the "ed" format
