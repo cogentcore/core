@@ -159,7 +159,7 @@ func (se StyleEntry) ToProps() ki.Props {
 		pr["font-style"] = gi.FontItalic
 	}
 	if se.Underline == Yes {
-		pr["text-decoration"] = gi.DecoUnderline
+		pr["text-decoration"] = 1 << uint32(gi.DecoUnderline)
 	}
 	return pr
 }

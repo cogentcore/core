@@ -17,7 +17,6 @@ import (
 	"strings"
 	"sync"
 
-	"log"
 	"unicode"
 	"unicode/utf8"
 
@@ -1115,7 +1114,7 @@ func (tr *TextRender) SetHTMLBytes(str []byte, font *FontStyle, txtSty *TextStyl
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
 func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyle, ctxt *units.Context, cssAgg ki.Props) {
-	errstr := "gi.TextRender SetHTML"
+	//	errstr := "gi.TextRender SetHTML"
 	sz := len(str)
 	if sz == 0 {
 		return
@@ -1149,7 +1148,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 			if err == io.EOF {
 				break
 			}
-			log.Printf("%v parsing error: %v for string\n%v\n", errstr, err, string(str))
+			// log.Printf("%v parsing error: %v for string\n%v\n", errstr, err, string(str))
 			break
 		}
 		switch se := t.(type) {
@@ -1197,7 +1196,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 					nextIsParaStart = true
 				case "br":
 				default:
-					log.Printf("%v tag not recognized: %v for string\n%v\n", errstr, nm, string(str))
+					// log.Printf("%v tag not recognized: %v for string\n%v\n", errstr, nm, string(str))
 				}
 			}
 			if len(se.Attr) > 0 {
