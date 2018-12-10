@@ -4,6 +4,12 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
+func (ps *Pvsi) tst() {
+	txt += rs[sd-1].String()
+	txt += rs[i].String()
+	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
+}	
+
 package main
 
 import "github.com/goki/gi/gi"

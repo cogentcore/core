@@ -6,6 +6,7 @@ package parse
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/goki/ki/kit"
@@ -23,17 +24,22 @@ type TraceOpts struct {
 	ScopeSrc     bool     `desc:"if true, shows the full scope source for every trace statement"`
 	FullStackOut bool     `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
 	RulesList    []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
+	OutWrite     *os.File `view:"-" json:"-" xml:"-" desc:"trace output is written here, connected via os.Pipe to OutRead"`
+	OutRead      *os.File `view:"-" json:"-" xml:"-" desc:"trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output"`
 }
 
 // parse.Trace controls the tracing options for debugging / monitoring the rule matching and execution process
 var Trace TraceOpts
 
-// Init intializes tracer after any changes
+// Init intializes tracer after any changes -- opens pipe if not already open
 func (pt *TraceOpts) Init() {
 	if pt.Rules == "" {
 		pt.RulesList = nil
 	} else {
 		pt.RulesList = strings.Split(pt.Rules, " ")
+	}
+	if pt.OutWrite == nil {
+		pt.OutRead, pt.OutWrite, _ = os.Pipe() // seriously, does this ever fail?
 	}
 }
 
@@ -89,10 +95,10 @@ func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex
 	for i := 0; i < plev; i++ {
 		ind += "\t"
 	}
-	fmt.Printf("%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name(), step, msg, tokSrc, scope, ast.PathUnique())
+	fmt.Fprintf(pt.OutWrite, "%v%v:\t %v\t %v\t tok: %v\t scope: %v\t ast: %v\n", ind, pr.Name(), step, msg, tokSrc, scope, ast.PathUnique())
 	if pt.ScopeSrc {
 		scopeSrc := ps.Src.TokenRegSrc(scope)
-		fmt.Printf("%v\t%v\n", ind, scopeSrc)
+		fmt.Fprintf(pt.OutWrite, "%v\t%v\n", ind, scopeSrc)
 	}
 	return true
 }

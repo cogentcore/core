@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv"
@@ -26,14 +27,6 @@ import (
 	"github.com/goki/pi/parse"
 )
 
-// todo:
-//
-// need to have textview using our style tokens so we can see the thing getting styled
-// directly from the lexer as it proceeds!  replace histyle tags with tokens.Tokens
-//
-// save all existing chroma styles, then load back in -- names should then transfer!
-// need to just add background style name
-
 // These are then the fixed indices of the different elements in the splitview
 const (
 	LexRulesIdx = iota
@@ -47,13 +40,16 @@ const (
 // lexer and parser
 type PiView struct {
 	gi.Frame
-	Parser   pi.Parser   `desc:"the parser we are viewing"`
-	Prefs    ProjPrefs   `desc:"project preferences -- this IS the project file"`
-	Changed  bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
-	TestBuf  giv.TextBuf `json:"-" desc:"test file buffer"`
-	LexBuf   giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
-	ParseBuf giv.TextBuf `json:"-" desc:"buffer of parse info"`
-	KeySeq1  key.Chord   `desc:"first key in sequence if needs2 key pressed"`
+	Parser        pi.Parser   `desc:"the parser we are viewing"`
+	Prefs         ProjPrefs   `desc:"project preferences -- this IS the project file"`
+	Changed       bool        `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	TestBuf       giv.TextBuf `json:"-" desc:"test file buffer"`
+	OutBuf        giv.TextBuf `json:"-" desc:"output buffer -- shows all errors, tracing"`
+	LexBuf        giv.TextBuf `json:"-" desc:"buffer of lexified tokens"`
+	ParseBuf      giv.TextBuf `json:"-" desc:"buffer of parse info"`
+	KeySeq1       key.Chord   `desc:"first key in sequence if needs2 key pressed"`
+	OutMonRunning bool        `json:"-" desc:"is the output monitor running?"`
+	OutMonMu      sync.Mutex  `json:"-" desc:"mutex for updating, checking output monitor run status"`
 }
 
 var KiT_PiView = kit.Types.AddType(&PiView{}, PiViewProps)
@@ -70,6 +66,7 @@ func (pv *PiView) InitView() {
 	pv.ConfigStatusBar()
 	pv.ConfigToolbar()
 	pv.UpdateEnd(updt)
+	go pv.MonitorOut()
 }
 
 // IsEmpty returns true if current project is empty
@@ -235,13 +232,17 @@ func (pv *PiView) SetStatus(msg string) {
 
 // LexInit initializes / restarts lexing process for current test file
 func (pv *PiView) LexInit() {
+	pv.OutBuf.New(0)
+	go pv.MonitorOut()
 	fs := &pv.TestBuf.PiState
 	fs.SetSrc(&pv.TestBuf.Lines, string(pv.TestBuf.Filename))
 	// pv.Hi.SetParser(&pv.Parser)
 	pv.Parser.LexInit(fs)
 	if fs.LexHasErrs() {
+		errs := fs.LexErrReport()
+		parse.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-			Prompt: "The Lexer validation has errors\n" + fs.LexErrString()}, true, false, nil, nil)
+			Prompt: "The Lexer validation has errors<br>\n" + errs}, true, false, nil, nil)
 	}
 	pv.UpdtLexBuf()
 }
@@ -252,11 +253,12 @@ func (pv *PiView) LexStopped() {
 	if fs.LexAtEnd() {
 		pv.SetStatus("The Lexer is now at the end of available text")
 	} else {
-		errs := fs.LexErrString()
+		errs := fs.LexErrReport()
 		if errs != "" {
+			parse.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
 			pv.SetStatus("Lexer Errors!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
-				Prompt: "The Lexer has stopped due to errors\n" + errs}, true, false, nil, nil)
+				Prompt: "The Lexer has stopped due to errors<br>\n" + errs}, true, false, nil, nil)
 		} else {
 			pv.SetStatus("Lexer Missing Rules!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
@@ -293,11 +295,9 @@ func (pv *PiView) LexNextLine() *lex.Rule {
 	return mrule
 }
 
-// LexAll does all remaining lexing until end or error -- if animate is true, then
-// it updates the display -- otherwise proceeds silently
-func (pv *PiView) LexAll(animate bool) {
+// LexAll does all remaining lexing until end or error
+func (pv *PiView) LexAll() {
 	fs := &pv.TestBuf.PiState
-	ntok := 0
 	for {
 		mrule := pv.Parser.LexNext(fs)
 		if mrule == nil {
@@ -305,14 +305,6 @@ func (pv *PiView) LexAll(animate bool) {
 				pv.LexStopped()
 			}
 			break
-		}
-		if animate {
-			nntok := len(fs.LexState.Lex)
-			if nntok != ntok {
-				pv.SetStatus(mrule.Nm + ": " + fs.LexLineString())
-				pv.SelectLexRule(mrule)
-				ntok = nntok
-			}
 		}
 	}
 	pv.UpdtLexBuf()
@@ -359,11 +351,14 @@ func (pv *PiView) EditPassTwo() {
 
 // PassTwo does the second pass after lexing, per current settings
 func (pv *PiView) PassTwo() {
+	pv.OutBuf.New(0)
 	fs := &pv.TestBuf.PiState
 	pv.Parser.DoPassTwo(fs)
 	if fs.PassTwoHasErrs() {
+		errs := fs.PassTwoErrReport()
+		parse.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "PassTwo Error",
-			Prompt: "The PassTwo had the following errors\n" + fs.PassTwoErrString()}, true, false, nil, nil)
+			Prompt: "The PassTwo had the following errors<br>\n" + errs}, true, false, nil, nil)
 	}
 }
 
@@ -381,28 +376,30 @@ func (pv *PiView) EditTrace() {
 // ParseInit initializes / restarts lexing process for current test file
 func (pv *PiView) ParseInit() {
 	fs := &pv.TestBuf.PiState
-	gide.TheConsole.Buf.New(0)
+	pv.OutBuf.New(0)
+	go pv.MonitorOut()
 	pv.LexInit()
 	pv.Parser.LexAll(fs)
 	pv.Parser.ParserInit(fs)
 	pv.UpdtLexBuf()
 	if fs.ParseHasErrs() {
+		errs := fs.ParseErrReportDetailed()
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-			Prompt: "The Parser validation has errors\n" + fs.ParseErrString()}, true, false, nil, nil)
+			Prompt: "The Parser validation has errors<br>\n" + errs}, true, false, nil, nil)
 	}
 }
 
 // ParseStopped tells the user why the lexer stopped
 func (pv *PiView) ParseStopped() {
 	fs := &pv.TestBuf.PiState
-	if fs.ParseAtEnd() {
+	if fs.ParseAtEnd() && !fs.ParseHasErrs() {
 		pv.SetStatus("The Parser is now at the end of available text")
 	} else {
-		errs := fs.ParseErrString()
+		errs := fs.ParseErrReportDetailed()
 		if errs != "" {
 			pv.SetStatus("Parse Error!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
-				Prompt: "The Parser has stopped due to errors<br>\n" + errs}, true, false, nil, nil)
+				Prompt: "The Parser has the following errors (see Output tab for full list)<br>\n" + errs}, true, false, nil, nil)
 		} else {
 			pv.SetStatus("Parse Missing Rules!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Parse Error",
@@ -420,6 +417,7 @@ func (pv *PiView) ParseNext() *parse.Rule {
 	at.UpdateEnd(updt)
 	at.OpenAll()
 	pv.AstTreeToEnd()
+	pv.UpdtLexBuf()
 	pv.UpdtParseBuf()
 	if mrule == nil {
 		pv.ParseStopped()
@@ -444,12 +442,11 @@ func (pv *PiView) ParseAll() {
 		}
 	}
 	at.UpdateEnd(updt)
-	at.OpenAll()
-	pv.AstTreeToEnd()
+	// at.OpenAll()
+	// pv.AstTreeToEnd()
+	pv.UpdtLexBuf()
 	pv.UpdtParseBuf()
-	if !fs.ParseAtEnd() {
-		pv.ParseStopped()
-	}
+	pv.ParseStopped()
 }
 
 // SelectParseRule selects given lex rule in Parser
@@ -669,6 +666,16 @@ func (pv *PiView) OpenTestTextTab() {
 	}
 }
 
+// OpenOutTab opens a main tab displaying all output
+func (pv *PiView) OpenOutTab() {
+	ctv, _ := pv.FindOrMakeMainTabTextView("Output", true, true)
+	ctv.SetInactive()
+	ctv.SetProp("white-space", gi.WhiteSpacePre) // no word wrap
+	if ctv.Buf == nil || ctv.Buf != &pv.OutBuf {
+		ctv.SetBuf(&pv.OutBuf)
+	}
+}
+
 // OpenLexTab opens a main tab displaying lexer output
 func (pv *PiView) OpenLexTab() {
 	ctv, _ := pv.FindOrMakeMainTabTextView("LexOut", true, true)
@@ -834,6 +841,23 @@ func (pv *PiView) SplitViewConfig() kit.TypeAndNameList {
 	return config
 }
 
+// MonitorOut sets up the OutBuf monitor -- must call as separate goroutine using go
+func (pv *PiView) MonitorOut() {
+	pv.OutMonMu.Lock()
+	if pv.OutMonRunning {
+		pv.OutMonMu.Unlock()
+		return
+	}
+	pv.OutMonRunning = true
+	pv.OutMonMu.Unlock()
+	obuf := giv.OutBuf{}
+	obuf.Init(parse.Trace.OutRead, &pv.OutBuf, 0, gide.MarkupCmdOutput)
+	obuf.MonOut()
+	pv.OutMonMu.Lock()
+	pv.OutMonRunning = false
+	pv.OutMonMu.Unlock()
+}
+
 // ConfigSplitView configures the SplitView.
 func (pv *PiView) ConfigSplitView() {
 	fs := &pv.TestBuf.PiState
@@ -865,6 +889,13 @@ func (pv *PiView) ConfigSplitView() {
 		gide.Prefs.Editor.ConfigTextBuf(&pv.TestBuf)
 		pv.TestBuf.Hi.Off = true // prevent auto-hi
 
+		pv.OutBuf.SetHiStyle(gide.Prefs.HiStyle)
+		gide.Prefs.Editor.ConfigTextBuf(&pv.OutBuf)
+		pv.OutBuf.Opts.LineNos = false
+
+		parse.Trace.Init()
+		go pv.MonitorOut()
+
 		pv.LexBuf.SetHiStyle(gide.Prefs.HiStyle)
 		gide.Prefs.Editor.ConfigTextBuf(&pv.LexBuf)
 
@@ -876,6 +907,7 @@ func (pv *PiView) ConfigSplitView() {
 
 		pv.OpenConsoleTab()
 		pv.OpenTestTextTab()
+		pv.OpenOutTab()
 		pv.OpenLexTab()
 		pv.OpenParseTab()
 
@@ -1175,9 +1207,6 @@ var PiViewProps = ki.Props{
 		{"LexAll", ki.Props{
 			"icon": "fast-fwd",
 			"desc": "do all remaining lexing",
-			"Args": ki.PropSlice{
-				{"Animate", ki.Props{}},
-			},
 		}},
 		{"sep-passtwo", ki.BlankProp{}},
 		{"EditPassTwo", ki.Props{

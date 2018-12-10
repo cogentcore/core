@@ -13,13 +13,15 @@ import (
 // the file are directly convertible to indexes in Lines structure
 type File struct {
 	Filename   string    `desc:"the current file being lex'd"`
+	BasePath   string    `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
 	Lines      *[][]rune `desc:"contents of the file as lines of runes"`
 	Lexs       []Line    `desc:"lex'd version of the lines -- allocated to size of Lines"`
 	Comments   []Line    `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
 	LastStacks []Stack   `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
 }
 
-// SetSrc sets the source to given content, and alloc Lexs
+// SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
+// then it is set to the path for the filename
 func (fl *File) SetSrc(src *[][]rune, fname string) {
 	fl.Filename = fname
 	fl.Lines = src
@@ -77,6 +79,15 @@ func (fl *File) NLines() int {
 		return 0
 	}
 	return len(*fl.Lines)
+}
+
+// SrcLine returns given line of source, as a string, or "" if out of range
+func (fl *File) SrcLine(ln int) string {
+	nlines := fl.NLines()
+	if ln < 0 || ln >= nlines {
+		return ""
+	}
+	return string((*fl.Lines)[ln])
 }
 
 // SetLine sets the line data from the lexer -- does a clone to keep the copy

@@ -70,7 +70,7 @@ func (ts *TwoState) Error(msg string) {
 	ppos := ts.Pos
 	ppos.Ch--
 	clex := ts.Src.LexAtSafe(ppos)
-	ts.Errs.Add(Pos{ts.Pos.Ln, clex.St}, ts.Src.Filename, "PassTwo: "+msg)
+	ts.Errs.Add(Pos{ts.Pos.Ln, clex.St}, ts.Src.Filename, "PassTwo: "+msg, ts.Src.SrcLine(ts.Pos.Ln), nil)
 }
 
 // NestStackStr returns the token stack as strings
@@ -100,11 +100,6 @@ func (pt *PassTwo) Error(ts *TwoState, msg string) {
 // HasErrs reports if there are errors in eosing process
 func (pt *PassTwo) HasErrs(ts *TwoState) bool {
 	return len(ts.Errs) > 0
-}
-
-// ErrString returns the errors as a single string
-func (pt *PassTwo) ErrString(ts *TwoState) string {
-	return ts.Errs.AllString()
 }
 
 // MismatchError reports a mismatch for given type of parentheses / bracket

@@ -55,21 +55,36 @@ func (ps *State) AllocRules() {
 }
 
 // Error adds a parsing error at given lex token position
-func (ps *State) Error(pos lex.Pos, msg string) {
+func (ps *State) Error(pos lex.Pos, msg string, rule *Rule) {
 	if pos != lex.PosZero {
 		pos = ps.Src.TokenSrcPos(pos).St
 	}
-	ps.Errs.Add(pos, ps.Src.Filename, "Parser: "+msg)
+	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Ln), rule)
 	if GuiActive {
-		fmt.Println("ERROR: " + ps.Errs[len(ps.Errs)-1].Error())
-	} else {
-		fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
+		erstr := e.Report(ps.Src.BasePath, true, true)
+		fmt.Fprintln(Trace.OutWrite, "ERROR: "+erstr)
 	}
 }
 
-// AtEof returns true if current position is at end of file
+// AtEof returns true if current position is at end of file -- this includes
+// common situation where it is just at the very last token
 func (ps *State) AtEof() bool {
-	return ps.Pos.Ln >= ps.Src.NLines()
+	if ps.Pos.Ln >= ps.Src.NLines() {
+		return true
+	}
+	sp, ok := ps.Src.ValidTokenPos(ps.Pos)
+	if !ok {
+		return true
+	}
+	sp, ok = ps.Src.NextTokenPos(sp)
+	if !ok {
+		return true
+	}
+	sp, ok = ps.Src.NextTokenPos(sp) // this is the last token case!
+	if !ok {
+		return true
+	}
+	return false
 }
 
 // NextSrcLine returns the next line of text

@@ -98,6 +98,7 @@
             "Pos": "AnyPos",
             "String": "*/",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -115,6 +116,7 @@
             "Pos": "AnyPos",
             "String": "/*",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PushState",
               "Next"
@@ -132,6 +134,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -144,6 +147,7 @@
         "Pos": "AnyPos",
         "String": "CommentMulti",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -172,6 +176,7 @@
             "Pos": "AnyPos",
             "String": "\\`",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -188,6 +193,7 @@
             "Pos": "AnyPos",
             "String": "`",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "PopState",
               "Next"
@@ -205,6 +211,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -217,6 +224,7 @@
         "Pos": "AnyPos",
         "String": "StrBacktick",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -231,6 +239,7 @@
         "Pos": "AnyPos",
         "String": "/*",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -248,6 +257,7 @@
         "Pos": "AnyPos",
         "String": "`",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "PushState",
           "Next"
@@ -265,6 +275,7 @@
         "Pos": "AnyPos",
         "String": "//",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "EOL"
         ],
@@ -281,6 +292,7 @@
         "Pos": "AnyPos",
         "String": "",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -373,6 +385,7 @@
                 "Pos": "AnyPos",
                 "String": "break",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -389,6 +402,7 @@
                 "Pos": "AnyPos",
                 "String": "case",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -405,6 +419,7 @@
                 "Pos": "AnyPos",
                 "String": "chan",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -421,6 +436,7 @@
                 "Pos": "AnyPos",
                 "String": "const",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -437,6 +453,7 @@
                 "Pos": "AnyPos",
                 "String": "continue",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -453,6 +470,7 @@
                 "Pos": "AnyPos",
                 "String": "default",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -469,6 +487,7 @@
                 "Pos": "AnyPos",
                 "String": "defer",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -485,6 +504,7 @@
                 "Pos": "AnyPos",
                 "String": "else",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -501,6 +521,7 @@
                 "Pos": "AnyPos",
                 "String": "fallthrough",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -517,6 +538,7 @@
                 "Pos": "AnyPos",
                 "String": "for",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -533,6 +555,7 @@
                 "Pos": "AnyPos",
                 "String": "func",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -549,6 +572,7 @@
                 "Pos": "AnyPos",
                 "String": "go",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -565,6 +589,7 @@
                 "Pos": "AnyPos",
                 "String": "goto",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -581,6 +606,7 @@
                 "Pos": "AnyPos",
                 "String": "if",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -597,6 +623,7 @@
                 "Pos": "AnyPos",
                 "String": "import",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -613,6 +640,7 @@
                 "Pos": "AnyPos",
                 "String": "interface",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -629,6 +657,7 @@
                 "Pos": "AnyPos",
                 "String": "map",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -645,6 +674,7 @@
                 "Pos": "AnyPos",
                 "String": "make",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -661,6 +691,7 @@
                 "Pos": "AnyPos",
                 "String": "new",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -677,6 +708,7 @@
                 "Pos": "AnyPos",
                 "String": "package",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -693,6 +725,7 @@
                 "Pos": "AnyPos",
                 "String": "range",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -709,6 +742,7 @@
                 "Pos": "AnyPos",
                 "String": "return",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -725,6 +759,7 @@
                 "Pos": "AnyPos",
                 "String": "select",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -741,6 +776,7 @@
                 "Pos": "AnyPos",
                 "String": "struct",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -757,6 +793,7 @@
                 "Pos": "AnyPos",
                 "String": "switch",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -773,6 +810,7 @@
                 "Pos": "AnyPos",
                 "String": "type",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -789,6 +827,7 @@
                 "Pos": "AnyPos",
                 "String": "var",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -801,6 +840,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": null,
             "PushState": ""
           },
@@ -861,6 +901,7 @@
                 "Pos": "AnyPos",
                 "String": "bool",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -877,6 +918,7 @@
                 "Pos": "AnyPos",
                 "String": "string",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -893,6 +935,7 @@
                 "Pos": "AnyPos",
                 "String": "int",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -909,6 +952,7 @@
                 "Pos": "AnyPos",
                 "String": "int8",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -925,6 +969,7 @@
                 "Pos": "AnyPos",
                 "String": "int16",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -941,6 +986,7 @@
                 "Pos": "AnyPos",
                 "String": "int32",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -957,6 +1003,7 @@
                 "Pos": "AnyPos",
                 "String": "int64",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -973,6 +1020,7 @@
                 "Pos": "AnyPos",
                 "String": "uint",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -989,6 +1037,7 @@
                 "Pos": "AnyPos",
                 "String": "uint8",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1005,6 +1054,7 @@
                 "Pos": "AnyPos",
                 "String": "uint16",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1021,6 +1071,7 @@
                 "Pos": "AnyPos",
                 "String": "uint32",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1037,6 +1088,7 @@
                 "Pos": "AnyPos",
                 "String": "uint64",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1053,6 +1105,7 @@
                 "Pos": "AnyPos",
                 "String": "uintptr",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1069,6 +1122,7 @@
                 "Pos": "AnyPos",
                 "String": "byte",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1085,6 +1139,7 @@
                 "Pos": "AnyPos",
                 "String": "rune",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1101,6 +1156,7 @@
                 "Pos": "AnyPos",
                 "String": "float32",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1117,6 +1173,7 @@
                 "Pos": "AnyPos",
                 "String": "float64",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1133,6 +1190,7 @@
                 "Pos": "AnyPos",
                 "String": "complex64",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1149,6 +1207,7 @@
                 "Pos": "AnyPos",
                 "String": "complex128",
                 "Off": 0,
+                "SizeAdj": 0,
                 "Acts": [
                   "Name"
                 ],
@@ -1161,6 +1220,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": null,
             "PushState": ""
           },
@@ -1175,6 +1235,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Name"
             ],
@@ -1187,6 +1248,7 @@
         "Pos": "AnyPos",
         "String": "",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -1201,6 +1263,7 @@
         "Pos": "AnyPos",
         "String": "",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Number"
         ],
@@ -1231,6 +1294,7 @@
             "Pos": "AnyPos",
             "String": "",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Number"
             ],
@@ -1257,6 +1321,7 @@
                 "Pos": "AnyPos",
                 "String": ".",
                 "Off": 2,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -1269,6 +1334,7 @@
             "Pos": "AnyPos",
             "String": ".",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [],
             "PushState": ""
           },
@@ -1283,6 +1349,7 @@
             "Pos": "AnyPos",
             "String": ".",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1295,6 +1362,7 @@
         "Pos": "AnyPos",
         "String": ".",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": null,
         "PushState": ""
       },
@@ -1309,6 +1377,7 @@
         "Pos": "AnyPos",
         "String": "'",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "QuotedRaw"
         ],
@@ -1325,6 +1394,7 @@
         "Pos": "AnyPos",
         "String": "\"",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "QuotedRaw"
         ],
@@ -1341,6 +1411,7 @@
         "Pos": "AnyPos",
         "String": "(",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1357,6 +1428,7 @@
         "Pos": "AnyPos",
         "String": ")",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1373,6 +1445,7 @@
         "Pos": "AnyPos",
         "String": "[",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1389,6 +1462,7 @@
         "Pos": "AnyPos",
         "String": "]",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1405,6 +1479,7 @@
         "Pos": "AnyPos",
         "String": "{",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1421,6 +1496,7 @@
         "Pos": "AnyPos",
         "String": "}",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1437,6 +1513,7 @@
         "Pos": "AnyPos",
         "String": ",",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1453,6 +1530,7 @@
         "Pos": "AnyPos",
         "String": ";",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -1481,6 +1559,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1497,6 +1576,7 @@
             "Pos": "AnyPos",
             "String": ":",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1509,6 +1589,7 @@
         "Pos": "AnyPos",
         "String": ":",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1537,6 +1618,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1553,6 +1635,7 @@
             "Pos": "AnyPos",
             "String": "+",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1569,6 +1652,7 @@
             "Pos": "AnyPos",
             "String": "+",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1581,6 +1665,7 @@
         "Pos": "AnyPos",
         "String": "+",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1609,6 +1694,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1625,6 +1711,7 @@
             "Pos": "AnyPos",
             "String": "-",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1641,6 +1728,7 @@
             "Pos": "AnyPos",
             "String": "-",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1653,6 +1741,7 @@
         "Pos": "AnyPos",
         "String": "-",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1679,6 +1768,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1695,6 +1785,7 @@
             "Pos": "AnyPos",
             "String": "*",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1707,6 +1798,7 @@
         "Pos": "AnyPos",
         "String": "*",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1733,6 +1825,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1749,6 +1842,7 @@
             "Pos": "AnyPos",
             "String": "/",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1761,6 +1855,7 @@
         "Pos": "AnyPos",
         "String": "/",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1787,6 +1882,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1803,6 +1899,7 @@
             "Pos": "AnyPos",
             "String": "%",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1815,6 +1912,7 @@
         "Pos": "AnyPos",
         "String": "%",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1841,6 +1939,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1857,6 +1956,7 @@
             "Pos": "AnyPos",
             "String": "^",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1869,6 +1969,7 @@
         "Pos": "AnyPos",
         "String": "^",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -1897,6 +1998,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1925,6 +2027,7 @@
                 "Pos": "AnyPos",
                 "String": "=",
                 "Off": 2,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -1941,6 +2044,7 @@
                 "Pos": "AnyPos",
                 "String": "\u003e",
                 "Off": 1,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -1953,6 +2057,7 @@
             "Pos": "AnyPos",
             "String": "\u003e",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [],
             "PushState": ""
           },
@@ -1967,6 +2072,7 @@
             "Pos": "AnyPos",
             "String": "\u003e",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -1979,6 +2085,7 @@
         "Pos": "AnyPos",
         "String": "\u003e",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -2009,6 +2116,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2025,6 +2133,7 @@
             "Pos": "AnyPos",
             "String": "-",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2053,6 +2162,7 @@
                 "Pos": "AnyPos",
                 "String": "=",
                 "Off": 2,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -2069,6 +2179,7 @@
                 "Pos": "AnyPos",
                 "String": "\u003c",
                 "Off": 1,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -2081,6 +2192,7 @@
             "Pos": "AnyPos",
             "String": "\u003c",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [],
             "PushState": ""
           },
@@ -2095,6 +2207,7 @@
             "Pos": "AnyPos",
             "String": "\u003c",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2107,6 +2220,7 @@
         "Pos": "AnyPos",
         "String": "\u003c",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -2133,6 +2247,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2149,6 +2264,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2161,6 +2277,7 @@
         "Pos": "AnyPos",
         "String": "=",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -2187,6 +2304,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2203,6 +2321,7 @@
             "Pos": "AnyPos",
             "String": "!",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2215,6 +2334,7 @@
         "Pos": "AnyPos",
         "String": "!",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -2245,6 +2365,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2273,6 +2394,7 @@
                 "Pos": "AnyPos",
                 "String": "=",
                 "Off": 2,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -2289,6 +2411,7 @@
                 "Pos": "AnyPos",
                 "String": "^",
                 "Off": 1,
+                "SizeAdj": 0,
                 "Acts": [
                   "Next"
                 ],
@@ -2301,6 +2424,7 @@
             "Pos": "AnyPos",
             "String": "^",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [],
             "PushState": ""
           },
@@ -2315,6 +2439,7 @@
             "Pos": "AnyPos",
             "String": "\u0026",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2331,6 +2456,7 @@
             "Pos": "AnyPos",
             "String": "\u0026",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2343,6 +2469,7 @@
         "Pos": "AnyPos",
         "String": "\u0026",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -2371,6 +2498,7 @@
             "Pos": "AnyPos",
             "String": "=",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2387,6 +2515,7 @@
             "Pos": "AnyPos",
             "String": "|",
             "Off": 1,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2403,6 +2532,7 @@
             "Pos": "AnyPos",
             "String": "|",
             "Off": 0,
+            "SizeAdj": 0,
             "Acts": [
               "Next"
             ],
@@ -2415,6 +2545,7 @@
         "Pos": "AnyPos",
         "String": "|",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [],
         "PushState": ""
       },
@@ -2429,6 +2560,7 @@
         "Pos": "AnyPos",
         "String": "",
         "Off": 0,
+        "SizeAdj": 0,
         "Acts": [
           "Next"
         ],
@@ -2441,6 +2573,7 @@
     "Pos": "AnyPos",
     "String": "",
     "Off": 0,
+    "SizeAdj": 0,
     "Acts": null,
     "PushState": ""
   },
@@ -2563,6 +2696,7 @@
             "Desc": "",
             "Rule": "'key:package' Name 'EOS'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2574,6 +2708,7 @@
             "Desc": "",
             "Rule": "'key:import' ImportN 'EOS'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2585,6 +2720,7 @@
             "Desc": "same as ConstDecl",
             "Rule": "'key:const' ConstDeclN 'EOS'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2596,6 +2732,7 @@
             "Desc": "same as TypeDecl",
             "Rule": "'key:type' TypeDeclN 'EOS'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2607,6 +2744,7 @@
             "Desc": "same as VarDecl",
             "Rule": "'key:var' VarDeclN 'EOS'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2618,6 +2756,7 @@
             "Desc": "",
             "Rule": "FunDecl 'EOS'",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -2625,6 +2764,7 @@
         "Desc": "only rules in this first group are used as top-level rules -- all others must be referenced from here",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       },
       {
@@ -2692,6 +2832,7 @@
                 "Desc": "package-qualified name",
                 "Rule": "'Name' '.' 'Name'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2703,6 +2844,7 @@
                 "Desc": "just a name without package scope",
                 "Rule": "'Name'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -2710,6 +2852,7 @@
             "Desc": "name that is either a full package-qualified name or short plain name",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2733,6 +2876,7 @@
                 "Desc": "",
                 "Rule": "'Name' ',' NameList",
                 "Ast": "AnchorFirstAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2744,6 +2888,7 @@
                 "Desc": "",
                 "Rule": "'Name'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -2751,6 +2896,7 @@
             "Desc": "one or more plain names, separated by , -- for var names",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2774,6 +2920,7 @@
                 "Desc": "",
                 "Rule": "Expr ',' ExprList",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2785,6 +2932,7 @@
                 "Desc": "",
                 "Rule": "Expr",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -2792,6 +2940,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2815,6 +2964,7 @@
                 "Desc": "",
                 "Rule": "BinaryExpr",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2826,6 +2976,7 @@
                 "Desc": "",
                 "Rule": "UnaryExpr",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -2833,6 +2984,7 @@
             "Desc": "The full set of possible expressions",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": true
           },
           {
@@ -2866,6 +3018,7 @@
                 "Desc": "",
                 "Rule": "'+' @UnaryExpr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2877,6 +3030,7 @@
                 "Desc": "",
                 "Rule": "'-' @UnaryExpr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2888,6 +3042,7 @@
                 "Desc": "",
                 "Rule": "'^' @UnaryExpr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2899,6 +3054,7 @@
                 "Desc": "",
                 "Rule": "'!' @UnaryExpr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2910,6 +3066,7 @@
                 "Desc": "",
                 "Rule": "'*' @UnaryExpr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2921,6 +3078,7 @@
                 "Desc": "",
                 "Rule": "'\u0026' @UnaryExpr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -2932,6 +3090,7 @@
                 "Desc": "essential that this is LAST in unary list, so that distinctive first-position unary tokens match instead of more general cases in primary",
                 "Rule": "PrimaryExpr",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -2939,6 +3098,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -2994,6 +3154,7 @@
                 "Desc": "",
                 "Rule": "Expr '!=' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3005,6 +3166,7 @@
                 "Desc": "",
                 "Rule": "Expr '==' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3016,6 +3178,7 @@
                 "Desc": "",
                 "Rule": "Expr '\u003e=' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3027,6 +3190,7 @@
                 "Desc": "",
                 "Rule": "Expr '\u003e' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3038,6 +3202,7 @@
                 "Desc": "",
                 "Rule": "Expr '\u003c=' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3049,6 +3214,7 @@
                 "Desc": "",
                 "Rule": "Expr '\u003c' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3060,6 +3226,7 @@
                 "Desc": "",
                 "Rule": "Expr '||' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3071,6 +3238,7 @@
                 "Desc": "",
                 "Rule": "Expr '\u0026\u0026' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3082,6 +3250,7 @@
                 "Desc": "",
                 "Rule": "-Expr '|' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3093,6 +3262,7 @@
                 "Desc": "",
                 "Rule": "-Expr '^' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3104,6 +3274,7 @@
                 "Desc": "",
                 "Rule": "-Expr '\u0026' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3115,6 +3286,7 @@
                 "Desc": "",
                 "Rule": "-Expr '\u003e\u003e' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3126,6 +3298,7 @@
                 "Desc": "",
                 "Rule": "-Expr '\u003c\u003c' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3137,6 +3310,7 @@
                 "Desc": "",
                 "Rule": "-Expr '-' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3148,6 +3322,7 @@
                 "Desc": "",
                 "Rule": "-Expr '+' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3159,6 +3334,7 @@
                 "Desc": "",
                 "Rule": "-Expr '%' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3170,6 +3346,7 @@
                 "Desc": "",
                 "Rule": "-Expr '/' Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3181,6 +3358,7 @@
                 "Desc": "! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice",
                 "Rule": "-Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3188,6 +3366,7 @@
             "Desc": "due to top-down nature of parser, *lowest* precedence is *first* -- all rules *must* have - first = reverse order to get associativity right",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3239,6 +3418,7 @@
                 "Desc": "",
                 "Rule": "BasicLiteral",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3250,6 +3430,7 @@
                 "Desc": "important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed?",
                 "Rule": "@LiteralType '{' ?ElementList '}'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3261,6 +3442,7 @@
                 "Desc": "",
                 "Rule": "'key:func' Signature '{' ?BlockList '}'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3272,6 +3454,7 @@
                 "Desc": "only works with basic builtin types -- others will get taken by FunCall",
                 "Rule": "@BasicType '(' Expr ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3283,6 +3466,7 @@
                 "Desc": "",
                 "Rule": "'(' @Type ')' '(' Expr ?',' ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3294,6 +3478,7 @@
                 "Desc": "note: a regular type(expr) will be a FunCall",
                 "Rule": "@TypeLiteral '(' Expr ?',' ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3305,6 +3490,7 @@
                 "Desc": "this needs further right recursion to keep matching more slices",
                 "Rule": "?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr",
                 "Ast": "SubAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3316,6 +3502,7 @@
                 "Desc": "",
                 "Rule": "'(' Expr ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3327,6 +3514,7 @@
                 "Desc": "must be before FunCall to get . match",
                 "Rule": "PrimaryExpr '.' '(' @Type ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3338,6 +3526,7 @@
                 "Desc": "takes type arg",
                 "Rule": "'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3349,6 +3538,7 @@
                 "Desc": "takes type arg",
                 "Rule": "'key:new' '(' Type ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3360,6 +3550,7 @@
                 "Desc": "This must be after unary expr esp addr, DePtr",
                 "Rule": "PrimaryExpr '.' PrimaryExpr",
                 "Ast": "SubAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3371,6 +3562,13 @@
                 "Desc": "",
                 "Rule": "?PrimaryExpr '.' Name '(' ?ArgsExpr ')'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "[0]",
+                    "Tok": "NameFunction"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -3382,6 +3580,13 @@
                 "Desc": "must be after parens",
                 "Rule": "PrimaryExpr '(' ?ArgsExpr ')'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "[0]",
+                    "Tok": "NameFunction"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -3395,6 +3600,7 @@
                 "Desc": "don't think this is needed.. todo: test more",
                 "Rule": "@RecvType '.' Name '(' ?ArgsExpr ')'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3406,6 +3612,7 @@
                 "Desc": "this is the least selective and must be at the end",
                 "Rule": "FullName",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3413,6 +3620,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3442,6 +3650,7 @@
                 "Desc": "",
                 "Rule": "'LitNumInteger'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3453,6 +3662,7 @@
                 "Desc": "",
                 "Rule": "'LitNumFloat'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3464,6 +3674,7 @@
                 "Desc": "",
                 "Rule": "'LitNumImag'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3475,6 +3686,7 @@
                 "Desc": "rune",
                 "Rule": "'LitStrSingle'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3486,6 +3698,7 @@
                 "Desc": "",
                 "Rule": "'LitStr'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3493,6 +3706,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3526,6 +3740,7 @@
                 "Desc": "",
                 "Rule": "StructType",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3537,6 +3752,7 @@
                 "Desc": "",
                 "Rule": "'key:interface' '{' '}'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3548,6 +3764,7 @@
                 "Desc": "slice must come before array",
                 "Rule": "SliceType",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3559,6 +3776,7 @@
                 "Desc": "",
                 "Rule": "ArrayType",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3570,6 +3788,7 @@
                 "Desc": "",
                 "Rule": "'[' '...' ']' Type",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3581,6 +3800,7 @@
                 "Desc": "",
                 "Rule": "MapType",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3592,6 +3812,7 @@
                 "Desc": "this is very general, must be at end..",
                 "Rule": "TypeName",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3599,6 +3820,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3610,6 +3832,7 @@
             "Desc": "",
             "Rule": "'{' ElementList '}' 'EOS'",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3633,6 +3856,7 @@
                 "Desc": "",
                 "Rule": "KeyedEl ',' ?ElementList",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3656,6 +3880,7 @@
                     "Desc": "",
                     "Rule": "Key ':' Element",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   },
                   {
@@ -3679,6 +3904,7 @@
                         "Desc": "",
                         "Rule": "Expr",
                         "Ast": "NoAst",
+                        "Acts": null,
                         "OptTokMap": false
                       },
                       {
@@ -3690,6 +3916,7 @@
                         "Desc": "",
                         "Rule": "LiteralValue",
                         "Ast": "NoAst",
+                        "Acts": null,
                         "OptTokMap": false
                       }
                     ],
@@ -3697,6 +3924,7 @@
                     "Desc": "",
                     "Rule": "",
                     "Ast": "NoAst",
+                    "Acts": null,
                     "OptTokMap": false
                   }
                 ],
@@ -3704,6 +3932,7 @@
                 "Desc": "",
                 "Rule": "",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3711,6 +3940,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3736,6 +3966,7 @@
                 "Desc": "",
                 "Rule": "'Name'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3747,6 +3978,7 @@
                 "Desc": "",
                 "Rule": "LiteralValue",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3758,6 +3990,7 @@
                 "Desc": "",
                 "Rule": "Expr",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3765,6 +3998,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3790,6 +4024,7 @@
                 "Desc": "",
                 "Rule": "'(' '*' TypeName ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3801,6 +4036,7 @@
                 "Desc": "",
                 "Rule": "'(' RecvType ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3812,6 +4048,7 @@
                 "Desc": "",
                 "Rule": "TypeName",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3819,6 +4056,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3842,6 +4080,7 @@
                 "Desc": "",
                 "Rule": "@Name '.' @Selectors",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3853,6 +4092,7 @@
                 "Desc": "",
                 "Rule": "Name",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3860,6 +4100,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3871,6 +4112,7 @@
             "Desc": "",
             "Rule": "'[' SliceExpr ']' ?SubSlice",
             "Ast": "SubAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3896,6 +4138,7 @@
                 "Desc": "",
                 "Rule": "?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3907,6 +4150,7 @@
                 "Desc": "",
                 "Rule": "?SliceIdx1 ':' ?SliceIdx2",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3918,6 +4162,7 @@
                 "Desc": "",
                 "Rule": "Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3925,6 +4170,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -3950,6 +4196,7 @@
                 "Desc": "",
                 "Rule": "Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3961,6 +4208,7 @@
                 "Desc": "",
                 "Rule": "Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -3972,6 +4220,7 @@
                 "Desc": "",
                 "Rule": "Expr",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -3979,6 +4228,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4002,6 +4252,7 @@
                 "Desc": "",
                 "Rule": "ExprList '...'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4013,6 +4264,7 @@
                 "Desc": "",
                 "Rule": "ExprList",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4020,6 +4272,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -4027,6 +4280,7 @@
         "Desc": "many different rules here that go into expressions etc",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       },
       {
@@ -4080,6 +4334,7 @@
                 "Desc": "",
                 "Rule": "'(' @Type ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4091,6 +4346,7 @@
                 "Desc": "",
                 "Rule": "TypeLiteral",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4102,6 +4358,7 @@
                 "Desc": "",
                 "Rule": "TypeName",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4109,6 +4366,7 @@
             "Desc": "type specifies a type either as a type name or type expression",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4134,6 +4392,7 @@
                 "Desc": "recognizes builtin types",
                 "Rule": "'KeywordType'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4145,6 +4404,7 @@
                 "Desc": "type equivalent to QualName",
                 "Rule": "'Name' '.' 'Name'",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4156,6 +4416,13 @@
                 "Desc": "local unqualified type name",
                 "Rule": "'Name'",
                 "Ast": "AddAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NameType"
+                  }
+                ],
                 "OptTokMap": false
               }
             ],
@@ -4163,6 +4430,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4186,6 +4454,7 @@
                 "Desc": "",
                 "Rule": "'*' TypeName",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4197,6 +4466,7 @@
                 "Desc": "",
                 "Rule": "TypeName",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4204,6 +4474,7 @@
             "Desc": "regular type name or pointer to type name",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4239,6 +4510,7 @@
                 "Desc": "",
                 "Rule": "'[' ']' @Type",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4250,6 +4522,7 @@
                 "Desc": "array must be after slice b/c slice matches on sequence of tokens",
                 "Rule": "'[' @Expr ']' @Type",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4261,6 +4534,7 @@
                 "Desc": "",
                 "Rule": "'key:struct' '{' ?FieldDecls '}' ?'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4272,6 +4546,7 @@
                 "Desc": "",
                 "Rule": "'*' @Type",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4283,6 +4558,7 @@
                 "Desc": "",
                 "Rule": "'key:func' @Signature",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4294,6 +4570,7 @@
                 "Desc": "",
                 "Rule": "'key:interface' '{' ?MethodSpecs '}'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4305,6 +4582,7 @@
                 "Desc": "",
                 "Rule": "'key:map' '[' @Type ']' @Type",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4330,6 +4608,7 @@
                     "Desc": "",
                     "Rule": "'key:chan' '\u003c-' @Type",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   },
                   {
@@ -4341,6 +4620,7 @@
                     "Desc": "",
                     "Rule": "'\u003c-' 'key:chan' @Type",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   },
                   {
@@ -4352,6 +4632,7 @@
                     "Desc": "",
                     "Rule": "'key:chan' @Type",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   }
                 ],
@@ -4359,6 +4640,7 @@
                 "Desc": "",
                 "Rule": "",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4366,6 +4648,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4377,6 +4660,7 @@
             "Desc": "",
             "Rule": "FieldDecl ?FieldDecls",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4400,6 +4684,7 @@
                 "Desc": "",
                 "Rule": "'Name' '.' 'Name' ?FieldTag 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4411,6 +4696,7 @@
                 "Desc": "",
                 "Rule": "NameList ?Type ?FieldTag 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4418,6 +4704,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4429,6 +4716,7 @@
             "Desc": "",
             "Rule": "'LitStr'",
             "Ast": "AddAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4452,6 +4740,7 @@
                 "Desc": "",
                 "Rule": "'(' TypeDecls ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4463,6 +4752,7 @@
                 "Desc": "",
                 "Rule": "Name Type 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4470,6 +4760,7 @@
             "Desc": "N = switch between 1 or multi",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4481,6 +4772,7 @@
             "Desc": "",
             "Rule": "TypeDeclEl ?TypeDecls",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4504,6 +4796,7 @@
                 "Desc": "",
                 "Rule": "Type ',' TypeList",
                 "Ast": "AnchorFirstAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4515,6 +4808,7 @@
                 "Desc": "",
                 "Rule": "Type",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4522,6 +4816,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -4529,6 +4824,7 @@
         "Desc": "",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       },
       {
@@ -4578,6 +4874,13 @@
                 "Desc": "",
                 "Rule": "'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "[1]",
+                    "Tok": "NameFunction"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4589,6 +4892,13 @@
                 "Desc": "",
                 "Rule": "'key:func' Name Signature ?Block 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "[0]",
+                    "Tok": "NameFunction"
+                  }
+                ],
                 "OptTokMap": false
               }
             ],
@@ -4596,6 +4906,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4607,6 +4918,7 @@
             "Desc": "",
             "Rule": "Name Type",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4618,6 +4930,7 @@
             "Desc": "",
             "Rule": "Params ?Result",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4641,6 +4954,7 @@
                 "Desc": "",
                 "Rule": "'Name' '.' 'Name' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4652,6 +4966,7 @@
                 "Desc": "",
                 "Rule": "'Name' Params ?Result 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4659,6 +4974,7 @@
             "Desc": "for interfaces only -- interface methods",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4670,6 +4986,7 @@
             "Desc": "",
             "Rule": "MethodSpec ?MethodSpecs",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4693,6 +5010,7 @@
                 "Desc": "",
                 "Rule": "'(' ParamsList ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4704,6 +5022,7 @@
                 "Desc": "",
                 "Rule": "Type",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4711,6 +5030,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4732,6 +5052,7 @@
                 "Desc": "",
                 "Rule": "?NameList '...' Type",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4739,6 +5060,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4764,6 +5086,7 @@
                 "Desc": "",
                 "Rule": "@Name @Type ?',' ?ParamsList",
                 "Ast": "SubAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4775,6 +5098,7 @@
                 "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
                 "Rule": "Name ',' @NameList @Type ?',' ?ParamsList",
                 "Ast": "SubAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4786,6 +5110,7 @@
                 "Desc": "",
                 "Rule": "@Type ?',' ?ParamsList",
                 "Ast": "SubAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -4793,6 +5118,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4804,6 +5130,7 @@
             "Desc": "",
             "Rule": "'(' ?ParamsList ')'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -4811,6 +5138,7 @@
         "Desc": "",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       },
       {
@@ -4844,6 +5172,7 @@
             "Desc": "",
             "Rule": "Stmt 'EOS' ?StmtList",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4855,6 +5184,7 @@
             "Desc": "",
             "Rule": "StmtList",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -4863,7 +5193,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 28,
+                "n": 29,
                 "type": "parse.Rule",
                 "name": "ConstDeclStmt",
                 "type": "parse.Rule",
@@ -4878,6 +5208,8 @@
                 "name": "ContStmt",
                 "type": "parse.Rule",
                 "name": "GotoStmt",
+                "type": "parse.Rule",
+                "name": "GoStmt",
                 "type": "parse.Rule",
                 "name": "FallthroughStmt",
                 "type": "parse.Rule",
@@ -4930,6 +5262,7 @@
                 "Desc": "",
                 "Rule": "ConstDecl",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4941,6 +5274,7 @@
                 "Desc": "",
                 "Rule": "TypeDecl",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4952,6 +5286,7 @@
                 "Desc": "",
                 "Rule": "VarDecl",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4963,6 +5298,7 @@
                 "Desc": "",
                 "Rule": "'key:return' ?ExprList 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4974,6 +5310,7 @@
                 "Desc": "",
                 "Rule": "'key:break' ?Name 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4985,6 +5322,7 @@
                 "Desc": "",
                 "Rule": "'key:continue' ?Name 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -4996,6 +5334,19 @@
                 "Desc": "",
                 "Rule": "'key:goto' Name 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "GoStmt",
+                "UniqueNm": "GoStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:go' Expr 'EOS'",
+                "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5007,6 +5358,7 @@
                 "Desc": "",
                 "Rule": "'key:fallthrough' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5018,6 +5370,7 @@
                 "Desc": "",
                 "Rule": "'key:defer' Expr 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5029,6 +5382,7 @@
                 "Desc": "",
                 "Rule": "'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5040,6 +5394,7 @@
                 "Desc": "",
                 "Rule": "'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5051,6 +5406,7 @@
                 "Desc": "",
                 "Rule": "'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5062,6 +5418,7 @@
                 "Desc": "most general at end",
                 "Rule": "'key:for' ?Expr '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5073,6 +5430,7 @@
                 "Desc": "",
                 "Rule": "'key:switch' ?Expr '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5084,6 +5442,7 @@
                 "Desc": "",
                 "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5095,6 +5454,7 @@
                 "Desc": "",
                 "Rule": "'key:switch' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5106,6 +5466,7 @@
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
                 "Rule": "'key:case' ExprList ':' ?Stmt",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5117,6 +5478,7 @@
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
                 "Rule": "'key:case' TypeList ':' ?Stmt",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5128,6 +5490,7 @@
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
                 "Rule": "'key:case' CommStmt 'EOS' ?Stmt",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5139,6 +5502,7 @@
                 "Desc": "",
                 "Rule": "'key:default' ':' ?Stmt",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5150,6 +5514,7 @@
                 "Desc": "",
                 "Rule": "Name ':' Stmt",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5161,6 +5526,7 @@
                 "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
                 "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5172,6 +5538,7 @@
                 "Desc": "",
                 "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5183,6 +5550,7 @@
                 "Desc": "",
                 "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5194,6 +5562,7 @@
                 "Desc": "",
                 "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5205,6 +5574,7 @@
                 "Desc": "",
                 "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5216,6 +5586,7 @@
                 "Desc": "",
                 "Rule": "'{' ?StmtList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5227,6 +5598,7 @@
                 "Desc": "",
                 "Rule": "SimpleStmt",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5234,6 +5606,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5263,6 +5636,7 @@
                 "Desc": "",
                 "Rule": "Expr '\u003c-' Expr 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5274,6 +5648,7 @@
                 "Desc": "",
                 "Rule": "Expr '++' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5285,6 +5660,7 @@
                 "Desc": "",
                 "Rule": "Expr '--' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5296,6 +5672,7 @@
                 "Desc": "",
                 "Rule": "Asgn",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5307,6 +5684,7 @@
                 "Desc": "",
                 "Rule": "Expr 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5314,6 +5692,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5341,6 +5720,13 @@
                 "Desc": "",
                 "Rule": "ExprList '=' ExprList 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameVar"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -5352,6 +5738,13 @@
                 "Desc": "",
                 "Rule": "ExprList ':=' ExprList 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameVar"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -5363,6 +5756,13 @@
                 "Desc": "",
                 "Rule": "ExprList 'OpMathAsgn' ExprList 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameVar"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -5374,6 +5774,7 @@
                 "Desc": "",
                 "Rule": "ExprList 'OpBitAsgn' ExprList 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5381,6 +5782,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5404,6 +5806,7 @@
                 "Desc": "",
                 "Rule": "'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5415,6 +5818,7 @@
                 "Desc": "",
                 "Rule": "'key:else' '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5422,6 +5826,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5447,6 +5852,7 @@
                 "Desc": "",
                 "Rule": "SendStmt",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5458,6 +5864,7 @@
                 "Desc": "",
                 "Rule": "ExprList '=' Expr 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5469,6 +5876,7 @@
                 "Desc": "",
                 "Rule": "NameList ':=' Expr 'EOS'",
                 "Ast": "AnchorAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5476,6 +5884,7 @@
             "Desc": "communication stmt: send or recv",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -5483,6 +5892,7 @@
         "Desc": "",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       },
       {
@@ -5518,6 +5928,7 @@
                 "Desc": "multiple imports",
                 "Rule": "'(' ImportList ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5529,6 +5940,7 @@
                 "Desc": "single import -- ImportList also allows diff options",
                 "Rule": "ImportList",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5536,6 +5948,7 @@
             "Desc": "N = number switch (One vs. Multi)",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5559,6 +5972,7 @@
                 "Desc": "put more specialized rules first",
                 "Rule": "'Name' 'LitStr' ?'EOS' ?ImportList",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5570,6 +5984,7 @@
                 "Desc": "",
                 "Rule": "'LitStr' ?'EOS' ?ImportList",
                 "Ast": "AddAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5577,6 +5992,7 @@
             "Desc": "",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -5584,6 +6000,7 @@
         "Desc": "",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       },
       {
@@ -5617,6 +6034,7 @@
             "Desc": "",
             "Rule": "'key:type' TypeDeclN 'EOS'",
             "Ast": "AnchorAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5628,6 +6046,7 @@
             "Desc": "",
             "Rule": "'key:const' ConstDeclN 'EOS'",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5639,6 +6058,7 @@
             "Desc": "",
             "Rule": "'key:var' VarDeclN 'EOS'",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5662,6 +6082,7 @@
                 "Desc": "",
                 "Rule": "'(' ConstList ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5685,6 +6106,7 @@
                     "Desc": "",
                     "Rule": "NameList ?Type '=' Expr 'EOS'",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   },
                   {
@@ -5696,6 +6118,7 @@
                     "Desc": "only a name, no expression",
                     "Rule": "NameList 'EOS'",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   }
                 ],
@@ -5703,6 +6126,7 @@
                 "Desc": "different types of const expressions",
                 "Rule": "",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5710,6 +6134,7 @@
             "Desc": "N = switch between 1 or multi",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5721,6 +6146,7 @@
             "Desc": "",
             "Rule": "ConstOpts ?ConstList",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5744,6 +6170,7 @@
                 "Desc": "",
                 "Rule": "'(' VarList ')'",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               },
               {
@@ -5767,6 +6194,7 @@
                     "Desc": "",
                     "Rule": "NameList ?Type '=' Expr 'EOS'",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   },
                   {
@@ -5778,6 +6206,7 @@
                     "Desc": "only a name and type, no expression",
                     "Rule": "NameList Type 'EOS'",
                     "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false
                   }
                 ],
@@ -5785,6 +6214,7 @@
                 "Desc": "different types of var expressions",
                 "Rule": "",
                 "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false
               }
             ],
@@ -5792,6 +6222,7 @@
             "Desc": "N = switch between 1 or multi",
             "Rule": "",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           },
           {
@@ -5803,6 +6234,7 @@
             "Desc": "",
             "Rule": "VarOpts ?VarList",
             "Ast": "NoAst",
+            "Acts": null,
             "OptTokMap": false
           }
         ],
@@ -5810,6 +6242,7 @@
         "Desc": "",
         "Rule": "",
         "Ast": "NoAst",
+        "Acts": null,
         "OptTokMap": false
       }
     ],
@@ -5817,6 +6250,7 @@
     "Desc": "",
     "Rule": "",
     "Ast": "NoAst",
+    "Acts": null,
     "OptTokMap": false
   },
   "Filename": ""

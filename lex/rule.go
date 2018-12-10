@@ -77,27 +77,27 @@ func (lr *Rule) Validate(ls *State) bool {
 		case String:
 			if len(lr.String) == 0 {
 				valid = false
-				ls.Error(0, fmt.Sprintf("lex.Rule: match = String or StrName but String is empty, in: %v\n", lr.PathUnique()))
+				ls.Error(0, "match = String or StrName but String is empty", lr)
 			}
 		case CurState:
 			for _, act := range lr.Acts {
 				if act == Next {
 					valid = false
-					ls.Error(0, fmt.Sprintf("lex.Rule: match = CurState cannot have Action = Next -- no src match, in: %v\n", lr.PathUnique()))
+					ls.Error(0, "match = CurState cannot have Action = Next -- no src match", lr)
 				}
 			}
 			if len(lr.String) == 0 {
-				ls.Error(0, fmt.Sprintf("lex.Rule: match = CurState must have state to match in String -- is empty, in: %v\n", lr.PathUnique()))
+				ls.Error(0, "match = CurState must have state to match in String -- is empty", lr)
 			}
 			if len(lr.PushState) > 0 {
-				ls.Error(0, fmt.Sprintf("lex.Rule: match = CurState has non-empty PushState -- must have state to match in String instead, in: %v\n", lr.PathUnique()))
+				ls.Error(0, "match = CurState has non-empty PushState -- must have state to match in String instead", lr)
 			}
 		}
 	}
 
 	if !lr.HasChildren() && len(lr.Acts) == 0 {
 		valid = false
-		ls.Error(0, fmt.Sprintf("lex.Rule: has no children and no action -- does nothing, in: %v\n", lr.PathUnique()))
+		ls.Error(0, "rule has no children and no action -- does nothing", lr)
 	}
 
 	hasPos := false
@@ -107,13 +107,13 @@ func (lr *Rule) Validate(ls *State) bool {
 		}
 		if act == Next && hasPos {
 			valid = false
-			ls.Error(0, fmt.Sprintf("lex.Rule: action = Next incompatible with action that reads item such as Name, Number, Quoted, in: %v\n", lr.PathUnique()))
+			ls.Error(0, "action = Next incompatible with action that reads item such as Name, Number, Quoted", lr)
 		}
 	}
 
 	if lr.Token.Cat() == token.Keyword && lr.Match != StrName {
 		valid = false
-		ls.Error(0, fmt.Sprintf("lex.Rule: Keyword token must use StrName to match entire name, in: %v\n", lr.PathUnique()))
+		ls.Error(0, "Keyword token must use StrName to match entire name", lr)
 	}
 
 	// now we iterate over our kids
@@ -133,8 +133,7 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 	lxsz := len(ls.Lex)
 	mrule := lr.Lex(ls)
 	if !ls.AtEol() && cpos == ls.Pos {
-		msg := fmt.Sprintf("did not advance position -- need more rules to match current input: %v", string(ls.Src[cpos:]))
-		ls.Error(cpos, msg)
+		ls.Error(cpos, "did not advance position -- need more rules to match current input", lr)
 		return nil
 	}
 	if hasGuest && ls.GuestLex != nil && lr != ls.GuestLex {
@@ -340,7 +339,7 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 		ls.PopState()
 	case SetGuestLex:
 		if ls.LastName == "" {
-			ls.Error(0, fmt.Sprintf("lex.Rule: SetGuestLex action requires prior Name action -- name is empty, in: %v\n", lr.PathUnique()))
+			ls.Error(ls.Pos, "SetGuestLex action requires prior Name action -- name is empty", lr)
 		} else {
 			lx := TheLangLexer.Lexer(ls.LastName)
 			if lx != nil {

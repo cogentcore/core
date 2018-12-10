@@ -65,8 +65,8 @@ func (ls *State) LineString() string {
 }
 
 // Error adds a lexing error at given position
-func (ls *State) Error(pos int, msg string) {
-	ls.Errs.Add(Pos{ls.Ln, pos}, ls.Filename, "Lexer: "+msg)
+func (ls *State) Error(pos int, msg string, rule *Rule) {
+	ls.Errs.Add(Pos{ls.Ln, pos}, ls.Filename, "Lexer: "+msg, string(ls.Src), rule)
 }
 
 // AtEol returns true if current position is at end of line
@@ -201,7 +201,7 @@ func (ls *State) ReadNumber() token.Tokens {
 			ls.ScanMantissa(16)
 			if ls.Pos-offs <= 2 {
 				// only scanned "0x" or "0X"
-				ls.Error(offs, "illegal hexadecimal number")
+				ls.Error(offs, "illegal hexadecimal number", nil)
 			}
 		} else {
 			// octal int or float
@@ -217,7 +217,7 @@ func (ls *State) ReadNumber() token.Tokens {
 			}
 			// octal int
 			if seenDecimalDigit {
-				ls.Error(offs, "illegal octal number")
+				ls.Error(offs, "illegal octal number", nil)
 			}
 		}
 		goto exit
@@ -242,7 +242,7 @@ fraction:
 		if DigitVal(ls.Ch) < 10 {
 			ls.ScanMantissa(10)
 		} else {
-			ls.Error(offs, "illegal floating-point exponent")
+			ls.Error(offs, "illegal floating-point exponent", nil)
 		}
 	}
 
@@ -282,7 +282,7 @@ func (ls *State) ReadQuoted() {
 	for {
 		ch := ls.Ch
 		if ch == '\n' || ch < 0 {
-			ls.Error(offs, "string literal not terminated")
+			ls.Error(offs, "string literal not terminated", nil)
 			break
 		}
 		if ch == delim {
@@ -293,7 +293,7 @@ func (ls *State) ReadQuoted() {
 			ls.ReadEscape(delim)
 		}
 		if !ls.NextRune() {
-			ls.Error(offs, "string literal not terminated")
+			ls.Error(offs, "string literal not terminated", nil)
 			break
 		}
 	}
@@ -328,7 +328,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 		if ls.Ch < 0 {
 			msg = "escape sequence not terminated"
 		}
-		ls.Error(offs, msg)
+		ls.Error(offs, msg, nil)
 		return false
 	}
 
@@ -340,7 +340,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 			if ls.Ch < 0 {
 				msg = "escape sequence not terminated"
 			}
-			ls.Error(ls.Pos, msg)
+			ls.Error(ls.Pos, msg, nil)
 			return false
 		}
 		x = x*base + d
@@ -349,7 +349,7 @@ func (ls *State) ReadEscape(quote rune) bool {
 	}
 
 	if x > max || 0xD800 <= x && x < 0xE000 {
-		ls.Error(ls.Pos, "escape sequence is invalid Unicode code point")
+		ls.Error(ls.Pos, "escape sequence is invalid Unicode code point", nil)
 		return false
 	}
 

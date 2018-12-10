@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _Actions_name = "AddTypeAddConstAddVarActionsN"
+const _Actions_name = "AddTypeAddConstAddVarChgTokenActionsN"
 
-var _Actions_index = [...]uint8{0, 7, 15, 21, 29}
+var _Actions_index = [...]uint8{0, 7, 15, 21, 29, 37}
 
 func (i Actions) String() string {
 	if i < 0 || i >= Actions(len(_Actions_index)-1) {

@@ -184,6 +184,25 @@ func (pr *Parser) ParseNext(fs *FileState) *parse.Rule {
 	return mrule
 }
 
+// ParseRun continues running the parser until nothing matches anymore
+func (pr *Parser) ParseRun(fs *FileState) {
+	for {
+		mrule := pr.Parser.StartParse(&fs.ParseState)
+		if mrule == nil {
+			break
+		}
+	}
+}
+
+// ParseAll does full parsing, including ParseInit and ParseRun, assuming LexAll
+// has been done already
+func (pr *Parser) ParseAll(fs *FileState) {
+	if !pr.ParserInit(fs) {
+		return
+	}
+	pr.ParseRun(fs)
+}
+
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
 func (pr *Parser) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
@@ -253,7 +272,9 @@ func NewFileState() *FileState {
 	return fs
 }
 
-// SetSrc sets source to be parsed, and filename it came from
+// SetSrc sets source to be parsed, and filename it came from, and also the
+// base path for project for reporting filenames relative to
+// (if empty, path to filename is used)
 func (fs *FileState) SetSrc(src *[][]rune, fname string) {
 	fs.Init()
 	fs.Src.SetSrc(src, fname)
@@ -286,9 +307,10 @@ func (fs *FileState) LexHasErrs() bool {
 	return len(fs.LexState.Errs) > 0
 }
 
-// LexErrString returns all the lexing errors as a string
-func (fs *FileState) LexErrString() string {
-	return fs.LexState.Errs.AllString()
+// LexErrReport returns a report of all the lexing errors -- these should only
+// occur during development of lexer so we use a detailed report format
+func (fs *FileState) LexErrReport() string {
+	return fs.LexState.Errs.Report(0, fs.Src.BasePath, true, true)
 }
 
 // PassTwoHasErrs returns true if there were errors from pass two processing
@@ -296,9 +318,10 @@ func (fs *FileState) PassTwoHasErrs() bool {
 	return len(fs.TwoState.Errs) > 0
 }
 
-// PassTwoErrString returns all the pass two errors as a string
-func (fs *FileState) PassTwoErrString() string {
-	return fs.TwoState.Errs.AllString()
+// PassTwoErrString returns all the pass two errors as a string -- these should
+// only occur during development so we use a detailed report format
+func (fs *FileState) PassTwoErrReport() string {
+	return fs.TwoState.Errs.Report(0, fs.Src.BasePath, true, true)
 }
 
 // ParseAtEnd returns true if parsing state is now at end of source
@@ -316,9 +339,16 @@ func (fs *FileState) ParseHasErrs() bool {
 	return len(fs.ParseState.Errs) > 0
 }
 
-// ParseErrString returns all the parsing errors as a string
-func (fs *FileState) ParseErrString() string {
-	return fs.ParseState.Errs.AllString()
+// ParseErrReport returns at most 10 parsing errors in end-user format, sorted
+func (fs *FileState) ParseErrReport() string {
+	fs.ParseState.Errs.Sort()
+	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, true, false)
+}
+
+// ParseErrReportDetailed returns at most 10 parsing errors in detailed format, sorted
+func (fs *FileState) ParseErrReportDetailed() string {
+	fs.ParseState.Errs.Sort()
+	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, true, true)
 }
 
 // RuleString returns the rule info for entire source -- if full

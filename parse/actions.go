@@ -6,6 +6,7 @@ package parse
 
 import (
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/token"
 )
 
 // Actions are parsing actions to perform
@@ -29,8 +30,21 @@ const (
 	// AddVar means add name as a variable
 	AddVar
 
+	// ChgToken changes the token
+	ChgToken
+
 	ActionsN
 )
+
+// Act is one action to perform, operating on the Ast output
+type Act struct {
+	Act  Actions      `desc:"what action to perform"`
+	Path string       `desc:"Ast path, relative to current node: [0..] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc"`
+	Tok  token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
+}
+
+// Acts are multiple actions
+type Acts []Act
 
 // AstActs are actions to perform on the Ast nodes
 type AstActs int

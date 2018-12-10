@@ -13,26 +13,66 @@ package lex
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"sort"
+
+	"github.com/goki/ki"
+	"github.com/goki/ki/ints"
 )
 
 // In an ErrorList, an error is represented by an *Error.
 // The position Pos, if valid, points to the beginning of
 // the offending token, and the error condition is described
 // by Msg.
-//
 type Error struct {
-	Pos      Pos
-	Filename string
-	Msg      string
+	Pos      Pos    `desc:"position where the error occurred in the source"`
+	Filename string `desc:"full filename with path"`
+	Msg      string `desc:"brief error message"`
+	Src      string `desc:"line of source where error was"`
+	Rule     ki.Ki  `desc:"lexer or parser rule that emitted the error"`
 }
 
-// Error implements the error interface.
+// Error implements the error interface -- gives the minimal version of error string
 func (e Error) Error() string {
 	if e.Filename != "" {
-		return e.Filename + ": " + e.Pos.String() + ": " + e.Msg
+		_, fn := filepath.Split(e.Filename)
+		return fn + ":" + e.Pos.String() + ": " + e.Msg
 	}
 	return e.Pos.String() + ": " + e.Msg
+}
+
+// Report provides customizable output options for viewing errors:
+// - basepath if non-empty shows filename relative to that path.
+// - showSrc shows the source line on a second line -- truncated to 30 chars around err
+// - showRule prints the rule name
+func (e Error) Report(basepath string, showSrc, showRule bool) string {
+	var err error
+	fnm := ""
+	if e.Filename != "" {
+		if basepath != "" {
+			fnm, err = filepath.Rel(basepath, e.Filename)
+		}
+		if basepath == "" || err != nil {
+			_, fnm = filepath.Split(e.Filename)
+		}
+	}
+	str := fnm + ":" + e.Pos.String() + ": " + e.Msg
+	if showRule && e.Rule != nil {
+		str += fmt.Sprintf(" (rule: %v)", e.Rule.Name())
+	}
+	ssz := len(e.Src)
+	if showSrc && ssz > 0 && ssz >= e.Pos.Ch {
+		str += "<br>\n\t> "
+		if e.Pos.Ch > 30 {
+			str += e.Src[e.Pos.Ch-30 : e.Pos.Ch]
+		}
+		if ssz > e.Pos.Ch+30 {
+			str += e.Src[e.Pos.Ch : e.Pos.Ch+30]
+		} else if ssz > e.Pos.Ch {
+			str += e.Src[e.Pos.Ch:]
+		}
+	}
+	return str
 }
 
 // ErrorList is a list of *Errors.
@@ -41,8 +81,10 @@ func (e Error) Error() string {
 type ErrorList []*Error
 
 // Add adds an Error with given position and error message to an ErrorList.
-func (p *ErrorList) Add(pos Pos, fname, msg string) {
-	*p = append(*p, &Error{pos, fname, msg})
+func (p *ErrorList) Add(pos Pos, fname, msg string, srcln string, rule ki.Ki) *Error {
+	e := &Error{pos, fname, msg, srcln, rule}
+	*p = append(*p, e)
+	return e
 }
 
 // Reset resets an ErrorList to no errors.
@@ -55,9 +97,6 @@ func (p ErrorList) Swap(i, j int) { p[i], p[j] = p[j], p[i] }
 func (p ErrorList) Less(i, j int) bool {
 	e := p[i]
 	f := p[j]
-	// Note that it is not sufficient to simply compare file offsets because
-	// the offsets do not reflect modified line information (through //line
-	// comments).
 	if e.Filename != f.Filename {
 		return e.Filename < f.Filename
 	}
@@ -73,7 +112,6 @@ func (p ErrorList) Less(i, j int) bool {
 // Sort sorts an ErrorList. *Error entries are sorted by position,
 // other errors are sorted by error message, and before any *Error
 // entry.
-//
 func (p ErrorList) Sort() {
 	sort.Sort(p)
 }
@@ -115,14 +153,24 @@ func (p ErrorList) Err() error {
 	return p
 }
 
-// AllString returns all the errors in the list in one string
-func (p ErrorList) AllString() string {
-	if len(p) == 0 {
+// Report returns all (or up to maxN if > 0) errors in the list in one string
+// with customizable output options for viewing errors:
+// - basepath if non-empty shows filename relative to that path.
+// - showSrc shows the source line on a second line -- truncated to 30 chars around err
+// - showRule prints the rule name
+func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) string {
+	ne := len(p)
+	if ne == 0 {
 		return ""
 	}
 	str := ""
-	for _, e := range p {
-		str += fmt.Sprintf("%s\n", e)
+	if maxN == 0 {
+		maxN = ne
+	} else {
+		maxN = ints.MinInt(ne, maxN)
+	}
+	for ei := 0; ei < maxN; ei++ {
+		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
 	}
 	return str
 }

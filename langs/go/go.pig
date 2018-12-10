@@ -416,6 +416,7 @@ StmtRules {
         BreakStmt:         'key:break' ?Name 'EOS'                                            >Ast
         ContStmt:          'key:continue' ?Name 'EOS'                                         >Ast
         GotoStmt:          'key:goto' Name 'EOS'                                              >Ast
+        GoStmt:            'key:go' Expr 'EOS'                                                >Ast
         FallthroughStmt:   'key:fallthrough' 'EOS'                                            >Ast
         DeferStmt:         'key:defer' Expr 'EOS'                                             >Ast
         IfStmtExpr:        'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                      >Ast
