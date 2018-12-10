@@ -5,11 +5,9 @@
 package giv
 
 import (
-	"fmt"
 	htmlstd "html"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
@@ -122,13 +120,13 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 		return nil, nil
 	}
 	if hm.PiParser != nil {
-		stt := time.Now()
+		// stt := time.Now()
 		hm.PiParser.InitAll(hm.PiState)
 		hm.PiParser.LexAll(hm.PiState)
-		lxdur := time.Now().Sub(stt)
+		// lxdur := time.Now().Sub(stt)
 		hm.PiParser.ParseAll(hm.PiState)
-		prdur := time.Now().Sub(stt)
-		fmt.Printf("lex: %v full parse: %v\n", lxdur, prdur)
+		// prdur := time.Now().Sub(stt)
+		// fmt.Printf("lex: %v full parse: %v\n", lxdur, prdur)
 		return hm.PiState.Src.Lexs, nil
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsAll(txt)
