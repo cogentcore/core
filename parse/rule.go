@@ -431,7 +431,7 @@ func (pr *Rule) Validate(ps *State) bool {
 
 // StartParse is called on the root of the parse rule tree to start the parsing process
 func (pr *Rule) StartParse(ps *State) *Rule {
-	if ps.AtEof() {
+	if ps.AtEof() || !pr.HasChildren() {
 		return nil
 	}
 	kpr := pr.Kids[0].Embed(KiT_Rule).(*Rule) // first rule is special set of valid top-level matches
