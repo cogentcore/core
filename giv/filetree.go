@@ -869,6 +869,19 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
+// ShowFileInfo calls ViewFile on selected files
+func (ftv *FileTreeView) ShowFileInfo() {
+	sels := ftv.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		fftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := fftv.FileNode()
+		if fn != nil {
+			StructViewDialog(ftv.Viewport, fn, DlgOpts{Title: "File Info"}, nil, nil)
+		}
+	}
+}
+
 // DuplicateFiles calls DuplicateFile on any selected nodes
 func (ftv *FileTreeView) DuplicateFiles() {
 	sels := ftv.SelectedViews()
@@ -1135,6 +1148,9 @@ var FileTreeViewProps = ki.Props{
 		"background-color": &gi.Prefs.Colors.Control,
 	},
 	"CtxtMenuActive": ki.PropSlice{
+		{"ShowFileInfo", ki.Props{
+			"label": "File Info",
+		}},
 		{"DuplicateFiles", ki.Props{
 			"label":    "Duplicate",
 			"updtfunc": FileTreeInactiveDirFunc,
