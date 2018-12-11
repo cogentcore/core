@@ -260,24 +260,41 @@ const (
 
 	// Cat: Names.
 	Name
-	NameAttribute     // e.g., HTML attr
-	NameBuiltin       // not keyword?
+	NameBuiltin       // not keyword..
 	NameBuiltinPseudo // e.g., this, self
-	NameClass
-	NameType
-	NameConstant
-	NameDecorator
-	NameEntity
-	NameException
-	NameFunction
-	NameFunctionMagic // e.g., __init__ in python
-	NameLabel         // e.g., goto label
-	NameNamespace
-	NameOperator
 	NameOther
 	NamePseudo
-	NameProperty
-	NameTag
+
+	// SubCat: Type names
+	NameType
+	NameClass
+	NameStruct
+	NameField
+	NameInterface
+	NameConstant
+	NameEnum
+	NameEnumMember
+	NameArray // includes slice etc
+	NameMap
+	NameObject
+	NameTypeParam // for generics, templates
+
+	// SubCat: Function names
+	NameFunction
+	NameDecorator     // function-like wrappers in python
+	NameFunctionMagic // e.g., __init__ in python
+	NameMethod
+	NameOperator
+	NameConstructor // includes destructor..
+	NameException
+	NameEvent // for LSP -- not really sure what it is..
+
+	// SubCat: Scoping names
+	NameScope
+	NameNamespace
+	NameModule
+	NamePackage
+	NameLabel // e.g., goto label
 
 	// SubCat: NameVar -- variable names
 	NameVar
@@ -286,30 +303,40 @@ const (
 	NameVarGlobal
 	NameVarInstance
 	NameVarMagic
+	NameVarParam
+
+	// SubCat: Value -- data-like elements
+	NameValue
+	NameTag // e.g., HTML tag
+	NameProperty
+	NameAttribute // e.g., HTML attr
+	NameEntity    // special entities. (e.g. &nbsp; in HTML).  seems like other..
 
 	// Cat: Literals.
 	Literal
 	LiteralDate
 	LiteralOther
+	LiteralBool
 
 	// SubCat: Literal Strings.
 	LitStr
-	LitStrAffix
+	LitStrAffix // unicode specifiers etc
 	LitStrAtom
 	LitStrBacktick
 	LitStrBoolean
 	LitStrChar
 	LitStrDelimiter
-	LitStrDoc
+	LitStrDoc // doc-specific strings where syntactically noted
 	LitStrDouble
-	LitStrEscape
-	LitStrHeredoc
-	LitStrInterpol
+	LitStrEscape   // esc sequences within strings
+	LitStrHeredoc  // in ruby, perl
+	LitStrInterpol // interpolated parts of strings in #{foo} in Ruby
 	LitStrName
 	LitStrOther
 	LitStrRegex
 	LitStrSingle
 	LitStrSymbol
+	LitStrFile // filename
 
 	// SubCat: Literal Numbers.
 	LitNum
@@ -467,7 +494,11 @@ var SubCats = []Tokens{
 	None,
 	Keyword,
 	Name,
+	NameType,
+	NameFunction,
+	NameScope,
 	NameVar,
+	NameValue,
 	Literal,
 	LitStr,
 	LitNum,

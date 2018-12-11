@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
 )
 
@@ -15,6 +16,9 @@ import (
 type State struct {
 	Src        *lex.File      `desc:"source and lexed version of source we're parsing"`
 	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
+	FileSyms   syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
+	Scopes     syms.SymMap    `desc:"scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
+	ExtScopes  syms.SymMap    `desc:"externally-added scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part"`
 	EosPos     *[]lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
 	Errs       lex.ErrorList  `desc:"any error messages accumulated during parsing specifically"`
