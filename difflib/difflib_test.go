@@ -30,6 +30,13 @@ func splitChars(s string) []string {
 	return chars
 }
 
+func TestlistifyString(t *testing.T) {
+	lst := listifyString("qwerty")
+	if reflect.DeepEqual(lst, []string{"q", "w", "e", "r", "t", "y"}) != true {
+		t.Fatal("listifyString failure:", lst)
+	}
+}
+
 func TestSequenceMatcherRatio(t *testing.T) {
 	s := NewMatcher(splitChars("abcd"), splitChars("bcde"))
 	assertEqual(t, s.Ratio(), 0.75)
@@ -423,4 +430,120 @@ func BenchmarkSplitLines100(b *testing.B) {
 
 func BenchmarkSplitLines10000(b *testing.B) {
 	benchmarkSplitLines(b, 10000)
+}
+
+func TestDifferCompare(t *testing.T) {
+	diff := NewDiffer()
+	// Test
+	aLst := []string{"foo\n", "bar\n", "baz\n"}
+	bLst := []string{"foo\n", "bar1\n", "asdf\n", "baz\n"}
+	out, err := diff.Compare(aLst, bLst)
+	if err != nil {
+		t.Fatal("Differ Compare() error:", err)
+	}
+	if reflect.DeepEqual(out, []string{
+		"  foo\n",
+		"- bar\n",
+		"+ bar1\n",
+		"?    +\n",
+		"+ asdf\n",
+		"  baz\n",
+	}) != true {
+		t.Fatal("Differ Compare failure:", out)
+	}
+}
+
+func TestDifferDump(t *testing.T) {
+	diff := NewDiffer()
+	out := diff.Dump("+",
+		[]string{"foo", "bar", "baz", "quux", "qwerty"},
+		1, 3)
+	if reflect.DeepEqual(out, []string{"+ bar", "+ baz"}) != true {
+		t.Fatal("Differ Dump() failure:", out)
+	}
+}
+
+func TestDifferPlainReplace(t *testing.T) {
+	diff := NewDiffer()
+	aLst := []string{"one\n", "two\n", "three\n", "four\n", "five\n"}
+	bLst := []string{"one\n", "two2\n", "three\n", "extra\n"}
+	// Test a then b
+	out, err := diff.PlainReplace(aLst, 1, 2, bLst, 1, 2)
+	if err != nil {
+		t.Fatal("Differ PlainReplace() error:", err)
+	}
+	if reflect.DeepEqual(out, []string{"- two\n", "+ two2\n"}) != true {
+		t.Fatal("Differ PlainReplace() failure:", out)
+	}
+	// Test b then a
+	out, err = diff.PlainReplace(aLst, 3, 5, bLst, 3, 4)
+	if err != nil {
+		t.Fatal("Differ PlainReplace() error:", err)
+	}
+	if reflect.DeepEqual(out,
+		[]string{"+ extra\n", "- four\n", "- five\n"}) != true {
+		t.Fatal("Differ PlainReplace() failure:", out)
+	}
+}
+
+func TestDifferFancyReplaceAndHelper(t *testing.T) {
+	diff := NewDiffer()
+	// Test identical sync point, both full
+	aLst := []string{"one\n", "asdf\n", "three\n"}
+	bLst := []string{"one\n", "two2\n", "three\n"}
+	out, err := diff.FancyReplace(aLst, 0, 3, bLst, 0, 3)
+	if err != nil {
+		t.Fatal("Differ FancyReplace() error:", err)
+	}
+	if reflect.DeepEqual(out,
+		[]string{"  one\n", "- asdf\n", "+ two2\n", "  three\n"}) != true {
+		t.Fatal("Differ FancyReplace() failure:", out)
+	}
+	// Test close sync point, both full
+	aLst = []string{"one\n", "two123456\n", "asdf\n", "three\n"}
+	bLst = []string{"one\n", "two123457\n", "qwerty\n", "three\n"}
+	out, err = diff.FancyReplace(aLst, 1, 3, bLst, 1, 3)
+	if err != nil {
+		t.Fatal("Differ FancyReplace() error:", err)
+	}
+	if reflect.DeepEqual(out, []string{
+		"- two123456\n",
+		"?         ^\n",
+		"+ two123457\n",
+		"?         ^\n",
+		"- asdf\n",
+		"+ qwerty\n",
+	}) != true {
+		t.Fatal("Differ FancyReplace() failure:", out)
+	}
+	// Test no identical no close
+	aLst = []string{"one\n", "asdf\n", "three\n"}
+	bLst = []string{"one\n", "qwerty\n", "three\n"}
+	out, err = diff.FancyReplace(aLst, 1, 2, bLst, 1, 2)
+	if err != nil {
+		t.Fatal("Differ FancyReplace() error:", err)
+	}
+	if reflect.DeepEqual(out, []string{
+		"- asdf\n",
+		"+ qwerty\n",
+	}) != true {
+		t.Fatal("Differ FancyReplace() failure:", out)
+	}
+}
+
+func TestDifferQFormat(t *testing.T) {
+	diff := NewDiffer()
+	aStr := "\tfoo2bar\n"
+	aTag := "    ^  ^"
+	bStr := "\tfoo3baz\n"
+	bTag := "    ^  ^"
+	out := diff.QFormat(aStr, bStr, aTag, bTag)
+	if reflect.DeepEqual(out, []string{
+		"- \tfoo2bar\n",
+		"? \t   ^  ^\n",
+		"+ \tfoo3baz\n",
+		"? \t   ^  ^\n",
+	}) != true {
+		t.Fatal("Differ QFormat() failure:", out)
+	}
 }
