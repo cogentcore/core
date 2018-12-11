@@ -328,6 +328,9 @@ func (w *windowImpl) handleMouse(x, y int16, button xproto.Button, state uint16,
 
 func (w *windowImpl) Screen() *oswin.Screen {
 	w.mu.Lock()
+	if w.Scrn == nil { // not sure how that is happening..
+		w.Scrn = theApp.Screen(0)
+	}
 	sc := w.Scrn
 	w.mu.Unlock()
 	return sc
