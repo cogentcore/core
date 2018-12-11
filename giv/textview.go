@@ -1362,11 +1362,13 @@ func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
 
 // FindPrevLink finds previous link before given position, returns false if no such links
 func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
-	for ln := pos.Ln; ln >= 0; ln-- {
+	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(tv.Renders[ln].Links) == 0 {
-			pos.Ln = ln - 1
 			if ln-1 >= 0 {
 				pos.Ch = tv.Buf.LineLen(ln-1) - 2
+			} else {
+				ln = tv.NLines
+				pos.Ch = tv.Buf.LineLen(ln - 2)
 			}
 			continue
 		}
@@ -1379,13 +1381,10 @@ func (tv *TextView) FindPrevLink(pos TextPos) (TextPos, TextRegion, bool) {
 				st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
 				ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
 				reg := NewTextRegion(ln, st, ln, ed)
-				pos.Ch = st - 1
+				pos.Ln = ln
+				pos.Ch = st + 1
 				return pos, reg, true
 			}
-		}
-		pos.Ln = ln - 1
-		if ln-1 >= 0 {
-			pos.Ch = tv.Buf.LineLen(ln-1) - 2
 		}
 	}
 	return pos, TextRegionNil, false
