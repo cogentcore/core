@@ -215,8 +215,10 @@ type Ki interface {
 
 	// FindPathUnique returns Ki object at given unique path, starting from
 	// this node (e.g., Root()) -- if this node is not the root, then the path
-	// to this node is subtracted from the start of the path.  returns false if
-	// not found.
+	// to this node is subtracted from the start of the path if present there.
+	// There is also support for [idx] index-based access for any given path
+	// element, for cases when indexes are more useful than names.
+	// Returns false if not found.
 	FindPathUnique(path string) (Ki, bool)
 
 	//////////////////////////////////////////////////////////////////////////
@@ -662,16 +664,16 @@ type Ki interface {
 	// prior to copying / moving.
 	GetPtrPaths()
 
-	// UpdatePtrPaths updates Ptr paths, replacing any occurrence of oldPath with
-	// newPath, optionally only at the start of the path (typically true) --
-	// for all nodes down from this one.
-	UpdatePtrPaths(oldPath, newPath string, startOnly bool)
-
 	// SetPtrsFmPaths walks the tree down from current node and calls
 	// PtrFromPath on all Ptr fields found -- called after Copy, Unmarshal* to
 	// recover pointers after entire structure is in place -- see
 	// UnmarshalPost.
 	SetPtrsFmPaths()
+
+	// UpdatePtrPaths updates Ptr paths, replacing any occurrence of oldPath with
+	// newPath, optionally only at the start of the path (typically true) --
+	// for all nodes down from this one.
+	UpdatePtrPaths(oldPath, newPath string, startOnly bool)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: for JSON and XML formats -- see also Slice, Ptr
