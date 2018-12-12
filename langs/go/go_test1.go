@@ -4,14 +4,9 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-func (ps *Pvsi) tst() {
-	txt += rs[sd-1].String()
-	txt += rs[i].String()
-	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
-}	
-
 package main
 
+/*
 import "github.com/goki/gi/gi"
 
 import (
@@ -22,6 +17,19 @@ import (
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
+*/
+
+type Pvsi struct {
+	Af int
+	Bf string
+}
+
+func (ps *Pvsi) tst() {
+	txt += rs[sd-1].String()
+	txt += rs[i].String()
+	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
+}	
+
 
 /*
 func tst() {
@@ -123,7 +131,7 @@ func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev
 }
 
 // todo: not dealing with all-in-one-line case -- needs to insert EOS before } 
-//func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+// func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 func tst() {
 	tokSrc := string(ps.TokenSrc(pos))

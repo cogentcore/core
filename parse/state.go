@@ -14,16 +14,16 @@ import (
 
 // parse.State is the state maintained for parsing
 type State struct {
-	Src        *lex.File      `desc:"source and lexed version of source we're parsing"`
+	Src        *lex.File      `view:"no-inline" desc:"source and lexed version of source we're parsing"`
 	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
-	FileSyms   syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
-	Scopes     syms.SymMap    `desc:"scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
+	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
+	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
 	ExtScopes  syms.SymMap    `desc:"externally-added scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part"`
 	EosPos     *[]lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
-	Errs       lex.ErrorList  `desc:"any error messages accumulated during parsing specifically"`
-	Matches    [][]MatchStack `desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
-	NonMatches ScopeRuleSet   `desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
+	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
+	Matches    [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
+	NonMatches ScopeRuleSet   `view:"no-inline" desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
 }
 
 // Init initializes the state at start of parsing
@@ -31,6 +31,8 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos *[]lex.Pos) {
 	ps.Src = src
 	ps.Ast = ast
 	ps.Ast.DeleteChildren(true)
+	ps.Syms.Reset()
+	ps.Scopes.Reset()
 	ps.EosPos = eospos
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
 	ps.Errs.Reset()
@@ -213,6 +215,19 @@ func (ps *State) FindEos(stpos lex.Pos, depth int) (lex.Pos, int) {
 		if lx.Depth == depth {
 			return ep, i
 		}
+	}
+	return lex.Pos{}, -1
+}
+
+// FindAnyEos finds the next EOS at any depth
+func (ps *State) FindAnyEos(stpos lex.Pos) (lex.Pos, int) {
+	sz := len(*ps.EosPos)
+	for i := 0; i < sz; i++ {
+		ep := (*ps.EosPos)[i]
+		if ep.IsLess(stpos) {
+			continue
+		}
+		return ep, i
 	}
 	return lex.Pos{}, -1
 }

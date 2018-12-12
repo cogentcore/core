@@ -171,7 +171,8 @@ AnyText:		 Text		 if AnyRune	 do: Next;
 
 // File only rules in this first group are used as top-level rules -- all others must be referenced from here 
 File {
-    PackageSpec:  'key:package' Name 'EOS'    >Ast
+    PackageSpec:  'key:package' Name 'EOS'  >Ast
+                  { -1:PushScope:"Name":NamePackage; }
     Imports:      'key:import' ImportN 'EOS'  >Ast
     // Consts same as ConstDecl 
     Consts:  'key:const' ConstDeclN 'EOS'  >Ast
@@ -258,8 +259,10 @@ ExprRules {
         // Selector This must be after unary expr esp addr, DePtr 
         Selector:  PrimaryExpr '.' PrimaryExpr              _Ast
         MethCall:  ?PrimaryExpr '.' Name '(' ?ArgsExpr ')'  >Ast
+                   { -1:ChgToken:"[0]":NameFunction; }
         // FuncCall must be after parens 
         FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'  >Ast
+                   { -1:ChgToken:"[0]":NameFunction; }
         // // OFF: TypeMethCall don't think this is needed.. todo: test more 
         // OFF: TypeMethCall:  @RecvType '.' Name '(' ?ArgsExpr ')'  >Ast
         // OpName this is the least selective and must be at the end 
@@ -339,6 +342,7 @@ TypeRules {
         QualType:  'Name' '.' 'Name'  +Ast
         // TypeNm local unqualified type name 
         TypeNm:  'Name'  +Ast
+                 { -1:ChgToken:"":NameType; }
     }
     // PtrOrTypeName regular type name or pointer to type name 
     PtrOrTypeName {
@@ -350,10 +354,11 @@ TypeRules {
         // ArrayType array must be after slice b/c slice matches on sequence of tokens 
         ArrayType:      '[' @Expr ']' @Type                      >Ast
         StructType:     'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
-        PointerType:    '*' @Type                                >Ast
-        FuncType:       'key:func' @Signature                    >Ast
-        InterfaceType:  'key:interface' '{' ?MethodSpecs '}'     >Ast
-        MapType:        'key:map' '[' @Type ']' @Type            >Ast
+                        { 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; }
+        PointerType:    '*' @Type                             >Ast
+        FuncType:       'key:func' @Signature                 >Ast
+        InterfaceType:  'key:interface' '{' ?MethodSpecs '}'  >Ast
+        MapType:        'key:map' '[' @Type ']' @Type         >Ast
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
             SendChanType:  '<-' 'key:chan' @Type  >Ast
@@ -364,6 +369,7 @@ TypeRules {
     FieldDecl {
         AnonQualField:  'Name' '.' 'Name' ?FieldTag 'EOS'  >Ast
         NamedField:     NameList ?Type ?FieldTag 'EOS'     >Ast
+                        { -1:ChgToken:"[0]":NameField; -1:AddSymbol:"[0]":NameField; }
     }
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
@@ -380,9 +386,12 @@ TypeRules {
 FuncRules {
     FunDecl {
         MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
-        FuncDecl:  'key:func' Name Signature ?Block 'EOS'                   >Ast
+                   { 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:PopScope:"":None; -1:PopScope:"":None; }
+        FuncDecl:  'key:func' Name Signature ?Block 'EOS'  >Ast
+                   { -1:ChgToken:"[0]":NameFunction; }
     }
-    MethRecv:   Name Type       >Ast
+    MethRecv:   Name Type  >Ast
+                { -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
     Signature:  Params ?Result  
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {
@@ -452,10 +461,14 @@ StmtRules {
         ExprStmt:  Expr 'EOS'            >Ast
     }
     Asgn {
-        AsgnExisting:  ExprList '=' ExprList 'EOS'           >Ast
-        AsgnNew:       ExprList ':=' ExprList 'EOS'          >Ast
+        AsgnExisting:  ExprList '=' ExprList 'EOS'  >Ast
+                       { -1:ChgToken:"Name":NameVar; }
+        AsgnNew:       ExprList ':=' ExprList 'EOS'  >Ast
+                       { -1:ChgToken:"Name":NameVar; }
         AsgnMath:      ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
-        AsgnBit:       ExprList 'OpBitAsgn' ExprList 'EOS'   >Ast
+                       { -1:ChgToken:"Name":NameVar; }
+        AsgnBit:       ExprList 'OpBitAsgn' ExprList 'EOS'  >Ast
+                       { -1:ChgToken:"Name":NameVar; }
     }
     Elses {
         ElseIfStmt:  'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'  >Ast

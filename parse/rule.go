@@ -21,6 +21,7 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
 )
 
@@ -441,7 +442,24 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 	} else {
 		parAst = ps.Ast.AddNewChild(KiT_Ast, kpr.Name()).(*Ast)
 	}
-	return kpr.Parse(ps, pr, parAst, lex.RegZero, nil, 0)
+	didErr := false
+	for {
+		cpos := ps.Pos
+		mrule := kpr.Parse(ps, pr, parAst, lex.RegZero, nil, 0)
+		if !ps.AtEof() && cpos == ps.Pos {
+			if !didErr {
+				ps.Error(cpos, "did not advance position -- need more rules to match current input -- skipping to next EOS", pr)
+				didErr = true
+			}
+			ep, eosIdx := ps.FindAnyEos(ps.Pos)
+			if eosIdx < 0 {
+				return nil
+			}
+			ps.Pos = ep
+		} else {
+			return mrule
+		}
+	}
 }
 
 // Parse tries to apply rule to given input state, returns rule that matched or nil
@@ -856,6 +874,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 	valid := true
 	creg := scope
 	for ri := 0; ri < nr; ri++ {
+		pr.DoActs(ps, ri, par, ourAst, parAst)
 		rr := &pr.Rules[ri]
 		if rr.IsToken() && !rr.Opt {
 			mp := mpos[ri].St
@@ -941,7 +960,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 	}
 	if valid {
-		pr.DoActs(ps, par, ourAst, parAst)
+		pr.DoActs(ps, -1, par, ourAst, parAst)
 	}
 	return valid
 }
@@ -1020,14 +1039,17 @@ func (pr *Rule) DoRulesRevBinExp(ps *State, par *Rule, parAst *Ast, scope lex.Re
 	return valid
 }
 
-// DoActs performs actions after a rule executes
-func (pr *Rule) DoActs(ps *State, par *Rule, ourAst, parAst *Ast) bool {
+// DoActs performs actions at given point in rule execution (ri = rule index, is -1 at end)
+func (pr *Rule) DoActs(ps *State, ri int, par *Rule, ourAst, parAst *Ast) bool {
 	if len(pr.Acts) == 0 {
 		return false
 	}
 	valid := true
 	for ai := range pr.Acts {
 		act := &pr.Acts[ai]
+		if act.RunIdx != ri {
+			continue
+		}
 		if !pr.DoAct(ps, act, par, ourAst, parAst) {
 			valid = false
 		}
@@ -1045,25 +1067,51 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	ok := false
 	if act.Path == "" {
 		node = useAst
-	} else if act.Path[0] == '[' {
-		idx, _ := kit.ToInt(string(act.Path[1]))
-		node, ok = useAst.Child(int(idx))
-		if !ok {
-			ps.Error(ps.Pos, fmt.Sprintf("Action %v: node not found at index: %v", act.Act, idx), pr)
-			return false
-		}
+		ok = true
 	} else {
-		node, ok = useAst.ChildByName(act.Path, 0)
-		if !ok {
-			ps.Error(ps.Pos, fmt.Sprintf("Action %v: node not found by name: %v", act.Act, act.Path), pr)
-			return false
+		pths := strings.Split(act.Path, "|")
+		for _, p := range pths {
+			if p[:3] == "../" {
+				node, ok = parAst.FindPathUnique(p[3:])
+			} else {
+				node, ok = useAst.FindPathUnique(p)
+			}
+			if ok {
+				break
+			}
 		}
 	}
+	if !ok {
+		ps.Error(ps.Pos, fmt.Sprintf("Action %v: node not found at path(s): %v", act.Act, act.Path), pr)
+		return false
+	}
 	ast := node.(*Ast)
+	lx := ps.Src.LexAt(ast.TokReg.St)
+	useTok := lx.Tok
+	if act.Tok != token.None {
+		useTok = act.Tok
+	}
 	switch act.Act {
 	case ChgToken:
-		lx := ps.Src.LexAt(ast.TokReg.St)
 		lx.Tok = act.Tok
+	case AddSymbol:
+		sy := ps.Syms.AddNew(ast.Src, useTok, ps.Src.Filename, ast.SrcReg)
+		sy.AddScopesMap(ps.ExtScopes)
+		sy.AddScopesStack(ps.Scopes)
+	case PushScope:
+		nm := ast.Src
+		sy, has := ps.Syms[nm]
+		if !has {
+			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, lex.RegZero) // zero = tmp
+		}
+		ps.Scopes.Push(sy)
+	case PushNewScope:
+		sy := ps.Syms.AddNew(ast.Src, useTok, ps.Src.Filename, ast.SrcReg)
+		sy.AddScopesMap(ps.ExtScopes)
+		sy.AddScopesStack(ps.Scopes)
+		ps.Scopes.Push(sy)
+	case PopScope:
+		ps.Scopes.Pop()
 	}
 	return true
 }
@@ -1123,6 +1171,9 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 				astr = ">1Ast"
 			}
 			fmt.Fprintf(writer, "%v%v:\t%v\t%v\n", ind, nmstr, pr.Rule, astr)
+			if len(pr.Acts) > 0 {
+				fmt.Fprintf(writer, "%v\t%v\n", ind, pr.Acts.String())
+			}
 		}
 	}
 }

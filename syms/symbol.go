@@ -41,8 +41,9 @@ type Symbol struct {
 	Name      string       `desc:"name of the symbol"`
 	Detail    string       `desc:"additional detail and specification of the symbol -- e.g. if a function, the signature of the function"`
 	Kind      token.Tokens `desc:"type of symbol, using token.Tokens list"`
+	Index     int          `desc:"index for ordering children within a given scope, e.g., fields in a struct / class"`
 	Filename  string       `desc:"full filename / URI of source"`
-	Region    lex.Reg      `desc:"region in source encompassing this item"`
+	Region    lex.Reg      `desc:"region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it"`
 	SelectReg lex.Reg      `desc:"region that should be selected when activated, etc"`
 	Scopes    SymNames     `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
 	Children  SymMap       `desc:"children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc"`
@@ -54,6 +55,32 @@ func NewSymbol(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbo
 	return sy
 }
 
+// IsTemp returns true if this is temporary symbol that is used for scoping but is not
+// otherwise permanently added to list of symbols.  Indicated by Zero Region.
+func (sy *Symbol) IsTemp() bool {
+	return sy.Region == lex.RegZero
+}
+
+// AddChild adds a child symbol, if this parent symbol is not temporary
+// returns true if item name was added and NOT already on the map,
+// and false if it was already or parent is temp.
+// Always adds new symbol in any case.
+// If parent symbol is of the NameType subcategory, then index of child is set
+// to the size of this child map before adding.
+func (sy *Symbol) AddChild(child *Symbol) bool {
+	if sy.IsTemp() {
+		return false
+	}
+	sy.Children.Alloc()
+	_, on := sy.Children[child.Name]
+	idx := len(sy.Children)
+	if sy.Kind.SubCat() == token.NameType {
+		child.Index = idx
+	}
+	sy.Children[child.Name] = child
+	return !on
+}
+
 // AllocScopes allocates scopes map if nil
 func (sy *Symbol) AllocScopes() {
 	if sy.Scopes == nil {
@@ -61,55 +88,31 @@ func (sy *Symbol) AllocScopes() {
 	}
 }
 
-// AddScopes adds a given scope element(s) to this Symbol
-func (sy *Symbol) AddScopes(sm SymMap) {
+// AddScopesMap adds a given scope element(s) from map to this Symbol, and
+// adds this symbol to those scopes if they are not temporary.
+func (sy *Symbol) AddScopesMap(sm SymMap) {
 	if len(sm) == 0 {
 		return
 	}
 	sy.AllocScopes()
 	for _, s := range sm {
 		sy.Scopes[s.Kind] = s.Name
+		s.AddChild(sy)
 	}
 }
 
-// SymMap is a map between symbol names and their full information.
-// A given project will have a top-level SymMap and perhaps local
-// maps for individual files, etc.  Namespaces / packages can be
-// created and elements added to them to create appropriate
-// scoping structure etc.  Note that we have to use pointers
-// for symbols b/c otherwise it is very expensive to re-assign
-// values all the time -- https://github.com/golang/go/issues/3117
-type SymMap map[string]*Symbol
-
-// Alloc ensures that map is made
-func (sm *SymMap) Alloc() {
-	if *sm == nil {
-		*sm = make(SymMap)
+// AddScopesStack adds a given scope element(s) from stack to this Symbol
+// adds this symbol to those scopes if they are not temporary.
+func (sy *Symbol) AddScopesStack(ss SymStack) {
+	if len(ss) == 0 {
+		return
+	}
+	sy.AllocScopes()
+	for _, s := range ss {
+		sy.Scopes[s.Kind] = s.Name
+		s.AddChild(sy)
 	}
 }
-
-// AddNew adds a new symbol to the map with the basic info
-func (sm *SymMap) AddNew(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
-	sy := NewSymbol(name, kind, fname, reg)
-	sm.Alloc()
-	(*sm)[name] = sy
-	return sy
-}
-
-// Reset resets the symbol map
-func (sm *SymMap) Reset() {
-	*sm = make(SymMap)
-}
-
-// CopyFrom copies all the symbols from given source map into this one
-func (sm *SymMap) CopyFrom(src SymMap) {
-	sm.Alloc()
-	for n, s := range src {
-		(*sm)[n] = s
-	}
-}
-
-// todo: probably will need a special json writer to write out the symbols instead of pointers.
 
 // SymNames provides a map-list of symbol names, indexed by their token kinds.
 // Used primarily for specifying Scopes

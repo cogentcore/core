@@ -2582,6 +2582,7 @@
     "Eol": false,
     "Semi": true,
     "Backslash": false,
+    "RBraceOneLine": true,
     "EolToks": [
       {
         "Tok": "Name",
@@ -2696,7 +2697,14 @@
             "Desc": "",
             "Rule": "'key:package' Name 'EOS'",
             "Ast": "AnchorAst",
-            "Acts": null,
+            "Acts": [
+              {
+                "RunIdx": -1,
+                "Act": "PushScope",
+                "Path": "Name",
+                "Tok": "NamePackage"
+              }
+            ],
             "OptTokMap": false
           },
           {
@@ -2708,7 +2716,7 @@
             "Desc": "",
             "Rule": "'key:import' ImportN 'EOS'",
             "Ast": "AnchorAst",
-            "Acts": null,
+            "Acts": [],
             "OptTokMap": false
           },
           {
@@ -3564,6 +3572,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameFunction"
@@ -3582,6 +3591,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameFunction"
@@ -4418,6 +4428,7 @@
                 "Ast": "AddAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameType"
@@ -4534,7 +4545,20 @@
                 "Desc": "",
                 "Rule": "'key:struct' '{' ?FieldDecls '}' ?'EOS'",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "../Name",
+                    "Tok": "NameStruct"
+                  },
+                  {
+                    "RunIdx": 0,
+                    "Act": "PushNewScope",
+                    "Path": "../Name",
+                    "Tok": "NameStruct"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4696,7 +4720,20 @@
                 "Desc": "",
                 "Rule": "NameList ?Type ?FieldTag 'EOS'",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "[0]",
+                    "Tok": "NameField"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "[0]",
+                    "Tok": "NameField"
+                  }
+                ],
                 "OptTokMap": false
               }
             ],
@@ -4876,9 +4913,28 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": 5,
                     "Act": "ChgToken",
-                    "Path": "[1]",
-                    "Tok": "NameFunction"
+                    "Path": "Name",
+                    "Tok": "NameMethod"
+                  },
+                  {
+                    "RunIdx": 5,
+                    "Act": "PushNewScope",
+                    "Path": "Name",
+                    "Tok": "NameMethod"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopScope",
+                    "Path": "",
+                    "Tok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopScope",
+                    "Path": "",
+                    "Tok": "None"
                   }
                 ],
                 "OptTokMap": false
@@ -4894,6 +4950,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "[0]",
                     "Tok": "NameFunction"
@@ -4918,7 +4975,14 @@
             "Desc": "",
             "Rule": "Name Type",
             "Ast": "AnchorAst",
-            "Acts": null,
+            "Acts": [
+              {
+                "RunIdx": -1,
+                "Act": "PushScope",
+                "Path": "TypeNm|PointerType/TypeNm",
+                "Tok": "NameStruct"
+              }
+            ],
             "OptTokMap": false
           },
           {
@@ -5722,6 +5786,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameVar"
@@ -5740,6 +5805,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameVar"
@@ -5758,6 +5824,7 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
+                    "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
                     "Tok": "NameVar"
@@ -5774,7 +5841,14 @@
                 "Desc": "",
                 "Rule": "ExprList 'OpBitAsgn' ExprList 'EOS'",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameVar"
+                  }
+                ],
                 "OptTokMap": false
               }
             ],

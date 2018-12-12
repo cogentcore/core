@@ -5,6 +5,8 @@
 package parse
 
 import (
+	"fmt"
+
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/token"
 )
@@ -21,30 +23,59 @@ func (ev *Actions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // The parsing acts
 const (
-	// AddType means add name as type name
-	AddType Actions = iota
+	// ChgToken changes the token to the Tok specified in the Act action
+	ChgToken Actions = iota
 
-	// AddConst means add name as constant
-	AddConst
+	// AddSymbol means add name as a symbol, using current scoping and token type
+	// or the token specified in the Act action if != None
+	AddSymbol
 
-	// AddVar means add name as a variable
-	AddVar
+	// PushScope means look for an existing symbol of given name
+	// to push onto current scope -- adding a new one if not found --
+	// does not add new item to overall symbol list.  This is useful
+	// for e.g., definitions of methods on a type, where this is not
+	// the definition of the type itself.
+	PushScope
 
-	// ChgToken changes the token
-	ChgToken
+	// PushNewScope means add a new symbol to the list and also push
+	// onto scope stack, using given token type or the token specified
+	// in the Act action if != None
+	PushNewScope
+
+	// PopScope means remove the most recently-added scope item
+	PopScope
 
 	ActionsN
 )
 
 // Act is one action to perform, operating on the Ast output
 type Act struct {
-	Act  Actions      `desc:"what action to perform"`
-	Path string       `desc:"Ast path, relative to current node: [0..] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc"`
-	Tok  token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
+	RunIdx int          `desc:"at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present"`
+	Act    Actions      `desc:"what action to perform"`
+	Path   string       `width:"50" desc:"Ast path, relative to current node: [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options"`
+	Tok    token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
+}
+
+// String satisfies fmt.Stringer interface
+func (ac Act) String() string {
+	return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIdx, ac.Act, ac.Path, ac.Tok)
 }
 
 // Acts are multiple actions
 type Acts []Act
+
+// String satisfies fmt.Stringer interface
+func (ac Acts) String() string {
+	if len(ac) == 0 {
+		return ""
+	}
+	str := "{ "
+	for i := range ac {
+		str += ac[i].String() + "; "
+	}
+	str += "}"
+	return str
+}
 
 // AstActs are actions to perform on the Ast nodes
 type AstActs int

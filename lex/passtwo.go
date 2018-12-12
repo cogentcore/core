@@ -15,11 +15,12 @@ import (
 // for parsing to first break the source down into statement-sized chunks.  A separate
 // list of EOS token positions is maintained for very fast access.
 type PassTwo struct {
-	DoEos     bool               `desc:"should we perform EOS detection on this type of file?"`
-	Eol       bool               `desc:"use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks"`
-	Semi      bool               `desc:"replace all semicolons with EOS to keep it consistent (C, Go..)"`
-	Backslash bool               `desc:"use backslash as a line continuer (python)"`
-	EolToks   token.KeyTokenList `desc:"specific tokens to recognize at the end of a line that trigger an EOS (Go)"`
+	DoEos         bool               `desc:"should we perform EOS detection on this type of file?"`
+	Eol           bool               `desc:"use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks"`
+	Semi          bool               `desc:"replace all semicolons with EOS to keep it consistent (C, Go..)"`
+	Backslash     bool               `desc:"use backslash as a line continuer (python)"`
+	RBraceOneLine bool               `desc:"if a right-brace } is detected at end of line, and there are multiple tokens on that line prior to right brace, insert an EOS *before* RBrace as well (needed for Go)"`
+	EolToks       token.KeyTokenList `desc:"specific tokens to recognize at the end of a line that trigger an EOS (Go)"`
 }
 
 // TwoState is the state maintained for the PassTwo process
@@ -221,6 +222,9 @@ func (pt *PassTwo) EosDetect(ts *TwoState) {
 			}
 			if pt.EolToks.Match(etkey) {
 				ts.InsertEOS(ep)
+				if pt.RBraceOneLine && elx.Tok == token.PunctGpRBrace && sz > 2 {
+					ts.InsertEOS(Pos{ts.Pos.Ln, sz - 2})
+				}
 			}
 		}
 		if pt.Semi {

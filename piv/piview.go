@@ -480,6 +480,14 @@ func (pv *PiView) UpdtParseBuf() {
 	pv.ParseBuf.SetText([]byte(txt))
 }
 
+// ViewParseState
+func (pv *PiView) ViewParseState() {
+	sv := pv.StructView()
+	if sv != nil {
+		sv.SetStruct(&pv.TestBuf.PiState.ParseState, nil)
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 //   Panels
 
@@ -1233,6 +1241,10 @@ var PiViewProps = ki.Props{
 		{"ParseAll", ki.Props{
 			"icon": "fast-fwd",
 			"desc": "do remaining parsing",
+		}},
+		{"ViewParseState", ki.Props{
+			"icon": "edit",
+			"desc": "view the parser state, including symbols recorded etc",
 		}},
 	},
 	"MainMenu": ki.PropSlice{
