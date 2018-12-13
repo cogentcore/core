@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -145,15 +146,74 @@ func (fi *FileInfo) Duplicate() error {
 	return CopyFile(dst, fi.Path, fi.Mode)
 }
 
-// Delete deletes this file -- does not work on directories (todo: fix)
+// Delete deletes the file or if a directory the directory and all files and subdirectories
 func (fi *FileInfo) Delete() error {
 	if fi.IsDir() {
-		err := fmt.Errorf("giv.Delete: cannot deleted directory: %v", fi.Path)
-		log.Println(err)
-		return err
+		path := fi.Path
+		d, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer d.Close()
+		names, err := d.Readdirnames(-1)
+		if err != nil {
+			return err
+		}
+		for _, name := range names {
+			err = os.RemoveAll(filepath.Join(path, name))
+			if err != nil {
+				return err
+			}
+		}
 	}
+
+	// remove file or directory
 	return os.Remove(fi.Path)
 	// note: we should be deleted now!
+}
+
+// FileNames recursively adds fullpath filenames within the starting directory to the "names" slice.
+// Directory names within the starting directory are not added.
+func FileNames(d os.File, names *[]string) (err error) {
+	nms, err := d.Readdirnames(-1)
+	if err != nil {
+		return err
+	}
+	for _, n := range nms {
+		fp := filepath.Join(d.Name(), n)
+		ffi, ferr := os.Stat(fp)
+		if ferr != nil {
+			return ferr
+		}
+		if ffi.IsDir() {
+			dd, err := os.Open(fp)
+			if err != nil {
+				return err
+			}
+			defer dd.Close()
+			FileNames(*dd, names)
+		} else {
+			*names = append(*names, fp)
+		}
+	}
+	return nil
+}
+
+// FileNames retuns a slice of file names from the starting directory and its subdirectories
+func (fi *FileInfo) FileNames(names *[]string) (err error) {
+	if !fi.IsDir() {
+		err = errors.New("Not a directory: FileNames returns a list of files within a directory")
+		return err
+	}
+	path := fi.Path
+	d, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+
+	err = FileNames(*d, names)
+	return err
 }
 
 // Rename renames file to new name

@@ -895,30 +895,82 @@ func (ftv *FileTreeView) DuplicateFiles() {
 	}
 }
 
-// DeleteFiles calls DeleteFile on any selected nodes
+// DeleteFiles calls DeleteFile on any selected nodes, confirming delete if file is open for editing
+// and also prompts for confirmation if the node is a directory
 func (ftv *FileTreeView) DeleteFiles() {
 	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
 		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := ftvv.FileNode()
-		if fn != nil {
-			if fn.Buf != nil {
-				gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "File open for editing, Delete?",
-					Prompt: fmt.Sprintf("The file %v is open for editing: Close and delete?", fn.Nm)},
-					[]string{"Delete", "Cancel"},
-					ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-						switch sig {
-						case 0:
-							fn.CloseBuf()
-							fn.DeleteFile()
-						case 1:
-							// do nothing
+		if fn == nil {
+			return
+		}
+		if fn.Info.IsDir() {
+			openList := []string{}
+			gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Directory and Contents",
+				Prompt: "Delete directory and all subdirectories and files? This action is not undoable and files are not moving to trash / recycle bin"},
+				[]string{"Delete Directory", "Cancel"},
+				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						var fns []string
+						fn.Info.FileNames(&fns)
+						ft := fn.FRoot
+						for _, filename := range fns {
+							fmt.Println(filename)
+							fn, ok := ft.FindFile(filename)
+							if !ok {
+								return
+							}
+							if fn.Buf != nil {
+								openList = append(openList, filename)
+							}
 						}
-					})
-			} else {
-				fn.DeleteFile()
-			}
+						if len(openList) > 0 {
+							gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Files Open for Editing",
+								Prompt: "One or more files are open for editing."}, []string{"Continue with Delete", "Cancel"},
+								ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+									switch sig {
+									case 0:
+										for _, filename := range openList {
+											fn, _ := ft.FindFile(filename)
+											fn.CloseBuf()
+										}
+										fn.DeleteFile()
+									case 1:
+										return
+									}
+								})
+						} else {
+							fn.DeleteFile()
+						}
+					case 1:
+						return
+					}
+
+				})
+		} else if fn.Buf != nil { // file not directory
+			gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "File open for editing, Delete?",
+				Prompt: fmt.Sprintf("The file %v is open for editing: Close and delete? This is not undoable and file is not moving to trash / recycle bin", fn.Nm)},
+				[]string{"Delete", "Cancel"},
+				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						fn.CloseBuf()
+						fn.DeleteFile()
+					case 1:
+						// do nothing
+					}
+				})
+		} else {
+			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Directory and Contents",
+				Prompt: "Ok to delete file(s)?  This is not undoable and file is not moving to trash / recycle bin"}, true, true,
+				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.DialogAccepted) {
+						fn.DeleteFile()
+					}
+				})
 		}
 	}
 }
@@ -1160,8 +1212,6 @@ var FileTreeViewProps = ki.Props{
 			"label":    "Delete",
 			"desc":     "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
 			"shortcut": gi.KeyFunDelete,
-			"confirm":  true,
-			"updtfunc": FileTreeInactiveDirFunc,
 		}},
 		{"RenameFiles", ki.Props{
 			"label": "Rename",
