@@ -124,7 +124,7 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 		hm.PiParser.InitAll(hm.PiState)
 		hm.PiParser.LexAll(hm.PiState)
 		// lxdur := time.Now().Sub(stt)
-		// hm.PiParser.ParseAll(hm.PiState) // hanging sometimes..
+		hm.PiParser.ParseAll(hm.PiState)
 		// prdur := time.Now().Sub(stt)
 		// fmt.Printf("lex: %v full parse: %v\n", lxdur, prdur)
 		return hm.PiState.Src.Lexs, nil
