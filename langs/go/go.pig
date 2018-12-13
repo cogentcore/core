@@ -172,7 +172,7 @@ AnyText:		 Text		 if AnyRune	 do: Next;
 // File only rules in this first group are used as top-level rules -- all others must be referenced from here 
 File {
     PackageSpec:  'key:package' Name 'EOS'  >Ast
-                  { -1:PushScope:"Name":NamePackage; }
+                  { -1:PushNewScope:"Name":NamePackage; }
     Imports:      'key:import' ImportN 'EOS'  >Ast
     // Consts same as ConstDecl 
     Consts:  'key:const' ConstDeclN 'EOS'  >Ast
@@ -351,14 +351,17 @@ TypeRules {
     }
     TypeLiteral {
         SliceType:  '[' ']' @Type  >Ast
+                    { 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
         // ArrayType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayType:      '[' @Expr ']' @Type                      >Ast
+        ArrayType:      '[' @Expr ']' @Type  >Ast
+                        { 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
         StructType:     'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
-                        { 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; }
+                        { 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
         PointerType:    '*' @Type                             >Ast
         FuncType:       'key:func' @Signature                 >Ast
         InterfaceType:  'key:interface' '{' ?MethodSpecs '}'  >Ast
         MapType:        'key:map' '[' @Type ']' @Type         >Ast
+                        { 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
             SendChanType:  '<-' 'key:chan' @Type  >Ast
@@ -374,7 +377,7 @@ TypeRules {
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
     TypeDeclN {
-        TypeDeclMulti:  '(' TypeDecls ')'  
+        TypeDeclGroup:  '(' TypeDecls ')'  
         TypeDeclEl:     Name Type 'EOS'    >Ast
     }
     TypeDecls:  TypeDeclEl ?TypeDecls  
@@ -388,11 +391,11 @@ FuncRules {
         MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
                    { 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:PopScope:"":None; -1:PopScope:"":None; }
         FuncDecl:  'key:func' Name Signature ?Block 'EOS'  >Ast
-                   { -1:ChgToken:"[0]":NameFunction; }
+                   { -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:PopScope:"":None; }
     }
     MethRecv:   Name Type  >Ast
                 { -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
-    Signature:  Params ?Result  
+    Signature:  Params ?Result  >Ast
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {
         MethSpecAnon:  'Name' '.' 'Name' 'EOS'      >Ast
@@ -482,10 +485,10 @@ StmtRules {
     }
 }
 ImportRules {
-    // ImportN N = number switch (One vs. Multi) 
+    // ImportN N = number switch (One vs. Group) 
     ImportN {
-        // ImportMulti multiple imports 
-        ImportMulti:  '(' ImportList ')'  
+        // ImportGroup group of multiple imports 
+        ImportGroup:  '(' ImportList ')'  
         // ImportOne single import -- ImportList also allows diff options 
         ImportOne:  ImportList  
     }
@@ -499,25 +502,29 @@ DeclRules {
     TypeDecl:   'key:type' TypeDeclN 'EOS'    >Ast
     ConstDecl:  'key:const' ConstDeclN 'EOS'  
     VarDecl:    'key:var' VarDeclN 'EOS'      
-    // ConstDeclN N = switch between 1 or multi 
+    // ConstDeclN N = switch between 1 or group 
     ConstDeclN {
-        ConstMulti:  '(' ConstList ')'  
+        ConstGroup:  '(' ConstList ')'  
         // ConstOpts different types of const expressions 
         ConstOpts {
             ConstSpec:  NameList ?Type '=' Expr 'EOS'  >Ast
+                        { -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
             // ConstSpecName only a name, no expression 
             ConstSpecName:  NameList 'EOS'  >Ast
+                            { -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
         }
     }
     ConstList:  ConstOpts ?ConstList  
-    // VarDeclN N = switch between 1 or multi 
+    // VarDeclN N = switch between 1 or group 
     VarDeclN {
-        VarMulti:  '(' VarList ')'  
+        VarGroup:  '(' VarList ')'  
         // VarOpts different types of var expressions 
         VarOpts {
             VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  >Ast
+                          { -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
             // VarSpec only a name and type, no expression 
             VarSpec:  NameList Type 'EOS'  >Ast
+                      { -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
         }
     }
     VarList:  VarOpts ?VarList  

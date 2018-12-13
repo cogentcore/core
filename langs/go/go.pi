@@ -2700,7 +2700,7 @@
             "Acts": [
               {
                 "RunIdx": -1,
-                "Act": "PushScope",
+                "Act": "PushNewScope",
                 "Path": "Name",
                 "Tok": "NamePackage"
               }
@@ -4521,7 +4521,20 @@
                 "Desc": "",
                 "Rule": "'[' ']' @Type",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "../Name",
+                    "Tok": "NameArray"
+                  },
+                  {
+                    "RunIdx": 0,
+                    "Act": "AddSymbol",
+                    "Path": "../Name",
+                    "Tok": "NameArray"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4533,7 +4546,20 @@
                 "Desc": "array must be after slice b/c slice matches on sequence of tokens",
                 "Rule": "'[' @Expr ']' @Type",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "../Name",
+                    "Tok": "NameArray"
+                  },
+                  {
+                    "RunIdx": 0,
+                    "Act": "AddSymbol",
+                    "Path": "../Name",
+                    "Tok": "NameArray"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4557,6 +4583,12 @@
                     "Act": "PushNewScope",
                     "Path": "../Name",
                     "Tok": "NameStruct"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopScope",
+                    "Path": "../Name",
+                    "Tok": "None"
                   }
                 ],
                 "OptTokMap": false
@@ -4606,7 +4638,20 @@
                 "Desc": "",
                 "Rule": "'key:map' '[' @Type ']' @Type",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "../Name",
+                    "Tok": "NameMap"
+                  },
+                  {
+                    "RunIdx": 0,
+                    "Act": "AddSymbol",
+                    "Path": "../Name",
+                    "Tok": "NameMap"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4764,13 +4809,13 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "TypeDeclMulti",
+                "name": "TypeDeclGroup",
                 "type": "parse.Rule",
                 "name": "TypeDeclEl"
               },
               {
-                "Nm": "TypeDeclMulti",
-                "UniqueNm": "TypeDeclMulti",
+                "Nm": "TypeDeclGroup",
+                "UniqueNm": "TypeDeclGroup",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -4952,8 +4997,20 @@
                   {
                     "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "[0]",
+                    "Path": "Name",
                     "Tok": "NameFunction"
+                  },
+                  {
+                    "RunIdx": 2,
+                    "Act": "PushNewScope",
+                    "Path": "Name",
+                    "Tok": "NameFunction"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopScope",
+                    "Path": "",
+                    "Tok": "None"
                   }
                 ],
                 "OptTokMap": false
@@ -4993,7 +5050,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "Params ?Result",
-            "Ast": "NoAst",
+            "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
           },
@@ -5989,17 +6046,17 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "ImportMulti",
+                "name": "ImportGroup",
                 "type": "parse.Rule",
                 "name": "ImportOne"
               },
               {
-                "Nm": "ImportMulti",
-                "UniqueNm": "ImportMulti",
+                "Nm": "ImportGroup",
+                "UniqueNm": "ImportGroup",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "multiple imports",
+                "Desc": "group of multiple imports",
                 "Rule": "'(' ImportList ')'",
                 "Ast": "NoAst",
                 "Acts": null,
@@ -6019,7 +6076,7 @@
               }
             ],
             "Off": false,
-            "Desc": "N = number switch (One vs. Multi)",
+            "Desc": "N = number switch (One vs. Group)",
             "Rule": "",
             "Ast": "NoAst",
             "Acts": null,
@@ -6143,13 +6200,13 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "ConstMulti",
+                "name": "ConstGroup",
                 "type": "parse.Rule",
                 "name": "ConstOpts"
               },
               {
-                "Nm": "ConstMulti",
-                "UniqueNm": "ConstMulti",
+                "Nm": "ConstGroup",
+                "UniqueNm": "ConstGroup",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -6180,7 +6237,20 @@
                     "Desc": "",
                     "Rule": "NameList ?Type '=' Expr 'EOS'",
                     "Ast": "AnchorAst",
-                    "Acts": null,
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "[0]",
+                        "Tok": "NameConstant"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
+                        "Tok": "NameConstant"
+                      }
+                    ],
                     "OptTokMap": false
                   },
                   {
@@ -6192,7 +6262,20 @@
                     "Desc": "only a name, no expression",
                     "Rule": "NameList 'EOS'",
                     "Ast": "AnchorAst",
-                    "Acts": null,
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "[0]",
+                        "Tok": "NameConstant"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
+                        "Tok": "NameConstant"
+                      }
+                    ],
                     "OptTokMap": false
                   }
                 ],
@@ -6205,7 +6288,7 @@
               }
             ],
             "Off": false,
-            "Desc": "N = switch between 1 or multi",
+            "Desc": "N = switch between 1 or group",
             "Rule": "",
             "Ast": "NoAst",
             "Acts": null,
@@ -6231,13 +6314,13 @@
               {
                 "n": 2,
                 "type": "parse.Rule",
-                "name": "VarMulti",
+                "name": "VarGroup",
                 "type": "parse.Rule",
                 "name": "VarOpts"
               },
               {
-                "Nm": "VarMulti",
-                "UniqueNm": "VarMulti",
+                "Nm": "VarGroup",
+                "UniqueNm": "VarGroup",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -6268,7 +6351,20 @@
                     "Desc": "",
                     "Rule": "NameList ?Type '=' Expr 'EOS'",
                     "Ast": "AnchorAst",
-                    "Acts": null,
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "[0]",
+                        "Tok": "NameVarGlobal"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
+                        "Tok": "NameVarGlobal"
+                      }
+                    ],
                     "OptTokMap": false
                   },
                   {
@@ -6280,7 +6376,20 @@
                     "Desc": "only a name and type, no expression",
                     "Rule": "NameList Type 'EOS'",
                     "Ast": "AnchorAst",
-                    "Acts": null,
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "[0]",
+                        "Tok": "NameVarGlobal"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
+                        "Tok": "NameVarGlobal"
+                      }
+                    ],
                     "OptTokMap": false
                   }
                 ],
@@ -6293,7 +6402,7 @@
               }
             ],
             "Off": false,
-            "Desc": "N = switch between 1 or multi",
+            "Desc": "N = switch between 1 or group",
             "Rule": "",
             "Ast": "NoAst",
             "Acts": null,

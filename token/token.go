@@ -287,6 +287,7 @@ const (
 	NameOperator
 	NameConstructor // includes destructor..
 	NameException
+	NameLabel // e.g., goto label
 	NameEvent // for LSP -- not really sure what it is..
 
 	// SubCat: Scoping names
@@ -294,7 +295,7 @@ const (
 	NameNamespace
 	NameModule
 	NamePackage
-	NameLabel // e.g., goto label
+	NameLibrary
 
 	// SubCat: NameVar -- variable names
 	NameVar
@@ -665,13 +666,14 @@ var Names = map[Tokens]string{
 	NameOperator:      "np",
 	NameConstructor:   "cr",
 	NameException:     "ne",
+	NameLabel:         "nl",
 	NameEvent:         "ev",
 
 	NameScope:     "nsc",
 	NameNamespace: "nn",
 	NameModule:    "md",
 	NamePackage:   "pk",
-	NameLabel:     "nl",
+	NameLibrary:   "lb",
 
 	NameVar:          "nv",
 	NameVarAnonymous: "ay",

@@ -451,7 +451,11 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 				ps.Error(cpos, "did not advance position -- need more rules to match current input -- skipping to next EOS", pr)
 				didErr = true
 			}
-			ep, eosIdx := ps.FindAnyEos(ps.Pos)
+			cp, ok := ps.Src.NextTokenPos(ps.Pos)
+			if !ok {
+				return nil
+			}
+			ep, eosIdx := ps.FindAnyEos(cp)
 			if eosIdx < 0 {
 				return nil
 			}
@@ -888,7 +892,9 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 				} else {
 					ps.Error(mp, fmt.Sprintf("expected token: %v (at rule index: %v) was consumed by prior sub-rule(s): %v\n\treg: %v src: %v scope: %v", rr.Tok, ri), pr)
 				}
-			} else if !(ri == nr-1 && rr.Tok.Tok == token.EOS) {
+			} else if ri == nr-1 && rr.Tok.Tok == token.EOS {
+				ps.ResetNonMatches() // passed this chunk of inputs -- don't need those nonmatches
+			} else {
 				ps.Error(mp, fmt.Sprintf("token: %v (at rule index: %v) has extra preceeding input inconsistent with grammar", rr.Tok, ri), pr)
 				ps.Pos, _ = ps.Src.NextTokenPos(mp) // move to token for more robustness
 			}
@@ -1082,7 +1088,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		}
 	}
 	if !ok {
-		ps.Error(ps.Pos, fmt.Sprintf("Action %v: node not found at path(s): %v", act.Act, act.Path), pr)
+		Trace.Out(ps, pr, SubMatch, ps.Pos, lex.RegZero, useAst, fmt.Sprintf("Action %v: node not found at path(s): %v", act.Act, act.Path))
 		return false
 	}
 	ast := node.(*Ast)
@@ -1091,24 +1097,47 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	if act.Tok != token.None {
 		useTok = act.Tok
 	}
+	nm := ast.Src
+	nms := strings.Split(nm, ",")
+	for i := range nms {
+		n := nms[i]
+		nms[i] = strings.TrimSpace(n)
+	}
 	switch act.Act {
 	case ChgToken:
 		lx.Tok = act.Tok
 	case AddSymbol:
-		sy := ps.Syms.AddNew(ast.Src, useTok, ps.Src.Filename, ast.SrcReg)
-		sy.AddScopesMap(ps.ExtScopes)
-		sy.AddScopesStack(ps.Scopes)
+		for i := range nms {
+			n := nms[i]
+			if n == "" || n == "_" { // go special case..
+				continue
+			}
+			sy := syms.NewSymbol(n, useTok, ps.Src.Filename, ast.SrcReg)
+			added := sy.AddScopesStack(ps.Scopes)
+			sy.AddScopesMap(ps.ExtScopes, !added) // add to exts if not otherwise added
+			if !added {
+				ps.Syms.Add(sy)
+			}
+		}
 	case PushScope:
-		nm := ast.Src
-		sy, has := ps.Syms[nm]
+		sy, has := ps.Syms.FindNameScoped(nm)
 		if !has {
-			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, lex.RegZero) // zero = tmp
+			sy, has = ps.ExtScopes.FindNameScoped(nm)
+			if !has {
+				// tmps should be overwritten automatically?
+				sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, lex.RegZero) // zero = tmp
+				ps.Syms.Add(sy)
+			}
 		}
 		ps.Scopes.Push(sy)
 	case PushNewScope:
-		sy := ps.Syms.AddNew(ast.Src, useTok, ps.Src.Filename, ast.SrcReg)
-		sy.AddScopesMap(ps.ExtScopes)
-		sy.AddScopesStack(ps.Scopes)
+		// add plus push
+		sy := syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg)
+		added := sy.AddScopesStack(ps.Scopes)
+		sy.AddScopesMap(ps.ExtScopes, !added) // add to exts if not otherwise added
+		if !added {
+			ps.Syms.Add(sy)
+		}
 		ps.Scopes.Push(sy)
 	case PopScope:
 		ps.Scopes.Pop()

@@ -29,6 +29,13 @@
 package syms
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+
+	"github.com/goki/ki/indent"
+	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
@@ -49,6 +56,12 @@ type Symbol struct {
 	Children  SymMap       `desc:"children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc"`
 }
 
+var KiT_Symbol = kit.Types.AddType(&Symbol{}, nil)
+
+// SymNames provides a map-list of symbol names, indexed by their token kinds.
+// Used primarily for specifying Scopes
+type SymNames map[token.Tokens]string
+
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region
 func NewSymbol(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
 	sy := &Symbol{Name: name, Kind: kind, Filename: fname, Region: reg, SelectReg: reg}
@@ -59,6 +72,11 @@ func NewSymbol(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbo
 // otherwise permanently added to list of symbols.  Indicated by Zero Region.
 func (sy *Symbol) IsTemp() bool {
 	return sy.Region == lex.RegZero
+}
+
+// HasChildren returns true if this symbol has children
+func (sy *Symbol) HasChildren() bool {
+	return len(sy.Children) > 0
 }
 
 // AddChild adds a child symbol, if this parent symbol is not temporary
@@ -88,32 +106,69 @@ func (sy *Symbol) AllocScopes() {
 	}
 }
 
-// AddScopesMap adds a given scope element(s) from map to this Symbol, and
-// adds this symbol to those scopes if they are not temporary.
-func (sy *Symbol) AddScopesMap(sm SymMap) {
+// AddScopesMap adds a given scope element(s) from map to this Symbol.
+// if add is true, add this symbol to those scopes if they are not temporary.
+func (sy *Symbol) AddScopesMap(sm SymMap, add bool) {
 	if len(sm) == 0 {
 		return
 	}
 	sy.AllocScopes()
 	for _, s := range sm {
 		sy.Scopes[s.Kind] = s.Name
-		s.AddChild(sy)
+		if add {
+			s.AddChild(sy)
+		}
 	}
 }
 
-// AddScopesStack adds a given scope element(s) from stack to this Symbol
-// adds this symbol to those scopes if they are not temporary.
-func (sy *Symbol) AddScopesStack(ss SymStack) {
-	if len(ss) == 0 {
-		return
+// AddScopesStack adds a given scope element(s) from stack to this Symbol.
+// Adds this symbol as a child to the top of the scopes if it is not temporary --
+// returns true if so added.
+func (sy *Symbol) AddScopesStack(ss SymStack) bool {
+	sz := len(ss)
+	if sz == 0 {
+		return false
 	}
 	sy.AllocScopes()
-	for _, s := range ss {
-		sy.Scopes[s.Kind] = s.Name
-		s.AddChild(sy)
+	added := false
+	for i := 0; i < sz; i++ {
+		sc := ss[i]
+		sy.Scopes[sc.Kind] = sc.Name
+		if i == sz-1 {
+			added = sc.AddChild(sy)
+		}
 	}
+	return added
 }
 
-// SymNames provides a map-list of symbol names, indexed by their token kinds.
-// Used primarily for specifying Scopes
-type SymNames map[token.Tokens]string
+// OpenJSON opens from a JSON-formatted file.
+func (sy *Symbol) OpenJSON(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, sy)
+}
+
+// SaveJSON saves to a JSON-formatted file.
+func (sy *Symbol) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(sy, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(filename, b, 0644)
+	return err
+}
+
+// WriteDoc writes basic doc info
+func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
+	ind := indent.Tabs(depth)
+	fmt.Fprintf(out, "%v%v: %v", ind, sy.Name, sy.Kind)
+	if sy.HasChildren() {
+		fmt.Fprint(out, " {\n")
+		sy.Children.WriteDoc(out, depth+1)
+		fmt.Fprintf(out, "%v}\n", ind)
+	} else {
+		fmt.Fprint(out, "\n")
+	}
+}

@@ -19,6 +19,8 @@ import (
 )
 */
 
+var av1, av2 int
+
 type Pvsi struct {
 	Af int
 	Bf string
@@ -56,7 +58,7 @@ func tst() {
 }
 */
 
-func tst() {
+func tst(txt string, amt int) (bool, *Rule) {
 	txt += rs[sd-1].String()
 	txt += rs[i].String()
 	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
@@ -137,7 +139,7 @@ func tst() {
 	tokSrc := string(ps.TokenSrc(pos))
 }
 
-var ifa interface{}
+// var ifa interface{} // todo: not working
 
 func tst() {
 	pv.SaveParser()

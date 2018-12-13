@@ -5,6 +5,12 @@
 package syms
 
 import (
+	"encoding/json"
+	"io"
+	"io/ioutil"
+	"sort"
+	"strings"
+
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
@@ -25,6 +31,12 @@ func (sm *SymMap) Alloc() {
 	}
 }
 
+// Add adds symbol to map
+func (sm *SymMap) Add(sy *Symbol) {
+	sm.Alloc()
+	(*sm)[sy.Name] = sy
+}
+
 // AddNew adds a new symbol to the map with the basic info
 func (sm *SymMap) AddNew(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
 	sy := NewSymbol(name, kind, fname, reg)
@@ -38,12 +50,115 @@ func (sm *SymMap) Reset() {
 	*sm = make(SymMap)
 }
 
-// CopyFrom copies all the symbols from given source map into this one
+// CopyFrom copies all the symbols from given source map into this one,
+// including merging everything from common elements
 func (sm *SymMap) CopyFrom(src SymMap) {
 	sm.Alloc()
-	for n, s := range src {
-		(*sm)[n] = s
+	for nm, ssy := range src {
+		dsy, has := (*sm)[nm]
+		if !has {
+			(*sm)[nm] = ssy
+			continue
+		}
+		if dsy.IsTemp() {
+			ssy.Children.CopyFrom(dsy.Children)
+			(*sm)[nm] = ssy
+		} else {
+			dsy.Children.CopyFrom(ssy.Children)
+		}
 	}
 }
 
-// todo: probably will need a special json writer to write out the symbols instead of pointers.
+// FindNameScoped looks for given symbol name within this map and any children on the map
+// that are of subcategory token.NameScope (i.e., namespace, module, package, library)
+func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
+	sy, has := (*sm)[nm]
+	if has {
+		return sy, has
+	}
+	for _, ss := range *sm {
+		if ss.Kind.SubCat() == token.NameScope {
+			sy, has = ss.Children.FindNameScoped(nm)
+			if has {
+				return sy, has
+			}
+		}
+	}
+	return nil, false
+}
+
+// FindKindScoped looks for given symbol kind within this map and any children on the map
+// that are of subcategory token.NameScope (i.e., namespace, module, package, library)
+func (sm *SymMap) FindKindScoped(kind token.Tokens) (*Symbol, bool) {
+	for _, sy := range *sm {
+		if sy.Kind == kind {
+			return sy, true
+		}
+	}
+	for _, ss := range *sm {
+		if ss.Kind.SubCat() == token.NameScope {
+			sy, has := ss.Children.FindKindScoped(kind)
+			if has {
+				return sy, has
+			}
+		}
+	}
+	return nil, false
+}
+
+// OpenJSON opens from a JSON-formatted file.
+func (sm *SymMap) OpenJSON(filename string) error {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, sm)
+}
+
+// SaveJSON saves to a JSON-formatted file.
+func (sm *SymMap) SaveJSON(filename string) error {
+	b, err := json.MarshalIndent(sm, "", "  ")
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(filename, b, 0644)
+	return err
+}
+
+// Names returns a slice of the names in this map, optionally sorted
+func (sm *SymMap) Names(sorted bool) []string {
+	nms := make([]string, len(*sm))
+	idx := 0
+	for _, sy := range *sm {
+		nms[idx] = sy.Name
+		idx++
+	}
+	if sorted {
+		sort.StringSlice(nms).Sort()
+	}
+	return nms
+}
+
+// KindNames returns a slice of the kind:names in this map, optionally sorted
+func (sm *SymMap) KindNames(sorted bool) []string {
+	nms := make([]string, len(*sm))
+	idx := 0
+	for _, sy := range *sm {
+		nms[idx] = sy.Kind.String() + ":" + sy.Name
+		idx++
+	}
+	if sorted {
+		sort.StringSlice(nms).Sort()
+	}
+	return nms
+}
+
+// WriteDoc writes basic doc info, sorted by kind and name
+func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
+	nms := sm.KindNames(true)
+	for _, nm := range nms {
+		ci := strings.Index(nm, ":")
+		sy := (*sm)[nm[ci+1:]]
+		sy.WriteDoc(out, depth)
+	}
+}
