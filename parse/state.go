@@ -347,7 +347,7 @@ type ScopeRuleSet map[lex.Reg]RuleSet
 func (rs ScopeRuleSet) Add(scope lex.Reg, pr *Rule) {
 	rm, has := rs[scope]
 	if !has {
-		rm = make(RuleSet, 1000)
+		rm = make(RuleSet)
 		rs[scope] = rm
 	}
 	rm[pr] = struct{}{}
@@ -375,5 +375,5 @@ func (ps *State) IsNonMatch(scope lex.Reg, pr *Rule) bool {
 
 // ResetNonMatches resets the non-match map -- do after every EOS
 func (ps *State) ResetNonMatches() {
-	ps.NonMatches = make(ScopeRuleSet, 1000)
+	ps.NonMatches = make(ScopeRuleSet)
 }
