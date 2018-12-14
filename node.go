@@ -1401,8 +1401,11 @@ func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc F
 
 // FuncDownBreadthFirst calls function on all children, then calls
 // FuncDownBreadthFirst on all the children -- does NOT call on first node
-// where this method is first called, due to nature of recursive logic --
-// level var is incremented before calling children -- if fun returns
+// where this method is first called, due to nature of recursive logic.
+// This is NOT a strict breadth-first search algorithm (which is computationally
+// expensive) but rather just a breadth-first variant of the recursive top-down
+// traversal, that first traverses all the children of a node before recursing.
+// The level var is incremented before calling children -- if fun returns
 // false then any further traversal of that branch of the tree is aborted,
 // but other branches can continue.
 func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
