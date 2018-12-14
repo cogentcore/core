@@ -17,6 +17,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
+	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 )
 
@@ -184,7 +185,7 @@ var DefaultIconSet *IconSet
 var CurIconSet *IconSet
 
 func (iset *IconSet) OpenDefaultIcons() error {
-	path, err := kit.GoSrcDir("github.com/goki/gi/icons")
+	path, err := dirs.GoSrcDir("github.com/goki/gi/icons")
 	if err != nil {
 		log.Println(err)
 		return err

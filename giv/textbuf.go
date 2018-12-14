@@ -26,8 +26,8 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
 	"github.com/goki/ki/runes"
-	"github.com/goki/pi"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
 	"github.com/pmezard/go-difflib/difflib"
 )

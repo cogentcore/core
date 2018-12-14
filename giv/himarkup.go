@@ -16,8 +16,8 @@ import (
 	"github.com/goki/gi/histyle"
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
-	"github.com/goki/pi"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/pi"
 )
 
 // Overall Strategy:
@@ -37,7 +37,7 @@ type HiMarkup struct {
 	TabSize   int               `desc:"tab size, in chars"`
 	CSSProps  ki.Props          `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
 	PiState   *pi.FileState     `desc:"pi parser state info"`
-	PiParser  *pi.Parser        `desc:"if supported, this is the pi parser"`
+	PiLang    pi.Lang           `desc:"if supported, this is the pi Lang support for parsing"`
 	HiStyle   histyle.Style     `desc:"current highlighting style"`
 	Off       bool              `desc:"external toggle to turn off automatic highlighting"`
 	lastLang  string
@@ -54,7 +54,7 @@ func (hm *HiMarkup) HasHi() bool {
 // UsingPi returns true if markup is using GoPi lexer / parser -- affects
 // use of results
 func (hm *HiMarkup) UsingPi() bool {
-	return hm.PiParser != nil
+	return hm.PiLang != nil
 }
 
 // Init initializes the syntax highlighting for current params
@@ -63,20 +63,17 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
 	hm.PiState = pist
 
 	if hm.Info.Sup != filecat.NoSupport {
-		if lp, ok := pi.StdLangProps[hm.Info.Sup]; ok {
-			if lp.Parser != nil {
+		if lp, err := pi.LangSupport.Props(hm.Info.Sup); err == nil {
+			if lp.Lang != nil {
 				hm.lexer = nil
-				if hm.PiParser != lp.Parser {
-					hm.PiParser = lp.Parser
-					hm.PiParser.InitAll(hm.PiState)
-				}
+				hm.PiLang = lp.Lang
 			} else {
-				hm.PiParser = nil
+				hm.PiLang = nil
 			}
 		}
 	}
 
-	if hm.PiParser == nil {
+	if hm.PiLang == nil {
 		lexer := lexers.Match(hm.Info.Name)
 		// if lexer == nil && len(pist.Src.Lines) > 0 {
 		// 	lexer = lexers.Analyse(string(tb.Txt))
@@ -87,7 +84,7 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
 		}
 	}
 
-	if hm.Style == "" || (hm.PiParser == nil && hm.lexer == nil) {
+	if hm.Style == "" || (hm.PiLang == nil && hm.lexer == nil) {
 		hm.Has = false
 		return
 	}
@@ -106,27 +103,14 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
 	}
 }
 
-// SetParser sets given parser directly
-func (hm *HiMarkup) SetParser(pr *pi.Parser) {
-	hm.lexer = nil
-	hm.PiParser = pr
-	hm.PiParser.InitAll(hm.PiState)
-}
-
 // MarkupTagsAll returns all the markup tags according to current
 // syntax highlighting settings
 func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
-	if hm.PiParser != nil {
-		// stt := time.Now()
-		hm.PiParser.InitAll(hm.PiState)
-		hm.PiParser.LexAll(hm.PiState)
-		// lxdur := time.Now().Sub(stt)
-		hm.PiParser.ParseAll(hm.PiState)
-		// prdur := time.Now().Sub(stt)
-		// fmt.Printf("lex: %v full parse: %v\n", lxdur, prdur)
+	if hm.PiLang != nil {
+		hm.PiLang.ParseFile(hm.PiState)
 		return hm.PiState.Src.Lexs, nil
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsAll(txt)
@@ -140,8 +124,8 @@ func (hm *HiMarkup) MarkupTagsLine(ln int, txt []byte) (lex.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
-	if hm.PiParser != nil {
-		ll := hm.PiParser.LexLine(hm.PiState, ln)
+	if hm.PiLang != nil {
+		ll := hm.PiLang.LexLine(hm.PiState, ln)
 		return ll, nil
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsLine(txt)
