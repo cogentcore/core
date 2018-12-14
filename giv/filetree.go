@@ -504,8 +504,33 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 // Duplicate creates a copy of given file -- only works for regular files, not
 // directories
 func (fn *FileNode) DuplicateFile() error {
-	err := fn.Info.Duplicate()
+	nn, err := fn.Info.Duplicate()
 	if err == nil && fn.Par != nil {
+		if fn.UsesGit() {
+			prompt := fmt.Sprintf("Do you want to add the duplicated file \"%v\" to Git? If you choose No, you can add the file later", nn)
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Add File to Git",
+				Prompt: prompt}, []string{"Yes", "No"},
+				fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						ExecGitCmd("Add", nn, "")
+					case 1:
+						// do nothing
+					}
+				})
+		} else if fn.UsesSvn() {
+			prompt := fmt.Sprintf("Do you want to add the duplicated file \"%v\" to SVN? If you choose No, you can add the file later", nn)
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Add File to SVN",
+				Prompt: prompt}, []string{"Yes", "No"},
+				fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						ExecSvnCmd("Add", nn, "")
+					case 1:
+						// do nothing
+					}
+				})
+		}
 		fnp := fn.Par.Embed(KiT_FileNode).(*FileNode)
 		fnp.UpdateNode()
 	}
@@ -516,6 +541,11 @@ func (fn *FileNode) DuplicateFile() error {
 func (fn *FileNode) DeleteFile() error {
 	err := fn.Info.Delete()
 	if err == nil {
+		if fn.UsesGit() && fn.InGitRepo() {
+			ExecGitCmd("Delete", string(fn.FPath), "")
+		} else if fn.UsesSvn() && fn.InSvnRepo() {
+			ExecSvnCmd("Delete", string(fn.FPath), "")
+		}
 		fn.Delete(true) // we're done
 	}
 	return err
@@ -545,6 +575,33 @@ func (fn *FileNode) NewFile(filename string) {
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
 		return
+	}
+	if fn.UsesGit() {
+		prompt := fmt.Sprintf("Do you want to add the file \"%v\" to Git? If you choose No, you can add the file later", fn.Name())
+		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Add File to Git",
+			Prompt: prompt}, []string{"Yes", "No"},
+			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					fp := filepath.Join(string(fn.FPath), filename)
+					ExecGitCmd("Add", fp, "")
+				case 1:
+					// do nothing
+				}
+			})
+	} else if fn.UsesSvn() {
+		prompt := fmt.Sprintf("Do you want to add the file \"%v\" to SVN? If you choose No, you can add the file later", fn.Name())
+		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Add File to SVN",
+			Prompt: prompt}, []string{"Yes", "No"},
+			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					fp := filepath.Join(string(fn.FPath), filename)
+					ExecSvnCmd("Add", fp, "")
+				case 1:
+					// do nothing
+				}
+			})
 	}
 	fn.FRoot.UpdateNewFile(np)
 }
@@ -1018,25 +1075,7 @@ func (ftv *FileTreeView) NewFile(filename string) {
 	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		if fn.UsesGit() {
-			prompt := fmt.Sprintf("Do you want to add the file \"%v\" to Git? \n\n If you choose No, you can add the file later", fn.Name())
-			gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Add File to Git",
-				Prompt: prompt}, []string{"Yes", "No"},
-				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						fn.NewFile(filename)
-						fp := filepath.Join(string(fn.FPath), filename)
-						ExecGitCmd("Add", fp, "")
-					case 1:
-						fn.NewFile(filename)
-					}
-				})
-		} else if fn.UsesSvn() {
-			// todo: add svn code to add file to repo
-		} else {
-			fn.NewFile(filename)
-		}
+		fn.NewFile(filename)
 	}
 }
 

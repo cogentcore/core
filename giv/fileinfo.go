@@ -134,16 +134,16 @@ func (fi *FileInfo) IsSymlink() bool {
 
 // Duplicate creates a copy of given file -- only works for regular files, not
 // directories.
-func (fi *FileInfo) Duplicate() error {
+func (fi *FileInfo) Duplicate() (string, error) {
 	if fi.IsDir() {
 		err := fmt.Errorf("giv.Duplicate: cannot copy directory: %v", fi.Path)
 		log.Println(err)
-		return err
+		return "", err
 	}
 	ext := filepath.Ext(fi.Path)
 	noext := strings.TrimSuffix(fi.Path, ext)
 	dst := noext + "_Copy" + ext
-	return CopyFile(dst, fi.Path, fi.Mode)
+	return dst, CopyFile(dst, fi.Path, fi.Mode)
 }
 
 // Delete deletes the file or if a directory the directory and all files and subdirectories
