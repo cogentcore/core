@@ -15,8 +15,9 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki"
+	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi"
+	"github.com/goki/pi/pi"
 )
 
 // Styles is a collection of styles
@@ -140,7 +141,7 @@ func (hs *Styles) SaveAll(dir gi.FileName) {
 
 // OpenDefaults opens the default highlighting styles (from chroma originally)
 func (hs *Styles) OpenDefaults() error {
-	path, err := kit.GoSrcDir("github.com/goki/gi/histyle")
+	path, err := dirs.GoSrcDir("github.com/goki/gi/histyle")
 	if err != nil {
 		log.Println(err)
 		return err
@@ -174,7 +175,7 @@ func (hs *Styles) ViewStd() {
 // Init must be called to initialize the hi styles -- post startup
 // so chroma stuff is all in place, and loads custom styles
 func Init() {
-	pi.OpenStdParsers()
+	pi.LangSupport.OpenStd()
 	StdStyles.OpenDefaults()
 	CustomStyles.OpenPrefs()
 	if len(CustomStyles) == 0 {

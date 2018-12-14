@@ -15,6 +15,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
+	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 )
 
@@ -90,7 +91,7 @@ func LoadSpellModel() error {
 
 // NewSpellModelFromText builds a NEW spelling model from text
 func NewSpellModelFromText() error {
-	bigdatapath, err := kit.GoSrcDir("github.com/goki/gi/spell")
+	bigdatapath, err := dirs.GoSrcDir("github.com/goki/gi/spell")
 	if err != nil {
 		log.Printf("Error getting path to corpus directory: %v.\n", err)
 		return err
