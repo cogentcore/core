@@ -8,13 +8,15 @@ import (
 	"flag"
 	"os"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/pi"
+	"github.com/goki/pi/syms"
 )
 
 func main() {
 	var path string
 
-	pi.OpenStdParsers()
+	pi.LangSupport.OpenStd()
 
 	// process command args
 	if len(os.Args) > 1 {
@@ -29,5 +31,11 @@ func main() {
 			}
 		}
 	}
-	pi.ParseGoPackage(path, true)
+
+	// todo: assuming go for now
+	lp := pi.LangSupport.Props(filecat.Go)
+	pkgsym := lp.ParseDir(path, pi.LangDirOpts{Rebuild: true})
+	if pkgsym != nil {
+		syms.SaveSymDoc(pkgsym, path)
+	}
 }

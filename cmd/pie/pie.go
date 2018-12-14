@@ -9,7 +9,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gide/gide"
-	"github.com/goki/pi"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/piv"
 )
 

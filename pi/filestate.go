@@ -12,6 +12,7 @@ import (
 
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
+	"github.com/goki/pi/syms"
 )
 
 // FileState is the parsing state information for a given file
@@ -21,6 +22,7 @@ type FileState struct {
 	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
 	ParseState parse.State  `json:"_" xml:"-" desc:"state for parsing"`
 	Ast        parse.Ast    `json:"_" xml:"-" desc:"ast output tree from parsing"`
+	Syms       syms.SymMap  `json:"_" xml:"-" desc:"aggregate symbols for this file -- the language is responsible for managing these symbols to contain those relevant for the given file, and these are used for lookup (again managed through the Lang interface)"`
 }
 
 // Init initializes the file state

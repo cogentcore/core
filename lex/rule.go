@@ -341,7 +341,7 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 		if ls.LastName == "" {
 			ls.Error(ls.Pos, "SetGuestLex action requires prior Name action -- name is empty", lr)
 		} else {
-			lx := TheLangLexer.Lexer(ls.LastName)
+			lx := TheLangLexer.LexerByName(ls.LastName)
 			if lx != nil {
 				ls.GuestLex = lx
 				ls.SaveStack = ls.Stack.Clone()

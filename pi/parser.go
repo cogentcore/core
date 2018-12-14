@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package pi provides the main interactive parser structure for running the parse
-// The piv sub-package provides the GUI for constructing and testing a parser
 package pi
 
 import (

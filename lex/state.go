@@ -15,8 +15,8 @@ import (
 // LangLexer looks up lexer for given language -- impl in parent pi package
 // so we need the interface
 type LangLexer interface {
-	// Lexer returns the top-level lex.Rule for given language (case invariant lookup)
-	Lexer(lang string) *Rule
+	// LexerByName returns the top-level lex.Rule for given language (case invariant lookup)
+	LexerByName(lang string) *Rule
 }
 
 // TheLangLexer is the instance of LangLexer interface used to lookup lexers

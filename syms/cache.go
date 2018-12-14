@@ -72,7 +72,7 @@ func CacheFilename(filename string) (string, error) {
 	if path[0] == filepath.Separator {
 		path = path[1:]
 	}
-	path = strings.Replace(path, string(filepath.Separator), "_", -1)
+	path = strings.Replace(path, string(filepath.Separator), "%", -1)
 	path = filepath.Join(cdir, path)
 	return path, nil
 }

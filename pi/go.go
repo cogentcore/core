@@ -9,58 +9,74 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/goki/gi/filecat"
-	"github.com/goki/ki/kit"
+	"github.com/goki/ki/dirs"
+	"github.com/goki/pi/lex"
+	"github.com/goki/pi/parse"
 	"github.com/goki/pi/syms"
 )
 
-// FilesInDir returns all the files with given extension(s) in directory (just the file names)
-func FilesInDir(path string, exts []string) []string {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil
-	}
-	files, err := f.Readdirnames(-1)
-	f.Close()
-	if err != nil {
-		return nil
-	}
-	if len(exts) == 0 {
-		return files
-	}
-	sz := len(files)
-	if sz == 0 {
-		return nil
-	}
-	for i := sz - 1; i >= 0; i-- {
-		fn := files[i]
-		ext := filepath.Ext(fn)
-		keep := false
-		for _, ex := range exts {
-			if strings.EqualFold(ext, ex) {
-				keep = true
-				break
-			}
-		}
-		if !keep {
-			files = append(files[:i], files[i+1:]...)
-		}
-	}
-	sort.StringSlice(files).Sort()
-	return files
+// GoLang implements the Lang interface for the Go language
+type GoLang struct {
+	Pr *Parser
 }
 
-// ParseGoPackage parses all the go files in a given package path
-// and optionally saves the symbols in the symbol cache, and also returns
-// them.  Path can be an import kind of path or a full path.
-func ParseGoPackage(path string, savecache bool) *syms.Symbol {
+// TheGoLang is the instance variable providing support for the Go language
+var TheGoLang = GoLang{}
+
+func (gl *GoLang) Parser() *Parser {
+	if gl.Pr != nil {
+		return gl.Pr
+	}
+	lp, _ := LangSupport.Props(filecat.Go)
+	if lp.Parser == nil {
+		LangSupport.OpenStd()
+	}
+	gl.Pr = lp.Parser
+	if gl.Pr == nil {
+		return nil
+	}
+	fs := &FileState{}
+	fs.Init()
+	gl.Pr.InitAll(fs)
+	return gl.Pr
+}
+
+func (gl *GoLang) ParseFile(fs *FileState) {
+	pr := gl.Parser()
+	if pr == nil {
+		return
+	}
+	pr.LexAll(fs)
+	pr.ParseAll(fs)
+	// todo: manage the symbols!
+}
+
+func (gl *GoLang) LexLine(fs *FileState, line int) lex.Line {
+	pr := gl.Parser()
+	if pr == nil {
+		return nil
+	}
+	// todo: could do some parsing here too!
+	return pr.LexLine(fs, line)
+}
+
+func (gl *GoLang) ParseLine(fs *FileState, line int) *parse.Ast {
+	// todo: writeme
+	return nil
+}
+
+func (gl *GoLang) CompleteLine(fs *FileState, pos lex.Pos) syms.SymStack {
+	// todo: writeme
+	return nil
+}
+
+func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		path, err = kit.GoSrcDir(path)
+		path, err = dirs.GoSrcDir(path)
 		if err != nil {
 			log.Println(err)
 			return nil
@@ -70,7 +86,7 @@ func ParseGoPackage(path string, savecache bool) *syms.Symbol {
 		return nil
 	}
 	path, _ = filepath.Abs(path)
-	fls := FilesInDir(path, []string{".go"})
+	fls := dirs.ExtFileNames(path, []string{".go"})
 	if len(fls) == 0 {
 		return nil
 	}
@@ -87,9 +103,6 @@ func ParseGoPackage(path string, savecache bool) *syms.Symbol {
 			continue
 		}
 		fmt.Printf("parsing file: %v\n", fnm)
-		// if pkgsym != nil && len(fs.ParseState.ExtScopes) == 0 {
-		// 	fs.ParseState.ExtScopes.Add(pkgsym)
-		// }
 		stt := time.Now()
 		pr.LexAll(fs)
 		lxdur := time.Now().Sub(stt)
@@ -106,9 +119,8 @@ func ParseGoPackage(path string, savecache bool) *syms.Symbol {
 			}
 		}
 	}
-	if pkgsym != nil && savecache {
+	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, path)
-		syms.SaveSymDoc(pkgsym, path)
 	}
 	return pkgsym
 }
