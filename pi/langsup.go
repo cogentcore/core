@@ -82,7 +82,7 @@ var StdLangProps = map[filecat.Supported]LangProps{
 	filecat.Scala:      {filecat.Scala, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Html:       {filecat.Html, "", "<!-- ", " -->", nil, nil, nil},
 	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, nil, nil},
-	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil, nil},
+	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, &TheMarkdownLang, nil},
 }
 
 // LangSupporter provides general support for supported languages.
