@@ -826,3 +826,75 @@ func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 	PrefsDbgView(prefs)
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  VersCtrlValueView
+
+// ValueView registers VersCtrlValueView as the viewer of VersCtrlName
+func (kn VersCtrlName) ValueView() ValueView {
+	vv := VersCtrlValueView{}
+	vv.Init(&vv)
+	return &vv
+}
+
+// VersCtrlValueView presents an action for displaying an VersCtrlName and selecting
+// from StringPopup
+type VersCtrlValueView struct {
+	ValueViewBase
+}
+
+var KiT_VersCtrlValueView = kit.Types.AddType(&VersCtrlValueView{}, nil)
+
+func (vv *VersCtrlValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_Action
+	return vv.WidgetTyp
+}
+
+func (vv *VersCtrlValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	ac := vv.Widget.(*gi.Action)
+	txt := kit.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "(none)"
+	}
+	ac.SetText(txt)
+}
+
+func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	ac := vv.Widget.(*gi.Action)
+	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.Embed(KiT_VersCtrlValueView).(*VersCtrlValueView)
+		ac := vvv.Widget.(*gi.Action)
+		vvv.Activate(ac.Viewport, nil, nil)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *VersCtrlValueView) HasAction() bool {
+	return true
+}
+
+func (vv *VersCtrlValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+	if vv.IsInactive() {
+		return
+	}
+	cur := kit.ToString(vv.Value.Interface())
+	var recv gi.Node2D
+	if vv.Widget != nil {
+		recv = vv.Widget
+	} else {
+		recv = vp.This().(gi.Node2D)
+	}
+	gi.StringsChooserPopup(VersCtrlSystems, cur, recv, func(recv, send ki.Ki, sig int64, data interface{}) {
+		ac := send.(*gi.Action)
+		vv.SetValue(ac.Text)
+		vv.UpdateWidget()
+		if dlgRecv != nil && dlgFunc != nil {
+			dlgFunc(dlgRecv, send, int64(gi.DialogAccepted), data)
+		}
+	})
+}

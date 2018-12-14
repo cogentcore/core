@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -321,6 +322,34 @@ func (fn *FileNode) RelPath(fpath gi.FileName) string {
 	return rpath
 }
 
+// UsesGit checks for the .git file to know if the files in the directory are being tracked with git
+func (fn *FileNode) UsesGit() bool {
+	ft := fn.FRoot
+	_, found := ft.FindFile(".git")
+	return found
+}
+
+// InGitRepo checks whether the particular file is in the git repo
+func (fn *FileNode) InGitRepo() bool {
+	_, err := exec.Command("git", "ls-files", "--error-unmatch", string(fn.FPath)).Output()
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+// UsesSvn checks for ?? file to know if the files in the directory are being tracked with svn
+func (fn *FileNode) UsesSvn() bool {
+	// todo: complete this function
+	return false
+}
+
+// InSvnRepo checks whether the particular file is in the svn repo
+func (fn *FileNode) InSvnRepo() bool {
+	// todo: complete this function
+	return false
+}
+
 // OpenDirsTo opens all the directories above the given filename, and returns the node
 // for element at given path (can be a file or directory itself -- not opened -- just returned)
 func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
@@ -496,8 +525,14 @@ func (fn *FileNode) DeleteFile() error {
 func (fn *FileNode) RenameFile(newpath string) error {
 	err := fn.Info.Rename(newpath)
 	if err == nil {
+		//if fn.UsesGit() && fn.InGitRepo() {
+		//	ExecGitCmd("Rename", string(fn.FPath), newpath)
+		//} else if fn.UsesSvn() && fn.InSvnRepo() {
+		//	ExecSvnCmd("", "", "")
+		//} else {
 		fn.FPath = gi.FileName(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
+		//}
 		fn.UpdateSig()
 	}
 	return err
@@ -895,30 +930,29 @@ func (ftv *FileTreeView) DuplicateFiles() {
 	}
 }
 
-// DeleteFiles calls DeleteFile on any selected nodes, confirming delete if file is open for editing
-// and also prompts for confirmation if the node is a directory
+// DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
+// all files and subdirectories are also deleted.
 func (ftv *FileTreeView) DeleteFiles() {
 	sels := ftv.SelectedViews()
-	for i := len(sels) - 1; i >= 0; i-- {
-		sn := sels[i]
-		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-		fn := ftvv.FileNode()
-		if fn == nil {
-			return
-		}
-		if fn.Info.IsDir() {
-			openList := []string{}
-			gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Directory and Contents",
-				Prompt: "Delete directory and all subdirectories and files? This action is not undoable and files are not moving to trash / recycle bin"},
-				[]string{"Delete Directory", "Cancel"},
-				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
+	gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Files?",
+		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
+		[]string{"Delete Files", "Cancel"},
+		ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			switch sig {
+			case 0:
+				for i := len(sels) - 1; i >= 0; i-- {
+					sn := sels[i]
+					ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+					fn := ftvv.FileNode()
+					if fn == nil {
+						return
+					}
+					if fn.Info.IsDir() {
+						openList := []string{}
 						var fns []string
 						fn.Info.FileNames(&fns)
 						ft := fn.FRoot
 						for _, filename := range fns {
-							fmt.Println(filename)
 							fn, ok := ft.FindFile(filename)
 							if !ok {
 								return
@@ -928,51 +962,23 @@ func (ftv *FileTreeView) DeleteFiles() {
 							}
 						}
 						if len(openList) > 0 {
-							gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Files Open for Editing",
-								Prompt: "One or more files are open for editing."}, []string{"Continue with Delete", "Cancel"},
-								ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-									switch sig {
-									case 0:
-										for _, filename := range openList {
-											fn, _ := ft.FindFile(filename)
-											fn.CloseBuf()
-										}
-										fn.DeleteFile()
-									case 1:
-										return
-									}
-								})
-						} else {
-							fn.DeleteFile()
+							for _, filename := range openList {
+								fn, _ := ft.FindFile(filename)
+								fn.CloseBuf()
+							}
 						}
-					case 1:
-						return
-					}
-
-				})
-		} else if fn.Buf != nil { // file not directory
-			gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "File open for editing, Delete?",
-				Prompt: fmt.Sprintf("The file %v is open for editing: Close and delete? This is not undoable and file is not moving to trash / recycle bin", fn.Nm)},
-				[]string{"Delete", "Cancel"},
-				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					switch sig {
-					case 0:
-						fn.CloseBuf()
 						fn.DeleteFile()
-					case 1:
-						// do nothing
-					}
-				})
-		} else {
-			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Directory and Contents",
-				Prompt: "Ok to delete file(s)?  This is not undoable and file is not moving to trash / recycle bin"}, true, true,
-				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.DialogAccepted) {
+					} else {
+						if fn.Buf != nil {
+							fn.CloseBuf()
+						}
 						fn.DeleteFile()
 					}
-				})
-		}
-	}
+				}
+			case 1:
+				// do nothing
+			}
+		})
 }
 
 // RenameFiles calls RenameFile on any selected nodes
@@ -1012,7 +1018,25 @@ func (ftv *FileTreeView) NewFile(filename string) {
 	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		fn.NewFile(filename)
+		if fn.UsesGit() {
+			prompt := fmt.Sprintf("Do you want to add the file \"%v\" to Git? \n\n If you choose No, you can add the file later", fn.Name())
+			gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Add File to Git",
+				Prompt: prompt}, []string{"Yes", "No"},
+				ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					switch sig {
+					case 0:
+						fn.NewFile(filename)
+						fp := filepath.Join(string(fn.FPath), filename)
+						ExecGitCmd("Add", fp, "")
+					case 1:
+						fn.NewFile(filename)
+					}
+				})
+		} else if fn.UsesSvn() {
+			// todo: add svn code to add file to repo
+		} else {
+			fn.NewFile(filename)
+		}
 	}
 }
 
