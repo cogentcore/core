@@ -2169,22 +2169,21 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 		return
 	}
 
-	nln := tb.NumLines()
-	doCom := false
-	for ln := st; ln < ed; ln++ {
-		if ln >= nln {
-			break
-		}
-		if !tb.LineCommented(ln) {
-			doCom = true
-			break
+	eln := ints.MinInt(tb.NumLines(), ed)
+	ncom := 0
+	nln := eln - st
+	for ln := st; ln < eln; ln++ {
+		if tb.LineCommented(ln) {
+			ncom++
 		}
 	}
+	trgln := ints.MaxInt(nln-2, 1)
+	doCom := true
+	if ncom >= trgln {
+		doCom = false
+	}
 
-	for ln := st; ln < ed; ln++ {
-		if ln >= nln {
-			break
-		}
+	for ln := st; ln < eln; ln++ {
 		if doCom {
 			tb.InsertText(TextPos{Ln: ln, Ch: ch}, []byte(comst), true, true)
 			if comed != "" {

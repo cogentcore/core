@@ -3760,6 +3760,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.CancelCorrect()
 		tv.ISearchCancel()
 		tv.QReplaceCancel()
+		tv.lastAutoInsert = 0
 	}
 
 	if kf != gi.KeyFunRecenter { // always start at centering
@@ -3921,11 +3922,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	switch kf {
-	case gi.KeyFunAccept: // ctrl+enter
-		tv.ISearchCancel()
-		tv.QReplaceCancel()
-		kt.SetProcessed()
-		tv.FocusNext()
+	// case gi.KeyFunAccept: // ctrl+enter
+	// 	tv.ISearchCancel()
+	// 	tv.QReplaceCancel()
+	// 	kt.SetProcessed()
+	// 	tv.FocusNext()
 	case gi.KeyFunBackspace:
 		// todo: previous item in qreplace
 		if tv.ISearch.On {
