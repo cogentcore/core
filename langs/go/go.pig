@@ -297,6 +297,8 @@ ExprRules {
                 ElLitVal:  LiteralValue  
             }
         }
+        // NoEl can have EOS's from inline } 
+        NoEl:  'EOS'  
     }
     Key {
         KeyName:    'Name'        
@@ -372,7 +374,8 @@ TypeRules {
     FieldDecl {
         AnonQualField:  'Name' '.' 'Name' ?FieldTag 'EOS'  >Ast
         NamedField:     NameList ?Type ?FieldTag 'EOS'     >Ast
-                        { -1:ChgToken:"[0]":NameField; -1:AddSymbol:"[0]":NameField; }
+                        { 0:ChgToken:"":None; 0:ChgToken:"":None; }
+        NoField:        'EOS'  
     }
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 

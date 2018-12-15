@@ -4,8 +4,9 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-package main
+// package main
 
+/*
 import "github.com/goki/gi/gi"
 
 import (
@@ -29,7 +30,7 @@ func (ps *Pvsi) tst() {
 	txt += rs[i].String()
 	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
 }	
-
+*/
 
 /*
 func tst() {
@@ -56,6 +57,7 @@ func tst() {
 }
 */
 
+/*
 func tst(txt string, amt int) (bool, *Rule) {
 	txt += rs[sd-1].String()
 	txt += rs[i].String()
@@ -126,12 +128,13 @@ func (pv *PiView) OpenTestTextTab() {
 func (ev Steps) MarshalJSON() ([]byte, error)  {
 	return kit.EnumMarshalJSON(ev)
 }
-
+*/
+/*
 func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b)
 }
 
 // todo: not dealing with all-in-one-line case -- needs to insert EOS before } 
-// func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 func tst() {
 	tokSrc := string(ps.TokenSrc(pos))
@@ -148,6 +151,7 @@ func tst() {
 // this is Go's "most vexing parse" from a top-down perspective:
 
 //var MultSlice = p[2]*Rule // todo: not working
+*/
 
 var SliceAr1 = []Rule{}
 

@@ -3,7 +3,7 @@
   "ParserFile": "/Users/oreilly/goki/pi/langs/go/go.pi",
   "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
   "TraceOpts": {
-    "On": false,
+    "On": true,
     "Rules": "",
     "Match": true,
     "SubMatch": true,

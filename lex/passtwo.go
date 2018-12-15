@@ -51,12 +51,13 @@ func (ts *TwoState) NextLine() {
 }
 
 // InsertEOS inserts an EOS just after the given token position (e.g., cp = last token in line)
-func (ts *TwoState) InsertEOS(cp Pos) {
+func (ts *TwoState) InsertEOS(cp Pos) Pos {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := ts.Src.LexAt(cp)
 	depth := elx.Depth
 	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.EOS, Depth: depth, St: elx.Ed, Ed: elx.Ed})
 	ts.EosPos = append(ts.EosPos, np)
+	return np
 }
 
 // ReplaceEOS replaces given token with an EOS
@@ -221,9 +222,16 @@ func (pt *PassTwo) EosDetect(ts *TwoState) {
 				etkey.Key = string(ts.Src.TokenSrc(ep))
 			}
 			if pt.EolToks.Match(etkey) {
-				ts.InsertEOS(ep)
 				if pt.RBraceOneLine && elx.Tok == token.PunctGpRBrace && sz > 2 {
-					ts.InsertEOS(Pos{ts.Pos.Ln, sz - 2})
+					ip := ts.InsertEOS(Pos{ts.Pos.Ln, sz - 2})
+					ilx := ts.Src.LexAt(ip)
+					fp := ts.InsertEOS(Pos{ts.Pos.Ln, sz})
+					plx := ts.Src.LexAt(fp)
+					if ilx.Depth == plx.Depth {
+						ilx.Depth++
+					}
+				} else {
+					ts.InsertEOS(ep)
 				}
 			}
 		}

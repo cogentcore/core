@@ -3851,11 +3851,13 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
                 "type": "parse.Rule",
                 "name": "ElementListEls",
                 "type": "parse.Rule",
-                "name": "KeyedEl"
+                "name": "KeyedEl",
+                "type": "parse.Rule",
+                "name": "NoEl"
               },
               {
                 "Nm": "ElementListEls",
@@ -3941,6 +3943,18 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "",
+                "Ast": "NoAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "NoEl",
+                "UniqueNm": "NoEl",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "can have EOS's from inline }",
+                "Rule": "'EOS'",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4738,11 +4752,13 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
                 "type": "parse.Rule",
                 "name": "AnonQualField",
                 "type": "parse.Rule",
-                "name": "NamedField"
+                "name": "NamedField",
+                "type": "parse.Rule",
+                "name": "NoField"
               },
               {
                 "Nm": "AnonQualField",
@@ -4767,18 +4783,30 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": -1,
+                    "RunIdx": 0,
                     "Act": "ChgToken",
-                    "Path": "[0]",
-                    "Tok": "NameField"
+                    "Path": "",
+                    "Tok": "None"
                   },
                   {
-                    "RunIdx": -1,
-                    "Act": "AddSymbol",
-                    "Path": "[0]",
-                    "Tok": "NameField"
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "None"
                   }
                 ],
+                "OptTokMap": false
+              },
+              {
+                "Nm": "NoField",
+                "UniqueNm": "NoField",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'EOS'",
+                "Ast": "NoAst",
+                "Acts": [],
                 "OptTokMap": false
               }
             ],
