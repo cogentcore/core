@@ -517,6 +517,9 @@ func findPathChild(k Ki, child string) (int, bool) {
 		if err != nil {
 			return idx, false
 		}
+		if !k.Children().IsValidIndex(idx) {
+			return idx, false
+		}
 		return idx, true
 	}
 	return k.Children().IndexByUniqueName(child, 0)
