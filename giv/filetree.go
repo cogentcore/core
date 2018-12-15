@@ -613,12 +613,21 @@ func (fn *FileNode) NewFile(filename string) {
 	fn.FRoot.UpdateNewFile(np)
 }
 
-// AddToVersCtrl adds the file to the version control system
+// AddToVersCtrl adds file to version control
 func (fn *FileNode) AddToVersCtrl() {
 	if fn.UsesGit() {
 		ExecGitCmd("Add", string(fn.FPath), "")
 	} else if fn.UsesSvn() {
 		ExecSvnCmd("Add", string(fn.FPath), "")
+	}
+}
+
+// RemoveFromVersCtrl removes file from version control - keeps local file
+func (fn *FileNode) RemoveFromVersCtrl() {
+	if fn.UsesGit() {
+		ExecGitCmd("RemoveFromRepo", string(fn.FPath), "")
+	} else if fn.UsesSvn() {
+		ExecSvnCmd("RemoveFromRepo", string(fn.FPath), "")
 	}
 }
 
@@ -1125,6 +1134,21 @@ func (ftv *FileTreeView) AddToVersCtrl() {
 	}
 }
 
+// RemoveFromVersCtrl adds the file to the version control system
+func (ftv *FileTreeView) RemoveFromVersCtrl() {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	sn := sels[sz-1]
+	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftvv.FileNode()
+	if fn != nil {
+		fn.RemoveFromVersCtrl()
+	}
+}
+
 // Cut copies to clip.Board and deletes selected items
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Cut() {
@@ -1250,6 +1274,14 @@ var FileTreeActiveNotInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act
 	}
 })
 
+var FileTreeActiveInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		act.SetActiveState((fn.UsesGit() && fn.InGitRepo()) || (fn.UsesSvn() && fn.InSvnRepo()))
+	}
+})
+
 var FileTreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
 	"spacing":          units.NewValue(.5, units.Ch),
@@ -1348,10 +1380,16 @@ var FileTreeViewProps = ki.Props{
 				}},
 			},
 		}},
+		{"sep-versctrl", ki.BlankProp{}},
 		{"AddToVersCtrl", ki.Props{
 			"label":    "Add To Version Control",
 			"desc":     "Add file to version control git/svn",
 			"updtfunc": FileTreeActiveNotInVersCtrlFunc,
+		}},
+		{"RemoveFromVersCtrl", ki.Props{
+			"label":    "Remove From Version Control",
+			"desc":     "Remove file from version control git/svn",
+			"updtfunc": FileTreeActiveInVersCtrlFunc,
 		}},
 	},
 }

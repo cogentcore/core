@@ -7,6 +7,7 @@ package giv
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // ChangeRec is version control change-log record
@@ -52,7 +53,7 @@ var VersCtrlFiles = map[string]string{
 var GitCmds = map[string]string{
 	"Add":            "add",
 	"Delete":         "rm",
-	"DeleteRepoOnly": "rm --cached",
+	"RemoveFromRepo": "rm --cached",
 	"Rename":         "mv",
 }
 
@@ -65,9 +66,22 @@ var SvnCmds = map[string]string{
 
 // ExecGitCmd calls os.exec to execute a Git command
 func ExecGitCmd(action, arg2, arg3 string) error {
-	arg1 := GitCmds[action]
-	oscmd := exec.Command("git", arg1, arg2, arg3)
+	str := GitCmds[action]
+	parts := strings.Split(str, " ")
+	args := make([]string, len(parts))
+	for i := 0; i < len(parts); i++ {
+		args[i] = parts[i]
+	}
+	if len(arg2) > 0 {
+		args = append(args, arg2)
+	}
+	if len(arg3) > 0 {
+		args = append(args, arg2)
+	}
+	//fmt.Println(args)
+	oscmd := exec.Command("git", args...)
 	stdoutStderr, err := oscmd.CombinedOutput()
+
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return err
