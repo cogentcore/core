@@ -340,14 +340,20 @@ func (fn *FileNode) InGitRepo() bool {
 
 // UsesSvn checks for ?? file to know if the files in the directory are being tracked with svn
 func (fn *FileNode) UsesSvn() bool {
-	// todo: complete this function
-	return false
+	_, err := exec.Command("svn", "info", "", "").Output()
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 // InSvnRepo checks whether the particular file is in the svn repo
 func (fn *FileNode) InSvnRepo() bool {
-	// todo: complete this function
-	return false
+	_, err := exec.Command("svn", "info", string(fn.FPath), "").Output()
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 // OpenDirsTo opens all the directories above the given filename, and returns the node
@@ -538,33 +544,34 @@ func (fn *FileNode) DuplicateFile() error {
 }
 
 // DeleteFile deletes this file
-func (fn *FileNode) DeleteFile() error {
-	err := fn.Info.Delete()
-	if err == nil {
-		if fn.UsesGit() && fn.InGitRepo() {
-			ExecGitCmd("Delete", string(fn.FPath), "")
-		} else if fn.UsesSvn() && fn.InSvnRepo() {
-			ExecSvnCmd("Delete", string(fn.FPath), "")
-		}
-		fn.Delete(true) // we're done
-	}
+func (fn *FileNode) DeleteFile() (err error) {
+	//if fn.UsesGit() && fn.InGitRepo() {
+	//	err = ExecGitCmd("Delete", string(fn.FPath), "")
+	//	if (err != nil) {
+	//		fmt.Println(err)
+	//	}
+	//} else if fn.UsesSvn() && fn.InSvnRepo() {
+	//	err = ExecSvnCmd("Delete", string(fn.FPath), "")
+	//}
+	err = fn.Info.Delete()
+	fn.Delete(true) // we're done
 	return err
 }
 
 // RenameFile renames file to new name
-func (fn *FileNode) RenameFile(newpath string) error {
-	err := fn.Info.Rename(newpath)
+func (fn *FileNode) RenameFile(newpath string) (err error) {
+	sc := ""
+	if fn.UsesGit() && fn.InGitRepo() {
+		sc = "git"
+	} else if fn.UsesSvn() && fn.InSvnRepo() {
+		sc = "svn"
+	}
+	err = fn.Info.Rename(newpath, sc)
 	if err == nil {
-		//if fn.UsesGit() && fn.InGitRepo() {
-		//	ExecGitCmd("Rename", string(fn.FPath), newpath)
-		//} else if fn.UsesSvn() && fn.InSvnRepo() {
-		//	ExecSvnCmd("", "", "")
-		//} else {
 		fn.FPath = gi.FileName(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
-		//}
-		fn.UpdateSig()
 	}
+	fn.UpdateSig()
 	return err
 }
 
@@ -584,7 +591,7 @@ func (fn *FileNode) NewFile(filename string) {
 				switch sig {
 				case 0:
 					fp := filepath.Join(string(fn.FPath), filename)
-					ExecGitCmd("Add", fp, "")
+					err = ExecGitCmd("Add", fp, "")
 				case 1:
 					// do nothing
 				}
@@ -597,13 +604,22 @@ func (fn *FileNode) NewFile(filename string) {
 				switch sig {
 				case 0:
 					fp := filepath.Join(string(fn.FPath), filename)
-					ExecSvnCmd("Add", fp, "")
+					err = ExecSvnCmd("Add", fp, "")
 				case 1:
 					// do nothing
 				}
 			})
 	}
 	fn.FRoot.UpdateNewFile(np)
+}
+
+// AddToVersCtrl adds the file to the version control system
+func (fn *FileNode) AddToVersCtrl() {
+	if fn.UsesGit() {
+		ExecGitCmd("Add", string(fn.FPath), "")
+	} else if fn.UsesSvn() {
+		ExecSvnCmd("Add", string(fn.FPath), "")
+	}
 }
 
 // NewFolder makes a new folder (directory) in given selected directory node
@@ -1094,6 +1110,21 @@ func (ftv *FileTreeView) NewFolder(foldername string) {
 	}
 }
 
+// AddToVersCtrl adds the file to the version control system
+func (ftv *FileTreeView) AddToVersCtrl() {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	sn := sels[sz-1]
+	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftvv.FileNode()
+	if fn != nil {
+		fn.AddToVersCtrl()
+	}
+}
+
 // Cut copies to clip.Board and deletes selected items
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Cut() {
@@ -1210,6 +1241,15 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Actio
 	}
 })
 
+// FileTreeActiveNotInVersCtrlFunc is an ActionUpdateFunc that activates action if node is in a dir using version control
+var FileTreeActiveNotInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		act.SetActiveState((fn.UsesGit() && !fn.InGitRepo()) || (fn.UsesSvn() && !fn.InSvnRepo()))
+	}
+})
+
 var FileTreeViewProps = ki.Props{
 	"indent":           units.NewValue(2, units.Ch),
 	"spacing":          units.NewValue(.5, units.Ch),
@@ -1307,6 +1347,11 @@ var FileTreeViewProps = ki.Props{
 					"width": 60,
 				}},
 			},
+		}},
+		{"AddToVersCtrl", ki.Props{
+			"label":    "Add To Version Control",
+			"desc":     "Add file to version control git/svn",
+			"updtfunc": FileTreeActiveNotInVersCtrlFunc,
 		}},
 	},
 }

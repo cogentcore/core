@@ -64,17 +64,20 @@ var SvnCmds = map[string]string{
 }
 
 // ExecGitCmd calls os.exec to execute a Git command
-func ExecGitCmd(action, arg2, arg3 string) {
+func ExecGitCmd(action, arg2, arg3 string) error {
 	arg1 := GitCmds[action]
 	oscmd := exec.Command("git", arg1, arg2, arg3)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("%s\n", err)
+		return err
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+	return nil
 }
 
 // ExecSvnCmd calls os.exec to execute a Svn command
-func ExecSvnCmd(action, arg2, arg3 string) {
-
+func ExecSvnCmd(action, arg2, arg3 string) error {
+	fmt.Println("svn commands not yet implemented")
+	return nil
 }

@@ -166,7 +166,6 @@ func (fi *FileInfo) Delete() error {
 			}
 		}
 	}
-
 	// remove file or directory
 	return os.Remove(fi.Path)
 	// note: we should be deleted now!
@@ -216,10 +215,10 @@ func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	return err
 }
 
-// Rename renames file to new name
-func (fi *FileInfo) Rename(newpath string) error {
+// Rename renames file to new name using source control call if file is under source control
+func (fi *FileInfo) Rename(newpath string, sc string) (err error) {
 	if newpath == "" {
-		err := fmt.Errorf("giv.Rename: new name is empty")
+		err = fmt.Errorf("giv.Rename: new name is empty")
 		log.Println(err)
 		return err
 	}
@@ -234,9 +233,16 @@ func (fi *FileInfo) Rename(newpath string) error {
 		dir, _ := filepath.Split(fi.Path)
 		newpath = filepath.Join(dir, newpath)
 	}
-	err := os.Rename(fi.Path, newpath)
-	if err == nil {
-		fi.InitFile(newpath)
+	if sc == "git" {
+		// todo: git mv does not handle relative paths so newpath must be absolute - not sure about svn
+		err = ExecGitCmd("Rename", string(fi.Path), newpath)
+	} else if sc == "svn" {
+		err = ExecSvnCmd("Rename", "", "")
+	} else {
+		err := os.Rename(fi.Path, newpath)
+		if err == nil {
+			fi.InitFile(newpath)
+		}
 	}
 	return err
 }
