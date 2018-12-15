@@ -6,7 +6,6 @@ license that can be found in the LICENSE file. */
 
 package main
 
-/*
 import "github.com/goki/gi/gi"
 
 import (
@@ -17,7 +16,6 @@ import (
 	"github.com/goki/pi"
 	"github.com/goki/pi/piv"
 )
-*/
 
 var av1, av2 int
 

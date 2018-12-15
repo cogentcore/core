@@ -44,10 +44,12 @@ func NewParser() *Parser {
 
 // InitAll initializes everything about the parser -- call this when setting up a new
 // parser after it has been loaded etc
-func (pr *Parser) InitAll(fs *FileState) {
-	fs.Src.AllocLines()
-	pr.LexInit(fs)
-	pr.ParserInit(fs)
+func (pr *Parser) InitAll() {
+	fs := &FileState{} // dummy, for error recording
+	fs.Init()
+	pr.Lexer.Validate(&fs.LexState)
+	pr.Parser.CompileAll(&fs.ParseState)
+	pr.Parser.Validate(&fs.ParseState)
 }
 
 // LexInit gets the lexer ready to start lexing
@@ -166,13 +168,7 @@ func (pr *Parser) LexAll(fs *FileState) {
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit(fs *FileState) bool {
 	fs.ParseState.Init(&fs.Src, &fs.Ast, &fs.TwoState.EosPos)
-	parse.Trace.Init()
-	ok := pr.Parser.CompileAll(&fs.ParseState)
-	if !ok {
-		return false
-	}
-	ok = pr.Parser.Validate(&fs.ParseState)
-	return ok
+	return true
 }
 
 // ParseNext does next step of parsing -- returns lowest-level rule that matched

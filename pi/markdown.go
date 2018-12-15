@@ -31,9 +31,7 @@ func (ml *MarkdownLang) Parser() *Parser {
 	if ml.Pr == nil {
 		return nil
 	}
-	fs := &FileState{}
-	fs.Init()
-	ml.Pr.InitAll(fs)
+	ml.Pr.InitAll()
 	return ml.Pr
 }
 

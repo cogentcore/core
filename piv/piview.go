@@ -129,7 +129,8 @@ func (pv *PiView) SaveProjAs(filename gi.FileName) {
 
 // ApplyPrefs applies project-level prefs (e.g., after opening)
 func (pv *PiView) ApplyPrefs() {
-	parse.Trace = pv.Prefs.TraceOpts
+	fs := &pv.TestBuf.PiState
+	fs.ParseState.Trace = pv.Prefs.TraceOpts
 	if pv.Prefs.ParserFile != "" {
 		pv.OpenParser(pv.Prefs.ParserFile)
 	}
@@ -140,7 +141,8 @@ func (pv *PiView) ApplyPrefs() {
 
 // GetPrefs gets the current values of things for prefs
 func (pv *PiView) GetPrefs() {
-	pv.Prefs.TraceOpts = parse.Trace
+	fs := &pv.TestBuf.PiState
+	pv.Prefs.TraceOpts = fs.ParseState.Trace
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -237,10 +239,11 @@ func (pv *PiView) LexInit() {
 	fs := &pv.TestBuf.PiState
 	fs.SetSrc(&pv.TestBuf.Lines, string(pv.TestBuf.Filename))
 	// pv.Hi.SetParser(&pv.Parser)
+	pv.Parser.Lexer.Validate(&fs.LexState)
 	pv.Parser.LexInit(fs)
 	if fs.LexHasErrs() {
 		errs := fs.LexErrReport()
-		parse.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
+		fs.ParseState.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
 			Prompt: "The Lexer validation has errors<br>\n" + errs}, true, false, nil, nil)
 	}
@@ -255,7 +258,7 @@ func (pv *PiView) LexStopped() {
 	} else {
 		errs := fs.LexErrReport()
 		if errs != "" {
-			parse.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
+			fs.ParseState.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
 			pv.SetStatus("Lexer Errors!")
 			gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "Lex Error",
 				Prompt: "The Lexer has stopped due to errors<br>\n" + errs}, true, false, nil, nil)
@@ -356,7 +359,7 @@ func (pv *PiView) PassTwo() {
 	pv.Parser.DoPassTwo(fs)
 	if fs.PassTwoHasErrs() {
 		errs := fs.PassTwoErrReport()
-		parse.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
+		fs.ParseState.Trace.OutWrite.Write([]byte(errs)) // goes to outbuf
 		gi.PromptDialog(pv.Viewport, gi.DlgOpts{Title: "PassTwo Error",
 			Prompt: "The PassTwo had the following errors<br>\n" + errs}, true, false, nil, nil)
 	}
@@ -369,7 +372,8 @@ func (pv *PiView) PassTwo() {
 func (pv *PiView) EditTrace() {
 	sv := pv.StructView()
 	if sv != nil {
-		sv.SetStruct(&parse.Trace, nil)
+		fs := &pv.TestBuf.PiState
+		sv.SetStruct(&fs.ParseState.Trace, nil)
 	}
 }
 
@@ -380,6 +384,8 @@ func (pv *PiView) ParseInit() {
 	go pv.MonitorOut()
 	pv.LexInit()
 	pv.Parser.LexAll(fs)
+	pv.Parser.Parser.CompileAll(&fs.ParseState)
+	pv.Parser.Parser.Validate(&fs.ParseState)
 	pv.Parser.ParserInit(fs)
 	pv.UpdtLexBuf()
 	if fs.ParseHasErrs() {
@@ -476,7 +482,7 @@ func (pv *PiView) AstTreeToEnd() {
 // UpdtParseBuf sets the ParseBuf to current parse rule output
 func (pv *PiView) UpdtParseBuf() {
 	fs := &pv.TestBuf.PiState
-	txt := fs.ParseRuleString(parse.Trace.FullStackOut)
+	txt := fs.ParseRuleString(fs.ParseState.Trace.FullStackOut)
 	pv.ParseBuf.SetText([]byte(txt))
 }
 
@@ -859,7 +865,8 @@ func (pv *PiView) MonitorOut() {
 	pv.OutMonRunning = true
 	pv.OutMonMu.Unlock()
 	obuf := giv.OutBuf{}
-	obuf.Init(parse.Trace.OutRead, &pv.OutBuf, 0, gide.MarkupCmdOutput)
+	fs := &pv.TestBuf.PiState
+	obuf.Init(fs.ParseState.Trace.OutRead, &pv.OutBuf, 0, gide.MarkupCmdOutput)
 	obuf.MonOut()
 	pv.OutMonMu.Lock()
 	pv.OutMonRunning = false
@@ -901,7 +908,7 @@ func (pv *PiView) ConfigSplitView() {
 		gide.Prefs.Editor.ConfigTextBuf(&pv.OutBuf)
 		pv.OutBuf.Opts.LineNos = false
 
-		parse.Trace.Init()
+		fs.ParseState.Trace.Init()
 		go pv.MonitorOut()
 
 		pv.LexBuf.SetHiStyle(gide.Prefs.HiStyle)

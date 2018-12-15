@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
@@ -20,9 +21,10 @@ type FileState struct {
 	Src        lex.File     `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
 	LexState   lex.State    `json:"_" xml:"-" desc:"state for lexing"`
 	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
-	ParseState parse.State  `json:"_" xml:"-" desc:"state for parsing"`
-	Ast        parse.Ast    `json:"_" xml:"-" desc:"ast output tree from parsing"`
-	Syms       syms.SymMap  `json:"_" xml:"-" desc:"aggregate symbols for this file -- the language is responsible for managing these symbols to contain those relevant for the given file, and these are used for lookup (again managed through the Lang interface)"`
+	ParseState parse.State  `json:"-" xml:"-" desc:"state for parsing"`
+	Ast        parse.Ast    `json:"-" xml:"-" desc:"ast output tree from parsing"`
+	Syms       syms.SymMap  `json:"-" xml:"-" desc:"aggregate symbols for this file -- the language is responsible for managing these symbols to contain those relevant for the given file, and these are used for lookup (again managed through the Lang interface)"`
+	SymsMu     sync.RWMutex `json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
 }
 
 // Init initializes the file state
@@ -31,6 +33,9 @@ func (fs *FileState) Init() {
 	fs.LexState.Init()
 	fs.TwoState.Init()
 	fs.ParseState.Init(&fs.Src, &fs.Ast, &fs.TwoState.EosPos)
+	fs.SymsMu.Lock()
+	fs.Syms = make(syms.SymMap)
+	fs.SymsMu.Unlock()
 }
 
 // NewFileState returns a new initialized file state

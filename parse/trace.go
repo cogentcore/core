@@ -28,9 +28,6 @@ type TraceOpts struct {
 	OutRead      *os.File `view:"-" json:"-" xml:"-" desc:"trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output"`
 }
 
-// parse.Trace controls the tracing options for debugging / monitoring the rule matching and execution process
-var Trace TraceOpts
-
 // Init intializes tracer after any changes -- opens pipe if not already open
 func (pt *TraceOpts) Init() {
 	if pt.Rules == "" {

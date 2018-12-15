@@ -45,6 +45,10 @@ const (
 	// PopScope means remove the most recently-added scope item
 	PopScope
 
+	// AddDetail adds src at given path as detail info for the last-added symbol
+	// if there is already something there, a space is added for this new addition
+	AddDetail
+
 	ActionsN
 )
 

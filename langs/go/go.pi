@@ -4971,6 +4971,12 @@
                   },
                   {
                     "RunIdx": -1,
+                    "Act": "AddDetail",
+                    "Path": "Signature",
+                    "Tok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
                     "Act": "PopScope",
                     "Path": "",
                     "Tok": "None"
@@ -5005,6 +5011,12 @@
                     "Act": "PushNewScope",
                     "Path": "Name",
                     "Tok": "NameFunction"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddDetail",
+                    "Path": "Signature",
+                    "Tok": "None"
                   },
                   {
                     "RunIdx": -1,
@@ -6103,7 +6115,14 @@
                 "Desc": "put more specialized rules first",
                 "Rule": "'Name' 'LitStr' ?'EOS' ?ImportList",
                 "Ast": "AddAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "",
+                    "Tok": "NameLibrary"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -6115,7 +6134,14 @@
                 "Desc": "",
                 "Rule": "'LitStr' ?'EOS' ?ImportList",
                 "Ast": "AddAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "",
+                    "Tok": "NameLibrary"
+                  }
+                ],
                 "OptTokMap": false
               }
             ],

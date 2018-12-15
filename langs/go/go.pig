@@ -389,9 +389,9 @@ TypeRules {
 FuncRules {
     FunDecl {
         MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
-                   { 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:PopScope:"":None; -1:PopScope:"":None; }
+                   { 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"Signature":None; -1:PopScope:"":None; -1:PopScope:"":None; }
         FuncDecl:  'key:func' Name Signature ?Block 'EOS'  >Ast
-                   { -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:PopScope:"":None; }
+                   { -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"Signature":None; -1:PopScope:"":None; }
     }
     MethRecv:   Name Type  >Ast
                 { -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
@@ -495,7 +495,9 @@ ImportRules {
     ImportList {
         // ImportAlias put more specialized rules first 
         ImportAlias:  'Name' 'LitStr' ?'EOS' ?ImportList  +Ast
-        Import:       'LitStr' ?'EOS' ?ImportList         +Ast
+                      { -1:AddSymbol:"":NameLibrary; }
+        Import:       'LitStr' ?'EOS' ?ImportList  +Ast
+                      { -1:AddSymbol:"":NameLibrary; }
     }
 }
 DeclRules {

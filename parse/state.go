@@ -15,10 +15,12 @@ import (
 // parse.State is the state maintained for parsing
 type State struct {
 	Src        *lex.File      `view:"no-inline" desc:"source and lexed version of source we're parsing"`
+	Trace      TraceOpts      `desc:"tracing for this parser"`
 	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
 	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
 	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
 	ExtScopes  syms.SymMap    `desc:"externally-added scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part"`
+	LastSym    *syms.Symbol   `desc:"last symbol referenced during current actions -- reset to nil at start of and end of DoActs"`
 	EosPos     *[]lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
 	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
@@ -36,6 +38,7 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos *[]lex.Pos) {
 	ps.EosPos = eospos
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
 	ps.Errs.Reset()
+	ps.Trace.Init()
 	ps.AllocRules()
 }
 
@@ -68,7 +71,7 @@ func (ps *State) Error(pos lex.Pos, msg string, rule *Rule) {
 	e := ps.Errs.Add(pos, ps.Src.Filename, msg, ps.Src.SrcLine(pos.Ln), rule)
 	if GuiActive {
 		erstr := e.Report(ps.Src.BasePath, true, true)
-		fmt.Fprintln(Trace.OutWrite, "ERROR: "+erstr)
+		fmt.Fprintln(ps.Trace.OutWrite, "ERROR: "+erstr)
 	}
 }
 
@@ -91,6 +94,12 @@ func (ps *State) AtEof() bool {
 		return true
 	}
 	return false
+}
+
+// GotoEof sets current position at EOF
+func (ps *State) GotoEof() {
+	ps.Pos.Ln = ps.Src.NLines()
+	ps.Pos.Ch = 0
 }
 
 // NextSrcLine returns the next line of text

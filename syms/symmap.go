@@ -88,22 +88,24 @@ func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
 }
 
 // FindKindScoped looks for given symbol kind within this map and any children on the map
-// that are of subcategory token.NameScope (i.e., namespace, module, package, library)
-func (sm *SymMap) FindKindScoped(kind token.Tokens) (*Symbol, bool) {
+// that are of subcategory token.NameScope (i.e., namespace, module, package, library).
+// Returns all instances found
+func (sm *SymMap) FindKindScoped(kind token.Tokens) SymMap {
+	sys := make(SymMap)
 	for _, sy := range *sm {
 		if sy.Kind == kind {
-			return sy, true
+			sys[sy.Name] = sy
 		}
 	}
 	for _, ss := range *sm {
 		if ss.Kind.SubCat() == token.NameScope {
-			sy, has := ss.Children.FindKindScoped(kind)
-			if has {
-				return sy, has
+			csys := ss.Children.FindKindScoped(kind)
+			if len(csys) > 0 {
+				sys.CopyFrom(csys)
 			}
 		}
 	}
-	return nil, false
+	return sys
 }
 
 // OpenJSON opens from a JSON-formatted file.
