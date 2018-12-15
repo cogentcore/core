@@ -107,10 +107,11 @@ var FileNodeHiStyle = histyle.StyleDefault
 // the name of the file.  Folders have children containing further nodes.
 type FileNode struct {
 	ki.Node
-	FPath gi.FileName `desc:"full path to this file"`
-	Info  FileInfo    `desc:"full standard file info about this file"`
-	Buf   *TextBuf    `json:"-" xml:"-" desc:"file buffer for editing this file"`
-	FRoot *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
+	FPath    gi.FileName `desc:"full path to this file"`
+	Info     FileInfo    `desc:"full standard file info about this file"`
+	Buf      *TextBuf    `json:"-" xml:"-" desc:"file buffer for editing this file"`
+	FRoot    *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
+	VersCtrl bool        `desc:"is the file under version control"`
 }
 
 var KiT_FileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
@@ -255,6 +256,7 @@ func (fn *FileNode) SetNodePath(path string) error {
 // UpdateNode updates information in node based on its associated file in FPath
 func (fn *FileNode) UpdateNode() error {
 	err := fn.Info.InitFile(string(fn.FPath))
+	fn.VersCtrl = fn.InGitRepo() || fn.InSvnRepo()
 	if err != nil {
 		emsg := fmt.Errorf("giv.FileNode UpdateNode Path %q: Error: %v", fn.FPath, err)
 		log.Println(emsg)
@@ -331,6 +333,9 @@ func (fn *FileNode) UsesGit() bool {
 
 // InGitRepo checks whether the particular file is in the git repo
 func (fn *FileNode) InGitRepo() bool {
+	if !fn.UsesGit() {
+		return false
+	}
 	_, err := exec.Command("git", "ls-files", "--error-unmatch", string(fn.FPath)).Output()
 	if err != nil {
 		return false
@@ -349,6 +354,9 @@ func (fn *FileNode) UsesSvn() bool {
 
 // InSvnRepo checks whether the particular file is in the svn repo
 func (fn *FileNode) InSvnRepo() bool {
+	if !fn.UsesSvn() {
+		return false
+	}
 	_, err := exec.Command("svn", "info", string(fn.FPath), "").Output()
 	if err != nil {
 		return false
@@ -545,12 +553,12 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
-	//if fn.UsesGit() && fn.InGitRepo() {
+	//if fn.InGitRepo() {
 	//	err = ExecGitCmd("Delete", string(fn.FPath), "")
 	//	if (err != nil) {
 	//		fmt.Println(err)
 	//	}
-	//} else if fn.UsesSvn() && fn.InSvnRepo() {
+	//} else if fn.InSvnRepo() {
 	//	err = ExecSvnCmd("Delete", string(fn.FPath), "")
 	//}
 	err = fn.Info.Delete()
@@ -561,9 +569,9 @@ func (fn *FileNode) DeleteFile() (err error) {
 // RenameFile renames file to new name
 func (fn *FileNode) RenameFile(newpath string) (err error) {
 	sc := ""
-	if fn.UsesGit() && fn.InGitRepo() {
+	if fn.InGitRepo() {
 		sc = "git"
-	} else if fn.UsesSvn() && fn.InSvnRepo() {
+	} else if fn.InSvnRepo() {
 		sc = "svn"
 	}
 	err = fn.Info.Rename(newpath, sc)
@@ -1270,7 +1278,7 @@ var FileTreeActiveNotInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetActiveState((fn.UsesGit() && !fn.InGitRepo()) || (fn.UsesSvn() && !fn.InSvnRepo()))
+		act.SetActiveState((!fn.VersCtrl))
 	}
 })
 
@@ -1278,7 +1286,7 @@ var FileTreeActiveInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act *g
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetActiveState((fn.UsesGit() && fn.InGitRepo()) || (fn.UsesSvn() && fn.InSvnRepo()))
+		act.SetActiveState((fn.VersCtrl))
 	}
 })
 
