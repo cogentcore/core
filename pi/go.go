@@ -5,12 +5,10 @@
 package pi
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -53,7 +51,6 @@ func (gl *GoLang) ParseFile(fs *FileState) {
 	}
 	pr.LexAll(fs)
 	pr.ParseAll(fs)
-	return                             // todo: below is symbol gathering stuff -- off until fixed!
 	if len(fs.ParseState.Scopes) > 0 { // should be
 		path, _ := filepath.Split(fs.Src.Filename)
 		pkg := fs.ParseState.Scopes[0]
@@ -98,7 +95,7 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		return nil
 	}
 	path, _ = filepath.Abs(path)
-	fmt.Printf("Parsing / loading path: %v\n", path)
+	// fmt.Printf("Parsing / loading path: %v\n", path)
 
 	fls := dirs.ExtFileNames(path, []string{".go"})
 	if len(fls) == 0 {
@@ -110,15 +107,20 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		if err == nil && csy != nil {
 			lstmod := dirs.LatestMod(path, []string{".go"})
 			if lstmod.Before(cts) {
-				fmt.Printf("loaded cache for: %v from: %v\n", path, cts)
+				// fmt.Printf("loaded cache for: %v from: %v\n", path, cts)
 				return csy
 			}
 		}
 	}
 
-	lp := StdLangProps[filecat.Go]
 	fs := &FileState{}
-	pr := lp.Parser
+	// optional monitoring of parsing
+	// fs.ParseState.Trace.On = true
+	// fs.ParseState.Trace.Match = true
+	// fs.ParseState.Trace.NoMatch = true
+	// fs.ParseState.Trace.Run = true
+	// fs.ParseState.Trace.StdOut()
+	pr := gl.Parser()
 	var pkgsym *syms.Symbol
 	for i := range fls {
 		fnm := fls[i]
@@ -130,14 +132,14 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		if err != nil {
 			continue
 		}
-		fmt.Printf("parsing file: %v\n", fnm)
-		stt := time.Now()
+		// fmt.Printf("parsing file: %v\n", fnm)
+		// stt := time.Now()
 		pr.LexAll(fs)
-		lxdur := time.Now().Sub(stt)
+		// lxdur := time.Now().Sub(stt)
 		pr.ParserInit(fs)
 		pr.ParseRun(fs)
-		prdur := time.Now().Sub(stt)
-		fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
+		// prdur := time.Now().Sub(stt)
+		// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
 			gl.DeleteUnexported(pkg.Children)
@@ -146,8 +148,8 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 			} else {
 				pkgsym.Children.CopyFrom(pkg.Children)
 			}
-		} else {
-			fmt.Printf("\tno parse state scopes!\n")
+			// } else {
+			// 	fmt.Printf("\tno parse state scopes!\n")
 		}
 	}
 	if pkgsym != nil && !opts.Nocache && pkgsym.Name != "main" {

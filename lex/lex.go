@@ -55,6 +55,11 @@ func (lx *Lex) OverlapsReg(or Lex) bool {
 	return false
 }
 
+// Region returns the region for this lexical element, at given line
+func (lx *Lex) Region(ln int) Reg {
+	return Reg{St: Pos{Ln: ln, Ch: lx.St}, Ed: Pos{Ln: ln, Ch: lx.Ed}}
+}
+
 // Line is one line of Lex'd text
 type Line []Lex
 

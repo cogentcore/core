@@ -172,8 +172,8 @@ AnyText:		 Text		 if AnyRune	 do: Next;
 // File only rules in this first group are used as top-level rules -- all others must be referenced from here 
 File {
     PackageSpec:  'key:package' Name 'EOS'  >Ast
-                  { -1:PushNewScope:"Name":NamePackage; }
-    Imports:      'key:import' ImportN 'EOS'  >Ast
+    Acts:{ -1:PushNewScope:"Name":NamePackage; -1:ChgToken:"Name":NamePackage; }
+    Imports:  'key:import' ImportN 'EOS'  >Ast
     // Consts same as ConstDecl 
     Consts:  'key:const' ConstDeclN 'EOS'  >Ast
     // Types same as TypeDecl 
@@ -251,18 +251,19 @@ ExprRules {
         Slice:      ?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr  _Ast
         ParenExpr:  '(' Expr ')'                                 
         // TypeAssert must be before FunCall to get . match 
-        TypeAssert:  PrimaryExpr '.' '(' @Type ')'  >Ast
+        TypeAssert:  PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr  >Ast
         // MakeCall takes type arg 
         MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'  >Ast
         // NewCall takes type arg 
         NewCall:  'key:new' '(' Type ')'  >Ast
         // Selector This must be after unary expr esp addr, DePtr 
-        Selector:  PrimaryExpr '.' PrimaryExpr              _Ast
+        Selector:  PrimaryExpr '.' PrimaryExpr  _Ast
+        Acts:{ -1:ChgToken:"[0]":NameTag; }
         MethCall:  ?PrimaryExpr '.' Name '(' ?ArgsExpr ')'  >Ast
-                   { -1:ChgToken:"[0]":NameFunction; }
+        Acts:{ -1:ChgToken:"[0]":NameFunction; }
         // FuncCall must be after parens 
         FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'  >Ast
-                   { -1:ChgToken:"[0]":NameFunction; }
+        Acts:{ -1:ChgToken:"[0]":NameFunction; }
         // // OFF: TypeMethCall don't think this is needed.. todo: test more 
         // OFF: TypeMethCall:  @RecvType '.' Name '(' ?ArgsExpr ')'  >Ast
         // OpName this is the least selective and must be at the end 
@@ -296,6 +297,8 @@ ExprRules {
                 ElExpr:    Expr          
                 ElLitVal:  LiteralValue  
             }
+            // KeyNoEl can have EOS's from inline } 
+            KeyNoEl:  'EOS'  
         }
         // NoEl can have EOS's from inline } 
         NoEl:  'EOS'  
@@ -326,8 +329,12 @@ ExprRules {
         SliceIdx3:  Expr  >Ast
     }
     ArgsExpr {
-        ArgsEllipsis:  ExprList '...'  >Ast
-        Args:          ExprList        >Ast
+        ArgsEllipsis:  ArgsList '...'  >Ast
+        Args:          ArgsList        >Ast
+    }
+    ArgsList {
+        ArgsListEls:  Expr ',' ArgsList  
+        ArgsListEl:   Expr               
     }
 }
 TypeRules {
@@ -342,9 +349,10 @@ TypeRules {
         BasicType:  'KeywordType'  +Ast
         // QualType type equivalent to QualName 
         QualType:  'Name' '.' 'Name'  +Ast
+        Acts:{ -1:ChgToken:"":NameType; }
         // TypeNm local unqualified type name 
         TypeNm:  'Name'  +Ast
-                 { -1:ChgToken:"":NameType; }
+        Acts:{ -1:ChgToken:"":NameType; }
     }
     // PtrOrTypeName regular type name or pointer to type name 
     PtrOrTypeName {
@@ -353,17 +361,17 @@ TypeRules {
     }
     TypeLiteral {
         SliceType:  '[' ']' @Type  >Ast
-                    { 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
         // ArrayType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayType:      '[' @Expr ']' @Type  >Ast
-                        { 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
-        StructType:     'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
-                        { 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
+        ArrayType:  '[' @Expr ']' @Type  >Ast
+        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        StructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
+        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
         PointerType:    '*' @Type                             >Ast
         FuncType:       'key:func' @Signature                 >Ast
         InterfaceType:  'key:interface' '{' ?MethodSpecs '}'  >Ast
         MapType:        'key:map' '[' @Type ']' @Type         >Ast
-                        { 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
+        Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
             SendChanType:  '<-' 'key:chan' @Type  >Ast
@@ -373,9 +381,10 @@ TypeRules {
     FieldDecls:  FieldDecl ?FieldDecls  
     FieldDecl {
         AnonQualField:  'Name' '.' 'Name' ?FieldTag 'EOS'  >Ast
-        NamedField:     NameList ?Type ?FieldTag 'EOS'     >Ast
-                        { 0:ChgToken:"":None; 0:ChgToken:"":None; }
-        NoField:        'EOS'  
+        Acts:{ -1:ChgToken:"":NamePackage; }
+        NamedField:  NameList ?Type ?FieldTag 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"[0]":NameField; -1:AddSymbol:"[0]":NameField; }
+        NoField:  'EOS'  
     }
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
@@ -392,12 +401,12 @@ TypeRules {
 FuncRules {
     FunDecl {
         MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
-                   { 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"Signature":None; -1:PopScope:"":None; -1:PopScope:"":None; }
+        Acts:{ 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"Signature":None; -1:PopScope:"":None; -1:PopScope:"":None; }
         FuncDecl:  'key:func' Name Signature ?Block 'EOS'  >Ast
-                   { -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"Signature":None; -1:PopScope:"":None; }
+        Acts:{ -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"Signature":None; -1:PopScope:"":None; }
     }
-    MethRecv:   Name Type  >Ast
-                { -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
+    MethRecv:  Name Type  >Ast
+    Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
     Signature:  Params ?Result  >Ast
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {
@@ -437,6 +446,7 @@ StmtRules {
         IfStmtExpr:        'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                      >Ast
         ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
         ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"NameListEls":NameVar; }
         // ForExpr most general at end 
         ForExpr:         'key:for' ?Expr '{' ?BlockList '}' 'EOS'                                       >Ast
         SwitchExpr:      'key:switch' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
@@ -468,13 +478,13 @@ StmtRules {
     }
     Asgn {
         AsgnExisting:  ExprList '=' ExprList 'EOS'  >Ast
-                       { -1:ChgToken:"Name":NameVar; }
-        AsgnNew:       ExprList ':=' ExprList 'EOS'  >Ast
-                       { -1:ChgToken:"Name":NameVar; }
-        AsgnMath:      ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
-                       { -1:ChgToken:"Name":NameVar; }
-        AsgnBit:       ExprList 'OpBitAsgn' ExprList 'EOS'  >Ast
-                       { -1:ChgToken:"Name":NameVar; }
+        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        AsgnNew:  ExprList ':=' ExprList 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        AsgnMath:  ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        AsgnBit:  ExprList 'OpBitAsgn' ExprList 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"Name...":NameVar; }
     }
     Elses {
         ElseIfStmt:  'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'  >Ast
@@ -498,9 +508,9 @@ ImportRules {
     ImportList {
         // ImportAlias put more specialized rules first 
         ImportAlias:  'Name' 'LitStr' ?'EOS' ?ImportList  +Ast
-                      { -1:AddSymbol:"":NameLibrary; }
-        Import:       'LitStr' ?'EOS' ?ImportList  +Ast
-                      { -1:AddSymbol:"":NameLibrary; }
+        Acts:{ -1:AddSymbol:"":NameLibrary; }
+        Import:  'LitStr' ?'EOS' ?ImportList  +Ast
+        Acts:{ -1:AddSymbol:"":NameLibrary; -1:ChgToken:"":NameLibrary; }
     }
 }
 DeclRules {
@@ -513,10 +523,10 @@ DeclRules {
         // ConstOpts different types of const expressions 
         ConstOpts {
             ConstSpec:  NameList ?Type '=' Expr 'EOS'  >Ast
-                        { -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
+            Acts:{ -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
             // ConstSpecName only a name, no expression 
             ConstSpecName:  NameList 'EOS'  >Ast
-                            { -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
+            Acts:{ -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
         }
     }
     ConstList:  ConstOpts ?ConstList  
@@ -526,10 +536,10 @@ DeclRules {
         // VarOpts different types of var expressions 
         VarOpts {
             VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  >Ast
-                          { -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
+            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
             // VarSpec only a name and type, no expression 
             VarSpec:  NameList Type 'EOS'  >Ast
-                      { -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
+            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
         }
     }
     VarList:  VarOpts ?VarList  

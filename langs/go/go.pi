@@ -2703,6 +2703,12 @@
                 "Act": "PushNewScope",
                 "Path": "Name",
                 "Tok": "NamePackage"
+              },
+              {
+                "RunIdx": -1,
+                "Act": "ChgToken",
+                "Path": "Name",
+                "Tok": "NamePackage"
               }
             ],
             "OptTokMap": false
@@ -2781,7 +2787,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 18,
+            "n": 19,
             "type": "parse.Rule",
             "name": "FullName",
             "type": "parse.Rule",
@@ -2817,7 +2823,9 @@
             "type": "parse.Rule",
             "name": "SliceIdxs",
             "type": "parse.Rule",
-            "name": "ArgsExpr"
+            "name": "ArgsExpr",
+            "type": "parse.Rule",
+            "name": "ArgsList"
           },
           {
             "Nm": "FullName",
@@ -3520,7 +3528,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "must be before FunCall to get . match",
-                "Rule": "PrimaryExpr '.' '(' @Type ')'",
+                "Rule": "PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3558,7 +3566,14 @@
                 "Desc": "This must be after unary expr esp addr, DePtr",
                 "Rule": "PrimaryExpr '.' PrimaryExpr",
                 "Ast": "SubAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "[0]",
+                    "Tok": "NameTag"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -3877,11 +3892,13 @@
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 2,
+                    "n": 3,
                     "type": "parse.Rule",
                     "name": "KeyEl",
                     "type": "parse.Rule",
-                    "name": "Element"
+                    "name": "Element",
+                    "type": "parse.Rule",
+                    "name": "KeyNoEl"
                   },
                   {
                     "Nm": "KeyEl",
@@ -3935,6 +3952,18 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "",
+                    "Ast": "NoAst",
+                    "Acts": null,
+                    "OptTokMap": false
+                  },
+                  {
+                    "Nm": "KeyNoEl",
+                    "UniqueNm": "KeyNoEl",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "can have EOS's from inline }",
+                    "Rule": "'EOS'",
                     "Ast": "NoAst",
                     "Acts": null,
                     "OptTokMap": false
@@ -4274,7 +4303,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "ExprList '...'",
+                "Rule": "ArgsList '...'",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4286,9 +4315,53 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "ExprList",
+                "Rule": "ArgsList",
                 "Ast": "AnchorAst",
                 "Acts": null,
+                "OptTokMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Rule": "",
+            "Ast": "NoAst",
+            "Acts": null,
+            "OptTokMap": false
+          },
+          {
+            "Nm": "ArgsList",
+            "UniqueNm": "ArgsList",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "ArgsListEls",
+                "type": "parse.Rule",
+                "name": "ArgsListEl"
+              },
+              {
+                "Nm": "ArgsListEls",
+                "UniqueNm": "ArgsListEls",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr ',' ArgsList",
+                "Ast": "NoAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ArgsListEl",
+                "UniqueNm": "ArgsListEl",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr",
+                "Ast": "NoAst",
+                "Acts": [],
                 "OptTokMap": false
               }
             ],
@@ -4428,7 +4501,14 @@
                 "Desc": "type equivalent to QualName",
                 "Rule": "'Name' '.' 'Name'",
                 "Ast": "AddAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NameType"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4769,7 +4849,14 @@
                 "Desc": "",
                 "Rule": "'Name' '.' 'Name' ?FieldTag 'EOS'",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NamePackage"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -4783,16 +4870,16 @@
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
-                    "RunIdx": 0,
+                    "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "",
-                    "Tok": "None"
+                    "Path": "[0]",
+                    "Tok": "NameField"
                   },
                   {
-                    "RunIdx": 0,
-                    "Act": "ChgToken",
-                    "Path": "",
-                    "Tok": "None"
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "[0]",
+                    "Tok": "NameField"
                   }
                 ],
                 "OptTokMap": false
@@ -5567,7 +5654,14 @@
                 "Desc": "",
                 "Rule": "'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "NameListEls",
+                    "Tok": "NameVar"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -5885,7 +5979,7 @@
                   {
                     "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "Name",
+                    "Path": "Name...",
                     "Tok": "NameVar"
                   }
                 ],
@@ -5904,7 +5998,7 @@
                   {
                     "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "Name",
+                    "Path": "Name...",
                     "Tok": "NameVar"
                   }
                 ],
@@ -5923,7 +6017,7 @@
                   {
                     "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "Name",
+                    "Path": "Name...",
                     "Tok": "NameVar"
                   }
                 ],
@@ -5942,7 +6036,7 @@
                   {
                     "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "Name",
+                    "Path": "Name...",
                     "Tok": "NameVar"
                   }
                 ],
@@ -6166,6 +6260,12 @@
                   {
                     "RunIdx": -1,
                     "Act": "AddSymbol",
+                    "Path": "",
+                    "Tok": "NameLibrary"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
                     "Path": "",
                     "Tok": "NameLibrary"
                   }

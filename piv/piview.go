@@ -130,7 +130,7 @@ func (pv *PiView) SaveProjAs(filename gi.FileName) {
 // ApplyPrefs applies project-level prefs (e.g., after opening)
 func (pv *PiView) ApplyPrefs() {
 	fs := &pv.TestBuf.PiState
-	fs.ParseState.Trace = pv.Prefs.TraceOpts
+	fs.ParseState.Trace.CopyOpts(&pv.Prefs.TraceOpts)
 	if pv.Prefs.ParserFile != "" {
 		pv.OpenParser(pv.Prefs.ParserFile)
 	}
@@ -142,7 +142,7 @@ func (pv *PiView) ApplyPrefs() {
 // GetPrefs gets the current values of things for prefs
 func (pv *PiView) GetPrefs() {
 	fs := &pv.TestBuf.PiState
-	pv.Prefs.TraceOpts = fs.ParseState.Trace
+	pv.Prefs.TraceOpts.CopyOpts(&fs.ParseState.Trace)
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -909,6 +909,7 @@ func (pv *PiView) ConfigSplitView() {
 		pv.OutBuf.Opts.LineNos = false
 
 		fs.ParseState.Trace.Init()
+		fs.ParseState.Trace.PipeOut()
 		go pv.MonitorOut()
 
 		pv.LexBuf.SetHiStyle(gide.Prefs.HiStyle)

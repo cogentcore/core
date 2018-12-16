@@ -4,11 +4,27 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-// package main
+package main
 
-/*
+func tst() {
+	tvn, two := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
+	for a, b := range cde {
+	}
+}
+
+var PiViewProps = ki.Props{
+	"MainMenu": ki.PropSlice{
+		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
+			pv := pvi.(*PiView)
+			act.SetActiveState(pv.Prefs.ProjFile != "")
+		}),
+		"offguy": true,
+	},
+}
+
 import "github.com/goki/gi/gi"
 
+/*
 import (
 	gi "github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -152,7 +168,7 @@ func tst() {
 
 //var MultSlice = p[2]*Rule // todo: not working
 */
-
+/*
 var SliceAr1 = []Rule{}
 
 var SliceAry = [25]*Rule{}
@@ -211,17 +227,21 @@ func test() {
 		pr.Reverse = false
 	}
 }
+*/
 
 type Rule struct {
+	OnePar
 	ki.Node
 	Off       bool     `desc:"disable this rule -- useful for testing"`
 }
 
+/*
 func tst() {
 	oswin.TheApp.SetQuitCleanFunc(func() {
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 }
+*/
 
 func (pr *Parser) LexErrString() string {
 	return pr.LexState.Errs.AllString()

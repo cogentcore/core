@@ -21,6 +21,7 @@ type TraceOpts struct {
 	SubMatch     bool     `desc:"trace sub-rule matches -- when the parts of each rule match"`
 	NoMatch      bool     `desc:"trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)"`
 	Run          bool     `desc:"trace progress runing through each of the sub-rules when a rule has matched and is 'running'"`
+	RunAct       bool     `desc:"trace actions performed by running rules"`
 	ScopeSrc     bool     `desc:"if true, shows the full scope source for every trace statement"`
 	FullStackOut bool     `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
 	RulesList    []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
@@ -35,9 +36,18 @@ func (pt *TraceOpts) Init() {
 	} else {
 		pt.RulesList = strings.Split(pt.Rules, " ")
 	}
+}
+
+// PipeOut sets output to a pipe for monitoring (OutWrite -> OutRead)
+func (pt *TraceOpts) PipeOut() {
 	if pt.OutWrite == nil {
 		pt.OutRead, pt.OutWrite, _ = os.Pipe() // seriously, does this ever fail?
 	}
+}
+
+// StdOut sets OutWrite to os.Stdout
+func (pt *TraceOpts) StdOut() {
+	pt.OutWrite = os.Stdout
 }
 
 // CheckRule checks if given rule should be traced
@@ -85,6 +95,10 @@ func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex
 		if !pt.Run {
 			return false
 		}
+	case RunAct:
+		if !pt.RunAct {
+			return false
+		}
 	}
 	tokSrc := pos.String() + `"` + string(ps.Src.TokenSrc(pos)) + `"`
 	plev := ast.ParentLevel(ps.Ast)
@@ -98,6 +112,18 @@ func (pt *TraceOpts) Out(ps *State, pr *Rule, step Steps, pos lex.Pos, scope lex
 		fmt.Fprintf(pt.OutWrite, "%v\t%v\n", ind, scopeSrc)
 	}
 	return true
+}
+
+// CopyOpts copies just the options
+func (pt *TraceOpts) CopyOpts(ot *TraceOpts) {
+	pt.On = ot.On
+	pt.Rules = ot.Rules
+	pt.Match = ot.Match
+	pt.SubMatch = ot.SubMatch
+	pt.NoMatch = ot.NoMatch
+	pt.Run = ot.Run
+	pt.RunAct = ot.RunAct
+	pt.ScopeSrc = ot.ScopeSrc
 }
 
 // Steps are the different steps of the parsing processing
@@ -124,6 +150,9 @@ const (
 
 	// Run is when the rule is running and iterating through its sub-rules
 	Run
+
+	// RunAct is when the rule is running and performing actions
+	RunAct
 
 	StepsN
 )

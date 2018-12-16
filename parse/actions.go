@@ -56,7 +56,7 @@ const (
 type Act struct {
 	RunIdx int          `desc:"at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present"`
 	Act    Actions      `desc:"what action to perform"`
-	Path   string       `width:"50" desc:"Ast path, relative to current node: [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options"`
+	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options; ... means use all nodes with given name (only for change token)"`
 	Tok    token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
 }
 

@@ -433,6 +433,7 @@ func (pr *Rule) Validate(ps *State) bool {
 // StartParse is called on the root of the parse rule tree to start the parsing process
 func (pr *Rule) StartParse(ps *State) *Rule {
 	if ps.AtEof() || !pr.HasChildren() {
+		ps.GotoEof()
 		return nil
 	}
 	kpr := pr.Kids[0].Embed(KiT_Rule).(*Rule) // first rule is special set of valid top-level matches
@@ -1074,7 +1075,9 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	if useAst == nil {
 		useAst = parAst
 	}
+	apath := useAst.PathUnique()
 	var node ki.Ki
+	var adnl []ki.Ki // additional nodes
 	ok := false
 	if act.Path == "" {
 		node = useAst
@@ -1082,18 +1085,31 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	} else {
 		pths := strings.Split(act.Path, "|")
 		for _, p := range pths {
+			findAll := false
+			if strings.HasSuffix(p, "...") {
+				findAll = true
+				p = strings.TrimSuffix(p, "...")
+			}
 			if p[:3] == "../" {
 				node, ok = parAst.FindPathUnique(p[3:])
 			} else {
 				node, ok = useAst.FindPathUnique(p)
 			}
 			if ok {
+				if findAll {
+					pn := node.Parent()
+					for _, pk := range *pn.Children() {
+						if pk != node && pk.Name() == node.Name() {
+							adnl = append(adnl, pk)
+						}
+					}
+				}
 				break
 			}
 		}
 	}
 	if !ok {
-		ps.Trace.Out(ps, pr, SubMatch, ps.Pos, lex.RegZero, useAst, fmt.Sprintf("Action %v: node not found at path(s): %v", act.Act, act.Path))
+		ps.Trace.Out(ps, pr, RunAct, ps.Pos, lex.RegZero, useAst, fmt.Sprintf("Act %v: ERROR: node not found at path(s): %v in node: %v", act.Act, act.Path))
 		return false
 	}
 	ast := node.(*Ast)
@@ -1110,7 +1126,25 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	}
 	switch act.Act {
 	case ChgToken:
-		lx.Tok = act.Tok
+		cp := ast.TokReg.St
+		for cp.IsLess(ast.TokReg.Ed) {
+			tlx := ps.Src.LexAt(cp)
+			tlx.Tok = act.Tok
+			cp, _ = ps.Src.NextTokenPos(cp)
+		}
+		if len(adnl) > 0 {
+			for _, pk := range adnl {
+				nast := pk.(*Ast)
+				cp := nast.TokReg.St
+				for cp.IsLess(nast.TokReg.Ed) {
+					tlx := ps.Src.LexAt(cp)
+					tlx.Tok = act.Tok
+					cp, _ = ps.Src.NextTokenPos(cp)
+				}
+			}
+		}
+		ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Token set to: %v from path: %v = %v in node: %v", act.Tok, act.Path, nm, apath))
+		return false
 	case AddSymbol:
 		for i := range nms {
 			n := nms[i]
@@ -1123,7 +1157,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			if !added {
 				ps.Syms.Add(sy)
 			}
-			ps.LastSym = sy
+			useAst.Syms.Push(sy)
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 		}
 	case PushScope:
 		sy, has := ps.Syms.FindNameScoped(nm)
@@ -1136,7 +1171,8 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			}
 		}
 		ps.Scopes.Push(sy)
-		ps.LastSym = sy
+		useAst.Syms.Push(sy)
+		ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Pushed Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 	case PushNewScope:
 		// add plus push
 		sy := syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg)
@@ -1146,18 +1182,23 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			ps.Syms.Add(sy)
 		}
 		ps.Scopes.Push(sy)
-		ps.LastSym = sy
+		useAst.Syms.Push(sy)
+		ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Pushed New Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 	case PopScope:
-		ps.LastSym = ps.Scopes.Pop()
+		sy := ps.Scopes.Pop()
+		ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
 	case AddDetail:
-		if ps.LastSym != nil {
-			if ps.LastSym.Detail == "" {
-				ps.LastSym.Detail = nm
+		sy := useAst.Syms.Top()
+		if sy != nil {
+			if sy.Detail == "" {
+				sy.Detail = nm
 			} else {
-				ps.LastSym.Detail += " " + nm
+				sy.Detail += " " + nm
 			}
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added Detail: %v to Sym: %v in node: %v", nm, sy.String(), apath))
+		} else {
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add Detail: %v ERROR -- symbol not found in node: %v", nm, apath))
 		}
-		ps.LastSym = ps.Scopes.Pop()
 	}
 	return true
 }
@@ -1218,7 +1259,7 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 			fmt.Fprintf(writer, "%v%v:\t%v\t%v\n", ind, nmstr, pr.Rule, astr)
 			if len(pr.Acts) > 0 {
-				fmt.Fprintf(writer, "%v\t%v\n", ind, pr.Acts.String())
+				fmt.Fprintf(writer, "%vActs:%v\n", ind, pr.Acts.String())
 			}
 		}
 	}

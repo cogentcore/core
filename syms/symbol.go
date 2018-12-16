@@ -79,6 +79,11 @@ func (sy *Symbol) HasChildren() bool {
 	return len(sy.Children) > 0
 }
 
+// String satisfied fmt.Stringer interface
+func (sy *Symbol) String() string {
+	return fmt.Sprintf("%v: %v (%v)", sy.Name, sy.Kind, sy.Region)
+}
+
 // AddChild adds a child symbol, if this parent symbol is not temporary
 // returns true if item name was added and NOT already on the map,
 // and false if it was already or parent is temp.

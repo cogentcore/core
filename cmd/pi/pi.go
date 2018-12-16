@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/goki/gi/filecat"
-	"github.com/goki/pi"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 )
 
@@ -33,8 +33,8 @@ func main() {
 	}
 
 	// todo: assuming go for now
-	lp := pi.LangSupport.Props(filecat.Go)
-	pkgsym := lp.ParseDir(path, pi.LangDirOpts{Rebuild: true})
+	lp, _ := pi.LangSupport.Props(filecat.Go)
+	pkgsym := lp.Lang.ParseDir(path, pi.LangDirOpts{Rebuild: true})
 	if pkgsym != nil {
 		syms.SaveSymDoc(pkgsym, path)
 	}

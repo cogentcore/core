@@ -20,7 +20,6 @@ type State struct {
 	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
 	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
 	ExtScopes  syms.SymMap    `desc:"externally-added scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part"`
-	LastSym    *syms.Symbol   `desc:"last symbol referenced during current actions -- reset to nil at start of and end of DoActs"`
 	EosPos     *[]lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
 	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
