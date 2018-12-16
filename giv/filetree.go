@@ -1273,7 +1273,7 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Actio
 	}
 })
 
-// FileTreeActiveNotInVersCtrlFunc is an ActionUpdateFunc that activates action if node is in a dir using version control
+// FileTreeActiveNotInVersCtrlFunc is an ActionUpdateFunc that inactivates action if node is not under version control
 var FileTreeActiveNotInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
@@ -1282,12 +1282,45 @@ var FileTreeActiveNotInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act
 	}
 })
 
+// FileTreeActiveInVersCtrlFunc is an ActionUpdateFunc that activates action if node is under version control
 var FileTreeActiveInVersCtrlFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
 		act.SetActiveState((fn.VersCtrl))
 	}
+})
+
+// VersCtrlGetAddLabelFunc gets the appropriate label for adding to version control
+var VersCtrlGetAddLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		if fn.UsesGit() {
+			return "Add to Git"
+		} else if fn.UsesSvn() {
+			return "Add to SVN"
+		} else {
+			return "Programmer Error"
+		}
+	}
+	return "FileNode is nil"
+})
+
+// VersCtrlGetAddLabelFunc gets the appropriate label for removing from version control
+var VersCtrlGetRemoveLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		if fn.UsesGit() {
+			return "Remove from Git"
+		} else if fn.UsesSvn() {
+			return "Remove from SVN"
+		} else {
+			return "Programmer Error"
+		}
+	}
+	return "FileNode is nil"
 })
 
 var FileTreeViewProps = ki.Props{
@@ -1390,14 +1423,16 @@ var FileTreeViewProps = ki.Props{
 		}},
 		{"sep-versctrl", ki.BlankProp{}},
 		{"AddToVersCtrl", ki.Props{
-			"label":    "Add To Version Control",
-			"desc":     "Add file to version control git/svn",
-			"updtfunc": FileTreeActiveNotInVersCtrlFunc,
+			//"label":    "Add To Git",
+			"desc":       "Add file to version control git/svn",
+			"updtfunc":   FileTreeActiveNotInVersCtrlFunc,
+			"label-func": VersCtrlGetAddLabelFunc,
 		}},
 		{"RemoveFromVersCtrl", ki.Props{
-			"label":    "Remove From Version Control",
-			"desc":     "Remove file from version control git/svn",
-			"updtfunc": FileTreeActiveInVersCtrlFunc,
+			//"label":    "Remove From Version Control",
+			"desc":       "Remove file from version control git/svn",
+			"updtfunc":   FileTreeActiveInVersCtrlFunc,
+			"label-func": VersCtrlGetRemoveLabelFunc,
 		}},
 	},
 }

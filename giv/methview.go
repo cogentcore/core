@@ -479,6 +479,16 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 			}
 		case "label":
 			ac.Text = kit.ToString(pv)
+		case "label-func":
+			if sf, ok := pv.(LabelFunc); ok {
+				str := sf(md.Val, ac)
+				fmt.Println(str)
+				ac.Text = str
+			} else if sf, ok := pv.(func(it interface{}, act *gi.Action) string); ok {
+				ac.Text = sf(md.Val, ac)
+			} else {
+				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
+			}
 		case "icon":
 			ac.Icon = gi.IconName(kit.ToString(pv))
 		case "desc":
@@ -605,6 +615,10 @@ type SubMenuFunc func(it interface{}, vp *gi.Viewport2D) []string
 // used in MethView shortcut-func option
 // first argument is the object on which the method is defined (receiver)
 type ShortcutFunc func(it interface{}, act *gi.Action) key.Chord
+
+// LabelFunc is a function that returns a string to set a label
+// first argument is the object on which the method is defined (receiver)
+type LabelFunc func(it interface{}, act *gi.Action) string
 
 // ActionUpdateFunc is a function that updates method active / inactive status
 // first argument is the object on which the method is defined (receiver)
