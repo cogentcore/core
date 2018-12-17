@@ -482,7 +482,6 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 		case "label-func":
 			if sf, ok := pv.(LabelFunc); ok {
 				str := sf(md.Val, ac)
-				fmt.Println(str)
 				ac.Text = str
 			} else if sf, ok := pv.(func(it interface{}, act *gi.Action) string); ok {
 				ac.Text = sf(md.Val, ac)

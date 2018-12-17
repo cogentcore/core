@@ -1462,6 +1462,8 @@ func (ft *FileTreeView) Style2D() {
 				ft.Class = "exec"
 			} else if fn.IsOpen() {
 				ft.Class = "open"
+			} else if !fn.VersCtrl {
+				ft.Class = "vc-not" // untracked file
 			} else {
 				ft.Class = ""
 			}
