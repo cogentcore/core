@@ -47,10 +47,15 @@ func (gl *GoLang) Parser() *Parser {
 func (gl *GoLang) ParseFile(fs *FileState) {
 	pr := gl.Parser()
 	if pr == nil {
+		log.Println("ParseFile: no parser -- must call pi.LangSupport.OpenStd() at startup!")
 		return
 	}
+	// stt := time.Now()
 	pr.LexAll(fs)
+	// lxdur := time.Now().Sub(stt)
 	pr.ParseAll(fs)
+	// prdur := time.Now().Sub(stt)
+	// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
 	if len(fs.ParseState.Scopes) > 0 { // should be
 		path, _ := filepath.Split(fs.Src.Filename)
 		pkg := fs.ParseState.Scopes[0]
@@ -142,6 +147,9 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
+			if pkg.Name == "main" {
+				continue
+			}
 			gl.DeleteUnexported(pkg.Children)
 			if pkgsym == nil {
 				pkgsym = pkg
@@ -152,7 +160,7 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 			// 	fmt.Printf("\tno parse state scopes!\n")
 		}
 	}
-	if pkgsym != nil && !opts.Nocache && pkgsym.Name != "main" {
+	if pkgsym != nil && !opts.Nocache {
 		syms.SaveSymCache(pkgsym, path)
 	}
 	return pkgsym

@@ -206,12 +206,12 @@ ExprRules {
         UnryExpr:  UnaryExpr   
     }
     UnaryExpr {
-        PosExpr:       '+' @UnaryExpr  >Ast
-        NegExpr:       '-' @UnaryExpr  >Ast
-        UnaryXorExpr:  '^' @UnaryExpr  >Ast
-        NotExpr:       '!' @UnaryExpr  >Ast
-        DePtrExpr:     '*' @UnaryExpr  >Ast
-        AddrExpr:      '&' @UnaryExpr  >Ast
+        PosExpr:       '+' UnaryExpr  >Ast
+        NegExpr:       '-' UnaryExpr  >Ast
+        UnaryXorExpr:  '^' UnaryExpr  >Ast
+        NotExpr:       '!' UnaryExpr  >Ast
+        DePtrExpr:     '*' UnaryExpr  >Ast
+        AddrExpr:      '&' UnaryExpr  >Ast
         // PrimExpr essential that this is LAST in unary list, so that distinctive first-position unary tokens match instead of more general cases in primary 
         PrimExpr:  PrimaryExpr  
     }
@@ -314,8 +314,8 @@ ExprRules {
         RecvTp:         TypeName              
     }
     Selectors {
-        Sels:  @Name '.' @Selectors  
-        Sel:   Name                  
+        Sels:  Name '.' Selectors  
+        Sel:   Name                
     }
     SubSlice:  '[' SliceExpr ']' ?SubSlice  _Ast
     SliceExpr {
@@ -363,7 +363,7 @@ TypeRules {
         SliceType:  '[' ']' @Type  >Ast
         Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
         // ArrayType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayType:  '[' @Expr ']' @Type  >Ast
+        ArrayType:  '[' Expr ']' @Type  >Ast
         Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
         StructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
         Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }

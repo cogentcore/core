@@ -6,6 +6,7 @@ package lex
 
 import (
 	"github.com/goki/pi/token"
+	"github.com/goki/prof"
 )
 
 // File contains the contents of the file being parsed -- all kept in
@@ -189,6 +190,8 @@ func (fl *File) NextTokenPos(pos Pos) (Pos, bool) {
 
 // PrevTokenPos returns the previous token position, false if at end of tokens
 func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
+	pr := prof.Start("PrevTokenPos")
+	defer pr.End()
 	pos.Ch--
 	if pos.Ch < 0 {
 		pos.Ln--

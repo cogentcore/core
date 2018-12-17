@@ -10,6 +10,7 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
+	"github.com/goki/prof"
 )
 
 // parse.State is the state maintained for parsing
@@ -138,6 +139,8 @@ func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool
 // Only matches when depth is same as at reg.St start at the start of the search.
 // All positions in token indexes.
 func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
+	prf := prof.Start("FindToken")
+	defer prf.End()
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
 	if !ok {
 		return cp, false
@@ -176,6 +179,8 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 // binary operator expressions (mathematical binary operators).
 // All positions are in token indexes.
 func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
+	prf := prof.Start("FindTokenReverse")
+	defer prf.End()
 	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
 	if !ok {
 		return cp, false
@@ -213,6 +218,8 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 
 // FindEos finds the next EOS position at given depth
 func (ps *State) FindEos(stpos lex.Pos, depth int) (lex.Pos, int) {
+	prf := prof.Start("FindEos")
+	defer prf.End()
 	sz := len(*ps.EosPos)
 	for i := 0; i < sz; i++ {
 		ep := (*ps.EosPos)[i]
@@ -355,7 +362,7 @@ type ScopeRuleSet map[lex.Reg]RuleSet
 func (rs ScopeRuleSet) Add(scope lex.Reg, pr *Rule) {
 	rm, has := rs[scope]
 	if !has {
-		rm = make(RuleSet)
+		rm = make(RuleSet, 100)
 		rs[scope] = rm
 	}
 	rm[pr] = struct{}{}
@@ -383,5 +390,5 @@ func (ps *State) IsNonMatch(scope lex.Reg, pr *Rule) bool {
 
 // ResetNonMatches resets the non-match map -- do after every EOS
 func (ps *State) ResetNonMatches() {
-	ps.NonMatches = make(ScopeRuleSet)
+	ps.NonMatches = make(ScopeRuleSet, 100)
 }

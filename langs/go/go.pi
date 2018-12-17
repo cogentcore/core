@@ -3032,7 +3032,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'+' @UnaryExpr",
+                "Rule": "'+' UnaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3044,7 +3044,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'-' @UnaryExpr",
+                "Rule": "'-' UnaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3056,7 +3056,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'^' @UnaryExpr",
+                "Rule": "'^' UnaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3068,7 +3068,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'!' @UnaryExpr",
+                "Rule": "'!' UnaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3080,7 +3080,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'*' @UnaryExpr",
+                "Rule": "'*' UnaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3092,7 +3092,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'\u0026' @UnaryExpr",
+                "Rule": "'\u0026' UnaryExpr",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4131,7 +4131,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "@Name '.' @Selectors",
+                "Rule": "Name '.' Selectors",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4638,7 +4638,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "array must be after slice b/c slice matches on sequence of tokens",
-                "Rule": "'[' @Expr ']' @Type",
+                "Rule": "'[' Expr ']' @Type",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {

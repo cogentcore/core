@@ -174,27 +174,33 @@ func (pr *Parser) ParserInit(fs *FileState) bool {
 // ParseNext does next step of parsing -- returns lowest-level rule that matched
 // or nil if no match error or at end
 func (pr *Parser) ParseNext(fs *FileState) *parse.Rule {
+	updt := fs.ParseState.Ast.UpdateStart()
 	mrule := pr.Parser.StartParse(&fs.ParseState)
+	fs.ParseState.Ast.UpdateEnd(updt)
 	return mrule
 }
 
 // ParseRun continues running the parser until the end of the file
 func (pr *Parser) ParseRun(fs *FileState) {
+	updt := fs.ParseState.Ast.UpdateStart()
 	for {
 		pr.Parser.StartParse(&fs.ParseState)
 		if fs.ParseState.AtEof() {
 			break
 		}
 	}
+	fs.ParseState.Ast.UpdateEnd(updt)
 }
 
 // ParseAll does full parsing, including ParseInit and ParseRun, assuming LexAll
 // has been done already
 func (pr *Parser) ParseAll(fs *FileState) {
+	updt := fs.ParseState.Ast.UpdateStart()
 	if !pr.ParserInit(fs) {
 		return
 	}
 	pr.ParseRun(fs)
+	fs.ParseState.Ast.UpdateEnd(updt)
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file

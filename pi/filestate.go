@@ -140,6 +140,12 @@ func (fs *FileState) ParseErrReport() string {
 	return fs.ParseState.Errs.Report(10, fs.Src.BasePath, true, false)
 }
 
+// ParseErrReportAll returns all parsing errors in end-user format, sorted
+func (fs *FileState) ParseErrReportAll() string {
+	fs.ParseState.Errs.Sort()
+	return fs.ParseState.Errs.Report(0, fs.Src.BasePath, true, false)
+}
+
 // ParseErrReportDetailed returns at most 10 parsing errors in detailed format, sorted
 func (fs *FileState) ParseErrReportDetailed() string {
 	fs.ParseState.Errs.Sort()
