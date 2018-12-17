@@ -256,7 +256,8 @@ func (fn *FileNode) SetNodePath(path string) error {
 // UpdateNode updates information in node based on its associated file in FPath
 func (fn *FileNode) UpdateNode() error {
 	err := fn.Info.InitFile(string(fn.FPath))
-	fn.VersCtrl = fn.InGitRepo() || fn.InSvnRepo()
+	// fn.VersCtrl = fn.InGitRepo() || fn.InSvnRepo() // too slow!
+	fn.VersCtrl = true
 	if err != nil {
 		emsg := fmt.Errorf("giv.FileNode UpdateNode Path %q: Error: %v", fn.FPath, err)
 		log.Println(emsg)
