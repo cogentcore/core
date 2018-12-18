@@ -3026,12 +3026,12 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 		lsted := 0
 		for ti := range ht {
 			lx := &ht[ti]
-			if lx.Depth > 0 {
-				cspec.Color = TextViewDepthColors[lx.Depth%len(TextViewDepthColors)]
+			if lx.Tok.Depth > 0 {
+				cspec.Color = TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)]
 				st := ints.MinInt(lsted, lx.St)
 				reg := TextRegion{Start: TextPos{Ln: ln, Ch: st}, End: TextPos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
-				lstdp = lx.Depth
+				lstdp = lx.Tok.Depth
 				tv.RenderRegionBoxSty(reg, sty, &cspec)
 			}
 		}

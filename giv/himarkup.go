@@ -18,6 +18,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
+	"github.com/goki/pi/token"
 )
 
 // Overall Strategy:
@@ -149,7 +150,7 @@ func (hm *HiMarkup) ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
 		ep := cp + slen
 		if tok.Type < chroma.Text {
 			ht := histyle.TokenFromChroma(tok.Type)
-			tags.AddLex(ht, cp, ep)
+			tags.AddLex(token.KeyToken{Tok: ht}, cp, ep)
 		}
 		cp = ep
 	}
@@ -234,7 +235,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 			mu = append(mu, []byte(htmlstd.EscapeString(string(txt[cp:tr.St])))...)
 		}
 		mu = append(mu, sps...)
-		clsnm := tr.Tok.StyleName()
+		clsnm := tr.Tok.Tok.StyleName()
 		mu = append(mu, []byte(clsnm)...)
 		mu = append(mu, sps2...)
 		ep := tr.Ed

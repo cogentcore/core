@@ -1910,7 +1910,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 	if !tb.IsValidLine(ln) {
 		return
 	}
-	tr := lex.NewLex(tag, st, ed)
+	tr := lex.NewLex(token.KeyToken{Tok: tag}, st, ed)
 	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
 		tb.Tags[ln] = append(tb.Tags[ln], tr)
@@ -1949,7 +1949,7 @@ func (tb *TextBuf) RemoveTag(pos TextPos, tag token.Tokens) (reg lex.Lex, ok boo
 	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range tb.Tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
-			if tag > 0 && t.Tok != tag {
+			if tag > 0 && t.Tok.Tok != tag {
 				continue
 			}
 			tb.Tags[pos.Ln] = append(tb.Tags[pos.Ln][:i], tb.Tags[pos.Ln][i+1:]...)
