@@ -235,6 +235,13 @@ type Ki interface {
 	// ensure name is unique (assumed to already have a name).
 	AddChild(kid Ki) error
 
+	// AddChildFast adds a new child at end of children list in the fastest
+	// way possible -- saves about 30% of time overall --
+	// assumes InitName has already been run, and doesn't
+	// ensure names are unique, or run other checks, including if child
+	// already has a parent.  Only use if you really need the speed..
+	AddChildFast(kid Ki)
+
 	// InsertChild adds a new child at given position in children list -- if
 	// child is in an existing tree, it is removed from that parent, and a
 	// NodeMoved signal is emitted for the child -- UniquifyNames is called

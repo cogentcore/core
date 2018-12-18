@@ -27,7 +27,6 @@ import (
 
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 	"github.com/jinzhu/copier"
 )
 
@@ -225,8 +224,8 @@ var UniquifyPreserveNameLimit = 100
 // 100), above which the index is appended, guaranteeing uniqueness at the
 // cost of making paths longer and less user-friendly
 func (n *Node) UniquifyNames() {
-	pr := prof.Start("ki.Node.UniquifyNames")
-	defer pr.End()
+	// pr := prof.Start("ki.Node.UniquifyNames")
+	// defer pr.End()
 
 	sz := len(n.Kids)
 	if sz > UniquifyPreserveNameLimit {
@@ -658,6 +657,19 @@ func (n *Node) AddChild(kid Ki) error {
 	}
 	n.UpdateEnd(updt)
 	return err
+}
+
+// AddChildFast adds a new child at end of children list in the fastest
+// way possible -- assumes InitName has already been run, and doesn't
+// ensure names are unique, or run other checks, including if child
+// already has a parent.
+func (n *Node) AddChildFast(kid Ki) {
+	updt := n.UpdateStart()
+	n.Kids = append(n.Kids, kid)
+	kid.SetParent(n.This())
+	kid.SetFlag(int(ChildAdded))
+	n.SetFlag(int(ChildAdded))
+	n.UpdateEnd(updt)
 }
 
 // InsertChild adds a new child at given position in children list -- if
