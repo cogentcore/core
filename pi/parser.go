@@ -160,9 +160,7 @@ func (pr *Parser) LexAll(fs *FileState) {
 	lprf := prof.Start("LexRun")
 	pr.LexRun(fs)
 	lprf.End()
-	// pprf := prof.Start("PassTwo")
-	pr.DoPassTwo(fs)
-	// pprf.End()
+	pr.DoPassTwo(fs) // takes virtually no time
 }
 
 // ParserInit initializes the parser prior to running
