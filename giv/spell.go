@@ -5,7 +5,7 @@ import (
 )
 
 // SpellCorrectEdit uses the selected correction to edit the text
-func SpellCorrectEdit(data interface{}, new string, old string) (ed spell.EditData) {
-	ed = spell.CorrectText(old, new)
+func SpellCorrectEdit(data interface{}, nwstr string, old string) (ed spell.EditData) {
+	ed = spell.CorrectText(old, nwstr)
 	return ed
 }
