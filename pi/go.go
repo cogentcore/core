@@ -141,8 +141,7 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		// stt := time.Now()
 		pr.LexAll(fs)
 		// lxdur := time.Now().Sub(stt)
-		pr.ParserInit(fs)
-		pr.ParseRun(fs)
+		pr.ParseAll(fs)
 		// prdur := time.Now().Sub(stt)
 		// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
 		if len(fs.ParseState.Scopes) > 0 { // should be

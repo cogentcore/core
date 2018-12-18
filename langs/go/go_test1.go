@@ -6,6 +6,83 @@ license that can be found in the LICENSE file. */
 
 package main
 
+func sfa() {
+	for i := 0; i < 100; i++ {
+		fmt.Printf("%v %v", a, i)
+		a++
+		p := a * i
+	}
+	
+	defer func() { tv.inFocusGrab = false }()
+}
+
+func tst() {
+	if kit.Enums.TypeRegistered(nptyp) { // todo: bitfield
+		vv := EnumValueView{}
+		vv.Init(&vv)
+		return &vv
+	} else if _, ok := it.(fmt.Stringer); ok { // use stringer
+		vv := ValueViewBase{}
+		vv.Init(&vv)
+		return &vv
+	} else {
+		vv := IntValueView{}
+		vv.Init(&vv)
+		return &vv
+	}
+}
+
+
+func dkf() {
+	goto pil
+pil:
+	return nil
+}
+
+func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
+	switch change {
+	case gi.FocusInactive: // don't care..
+	case gi.FocusActive:
+	}
+}
+
+func adlf() {
+	switch pr := bprpi.(type) {
+	case map[string]interface{}:
+		wb.SetIconProps(ki.Props(pr))
+	case ki.Props:
+		wb.SetIconProps(pr)
+	}	
+}
+
+var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
+
+func sld() {
+	<-TextViewBlinker.C
+}
+
+func main() {
+	if sz > max {
+		*ch = (*ch)[:max]
+	}
+}
+
+func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
+	
+}
+
+func tst() {
+	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+}
+
+func tst() {
+	a := tv.Renders[ln].Links 
+
+	if !tv.HasLinks && tv.Renders[ln].Links > 0 {
+		tv.HasLinks = true
+	}
+}
+
 func tst() {
 	tvn, two := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
 	for a, b := range cde {
@@ -176,6 +253,8 @@ var SliceAry = [25]*Rule{}
 //var SliceAry = []*Rule{} // todo: ? not excluding here
 
 var RuleMap map[string]*Rule // looks like binary *
+
+var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 // exclude rule -- two rules fwd and back:
 // ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name
@@ -545,4 +624,53 @@ Version: ` + pi.VersionInfo())
 }
 
 var someother int
+
+
+type Lang interface {
+	// Parser returns the pi.Parser for this language
+	Parser() *Parser
+
+	// ParseFile does the complete processing of a given single file, as appropriate
+	// for the language -- e.g., runs the lexer followed by the parser, and
+	// manages any symbol output from parsing as appropriate for the language / format.
+	ParseFile(fs *FileState)
+	
+	// LexLine does the lexing of a given line of the file, using existing context
+	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
+	// The rune source information is assumed to have already been updated in FileState.
+	// languages can run the parser on the line to augment the lex token output as appropriate.
+	LexLine(fs *FileState, line int) lex.Line
+}
+
+var TextViewProps = ki.Props{
+	"white-space":      gi.WhiteSpacePreWrap,
+	"font-family":      "Go Mono",
+	"border-width":     0, // don't render our own border
+	"cursor-width":     units.NewValue(3, units.Px),
+	"border-color":     &gi.Prefs.Colors.Border,
+	"border-style":     gi.BorderSolid,
+	"padding":          units.NewValue(2, units.Px),
+	"margin":           units.NewValue(2, units.Px),
+	"vertical-align":   gi.AlignTop,
+	"text-align":       gi.AlignLeft,
+	"tab-size":         4,
+	"color":            &gi.Prefs.Colors.Font,
+	"background-color": &gi.Prefs.Colors.Background,
+	TextViewSelectors[TextViewActive]: ki.Props{
+		"background-color": "highlight-10",
+	},
+	TextViewSelectors[TextViewFocus]: ki.Props{
+		"background-color": "lighter-0",
+	},
+	TextViewSelectors[TextViewInactive]: ki.Props{
+		"background-color": "highlight-20",
+	},
+	TextViewSelectors[TextViewSel]: ki.Props{
+		"background-color": &gi.Prefs.Colors.Select,
+	},
+	TextViewSelectors[TextViewHighlight]: ki.Props{
+		"background-color": &gi.Prefs.Colors.Highlight,
+	},
+}
+
 

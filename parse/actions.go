@@ -49,6 +49,13 @@ const (
 	// if there is already something there, a space is added for this new addition
 	AddDetail
 
+	// PushStack adds name to stack -- provides context-sensitivity option for
+	// optimizing and ambiguity resolution
+	PushStack
+
+	// PopStack pops the stack
+	PopStack
+
 	ActionsN
 )
 
@@ -56,7 +63,7 @@ const (
 type Act struct {
 	RunIdx int          `desc:"at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present"`
 	Act    Actions      `desc:"what action to perform"`
-	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options; ... means use all nodes with given name (only for change token)"`
+	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options; ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack"`
 	Tok    token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
 }
 

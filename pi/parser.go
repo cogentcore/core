@@ -15,18 +15,13 @@ import (
 	"github.com/goki/pi/parse"
 )
 
-// VersionInfo returns Pi version information
-func VersionInfo() string {
-	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
-	return vinfo
-}
-
 // Parser is the overall parser for managing the parsing
 type Parser struct {
-	Lexer    lex.Rule    `desc:"lexer rules for first pass of lexing file"`
-	PassTwo  lex.PassTwo `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
-	Parser   parse.Rule  `desc:"parser rules for parsing lexed tokens"`
-	Filename string      `desc:"file name for overall parser"`
+	Lexer      lex.Rule    `desc:"lexer rules for first pass of lexing file"`
+	PassTwo    lex.PassTwo `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
+	Parser     parse.Rule  `desc:"parser rules for parsing lexed tokens"`
+	Filename   string      `desc:"file name for overall parser (not file being parsed!)"`
+	ReportErrs bool        `desc:"if true, reports errors after parsing, to stdout"`
 }
 
 // Init initializes the parser -- must be called after creation
@@ -174,33 +169,53 @@ func (pr *Parser) ParserInit(fs *FileState) bool {
 // ParseNext does next step of parsing -- returns lowest-level rule that matched
 // or nil if no match error or at end
 func (pr *Parser) ParseNext(fs *FileState) *parse.Rule {
-	updt := fs.ParseState.Ast.UpdateStart()
+	updt := false
+	if !parse.GuiActive {
+		updt = fs.ParseState.Ast.UpdateStart()
+	}
 	mrule := pr.Parser.StartParse(&fs.ParseState)
-	fs.ParseState.Ast.UpdateEnd(updt)
+	if !parse.GuiActive {
+		fs.ParseState.Ast.UpdateEnd(updt)
+	}
 	return mrule
 }
 
 // ParseRun continues running the parser until the end of the file
 func (pr *Parser) ParseRun(fs *FileState) {
-	updt := fs.ParseState.Ast.UpdateStart()
+	updt := false
+	if !parse.GuiActive {
+		updt = fs.ParseState.Ast.UpdateStart()
+	}
 	for {
 		pr.Parser.StartParse(&fs.ParseState)
-		if fs.ParseState.AtEof() {
+		if fs.ParseState.AtEofNext() {
 			break
 		}
 	}
-	fs.ParseState.Ast.UpdateEnd(updt)
+	if !parse.GuiActive {
+		fs.ParseState.Ast.UpdateEnd(updt)
+	}
 }
 
 // ParseAll does full parsing, including ParseInit and ParseRun, assuming LexAll
 // has been done already
 func (pr *Parser) ParseAll(fs *FileState) {
-	updt := fs.ParseState.Ast.UpdateStart()
+	updt := false
+	if !parse.GuiActive {
+		updt = fs.ParseState.Ast.UpdateStart()
+	}
 	if !pr.ParserInit(fs) {
 		return
 	}
 	pr.ParseRun(fs)
-	fs.ParseState.Ast.UpdateEnd(updt)
+	if !parse.GuiActive {
+		fs.ParseState.Ast.UpdateEnd(updt)
+	}
+	if pr.ReportErrs {
+		if fs.ParseHasErrs() {
+			fmt.Println(fs.ParseErrReport())
+		}
+	}
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
@@ -243,4 +258,10 @@ func (pr *Parser) SaveGrammar(filename string) error {
 	fmt.Fprintf(ofl, "\n\n///////////////////////////////////////////////////\n// %v Parser\n\n", filename)
 	pr.Parser.WriteGrammar(ofl, 0)
 	return ofl.Close()
+}
+
+// VersionInfo returns Pi version information
+func VersionInfo() string {
+	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
+	return vinfo
 }

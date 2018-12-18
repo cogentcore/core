@@ -66,6 +66,7 @@ type Rule struct {
 	Off        bool     `desc:"disable this rule -- useful for testing"`
 	Desc       string   `desc:"description / comments about this rule"`
 	Rule       string   `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that."`
+	StackMatch string   `desc:"if present, this rule only fires if stack has this on it"`
 	Ast        AstActs  `desc:"what action should be take for this node when it matches"`
 	Acts       Acts     `desc:"actions to perform based on parsed Ast tree data, when this rule is done executing"`
 	OptTokMap  bool     `desc:"for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens"`
@@ -433,7 +434,7 @@ func (pr *Rule) Validate(ps *State) bool {
 
 // StartParse is called on the root of the parse rule tree to start the parsing process
 func (pr *Rule) StartParse(ps *State) *Rule {
-	if ps.AtEof() || !pr.HasChildren() {
+	if ps.AtEofNext() || !pr.HasChildren() {
 		ps.GotoEof()
 		return nil
 	}
@@ -560,7 +561,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 			stlx := ps.Src.LexAt(creg.St)
 			ep, eosIdx := ps.FindEos(creg.St, stlx.Depth+lr.Tok.Depth)
 			if eosIdx < 0 {
-				ps.Error(creg.St, "could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr)
+				// ps.Error(creg.St, "could not find EOS at target nesting depth -- parens / bracket / brace mismatch?", pr)
 				return nscope, false
 			}
 			if lr.Opt && scope.Ed.IsLess(ep) { // optional tokens can't take us out of scope
@@ -574,7 +575,7 @@ func (pr *Rule) Scope(ps *State, parAst *Ast, scope lex.Reg) (lex.Reg, bool) {
 			} else {
 				creg.St, ok = ps.Src.NextTokenPos(ep) // advance
 				if !ok {
-					ps.Error(scope.St, "end of file looking for EOS tokens -- premature file end?", pr)
+					// ps.Error(scope.St, "end of file looking for EOS tokens -- premature file end?", pr)
 					return nscope, false
 				}
 			}
@@ -601,11 +602,25 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	}
 
 	if ps.IsNonMatch(scope, pr) {
+		// prf := prof.Start("GotNonMatch") // this counts matches in test
+		// prf.End()
 		return false, scope, nil
+	}
+
+	if pr.StackMatch != "" {
+		if ps.Stack.Top() != pr.StackMatch {
+			return false, scope, nil
+		}
 	}
 
 	nr := len(pr.Rules)
 	if nr == 0 { // Group
+		// prf := prof.Start("SubMatch")
+		if mst, match := ps.IsMatch(pr, scope); match {
+			// 	prf.End()
+			return true, scope, mst.Regs
+		}
+		// prf.End()
 		for _, kpri := range pr.Kids {
 			kpr := kpri.Embed(KiT_Rule).(*Rule)
 			match, nscope, mpos := kpr.Match(ps, parAst, scope, depth+1, optMap)
@@ -613,6 +628,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 				if ps.Trace.On {
 					ps.Trace.Out(ps, pr, SubMatch, scope.St, scope, parAst, fmt.Sprintf("group child: %v", kpr.Name()))
 				}
+				ps.AddMatch(pr, scope, mpos)
 				return true, nscope, mpos
 			}
 		}
@@ -620,10 +636,12 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		return false, scope, nil
 	}
 
+	// prf := prof.Start("IsMatch")
 	if mst, match := ps.IsMatch(pr, scope); match {
-		mst.Ran = true
+		// prf.End()
 		return true, scope, mst.Regs
 	}
+	// prf.End()
 
 	mpos := make(Matches, nr)
 
@@ -652,13 +670,13 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 			creg.St = lmnpos
 		}
 		for stinc := 0; stinc < rr.StInc; stinc++ {
-			creg.St, ok = ps.Src.NextTokenPos(creg.St)
-			if !ok {
-				if ps.Trace.On {
-					ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v ran out of tokens", ri))
-				}
-				return false, scope, nil
-			}
+			creg.St, _ = ps.Src.NextTokenPos(creg.St)
+			// if !ok {
+			// 	if ps.Trace.On {
+			// 		ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v ran out of tokens", ri))
+			// 	}
+			// 	return false, scope, nil
+			// }
 		}
 		if ri == nr-1 && rr.Tok.Tok == token.EOS {
 			mpos[ri] = lex.Reg{scope.Ed, scope.Ed}
@@ -783,7 +801,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	}
 
 	mreg := mpos.StartEnd()
-	ps.AddMatch(pr, scope, mpos, depth)
+	ps.AddMatch(pr, scope, mpos)
 	if ps.Trace.On {
 		ps.Trace.Out(ps, pr, Match, mreg.St, scope, parAst, fmt.Sprintf("Full Match reg: %v", mreg))
 	}
@@ -1141,6 +1159,14 @@ func (pr *Rule) DoActs(ps *State, ri int, par *Rule, ourAst, parAst *Ast) bool {
 
 // DoAct performs one action after a rule executes
 func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool {
+	if act.Act == PushStack {
+		ps.Stack.Push(act.Path)
+		return true
+	} else if act.Act == PopStack {
+		ps.Stack.Pop()
+		return true
+	}
+
 	useAst := ourAst
 	if useAst == nil {
 		useAst = parAst

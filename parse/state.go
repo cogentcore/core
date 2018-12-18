@@ -26,6 +26,7 @@ type State struct {
 	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
 	Matches    [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
 	NonMatches ScopeRuleSet   `view:"no-inline" desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
+	Stack      lex.Stack      `view:"no-inline" desc:"stack for context-sensitive rules"`
 }
 
 // Init initializes the state at start of parsing
@@ -35,6 +36,7 @@ func (ps *State) Init(src *lex.File, ast *Ast, eospos *[]lex.Pos) {
 	ps.Ast.DeleteChildren(true)
 	ps.Syms.Reset()
 	ps.Scopes.Reset()
+	ps.Stack.Reset()
 	ps.EosPos = eospos
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
 	ps.Errs.Reset()
@@ -81,16 +83,20 @@ func (ps *State) AtEof() bool {
 	if ps.Pos.Ln >= ps.Src.NLines() {
 		return true
 	}
-	sp, ok := ps.Src.ValidTokenPos(ps.Pos)
+	_, ok := ps.Src.ValidTokenPos(ps.Pos)
 	if !ok {
 		return true
 	}
-	sp, ok = ps.Src.NextTokenPos(sp)
-	if !ok {
+	return false
+}
+
+// AtEofNext returns true if current OR NEXT position is at end of file -- this includes
+// common situation where it is just at the very last token
+func (ps *State) AtEofNext() bool {
+	if ps.AtEof() {
 		return true
 	}
-	sp, ok = ps.Src.NextTokenPos(sp) // this is the last token case!
-	if !ok {
+	if ps.Pos.Ln == ps.Src.NLines()-1 {
 		return true
 	}
 	return false
@@ -262,8 +268,6 @@ type MatchState struct {
 	Rule  *Rule   `desc:"rule that either matched or ran here"`
 	Scope lex.Reg `desc:"scope for match"`
 	Regs  Matches `desc:"regions of match for each sub-region"`
-	Depth int     `desc:"parsing depth at which it matched -- matching depth is given by actual depth of stack"`
-	Ran   bool    `desc:"if false, then it is just a match at this point"`
 }
 
 // String is fmt.Stringer
@@ -271,19 +275,15 @@ func (rs MatchState) String() string {
 	if rs.Rule == nil {
 		return ""
 	}
-	rstr := "-"
-	if rs.Ran {
-		rstr = "+"
-	}
-	return fmt.Sprintf("%v%v%v+%v", rstr, rs.Rule.Name(), rs.Scope, rs.Depth)
+	return fmt.Sprintf("%v%v", rs.Rule.Name(), rs.Scope)
 }
 
 // MatchStack is the stack of rules that matched or ran for each token point
 type MatchStack []MatchState
 
 // Add given rule to stack
-func (rs *MatchStack) Add(pr *Rule, scope lex.Reg, regs Matches, depth int) {
-	*rs = append(*rs, MatchState{Rule: pr, Scope: scope, Regs: regs, Depth: depth})
+func (rs *MatchStack) Add(pr *Rule, scope lex.Reg, regs Matches) {
+	*rs = append(*rs, MatchState{Rule: pr, Scope: scope, Regs: regs})
 }
 
 // Find looks for given rule and scope on the stack
@@ -298,9 +298,9 @@ func (rs *MatchStack) Find(pr *Rule, scope lex.Reg) (*MatchState, bool) {
 }
 
 // AddMatch adds given rule to rule stack at given scope
-func (ps *State) AddMatch(pr *Rule, scope lex.Reg, regs Matches, depth int) {
+func (ps *State) AddMatch(pr *Rule, scope lex.Reg, regs Matches) {
 	rs := &ps.Matches[scope.St.Ln][scope.St.Ch]
-	rs.Add(pr, scope, regs, depth)
+	rs.Add(pr, scope, regs)
 }
 
 // IsMatch looks for rule at given scope in list of matches, if found
@@ -352,29 +352,25 @@ func (ps *State) RuleString(full bool) string {
 ///////////////////////////////////////////////////////////////////////////
 //  ScopeRuleSet and NonMatch
 
-// RuleSet is a map for representing binary presence of a rule
-type RuleSet map[*Rule]struct{}
+// ScopeRule is a scope and a rule, for storing matches / nonmatch
+type ScopeRule struct {
+	Scope lex.Reg
+	Rule  *Rule
+}
 
 // ScopeRuleSet is a map by scope of RuleSets, for non-matching rules
-type ScopeRuleSet map[lex.Reg]RuleSet
+type ScopeRuleSet map[ScopeRule]struct{}
 
 // Add a rule to scope set, with auto-alloc
 func (rs ScopeRuleSet) Add(scope lex.Reg, pr *Rule) {
-	rm, has := rs[scope]
-	if !has {
-		rm = make(RuleSet, 100)
-		rs[scope] = rm
-	}
-	rm[pr] = struct{}{}
+	sr := ScopeRule{scope, pr}
+	rs[sr] = struct{}{}
 }
 
 // Has checks if scope rule set has given scope, rule
 func (rs ScopeRuleSet) Has(scope lex.Reg, pr *Rule) bool {
-	rm, has := rs[scope]
-	if !has {
-		return false
-	}
-	_, has = rm[pr]
+	sr := ScopeRule{scope, pr}
+	_, has := rs[sr]
 	return has
 }
 
@@ -390,5 +386,5 @@ func (ps *State) IsNonMatch(scope lex.Reg, pr *Rule) bool {
 
 // ResetNonMatches resets the non-match map -- do after every EOS
 func (ps *State) ResetNonMatches() {
-	ps.NonMatches = make(ScopeRuleSet, 100)
+	ps.NonMatches = make(ScopeRuleSet)
 }

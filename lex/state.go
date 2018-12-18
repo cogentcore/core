@@ -44,7 +44,7 @@ type State struct {
 // Init initializes the state at start of parsing
 func (ls *State) Init() {
 	ls.GuestLex = nil
-	ls.Stack = nil
+	ls.Stack.Reset()
 	ls.Ln = 0
 	ls.SetLine(nil)
 	ls.SaveStack = nil

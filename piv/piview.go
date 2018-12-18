@@ -443,7 +443,7 @@ func (pv *PiView) ParseAll() {
 	updt := at.UpdateStart()
 	for {
 		mrule := pv.Parser.ParseNext(fs)
-		if mrule == nil {
+		if mrule == nil || fs.ParseState.AtEofNext() {
 			break
 		}
 	}

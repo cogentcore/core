@@ -121,7 +121,7 @@ func (fs *FileState) PassTwoErrReport() string {
 
 // ParseAtEnd returns true if parsing state is now at end of source
 func (fs *FileState) ParseAtEnd() bool {
-	return fs.ParseState.AtEof()
+	return fs.ParseState.AtEofNext()
 }
 
 // ParseNextSrcLine returns the next line of source that the parser is currently at

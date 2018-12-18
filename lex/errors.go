@@ -63,9 +63,6 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 	ssz := len(e.Src)
 	if showSrc && ssz > 0 && ssz >= e.Pos.Ch {
 		str += "<br>\n\t> "
-		if e.Pos.Ch > 30 {
-			str += e.Src[e.Pos.Ch-30 : e.Pos.Ch]
-		}
 		if ssz > e.Pos.Ch+30 {
 			str += e.Src[e.Pos.Ch : e.Pos.Ch+30]
 		} else if ssz > e.Pos.Ch {
@@ -171,6 +168,9 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	}
 	for ei := 0; ei < maxN; ei++ {
 		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
+	}
+	if ne > maxN {
+		str += fmt.Sprintf("... and %v more errors<br>\n", ne-maxN)
 	}
 	return str
 }

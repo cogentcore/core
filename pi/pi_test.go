@@ -15,9 +15,14 @@ import (
 	"github.com/goki/prof"
 )
 
-func TestParse(t *testing.T) {
+func init() {
 	LangSupport.OpenStd()
+}
+
+func TestParse(t *testing.T) {
 	lp, _ := LangSupport.Props(filecat.Go)
+	pr := lp.Lang.Parser()
+	pr.ReportErrs = true
 
 	fs := &FileState{}
 	err := fs.OpenFile("testdata/textview.go")
@@ -30,8 +35,6 @@ func TestParse(t *testing.T) {
 	lp.Lang.ParseFile(fs)
 	prdur := time.Now().Sub(stt)
 	fmt.Printf("pi parse: %v\n", prdur)
-	// todo: getting several errs here..
-	// fmt.Println(fs.ParseErrReportAll())
 
 	prof.Report(time.Millisecond)
 	prof.Profiling = false

@@ -44,3 +44,8 @@ func (ss *Stack) Clone() Stack {
 	}
 	return cl
 }
+
+// Reset stack
+func (ss *Stack) Reset() {
+	*ss = nil
+}

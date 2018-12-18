@@ -2643,6 +2643,11 @@
         "Tok": "KeywordType",
         "Key": "",
         "Depth": 0
+      },
+      {
+        "Tok": "PunctSepColon",
+        "Key": "",
+        "Depth": 0
       }
     ]
   },
@@ -2696,6 +2701,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'key:package' Name 'EOS'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": [
               {
@@ -2721,6 +2727,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'key:import' ImportN 'EOS'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": [],
             "OptTokMap": false
@@ -2733,6 +2740,7 @@
             "Off": false,
             "Desc": "same as ConstDecl",
             "Rule": "'key:const' ConstDeclN 'EOS'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -2745,6 +2753,7 @@
             "Off": false,
             "Desc": "same as TypeDecl",
             "Rule": "'key:type' TypeDeclN 'EOS'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -2757,6 +2766,7 @@
             "Off": false,
             "Desc": "same as VarDecl",
             "Rule": "'key:var' VarDeclN 'EOS'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -2769,6 +2779,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "FunDecl 'EOS'",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -2777,6 +2788,7 @@
         "Off": false,
         "Desc": "only rules in this first group are used as top-level rules -- all others must be referenced from here",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -2847,6 +2859,7 @@
                 "Off": false,
                 "Desc": "package-qualified name",
                 "Rule": "'Name' '.' 'Name'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2859,6 +2872,7 @@
                 "Off": false,
                 "Desc": "just a name without package scope",
                 "Rule": "'Name'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2867,6 +2881,7 @@
             "Off": false,
             "Desc": "name that is either a full package-qualified name or short plain name",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -2891,6 +2906,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' ',' NameList",
+                "StackMatch": "",
                 "Ast": "AnchorFirstAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2903,6 +2919,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2911,6 +2928,7 @@
             "Off": false,
             "Desc": "one or more plain names, separated by , -- for var names",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -2935,6 +2953,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr ',' ExprList",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2947,6 +2966,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2955,6 +2975,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -2979,6 +3000,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "BinaryExpr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2991,6 +3013,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "UnaryExpr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -2999,6 +3022,7 @@
             "Off": false,
             "Desc": "The full set of possible expressions",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": true
@@ -3033,6 +3057,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'+' UnaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3045,6 +3070,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'-' UnaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3057,6 +3083,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'^' UnaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3069,6 +3096,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'!' UnaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3081,6 +3109,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'*' UnaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3093,6 +3122,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'\u0026' UnaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3105,6 +3135,7 @@
                 "Off": false,
                 "Desc": "essential that this is LAST in unary list, so that distinctive first-position unary tokens match instead of more general cases in primary",
                 "Rule": "PrimaryExpr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3113,6 +3144,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -3129,6 +3161,10 @@
                 "type": "parse.Rule",
                 "name": "EqExpr",
                 "type": "parse.Rule",
+                "name": "LogOrExpr",
+                "type": "parse.Rule",
+                "name": "LogAndExpr",
+                "type": "parse.Rule",
                 "name": "GtEqExpr",
                 "type": "parse.Rule",
                 "name": "GreaterExpr",
@@ -3136,10 +3172,6 @@
                 "name": "LtEqExpr",
                 "type": "parse.Rule",
                 "name": "LessExpr",
-                "type": "parse.Rule",
-                "name": "LogOrExpr",
-                "type": "parse.Rule",
-                "name": "LogAndExpr",
                 "type": "parse.Rule",
                 "name": "BitOrExpr",
                 "type": "parse.Rule",
@@ -3169,6 +3201,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '!=' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3181,54 +3214,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '==' Expr",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "GtEqExpr",
-                "UniqueNm": "GtEqExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '\u003e=' Expr",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "GreaterExpr",
-                "UniqueNm": "GreaterExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '\u003e' Expr",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "LtEqExpr",
-                "UniqueNm": "LtEqExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '\u003c=' Expr",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "LessExpr",
-                "UniqueNm": "LessExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Expr '\u003c' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3241,6 +3227,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '||' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3253,6 +3240,59 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '\u0026\u0026' Expr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "GtEqExpr",
+                "UniqueNm": "GtEqExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '\u003e=' Expr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "GreaterExpr",
+                "UniqueNm": "GreaterExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '\u003e' Expr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LtEqExpr",
+                "UniqueNm": "LtEqExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '\u003c=' Expr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LessExpr",
+                "UniqueNm": "LessExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Expr '\u003c' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3265,6 +3305,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '|' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3277,6 +3318,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '^' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3289,6 +3331,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '\u0026' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3301,6 +3344,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '\u003e\u003e' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3313,6 +3357,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '\u003c\u003c' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3325,6 +3370,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '-' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3337,6 +3383,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '+' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3349,6 +3396,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '%' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3361,6 +3409,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "-Expr '/' Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3373,6 +3422,7 @@
                 "Off": false,
                 "Desc": "! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice",
                 "Rule": "-Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3381,6 +3431,7 @@
             "Off": false,
             "Desc": "due to top-down nature of parser, *lowest* precedence is *first* -- all rules *must* have - first = reverse order to get associativity right",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -3397,6 +3448,8 @@
                 "type": "parse.Rule",
                 "name": "CompositeLit",
                 "type": "parse.Rule",
+                "name": "FuncLitCall",
+                "type": "parse.Rule",
                 "name": "FuncLit",
                 "type": "parse.Rule",
                 "name": "ConvertBasic",
@@ -3404,8 +3457,6 @@
                 "name": "ConvertParens",
                 "type": "parse.Rule",
                 "name": "Convert",
-                "type": "parse.Rule",
-                "name": "Slice",
                 "type": "parse.Rule",
                 "name": "ParenExpr",
                 "type": "parse.Rule",
@@ -3417,11 +3468,11 @@
                 "type": "parse.Rule",
                 "name": "Selector",
                 "type": "parse.Rule",
+                "name": "Slice",
+                "type": "parse.Rule",
                 "name": "MethCall",
                 "type": "parse.Rule",
                 "name": "FuncCall",
-                "type": "parse.Rule",
-                "name": "TypeMethCall",
                 "type": "parse.Rule",
                 "name": "OpName"
               },
@@ -3433,6 +3484,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "BasicLiteral",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3444,7 +3496,21 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed?",
-                "Rule": "@LiteralType '{' ?ElementList '}'",
+                "Rule": "@LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "FuncLitCall",
+                "UniqueNm": "FuncLitCall",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:func' Signature '{' ?BlockListInline '}' '(' ?ArgsExpr ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3456,7 +3522,8 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:func' Signature '{' ?BlockList '}'",
+                "Rule": "'key:func' Signature '{' ?BlockList '}' ?PrimaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3469,6 +3536,7 @@
                 "Off": false,
                 "Desc": "only works with basic builtin types -- others will get taken by FunCall",
                 "Rule": "@BasicType '(' Expr ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3481,6 +3549,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' @Type ')' '(' Expr ?',' ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3493,19 +3562,8 @@
                 "Off": false,
                 "Desc": "note: a regular type(expr) will be a FunCall",
                 "Rule": "@TypeLiteral '(' Expr ?',' ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "Slice",
-                "UniqueNm": "Slice",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "this needs further right recursion to keep matching more slices",
-                "Rule": "?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr",
-                "Ast": "SubAst",
                 "Acts": null,
                 "OptTokMap": false
               },
@@ -3516,7 +3574,8 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'(' Expr ')'",
+                "Rule": "'(' Expr ')' ?PrimaryExpr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3529,6 +3588,7 @@
                 "Off": false,
                 "Desc": "must be before FunCall to get . match",
                 "Rule": "PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3541,6 +3601,7 @@
                 "Off": false,
                 "Desc": "takes type arg",
                 "Rule": "'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3553,6 +3614,7 @@
                 "Off": false,
                 "Desc": "takes type arg",
                 "Rule": "'key:new' '(' Type ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3565,6 +3627,7 @@
                 "Off": false,
                 "Desc": "This must be after unary expr esp addr, DePtr",
                 "Rule": "PrimaryExpr '.' PrimaryExpr",
+                "StackMatch": "",
                 "Ast": "SubAst",
                 "Acts": [
                   {
@@ -3577,6 +3640,19 @@
                 "OptTokMap": false
               },
               {
+                "Nm": "Slice",
+                "UniqueNm": "Slice",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "this needs further right recursion to keep matching more slices",
+                "Rule": "?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr",
+                "StackMatch": "",
+                "Ast": "SubAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
                 "Nm": "MethCall",
                 "UniqueNm": "MethCall",
                 "Props": null,
@@ -3584,6 +3660,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "?PrimaryExpr '.' Name '(' ?ArgsExpr ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -3603,6 +3680,7 @@
                 "Off": false,
                 "Desc": "must be after parens",
                 "Rule": "PrimaryExpr '(' ?ArgsExpr ')'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -3615,20 +3693,6 @@
                 "OptTokMap": false
               },
               {
-                "Nm": "TypeMethCall",
-                "UniqueNm": "TypeMethCall",
-                "Props": {
-                  "inactive": true
-                },
-                "Kids": null,
-                "Off": true,
-                "Desc": "don't think this is needed.. todo: test more",
-                "Rule": "@RecvType '.' Name '(' ?ArgsExpr ')'",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
                 "Nm": "OpName",
                 "UniqueNm": "OpName",
                 "Props": null,
@@ -3636,6 +3700,7 @@
                 "Off": false,
                 "Desc": "this is the least selective and must be at the end",
                 "Rule": "FullName",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3644,6 +3709,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -3674,6 +3740,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'LitNumInteger'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3686,6 +3753,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'LitNumFloat'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3698,6 +3766,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'LitNumImag'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3710,6 +3779,7 @@
                 "Off": false,
                 "Desc": "rune",
                 "Rule": "'LitStrSingle'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3722,6 +3792,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'LitStr'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3730,6 +3801,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -3740,13 +3812,15 @@
             "Props": null,
             "Kids": [
               {
-                "n": 7,
+                "n": 8,
                 "type": "parse.Rule",
                 "name": "LitStructType",
                 "type": "parse.Rule",
                 "name": "LitIFaceType",
                 "type": "parse.Rule",
                 "name": "LitSliceType",
+                "type": "parse.Rule",
+                "name": "LitArrayAutoType",
                 "type": "parse.Rule",
                 "name": "LitArrayType",
                 "type": "parse.Rule",
@@ -3764,6 +3838,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "StructType",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3776,6 +3851,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:interface' '{' '}'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3788,6 +3864,20 @@
                 "Off": false,
                 "Desc": "slice must come before array",
                 "Rule": "SliceType",
+                "StackMatch": "",
+                "Ast": "NoAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "LitArrayAutoType",
+                "UniqueNm": "LitArrayAutoType",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "ArrayAutoType",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3800,6 +3890,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ArrayType",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3812,6 +3903,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'[' '...' ']' Type",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3824,6 +3916,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "MapType",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3836,6 +3929,7 @@
                 "Off": false,
                 "Desc": "this is very general, must be at end..",
                 "Rule": "TypeName",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3844,6 +3938,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -3855,7 +3950,8 @@
             "Kids": null,
             "Off": false,
             "Desc": "",
-            "Rule": "'{' ElementList '}' 'EOS'",
+            "Rule": "'{' ElementList ?'EOS' '}' 'EOS'",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -3866,13 +3962,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 3,
+                "n": 2,
                 "type": "parse.Rule",
                 "name": "ElementListEls",
                 "type": "parse.Rule",
-                "name": "KeyedEl",
-                "type": "parse.Rule",
-                "name": "NoEl"
+                "name": "KeyedEl"
               },
               {
                 "Nm": "ElementListEls",
@@ -3882,6 +3976,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "KeyedEl ',' ?ElementList",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3892,13 +3987,11 @@
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 3,
+                    "n": 2,
                     "type": "parse.Rule",
                     "name": "KeyEl",
                     "type": "parse.Rule",
-                    "name": "Element",
-                    "type": "parse.Rule",
-                    "name": "KeyNoEl"
+                    "name": "Element"
                   },
                   {
                     "Nm": "KeyEl",
@@ -3908,6 +4001,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "Key ':' Element",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
                     "OptTokMap": false
@@ -3932,6 +4026,7 @@
                         "Off": false,
                         "Desc": "",
                         "Rule": "Expr",
+                        "StackMatch": "",
                         "Ast": "NoAst",
                         "Acts": null,
                         "OptTokMap": false
@@ -3944,6 +4039,7 @@
                         "Off": false,
                         "Desc": "",
                         "Rule": "LiteralValue",
+                        "StackMatch": "",
                         "Ast": "NoAst",
                         "Acts": null,
                         "OptTokMap": false
@@ -3952,18 +4048,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "",
-                    "Ast": "NoAst",
-                    "Acts": null,
-                    "OptTokMap": false
-                  },
-                  {
-                    "Nm": "KeyNoEl",
-                    "UniqueNm": "KeyNoEl",
-                    "Props": null,
-                    "Kids": null,
-                    "Off": false,
-                    "Desc": "can have EOS's from inline }",
-                    "Rule": "'EOS'",
+                    "StackMatch": "",
                     "Ast": "NoAst",
                     "Acts": null,
                     "OptTokMap": false
@@ -3972,18 +4057,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "NoEl",
-                "UniqueNm": "NoEl",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "can have EOS's from inline }",
-                "Rule": "'EOS'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -3992,6 +4066,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -4002,25 +4077,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 3,
-                "type": "parse.Rule",
-                "name": "KeyName",
+                "n": 2,
                 "type": "parse.Rule",
                 "name": "KeyLitVal",
                 "type": "parse.Rule",
                 "name": "KeyExpr"
-              },
-              {
-                "Nm": "KeyName",
-                "UniqueNm": "KeyName",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'Name'",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false
               },
               {
                 "Nm": "KeyLitVal",
@@ -4030,6 +4091,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "LiteralValue",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4042,6 +4104,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4050,6 +4113,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -4076,6 +4140,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' '*' TypeName ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4088,6 +4153,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' RecvType ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4100,6 +4166,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "TypeName",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4108,6 +4175,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4132,6 +4200,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Name '.' Selectors",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4144,6 +4213,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Name",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4152,6 +4222,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4164,6 +4235,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'[' SliceExpr ']' ?SubSlice",
+            "StackMatch": "",
             "Ast": "SubAst",
             "Acts": null,
             "OptTokMap": false
@@ -4190,6 +4262,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "?SliceIdx1 ':' SliceIdx2 ':' SliceIdx3",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4202,6 +4275,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "?SliceIdx1 ':' ?SliceIdx2",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4214,6 +4288,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4222,6 +4297,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4248,6 +4324,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4260,6 +4337,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4272,6 +4350,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4280,6 +4359,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4304,6 +4384,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ArgsList '...'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4316,6 +4397,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ArgsList",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4324,6 +4406,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4348,6 +4431,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr ',' ArgsList",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4360,6 +4444,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": [],
                 "OptTokMap": false
@@ -4368,6 +4453,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4376,6 +4462,7 @@
         "Off": false,
         "Desc": "many different rules here that go into expressions etc",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -4430,6 +4517,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' @Type ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4442,6 +4530,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "TypeLiteral",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4454,6 +4543,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "TypeName",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4462,6 +4552,7 @@
             "Off": false,
             "Desc": "type specifies a type either as a type name or type expression",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4488,6 +4579,7 @@
                 "Off": false,
                 "Desc": "recognizes builtin types",
                 "Rule": "'KeywordType'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4500,6 +4592,7 @@
                 "Off": false,
                 "Desc": "type equivalent to QualName",
                 "Rule": "'Name' '.' 'Name'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": [
                   {
@@ -4519,6 +4612,7 @@
                 "Off": false,
                 "Desc": "local unqualified type name",
                 "Rule": "'Name'",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": [
                   {
@@ -4534,6 +4628,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4558,6 +4653,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'*' TypeName",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4570,6 +4666,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "TypeName",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4578,6 +4675,7 @@
             "Off": false,
             "Desc": "regular type name or pointer to type name",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4588,9 +4686,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 8,
+                "n": 9,
                 "type": "parse.Rule",
                 "name": "SliceType",
+                "type": "parse.Rule",
+                "name": "ArrayAutoType",
                 "type": "parse.Rule",
                 "name": "ArrayType",
                 "type": "parse.Rule",
@@ -4614,6 +4714,33 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'[' ']' @Type",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "../Name",
+                    "Tok": "NameArray"
+                  },
+                  {
+                    "RunIdx": 0,
+                    "Act": "AddSymbol",
+                    "Path": "../Name",
+                    "Tok": "NameArray"
+                  }
+                ],
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ArrayAutoType",
+                "UniqueNm": "ArrayAutoType",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "array must be after slice b/c slice matches on sequence of tokens",
+                "Rule": "'[' '...' ']' @Type",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -4639,6 +4766,7 @@
                 "Off": false,
                 "Desc": "array must be after slice b/c slice matches on sequence of tokens",
                 "Rule": "'[' Expr ']' @Type",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -4664,6 +4792,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:struct' '{' ?FieldDecls '}' ?'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -4695,6 +4824,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'*' @Type",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4707,6 +4837,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:func' @Signature",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4719,6 +4850,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:interface' '{' ?MethodSpecs '}'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4731,6 +4863,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:map' '[' @Type ']' @Type",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -4770,6 +4903,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "'key:chan' '\u003c-' @Type",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
                     "OptTokMap": false
@@ -4782,6 +4916,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "'\u003c-' 'key:chan' @Type",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
                     "OptTokMap": false
@@ -4794,6 +4929,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "'key:chan' @Type",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
                     "OptTokMap": false
@@ -4802,6 +4938,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4810,6 +4947,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4822,6 +4960,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "FieldDecl ?FieldDecls",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4848,6 +4987,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' '.' 'Name' ?FieldTag 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -4867,6 +5007,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "NameList ?Type ?FieldTag 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -4892,6 +5033,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'EOS'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": [],
                 "OptTokMap": false
@@ -4900,6 +5042,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4912,6 +5055,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'LitStr'",
+            "StackMatch": "",
             "Ast": "AddAst",
             "Acts": null,
             "OptTokMap": false
@@ -4936,6 +5080,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' TypeDecls ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4948,6 +5093,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Name Type 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -4956,6 +5102,7 @@
             "Off": false,
             "Desc": "N = switch between 1 or multi",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4968,6 +5115,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "TypeDeclEl ?TypeDecls",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -4992,6 +5140,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Type ',' TypeList",
+                "StackMatch": "",
                 "Ast": "AnchorFirstAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5004,6 +5153,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Type",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5012,6 +5162,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5020,6 +5171,7 @@
         "Off": false,
         "Desc": "",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -5070,6 +5222,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -5113,6 +5266,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:func' Name Signature ?Block 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -5146,6 +5300,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5158,6 +5313,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "Name Type",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": [
               {
@@ -5177,6 +5333,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "Params ?Result",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -5201,6 +5358,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' '.' 'Name' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5213,6 +5371,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' Params ?Result 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5221,6 +5380,7 @@
             "Off": false,
             "Desc": "for interfaces only -- interface methods",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5233,6 +5393,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "MethodSpec ?MethodSpecs",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5257,6 +5418,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' ParamsList ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5269,6 +5431,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Type",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5277,6 +5440,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -5299,6 +5463,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "?NameList '...' Type",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5307,6 +5472,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5317,13 +5483,15 @@
             "Props": null,
             "Kids": [
               {
-                "n": 3,
+                "n": 4,
                 "type": "parse.Rule",
                 "name": "ParName",
                 "type": "parse.Rule",
+                "name": "ParType",
+                "type": "parse.Rule",
                 "name": "ParNames",
                 "type": "parse.Rule",
-                "name": "ParType"
+                "name": "ParTypeOld"
               },
               {
                 "Nm": "ParName",
@@ -5333,18 +5501,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "@Name @Type ?',' ?ParamsList",
-                "Ast": "SubAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "ParNames",
-                "UniqueNm": "ParNames",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
-                "Rule": "Name ',' @NameList @Type ?',' ?ParamsList",
+                "StackMatch": "",
                 "Ast": "SubAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5357,6 +5514,35 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "@Type ?',' ?ParamsList",
+                "StackMatch": "",
+                "Ast": "SubAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ParNames",
+                "UniqueNm": "ParNames",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
+                "Rule": "Name ',' @NameList @Type ?',' ?ParamsList",
+                "StackMatch": "",
+                "Ast": "SubAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ParTypeOld",
+                "UniqueNm": "ParTypeOld",
+                "Props": {
+                  "inactive": true
+                },
+                "Kids": null,
+                "Off": true,
+                "Desc": "",
+                "Rule": "@Type ?',' ?ParamsList",
+                "StackMatch": "",
                 "Ast": "SubAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5365,6 +5551,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5377,6 +5564,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'(' ?ParamsList ')'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -5385,6 +5573,7 @@
         "Off": false,
         "Desc": "",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -5395,11 +5584,13 @@
         "Props": null,
         "Kids": [
           {
-            "n": 7,
+            "n": 8,
             "type": "parse.Rule",
             "name": "StmtList",
             "type": "parse.Rule",
             "name": "BlockList",
+            "type": "parse.Rule",
+            "name": "BlockListInline",
             "type": "parse.Rule",
             "name": "Stmt",
             "type": "parse.Rule",
@@ -5419,6 +5610,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "Stmt 'EOS' ?StmtList",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5430,7 +5622,21 @@
             "Kids": null,
             "Off": false,
             "Desc": "",
-            "Rule": "StmtList",
+            "Rule": "Stmt 'EOS' ?BlockList",
+            "StackMatch": "",
+            "Ast": "AnchorAst",
+            "Acts": null,
+            "OptTokMap": false
+          },
+          {
+            "Nm": "BlockListInline",
+            "UniqueNm": "BlockListInline",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Rule": "Stmt ?'EOS' ?BlockListInline",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -5441,7 +5647,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 29,
+                "n": 31,
                 "type": "parse.Rule",
                 "name": "ConstDeclStmt",
                 "type": "parse.Rule",
@@ -5471,21 +5677,25 @@
                 "type": "parse.Rule",
                 "name": "ForExpr",
                 "type": "parse.Rule",
-                "name": "SwitchExpr",
+                "name": "LabeledStmt",
                 "type": "parse.Rule",
                 "name": "SwitchTypeName",
                 "type": "parse.Rule",
                 "name": "SwitchTypeAnon",
                 "type": "parse.Rule",
-                "name": "CaseStmt",
+                "name": "SwitchExpr",
+                "type": "parse.Rule",
+                "name": "TypeCaseEmptyStmt",
                 "type": "parse.Rule",
                 "name": "TypeCaseStmt",
+                "type": "parse.Rule",
+                "name": "CaseEmptyStmt",
+                "type": "parse.Rule",
+                "name": "CaseStmt",
                 "type": "parse.Rule",
                 "name": "SelCaseStmt",
                 "type": "parse.Rule",
                 "name": "DefaultStmt",
-                "type": "parse.Rule",
-                "name": "LabeledStmt",
                 "type": "parse.Rule",
                 "name": "ForClauseStmt",
                 "type": "parse.Rule",
@@ -5509,6 +5719,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ConstDecl",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5521,6 +5732,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "TypeDecl",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5533,6 +5745,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "VarDecl",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5545,6 +5758,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:return' ?ExprList 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5557,6 +5771,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:break' ?Name 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5569,6 +5784,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:continue' ?Name 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5581,6 +5797,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:goto' Name 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5593,6 +5810,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:go' Expr 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5605,6 +5823,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:fallthrough' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5617,6 +5836,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:defer' Expr 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5629,6 +5849,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5641,6 +5862,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5653,6 +5875,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -5672,18 +5895,20 @@
                 "Off": false,
                 "Desc": "most general at end",
                 "Rule": "'key:for' ?Expr '{' ?BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
               },
               {
-                "Nm": "SwitchExpr",
-                "UniqueNm": "SwitchExpr",
+                "Nm": "LabeledStmt",
+                "UniqueNm": "LabeledStmt",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:switch' ?Expr '{' BlockList '}' 'EOS'",
+                "Rule": "@Name ':' ?Stmt",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5695,9 +5920,23 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "PushStack",
+                    "Path": "SwitchType",
+                    "Tok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopStack",
+                    "Path": "",
+                    "Tok": "None"
+                  }
+                ],
                 "OptTokMap": false
               },
               {
@@ -5707,19 +5946,47 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:switch' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "Rule": "'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "PushStack",
+                    "Path": "SwitchType",
+                    "Tok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopStack",
+                    "Path": "",
+                    "Tok": "None"
+                  }
+                ],
+                "OptTokMap": false
+              },
+              {
+                "Nm": "SwitchExpr",
+                "UniqueNm": "SwitchExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:switch' ?Expr '{' BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
               },
               {
-                "Nm": "CaseStmt",
-                "UniqueNm": "CaseStmt",
+                "Nm": "TypeCaseEmptyStmt",
+                "UniqueNm": "TypeCaseEmptyStmt",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' ExprList ':' ?Stmt",
+                "Rule": "'key:case' @TypeList ':' 'EOS'",
+                "StackMatch": "SwitchType",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5731,7 +5998,34 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' TypeList ':' ?Stmt",
+                "Rule": "'key:case' @TypeList ':' Stmt",
+                "StackMatch": "SwitchType",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "CaseEmptyStmt",
+                "UniqueNm": "CaseEmptyStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                "Rule": "'key:case' ExprList ':' 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "CaseStmt",
+                "UniqueNm": "CaseStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                "Rule": "'key:case' ExprList ':' Stmt",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5744,6 +6038,7 @@
                 "Off": false,
                 "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
                 "Rule": "'key:case' CommStmt 'EOS' ?Stmt",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5756,18 +6051,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:default' ':' ?Stmt",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false
-              },
-              {
-                "Nm": "LabeledStmt",
-                "UniqueNm": "LabeledStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Name ':' Stmt",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5780,6 +6064,7 @@
                 "Off": false,
                 "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
                 "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5792,6 +6077,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5804,6 +6090,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5816,6 +6103,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5828,6 +6116,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5840,6 +6129,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'{' ?StmtList '}' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5852,6 +6142,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "SimpleStmt",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5860,6 +6151,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5889,7 +6181,8 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "Expr '\u003c-' Expr 'EOS'",
+                "Rule": "?Expr '\u003c-' Expr 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5902,6 +6195,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '++' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5914,6 +6208,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr '--' 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5926,6 +6221,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Asgn",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5938,6 +6234,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "Expr 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -5946,6 +6243,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -5974,6 +6272,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ExprList '=' ExprList 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -5993,6 +6292,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ExprList ':=' ExprList 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -6012,6 +6312,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ExprList 'OpMathAsgn' ExprList 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -6031,6 +6332,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ExprList 'OpBitAsgn' ExprList 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
                   {
@@ -6046,6 +6348,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6056,11 +6359,13 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
                 "type": "parse.Rule",
                 "name": "ElseIfStmt",
                 "type": "parse.Rule",
-                "name": "ElseStmt"
+                "name": "ElseStmt",
+                "type": "parse.Rule",
+                "name": "ElseIfStmtInit"
               },
               {
                 "Nm": "ElseIfStmt",
@@ -6070,6 +6375,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6082,6 +6388,20 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:else' '{' ?BlockList '}' 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false
+              },
+              {
+                "Nm": "ElseIfStmtInit",
+                "UniqueNm": "ElseIfStmtInit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:else' 'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6090,6 +6410,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6116,6 +6437,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "SendStmt",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6128,6 +6450,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "ExprList '=' Expr 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6140,6 +6463,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "NameList ':=' Expr 'EOS'",
+                "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6148,6 +6472,7 @@
             "Off": false,
             "Desc": "communication stmt: send or recv",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6156,6 +6481,7 @@
         "Off": false,
         "Desc": "",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -6192,6 +6518,7 @@
                 "Off": false,
                 "Desc": "group of multiple imports",
                 "Rule": "'(' ImportList ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6204,6 +6531,7 @@
                 "Off": false,
                 "Desc": "single import -- ImportList also allows diff options",
                 "Rule": "ImportList",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6212,6 +6540,7 @@
             "Off": false,
             "Desc": "N = number switch (One vs. Group)",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6236,6 +6565,7 @@
                 "Off": false,
                 "Desc": "put more specialized rules first",
                 "Rule": "'Name' 'LitStr' ?'EOS' ?ImportList",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": [
                   {
@@ -6255,6 +6585,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'LitStr' ?'EOS' ?ImportList",
+                "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": [
                   {
@@ -6276,6 +6607,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6284,6 +6616,7 @@
         "Off": false,
         "Desc": "",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -6318,6 +6651,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'key:type' TypeDeclN 'EOS'",
+            "StackMatch": "",
             "Ast": "AnchorAst",
             "Acts": null,
             "OptTokMap": false
@@ -6330,6 +6664,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'key:const' ConstDeclN 'EOS'",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6342,6 +6677,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "'key:var' VarDeclN 'EOS'",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6366,6 +6702,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' ConstList ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6390,6 +6727,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "NameList ?Type '=' Expr 'EOS'",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
@@ -6415,6 +6753,7 @@
                     "Off": false,
                     "Desc": "only a name, no expression",
                     "Rule": "NameList 'EOS'",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
@@ -6436,6 +6775,7 @@
                 "Off": false,
                 "Desc": "different types of const expressions",
                 "Rule": "",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6444,6 +6784,7 @@
             "Off": false,
             "Desc": "N = switch between 1 or group",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6456,6 +6797,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "ConstOpts ?ConstList",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6480,6 +6822,7 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'(' VarList ')'",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6504,6 +6847,7 @@
                     "Off": false,
                     "Desc": "",
                     "Rule": "NameList ?Type '=' Expr 'EOS'",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
@@ -6529,6 +6873,7 @@
                     "Off": false,
                     "Desc": "only a name and type, no expression",
                     "Rule": "NameList Type 'EOS'",
+                    "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": [
                       {
@@ -6550,6 +6895,7 @@
                 "Off": false,
                 "Desc": "different types of var expressions",
                 "Rule": "",
+                "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false
@@ -6558,6 +6904,7 @@
             "Off": false,
             "Desc": "N = switch between 1 or group",
             "Rule": "",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6570,6 +6917,7 @@
             "Off": false,
             "Desc": "",
             "Rule": "VarOpts ?VarList",
+            "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false
@@ -6578,6 +6926,7 @@
         "Off": false,
         "Desc": "",
         "Rule": "",
+        "StackMatch": "",
         "Ast": "NoAst",
         "Acts": null,
         "OptTokMap": false
@@ -6586,9 +6935,11 @@
     "Off": false,
     "Desc": "",
     "Rule": "",
+    "StackMatch": "",
     "Ast": "NoAst",
     "Acts": null,
     "OptTokMap": false
   },
-  "Filename": ""
+  "Filename": "",
+  "ReportErrs": false
 }
