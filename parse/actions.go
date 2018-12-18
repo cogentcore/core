@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
 
@@ -65,11 +66,28 @@ type Act struct {
 	Act    Actions      `desc:"what action to perform"`
 	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options; ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack"`
 	Tok    token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
+	FmTok  token.Tokens `desc:"for ChgToken, only change if token is this to start with (only if != None))"`
 }
 
 // String satisfies fmt.Stringer interface
 func (ac Act) String() string {
-	return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIdx, ac.Act, ac.Path, ac.Tok)
+	if ac.FmTok != token.None {
+		return fmt.Sprintf(`%v:%v:"%v":%v<-%v`, ac.RunIdx, ac.Act, ac.Path, ac.Tok, ac.FmTok)
+	} else {
+		return fmt.Sprintf(`%v:%v:"%v":%v`, ac.RunIdx, ac.Act, ac.Path, ac.Tok)
+	}
+}
+
+// ChgTok changes the token type, using FmTok logic
+func (ac *Act) ChgTok(lx *lex.Lex) {
+	if ac.FmTok == token.None {
+		lx.Tok.Tok = ac.Tok
+		return
+	}
+	if lx.Tok.Tok != ac.FmTok {
+		return
+	}
+	lx.Tok.Tok = ac.Tok
 }
 
 // Acts are multiple actions

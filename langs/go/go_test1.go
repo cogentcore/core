@@ -6,7 +6,47 @@ license that can be found in the LICENSE file. */
 
 package main
 
-func (ft FileTime) String() string {
+
+func adkf() {
+	for range sr.Text {
+		if unicode.IsSpace(sr.Text[0]) {
+		}
+	}
+}
+
+var StyleValueTypes = map[reflect.Type]struct{}{
+	units.KiT_Value: {Key: "value"},
+	KiT_Color:       {},
+	KiT_ColorSpec:   {},
+	KiT_Matrix2D:    {},
+}
+
+func extfun() {
+	rs.Raster.SetStroke(
+		Float32ToFixed(pc.StrokeWidth(rs)),
+		Float32ToFixed(pc.StrokeStyle.MiterLimit),
+		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
+		dash, 0	)
+	rs.Scanner.SetClip(rs.Bounds)
+}
+
+func (w *Window) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
+	ke := key.ChordEvent{}
+	ke.SetTime()
+	ke.SetModifiers(mods...)
+	ke.Rune = r
+	ke.Action = key.Press
+	w.SendEventSignal(&ke, popup)
+}
+
+func (fl *FontLib) InitFontPaths(paths ...string) {
+	if len(fl.FontPaths) > 0 {
+		return
+	}
+	fl.AddFontPaths(paths...)
+}
+
+func (ft FileTime) String(reg string, pars int) string {
 	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
 }
 
@@ -171,7 +211,6 @@ var PiViewProps = ki.Props{
 
 import "github.com/goki/gi/gi"
 
-/*
 import (
 	gi "github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -181,6 +220,7 @@ import (
 	"github.com/goki/pi/piv"
 )
 
+/*
 var av1, av2 int
 
 type Pvsi struct {

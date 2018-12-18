@@ -1272,7 +1272,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		cp := ast.TokReg.St
 		for cp.IsLess(ast.TokReg.Ed) {
 			tlx := ps.Src.LexAt(cp)
-			tlx.Tok.Tok = act.Tok
+			act.ChgTok(tlx)
 			cp, _ = ps.Src.NextTokenPos(cp)
 		}
 		if len(adnl) > 0 {
@@ -1281,7 +1281,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 				cp := nast.TokReg.St
 				for cp.IsLess(nast.TokReg.Ed) {
 					tlx := ps.Src.LexAt(cp)
-					tlx.Tok.Tok = act.Tok
+					act.ChgTok(tlx)
 					cp, _ = ps.Src.NextTokenPos(cp)
 				}
 			}

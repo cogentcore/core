@@ -69,6 +69,10 @@ Letter:		 None		 if Letter {
         complex64:        KeywordType       if StrName == "complex64"    do: Name; 
         complex128:       KeywordType       if StrName == "complex128"   do: Name; 
     }
+    Builtins:       None       if String == "" {
+        true:        NameBuiltin       if StrName == "true"    do: Name; 
+        false:       NameBuiltin       if StrName == "false"   do: Name; 
+    }
     Name:       Name       if Letter   do: Name; 
 }
 Number:		 LitNum		 if Digit	 do: Number; 
@@ -294,6 +298,7 @@ ExprRules {
         KeyedEl {
             KeyEl:  Key ':' Element  >Ast
             Element {
+                EmptyEl:   '{' '}'       _Ast
                 ElExpr:    Expr          
                 ElLitVal:  LiteralValue  
             }
@@ -398,9 +403,9 @@ TypeRules {
 FuncRules {
     FunDecl {
         MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
-        Acts:{ 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"Signature":None; -1:PopScope:"":None; -1:PopScope:"":None; }
+        Acts:{ 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"SigParams|SigParamsResult":None; -1:PopScope:"":None; -1:PopScope:"":None; }
         FuncDecl:  'key:func' Name Signature ?Block 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"Signature":None; -1:PopScope:"":None; }
+        Acts:{ -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"SigParams|SigParamsResult":None; -1:PopScope:"":None; }
     }
     MethRecv:  Name Type  >Ast
     Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
@@ -420,12 +425,10 @@ FuncRules {
         Results:    '(' ParamsList ')'  
         ResultOne:  Type                
     }
-    Param {
-        ParamNameEllipsis:  ?NameList '...' Type  
-    }
     ParamsList {
-        ParName:  @Name @Type ?',' ?ParamsList  _Ast
-        ParType:  @Type ?',' ?ParamsList        _Ast
+        ParNameEllipsis:  ?ParamsList ?',' ?NameList '...' @Type  >Ast
+        ParName:          @Name @Type ?',' ?ParamsList            _Ast
+        ParType:          @Type ?',' ?ParamsList                  _Ast
         // ParNames need the explicit ',' in here to absorb so later one goes to paramslist 
         ParNames:  Name ',' @NameList @Type ?',' ?ParamsList  _Ast
     }
@@ -448,6 +451,8 @@ StmtRules {
         IfStmtExpr:        'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                      >Ast
         ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
         ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"NameListEls":NameVar; }
+        ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
         Acts:{ -1:ChgToken:"NameListEls":NameVar; }
         // ForExpr most general at end 
         ForExpr:         'key:for' ?Expr '{' ?BlockList '}' 'EOS'                                             >Ast
@@ -486,13 +491,13 @@ StmtRules {
     }
     Asgn {
         AsgnExisting:  ExprList '=' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
         AsgnNew:  ExprList ':=' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
         AsgnMath:  ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
         AsgnBit:  ExprList 'OpBitAsgn' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar; }
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
     }
     Elses {
         ElseIfStmt:      'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                   >Ast
@@ -517,7 +522,7 @@ ImportRules {
     ImportList {
         // ImportAlias put more specialized rules first 
         ImportAlias:  'Name' 'LitStr' ?'EOS' ?ImportList  +Ast
-        Acts:{ -1:AddSymbol:"":NameLibrary; }
+        Acts:{ -1:AddSymbol:"":NameLibrary; -1:ChgToken:"":NameLibrary; }
         Import:  'LitStr' ?'EOS' ?ImportList  +Ast
         Acts:{ -1:AddSymbol:"":NameLibrary; -1:ChgToken:"":NameLibrary; }
     }
