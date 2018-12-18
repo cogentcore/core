@@ -10,7 +10,6 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
-	"github.com/goki/prof"
 )
 
 // parse.State is the state maintained for parsing
@@ -21,7 +20,6 @@ type State struct {
 	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
 	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
 	ExtScopes  syms.SymMap    `desc:"externally-added scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part"`
-	EosPos     *[]lex.Pos     `desc:"positions *in token coordinates* of the EOS markers from PassTwo"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
 	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
 	Matches    [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
@@ -30,14 +28,13 @@ type State struct {
 }
 
 // Init initializes the state at start of parsing
-func (ps *State) Init(src *lex.File, ast *Ast, eospos *[]lex.Pos) {
+func (ps *State) Init(src *lex.File, ast *Ast) {
 	ps.Src = src
 	ps.Ast = ast
 	ps.Ast.DeleteChildren(true)
 	ps.Syms.Reset()
 	ps.Scopes.Reset()
 	ps.Stack.Reset()
-	ps.EosPos = eospos
 	ps.Pos, _ = ps.Src.ValidTokenPos(lex.PosZero)
 	ps.Errs.Reset()
 	ps.Trace.Init()
@@ -129,24 +126,24 @@ func (ps *State) NextSrcLine() string {
 
 // MatchLex is our optimized matcher method, matching tkey depth as well
 func (ps *State) MatchLex(lx *lex.Lex, tkey token.KeyToken, isCat, isSubCat bool, cp lex.Pos) bool {
-	if lx.Depth != tkey.Depth {
+	if lx.Tok.Depth != tkey.Depth {
 		return false
 	}
-	if !(lx.Tok == tkey.Tok || (isCat && lx.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Tok.SubCat() == tkey.Tok)) {
+	if !(lx.Tok.Tok == tkey.Tok || (isCat && lx.Tok.Tok.Cat() == tkey.Tok) || (isSubCat && lx.Tok.Tok.SubCat() == tkey.Tok)) {
 		return false
 	}
 	if tkey.Key == "" {
 		return true
 	}
-	return tkey.Key == string(ps.Src.TokenSrc(cp))
+	return tkey.Key == lx.Tok.Key
 }
 
 // FindToken looks for token in given region, returns position where found, false if not.
 // Only matches when depth is same as at reg.St start at the start of the search.
 // All positions in token indexes.
 func (ps *State) FindToken(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
-	prf := prof.Start("FindToken")
-	defer prf.End()
+	// prf := prof.Start("FindToken")
+	// defer prf.End()
 	cp, ok := ps.Src.ValidTokenPos(reg.St)
 	if !ok {
 		return cp, false
@@ -174,7 +171,7 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 	isCat := tok.Cat() == tok
 	isSubCat := tok.SubCat() == tok
 	lx := ps.Src.LexAt(pos)
-	tkey.Depth = lx.Depth
+	tkey.Depth = lx.Tok.Depth
 	return ps.MatchLex(lx, tkey, isCat, isSubCat, pos)
 }
 
@@ -185,8 +182,8 @@ func (ps *State) MatchToken(tkey token.KeyToken, pos lex.Pos) bool {
 // binary operator expressions (mathematical binary operators).
 // All positions are in token indexes.
 func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bool) {
-	prf := prof.Start("FindTokenReverse")
-	defer prf.End()
+	// prf := prof.Start("FindTokenReverse")
+	// defer prf.End()
 	cp, ok := ps.Src.PrevTokenPos(reg.Ed)
 	if !ok {
 		return cp, false
@@ -202,7 +199,7 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 				pp, ok := ps.Src.PrevTokenPos(cp)
 				if ok {
 					pt := ps.Src.Token(pp)
-					if !pt.IsAmbigUnaryOp() {
+					if !pt.Tok.IsAmbigUnaryOp() {
 						return cp, true
 					}
 					// otherwise we don't match -- cannot match second opr
@@ -222,40 +219,17 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 	return cp, false
 }
 
-// FindEos finds the next EOS position at given depth
-func (ps *State) FindEos(stpos lex.Pos, depth int) (lex.Pos, int) {
-	prf := prof.Start("FindEos")
-	defer prf.End()
-	sz := len(*ps.EosPos)
-	for i := 0; i < sz; i++ {
-		ep := (*ps.EosPos)[i]
-		if ep.IsLess(stpos) {
-			continue
-		}
-		lx := ps.Src.LexAt(ep)
-		if lx.Depth == depth {
-			return ep, i
-		}
-	}
-	return lex.Pos{}, -1
-}
-
-// FindAnyEos finds the next EOS at any depth
-func (ps *State) FindAnyEos(stpos lex.Pos) (lex.Pos, int) {
-	sz := len(*ps.EosPos)
-	for i := 0; i < sz; i++ {
-		ep := (*ps.EosPos)[i]
-		if ep.IsLess(stpos) {
-			continue
-		}
-		return ep, i
-	}
-	return lex.Pos{}, -1
-}
-
 // AddAst adds a child Ast node to given parent Ast node
 func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
-	chAst := parAst.AddNewChild(KiT_Ast, rule).(*Ast)
+	var chAst *Ast
+	if !GuiActive {
+		chAst = &Ast{}
+		chAst.InitName(chAst, rule)
+		chAst.UniqueNm = rule
+		parAst.AddChildFast(chAst)
+	} else {
+		chAst = parAst.AddNewChild(KiT_Ast, rule).(*Ast)
+	}
 	chAst.SetTokReg(reg, ps.Src)
 	return chAst
 }

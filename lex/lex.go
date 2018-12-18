@@ -20,21 +20,20 @@ import (
 // within a line of a file.  Critically it also contains the nesting depth computed from
 // all the parens, brackets, braces.  Todo: also support XML < > </ > tag depth.
 type Lex struct {
-	Tok   token.Tokens `desc:"token"`
-	Depth int          `desc:"nesting depth, starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement.  Coloring background according to this depth should give direct information about mismatches etc.  Is computed once and used extensively in parsing."`
-	St    int          `desc:"start rune index within original source line for this token"`
-	Ed    int          `desc:"end rune index within original source line for this token (exclusive -- ends one before this)"`
-	Time  nptime.Time  `desc:"time when region was set -- used for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+	Tok  token.KeyToken `desc:"token, includes cache of keyword for keyword types, and also has nesting depth: starting at 0 at start of file and going up for every increment in bracket / paren / start tag and down for every decrement. Is computed once and used extensively in parsing."`
+	St   int            `desc:"start rune index within original source line for this token"`
+	Ed   int            `desc:"end rune index within original source line for this token (exclusive -- ends one before this)"`
+	Time nptime.Time    `desc:"time when region was set -- used for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
-func NewLex(tok token.Tokens, st, ed int) Lex {
+func NewLex(tok token.KeyToken, st, ed int) Lex {
 	lx := Lex{Tok: tok, St: st, Ed: ed}
 	return lx
 }
 
 // String satisfies the fmt.Stringer interface
 func (lx Lex) String() string {
-	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Depth, lx.St, lx.Ed, lx.Tok.String())
+	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Tok.Depth, lx.St, lx.Ed, lx.Tok.String())
 }
 
 // ContainsPos returns true if the Lex element contains given character position
@@ -69,7 +68,7 @@ func (ll *Line) Add(lx Lex) {
 }
 
 // Add adds one element to the lex line with given params, returns pointer to that new lex
-func (ll *Line) AddLex(tok token.Tokens, st, ed int) *Lex {
+func (ll *Line) AddLex(tok token.KeyToken, st, ed int) *Lex {
 	lx := NewLex(tok, st, ed)
 	li := len(*ll)
 	ll.Add(lx)

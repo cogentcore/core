@@ -6,14 +6,84 @@ license that can be found in the LICENSE file. */
 
 package main
 
+func (ft FileTime) String() string {
+	return (time.Time)(ft).Format("Mon Jan  2 15:04:05 MST 2006")
+}
+
+var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
+
+var FileInfoProps = ki.Props{
+	"CtxtMenu": ki.PropSlice{
+		{"Duplicate", ki.Props{
+			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Action) {
+				fi := fii.(*FileInfo)
+				act.SetInactiveState(fi.IsDir())
+			}),
+		}},
+		{"Delete", ki.Props{
+			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
+			"confirm": true,
+			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Action) {
+				fi := fii.(*FileInfo)
+				act.SetInactiveState(fi.IsDir())
+			}),
+		}},
+		{"Rename", ki.Props{
+			"desc": "Rename file to new file name",
+			"Args": ki.PropSlice{
+				{"New Name", ki.Props{
+					"default-field": "Name",
+				}},
+			},
+		}},
+	},
+}
+
+func baf() {
+//	switch apv := aps.Value.(type) {
+//	case ki.BlankProp:
+//	}
+}
+
+func aaa() {
+	sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord)	
+}
+
+func ccc() {
+	if sf, ok := pv.(ShortcutFunc); ok {
+		ac.Shortcut = sf(md.Val, ac)
+	} else if sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord); ok {
+		ac.Shortcut = sf(md.Val, ac)
+	} else {
+		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
+	}
+}
+
+
+func bbb() {
+	a := struct{}{}
+}
+
+func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
+	
+	tv.inFocusGrab = slice{}
+
+	defer func() { tv.inFocusGrab = false 	}
+	
+	defer func() { tv.inFocusGrab = false 	}()
+	
+	return nil
+}
+
 func sfa() {
 	for i := 0; i < 100; i++ {
 		fmt.Printf("%v %v", a, i)
 		a++
 		p := a * i
 	}
-	
+	tv.inFocusGrab = true
 	defer func() { tv.inFocusGrab = false }()
+	tv.inFocusGrab = true
 }
 
 func tst() {

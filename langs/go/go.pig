@@ -240,12 +240,12 @@ ExprRules {
     PrimaryExpr {
         BasicLit:  BasicLiteral  
         // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
-        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr            >Ast
-        FuncLitCall:   'key:func' Signature '{' ?BlockListInline '}' '(' ?ArgsExpr ')'  >Ast
-        FuncLit:       'key:func' Signature '{' ?BlockList '}' ?PrimaryExpr             >Ast
+        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr      >Ast
+        FuncLitCall:   'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
+        FuncLit:       'key:func' Signature '{' ?BlockList '}'                    >Ast
         // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
-        ConvertBasic:   @BasicType '(' Expr ')'          >Ast
-        ConvertParens:  '(' @Type ')' '(' Expr ?',' ')'  >Ast
+        ConvertBasic:   @BasicType '(' Expr ')'                       >Ast
+        ConvertParens:  '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr  >Ast
         // Convert note: a regular type(expr) will be a FunCall 
         Convert:    @TypeLiteral '(' Expr ?',' ')'  >Ast
         ParenExpr:  '(' Expr ')' ?PrimaryExpr       
@@ -382,7 +382,6 @@ TypeRules {
         Acts:{ -1:ChgToken:"":NamePackage; }
         NamedField:  NameList ?Type ?FieldTag 'EOS'  >Ast
         Acts:{ -1:ChgToken:"[0]":NameField; -1:AddSymbol:"[0]":NameField; }
-        NoField:  'EOS'  
     }
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
@@ -405,11 +404,16 @@ FuncRules {
     }
     MethRecv:  Name Type  >Ast
     Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
-    Signature:  Params ?Result  >Ast
+    Signature {
+        // SigParamsResult all types must fully match, using @ 
+        SigParamsResult:  @Params @Result  
+        SigParams:        @Params          >Ast
+    }
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {
         MethSpecAnon:  'Name' '.' 'Name' 'EOS'      >Ast
         MethSpecName:  'Name' Params ?Result 'EOS'  >Ast
+        MethSpecNone:  'EOS'                        
     }
     MethodSpecs:  MethodSpec ?MethodSpecs  
     Result {
@@ -423,19 +427,17 @@ FuncRules {
         ParName:  @Name @Type ?',' ?ParamsList  _Ast
         ParType:  @Type ?',' ?ParamsList        _Ast
         // ParNames need the explicit ',' in here to absorb so later one goes to paramslist 
-        ParNames:            Name ',' @NameList @Type ?',' ?ParamsList  _Ast
-        // OFF: ParTypeOld:  @Type ?',' ?ParamsList                     _Ast
+        ParNames:  Name ',' @NameList @Type ?',' ?ParamsList  _Ast
     }
     Params:  '(' ?ParamsList ')'  >Ast
 }
 StmtRules {
-    StmtList:         Stmt 'EOS' ?StmtList          
-    BlockList:        Stmt 'EOS' ?BlockList         >Ast
-    BlockListInline:  Stmt ?'EOS' ?BlockListInline  >Ast
+    StmtList:   Stmt 'EOS' ?StmtList  
+    BlockList:  StmtList              >Ast
     Stmt {
-        ConstDeclStmt:     ConstDecl                                                          
-        TypeDeclStmt:      TypeDecl                                                           
-        VarDeclStmt:       VarDecl                                                            
+        ConstDeclStmt:     'key:const' ConstDeclN 'EOS'                                       
+        TypeDeclStmt:      'key:type' TypeDeclN 'EOS'                                         
+        VarDeclStmt:       'key:var' VarDeclN 'EOS'                                           
         ReturnStmt:        'key:return' ?ExprList 'EOS'                                       >Ast
         BreakStmt:         'key:break' ?Name 'EOS'                                            >Ast
         ContStmt:          'key:continue' ?Name 'EOS'                                         >Ast
@@ -449,7 +451,6 @@ StmtRules {
         Acts:{ -1:ChgToken:"NameListEls":NameVar; }
         // ForExpr most general at end 
         ForExpr:         'key:for' ?Expr '{' ?BlockList '}' 'EOS'                                             >Ast
-        LabeledStmt:     @Name ':' ?Stmt                                                                      >Ast
         SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
         Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
         SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
@@ -472,6 +473,7 @@ StmtRules {
         SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
         SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
         SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
+        LabeledStmt:         @Name ':' ?Stmt                                                                                 >Ast
         Block:               '{' ?StmtList '}' 'EOS'                                                                         >Ast
         SimpleSt:            SimpleStmt                                                                                      
     }

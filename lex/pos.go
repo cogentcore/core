@@ -47,6 +47,9 @@ func (ps *Pos) IsLess(cmp Pos) bool {
 	}
 }
 
+////////////////////////////////////////////////////////////////////
+//  Reg
+
 // Reg is a contiguous region within the source file
 type Reg struct {
 	St Pos `desc:"starting position of region"`
@@ -60,6 +63,35 @@ var RegZero = Reg{}
 func (tr Reg) IsNil() bool {
 	return !tr.St.IsLess(tr.Ed)
 }
+
+////////////////////////////////////////////////////////////////////
+//  EosPos
+
+// EosPos is a line of EOS token positions, always sorted low-to-high
+type EosPos []int
+
+// FindGt returns any pos value greater than given token pos, -1 if none
+func (ep EosPos) FindGt(ch int) int {
+	for i := range ep {
+		if ep[i] > ch {
+			return ep[i]
+		}
+	}
+	return -1
+}
+
+// FindGtEq returns any pos value greater than or equal to given token pos, -1 if none
+func (ep EosPos) FindGtEq(ch int) int {
+	for i := range ep {
+		if ep[i] >= ch {
+			return ep[i]
+		}
+	}
+	return -1
+}
+
+////////////////////////////////////////////////////////////////////
+//  TokenMap
 
 // TokenMap is a token map, for optimizing token exclusion
 type TokenMap map[token.Tokens]struct{}

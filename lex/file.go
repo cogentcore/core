@@ -6,7 +6,6 @@ package lex
 
 import (
 	"github.com/goki/pi/token"
-	"github.com/goki/prof"
 )
 
 // File contains the contents of the file being parsed -- all kept in
@@ -19,6 +18,7 @@ type File struct {
 	Lexs       []Line    `desc:"lex'd version of the lines -- allocated to size of Lines"`
 	Comments   []Line    `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
 	LastStacks []Stack   `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
+	EosPos     []EosPos  `desc:"token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
@@ -39,6 +39,7 @@ func (fl *File) AllocLines() {
 	fl.Lexs = make([]Line, nlines)
 	fl.Comments = make([]Line, nlines)
 	fl.LastStacks = make([]Stack, nlines)
+	fl.EosPos = make([]EosPos, nlines)
 }
 
 // LinesInserted inserts new lines -- called e.g., by giv.TextBuf to sync
@@ -64,6 +65,13 @@ func (fl *File) LinesInserted(stln, nsz int) {
 	copy(nls[stln+nsz:], nls[stln:])
 	copy(nls[stln:], tmpls)
 	fl.LastStacks = nls
+
+	// EosPos
+	tmpep := make([]EosPos, nsz)
+	nep := append(fl.EosPos, tmpep...)
+	copy(nep[stln+nsz:], nep[stln:])
+	copy(nep[stln:], tmpep)
+	fl.EosPos = nep
 }
 
 // LinesDeleted deletes lines -- called e.g., by giv.TextBuf to sync
@@ -72,6 +80,7 @@ func (fl *File) LinesDeleted(stln, edln int) {
 	fl.Lexs = append(fl.Lexs[:stln], fl.Lexs[edln:]...)
 	fl.Comments = append(fl.Comments[:stln], fl.Comments[edln:]...)
 	fl.LastStacks = append(fl.LastStacks[:stln], fl.LastStacks[edln:]...)
+	fl.EosPos = append(fl.EosPos[:stln], fl.EosPos[edln:]...)
 }
 
 // NLines returns the number of lines in source
@@ -102,6 +111,7 @@ func (fl *File) SetLine(ln int, lexs, comments Line, stack Stack) {
 	fl.Lexs[ln] = lexs.Clone()
 	fl.Comments[ln] = comments.Clone()
 	fl.LastStacks[ln] = stack.Clone()
+	fl.EosPos[ln] = nil
 }
 
 // LexLine returns the lexing output for given line, combining comments and all other tokens
@@ -190,8 +200,6 @@ func (fl *File) NextTokenPos(pos Pos) (Pos, bool) {
 
 // PrevTokenPos returns the previous token position, false if at end of tokens
 func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
-	pr := prof.Start("PrevTokenPos")
-	defer pr.End()
 	pos.Ch--
 	if pos.Ch < 0 {
 		pos.Ln--
@@ -212,7 +220,7 @@ func (fl *File) PrevTokenPos(pos Pos) (Pos, bool) {
 }
 
 // Token gets lex token at given Pos (Ch = token index)
-func (fl *File) Token(pos Pos) token.Tokens {
+func (fl *File) Token(pos Pos) token.KeyToken {
 	return fl.Lexs[pos.Ln][pos.Ch].Tok
 }
 
@@ -223,7 +231,7 @@ func (fl *File) PrevDepth(ln int) int {
 	if !ok {
 		return 0
 	}
-	return fl.LexAt(pos).Depth
+	return fl.LexAt(pos).Tok.Depth
 }
 
 // PrevStack returns the stack from the previous line
@@ -244,7 +252,7 @@ func (fl *File) TokenMapReg(reg Reg) TokenMap {
 	m := make(TokenMap)
 	cp, ok := fl.ValidTokenPos(reg.St)
 	for ok && cp.IsLess(reg.Ed) {
-		tok := fl.Token(cp)
+		tok := fl.Token(cp).Tok
 		m.Set(tok)
 		subc := tok.SubCat()
 		if subc != tok {
@@ -327,4 +335,65 @@ func (fl *File) LexTagSrc() string {
 		txt += fl.LexTagSrcLn(ln) + "\n"
 	}
 	return txt
+}
+
+// NextEos finds the next EOS position at given depth, false if none
+func (fl *File) NextEos(stpos Pos, depth int) (Pos, bool) {
+	// prf := prof.Start("NextEos")
+	// defer prf.End()
+
+	ep := stpos
+	nlines := fl.NLines()
+	if stpos.Ln >= nlines {
+		return ep, false
+	}
+	eps := fl.EosPos[stpos.Ln]
+	for i := range eps {
+		if eps[i] < stpos.Ch {
+			continue
+		}
+		ep.Ch = eps[i]
+		lx := fl.LexAt(ep)
+		if lx.Tok.Depth == depth {
+			return ep, true
+		}
+	}
+	for ep.Ln = stpos.Ln + 1; ep.Ln < nlines; ep.Ln++ {
+		eps := fl.EosPos[ep.Ln]
+		sz := len(eps)
+		if sz == 0 {
+			continue
+		}
+		for i := 0; i < sz; i++ {
+			ep.Ch = eps[i]
+			lx := fl.LexAt(ep)
+			if lx.Tok.Depth == depth {
+				return ep, true
+			}
+		}
+	}
+	return ep, false
+}
+
+// NextEosAnyDepth finds the next EOS at any depth
+func (fl *File) NextEosAnyDepth(stpos Pos) (Pos, bool) {
+	ep := stpos
+	nlines := fl.NLines()
+	if stpos.Ln >= nlines {
+		return ep, false
+	}
+	eps := fl.EosPos[stpos.Ln]
+	if np := eps.FindGtEq(stpos.Ch); np >= 0 {
+		ep.Ch = np
+		return ep, true
+	}
+	ep.Ch = 0
+	for ep.Ln = stpos.Ln + 1; ep.Ln < nlines; ep.Ln++ {
+		sz := len(fl.EosPos[ep.Ln])
+		if sz == 0 {
+			continue
+		}
+		return ep, true
+	}
+	return ep, false
 }

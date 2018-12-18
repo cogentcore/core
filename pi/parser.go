@@ -13,6 +13,7 @@ import (
 
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
+	"github.com/goki/prof"
 )
 
 // Parser is the overall parser for managing the parsing
@@ -156,13 +157,17 @@ func (pr *Parser) DoPassTwo(fs *FileState) {
 // LexAll runs a complete pass of the lexer and pass two, on current state
 func (pr *Parser) LexAll(fs *FileState) {
 	pr.LexInit(fs)
+	lprf := prof.Start("LexRun")
 	pr.LexRun(fs)
+	lprf.End()
+	// pprf := prof.Start("PassTwo")
 	pr.DoPassTwo(fs)
+	// pprf.End()
 }
 
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit(fs *FileState) bool {
-	fs.ParseState.Init(&fs.Src, &fs.Ast, &fs.TwoState.EosPos)
+	fs.ParseState.Init(&fs.Src, &fs.Ast)
 	return true
 }
 

@@ -129,18 +129,18 @@ func (ls *State) CurRune() bool {
 }
 
 // Add adds a lex token for given region -- merges with prior if same
-func (ls *State) Add(tok token.Tokens, st, ed int) {
-	if tok == token.TextWhitespace && !ls.KeepWS {
+func (ls *State) Add(tok token.KeyToken, st, ed int) {
+	if tok.Tok == token.TextWhitespace && !ls.KeepWS {
 		return
 	}
 	lxl := &ls.Lex
-	if tok.Cat() == token.Comment {
+	if tok.Tok.Cat() == token.Comment {
 		lxl = &ls.Comments
 	}
 	sz := len(*lxl)
-	if sz > 0 && tok.CombineRepeats() {
+	if sz > 0 && tok.Tok.CombineRepeats() {
 		lst := &(*lxl)[sz-1]
-		if lst.Tok == tok && lst.Ed == st {
+		if lst.Tok.Tok == tok.Tok && lst.Ed == st {
 			lst.Ed = ed
 			return
 		}
@@ -162,6 +162,15 @@ func (ls *State) CurState() string {
 // PopState pops state off of stack
 func (ls *State) PopState() string {
 	return ls.Stack.Pop()
+}
+
+// MatchState returns true if the current state matches the string
+func (ls *State) MatchState(st string) bool {
+	sz := len(ls.Stack)
+	if sz == 0 {
+		return false
+	}
+	return ls.Stack[sz-1] == st
 }
 
 func (ls *State) ReadName() {

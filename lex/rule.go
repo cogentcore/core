@@ -52,7 +52,6 @@ type Rule struct {
 	SizeAdj   int          `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
 	Acts      []Actions    `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
 	PushState string       `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
-	TokEff    token.Tokens `view:"-" json:"-" desc:"effective token based on input -- e.g., for number is the type of number"`
 	MatchLen  int          `view:"-" json:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
 }
 
@@ -63,7 +62,7 @@ func (lr *Rule) BaseIface() reflect.Type {
 }
 
 func (lr *Rule) AsLexRule() *Rule {
-	return lr.This().Embed(KiT_Rule).(*Rule)
+	return lr.This().(*Rule)
 }
 
 // Validate checks for any errors in the rules and issues warnings,
@@ -71,6 +70,7 @@ func (lr *Rule) AsLexRule() *Rule {
 func (lr *Rule) Validate(ls *State) bool {
 	valid := true
 	if !lr.IsRoot() {
+		lr.ComputeMatchLen(ls)
 		switch lr.Match {
 		case StrName:
 			fallthrough
@@ -118,7 +118,7 @@ func (lr *Rule) Validate(ls *State) bool {
 
 	// now we iterate over our kids
 	for _, klri := range lr.Kids {
-		klr := klri.Embed(KiT_Rule).(*Rule)
+		klr := klri.(*Rule)
 		if !klr.Validate(ls) {
 			valid = false
 		}
@@ -126,12 +126,40 @@ func (lr *Rule) Validate(ls *State) bool {
 	return valid
 }
 
+// ComputeMatchLen computes MatchLen based on match type
+func (lr *Rule) ComputeMatchLen(ls *State) {
+	switch lr.Match {
+	case String:
+		sz := len(lr.String)
+		lr.MatchLen = lr.Off + sz + lr.SizeAdj
+	case StrName:
+		sz := len(lr.String)
+		lr.MatchLen = lr.Off + sz + lr.SizeAdj
+	case Letter:
+		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+	case Digit:
+		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+	case WhiteSpace:
+		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+	case CurState:
+		lr.MatchLen = 0
+	case AnyRune:
+		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+	}
+}
+
 // LexStart is called on the top-level lex node to start lexing process for one step
 func (lr *Rule) LexStart(ls *State) *Rule {
 	hasGuest := ls.GuestLex != nil
 	cpos := ls.Pos
 	lxsz := len(ls.Lex)
-	mrule := lr.Lex(ls)
+	mrule := lr
+	for _, klri := range lr.Kids {
+		klr := klri.(*Rule)
+		if mrule = klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
+			break
+		}
+	}
 	if !ls.AtEol() && cpos == ls.Pos {
 		ls.Error(cpos, "did not advance position -- need more rules to match current input", lr)
 		return nil
@@ -155,13 +183,16 @@ func (lr *Rule) Lex(ls *State) *Rule {
 		return nil
 	}
 	st := ls.Pos // starting pos that we're consuming
-	lr.TokEff = lr.Token
+	tok := token.KeyToken{Tok: lr.Token}
 	for _, act := range lr.Acts {
-		lr.DoAct(ls, act)
+		lr.DoAct(ls, act, &tok)
 	}
 	ed := ls.Pos // our ending state
 	if ed > st {
-		ls.Add(lr.TokEff, st, ed)
+		if tok.Tok.IsKeyword() {
+			tok.Key = lr.String //  if we matched, this is it
+		}
+		ls.Add(tok, st, ed)
 	}
 	if !lr.HasChildren() {
 		return lr
@@ -169,7 +200,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 
 	// now we iterate over our kids
 	for _, klri := range lr.Kids {
-		klr := klri.Embed(KiT_Rule).(*Rule)
+		klr := klri.(*Rule)
 		if mrule := klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
 			return mrule
 		}
@@ -186,10 +217,6 @@ func (lr *Rule) Lex(ls *State) *Rule {
 
 // IsMatch tests if the rule matches for current input state, returns true if so, false if not
 func (lr *Rule) IsMatch(ls *State) bool {
-	if lr.IsRoot() { // root always matches
-		return true
-	}
-
 	if !lr.IsMatchPos(ls) {
 		return false
 	}
@@ -204,7 +231,6 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if str != lr.String {
 			return false
 		}
-		lr.MatchLen = lr.Off + sz + lr.SizeAdj
 		return true
 	case StrName:
 		cp := ls.Pos
@@ -222,7 +248,6 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if str != lr.String {
 			return false
 		}
-		lr.MatchLen = lr.Off + sz + lr.SizeAdj
 		return true
 	case Letter:
 		rn, ok := ls.Rune(lr.Off)
@@ -230,7 +255,6 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsLetter(rn) {
-			lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 			return true
 		}
 		return false
@@ -240,7 +264,6 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsDigit(rn) {
-			lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 			return true
 		}
 		return false
@@ -250,13 +273,11 @@ func (lr *Rule) IsMatch(ls *State) bool {
 			return false
 		}
 		if IsWhiteSpace(rn) {
-			lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 			return true
 		}
 		return false
 	case CurState:
-		if ls.CurState() == lr.String {
-			lr.MatchLen = lr.SizeAdj
+		if ls.MatchState(lr.String) {
 			return true
 		}
 		return false
@@ -265,7 +286,6 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		if !ok {
 			return false
 		}
-		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
 		return true
 	}
 	return false
@@ -273,9 +293,6 @@ func (lr *Rule) IsMatch(ls *State) bool {
 
 // IsMatchPos tests if the rule matches position
 func (lr *Rule) IsMatchPos(ls *State) bool {
-	if lr.IsRoot() { // root always matches
-		return true
-	}
 	switch lr.Pos {
 	case AnyPos:
 		return true
@@ -319,14 +336,14 @@ func (lr *Rule) TargetLen(ls *State) int {
 }
 
 // DoAct performs given action
-func (lr *Rule) DoAct(ls *State, act Actions) {
+func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 	switch act {
 	case Next:
 		ls.Next(lr.MatchLen)
 	case Name:
 		ls.ReadName()
 	case Number:
-		lr.TokEff = ls.ReadNumber()
+		tok.Tok = ls.ReadNumber()
 	case Quoted:
 		ls.ReadQuoted()
 	case QuotedRaw:
@@ -363,7 +380,7 @@ func (lr *Rule) DoAct(ls *State, act Actions) {
 func (lr *Rule) Find(find string) []*Rule {
 	var res []*Rule
 	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d interface{}) bool {
-		lri := k.Embed(KiT_Rule).(*Rule)
+		lri := k.(*Rule)
 		if strings.Contains(lri.String, find) || strings.Contains(lri.Nm, find) {
 			res = append(res, lri)
 		}
@@ -377,7 +394,7 @@ func (lr *Rule) Find(find string) []*Rule {
 func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 	if lr.IsRoot() {
 		for _, k := range lr.Kids {
-			lri := k.Embed(KiT_Rule).(*Rule)
+			lri := k.(*Rule)
 			lri.WriteGrammar(writer, depth)
 		}
 	} else {
@@ -412,7 +429,7 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 		if lr.HasChildren() {
 			w := tabwriter.NewWriter(writer, 4, 4, 2, ' ', 0)
 			for _, k := range lr.Kids {
-				lri := k.Embed(KiT_Rule).(*Rule)
+				lri := k.(*Rule)
 				lri.WriteGrammar(w, depth+1)
 			}
 			w.Flush()

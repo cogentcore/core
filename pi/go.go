@@ -50,12 +50,12 @@ func (gl *GoLang) ParseFile(fs *FileState) {
 		log.Println("ParseFile: no parser -- must call pi.LangSupport.OpenStd() at startup!")
 		return
 	}
-	// stt := time.Now()
+	// lprf := prof.Start("LexAll")
 	pr.LexAll(fs)
-	// lxdur := time.Now().Sub(stt)
+	// lprf.End()
+	// pprf := prof.Start("ParseAll")
 	pr.ParseAll(fs)
-	// prdur := time.Now().Sub(stt)
-	// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
+	// pprf.End()
 	if len(fs.ParseState.Scopes) > 0 { // should be
 		path, _ := filepath.Split(fs.Src.Filename)
 		pkg := fs.ParseState.Scopes[0]

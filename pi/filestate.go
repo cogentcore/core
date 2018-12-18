@@ -32,7 +32,7 @@ func (fs *FileState) Init() {
 	fs.Ast.InitName(&fs.Ast, "Ast")
 	fs.LexState.Init()
 	fs.TwoState.Init()
-	fs.ParseState.Init(&fs.Src, &fs.Ast, &fs.TwoState.EosPos)
+	fs.ParseState.Init(&fs.Src, &fs.Ast)
 	fs.SymsMu.Lock()
 	fs.Syms = make(syms.SymMap)
 	fs.SymsMu.Unlock()

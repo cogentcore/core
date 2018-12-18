@@ -213,6 +213,16 @@ func (kt KeyToken) MatchDepth(okt KeyToken) bool {
 	return kt.Match(okt)
 }
 
+// StringKey encodes token into a string for optimized string-based map key lookup
+func (kt KeyToken) StringKey() string {
+	tstr := string([]byte{byte(kt.Tok)})
+	if kt.Tok.IsKeyword() {
+		return tstr + kt.Key
+	} else {
+		return tstr
+	}
+}
+
 // KeyTokenList is a list (slice) of KeyTokens
 type KeyTokenList []KeyToken
 

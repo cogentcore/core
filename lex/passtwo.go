@@ -15,12 +15,12 @@ import (
 // for parsing to first break the source down into statement-sized chunks.  A separate
 // list of EOS token positions is maintained for very fast access.
 type PassTwo struct {
-	DoEos         bool               `desc:"should we perform EOS detection on this type of file?"`
-	Eol           bool               `desc:"use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks"`
-	Semi          bool               `desc:"replace all semicolons with EOS to keep it consistent (C, Go..)"`
-	Backslash     bool               `desc:"use backslash as a line continuer (python)"`
-	RBraceOneLine bool               `desc:"if a right-brace } is detected at end of line, and there are multiple tokens on that line prior to right brace, insert an EOS *before* RBrace as well (needed for Go)"`
-	EolToks       token.KeyTokenList `desc:"specific tokens to recognize at the end of a line that trigger an EOS (Go)"`
+	DoEos     bool               `desc:"should we perform EOS detection on this type of file?"`
+	Eol       bool               `desc:"use end-of-line as a default EOS, if nesting depth is same as start of line (python) -- see also EolToks"`
+	Semi      bool               `desc:"replace all semicolons with EOS to keep it consistent (C, Go..)"`
+	Backslash bool               `desc:"use backslash as a line continuer (python)"`
+	RBraceEos bool               `desc:"if a right-brace } is detected anywhere in the line, insert an EOS *before* RBrace AND after it (needed for Go) -- do not include RBrace in EolToks in this case"`
+	EolToks   token.KeyTokenList `desc:"specific tokens to recognize at the end of a line that trigger an EOS (Go)"`
 }
 
 // TwoState is the state maintained for the PassTwo process
@@ -28,7 +28,6 @@ type TwoState struct {
 	Pos       Pos            `desc:"position in lex tokens we're on"`
 	Src       *File          `desc:"file that we're operating on"`
 	NestStack []token.Tokens `desc:"stack of nesting tokens"`
-	EosPos    []Pos          `desc:"positions *in token coordinates* of the EOS markers generated"`
 	Errs      ErrorList      `desc:"any error messages accumulated during lexing specifically"`
 }
 
@@ -36,7 +35,6 @@ type TwoState struct {
 func (ts *TwoState) Init() {
 	ts.Pos = PosZero
 	ts.NestStack = ts.NestStack[0:0]
-	ts.EosPos = ts.EosPos[0:0]
 }
 
 // SetSrc sets the source we're operating on
@@ -54,17 +52,17 @@ func (ts *TwoState) NextLine() {
 func (ts *TwoState) InsertEOS(cp Pos) Pos {
 	np := Pos{cp.Ln, cp.Ch + 1}
 	elx := ts.Src.LexAt(cp)
-	depth := elx.Depth
-	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.EOS, Depth: depth, St: elx.Ed, Ed: elx.Ed})
-	ts.EosPos = append(ts.EosPos, np)
+	depth := elx.Tok.Depth
+	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.KeyToken{Tok: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
+	ts.Src.EosPos[np.Ln] = append(ts.Src.EosPos[np.Ln], np.Ch)
 	return np
 }
 
 // ReplaceEOS replaces given token with an EOS
 func (ts *TwoState) ReplaceEOS(cp Pos) {
 	clex := ts.Src.LexAt(cp)
-	clex.Tok = token.EOS
-	ts.EosPos = append(ts.EosPos, cp)
+	clex.Tok.Tok = token.EOS
+	ts.Src.EosPos[cp.Ln] = append(ts.Src.EosPos[cp.Ln], cp.Ch)
 }
 
 // Error adds an passtwo error at current position
@@ -153,15 +151,15 @@ func (pt *PassTwo) NestDepth(ts *TwoState) {
 			continue
 		}
 		lx := ts.Src.LexAt(ts.Pos)
-		tok := lx.Tok
+		tok := lx.Tok.Tok
 		if tok.IsPunctGpLeft() {
-			lx.Depth = len(ts.NestStack) // depth increments AFTER -- this turns out to be ESSENTIAL!
+			lx.Tok.Depth = len(ts.NestStack) // depth increments AFTER -- this turns out to be ESSENTIAL!
 			pt.PushNest(ts, tok)
 		} else if tok.IsPunctGpRight() {
 			pt.PopNest(ts, tok)
-			lx.Depth = len(ts.NestStack) // end has same depth as start, which is same as SURROUND
+			lx.Tok.Depth = len(ts.NestStack) // end has same depth as start, which is same as SURROUND
 		} else {
-			lx.Depth = len(ts.NestStack)
+			lx.Tok.Depth = len(ts.NestStack)
 		}
 		ts.Pos.Ch++
 		if ts.Pos.Ch >= sz {
@@ -184,15 +182,15 @@ func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
 	depth := initDepth
 	for i := 0; i < sz; i++ {
 		lx := &line[i]
-		tok := lx.Tok
+		tok := lx.Tok.Tok
 		if tok.IsPunctGpLeft() {
-			lx.Depth = depth
+			lx.Tok.Depth = depth
 			depth++
 		} else if tok.IsPunctGpRight() {
 			depth--
-			lx.Depth = depth
+			lx.Tok.Depth = depth
 		} else {
-			lx.Depth = depth
+			lx.Tok.Depth = depth
 		}
 	}
 }
@@ -207,38 +205,58 @@ func (pt *PassTwo) EosDetect(ts *TwoState) {
 			ts.NextLine()
 			continue
 		}
+		if pt.RBraceEos {
+			skip := false
+			for ci := 0; ci < sz; ci++ {
+				lx := ts.Src.LexAt(Pos{ts.Pos.Ln, ci})
+				if lx.Tok.Tok == token.PunctGpRBrace {
+					if ci == 0 {
+						ip := Pos{ts.Pos.Ln, 0}
+						ip, _ = ts.Src.PrevTokenPos(ip)
+						ilx := ts.Src.LexAt(ip)
+						if ilx.Tok.Tok != token.PunctGpLBrace && ilx.Tok.Tok != token.EOS {
+							ts.InsertEOS(ip)
+						}
+					} else {
+						ip := Pos{ts.Pos.Ln, ci - 1}
+						ilx := ts.Src.LexAt(ip)
+						if ilx.Tok.Tok != token.PunctGpLBrace {
+							ts.InsertEOS(ip)
+							ci++
+							sz++
+						}
+					}
+					if ci == sz-1 {
+						ip := Pos{ts.Pos.Ln, ci}
+						ts.InsertEOS(ip)
+						sz++
+						skip = true
+					}
+				}
+			}
+			if skip {
+				ts.NextLine()
+				continue
+			}
+		}
 		ep := Pos{ts.Pos.Ln, sz - 1} // end of line token
 		elx := ts.Src.LexAt(ep)
 		if pt.Eol {
 			sp := Pos{ts.Pos.Ln, 0} // start of line token
 			slx := ts.Src.LexAt(sp)
-			if slx.Depth == elx.Depth {
+			if slx.Tok.Depth == elx.Tok.Depth {
 				ts.InsertEOS(ep)
 			}
 		}
 		if len(pt.EolToks) > 0 { // not depth specific
-			etkey := token.KeyToken{Tok: elx.Tok}
-			if elx.Tok.IsKeyword() {
-				etkey.Key = string(ts.Src.TokenSrc(ep))
-			}
-			if pt.EolToks.Match(etkey) {
-				if pt.RBraceOneLine && elx.Tok == token.PunctGpRBrace && sz > 2 {
-					ip := ts.InsertEOS(Pos{ts.Pos.Ln, sz - 2})
-					ilx := ts.Src.LexAt(ip)
-					fp := ts.InsertEOS(Pos{ts.Pos.Ln, sz})
-					plx := ts.Src.LexAt(fp)
-					if ilx.Depth == plx.Depth {
-						ilx.Depth++
-					}
-				} else {
-					ts.InsertEOS(ep)
-				}
+			if pt.EolToks.Match(elx.Tok) {
+				ts.InsertEOS(ep)
 			}
 		}
 		if pt.Semi {
 			for ts.Pos.Ch = 0; ts.Pos.Ch < sz; ts.Pos.Ch++ {
 				lx := ts.Src.LexAt(ts.Pos)
-				if lx.Tok == token.PunctSepSemicolon {
+				if lx.Tok.Tok == token.PunctSepSemicolon {
 					ts.ReplaceEOS(ts.Pos)
 				}
 			}

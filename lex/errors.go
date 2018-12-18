@@ -166,8 +166,19 @@ func (p ErrorList) Report(maxN int, basepath string, showSrc, showRule bool) str
 	} else {
 		maxN = ints.MinInt(ne, maxN)
 	}
-	for ei := 0; ei < maxN; ei++ {
+	cnt := 0
+	lstln := -1
+	for ei := 0; ei < ne; ei++ {
+		er := p[ei]
+		if er.Pos.Ln == lstln {
+			continue
+		}
 		str += p[ei].Report(basepath, showSrc, showRule) + "<br>\n"
+		lstln = er.Pos.Ln
+		cnt++
+		if cnt > maxN {
+			break
+		}
 	}
 	if ne > maxN {
 		str += fmt.Sprintf("... and %v more errors<br>\n", ne-maxN)
