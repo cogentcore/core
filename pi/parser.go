@@ -11,9 +11,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
-	"github.com/goki/prof"
 )
 
 // Parser is the overall parser for managing the parsing
@@ -138,6 +138,8 @@ func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
 	initDepth := fs.Src.PrevDepth(ln)
 	pr.PassTwo.NestDepthLine(fs.LexState.Lex, initDepth)                         // important to set this one's depth
 	fs.Src.SetLine(ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack) // before saving here
+	fs.TwoState.SetSrc(&fs.Src)
+	pr.PassTwo.EosDetectPos(&fs.TwoState, lex.Pos{Ln: ln}, 1)
 	merge := lex.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
 	mc := merge.Clone()
 	if len(fs.LexState.Comments) > 0 {
@@ -158,9 +160,9 @@ func (pr *Parser) DoPassTwo(fs *FileState) {
 // LexAll runs a complete pass of the lexer and pass two, on current state
 func (pr *Parser) LexAll(fs *FileState) {
 	pr.LexInit(fs)
-	lprf := prof.Start("LexRun")
+	// lprf := prof.Start("LexRun") // quite fast now..
 	pr.LexRun(fs)
-	lprf.End()
+	// lprf.End()
 	pr.DoPassTwo(fs) // takes virtually no time
 }
 
@@ -205,7 +207,7 @@ func (pr *Parser) ParseRun(fs *FileState) {
 // has been done already
 func (pr *Parser) ParseAll(fs *FileState) {
 	updt := false
-	if !parse.GuiActive {
+	if !parse.GuiActive { // with gui, need updates to track updating of treeview
 		updt = fs.ParseState.Ast.UpdateStart()
 	}
 	if !pr.ParserInit(fs) {
@@ -220,6 +222,44 @@ func (pr *Parser) ParseAll(fs *FileState) {
 			fmt.Println(fs.ParseErrReport())
 		}
 	}
+}
+
+// ParseLine runs parser for given single line of source
+// does Parsing in a separate FileState and returns that with
+// Ast etc (or nil if nothing).  Assumes LexLine has already
+// been run on given line.
+func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
+	nlines := fs.Src.NLines()
+	if ln > nlines || ln < 0 {
+		return nil
+	}
+	lfs := &FileState{}
+	lfs.InitFromLine(fs, ln)
+	lfs.ParseState.Init(&lfs.Src, &lfs.Ast)
+	pr.ParseRun(lfs)
+	return lfs
+}
+
+// ParseString runs lexer and parser on given string of text, returning
+// FileState of results (can be nil if string is empty or no lexical tokens).
+// Also takes supporting contextual info for file / language that this string
+// is associated with (only for reference)
+func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *FileState {
+	if str == "" {
+		return nil
+	}
+	lfs := &FileState{}
+	lfs.InitFromString(str, fname, sup)
+	// lfs.ParseState.Trace.FullOn()
+	// lfs.ParseSTate.Trace.StdOut()
+	lfs.ParseState.Init(&lfs.Src, &lfs.Ast)
+	pr.LexAll(lfs)
+	lxs := lfs.Src.Lexs[0]
+	if len(lxs) == 0 {
+		return nil
+	}
+	pr.ParseAll(lfs)
+	return lfs
 }
 
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file

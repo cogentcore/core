@@ -2869,7 +2869,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 6,
+            "n": 7,
             "type": "parse.Rule",
             "name": "PackageSpec",
             "type": "parse.Rule",
@@ -2881,7 +2881,9 @@
             "type": "parse.Rule",
             "name": "Vars",
             "type": "parse.Rule",
-            "name": "Funcs"
+            "name": "Funcs",
+            "type": "parse.Rule",
+            "name": "Stmts"
           },
           {
             "Nm": "PackageSpec",
@@ -2975,7 +2977,21 @@
             "Kids": null,
             "Off": false,
             "Desc": "",
-            "Rule": "FunDecl 'EOS'",
+            "Rule": "@FunDecl 'EOS'",
+            "StackMatch": "",
+            "Ast": "NoAst",
+            "Acts": null,
+            "OptTokMap": false,
+            "FirstTokMap": false
+          },
+          {
+            "Nm": "Stmts",
+            "UniqueNm": "Stmts",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "this allows direct parsing of anything -- for one-line parsing",
+            "Rule": "Stmt 'EOS'",
             "StackMatch": "",
             "Ast": "NoAst",
             "Acts": null,

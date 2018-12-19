@@ -6,7 +6,11 @@
 package parse
 
 import (
+	"fmt"
+	"io"
+
 	"github.com/goki/ki"
+	"github.com/goki/ki/indent"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/syms"
@@ -39,6 +43,17 @@ func (ast *Ast) SetTokRegEnd(pos lex.Pos, src *lex.File) {
 	ast.TokReg.Ed = pos
 	ast.SrcReg = src.TokenSrcReg(ast.TokReg)
 	ast.Src = src.RegSrc(ast.SrcReg)
+}
+
+// WriteTree writes the AST tree data to the writer -- not attempting to re-render
+// source code -- just for debugging etc
+func (ast *Ast) WriteTree(out io.Writer, depth int) {
+	ind := indent.Tabs(depth)
+	fmt.Fprintf(out, "%v%v: %v\n", ind, ast.Nm, ast.Src)
+	for _, k := range ast.Kids {
+		ai := k.(*Ast)
+		ai.WriteTree(out, depth+1)
+	}
 }
 
 var AstProps = ki.Props{

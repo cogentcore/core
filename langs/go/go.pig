@@ -184,7 +184,9 @@ File {
     Types:  'key:type' TypeDeclN 'EOS'  >Ast
     // Vars same as VarDecl 
     Vars:   'key:var' VarDeclN 'EOS'  >Ast
-    Funcs:  FunDecl 'EOS'             
+    Funcs:  @FunDecl 'EOS'            
+    // Stmts this allows direct parsing of anything -- for one-line parsing 
+    Stmts:  Stmt 'EOS'  
 }
 // ExprRules many different rules here that go into expressions etc 
 ExprRules {

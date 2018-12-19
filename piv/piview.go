@@ -237,7 +237,7 @@ func (pv *PiView) LexInit() {
 	pv.OutBuf.New(0)
 	go pv.MonitorOut()
 	fs := &pv.TestBuf.PiState
-	fs.SetSrc(&pv.TestBuf.Lines, string(pv.TestBuf.Filename))
+	fs.SetSrc(&pv.TestBuf.Lines, string(pv.TestBuf.Filename), pv.TextBuf.Info.Sup)
 	// pv.Hi.SetParser(&pv.Parser)
 	pv.Parser.Lexer.CompileAll(&fs.LexState)
 	pv.Parser.Lexer.Validate(&fs.LexState)

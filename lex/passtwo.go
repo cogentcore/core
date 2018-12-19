@@ -197,9 +197,15 @@ func (pt *PassTwo) NestDepthLine(line Line, initDepth int) {
 
 // Perform EOS detection
 func (pt *PassTwo) EosDetect(ts *TwoState) {
-	ts.Pos = PosZero
 	nlines := ts.Src.NLines()
-	for ts.Pos.Ln < nlines {
+	pt.EosDetectPos(ts, PosZero, nlines)
+}
+
+// Perform EOS detection at given starting position, for given number of lines
+func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
+	ts.Pos = pos
+	nlines := ts.Src.NLines()
+	for lc := 0; ts.Pos.Ln < nlines && lc < nln; lc++ {
 		sz := len(ts.Src.Lexs[ts.Pos.Ln])
 		if sz == 0 {
 			ts.NextLine()

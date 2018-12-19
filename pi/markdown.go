@@ -5,9 +5,9 @@
 package pi
 
 import (
+	"github.com/goki/gi/complete"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/lex"
-	"github.com/goki/pi/parse"
 	"github.com/goki/pi/syms"
 )
 
@@ -52,14 +52,14 @@ func (ml *MarkdownLang) LexLine(fs *FileState, line int) lex.Line {
 	return pr.LexLine(fs, line)
 }
 
-func (ml *MarkdownLang) ParseLine(fs *FileState, line int) *parse.Ast {
+func (ml *MarkdownLang) ParseLine(fs *FileState, line int) *FileState {
 	// n/a
 	return nil
 }
 
-func (ml *MarkdownLang) CompleteLine(fs *FileState, pos lex.Pos) syms.SymStack {
+func (ml *MarkdownLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md complete.MatchData) {
 	// n/a
-	return nil
+	return md
 }
 
 func (ml *MarkdownLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {

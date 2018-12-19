@@ -5,6 +5,7 @@
 package lex
 
 import (
+	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/token"
 )
 
@@ -12,19 +13,21 @@ import (
 // memory, and represented by Line as runes, so that positions in
 // the file are directly convertible to indexes in Lines structure
 type File struct {
-	Filename   string    `desc:"the current file being lex'd"`
-	BasePath   string    `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
-	Lines      *[][]rune `desc:"contents of the file as lines of runes"`
-	Lexs       []Line    `desc:"lex'd version of the lines -- allocated to size of Lines"`
-	Comments   []Line    `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
-	LastStacks []Stack   `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
-	EosPos     []EosPos  `desc:"token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing"`
+	Filename   string            `desc:"the current file being lex'd"`
+	Sup        filecat.Supported `desc:"the supported file type, if supported (typically only supported files are processed)"`
+	BasePath   string            `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
+	Lines      *[][]rune         `desc:"contents of the file as lines of runes"`
+	Lexs       []Line            `desc:"lex'd version of the lines -- allocated to size of Lines"`
+	Comments   []Line            `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
+	LastStacks []Stack           `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
+	EosPos     []EosPos          `desc:"token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
 // then it is set to the path for the filename
-func (fl *File) SetSrc(src *[][]rune, fname string) {
+func (fl *File) SetSrc(src *[][]rune, fname string, sup filecat.Supported) {
 	fl.Filename = fname
+	fl.Sup = sup
 	fl.Lines = src
 	fl.AllocLines()
 }
@@ -231,7 +234,12 @@ func (fl *File) PrevDepth(ln int) int {
 	if !ok {
 		return 0
 	}
-	return fl.LexAt(pos).Tok.Depth
+	lx := fl.LexAt(pos)
+	depth := lx.Tok.Depth
+	if lx.Tok.Tok.IsPunctGpLeft() {
+		depth++
+	}
+	return depth
 }
 
 // PrevStack returns the stack from the previous line

@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/goki/gi/complete"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
@@ -162,5 +163,52 @@ func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
 		ci := strings.Index(nm, ":")
 		sy := (*sm)[nm[ci+1:]]
 		sy.WriteDoc(out, depth)
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+// Partial lookups
+
+// Slice returns a slice of the elements in the map, optionally sorted by name
+func (sm *SymMap) Slice(sorted bool) []*Symbol {
+	sys := make([]*Symbol, len(*sm))
+	idx := 0
+	for _, sy := range *sm {
+		sys[idx] = sy
+		idx++
+	}
+	if sorted {
+		sort.Slice(sys, func(i, j int) bool {
+			return sys[i].Name < sys[j].Name
+		})
+	}
+	return sys
+}
+
+// FindNamePrefix looks for given symbol name prefix within this map
+// and any children on the map that are of subcategory
+// token.NameScope (i.e., namespace, module, package, library)
+// adds to given matches map (which can be nil), for more efficient recursive use
+func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
+	noCase := true
+	if complete.HasUpperCase(seed) {
+		noCase = false
+	}
+	if *matches == nil {
+		*matches = make(SymMap)
+	}
+	for _, sy := range *sm {
+		nm := sy.Name
+		if noCase {
+			nm = strings.ToLower(nm)
+		}
+		if strings.HasPrefix(nm, seed) {
+			(*matches)[sy.Name] = sy
+		}
+	}
+	for _, ss := range *sm {
+		if ss.Kind.SubCat() == token.NameScope {
+			ss.Children.FindNamePrefix(seed, matches)
+		}
 	}
 }

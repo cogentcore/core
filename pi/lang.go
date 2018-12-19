@@ -5,8 +5,8 @@
 package pi
 
 import (
+	"github.com/goki/gi/complete"
 	"github.com/goki/pi/lex"
-	"github.com/goki/pi/parse"
 	"github.com/goki/pi/syms"
 )
 
@@ -46,19 +46,20 @@ type Lang interface {
 	LexLine(fs *FileState, line int) lex.Line
 
 	// ParseLine does complete parser processing of a single line from given file, and returns
-	// the Ast generated for that line.  Line is in 0-indexed "internal" line indexes.
+	// the FileState for just that line.  Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState
 	// Existing context information from full-file parsing is used as appropriate, but
 	// the results will NOT be used to update any existing full-file Ast representation --
 	// should call ParseFile to update that as appropriate.
-	ParseLine(fs *FileState, line int) *parse.Ast
+	ParseLine(fs *FileState, line int) *FileState
 
-	// CompleteLine provides the list of relevant completions for given position within
-	// the file -- typically language will call ParseLine on that line, and use the Ast
+	// CompleteLine provides the list of relevant completions for given text
+	// which is at given position within the file.
+	// Typically the language will call ParseLine on that line, and use the Ast
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.  A stack (slice) of symbols is returned so that the completer
 	// can control the order of items presented, as compared to the SymMap.
-	CompleteLine(fs *FileState, pos lex.Pos) syms.SymStack
+	CompleteLine(fs *FileState, text string, pos lex.Pos) complete.MatchData
 
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),

@@ -9,8 +9,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/syms"
@@ -48,10 +50,33 @@ func NewFileState() *FileState {
 // SetSrc sets source to be parsed, and filename it came from, and also the
 // base path for project for reporting filenames relative to
 // (if empty, path to filename is used)
-func (fs *FileState) SetSrc(src *[][]rune, fname string) {
+func (fs *FileState) SetSrc(src *[][]rune, fname string, sup filecat.Supported) {
 	fs.Init()
-	fs.Src.SetSrc(src, fname)
+	fs.Src.SetSrc(src, fname, sup)
 	fs.LexState.Filename = fname
+}
+
+// RunesFromBytes returns the lines of runes from a basic byte array
+func (fs *FileState) RunesFromBytes(b []byte) [][]rune {
+	lns := bytes.Split(b, []byte("\n"))
+	nlines := len(lns)
+	rns := make([][]rune, nlines)
+	for ln, txt := range lns {
+		rns[ln] = bytes.Runes(txt)
+	}
+	return rns
+}
+
+// RunesFromString returns the lines of runes from a string (more efficient
+// than converting to bytes)
+func (fs *FileState) RunesFromString(str string) [][]rune {
+	lns := strings.Split(str, "\n")
+	nlines := len(lns)
+	rns := make([][]rune, nlines)
+	for ln, txt := range lns {
+		rns[ln] = []rune(txt)
+	}
+	return rns
 }
 
 // OpenFile sets source to be parsed from given filename
@@ -62,18 +87,43 @@ func (fs *FileState) OpenFile(fname string) error {
 		return err
 	}
 	alltxt, err := ioutil.ReadAll(fp)
+	fp.Close()
 	if err != nil {
 		log.Println(err.Error())
 		return err
 	}
-	lns := bytes.Split(alltxt, []byte("\n"))
-	nlines := len(lns)
-	rns := make([][]rune, nlines)
-	for ln, txt := range lns {
-		rns[ln] = bytes.Runes(txt)
-	}
-	fs.SetSrc(&rns, fname)
+	rns := fs.RunesFromBytes(alltxt)
+	sup := filecat.SupportedFromFile(fname)
+	fs.SetSrc(&rns, fname, sup)
 	return nil
+}
+
+// InitFromLine initializes from one line of source fs
+func (fs *FileState) InitFromLine(sfs *FileState, ln int) bool {
+	nlines := sfs.Src.NLines()
+	if ln > nlines || ln < 0 {
+		return false
+	}
+	src := [][]rune{(*sfs.Src.Lines)[ln], []rune{}} // need extra blank
+	fs.SetSrc(&src, sfs.Src.Filename, sfs.Src.Sup)
+	fs.Src.Lexs = []lex.Line{sfs.Src.Lexs[ln], lex.Line{}}
+	fs.Src.Comments = []lex.Line{sfs.Src.Comments[ln], lex.Line{}}
+	fs.Src.EosPos = []lex.EosPos{sfs.Src.EosPos[ln], lex.EosPos{}}
+	return true
+}
+
+// InitFromString initializes from given string
+// returns false if string is empty
+func (fs *FileState) InitFromString(str string, fname string, sup filecat.Supported) bool {
+	if str == "" {
+		return false
+	}
+	src := fs.RunesFromString(str)
+	if len(src) == 1 { // need more than 1 line
+		src = append(src, []rune{})
+	}
+	fs.SetSrc(&src, fname, sup)
+	return true
 }
 
 // LexAtEnd returns true if lexing state is now at end of source

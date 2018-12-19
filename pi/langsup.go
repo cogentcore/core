@@ -6,11 +6,13 @@ package pi
 
 import (
 	"fmt"
+	"go/token"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/gi/complete"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
@@ -154,4 +156,21 @@ func (ll *LangSupporter) LexerByName(lang string) *lex.Rule {
 		return nil
 	}
 	return &lp.Parser.Lexer
+}
+
+// CompletePi uses GoPi symbols and language -- the string is a line of text
+// up to point where user has typed.
+// The data must be the *FileState from which the language type is obtained.
+func CompletePi(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+	sfs := data.(*FileState)
+	if sfs == nil {
+		log.Printf("pi.CompletePi: data is nil not FileState or is nil - can't complete\n")
+		return md
+	}
+	lp, err := LangSupport.Props(sfs.Src.Sup)
+	if err != nil {
+		log.Printf("pi.CompletePi: %v\n", err)
+		return md
+	}
+	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})
 }

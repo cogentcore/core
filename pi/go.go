@@ -12,10 +12,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/goki/gi/complete"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/pi/lex"
-	"github.com/goki/pi/parse"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
 )
@@ -72,19 +72,114 @@ func (gl *GoLang) LexLine(fs *FileState, line int) lex.Line {
 	if pr == nil {
 		return nil
 	}
-	// todo: could do some parsing here too!
-	return pr.LexLine(fs, line)
+	ll := pr.LexLine(fs, line)
+	lfs := pr.ParseLine(fs, line)
+	if lfs != nil {
+		return lfs.Src.Lexs[0]
+	} else {
+		return ll
+	}
 }
 
-func (gl *GoLang) ParseLine(fs *FileState, line int) *parse.Ast {
-	// todo: writeme
-	return nil
+func (gl *GoLang) ParseLine(fs *FileState, line int) *FileState {
+	pr := gl.Parser()
+	if pr == nil {
+		return nil
+	}
+	lfs := pr.ParseLine(fs, line) // should highlight same line?
+	return lfs
 }
 
-func (gl *GoLang) CompleteLine(fs *FileState, pos lex.Pos) syms.SymStack {
-	// todo: writeme
-	// todo: be sure to do fs.SymsMu.RLock() / defer RUnlock() when accessing symbs
-	return nil
+func (gl *GoLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md complete.MatchData) {
+	if str == "" {
+		return
+	}
+	pr := gl.Parser()
+	if pr == nil {
+		return
+	}
+	lfs := pr.ParseString(str, fs.Src.Filename, fs.Src.Sup)
+	if lfs == nil {
+		return
+	}
+
+	// lxstr := lfs.Src.LexTagSrc()
+	// fmt.Println(lxstr)
+	// lfs.Ast.WriteTree(os.Stdout, 0)
+
+	// first pass: just use lexical tokens even though we have the full Ast..
+	lxs := lfs.Src.Lexs[0]
+	sz := len(lxs)
+	// look for scope.name
+	name := ""
+	scope := ""
+	if lxs[sz-1].Tok.Tok == token.EOS {
+		sz--
+	}
+	gotSep := false
+	for i := sz - 1; i >= 0; i-- {
+		lx := lxs[i]
+		if lx.Tok.Tok.Cat() == token.Name {
+			nm := string(lfs.Src.TokenSrc(lex.Pos{0, i}))
+			if gotSep {
+				scope = nm
+				break
+			} else {
+				name = nm
+			}
+		} else if lx.Tok.Tok.SubCat() == token.PunctSep {
+			gotSep = true
+		} else {
+			break
+		}
+	}
+	if name == "" && scope == "" {
+		return
+	}
+
+	if scope != "" {
+		md.Seed = scope + "." + name
+	} else {
+		md.Seed = name
+	}
+	// fmt.Printf("seed: %v\n", md.Seed)
+
+	fs.SymsMu.RLock() // syms access needs to be locked -- could be updated..
+	var matches syms.SymMap
+	if scope != "" {
+		scsym, got := fs.Syms.FindNameScoped(scope)
+		if got {
+			if name == "" {
+				matches = scsym.Children
+			} else {
+				scsym.Children.FindNamePrefix(name, &matches)
+			}
+		} else {
+			scope = ""
+			md.Seed = name
+		}
+	}
+	if len(matches) == 0 {
+		fs.Syms.FindNamePrefix(name, &matches)
+	}
+	fs.SymsMu.RUnlock()
+	if len(matches) == 0 {
+		return
+	}
+
+	sys := matches.Slice(true) // sorted
+	for _, sy := range sys {
+		if sy.Name[0] == '_' || sy.Kind == token.NameLibrary { // internal / import
+			continue
+		}
+		nm := sy.Name
+		if scope != "" {
+			nm = scope + "." + nm
+		}
+		c := complete.Completion{Text: nm, Icon: sy.Kind.IconName(), Desc: sy.Detail}
+		md.Matches = append(md.Matches, c)
+	}
+	return
 }
 
 func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {

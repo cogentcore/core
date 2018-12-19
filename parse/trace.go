@@ -38,6 +38,17 @@ func (pt *TraceOpts) Init() {
 	}
 }
 
+// FullOn sets all options on
+func (pt *TraceOpts) FullOn() {
+	pt.On = true
+	pt.Match = true
+	pt.SubMatch = true
+	pt.NoMatch = true
+	pt.Run = true
+	pt.RunAct = true
+	pt.ScopeSrc = true
+}
+
 // PipeOut sets output to a pipe for monitoring (OutWrite -> OutRead)
 func (pt *TraceOpts) PipeOut() {
 	if pt.OutWrite == nil {

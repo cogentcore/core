@@ -236,6 +236,21 @@ func (kl KeyTokenList) Match(okt KeyToken) bool {
 	return false
 }
 
+// IconName returns the appropriate icon name for the type of lexical item this is
+func (tk Tokens) IconName() string {
+	switch {
+	case tk.SubCat() == NameVar:
+		return "var"
+	case tk == NameConstant || tk == NameEnum || tk == NameEnumMember:
+		return "const"
+	case tk.SubCat() == NameType:
+		return "type"
+	case tk.SubCat() == NameFunction:
+		return "func"
+	}
+	return ""
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //  Tokens
 
