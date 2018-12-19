@@ -1450,7 +1450,7 @@ func (ft *FileTreeView) Style2D() {
 				ft.Class = "exec"
 			} else if fn.IsOpen() {
 				ft.Class = "open"
-			} else if !fn.InVcs {
+			} else if fn.Repo() != nil && !fn.InVcs {
 				ft.Class = "vcs-no" // untracked file
 			} else {
 				ft.Class = ""
