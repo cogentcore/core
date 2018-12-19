@@ -34,7 +34,7 @@ var NodeBaseProps = ki.Props{
 // NodeFlags define gi node bitflags for tracking common high-frequency GUI
 // state, mostly having to do with event processing -- use properties map for
 // less frequently used information -- uses ki Flags field (64 bit capacity)
-type NodeFlags int32
+type NodeFlags int
 
 const (
 	// NoLayout means that this node does not participate in the layout

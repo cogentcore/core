@@ -574,8 +574,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 		Float32ToFixed(pc.StrokeWidth(rs)),
 		Float32ToFixed(pc.StrokeStyle.MiterLimit),
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
-		dash, 0,
-	)
+		dash, 0)
 	rs.Scanner.SetClip(rs.Bounds)
 	rs.Path.AddTo(rs.Raster)
 	fbox := rs.Raster.Scanner.GetPathExtent()
