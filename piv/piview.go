@@ -239,6 +239,7 @@ func (pv *PiView) LexInit() {
 	fs := &pv.TestBuf.PiState
 	fs.SetSrc(&pv.TestBuf.Lines, string(pv.TestBuf.Filename))
 	// pv.Hi.SetParser(&pv.Parser)
+	pv.Parser.Lexer.CompileAll(&fs.LexState)
 	pv.Parser.Lexer.Validate(&fs.LexState)
 	pv.Parser.LexInit(fs)
 	if fs.LexHasErrs() {

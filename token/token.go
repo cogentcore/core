@@ -270,7 +270,7 @@ const (
 
 	// Cat: Names.
 	Name
-	NameBuiltin       // not keyword..
+	NameBuiltin       // e.g., true, false -- builtin values..
 	NameBuiltinPseudo // e.g., this, self
 	NameOther
 	NamePseudo

@@ -22,6 +22,9 @@ import (
 type Lexer interface {
 	ki.Ki
 
+	// Compile performs any one-time compilation steps on the rule
+	Compile(ls *State) bool
+
 	// Validate checks for any errors in the rules and issues warnings,
 	// returns true if valid (no err) and false if invalid (errs)
 	Validate(ls *State) bool
@@ -33,26 +36,30 @@ type Lexer interface {
 	AsLexRule() *Rule
 }
 
-// lex.Rule operates on the text input to produce the lexical tokens
-// it is assembled into a lexical grammar structure to perform lexing
+// lex.Rule operates on the text input to produce the lexical tokens.
 //
 // Lexing is done line-by-line -- you must push and pop states to
-// coordinate across multiple lines, e.g., for multi-line comments
+// coordinate across multiple lines, e.g., for multi-line comments.
+//
+// There is full access to entire line and you can decide based on future
+// (offset) characters.
 //
 // In general it is best to keep lexing as simple as possible and
 // leave the more complex things for the parsing step.
 type Rule struct {
 	ki.Node
-	Desc      string       `desc:"description / comments about this rule"`
-	Token     token.Tokens `desc:"the token value that this rule generates -- use None for non-terminals"`
-	Match     Matches      `desc:"the lexical match that we look for to engage this rule"`
-	Pos       MatchPos     `desc:"position where match can occur"`
-	String    string       `desc:"if action is LexMatch, this is the string we match"`
-	Off       int          `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
-	SizeAdj   int          `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
-	Acts      []Actions    `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
-	PushState string       `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
-	MatchLen  int          `view:"-" json:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
+	Desc      string           `desc:"description / comments about this rule"`
+	Token     token.Tokens     `desc:"the token value that this rule generates -- use None for non-terminals"`
+	Match     Matches          `desc:"the lexical match that we look for to engage this rule"`
+	Pos       MatchPos         `desc:"position where match can occur"`
+	String    string           `desc:"if action is LexMatch, this is the string we match"`
+	Off       int              `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
+	SizeAdj   int              `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
+	Acts      []Actions        `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
+	PushState string           `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
+	NameMap   bool             `desc:"create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords."`
+	MatchLen  int              `view:"-" json:"-" xml:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
+	NmMap     map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"NameMap lookup map -- created during Compile"`
 }
 
 var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
@@ -65,12 +72,63 @@ func (lr *Rule) AsLexRule() *Rule {
 	return lr.This().(*Rule)
 }
 
+// CompileAll is called on the top-level Rule to compile all nodes.
+// returns true if everything is ok
+func (lr *Rule) CompileAll(ls *State) bool {
+	allok := false
+	lr.FuncDownMeFirst(0, lr.This(), func(k ki.Ki, level int, d interface{}) bool {
+		lri := k.(*Rule)
+		ok := lri.Compile(ls)
+		if !ok {
+			allok = false
+		}
+		return true
+	})
+	return allok
+}
+
+// Compile performs any one-time compilation steps on the rule
+// returns false if there are any problems.
+func (lr *Rule) Compile(ls *State) bool {
+	valid := true
+	lr.ComputeMatchLen(ls)
+	if lr.NameMap {
+		if !lr.CompileNameMap(ls) {
+			valid = false
+		}
+	}
+	return valid
+}
+
+// CompileNameMap compiles name map -- returns false if there are problems.
+func (lr *Rule) CompileNameMap(ls *State) bool {
+	valid := true
+	lr.NmMap = make(map[string]*Rule, len(lr.Kids))
+	for _, klri := range lr.Kids {
+		klr := klri.(*Rule)
+		if !klr.Validate(ls) {
+			valid = false
+		}
+		if klr.String == "" {
+			ls.Error(0, "CompileNameMap: must have non-empty String to match", lr)
+			valid = false
+			continue
+		}
+		if _, has := lr.NmMap[klr.String]; has {
+			ls.Error(0, fmt.Sprintf("CompileNameMap: multiple rules have the same string name: %v -- must be unique!", klr.String), lr)
+			valid = false
+		} else {
+			lr.NmMap[klr.String] = klr
+		}
+	}
+	return valid
+}
+
 // Validate checks for any errors in the rules and issues warnings,
 // returns true if valid (no err) and false if invalid (errs)
 func (lr *Rule) Validate(ls *State) bool {
 	valid := true
 	if !lr.IsRoot() {
-		lr.ComputeMatchLen(ls)
 		switch lr.Match {
 		case StrName:
 			fallthrough
@@ -198,11 +256,21 @@ func (lr *Rule) Lex(ls *State) *Rule {
 		return lr
 	}
 
-	// now we iterate over our kids
-	for _, klri := range lr.Kids {
-		klr := klri.(*Rule)
-		if mrule := klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
-			return mrule
+	if lr.NameMap && lr.NmMap != nil {
+		nm := ls.ReadNameTmp(lr.Off)
+		klr, ok := lr.NmMap[nm]
+		if ok {
+			if mrule := klr.Lex(ls); mrule != nil { // should!
+				return mrule
+			}
+		}
+	} else {
+		// now we iterate over our kids
+		for _, klri := range lr.Kids {
+			klr := klri.(*Rule)
+			if mrule := klr.Lex(ls); mrule != nil { // first to match takes it -- order matters!
+				return mrule
+			}
 		}
 	}
 
@@ -233,19 +301,8 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return true
 	case StrName:
-		cp := ls.Pos
-		ls.Pos += lr.Off
-		st := ls.Pos
-		ls.ReadName()
-		ed := ls.Pos
-		ls.Pos = cp
-		nsz := ed - st
-		sz := len(lr.String)
-		if nsz != sz {
-			return false
-		}
-		str := string(ls.Src[st:ed])
-		if str != lr.String {
+		nm := ls.ReadNameTmp(lr.Off)
+		if nm != lr.String {
 			return false
 		}
 		return true

@@ -173,6 +173,17 @@ func (ls *State) MatchState(st string) bool {
 	return ls.Stack[sz-1] == st
 }
 
+// ReadNameTmp reads a standard alpha-numeric_ name and returns it.
+// Does not update the lexing position -- a "lookahead" name read
+func (ls *State) ReadNameTmp(off int) string {
+	cp := ls.Pos
+	ls.Pos += off
+	ls.ReadName()
+	ls.Pos = cp
+	return ls.LastName
+}
+
+// ReadName reads a standard alpha-numeric_ name -- saves in LastName
 func (ls *State) ReadName() {
 	str := ""
 	sz := len(ls.Src)

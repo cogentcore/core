@@ -103,7 +103,8 @@
               "PopState",
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "StartEmbededMulti",
@@ -121,7 +122,8 @@
               "PushState",
               "Next"
             ],
-            "PushState": "CommentMulti"
+            "PushState": "CommentMulti",
+            "NameMap": false
           },
           {
             "Nm": "Comment",
@@ -138,7 +140,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "all CurState must be at top!  any multi-line requires state",
@@ -149,7 +152,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "InStrBacktick",
@@ -180,7 +184,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "EndStrBacktick",
@@ -198,7 +203,8 @@
               "PopState",
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "StrBacktick",
@@ -215,7 +221,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "curstate at start -- multiline requires state",
@@ -226,7 +233,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "StartCommentMulti",
@@ -244,7 +252,8 @@
           "PushState",
           "Next"
         ],
-        "PushState": "CommentMulti"
+        "PushState": "CommentMulti",
+        "NameMap": false
       },
       {
         "Nm": "LitStrBacktick",
@@ -262,7 +271,8 @@
           "PushState",
           "Next"
         ],
-        "PushState": "StrBacktick"
+        "PushState": "StrBacktick",
+        "NameMap": false
       },
       {
         "Nm": "CommentLine",
@@ -279,7 +289,8 @@
         "Acts": [
           "EOL"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "SkipWhite",
@@ -296,7 +307,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Letter",
@@ -391,7 +403,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "case",
@@ -408,7 +421,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "chan",
@@ -425,7 +439,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "const",
@@ -442,7 +457,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "continue",
@@ -459,7 +475,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "default",
@@ -476,7 +493,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "defer",
@@ -493,7 +511,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "else",
@@ -510,7 +529,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "fallthrough",
@@ -527,7 +547,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "for",
@@ -544,7 +565,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "func",
@@ -561,7 +583,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "go",
@@ -578,7 +601,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "goto",
@@ -595,7 +619,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "if",
@@ -612,7 +637,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "import",
@@ -629,7 +655,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "interface",
@@ -646,7 +673,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "map",
@@ -663,7 +691,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "make",
@@ -680,7 +709,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "new",
@@ -697,7 +727,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "package",
@@ -714,7 +745,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "range",
@@ -731,7 +763,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "return",
@@ -748,7 +781,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "select",
@@ -765,7 +799,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "struct",
@@ -782,7 +817,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "switch",
@@ -799,7 +835,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "type",
@@ -816,7 +853,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "var",
@@ -833,7 +871,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "this group should contain all reserved keywords",
@@ -844,7 +883,8 @@
             "Off": 0,
             "SizeAdj": 0,
             "Acts": null,
-            "PushState": ""
+            "PushState": "",
+            "NameMap": true
           },
           {
             "Nm": "Type",
@@ -907,7 +947,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "string",
@@ -924,7 +965,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "int",
@@ -941,7 +983,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "int8",
@@ -958,7 +1001,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "int16",
@@ -975,7 +1019,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "int32",
@@ -992,7 +1037,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "int64",
@@ -1009,7 +1055,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "uint",
@@ -1026,7 +1073,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "uint8",
@@ -1043,7 +1091,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "uint16",
@@ -1060,7 +1109,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "uint32",
@@ -1077,7 +1127,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "uint64",
@@ -1094,7 +1145,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "uintptr",
@@ -1111,7 +1163,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "byte",
@@ -1128,7 +1181,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "rune",
@@ -1145,7 +1199,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "float32",
@@ -1162,7 +1217,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "float64",
@@ -1179,7 +1235,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "complex64",
@@ -1196,7 +1253,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "complex128",
@@ -1213,7 +1271,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "this group should contain all basic types, and no types that are not built into the language",
@@ -1224,7 +1283,8 @@
             "Off": 0,
             "SizeAdj": 0,
             "Acts": null,
-            "PushState": ""
+            "PushState": "",
+            "NameMap": true
           },
           {
             "Nm": "Builtins",
@@ -1253,7 +1313,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "false",
@@ -1270,7 +1331,8 @@
                 "Acts": [
                   "Name"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "",
@@ -1281,7 +1343,8 @@
             "Off": 0,
             "SizeAdj": 0,
             "Acts": null,
-            "PushState": ""
+            "PushState": "",
+            "NameMap": true
           },
           {
             "Nm": "Name",
@@ -1298,7 +1361,8 @@
             "Acts": [
               "Name"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1309,7 +1373,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Number",
@@ -1326,7 +1391,8 @@
         "Acts": [
           "Number"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Dot",
@@ -1357,7 +1423,8 @@
             "Acts": [
               "Number"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "NextDot",
@@ -1384,7 +1451,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "lookahead for another dot -- ellipses",
@@ -1395,7 +1463,8 @@
             "Off": 1,
             "SizeAdj": 0,
             "Acts": [],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Period",
@@ -1412,7 +1481,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1423,7 +1493,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LitStrSingle",
@@ -1440,7 +1511,8 @@
         "Acts": [
           "QuotedRaw"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LitStrDouble",
@@ -1457,7 +1529,8 @@
         "Acts": [
           "QuotedRaw"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LParen",
@@ -1474,7 +1547,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "RParen",
@@ -1491,7 +1565,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LBrack",
@@ -1508,7 +1583,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "RBrack",
@@ -1525,7 +1601,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LBrace",
@@ -1542,7 +1619,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "RBrace",
@@ -1559,7 +1637,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Comma",
@@ -1576,7 +1655,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Semi",
@@ -1593,7 +1673,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Colon",
@@ -1622,7 +1703,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Colon",
@@ -1639,7 +1721,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1650,7 +1733,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Plus",
@@ -1681,7 +1765,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AsgnInc",
@@ -1698,7 +1783,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Add",
@@ -1715,7 +1801,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1726,7 +1813,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Minus",
@@ -1757,7 +1845,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AsgnDec",
@@ -1774,7 +1863,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Sub",
@@ -1791,7 +1881,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1802,7 +1893,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Mult",
@@ -1831,7 +1923,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Mult",
@@ -1848,7 +1941,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1859,7 +1953,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Div",
@@ -1888,7 +1983,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Div",
@@ -1905,7 +2001,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "comments already matched above..",
@@ -1916,7 +2013,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Rem",
@@ -1945,7 +2043,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Rem",
@@ -1962,7 +2061,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -1973,7 +2073,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Xor",
@@ -2002,7 +2103,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Xor",
@@ -2019,7 +2121,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2030,7 +2133,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Rangle",
@@ -2061,7 +2165,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "ShiftRight",
@@ -2090,7 +2195,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "ShiftRight",
@@ -2107,7 +2213,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "",
@@ -2118,7 +2225,8 @@
             "Off": 1,
             "SizeAdj": 0,
             "Acts": [],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Greater",
@@ -2135,7 +2243,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2146,7 +2255,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Langle",
@@ -2179,7 +2289,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AsgnArrow",
@@ -2196,7 +2307,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "ShiftLeft",
@@ -2225,7 +2337,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "ShiftLeft",
@@ -2242,7 +2355,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "",
@@ -2253,7 +2367,8 @@
             "Off": 1,
             "SizeAdj": 0,
             "Acts": [],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Less",
@@ -2270,7 +2385,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2281,7 +2397,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Equals",
@@ -2310,7 +2427,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Asgn",
@@ -2327,7 +2445,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2338,7 +2457,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Not",
@@ -2367,7 +2487,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Not",
@@ -2384,7 +2505,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2395,7 +2517,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "And",
@@ -2428,7 +2551,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AndNot",
@@ -2457,7 +2581,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "AndNot",
@@ -2474,7 +2599,8 @@
                 "Acts": [
                   "Next"
                 ],
-                "PushState": ""
+                "PushState": "",
+                "NameMap": false
               }
             ],
             "Desc": "",
@@ -2485,7 +2611,8 @@
             "Off": 1,
             "SizeAdj": 0,
             "Acts": [],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "LogAnd",
@@ -2502,7 +2629,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "BitAnd",
@@ -2519,7 +2647,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2530,7 +2659,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Or",
@@ -2561,7 +2691,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "LogOr",
@@ -2578,7 +2709,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "BitOr",
@@ -2595,7 +2727,8 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "PushState": "",
+            "NameMap": false
           }
         ],
         "Desc": "",
@@ -2606,7 +2739,8 @@
         "Off": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "AnyText",
@@ -2623,7 +2757,8 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "PushState": "",
+        "NameMap": false
       }
     ],
     "Desc": "",
@@ -2634,7 +2769,8 @@
     "Off": 0,
     "SizeAdj": 0,
     "Acts": null,
-    "PushState": ""
+    "PushState": "",
+    "NameMap": false
   },
   "PassTwo": {
     "DoEos": true,
@@ -5904,7 +6040,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 32,
+                "n": 18,
                 "type": "parse.Rule",
                 "name": "ConstDeclStmt",
                 "type": "parse.Rule",
@@ -5926,43 +6062,15 @@
                 "type": "parse.Rule",
                 "name": "DeferStmt",
                 "type": "parse.Rule",
-                "name": "IfStmtExpr",
+                "name": "IfStmt",
                 "type": "parse.Rule",
-                "name": "ForRangeExisting",
+                "name": "ForStmt",
                 "type": "parse.Rule",
-                "name": "ForRangeNew",
-                "type": "parse.Rule",
-                "name": "ForRangeOnly",
-                "type": "parse.Rule",
-                "name": "ForExpr",
-                "type": "parse.Rule",
-                "name": "SwitchTypeName",
-                "type": "parse.Rule",
-                "name": "SwitchTypeAnon",
-                "type": "parse.Rule",
-                "name": "SwitchExpr",
-                "type": "parse.Rule",
-                "name": "TypeCaseEmptyStmt",
-                "type": "parse.Rule",
-                "name": "TypeCaseStmt",
-                "type": "parse.Rule",
-                "name": "CaseEmptyStmt",
+                "name": "SwitchStmt",
                 "type": "parse.Rule",
                 "name": "CaseStmt",
                 "type": "parse.Rule",
-                "name": "SelCaseStmt",
-                "type": "parse.Rule",
                 "name": "DefaultStmt",
-                "type": "parse.Rule",
-                "name": "ForClauseStmt",
-                "type": "parse.Rule",
-                "name": "IfStmtInit",
-                "type": "parse.Rule",
-                "name": "SwitchInit",
-                "type": "parse.Rule",
-                "name": "SwitchTypeNameInit",
-                "type": "parse.Rule",
-                "name": "SwitchTypeAnonInit",
                 "type": "parse.Rule",
                 "name": "LabeledStmt",
                 "type": "parse.Rule",
@@ -6111,201 +6219,309 @@
                 "FirstTokMap": false
               },
               {
-                "Nm": "IfStmtExpr",
-                "UniqueNm": "IfStmtExpr",
+                "Nm": "IfStmt",
+                "UniqueNm": "IfStmt",
                 "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "ForRangeExisting",
-                "UniqueNm": "ForRangeExisting",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "ForRangeNew",
-                "UniqueNm": "ForRangeNew",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": [
+                "Kids": [
                   {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "NameListEls",
-                    "Tok": "NameVar",
-                    "FmTok": "None"
-                  }
-                ],
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "ForRangeOnly",
-                "UniqueNm": "ForRangeOnly",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "NameListEls",
-                    "Tok": "NameVar",
-                    "FmTok": "None"
-                  }
-                ],
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "ForExpr",
-                "UniqueNm": "ForExpr",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "most general at end",
-                "Rule": "'key:for' ?Expr '{' ?BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "SwitchTypeName",
-                "UniqueNm": "SwitchTypeName",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": 0,
-                    "Act": "PushStack",
-                    "Path": "SwitchType",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "n": 2,
+                    "type": "parse.Rule",
+                    "name": "IfStmtExpr",
+                    "type": "parse.Rule",
+                    "name": "IfStmtInit"
                   },
                   {
-                    "RunIdx": -1,
-                    "Act": "PopStack",
-                    "Path": "",
-                    "Tok": "None",
-                    "FmTok": "None"
-                  }
-                ],
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "SwitchTypeAnon",
-                "UniqueNm": "SwitchTypeAnon",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": 0,
-                    "Act": "PushStack",
-                    "Path": "SwitchType",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Nm": "IfStmtExpr",
+                    "UniqueNm": "IfStmtExpr",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
                   },
                   {
-                    "RunIdx": -1,
-                    "Act": "PopStack",
-                    "Path": "",
-                    "Tok": "None",
-                    "FmTok": "None"
+                    "Nm": "IfStmtInit",
+                    "UniqueNm": "IfStmtInit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
                   }
                 ],
+                "Off": false,
+                "Desc": "just matches if keyword",
+                "Rule": ":'key:if'",
+                "StackMatch": "",
+                "Ast": "NoAst",
+                "Acts": null,
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
               {
-                "Nm": "SwitchExpr",
-                "UniqueNm": "SwitchExpr",
+                "Nm": "ForStmt",
+                "UniqueNm": "ForStmt",
                 "Props": null,
-                "Kids": null,
+                "Kids": [
+                  {
+                    "n": 5,
+                    "type": "parse.Rule",
+                    "name": "ForRangeExisting",
+                    "type": "parse.Rule",
+                    "name": "ForRangeNew",
+                    "type": "parse.Rule",
+                    "name": "ForRangeOnly",
+                    "type": "parse.Rule",
+                    "name": "ForExpr",
+                    "type": "parse.Rule",
+                    "name": "ForClauseStmt"
+                  },
+                  {
+                    "Nm": "ForRangeExisting",
+                    "UniqueNm": "ForRangeExisting",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "ForRangeNew",
+                    "UniqueNm": "ForRangeNew",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "NameListEls",
+                        "Tok": "NameVar",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "ForRangeOnly",
+                    "UniqueNm": "ForRangeOnly",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "NameListEls",
+                        "Tok": "NameVar",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "ForExpr",
+                    "UniqueNm": "ForExpr",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "most general at end",
+                    "Rule": "'key:for' ?Expr '{' ?BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "ForClauseStmt",
+                    "UniqueNm": "ForClauseStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
+                    "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  }
+                ],
+                "Off": false,
+                "Desc": "just for matching for token -- delegates to children",
+                "Rule": ":'key:for'",
+                "StackMatch": "",
+                "Ast": "NoAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "SwitchStmt",
+                "UniqueNm": "SwitchStmt",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 6,
+                    "type": "parse.Rule",
+                    "name": "SwitchTypeName",
+                    "type": "parse.Rule",
+                    "name": "SwitchTypeAnon",
+                    "type": "parse.Rule",
+                    "name": "SwitchExpr",
+                    "type": "parse.Rule",
+                    "name": "SwitchInit",
+                    "type": "parse.Rule",
+                    "name": "SwitchTypeNameInit",
+                    "type": "parse.Rule",
+                    "name": "SwitchTypeAnonInit"
+                  },
+                  {
+                    "Nm": "SwitchTypeName",
+                    "UniqueNm": "SwitchTypeName",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": [
+                      {
+                        "RunIdx": 0,
+                        "Act": "PushStack",
+                        "Path": "SwitchType",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "PopStack",
+                        "Path": "",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SwitchTypeAnon",
+                    "UniqueNm": "SwitchTypeAnon",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": [
+                      {
+                        "RunIdx": 0,
+                        "Act": "PushStack",
+                        "Path": "SwitchType",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "PopStack",
+                        "Path": "",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SwitchExpr",
+                    "UniqueNm": "SwitchExpr",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' ?Expr '{' BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SwitchInit",
+                    "UniqueNm": "SwitchInit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SwitchTypeNameInit",
+                    "UniqueNm": "SwitchTypeNameInit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SwitchTypeAnonInit",
+                    "UniqueNm": "SwitchTypeAnonInit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  }
+                ],
                 "Off": false,
                 "Desc": "",
-                "Rule": "'key:switch' ?Expr '{' BlockList '}' 'EOS'",
+                "Rule": ":'key:switch'",
                 "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "TypeCaseEmptyStmt",
-                "UniqueNm": "TypeCaseEmptyStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' @TypeList ':' 'EOS'",
-                "StackMatch": "SwitchType",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "TypeCaseStmt",
-                "UniqueNm": "TypeCaseStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' @TypeList ':' Stmt",
-                "StackMatch": "SwitchType",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "CaseEmptyStmt",
-                "UniqueNm": "CaseEmptyStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' ExprList ':' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
+                "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false,
                 "FirstTokMap": false
@@ -6314,26 +6530,96 @@
                 "Nm": "CaseStmt",
                 "UniqueNm": "CaseStmt",
                 "Props": null,
-                "Kids": null,
+                "Kids": [
+                  {
+                    "n": 5,
+                    "type": "parse.Rule",
+                    "name": "TypeCaseEmptyStmt",
+                    "type": "parse.Rule",
+                    "name": "TypeCaseStmt",
+                    "type": "parse.Rule",
+                    "name": "CaseEmptyStmt",
+                    "type": "parse.Rule",
+                    "name": "CaseExprStmt",
+                    "type": "parse.Rule",
+                    "name": "SelCaseStmt"
+                  },
+                  {
+                    "Nm": "TypeCaseEmptyStmt",
+                    "UniqueNm": "TypeCaseEmptyStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' @TypeList ':' 'EOS'",
+                    "StackMatch": "SwitchType",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "TypeCaseStmt",
+                    "UniqueNm": "TypeCaseStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' @TypeList ':' Stmt",
+                    "StackMatch": "SwitchType",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "CaseEmptyStmt",
+                    "UniqueNm": "CaseEmptyStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' ExprList ':' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "CaseExprStmt",
+                    "UniqueNm": "CaseExprStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' ExprList ':' Stmt",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SelCaseStmt",
+                    "UniqueNm": "SelCaseStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' CommStmt 'EOS' ?Stmt",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  }
+                ],
                 "Off": false,
-                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' ExprList ':' Stmt",
+                "Desc": "",
+                "Rule": ":'key:case'",
                 "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "SelCaseStmt",
-                "UniqueNm": "SelCaseStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                "Rule": "'key:case' CommStmt 'EOS' ?Stmt",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
+                "Ast": "NoAst",
                 "Acts": null,
                 "OptTokMap": false,
                 "FirstTokMap": false
@@ -6346,76 +6632,6 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'key:default' ':' ?Stmt",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "ForClauseStmt",
-                "UniqueNm": "ForClauseStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "the embedded EOS's here require full expr here so final EOS has proper EOS StInc count",
-                "Rule": "'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "IfStmtInit",
-                "UniqueNm": "IfStmtInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "SwitchInit",
-                "UniqueNm": "SwitchInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "SwitchTypeNameInit",
-                "UniqueNm": "SwitchTypeNameInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "SwitchTypeAnonInit",
-                "UniqueNm": "SwitchTypeAnonInit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -6472,7 +6688,7 @@
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false,
-            "FirstTokMap": false
+            "FirstTokMap": true
           },
           {
             "Nm": "SimpleStmt",

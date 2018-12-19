@@ -438,49 +438,59 @@ StmtRules {
     StmtList:   Stmt 'EOS' ?StmtList  
     BlockList:  StmtList              >Ast
     Stmt {
-        ConstDeclStmt:     'key:const' ConstDeclN 'EOS'                                       
-        TypeDeclStmt:      'key:type' TypeDeclN 'EOS'                                         
-        VarDeclStmt:       'key:var' VarDeclN 'EOS'                                           
-        ReturnStmt:        'key:return' ?ExprList 'EOS'                                       >Ast
-        BreakStmt:         'key:break' ?Name 'EOS'                                            >Ast
-        ContStmt:          'key:continue' ?Name 'EOS'                                         >Ast
-        GotoStmt:          'key:goto' Name 'EOS'                                              >Ast
-        GoStmt:            'key:go' Expr 'EOS'                                                >Ast
-        FallthroughStmt:   'key:fallthrough' 'EOS'                                            >Ast
-        DeferStmt:         'key:defer' Expr 'EOS'                                             >Ast
-        IfStmtExpr:        'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                      >Ast
-        ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
-        ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"NameListEls":NameVar; }
-        ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"NameListEls":NameVar; }
-        // ForExpr most general at end 
-        ForExpr:         'key:for' ?Expr '{' ?BlockList '}' 'EOS'                                             >Ast
-        SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
-        Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-        SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
-        Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-        SwitchExpr:  'key:switch' ?Expr '{' BlockList '}' 'EOS'  >Ast
-        // TypeCaseEmptyStmt case and default require post-step to create sub-block -- no explicit { } scoping 
-        TypeCaseEmptyStmt:  'key:case' @TypeList ':' 'EOS'  >Ast
-        // TypeCaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
-        TypeCaseStmt:  'key:case' @TypeList ':' Stmt  >Ast
-        // CaseEmptyStmt case and default require post-step to create sub-block -- no explicit { } scoping 
-        CaseEmptyStmt:  'key:case' ExprList ':' 'EOS'  >Ast
-        // CaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
-        CaseStmt:  'key:case' ExprList ':' Stmt  >Ast
-        // SelCaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
-        SelCaseStmt:  'key:case' CommStmt 'EOS' ?Stmt  >Ast
-        DefaultStmt:  'key:default' ':' ?Stmt          >Ast
-        // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
-        ForClauseStmt:       'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'                    >Ast
-        IfStmtInit:          'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'                                  >Ast
-        SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
-        SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
-        SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
-        LabeledStmt:         @Name ':' ?Stmt                                                                                 >Ast
-        Block:               '{' ?StmtList '}' 'EOS'                                                                         >Ast
-        SimpleSt:            SimpleStmt                                                                                      
+        ConstDeclStmt:    'key:const' ConstDeclN 'EOS'  
+        TypeDeclStmt:     'key:type' TypeDeclN 'EOS'    
+        VarDeclStmt:      'key:var' VarDeclN 'EOS'      
+        ReturnStmt:       'key:return' ?ExprList 'EOS'  >Ast
+        BreakStmt:        'key:break' ?Name 'EOS'       >Ast
+        ContStmt:         'key:continue' ?Name 'EOS'    >Ast
+        GotoStmt:         'key:goto' Name 'EOS'         >Ast
+        GoStmt:           'key:go' Expr 'EOS'           >Ast
+        FallthroughStmt:  'key:fallthrough' 'EOS'       >Ast
+        DeferStmt:        'key:defer' Expr 'EOS'        >Ast
+        // IfStmt just matches if keyword 
+        IfStmt {
+            IfStmtExpr:  'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                   >Ast
+            IfStmtInit:  'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'  >Ast
+        }
+        // ForStmt just for matching for token -- delegates to children 
+        ForStmt {
+            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
+            ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+            Acts:{ -1:ChgToken:"NameListEls":NameVar; }
+            ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+            Acts:{ -1:ChgToken:"NameListEls":NameVar; }
+            // ForExpr most general at end 
+            ForExpr:  'key:for' ?Expr '{' ?BlockList '}' 'EOS'  >Ast
+            // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
+            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'  >Ast
+        }
+        SwitchStmt {
+            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
+            Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
+            SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
+            Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
+            SwitchExpr:          'key:switch' ?Expr '{' BlockList '}' 'EOS'                                                      >Ast
+            SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
+            SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
+            SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
+        }
+        CaseStmt {
+            // TypeCaseEmptyStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+            TypeCaseEmptyStmt:  'key:case' @TypeList ':' 'EOS'  >Ast
+            // TypeCaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+            TypeCaseStmt:  'key:case' @TypeList ':' Stmt  >Ast
+            // CaseEmptyStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+            CaseEmptyStmt:  'key:case' ExprList ':' 'EOS'  >Ast
+            // CaseExprStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+            CaseExprStmt:  'key:case' ExprList ':' Stmt  >Ast
+            // SelCaseStmt case and default require post-step to create sub-block -- no explicit { } scoping 
+            SelCaseStmt:  'key:case' CommStmt 'EOS' ?Stmt  >Ast
+        }
+        DefaultStmt:  'key:default' ':' ?Stmt  >Ast
+        LabeledStmt:  @Name ':' ?Stmt          >Ast
+        Block:        '{' ?StmtList '}' 'EOS'  >Ast
+        SimpleSt:     SimpleStmt               
     }
     SimpleStmt {
         SendStmt:  ?Expr '<-' Expr 'EOS'  >Ast

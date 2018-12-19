@@ -64,24 +64,44 @@ type Rule struct {
 	ki.Node
 	Off          bool             `desc:"disable this rule -- useful for testing"`
 	Desc         string           `desc:"description / comments about this rule"`
-	Rule         string           `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that."`
+	Rule         string           `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule."`
 	StackMatch   string           `desc:"if present, this rule only fires if stack has this on it"`
 	Ast          AstActs          `desc:"what action should be take for this node when it matches"`
 	Acts         Acts             `desc:"actions to perform based on parsed Ast tree data, when this rule is done executing"`
 	OptTokMap    bool             `desc:"for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens"`
 	FirstTokMap  bool             `desc:"for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case"`
-	Rules        RuleList         `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
-	SetsScope    bool             `json:"-" xml:"-" desc:"this rule sets its own scope, because it ends with EOS"`
-	Reverse      bool             `inactive:"+" json:"-" xml:"-" desc:"use a reverse parsing direction for binary operator expressions -- this is needed to produce proper associativity result for mathematical expressions in the recursive descent parser, triggered by a '-' at the start of the rule -- only for rules of form: Expr '+' Expr -- two sub-rules with a token operator in the middle"`
-	NoToks       bool             `inactive:"+" json:"-" xml:"-" desc:"no tokens in this rule -- operates by diff rules"`
-	FiTokMap     map[string]*Rule `json:"-" xml:"-" desc:"map from first tokens / keywords to rules for FirstTokMap case"`
-	FiTokElseIdx int              `json:"-" xml:"-" desc:"for FirstTokMap, the start of the else cases not covered by the map"`
+	Rules        RuleList         `inactive:"+" json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
+	FiTokMap     map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"map from first tokens / keywords to rules for FirstTokMap case"`
+	FiTokElseIdx int              `inactive:"+" json:"-" xml:"-" desc:"for FirstTokMap, the start of the else cases not covered by the map"`
 	ExclKeyIdx   int              `inactive:"+" json:"-" xml:"-" desc:"exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules"`
-	ExclFwd      RuleList         `json:"-" xml:"-" desc:"exclusionary forward-search rule elements compiled from Rule string"`
-	ExclRev      RuleList         `json:"-" xml:"-" desc:"exclusionary reverse-search rule elements compiled from Rule string"`
+	ExclFwd      RuleList         `inactive:"+" json:"-" xml:"-" desc:"exclusionary forward-search rule elements compiled from Rule string"`
+	ExclRev      RuleList         `inactive:"+" json:"-" xml:"-" desc:"exclusionary reverse-search rule elements compiled from Rule string"`
 }
 
 var KiT_Rule = kit.Types.AddType(&Rule{}, RuleProps)
+
+// RuleFlags define bitflags for rule options compiled from rule syntax
+type RuleFlags int
+
+const (
+	// SetsScope means that this rule sets its own scope, because it ends with EOS
+	SetsScope RuleFlags = RuleFlags(ki.FlagsN) + iota
+
+	// Reverse means that this rule runs in reverse (starts with - sign) -- for arithmetic
+	// binary expressions only: this is needed to produce proper associativity result for
+	// mathematical expressions in the recursive descent parser.
+	// Only for rules of form: Expr '+' Expr -- two sub-rules with a token operator
+	// in the middle.
+	Reverse
+
+	// NoToks means that this rule doesn't have any explicit tokens -- only refers to
+	// other rules
+	NoToks
+
+	// TokMatchGroup is a group node that also has a single token match, so it can
+	// be used in a FirstTokMap to optimize lookup of rules
+	TokMatchGroup
+)
 
 // Parser is the interface type for parsers -- likely not necessary except is essential
 // for defining the BaseIface for gui in making new nodes
@@ -209,7 +229,7 @@ func (pr *Rule) Compile(ps *State) bool {
 	}
 	if pr.Rule == "" { // parent
 		pr.Rules = nil
-		pr.SetsScope = false
+		pr.ClearFlag(int(SetsScope))
 		if pr.FirstTokMap {
 			pr.CompileTokMap(ps)
 		}
@@ -219,17 +239,18 @@ func (pr *Rule) Compile(ps *State) bool {
 	rstr := pr.Rule
 	if pr.Rule[0] == '-' {
 		rstr = rstr[1:]
-		pr.Reverse = true
+		pr.SetFlag(int(Reverse))
 	} else {
-		pr.Reverse = false
+		pr.ClearFlag(int(Reverse))
 	}
 	rs := strings.Split(rstr, " ")
 	nr := len(rs)
 	pr.Rules = make(RuleList, nr)
 	pr.ExclFwd = nil
 	pr.ExclRev = nil
-	pr.NoToks = false
-	pr.SetsScope = false
+	pr.ClearFlag(int(NoToks))
+	pr.ClearFlag(int(SetsScope))
+	pr.ClearFlag(int(TokMatchGroup))
 	nmatch := 0
 	ntok := 0
 	curStInc := 0
@@ -246,6 +267,9 @@ func (pr *Rule) Compile(ps *State) bool {
 			pr.Rules = pr.Rules[:ri]
 			pr.CompileExcl(ps, rs, ri+1)
 			break
+		}
+		if rn[0] == ':' {
+			pr.SetFlag(int(TokMatchGroup))
 		}
 		rr := &pr.Rules[ri]
 		tokst := strings.Index(rn, "'")
@@ -283,7 +307,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				eoses++
 				if ri == nr-1 {
 					rr.StInc = eoses
-					pr.SetsScope = true
+					pr.SetFlag(int(SetsScope))
 				}
 			}
 		} else {
@@ -307,31 +331,38 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 		}
 	}
-	if pr.Reverse {
+	if pr.HasFlag(int(Reverse)) {
 		pr.Ast = AnchorAst // must be
 	}
 	if ntok == 0 {
 		pr.Rules[0].Match = true
-		pr.NoToks = true
+		pr.SetFlag(int(NoToks))
 	}
 	return valid
 }
 
 // CompileTokMap compiles first token map
 func (pr *Rule) CompileTokMap(ps *State) bool {
+	valid := true
 	pr.FiTokMap = make(map[string]*Rule, len(pr.Kids))
 	for i, kpri := range pr.Kids {
 		kpr := kpri.(*Rule)
 		kpr.Compile(ps)
 		fr := kpr.Rules[0]
 		if fr.IsToken() {
-			pr.FiTokMap[fr.Tok.StringKey()] = kpr
+			skey := fr.Tok.StringKey()
+			if _, has := pr.FiTokMap[skey]; has {
+				ps.Error(lex.PosZero, fmt.Sprintf("CompileFirstTokMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Tok), pr)
+				valid = false
+			} else {
+				pr.FiTokMap[skey] = kpr
+			}
 		} else {
 			pr.FiTokElseIdx = i
 			break
 		}
 	}
-	return true
+	return valid
 }
 
 // CompileExcl compiles exclusionary rules starting at given point
@@ -415,11 +446,11 @@ func (pr *Rule) Validate(ps *State) bool {
 		ps.Error(lex.PosZero, "Validate: rule has no rules and no children", pr)
 		valid = false
 	}
-	if len(pr.Rules) > 0 && pr.HasChildren() {
+	if !pr.HasFlag(int(TokMatchGroup)) && len(pr.Rules) > 0 && pr.HasChildren() {
 		ps.Error(lex.PosZero, "Validate: rule has both rules and children -- should be either-or", pr)
 		valid = false
 	}
-	if pr.Reverse {
+	if pr.HasFlag(int(Reverse)) {
 		if len(pr.Rules) != 3 {
 			ps.Error(lex.PosZero, "Validate: a Reverse (-) rule must have 3 children -- for binary operator expressions only", pr)
 			valid = false
@@ -433,7 +464,7 @@ func (pr *Rule) Validate(ps *State) bool {
 	if len(pr.Rules) > 0 {
 		if pr.Rules[0].IsRule() && (pr.Rules[0].Rule == pr || pr.ParentLevel(pr.Rules[0].Rule) >= 0) { // left recursive
 			if pr.Rules[0].Match {
-				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v and that sub-rule is marked as a Match -- this is infinite recursion and is not allowed!", pr.Rules[0].Rule.Name()), pr)
+				ps.Error(lex.PosZero, fmt.Sprintf("Validate: rule refers to itself recursively in first sub-rule: %v and that sub-rule is marked as a Match -- this is infinite recursion and is not allowed!  Must use distinctive tokens in rule to match this rule, and then left-recursive elements will be filled in when the rule runs, but they cannot be used for matching rule.", pr.Rules[0].Rule.Name()), pr)
 				valid = false
 			}
 			ntok := 0
@@ -526,7 +557,7 @@ func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap l
 	}
 
 	nr := len(pr.Rules)
-	if nr > 0 {
+	if !pr.HasFlag(int(TokMatchGroup)) && nr > 0 {
 		return pr.ParseRules(ps, par, parAst, scope, optMap, depth)
 	}
 
@@ -550,7 +581,7 @@ func (pr *Rule) Parse(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap l
 // ParseRules parses rules and returns this rule if it matches, nil if not
 func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, optMap lex.TokenMap, depth int) *Rule {
 	ok := false
-	if pr.SetsScope {
+	if pr.HasFlag(int(SetsScope)) {
 		scope, ok = pr.Scope(ps, parAst, scope)
 		if !ok {
 			return nil
@@ -707,7 +738,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 	lastMatch := false // last was a match -- if so, next must match right there..
 	for ri := 0; ri < nr; ri++ {
 		rr := &pr.Rules[ri]
-		if pr.Reverse {
+		if pr.HasFlag(int(Reverse)) {
 			rr = &pr.Rules[nr-1-ri]
 		}
 		if !rr.Match {
@@ -757,7 +788,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 					return false, scope, nil
 				}
 				// prf := prof.Start("FindToken")
-				if pr.Reverse {
+				if pr.HasFlag(int(Reverse)) {
 					pos, ok = ps.FindTokenReverse(kt, creg)
 				} else {
 					pos, ok = ps.FindToken(kt, creg)
@@ -813,8 +844,8 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		}
 		creg.Ed = scope.Ed // back to full scope
 		// look through smpos for last valid position -- use that as last match pos
-		mreg := smpos.StartEnd() // todo: should this include creg start instead?
-		if pr.NoToks {           // just an alias rule
+		mreg := smpos.StartEnd()     // todo: should this include creg start instead?
+		if pr.HasFlag(int(NoToks)) { // just an alias rule
 			mpos = smpos // pass it up
 		} else {
 			mpos[ri] = mreg
@@ -987,7 +1018,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 	}
 
-	if pr.Reverse {
+	if pr.HasFlag(int(Reverse)) {
 		return pr.DoRulesRevBinExp(ps, par, parAst, scope, mpos, ourAst, optMap, depth)
 	}
 
@@ -1026,7 +1057,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 		}
 		creg.St = ps.Pos
 		creg.Ed = scope.Ed
-		if !pr.NoToks {
+		if !pr.HasFlag(int(NoToks)) {
 			for mi := ri + 1; mi < nr; mi++ {
 				if mpos[mi].St != lex.PosZero {
 					creg.Ed = mpos[mi].St // only look up to point of next matching token

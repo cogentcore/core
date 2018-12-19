@@ -43,6 +43,7 @@ func NewParser() *Parser {
 func (pr *Parser) InitAll() {
 	fs := &FileState{} // dummy, for error recording
 	fs.Init()
+	pr.Lexer.CompileAll(&fs.LexState)
 	pr.Lexer.Validate(&fs.LexState)
 	pr.Parser.CompileAll(&fs.ParseState)
 	pr.Parser.Validate(&fs.ParseState)
