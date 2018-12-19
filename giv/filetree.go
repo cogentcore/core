@@ -59,19 +59,19 @@ func (ft *FileTree) OpenPath(path string) {
 	repo, err := vcs.NewRepo("origin", path)
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-
-	switch repo.Vcs() {
-	case vcs.Git:
-		ft.Repo = vcsgi.GitGiRepo{Repo: repo}
-		ft.RepoType = "git"
-	case vcs.Svn:
-		fmt.Println("Svn version control not yet supported ")
-	case vcs.Hg:
-		fmt.Println("Hg version control not yet supported ")
-	case vcs.Bzr:
-		fmt.Println("Bzr version control not yet supported ")
+		// return // not all dirs are VCS controlled!!
+	} else {
+		switch repo.Vcs() {
+		case vcs.Git:
+			ft.Repo = vcsgi.GitGiRepo{Repo: repo}
+			ft.RepoType = "git"
+		case vcs.Svn:
+			fmt.Println("Svn version control not yet supported ")
+		case vcs.Hg:
+			fmt.Println("Hg version control not yet supported ")
+		case vcs.Bzr:
+			fmt.Println("Bzr version control not yet supported ")
+		}
 	}
 
 	ft.FRoot = ft // we are our own root..
