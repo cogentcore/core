@@ -215,36 +215,25 @@ func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	return err
 }
 
-// Rename renames file to new name using source control call if file is under source control
-func (fi *FileInfo) Rename(newpath string, sc string) (err error) {
-	if newpath == "" {
+// Rename returns the proposed path or the new full path
+func (fi *FileInfo) Rename(path string) (newpath string, err error) {
+	if path == "" {
 		err = fmt.Errorf("giv.Rename: new name is empty")
 		log.Println(err)
-		return err
+		return path, err
 	}
-	if newpath == fi.Path {
-		return nil
+	if path == fi.Path {
+		return "", nil
 	}
-	ndir, np := filepath.Split(newpath)
+	ndir, np := filepath.Split(path)
 	if ndir == "" {
 		if np == fi.Name {
-			return nil
+			return path, nil
 		}
 		dir, _ := filepath.Split(fi.Path)
-		newpath = filepath.Join(dir, newpath)
+		newpath = filepath.Join(dir, np)
 	}
-	if sc == "git" {
-		// todo: git mv does not handle relative paths so newpath must be absolute - not sure about svn
-		err = ExecGitCmd("Rename", string(fi.Path), newpath)
-	} else if sc == "svn" {
-		err = ExecSvnCmd("Rename", "", "")
-	} else {
-		err := os.Rename(fi.Path, newpath)
-		if err == nil {
-			fi.InitFile(newpath)
-		}
-	}
-	return err
+	return newpath, nil
 }
 
 // FindIcon uses file info to find an appropriate icon for this file -- uses

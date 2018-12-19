@@ -4,12 +4,6 @@
 
 package giv
 
-import (
-	"fmt"
-	"os/exec"
-	"strings"
-)
-
 // ChangeRec is version control change-log record
 type ChangeRec struct {
 	Date     FileTime `desc:"date/time when change made"`
@@ -47,51 +41,4 @@ type VersCtrlName string
 var VersCtrlFiles = map[string]string{
 	"Git": ".git",
 	"SVN": ".svn",
-}
-
-// GitCmds is a map of actions and the Git command string
-var GitCmds = map[string]string{
-	"Add":            "add",
-	"Delete":         "rm",
-	"RemoveFromRepo": "rm --cached",
-	"Rename":         "mv",
-}
-
-// SvnCmds is a map of actions and the Subversion command string
-var SvnCmds = map[string]string{
-	"Add":    "add",
-	"Delete": "rm",
-	"Rename": "mv",
-}
-
-// ExecGitCmd calls os.exec to execute a Git command
-func ExecGitCmd(action, arg2, arg3 string) error {
-	str := GitCmds[action]
-	parts := strings.Split(str, " ")
-	args := make([]string, len(parts))
-	for i := 0; i < len(parts); i++ {
-		args[i] = parts[i]
-	}
-	if len(arg2) > 0 {
-		args = append(args, arg2)
-	}
-	if len(arg3) > 0 {
-		args = append(args, arg2)
-	}
-	//fmt.Println(args)
-	oscmd := exec.Command("git", args...)
-	stdoutStderr, err := oscmd.CombinedOutput()
-
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return err
-	}
-	fmt.Printf("%s\n", stdoutStderr)
-	return nil
-}
-
-// ExecSvnCmd calls os.exec to execute a Svn command
-func ExecSvnCmd(action, arg2, arg3 string) error {
-	fmt.Println("svn commands not yet implemented")
-	return nil
 }
