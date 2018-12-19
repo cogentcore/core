@@ -341,7 +341,7 @@ func (tb *TextBuf) New(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(&tb.Lines, string(tb.Filename))
+	tb.PiState.SetSrc(&tb.Lines, string(tb.Filename), tb.Info.Sup)
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 
 	tb.MarkupMu.Unlock()
@@ -364,6 +364,12 @@ func (tb *TextBuf) Stat() error {
 // returns true if supported
 func (tb *TextBuf) ConfigSupported() bool {
 	if tb.Info.Sup != filecat.NoSupport {
+		if tb.SpellCorrect == nil {
+			tb.SetSpellCorrect(tb, SpellCorrectEdit)
+		}
+		if tb.Complete == nil {
+			tb.SetCompleter(&tb.PiState, pi.CompletePi, CompleteGoEdit) // todo: need pi edit too..
+		}
 		return tb.Opts.ConfigSupported(tb.Info.Sup)
 	}
 	return false
@@ -414,7 +420,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 
 	// markup the first 100 lines
 	mxhi := ints.MinInt(100, tb.NLines-1)
-	tb.MarkupLines(0, mxhi)
+	tb.MarkupLinesLock(0, mxhi)
 
 	// update views
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
@@ -1803,6 +1809,13 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 	return allgood
 }
 
+// MarkupLinesLock does MarkupLines and gets the mutex lock first
+func (tb *TextBuf) MarkupLinesLock(st, ed int) bool {
+	tb.MarkupMu.Lock()
+	defer tb.MarkupMu.Unlock()
+	return tb.MarkupLines(st, ed)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //   Undo
 
@@ -1918,7 +1931,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 		tb.Tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
 		tb.Tags[ln].AddSort(tr)
 	}
-	tb.MarkupLines(ln, ln)
+	tb.MarkupLinesLock(ln, ln)
 }
 
 // AddTagEdit adds a new custom tag for given line, using TextBufEdit for location
@@ -1959,7 +1972,7 @@ func (tb *TextBuf) RemoveTag(pos TextPos, tag token.Tokens) (reg lex.Lex, ok boo
 		}
 	}
 	if ok {
-		tb.MarkupLines(pos.Ln, pos.Ln)
+		tb.MarkupLinesLock(pos.Ln, pos.Ln)
 	}
 	return
 }

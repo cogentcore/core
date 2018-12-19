@@ -3977,9 +3977,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunComplete:
 		tv.ISearchCancel()
 		kt.SetProcessed()
-		if !tv.OfferCorrect() {
+		if tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
+			tv.OfferCorrect()
+		} else {
 			tv.ForceComplete = true
 			tv.OfferComplete()
+			tv.ForceComplete = false // ROR: I definitely don't like this option!  want it just when I want it!
 		}
 	case gi.KeyFunEnter:
 		cancelAll()

@@ -47,9 +47,10 @@ type EditFunc func(data interface{}, text string, cursorPos int, completion Comp
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The seed is basically a prefix.
 func MatchSeedString(completions []string, seed string) (matches []string) {
+
 	matches = completions[0:0]
-	match_start := -1
-	match_end := -1
+	start := -1
+	end := -1
 
 	// fast case insensitive sort from Andrew Kutz
 	less := func(i, j int) bool {
@@ -63,38 +64,36 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 	}
 
 	for i, s := range completions {
-		if match_end > -1 {
+		if end > -1 {
 			break
 		}
-
-		var case_insensitive = true
+		var noCase = true
 		if HasUpperCase(seed) {
-			case_insensitive = false
+			noCase = false
 		}
 		text := s
-		if case_insensitive {
+		if noCase {
 			text = strings.ToLower(s)
 		}
-
-		if match_start == -1 {
+		if start == -1 {
 			if strings.HasPrefix(text, seed) {
-				match_start = i // first match in sorted list
+				start = i // first match in sorted list
 			}
 			continue
 		}
-		if match_start > -1 {
+		if start > -1 {
 			if strings.HasPrefix(text, seed) == false {
-				match_end = i
+				end = i
 			}
 		}
 	}
-	if match_start > -1 && match_end == -1 { // everything possible was a match!
-		match_end = len(completions)
+	if start > -1 && end == -1 { // everything possible was a match!
+		end = len(completions)
 	}
 
-	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
-	if match_start > -1 && match_end > -1 {
-		matches = completions[match_start:match_end]
+	//fmt.Printf("match start: %d, end: %d", start, end)
+	if start > -1 && end > -1 {
+		matches = completions[start:end]
 	}
 	return matches
 }
@@ -103,8 +102,8 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 // The seed is basically a prefix.
 func MatchSeedCompletion(completions []Completion, seed string) (matches []Completion) {
 	matches = completions[0:0]
-	match_start := -1
-	match_end := -1
+	start := -1
+	end := -1
 
 	// fast case insensitive sort from Andrew Kutz
 	less := func(i, j int) bool {
@@ -117,37 +116,37 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 		return matches
 	}
 
-	var case_insensitive = true
+	var noCase = true
 	if HasUpperCase(seed) {
-		case_insensitive = false
+		noCase = false
 	}
 	for i, c := range completions {
-		if match_end > -1 {
+		if end > -1 {
 			break
 		}
 		text := c.Text
-		if case_insensitive {
+		if noCase {
 			text = strings.ToLower(text)
 		}
-		if match_start == -1 {
+		if start == -1 {
 			if strings.HasPrefix(text, seed) {
-				match_start = i // first match in sorted list
+				start = i // first match in sorted list
 			}
 			continue
 		}
-		if match_start > -1 {
+		if start > -1 {
 			if strings.HasPrefix(text, seed) == false {
-				match_end = i
+				end = i
 			}
 		}
 	}
-	if match_start > -1 && match_end == -1 { // everything possible was a match!
-		match_end = len(completions)
+	if start > -1 && end == -1 { // everything possible was a match!
+		end = len(completions)
 	}
 
-	//fmt.Printf("match start: %d, match_end: %d", match_start, match_end)
-	if match_start > -1 && match_end > -1 {
-		matches = completions[match_start:match_end]
+	//fmt.Printf("match start: %d, end: %d", start, end)
+	if start > -1 && end > -1 {
+		matches = completions[start:end]
 	}
 	return matches
 }

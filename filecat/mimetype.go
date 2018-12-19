@@ -167,6 +167,16 @@ func ExtSupported(ext string) Supported {
 	return mt.Sup
 }
 
+// SupportedFromFile returns the supported type for given file,
+// or NoSupport if not found or not a supported file type
+func SupportedFromFile(fname string) Supported {
+	mtyp, _, err := MimeFromFile(fname)
+	if err != nil {
+		return NoSupport
+	}
+	return MimeSupported(mtyp)
+}
+
 // MergeAvailMimes merges the StdMimes and CustomMimes into AvailMimes
 // if CustomMimes is updated, then this should be called -- initially
 // it just has StdMimes.

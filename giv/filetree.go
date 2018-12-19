@@ -58,7 +58,7 @@ func (ft *FileTree) OpenPath(path string) {
 	// setup vcs repo before opening dirs
 	repo, err := vcs.NewRepo("origin", path)
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		// return // not all dirs are VCS controlled!!
 	} else {
 		switch repo.Vcs() {
