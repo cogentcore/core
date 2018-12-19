@@ -28,7 +28,7 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
-	"github.com/goki/gi/vcsgi"
+	"github.com/goki/gi/vci"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/runes"
@@ -43,7 +43,7 @@ type FileTree struct {
 	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
 	NodeType  reflect.Type `desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
-	Repo      vcsgi.Repo   `desc:"interface for version control system calls"`
+	Repo      vci.Repo     `desc:"interface for version control system calls"`
 	RepoType  string       `desc:"the repository type, git, svn, etc cached for performance"`
 }
 
@@ -63,7 +63,7 @@ func (ft *FileTree) OpenPath(path string) {
 	} else {
 		switch repo.Vcs() {
 		case vcs.Git:
-			ft.Repo = vcsgi.GitRepo{Repo: repo}
+			ft.Repo = vci.GitRepo{Repo: repo}
 			ft.RepoType = "git"
 		case vcs.Svn:
 			fmt.Println("Svn version control not yet supported ")
@@ -218,7 +218,7 @@ func (fn *FileNode) ReadDir(path string) error {
 	sep := byte(10)
 	names := strings.Split(string(bytes), string(sep))
 	for _, n := range names {
-		vcsgi.AppendToVcsFiles(n)
+		vci.AppendToVcsFiles(n)
 	}
 
 	config := fn.ConfigOfFiles(path)
@@ -231,7 +231,7 @@ func (fn *FileNode) ReadDir(path string) error {
 		sf.SetNodePath(fp)
 		prefix := string(fn.FRoot.FPath) + "/"
 		relpth := strings.TrimPrefix(fp, prefix)
-		sf.InVcs = vcsgi.InRepo(string(relpth))
+		sf.InVcs = vci.InRepo(string(relpth))
 	}
 
 	if mods {
@@ -651,7 +651,7 @@ func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
 //    File VCS ops
 
 // VcsRepo
-func (fn *FileNode) Repo() vcsgi.Repo {
+func (fn *FileNode) Repo() vci.Repo {
 	return fn.FRoot.Repo
 }
 
