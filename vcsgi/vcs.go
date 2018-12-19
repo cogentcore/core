@@ -38,7 +38,7 @@ func InRepo(filename string) bool {
 
 // Repo provides an interface that parallels vcs.Repo (https://github.com/Masterminds/vcs)
 // with some additional functions
-type GiRepo interface {
+type Repo interface {
 	vcs.Repo
 
 	// Get is used to perform an initial clone/checkout of a repository.
@@ -57,12 +57,12 @@ type GiRepo interface {
 	RemoveKeepLocal(filename string) error
 }
 
-type GitGiRepo struct {
+type GitRepo struct {
 	vcs.Repo
 }
 
 // IsTracked returns true if the file is being tracked in the specified repository
-func (gr GitGiRepo) IsTracked(filename string) bool {
+func (gr GitRepo) IsTracked(filename string) bool {
 	for _, f := range VcsFiles {
 		if f == filename {
 			return true
@@ -72,7 +72,7 @@ func (gr GitGiRepo) IsTracked(filename string) bool {
 }
 
 // Add adds the file to the repo
-func (gr GitGiRepo) Add(filename string) error {
+func (gr GitRepo) Add(filename string) error {
 	oscmd := exec.Command("git", "add", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
@@ -85,7 +85,7 @@ func (gr GitGiRepo) Add(filename string) error {
 }
 
 // Move moves updates the repo with the rename
-func (gr GitGiRepo) Move(oldpath, newpath string) error {
+func (gr GitRepo) Move(oldpath, newpath string) error {
 	oscmd := exec.Command("git", "mv", oldpath, newpath)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
@@ -98,7 +98,7 @@ func (gr GitGiRepo) Move(oldpath, newpath string) error {
 }
 
 // Remove removes the file from the repo
-func (gr GitGiRepo) Remove(filename string) error {
+func (gr GitRepo) Remove(filename string) error {
 	oscmd := exec.Command("git", "rm", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
@@ -111,7 +111,7 @@ func (gr GitGiRepo) Remove(filename string) error {
 }
 
 // Remove removes the file from the repo
-func (gr GitGiRepo) RemoveKeepLocal(filename string) error {
+func (gr GitRepo) RemoveKeepLocal(filename string) error {
 	oscmd := exec.Command("git", "rm", "--cached", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 

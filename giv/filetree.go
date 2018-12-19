@@ -43,7 +43,7 @@ type FileTree struct {
 	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
 	NodeType  reflect.Type `desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
-	Repo      vcsgi.GiRepo `desc:"interface for version control system calls"`
+	Repo      vcsgi.Repo   `desc:"interface for version control system calls"`
 	RepoType  string       `desc:"the repository type, git, svn, etc cached for performance"`
 }
 
@@ -63,7 +63,7 @@ func (ft *FileTree) OpenPath(path string) {
 	} else {
 		switch repo.Vcs() {
 		case vcs.Git:
-			ft.Repo = vcsgi.GitGiRepo{Repo: repo}
+			ft.Repo = vcsgi.GitRepo{Repo: repo}
 			ft.RepoType = "git"
 		case vcs.Svn:
 			fmt.Println("Svn version control not yet supported ")
@@ -651,7 +651,7 @@ func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
 //    File VCS ops
 
 // VcsRepo
-func (fn *FileNode) Repo() vcsgi.GiRepo {
+func (fn *FileNode) Repo() vcsgi.Repo {
 	return fn.FRoot.Repo
 }
 
