@@ -62,7 +62,7 @@ var DepthLimit = 1000
 //
 type Rule struct {
 	ki.Node
-	Off          bool             `desc:"disable this rule -- useful for testing"`
+	Off          bool             `desc:"disable this rule -- useful for testing and exploration"`
 	Desc         string           `desc:"description / comments about this rule"`
 	Rule         string           `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule."`
 	StackMatch   string           `desc:"if present, this rule only fires if stack has this on it"`

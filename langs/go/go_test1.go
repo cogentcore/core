@@ -6,6 +6,10 @@ license that can be found in the LICENSE file. */
 
 package main
 
+func bb() {
+	a := pv.FuncMonk(27)[2]
+}
+
 
 func adkf() {
 	for range sr.Text {
@@ -220,7 +224,6 @@ import (
 	"github.com/goki/pi/piv"
 )
 
-/*
 var av1, av2 int
 
 type Pvsi struct {
@@ -233,9 +236,7 @@ func (ps *Pvsi) tst() {
 	txt += rs[i].String()
 	fmt.Println(ps.Errs[len(ps.Errs)-1].Error())
 }	
-*/
 
-/*
 func tst() {
 	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
 		if !inClosePrompt {
@@ -258,9 +259,7 @@ func tst() {
 		}
 	})
 }
-*/
 
-/*
 func tst(txt string, amt int) (bool, *Rule) {
 	txt += rs[sd-1].String()
 	txt += rs[i].String()
@@ -331,8 +330,7 @@ func (pv *PiView) OpenTestTextTab() {
 func (ev Steps) MarshalJSON() ([]byte, error)  {
 	return kit.EnumMarshalJSON(ev)
 }
-*/
-/*
+
 func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b)
 }
 
@@ -354,8 +352,7 @@ func tst() {
 // this is Go's "most vexing parse" from a top-down perspective:
 
 //var MultSlice = p[2]*Rule // todo: not working
-*/
-/*
+
 var SliceAr1 = []Rule{}
 
 var SliceAry = [25]*Rule{}
@@ -416,7 +413,6 @@ func test() {
 		pr.Reverse = false
 	}
 }
-*/
 
 type Rule struct {
 	OnePar
@@ -424,13 +420,11 @@ type Rule struct {
 	Off       bool     `desc:"disable this rule -- useful for testing"`
 }
 
-/*
 func tst() {
 	oswin.TheApp.SetQuitCleanFunc(func() {
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 }
-*/
 
 func (pr *Parser) LexErrString() string {
 	return pr.LexState.Errs.AllString()

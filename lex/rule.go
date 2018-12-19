@@ -48,12 +48,13 @@ type Lexer interface {
 // leave the more complex things for the parsing step.
 type Rule struct {
 	ki.Node
+	Off       bool             `desc:"disable this rule -- useful for testing and exploration"`
 	Desc      string           `desc:"description / comments about this rule"`
 	Token     token.Tokens     `desc:"the token value that this rule generates -- use None for non-terminals"`
 	Match     Matches          `desc:"the lexical match that we look for to engage this rule"`
 	Pos       MatchPos         `desc:"position where match can occur"`
 	String    string           `desc:"if action is LexMatch, this is the string we match"`
-	Off       int              `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
+	Offset    int              `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
 	SizeAdj   int              `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
 	Acts      []Actions        `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
 	PushState string           `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
@@ -90,6 +91,11 @@ func (lr *Rule) CompileAll(ls *State) bool {
 // Compile performs any one-time compilation steps on the rule
 // returns false if there are any problems.
 func (lr *Rule) Compile(ls *State) bool {
+	if lr.Off {
+		lr.SetProp("inactive", true)
+	} else {
+		lr.DeleteProp("inactive")
+	}
 	valid := true
 	lr.ComputeMatchLen(ls)
 	if lr.NameMap {
@@ -189,20 +195,20 @@ func (lr *Rule) ComputeMatchLen(ls *State) {
 	switch lr.Match {
 	case String:
 		sz := len(lr.String)
-		lr.MatchLen = lr.Off + sz + lr.SizeAdj
+		lr.MatchLen = lr.Offset + sz + lr.SizeAdj
 	case StrName:
 		sz := len(lr.String)
-		lr.MatchLen = lr.Off + sz + lr.SizeAdj
+		lr.MatchLen = lr.Offset + sz + lr.SizeAdj
 	case Letter:
-		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+		lr.MatchLen = lr.Offset + 1 + lr.SizeAdj
 	case Digit:
-		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+		lr.MatchLen = lr.Offset + 1 + lr.SizeAdj
 	case WhiteSpace:
-		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+		lr.MatchLen = lr.Offset + 1 + lr.SizeAdj
 	case CurState:
 		lr.MatchLen = 0
 	case AnyRune:
-		lr.MatchLen = lr.Off + 1 + lr.SizeAdj
+		lr.MatchLen = lr.Offset + 1 + lr.SizeAdj
 	}
 }
 
@@ -237,7 +243,7 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 
 // Lex tries to apply rule to given input state, returns lowest-level rule that matched, nil if none
 func (lr *Rule) Lex(ls *State) *Rule {
-	if !lr.IsMatch(ls) {
+	if lr.Off || !lr.IsMatch(ls) {
 		return nil
 	}
 	st := ls.Pos // starting pos that we're consuming
@@ -257,7 +263,7 @@ func (lr *Rule) Lex(ls *State) *Rule {
 	}
 
 	if lr.NameMap && lr.NmMap != nil {
-		nm := ls.ReadNameTmp(lr.Off)
+		nm := ls.ReadNameTmp(lr.Offset)
 		klr, ok := lr.NmMap[nm]
 		if ok {
 			if mrule := klr.Lex(ls); mrule != nil { // should!
@@ -292,7 +298,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 	switch lr.Match {
 	case String:
 		sz := len(lr.String)
-		str, ok := ls.String(lr.Off, sz)
+		str, ok := ls.String(lr.Offset, sz)
 		if !ok {
 			return false
 		}
@@ -301,13 +307,13 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return true
 	case StrName:
-		nm := ls.ReadNameTmp(lr.Off)
+		nm := ls.ReadNameTmp(lr.Offset)
 		if nm != lr.String {
 			return false
 		}
 		return true
 	case Letter:
-		rn, ok := ls.Rune(lr.Off)
+		rn, ok := ls.Rune(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -316,7 +322,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return false
 	case Digit:
-		rn, ok := ls.Rune(lr.Off)
+		rn, ok := ls.Rune(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -325,7 +331,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return false
 	case WhiteSpace:
-		rn, ok := ls.Rune(lr.Off)
+		rn, ok := ls.Rune(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -339,7 +345,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 		}
 		return false
 	case AnyRune:
-		_, ok := ls.Rune(lr.Off)
+		_, ok := ls.Rune(lr.Offset)
 		if !ok {
 			return false
 		}
@@ -377,15 +383,15 @@ func (lr *Rule) TargetLen(ls *State) int {
 		fallthrough
 	case String:
 		sz := len(lr.String)
-		return lr.Off + sz
+		return lr.Offset + sz
 	case Letter:
-		return lr.Off + 1
+		return lr.Offset + 1
 	case Digit:
-		return lr.Off + 1
+		return lr.Offset + 1
 	case WhiteSpace:
-		return lr.Off + 1
+		return lr.Offset + 1
 	case AnyRune:
-		return lr.Off + 1
+		return lr.Offset + 1
 	case CurState:
 		return 0
 	}
@@ -461,8 +467,8 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			gpstr = " {"
 		}
 		offstr := ""
-		if lr.Off > 0 {
-			offstr = fmt.Sprintf("+%d:", lr.Off)
+		if lr.Offset > 0 {
+			offstr = fmt.Sprintf("+%d:", lr.Offset)
 		}
 		actstr := ""
 		if len(lr.Acts) > 0 {

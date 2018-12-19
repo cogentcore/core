@@ -72,6 +72,7 @@ Letter:		 None		 if Letter {
     Builtins:       None       if String == "" {
         true:        NameBuiltin       if StrName == "true"    do: Name; 
         false:       NameBuiltin       if StrName == "false"   do: Name; 
+        len:         NameBuiltin       if StrName == "len"     do: Name; 
     }
     Name:       Name       if Letter   do: Name; 
 }
@@ -262,10 +263,10 @@ ExprRules {
         // NewCall takes type arg 
         NewCall:  'key:new' '(' Type ')'  >Ast
         // Selector This must be after unary expr esp addr, DePtr 
-        Selector:  PrimaryExpr '.' PrimaryExpr  _Ast
+        Selector:  PrimaryExpr '.' PrimaryExpr  >Ast
         Acts:{ -1:ChgToken:"[0]":NameTag; }
         // Slice this needs further right recursion to keep matching more slices 
-        Slice:     ?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr  _Ast
+        Slice:     ?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr  >Ast
         MethCall:  ?PrimaryExpr '.' Name '(' ?ArgsExpr ')'      >Ast
         Acts:{ -1:ChgToken:"[0]":NameFunction; }
         // FuncCall must be after parens 
@@ -505,7 +506,7 @@ StmtRules {
         AsgnExisting:  ExprList '=' ExprList 'EOS'  >Ast
         Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
         AsgnNew:  ExprList ':=' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
         AsgnMath:  ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
         Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
         AsgnBit:  ExprList 'OpBitAsgn' ExprList 'EOS'  >Ast

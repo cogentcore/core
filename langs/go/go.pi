@@ -92,12 +92,13 @@
             "UniqueNm": "EndMulti",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "CommentMultiline",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "*/",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "PopState",
@@ -111,12 +112,13 @@
             "UniqueNm": "StartEmbededMulti",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "CommentMultiline",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "/*",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "PushState",
@@ -130,12 +132,13 @@
             "UniqueNm": "Comment",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "CommentMultiline",
             "Match": "AnyRune",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -144,12 +147,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "all CurState must be at top!  any multi-line requires state",
         "Token": "CommentMultiline",
         "Match": "CurState",
         "Pos": "AnyPos",
         "String": "CommentMulti",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -174,12 +178,13 @@
             "UniqueNm": "QuotedStrBacktick",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrBacktick",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\\`",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -192,12 +197,13 @@
             "UniqueNm": "EndStrBacktick",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrBacktick",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "`",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "PopState",
@@ -211,12 +217,13 @@
             "UniqueNm": "StrBacktick",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrBacktick",
             "Match": "AnyRune",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -225,12 +232,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "curstate at start -- multiline requires state",
         "Token": "LitStrBacktick",
         "Match": "CurState",
         "Pos": "AnyPos",
         "String": "StrBacktick",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
         "PushState": "",
@@ -241,12 +249,13 @@
         "UniqueNm": "StartCommentMulti",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "CommentMultiline",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "/*",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "PushState",
@@ -260,12 +269,13 @@
         "UniqueNm": "LitStrBacktick",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "LitStrBacktick",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "`",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "PushState",
@@ -279,12 +289,13 @@
         "UniqueNm": "CommentLine",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Comment",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "//",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "EOL"
@@ -297,12 +308,13 @@
         "UniqueNm": "SkipWhite",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "TextWhitespace",
         "Match": "WhiteSpace",
         "Pos": "AnyPos",
         "String": "",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -393,12 +405,13 @@
                 "UniqueNm": "break",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "break",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -411,12 +424,13 @@
                 "UniqueNm": "case",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "case",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -429,12 +443,13 @@
                 "UniqueNm": "chan",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "chan",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -447,12 +462,13 @@
                 "UniqueNm": "const",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "const",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -465,12 +481,13 @@
                 "UniqueNm": "continue",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "continue",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -483,12 +500,13 @@
                 "UniqueNm": "default",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "default",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -501,12 +519,13 @@
                 "UniqueNm": "defer",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "defer",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -519,12 +538,13 @@
                 "UniqueNm": "else",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "else",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -537,12 +557,13 @@
                 "UniqueNm": "fallthrough",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "fallthrough",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -555,12 +576,13 @@
                 "UniqueNm": "for",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "for",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -573,12 +595,13 @@
                 "UniqueNm": "func",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "func",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -591,12 +614,13 @@
                 "UniqueNm": "go",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "go",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -609,12 +633,13 @@
                 "UniqueNm": "goto",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "goto",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -627,12 +652,13 @@
                 "UniqueNm": "if",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "if",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -645,12 +671,13 @@
                 "UniqueNm": "import",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "import",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -663,12 +690,13 @@
                 "UniqueNm": "interface",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "interface",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -681,12 +709,13 @@
                 "UniqueNm": "map",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "map",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -699,12 +728,13 @@
                 "UniqueNm": "make",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "make",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -717,12 +747,13 @@
                 "UniqueNm": "new",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "new",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -735,12 +766,13 @@
                 "UniqueNm": "package",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "package",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -753,12 +785,13 @@
                 "UniqueNm": "range",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "range",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -771,12 +804,13 @@
                 "UniqueNm": "return",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "return",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -789,12 +823,13 @@
                 "UniqueNm": "select",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "select",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -807,12 +842,13 @@
                 "UniqueNm": "struct",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "struct",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -825,12 +861,13 @@
                 "UniqueNm": "switch",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "switch",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -843,12 +880,13 @@
                 "UniqueNm": "type",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "type",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -861,12 +899,13 @@
                 "UniqueNm": "var",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "Keyword",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "var",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -875,12 +914,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "this group should contain all reserved keywords",
             "Token": "None",
             "Match": "Letter",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": null,
             "PushState": "",
@@ -937,12 +977,13 @@
                 "UniqueNm": "bool",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "bool",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -955,12 +996,13 @@
                 "UniqueNm": "string",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "string",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -973,12 +1015,13 @@
                 "UniqueNm": "int",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "int",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -991,12 +1034,13 @@
                 "UniqueNm": "int8",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "int8",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1009,12 +1053,13 @@
                 "UniqueNm": "int16",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "int16",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1027,12 +1072,13 @@
                 "UniqueNm": "int32",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "int32",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1045,12 +1091,13 @@
                 "UniqueNm": "int64",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "int64",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1063,12 +1110,13 @@
                 "UniqueNm": "uint",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "uint",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1081,12 +1129,13 @@
                 "UniqueNm": "uint8",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "uint8",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1099,12 +1148,13 @@
                 "UniqueNm": "uint16",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "uint16",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1117,12 +1167,13 @@
                 "UniqueNm": "uint32",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "uint32",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1135,12 +1186,13 @@
                 "UniqueNm": "uint64",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "uint64",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1153,12 +1205,13 @@
                 "UniqueNm": "uintptr",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "uintptr",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1171,12 +1224,13 @@
                 "UniqueNm": "byte",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "byte",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1189,12 +1243,13 @@
                 "UniqueNm": "rune",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "rune",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1207,12 +1262,13 @@
                 "UniqueNm": "float32",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "float32",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1225,12 +1281,13 @@
                 "UniqueNm": "float64",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "float64",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1243,12 +1300,13 @@
                 "UniqueNm": "complex64",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "complex64",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1261,12 +1319,13 @@
                 "UniqueNm": "complex128",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "complex128",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1275,12 +1334,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "this group should contain all basic types, and no types that are not built into the language",
             "Token": "None",
             "Match": "Letter",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": null,
             "PushState": "",
@@ -1292,23 +1352,26 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
                 "type": "lex.Rule",
                 "name": "true",
                 "type": "lex.Rule",
-                "name": "false"
+                "name": "false",
+                "type": "lex.Rule",
+                "name": "len"
               },
               {
                 "Nm": "true",
                 "UniqueNm": "true",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "NameBuiltin",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "true",
-                "Off": 0,
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1321,12 +1384,32 @@
                 "UniqueNm": "false",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "NameBuiltin",
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "false",
-                "Off": 0,
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "len",
+                "UniqueNm": "len",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "len",
+                "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
                   "Name"
@@ -1335,12 +1418,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "",
             "Token": "None",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": null,
             "PushState": "",
@@ -1351,12 +1435,13 @@
             "UniqueNm": "Name",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "Name",
             "Match": "Letter",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Name"
@@ -1365,12 +1450,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "Letter",
         "Pos": "AnyPos",
         "String": "",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
         "PushState": "",
@@ -1381,12 +1467,13 @@
         "UniqueNm": "Number",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "LitNum",
         "Match": "Digit",
         "Pos": "AnyPos",
         "String": "",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Number"
@@ -1413,12 +1500,13 @@
             "UniqueNm": "NextNum",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "lookahead for number",
             "Token": "LitNum",
             "Match": "Digit",
             "Pos": "AnyPos",
             "String": "",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Number"
@@ -1441,12 +1529,13 @@
                 "UniqueNm": "Ellipsis",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpListEllipsis",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": ".",
-                "Off": 2,
+                "Offset": 2,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -1455,12 +1544,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "lookahead for another dot -- ellipses",
             "Token": "None",
             "Match": "String",
             "Pos": "AnyPos",
             "String": ".",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [],
             "PushState": "",
@@ -1471,12 +1561,13 @@
             "UniqueNm": "Period",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "default is just a plain .",
             "Token": "PunctSepPeriod",
             "Match": "String",
             "Pos": "AnyPos",
             "String": ".",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1485,12 +1576,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": ".",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
         "PushState": "",
@@ -1501,12 +1593,13 @@
         "UniqueNm": "LitStrSingle",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "LitStrSingle",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "'",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "QuotedRaw"
@@ -1519,12 +1612,13 @@
         "UniqueNm": "LitStrDouble",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "LitStrDouble",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "\"",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "QuotedRaw"
@@ -1537,12 +1631,13 @@
         "UniqueNm": "LParen",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctGpLParen",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "(",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1555,12 +1650,13 @@
         "UniqueNm": "RParen",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctGpRParen",
         "Match": "String",
         "Pos": "AnyPos",
         "String": ")",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1573,12 +1669,13 @@
         "UniqueNm": "LBrack",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctGpLBrack",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "[",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1591,12 +1688,13 @@
         "UniqueNm": "RBrack",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctGpRBrack",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "]",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1609,12 +1707,13 @@
         "UniqueNm": "LBrace",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctGpLBrace",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "{",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1627,12 +1726,13 @@
         "UniqueNm": "RBrace",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctGpRBrace",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "}",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1645,12 +1745,13 @@
         "UniqueNm": "Comma",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctSepComma",
         "Match": "String",
         "Pos": "AnyPos",
         "String": ",",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1663,12 +1764,13 @@
         "UniqueNm": "Semi",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "PunctSepSemicolon",
         "Match": "String",
         "Pos": "AnyPos",
         "String": ";",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -1693,12 +1795,13 @@
             "UniqueNm": "Define",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpAsgnDefine",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1711,12 +1814,13 @@
             "UniqueNm": "Colon",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "PunctSepColon",
             "Match": "String",
             "Pos": "AnyPos",
             "String": ":",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1725,12 +1829,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": ":",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -1755,12 +1860,13 @@
             "UniqueNm": "AsgnAdd",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathAsgnAdd",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1773,12 +1879,13 @@
             "UniqueNm": "AsgnInc",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpAsgnInc",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "+",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1791,12 +1898,13 @@
             "UniqueNm": "Add",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathAdd",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "+",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1805,12 +1913,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "+",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -1835,12 +1944,13 @@
             "UniqueNm": "AsgnSub",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathAsgnSub",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1853,12 +1963,13 @@
             "UniqueNm": "AsgnDec",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpAsgnDec",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "-",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1871,12 +1982,13 @@
             "UniqueNm": "Sub",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathSub",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "-",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1885,12 +1997,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "-",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -1913,12 +2026,13 @@
             "UniqueNm": "AsgnMul",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathAsgnMul",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1931,12 +2045,13 @@
             "UniqueNm": "Mult",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathMul",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "*",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1945,12 +2060,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "*",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -1973,12 +2089,13 @@
             "UniqueNm": "AsgnDiv",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathAsgnDiv",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -1991,12 +2108,13 @@
             "UniqueNm": "Div",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathDiv",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "/",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2005,12 +2123,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "comments already matched above..",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "/",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2033,12 +2152,13 @@
             "UniqueNm": "AsgnRem",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathAsgnRem",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2051,12 +2171,13 @@
             "UniqueNm": "Rem",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpMathRem",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "%",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2065,12 +2186,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "%",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2093,12 +2215,13 @@
             "UniqueNm": "AsgnXor",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpBitAsgnXor",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2111,12 +2234,13 @@
             "UniqueNm": "Xor",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpBitXor",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "^",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2125,12 +2249,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "^",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2155,12 +2280,13 @@
             "UniqueNm": "GtEq",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpRelGtEq",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2185,12 +2311,13 @@
                 "UniqueNm": "AsgnShiftRight",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpBitAsgnShiftRight",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": "=",
-                "Off": 2,
+                "Offset": 2,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -2203,12 +2330,13 @@
                 "UniqueNm": "ShiftRight",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpBitShiftRight",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": "\u003e",
-                "Off": 1,
+                "Offset": 1,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -2217,12 +2345,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "",
             "Token": "None",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\u003e",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [],
             "PushState": "",
@@ -2233,12 +2362,13 @@
             "UniqueNm": "Greater",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpRelGreater",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\u003e",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2247,12 +2377,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "\u003e",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2279,12 +2410,13 @@
             "UniqueNm": "LtEq",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpRelLtEq",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2297,12 +2429,13 @@
             "UniqueNm": "AsgnArrow",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpAsgnArrow",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "-",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2327,12 +2460,13 @@
                 "UniqueNm": "AsgnShiftLeft",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpBitAsgnShiftLeft",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": "=",
-                "Off": 2,
+                "Offset": 2,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -2345,12 +2479,13 @@
                 "UniqueNm": "ShiftLeft",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpBitShiftLeft",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": "\u003c",
-                "Off": 1,
+                "Offset": 1,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -2359,12 +2494,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "",
             "Token": "None",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\u003c",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [],
             "PushState": "",
@@ -2375,12 +2511,13 @@
             "UniqueNm": "Less",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpRelLess",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\u003c",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2389,12 +2526,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "\u003c",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2417,12 +2555,13 @@
             "UniqueNm": "Equality",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpRelEqual",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2435,12 +2574,13 @@
             "UniqueNm": "Asgn",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpAsgnAssign",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2449,12 +2589,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "=",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2477,12 +2618,13 @@
             "UniqueNm": "NotEqual",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpRelNotEqual",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2495,12 +2637,13 @@
             "UniqueNm": "Not",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpLogNot",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "!",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2509,12 +2652,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "!",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2541,12 +2685,13 @@
             "UniqueNm": "AsgnAnd",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpBitAsgnAnd",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2571,12 +2716,13 @@
                 "UniqueNm": "AsgnAndNot",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpBitAsgnAndNot",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": "=",
-                "Off": 2,
+                "Offset": 2,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -2589,12 +2735,13 @@
                 "UniqueNm": "AndNot",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "OpBitAndNot",
                 "Match": "String",
                 "Pos": "AnyPos",
                 "String": "^",
-                "Off": 1,
+                "Offset": 1,
                 "SizeAdj": 0,
                 "Acts": [
                   "Next"
@@ -2603,12 +2750,13 @@
                 "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "",
             "Token": "None",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "^",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [],
             "PushState": "",
@@ -2619,12 +2767,13 @@
             "UniqueNm": "LogAnd",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpLogAnd",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\u0026",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2637,12 +2786,13 @@
             "UniqueNm": "BitAnd",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpBitAnd",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "\u0026",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2651,12 +2801,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "\u0026",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2681,12 +2832,13 @@
             "UniqueNm": "AsgnOr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpBitAsgnOr",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "=",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2699,12 +2851,13 @@
             "UniqueNm": "LogOr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpLogOr",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "|",
-            "Off": 1,
+            "Offset": 1,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2717,12 +2870,13 @@
             "UniqueNm": "BitOr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "OpBitOr",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "|",
-            "Off": 0,
+            "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
               "Next"
@@ -2731,12 +2885,13 @@
             "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "|",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
         "PushState": "",
@@ -2747,12 +2902,13 @@
         "UniqueNm": "AnyText",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "all lexers should end with a default AnyRune rule so lexing is robust",
         "Token": "Text",
         "Match": "AnyRune",
         "Pos": "AnyPos",
         "String": "",
-        "Off": 0,
+        "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
           "Next"
@@ -2761,12 +2917,13 @@
         "NameMap": false
       }
     ],
+    "Off": false,
     "Desc": "",
     "Token": "None",
     "Match": "String",
     "Pos": "AnyPos",
     "String": "",
-    "Off": 0,
+    "Offset": 0,
     "SizeAdj": 0,
     "Acts": null,
     "PushState": "",
@@ -3893,7 +4050,7 @@
                 "Desc": "This must be after unary expr esp addr, DePtr",
                 "Rule": "PrimaryExpr '.' PrimaryExpr",
                 "StackMatch": "",
-                "Ast": "SubAst",
+                "Ast": "AnchorAst",
                 "Acts": [
                   {
                     "RunIdx": -1,
@@ -3915,7 +4072,7 @@
                 "Desc": "this needs further right recursion to keep matching more slices",
                 "Rule": "?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr",
                 "StackMatch": "",
-                "Ast": "SubAst",
+                "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false,
                 "FirstTokMap": false
@@ -6859,6 +7016,20 @@
                     "Path": "Name...",
                     "Tok": "NameVar",
                     "FmTok": "Name"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "Name",
+                    "Tok": "NameVar",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddDetail",
+                    "Path": "[1]",
+                    "Tok": "None",
+                    "FmTok": "None"
                   }
                 ],
                 "OptTokMap": false,
