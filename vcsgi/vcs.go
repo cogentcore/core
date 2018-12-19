@@ -7,10 +7,11 @@ package vcsgi
 import (
 	"errors"
 	"fmt"
-	"github.com/goki/gi/gi"
 	"os/exec"
 
-	"github.com/vcs"
+	"github.com/goki/gi/gi"
+
+	"github.com/Masterminds/vcs"
 )
 
 // A list of files that are tracked by version control - used temporarily as each directory is traversed

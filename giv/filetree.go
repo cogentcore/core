@@ -18,6 +18,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
@@ -31,7 +32,6 @@ import (
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/runes"
-	"github.com/vcs"
 )
 
 // FileTree is the root of a tree representing files in a given directory (and
