@@ -200,11 +200,13 @@ func (fn *FileNode) ReadDir(path string) error {
 	}
 	fn.SetOpen()
 
-	bytes, err := exec.Command("git", "ls-files", path).Output()
-	sep := byte(10)
-	names := strings.Split(string(bytes), string(sep))
-	for _, n := range names {
-		fn.Repo().AddFile(n)
+	if fn.Repo() != nil {
+		bytes, _ := exec.Command("git", "ls-files", path).Output()
+		sep := byte(10)
+		names := strings.Split(string(bytes), string(sep))
+		for _, n := range names {
+			fn.Repo().AddFile(n)
+		}
 	}
 
 	config := fn.ConfigOfFiles(path)
@@ -215,9 +217,11 @@ func (fn *FileNode) ReadDir(path string) error {
 		sf.FRoot = fn.FRoot
 		fp := filepath.Join(path, sf.Nm)
 		sf.SetNodePath(fp)
-		prefix := string(fn.FRoot.FPath) + "/"
-		relpth := strings.TrimPrefix(fp, prefix)
-		sf.InVcs = fn.Repo().InRepo(string(relpth))
+		if fn.Repo() != nil {
+			prefix := string(fn.FRoot.FPath) + "/"
+			relpth := strings.TrimPrefix(fp, prefix)
+			sf.InVcs = fn.Repo().InRepo(string(relpth))
+		}
 	}
 
 	if mods {
@@ -508,13 +512,8 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
-	//if fn.InGitRepo() {
-	//	err = ExecGitCmd("Delete", string(fn.FPath), "")
-	//	if (err != nil) {
-	//		fmt.Println(err)
-	//	}
-	//} else if fn.InSvnRepo() {
-	//	err = ExecSvnCmd("Delete", string(fn.FPath), "")
+	//if fn.InVcs {
+	//	fn.Repo().Remove()
 	//}
 	err = fn.Info.Delete()
 	fn.Delete(true) // we're done

@@ -45,17 +45,19 @@ type Repo interface {
 
 func NewRepo(remote, local string) (Repo, error) {
 	repo, err := vcs.NewRepo(remote, local)
-	switch repo.Vcs() {
-	case vcs.Git:
-		r := &GitRepo{}
-		r.Repo = repo
-		return r, err
-	case vcs.Svn:
-		fmt.Println("Svn version control not yet supported ")
-	case vcs.Hg:
-		fmt.Println("Hg version control not yet supported ")
-	case vcs.Bzr:
-		fmt.Println("Bzr version control not yet supported ")
+	if err == nil {
+		switch repo.Vcs() {
+		case vcs.Git:
+			r := &GitRepo{}
+			r.Repo = repo
+			return r, err
+		case vcs.Svn:
+			fmt.Println("Svn version control not yet supported ")
+		case vcs.Hg:
+			fmt.Println("Hg version control not yet supported ")
+		case vcs.Bzr:
+			fmt.Println("Bzr version control not yet supported ")
+		}
 	}
 	return nil, err
 }
