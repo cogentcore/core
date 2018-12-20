@@ -7,7 +7,6 @@ package vci
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os/exec"
 	"strings"
 
@@ -29,8 +28,8 @@ type Repo interface {
 	// into a local cache to speed checking whether a file is in the repository or not.
 	CacheFileNames()
 
-	// InRepo returns true if filename is in the repository -- must have called CacheFileNames
-	// first
+	// InRepo returns true if filename is in the repository -- uses CacheFileNames --
+	// will do that automatically but if cache might be stale, call it to refresh
 	InRepo(filename string) bool
 
 	// Add adds the file to the repo
@@ -82,8 +81,7 @@ func (gr *GitRepo) CacheFileNames() {
 
 func (gr *GitRepo) InRepo(filename string) bool {
 	if len(gr.Files) == 0 {
-		log.Println("GitRepo: must call CacheFileNames before using InRepo check")
-		return false
+		gr.CacheFileNames()
 	}
 	_, has := gr.Files[filename]
 	return has
