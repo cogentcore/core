@@ -12,7 +12,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -201,12 +200,7 @@ func (fn *FileNode) ReadDir(path string) error {
 	fn.SetOpen()
 
 	if fn.Repo() != nil {
-		bytes, _ := exec.Command("git", "ls-files", path).Output()
-		sep := byte(10)
-		names := strings.Split(string(bytes), string(sep))
-		for _, n := range names {
-			fn.Repo().AddFile(n)
-		}
+		fn.FRoot.Repo.AddFiles(path)
 	}
 
 	config := fn.ConfigOfFiles(path)

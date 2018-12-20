@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
@@ -24,8 +25,8 @@ type Repo interface {
 	// vcs.Repo includes those interface functions
 	vcs.Repo
 
-	// AddFile adds a path to a file to the cached list of files in repo - purely to limit disk access
-	AddFile(path string)
+	// AddFiles adds files at dirpath to the cached list of files in repo - purely to limit disk access
+	AddFiles(dirpath string)
 
 	// Get is used to perform an initial clone/checkout of a repository.
 	InRepo(filename string) bool
@@ -67,9 +68,14 @@ type GitRepo struct {
 	Files []string
 }
 
-// AddFile adds a path to a file to the cached list of files in repo - purely to limit disk access
-func (gr GitRepo) AddFile(path string) {
-	gi.StringsAppendIfUnique(&gr.Files, path, 500)
+// AddFiles adds files at dirpath to the cached list of files in repo - purely to limit disk access
+func (gr GitRepo) AddFiles(dirpath string) {
+	bytes, _ := exec.Command("git", "ls-files", dirpath).Output()
+	sep := byte(10)
+	paths := strings.Split(string(bytes), string(sep))
+	for _, path := range paths {
+		gi.StringsAppendIfUnique(&gr.Files, path, 500)
+	}
 }
 
 // IsTracked returns true if the file is being tracked in the specified repository
