@@ -516,6 +516,9 @@ func findPathChild(k Ki, child string) (int, bool) {
 		if err != nil {
 			return idx, false
 		}
+		if idx < 0 { // from end
+			idx = len(*k.Children()) + idx
+		}
 		if !k.Children().IsValidIndex(idx) {
 			return idx, false
 		}
