@@ -18,7 +18,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
@@ -55,23 +54,10 @@ var FileTreeProps = ki.Props{}
 // given path into this tree -- uses config children to preserve extra info
 // already stored about files.  Only paths listed in OpenDirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
-	// setup vcs repo before opening dirs
-	repo, err := vcs.NewRepo("origin", path)
-	if err != nil {
-		// fmt.Println(err)
-		// return // not all dirs are VCS controlled!!
-	} else {
-		switch repo.Vcs() {
-		case vcs.Git:
-			ft.Repo = vci.GitRepo{Repo: repo}
-			ft.RepoType = "git"
-		case vcs.Svn:
-			fmt.Println("Svn version control not yet supported ")
-		case vcs.Hg:
-			fmt.Println("Hg version control not yet supported ")
-		case vcs.Bzr:
-			fmt.Println("Bzr version control not yet supported ")
-		}
+	repo, err := vci.NewRepo("origin", path)
+	if err == nil {
+		ft.Repo = repo
+		ft.RepoType = string(repo.Vcs())
 	}
 
 	ft.FRoot = ft // we are our own root..
@@ -218,7 +204,7 @@ func (fn *FileNode) ReadDir(path string) error {
 	sep := byte(10)
 	names := strings.Split(string(bytes), string(sep))
 	for _, n := range names {
-		vci.AppendToVcsFiles(n)
+		fn.Repo().AddFile(n)
 	}
 
 	config := fn.ConfigOfFiles(path)
@@ -231,7 +217,7 @@ func (fn *FileNode) ReadDir(path string) error {
 		sf.SetNodePath(fp)
 		prefix := string(fn.FRoot.FPath) + "/"
 		relpth := strings.TrimPrefix(fp, prefix)
-		sf.InVcs = vci.InRepo(string(relpth))
+		sf.InVcs = fn.Repo().InRepo(string(relpth))
 	}
 
 	if mods {
@@ -512,23 +498,8 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 // Duplicate creates a copy of given file -- only works for regular files, not
 // directories
 func (fn *FileNode) DuplicateFile() error {
-	nn, err := fn.Info.Duplicate()
+	_, err := fn.Info.Duplicate()
 	if err == nil && fn.Par != nil {
-		prompt := fmt.Sprintf("Do you want to add the duplicated file \"%v\" to %v? If you choose No, you can add the file later", nn, fn.RepoType())
-		title := fmt.Sprintf("Add File to %v", fn.RepoType())
-		gi.ChoiceDialog(nil, gi.DlgOpts{Title: title,
-			Prompt: prompt}, []string{"Yes", "No"},
-			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				switch sig {
-				case 0:
-					fnd, found := fn.FRoot.FindFile(nn)
-					if found && fnd != nil {
-						fnd.AddToVcs()
-					}
-				case 1:
-					// do nothing
-				}
-			})
 		fnp := fn.Par.Embed(KiT_FileNode).(*FileNode)
 		fnp.UpdateNode()
 	}

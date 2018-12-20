@@ -9,40 +9,26 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/goki/gi/gi"
-
 	"github.com/Masterminds/vcs"
+	"github.com/goki/gi/gi"
 )
-
-// A list of files that are tracked by version control - used temporarily as each directory is traversed
-// VCS add/delete should set fn.InVc to keep the FileNode up to date
-var VcsFiles []string
 
 var (
 	// ErrUnknownVCS is returned when VCS cannot be determined from the vcs Repo
 	ErrUnknownVCS = errors.New("Unknown VCS")
 )
 
-func AppendToVcsFiles(str string) {
-	gi.StringsAppendIfUnique(&VcsFiles, str, 500)
-}
-
-func InRepo(filename string) bool {
-	for _, f := range VcsFiles {
-		if f == filename {
-			return true
-		}
-	}
-	return false
-}
-
 // Repo provides an interface that parallels vcs.Repo (https://github.com/Masterminds/vcs)
 // with some additional functions
 type Repo interface {
+	// vcs.Repo includes those interface functions
 	vcs.Repo
 
+	// AddFile adds a path to a file to the cached list of files in repo - purely to limit disk access
+	AddFile(path string)
+
 	// Get is used to perform an initial clone/checkout of a repository.
-	IsTracked(filename string) bool
+	InRepo(filename string) bool
 
 	// Add adds the file to the repo
 	Add(filename string) error
@@ -57,13 +43,36 @@ type Repo interface {
 	RemoveKeepLocal(filename string) error
 }
 
+func NewRepo(remote, local string) (Repo, error) {
+	repo, err := vcs.NewRepo(remote, local)
+	switch repo.Vcs() {
+	case vcs.Git:
+		r := &GitRepo{}
+		r.Repo = repo
+		return r, err
+	case vcs.Svn:
+		fmt.Println("Svn version control not yet supported ")
+	case vcs.Hg:
+		fmt.Println("Hg version control not yet supported ")
+	case vcs.Bzr:
+		fmt.Println("Bzr version control not yet supported ")
+	}
+	return nil, err
+}
+
 type GitRepo struct {
 	vcs.Repo
+	Files []string
+}
+
+// AddFile adds a path to a file to the cached list of files in repo - purely to limit disk access
+func (gr GitRepo) AddFile(path string) {
+	gi.StringsAppendIfUnique(&gr.Files, path, 500)
 }
 
 // IsTracked returns true if the file is being tracked in the specified repository
-func (gr GitRepo) IsTracked(filename string) bool {
-	for _, f := range VcsFiles {
+func (gr GitRepo) InRepo(filename string) bool {
+	for _, f := range gr.Files {
 		if f == filename {
 			return true
 		}
