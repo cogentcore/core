@@ -6,6 +6,19 @@ license that can be found in the LICENSE file. */
 
 package main
 
+type ityp int
+
+type ptyp *string
+
+type mtyp map[string]int
+
+type sltyp []float32
+
+type sttyp struct {
+	A int
+	B float32
+}
+
 func bb() {
 	a := pv.FuncMonk(27)[2]
 }

@@ -5937,7 +5937,29 @@
                 "Rule": "Name Type 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameType",
+                    "FmTok": "Name"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "Name",
+                    "Tok": "None",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddDetail",
+                    "Path": "[1]",
+                    "Tok": "None",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               }
@@ -7302,15 +7324,7 @@
                 "Rule": "ExprList '=' ExprList 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "Name...",
-                    "Tok": "NameVar",
-                    "FmTok": "Name"
-                  }
-                ],
+                "Acts": [],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -7360,15 +7374,7 @@
                 "Rule": "ExprList 'OpMathAsgn' ExprList 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "Name...",
-                    "Tok": "NameVar",
-                    "FmTok": "Name"
-                  }
-                ],
+                "Acts": [],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -7382,15 +7388,7 @@
                 "Rule": "ExprList 'OpBitAsgn' ExprList 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "Name...",
-                    "Tok": "NameVar",
-                    "FmTok": "Name"
-                  }
-                ],
+                "Acts": [],
                 "OptTokMap": false,
                 "FirstTokMap": false
               }
@@ -7824,6 +7822,13 @@
                         "Path": "[0]",
                         "Tok": "NameConstant",
                         "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddDetail",
+                        "Path": "[-1]",
+                        "Tok": "None",
+                        "FmTok": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7954,6 +7959,13 @@
                         "Path": "[0]",
                         "Tok": "NameVarGlobal",
                         "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddDetail",
+                        "Path": "[-1]",
+                        "Tok": "None",
+                        "FmTok": "None"
                       }
                     ],
                     "OptTokMap": false,
@@ -7982,6 +7994,13 @@
                         "Act": "AddSymbol",
                         "Path": "[0]",
                         "Tok": "NameVarGlobal",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddDetail",
+                        "Path": "[1]",
+                        "Tok": "None",
                         "FmTok": "None"
                       }
                     ],

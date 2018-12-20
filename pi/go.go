@@ -229,7 +229,7 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		}
 	}
 
-	fs := &FileState{}
+	fs := NewFileState()
 	// optional monitoring of parsing
 	// fs.ParseState.Trace.On = true
 	// fs.ParseState.Trace.Match = true
@@ -244,7 +244,7 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 			continue
 		}
 		fpath := filepath.Join(path, fnm)
-		err = fs.OpenFile(fpath)
+		err = fs.Src.OpenFile(fpath)
 		if err != nil {
 			continue
 		}

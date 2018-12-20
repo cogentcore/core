@@ -139,6 +139,7 @@ func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
 	pr.PassTwo.NestDepthLine(fs.LexState.Lex, initDepth)                         // important to set this one's depth
 	fs.Src.SetLine(ln, fs.LexState.Lex, fs.LexState.Comments, fs.LexState.Stack) // before saving here
 	fs.TwoState.SetSrc(&fs.Src)
+	fs.Src.EosPos[ln] = nil // reset eos
 	pr.PassTwo.EosDetectPos(&fs.TwoState, lex.Pos{Ln: ln}, 1)
 	merge := lex.MergeLines(fs.LexState.Lex, fs.LexState.Comments)
 	mc := merge.Clone()
@@ -233,8 +234,9 @@ func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 	if ln > nlines || ln < 0 {
 		return nil
 	}
-	lfs := &FileState{}
-	lfs.InitFromLine(fs, ln)
+	lfs := NewFileState()
+	lfs.Src.InitFromLine(&fs.Src, ln)
+	lfs.Src.EnsureFinalEos(0)
 	lfs.ParseState.Init(&lfs.Src, &lfs.Ast)
 	pr.ParseRun(lfs)
 	return lfs
@@ -248,8 +250,8 @@ func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *
 	if str == "" {
 		return nil
 	}
-	lfs := &FileState{}
-	lfs.InitFromString(str, fname, sup)
+	lfs := NewFileState()
+	lfs.Src.InitFromString(str, fname, sup)
 	// lfs.ParseState.Trace.FullOn()
 	// lfs.ParseSTate.Trace.StdOut()
 	lfs.ParseState.Init(&lfs.Src, &lfs.Ast)

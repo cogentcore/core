@@ -24,8 +24,8 @@ func TestParse(t *testing.T) {
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := &FileState{}
-	err := fs.OpenFile("testdata/textview.go")
+	fs := NewFileState()
+	err := fs.Src.OpenFile("testdata/textview.go")
 	if err != nil {
 		t.Error(err)
 	}

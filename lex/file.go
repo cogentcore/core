@@ -5,6 +5,12 @@
 package lex
 
 import (
+	"bytes"
+	"io/ioutil"
+	"log"
+	"os"
+	"strings"
+
 	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/token"
 )
@@ -85,6 +91,78 @@ func (fl *File) LinesDeleted(stln, edln int) {
 	fl.LastStacks = append(fl.LastStacks[:stln], fl.LastStacks[edln:]...)
 	fl.EosPos = append(fl.EosPos[:stln], fl.EosPos[edln:]...)
 }
+
+// RunesFromBytes returns the lines of runes from a basic byte array
+func RunesFromBytes(b []byte) [][]rune {
+	lns := bytes.Split(b, []byte("\n"))
+	nlines := len(lns)
+	rns := make([][]rune, nlines)
+	for ln, txt := range lns {
+		rns[ln] = bytes.Runes(txt)
+	}
+	return rns
+}
+
+// RunesFromString returns the lines of runes from a string (more efficient
+// than converting to bytes)
+func RunesFromString(str string) [][]rune {
+	lns := strings.Split(str, "\n")
+	nlines := len(lns)
+	rns := make([][]rune, nlines)
+	for ln, txt := range lns {
+		rns[ln] = []rune(txt)
+	}
+	return rns
+}
+
+// OpenFile sets source to be parsed from given filename
+func (fl *File) OpenFile(fname string) error {
+	fp, err := os.Open(fname)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	alltxt, err := ioutil.ReadAll(fp)
+	fp.Close()
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	rns := RunesFromBytes(alltxt)
+	sup := filecat.SupportedFromFile(fname)
+	fl.SetSrc(&rns, fname, sup)
+	return nil
+}
+
+// InitFromLine initializes from one line of source file
+func (fl *File) InitFromLine(sfl *File, ln int) bool {
+	nlines := sfl.NLines()
+	if ln > nlines || ln < 0 {
+		return false
+	}
+	src := [][]rune{(*sfl.Lines)[ln], []rune{}} // need extra blank
+	fl.SetSrc(&src, sfl.Filename, sfl.Sup)
+	fl.Lexs = []Line{sfl.Lexs[ln], Line{}}
+	fl.Comments = []Line{sfl.Comments[ln], Line{}}
+	fl.EosPos = []EosPos{sfl.EosPos[ln], EosPos{}}
+	return true
+}
+
+// InitFromString initializes from given string. Returns false if string is empty
+func (fl *File) InitFromString(str string, fname string, sup filecat.Supported) bool {
+	if str == "" {
+		return false
+	}
+	src := RunesFromString(str)
+	if len(src) == 1 { // need more than 1 line
+		src = append(src, []rune{})
+	}
+	fl.SetSrc(&src, fname, sup)
+	return true
+}
+
+///////////////////////////////////////////////////////////////////////////
+//  Accessors
 
 // NLines returns the number of lines in source
 func (fl *File) NLines() int {
@@ -275,6 +353,9 @@ func (fl *File) TokenMapReg(reg Reg) TokenMap {
 	return m
 }
 
+/////////////////////////////////////////////////////////////////////
+//  Source access from pos, reg, tok
+
 // TokenSrc gets source runes for given token position
 func (fl *File) TokenSrc(pos Pos) []rune {
 	if !fl.IsLexPosValid(pos) {
@@ -315,9 +396,9 @@ func (fl *File) RegSrc(reg Reg) string {
 	}
 	src := string((*fl.Lines)[reg.St.Ln][reg.St.Ch:])
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
-		src += "|" + string((*fl.Lines)[ln])
+		src += "|>" + string((*fl.Lines)[ln])
 	}
-	src += "|" + string((*fl.Lines)[reg.Ed.Ln][:reg.Ed.Ch])
+	src += "|>" + string((*fl.Lines)[reg.Ed.Ln][:reg.Ed.Ch])
 	return src
 }
 
@@ -343,6 +424,47 @@ func (fl *File) LexTagSrc() string {
 		txt += fl.LexTagSrcLn(ln) + "\n"
 	}
 	return txt
+}
+
+/////////////////////////////////////////////////////////////////
+// EOS end of statement processing
+
+// InsertEos inserts an EOS just after the given token position
+// (e.g., cp = last token in line)
+func (fl *File) InsertEos(cp Pos) Pos {
+	np := Pos{cp.Ln, cp.Ch + 1}
+	elx := fl.LexAt(cp)
+	depth := elx.Tok.Depth
+	fl.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.KeyToken{Tok: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
+	fl.EosPos[np.Ln] = append(fl.EosPos[np.Ln], np.Ch)
+	return np
+}
+
+// ReplaceEos replaces given token with an EOS
+func (fl *File) ReplaceEos(cp Pos) {
+	clex := fl.LexAt(cp)
+	clex.Tok.Tok = token.EOS
+	fl.EosPos[cp.Ln] = append(fl.EosPos[cp.Ln], cp.Ch)
+}
+
+// EnsureFinalEos makes sure that the given line ends with an EOS (if it
+// has tokens).
+// Used for line-at-time parsing just to make sure it matches even if
+// you haven't gotten to the end etc.
+func (fl *File) EnsureFinalEos(ln int) {
+	if ln >= fl.NLines() {
+		return
+	}
+	sz := len(fl.Lexs[ln])
+	if sz == 0 {
+		return // can't get depth or anything -- useless
+	}
+	ep := Pos{ln, sz - 1}
+	elx := fl.LexAt(ep)
+	if elx.Tok.Tok == token.EOS {
+		return
+	}
+	fl.InsertEos(ep)
 }
 
 // NextEos finds the next EOS position at given depth, false if none

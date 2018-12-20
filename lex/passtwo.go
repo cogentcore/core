@@ -48,23 +48,6 @@ func (ts *TwoState) NextLine() {
 	ts.Pos.Ch = 0
 }
 
-// InsertEOS inserts an EOS just after the given token position (e.g., cp = last token in line)
-func (ts *TwoState) InsertEOS(cp Pos) Pos {
-	np := Pos{cp.Ln, cp.Ch + 1}
-	elx := ts.Src.LexAt(cp)
-	depth := elx.Tok.Depth
-	ts.Src.Lexs[cp.Ln].Insert(np.Ch, Lex{Tok: token.KeyToken{Tok: token.EOS, Depth: depth}, St: elx.Ed, Ed: elx.Ed})
-	ts.Src.EosPos[np.Ln] = append(ts.Src.EosPos[np.Ln], np.Ch)
-	return np
-}
-
-// ReplaceEOS replaces given token with an EOS
-func (ts *TwoState) ReplaceEOS(cp Pos) {
-	clex := ts.Src.LexAt(cp)
-	clex.Tok.Tok = token.EOS
-	ts.Src.EosPos[cp.Ln] = append(ts.Src.EosPos[cp.Ln], cp.Ch)
-}
-
 // Error adds an passtwo error at current position
 func (ts *TwoState) Error(msg string) {
 	ppos := ts.Pos
@@ -223,21 +206,21 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 						if ok {
 							ilx := ts.Src.LexAt(ip)
 							if ilx.Tok.Tok != token.PunctGpLBrace && ilx.Tok.Tok != token.EOS {
-								ts.InsertEOS(ip)
+								ts.Src.InsertEos(ip)
 							}
 						}
 					} else {
 						ip := Pos{ts.Pos.Ln, ci - 1}
 						ilx := ts.Src.LexAt(ip)
 						if ilx.Tok.Tok != token.PunctGpLBrace {
-							ts.InsertEOS(ip)
+							ts.Src.InsertEos(ip)
 							ci++
 							sz++
 						}
 					}
 					if ci == sz-1 {
 						ip := Pos{ts.Pos.Ln, ci}
-						ts.InsertEOS(ip)
+						ts.Src.InsertEos(ip)
 						sz++
 						skip = true
 					}
@@ -254,19 +237,19 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 			sp := Pos{ts.Pos.Ln, 0} // start of line token
 			slx := ts.Src.LexAt(sp)
 			if slx.Tok.Depth == elx.Tok.Depth {
-				ts.InsertEOS(ep)
+				ts.Src.InsertEos(ep)
 			}
 		}
 		if len(pt.EolToks) > 0 { // not depth specific
 			if pt.EolToks.Match(elx.Tok) {
-				ts.InsertEOS(ep)
+				ts.Src.InsertEos(ep)
 			}
 		}
 		if pt.Semi {
 			for ts.Pos.Ch = 0; ts.Pos.Ch < sz; ts.Pos.Ch++ {
 				lx := ts.Src.LexAt(ts.Pos)
 				if lx.Tok.Tok == token.PunctSepSemicolon {
-					ts.ReplaceEOS(ts.Pos)
+					ts.Src.ReplaceEos(ts.Pos)
 				}
 			}
 		}

@@ -411,6 +411,7 @@ TypeRules {
     TypeDeclN {
         TypeDeclGroup:  '(' TypeDecls ')'  
         TypeDeclEl:     Name Type 'EOS'    >Ast
+        Acts:{ -1:ChgToken:"Name":NameType<-Name; -1:AddSymbol:"Name":None; -1:AddDetail:"[1]":None; }
     }
     TypeDecls:  TypeDeclEl ?TypeDecls  
     TypeList {
@@ -518,14 +519,11 @@ StmtRules {
         ExprStmt:  Expr 'EOS'             >Ast
     }
     Asgn {
-        AsgnExisting:  ExprList '=' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
-        AsgnNew:  ExprList ':=' ExprList 'EOS'  >Ast
+        AsgnExisting:  ExprList '=' ExprList 'EOS'   >Ast
+        AsgnNew:       ExprList ':=' ExprList 'EOS'  >Ast
         Acts:{ -1:ChgToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
         AsgnMath:  ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
-        AsgnBit:  ExprList 'OpBitAsgn' ExprList 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; }
+        AsgnBit:   ExprList 'OpBitAsgn' ExprList 'EOS'   >Ast
     }
     Elses {
         ElseIfStmt:      'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                   >Ast
@@ -565,7 +563,7 @@ DeclRules {
         // ConstOpts different types of const expressions 
         ConstOpts {
             ConstSpec:  NameList ?Type '=' Expr 'EOS'  >Ast
-            Acts:{ -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
+            Acts:{ -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; -1:AddDetail:"[-1]":None; }
             // ConstSpecName only a name, no expression 
             ConstSpecName:  NameList 'EOS'  >Ast
             Acts:{ -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; }
@@ -578,10 +576,10 @@ DeclRules {
         // VarOpts different types of var expressions 
         VarOpts {
             VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  >Ast
-            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
+            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; -1:AddDetail:"[-1]":None; }
             // VarSpec only a name and type, no expression 
             VarSpec:  NameList Type 'EOS'  >Ast
-            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; }
+            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; -1:AddDetail:"[1]":None; }
         }
     }
     VarList:  VarOpts ?VarList  
