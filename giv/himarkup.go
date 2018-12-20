@@ -126,7 +126,7 @@ func (hm *HiMarkup) MarkupTagsLine(ln int, txt []byte) (lex.Line, error) {
 		return nil, nil
 	}
 	if hm.PiLang != nil {
-		ll := hm.PiLang.LexLine(hm.PiState, ln)
+		ll := hm.PiLang.HiLine(hm.PiState, ln)
 		return ll, nil
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsLine(txt)
