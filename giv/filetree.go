@@ -40,8 +40,8 @@ type FileTree struct {
 	FileNode
 	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
-	NodeType  reflect.Type `desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
-	Repo      vci.Repo     `desc:"interface for version control system calls"`
+	NodeType  reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
+	Repo      vci.Repo     `view:"-" json:"-" xml:"-" desc:"interface for version control system calls"`
 	RepoType  string       `desc:"the repository type, git, svn, etc cached for performance"`
 }
 
