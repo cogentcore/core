@@ -39,7 +39,7 @@ type Lang interface {
 	// manages any symbol output from parsing as appropriate for the language / format.
 	ParseFile(fs *FileState)
 
-	// LexLine does the lexing of a given line of the file, using existing context
+	// LexLine does just the lexing of a given line of the file, using existing context
 	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState.
 	// languages can run the parser on the line to augment the lex token output as appropriate.
@@ -52,6 +52,13 @@ type Lang interface {
 	// the results will NOT be used to update any existing full-file Ast representation --
 	// should call ParseFile to update that as appropriate.
 	ParseLine(fs *FileState, line int) *FileState
+
+	// HiLine does the lexing and potentially parsing of a given line of the file,
+	// for purposes of syntax highlighting -- uses existing context
+	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
+	// The rune source information is assumed to have already been updated in FileState.
+	// languages can run the parser on the line to augment the lex token output as appropriate.
+	HiLine(fs *FileState, line int) lex.Line
 
 	// CompleteLine provides the list of relevant completions for given text
 	// which is at given position within the file.

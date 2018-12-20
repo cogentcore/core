@@ -50,29 +50,44 @@ Letter:		 None		 if Letter {
     // Type this group should contain all basic types, and no types that are not built into the language 
     Type:       None       if Letter {
         bool:             KeywordType       if StrName == "bool"         do: Name; 
-        string:           KeywordType       if StrName == "string"       do: Name; 
+        byte:             KeywordType       if StrName == "byte"         do: Name; 
+        complex64:        KeywordType       if StrName == "complex64"    do: Name; 
+        complex128:       KeywordType       if StrName == "complex128"   do: Name; 
+        error:            KeywordType       if StrName == "error"        do: Name; 
+        float32:          KeywordType       if StrName == "float32"      do: Name; 
+        float64:          KeywordType       if StrName == "float64"      do: Name; 
         int:              KeywordType       if StrName == "int"          do: Name; 
         int8:             KeywordType       if StrName == "int8"         do: Name; 
         int16:            KeywordType       if StrName == "int16"        do: Name; 
         int32:            KeywordType       if StrName == "int32"        do: Name; 
         int64:            KeywordType       if StrName == "int64"        do: Name; 
+        rune:             KeywordType       if StrName == "rune"         do: Name; 
+        string:           KeywordType       if StrName == "string"       do: Name; 
         uint:             KeywordType       if StrName == "uint"         do: Name; 
         uint8:            KeywordType       if StrName == "uint8"        do: Name; 
         uint16:           KeywordType       if StrName == "uint16"       do: Name; 
         uint32:           KeywordType       if StrName == "uint32"       do: Name; 
         uint64:           KeywordType       if StrName == "uint64"       do: Name; 
         uintptr:          KeywordType       if StrName == "uintptr"      do: Name; 
-        byte:             KeywordType       if StrName == "byte"         do: Name; 
-        rune:             KeywordType       if StrName == "rune"         do: Name; 
-        float32:          KeywordType       if StrName == "float32"      do: Name; 
-        float64:          KeywordType       if StrName == "float64"      do: Name; 
-        complex64:        KeywordType       if StrName == "complex64"    do: Name; 
-        complex128:       KeywordType       if StrName == "complex128"   do: Name; 
     }
     Builtins:       None       if String == "" {
-        true:        NameBuiltin       if StrName == "true"    do: Name; 
-        false:       NameBuiltin       if StrName == "false"   do: Name; 
-        len:         NameBuiltin       if StrName == "len"     do: Name; 
+        append:        NameBuiltin       if StrName == "append"    do: Name; 
+        cap:           NameBuiltin       if StrName == "cap"       do: Name; 
+        close:         NameBuiltin       if StrName == "close"     do: Name; 
+        complex:       NameBuiltin       if StrName == "complex"   do: Name; 
+        copy:          NameBuiltin       if StrName == "copy"      do: Name; 
+        delete:        NameBuiltin       if StrName == "delete"    do: Name; 
+        imag:          NameBuiltin       if StrName == "imag"      do: Name; 
+        len:           NameBuiltin       if StrName == "len"       do: Name; 
+        panic:         NameBuiltin       if StrName == "panic"     do: Name; 
+        print:         NameBuiltin       if StrName == "print"     do: Name; 
+        println:       NameBuiltin       if StrName == "println"   do: Name; 
+        real:          NameBuiltin       if StrName == "real"      do: Name; 
+        recover:       NameBuiltin       if StrName == "recover"   do: Name; 
+        true:          NameBuiltin       if StrName == "true"      do: Name; 
+        false:         NameBuiltin       if StrName == "false"     do: Name; 
+        iota:          NameBuiltin       if StrName == "iota"      do: Name; 
+        nil:           NameBuiltin       if StrName == "nil"       do: Name; 
     }
     Name:       Name       if Letter   do: Name; 
 }

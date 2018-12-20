@@ -205,6 +205,7 @@ func (pt *PassTwo) EosDetect(ts *TwoState) {
 func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 	ts.Pos = pos
 	nlines := ts.Src.NLines()
+	ok := false
 	for lc := 0; ts.Pos.Ln < nlines && lc < nln; lc++ {
 		sz := len(ts.Src.Lexs[ts.Pos.Ln])
 		if sz == 0 {
@@ -218,10 +219,12 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 				if lx.Tok.Tok == token.PunctGpRBrace {
 					if ci == 0 {
 						ip := Pos{ts.Pos.Ln, 0}
-						ip, _ = ts.Src.PrevTokenPos(ip)
-						ilx := ts.Src.LexAt(ip)
-						if ilx.Tok.Tok != token.PunctGpLBrace && ilx.Tok.Tok != token.EOS {
-							ts.InsertEOS(ip)
+						ip, ok = ts.Src.PrevTokenPos(ip)
+						if ok {
+							ilx := ts.Src.LexAt(ip)
+							if ilx.Tok.Tok != token.PunctGpLBrace && ilx.Tok.Tok != token.EOS {
+								ts.InsertEOS(ip)
+							}
 						}
 					} else {
 						ip := Pos{ts.Pos.Ln, ci - 1}

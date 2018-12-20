@@ -932,11 +932,21 @@
             "Props": null,
             "Kids": [
               {
-                "n": 19,
+                "n": 20,
                 "type": "lex.Rule",
                 "name": "bool",
                 "type": "lex.Rule",
-                "name": "string",
+                "name": "byte",
+                "type": "lex.Rule",
+                "name": "complex64",
+                "type": "lex.Rule",
+                "name": "complex128",
+                "type": "lex.Rule",
+                "name": "error",
+                "type": "lex.Rule",
+                "name": "float32",
+                "type": "lex.Rule",
+                "name": "float64",
                 "type": "lex.Rule",
                 "name": "int",
                 "type": "lex.Rule",
@@ -948,6 +958,10 @@
                 "type": "lex.Rule",
                 "name": "int64",
                 "type": "lex.Rule",
+                "name": "rune",
+                "type": "lex.Rule",
+                "name": "string",
+                "type": "lex.Rule",
                 "name": "uint",
                 "type": "lex.Rule",
                 "name": "uint8",
@@ -958,19 +972,7 @@
                 "type": "lex.Rule",
                 "name": "uint64",
                 "type": "lex.Rule",
-                "name": "uintptr",
-                "type": "lex.Rule",
-                "name": "byte",
-                "type": "lex.Rule",
-                "name": "rune",
-                "type": "lex.Rule",
-                "name": "float32",
-                "type": "lex.Rule",
-                "name": "float64",
-                "type": "lex.Rule",
-                "name": "complex64",
-                "type": "lex.Rule",
-                "name": "complex128"
+                "name": "uintptr"
               },
               {
                 "Nm": "bool",
@@ -992,8 +994,8 @@
                 "NameMap": false
               },
               {
-                "Nm": "string",
-                "UniqueNm": "string",
+                "Nm": "byte",
+                "UniqueNm": "byte",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -1001,7 +1003,102 @@
                 "Token": "KeywordType",
                 "Match": "StrName",
                 "Pos": "AnyPos",
-                "String": "string",
+                "String": "byte",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "complex64",
+                "UniqueNm": "complex64",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "complex64",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "complex128",
+                "UniqueNm": "complex128",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "complex128",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "error",
+                "UniqueNm": "error",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "error",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "float32",
+                "UniqueNm": "float32",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "float32",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "float64",
+                "UniqueNm": "float64",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "float64",
                 "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
@@ -1097,6 +1194,44 @@
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "int64",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "rune",
+                "UniqueNm": "rune",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "rune",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "string",
+                "UniqueNm": "string",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "KeywordType",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "string",
                 "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
@@ -1218,120 +1353,6 @@
                 ],
                 "PushState": "",
                 "NameMap": false
-              },
-              {
-                "Nm": "byte",
-                "UniqueNm": "byte",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "byte",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": "",
-                "NameMap": false
-              },
-              {
-                "Nm": "rune",
-                "UniqueNm": "rune",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "rune",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": "",
-                "NameMap": false
-              },
-              {
-                "Nm": "float32",
-                "UniqueNm": "float32",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "float32",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": "",
-                "NameMap": false
-              },
-              {
-                "Nm": "float64",
-                "UniqueNm": "float64",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "float64",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": "",
-                "NameMap": false
-              },
-              {
-                "Nm": "complex64",
-                "UniqueNm": "complex64",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "complex64",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": "",
-                "NameMap": false
-              },
-              {
-                "Nm": "complex128",
-                "UniqueNm": "complex128",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "complex128",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "PushState": "",
-                "NameMap": false
               }
             ],
             "Off": false,
@@ -1352,13 +1373,288 @@
             "Props": null,
             "Kids": [
               {
-                "n": 3,
+                "n": 17,
+                "type": "lex.Rule",
+                "name": "append",
+                "type": "lex.Rule",
+                "name": "cap",
+                "type": "lex.Rule",
+                "name": "close",
+                "type": "lex.Rule",
+                "name": "complex",
+                "type": "lex.Rule",
+                "name": "copy",
+                "type": "lex.Rule",
+                "name": "delete",
+                "type": "lex.Rule",
+                "name": "imag",
+                "type": "lex.Rule",
+                "name": "len",
+                "type": "lex.Rule",
+                "name": "panic",
+                "type": "lex.Rule",
+                "name": "print",
+                "type": "lex.Rule",
+                "name": "println",
+                "type": "lex.Rule",
+                "name": "real",
+                "type": "lex.Rule",
+                "name": "recover",
                 "type": "lex.Rule",
                 "name": "true",
                 "type": "lex.Rule",
                 "name": "false",
                 "type": "lex.Rule",
-                "name": "len"
+                "name": "iota",
+                "type": "lex.Rule",
+                "name": "nil"
+              },
+              {
+                "Nm": "append",
+                "UniqueNm": "append",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "append",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "cap",
+                "UniqueNm": "cap",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "cap",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "close",
+                "UniqueNm": "close",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "close",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "complex",
+                "UniqueNm": "complex",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "complex",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "copy",
+                "UniqueNm": "copy",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "copy",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "delete",
+                "UniqueNm": "delete",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "delete",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "imag",
+                "UniqueNm": "imag",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "imag",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "len",
+                "UniqueNm": "len",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "len",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "panic",
+                "UniqueNm": "panic",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "panic",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "print",
+                "UniqueNm": "print",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "print",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "println",
+                "UniqueNm": "println",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "println",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "real",
+                "UniqueNm": "real",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "real",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "recover",
+                "UniqueNm": "recover",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "recover",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "true",
@@ -1399,8 +1695,8 @@
                 "NameMap": false
               },
               {
-                "Nm": "len",
-                "UniqueNm": "len",
+                "Nm": "iota",
+                "UniqueNm": "iota",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -1408,7 +1704,26 @@
                 "Token": "NameBuiltin",
                 "Match": "StrName",
                 "Pos": "AnyPos",
-                "String": "len",
+                "String": "iota",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "nil",
+                "UniqueNm": "nil",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "nil",
                 "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [

@@ -72,13 +72,7 @@ func (gl *GoLang) LexLine(fs *FileState, line int) lex.Line {
 	if pr == nil {
 		return nil
 	}
-	ll := pr.LexLine(fs, line)
-	lfs := pr.ParseLine(fs, line)
-	if lfs != nil {
-		return lfs.Src.Lexs[0]
-	} else {
-		return ll
-	}
+	return pr.LexLine(fs, line)
 }
 
 func (gl *GoLang) ParseLine(fs *FileState, line int) *FileState {
@@ -88,6 +82,28 @@ func (gl *GoLang) ParseLine(fs *FileState, line int) *FileState {
 	}
 	lfs := pr.ParseLine(fs, line) // should highlight same line?
 	return lfs
+}
+
+func (gl *GoLang) HiLine(fs *FileState, line int) lex.Line {
+	pr := gl.Parser()
+	if pr == nil {
+		return nil
+	}
+	ll := pr.LexLine(fs, line)
+	lfs := pr.ParseLine(fs, line)
+	if lfs != nil {
+		ll = lfs.Src.Lexs[0]
+		cml := fs.Src.Comments[line]
+		merge := lex.MergeLines(ll, cml)
+		mc := merge.Clone()
+		if len(cml) > 0 {
+			initDepth := fs.Src.PrevDepth(line)
+			pr.PassTwo.NestDepthLine(mc, initDepth)
+		}
+		return mc
+	} else {
+		return ll
+	}
 }
 
 func (gl *GoLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md complete.MatchData) {

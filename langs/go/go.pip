@@ -1,10 +1,10 @@
 {
   "ProjFile": "/Users/oreilly/goki/pi/langs/go/go.pip",
   "ParserFile": "/Users/oreilly/goki/pi/langs/go/go.pi",
-  "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test1.go",
+  "TestFile": "/Users/oreilly/goki/pi/langs/go/go_test2.go",
   "TraceOpts": {
     "On": true,
-    "Rules": "ElLitVal ElementListEls LiteralValue KeyedEl",
+    "Rules": "",
     "Match": true,
     "SubMatch": true,
     "NoMatch": true,

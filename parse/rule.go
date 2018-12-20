@@ -851,7 +851,8 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 			mpos[ri] = mreg
 		}
 		lmnpos, ok = ps.Src.NextTokenPos(mreg.Ed)
-		if !ok && ri < nr-1 { // if at end, then ok..
+		if !ok && !(ri == nr-1 || (ri == nr-2 && pr.HasFlag(int(SetsScope)))) {
+			// if at end, or ends in EOS, then ok..
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, NoMatch, creg.St, creg, parAst, fmt.Sprintf("%v sub-rule: %v -- not at end and no tokens left", ri, rr.Rule.Name()))
 			}

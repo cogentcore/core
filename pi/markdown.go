@@ -57,6 +57,10 @@ func (ml *MarkdownLang) ParseLine(fs *FileState, line int) *FileState {
 	return nil
 }
 
+func (ml *MarkdownLang) HiLine(fs *FileState, line int) lex.Line {
+	return ml.LexLine(fs, line)
+}
+
 func (ml *MarkdownLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md complete.MatchData) {
 	// n/a
 	return md
