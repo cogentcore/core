@@ -7,11 +7,11 @@ package vci
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 
 	"github.com/Masterminds/vcs"
-	"github.com/goki/gi/gi"
 )
 
 var (
@@ -25,10 +25,12 @@ type Repo interface {
 	// vcs.Repo includes those interface functions
 	vcs.Repo
 
-	// AddFiles adds files at dirpath to the cached list of files in repo - purely to limit disk access
-	AddFiles(dirpath string)
+	// CacheFileNames reads all of the file names stored in the repository
+	// into a local cache to speed checking whether a file is in the repository or not.
+	CacheFileNames()
 
-	// Get is used to perform an initial clone/checkout of a repository.
+	// InRepo returns true if filename is in the repository -- must have called CacheFileNames
+	// first
 	InRepo(filename string) bool
 
 	// Add adds the file to the repo
@@ -65,31 +67,30 @@ func NewRepo(remote, local string) (Repo, error) {
 
 type GitRepo struct {
 	vcs.Repo
-	Files []string
+	Files map[string]struct{}
 }
 
-// AddFiles adds files at dirpath to the cached list of files in repo - purely to limit disk access
-func (gr GitRepo) AddFiles(dirpath string) {
-	bytes, _ := exec.Command("git", "ls-files", dirpath).Output()
-	sep := byte(10)
-	paths := strings.Split(string(bytes), string(sep))
-	for _, path := range paths {
-		gi.StringsAppendIfUnique(&gr.Files, path, 500)
+func (gr *GitRepo) CacheFileNames() {
+	gr.Files = make(map[string]struct{}, 1000)
+	bytes, _ := exec.Command("git", "ls-files", gr.LocalPath()).Output()
+	sep := byte(10) // ??
+	names := strings.Split(string(bytes), string(sep))
+	for _, n := range names {
+		gr.Files[n] = struct{}{}
 	}
 }
 
-// IsTracked returns true if the file is being tracked in the specified repository
-func (gr GitRepo) InRepo(filename string) bool {
-	for _, f := range gr.Files {
-		if f == filename {
-			return true
-		}
+func (gr *GitRepo) InRepo(filename string) bool {
+	if len(gr.Files) == 0 {
+		log.Println("GitRepo: must call CacheFileNames before using InRepo check")
+		return false
 	}
-	return false
+	_, has := gr.Files[filename]
+	return has
 }
 
 // Add adds the file to the repo
-func (gr GitRepo) Add(filename string) error {
+func (gr *GitRepo) Add(filename string) error {
 	oscmd := exec.Command("git", "add", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
@@ -102,7 +103,7 @@ func (gr GitRepo) Add(filename string) error {
 }
 
 // Move moves updates the repo with the rename
-func (gr GitRepo) Move(oldpath, newpath string) error {
+func (gr *GitRepo) Move(oldpath, newpath string) error {
 	oscmd := exec.Command("git", "mv", oldpath, newpath)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
@@ -115,7 +116,7 @@ func (gr GitRepo) Move(oldpath, newpath string) error {
 }
 
 // Remove removes the file from the repo
-func (gr GitRepo) Remove(filename string) error {
+func (gr *GitRepo) Remove(filename string) error {
 	oscmd := exec.Command("git", "rm", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
@@ -128,7 +129,7 @@ func (gr GitRepo) Remove(filename string) error {
 }
 
 // Remove removes the file from the repo
-func (gr GitRepo) RemoveKeepLocal(filename string) error {
+func (gr *GitRepo) RemoveKeepLocal(filename string) error {
 	oscmd := exec.Command("git", "rm", "--cached", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 

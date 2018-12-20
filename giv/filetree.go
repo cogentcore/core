@@ -57,6 +57,7 @@ func (ft *FileTree) OpenPath(path string) {
 	if err == nil {
 		ft.Repo = repo
 		ft.RepoType = string(repo.Vcs())
+		ft.Repo.CacheFileNames()
 	}
 
 	ft.FRoot = ft // we are our own root..
@@ -198,10 +199,6 @@ func (fn *FileNode) ReadDir(path string) error {
 		return err
 	}
 	fn.SetOpen()
-
-	if fn.Repo() != nil {
-		fn.FRoot.Repo.AddFiles(path)
-	}
 
 	config := fn.ConfigOfFiles(path)
 	mods, updt := fn.ConfigChildren(config, false) // NOT unique names
