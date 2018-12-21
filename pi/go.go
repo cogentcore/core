@@ -40,7 +40,6 @@ func (gl *GoLang) Parser() *Parser {
 	if gl.Pr == nil {
 		return nil
 	}
-	gl.Pr.InitAll()
 	return gl.Pr
 }
 

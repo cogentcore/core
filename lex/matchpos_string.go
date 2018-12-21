@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _MatchPos_name = "AnyPosStartOfLineEndOfLineMiddleOfLineMatchPosN"
+const _MatchPos_name = "AnyPosStartOfLineEndOfLineMiddleOfLineStartOfWordEndOfWordMiddleOfWordMatchPosN"
 
-var _MatchPos_index = [...]uint8{0, 6, 17, 26, 38, 47}
+var _MatchPos_index = [...]uint8{0, 6, 17, 26, 38, 49, 58, 70, 79}
 
 func (i MatchPos) String() string {
 	if i < 0 || i >= MatchPos(len(_MatchPos_index)-1) {

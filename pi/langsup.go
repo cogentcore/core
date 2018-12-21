@@ -83,7 +83,7 @@ var StdLangProps = map[filecat.Supported]LangProps{
 	filecat.Rust:       {filecat.Rust, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Scala:      {filecat.Scala, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Html:       {filecat.Html, "", "<!-- ", " -->", nil, nil, nil},
-	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, nil, nil},
+	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, &TheTexLang, nil},
 	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, &TheMarkdownLang, nil},
 }
 
@@ -117,6 +117,7 @@ func (ll *LangSupporter) OpenStd() error {
 		pr := NewParser()
 		pr.OpenJSON(fn)
 		lp.Parser = pr
+		lp.Parser.InitAll()
 		StdLangProps[sl] = lp
 	}
 	return nil
@@ -170,6 +171,9 @@ func CompletePi(data interface{}, text string, pos token.Position) (md complete.
 	lp, err := LangSupport.Props(sfs.Src.Sup)
 	if err != nil {
 		log.Printf("pi.CompletePi: %v\n", err)
+		return md
+	}
+	if lp.Lang == nil {
 		return md
 	}
 	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})

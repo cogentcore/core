@@ -46,6 +46,10 @@ const (
 	// EOL means read till the end of the line (e.g., for single-line comments)
 	EOL
 
+	// ReadUntil reads until string(s) in the Until field are found,
+	// or until the EOL if none are found
+	ReadUntil
+
 	// PushState means push the given state value onto the state stack
 	PushState
 

@@ -260,6 +260,7 @@ func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *
 	if len(lxs) == 0 {
 		return nil
 	}
+	lfs.Src.EnsureFinalEos(0)
 	pr.ParseAll(lfs)
 	return lfs
 }

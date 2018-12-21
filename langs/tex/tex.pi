@@ -1,0 +1,574 @@
+{
+  "Lexer": {
+    "Nm": "Lexer",
+    "UniqueNm": "Lexer",
+    "Props": null,
+    "Kids": [
+      {
+        "n": 11,
+        "type": "lex.Rule",
+        "name": "Comment",
+        "type": "lex.Rule",
+        "name": "LetterText",
+        "type": "lex.Rule",
+        "name": "Backslash",
+        "type": "lex.Rule",
+        "name": "LBraceBf",
+        "type": "lex.Rule",
+        "name": "LBraceEm",
+        "type": "lex.Rule",
+        "name": "LBrace",
+        "type": "lex.Rule",
+        "name": "LBrack",
+        "type": "lex.Rule",
+        "name": "RBrace",
+        "type": "lex.Rule",
+        "name": "DollarSign",
+        "type": "lex.Rule",
+        "name": "Number",
+        "type": "lex.Rule",
+        "name": "AnyText"
+      },
+      {
+        "Nm": "Comment",
+        "UniqueNm": "Comment",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Comment",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "%",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "EOL"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LetterText",
+        "UniqueNm": "LetterText",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "optimization for plain letters which are always text",
+        "Token": "Text",
+        "Match": "Letter",
+        "Pos": "AnyPos",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Backslash",
+        "UniqueNm": "Backslash",
+        "Props": null,
+        "Kids": [
+          {
+            "n": 8,
+            "type": "lex.Rule",
+            "name": "Section",
+            "type": "lex.Rule",
+            "name": "Subsection",
+            "type": "lex.Rule",
+            "name": "Subsubsection",
+            "type": "lex.Rule",
+            "name": "Bold",
+            "type": "lex.Rule",
+            "name": "Emph",
+            "type": "lex.Rule",
+            "name": "TT",
+            "type": "lex.Rule",
+            "name": "Verb",
+            "type": "lex.Rule",
+            "name": "AnyCmd"
+          },
+          {
+            "Nm": "Section",
+            "UniqueNm": "Section",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleHeading",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "section{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "EOL"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Subsection",
+            "UniqueNm": "Subsection",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleSubheading",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "subsection{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "EOL"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Subsubsection",
+            "UniqueNm": "Subsubsection",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleSubheading",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "subsubsection{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Bold",
+            "UniqueNm": "Bold",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "BoldTxt"
+              },
+              {
+                "Nm": "BoldTxt",
+                "UniqueNm": "BoldTxt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleStrong",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "textbf{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Emph",
+            "UniqueNm": "Emph",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "EmpTxt"
+              },
+              {
+                "Nm": "EmpTxt",
+                "UniqueNm": "EmpTxt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleEmph",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "emph{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "TT",
+            "UniqueNm": "TT",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "TTTxt"
+              },
+              {
+                "Nm": "TTTxt",
+                "UniqueNm": "TTTxt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleOutput",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "textt{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Verb",
+            "UniqueNm": "Verb",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "VerbTxt"
+              },
+              {
+                "Nm": "VerbTxt",
+                "UniqueNm": "VerbTxt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "diff delims used here -- just supporting \\ and |",
+                "Token": "TextStyleOutput",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "\\||",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "verb\\",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "\\",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "AnyCmd",
+            "UniqueNm": "AnyCmd",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "AnyRune",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Name"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
+        "Desc": "gets command after",
+        "Token": "NameBuiltin",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\\",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBraceBf",
+        "UniqueNm": "LBraceBf",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "old school..",
+        "Token": "TextStyleStrong",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "{\\bf",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "}",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBraceEm",
+        "UniqueNm": "LBraceEm",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "old school..",
+        "Token": "TextStyleEmph",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "{\\em",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "}",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBrace",
+        "UniqueNm": "LBrace",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "NameFunction",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "{",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "}",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "LBrack",
+        "UniqueNm": "LBrack",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "NameAttribute",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "[",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "]",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "RBrace",
+        "UniqueNm": "RBrace",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "straggler from prior special case",
+        "Token": "NameBuiltin",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "}",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "DollarSign",
+        "UniqueNm": "DollarSign",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStr",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "$",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "$",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Number",
+        "UniqueNm": "Number",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitNum",
+        "Match": "Digit",
+        "Pos": "StartOfWord",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Number"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "AnyText",
+        "UniqueNm": "AnyText",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "Text",
+        "Match": "AnyRune",
+        "Pos": "AnyPos",
+        "String": "",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
+      }
+    ],
+    "Off": false,
+    "Desc": "",
+    "Token": "None",
+    "Match": "String",
+    "Pos": "AnyPos",
+    "String": "",
+    "Offset": 0,
+    "SizeAdj": 0,
+    "Acts": null,
+    "Until": "",
+    "PushState": "",
+    "NameMap": false
+  },
+  "PassTwo": {
+    "DoEos": false,
+    "Eol": false,
+    "Semi": false,
+    "Backslash": false,
+    "RBraceEos": false,
+    "EolToks": null
+  },
+  "Parser": {
+    "Nm": "Parser",
+    "UniqueNm": "Parser",
+    "Props": null,
+    "Kids": null,
+    "Off": false,
+    "Desc": "",
+    "Rule": "",
+    "StackMatch": "",
+    "Ast": "NoAst",
+    "Acts": null,
+    "OptTokMap": false,
+    "FirstTokMap": false
+  },
+  "Filename": "",
+  "ReportErrs": false
+}

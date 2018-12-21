@@ -2,16 +2,19 @@
 
 * **bold at start** is not a problem now
 
+<!--- this is a comment for sure -->  and beyond
+
 > quote para -- what is it doing?
 
 ![figure](some text){ width=30% }
 
 ```Go
-if a + b * 2 / 7 - 42 > c * d + e / 72 
-for a := 0; a < 10; a++ {
+if a + b * 2 / 7 - 42 > c * d + e / 72 {
+  for a := 0; a < 10; a++ {
     switch a {
     case 1:
     }
+  }
 }
 ```
 

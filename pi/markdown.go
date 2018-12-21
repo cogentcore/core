@@ -31,7 +31,6 @@ func (ml *MarkdownLang) Parser() *Parser {
 	if ml.Pr == nil {
 		return nil
 	}
-	ml.Pr.InitAll()
 	return ml.Pr
 }
 

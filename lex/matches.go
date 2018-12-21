@@ -65,7 +65,7 @@ var KiT_MatchPos = kit.Enums.AddEnum(MatchPosN, false, nil)
 func (ev MatchPos) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *MatchPos) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
-// Matching rules
+// Matching position rules
 const (
 	// AnyPos matches at any position
 	AnyPos MatchPos = iota
@@ -78,6 +78,15 @@ const (
 
 	// MiddleOfLine matches not at the start or end
 	MiddleOfLine
+
+	// StartOfWord matches at start of word
+	StartOfWord
+
+	// EndOfWord matches at end of word
+	EndOfWord
+
+	// MiddleOfWord matches not at the start or end
+	MiddleOfWord
 
 	MatchPosN
 )

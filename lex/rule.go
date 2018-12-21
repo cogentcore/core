@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 	"text/tabwriter"
+	"unicode"
 
 	"github.com/goki/ki"
 	"github.com/goki/ki/indent"
@@ -57,6 +58,7 @@ type Rule struct {
 	Offset    int              `desc:"offset into the input to look for a match: 0 = current char, 1 = next one, etc"`
 	SizeAdj   int              `desc:"adjusts the size of the region (plus or minus) that is processed for the Next action -- allows broader and narrower matching relative to tagging"`
 	Acts      []Actions        `desc:"the action(s) to perform, in order, if there is a match -- these are performed prior to iterating over child nodes"`
+	Until     string           `desc:"string(s) for ReadUntil action -- will read until any of these strings are found -- separate different options with | -- if you need to read until a literal | just put two || in a row and that will show up as a blank, which is interpreted as a literal |"`
 	PushState string           `desc:"the state to push if our action is PushState -- note that State matching is on String, not this value"`
 	NameMap   bool             `desc:"create an optimization map for this rule, which must be a parent with children that all match against a Name string -- this reads the Name and directly activates the associated rule with that String, without having to iterate through them -- use this for keywords etc -- produces a SIGNIFICANT speedup for long lists of keywords."`
 	MatchLen  int              `view:"-" json:"-" xml:"-" desc:"length of source that matched -- if Next is called, this is what will be skipped to"`
@@ -224,10 +226,6 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 			break
 		}
 	}
-	if !ls.AtEol() && cpos == ls.Pos {
-		ls.Error(cpos, "did not advance position -- need more rules to match current input", lr)
-		return nil
-	}
 	if hasGuest && ls.GuestLex != nil && lr != ls.GuestLex {
 		ls.Pos = cpos // backup and undo what the standard rule did, and redo with guest..
 		// this is necessary to allow main lex to detect when to turn OFF the guest!
@@ -237,6 +235,10 @@ func (lr *Rule) LexStart(ls *State) *Rule {
 			ls.Lex = nil
 		}
 		mrule = ls.GuestLex.LexStart(ls)
+	}
+	if !ls.AtEol() && cpos == ls.Pos {
+		ls.Error(cpos, "did not advance position -- need more rules to match current input", lr)
+		return nil
 	}
 	return mrule
 }
@@ -356,6 +358,7 @@ func (lr *Rule) IsMatch(ls *State) bool {
 
 // IsMatchPos tests if the rule matches position
 func (lr *Rule) IsMatchPos(ls *State) bool {
+	lsz := len(ls.Src)
 	switch lr.Pos {
 	case AnyPos:
 		return true
@@ -363,15 +366,29 @@ func (lr *Rule) IsMatchPos(ls *State) bool {
 		return ls.Pos == 0
 	case EndOfLine:
 		tsz := lr.TargetLen(ls)
-		lsz := len(ls.Src)
 		return ls.Pos == lsz-1-tsz
 	case MiddleOfLine:
 		if ls.Pos == 0 {
 			return false
 		}
 		tsz := lr.TargetLen(ls)
-		lsz := len(ls.Src)
 		return ls.Pos != lsz-1-tsz
+	case StartOfWord:
+		return ls.Pos == 0 || unicode.IsSpace(ls.Src[ls.Pos-1])
+	case EndOfWord:
+		tsz := lr.TargetLen(ls)
+		ep := ls.Pos + tsz
+		return ep == lsz || (ep+1 < lsz && unicode.IsSpace(ls.Src[ep+1]))
+	case MiddleOfWord:
+		if ls.Pos == 0 || unicode.IsSpace(ls.Src[ls.Pos-1]) {
+			return false
+		}
+		tsz := lr.TargetLen(ls)
+		ep := ls.Pos + tsz
+		if ep == lsz || (ep+1 < lsz && unicode.IsSpace(ls.Src[ep+1])) {
+			return false
+		}
+		return true
 	}
 	return true
 }
@@ -413,6 +430,9 @@ func (lr *Rule) DoAct(ls *State, act Actions, tok *token.KeyToken) {
 		ls.ReadQuoted() // todo: raw!
 	case EOL:
 		ls.Pos = len(ls.Src)
+	case ReadUntil:
+		ls.ReadUntil(lr.Until)
+		ls.Pos += lr.SizeAdj
 	case PushState:
 		ls.PushState(lr.PushState)
 	case PopState:

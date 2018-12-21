@@ -6,6 +6,7 @@ package lex
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 
 	"github.com/goki/ki/nptime"
@@ -207,6 +208,65 @@ func (ls *State) NextSrcLine() string {
 	return string(ls.Src[ls.Pos:])
 }
 
+// ReadUntil reads until given string(s) -- does do depth tracking if looking for a bracket
+// open / close kind of symbol
+// until string options are separated by | -- use two || in a row for a literal |
+// terminates at end of line without error
+func (ls *State) ReadUntil(until string) {
+	ustrs := strings.Split(until, "|")
+	sz := len(ls.Src)
+	got := false
+	depth := 0
+	match := rune(0)
+	if len(ustrs) == 1 && len(ustrs[0]) == 1 {
+		switch ustrs[0][0] {
+		case '}':
+			match = '{'
+		case ')':
+			match = '('
+		case ']':
+			match = '['
+		}
+	}
+	for ls.NextRune() {
+		if match != 0 {
+			if ls.Ch == match {
+				depth++
+				continue
+			} else if ls.Ch == rune(ustrs[0][0]) {
+				if depth > 0 {
+					depth--
+					continue
+				}
+			}
+			if depth > 0 {
+				continue
+			}
+		}
+		for _, un := range ustrs {
+			usz := len(un)
+			if usz == 0 { // ||
+				if ls.Ch == '|' {
+					ls.NextRune() // move past
+					break
+				}
+			} else {
+				ep := ls.Pos + usz
+				sm := string(ls.Src[ls.Pos:ep])
+				if ep <= sz && sm == un {
+					ls.Pos += usz
+					got = true
+					break
+				}
+			}
+		}
+		if got {
+			break
+		}
+	}
+}
+
+// ReadNumber reads a number of any sort, returning the type of the number
 func (ls *State) ReadNumber() token.Tokens {
 	offs := ls.Pos
 	tok := token.LitNumInteger
@@ -301,10 +361,6 @@ func (ls *State) ReadQuoted() {
 	ls.NextRune()
 	for {
 		ch := ls.Ch
-		if ch == '\n' || ch < 0 {
-			ls.Error(offs, "string literal not terminated", nil)
-			break
-		}
 		if ch == delim {
 			ls.NextRune() // move past
 			break

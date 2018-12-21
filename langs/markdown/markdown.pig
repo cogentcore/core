@@ -1,9 +1,5 @@
 // /Users/oreilly/goki/pi/langs/markdown/markdown.pig Lexer
 
-InComment:		 None		 if CurState == "Comment" {
-    CommentEnd:       Comment       if String == "-->"   do: PopState; Next; 
-    AnyComment:       Comment       if AnyRune           do: Next; 
-}
 InCode:		 None		 if CurState == "Code" {
     CodeEnd:       LitStrBacktick       if String == "```"   do: PopGuestLex; PopState; Next; 
     AnyCode:       LitStrBacktick       if AnyRune           do: Next; 
@@ -22,23 +18,6 @@ InLinkTag:		 None		 if CurState == "LinkTag" {
     // EndLinkTag for a plain tag with no addr 
     EndLinkTag:       NameTag       if String == "]"   do: PopState; Next; 
     AnyLinkTag:       NameTag       if AnyRune         do: Next; 
-}
-InBoldStars:		 None		 if CurState == "BoldStars" {
-    EndBoldStars:       TextStyleStrong       if String == "**"   do: PopState; Next; 
-    AnyBoldStars:       TextStyleStrong       if AnyRune          do: Next; 
-}
-InBoldUnders:		 None		 if CurState == "BoldUnders" {
-    EndBoldUnders:       TextStyleStrong       if String == "__"   do: PopState; Next; 
-    AnyBoldUnders:       TextStyleStrong       if AnyRune          do: Next; 
-}
-InEmphStar:		 None		 if CurState == "EmphStar" {
-    EndEmphStar:       TextStyleEmph       if String == "*"   do: PopState; Next; 
-    AnyEmphStar:       TextStyleEmph       if AnyRune         do: Next; 
-}
-InEmphUnder:		 None		 if CurState == "EmphUnder" {
-    // EndEmphUnder todo: in theory should be followed by whitespace or punct 
-    EndEmphUnder:       TextStyleEmph       if String == "_"   do: PopState; Next; 
-    AnyEmphUnder:       TextStyleEmph       if AnyRune         do: Next; 
 }
 // LetterText optimization for plain letters which are always text 
 LetterText:		 Text		 if Letter	 do: Next; 
@@ -64,10 +43,14 @@ ItemStar:		 Keyword		 if String == "* "	 do: Next;
 ItemPlus:		 Keyword		 if String == "+ "	 do: Next; 
 ItemMinus:		 Keyword		 if String == "- "	 do: Next; 
 NumList:		 Keyword		 if Digit	 do: Next; 
-CommentStart:		 Comment		 if String == "<!---"	 do: PushState: Comment; Next; 
+CommentStart:		 Comment		 if String == "<!---"	 do: ReadUntil; 
 QuotePara:		 TextStyleUnderline		 if String == "> "	 do: EOL; 
-BoldStars:		 TextStyleStrong		 if String == " **"	 do: PushState: BoldStars; Next; 
-BoldUnders:		 TextStyleStrong		 if String == " __"	 do: PushState: BoldUnders; Next; 
+BoldStars:		 TextStyleStrong		 if String == " **"	 do: Next;  {
+    BoldText:       TextStyleStrong       if String == ""   do: ReadUntil; 
+}
+BoldUnders:		 TextStyleStrong		 if String == " __"	 do: Next;  {
+    BoldText:       TextStyleStrong       if String == ""   do: ReadUntil; 
+}
 // ItemStarSub note all have space after 
 ItemStarSub:		 Keyword		 if +4:String == "* "	 do: Next; 
 ItemPlusSub:		 Keyword		 if +4:String == "+ "	 do: Next; 
@@ -79,8 +62,12 @@ Apostrophe:		 LitStrSingle		 if String == "'" {
     QuoteSingle:       LitStrSingle       if +2:String == "'"   do: Next; 
     Apost:             None               if String == "'"      do: Next; 
 }
-EmphStar:		 TextStyleEmph		 if String == " *"	 do: PushState: EmphStar; Next; 
-EmphUnder:		 TextStyleEmph		 if String == " _"	 do: PushState: EmphUnder; Next; 
+EmphStar:		 TextStyleEmph		 if String == " *"	 do: Next;  {
+    EmphText:       TextStyleEmph       if String == ""   do: ReadUntil; 
+}
+EmphUnder:		 TextStyleEmph		 if String == " _"	 do: Next;  {
+    EmphUnder:       TextStyleEmph       if String == ""   do: ReadUntil; 
+}
 AnyText:		 Text		 if AnyRune	 do: Next; 
 
 

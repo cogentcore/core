@@ -1,0 +1,160 @@
+% test
+This is {\em some great text}  depends
+
+Text is \textbf{bold} and \emph{emphasized} and this is \textt{code output} or \textbf{bold and \emph{emph}} or whatever.  also 1234 numbers are good.  I usually use the {\bf old school} way of doing {\em emphasis etc} so that's too bad.  \verb\http:addr.com\ is pretty good too.
+
+\documentclass[11pt,twoside]{article}
+%\documentclass[10pt,twoside,twocolumn]{article}
+\usepackage[english]{babel}
+\usepackage{times,subeqnarray}
+\usepackage{url}
+% following is for pdflatex vs. old(dvi) latex
+\newif\myifpdf
+\ifx\pdfoutput\undefined
+%  \pdffalse           % we are not running PDFLaTeX
+   \usepackage[dvips]{graphicx}
+\else
+   \pdfoutput=1        % we are running PDFLaTeX
+%  \pdftrue
+   \usepackage[pdftex]{graphicx}
+\fi
+\usepackage{apatitlepages}
+% if you want to be more fully apa-style for submission, then use this
+%\usepackage{setspace,psypub,ulem}
+\usepackage{setspace} % must come before psypub
+%\usepackage{psypub}
+\usepackage{psydraft}
+%\usepackage{one-in-margins}  % use instead of psydraft for one-in-margs
+\usepackage{apa}       % apa must come last
+% using latex2e as standard, use the following for latex209
+% \documentstyle [times,11pt,twoside,subeqnarray,psydraft,apa,epsf]{article}
+\input netsym
+
+% tell pdflatex to prefer .pdf files over .png files!!
+\myifpdf
+  \DeclareGraphicsExtensions{.pdf,.eps,.png,.jpg,.mps,.tif}
+\fi
+
+% use 0 for psypub format 
+\parskip 2pt
+% for double-spacing, determines spacing 
+%\doublespacing
+\setstretch{1.7}
+
+\columnsep .25in   % 3/8 in column separation
+
+\def\myheading{ Computational Models of Motivated Frontal Function }
+
+% no twoside for pure apa style, use \markright with heading only
+\pagestyle{myheadings}
+\markboth{\hspace{.5in} \myheading \hfill}{\hfill O'Reilly, Russin, \& Herd \hspace{.5in}}
+
+\begin{document}
+\bibliographystyle{apa}
+
+% sloppy is the way to go!
+\sloppy
+\raggedbottom
+
+\def\mytitle{ \myheading } % replace with full title
+
+\def\myauthor{Randall C. O'Reilly, Jacob Russin, Seth A. Herd\\
+  Department of Psychology and Neuroscience\\
+  University of Colorado Boulder \\
+  345 UCB\\
+  Boulder, CO 80309\\
+  {\small randy.oreilly@colorado.edu}\\}
+
+\def\mynote{We are grateful for important contributions from Kai Krueger, Ananta Nair, and George W. Chapman, IV.
+
+R. C. O'Reilly is CTO, S. A. Herd is CEO of eCortex, Inc., which may derive indirect benefit from the work presented here.
+
+  Supported by ONR: N00014-18-1-2116, N00014-13-1-0067, D00014-12-C-0638
+}
+
+\def\myabstract{
+  Computational models of frontal function have made important contributions to understanding how the frontal lobes support a wide range of important functions, in their interactions with other brain areas including critically the basal ganglia.  We focus here on the specific case of how different frontal areas support goal-directed, motivated decision making, by representing three essential types of information: possible plans of action (in more dorsal and lateral frontal areas), affectively-significant outcomes of those action plans (in ventral, medial frontal areas including the orbital frontal cortex), and the overall utility of a given plan compared to other possible courses of action (in anterior cingulate cortex).  Computational models of goal-directed action selection at multiple different levels of analysis provide insight into the nature of learning and processing in these areas, and the relative contributions of the frontal cortex versus the basal ganglia.  The most common neurological disorders implicate these areas, and understanding their precise function and modes of dysfunction can contribute to the new field of Computational Psychiatry, within the broader field of Computational Neuroscience.\\
+
+Key words: Computational models, Frontal Cortex, Basal Ganglia, Goal-directed, Motivation, Working Memory, Reinforcement Learning
+}
+
+% \titlesepage{\mytitle}{\myauthor}{\mynote}{\myabstract}
+% \twocolumn
+
+%\titlesamepage{\mytitle}{\myauthor}{\mynote}{\myabstract}
+
+\titlesamepageoc{\mytitle}{\myauthor}{\mynote}{\myabstract}
+
+% single-spaced table of contents, delete if unwanted
+% \newpage
+% \begingroup
+% \parskip 0em
+% \tableofcontents
+% \endgroup
+% \newpage
+
+% \twocolumn
+
+\pagestyle{myheadings}
+
+\section{Introduction}
+
+The frontal lobes are well deserving of all the attention in this volume, and the broader scientific literature, due to their outsized role in so many central aspects of human cognition and behavior.  However, the frontal lobes do not work alone: there is increasing evidence that frontal cortex depends critically on the basal ganglia (BG) and parietal lobes, for example.  Thus, a more complete understanding of frontal function likely requires a systems-level framework that integrates the contributions of all of these brain areas.  A computational modeling approach can play an essential role in this context, by helping to understand how different brain systems can work together while each contributes a distinct function.  In this chapter, we review some of the major computational frameworks for understanding frontal function within a larger systems perspective.  To narrow the scope and provide a more concrete, substantive treatment within the very broad range of frontal functions, we focus on frontal contributions to motivated decision making, where the ventral and medial frontal areas (e.g., orbitofrontal cortex, OFC, and anterior cingulate cortex, ACC), play central roles.  Evolutionarily, it seems that these brain areas are the oldest, primary frontal areas.  For example, in rodents, analogs of these areas (using primate terminology) are clearly present, whereas analogs of dorsolateral PFC areas are less obviously developed \cite[e.g.,]{BrownBowman02,UylingsGroenewegenKolb03,OngurPrice00}.  Thus, a focus on these areas may shed light on the essential forces shaping frontal function, which later adapted to support higher-level cognitive functions in primates and humans.
+
+
+Outer loop: For each event (trial) in an epoch:
+\begin{enumerate}
+\item Iterate over minus and plus phases of settling for each event.
+ \begin{enumerate}
+ \item At start of settling, for all units:
+  \begin{enumerate}
+  \item Initialize all state variables (activation, $V_m$, etc).
+  \item Clamp external patterns (V1 input in minus phase, V1 input \& Output in plus phase).
+  \end{enumerate}
+ \item During each cycle of settling, for all non-clamped units:
+  \begin{enumerate}
+  \item Compute excitatory netinput ($g_e(t)$ or $\eta_j$,
+   eq~\ref{eq.net_in_avg}).
+  \item Compute FFFB inhibition for each layer, based on average net input and activation levels within the layer (eq~\ref{eq.fffb})
+  \item Compute point-neuron activation combining excitatory input and inhibition (eq~\ref{eq.vm}).
+  \item Update time-averaged activation values (short, medium, long) for use in learning.
+  \end{enumerate}
+ \end{enumerate}
+ \item After both phases update the weights, for all connections:
+ \begin{enumerate}
+ \item Compute XCAL learning as function of short, medium, and long time averages.
+ \item Increment the weights according to net weight change.
+ \end{enumerate}
+\end{enumerate}
+
+\subsection{Point Neuron Activation Function} 
+
+\begin{table}
+ \centering
+ \begin{tabular}{ll|ll} \hline
+Parameter & Value & Parameter & Value \\ \hline
+$E_l$ & 0.30 & $\overline{g_l}$ & 0.10 \\
+$E_i$ & 0.25 & $\overline{g_i}$ & 1.00 \\
+$E_e$ & 1.00 & $\overline{g_e}$ & 1.00 \\
+$V_{rest}$ & 0.30 & $\Theta$  & 0.50 \\
+$\tau$ & .3 & $\gamma$ & 80 \\ \hline
+ \end{tabular}
+ \caption{\small Parameters for the simulation (see equations in text
+  for explanations of parameters). All are standard default parameter values.}
+ \label{tab.sim_params}
+\end{table}
+
+Leabra uses a {\em point neuron} activation function that models the electrophysiological properties of real neurons, while simplifying their geometry to a single point. This function is nearly as simple computationally as the standard sigmoidal activation function, but the more biologically-based implementation makes it considerably easier to model inhibitory competition, as described below. Further, using this function enables cognitive models to be more easily related to more physiologically detailed simulations, thereby facilitating bridge-building between biology and cognition. We use normalized units where the unit of time is 1 msec, the unit of electrical potential is 0.1 V (with an offset of -0.1 for membrane potentials and related terms, such that their normal range stays within the $[0, 1]$ normalized bounds), and the unit of current is $1.0x10^{-8}$.
+
+The membrane potential $V_m$ is updated as a function of ionic conductances $g$ with reversal (driving) potentials $E$ as follows:
+\begin{equation}
+ \Delta V_m(t) = \tau \sum_c g_c(t) \overline{g_c} (E_c - V_m(t))
+ \label{eq.vm}
+\end{equation}
+with 3 channels ($c$) corresponding to: $e$ excitatory input; $l$ leak current; and $i$ inhibitory input. Following electrophysiological convention, the overall conductance is decomposed into a time-varying component $g_c(t)$ computed as a function of the dynamic state of the network, and a constant $\overline{g_c}$ that controls the relative influence of the different conductances. The equilibrium potential can be written in a simplified form by setting the excitatory driving potential ($E_e$) to 1 and the leak and inhibitory driving potentials ($E_l$ and $E_i$) of 0:
+\begin{equation}
+ V_m^\infty = \frac{g_e \overline{g_e}} {g_e
+  \overline{g_e} + g_l \overline{g_l} + g_i \overline{g_i}} 
+\end{equation}
+which shows that the neuron is computing a balance between excitation and the opposing forces of leak and inhibition. This equilibrium form of the equation can be understood in terms of a Bayesian decision making framework \cite{OReillyMunakata00}.
+

@@ -5,9 +5,7 @@
     "Props": null,
     "Kids": [
       {
-        "n": 31,
-        "type": "lex.Rule",
-        "name": "InComment",
+        "n": 26,
         "type": "lex.Rule",
         "name": "InCode",
         "type": "lex.Rule",
@@ -16,14 +14,6 @@
         "name": "InLinkAddr",
         "type": "lex.Rule",
         "name": "InLinkTag",
-        "type": "lex.Rule",
-        "name": "InBoldStars",
-        "type": "lex.Rule",
-        "name": "InBoldUnders",
-        "type": "lex.Rule",
-        "name": "InEmphStar",
-        "type": "lex.Rule",
-        "name": "InEmphUnder",
         "type": "lex.Rule",
         "name": "LetterText",
         "type": "lex.Rule",
@@ -70,64 +60,6 @@
         "name": "AnyText"
       },
       {
-        "Nm": "InComment",
-        "UniqueNm": "InComment",
-        "Props": null,
-        "Kids": [
-          {
-            "n": 2,
-            "type": "lex.Rule",
-            "name": "CommentEnd",
-            "type": "lex.Rule",
-            "name": "AnyComment"
-          },
-          {
-            "Nm": "CommentEnd",
-            "UniqueNm": "CommentEnd",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "Comment",
-            "Match": "String",
-            "Pos": "AnyPos",
-            "String": "--\u003e",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "AnyComment",
-            "UniqueNm": "AnyComment",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "Comment",
-            "Match": "AnyRune",
-            "Pos": "AnyPos",
-            "String": "",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "Next"
-            ],
-            "PushState": ""
-          }
-        ],
-        "Desc": "",
-        "Token": "None",
-        "Match": "CurState",
-        "Pos": "AnyPos",
-        "String": "Comment",
-        "Offset": 0,
-        "SizeAdj": 0,
-        "Acts": null,
-        "PushState": ""
-      },
-      {
         "Nm": "InCode",
         "UniqueNm": "InCode",
         "Props": null,
@@ -144,6 +76,7 @@
             "UniqueNm": "CodeEnd",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrBacktick",
             "Match": "String",
@@ -156,13 +89,16 @@
               "PopState",
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AnyCode",
             "UniqueNm": "AnyCode",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrBacktick",
             "Match": "AnyRune",
@@ -173,9 +109,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "CurState",
@@ -184,7 +123,9 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "InLinkAttr",
@@ -203,6 +144,7 @@
             "UniqueNm": "EndLinkAttr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameVar",
             "Match": "String",
@@ -214,13 +156,16 @@
               "PopState",
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AnyLinkAttr",
             "UniqueNm": "AnyLinkAttr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameVar",
             "Match": "AnyRune",
@@ -231,9 +176,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "CurState",
@@ -242,7 +190,9 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "InLinkAddr",
@@ -263,6 +213,7 @@
             "UniqueNm": "LinkAttr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameAttribute",
             "Match": "String",
@@ -275,13 +226,16 @@
               "PushState",
               "Next"
             ],
-            "PushState": "LinkAttr"
+            "Until": "",
+            "PushState": "LinkAttr",
+            "NameMap": false
           },
           {
             "Nm": "EndLinkAddr",
             "UniqueNm": "EndLinkAddr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameAttribute",
             "Match": "String",
@@ -293,13 +247,16 @@
               "PopState",
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AnyLinkAddr",
             "UniqueNm": "AnyLinkAddr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameAttribute",
             "Match": "AnyRune",
@@ -310,9 +267,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "CurState",
@@ -321,7 +281,9 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "InLinkTag",
@@ -342,6 +304,7 @@
             "UniqueNm": "LinkAddr",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameTag",
             "Match": "String",
@@ -354,13 +317,16 @@
               "PushState",
               "Next"
             ],
-            "PushState": "LinkAddr"
+            "Until": "",
+            "PushState": "LinkAddr",
+            "NameMap": false
           },
           {
             "Nm": "EndLinkTag",
             "UniqueNm": "EndLinkTag",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "for a plain tag with no addr",
             "Token": "NameTag",
             "Match": "String",
@@ -372,13 +338,16 @@
               "PopState",
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "AnyLinkTag",
             "UniqueNm": "AnyLinkTag",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameTag",
             "Match": "AnyRune",
@@ -389,9 +358,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "CurState",
@@ -400,245 +372,16 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
-      },
-      {
-        "Nm": "InBoldStars",
-        "UniqueNm": "InBoldStars",
-        "Props": null,
-        "Kids": [
-          {
-            "n": 2,
-            "type": "lex.Rule",
-            "name": "EndBoldStars",
-            "type": "lex.Rule",
-            "name": "AnyBoldStars"
-          },
-          {
-            "Nm": "EndBoldStars",
-            "UniqueNm": "EndBoldStars",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleStrong",
-            "Match": "String",
-            "Pos": "AnyPos",
-            "String": "**",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "AnyBoldStars",
-            "UniqueNm": "AnyBoldStars",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleStrong",
-            "Match": "AnyRune",
-            "Pos": "AnyPos",
-            "String": "",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "Next"
-            ],
-            "PushState": ""
-          }
-        ],
-        "Desc": "",
-        "Token": "None",
-        "Match": "CurState",
-        "Pos": "AnyPos",
-        "String": "BoldStars",
-        "Offset": 0,
-        "SizeAdj": 0,
-        "Acts": null,
-        "PushState": ""
-      },
-      {
-        "Nm": "InBoldUnders",
-        "UniqueNm": "InBoldUnders",
-        "Props": null,
-        "Kids": [
-          {
-            "n": 2,
-            "type": "lex.Rule",
-            "name": "EndBoldUnders",
-            "type": "lex.Rule",
-            "name": "AnyBoldUnders"
-          },
-          {
-            "Nm": "EndBoldUnders",
-            "UniqueNm": "EndBoldUnders",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleStrong",
-            "Match": "String",
-            "Pos": "AnyPos",
-            "String": "__",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "AnyBoldUnders",
-            "UniqueNm": "AnyBoldUnders",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleStrong",
-            "Match": "AnyRune",
-            "Pos": "AnyPos",
-            "String": "",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "Next"
-            ],
-            "PushState": ""
-          }
-        ],
-        "Desc": "",
-        "Token": "None",
-        "Match": "CurState",
-        "Pos": "AnyPos",
-        "String": "BoldUnders",
-        "Offset": 0,
-        "SizeAdj": 0,
-        "Acts": null,
-        "PushState": ""
-      },
-      {
-        "Nm": "InEmphStar",
-        "UniqueNm": "InEmphStar",
-        "Props": null,
-        "Kids": [
-          {
-            "n": 2,
-            "type": "lex.Rule",
-            "name": "EndEmphStar",
-            "type": "lex.Rule",
-            "name": "AnyEmphStar"
-          },
-          {
-            "Nm": "EndEmphStar",
-            "UniqueNm": "EndEmphStar",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleEmph",
-            "Match": "String",
-            "Pos": "AnyPos",
-            "String": "*",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "AnyEmphStar",
-            "UniqueNm": "AnyEmphStar",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleEmph",
-            "Match": "AnyRune",
-            "Pos": "AnyPos",
-            "String": "",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "Next"
-            ],
-            "PushState": ""
-          }
-        ],
-        "Desc": "",
-        "Token": "None",
-        "Match": "CurState",
-        "Pos": "AnyPos",
-        "String": "EmphStar",
-        "Offset": 0,
-        "SizeAdj": 0,
-        "Acts": null,
-        "PushState": ""
-      },
-      {
-        "Nm": "InEmphUnder",
-        "UniqueNm": "InEmphUnder",
-        "Props": null,
-        "Kids": [
-          {
-            "n": 2,
-            "type": "lex.Rule",
-            "name": "EndEmphUnder",
-            "type": "lex.Rule",
-            "name": "AnyEmphUnder"
-          },
-          {
-            "Nm": "EndEmphUnder",
-            "UniqueNm": "EndEmphUnder",
-            "Props": null,
-            "Kids": null,
-            "Desc": "todo: in theory should be followed by whitespace or punct",
-            "Token": "TextStyleEmph",
-            "Match": "String",
-            "Pos": "AnyPos",
-            "String": "_",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "PopState",
-              "Next"
-            ],
-            "PushState": ""
-          },
-          {
-            "Nm": "AnyEmphUnder",
-            "UniqueNm": "AnyEmphUnder",
-            "Props": null,
-            "Kids": null,
-            "Desc": "",
-            "Token": "TextStyleEmph",
-            "Match": "AnyRune",
-            "Pos": "AnyPos",
-            "String": "",
-            "Offset": 0,
-            "SizeAdj": 0,
-            "Acts": [
-              "Next"
-            ],
-            "PushState": ""
-          }
-        ],
-        "Desc": "",
-        "Token": "None",
-        "Match": "CurState",
-        "Pos": "AnyPos",
-        "String": "EmphUnder",
-        "Offset": 0,
-        "SizeAdj": 0,
-        "Acts": null,
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LetterText",
         "UniqueNm": "LetterText",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "optimization for plain letters which are always text",
         "Token": "Text",
         "Match": "Letter",
@@ -649,7 +392,9 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "CodeStart",
@@ -668,6 +413,7 @@
             "UniqueNm": "CodeLang",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "KeywordNamespace",
             "Match": "Letter",
@@ -679,13 +425,16 @@
               "Name",
               "SetGuestLex"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "CodePlain",
             "UniqueNm": "CodePlain",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrBacktick",
             "Match": "AnyRune",
@@ -696,9 +445,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "LitStrBacktick",
         "Match": "String",
@@ -710,7 +462,9 @@
           "Next",
           "PushState"
         ],
-        "PushState": "Code"
+        "Until": "",
+        "PushState": "Code",
+        "NameMap": false
       },
       {
         "Nm": "HeadPound",
@@ -751,6 +505,7 @@
                     "UniqueNm": "SubSubHeading",
                     "Props": null,
                     "Kids": null,
+                    "Off": false,
                     "Desc": "",
                     "Token": "TextStyleSubheading",
                     "Match": "AnyRune",
@@ -761,9 +516,12 @@
                     "Acts": [
                       "EOL"
                     ],
-                    "PushState": ""
+                    "Until": "",
+                    "PushState": "",
+                    "NameMap": false
                   }
                 ],
+                "Off": false,
                 "Desc": "",
                 "Token": "None",
                 "Match": "String",
@@ -772,13 +530,16 @@
                 "Offset": 2,
                 "SizeAdj": 0,
                 "Acts": null,
-                "PushState": ""
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
               },
               {
                 "Nm": "SubHeading",
                 "UniqueNm": "SubHeading",
                 "Props": null,
                 "Kids": null,
+                "Off": false,
                 "Desc": "",
                 "Token": "TextStyleSubheading",
                 "Match": "WhiteSpace",
@@ -789,9 +550,12 @@
                 "Acts": [
                   "EOL"
                 ],
-                "PushState": ""
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
               }
             ],
+            "Off": false,
             "Desc": "",
             "Token": "None",
             "Match": "String",
@@ -800,13 +564,16 @@
             "Offset": 1,
             "SizeAdj": 0,
             "Acts": null,
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Heading",
             "UniqueNm": "Heading",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "TextStyleHeading",
             "Match": "WhiteSpace",
@@ -817,9 +584,12 @@
             "Acts": [
               "EOL"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "None",
         "Match": "String",
@@ -828,7 +598,9 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": null,
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemCheck",
@@ -847,6 +619,7 @@
             "UniqueNm": "ItemCheckDone",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "KeywordType",
             "Match": "String",
@@ -857,13 +630,16 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "ItemCheckTodo",
             "UniqueNm": "ItemCheckTodo",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "NameException",
             "Match": "String",
@@ -874,9 +650,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "KeywordType",
         "Match": "String",
@@ -885,13 +664,16 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemStar",
         "UniqueNm": "ItemStar",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "note: these all have a space after them!",
         "Token": "Keyword",
         "Match": "String",
@@ -902,13 +684,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemPlus",
         "UniqueNm": "ItemPlus",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Keyword",
         "Match": "String",
@@ -919,13 +704,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemMinus",
         "UniqueNm": "ItemMinus",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Keyword",
         "Match": "String",
@@ -936,13 +724,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "NumList",
         "UniqueNm": "NumList",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Keyword",
         "Match": "Digit",
@@ -953,13 +744,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "CommentStart",
         "UniqueNm": "CommentStart",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Comment",
         "Match": "String",
@@ -968,16 +762,18 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
-          "PushState",
-          "Next"
+          "ReadUntil"
         ],
-        "PushState": "Comment"
+        "Until": "--\u003e",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "QuotePara",
         "UniqueNm": "QuotePara",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "TextStyleUnderline",
         "Match": "String",
@@ -988,13 +784,42 @@
         "Acts": [
           "EOL"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "BoldStars",
         "UniqueNm": "BoldStars",
         "Props": null,
-        "Kids": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "lex.Rule",
+            "name": "BoldText"
+          },
+          {
+            "Nm": "BoldText",
+            "UniqueNm": "BoldText",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "**",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
         "Desc": "",
         "Token": "TextStyleStrong",
         "Match": "String",
@@ -1003,16 +828,44 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
-          "PushState",
           "Next"
         ],
-        "PushState": "BoldStars"
+        "Until": "**",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "BoldUnders",
         "UniqueNm": "BoldUnders",
         "Props": null,
-        "Kids": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "lex.Rule",
+            "name": "BoldText"
+          },
+          {
+            "Nm": "BoldText",
+            "UniqueNm": "BoldText",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleStrong",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "__",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
         "Desc": "",
         "Token": "TextStyleStrong",
         "Match": "String",
@@ -1021,16 +874,18 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
-          "PushState",
           "Next"
         ],
-        "PushState": "BoldUnders"
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemStarSub",
         "UniqueNm": "ItemStarSub",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "note all have space after",
         "Token": "Keyword",
         "Match": "String",
@@ -1041,13 +896,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemPlusSub",
         "UniqueNm": "ItemPlusSub",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Keyword",
         "Match": "String",
@@ -1058,13 +916,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "ItemMinusSub",
         "UniqueNm": "ItemMinusSub",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Keyword",
         "Match": "String",
@@ -1075,13 +936,16 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "LinkTag",
         "UniqueNm": "LinkTag",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "NameTag",
         "Match": "String",
@@ -1093,13 +957,16 @@
           "PushState",
           "Next"
         ],
-        "PushState": "LinkTag"
+        "Until": "",
+        "PushState": "LinkTag",
+        "NameMap": false
       },
       {
         "Nm": "BacktickCode",
         "UniqueNm": "BacktickCode",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "LitStrBacktick",
         "Match": "String",
@@ -1110,13 +977,16 @@
         "Acts": [
           "QuotedRaw"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Quote",
         "UniqueNm": "Quote_021",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "LitStrDouble",
         "Match": "String",
@@ -1127,7 +997,9 @@
         "Acts": [
           "QuotedRaw"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "Apostrophe",
@@ -1146,6 +1018,7 @@
             "UniqueNm": "QuoteSingle",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "LitStrSingle",
             "Match": "String",
@@ -1156,13 +1029,16 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           },
           {
             "Nm": "Apost",
             "UniqueNm": "Apost",
             "Props": null,
             "Kids": null,
+            "Off": false,
             "Desc": "",
             "Token": "None",
             "Match": "String",
@@ -1173,9 +1049,12 @@
             "Acts": [
               "Next"
             ],
-            "PushState": ""
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
           }
         ],
+        "Off": false,
         "Desc": "",
         "Token": "LitStrSingle",
         "Match": "String",
@@ -1184,13 +1063,42 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "EmphStar",
         "UniqueNm": "EmphStar",
         "Props": null,
-        "Kids": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "lex.Rule",
+            "name": "EmphText"
+          },
+          {
+            "Nm": "EmphText",
+            "UniqueNm": "EmphText",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "*",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
         "Desc": "",
         "Token": "TextStyleEmph",
         "Match": "String",
@@ -1199,16 +1107,44 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
-          "PushState",
           "Next"
         ],
-        "PushState": "EmphStar"
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "EmphUnder",
         "UniqueNm": "EmphUnder",
         "Props": null,
-        "Kids": null,
+        "Kids": [
+          {
+            "n": 1,
+            "type": "lex.Rule",
+            "name": "EmphUnder"
+          },
+          {
+            "Nm": "EmphUnder",
+            "UniqueNm": "EmphUnder",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "TextStyleEmph",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "ReadUntil"
+            ],
+            "Until": "_",
+            "PushState": "",
+            "NameMap": false
+          }
+        ],
+        "Off": false,
         "Desc": "",
         "Token": "TextStyleEmph",
         "Match": "String",
@@ -1217,16 +1153,18 @@
         "Offset": 0,
         "SizeAdj": 0,
         "Acts": [
-          "PushState",
           "Next"
         ],
-        "PushState": "EmphUnder"
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       },
       {
         "Nm": "AnyText",
         "UniqueNm": "AnyText",
         "Props": null,
         "Kids": null,
+        "Off": false,
         "Desc": "",
         "Token": "Text",
         "Match": "AnyRune",
@@ -1237,9 +1175,12 @@
         "Acts": [
           "Next"
         ],
-        "PushState": ""
+        "Until": "",
+        "PushState": "",
+        "NameMap": false
       }
     ],
+    "Off": false,
     "Desc": "",
     "Token": "None",
     "Match": "String",
@@ -1248,13 +1189,16 @@
     "Offset": 0,
     "SizeAdj": 0,
     "Acts": null,
-    "PushState": ""
+    "Until": "",
+    "PushState": "",
+    "NameMap": false
   },
   "PassTwo": {
     "DoEos": false,
     "Eol": false,
     "Semi": false,
     "Backslash": false,
+    "RBraceEos": false,
     "EolToks": null
   },
   "Parser": {
@@ -1262,11 +1206,15 @@
     "UniqueNm": "Parser",
     "Props": null,
     "Kids": null,
-    "Offset": false,
+    "Off": false,
     "Desc": "",
     "Rule": "",
+    "StackMatch": "",
     "Ast": "NoAst",
-    "OptTokMap": false
+    "Acts": null,
+    "OptTokMap": false,
+    "FirstTokMap": false
   },
-  "Filename": ""
+  "Filename": "",
+  "ReportErrs": false
 }
