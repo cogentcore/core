@@ -48,10 +48,7 @@ func InitSpell() error {
 	err := LoadSpellModel()
 	if err != nil {
 		// oh well, try creating a new model from corpus
-		err = NewSpellModelFromText()
-		if err != nil {
-			return err
-		}
+		go NewSpellModelFromText() // this is slow -- do it offline -- todo: needs mutexes probably
 	}
 
 	notWordChar, err = regexp.Compile(`[^0-9A-Za-z]`)
@@ -110,6 +107,9 @@ func NewSpellModelFromText() error {
 		log.Printf("Failed building model from corpus file: %v.\n", err)
 		return err
 	}
+
+	SaveSpellModel()
+
 	return nil
 }
 
