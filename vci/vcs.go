@@ -43,6 +43,10 @@ type Repo interface {
 
 	// RemoveKeepLocal removes the file from the repo but keeps the file itself
 	RemoveKeepLocal(filename string) error
+	
+	// CommitFile commits a single file
+	CommitFile(filename string, message string) error
+	
 }
 
 func NewRepo(remote, local string) (Repo, error) {
@@ -129,6 +133,19 @@ func (gr *GitRepo) Remove(filename string) error {
 // Remove removes the file from the repo
 func (gr *GitRepo) RemoveKeepLocal(filename string) error {
 	oscmd := exec.Command("git", "rm", "--cached", filename)
+	stdoutStderr, err := oscmd.CombinedOutput()
+
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return err
+	}
+	fmt.Printf("%s\n", stdoutStderr)
+	return nil
+}
+
+// CommitFile commits single file to repo staging
+func (gr *GitRepo) CommitFile(filename string, message string) error {
+	oscmd := exec.Command("git", "commit", message, filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 
 	if err != nil {

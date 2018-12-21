@@ -503,11 +503,12 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
-	//if fn.InVcs {
-	//	fn.Repo().Remove()
-	//}
-	err = fn.Info.Delete()
-	fn.Delete(true) // we're done
+	if fn.InVcs {
+		err = fn.Repo().Remove(string(fn.FPath))
+	} else {
+		err = fn.Info.Delete()
+		fn.Delete(true) // we're done
+	}
 	return err
 }
 
@@ -1250,24 +1251,13 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 	}
 })
 
-// VcsGetAddLabelFunc gets the appropriate label for adding to version control
-var VcsGetAddLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
-	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ftv.FileNode()
-	label := ""
-	if fn != nil {
-		label = fmt.Sprintf("Add to %v", fn.RepoType())
-	}
-	return label
-})
-
 // VcsGetRemoveLabelFunc gets the appropriate label for removing from version control
-var VcsGetRemoveLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
+var VcsLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
-	label := ""
+	label := act.Text
 	if fn != nil {
-		label = fmt.Sprintf("Remove from %v", fn.RepoType())
+		label = strings.Replace(label, "Vcs", fn.RepoType(), 1)
 	}
 	return label
 })
@@ -1372,16 +1362,16 @@ var FileTreeViewProps = ki.Props{
 		}},
 		{"sep-vcs", ki.BlankProp{}},
 		{"AddToVcs", ki.Props{
-			//"label":    "Add To Git",
-			"desc":       "Add file to version control git/svn",
+			//"label":    "Add To Vcs",
+			"desc":       "Add file to version control",
 			"updtfunc":   FileTreeActiveNotInVcsFunc,
-			"label-func": VcsGetAddLabelFunc,
+			"label-func": VcsLabelFunc,
 		}},
 		{"RemoveFromVcs", ki.Props{
-			//"label":    "Remove From Version Control",
-			"desc":       "Remove file from version control git/svn",
+			//"label":    "Remove From Vcs",
+			"desc":       "Remove file from version control",
 			"updtfunc":   FileTreeActiveInVcsFunc,
-			"label-func": VcsGetRemoveLabelFunc,
+			"label-func": VcsLabelFunc,
 		}},
 	},
 }
