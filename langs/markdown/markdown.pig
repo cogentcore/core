@@ -1,8 +1,8 @@
 // /Users/oreilly/goki/pi/langs/markdown/markdown.pig Lexer
 
 InCode:		 None		 if CurState == "Code" {
-    CodeEnd:       LitStrBacktick       if String == "```"   do: PopGuestLex; PopState; Next; 
-    AnyCode:       LitStrBacktick       if AnyRune           do: Next; 
+    CodeEnd:       LitStrBacktick       if @StartOfLine:String == "```"   do: PopGuestLex; PopState; Next; 
+    AnyCode:       LitStrBacktick       if AnyRune                        do: Next; 
 }
 InLinkAttr:		 None		 if CurState == "LinkAttr" {
     EndLinkAttr:       NameVar       if String == "}"   do: PopState; Next; 
@@ -21,11 +21,11 @@ InLinkTag:		 None		 if CurState == "LinkTag" {
 }
 // LetterText optimization for plain letters which are always text 
 LetterText:		 Text		 if Letter	 do: Next; 
-CodeStart:		 LitStrBacktick		 if String == "```"	 do: Next; PushState: Code;  {
+CodeStart:		 LitStrBacktick		 if @StartOfLine:String == "```"	 do: Next; PushState: Code;  {
     CodeLang:        KeywordNamespace       if Letter    do: Name; SetGuestLex; 
     CodePlain:       LitStrBacktick         if AnyRune   do: Next; 
 }
-HeadPound:		 None		 if String == "#" {
+HeadPound:		 None		 if @StartOfLine:String == "#" {
     HeadPound2:       None       if +1:String == "#" {
         HeadPound3:       None       if +2:String == "#" {
             SubSubHeading:       TextStyleSubheading       if +3:AnyRune   do: EOL; 
@@ -34,27 +34,27 @@ HeadPound:		 None		 if String == "#" {
     }
     Heading:       TextStyleHeading       if +1:WhiteSpace   do: EOL; 
 }
-ItemCheck:		 KeywordType		 if String == "- [" {
+ItemCheck:		 KeywordType		 if @StartOfLine:String == "- [" {
     ItemCheckDone:       KeywordType         if String == "- [x] "   do: Next; 
     ItemCheckTodo:       NameException       if String == "- [ ] "   do: Next; 
 }
 // ItemStar note: these all have a space after them! 
-ItemStar:		 Keyword		 if String == "* "	 do: Next; 
-ItemPlus:		 Keyword		 if String == "+ "	 do: Next; 
-ItemMinus:		 Keyword		 if String == "- "	 do: Next; 
-NumList:		 Keyword		 if Digit	 do: Next; 
-CommentStart:		 Comment		 if String == "<!---"	 do: ReadUntil; 
-QuotePara:		 TextStyleUnderline		 if String == "> "	 do: EOL; 
+ItemStar:		 Keyword		 if @StartOfLine:String == "* "	 do: Next; 
+ItemPlus:		 Keyword		 if @StartOfLine:String == "+ "	 do: Next; 
+ItemMinus:		 Keyword		 if @StartOfLine:String == "- "	 do: Next; 
+NumList:		 Keyword		 if @StartOfLine:Digit	 do: Next; 
+CommentStart:		 Comment		 if String == "<!---"	 do: ReadUntil: "-->"; 
+QuotePara:		 TextStyleUnderline		 if @StartOfLine:String == "> "	 do: EOL; 
 BoldStars:		 TextStyleStrong		 if String == " **"	 do: Next;  {
-    BoldText:       TextStyleStrong       if String == ""   do: ReadUntil; 
+    BoldText:       TextStyleStrong       if AnyRune   do: ReadUntil: "**"; 
 }
 BoldUnders:		 TextStyleStrong		 if String == " __"	 do: Next;  {
-    BoldText:       TextStyleStrong       if String == ""   do: ReadUntil; 
+    BoldText:       TextStyleStrong       if AnyRune   do: ReadUntil: "__"; 
 }
 // ItemStarSub note all have space after 
-ItemStarSub:		 Keyword		 if +4:String == "* "	 do: Next; 
-ItemPlusSub:		 Keyword		 if +4:String == "+ "	 do: Next; 
-ItemMinusSub:		 Keyword		 if +4:String == "- "	 do: Next; 
+ItemStarSub:		 Keyword		 if @StartOfLine:+4:String == "* "	 do: Next; 
+ItemPlusSub:		 Keyword		 if @StartOfLine:+4:String == "+ "	 do: Next; 
+ItemMinusSub:		 Keyword		 if @StartOfLine:+4:String == "- "	 do: Next; 
 LinkTag:		 NameTag		 if String == "["	 do: PushState: LinkTag; Next; 
 BacktickCode:		 LitStrBacktick		 if String == "`"	 do: QuotedRaw; 
 Quote:		 LitStrDouble		 if String == """	 do: QuotedRaw; 
@@ -63,10 +63,10 @@ Apostrophe:		 LitStrSingle		 if String == "'" {
     Apost:             None               if String == "'"      do: Next; 
 }
 EmphStar:		 TextStyleEmph		 if String == " *"	 do: Next;  {
-    EmphText:       TextStyleEmph       if String == ""   do: ReadUntil; 
+    EmphText:       TextStyleEmph       if AnyRune   do: ReadUntil: "*"; 
 }
 EmphUnder:		 TextStyleEmph		 if String == " _"	 do: Next;  {
-    EmphUnder:       TextStyleEmph       if String == ""   do: ReadUntil; 
+    EmphUnder:       TextStyleEmph       if AnyRune   do: ReadUntil: "_"; 
 }
 AnyText:		 Text		 if AnyRune	 do: Next; 
 

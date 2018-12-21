@@ -487,18 +487,23 @@ func (lr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			gpstr = " {"
 		}
 		offstr := ""
+		if lr.Pos != AnyPos {
+			offstr += fmt.Sprintf("@%v:", lr.Pos)
+		}
 		if lr.Offset > 0 {
-			offstr = fmt.Sprintf("+%d:", lr.Offset)
+			offstr += fmt.Sprintf("+%d:", lr.Offset)
 		}
 		actstr := ""
 		if len(lr.Acts) > 0 {
 			actstr = "\t do: "
 			for _, ac := range lr.Acts {
+				actstr += ac.String()
 				if ac == PushState {
-					actstr += ac.String() + ": " + lr.PushState + "; "
-				} else {
-					actstr += ac.String() + "; "
+					actstr += ": " + lr.PushState
+				} else if ac == ReadUntil {
+					actstr += ": \"" + lr.Until + "\""
 				}
+				actstr += "; "
 			}
 		}
 		if lr.Desc != "" {

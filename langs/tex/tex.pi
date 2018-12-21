@@ -5,7 +5,7 @@
     "Props": null,
     "Kids": [
       {
-        "n": 11,
+        "n": 12,
         "type": "lex.Rule",
         "name": "Comment",
         "type": "lex.Rule",
@@ -26,6 +26,8 @@
         "name": "DollarSign",
         "type": "lex.Rule",
         "name": "Number",
+        "type": "lex.Rule",
+        "name": "Quotes",
         "type": "lex.Rule",
         "name": "AnyText"
       },
@@ -75,7 +77,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 8,
+            "n": 9,
             "type": "lex.Rule",
             "name": "Section",
             "type": "lex.Rule",
@@ -89,7 +91,9 @@
             "type": "lex.Rule",
             "name": "TT",
             "type": "lex.Rule",
-            "name": "Verb",
+            "name": "VerbSlash",
+            "type": "lex.Rule",
+            "name": "VerbPipe",
             "type": "lex.Rule",
             "name": "AnyCmd"
           },
@@ -97,17 +101,43 @@
             "Nm": "Section",
             "UniqueNm": "Section",
             "Props": null,
-            "Kids": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "SectText"
+              },
+              {
+                "Nm": "SectText",
+                "UniqueNm": "SectText",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleHeading",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
             "Off": false,
             "Desc": "",
-            "Token": "TextStyleHeading",
+            "Token": "NameBuiltin",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "section{",
             "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
-              "EOL"
+              "Next"
             ],
             "Until": "",
             "PushState": "",
@@ -117,17 +147,43 @@
             "Nm": "Subsection",
             "UniqueNm": "Subsection",
             "Props": null,
-            "Kids": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "SubSectText"
+              },
+              {
+                "Nm": "SubSectText",
+                "UniqueNm": "SubSectText",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleSubheading",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
             "Off": false,
             "Desc": "",
-            "Token": "TextStyleSubheading",
+            "Token": "NameBuiltin",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "subsection{",
             "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
-              "EOL"
+              "Next"
             ],
             "Until": "",
             "PushState": "",
@@ -137,17 +193,43 @@
             "Nm": "Subsubsection",
             "UniqueNm": "Subsubsection",
             "Props": null,
-            "Kids": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "SubSubSectText"
+              },
+              {
+                "Nm": "SubSubSectText",
+                "UniqueNm": "SubSubSectText",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleSubheading",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": -1,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "}",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
             "Off": false,
             "Desc": "",
-            "Token": "TextStyleSubheading",
+            "Token": "NameBuiltin",
             "Match": "String",
             "Pos": "AnyPos",
             "String": "subsubsection{",
             "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
-              "ReadUntil"
+              "Next"
             ],
             "Until": "",
             "PushState": "",
@@ -161,11 +243,11 @@
               {
                 "n": 1,
                 "type": "lex.Rule",
-                "name": "BoldTxt"
+                "name": "BoldText"
               },
               {
-                "Nm": "BoldTxt",
-                "UniqueNm": "BoldTxt",
+                "Nm": "BoldText",
+                "UniqueNm": "BoldText",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -207,11 +289,11 @@
               {
                 "n": 1,
                 "type": "lex.Rule",
-                "name": "EmpTxt"
+                "name": "EmpText"
               },
               {
-                "Nm": "EmpTxt",
-                "UniqueNm": "EmpTxt",
+                "Nm": "EmpText",
+                "UniqueNm": "EmpText",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -253,11 +335,11 @@
               {
                 "n": 1,
                 "type": "lex.Rule",
-                "name": "TTTxt"
+                "name": "TTText"
               },
               {
-                "Nm": "TTTxt",
-                "UniqueNm": "TTTxt",
+                "Nm": "TTText",
+                "UniqueNm": "TTText",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -292,22 +374,22 @@
             "NameMap": false
           },
           {
-            "Nm": "Verb",
-            "UniqueNm": "Verb",
+            "Nm": "VerbSlash",
+            "UniqueNm": "VerbSlash",
             "Props": null,
             "Kids": [
               {
                 "n": 1,
                 "type": "lex.Rule",
-                "name": "VerbTxt"
+                "name": "VerbText"
               },
               {
-                "Nm": "VerbTxt",
-                "UniqueNm": "VerbTxt",
+                "Nm": "VerbText",
+                "UniqueNm": "VerbText",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "diff delims used here -- just supporting \\ and |",
+                "Desc": "",
                 "Token": "TextStyleOutput",
                 "Match": "AnyRune",
                 "Pos": "AnyPos",
@@ -317,7 +399,7 @@
                 "Acts": [
                   "ReadUntil"
                 ],
-                "Until": "\\||",
+                "Until": "\\",
                 "PushState": "",
                 "NameMap": false
               }
@@ -331,9 +413,55 @@
             "Offset": 0,
             "SizeAdj": 0,
             "Acts": [
-              "ReadUntil"
+              "Next"
             ],
-            "Until": "\\",
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "VerbPipe",
+            "UniqueNm": "VerbPipe",
+            "Props": null,
+            "Kids": [
+              {
+                "n": 1,
+                "type": "lex.Rule",
+                "name": "VerbText"
+              },
+              {
+                "Nm": "VerbText",
+                "UniqueNm": "VerbText",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "TextStyleOutput",
+                "Match": "AnyRune",
+                "Pos": "AnyPos",
+                "String": "",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "ReadUntil"
+                ],
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
+              }
+            ],
+            "Off": false,
+            "Desc": "",
+            "Token": "NameBuiltin",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "verb|",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
             "PushState": "",
             "NameMap": false
           },
@@ -420,7 +548,7 @@
         "Kids": null,
         "Off": false,
         "Desc": "",
-        "Token": "NameFunction",
+        "Token": "NameVar",
         "Match": "String",
         "Pos": "AnyPos",
         "String": "{",
@@ -510,6 +638,26 @@
           "Number"
         ],
         "Until": "",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Quotes",
+        "UniqueNm": "Quotes",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "LitStrDouble",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "``",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "ReadUntil"
+        ],
+        "Until": "''",
         "PushState": "",
         "NameMap": false
       },

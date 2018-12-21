@@ -209,11 +209,15 @@ func (ls *State) NextSrcLine() string {
 }
 
 // ReadUntil reads until given string(s) -- does do depth tracking if looking for a bracket
-// open / close kind of symbol
-// until string options are separated by | -- use two || in a row for a literal |
-// terminates at end of line without error
+// open / close kind of symbol.
+// For multiple "until" string options, separate each by |
+// and use empty to match a single | or || in combination with other options.
+// Terminates at end of line without error
 func (ls *State) ReadUntil(until string) {
 	ustrs := strings.Split(until, "|")
+	if len(ustrs) == 0 || (len(ustrs) == 1 && len(ustrs[0]) == 0) {
+		ustrs = []string{"|"}
+	}
 	sz := len(ls.Src)
 	got := false
 	depth := 0
