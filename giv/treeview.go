@@ -1475,26 +1475,26 @@ func (tv *TreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 
 // DropAssign assigns mime data (only the first one!) to this node
 func (tv *TreeView) DropAssign(md mimedata.Mimes) {
-	tv.DragNDropFinalize(dnd.DropCopy)
 	tv.PasteAssign(md)
+	tv.DragNDropFinalize(dnd.DropCopy)
 }
 
 // DropBefore inserts object(s) from mime data before this node
 func (tv *TreeView) DropBefore(md mimedata.Mimes, mod dnd.DropMods) {
-	tv.DragNDropFinalize(mod)
 	tv.PasteBefore(md, mod)
+	tv.DragNDropFinalize(mod)
 }
 
 // DropAfter inserts object(s) from mime data after this node
 func (tv *TreeView) DropAfter(md mimedata.Mimes, mod dnd.DropMods) {
-	tv.DragNDropFinalize(mod)
 	tv.PasteAfter(md, mod)
+	tv.DragNDropFinalize(mod)
 }
 
 // DropChildren inserts object(s) from mime data at end of children of this node
 func (tv *TreeView) DropChildren(md mimedata.Mimes, mod dnd.DropMods) {
-	tv.DragNDropFinalize(mod)
 	tv.PasteChildren(md, mod)
+	tv.DragNDropFinalize(mod)
 }
 
 // DropCancel cancels the drop action e.g., preventing deleting of source
