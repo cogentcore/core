@@ -48,7 +48,7 @@ func InitSpell() error {
 	err := LoadSpellModel()
 	if err != nil {
 		// oh well, try creating a new model from corpus
-		go NewSpellModelFromText() // this is slow -- do it offline -- todo: needs mutexes probably
+		NewSpellModelFromText()
 	}
 
 	notWordChar, err = regexp.Compile(`[^0-9A-Za-z]`)
@@ -80,7 +80,7 @@ func InitSpell() error {
 
 // LoadSpellModel loads a saved spelling model
 func LoadSpellModel() error {
-	pdir := oswin.TheApp.AppPrefsDir()
+	pdir := oswin.TheApp.GoGiPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
 	err := spell.Load(openpath)
 	return err
@@ -131,7 +131,7 @@ func AddToSpellModel(filepath string) error {
 
 // SaveSpellModel saves the spelling model which includes the data and parameters
 func SaveSpellModel() error {
-	pdir := oswin.TheApp.AppPrefsDir()
+	pdir := oswin.TheApp.GoGiPrefsDir()
 	path := filepath.Join(pdir, "spell_en_us_plain.json")
 	err := spell.Save(path)
 	if err != nil {
