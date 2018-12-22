@@ -846,6 +846,11 @@ func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 	tb.UpdateEnd(bufUpdt) // nobody listening probably, but flag avail for testing
 }
 
+// AddFileNode adds the FileNode to the list or receivers of changes to buffer
+func (tb *TextBuf) AddFileNode(fn *FileNode) {
+	tb.TextBufSig.Connect(fn.This(), FileNodeBufSigRecv)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //   Accessing Text
 

@@ -7,6 +7,7 @@ package giv
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"image/color"
 	"io"
@@ -58,6 +59,7 @@ func (ft *FileTree) OpenPath(path string) {
 		ft.Repo = repo
 		ft.RepoType = string(repo.Vcs())
 		ft.Repo.CacheFileNames()
+		ft.Repo.CacheFilesChanged()
 	}
 
 	ft.FRoot = ft // we are our own root..
@@ -66,7 +68,6 @@ func (ft *FileTree) OpenPath(path string) {
 	}
 	ft.OpenDirs.ClearFlags()
 	ft.ReadDir(path)
-
 }
 
 // UpdateNewFile should be called with path to a new file that has just been
@@ -117,11 +118,12 @@ var FileNodeHiStyle = histyle.StyleDefault
 // the name of the file.  Folders have children containing further nodes.
 type FileNode struct {
 	ki.Node
-	FPath gi.FileName `desc:"full path to this file"`
-	Info  FileInfo    `desc:"full standard file info about this file"`
-	Buf   *TextBuf    `json:"-" xml:"-" desc:"file buffer for editing this file"`
-	FRoot *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
-	InVcs bool        `desc:"is the file under version control"`
+	FPath      gi.FileName `desc:"full path to this file"`
+	Info       FileInfo    `desc:"full standard file info about this file"`
+	Buf        *TextBuf    `json:"-" xml:"-" desc:"file buffer for editing this file"`
+	FRoot      *FileTree   `json:"-" xml:"-" desc:"root of the tree -- has global state"`
+	InVcs      bool        `json:"-" xml:"-" desc:"is the file under version control"`
+	ChangedVcs bool        `json:"-" xml:"-" desc:"file changed since last commit"`
 }
 
 var KiT_FileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
@@ -212,6 +214,9 @@ func (fn *FileNode) ReadDir(path string) error {
 			prefix := string(fn.FRoot.FPath) + "/"
 			relpth := strings.TrimPrefix(fp, prefix)
 			sf.InVcs = fn.Repo().InRepo(string(relpth))
+			if sf.ChangedVcs == false { // could be changed but not saved
+				sf.ChangedVcs = fn.Repo().IsChanged(string(relpth))
+			}
 		}
 	}
 
@@ -314,6 +319,7 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 	} else {
 		fn.Buf = &TextBuf{}
 		fn.Buf.InitName(fn.Buf, fn.Nm)
+		fn.Buf.AddFileNode(fn)
 	}
 	fn.Buf.Hi.Style = FileNodeHiStyle
 	return true, fn.Buf.Open(fn.FPath)
@@ -642,6 +648,30 @@ func (fn *FileNode) RemoveFromVcs() {
 	fmt.Println(err)
 }
 
+// CommitToVcs commits file changes to version control system
+func (fn *FileNode) CommitToVcs(message string) (err error) {
+	if fn.Repo() == nil || !fn.InVcs {
+		return errors.New("Repo nil or file not in repo")
+	}
+	err = fn.Repo().CommitFile(string(fn.FPath), message)
+	fn.UpdateSig()
+	return err
+}
+
+// RevertVcs reverts file changes since last commit
+func (fn *FileNode) RevertVcs() (err error) {
+	if fn.Repo() == nil || !fn.InVcs {
+		return errors.New("Repo nil or file not in repo")
+	}
+	err = fn.Repo().RevertFile(string(fn.FPath))
+	if err == nil {
+		fn.ChangedVcs = false
+		fn.Buf.Revert()
+		fn.UpdateSig()
+	}
+	return err
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Search
 
@@ -746,6 +776,15 @@ var FileNodeProps = ki.Props{
 			"desc":  "Create a new folder within this folder",
 			"Args": ki.PropSlice{
 				{"Folder Name", ki.Props{
+					"width": 60,
+				}},
+			},
+		}},
+		{"CommitToVcs", ki.Props{
+			"label": "Commit to Vcs...",
+			"desc":  "Commit this file to version control",
+			"Args": ki.PropSlice{
+				{"Message", ki.Props{
 					"width": 60,
 				}},
 			},
@@ -1109,6 +1148,36 @@ func (ftv *FileTreeView) RemoveFromVcs() {
 	}
 }
 
+// CommitToVcs removes the file from version control system
+func (ftv *FileTreeView) CommitToVcs() {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	sn := sels[sz-1]
+	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftvv.FileNode()
+	if fn != nil {
+		CallMethod(fn, "CommitToVcs", ftv.Viewport)
+	}
+}
+
+// RevertVcs removes the file from version control system
+func (ftv *FileTreeView) RevertVcs() {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	sn := sels[sz-1]
+	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftvv.FileNode()
+	if fn != nil {
+		fn.RevertVcs()
+	}
+}
+
 // Cut copies to clip.Board and deletes selected items
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Cut() {
@@ -1251,6 +1320,20 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 	}
 })
 
+// FileTreeActiveInVcsFunc is an ActionUpdateFunc that activates action if node is under version control
+// and the file has been modified
+var FileTreeActiveInVcsChangedFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		if fn.IsDir() {
+			act.SetActiveState((false))
+			return
+		}
+		act.SetActiveState((fn.InVcs && fn.ChangedVcs))
+	}
+})
+
 // VcsGetRemoveLabelFunc gets the appropriate label for removing from version control
 var VcsLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
@@ -1362,15 +1445,23 @@ var FileTreeViewProps = ki.Props{
 		}},
 		{"sep-vcs", ki.BlankProp{}},
 		{"AddToVcs", ki.Props{
-			//"label":    "Add To Vcs",
 			"desc":       "Add file to version control",
 			"updtfunc":   FileTreeActiveNotInVcsFunc,
 			"label-func": VcsLabelFunc,
 		}},
 		{"RemoveFromVcs", ki.Props{
-			//"label":    "Remove From Vcs",
 			"desc":       "Remove file from version control",
 			"updtfunc":   FileTreeActiveInVcsFunc,
+			"label-func": VcsLabelFunc,
+		}},
+		{"CommitToVcs", ki.Props{
+			"desc":       "Commit file to version control",
+			"updtfunc":   FileTreeActiveInVcsChangedFunc,
+			"label-func": VcsLabelFunc,
+		}},
+		{"RevertVcs", ki.Props{
+			"desc":       "Revert file to last commit",
+			"updtfunc":   FileTreeActiveInVcsChangedFunc,
 			"label-func": VcsLabelFunc,
 		}},
 	},
@@ -1399,15 +1490,44 @@ func (ft *FileTreeView) Style2D() {
 			}
 			if fn.IsExec() {
 				ft.Class = "exec"
-			} else if fn.IsOpen() {
-				ft.Class = "open"
-			} else if fn.Repo() != nil && !fn.InVcs {
-				ft.Class = "vcs-no" // untracked file
-			} else {
-				ft.Class = ""
+			} else if fn.Repo() != nil {
+				if fn.InVcs {
+					if fn.ChangedVcs {
+						if fn.IsOpen() {
+							ft.Class = "open-invcs-chng" // file open, in vcs && changed
+						} else {
+							ft.Class = "invcs-chng" // in vcs && changed
+						}
+					} else {
+						if fn.IsOpen() {
+							ft.Class = "open-invcs" // in vcs && open
+						}
+					}
+				} else {
+					if fn.IsOpen() {
+						ft.Class = "open-invcs-no" // not in vcs && open
+					} else {
+						ft.Class = "invcs-no"
+					}
+				}
+			} else { // repo is nil - no vcs
+				if fn.IsOpen() {
+					ft.Class = "open-repo-no" // file is open for edit
+				} else {
+					ft.Class = ""
+				}
 			}
 		}
 	}
 	ft.StyleTreeView()
 	ft.LayData.SetFromStyle(&ft.Sty.Layout) // also does reset
+}
+
+// FileNodeBufSigRecv receives a signal from the buffer and updates view accordingly
+func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
+	fn := rvwki.Embed(KiT_FileNode).(*FileNode)
+	switch TextBufSignals(sig) {
+	case TextBufDone, TextBufInsert, TextBufDelete:
+		fn.ChangedVcs = true
+	}
 }
