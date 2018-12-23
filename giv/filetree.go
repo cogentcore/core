@@ -1528,6 +1528,8 @@ func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	fn := rvwki.Embed(KiT_FileNode).(*FileNode)
 	switch TextBufSignals(sig) {
 	case TextBufDone, TextBufInsert, TextBufDelete:
-		fn.ChangedVcs = true
+		if fn.ChangedVcs == false {
+			fn.ChangedVcs = true
+		}
 	}
 }
