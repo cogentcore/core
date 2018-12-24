@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/goki/gi/gi"
@@ -829,6 +830,25 @@ func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  VersCtrlValueView
+
+// VersCtrlSystems is a list of supported Version Control Systems -- use these
+// names in commands to select commands for the current VCS for this project
+// (i.e., use shortest version of name, typically three letters)
+var VersCtrlSystems = []string{"Git", "SVN"}
+
+// VersCtrlName is the name of a version control system
+type VersCtrlName string
+
+func VersCtrlNameProper(vc string) VersCtrlName {
+	vcl := strings.ToLower(vc)
+	for _, vcnp := range VersCtrlSystems {
+		vcnpl := strings.ToLower(vcnp)
+		if strings.Compare(vcl, vcnpl) == 0 {
+			return VersCtrlName(vcnp)
+		}
+	}
+	return ""
+}
 
 // ValueView registers VersCtrlValueView as the viewer of VersCtrlName
 func (kn VersCtrlName) ValueView() ValueView {
