@@ -978,7 +978,7 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 			ftv.NewFile("")
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter: // New Folder
-			ftv.NewFile("")
+			ftv.NewFolder("")
 			kt.SetProcessed()
 		}
 	}
