@@ -549,18 +549,20 @@ func (fn *FileNode) NewFile(filename string) {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
 		return
 	}
-	prompt := fmt.Sprintf("Do you want to add the file \"%v\" to %v? If you choose No, you can add the file later", fn.Name(), fn.RepoType())
-	title := fmt.Sprintf("Add File to %v", fn.RepoType())
-	gi.ChoiceDialog(nil, gi.DlgOpts{Title: title,
-		Prompt: prompt}, []string{"Yes", "No"},
-		fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			switch sig {
-			case 0:
-				fn.AddToVcs()
-			case 1:
-				// do nothing
-			}
-		})
+	if fn.Repo() != nil {
+		prompt := fmt.Sprintf("Do you want to add the file \"%v\" to %v? If you choose No, you can add the file later", fn.Name(), fn.RepoType())
+		title := fmt.Sprintf("Add File to %v", fn.RepoType())
+		gi.ChoiceDialog(nil, gi.DlgOpts{Title: title,
+			Prompt: prompt}, []string{"Yes", "No"},
+			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					fn.AddToVcs()
+				case 1:
+					// do nothing
+				}
+			})
+	}
 	fn.FRoot.UpdateNewFile(np)
 }
 
@@ -1299,7 +1301,7 @@ var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		if fn.IsDir() {
+		if fn.Repo() == nil || fn.IsDir() {
 			act.SetActiveState((false))
 			return
 		}
@@ -1312,7 +1314,7 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		if fn.IsDir() {
+		if fn.Repo() == nil || fn.IsDir() {
 			act.SetActiveState((false))
 			return
 		}
@@ -1326,7 +1328,7 @@ var FileTreeActiveInVcsChangedFunc = ActionUpdateFunc(func(fni interface{}, act 
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		if fn.IsDir() {
+		if fn.Repo() == nil || fn.IsDir() {
 			act.SetActiveState((false))
 			return
 		}
