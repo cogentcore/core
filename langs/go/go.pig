@@ -411,7 +411,7 @@ TypeRules {
     TypeDeclN {
         TypeDeclGroup:  '(' TypeDecls ')'  
         TypeDeclEl:     Name Type 'EOS'    >Ast
-        Acts:{ -1:ChgToken:"Name":NameType<-Name; -1:AddSymbol:"Name":None; -1:AddDetail:"[1]":None; }
+        Acts:{ -1:ChgToken:"Name":NameType<-Name; -1:AddSymbol:"Name":None; -1:AddDetail:"[1]":None; -1:AddType:"Name":None; }
     }
     TypeDecls:  TypeDeclEl ?TypeDecls  
     TypeList {

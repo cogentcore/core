@@ -1335,6 +1335,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 				ps.Syms.Add(sy)
 			}
 			useAst.Syms.Push(sy)
+			sy.Ast = useAst.This()
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 			}
@@ -1364,6 +1365,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		}
 		ps.Scopes.Push(sy)
 		useAst.Syms.Push(sy)
+		sy.Ast = useAst.This()
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Pushed New Sym: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 		}
@@ -1386,6 +1388,24 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		} else {
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add Detail: %v ERROR -- symbol not found in node: %v", nm, apath))
+			}
+		}
+	case AddType:
+		scp := ps.Scopes.Top()
+		if scp == nil {
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add Type: %v ERROR -- requires current scope -- none set in node: %v", nm, apath))
+			return false
+		}
+		for i := range nms {
+			n := nms[i]
+			if n == "" || n == "_" { // go special case..
+				continue
+			}
+			ty := syms.NewType(n, syms.Unknown)
+			ty.Ast = useAst.This()
+			scp.Types.Add(ty)
+			if ps.Trace.On {
+				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added type: %v from path: %v = %v in node: %v", ty.String(), act.Path, n, apath))
 			}
 		}
 	}

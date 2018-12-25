@@ -228,20 +228,22 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		}
 	}
 
-	fs := NewFileState()
-	// optional monitoring of parsing
-	// fs.ParseState.Trace.On = true
-	// fs.ParseState.Trace.Match = true
-	// fs.ParseState.Trace.NoMatch = true
-	// fs.ParseState.Trace.Run = true
-	// fs.ParseState.Trace.StdOut()
 	pr := gl.Parser()
 	var pkgsym *syms.Symbol
+	var fss []*FileState // file states for each file
 	for i := range fls {
 		fnm := fls[i]
 		if strings.HasSuffix(fnm, "_test.go") {
 			continue
 		}
+		fs := NewFileState() // we use a separate fs for each file, so we have full ast
+		fss = append(fss, fs)
+		// optional monitoring of parsing
+		// fs.ParseState.Trace.On = true
+		// fs.ParseState.Trace.Match = true
+		// fs.ParseState.Trace.NoMatch = true
+		// fs.ParseState.Trace.Run = true
+		// fs.ParseState.Trace.StdOut()
 		fpath := filepath.Join(path, fnm)
 		err = fs.Src.OpenFile(fpath)
 		if err != nil {
@@ -256,7 +258,7 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 		// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
-			if pkg.Name == "main" {
+			if pkg.Name == "main" { // todo: not sure about skipping this..
 				continue
 			}
 			gl.DeleteUnexported(pkg.Children)
@@ -264,12 +266,17 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 				pkgsym = pkg
 			} else {
 				pkgsym.Children.CopyFrom(pkg.Children)
+				pkgsym.Types.CopyFrom(pkg.Types)
 			}
 			// } else {
 			// 	fmt.Printf("\tno parse state scopes!\n")
 		}
 	}
-	if pkgsym != nil && !opts.Nocache {
+	if pkgsym == nil {
+		return nil
+	}
+	gl.ResolveTypes(pkgsym)
+	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, path)
 	}
 	return pkgsym
@@ -357,4 +364,21 @@ func (gl *GoLang) AddPathToSyms(fs *FileState, path string) {
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// ResolveTypes
+
+// ResolveTypes initializes all user-defined types from Ast data
+// and then resolves types of symbols
+func (gl *GoLang) ResolveTypes(pkgsym *syms.Symbol) {
+
+}
+
+var GoBuiltinTypes syms.TypeMap
+
+// InstallBuiltinResolveTypes initializes all user-defined types from Ast data
+// and then resolves types of symbols
+func (gl *GoLang) ResolveTypes(pkgsym *syms.Symbol) {
+
 }

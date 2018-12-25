@@ -34,6 +34,7 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/goki/ki"
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
@@ -47,13 +48,16 @@ import (
 type Symbol struct {
 	Name      string       `desc:"name of the symbol"`
 	Detail    string       `desc:"additional detail and specification of the symbol -- e.g. if a function, the signature of the function"`
-	Kind      token.Tokens `desc:"type of symbol, using token.Tokens list"`
+	Kind      token.Tokens `desc:"lexical kind of symbol, using token.Tokens list"`
+	Type      string       `desc:"Type name for this symbol -- if it is a type, this is its corresponding type representation -- if it is a variable then this is its type"`
 	Index     int          `desc:"index for ordering children within a given scope, e.g., fields in a struct / class"`
 	Filename  string       `desc:"full filename / URI of source"`
 	Region    lex.Reg      `desc:"region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it"`
 	SelectReg lex.Reg      `desc:"region that should be selected when activated, etc"`
 	Scopes    SymNames     `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
 	Children  SymMap       `desc:"children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc"`
+	Types     TypeMap      `desc:"types defined within the scope of this symbol"`
+	Ast       ki.Ki        `json:"-" xml:"-" desc:"Ast node that created this symbol -- only valid during parsing"`
 }
 
 var KiT_Symbol = kit.Types.AddType(&Symbol{}, nil)

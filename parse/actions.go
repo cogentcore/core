@@ -50,6 +50,10 @@ const (
 	// if there is already something there, a space is added for this new addition
 	AddDetail
 
+	// AddType Adds a type with the given name -- sets the Ast node for this rule
+	// and actual type is resolved later in a second language-specific pass
+	AddType
+
 	// PushStack adds name to stack -- provides context-sensitivity option for
 	// optimizing and ambiguity resolution
 	PushStack
