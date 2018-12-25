@@ -1,7 +1,7 @@
 {
   "ProjFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.pip",
   "ParserFile": "/Users/oreilly/goki/pi/langs/markdown/markdown.pi",
-  "TestFile": "/Users/oreilly/goki/pi/langs/markdown/markdown_test.md",
+  "TestFile": "/Users/oreilly/goki/pi/langs/markdown/testdata/markdown_test.md",
   "TraceOpts": {
     "On": false,
     "Rules": "Slice SelectExpr AddExpr",

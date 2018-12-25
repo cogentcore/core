@@ -8,24 +8,29 @@ import (
 	"github.com/goki/gi/complete"
 	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 )
 
 // MarkdownLang implements the Lang interface for the Markdown language
 type MarkdownLang struct {
-	Pr *Parser
+	Pr *pi.Parser
 }
 
-// TheMarkdownLang is the instance variable providing support for the Go language
+// TheMarkdownLang is the instance variable providing support for the Markdown language
 var TheMarkdownLang = MarkdownLang{}
 
-func (ml *MarkdownLang) Parser() *Parser {
+func init() {
+	pi.StdLangProps[filecat.Markdown].Lang = &TheMarkdownLang
+}
+
+func (ml *MarkdownLang) Parser() *pi.Parser {
 	if ml.Pr != nil {
 		return ml.Pr
 	}
-	lp, _ := LangSupport.Props(filecat.Markdown)
+	lp, _ := pi.LangSupport.Props(filecat.Markdown)
 	if lp.Parser == nil {
-		LangSupport.OpenStd()
+		pi.LangSupport.OpenStd()
 	}
 	ml.Pr = lp.Parser
 	if ml.Pr == nil {
@@ -34,7 +39,7 @@ func (ml *MarkdownLang) Parser() *Parser {
 	return ml.Pr
 }
 
-func (ml *MarkdownLang) ParseFile(fs *FileState) {
+func (ml *MarkdownLang) ParseFile(fs *pi.FileState) {
 	pr := ml.Parser()
 	if pr == nil {
 		return
@@ -43,7 +48,7 @@ func (ml *MarkdownLang) ParseFile(fs *FileState) {
 	// no parser
 }
 
-func (ml *MarkdownLang) LexLine(fs *FileState, line int) lex.Line {
+func (ml *MarkdownLang) LexLine(fs *pi.FileState, line int) lex.Line {
 	pr := ml.Parser()
 	if pr == nil {
 		return nil
@@ -51,21 +56,21 @@ func (ml *MarkdownLang) LexLine(fs *FileState, line int) lex.Line {
 	return pr.LexLine(fs, line)
 }
 
-func (ml *MarkdownLang) ParseLine(fs *FileState, line int) *FileState {
+func (ml *MarkdownLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	// n/a
 	return nil
 }
 
-func (ml *MarkdownLang) HiLine(fs *FileState, line int) lex.Line {
+func (ml *MarkdownLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	return ml.LexLine(fs, line)
 }
 
-func (ml *MarkdownLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md complete.MatchData) {
+func (ml *MarkdownLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
 	// n/a
 	return md
 }
 
-func (ml *MarkdownLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
+func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	// n/a
 	return nil
 }

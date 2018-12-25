@@ -4,20 +4,24 @@ license that can be found in the LICENSE file. */
 
 /* This has /* embedded */ comments which is /* a bit  */ tricky */ 
 
-package main
+package golang
 
-type ityp int
+type Ityp int
 
-type ptyp *string
+type Ptyp *string
 
-type mtyp map[string]int
+type Mtyp map[string]int
 
-type sltyp []float32
+type Sltyp []float32
 
-type sttyp struct {
+type Sttyp struct {
 	A int
 	B float32
 }
+
+type Artyp []beebs
+
+type Rndyp peeps
 
 func bb() {
 	a := pv.FuncMonk(27)[2]

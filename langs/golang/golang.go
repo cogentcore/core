@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package pi
+package golang
 
 import (
 	"log"
@@ -16,25 +16,30 @@ import (
 	"github.com/goki/gi/filecat"
 	"github.com/goki/ki/dirs"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
 )
 
 // GoLang implements the Lang interface for the Go language
 type GoLang struct {
-	Pr *Parser
+	Pr *pi.Parser
 }
 
 // TheGoLang is the instance variable providing support for the Go language
 var TheGoLang = GoLang{}
 
-func (gl *GoLang) Parser() *Parser {
+func init() {
+	pi.StdLangProps[filecat.Go].Lang = &TheGoLang
+}
+
+func (gl *GoLang) Parser() *pi.Parser {
 	if gl.Pr != nil {
 		return gl.Pr
 	}
-	lp, _ := LangSupport.Props(filecat.Go)
+	lp, _ := pi.LangSupport.Props(filecat.Go)
 	if lp.Parser == nil {
-		LangSupport.OpenStd()
+		pi.LangSupport.OpenStd()
 	}
 	gl.Pr = lp.Parser
 	if gl.Pr == nil {
@@ -43,7 +48,7 @@ func (gl *GoLang) Parser() *Parser {
 	return gl.Pr
 }
 
-func (gl *GoLang) ParseFile(fs *FileState) {
+func (gl *GoLang) ParseFile(fs *pi.FileState) {
 	pr := gl.Parser()
 	if pr == nil {
 		log.Println("ParseFile: no parser -- must call pi.LangSupport.OpenStd() at startup!")
@@ -63,10 +68,11 @@ func (gl *GoLang) ParseFile(fs *FileState) {
 			go gl.AddPathToSyms(fs, path)
 		}
 		gl.AddImportsToSyms(fs, pkg)
+		gl.ResolveTypes(pkg)
 	}
 }
 
-func (gl *GoLang) LexLine(fs *FileState, line int) lex.Line {
+func (gl *GoLang) LexLine(fs *pi.FileState, line int) lex.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
@@ -74,7 +80,7 @@ func (gl *GoLang) LexLine(fs *FileState, line int) lex.Line {
 	return pr.LexLine(fs, line)
 }
 
-func (gl *GoLang) ParseLine(fs *FileState, line int) *FileState {
+func (gl *GoLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
@@ -83,7 +89,7 @@ func (gl *GoLang) ParseLine(fs *FileState, line int) *FileState {
 	return lfs
 }
 
-func (gl *GoLang) HiLine(fs *FileState, line int) lex.Line {
+func (gl *GoLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
@@ -105,7 +111,7 @@ func (gl *GoLang) HiLine(fs *FileState, line int) lex.Line {
 	}
 }
 
-func (gl *GoLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md complete.MatchData) {
+func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
 	if str == "" {
 		return
 	}
@@ -197,7 +203,7 @@ func (gl *GoLang) CompleteLine(fs *FileState, str string, pos lex.Pos) (md compl
 	return
 }
 
-func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
+func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		path, err = dirs.GoSrcDir(path)
@@ -230,13 +236,13 @@ func (gl *GoLang) ParseDir(path string, opts LangDirOpts) *syms.Symbol {
 
 	pr := gl.Parser()
 	var pkgsym *syms.Symbol
-	var fss []*FileState // file states for each file
+	var fss []*pi.FileState // file states for each file
 	for i := range fls {
 		fnm := fls[i]
 		if strings.HasSuffix(fnm, "_test.go") {
 			continue
 		}
-		fs := NewFileState() // we use a separate fs for each file, so we have full ast
+		fs := pi.NewFileState() // we use a separate fs for each file, so we have full ast
 		fss = append(fss, fs)
 		// optional monitoring of parsing
 		// fs.ParseState.Trace.On = true
@@ -303,10 +309,10 @@ func (gl *GoLang) DeleteUnexported(sm syms.SymMap) {
 }
 
 // AddPkgToSyms adds given package symbol, with children from package
-// to FileState.Syms list -- merges with anything already there
+// to pi.FileState.Syms list -- merges with anything already there
 // does NOT add imports -- that is an optional second step.
 // Returns true if there was an existing entry for this package.
-func (gl *GoLang) AddPkgToSyms(fs *FileState, pkg *syms.Symbol) bool {
+func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	fs.SymsMu.Lock()
 	psy, has := fs.Syms[pkg.Name]
 	if has {
@@ -319,9 +325,9 @@ func (gl *GoLang) AddPkgToSyms(fs *FileState, pkg *syms.Symbol) bool {
 	return has
 }
 
-// AddImportsToSyms adds imports from given package into FileState.Syms list
+// AddImportsToSyms adds imports from given package into pi.FileState.Syms list
 // imports are coded as NameLibrary symbols with names = import path
-func (gl *GoLang) AddImportsToSyms(fs *FileState, pkg *syms.Symbol) {
+func (gl *GoLang) AddImportsToSyms(fs *pi.FileState, pkg *syms.Symbol) {
 	fs.SymsMu.RLock()
 	imps := pkg.Children.FindKindScoped(token.NameLibrary)
 	fs.SymsMu.RUnlock()
@@ -333,9 +339,9 @@ func (gl *GoLang) AddImportsToSyms(fs *FileState, pkg *syms.Symbol) {
 	}
 }
 
-// AddImportToSyms adds given import into FileState.Syms list
+// AddImportToSyms adds given import into pi.FileState.Syms list
 // assumed to be called as a separate goroutine
-func (gl *GoLang) AddImportToSyms(fs *FileState, im string) {
+func (gl *GoLang) AddImportToSyms(fs *pi.FileState, im string) {
 	sz := len(im)
 	if sz == 0 {
 		return
@@ -350,35 +356,18 @@ func (gl *GoLang) AddImportToSyms(fs *FileState, im string) {
 		pnm = im[:isp]
 		im = im[isp+2 : sz-1] // assuming quotes around rest..
 	}
-	psym := gl.ParseDir(im, LangDirOpts{})
+	psym := gl.ParseDir(im, pi.LangDirOpts{})
 	if psym != nil {
 		psym.Name = pnm
 		gl.AddPkgToSyms(fs, psym)
 	}
 }
 
-// AddPathToSyms adds given path into FileState.Syms list
+// AddPathToSyms adds given path into pi.FileState.Syms list
 // assumed to be called as a separate goroutine
-func (gl *GoLang) AddPathToSyms(fs *FileState, path string) {
-	psym := gl.ParseDir(path, LangDirOpts{})
+func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
+	psym := gl.ParseDir(path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
 	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// ResolveTypes
-
-// ResolveTypes initializes all user-defined types from Ast data
-// and then resolves types of symbols
-func (gl *GoLang) ResolveTypes(pkgsym *syms.Symbol) {
-
-}
-
-var GoBuiltinTypes syms.TypeMap
-
-// InstallBuiltinResolveTypes initializes all user-defined types from Ast data
-// and then resolves types of symbols
-func (gl *GoLang) ResolveTypes(pkgsym *syms.Symbol) {
-
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package pi
+package golang
 
 import (
 	"fmt"
@@ -12,19 +12,20 @@ import (
 	"time"
 
 	"github.com/goki/gi/filecat"
+	"github.com/goki/pi/pi"
 	"github.com/goki/prof"
 )
 
 func init() {
-	LangSupport.OpenStd()
+	pi.LangSupport.OpenStd()
 }
 
 func TestParse(t *testing.T) {
-	lp, _ := LangSupport.Props(filecat.Go)
+	lp, _ := pi.LangSupport.Props(filecat.Go)
 	pr := lp.Lang.Parser()
 	pr.ReportErrs = true
 
-	fs := NewFileState()
+	fs := pi.NewFileState()
 	err := fs.Src.OpenFile("testdata/textview.go")
 	if err != nil {
 		t.Error(err)

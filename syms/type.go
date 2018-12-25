@@ -14,7 +14,7 @@ type Type struct {
 	Name  string   `desc:"name of the type -- can be the name of a field or the role for a type element"`
 	Kind  Kinds    `desc:"kind of type -- overall nature of the type"`
 	Desc  string   `desc:"documentation about this type, extracted from code"`
-	Els   Types    `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
+	Els   TypeEls  `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
 	Size  []int    `desc:"for primitive types, this is the number of bits, for composite types, it is the number of elements, which can be multi-dimensional in some cases"`
 	Props ki.Props `desc:"additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property"`
 	Ast   ki.Ki    `json:"-" xml:"-" desc:"Ast node that corresponds to this type -- only valid during parsing"`
@@ -32,37 +32,19 @@ func (ty *Type) String() string {
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-// Types, TypeMap
+// TypeEls
 
-// Types is an ordered slice list of types -- used for representing elements
-// of other types for example
-type Types []Type
-
-// TypeMap is a map of types for quick looking up by name
-type TypeMap map[string]*Type
-
-// Alloc ensures that map is made
-func (tm *TypeMap) Alloc() {
-	if *tm == nil {
-		*tm = make(TypeMap)
-	}
+// TypeEl is a type element -- has a name (local to the type, e.g., field name)
+// and a type name that can be looked up in a master list of types
+type TypeEl struct {
+	Name string `desc:"element name -- e.g., field name for struct, or functional name for other types"`
+	Type string `desc:"type name -- looked up on relevant lists -- includes scoping / package / namespace name as appropriate"`
 }
 
-// Add adds a type to the map, handling allocation for nil maps
-func (tm *TypeMap) Add(ty *Type) {
-	tm.Alloc()
-	(*tm)[ty.Name] = ty
-}
+// TypeEls are the type elements for types
+type TypeEls []TypeEl
 
-// CopyFrom copies all the types from given source map into this one
-func (tm *TypeMap) CopyFrom(src TypeMap) {
-	tm.Alloc()
-	for nm, sty := range src {
-		dty, has := (*tm)[nm]
-		if !has {
-			(*tm)[nm] = sty
-			continue
-		}
-		// todo: any merging?
-	}
+// Add adds a new type element
+func (te *TypeEls) Add(nm, typ string) {
+	(*te) = append(*te, TypeEl{Name: nm, Type: typ})
 }

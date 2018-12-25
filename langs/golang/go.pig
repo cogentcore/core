@@ -1,4 +1,4 @@
-// /Users/oreilly/goki/pi/langs/go/go.pig Lexer
+// /Users/oreilly/goki/pi/langs/golang/go.pig Lexer
 
 // InCommentMulti all CurState must be at top!  any multi-line requires state 
 InCommentMulti:		 CommentMultiline		 if CurState == "CommentMulti" {
@@ -187,7 +187,7 @@ AnyText:		 Text		 if AnyRune	 do: Next;
 
 
 ///////////////////////////////////////////////////
-// /Users/oreilly/goki/pi/langs/go/go.pig Parser
+// /Users/oreilly/goki/pi/langs/golang/go.pig Parser
 
 // File only rules in this first group are used as top-level rules -- all others must be referenced from here 
 File {

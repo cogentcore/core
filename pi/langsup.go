@@ -56,7 +56,7 @@ type LangProps struct {
 }
 
 // StdLangProps is the standard compiled-in set of langauge properties
-var StdLangProps = map[filecat.Supported]LangProps{
+var StdLangProps = map[filecat.Supported]*LangProps{
 	filecat.Ada:        {filecat.Ada, "--", "", "", nil, nil, nil},
 	filecat.Bash:       {filecat.Bash, "# ", "", "", nil, nil, nil},
 	filecat.Csh:        {filecat.Csh, "# ", "", "", nil, nil, nil},
@@ -64,7 +64,7 @@ var StdLangProps = map[filecat.Supported]LangProps{
 	filecat.CSharp:     {filecat.CSharp, "// ", "/* ", " */", nil, nil, nil},
 	filecat.D:          {filecat.D, "// ", "/* ", " */", nil, nil, nil},
 	filecat.ObjC:       {filecat.ObjC, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, &TheGoLang, nil},
+	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
 	filecat.Java:       {filecat.Java, "// ", "/* ", " */", nil, nil, nil},
 	filecat.JavaScript: {filecat.JavaScript, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Eiffel:     {filecat.Eiffel, "--", "", "", nil, nil, nil},
@@ -83,8 +83,8 @@ var StdLangProps = map[filecat.Supported]LangProps{
 	filecat.Rust:       {filecat.Rust, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Scala:      {filecat.Scala, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Html:       {filecat.Html, "", "<!-- ", " -->", nil, nil, nil},
-	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, &TheTexLang, nil},
-	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, &TheMarkdownLang, nil},
+	filecat.TeX:        {filecat.TeX, "% ", "", "", nil, nil, nil},
+	filecat.Markdown:   {filecat.Markdown, "", "<!--- ", " -->", []LangFlags{IndentSpace}, nil, nil},
 }
 
 // LangSupporter provides general support for supported languages.
@@ -109,7 +109,11 @@ func (ll *LangSupporter) OpenStd() error {
 	}
 	for sl, lp := range StdLangProps {
 		ln := strings.ToLower(sl.String())
-		fd := filepath.Join(path, ln)
+		lndir := ln
+		if lndir == "go" {
+			lndir = "golang" // can't name a package "go"..
+		}
+		fd := filepath.Join(path, lndir)
 		fn := filepath.Join(fd, ln+".pi")
 		if _, err := os.Stat(fn); os.IsNotExist(err) {
 			continue
@@ -131,7 +135,7 @@ func (ll *LangSupporter) Props(sup filecat.Supported) (*LangProps, error) {
 		//		log.Println(err.Error()) // don't want output
 		return nil, err
 	}
-	return &lp, nil
+	return lp, nil
 }
 
 // PropsByName looks up language properties by string name of language
