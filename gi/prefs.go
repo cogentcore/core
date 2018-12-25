@@ -99,7 +99,7 @@ func (pf *ColorPrefs) Defaults() {
 	pf.Border.SetString("#666", nil)
 	pf.Background.SetColor(color.White)
 	pf.Shadow.SetString("darker-10", &pf.Background)
-	pf.Control.SetString("#EEF", nil)
+	pf.Control.SetString("#F8F8F8", nil)
 	pf.Icon.SetString("highlight-30", pf.Control)
 	pf.Select.SetString("#CFC", nil)
 	pf.Highlight.SetString("#FFA", nil)

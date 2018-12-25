@@ -2288,6 +2288,9 @@ func (tv *TextView) PasteHist() {
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
 func (tv *TextView) Cut() *TextBufEdit {
+	if !tv.HasSelection() {
+		return nil
+	}
 	updt := tv.Viewport.Win.UpdateStart()
 	defer tv.Viewport.Win.UpdateEnd(updt)
 	org := tv.SelectReg.Start
@@ -2313,12 +2316,12 @@ func (tv *TextView) DeleteSelection() *TextBufEdit {
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
 func (tv *TextView) Copy(reset bool) *TextBufEdit {
-	updt := tv.Viewport.Win.UpdateStart()
-	defer tv.Viewport.Win.UpdateEnd(updt)
 	tbe := tv.Selection()
 	if tbe == nil {
 		return nil
 	}
+	updt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(updt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
 	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
