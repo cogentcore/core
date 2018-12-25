@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/histyle"
 	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
+	_ "github.com/goki/pi/langs"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"

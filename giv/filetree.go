@@ -54,11 +54,16 @@ var FileTreeProps = ki.Props{}
 // given path into this tree -- uses config children to preserve extra info
 // already stored about files.  Only paths listed in OpenDirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
-	repo, err := vci.NewRepo("origin", path)
-	if err == nil {
-		ft.Repo = repo
-		ft.RepoType = string(repo.Vcs())
-		ft.Repo.CacheFileNames()
+	if ft.Repo == nil {
+		repo, err := vci.NewRepo("origin", path)
+		if err == nil {
+			ft.Repo = repo
+			ft.RepoType = string(repo.Vcs())
+			ft.Repo.CacheFileNames()
+			ft.Repo.CacheFilesChanged()
+		}
+	} else {
+		ft.Repo.CacheFileNames() // refresh
 		ft.Repo.CacheFilesChanged()
 	}
 
