@@ -17,6 +17,7 @@ import (
 	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/syms"
 )
 
 // LangFlags are special properties of a given language
@@ -181,4 +182,21 @@ func CompletePi(data interface{}, text string, pos token.Position) (md complete.
 		return md
 	}
 	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})
+}
+
+func FileFuncsPi(data interface{}) (ffns syms.SymMap) {
+	sfs := data.(*FileState)
+	if sfs == nil {
+		log.Printf("pi.CompletePi: data is nil not FileState or is nil - can't list funcs\n")
+		return ffns
+	}
+	lp, err := LangSupport.Props(sfs.Src.Sup)
+	if err != nil {
+		log.Printf("pi.FileFuncsPi: %v\n", err)
+		return ffns
+	}
+	if lp.Lang == nil {
+		return ffns
+	}
+	return lp.Lang.FileFuncs(sfs)
 }

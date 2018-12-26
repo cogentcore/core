@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package tex
+package pi
 
 import (
 	"github.com/goki/gi/complete"
@@ -17,30 +17,26 @@ type TexLang struct {
 	Pr *pi.Parser
 }
 
-// TheTexLang is the instance variable providing support for the TeX language
+// TheTexLang is the instance variable providing support for the Go language
 var TheTexLang = TexLang{}
 
-func init() {
-	pi.StdLangProps[filecat.TeX].Lang = &TheTexLang
-}
-
-func (ml *TexLang) Parser() *pi.Parser {
-	if ml.Pr != nil {
-		return ml.Pr
+func (tl *TexLang) Parser() *pi.Parser {
+	if tl.Pr != nil {
+		return tl.Pr
 	}
 	lp, _ := pi.LangSupport.Props(filecat.TeX)
 	if lp.Parser == nil {
 		pi.LangSupport.OpenStd()
 	}
-	ml.Pr = lp.Parser
-	if ml.Pr == nil {
+	tl.Pr = lp.Parser
+	if tl.Pr == nil {
 		return nil
 	}
-	return ml.Pr
+	return tl.Pr
 }
 
-func (ml *TexLang) ParseFile(fs *pi.FileState) {
-	pr := ml.Parser()
+func (tl *TexLang) ParseFile(fs *pi.FileState) {
+	pr := tl.Parser()
 	if pr == nil {
 		return
 	}
@@ -48,29 +44,34 @@ func (ml *TexLang) ParseFile(fs *pi.FileState) {
 	// no parser
 }
 
-func (ml *TexLang) LexLine(fs *pi.FileState, line int) lex.Line {
-	pr := ml.Parser()
+func (tl *TexLang) LexLine(fs *pi.FileState, line int) lex.Line {
+	pr := tl.Parser()
 	if pr == nil {
 		return nil
 	}
 	return pr.LexLine(fs, line)
 }
 
-func (ml *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
+func (tl *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	// n/a
 	return nil
 }
 
-func (ml *TexLang) HiLine(fs *pi.FileState, line int) lex.Line {
-	return ml.LexLine(fs, line)
+func (tl *TexLang) HiLine(fs *pi.FileState, line int) lex.Line {
+	return tl.LexLine(fs, line)
 }
 
-func (ml *TexLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
+func (tl *TexLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
 	// n/a
 	return md
 }
 
-func (ml *TexLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
+func (tl *TexLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	// n/a
 	return nil
+}
+
+func (tl *TexLang) FileFuncs(fs *pi.FileState) (fsyms syms.SymMap) {
+	// n/a
+	return fsyms
 }

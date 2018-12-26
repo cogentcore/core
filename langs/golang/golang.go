@@ -371,3 +371,15 @@ func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
 		gl.AddPkgToSyms(fs, psym)
 	}
 }
+
+func (gl *GoLang) FileFuncs(fs *pi.FileState) (fsyms syms.SymMap) {
+	fsyms = make(syms.SymMap)
+	filename := fs.Src.Filename
+	syms := fs.Syms.FindKindScoped(token.NameFunction)
+	for k, v := range syms {
+		if v.Filename == filename {
+			fsyms[k] = v
+		}
+	}
+	return fsyms
+}
