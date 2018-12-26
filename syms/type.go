@@ -4,7 +4,13 @@
 
 package syms
 
-import "github.com/goki/ki"
+import (
+	"fmt"
+	"io"
+
+	"github.com/goki/ki"
+	"github.com/goki/ki/indent"
+)
 
 // Type contains all the information about types.  Types can be builtin
 // or composed of builtin types.  Each type can have one or more elements,
@@ -15,7 +21,7 @@ type Type struct {
 	Kind  Kinds    `desc:"kind of type -- overall nature of the type"`
 	Desc  string   `desc:"documentation about this type, extracted from code"`
 	Els   TypeEls  `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
-	Size  []int    `desc:"for primitive types, this is the number of bits, for composite types, it is the number of elements, which can be multi-dimensional in some cases"`
+	Size  []int    `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] and return vals is [1])"`
 	Props ki.Props `desc:"additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property"`
 	Ast   ki.Ki    `json:"-" xml:"-" desc:"Ast node that corresponds to this type -- only valid during parsing"`
 }
@@ -29,6 +35,31 @@ func NewType(name string, kind Kinds) *Type {
 // String() satisfies the fmt.Stringer interface
 func (ty *Type) String() string {
 	return ty.Name + ": " + ty.Kind.String()
+}
+
+// WriteDoc writes basic doc info
+func (ty *Type) WriteDoc(out io.Writer, depth int) {
+	ind := indent.Tabs(depth)
+	fmt.Fprintf(out, "%v%v: %v", ind, ty.Name, ty.Kind)
+	if len(ty.Size) == 1 {
+		fmt.Fprintf(out, " Size: %v", ty.Size[0])
+	} else if len(ty.Size) > 1 {
+		fmt.Fprint(out, " Size: { ")
+		for i := range ty.Size {
+			fmt.Fprintf(out, "%v, ", ty.Size[i])
+		}
+		fmt.Fprint(out, " }")
+	}
+	if len(ty.Els) > 0 {
+		fmt.Fprint(out, " {\n")
+		indp := indent.Tabs(depth + 1)
+		for i := range ty.Els {
+			fmt.Fprintf(out, "%v%v: %v\n", indp, ty.Els[i].Name, ty.Els[i].Type)
+		}
+		fmt.Fprintf(out, "%v}\n", ind)
+	} else {
+		fmt.Fprint(out, "\n")
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////

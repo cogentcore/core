@@ -4,7 +4,11 @@
 
 package golang
 
-import "github.com/goki/pi/syms"
+import (
+	"unsafe"
+
+	"github.com/goki/pi/syms"
+)
 
 var BuiltinTypes syms.TypeMap
 
@@ -14,38 +18,40 @@ func InstallBuiltinTypes() {
 		return
 	}
 	for _, tk := range BuiltinTypeKind {
-		BuiltinTypes.Add(syms.NewType(tk.Name, tk.Kind))
+		ty := syms.NewType(tk.Name, tk.Kind)
+		ty.Size = []int{tk.Size}
+		BuiltinTypes.Add(ty)
 	}
 }
 
 // BuiltinTypeKind are the type names and kinds for builtin Go primitive types
 // (i.e., those with names)
-var BuiltinTypeKind = []syms.TypeKind{
-	{"int", syms.Int},
-	{"int8", syms.Int8},
-	{"int16", syms.Int16},
-	{"int32", syms.Int32},
-	{"int64", syms.Int64},
+var BuiltinTypeKind = []syms.TypeKindSize{
+	{"int", syms.Int, int(unsafe.Sizeof(int(0)))},
+	{"int8", syms.Int8, 1},
+	{"int16", syms.Int16, 2},
+	{"int32", syms.Int32, 4},
+	{"int64", syms.Int64, 8},
 
-	{"uint", syms.Uint},
-	{"uint8", syms.Uint8},
-	{"uint16", syms.Uint16},
-	{"uint32", syms.Uint32},
-	{"uint64", syms.Uint64},
-	{"uintptr", syms.Uintptr},
+	{"uint", syms.Uint, int(unsafe.Sizeof(uint(0)))},
+	{"uint8", syms.Uint8, 1},
+	{"uint16", syms.Uint16, 2},
+	{"uint32", syms.Uint32, 4},
+	{"uint64", syms.Uint64, 8},
+	{"uintptr", syms.Uintptr, 8},
 
-	{"byte", syms.Uint8},
-	{"rune", syms.Int32},
+	{"byte", syms.Uint8, 1},
+	{"rune", syms.Int32, 4},
 
-	{"float32", syms.Float32},
-	{"float64", syms.Float64},
+	{"float32", syms.Float32, 4},
+	{"float64", syms.Float64, 8},
 
-	{"complex64", syms.Complex64},
-	{"complex128", syms.Complex128},
+	{"complex64", syms.Complex64, 8},
+	{"complex128", syms.Complex128, 16},
 
-	{"bool", syms.Bool},
+	{"bool", syms.Bool, 1},
 
-	{"string", syms.String},
+	{"string", syms.String, 0},
 
-	{"error", syms.Interface},
+	{"error", syms.Interface, 0},
 }

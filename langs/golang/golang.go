@@ -5,6 +5,7 @@
 package golang
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -68,7 +69,7 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 			go gl.AddPathToSyms(fs, path)
 		}
 		gl.AddImportsToSyms(fs, pkg)
-		gl.ResolveTypes(pkg)
+		gl.ResolveTypes(fs, pkg)
 	}
 }
 
@@ -267,7 +268,7 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 			if pkg.Name == "main" { // todo: not sure about skipping this..
 				continue
 			}
-			gl.DeleteUnexported(pkg.Children)
+			gl.DeleteUnexported(pkg)
 			if pkgsym == nil {
 				pkgsym = pkg
 			} else {
@@ -281,7 +282,8 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	if pkgsym == nil {
 		return nil
 	}
-	gl.ResolveTypes(pkgsym)
+	pfs := pi.NewFileState() // master overall package file state
+	gl.ResolveTypes(pfs, pkgsym)
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, path)
 	}
@@ -293,17 +295,21 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 
 // DeleteUnexported deletes lower-case unexported items from map, and
 // children of symbols on map
-func (gl *GoLang) DeleteUnexported(sm syms.SymMap) {
-	for nm, sy := range sm {
-		if sy.Kind.SubCat() == token.NameScope { // typically lowercase
+func (gl *GoLang) DeleteUnexported(sy *syms.Symbol) {
+	for nm, ss := range sy.Children {
+		if ss == sy {
+			fmt.Printf("warning: child is self!: %v\n", sy.String())
+			continue
+		}
+		if ss.Kind.SubCat() == token.NameScope { // typically lowercase
 			continue
 		}
 		rn, _ := utf8.DecodeRuneInString(nm)
 		if nm == "" || unicode.IsLower(rn) {
-			delete(sm, nm)
+			delete(sy.Children, nm)
 		}
-		if sy.HasChildren() {
-			gl.DeleteUnexported(sy.Children)
+		if ss.HasChildren() {
+			gl.DeleteUnexported(ss)
 		}
 	}
 }
@@ -335,7 +341,7 @@ func (gl *GoLang) AddImportsToSyms(fs *pi.FileState, pkg *syms.Symbol) {
 		return
 	}
 	for _, im := range imps {
-		go gl.AddImportToSyms(fs, im.Name) // todo: should be "go"
+		go gl.AddImportToSyms(fs, im.Name)
 	}
 }
 

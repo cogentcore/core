@@ -4,6 +4,12 @@
 
 package syms
 
+import (
+	"io"
+	"sort"
+	"strings"
+)
+
 // TypeMap is a map of types for quick looking up by name
 type TypeMap map[string]*Type
 
@@ -33,8 +39,47 @@ func (tm *TypeMap) CopyFrom(src TypeMap) {
 	}
 }
 
-// TypeKind is used for initialization of builtin typemaps
-type TypeKind struct {
+// Names returns a slice of the names in this map, optionally sorted
+func (tm *TypeMap) Names(sorted bool) []string {
+	nms := make([]string, len(*tm))
+	idx := 0
+	for _, ty := range *tm {
+		nms[idx] = ty.Name
+		idx++
+	}
+	if sorted {
+		sort.StringSlice(nms).Sort()
+	}
+	return nms
+}
+
+// KindNames returns a slice of the kind:names in this map, optionally sorted
+func (tm *TypeMap) KindNames(sorted bool) []string {
+	nms := make([]string, len(*tm))
+	idx := 0
+	for _, ty := range *tm {
+		nms[idx] = ty.Kind.String() + ":" + ty.Name
+		idx++
+	}
+	if sorted {
+		sort.StringSlice(nms).Sort()
+	}
+	return nms
+}
+
+// WriteDoc writes basic doc info, sorted by kind and name
+func (tm *TypeMap) WriteDoc(out io.Writer, depth int) {
+	nms := tm.KindNames(true)
+	for _, nm := range nms {
+		ci := strings.Index(nm, ":")
+		ty := (*tm)[nm[ci+1:]]
+		ty.WriteDoc(out, depth)
+	}
+}
+
+// TypeKindSize is used for initialization of builtin typemaps
+type TypeKindSize struct {
 	Name string
 	Kind Kinds
+	Size int
 }

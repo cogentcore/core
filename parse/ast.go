@@ -30,6 +30,20 @@ type Ast struct {
 
 var KiT_Ast = kit.Types.AddType(&Ast{}, AstProps)
 
+// ChildAst returns the child at given index as an Ast -- false if not valid
+func (ast *Ast) ChildAst(idx int) (*Ast, bool) {
+	asti, ok := ast.Child(idx)
+	if !ok {
+		return nil, false
+	}
+	return asti.(*Ast), true
+}
+
+// KnownChildAst returns the KnownChild at given index as an Ast
+func (ast *Ast) KnownChildAst(idx int) *Ast {
+	return ast.KnownChild(idx).(*Ast)
+}
+
 // SetTokReg sets the token region for this rule to given region
 func (ast *Ast) SetTokReg(reg lex.Reg, src *lex.File) {
 	ast.TokReg = reg

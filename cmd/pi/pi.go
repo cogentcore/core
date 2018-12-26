@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/goki/gi/filecat"
+	_ "github.com/goki/pi/langs"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 )

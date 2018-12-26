@@ -1323,12 +1323,24 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		}
 		return false
 	case AddSymbol:
+		sc := ps.Scopes.Top()
 		for i := range nms {
 			n := nms[i]
 			if n == "" || n == "_" { // go special case..
 				continue
 			}
-			sy := syms.NewSymbol(n, useTok, ps.Src.Filename, ast.SrcReg)
+			var sy *syms.Symbol
+			has := false
+			if sc != nil {
+				if sy, has = sc.Children[n]; has {
+					if ps.Trace.On {
+						ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
+					}
+				}
+			}
+			if sy == nil {
+				sy = syms.NewSymbol(n, useTok, ps.Src.Filename, ast.SrcReg)
+			}
 			added := sy.AddScopesStack(ps.Scopes)
 			sy.AddScopesMap(ps.ExtScopes, !added) // add to exts if not otherwise added
 			if !added {

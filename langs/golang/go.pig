@@ -215,8 +215,8 @@ ExprRules {
     }
     // NameList one or more plain names, separated by , -- for var names 
     NameList {
-        NameListEls:  'Name' ',' NameList  >1Ast
-        NameListEl:   'Name'               +Ast
+        NameListEls:  @Name ',' NameList  >1Ast
+        NameListEl:   'Name'              +Ast
     }
     ExprList {
         ExprListEls:  Expr ',' ExprList  
@@ -391,7 +391,8 @@ TypeRules {
         PointerType:    '*' @Type                             >Ast
         FuncType:       'key:func' @Signature                 >Ast
         InterfaceType:  'key:interface' '{' ?MethodSpecs '}'  >Ast
-        MapType:        'key:map' '[' @Type ']' @Type         >Ast
+        Acts:{ 0:ChgToken:"../Name":NameInterface; 0:PushNewScope:"../Name":NameInterface; -1:PopScope:"../Name":None; }
+        MapType:  'key:map' '[' @Type ']' @Type  >Ast
         Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
@@ -435,9 +436,13 @@ FuncRules {
     }
     // MethodSpec for interfaces only -- interface methods 
     MethodSpec {
-        MethSpecAnon:  'Name' '.' 'Name' 'EOS'      >Ast
-        MethSpecName:  'Name' Params ?Result 'EOS'  >Ast
-        MethSpecNone:  'EOS'                        
+        MethSpecAnonQual:  'Name' '.' 'Name' 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"":NameInterface; -1:AddSymbol:"":NameInterface; }
+        MethSpecName:  @Name @Params ?Result 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"Name":NameMethod; -1:AddSymbol:"Name":NameMethod; }
+        MethSpecAnonLocal:  'Name' 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"":NameInterface; -1:AddSymbol:"":NameInterface; }
+        MethSpecNone:  'EOS'  
     }
     MethodSpecs:  MethodSpec ?MethodSpecs  
     Result {
@@ -449,7 +454,7 @@ FuncRules {
         ParName:          @Name @Type ?',' ?ParamsList            _Ast
         ParType:          @Type ?',' ?ParamsList                  _Ast
         // ParNames need the explicit ',' in here to absorb so later one goes to paramslist 
-        ParNames:  Name ',' @NameList @Type ?',' ?ParamsList  _Ast
+        ParNames:  @Name ',' @NameList @Type ?',' ?ParamsList  _Ast
     }
     Params:  '(' ?ParamsList ')'  >Ast
 }
@@ -508,8 +513,9 @@ StmtRules {
         }
         DefaultStmt:  'key:default' ':' ?Stmt  >Ast
         LabeledStmt:  @Name ':' ?Stmt          >Ast
-        Block:        '{' ?StmtList '}' 'EOS'  >Ast
-        SimpleSt:     SimpleStmt               
+        Acts:{ -1:ChgToken:"":NameLabel; }
+        Block:     '{' ?StmtList '}' 'EOS'  >Ast
+        SimpleSt:  SimpleStmt               
     }
     SimpleStmt {
         SendStmt:  ?Expr '<-' Expr 'EOS'  >Ast

@@ -183,8 +183,8 @@ const (
 	Chan
 
 	// Category: Function -- types that are functions
-	// generally have anonymous Tuple types in Type.Els representing the params (first)
-	// and return values (second)
+	// Type.Els are the params and return values in order, with Size[0] being number
+	// of params and Size[1] number of returns
 	Function
 
 	// SubCat: Func -- a standalone function
@@ -192,7 +192,7 @@ const (
 
 	// 	SubCat: Method -- a function with a specific receiver (e.g., on a Class in C++,
 	// or on any type in Go).
-	// additional third Type.Els is the receiver type
+	// First Type.Els is receiver param -- included in Size[0]
 	Method
 
 	// SubCat: Interface -- an abstract definition of a set of methods (in Go)

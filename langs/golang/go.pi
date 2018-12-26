@@ -3747,7 +3747,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'Name' ',' NameList",
+                "Rule": "@Name ',' NameList",
                 "StackMatch": "",
                 "Ast": "AnchorFirstAst",
                 "Acts": null,
@@ -5843,7 +5843,29 @@
                 "Rule": "'key:interface' '{' ?MethodSpecs '}'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": 0,
+                    "Act": "ChgToken",
+                    "Path": "../Name",
+                    "Tok": "NameInterface",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": 0,
+                    "Act": "PushNewScope",
+                    "Path": "../Name",
+                    "Tok": "NameInterface",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopScope",
+                    "Path": "../Name",
+                    "Tok": "None",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -6423,17 +6445,19 @@
             "Props": null,
             "Kids": [
               {
-                "n": 3,
+                "n": 4,
                 "type": "parse.Rule",
-                "name": "MethSpecAnon",
+                "name": "MethSpecAnonQual",
                 "type": "parse.Rule",
                 "name": "MethSpecName",
+                "type": "parse.Rule",
+                "name": "MethSpecAnonLocal",
                 "type": "parse.Rule",
                 "name": "MethSpecNone"
               },
               {
-                "Nm": "MethSpecAnon",
-                "UniqueNm": "MethSpecAnon",
+                "Nm": "MethSpecAnonQual",
+                "UniqueNm": "MethSpecAnonQual",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
@@ -6441,7 +6465,22 @@
                 "Rule": "'Name' '.' 'Name' 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NameInterface",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "",
+                    "Tok": "NameInterface",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -6452,10 +6491,54 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "'Name' Params ?Result 'EOS'",
+                "Rule": "@Name @Params ?Result 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameMethod",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "Name",
+                    "Tok": "NameMethod",
+                    "FmTok": "None"
+                  }
+                ],
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "MethSpecAnonLocal",
+                "UniqueNm": "MethSpecAnonLocal",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'Name' 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NameInterface",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "",
+                    "Tok": "NameInterface",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -6612,7 +6695,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
-                "Rule": "Name ',' @NameList @Type ?',' ?ParamsList",
+                "Rule": "@Name ',' @NameList @Type ?',' ?ParamsList",
                 "StackMatch": "",
                 "Ast": "SubAst",
                 "Acts": null,
@@ -7317,7 +7400,15 @@
                 "Rule": "@Name ':' ?Stmt",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NameLabel",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },

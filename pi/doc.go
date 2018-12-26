@@ -25,7 +25,7 @@
 // To more effectively manage and organize the symbols from parsing,
 // language-specific logic is required, and this is supported by the
 // Lang interface, which is implemented for each of the supported
-// languages (see lang.go and e.g., go.go).
+// languages (see lang.go and langs/* e.g., golang/golang.go).
 //
 // The LangSupport variable provides the hub for accessing interfaces
 // for supported languages, using the StdLangProps map which

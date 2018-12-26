@@ -173,6 +173,14 @@ func (sy *Symbol) SaveJSON(filename string) error {
 func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
 	ind := indent.Tabs(depth)
 	fmt.Fprintf(out, "%v%v: %v", ind, sy.Name, sy.Kind)
+	if sy.Type != "" {
+		fmt.Fprintf(out, " (%v)", sy.Type)
+	}
+	if len(sy.Types) > 0 {
+		fmt.Fprint(out, " Types: {\n")
+		sy.Types.WriteDoc(out, depth+1)
+		fmt.Fprintf(out, "%v}\n", ind)
+	}
 	if sy.HasChildren() {
 		fmt.Fprint(out, " {\n")
 		sy.Children.WriteDoc(out, depth+1)
