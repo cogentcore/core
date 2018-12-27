@@ -1591,9 +1591,9 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	}
 	did := false
 	if nxti >= 0 {
-		did = win.FocusOnOrNext(ly.KnownChild(nxti))
+		did = win.FocusOnOrPrev(ly.KnownChild(nxti))
 	} else {
-		did = win.FocusOnOrNext(ly.KnownChild(sz - 1))
+		did = win.FocusOnOrPrev(ly.KnownChild(sz - 1))
 	}
 	if !did || win.CurFocus() == cur {
 		return false

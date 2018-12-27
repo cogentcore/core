@@ -2495,6 +2495,24 @@ func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
 	return w.FocusNext(foc)
 }
 
+// FocusOnOrPrev sets the focus on the given item, or the previous one that can
+// accept focus -- returns true if a new focus item found.
+func (w *Window) FocusOnOrPrev(foc ki.Ki) bool {
+	cfoc := w.CurFocus()
+	if cfoc == foc {
+		return true
+	}
+	_, ni := KiToNode2D(foc)
+	if ni == nil || ni.This() == nil {
+		return false
+	}
+	if ni.CanFocus() {
+		w.SetFocus(foc)
+		return true
+	}
+	return w.FocusPrev(foc)
+}
+
 // FocusPrev sets the focus on the previous item before the given item (can be nil)
 func (w *Window) FocusPrev(foc ki.Ki) bool {
 	if foc == nil { // must have a current item here
