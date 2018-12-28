@@ -487,7 +487,7 @@ StmtRules {
             // ForExpr most general at end 
             ForExpr:  'key:for' ?Expr '{' ?BlockList '}' 'EOS'  >Ast
             // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
-            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'  >Ast
+            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?PostStmt '{' ?BlockList '}' 'EOS'  >Ast
         }
         SwitchStmt {
             SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
@@ -523,6 +523,18 @@ StmtRules {
         DecrStmt:  Expr '--' 'EOS'        >Ast
         AsgnStmt:  Asgn                   
         ExprStmt:  Expr 'EOS'             >Ast
+    }
+    // PostStmt for loop post statement -- has no EOS 
+    PostStmt {
+        PostSendStmt:      ?Expr '<-' Expr                 >Ast
+        PostIncrStmt:      Expr '++'                       >Ast
+        PostDecrStmt:      Expr '--'                       >Ast
+        PostAsgnExisting:  ExprList '=' ExprList           >Ast
+        PostAsgnBit:       ExprList 'OpBitAsgn' ExprList   >Ast
+        PostAsgnMath:      ExprList 'OpMathAsgn' ExprList  >Ast
+        PostAsgnNew:       ExprList ':=' ExprList          >Ast
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
+        PostExprStmt:  Expr  >Ast
     }
     Asgn {
         AsgnExisting:  ExprList '=' ExprList 'EOS'   >Ast

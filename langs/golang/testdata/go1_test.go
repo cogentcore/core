@@ -6,6 +6,16 @@ license that can be found in the LICENSE file. */
 
 package golang
 
+func ffb() {
+	a++
+}
+
+func sfa() {
+	for i := 0; i < 100; i++ {
+		fmt.Printf("%v %v", a, i)
+	}
+}
+
 type Ityp int
 
 type Ptyp *string
@@ -100,11 +110,11 @@ var FileInfoProps = ki.Props{
 	},
 }
 
-func baf() {
+//func baf() {
 //	switch apv := aps.Value.(type) {
 //	case ki.BlankProp:
 //	}
-}
+//}
 
 func aaa() {
 	sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord)	
