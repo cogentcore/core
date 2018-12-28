@@ -378,13 +378,24 @@ func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
 	}
 }
 
-func (gl *GoLang) FileFuncs(fs *pi.FileState) (fsyms syms.SymMap) {
-	fsyms = make(syms.SymMap)
-	filename := fs.Src.Filename
-	syms := fs.Syms.FindKindScoped(token.NameFunction)
-	for k, v := range syms {
-		if v.Filename == filename {
-			fsyms[k] = v
+// FileFuncs returns a slice of symbols of functions and methods in the file
+func (gl *GoLang) FileFuncs(fs *pi.FileState) (fsyms []syms.Symbol) {
+	for _, v := range fs.Syms {
+		if v.Kind == token.NamePackage && v.Filename == fs.Src.Filename {
+			for _, w := range v.Children {
+				if w.Filename == fs.Src.Filename {
+					switch w.Kind {
+					case token.NameFunction:
+						fsyms = append(fsyms, *w)
+					case token.NameStruct:
+						for _, x := range w.Children {
+							if x.Kind == token.NameMethod {
+								fsyms = append(fsyms, *x)
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return fsyms
