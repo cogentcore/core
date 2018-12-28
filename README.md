@@ -1,5 +1,6 @@
-# goki
-Go language (golang) full strength tree structures (ki = tree in Japanese)
+![alt tag](logo/goki_logo.png)
+
+Go language (golang) full strength tree structures (ki = 木 = tree in Japanese)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/ki)](https://goreportcard.com/report/github.com/goki/ki)
 [![GoDoc](https://godoc.org/github.com/goki/ki?status.svg)](https://godoc.org/github.com/goki/ki)
