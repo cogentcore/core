@@ -6,6 +6,8 @@ license that can be found in the LICENSE file. */
 
 package golang
 
+var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
+
 func ffb() {
 }
 

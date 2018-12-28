@@ -260,23 +260,32 @@ ExprRules {
         MultExpr:  -Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'  >Ast
     }
     PrimaryExpr {
-        BasicLit:  BasicLiteral  
-        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
-        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr      >Ast
-        FuncLitCall:   'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
-        FuncLit:       'key:func' Signature '{' ?BlockList '}'                    >Ast
-        // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
-        ConvertBasic:   @BasicType '(' Expr ')'                       >Ast
-        ConvertParens:  '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr  >Ast
-        // Convert note: a regular type(expr) will be a FunCall 
-        Convert:    @TypeLiteral '(' Expr ?',' ')'  >Ast
-        ParenExpr:  '(' Expr ')' ?PrimaryExpr       
-        // TypeAssert must be before FunCall to get . match 
-        TypeAssert:  PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr  >Ast
+        LitNumInteger:  'LitNumInteger'  +Ast
+        LitString:      'LitStr'         +Ast
+        // LitRune rune 
+        LitRune:      'LitStrSingle'  +Ast
+        LitNumImag:   'LitNumImag'    +Ast
+        LitNumFloat:  'LitNumFloat'   +Ast
+        FuncExpr {
+            FuncLitCall:  'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
+            FuncLit:      'key:func' Signature '{' ?BlockList '}'                    >Ast
+        }
         // MakeCall takes type arg 
         MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'  >Ast
         // NewCall takes type arg 
         NewCall:  'key:new' '(' Type ')'  >Ast
+        Paren {
+            ConvertParens:  '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr  >Ast
+            ParenExpr:      '(' Expr ')' ?PrimaryExpr                     
+        }
+        // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
+        ConvertBasic:  @BasicType '(' Expr ')'  >Ast
+        // Convert note: a regular type(expr) will be a FunCall 
+        Convert:  @TypeLiteral '(' Expr ?',' ')'  >Ast
+        // TypeAssert must be before FunCall to get . match 
+        TypeAssert:  PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr  >Ast
+        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
+        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr  >Ast
         // Selector This must be after unary expr esp addr, DePtr 
         Selector:  PrimaryExpr '.' PrimaryExpr  >Ast
         Acts:{ -1:ChgToken:"[0]":NameTag; }
@@ -290,23 +299,22 @@ ExprRules {
         // OpName this is the least selective and must be at the end 
         OpName:  FullName  
     }
-    BasicLiteral {
-        LitNumInteger:  'LitNumInteger'  +Ast
-        LitNumFloat:    'LitNumFloat'    +Ast
-        LitNumImag:     'LitNumImag'     +Ast
-        // LitRune rune 
-        LitRune:    'LitStrSingle'  +Ast
-        LitString:  'LitStr'        +Ast
-    }
     LiteralType {
-        LitStructType:  StructType               
-        LitIFaceType:   'key:interface' '{' '}'  +Ast
-        // LitSliceType slice must come before array 
-        LitSliceType:      SliceType           
-        LitArrayAutoType:  ArrayAutoType       
-        LitArrayType:      ArrayType           
-        LitElType:         '[' '...' ']' Type  
-        LitMapType:        MapType             
+        LitStructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
+        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
+        LitIFaceType:  'key:interface' '{' '}'  +Ast
+        LitSliceOrArray {
+            LitSliceType:  '[' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // LitArrayAutoType array must be after slice b/c slice matches on sequence of tokens 
+            LitArrayAutoType:  '[' '...' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // LitArrayType array must be after slice b/c slice matches on sequence of tokens 
+            LitArrayType:  '[' Expr ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        }
+        LitMapType:  'key:map' '[' @Type ']' @Type  >Ast
+        Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
         // LitTypeName this is very general, must be at end.. 
         LitTypeName:  TypeName  
     }
@@ -378,14 +386,16 @@ TypeRules {
         NoPtrTypeName:  TypeName      
     }
     TypeLiteral {
-        SliceType:  '[' ']' @Type  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
-        // ArrayAutoType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayAutoType:  '[' '...' ']' @Type  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
-        // ArrayType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayType:  '[' Expr ']' @Type  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        SliceOrArray {
+            SliceType:  '[' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // ArrayAutoType array must be after slice b/c slice matches on sequence of tokens 
+            ArrayAutoType:  '[' '...' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // ArrayType array must be after slice b/c slice matches on sequence of tokens 
+            ArrayType:  '[' Expr ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        }
         StructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
         Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
         PointerType:    '*' @Type                             >Ast
@@ -394,9 +404,9 @@ TypeRules {
         Acts:{ 0:ChgToken:"../Name":NameInterface; 0:PushNewScope:"../Name":NameInterface; -1:PopScope:"../Name":None; }
         MapType:  'key:map' '[' @Type ']' @Type  >Ast
         Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
+        SendChanType:  '<-' 'key:chan' @Type  >Ast
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
-            SendChanType:  '<-' 'key:chan' @Type  >Ast
             SRChanType:    'key:chan' @Type       >Ast
         }
     }
