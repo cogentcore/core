@@ -261,11 +261,14 @@ ExprRules {
     }
     PrimaryExpr {
         LitNumInteger:  'LitNumInteger'  +Ast
-        LitString:      'LitStr'         +Ast
         // LitRune rune 
-        LitRune:      'LitStrSingle'  +Ast
-        LitNumImag:   'LitNumImag'    +Ast
-        LitNumFloat:  'LitNumFloat'   +Ast
+        LitRune:       'LitStrSingle'  +Ast
+        LitString:     'LitStr'        +Ast
+        LitStringDbl:  'LitStrDouble'  +Ast
+        // LitStringTick todo: get map to work with subcategories.. 
+        LitStringTick:  'LitStrBacktick'  +Ast
+        LitNumImag:     'LitNumImag'      +Ast
+        LitNumFloat:    'LitNumFloat'     +Ast
         FuncExpr {
             FuncLitCall:  'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
             FuncLit:      'key:func' Signature '{' ?BlockList '}'                    >Ast

@@ -4318,13 +4318,17 @@
             "Props": null,
             "Kids": [
               {
-                "n": 18,
+                "n": 20,
                 "type": "parse.Rule",
                 "name": "LitNumInteger",
                 "type": "parse.Rule",
+                "name": "LitRune",
+                "type": "parse.Rule",
                 "name": "LitString",
                 "type": "parse.Rule",
-                "name": "LitRune",
+                "name": "LitStringDbl",
+                "type": "parse.Rule",
+                "name": "LitStringTick",
                 "type": "parse.Rule",
                 "name": "LitNumImag",
                 "type": "parse.Rule",
@@ -4371,6 +4375,20 @@
                 "FirstTokMap": false
               },
               {
+                "Nm": "LitRune",
+                "UniqueNm": "LitRune",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "rune",
+                "Rule": "'LitStrSingle'",
+                "StackMatch": "",
+                "Ast": "AddAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
                 "Nm": "LitString",
                 "UniqueNm": "LitString",
                 "Props": null,
@@ -4385,13 +4403,27 @@
                 "FirstTokMap": false
               },
               {
-                "Nm": "LitRune",
-                "UniqueNm": "LitRune",
+                "Nm": "LitStringDbl",
+                "UniqueNm": "LitStringDbl",
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "rune",
-                "Rule": "'LitStrSingle'",
+                "Desc": "",
+                "Rule": "'LitStrDouble'",
+                "StackMatch": "",
+                "Ast": "AddAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "LitStringTick",
+                "UniqueNm": "LitStringTick",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "todo: get map to work with subcategories..",
+                "Rule": "'LitStrBacktick'",
                 "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
@@ -6082,7 +6114,7 @@
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": false,
-            "FirstTokMap": false
+            "FirstTokMap": true
           },
           {
             "Nm": "FieldDecls",

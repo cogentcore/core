@@ -394,6 +394,7 @@ func (pr *Rule) OptimizeOrder(ps *State) {
 func (pr *Rule) CompileTokMap(ps *State) bool {
 	valid := true
 	pr.FiTokMap = make(map[string]*Rule, len(pr.Kids))
+	pr.FiTokElseIdx = len(pr.Kids)
 	for i, kpri := range pr.Kids {
 		kpr := kpri.(*Rule)
 		if len(kpr.Rules) == 0 || !kpr.Rules[0].IsToken() {
@@ -404,6 +405,7 @@ func (pr *Rule) CompileTokMap(ps *State) bool {
 		skey := fr.Tok.StringKey()
 		if _, has := pr.FiTokMap[skey]; has {
 			ps.Error(lex.PosZero, fmt.Sprintf("CompileFirstTokMap: multiple rules have the same first token: %v -- must be unique -- use a :'tok' group to match that first token and put all the sub-rules as children of that node", fr.Tok), pr)
+			pr.FiTokElseIdx = 0
 			valid = false
 		} else {
 			pr.FiTokMap[skey] = kpr
@@ -725,11 +727,13 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 
 	// mprf := prof.Start("Match")
 	// defer mprf.End()
+	// Note: uncomment the following to see which rules are taking the most
+	// time -- very helpful for focusing effort on optimizing those rules.
 	// prf := prof.Start(pr.Nm)
-	// er prf.End()
+	// defer prf.End()
 
 	nr := len(pr.Rules)
-	if nr == 0 { // Group
+	if pr.HasFlag(int(TokMatchGroup)) || nr == 0 { // Group
 		return pr.MatchGroup(ps, parAst, scope, depth, optMap)
 	}
 
