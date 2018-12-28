@@ -144,3 +144,33 @@ func (fs *FileState) ParseErrReportDetailed() string {
 func (fs *FileState) ParseRuleString(full bool) string {
 	return fs.ParseState.RuleString(full)
 }
+
+////////////////////////////////////////////////////////////////////////
+//  Syms symbol processing support
+
+// FindNameScoped looks for given symbol name within Syms and ExtSyms
+// maps, and any children on the map that are of subcategory
+// token.NameScope (i.e., namespace, module, package, library)
+func (fs *FileState) FindNameScoped(nm string) (*syms.Symbol, bool) {
+	sy, has := fs.Syms.FindNameScoped(nm)
+	if has {
+		return sy, true
+	}
+	sy, has = fs.ExtSyms.FindNameScoped(nm)
+	if has {
+		return sy, true
+	}
+	return nil, false
+}
+
+// FindNamePrefix looks for given symbol name prefix within Syms and ExtSyms
+// and any children on the map that are of subcategory
+// token.NameScope (i.e., namespace, module, package, library)
+// adds to given matches map (which can be nil), for more efficient recursive use
+func (fs *FileState) FindNamePrefix(seed string, matches *syms.SymMap) {
+	lm := len(*matches)
+	fs.Syms.FindNamePrefix(seed, matches)
+	if len(*matches) == lm {
+		fs.ExtSyms.FindNamePrefix(seed, matches)
+	}
+}

@@ -68,7 +68,7 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 		if !gl.AddPkgToSyms(fs, pkg) { // first time, no existing
 			go gl.AddPathToSyms(fs, path)
 		}
-		gl.AddImportsToSyms(fs, pkg)
+		gl.AddImportsToExts(fs, pkg)
 		gl.ResolveTypes(fs, pkg)
 	}
 }
@@ -169,7 +169,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	fs.SymsMu.RLock() // syms access needs to be locked -- could be updated..
 	var matches syms.SymMap
 	if scope != "" {
-		scsym, got := fs.Syms.FindNameScoped(scope)
+		scsym, got := fs.FindNameScoped(scope)
 		if got {
 			if name == "" {
 				matches = scsym.Children
@@ -182,7 +182,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		}
 	}
 	if len(matches) == 0 {
-		fs.Syms.FindNamePrefix(name, &matches)
+		fs.FindNamePrefix(name, &matches)
 	}
 	fs.SymsMu.RUnlock()
 	if len(matches) == 0 {
@@ -315,7 +315,7 @@ func (gl *GoLang) DeleteUnexported(sy *syms.Symbol) {
 }
 
 // AddPkgToSyms adds given package symbol, with children from package
-// to pi.FileState.Syms list -- merges with anything already there
+// to pi.FileState.Syms map -- merges with anything already there
 // does NOT add imports -- that is an optional second step.
 // Returns true if there was an existing entry for this package.
 func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
@@ -331,9 +331,29 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	return has
 }
 
-// AddImportsToSyms adds imports from given package into pi.FileState.Syms list
+// AddPkgToExts adds given package symbol, with children from package
+// to pi.FileState.ExtSyms map -- merges with anything already there
+// does NOT add imports -- that is an optional second step.
+// Returns true if there was an existing entry for this package.
+func (gl *GoLang) AddPkgToExts(fs *pi.FileState, pkg *syms.Symbol) bool {
+	fs.SymsMu.Lock()
+	psy, has := fs.ExtSyms[pkg.Name]
+	if has {
+		psy.Children.CopyFrom(pkg.Children)
+		pkg = psy
+	} else {
+		if fs.ExtSyms == nil {
+			fs.ExtSyms = make(syms.SymMap)
+		}
+		fs.ExtSyms[pkg.Name] = pkg
+	}
+	fs.SymsMu.Unlock()
+	return has
+}
+
+// AddImportsToExts adds imports from given package into pi.FileState.ExtSyms list
 // imports are coded as NameLibrary symbols with names = import path
-func (gl *GoLang) AddImportsToSyms(fs *pi.FileState, pkg *syms.Symbol) {
+func (gl *GoLang) AddImportsToExts(fs *pi.FileState, pkg *syms.Symbol) {
 	fs.SymsMu.RLock()
 	imps := pkg.Children.FindKindScoped(token.NameLibrary)
 	fs.SymsMu.RUnlock()
@@ -341,13 +361,13 @@ func (gl *GoLang) AddImportsToSyms(fs *pi.FileState, pkg *syms.Symbol) {
 		return
 	}
 	for _, im := range imps {
-		go gl.AddImportToSyms(fs, im.Name)
+		go gl.AddImportToExts(fs, im.Name)
 	}
 }
 
-// AddImportToSyms adds given import into pi.FileState.Syms list
+// AddImportToExts adds given import into pi.FileState.ExtSyms list
 // assumed to be called as a separate goroutine
-func (gl *GoLang) AddImportToSyms(fs *pi.FileState, im string) {
+func (gl *GoLang) AddImportToExts(fs *pi.FileState, im string) {
 	sz := len(im)
 	if sz == 0 {
 		return
@@ -365,7 +385,7 @@ func (gl *GoLang) AddImportToSyms(fs *pi.FileState, im string) {
 	psym := gl.ParseDir(im, pi.LangDirOpts{})
 	if psym != nil {
 		psym.Name = pnm
-		gl.AddPkgToSyms(fs, psym)
+		gl.AddPkgToExts(fs, psym)
 	}
 }
 
@@ -375,6 +395,15 @@ func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
 	psym := gl.ParseDir(path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
+	}
+}
+
+// AddPathToExts adds given path into pi.FileState.ExtSyms list
+// assumed to be called as a separate goroutine
+func (gl *GoLang) AddPathToExts(fs *pi.FileState, path string) {
+	psym := gl.ParseDir(path, pi.LangDirOpts{})
+	if psym != nil {
+		gl.AddPkgToExts(fs, psym)
 	}
 }
 
