@@ -433,6 +433,9 @@ func (tv *TreeView) Unselect() {
 
 // UnselectAll unselects all selected items in the view
 func (tv *TreeView) UnselectAll() {
+	if tv.Viewport == nil {
+		return
+	}
 	win := tv.Viewport.Win
 	updt := false
 	if win != nil {
@@ -452,6 +455,9 @@ func (tv *TreeView) UnselectAll() {
 
 // SelectAll all items in view
 func (tv *TreeView) SelectAll() {
+	if tv.Viewport == nil {
+		return
+	}
 	win := tv.Viewport.Win
 	updt := false
 	if win != nil {

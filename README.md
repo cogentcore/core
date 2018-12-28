@@ -1,6 +1,6 @@
 ![alt tag](logo/gogi_logo.png)
 
-GoGi is part of the GoKi Go language (golang) full strength tree structure system (ki = tree in Japanese)
+GoGi is part of the GoKi Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
 
 `package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go
 
