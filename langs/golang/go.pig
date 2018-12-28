@@ -479,25 +479,25 @@ StmtRules {
         }
         // ForStmt just for matching for token -- delegates to children 
         ForStmt {
-            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
-            ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'   >Ast
+            ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             Acts:{ -1:ChgToken:"NameListEls":NameVar; }
-            ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+            ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             Acts:{ -1:ChgToken:"NameListEls":NameVar; }
             // ForExpr most general at end 
-            ForExpr:  'key:for' ?Expr '{' ?BlockList '}' 'EOS'  >Ast
+            ForExpr:  'key:for' ?Expr '{' ?BlockList -'}' 'EOS'  >Ast
             // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
-            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?PostStmt '{' ?BlockList '}' 'EOS'  >Ast
+            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?PostStmt '{' ?BlockList -'}' 'EOS'  >Ast
         }
         SwitchStmt {
-            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
+            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-            SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
+            SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-            SwitchExpr:          'key:switch' ?Expr '{' BlockList '}' 'EOS'                                                      >Ast
-            SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
-            SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
-            SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
+            SwitchExpr:          'key:switch' ?Expr '{' BlockList -'}' 'EOS'                                                      >Ast
+            SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'                                     >Ast
+            SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList -'}' 'EOS'  >Ast
+            SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList -'}' 'EOS'              >Ast
         }
         CaseStmt {
             // TypeCaseEmptyStmt case and default require post-step to create sub-block -- no explicit { } scoping 
@@ -514,8 +514,8 @@ StmtRules {
         DefaultStmt:  'key:default' ':' ?Stmt  >Ast
         LabeledStmt:  @Name ':' ?Stmt          >Ast
         Acts:{ -1:ChgToken:"":NameLabel; }
-        Block:     '{' ?StmtList '}' 'EOS'  >Ast
-        SimpleSt:  SimpleStmt               
+        Block:     '{' ?StmtList -'}' 'EOS'  >Ast
+        SimpleSt:  SimpleStmt                
     }
     SimpleStmt {
         SendStmt:  ?Expr '<-' Expr 'EOS'  >Ast
@@ -545,7 +545,7 @@ StmtRules {
     }
     Elses {
         ElseIfStmt:      'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                   >Ast
-        ElseStmt:        'key:else' '{' ?BlockList '}' 'EOS'                                        >Ast
+        ElseStmt:        'key:else' '{' ?BlockList -'}' 'EOS'                                       >Ast
         ElseIfStmtInit:  'key:else' 'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'  >Ast
     }
     // CommStmt communication stmt: send or recv 

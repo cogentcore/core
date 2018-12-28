@@ -7,6 +7,13 @@ license that can be found in the LICENSE file. */
 package golang
 
 func ffb() {
+}
+
+func (tv *TextView) FindNextLink(pos TextPos) (TextPos, TextRegion, bool) {
+	
+}
+
+func ffi() {
 	a++
 }
 
