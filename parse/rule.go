@@ -64,7 +64,7 @@ type Rule struct {
 	ki.Node
 	Off          bool             `desc:"disable this rule -- useful for testing and exploration"`
 	Desc         string           `desc:"description / comments about this rule"`
-	Rule         string           `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule."`
+	Rule         string           `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -"`
 	StackMatch   string           `desc:"if present, this rule only fires if stack has this on it"`
 	Ast          AstActs          `desc:"what action should be take for this node when it matches"`
 	Acts         Acts             `desc:"actions to perform based on parsed Ast tree data, when this rule is done executing"`
@@ -142,12 +142,12 @@ var _ Parser = (*Rule)(nil)
 
 // RuleEl is an element of a parsing rule -- either a pointer to another rule or a token
 type RuleEl struct {
-	Rule  *Rule          `desc:"sub-rule for this position -- nil if token"`
-	Tok   token.KeyToken `desc:"token, None if rule"`
-	StInc int            `desc:"start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching"`
-	Match bool           `desc:"if true, this rule must match for rule to fire -- by default only tokens and, failing that, the first sub-rule is used for matching -- use @ to require a match"`
-	Opt   bool           `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
-	FmEnd bool           `desc:"match this rule working backward from the end -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other reverse-search elements and is ignored if at the very end"`
+	Rule   *Rule          `desc:"sub-rule for this position -- nil if token"`
+	Tok    token.KeyToken `desc:"token, None if rule"`
+	StInc  int            `desc:"start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching"`
+	Match  bool           `desc:"if true, this rule must match for rule to fire -- by default only tokens and, failing that, the first sub-rule is used for matching -- use @ to require a match"`
+	Opt    bool           `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
+	FmNext bool           `desc:"match this rule working backward from the next token -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other FmNext elements and is ignored if at the very end"`
 }
 
 func (re RuleEl) IsRule() bool {
@@ -305,7 +305,7 @@ func (pr *Rule) Compile(ps *State) bool {
 				td, _ := strconv.ParseInt(rn[1:tokst], 10, 64)
 				rr.Tok.Depth = int(td)
 			} else if rn[0] == '-' {
-				rr.FmEnd = true
+				rr.FmNext = true
 			}
 			tn := rn[tokst+1 : sz-1]
 			if len(tn) > 4 && tn[:4] == "key:" {
@@ -372,43 +372,43 @@ func (pr *Rule) Compile(ps *State) bool {
 }
 
 // OptimizeOrder optimizes the order of processing rule elements, including:
-// * A block of reversed elements that match backward
+// * A block of reversed elements that match from next
 func (pr *Rule) OptimizeOrder(ps *State) {
 	osz := len(pr.Order)
 	if osz == 0 {
 		return
 	}
-	nfmend := 0
-	fmeSt := -1
-	fmeEd := -1
+	nfmnxt := 0
+	fmnSt := -1
+	fmnEd := -1
 	lastwas := false
 	for oi := 0; oi < osz; oi++ {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
-		if rr.FmEnd {
-			nfmend++
-			if fmeSt < 0 {
-				fmeSt = oi
+		if rr.FmNext {
+			nfmnxt++
+			if fmnSt < 0 {
+				fmnSt = oi
 			}
 			if lastwas {
-				fmeEd = oi // end of block
+				fmnEd = oi // end of block
 			}
 			lastwas = true
 		} else {
 			lastwas = false
 		}
 	}
-	if nfmend > 1 && fmeEd > 0 {
+	if nfmnxt > 1 && fmnEd > 0 {
 		nword := make([]int, osz)
-		for oi := 0; oi < fmeSt; oi++ {
+		for oi := 0; oi < fmnSt; oi++ {
 			nword[oi] = pr.Order[oi]
 		}
-		idx := fmeSt
-		for oi := fmeEd - 1; oi >= fmeSt; oi-- {
+		idx := fmnSt
+		for oi := fmnEd - 1; oi >= fmnSt; oi-- {
 			nword[idx] = pr.Order[oi]
 			idx++
 		}
-		for oi := fmeEd; oi < osz; oi++ {
+		for oi := fmnEd; oi < osz; oi++ {
 			nword[oi] = pr.Order[oi]
 		}
 		pr.Order = nword
@@ -821,7 +821,7 @@ func (pr *Rule) MatchOnlyToks(ps *State, parAst *Ast, scope lex.Reg, depth int, 
 		if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
 			return false, nil
 		}
-		if rr.FmEnd {
+		if rr.FmNext {
 			if mpos == nil {
 				mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 			}
@@ -866,7 +866,7 @@ func (pr *Rule) MatchToken(ps *State, rr *RuleEl, ri int, kt token.KeyToken, cre
 		lpos := mpos[ri-1].Ed
 		if lpos != lex.PosZero { // previous has matched
 			matchst = true
-		} else if ri < nr-1 && rr.FmEnd {
+		} else if ri < nr-1 && rr.FmNext {
 			lpos := mpos[ri+1].St
 			if lpos != lex.PosZero { // previous has matched
 				creg.Ed, _ = ps.Src.PrevTokenPos(lpos)
@@ -931,7 +931,7 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 			if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
 				return false, nil
 			}
-			if rr.FmEnd {
+			if rr.FmNext {
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!
 				}
