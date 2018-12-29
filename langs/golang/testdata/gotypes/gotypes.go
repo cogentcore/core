@@ -1,5 +1,6 @@
-
 package gotypes
+
+import "github.com/goki/ki"
 
 type Ityp int
 
@@ -18,8 +19,8 @@ type Artyp [20]float64
 type Sttyp struct {
 	Anon1
 	ki.Node
-	FieldA int
-	FieldB Sltyp
+	FieldA         int
+	FieldB         Sltyp
 	FieldC, FieldD string
 }
 
@@ -28,15 +29,15 @@ type Sl2typ []Ityp
 type Iftyp interface {
 	ki.Ki
 	LocalIface
-	MethA(Ityp a, b) Ptyp
-	MethB(Ityp a, b) Ptyp
+	MethA(a, b Ityp) Ptyp
+	MethB(a, b Ityp) Ptyp
 }
 
 type Dtyp Sttyp
 
 type DPtyp ki.Ki
 
-type Futyp func(ab, bb string, Sttyp, int, ki.Ki) PMtyp
+type Futyp func(ab, bb string, st Sttyp, in int, kk ki.Ki) PMtyp
 
 type Fustyp func()
 
@@ -60,7 +61,7 @@ var (
 func (st *Sttyp) Method1(para int, meter string) {
 	st.FieldA = para
 	st.FieldC = meter
-	
+
 	nwvar := st.FieldA
 	var nmvar Mtyp
 }
@@ -75,5 +76,3 @@ func (st *Sttyp) MethodNP() {
 	st.FieldA = 22
 	st.FieldC = "be"
 }
-
-
