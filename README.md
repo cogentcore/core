@@ -1,6 +1,6 @@
 # GoPi = Interactive Parser in GoKi / GoGi Framework
 
-GoPi is part of the GoKi Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
+GoPi is part of the GoKi Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese).
 
 The `pi` package supports a simple and robust form of lexing and parsing based on top-down recursive descent, and allows users to create parsers using the GoGi graphical interface system.  It is used for syntax highlighting, completion, and more advanced language-structure specific functionality in GoGi and in the [Gide](https://github.com/goki/gide) IDE / editor.
 
