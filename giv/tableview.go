@@ -391,7 +391,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 			}
 		}
 		hdr.Data = fli
-		hdr.Tooltip = "click to sort / toggle sort direction by this column"
+		hdr.Tooltip = "(click to sort / toggle sort direction by this column)"
 		dsc := fld.Tag.Get("desc")
 		if dsc != "" {
 			hdr.Tooltip += ": " + dsc

@@ -260,8 +260,10 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 				}
 			}
 		}
-		ep = ints.MinInt(sz, ep)
-		mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:ep])))...)
+		ep = ints.MinInt(len(txt), ep)
+		if tr.St < ep {
+			mu = append(mu, []byte(htmlstd.EscapeString(string(txt[tr.St:ep])))...)
+		}
 		if addEnd {
 			mu = append(mu, spe...)
 		}

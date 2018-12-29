@@ -368,7 +368,7 @@ func (tb *TextBuf) ConfigSupported() bool {
 			tb.SetSpellCorrect(tb, SpellCorrectEdit)
 		}
 		if tb.Complete == nil {
-			tb.SetCompleter(&tb.PiState, pi.CompletePi, CompleteGoEdit) // todo: need pi edit too..
+			tb.SetCompleter(&tb.PiState, pi.Complete, CompleteGoEdit) // todo: need pi edit too..
 		}
 		return tb.Opts.ConfigSupported(tb.Info.Sup)
 	}
@@ -1749,6 +1749,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	tb.MarkupMu.Lock()
 	mtags, err := tb.Hi.MarkupTagsAll(tb.Txt)
 	if err != nil {
+		tb.MarkupMu.Unlock()
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
