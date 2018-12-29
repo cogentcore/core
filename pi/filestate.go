@@ -13,14 +13,25 @@ import (
 	"github.com/goki/pi/syms"
 )
 
-// FileState is the parsing state information for a given file
+// FileState contains the full lexing and parsing state information for a given file.
+// It is the master state record for everything that happens in GoPi.  One of these
+// should be maintained for each file -- giv.TextBuf has one as PiState field.
+//
+// Separate State structs are maintained for each stage (Lexing, PassTwo, Parsing) and
+// the final output of Parsing goes into the Ast and Syms fields.
+//
+// The Src lex.File field maintains all the info about the source file, and the basic
+// tokenized version of the source produced initially by lexing and updated by the
+// remaining passes.  It has everything that is maintained at a line-by-line level.
+//
 type FileState struct {
 	Src        lex.File     `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
 	LexState   lex.State    `json:"_" xml:"-" desc:"state for lexing"`
 	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
 	ParseState parse.State  `json:"-" xml:"-" desc:"state for parsing"`
 	Ast        parse.Ast    `json:"-" xml:"-" desc:"ast output tree from parsing"`
-	Syms       syms.SymMap  `json:"-" xml:"-" desc:"aggregate symbols for this file -- the language is responsible for managing these symbols to contain those relevant for the given file, and these are used for lookup (again managed through the Lang interface)"`
+	Syms       syms.SymMap  `json:"-" xml:"-" desc:"symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface."`
+	ExtSyms    syms.SymMap  `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
 	SymsMu     sync.RWMutex `json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
 }
 
@@ -132,4 +143,34 @@ func (fs *FileState) ParseErrReportDetailed() string {
 // of stack
 func (fs *FileState) ParseRuleString(full bool) string {
 	return fs.ParseState.RuleString(full)
+}
+
+////////////////////////////////////////////////////////////////////////
+//  Syms symbol processing support
+
+// FindNameScoped looks for given symbol name within Syms and ExtSyms
+// maps, and any children on the map that are of subcategory
+// token.NameScope (i.e., namespace, module, package, library)
+func (fs *FileState) FindNameScoped(nm string) (*syms.Symbol, bool) {
+	sy, has := fs.Syms.FindNameScoped(nm)
+	if has {
+		return sy, true
+	}
+	sy, has = fs.ExtSyms.FindNameScoped(nm)
+	if has {
+		return sy, true
+	}
+	return nil, false
+}
+
+// FindNamePrefix looks for given symbol name prefix within Syms and ExtSyms
+// and any children on the map that are of subcategory
+// token.NameScope (i.e., namespace, module, package, library)
+// adds to given matches map (which can be nil), for more efficient recursive use
+func (fs *FileState) FindNamePrefix(seed string, matches *syms.SymMap) {
+	lm := len(*matches)
+	fs.Syms.FindNamePrefix(seed, matches)
+	if len(*matches) == lm {
+		fs.ExtSyms.FindNamePrefix(seed, matches)
+	}
 }

@@ -71,7 +71,7 @@ func (tl *TexLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	return nil
 }
 
-func (tl *TexLang) FileFuncs(fs *pi.FileState) (fsyms []syms.Symbol) {
+func (tl *TexLang) FileFuncs(fs *pi.FileState) (fsyms syms.SymMap) {
 	// n/a
 	return fsyms
 }

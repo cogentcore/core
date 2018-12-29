@@ -17,9 +17,8 @@ type State struct {
 	Src        *lex.File      `view:"no-inline" desc:"source and lexed version of source we're parsing"`
 	Trace      TraceOpts      `desc:"tracing for this parser"`
 	Ast        *Ast           `desc:"root of the Ast abstract syntax tree we're updating"`
-	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing"`
-	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself -- see ExtScopes for externally-provided scopes"`
-	ExtScopes  syms.SymMap    `desc:"externally-added scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part"`
+	Syms       syms.SymMap    `desc:"symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that"`
+	Scopes     syms.SymStack  `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself"`
 	Pos        lex.Pos        `desc:"the current lex token position"`
 	Errs       lex.ErrorList  `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
 	Matches    [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
@@ -361,4 +360,18 @@ func (ps *State) IsNonMatch(scope lex.Reg, pr *Rule) bool {
 // ResetNonMatches resets the non-match map -- do after every EOS
 func (ps *State) ResetNonMatches() {
 	ps.NonMatches = make(ScopeRuleSet)
+}
+
+///////////////////////////////////////////////////////////////////////////
+//  Symbol management
+
+// FindNameScoped searches top-down in the stack for something with the given name
+// in symbols that are of subcategory token.NameScope (i.e., namespace, module, package, library)
+// also looks in ps.Syms if not found in Scope stack.
+func (ps *State) FindNameScoped(nm string) (*syms.Symbol, bool) {
+	sy, has := ps.Scopes.FindNameScoped(nm)
+	if has {
+		return sy, has
+	}
+	return ps.Syms.FindNameScoped(nm)
 }

@@ -48,3 +48,23 @@ func (ss *SymStack) Pop() *Symbol {
 func (ss *SymStack) Reset() {
 	*ss = nil
 }
+
+// FindNameScoped searches top-down in the stack for something with the given name
+// in symbols that are of subcategory token.NameScope (i.e., namespace, module, package, library)
+func (ss *SymStack) FindNameScoped(nm string) (*Symbol, bool) {
+	sz := len(*ss)
+	if sz == 0 {
+		return nil, false
+	}
+	for i := sz - 1; i >= 0; i-- {
+		sy := (*ss)[i]
+		if sy.Name == nm {
+			return sy, true
+		}
+		ssy, has := sy.Children.FindNameScoped(nm)
+		if has {
+			return ssy, true
+		}
+	}
+	return nil, false
+}

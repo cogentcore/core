@@ -184,9 +184,7 @@ func CompletePi(data interface{}, text string, pos token.Position) (md complete.
 	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})
 }
 
-// FileFuncsPi retuns a list of symbols of functions and methods calling the
-// language specific function
-func FileFuncsPi(data interface{}) (ffns []syms.Symbol) {
+func FileFuncsPi(data interface{}) (ffns syms.SymMap) {
 	sfs := data.(*FileState)
 	if sfs == nil {
 		log.Printf("pi.CompletePi: data is nil not FileState or is nil - can't list funcs\n")

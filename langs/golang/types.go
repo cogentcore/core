@@ -40,6 +40,12 @@ func (gl *GoLang) FindTypeName(tynm string, fs *pi.FileState, pkg *syms.Symbol) 
 			return gtyp
 		}
 	}
+	if scpkg, ok := fs.ExtSyms[scnm]; ok {
+		pnm := tynm[sci+1:]
+		if gtyp, ok := scpkg.Types[pnm]; ok {
+			return gtyp
+		}
+	}
 	return nil
 }
 

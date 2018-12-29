@@ -260,23 +260,35 @@ ExprRules {
         MultExpr:  -Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'  >Ast
     }
     PrimaryExpr {
-        BasicLit:  BasicLiteral  
-        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
-        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr      >Ast
-        FuncLitCall:   'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
-        FuncLit:       'key:func' Signature '{' ?BlockList '}'                    >Ast
-        // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
-        ConvertBasic:   @BasicType '(' Expr ')'                       >Ast
-        ConvertParens:  '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr  >Ast
-        // Convert note: a regular type(expr) will be a FunCall 
-        Convert:    @TypeLiteral '(' Expr ?',' ')'  >Ast
-        ParenExpr:  '(' Expr ')' ?PrimaryExpr       
-        // TypeAssert must be before FunCall to get . match 
-        TypeAssert:  PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr  >Ast
+        LitNumInteger:  'LitNumInteger'  +Ast
+        // LitRune rune 
+        LitRune:       'LitStrSingle'  +Ast
+        LitString:     'LitStr'        +Ast
+        LitStringDbl:  'LitStrDouble'  +Ast
+        // LitStringTick todo: get map to work with subcategories.. 
+        LitStringTick:  'LitStrBacktick'  +Ast
+        LitNumImag:     'LitNumImag'      +Ast
+        LitNumFloat:    'LitNumFloat'     +Ast
+        FuncExpr {
+            FuncLitCall:  'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
+            FuncLit:      'key:func' Signature '{' ?BlockList '}'                    >Ast
+        }
         // MakeCall takes type arg 
         MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'  >Ast
         // NewCall takes type arg 
         NewCall:  'key:new' '(' Type ')'  >Ast
+        Paren {
+            ConvertParens:  '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr  >Ast
+            ParenExpr:      '(' Expr ')' ?PrimaryExpr                     
+        }
+        // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
+        ConvertBasic:  @BasicType '(' Expr ')'  >Ast
+        // Convert note: a regular type(expr) will be a FunCall 
+        Convert:  @TypeLiteral '(' Expr ?',' ')'  >Ast
+        // TypeAssert must be before FunCall to get . match 
+        TypeAssert:  PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr  >Ast
+        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
+        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr  >Ast
         // Selector This must be after unary expr esp addr, DePtr 
         Selector:  PrimaryExpr '.' PrimaryExpr  >Ast
         Acts:{ -1:ChgToken:"[0]":NameTag; }
@@ -290,23 +302,22 @@ ExprRules {
         // OpName this is the least selective and must be at the end 
         OpName:  FullName  
     }
-    BasicLiteral {
-        LitNumInteger:  'LitNumInteger'  +Ast
-        LitNumFloat:    'LitNumFloat'    +Ast
-        LitNumImag:     'LitNumImag'     +Ast
-        // LitRune rune 
-        LitRune:    'LitStrSingle'  +Ast
-        LitString:  'LitStr'        +Ast
-    }
     LiteralType {
-        LitStructType:  StructType               
-        LitIFaceType:   'key:interface' '{' '}'  +Ast
-        // LitSliceType slice must come before array 
-        LitSliceType:      SliceType           
-        LitArrayAutoType:  ArrayAutoType       
-        LitArrayType:      ArrayType           
-        LitElType:         '[' '...' ']' Type  
-        LitMapType:        MapType             
+        LitStructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
+        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
+        LitIFaceType:  'key:interface' '{' '}'  +Ast
+        LitSliceOrArray {
+            LitSliceType:  '[' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // LitArrayAutoType array must be after slice b/c slice matches on sequence of tokens 
+            LitArrayAutoType:  '[' '...' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // LitArrayType array must be after slice b/c slice matches on sequence of tokens 
+            LitArrayType:  '[' Expr ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        }
+        LitMapType:  'key:map' '[' @Type ']' @Type  >Ast
+        Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
         // LitTypeName this is very general, must be at end.. 
         LitTypeName:  TypeName  
     }
@@ -378,14 +389,16 @@ TypeRules {
         NoPtrTypeName:  TypeName      
     }
     TypeLiteral {
-        SliceType:  '[' ']' @Type  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
-        // ArrayAutoType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayAutoType:  '[' '...' ']' @Type  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
-        // ArrayType array must be after slice b/c slice matches on sequence of tokens 
-        ArrayType:  '[' Expr ']' @Type  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        SliceOrArray {
+            SliceType:  '[' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // ArrayAutoType array must be after slice b/c slice matches on sequence of tokens 
+            ArrayAutoType:  '[' '...' ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+            // ArrayType array must be after slice b/c slice matches on sequence of tokens 
+            ArrayType:  '[' Expr ']' @Type  >Ast
+            Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
+        }
         StructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
         Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
         PointerType:    '*' @Type                             >Ast
@@ -394,9 +407,9 @@ TypeRules {
         Acts:{ 0:ChgToken:"../Name":NameInterface; 0:PushNewScope:"../Name":NameInterface; -1:PopScope:"../Name":None; }
         MapType:  'key:map' '[' @Type ']' @Type  >Ast
         Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
+        SendChanType:  '<-' 'key:chan' @Type  >Ast
         ChannelType {
             RecvChanType:  'key:chan' '<-' @Type  >Ast
-            SendChanType:  '<-' 'key:chan' @Type  >Ast
             SRChanType:    'key:chan' @Type       >Ast
         }
     }
@@ -479,25 +492,25 @@ StmtRules {
         }
         // ForStmt just for matching for token -- delegates to children 
         ForStmt {
-            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList '}' 'EOS'   >Ast
-            ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'   >Ast
+            ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             Acts:{ -1:ChgToken:"NameListEls":NameVar; }
-            ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList '}' 'EOS'  >Ast
+            ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             Acts:{ -1:ChgToken:"NameListEls":NameVar; }
             // ForExpr most general at end 
-            ForExpr:  'key:for' ?Expr '{' ?BlockList '}' 'EOS'  >Ast
+            ForExpr:  'key:for' ?Expr '{' ?BlockList -'}' 'EOS'  >Ast
             // ForClauseStmt the embedded EOS's here require full expr here so final EOS has proper EOS StInc count 
-            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?SimpleStmt '{' ?BlockList '}' 'EOS'  >Ast
+            ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?PostStmt '{' ?BlockList -'}' 'EOS'  >Ast
         }
         SwitchStmt {
-            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
+            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-            SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList '}' 'EOS'  >Ast
+            SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-            SwitchExpr:          'key:switch' ?Expr '{' BlockList '}' 'EOS'                                                      >Ast
-            SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList '}' 'EOS'                                     >Ast
-            SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'  >Ast
-            SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList '}' 'EOS'              >Ast
+            SwitchExpr:          'key:switch' ?Expr '{' BlockList -'}' 'EOS'                                                      >Ast
+            SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'                                     >Ast
+            SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList -'}' 'EOS'  >Ast
+            SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList -'}' 'EOS'              >Ast
         }
         CaseStmt {
             // TypeCaseEmptyStmt case and default require post-step to create sub-block -- no explicit { } scoping 
@@ -514,8 +527,8 @@ StmtRules {
         DefaultStmt:  'key:default' ':' ?Stmt  >Ast
         LabeledStmt:  @Name ':' ?Stmt          >Ast
         Acts:{ -1:ChgToken:"":NameLabel; }
-        Block:     '{' ?StmtList '}' 'EOS'  >Ast
-        SimpleSt:  SimpleStmt               
+        Block:     '{' ?StmtList -'}' 'EOS'  >Ast
+        SimpleSt:  SimpleStmt                
     }
     SimpleStmt {
         SendStmt:  ?Expr '<-' Expr 'EOS'  >Ast
@@ -523,6 +536,18 @@ StmtRules {
         DecrStmt:  Expr '--' 'EOS'        >Ast
         AsgnStmt:  Asgn                   
         ExprStmt:  Expr 'EOS'             >Ast
+    }
+    // PostStmt for loop post statement -- has no EOS 
+    PostStmt {
+        PostSendStmt:      ?Expr '<-' Expr                 >Ast
+        PostIncrStmt:      Expr '++'                       >Ast
+        PostDecrStmt:      Expr '--'                       >Ast
+        PostAsgnExisting:  ExprList '=' ExprList           >Ast
+        PostAsgnBit:       ExprList 'OpBitAsgn' ExprList   >Ast
+        PostAsgnMath:      ExprList 'OpMathAsgn' ExprList  >Ast
+        PostAsgnNew:       ExprList ':=' ExprList          >Ast
+        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
+        PostExprStmt:  Expr  >Ast
     }
     Asgn {
         AsgnExisting:  ExprList '=' ExprList 'EOS'   >Ast
@@ -533,7 +558,7 @@ StmtRules {
     }
     Elses {
         ElseIfStmt:      'key:else' 'key:if' Expr '{' ?BlockList '}' ?Elses 'EOS'                   >Ast
-        ElseStmt:        'key:else' '{' ?BlockList '}' 'EOS'                                        >Ast
+        ElseStmt:        'key:else' '{' ?BlockList -'}' 'EOS'                                       >Ast
         ElseIfStmtInit:  'key:else' 'key:if' SimpleStmt 'EOS' Expr '{' ?BlockList '}' ?Elses 'EOS'  >Ast
     }
     // CommStmt communication stmt: send or recv 

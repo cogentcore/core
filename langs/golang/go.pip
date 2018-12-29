@@ -1,16 +1,16 @@
 {
   "ProjFile": "/Users/oreilly/goki/pi/langs/golang/go.pip",
   "ParserFile": "/Users/oreilly/goki/pi/langs/golang/go.pi",
-  "TestFile": "/Users/oreilly/goki/pi/langs/golang/testdata/types_test.go",
+  "TestFile": "/Users/oreilly/goki/pi/langs/golang/testdata/go1_test.go",
   "TraceOpts": {
-    "On": true,
+    "On": false,
     "Rules": "",
-    "Match": false,
+    "Match": true,
     "SubMatch": false,
     "NoMatch": false,
-    "Run": false,
-    "RunAct": true,
-    "ScopeSrc": false,
+    "Run": true,
+    "RunAct": false,
+    "ScopeSrc": true,
     "FullStackOut": false
   }
 }
