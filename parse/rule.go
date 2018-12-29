@@ -147,7 +147,7 @@ type RuleEl struct {
 	StInc int            `desc:"start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching"`
 	Match bool           `desc:"if true, this rule must match for rule to fire -- by default only tokens and, failing that, the first sub-rule is used for matching -- use @ to require a match"`
 	Opt   bool           `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
-	FmEnd bool           `desc:"match this rule working backward from the end -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS and is ignored if at the very end"`
+	FmEnd bool           `desc:"match this rule working backward from the end -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other reverse-search elements and is ignored if at the very end"`
 }
 
 func (re RuleEl) IsRule() bool {
@@ -371,22 +371,47 @@ func (pr *Rule) Compile(ps *State) bool {
 	return valid
 }
 
-// OptimizeOrder optimizes the order of processing rule elements
+// OptimizeOrder optimizes the order of processing rule elements, including:
+// * A block of reversed elements that match backward
 func (pr *Rule) OptimizeOrder(ps *State) {
-	// nr := len(pr.Rules)
-	return
 	osz := len(pr.Order)
 	if osz == 0 {
 		return
 	}
-	if pr.HasFlag(int(OnlyToks)) {
-		if pr.HasFlag(int(MatchEOS)) {
-			// pr.Order = pr.Order[:osz-1]
-			// osz--
-			// } else {
-			// 	pr.ClearFlag(int(OnlyToks)) // for now
+	nfmend := 0
+	fmeSt := -1
+	fmeEd := -1
+	lastwas := false
+	for oi := 0; oi < osz; oi++ {
+		ri := pr.Order[oi]
+		rr := &pr.Rules[ri]
+		if rr.FmEnd {
+			nfmend++
+			if fmeSt < 0 {
+				fmeSt = oi
+			}
+			if lastwas {
+				fmeEd = oi // end of block
+			}
+			lastwas = true
+		} else {
+			lastwas = false
 		}
-	} else {
+	}
+	if nfmend > 1 && fmeEd > 0 {
+		nword := make([]int, osz)
+		for oi := 0; oi < fmeSt; oi++ {
+			nword[oi] = pr.Order[oi]
+		}
+		idx := fmeSt
+		for oi := fmeEd - 1; oi >= fmeSt; oi-- {
+			nword[idx] = pr.Order[oi]
+			idx++
+		}
+		for oi := fmeEd; oi < osz; oi++ {
+			nword[oi] = pr.Order[oi]
+		}
+		pr.Order = nword
 	}
 }
 

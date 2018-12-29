@@ -6,6 +6,12 @@ license that can be found in the LICENSE file. */
 
 package golang
 
+func baf() {
+	switch apv := aps.Value.(type) {
+		case ki.BlankProp:
+	}
+}
+
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight",}
 
 func ffb() {
@@ -118,12 +124,6 @@ var FileInfoProps = ki.Props{
 		}},
 	},
 }
-
-//func baf() {
-//	switch apv := aps.Value.(type) {
-//	case ki.BlankProp:
-//	}
-//}
 
 func aaa() {
 	sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord)	

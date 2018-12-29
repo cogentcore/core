@@ -1,7 +1,7 @@
 {
   "ProjFile": "/Users/oreilly/goki/pi/langs/golang/go.pip",
   "ParserFile": "/Users/oreilly/goki/pi/langs/golang/go.pi",
-  "TestFile": "/Users/oreilly/goki/pi/langs/golang/testdata/gotypes/gotypes.go",
+  "TestFile": "/Users/oreilly/goki/pi/langs/golang/testdata/go1_test.go",
   "TraceOpts": {
     "On": true,
     "Rules": "",
