@@ -18,9 +18,9 @@ type Artyp [20]float64
 type Sttyp struct {
 	Anon1
 	ki.Node
-	A int
-	B Sltyp
-	C, D string
+	FieldA int
+	FieldB Sltyp
+	FieldC, FieldD string
 }
 
 type Sl2typ []Ityp
@@ -56,3 +56,24 @@ var (
 	Mvar map[string]float32
 	Avar []ki.Ki
 )
+
+func (st *Sttyp) Method1(para int, meter string) {
+	st.FieldA = para
+	st.FieldC = meter
+	
+	nwvar := st.FieldA
+	var nmvar Mtyp
+}
+
+func (st *Sttyp) Method2(para int, meter string) (bool, int) {
+	st.FieldA = para
+	st.FieldC = meter
+	return false, -1
+}
+
+func (st *Sttyp) MethodNP() {
+	st.FieldA = 22
+	st.FieldC = "be"
+}
+
+

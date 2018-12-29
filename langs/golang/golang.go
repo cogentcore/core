@@ -64,9 +64,9 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 	if len(fs.ParseState.Scopes) > 0 { // should be
 		path, _ := filepath.Split(fs.Src.Filename)
 		pkg := fs.ParseState.Scopes[0]
-		// gl.DeleteUnexported(pkg.Children) // for local access we keep unexported!
-		if !gl.AddPkgToSyms(fs, pkg) { // first time, no existing
-			go gl.AddPathToSyms(fs, path)
+		fs.Syms[pkg.Name] = pkg // keep around..
+		if len(fs.ExtSyms) == 0 {
+			go gl.AddPathToExts(fs, path)
 		}
 		gl.AddImportsToExts(fs, pkg)
 		gl.ResolveTypes(fs, pkg)
@@ -124,6 +124,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	if lfs == nil {
 		return
 	}
+	// pkg := fs.Syms.First()
 
 	// lxstr := lfs.Src.LexTagSrc()
 	// fmt.Println(lxstr)
@@ -166,11 +167,29 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	}
 	// fmt.Printf("seed: %v\n", md.Seed)
 
-	fs.SymsMu.RLock() // syms access needs to be locked -- could be updated..
+	fs.SymsMu.RLock()     // syms access needs to be locked -- could be updated..
+	var conts syms.SymMap // containers of given region -- local scoping
+	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
+	// if len(conts) > 0 {
+	// 	conts.WriteDoc(os.Stdout, 0)
+	// }
+
 	var matches syms.SymMap
 	if scope != "" {
-		scsym, got := fs.FindNameScoped(scope)
+		scsym, got := fs.FindNameScoped(scope, conts)
 		if got {
+			if len(scsym.Children) == 0 {
+				if scsym.Type != "" {
+					// typ := gl.FindTypeName(scsym.Type, fs, pkg)
+					// if typ != nil {
+					// 	scsym = typ
+					// }
+					typ, got := fs.FindNameScoped(scsym.Type, conts)
+					if got {
+						scsym = typ
+					}
+				}
+			}
 			if name == "" {
 				matches = scsym.Children
 			} else {
@@ -182,7 +201,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		}
 	}
 	if len(matches) == 0 {
-		fs.FindNamePrefix(name, &matches)
+		fs.FindNamePrefixScoped(name, conts, &matches)
 	}
 	fs.SymsMu.RUnlock()
 	if len(matches) == 0 {
@@ -250,6 +269,7 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 		// fs.ParseState.Trace.Match = true
 		// fs.ParseState.Trace.NoMatch = true
 		// fs.ParseState.Trace.Run = true
+		// fs.ParseState.Trace.RunAct = true
 		// fs.ParseState.Trace.StdOut()
 		fpath := filepath.Join(path, fnm)
 		err = fs.Src.OpenFile(fpath)
@@ -296,17 +316,19 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 // DeleteUnexported deletes lower-case unexported items from map, and
 // children of symbols on map
 func (gl *GoLang) DeleteUnexported(sy *syms.Symbol) {
+	if sy.Kind.SubCat() != token.NameScope { // only for top-level scopes
+		return
+	}
 	for nm, ss := range sy.Children {
 		if ss == sy {
 			fmt.Printf("warning: child is self!: %v\n", sy.String())
 			continue
 		}
-		if ss.Kind.SubCat() == token.NameScope { // typically lowercase
-			continue
-		}
-		rn, _ := utf8.DecodeRuneInString(nm)
-		if nm == "" || unicode.IsLower(rn) {
-			delete(sy.Children, nm)
+		if ss.Kind.SubCat() != token.NameScope { // typically lowercase
+			rn, _ := utf8.DecodeRuneInString(nm)
+			if nm == "" || unicode.IsLower(rn) {
+				delete(sy.Children, nm)
+			}
 		}
 		if ss.HasChildren() {
 			gl.DeleteUnexported(ss)
@@ -355,7 +377,8 @@ func (gl *GoLang) AddPkgToExts(fs *pi.FileState, pkg *syms.Symbol) bool {
 // imports are coded as NameLibrary symbols with names = import path
 func (gl *GoLang) AddImportsToExts(fs *pi.FileState, pkg *syms.Symbol) {
 	fs.SymsMu.RLock()
-	imps := pkg.Children.FindKindScoped(token.NameLibrary)
+	var imps syms.SymMap
+	pkg.Children.FindKindScoped(token.NameLibrary, &imps)
 	fs.SymsMu.RUnlock()
 	if len(imps) == 0 {
 		return
@@ -410,18 +433,20 @@ func (gl *GoLang) AddPathToExts(fs *pi.FileState, path string) {
 // FileFuncs returns a slice of symbols of functions and methods in the file
 func (gl *GoLang) FileFuncs(fs *pi.FileState) (fsyms []syms.Symbol) {
 	for _, v := range fs.Syms {
-		if v.Kind == token.NamePackage && v.Filename == fs.Src.Filename {
-			for _, w := range v.Children {
-				if w.Filename == fs.Src.Filename {
-					switch w.Kind {
-					case token.NameFunction:
-						fsyms = append(fsyms, *w)
-					case token.NameStruct:
-						for _, x := range w.Children {
-							if x.Kind == token.NameMethod {
-								fsyms = append(fsyms, *x)
-							}
-						}
+		if v.Kind != token.NamePackage { // note: package symbol filename won't always corresp.
+			continue
+		}
+		for _, w := range v.Children {
+			if w.Filename != fs.Src.Filename {
+				continue
+			}
+			switch w.Kind {
+			case token.NameFunction:
+				fsyms = append(fsyms, *w)
+			case token.NameStruct:
+				for _, x := range w.Children {
+					if x.Kind == token.NameMethod {
+						fsyms = append(fsyms, *x)
 					}
 				}
 			}

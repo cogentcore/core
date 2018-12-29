@@ -46,6 +46,11 @@ const (
 	// PopScope means remove the most recently-added scope item
 	PopScope
 
+	// PopScopeReg means remove the most recently-added scope item, and also
+	// updates the source region for that item based on final SrcReg from
+	// corresponding Ast node -- for "definitional" scope
+	PopScopeReg
+
 	// AddDetail adds src at given path as detail info for the last-added symbol
 	// if there is already something there, a space is added for this new addition
 	AddDetail
@@ -68,7 +73,7 @@ const (
 type Act struct {
 	RunIdx int          `desc:"at what point during sequence of sub-rules / tokens should this action be run?  -1 = at end, 0 = before first rule, 1 = before second rule, etc -- must be at point when relevant Ast nodes have been added, but for scope setting, must be early enough so that scope is present"`
 	Act    Actions      `desc:"what action to perform"`
-	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | and will be tried in order until one succeeds, in case there are different options; ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack"`
+	Path   string       `width:"50" desc:"Ast path, relative to current node: empty = current node; [idx] specifies a child node by index, and a name specifies it by name -- include name/name for sub-nodes etc -- multiple path options can be specified by | or & and will be tried in order until one succeeds (for |) or all that succeed will be used for &. ... means use all nodes with given name (only for change token) -- for PushStack, this is what to push on the stack"`
 	Tok    token.Tokens `desc:"for ChgToken, the new token type to assign to token at given path"`
 	FmTok  token.Tokens `desc:"for ChgToken, only change if token is this to start with (only if != None))"`
 }

@@ -79,3 +79,25 @@ type TypeEls []TypeEl
 func (te *TypeEls) Add(nm, typ string) {
 	(*te) = append(*te, TypeEl{Name: nm, Type: typ})
 }
+
+// ByName returns type el with given name, nil if not there
+func (te *TypeEls) ByName(nm string) *TypeEl {
+	for i := range *te {
+		el := &(*te)[i]
+		if el.Name == nm {
+			return el
+		}
+	}
+	return nil
+}
+
+// ByType returns type el with given type, nil if not there
+func (te *TypeEls) ByType(typ string) *TypeEl {
+	for i := range *te {
+		el := &(*te)[i]
+		if el.Type == typ {
+			return el
+		}
+	}
+	return nil
+}

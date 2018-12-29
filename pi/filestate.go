@@ -148,11 +148,20 @@ func (fs *FileState) ParseRuleString(full bool) string {
 ////////////////////////////////////////////////////////////////////////
 //  Syms symbol processing support
 
-// FindNameScoped looks for given symbol name within Syms and ExtSyms
-// maps, and any children on the map that are of subcategory
+// FindNameScoped looks for given symbol name within given map first
+// (if non nil) and then in fs.Syms and ExtSyms maps,
+// and any children on those global maps that are of subcategory
 // token.NameScope (i.e., namespace, module, package, library)
-func (fs *FileState) FindNameScoped(nm string) (*syms.Symbol, bool) {
-	sy, has := fs.Syms.FindNameScoped(nm)
+func (fs *FileState) FindNameScoped(nm string, scope syms.SymMap) (*syms.Symbol, bool) {
+	var sy *syms.Symbol
+	has := false
+	if scope != nil {
+		sy, has = scope.FindName(nm)
+		if has {
+			return sy, true
+		}
+	}
+	sy, has = fs.Syms.FindNameScoped(nm)
 	if has {
 		return sy, true
 	}
@@ -163,14 +172,22 @@ func (fs *FileState) FindNameScoped(nm string) (*syms.Symbol, bool) {
 	return nil, false
 }
 
-// FindNamePrefix looks for given symbol name prefix within Syms and ExtSyms
-// and any children on the map that are of subcategory
+// FindNamePrefixScoped looks for given symbol name prefix within given map first
+// (if non nil) and then in fs.Syms and ExtSyms maps,
+// and any children on those global maps that are of subcategory
 // token.NameScope (i.e., namespace, module, package, library)
 // adds to given matches map (which can be nil), for more efficient recursive use
-func (fs *FileState) FindNamePrefix(seed string, matches *syms.SymMap) {
+func (fs *FileState) FindNamePrefixScoped(seed string, scope syms.SymMap, matches *syms.SymMap) {
 	lm := len(*matches)
-	fs.Syms.FindNamePrefix(seed, matches)
-	if len(*matches) == lm {
-		fs.ExtSyms.FindNamePrefix(seed, matches)
+	if scope != nil {
+		scope.FindNamePrefix(seed, matches)
 	}
+	if len(*matches) != lm {
+		return
+	}
+	fs.Syms.FindNamePrefixScoped(seed, matches)
+	if len(*matches) != lm {
+		return
+	}
+	fs.ExtSyms.FindNamePrefixScoped(seed, matches)
 }

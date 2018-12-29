@@ -70,6 +70,45 @@ func (sm *SymMap) CopyFrom(src SymMap) {
 	}
 }
 
+// First returns the first symbol in the map -- only sensible when there
+// is just one such element
+func (sm *SymMap) First() *Symbol {
+	for _, sy := range *sm {
+		return sy
+	}
+	return nil
+}
+
+// Slice returns a slice of the elements in the map, optionally sorted by name
+func (sm *SymMap) Slice(sorted bool) []*Symbol {
+	sys := make([]*Symbol, len(*sm))
+	idx := 0
+	for _, sy := range *sm {
+		sys[idx] = sy
+		idx++
+	}
+	if sorted {
+		sort.Slice(sys, func(i, j int) bool {
+			return sys[i].Name < sys[j].Name
+		})
+	}
+	return sys
+}
+
+// FindName looks for given symbol name within this map and any children on the map
+func (sm *SymMap) FindName(nm string) (*Symbol, bool) {
+	sy, has := (*sm)[nm]
+	if has {
+		return sy, has
+	}
+	for _, ss := range *sm {
+		if sy, has = ss.Children.FindName(nm); has {
+			return sy, has
+		}
+	}
+	return nil, false
+}
+
 // FindNameScoped looks for given symbol name within this map and any children on the map
 // that are of subcategory token.NameScope (i.e., namespace, module, package, library)
 func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
@@ -79,8 +118,7 @@ func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
 	}
 	for _, ss := range *sm {
 		if ss.Kind.SubCat() == token.NameScope {
-			sy, has = ss.Children.FindNameScoped(nm)
-			if has {
+			if sy, has = ss.Children.FindNameScoped(nm); has {
 				return sy, has
 			}
 		}
@@ -88,25 +126,66 @@ func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
 	return nil, false
 }
 
+// FindKind looks for given symbol kind within this map and any children on the map
+// Returns all instances found.  Uses cat / subcat based token matching -- if you
+// specify a category-level or subcategory level token, it will match everything in that group
+func (sm *SymMap) FindKind(kind token.Tokens, matches *SymMap) {
+	for _, sy := range *sm {
+		if kind.Match(sy.Kind) {
+			if *matches == nil {
+				*matches = make(SymMap)
+			}
+			(*matches)[sy.Name] = sy
+		}
+	}
+	for _, ss := range *sm {
+		ss.Children.FindKind(kind, matches)
+	}
+}
+
 // FindKindScoped looks for given symbol kind within this map and any children on the map
 // that are of subcategory token.NameScope (i.e., namespace, module, package, library).
-// Returns all instances found
-func (sm *SymMap) FindKindScoped(kind token.Tokens) SymMap {
-	sys := make(SymMap)
+// Returns all instances found.  Uses cat / subcat based token matching -- if you
+// specify a category-level or subcategory level token, it will match everything in that group
+func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
 	for _, sy := range *sm {
-		if sy.Kind == kind {
-			sys[sy.Name] = sy
+		if kind.Match(sy.Kind) {
+			if *matches == nil {
+				*matches = make(SymMap)
+			}
+			(*matches)[sy.Name] = sy
 		}
 	}
 	for _, ss := range *sm {
 		if ss.Kind.SubCat() == token.NameScope {
-			csys := ss.Children.FindKindScoped(kind)
-			if len(csys) > 0 {
-				sys.CopyFrom(csys)
-			}
+			ss.Children.FindKindScoped(kind, matches)
 		}
 	}
-	return sys
+}
+
+// FindContainsRegion looks for given symbol kind that contains the given
+// source code position, looking at all children.  Assumes that you've already
+// localized the search to a map containing symbols from target file name, as
+// filename matching can be somewhat tricky in the general case.
+// Returns all instances found.  Uses cat / subcat based token matching -- if you
+// specify a category-level or subcategory level token, it will match everything
+// in that group.  if you specify kind = token.None then all tokens that contain
+// region will be returned.
+func (sm *SymMap) FindContainsRegion(pos lex.Pos, kind token.Tokens, matches *SymMap) {
+	for _, sy := range *sm {
+		if !sy.Region.Contains(pos) {
+			continue
+		}
+		if kind == token.None || kind.Match(sy.Kind) {
+			if *matches == nil {
+				*matches = make(SymMap)
+			}
+			(*matches)[sy.Name] = sy
+		}
+	}
+	for _, ss := range *sm {
+		ss.Children.FindContainsRegion(pos, kind, matches)
+	}
 }
 
 // OpenJSON opens from a JSON-formatted file.
@@ -169,33 +248,13 @@ func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
 //////////////////////////////////////////////////////////////////////
 // Partial lookups
 
-// Slice returns a slice of the elements in the map, optionally sorted by name
-func (sm *SymMap) Slice(sorted bool) []*Symbol {
-	sys := make([]*Symbol, len(*sm))
-	idx := 0
-	for _, sy := range *sm {
-		sys[idx] = sy
-		idx++
-	}
-	if sorted {
-		sort.Slice(sys, func(i, j int) bool {
-			return sys[i].Name < sys[j].Name
-		})
-	}
-	return sys
-}
-
 // FindNamePrefix looks for given symbol name prefix within this map
-// and any children on the map that are of subcategory
-// token.NameScope (i.e., namespace, module, package, library)
+// and any children on the map.
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 	noCase := true
 	if complete.HasUpperCase(seed) {
 		noCase = false
-	}
-	if *matches == nil {
-		*matches = make(SymMap)
 	}
 	for _, sy := range *sm {
 		nm := sy.Name
@@ -203,12 +262,41 @@ func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 			nm = strings.ToLower(nm)
 		}
 		if strings.HasPrefix(nm, seed) {
+			if *matches == nil {
+				*matches = make(SymMap)
+			}
+			(*matches)[sy.Name] = sy
+		}
+	}
+	for _, ss := range *sm {
+		ss.Children.FindNamePrefix(seed, matches)
+	}
+}
+
+// FindNamePrefixScoped looks for given symbol name prefix within this map
+// and any children on the map that are of subcategory
+// token.NameScope (i.e., namespace, module, package, library)
+// adds to given matches map (which can be nil), for more efficient recursive use
+func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
+	noCase := true
+	if complete.HasUpperCase(seed) {
+		noCase = false
+	}
+	for _, sy := range *sm {
+		nm := sy.Name
+		if noCase {
+			nm = strings.ToLower(nm)
+		}
+		if strings.HasPrefix(nm, seed) {
+			if *matches == nil {
+				*matches = make(SymMap)
+			}
 			(*matches)[sy.Name] = sy
 		}
 	}
 	for _, ss := range *sm {
 		if ss.Kind.SubCat() == token.NameScope {
-			ss.Children.FindNamePrefix(seed, matches)
+			ss.Children.FindNamePrefixScoped(seed, matches)
 		}
 	}
 }

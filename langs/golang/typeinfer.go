@@ -16,10 +16,36 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 	if sy.Ast != nil {
 		ast := sy.Ast.(*parse.Ast)
 		switch {
+		case sy.Kind == token.NameField:
+			stsc, ok := sy.Scopes[token.NameStruct]
+			if ok {
+				stty := gl.FindTypeName(stsc, fs, pkg)
+				if stty != nil {
+					fldel := stty.Els.ByName(sy.Name)
+					if fldel != nil {
+						sy.Type = fldel.Type
+					}
+				}
+				if sy.Type == "" {
+					sy.Type = stsc + "." + sy.Name
+				}
+			}
+		case sy.Kind == token.NameVarClass: // method receiver
+			stsc, ok := sy.Scopes[token.NameStruct]
+			if ok {
+				sy.Type = stsc
+			}
 		case sy.Kind.SubCat() == token.NameVar:
 			vty := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1) // type always last thing
 			if vty != nil {
 				sy.Type = vty.Name
+			}
+		case sy.Kind.SubCat() == token.NameType:
+			vty := gl.FindTypeName(sy.Name, fs, pkg)
+			if vty != nil {
+				sy.Type = vty.Name
+			} else {
+				sy.Type = sy.Name // should be anyway..
 			}
 		}
 	}

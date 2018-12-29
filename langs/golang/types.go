@@ -74,23 +74,6 @@ func (gl *GoLang) TypesFromAst(fs *pi.FileState, pkg *syms.Symbol) {
 	}
 }
 
-// SubTypeFromAst returns a subtype from child ast at given index, nil if failed
-func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) *syms.Type {
-	sast, ok := ast.ChildAst(idx)
-	if !ok {
-		if TraceTypes {
-			fmt.Printf("child not found at index: %v in ast node: %v\n", idx, ast.PathUnique())
-		}
-		return nil
-	}
-	sty := &syms.Type{}
-	if ok = gl.TypeFromAst(fs, pkg, sty, sast); ok {
-		return sty
-	}
-	// will have err msg already
-	return nil
-}
-
 // TypeFromAst initializes the types from their Ast parse -- returns true if successful
 func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) bool {
 	src := tyast.Src
@@ -195,7 +178,10 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 				}
 				fldty := gl.SubTypeFromAst(fs, pkg, fld, 1)
 				if fldty != nil {
-					ty.Els.Add(fsrc, fldty.Name)
+					nms := gl.NamesFromAst(fs, pkg, fld, 0)
+					for _, nm := range nms {
+						ty.Els.Add(nm, fldty.Name)
+					}
 				}
 			case "AnonQualField":
 				ty.Els.Add(fsrc, fsrc) // anon two are same
@@ -237,6 +223,43 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 		}
 	}
 	return true
+}
+
+// SubTypeFromAst returns a subtype from child ast at given index, nil if failed
+func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) *syms.Type {
+	sast, ok := ast.ChildAst(idx)
+	if !ok {
+		if TraceTypes {
+			fmt.Printf("child not found at index: %v in ast node: %v\n", idx, ast.PathUnique())
+		}
+		return nil
+	}
+	sty := &syms.Type{}
+	if ok = gl.TypeFromAst(fs, pkg, sty, sast); ok {
+		return sty
+	}
+	// will have err msg already
+	return nil
+}
+
+// NamesFromAst returns a slice of name(s) from namelist nodes
+func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) []string {
+	sast, ok := ast.ChildAst(idx)
+	if !ok {
+		if TraceTypes {
+			fmt.Printf("child not found at index: %v in ast node: %v\n", idx, ast.PathUnique())
+		}
+		return nil
+	}
+	var sary []string
+	if sast.HasChildren() {
+		for i := range sast.Kids {
+			sary = append(sary, gl.NamesFromAst(fs, pkg, sast, i)...)
+		}
+	} else {
+		sary = append(sary, sast.Src)
+	}
+	return sary
 }
 
 // FuncTypeFromAst initializes a function type from ast -- type can either be anon

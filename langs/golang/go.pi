@@ -4791,7 +4791,7 @@
                   },
                   {
                     "RunIdx": -1,
-                    "Act": "PopScope",
+                    "Act": "PopScopeReg",
                     "Path": "../Name",
                     "Tok": "None",
                     "FmTok": "None"
@@ -5940,7 +5940,7 @@
                   },
                   {
                     "RunIdx": -1,
-                    "Act": "PopScope",
+                    "Act": "PopScopeReg",
                     "Path": "../Name",
                     "Tok": "None",
                     "FmTok": "None"
@@ -6004,7 +6004,7 @@
                   },
                   {
                     "RunIdx": -1,
-                    "Act": "PopScope",
+                    "Act": "PopScopeReg",
                     "Path": "../Name",
                     "Tok": "None",
                     "FmTok": "None"
@@ -6178,14 +6178,14 @@
                   {
                     "RunIdx": -1,
                     "Act": "ChgToken",
-                    "Path": "[0]",
+                    "Path": "NameListEl\u0026NameListEls/Name...\u0026NameListEls/NameListEl",
                     "Tok": "NameField",
                     "FmTok": "None"
                   },
                   {
                     "RunIdx": -1,
                     "Act": "AddSymbol",
-                    "Path": "[0]",
+                    "Path": "NameListEl\u0026NameListEls/Name...\u0026NameListEls/NameListEl",
                     "Tok": "NameField",
                     "FmTok": "None"
                   }
@@ -6265,7 +6265,7 @@
                     "RunIdx": -1,
                     "Act": "AddSymbol",
                     "Path": "Name",
-                    "Tok": "None",
+                    "Tok": "NameType",
                     "FmTok": "None"
                   },
                   {
@@ -6434,13 +6434,27 @@
                   {
                     "RunIdx": -1,
                     "Act": "AddDetail",
+                    "Path": "MethRecv",
+                    "Tok": "None",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddDetail",
                     "Path": "SigParams|SigParamsResult",
                     "Tok": "None",
                     "FmTok": "None"
                   },
                   {
                     "RunIdx": -1,
-                    "Act": "PopScope",
+                    "Act": "AddSymbol",
+                    "Path": "MethRecv/Name",
+                    "Tok": "NameVarClass",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "PopScopeReg",
                     "Path": "",
                     "Tok": "None",
                     "FmTok": "None"
@@ -6490,7 +6504,7 @@
                   },
                   {
                     "RunIdx": -1,
-                    "Act": "PopScope",
+                    "Act": "PopScopeReg",
                     "Path": "",
                     "Tok": "None",
                     "FmTok": "None"
@@ -6552,7 +6566,7 @@
                 "Desc": "all types must fully match, using @",
                 "Rule": "@Params @Result",
                 "StackMatch": "",
-                "Ast": "NoAst",
+                "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false,
                 "FirstTokMap": false

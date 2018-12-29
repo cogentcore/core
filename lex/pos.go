@@ -64,6 +64,11 @@ func (tr Reg) IsNil() bool {
 	return !tr.St.IsLess(tr.Ed)
 }
 
+// Contains returns true if region contains position
+func (tr Reg) Contains(ps Pos) bool {
+	return ps.IsLess(tr.Ed) && (tr.St == ps || tr.St.IsLess(ps))
+}
+
 ////////////////////////////////////////////////////////////////////
 //  EosPos
 

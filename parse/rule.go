@@ -1425,6 +1425,36 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	if act.Path == "" {
 		node = useAst
 		ok = true
+	} else if andidx := strings.Index(act.Path, "&"); andidx >= 0 {
+		pths := strings.Split(act.Path, "&")
+		for _, p := range pths {
+			findAll := false
+			if strings.HasSuffix(p, "...") {
+				findAll = true
+				p = strings.TrimSuffix(p, "...")
+			}
+			var nd ki.Ki
+			if p[:3] == "../" {
+				nd, ok = parAst.FindPathUnique(p[3:])
+			} else {
+				nd, ok = useAst.FindPathUnique(p)
+			}
+			if ok {
+				if node == nil {
+					node = nd
+				}
+				if findAll {
+					pn := nd.Parent()
+					for _, pk := range *pn.Children() {
+						if pk != nd && pk.Name() == nd.Name() {
+							adnl = append(adnl, pk)
+						}
+					}
+				} else if node != nd {
+					adnl = append(adnl, nd)
+				}
+			}
+		}
 	} else {
 		pths := strings.Split(act.Path, "|")
 		for _, p := range pths {
@@ -1451,7 +1481,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			}
 		}
 	}
-	if !ok {
+	if node == nil {
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, RunAct, ps.Pos, lex.RegZero, useAst, fmt.Sprintf("Act %v: ERROR: node not found at path(s): %v in node: %v", act.Act, act.Path, apath))
 		}
@@ -1465,9 +1495,16 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	}
 	nm := ast.Src
 	nms := strings.Split(nm, ",")
+	if len(adnl) > 0 {
+		for _, pk := range adnl {
+			nast := pk.(*Ast)
+			if nast != ast {
+				nms = append(nms, strings.Split(nast.Src, ",")...)
+			}
+		}
+	}
 	for i := range nms {
-		n := nms[i]
-		nms[i] = strings.TrimSpace(n)
+		nms[i] = strings.TrimSpace(nms[i])
 	}
 	switch act.Act {
 	case ChgToken:
@@ -1501,6 +1538,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			sy, has := ps.FindNameScoped(n)
 			added := false
 			if has {
+				sy.Region = ast.SrcReg
 				if ps.Trace.On {
 					ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 				}
@@ -1552,6 +1590,12 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		}
 	case PopScope:
 		sy := ps.Scopes.Pop()
+		if ps.Trace.On {
+			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
+		}
+	case PopScopeReg:
+		sy := ps.Scopes.Pop()
+		sy.Region = ast.SrcReg // update source region to final -- select remains initial trigger one
 		if ps.Trace.On {
 			ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Popped Sym: %v in node: %v", sy.String(), apath))
 		}

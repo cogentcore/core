@@ -304,7 +304,7 @@ ExprRules {
     }
     LiteralType {
         LitStructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
+        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScopeReg:"../Name":None; }
         LitIFaceType:  'key:interface' '{' '}'  +Ast
         LitSliceOrArray {
             LitSliceType:  '[' ']' @Type  >Ast
@@ -400,11 +400,11 @@ TypeRules {
             Acts:{ 0:ChgToken:"../Name":NameArray; 0:AddSymbol:"../Name":NameArray; }
         }
         StructType:  'key:struct' '{' ?FieldDecls '}' ?'EOS'  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScope:"../Name":None; }
+        Acts:{ 0:ChgToken:"../Name":NameStruct; 0:PushNewScope:"../Name":NameStruct; -1:PopScopeReg:"../Name":None; }
         PointerType:    '*' @Type                             >Ast
         FuncType:       'key:func' @Signature                 >Ast
         InterfaceType:  'key:interface' '{' ?MethodSpecs '}'  >Ast
-        Acts:{ 0:ChgToken:"../Name":NameInterface; 0:PushNewScope:"../Name":NameInterface; -1:PopScope:"../Name":None; }
+        Acts:{ 0:ChgToken:"../Name":NameInterface; 0:PushNewScope:"../Name":NameInterface; -1:PopScopeReg:"../Name":None; }
         MapType:  'key:map' '[' @Type ']' @Type  >Ast
         Acts:{ 0:ChgToken:"../Name":NameMap; 0:AddSymbol:"../Name":NameMap; }
         SendChanType:  '<-' 'key:chan' @Type  >Ast
@@ -418,14 +418,14 @@ TypeRules {
         AnonQualField:  'Name' '.' 'Name' ?FieldTag 'EOS'  >Ast
         Acts:{ -1:ChgToken:"":NamePackage; }
         NamedField:  NameList ?Type ?FieldTag 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"[0]":NameField; -1:AddSymbol:"[0]":NameField; }
+        Acts:{ -1:ChgToken:"NameListEl&NameListEls/Name...&NameListEls/NameListEl":NameField; -1:AddSymbol:"NameListEl&NameListEls/Name...&NameListEls/NameListEl":NameField; }
     }
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
     TypeDeclN {
         TypeDeclGroup:  '(' TypeDecls ')'  
         TypeDeclEl:     Name Type 'EOS'    >Ast
-        Acts:{ -1:ChgToken:"Name":NameType<-Name; -1:AddSymbol:"Name":None; -1:AddDetail:"[1]":None; -1:AddType:"Name":None; }
+        Acts:{ -1:ChgToken:"Name":NameType<-Name; -1:AddSymbol:"Name":NameType; -1:AddDetail:"[1]":None; -1:AddType:"Name":None; }
     }
     TypeDecls:  TypeDeclEl ?TypeDecls  
     TypeList {
@@ -436,15 +436,15 @@ TypeRules {
 FuncRules {
     FunDecl {
         MethDecl:  'key:func' '(' MethRecv ')' Name Signature ?Block 'EOS'  >Ast
-        Acts:{ 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"SigParams|SigParamsResult":None; -1:PopScope:"":None; -1:PopScope:"":None; }
+        Acts:{ 5:ChgToken:"Name":NameMethod; 5:PushNewScope:"Name":NameMethod; -1:AddDetail:"MethRecv":None; -1:AddDetail:"SigParams|SigParamsResult":None; -1:AddSymbol:"MethRecv/Name":NameVarClass; -1:PopScopeReg:"":None; -1:PopScope:"":None; }
         FuncDecl:  'key:func' Name Signature ?Block 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"SigParams|SigParamsResult":None; -1:PopScope:"":None; }
+        Acts:{ -1:ChgToken:"Name":NameFunction; 2:PushNewScope:"Name":NameFunction; -1:AddDetail:"SigParams|SigParamsResult":None; -1:PopScopeReg:"":None; }
     }
     MethRecv:  Name Type  >Ast
     Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
     Signature {
         // SigParamsResult all types must fully match, using @ 
-        SigParamsResult:  @Params @Result  
+        SigParamsResult:  @Params @Result  >Ast
         SigParams:        @Params          >Ast
     }
     // MethodSpec for interfaces only -- interface methods 
