@@ -164,18 +164,18 @@ func (ll *LangSupporter) LexerByName(lang string) *lex.Rule {
 	return &lp.Parser.Lexer
 }
 
-// CompletePi uses GoPi symbols and language -- the string is a line of text
+// Complete uses GoPi symbols and language -- the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompletePi(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+func Complete(data interface{}, text string, pos token.Position) (md complete.MatchData) {
 	sfs := data.(*FileState)
 	if sfs == nil {
-		log.Printf("pi.CompletePi: data is nil not FileState or is nil - can't complete\n")
+		log.Printf("pi.Complete: data is nil not FileState or is nil - can't complete\n")
 		return md
 	}
 	lp, err := LangSupport.Props(sfs.Src.Sup)
 	if err != nil {
-		log.Printf("pi.CompletePi: %v\n", err)
+		log.Printf("pi.Complete: %v\n", err)
 		return md
 	}
 	if lp.Lang == nil {
@@ -184,21 +184,19 @@ func CompletePi(data interface{}, text string, pos token.Position) (md complete.
 	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})
 }
 
-// FileFuncsPi retuns a list of symbols of functions and methods calling the
+/////////////////////////////////////////////////////////////////////////
+// Convenience wrappers for Lang methods
+
+// FileFuncs retuns a list of symbols of functions and methods calling the
 // language specific function
-func FileFuncsPi(data interface{}) (ffns []syms.Symbol) {
-	sfs := data.(*FileState)
-	if sfs == nil {
-		log.Printf("pi.CompletePi: data is nil not FileState or is nil - can't list funcs\n")
-		return ffns
-	}
-	lp, err := LangSupport.Props(sfs.Src.Sup)
+func (ll *LangSupporter) FileFuncs(fs *FileState) (ffns []syms.Symbol) {
+	lp, err := ll.Props(fs.Src.Sup)
 	if err != nil {
-		log.Printf("pi.FileFuncsPi: %v\n", err)
+		log.Println(err.Error())
 		return ffns
 	}
 	if lp.Lang == nil {
 		return ffns
 	}
-	return lp.Lang.FileFuncs(sfs)
+	return lp.Lang.FileFuncs(fs)
 }
