@@ -74,8 +74,3 @@ func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol 
 	// n/a
 	return nil
 }
-
-func (ml *MarkdownLang) FileFuncs(fs *pi.FileState) (fsyms []syms.Symbol) {
-	// n/a
-	return fsyms
-}

@@ -17,7 +17,6 @@ import (
 	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
-	"github.com/goki/pi/syms"
 )
 
 // LangFlags are special properties of a given language
@@ -186,17 +185,3 @@ func Complete(data interface{}, text string, pos token.Position) (md complete.Ma
 
 /////////////////////////////////////////////////////////////////////////
 // Convenience wrappers for Lang methods
-
-// FileFuncs retuns a list of symbols of functions and methods calling the
-// language specific function
-func (ll *LangSupporter) FileFuncs(fs *FileState) (ffns []syms.Symbol) {
-	lp, err := ll.Props(fs.Src.Sup)
-	if err != nil {
-		log.Println(err.Error())
-		return ffns
-	}
-	if lp.Lang == nil {
-		return ffns
-	}
-	return lp.Lang.FileFuncs(fs)
-}

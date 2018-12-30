@@ -75,10 +75,6 @@ type Lang interface {
 	// language-appropriate set of symbols for the directory(s), which could then provide
 	// the symbols for a given package, library, or module at that path.
 	ParseDir(path string, opts LangDirOpts) *syms.Symbol
-
-	// FileFuncs returns a slice of symbols of functions and methods --
-	// not applicable for all file types
-	FileFuncs(fs *FileState) []syms.Symbol
 }
 
 // LangDirOpts provides options for Lang ParseDir method

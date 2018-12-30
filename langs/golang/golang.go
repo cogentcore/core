@@ -429,28 +429,3 @@ func (gl *GoLang) AddPathToExts(fs *pi.FileState, path string) {
 		gl.AddPkgToExts(fs, psym)
 	}
 }
-
-// FileFuncs returns a slice of symbols of functions and methods in the file
-func (gl *GoLang) FileFuncs(fs *pi.FileState) (fsyms []syms.Symbol) {
-	for _, v := range fs.Syms {
-		if v.Kind != token.NamePackage { // note: package symbol filename won't always corresp.
-			continue
-		}
-		for _, w := range v.Children {
-			if w.Filename != fs.Src.Filename {
-				continue
-			}
-			switch w.Kind {
-			case token.NameFunction:
-				fsyms = append(fsyms, *w)
-			case token.NameStruct:
-				for _, x := range w.Children {
-					if x.Kind == token.NameMethod {
-						fsyms = append(fsyms, *x)
-					}
-				}
-			}
-		}
-	}
-	return fsyms
-}
