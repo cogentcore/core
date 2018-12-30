@@ -503,9 +503,9 @@ StmtRules {
             ForClauseStmt:  'key:for' ?SimpleStmt 'EOS' ?Expr 'EOS' ?PostStmt '{' ?BlockList -'}' 'EOS'  >Ast
         }
         SwitchStmt {
-            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'  >Ast
+            SwitchTypeName:  'key:switch' 'Name' ':=' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
-            SwitchTypeAnon:  'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'  >Ast
+            SwitchTypeAnon:  'key:switch' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
             SwitchExpr:          'key:switch' ?Expr '{' BlockList -'}' 'EOS'                                                      >Ast
             SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'                                     >Ast

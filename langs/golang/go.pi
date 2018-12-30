@@ -7319,7 +7319,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:switch' 'Name' ':=' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'",
+                    "Rule": "'key:switch' 'Name' ':=' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": [
@@ -7348,7 +7348,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:switch' PrimaryExpr '.' '(' 'key:type' ')' '{' BlockList -'}' 'EOS'",
+                    "Rule": "'key:switch' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": [
