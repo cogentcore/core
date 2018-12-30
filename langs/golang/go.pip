@@ -3,14 +3,14 @@
   "ParserFile": "/Users/oreilly/goki/pi/langs/golang/go.pi",
   "TestFile": "/Users/oreilly/goki/pi/langs/golang/testdata/go1_test.go",
   "TraceOpts": {
-    "On": true,
+    "On": false,
     "Rules": "",
-    "Match": false,
-    "SubMatch": false,
-    "NoMatch": false,
+    "Match": true,
+    "SubMatch": true,
+    "NoMatch": true,
     "Run": false,
-    "RunAct": true,
-    "ScopeSrc": false,
+    "RunAct": false,
+    "ScopeSrc": true,
     "FullStackOut": false
   }
 }

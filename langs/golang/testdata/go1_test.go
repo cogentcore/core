@@ -6,7 +6,183 @@ license that can be found in the LICENSE file. */
 
 package golang
 
+func (*BadExpr) exprNode() {}
+
+func ddd() {
+	var abf = [...]string{
+		full,
+		full + ".gox",
+		pkgdir + "lib" + pkg + ".so",
+		pkgdir + "lib" + pkg + ".a",
+		full + ".o"	,
+	}
+		
+}
+
+//func tstr() {
+//	for i, expr := range []ast.Expr{e.Low, e.High, e.Max} { // can be fixed by @Type in ForRangeNew but that breaks other stuff...
+//	}
+//}
+
+func rsww() {
+	switch e := e.(type) {
+	case *ast.CompositeLit:
+		var typ, base Type
+		switch {
+		case e.Type != nil:
+		}
+	}
+}
+
+type Checker struct {
+	conf *Config
+	fset *token.FileSet
+	pkg  *Package
+	*Info
+	objMap map[Object]*declInfo   // maps package-level object to declaration info
+}
+
+func slfk() {
+	x.typ = &Signature{
+		// this is the []*Var ambiguity -- parsed as mult instead of ptr..
+//		params:   NewTuple(append([]*Var{NewVar(token.NoPos, check.pkg, "", x.typ)}, params...)...),
+		results:  sig.results,
+		variadic: sig.variadic,
+	}
+}
+
+func ruf() {
+	return &(*structTypeUncommon)(unsafe.Pointer(t)) // this is ok
+	
+	return &(*structTypeUncommon)(unsafe.Pointer(t)).u
+	// the extra selector on top of the convert parens is not working
+	// -- selector needs to be outside but is lower in order
+	// moving it before convertparens breaks other things..
+	// added a special case for a final selector on top of a convert.. :)
+}
+
+func sddfaf() {
+	switch x.typ.Underlying().(*Basic).kind {
+		default:
+	}
+}
+
+func stsf() {
+	switch typ = implicitArrayDeref(x.typ.Underlying()); t := typ.(type) {
+	case *Basic:
+	}
+}
+
+
+func Pipe() (*PipeReader, *PipeWriter) {
+	p := &pipe{
+		wrCh: make(chan []byte),
+		rdCh: make(chan int),
+		done: make(chan struct{}),
+	}
+	return &PipeReader{p}, &PipeWriter{p}
+}
+
+func (eofReader) Read([]byte) (int, error) {
+	return 0, EOF
+}
+
+func round(n, a uintptr) uintptr {
+	return (n + a - 1) &^ (a - 1)
+}
+
+func (s *ss) error(err error) {
+	panic(scanError{err})
+}
+
+var ppFree = sync.Pool{
+	New: func() interface{} { return new(pp) },
+}
+
+func aaaa() {
+	mvp := calcMVP(
+		t.size.X, t.size.Y,
+		minX, minY,
+		maxX, minY,
+		minX, maxY,
+		)
+	 // note: trick for extra comma was Expr ',' ?ArgsList -- key is ?
+	 //  -- introducing any other ',' rule doesn't work since this needs to be first and will match
+}
+
+// this is Go's "most vexing parse" from a top-down perspective:
+// Note: now solved by having a priority @CompositeLit case for var = and regular asgn := = cases
+// gives @CompositeLit first crack for those cases and then generic expr is backup
+
+var MultSlice = p[2]*Rule // todo: not working
+
+var SliceAr1 = []Rule{}
+
+var SliceAry = [25]*Rule{}
+
+var SliceAry = []*Rule{} // todo: ? not excluding here
+
+var RuleMap map[string]*Rule // looks like binary *
+
+var val = a[2] * b[0]
+
+// exclude rule -- two rules fwd and back:
+// ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name
+//  + start at ', go forward to match name, pkg.name -- exclude if no match
+//  + go back.. 
+// range is 
+// start at *, 
+// backtrack: if a given parse fails... nah, way too complicated..
+
+var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
+
+func mulm() {
+	return f64.Aff3{
+		a[0]*b[0] + a[1]*b[3],
+		a[0]*b[1] + a[1]*b[4],
+		a[0]*b[2] + a[1]*b[5] + a[2],
+
+		a[3]*b[0] + a[4]*b[3],
+		a[3]*b[1] + a[4]*b[4],
+		a[3]*b[2] + a[4]*b[5] + a[5],
+	}
+}
+
+var ifa interface{}
+
+func slfaa() {
+	a <- b
+	if err := <-errCh; err != nil {
+		return nil, err
+	}
+}
+
+func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
+	switch change {
+	case gi.FocusInactive: // don't care..
+	case gi.FocusActive:
+	}
+}
+
+
 func baf() {
+outer:
+	for {
+		select {
+		case <-w.winClose:
+		case <-w.winOpen:
+		case i := <-w.winOpen:
+		case j = <-w.winOpen:
+		}
+	}
+}
+
+
+func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, heightMM, depth int, sname *C.char, snlen C.int) {
+	theApp.mu.Lock()
+}
+
+func saff() {
 	switch apv := aps.Value.(type) {
 		case ki.BlankProp:
 	}
@@ -370,14 +546,12 @@ func (ev Steps) MarshalJSON() ([]byte, error)  {
 func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b)
 }
 
-// todo: not dealing with all-in-one-line case -- needs to insert EOS before } 
+// was not dealing with all-in-one-line case -- needs to insert EOS before } 
 func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 func tst() {
 	tokSrc := string(ps.TokenSrc(pos))
 }
-
-// var ifa interface{} // todo: not working
 
 func tst() {
 	pv.SaveParser()
@@ -385,32 +559,12 @@ func tst() {
 	Trace.Out(ps, pr, Run, creg.St, creg, trcAst, fmt.Sprintf("%v: optional rule: %v failed", ri, rr.Rule.Name()))
 }
 
-// this is Go's "most vexing parse" from a top-down perspective:
-
-//var MultSlice = p[2]*Rule // todo: not working
-
-var SliceAr1 = []Rule{}
-
-var SliceAry = [25]*Rule{}
-
-//var SliceAry = []*Rule{} // todo: ? not excluding here
-
-var RuleMap map[string]*Rule // looks like binary *
-
-var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
-
-// exclude rule -- two rules fwd and back:
-// ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name
-//  + start at ', go forward to match name, pkg.name -- exclude if no match
-//  + go back.. 
-// range is 
-// start at *, 
-// backtrack: if a given parse fails... nah, way too complicated..
-
 var unaryptr = 25 * *(ptr+2)  // directly to rhs or depth sub of it
 var multexpr = 25 * (ptr + 2)
 var multex = 25 * ptr + 25 * *ptr // 
 var a,b,c,d = 32
+
+var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 func (pr *Rule) BaseIface() reflect.Type {
 	return reflect.TypeOf((*Parser)(nil)).Elem()

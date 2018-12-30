@@ -972,7 +972,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 20,
+                "n": 19,
                 "type": "lex.Rule",
                 "name": "bool",
                 "type": "lex.Rule",
@@ -981,8 +981,6 @@
                 "name": "complex64",
                 "type": "lex.Rule",
                 "name": "complex128",
-                "type": "lex.Rule",
-                "name": "error",
                 "type": "lex.Rule",
                 "name": "float32",
                 "type": "lex.Rule",
@@ -1085,26 +1083,6 @@
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "complex128",
-                "Offset": 0,
-                "SizeAdj": 0,
-                "Acts": [
-                  "Name"
-                ],
-                "Until": "",
-                "PushState": "",
-                "NameMap": false
-              },
-              {
-                "Nm": "error",
-                "UniqueNm": "error",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Token": "KeywordType",
-                "Match": "StrName",
-                "Pos": "AnyPos",
-                "String": "error",
                 "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
@@ -1434,7 +1412,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 17,
+                "n": 18,
                 "type": "lex.Rule",
                 "name": "append",
                 "type": "lex.Rule",
@@ -1447,6 +1425,8 @@
                 "name": "copy",
                 "type": "lex.Rule",
                 "name": "delete",
+                "type": "lex.Rule",
+                "name": "error",
                 "type": "lex.Rule",
                 "name": "imag",
                 "type": "lex.Rule",
@@ -1581,6 +1561,26 @@
                 "Match": "StrName",
                 "Pos": "AnyPos",
                 "String": "delete",
+                "Offset": 0,
+                "SizeAdj": 0,
+                "Acts": [
+                  "Name"
+                ],
+                "Until": "",
+                "PushState": "",
+                "NameMap": false
+              },
+              {
+                "Nm": "error",
+                "UniqueNm": "error",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Token": "NameBuiltin",
+                "Match": "StrName",
+                "Pos": "AnyPos",
+                "String": "error",
                 "Offset": 0,
                 "SizeAdj": 0,
                 "Acts": [
@@ -3882,7 +3882,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 7,
+                "n": 8,
                 "type": "parse.Rule",
                 "name": "PosExpr",
                 "type": "parse.Rule",
@@ -3895,6 +3895,8 @@
                 "name": "DePtrExpr",
                 "type": "parse.Rule",
                 "name": "AddrExpr",
+                "type": "parse.Rule",
+                "name": "SendExpr",
                 "type": "parse.Rule",
                 "name": "PrimExpr"
               },
@@ -3983,6 +3985,20 @@
                 "FirstTokMap": false
               },
               {
+                "Nm": "SendExpr",
+                "UniqueNm": "SendExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'\u003c-' UnaryExpr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
                 "Nm": "PrimExpr",
                 "UniqueNm": "PrimExpr",
                 "Props": null,
@@ -4012,7 +4028,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 18,
+                "n": 19,
                 "type": "parse.Rule",
                 "name": "NotEqExpr",
                 "type": "parse.Rule",
@@ -4035,6 +4051,8 @@
                 "name": "BitXorExpr",
                 "type": "parse.Rule",
                 "name": "BitAndExpr",
+                "type": "parse.Rule",
+                "name": "BitAndNotExpr",
                 "type": "parse.Rule",
                 "name": "ShiftRightExpr",
                 "type": "parse.Rule",
@@ -4205,6 +4223,20 @@
                 "FirstTokMap": false
               },
               {
+                "Nm": "BitAndNotExpr",
+                "UniqueNm": "BitAndNotExpr",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "-Expr '\u0026^' Expr",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
                 "Nm": "ShiftRightExpr",
                 "UniqueNm": "ShiftRightExpr",
                 "Props": null,
@@ -4295,7 +4327,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice",
-                "Rule": "-Expr '*' Expr ! ?'key:map' '[' ? ']' '*' 'Name' ?'.' ?'Name'",
+                "Rule": "-Expr '*' Expr",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -4318,7 +4350,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 20,
+                "n": 21,
                 "type": "parse.Rule",
                 "name": "LitNumInteger",
                 "type": "parse.Rule",
@@ -4345,6 +4377,8 @@
                 "name": "ConvertBasic",
                 "type": "parse.Rule",
                 "name": "Convert",
+                "type": "parse.Rule",
+                "name": "TypeAssertSel",
                 "type": "parse.Rule",
                 "name": "TypeAssert",
                 "type": "parse.Rule",
@@ -4491,7 +4525,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:func' Signature '{' ?BlockList '}'",
+                    "Rule": "'key:func' @Signature '{' ?BlockList '}'",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
@@ -4542,11 +4576,27 @@
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 2,
+                    "n": 3,
+                    "type": "parse.Rule",
+                    "name": "ConvertParensSel",
                     "type": "parse.Rule",
                     "name": "ConvertParens",
                     "type": "parse.Rule",
                     "name": "ParenExpr"
+                  },
+                  {
+                    "Nm": "ConvertParensSel",
+                    "UniqueNm": "ConvertParensSel",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'(' @Type ')' '(' Expr ?',' ')' '.' PrimaryExpr",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
                   },
                   {
                     "Nm": "ConvertParens",
@@ -4608,6 +4658,20 @@
                 "Off": false,
                 "Desc": "note: a regular type(expr) will be a FunCall",
                 "Rule": "@TypeLiteral '(' Expr ?',' ')'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "TypeAssertSel",
+                "UniqueNm": "TypeAssertSel",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "must be before FunCall to get . match",
+                "Rule": "PrimaryExpr '.' '(' @Type ')' '.' PrimaryExpr",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -5081,7 +5145,7 @@
                         "Desc": "",
                         "Rule": "Expr",
                         "StackMatch": "",
-                        "Ast": "NoAst",
+                        "Ast": "AnchorAst",
                         "Acts": null,
                         "OptTokMap": false,
                         "FirstTokMap": false
@@ -5511,7 +5575,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "Expr ',' ArgsList",
+                "Rule": "Expr ',' ?ArgsList",
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
@@ -5558,11 +5622,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 10,
+            "n": 9,
             "type": "parse.Rule",
             "name": "Type",
-            "type": "parse.Rule",
-            "name": "TypeName",
             "type": "parse.Rule",
             "name": "PtrOrTypeName",
             "type": "parse.Rule",
@@ -5592,7 +5654,7 @@
                 "type": "parse.Rule",
                 "name": "TypeLit",
                 "type": "parse.Rule",
-                "name": "TypeNms"
+                "name": "TypeName"
               },
               {
                 "Nm": "ParenType",
@@ -5623,13 +5685,105 @@
                 "FirstTokMap": false
               },
               {
-                "Nm": "TypeNms",
-                "UniqueNm": "TypeNms",
+                "Nm": "TypeName",
+                "UniqueNm": "TypeName",
                 "Props": null,
-                "Kids": null,
+                "Kids": [
+                  {
+                    "n": 4,
+                    "type": "parse.Rule",
+                    "name": "BasicType",
+                    "type": "parse.Rule",
+                    "name": "QualType",
+                    "type": "parse.Rule",
+                    "name": "QualBasicType",
+                    "type": "parse.Rule",
+                    "name": "TypeNm"
+                  },
+                  {
+                    "Nm": "BasicType",
+                    "UniqueNm": "BasicType",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "recognizes builtin types",
+                    "Rule": "'KeywordType'",
+                    "StackMatch": "",
+                    "Ast": "AddAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "QualType",
+                    "UniqueNm": "QualType",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "type equivalent to QualName",
+                    "Rule": "'Name' '.' 'Name'",
+                    "StackMatch": "",
+                    "Ast": "AddAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "",
+                        "Tok": "NameType",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "QualBasicType",
+                    "UniqueNm": "QualBasicType",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "type equivalent to QualName",
+                    "Rule": "'Name' '.' 'KeywordType'",
+                    "StackMatch": "",
+                    "Ast": "AddAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "",
+                        "Tok": "NameType",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "TypeNm",
+                    "UniqueNm": "TypeNm",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "local unqualified type name",
+                    "Rule": "'Name'",
+                    "StackMatch": "",
+                    "Ast": "AddAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "",
+                        "Tok": "NameType",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  }
+                ],
                 "Off": false,
                 "Desc": "",
-                "Rule": "TypeName",
+                "Rule": "",
                 "StackMatch": "",
                 "Ast": "NoAst",
                 "Acts": null,
@@ -5644,88 +5798,6 @@
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": true,
-            "FirstTokMap": false
-          },
-          {
-            "Nm": "TypeName",
-            "UniqueNm": "TypeName",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 3,
-                "type": "parse.Rule",
-                "name": "BasicType",
-                "type": "parse.Rule",
-                "name": "QualType",
-                "type": "parse.Rule",
-                "name": "TypeNm"
-              },
-              {
-                "Nm": "BasicType",
-                "UniqueNm": "BasicType",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "recognizes builtin types",
-                "Rule": "'KeywordType'",
-                "StackMatch": "",
-                "Ast": "AddAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "QualType",
-                "UniqueNm": "QualType",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "type equivalent to QualName",
-                "Rule": "'Name' '.' 'Name'",
-                "StackMatch": "",
-                "Ast": "AddAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "",
-                    "Tok": "NameType",
-                    "FmTok": "None"
-                  }
-                ],
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "TypeNm",
-                "UniqueNm": "TypeNm",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "local unqualified type name",
-                "Rule": "'Name'",
-                "StackMatch": "",
-                "Ast": "AddAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "",
-                    "Tok": "NameType",
-                    "FmTok": "None"
-                  }
-                ],
-                "OptTokMap": false,
-                "FirstTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "",
-            "Rule": "",
-            "StackMatch": "",
-            "Ast": "NoAst",
-            "Acts": null,
-            "OptTokMap": false,
             "FirstTokMap": false
           },
           {
@@ -6136,9 +6208,11 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
                 "type": "parse.Rule",
                 "name": "AnonQualField",
+                "type": "parse.Rule",
+                "name": "AnonPtrField",
                 "type": "parse.Rule",
                 "name": "NamedField"
               },
@@ -6150,6 +6224,28 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'Name' '.' 'Name' ?FieldTag 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "",
+                    "Tok": "NamePackage",
+                    "FmTok": "None"
+                  }
+                ],
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "AnonPtrField",
+                "UniqueNm": "AnonPtrField",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'*' 'Name' ?FieldTag 'EOS'",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [
@@ -6434,7 +6530,7 @@
                   {
                     "RunIdx": -1,
                     "Act": "AddDetail",
-                    "Path": "MethRecv",
+                    "Path": "MethRecvName|MethRecvNoNm",
                     "Tok": "None",
                     "FmTok": "None"
                   },
@@ -6448,7 +6544,7 @@
                   {
                     "RunIdx": -1,
                     "Act": "AddSymbol",
-                    "Path": "MethRecv/Name",
+                    "Path": "MethRecvName/Name",
                     "Tok": "NameVarClass",
                     "FmTok": "None"
                   },
@@ -6527,21 +6623,65 @@
             "Nm": "MethRecv",
             "UniqueNm": "MethRecv",
             "Props": null,
-            "Kids": null,
-            "Off": false,
-            "Desc": "",
-            "Rule": "Name Type",
-            "StackMatch": "",
-            "Ast": "AnchorAst",
-            "Acts": [
+            "Kids": [
               {
-                "RunIdx": -1,
-                "Act": "PushScope",
-                "Path": "TypeNm|PointerType/TypeNm",
-                "Tok": "NameStruct",
-                "FmTok": "None"
+                "n": 2,
+                "type": "parse.Rule",
+                "name": "MethRecvName",
+                "type": "parse.Rule",
+                "name": "MethRecvNoNm"
+              },
+              {
+                "Nm": "MethRecvName",
+                "UniqueNm": "MethRecvName",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "@Name @Type",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "PushScope",
+                    "Path": "TypeNm|PointerType/TypeNm",
+                    "Tok": "NameStruct",
+                    "FmTok": "None"
+                  }
+                ],
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "MethRecvNoNm",
+                "UniqueNm": "MethRecvNoNm",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "Type",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "PushScope",
+                    "Path": "TypeNm|PointerType/TypeNm",
+                    "Tok": "NameStruct",
+                    "FmTok": "None"
+                  }
+                ],
+                "OptTokMap": false,
+                "FirstTokMap": false
               }
             ],
+            "Off": false,
+            "Desc": "",
+            "Rule": "",
+            "StackMatch": "",
+            "Ast": "NoAst",
+            "Acts": [],
             "OptTokMap": false,
             "FirstTokMap": false
           },
@@ -6898,7 +7038,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 8,
+            "n": 7,
             "type": "parse.Rule",
             "name": "StmtList",
             "type": "parse.Rule",
@@ -6912,9 +7052,7 @@
             "type": "parse.Rule",
             "name": "Asgn",
             "type": "parse.Rule",
-            "name": "Elses",
-            "type": "parse.Rule",
-            "name": "CommStmt"
+            "name": "Elses"
           },
           {
             "Nm": "StmtList",
@@ -6950,7 +7088,7 @@
             "Props": null,
             "Kids": [
               {
-                "n": 18,
+                "n": 19,
                 "type": "parse.Rule",
                 "name": "ConstDeclStmt",
                 "type": "parse.Rule",
@@ -6977,6 +7115,8 @@
                 "name": "ForStmt",
                 "type": "parse.Rule",
                 "name": "SwitchStmt",
+                "type": "parse.Rule",
+                "name": "SelectStmt",
                 "type": "parse.Rule",
                 "name": "CaseStmt",
                 "type": "parse.Rule",
@@ -7405,10 +7545,25 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr '.' '(' Type ')' '{' BlockList -'}' 'EOS'",
+                    "Rule": "'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
-                    "Acts": null,
+                    "Acts": [
+                      {
+                        "RunIdx": 0,
+                        "Act": "PushStack",
+                        "Path": "SwitchType",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "PopStack",
+                        "Path": "",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      }
+                    ],
                     "OptTokMap": false,
                     "FirstTokMap": false
                   },
@@ -7419,10 +7574,25 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr '.' '(' Type ')' '{' BlockList -'}' 'EOS'",
+                    "Rule": "'key:switch' SimpleStmt 'EOS' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
-                    "Acts": null,
+                    "Acts": [
+                      {
+                        "RunIdx": 0,
+                        "Act": "PushStack",
+                        "Path": "SwitchType",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "PopStack",
+                        "Path": "",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      }
+                    ],
                     "OptTokMap": false,
                     "FirstTokMap": false
                   }
@@ -7437,22 +7607,40 @@
                 "FirstTokMap": false
               },
               {
+                "Nm": "SelectStmt",
+                "UniqueNm": "SelectStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "'key:select' '{' BlockList -'}' 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
                 "Nm": "CaseStmt",
                 "UniqueNm": "CaseStmt",
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 5,
+                    "n": 7,
                     "type": "parse.Rule",
                     "name": "TypeCaseEmptyStmt",
                     "type": "parse.Rule",
                     "name": "TypeCaseStmt",
                     "type": "parse.Rule",
+                    "name": "SelCaseRecvExistStmt",
+                    "type": "parse.Rule",
+                    "name": "SelCaseRecvNewStmt",
+                    "type": "parse.Rule",
+                    "name": "SelCaseSendStmt",
+                    "type": "parse.Rule",
                     "name": "CaseEmptyStmt",
                     "type": "parse.Rule",
-                    "name": "CaseExprStmt",
-                    "type": "parse.Rule",
-                    "name": "SelCaseStmt"
+                    "name": "CaseExprStmt"
                   },
                   {
                     "Nm": "TypeCaseEmptyStmt",
@@ -7483,6 +7671,48 @@
                     "FirstTokMap": false
                   },
                   {
+                    "Nm": "SelCaseRecvExistStmt",
+                    "UniqueNm": "SelCaseRecvExistStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' ExprList '=' Expr ':' ?Stmt",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SelCaseRecvNewStmt",
+                    "UniqueNm": "SelCaseRecvNewStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' NameList ':=' Expr ':' ?Stmt",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SelCaseSendStmt",
+                    "UniqueNm": "SelCaseSendStmt",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
+                    "Rule": "'key:case' ?Expr '\u003c-' Expr ':' ?Stmt",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
                     "Nm": "CaseEmptyStmt",
                     "UniqueNm": "CaseEmptyStmt",
                     "Props": null,
@@ -7504,20 +7734,6 @@
                     "Off": false,
                     "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
                     "Rule": "'key:case' ExprList ':' Stmt",
-                    "StackMatch": "",
-                    "Ast": "AnchorAst",
-                    "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
-                  },
-                  {
-                    "Nm": "SelCaseStmt",
-                    "UniqueNm": "SelCaseStmt",
-                    "Props": null,
-                    "Kids": null,
-                    "Off": false,
-                    "Desc": "case and default require post-step to create sub-block -- no explicit { } scoping",
-                    "Rule": "'key:case' CommStmt 'EOS' ?Stmt",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
@@ -7616,29 +7832,15 @@
               {
                 "n": 5,
                 "type": "parse.Rule",
-                "name": "SendStmt",
-                "type": "parse.Rule",
                 "name": "IncrStmt",
                 "type": "parse.Rule",
                 "name": "DecrStmt",
                 "type": "parse.Rule",
                 "name": "AsgnStmt",
                 "type": "parse.Rule",
+                "name": "SendStmt",
+                "type": "parse.Rule",
                 "name": "ExprStmt"
-              },
-              {
-                "Nm": "SendStmt",
-                "UniqueNm": "SendStmt",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "?Expr '\u003c-' Expr 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
               },
               {
                 "Nm": "IncrStmt",
@@ -7678,6 +7880,20 @@
                 "Rule": "Asgn",
                 "StackMatch": "",
                 "Ast": "NoAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "SendStmt",
+                "UniqueNm": "SendStmt",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "?Expr '\u003c-' Expr 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
                 "Acts": null,
                 "OptTokMap": false,
                 "FirstTokMap": false
@@ -7880,15 +8096,33 @@
             "Props": null,
             "Kids": [
               {
-                "n": 4,
+                "n": 6,
+                "type": "parse.Rule",
+                "name": "AsgnExistingLit",
                 "type": "parse.Rule",
                 "name": "AsgnExisting",
+                "type": "parse.Rule",
+                "name": "AsgnNewLit",
                 "type": "parse.Rule",
                 "name": "AsgnNew",
                 "type": "parse.Rule",
                 "name": "AsgnMath",
                 "type": "parse.Rule",
                 "name": "AsgnBit"
+              },
+              {
+                "Nm": "AsgnExistingLit",
+                "UniqueNm": "AsgnExistingLit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "ExprList '=' @CompositeLit 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [],
+                "OptTokMap": false,
+                "FirstTokMap": false
               },
               {
                 "Nm": "AsgnExisting",
@@ -7901,6 +8135,42 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
+                "Nm": "AsgnNewLit",
+                "UniqueNm": "AsgnNewLit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "",
+                "Rule": "ExprList ':=' @CompositeLit 'EOS'",
+                "StackMatch": "",
+                "Ast": "AnchorAst",
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "Name...",
+                    "Tok": "NameVar",
+                    "FmTok": "Name"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "Name",
+                    "Tok": "NameVar",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddDetail",
+                    "Path": "[1]",
+                    "Tok": "None",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -8037,72 +8307,6 @@
             ],
             "Off": false,
             "Desc": "",
-            "Rule": "",
-            "StackMatch": "",
-            "Ast": "NoAst",
-            "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
-          },
-          {
-            "Nm": "CommStmt",
-            "UniqueNm": "CommStmt",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 3,
-                "type": "parse.Rule",
-                "name": "CommSend",
-                "type": "parse.Rule",
-                "name": "RecvExisting",
-                "type": "parse.Rule",
-                "name": "RecvNew"
-              },
-              {
-                "Nm": "CommSend",
-                "UniqueNm": "CommSend",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "SendStmt",
-                "StackMatch": "",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "RecvExisting",
-                "UniqueNm": "RecvExisting",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "ExprList '=' Expr 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "RecvNew",
-                "UniqueNm": "RecvNew",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "NameList ':=' Expr 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "communication stmt: send or recv",
             "Rule": "",
             "StackMatch": "",
             "Ast": "NoAst",
@@ -8505,11 +8709,49 @@
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 2,
+                    "n": 3,
+                    "type": "parse.Rule",
+                    "name": "VarSpecLit",
                     "type": "parse.Rule",
                     "name": "VarSpecExpr",
                     "type": "parse.Rule",
                     "name": "VarSpec"
+                  },
+                  {
+                    "Nm": "VarSpecLit",
+                    "UniqueNm": "VarSpecLit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "NameList ?Type '=' @CompositeLit 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "[0]",
+                        "Tok": "NameVarGlobal",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
+                        "Tok": "NameVarGlobal",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddDetail",
+                        "Path": "[-1]",
+                        "Tok": "None",
+                        "FmTok": "None"
+                      }
+                    ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
                   },
                   {
                     "Nm": "VarSpecExpr",

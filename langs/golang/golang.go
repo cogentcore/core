@@ -384,6 +384,9 @@ func (gl *GoLang) AddImportsToExts(fs *pi.FileState, pkg *syms.Symbol) {
 		return
 	}
 	for _, im := range imps {
+		if im.Name == "C" {
+			continue
+		}
 		go gl.AddImportToExts(fs, im.Name)
 	}
 }

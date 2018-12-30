@@ -71,7 +71,7 @@ type Rule struct {
 	OptTokMap    bool             `desc:"for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens"`
 	FirstTokMap  bool             `desc:"for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case"`
 	Rules        RuleList         `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
-	Order        []int            `json:"-" xml:"-" desc:"strategic matching order for matching the rules"`
+	Order        []int            `inactive:"+" json:"-" xml:"-" desc:"strategic matching order for matching the rules"`
 	FiTokMap     map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"map from first tokens / keywords to rules for FirstTokMap case"`
 	FiTokElseIdx int              `inactive:"+" json:"-" xml:"-" desc:"for FirstTokMap, the start of the else cases not covered by the map"`
 	ExclKeyIdx   int              `inactive:"+" json:"-" xml:"-" desc:"exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules"`
