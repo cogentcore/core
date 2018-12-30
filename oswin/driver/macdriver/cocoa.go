@@ -231,7 +231,6 @@ func drawLoop(w *windowImpl, vba uintptr) {
 
 	workAvailable := w.worker.WorkAvailable()
 
-	// TODO(crawshaw): exit this goroutine on Close.
 outer:
 	for {
 		select {
@@ -512,7 +511,7 @@ func mouseEvent(id uintptr, x, y, dx, dy float32, ty, button int32, flags uint32
 				act = mouse.DoubleClick
 			}
 		}
-		if (mods&(1<<uint32(key.Control)) != 0) {
+		if mods&(1<<uint32(key.Control)) != 0 {
 			cmButton = mouse.Right
 		}
 		event = &mouse.Event{

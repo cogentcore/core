@@ -1397,6 +1397,9 @@ func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
 // performing target actions -- mod must indicate actual action taken by the
 // target, including ignore
 func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
+	if tv.Viewport == nil {
+		return
+	}
 	tv.UnselectAll()
 	tv.Viewport.Win.FinalizeDragNDrop(mod)
 }
