@@ -3832,11 +3832,27 @@
             "Props": null,
             "Kids": [
               {
-                "n": 2,
+                "n": 3,
+                "type": "parse.Rule",
+                "name": "CompLit",
                 "type": "parse.Rule",
                 "name": "BinExpr",
                 "type": "parse.Rule",
                 "name": "UnryExpr"
+              },
+              {
+                "Nm": "CompLit",
+                "UniqueNm": "CompLit",
+                "Props": null,
+                "Kids": null,
+                "Off": false,
+                "Desc": "putting this first resolves ambiguity of * for pointers in types vs. mult",
+                "Rule": "CompositeLit",
+                "StackMatch": "",
+                "Ast": "NoAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
               },
               {
                 "Nm": "BinExpr",
@@ -4356,11 +4372,11 @@
                 "type": "parse.Rule",
                 "name": "LitRune",
                 "type": "parse.Rule",
+                "name": "LitStringTick",
+                "type": "parse.Rule",
                 "name": "LitString",
                 "type": "parse.Rule",
                 "name": "LitStringDbl",
-                "type": "parse.Rule",
-                "name": "LitStringTick",
                 "type": "parse.Rule",
                 "name": "LitNumImag",
                 "type": "parse.Rule",
@@ -4423,6 +4439,56 @@
                 "FirstTokMap": false
               },
               {
+                "Nm": "LitStringTick",
+                "UniqueNm": "LitStringTick",
+                "Props": null,
+                "Kids": [
+                  {
+                    "n": 2,
+                    "type": "parse.Rule",
+                    "name": "LitStringTicks",
+                    "type": "parse.Rule",
+                    "name": "LitStringTck"
+                  },
+                  {
+                    "Nm": "LitStringTicks",
+                    "UniqueNm": "LitStringTicks",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'LitStrBacktick' LitStringTick",
+                    "StackMatch": "",
+                    "Ast": "AddAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "LitStringTck",
+                    "UniqueNm": "LitStringTck",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'LitStrBacktick'",
+                    "StackMatch": "",
+                    "Ast": "AddAst",
+                    "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  }
+                ],
+                "Off": false,
+                "Desc": "backtick can go across multiple lines..",
+                "Rule": ":'LitStrBacktick'",
+                "StackMatch": "",
+                "Ast": "AddAst",
+                "Acts": null,
+                "OptTokMap": false,
+                "FirstTokMap": false
+              },
+              {
                 "Nm": "LitString",
                 "UniqueNm": "LitString",
                 "Props": null,
@@ -4444,20 +4510,6 @@
                 "Off": false,
                 "Desc": "",
                 "Rule": "'LitStrDouble'",
-                "StackMatch": "",
-                "Ast": "AddAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "LitStringTick",
-                "UniqueNm": "LitStringTick",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "todo: get map to work with subcategories..",
-                "Rule": "'LitStrBacktick'",
                 "StackMatch": "",
                 "Ast": "AddAst",
                 "Acts": null,
@@ -4549,7 +4601,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "takes type arg",
-                "Rule": "'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'",
+                "Rule": "'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')' ?PrimaryExpr",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -4563,7 +4615,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "takes type arg",
-                "Rule": "'key:new' '(' Type ')'",
+                "Rule": "'key:new' '(' Type ')' ?PrimaryExpr",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": null,
@@ -7324,9 +7376,11 @@
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 5,
+                    "n": 6,
                     "type": "parse.Rule",
                     "name": "ForRangeExisting",
+                    "type": "parse.Rule",
+                    "name": "ForRangeNewLit",
                     "type": "parse.Rule",
                     "name": "ForRangeNew",
                     "type": "parse.Rule",
@@ -7347,6 +7401,28 @@
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "ForRangeNewLit",
+                    "UniqueNm": "ForRangeNewLit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "composite lit will match but brackets won't be absorbed -- this does that..",
+                    "Rule": "'key:for' NameList ':=' 'key:range' @CompositeLit '{' ?BlockList -'}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": [
+                      {
+                        "RunIdx": -1,
+                        "Act": "ChgToken",
+                        "Path": "NameListEls",
+                        "Tok": "NameVar",
+                        "FmTok": "None"
+                      }
+                    ],
                     "OptTokMap": false,
                     "FirstTokMap": false
                   },
@@ -7446,11 +7522,11 @@
                     "type": "parse.Rule",
                     "name": "SwitchExpr",
                     "type": "parse.Rule",
-                    "name": "SwitchInit",
-                    "type": "parse.Rule",
                     "name": "SwitchTypeNameInit",
                     "type": "parse.Rule",
-                    "name": "SwitchTypeAnonInit"
+                    "name": "SwitchTypeAnonInit",
+                    "type": "parse.Rule",
+                    "name": "SwitchInit"
                   },
                   {
                     "Nm": "SwitchTypeName",
@@ -7525,20 +7601,6 @@
                     "FirstTokMap": false
                   },
                   {
-                    "Nm": "SwitchInit",
-                    "UniqueNm": "SwitchInit",
-                    "Props": null,
-                    "Kids": null,
-                    "Off": false,
-                    "Desc": "",
-                    "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'",
-                    "StackMatch": "",
-                    "Ast": "AnchorAst",
-                    "Acts": null,
-                    "OptTokMap": false,
-                    "FirstTokMap": false
-                  },
-                  {
                     "Nm": "SwitchTypeNameInit",
                     "UniqueNm": "SwitchTypeNameInit",
                     "Props": null,
@@ -7593,6 +7655,20 @@
                         "FmTok": "None"
                       }
                     ],
+                    "OptTokMap": false,
+                    "FirstTokMap": false
+                  },
+                  {
+                    "Nm": "SwitchInit",
+                    "UniqueNm": "SwitchInit",
+                    "Props": null,
+                    "Kids": null,
+                    "Off": false,
+                    "Desc": "",
+                    "Rule": "'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'",
+                    "StackMatch": "",
+                    "Ast": "AnchorAst",
+                    "Acts": null,
                     "OptTokMap": false,
                     "FirstTokMap": false
                   }
@@ -8096,33 +8172,15 @@
             "Props": null,
             "Kids": [
               {
-                "n": 6,
-                "type": "parse.Rule",
-                "name": "AsgnExistingLit",
+                "n": 4,
                 "type": "parse.Rule",
                 "name": "AsgnExisting",
-                "type": "parse.Rule",
-                "name": "AsgnNewLit",
                 "type": "parse.Rule",
                 "name": "AsgnNew",
                 "type": "parse.Rule",
                 "name": "AsgnMath",
                 "type": "parse.Rule",
                 "name": "AsgnBit"
-              },
-              {
-                "Nm": "AsgnExistingLit",
-                "UniqueNm": "AsgnExistingLit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "ExprList '=' @CompositeLit 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
               },
               {
                 "Nm": "AsgnExisting",
@@ -8135,42 +8193,6 @@
                 "StackMatch": "",
                 "Ast": "AnchorAst",
                 "Acts": [],
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "AsgnNewLit",
-                "UniqueNm": "AsgnNewLit",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "ExprList ':=' @CompositeLit 'EOS'",
-                "StackMatch": "",
-                "Ast": "AnchorAst",
-                "Acts": [
-                  {
-                    "RunIdx": -1,
-                    "Act": "ChgToken",
-                    "Path": "Name...",
-                    "Tok": "NameVar",
-                    "FmTok": "Name"
-                  },
-                  {
-                    "RunIdx": -1,
-                    "Act": "AddSymbol",
-                    "Path": "Name",
-                    "Tok": "NameVar",
-                    "FmTok": "None"
-                  },
-                  {
-                    "RunIdx": -1,
-                    "Act": "AddDetail",
-                    "Path": "[1]",
-                    "Tok": "None",
-                    "FmTok": "None"
-                  }
-                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -8709,49 +8731,11 @@
                 "Props": null,
                 "Kids": [
                   {
-                    "n": 3,
-                    "type": "parse.Rule",
-                    "name": "VarSpecLit",
+                    "n": 2,
                     "type": "parse.Rule",
                     "name": "VarSpecExpr",
                     "type": "parse.Rule",
                     "name": "VarSpec"
-                  },
-                  {
-                    "Nm": "VarSpecLit",
-                    "UniqueNm": "VarSpecLit",
-                    "Props": null,
-                    "Kids": null,
-                    "Off": false,
-                    "Desc": "",
-                    "Rule": "NameList ?Type '=' @CompositeLit 'EOS'",
-                    "StackMatch": "",
-                    "Ast": "AnchorAst",
-                    "Acts": [
-                      {
-                        "RunIdx": -1,
-                        "Act": "ChgToken",
-                        "Path": "[0]",
-                        "Tok": "NameVarGlobal",
-                        "FmTok": "None"
-                      },
-                      {
-                        "RunIdx": -1,
-                        "Act": "AddSymbol",
-                        "Path": "[0]",
-                        "Tok": "NameVarGlobal",
-                        "FmTok": "None"
-                      },
-                      {
-                        "RunIdx": -1,
-                        "Act": "AddDetail",
-                        "Path": "[-1]",
-                        "Tok": "None",
-                        "FmTok": "None"
-                      }
-                    ],
-                    "OptTokMap": false,
-                    "FirstTokMap": false
                   },
                   {
                     "Nm": "VarSpecExpr",

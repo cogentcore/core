@@ -224,8 +224,10 @@ ExprRules {
     }
     // Expr The full set of possible expressions 
     Expr {
-        BinExpr:   BinaryExpr  
-        UnryExpr:  UnaryExpr   
+        // CompLit putting this first resolves ambiguity of * for pointers in types vs. mult 
+        CompLit:   CompositeLit  
+        BinExpr:   BinaryExpr    
+        UnryExpr:  UnaryExpr     
     }
     UnaryExpr {
         PosExpr:       '+' UnaryExpr   >Ast
@@ -264,21 +266,24 @@ ExprRules {
     PrimaryExpr {
         LitNumInteger:  'LitNumInteger'  +Ast
         // LitRune rune 
-        LitRune:       'LitStrSingle'  +Ast
+        LitRune:  'LitStrSingle'  +Ast
+        // LitStringTick backtick can go across multiple lines.. 
+        LitStringTick {
+            LitStringTicks:  'LitStrBacktick' LitStringTick  +Ast
+            LitStringTck:    'LitStrBacktick'                +Ast
+        }
         LitString:     'LitStr'        +Ast
         LitStringDbl:  'LitStrDouble'  +Ast
-        // LitStringTick todo: get map to work with subcategories.. 
-        LitStringTick:  'LitStrBacktick'  +Ast
-        LitNumImag:     'LitNumImag'      +Ast
-        LitNumFloat:    'LitNumFloat'     +Ast
+        LitNumImag:    'LitNumImag'    +Ast
+        LitNumFloat:   'LitNumFloat'   +Ast
         FuncExpr {
             FuncLitCall:  'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
             FuncLit:      'key:func' @Signature '{' ?BlockList '}'                   >Ast
         }
         // MakeCall takes type arg 
-        MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')'  >Ast
+        MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')' ?PrimaryExpr  >Ast
         // NewCall takes type arg 
-        NewCall:  'key:new' '(' Type ')'  >Ast
+        NewCall:  'key:new' '(' Type ')' ?PrimaryExpr  >Ast
         Paren {
             ConvertParensSel:  '(' @Type ')' '(' Expr ?',' ')' '.' PrimaryExpr  >Ast
             ConvertParens:     '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr     >Ast
@@ -505,8 +510,11 @@ StmtRules {
         }
         // ForStmt just for matching for token -- delegates to children 
         ForStmt {
-            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'   >Ast
-            ForRangeNew:       'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
+            ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
+            // ForRangeNewLit composite lit will match but brackets won't be absorbed -- this does that.. 
+            ForRangeNewLit:  'key:for' NameList ':=' 'key:range' @CompositeLit '{' ?BlockList -'}' 'EOS'  >Ast
+            Acts:{ -1:ChgToken:"NameListEls":NameVar; }
+            ForRangeNew:  'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             Acts:{ -1:ChgToken:"NameListEls":NameVar; }
             ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             Acts:{ -1:ChgToken:"NameListEls":NameVar; }
@@ -521,11 +529,11 @@ StmtRules {
             SwitchTypeAnon:  'key:switch' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
             SwitchExpr:          'key:switch' ?Expr '{' BlockList -'}' 'EOS'                                                                 >Ast
-            SwitchInit:          'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'                                                >Ast
             SwitchTypeNameInit:  'key:switch' SimpleStmt 'EOS' 'Name' ':=' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
             SwitchTypeAnonInit:  'key:switch' SimpleStmt 'EOS' PrimaryExpr -'.' -'(' -'key:type' -')' -'{' BlockList -'}' 'EOS'  >Ast
             Acts:{ 0:PushStack:"SwitchType":None; -1:PopStack:"":None; }
+            SwitchInit:  'key:switch' SimpleStmt 'EOS' ?Expr '{' BlockList -'}' 'EOS'  >Ast
         }
         SelectStmt:  'key:select' '{' BlockList -'}' 'EOS'  >Ast
         CaseStmt {
@@ -570,11 +578,8 @@ StmtRules {
         PostExprStmt:  Expr  >Ast
     }
     Asgn {
-        AsgnExistingLit:  ExprList '=' @CompositeLit 'EOS'   >Ast
-        AsgnExisting:     ExprList '=' ExprList 'EOS'        >Ast
-        AsgnNewLit:       ExprList ':=' @CompositeLit 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
-        AsgnNew:  ExprList ':=' ExprList 'EOS'  >Ast
+        AsgnExisting:  ExprList '=' ExprList 'EOS'   >Ast
+        AsgnNew:       ExprList ':=' ExprList 'EOS'  >Ast
         Acts:{ -1:ChgToken:"Name...":NameVar<-Name; -1:AddSymbol:"Name":NameVar; -1:AddDetail:"[1]":None; }
         AsgnMath:  ExprList 'OpMathAsgn' ExprList 'EOS'  >Ast
         AsgnBit:   ExprList 'OpBitAsgn' ExprList 'EOS'   >Ast
@@ -623,8 +628,6 @@ DeclRules {
         VarGroup:  '(' VarList ')'  
         // VarOpts different types of var expressions 
         VarOpts {
-            VarSpecLit:  NameList ?Type '=' @CompositeLit 'EOS'  >Ast
-            Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; -1:AddDetail:"[-1]":None; }
             VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  >Ast
             Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; -1:AddDetail:"[-1]":None; }
             // VarSpec only a name and type, no expression 

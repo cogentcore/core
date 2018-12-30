@@ -31,7 +31,7 @@ import (
 var GuiActive = false
 
 // DepthLimit is the infinite recursion prevention cutoff
-var DepthLimit = 1000
+var DepthLimit = 10000
 
 // parse.Rule operates on the lexically-tokenized input, not the raw source.
 //
