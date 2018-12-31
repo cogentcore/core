@@ -7,7 +7,6 @@ package main
 import (
 	"go/token"
 	"log"
-	"os/exec"
 	"strings"
 
 	"github.com/goki/gi/spell"
@@ -124,10 +123,6 @@ func mainrun() {
 
 	win.MainMenuUpdated()
 	vp.UpdateEndNoSig(updt)
-
-	// todo: find a place for this code perhaps in SetCompleter
-	cmd := exec.Command("gocode", "close")
-	defer cmd.Run()
 
 	win.StartEventLoop()
 }
