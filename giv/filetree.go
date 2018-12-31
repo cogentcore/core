@@ -218,7 +218,9 @@ func (fn *FileNode) ReadDir(path string) error {
 		if fn.Repo() != nil {
 			prefix := string(fn.FRoot.FPath) + "/"
 			relpth := strings.TrimPrefix(fp, prefix)
-			sf.InVcs = fn.Repo().InRepo(string(relpth))
+			if fn.InVcs == false {
+				sf.InVcs = fn.Repo().InRepo(string(relpth))
+			}
 			if sf.ChangedVcs == false { // could be changed but not saved
 				sf.ChangedVcs = fn.Repo().IsChanged(string(relpth))
 			}
@@ -547,28 +549,20 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 }
 
 // NewFile makes a new file in given selected directory node
-func (fn *FileNode) NewFile(filename string) {
+func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 	np := filepath.Join(string(fn.FPath), filename)
 	_, err := os.Create(np)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
 		return
 	}
-	if fn.Repo() != nil {
-		prompt := fmt.Sprintf("Do you want to add the file \"%v\" to %v? If you choose No, you can add the file later", fn.Name(), fn.RepoType())
-		title := fmt.Sprintf("Add File to %v", fn.RepoType())
-		gi.ChoiceDialog(nil, gi.DlgOpts{Title: title,
-			Prompt: prompt}, []string{"Yes", "No"},
-			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				switch sig {
-				case 0:
-					fn.AddToVcs()
-				case 1:
-					// do nothing
-				}
-			})
-	}
 	fn.FRoot.UpdateNewFile(np)
+	if addToVcs {
+		nfn, ok := fn.FRoot.FindFile(np)
+		if ok {
+			nfn.AddToVcs()
+		}
+	}
 }
 
 // NewFolder makes a new folder (directory) in given selected directory node
@@ -776,6 +770,7 @@ var FileNodeProps = ki.Props{
 				{"File Name", ki.Props{
 					"width": 60,
 				}},
+				{"Add To Version Control", ki.Props{}},
 			},
 		}},
 		{"NewFolder", ki.Props{
@@ -980,7 +975,7 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 			ftv.DuplicateFiles()
 			kt.SetProcessed()
 		case gi.KeyFunInsert: // New File
-			ftv.NewFile("")
+			ftv.NewFile("", false)
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter: // New Folder
 			ftv.NewFolder("")
@@ -1096,7 +1091,7 @@ func (ftv *FileTreeView) OpenDirs() {
 }
 
 // NewFile makes a new file in given selected directory node
-func (ftv *FileTreeView) NewFile(filename string) {
+func (ftv *FileTreeView) NewFile(filename string, addToVcs bool) {
 	sels := ftv.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -1106,7 +1101,7 @@ func (ftv *FileTreeView) NewFile(filename string) {
 	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		fn.NewFile(filename)
+		fn.NewFile(filename, addToVcs)
 	}
 }
 
