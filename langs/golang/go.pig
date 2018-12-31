@@ -8,6 +8,7 @@ InCommentMulti:		 CommentMultiline		 if CurState == "CommentMulti" {
 }
 // InStrBacktick curstate at start -- multiline requires state 
 InStrBacktick:		 LitStrBacktick		 if CurState == "StrBacktick" {
+    // QuotedStrBacktick backtick actually has NO escape! 
     QuotedStrBacktick:       LitStrBacktick       if String == "\`"   do: Next; 
     EndStrBacktick:          LitStrBacktick       if String == "`"    do: PopState; Next; 
     StrBacktick:             LitStrBacktick       if AnyRune          do: Next; 
@@ -211,12 +212,16 @@ ExprRules {
         // QualName package-qualified name 
         QualName:  'Name' '.' 'Name'  +Ast
         // Name just a name without package scope 
-        Name:  'Name'  +Ast
+        Name {
+            NameLit:  'Name'  
+            // KeyName keyword used as a name -- allowed.. 
+            KeyName:  'Keyword'  
+        }
     }
     // NameList one or more plain names, separated by , -- for var names 
     NameList {
         NameListEls:  @Name ',' NameList  >1Ast
-        NameListEl:   'Name'              +Ast
+        NameListEl:   Name                
     }
     ExprList {
         ExprListEls:  Expr ',' ExprList  
@@ -225,9 +230,11 @@ ExprRules {
     // Expr The full set of possible expressions 
     Expr {
         // CompLit putting this first resolves ambiguity of * for pointers in types vs. mult 
-        CompLit:   CompositeLit  
-        BinExpr:   BinaryExpr    
-        UnryExpr:  UnaryExpr     
+        CompLit:     CompositeLit  
+        FunLitCall:  FuncLitCall   
+        FunLit:      FuncLit       
+        BinExpr:     BinaryExpr    
+        UnryExpr:    UnaryExpr     
     }
     UnaryExpr {
         PosExpr:       '+' UnaryExpr   >Ast
@@ -251,8 +258,8 @@ ExprRules {
         LtEqExpr:        Expr '<=' Expr   >Ast
         LessExpr:        Expr '<' Expr    >Ast
         BitOrExpr:       -Expr '|' Expr   >Ast
-        BitXorExpr:      -Expr '^' Expr   >Ast
         BitAndExpr:      -Expr '&' Expr   >Ast
+        BitXorExpr:      -Expr '^' Expr   >Ast
         BitAndNotExpr:   -Expr '&^' Expr  >Ast
         ShiftRightExpr:  -Expr '>>' Expr  >Ast
         ShiftLeftExpr:   -Expr '<<' Expr  >Ast
@@ -264,47 +271,55 @@ ExprRules {
         MultExpr:  -Expr '*' Expr  >Ast
     }
     PrimaryExpr {
-        LitNumInteger:  'LitNumInteger'  +Ast
-        // LitRune rune 
-        LitRune:  'LitStrSingle'  +Ast
-        // LitStringTick backtick can go across multiple lines.. 
-        LitStringTick {
-            LitStringTicks:  'LitStrBacktick' LitStringTick  +Ast
-            LitStringTck:    'LitStrBacktick'                +Ast
+        Lits {
+            // LitRune rune 
+            LitRune:        'LitStrSingle'   +Ast
+            LitNumInteger:  'LitNumInteger'  +Ast
+            LitNumFloat:    'LitNumFloat'    +Ast
+            LitNumImag:     'LitNumImag'     +Ast
+            LitStringDbl:   'LitStrDouble'   +Ast
+            // LitStringTicks backtick can go across multiple lines.. 
+            LitStringTicks {
+                LitStringTickGp {
+                    LitStringTickList:  @LitStringTick 'EOS' LitStringTickGp  
+                    LitStringTick:      'LitStrBacktick'                      +Ast
+                }
+            }
+            LitString:  'LitStr'  +Ast
         }
-        LitString:     'LitStr'        +Ast
-        LitStringDbl:  'LitStrDouble'  +Ast
-        LitNumImag:    'LitNumImag'    +Ast
-        LitNumFloat:   'LitNumFloat'   +Ast
         FuncExpr {
             FuncLitCall:  'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'  >Ast
             FuncLit:      'key:func' @Signature '{' ?BlockList '}'                   >Ast
         }
         // MakeCall takes type arg 
-        MakeCall:  'key:make' '(' Type ?',' ?Expr ?',' ?Expr ')' ?PrimaryExpr  >Ast
+        MakeCall:  'key:make' '(' @Type ?',' ?Expr ?',' ?Expr ')' ?PrimaryExpr  >Ast
         // NewCall takes type arg 
-        NewCall:  'key:new' '(' Type ')' ?PrimaryExpr  >Ast
+        NewCall:  'key:new' '(' @Type ')' ?PrimaryExpr  >Ast
         Paren {
             ConvertParensSel:  '(' @Type ')' '(' Expr ?',' ')' '.' PrimaryExpr  >Ast
             ConvertParens:     '(' @Type ')' '(' Expr ?',' ')' ?PrimaryExpr     >Ast
+            ParenSelector:     '(' Expr ')' '.' PrimaryExpr                     >Ast
             ParenExpr:         '(' Expr ')' ?PrimaryExpr                        
         }
-        // ConvertBasic only works with basic builtin types -- others will get taken by FunCall 
-        ConvertBasic:  @BasicType '(' Expr ')'  >Ast
         // Convert note: a regular type(expr) will be a FunCall 
         Convert:  @TypeLiteral '(' Expr ?',' ')'  >Ast
         // TypeAssertSel must be before FunCall to get . match 
         TypeAssertSel:  PrimaryExpr '.' '(' @Type ')' '.' PrimaryExpr  >Ast
         // TypeAssert must be before FunCall to get . match 
         TypeAssert:  PrimaryExpr '.' '(' @Type ')' ?PrimaryExpr  >Ast
-        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
-        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr  >Ast
         // Selector This must be after unary expr esp addr, DePtr 
         Selector:  PrimaryExpr '.' PrimaryExpr  >Ast
         Acts:{ -1:ChgToken:"[0]":NameTag; }
+        // CompositeLit important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed? 
+        CompositeLit:  @LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr  >Ast
+        // SliceCall function call on a slice -- meth must be after this so it doesn't match.. 
+        SliceCall:  ?PrimaryExpr '[' SliceExpr ']' '(' ?ArgsExpr ')'  >Ast
         // Slice this needs further right recursion to keep matching more slices 
         Slice:     ?PrimaryExpr '[' SliceExpr ']' ?PrimaryExpr  >Ast
         MethCall:  ?PrimaryExpr '.' Name '(' ?ArgsExpr ')'      >Ast
+        Acts:{ -1:ChgToken:"[0]":NameFunction; }
+        // FuncCallFun must be after parens 
+        FuncCallFun:  PrimaryExpr '(' ?ArgsExpr ')' '(' ?ArgsExpr ')'  >Ast
         Acts:{ -1:ChgToken:"[0]":NameFunction; }
         // FuncCall must be after parens 
         FuncCall:  PrimaryExpr '(' ?ArgsExpr ')'  >Ast
@@ -428,11 +443,11 @@ TypeRules {
     FieldDecls:  FieldDecl ?FieldDecls  
     FieldDecl {
         AnonQualField:  'Name' '.' 'Name' ?FieldTag 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"":NamePackage; }
-        AnonPtrField:  '*' 'Name' ?FieldTag 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"":NamePackage; }
+        Acts:{ -1:ChgToken:"":NameField; -1:AddSymbol:"":NameField; }
+        AnonPtrField:  '*' @FullName ?FieldTag 'EOS'  >Ast
+        Acts:{ -1:ChgToken:"Name|QualName":NameField; -1:AddSymbol:"Name|QualName":NameField; }
         NamedField:  NameList ?Type ?FieldTag 'EOS'  >Ast
-        Acts:{ -1:ChgToken:"NameListEl&NameListEls/Name...&NameListEls/NameListEl":NameField; -1:AddSymbol:"NameListEl&NameListEls/Name...&NameListEls/NameListEl":NameField; }
+        Acts:{ -1:ChgToken:"Name&NameListEls/Name...":NameField; -1:AddSymbol:"Name&NameListEls/Name...":NameField; }
     }
     FieldTag:  'LitStr'  +Ast
     // TypeDeclN N = switch between 1 or multi 
@@ -443,8 +458,8 @@ TypeRules {
     }
     TypeDecls:  TypeDeclEl ?TypeDecls  
     TypeList {
-        TypeListEls:  Type ',' TypeList  >1Ast
-        TypeListEl:   Type               
+        TypeListEls:  @Type ',' @TypeList  >1Ast
+        TypeListEl:   Type                 
     }
 }
 FuncRules {
@@ -615,7 +630,7 @@ DeclRules {
         ConstGroup:  '(' ConstList ')'  
         // ConstOpts different types of const expressions 
         ConstOpts {
-            ConstSpec:  NameList ?Type '=' Expr 'EOS'  >Ast
+            ConstSpec:  NameList ?Type '=' ExprList 'EOS'  >Ast
             Acts:{ -1:ChgToken:"[0]":NameConstant; -1:AddSymbol:"[0]":NameConstant; -1:AddDetail:"[-1]":None; }
             // ConstSpecName only a name, no expression 
             ConstSpecName:  NameList 'EOS'  >Ast
@@ -628,7 +643,7 @@ DeclRules {
         VarGroup:  '(' VarList ')'  
         // VarOpts different types of var expressions 
         VarOpts {
-            VarSpecExpr:  NameList ?Type '=' Expr 'EOS'  >Ast
+            VarSpecExpr:  NameList ?Type '=' ExprList 'EOS'  >Ast
             Acts:{ -1:ChgToken:"[0]":NameVarGlobal; -1:AddSymbol:"[0]":NameVarGlobal; -1:AddDetail:"[-1]":None; }
             // VarSpec only a name and type, no expression 
             VarSpec:  NameList Type 'EOS'  >Ast

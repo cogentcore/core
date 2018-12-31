@@ -12,16 +12,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 )
 
-// GoPiCacheDir returns the GoPi cache directory, and ensures that it exists
-func GoPiCacheDir() (string, error) {
+// GoPiCacheDir returns the GoPi cache directory for given language, and ensures that it exists
+func GoPiCacheDir(lang filecat.Supported) (string, error) {
 	ucdir, err := os.UserCacheDir()
 	if err != nil {
 		return "", err
 	}
-	cdir := filepath.Join(ucdir, "GoPi")
+	cdir := filepath.Join(filepath.Join(ucdir, "GoPi"), lang.String())
 	err = os.MkdirAll(cdir, 0775)
 	if err != nil {
 		log.Printf("GoPiCacheDir: cache not available: %v\n", err)
@@ -55,8 +56,8 @@ func GoRelPath(filename string) (string, error) {
 }
 
 // CacheFilename returns the filename to use for cache file for given filename
-func CacheFilename(filename string) (string, error) {
-	cdir, err := GoPiCacheDir()
+func CacheFilename(lang filecat.Supported, filename string) (string, error) {
+	cdir, err := GoPiCacheDir(lang)
 	if err != nil {
 		return "", err
 	}
@@ -80,8 +81,8 @@ func CacheFilename(filename string) (string, error) {
 // SaveSymCache saves cache of symbols starting with given symbol
 // (typically a package, module, library), which is at given
 // filename
-func SaveSymCache(sy *Symbol, filename string) error {
-	cfile, err := CacheFilename(filename)
+func SaveSymCache(sy *Symbol, lang filecat.Supported, filename string) error {
+	cfile, err := CacheFilename(lang, filename)
 	if err != nil {
 		return err
 	}
@@ -89,8 +90,8 @@ func SaveSymCache(sy *Symbol, filename string) error {
 }
 
 // SaveSymDoc saves doc file of syms -- for double-checking contents etc
-func SaveSymDoc(sy *Symbol, filename string) error {
-	cfile, err := CacheFilename(filename)
+func SaveSymDoc(sy *Symbol, lang filecat.Supported, filename string) error {
+	cfile, err := CacheFilename(lang, filename)
 	if err != nil {
 		return err
 	}
@@ -106,8 +107,8 @@ func SaveSymDoc(sy *Symbol, filename string) error {
 // OpenSymCache opens cache of symbols into given symbol
 // (typically a package, module, library), which is at given
 // filename -- returns time stamp when cache was last saved
-func OpenSymCache(filename string) (*Symbol, time.Time, error) {
-	cfile, err := CacheFilename(filename)
+func OpenSymCache(lang filecat.Supported, filename string) (*Symbol, time.Time, error) {
+	cfile, err := CacheFilename(lang, filename)
 	if err != nil {
 		return nil, time.Time{}, err
 	}

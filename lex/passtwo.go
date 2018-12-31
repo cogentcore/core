@@ -195,6 +195,14 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 			ts.NextLine()
 			continue
 		}
+		if pt.Semi {
+			for ts.Pos.Ch = 0; ts.Pos.Ch < sz; ts.Pos.Ch++ {
+				lx := ts.Src.LexAt(ts.Pos)
+				if lx.Tok.Tok == token.PunctSepSemicolon {
+					ts.Src.ReplaceEos(ts.Pos)
+				}
+			}
+		}
 		if pt.RBraceEos {
 			skip := false
 			for ci := 0; ci < sz; ci++ {
@@ -243,14 +251,6 @@ func (pt *PassTwo) EosDetectPos(ts *TwoState, pos Pos, nln int) {
 		if len(pt.EolToks) > 0 { // not depth specific
 			if pt.EolToks.Match(elx.Tok) {
 				ts.Src.InsertEos(ep)
-			}
-		}
-		if pt.Semi {
-			for ts.Pos.Ch = 0; ts.Pos.Ch < sz; ts.Pos.Ch++ {
-				lx := ts.Src.LexAt(ts.Pos)
-				if lx.Tok.Tok == token.PunctSepSemicolon {
-					ts.Src.ReplaceEos(ts.Pos)
-				}
 			}
 		}
 		ts.NextLine()

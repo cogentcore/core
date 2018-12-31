@@ -138,7 +138,14 @@ func (tk Tokens) PunctGpMatch() Tokens {
 // a Unary or Binary operator -- need special matching for this.
 // includes * and & which are used for address operations in C-like languages
 func (tk Tokens) IsAmbigUnaryOp() bool {
-	return (tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd)
+	return (tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd || tk == OpBitXor)
+}
+
+// IsUnaryOp returns true if this token is an operator that is typically used as
+// a Unary operator: - + & * ! ^ ! <-
+func (tk Tokens) IsUnaryOp() bool {
+	return (tk == OpMathSub || tk == OpMathMul || tk == OpBitAnd || tk == OpMathAdd ||
+		tk == OpBitXor || tk == OpLogNot || tk == OpAsgnArrow)
 }
 
 // CombineRepeats are token types where repeated tokens of the same type should

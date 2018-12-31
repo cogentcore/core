@@ -198,8 +198,14 @@ func (ps *State) FindTokenReverse(tkey token.KeyToken, reg lex.Reg) (lex.Pos, bo
 				pp, ok := ps.Src.PrevTokenPos(cp)
 				if ok {
 					pt := ps.Src.Token(pp)
-					if !pt.Tok.IsAmbigUnaryOp() {
-						return cp, true
+					if tok == token.OpMathMul {
+						if !pt.Tok.IsUnaryOp() {
+							return cp, true
+						}
+					} else {
+						if !pt.Tok.IsAmbigUnaryOp() {
+							return cp, true
+						}
 					}
 					// otherwise we don't match -- cannot match second opr
 				} else {

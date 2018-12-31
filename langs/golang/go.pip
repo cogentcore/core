@@ -8,7 +8,7 @@
     "Match": true,
     "SubMatch": true,
     "NoMatch": true,
-    "Run": false,
+    "Run": true,
     "RunAct": false,
     "ScopeSrc": true,
     "FullStackOut": false

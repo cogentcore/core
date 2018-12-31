@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/goki/gi/filecat"
 	"github.com/goki/pi/lex"
@@ -23,6 +24,7 @@ type Parser struct {
 	Parser     parse.Rule  `desc:"parser rules for parsing lexed tokens"`
 	Filename   string      `desc:"file name for overall parser (not file being parsed!)"`
 	ReportErrs bool        `desc:"if true, reports errors after parsing, to stdout"`
+	ModTime    time.Time   `json:"-" xml:"-" desc:"when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files"`
 }
 
 // Init initializes the parser -- must be called after creation

@@ -186,6 +186,14 @@ func (mm Matches) StartEnd() lex.Reg {
 	return reg
 }
 
+// StartEndExcl returns the first and last non-zero positions in the Matches list as a region
+// moves the end to next toke to make it the usual exclusive end pos
+func (mm Matches) StartEndExcl(ps *State) lex.Reg {
+	reg := mm.StartEnd()
+	reg.Ed, _ = ps.Src.NextTokenPos(reg.Ed)
+	return reg
+}
+
 ///////////////////////////////////////////////////////////////////////
 //  Rule
 
@@ -337,7 +345,11 @@ func (pr *Rule) Compile(ps *State) bool {
 			}
 		} else {
 			st := 0
-			if rn[0] == '?' {
+			if rn[:2] == "?@" || rn[:2] == "@?" {
+				st = 2
+				rr.Opt = true
+				rr.Match = true
+			} else if rn[0] == '?' {
 				st = 1
 				rr.Opt = true
 			} else if rn[0] == '@' {
@@ -676,10 +688,22 @@ func (pr *Rule) ParseRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, opt
 	if !match {
 		return nil
 	}
+
+	ppar := par.Par.(*Rule)
+
 	if par.Ast != NoAst && par.IsGroup() {
 		if parAst.Nm != par.Nm {
-			newAst := ps.AddAst(parAst, par.Name(), scope)
+			mreg := mpos.StartEndExcl(ps)
+			newAst := ps.AddAst(parAst, par.Name(), mreg)
 			if par.Ast == AnchorAst {
+				parAst = newAst
+			}
+		}
+	} else if par.IsGroup() && ppar.Ast != NoAst && ppar.IsGroup() { // two-level group...
+		if parAst.Nm != ppar.Nm {
+			mreg := mpos.StartEndExcl(ps)
+			newAst := ps.AddAst(parAst, ppar.Name(), mreg)
+			if ppar.Ast == AnchorAst {
 				parAst = newAst
 			}
 		}

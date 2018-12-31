@@ -244,12 +244,16 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	}
 
 	if !opts.Rebuild {
-		csy, cts, err := syms.OpenSymCache(path)
+		csy, cts, err := syms.OpenSymCache(filecat.Go, path)
 		if err == nil && csy != nil {
-			lstmod := dirs.LatestMod(path, []string{".go"})
-			if lstmod.Before(cts) {
-				// fmt.Printf("loaded cache for: %v from: %v\n", path, cts)
-				return csy
+			if !gl.Pr.ModTime.IsZero() && cts.Before(gl.Pr.ModTime) {
+				// fmt.Printf("rebuilding %v because parser: %v is newer than cache: %v\n", path, gl.Pr.ModTime, cts)
+			} else {
+				lstmod := dirs.LatestMod(path, []string{".go"})
+				if lstmod.Before(cts) {
+					// fmt.Printf("loaded cache for: %v from: %v\n", path, cts)
+					return csy
+				}
 			}
 		}
 	}
@@ -305,7 +309,7 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	pfs := pi.NewFileState() // master overall package file state
 	gl.ResolveTypes(pfs, pkgsym)
 	if !opts.Nocache {
-		syms.SaveSymCache(pkgsym, path)
+		syms.SaveSymCache(pkgsym, filecat.Go, path)
 	}
 	return pkgsym
 }

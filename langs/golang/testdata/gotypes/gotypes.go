@@ -19,6 +19,7 @@ type Artyp [20]float64
 type Sttyp struct {
 	Anon1
 	ki.Node
+	*APtrField
 	FieldA         int
 	FieldB         Sltyp
 	FieldC, FieldD string

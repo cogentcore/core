@@ -115,12 +115,17 @@ func (ll *LangSupporter) OpenStd() error {
 		}
 		fd := filepath.Join(path, lndir)
 		fn := filepath.Join(fd, ln+".pi")
-		if _, err := os.Stat(fn); os.IsNotExist(err) {
+		pinfo, err := os.Stat(fn)
+		if os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
 			continue
 		}
 		pr := NewParser()
 		pr.OpenJSON(fn)
 		lp.Parser = pr
+		pr.ModTime = pinfo.ModTime()
 		lp.Parser.InitAll()
 		StdLangProps[sl] = lp
 	}
