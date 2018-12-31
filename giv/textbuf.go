@@ -368,7 +368,7 @@ func (tb *TextBuf) ConfigSupported() bool {
 			tb.SetSpellCorrect(tb, SpellCorrectEdit)
 		}
 		if tb.Complete == nil {
-			tb.SetCompleter(&tb.PiState, pi.Complete, CompleteGoEdit) // todo: need pi edit too..
+			tb.SetCompleter(&tb.PiState, pi.Complete, pi.CompleteEdit)
 		}
 		return tb.Opts.ConfigSupported(tb.Info.Sup)
 	}

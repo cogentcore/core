@@ -113,29 +113,28 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 	c.Completions = md.Matches
 	c.Seed = md.Seed
 	count := len(c.Completions)
-	if count > 0 {
-		if count == 1 && c.Completions[0].Text == c.Seed {
-			return
-		}
-
-		var m Menu
-		if count <= CompleteMaxItems || force {
-			for i := 0; i < count; i++ {
-				text := c.Completions[i].Text
-				icon := c.Completions[i].Icon
-				m.AddAction(ActOpts{Icon: icon, Label: text, Data: text},
-					c, func(recv, send ki.Ki, sig int64, data interface{}) {
-						tff := recv.Embed(KiT_Complete).(*Complete)
-						tff.Complete(data.(string))
-					})
-			}
-			c.Vp = vp
-			pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-			pvp.SetFlag(int(VpFlagCompleter))
-			pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-			oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
-		}
+	if count == 0 || (count == 1 && c.Completions[0].Text == c.Seed) || (count > CompleteMaxItems && !force) {
+		return
 	}
+	var m Menu
+	for i := 0; i < count; i++ {
+		cmp := &c.Completions[i]
+		text := cmp.Text
+		if cmp.Label != "" {
+			text = cmp.Label
+		}
+		icon := cmp.Icon
+		m.AddAction(ActOpts{Icon: icon, Label: text, Data: cmp.Text},
+			c, func(recv, send ki.Ki, sig int64, data interface{}) {
+				cc := recv.Embed(KiT_Complete).(*Complete)
+				cc.Complete(data.(string))
+			})
+	}
+	c.Vp = vp
+	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+	pvp.SetFlag(int(VpFlagCompleter))
+	pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
 }
 
 // Cancel cancels any pending completion -- call when new events nullify prior completions

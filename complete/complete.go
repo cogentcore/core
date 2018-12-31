@@ -16,20 +16,25 @@ import (
 	"github.com/akutz/sortfold"
 )
 
+// Completion holds one potential completion
 type Completion struct {
-	Text  string            `desc:"completion text"`
+	Text  string            `desc:"completion text -- what will actually be inserted if selected"`
+	Label string            `desc:"label to show the user -- only used for menu display if non-empty -- otherwise Text is used"`
 	Icon  string            `desc:"icon name"`
 	Desc  string            `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"	`
 	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
 }
 
+// Completions is a full list (slice) of completion options
 type Completions []Completion
 
+// MatchData is used for passing completions around -- contains seed in addition to completions
 type MatchData struct {
 	Matches Completions `desc:"the matches based on seed"`
 	Seed    string      `desc:"seed is the prefix we use to find possible completions"`
 }
 
+// EditData is returned from completion edit function to incorporate the selected completion
 type EditData struct {
 	NewText       string `desc:"completion text after special edits"`
 	ForwardDelete int    `desc:"number of runes, past the cursor, to delete, if any"`
