@@ -1,0 +1,414 @@
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/archive
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/archive/tar
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/archive/zip
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/bufio
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/builtin
+builtin.go:88:5: required element: TypeDeclN did not match input<br>
+	> byte = uint8<br>
+builtin.go:92:17: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:97:14: missing expected input for: Stmt<br>
+	>  // Untyped int.<br>
+builtin.go:101:12: missing expected input for: Stmt<br>
+	>  // Type must be a pointer, ch<br>
+builtin.go:106:13: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:111:14: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:115:20: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:119:22: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:123:26: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:134:47: missing expected input for: Stmt<br>
+	> <br>
+builtin.go:141:30: missing expected input for: Stmt<br>
+	> <br>
+... and 26 more errors<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/bytes
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/compress
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/compress/bzip2
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/compress/flate
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/compress/gzip
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/compress/lzw
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/compress/zlib
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/container
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/container/heap
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/container/list
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/container/ring
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/context
+context.go:253:22: required element: TypeLiteral did not match input<br>
+	> map[canceler]struct{})<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/aes
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/cipher
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/des
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/dsa
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/ecdsa
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/elliptic
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/hmac
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/internal/randutil
+randutil.go:27:20: required element: TypeLiteral did not match input<br>
+	> chan struct{})<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/internal/subtle
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/md5
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/rand
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/rc4
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/rsa
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/sha1
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/sha256
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/sha512
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/subtle
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/tls
+generate_cert.go:149:80: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+
+handshake_client.go:687:66: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+
+handshake_server.go:646:66: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/x509
+verify.go:768:77: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/crypto/x509/pkix
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/database
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/database/sql
+convert.go:325:36: token: PunctSepComma (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> , sv); ok {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/database/sql/driver
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug/dwarf
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug/elf
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug/gosym
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug/macho
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug/pe
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/debug/plan9obj
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/ascii85
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/asn1
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/base32
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/base64
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/binary
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/csv
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/gob
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/hex
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/json
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/pem
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/encoding/xml
+marshal.go:998:49: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+marshal.go:1009:13: token: PunctSepPeriod (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> .p.writeStart(&StartElement{Na<br>
+
+xml.go:695:24: token: PunctGpLBrace (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/errors
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/expvar
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/flag
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/fmt
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/ast
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/build
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/constant
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/doc
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/format
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/importer
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/internal/gccgoimporter
+importer.go:161:3: required element: Stmt did not match input<br>
+	> if n, ok := rc.(interface{ Nam<br>
+importer.go:164:2: token: PunctGpRBrace (at rule index: 4) has extra preceeding input inconsistent with grammar<br>
+	> } else {<br>
+... and 3 more errors<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/internal/gcimporter
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/internal/srcimporter
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/parser
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/printer
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/scanner
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/token
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/go/types
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/hash
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/hash/adler32
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/hash/crc32
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/hash/crc64
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/hash/fnv
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/html
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/html/template
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/color
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/color/palette
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/draw
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/gif
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/internal/imageutil
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/jpeg
+writer.go:333:35: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+writer.go:334:35: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+writer.go:353:35: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> )<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/image/png
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/index
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/index/suffixarray
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/bytealg
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/cpu
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/nettrace
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/poll
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/race
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/singleflight
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/syscall
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/syscall/unix
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/syscall/windows
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/syscall/windows/registry
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/syscall/windows/sysdll
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/testenv
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/testlog
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/internal/trace
+parser.go:308:67: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ) {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/io
+pipe.go:190:13: required element: TypeLiteral did not match input<br>
+	> chan struct{}),<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/io/ioutil
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/log
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/log/syslog
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/math
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/math/big
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/math/bits
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/math/cmplx
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/math/rand
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/mime
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/mime/multipart
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/mime/quotedprintable
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net
+net.go:620:21: required element: TypeLiteral did not match input<br>
+	> chan struct{}, concurrentThrea<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http
+h2_bundle.go:964:72: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/cgi
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/cookiejar
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/fcgi
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/httptest
+server.go:112:2: required element: Stmt did not match input<br>
+	> select {}<br>
+server.go:113:1: token: PunctGpRBrace (at rule index: 4) has extra preceeding input inconsistent with grammar<br>
+	> }<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/httptrace
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/httputil
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/http/pprof
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/internal/socktest
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/mail
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/rpc
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/rpc/jsonrpc
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/smtp
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/textproto
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/net/url
+url.go:316:36: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+url.go:317:36: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/os
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/os/exec
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/os/signal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/os/signal/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/os/signal/internal/pty
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/os/user
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/path
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/path/filepath
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/plugin
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/reflect
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/regexp
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/regexp/syntax
+prog.go:286:32: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> )<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/sort
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/strconv
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/strings
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/sync
+mutex.go:205:3: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/sync/atomic
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/syscall
+dirent.go:81:53: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ))<br>
+
+route_bsd.go:116:60: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ))<br>
+route_bsd.go:117:60: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ))<br>
+
+syscall_darwin.go:72:70: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+syscall_darwin.go:79:49: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Ino)<br>
+syscall_darwin.go:83:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_darwin.go:87:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Naml<br>
+
+syscall_dragonfly.go:53:70: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+syscall_dragonfly.go:60:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.File<br>
+syscall_dragonfly.go:72:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Naml<br>
+
+syscall_freebsd.go:51:70: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; err != nil {<br>
+syscall_freebsd.go:58:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.File<br>
+syscall_freebsd.go:62:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_freebsd.go:66:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Naml<br>
+
+syscall_js.go:26:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_js.go:34:53: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> )), true<br>
+
+syscall_linux.go:867:49: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Ino)<br>
+syscall_linux.go:871:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_linux.go:879:53: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> )), true<br>
+
+syscall_nacl.go:29:49: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Ino)<br>
+syscall_nacl.go:33:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_nacl.go:41:53: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> )), true<br>
+
+syscall_netbsd.go:94:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.File<br>
+syscall_netbsd.go:98:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_netbsd.go:102:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Naml<br>
+
+syscall_openbsd.go:54:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.File<br>
+syscall_openbsd.go:58:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_openbsd.go:62:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Naml<br>
+
+syscall_solaris.go:33:49: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Ino)<br>
+syscall_solaris.go:37:52: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), unsafe.Sizeof(Dirent{}.Recl<br>
+syscall_solaris.go:45:53: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> )), true<br>
+
+syscall_unix.go:309:63: token: PunctGpRParen (at rule index: 3) has extra preceeding input inconsistent with grammar<br>
+	> ), uintptr(len(s)))<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/syscall/js
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/testing
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/testing/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/testing/internal/testdeps
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/testing/iotest
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/testing/quick
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/text
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/text/scanner
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/text/tabwriter
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/text/template
+template.go:223:12: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/text/template/parse
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/time
+sleep.go:172:18: token: EOS (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> <br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/unicode
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/unicode/utf16
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/unicode/utf8
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/unsafe
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/chacha20poly1305
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/cryptobyte
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/cryptobyte/asn1
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/curve25519
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/internal/chacha20
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/crypto/poly1305
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/dns
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/dns/dnsmessage
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/http
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/http/httpguts
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/http/httpproxy
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/http2
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/http2/hpack
+tables.go:74:2: required element: Stmt did not match input<br>
+	> if p := (pairNameValue{f.Name,<br>
+tables.go:77:1: token: PunctGpRBrace (at rule index: 8) has extra preceeding input inconsistent with grammar<br>
+	> }<br>
+tables.go:105:56: token: EOS (at rule index: 2) has extra preceeding input inconsistent with grammar<br>
+	> ; id != 0 {<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/idna
+tables.go:1506:17: depth limit exceeded -- parser rules error -- look for recursive cases<br>
+	> 0x13bd: 0x7c09, 0x13be: 0x7c09<br>
+... and 69 more errors<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/internal
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/internal/nettest
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/lif
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/nettest
+conntest.go:454:25: required element: LiteralType did not match input<br>
+	> struct{ io.Writer }{w}, struct<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/net/route
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text/secure
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text/secure/bidirule
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text/transform
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text/unicode
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text/unicode/bidi
+tables.go:1485:33: depth limit exceeded -- parser rules error -- look for recursive cases<br>
+	> 0x3302: 0x000c, 0x3303: 0x000c<br>
+... and 69 more errors<br>
+
+Processing path: /usr/local/Cellar/go/1.11.3/libexec/src/vendor/golang_org/x/text/unicode/norm
+normalize.go:51:27: token: PunctGpLParen (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> (b))<br>
+normalize.go:65:27: token: PunctGpLParen (at rule index: 1) has extra preceeding input inconsistent with grammar<br>
+	> (s))<br>
+
+tables.go:742:37: depth limit exceeded -- parser rules error -- look for recursive cases<br>
+	> 0x95, 0x43,<br>
+... and 26 more errors<br>
+

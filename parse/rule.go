@@ -1742,7 +1742,7 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 			}
 			fmt.Fprintf(writer, "%v%v:\t%v\t%v\n", ind, nmstr, pr.Rule, astr)
 			if len(pr.Acts) > 0 {
-				fmt.Fprintf(writer, "%vActs:%v\n", ind, pr.Acts.String())
+				fmt.Fprintf(writer, "%v--->Acts:%v\n", ind, pr.Acts.String())
 			}
 		}
 	}

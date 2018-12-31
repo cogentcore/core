@@ -3640,7 +3640,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 18,
+            "n": 16,
             "type": "parse.Rule",
             "name": "FullName",
             "type": "parse.Rule",
@@ -3665,10 +3665,6 @@
             "name": "Key",
             "type": "parse.Rule",
             "name": "RecvType",
-            "type": "parse.Rule",
-            "name": "Selectors",
-            "type": "parse.Rule",
-            "name": "SubSlice",
             "type": "parse.Rule",
             "name": "SliceExpr",
             "type": "parse.Rule",
@@ -4412,7 +4408,7 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "! expr is exclusion conditions on '*' to deal with possibility of ptr type literal in map or slice",
+                "Desc": "",
                 "Rule": "-Expr '*' Expr",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
@@ -4422,7 +4418,7 @@
               }
             ],
             "Off": false,
-            "Desc": "due to top-down nature of parser, *lowest* precedence is *first* -- all rules *must* have - first = reverse order to get associativity right",
+            "Desc": "due to top-down nature of parser, *lowest* precedence is *first* -- math ops *must* have minus - first = reverse order to get associativity right",
             "Rule": "",
             "StackMatch": "",
             "Ast": "NoAst",
@@ -4675,7 +4671,7 @@
                     "Kids": null,
                     "Off": false,
                     "Desc": "",
-                    "Rule": "'key:func' Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'",
+                    "Rule": "'key:func' @Signature '{' ?BlockList '}' '(' ?ArgsExpr ')'",
                     "StackMatch": "",
                     "Ast": "AnchorAst",
                     "Acts": null,
@@ -4886,7 +4882,7 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "important to match sepcific '{' here, not using literal value -- must be before slice, to get map[] keyword instead of slice -- todo: had 'EOS' at the end -- not needed?",
+                "Desc": "important to match sepcific '{' here -- must be before slice, to get map[] keyword instead of slice",
                 "Rule": "@LiteralType '{' ?ElementList ?'EOS' '}' ?PrimaryExpr",
                 "StackMatch": "",
                 "Ast": "AnchorAst",
@@ -5513,70 +5509,6 @@
             "FirstTokMap": false
           },
           {
-            "Nm": "Selectors",
-            "UniqueNm": "Selectors",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 2,
-                "type": "parse.Rule",
-                "name": "Sels",
-                "type": "parse.Rule",
-                "name": "Sel"
-              },
-              {
-                "Nm": "Sels",
-                "UniqueNm": "Sels",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Name '.' Selectors",
-                "StackMatch": "",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "Sel",
-                "UniqueNm": "Sel",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "Name",
-                "StackMatch": "",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "",
-            "Rule": "",
-            "StackMatch": "",
-            "Ast": "NoAst",
-            "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
-          },
-          {
-            "Nm": "SubSlice",
-            "UniqueNm": "SubSlice",
-            "Props": null,
-            "Kids": null,
-            "Off": false,
-            "Desc": "",
-            "Rule": "'[' SliceExpr ']' ?SubSlice",
-            "StackMatch": "",
-            "Ast": "SubAst",
-            "Acts": null,
-            "OptTokMap": false,
-            "FirstTokMap": false
-          },
-          {
             "Nm": "SliceExpr",
             "UniqueNm": "SliceExpr",
             "Props": null,
@@ -5824,11 +5756,9 @@
         "Props": null,
         "Kids": [
           {
-            "n": 9,
+            "n": 8,
             "type": "parse.Rule",
             "name": "Type",
-            "type": "parse.Rule",
-            "name": "PtrOrTypeName",
             "type": "parse.Rule",
             "name": "TypeLiteral",
             "type": "parse.Rule",
@@ -6000,56 +5930,6 @@
             "Ast": "NoAst",
             "Acts": null,
             "OptTokMap": true,
-            "FirstTokMap": false
-          },
-          {
-            "Nm": "PtrOrTypeName",
-            "UniqueNm": "PtrOrTypeName",
-            "Props": null,
-            "Kids": [
-              {
-                "n": 2,
-                "type": "parse.Rule",
-                "name": "PtrTypeName",
-                "type": "parse.Rule",
-                "name": "NoPtrTypeName"
-              },
-              {
-                "Nm": "PtrTypeName",
-                "UniqueNm": "PtrTypeName",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "'*' TypeName",
-                "StackMatch": "",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "NoPtrTypeName",
-                "UniqueNm": "NoPtrTypeName",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "",
-                "Rule": "TypeName",
-                "StackMatch": "",
-                "Ast": "NoAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              }
-            ],
-            "Off": false,
-            "Desc": "regular type name or pointer to type name",
-            "Rule": "",
-            "StackMatch": "",
-            "Ast": "NoAst",
-            "Acts": null,
-            "OptTokMap": false,
             "FirstTokMap": false
           },
           {

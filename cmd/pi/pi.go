@@ -62,7 +62,7 @@ func DoGoPath(path string) {
 	pr.ReportErrs = true
 	pkgsym := lp.Lang.ParseDir(path, pi.LangDirOpts{Rebuild: true})
 	if pkgsym != nil {
-		syms.SaveSymDoc(pkgsym, path)
+		syms.SaveSymDoc(pkgsym, filecat.Go, path)
 	}
 }
 

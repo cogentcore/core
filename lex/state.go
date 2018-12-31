@@ -256,11 +256,13 @@ func (ls *State) ReadUntil(until string) {
 				}
 			} else {
 				ep := ls.Pos + usz
-				sm := string(ls.Src[ls.Pos:ep])
-				if ep <= sz && sm == un {
-					ls.Pos += usz
-					got = true
-					break
+				if ep < sz && ls.Pos < ep {
+					sm := string(ls.Src[ls.Pos:ep])
+					if sm == un {
+						ls.Pos += usz
+						got = true
+						break
+					}
 				}
 			}
 		}
