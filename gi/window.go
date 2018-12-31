@@ -1030,9 +1030,9 @@ func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport
 		w.Sprites = make(map[string]*Viewport2D)
 		w.SpritesBg = make(map[string]oswin.Image)
 	}
-	if _, has := w.Sprites[nm]; has {
-		log.Printf("gi.Window AddSprite -- name is already in use: %v\n", nm)
-		return nil
+	if exsp, has := w.Sprites[nm]; has {
+		// log.Printf("gi.Window AddSprite -- name is already in use: %v\n", nm)
+		return exsp
 	}
 	sp := &Viewport2D{}
 	sp.InitName(sp, nm)
