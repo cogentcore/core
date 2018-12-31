@@ -944,6 +944,21 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 
 	creg := scope
 	osz := len(pr.Order)
+
+	// 	first pass filter on tokens
+	if optMap != nil {
+		for oi := 0; oi < osz; oi++ {
+			ri := pr.Order[oi]
+			rr := &pr.Rules[ri]
+			if rr.IsToken() {
+				kt := rr.Tok
+				if !optMap.Has(kt.Tok) { // not even a possibility
+					return false, nil
+				}
+			}
+		}
+	}
+
 	for oi := 0; oi < osz; oi++ {
 		ri := pr.Order[oi]
 		rr := &pr.Rules[ri]
@@ -952,9 +967,6 @@ func (pr *Rule) MatchMixed(ps *State, parAst *Ast, scope lex.Reg, depth int, opt
 		// Token
 		if rr.IsToken() {
 			kt := rr.Tok
-			if optMap != nil && !optMap.Has(kt.Tok) { // not even a possibility
-				return false, nil
-			}
 			if rr.FmNext {
 				if mpos == nil {
 					mpos = make(Matches, nr) // make on demand -- cuts out a lot of allocations!

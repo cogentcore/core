@@ -188,5 +188,23 @@ func Complete(data interface{}, text string, pos token.Position) (md complete.Ma
 	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})
 }
 
+// CompleteEdit uses the selected completion to edit the text
+func CompleteEdit(data interface{}, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.EditData) {
+	sfs := data.(*FileState)
+	if sfs == nil {
+		log.Printf("pi.CompleteEdit: data is nil not FileState or is nil - can't complete\n")
+		return ed
+	}
+	lp, err := LangSupport.Props(sfs.Src.Sup)
+	if err != nil {
+		log.Printf("pi.CompleteEdit: %v\n", err)
+		return ed
+	}
+	if lp.Lang == nil {
+		return ed
+	}
+	return lp.Lang.CompleteEdit(sfs, text, cursorPos, comp, seed)
+}
+
 /////////////////////////////////////////////////////////////////////////
 // Convenience wrappers for Lang methods

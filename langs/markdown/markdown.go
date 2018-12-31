@@ -70,6 +70,11 @@ func (ml *MarkdownLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) 
 	return md
 }
 
+func (ml *MarkdownLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData) {
+	// n/a
+	return ed
+}
+
 func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	// n/a
 	return nil

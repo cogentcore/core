@@ -112,10 +112,9 @@ func (gl *GoLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	}
 }
 
-func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
-	if str == "" {
-		return
-	}
+// ElInString gets the element in given string where the cursor is
+// could return Ast elements where these things are..
+func (gl *GoLang) ElInString(fs *pi.FileState, str string, pos lex.Pos) (scope, name string, tok token.KeyToken) {
 	pr := gl.Parser()
 	if pr == nil {
 		return
@@ -133,22 +132,29 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	// first pass: just use lexical tokens even though we have the full Ast..
 	lxs := lfs.Src.Lexs[0]
 	sz := len(lxs)
-	// look for scope.name
-	name := ""
-	scope := ""
 	if lxs[sz-1].Tok.Tok == token.EOS {
 		sz--
 	}
 	gotSep := false
+	// nmidx := -1
+	// scidx := -1
 	for i := sz - 1; i >= 0; i-- {
 		lx := lxs[i]
+		if lx.St > pos.Ch {
+			continue
+		}
+		if lx.St <= pos.Ch && pos.Ch < lx.Ed {
+			tok = lx.Tok
+		}
 		if lx.Tok.Tok.Cat() == token.Name {
 			nm := string(lfs.Src.TokenSrc(lex.Pos{0, i}))
 			if gotSep {
 				scope = nm
+				// scidx = i
 				break
 			} else {
 				name = nm
+				// nmidx = i
 			}
 		} else if lx.Tok.Tok.SubCat() == token.PunctSep {
 			gotSep = true
@@ -156,16 +162,27 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			break
 		}
 	}
+
+	// todo: get full path?
+	// if nmidx > 0 {
+	// }
+	// fmt.Printf("seed: %v\n", md.Seed)
+	return
+}
+
+func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
+	if str == "" {
+		return
+	}
+	scope, name, _ := gl.ElInString(fs, str, pos)
 	if name == "" && scope == "" {
 		return
 	}
-
 	if scope != "" {
 		md.Seed = scope + "." + name
 	} else {
 		md.Seed = name
 	}
-	// fmt.Printf("seed: %v\n", md.Seed)
 
 	fs.SymsMu.RLock()     // syms access needs to be locked -- could be updated..
 	var conts syms.SymMap // containers of given region -- local scoping
@@ -180,20 +197,22 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		if got {
 			if len(scsym.Children) == 0 {
 				if scsym.Type != "" {
-					// typ := gl.FindTypeName(scsym.Type, fs, pkg)
-					// if typ != nil {
-					// 	scsym = typ
-					// }
 					typ, got := fs.FindNameScoped(scsym.Type, conts)
 					if got {
 						scsym = typ
+					} else {
+						scsym = nil
+						scope = ""
+						md.Seed = name
 					}
 				}
 			}
-			if name == "" {
-				matches = scsym.Children
-			} else {
-				scsym.Children.FindNamePrefix(name, &matches)
+			if scsym != nil {
+				if name == "" {
+					matches = scsym.Children
+				} else {
+					scsym.Children.FindNamePrefix(name, &matches)
+				}
 			}
 		} else {
 			scope = ""
@@ -214,13 +233,52 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			continue
 		}
 		nm := sy.Name
+		lbl := sy.Name
 		if scope != "" {
+			lbl = nm + " (." + scope + ")"
 			nm = scope + "." + nm
 		}
-		c := complete.Completion{Text: nm, Icon: sy.Kind.IconName(), Desc: sy.Detail}
+		c := complete.Completion{Text: nm, Label: lbl, Icon: sy.Kind.IconName(), Desc: sy.Detail}
 		md.Matches = append(md.Matches, c)
 	}
 	return
+}
+
+// CompleteEdit returns the completion edit data for integrating the selected completion
+// into the source
+func (gl *GoLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData) {
+	// if the original is ChildByName() and the cursor is between d and B and the comp is Children,
+	// then delete the portion after "Child" and return the new comp and the number or runes past
+	// the cursor to delete
+	s2 := text[cp:]
+	if len(s2) > 0 {
+		r := rune(s2[0])
+		// find the next whitespace or end of text
+		if !(unicode.IsSpace(r)) {
+			count := len(s2)
+			for i, c := range s2 {
+				r = rune(c)
+				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') || r == rune('&') || r == rune('*') {
+					s2 = s2[0:i]
+					break
+				}
+				// might be last word
+				if i == count-1 {
+					break
+				}
+			}
+		}
+	}
+
+	var new = comp.Text
+	// todo: only do if parens not already there
+	//class, ok := comp.Extra["class"]
+	//if ok && class == "func" {
+	//	new = new + "()"
+	//}
+	ed.NewText = new
+	ed.ForwardDelete = len(s2)
+	return ed
 }
 
 func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {

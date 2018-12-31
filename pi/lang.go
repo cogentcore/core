@@ -68,6 +68,10 @@ type Lang interface {
 	// can control the order of items presented, as compared to the SymMap.
 	CompleteLine(fs *FileState, text string, pos lex.Pos) complete.MatchData
 
+	// CompleteEdit returns the completion edit data for integrating the selected completion
+	// into the source
+	CompleteEdit(fs *FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData)
+
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),
 	// instead of using cached symbols.  Typically the cache will be used unless files

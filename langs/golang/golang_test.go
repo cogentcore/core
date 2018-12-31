@@ -20,6 +20,23 @@ func init() {
 	pi.LangSupport.OpenStd()
 }
 
+func TestElInString(t *testing.T) {
+	lp, _ := pi.LangSupport.Props(filecat.Go)
+	pr := lp.Lang.Parser()
+	pr.ReportErrs = true
+
+	fs := pi.NewFileState()
+	err := fs.Src.OpenFile("testdata/textview.go")
+	if err != nil {
+		t.Error(err)
+	}
+
+	gl := lp.Lang.(*GoLang)
+
+	lp.Lang.ParseFile(fs)
+
+}
+
 func TestParse(t *testing.T) {
 	lp, _ := pi.LangSupport.Props(filecat.Go)
 	pr := lp.Lang.Parser()

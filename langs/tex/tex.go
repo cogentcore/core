@@ -66,6 +66,11 @@ func (tl *TexLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md c
 	return md
 }
 
+func (tl *TexLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData) {
+	// n/a
+	return ed
+}
+
 func (tl *TexLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	// n/a
 	return nil
