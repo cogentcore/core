@@ -2021,6 +2021,7 @@ func (tv *TextView) IsWordBreak(r1, r2 rune) bool {
 func (tv *TextView) WordBefore(tp TextPos) *TextBufEdit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
+	ch = ints.MinInt(ch, len(txt))
 	st := ch
 	for i := ch - 1; i >= 0; i-- {
 		if i == 0 { // start of line
@@ -2048,7 +2049,7 @@ func (tv *TextView) IsWordStart(tp TextPos) bool {
 	if sz == 0 {
 		return false
 	}
-	if tp.Ch == len(txt) { // end of line
+	if tp.Ch >= len(txt) { // end of line
 		return false
 	}
 	if tp.Ch == 0 { // start of line
@@ -2074,8 +2075,8 @@ func (tv *TextView) IsWordEnd(tp TextPos) bool {
 	if sz == 0 {
 		return false
 	}
-	if tp.Ch == len(txt) { // end of line
-		r := txt[tp.Ch-1]
+	if tp.Ch >= len(txt) { // end of line
+		r := txt[len(txt)-1]
 		if tv.IsWordBreak(r, rune(-1)) {
 			return true
 		}
@@ -2105,7 +2106,7 @@ func (tv *TextView) IsWordMiddle(tp TextPos) bool {
 	if sz < 2 {
 		return false
 	}
-	if tp.Ch == len(txt) { // end of line
+	if tp.Ch >= len(txt) { // end of line
 		return false
 	}
 	if tp.Ch == 0 { // start of line
@@ -2967,7 +2968,7 @@ func (tv *TextView) CursorSprite() *gi.Viewport2D {
 	}
 	sty := &tv.StateStyles[TextViewActive]
 	spnm := fmt.Sprintf("%v-%v", TextViewSpriteName, tv.FontHeight)
-	sp, ok := win.Sprites[spnm]
+	sp, ok := win.SpriteByName(spnm)
 	if !ok {
 		bbsz := image.Point{int(math32.Ceil(tv.CursorWidth.Dots)), int(math32.Ceil(tv.FontHeight))}
 		if bbsz.X < 2 { // at least 2

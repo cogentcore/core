@@ -1369,6 +1369,12 @@ var FileTreeViewProps = ki.Props{
 	".open": ki.Props{
 		"font-style": gi.FontItalic,
 	},
+	".notinvcs": ki.Props{
+		"color": "#ce4252",
+	},
+	".changed": ki.Props{
+		"color": "#4b7fd1",
+	},
 	"#icon": ki.Props{
 		"width":   units.NewValue(1, units.Em),
 		"height":  units.NewValue(1, units.Em),
@@ -1481,6 +1487,7 @@ var fnFolderProps = ki.Props{
 
 func (ft *FileTreeView) Style2D() {
 	fn := ft.FileNode()
+	ft.Class = ""
 	if fn != nil {
 		if fn.IsDir() {
 			if fn.HasChildren() {
@@ -1489,39 +1496,26 @@ func (ft *FileTreeView) Style2D() {
 				ft.Icon = gi.IconName("folder")
 			}
 			ft.SetProp("#branch", fnFolderProps)
-			ft.Class = "folder"
+			ft.AddClass("folder")
 		} else {
 			ft.Icon = fn.Info.Ic
 			if ft.Icon == "" || ft.Icon == "none" {
 				ft.Icon = "blank"
 			}
 			if fn.IsExec() {
-				ft.Class = "exec"
-			} else if fn.Repo() != nil {
+				ft.AddClass("exec")
+			}
+			if fn.IsOpen() {
+				ft.AddClass("open")
+			}
+			if fn.Repo() != nil {
 				if fn.InVcs {
-					if fn.ChangedVcs {
-						if fn.IsOpen() {
-							ft.Class = "open-invcs-chng" // file open, in vcs && changed
-						} else {
-							ft.Class = "invcs-chng" // in vcs && changed
-						}
-					} else {
-						if fn.IsOpen() {
-							ft.Class = "open-invcs" // in vcs && open
-						}
-					}
+					ft.AddClass("invcs")
 				} else {
-					if fn.IsOpen() {
-						ft.Class = "open-invcs-no" // not in vcs && open
-					} else {
-						ft.Class = "invcs-no"
-					}
+					ft.AddClass("notinvcs")
 				}
-			} else { // repo is nil - no vcs
-				if fn.IsOpen() {
-					ft.Class = "open-repo-no" // file is open for edit
-				} else {
-					ft.Class = ""
+				if fn.ChangedVcs {
+					ft.AddClass("changed")
 				}
 			}
 		}

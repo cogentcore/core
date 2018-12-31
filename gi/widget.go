@@ -148,9 +148,12 @@ func (wb *WidgetBase) Style2DWidget() {
 	// dynamically now -- cannot compile into default which is type-general
 	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
 	kit.TypesMu.RLock()
-	clsty := "." + wb.Class
-	if sp, ok := ki.SubProps(tprops, clsty); ok {
-		wb.Sty.SetStyleProps(parSty, sp, wb.Viewport)
+	classes := strings.Split(strings.ToLower(wb.Class), " ")
+	for _, cl := range classes {
+		clsty := "." + strings.TrimSpace(cl)
+		if sp, ok := ki.SubProps(tprops, clsty); ok {
+			wb.Sty.SetStyleProps(parSty, sp, wb.Viewport)
+		}
 	}
 	kit.TypesMu.RUnlock()
 

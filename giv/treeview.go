@@ -237,7 +237,10 @@ func (tv *TreeView) Label() string {
 }
 
 // UpdateInactive updates the Inactive state based on SrcNode -- returns true if
-// inactive
+// inactive.  The inactivity of individual nodes only affects display properties
+// typically, and not overall functional behavior, which is controlled by
+// inactivity of the root node (i.e, make the root inactive to make entire tree
+// read-only and non-modifiable)
 func (tv *TreeView) UpdateInactive() bool {
 	tv.ClearInactive()
 	if tv.SrcNode.Ptr == nil {
@@ -250,6 +253,16 @@ func (tv *TreeView) UpdateInactive() bool {
 		}
 	}
 	return tv.IsInactive()
+}
+
+// RootIsInactive returns the inactive status of the root node, which is what
+// controls the functional inactivity of the tree -- if individual nodes
+// are inactive that only affects display typically.
+func (tv *TreeView) RootIsInactive() bool {
+	if tv.RootView == nil {
+		return true
+	}
+	return tv.RootView.IsInactive()
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -908,13 +921,14 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This().(gi.Node2D), m)
 	}
-	if CtxtMenuView(tv.SrcNode.Ptr, tv.IsInactive(), tv.Viewport, m) { // our viewed obj's menu
+	// note: root inactivity is relevant factor here..
+	if CtxtMenuView(tv.SrcNode.Ptr, tv.RootIsInactive(), tv.Viewport, m) { // our viewed obj's menu
 		if tv.ShowViewCtxtMenu {
 			m.AddSeparator("sep-tvmenu")
-			CtxtMenuView(tv.This(), tv.IsInactive(), tv.Viewport, m)
+			CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Viewport, m)
 		}
 	} else {
-		CtxtMenuView(tv.This(), tv.IsInactive(), tv.Viewport, m)
+		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Viewport, m)
 	}
 }
 
@@ -1319,8 +1333,10 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	sz := len(sl)
 	var ski ki.Ki
 	for i, ns := range sl {
-		if _, has := par.ChildByName(ns.Name(), 0); has {
-			ns.SetName(ns.Name() + "_Copy")
+		if mod != dnd.DropMove {
+			if _, has := par.ChildByName(ns.Name(), 0); has {
+				ns.SetName(ns.Name() + "_Copy")
+			}
 		}
 		par.InsertChild(ns, myidx+i)
 		if i == sz-1 {
@@ -1526,8 +1542,9 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 	return nil
 }
 
-// RootTreeView returns the root node of TreeView tree -- several properties
-// for the overall view are stored there -- cached..
+// RootTreeView returns the root node of TreeView tree -- typically cached in
+// RootView on each node, but this can be used if that cached value needs
+// to be updated for any reason.
 func (tv *TreeView) RootTreeView() *TreeView {
 	rn := tv
 	tv.FuncUp(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
@@ -1601,7 +1618,7 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 		tv.CopyAction(true)
 		kt.SetProcessed()
 	}
-	if !tv.IsInactive() && !kt.IsProcessed() {
+	if !tv.RootIsInactive() && !kt.IsProcessed() {
 		switch kf {
 		case gi.KeyFunDelete:
 			tv.SrcDelete()

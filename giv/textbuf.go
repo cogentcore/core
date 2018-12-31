@@ -1345,6 +1345,7 @@ func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
 		}
 	} else {
 		for l := ln; l >= 0; l-- {
+			ch = ints.MinInt(ch, len(txt))
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
 					right++

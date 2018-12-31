@@ -239,6 +239,7 @@ func (tf *TextField) Clear() {
 	tf.StartPos = 0
 	tf.EndPos = 0
 	tf.SelectReset()
+	tf.GrabFocus() // this is essential for ensuring that the clear applies after focus is lost..
 	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldCleared), tf.Txt)
 }
 
@@ -879,7 +880,7 @@ func (tf *TextField) CursorSprite() *Viewport2D {
 	}
 	sty := &tf.StateStyles[TextFieldActive]
 	spnm := fmt.Sprintf("%v-%v", TextFieldSpriteName, tf.FontHeight)
-	sp, ok := win.Sprites[spnm]
+	sp, ok := win.SpriteByName(spnm)
 	if !ok {
 		bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
 		if bbsz.X < 2 { // at least 2

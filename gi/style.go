@@ -341,8 +341,11 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, vp *Vi
 func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string, vp *Viewport2D) {
 	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
 	s.ApplyCSS(node, css, tyn, selector, vp)
-	cln := "." + strings.ToLower(node.AsNode2D().Class) // then class
-	s.ApplyCSS(node, css, cln, selector, vp)
+	classes := strings.Split(strings.ToLower(node.AsNode2D().Class), " ")
+	for _, cl := range classes {
+		cln := "." + strings.TrimSpace(cl)
+		s.ApplyCSS(node, css, cln, selector, vp)
+	}
 	idnm := "#" + strings.ToLower(node.Name()) // then name
 	s.ApplyCSS(node, css, idnm, selector, vp)
 }

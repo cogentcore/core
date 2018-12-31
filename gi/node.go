@@ -16,7 +16,7 @@ import (
 // containing infrastructure for both 2D and 3D scene graph nodes
 type NodeBase struct {
 	ki.Node
-	Class   string          `desc:"user-defined class name used primarily for attaching CSS styles to different display elements"`
+	Class   string          `desc:"user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"`
 	CSS     ki.Props        `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
 	CSSAgg  ki.Props        `json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
 	BBox    image.Rectangle `json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
@@ -284,6 +284,15 @@ func (nb *NodeBase) SetAsOverlay() {
 // translate a point in global pixel coords into relative position within node
 func (nb *NodeBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(nb.WinBBox.Min)
+}
+
+// AddClass adds a CSS class name -- does proper space separation
+func (nb *NodeBase) AddClass(class string) {
+	if nb.Class == "" {
+		nb.Class = class
+	} else {
+		nb.Class += " " + class
+	}
 }
 
 // StyleProps returns a property that contains another map of properties for a

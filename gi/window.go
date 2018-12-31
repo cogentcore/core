@@ -965,7 +965,22 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 // (e.g., call ki.InitName) -- typically it is a Bitmap and should have
 // the bitmap pixels set already
 func (w *Window) AddOverlay(nii Node2D) {
+	w.UpMu.Lock()
 	w.OverlayVp.AddOverlay(nii)
+	w.UpMu.Unlock()
+}
+
+// DeleteOverlay deletes given node from overlays, and re-renders the overlays to
+// update without it -- returns false if overlay was not found (in which case no update)
+func (w *Window) DeleteOverlay(nii Node2D) bool {
+	w.UpMu.Lock()
+	del := w.OverlayVp.DeleteChild(nii, true)
+	w.UpMu.Unlock()
+	if !del {
+		return del
+	}
+	w.RenderOverlays()
+	return true
 }
 
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
@@ -975,7 +990,7 @@ func (w *Window) RenderOverlays() {
 		return
 	}
 	w.UpMu.Lock()
-	if w.OverlayVp == nil || !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
+	if w.OverlayVp == nil { // only if deleted -- shouldn't be but just in case..
 		w.ClearFlag(int(WinFlagOverTexActive))
 		w.UpMu.Unlock()
 		return
@@ -994,7 +1009,7 @@ func (w *Window) RenderOverlays() {
 	}
 	w.OverlayVp.Win = w
 	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
-	if len(w.OverlayVp.Kids) == 0 {
+	if !w.OverlayVp.HasChildren() {
 		if !w.HasFlag(int(WinFlagOverlayVpCleared)) {
 			vp := w.OverlayVp
 			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
@@ -1013,9 +1028,26 @@ func (w *Window) RenderOverlays() {
 			w.RenderSprite(sp)
 		}
 	}
-	w.SetFlag(int(WinFlagOverTexActive))
+	if !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
+		w.ClearFlag(int(WinFlagOverTexActive))
+	} else {
+		w.SetFlag(int(WinFlagOverTexActive))
+	}
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives the publish
+}
+
+// SpriteByName returns a sprite by name -- false if not created yet
+func (w *Window) SpriteByName(nm string) (*Viewport2D, bool) {
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+	if w.Sprites == nil {
+		return nil, false
+	}
+	if exsp, has := w.Sprites[nm]; has {
+		return exsp, true
+	}
+	return nil, false
 }
 
 // AddSprite adds a new sprite viewport with given name (which must remain
@@ -1031,7 +1063,6 @@ func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport
 		w.SpritesBg = make(map[string]oswin.Image)
 	}
 	if exsp, has := w.Sprites[nm]; has {
-		// log.Printf("gi.Window AddSprite -- name is already in use: %v\n", nm)
 		return exsp
 	}
 	sp := &Viewport2D{}
@@ -2870,11 +2901,10 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 func (w *Window) ClearDragNDrop() {
 	w.DNDSource = nil
 	w.DNDData = nil
-	w.OverlayVp.DeleteChild(w.DNDImage, true)
+	w.DeleteOverlay(w.DNDImage.(Node2D))
 	w.DNDImage = nil
 	w.DNDClearCursor()
 	w.Dragging = nil
-	w.RenderOverlays()
 }
 
 // DNDModCursor gets the appropriate cursor based on the DND event mod.
