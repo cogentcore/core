@@ -1649,6 +1649,9 @@ func (tv *TreeView) TreeViewEvents() {
 		tvv.KeyInput(kt)
 	})
 	tv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		if recv == nil {
+			return
+		}
 		de := d.(*dnd.Event)
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		switch de.Action {
@@ -1661,6 +1664,9 @@ func (tv *TreeView) TreeViewEvents() {
 		}
 	})
 	tv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		if recv == nil {
+			return
+		}
 		de := d.(*dnd.FocusEvent)
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		switch de.Action {
