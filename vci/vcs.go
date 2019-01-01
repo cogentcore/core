@@ -28,16 +28,22 @@ type Repo interface {
 	// into a local cache to speed checking whether a file is in the repository or not.
 	CacheFileNames()
 
-	// CacheFilesChanged gets a list of files in repository changed since last commit
-	CacheFilesChanged()
+	// CacheFilesModified gets a list of files in repository changed since last commit
+	CacheFilesModified()
+
+	// CacheFilesAdded gets a list of files added to repository but not yet committed
+	CacheFilesAdded()
 
 	// InRepo returns true if filename is in the repository -- uses CacheFileNames --
 	// will do that automatically but if cache might be stale, call it to refresh
 	InRepo(filename string) bool
 
-	// IsChanged checks against the cached list to see if the file is modified since the last commit
+	// IsModified checks against the cached list to see if the file is modified since the last commit
 	// IsDirty() will check with the repo rather than the cached list
-	IsChanged(filename string) bool
+	IsModified(filename string) bool
+
+	// IsAdded checks for the file in the cached FilesAdded list
+	IsAdded(filename string) bool
 
 	// Add adds the file to the repo
 	Add(filename string) error
@@ -79,8 +85,9 @@ func NewRepo(remote, local string) (Repo, error) {
 
 type GitRepo struct {
 	vcs.Repo
-	FilesAll     map[string]struct{}
-	FilesChanged map[string]struct{}
+	FilesAll      map[string]struct{}
+	FilesModified map[string]struct{}
+	FilesAdded    map[string]struct{}
 }
 
 func (gr *GitRepo) CacheFileNames() {
@@ -93,13 +100,23 @@ func (gr *GitRepo) CacheFileNames() {
 	}
 }
 
-func (gr *GitRepo) CacheFilesChanged() {
-	gr.FilesChanged = make(map[string]struct{}, 1000)
-	bytes, _ := exec.Command("git", "ls-files", "--modified", gr.LocalPath()).Output()
+func (gr *GitRepo) CacheFilesModified() {
+	gr.FilesModified = make(map[string]struct{}, 100)
+	bytes, _ := exec.Command("git", "diff", "--name-only", "--diff-filter=M", "HEAD", gr.LocalPath()).Output()
 	sep := byte(10) // Linefeed is the separator - will this work cross platform?
 	names := strings.Split(string(bytes), string(sep))
 	for _, n := range names {
-		gr.FilesChanged[n] = struct{}{}
+		gr.FilesModified[n] = struct{}{}
+	}
+}
+
+func (gr *GitRepo) CacheFilesAdded() {
+	gr.FilesAdded = make(map[string]struct{}, 100)
+	bytes, _ := exec.Command("git", "diff", "--name-only", "--diff-filter=A", "HEAD", gr.LocalPath()).Output()
+	sep := byte(10) // Linefeed is the separator - will this work cross platform?
+	names := strings.Split(string(bytes), string(sep))
+	for _, n := range names {
+		gr.FilesAdded[n] = struct{}{}
 	}
 }
 
@@ -111,11 +128,19 @@ func (gr *GitRepo) InRepo(filename string) bool {
 	return has
 }
 
-func (gr *GitRepo) IsChanged(filename string) bool {
-	if len(gr.FilesChanged) == 0 {
-		gr.CacheFilesChanged()
+func (gr *GitRepo) IsModified(filename string) bool {
+	if len(gr.FilesModified) == 0 {
+		gr.CacheFilesModified()
 	}
-	_, has := gr.FilesChanged[filename]
+	_, has := gr.FilesModified[filename]
+	return has
+}
+
+func (gr *GitRepo) IsAdded(filename string) bool {
+	if len(gr.FilesAdded) == 0 {
+		gr.CacheFilesAdded()
+	}
+	_, has := gr.FilesAdded[filename]
 	return has
 }
 
