@@ -550,7 +550,11 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 
 // NewFile makes a new file in given selected directory node
 func (fn *FileNode) NewFile(filename string, addToVcs bool) {
-	np := filepath.Join(string(fn.FPath), filename)
+	ppath := string(fn.FPath)
+	if !fn.IsDir() {
+		ppath, _ = filepath.Split(ppath)
+	}
+	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
@@ -567,14 +571,18 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 
 // NewFolder makes a new folder (directory) in given selected directory node
 func (fn *FileNode) NewFolder(foldername string) {
-	np := filepath.Join(string(fn.FPath), foldername)
+	ppath := string(fn.FPath)
+	if !fn.IsDir() {
+		ppath, _ = filepath.Split(ppath)
+	}
+	np := filepath.Join(ppath, foldername)
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
-		emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", fn.FPath, err)
+		emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", ppath, err)
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg}, true, false, nil, nil)
 		return
 	}
-	fn.FRoot.UpdateNewFile(string(fn.FPath))
+	fn.FRoot.UpdateNewFile(ppath)
 }
 
 // CopyFileToDir copies given file path into node that is a directory
@@ -631,6 +639,9 @@ func (fn *FileNode) RepoType() string {
 
 // AddToVcs adds file to version control
 func (fn *FileNode) AddToVcs() {
+	if fn.Repo() == nil {
+		return
+	}
 	err := fn.Repo().Add(string(fn.FPath))
 	if err == nil {
 		fn.InVcs = true
@@ -641,6 +652,9 @@ func (fn *FileNode) AddToVcs() {
 
 // RemoveFromVcs removes file from version control
 func (fn *FileNode) RemoveFromVcs() {
+	if fn.Repo() == nil {
+		return
+	}
 	err := fn.Repo().RemoveKeepLocal(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.InVcs = false
@@ -975,10 +989,10 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 			ftv.DuplicateFiles()
 			kt.SetProcessed()
 		case gi.KeyFunInsert: // New File
-			ftv.NewFile("", false)
+			CallMethod(ftv, "NewFile", ftv.Viewport)
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter: // New Folder
-			ftv.NewFolder("")
+			CallMethod(ftv, "NewFolder", ftv.Viewport)
 			kt.SetProcessed()
 		}
 	}
@@ -1438,6 +1452,7 @@ var FileTreeViewProps = ki.Props{
 				{"File Name", ki.Props{
 					"width": 60,
 				}},
+				{"Add To Version Control", ki.Props{}},
 			},
 		}},
 		{"NewFolder", ki.Props{
