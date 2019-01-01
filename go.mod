@@ -3,6 +3,7 @@ module github.com/goki/gi
 require (
 	github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802
 	github.com/Knetic/govaluate v3.0.0+incompatible
+	github.com/Masterminds/vcs v1.12.0
 	github.com/akutz/sortfold v0.2.1
 	github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38 // indirect
 	github.com/alecthomas/chroma v0.6.1-0.20181112090824-813e33c8f4bb
@@ -18,7 +19,7 @@ require (
 	github.com/gabriel-vasile/mimetype v0.0.0-20181202175247-077d38b2e891
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
 	github.com/goki/freetype v0.0.0-20180830230203-9c0c85f17044
-	github.com/goki/ki v0.9.4
+	github.com/goki/ki v0.9.5
 	github.com/goki/pi v0.0.0-20181209081140-be35559297c6
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
