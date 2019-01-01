@@ -599,6 +599,7 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 			nfn, ok := fn.FRoot.FindFile(tpath)
 			if ok {
 				nfn.AddToVcs()
+				nfn.UpdateNode()
 			}
 		}
 	} else {
