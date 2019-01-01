@@ -37,6 +37,18 @@ func (ty *Type) String() string {
 	return ty.Name + ": " + ty.Kind.String()
 }
 
+// NonPtrType returns the non-pointer name of this type, if it is a pointer type
+// otherwise just returns Name
+func (ty *Type) NonPtrType() string {
+	if !(ty.Kind == Ptr || ty.Kind == Ref || ty.Kind == UnsafePtr) {
+		return ty.Name
+	}
+	if len(ty.Els) == 1 {
+		return ty.Els[0].Type
+	}
+	return ty.Name // shouldn't happen
+}
+
 // WriteDoc writes basic doc info
 func (ty *Type) WriteDoc(out io.Writer, depth int) {
 	ind := indent.Tabs(depth)

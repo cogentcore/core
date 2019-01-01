@@ -3779,7 +3779,7 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "@Name ',' NameList",
+                "Rule": "@Name ',' @NameList",
                 "StackMatch": "",
                 "Ast": "AnchorFirstAst",
                 "Acts": null,
@@ -6744,6 +6744,13 @@
                     "Path": "TypeNm|PointerType/TypeNm",
                     "Tok": "NameStruct",
                     "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "Name",
+                    "Tok": "NameVarParam",
+                    "FmTok": "None"
                   }
                 ],
                 "OptTokMap": false,
@@ -7028,15 +7035,13 @@
             "Props": null,
             "Kids": [
               {
-                "n": 4,
+                "n": 3,
                 "type": "parse.Rule",
                 "name": "ParNameEllipsis",
                 "type": "parse.Rule",
                 "name": "ParName",
                 "type": "parse.Rule",
-                "name": "ParType",
-                "type": "parse.Rule",
-                "name": "ParNames"
+                "name": "ParType"
               },
               {
                 "Nm": "ParNameEllipsis",
@@ -7059,10 +7064,32 @@
                 "Kids": null,
                 "Off": false,
                 "Desc": "",
-                "Rule": "@Name @Type ?',' ?ParamsList",
+                "Rule": "@NameList @Type ?',' ?ParamsList",
                 "StackMatch": "",
                 "Ast": "SubAst",
-                "Acts": null,
+                "Acts": [
+                  {
+                    "RunIdx": -1,
+                    "Act": "ChgToken",
+                    "Path": "Name|NameListEls/Name...",
+                    "Tok": "NameVarParam",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddSymbol",
+                    "Path": "Name|NameListEls/Name...",
+                    "Tok": "NameVarParam",
+                    "FmTok": "None"
+                  },
+                  {
+                    "RunIdx": -1,
+                    "Act": "AddDetail",
+                    "Path": "[1]",
+                    "Tok": "None",
+                    "FmTok": "None"
+                  }
+                ],
                 "OptTokMap": false,
                 "FirstTokMap": false
               },
@@ -7072,25 +7099,11 @@
                 "Props": null,
                 "Kids": null,
                 "Off": false,
-                "Desc": "",
+                "Desc": "due to parsing, this is typically actually a name",
                 "Rule": "@Type ?',' ?ParamsList",
                 "StackMatch": "",
                 "Ast": "SubAst",
-                "Acts": null,
-                "OptTokMap": false,
-                "FirstTokMap": false
-              },
-              {
-                "Nm": "ParNames",
-                "UniqueNm": "ParNames",
-                "Props": null,
-                "Kids": null,
-                "Off": false,
-                "Desc": "need the explicit ',' in here to absorb so later one goes to paramslist",
-                "Rule": "@Name ',' @NameList @Type ?',' ?ParamsList",
-                "StackMatch": "",
-                "Ast": "SubAst",
-                "Acts": null,
+                "Acts": [],
                 "OptTokMap": false,
                 "FirstTokMap": false
               }

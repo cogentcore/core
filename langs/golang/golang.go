@@ -195,32 +195,24 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	if scope != "" {
 		scsym, got := fs.FindNameScoped(scope, conts)
 		if got {
-			if len(scsym.Children) == 0 {
-				if scsym.Type != "" {
-					typ, got := fs.FindNameScoped(scsym.Type, conts)
-					if got {
-						scsym = typ
-					} else {
-						scsym = nil
-						scope = ""
-						md.Seed = name
-					}
-				}
-			}
-			if scsym != nil {
-				if name == "" {
-					matches = scsym.Children
-				} else {
-					scsym.Children.FindNamePrefix(name, &matches)
-				}
+			gotKids := fs.FindAnyChildren(scsym, name, conts, &matches)
+			if !gotKids {
+				scope = ""
+				md.Seed = name
 			}
 		} else {
 			scope = ""
 			md.Seed = name
 		}
 	}
-	if len(matches) == 0 {
-		fs.FindNamePrefixScoped(name, conts, &matches)
+	if len(matches) == 0 { // look just at name if nothing from scope
+		nmsym, got := fs.FindNameScoped(name, conts)
+		if got {
+			fs.FindAnyChildren(nmsym, name, conts, &matches)
+		}
+		if len(matches) == 0 {
+			fs.FindNamePrefixScoped(name, conts, &matches)
+		}
 	}
 	fs.SymsMu.RUnlock()
 	if len(matches) == 0 {

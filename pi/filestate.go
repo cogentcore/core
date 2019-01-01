@@ -172,6 +172,29 @@ func (fs *FileState) FindNameScoped(nm string, scope syms.SymMap) (*syms.Symbol,
 	return nil, false
 }
 
+// FindAnyChildren fills out map with either direct children of given symbol
+// or those of the type of this symbol -- useful for completion.
+// If seed is non-empty it is used as a prefix for filtering children names.
+// Returns false if no children were found.
+func (fs *FileState) FindAnyChildren(sym *syms.Symbol, seed string, scope syms.SymMap, kids *syms.SymMap) bool {
+	if len(sym.Children) == 0 {
+		if sym.Type != "" {
+			typ, got := fs.FindNameScoped(sym.NonPtrTypeName(), scope)
+			if got {
+				sym = typ
+			} else {
+				return false
+			}
+		}
+	}
+	if seed != "" {
+		sym.Children.FindNamePrefix(seed, kids)
+	} else {
+		kids.CopyFrom(sym.Children)
+	}
+	return len(*kids) > 0
+}
+
 // FindNamePrefixScoped looks for given symbol name prefix within given map first
 // (if non nil) and then in fs.Syms and ExtSyms maps,
 // and any children on those global maps that are of subcategory

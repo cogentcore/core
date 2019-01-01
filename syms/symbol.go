@@ -33,6 +33,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/goki/ki"
 	"github.com/goki/ki/indent"
@@ -148,6 +149,11 @@ func (sy *Symbol) AddScopesStack(ss SymStack) bool {
 		}
 	}
 	return added
+}
+
+// NonPtrTypeName returns the name of the type without any leading * or &
+func (sy *Symbol) NonPtrTypeName() string {
+	return strings.TrimPrefix(strings.TrimPrefix(sy.Type, "&"), "*")
 }
 
 // OpenJSON opens from a JSON-formatted file.

@@ -220,8 +220,8 @@ ExprRules {
     }
     // NameList one or more plain names, separated by , -- for var names 
     NameList {
-        NameListEls:  @Name ',' NameList  >1Ast
-        NameListEl:   Name                
+        NameListEls:  @Name ',' @NameList  >1Ast
+        NameListEl:   Name                 
     }
     ExprList {
         ExprListEls:  Expr ',' ExprList  
@@ -460,7 +460,7 @@ FuncRules {
     }
     MethRecv {
         MethRecvName:  @Name @Type  >Ast
-        --->Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
+        --->Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; -1:ChgToken:"Name":NameVarParam; }
         MethRecvNoNm:  Type  >Ast
         --->Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
     }
@@ -486,10 +486,10 @@ FuncRules {
     }
     ParamsList {
         ParNameEllipsis:  ?ParamsList ?',' ?NameList '...' @Type  >Ast
-        ParName:          @Name @Type ?',' ?ParamsList            _Ast
-        ParType:          @Type ?',' ?ParamsList                  _Ast
-        // ParNames need the explicit ',' in here to absorb so later one goes to paramslist 
-        ParNames:  @Name ',' @NameList @Type ?',' ?ParamsList  _Ast
+        ParName:          @NameList @Type ?',' ?ParamsList        _Ast
+        --->Acts:{ -1:ChgToken:"Name|NameListEls/Name...":NameVarParam; -1:AddSymbol:"Name|NameListEls/Name...":NameVarParam; -1:AddDetail:"[1]":None; }
+        // ParType due to parsing, this is typically actually a name 
+        ParType:  @Type ?',' ?ParamsList  _Ast
     }
     Params:  '(' ?ParamsList ')'  >Ast
 }

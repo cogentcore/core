@@ -62,12 +62,11 @@ var (
 func (st *Sttyp) Method1(para int, meter string) {
 	st.FieldA = para
 	st.FieldC = meter
-
 	nwvar := st.FieldA
-	var nmvar Mtyp
+	var nmvar Sttyp
 }
 
-func (st *Sttyp) Method2(para int, meter string) (bool, int) {
+func (st *Sttyp) Method2(para int, meter, feter string, starg *Sttyp) (bool, int) {
 	st.FieldA = para
 	st.FieldC = meter
 	return false, -1
