@@ -588,10 +588,19 @@ func (fn *FileNode) NewFolder(foldername string) {
 // CopyFileToDir copies given file path into node that is a directory
 // prompts before overwriting any existing
 func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
+	ppath := string(fn.FPath)
 	_, sfn := filepath.Split(filename)
-	tpath := filepath.Join(string(fn.FPath), sfn)
+	tpath := filepath.Join(ppath, sfn)
 	if _, err := os.Stat(tpath); os.IsNotExist(err) {
 		CopyFile(tpath, filename, perm)
+		fn.FRoot.UpdateNewFile(ppath)
+		ofn, ok := fn.FRoot.FindFile(filename)
+		if ok && ofn.InVcs {
+			nfn, ok := fn.FRoot.FindFile(tpath)
+			if ok {
+				nfn.AddToVcs()
+			}
+		}
 	} else {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File: %v exists, do you want to overwrite it with: %v?", tpath, filename)},
