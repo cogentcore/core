@@ -34,6 +34,9 @@ type Repo interface {
 	// CacheFilesAdded gets a list of files added to repository but not yet committed
 	CacheFilesAdded()
 
+	// CacheRefresh calls all of the Cache functions
+	CacheRefresh()
+
 	// InRepo returns true if filename is in the repository -- uses CacheFileNames --
 	// will do that automatically but if cache might be stale, call it to refresh
 	InRepo(filename string) bool
@@ -92,7 +95,9 @@ type GitRepo struct {
 
 func (gr *GitRepo) CacheFileNames() {
 	gr.FilesAll = make(map[string]struct{}, 1000)
-	bytes, _ := exec.Command("git", "ls-files", gr.LocalPath()).Output()
+	cmd := exec.Command("git", "ls-files")
+	cmd.Dir = gr.LocalPath()
+	bytes, _ := cmd.Output()
 	sep := byte(10) // Linefeed is the separator - will this work cross platform?
 	names := strings.Split(string(bytes), string(sep))
 	for _, n := range names {
@@ -102,7 +107,9 @@ func (gr *GitRepo) CacheFileNames() {
 
 func (gr *GitRepo) CacheFilesModified() {
 	gr.FilesModified = make(map[string]struct{}, 100)
-	bytes, _ := exec.Command("git", "diff", "--name-only", "--diff-filter=M", "HEAD", gr.LocalPath()).Output()
+	cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=M", "HEAD")
+	cmd.Dir = gr.LocalPath()
+	bytes, _ := cmd.Output()
 	sep := byte(10) // Linefeed is the separator - will this work cross platform?
 	names := strings.Split(string(bytes), string(sep))
 	for _, n := range names {
@@ -112,12 +119,20 @@ func (gr *GitRepo) CacheFilesModified() {
 
 func (gr *GitRepo) CacheFilesAdded() {
 	gr.FilesAdded = make(map[string]struct{}, 100)
-	bytes, _ := exec.Command("git", "diff", "--name-only", "--diff-filter=A", "HEAD", gr.LocalPath()).Output()
+	cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=A", "HEAD")
+	cmd.Dir = gr.LocalPath()
+	bytes, _ := cmd.Output()
 	sep := byte(10) // Linefeed is the separator - will this work cross platform?
 	names := strings.Split(string(bytes), string(sep))
 	for _, n := range names {
 		gr.FilesAdded[n] = struct{}{}
 	}
+}
+
+func (gr *GitRepo) CacheRefresh() {
+	gr.CacheFileNames()
+	gr.CacheFilesAdded()
+	gr.CacheFilesModified()
 }
 
 func (gr *GitRepo) InRepo(filename string) bool {
@@ -154,6 +169,7 @@ func (gr *GitRepo) Add(filename string) error {
 		return err
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+	gr.CacheFilesAdded()
 	return nil
 }
 
@@ -180,6 +196,7 @@ func (gr *GitRepo) Remove(filename string) error {
 		return err
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+	gr.CacheRefresh()
 	return nil
 }
 
@@ -193,18 +210,20 @@ func (gr *GitRepo) RemoveKeepLocal(filename string) error {
 		return err
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+	gr.CacheRefresh()
 	return nil
 }
 
 // CommitFile commits single file to repo staging
 func (gr *GitRepo) CommitFile(filename string, message string) error {
-	oscmd := exec.Command("git", "commit", message, filename)
+	oscmd := exec.Command("git", "commit", filename, "-m", message)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("%s\n", err)
 		return err
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+	gr.CacheRefresh()
 	return nil
 }
 
@@ -217,5 +236,6 @@ func (gr *GitRepo) RevertFile(filename string) error {
 		return err
 	}
 	fmt.Printf("%s\n", stdoutStderr)
+	gr.CacheFilesModified()
 	return nil
 }
