@@ -518,7 +518,7 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
-	if fn.VcsState >= FileNodeVcsAdded {
+	if fn.VcsState >= FileNodeInVcs {
 		err = fn.Repo().Remove(string(fn.FPath))
 	} else {
 		err = fn.Info.Delete()
@@ -680,7 +680,10 @@ func (fn *FileNode) CommitToVcs(message string) (err error) {
 		return errors.New("Repo nil or file not in repo")
 	}
 	err = fn.Repo().CommitFile(string(fn.FPath), message)
-	fn.UpdateSig()
+	if err == nil {
+		fn.VcsState = FileNodeInVcs
+		fn.UpdateSig()
+	}
 	return err
 }
 
@@ -691,8 +694,14 @@ func (fn *FileNode) RevertVcs() (err error) {
 	}
 	err = fn.Repo().RevertFile(string(fn.FPath))
 	if err == nil {
-		fn.VcsState = FileNodeInVcs
-		fn.Buf.Revert()
+		if fn.VcsState == FileNodeVcsModified {
+			fn.VcsState = FileNodeInVcs
+		} else if fn.VcsState == FileNodeVcsAdded {
+			// do nothing - leave in "added" state
+		}
+		if fn.Buf != nil {
+			fn.Buf.Revert()
+		}
 		fn.UpdateSig()
 	}
 	return err
@@ -1579,7 +1588,6 @@ func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	case TextBufDone, TextBufInsert, TextBufDelete:
 		if fn.VcsState == FileNodeInVcs {
 			fn.VcsState = FileNodeVcsModified
-			fn.UpdateNode()
 		}
 	}
 }

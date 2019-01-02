@@ -165,10 +165,9 @@ func (gr *GitRepo) Add(filename string) error {
 	stdoutStderr, err := oscmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n", stdoutStderr)
 		return err
 	}
-	fmt.Printf("%s\n", stdoutStderr)
 	gr.CacheFilesAdded()
 	return nil
 }
@@ -179,10 +178,9 @@ func (gr *GitRepo) Move(oldpath, newpath string) error {
 	stdoutStderr, err := oscmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n", stdoutStderr)
 		return err
 	}
-	fmt.Printf("%s\n", stdoutStderr)
 	return nil
 }
 
@@ -192,10 +190,9 @@ func (gr *GitRepo) Remove(filename string) error {
 	stdoutStderr, err := oscmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n", stdoutStderr)
 		return err
 	}
-	fmt.Printf("%s\n", stdoutStderr)
 	gr.CacheRefresh()
 	return nil
 }
@@ -206,10 +203,9 @@ func (gr *GitRepo) RemoveKeepLocal(filename string) error {
 	stdoutStderr, err := oscmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n", stdoutStderr)
 		return err
 	}
-	fmt.Printf("%s\n", stdoutStderr)
 	gr.CacheRefresh()
 	return nil
 }
@@ -219,10 +215,9 @@ func (gr *GitRepo) CommitFile(filename string, message string) error {
 	oscmd := exec.Command("git", "commit", filename, "-m", message)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n", stdoutStderr)
 		return err
 	}
-	fmt.Printf("%s\n", stdoutStderr)
 	gr.CacheRefresh()
 	return nil
 }
@@ -232,10 +227,9 @@ func (gr *GitRepo) RevertFile(filename string) error {
 	oscmd := exec.Command("git", "checkout", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		fmt.Printf("%s\n", stdoutStderr)
 		return err
 	}
-	fmt.Printf("%s\n", stdoutStderr)
 	gr.CacheFilesModified()
 	return nil
 }
