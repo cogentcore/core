@@ -15,7 +15,6 @@ import (
 
 	"unicode"
 
-	"github.com/goki/gi/complete"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -23,6 +22,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/complete"
 	"github.com/mitchellh/go-homedir"
 )
 

@@ -9,7 +9,6 @@ import (
 	"go/token"
 	"reflect"
 
-	"github.com/goki/gi/complete"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
@@ -17,6 +16,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/complete"
 )
 
 func main() {

@@ -12,7 +12,6 @@ import (
 	"log"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -24,6 +23,7 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/prof"
 )
 

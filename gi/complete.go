@@ -10,10 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/complete"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/spell"
 	"github.com/goki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/complete"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -200,4 +201,16 @@ func (c *Complete) GetCompletion(s string) complete.Completion {
 		}
 	}
 	return complete.Completion{}
+}
+
+// CompleteText is the function for completing text files
+func CompleteText(s string) (result []string, err error) {
+	result, err = spell.Complete(s)
+	return result, err
+}
+
+// CompleteEditText is a chance to modify the completion selection before it is inserted
+func CompleteEditText(text string, cp int, completion string, seed string) (ed complete.EditData) {
+	ed.NewText = completion
+	return ed
 }

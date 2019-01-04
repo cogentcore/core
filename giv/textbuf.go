@@ -15,8 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/complete"
-	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
@@ -26,6 +24,8 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
 	"github.com/goki/ki/runes"
+	"github.com/goki/pi/complete"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
@@ -368,7 +368,7 @@ func (tb *TextBuf) ConfigSupported() bool {
 			tb.SetSpellCorrect(tb, SpellCorrectEdit)
 		}
 		if tb.Complete == nil {
-			tb.SetCompleter(&tb.PiState, pi.Complete, pi.CompleteEdit)
+			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi)
 		}
 		return tb.Opts.ConfigSupported(tb.Info.Sup)
 	}

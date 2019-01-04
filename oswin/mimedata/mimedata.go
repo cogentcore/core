@@ -24,7 +24,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"github.com/goki/gi/filecat"
+	"github.com/goki/pi/filecat"
 )
 
 const (
