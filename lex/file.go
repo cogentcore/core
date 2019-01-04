@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/goki/gi/filecat"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/token"
 )
 

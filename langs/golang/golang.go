@@ -13,9 +13,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/goki/gi/complete"
-	"github.com/goki/gi/filecat"
 	"github.com/goki/ki/dirs"
+	"github.com/goki/pi/complete"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"

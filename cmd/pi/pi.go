@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/gi/filecat"
 	"github.com/goki/ki/dirs"
+	"github.com/goki/pi/filecat"
 	_ "github.com/goki/pi/langs"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"

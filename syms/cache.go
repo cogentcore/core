@@ -8,12 +8,12 @@ import (
 	"go/build"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/goki/gi/filecat"
-	"github.com/goki/gi/gi"
+	"github.com/goki/pi/filecat"
 )
 
 // GoPiCacheDir returns the GoPi cache directory for given language, and ensures that it exists
@@ -48,7 +48,11 @@ func GoRelPath(filename string) (string, error) {
 	if got {
 		return relfn, nil
 	}
-	homedir := gi.Prefs.User.HomeDir
+	usr, err := user.Current()
+	if err != nil {
+		return relfn, err
+	}
+	homedir := usr.HomeDir
 	if strings.HasPrefix(absfn, homedir) {
 		relfn = strings.TrimPrefix(absfn, homedir)
 	}

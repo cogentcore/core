@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goki/gi/filecat"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/pi"
 	"github.com/goki/prof"
 )

@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/goki/gi/complete"
+	"github.com/goki/pi/complete"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )

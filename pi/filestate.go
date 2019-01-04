@@ -7,7 +7,7 @@ package pi
 import (
 	"sync"
 
-	"github.com/goki/gi/filecat"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/syms"
