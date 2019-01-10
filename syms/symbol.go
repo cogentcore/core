@@ -151,6 +151,35 @@ func (sy *Symbol) AddScopesStack(ss SymStack) bool {
 	return added
 }
 
+// FindAnyChildren finds children of this symbol using either
+// direct children if those are present, or the type name if
+// present -- used for completion routines.  Adds to kids map.
+// scope1, scope2 are used for looking up type name.
+// If seed is non-empty it is used as a prefix for filtering children names.
+// Returns false if no children were found.
+func (sy *Symbol) FindAnyChildren(seed string, scope1, scope2 SymMap, kids *SymMap) bool {
+	sym := sy
+	if len(sym.Children) == 0 {
+		if sym.Type != "" {
+			tynm := sym.NonPtrTypeName()
+			if typ, got := scope1.FindNameScoped(tynm); got {
+				sym = typ
+			} else if typ, got := scope2.FindNameScoped(tynm); got {
+				sym = typ
+			} else {
+				return false
+			}
+		}
+	}
+	if seed != "" {
+		sym.Children.FindNamePrefix(seed, kids)
+	} else {
+		kids.CopyFrom(sym.Children)
+	}
+	return len(*kids) > 0
+
+}
+
 // NonPtrTypeName returns the name of the type without any leading * or &
 func (sy *Symbol) NonPtrTypeName() string {
 	return strings.TrimPrefix(strings.TrimPrefix(sy.Type, "&"), "*")

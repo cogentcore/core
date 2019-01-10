@@ -250,10 +250,14 @@ func (tk Tokens) IconName() string {
 		return "var"
 	case tk == NameConstant || tk == NameEnum || tk == NameEnumMember:
 		return "const"
+	case tk == NameField:
+		return "field"
 	case tk.SubCat() == NameType:
 		return "type"
+	case tk == NameMethod:
+		return "method"
 	case tk.SubCat() == NameFunction:
-		return "func"
+		return "function"
 	}
 	return ""
 }

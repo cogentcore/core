@@ -112,9 +112,9 @@ func (gl *GoLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	}
 }
 
-// ElInString gets the element in given string where the cursor is
-// could return Ast elements where these things are..
-func (gl *GoLang) ElInString(fs *pi.FileState, str string, pos lex.Pos) (scope, name string, tok token.KeyToken) {
+// PathNamesInString returns the package, scope (type, fun) and
+// element names in given string (line of code) at given position
+func (gl *GoLang) PathNamesInString(fs *pi.FileState, str string, pos lex.Pos) (pkg, scope, name string, tok token.KeyToken) {
 	pr := gl.Parser()
 	if pr == nil {
 		return
@@ -129,44 +129,64 @@ func (gl *GoLang) ElInString(fs *pi.FileState, str string, pos lex.Pos) (scope, 
 	// fmt.Println(lxstr)
 	// lfs.Ast.WriteTree(os.Stdout, 0)
 
-	// first pass: just use lexical tokens even though we have the full Ast..
 	lxs := lfs.Src.Lexs[0]
 	sz := len(lxs)
 	if lxs[sz-1].Tok.Tok == token.EOS {
 		sz--
 	}
-	gotSep := false
-	// nmidx := -1
-	// scidx := -1
+	if sz <= 0 {
+		return
+	}
+	posidx := -1
+	posnm := ""
 	for i := sz - 1; i >= 0; i-- {
 		lx := lxs[i]
-		if lx.St > pos.Ch {
-			continue
-		}
 		if lx.St <= pos.Ch && pos.Ch < lx.Ed {
 			tok = lx.Tok
+			posidx = i
+			if tok.Tok.Cat() == token.Name {
+				posnm = string(lfs.Src.TokenSrc(lex.Pos{0, i}))
+				break
+			}
 		}
+	}
+	if posidx < 0 {
+		posidx = sz - 1
+		for ; posidx >= 0; posidx-- {
+			tok = lxs[posidx].Tok
+			if tok.Tok.Cat() == token.Name {
+				posnm = string(lfs.Src.TokenSrc(lex.Pos{0, posidx}))
+				break
+			}
+		}
+	}
+	if posnm != "" {
+		if _, has := gl.ExtsPkg(fs, posnm); has {
+			pkg = posnm
+			return // highest level of scoping -- done
+		}
+		if posidx < sz-1 && lxs[posidx+1].Tok.Tok.SubCat() == token.PunctSep {
+			scope = posnm // next element is a sep -- we are not final name
+		}
+	}
+	// now find earlier scopers
+	for i := posidx - 1; i >= 0; i-- {
+		lx := lxs[i]
 		if lx.Tok.Tok.Cat() == token.Name {
 			nm := string(lfs.Src.TokenSrc(lex.Pos{0, i}))
-			if gotSep {
-				scope = nm
-				// scidx = i
-				break
-			} else {
-				name = nm
-				// nmidx = i
+			if _, has := gl.ExtsPkg(fs, nm); has {
+				pkg = nm
+				return
 			}
-		} else if lx.Tok.Tok.SubCat() == token.PunctSep {
-			gotSep = true
-		} else {
+			if scope == "" && name == "" {
+				name = nm
+			} else if scope == "" && name != "" {
+				scope = nm
+			}
+		} else if lx.Tok.Tok.SubCat() != token.PunctSep {
 			break
 		}
 	}
-
-	// todo: get full path?
-	// if nmidx > 0 {
-	// }
-	// fmt.Printf("seed: %v\n", md.Seed)
 	return
 }
 
@@ -174,9 +194,14 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	if str == "" {
 		return
 	}
-	scope, name, _ := gl.ElInString(fs, str, pos)
-	if name == "" && scope == "" {
+	fs.SymsMu.RLock()
+	defer fs.SymsMu.RUnlock()
+	pkg, scope, name, _ := gl.PathNamesInString(fs, str, pos)
+	if pkg == "" && name == "" && scope == "" {
 		return
+	}
+	if pkg != "" {
+		return gl.CompleteLinePkg(fs, str, pos, pkg, scope, name)
 	}
 	if scope != "" {
 		md.Seed = scope + "." + name
@@ -184,12 +209,8 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		md.Seed = name
 	}
 
-	fs.SymsMu.RLock()     // syms access needs to be locked -- could be updated..
 	var conts syms.SymMap // containers of given region -- local scoping
 	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
-	// if len(conts) > 0 {
-	// 	conts.WriteDoc(os.Stdout, 0)
-	// }
 
 	var matches syms.SymMap
 	if scope != "" {
@@ -214,11 +235,16 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			fs.FindNamePrefixScoped(name, conts, &matches)
 		}
 	}
-	fs.SymsMu.RUnlock()
+	gl.CompleteReturnMatches(matches, scope, &md)
+	return
+}
+
+// CompleteReturnMatches returns the matched syms in given map as
+// completion edit data
+func (gl *GoLang) CompleteReturnMatches(matches syms.SymMap, scope string, md *complete.MatchData) {
 	if len(matches) == 0 {
 		return
 	}
-
 	sys := matches.Slice(true) // sorted
 	for _, sy := range sys {
 		if sy.Name[0] == '_' || sy.Kind == token.NameLibrary { // internal / import
@@ -233,6 +259,50 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		c := complete.Completion{Text: nm, Label: lbl, Icon: sy.Kind.IconName(), Desc: sy.Detail}
 		md.Matches = append(md.Matches, c)
 	}
+	return
+}
+
+// CompleteLinePkg returns completion for symbol in given external
+// package
+func (gl *GoLang) CompleteLinePkg(fs *pi.FileState, str string, pos lex.Pos, pkg, scope, name string) (md complete.MatchData) {
+	fs.SymsMu.RLock()
+	defer fs.SymsMu.RUnlock()
+	psym, _ := gl.ExtsPkg(fs, pkg)
+
+	if scope != "" {
+		md.Seed = scope + "." + name
+	} else {
+		md.Seed = name
+	}
+	var matches syms.SymMap
+	if scope != "" {
+		scsym, got := psym.Children.FindNameScoped(scope)
+		if got {
+			gotKids := scsym.FindAnyChildren(name, psym.Children, nil, &matches)
+			if !gotKids {
+				scope = ""
+				md.Seed = name
+			}
+		} else {
+			scope = ""
+			md.Seed = name
+		}
+	}
+	if len(matches) == 0 { // look just at name if nothing from scope
+		nmsym, got := psym.Children.FindNameScoped(name)
+		if got {
+			nmsym.FindAnyChildren("", psym.Children, nil, &matches)
+		}
+		if len(matches) == 0 {
+			psym.Children.FindNamePrefixScoped(name, &matches)
+		}
+	}
+	md.Seed = pkg + "." + md.Seed
+	effscp := pkg
+	if scope != "" {
+		effscp += "." + scope
+	}
+	gl.CompleteReturnMatches(matches, effscp, &md)
 	return
 }
 
@@ -425,6 +495,14 @@ func (gl *GoLang) AddPkgToExts(fs *pi.FileState, pkg *syms.Symbol) bool {
 	}
 	fs.SymsMu.Unlock()
 	return has
+}
+
+// ExtsPkg returns the symbol in fs.ExtSyms for given name that
+// is a package -- false if not found -- assumed to be called under
+// SymsMu lock
+func (gl *GoLang) ExtsPkg(fs *pi.FileState, nm string) (*syms.Symbol, bool) {
+	sy, has := fs.ExtSyms[nm]
+	return sy, has
 }
 
 // AddImportsToExts adds imports from given package into pi.FileState.ExtSyms list

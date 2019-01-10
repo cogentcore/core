@@ -97,6 +97,9 @@ func (sm *SymMap) Slice(sorted bool) []*Symbol {
 
 // FindName looks for given symbol name within this map and any children on the map
 func (sm *SymMap) FindName(nm string) (*Symbol, bool) {
+	if *sm == nil {
+		return nil, false
+	}
 	sy, has := (*sm)[nm]
 	if has {
 		return sy, has
@@ -112,6 +115,9 @@ func (sm *SymMap) FindName(nm string) (*Symbol, bool) {
 // FindNameScoped looks for given symbol name within this map and any children on the map
 // that are of subcategory token.NameScope (i.e., namespace, module, package, library)
 func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
+	if *sm == nil {
+		return nil, false
+	}
 	sy, has := (*sm)[nm]
 	if has {
 		return sy, has
@@ -130,6 +136,9 @@ func (sm *SymMap) FindNameScoped(nm string) (*Symbol, bool) {
 // Returns all instances found.  Uses cat / subcat based token matching -- if you
 // specify a category-level or subcategory level token, it will match everything in that group
 func (sm *SymMap) FindKind(kind token.Tokens, matches *SymMap) {
+	if *sm == nil {
+		return
+	}
 	for _, sy := range *sm {
 		if kind.Match(sy.Kind) {
 			if *matches == nil {
@@ -148,6 +157,9 @@ func (sm *SymMap) FindKind(kind token.Tokens, matches *SymMap) {
 // Returns all instances found.  Uses cat / subcat based token matching -- if you
 // specify a category-level or subcategory level token, it will match everything in that group
 func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
+	if *sm == nil {
+		return
+	}
 	for _, sy := range *sm {
 		if kind.Match(sy.Kind) {
 			if *matches == nil {
@@ -172,6 +184,9 @@ func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
 // in that group.  if you specify kind = token.None then all tokens that contain
 // region will be returned.
 func (sm *SymMap) FindContainsRegion(pos lex.Pos, kind token.Tokens, matches *SymMap) {
+	if *sm == nil {
+		return
+	}
 	for _, sy := range *sm {
 		if !sy.Region.Contains(pos) {
 			continue
