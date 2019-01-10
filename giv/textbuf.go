@@ -2017,6 +2017,8 @@ func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, ichr indent.Char) {
 				return
 			}
 		}
+		n /= tabSz
+		return
 	} else {
 		for i := 1; i < sz; i++ {
 			if txt[i] == '\t' {
