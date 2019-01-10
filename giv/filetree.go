@@ -522,7 +522,9 @@ func (fn *FileNode) DeleteFile() (err error) {
 		err = fn.Repo().Remove(string(fn.FPath))
 	} else {
 		err = fn.Info.Delete()
-		fn.Delete(true) // we're done
+	}
+	if err == nil {
+		fn.Delete(true)
 	}
 	return err
 }
