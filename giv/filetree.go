@@ -598,7 +598,7 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 		CopyFile(tpath, filename, perm)
 		fn.FRoot.UpdateNewFile(ppath)
 		ofn, ok := fn.FRoot.FindFile(filename)
-		if ok && ofn.VcsState == FileNodeInVcs {
+		if ok && ofn.VcsState > FileNodeNotInVcs {
 			nfn, ok := fn.FRoot.FindFile(tpath)
 			if ok {
 				nfn.AddToVcs()
@@ -658,6 +658,8 @@ func (fn *FileNode) AddToVcs() {
 	err := fn.Repo().Add(string(fn.FPath))
 	if err == nil {
 		fn.VcsState = FileNodeVcsAdded
+		dpath, _ := filepath.Split(string(fn.FPath))
+		fn.ReadDir(string(dpath))
 		return
 	}
 	fmt.Println(err)
@@ -671,6 +673,8 @@ func (fn *FileNode) RemoveFromVcs() {
 	err := fn.Repo().RemoveKeepLocal(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.VcsState = FileNodeNotInVcs
+		dpath, _ := filepath.Split(string(fn.FPath))
+		fn.ReadDir(string(dpath))
 		return
 	}
 	fmt.Println(err)
