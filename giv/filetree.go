@@ -563,13 +563,13 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
 		return
 	}
-	fn.FRoot.UpdateNewFile(np)
 	if addToVcs {
 		nfn, ok := fn.FRoot.FindFile(np)
 		if ok {
 			nfn.AddToVcs()
 		}
 	}
+	fn.FRoot.UpdateNewFile(np)
 }
 
 // NewFolder makes a new folder (directory) in given selected directory node
