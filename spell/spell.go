@@ -54,9 +54,8 @@ func Save(filename string) error {
 	return model.Save(filename)
 }
 
-func Train(file os.File, new bool) error {
+func Train(file os.File, new bool) (err error) {
 	var out []string
-	var err error
 
 	reader := bufio.NewReader(&file)
 	scanner := bufio.NewScanner(reader)
@@ -74,7 +73,7 @@ func Train(file os.File, new bool) error {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		log.Println(os.Stderr, "reading input: ", err)
 		return err
 	}

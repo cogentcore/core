@@ -115,6 +115,7 @@ func NewSpellModelFromText() error {
 
 // AddToSpellModel trains on additional text - extends model
 func AddToSpellModel(filepath string) error {
+	InitSpell() // make sure model is initialized
 	file, err := os.Open(filepath)
 	if err != nil {
 		log.Printf("Could not open text file selected for training: %v.\n", err)
