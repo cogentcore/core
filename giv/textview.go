@@ -4053,10 +4053,18 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 		if kt.Rune == '{' || kt.Rune == '(' || kt.Rune == '[' {
 			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 			pos := tv.CursorPos
+			var close = true
+			if pos.Ch < tv.Buf.LineLen(pos.Ln) && !unicode.IsSpace(tv.Buf.Line(pos.Ln)[pos.Ch]) {
+				close = false
+			}
 			pos.Ch++
-			match, _ := PunctGpMatch(kt.Rune)
-			tv.InsertAtCursor([]byte(string(kt.Rune) + string(match)))
-			tv.lastAutoInsert = match
+			if close {
+				match, _ := PunctGpMatch(kt.Rune)
+				tv.InsertAtCursor([]byte(string(kt.Rune) + string(match)))
+				tv.lastAutoInsert = match
+			} else {
+				tv.InsertAtCursor([]byte(string(kt.Rune)))
+			}
 			tv.SetCursorShow(pos)
 			tv.SetCursorCol(tv.CursorPos)
 			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
