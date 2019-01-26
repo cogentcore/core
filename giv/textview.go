@@ -1905,6 +1905,7 @@ func (tv *TextView) QReplaceKeyInput(kt *key.ChordEvent) {
 		tv.QReplaceCancel()
 	case kt.Rune == '!':
 		tv.QReplaceReplaceAll(tv.QReplace.Pos)
+		tv.QReplaceCancel()
 	}
 }
 
