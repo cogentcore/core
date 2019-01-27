@@ -3015,6 +3015,8 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	if !tv.Buf.Opts.DepthColor || tv.IsInactive() || !tv.HasFocus() || !tv.IsFocusActive() {
 		return
 	}
+	tv.Buf.MarkupMu.RLock() // needed for HiTags access
+	defer tv.Buf.MarkupMu.RUnlock()
 	sty := &tv.Sty
 	cspec := sty.Font.BgColor
 	lstdp := 0
@@ -3025,6 +3027,9 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 			continue
 		}
 		if int(math32.Floor(lst)) > tv.VpBBox.Max.Y {
+			continue
+		}
+		if ln >= len(tv.Buf.HiTags) { // may be out of sync
 			continue
 		}
 		ht := tv.Buf.HiTags[ln]

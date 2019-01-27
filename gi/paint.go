@@ -20,7 +20,7 @@ import (
 	// "github.com/rcoreilly/rasterx"
 	// "github.com/rcoreilly/scanFT"
 	"github.com/srwiley/rasterx"
-	"github.com/srwiley/scanFT"
+	"github.com/srwiley/scanx"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )
@@ -224,11 +224,14 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 // The RenderState holds all the current rendering state information used
 // while painting -- a viewport just has one of these
 type RenderState struct {
-	Paint          Paint             `desc:"communal painter -- for widgets -- SVG have their own"`
-	XForm          Matrix2D          `desc:"current transform"`
-	Path           rasterx.Path      `desc:"current path"`
-	Raster         *rasterx.Dasher   `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
-	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
+	Paint  Paint           `desc:"communal painter -- for widgets -- SVG have their own"`
+	XForm  Matrix2D        `desc:"current transform"`
+	Path   rasterx.Path    `desc:"current path"`
+	Raster *rasterx.Dasher `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
+	//	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
+	// CompSpanner    *scanx.CompressSpanner `desc:"spanner for scanx"`
+	Scanner        *scanx.Scanner    `desc:"scanner for scanx"`
+	ImgSpanner     *scanx.ImgSpanner `desc:"spanner for scanx"`
 	Start          Vec2D             `desc:"starting point, for close path"`
 	Current        Vec2D             `desc:"current point"`
 	HasCurrent     bool              `desc:"is current point current?"`
@@ -252,8 +255,17 @@ func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 	// to use the golang.org/x/image/vector scanner, do this:
 	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
 	// and cut out painter:
-	painter := scanFT.NewRGBAPainter(img)
-	rs.Scanner = scanFT.NewScannerFT(width, height, painter)
+	/*
+		painter := scanFT.NewRGBAPainter(img)
+		rs.Scanner = scanFT.NewScannerFT(width, height, painter)
+	*/
+	/*
+		rs.CompSpanner = &scanx.CompressSpanner{}
+		rs.CompSpanner.SetBounds(img.Bounds())
+	*/
+	rs.ImgSpanner = scanx.NewImgSpanner(img)
+	rs.Scanner = scanx.NewScanner(rs.ImgSpanner, width, height)
+	// rs.Scanner = scanx.NewScanner(rs.CompSpanner, width, height)
 	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
 }
 
@@ -585,6 +597,11 @@ func (pc *Paint) stroke(rs *RenderState) {
 	rs.Raster.Draw()
 	rs.Raster.Clear()
 
+	/*
+		rs.CompSpanner.DrawToImage(rs.Image)
+		rs.CompSpanner.Clear()
+	*/
+
 	pr.End()
 }
 
@@ -609,6 +626,11 @@ func (pc *Paint) fill(rs *RenderState) {
 	}
 	rf.Draw()
 	rf.Clear()
+
+	/*
+		rs.CompSpanner.DrawToImage(rs.Image)
+		rs.CompSpanner.Clear()
+	*/
 
 	pr.End()
 }
