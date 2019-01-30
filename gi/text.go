@@ -1250,7 +1250,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 		case xml.CharData:
 			curf := fstack[len(fstack)-1]
 			atStart := len(curSp.Text) == 0
-			sstr := string(se)
+			sstr := html.UnescapeString(string(se))
 			if nextIsParaStart && atStart {
 				sstr = strings.TrimLeftFunc(sstr, func(r rune) bool {
 					return unicode.IsSpace(r)

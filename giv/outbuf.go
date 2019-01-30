@@ -7,7 +7,6 @@ package giv
 import (
 	"bufio"
 	"bytes"
-	"html"
 	"io"
 	"sync"
 	"time"
@@ -21,8 +20,7 @@ type OutBufMarkupFunc func(line []byte) []byte
 // OutBuf is a TextBuf that records the output from an io.Reader using
 // bufio.Scanner -- optimized to combine fast chunks of output into
 // large blocks of updating.  Also supports arbitrary markup function
-// that operates on each line of output bytes.  It calls html.EscapeString on
-// the output right away so it is safe for display in TextView.
+// that operates on each line of output bytes.
 type OutBuf struct {
 	Out        io.Reader        `desc:"the output that we are reading from, as an io.Reader"`
 	Buf        *TextBuf         `desc:"the TextBuf that we output to"`
@@ -54,7 +52,7 @@ func (ob *OutBuf) MonOut() {
 	ob.CurOutMus = make([][]byte, 0, 100)
 	for outscan.Scan() {
 		b := outscan.Bytes()
-		bc := []byte(html.EscapeString(string(b)))
+		bc := HTMLEscapeBytes(b) // automatically copies bytes -- outscan bytes are temp
 		ob.Mu.Lock()
 		if ob.AfterTimer != nil {
 			ob.AfterTimer.Stop()

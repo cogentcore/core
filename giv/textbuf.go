@@ -928,7 +928,7 @@ func (tb *TextBuf) BytesToLines() {
 		tb.Lines[ln] = bytes.Runes(txt)
 		tb.LineBytes[ln] = make([]byte, len(txt))
 		copy(tb.LineBytes[ln], txt)
-		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
 		bo += len(txt) + 1 // lf
 	}
 	tb.TotalBytes = bo
@@ -1646,7 +1646,7 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
 		tb.ByteOffs[ln] = bo
 		bo += len(tb.LineBytes[ln]) + 1
 	}
@@ -1674,7 +1674,7 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 
 	st := tbe.Reg.Start.Ln
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
-	tb.Markup[st] = tb.LineBytes[st]
+	tb.Markup[st] = HTMLEscapeBytes(tb.LineBytes[st])
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -1690,7 +1690,7 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
@@ -1809,7 +1809,7 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 			tb.HiTags[ln] = mt
 			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.AdjustedTags(ln))
 		} else {
-			tb.Markup[ln] = ltxt
+			tb.Markup[ln] = HTMLEscapeBytes(ltxt)
 			allgood = false
 		}
 	}
