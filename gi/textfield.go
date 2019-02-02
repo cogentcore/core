@@ -127,6 +127,15 @@ const (
 	// TextFieldCleared means the clear button was clicked
 	TextFieldCleared
 
+	// TextFieldInsert is emitted when a character is inserted into the textfield
+	TextFieldInsert
+
+	// TextFieldBackspace is emitted when a character before cursor is deleted
+	TextFieldBackspace
+
+	// TextFieldDelete is emitted when a character after cursor is deleted
+	TextFieldDelete
+
 	TextFieldSignalsN
 )
 
@@ -337,6 +346,7 @@ func (tf *TextField) CursorBackspace(steps int) {
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos-steps], tf.EditTxt[tf.CursorPos:]...)
 	tf.CursorBackward(steps)
+	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldBackspace), tf.Txt)
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -357,6 +367,7 @@ func (tf *TextField) CursorDelete(steps int) {
 	defer tf.UpdateEnd(updt)
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[tf.CursorPos+steps:]...)
+	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDelete), tf.Txt)
 }
 
 // CursorKill deletes text from cursor to end of text
@@ -590,6 +601,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
+	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.Txt)
 }
 
 // cpos := tf.CharStartPos(tf.CursorPos).ToPoint()

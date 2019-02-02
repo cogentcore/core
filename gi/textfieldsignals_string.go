@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _TextFieldSignals_name = "TextFieldDoneTextFieldDeFocusedTextFieldSelectedTextFieldClearedTextFieldSignalsN"
+const _TextFieldSignals_name = "TextFieldDoneTextFieldDeFocusedTextFieldSelectedTextFieldClearedTextFieldInsertTextFieldBackspaceTextFieldDeleteTextFieldSignalsN"
 
-var _TextFieldSignals_index = [...]uint8{0, 13, 31, 48, 64, 81}
+var _TextFieldSignals_index = [...]uint8{0, 13, 31, 48, 64, 79, 97, 112, 129}
 
 func (i TextFieldSignals) String() string {
 	if i < 0 || i >= TextFieldSignals(len(_TextFieldSignals_index)-1) {
