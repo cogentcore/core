@@ -167,6 +167,8 @@ func (gl *GoLang) PathNamesInString(fs *pi.FileState, str string, pos lex.Pos) (
 		}
 		if posidx < sz-1 && lxs[posidx+1].Tok.Tok.SubCat() == token.PunctSep {
 			scope = posnm // next element is a sep -- we are not final name
+		} else {
+			name = posnm
 		}
 	}
 	// now find earlier scopers
