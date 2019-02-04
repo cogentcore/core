@@ -7,7 +7,7 @@ Go language (golang) full strength tree structures (ki = 木 = tree in Japanese)
 
 # Overview
 
-See the [Wiki](https://github.com/goki/ki/wiki) for more docs, discussion, etc.
+See the [Wiki](https://github.com/goki/ki/wiki) for more docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
 The **Tree** is the most powerful data structure in programming, and it underlies all the best tech, such as the WWW (the DOM is a tree structure), scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  GoKi provides a powerful tree container type, that can support all of these things just by embedding and extending the `Node` struct type that implements the `Ki` (Ki = Tree in Japanese) interface.
 

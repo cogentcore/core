@@ -170,7 +170,7 @@ type Ki interface {
 	Children() *Slice
 
 	// Child returns the child at given index -- false if index is invalid.
-	// See methods on ki.Slice for more ways to acces.
+	// See methods on ki.Slice for more ways to access.
 	Child(idx int) (Ki, bool)
 
 	// KnownChild returns the child at given index without checking index --
