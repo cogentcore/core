@@ -228,6 +228,11 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			md.Seed = name
 		}
 	}
+
+	if scope == "" && name == "" {
+		return md
+	}
+
 	if len(matches) == 0 { // look just at name if nothing from scope
 		nmsym, got := fs.FindNameScoped(name, conts)
 		if got {
