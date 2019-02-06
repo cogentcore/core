@@ -146,16 +146,28 @@ type Ki interface {
 	HasParent(par Ki) bool
 
 	// ParentByName finds first parent recursively up hierarchy that matches
-	// given name -- returns false if not found.
-	ParentByName(name string) (Ki, bool)
+	// given name.  Returns nil if not found.
+	ParentByName(name string) Ki
+
+	// ParentByNameTry finds first parent recursively up hierarchy that matches
+	// given name -- Try version returns error on failure.
+	ParentByNameTry(name string) (Ki, error)
 
 	// ParentByType finds parent recursively up hierarchy, by type, and
-	// returns false if not found. If embeds is true, then it looks for any
+	// returns nil if not found. If embeds is true, then it looks for any
 	// type that embeds the given type at any level of anonymous embedding.
-	ParentByType(t reflect.Type, embeds bool) (Ki, bool)
+	ParentByType(t reflect.Type, embeds bool) Ki
 
-	// KiFieldByName returns field Ki element by name -- returns false if not found.
-	KiFieldByName(name string) (Ki, bool)
+	// ParentByTypeTry finds parent recursively up hierarchy, by type, and
+	// returns error if not found. If embeds is true, then it looks for any
+	// type that embeds the given type at any level of anonymous embedding.
+	ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error)
+
+	// KiFieldByName returns field Ki element by name -- returns nil if not found.
+	KiFieldByName(name string) Ki
+
+	// KiFieldByNameTry returns field Ki element by name -- returns error if not found.
+	KiFieldByNameTry(name string) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Children
@@ -169,26 +181,44 @@ type Ki interface {
 	// methods on parent node should be used to ensure proper tracking.
 	Children() *Slice
 
-	// Child returns the child at given index -- false if index is invalid.
+	// Child returns the child at given index -- will panic if index is invalid.
 	// See methods on ki.Slice for more ways to access.
-	Child(idx int) (Ki, bool)
+	Child(idx int) Ki
 
-	// KnownChild returns the child at given index without checking index --
-	// use when index is known to be good.
-	KnownChild(idx int) Ki
+	// ChildTry returns the child at given index -- Try version returns
+	// error if index is invalid.
+	// See methods on ki.Slice for more ways to access.
+	ChildTry(idx int) (Ki, error)
 
-	// ChildByName returns first element that has given name, false if not
-	// found. startIdx arg allows for optimized bidirectional find if you have
+	// ChildByName returns first element that has given name, nil if not found.
+	// startIdx arg allows for optimized bidirectional find if you have
 	// an idea where it might be -- can be key speedup for large lists -- pass
 	// -1 to start in the middle (good default).
-	ChildByName(name string, startIdx int) (Ki, bool)
+	ChildByName(name string, startIdx int) Ki
 
-	// KnownChildByName returns first element that has given name, without
-	// returning the bool check value -- use when named element is known to
-	// exist, and will be directly converted to another type, so the multiple
-	// return values are cumbersome.  nil is returned if it actually does not
-	// exist. See ChildByName for info on startIdx.
-	KnownChildByName(name string, startIdx int) Ki
+	// ChildByNameTry returns first element that has given name -- Try version
+	// returns error message if not found.
+	// startIdx arg allows for optimized bidirectional find if you have
+	// an idea where it might be -- can be key speedup for large lists -- pass
+	// -1 to start in the middle (good default).
+	ChildByNameTry(name string, startIdx int) (Ki, error)
+
+	// ChildByType returns first element that has given type, nil if not found.
+	// If embeds is true, then it looks for any type that embeds the given type
+	// at any level of anonymous embedding.
+	// startIdx arg allows for optimized bidirectional find if you have
+	// an idea where it might be -- can be key speedup for large lists -- pass
+	// -1 to start in the middle (good default).
+	ChildByType(t reflect.Type, embeds bool, startIdx int) Ki
+
+	// ChildByTypeTry returns first element that has given name -- Try version
+	// returns error message if not found.
+	// If embeds is true, then it looks for any type that embeds the given type
+	// at any level of anonymous embedding.
+	// startIdx arg allows for optimized bidirectional find if you have
+	// an idea where it might be -- can be key speedup for large lists -- pass
+	// -1 to start in the middle (good default).
+	ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Paths
@@ -218,8 +248,16 @@ type Ki interface {
 	// to this node is subtracted from the start of the path if present there.
 	// There is also support for [idx] index-based access for any given path
 	// element, for cases when indexes are more useful than names.
-	// Returns false if not found.
-	FindPathUnique(path string) (Ki, bool)
+	// Returns nil if not found.
+	FindPathUnique(path string) Ki
+
+	// FindPathUniqueTry returns Ki object at given unique path, starting from
+	// this node (e.g., Root()) -- if this node is not the root, then the path
+	// to this node is subtracted from the start of the path if present there.
+	// There is also support for [idx] index-based access for any given path
+	// element, for cases when indexes are more useful than names.
+	// Returns error if not found.
+	FindPathUniqueTry(path string) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Adding, Inserting Children
@@ -262,11 +300,6 @@ type Ki interface {
 	// children list -- assigns name (can be empty) and enforces UniqueName.
 	InsertNewChild(typ reflect.Type, at int, name string) Ki
 
-	// InsertNewChildUnique adds a new child at given position in children
-	// list, and gives it a name, using SetNameRaw and SetUniqueName for the
-	// name -- only when names are known to be unique (faster).
-	InsertNewChildUnique(typ reflect.Type, at int, name string) Ki
-
 	// SetChild sets child at given index to be the given item -- if name is
 	// non-empty then it sets the name of the child as well -- just calls Init
 	// (or InitName) on the child, and SetParent -- does NOT uniquify the
@@ -276,13 +309,13 @@ type Ki interface {
 
 	// MoveChild moves child from one position to another in the list of
 	// children (see also corresponding Slice method, which does not
-	// signal, like this one does).  Returns false if either index is invalid.
-	MoveChild(from, to int) bool
+	// signal, like this one does).  Returns error if either index is invalid.
+	MoveChild(from, to int) error
 
 	// SwapChildren swaps children between positions (see also corresponding
-	// Slice method which does not signal like this one does).  Returns false if
+	// Slice method which does not signal like this one does).  Returns error if
 	// either index is invalid.
-	SwapChildren(i, j int) bool
+	SwapChildren(i, j int) error
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using AddNewChild with given type and
@@ -316,25 +349,25 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Deleting Children
 
-	// DeleteChildAtIndex deletes child at given index (returns false for
+	// DeleteChildAtIndex deletes child at given index (returns error for
 	// invalid index) -- if child's parent = this node, then will call
 	// SetParent(nil), so to transfer to another list, set new parent first --
 	// destroy will add removed child to deleted list, to be destroyed later
 	// -- otherwise child remains intact but parent is nil -- could be
 	// inserted elsewhere.
-	DeleteChildAtIndex(idx int, destroy bool) bool
+	DeleteChildAtIndex(idx int, destroy bool) error
 
-	// DeleteChild deletes child node, returning false if not found in
+	// DeleteChild deletes child node, returning error if not found in
 	// Children.  If child's parent = this node, then will call
 	// SetParent(nil), so to transfer to another list, set new parent
 	// first. See DeleteChildAtIndex for destroy info.
-	DeleteChild(child Ki, destroy bool) bool
+	DeleteChild(child Ki, destroy bool) error
 
-	// DeleteChildByName deletes child node by name -- returns child, false
+	// DeleteChildByName deletes child node by name -- returns child, error
 	// if not found -- if child's parent = this node, then will call
 	// SetParent(nil), so to transfer to another list, set new parent first.
 	// See DeleteChildAtIndex for destroy info.
-	DeleteChildByName(name string, destroy bool) (Ki, bool)
+	DeleteChildByName(name string, destroy bool) (Ki, error)
 
 	// DeleteChildren deletes all children nodes -- destroy will add removed
 	// children to deleted list, to be destroyed later -- otherwise children
@@ -612,9 +645,9 @@ type Ki interface {
 
 	// SetField sets given field name to given value, using very robust
 	// conversion routines to e.g., convert from strings to numbers, and
-	// vice-versa, automatically -- returns true if successfully set --
+	// vice-versa, automatically.  Returns error if not successfully set.
 	// wrapped in UpdateStart / End and sets the FieldUpdated flag.
-	SetField(field string, val interface{}) bool
+	SetField(field string, val interface{}) error
 
 	// SetFieldDown sets given field name to given value, all the way down the
 	// tree from me -- wrapped in UpdateStart / End.
@@ -628,8 +661,11 @@ type Ki interface {
 	// see KiFieldByName for Ki fields) -- returns nil if not found.
 	FieldByName(field string) interface{}
 
-	// FieldTag returns given field tag for that field, or empty string if not
-	// set.
+	// FieldByNameTry returns field value by name (can be any type of field --
+	// see KiFieldByName for Ki fields) -- returns error if not found.
+	FieldByNameTry(field string) (interface{}, error)
+
+	// FieldTag returns given field tag for that field, or empty string if not set.
 	FieldTag(field, tag string) string
 
 	//////////////////////////////////////////////////////////////////////////

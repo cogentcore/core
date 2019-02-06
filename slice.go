@@ -35,33 +35,46 @@ type Slice []Ki
 // differentiate them.  But there you still be able to directly cast!
 
 // SliceIsValidIndex checks whether the given index is a valid index into slice,
-// within range of 0..len-1.
-func SliceIsValidIndex(sl *[]Ki, idx int) bool {
-	return idx >= 0 && idx < len(*sl)
+// within range of 0..len-1.  Returns error if not.
+func SliceIsValidIndex(sl *[]Ki, idx int) error {
+	if idx >= 0 && idx < len(*sl) {
+		return nil
+	}
+	return fmt.Errorf("ki.Slice: invalid index: %v -- len = %v", idx, len(*sl))
 }
 
 // IsValidIndex checks whether the given index is a valid index into slice,
-// within range of 0..len-1.
-func (sl Slice) IsValidIndex(idx int) bool {
-	return idx >= 0 && idx < len(sl)
+// within range of 0..len-1.  Returns error if not.
+func (sl *Slice) IsValidIndex(idx int) error {
+	if idx >= 0 && idx < len(*sl) {
+		return nil
+	}
+	return fmt.Errorf("ki.Slice: invalid index: %v -- len = %v", idx, len(*sl))
 }
 
-// Elem returns element at index, returning false if invalid index
-func (sl *Slice) Elem(idx int) (Ki, bool) {
-	if !sl.IsValidIndex(idx) {
-		return nil, false
+// Elem returns element at index -- panics if index is invalid
+func (sl *Slice) Elem(idx int) Ki {
+	return (*sl)[idx]
+}
+
+// ElemTry returns element at index -- Try version returns error if index is invalid.
+func (sl *Slice) ElemTry(idx int) (Ki, error) {
+	if err := sl.IsValidIndex(idx); err != nil {
+		return nil, err
 	}
-	return (*sl)[idx], true
+	return (*sl)[idx], nil
 }
 
 // ElemFromEnd returns element at index from end of slice (0 = last element,
-// 1 = 2nd to last, etc), returning false if invalid index
-func (sl *Slice) ElemFromEnd(idx int) (Ki, bool) {
-	idx = len(*sl) - 1 - idx
-	if !sl.IsValidIndex(idx) {
-		return nil, false
-	}
-	return (*sl)[idx], true
+// 1 = 2nd to last, etc).  Panics if invalid index.
+func (sl *Slice) ElemFromEnd(idx int) Ki {
+	return (*sl)[len(*sl)-1-idx]
+}
+
+// ElemFromEndTry returns element at index from end of slice (0 = last element,
+// 1 = 2nd to last, etc). Try version returns error on invalid index.
+func (sl *Slice) ElemFromEndTry(idx int) (Ki, error) {
+	return sl.ElemTry(len(*sl) - 1 - idx)
 }
 
 // SliceIndexByFunc finds index of item based on match function (which must
@@ -116,7 +129,7 @@ func SliceIndexByFunc(sl *[]Ki, startIdx int, match func(k Ki) bool) (int, bool)
 // true for a find match, false for not).  Returns false if not found.
 // startIdx arg allows for optimized bidirectional find if you have an idea
 // where it might be -- can be key speedup for large lists -- pass -1 to start
-// in the middle (good default)
+// in the middle (good default).
 func (sl *Slice) IndexByFunc(startIdx int, match func(k Ki) bool) (int, bool) {
 	return SliceIndexByFunc((*[]Ki)(sl), startIdx, match)
 }
@@ -138,7 +151,7 @@ func (sl *Slice) IndexOf(kid Ki, startIdx int) (int, bool) {
 }
 
 // SliceIndexByName returns index of first element that has given name, false if
-// not found. See IndexOf for info on startIdx
+// not found. See IndexOf for info on startIdx.
 func SliceIndexByName(sl *[]Ki, name string, startIdx int) (int, bool) {
 	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
@@ -181,22 +194,9 @@ func (sl *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) (int, bo
 	}
 }
 
-// ElemByName returns first element that has given name, false if
-// not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByName(name string, startIdx int) (Ki, bool) {
-	idx, ok := sl.IndexByName(name, startIdx)
-	if !ok {
-		return nil, false
-	}
-	return (*sl)[idx], true
-}
-
-// KnownElemByName returns first element that has given name, without
-// returning the bool check value -- when named element is known to exist, and
-// will be directly converted to another type, so the multiple return values
-// are cumbersome.  nil is returned if it actually does not exist. See IndexOf
-// for info on startIdx.
-func (sl *Slice) KnownElemByName(name string, startIdx int) Ki {
+// ElemByName returns first element that has given name, nil if not found.
+// See IndexOf for info on startIdx.
+func (sl *Slice) ElemByName(name string, startIdx int) Ki {
 	idx, ok := sl.IndexByName(name, startIdx)
 	if !ok {
 		return nil
@@ -204,24 +204,54 @@ func (sl *Slice) KnownElemByName(name string, startIdx int) Ki {
 	return (*sl)[idx]
 }
 
+// ElemByNameTry returns first element that has given name, error if not found.
+// See IndexOf for info on startIdx.
+func (sl *Slice) ElemByNameTry(name string, startIdx int) (Ki, error) {
+	idx, ok := sl.IndexByName(name, startIdx)
+	if !ok {
+		return nil, fmt.Errorf("ki.Slice: element named: %v not found", name)
+	}
+	return (*sl)[idx], nil
+}
+
 // ElemByUniqueName returns index of first element that has given unique
-// name, false if not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByUniqueName(name string, startIdx int) (Ki, bool) {
+// name, nil if not found. See IndexOf for info on startIdx.
+func (sl *Slice) ElemByUniqueName(name string, startIdx int) Ki {
 	idx, ok := sl.IndexByUniqueName(name, startIdx)
 	if !ok {
-		return nil, false
+		return nil
 	}
-	return (*sl)[idx], true
+	return (*sl)[idx]
+}
+
+// ElemByUniqueNameTry returns index of first element that has given unique
+// name, error if not found. See IndexOf for info on startIdx.
+func (sl *Slice) ElemByUniqueNameTry(name string, startIdx int) (Ki, error) {
+	idx, ok := sl.IndexByUniqueName(name, startIdx)
+	if !ok {
+		return nil, fmt.Errorf("ki.Slice: element with unique name: %v not found", name)
+	}
+	return (*sl)[idx], nil
 }
 
 // ElemByType returns index of element that either is that type or embeds
-// that type, false if not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByType(t reflect.Type, embeds bool, startIdx int) (Ki, bool) {
+// that type, nil if not found. See IndexOf for info on startIdx.
+func (sl *Slice) ElemByType(t reflect.Type, embeds bool, startIdx int) Ki {
 	idx, ok := sl.IndexByType(t, embeds, startIdx)
 	if !ok {
-		return nil, false
+		return nil
 	}
-	return (*sl)[idx], true
+	return (*sl)[idx]
+}
+
+// ElemByTypeTry returns index of element that either is that type or embeds
+// that type, error if not found. See IndexOf for info on startIdx.
+func (sl *Slice) ElemByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error) {
+	idx, ok := sl.IndexByType(t, embeds, startIdx)
+	if !ok {
+		return nil, fmt.Errorf("ki.Slice: element of type: %v not found", t)
+	}
+	return (*sl)[idx], nil
 }
 
 // SliceInsert item at index -- does not do any parent updating etc -- use Ki/Node
@@ -252,62 +282,68 @@ func (sl *Slice) Insert(k Ki, idx int) {
 }
 
 // SliceDeleteAtIndex deletes item at index -- does not do any further management
-// deleted item -- optimized version for avoiding memory leaks.  returns false
+// deleted item -- optimized version for avoiding memory leaks.  returns error
 // if index is invalid.
-func SliceDeleteAtIndex(sl *[]Ki, idx int) bool {
-	if !SliceIsValidIndex(sl, idx) {
-		return false
+func SliceDeleteAtIndex(sl *[]Ki, idx int) error {
+	if err := SliceIsValidIndex(sl, idx); err != nil {
+		return err
 	}
 	// this copy makes sure there are no memory leaks
 	sz := len(*sl)
 	copy((*sl)[idx:], (*sl)[idx+1:])
 	(*sl)[sz-1] = nil
 	(*sl) = (*sl)[:sz-1]
-	return true
+	return nil
 }
 
 // DeleteAtIndex deletes item at index -- does not do any further management
-// deleted item -- optimized version for avoiding memory leaks.  returns false
+// deleted item -- optimized version for avoiding memory leaks.  returns error
 // if index is invalid.
-func (sl *Slice) DeleteAtIndex(idx int) bool {
+func (sl *Slice) DeleteAtIndex(idx int) error {
 	return SliceDeleteAtIndex((*[]Ki)(sl), idx)
 }
 
-// SliceMove moves element from one position to another.  Returns false if
+// SliceMove moves element from one position to another.  Returns error if
 // either index is invalid.
-func SliceMove(sl *[]Ki, from, to int) bool {
-	if !SliceIsValidIndex(sl, from) || !SliceIsValidIndex(sl, to) {
-		return false
+func SliceMove(sl *[]Ki, from, to int) error {
+	if err := SliceIsValidIndex(sl, from); err != nil {
+		return err
+	}
+	if err := SliceIsValidIndex(sl, to); err != nil {
+		return err
 	}
 	if from == to {
-		return false
+		return nil
 	}
 	tmp := (*sl)[from]
 	SliceDeleteAtIndex(sl, from)
 	SliceInsert(sl, tmp, to)
-	return false
+	return nil
 }
 
-// Move element from one position to another.  Returns false if either index
+// Move element from one position to another.  Returns error if either index
 // is invalid.
-func (sl *Slice) Move(from, to int) bool {
+func (sl *Slice) Move(from, to int) error {
 	return SliceMove((*[]Ki)(sl), from, to)
 }
 
-// SliceSwap swaps elements between positions.  Returns false if either index is invalid
-func SliceSwap(sl *[]Ki, i, j int) bool {
-	if !SliceIsValidIndex(sl, i) || !SliceIsValidIndex(sl, j) {
-		return false
+// SliceSwap swaps elements between positions.  Returns error if either index is invalid
+func SliceSwap(sl *[]Ki, i, j int) error {
+	if err := SliceIsValidIndex(sl, i); err != nil {
+		return err
+	}
+	if err := SliceIsValidIndex(sl, j); err != nil {
+		return err
 	}
 	if i == j {
-		return false
+		return nil
 	}
 	(*sl)[j], (*sl)[i] = (*sl)[i], (*sl)[j]
-	return false
+	return nil
 }
 
-// Swap elements between positions.  Returns false if either index is invalid
-func (sl *Slice) Swap(i, j int) bool {
+// Swap elements between positions.  Returns error if either index is invalid
+func (sl *Slice) Swap(i, j int) error {
 	return SliceSwap((*[]Ki)(sl), i, j)
 }
 

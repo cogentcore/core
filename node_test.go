@@ -202,9 +202,9 @@ func TestNodeFindType(t *testing.T) {
 	if !ok || idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	cn, ok := parent.Children().ElemByType(KiT_Node, false, 0)
-	if cn == nil {
-		t.Error("find child by type was nil")
+	_, err := parent.Children().ElemByTypeTry(KiT_Node, false, 0)
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -802,17 +802,23 @@ func TestNodeFieldSet(t *testing.T) {
 	child2.Ptr.Ptr = &schild2.Field2
 
 	ts := "child2 is nice"
-	ok := child2.SetField("Mbr1", ts)
+	err := child2.SetField("Mbr1", ts)
+	if err != nil {
+		t.Error(err)
+	}
 	fs := kit.NonPtrInterface(child2.FieldByName("Mbr1"))
-	if !ok || fs != ts {
-		t.Errorf("Set field error: %+v != %+v, ok: %v\n", fs, ts, ok)
+	if fs != ts {
+		t.Errorf("Set field error: %+v != %+v\n", fs, ts)
 	}
 
 	ts = "45.21"
-	ok = child2.SetField("Mbr1", 45.21)
+	err = child2.SetField("Mbr1", 45.21)
+	if err != nil {
+		t.Error(err)
+	}
 	fs = kit.NonPtrInterface(child2.FieldByName("Mbr1"))
-	if !ok || fs != ts {
-		t.Errorf("Set field error: %+v != %+v, ok: %v\n", fs, ts, ok)
+	if fs != ts {
+		t.Errorf("Set field error: %+v != %+v\n", fs, ts)
 	}
 }
 

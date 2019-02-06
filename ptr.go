@@ -13,8 +13,6 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// key fact of Go: interface such as Ki is implicitly a pointer!
-
 // Ptr provides JSON marshal / unmarshal via saved PathUnique
 type Ptr struct {
 	Ptr  Ki `json:"-" xml:"-"`
@@ -38,16 +36,17 @@ func (k *Ptr) GetPath() {
 	}
 }
 
-// PtrFromPath finds and sets the Ptr value based on the current Path string -- returns true if pointer is found and non-nil
-func (k *Ptr) PtrFmPath(root Ki) bool {
+// PtrFromPath finds and sets the Ptr value based on the current Path string.
+// Returns error if pointer not found.
+func (k *Ptr) PtrFmPath(root Ki) error {
 	// fmt.Printf("finding path: %v\n", k.Path)
 	if len(k.Path) == 0 {
 		k.Ptr = nil
-		return true
+		return nil
 	}
-	var ok bool
-	k.Ptr, ok = root.FindPathUnique(k.Path)
-	return ok
+	var err error
+	k.Ptr, err = root.FindPathUniqueTry(k.Path)
+	return err
 }
 
 // UpdatePath replaces any occurrence of oldPath with newPath, optionally only at the start of the path (typically true)

@@ -12,6 +12,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -357,47 +358,77 @@ func (n *Node) HasParent(par Ki) bool {
 }
 
 // ParentByName finds first parent recursively up hierarchy that matches
-// given name -- returns false if not found.
-func (n *Node) ParentByName(name string) (Ki, bool) {
+// given name -- returns nil if not found.
+func (n *Node) ParentByName(name string) Ki {
 	if n.IsRoot() {
-		return nil, false
+		return nil
 	}
 	if n.Par.Name() == name {
-		return n.Par, true
+		return n.Par
 	}
 	return n.Par.ParentByName(name)
 }
 
+// ParentByNameTry finds first parent recursively up hierarchy that matches
+// given name -- returns error if not found.
+func (n *Node) ParentByNameTry(name string) (Ki, error) {
+	par := n.ParentByName(name)
+	if par != nil {
+		return par, nil
+	}
+	return nil, fmt.Errorf("ki %v: Parent name: %v not found", n.PathUnique(), name)
+}
+
 // ParentByType finds parent recursively up hierarchy, by type, and
-// returns false if not found. If embeds is true, then it looks for any
+// returns nil if not found. If embeds is true, then it looks for any
 // type that embeds the given type at any level of anonymous embedding.
-func (n *Node) ParentByType(t reflect.Type, embeds bool) (Ki, bool) {
+func (n *Node) ParentByType(t reflect.Type, embeds bool) Ki {
 	if n.IsRoot() {
-		return nil, false
+		return nil
 	}
 	if embeds {
 		if n.Par.TypeEmbeds(t) {
-			return n.Par, true
+			return n.Par
 		}
 	} else {
 		if n.Par.Type() == t {
-			return n.Par, true
+			return n.Par
 		}
 	}
 	return n.Par.ParentByType(t, embeds)
 }
 
+// ParentByTypeTry finds parent recursively up hierarchy, by type, and
+// returns error if not found. If embeds is true, then it looks for any
+// type that embeds the given type at any level of anonymous embedding.
+func (n *Node) ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error) {
+	par := n.ParentByType(t, embeds)
+	if par != nil {
+		return par, nil
+	}
+	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.PathUnique(), t)
+}
+
 // KiFieldByName returns field Ki element by name -- returns false if not found.
-func (n *Node) KiFieldByName(name string) (Ki, bool) {
+func (n *Node) KiFieldByName(name string) Ki {
 	v := reflect.ValueOf(n.This()).Elem()
 	f := v.FieldByName(name)
 	if !f.IsValid() {
-		return nil, false
+		return nil
 	}
 	if !kit.EmbedImplements(f.Type(), KiType) {
-		return nil, false
+		return nil
 	}
-	return kit.PtrValue(f).Interface().(Ki), true
+	return kit.PtrValue(f).Interface().(Ki)
+}
+
+// KiFieldByNameTry returns field Ki element by name -- returns error if not found.
+func (n *Node) KiFieldByNameTry(name string) (Ki, error) {
+	fld := n.KiFieldByName(name)
+	if fld != nil {
+		return fld, nil
+	}
+	return nil, fmt.Errorf("ki %v: Ki Field named: %v not found", n.PathUnique(), name)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -416,38 +447,74 @@ func (n *Node) Children() *Slice {
 	return &n.Kids
 }
 
-// IsValidIndex returns true if given index is valid for accessing children
-func (n *Node) IsValidIndex(idx int) bool {
-	return n.Kids.IsValidIndex(idx)
+// IsValidIndex returns error if given index is not valid for accessing children
+// nil otherwise.
+func (n *Node) IsValidIndex(idx int) error {
+	sz := len(n.Kids)
+	if idx >= 0 && idx < sz {
+		return nil
+	}
+	return fmt.Errorf("ki %v: invalid index: %v -- len = %v", n.PathUnique(), idx, sz)
 }
 
-// Child returns the child at given index -- false if index is invalid.
-// See methods on ki.Slice for more ways to acces.
-func (n *Node) Child(idx int) (Ki, bool) {
-	return n.Kids.Elem(idx)
-}
-
-// KnownChild returns the child at given index without checking index --
-// use when index is known to be good.
-func (n *Node) KnownChild(idx int) Ki {
+// Child returns the child at given index -- will panic if index is invalid.
+// See methods on ki.Slice for more ways to access.
+func (n *Node) Child(idx int) Ki {
 	return n.Kids[idx]
 }
 
-// ChildByName returns first element that has given name, false if not
-// found. startIdx arg allows for optimized bidirectional find if you have
+// ChildTry returns the child at given index.  Try version returns error if index is invalid.
+// See methods on ki.Slice for more ways to acces.
+func (n *Node) ChildTry(idx int) (Ki, error) {
+	if err := n.IsValidIndex(idx); err != nil {
+		return nil, err
+	}
+	return n.Kids[idx], nil
+}
+
+// ChildByName returns first element that has given name, nil if not found.
+// startIdx arg allows for optimized bidirectional find if you have
 // an idea where it might be -- can be key speedup for large lists -- pass
 // -1 to start in the middle (good default).
-func (n *Node) ChildByName(name string, startIdx int) (Ki, bool) {
+func (n *Node) ChildByName(name string, startIdx int) Ki {
 	return n.Kids.ElemByName(name, startIdx)
 }
 
-// KnownChildByName returns first element that has given name, without
-// returning the bool check value -- use when named element is known to
-// exist, and will be directly converted to another type, so the multiple
-// return values are cumbersome.  nil is returned if it actually does not
-// exist. See ChildByName for info on startIdx.
-func (n *Node) KnownChildByName(name string, startIdx int) Ki {
-	return n.Kids.KnownElemByName(name, startIdx)
+// ChildByNameTry returns first element that has given name, error if not found.
+// startIdx arg allows for optimized bidirectional find if you have
+// an idea where it might be -- can be key speedup for large lists -- pass
+// -1 to start in the middle (good default).
+func (n *Node) ChildByNameTry(name string, startIdx int) (Ki, error) {
+	idx, ok := n.Kids.IndexByName(name, startIdx)
+	if !ok {
+		return nil, fmt.Errorf("ki %v: child named: %v not found", n.PathUnique(), name)
+	}
+	return n.Kids[idx], nil
+}
+
+// ChildByType returns first element that has given type, nil if not found.
+// If embeds is true, then it looks for any type that embeds the given type
+// at any level of anonymous embedding.
+// startIdx arg allows for optimized bidirectional find if you have
+// an idea where it might be -- can be key speedup for large lists -- pass
+// -1 to start in the middle (good default).
+func (n *Node) ChildByType(t reflect.Type, embeds bool, startIdx int) Ki {
+	return n.Kids.ElemByType(t, embeds, startIdx)
+}
+
+// ChildByTypeTry returns first element that has given name -- Try version
+// returns error message if not found.
+// If embeds is true, then it looks for any type that embeds the given type
+// at any level of anonymous embedding.
+// startIdx arg allows for optimized bidirectional find if you have
+// an idea where it might be -- can be key speedup for large lists -- pass
+// -1 to start in the middle (good default).
+func (n *Node) ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error) {
+	idx, ok := n.Kids.IndexByType(t, embeds, startIdx)
+	if !ok {
+		return nil, fmt.Errorf("ki %v: child of type: %t not found", n.PathUnique(), t)
+	}
+	return n.Kids[idx], nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -519,7 +586,7 @@ func findPathChild(k Ki, child string) (int, bool) {
 		if idx < 0 { // from end
 			idx = len(*k.Children()) + idx
 		}
-		if !k.Children().IsValidIndex(idx) {
+		if k.Children().IsValidIndex(idx) != nil {
 			return idx, false
 		}
 		return idx, true
@@ -532,8 +599,8 @@ func findPathChild(k Ki, child string) (int, bool) {
 // to this node is subtracted from the start of the path if present there.
 // There is also support for [idx] index-based access for any given path
 // element, for cases when indexes are more useful than names.
-// Returns false if not found.
-func (n *Node) FindPathUnique(path string) (Ki, bool) {
+// Returns nil if not found.
+func (n *Node) FindPathUnique(path string) Ki {
 	if n.Par != nil { // we are not root..
 		myp := n.PathUnique()
 		path = strings.TrimPrefix(path, myp)
@@ -552,26 +619,40 @@ func (n *Node) FindPathUnique(path string) (Ki, bool) {
 			// find the child first, then the fields
 			idx, ok := findPathChild(curn, fels[0])
 			if !ok {
-				return nil, false
+				return nil
 			}
 			curn = (*(curn.Children()))[idx]
 			for i := 1; i < len(fels); i++ {
 				fe := fels[i]
-				fk, ok := curn.KiFieldByName(fe)
-				if !ok {
-					return nil, false
+				fk := curn.KiFieldByName(fe)
+				if fk == nil {
+					return nil
 				}
 				curn = fk
 			}
 		} else {
 			idx, ok := findPathChild(curn, pe)
 			if !ok {
-				return nil, false
+				return nil
 			}
 			curn = (*(curn.Children()))[idx]
 		}
 	}
-	return curn, true
+	return curn
+}
+
+// FindPathUniqueTry returns Ki object at given unique path, starting from
+// this node (e.g., Root()) -- if this node is not the root, then the path
+// to this node is subtracted from the start of the path if present there.
+// There is also support for [idx] index-based access for any given path
+// element, for cases when indexes are more useful than names.
+// Returns error if not found.
+func (n *Node) FindPathUniqueTry(path string) (Ki, error) {
+	fk := n.FindPathUnique(path)
+	if fk != nil {
+		return fk, nil
+	}
+	return nil, fmt.Errorf("ki %v: element at path: %v not found", n.PathUnique(), path)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -767,8 +848,8 @@ func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
 // names -- this is for high-volume child creation -- call UniquifyNames
 // afterward if needed, but better to ensure that names are unique up front.
 func (n *Node) SetChild(kid Ki, idx int, name string) error {
-	if !n.Kids.IsValidIndex(idx) {
-		return fmt.Errorf("ki.SetChild for node: %v index invalid: %v -- size: %v", n.PathUnique(), idx, len(n.Kids))
+	if err := n.Kids.IsValidIndex(idx); err != nil {
+		return err
 	}
 	if name != "" {
 		kid.InitName(kid, name)
@@ -782,28 +863,28 @@ func (n *Node) SetChild(kid Ki, idx int, name string) error {
 
 // MoveChild moves child from one position to another in the list of
 // children (see also corresponding Slice method, which does not
-// signal, like this one does).  Returns false if either index is invalid.
-func (n *Node) MoveChild(from, to int) bool {
+// signal, like this one does).  Returns error if either index is invalid.
+func (n *Node) MoveChild(from, to int) error {
 	updt := n.UpdateStart()
-	ok := n.Kids.Move(from, to)
-	if ok {
+	err := n.Kids.Move(from, to)
+	if err == nil {
 		n.SetFlag(int(ChildMoved))
 	}
 	n.UpdateEnd(updt)
-	return ok
+	return err
 }
 
 // SwapChildren swaps children between positions (see also corresponding
-// Slice method which does not signal like this one does).  Returns false if
+// Slice method which does not signal like this one does).  Returns error if
 // either index is invalid.
-func (n *Node) SwapChildren(i, j int) bool {
+func (n *Node) SwapChildren(i, j int) error {
 	updt := n.UpdateStart()
-	ok := n.Kids.Swap(i, j)
-	if ok {
+	err := n.Kids.Swap(i, j)
+	if err == nil {
 		n.SetFlag(int(ChildMoved))
 	}
 	n.UpdateEnd(updt)
-	return ok
+	return err
 }
 
 // SetNChildren ensures that there are exactly n children, deleting any
@@ -864,16 +945,16 @@ func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, up
 //////////////////////////////////////////////////////////////////////////
 //  Deleting Children
 
-// DeleteChildAtIndex deletes child at given index (returns false for
+// DeleteChildAtIndex deletes child at given index (returns error for
 // invalid index) -- if child's parent = this node, then will call
 // SetParent(nil), so to transfer to another list, set new parent first --
 // destroy will add removed child to deleted list, to be destroyed later
 // -- otherwise child remains intact but parent is nil -- could be
 // inserted elsewhere.
-func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
-	child, ok := n.Child(idx)
-	if !ok {
-		return false
+func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
+	child, err := n.ChildTry(idx)
+	if err != nil {
+		return err
 	}
 	updt := n.UpdateStart()
 	n.SetFlag(int(ChildDeleted))
@@ -893,33 +974,35 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) bool {
 	}
 	child.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
 	n.UpdateEnd(updt)
-	return true
+	return nil
 }
 
-// DeleteChild deletes child node, returning false if not found in
+// DeleteChild deletes child node, returning error if not found in
 // Children.  If child's parent = this node, then will call
 // SetParent(nil), so to transfer to another list, set new parent
 // first. See DeleteChildAtIndex for destroy info.
-func (n *Node) DeleteChild(child Ki, destroy bool) bool {
+func (n *Node) DeleteChild(child Ki, destroy bool) error {
+	if child == nil {
+		return errors.New("ki DeleteChild: child is nil")
+	}
 	idx, ok := n.Kids.IndexOf(child, 0)
 	if !ok {
-		return false
+		return fmt.Errorf("ki %v: child: %v not found", n.PathUnique(), child.PathUnique())
 	}
 	return n.DeleteChildAtIndex(idx, destroy)
 }
 
-// DeleteChildByName deletes child node by name -- returns child, false
+// DeleteChildByName deletes child node by name -- returns child, error
 // if not found -- if child's parent = this node, then will call
 // SetParent(nil), so to transfer to another list, set new parent first.
 // See DeleteChildAtIndex for destroy info.
-func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, bool) {
+func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
 	idx, ok := n.Kids.IndexByName(name, 0)
 	if !ok {
-		return nil, false
+		return nil, fmt.Errorf("ki %v: child named: %v not found", n.PathUnique(), name)
 	}
 	child := n.Kids[idx]
-	n.DeleteChildAtIndex(idx, destroy)
-	return child, true
+	return child, n.DeleteChildAtIndex(idx, destroy)
 }
 
 // DeleteChildren deletes all children nodes -- destroy will add removed
@@ -1646,28 +1729,27 @@ func (n *Node) DisconnectAll() {
 
 // SetField sets given field name to given value, using very robust
 // conversion routines to e.g., convert from strings to numbers, and
-// vice-versa, automatically -- returns true if successfully set --
+// vice-versa, automatically.  Returns error if not successfully set.
 // wrapped in UpdateStart / End and sets the FieldUpdated flag.
-func (n *Node) SetField(field string, val interface{}) bool {
+func (n *Node) SetField(field string, val interface{}) error {
 	fv := kit.FlatFieldValueByName(n.This(), field)
 	if !fv.IsValid() {
-		log.Printf("ki.SetField, could not find field %v on node %v\n", field, n.PathUnique())
-		return false
+		return fmt.Errorf("ki.SetField, could not find field %v on node %v", field, n.PathUnique())
 	}
 	updt := n.UpdateStart()
-	ok := false
+	var err error
 	if field == "Nm" {
 		n.SetName(kit.ToString(val))
 		n.SetFlag(int(FieldUpdated))
-		ok = true
 	} else {
-		ok = kit.SetRobust(kit.PtrValue(fv).Interface(), val)
-		if ok {
+		if kit.SetRobust(kit.PtrValue(fv).Interface(), val) {
 			n.SetFlag(int(FieldUpdated))
+		} else {
+			err = fmt.Errorf("ki.SetField, SetRobust failed to set field %v on node %v to value: %v", field, n.PathUnique(), val)
 		}
 	}
 	n.UpdateEnd(updt)
-	return ok
+	return err
 }
 
 // SetFieldDown sets given field name to given value, all the way down the
@@ -1696,6 +1778,16 @@ func (n *Node) SetFieldUp(field string, val interface{}) {
 // see KiFieldByName for Ki fields) -- returns nil if not found.
 func (n *Node) FieldByName(field string) interface{} {
 	return kit.FlatFieldInterfaceByName(n.This(), field)
+}
+
+// FieldByNameTry returns field value by name (can be any type of field --
+// see KiFieldByName for Ki fields) -- returns error if not found.
+func (n *Node) FieldByNameTry(field string) (interface{}, error) {
+	fld := n.FieldByName(field)
+	if fld != nil {
+		return fld, nil
+	}
+	return nil, fmt.Errorf("ki %v: field named: %v not found", n.PathUnique(), field)
 }
 
 // FieldTag returns given field tag for that field, or empty string if not
@@ -1884,8 +1976,8 @@ func (n *Node) SetPtrsFmPaths() {
 				vfi := kit.PtrValue(fieldVal).Interface()
 				switch vfv := vfi.(type) {
 				case *Ptr:
-					if !vfv.PtrFmPath(root) {
-						log.Printf("Ki Node SetPtrsFmPaths: could not find path: %v in root obj: %v", vfv.Path, root.Name())
+					if err := vfv.PtrFmPath(root); err != nil {
+						log.Println(err)
 					}
 				}
 			}
