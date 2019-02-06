@@ -172,7 +172,7 @@ func (sy *Symbol) FindAnyChildren(seed string, scope1, scope2 SymMap, kids *SymM
 		}
 	}
 	if seed != "" {
-		sym.Children.FindNamePrefix(seed, kids)
+		sym.Children.FindNamePrefixRecursive(seed, kids)
 	} else {
 		kids.CopyFrom(sym.Children)
 	}

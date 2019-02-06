@@ -264,7 +264,6 @@ func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
 // Partial lookups
 
 // FindNamePrefix looks for given symbol name prefix within this map
-// and any children on the map.
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 	noCase := true
@@ -283,8 +282,30 @@ func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 			(*matches)[sy.Name] = sy
 		}
 	}
+}
+
+// FindNamePrefixRecursive looks for given symbol name prefix within this map
+// and any children on the map.
+// adds to given matches map (which can be nil), for more efficient recursive use
+func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
+	noCase := true
+	if complete.HasUpperCase(seed) {
+		noCase = false
+	}
+	for _, sy := range *sm {
+		nm := sy.Name
+		if noCase {
+			nm = strings.ToLower(nm)
+		}
+		if strings.HasPrefix(nm, seed) {
+			if *matches == nil {
+				*matches = make(SymMap)
+			}
+			(*matches)[sy.Name] = sy
+		}
+	}
 	for _, ss := range *sm {
-		ss.Children.FindNamePrefix(seed, matches)
+		ss.Children.FindNamePrefixRecursive(seed, matches)
 	}
 }
 

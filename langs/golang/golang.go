@@ -218,7 +218,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	if scope != "" {
 		scsym, got := fs.FindNameScoped(scope, conts)
 		if got {
-			gotKids := fs.FindAnyChildren(scsym, name, conts, &matches)
+			gotKids := fs.FindChildren(scsym, name, conts, &matches)
 			if !gotKids {
 				scope = ""
 				md.Seed = name
