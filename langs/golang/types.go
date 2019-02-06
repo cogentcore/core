@@ -66,8 +66,8 @@ func (gl *GoLang) TypesFromAst(fs *pi.FileState, pkg *syms.Symbol) {
 		if ty.Ast == nil {
 			continue // shouldn't be
 		}
-		tyast, ok := ty.Ast.(*parse.Ast).ChildAst(1)
-		if !ok {
+		tyast, err := ty.Ast.(*parse.Ast).ChildAstTry(1)
+		if err != nil {
 			continue
 		}
 		gl.TypeFromAst(fs, pkg, ty, tyast)
@@ -206,7 +206,7 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 			case "MethSpecAnonQual":
 				ty.Els.Add(fsrc, fsrc) // anon two are same
 			case "MethSpecName":
-				if nm, ok := fld.ChildAst(0); ok {
+				if nm, err := fld.ChildAstTry(0); err == nil {
 					mty := syms.NewType(ty.Name+":"+nm.Nm, syms.Method)
 					pkg.Types.Add(mty) // add interface methods as new types..
 					gl.FuncTypeFromAst(fs, pkg, fld, mty)
@@ -227,15 +227,15 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 
 // SubTypeFromAst returns a subtype from child ast at given index, nil if failed
 func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) *syms.Type {
-	sast, ok := ast.ChildAst(idx)
-	if !ok {
+	sast, err := ast.ChildAstTry(idx)
+	if err != nil {
 		if TraceTypes {
-			fmt.Printf("child not found at index: %v in ast node: %v\n", idx, ast.PathUnique())
+			fmt.Println(err)
 		}
 		return nil
 	}
 	sty := &syms.Type{}
-	if ok = gl.TypeFromAst(fs, pkg, sty, sast); ok {
+	if ok := gl.TypeFromAst(fs, pkg, sty, sast); ok {
 		return sty
 	}
 	// will have err msg already
@@ -244,10 +244,10 @@ func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.
 
 // NamesFromAst returns a slice of name(s) from namelist nodes
 func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) []string {
-	sast, ok := ast.ChildAst(idx)
-	if !ok {
+	sast, err := ast.ChildAstTry(idx)
+	if err != nil {
 		if TraceTypes {
-			fmt.Printf("child not found at index: %v in ast node: %v\n", idx, ast.PathUnique())
+			fmt.Println(err)
 		}
 		return nil
 	}
@@ -265,17 +265,17 @@ func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.As
 // FuncTypeFromAst initializes a function type from ast -- type can either be anon
 // or a named type -- if anon then the name is the full type signature without param names
 func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, fty *syms.Type) {
-	pars, ok := ast.ChildAst(0)
-	if !ok {
+	pars, err := ast.ChildAstTry(0)
+	if err != nil {
 		if TraceTypes {
-			fmt.Printf("params not found at index: %v in ast node: %v\n", 0, ast.PathUnique())
+			fmt.Println(err)
 		}
 		return
 	}
 	poff := 0
 	if pars.Nm == "Name" && len(ast.Kids) > 1 {
 		poff = 1
-		pars = ast.KnownChildAst(1)
+		pars = ast.ChildAst(1)
 	}
 	npars := len(pars.Kids)
 	if npars > 0 && pars.Nm == "SigParams" {
@@ -287,10 +287,10 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 	}
 	nrvals := 0
 	if len(ast.Kids) >= poff+2 {
-		rvals := ast.KnownChildAst(poff + 1)
+		rvals := ast.ChildAst(poff + 1)
 		nrvals := len(rvals.Kids)
 		if nrvals == 1 { // single rval, unnamed, has type directly..
-			rval := rvals.KnownChildAst(0)
+			rval := rvals.ChildAst(0)
 			if rval.Nm != "ParName" {
 				nrvals = 1
 				rtyp := gl.SubTypeFromAst(fs, pkg, rvals, 0)

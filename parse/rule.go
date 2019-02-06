@@ -592,7 +592,7 @@ func (pr *Rule) StartParse(ps *State) *Rule {
 	var parAst *Ast
 	scope := lex.Reg{St: ps.Pos}
 	if ps.Ast.HasChildren() {
-		parAst = ps.Ast.KnownChild(0).(*Ast)
+		parAst = ps.Ast.ChildAst(0)
 	} else {
 		parAst = ps.Ast.AddNewChild(KiT_Ast, kpr.Name()).(*Ast)
 		ok := false
@@ -1482,10 +1482,9 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	apath := useAst.PathUnique()
 	var node ki.Ki
 	var adnl []ki.Ki // additional nodes
-	ok := false
+	var err error
 	if act.Path == "" {
 		node = useAst
-		ok = true
 	} else if andidx := strings.Index(act.Path, "&"); andidx >= 0 {
 		pths := strings.Split(act.Path, "&")
 		for _, p := range pths {
@@ -1496,11 +1495,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			}
 			var nd ki.Ki
 			if p[:3] == "../" {
-				nd, ok = parAst.FindPathUnique(p[3:])
+				nd, err = parAst.FindPathUniqueTry(p[3:])
 			} else {
-				nd, ok = useAst.FindPathUnique(p)
+				nd, err = useAst.FindPathUniqueTry(p)
 			}
-			if ok {
+			if err == nil {
 				if node == nil {
 					node = nd
 				}
@@ -1525,11 +1524,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 				p = strings.TrimSuffix(p, "...")
 			}
 			if p[:3] == "../" {
-				node, ok = parAst.FindPathUnique(p[3:])
+				node, err = parAst.FindPathUniqueTry(p[3:])
 			} else {
-				node, ok = useAst.FindPathUnique(p)
+				node, err = useAst.FindPathUniqueTry(p)
 			}
-			if ok {
+			if err == nil {
 				if findAll {
 					pn := node.Parent()
 					for _, pk := range *pn.Children() {
