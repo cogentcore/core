@@ -134,8 +134,8 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 	c.Vp = vp
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
 	pvp.SetFlag(int(VpFlagCompleter))
-	pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	oswin.SendCustomEvent(vp.Win.OSWin, nil)         // needs an extra event to show popup
+	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	oswin.SendCustomEvent(vp.Win.OSWin, nil)    // needs an extra event to show popup
 }
 
 // Cancel cancels any pending completion -- call when new events nullify prior completions

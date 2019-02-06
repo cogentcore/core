@@ -824,17 +824,17 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 // part style props, using given props if not set in object props
 func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
-		ic := wb.Parts.KnownChild(icIdx).(*Icon)
+		ic := wb.Parts.Child(icIdx).(*Icon)
 		if set, _ := ic.SetIcon(icnm); set || wb.NeedsFullReRender() {
 			wb.StylePart(Node2D(ic))
 		}
 	}
 	if lbIdx >= 0 {
-		lbl := wb.Parts.KnownChild(lbIdx).(*Label)
+		lbl := wb.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != txt {
 			wb.StylePart(Node2D(lbl))
 			if icIdx >= 0 {
-				wb.StylePart(wb.Parts.KnownChild(lbIdx - 1).(Node2D)) // also get the space
+				wb.StylePart(wb.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			}
 			lbl.SetText(txt)
 		}
@@ -844,8 +844,8 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icId
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
 func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) bool {
 	if IconName(icnm).IsValid() {
-		ick, ok := wb.Parts.ChildByName("icon", 0)
-		if !ok {
+		ick := wb.Parts.ChildByName("icon", 0)
+		if ick == nil {
 			return true
 		}
 		ic := ick.(*Icon)
@@ -853,14 +853,14 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 			return true
 		}
 	} else {
-		_, ok := wb.Parts.ChildByName("icon", 0)
-		if ok { // need to remove it
+		cn := wb.Parts.ChildByName("icon", 0)
+		if cn != nil { // need to remove it
 			return true
 		}
 	}
 	if txt != "" {
-		lblk, ok := wb.Parts.ChildByName("label", 2)
-		if !ok {
+		lblk := wb.Parts.ChildByName("label", 2)
+		if lblk == nil {
 			return true
 		}
 		lbl := lblk.(*Label)
@@ -869,8 +869,8 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 			return true
 		}
 	} else {
-		_, ok := wb.Parts.ChildByName("label", 2)
-		if ok {
+		cn := wb.Parts.ChildByName("label", 2)
+		if cn != nil {
 			return true
 		}
 	}
@@ -880,11 +880,11 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm string, txt string) boo
 // SetFullReRenderIconLabel sets the icon and label to be re-rendered, needed
 // when styles change
 func (wb *PartsWidgetBase) SetFullReRenderIconLabel() {
-	if ick, ok := wb.Parts.ChildByName("icon", 0); ok {
+	if ick := wb.Parts.ChildByName("icon", 0); ick != nil {
 		ic := ick.(*Icon)
 		ic.SetFullReRender()
 	}
-	if lblk, ok := wb.Parts.ChildByName("label", 2); ok {
+	if lblk := wb.Parts.ChildByName("label", 2); lblk != nil {
 		lbl := lblk.(*Label)
 		lbl.SetFullReRender()
 	}

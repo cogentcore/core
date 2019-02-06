@@ -532,7 +532,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 		switch vv.OwnKind {
 		case reflect.Struct:
 			if kiv, ok := vv.Owner.(ki.Ki); ok {
-				rval = kiv.SetField(vv.Field.Name, val)
+				rval = (kiv.SetField(vv.Field.Name, val) == nil)
 
 			} else {
 				rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)

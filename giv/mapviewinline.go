@@ -100,8 +100,8 @@ func (mv *MapViewInline) ConfigParts() {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
 			mvv.SetChanged()
 		})
-		keyw := mv.Parts.KnownChild(i * 2).(gi.Node2D)
-		widg := mv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
+		keyw := mv.Parts.Child(i * 2).(gi.Node2D)
+		widg := mv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
@@ -110,8 +110,8 @@ func (mv *MapViewInline) ConfigParts() {
 			keyw.AsNode2D().SetInactive()
 		}
 	}
-	adack, ok := mv.Parts.Children().ElemFromEnd(1)
-	if ok {
+	adack, err := mv.Parts.Children().ElemFromEndTry(1)
+	if err == nil {
 		adac := adack.(*gi.Action)
 		adac.SetIcon("plus")
 		adac.Tooltip = "add an entry to the map"
@@ -120,8 +120,8 @@ func (mv *MapViewInline) ConfigParts() {
 			mvv.MapAdd()
 		})
 	}
-	edack, ok := mv.Parts.Children().ElemFromEnd(0)
-	if ok {
+	edack, err := mv.Parts.Children().ElemFromEndTry(0)
+	if err == nil {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("edit")
 		edac.Tooltip = "map edit dialog"
@@ -139,8 +139,8 @@ func (mv *MapViewInline) ConfigParts() {
 				}
 			}
 			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: tynm, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave}, nil, nil)
-			mvvvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
-			if ok {
+			mvvvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
+			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)
 				mvvv.MapValView = mvv.MapValView
 				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

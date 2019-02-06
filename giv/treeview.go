@@ -601,7 +601,7 @@ func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 		return tv.MoveDownSibling(selMode)
 	} else {
 		if tv.HasChildren() {
-			nn := tv.KnownChild(0).Embed(KiT_TreeView).(*TreeView)
+			nn := tv.Child(0).Embed(KiT_TreeView).(*TreeView)
 			if nn != nil {
 				nn.SelectUpdate(selMode)
 				return nn
@@ -634,7 +634,7 @@ func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
 	}
 	myidx, ok := tv.IndexInParent()
 	if ok && myidx < len(*tv.Par.Children())-1 {
-		nn := tv.Par.KnownChild(myidx + 1).Embed(KiT_TreeView).(*TreeView)
+		nn := tv.Par.Child(myidx + 1).Embed(KiT_TreeView).(*TreeView)
 		if nn != nil {
 			nn.SelectUpdate(selMode)
 			return nn
@@ -653,7 +653,7 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 	}
 	myidx, ok := tv.IndexInParent()
 	if ok && myidx > 0 {
-		nn := tv.Par.KnownChild(myidx - 1).Embed(KiT_TreeView).(*TreeView)
+		nn := tv.Par.Child(myidx - 1).Embed(KiT_TreeView).(*TreeView)
 		if nn != nil {
 			return nn.MoveToLastChild(selMode)
 		}
@@ -763,8 +763,8 @@ func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 		return nil
 	}
 	if !tv.IsClosed() && tv.HasChildren() {
-		nnk, ok := tv.Children().ElemFromEnd(0)
-		if ok {
+		nnk, err := tv.Children().ElemFromEndTry(0)
+		if err == nil {
 			nn := nnk.Embed(KiT_TreeView).(*TreeView)
 			return nn.MoveToLastChild(selMode)
 		}
@@ -1006,7 +1006,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				tvv.SetChanged()
 				par.UpdateEnd(updt)
 				if ski != nil {
-					if tvk, got := tvv.ChildByName("tv_"+ski.Name(), 0); got {
+					if tvk := tvv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
 						stv.SelectAction(mouse.SelectOne)
 					}
@@ -1045,7 +1045,7 @@ func (tv *TreeView) SrcAddChild() {
 				sk.UpdateEnd(updt)
 				if ski != nil {
 					tvv.Open()
-					if tvk, got := tvv.ChildByName("tv_"+ski.Name(), 0); got {
+					if tvk := tvv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 						stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
 						stv.SelectAction(mouse.SelectOne)
 					}
@@ -1103,7 +1103,7 @@ func (tv *TreeView) SrcDuplicate() {
 	nwkid.SetName(nm)
 	par.InsertChild(nwkid, myidx+1)
 	tvpar.SetChanged()
-	if tvk, got := tvpar.ChildByName("tv_"+nm, 0); got {
+	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
 		stv.SelectAction(mouse.SelectOne)
 	}
@@ -1334,7 +1334,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	var ski ki.Ki
 	for i, ns := range sl {
 		if mod != dnd.DropMove {
-			if _, has := par.ChildByName(ns.Name(), 0); has {
+			if cn := par.ChildByName(ns.Name(), 0); cn != nil {
 				ns.SetName(ns.Name() + "_Copy")
 			}
 		}
@@ -1346,7 +1346,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	par.UpdateEnd(updt)
 	tvpar.SetChanged()
 	if ski != nil {
-		if tvk, got := tvpar.ChildByName("tv_"+ski.Name(), 0); got {
+		if tvk := tvpar.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 			stv, _ := tvk.Embed(KiT_TreeView).(*TreeView)
 			stv.SelectAction(mouse.SelectOne)
 		}
@@ -1432,8 +1432,8 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 	for _, d := range md {
 		if d.Type == filecat.TextPlain { // link
 			path := string(d.Data)
-			sn, ok := sroot.FindPathUnique(path)
-			if ok {
+			sn := sroot.FindPathUnique(path)
+			if sn != nil {
 				sn.Delete(true)
 			}
 		}
@@ -1731,24 +1731,24 @@ var TVBranchProps = ki.Props{
 
 // BranchPart returns the branch in parts, if it exists
 func (tv *TreeView) BranchPart() (*gi.CheckBox, bool) {
-	if icc, ok := tv.Parts.ChildByName("branch", 0); ok {
-		return icc.(*gi.CheckBox), ok
+	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
+		return icc.(*gi.CheckBox), true
 	}
 	return nil, false
 }
 
 // IconPart returns the icon in parts, if it exists
 func (tv *TreeView) IconPart() (*gi.Icon, bool) {
-	if icc, ok := tv.Parts.ChildByName("icon", 1); ok {
-		return icc.(*gi.Icon), ok
+	if icc := tv.Parts.ChildByName("icon", 1); icc != nil {
+		return icc.(*gi.Icon), true
 	}
 	return nil, false
 }
 
 // LabelPart returns the label in parts, if it exists
 func (tv *TreeView) LabelPart() (*gi.Label, bool) {
-	if lbl, ok := tv.Parts.ChildByName("label", 1); ok {
-		return lbl.(*gi.Label), ok
+	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
+		return lbl.(*gi.Label), true
 	}
 	return nil, false
 }

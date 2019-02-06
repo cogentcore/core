@@ -160,8 +160,8 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 // SliceViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
 func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 	frame := dlg.Frame()
-	sv, ok := frame.ChildByName("slice-view", 0)
-	if ok {
+	sv := frame.ChildByName("slice-view", 0)
+	if sv != nil {
 		svv := sv.(*SliceView)
 		return svv.SelectedIdx
 	}
@@ -243,8 +243,8 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 // TableViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
 func TableViewSelectDialogValue(dlg *gi.Dialog) int {
 	frame := dlg.Frame()
-	sv, ok := frame.ChildByName("tableview", 0)
-	if ok {
+	sv := frame.ChildByName("tableview", 0)
+	if sv != nil {
 		svv := sv.(*TableView)
 		rval := svv.SelectedIdx
 		return rval
@@ -327,8 +327,8 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki,
 // ColorViewDialogValue gets the color from the dialog
 func ColorViewDialogValue(dlg *gi.Dialog) gi.Color {
 	frame := dlg.Frame()
-	cvvvk, ok := frame.Children().ElemByType(KiT_ColorView, true, 2)
-	if ok {
+	cvvvk := frame.ChildByType(KiT_ColorView, true, 2)
+	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
 		return cvvv.Color
 	}
@@ -375,8 +375,8 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filt
 // FileViewDialogValue gets the full path of selected file
 func FileViewDialogValue(dlg *gi.Dialog) string {
 	frame := dlg.Frame()
-	fvk, ok := frame.ChildByName("file-view", 0)
-	if ok {
+	fvk := frame.ChildByName("file-view", 0)
+	if fvk != nil {
 		fv := fvk.(*FileView)
 		fn := fv.SelectedFile()
 		return fn

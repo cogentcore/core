@@ -236,7 +236,7 @@ func (fb *FileBrowse) TitleWidget() (*gi.Label, int) {
 	if !ok {
 		return nil, -1
 	}
-	return fb.KnownChild(idx).(*gi.Label), idx
+	return fb.Child(idx).(*gi.Label), idx
 }
 
 // SplitView returns the main SplitView
@@ -245,14 +245,14 @@ func (fb *FileBrowse) SplitView() (*gi.SplitView, int) {
 	if !ok {
 		return nil, -1
 	}
-	return fb.KnownChild(idx).(*gi.SplitView), idx
+	return fb.Child(idx).(*gi.SplitView), idx
 }
 
 // FileTree returns the main FileTree
 func (fb *FileBrowse) FileTree() *giv.TreeView {
 	split, _ := fb.SplitView()
 	if split != nil {
-		tv := split.KnownChild(0).KnownChild(0).(*giv.TreeView)
+		tv := split.Child(0).Child(0).(*giv.TreeView)
 		return tv
 	}
 	return nil
@@ -267,7 +267,7 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
 	split, _ := fb.SplitView()
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
-		svk := split.KnownChild(stidx + idx).KnownChild(0)
+		svk := split.Child(stidx + idx).Child(0)
 		if !svk.TypeEmbeds(giv.KiT_TextView) {
 			log.Printf("FileBrowse: text view not at index: %v\n", idx)
 			return nil
@@ -283,7 +283,7 @@ func (fb *FileBrowse) ToolBar() *gi.ToolBar {
 	if !ok {
 		return nil
 	}
-	return fb.KnownChild(idx).(*gi.ToolBar)
+	return fb.Child(idx).(*gi.ToolBar)
 }
 
 // ConfigToolbar adds a FileBrowse toolbar.
@@ -323,12 +323,12 @@ func (fb *FileBrowse) ConfigSplitView() {
 	config := fb.SplitViewConfig()
 	mods, updt := split.ConfigChildren(config, true)
 	if mods {
-		ftfr := split.KnownChild(0).(*gi.Frame)
+		ftfr := split.Child(0).(*gi.Frame)
 		ft := ftfr.AddNewChild(giv.KiT_FileTreeView, "filetree").(*giv.FileTreeView)
 		ft.SetRootNode(&fb.Files)
 
 		for i := 0; i < fb.NTextViews; i++ {
-			txly := split.KnownChild(1 + i).(*gi.Layout)
+			txly := split.Child(1 + i).(*gi.Layout)
 			txly.SetStretchMaxWidth()
 			txly.SetStretchMaxHeight()
 			txly.SetMinPrefWidth(units.NewValue(20, units.Ch))

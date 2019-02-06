@@ -337,7 +337,7 @@ func (sc *SpellCorrect) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 		})
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
 	pvp.SetFlag(int(VpFlagCorrector))
-	pvp.KnownChild(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 }
 
 // SpellCorrect emits a signal to let subscribers know that the user has made a

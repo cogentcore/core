@@ -322,8 +322,8 @@ func (bb *ButtonBase) OpenMenu() bool {
 	if pos.X == 0 && pos.Y == 0 { // offscreen
 		pos = bb.ObjBBox.Max
 	}
-	indic, ok := bb.Parts.ChildByName("indicator", 3)
-	if ok {
+	indic := bb.Parts.ChildByName("indicator", 3)
+	if indic != nil {
 		pos = KiToNode2DBase(indic).WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
 			pos = KiToNode2DBase(indic).ObjBBox.Min
@@ -367,13 +367,13 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	if indIdx < 0 {
 		return
 	}
-	ic := bb.Parts.KnownChild(indIdx).(*Icon)
+	ic := bb.Parts.Child(indIdx).(*Icon)
 	icnm := string(bb.Indicator)
 	if IconName(icnm).IsNil() {
 		icnm = "widget-wedge-down"
 	}
 	if set, _ := IconName(icnm).SetIcon(ic); set {
-		bb.StylePart(bb.Parts.KnownChild(indIdx - 1).(Node2D)) // also get the stretch
+		bb.StylePart(bb.Parts.Child(indIdx - 1).(Node2D)) // also get the stretch
 		bb.StylePart(Node2D(ic))
 	}
 }
@@ -857,15 +857,15 @@ func (cb *CheckBox) ConfigParts() {
 		config.Add(KiT_Label, "label")
 	}
 	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names
-	ist := cb.Parts.KnownChild(icIdx).(*Layout)
+	ist := cb.Parts.Child(icIdx).(*Layout)
 	if mods {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
-		icon := ist.KnownChild(0).(*Icon)
+		icon := ist.Child(0).(*Icon)
 		if set, _ := cb.Icon.SetIcon(icon); set {
 			cb.StylePart(Node2D(icon))
 		}
-		icoff := ist.KnownChild(1).(*Icon)
+		icoff := ist.Child(1).(*Icon)
 		if set, _ := cb.IconOff.SetIcon(icoff); set {
 			cb.StylePart(Node2D(icoff))
 		}
@@ -876,9 +876,9 @@ func (cb *CheckBox) ConfigParts() {
 		ist.StackTop = 1
 	}
 	if lbIdx >= 0 {
-		lbl := cb.Parts.KnownChild(lbIdx).(*Label)
+		lbl := cb.Parts.Child(lbIdx).(*Label)
 		if lbl.Text != cb.Text {
-			cb.StylePart(cb.Parts.KnownChild(lbIdx - 1).(Node2D)) // also get the space
+			cb.StylePart(cb.Parts.Child(lbIdx - 1).(Node2D)) // also get the space
 			cb.StylePart(Node2D(lbl))
 			lbl.SetText(cb.Text)
 		}
@@ -893,9 +893,9 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 		cb.This().(ButtonWidget).ConfigParts()
 	}
 	icIdx := 0 // always there
-	ist := cb.Parts.KnownChild(icIdx).(*Layout)
+	ist := cb.Parts.Child(icIdx).(*Layout)
 	if cb.Icon.IsValid() {
-		icon := ist.KnownChild(0).(*Icon)
+		icon := ist.Child(0).(*Icon)
 		if !icon.HasChildren() || icon.UniqueNm != string(cb.Icon) || cb.NeedsFullReRender() {
 			if set, _ := cb.Icon.SetIcon(icon); set {
 				cb.StylePart(Node2D(icon))
@@ -903,7 +903,7 @@ func (cb *CheckBox) ConfigPartsIfNeeded() {
 		}
 	}
 	if cb.IconOff.IsValid() {
-		icoff := ist.KnownChild(1).(*Icon)
+		icoff := ist.Child(1).(*Icon)
 		if !icoff.HasChildren() || icoff.UniqueNm != string(cb.IconOff) || cb.NeedsFullReRender() {
 			if set, _ := cb.IconOff.SetIcon(icoff); set {
 				cb.StylePart(Node2D(icoff))

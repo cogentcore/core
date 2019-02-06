@@ -284,14 +284,14 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
 
-	amen := win.MainMenu.KnownChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
 	// note: use KeyFunMenu* for standard shortcuts
 	// Command in shortcuts is automatically translated into Control for
 	// Linux, Windows or Meta for MacOS
-	fmen := win.MainMenu.KnownChildByName("File", 0).(*gi.Action)
+	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -315,7 +315,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			win.OSWin.CloseReq()
 		})
 
-	emen := win.MainMenu.KnownChildByName("Edit", 1).(*gi.Action)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 

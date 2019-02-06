@@ -279,7 +279,7 @@ func (vp *Viewport2D) DeletePopup() {
 	if !vp.HasFlag(int(VpFlagPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {
-			cli, _ := KiToNode2D(vp.KnownChild(0))
+			cli, _ := KiToNode2D(vp.Child(0))
 			ly := cli.AsLayout2D()
 			if ly != nil {
 				ly.DeleteChildren(false) // do NOT destroy children -- just delete them

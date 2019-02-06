@@ -128,7 +128,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	}
 	dlg.Win = nil
 
-	frame := dlg.KnownChildByName("frame", 0).(*Frame)
+	frame := dlg.ChildByName("frame", 0).(*Frame)
 	vpsz := dlg.DefSize
 
 	if dlg.DefSize == image.ZP {
@@ -196,7 +196,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		}
 		x = ints.MinInt(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
 		y = ints.MinInt(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
-		frame := dlg.KnownChild(0).(*Frame)
+		frame := dlg.Child(0).(*Frame)
 		dlg.StylePart(Node2D(frame)) // use special styles
 		dlg.SetFlag(int(VpFlagPopup))
 		dlg.Resize(vpsz)
@@ -293,7 +293,7 @@ func (dlg *Dialog) SetFrame() *Frame {
 
 // Frame returns the main frame for the dialog, assumed to be the first element in the dialog
 func (dlg *Dialog) Frame() *Frame {
-	return dlg.KnownChild(0).(*Frame)
+	return dlg.Child(0).(*Frame)
 }
 
 // SetTitle sets the title and adds a Label named "title" to the given frame layout if passed
@@ -314,7 +314,7 @@ func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
 	if !ok {
 		return nil, -1
 	}
-	return frame.KnownChild(idx).(*Label), idx
+	return frame.Child(idx).(*Label), idx
 }
 
 // SetPrompt sets the prompt and adds a Label named "prompt" to the given
@@ -337,7 +337,7 @@ func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 	if !ok {
 		return dlg.TitleWidget(frame)
 	}
-	return frame.KnownChild(idx).(*Label), idx
+	return frame.Child(idx).(*Label), idx
 }
 
 // AddButtonBox adds a button box (Row Layout) named "buttons" to given frame,
@@ -359,7 +359,7 @@ func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
 	if !ok {
 		return nil, -1
 	}
-	return frame.KnownChild(idx).(*Layout), idx
+	return frame.Child(idx).(*Layout), idx
 }
 
 // StdButtonConfig returns a kit.TypeAndNameList for calling on ConfigChildren
@@ -388,7 +388,7 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList
 // Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
-		okb := bb.KnownChildByName("ok", 0).Embed(KiT_Button).(*Button)
+		okb := bb.ChildByName("ok", 0).Embed(KiT_Button).(*Button)
 		okb.SetText("Ok")
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
@@ -398,7 +398,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 		})
 	}
 	if cancel {
-		canb := bb.KnownChildByName("cancel", 0).Embed(KiT_Button).(*Button)
+		canb := bb.ChildByName("cancel", 0).Embed(KiT_Button).(*Button)
 		canb.SetText("Cancel")
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(ButtonClicked) {
@@ -575,11 +575,11 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 // NewKiDialogValues gets the user-set values from a NewKiDialog.
 func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	frame := dlg.Frame()
-	nrow := frame.KnownChildByName("n-row", 0).(*Layout)
-	ntf := nrow.KnownChildByName("n-field", 0).(*SpinBox)
+	nrow := frame.ChildByName("n-row", 0).(*Layout)
+	ntf := nrow.ChildByName("n-field", 0).(*SpinBox)
 	n := int(ntf.Value)
-	trow := frame.KnownChildByName("t-row", 0).(*Layout)
-	typs := trow.KnownChildByName("types", 0).(*ComboBox)
+	trow := frame.ChildByName("t-row", 0).(*Layout)
+	typs := trow.ChildByName("types", 0).(*ComboBox)
 	var typ reflect.Type
 	if typs.CurVal != nil {
 		typ = typs.CurVal.(reflect.Type)
@@ -616,6 +616,6 @@ func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpt
 // StringPromptDialogValue gets the string value the user set.
 func StringPromptDialogValue(dlg *Dialog) string {
 	frame := dlg.Frame()
-	tf := frame.KnownChildByName("str-field", 0).(*TextField)
+	tf := frame.ChildByName("str-field", 0).(*TextField)
 	return tf.Text()
 }

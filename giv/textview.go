@@ -1772,11 +1772,11 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 // QReplaceDialogValues gets the string values
 func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string) {
 	frame := dlg.Frame()
-	tff := frame.KnownChildByName("find", 1).(*gi.ComboBox)
+	tff := frame.ChildByName("find", 1).(*gi.ComboBox)
 	if tf, found := tff.TextField(); found {
 		find = tf.Text()
 	}
-	tfr := frame.KnownChildByName("repl", 2).(*gi.ComboBox)
+	tfr := frame.ChildByName("repl", 2).(*gi.ComboBox)
 	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}

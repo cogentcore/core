@@ -111,7 +111,7 @@ func (sv *StructView) StructGrid() (*gi.Frame, int) {
 	if !ok {
 		return nil, -1
 	}
-	return sv.KnownChild(idx).(*gi.Frame), idx
+	return sv.Child(idx).(*gi.Frame), idx
 }
 
 // ToolBar returns the toolbar widget
@@ -120,7 +120,7 @@ func (sv *StructView) ToolBar() *gi.ToolBar {
 	if !ok {
 		return nil
 	}
-	return sv.KnownChild(idx).(*gi.ToolBar)
+	return sv.Child(idx).(*gi.ToolBar)
 }
 
 // ConfigToolbar adds a toolbar based on the methview ToolBarView function, if
@@ -196,7 +196,7 @@ func (sv *StructView) ConfigStructGrid() {
 		updt = sg.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		lbl := sg.KnownChild(i * 2).(*gi.Label)
+		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructView).(*StructView)
@@ -222,7 +222,7 @@ func (sv *StructView) ConfigStructGrid() {
 		if ttip, has := vvb.Tag("desc"); has {
 			lbl.Tooltip = ttip
 		}
-		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
+		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
 
 		_, has := vvb.Tag("inactive")

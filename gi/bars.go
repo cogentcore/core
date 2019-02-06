@@ -129,7 +129,7 @@ func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
 
 // ConfigMenus configures Action items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
-// etc).  Access the resulting menus as .KnownChildByName("name").(*Action).
+// etc).  Access the resulting menus as .ChildByName("name").(*Action).
 func (mb *MenuBar) ConfigMenus(menus []string) {
 	if mb == nil {
 		return
@@ -284,7 +284,10 @@ var ToolBarProps = ki.Props{
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
 func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
-	nm := opts.Label
+	nm := opts.Name
+	if nm == "" {
+		nm = opts.Label
+	}
 	if nm == "" {
 		nm = opts.Icon
 	}

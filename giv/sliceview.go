@@ -167,7 +167,7 @@ func (sv *SliceView) SliceGrid() (*gi.Frame, int) {
 	if !ok {
 		return nil, -1
 	}
-	return sv.KnownChild(idx).(*gi.Frame), idx
+	return sv.Child(idx).(*gi.Frame), idx
 }
 
 // ToolBar returns the toolbar widget
@@ -176,7 +176,7 @@ func (sv *SliceView) ToolBar() *gi.ToolBar {
 	if !ok {
 		return nil
 	}
-	return sv.KnownChild(idx).(*gi.ToolBar)
+	return sv.Child(idx).(*gi.ToolBar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -589,7 +589,7 @@ func (sv *SliceView) RowGrabFocus(row int) *gi.WidgetBase {
 		return nil
 	}
 	ridx := nWidgPerRow * row
-	widg := sg.KnownChild(ridx + idxOff).(gi.Node2D).AsWidget()
+	widg := sg.Child(ridx + idxOff).(gi.Node2D).AsWidget()
 	if widg.HasFocus() {
 		return widg
 	}
@@ -778,14 +778,14 @@ func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	rowidx := idx * nWidgPerRow
 	if sv.ShowIndex {
-		if sg.Kids.IsValidIndex(rowidx) {
-			widg := sg.KnownChild(rowidx).(gi.Node2D).AsNode2D()
+		if sg.Kids.IsValidIndex(rowidx) == nil {
+			widg := sg.Child(rowidx).(gi.Node2D).AsNode2D()
 			widg.SetSelectedState(sel)
 			widg.UpdateSig()
 		}
 	}
-	if sg.Kids.IsValidIndex(rowidx + idxOff) {
-		widg := sg.KnownChild(rowidx + idxOff).(gi.Node2D).AsNode2D()
+	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
+		widg := sg.Child(rowidx + idxOff).(gi.Node2D).AsNode2D()
 		widg.SetSelectedState(sel)
 		widg.UpdateSig()
 	}

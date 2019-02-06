@@ -355,12 +355,12 @@ func (w *Window) ConfigVLay() {
 	if !vp.HasChildren() {
 		vp.AddNewChild(KiT_Layout, "main-vlay")
 	}
-	w.MasterVLay = vp.KnownChild(0).Embed(KiT_Layout).(*Layout)
+	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
 		w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu")
 	}
 	w.MasterVLay.Lay = LayoutVert
-	w.MainMenu = w.MasterVLay.KnownChild(0).(*MenuBar)
+	w.MainMenu = w.MasterVLay.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 }
@@ -375,12 +375,12 @@ func (w *Window) AddMainMenu() *MenuBar {
 	if !vp.HasChildren() {
 		vp.AddNewChild(KiT_Layout, "main-vlay")
 	}
-	w.MasterVLay = vp.KnownChild(0).Embed(KiT_Layout).(*Layout)
+	w.MasterVLay = vp.Child(0).Embed(KiT_Layout).(*Layout)
 	if !w.MasterVLay.HasChildren() {
 		w.MainMenu = w.MasterVLay.AddNewChild(KiT_MenuBar, "main-menu").(*MenuBar)
 	} else {
-		mmi, has := w.MasterVLay.ChildByName("main-menu", 0)
-		if has {
+		mmi := w.MasterVLay.ChildByName("main-menu", 0)
+		if mmi != nil {
 			mm := mmi.(*MenuBar)
 			w.MainMenu = mm
 			return mm
@@ -401,7 +401,7 @@ func (w *Window) SetMainWidget(mw ki.Ki) {
 		w.MasterVLay.AddChild(mw)
 		return
 	}
-	cmw := w.MasterVLay.KnownChild(1)
+	cmw := w.MasterVLay.Child(1)
 	if cmw != mw {
 		w.MasterVLay.DeleteChildAtIndex(1, true)
 		w.MasterVLay.InsertChild(mw, 1)
@@ -416,7 +416,7 @@ func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 	if len(w.MasterVLay.Kids) == 1 {
 		return w.MasterVLay.AddNewChild(typ, name)
 	}
-	cmw := w.MasterVLay.KnownChild(1)
+	cmw := w.MasterVLay.Child(1)
 	if cmw.Type() != typ {
 		w.MasterVLay.DeleteChildAtIndex(1, true)
 		return w.MasterVLay.InsertNewChild(typ, 1, name)
@@ -473,9 +473,9 @@ func (w *Window) SetTitle(name string) {
 }
 
 // MainWidget returns the main widget for this window -- 2nd element in
-// MasterVLay -- returns false if not yet set.
-func (w *Window) MainWidget() (ki.Ki, bool) {
-	return w.MasterVLay.Child(1)
+// MasterVLay -- returns error if not yet set.
+func (w *Window) MainWidget() (ki.Ki, error) {
+	return w.MasterVLay.ChildTry(1)
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the
@@ -510,8 +510,8 @@ func (w *Window) ZoomDPI(steps int) {
 // WinViewport2D returns the viewport directly under this window that serves
 // as the master viewport for the entire window.
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi, ok := w.Children().ElemByType(KiT_Viewport2D, true, 0)
-	if !ok { // shouldn't happen
+	vpi := w.ChildByType(KiT_Viewport2D, true, 0)
+	if vpi == nil { // shouldn't happen
 		return nil
 	}
 	vp, _ := vpi.Embed(KiT_Viewport2D).(*Viewport2D)
@@ -971,16 +971,16 @@ func (w *Window) AddOverlay(nii Node2D) {
 }
 
 // DeleteOverlay deletes given node from overlays, and re-renders the overlays to
-// update without it -- returns false if overlay was not found (in which case no update)
-func (w *Window) DeleteOverlay(nii Node2D) bool {
+// update without it -- returns error if overlay was not found (in which case no update)
+func (w *Window) DeleteOverlay(nii Node2D) error {
 	w.UpMu.Lock()
-	del := w.OverlayVp.DeleteChild(nii, true)
+	err := w.OverlayVp.DeleteChild(nii, true)
 	w.UpMu.Unlock()
-	if !del {
-		return del
+	if err != nil {
+		return err
 	}
 	w.RenderOverlays()
-	return true
+	return nil
 }
 
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
@@ -1200,8 +1200,8 @@ func (w *Window) MainMenuUpdateWindows() {
 		return
 	}
 	WindowGlobalMu.Lock()
-	wmeni, ok := w.MainMenu.ChildByName("Window", 3)
-	if !ok {
+	wmeni := w.MainMenu.ChildByName("Window", 3)
+	if wmeni == nil {
 		WindowGlobalMu.Unlock()
 		w.UpMu.Unlock()
 		return

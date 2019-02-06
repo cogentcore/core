@@ -458,8 +458,8 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		sb.ConfigParts()
 	}
 	if sb.Icon.IsValid() && sb.Parts.HasChildren() {
-		ick, ok := sb.Parts.Children().ElemByType(KiT_Icon, true, 0)
-		if ok {
+		ick := sb.Parts.ChildByType(KiT_Icon, true, 0)
+		if ick != nil {
 			ic := ick.(*Icon)
 			mrg := sb.Sty.Layout.Margin.Dots
 			pad := sb.Sty.Layout.Padding.Dots

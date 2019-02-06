@@ -66,7 +66,7 @@ type Label struct {
 	WidgetBase
 	Text        string              `xml:"text" desc:"label to display"`
 	Selectable  bool                `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
-	Redrawable  bool                `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing"`
+	Redrawable  bool                `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
 	LinkSig     ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles [LabelStatesN]Style `json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      TextRender          `xml:"-" json:"-" desc:"render data for text label"`
@@ -121,11 +121,15 @@ func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJ
 // LabelSelectors are Style selector names for the different states:
 var LabelSelectors = []string{":active", ":inactive", ":selected"}
 
-// SetText sets the text and updates the rendered version
+// SetText sets the text and updates the rendered version.
+// Note: if there is already a label set, and no other larger updates are taking place,
+// the new label may just illegibly overlay on top of the old one -- set Redrawable = true
+// to fix this issue (it will redraw the background -- sampling from actual if none
+// is set).
 func (lb *Label) SetText(txt string) {
 	updt := lb.UpdateStart()
-	// if updt {
-	// 	fmt.Printf("label is updating: %v\n", txt)
+	// if lb.Text != "" { // not good to automate this -- better to use docs -- bg can be bad
+	// 	lb.Redrawable = true
 	// }
 	if lb.Sty.Font.Size.Val == 0 { // not yet styled
 		lb.StyleLabel()

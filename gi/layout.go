@@ -1292,8 +1292,8 @@ func (ly *Layout) Render2DChildren() {
 func (ly *Layout) Move2DChildren(delta image.Point) {
 	cbb := ly.This().(Node2D).ChildrenBBox2D()
 	if ly.Lay == LayoutStacked {
-		sn, ok := ly.Child(ly.StackTop)
-		if !ok {
+		sn := ly.Child(ly.StackTop)
+		if sn == nil {
 			return
 		}
 		nii, _ := KiToNode2D(sn)
@@ -1562,9 +1562,9 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	}
 	did := false
 	if nxti < sz {
-		did = win.FocusOnOrNext(ly.KnownChild(nxti))
+		did = win.FocusOnOrNext(ly.Child(nxti))
 	} else {
-		did = win.FocusOnOrNext(ly.KnownChild(0))
+		did = win.FocusOnOrNext(ly.Child(0))
 	}
 	if !did || win.CurFocus() == cur {
 		return false
@@ -1591,9 +1591,9 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	}
 	did := false
 	if nxti >= 0 {
-		did = win.FocusOnOrPrev(ly.KnownChild(nxti))
+		did = win.FocusOnOrPrev(ly.Child(nxti))
 	} else {
-		did = win.FocusOnOrPrev(ly.KnownChild(sz - 1))
+		did = win.FocusOnOrPrev(ly.Child(sz - 1))
 	}
 	if !did || win.CurFocus() == cur {
 		return false

@@ -59,7 +59,7 @@ func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 	mbar.ConfigMenus(mnms)
 	rval := true
 	for mmi, mm := range mp {
-		ma := mbar.KnownChild(mmi).(*gi.Action)
+		ma := mbar.Child(mmi).(*gi.Action)
 		if mm.Name == "AppMenu" {
 			ma.Menu.AddAppMenu(win)
 			continue
@@ -138,7 +138,7 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 			continue
 		}
 		var ac *gi.Action
-		if aci, has := tb.ChildByName(te.Name, 0); has { // allows overriding of defaults etc
+		if aci := tb.ChildByName(te.Name, 0); aci != nil { // allows overriding of defaults etc
 			ac = aci.(*gi.Action)
 			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()

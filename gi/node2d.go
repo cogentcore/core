@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2019, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -378,7 +378,7 @@ func (nb *Node2DBase) FindNamedElement(name string) Node2D {
 	if nb.Par == nil {
 		return nil
 	}
-	if ce, ok := nb.Par.ChildByName(name, -1); ok {
+	if ce := nb.Par.ChildByName(name, -1); ce != nil {
 		return ce.(Node2D)
 	}
 	if pni, _ := KiToNode2D(nb.Par); pni != nil {
@@ -692,8 +692,9 @@ func (nb *Node2DBase) ParentWindow() *Window {
 	if nb.Viewport != nil && nb.Viewport.Win != nil {
 		return nb.Viewport.Win
 	}
-	wini, ok := nb.ParentByType(KiT_Window, true)
-	if !ok {
+	wini, err := nb.ParentByTypeTry(KiT_Window, true)
+	if err != nil {
+		// log.Println(err)
 		return nil
 	}
 	return wini.Embed(KiT_Window).(*Window)
@@ -760,8 +761,8 @@ func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 
 // ParentLayout returns the parent layout
 func (nb *Node2DBase) ParentLayout() *Layout {
-	ly, ok := nb.ParentByType(KiT_Layout, true)
-	if !ok {
+	ly := nb.ParentByType(KiT_Layout, true)
+	if ly == nil {
 		return nil
 	}
 	return ly.Embed(KiT_Layout).(*Layout)
@@ -769,8 +770,8 @@ func (nb *Node2DBase) ParentLayout() *Layout {
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
 func (nb *Node2DBase) ParentScrollLayout() *Layout {
-	lyk, ok := nb.ParentByType(KiT_Layout, true)
-	if !ok {
+	lyk := nb.ParentByType(KiT_Layout, true)
+	if lyk == nil {
 		return nil
 	}
 	ly := lyk.Embed(KiT_Layout).(*Layout)

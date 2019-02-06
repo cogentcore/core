@@ -238,7 +238,7 @@ func (tv *TableView) SliceFrame() (*gi.Frame, int) {
 	if !ok {
 		return nil, -1
 	}
-	return tv.KnownChild(idx).(*gi.Frame), idx
+	return tv.Child(idx).(*gi.Frame), idx
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
@@ -248,7 +248,7 @@ func (tv *TableView) SliceGrid() *gi.Frame {
 	if sf == nil {
 		return nil
 	}
-	return sf.KnownChild(1).(*gi.Frame)
+	return sf.Child(1).(*gi.Frame)
 }
 
 // SliceHeader returns the Toolbar header for slice grid
@@ -257,7 +257,7 @@ func (tv *TableView) SliceHeader() *gi.ToolBar {
 	if sf == nil {
 		return nil
 	}
-	return sf.KnownChild(0).(*gi.ToolBar)
+	return sf.Child(0).(*gi.ToolBar)
 }
 
 // ToolBar returns the toolbar widget
@@ -266,7 +266,7 @@ func (tv *TableView) ToolBar() *gi.ToolBar {
 	if !ok {
 		return nil
 	}
-	return tv.KnownChild(idx).(*gi.ToolBar)
+	return tv.Child(idx).(*gi.ToolBar)
 }
 
 // StdSliceFrameConfig returns a TypeAndNameList for configuring the slice-frame
@@ -376,12 +376,12 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		updth = sgh.UpdateStart()
 	}
 	if tv.ShowIndex {
-		lbl := sgh.KnownChild(0).(*gi.Label)
+		lbl := sgh.Child(0).(*gi.Label)
 		lbl.Text = "Index"
 	}
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
-		hdr := sgh.KnownChild(idxOff + fli).(*gi.Action)
+		hdr := sgh.Child(idxOff + fli).(*gi.Action)
 		hdr.SetText(fld.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
@@ -404,10 +404,10 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		})
 	}
 	if !tv.IsInactive() {
-		lbl := sgh.KnownChild(tv.NVisFields + idxOff).(*gi.Label)
+		lbl := sgh.Child(tv.NVisFields + idxOff).(*gi.Label)
 		lbl.Text = "+"
 		lbl.Tooltip = "insert row"
-		lbl = sgh.KnownChild(tv.NVisFields + idxOff + 1).(*gi.Label)
+		lbl = sgh.Child(tv.NVisFields + idxOff + 1).(*gi.Label)
 		lbl.Text = "-"
 		lbl.Tooltip = "delete row"
 	}
@@ -619,7 +619,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	ascending := true
 
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		hdr := sgh.KnownChild(idxOff + fli).(*gi.Action)
+		hdr := sgh.Child(idxOff + fli).(*gi.Action)
 		if fli == fldIdx {
 			if tv.SortIdx == fli {
 				tv.SortDesc = !tv.SortDesc
@@ -739,14 +739,14 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if len(sgf.Kids) >= nfld {
 		sumwd := float32(0)
 		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
+			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 			wd := sgf.GridData[gi.Col][fli].AllocSize
 			lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
 			sumwd += wd
 		}
 		if !tv.IsInactive() {
 			for fli := nfld; fli < nfld+2; fli++ {
-				lbl := sgh.KnownChild(fli).(gi.Node2D).AsWidget()
+				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 				wd := sgf.GridData[gi.Col][fli].AllocSize
 				lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
 				sumwd += wd
@@ -849,7 +849,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sgf.KnownChild(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sgf.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
 		if widg.VpBBox != image.ZR {
 			return widg, true
 		}
@@ -874,7 +874,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	sgf := tv.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sgf.KnownChild(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sgf.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
 		if widg.HasFocus() {
 			return widg
 		}
@@ -882,7 +882,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	tv.inFocusGrab = true
 	defer func() { tv.inFocusGrab = false }()
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sgf.KnownChild(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sgf.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
 		if widg.CanFocus() {
 			widg.GrabFocus()
 			return widg
@@ -1089,15 +1089,15 @@ func (tv *TableView) SelectRowWidgets(idx int, sel bool) {
 	ridx := idx * nWidgPerRow
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		seldx := ridx + idxOff + fli
-		if sgf.Kids.IsValidIndex(seldx) {
-			widg := sgf.KnownChild(seldx).(gi.Node2D).AsNode2D()
+		if sgf.Kids.IsValidIndex(seldx) == nil {
+			widg := sgf.Child(seldx).(gi.Node2D).AsNode2D()
 			widg.SetSelectedState(sel)
 			widg.UpdateSig()
 		}
 	}
 	if idxOff == 1 {
-		if sgf.Kids.IsValidIndex(ridx) {
-			widg := sgf.KnownChild(ridx).(gi.Node2D).AsNode2D()
+		if sgf.Kids.IsValidIndex(ridx) == nil {
+			widg := sgf.Child(ridx).(gi.Node2D).AsNode2D()
 			widg.SetSelectedState(sel)
 			widg.UpdateSig()
 		}

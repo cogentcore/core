@@ -92,7 +92,7 @@ func (mv *MapView) MapGrid() (*gi.Frame, int) {
 	if !ok {
 		return nil, -1
 	}
-	return mv.KnownChild(idx).(*gi.Frame), idx
+	return mv.Child(idx).(*gi.Frame), idx
 }
 
 // ToolBar returns the toolbar widget
@@ -101,7 +101,7 @@ func (mv *MapView) ToolBar() *gi.ToolBar {
 	if !ok {
 		return nil
 	}
-	return mv.KnownChild(idx).(*gi.ToolBar)
+	return mv.Child(idx).(*gi.ToolBar)
 }
 
 // KiPropTag returns the PropTag value from Ki owner of this map, if it is..
@@ -209,8 +209,8 @@ func (mv *MapView) ConfigMapGrid() {
 			mvv, _ := recv.Embed(KiT_MapView).(*MapView)
 			mvv.SetChanged()
 		})
-		keyw := sg.KnownChild(i * ncol).(gi.Node2D)
-		widg := sg.KnownChild(i*ncol + 1).(gi.Node2D)
+		keyw := sg.Child(i * ncol).(gi.Node2D)
+		widg := sg.Child(i*ncol + 1).(gi.Node2D)
 		kv := mv.Keys[i]
 		kvb := kv.AsValueViewBase()
 		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -220,7 +220,7 @@ func (mv *MapView) ConfigMapGrid() {
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if ifaceType {
-			typw := sg.KnownChild(i*ncol + 2).(*gi.ComboBox)
+			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
 			vtyp := kit.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
@@ -236,7 +236,7 @@ func (mv *MapView) ConfigMapGrid() {
 				mvv.MapChangeValueType(idx, typ)
 			})
 		}
-		delact := sg.KnownChild(i*ncol + ncol - 1).(*gi.Action)
+		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete item"
 		delact.Data = kv

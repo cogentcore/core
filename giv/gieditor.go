@@ -144,7 +144,7 @@ func (ge *GiEditor) TitleWidget() (*gi.Label, int) {
 	if !ok {
 		return nil, -1
 	}
-	return ge.KnownChild(idx).(*gi.Label), idx
+	return ge.Child(idx).(*gi.Label), idx
 }
 
 // SplitView returns the main SplitView
@@ -153,14 +153,14 @@ func (ge *GiEditor) SplitView() (*gi.SplitView, int) {
 	if !ok {
 		return nil, -1
 	}
-	return ge.KnownChild(idx).(*gi.SplitView), idx
+	return ge.Child(idx).(*gi.SplitView), idx
 }
 
 // TreeView returns the main TreeView
 func (ge *GiEditor) TreeView() *TreeView {
 	split, _ := ge.SplitView()
 	if split != nil {
-		tv := split.KnownChild(0).KnownChild(0).(*TreeView)
+		tv := split.Child(0).Child(0).(*TreeView)
 		return tv
 	}
 	return nil
@@ -170,7 +170,7 @@ func (ge *GiEditor) TreeView() *TreeView {
 func (ge *GiEditor) StructView() *StructView {
 	split, _ := ge.SplitView()
 	if split != nil {
-		sv := split.KnownChild(1).(*StructView)
+		sv := split.Child(1).(*StructView)
 		return sv
 	}
 	return nil
@@ -182,7 +182,7 @@ func (ge *GiEditor) ToolBar() *gi.ToolBar {
 	if !ok {
 		return nil
 	}
-	return ge.KnownChild(idx).(*gi.ToolBar)
+	return ge.Child(idx).(*gi.ToolBar)
 }
 
 // ConfigToolbar adds a GiEditor toolbar.

@@ -38,6 +38,7 @@ type MakeMenuFunc func(obj ki.Ki, m *Menu)
 
 // ActOpts provides named and partial parameters for AddAction method
 type ActOpts struct {
+	Name        string
 	Label       string
 	Icon        string
 	Tooltip     string
@@ -49,7 +50,10 @@ type ActOpts struct {
 
 // SetAction sets properties of given action
 func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) {
-	nm := opts.Label
+	nm := opts.Name
+	if nm == "" {
+		nm = opts.Label
+	}
 	if nm == "" {
 		nm = opts.Icon
 	}

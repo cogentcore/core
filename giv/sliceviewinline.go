@@ -96,7 +96,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
 			svv.SetChanged()
 		})
-		widg := sv.Parts.KnownChild(i).(gi.Node2D)
+		widg := sv.Parts.Child(i).(gi.Node2D)
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
@@ -106,8 +106,8 @@ func (sv *SliceViewInline) ConfigParts() {
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		adack, ok := sv.Parts.Children().ElemFromEnd(1)
-		if ok {
+		adack, err := sv.Parts.Children().ElemFromEndTry(1)
+		if err == nil {
 			adac := adack.(*gi.Action)
 			adac.SetIcon("plus")
 			adac.Tooltip = "add an element to the slice"
@@ -117,8 +117,8 @@ func (sv *SliceViewInline) ConfigParts() {
 			})
 		}
 	}
-	edack, ok := sv.Parts.Children().ElemFromEnd(0)
-	if ok {
+	edack, err := sv.Parts.Children().ElemFromEndTry(0)
+	if err == nil {
 		edac := edack.(*gi.Action)
 		edac.SetIcon("edit")
 		edac.Tooltip = "edit slice in a dialog window"
@@ -133,8 +133,8 @@ func (sv *SliceViewInline) ConfigParts() {
 				}
 			}
 			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: tynm, TmpSave: svv.TmpSave}, nil, nil, nil)
-			svvvk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
-			if ok {
+			svvvk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
+			if svvvk != nil {
 				svvv := svvvk.(*SliceView)
 				svvv.SliceValView = svv.SliceValView
 				svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

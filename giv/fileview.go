@@ -180,7 +180,7 @@ func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 			wi.SetProp("color", clr)
 			return
 		}
-		if fvv, pok := tv.ParentByType(KiT_FileView, true); pok {
+		if fvv := tv.ParentByType(KiT_FileView, true); fvv != nil {
 			fv := fvv.Embed(KiT_FileView).(*FileView)
 			fn := finf[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
@@ -227,7 +227,7 @@ func (fv *FileView) DoStdConfig() {
 }
 
 func (fv *FileView) ConfigPathRow() {
-	pr := fv.KnownChildByName("path-tbar", 0).(*gi.ToolBar)
+	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
 	pr.Lay = gi.LayoutHoriz
 	pr.SetStretchMaxWidth()
 	config := kit.TypeAndNameList{}
@@ -239,7 +239,7 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Action, "new-folder")
 	mods, updt := pr.ConfigChildren(config, false) // already covered by parent update
 	if mods {
-		pl := pr.KnownChildByName("path-lbl", 0).(*gi.Label)
+		pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
 		pl.Text = "Path:"
 		pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
 		pf := fv.PathField()
@@ -278,7 +278,7 @@ func (fv *FileView) ConfigPathRow() {
 			}
 		})
 
-		pu := pr.KnownChildByName("path-up", 0).(*gi.Action)
+		pu := pr.ChildByName("path-up", 0).(*gi.Action)
 		pu.Icon = gi.IconName("widget-wedge-up")
 		pu.Tooltip = "go up one level into the parent folder"
 		pu.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -286,7 +286,7 @@ func (fv *FileView) ConfigPathRow() {
 			fvv.DirPathUp()
 		})
 
-		prf := pr.KnownChildByName("path-ref", 0).(*gi.Action)
+		prf := pr.ChildByName("path-ref", 0).(*gi.Action)
 		prf.Icon = gi.IconName("update")
 		prf.Tooltip = "Update directory view -- in case files might have changed"
 		prf.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -294,7 +294,7 @@ func (fv *FileView) ConfigPathRow() {
 			fvv.UpdateFilesAction()
 		})
 
-		pfv := pr.KnownChildByName("path-fav", 0).(*gi.Action)
+		pfv := pr.ChildByName("path-fav", 0).(*gi.Action)
 		pfv.Icon = gi.IconName("heart")
 		pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
 		pfv.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -302,7 +302,7 @@ func (fv *FileView) ConfigPathRow() {
 			fvv.AddPathToFavs()
 		})
 
-		nf := pr.KnownChildByName("new-folder", 0).(*gi.Action)
+		nf := pr.ChildByName("new-folder", 0).(*gi.Action)
 		nf.Icon = gi.IconName("folder-plus")
 		nf.Tooltip = "Create a new folder in this folder"
 		nf.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -314,7 +314,7 @@ func (fv *FileView) ConfigPathRow() {
 }
 
 func (fv *FileView) ConfigFilesRow() {
-	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
 	fr.SetStretchMaxHeight()
 	fr.SetStretchMaxWidth()
 	fr.Lay = gi.LayoutHoriz
@@ -379,7 +379,7 @@ func (fv *FileView) ConfigFilesRow() {
 }
 
 func (fv *FileView) ConfigSelRow() {
-	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
+	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
 	sr.Lay = gi.LayoutHoriz
 	sr.SetProp("spacing", units.NewValue(4, units.Px))
 	sr.SetStretchMaxWidth()
@@ -390,7 +390,7 @@ func (fv *FileView) ConfigSelRow() {
 	config.Add(gi.KiT_TextField, "ext")
 	sr.ConfigChildren(config, false) // already covered by parent update
 
-	sl := sr.KnownChildByName("sel-lbl", 0).(*gi.Label)
+	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
@@ -407,7 +407,7 @@ func (fv *FileView) ConfigSelRow() {
 		}
 	})
 
-	el := sr.KnownChildByName("ext-lbl", 0).(*gi.Label)
+	el := sr.ChildByName("ext-lbl", 0).(*gi.Label)
 	el.Text = "Ext(s):"
 	el.Tooltip = "target extension(s) to highlight -- if multiple, separate with commas, and do include the . at the start"
 	ef := fv.ExtField()
@@ -424,32 +424,32 @@ func (fv *FileView) ConfigSelRow() {
 
 // PathField returns the ComboBox of the path
 func (fv *FileView) PathField() *gi.ComboBox {
-	pr := fv.KnownChildByName("path-tbar", 0).(*gi.ToolBar)
-	return pr.KnownChildByName("path", 1).(*gi.ComboBox)
+	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
+	return pr.ChildByName("path", 1).(*gi.ComboBox)
 }
 
 // FavsView returns the TableView of the favorites
 func (fv *FileView) FavsView() *TableView {
-	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
-	return fr.KnownChildByName("favs-view", 1).(*TableView)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
+	return fr.ChildByName("favs-view", 1).(*TableView)
 }
 
 // FilesView returns the TableView of the files
 func (fv *FileView) FilesView() *TableView {
-	fr := fv.KnownChildByName("files-row", 2).(*gi.Layout)
-	return fr.KnownChildByName("files-view", 1).(*TableView)
+	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
+	return fr.ChildByName("files-view", 1).(*TableView)
 }
 
 // SelField returns the TextField of the selected file
 func (fv *FileView) SelField() *gi.TextField {
-	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
-	return sr.KnownChildByName("sel", 1).(*gi.TextField)
+	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
+	return sr.ChildByName("sel", 1).(*gi.TextField)
 }
 
 // ExtField returns the TextField of the extension
 func (fv *FileView) ExtField() *gi.TextField {
-	sr := fv.KnownChildByName("sel-row", 4).(*gi.Layout)
-	return sr.KnownChildByName("ext", 2).(*gi.TextField)
+	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
+	return sr.ChildByName("ext", 2).(*gi.TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..

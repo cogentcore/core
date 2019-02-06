@@ -1327,7 +1327,7 @@ func (tf *TextField) ConfigParts() {
 	config.Add(KiT_Action, "clear")
 	mods, updt := tf.Parts.ConfigChildren(config, false) // not unique names
 	if mods {
-		clr := tf.Parts.KnownChild(1).(*Action)
+		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
 		clr.SetIcon("close")
 		clr.SetProp("no-focus", true)
@@ -1415,7 +1415,7 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	redo := tf.Layout2DChildren(iter)
 	sz := tf.LayData.AllocSize
 	if tf.ClearAct && len(*tf.Parts.Children()) == 2 {
-		clr := tf.Parts.KnownChild(1).(*Action)
+		clr := tf.Parts.Child(1).(*Action)
 		sz.X -= clr.LayData.AllocSize.X
 	}
 	tf.EffSize = sz

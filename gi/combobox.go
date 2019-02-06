@@ -122,8 +122,8 @@ func (cb *ComboBox) ButtonRelease() {
 	if pos.X == 0 && pos.Y == 0 { // offscreen
 		pos = cb.ObjBBox.Max
 	}
-	indic, ok := cb.Parts.ChildByName("indicator", 3)
-	if ok {
+	indic := cb.Parts.ChildByName("indicator", 3)
+	if indic != nil {
 		pos = KiToNode2DBase(indic).WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
 			pos = KiToNode2DBase(indic).ObjBBox.Min
@@ -155,19 +155,19 @@ func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm string
 // object props
 func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
-		tx := cb.Parts.KnownChild(txIdx).(*TextField)
+		tx := cb.Parts.Child(txIdx).(*TextField)
 		tx.SetText(txt)
 		if _, ok := tx.Prop("__comboInit"); !ok {
 			cb.StylePart(Node2D(tx))
 			if icIdx >= 0 {
-				cb.StylePart(cb.Parts.KnownChild(txIdx - 1).(Node2D)) // also get the space
+				cb.StylePart(cb.Parts.Child(txIdx - 1).(Node2D)) // also get the space
 			}
 			tx.SetProp("__comboInit", true)
 			if cb.MaxLength > 0 {
 				tx.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ch))
 			}
 			if indIdx > 0 {
-				ispc := cb.Parts.KnownChild(indIdx - 1).(Node2D)
+				ispc := cb.Parts.Child(indIdx - 1).(Node2D)
 				ispc.SetProp("max-width", 0)
 			}
 		}
@@ -190,8 +190,8 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *kit.TypeAndNameList, 
 
 func (cb *ComboBox) ConfigPartsIfNeeded() {
 	if cb.Editable {
-		_, ok := cb.Parts.ChildByName("text", 2)
-		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), "") && ok {
+		cn := cb.Parts.ChildByName("text", 2)
+		if !cb.PartsNeedUpdateIconLabel(string(cb.Icon), "") && cn != nil {
 			return
 		}
 	} else {
@@ -225,7 +225,7 @@ func (cb *ComboBox) ConfigParts() {
 		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx, indIdx)
 	}
 	if cb.MaxLength > 0 && lbIdx >= 0 {
-		lbl := cb.Parts.KnownChild(lbIdx).(*Label)
+		lbl := cb.Parts.Child(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.NewValue(float32(cb.MaxLength), units.Ch))
 	}
 	if mods {
@@ -235,11 +235,11 @@ func (cb *ComboBox) ConfigParts() {
 
 // TextField returns the text field of an editable combobox, and false if not made
 func (cb *ComboBox) TextField() (*TextField, bool) {
-	tff, ok := cb.Parts.ChildByName("text", 2)
-	if !ok {
-		return nil, ok
+	tff := cb.Parts.ChildByName("text", 2)
+	if tff == nil {
+		return nil, false
 	}
-	return tff.(*TextField), ok
+	return tff.(*TextField), true
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,

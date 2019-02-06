@@ -350,7 +350,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 		spsum += sp
 		if i < sz-1 {
-			spl := sv.Parts.KnownChild(i).(*Splitter)
+			spl := sv.Parts.Child(i).(*Splitter)
 			spl.Value = spsum
 			spl.UpdatePosFromValue()
 		}
@@ -466,8 +466,8 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	if !sr.Icon.IsValid() || !sr.Parts.HasChildren() {
 		return
 	}
-	ick, ok := sr.Parts.Children().ElemByType(KiT_Icon, true, 0)
-	if !ok {
+	ick := sr.Parts.ChildByType(KiT_Icon, true, 0)
+	if ick == nil {
 		return
 	}
 	ic := ick.(*Icon)
@@ -551,18 +551,18 @@ func (sr *Splitter) Render2D() {
 	win := vp.Win
 	sr.This().(Node2D).ConnectEvents2D()
 	if sr.IsDragging() {
-		ick, ok := sr.Parts.Children().ElemByType(KiT_Icon, true, 0)
-		if !ok {
+		ick := sr.Parts.ChildByType(KiT_Icon, true, 0)
+		if ick == nil {
 			return
 		}
 		ic := ick.(*Icon)
-		icvp, ok := ic.Children().ElemByType(KiT_Viewport2D, true, 0)
-		if !ok {
+		icvp := ic.ChildByType(KiT_Viewport2D, true, 0)
+		if icvp == nil {
 			return
 		}
-		ovk, ok := win.OverlayVp.ChildByName(sr.UniqueName(), 0)
+		ovk := win.OverlayVp.ChildByName(sr.UniqueName(), 0)
 		var ovb *Bitmap
-		if !ok {
+		if ovk == nil {
 			ovb = &Bitmap{}
 			ovb.InitName(ovb, sr.UniqueName())
 			ovb.GrabRenderFrom(icvp.(Node2D))

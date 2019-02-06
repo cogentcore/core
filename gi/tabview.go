@@ -63,7 +63,7 @@ func (tv *TabView) CurTab() (Node2D, int, bool) {
 	if fr.StackTop < 0 {
 		return nil, -1, false
 	}
-	widg := fr.KnownChild(fr.StackTop).(Node2D)
+	widg := fr.Child(fr.StackTop).(Node2D)
 	return widg, fr.StackTop, true
 }
 
@@ -154,8 +154,8 @@ func (tv *TabView) TabAtIndex(idx int) (Node2D, *TabButton, bool) {
 		log.Printf("giv.TabView: index %v out of range for number of tabs: %v\n", idx, sz)
 		return nil, nil, false
 	}
-	tab := tb.KnownChild(idx).Embed(KiT_TabButton).(*TabButton)
-	widg := fr.KnownChild(idx).(Node2D)
+	tab := tb.Child(idx).Embed(KiT_TabButton).(*TabButton)
+	widg := fr.Child(idx).(Node2D)
 	return widg, tab, true
 }
 
@@ -204,7 +204,7 @@ func (tv *TabView) TabByName(label string) (Node2D, int, bool) {
 		return nil, -1, false
 	}
 	fr := tv.Frame()
-	widg := fr.KnownChild(idx).(Node2D)
+	widg := fr.Child(idx).(Node2D)
 	return widg, idx, true
 }
 
@@ -214,8 +214,8 @@ func (tv *TabView) TabName(idx int) string {
 	defer tv.Mu.Unlock()
 
 	tb := tv.Tabs()
-	tbut, ok := tb.Child(idx)
-	if !ok {
+	tbut, err := tb.ChildTry(idx)
+	if err != nil {
 		return ""
 	}
 	return tbut.Name()
@@ -366,13 +366,13 @@ func (tv *TabView) InitTabView() {
 // Tabs returns the layout containing the tabs -- the first element within us
 func (tv *TabView) Tabs() *Frame {
 	tv.InitTabView()
-	return tv.KnownChild(0).(*Frame)
+	return tv.Child(0).(*Frame)
 }
 
 // Frame returns the stacked frame layout -- the second element
 func (tv *TabView) Frame() *Frame {
 	tv.InitTabView()
-	return tv.KnownChild(1).(*Frame)
+	return tv.Child(1).(*Frame)
 }
 
 // UnselectOtherTabs turns off all the tabs except given one
@@ -383,7 +383,7 @@ func (tv *TabView) UnselectOtherTabs(idx int) {
 		if i == idx {
 			continue
 		}
-		tb := tbs.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
+		tb := tbs.Child(i).Embed(KiT_TabButton).(*TabButton)
 		if tb.IsSelected() {
 			tb.SetSelectedState(false)
 		}
@@ -395,7 +395,7 @@ func (tv *TabView) RenumberTabs() {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
-		tb := tbs.KnownChild(i).Embed(KiT_TabButton).(*TabButton)
+		tb := tbs.Child(i).Embed(KiT_TabButton).(*TabButton)
 		tb.Data = i
 	}
 }
@@ -417,7 +417,7 @@ func (tv *TabView) RenderTabSeps() {
 	tbs := tv.Tabs()
 	sz := len(tbs.Kids)
 	for i := 1; i < sz; i++ {
-		tb := tbs.KnownChild(i).(Node2D)
+		tb := tbs.Child(i).(Node2D)
 		ni := tb.AsWidget()
 
 		pos := ni.LayData.AllocPos
@@ -527,8 +527,8 @@ func (tb *TabButton) ButtonAsBase() *ButtonBase {
 }
 
 func (tb *TabButton) TabView() *TabView {
-	tv, ok := tb.ParentByType(KiT_TabView, true)
-	if !ok {
+	tv := tb.ParentByType(KiT_TabView, true)
+	if tv == nil {
 		return nil
 	}
 	return tv.Embed(KiT_TabView).(*TabView)
@@ -543,7 +543,7 @@ func (tb *TabButton) ConfigParts() {
 	mods, updt := tb.Parts.ConfigChildren(config, false) // not unique names
 	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
 	if mods {
-		cls := tb.Parts.KnownChild(clsIdx).(*Action)
+		cls := tb.Parts.Child(clsIdx).(*Action)
 		if tb.Indicator.IsNil() {
 			tb.Indicator = "close"
 		}

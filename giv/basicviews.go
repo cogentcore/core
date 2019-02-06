@@ -74,8 +74,8 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	desc, _ := vv.Tag("desc")
 	dlg := StructViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
-	svk, ok := dlg.Frame().Children().ElemByType(KiT_StructView, true, 2)
-	if ok {
+	svk := dlg.Frame().ChildByType(KiT_StructView, true, 2)
+	if svk != nil {
 		sv := svk.(*StructView)
 		sv.StructValView = vv
 		// no need to connect ViewSig
@@ -197,8 +197,8 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	if !vv.IsArray && vv.ElIsStruct {
 		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
-		svk, ok := dlg.Frame().Children().ElemByType(KiT_TableView, true, 2)
-		if ok {
+		svk := dlg.Frame().ChildByType(KiT_TableView, true, 2)
+		if svk != nil {
 			sv := svk.(*TableView)
 			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -210,8 +210,8 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	} else {
 		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
-		svk, ok := dlg.Frame().Children().ElemByType(KiT_SliceView, true, 2)
-		if ok {
+		svk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
+		if svk != nil {
 			sv := svk.(*SliceView)
 			sv.SliceValView = vv
 			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -325,8 +325,8 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	}
 	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
-	mvk, ok := dlg.Frame().Children().ElemByType(KiT_MapView, true, 2)
-	if ok {
+	mvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
+	if mvk != nil {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
 		mv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

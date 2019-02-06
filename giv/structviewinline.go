@@ -90,7 +90,7 @@ func (sv *StructViewInline) ConfigParts() {
 		updt = sv.Parts.UpdateStart()
 	}
 	for i, vv := range sv.FieldViews {
-		lbl := sv.Parts.KnownChild(i * 2).(*gi.Label)
+		lbl := sv.Parts.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
@@ -106,7 +106,7 @@ func (sv *StructViewInline) ConfigParts() {
 		lbl.Tooltip = vvb.Field.Tag.Get("desc")
 		lbl.Redrawable = true
 		lbl.SetProp("horizontal-align", gi.AlignLeft)
-		widg := sv.Parts.KnownChild((i * 2) + 1).(gi.Node2D)
+		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		vv.ConfigWidget(widg)
 		if sv.IsInactive() {
 			widg.AsNode2D().SetInactive()

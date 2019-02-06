@@ -376,12 +376,12 @@ func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
 	sz := len(dirs)
 	for i := 0; i < sz; i++ {
 		dr := dirs[i]
-		sfni, ok := cfn.ChildByName(dr, 0)
-		if !ok {
+		sfni, err := cfn.ChildByNameTry(dr, 0)
+		if err != nil {
 			if i == sz-1 { // ok for terminal -- might not exist yet
 				return cfn, nil
 			} else {
-				err := fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
+				err = fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
 				log.Println(err)
 				return nil, err
 			}
@@ -1292,9 +1292,9 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 		}
 		// todo: process file:/// kinds of paths..
 		path := string(d.Data)
-		sfni, ok := sroot.FindPathUnique(path)
-		if !ok {
-			fmt.Printf("giv.FileTreeView: could not find filenode at path: %v\n", path)
+		sfni, err := sroot.FindPathUniqueTry(path)
+		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
@@ -1329,9 +1329,9 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 			continue
 		}
 		path := string(d.Data)
-		sfni, ok := sroot.FindPathUnique(path)
-		if !ok {
-			fmt.Printf("giv.FileTreeView: could not find filenode at path: %v\n", path)
+		sfni, err := sroot.FindPathUniqueTry(path)
+		if err != nil {
+			fmt.Println(err)
 			continue
 		}
 		sfn := sfni.Embed(KiT_FileNode).(*FileNode)

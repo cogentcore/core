@@ -78,7 +78,7 @@ func (ic *Icon) SVGIcon() *Viewport2D {
 	if !ic.HasChildren() {
 		return nil
 	}
-	sic := ic.KnownChild(0).Embed(KiT_Viewport2D).(*Viewport2D)
+	sic := ic.Child(0).Embed(KiT_Viewport2D).(*Viewport2D)
 	return sic
 }
 

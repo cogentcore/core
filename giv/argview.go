@@ -85,7 +85,7 @@ func (av *ArgView) TitleWidget() (*gi.Label, int) {
 	if !ok {
 		return nil, -1
 	}
-	return av.KnownChild(idx).(*gi.Label), idx
+	return av.Child(idx).(*gi.Label), idx
 }
 
 // ArgsGrid returns the grid layout widget, which contains all the fields
@@ -95,7 +95,7 @@ func (av *ArgView) ArgsGrid() (*gi.Frame, int) {
 	if !ok {
 		return nil, -1
 	}
-	return av.KnownChild(idx).(*gi.Frame), idx
+	return av.Child(idx).(*gi.Frame), idx
 }
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
@@ -139,7 +139,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		if ad.HasValSet() {
 			continue
 		}
-		lbl := sg.KnownChild(i * 2).(*gi.Label)
+		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := ad.View.AsValueViewBase()
 		vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			avv, _ := recv.Embed(KiT_ArgView).(*ArgView)
@@ -148,7 +148,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		})
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
-		widg := sg.KnownChild((i * 2) + 1).(gi.Node2D)
+		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
 		ad.View.ConfigWidget(widg)
 	}

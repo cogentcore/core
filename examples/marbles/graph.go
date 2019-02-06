@@ -461,7 +461,7 @@ func UpdateMarbles() {
 		m.PrvPos = ppos
 		m.Pos = m.Pos.Add(m.Vel.MulVal(Gr.Params.UpdtRate))
 
-		circle := SvgMarbles.KnownChild(i).(*svg.Circle)
+		circle := SvgMarbles.Child(i).(*svg.Circle)
 		circle.Pos = m.Pos
 	}
 	SvgGraph.UpdateEnd(updt)

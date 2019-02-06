@@ -155,12 +155,12 @@ func (sb *SpinBox) ConfigParts() {
 	config.Add(KiT_Layout, "buttons")
 	mods, updt := sb.Parts.ConfigChildren(config, false) // not unique names
 	if mods || RebuildDefaultStyles {
-		buts := sb.Parts.KnownChild(sbButtonsIdx).(*Layout)
+		buts := sb.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutVert
 		sb.StylePart(Node2D(buts))
 		buts.SetNChildren(2, KiT_Action, "but")
 		// up
-		up := buts.KnownChild(0).(*Action)
+		up := buts.Child(0).(*Action)
 		up.SetName("up")
 		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
 		// not compiled into style prop
@@ -174,7 +174,7 @@ func (sb *SpinBox) ConfigParts() {
 			})
 		}
 		// dn
-		dn := buts.KnownChild(1).(*Action)
+		dn := buts.Child(1).(*Action)
 		dn.SetFlagState(sb.IsInactive(), int(Inactive))
 		dn.SetName("down")
 		dn.SetProp("no-focus", true)
@@ -187,9 +187,9 @@ func (sb *SpinBox) ConfigParts() {
 			})
 		}
 		// space
-		sb.StylePart(sb.Parts.KnownChild(sbSpaceIdx).(Node2D)) // also get the space
+		sb.StylePart(sb.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
-		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
 		sb.SetFlagState(sb.IsInactive(), int(Inactive))
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
@@ -216,7 +216,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 	if !sb.Parts.HasChildren() {
 		sb.ConfigParts()
 	}
-	tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+	tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
 	txt := fmt.Sprintf("%g", sb.Value)
 	if tf.Txt != txt {
 		tf.SetText(txt)
@@ -236,7 +236,7 @@ func (sb *SpinBox) MouseScrollEvent() {
 }
 
 func (sb *SpinBox) TextFieldEvent() {
-	tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+	tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
@@ -289,7 +289,7 @@ func (sb *SpinBox) Render2D() {
 	if sb.PushBounds() {
 		sb.This().(Node2D).ConnectEvents2D()
 		// sb.Sty = sb.StateStyles[sb.State] // get current styles
-		tf := sb.Parts.KnownChild(sbTextFieldIdx).(*TextField)
+		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
 		tf.SetSelectedState(sb.IsSelected())
 		sb.ConfigPartsIfNeeded()
 		sb.Render2DChildren()
