@@ -355,7 +355,7 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	if os.IsNotExist(err) {
 		path, err = dirs.GoSrcDir(path)
 		if err != nil {
-			log.Println(err)
+			// log.Println(err)
 			return nil
 		}
 	} else if err != nil {
