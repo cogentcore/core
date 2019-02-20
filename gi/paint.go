@@ -822,8 +822,8 @@ func (pc *Paint) DrawEllipticalArc(rs *RenderState, cx, cy, rx, ry, angle1, angl
 		a2 := angle1 + (angle2-angle1)*p2
 		x0 := cx + rx*math32.Cos(a1)
 		y0 := cy + ry*math32.Sin(a1)
-		x1 := cx + rx*math32.Cos(a1+(a2-a1)/2)
-		y1 := cy + ry*math32.Sin(a1+(a2-a1)/2)
+		x1 := cx + rx*math32.Cos((a1+a2)/2)
+		y1 := cy + ry*math32.Sin((a1+a2)/2)
 		x2 := cx + rx*math32.Cos(a2)
 		y2 := cy + ry*math32.Sin(a2)
 		ncx := 2*x1 - x0/2 - x2/2
