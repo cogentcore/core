@@ -454,20 +454,31 @@ func (tb *TextBuf) Revert() bool {
 		return false
 	}
 
-	ob := &TextBuf{}
-	ob.InitName(ob, "revert-tmp")
-	err := ob.OpenFile(tb.Filename)
-	if err != nil {
-		vp := tb.ViewportFromView()
-		if vp != nil { // only if viewing
-			gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, true, false, nil, nil)
+	didDiff := false
+	if tb.NLines < 1000 {
+		ob := &TextBuf{}
+		ob.InitName(ob, "revert-tmp")
+		err := ob.OpenFile(tb.Filename)
+		if err != nil {
+			vp := tb.ViewportFromView()
+			if vp != nil { // only if viewing
+				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, true, false, nil, nil)
+			}
+			log.Println(err)
+			return false
 		}
-		log.Println(err)
-		return false
+		tb.Stat() // "own" the new file..
+		if ob.NLines < 1000 {
+			diffs := tb.DiffBufs(ob)
+			if len(diffs) < 10 {
+				tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
+				didDiff = true
+			}
+		}
 	}
-	tb.Stat() // "own" the new file..
-	diffs := tb.DiffBufs(ob)
-	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
+	if !didDiff {
+		tb.OpenFile(tb.Filename)
+	}
 	tb.ClearChanged()
 	tb.AutoSaveDelete()
 	tb.ReMarkup()
