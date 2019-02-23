@@ -51,6 +51,14 @@ type TextBufOpts struct {
 // MaxScopeLines	 is the maximum lines to search for a scope marker, e.g. '}'
 var MaxScopeLines = 100
 
+// TextBufDiffRevertLines is max number of lines to use the diff-based revert, which results
+// in faster reverts but only if the file isn't too big..
+var TextBufDiffRevertLines = 10000
+
+// TextBufDiffRevertDiffs is max number of difference regions to apply for diff-based revert
+// otherwise just reopens file
+var TextBufDiffRevertDiffs = 20
+
 // CommentStrs returns the comment start and end strings, using line-based CommentLn first if set
 // and falling back on multi-line / general purpose start / end syntax
 func (tb *TextBufOpts) CommentStrs() (comst, comed string) {
@@ -455,7 +463,7 @@ func (tb *TextBuf) Revert() bool {
 	}
 
 	didDiff := false
-	if tb.NLines < 1000 {
+	if tb.NLines < TextBufDiffRevertLines {
 		ob := &TextBuf{}
 		ob.InitName(ob, "revert-tmp")
 		err := ob.OpenFile(tb.Filename)
@@ -468,9 +476,9 @@ func (tb *TextBuf) Revert() bool {
 			return false
 		}
 		tb.Stat() // "own" the new file..
-		if ob.NLines < 1000 {
+		if ob.NLines < TextBufDiffRevertLines {
 			diffs := tb.DiffBufs(ob)
-			if len(diffs) < 10 {
+			if len(diffs) < TextBufDiffRevertDiffs {
 				tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
 				didDiff = true
 			}

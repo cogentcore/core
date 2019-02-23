@@ -3012,6 +3012,9 @@ var TextViewDepthColors = []gi.Color{
 
 // RenderDepthBg renders the depth background color
 func (tv *TextView) RenderDepthBg(stln, edln int) {
+	if tv.Buf == nil {
+		return
+	}
 	if !tv.Buf.Opts.DepthColor || tv.IsInactive() || !tv.HasFocus() || !tv.IsFocusActive() {
 		return
 	}
