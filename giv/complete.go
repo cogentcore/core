@@ -2,7 +2,6 @@ package giv
 
 import (
 	"fmt"
-	"go/token"
 	"log"
 
 	"github.com/goki/gi/gi"
@@ -14,7 +13,7 @@ import (
 // CompletePi uses GoPi symbols and language -- the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompletePi(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
 	sfs := data.(*pi.FileState)
 	if sfs == nil {
 		log.Printf("CompletePi: data is nil not FileState or is nil - can't complete\n")
@@ -28,7 +27,7 @@ func CompletePi(data interface{}, text string, pos token.Position) (md complete.
 	if lp.Lang == nil {
 		return md
 	}
-	return lp.Lang.CompleteLine(sfs, text, lex.Pos{pos.Line, pos.Column})
+	return lp.Lang.CompleteLine(sfs, text, lex.Pos{posLn, posCh})
 }
 
 // CompleteEditPi uses the selected completion to edit the text
@@ -50,7 +49,7 @@ func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.
 }
 
 // CompleteText does completion for text files
-func CompleteText(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
 	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
 		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)

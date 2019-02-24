@@ -6,7 +6,6 @@ package giv
 
 import (
 	"fmt"
-	gotoken "go/token"
 	"image"
 	"image/draw"
 	"log"
@@ -2435,18 +2434,13 @@ func (tv *TextView) OfferComplete() {
 		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
 	}
 
-	tpos := gotoken.Position{} // text position
-	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
-	tpos.Line = tv.CursorPos.Ln
-	tpos.Column = tv.CursorPos.Ch
-	tpos.Offset = count
-	tpos.Filename = ""
+	//	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	tv.Buf.CurView = tv
-	tv.Buf.Complete.Show(s, tpos, tv.Viewport, cpos, tv.ForceComplete)
+	tv.Buf.Complete.Show(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Viewport, cpos, tv.ForceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events

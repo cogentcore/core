@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"go/token"
 	"image"
 	"image/draw"
 	"strings"
@@ -671,8 +670,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
 	cpos.X += 5
 	cpos.Y += 10
-	position := token.Position{}
-	tf.Complete.Show(s, position, tf.Viewport, cpos, forceComplete)
+	tf.Complete.Show(s, 0, tf.CursorPos, tf.Viewport, cpos, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events

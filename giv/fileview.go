@@ -6,7 +6,6 @@ package giv
 
 import (
 	"fmt"
-	"go/token"
 	"io/ioutil"
 	"log"
 	"os"
@@ -766,7 +765,7 @@ func (fv *FileView) HasFocus2D() bool {
 //  Completion
 
 // FileComplete finds the possible completions for the file field
-func (fv *FileView) FileComplete(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+func (fv *FileView) FileComplete(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -794,7 +793,7 @@ func (fv *FileView) FileComplete(data interface{}, text string, pos token.Positi
 }
 
 // PathComplete finds the possible completions for the path field
-func (fv *FileView) PathComplete(data interface{}, path string, pos token.Position) (md complete.MatchData) {
+func (fv *FileView) PathComplete(data interface{}, path string, posLn, posCh int) (md complete.MatchData) {
 	dir, seed := filepath.Split(path)
 	md.Seed = seed
 	d, err := os.Open(dir)

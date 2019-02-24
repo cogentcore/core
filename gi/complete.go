@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"go/token"
 	"image"
 	"sync"
 	"time"
@@ -67,7 +66,7 @@ var CompleteMaxItems = 25
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt image.Point, force bool) {
+func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -89,7 +88,7 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 	}
 	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
 		func() {
-			c.ShowNow(text, pos, vp, pt, force)
+			c.ShowNow(text, posLn, posCh, vp, pt, force)
 			c.DelayMu.Lock()
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
@@ -99,7 +98,7 @@ func (c *Complete) Show(text string, pos token.Position, vp *Viewport2D, pt imag
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu
-func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt image.Point, force bool) {
+func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -110,7 +109,7 @@ func (c *Complete) ShowNow(text string, pos token.Position, vp *Viewport2D, pt i
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
 	c.Vp = nil
-	md := c.MatchFunc(c.Context, text, pos)
+	md := c.MatchFunc(c.Context, text, posLn, posCh)
 	c.Completions = md.Matches
 	c.Seed = md.Seed
 	count := len(c.Completions)

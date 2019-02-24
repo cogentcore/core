@@ -1092,12 +1092,12 @@ func OpenFontFace(path string, size int, strokeWidth int) (font.Face, error) {
 
 // see: https://blog.golang.org/go-fonts
 
-type goFontInfo struct {
+type GoFontInfo struct {
 	name string
 	ttf  []byte
 }
 
-var GoFonts = map[string]goFontInfo{
+var GoFonts = map[string]GoFontInfo{
 	"gofont/goregular":         {"Go", goregular.TTF},
 	"gofont/gobold":            {"Go Bold", gobold.TTF},
 	"gofont/gobolditalic":      {"Go Bold Italic", gobolditalic.TTF},
