@@ -8,7 +8,6 @@
 package complete
 
 import (
-	"go/token"
 	"sort"
 	"strings"
 	"unicode"
@@ -43,7 +42,7 @@ type EditData struct {
 
 // MatchFunc is the function called to get the list of possible completions
 // and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type MatchFunc func(data interface{}, text string, pos token.Position) MatchData
+type MatchFunc func(data interface{}, text string, posLn, posCh int) MatchData
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
