@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goki/ki"
 	"github.com/goki/ki/indent"
+	"github.com/goki/ki/ki"
 )
 
 // Type contains all the information about types.  Types can be builtin

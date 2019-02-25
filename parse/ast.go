@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/goki/ki"
 	"github.com/goki/ki/indent"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/syms"
