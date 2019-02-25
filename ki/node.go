@@ -864,9 +864,9 @@ func (n *Node) SetChild(kid Ki, idx int, name string) error {
 // MoveChild moves child from one position to another in the list of
 // children (see also corresponding Slice method, which does not
 // signal, like this one does).  Returns error if either index is invalid.
-func (n *Node) MoveChild(from, to int) error {
+func (n *Node) MoveChild(frm, to int) error {
 	updt := n.UpdateStart()
-	err := n.Kids.Move(from, to)
+	err := n.Kids.Move(frm, to)
 	if err == nil {
 		n.SetFlag(int(ChildMoved))
 	}
@@ -1290,14 +1290,14 @@ func init() {
 // the original map (and we don't reset our map first -- call
 // DeleteAllProps to do that -- deep copy uses gob encode / decode --
 // usually not needed).
-func (n *Node) CopyPropsFrom(from Ki, deep bool) error {
-	if *(from.Properties()) == nil {
+func (n *Node) CopyPropsFrom(frm Ki, deep bool) error {
+	if *(frm.Properties()) == nil {
 		return nil
 	}
 	if n.Props == nil {
 		n.Props = make(Props)
 	}
-	fmP := *(from.Properties())
+	fmP := *(frm.Properties())
 	if deep {
 		// code from https://gist.github.com/soroushjp/0ec92102641ddfc3ad5515ca76405f4d
 		var buf bytes.Buffer
@@ -1822,24 +1822,24 @@ func (n *Node) FieldTag(field, tag string) string {
 // as before.  See also MoveTo function for moving nodes to other parts of
 // the tree.  Sequence of functions is: GetPtrPaths on from, CopyFromRaw,
 // UpdtPtrPaths, then SetPtrsFmPaths.
-func (n *Node) CopyFrom(from Ki) error {
-	if from == nil {
+func (n *Node) CopyFrom(frm Ki) error {
+	if frm == nil {
 		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.PathUnique())
 		log.Println(err)
 		return err
 	}
 	mypath := n.PathUnique()
-	fmpath := from.PathUnique()
-	if n.Type() != from.Type() {
-		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", mypath, fmpath, n.Type().Name(), from.Type().Name())
+	fmpath := frm.PathUnique()
+	if n.Type() != frm.Type() {
+		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", mypath, fmpath, n.Type().Name(), frm.Type().Name())
 		log.Println(err)
 		return err
 	}
 	updt := n.UpdateStart()
 	n.SetFlag(int(NodeCopied))
-	sameTree := (n.Root() == from.Root())
-	from.GetPtrPaths()
-	err := n.CopyFromRaw(from)
+	sameTree := (n.Root() == frm.Root())
+	frm.GetPtrPaths()
+	err := n.CopyFromRaw(frm)
 	// DelMgr.DestroyDeleted() // in case we deleted some kiddos
 	if err != nil {
 		n.UpdateEnd(updt)
@@ -1864,16 +1864,16 @@ func (n *Node) Clone() Ki {
 }
 
 // CopyMakeChildrenFrom uses ConfigChildren to recreate source children
-func (n *Node) CopyMakeChildrenFrom(from Ki) {
-	sz := len(*from.Children())
+func (n *Node) CopyMakeChildrenFrom(frm Ki) {
+	sz := len(*frm.Children())
 	if sz > 0 {
 		cfg := make(kit.TypeAndNameList, sz)
-		for i, kid := range *from.Children() {
+		for i, kid := range *frm.Children() {
 			cfg[i].Type = kid.Type()
 			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
 		}
 		mods, updt := n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
-		for i, kid := range *from.Children() {
+		for i, kid := range *frm.Children() {
 			mkid := n.Kids[i]
 			mkid.SetNameRaw(kid.Name()) // restore orig user-names
 		}
@@ -1887,10 +1887,10 @@ func (n *Node) CopyMakeChildrenFrom(from Ki) {
 
 // CopyFieldsFrom copies from primary fields of source object,
 // recursively following anonymous embedded structs
-func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
+func (n *Node) CopyFieldsFrom(to interface{}, frm interface{}) {
 	kitype := KiType
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
-	sv := kit.NonPtrValue(reflect.ValueOf(from))
+	sv := kit.NonPtrValue(reflect.ValueOf(frm))
 	typ := tv.Type()
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
@@ -1930,13 +1930,13 @@ func (n *Node) CopyFieldsFrom(to interface{}, from interface{}) {
 
 // CopyFromRaw performs a raw copy that just does the deep copy of the
 // bits and doesn't do anything with pointers.
-func (n *Node) CopyFromRaw(from Ki) error {
-	n.CopyMakeChildrenFrom(from)
-	n.DeleteAllProps(len(*from.Properties())) // start off fresh, allocated to size of from
-	n.CopyPropsFrom(from, false)              // use shallow props copy by default
-	n.CopyFieldsFrom(n.This(), from)
+func (n *Node) CopyFromRaw(frm Ki) error {
+	n.CopyMakeChildrenFrom(frm)
+	n.DeleteAllProps(len(*frm.Properties())) // start off fresh, allocated to size of from
+	n.CopyPropsFrom(frm, false)              // use shallow props copy by default
+	n.CopyFieldsFrom(n.This(), frm)
 	for i, kid := range n.Kids {
-		fmk := (*(from.Children()))[i]
+		fmk := (*(frm.Children()))[i]
 		kid.CopyFromRaw(fmk)
 	}
 	return nil

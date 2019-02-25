@@ -305,26 +305,26 @@ func (sl *Slice) DeleteAtIndex(idx int) error {
 
 // SliceMove moves element from one position to another.  Returns error if
 // either index is invalid.
-func SliceMove(sl *[]Ki, from, to int) error {
-	if err := SliceIsValidIndex(sl, from); err != nil {
+func SliceMove(sl *[]Ki, frm, to int) error {
+	if err := SliceIsValidIndex(sl, frm); err != nil {
 		return err
 	}
 	if err := SliceIsValidIndex(sl, to); err != nil {
 		return err
 	}
-	if from == to {
+	if frm == to {
 		return nil
 	}
-	tmp := (*sl)[from]
-	SliceDeleteAtIndex(sl, from)
+	tmp := (*sl)[frm]
+	SliceDeleteAtIndex(sl, frm)
 	SliceInsert(sl, tmp, to)
 	return nil
 }
 
 // Move element from one position to another.  Returns error if either index
 // is invalid.
-func (sl *Slice) Move(from, to int) error {
-	return SliceMove((*[]Ki)(sl), from, to)
+func (sl *Slice) Move(frm, to int) error {
+	return SliceMove((*[]Ki)(sl), frm, to)
 }
 
 // SliceSwap swaps elements between positions.  Returns error if either index is invalid

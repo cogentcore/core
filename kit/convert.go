@@ -260,7 +260,7 @@ func ToString(it interface{}) string {
 // SetRobust robustly sets the to value from the from value -- to must be a
 // pointer-to -- only for basic field values -- use copier package for more
 // complex cases
-func SetRobust(to, from interface{}) bool {
+func SetRobust(to, frm interface{}) bool {
 	if IfaceIsNil(to) {
 		return false
 	}
@@ -278,25 +278,25 @@ func SetRobust(to, from interface{}) bool {
 	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		fm, ok := ToInt(from)
+		fm, ok := ToInt(frm)
 		if ok {
 			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 			return true
 		}
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		fm, ok := ToInt(from)
+		fm, ok := ToInt(frm)
 		if ok {
 			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 			return true
 		}
 	case vk == reflect.Bool:
-		fm, ok := ToBool(from)
+		fm, ok := ToBool(frm)
 		if ok {
 			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 			return true
 		}
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		fm, ok := ToFloat(from)
+		fm, ok := ToFloat(frm)
 		if ok {
 			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 			return true
@@ -306,12 +306,12 @@ func SetRobust(to, from interface{}) bool {
 		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
 		// return rv, true
 	case vk == reflect.String: // todo: what about []byte?
-		fm := ToString(from)
+		fm := ToString(frm)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 		return true
 	}
 
-	fv := reflect.ValueOf(from)
+	fv := reflect.ValueOf(frm)
 	// Just set it if possible to assign
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)

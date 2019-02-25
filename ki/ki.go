@@ -310,7 +310,7 @@ type Ki interface {
 	// MoveChild moves child from one position to another in the list of
 	// children (see also corresponding Slice method, which does not
 	// signal, like this one does).  Returns error if either index is invalid.
-	MoveChild(from, to int) error
+	MoveChild(frm, to int) error
 
 	// SwapChildren swaps children between positions (see also corresponding
 	// Slice method which does not signal like this one does).  Returns error if
@@ -514,7 +514,7 @@ type Ki interface {
 	// the original map (and we don't reset our map first -- call
 	// DeleteAllProps to do that -- deep copy uses gob encode / decode --
 	// usually not needed).
-	CopyPropsFrom(from Ki, deep bool) error
+	CopyPropsFrom(frm Ki, deep bool) error
 
 	// PropTag returns the name to look for in type properties, for types
 	// that are valid options for values that can be set in Props.  For example
@@ -691,7 +691,7 @@ type Ki interface {
 	// as before.  See also MoveTo function for moving nodes to other parts of
 	// the tree.  Sequence of functions is: GetPtrPaths on from, CopyFromRaw,
 	// UpdtPtrPaths, then SetPtrsFmPaths.
-	CopyFrom(from Ki) error
+	CopyFrom(frm Ki) error
 
 	// Clone creates and returns a deep copy of the tree from this node down.
 	// Any pointers within the cloned tree will correctly point within the new
@@ -700,7 +700,7 @@ type Ki interface {
 
 	// CopyFromRaw performs a raw copy that just does the deep copy of the
 	// bits and doesn't do anything with pointers.
-	CopyFromRaw(from Ki) error
+	CopyFromRaw(frm Ki) error
 
 	// GetPtrPaths gets all Ptr path strings -- walks the tree down from
 	// current node and calls GetPath on all Ptr fields -- this is called
