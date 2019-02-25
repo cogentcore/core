@@ -8,6 +8,8 @@
 package gimain
 
 import (
+	"fmt"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
@@ -22,7 +24,7 @@ var dummyVV giv.ValueViewBase
 
 func Main(mainrun func()) {
 	DebugEnumSizes()
-
+	fmt.Printf("gimain running driver now\n")
 	driver.Main(func(app oswin.App) {
 		mainrun()
 	})

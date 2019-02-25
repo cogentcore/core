@@ -22,23 +22,25 @@ type ViewBox struct {
 func (vb *ViewBox) Defaults() {
 	vb.Min = gi.Vec2DZero
 	vb.Size = gi.Vec2DZero
-	vb.PreserveAspectRatio.Align = None
+	vb.PreserveAspectRatio.Align = NoAlign
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }
+
+// todo: these should be regular ints and use bitflag etc.
 
 // ViewBoxAlign defines values for the PreserveAspectRatio alignment factor
 type ViewBoxAlign int32
 
 const (
-	None  ViewBoxAlign = 1 << iota          // do not preserve uniform scaling
-	XMin                                    // align ViewBox.Min with smallest values of Viewport
-	XMid                                    // align ViewBox.Min with midpoint values of Viewport
-	XMax                                    // align ViewBox.Min+Size with maximum values of Viewport
-	XMask ViewBoxAlign = XMin + XMid + XMax // mask for X values -- clear all X before setting new one
-	YMin  ViewBoxAlign = 1 << iota          // align ViewBox.Min with smallest values of Viewport
-	YMid                                    // align ViewBox.Min with midpoint values of Viewport
-	YMax                                    // align ViewBox.Min+Size with maximum values of Viewport
-	YMask ViewBoxAlign = YMin + YMid + YMax // mask for Y values -- clear all Y before setting new one
+	NoAlign ViewBoxAlign = 1 << iota          // do not preserve uniform scaling
+	XMin                                      // align ViewBox.Min with smallest values of Viewport
+	XMid                                      // align ViewBox.Min with midpoint values of Viewport
+	XMax                                      // align ViewBox.Min+Size with maximum values of Viewport
+	XMask   ViewBoxAlign = XMin + XMid + XMax // mask for X values -- clear all X before setting new one
+	YMin    ViewBoxAlign = 1 << iota          // align ViewBox.Min with smallest values of Viewport
+	YMid                                      // align ViewBox.Min with midpoint values of Viewport
+	YMax                                      // align ViewBox.Min+Size with maximum values of Viewport
+	YMask   ViewBoxAlign = YMin + YMid + YMax // mask for Y values -- clear all Y before setting new one
 )
 
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor

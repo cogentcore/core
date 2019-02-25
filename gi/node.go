@@ -287,11 +287,11 @@ func (nb *NodeBase) PointToRelPos(pt image.Point) image.Point {
 }
 
 // AddClass adds a CSS class name -- does proper space separation
-func (nb *NodeBase) AddClass(class string) {
+func (nb *NodeBase) AddClass(cls string) {
 	if nb.Class == "" {
-		nb.Class = class
+		nb.Class = cls
 	} else {
-		nb.Class += " " + class
+		nb.Class += " " + cls
 	}
 }
 

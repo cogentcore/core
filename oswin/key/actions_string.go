@@ -3,13 +3,15 @@
 package key
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _Actions_name = "NonePressReleaseActionsN"
+var _ = errors.New("dummy error")
 
-var _Actions_index = [...]uint8{0, 4, 9, 16, 24}
+const _Actions_name = "NoActionPressReleaseActionsN"
+
+var _Actions_index = [...]uint8{0, 8, 13, 20, 28}
 
 func (i Actions) String() string {
 	if i < 0 || i >= Actions(len(_Actions_index)-1) {
@@ -25,5 +27,5 @@ func (i *Actions) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Actions", s)
+	return errors.New("String: " + s + " is not a valid option for type: Actions")
 }

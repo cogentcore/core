@@ -204,7 +204,7 @@ func CodeIsModifier(c Codes) bool {
 type Actions int32
 
 const (
-	None Actions = iota
+	NoAction Actions = iota
 	Press
 	Release
 

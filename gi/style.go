@@ -392,9 +392,9 @@ type StyledFields struct {
 	Default  interface{}             `desc:"points to the Default instance of this type, initialized with the default values used for 'initial' keyword"`
 }
 
-func (sf *StyledFields) Init(def interface{}) {
-	sf.Default = def
-	sf.CompileFields(def)
+func (sf *StyledFields) Init(df interface{}) {
+	sf.Default = df
+	sf.CompileFields(df)
 }
 
 // get the full effective tag based on outer tag plus given tag
@@ -413,7 +413,7 @@ func StyleEffTag(tag, outerTag string) string {
 // AddField adds a single field -- must be a direct field on the object and
 // not a field on an embedded type -- used for Widget objects where only one
 // or a few fields are styled
-func (sf *StyledFields) AddField(def interface{}, fieldName string) error {
+func (sf *StyledFields) AddField(df interface{}, fieldName string) error {
 	valtyp := reflect.TypeOf(units.Value{})
 
 	if sf.Fields == nil {
@@ -421,7 +421,7 @@ func (sf *StyledFields) AddField(def interface{}, fieldName string) error {
 		sf.Inherits = make([]*StyledField, 0, 5)
 		sf.Units = make([]*StyledField, 0, 5)
 	}
-	otp := reflect.TypeOf(def)
+	otp := reflect.TypeOf(df)
 	if otp.Kind() != reflect.Ptr {
 		err := fmt.Errorf("gi.StyleFields.AddField: must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())
 		log.Print(err)
@@ -433,7 +433,7 @@ func (sf *StyledFields) AddField(def interface{}, fieldName string) error {
 		log.Print(err)
 		return err
 	}
-	vo := reflect.ValueOf(def).Elem()
+	vo := reflect.ValueOf(df).Elem()
 	struf, ok := ot.FieldByName(fieldName)
 	if !ok {
 		err := fmt.Errorf("gi.StyleFields.AddField: field name: %v not found in type %v\n", fieldName, ot.Name())
@@ -466,14 +466,14 @@ func (sf *StyledFields) AddField(def interface{}, fieldName string) error {
 
 // CompileFields gathers all the fields with xml tag != "-", plus those
 // that are units.Value's for later optimized processing of styles
-func (sf *StyledFields) CompileFields(def interface{}) {
+func (sf *StyledFields) CompileFields(df interface{}) {
 	valtyp := reflect.TypeOf(units.Value{})
 
 	sf.Fields = make(map[string]*StyledField, 50)
 	sf.Inherits = make([]*StyledField, 0, 50)
 	sf.Units = make([]*StyledField, 0, 50)
 
-	WalkStyleStruct(def, "", uintptr(0),
+	WalkStyleStruct(df, "", uintptr(0),
 		func(struf reflect.StructField, vf reflect.Value, outerTag string, baseoff uintptr) {
 			styf := &StyledField{Field: struf, NetOff: baseoff + struf.Offset, Default: vf}
 			tag := StyleEffTag(struf.Tag.Get("xml"), outerTag)
