@@ -27,7 +27,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/gi/vci"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/runes"
 	"github.com/goki/pi/filecat"

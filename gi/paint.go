@@ -14,7 +14,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/prof"
 	// "github.com/rcoreilly/rasterx"

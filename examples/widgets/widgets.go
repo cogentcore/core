@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"go/token"
 	"reflect"
 
 	"github.com/goki/gi/gi"
@@ -14,7 +13,7 @@ import (
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
 )
@@ -373,7 +372,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(data interface{}, text string, pos token.Position) (md complete.MatchData) {
+func Complete(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
 	md.Seed = complete.SeedWhiteSpace(text)
 	if md.Seed == "" {
 		return md

@@ -14,8 +14,8 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/ki"
 	"github.com/goki/ki/dirs"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/pi"
 )

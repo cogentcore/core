@@ -9,7 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 )
 
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --

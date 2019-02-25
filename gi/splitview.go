@@ -12,8 +12,8 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 

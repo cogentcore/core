@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 )
 
 // DebugEnumSizes is a startup function that reports current sizes of some big

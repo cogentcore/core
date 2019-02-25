@@ -12,7 +12,7 @@ import (
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/svg"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 )
 
 var Vp *gi.Viewport2D

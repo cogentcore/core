@@ -13,12 +13,12 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// SliderBase -- basis for sliders
+// SliderMinThumbSize is the minimum thumb size, even if computed value would make it smaller
+var SliderMinThumbSize = float32(8)
 
 // SliderBase has common slider functionality -- two major modes: ValThumb =
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
@@ -293,6 +293,7 @@ func (sb *SliderBase) UpdateThumbValSize() {
 	sb.ThSize = Min32(sb.ThSize, 1.0)
 	sb.ThSize = Max32(sb.ThSize, 0.0)
 	sb.ThSize *= sb.Size
+	sb.ThSize = Max32(sb.ThSize, SliderMinThumbSize)
 }
 
 func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {

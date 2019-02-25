@@ -11,7 +11,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"

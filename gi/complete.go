@@ -11,7 +11,7 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/spell"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
 )

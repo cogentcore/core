@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	// "github.com/rcoreilly/rasterx"
 	"github.com/srwiley/rasterx"

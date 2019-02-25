@@ -4,7 +4,7 @@
 
 package gi
 
-import "github.com/goki/ki"
+import "github.com/goki/ki/ki"
 
 // ViewIFace is an interface into the View GUI types in giv subpackage,
 // allowing it to be a sub-package with just this narrow set of dependencies

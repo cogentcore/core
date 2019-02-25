@@ -9,7 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 )
 
 // PrefsView opens a view of user preferences

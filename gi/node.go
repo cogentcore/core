@@ -8,7 +8,7 @@ import (
 	"image"
 	"log"
 
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 

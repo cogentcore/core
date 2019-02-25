@@ -11,8 +11,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
 	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
