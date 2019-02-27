@@ -66,7 +66,6 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	"log"
 	"runtime"
 	"strings"
 	"sync"
@@ -98,12 +97,14 @@ func init() {
 	// https://groups.google.com/forum/#!msg/golang-nuts/IiWZ2hUuLDA/SNKYYZBelsYJ
 	runtime.LockOSThread()
 	initThreadID = C.threadID()
+	// fmt.Printf("cocoa init thread id: %v\n", initThreadID)
 }
 
 func startDriver() {
-	if tid := C.threadID(); tid != initThreadID {
-		log.Fatalf("macdriver.Main called on thread %d, but macdriver.init ran on %d", tid, initThreadID)
-	}
+	// if tid := C.threadID(); tid != initThreadID {
+	// 	log.Fatalf("macdriver.Main called on thread %d, but macdriver.init ran on %d", tid, initThreadID)
+	// }
+	runtime.LockOSThread()
 	C.startDriver()
 }
 

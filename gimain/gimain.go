@@ -8,7 +8,7 @@
 package gimain
 
 import (
-	"fmt"
+	"sync/atomic"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv"
@@ -22,10 +22,36 @@ var dummyGi gi.Vec2D
 var dummSvg svg.Line
 var dummyVV giv.ValueViewBase
 
+// Main is run in a main package to start the GUI driver / event loop,
+// and call given function as the effective "main" function.
 func Main(mainrun func()) {
 	DebugEnumSizes()
-	fmt.Printf("gimain running driver now\n")
 	driver.Main(func(app oswin.App) {
 		mainrun()
 	})
+}
+
+var quit = make(chan struct{})
+
+var started int32
+
+// Start is called via a library to start the driver -- dynamic libraries
+// in Go do not run in the main thread, so this needs to be called after
+// loading the library.  This call will never return, so another thread
+// must be launched prior to calling this in the main thread.  That thread
+// can call gimain.Quit() to close this main thread.
+func Start() {
+	driver.Main(func(app oswin.App) {
+		atomic.AddInt32(&started, 1)
+		<-quit
+	})
+}
+
+func HasStarted() bool {
+	return atomic.LoadInt32(&started) > 0
+}
+
+// Quit can be called to close the main thread started by Start()
+func Quit() {
+	close(quit)
 }
