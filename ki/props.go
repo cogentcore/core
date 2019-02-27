@@ -53,6 +53,18 @@ func SubTypeProps(pr map[string]interface{}, key string) (Props, bool) {
 	return nil, false
 }
 
+// SetPropStr is a convenience method for e.g., python wrapper that avoids need to deal
+// directly with props interface{} type
+func SetPropStr(pr Props, key, val string) {
+	pr[key] = val
+}
+
+// SetSubProps is a convenience method for e.g., python wrapper that avoids need to deal
+// directly with props interface{} type
+func SetSubProps(pr Props, key string, sp Props) {
+	pr[key] = sp
+}
+
 // special key prefix indicating type info
 var struTypeKey = "__type:"
 

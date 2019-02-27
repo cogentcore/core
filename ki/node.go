@@ -1185,13 +1185,25 @@ func (n *Node) Properties() *Props {
 	return &n.Props
 }
 
-// SetProp sets given property key to value val -- initializes property
-// map if nil.
+// SetProp sets given property key to value val.
+// initializes property map if nil.
 func (n *Node) SetProp(key string, val interface{}) {
 	if n.Props == nil {
 		n.Props = make(Props)
 	}
 	n.Props[key] = val
+}
+
+// SetPropStr sets given property key to value val as a string (e.g., for python wrapper)
+// Initializes property map if nil.
+func (n *Node) SetPropStr(key, val string) {
+	n.SetProp(key, val)
+}
+
+// SetSubProps sets given property key to sub-Props value (e.g., for python wrapper)
+// Initializes property map if nil.
+func (n *Node) SetSubProps(key string, val Props) {
+	n.SetProp(key, val)
 }
 
 // SetProps sets a whole set of properties, and optionally sets the
@@ -1225,6 +1237,8 @@ func (n *Node) SetPropChildren(key string, val interface{}) {
 		k.SetProp(key, val)
 	}
 }
+
+// todo: switch to PropTry, Prop instead of KnownProp etc.
 
 // Prop gets property value from key.
 func (n *Node) Prop(key string) (interface{}, bool) {
