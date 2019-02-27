@@ -17,9 +17,9 @@ def mainrun():
 #    rec = ki.Node{}          # receiver for events
 #    rec.InitName(&rec, "rec") # this is essential for root objects not owned by other Ki tree nodes
 
-    # app = oswin.TheApp()
-    # app.SetName("widgets")
-    # app.SetAbout('This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>')
+    app = oswin.TheApp()
+    app.SetName("widgets")
+    app.SetAbout('This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>')
 
     win = gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, True) # True = pixel sizes
     
@@ -253,9 +253,9 @@ def mainrun():
     # //////////////////////////////////////////
     # #      Main Menu
 
-    # appnm = oswin.TheApp.Name()
-    # mmen = win.MainMenu
-    # mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+    appnm = app.Name()
+    mmen = win.MainMenu
+    mmen.ConfigMenus(go.Slice_string([appnm, "File", "Edit", "Window"]))
 
     # amen = win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
     # amen.Menu = make(gi.Menu, 0, 10)
