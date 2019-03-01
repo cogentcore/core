@@ -4,6 +4,35 @@
 
 from gi import go, gi, giv, units, ki, oswin, gimain
 
+def strdlgcb(recv, send, sig, data):
+    print("string dialog callback, sig:",  sig)
+    # todo: at this point it seems to hang or lose progress on this thread.. still some
+    # residual problem associated with the zombie interpreter..
+    dlg = gi.Dialog(send.handle)
+    if sig == gi.DialogAccepted:
+        print("processing value")
+        val = gi.StringPromptDialogValue(dlg)
+        print("got string value: ", val)
+
+def button1cb(recv, send, sig, data):
+    """ callback for button1 press -- lambda functions in python are only 1 line.. """
+    sb = gi.Button(handle=send)
+    print("Received button signal:", sig, "from button:", sb.Name())
+    if sig == gi.ButtonClicked: # note: 3 diff ButtonSig sig's possible -- important to check
+        gi.StringPromptDialog(sb.Viewport, "", "Enter value here..",
+             gi.DlgOpts(Title="Button1 Dialog", Prompt="This is a string prompt dialog!  Various specific types of dialogs are available."), sb, strdlgcb)
+
+def button2cb(recv, send, sig, data):
+    sb = gi.Button(handle=send)
+    print("Received button signal:", sig, "from button:", sb.Name())
+    if sig == gi.ButtonClicked:
+        print("attempting to open editor dialog:")
+        giv.GoGiEditorDialog(sb.Viewport)
+
+def menu1cb(recv, send, sig, data):
+    sa = gi.Action(handle=send)
+    print("Received menu action data:", data, "from menu action", sa.Name())
+        
 def mainrun():
     width = 1024
     height = 768
@@ -39,10 +68,9 @@ def mainrun():
     # ".hslides": ki.Props{
     # "background-color": gi.Color{240, 225, 255, 255},
     # },
-    # "kbd": ki.Props{
-    # "color": "blue",
-    # },
-    # }
+    kbd = ki.Props()
+    ki.SetPropStr(kbd, "color", "blue")
+    ki.SetSubProps(css, "kbd", kbd)
     vp.CSS = css
 
     mfr = win.SetMainFrame()
@@ -59,7 +87,7 @@ def mainrun():
     # giedsc = gi.ActiveKeyMap().ChordForFun(gi.KeyFunGoGiEditor())
     # prsc = gi.ActiveKeyMap().ChordForFun(gi.KeyFunPrefs())
 
-    giedsc = "Alt+I"
+    giedsc = "Ctrl+Alt+I"
     prsc = "Alt+P"
     
     title = gi.Label(trow.AddNewChild(gi.KiT_Label(), "title"))
@@ -98,28 +126,13 @@ def mainrun():
     button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
     button1.SetIcon(icnm)
-    # button1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    #     fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-    #     if sig == gi.ButtonClicked: # note: 3 diff ButtonSig sig's possible -- important to check
-    #         # vp.Win.Quit()
-    #         gi.StringPromptDialog(vp, "", "Enter value here..",
-    #             gi.DlgOpts(Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."),
-    #             rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    #                 dlg = send.(*gi.Dialog)
-    #                 if sig == gi.DialogAccepted:
-    #                     val = gi.StringPromptDialogValue(dlg)
-    #                     fmt.Printf("got string value: %v\n", val)
+    button1.ButtonSig.Connect(win.This(), button1cb)
 
     button2 = gi.Button(brow.AddNewChild(gi.KiT_Button(), "button2"))
     button2.SetText("Open GoGiEditor")
     # # button2.SetProp("background-color", "#EDF")
     button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
-    # button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-    # if sig == int64(gi.ButtonClicked) {
-    # giv.GoGiEditorDialog(vp)
-    # }
-    # })
+    button2.ButtonSig.Connect(win.This(), button2cb)
 
     checkbox = gi.CheckBox(brow.AddNewChild(gi.KiT_CheckBox(), "checkbox"))
     checkbox.Text = "Toggle"
@@ -127,10 +140,8 @@ def mainrun():
     # # note: receiver for menu items with shortcuts must be a Node2D or Window
     mb1 = gi.MenuButton(brow.AddNewChild(gi.KiT_MenuButton(), "menubutton1"))
     mb1.SetText("Menu Button")
-    # mb1.Menu.AddAction(gi.ActOpts(Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1),
-    # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-    # })
+    # mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1),
+    #     win.This(), menu1cb)
 
     # mi2 = mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
 
