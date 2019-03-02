@@ -21,5 +21,5 @@ install:
 
 install-exe:
 	# install executable into /usr/local/bin
-	cp gi/gi /usr/local/bin
+	cp gi/pygi /usr/local/bin/
 

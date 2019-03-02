@@ -5,34 +5,54 @@
 from gi import go, gi, giv, units, ki, oswin, gimain
 
 def strdlgcb(recv, send, sig, data):
-    print("string dialog callback, sig:",  sig)
-    # todo: at this point it seems to hang or lose progress on this thread.. still some
-    # residual problem associated with the zombie interpreter..
-    dlg = gi.Dialog(send.handle)
+    dlg = gi.Dialog(send)
     if sig == gi.DialogAccepted:
-        print("processing value")
         val = gi.StringPromptDialogValue(dlg)
         print("got string value: ", val)
 
 def button1cb(recv, send, sig, data):
     """ callback for button1 press -- lambda functions in python are only 1 line.. """
-    sb = gi.Button(handle=send)
+    sb = gi.Button(send)
     print("Received button signal:", sig, "from button:", sb.Name())
     if sig == gi.ButtonClicked: # note: 3 diff ButtonSig sig's possible -- important to check
         gi.StringPromptDialog(sb.Viewport, "", "Enter value here..",
              gi.DlgOpts(Title="Button1 Dialog", Prompt="This is a string prompt dialog!  Various specific types of dialogs are available."), sb, strdlgcb)
 
 def button2cb(recv, send, sig, data):
-    sb = gi.Button(handle=send)
+    sb = gi.Button(send)
     print("Received button signal:", sig, "from button:", sb.Name())
     if sig == gi.ButtonClicked:
-        print("attempting to open editor dialog:")
         giv.GoGiEditorDialog(sb.Viewport)
 
 def menu1cb(recv, send, sig, data):
-    sa = gi.Action(handle=send)
-    print("Received menu action data:", data, "from menu action", sa.Name())
-        
+    sa = gi.Action(send)
+    print("Received menu action from menu action", sa.Name())
+
+def slidercb(recv, send, sig, data):
+    sa = gi.Slider(send)
+    print("Received slider signal:", sig, "from slider:", sa.Name(), "val:", sa.Value)
+
+def scrollcb(recv, send, sig, data):
+    sa = gi.ScrollBar(send)
+    print("Received scroll signal:", sig, "from scrollbar:", sa.Name(), "val:", sa.Value)
+
+def textcb(recv, send, sig, data):
+    sa = gi.TextField(send)
+    print("Received text signal:", sig, "from field:", sa.Name(), "val:", sa.Txt)
+
+def spinboxcb(recv, send, sig, data):
+    sa = gi.SpinBox(send)
+    print("Received spinbox signal:", sig, "from:", sa.Name(), "val:", sa.Value)
+
+def combocb(recv, send, sig, data):
+    sa = gi.ComboBox(send)
+    print("Received combobox signal:", sig, "from:", sa.Name(), "index:", sa.CurIndex)
+
+def winclosecb(recv, send, sig, data):
+    sa = gi.Action(send)
+    print("Received menu action from menu action", sa.Name())
+    sa.Win.OSWin.CloseReq()
+
 def mainrun():
     width = 1024
     height = 768
@@ -42,9 +62,6 @@ def mainrun():
     # gi.Render2DTrace = True
     # gi.Layout2DTrace = True
     # ki.SignalTrace = True
-
-#    rec = ki.Node{}          # receiver for events
-#    rec.InitName(&rec, "rec") # this is essential for root objects not owned by other Ki tree nodes
 
     app = oswin.TheApp()
     app.SetName("widgets")
@@ -65,9 +82,9 @@ def mainrun():
     cmbo = ki.Props()
     ki.SetPropStr(cmbo, "background-color", "#F0FFF0FF")
     ki.SetSubProps(css, "#combo", cmbo)
-    # ".hslides": ki.Props{
-    # "background-color": gi.Color{240, 225, 255, 255},
-    # },
+    hsld = ki.Props()
+    ki.SetPropStr(hsld, "background-color", "#F0E0FFFF"),
+    ki.SetSubProps(css, ".hslides", hsld)
     kbd = ki.Props()
     ki.SetPropStr(kbd, "color", "blue")
     ki.SetSubProps(css, "kbd", kbd)
@@ -140,25 +157,18 @@ def mainrun():
     # # note: receiver for menu items with shortcuts must be a Node2D or Window
     mb1 = gi.MenuButton(brow.AddNewChild(gi.KiT_MenuButton(), "menubutton1"))
     mb1.SetText("Menu Button")
-    # mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1),
-    #     win.This(), menu1cb)
+    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1), win.This(), menu1cb)
+    mi2 = mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 2", Data=2), go.nil(), go.nil())
 
-    # mi2 = mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+    mi2.Menu.AddAction(gi.ActOpts(Label="Sub Menu Item 2", Data=2.1), win.This(), menu1cb)
 
-    # mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-    # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-    # })
+    mb1.Menu.AddSeparator("sep1")
 
-    # mb1.Menu.AddSeparator("sep1")
-
-    # mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-    # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-    # })
+    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 3", Shortcut="Control+3", Data=3),
+        win.This(), menu1cb)
 
     # //////////////////////////////////////////
-    # #      Sliders
+    #       Sliders
 
     mfr.AddNewChild(gi.KiT_Space(), "slspc")
     slrow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "slrow"))
@@ -190,13 +200,8 @@ def mainrun():
     slider2.SetStretchMaxHeight()
     slider2.SetValue(0.5)
 
-    # slider1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-    # })
-
-    # slider2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-    # })
+    slider1.SliderSig.Connect(win.This(), slidercb)
+    slider2.SliderSig.Connect(win.This(), slidercb)
 
     scrollbar1 = gi.ScrollBar(srow.AddNewChild(gi.KiT_ScrollBar(), "scrollbar1"))
     scrollbar1.Dim = gi.X
@@ -208,9 +213,7 @@ def mainrun():
     scrollbar1.SetValue(0.25)
     scrollbar1.Snap = True
     scrollbar1.Tracking = True
-    # scrollbar1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-    # })
+    scrollbar1.SliderSig.Connect(win.This(), scrollcb)
 
     scrollbar2 = gi.ScrollBar(srow.AddNewChild(gi.KiT_ScrollBar(), "scrollbar2"))
     scrollbar2.Dim = gi.Y
@@ -220,9 +223,7 @@ def mainrun():
     scrollbar2.SetStretchMaxHeight()
     scrollbar2.SetThumbValue(0.1)
     scrollbar2.SetValue(0.5)
-    # scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-    # })
+    scrollbar2.SliderSig.Connect(win.This(), scrollcb)
 
     # //////////////////////////////////////////
     # #      Text Widgets
@@ -239,27 +240,22 @@ def mainrun():
 
     edit1 = gi.TextField(txrow.AddNewChild(gi.KiT_TextField(), "edit1"))
     edit1.Placeholder = "Enter text here..."
-    # # edit1.SetText("Edit this text")
+    # edit1.SetText("Edit this text")
     edit1.SetPropStr("min-width", "20em")
     # edit1.SetCompleter(edit1, Complete, CompleteEdit) # gets us word demo completion
-    # edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
-    # })
-    # # edit1.SetProp("inactive", True)
+    edit1.TextFieldSig.Connect(win.This(), textcb)
+    # edit1.SetProp("inactive", True)
 
     sb = gi.SpinBox(txrow.AddNewChild(gi.KiT_SpinBox(), "spin"))
     sb.Defaults()
     sb.HasMin = True
     sb.Min = 0.0
-    # sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
-    # })
+    sb.SpinBoxSig.Connect(win.This(), spinboxcb)
 
     cb = gi.ComboBox(txrow.AddNewChild(gi.KiT_ComboBox(), "combo"))
-    # cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), False), True, True, 50)
-    # cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
-    # })
+    cbitms = go.Slice_string(["Item1", "AnotherItem", "Item3"])
+    cb.ItemsFromStringList(cbitms, True, 50)
+    cb.ComboSig.Connect(win.This(), combocb)
 
     # //////////////////////////////////////////
     # #      Main Menu
@@ -268,40 +264,23 @@ def mainrun():
     mmen = win.MainMenu
     mmen.ConfigMenus(go.Slice_string([appnm, "File", "Edit", "Window"]))
 
-    # amen = win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+    amen = gi.Action(mmen.ChildByName(appnm, 0))
     # amen.Menu = make(gi.Menu, 0, 10)
-    # amen.Menu.AddAppMenu(win)
+    amen.Menu.AddAppMenu(win)
 
-    # # note: use KeyFunMenu* for standard shortcuts
-    # # Command in shortcuts is automatically translated into Control for
-    # # Linux, Windows or Meta for MacOS
-    # fmen = win.MainMenu.ChildByName("File", 0).(*gi.Action)
-    # fmen.Menu = make(gi.Menu, 0, 10)
-    # fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
-    # rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("File:New menu action triggered\n")
-    # })
-    # fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
-    # rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("File:Open menu action triggered\n")
-    # })
-    # fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
-    # rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("File:Save menu action triggered\n")
-    # })
-    # fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
-    # rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # fmt.Printf("File:SaveAs menu action triggered\n")
-    # })
-    # fmen.Menu.AddSeparator("csep")
-    # fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunMenuClose},
-    # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-    # win.OSWin.CloseReq()
-    # })
+    # note: use KeyFunMenu* for standard shortcuts
+    # Command in shortcuts is automatically translated into Control for
+    # Linux, Windows or Meta for MacOS
+    fmen = gi.Action(win.MainMenu.ChildByName("File", 0))
+    fmen.Menu.AddAction(gi.ActOpts(Label="New", ShortcutKey=gi.KeyFunMenuNew), win.This(), menu1cb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="Open", ShortcutKey=gi.KeyFunMenuOpen), win.This(), menu1cb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="Save", ShortcutKey=gi.KeyFunMenuSave), win.This(), menu1cb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="Save As..", ShortcutKey=gi.KeyFunMenuSaveAs), win.This(), menu1cb)
+    fmen.Menu.AddSeparator("csep")
+    fmen.Menu.AddAction(gi.ActOpts(Label="Close Window", ShortcutKey=gi.KeyFunMenuClose), win.This(), winclosecb)
 
-    # emen = win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
-    # emen.Menu = make(gi.Menu, 0, 10)
-    # emen.Menu.AddCopyCutPaste(win)
+    emen = gi.Action(win.MainMenu.ChildByName("Edit", 1))
+    emen.Menu.AddCopyCutPaste(win)
 
     # inQuitPrompt = False
     # oswin.TheApp.SetQuitReqFunc(func() {
