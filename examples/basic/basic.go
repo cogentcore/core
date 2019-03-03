@@ -7,7 +7,6 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/oswin"
 )
 
 func main() {
@@ -47,7 +46,7 @@ func mainrun() {
 	// spin1.SetValue(0.0)
 
 	// main menu
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
 
@@ -59,13 +58,11 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
+	win.SetCloseCleanFunc(func(w *gi.Window) {
+		go gi.Quit() // once main window is closed, quit
 	})
 
 	win.MainMenuUpdated()
-
 	vp.UpdateEndNoSig(updt)
-
 	win.StartEventLoop()
 }

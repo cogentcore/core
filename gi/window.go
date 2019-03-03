@@ -244,6 +244,46 @@ func (w *Window) IsClosing() bool {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//               App wrappers for oswin (end-user doesn't need to import)
+
+// SetAppName sets the application name -- defaults to GoGi if not otherwise set
+// Name appears in the first app menu, and specifies the default application-specific
+// preferences directory, etc
+func SetAppName(name string) {
+	oswin.TheApp.SetName(name)
+}
+
+// AppName returns the application name -- see SetAppName to set
+func AppName() string {
+	return oswin.TheApp.Name()
+}
+
+// SetAppAbout sets the 'about' info for the app -- appears as a menu option
+// in the default app menu
+func SetAppAbout(about string) {
+	oswin.TheApp.SetAbout(about)
+}
+
+// SetQuitReqFunc sets the function that is called whenever there is a
+// request to quit the app (via a OS or a call to QuitReq() method).  That
+// function can then adjudicate whether and when to actually call Quit.
+func SetQuitReqFunc(fun func()) {
+	oswin.TheApp.SetQuitReqFunc(fun)
+}
+
+// SetQuitCleanFunc sets the function that is called whenever app is
+// actually about to quit (irrevocably) -- can do any necessary
+// last-minute cleanup here.
+func SetQuitCleanFunc(fun func()) {
+	oswin.TheApp.SetQuitCleanFunc(fun)
+}
+
+// Quit closes all windows and exits the program.
+func Quit() {
+	oswin.TheApp.Quit()
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //                   New Windows and Init
 
 // NewWindow creates a new window with given internal name handle, display
@@ -627,6 +667,24 @@ func (w *Window) IsClosed() bool {
 		return true
 	}
 	return false
+}
+
+// SetCloseReqFunc sets the function that is called whenever there is a
+// request to close the window (via a OS or a call to CloseReq() method).  That
+// function can then adjudicate whether and when to actually call Close.
+func (w *Window) SetCloseReqFunc(fun func(win *Window)) {
+	w.OSWin.SetCloseReqFunc(func(owin oswin.Window) {
+		fun(w)
+	})
+}
+
+// SetCloseCleanFunc sets the function that is called whenever window is
+// actually about to close (irrevocably) -- can do any necessary
+// last-minute cleanup here.
+func (w *Window) SetCloseCleanFunc(fun func(win *Window)) {
+	w.OSWin.SetCloseCleanFunc(func(owin oswin.Window) {
+		fun(w)
+	})
 }
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!

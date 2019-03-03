@@ -7,7 +7,6 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -24,8 +23,8 @@ func mainrun() {
 
 	// gi.Layout2DTrace = true
 
-	oswin.TheApp.SetName("label")
-	oswin.TheApp.SetAbout(`This is a demo of the text rendering using labels in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	gi.SetAppName("label")
+	gi.SetAppAbout(`This is a demo of the text rendering using labels in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewWindow2D("gogi-label-test", "GoGi Label Test", width, height, true) // true = pixel sizes
 
@@ -91,7 +90,7 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	etxt2.Text = "this is after final stretch"
 
 	// main menu
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
 
@@ -103,8 +102,8 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
+	win.SetCloseCleanFunc(func(w *gi.Window) {
+		go gi.Quit() // once main window is closed, quit
 	})
 
 	win.MainMenuUpdated()

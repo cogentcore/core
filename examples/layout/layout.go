@@ -9,7 +9,6 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 )
 
@@ -39,8 +38,8 @@ func mainrun() {
 	// 	{100, 100},
 	// }
 
-	oswin.TheApp.SetName("layout")
-	oswin.TheApp.SetAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
+	gi.SetAppName("layout")
+	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
 	win := gi.NewWindow2D("gogi-layout-test", "GoGi Layout Test", width, height, true)
 
@@ -146,7 +145,7 @@ func mainrun() {
 	}
 
 	// main menu
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
 
@@ -158,8 +157,8 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
+	win.SetCloseCleanFunc(func(w *gi.Window) {
+		go gi.Quit() // once main window is closed, quit
 	})
 
 	win.MainMenuUpdated()

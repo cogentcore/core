@@ -10,7 +10,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -71,8 +70,8 @@ func mainrun() {
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 
-	oswin.TheApp.SetName("treeview")
-	oswin.TheApp.SetAbout(`This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
+	gi.SetAppName("treeview")
+	gi.SetAppAbout(`This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`)
 
 	width := 1024
@@ -128,7 +127,7 @@ func mainrun() {
 	})
 
 	// main menu
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
 
@@ -140,8 +139,8 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
+	win.SetCloseCleanFunc(func(w *gi.Window) {
+		go gi.Quit() // once main window is closed, quit
 	})
 
 	win.MainMenuUpdated()

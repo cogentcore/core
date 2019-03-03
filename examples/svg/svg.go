@@ -10,7 +10,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -69,8 +68,8 @@ func mainrun() {
 	width := 1600
 	height := 1200
 
-	oswin.TheApp.SetName("svg")
-	oswin.TheApp.SetAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
+	gi.SetAppName("svg")
+	gi.SetAppAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
 <p>You can drag the image around and use the scroll wheel to zoom.</p>`)
 
 	win := gi.NewWindow2D("gogi-svg-viewer", "GoGi SVG Viewer", width, height, true)
@@ -192,7 +191,7 @@ func mainrun() {
 	vp.UpdateEndNoSig(updt)
 
 	// main menu
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
 
@@ -218,8 +217,8 @@ func mainrun() {
 			win.OSWin.Close()
 		})
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
+	win.SetCloseCleanFunc(func(w *gi.Window) {
+		go gi.Quit() // once main window is closed, quit
 	})
 
 	// todo: when saving works, add option to save, and change above to CloseReq

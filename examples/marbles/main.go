@@ -10,7 +10,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
 )
@@ -39,8 +38,8 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	oswin.TheApp.SetName("marbles")
-	oswin.TheApp.SetAbout("marbles allows you to enter equations, which are graphed, and then marbles are dropped down on the resulting lines, and bounce around in very entertaining ways!")
+	gi.SetAppName("marbles")
+	gi.SetAppAbout("marbles allows you to enter equations, which are graphed, and then marbles are dropped down on the resulting lines, and bounce around in very entertaining ways!")
 
 	win := gi.NewWindow2D("marbles", "Marbles", width, height, true) // true = pixel sizes
 
@@ -108,7 +107,7 @@ func mainrun() {
 	//////////////////////////////////////////
 	//      Main Menu
 
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
 
@@ -121,8 +120,6 @@ func mainrun() {
 	emen.Menu.AddCopyCutPaste(win)
 
 	win.MainMenuUpdated()
-
 	Vp.UpdateEndNoSig(updt)
-
 	win.StartEventLoop()
 }

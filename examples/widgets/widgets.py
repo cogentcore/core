@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-from gi import go, gi, giv, units, ki, oswin, gimain
+from gi import go, gi, giv, units, ki, gimain
 
 def strdlgcb(recv, send, sig, data):
     dlg = gi.Dialog(send)
@@ -51,7 +51,7 @@ def combocb(recv, send, sig, data):
 def winclosecb(recv, send, sig, data):
     sa = gi.Action(send)
     print("Received menu action from menu action", sa.Name())
-    sa.Win.OSWin.CloseReq()
+    sa.Win.CloseReq()
 
 def mainrun():
     width = 1024
@@ -63,9 +63,8 @@ def mainrun():
     # gi.Layout2DTrace = True
     # ki.SignalTrace = True
 
-    app = oswin.TheApp()
-    app.SetName("widgets")
-    app.SetAbout('This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>')
+    gi.SetAppName("widgets")
+    gi.SetAppAbout('This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>. <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>')
 
     win = gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, True) # True = pixel sizes
     
@@ -260,7 +259,7 @@ def mainrun():
     # //////////////////////////////////////////
     # #      Main Menu
 
-    appnm = app.Name()
+    appnm = gi.AppName()
     mmen = win.MainMenu
     mmen.ConfigMenus(go.Slice_string([appnm, "File", "Edit", "Window"]))
 
@@ -283,7 +282,7 @@ def mainrun():
     emen.Menu.AddCopyCutPaste(win)
 
     # inQuitPrompt = False
-    # oswin.TheApp.SetQuitReqFunc(func() {
+    # gi.SetQuitReqFunc(func() {
     # if inQuitPrompt {
     # return
     # }
@@ -292,19 +291,19 @@ def mainrun():
     # Prompt: "Are you <i>sure</i> you want to quit?"}, True, True,
     # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
     # if sig == int64(gi.DialogAccepted) {
-    # oswin.TheApp.Quit()
+    # gi.Quit()
     # } else {
     # inQuitPrompt = False
     # }
     # })
     # })
 
-    # oswin.TheApp.SetQuitCleanFunc(func() {
-    # fmt.Printf("Doing final Quit cleanup here..\n")
+    # gi.SetQuitCleanFunc(func() {
+    # print("Doing final Quit cleanup here..")
     # })
 
     # inClosePrompt = False
-    # win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+    # win.SetCloseReqFunc(func(w gi.Window) {
     # if inClosePrompt {
     # return
     # }
@@ -313,19 +312,18 @@ def mainrun():
     # Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, True, True,
     # win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
     # if sig == int64(gi.DialogAccepted) {
-    # oswin.TheApp.Quit()
+    # gi.Quit()
     # } else {
     # inClosePrompt = False
     # }
     # })
     # })
 
-    # win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-    # fmt.Printf("Doing final Close cleanup here..\n")
+    # win.SetCloseCleanFunc(func(w gi.Window) {
+    # print("Doing final Close cleanup here..")
     # })
 
-    # win.MainMenuUpdated()
-
+    win.MainMenuUpdated()
     vp.UpdateEndNoSig(updt)
     win.GoStartEventLoop()
 

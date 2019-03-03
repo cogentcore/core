@@ -11,7 +11,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -37,8 +36,8 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	oswin.TheApp.SetName("widgets")
-	oswin.TheApp.SetAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
+	gi.SetAppName("widgets")
+	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
 	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
@@ -279,7 +278,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	//////////////////////////////////////////
 	//      Main Menu
 
-	appnm := oswin.TheApp.Name()
+	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
 
@@ -309,14 +308,14 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunMenuClose},
 		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			win.OSWin.CloseReq()
+			win.CloseReq()
 		})
 
 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
 	emen.Menu.AddCopyCutPaste(win)
 
 	inQuitPrompt := false
-	oswin.TheApp.SetQuitReqFunc(func() {
+	gi.SetQuitReqFunc(func() {
 		if inQuitPrompt {
 			return
 		}
@@ -325,19 +324,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			Prompt: "Are you <i>sure</i> you want to quit?"}, true, true,
 			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
-					oswin.TheApp.Quit()
+					gi.Quit()
 				} else {
 					inQuitPrompt = false
 				}
 			})
 	})
 
-	oswin.TheApp.SetQuitCleanFunc(func() {
+	gi.SetQuitCleanFunc(func() {
 		fmt.Printf("Doing final Quit cleanup here..\n")
 	})
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.SetCloseReqFunc(func(w *gi.Window) {
 		if inClosePrompt {
 			return
 		}
@@ -346,21 +345,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, true, true,
 			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
-					oswin.TheApp.Quit()
+					gi.Quit()
 				} else {
 					inClosePrompt = false
 				}
 			})
 	})
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+	win.SetCloseCleanFunc(func(w *gi.Window) {
 		fmt.Printf("Doing final Close cleanup here..\n")
 	})
 
 	win.MainMenuUpdated()
-
 	vp.UpdateEndNoSig(updt)
-
 	win.StartEventLoop()
 
 	// note: may eventually get down here on a well-behaved quit, but better

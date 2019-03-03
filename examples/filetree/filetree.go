@@ -14,7 +14,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -470,7 +469,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 	giv.MainMenuView(fb, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w oswin.Window) {
+	win.SetCloseReqFunc(func(w *gi.Window) {
 		if !inClosePrompt {
 			inClosePrompt = true
 			// if fb.Changed {
@@ -492,14 +491,14 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 	})
 
 	inQuitPrompt := false
-	oswin.TheApp.SetQuitReqFunc(func() {
+	gi.SetQuitReqFunc(func() {
 		if !inQuitPrompt {
 			inQuitPrompt = true
 			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
 				Prompt: "Are you <i>sure</i> you want to quit?"}, true, true,
 				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.DialogAccepted) {
-						oswin.TheApp.Quit()
+						gi.Quit()
 					} else {
 						inQuitPrompt = false
 					}
@@ -507,13 +506,13 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 		}
 	})
 
-	// win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+	// win.SetCloseCleanFunc(func(w *gi.Window) {
 	// 	fmt.Printf("Doing final Close cleanup here..\n")
 	// })
 
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+	win.SetCloseCleanFunc(func(w *gi.Window) {
 		if gi.MainWindows.Len() <= 1 {
-			go oswin.TheApp.Quit() // once main window is closed, quit
+			go gi.Quit() // once main window is closed, quit
 		}
 	})
 
@@ -535,10 +534,10 @@ func main() {
 }
 
 func mainrun() {
-	oswin.TheApp.SetName("file-browser")
-	oswin.TheApp.SetAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki/gide">gide on GitHub</a>`)
+	gi.SetAppName("file-browser")
+	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki/gide">gide on GitHub</a>`)
 
-	// oswin.TheApp.SetQuitCleanFunc(func() {
+	// gi.SetQuitCleanFunc(func() {
 	// 	fmt.Printf("Doing final Quit cleanup here..\n")
 	// })
 
