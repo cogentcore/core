@@ -40,8 +40,16 @@ func (vv *StructValueView) UpdateWidget() {
 	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(npv) {
 		ac.SetText("nil")
 	} else {
-		txt := fmt.Sprintf("%T", npv.Interface())
-		ac.SetText(txt)
+		opv := kit.OnePtrUnderlyingValue(vv.Value)
+		if lbler, ok := opv.Interface().(gi.Labeler); ok {
+			ac.SetText(lbler.Label())
+		} else {
+			txt := fmt.Sprintf("%T", npv.Interface())
+			if txt == "" {
+				fmt.Printf("no label for struct!")
+			}
+			ac.SetText(txt)
+		}
 	}
 }
 
@@ -66,13 +74,14 @@ func (vv *StructValueView) HasAction() bool {
 }
 
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	tynm := kit.NonPtrType(vv.Value.Type()).Name()
+	opv := kit.OnePtrUnderlyingValue(vv.Value)
+	tynm := kit.NonPtrType(opv.Type()).Name()
 	olbl := vv.OwnerLabel()
 	if olbl != "" {
 		tynm += ": " + olbl
 	}
 	desc, _ := vv.Tag("desc")
-	dlg := StructViewDialog(vp, vv.Value.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
+	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
 	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
 	svk := dlg.Frame().ChildByType(KiT_StructView, true, 2)
 	if svk != nil {

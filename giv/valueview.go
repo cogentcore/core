@@ -201,6 +201,8 @@ func ToValueView(it interface{}, tags string) ValueView {
 		}
 		v := reflect.ValueOf(it)
 		if !kit.ValueIsZero(v) {
+			// note: interfaces go here:
+			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
 			return ToValueView(v.Elem().Interface(), tags)
 		}
 	case nptyp == ki.KiT_Signal:
@@ -251,8 +253,8 @@ func ToValueView(it interface{}, tags string) ValueView {
 			vv.Init(&vv)
 			return &vv
 		}
-		nfld := kit.AllFieldsN(typ)
-		if !forceNoInline && (forceInline || nfld <= StructInlineLen) {
+		nfld := kit.AllFieldsN(nptyp)
+		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
 			vv := StructInlineValueView{}
 			vv.Init(&vv)
 			return &vv
@@ -262,6 +264,8 @@ func ToValueView(it interface{}, tags string) ValueView {
 			return &vv
 		}
 	case vk == reflect.Interface:
+		// note: we never get here -- all interfaces are captured by pointer kind above
+		// apparently (because the non-ptr vk indirection does that I guess?)
 		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
 		switch {
 		case nptyp == reflect.TypeOf((*reflect.Type)(nil)).Elem():

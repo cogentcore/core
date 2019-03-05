@@ -447,7 +447,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 
 	for i := 0; i < sz; i++ {
 		ridx := i * nWidgPerRow
-		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
+		val := kit.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
 		stru := val.Interface()
 		idxtxt := fmt.Sprintf("%05d", i)
 		labnm := fmt.Sprintf("index-%v", idxtxt)
@@ -810,7 +810,7 @@ func (tv *TableView) RowStruct(row int) interface{} {
 		// fmt.Printf("giv.TableView: row index out of range: %v\n", row)
 		return nil
 	}
-	val := kit.OnePtrValue(mvnp.Index(row)) // deal with pointer lists
+	val := kit.OnePtrUnderlyingValue(mvnp.Index(row)) // deal with pointer lists
 	stru := val.Interface()
 	return stru
 }
@@ -958,7 +958,7 @@ func StructSliceRowByValue(struSlice interface{}, fldName string, fldVal interfa
 	}
 	fldIdx := fld.Index[0]
 	for row := 0; row < sz; row++ {
-		rval := kit.OnePtrValue(mvnp.Index(row))
+		rval := kit.OnePtrUnderlyingValue(mvnp.Index(row))
 		fval := rval.Elem().Field(fldIdx)
 		if fval.Interface() == fldVal {
 			return row, nil

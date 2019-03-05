@@ -254,7 +254,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 
 	for i := 0; i < sz; i++ {
 		ridx := i * nWidgPerRow
-		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
+		val := kit.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
@@ -553,7 +553,7 @@ func (sv *SliceView) RowVal(row int) interface{} {
 		fmt.Printf("giv.SliceView: row index out of range: %v\n", row)
 		return nil
 	}
-	val := kit.OnePtrValue(mvnp.Index(row)) // deal with pointer lists
+	val := kit.OnePtrUnderlyingValue(mvnp.Index(row)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }

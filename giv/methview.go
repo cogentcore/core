@@ -721,8 +721,33 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 		md.Vp.FullRender2DTree() // always update after all methods -- almost always want that
 	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
-		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: md.Method + " Result", Prompt: rv[0].String()}, true, false, nil, nil)
+		if len(rv) >= 1 {
+			MethViewShowValue(md.Vp, rv[0], md.Method+" Result", "")
+		}
 	}
+}
+
+// MethViewShowValue displays a value in a dialog window (e.g., for MethViewShowReturn)
+func MethViewShowValue(vp *gi.Viewport2D, val reflect.Value, title, prompt string) {
+	if kit.ValueIsZero(val) {
+		return
+	}
+	npv := kit.NonPtrValue(val)
+	if kit.ValueIsZero(npv) {
+		return
+	}
+	tk := npv.Type().Kind()
+	switch tk {
+	case reflect.Struct:
+		StructViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil)
+	case reflect.Slice:
+		SliceViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil, nil)
+	case reflect.Map:
+		MapViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil)
+	default:
+		gi.PromptDialog(vp, gi.DlgOpts{Title: title, Prompt: npv.String()}, true, false, nil, nil)
+	}
+
 }
 
 // ArgData contains the relevant data for each arg, including the

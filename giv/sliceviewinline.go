@@ -70,9 +70,10 @@ func (sv *SliceViewInline) ConfigParts() {
 
 	sz := ints.MinInt(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
-		val := kit.OnePtrValue(mvnp.Index(i)) // deal with pointer lists
+		val := kit.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
+			fmt.Printf("nil value view!\n")
 			continue
 		}
 		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)

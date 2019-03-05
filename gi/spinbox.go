@@ -190,7 +190,7 @@ func (sb *SpinBox) ConfigParts() {
 		sb.StylePart(sb.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
 		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
-		sb.SetFlagState(sb.IsInactive(), int(Inactive))
+		tf.SetFlagState(sb.IsInactive(), int(Inactive))
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		tf.SetProp("clear-act", false)
