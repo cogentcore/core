@@ -71,7 +71,8 @@ func PtrValue(v reflect.Value) reflect.Value {
 	return v
 }
 
-// OnePtrValue returns a value that is exactly one pointer away from a non-pointer type
+// OnePtrValue returns a value that is exactly one pointer away
+// from a non-pointer type
 func OnePtrValue(v reflect.Value) reflect.Value {
 	if v.Kind() != reflect.Ptr {
 		if v.CanAddr() {
@@ -83,6 +84,21 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 		}
 	}
 	return v
+}
+
+// OnePtrUnderlyingValue returns a value that is exactly one pointer away
+// from a non-pointer type, and also goes through an interface to find the
+// actual underlying type behind the interface.
+func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
+	opv := OnePtrValue(v)
+	npv := NonPtrValue(opv)
+	itv := reflect.ValueOf(npv.Interface())
+	if itv.Kind() == reflect.Ptr {
+		// for this to still be a ptr, means that orig Value is
+		// an interface, so this is the underlying value of that interface
+		opv = OnePtrValue(itv)
+	}
+	return opv
 }
 
 // MakePtrValue makes a new pointer to the given value, adding an extra level
@@ -99,7 +115,7 @@ func MakePtrValue(v reflect.Value) reflect.Value {
 // UnhideIfaceValue returns a reflect.Value for any of the Make* functions
 // that is actually assignable -- even though these functions return a pointer
 // to the new object, it is somehow hidden behind an interface{} and this
-// magic foo, posted by someone somewhere that I cannot now find again,
+// magic code, posted by someone somewhere that I cannot now find again,
 // un-hides it..
 func UnhideIfaceValue(v reflect.Value) reflect.Value {
 	vn := reflect.ValueOf(v.Interface())

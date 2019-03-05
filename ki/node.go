@@ -1196,7 +1196,19 @@ func (n *Node) SetProp(key string, val interface{}) {
 
 // SetPropStr sets given property key to value val as a string (e.g., for python wrapper)
 // Initializes property map if nil.
-func (n *Node) SetPropStr(key, val string) {
+func (n *Node) SetPropStr(key string, val string) {
+	n.SetProp(key, val)
+}
+
+// SetPropInt sets given property key to value val as an int (e.g., for python wrapper)
+// Initializes property map if nil.
+func (n *Node) SetPropInt(key string, val int) {
+	n.SetProp(key, val)
+}
+
+// SetPropFloat64 sets given property key to value val as a float64 (e.g., for python wrapper)
+// Initializes property map if nil.
+func (n *Node) SetPropFloat64(key string, val float64) {
 	n.SetProp(key, val)
 }
 
