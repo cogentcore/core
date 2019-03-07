@@ -2,54 +2,63 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
+# to run this python version of the demo:
+# * install gopy, currently in fork at https://github.com/goki/gopy
+#   e.g., 'go get github.com/goki/gopy -u ./...' and then cd to that package
+#   and do 'go install'
+# * go to the python directory in this repository, read README.md there, and 
+#   type 'make' -- if that works, then type make install (may need sudo)
+# * cd back here, and run 'pygi' which was installed into /usr/local/bin
+# * then type 'import widgets' and this should run
+
 from gi import go, gi, giv, units, ki, gimain
 
 def strdlgcb(recv, send, sig, data):
-    dlg = gi.Dialog(send)
+    dlg = gi.Dialog(handle=send)
     if sig == gi.DialogAccepted:
         val = gi.StringPromptDialogValue(dlg)
         print("got string value: ", val)
 
 def button1cb(recv, send, sig, data):
     """ callback for button1 press -- lambda functions in python are only 1 line.. """
-    sb = gi.Button(send)
+    sb = gi.Button(handle=send)
     print("Received button signal:", sig, "from button:", sb.Name())
     if sig == gi.ButtonClicked: # note: 3 diff ButtonSig sig's possible -- important to check
         gi.StringPromptDialog(sb.Viewport, "", "Enter value here..",
              gi.DlgOpts(Title="Button1 Dialog", Prompt="This is a string prompt dialog!  Various specific types of dialogs are available."), sb, strdlgcb)
 
 def button2cb(recv, send, sig, data):
-    sb = gi.Button(send)
+    sb = gi.Button(handle=send)
     print("Received button signal:", sig, "from button:", sb.Name())
     if sig == gi.ButtonClicked:
         giv.GoGiEditorDialog(sb.Viewport)
 
 def menu1cb(recv, send, sig, data):
-    sa = gi.Action(send)
+    sa = gi.Action(handle=send)
     print("Received menu action from menu action", sa.Name())
 
 def slidercb(recv, send, sig, data):
-    sa = gi.Slider(send)
+    sa = gi.Slider(handle=send)
     print("Received slider signal:", sig, "from slider:", sa.Name(), "val:", sa.Value)
 
 def scrollcb(recv, send, sig, data):
-    sa = gi.ScrollBar(send)
+    sa = gi.ScrollBar(handle=send)
     print("Received scroll signal:", sig, "from scrollbar:", sa.Name(), "val:", sa.Value)
 
 def textcb(recv, send, sig, data):
-    sa = gi.TextField(send)
-    print("Received text signal:", sig, "from field:", sa.Name(), "val:", sa.Txt)
+    sa = gi.TextField(handle=send)
+    print("Received text signal:", sig, "from field:", sa.Name(), "val:", data)
 
 def spinboxcb(recv, send, sig, data):
-    sa = gi.SpinBox(send)
+    sa = gi.SpinBox(handle=send)
     print("Received spinbox signal:", sig, "from:", sa.Name(), "val:", sa.Value)
 
 def combocb(recv, send, sig, data):
-    sa = gi.ComboBox(send)
+    sa = gi.ComboBox(handle=send)
     print("Received combobox signal:", sig, "from:", sa.Name(), "index:", sa.CurIndex)
 
 def winclosecb(recv, send, sig, data):
-    sa = gi.Action(send)
+    sa = gi.Action(handle=send)
     print("Received menu action from menu action", sa.Name())
     sa.Win.CloseReq()
 

@@ -1,0 +1,2 @@
+global-include *.so *.py
+global-exclude build.py

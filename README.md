@@ -59,10 +59,11 @@ The best way to see how the system works are in the `examples` directory, and by
 
 As of 11/2018 it is now at a **beta** level:
 
-* All major functionality is in place, and API is stable and only very minor changes are anticipated going forward.  The system is now ready for wider adoption.
+* All major functionality is in place, and API is stable and only minor changes are anticipated going forward.  The system is now ready for wider adoption.
 
 * Everything has been thoroughly tested, but generally only by a small number of core developers / users.
 
 * Please file [Issues](https://github.com/goki/gi/issues) for anything that does not work.
 
+* 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://github.com/goki/gi/tree/master/python/README.md) file there for more details.
 
