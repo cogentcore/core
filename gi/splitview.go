@@ -101,6 +101,15 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 	sv.UpdateEnd(updt)
 }
 
+// SetSplitsList sets the split proportions using a list (slice) argument,
+// instead of variable args -- e.g., for Python or other external users.
+// can use 0 to hide / collapse a child entirely -- just does the basic local
+// update start / end -- use SetSplitsAction to trigger full rebuild
+// which is typically required
+func (sv *SplitView) SetSplitsList(splits []float32) {
+	sv.SetSplits(splits...)
+}
+
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of viewport
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
