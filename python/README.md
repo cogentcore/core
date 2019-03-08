@@ -6,7 +6,7 @@ Go incorporates many features found in Python, and provides a really natural "ba
 
 # Installation
 
-Python version 3 (3.6 has been well tested) is recommended.
+Python version 3 (3.6 has been well tested) is recommended.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions.
 
 ```sh
 $ python3 -m pip install --upgrade pybindgen setuptools wheel
