@@ -19,6 +19,7 @@ package macdriver
 #include <OpenGL/gl3.h>
 #import <Carbon/Carbon.h> // for HIToolbox/Events.h
 #import <Cocoa/Cocoa.h>
+#import <AppKit/NSEvent.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdlib.h>
