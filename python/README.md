@@ -6,7 +6,7 @@ Go incorporates many features found in Python, and provides a really natural "ba
 
 # Installation
 
-Python version 3 (3.6 has been well tested) is recommended.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.
+Python version 3 (3.6 has been well tested) is recommended.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.   
 
 ```sh
 $ python3 -m pip install --upgrade pybindgen setuptools wheel
@@ -21,6 +21,12 @@ $ cd ../examples/widgets
 $ pygi   # this was installed during make install into /usr/local/bin
 $ import widgets  #this loads and runs widgets.py -- edit that and compare with widgets.go
 ```
+
+If you get something like this error:
+```sh
+dyld: Library not loaded: @rpath/libpython3.6m.dylib
+```
+then you need to make sure that this lib is on your LD_LIBRARY_PATH -- on mac you can do `otool -L /usr/local/bin/pygi` and on linux it is `ldd /usr/local/bin/pygi` -- that should show you where it is trying to find that library.
 
 # How it works
 
