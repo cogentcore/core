@@ -166,7 +166,7 @@ def mainrun():
     mb1 = gi.MenuButton(brow.AddNewChild(gi.KiT_MenuButton(), "menubutton1"))
     mb1.SetText("Menu Button")
     mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1), win.This(), menu1cb)
-    mi2 = mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 2", Data=2), go.nil(), go.nil())
+    mi2 = mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 2", Data=2), go.nil, go.nil)
 
     mi2.Menu.AddAction(gi.ActOpts(Label="Sub Menu Item 2", Data=2.1), win.This(), menu1cb)
 
