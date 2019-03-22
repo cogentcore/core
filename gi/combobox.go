@@ -157,7 +157,7 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 	if txIdx >= 0 {
 		tx := cb.Parts.Child(txIdx).(*TextField)
 		tx.SetText(txt)
-		if _, ok := tx.Prop("__comboInit"); !ok {
+		if _, err := tx.PropTry("__comboInit"); err != nil {
 			cb.StylePart(Node2D(tx))
 			if icIdx >= 0 {
 				cb.StylePart(cb.Parts.Child(txIdx - 1).(Node2D)) // also get the space
@@ -203,7 +203,7 @@ func (cb *ComboBox) ConfigPartsIfNeeded() {
 }
 
 func (cb *ComboBox) ConfigParts() {
-	if eb, ok := cb.Prop("editable"); ok {
+	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = kit.ToBool(eb)
 	}
 	config := kit.TypeAndNameList{}

@@ -246,7 +246,7 @@ func (tv *TreeView) UpdateInactive() bool {
 	if tv.SrcNode.Ptr == nil {
 		tv.SetInactive()
 	} else {
-		if inact, has := tv.SrcNode.Ptr.Prop("inactive"); has {
+		if inact, err := tv.SrcNode.Ptr.PropTry("inactive"); err == nil {
 			if bo, ok := kit.ToBool(inact); bo && ok {
 				tv.SetInactive()
 			}
@@ -356,8 +356,8 @@ const (
 
 // SelectMode returns true if keyboard movements should automatically select nodes
 func (tv *TreeView) SelectMode() bool {
-	smp, ok := tv.RootView.Prop(TreeViewSelModeProp)
-	if !ok {
+	smp, err := tv.RootView.PropTry(TreeViewSelModeProp)
+	if err != nil {
 		tv.SetSelectMode(false)
 		return false
 	} else {
@@ -386,8 +386,8 @@ func (tv *TreeView) SelectedViews() []*TreeView {
 		return nil
 	}
 	var sl []*TreeView
-	slp, ok := tv.RootView.Prop(TreeViewSelProp)
-	if !ok {
+	slp, err := tv.RootView.PropTry(TreeViewSelProp)
+	if err != nil {
 		sl = make([]*TreeView, 0)
 		tv.SetSelectedViews(sl)
 	} else {
@@ -1773,7 +1773,7 @@ func (tv *TreeView) ConfigParts() {
 			tv.StylePart(gi.Node2D(wb))
 			// unfortunately StylePart only handles default Style obj -- not
 			// these special styles.. todo: fix this somehow
-			if bprpi, ok := tv.Prop("#branch"); ok {
+			if bprpi, err := tv.PropTry("#branch"); err == nil {
 				switch pr := bprpi.(type) {
 				case map[string]interface{}:
 					wb.SetIconProps(ki.Props(pr))

@@ -99,10 +99,10 @@ func (svg *SVG) StyleSVG() {
 func (svg *SVG) Style2D() {
 	svg.StyleSVG()
 	svg.LayData.SetFromStyle(&svg.Sty.Layout) // also does reset
-	if nv, ok := svg.Prop("norm"); ok {
+	if nv, err := svg.PropTry("norm"); err == nil {
 		svg.Norm, _ = kit.ToBool(nv)
 	}
-	if iv, ok := svg.Prop("invert-y"); ok {
+	if iv, err := svg.PropTry("invert-y"); err == nil {
 		svg.InvertY, _ = kit.ToBool(iv)
 	}
 }

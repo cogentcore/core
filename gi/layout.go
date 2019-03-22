@@ -1662,7 +1662,7 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 			return
 		}
 	}
-	if nf, ok := ly.Prop("no-focus-name"); ok {
+	if nf, err := ly.PropTry("no-focus-name"); err == nil {
 		if nf.(bool) {
 			return
 		}

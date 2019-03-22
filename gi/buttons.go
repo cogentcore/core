@@ -559,7 +559,7 @@ func (bb *ButtonBase) ConfigPartsIfNeeded() {
 func (bb *ButtonBase) StyleButton() {
 	bb.Style2DWidget()
 	bb.This().(ButtonWidget).StyleParts()
-	if nf, ok := bb.Prop("no-focus"); ok {
+	if nf, err := bb.PropTry("no-focus"); err == nil {
 		bb.SetFlagState(!bb.IsInactive() && !nf.(bool), int(CanFocus))
 	} else {
 		bb.SetFlagState(!bb.IsInactive(), int(CanFocus))

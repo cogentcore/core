@@ -86,11 +86,11 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 		sv.SetFullReRender()
 	}
 	sv.ShowIndex = true
-	if sidxp, ok := sv.Prop("index"); ok {
+	if sidxp, err := sv.PropTry("index"); err == nil {
 		sv.ShowIndex, _ = kit.ToBool(sidxp)
 	}
 	sv.InactKeyNav = true
-	if siknp, ok := sv.Prop("inact-key-nav"); ok {
+	if siknp, err := sv.PropTry("inact-key-nav"); err == nil {
 		sv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
 	sv.TmpSave = tmpSave
@@ -280,7 +280,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
-					idx := wbb.KnownProp("slv-index").(int)
+					idx := wbb.Prop("slv-index").(int)
 					svv := recv.Embed(KiT_SliceView).(*SliceView)
 					svv.UpdateSelect(idx, wbb.IsSelected())
 				}
@@ -305,7 +305,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 				wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.KnownProp("slv-index").(int)
+						idx := wbb.Prop("slv-index").(int)
 						svv := recv.Embed(KiT_SliceView).(*SliceView)
 						svv.UpdateSelect(idx, wbb.IsSelected())
 					}

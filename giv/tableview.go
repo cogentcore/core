@@ -122,11 +122,11 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 		tv.SetFullReRender()
 	}
 	tv.ShowIndex = true
-	if sidxp, ok := tv.Prop("index"); ok {
+	if sidxp, err := tv.PropTry("index"); err == nil {
 		tv.ShowIndex, _ = kit.ToBool(sidxp)
 	}
 	tv.InactKeyNav = true
-	if siknp, ok := tv.Prop("inact-key-nav"); ok {
+	if siknp, err := tv.PropTry("inact-key-nav"); err == nil {
 		tv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
 	tv.TmpSave = tmpSave
@@ -465,7 +465,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
-					idx := wbb.KnownProp("tv-index").(int)
+					idx := wbb.Prop("tv-index").(int)
 					tvv := recv.Embed(KiT_TableView).(*TableView)
 					tvv.UpdateSelect(idx, wbb.IsSelected())
 				}
@@ -499,7 +499,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
 						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.KnownProp("tv-index").(int)
+						idx := wbb.Prop("tv-index").(int)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
 						if sig != int64(gi.WidgetFocused) || !tvv.inFocusGrab {
 							tvv.UpdateSelect(idx, wbb.IsSelected())

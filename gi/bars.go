@@ -251,8 +251,8 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 		return
 	}
 	for _, ma := range mb.OSMainMenus {
-		mid, ok := ma.Prop("__OSMainMenuItemID")
-		if !ok {
+		mid, err := ma.PropTry("__OSMainMenuItemID")
+		if err != nil {
 			continue
 		}
 		osmm.SetItemActive(mid.(oswin.MenuItem), ma.IsActive()) // assuming this is threadsafe

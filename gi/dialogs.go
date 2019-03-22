@@ -508,7 +508,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 				if sig == int64(ButtonClicked) {
 					tb := send.Embed(KiT_Button).(*Button)
 					dlg := recv.Embed(KiT_Dialog).(*Dialog)
-					dlg.SigVal = tb.KnownProp("__cdSigVal").(int64)
+					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
 					dlg.Cancel()
 				}
 			})
@@ -517,7 +517,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 				if sig == int64(ButtonClicked) {
 					tb := send.Embed(KiT_Button).(*Button)
 					dlg := recv.Embed(KiT_Dialog).(*Dialog)
-					dlg.SigVal = tb.KnownProp("__cdSigVal").(int64)
+					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
 					dlg.Accept()
 				}
 			})
