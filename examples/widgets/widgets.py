@@ -105,8 +105,7 @@ def mainrun():
     # mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
     # mfr.SetProp("background-color", "radial-gradient(red, lighter-80)")
 
-    trow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "trow"))
-    trow.Lay = gi.LayoutHoriz
+    trow = gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
     trow.SetStretchMaxWidth()
 
     # giedsc = gi.ActiveKeyMap().ChordForFun(gi.KeyFunGoGiEditor())
@@ -115,8 +114,7 @@ def mainrun():
     giedsc = "Ctrl+Alt+I"
     prsc = "Alt+P"
     
-    title = gi.Label(trow.AddNewChild(gi.KiT_Label(), "title"))
-    title.Text = 'This is a <b>demonstration</b> of the <span style="color:red">various</span> <a href="https://github.com/goki/gi/gi">GoGi</a> <i>Widgets</i><br> <large>Shortcuts: <kbd>' + prsc + '</kbd> = Preferences, <kbd>' + giedsc + '</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br> See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.'
+    title = gi.AddNewLabel(trow, "title", 'This is a <b>demonstration</b> of the <span style="color:red">various</span> <a href="https://github.com/goki/gi/gi">GoGi</a> <i>Widgets</i><br> <large>Shortcuts: <kbd>' + prsc + '</kbd> = Preferences, <kbd>' + giedsc + '</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br> See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.')
     title.SetPropStr("white-space", "normal") # wrap
     title.SetPropStr("text-align", "center")       # note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
     title.SetPropStr("vertical-align", "center")
@@ -129,21 +127,19 @@ def mainrun():
 
     # Buttons
 
-    mfr.AddNewChild(gi.KiT_Space(), "blspc")
-    blrow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "blrow"))
-    blab = gi.Label(blrow.AddNewChild(gi.KiT_Label(), "blab"))
-    blab.Text = "Buttons:"
+    gi.AddNewSpace(mfr, "blspc")
+    blrow = gi.AddNewLayout(mfr, "blrow", gi.LayoutHoriz)
+    blab = gi.AddNewLabel(blrow, "blab", "Buttons:")
     blab.Selectable = True
 
-    brow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "brow"))
-    brow.Lay = gi.LayoutHoriz
+    brow = gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
     brow.SetPropStr("spacing", "2ex")
 
     brow.SetPropStr("horizontal-align", "left")
     # brow.SetProp("horizontal-align", gi.AlignJustify)
     brow.SetStretchMaxWidth()
 
-    button1 = gi.Button(brow.AddNewChild(gi.KiT_Button(), "button1"))
+    button1 = gi.AddNewButton(brow, "button1")
     # button1.SetProp("#icon", ki.Props{ # note: must come before SetIcon
     # "width":  units.NewValue(1.5, units.Em),
     # "height": units.NewValue(1.5, units.Em),
@@ -153,17 +149,17 @@ def mainrun():
     button1.SetIcon(icnm)
     button1.ButtonSig.Connect(win.This(), button1cb)
 
-    button2 = gi.Button(brow.AddNewChild(gi.KiT_Button(), "button2"))
+    button2 = gi.AddNewButton(brow, "button2")
     button2.SetText("Open GoGiEditor")
     # # button2.SetProp("background-color", "#EDF")
     button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
     button2.ButtonSig.Connect(win.This(), button2cb)
 
-    checkbox = gi.CheckBox(brow.AddNewChild(gi.KiT_CheckBox(), "checkbox"))
+    checkbox = gi.AddNewCheckBox(brow, "checkbox")
     checkbox.Text = "Toggle"
 
     # # note: receiver for menu items with shortcuts must be a Node2D or Window
-    mb1 = gi.MenuButton(brow.AddNewChild(gi.KiT_MenuButton(), "menubutton1"))
+    mb1 = gi.AddNewMenuButton(brow, "menubutton1")
     mb1.SetText("Menu Button")
     mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1), win.This(), menu1cb)
     mi2 = mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 2", Data=2), go.nil, go.nil)
@@ -178,18 +174,16 @@ def mainrun():
     # //////////////////////////////////////////
     #       Sliders
 
-    mfr.AddNewChild(gi.KiT_Space(), "slspc")
-    slrow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "slrow"))
-    slab = gi.Label(slrow.AddNewChild(gi.KiT_Label(), "slab"))
-    slab.Text = "Sliders:"
+    gi.AddNewSpace(mfr, "slspc")
+    slrow = gi.AddNewLayout(mfr, "slrow", gi.LayoutHoriz)
+    slab = gi.AddNewLabel(slrow, "slab", "Sliders:")
 
-    srow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "srow"))
-    srow.Lay = gi.LayoutHoriz
+    srow = gi.AddNewLayout(mfr, "srow", gi.LayoutHoriz)
     srow.SetPropStr("spacing", "2ex")
     srow.SetPropStr("horizontal-align", "left")
     srow.SetStretchMaxWidth()
 
-    slider1 = gi.Slider(srow.AddNewChild(gi.KiT_Slider(), "slider1"))
+    slider1 = gi.AddNewSlider(srow, "slider1")
     slider1.Dim = gi.X
     slider1.Class = "hslides"
     slider1.Defaults()
@@ -200,7 +194,7 @@ def mainrun():
     slider1.Tracking = True
     slider1.Icon = "widget-circlebutton-on"
 
-    slider2 = gi.Slider(srow.AddNewChild(gi.KiT_Slider(), "slider2"))
+    slider2 = gi.AddNewSlider(srow, "slider2")
     slider2.Dim = gi.Y
     slider2.Defaults()
     slider2.SetMinPrefHeight(units.NewValue(10, units.Em))
@@ -211,7 +205,7 @@ def mainrun():
     slider1.SliderSig.Connect(win.This(), slidercb)
     slider2.SliderSig.Connect(win.This(), slidercb)
 
-    scrollbar1 = gi.ScrollBar(srow.AddNewChild(gi.KiT_ScrollBar(), "scrollbar1"))
+    scrollbar1 = gi.AddNewScrollBar(srow, "scrollbar1")
     scrollbar1.Dim = gi.X
     scrollbar1.Class = "hslides"
     scrollbar1.Defaults()
@@ -223,7 +217,7 @@ def mainrun():
     scrollbar1.Tracking = True
     scrollbar1.SliderSig.Connect(win.This(), scrollcb)
 
-    scrollbar2 = gi.ScrollBar(srow.AddNewChild(gi.KiT_ScrollBar(), "scrollbar2"))
+    scrollbar2 = gi.AddNewScrollBar(srow, "scrollbar2")
     scrollbar2.Dim = gi.Y
     scrollbar2.Defaults()
     scrollbar2.SetMinPrefHeight(units.NewValue(10, units.Em))
@@ -236,17 +230,15 @@ def mainrun():
     # //////////////////////////////////////////
     # #      Text Widgets
 
-    mfr.AddNewChild(gi.KiT_Space(), "tlspc")
-    txlrow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "txlrow"))
-    txlab = gi.Label(txlrow.AddNewChild(gi.KiT_Label(), "txlab"))
-    txlab.Text = "Text Widgets:"
-    txrow = gi.Layout(mfr.AddNewChild(gi.KiT_Layout(), "txrow"))
-    txrow.Lay = gi.LayoutHoriz
+    gi.AddNewSpace(mfr, "tlspc")
+    txlrow = gi.AddNewLayout(mfr, "txlrow", gi.LayoutHoriz)
+    txlab = gi.AddNewLabel(txlrow, "txlab", "Text Widgets:")
+    txrow = gi.AddNewLayout(mfr, "txrow", gi.LayoutHoriz)
     txrow.SetPropStr("spacing", "2ex")
     # # txrow.SetProp("horizontal-align", gi.AlignJustify)
     txrow.SetStretchMaxWidth()
 
-    edit1 = gi.TextField(txrow.AddNewChild(gi.KiT_TextField(), "edit1"))
+    edit1 = gi.AddNewTextField(txrow, "edit1")
     edit1.Placeholder = "Enter text here..."
     # edit1.SetText("Edit this text")
     edit1.SetPropStr("min-width", "20em")
@@ -254,13 +246,13 @@ def mainrun():
     edit1.TextFieldSig.Connect(win.This(), textcb)
     # edit1.SetProp("inactive", True)
 
-    sb = gi.SpinBox(txrow.AddNewChild(gi.KiT_SpinBox(), "spin"))
+    sb = gi.AddNewSpinBox(txrow, "spin")
     sb.Defaults()
     sb.HasMin = True
     sb.Min = 0.0
     sb.SpinBoxSig.Connect(win.This(), spinboxcb)
 
-    cb = gi.ComboBox(txrow.AddNewChild(gi.KiT_ComboBox(), "combo"))
+    cb = gi.AddNewComboBox(txrow, "combo")
     cbitms = go.Slice_string(["Item1", "AnotherItem", "Item3"])
     cb.ItemsFromStringList(cbitms, True, 50)
     cb.ComboSig.Connect(win.This(), combocb)
