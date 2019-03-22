@@ -49,35 +49,33 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutHoriz
+	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetProp("horizontal-align", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 
-	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := gi.AddNewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	trow.AddNewChild(gi.KiT_Stretch, "str1")
-	lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>"
+	gi.AddNewStretch(trow, "str1")
+	lab1 := gi.AddNewLabel(trow, "lab1", "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
-	trow.AddNewChild(gi.KiT_Stretch, "str2")
+	gi.AddNewStretch(trow, "str2")
 
-	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split := gi.AddNewSplitView(mfr, "split")
 	split.Dim = gi.X
 
-	mvfr := split.AddNewChild(gi.KiT_Frame, "mvfr").(*gi.Frame)
-	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
+	mvfr := gi.AddNewFrame(split, "mvfr", gi.LayoutHoriz)
+	svfr := gi.AddNewFrame(split, "svfr", gi.LayoutHoriz)
 	split.SetSplits(.5, .5)
 
-	mv := mvfr.AddNewChild(giv.KiT_MapView, "mv").(*giv.MapView)
+	mv := giv.AddNewMapView(mvfr, "mv")
 	mv.SetMap(&tstmap, nil)
 	mv.SetStretchMaxWidth()
 	mv.SetStretchMaxHeight()
 
-	sv := svfr.AddNewChild(giv.KiT_SliceView, "sv").(*giv.SliceView)
+	sv := giv.AddNewSliceView(svfr, "sv")
 	sv.SetSlice(&tstslice, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()

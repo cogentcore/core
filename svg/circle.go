@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -17,6 +18,14 @@ type Circle struct {
 }
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, nil)
+
+// AddNewCircle adds a new button to given parent node, with given name, x,y pos, and radius.
+func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {
+	g := parent.AddNewChild(KiT_Circle, name).(*Circle)
+	g.Pos.Set(x, y)
+	g.Radius = radius
+	return g
+}
 
 func (g *Circle) Render2D() {
 	if g.Viewport == nil {

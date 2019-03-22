@@ -24,6 +24,11 @@ type StyleSheet struct {
 
 var KiT_StyleSheet = kit.Types.AddType(&StyleSheet{}, nil)
 
+// AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
+func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
+	return parent.AddNewChild(KiT_StyleSheet, name).(*StyleSheet)
+}
+
 // ParseString parses the string into a StyleSheet of rules, which can then be
 // used for extracting properties
 func (ss *StyleSheet) ParseString(str string) error {

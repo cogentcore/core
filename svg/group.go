@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -18,6 +19,11 @@ type Group struct {
 }
 
 var KiT_Group = kit.Types.AddType(&Group{}, nil)
+
+// AddNewGroup adds a new group to given parent node, with given name.
+func AddNewGroup(parent ki.Ki, name string) *Group {
+	return parent.AddNewChild(KiT_Group, name).(*Group)
+}
 
 // BBoxFromChildren sets the Group BBox from children
 func (g *Group) BBoxFromChildren() image.Rectangle {

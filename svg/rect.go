@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -18,6 +19,14 @@ type Rect struct {
 }
 
 var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
+
+// AddNewRect adds a new rectangle to given parent node, with given name, pos, and size.
+func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {
+	g := parent.AddNewChild(KiT_Rect, name).(*Rect)
+	g.Pos.Set(x, y)
+	g.Size.Set(sx, sy)
+	return g
+}
 
 func (g *Rect) Render2D() {
 	if g.Viewport == nil {

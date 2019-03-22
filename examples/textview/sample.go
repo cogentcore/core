@@ -47,18 +47,16 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutHoriz
+	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
 
-	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	hdrText := `This is a <b>test</b> of the TextEdit`
-	title.Text = hdrText
+	title := gi.AddNewLabel(trow, "title", hdrText)
 	title.SetProp("text-align", gi.AlignCenter)
 	title.SetProp("vertical-align", gi.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	txed := mfr.AddNewChild(gi.KiT_TextEdit, "textedit").(*gi.TextEdit)
+	txed := giv.AddNewTextEdit(mfr, "textedit")
 	// txed.SetProp("word-wrap", true)
 	txed.SetProp("max-width", -1)
 	txed.SetProp("min-width", units.NewValue(80, units.Ch))

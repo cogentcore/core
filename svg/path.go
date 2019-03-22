@@ -13,6 +13,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -26,6 +27,15 @@ type Path struct {
 }
 
 var KiT_Path = kit.Types.AddType(&Path{}, nil)
+
+// AddNewPath adds a new button to given parent node, with given name and path data.
+func AddNewPath(parent ki.Ki, name string, data string) *Path {
+	g := parent.AddNewChild(KiT_Path, name).(*Path)
+	if data != "" {
+		g.SetData(data)
+	}
+	return g
+}
 
 // SetData sets the path data to given string, parsing it into an optimized
 // form used for rendering

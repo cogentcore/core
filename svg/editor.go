@@ -26,6 +26,11 @@ type Editor struct {
 
 var KiT_Editor = kit.Types.AddType(&Editor{}, nil)
 
+// AddNewEditor adds a new editor to given parent node, with given name.
+func AddNewEditor(parent ki.Ki, name string) *Editor {
+	return parent.AddNewChild(KiT_Editor, name).(*Editor)
+}
+
 // EditorEvents handles svg editing events
 func (svg *Editor) EditorEvents() {
 	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

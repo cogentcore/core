@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
@@ -31,6 +32,11 @@ type TabView struct {
 }
 
 var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
+
+// AddNewTabView adds a new tabview to given parent node, with given name.
+func AddNewTabView(parent ki.Ki, name string) *TabView {
+	return parent.AddNewChild(KiT_TabView, name).(*TabView)
+}
 
 var TabViewProps = ki.Props{
 	"border-color":     &Prefs.Colors.Border,
@@ -113,20 +119,22 @@ func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
 }
 
 // AddNewTab adds a new widget as a new tab of given widget type, with given
-// tab label, and returns the new widget and its tab index
-func (tv *TabView) AddNewTab(typ reflect.Type, label string) (Node2D, int) {
+// tab label, and returns the new widget
+func (tv *TabView) AddNewTab(typ reflect.Type, label string) Node2D {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	widg := tv.InsertNewTab(typ, label, idx)
-	return widg, idx
+	return widg
 }
 
 // AddNewTabAction adds a new widget as a new tab of given widget type, with given
-// tab label, and returns the new widget and its tab index -- emits TabAdded signal
-func (tv *TabView) AddNewTabAction(typ reflect.Type, label string) (Node2D, int) {
-	widg, idx := tv.AddNewTab(typ, label)
+// tab label, and returns the new widget -- emits TabAdded signal
+func (tv *TabView) AddNewTabAction(typ reflect.Type, label string) Node2D {
+	widg := tv.AddNewTab(typ, label)
+	fr := tv.Frame()
+	idx := len(*fr.Children()) - 1
 	tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
-	return widg, idx
+	return widg
 }
 
 // InsertNewTab inserts a new widget of given type into given index position
@@ -192,20 +200,38 @@ func (tv *TabView) SelectTabIndexAction(idx int) {
 	}
 }
 
-// TabByName returns tab with given name, and its index -- returns false if
-// not found
-func (tv *TabView) TabByName(label string) (Node2D, int, bool) {
+// TabByName returns tab with given name (nil if not found -- see TabByNameTry)
+func (tv *TabView) TabByName(label string) Node2D {
+	t, _ := tv.TabByNameTry(label)
+	return t
+}
+
+// TabByNameTry returns tab with given name, and an error if not found.
+func (tv *TabView) TabByNameTry(label string) (Node2D, error) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
 	tb := tv.Tabs()
 	idx, ok := tb.Children().IndexByName(label, 0)
 	if !ok {
-		return nil, -1, false
+		return nil, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.PathUnique())
 	}
 	fr := tv.Frame()
 	widg := fr.Child(idx).(Node2D)
-	return widg, idx, true
+	return widg, nil
+}
+
+// TabIndexByName returns tab index for given tab name, and an error if not found.
+func (tv *TabView) TabIndexByName(label string) (int, error) {
+	tv.Mu.Lock()
+	defer tv.Mu.Unlock()
+
+	tb := tv.Tabs()
+	idx, ok := tb.Children().IndexByName(label, 0)
+	if !ok {
+		return -1, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.PathUnique())
+	}
+	return idx, nil
 }
 
 // TabName returns tab name at given index
@@ -221,14 +247,26 @@ func (tv *TabView) TabName(idx int) string {
 	return tbut.Name()
 }
 
-// SelectTabName selects tab by name, returning it -- returns false if not
-// found
-func (tv *TabView) SelectTabByName(label string) (Node2D, int, bool) {
-	widg, idx, ok := tv.TabByName(label)
-	if ok {
+// SelectTabByName selects tab by name, returning it.
+func (tv *TabView) SelectTabByName(label string) Node2D {
+	idx, err := tv.TabIndexByName(label)
+	if err == nil {
 		tv.SelectTabIndex(idx)
+		fr := tv.Frame()
+		return fr.Child(idx).(Node2D)
 	}
-	return widg, idx, ok
+	return nil
+}
+
+// SelectTabByNameTry selects tab by name, returning it.  Returns error if not found.
+func (tv *TabView) SelectTabByNameTry(label string) (Node2D, error) {
+	idx, err := tv.TabIndexByName(label)
+	if err == nil {
+		tv.SelectTabIndex(idx)
+		fr := tv.Frame()
+		return fr.Child(idx).(Node2D), nil
+	}
+	return nil, err
 }
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
@@ -339,8 +377,7 @@ func (tv *TabView) InitTabView() {
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()
 
-	tabs := tv.AddNewChild(KiT_Frame, "tabs").(*Frame)
-	tabs.Lay = LayoutHoriz
+	tabs := AddNewFrame(tv, "tabs", LayoutHoriz)
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
 	// tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
@@ -351,8 +388,7 @@ func (tv *TabView) InitTabView() {
 	tabs.SetProp("spacing", units.NewValue(4, units.Px))
 	tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
-	frame := tv.AddNewChild(KiT_Frame, "frame").(*Frame)
-	frame.Lay = LayoutStacked
+	frame := AddNewFrame(tv, "frame", LayoutStacked)
 	frame.SetMinPrefWidth(units.NewValue(10, units.Em))
 	frame.SetMinPrefHeight(units.NewValue(7, units.Em))
 	frame.SetStretchMaxWidth()

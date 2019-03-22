@@ -339,8 +339,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 
 	menu.UpdateActions()
 
-	pvp := Viewport2D{}
-	pvp.InitName(&pvp, name+"Menu")
+	pvp := &Viewport2D{}
+	pvp.InitName(pvp, name+"Menu")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
 	pvp.SetProp("color", &Prefs.Colors.Font)
@@ -350,8 +350,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
-	frame := pvp.AddNewChild(KiT_Frame, "Frame").(*Frame)
-	frame.Lay = LayoutVert
+	frame := AddNewFrame(pvp, "Frame", LayoutVert)
 	frame.SetProps(MenuFrameProps, false)
 	var focus ki.Ki
 	for _, ac := range menu {
@@ -379,7 +378,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.UpdateEndNoSig(updt)
 	win.SetNextPopup(pvp.This(), focus)
-	return &pvp
+	return pvp
 }
 
 // StringsChooserPopup creates a menu of the strings in the given string
@@ -501,6 +500,11 @@ type MenuButton struct {
 
 var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 
+// AddNewMenuButton adds a new button to given parent node, with given name.
+func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
+	return parent.AddNewChild(KiT_MenuButton, name).(*MenuButton)
+}
+
 var MenuButtonProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
@@ -588,6 +592,13 @@ type Separator struct {
 }
 
 var KiT_Separator = kit.Types.AddType(&Separator{}, SeparatorProps)
+
+// AddNewSeparator adds a new separator to given parent node, with given name and Horiz (else Vert).
+func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
+	sp := parent.AddNewChild(KiT_Separator, name).(*Separator)
+	sp.Horiz = horiz
+	return sp
+}
 
 var SeparatorProps = ki.Props{
 	"padding":          units.NewValue(0, units.Px),

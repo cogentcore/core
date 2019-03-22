@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -31,6 +32,14 @@ type Text struct {
 }
 
 var KiT_Text = kit.Types.AddType(&Text{}, nil)
+
+// AddNewText adds a new text to given parent node, with given name, pos and text.
+func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {
+	g := parent.AddNewChild(KiT_Text, name).(*Text)
+	g.Pos.Set(x, y)
+	g.Text = text
+	return g
+}
 
 func (g *Text) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render

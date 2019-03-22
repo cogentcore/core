@@ -312,6 +312,13 @@ type Layout struct {
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
 
+// AddNewLayout adds a new layout to given parent node, with given name and layout
+func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
+	ly := parent.AddNewChild(KiT_Layout, name).(*Layout)
+	ly.Lay = layout
+	return ly
+}
+
 // Layouts are the different types of layouts
 type Layouts int32
 
@@ -1927,6 +1934,11 @@ type Stretch struct {
 
 var KiT_Stretch = kit.Types.AddType(&Stretch{}, StretchProps)
 
+// AddNewStretch adds a new stretch to given parent node, with given name.
+func AddNewStretch(parent ki.Ki, name string) *Stretch {
+	return parent.AddNewChild(KiT_Stretch, name).(*Stretch)
+}
+
 var StretchProps = ki.Props{
 	"max-width":  -1.0,
 	"max-height": -1.0,
@@ -1948,6 +1960,11 @@ type Space struct {
 }
 
 var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
+
+// AddNewSpace adds a new space to given parent node, with given name.
+func AddNewSpace(parent ki.Ki, name string) *Space {
+	return parent.AddNewChild(KiT_Space, name).(*Space)
+}
 
 var SpaceProps = ki.Props{
 	"width":  units.NewValue(1, units.Ch),

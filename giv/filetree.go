@@ -926,6 +926,11 @@ type FileTreeView struct {
 
 var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, nil)
 
+// AddNewFileTreeView adds a new filetreeview to given parent node, with given name.
+func AddNewFileTreeView(parent ki.Ki, name string) *FileTreeView {
+	return parent.AddNewChild(KiT_FileTreeView, name).(*FileTreeView)
+}
+
 func init() {
 	kit.Types.SetProps(KiT_FileTreeView, FileTreeViewProps)
 }

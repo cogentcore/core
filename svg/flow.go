@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -15,3 +16,8 @@ type Flow struct {
 }
 
 var KiT_Flow = kit.Types.AddType(&Flow{}, nil)
+
+// AddNewFlow adds a new flow to given parent node, with given name.
+func AddNewFlow(parent ki.Ki, name string) *Flow {
+	return parent.AddNewChild(KiT_Flow, name).(*Flow)
+}

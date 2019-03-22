@@ -7,6 +7,7 @@ package svg
 import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -18,6 +19,14 @@ type Line struct {
 }
 
 var KiT_Line = kit.Types.AddType(&Line{}, nil)
+
+// AddNewLine adds a new line to given parent node, with given name, st and end.
+func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {
+	g := parent.AddNewChild(KiT_Line, name).(*Line)
+	g.Start.Set(sx, sy)
+	g.End.Set(ex, ey)
+	return g
+}
 
 func (g *Line) Render2D() {
 	if g.Viewport == nil {

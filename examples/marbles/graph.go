@@ -266,7 +266,7 @@ func (ln *Line) Graph(lidx int) {
 	if ln.MaxX == 0 {
 		ln.MaxX = 10
 	}
-	path := SvgLines.AddNewChild(svg.KiT_Path, "path").(*svg.Path)
+	path := svg.AddNewPath(SvgLines, "path", "")
 	path.SetProp("fill", "none")
 	clr := ln.Color
 	path.SetProp("stroke", clr)
@@ -300,14 +300,10 @@ func InitCoords() {
 	updt := SvgGraph.UpdateStart()
 	SvgCoords.DeleteChildren(true)
 
-	xAxis := SvgCoords.AddNewChild(svg.KiT_Line, "xAxis").(*svg.Line)
-	xAxis.Start = gi.Vec2D{-10, 0}
-	xAxis.End = gi.Vec2D{10, 0}
+	xAxis := svg.AddNewLine(SvgCoords, "xAxis", -10, 0, 10, 0)
 	xAxis.SetProp("stroke", "#888")
 
-	yAxis := SvgCoords.AddNewChild(svg.KiT_Line, "yAxis").(*svg.Line)
-	yAxis.Start = gi.Vec2D{0, -10}
-	yAxis.End = gi.Vec2D{0, 10}
+	yAxis := svg.AddNewLine(SvgCoords, "yAxis", 0, -10, 0, 10)
 	yAxis.SetProp("stroke", "#888")
 
 	SvgGraph.UpdateEnd(updt)
@@ -363,11 +359,9 @@ func GraphMarblesInit() {
 
 	SvgMarbles.DeleteChildren(true)
 	for i, m := range Marbles {
-		circle := SvgMarbles.AddNewChild(svg.KiT_Circle, "circle").(*svg.Circle)
+		circle := svg.AddNewCircle(SvgMarbles, "circle", m.Pos.X, m.Pos.Y, float32(MarbleRadius))
 		circle.SetProp("stroke", "none")
 		circle.SetProp("fill", colors[i%len(colors)])
-		circle.Radius = float32(MarbleRadius)
-		circle.Pos = m.Pos
 	}
 	SvgGraph.UpdateEnd(updt)
 }

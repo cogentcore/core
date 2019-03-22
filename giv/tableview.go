@@ -81,8 +81,10 @@ type TableView struct {
 
 var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
 
-// Note: the overall strategy here is similar to Dialog, where we provide lots
-// of flexible configuration elements that can be easily extended and modified
+// AddNewTableView adds a new tableview to given parent node, with given name.
+func AddNewTableView(parent ki.Ki, name string) *TableView {
+	return parent.AddNewChild(KiT_TableView, name).(*TableView)
+}
 
 // TableViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view

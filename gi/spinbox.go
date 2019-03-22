@@ -39,6 +39,11 @@ type SpinBox struct {
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 
+// AddNewSpinBox adds a new spinbox to given parent node, with given name.
+func AddNewSpinBox(parent ki.Ki, name string) *SpinBox {
+	return parent.AddNewChild(KiT_SpinBox, name).(*SpinBox)
+}
+
 var SpinBoxProps = ki.Props{
 	"#buttons": ki.Props{
 		"vertical-align": AlignMiddle,

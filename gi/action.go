@@ -27,6 +27,11 @@ type Action struct {
 
 var KiT_Action = kit.Types.AddType(&Action{}, ActionProps)
 
+// AddNewAction adds a new action to given parent node, with given name.
+func AddNewAction(parent ki.Ki, name string) *Action {
+	return parent.AddNewChild(KiT_Action, name).(*Action)
+}
+
 var ActionProps = ki.Props{
 	"border-width":     units.NewValue(0, units.Px), // todo: should be default
 	"border-radius":    units.NewValue(0, units.Px),

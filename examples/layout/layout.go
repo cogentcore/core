@@ -48,8 +48,7 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	row1 := mfr.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutHoriz
+	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
 
 	row1.SetProp("vertical-align", "top")
 	// row1.SetProp("horizontal-align", "justify")
@@ -60,7 +59,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row1.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := gi.AddNewFrame(row1, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("vertical-align", "inherit")
@@ -75,8 +74,7 @@ func mainrun() {
 		}
 	}
 
-	row2 := mfr.AddNewChild(gi.KiT_Layout, "row2").(*gi.Layout)
-	row2.Lay = gi.LayoutHoriz
+	row2 := gi.AddNewLayout(mfr, "row2", gi.LayoutHoriz)
 	row2.SetProp("text-align", "center")
 	row2.SetProp("max-width", -1) // always stretch width
 
@@ -88,19 +86,18 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row2.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := gi.AddNewFrame(row2, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("vertical-align", "inherit")
 		// fr.SetProp("horizontal-align", "inherit")
 		fr.SetProp("margin", "inherit")
 		// if i == 2 {
-		// 	row2.AddNewChild(gi.KiT_Stretch, "str")
+		// 	gi.AddNewStretch(row2, "str")
 		// }
 	}
 
-	row3 := mfr.AddNewChild(gi.KiT_Layout, "row3").(*gi.Layout)
-	row3.Lay = gi.LayoutHoriz
+	row3 := gi.AddNewLayout(mfr, "row3", gi.LayoutHoriz)
 	row3.SetProp("text-align", "center")
 	// row3.SetProp("max-width", -1) // always stretch width
 
@@ -112,7 +109,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row3.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := gi.AddNewFrame(row3, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		fr.SetProp("min-height", sz.Y)
@@ -122,8 +119,7 @@ func mainrun() {
 		// fr.SetProp("max-width", -1) // spacer
 	}
 
-	row4 := mfr.AddNewChild(gi.KiT_Layout, "row4").(*gi.Layout)
-	row4.Lay = gi.LayoutGrid
+	row4 := gi.AddNewLayout(mfr, "row4", gi.LayoutGrid)
 	row4.SetProp("columns", 2)
 	// row4.SetProp("max-width", -1)
 
@@ -134,7 +130,7 @@ func mainrun() {
 
 	for i, sz := range frsz {
 		nm := fmt.Sprintf("fr%v", i)
-		fr := row4.AddNewChild(gi.KiT_Frame, nm).(*gi.Frame)
+		fr := gi.AddNewFrame(row4, nm, gi.LayoutHoriz)
 		fr.SetProp("width", sz.X)
 		fr.SetProp("height", sz.Y)
 		// fr.SetProp("min-height", sz.Y)

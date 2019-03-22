@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -17,6 +18,14 @@ type Ellipse struct {
 }
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, nil)
+
+// AddNewEllipse adds a new button to given parent node, with given name, pos and radii.
+func AddNewEllipse(parent ki.Ki, name string, x, y, rx, ry float32) *Ellipse {
+	g := parent.AddNewChild(KiT_Ellipse, name).(*Ellipse)
+	g.Pos.Set(x, y)
+	g.Radii.Set(rx, ry)
+	return g
+}
 
 func (g *Ellipse) Render2D() {
 	if g.Viewport == nil {

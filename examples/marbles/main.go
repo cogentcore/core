@@ -66,26 +66,26 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	// the StructView will also show the Graph Toolbar which is main actions..
-	gstru := mfr.AddNewChild(giv.KiT_StructView, "gstru").(*giv.StructView)
+	gstru := giv.AddNewStructView(mfr, "gstru")
 	gstru.Viewport = Vp // needs vp early for toolbar
 	gstru.SetProp("height", "4.5em")
 	gstru.SetStruct(&Gr, nil)
 
-	lns := mfr.AddNewChild(giv.KiT_TableView, "lns").(*giv.TableView)
+	lns := giv.AddNewTableView(mfr, "lns")
 	lns.Viewport = Vp
 	lns.SetSlice(&Gr.Lines, nil)
 
-	frame := mfr.AddNewChild(gi.KiT_Frame, "frame").(*gi.Frame)
+	frame := gi.AddNewFrame(mfr, "frame", gi.LayoutHoriz)
 
-	SvgGraph = frame.AddNewChild(svg.KiT_SVG, "graph").(*svg.SVG)
+	SvgGraph = svg.AddNewSVG(frame, "graph")
 	SvgGraph.SetProp("min-width", GraphSize)
 	SvgGraph.SetProp("min-height", GraphSize)
 	SvgGraph.SetStretchMaxWidth()
 	SvgGraph.SetStretchMaxHeight()
 
-	SvgLines = SvgGraph.AddNewChild(svg.KiT_Group, "SvgLines").(*svg.Group)
-	SvgMarbles = SvgGraph.AddNewChild(svg.KiT_Group, "SvgMarbles").(*svg.Group)
-	SvgCoords = SvgGraph.AddNewChild(svg.KiT_Group, "SvgCoords").(*svg.Group)
+	SvgLines = svg.AddNewGroup(SvgGraph, "SvgLines")
+	SvgMarbles = svg.AddNewGroup(SvgGraph, "SvgMarbles")
+	SvgCoords = svg.AddNewGroup(SvgGraph, "SvgCoords")
 
 	gmin = gi.Vec2D{-10, -10}
 	gmax = gi.Vec2D{10, 10}

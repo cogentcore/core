@@ -181,7 +181,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "rect":
-				rect := curPar.AddNewChild(KiT_Rect, "rect").(*Rect)
+				rect := AddNewRect(curPar, "rect", 0, 0, 1, 1)
 				var x, y, w, h, rx, ry float32
 				for _, attr := range se.Attr {
 					if rect.SetStdXMLAttr(attr.Name.Local, attr.Value) {
@@ -211,7 +211,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				rect.Size.Set(w, h)
 				rect.Radius.Set(rx, ry)
 			case nm == "circle":
-				circle := curPar.AddNewChild(KiT_Circle, "circle").(*Circle)
+				circle := AddNewCircle(curPar, "circle", 0, 0, 1)
 				var cx, cy, r float32
 				for _, attr := range se.Attr {
 					if circle.SetStdXMLAttr(attr.Name.Local, attr.Value) {
@@ -234,7 +234,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				circle.Pos.Set(cx, cy)
 				circle.Radius = r
 			case nm == "ellipse":
-				ellipse := curPar.AddNewChild(KiT_Ellipse, "ellipse").(*Ellipse)
+				ellipse := AddNewEllipse(curPar, "ellipse", 0, 0, 1, 1)
 				var cx, cy, rx, ry float32
 				for _, attr := range se.Attr {
 					if ellipse.SetStdXMLAttr(attr.Name.Local, attr.Value) {
@@ -259,7 +259,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				ellipse.Pos.Set(cx, cy)
 				ellipse.Radii.Set(rx, ry)
 			case nm == "line":
-				line := curPar.AddNewChild(KiT_Line, "line").(*Line)
+				line := AddNewLine(curPar, "line", 0, 0, 1, 1)
 				var x1, x2, y1, y2 float32
 				for _, attr := range se.Attr {
 					if line.SetStdXMLAttr(attr.Name.Local, attr.Value) {
@@ -284,7 +284,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				line.Start.Set(x1, y1)
 				line.End.Set(x2, y2)
 			case nm == "polygon":
-				polygon := curPar.AddNewChild(KiT_Polygon, "polygon").(*Polygon)
+				polygon := AddNewPolygon(curPar, "polygon", nil)
 				for _, attr := range se.Attr {
 					if polygon.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -313,7 +313,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "polyline":
-				polyline := curPar.AddNewChild(KiT_Polyline, "polyline").(*Polyline)
+				polyline := AddNewPolyline(curPar, "polyline", nil)
 				for _, attr := range se.Attr {
 					if polyline.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -342,7 +342,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "path":
-				path := curPar.AddNewChild(KiT_Path, "path").(*Path)
+				path := AddNewPath(curPar, "path", "")
 				for _, attr := range se.Attr {
 					if path.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -362,15 +362,15 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			case nm == "text":
 				var txt *Text
 				if se.Name.Local == "text" {
-					txt = curPar.AddNewChild(KiT_Text, "txt").(*Text)
+					txt = AddNewText(curPar, "txt", 0, 0, "")
 					inTxt = true
 					curTxt = txt
 				} else {
 					if inTxt && curTxt != nil {
-						txt = curTxt.AddNewChild(KiT_Text, "tspan").(*Text)
+						txt = AddNewText(curTxt, "tspan", 0, 0, "")
 						txt.Pos = curTxt.Pos
 					} else {
-						txt = curPar.AddNewChild(KiT_Text, "tspan").(*Text)
+						txt = AddNewText(curPar, "tspan", 0, 0, "")
 					}
 					inTspn = true
 					curTspn = txt
@@ -428,7 +428,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 				}
 			case nm == "linearGradient":
-				grad := curPar.AddNewChild(gi.KiT_Gradient, "lin-grad").(*gi.Gradient)
+				grad := gi.AddNewGradient(curPar, "lin-grad")
 				for _, attr := range se.Attr {
 					if grad.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -453,7 +453,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "radialGradient":
-				grad := curPar.AddNewChild(gi.KiT_Gradient, "rad-grad").(*gi.Gradient)
+				grad := gi.AddNewGradient(curPar, "rad-grad")
 				for _, attr := range se.Attr {
 					if grad.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue
@@ -478,7 +478,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					return err
 				}
 			case nm == "style":
-				sty := curPar.AddNewChild(gi.KiT_StyleSheet, "style").(*gi.StyleSheet)
+				sty := gi.AddNewStyleSheet(curPar, "style")
 				for _, attr := range se.Attr {
 					if sty.SetStdXMLAttr(attr.Name.Local, attr.Value) {
 						continue

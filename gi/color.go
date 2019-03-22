@@ -845,3 +845,8 @@ type Gradient struct {
 }
 
 var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)
+
+// AddNewGradient adds a new gradient to given parent node, with given name.
+func AddNewGradient(parent ki.Ki, name string) *Gradient {
+	return parent.AddNewChild(KiT_Gradient, name).(*Gradient)
+}

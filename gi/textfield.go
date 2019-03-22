@@ -69,6 +69,11 @@ type TextField struct {
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 
+// AddNewTextField adds a new textfield to given parent node, with given name.
+func AddNewTextField(parent ki.Ki, name string) *TextField {
+	return parent.AddNewChild(KiT_TextField, name).(*TextField)
+}
+
 var TextFieldProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"cursor-width":     units.NewValue(3, units.Px),

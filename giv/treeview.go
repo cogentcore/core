@@ -49,6 +49,11 @@ type TreeView struct {
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 
+// AddNewTreeView adds a new treeview to given parent node, with given name.
+func AddNewTreeView(parent ki.Ki, name string) *TreeView {
+	return parent.AddNewChild(KiT_TreeView, name).(*TreeView)
+}
+
 func init() {
 	kit.Types.SetProps(KiT_TreeView, TreeViewProps)
 }

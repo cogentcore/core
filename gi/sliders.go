@@ -502,6 +502,11 @@ type Slider struct {
 
 var KiT_Slider = kit.Types.AddType(&Slider{}, SliderProps)
 
+// AddNewSlider adds a new slider to given parent node, with given name.
+func AddNewSlider(parent ki.Ki, name string) *Slider {
+	return parent.AddNewChild(KiT_Slider, name).(*Slider)
+}
+
 var SliderProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),
@@ -708,6 +713,11 @@ type ScrollBar struct {
 }
 
 var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
+
+// AddNewScrollBar adds a new scrollbar to given parent node, with given name.
+func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
+	return parent.AddNewChild(KiT_ScrollBar, name).(*ScrollBar)
+}
 
 var ScrollBarProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),

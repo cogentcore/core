@@ -83,33 +83,31 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutHoriz
+	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetProp("horizontal-align", "center")
 	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	trow.SetStretchMaxWidth()
 
-	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := gi.AddNewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	trow.AddNewChild(gi.KiT_Stretch, "str1")
-	lab1 := trow.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "This is a test of the TreeView and StructView reflect-ive GUI"
+	gi.AddNewStretch(trow, "str1")
+	lab1 := gi.AddNewLabel(trow, "lab1", "This is a test of the TreeView and StructView reflect-ive GUI")
 	lab1.SetStretchMaxWidth()
 	lab1.SetProp("text-align", "center")
-	trow.AddNewChild(gi.KiT_Stretch, "str2")
+	gi.AddNewStretch(trow, "str2")
 
-	split := mfr.AddNewChild(gi.KiT_SplitView, "split").(*gi.SplitView)
+	split := gi.AddNewSplitView(mfr, "split")
 	split.Dim = gi.X
 
-	tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
-	svfr := split.AddNewChild(gi.KiT_Frame, "svfr").(*gi.Frame)
+	tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)
+	svfr := gi.AddNewFrame(split, "svfr", gi.LayoutHoriz)
 	split.SetSplits(.3, .7)
 
-	tv := tvfr.AddNewChild(giv.KiT_TreeView, "tv").(*giv.TreeView)
+	tv := giv.AddNewTreeView(tvfr, "tv")
 	tv.SetRootNode(&srctree)
 
-	sv := svfr.AddNewChild(giv.KiT_StructView, "sv").(*giv.StructView)
+	sv := giv.AddNewStructView(svfr, "sv")
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 	sv.SetStruct(&srctree, nil)

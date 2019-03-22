@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -16,3 +17,8 @@ type ClipPath struct {
 }
 
 var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)
+
+// AddNewClipPath adds a new clippath to given parent node, with given name.
+func AddNewClipPath(parent ki.Ki, name string) *ClipPath {
+	return parent.AddNewChild(KiT_ClipPath, name).(*ClipPath)
+}

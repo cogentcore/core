@@ -31,6 +31,11 @@ type Bitmap struct {
 
 var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
 
+// AddNewBitmap adds a new bitmap to given parent node, with given name.
+func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
+	return parent.AddNewChild(KiT_Bitmap, name).(*Bitmap)
+}
+
 var BitmapProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{

@@ -32,6 +32,11 @@ type ComboBox struct {
 
 var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
 
+// AddNewComboBox adds a new button to given parent node, with given name.
+func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
+	return parent.AddNewChild(KiT_ComboBox, name).(*ComboBox)
+}
+
 var ComboBoxProps = ki.Props{
 	"border-width":     units.NewValue(1, units.Px),
 	"border-radius":    units.NewValue(4, units.Px),

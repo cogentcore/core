@@ -285,8 +285,7 @@ var DialogProps = ki.Props{
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
 func (dlg *Dialog) SetFrame() *Frame {
 	dlg.SetProp("color", &Prefs.Colors.Font)
-	frame := dlg.AddNewChild(KiT_Frame, "frame").(*Frame)
-	frame.Lay = LayoutVert
+	frame := AddNewFrame(dlg, "frame", LayoutVert)
 	frame.SetProp("spacing", StdDialogVSpaceUnits)
 	return frame
 }
@@ -300,8 +299,7 @@ func (dlg *Dialog) Frame() *Frame {
 func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
 	dlg.Title = title
 	if frame != nil {
-		lab := frame.AddNewChild(KiT_Label, "title").(*Label)
-		lab.Text = title
+		lab := AddNewLabel(frame, "title", title)
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -322,8 +320,7 @@ func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
 func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	dlg.Prompt = prompt
 	if frame != nil {
-		lab := frame.AddNewChild(KiT_Label, "prompt").(*Label)
-		lab.Text = prompt
+		lab := AddNewLabel(frame, "prompt", prompt)
 		dlg.StylePart(Node2D(lab))
 		return lab
 	}
@@ -346,9 +343,8 @@ func (dlg *Dialog) AddButtonBox(frame *Frame) *Layout {
 	if frame == nil {
 		return nil
 	}
-	frame.AddNewChild(KiT_Space, "button-space")
-	bb := frame.AddNewChild(KiT_Layout, "buttons").(*Layout)
-	bb.Lay = LayoutHoriz
+	AddNewSpace(frame, "button-space")
+	bb := AddNewLayout(frame, "buttons", LayoutHoriz)
 	bb.SetProp("max-width", -1)
 	return bb
 }
@@ -500,7 +496,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 	bb, _ := dlg.ButtonBox(frame)
 	for i, ch := range choices {
 		chnm := strcase.ToKebab(ch)
-		b := bb.AddNewChild(KiT_Button, chnm).(*Button)
+		b := AddNewButton(bb, chnm)
 		b.SetProp("__cdSigVal", int64(i))
 		b.SetText(ch)
 		if chnm == "cancel" {
@@ -543,10 +539,9 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	nrow := frame.InsertNewChild(KiT_Layout, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
-	nlbl := nrow.AddNewChild(KiT_Label, "n-label").(*Label)
-	nlbl.Text = "Number:  "
+	AddNewLabel(nrow, "n-label", "Number:  ")
 
-	nsb := nrow.AddNewChild(KiT_SpinBox, "n-field").(*SpinBox)
+	nsb := AddNewSpinBox(nrow, "n-field")
 	nsb.Defaults()
 	nsb.SetMin(1)
 	nsb.Value = 1
@@ -558,10 +553,9 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
 
-	tlbl := trow.AddNewChild(KiT_Label, "t-label").(*Label)
-	tlbl.Text = "Type:    "
+	AddNewLabel(trow, "t-label", "Type:    ")
 
-	typs := trow.AddNewChild(KiT_ComboBox, "types").(*ComboBox)
+	typs := AddNewComboBox(trow, "types")
 	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
 
 	if recv != nil && fun != nil {

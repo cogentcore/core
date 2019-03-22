@@ -29,6 +29,11 @@ type ColorView struct {
 
 var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
 
+// AddNewColorView adds a new colorview to given parent node, with given name.
+func AddNewColorView(parent ki.Ki, name string) *ColorView {
+	return parent.AddNewChild(KiT_ColorView, name).(*ColorView)
+}
+
 var ColorViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,

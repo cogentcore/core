@@ -7,6 +7,7 @@ package svg
 import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -17,6 +18,13 @@ type Polygon struct {
 }
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
+
+// AddNewPolygon adds a new polygon to given parent node, with given name and points.
+func AddNewPolygon(parent ki.Ki, name string, points []gi.Vec2D) *Polygon {
+	g := parent.AddNewChild(KiT_Polygon, name).(*Polygon)
+	g.Points = points
+	return g
+}
 
 func (g *Polygon) Render2D() {
 	if g.Viewport == nil {

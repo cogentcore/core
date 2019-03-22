@@ -26,6 +26,11 @@ type GiEditor struct {
 
 var KiT_GiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)
 
+// AddNewGiEditor adds a new gieditor to given parent node, with given name.
+func AddNewGiEditor(parent ki.Ki, name string) *GiEditor {
+	return parent.AddNewChild(KiT_GiEditor, name).(*GiEditor)
+}
+
 // Update updates the objects being edited (e.g., updating display changes)
 func (ge *GiEditor) Update() {
 	if ge.KiRoot == nil {
@@ -208,9 +213,9 @@ func (ge *GiEditor) ConfigSplitView() {
 	split.Dim = gi.X
 
 	if len(split.Kids) == 0 {
-		tvfr := split.AddNewChild(gi.KiT_Frame, "tvfr").(*gi.Frame)
-		tv := tvfr.AddNewChild(KiT_TreeView, "tv").(*TreeView)
-		sv := split.AddNewChild(KiT_StructView, "sv").(*StructView)
+		tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)
+		tv := AddNewTreeView(tvfr, "tv")
+		sv := AddNewStructView(split, "sv")
 		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if data == nil {
 				return
@@ -368,7 +373,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	ge := mfr.AddNewChild(KiT_GiEditor, "editor").(*GiEditor)
+	ge := AddNewGiEditor(mfr, "editor")
 	ge.Viewport = vp
 	ge.SetRoot(obj)
 

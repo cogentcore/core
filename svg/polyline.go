@@ -7,6 +7,7 @@ package svg
 import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -17,6 +18,13 @@ type Polyline struct {
 }
 
 var KiT_Polyline = kit.Types.AddType(&Polyline{}, nil)
+
+// AddNewPolyline adds a new polyline to given parent node, with given name and points.
+func AddNewPolyline(parent ki.Ki, name string, points []gi.Vec2D) *Polyline {
+	g := parent.AddNewChild(KiT_Polyline, name).(*Polyline)
+	g.Points = points
+	return g
+}
 
 func (g *Polyline) Render2D() {
 	if g.Viewport == nil {

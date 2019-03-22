@@ -34,6 +34,11 @@ type FileBrowse struct {
 
 var KiT_FileBrowse = kit.Types.AddType(&FileBrowse{}, FileBrowseProps)
 
+// AddNewFileBrowse adds a new filebrowse to given parent node, with given name.
+func AddNewFileBrowse(parent ki.Ki, name string) *FileBrowse {
+	return parent.AddNewChild(KiT_FileBrowse, name).(*FileBrowse)
+}
+
 // UpdateFiles updates the list of files saved in project
 func (fb *FileBrowse) UpdateFiles() {
 	fb.Files.OpenPath(string(fb.ProjRoot))
@@ -323,7 +328,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 	mods, updt := split.ConfigChildren(config, true)
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
-		ft := ftfr.AddNewChild(giv.KiT_FileTreeView, "filetree").(*giv.FileTreeView)
+		ft := giv.AddNewFileTreeView(ftfr, "filetree")
 		ft.SetRootNode(&fb.Files)
 
 		for i := 0; i < fb.NTextViews; i++ {
@@ -333,7 +338,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txly.SetMinPrefWidth(units.NewValue(20, units.Ch))
 			txly.SetMinPrefHeight(units.NewValue(10, units.Ch))
 
-			txed := txly.AddNewChild(giv.KiT_TextView, fmt.Sprintf("textview-%v", i)).(*giv.TextView)
+			txed := giv.AddNewTextView(txly, fmt.Sprintf("textview-%v", i))
 			txed.Viewport = fb.Viewport
 		}
 
@@ -460,7 +465,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 
 	mfr := win.SetMainFrame()
 
-	fb := mfr.AddNewChild(KiT_FileBrowse, "browser").(*FileBrowse)
+	fb := AddNewFileBrowse(mfr, "browser")
 	fb.Viewport = vp
 
 	fb.OpenPath(gi.FileName(path))

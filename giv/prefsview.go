@@ -30,7 +30,7 @@ func PrefsView(pf *gi.Preferences) (*StructView, *gi.Window) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf, nil)
 	sv.SetStretchMaxWidth()
@@ -93,7 +93,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) (*StructView, *gi.Window) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf, nil)
 	sv.SetStretchMaxWidth()
@@ -156,7 +156,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) (*StructView, *gi.Window) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	sv := mfr.AddNewChild(KiT_StructView, "sv").(*StructView)
+	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
 	sv.SetStruct(pf, nil)
 	sv.SetStretchMaxWidth()

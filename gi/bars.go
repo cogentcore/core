@@ -28,6 +28,11 @@ type MenuBar struct {
 
 var KiT_MenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
 
+// AddNewMenuBar adds a new menubar to given parent node, with given name.
+func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
+	return parent.AddNewChild(KiT_MenuBar, name).(*MenuBar)
+}
+
 var MenuBarProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(0, units.Px),
@@ -270,6 +275,11 @@ type ToolBar struct {
 
 var KiT_ToolBar = kit.Types.AddType(&ToolBar{}, ToolBarProps)
 
+// AddNewToolBar adds a new toolbar to given parent node, with given name.
+func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
+	return parent.AddNewChild(KiT_ToolBar, name).(*ToolBar)
+}
+
 var ToolBarProps = ki.Props{
 	"padding":          units.NewValue(2, units.Px),
 	"margin":           units.NewValue(0, units.Px),
@@ -291,7 +301,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	if nm == "" {
 		nm = opts.Icon
 	}
-	ac := tb.AddNewChild(KiT_Action, nm).(*Action)
+	ac := AddNewAction(tb, nm)
 	ac.Text = opts.Label
 	ac.Icon = IconName(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
@@ -301,6 +311,18 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 		ac.ActionSig.Connect(sigTo, fun)
 	}
 	return ac
+}
+
+// AddSeparator adds a new separator to the toolbar -- automatically sets orientation
+// depending on layout.  All nodes need a name identifier.
+func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
+	sp := AddNewSeparator(tb, sepnm, false)
+	if tb.Lay == LayoutHoriz {
+		sp.Horiz = false
+	} else {
+		sp.Horiz = true
+	}
+	return sp
 }
 
 // ToolBarStdRender does the standard rendering of the bar

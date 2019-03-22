@@ -76,6 +76,13 @@ type Label struct {
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
 
+// AddNewLabel adds a new label to given parent node, with given name and text.
+func AddNewLabel(parent ki.Ki, name string, text string) *Label {
+	lb := parent.AddNewChild(KiT_Label, name).(*Label)
+	lb.Text = text
+	return lb
+}
+
 var LabelProps = ki.Props{
 	"white-space":      WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	"padding":          units.NewValue(2, units.Px),

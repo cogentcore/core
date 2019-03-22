@@ -80,6 +80,11 @@ type TextView struct {
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
 
+// AddNewTextView adds a new textview to given parent node, with given name.
+func AddNewTextView(parent ki.Ki, name string) *TextView {
+	return parent.AddNewChild(KiT_TextView, name).(*TextView)
+}
+
 var TextViewProps = ki.Props{
 	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",

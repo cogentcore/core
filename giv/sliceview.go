@@ -63,8 +63,10 @@ type SliceView struct {
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
 
-// Note: the overall strategy here is similar to Dialog, where we provide lots
-// of flexible configuration elements that can be easily extended and modified
+// AddNewSliceView adds a new sliceview to given parent node, with given name.
+func AddNewSliceView(parent ki.Ki, name string) *SliceView {
+	return parent.AddNewChild(KiT_SliceView, name).(*SliceView)
+}
 
 // SliceViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view

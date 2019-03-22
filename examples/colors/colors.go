@@ -30,25 +30,22 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	row1 := mfr.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutHoriz
+	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
 	row1.SetProp("vertical-align", gi.AlignMiddle)
 	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
 
-	spc := mfr.AddNewChild(gi.KiT_Space, "spc1").(*gi.Space)
+	spc := gi.AddNewSpace(mfr, "spc1")
 	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
 
-	row1.AddNewChild(gi.KiT_Stretch, "str1")
-	lab1 := row1.AddNewChild(gi.KiT_Label, "lab1").(*gi.Label)
-	lab1.Text = "These are tests of the various GoGi Color functions"
+	gi.AddNewStretch(row1, "str1")
+	lab1 := gi.AddNewLabel(row1, "lab1", "These are tests of the various GoGi Color functions")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")
-	row1.AddNewChild(gi.KiT_Stretch, "str2")
+	gi.AddNewStretch(row1, "str2")
 
-	grid := mfr.AddNewChild(gi.KiT_Layout, "grid").(*gi.Layout)
-	grid.Lay = gi.LayoutGrid
+	grid := gi.AddNewLayout(mfr, "grid", gi.LayoutGrid)
 	grid.SetProp("columns", 11)
 	grid.SetProp("vertical-align", "center")
 	grid.SetProp("horizontal-align", "center")
@@ -62,7 +59,7 @@ func mainrun() {
 
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
-			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
+			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
@@ -71,7 +68,7 @@ func mainrun() {
 	// try again with alpha
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
-			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
+			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 0.5})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
@@ -81,7 +78,7 @@ func mainrun() {
 	lt := float32(0.5)
 	for _, hu := range hues {
 		for sat := float32(0.0); sat <= 1.01; sat += 0.1 {
-			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
+			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
@@ -92,7 +89,7 @@ func mainrun() {
 		clr := gi.Color{}
 		clr.SetHSLA(hu, 1.0, 0.2, 1)
 		for lt := float32(0.0); lt <= 100.01; lt += 10 {
-			fr := grid.AddNewChild(gi.KiT_Frame, "fr").(*gi.Frame)
+			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
 			fr.SetProp("background-color", clr.Lighter(lt))
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)

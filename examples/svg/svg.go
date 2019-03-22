@@ -79,18 +79,16 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	tbar := mfr.AddNewChild(gi.KiT_ToolBar, "tbar").(*gi.ToolBar)
-	tbar.Lay = gi.LayoutHoriz
+	tbar := gi.AddNewToolBar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
-	svgrow := mfr.AddNewChild(gi.KiT_Layout, "svgrow").(*gi.Layout)
-	svgrow.Lay = gi.LayoutHoriz
+	svgrow := gi.AddNewLayout(mfr, "svgrow", gi.LayoutHoriz)
 	svgrow.SetProp("horizontal-align", "center")
 	svgrow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	svgrow.SetStretchMaxWidth()
 	svgrow.SetStretchMaxHeight()
 
-	svge := svgrow.AddNewChild(svg.KiT_Editor, "svg").(*svg.Editor)
+	svge := svg.AddNewEditor(svgrow, "svg")
 	TheSVG = svge
 	svge.InitScale()
 	svge.Fill = true
@@ -100,63 +98,68 @@ func mainrun() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddNewChild(gi.KiT_Action, "loadsvg").(*gi.Action)
-	loads.SetText("Open SVG")
+	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: "file-open"}, win.This(),
+		func(recv, send ki.Ki, sig int64, data interface{}) {
+			FileViewOpenSVG(vp)
+		})
 	loads.StartFocus()
 
-	fnm := tbar.AddNewChild(gi.KiT_TextField, "cur-fname").(*gi.TextField)
+	fnm := gi.AddNewTextField(tbar, "cur-fname")
 	TheFile = fnm
 	fnm.SetMinPrefWidth(units.NewValue(60, units.Ch))
 
-	zmlb := tbar.AddNewChild(gi.KiT_Label, "zmlb").(*gi.Label)
-	zmlb.Text = "Zoom: "
+	zmlb := gi.AddNewLabel(tbar, "zmlb", "Zoom: ")
 	zmlb.SetProp("vertical-align", gi.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
-	zoomout := tbar.AddNewChild(gi.KiT_Action, "zoomout").(*gi.Action)
+
+	zoomout := tbar.AddAction(gi.ActOpts{Icon: "zoom-out", Name: "zoomout", Tooltip: "zoom out"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			SetZoom(svge.Scale * 0.9)
+			win.FullReRender()
+		})
 	zoomout.SetProp("margin", 0)
 	zoomout.SetProp("padding", 0)
 	zoomout.SetProp("#icon", ki.Props{
 		"width":  units.NewValue(1.5, units.Em),
 		"height": units.NewValue(1.5, units.Em),
 	})
-	zoomout.SetIcon("zoom-out")
-	zoomout.Tooltip = "zoom out"
-
-	zoom := tbar.AddNewChild(gi.KiT_SpinBox, "zoom").(*gi.SpinBox)
+	zoom := gi.AddNewSpinBox(tbar, "zoom")
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
+	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		sp := send.(*gi.SpinBox)
+		SetZoom(sp.Value)
+		win.FullReRender()
+	})
 
-	zoomin := tbar.AddNewChild(gi.KiT_Action, "zoomin").(*gi.Action)
-	zoomin.Tooltip = "zoom in"
+	zoomin := tbar.AddAction(gi.ActOpts{Icon: "zoom-in", Name: "zoomin", Tooltip: " zoom in"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			SetZoom(svge.Scale * 1.1)
+			win.FullReRender()
+		})
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
 	zoomin.SetProp("#icon", ki.Props{
 		"width":  units.NewValue(1.5, units.Em),
 		"height": units.NewValue(1.5, units.Em),
 	})
-	zoomin.SetIcon("zoom-in")
 
-	tbar.AddNewChild(gi.KiT_Space, "spctr")
-	trlb := tbar.AddNewChild(gi.KiT_Label, "trlb").(*gi.Label)
-	trlb.Text = "Translate: "
+	gi.AddNewSpace(tbar, "spctr")
+	trlb := gi.AddNewLabel(tbar, "trlb", "Translate: ")
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
 	trlb.SetProp("vertical-align", gi.AlignMiddle)
 
-	trx := tbar.AddNewChild(gi.KiT_SpinBox, "trx").(*gi.SpinBox)
+	trx := gi.AddNewSpinBox(tbar, "trx")
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
 
-	try := tbar.AddNewChild(gi.KiT_SpinBox, "try").(*gi.SpinBox)
+	try := gi.AddNewSpinBox(tbar, "try")
 	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
-
-	loads.ActionSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		FileViewOpenSVG(vp)
-	})
 
 	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {
@@ -164,22 +167,6 @@ func mainrun() {
 			fn, _ := homedir.Expand(tf.Text())
 			OpenSVG(fn)
 		}
-	})
-
-	zoomin.ActionSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		SetZoom(svge.Scale * 1.1)
-		win.FullReRender()
-	})
-
-	zoomout.ActionSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		SetZoom(svge.Scale * 0.9)
-		win.FullReRender()
-	})
-
-	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		sp := send.(*gi.SpinBox)
-		SetZoom(sp.Value)
-		win.FullReRender()
 	})
 
 	svge.NodeSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

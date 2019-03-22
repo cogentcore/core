@@ -653,6 +653,11 @@ type Button struct {
 
 var KiT_Button = kit.Types.AddType(&Button{}, ButtonProps)
 
+// AddNewButton adds a new button to given parent node, with given name.
+func AddNewButton(parent ki.Ki, name string) *Button {
+	return parent.AddNewChild(KiT_Button, name).(*Button)
+}
+
 var ButtonProps = ki.Props{
 	"border-width":  units.NewValue(1, units.Px),
 	"border-radius": units.NewValue(4, units.Px),
@@ -736,6 +741,11 @@ type CheckBox struct {
 }
 
 var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
+
+// AddNewCheckBox adds a new button to given parent node, with given name.
+func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
+	return parent.AddNewChild(KiT_CheckBox, name).(*CheckBox)
+}
 
 var CheckBoxProps = ki.Props{
 	"icon":             "widget-checked-box",

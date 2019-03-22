@@ -21,6 +21,13 @@ type Frame struct {
 
 var KiT_Frame = kit.Types.AddType(&Frame{}, FrameProps)
 
+// AddNewFrame adds a new frame to given parent node, with given name and layout
+func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
+	fr := parent.AddNewChild(KiT_Frame, name).(*Frame)
+	fr.Lay = layout
+	return fr
+}
+
 var FrameProps = ki.Props{
 	"border-width":     units.NewValue(2, units.Px),
 	"border-radius":    units.NewValue(0, units.Px),

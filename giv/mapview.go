@@ -32,8 +32,10 @@ type MapView struct {
 
 var KiT_MapView = kit.Types.AddType(&MapView{}, MapViewProps)
 
-// Note: the overall strategy here is similar to Dialog, where we provide lots
-// of flexible configuration elements that can be easily extended and modified
+// AddNewMapView adds a new mapview to given parent node, with given name.
+func AddNewMapView(parent ki.Ki, name string) *MapView {
+	return parent.AddNewChild(KiT_MapView, name).(*MapView)
+}
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to
 // represent this map

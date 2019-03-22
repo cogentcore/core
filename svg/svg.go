@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -30,6 +31,11 @@ type SVG struct {
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
+
+// AddNewSVG adds a new svg viewport to given parent node, with given name.
+func AddNewSVG(parent ki.Ki, name string) *SVG {
+	return parent.AddNewChild(KiT_SVG, name).(*SVG)
+}
 
 // Paint satisfies the painter interface
 func (g *SVG) Paint() *gi.Paint {

@@ -26,16 +26,14 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	tv := mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
+	tv := gi.AddNewTabView(mfr, "tv")
 	tv.NewTabButton = true
 
-	lbl1k, _ := tv.AddNewTab(gi.KiT_Label, "This is Label1")
-	lbl1 := lbl1k.(*gi.Label)
+	lbl1 := tv.AddNewTab(gi.KiT_Label, "This is Label1").(*gi.Label)
 	lbl1.SetText("this is the contents of the first tab")
 	lbl1.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 
-	lbl2k, _ := tv.AddNewTab(gi.KiT_Label, "And this Label2")
-	lbl2 := lbl2k.(*gi.Label)
+	lbl2 := tv.AddNewTab(gi.KiT_Label, "And this Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
 	lbl2.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 

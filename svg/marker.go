@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
@@ -25,6 +26,11 @@ type Marker struct {
 }
 
 var KiT_Marker = kit.Types.AddType(&Marker{}, nil)
+
+// AddNewMarker adds a new marker to given parent node, with given name.
+func AddNewMarker(parent ki.Ki, name string) *Marker {
+	return parent.AddNewChild(KiT_Marker, name).(*Marker)
+}
 
 // MarkerUnits specifies units to use for svg marker elements
 type MarkerUnits int32

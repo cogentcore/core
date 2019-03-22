@@ -49,6 +49,13 @@ type Icon struct {
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
 
+// AddNewIcon adds a new icon to given parent node, with given name, and icon name.
+func AddNewIcon(parent ki.Ki, name string, icon string) *Icon {
+	ic := parent.AddNewChild(KiT_Icon, name).(*Icon)
+	ic.SetIcon(icon)
+	return ic
+}
+
 var IconProps = ki.Props{
 	"background-color": color.Transparent,
 }

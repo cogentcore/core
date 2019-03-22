@@ -41,11 +41,9 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := mfr.AddNewChild(gi.KiT_Layout, "trow").(*gi.Layout)
-	trow.Lay = gi.LayoutHoriz
+	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
 
-	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	hdrText := `This is a <b>test</b> of the
 	 <span style="color:red">various</span> <i>GoGi</i> Text elements<br>
 	 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
@@ -53,7 +51,8 @@ func mainrun() {
 	 Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>strikethrough</strike><br>
 	 <q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
 	 and Sub<sub>script</sub> and Super<sup>script</sup>`
-	title.Text = hdrText
+
+	title := gi.AddNewLabel(trow, "title", hdrText)
 	// title.Text = "header" // use this to test word wrapping
 	title.SetProp("white-space", gi.WhiteSpaceNormal)
 	title.SetProp("text-align", gi.AlignRight)
@@ -63,10 +62,9 @@ func mainrun() {
 	// title.SetProp("letter-spacing", 2)
 	title.SetProp("line-height", 1.5)
 
-	rtxt := trow.AddNewChild(gi.KiT_Label, "rtxt").(*gi.Label)
-	rtxt.Text = "this is to test right margin"
+	gi.AddNewLabel(trow, "rtxt", "this is to test right margin")
 
-	wrlab := mfr.AddNewChild(gi.KiT_Label, "wrlab").(*gi.Label)
+	wrlab := gi.AddNewLabel(mfr, "wrlab", "")
 	wrlab.SetProp("white-space", gi.WhiteSpaceNormal)
 	wrlab.SetProp("width", "20em")
 	wrlab.SetProp("max-width", -1)
@@ -80,14 +78,12 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 
 	// mfr.AddNewChild(gi.KiT_Space, "aspc")
 
-	etxt := mfr.AddNewChild(gi.KiT_Label, "etxt").(*gi.Label)
-	etxt.Text = "this is to test bottom after word wrapped text"
+	gi.AddNewLabel(mfr, "etxt", "this is to test bottom after word wrapped text")
 
-	str := mfr.AddNewChild(gi.KiT_Stretch, "str").(*gi.Stretch)
+	str := gi.AddNewStretch(mfr, "str")
 	str.SetMinPrefHeight(units.NewValue(5, units.Em))
 
-	etxt2 := mfr.AddNewChild(gi.KiT_Label, "etxt2").(*gi.Label)
-	etxt2.Text = "this is after final stretch"
+	gi.AddNewLabel(mfr, "etxt2", "this is after final stretch")
 
 	// main menu
 	appnm := gi.AppName()

@@ -40,7 +40,11 @@ type SplitView struct {
 
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 
-// auto-max-stretch
+// AddNewSplitView adds a new splitview to given parent node, with given name.
+func AddNewSplitView(parent ki.Ki, name string) *SplitView {
+	return parent.AddNewChild(KiT_SplitView, name).(*SplitView)
+}
+
 var SplitViewProps = ki.Props{
 	"handle-size": units.NewValue(10, units.Px),
 	"max-width":   -1.0,

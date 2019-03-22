@@ -31,6 +31,11 @@ type StructView struct {
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
 
+// AddNewStructView adds a new structview to given parent node, with given name.
+func AddNewStructView(parent ki.Ki, name string) *StructView {
+	return parent.AddNewChild(KiT_StructView, name).(*StructView)
+}
+
 var StructViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,

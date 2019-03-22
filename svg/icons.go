@@ -43,6 +43,11 @@ type Icon struct {
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
 
+// AddNewIcon adds a new icon to given parent node, with given name.
+func AddNewIcon(parent ki.Ki, name string) *Icon {
+	return parent.AddNewChild(KiT_Icon, name).(*Icon)
+}
+
 var IconProps = ki.Props{
 	"background-color": color.Transparent,
 }
@@ -252,140 +257,112 @@ func MakeDefaultIcons() *IconSet {
 	iset := make(IconSet, 100)
 	if true {
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-wedge-down")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-wedge-down")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p := AddNewPath(ic, "p", "M 0.05 0.05 .95 0.05 .5 .95 Z")
 			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
-			p.SetData("M 0.05 0.05 .95 0.05 .5 .95 Z")
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-wedge-up")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-wedge-up")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p := AddNewPath(ic, "p", "M 0.05 0.95 .95 0.95 .5 .05 Z")
 			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
-			p.SetData("M 0.05 0.95 .95 0.95 .5 .05 Z")
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-wedge-left")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-wedge-left")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p := AddNewPath(ic, "p", "M 0.95 0.05 .95 0.95 .05 .5 Z")
 			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
-			p.SetData("M 0.95 0.05 .95 0.95 .05 .5 Z")
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-wedge-right")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-wedge-right")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p := AddNewPath(ic, "p", "M 0.05 0.05 .05 0.95 .95 .5 Z")
 			p.SetProp("stroke-width", units.NewValue(1, units.Pct))
-			p.SetData("M 0.05 0.05 .05 0.95 .95 .5 Z")
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-checkmark")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-checkmark")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p := AddNewPath(ic, "p", "M 0.1 0.5 .5 0.9 .9 .1")
 			p.SetProp("stroke-width", units.NewValue(20, units.Pct))
 			p.SetProp("fill", "none")
-			p.SetData("M 0.1 0.5 .5 0.9 .9 .1")
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-checked-box")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-checked-box")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			bx := ic.AddNewChild(KiT_Rect, "bx").(*Rect)
-			bx.Pos.Set(0.05, 0.05)
-			bx.Size.Set(0.9, 0.9)
+			bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
 			bx.SetProp("stroke-width", units.NewValue(5, units.Pct))
 			// bx.Radius.Set(0.02, 0.02)
-			p := ic.AddNewChild(KiT_Path, "p").(*Path)
+			p := AddNewPath(ic, "p", "M 0.2 0.5 .5 0.8 .8 .2")
 			p.SetProp("stroke-width", units.NewValue(20, units.Pct))
 			p.SetProp("fill", "none")
-			p.SetData("M 0.2 0.5 .5 0.8 .8 .2")
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-unchecked-box")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-unchecked-box")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			bx := ic.AddNewChild(KiT_Rect, "bx").(*Rect)
+			bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
 			bx.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			bx.Pos.Set(0.05, 0.05)
-			bx.Size.Set(0.9, 0.9)
 			// bx.Radius.Set(0.02, 0.02) // not rendering well at small sizes
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-circlebutton-on")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-circlebutton-on")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			oc := ic.AddNewChild(KiT_Circle, "oc").(*Circle)
-			oc.Pos.Set(0.5, 0.5)
-			oc.Radius = 0.4
+			oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
 			oc.SetProp("fill", "none")
 			oc.SetProp("stroke-width", units.NewValue(10, units.Pct))
-			inc := ic.AddNewChild(KiT_Circle, "ic").(*Circle)
-			inc.Pos.Set(0.5, 0.5)
-			inc.Radius = 0.2
+			inc := AddNewCircle(ic, "ic", 0.5, 0.5, 0.2)
 			inc.SetProp("stroke-width", units.NewValue(10, units.Pct))
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
-			ic.InitName(&ic, "widget-circlebutton-off")
+			ic := &Icon{}
+			ic.InitName(ic, "widget-circlebutton-off")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			oc := ic.AddNewChild(KiT_Circle, "oc").(*Circle)
-			oc.Pos.Set(0.5, 0.5)
-			oc.Radius = 0.4
+			oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
 			oc.SetProp("fill", "none")
 			oc.SetProp("stroke-width", units.NewValue(10, units.Pct))
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
+			ic := &Icon{}
 			rad := gi.Vec2D{0.25, 0.12}
-			ic.InitName(&ic, "widget-handle-circles-vert")
+			ic.InitName(ic, "widget-handle-circles-vert")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			c0 := ic.AddNewChild(KiT_Ellipse, "c0").(*Ellipse)
+			c0 := AddNewEllipse(ic, "c0", 0.5, 0.15, rad.X, rad.Y)
 			c0.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			c0.Pos.Set(0.5, 0.15)
-			c0.Radii = rad
-			c1 := ic.AddNewChild(KiT_Ellipse, "c1").(*Ellipse)
+			c1 := AddNewEllipse(ic, "c1", 0.5, 0.5, rad.X, rad.Y)
 			c1.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			c1.Pos.Set(0.5, 0.5)
-			c1.Radii = rad
-			c2 := ic.AddNewChild(KiT_Ellipse, "c2").(*Ellipse)
+			c2 := AddNewEllipse(ic, "c2", 0.5, 0.85, rad.X, rad.Y)
 			c2.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			c2.Pos.Set(0.5, 0.85)
-			c2.Radii = rad
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 		{
-			ic := Icon{}
+			ic := &Icon{}
 			rad := gi.Vec2D{0.12, 0.25}
-			ic.InitName(&ic, "widget-handle-circles-horiz")
+			ic.InitName(ic, "widget-handle-circles-horiz")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
-			c0 := ic.AddNewChild(KiT_Ellipse, "c0").(*Ellipse)
+			c0 := AddNewEllipse(ic, "c0", 0.15, 0.5, rad.X, rad.Y)
 			c0.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			c0.Pos.Set(0.15, 0.5)
-			c0.Radii = rad
-			c1 := ic.AddNewChild(KiT_Ellipse, "c1").(*Ellipse)
+			c1 := AddNewEllipse(ic, "c1", 0.5, 0.5, rad.X, rad.Y)
 			c1.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			c1.Pos.Set(0.5, 0.5)
-			c1.Radii = rad
-			c2 := ic.AddNewChild(KiT_Ellipse, "c2").(*Ellipse)
+			c2 := AddNewEllipse(ic, "c2", 0.85, 0.5, rad.X, rad.Y)
 			c2.SetProp("stroke-width", units.NewValue(5, units.Pct))
-			c2.Pos.Set(0.85, 0.5)
-			c2.Radii = rad
-			iset[ic.Nm] = &ic
+			iset[ic.Nm] = ic
 		}
 	}
 	return &iset

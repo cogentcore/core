@@ -29,8 +29,7 @@ within that, or a LayoutGrid for more complex layouts:
 
 	vlay := win.SetMainVLay() // or SetMainFrame
 
-	row1 := vlay.AddNewChild(gi.KiT_Layout, "row1").(*gi.Layout)
-	row1.Lay = gi.LayoutHoriz
+	row1 := gi.AddNewLayout(vlay, "row1", gi.LayoutHoriz)
 
 	...
 
