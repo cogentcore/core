@@ -487,12 +487,15 @@ type Ki interface {
 	// SetPropChildren sets given property key to value val for all Children.
 	SetPropChildren(key string, val interface{})
 
-	// Prop gets property value from key.
-	Prop(key string) (interface{}, bool)
+	// Prop returns property value for key that is known to exist.
+	// Returns nil if it actually doesn't -- this version allows
+	// direct conversion of return.  See PropTry for version with
+	// error message if uncertain if property exists.
+	Prop(key string) interface{}
 
-	// KnownProp gets property value from key that is known to exist --
-	// returns nil if it actually doesn't -- less cumbersome for conversions.
-	KnownProp(key string) interface{}
+	// PropTry returns property value for key.  Returns error message
+	// if property with that key does not exist.
+	PropTry(key string) (interface{}, error)
 
 	// PropInherit gets property value from key with options for inheriting
 	// property from parents and / or type-level properties.  If inherit, then

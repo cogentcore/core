@@ -554,7 +554,7 @@ func TestProps(t *testing.T) {
 	schild2 := child2.AddNewChild(nil, "subchild1")
 
 	parent.SetProp("intprop", 42)
-	pprop, ok := kit.ToInt(parent.KnownProp("intprop"))
+	pprop, ok := kit.ToInt(parent.Prop("intprop"))
 	if !ok || pprop != 42 {
 		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
 	}

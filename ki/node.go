@@ -1250,18 +1250,22 @@ func (n *Node) SetPropChildren(key string, val interface{}) {
 	}
 }
 
-// todo: switch to PropTry, Prop instead of KnownProp etc.
-
-// Prop gets property value from key.
-func (n *Node) Prop(key string) (interface{}, bool) {
-	v, ok := n.Props[key]
-	return v, ok
+// Prop returns property value for key that is known to exist.
+// Returns nil if it actually doesn't -- this version allows
+// direct conversion of return.  See PropTry for version with
+// error message if uncertain if property exists.
+func (n *Node) Prop(key string) interface{} {
+	return n.Props[key]
 }
 
-// KnownProp gets property value from key that is known to exist --
-// returns nil if it actually doesn't -- less cumbersome for conversions.
-func (n *Node) KnownProp(key string) interface{} {
-	return n.Props[key]
+// PropTry returns property value for key.  Returns error message
+// if property with that key does not exist.
+func (n *Node) PropTry(key string) (interface{}, error) {
+	v, ok := n.Props[key]
+	if !ok {
+		return v, fmt.Errorf("ki.PropTry, could not find property with key %v on node %v", key, n.PathUnique())
+	}
+	return v, nil
 }
 
 // PropInherit gets property value from key with options for inheriting
