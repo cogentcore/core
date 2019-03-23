@@ -1011,3 +1011,145 @@ void showCursor() {
 }
 
 
+////////////////////////////////////////////////////////
+//  Vulkan support
+
+#define VK_NULL_HANDLE 0
+
+typedef void* VkInstance;
+typedef void* VkPhysicalDevice;
+typedef uint64_t VkSurfaceKHR;
+typedef uint32_t VkFlags;
+typedef uint32_t VkBool32;
+
+typedef enum VkStructureType
+{
+    VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR = 1000004000,
+    VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR = 1000005000,
+    VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR = 1000006000,
+    VK_STRUCTURE_TYPE_MIR_SURFACE_CREATE_INFO_KHR = 1000007000,
+    VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR = 1000009000,
+    VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK = 1000053000,
+    VK_STRUCTURE_TYPE_MAX_ENUM = 0x7FFFFFFF
+} VkStructureType;
+
+typedef enum VkResult
+{
+    VK_SUCCESS = 0,
+    VK_NOT_READY = 1,
+    VK_TIMEOUT = 2,
+    VK_EVENT_SET = 3,
+    VK_EVENT_RESET = 4,
+    VK_INCOMPLETE = 5,
+    VK_ERROR_OUT_OF_HOST_MEMORY = -1,
+    VK_ERROR_OUT_OF_DEVICE_MEMORY = -2,
+    VK_ERROR_INITIALIZATION_FAILED = -3,
+    VK_ERROR_DEVICE_LOST = -4,
+    VK_ERROR_MEMORY_MAP_FAILED = -5,
+    VK_ERROR_LAYER_NOT_PRESENT = -6,
+    VK_ERROR_EXTENSION_NOT_PRESENT = -7,
+    VK_ERROR_FEATURE_NOT_PRESENT = -8,
+    VK_ERROR_INCOMPATIBLE_DRIVER = -9,
+    VK_ERROR_TOO_MANY_OBJECTS = -10,
+    VK_ERROR_FORMAT_NOT_SUPPORTED = -11,
+    VK_ERROR_SURFACE_LOST_KHR = -1000000000,
+    VK_SUBOPTIMAL_KHR = 1000001003,
+    VK_ERROR_OUT_OF_DATE_KHR = -1000001004,
+    VK_ERROR_INCOMPATIBLE_DISPLAY_KHR = -1000003001,
+    VK_ERROR_NATIVE_WINDOW_IN_USE_KHR = -1000000001,
+    VK_ERROR_VALIDATION_FAILED_EXT = -1000011001,
+    VK_RESULT_MAX_ENUM = 0x7FFFFFFF
+} VkResult;
+
+typedef struct VkAllocationCallbacks VkAllocationCallbacks;
+
+typedef struct VkExtensionProperties
+{
+    char            extensionName[256];
+    uint32_t        specVersion;
+} VkExtensionProperties;
+
+typedef void (APIENTRY * PFN_vkVoidFunction)(void);
+
+/*
+#if defined(_GLFW_VULKAN_STATIC)
+  PFN_vkVoidFunction vkGetInstanceProcAddr(VkInstance,const char*);
+  VkResult vkEnumerateInstanceExtensionProperties(const char*,uint32_t*,VkExtensionProperties*);
+#else
+  typedef PFN_vkVoidFunction (APIENTRY * PFN_vkGetInstanceProcAddr)(VkInstance,const char*);
+  typedef VkResult (APIENTRY * PFN_vkEnumerateInstanceExtensionProperties)(const char*,uint32_t*,VkExtensionProperties*);
+  #define vkEnumerateInstanceExtensionProperties _glfw.vk.EnumerateInstanceExtensionProperties
+  #define vkGetInstanceProcAddr _glfw.vk.GetInstanceProcAddr
+#endif
+
+typedef VkFlags VkMacOSSurfaceCreateFlagsMVK;
+
+typedef struct VkMacOSSurfaceCreateInfoMVK
+{
+    VkStructureType                 sType;
+    const void*                     pNext;
+    VkMacOSSurfaceCreateFlagsMVK    flags;
+    const void*                     pView;
+} VkMacOSSurfaceCreateInfoMVK;
+
+typedef VkResult (APIENTRY *PFN_vkCreateMacOSSurfaceMVK)(VkInstance,const VkMacOSSurfaceCreateInfoMVK*,const VkAllocationCallbacks*,VkSurfaceKHR*);
+
+VkResult _glfwPlatformCreateWindowSurface(VkInstance instance,
+                                          _GLFWwindow* window,
+                                          const VkAllocationCallbacks* allocator,
+                                          VkSurfaceKHR* surface)
+{
+    VkResult err;
+    VkMacOSSurfaceCreateInfoMVK sci;
+    PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
+
+    vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK)
+        vkGetInstanceProcAddr(instance, "vkCreateMacOSSurfaceMVK");
+    if (!vkCreateMacOSSurfaceMVK)
+    {
+        _glfwInputError(GLFW_API_UNAVAILABLE,
+                        "Cocoa: Vulkan instance missing VK_MVK_macos_surface extension");
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+
+    // HACK: Dynamically load Core Animation to avoid adding an extra
+    //       dependency for the majority who don't use MoltenVK
+    NSBundle* bundle = [NSBundle bundleWithPath:@"/System/Library/Frameworks/QuartzCore.framework"];
+    if (!bundle)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Cocoa: Failed to find QuartzCore.framework");
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+
+    // NOTE: Create the layer here as makeBackingLayer should not return nil
+    window->ns.layer = [[bundle classNamed:@"CAMetalLayer"] layer];
+    if (!window->ns.layer)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Cocoa: Failed to create layer for view");
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
+    }
+
+    [window->ns.view setWantsLayer:YES];
+
+    memset(&sci, 0, sizeof(sci));
+    sci.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
+    sci.pView = window->ns.view;
+
+    err = vkCreateMacOSSurfaceMVK(instance, &sci, allocator, surface);
+    if (err)
+    {
+        _glfwInputError(GLFW_PLATFORM_ERROR,
+                        "Cocoa: Failed to create Vulkan surface: %s",
+                        _glfwGetVulkanResultString(err));
+    }
+
+    return err;
+#else
+    return VK_ERROR_EXTENSION_NOT_PRESENT;
+#endif
+}
+
+*/
+
