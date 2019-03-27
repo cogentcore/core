@@ -15,7 +15,7 @@ package macdriver
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Cocoa -framework OpenGL -framework IOKit
+#cgo LDFLAGS: -framework Cocoa -framework OpenGL -framework IOKit -framework vulkan
 #include <OpenGL/gl3.h>
 #import <Carbon/Carbon.h> // for HIToolbox/Events.h
 #import <Cocoa/Cocoa.h>
@@ -23,6 +23,8 @@ package macdriver
 #include <pthread.h>
 #include <stdint.h>
 #include <stdlib.h>
+#define VK_USE_PLATFORM_MACOS_MVK 1
+#include <vulkan/vulkan.h>
 
 void startDriver();
 void stopDriver();
@@ -39,6 +41,7 @@ void doMinimizeWindow(uintptr_t id);
 void doCloseWindow(uintptr_t id);
 void getScreens();
 void doSetMainMenu(uintptr_t viewID);
+int doCreateWindowSurface	(uintptr_t inst, uintptr_t vw, uintptr_t surf);
 uintptr_t doGetMainMenu(uintptr_t viewID);
 uintptr_t doGetMainMenuLock(uintptr_t viewID);
 void doMainMenuUnlock(uintptr_t menuID);
@@ -75,13 +78,13 @@ import (
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/pi/filecat"
+	"github.com/vulkan-go/vulkan"
 	"golang.org/x/mobile/gl"
 )
 
@@ -423,6 +426,22 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 	}
 	// todo: rest of the fields
 }
+
+// createWindowSurface creates a Vulkan surface for this window.
+func createWindowSurface(id uintptr) (surface vulkan.Surface, err error) {
+	if theGPU == nil || theGPU.Instance() == nil {
+		return surface, errors.New("vulkan: instance is nil")
+	}
+	var vulkanSurface C.VkSurfaceKHR
+	ret := C.doCreateWindowSurface(C.uintptr_t(uintptr(unsafe.Pointer(theGPU.Instance()))), C.uintptr_t(id), (C.uintptr_t)(uintptr(unsafe.Pointer(&vulkanSurface))))
+	if ret != C.VK_SUCCESS {
+		return surface, errors.New("vulkan: error creating window surface")
+	}
+	return vulkan.SurfaceFromPointer(uintptr(unsafe.Pointer(&vulkanSurface))), nil
+}
+
+/////////////////////////////////////////////////////
+// 		mouse / key input
 
 func cocoaMouseAct(ty int32) mouse.Actions {
 	switch ty {
@@ -1148,36 +1167,4 @@ func cocoaMods(flags uint32) (m int32) {
 		}
 	}
 	return m
-}
-
-///////////////////////////////////////////////////////////////
-//  GPU - Vulkan
-
-type gpuImpl struct {
-	gpu.GPUBase
-}
-
-var theGPU = &gpuImpl{}
-
-func initGPU() error {
-	gp := theGPU
-
-	gp.SetReqDeviceExts([]string{
-		"VK_KHR_swapchain",
-		"VK_MVK_macos_surface",
-	})
-	// todo: SetReqInstanceExts
-
-	gp.SetReqValidationLayers([]string{
-		"VK_LAYER_LUNARG_standard_validation",
-		// "VK_LAYER_GOOGLE_threading",
-		// "VK_LAYER_LUNARG_parameter_validation",
-		// "VK_LAYER_LUNARG_object_tracker",
-		// "VK_LAYER_LUNARG_core_validation",
-		// "VK_LAYER_LUNARG_api_dump",
-		// "VK_LAYER_LUNARG_swapchain",
-		// "VK_LAYER_GOOGLE_unique_objects",
-	})
-
-	return gp.InitBase()
 }
