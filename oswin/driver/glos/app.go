@@ -7,10 +7,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build !3d
+// +build 3d
 
-package macdriver
+package glos
 
 import (
 	"fmt"
@@ -21,16 +20,25 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
+	"runtime"
 	"sync"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
-	"golang.org/x/mobile/gl"
 )
 
+func init() {
+	runtime.LockOSThread()
+	if err := glfw.Init(); err != nil {
+		log.Fatalln("failed to initialize glfw:", err)
+	}
+}
+
 var theApp = &appImpl{
-	windows:      make(map[uintptr]*windowImpl),
+	windows:      make(map[*glfw.Window]*windowImpl),
 	winlist:      make([]*windowImpl, 0),
 	screens:      make([]*oswin.Screen, 0),
 	name:         "GoGi",
@@ -56,6 +64,8 @@ type appImpl struct {
 	}
 
 	mu            sync.Mutex
+	mainQueue     chan funcRun
+	mainDone      chan struct{}
 	windows       map[uintptr]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
@@ -68,61 +78,72 @@ type appImpl struct {
 	quitCleanFunc func()
 }
 
-func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
-	m := image.NewRGBA(image.Rectangle{Max: size})
-	return &imageImpl{
-		buf:  m.Pix,
-		rgba: *m,
-		size: size,
-	}, nil
+// Main is called from main thread when it is time to start running the
+// main loop.  When function f returns, the app ends automatically.
+func Main(f func(oswin.App)) {
+	// Initialize Glow -- todo: not sure this is necessary
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+	app.getScreens()
+	oswin.TheApp = theApp
+	go func() {
+		f(theApp)
+		theApp.stopMain()
+	}()
 }
 
-func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
-	// TODO: can we compile these programs eagerly instead of lazily?
+type funcRun struct {
+	f    func()
+	done chan bool
+}
 
-	w := win.(*windowImpl)
-
-	w.glctxMu.Lock()
-	defer w.glctxMu.Unlock()
-	glctx := w.glctx
-	if glctx == nil {
-		return nil, fmt.Errorf("macdriver: no GL context available")
+// RunOnMain runs given function on main thread
+func (app *appImpl) RunOnMain(f func()) {
+	if app.mainQueue == nil {
+		f()
+	} else {
+		done := make(chan bool)
+		app.mainQueue <- funcRun{f: f, done: done}
+		<-done
 	}
+}
 
-	if !glctx.IsProgram(app.texture.program) {
-		p, err := compileProgram(glctx, textureVertexSrc, textureFragmentSrc)
-		if err != nil {
-			return nil, err
+// GoRunOnMain runs given function on main thread and returns immediately
+func (app *appImpl) GoRunOnMain(f func()) {
+	go func() {
+		app.mainQueue <- funcRun{f: f, done: nil}
+	}()
+}
+
+// MainLoop starts running event loop on main thread (must be called
+// from the main thread).
+func (app *appImpl) mainLoop() {
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
+	for {
+		select {
+		case <-app.mainDone:
+			glfw.Terminate()
+			return
+		case f := <-mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		default:
+			glfw.WaitEvents()
 		}
-		app.texture.program = p
-		app.texture.pos = glctx.GetAttribLocation(p, "pos")
-		app.texture.mvp = glctx.GetUniformLocation(p, "mvp")
-		app.texture.uvp = glctx.GetUniformLocation(p, "uvp")
-		app.texture.inUV = glctx.GetAttribLocation(p, "inUV")
-		app.texture.sample = glctx.GetUniformLocation(p, "sample")
-		app.texture.quad = glctx.CreateBuffer()
-
-		glctx.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
-		glctx.BufferData(gl.ARRAY_BUFFER, quadCoords, gl.STATIC_DRAW)
 	}
-
-	t := &textureImpl{
-		w:    w,
-		id:   glctx.CreateTexture(),
-		size: size,
-	}
-
-	glctx.BindTexture(gl.TEXTURE_2D, t.id)
-	glctx.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.X, size.Y, gl.RGBA, gl.UNSIGNED_BYTE, nil)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-	w.AddTexture(t)
-
-	return t, nil
 }
+
+// stopMain stops the main loop and thus terminates the app
+func (app *appImpl) stopMain() {
+	app.mainDone <- struct{}{}
+}
+
+////////////////////////////////////////////////////////
+//  Window
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
 	if opts == nil {
@@ -131,13 +152,14 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	opts.Fixup()
 	// can also apply further tuning here..
 
-	id, err := newWindow(opts)
+	glw, err := newGLWindow(opts)
 	if err != nil {
 		return nil, err
 	}
 	w := &windowImpl{
 		app:         app,
-		id:          id,
+		glw:         glw,
+		Titl:        opts.GetTitle(),
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
 		publishDone: make(chan oswin.PublishResult),
@@ -145,14 +167,28 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	}
 	initWindow(w)
 
-	if opts.Title != "" {
-		w.SetTitle(opts.Title)
-	}
-
 	app.mu.Lock()
 	app.windows[id] = w
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
+
+	glw.SetPosCallback(w.moved)
+	glw.SetSizeCallback(w.winResized)
+	glw.SetFramebufferSizeCallback(w.fbResized)
+	glw.SetCloseCallback(w.closeReq)
+	glw.SetRefreshCallback(w.refresh)
+	glw.SetFocusCallback(w.focus)
+	glw.SetIconifyCallback(w.iconify)
+
+	glw.SetKeyCallback(w.keyEvent)
+	glw.SetCharModsCallback(w.charEvent)
+	glw.SetMouseButtonCallback(w.mouseButtonEvent)
+	glw.SetScrollCallback(w.scrollEvennt)
+	glw.SetCursorPosCallback(w.cursorPosEvent)
+	glw.SetCursorEnterCallback(w.cursorEnterEvent)
+	glw.SetDropCallback(w.dropEvent)
+
+	glfw.DetachCurrentContext()
 
 	// todo: could try to find alternative screen number here..
 	sc := app.Screen(0)
@@ -237,6 +273,60 @@ func (app *appImpl) ContextWindow() oswin.Window {
 	cw := app.ctxtwin
 	app.mu.Unlock()
 	return cw
+}
+
+func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
+	m := image.NewRGBA(image.Rectangle{Max: size})
+	return &imageImpl{
+		buf:  m.Pix,
+		rgba: *m,
+		size: size,
+	}, nil
+}
+
+func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
+	w := win.(*windowImpl)
+
+	w.glctxMu.Lock()
+	defer w.glctxMu.Unlock()
+	glctx := w.glctx
+	if glctx == nil {
+		return nil, fmt.Errorf("macdriver: no GL context available")
+	}
+
+	if !glctx.IsProgram(app.texture.program) {
+		p, err := compileProgram(glctx, textureVertexSrc, textureFragmentSrc)
+		if err != nil {
+			return nil, err
+		}
+		app.texture.program = p
+		app.texture.pos = glctx.GetAttribLocation(p, "pos")
+		app.texture.mvp = glctx.GetUniformLocation(p, "mvp")
+		app.texture.uvp = glctx.GetUniformLocation(p, "uvp")
+		app.texture.inUV = glctx.GetAttribLocation(p, "inUV")
+		app.texture.sample = glctx.GetUniformLocation(p, "sample")
+		app.texture.quad = glctx.CreateBuffer()
+
+		glctx.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
+		glctx.BufferData(gl.ARRAY_BUFFER, quadCoords, gl.STATIC_DRAW)
+	}
+
+	t := &textureImpl{
+		w:    w,
+		id:   glctx.CreateTexture(),
+		size: size,
+	}
+
+	glctx.BindTexture(gl.TEXTURE_2D, t.id)
+	glctx.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.X, size.Y, gl.RGBA, gl.UNSIGNED_BYTE, nil)
+	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+	w.AddTexture(t)
+
+	return t, nil
 }
 
 func (app *appImpl) Name() string {

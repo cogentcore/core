@@ -10,6 +10,7 @@
 // +build darwin
 // +build 386 amd64
 // +build !ios
+// +build !3d
 
 package macdriver
 

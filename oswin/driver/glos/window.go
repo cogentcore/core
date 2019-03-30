@@ -1,4 +1,4 @@
-// Copyright 2018 The GoKi Authors. All rights reserved.
+// Copyright 2019 The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -7,10 +7,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build !3d
+// +build 3d
 
-package macdriver
+package glos
 
 import (
 	"image"
@@ -18,31 +17,20 @@ import (
 	"image/draw"
 	"sync"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.0/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 	"golang.org/x/image/math/f64"
-	"golang.org/x/mobile/gl"
 )
 
 type windowImpl struct {
 	oswin.WindowBase
-
 	app *appImpl
-
-	// id is an OS-specific data structure for the window.
-	//	- Cocoa:   AppGLView*
-	//	- X11:     Window
-	//	- Windows: win32.HWND
-	id uintptr
-
-	// ctx is a C data structure for the GL context.
-	//	- Cocoa:   uintptr holding a NSOpenGLContext*.
-	//	- X11:     uintptr holding an EGLSurface.
-	//	- Windows: ctxWin32
-	ctx interface{}
-
+	glw *glfw.Window
 	event.Deque
 	publish     chan struct{}
 	publishDone chan oswin.PublishResult
@@ -78,6 +66,35 @@ type windowImpl struct {
 	closeCleanFunc func(win oswin.Window)
 }
 
+func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
+	dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
+	glfw.DefaultWindowHints()
+	glfw.WindowHint(glfw.Resizable, glfw.True)
+	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
+	glfw.WindowHint(glfw.Focused, glfw.True)
+	glfw.WindowHint(glfw.ContextVersionMajor, 4)
+	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+
+	// todo: glfw.Samples -- multisampling
+	if fullscreen {
+		glfw.WindowHint(glfw.Maximized, glfw.True)
+	}
+	if tool {
+		glfw.WindowHint(glfw.Decorated, glfw.False)
+	} else {
+		glfw.WindowHint(glfw.Decorated, glfw.True)
+	}
+	// todo: glfw.Floating for always-on-top -- could set for modal
+	win, err := glfw.CreateWindow(opts.Size.X, opts.Size.Y, opts.GetTitle(), nil, nil)
+	if err != nil {
+		return win, err
+	}
+	win.SetPos(opts.Pos.X, opts.Pos.Y)
+	return win, err
+}
+
 // for sending any kind of event
 func sendEvent(id uintptr, ev oswin.Event) {
 	theApp.mu.Lock()
@@ -91,7 +108,7 @@ func sendEvent(id uintptr, ev oswin.Event) {
 }
 
 // for sending window.Event's
-func sendWindowEvent(w *windowImpl, act window.Actions) {
+func (w *windowImpl) sendWindowEvent(act window.Actions) {
 	winEv := window.Event{
 		Action: act,
 	}
@@ -387,14 +404,18 @@ func (w *windowImpl) Screen() *oswin.Screen {
 
 func (w *windowImpl) Size() image.Point {
 	w.mu.Lock()
-	sz := w.Sz
+	var sz image.Point
+	sz.X, sz.Y = w.glw.GetSize()
+	w.Sz = sz
 	w.mu.Unlock()
 	return sz
 }
 
 func (w *windowImpl) Position() image.Point {
 	w.mu.Lock()
-	ps := w.Pos
+	var ps image.Point
+	ps.X, ps.Y = w.glw.GetPos()
+	w.Pos = ps
 	w.mu.Unlock()
 	return ps
 }
@@ -421,19 +442,20 @@ func (w *windowImpl) SetLogicalDPI(dpi float32) {
 
 func (w *windowImpl) SetTitle(title string) {
 	w.Titl = title
-	updateTitle(w, title)
+	w.glw.SetTitle(title)
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {
-	resizeWindow(w, sz)
+	w.glw.SetSize(sz.X, sz.Y)
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
-	posWindow(w, pos)
+	w.glw.SetPos(pos.X, pos.Y)
 }
 
 func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
-	setGeomWindow(w, pos, sz)
+	w.glw.SetSize(sz.X, sz.Y)
+	w.glw.SetPos(pos.X, pos.Y)
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
@@ -445,11 +467,11 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) Raise() {
-	raiseWindow(w)
+	w.glw.Restore()
 }
 
 func (w *windowImpl) Minimize() {
-	minimizeWindow(w)
+	w.glw.Hide()
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
@@ -504,5 +526,56 @@ func (w *windowImpl) Close() {
 		}
 	}
 	w.textures = nil
-	closeWindow(w.id)
+	w.glw.Destroy()
+	// 	closeWindow(w.id)
+}
+
+/////////////////////////////////////////////////////////
+//  Window Callbacks
+
+func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
+	w.mu.Lock()
+	w.Pos = image.Point{x, y}
+	w.mu.Unlock()
+	w.sendWindowEvent(window.Move)
+}
+
+func (w *windowImpl) winResized(gw *glfw.Window, w, h int) {
+	w.mu.Lock()
+	w.Sz = image.Point{w, h}
+	w.mu.Unlock()
+	w.sendWindowEvent(window.Resize)
+}
+
+func (w *windowImpl) fbResized(gw *glfw.Window, w, h int) {
+}
+
+func (w *windowImpl) closeReq(gw *glfw.Window) {
+	w.CloseReq()
+}
+
+func (w *windowImpl) refresh(gw *glfw.Window) {
+	w.Publish()
+}
+
+func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
+	if focused {
+		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+		bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
+		w.sendWindowEvent(window.Focus)
+	} else {
+		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		w.sendWindowEvent(window.DeFocus)
+	}
+}
+
+func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
+	if iconified {
+		bitflag.SetAtomic(&w.Flag, int(oswin.Minimized))
+		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		w.sendWindowEvent(window.Minimize)
+	} else {
+		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+		w.sendWindowEvent(window.Minimize)
+	}
 }

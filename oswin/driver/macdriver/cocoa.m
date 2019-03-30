@@ -10,6 +10,7 @@
 // +build darwin
 // +build 386 amd64
 // +build !ios
+// +build !3d
 
 #include "_cgo_export.h"
 #include <pthread.h>
@@ -1013,56 +1014,4 @@ void showCursor() {
     [NSCursor unhide];
 }
 
-////////////////////////////////////////////////////////
-// Vulkan
-
-int doCreateWindowSurface
-	(uintptr_t inst, uintptr_t vw, uintptr_t surf)
-{
-	VkInstance instance = (VkInstance)inst;
-	ScreenGLView* view = (ScreenGLView*)vw;
-	VkSurfaceKHR* surface = (VkSurfaceKHR*)surf;
-    VkResult err;
-    VkMacOSSurfaceCreateInfoMVK sci;
-    PFN_vkCreateMacOSSurfaceMVK vkCreateMacOSSurfaceMVK;
-
-    vkCreateMacOSSurfaceMVK = (PFN_vkCreateMacOSSurfaceMVK)
-        vkGetInstanceProcAddr(instance, "vkCreateMacOSSurfaceMVK");
-    if (!vkCreateMacOSSurfaceMVK)
-    {
-  		 printf("Cocoa: Vulkan instance missing VK_MVK_macos_surface extension\n");
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-	
-    // HACK: Dynamically load Core Animation to avoid adding an extra
-    //       dependency for the majority who don't use MoltenVK
-    NSBundle* bundle = [NSBundle bundleWithPath:@"/System/Library/Frameworks/QuartzCore.framework"];
-    if (!bundle)
-    {
-        printf("Cocoa: Failed to find QuartzCore.framework\n");
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-
-    // NOTE: Create the layer here as makeBackingLayer should not return nil
-    view.vkLayer = [[bundle classNamed:@"CAMetalLayer"] layer];
-    if (!view.vkLayer)
-    {
-        printf("Cocoa: Failed to create layer for view\n");
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-    }
-
-    [view setWantsLayer:YES];
-
-    memset(&sci, 0, sizeof(sci));
-    sci.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-    sci.pView = view;
-
-    err = vkCreateMacOSSurfaceMVK(instance, &sci, NULL, surface);
-    if (err)
-    {
-        printf("Cocoa: Failed to create Vulkan surface: %d\n", err);
-    }
-
-    return err;
-}
 

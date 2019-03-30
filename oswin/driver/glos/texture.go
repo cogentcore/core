@@ -7,10 +7,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build darwin
-// +build !3d
+// +build 3d
 
-package macdriver
+package glos
 
 import (
 	"encoding/binary"
@@ -18,8 +17,8 @@ import (
 	"image/color"
 	"image/draw"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/goki/gi/oswin"
-	"golang.org/x/mobile/gl"
 )
 
 type textureImpl struct {

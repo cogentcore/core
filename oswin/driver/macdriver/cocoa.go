@@ -10,6 +10,7 @@
 // +build darwin
 // +build 386 amd64
 // +build !ios
+// +build !3d
 
 package macdriver
 
@@ -41,7 +42,6 @@ void doMinimizeWindow(uintptr_t id);
 void doCloseWindow(uintptr_t id);
 void getScreens();
 void doSetMainMenu(uintptr_t viewID);
-int doCreateWindowSurface	(uintptr_t inst, uintptr_t vw, uintptr_t surf);
 uintptr_t doGetMainMenu(uintptr_t viewID);
 uintptr_t doGetMainMenuLock(uintptr_t viewID);
 void doMainMenuUnlock(uintptr_t menuID);
@@ -84,7 +84,6 @@ import (
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/pi/filecat"
-	"github.com/vulkan-go/vulkan"
 	"golang.org/x/mobile/gl"
 )
 
@@ -425,19 +424,6 @@ func setScreen(scrIdx int, dpi, pixratio float32, widthPx, heightPx, widthMM, he
 		sc.Name = C.GoStringN(sname, snlen)
 	}
 	// todo: rest of the fields
-}
-
-// createWindowSurface creates a Vulkan surface for this window.
-func createWindowSurface(id uintptr) (surface vulkan.Surface, err error) {
-	if theGPU == nil || theGPU.Instance() == nil {
-		return surface, errors.New("vulkan: instance is nil")
-	}
-	var vulkanSurface C.VkSurfaceKHR
-	ret := C.doCreateWindowSurface(C.uintptr_t(uintptr(unsafe.Pointer(theGPU.Instance()))), C.uintptr_t(id), (C.uintptr_t)(uintptr(unsafe.Pointer(&vulkanSurface))))
-	if ret != C.VK_SUCCESS {
-		return surface, errors.New("vulkan: error creating window surface")
-	}
-	return vulkan.SurfaceFromPointer(uintptr(unsafe.Pointer(&vulkanSurface))), nil
 }
 
 /////////////////////////////////////////////////////
