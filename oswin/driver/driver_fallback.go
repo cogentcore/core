@@ -12,6 +12,7 @@
 // +build !windows
 // +build !dragonfly
 // +build !openbsd
+// +build !3d
 
 package driver
 

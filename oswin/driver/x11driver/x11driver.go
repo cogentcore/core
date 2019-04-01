@@ -8,6 +8,7 @@
 // license that can be found in the LICENSE file.
 
 // +build linux,!android dragonfly openbsd
+// +build !3d
 
 // Package x11driver provides the X11 driver for oswin
 package x11driver

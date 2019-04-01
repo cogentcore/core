@@ -18,7 +18,7 @@ import (
 	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.0/glfw"
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
@@ -37,14 +37,9 @@ type windowImpl struct {
 	drawDone    chan struct{}
 	winClose    chan struct{}
 
-	// glctxMu is a mutex that enforces the atomicity of methods like
-	// Texture.Upload or Window.Draw that are conceptually one operation
-	// but are implemented by multiple OpenGL calls. OpenGL is a stateful
-	// API, so interleaving OpenGL calls from separate higher-level
-	// operations causes inconsistencies.
+	// glctxMu is mutex for all OpenGL calls, locked in GPU.Context
 	glctxMu sync.Mutex
-	glctx   gl.Context
-	worker  gl.Worker
+
 	// backBufferBound is whether the default Framebuffer, with ID 0, also
 	// known as the back buffer or the window's Framebuffer, is bound and its
 	// viewport is known to equal the window size. It can become false when we
@@ -93,18 +88,6 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	}
 	win.SetPos(opts.Pos.X, opts.Pos.Y)
 	return win, err
-}
-
-// for sending any kind of event
-func sendEvent(id uintptr, ev oswin.Event) {
-	theApp.mu.Lock()
-	w := theApp.windows[id]
-	theApp.mu.Unlock()
-	if w == nil {
-		return
-	}
-	ev.Init()
-	w.Send(ev)
 }
 
 // for sending window.Event's
@@ -466,6 +449,10 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 	return w.mainMenu.(*mainMenuImpl)
 }
 
+func (w *windowImpl) show() {
+	w.glw.Show()
+}
+
 func (w *windowImpl) Raise() {
 	w.glw.Restore()
 }
@@ -533,10 +520,20 @@ func (w *windowImpl) Close() {
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
+func (w *windowImpl) getScreen() {
+	w.mu.Lock()
+	mon := w.glw.GetMonitor()
+	sc := theApp.ScreenByName(mon.GetName())
+	w.Scrn = sc
+	w.PhysDPI = sc.PhysicalDPI
+	w.mu.Unlock()
+}
+
 func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 	w.mu.Lock()
 	w.Pos = image.Point{x, y}
 	w.mu.Unlock()
+	w.getScreen()
 	w.sendWindowEvent(window.Move)
 }
 
@@ -544,6 +541,7 @@ func (w *windowImpl) winResized(gw *glfw.Window, w, h int) {
 	w.mu.Lock()
 	w.Sz = image.Point{w, h}
 	w.mu.Unlock()
+	w.getScreen()
 	w.sendWindowEvent(window.Resize)
 }
 
@@ -576,6 +574,7 @@ func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
 		w.sendWindowEvent(window.Minimize)
 	} else {
 		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+		w.getScreen()
 		w.sendWindowEvent(window.Minimize)
 	}
 }

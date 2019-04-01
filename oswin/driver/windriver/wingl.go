@@ -8,6 +8,7 @@
 // license that can be found in the LICENSE file.
 
 // +build windows
+// +build !3d
 
 // this is all windows-specific code from old gldriver -- integrate into windriver
 // package as gl option

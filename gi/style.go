@@ -31,7 +31,7 @@ import (
 // Style has all the CSS-based style elements -- used for widget-type objects
 type Style struct {
 	Display       bool          `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
-	Visible       bool          `xml:"visible" desc:"todo big enum of how to display item -- controls layout etc"`
+	Visible       bool          `xml:"visible" desc:"is the item visible or not"`
 	Inactive      bool          `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
 	Layout        LayoutStyle   `desc:"layout styles -- do not prefix with any xml"`
 	Border        BorderStyle   `xml:"border" desc:"border around the box element -- todo: can have separate ones for different sides"`

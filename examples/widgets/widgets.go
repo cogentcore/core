@@ -52,6 +52,9 @@ func mainrun() {
 		"button": ki.Props{
 			"background-color": gi.Prefs.Colors.Control, // gi.Color{255, 240, 240, 255},
 		},
+		// "#label": ki.Props{ // affects all button labels
+		// 	"font-size": "x-large",
+		// },
 		"#combo": ki.Props{
 			"background-color": gi.Color{240, 255, 240, 255},
 		},
@@ -87,6 +90,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	title.SetProp("vertical-align", gi.AlignCenter)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
+	// title.SetProp("font-size", "24pt")
 	// title.SetProp("letter-spacing", 2)
 	title.SetProp("line-height", 1.5)
 	title.SetStretchMaxWidth()
@@ -131,6 +135,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	})
 
 	button2 := gi.AddNewButton(brow, "button2")
+	// button2.SetProp("font-size", "x-large")
 	button2.SetText("Open GoGiEditor")
 	// button2.SetProp("background-color", "#EDF")
 	button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"

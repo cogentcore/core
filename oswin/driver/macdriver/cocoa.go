@@ -1097,14 +1097,14 @@ func cocoaKeyCode(vkcode uint16) key.Codes {
 	case C.kVK_Option:
 		return key.CodeLeftAlt
 	case C.kVK_Command:
-		return key.CodeLeftGUI
+		return key.CodeLeftMeta
 	case C.kVK_RightControl:
 		return key.CodeRightControl
 	case C.kVK_RightShift:
 		return key.CodeRightShift
 	case C.kVK_RightOption:
 		return key.CodeRightAlt
-	// TODO key.CodeRightGUI
+	// TODO key.CodeRightMeta
 	default:
 		return key.CodeUnknown
 	}

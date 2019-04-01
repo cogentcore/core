@@ -689,6 +689,7 @@ var ButtonProps = ki.Props{
 	"#label": ki.Props{
 		"margin":  units.NewValue(0, units.Px),
 		"padding": units.NewValue(0, units.Px),
+		// "font-size": units.NewValue(24, units.Pt),
 	},
 	"#indicator": ki.Props{
 		"width":          units.NewValue(1.5, units.Ex),

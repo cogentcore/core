@@ -8,6 +8,7 @@
 // license that can be found in the LICENSE file.
 
 // +build windows
+// +build !3d
 
 package windriver
 
@@ -155,9 +156,9 @@ func convVirtualKeyCode(vKey uint32) key.Codes {
 	case 0x5A:
 		return key.CodeZ
 	case 0x5B: // VK_LWIN
-		return key.CodeLeftGUI
+		return key.CodeLeftMeta
 	case 0x5C: // VK_RWIN
-		return key.CodeRightGUI
+		return key.CodeRightMeta
 	case 0x5D: // VK_APPS
 	case 0x5F: // VK_SLEEP
 	case 0x60: // VK_NUMPAD0

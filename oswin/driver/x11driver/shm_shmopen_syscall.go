@@ -4,6 +4,7 @@
 
 // +build linux dragonfly
 // +build amd64 arm arm64 mips64 mips64le
+// +build !3d
 
 package x11driver
 

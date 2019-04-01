@@ -57,7 +57,7 @@ type FontStyle struct {
 	Color    Color           `xml:"color" inherit:"true" desc:"prop: color = text color -- also defines the currentColor variable value"`
 	BgColor  ColorSpec       `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 	Opacity  float32         `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`
-	Size     units.Value     `xml:"font-size" desc:"prop: font-size = size of font to render -- convert to points when getting font to use"`
+	Size     units.Value     `xml:"font-size" inherit:"true" desc:"prop: font-size = size of font to render -- convert to points when getting font to use"`
 	Family   string          `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
 	Style    FontStyles      `xml:"font-style" inherit:"true" desc:"prop: font-style = style -- normal, italic, etc"`
 	Weight   FontWeights     `xml:"font-weight" inherit:"true" desc:"prop: font-weight = weight: normal, bold, etc"`
@@ -108,6 +108,9 @@ func (fs *FontStyle) InheritFields(par *FontStyle) {
 	fs.Color = par.Color
 	fs.Family = par.Family
 	fs.Style = par.Style
+	if par.Size.Val != 0 {
+		fs.Size = par.Size
+	}
 	fs.Weight = par.Weight
 	fs.Stretch = par.Stretch
 	fs.Variant = par.Variant

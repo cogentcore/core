@@ -194,6 +194,15 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 	return nil
 }
 
+func (app *appImpl) ScreenByName(name string) *oswin.Screen {
+	for _, sc := range app.screens {
+		if sc.Name == name {
+			return sc
+		}
+	}
+	return nil
+}
+
 func (app *appImpl) NWindows() int {
 	app.mu.Lock()
 	defer app.mu.Unlock()

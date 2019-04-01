@@ -9,6 +9,7 @@
 
 // +build openbsd
 // +build i386 amd64
+// +build !3d
 
 package x11driver
 

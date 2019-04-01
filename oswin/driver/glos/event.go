@@ -10,37 +10,40 @@ import (
 	"image"
 	"time"
 
-	"github.com/go-gl/glfw/v3.0/glfw"
+	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 )
 
 var lastMouseClickTime time.Time
 var lastMousePos image.Point
-var lastMouseButton glfw.MouseButton
+var lastMouseButton mouse.Buttons
 var lastMods int32
+var lastKey key.Codes
 
 func glfwMods(mod glfw.ModifierKey) int32 {
 	m := int32(0)
-	if mod & glfw.ModShift {
+	if mod&glfw.ModShift == 0 {
 		m |= 1 << uint32(key.Shift)
 	}
-	if mod & glfw.ModControl {
+	if mod&glfw.ModControl == 0 {
 		m |= 1 << uint32(key.Control)
 	}
-	if mod & glfw.ModAlt {
+	if mod&glfw.ModAlt == 0 {
 		m |= 1 << uint32(key.Alt)
 	}
-	if mod & glfw.ModSuper {
-		m |= 1 << uint32(key.Super)
+	if mod&glfw.ModSuper == 0 {
+		m |= 1 << uint32(key.Meta)
 	}
 	return m
 }
 
 // physical key
-func (w *windowImpl) keyEvent(gw *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
+func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
 	em := glfwMods(mod)
 	lastMods = em
-	ec := glfwKeyCode(key)
+	ec := glfwKeyCode(ky)
+	lastKey = ec
 	act := key.Press
 	if action == glfw.Release {
 		act = key.Release
@@ -60,11 +63,16 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, key glfw.Key, scancode int, actio
 
 // char input
 func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey) {
+	em := glfwMods(mods)
+	act := key.Press
 	che := &key.ChordEvent{
-		Rune: char,
+		Event: key.Event{
+			Rune:      char,
+			Modifiers: em,
+			Action:    act,
+		},
 	}
-	sendEvent(id, che)
-
+	w.Send(che)
 }
 
 func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
@@ -92,6 +100,7 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 	if mod&glfw.ModControl != 0 {
 		but = mouse.Right
 	}
+	lastMouseButton = but
 	event := &mouse.Event{
 		Where:     lastMousePos,
 		Button:    but,
@@ -126,9 +135,9 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	event := &mouse.MoveEvent{
 		Event: mouse.Event{
 			Where:     where,
-			Button:    cmButton,
+			Button:    lastMouseButton,
 			Action:    mouse.Move,
-			Modifiers: mods,
+			Modifiers: lastMods,
 		},
 		From: from,
 	}
@@ -143,7 +152,7 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 }
 
 func glfwKeyCode(kcode glfw.Key) key.Codes {
-	switch vkcode {
+	switch kcode {
 	case glfw.KeyA:
 		return key.CodeA
 	case glfw.KeyB:
@@ -216,7 +225,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 		return key.Code9
 	case glfw.Key0:
 		return key.Code0
-	case glfw.KeyEnnter:
+	case glfw.KeyEnter:
 		return key.CodeReturnEnter
 	case glfw.KeyEscape:
 		return key.CodeEscape
@@ -238,7 +247,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 		return key.CodeBackslash
 	case glfw.KeySemicolon:
 		return key.CodeSemicolon
-	case glfw.KeyQuote:
+	case glfw.KeyApostrophe:
 		return key.CodeApostrophe
 	case glfw.KeyGraveAccent:
 		return key.CodeGraveAccent
@@ -282,29 +291,29 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 		return key.CodeHome
 	case glfw.KeyPageUp:
 		return key.CodePageUp
-	case glfw.KeyForwardDelete:
+	case glfw.KeyDelete:
 		return key.CodeDeleteForward
 	case glfw.KeyEnd:
 		return key.CodeEnd
 	case glfw.KeyPageDown:
 		return key.CodePageDown
-	case glfw.KeyRightArrow:
+	case glfw.KeyRight:
 		return key.CodeRightArrow
-	case glfw.KeyLeftArrow:
+	case glfw.KeyLeft:
 		return key.CodeLeftArrow
-	case glfw.KeyDownArrow:
+	case glfw.KeyDown:
 		return key.CodeDownArrow
-	case glfw.KeyUpArrow:
+	case glfw.KeyUp:
 		return key.CodeUpArrow
-	case glfw.KeyKPClear:
+	case glfw.KeyNumLock:
 		return key.CodeKeypadNumLock
 	case glfw.KeyKPDivide:
 		return key.CodeKeypadSlash
 	case glfw.KeyKPMultiply:
 		return key.CodeKeypadAsterisk
-	case glfw.KeyKPMinus:
+	case glfw.KeyKPSubtract:
 		return key.CodeKeypadHyphenMinus
-	case glfw.KeyKPPlus:
+	case glfw.KeyKPAdd:
 		return key.CodeKeypadPlusSign
 	case glfw.KeyKPEnter:
 		return key.CodeKeypadEnter
@@ -330,7 +339,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 		return key.CodeKeypad0
 	case glfw.KeyKPDecimal:
 		return key.CodeKeypadFullStop
-	case glfw.KeyKPEquals:
+	case glfw.KeyKPEqual:
 		return key.CodeKeypadEqualSign
 	case glfw.KeyF13:
 		return key.CodeF13
@@ -349,8 +358,8 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 	case glfw.KeyF20:
 		return key.CodeF20
 	// 116: Keyboard Execute
-	case glfw.KeyHelp:
-		return key.CodeHelp
+	// case glfw.KeyHelp:
+	// 	return key.CodeHelp
 	// 118: Keyboard Menu
 	// 119: Keyboard Select
 	// 120: Keyboard Stop
@@ -360,32 +369,35 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 	// 124: Keyboard Copy
 	// 125: Keyboard Paste
 	// 126: Keyboard Find
-	case glfw.KeyMute:
-		return key.CodeMute
-	case glfw.KeyVolumeUp:
-		return key.CodeVolumeUp
-	case glfw.KeyVolumeDown:
-		return key.CodeVolumeDown
+	// case glfw.KeyMute:
+	// 	return key.CodeMute
+	// case glfw.KeyVolumeUp:
+	// 	return key.CodeVolumeUp
+	// case glfw.KeyVolumeDown:
+	// 	return key.CodeVolumeDown
 	// 130: Keyboard Locking Caps Lock
 	// 131: Keyboard Locking Num Lock
 	// 132: Keyboard Locking Scroll Lock
 	// 133: Keyboard Comma
 	// 134: Keyboard Equal Sign
-	// ...: Bunch of stuff
-	case glfw.KeyControl:
+	case glfw.KeyLeftControl:
 		return key.CodeLeftControl
-	case glfw.KeyShift:
+	case glfw.KeyLeftShift:
 		return key.CodeLeftShift
-	case glfw.KeyOption:
+	case glfw.KeyLeftAlt:
 		return key.CodeLeftAlt
-	case glfw.KeyCommand:
-		return key.CodeLeftGUI
+	case glfw.KeyLeftSuper:
+		return key.CodeLeftSuper
 	case glfw.KeyRightControl:
 		return key.CodeRightControl
 	case glfw.KeyRightShift:
 		return key.CodeRightShift
 	case glfw.KeyRightOption:
 		return key.CodeRightAlt
+	case glfw.KeyRightSuper:
+		return key.CodeRightSuper
+	case glfw.KeyLast:
+		return lastKey
 	default:
 		return key.CodeUnknown
 	}

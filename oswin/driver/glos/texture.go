@@ -12,7 +12,6 @@
 package glos
 
 import (
-	"encoding/binary"
 	"image"
 	"image/color"
 	"image/draw"
@@ -23,8 +22,8 @@ import (
 
 type textureImpl struct {
 	w    *windowImpl
-	id   gl.Texture
-	fb   gl.Framebuffer
+	id   uint32
+	fb   uint32
 	size image.Point
 }
 
@@ -120,12 +119,12 @@ func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	t.w.backBufferBound = false
 }
 
-var quadCoords = f32Bytes(binary.LittleEndian,
+var quadCoords = []float32{
 	0, 0, // top left
 	1, 0, // top right
 	0, 1, // bottom left
 	1, 1, // bottom right
-)
+}
 
 const textureVertexSrc = `#version 100
 uniform mat3 mvp;

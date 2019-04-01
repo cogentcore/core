@@ -7,10 +7,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// +build windows
+// +build !3d
+
 package driver
 
 import (
-        "github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/windriver"
 )
 

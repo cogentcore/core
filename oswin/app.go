@@ -43,6 +43,10 @@ type App interface {
 	// valid screen number.
 	Screen(scrN int) *Screen
 
+	// ScreenByName returns screen for given screen name, or nil if not a
+	// valid screen name.
+	ScreenByName(name string) *Screen
+
 	// NWindows returns the number of windows open for this app.
 	NWindows() int
 

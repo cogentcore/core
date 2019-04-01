@@ -10,6 +10,7 @@
 // +build !linux
 // +build !dragonfly
 // +build !openbsd
+// +build !3d
 
 package x11driver
 

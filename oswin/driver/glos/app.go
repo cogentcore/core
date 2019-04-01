@@ -47,26 +47,27 @@ var theApp = &appImpl{
 
 type appImpl struct {
 	texture struct {
-		program gl.Program
-		pos     gl.Attrib
-		mvp     gl.Uniform
-		uvp     gl.Uniform
-		inUV    gl.Attrib
-		sample  gl.Uniform
-		quad    gl.Buffer
+		init    bool
+		program uint32
+		pos     int32
+		mvp     int32
+		uvp     int32
+		inUV    int32
+		sample  int32
+		quad    uint32
 	}
 	fill struct {
-		program gl.Program
-		pos     gl.Attrib
-		mvp     gl.Uniform
-		color   gl.Uniform
-		quad    gl.Buffer
+		program uint32
+		pos     uint
+		mvp     int32
+		color   int32
+		quad    uint32
 	}
 
 	mu            sync.Mutex
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
-	windows       map[uintptr]*windowImpl
+	windows       map[*glfw.Window]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
 	ctxtwin       *windowImpl
@@ -81,11 +82,7 @@ type appImpl struct {
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(oswin.App)) {
-	// Initialize Glow -- todo: not sure this is necessary
-	if err := gl.Init(); err != nil {
-		panic(err)
-	}
-	app.getScreens()
+	theApp.getScreens()
 	oswin.TheApp = theApp
 	go func() {
 		f(theApp)
@@ -126,7 +123,7 @@ func (app *appImpl) mainLoop() {
 		case <-app.mainDone:
 			glfw.Terminate()
 			return
-		case f := <-mainQueue:
+		case f := <-app.mainQueue:
 			f.f()
 			if f.done != nil {
 				f.done <- true
@@ -159,18 +156,30 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	w := &windowImpl{
 		app:         app,
 		glw:         glw,
-		Titl:        opts.GetTitle(),
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
 		publishDone: make(chan oswin.PublishResult),
 		drawDone:    make(chan struct{}),
+		WindowBase: oswin.WindowBase{
+			Titl: opts.GetTitle(),
+			Flag: opts.Flags,
+		},
 	}
-	initWindow(w)
 
 	app.mu.Lock()
-	app.windows[id] = w
+	app.windows[glw] = w
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
+
+	theGPU.UseContext(w)
+
+	// Initialize Glow for current context
+	if err := gl.Init(); err != nil {
+		panic(err)
+	}
+	if !app.texture.init {
+		app.initGLPrograms()
+	}
 
 	glw.SetPosCallback(w.moved)
 	glw.SetSizeCallback(w.winResized)
@@ -183,39 +192,33 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetKeyCallback(w.keyEvent)
 	glw.SetCharModsCallback(w.charEvent)
 	glw.SetMouseButtonCallback(w.mouseButtonEvent)
-	glw.SetScrollCallback(w.scrollEvennt)
+	glw.SetScrollCallback(w.scrollEvent)
 	glw.SetCursorPosCallback(w.cursorPosEvent)
 	glw.SetCursorEnterCallback(w.cursorEnterEvent)
 	glw.SetDropCallback(w.dropEvent)
 
-	glfw.DetachCurrentContext()
+	w.getScreen()
+	theGPU.ClearContext()
 
-	// todo: could try to find alternative screen number here..
-	sc := app.Screen(0)
-	w.PhysDPI = sc.PhysicalDPI
-	w.LogDPI = sc.LogicalDPI
-	w.Scrn = sc
-	w.Flag = opts.Flags
-
-	showWindow(w)
+	w.show()
 
 	return w, nil
 }
 
-func (app *appImpl) DeleteWin(id uintptr) {
+func (app *appImpl) DeleteWin(glw *glfw.Window) {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	_, ok := app.windows[id]
+	_, ok := app.windows[glw]
 	if !ok {
 		return
 	}
 	for i, w := range app.winlist {
-		if w.id == id {
+		if w.glw == glw {
 			app.winlist = append(app.winlist[:i], app.winlist[i+1:]...)
 			break
 		}
 	}
-	delete(app.windows, id)
+	delete(app.windows, glw)
 }
 
 func (app *appImpl) NScreens() int {
@@ -226,6 +229,15 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 	sz := len(app.screens)
 	if scrN < sz {
 		return app.screens[scrN]
+	}
+	return nil
+}
+
+func (app *appImpl) ScreenByName(name string) *oswin.Screen {
+	for _, sc := range app.screens {
+		if sc.Name == name {
+			return sc
+		}
 	}
 	return nil
 }
@@ -284,45 +296,60 @@ func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error
 	}, nil
 }
 
+func (app *appImpl) initGLPrograms() error {
+	if app.texture.init {
+		return nil
+	}
+	p, err := theGPU.NewProgram(textureVertexSrc, textureFragmentSrc)
+	if err != nil {
+		return err
+	}
+	app.texture.program = p
+	app.texture.pos = gl.GetAttribLocation(p, gl.Str("pos\x00"))
+	app.texture.mvp = gl.GetUniformLocation(p, gl.Str("mvp\x00"))
+	app.texture.uvp = gl.GetUniformLocation(p, gl.Str("uvp\x00"))
+	app.texture.inUV = gl.GetAttribLocation(p, gl.Str("inUV\x00"))
+	app.texture.sample = gl.GetUniformLocation(p, gl.Str("sample\x00"))
+	gl.GenBuffers(1, &app.texture.quad)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
+	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)
+	app.texture.init = true
+	return nil
+}
+
 func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
 	w := win.(*windowImpl)
 
-	w.glctxMu.Lock()
-	defer w.glctxMu.Unlock()
-	glctx := w.glctx
-	if glctx == nil {
-		return nil, fmt.Errorf("macdriver: no GL context available")
-	}
+	theGPU.UseContext(w)
+	defer theGPU.ClearContext(w)
 
-	if !glctx.IsProgram(app.texture.program) {
-		p, err := compileProgram(glctx, textureVertexSrc, textureFragmentSrc)
-		if err != nil {
-			return nil, err
-		}
-		app.texture.program = p
-		app.texture.pos = glctx.GetAttribLocation(p, "pos")
-		app.texture.mvp = glctx.GetUniformLocation(p, "mvp")
-		app.texture.uvp = glctx.GetUniformLocation(p, "uvp")
-		app.texture.inUV = glctx.GetAttribLocation(p, "inUV")
-		app.texture.sample = glctx.GetUniformLocation(p, "sample")
-		app.texture.quad = glctx.CreateBuffer()
-
-		glctx.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
-		glctx.BufferData(gl.ARRAY_BUFFER, quadCoords, gl.STATIC_DRAW)
-	}
+	var tex uint32
+	gl.GenTextures(1, &tex)
 
 	t := &textureImpl{
 		w:    w,
-		id:   glctx.CreateTexture(),
+		id:   tex,
 		size: size,
 	}
 
-	glctx.BindTexture(gl.TEXTURE_2D, t.id)
-	glctx.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.X, size.Y, gl.RGBA, gl.UNSIGNED_BYTE, nil)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	glctx.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	// gl.ActiveTexture(gl.TEXTURE0)
+
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	gl.TexImage2D(
+		gl.TEXTURE_2D,
+		0,
+		gl.RGBA,
+		int32(size.X),
+		int32(size.Y),
+		0,
+		gl.RGBA,
+		gl.UNSIGNED_BYTE,
+		nil)
 
 	w.AddTexture(t)
 
@@ -449,5 +476,5 @@ func (app *appImpl) QuitClean() {
 
 func (app *appImpl) Quit() {
 	app.QuitClean()
-	callStopDriver()
+	app.stopMain()
 }

@@ -194,7 +194,7 @@ func (ch Chord) OSShortcut() Chord {
 
 // CodeIsModifier returns true if given code is a modifier key
 func CodeIsModifier(c Codes) bool {
-	if c >= CodeLeftControl && c <= CodeRightGUI {
+	if c >= CodeLeftControl && c <= CodeRightMeta {
 		return true
 	}
 	return false
@@ -390,11 +390,11 @@ const (
 	CodeLeftControl  Codes = 224
 	CodeLeftShift    Codes = 225
 	CodeLeftAlt      Codes = 226
-	CodeLeftGUI      Codes = 227 // Command on mac, ? on windows, ? on linux
+	CodeLeftMeta     Codes = 227 // Command on mac, win key on windows, ? on linux
 	CodeRightControl Codes = 228
 	CodeRightShift   Codes = 229
 	CodeRightAlt     Codes = 230
-	CodeRightGUI     Codes = 231
+	CodeRightMeta    Codes = 231
 
 	// The following codes are not part of the standard USB HID Usage IDs for
 	// keyboards. See http://www.usb.org/developers/hidpage/Hut1_12v2.pdf

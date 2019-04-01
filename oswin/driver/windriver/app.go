@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // +build windows
+// +build !3d
 
 package windriver
 
@@ -227,6 +228,15 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 	sz := len(app.screens)
 	if scrN < sz {
 		return app.screens[scrN]
+	}
+	return nil
+}
+
+func (app *appImpl) ScreenByName(name string) *oswin.Screen {
+	for _, sc := range app.screens {
+		if sc.Name == name {
+			return sc
+		}
 	}
 	return nil
 }

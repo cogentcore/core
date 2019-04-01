@@ -8,6 +8,7 @@
 // license that can be found in the LICENSE file.
 
 // +build linux,!android dragonfly openbsd
+// +build !3d
 
 package x11driver
 
@@ -176,8 +177,8 @@ var nonUnicodeKeycodes = map[rune]key.Codes{
 	xkControlR: key.CodeRightControl,
 	xkAltL:     key.CodeLeftAlt,
 	xkAltR:     key.CodeRightAlt,
-	xkSuperL:   key.CodeLeftGUI,
-	xkSuperR:   key.CodeRightGUI,
+	xkSuperL:   key.CodeLeftMeta,
+	xkSuperR:   key.CodeRightMeta,
 
 	xkDelete: key.CodeDeleteForward,
 

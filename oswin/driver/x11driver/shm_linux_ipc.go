@@ -9,6 +9,7 @@
 
 // +build linux
 // +build 386 ppc64 ppc64le s390x
+// +build !3d
 
 package x11driver
 
