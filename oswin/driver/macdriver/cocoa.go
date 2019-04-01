@@ -16,7 +16,7 @@ package macdriver
 
 /*
 #cgo CFLAGS: -x objective-c
-#cgo LDFLAGS: -framework Cocoa -framework OpenGL -framework IOKit -framework vulkan
+#cgo LDFLAGS: -framework Cocoa -framework OpenGL -framework IOKit
 #include <OpenGL/gl3.h>
 #import <Carbon/Carbon.h> // for HIToolbox/Events.h
 #import <Cocoa/Cocoa.h>
@@ -24,8 +24,6 @@ package macdriver
 #include <pthread.h>
 #include <stdint.h>
 #include <stdlib.h>
-#define VK_USE_PLATFORM_MACOS_MVK 1
-#include <vulkan/vulkan.h>
 
 void startDriver();
 void stopDriver();

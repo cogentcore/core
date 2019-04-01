@@ -58,7 +58,7 @@ type appImpl struct {
 	}
 	fill struct {
 		program uint32
-		pos     uint
+		pos     int32
 		mvp     int32
 		color   int32
 		quad    uint32
@@ -198,7 +198,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetDropCallback(w.dropEvent)
 
 	w.getScreen()
-	theGPU.ClearContext()
+	theGPU.ClearContext(w)
 
 	w.show()
 
@@ -314,6 +314,20 @@ func (app *appImpl) initGLPrograms() error {
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
 	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)
+
+	p, err = theGPU.NewProgram(fillVertexSrc, fillFragmentSrc)
+	if err != nil {
+		return err
+	}
+	app.fill.program = p
+	app.fill.pos = gl.GetAttribLocation(p, gl.Str("pos\x00"))
+	app.fill.mvp = gl.GetUniformLocation(p, gl.Str("mvp\x00"))
+	app.fill.color = gl.GetUniformLocation(p, gl.Str("color\x00"))
+	gl.CreateBuffers(1, &app.fill.quad)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
+	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)
+
 	app.texture.init = true
 	return nil
 }

@@ -125,12 +125,12 @@ func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle)
 	t.Release()
 }
 
-func useOp(glctx gl.Context, op draw.Op) {
+func useOp(op draw.Op) {
 	if op == draw.Over {
-		glctx.Enable(gl.BLEND)
-		glctx.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+		gl.Enable(gl.BLEND)
+		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	} else {
-		glctx.Disable(gl.BLEND)
+		gl.Disable(gl.BLEND)
 	}
 }
 
@@ -140,8 +140,8 @@ func (w *windowImpl) bindBackBuffer() {
 	w.mu.Unlock()
 
 	w.backBufferBound = true
-	w.glctx.BindFramebuffer(gl.FRAMEBUFFER, gl.Framebuffer{Value: 0})
-	w.glctx.Viewport(0, 0, size.X, size.Y)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	gl.Viewport(0, 0, int32(size.X), int32(size.Y))
 }
 
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
@@ -152,32 +152,17 @@ func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
 		w.bindBackBuffer()
 	}
 
-	doFill(w.app, w.glctx, mvp, src, op)
+	doFill(w.app, mvp, src, op)
 }
 
-func doFill(app *appImpl, glctx gl.Context, mvp f64.Aff3, src color.Color, op draw.Op) {
-	useOp(glctx, op)
-	if !glctx.IsProgram(app.fill.program) {
-		p, err := compileProgram(glctx, fillVertexSrc, fillFragmentSrc)
-		if err != nil {
-			// TODO: initialize this somewhere else we can better handle the error.
-			panic(err.Error())
-		}
-		app.fill.program = p
-		app.fill.pos = glctx.GetAttribLocation(p, "pos")
-		app.fill.mvp = glctx.GetUniformLocation(p, "mvp")
-		app.fill.color = glctx.GetUniformLocation(p, "color")
-		app.fill.quad = glctx.CreateBuffer()
+func doFill(app *appImpl, mvp f64.Aff3, src color.Color, op draw.Op) {
+	useOp(op)
+	gl.UseProgram(app.fill.program)
 
-		glctx.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
-		glctx.BufferData(gl.ARRAY_BUFFER, quadCoords, gl.STATIC_DRAW)
-	}
-	glctx.UseProgram(app.fill.program)
-
-	writeAff3(glctx, app.fill.mvp, mvp)
+	writeAff3(app.fill.mvp, mvp)
 
 	r, g, b, a := src.RGBA()
-	glctx.Uniform4f(
+	gl.Uniform4f(
 		app.fill.color,
 		float32(r)/65535,
 		float32(g)/65535,
@@ -185,13 +170,13 @@ func doFill(app *appImpl, glctx gl.Context, mvp f64.Aff3, src color.Color, op dr
 		float32(a)/65535,
 	)
 
-	glctx.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
-	glctx.EnableVertexAttribArray(app.fill.pos)
-	glctx.VertexAttribPointer(app.fill.pos, 2, gl.FLOAT, false, 0, 0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
+	gl.EnableVertexAttribArray(uint32(app.fill.pos))
+	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 0, 0)
 
-	glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-	glctx.DisableVertexAttribArray(app.fill.pos)
+	gl.DisableVertexAttribArray(uint32(app.fill.pos))
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
@@ -228,15 +213,15 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 		return
 	}
 
-	w.glctxMu.Lock()
-	defer w.glctxMu.Unlock()
+	theGPU.UseContext(w)
+	defer theGPU.ClearContext(w)
 
 	if !w.backBufferBound {
 		w.bindBackBuffer()
 	}
 
-	useOp(w.glctx, op)
-	w.glctx.UseProgram(w.app.texture.program)
+	useOp(op)
+	gl.UseProgram(w.app.texture.program)
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float64(sr.Min.X)
@@ -244,7 +229,7 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	srcR := float64(sr.Max.X)
 	srcB := float64(sr.Max.Y)
 	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
-	writeAff3(w.glctx, w.app.texture.mvp, w.mvp(
+	writeAff3(w.app.texture.mvp, w.mvp(
 		src2dst[0]*srcL+src2dst[1]*srcT+src2dst[2],
 		src2dst[3]*srcL+src2dst[4]*srcT+src2dst[5],
 		src2dst[0]*srcR+src2dst[1]*srcT+src2dst[2],
@@ -283,27 +268,27 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	//	a10 +   0 + a12 = qy = py
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
-	writeAff3(w.glctx, w.app.texture.uvp, f64.Aff3{
+	writeAff3(w.app.texture.uvp, f64.Aff3{
 		qx - px, 0, px,
 		0, sy - py, py,
 	})
 
-	w.glctx.ActiveTexture(gl.TEXTURE0)
-	w.glctx.BindTexture(gl.TEXTURE_2D, t.id)
-	w.glctx.Uniform1i(w.app.texture.sample, 0)
+	gl.ActiveTexture(gl.TEXTURE0)
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
+	gl.Uniform1i(w.app.texture.sample, 0)
 
-	w.glctx.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
-	w.glctx.EnableVertexAttribArray(w.app.texture.pos)
-	w.glctx.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, 0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
+	gl.EnableVertexAttribArray(w.app.texture.pos)
+	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, 0)
 
-	w.glctx.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
-	w.glctx.EnableVertexAttribArray(w.app.texture.inUV)
-	w.glctx.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, 0)
+	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
+	gl.EnableVertexAttribArray(w.app.texture.inUV)
+	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, 0)
 
-	w.glctx.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
-	w.glctx.DisableVertexAttribArray(w.app.texture.pos)
-	w.glctx.DisableVertexAttribArray(w.app.texture.inUV)
+	gl.DisableVertexAttribArray(w.app.texture.pos)
+	gl.DisableVertexAttribArray(w.app.texture.inUV)
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
@@ -364,7 +349,7 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	// This enforces that the final receive (for this paint cycle) on
 	// gl.WorkAvailable happens before the send on publish.
 	w.glctxMu.Lock()
-	w.glctx.Flush()
+	gl.Flush()
 	w.glctxMu.Unlock()
 
 	w.publish <- struct{}{}
@@ -537,15 +522,15 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 	w.sendWindowEvent(window.Move)
 }
 
-func (w *windowImpl) winResized(gw *glfw.Window, w, h int) {
+func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
 	w.mu.Lock()
-	w.Sz = image.Point{w, h}
+	w.Sz = image.Point{width, height}
 	w.mu.Unlock()
 	w.getScreen()
 	w.sendWindowEvent(window.Resize)
 }
 
-func (w *windowImpl) fbResized(gw *glfw.Window, w, h int) {
+func (w *windowImpl) fbResized(gw *glfw.Window, width, height int) {
 }
 
 func (w *windowImpl) closeReq(gw *glfw.Window) {

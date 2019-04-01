@@ -12,6 +12,23 @@
 
 package glos
 
+/*
+#cgo CFLAGS: -x objective-c
+#cgo LDFLAGS: -framework Cocoa
+#import <Cocoa/Cocoa.h>
+bool clipIsEmpty();
+void clipReadText();
+void pasteWriteAddText(char* data, int dlen);
+void clipWrite();
+void pushCursor(int);
+void popCursor();
+void setCursor(int);
+void hideCursor();
+void showCursor();
+void clipClear();
+*/
+import "C"
+
 import (
 	"sync"
 	"unsafe"

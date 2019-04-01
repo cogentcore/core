@@ -36,12 +36,12 @@ func (t *textureImpl) Release() {
 
 	t.w.DeleteTexture(t)
 
-	if t.fb.Value != 0 {
-		t.w.glctx.DeleteFramebuffer(t.fb)
-		t.fb = gl.Framebuffer{}
+	if t.fb != 0 {
+		gl.DeleteFramebuffer(t.fb)
+		t.fb = 0
 	}
-	t.w.glctx.DeleteTexture(t.id)
-	t.id = gl.Texture{}
+	gl.DeleteTexture(t.id)
+	t.id = 0
 }
 
 func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
@@ -68,17 +68,17 @@ func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle
 	t.w.glctxMu.Lock()
 	defer t.w.glctxMu.Unlock()
 
-	t.w.glctx.BindTexture(gl.TEXTURE_2D, t.id)
+	gl.BindTexture(gl.TEXTURE_2D, t.id)
 
 	width := dr.Dx()
 	if width*4 == buf.rgba.Stride {
-		t.w.glctx.TexSubImage2D(gl.TEXTURE_2D, 0, dr.Min.X, dr.Min.Y, width, dr.Dy(), gl.RGBA, gl.UNSIGNED_BYTE, pix)
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, pix)
 		return
 	}
 	// TODO: can we use GL_UNPACK_ROW_LENGTH with glPixelStorei for stride in
 	// ES 3.0, instead of uploading the pixels row-by-row?
 	for y, p := dr.Min.Y, 0; y < dr.Max.Y; y++ {
-		t.w.glctx.TexSubImage2D(gl.TEXTURE_2D, 0, dr.Min.X, y, width, 1, gl.RGBA, gl.UNSIGNED_BYTE, pix[p:])
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, pix[p:])
 		p += buf.rgba.Stride
 	}
 }
@@ -95,22 +95,20 @@ func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 		minX, maxY,
 	)
 
-	glctx := t.w.glctx
-
 	t.w.glctxMu.Lock()
 	defer t.w.glctxMu.Unlock()
 
-	create := t.fb.Value == 0
+	create := t.fb == 0
 	if create {
-		t.fb = glctx.CreateFramebuffer()
+		t.fb = gl.CreateFramebuffer()
 	}
-	glctx.BindFramebuffer(gl.FRAMEBUFFER, t.fb)
+	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fb)
 	if create {
-		glctx.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t.id, 0)
+		gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t.id, 0)
 	}
 
-	glctx.Viewport(0, 0, t.size.X, t.size.Y)
-	doFill(t.w.app, t.w.glctx, mvp, src, op)
+	gl.Viewport(0, 0, int32(t.size.X), int32(t.size.Y))
+	doFill(t.w.app, mvp, src, op)
 
 	// We can't restore the GL state (i.e. bind the back buffer, also known as
 	// gl.Framebuffer{Value: 0}) right away, since we don't necessarily know

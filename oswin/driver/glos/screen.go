@@ -29,7 +29,7 @@ func (app *appImpl) getScreens() {
 	}
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
-		sc := sc[i]
+		sc := app.screens[i]
 		pw, ph := mon.GetPhysicalSize()
 		x, y := mon.GetPos()
 		vm := mon.GetVideoMode()
@@ -38,11 +38,11 @@ func (app *appImpl) getScreens() {
 		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
 		depth := vm.RedBits + vm.GreenBits + vm.BlueBits
 		sc.Depth = depth
-		sc.PhysicalSize = image.Point{px, py}
+		sc.PhysicalSize = image.Point{pw, ph}
 		dpi := 25.4 * float32(vm.Width) / float32(pw)
 		sc.PhysicalDPI = dpi
 		sc.LogicalDPI = dpi
 		// todo: mac device pixel ratio!
-		sc.RefreshRate = vm.RefreshRate
+		sc.RefreshRate = float32(vm.RefreshRate)
 	}
 }

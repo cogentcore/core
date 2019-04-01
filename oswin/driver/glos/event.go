@@ -229,7 +229,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 		return key.CodeReturnEnter
 	case glfw.KeyEscape:
 		return key.CodeEscape
-	case glfw.KeyDelete:
+	case glfw.KeyBackspace:
 		return key.CodeDeleteBackspace
 	case glfw.KeyTab:
 		return key.CodeTab
@@ -387,15 +387,15 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 	case glfw.KeyLeftAlt:
 		return key.CodeLeftAlt
 	case glfw.KeyLeftSuper:
-		return key.CodeLeftSuper
+		return key.CodeLeftMeta
 	case glfw.KeyRightControl:
 		return key.CodeRightControl
 	case glfw.KeyRightShift:
 		return key.CodeRightShift
-	case glfw.KeyRightOption:
+	case glfw.KeyRightAlt:
 		return key.CodeRightAlt
 	case glfw.KeyRightSuper:
-		return key.CodeRightSuper
+		return key.CodeRightMeta
 	case glfw.KeyLast:
 		return lastKey
 	default:

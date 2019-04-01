@@ -17,6 +17,9 @@ import (
 	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/goki/gi/oswin"
+	"golang.org/x/image/math/f64"
 )
 
 type gpuImpl struct {
@@ -27,25 +30,25 @@ type gpuImpl struct {
 
 var theGPU = &gpuImpl{}
 
-func (gpu *gpuImpl) UseContext(win Window) {
+func (gpu *gpuImpl) UseContext(win oswin.Window) {
 	w := win.(*windowImpl)
 	w.glctxMu.Lock()
 	w.glw.MakeContextCurrent()
 }
 
-func (gpu *gpuImpl) ClearContext(win Window) {
+func (gpu *gpuImpl) ClearContext(win oswin.Window) {
 	w := win.(*windowImpl)
-	w.glw.DetachContextCurrent()
+	glfw.DetachCurrentContext()
 	w.glctxMu.Unlock()
 }
 
 func (gpu *gpuImpl) NewProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
+	vertexShader, err := gpu.CompileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		return 0, err
 	}
 
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragmentShader, err := gpu.CompileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
 	if err != nil {
 		return 0, err
 	}
@@ -95,4 +98,18 @@ func (gpu *gpuImpl) CompileShader(source string, shaderType uint32) (uint32, err
 	}
 
 	return shader, nil
+}
+
+func writeAff3(u int32, a f64.Aff3) {
+	var m [9]float32
+	m[0*3+0] = float32(a[0*3+0])
+	m[0*3+1] = float32(a[1*3+0])
+	m[0*3+2] = 0
+	m[1*3+0] = float32(a[0*3+1])
+	m[1*3+1] = float32(a[1*3+1])
+	m[1*3+2] = 0
+	m[2*3+0] = float32(a[0*3+2])
+	m[2*3+1] = float32(a[1*3+2])
+	m[2*3+2] = 1
+	gl.UniformMatrix3fv(u, m[:])
 }
