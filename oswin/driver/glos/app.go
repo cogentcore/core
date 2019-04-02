@@ -49,10 +49,10 @@ type appImpl struct {
 	texture struct {
 		init    bool
 		program uint32
-		pos     int32
+		pos     uint32
 		mvp     int32
 		uvp     int32
-		inUV    int32
+		inUV    uint32
 		sample  int32
 		quad    uint32
 	}
@@ -305,10 +305,10 @@ func (app *appImpl) initGLPrograms() error {
 		return err
 	}
 	app.texture.program = p
-	app.texture.pos = gl.GetAttribLocation(p, gl.Str("pos\x00"))
+	app.texture.pos = uint32(gl.GetAttribLocation(p, gl.Str("pos\x00")))
 	app.texture.mvp = gl.GetUniformLocation(p, gl.Str("mvp\x00"))
 	app.texture.uvp = gl.GetUniformLocation(p, gl.Str("uvp\x00"))
-	app.texture.inUV = gl.GetAttribLocation(p, gl.Str("inUV\x00"))
+	app.texture.inUV = uint32(gl.GetAttribLocation(p, gl.Str("inUV\x00")))
 	app.texture.sample = gl.GetUniformLocation(p, gl.Str("sample\x00"))
 	gl.GenBuffers(1, &app.texture.quad)
 

@@ -172,7 +172,7 @@ func doFill(app *appImpl, mvp f64.Aff3, src color.Color, op draw.Op) {
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
 	gl.EnableVertexAttribArray(uint32(app.fill.pos))
-	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
@@ -279,11 +279,11 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
 	gl.EnableVertexAttribArray(w.app.texture.pos)
-	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
 	gl.EnableVertexAttribArray(w.app.texture.inUV)
-	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, 0)
+	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 

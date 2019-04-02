@@ -37,10 +37,10 @@ func (t *textureImpl) Release() {
 	t.w.DeleteTexture(t)
 
 	if t.fb != 0 {
-		gl.DeleteFramebuffer(t.fb)
+		gl.DeleteFramebuffers(1, &t.fb)
 		t.fb = 0
 	}
-	gl.DeleteTexture(t.id)
+	gl.DeleteTextures(1, &t.id)
 	t.id = 0
 }
 
@@ -72,13 +72,13 @@ func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle
 
 	width := dr.Dx()
 	if width*4 == buf.rgba.Stride {
-		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, pix)
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix))
 		return
 	}
 	// TODO: can we use GL_UNPACK_ROW_LENGTH with glPixelStorei for stride in
 	// ES 3.0, instead of uploading the pixels row-by-row?
 	for y, p := dr.Min.Y, 0; y < dr.Max.Y; y++ {
-		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, pix[p:])
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix[p:]))
 		p += buf.rgba.Stride
 	}
 }
@@ -100,7 +100,7 @@ func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 
 	create := t.fb == 0
 	if create {
-		t.fb = gl.CreateFramebuffer()
+		gl.CreateFramebuffers(1, &t.fb)
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fb)
 	if create {

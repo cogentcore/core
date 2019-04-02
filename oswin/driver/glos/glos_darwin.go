@@ -16,6 +16,7 @@ package glos
 #cgo CFLAGS: -x objective-c
 #cgo LDFLAGS: -framework Cocoa
 #import <Cocoa/Cocoa.h>
+void clipClear();
 bool clipIsEmpty();
 void clipReadText();
 void pasteWriteAddText(char* data, int dlen);
@@ -25,15 +26,28 @@ void popCursor();
 void setCursor(int);
 void hideCursor();
 void showCursor();
-void clipClear();
+void doSetMainMenu(uintptr_t viewID);
+uintptr_t doGetMainMenu(uintptr_t viewID);
+uintptr_t doGetMainMenuLock(uintptr_t viewID);
+void doMainMenuUnlock(uintptr_t menuID);
+void doMenuReset(uintptr_t menuID);
+uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm);
+uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scCtrl, int tag, bool active);
+void doAddSeparator(uintptr_t menuID);
+uintptr_t doMenuItemByTitle(uintptr_t menuID, char* mnm);
+uintptr_t doMenuItemByTag(uintptr_t menuID, int tag);
+void doSetMenuItemActive(uintptr_t mitmID, bool active);
 */
 import "C"
 
 import (
+	"strings"
 	"sync"
 	"unsafe"
 
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/pi/filecat"
 )
@@ -211,4 +225,117 @@ func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
 	}
 	c.mu.Unlock()
 	return false
+}
+
+type mainMenuImpl struct {
+	win      *windowImpl
+	callback func(win oswin.Window, title string, tag int)
+}
+
+func (mm *mainMenuImpl) Window() oswin.Window {
+	return mm.win
+}
+
+func (mm *mainMenuImpl) SetWindow(win oswin.Window) {
+	mm.win = win.(*windowImpl)
+}
+
+func (mm *mainMenuImpl) SetFunc(fun func(win oswin.Window, title string, tag int)) {
+	mm.callback = fun
+}
+
+func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
+	if mm.callback == nil {
+		return
+	}
+	mm.callback(win, title, tag)
+}
+
+func (mm *mainMenuImpl) Menu() oswin.Menu {
+	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
+	return oswin.Menu(mmen)
+}
+
+func (mm *mainMenuImpl) SetMenu() {
+	C.doSetMainMenu(C.uintptr_t(mm.win.id))
+}
+
+func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
+	mmen := C.doGetMainMenuLock(C.uintptr_t(mm.win.id))
+	return oswin.Menu(mmen)
+}
+
+func (mm *mainMenuImpl) EndUpdate(men oswin.Menu) {
+	C.doMainMenuUnlock(C.uintptr_t(mm.win.id))
+}
+
+func (mm *mainMenuImpl) Reset(men oswin.Menu) {
+	C.doMenuReset(C.uintptr_t(men))
+}
+
+func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	subid := C.doAddSubMenu(C.uintptr_t(men), title)
+	return oswin.Menu(subid)
+}
+
+func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int, active bool) oswin.MenuItem {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+
+	sc := ""
+	r, mods, err := key.Chord(shortcut).Decode()
+	if err == nil {
+		sc = strings.ToLower(string(r))
+	}
+
+	scShift := (mods&(1<<uint32(key.Shift)) != 0)
+	scControl := (mods&(1<<uint32(key.Control)) != 0)
+	scAlt := (mods&(1<<uint32(key.Alt)) != 0)
+	scCommand := (mods&(1<<uint32(key.Meta)) != 0)
+
+	scs := C.CString(sc)
+	defer C.free(unsafe.Pointer(scs))
+
+	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
+	C.doAddSeparator(C.uintptr_t(men))
+}
+
+func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
+	title := C.CString(titles)
+	defer C.free(unsafe.Pointer(title))
+	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
+	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
+	return oswin.MenuItem(mid)
+}
+
+func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
+	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
+}
+
+//export menuFired
+func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
+	theApp.mu.Lock()
+	w := theApp.windows[id]
+	theApp.mu.Unlock()
+	if w == nil {
+		return
+	}
+
+	tit := C.GoStringN(title, tilen)
+	osmm := w.MainMenu()
+	if osmm == nil {
+		return
+	}
+	go osmm.Triggered(w, tit, int(tag))
 }

@@ -111,5 +111,5 @@ func writeAff3(u int32, a f64.Aff3) {
 	m[2*3+0] = float32(a[0*3+2])
 	m[2*3+1] = float32(a[1*3+2])
 	m[2*3+2] = 1
-	gl.UniformMatrix3fv(u, m[:])
+	gl.UniformMatrix3fv(u, 1, false, &m[0])
 }
