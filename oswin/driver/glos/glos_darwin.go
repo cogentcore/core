@@ -252,21 +252,21 @@ func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
 }
 
 func (mm *mainMenuImpl) Menu() oswin.Menu {
-	mmen := C.doGetMainMenu(C.uintptr_t(mm.win.id))
+	mmen := C.doGetMainMenu(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 	return oswin.Menu(mmen)
 }
 
 func (mm *mainMenuImpl) SetMenu() {
-	C.doSetMainMenu(C.uintptr_t(mm.win.id))
+	C.doSetMainMenu(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 }
 
 func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
-	mmen := C.doGetMainMenuLock(C.uintptr_t(mm.win.id))
+	mmen := C.doGetMainMenuLock(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 	return oswin.Menu(mmen)
 }
 
 func (mm *mainMenuImpl) EndUpdate(men oswin.Menu) {
-	C.doMainMenuUnlock(C.uintptr_t(mm.win.id))
+	C.doMainMenuUnlock(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 }
 
 func (mm *mainMenuImpl) Reset(men oswin.Menu) {
@@ -299,7 +299,7 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
 
-	mid := C.doAddMenuItem(C.uintptr_t(mm.win.id), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
+	mid := C.doAddMenuItem(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
 	return oswin.MenuItem(mid)
 }
 
@@ -325,17 +325,18 @@ func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
 
 //export menuFired
 func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
-	theApp.mu.Lock()
-	w := theApp.windows[id]
-	theApp.mu.Unlock()
-	if w == nil {
-		return
-	}
+	/*	theApp.mu.Lock()
+		w := theApp.windows[id]
+		theApp.mu.Unlock()
+		if w == nil {
+			return
+		}
 
-	tit := C.GoStringN(title, tilen)
-	osmm := w.MainMenu()
-	if osmm == nil {
-		return
-	}
-	go osmm.Triggered(w, tit, int(tag))
+		tit := C.GoStringN(title, tilen)
+		osmm := w.MainMenu()
+		if osmm == nil {
+			return
+		}
+		go osmm.Triggered(w, tit, int(tag))
+	*/
 }

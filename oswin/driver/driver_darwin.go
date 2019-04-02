@@ -17,6 +17,6 @@ import (
 	"github.com/goki/gi/oswin/driver/macdriver"
 )
 
-func main(f func(oswin.App)) {
+func driverMain(f func(oswin.App)) {
 	macdriver.Main(f)
 }

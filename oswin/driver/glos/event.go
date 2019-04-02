@@ -50,7 +50,6 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	} else if action == glfw.Repeat {
 		act = key.Press
 	}
-	ea := key.Actions(act)
 
 	event := &key.Event{
 		Code:      ec,

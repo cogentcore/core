@@ -13,9 +13,9 @@ package driver
 
 import (
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/glos"
+	"github.com/goki/gi/oswin/driver/glos"
 )
 
-func main(f func(oswin.App)) {
+func driverMain(f func(oswin.App)) {
 	glos.Main(f)
 }

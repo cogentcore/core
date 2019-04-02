@@ -24,5 +24,5 @@ import "github.com/goki/gi/oswin"
 // specific libraries require being on 'the main thread'. It returns when f
 // returns.
 func Main(f func(oswin.App)) {
-	main(f)
+	driverMain(f)
 }

@@ -40,7 +40,7 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
+	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo\x00", width, height, true) // true = pixel sizes
 
 	icnm := "widget-wedge-down"
 

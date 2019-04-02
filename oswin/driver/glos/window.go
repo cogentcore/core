@@ -62,7 +62,7 @@ type windowImpl struct {
 }
 
 func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
-	dialog, modal, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
+	_, _, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
@@ -491,7 +491,7 @@ func (w *windowImpl) Close() {
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	sendWindowEvent(w, window.Close)
+	w.sendWindowEvent(window.Close)
 	if w.textures != nil {
 		for t, _ := range w.textures {
 			t.Release() // deletes from map

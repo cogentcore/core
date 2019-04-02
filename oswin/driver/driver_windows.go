@@ -17,6 +17,6 @@ import (
 	"github.com/goki/gi/oswin/driver/windriver"
 )
 
-func main(f func(oswin.App)) {
+func driverMain(f func(oswin.App)) {
 	windriver.Main(f)
 }

@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -79,15 +80,19 @@ type appImpl struct {
 	quitCleanFunc func()
 }
 
+var mainCallback func(oswin.App)
+
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(oswin.App)) {
+	mainCallback = f
 	theApp.getScreens()
 	oswin.TheApp = theApp
 	go func() {
-		f(theApp)
+		mainCallback(theApp)
 		theApp.stopMain()
 	}()
+	theApp.mainLoop()
 }
 
 type funcRun struct {
@@ -129,7 +134,11 @@ func (app *appImpl) mainLoop() {
 				f.done <- true
 			}
 		default:
-			glfw.WaitEvents()
+			if len(app.windows) == 0 {
+				time.Sleep(1)
+			} else {
+				glfw.WaitEvents()
+			}
 		}
 	}
 }

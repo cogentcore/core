@@ -30,6 +30,10 @@ func (app *appImpl) getScreens() {
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
 		sc := app.screens[i]
+		if sc == nil {
+			sc = &oswin.Screen{}
+			app.screens[i] = sc
+		}
 		pw, ph := mon.GetPhysicalSize()
 		x, y := mon.GetPos()
 		vm := mon.GetVideoMode()

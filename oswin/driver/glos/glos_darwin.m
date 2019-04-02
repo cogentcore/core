@@ -248,38 +248,44 @@ void showCursor() {
 
 // qtbase/src/plugins/platforms/cocoa/qcocoamenu.mm
 
-/*
+// todo: get NSWindow from GetCocoaWindnow from glfw window
+
 // called during expose or focus
-void menuSetAsMain(ScreenGLView* view) {
-	while (view.menuUpdtMu == YES) { }; // busy wait..
+void menuSetAsMain(NSWindow* view) {
+	/* while (view.menuUpdtMu == YES) { }; // busy wait..
    view.menuUpdtMu = YES; // locked
 	NSMenu* men = [view mainMenu];
  	[NSApp setMainMenu: men];
    view.menuUpdtMu = NO; // unlocked
+	*/
 }
 
 void doSetMainMenu(uintptr_t viewID) {
-	ScreenGLView* view = (ScreenGLView*)viewID;
+	/* ScreenGLView* view = (ScreenGLView*)viewID;
 	menuSetAsMain(view);
+	*/
 }
 
 uintptr_t doGetMainMenu(uintptr_t viewID) {
-	ScreenGLView* view = (ScreenGLView*)viewID;
+	/* ScreenGLView* view = (ScreenGLView*)viewID;
 	NSMenu* men = [view mainMenu];
-	return (uintptr_t)men;
+	return (uintptr_t)men; */
+	return (uintptr_t)0;
 }
 
 uintptr_t doGetMainMenuLock(uintptr_t viewID) {
-	ScreenGLView* view = (ScreenGLView*)viewID;
+	/* ScreenGLView* view = (ScreenGLView*)viewID;
 	while (view.menuUpdtMu == YES) { }; // busy wait..
    view.menuUpdtMu = YES; // locked
 	NSMenu* men = [view mainMenu];
-	return (uintptr_t)men;
+	return (uintptr_t)men; */
+	return (uintptr_t)0;
 }
 
 void doMainMenuUnlock(uintptr_t viewID) {
-	ScreenGLView* view = (ScreenGLView*)viewID;
+	/* ScreenGLView* view = (ScreenGLView*)viewID;
    view.menuUpdtMu = NO; // unlocked
+	*/
 }
 
 void doMenuReset(uintptr_t menuID) {
@@ -301,7 +307,7 @@ uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
 }
 
 uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag, bool active) {
-    ScreenGLView* view = (ScreenGLView*)viewID;
+ 	/*  ScreenGLView* view = (ScreenGLView*)viewID;
     NSMenu* subm  = (NSMenu*)submID;
     MenuDelegate* md = [view menuDel];
     NSString* title = [[NSString alloc] initWithUTF8String:itmnm];
@@ -334,6 +340,9 @@ uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* s
 	[title release];
 	[scut release];
     return (uintptr_t)mi;
+	*/
+	return (uintptr_t)0;
+
 }
 
 void doAddSeparator(uintptr_t menuID) {
@@ -361,5 +370,4 @@ void doSetMenuItemActive(uintptr_t mitmID, bool active) {
     mi.enabled = active;
 }
 
-*/
 
