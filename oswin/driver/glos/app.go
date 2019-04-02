@@ -158,7 +158,11 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	opts.Fixup()
 	// can also apply further tuning here..
 
-	glw, err := newGLWindow(opts)
+	var glw *glfw.Window
+	var err error
+	app.RunOnMain(func() {
+		glw, err = newGLWindow(opts)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -206,11 +210,12 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetCursorEnterCallback(w.cursorEnterEvent)
 	glw.SetDropCallback(w.dropEvent)
 
-	w.getScreen()
+	app.RunOnMain(func() {
+		w.getScreen()
+		w.show()
+	})
+
 	theGPU.ClearContext(w)
-
-	w.show()
-
 	return w, nil
 }
 

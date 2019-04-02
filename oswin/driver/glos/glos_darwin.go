@@ -41,13 +41,11 @@ void doSetMenuItemActive(uintptr_t mitmID, bool active);
 import "C"
 
 import (
-	"strings"
 	"sync"
 	"unsafe"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/pi/filecat"
 )
@@ -252,75 +250,89 @@ func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
 }
 
 func (mm *mainMenuImpl) Menu() oswin.Menu {
-	mmen := C.doGetMainMenu(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
-	return oswin.Menu(mmen)
+	// mmen := C.doGetMainMenu(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
+	// 	return oswin.Menu(mmen)
+	return oswin.Menu(0)
 }
 
 func (mm *mainMenuImpl) SetMenu() {
-	C.doSetMainMenu(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
+	// C.doSetMainMenu(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 }
 
 func (mm *mainMenuImpl) StartUpdate() oswin.Menu {
-	mmen := C.doGetMainMenuLock(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
+	/* mmen := C.doGetMainMenuLock(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 	return oswin.Menu(mmen)
+	*/
+	return oswin.Menu(0)
 }
 
 func (mm *mainMenuImpl) EndUpdate(men oswin.Menu) {
-	C.doMainMenuUnlock(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
+	// C.doMainMenuUnlock(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))))
 }
 
 func (mm *mainMenuImpl) Reset(men oswin.Menu) {
-	C.doMenuReset(C.uintptr_t(men))
+	// C.doMenuReset(C.uintptr_t(men))
 }
 
 func (mm *mainMenuImpl) AddSubMenu(men oswin.Menu, titles string) oswin.Menu {
-	title := C.CString(titles)
+	/* title := C.CString(titles)
 	defer C.free(unsafe.Pointer(title))
 
 	subid := C.doAddSubMenu(C.uintptr_t(men), title)
 	return oswin.Menu(subid)
+	*/
+	return oswin.Menu(0)
 }
 
 func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, tag int, active bool) oswin.MenuItem {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
+	/*
+		title := C.CString(titles)
+		defer C.free(unsafe.Pointer(title))
 
-	sc := ""
-	r, mods, err := key.Chord(shortcut).Decode()
-	if err == nil {
-		sc = strings.ToLower(string(r))
-	}
+		sc := ""
+		r, mods, err := key.Chord(shortcut).Decode()
+		if err == nil {
+			sc = strings.ToLower(string(r))
+		}
 
-	scShift := (mods&(1<<uint32(key.Shift)) != 0)
-	scControl := (mods&(1<<uint32(key.Control)) != 0)
-	scAlt := (mods&(1<<uint32(key.Alt)) != 0)
-	scCommand := (mods&(1<<uint32(key.Meta)) != 0)
+		scShift := (mods&(1<<uint32(key.Shift)) != 0)
+		scControl := (mods&(1<<uint32(key.Control)) != 0)
+		scAlt := (mods&(1<<uint32(key.Alt)) != 0)
+		scCommand := (mods&(1<<uint32(key.Meta)) != 0)
 
-	scs := C.CString(sc)
-	defer C.free(unsafe.Pointer(scs))
+		scs := C.CString(sc)
+		defer C.free(unsafe.Pointer(scs))
 
-	mid := C.doAddMenuItem(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
-	return oswin.MenuItem(mid)
+		mid := C.doAddMenuItem(C.uintptr_t(uintptr(unsafe.Pointer(mm.win.glw))), C.uintptr_t(men), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
+		return oswin.MenuItem(mid)
+	*/
+	return oswin.MenuItem(0)
 }
 
 func (mm *mainMenuImpl) AddSeparator(men oswin.Menu) {
-	C.doAddSeparator(C.uintptr_t(men))
+	// C.doAddSeparator(C.uintptr_t(men))
 }
 
 func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuItem {
-	title := C.CString(titles)
-	defer C.free(unsafe.Pointer(title))
-	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
-	return oswin.MenuItem(mid)
+	/*
+		title := C.CString(titles)
+		defer C.free(unsafe.Pointer(title))
+		mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
+		return oswin.MenuItem(mid)
+	*/
+	return oswin.MenuItem(0)
 }
 
 func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
-	mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
+	/* mid := C.doMenuItemByTag(C.uintptr_t(men), C.int(tag))
 	return oswin.MenuItem(mid)
+	*/
+	return oswin.MenuItem(0)
 }
 
 func (mm *mainMenuImpl) SetItemActive(mitm oswin.MenuItem, active bool) {
-	C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
+	/* C.doSetMenuItemActive(C.uintptr_t(mitm), C.bool(active))
+	 */
 }
 
 //export menuFired

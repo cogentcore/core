@@ -427,11 +427,12 @@ func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
-	if w.mainMenu == nil {
-		mm := &mainMenuImpl{win: w}
-		w.mainMenu = mm
-	}
-	return w.mainMenu.(*mainMenuImpl)
+	return nil
+	// if w.mainMenu == nil {
+	// 	mm := &mainMenuImpl{win: w}
+	// 	w.mainMenu = mm
+	// }
+	// return w.mainMenu.(*mainMenuImpl)
 }
 
 func (w *windowImpl) show() {
@@ -508,9 +509,11 @@ func (w *windowImpl) Close() {
 func (w *windowImpl) getScreen() {
 	w.mu.Lock()
 	mon := w.glw.GetMonitor()
-	sc := theApp.ScreenByName(mon.GetName())
-	w.Scrn = sc
-	w.PhysDPI = sc.PhysicalDPI
+	if mon != nil {
+		sc := theApp.ScreenByName(mon.GetName())
+		w.Scrn = sc
+		w.PhysDPI = sc.PhysicalDPI
+	}
 	w.mu.Unlock()
 }
 
