@@ -185,13 +185,18 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.mu.Unlock()
 
 	theGPU.UseContext(w)
-
-	// Initialize Glow for current context
 	if err := gl.Init(); err != nil {
-		panic(err)
+		theGPU.ClearContext(w)
+		return nil, err
 	}
+	theGPU.ClearContext(w)
+
 	if !app.texture.init {
-		app.initGLPrograms()
+		app.RunOnMain(func() {
+			theGPU.UseContext(w)
+			app.initGLPrograms()
+			theGPU.ClearContext(w)
+		})
 	}
 
 	glw.SetPosCallback(w.moved)
@@ -210,12 +215,11 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetCursorEnterCallback(w.cursorEnterEvent)
 	glw.SetDropCallback(w.dropEvent)
 
-	app.RunOnMain(func() {
-		w.getScreen()
-		w.show()
-	})
+	go w.drawLoop() // monitors for publish events
 
-	theGPU.ClearContext(w)
+	w.getScreen()
+	w.show()
+
 	return w, nil
 }
 
@@ -337,7 +341,7 @@ func (app *appImpl) initGLPrograms() error {
 	app.fill.pos = gl.GetAttribLocation(p, gl.Str("pos\x00"))
 	app.fill.mvp = gl.GetUniformLocation(p, gl.Str("mvp\x00"))
 	app.fill.color = gl.GetUniformLocation(p, gl.Str("color\x00"))
-	gl.CreateBuffers(1, &app.fill.quad)
+	gl.GenBuffers(1, &app.fill.quad)
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
 	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)

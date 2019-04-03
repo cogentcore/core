@@ -31,8 +31,8 @@ func (t *textureImpl) Size() image.Point       { return t.size }
 func (t *textureImpl) Bounds() image.Rectangle { return image.Rectangle{Max: t.size} }
 
 func (t *textureImpl) Release() {
-	t.w.glctxMu.Lock()
-	defer t.w.glctxMu.Unlock()
+	theGPU.UseContext(t.w)
+	defer theGPU.ClearContext(t.w)
 
 	t.w.DeleteTexture(t)
 
@@ -65,8 +65,8 @@ func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle
 	// Bring dr.Min in dst-space back to src-space to get the pixel image offset.
 	pix := buf.rgba.Pix[buf.rgba.PixOffset(dr.Min.X-src2dst.X, dr.Min.Y-src2dst.Y):]
 
-	t.w.glctxMu.Lock()
-	defer t.w.glctxMu.Unlock()
+	theGPU.UseContext(t.w)
+	defer theGPU.ClearContext(t.w)
 
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 
@@ -95,8 +95,8 @@ func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 		minX, maxY,
 	)
 
-	t.w.glctxMu.Lock()
-	defer t.w.glctxMu.Unlock()
+	theGPU.UseContext(t.w)
+	defer theGPU.ClearContext(t.w)
 
 	create := t.fb == 0
 	if create {

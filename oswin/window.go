@@ -344,11 +344,11 @@ func (o *NewWindowOptions) Fixup() {
 
 	dialog, modal, _, _ := WindowFlagsToBool(o.Flags)
 
-	if o.Size.X == 0 {
+	if o.Size.X <= 0 {
 		o.StdPixels = false
 		o.Size.X = int(0.8 * float32(scsz.X))
 	}
-	if o.Size.Y == 0 {
+	if o.Size.Y <= 0 {
 		o.StdPixels = false
 		o.Size.Y = int(0.8 * float32(scsz.Y))
 	}

@@ -15,6 +15,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"runtime"
 	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -61,6 +62,7 @@ type windowImpl struct {
 	closeCleanFunc func(win oswin.Window)
 }
 
+// must be run on main
 func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	_, _, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 	glfw.DefaultWindowHints()
@@ -145,8 +147,8 @@ func (w *windowImpl) bindBackBuffer() {
 }
 
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
-	w.glctxMu.Lock()
-	defer w.glctxMu.Unlock()
+	theGPU.UseContext(w)
+	defer theGPU.ClearContext(w)
 
 	if !w.backBufferBound {
 		w.bindBackBuffer()
@@ -340,6 +342,35 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float64) f64.Af
 	}
 }
 
+// drawLoop is the primary drawing loop.
+func (w *windowImpl) drawLoop() {
+	runtime.LockOSThread()
+
+	// Starting in OS X 10.11 (El Capitan), the vertex array is
+	// occasionally getting unbound when the context changes threads.
+	//
+	// Avoid this by binding it again.
+	// 	C.glBindVertexArray(C.GLuint(vba))
+	// if errno := C.glGetError(); errno != 0 {
+	// 	panic(fmt.Sprintf("macdriver: glBindVertexArray failed: %d", errno))
+	// }
+	//
+	// workAvailable := w.worker.WorkAvailable()
+
+outer:
+	for {
+		select {
+		case <-w.winClose:
+			break outer
+		case <-w.publish:
+			theGPU.UseContext(w)
+			gl.Flush()
+			theGPU.ClearContext(w)
+			w.publishDone <- oswin.PublishResult{}
+		}
+	}
+}
+
 func (w *windowImpl) Publish() oswin.PublishResult {
 	// gl.Flush is a lightweight (on modern GL drivers) blocking call
 	// that ensures all GL functions pending in the gl package have
@@ -348,9 +379,9 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	//
 	// This enforces that the final receive (for this paint cycle) on
 	// gl.WorkAvailable happens before the send on publish.
-	w.glctxMu.Lock()
-	gl.Flush()
-	w.glctxMu.Unlock()
+	// theGPU.UseContext(w)
+	// gl.Flush()
+	// theGPU.ClearContext(w)
 
 	w.publish <- struct{}{}
 	res := <-w.publishDone
@@ -364,6 +395,12 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 }
 
 func (w *windowImpl) Screen() *oswin.Screen {
+	if w.Scrn == nil {
+		w.getScreen()
+	}
+	if w.Scrn == nil {
+		return theApp.screens[0]
+	}
 	w.mu.Lock()
 	sc := w.Scrn
 	w.mu.Unlock()
@@ -410,20 +447,28 @@ func (w *windowImpl) SetLogicalDPI(dpi float32) {
 
 func (w *windowImpl) SetTitle(title string) {
 	w.Titl = title
-	w.glw.SetTitle(title)
+	w.app.RunOnMain(func() {
+		w.glw.SetTitle(title)
+	})
 }
 
 func (w *windowImpl) SetSize(sz image.Point) {
-	w.glw.SetSize(sz.X, sz.Y)
+	w.app.RunOnMain(func() {
+		w.glw.SetSize(sz.X, sz.Y)
+	})
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {
-	w.glw.SetPos(pos.X, pos.Y)
+	w.app.RunOnMain(func() {
+		w.glw.SetPos(pos.X, pos.Y)
+	})
 }
 
 func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
-	w.glw.SetSize(sz.X, sz.Y)
-	w.glw.SetPos(pos.X, pos.Y)
+	w.app.RunOnMain(func() {
+		w.glw.SetSize(sz.X, sz.Y)
+		w.glw.SetPos(pos.X, pos.Y)
+	})
 }
 
 func (w *windowImpl) MainMenu() oswin.MainMenu {
@@ -436,15 +481,21 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) show() {
-	w.glw.Show()
+	w.app.RunOnMain(func() {
+		w.glw.Show()
+	})
 }
 
 func (w *windowImpl) Raise() {
-	w.glw.Restore()
+	w.app.RunOnMain(func() {
+		w.glw.Restore()
+	})
 }
 
 func (w *windowImpl) Minimize() {
-	w.glw.Hide()
+	w.app.RunOnMain(func() {
+		w.glw.Hide()
+	})
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win oswin.Window)) {
@@ -499,7 +550,9 @@ func (w *windowImpl) Close() {
 		}
 	}
 	w.textures = nil
-	w.glw.Destroy()
+	w.app.RunOnMain(func() {
+		w.glw.Destroy()
+	})
 	// 	closeWindow(w.id)
 }
 
@@ -508,11 +561,15 @@ func (w *windowImpl) Close() {
 
 func (w *windowImpl) getScreen() {
 	w.mu.Lock()
-	mon := w.glw.GetMonitor()
+	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
+	// that is super useless it seems.
 	if mon != nil {
 		sc := theApp.ScreenByName(mon.GetName())
 		w.Scrn = sc
 		w.PhysDPI = sc.PhysicalDPI
+	} else {
+		w.Scrn = theApp.screens[0]
+		w.PhysDPI = w.Scrn.PhysicalDPI
 	}
 	w.mu.Unlock()
 }
@@ -537,7 +594,7 @@ func (w *windowImpl) fbResized(gw *glfw.Window, width, height int) {
 }
 
 func (w *windowImpl) closeReq(gw *glfw.Window) {
-	w.CloseReq()
+	go w.CloseReq()
 }
 
 func (w *windowImpl) refresh(gw *glfw.Window) {
