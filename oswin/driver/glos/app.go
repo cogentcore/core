@@ -105,6 +105,7 @@ func (app *appImpl) RunOnMain(f func()) {
 	if app.mainQueue == nil {
 		f()
 	} else {
+		glfw.PostEmptyEvent()
 		done := make(chan bool)
 		app.mainQueue <- funcRun{f: f, done: done}
 		<-done
@@ -114,6 +115,7 @@ func (app *appImpl) RunOnMain(f func()) {
 // GoRunOnMain runs given function on main thread and returns immediately
 func (app *appImpl) GoRunOnMain(f func()) {
 	go func() {
+		glfw.PostEmptyEvent()
 		app.mainQueue <- funcRun{f: f, done: nil}
 	}()
 }
@@ -325,8 +327,8 @@ func (app *appImpl) initGLPrograms() error {
 	app.texture.uvp = gl.GetUniformLocation(p, gl.Str("uvp\x00"))
 	app.texture.inUV = uint32(gl.GetAttribLocation(p, gl.Str("inUV\x00")))
 	app.texture.sample = gl.GetUniformLocation(p, gl.Str("sample\x00"))
-	gl.GenBuffers(1, &app.texture.quad)
 
+	gl.GenBuffers(1, &app.texture.quad)
 	gl.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
 	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)
 
@@ -371,8 +373,7 @@ func (app *appImpl) newTexture(win oswin.Window, size image.Point) (oswin.Textur
 		size: size,
 	}
 
-	//	gl.ActiveTexture(gl.TEXTURE0)
-
+	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)

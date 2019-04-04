@@ -142,7 +142,7 @@ func (w *windowImpl) bindBackBuffer() {
 	w.mu.Unlock()
 
 	w.backBufferBound = true
-	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	gl.Viewport(0, 0, int32(size.X), int32(size.Y))
 }
 
@@ -290,16 +290,18 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
 	gl.EnableVertexAttribArray(w.app.texture.pos)
-	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
 	gl.EnableVertexAttribArray(w.app.texture.inUV)
-	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
+	gl.Flush()
+	w.glw.SwapBuffers()
 
-	gl.DisableVertexAttribArray(w.app.texture.pos)
-	gl.DisableVertexAttribArray(w.app.texture.inUV)
+	// gl.DisableVertexAttribArray(w.app.texture.pos)
+	// gl.DisableVertexAttribArray(w.app.texture.inUV)
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
@@ -362,8 +364,8 @@ outer:
 		case <-w.publish:
 			w.app.RunOnMain(func() {
 				theGPU.UseContext(w)
-				gl.Flush()
-				w.glw.SwapBuffers()
+				// gl.Flush()
+				// w.glw.SwapBuffers()
 				theGPU.ClearContext(w)
 			})
 			w.publishDone <- oswin.PublishResult{}

@@ -79,13 +79,13 @@ func (t *textureImpl) upload(dp image.Point, src oswin.Image, sr image.Rectangle
 
 	width := dr.Dx()
 	if width*4 == buf.rgba.Stride {
-		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(&pix[0]))
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix))
 		return
 	}
 	// TODO: can we use GL_UNPACK_ROW_LENGTH with glPixelStorei for stride in
 	// ES 3.0, instead of uploading the pixels row-by-row?
 	for y, p := dr.Min.Y, 0; y < dr.Max.Y; y++ {
-		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(&pix[p]))
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix[p:]))
 		p += buf.rgba.Stride
 	}
 }
@@ -137,7 +137,7 @@ var quadCoords = []float32{
 	1, 1, // bottom right
 }
 
-const textureVertexSrc = `#version 330
+const textureVertexSrc = `#version 110
 uniform mat3 mvp;
 uniform mat3 uvp;
 attribute vec3 pos;
@@ -151,7 +151,7 @@ void main() {
 }
 ` + "\x00"
 
-const textureFragmentSrc = `#version 330
+const textureFragmentSrc = `#version 110
 precision mediump float;
 varying vec2 uv;
 uniform sampler2D sample;
@@ -160,7 +160,7 @@ void main() {
 }
 ` + "\x00"
 
-const fillVertexSrc = `#version 330
+const fillVertexSrc = `#version 110
 uniform mat3 mvp;
 attribute vec3 pos;
 void main() {
@@ -170,7 +170,7 @@ void main() {
 }
 ` + "\x00"
 
-const fillFragmentSrc = `#version 330
+const fillFragmentSrc = `#version 110
 precision mediump float;
 uniform vec4 color;
 void main() {
