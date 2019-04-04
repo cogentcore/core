@@ -45,6 +45,12 @@ func (t *textureImpl) Release() {
 }
 
 func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
+	theApp.RunOnMain(func() {
+		t.upload(dp, src, sr)
+	})
+}
+
+func (t *textureImpl) upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
 	buf := src.(*imageImpl)
 	buf.preUpload()
 
@@ -68,22 +74,29 @@ func (t *textureImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle
 	theGPU.UseContext(t.w)
 	defer theGPU.ClearContext(t.w)
 
+	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 
 	width := dr.Dx()
 	if width*4 == buf.rgba.Stride {
-		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix))
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(&pix[0]))
 		return
 	}
 	// TODO: can we use GL_UNPACK_ROW_LENGTH with glPixelStorei for stride in
 	// ES 3.0, instead of uploading the pixels row-by-row?
 	for y, p := dr.Min.Y, 0; y < dr.Max.Y; y++ {
-		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix[p:]))
+		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(&pix[p]))
 		p += buf.rgba.Stride
 	}
 }
 
 func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
+	theApp.RunOnMain(func() {
+		t.fill(dr, src, op)
+	})
+}
+
+func (t *textureImpl) fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	minX := float64(dr.Min.X)
 	minY := float64(dr.Min.Y)
 	maxX := float64(dr.Max.X)
@@ -100,7 +113,7 @@ func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 
 	create := t.fb == 0
 	if create {
-		gl.CreateFramebuffers(1, &t.fb)
+		gl.GenFramebuffers(1, &t.fb)
 	}
 	gl.BindFramebuffer(gl.FRAMEBUFFER, t.fb)
 	if create {
@@ -124,7 +137,7 @@ var quadCoords = []float32{
 	1, 1, // bottom right
 }
 
-const textureVertexSrc = `#version 100
+const textureVertexSrc = `#version 330
 uniform mat3 mvp;
 uniform mat3 uvp;
 attribute vec3 pos;
@@ -136,18 +149,18 @@ void main() {
 	gl_Position = vec4(mvp * p, 1);
 	uv = (uvp * vec3(inUV, 1)).xy;
 }
-`
+` + "\x00"
 
-const textureFragmentSrc = `#version 100
+const textureFragmentSrc = `#version 330
 precision mediump float;
 varying vec2 uv;
 uniform sampler2D sample;
 void main() {
 	gl_FragColor = texture2D(sample, uv);
 }
-`
+` + "\x00"
 
-const fillVertexSrc = `#version 100
+const fillVertexSrc = `#version 330
 uniform mat3 mvp;
 attribute vec3 pos;
 void main() {
@@ -155,12 +168,12 @@ void main() {
 	p.z = 1.0;
 	gl_Position = vec4(mvp * p, 1);
 }
-`
+` + "\x00"
 
-const fillFragmentSrc = `#version 100
+const fillFragmentSrc = `#version 330
 precision mediump float;
 uniform vec4 color;
 void main() {
 	gl_FragColor = color;
 }
-`
+` + "\x00"

@@ -973,11 +973,16 @@ func (w *Window) ClearWinUpdating() {
 // texture (and overlay texture if active)
 func (w *Window) Publish() {
 	if !w.IsVisible() || w.OSWin.IsMinimized() {
-		// fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
+		if WinEventTrace {
+			fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
+		}
 		return
 	}
 	w.UpMu.Lock()       // block all updates while we publish
 	if !w.IsVisible() { // could have closed while we waited for lock
+		if WinEventTrace {
+			fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
+		}
 		w.UpMu.Unlock()
 		return
 	}
@@ -988,7 +993,9 @@ func (w *Window) Publish() {
 	}
 
 	w.SetWinUpdating()
-	// fmt.Printf("Win %v doing publish\n", w.Nm)
+	if WinEventTrace {
+		fmt.Printf("Win %v doing publish\n", w.Nm)
+	}
 	pr := prof.Start("win.Publish.Copy")
 	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
 	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
@@ -3395,7 +3402,9 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	wgr.Size = win.OSWin.Size()
 	if wgr.Size == image.ZP {
 		WinGeomPrefsMu.Unlock()
-		// fmt.Printf("Pref: NOT storing null size for win: %v scrn: %v\n", winName, sc.Name)
+		if WinEventTrace {
+			fmt.Printf("WindowGeomPrefs: NOT storing null size for win: %v scrn: %v\n", winName, sc.Name)
+		}
 		return
 	}
 
@@ -3408,6 +3417,9 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 		(*wg)[winName] = make(map[string]WindowGeom, 10)
 	}
 	(*wg)[winName][sc.Name] = wgr
+	if WinEventTrace {
+		fmt.Printf("WindowGeomPrefs Saving for window: %v pos: %v size: %v\n", winName, wgr.Pos, wgr.Size)
+	}
 	wg.Save()
 	wg.UnlockFile()
 	WinGeomPrefsMu.Unlock()
@@ -3444,13 +3456,24 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		if scrn.LogicalDPI == wp.LogicalDPI {
 			wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
 			wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
+			if WinEventTrace {
+				fmt.Printf("WindowGeomPrefs for window: %v size: %v\n", winName, wp.Size)
+			}
 			return &wp
 		} else {
-			// fmt.Printf("rescaling scrn dpi: %v saved dpi: %v\n", scrn.LogicalDPI, wp.LogicalDPI)
+			if wp.LogicalDPI <= 0 {
+				wp.LogicalDPI = 96
+			}
+			if WinEventTrace {
+				fmt.Printf("WindowGeomPrefs: rescaling scrn dpi: %v saved dpi: %v\n", scrn.LogicalDPI, wp.LogicalDPI)
+			}
 			wp.Size.X = int(float32(wp.Size.X) * (scrn.LogicalDPI / wp.LogicalDPI))
 			wp.Size.Y = int(float32(wp.Size.Y) * (scrn.LogicalDPI / wp.LogicalDPI))
 			wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
 			wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
+			if WinEventTrace {
+				fmt.Printf("WindowGeomPrefs for window: %v size: %v\n", winName, wp.Size)
+			}
 			return &wp
 		}
 	}
@@ -3467,6 +3490,9 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	minDPId := float32(100000.0)
 	for _, wp = range wps {
 		if wp.LogicalDPI == trgdpi {
+			if WinEventTrace {
+				fmt.Printf("WindowGeomPrefs for window: %v other screen pos: %v size: %v\n", winName, wp.Pos, wp.Size)
+			}
 			return &wp
 		}
 		dpid := math32.Abs(wp.LogicalDPI - trgdpi)
@@ -3484,7 +3510,9 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
 	wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
 	wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
-	// fmt.Printf("Pref: rescaled pos: %v size: %v\n", wp.Pos, wp.Size)
+	if WinEventTrace {
+		fmt.Printf("WindowGeomPrefs for window: %v rescaled pos: %v size: %v\n", winName, wp.Pos, wp.Size)
+	}
 	return &wp
 }
 

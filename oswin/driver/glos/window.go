@@ -147,14 +147,16 @@ func (w *windowImpl) bindBackBuffer() {
 }
 
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
-	theGPU.UseContext(w)
-	defer theGPU.ClearContext(w)
+	w.app.RunOnMain(func() {
+		theGPU.UseContext(w)
+		defer theGPU.ClearContext(w)
 
-	if !w.backBufferBound {
-		w.bindBackBuffer()
-	}
+		if !w.backBufferBound {
+			w.bindBackBuffer()
+		}
 
-	doFill(w.app, mvp, src, op)
+		doFill(w.app, mvp, src, op)
+	})
 }
 
 func doFill(app *appImpl, mvp f64.Aff3, src color.Color, op draw.Op) {
@@ -174,7 +176,7 @@ func doFill(app *appImpl, mvp f64.Aff3, src color.Color, op draw.Op) {
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
 	gl.EnableVertexAttribArray(uint32(app.fill.pos))
-	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
@@ -209,6 +211,13 @@ func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rec
 }
 
 func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+	w.app.RunOnMain(func() {
+		w.draw(src2dst, src, sr, op, opts)
+	})
+}
+
+func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+
 	t := src.(*textureImpl)
 	sr = sr.Intersect(t.Bounds())
 	if sr.Empty() {
@@ -281,11 +290,11 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
 	gl.EnableVertexAttribArray(w.app.texture.pos)
-	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
 	gl.EnableVertexAttribArray(w.app.texture.inUV)
-	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
@@ -345,44 +354,24 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float64) f64.Af
 // drawLoop is the primary drawing loop.
 func (w *windowImpl) drawLoop() {
 	runtime.LockOSThread()
-
-	// Starting in OS X 10.11 (El Capitan), the vertex array is
-	// occasionally getting unbound when the context changes threads.
-	//
-	// Avoid this by binding it again.
-	// 	C.glBindVertexArray(C.GLuint(vba))
-	// if errno := C.glGetError(); errno != 0 {
-	// 	panic(fmt.Sprintf("macdriver: glBindVertexArray failed: %d", errno))
-	// }
-	//
-	// workAvailable := w.worker.WorkAvailable()
-
 outer:
 	for {
 		select {
 		case <-w.winClose:
 			break outer
 		case <-w.publish:
-			theGPU.UseContext(w)
-			gl.Flush()
-			theGPU.ClearContext(w)
+			w.app.RunOnMain(func() {
+				theGPU.UseContext(w)
+				gl.Flush()
+				w.glw.SwapBuffers()
+				theGPU.ClearContext(w)
+			})
 			w.publishDone <- oswin.PublishResult{}
 		}
 	}
 }
 
 func (w *windowImpl) Publish() oswin.PublishResult {
-	// gl.Flush is a lightweight (on modern GL drivers) blocking call
-	// that ensures all GL functions pending in the gl package have
-	// been passed onto the GL driver before the app package attempts
-	// to swap the buffer.
-	//
-	// This enforces that the final receive (for this paint cycle) on
-	// gl.WorkAvailable happens before the send on publish.
-	// theGPU.UseContext(w)
-	// gl.Flush()
-	// theGPU.ClearContext(w)
-
 	w.publish <- struct{}{}
 	res := <-w.publishDone
 
@@ -571,6 +560,9 @@ func (w *windowImpl) getScreen() {
 		w.Scrn = theApp.screens[0]
 		w.PhysDPI = w.Scrn.PhysicalDPI
 	}
+	if w.LogDPI == 0 {
+		w.LogDPI = w.Scrn.LogicalDPI
+	}
 	w.mu.Unlock()
 }
 
@@ -598,7 +590,7 @@ func (w *windowImpl) closeReq(gw *glfw.Window) {
 }
 
 func (w *windowImpl) refresh(gw *glfw.Window) {
-	w.Publish()
+	go w.Publish()
 }
 
 func (w *windowImpl) focus(gw *glfw.Window, focused bool) {

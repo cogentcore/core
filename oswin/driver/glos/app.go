@@ -184,13 +184,6 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
-	theGPU.UseContext(w)
-	if err := gl.Init(); err != nil {
-		theGPU.ClearContext(w)
-		return nil, err
-	}
-	theGPU.ClearContext(w)
-
 	if !app.texture.init {
 		app.RunOnMain(func() {
 			theGPU.UseContext(w)
@@ -218,7 +211,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	go w.drawLoop() // monitors for publish events
 
 	w.getScreen()
-	w.show()
+	w.show() // todo: need to raise window too -- not supported in glfw
 
 	return w, nil
 }
@@ -318,6 +311,10 @@ func (app *appImpl) initGLPrograms() error {
 	if app.texture.init {
 		return nil
 	}
+	if err := gl.Init(); err != nil {
+		return err
+	}
+	gl.Enable(gl.DEBUG_OUTPUT)
 	p, err := theGPU.NewProgram(textureVertexSrc, textureFragmentSrc)
 	if err != nil {
 		return err
@@ -351,6 +348,15 @@ func (app *appImpl) initGLPrograms() error {
 }
 
 func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
+	var t oswin.Texture
+	var err error
+	app.RunOnMain(func() {
+		t, err = app.newTexture(win, size)
+	})
+	return t, err
+}
+
+func (app *appImpl) newTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
 	w := win.(*windowImpl)
 
 	theGPU.UseContext(w)
@@ -365,7 +371,7 @@ func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Textur
 		size: size,
 	}
 
-	// gl.ActiveTexture(gl.TEXTURE0)
+	//	gl.ActiveTexture(gl.TEXTURE0)
 
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
