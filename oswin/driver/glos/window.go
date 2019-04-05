@@ -67,12 +67,15 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	_, _, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.True)
-	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
+	glfw.WindowHint(glfw.Visible, glfw.True) // needed to position
 	glfw.WindowHint(glfw.Focused, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	if glosDebug {
+		glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
+	}
 
 	// todo: glfw.Samples -- multisampling
 	if fullscreen {
@@ -136,14 +139,15 @@ func useOp(op draw.Op) {
 	}
 }
 
+// todo: this appears to be unnecessary
 func (w *windowImpl) bindBackBuffer() {
-	w.mu.Lock()
-	size := w.Sz
-	w.mu.Unlock()
-
+	// w.mu.Lock()
+	// size := w.Sz
+	// w.mu.Unlock()
+	//
 	w.backBufferBound = true
 	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	gl.Viewport(0, 0, int32(size.X), int32(size.Y))
+	// gl.Viewport(0, 0, int32(size.X), int32(size.Y))
 }
 
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
@@ -233,6 +237,7 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 
 	useOp(op)
 	gl.UseProgram(w.app.texture.program)
+	glErrProc("draw useproc")
 
 	// Start with src-space left, top, right and bottom.
 	srcL := float64(sr.Min.X)
@@ -288,20 +293,29 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
 	gl.Uniform1i(w.app.texture.sample, 0)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
-	gl.EnableVertexAttribArray(w.app.texture.pos)
-	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+	// This is essential in more recent GL to enable vertex arrays to work
+	var vao uint32
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
 
+	// note: pos and inUV use the *same* 2d quad inputs
 	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
+
+	// todo: can probably move these to common setup -- then just activate vao -- save that
+	// it holds all of these guys
+
+	// note: 0 stride and 0 offset -- just using same quads sequentially
+	gl.EnableVertexAttribArray(w.app.texture.pos)
+	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
+
 	gl.EnableVertexAttribArray(w.app.texture.inUV)
-	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
+	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
 
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-	gl.Flush()
-	w.glw.SwapBuffers()
 
 	// gl.DisableVertexAttribArray(w.app.texture.pos)
 	// gl.DisableVertexAttribArray(w.app.texture.inUV)
+	gl.DeleteVertexArrays(1, &vao)
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
@@ -364,8 +378,9 @@ outer:
 		case <-w.publish:
 			w.app.RunOnMain(func() {
 				theGPU.UseContext(w)
-				// gl.Flush()
-				// w.glw.SwapBuffers()
+				gl.Flush()
+				w.glw.SwapBuffers()
+				// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 				theGPU.ClearContext(w)
 			})
 			w.publishDone <- oswin.PublishResult{}

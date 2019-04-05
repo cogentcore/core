@@ -12,6 +12,7 @@
 package glos
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -76,10 +77,13 @@ func (t *textureImpl) upload(dp image.Point, src oswin.Image, sr image.Rectangle
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
+	glErrProc("tex upload tex")
 
 	width := dr.Dx()
 	if width*4 == buf.rgba.Stride {
 		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix))
+		glErrProc("tex subimg")
+		fmt.Printf("uploaded tex: dr: %+v\n", dr)
 		return
 	}
 	// TODO: can we use GL_UNPACK_ROW_LENGTH with glPixelStorei for stride in
@@ -88,6 +92,7 @@ func (t *textureImpl) upload(dp image.Point, src oswin.Image, sr image.Rectangle
 		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix[p:]))
 		p += buf.rgba.Stride
 	}
+	fmt.Printf("uploaded tex: dr: %+v\n", dr)
 }
 
 func (t *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
@@ -137,32 +142,47 @@ var quadCoords = []float32{
 	1, 1, // bottom right
 }
 
-const textureVertexSrc = `#version 110
+const textureVertexSrc = `
+#version 330
+
 uniform mat3 mvp;
 uniform mat3 uvp;
-attribute vec3 pos;
-attribute vec2 inUV;
-varying vec2 uv;
+
+in vec2 pos;
+in vec2 inUV;
+
+out vec2 uv;
+
 void main() {
-	vec3 p = pos;
-	p.z = 1.0;
+	vec3 p = vec3(pos, 1);
 	gl_Position = vec4(mvp * p, 1);
 	uv = (uvp * vec3(inUV, 1)).xy;
 }
 ` + "\x00"
 
-const textureFragmentSrc = `#version 110
+const textureFragmentSrc = `
+#version 330
+
 precision mediump float;
-varying vec2 uv;
+
 uniform sampler2D sample;
+
+in vec2 uv;
+
+out vec4 outputColor;
+
 void main() {
-	gl_FragColor = texture2D(sample, uv);
+	outputColor = texture(sample, uv);
 }
 ` + "\x00"
 
-const fillVertexSrc = `#version 110
+const fillVertexSrc = `
+#version 330
+
 uniform mat3 mvp;
-attribute vec3 pos;
+
+in vec3 pos;
+
 void main() {
 	vec3 p = pos;
 	p.z = 1.0;
@@ -170,10 +190,16 @@ void main() {
 }
 ` + "\x00"
 
-const fillFragmentSrc = `#version 110
+const fillFragmentSrc = `
+#version 330
+
 precision mediump float;
+
 uniform vec4 color;
+
+out vec4 outputColor;
+
 void main() {
-	gl_FragColor = color;
+	outputColor = color;
 }
 ` + "\x00"

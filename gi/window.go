@@ -867,7 +867,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	}
 	w.SetWinUpdating()
 	pr := prof.Start("win.UploadVpRegion")
-	if Render2DTrace {
+	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
@@ -890,7 +890,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	w.SetWinUpdating()
 	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
-	if Render2DTrace {
+	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.OSImage.Bounds(), w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
@@ -915,7 +915,7 @@ func (w *Window) UploadAllViewports() {
 	w.SetWinUpdating()
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
-	if Render2DTrace {
+	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
 	}
 	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
@@ -940,7 +940,7 @@ func (w *Window) UploadAllViewports() {
 		if gii != nil {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
-			if Render2DTrace {
+			if Render2DTrace || WinEventTrace {
 				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
 			}
 			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())

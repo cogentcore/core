@@ -13,6 +13,7 @@ package glos
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"sync"
 
@@ -42,13 +43,13 @@ func (gpu *gpuImpl) ClearContext(win oswin.Window) {
 	w.glctxMu.Unlock()
 }
 
-func (gpu *gpuImpl) NewProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
-	vertexShader, err := gpu.CompileShader(vertexShaderSource, gl.VERTEX_SHADER)
+func (gpu *gpuImpl) NewProgram(vertexSrc, fragmentSrc string) (uint32, error) {
+	vertexShader, err := gpu.CompileShader(vertexSrc, gl.VERTEX_SHADER)
 	if err != nil {
 		return 0, err
 	}
 
-	fragmentShader, err := gpu.CompileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
+	fragmentShader, err := gpu.CompileShader(fragmentSrc, gl.FRAGMENT_SHADER)
 	if err != nil {
 		return 0, err
 	}
@@ -58,6 +59,14 @@ func (gpu *gpuImpl) NewProgram(vertexShaderSource, fragmentShaderSource string) 
 	gl.AttachShader(program, vertexShader)
 	gl.AttachShader(program, fragmentShader)
 	gl.LinkProgram(program)
+	if glosDebug {
+		gl.ValidateProgram(program)
+	}
+
+	gl.DetachShader(program, vertexShader)
+	gl.DetachShader(program, fragmentShader)
+	gl.DeleteShader(vertexShader)
+	gl.DeleteShader(fragmentShader)
 
 	var status int32
 	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
@@ -70,9 +79,6 @@ func (gpu *gpuImpl) NewProgram(vertexShaderSource, fragmentShaderSource string) 
 
 		return 0, fmt.Errorf("failed to link program: %v", log)
 	}
-
-	gl.DeleteShader(vertexShader)
-	gl.DeleteShader(fragmentShader)
 
 	return program, nil
 }
@@ -91,10 +97,12 @@ func (gpu *gpuImpl) CompileShader(source string, shaderType uint32) (uint32, err
 		var logLength int32
 		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
 
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
+		msg := strings.Repeat("\x00", int(logLength+1))
+		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(msg))
 
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
+		err := fmt.Errorf("failed to compile:\n%v\nerror: %v", source, msg)
+		log.Printf("glos GPU CompileShader %v\n", err)
+		return 0, err
 	}
 
 	return shader, nil
@@ -112,4 +120,5 @@ func writeAff3(u int32, a f64.Aff3) {
 	m[2*3+1] = float32(a[1*3+2])
 	m[2*3+2] = 1
 	gl.UniformMatrix3fv(u, 1, false, &m[0])
+	glErrProc("writeaff3")
 }
