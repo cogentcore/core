@@ -23,6 +23,11 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
+// how to code opengl to be vulkan-friendly
+// https://developer.nvidia.com/opengl-vulkan
+// https://www.slideshare.net/CassEveritt/approaching-zero-driver-overhead
+// in general, use drawelements instead of arrays (i.e., use indexing)
+
 type gpuImpl struct {
 	// mu is in case we need a cpu-wide mutex -- mostly it is the
 	// window-specific glctxtMu that is used

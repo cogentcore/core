@@ -69,10 +69,11 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.Visible, glfw.True) // needed to position
 	glfw.WindowHint(glfw.Focused, glfw.True)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
+	glfw.WindowHint(glfw.ContextVersionMajor, 4) // 4.1 is max supported on macos
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.Samples, 0) // don't do multisampling for main window -- only in sub-render
 	if glosDebug {
 		glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 	}
