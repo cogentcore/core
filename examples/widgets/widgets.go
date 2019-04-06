@@ -32,7 +32,7 @@ func mainrun() {
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 	// ki.SignalTrace = true
-	gi.WinEventTrace = true
+	// gi.WinEventTrace = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
