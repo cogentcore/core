@@ -33,6 +33,7 @@ type windowImpl struct {
 	app *appImpl
 	glw *glfw.Window
 	event.Deque
+	runQueue    chan funcRun
 	publish     chan struct{}
 	publishDone chan oswin.PublishResult
 	drawDone    chan struct{}
@@ -40,12 +41,6 @@ type windowImpl struct {
 
 	// glctxMu is mutex for all OpenGL calls, locked in GPU.Context
 	glctxMu sync.Mutex
-
-	// backBufferBound is whether the default Framebuffer, with ID 0, also
-	// known as the back buffer or the window's Framebuffer, is bound and its
-	// viewport is known to equal the window size. It can become false when we
-	// bind to a texture's Framebuffer or when the window size changes.
-	backBufferBound bool
 
 	// textures are the textures created for this window -- they are released
 	// when the window is closed
@@ -111,6 +106,65 @@ func (w *windowImpl) NextEvent() oswin.Event {
 	return e
 }
 
+// winLoop is the window's own locked processing loop
+// all gl processing should be done on this loop by calling RunOnWin
+// and
+func (w *windowImpl) winLoop() {
+	runtime.LockOSThread()
+	theGPU.UseContext(w)
+	gl.Init() // call to init in each context
+	theGPU.ClearContext(w)
+outer:
+	for {
+		select {
+		case <-w.winClose:
+			break outer
+		case f := <-w.runQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		case <-w.publish:
+			// w.app.RunOnMain(func() {
+			theGPU.UseContext(w)
+			w.glw.SwapBuffers() // note: implicitly does a flush
+			// note: generally don't need this:
+			// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			theGPU.ClearContext(w)
+			// })
+			w.publishDone <- oswin.PublishResult{}
+		}
+	}
+}
+
+// todo: add to oswin.Window interface at some point
+
+// RunOnWin runs given function on window's unique locked thread
+func (w *windowImpl) RunOnWin(f func()) {
+	done := make(chan bool)
+	w.runQueue <- funcRun{f: f, done: done}
+	<-done
+}
+
+// GoRunOnWin runs given function on window's unique locked thread and returns immediately
+func (w *windowImpl) GoRunOnWin(f func()) {
+	go func() {
+		w.runQueue <- funcRun{f: f, done: nil}
+	}()
+}
+
+func (w *windowImpl) Publish() oswin.PublishResult {
+	w.publish <- struct{}{}
+	res := <-w.publishDone
+
+	select {
+	case w.drawDone <- struct{}{}:
+	default:
+	}
+
+	return res
+}
+
 func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
 	originalSRMin := sr.Min
 	sr = sr.Intersect(src.Bounds())
@@ -140,25 +194,10 @@ func useOp(op draw.Op) {
 	}
 }
 
-// todo: this appears to be unnecessary
-func (w *windowImpl) bindBackBuffer() {
-	// w.mu.Lock()
-	// size := w.Sz
-	// w.mu.Unlock()
-	//
-	w.backBufferBound = true
-	// gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
-	// gl.Viewport(0, 0, int32(size.X), int32(size.Y))
-}
-
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
-	w.app.RunOnMain(func() {
+	w.RunOnWin(func() {
 		theGPU.UseContext(w)
 		defer theGPU.ClearContext(w)
-
-		if !w.backBufferBound {
-			w.bindBackBuffer()
-		}
 
 		doFill(w.app, mvp, src, op)
 	})
@@ -216,7 +255,7 @@ func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rec
 }
 
 func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	w.app.RunOnMain(func() {
+	w.RunOnWin(func() {
 		w.draw(src2dst, src, sr, op, opts)
 	})
 }
@@ -231,10 +270,6 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 
 	theGPU.UseContext(w)
 	defer theGPU.ClearContext(w)
-
-	if !w.backBufferBound {
-		w.bindBackBuffer()
-	}
 
 	useOp(op)
 	gl.UseProgram(w.app.texture.program)
@@ -366,39 +401,6 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float64) f64.Af
 		trx - tlx, blx - tlx, tlx,
 		try - tly, bly - tly, tly,
 	}
-}
-
-// drawLoop is the primary drawing loop.
-func (w *windowImpl) drawLoop() {
-	runtime.LockOSThread()
-outer:
-	for {
-		select {
-		case <-w.winClose:
-			break outer
-		case <-w.publish:
-			w.app.RunOnMain(func() {
-				theGPU.UseContext(w)
-				gl.Flush()
-				w.glw.SwapBuffers()
-				// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-				theGPU.ClearContext(w)
-			})
-			w.publishDone <- oswin.PublishResult{}
-		}
-	}
-}
-
-func (w *windowImpl) Publish() oswin.PublishResult {
-	w.publish <- struct{}{}
-	res := <-w.publishDone
-
-	select {
-	case w.drawDone <- struct{}{}:
-	default:
-	}
-
-	return res
 }
 
 func (w *windowImpl) Screen() *oswin.Screen {

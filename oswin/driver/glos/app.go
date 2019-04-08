@@ -193,7 +193,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	if !app.texture.init {
 		app.RunOnMain(func() {
-			theGPU.UseContext(w)
+			theGPU.UseContext(w) // initGL needs a context -- use the first
 			err = app.initGLPrograms()
 			if err != nil {
 				log.Printf("glos initGLPrograms err:\n%s\n", err)
@@ -201,6 +201,8 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 			theGPU.ClearContext(w)
 		})
 	}
+
+	go w.winLoop() // start window's own dedicated loop
 
 	glw.SetPosCallback(w.moved)
 	glw.SetSizeCallback(w.winResized)
@@ -218,10 +220,8 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetCursorEnterCallback(w.cursorEnterEvent)
 	glw.SetDropCallback(w.dropEvent)
 
-	go w.drawLoop() // monitors for publish events
-
 	w.getScreen()
-	w.show() // todo: need to raise window too -- not supported in glfw
+	w.show()
 
 	return w, nil
 }
