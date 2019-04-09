@@ -34,9 +34,6 @@ import (
 
 func init() {
 	runtime.LockOSThread()
-	if err := glfw.Init(); err != nil {
-		log.Fatalln("failed to initialize glfw:", err)
-	}
 }
 
 var glosDebug = true
@@ -73,10 +70,11 @@ type appImpl struct {
 	mu            sync.Mutex
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
+	shareWin      *glfw.Window // a non-visible, always-present window that all windows share gl context with
 	windows       map[*glfw.Window]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
-	ctxtwin       *windowImpl
+	ctxtwin       *windowImpl // context window, dynamically set, for e.g., pointer and other methods
 	name          string
 	about         string
 	quitting      bool          // set to true when quitting and closing windows
@@ -91,7 +89,7 @@ var mainCallback func(oswin.App)
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(oswin.App)) {
 	mainCallback = f
-	theApp.getScreens()
+	theApp.initGl()
 	oswin.TheApp = theApp
 	go func() {
 		mainCallback(theApp)
@@ -155,6 +153,27 @@ func (app *appImpl) stopMain() {
 	app.mainDone <- struct{}{}
 }
 
+// initGl initializes glfw, opengl, etc
+func (app *appImpl) initGl() {
+	if err := glfw.Init(); err != nil {
+		log.Fatalln("oswin.glos failed to initialize glfw:", err)
+	}
+	glfw.DefaultWindowHints()
+	glfw.WindowHint(glfw.Resizable, glfw.False)
+	glfw.WindowHint(glfw.Visible, glfw.False)
+	app.shareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
+	if err != nil {
+		log.Fatalln("oswin.glos failed to create hidden share window:", err)
+	}
+	app.shareWin.MakeContextCurrent()
+	err = app.initGLPrograms()
+	if err != nil {
+		log.Printf("oswin.glos initGLPrograms err:\n%s\n", err)
+	}
+	app.DetatchCurrentContext()
+	app.getScreens()
+}
+
 ////////////////////////////////////////////////////////
 //  Window
 
@@ -190,17 +209,6 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.windows[glw] = w
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
-
-	if !app.texture.init {
-		app.RunOnMain(func() {
-			theGPU.UseContext(w) // initGL needs a context -- use the first
-			err = app.initGLPrograms()
-			if err != nil {
-				log.Printf("glos initGLPrograms err:\n%s\n", err)
-			}
-			theGPU.ClearContext(w)
-		})
-	}
 
 	go w.winLoop() // start window's own dedicated loop
 

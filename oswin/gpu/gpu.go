@@ -1,12 +1,8 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2019, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// based extensively on vulkan-go/asche
-// The MIT License (MIT)
-// Copyright © 2017 Maxim Kupriianov <max@kc.vc>
-
-package oswin
+package gpu
 
 // TheGPU is the current oswin GPU instance
 var TheGPU GPU
@@ -35,4 +31,8 @@ type GPU interface {
 	// CompileShader returns a new compiled shader from given source.
 	// return value is the GL handle.
 	CompileShader(source string) (uint32, error)
+
+	// 	NextUniformBindingPoint returns the next avail uniform binding point.
+	// Counts up from 0 -- this call increments for next call.
+	NextUniformBindingPoint() int32
 }

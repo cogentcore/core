@@ -62,7 +62,7 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	_, _, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.True)
-	glfw.WindowHint(glfw.Visible, glfw.True) // needed to position
+	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
 	glfw.WindowHint(glfw.Focused, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4) // 4.1 is max supported on macos
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
@@ -83,7 +83,7 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	win, err := glfw.CreateWindow(opts.Size.X, opts.Size.Y, opts.GetTitle(), nil, nil)
+	win, err := glfw.CreateWindow(opts.Size.X, opts.Size.Y, opts.GetTitle(), nil, theApp.shareWin)
 	if err != nil {
 		return win, err
 	}
