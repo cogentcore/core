@@ -16,7 +16,7 @@ import (
 type Types int32
 
 const (
-	NoType Types = iota
+	UndefType Types = iota
 	Bool
 	Int
 	UInt
@@ -29,13 +29,13 @@ const (
 
 var KiT_Types = kit.Enums.AddEnum(TypesN, false, nil)
 
-var TypeNames = map[Type]string{
-	NoType:  "none",
-	Bool:    "bool",
-	Int:     "int",
-	UInt:    "uint",
-	Float32: "float",
-	Float64: "double",
+var TypeNames = map[Types]string{
+	UndefType: "none",
+	Bool:      "bool",
+	Int:       "int",
+	UInt:      "uint",
+	Float32:   "float",
+	Float64:   "double",
 }
 
 // UniType represents a fully-specified GPU uniform type, including vectors and matricies
@@ -46,11 +46,11 @@ type UniType struct {
 }
 
 // Name returns the full GLSL type name for the type
-func (ty *UniType) Name() {
+func (ty *UniType) Name() string {
 	if ty.Vec == 0 && ty.MatCol == 0 {
 		return TypeNames[ty.Type]
 	}
-	pfx := TypeNames[ty.Type][0]
+	pfx := TypeNames[ty.Type][0:1]
 	if ty.Type == Float32 {
 		pfx = ""
 	}
@@ -63,8 +63,9 @@ func (ty *UniType) Name() {
 	}
 }
 
-// InputType represents a fully-specified GPU vertex input type, including vectors and matricies
-type InputType struct {
+// VectorType represents a fully-specified GPU vector type, e.g., for inputs / outputs
+// to shader programs
+type VectorType struct {
 	Type Types `desc:"data type"`
 	Len  int   `desc:"length of vector (valid values are 2,3,4)"`
 }

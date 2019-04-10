@@ -4,6 +4,8 @@
 
 package gpu
 
+import "github.com/goki/gi/oswin"
+
 // TheGPU is the current oswin GPU instance
 var TheGPU GPU
 
@@ -17,20 +19,22 @@ type GPU interface {
 	// All methods in GPU operate on the current context.
 	// Also locks a per-window mutex, as GL calls are not threadsafe -- MUST
 	// call ClearContext after every call to UseContext
-	UseContext(win Window)
+	UseContext(win oswin.Window)
 
 	// ClearContext unsets the current OpenGL context for given window
 	// and unlocks the per-window mutex.
 	// Assumes that UseContext was previously called on window.
-	ClearContext(win Window)
+	ClearContext(win oswin.Window)
 
-	// NewProgram returns a new program with the given vertex and fragment
-	// shader programs, in GLSL.  return value is the GL handle.
-	NewProgram(vertexShaderSrc, fragmentShaderSrc string) (uint32, error)
+	// NewProgram returns a new Program with given name -- for standalone programs.
+	// See also NewPipeline.
+	NewProgram(name string) Program
 
-	// CompileShader returns a new compiled shader from given source.
-	// return value is the GL handle.
-	CompileShader(source string) (uint32, error)
+	// NewPipeline returns a new Pipeline to manage multiple coordinated Programs.
+	NewPipeline(name string) Pipeline
+
+	// NewBufferMgr returns a new BufferMgr for managing Vectors and Indexes for rendering.
+	NewBufferMgr() BufferMgr
 
 	// 	NextUniformBindingPoint returns the next avail uniform binding point.
 	// Counts up from 0 -- this call increments for next call.

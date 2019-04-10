@@ -29,7 +29,7 @@ type Uniform interface {
 
 	// SetLen sets the number of array elements -- if this is changed, then the associated
 	// Shader program needs to be re-generated and recompiled.
-	SetLen(int ln)
+	SetLen(ln int)
 
 	// Offset returns byte-wise offset into the UBO where this uniform starts (only for UBO's)
 	Offset() int32

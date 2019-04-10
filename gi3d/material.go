@@ -48,6 +48,12 @@ type Material interface {
 	Phong() Phong
 }
 
+// Design note: all vertex data must be in ONE gpu.VectorsBuffer, and the cost of
+// consolidating a bunch of vector data dynamically on the CPU is going to be
+// way higher than buffer switching on the GPU and re-running the same program
+// so basically the gpu.VectorsBuffer must be assembled at the Object level
+// and, yeah, each object rendered separately -- no aggrgation is sensible.
+
 // Base material type
 type MaterialBase struct {
 	Nm   string
@@ -56,10 +62,6 @@ type MaterialBase struct {
 }
 
 // ColorOpaqueVertex is a material with opaque color parameters per vertex.
-// All verticies with this type of material, which has no individual material
-// parameters at all, can be rendered together at the same time -- this
-// material aggregates all of those verticies (subject to other potential
-// optimizations about what is rendered in the scene) and does them all at once.
 // This uses the standard Phong color model, with color computed in the
 // fragment shader (more accurate, more expensive).
 type ColorOpaqueVertex struct {
@@ -67,10 +69,6 @@ type ColorOpaqueVertex struct {
 }
 
 // ColorTransVertex is a material with transparent color parameters per vertex.
-// All verticies with this type of material, which has no individual material
-// colors, can be rendered together at the same time -- this
-// material aggregates all of those verticies (subject to other potential
-// optimizations about what is rendered in the scene) and does them all at once.
 // This uses the standard Phong color model, with color computed in the
 // fragment shader (more accurate, more expensive).
 // Verticies are automatically depth-sorted using GPU-computed depth map.
@@ -79,18 +77,18 @@ type ColorTransVertex struct {
 }
 
 // ColorOpaqueUniform is a material with one set of opaque color parameters
-// for entire object.  There is one of these per color, and it renders all verticies
-// of that color in one pass.  This uses the standard Phong color model, with
-// color computed in the fragment shader (more accurate, more expensive).
+// for entire object.  There is one of these per color.
+// This uses the standard Phong color model, with color computed in the
+// fragment shader (more accurate, more expensive).
 type ColorOpaqueUniform struct {
 	MaterialBase
 	Color math32.Color
 }
 
 // ColorTransUniform is a material with one set of transparent color parameters
-// for entire object. There is one of these per color per distance, and it renders
-// all verticies of that color in one pass.  This uses the standard Phong color model, with
-// color computed in the fragment shader (more accurate, more expensive).
+// for entire object. There is one of these per color.
+// This uses the standard Phong color model, with color computed in the
+// fragment shader (more accurate, more expensive).
 type ColorTransUniform struct {
 	MaterialBase
 	Color math32.Color

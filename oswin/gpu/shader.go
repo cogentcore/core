@@ -10,7 +10,7 @@ import "github.com/goki/ki/kit"
 type ShaderTypes int32
 
 const (
-	NoType ShaderTypes = iota
+	UndefShader ShaderTypes = iota
 	VertexShader
 	FragmentShader
 	ComputeShader
