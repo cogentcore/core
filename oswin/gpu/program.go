@@ -7,11 +7,28 @@ package gpu
 // Program manages a set of shaders and associated variables and uniforms.
 // Multiple programs can be assembled into a Pipeline, which can create
 // new Programs.  GPU.NewProgram() can also create standalone Programs.
+// All uniforms must be added before compiling program.
 type Program interface {
 	// Name returns name of program
 	Name() string
 
-	// AddUniform adds an individual standalone uniform variable to the program of given type
+	// AddShader adds shader of given type, unique name and source code.
+	// Any array uniform's will add their #define NAME_LEN's to the top
+	// of the source code automatically, so the source can assume those exist
+	// when compiled.
+	AddShader(typ ShaderTypes, name string, src string) (Shader, error)
+
+	// ShaderByName returns shader by its unique name
+	ShaderByName(name string) Shader
+
+	// ShaderByType returns shader by its type
+	ShaderByType(typ ShaderTypes) Shader
+
+	// SetFragDataVar sets the variable name to use for the fragment shader's output
+	SetFragDataVar(name string)
+
+	// AddUniform adds an individual standalone uniform variable to the program of given type.
+	// Must add all uniform variables before compiling, as they add to source.
 	AddUniform(name string, typ UniType, ary bool, ln int) Uniform
 
 	// NewUniforms makes a new named set of uniforms (i.e,. a Uniform Buffer Object)
@@ -46,7 +63,7 @@ type Program interface {
 	Inputs() []Vectors
 
 	// Outputs returns a list (slice) of all the output ('out') vectors defined for this program.
-	Output() []Vectors
+	Outputs() []Vectors
 
 	// InputByName returns given input vectors by name.
 	// Returns nil if not found (error auto logged)
@@ -64,18 +81,6 @@ type Program interface {
 	// Returns nil if not found (error auto logged)
 	OutputByRole(role VectorRoles) Vectors
 
-	// AddShader adds shader of given type, unique name and source code.
-	// Any array uniform's will add their #define NAME_LEN's to the top
-	// of the source code automatically, so the source can assume those exist
-	// when compiled.
-	AddShader(typ ShaderTypes, name string, src string) error
-
-	// ShaderByName returns shader by its unique name
-	ShaderByName(name string) Shader
-
-	// ShaderByType returns shader by its type
-	ShaderByType(typ ShaderTypes) Shader
-
 	// Compile compiles all the shaders and links the program, binds the uniforms
 	// and input / output vector variables, etc.
 	// This must be called after setting the lengths of any array uniforms (e.g.,
@@ -83,8 +88,14 @@ type Program interface {
 	Compile() error
 
 	// Handle returns the handle for the program -- only valid after a Compile call
-	Handle() int32
+	Handle() uint32
 
 	// Activate activates this as the active program -- must have been Compiled first.
 	Activate()
+
+	// Delete deletes the GPU resources associated with this program
+	// (requires Compile and Activate to re-establish a new one).
+	// Should be called prior to Go object being deleted
+	// (ref counting can be done externally).
+	Delete()
 }

@@ -25,18 +25,18 @@ type Uniform interface {
 	Array() bool
 
 	// Len returns number of array elements, if an Array (can be 0)
-	Len() int32
+	Len() int
 
 	// SetLen sets the number of array elements -- if this is changed, then the associated
 	// Shader program needs to be re-generated and recompiled.
 	SetLen(ln int)
 
 	// Offset returns byte-wise offset into the UBO where this uniform starts (only for UBO's)
-	Offset() int32
+	Offset() int
 
 	// Size() returns byte-wise size of this uniform, *including padding*,
 	// as determined by the std140 standard opengl layout
-	Size() int32
+	Size() int
 
 	// Handle() returns the unique id for this uniform.
 	// if in a UBO, then this is the index of the item within the list of UBO's
@@ -57,14 +57,17 @@ type Uniforms interface {
 	Name() string
 
 	// AddUniform adds a uniform variable to this collection of uniforms of given type
-	AddUniform(name string, typ UniType, ary bool, ln int)
+	AddUniform(name string, typ UniType, ary bool, ln int) Uniform
 
-	// UniformByName returns a Uniform based on unique name -- this could be in a
-	// collection of Uniforms (i.e., a Uniform Buffer Object in GL) or standalone
-	UniformByName() Uniform
+	// UniformByName returns a Uniform based on unique name.
+	// returns nil and logs an error if not found
+	UniformByName(name string) Uniform
 
-	// Gen generates the Uniform Buffer Object structure and reserves the binding point
-	Gen() error
+	// LenDefines returns the #define NAME_LEN source code for all uniforms, empty if no arrays
+	LenDefines() string
+
+	// Activate generates the Uniform Buffer Object structure and reserves the binding point
+	Activate() error
 
 	// Bind binds the Uniform Buffer Object structure to given program
 	Bind(prog Program) error

@@ -351,7 +351,7 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 
 	// gl.DisableVertexAttribArray(w.app.texture.pos)
 	// gl.DisableVertexAttribArray(w.app.texture.inUV)
-	gl.DeleteVertexArrays(1, &vao)
+	// gl.DeleteVertexArrays(1, &vao)
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {

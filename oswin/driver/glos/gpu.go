@@ -8,13 +8,13 @@ package glos
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/gpu"
 	"golang.org/x/image/math/f64"
 )
 
@@ -22,6 +22,15 @@ import (
 // https://developer.nvidia.com/opengl-vulkan
 // https://www.slideshare.net/CassEveritt/approaching-zero-driver-overhead
 // in general, use drawelements instead of arrays (i.e., use indexing)
+
+var glTypes = map[gpu.Types]int32{
+	gpu.UndefType: gl.FLOAT,
+	gpu.Bool:      gl.BOOL,
+	gpu.Int:       gl.INT,
+	gpu.UInt:      gl.UINT,
+	gpu.Float32:   gl.FLOAT,
+	gpu.Float64:   gl.DOUBLE,
+}
 
 type gpuImpl struct {
 	// mu is in case we need a cpu-wide mutex -- mostly it is the
@@ -41,6 +50,10 @@ func (gpu *gpuImpl) ClearContext(win oswin.Window) {
 	w := win.(*windowImpl)
 	glfw.DetachCurrentContext()
 	w.glctxMu.Unlock()
+}
+
+func (gpu *gpuImpl) Type(typ gpu.Types) int32 {
+	return glTypes[typ]
 }
 
 func (gpu *gpuImpl) NewProgram(vertexSrc, fragmentSrc string) (uint32, error) {
@@ -81,31 +94,6 @@ func (gpu *gpuImpl) NewProgram(vertexSrc, fragmentSrc string) (uint32, error) {
 	}
 
 	return program, nil
-}
-
-func (gpu *gpuImpl) CompileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		msg := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(msg))
-
-		err := fmt.Errorf("failed to compile:\n%v\nerror: %v", source, msg)
-		log.Printf("glos GPU CompileShader %v\n", err)
-		return 0, err
-	}
-
-	return shader, nil
 }
 
 func writeAff3(u int32, a f64.Aff3) {

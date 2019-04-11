@@ -5,7 +5,6 @@
 package gpu
 
 import (
-	"github.com/g3n/engine/math32"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
 )
@@ -39,17 +38,17 @@ type Vectors interface {
 //    this is the render step.
 
 // VectorsBuffer represents a buffer with multiple Vectors elements, which
-// can be either interleaved (starting from the start) or appended seqeuentially.
-// It is created in BufferMgr.AddVectorsBuffer -- the Mgr is essential for
-// managing buffers.
+// can be either interleaved (contiguous from the start only) or appended seqeuentially.
+// All elements must be Float32, not Float64!  Need a different buffer type that handles 64bit.
+// It is created in BufferMgr.AddVectorsBuffer -- the Mgr is essential for managing buffers.
 // The buffer maintains its own internal memory storage (mat32.ArrayF32)
 // which can be operated upon or set from external sources.
 type VectorsBuffer interface {
 	// Usage returns whether this is dynamic or static etc
-	Usage() VectorUsage
+	Usage() VectorUsages
 
 	// SetUsage sets the usage of the buffer
-	SetUsage(usg VectorUsage)
+	SetUsage(usg VectorUsages)
 
 	// AddVectors adds a Vectors to this buffer, all interleaved vectors
 	// must be added first, before any non-interleaved (error will be logged if not).
@@ -73,16 +72,24 @@ type VectorsBuffer interface {
 	// SetLen sets the number of elements in the buffer -- must be same number for each
 	// Vectors type in buffer.  Also triggers computation of offsets and strides for each
 	// vector -- call after having added all vectors.
-	SetLen(ln int32)
+	SetLen(ln int)
 
 	// Len returns the number of elements in the buffer.
-	Len() int32
+	Len() int
 
-	// ByteOffset returns the starting offset of given Vectors in buffer
-	ByteOffset(vec Vectors) uint32
+	// ByteOffset returns the starting offset of given Vectors in buffer.
+	// Only valid after SetLen has been called.
+	ByteOffset(vec Vectors) int
 
-	// Stride returns the stride of this item within VectorsBuffer
-	Stride(vec Vectors) uint32
+	// Offset returns the float element wise starting offset of given Vectors (ByteOffset / 4).
+	// Only valid after SetLen has been called.
+	Offset(vec Vectors) int
+
+	// Stride returns the float element stride of given Vectors in buffer
+	Stride(vec Vectors) int
+
+	// ByteStride returns the byte stride of given Vectors in buffer (Stride * 4)
+	ByteStride(vec Vectors) int
 
 	// SetAllData sets all of the data in the buffer copying from given source
 	SetAllData(data mat32.ArrayF32)
@@ -91,20 +98,18 @@ type VectorsBuffer interface {
 	// data -- if you modify it, you modify the internal data!  copy first if needed.
 	AllData() mat32.ArrayF32
 
-	// SetVecData sets data for given vectors -- handles interleaving etc
+	// SetVecData sets data for given Vectors -- handles interleaving etc
 	SetVecData(vec Vectors, data mat32.ArrayF32)
 
-	// VecData returns data for given vectors -- this is a copy for interleaved data
+	// VecData returns data for given Vectors -- this is a copy for interleaved data
 	// and a direct sub-slice for non-interleaved.
 	VecData(vec Vectors) mat32.ArrayF32
 
-	// Vec3Func iterates over all values of given vec3 vector
+	// Vec3Func iterates over all values of given vec3 Vectors
 	// and calls the specified callback function with a pointer to each item as a Vector3.
 	// Modifications to vec will be applied to the buffer at each iteration.
 	// The callback function returns false to break or true to continue.
-	Vec3Func(vec Vectors, fun func(vec *math32.Vector3) bool)
-
-	// todo: internally maintain bool for Gen
+	Vec3Func(vec Vectors, fun func(vec *mat32.Vector3) bool)
 
 	// Activate binds buffer as active one, and configures it per all existing settings
 	Activate()
@@ -124,7 +129,13 @@ type VectorsBuffer interface {
 	TransferVec(vec Vectors)
 
 	// Delete deletes the GPU resources associated with this buffer
+	// (requires Activate to re-establish a new one).
+	// Should be called prior to Go object being deleted
+	// (ref counting can be done externally).
 	Delete()
+
+	// GPUUsage returns the GPU vector usage id for given usage
+	GPUUsage(usg VectorUsages) uint32
 }
 
 // VectorRoles are the functional roles of vectors
@@ -151,13 +162,13 @@ var KiT_VectorRoles = kit.Enums.AddEnum(VectorRolesN, false, nil)
 // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBufferData.xhtml
 // http://docs.gl/gl4/glBufferStorage (new more precise version that is only avail in 4.4)
 
-// VectorUsage are the usage hints for vector buffers
-type VectorUsage int32
+// VectorUsages are the usage hints for vector buffers
+type VectorUsages int32
 
 const (
 	// The data store contents will be modified once and used at most a few times.
 	// The data store contents are modified by the application, and used as the source for GL drawing and image specification commands.
-	StreamDraw VectorUsage = iota
+	StreamDraw VectorUsages = iota
 
 	// The data store contents will be modified once and used at most a few times.
 	// The data store contents are modified by reading data from the GL, and used to return that data when queried by the application.
@@ -191,9 +202,9 @@ const (
 	// The data store contents are modified by reading data from the GL, and used as the source for GL drawing and image specification commands.
 	DynamicCopy
 
-	VectorUsageN
+	VectorUsagesN
 )
 
-//go:generate stringer -type=VectorUsage
+//go:generate stringer -type=VectorUsages
 
-var KiT_VectorUsage = kit.Enums.AddEnum(VectorUsageN, false, nil)
+var KiT_VectorUsages = kit.Enums.AddEnum(VectorUsagesN, false, nil)

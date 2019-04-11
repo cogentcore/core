@@ -20,4 +20,9 @@ type Pipeline interface {
 
 	// Programs returns list (slice) of programs in pipeline, in order added
 	Programs() []Program
+
+	// Delete deletes the GPU resources associated with this pipeline
+	// Should be called prior to Go object being deleted
+	// (ref counting can be done externally).
+	Delete()
 }

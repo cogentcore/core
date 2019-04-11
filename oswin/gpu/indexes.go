@@ -10,10 +10,10 @@ import "github.com/goki/gi/mat32"
 // (i.e., GL_ELEMENT_ARRAY_BUFFER for glDrawElements calls in OpenGL).
 type IndexesBuffer interface {
 	// SetLen sets the number of indexes in buffer
-	SetLen(ln int32)
+	SetLen(ln int)
 
 	// Len returns the number of indexes in bufer
-	Len() int32
+	Len() int
 
 	// Set sets the indexes by copying given data
 	Set(idxs mat32.ArrayU32)
@@ -32,12 +32,10 @@ type IndexesBuffer interface {
 	// strategy per: https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
 	// so it is safe if buffer was still being used from prior GL rendering call.
 	Transfer()
+
+	// Delete deletes the GPU resources associated with this buffer
+	// (requires Activate to re-establish a new one).
+	// Should be called prior to Go object being deleted
+	// (ref counting can be done externally).
+	Delete()
 }
-
-// from g3n/engine/geometry.go: RenderSetup at end -- key..
-// // Update Indices buffer if necessary
-// if g.indices.Size() > 0 && g.updateIndices {
-// 	gs.BindBuffer(gls.ELEMENT_ARRAY_BUFFER, g.handleIndices)
-// 	gs.BufferData(gls.ELEMENT_ARRAY_BUFFER, g.indices.Bytes(), g.indices, gls.STATIC_DRAW)
-// 	g.updateIndices = false
-

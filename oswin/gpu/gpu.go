@@ -26,6 +26,9 @@ type GPU interface {
 	// Assumes that UseContext was previously called on window.
 	ClearContext(win oswin.Window)
 
+	// Type returns the GPU data type id for given type
+	Type(typ Types) uint32
+
 	// NewProgram returns a new Program with given name -- for standalone programs.
 	// See also NewPipeline.
 	NewProgram(name string) Program

@@ -404,7 +404,7 @@ func (app *appImpl) initGLPrograms() error {
 
 	gl.BindFragDataLocation(p, 0, gl.Str("outputColor\x00"))
 
-	fmt.Printf("texture: %+v\n", app.texture)
+	// fmt.Printf("texture: %+v\n", app.texture)
 
 	p, err = theGPU.NewProgram(fillVertexSrc, fillFragmentSrc)
 	if err != nil {

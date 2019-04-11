@@ -10,13 +10,13 @@ package gpu
 // TheGPU.NewBufferMgr() returns a new buffer manager.
 type BufferMgr interface {
 	// AddVectorsBuffer makes a new VectorsBuffer to contain Vectors.
-	AddVectorsBuffer(usg VectorUsage) VectorsBuffer
+	AddVectorsBuffer(usg VectorUsages) VectorsBuffer
 
 	// VectorsBuffer returns the VectorsBuffer for this mgr
 	VectorsBuffer() VectorsBuffer
 
 	// AddIndexesBuffer makes a new IndexesBuffer to contain Indexes.
-	AddIndexesBuffer(usg VectorUsage) IndexesBuffer
+	AddIndexesBuffer(usg VectorUsages) IndexesBuffer
 
 	// IndexesBuffer returns the IndexesBuffer for this mgr
 	IndexesBuffer() IndexesBuffer
@@ -31,4 +31,10 @@ type BufferMgr interface {
 	// Transfer transfers all buffer data to GPU -- Activate must have been called
 	// with no other such buffers activated in between.
 	Transfer()
+
+	// Delete deletes the GPU resources associated with this buffer
+	// (requires Activate to re-establish a new one).
+	// Should be called prior to Go object being deleted
+	// (ref counting can be done externally).
+	Delete()
 }
