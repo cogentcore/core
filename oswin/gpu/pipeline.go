@@ -11,6 +11,9 @@ type Pipeline interface {
 	// Name returns name of this pipeline
 	Name() string
 
+	// SetName sets name of this pipeline
+	SetName(name string)
+
 	// AddProgram adds program with given name to the pipeline
 	AddProgram(name string) Program
 

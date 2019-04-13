@@ -13,8 +13,8 @@ import (
 	"github.com/goki/gi/oswin/gpu"
 )
 
-// Shader manages a single shader program
-type shader struct {
+// Shader manages a single Shader program
+type Shader struct {
 	init   bool
 	handle uint32
 	name   string
@@ -23,22 +23,22 @@ type shader struct {
 	orgSrc string // original source as provided by user -- program adds extra source..
 }
 
-// Name returns the unique name of this shader
-func (sh *shader) Name() string {
+// Name returns the unique name of this Shader
+func (sh *Shader) Name() string {
 	return sh.name
 }
 
-// Type returns the type of the shader
-func (sh *shader) Type() gpu.ShaderTypes {
+// Type returns the type of the Shader
+func (sh *Shader) Type() gpu.ShaderTypes {
 	return sh.typ
 }
 
-// Compile compiles given source code for the shader, of given type and unique name.
+// Compile compiles given source code for the Shader, of given type and unique name.
 // Currently, source must be GLSL version 410, which is the supported version of OpenGL.
 // The source does not need to be null terminated (with \x00 code) but that will be more
 // efficient, skipping the extra step of adding the null terminator.
 // Context must be set.
-func (sh *shader) Compile(src string) error {
+func (sh *Shader) Compile(src string) error {
 	handle := gl.CreateShader(sh.GPUType(sh.typ))
 
 	sh.src = src
@@ -68,26 +68,26 @@ func (sh *shader) Compile(src string) error {
 	return nil
 }
 
-// Handle returns the GPU handle for this shader
-func (sh *shader) Handle() uint32 {
+// Handle returns the GPU handle for this Shader
+func (sh *Shader) Handle() uint32 {
 	return sh.handle
 }
 
-// Source returns the actual final source code for the shader
+// Source returns the actual final source code for the Shader
 // excluding the null terminator (for display purposes).
 // This includes extra auto-generated code from the Program.
-func (sh *shader) Source() string {
+func (sh *Shader) Source() string {
 	return gpu.GoString(sh.src)
 }
 
 // OrigSource returns the original user-supplied source code
 // excluding the null terminator (for display purposes)
-func (sh *shader) OrigSource() string {
+func (sh *Shader) OrigSource() string {
 	return gpu.GoString(sh.orgSrc)
 }
 
-// Delete deletes the shader
-func (sh *shader) Delete() {
+// Delete deletes the Shader
+func (sh *Shader) Delete() {
 	if !sh.init {
 		return
 	}
@@ -96,8 +96,8 @@ func (sh *shader) Delete() {
 	sh.init = false
 }
 
-// GPUType returns the GPU type id of the given shader type
-func (sh *shader) GPUType(typ gpu.ShaderTypes) uint32 {
+// GPUType returns the GPU type id of the given Shader type
+func (sh *Shader) GPUType(typ gpu.ShaderTypes) uint32 {
 	return glShaders[typ]
 }
 

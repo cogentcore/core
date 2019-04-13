@@ -13,37 +13,37 @@ import (
 // VAO (Vertex Array Object) for OpenGL which holds these active buffer pointers.
 // A typical Shape / Object / Geom will just have this.
 // TheGPU.NewBufferMgr() returns a new buffer manager.
-type bufferMgr struct {
+type BufferMgr struct {
 	init   bool
 	handle uint32
-	vecs   *vecsBuff
-	idxs   *idxsBuff
+	vecs   *VectorsBuffer
+	idxs   *IndexesBuffer
 }
 
 // AddVectorsBuffer makes a new VectorsBuffer to contain Vectors.
-func (bm *bufferMgr) AddVectorsBuffer(usg gpu.VectorUsages) gpu.VectorsBuffer {
-	bm.vecs = &vecsBuff{usage: usg}
+func (bm *BufferMgr) AddVectorsBuffer(usg gpu.VectorUsages) gpu.VectorsBuffer {
+	bm.vecs = &VectorsBuffer{usage: usg}
 	return bm.vecs
 }
 
 // VectorsBuffer returns the VectorsBuffer for this mgr
-func (bm *bufferMgr) VectorsBuffer() gpu.VectorsBuffer {
+func (bm *BufferMgr) VectorsBuffer() gpu.VectorsBuffer {
 	return bm.vecs
 }
 
 // AddIndexesBuffer makes a new IndexesBuffer to contain Indexes.
-func (bm *bufferMgr) AddIndexesBuffer(usg gpu.VectorUsages) gpu.IndexesBuffer {
-	bm.idxs = &idxsBuff{}
+func (bm *BufferMgr) AddIndexesBuffer(usg gpu.VectorUsages) gpu.IndexesBuffer {
+	bm.idxs = &IndexesBuffer{}
 	return bm.idxs
 }
 
 // IndexesBuffer returns the IndexesBuffer for this mgr
-func (bm *bufferMgr) IndexesBuffer() gpu.IndexesBuffer {
+func (bm *BufferMgr) IndexesBuffer() gpu.IndexesBuffer {
 	return bm.idxs
 }
 
 // Activate binds buffers as active and configures as needed
-func (bm *bufferMgr) Activate() {
+func (bm *BufferMgr) Activate() {
 	if !bm.init {
 		gl.GenVertexArrays(1, &bm.handle)
 		bm.init = true
@@ -59,13 +59,13 @@ func (bm *bufferMgr) Activate() {
 
 // Handle returns the unique handle for this buffer manager -- only valid after Activate()
 // this is the VAO
-func (bm *bufferMgr) Handle() uint32 {
+func (bm *BufferMgr) Handle() uint32 {
 	return bm.handle
 }
 
 // Transfer transfers all buffer data to GPU -- Activate must have been called
 // with no other such buffers activated in between.
-func (bm *bufferMgr) Transfer() {
+func (bm *BufferMgr) Transfer() {
 	if bm.idxs != nil {
 		bm.idxs.Transfer()
 	}
@@ -78,7 +78,7 @@ func (bm *bufferMgr) Transfer() {
 // (requires Activate to re-establish a new one).
 // Should be called prior to Go object being deleted
 // (ref counting can be done externally).
-func (bm *bufferMgr) Delete() {
+func (bm *BufferMgr) Delete() {
 	if bm.idxs != nil {
 		bm.idxs.Delete()
 	}

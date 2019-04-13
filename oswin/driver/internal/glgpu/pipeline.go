@@ -15,7 +15,7 @@ import (
 // A new Pipeline can be created in TheGPU.NewPipeline().
 type Pipeline struct {
 	name  string
-	progs map[string]*program
+	progs map[string]*Program
 }
 
 // Name returns name of this pipeline
@@ -23,28 +23,33 @@ func (pl *Pipeline) Name() string {
 	return pl.name
 }
 
+// SetName sets name of this pipeline
+func (pl *Pipeline) SetName(name string) {
+	pl.name = name
+}
+
 // AddProgram adds program with given name to the pipeline
 func (pl *Pipeline) AddProgram(name string) gpu.Program {
 	if pl.progs == nil {
-		pl.progs = make(map[string]*program)
+		pl.progs = make(map[string]*Program)
 	}
-	pr := &program{name: name}
+	pr := &Program{name: name}
 	pl.progs[name] = pr
 	return pr
 }
 
-// ProgramByName returns program by name.
+// ProgramByName returns Program by name.
 // Returns nil if not found (error auto logged).
 func (pl *Pipeline) ProgramByName(name string) gpu.Program {
 	pr, ok := pl.progs[name]
 	if !ok {
-		log.Printf("glgpu Pipeline ProgramByName: program: %s not found in pipeline: %s\n", name, pl.name)
+		log.Printf("glgpu Pipeline ProgramByName: Program: %s not found in pipeline: %s\n", name, pl.name)
 		return nil
 	}
 	return pr
 }
 
-// Programs returns list (slice) of programs in pipeline
+// Programs returns list (slice) of Programs in pipeline
 func (pl *Pipeline) Programs() []gpu.Program {
 	return nil
 }

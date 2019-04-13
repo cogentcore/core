@@ -7,13 +7,12 @@
 package glos
 
 import (
-	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/driver/internal/glgpu"
 	"github.com/goki/gi/oswin/gpu"
 	"golang.org/x/image/math/f64"
 )
@@ -56,44 +55,31 @@ func (gpu *gpuImpl) Type(typ gpu.Types) int32 {
 	return glTypes[typ]
 }
 
-func (gpu *gpuImpl) NewProgram(vertexSrc, fragmentSrc string) (uint32, error) {
-	vertexShader, err := gpu.CompileShader(vertexSrc, gl.VERTEX_SHADER)
-	if err != nil {
-		return 0, err
-	}
+// NewProgram returns a new Program with given name -- for standalone programs.
+// See also NewPipeline.
+func (gpu *gpuImpl) NewProgram(name string) gpu.Program {
+	pr := &glgpu.Program{}
+	pr.SetName(name)
+	return pr
+}
 
-	fragmentShader, err := gpu.CompileShader(fragmentSrc, gl.FRAGMENT_SHADER)
-	if err != nil {
-		return 0, err
-	}
+// NewPipeline returns a new Pipeline to manage multiple coordinated Programs.
+func (gpu *gpuImpl) NewPipeline(name string) gpu.Pipeline {
+	pl := &glgpu.Pipeline{}
+	pl.SetName(name)
+	return pr
+}
 
-	program := gl.CreateProgram()
+// NewBufferMgr returns a new BufferMgr for managing Vectors and Indexes for rendering.
+func (gpu *gpuImpl) NewBufferMgr() gpu.BufferMgr {
+	bm := &glgpu.BufferMgr{}
+	return bm
+}
 
-	gl.AttachShader(program, vertexShader)
-	gl.AttachShader(program, fragmentShader)
-	gl.LinkProgram(program)
-	if glosDebug {
-		gl.ValidateProgram(program)
-	}
+// 	NextUniformBindingPoint returns the next avail uniform binding point.
+// Counts up from 0 -- this call increments for next call.
+func (gpu *gpuImpl) NextUniformBindingPoint() int {
 
-	gl.DetachShader(program, vertexShader)
-	gl.DetachShader(program, fragmentShader)
-	gl.DeleteShader(vertexShader)
-	gl.DeleteShader(fragmentShader)
-
-	var status int32
-	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to link program: %v", log)
-	}
-
-	return program, nil
 }
 
 func writeAff3(u int32, a f64.Aff3) {

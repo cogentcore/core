@@ -12,6 +12,9 @@ type Program interface {
 	// Name returns name of program
 	Name() string
 
+	// SetName sets name of program
+	SetName(name string)
+
 	// AddShader adds shader of given type, unique name and source code.
 	// Any array uniform's will add their #define NAME_LEN's to the top
 	// of the source code automatically, so the source can assume those exist

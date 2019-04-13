@@ -73,9 +73,9 @@ type Uniforms interface {
 	Bind(prog Program) error
 
 	// Handle returns the handle for the program -- only valid after a Compile call
-	Handle() int32
+	Handle() uint32
 
 	// BindingPoint returns the unique binding point for this set of Uniforms --
 	// needed for connecting to programs
-	BindingPoint() int32
+	BindingPoint() uint32
 }

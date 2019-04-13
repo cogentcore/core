@@ -41,5 +41,5 @@ type GPU interface {
 
 	// 	NextUniformBindingPoint returns the next avail uniform binding point.
 	// Counts up from 0 -- this call increments for next call.
-	NextUniformBindingPoint() int32
+	NextUniformBindingPoint() int
 }

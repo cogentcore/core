@@ -49,14 +49,14 @@ func TypeBytes(tp Types) int {
 
 // UniType represents a fully-specified GPU uniform type, including vectors and matricies
 type UniType struct {
-	Type           Types `desc:"data type"`
-	Vec            int   `desc:"if a vector, this is the length of the vector, 0 for scalar (valid values are 2,3,4)"`
-	MatCol, MatRow int   `desc:"matrix dimensions, if a matrix (valid values are 2,3,4)"`
+	Type Types `desc:"data type"`
+	Vec  int   `desc:"if a vector, this is the length of the vector, 0 for scalar (valid values are 2,3,4)"`
+	Mat  int   `desc:"square matrix dimensions, if a matrix (valid values are 3,4)"`
 }
 
 // Name returns the full GLSL type name for the type
 func (ty *UniType) Name() string {
-	if ty.Vec == 0 && ty.MatCol == 0 {
+	if ty.Vec == 0 && ty.Mat == 0 {
 		return TypeNames[ty.Type]
 	}
 	pfx := TypeNames[ty.Type][0:1]
@@ -65,10 +65,8 @@ func (ty *UniType) Name() string {
 	}
 	if ty.Vec > 0 {
 		return fmt.Sprintf("%svec%d", pfx, ty.Vec)
-	} else if ty.MatCol == ty.MatRow {
-		return fmt.Sprintf("%smat%d", pfx, ty.MatCol)
 	} else {
-		return fmt.Sprintf("%smat%dx%d", pfx, ty.MatCol, ty.MatRow)
+		return fmt.Sprintf("%smat%d", pfx, ty.Mat)
 	}
 }
 
@@ -76,7 +74,7 @@ func (ty *UniType) Name() string {
 // https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
 func (ty *UniType) Bytes() int {
 	n := TypeBytes(ty.Type)
-	if ty.Vec == 0 && ty.MatCol == 0 {
+	if ty.Vec == 0 && ty.Mat == 0 {
 		return n
 	}
 	if ty.Vec > 0 {
@@ -85,7 +83,7 @@ func (ty *UniType) Bytes() int {
 		}
 		return 4 * n
 	}
-	return ty.MatCol * 4 * n
+	return ty.Mat * 4 * n
 }
 
 // VectorType represents a fully-specified GPU vector type, e.g., for inputs / outputs

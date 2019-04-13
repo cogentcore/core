@@ -11,7 +11,7 @@ import (
 
 // IndexesBuffer manages a buffer of indexes for index-based rendering
 // (i.e., GL_ELEMENT_ARRAY_BUFFER for glDrawElements calls in OpenGL).
-type idxsBuff struct {
+type IndexesBuffer struct {
 	init   bool
 	handle uint32
 	ln     int
@@ -19,18 +19,18 @@ type idxsBuff struct {
 }
 
 // SetLen sets the number of indexes in buffer
-func (ib *idxsBuff) SetLen(ln int) {
+func (ib *IndexesBuffer) SetLen(ln int) {
 	ib.ln = ln
 	ib.idxs = make(mat32.ArrayU32, ln)
 }
 
 // Len returns the number of indexes in bufer
-func (ib *idxsBuff) Len() int {
+func (ib *IndexesBuffer) Len() int {
 	return ib.ln
 }
 
 // Set sets the indexes by copying given data
-func (ib *idxsBuff) Set(idxs mat32.ArrayU32) {
+func (ib *IndexesBuffer) Set(idxs mat32.ArrayU32) {
 	if len(idxs) == 0 {
 		return
 	}
@@ -44,12 +44,12 @@ func (ib *idxsBuff) Set(idxs mat32.ArrayU32) {
 }
 
 // Returns the indexes (direct copy of internal buffer -- can be modified)
-func (ib *idxsBuff) Indexes() mat32.ArrayU32 {
+func (ib *IndexesBuffer) Indexes() mat32.ArrayU32 {
 	return ib.idxs
 }
 
 // Activate binds buffer as active one
-func (ib *idxsBuff) Activate() {
+func (ib *IndexesBuffer) Activate() {
 	if !ib.init {
 		gl.GenBuffers(1, &ib.handle)
 		ib.init = true
@@ -58,7 +58,7 @@ func (ib *idxsBuff) Activate() {
 }
 
 // Handle returns the unique handle for this buffer -- only valid after Activate()
-func (ib *idxsBuff) Handle() uint32 {
+func (ib *IndexesBuffer) Handle() uint32 {
 	return ib.handle
 }
 
@@ -66,7 +66,7 @@ func (ib *idxsBuff) Handle() uint32 {
 // such buffers activated in between.  Automatically uses re-specification
 // strategy per: https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
 // so it is safe if buffer was still being used from prior GL rendering call.
-func (ib *idxsBuff) Transfer() {
+func (ib *IndexesBuffer) Transfer() {
 	gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, ib.idxs.Bytes(), gl.Ptr(ib.idxs), gl.STATIC_DRAW)
 }
 
@@ -74,7 +74,7 @@ func (ib *idxsBuff) Transfer() {
 // (requires Activate to re-establish a new one).
 // Should be called prior to Go object being deleted
 // (ref counting can be done externally).
-func (ib *idxsBuff) Delete() {
+func (ib *IndexesBuffer) Delete() {
 	if !ib.init {
 		return
 	}

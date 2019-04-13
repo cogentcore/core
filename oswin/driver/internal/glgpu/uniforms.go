@@ -9,6 +9,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/gpu"
 )
 
@@ -19,7 +21,7 @@ import (
 // These uniforms are used directly to generate the shader code.
 // See Program.AddUniform to create a new standalone one, and
 // Program.NewUniforms to create a new set of them (i.e., Uniform Buffer Object)
-type uniform struct {
+type Uniform struct {
 	init   bool
 	name   string
 	handle int32
@@ -28,62 +30,202 @@ type uniform struct {
 	ln     int
 	offset int
 	size   int
+	ubo    *Uniforms // set if a member of a ubo
 }
 
-// Name returns name of the uniform
-func (un *uniform) Name() string {
+// Name returns name of the Uniform
+func (un *Uniform) Name() string {
 	return un.name
 }
 
-// Type returns type of the uniform
-func (un *uniform) Type() gpu.UniType {
+// Type returns type of the Uniform
+func (un *Uniform) Type() gpu.UniType {
 	return un.typ
 }
 
-// Array returns true if this is an array uniform.
+// Array returns true if this is an array Uniform.
 // If so, then it automatically generates a #define NAME_LEN <Len> definition prior
-// to the uniform definition, and if Len == 0 then it is *not* defined at all.
-// All code referencing this uniform should use #if NAME_LEN>0 wrapper.
-func (un *uniform) Array() bool {
+// to the Uniform definition, and if Len == 0 then it is *not* defined at all.
+// All code referencing this Uniform should use #if NAME_LEN>0 wrapper.
+func (un *Uniform) Array() bool {
 	return un.array
 }
 
 // Len returns number of array elements, if an Array (can be 0)
-func (un *uniform) Len() int {
+func (un *Uniform) Len() int {
 	return un.ln
 }
 
 // SetLen sets the number of array elements -- if this is changed, then the associated
 // Shader program needs to be re-generated and recompiled.
-func (un *uniform) SetLen(ln int) {
+func (un *Uniform) SetLen(ln int) {
 	un.ln = ln
 }
 
-// Offset returns byte-wise offset into the UBO where this uniform starts (only for UBO's)
-func (un *uniform) Offset() int {
+// Offset returns byte-wise offset into the UBO where this Uniform starts (only for UBO's)
+func (un *Uniform) Offset() int {
 	return un.offset
 }
 
-// Size() returns byte-wise size of this uniform, *including padding*,
+// Size() returns byte-wise size of this Uniform, *including padding*,
 // as determined by the std140 standard opengl layout
-func (un *uniform) Size() int {
+func (un *Uniform) Size() int {
+	if un.size == 0 {
+		un.size = un.typ.Bytes()
+	}
 	return un.size
 }
 
-// Handle() returns the unique id for this uniform.
+// Handle() returns the unique id for this Uniform.
 // if in a UBO, then this is the index of the item within the list of UBO's
-func (un *uniform) Handle() int32 {
+func (un *Uniform) Handle() int32 {
 	return un.handle
 }
 
-// SetValue sets the value of the uniform to given value, which must be of the corresponding
+// SetValue sets the value of the Uniform to given value, which must be of the corresponding
 // elemental or mat32.Vector or mat32.Matrix type.  Proper context must be bound, etc.
-func (un *uniform) SetValue(val interface{}) error {
+func (un *Uniform) SetValue(val interface{}) error {
+	if un.ubo != nil {
+		un.ubo.Activate()
+	}
+	switch un.typ.Type {
+	case gpu.Float32:
+		if un.array {
+			switch {
+			case un.typ.Mat == 3:
+				fv, ok := val.([]mat32.Matrix3)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Matrix3", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.UniformMatrix3fv(un.handle, int32(un.ln), false, &fv[0][0])
+				}
+			case un.typ.Mat == 4:
+				fv, ok := val.([]mat32.Matrix4)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Matrix4", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.UniformMatrix4fv(un.handle, int32(un.ln), false, &fv[0][0])
+				}
+			case un.typ.Vec == 2:
+				fv, ok := val.([]mat32.Vector2)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector2", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.Uniform2fv(un.handle, int32(un.ln), &fv[0].X)
+				}
+			case un.typ.Vec == 3:
+				fv, ok := val.([]mat32.Vector3)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector3", un.name)
+				}
+				if un.ubo != nil {
+					// need separate writes b/c alignment is vec4
+					for i := 0; i < un.ln; i++ {
+						gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset+i*4*4, 4*3, gl.Ptr(fv[i]))
+					}
+				} else {
+					gl.Uniform3fv(un.handle, int32(un.ln), &fv[0].X)
+				}
+			case un.typ.Vec == 4:
+				fv, ok := val.([]mat32.Vector4)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector4", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0].X))
+				} else {
+					gl.Uniform4fv(un.handle, int32(un.ln), &fv[0].X)
+				}
+			case un.typ.Vec == 0:
+				fv, ok := val.([]float32)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []float32", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.Uniform1fv(un.handle, int32(un.ln), &fv[0])
+				}
+			}
+		} else {
+			switch {
+			case un.typ.Mat == 3:
+				fv, ok := val.(mat32.Matrix3)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Matrix3", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.UniformMatrix3fv(un.handle, 1, false, &fv[0])
+				}
+			case un.typ.Mat == 4:
+				fv, ok := val.(mat32.Matrix4)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Matrix4", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.UniformMatrix4fv(un.handle, 1, false, &fv[0])
+				}
+			case un.typ.Vec == 2:
+				fv, ok := val.(mat32.Vector2)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector2", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform2f(un.handle, fv.X, fv.Y)
+				}
+			case un.typ.Vec == 3:
+				fv, ok := val.(mat32.Vector3)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector3", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform3f(un.handle, fv.X, fv.Y, fv.Z)
+				}
+			case un.typ.Vec == 4:
+				fv, ok := val.(mat32.Vector4)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector4", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform4f(un.handle, fv.X, fv.Y, fv.Z, fv.W)
+				}
+			case un.typ.Vec == 0:
+				fv, ok := val.(float32)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be float32", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform1f(un.handle, fv)
+				}
+			}
+		}
+	}
 	return nil
 }
 
-// LenDefine returns the #define NAME_LEN source code for this uniform, empty if not an array
-func (un *uniform) LenDefine() string {
+// LenDefine returns the #define NAME_LEN source code for this Uniform, empty if not an array
+func (un *Uniform) LenDefine() string {
 	if !un.array {
 		return ""
 	}
@@ -94,45 +236,49 @@ func (un *uniform) LenDefine() string {
 //////////////////////////////////////////////
 // Uniforms
 
+// https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
+
 // Uniforms is a set of Uniform objects that are all organized together
 // (i.e., a UniformBufferObject in OpenGL)
-type uniforms struct {
+type Uniforms struct {
 	init   bool
 	name   string
-	handle int32
-	bindPt int32
-	unis   map[string]*uniform
+	handle uint32
+	bindPt uint32
+	unis   map[string]*Uniform
+	uniOrd []*Uniform
+	size   int
 }
 
-// Name returns the name of this set of uniforms
-func (un *uniforms) Name() string {
+// Name returns the name of this set of Uniforms
+func (un *Uniforms) Name() string {
 	return un.name
 }
 
-// AddUniform adds a uniform variable to this collection of uniforms of given type
-func (un *uniforms) AddUniform(name string, typ gpu.UniType, ary bool, ln int) gpu.Uniform {
+// AddUniform adds a Uniform variable to this collection of Uniforms of given type
+func (un *Uniforms) AddUniform(name string, typ gpu.UniType, ary bool, ln int) gpu.Uniform {
 	if un.unis == nil {
-		un.unis = make(map[string]*uniform)
+		un.unis = make(map[string]*Uniform)
 	}
-	u := &uniform{name: name, typ: typ, array: ary, ln: ln}
+	u := &Uniform{name: name, typ: typ, array: ary, ln: ln}
 	un.unis[name] = u
+	un.uniOrd = append(un.uniOrd, u)
 	return u
 }
 
 // UniformByName returns a Uniform based on unique name -- this could be in a
 // collection of Uniforms (i.e., a Uniform Buffer Object in GL) or standalone
-func (un *uniforms) UniformByName(name string) gpu.Uniform {
-	for _, u := range un.unis {
-		if u.name == name {
-			return u
-		}
+func (un *Uniforms) UniformByName(name string) gpu.Uniform {
+	u, ok := un.unis[name]
+	if !ok {
+		log.Printf("glgpu Uniforms: name %s not found in Uniforms: %s\n", name, un.name)
+		return nil
 	}
-	log.Printf("glgpu Uniforms: name %s not found in Uniforms: %s\n", name, un.name)
-	return nil
+	return u
 }
 
-// LenDefines returns the #define NAME_LEN source code for all uniforms, empty if no arrays
-func (un *uniforms) LenDefines() string {
+// LenDefines returns the #define NAME_LEN source code for all Uniforms, empty if no arrays
+func (un *Uniforms) LenDefines() string {
 	defs := ""
 	for _, u := range un.unis {
 		defs += u.LenDefine()
@@ -140,24 +286,57 @@ func (un *uniforms) LenDefines() string {
 	return defs
 }
 
+// getSize computes the size based on all the elements
+func (un *Uniforms) getSize() int {
+	sz := 0
+	for i, u := range un.uniOrd {
+		u.ubo = un
+		u.offset = sz
+		u.handle = int32(i)
+		u.size = u.typ.Bytes()
+		sz += u.size
+	}
+	return sz
+}
+
 // Activate generates the Uniform Buffer Object structure and reserves the binding point
-func (un *uniforms) Activate() error {
-	un.bindPt = gpu.TheGPU.NextUniformBindingPoint()
+func (un *Uniforms) Activate() error {
+	if !un.init {
+		un.bindPt = uint32(gpu.TheGPU.NextUniformBindingPoint())
+		un.size = un.getSize()
+		gl.GenBuffers(1, &un.handle)
+		gl.BindBuffer(gl.UNIFORM_BUFFER, un.handle)
+		gl.BufferData(gl.UNIFORM_BUFFER, un.size, nil, gl.STATIC_DRAW)
+		gl.BindBufferBase(gl.UNIFORM_BUFFER, un.bindPt, un.handle)
+		un.init = true
+	} else {
+		gl.BindBuffer(gl.UNIFORM_BUFFER, un.handle)
+	}
 	return nil
 }
 
 // Bind binds the Uniform Buffer Object structure to given program
-func (un *uniforms) Bind(prog gpu.Program) error {
+// Activate must be called first
+func (un *Uniforms) Bind(prog gpu.Program) error {
+	pr := prog.(*Program)
+	ubidx := gl.GetUniformBlockIndex(pr.handle, gl.Str(un.name))
+	if ubidx < 0 {
+		return fmt.Errorf("glgpu Uniforms named: %s not found in Program: %v", un.name, pr.name)
+	}
+	if !un.init {
+		un.Activate()
+	}
+	gl.UniformBlockBinding(pr.handle, ubidx, un.bindPt)
 	return nil
 }
 
-// Handle returns the handle for the program -- only valid after a Compile call
-func (un *uniforms) Handle() int32 {
+// Handle returns the handle for the Program -- only valid after a Compile call
+func (un *Uniforms) Handle() uint32 {
 	return un.handle
 }
 
 // BindingPoint returns the unique binding point for this set of Uniforms --
-// needed for connecting to programs
-func (un *uniforms) BindingPoint() int32 {
+// needed for connecting to Programs
+func (un *Uniforms) BindingPoint() uint32 {
 	return un.bindPt
 }

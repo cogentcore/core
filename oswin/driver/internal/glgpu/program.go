@@ -17,43 +17,48 @@ import (
 // Multiple programs can be assembled into a Pipeline, which can create
 // new Programs.  GPU.NewProgram() can also create standalone Programs.
 // All uniforms must be added before compiling program.
-type program struct {
+type Program struct {
 	init        bool
 	handle      uint32
 	name        string
-	shaders     map[gpu.ShaderTypes]*shader
-	unis        map[string]*uniform
-	ubos        map[string]*uniforms
-	ins         map[string]*vectors
-	outs        map[string]*vectors
+	shaders     map[gpu.ShaderTypes]*Shader
+	unis        map[string]*Uniform
+	ubos        map[string]*Uniforms
+	ins         map[string]*Vectors
+	outs        map[string]*Vectors
 	fragDataVar string
 }
 
-// Name returns name of program
-func (pr *program) Name() string {
+// Name returns name of Program
+func (pr *Program) Name() string {
 	return pr.name
 }
 
+// SetName sets name of program
+func (pr *Program) SetName(name string) {
+	pr.name = name
+}
+
 // AddShader adds shader of given type, unique name and source code.
-// Any array uniform's will add their #define NAME_LEN's to the top
+// Any array Uniform's will add their #define NAME_LEN's to the top
 // of the source code automatically, so the source can assume those exist
 // when compiled.
-func (pr *program) AddShader(typ gpu.ShaderTypes, name string, src string) (gpu.Shader, error) {
+func (pr *Program) AddShader(typ gpu.ShaderTypes, name string, src string) (gpu.Shader, error) {
 	if pr.shaders == nil {
-		pr.shaders = make(map[gpu.ShaderTypes]*shader)
+		pr.shaders = make(map[gpu.ShaderTypes]*Shader)
 	}
 	if _, has := pr.shaders[typ]; has {
 		err := fmt.Errorf("glos gpu.AddShader: shader of that type: %s already added!", typ)
 		log.Println(err)
 		return nil, err
 	}
-	sh := &shader{name: name, typ: typ, orgSrc: src}
+	sh := &Shader{name: name, typ: typ, orgSrc: src}
 	pr.shaders[typ] = sh
 	return sh, nil
 }
 
 // ShaderByName returns shader by its unique name
-func (pr *program) ShaderByName(name string) gpu.Shader {
+func (pr *Program) ShaderByName(name string) gpu.Shader {
 	for _, sh := range pr.shaders {
 		if sh.name == name {
 			return sh
@@ -64,7 +69,7 @@ func (pr *program) ShaderByName(name string) gpu.Shader {
 }
 
 // ShaderByType returns shader by its type
-func (pr *program) ShaderByType(typ gpu.ShaderTypes) gpu.Shader {
+func (pr *Program) ShaderByType(typ gpu.ShaderTypes) gpu.Shader {
 	sh, ok := pr.shaders[typ]
 	if !ok {
 		log.Println("glos gpu.AddShader: shader of that type: %s not added\n", typ)
@@ -74,49 +79,49 @@ func (pr *program) ShaderByType(typ gpu.ShaderTypes) gpu.Shader {
 }
 
 // SetFragDataVar sets the variable name to use for the fragment shader's output
-func (pr *program) SetFragDataVar(name string) {
+func (pr *Program) SetFragDataVar(name string) {
 	pr.fragDataVar = name
 }
 
-// AddUniform adds an individual standalone uniform variable to the program of given type.
-// Must add all uniform variables before compiling, as they add to source.
-func (pr *program) AddUniform(name string, typ gpu.UniType, ary bool, ln int) gpu.Uniform {
+// AddUniform adds an individual standalone Uniform variable to the Program of given type.
+// Must add all Uniform variables before compiling, as they add to source.
+func (pr *Program) AddUniform(name string, typ gpu.UniType, ary bool, ln int) gpu.Uniform {
 	if pr.unis == nil {
-		pr.unis = make(map[string]*uniform)
+		pr.unis = make(map[string]*Uniform)
 	}
-	u := &uniform{name: name, typ: typ, array: ary, ln: ln}
+	u := &Uniform{name: name, typ: typ, array: ary, ln: ln}
 	pr.unis[name] = u
 	return u
 }
 
-// NewUniforms makes a new named set of uniforms (i.e,. a Uniform Buffer Object)
-// These uniforms can be bound to programs -- first add all the uniform variables
-// and then AddUniforms to each program that uses it (already added to this one).
-// Uniforms will be bound etc when the program is compiled.
-func (pr *program) NewUniforms(name string) gpu.Uniforms {
+// NewUniforms makes a new named set of Uniforms (i.e,. a Uniform Buffer Object)
+// These Uniforms can be bound to Programs -- first add all the Uniform variables
+// and then AddUniforms to each Program that uses it (already added to this one).
+// Uniforms will be bound etc when the Program is compiled.
+func (pr *Program) NewUniforms(name string) gpu.Uniforms {
 	if pr.ubos == nil {
-		pr.ubos = make(map[string]*uniforms)
+		pr.ubos = make(map[string]*Uniforms)
 	}
-	us := &uniforms{name: name}
+	us := &Uniforms{name: name}
 	pr.ubos[name] = us
 	return us
 }
 
-// AddUniforms adds an existing Uniforms collection of uniform variables to this
-// program.
-// Uniforms will be bound etc when the program is compiled.
-func (pr *program) AddUniforms(unis gpu.Uniforms) {
+// AddUniforms adds an existing Uniforms collection of Uniform variables to this
+// Program.
+// Uniforms will be bound etc when the Program is compiled.
+func (pr *Program) AddUniforms(unis gpu.Uniforms) {
 	if pr.ubos == nil {
-		pr.ubos = make(map[string]*uniforms)
+		pr.ubos = make(map[string]*Uniforms)
 	}
-	us := unis.(*uniforms)
+	us := unis.(*Uniforms)
 	pr.ubos[us.name] = us
 }
 
 // UniformByName returns a Uniform based on unique name -- this could be in a
 // collection of Uniforms (i.e., a Uniform Buffer Object in GL) or standalone
 // Returns nil if not found (error auto logged)
-func (pr *program) UniformByName(name string) gpu.Uniform {
+func (pr *Program) UniformByName(name string) gpu.Uniform {
 	u, ok := pr.unis[name]
 	if !ok {
 		log.Printf("glgpu Program UniformByName: name %s not found in %s\n", name, pr.name)
@@ -127,7 +132,7 @@ func (pr *program) UniformByName(name string) gpu.Uniform {
 
 // UniformsByName returns Uniforms collection of given name
 // Returns nil if not found (error auto logged)
-func (pr *program) UniformsByName(name string) gpu.Uniforms {
+func (pr *Program) UniformsByName(name string) gpu.Uniforms {
 	us, ok := pr.ubos[name]
 	if !ok {
 		log.Printf("glgpu Program UniformsByName: name %s not found in %s\n", name, pr.name)
@@ -136,30 +141,30 @@ func (pr *program) UniformsByName(name string) gpu.Uniforms {
 	return us
 }
 
-// AddInput adds a Vectors input variable to the program -- name must = 'in' var name.
-// This input will get bound to variable and handle updated when program is compiled.
-func (pr *program) AddInput(name string, typ gpu.VectorType, role gpu.VectorRoles) gpu.Vectors {
+// AddInput adds a Vectors input variable to the Program -- name must = 'in' var name.
+// This input will get bound to variable and handle updated when Program is compiled.
+func (pr *Program) AddInput(name string, typ gpu.VectorType, role gpu.VectorRoles) gpu.Vectors {
 	if pr.ins == nil {
-		pr.ins = make(map[string]*vectors)
+		pr.ins = make(map[string]*Vectors)
 	}
-	v := &vectors{name: name, typ: typ, role: role}
+	v := &Vectors{name: name, typ: typ, role: role}
 	pr.ins[name] = v
 	return v
 }
 
-// AddOutput adds a Vectors output variable to the program -- name must = 'out' var name.
-// This output will get bound to variable and handle updated when program is compiled.
-func (pr *program) AddOutput(name string, typ gpu.VectorType, role gpu.VectorRoles) gpu.Vectors {
+// AddOutput adds a Vectors output variable to the Program -- name must = 'out' var name.
+// This output will get bound to variable and handle updated when Program is compiled.
+func (pr *Program) AddOutput(name string, typ gpu.VectorType, role gpu.VectorRoles) gpu.Vectors {
 	if pr.outs == nil {
-		pr.outs = make(map[string]*vectors)
+		pr.outs = make(map[string]*Vectors)
 	}
-	v := &vectors{name: name, typ: typ, role: role}
+	v := &Vectors{name: name, typ: typ, role: role}
 	pr.outs[name] = v
 	return v
 }
 
-// Inputs returns a list (slice) of all the input ('in') vectors defined for this program.
-func (pr *program) Inputs() []gpu.Vectors {
+// Inputs returns a list (slice) of all the input ('in') Vectors defined for this Program.
+func (pr *Program) Inputs() []gpu.Vectors {
 	sz := len(pr.ins)
 	if sz == 0 {
 		return nil
@@ -173,8 +178,8 @@ func (pr *program) Inputs() []gpu.Vectors {
 	return vs
 }
 
-// Outputs returns a list (slice) of all the output ('out') vectors defined for this program.
-func (pr *program) Outputs() []gpu.Vectors {
+// Outputs returns a list (slice) of all the output ('out') Vectors defined for this Program.
+func (pr *Program) Outputs() []gpu.Vectors {
 	sz := len(pr.outs)
 	if sz == 0 {
 		return nil
@@ -188,9 +193,9 @@ func (pr *program) Outputs() []gpu.Vectors {
 	return vs
 }
 
-// InputByName returns given input vectors by name.
+// InputByName returns given input Vectors by name.
 // Returns nil if not found (error auto logged)
-func (pr *program) InputByName(name string) gpu.Vectors {
+func (pr *Program) InputByName(name string) gpu.Vectors {
 	v, ok := pr.ins[name]
 	if !ok {
 		log.Printf("glgpu Program InputByName: name %s not found in %s\n", name, pr.name)
@@ -199,9 +204,9 @@ func (pr *program) InputByName(name string) gpu.Vectors {
 	return v
 }
 
-// OutputByName returns given output vectors by name.
+// OutputByName returns given output Vectors by name.
 // Returns nil if not found (error auto logged)
-func (pr *program) OutputByName(name string) gpu.Vectors {
+func (pr *Program) OutputByName(name string) gpu.Vectors {
 	v, ok := pr.outs[name]
 	if !ok {
 		log.Printf("glgpu Program OutputByName: name %s not found in %s\n", name, pr.name)
@@ -210,9 +215,9 @@ func (pr *program) OutputByName(name string) gpu.Vectors {
 	return v
 }
 
-// InputByRole returns given input vectors by role.
+// InputByRole returns given input Vectors by role.
 // Returns nil if not found (error auto logged)
-func (pr *program) InputByRole(role gpu.VectorRoles) gpu.Vectors {
+func (pr *Program) InputByRole(role gpu.VectorRoles) gpu.Vectors {
 	for _, v := range pr.ins {
 		if v.role == role {
 			return v
@@ -222,9 +227,9 @@ func (pr *program) InputByRole(role gpu.VectorRoles) gpu.Vectors {
 	return nil
 }
 
-// OutputByRole returns given input vectors by role.
+// OutputByRole returns given input Vectors by role.
 // Returns nil if not found (error auto logged)
-func (pr *program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
+func (pr *Program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
 	for _, v := range pr.outs {
 		if v.role == role {
 			return v
@@ -234,11 +239,11 @@ func (pr *program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
 	return nil
 }
 
-// Compile compiles all the shaders and links the program, binds the uniforms
+// Compile compiles all the shaders and links the Program, binds the Uniforms
 // and input / output vector variables, etc.
-// This must be called after setting the lengths of any array uniforms (e.g.,
+// This must be called after setting the lengths of any array Uniforms (e.g.,
 // the number of lights)
-func (pr *program) Compile() error {
+func (pr *Program) Compile() error {
 	defs := ""
 	for _, u := range pr.unis {
 		defs += u.LenDefine()
@@ -275,16 +280,29 @@ func (pr *program) Compile() error {
 		lg := strings.Repeat("\x00", int(lgLength+1))
 		gl.GetProgramInfoLog(handle, lgLength, nil, gl.Str(lg))
 
-		err := fmt.Errorf("glgpu Program %s Compile: failed to link program: %v", lg)
+		err := fmt.Errorf("glgpu Program %s Compile: failed to link Program: %v", lg)
 		log.Println(err)
 		return err
 	}
 
-	// bind uniforms
+	// bind Uniforms
 	for _, u := range pr.unis {
 		u.handle = gl.GetUniformLocation(handle, gl.Str(gpu.CString(u.name)))
 		if u.handle < 0 {
-			err := fmt.Errorf("glgpu Program %s Compile: uniform named: %s not found", u.name)
+			err := fmt.Errorf("glgpu Program %s Compile: Uniform named: %s not found", u.name)
+			log.Println(err)
+			return err
+		}
+	}
+	// bind ubos
+	for _, u := range pr.ubos {
+		err := u.Activate()
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		err = u.Bind(pr)
+		if err != nil {
 			log.Println(err)
 			return err
 		}
@@ -316,24 +334,24 @@ func (pr *program) Compile() error {
 	return nil
 }
 
-// Handle returns the handle for the program -- only valid after a Compile call
-func (pr *program) Handle() uint32 {
+// Handle returns the handle for the Program -- only valid after a Compile call
+func (pr *Program) Handle() uint32 {
 	return pr.handle
 }
 
-// Activate activates this as the active program -- must have been Compiled first.
-func (pr *program) Activate() {
+// Activate activates this as the active Program -- must have been Compiled first.
+func (pr *Program) Activate() {
 	if !pr.init {
 		return
 	}
 	gl.UseProgram(pr.handle)
 }
 
-// Delete deletes the GPU resources associated with this program
+// Delete deletes the GPU resources associated with this Program
 // (requires Compile and Activate to re-establish a new one).
 // Should be called prior to Go object being deleted
 // (ref counting can be done externally).
-func (pr *program) Delete() {
+func (pr *Program) Delete() {
 	if !pr.init {
 		return
 	}
