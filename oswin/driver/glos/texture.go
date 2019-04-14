@@ -19,6 +19,7 @@ import (
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/gpu"
 )
 
 type textureImpl struct {
@@ -77,12 +78,12 @@ func (t *textureImpl) upload(dp image.Point, src oswin.Image, sr image.Rectangle
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.BindTexture(gl.TEXTURE_2D, t.id)
-	glErrProc("tex upload tex")
+	gpu.TheGPU.ErrCheck("tex upload tex")
 
 	width := dr.Dx()
 	if width*4 == buf.rgba.Stride {
 		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix))
-		glErrProc("tex subimg")
+		gpu.TheGPU.ErrCheck("tex subimg")
 		fmt.Printf("uploaded tex: dr: %+v\n", dr)
 		return
 	}
@@ -127,79 +128,4 @@ func (t *textureImpl) fill(dr image.Rectangle, src color.Color, op draw.Op) {
 
 	gl.Viewport(0, 0, int32(t.size.X), int32(t.size.Y))
 	doFill(t.w.app, mvp, src, op)
-
-	// We can't restore the GL state (i.e. bind the back buffer, also known as
-	// gl.Framebuffer{Value: 0}) right away, since we don't necessarily know
-	// the right viewport size yet. It is valid to call textureImpl.Fill before
-	// we've gotten our first size.Event. We bind it lazily instead.
-	t.w.backBufferBound = false
 }
-
-var quadCoords = []float32{
-	0, 0, // top left
-	1, 0, // top right
-	0, 1, // bottom left
-	1, 1, // bottom right
-}
-
-const textureVertexSrc = `
-#version 330
-
-uniform mat3 mvp;
-uniform mat3 uvp;
-
-in vec2 pos;
-in vec2 inUV;
-
-out vec2 uv;
-
-void main() {
-	vec3 p = vec3(pos, 1);
-	gl_Position = vec4(mvp * p, 1);
-	uv = (uvp * vec3(inUV, 1)).xy;
-}
-` + "\x00"
-
-const textureFragmentSrc = `
-#version 330
-
-precision mediump float;
-
-uniform sampler2D sample;
-
-in vec2 uv;
-
-out vec4 outputColor;
-
-void main() {
-	outputColor = texture(sample, uv);
-}
-` + "\x00"
-
-const fillVertexSrc = `
-#version 330
-
-uniform mat3 mvp;
-
-in vec3 pos;
-
-void main() {
-	vec3 p = pos;
-	p.z = 1.0;
-	gl_Position = vec4(mvp * p, 1);
-}
-` + "\x00"
-
-const fillFragmentSrc = `
-#version 330
-
-precision mediump float;
-
-uniform vec4 color;
-
-out vec4 outputColor;
-
-void main() {
-	outputColor = color;
-}
-` + "\x00"

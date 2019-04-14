@@ -4,17 +4,36 @@
 
 package gpu
 
-import "github.com/goki/gi/oswin"
+import (
+	"github.com/goki/gi/oswin"
+)
 
 // TheGPU is the current oswin GPU instance
 var TheGPU GPU
 
-// GPU represents provides the main interface to the GPU hardware.
+// GPU provides the main interface to the GPU hardware.
 // currently based on OpenGL.
 // All calls apply to the current context, which must be set with
 // UseContext call, and cleared after with ClearContext, in strict
 // pairing as there is a mutex locked and unlocked with each call.
 type GPU interface {
+	// Init initializes the GPU framework etc
+	// if debug is true, then it turns on debugging mode
+	// and, if available, enables automatic error callback
+	// unfortunately that is not avail for OpenGL on mac
+	// and possibly other systems, so ErrCheck must be used
+	// but it is a NOP if the callback method is avail.
+	Init(debug bool) error
+
+	// IsDebug returns true if debug mode is on
+	IsDebug() bool
+
+	// ErrCheck checks if there have been any GPU-related errors
+	// since the last call to ErrCheck -- if callback errors
+	// are avail, then returns most recent such error, which are
+	// also automatically logged when they occur.
+	ErrCheck(ctxt string) error
+
 	// UseContext sets the current OpenGL context to be that of given window.
 	// All methods in GPU operate on the current context.
 	// Also locks a per-window mutex, as GL calls are not threadsafe -- MUST

@@ -125,13 +125,11 @@ outer:
 				f.done <- true
 			}
 		case <-w.publish:
-			// w.app.RunOnMain(func() {
 			theGPU.UseContext(w)
 			w.glw.SwapBuffers() // note: implicitly does a flush
 			// note: generally don't need this:
-			// gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			// theGPU.Clear(true, true)
 			theGPU.ClearContext(w)
-			// })
 			w.publishDone <- oswin.PublishResult{}
 		}
 	}
@@ -183,15 +181,6 @@ func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle)
 		0, 1, float64(dp.Y),
 	}, t, t.Bounds(), draw.Src, nil)
 	t.Release()
-}
-
-func useOp(op draw.Op) {
-	if op == draw.Over {
-		gl.Enable(gl.BLEND)
-		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
-	} else {
-		gl.Disable(gl.BLEND)
-	}
 }
 
 func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
@@ -258,100 +247,6 @@ func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	w.RunOnWin(func() {
 		w.draw(src2dst, src, sr, op, opts)
 	})
-}
-
-func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-
-	t := src.(*textureImpl)
-	sr = sr.Intersect(t.Bounds())
-	if sr.Empty() {
-		return
-	}
-
-	theGPU.UseContext(w)
-	defer theGPU.ClearContext(w)
-
-	useOp(op)
-	gl.UseProgram(w.app.texture.program)
-	glErrProc("draw useproc")
-
-	// Start with src-space left, top, right and bottom.
-	srcL := float64(sr.Min.X)
-	srcT := float64(sr.Min.Y)
-	srcR := float64(sr.Max.X)
-	srcB := float64(sr.Max.Y)
-	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
-	writeAff3(w.app.texture.mvp, w.mvp(
-		src2dst[0]*srcL+src2dst[1]*srcT+src2dst[2],
-		src2dst[3]*srcL+src2dst[4]*srcT+src2dst[5],
-		src2dst[0]*srcR+src2dst[1]*srcT+src2dst[2],
-		src2dst[3]*srcR+src2dst[4]*srcT+src2dst[5],
-		src2dst[0]*srcL+src2dst[1]*srcB+src2dst[2],
-		src2dst[3]*srcL+src2dst[4]*srcB+src2dst[5],
-	))
-
-	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
-	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
-	//
-	// We are drawing a rectangle PQRS, defined by two of its
-	// corners, onto the entire texture. The two quads may actually
-	// be equal, but in the general case, PQRS can be smaller.
-	//
-	//	(0,0) +---------------+ (1,0)
-	//	      |  P +-----+ Q  |
-	//	      |    |     |    |
-	//	      |  S +-----+ R  |
-	//	(0,1) +---------------+ (1,1)
-	//
-	// The PQRS quad is always axis-aligned. First of all, convert
-	// from pixel space to texture space.
-	tw := float64(t.size.X)
-	th := float64(t.size.Y)
-	px := float64(sr.Min.X-0) / tw
-	py := float64(sr.Min.Y-0) / th
-	qx := float64(sr.Max.X-0) / tw
-	sy := float64(sr.Max.Y-0) / th
-	// Due to axis alignment, qy = py and sx = px.
-	//
-	// The simultaneous equations are:
-	//	  0 +   0 + a02 = px
-	//	  0 +   0 + a12 = py
-	//	a00 +   0 + a02 = qx
-	//	a10 +   0 + a12 = qy = py
-	//	  0 + a01 + a02 = sx = px
-	//	  0 + a11 + a12 = sy
-	writeAff3(w.app.texture.uvp, f64.Aff3{
-		qx - px, 0, px,
-		0, sy - py, py,
-	})
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, t.id)
-	gl.Uniform1i(w.app.texture.sample, 0)
-
-	// This is essential in more recent GL to enable vertex arrays to work
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
-
-	// note: pos and inUV use the *same* 2d quad inputs
-	gl.BindBuffer(gl.ARRAY_BUFFER, w.app.texture.quad)
-
-	// todo: can probably move these to common setup -- then just activate vao -- save that
-	// it holds all of these guys
-
-	// note: 0 stride and 0 offset -- just using same quads sequentially
-	gl.EnableVertexAttribArray(w.app.texture.pos)
-	gl.VertexAttribPointer(w.app.texture.pos, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	gl.EnableVertexAttribArray(w.app.texture.inUV)
-	gl.VertexAttribPointer(w.app.texture.inUV, 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-	// gl.DisableVertexAttribArray(w.app.texture.pos)
-	// gl.DisableVertexAttribArray(w.app.texture.inUV)
-	// gl.DeleteVertexArrays(1, &vao)
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {

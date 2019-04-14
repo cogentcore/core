@@ -90,11 +90,11 @@ func (ty *UniType) Bytes() int {
 // to shader programs
 type VectorType struct {
 	Type Types `desc:"data type"`
-	Len  int   `desc:"length of vector (valid values are 2,3,4)"`
+	Vec  int   `desc:"length of vector (valid values are 2,3,4)"`
 }
 
 // Bytes returns number of bytes per Vector element (len * 4 basically)
 func (ty *VectorType) Bytes() int {
 	n := TypeBytes(ty.Type)
-	return n * ty.Len
+	return n * ty.Vec
 }

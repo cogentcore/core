@@ -1,4 +1,4 @@
-// Copyright 2018 The GoKi Authors. All rights reserved.
+// Copyright 2019 The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -23,13 +23,13 @@ import (
 	"runtime"
 	"sync"
 	"time"
-	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/gi/oswin/gpu"
 )
 
 func init() {
@@ -49,24 +49,6 @@ var theApp = &appImpl{
 }
 
 type appImpl struct {
-	texProg glture struct {
-		init    bool
-		program uint32
-		pos     uint32
-		mvp     int32
-		uvp     int32
-		inUV    uint32
-		sample  int32
-		quad    uint32
-	}
-	fill struct {
-		program uint32
-		pos     int32
-		mvp     int32
-		color   int32
-		quad    uint32
-	}
-
 	mu            sync.Mutex
 	mainQueue     chan funcRun
 	mainDone      chan struct{}
@@ -81,6 +63,13 @@ type appImpl struct {
 	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
+
+	// gl drawing programs
+	progInit  bool
+	drawProg  gpu.Program
+	drawQuads gpu.BufferMgr
+	fillProg  gpu.Program
+	fillQuads gpu.BufferMgr
 }
 
 var mainCallback func(oswin.App)
@@ -161,16 +150,18 @@ func (app *appImpl) initGl() {
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.Visible, glfw.False)
+	var err error
 	app.shareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
 		log.Fatalln("oswin.glos failed to create hidden share window:", err)
 	}
 	app.shareWin.MakeContextCurrent()
-	err = app.initGLPrograms()
+	theGPU.Init(glosDebug)
+	err = app.initDrawProgs()
 	if err != nil {
-		log.Printf("oswin.glos initGLPrograms err:\n%s\n", err)
+		log.Printf("oswin.glos initDrawProgs err:\n%s\n", err)
 	}
-	app.DetatchCurrentContext()
+	glfw.DetatchCurrentContext()
 	app.getScreens()
 }
 
@@ -323,105 +314,6 @@ func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error
 		rgba: *m,
 		size: size,
 	}, nil
-}
-
-func DebugMsg(
-	source uint32,
-	gltype uint32,
-	id uint32,
-	severity uint32,
-	length int32,
-	message string,
-	userParam unsafe.Pointer) {
-	fmt.Printf("glos gl error msg: %v source: %v gltype %v id %v severity %v length %v\n",
-		message, source, gltype, id, severity, length)
-}
-
-var glDebugSet = false
-
-var glErrStrings = map[uint32]string{
-	gl.INVALID_ENUM:                  "INVALID_ENUM: Given when an enumeration parameter is not a legal enumeration for that function. This is given only for local problems; if the spec allows the enumeration in certain circumstances, where other parameters or state dictate those circumstances, then GL_INVALID_OPERATION is the result instead.",
-	gl.INVALID_VALUE:                 "INVALID_VALUE: Given when a value parameter is not a legal value for that function. This is only given for local problems; if the spec allows the value in certain circumstances, where other parameters or state dictate those circumstances, then GL_INVALID_OPERATION is the result instead.",
-	gl.INVALID_OPERATION:             "INVALID_OPERATION: Given when the set of state for a command is not legal for the parameters given to that command. It is also given for commands where combinations of parameters define what the legal parameters are.",
-	gl.STACK_OVERFLOW:                "STACK_OVERFLOW: Given when a stack pushing operation cannot be done because it would overflow the limit of that stack's size.",
-	gl.STACK_UNDERFLOW:               "STACK_UNDERFLOW: Given when a stack popping operation cannot be done because the stack is already at its lowest point.",
-	gl.OUT_OF_MEMORY:                 "OUT_OF_MEMORY: Given when performing an operation that can allocate memory, and the memory cannot be allocated. The results of OpenGL functions that return this error are undefined; it is allowable for partial operations to happen.",
-	gl.INVALID_FRAMEBUFFER_OPERATION: "INVALID_FRAMEBUFFER_OPERATION: Given when doing anything that would attempt to read from or write/render to a framebuffer that is not complete.",
-}
-
-func glErrProc(ctxt string) {
-	if glDebugSet {
-		return
-	}
-	for {
-		glerr := gl.GetError()
-		if glerr == gl.NO_ERROR {
-			break
-		}
-		errstr, _ := glErrStrings[glerr]
-		fmt.Printf("glos gl error in context: %s:\n\t%x = %s\n", ctxt, glerr, errstr)
-	}
-}
-
-func (app *appImpl) initGLPrograms() error {
-	if app.texture.init {
-		return nil
-	}
-	if err := gl.Init(); err != nil {
-		return err
-	}
-
-	if glosDebug {
-		version := gl.GoStr(gl.GetString(gl.VERSION))
-		fmt.Println("OpenGL version", version)
-		// Query the extensions to determine if we can enable the debug callback
-		var numExtensions int32
-		gl.GetIntegerv(gl.NUM_EXTENSIONS, &numExtensions)
-		for i := int32(0); i < numExtensions; i++ {
-			extension := gl.GoStr(gl.GetStringi(gl.EXTENSIONS, uint32(i)))
-			// fmt.Println(extension)
-			if extension == "GL_ARB_debug_output" {
-				glDebugSet = true
-				gl.Enable(gl.DEBUG_OUTPUT_SYNCHRONOUS_ARB)
-				gl.DebugMessageCallbackARB(gl.DebugProc(DebugMsg), gl.Ptr(nil))
-			}
-		}
-	}
-	p, err := theGPU.NewProgram(textureVertexSrc, textureFragmentSrc)
-	if err != nil {
-		return err
-	}
-	app.texture.program = p
-	app.texture.pos = uint32(gl.GetAttribLocation(p, gl.Str("pos\x00")))
-	app.texture.mvp = gl.GetUniformLocation(p, gl.Str("mvp\x00"))
-	app.texture.uvp = gl.GetUniformLocation(p, gl.Str("uvp\x00"))
-	app.texture.inUV = uint32(gl.GetAttribLocation(p, gl.Str("inUV\x00")))
-	app.texture.sample = gl.GetUniformLocation(p, gl.Str("sample\x00"))
-
-	gl.GenBuffers(1, &app.texture.quad)
-	gl.BindBuffer(gl.ARRAY_BUFFER, app.texture.quad)
-	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)
-
-	gl.BindFragDataLocation(p, 0, gl.Str("outputColor\x00"))
-
-	// fmt.Printf("texture: %+v\n", app.texture)
-
-	p, err = theGPU.NewProgram(fillVertexSrc, fillFragmentSrc)
-	if err != nil {
-		return err
-	}
-	app.fill.program = p
-	app.fill.pos = gl.GetAttribLocation(p, gl.Str("pos\x00"))
-	app.fill.mvp = gl.GetUniformLocation(p, gl.Str("mvp\x00"))
-	app.fill.color = gl.GetUniformLocation(p, gl.Str("color\x00"))
-	gl.GenBuffers(1, &app.fill.quad)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
-	gl.BufferData(gl.ARRAY_BUFFER, len(quadCoords)*4, gl.Ptr(quadCoords), gl.STATIC_DRAW)
-
-	glErrProc("gl init and prog init")
-	app.texture.init = true
-	return nil
 }
 
 func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {

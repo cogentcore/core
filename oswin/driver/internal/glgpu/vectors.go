@@ -156,7 +156,7 @@ func (vb *VectorsBuffer) updtVecs() {
 		for i := 0; i < vb.nInter; i++ {
 			v := vb.vecs[i]
 			vb.offs[i] = str * 4
-			str += v.typ.Len
+			str += v.typ.Vec
 		}
 		vb.stride = str
 		vb.totLn = vb.stride * vb.ln
@@ -245,7 +245,7 @@ func (vb *VectorsBuffer) SetVecData(vec gpu.Vectors, data mat32.ArrayF32) {
 		return
 	}
 	off := vb.offs[i] / 4
-	els := v.typ.Len
+	els := v.typ.Vec
 	str := els
 	if i < vb.nInter {
 		str = vb.stride
@@ -270,7 +270,7 @@ func (vb *VectorsBuffer) VecData(vec gpu.Vectors) mat32.ArrayF32 {
 		return nil
 	}
 	off := vb.offs[i] / 4
-	els := v.typ.Len
+	els := v.typ.Vec
 	sz := els * vb.ln
 	if i >= vb.nInter {
 		return vb.buff[off : off+sz]
@@ -297,7 +297,7 @@ func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vector3) 
 		return
 	}
 	off := vb.offs[i] / 4
-	els := v.typ.Len
+	els := v.typ.Vec
 	str := els
 	if i < vb.nInter {
 		str = vb.stride
@@ -329,7 +329,7 @@ func (vb *VectorsBuffer) Activate() {
 		}
 		off := vb.offs[i]
 		gl.EnableVertexAttribArray(uint32(v.handle))
-		gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Len), gpu.TheGPU.Type(v.typ.Type), false, int32(str), gl.PtrOffset(off))
+		gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str), gl.PtrOffset(off))
 	}
 }
 
@@ -356,7 +356,7 @@ func (vb *VectorsBuffer) TransferVec(vec gpu.Vectors) {
 	}
 	offb := vb.offs[i]
 	off := offb / 4
-	els := v.typ.Len
+	els := v.typ.Vec
 	sz := els * vb.ln
 	bf := vb.buff[off : off+sz]
 	gl.BufferSubData(gl.ARRAY_BUFFER, offb, vb.ln, gl.Ptr(bf))
