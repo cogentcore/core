@@ -7,26 +7,7 @@ package gi
 import (
 	"image"
 	_ "image/jpeg" // force include of jpeg decoder
-	"image/png"
-	"log"
-	"os"
 
-	"github.com/goki/ki/ki"
-	"github.com/goki/ki/kit"
-	"golang.org/x/image/draw"
-	"golang.org/x/image/math/f64"
-)
-
-// bitmap contains various bitmap-related elements, including the Bitmap node
-// for showing bitmaps, and image processing utilities
-
-// Bitmap is a Viewport2D that is optimized to render a static bitmap image --
-// it expects to be a terminal node and does NOT call rendering etc on its
-// children.  It is particularly useful for overlays in drag-n-drop uses --
-// can grab the image of another vp and show that
-type Bitmap struct {
-	Viewport2D
-	Filename FileName `desc:"file name of image loaded -- set by OpenImage"`
 }
 
 var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
@@ -45,7 +26,7 @@ var BitmapProps = ki.Props{
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",
-					"ext":           ".png,.jpg",
+e					"ext":           ".png,.jpg",
 				}},
 				{"Width", ki.Props{
 					"desc": "width in raw display dots -- use image size if 0",

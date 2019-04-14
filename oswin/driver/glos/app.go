@@ -49,7 +49,7 @@ var theApp = &appImpl{
 }
 
 type appImpl struct {
-	texture struct {
+	texProg glture struct {
 		init    bool
 		program uint32
 		pos     uint32
