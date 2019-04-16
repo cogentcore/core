@@ -7,24 +7,23 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build 3d
-
 package glos
 
 import (
 	"image"
+	"image/color"
 	"image/draw"
 	"runtime"
 	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
-	"golang.org/x/image/math/f64"
 )
 
 type windowImpl struct {
@@ -34,7 +33,7 @@ type windowImpl struct {
 	event.Deque
 	runQueue    chan funcRun
 	publish     chan struct{}
-	publishDone chan oswin.PublishResult
+	publishDone chan struct{}
 	drawDone    chan struct{}
 	winClose    chan struct{}
 
@@ -58,6 +57,14 @@ type windowImpl struct {
 
 func (w *windowImpl) Handle() interface{} {
 	return w.glw
+}
+
+func (w *windowImpl) Activate() {
+	w.glw.MakeContextCurrent()
+}
+
+func (w *windowImpl) DeActivate() {
+	glfw.DetachCurrentContext()
 }
 
 // must be run on main
@@ -133,7 +140,7 @@ outer:
 			// note: generally don't need this:
 			// theGPU.Clear(true, true)
 			theGPU.ClearContext(w)
-			w.publishDone <- oswin.PublishResult{}
+			w.publishDone <- struct{}{}
 		}
 	}
 }
@@ -152,22 +159,40 @@ func (w *windowImpl) GoRunOnWin(f func()) {
 	}()
 }
 
-func (w *windowImpl) Publish() oswin.PublishResult {
+func (w *windowImpl) Publish() {
 	w.publish <- struct{}{}
-	res := <-w.publishDone
+	<-w.publishDone
 
 	select {
 	case w.drawDone <- struct{}{}:
 	default:
 	}
-
-	return res
 }
 
-func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (w *windowImpl) PublishTex() {
+	// todo: draw WinTex
+}
+
+func (w *windowImpl) WinTex() oswin.Texture {
+	// todo: return WinTex
+}
+
+func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+	sz := w.Size()
+	w.Activate()
 	w.RunOnWin(func() {
-		w.draw(src2dst, src, sr, op, opts)
+		theApp.draw(sz, w.src2dst, src, sr, op, opts)
 	})
+	w.DeActivate()
+}
+
+func (w *windowImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+	sz := w.Size()
+	w.Activate()
+	w.RunOnWin(func() {
+		theApp.drawUniform(sz, w.src2dst, src, sr, op, opts)
+	})
+	w.DeActivate()
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
@@ -178,45 +203,13 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 	drawer.Scale(w, dr, src, sr, op, opts)
 }
 
-func (w *windowImpl) mvp(tlx, tly, trx, try, blx, bly float64) f64.Aff3 {
-	w.mu.Lock()
-	size := w.Sz
-	w.mu.Unlock()
-
-	return calcMVP(size.X, size.Y, tlx, tly, trx, try, blx, bly)
-}
-
-// calcMVP returns the Model View Projection matrix that maps the quadCoords
-// unit square, (0, 0) to (1, 1), to a quad QV, such that QV in vertex shader
-// space corresponds to the quad QP in pixel space, where QP is defined by
-// three of its four corners - the arguments to this function. The three
-// corners are nominally the top-left, top-right and bottom-left, but there is
-// no constraint that e.g. tlx < trx.
-//
-// In pixel space, the window ranges from (0, 0) to (widthPx, heightPx). The
-// Y-axis points downwards.
-//
-// In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
-// is a 2-unit by 2-unit square. The Y-axis points upwards.
-func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float64) f64.Aff3 {
-	// Convert from pixel coords to vertex shader coords.
-	invHalfWidth := +2 / float64(widthPx)
-	invHalfHeight := -2 / float64(heightPx)
-	tlx = tlx*invHalfWidth - 1
-	tly = tly*invHalfHeight + 1
-	trx = trx*invHalfWidth - 1
-	try = try*invHalfHeight + 1
-	blx = blx*invHalfWidth - 1
-	bly = bly*invHalfHeight + 1
-
-	// The resultant affine matrix:
-	//	- maps (0, 0) to (tlx, tly).
-	//	- maps (1, 0) to (trx, try).
-	//	- maps (0, 1) to (blx, bly).
-	return f64.Aff3{
-		trx - tlx, blx - tlx, tlx,
-		try - tly, bly - tly, tly,
-	}
+func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
+	sz := w.Size()
+	w.Activate()
+	w.RunOnWin(func() {
+		theApp.fillRect(sz, dr, src, op)
+	})
+	w.DeActivate()
 }
 
 func (w *windowImpl) Screen() *oswin.Screen {

@@ -22,11 +22,11 @@ import (
 //
 // It must be defined here at the oswin level because it provides the
 // updatable backing for a Window: you render to a Texture which is
-// then drawn to the window during Publish().
+// then drawn to the window during PublishTex().
 //
 // Images can be uploaded to Textures, and Textures can be drawn on Windows.
-// Textures can also be drawn onto Textures, and Textures can serve as
-// render targets for 3D graphics (via gpu and gi3d packages).
+// Textures can also be drawn onto Textures, and can grab rendered output
+// from 3D graphics rendering (e.g., via gpu.FrameBuffer and gi3d packages).
 //
 // Please use the gpu.Texture2D version for GPU-based texture uses (3D rendering)
 // for greater clarity.
@@ -102,7 +102,7 @@ type Texture interface {
 	// valid after Activate.
 	Handle() uint32
 
-	// Delete deletes the GPU resources associated with this image
+	// Delete deletes the GPU resources associated with this texture
 	// (requires Activate to re-establish a new one).
 	// Should be called prior to Go object being deleted
 	// (ref counting can be done externally).

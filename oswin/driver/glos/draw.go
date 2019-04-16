@@ -7,8 +7,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build 3d
-
 package glos
 
 import (
@@ -96,7 +94,9 @@ func (app *appImpl) initDrawProgs() error {
 	return nil
 }
 
-func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+// draw draws to current render target (could be window or framebuffer / texture)
+// proper context must have already been established outside this call!
+func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 
 	t := src.(*textureImpl)
 	sr = sr.Intersect(t.Bounds())
@@ -104,28 +104,25 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 		return
 	}
 
-	theGPU.UseContext(w)
-	defer theGPU.ClearContext(w)
-
 	gpu.Draw.Op(op)
-	theApp.drawProg.Activate()
-
-	// todo: convert over to mat32 math..
+	app.drawProg.Activate()
 
 	// Start with src-space left, top, right and bottom.
-	srcL := float64(sr.Min.X)
-	srcT := float64(sr.Min.Y)
-	srcR := float64(sr.Max.X)
-	srcB := float64(sr.Max.Y)
+	srcL := float32(sr.Min.X)
+	srcT := float32(sr.Min.Y)
+	srcR := float32(sr.Max.X)
+	srcB := float32(sr.Max.Y)
+
 	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
-	writeAff3(w.app.texture.mvp, w.mvp(
-		src2dst[0]*srcL+src2dst[1]*srcT+src2dst[2],
-		src2dst[3]*srcL+src2dst[4]*srcT+src2dst[5],
-		src2dst[0]*srcR+src2dst[1]*srcT+src2dst[2],
-		src2dst[3]*srcR+src2dst[4]*srcT+src2dst[5],
-		src2dst[0]*srcL+src2dst[1]*srcB+src2dst[2],
-		src2dst[3]*srcL+src2dst[4]*srcB+src2dst[5],
-	))
+	matMVP := calcMVP(dstSz.X, dstSz.Y,
+		src2dst[0]*srcL+src2dst[3]*srcT+src2dst[6],
+		src2dst[1]*srcL+src2dst[4]*srcT+src2dst[7],
+		src2dst[0]*srcR+src2dst[3]*srcT+src2dst[6],
+		src2dst[1]*srcR+src2dst[4]*srcT+src2dst[7],
+		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
+		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
+	)
+	app.drawProg.UniformByName("mvp").SetVal(matMVP)
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -142,12 +139,12 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	//
 	// The PQRS quad is always axis-aligned. First of all, convert
 	// from pixel space to texture space.
-	tw := float64(t.size.X)
-	th := float64(t.size.Y)
-	px := float64(sr.Min.X-0) / tw
-	py := float64(sr.Min.Y-0) / th
-	qx := float64(sr.Max.X-0) / tw
-	sy := float64(sr.Max.Y-0) / th
+	tw := float32(t.size.X)
+	th := float32(t.size.Y)
+	px := float32(sr.Min.X-0) / tw
+	py := float32(sr.Min.Y-0) / th
+	qx := float32(sr.Max.X-0) / tw
+	sy := float32(sr.Max.Y-0) / th
 	// Due to axis alignment, qy = py and sx = px.
 	//
 	// The simultaneous equations are:
@@ -157,78 +154,111 @@ func (w *windowImpl) draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangl
 	//	a10 +   0 + a12 = qy = py
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
-	writeAff3(w.app.texture.uvp, f64.Aff3{
-		qx - px, 0, px,
-		0, sy - py, py,
-	})
+	matUVP := mat32.Matrix3{
+		qx - px, 0,
+		0, sy - py,
+		px, py,
+	}
+	app.drawProg.UniformByName("uvp").SetVal(matUVP)
 
-	// todo: need gpu.Texture2D here
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, t.id)
-	gl.Uniform1i(w.app.texture.sample, 0)
+	t.Activate(0)
+	app.drawProg.UniformByName("sample").SetVal(0)
 
-	theApp.drawQuads.Activate()
+	app.drawQuads.Activate()
 	gpu.Draw.TriangleStrips(0, 4)
 }
 
-func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
-	w.RunOnWin(func() {
-		theGPU.UseContext(w)
-		defer theGPU.ClearContext(w)
-
-		doFill(w.app, mvp, src, op)
-	})
-}
-
-func doFill(app *appImpl, mvp f64.Aff3, src color.Color, op draw.Op) {
+// fill fills to current render target (could be window or framebuffer / texture)
+// proper context must have already been established outside this call!
+func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op) {
 	useOp(op)
 	gl.UseProgram(app.fill.program)
 
-	writeAff3(app.fill.mvp, mvp)
+	gpu.Draw.Op(op)
+	app.fillProg.Activate()
+
+	app.fillProg.UniformByName("mvp").SetValue(mvp)
 
 	r, g, b, a := src.RGBA()
-	gl.Uniform4f(
-		app.fill.color,
+
+	clvec4 := mat32.NewVector4(
 		float32(r)/65535,
 		float32(g)/65535,
 		float32(b)/65535,
 		float32(a)/65535,
 	)
 
-	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
-	gl.EnableVertexAttribArray(uint32(app.fill.pos))
-	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
+	app.fillProg.UniformByName("color").SetValue(clvec4)
 
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-	gl.DisableVertexAttribArray(uint32(app.fill.pos))
+	app.fillQuads.Activate()
+	gpu.Draw.TriangleStrips(0, 4)
 }
 
-func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
-	minX := float64(dr.Min.X)
-	minY := float64(dr.Min.Y)
-	maxX := float64(dr.Max.X)
-	maxY := float64(dr.Max.Y)
-	w.fill(w.mvp(
+// fillRect fills given rectangle, where dstSz is overall size of the destination (e.g., window)
+func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Color, op draw.Op) {
+	minX := float32(dr.Min.X)
+	minY := float32(dr.Min.Y)
+	maxX := float32(dr.Max.X)
+	maxY := float32(dr.Max.Y)
+
+	mvp := calcMVP(dstSz.X, dstSz.Y,
 		minX, minY,
 		maxX, minY,
 		minX, maxY,
-	), src, op)
+	)
+	app.fill(mvp, src, op)
 }
 
-func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	minX := float64(sr.Min.X)
-	minY := float64(sr.Min.Y)
-	maxX := float64(sr.Max.X)
-	maxY := float64(sr.Max.Y)
-	w.fill(w.mvp(
-		src2dst[0]*minX+src2dst[1]*minY+src2dst[2],
-		src2dst[3]*minX+src2dst[4]*minY+src2dst[5],
-		src2dst[0]*maxX+src2dst[1]*minY+src2dst[2],
-		src2dst[3]*maxX+src2dst[4]*minY+src2dst[5],
-		src2dst[0]*minX+src2dst[1]*maxY+src2dst[2],
-		src2dst[3]*minX+src2dst[4]*maxY+src2dst[5],
-	), src, op)
+// drawUniform does a fill-like uniform color fill but with an arbitrary src2dst transform
+func (app *ampImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+	minX := float32(sr.Min.X)
+	minY := float32(sr.Min.Y)
+	maxX := float32(sr.Max.X)
+	maxY := float32(sr.Max.Y)
+
+	// Transform to dst-space via the src2dst matrix, then to a MVP matrix.
+	mvp := calcMVP(dstSz.X, dstSz.Y,
+		src2dst[0]*minX+src2dst[3]*minY+src2dst[6],
+		src2dst[1]*minX+src2dst[4]*minY+src2dst[7],
+		src2dst[0]*maxX+src2dst[3]*minY+src2dst[6],
+		src2dst[1]*maxX+src2dst[4]*minY+src2dst[7],
+		src2dst[0]*minX+src2dst[3]*maxY+src2dst[6],
+		src2dst[1]*minX+src2dst[4]*maxY+src2dst[7],
+	)
+	app.fill(mvp, src, op)
+}
+
+// calcMVP returns the Model View Projection matrix that maps the quadCoords
+// unit square, (0, 0) to (1, 1), to a quad QV, such that QV in vertex shader
+// space corresponds to the quad QP in pixel space, where QP is defined by
+// three of its four corners - the arguments to this function. The three
+// corners are nominally the top-left, top-right and bottom-left, but there is
+// no constraint that e.g. tlx < trx.
+//
+// In pixel space, the window ranges from (0, 0) to (widthPx, heightPx). The
+// Y-axis points downwards.
+//
+// In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
+// is a 2-unit by 2-unit square. The Y-axis points upwards.
+func calcMVP(widthPx, hightPxY int, tlx, tly, trx, try, blx, bly float32) mat32.Matrix3 {
+	// Convert from pixel coords to vertex shader coords.
+	invHalfWidth := +2 / float32(widthPx)
+	invHalfHeight := -2 / float32(heightPx)
+	tlx = tlx*invHalfWidth - 1
+	tly = tly*invHalfHeight + 1
+	trx = trx*invHalfWidth - 1
+	try = try*invHalfHeight + 1
+	blx = blx*invHalfWidth - 1
+	bly = bly*invHalfHeight + 1
+
+	// The resultant affine matrix:
+	//	- maps (0, 0) to (tlx, tly).
+	//	- maps (1, 0) to (trx, try).
+	//	- maps (0, 1) to (blx, bly).
+	return f64.Aff3{
+		trx - tlx, blx - tlx, tlx,
+		try - tly, bly - tly, tly,
+	}
 }
 
 func writeAff3(u int32, a f64.Aff3) {

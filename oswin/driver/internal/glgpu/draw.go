@@ -13,16 +13,16 @@ import (
 )
 
 func init() {
-	gpu.TheDraw = &Draw{}
+	gpu.Draw = &Drawing{}
 }
 
-// Draw provides commonly-used GPU drawing functions
+// Drawing provides commonly-used GPU drawing functions
 // All operate on the current context with current program, target, etc
-type Draw struct {
+type Drawing struct {
 }
 
 // Clear clears the given properties of the current render target
-func (dr *Draw) Clear(color, depth bool) {
+func (dr *Drawing) Clear(color, depth bool) {
 	bits := uint32(0)
 	if color {
 		bits |= gl.COLOR_BUFFER_BIT
@@ -35,7 +35,7 @@ func (dr *Draw) Clear(color, depth bool) {
 
 // Op sets the blend function based on go standard draw operation
 // Src disables blending, and Over uses alpha-blending
-func (dr *Draw) Op(op draw.Op) {
+func (dr *Drawing) Op(op draw.Op) {
 	if op == draw.Over {
 		gl.Enable(gl.BLEND)
 		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
@@ -46,24 +46,24 @@ func (dr *Draw) Op(op draw.Op) {
 
 // Triangles uses all existing settings to draw Triangles
 // (non-indexed)
-func (dr *Draw) Triangles(start, count int) {
+func (dr *Drawing) Triangles(start, count int) {
 	gl.DrawArrays(gl.TRIANGLES, int32(start), int32(count))
 }
 
 // TriangleStrips uses all existing settings to draw TriangleStrip
 // (non-indexed)
-func (dr *Draw) TriangleStrips(start, count int) {
+func (dr *Drawing) TriangleStrips(start, count int) {
 	gl.DrawArrays(gl.TRIANGLE_STRIP, int32(start), int32(count))
 }
 
 // TrianglesIndexed uses all existing settings to draw Triangles
 // Indexed
-func (dr *Draw) TrianglesIndexed(count int, idxs mat32.ArrayU32) {
+func (dr *Drawing) TrianglesIndexed(count int, idxs mat32.ArrayU32) {
 	gl.DrawElements(gl.TRIANGLES, int32(count), gl.UNSIGNED_INT, gl.Ptr(idxs))
 }
 
 // TriangleStripsIndexed uses all existing settings to draw Triangles
 // Indexed
-func (dr *Draw) TriangleStripsIndexed(count int, idxs mat32.ArrayU32) {
+func (dr *Drawing) TriangleStripsIndexed(count int, idxs mat32.ArrayU32) {
 	gl.DrawElements(gl.TRIANGLE_STRIP, int32(count), gl.UNSIGNED_INT, gl.Ptr(idxs))
 }

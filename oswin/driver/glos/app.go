@@ -7,8 +7,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// +build 3d
-
 package glos
 
 import (
@@ -161,7 +159,7 @@ func (app *appImpl) initGl() {
 	if err != nil {
 		log.Printf("oswin.glos initDrawProgs err:\n%s\n", err)
 	}
-	glfw.DetatchCurrentContext()
+	glfw.DetachCurrentContext()
 	app.getScreens()
 }
 
@@ -188,7 +186,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		glw:         glw,
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
-		publishDone: make(chan oswin.PublishResult),
+		publishDone: make(chan struct{}),
 		drawDone:    make(chan struct{}),
 		WindowBase: oswin.WindowBase{
 			Titl: opts.GetTitle(),
