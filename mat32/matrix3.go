@@ -18,7 +18,6 @@ type Matrix3 [9]float32
 // NewMatrix3 creates and returns a pointer to a new Matrix3
 // initialized as the identity matrix.
 func NewMatrix3() *Matrix3 {
-
 	var m Matrix3
 	m.Identity()
 	return &m
@@ -28,7 +27,6 @@ func NewMatrix3() *Matrix3 {
 // row1, column2, row1, column3 and so forth.
 // Returns the pointer to this updated Matrix.
 func (m *Matrix3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) *Matrix3 {
-
 	m[0] = n11
 	m[3] = n12
 	m[6] = n13
@@ -43,7 +41,6 @@ func (m *Matrix3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) *Matr
 
 // SetFromMatrix4 sets the matrix elements based on a Matrix4.
 func (m *Matrix3) SetFromMatrix4(src *Matrix4) *Matrix3 {
-
 	m.Set(
 		src[0], src[4], src[8],
 		src[1], src[5], src[9],
@@ -55,7 +52,6 @@ func (m *Matrix3) SetFromMatrix4(src *Matrix4) *Matrix3 {
 // Identity sets this matrix as the identity matrix.
 // Returns the pointer to this updated matrix.
 func (m *Matrix3) Identity() *Matrix3 {
-
 	m.Set(
 		1, 0, 0,
 		0, 1, 0,
@@ -67,7 +63,6 @@ func (m *Matrix3) Identity() *Matrix3 {
 // Zero sets this matrix as the zero matrix.
 // Returns the pointer to this updated matrix.
 func (m *Matrix3) Zero() *Matrix3 {
-
 	m.Set(
 		0, 0, 0,
 		0, 0, 0,
@@ -79,7 +74,6 @@ func (m *Matrix3) Zero() *Matrix3 {
 // Copy copies src matrix into this one.
 // Returns the pointer to this updated matrix.
 func (m *Matrix3) Copy(src *Matrix3) *Matrix3 {
-
 	*m = *src
 	return m
 }
@@ -87,7 +81,6 @@ func (m *Matrix3) Copy(src *Matrix3) *Matrix3 {
 // MakeRotationFromQuaternion sets this matrix as a rotation matrix from the specified quaternion.
 // Returns pointer to this updated matrix.
 func (m *Matrix3) MakeRotationFromQuaternion(q *Quaternion) *Matrix3 {
-
 	x := q.X
 	y := q.Y
 	z := q.Z
@@ -118,14 +111,12 @@ func (m *Matrix3) MakeRotationFromQuaternion(q *Quaternion) *Matrix3 {
 	m[8] = 1 - (xx + yy)
 
 	return m
-
 }
 
 // ApplyToVector3Array multiplies length vectors in the array starting at offset by this matrix.
 // Returns pointer to the updated array.
 // This matrix is unchanged.
 func (m *Matrix3) ApplyToVector3Array(array []float32, offset int, length int) []float32 {
-
 	var v1 Vector3
 	j := offset
 	for i := 0; i < length; i += 3 {
@@ -143,14 +134,12 @@ func (m *Matrix3) ApplyToVector3Array(array []float32, offset int, length int) [
 // Multiply multiply this matrix by the other matrix
 // Returns pointer to this updated matrix.
 func (m *Matrix3) Multiply(other *Matrix3) *Matrix3 {
-
 	return m.MultiplyMatrices(m, other)
 }
 
 // MultiplyMatrices multiply matrix a by b storing the result in this matrix.
 // Returns pointer to this updated matrix.
 func (m *Matrix3) MultiplyMatrices(a, b *Matrix3) *Matrix3 {
-
 	a11 := a[0]
 	a12 := a[3]
 	a13 := a[6]
@@ -189,7 +178,6 @@ func (m *Matrix3) MultiplyMatrices(a, b *Matrix3) *Matrix3 {
 // MultiplyScalar multiplies each of this matrix's components by the specified scalar.
 // Returns pointer to this updated matrix.
 func (m *Matrix3) MultiplyScalar(s float32) *Matrix3 {
-
 	m[0] *= s
 	m[3] *= s
 	m[6] *= s
@@ -206,7 +194,6 @@ func (m *Matrix3) MultiplyScalar(s float32) *Matrix3 {
 // This can be used when multiplying this matrix by a diagonal matrix if we store the diagonal components as a vector.
 // Returns pointer to this updated matrix.
 func (m *Matrix3) ScaleColumns(v *Vector3) *Matrix3 {
-
 	m[0] *= v.X
 	m[1] *= v.X
 	m[2] *= v.X
@@ -221,7 +208,6 @@ func (m *Matrix3) ScaleColumns(v *Vector3) *Matrix3 {
 
 // Determinant calculates and returns the determinant of this matrix.
 func (m *Matrix3) Determinant() float32 {
-
 	return m[0]*m[4]*m[8] -
 		m[0]*m[5]*m[7] -
 		m[1]*m[3]*m[8] +
@@ -234,7 +220,6 @@ func (m *Matrix3) Determinant() float32 {
 // If the src matrix cannot be inverted returns error and
 // sets this matrix to the identity matrix.
 func (m *Matrix3) GetInverse(src *Matrix3) error {
-
 	n11 := src[0]
 	n21 := src[1]
 	n31 := src[2]
@@ -275,17 +260,9 @@ func (m *Matrix3) GetInverse(src *Matrix3) error {
 // Transpose transposes this matrix.
 // Returns pointer to this updated matrix.
 func (m *Matrix3) Transpose() *Matrix3 {
-
-	var tmp float32
-	tmp = m[1]
-	m[1] = m[3]
-	m[3] = tmp
-	tmp = m[2]
-	m[2] = m[6]
-	m[6] = tmp
-	tmp = m[5]
-	m[5] = m[7]
-	m[7] = tmp
+	m[1], m[3] = m[3], m[1]
+	m[2], m[6] = m[6], m[2]
+	m[5], m[7] = m[7], m[5]
 	return m
 }
 
@@ -293,7 +270,6 @@ func (m *Matrix3) Transpose() *Matrix3 {
 // from the src matrix to transform the vertices.
 // If the src matrix cannot be inverted returns error.
 func (m *Matrix3) GetNormalMatrix(src *Matrix4) error {
-
 	m.SetFromMatrix4(src)
 	err := m.GetInverse(m)
 	m.Transpose()
@@ -303,7 +279,6 @@ func (m *Matrix3) GetNormalMatrix(src *Matrix4) error {
 // FromArray set this matrix array starting at offset.
 // Returns pointer to this updated matrix.
 func (m *Matrix3) FromArray(array []float32, offset int) *Matrix3 {
-
 	copy(m[:], array[offset:offset+9])
 	return m
 }
@@ -311,14 +286,12 @@ func (m *Matrix3) FromArray(array []float32, offset int) *Matrix3 {
 // ToArray copies this matrix to array starting at offset.
 // Returns pointer to the updated array.
 func (m *Matrix3) ToArray(array []float32, offset int) []float32 {
-
 	copy(array[offset:], m[:])
 	return array
 }
 
 // Clone creates and returns a pointer to a copy of this matrix.
 func (m *Matrix3) Clone() *Matrix3 {
-
 	var cloned Matrix3
 	cloned = *m
 	return &cloned

@@ -142,6 +142,16 @@ type App interface {
 
 	// Quit closes all windows and exits the program.
 	Quit()
+
+	// RunOnMain runs given function on main thread (where main event loop is running)
+	// Some functions (GUI-specific etc) must run on this initial main thread for the
+	// overall app.
+	RunOnMain(f func())
+
+	// GoRunOnMain runs given function on main thread and returns immediately
+	// Some functions (GUI-specific etc) must run on this initial main thread for the
+	// overall app.
+	GoRunOnMain(f func())
 }
 
 // Platforms are all the supported platforms for OSWin

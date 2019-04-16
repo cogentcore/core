@@ -14,42 +14,104 @@ import (
 	"image/color"
 	"image/draw"
 
-	"golang.org/x/image/math/f64"
+	"github.com/goki/gi/mat32"
 )
 
-// Texture is a pixel buffer, but not one that is directly accessible as a
-// []byte. Conceptually, it could live on a GPU, in another process or even be
-// across a network, instead of on a CPU in this process.
+// Texture is a pixel buffer on the GPU, and is synonymous with the
+// gpu.Texture2D interface.
+//
+// It must be defined here at the oswin level because it provides the
+// updatable backing for a Window: you render to a Texture which is
+// then drawn to the window during Publish().
 //
 // Images can be uploaded to Textures, and Textures can be drawn on Windows.
+// Textures can also be drawn onto Textures, and Textures can serve as
+// render targets for 3D graphics (via gpu and gi3d packages).
+//
+// Please use the gpu.Texture2D version for GPU-based texture uses (3D rendering)
+// for greater clarity.
+//
+// For GPU-level uses, a Texture can be created and configured prior to calling
+// Activate(), which is when the GPU-side version of the texture is created
+// and configured.  Window-backing Textures are always Activated and are
+// automatically resized etc along with their parent window.
 //
 // When specifying a sub-Texture via Draw, a Texture's top-left pixel is always
 // (0, 0) in its own coordinate space.
-//
-// Windows keep track of all textures created for them, and will Release() them
-// if they haven't previously been released, when the window is Release()'d
 type Texture interface {
-	// Release releases the Texture's resources, after all pending uploads and
-	// draws resolve.
-	//
-	// The behavior of the Texture after Release, whether calling its methods
-	// or passing it as an argument, is undefined.
-	Release()
+	// Name returns the name of the texture (filename without extension
+	// by default)
+	Name() string
 
-	// Size returns the size of the Texture's image.
+	// SetName sets the name of the texture
+	SetName(name string)
+
+	// Open loads texture image from file.
+	// format inferred from filename -- JPEG and PNG
+	// supported by default.
+	Open(path string) error
+
+	// SaveAs saves texture image to file (calls Image() first).
+	// Format is inferred from filename extension -- JPEG and PNG
+	// supported by default.
+	SaveAs(path string) error
+
+	// Image returns an Image of the texture, as an *image.RGBA.
+	// If this Texture has been Activate'd then this retrieves
+	// the current contents of the Texture, e.g., if it has been
+	// used as a rendering target.
+	Image() image.Image
+
+	// SetImage sets entire contents of the Texture from given image
+	// (including setting the size of the texture from that of the img).
+	// This is most efficiently done using an image.RGBA, but other
+	// formats will be converted as necessary.
+	// Can be called prior to doing Activate(), in which case the image
+	// pixels initialize the GPU version of the texture (most efficient case
+	// for standard GPU / 3D usage).
+	// If called after Activate and different than current size,
+	// then the texture is resized to size of image.
+	SetImage(img image.Image) error
+
+	// SetSubImage uploads the sub-Image defined by src and sr to the texture.
+	// such that sr.Min in src-space aligns with dp in dst-space.
+	// The textures's contents are overwritten; the draw operator
+	// is implicitly draw.Src. Texture must be Activate'd to the GPU for this
+	// to proceed -- if Activate() has not yet been called, it will be (on texture 0).
+	SetSubImage(dp image.Point, src image.Image, sr image.Rectangle) error
+
+	// Size returns the size of the texture
 	Size() image.Point
+
+	// SetSize sets the size of the texture.
+	// If texture has been Activate'd, then this resizes the GPU side as well.
+	SetSize(size image.Point)
 
 	// Bounds returns the bounds of the Texture's image. It is equal to
 	// image.Rectangle{Max: t.Size()}.
 	Bounds() image.Rectangle
 
-	Uploader
+	// Activate establishes the GPU resources and handle for the
+	// texture, using the given texture number (0-31 range).
+	// If an image has already been set for this texture, then it is
+	// copied up to the GPU at this point -- otherwise the texture
+	// is nil initialized.
+	Activate(texNo int)
 
-	// TODO: also implement Drawer? If so, merge the Uploader and Drawer
-	// interfaces??
+	// Handle returns the GPU handle for the texture -- only
+	// valid after Activate.
+	Handle() uint32
+
+	// Delete deletes the GPU resources associated with this image
+	// (requires Activate to re-establish a new one).
+	// Should be called prior to Go object being deleted
+	// (ref counting can be done externally).
+	Delete()
+
+	Drawer
 }
 
-// Drawer is something you can draw Textures on.
+// Drawer is something you can Draw Textures on (i.e., a Window or another Texture).
 //
 // Draw is the most general purpose of this interface's methods. It supports
 // arbitrary affine transformations, such as translations, scales and
@@ -69,14 +131,15 @@ type Drawer interface {
 	//
 	// m00 m01 m02
 	// m10 m11 m12
+	// 0   0   1
 	//
 	// then the src-space point (sx, sy) maps to the dst-space point
 	// (m00*sx + m01*sy + m02, m10*sx + m11*sy + m12).
-	Draw(src2dst f64.Aff3, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
+	Draw(src2dst mat32.Matrix3, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// DrawUniform is like Draw except that the src is a uniform color instead
 	// of a Texture.
-	DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *DrawOptions)
+	DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// Copy copies the sub-Texture defined by src and sr to the destination
 	// (the method receiver), such that sr.Min in src-space aligns with dp in
@@ -87,6 +150,13 @@ type Drawer interface {
 	// (the method receiver), such that sr in src-space is mapped to dr in
 	// dst-space.
 	Scale(dr image.Rectangle, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
+
+	// Fill fills that part of the destination (the method receiver) defined by
+	// dr with the given color.
+	//
+	// When filling a Window, there will not be any visible effect until
+	// Publish is called.
+	Fill(dr image.Rectangle, src color.Color, op draw.Op)
 }
 
 // These draw.Op constants are provided so that users of this package don't

@@ -412,34 +412,18 @@ func (m *Matrix4) Determinant() float32 {
 // Transpose transposes this matrix.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) Transpose() *Matrix4 {
-
-	var tmp float32
-	tmp = m[1]
-	m[1] = m[4]
-	m[4] = tmp
-	tmp = m[2]
-	m[2] = m[8]
-	m[8] = tmp
-	tmp = m[6]
-	m[6] = m[9]
-	m[9] = tmp
-
-	tmp = m[3]
-	m[3] = m[12]
-	m[12] = tmp
-	tmp = m[7]
-	m[7] = m[13]
-	m[13] = tmp
-	tmp = m[11]
-	m[11] = m[14]
-	m[14] = tmp
+	m[1], m[4] = m[4], m[1]
+	m[2], m[8] = m[8], m[2]
+	m[6], m[9] = m[9], m[6]
+	m[3], m[12] = m[12], m[3]
+	m[7], m[13] = m[13], m[7]
+	m[11], m[14] = m[14], m[11]
 	return m
 }
 
 // SetPosition sets this transformation matrix position fields from the specified vector v.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) SetPosition(v *Vector3) *Matrix4 {
-
 	m[12] = v.X
 	m[13] = v.Y
 	m[14] = v.Z
@@ -450,7 +434,6 @@ func (m *Matrix4) SetPosition(v *Vector3) *Matrix4 {
 // If the src matrix cannot be inverted returns error and
 // sets this matrix to the identity matrix.
 func (m *Matrix4) GetInverse(src *Matrix4) error {
-
 	n11 := src[0]
 	n12 := src[4]
 	n13 := src[8]
@@ -510,7 +493,6 @@ func (m *Matrix4) GetInverse(src *Matrix4) error {
 // the vector Z component. The matrix fourth column is unchanged.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) Scale(v *Vector3) *Matrix4 {
-
 	m[0] *= v.X
 	m[4] *= v.Y
 	m[8] *= v.Z
@@ -528,7 +510,6 @@ func (m *Matrix4) Scale(v *Vector3) *Matrix4 {
 
 // GetMaxScaleOnAxis returns the maximum scale value of the 3 axes.
 func (m *Matrix4) GetMaxScaleOnAxis() float32 {
-
 	scaleXSq := m[0]*m[0] + m[1]*m[1] + m[2]*m[2]
 	scaleYSq := m[4]*m[4] + m[5]*m[5] + m[6]*m[6]
 	scaleZSq := m[8]*m[8] + m[9]*m[9] + m[10]*m[10]
@@ -551,7 +532,6 @@ func (m *Matrix4) MakeTranslation(x, y, z float32) *Matrix4 {
 // MakeRotationX sets this matrix to a rotation matrix of angle theta around the X axis.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) MakeRotationX(theta float32) *Matrix4 {
-
 	c := Cos(theta)
 	s := Sin(theta)
 
@@ -567,7 +547,6 @@ func (m *Matrix4) MakeRotationX(theta float32) *Matrix4 {
 // MakeRotationY sets this matrix to a rotation matrix of angle theta around the Y axis.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) MakeRotationY(theta float32) *Matrix4 {
-
 	c := Cos(theta)
 	s := Sin(theta)
 	m.Set(
@@ -582,7 +561,6 @@ func (m *Matrix4) MakeRotationY(theta float32) *Matrix4 {
 // MakeRotationZ sets this matrix to a rotation matrix of angle theta around the Z axis.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) MakeRotationZ(theta float32) *Matrix4 {
-
 	c := Cos(theta)
 	s := Sin(theta)
 	m.Set(
@@ -597,7 +575,6 @@ func (m *Matrix4) MakeRotationZ(theta float32) *Matrix4 {
 // MakeRotationAxis sets this matrix to a rotation matrix of the specified angle around the specified axis.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) MakeRotationAxis(axis *Vector3, angle float32) *Matrix4 {
-
 	c := Cos(angle)
 	s := Sin(angle)
 	t := 1 - c
@@ -618,7 +595,6 @@ func (m *Matrix4) MakeRotationAxis(axis *Vector3, angle float32) *Matrix4 {
 // MakeScale sets this matrix to a scale transformation matrix using the specified x, y and z values.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) MakeScale(x, y, z float32) *Matrix4 {
-
 	m.Set(
 		x, 0, 0, 0,
 		0, y, 0, 0,
@@ -632,7 +608,6 @@ func (m *Matrix4) MakeScale(x, y, z float32) *Matrix4 {
 // rotation specified by the quaternion and scale.
 // Returns pointer to this updated matrix.
 func (m *Matrix4) Compose(position *Vector3, quaternion *Quaternion, scale *Vector3) *Matrix4 {
-
 	m.MakeRotationFromQuaternion(quaternion)
 	m.Scale(scale)
 	m.SetPosition(position)

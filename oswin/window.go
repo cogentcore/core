@@ -17,9 +17,30 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Window is a double-buffered OS-specific hardware window.  Windows are
-// generally always visible unless specifically iconified (i.e., there is no
-// explicit mechanism to show the window).
+// Window is a double-buffered OS-specific hardware window.
+//
+// It provides basic GPU support functions, and is currently implemented
+// via OpenGL on top of glfw cross-platform window mgmt toolkit (see driver/glos).
+// A Vulkan-based implementation is also planned.
+//
+// The Window maintains a Texture of the same dimensions, as WinTex(),
+// which is used for updating the window contents.  Call SetSubImage
+// or the various Draw methods on the WinTex() to update the window contents, and
+// PublishTex() to update the window display with the current Texture.
+//
+// The Drawer interface methods can also be called to render textures directly into
+// the window backbuffer, and Publish() called to swap buffers.
+// Direct rendering to the window can also be accomplished via the oswin/gpu
+// interfaces -- call Activate() on the window to make it the current context and
+// render target (equivalent to MakeCurrentContext OpenGL call).
+//
+// Each window has its own locked processing thread, which maintains its
+// own GPU context state, and is where e.g., Publish() is actually
+// executed.  IMPORTANT: ALL GPU (e.g., OPENGL) CALLS MUST USE RunOnWin()
+// to execute on this thread!!  Note that this is not the main thread for
+// the overall app itself, which is available via TheApp.RunOnMain() --
+// the App locks this main thread and runs the overall event loop there.
+//
 type Window interface {
 
 	// Name returns the name of the window -- name is used strictly for
@@ -143,22 +164,52 @@ type Window interface {
 	// is undefined.  See App.Quit methods to quit overall app.
 	Close()
 
+	// RunOnWin runs given function on the window's unique locked thread.
+	RunOnWin(f func())
+
+	// GoRunOnWin runs given function on the window's unique locked thread
+	// and returns immediately.
+	GoRunOnWin(f func())
+
+	// Handle returns the driver-specific handle for this window.
+	// Currently, for all platforms, this is *glfw.Window, but that
+	// cannot always be assumed.  Only provided for unforseen emergency use --
+	// please file an Issue for anything that should be added to Window
+	// interface.
+	Handle() interface{}
+
+	//////////////////////////////////
+	// 		Rendering / Updating
+
+	// Publish does the equivalent of SwapBuffers on OpenGL: pushes the
+	// current rendered back-buffer to the front (and ensures that any
+	// ongoing rendering has completed) (see also PublishTex)
+	Publish()
+
+	// PublishTex draws the current WinTex texture to the window and then
+	// calls Publish() -- this is the typical update call.
+	PublishTex()
+
+	// Activate() sets this window as the current render target for gpu rendering
+	// functions, and the current context for gpu state (equivalent to
+	// MakeCurrentContext on OpenGL).
+	Activate()
+
+	// DeActivate() clears the current render target and gpu rendering context
+	DeActivate()
+
+	// WinTex() returns the current Texture of the same size as the window that
+	// is typically used to update the window contents.
+	// Use the various Drawer and SetSubImage methods to update this Texture, and
+	// then call PublishTex() to update the window.
+	// This Texture is automatically resized when the window is resized, and
+	// when that occurs, existing contents are lost -- a full update of the
+	// Texture at the current size is required at that point.
+	WinTex() Texture
+
 	EventDeque
 
-	Uploader
-
 	Drawer
-
-	// Publish flushes any pending Upload and Draw calls to the window, and
-	// swaps the back buffer to the front.
-	Publish() PublishResult
-}
-
-// PublishResult is the result of an Window.Publish call.
-type PublishResult struct {
-	// BackImagePreserved is whether the contents of the back buffer was
-	// preserved. If false, the contents are undefined.
-	BackImagePreserved bool
 }
 
 // WindowBase provides a base-level implementation of the generic data aspects

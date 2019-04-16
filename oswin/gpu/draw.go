@@ -10,12 +10,13 @@ import (
 	"github.com/goki/gi/mat32"
 )
 
-// TheDraw is the current oswin gpu Draw instance
-var TheDraw Draw
+// Draw is the current oswin gpu Drawing instance.
+// Call methods as, e.g.: gpu.Draw.Triangles(..) etc..
+var Draw Drawing
 
-// Draw provides commonly-used GPU drawing functions
+// Drawing provides commonly-used GPU drawing functions
 // All operate on the current context with current program, target, etc
-type Draw interface {
+type Drawing interface {
 	// Clear clears the given properties of the current render target
 	Clear(color, depth bool)
 

@@ -11,8 +11,6 @@ package oswin
 
 import (
 	"image"
-	"image/color"
-	"image/draw"
 )
 
 // Image is an in-memory pixel buffer. Its pixels can be modified by any Go
@@ -72,33 +70,3 @@ type Image interface {
 	//	*buffer.RGBA() = anotherImageRGBA
 	RGBA() *image.RGBA
 }
-
-// Uploader is something you can upload a Image to.
-type Uploader interface {
-	// Upload uploads the sub-Image defined by src and sr to the destination
-	// (the method receiver), such that sr.Min in src-space aligns with dp in
-	// dst-space. The destination's contents are overwritten; the draw operator
-	// is implicitly draw.Src.
-	//
-	// It is valid to upload a Image while another upload of the same Image
-	// is in progress, but a Image's image.RGBA pixel contents should not be
-	// accessed while it is uploading. A Image is re-usable, in that its pixel
-	// contents can be further modified, once all outstanding calls to Upload
-	// have returned.
-	//
-	// When uploading to a Window, there will not be any visible effect until
-	// Publish is called.
-	Upload(dp image.Point, src Image, sr image.Rectangle)
-
-	// Fill fills that part of the destination (the method receiver) defined by
-	// dr with the given color.
-	//
-	// When filling a Window, there will not be any visible effect until
-	// Publish is called.
-	Fill(dr image.Rectangle, src color.Color, op draw.Op)
-}
-
-// TODO: have a Downloader interface? Not every graphical app needs to be
-// interactive or involve a window. You could use the GPU for hardware-
-// accelerated image manipulation: upload a buffer, do some texture ops, then
-// download the result.

@@ -13,7 +13,6 @@ package glos
 
 import (
 	"image"
-	"image/color"
 	"image/draw"
 	"runtime"
 	"sync"
@@ -55,6 +54,10 @@ type windowImpl struct {
 
 	closeReqFunc   func(win oswin.Window)
 	closeCleanFunc func(win oswin.Window)
+}
+
+func (w *windowImpl) Handle() interface{} {
+	return w.glw
 }
 
 // must be run on main
@@ -108,7 +111,7 @@ func (w *windowImpl) NextEvent() oswin.Event {
 
 // winLoop is the window's own locked processing loop
 // all gl processing should be done on this loop by calling RunOnWin
-// and
+// or GoRunOnWin.
 func (w *windowImpl) winLoop() {
 	runtime.LockOSThread()
 	theGPU.UseContext(w)
@@ -135,8 +138,6 @@ outer:
 	}
 }
 
-// todo: add to oswin.Window interface at some point
-
 // RunOnWin runs given function on window's unique locked thread
 func (w *windowImpl) RunOnWin(f func()) {
 	done := make(chan bool)
@@ -161,86 +162,6 @@ func (w *windowImpl) Publish() oswin.PublishResult {
 	}
 
 	return res
-}
-
-func (w *windowImpl) Upload(dp image.Point, src oswin.Image, sr image.Rectangle) {
-	originalSRMin := sr.Min
-	sr = sr.Intersect(src.Bounds())
-	if sr.Empty() {
-		return
-	}
-	dp = dp.Add(sr.Min.Sub(originalSRMin))
-	// TODO: keep a texture around for this purpose?
-	t, err := w.app.NewTexture(w, sr.Size())
-	if err != nil {
-		panic(err)
-	}
-	t.Upload(image.Point{}, src, sr)
-	w.Draw(f64.Aff3{
-		1, 0, float64(dp.X),
-		0, 1, float64(dp.Y),
-	}, t, t.Bounds(), draw.Src, nil)
-	t.Release()
-}
-
-func (w *windowImpl) fill(mvp f64.Aff3, src color.Color, op draw.Op) {
-	w.RunOnWin(func() {
-		theGPU.UseContext(w)
-		defer theGPU.ClearContext(w)
-
-		doFill(w.app, mvp, src, op)
-	})
-}
-
-func doFill(app *appImpl, mvp f64.Aff3, src color.Color, op draw.Op) {
-	useOp(op)
-	gl.UseProgram(app.fill.program)
-
-	writeAff3(app.fill.mvp, mvp)
-
-	r, g, b, a := src.RGBA()
-	gl.Uniform4f(
-		app.fill.color,
-		float32(r)/65535,
-		float32(g)/65535,
-		float32(b)/65535,
-		float32(a)/65535,
-	)
-
-	gl.BindBuffer(gl.ARRAY_BUFFER, app.fill.quad)
-	gl.EnableVertexAttribArray(uint32(app.fill.pos))
-	gl.VertexAttribPointer(uint32(app.fill.pos), 2, gl.FLOAT, false, 0, gl.PtrOffset(0))
-
-	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
-
-	gl.DisableVertexAttribArray(uint32(app.fill.pos))
-}
-
-func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
-	minX := float64(dr.Min.X)
-	minY := float64(dr.Min.Y)
-	maxX := float64(dr.Max.X)
-	maxY := float64(dr.Max.Y)
-	w.fill(w.mvp(
-		minX, minY,
-		maxX, minY,
-		minX, maxY,
-	), src, op)
-}
-
-func (w *windowImpl) DrawUniform(src2dst f64.Aff3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	minX := float64(sr.Min.X)
-	minY := float64(sr.Min.Y)
-	maxX := float64(sr.Max.X)
-	maxY := float64(sr.Max.Y)
-	w.fill(w.mvp(
-		src2dst[0]*minX+src2dst[1]*minY+src2dst[2],
-		src2dst[3]*minX+src2dst[4]*minY+src2dst[5],
-		src2dst[0]*maxX+src2dst[1]*minY+src2dst[2],
-		src2dst[3]*maxX+src2dst[4]*minY+src2dst[5],
-		src2dst[0]*minX+src2dst[1]*maxY+src2dst[2],
-		src2dst[3]*minX+src2dst[4]*maxY+src2dst[5],
-	), src, op)
 }
 
 func (w *windowImpl) Draw(src2dst f64.Aff3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
