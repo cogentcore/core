@@ -47,19 +47,18 @@ type Texture interface {
 	SetName(name string)
 
 	// Open loads texture image from file.
-	// format inferred from filename -- JPEG and PNG
-	// supported by default.
+	// Format inferred from filename -- JPEG and PNG supported by default.
+	// Generally call this prior to doing Activate --
+	// If Activate()'d, then must be called with a valid gpu context
+	// and on proper thread for that context.
 	Open(path string) error
-
-	// SaveAs saves texture image to file (calls Image() first).
-	// Format is inferred from filename extension -- JPEG and PNG
-	// supported by default.
-	SaveAs(path string) error
 
 	// Image returns an Image of the texture, as an *image.RGBA.
 	// If this Texture has been Activate'd then this retrieves
 	// the current contents of the Texture, e.g., if it has been
 	// used as a rendering target.
+	// If Activate()'d, then must be called with a valid gpu context
+	// and on proper thread for that context.
 	Image() image.Image
 
 	// SetImage sets entire contents of the Texture from given image
@@ -67,10 +66,12 @@ type Texture interface {
 	// This is most efficiently done using an image.RGBA, but other
 	// formats will be converted as necessary.
 	// Can be called prior to doing Activate(), in which case the image
-	// pixels initialize the GPU version of the texture (most efficient case
-	// for standard GPU / 3D usage).
-	// If called after Activate and different than current size,
-	// then the texture is resized to size of image.
+	// pixels will then initialize the GPU version of the texture.
+	// (most efficient case for standard GPU / 3D usage).
+	// If called after Activate then the image is copied up to the GPU
+	// and texture is left in an Activate state.
+	// If Activate()'d, then must be called with a valid gpu context
+	// and on proper thread for that context.
 	SetImage(img image.Image) error
 
 	// SetSubImage uploads the sub-Image defined by src and sr to the texture.
@@ -78,6 +79,7 @@ type Texture interface {
 	// The textures's contents are overwritten; the draw operator
 	// is implicitly draw.Src. Texture must be Activate'd to the GPU for this
 	// to proceed -- if Activate() has not yet been called, it will be (on texture 0).
+	// Must be called with a valid gpu context and on proper thread for that context.
 	SetSubImage(dp image.Point, src image.Image, sr image.Rectangle) error
 
 	// Size returns the size of the texture
@@ -85,6 +87,8 @@ type Texture interface {
 
 	// SetSize sets the size of the texture.
 	// If texture has been Activate'd, then this resizes the GPU side as well.
+	// If Activate()'d, then must be called with a valid gpu context
+	// and on proper thread for that context.
 	SetSize(size image.Point)
 
 	// Bounds returns the bounds of the Texture's image. It is equal to
@@ -96,6 +100,7 @@ type Texture interface {
 	// If an image has already been set for this texture, then it is
 	// copied up to the GPU at this point -- otherwise the texture
 	// is nil initialized.
+	// Must be called with a valid gpu context and on proper thread for that context.
 	Activate(texNo int)
 
 	// Handle returns the GPU handle for the texture -- only
@@ -106,7 +111,27 @@ type Texture interface {
 	// (requires Activate to re-establish a new one).
 	// Should be called prior to Go object being deleted
 	// (ref counting can be done externally).
+	// Must be called with a valid gpu context and on proper thread for that context.
 	Delete()
+
+	// ActivateFramebuffer creates a gpu.Framebuffer for rendering onto
+	// this texture (if not already created) and activates it for
+	// rendering.  The gpu.Texture2D interface can provide direct access
+	// to the created framebuffer.
+	// Call gpu.TheGPU.RenderToWindow() or DeActivateFramebuffer
+	// to return to window rendering.
+	// Must be called with a valid gpu context and on proper thread for that context.
+	ActivateFramebuffer()
+
+	// DeActivateFramebuffer de-activates this texture's framebuffer
+	// for rendering (just calls gpu.TheGPU.RenderToWindow())
+	// Must be called with a valid gpu context and on proper thread for that context.
+	DeActivateFramebuffer()
+
+	// DeleteFramebuffer deletes this Texture's framebuffer
+	// created during ActivateFramebuffer.
+	// Must be called with a valid gpu context and on proper thread for that context.
+	DeleteFramebuffer()
 
 	Drawer
 }
@@ -135,20 +160,24 @@ type Drawer interface {
 	//
 	// then the src-space point (sx, sy) maps to the dst-space point
 	// (m00*sx + m01*sy + m02, m10*sx + m11*sy + m12).
+	// Must be called with a valid gpu context and on proper thread for that context.
 	Draw(src2dst mat32.Matrix3, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// DrawUniform is like Draw except that the src is a uniform color instead
 	// of a Texture.
+	// Must be called with a valid gpu context and on proper thread for that context.
 	DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// Copy copies the sub-Texture defined by src and sr to the destination
 	// (the method receiver), such that sr.Min in src-space aligns with dp in
 	// dst-space.
+	// Must be called with a valid gpu context and on proper thread for that context.
 	Copy(dp image.Point, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// Scale scales the sub-Texture defined by src and sr to the destination
 	// (the method receiver), such that sr in src-space is mapped to dr in
 	// dst-space.
+	// Must be called with a valid gpu context and on proper thread for that context.
 	Scale(dr image.Rectangle, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// Fill fills that part of the destination (the method receiver) defined by
@@ -156,6 +185,7 @@ type Drawer interface {
 	//
 	// When filling a Window, there will not be any visible effect until
 	// Publish is called.
+	// Must be called with a valid gpu context and on proper thread for that context.
 	Fill(dr image.Rectangle, src color.Color, op draw.Op)
 }
 

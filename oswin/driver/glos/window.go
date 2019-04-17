@@ -28,41 +28,48 @@ import (
 
 type windowImpl struct {
 	oswin.WindowBase
-	app *appImpl
-	glw *glfw.Window
 	event.Deque
-	runQueue    chan funcRun
-	publish     chan struct{}
-	publishDone chan struct{}
-	drawDone    chan struct{}
-	winClose    chan struct{}
-
-	// glctxMu is mutex for all OpenGL calls, locked in GPU.Context
-	glctxMu sync.Mutex
-
-	// textures are the textures created for this window -- they are released
-	// when the window is closed
-	textures map[*textureImpl]struct{}
-
-	// mu is general state mutex. If you need to hold both glctxMu and mu,
-	// the lock ordering is to lock glctxMu first (and unlock it last).
-	mu sync.Mutex
-
-	// mainMenu is the main menu associated with window, if applicable.
-	mainMenu oswin.MainMenu
-
+	app            *appImpl
+	glw            *glfw.Window
+	runQueue       chan funcRun
+	publish        chan struct{}
+	publishDone    chan struct{}
+	winClose       chan struct{}
+	winTex         *textureImpl
+	mu             sync.Mutex
+	mainMenu       oswin.MainMenu
 	closeReqFunc   func(win oswin.Window)
 	closeCleanFunc func(win oswin.Window)
 }
 
+// Handle returns the driver-specific handle for this window.
+// Currently, for all platforms, this is *glfw.Window, but that
+// cannot always be assumed.  Only provided for unforseen emergency use --
+// please file an Issue for anything that should be added to Window
+// interface.
 func (w *windowImpl) Handle() interface{} {
 	return w.glw
 }
 
+// Activate() sets this window as the current render target for gpu rendering
+// functions, and the current context for gpu state (equivalent to
+// MakeCurrentContext on OpenGL).
+// Must call this on window's unique locked thread using RunOnWin.
+//
+// win.RunOnWin(func() {
+//    win.Activate()
+//    // do GPU calls here
+// })
+//
 func (w *windowImpl) Activate() {
 	w.glw.MakeContextCurrent()
 }
 
+// DeActivate() clears the current render target and gpu rendering context.
+// Generally more efficient to NOT call this and just be sure to call
+// Activate where relevant, so that if the window is already current context
+// no switching is required.
+// Must call this on window's unique locked thread using RunOnWin.
 func (w *windowImpl) DeActivate() {
 	glfw.DetachCurrentContext()
 }
@@ -74,8 +81,8 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
 	glfw.WindowHint(glfw.Focused, glfw.True)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4) // 4.1 is max supported on macos
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.ContextVersionMajor, glosGlMajor)
+	glfw.WindowHint(glfw.ContextVersionMinor, glosGlMinor)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	glfw.WindowHint(glfw.Samples, 0) // don't do multisampling for main window -- only in sub-render
@@ -116,14 +123,14 @@ func (w *windowImpl) NextEvent() oswin.Event {
 	return e
 }
 
-// winLoop is the window's own locked processing loop
+// winLoop is the window's own locked processing loop.
 // all gl processing should be done on this loop by calling RunOnWin
 // or GoRunOnWin.
 func (w *windowImpl) winLoop() {
 	runtime.LockOSThread()
-	theGPU.UseContext(w)
+	w.Activate()
 	gl.Init() // call to init in each context
-	theGPU.ClearContext(w)
+	w.winTex.Activate(0)
 outer:
 	for {
 		select {
@@ -135,17 +142,23 @@ outer:
 				f.done <- true
 			}
 		case <-w.publish:
-			theGPU.UseContext(w)
+			w.Activate()
 			w.glw.SwapBuffers() // note: implicitly does a flush
 			// note: generally don't need this:
 			// theGPU.Clear(true, true)
-			theGPU.ClearContext(w)
 			w.publishDone <- struct{}{}
 		}
 	}
 }
 
-// RunOnWin runs given function on window's unique locked thread
+// RunOnWin runs given function on the window's unique locked thread.
+// All GPU-related calls must be run via this method:
+//
+// win.RunOnWin(func() {
+//    win.Activate()
+//    // do GPU calls here
+// })
+//
 func (w *windowImpl) RunOnWin(f func()) {
 	done := make(chan bool)
 	w.runQueue <- funcRun{f: f, done: done}
@@ -159,40 +172,65 @@ func (w *windowImpl) GoRunOnWin(f func()) {
 	}()
 }
 
+// Publish does the equivalent of SwapBuffers on OpenGL: pushes the
+// current rendered back-buffer to the front (and ensures that any
+// ongoing rendering has completed) (see also PublishTex)
 func (w *windowImpl) Publish() {
 	w.publish <- struct{}{}
 	<-w.publishDone
-
-	select {
-	case w.drawDone <- struct{}{}:
-	default:
-	}
 }
 
+// PublishTex draws the current WinTex texture to the window and then
+// calls Publish() -- this is the typical update call.
 func (w *windowImpl) PublishTex() {
-	// todo: draw WinTex
+	w.RunOnWin(func() {
+		w.Activate()
+		w.Copy(image.ZP, w.winTex, w.winTex.Bounds(), oswin.Src, nil)
+	})
+	w.Publish()
 }
 
+// WinTex() returns the current Texture of the same size as the window that
+// is typically used to update the window contents.
+// Use the various Drawer and SetSubImage methods to update this Texture, and
+// then call PublishTex() to update the window.
+// This Texture is automatically resized when the window is resized, and
+// when that occurs, existing contents are lost -- a full update of the
+// Texture at the current size is required at that point.
 func (w *windowImpl) WinTex() oswin.Texture {
-	// todo: return WinTex
+	return w.winTex
 }
+
+// SetWinTexSubImage calls SetSubImage on WinTex with given parameters.
+// convenience routine that activates the window context and runs on the
+// window's thread.
+func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image.Rectangle) error {
+	var err error
+	w.RunOnWin(func() {
+		w.Activate()
+		wt := w.winTex
+		err = wt.SetSubImage(dp, src, sr)
+	})
+	return err
+}
+
+////////////////////////////////////////////////
+//   Drawer wrappers
 
 func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	sz := w.Size()
-	w.Activate()
 	w.RunOnWin(func() {
-		theApp.draw(sz, w.src2dst, src, sr, op, opts)
+		w.Activate()
+		sz := w.Size()
+		theApp.draw(sz, src2dst, src, sr, op, opts)
 	})
-	w.DeActivate()
 }
 
 func (w *windowImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	sz := w.Size()
-	w.Activate()
 	w.RunOnWin(func() {
-		theApp.drawUniform(sz, w.src2dst, src, sr, op, opts)
+		w.Activate()
+		sz := w.Size()
+		theApp.drawUniform(sz, src2dst, src, sr, op, opts)
 	})
-	w.DeActivate()
 }
 
 func (w *windowImpl) Copy(dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
@@ -204,12 +242,11 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
-	sz := w.Size()
-	w.Activate()
 	w.RunOnWin(func() {
+		w.Activate()
+		sz := w.Size()
 		theApp.fillRect(sz, dr, src, op)
 	})
-	w.DeActivate()
 }
 
 func (w *windowImpl) Screen() *oswin.Screen {
@@ -341,33 +378,16 @@ func (w *windowImpl) CloseClean() {
 	}
 }
 
-func (w *windowImpl) AddTexture(t *textureImpl) {
-	if w.textures == nil {
-		w.textures = make(map[*textureImpl]struct{})
-	}
-	w.textures[t] = struct{}{}
-}
-
-// DeleteTexture just deletes it from our list -- does not Release -- is called during t.Release
-func (w *windowImpl) DeleteTexture(t *textureImpl) {
-	if w.textures == nil {
-		return
-	}
-	delete(w.textures, t)
-}
-
 func (w *windowImpl) Close() {
 	// this is actually the final common pathway for closing here
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
 	w.sendWindowEvent(window.Close)
-	if w.textures != nil {
-		for t, _ := range w.textures {
-			t.Release() // deletes from map
-		}
+	if w.winTex != nil {
+		w.winTex.Delete()
+		w.winTex = nil
 	}
-	w.textures = nil
 	w.app.RunOnMain(func() {
 		w.glw.Destroy()
 	})
@@ -406,6 +426,7 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
 	w.mu.Lock()
 	w.Sz = image.Point{width, height}
+	w.winTex.SetSize(w.Sz)
 	w.mu.Unlock()
 	w.getScreen()
 	w.sendWindowEvent(window.Resize)

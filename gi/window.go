@@ -123,13 +123,12 @@ type Window struct {
 	Viewport          *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
 	MasterVLay        *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
 	MainMenu          *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	WinTex            oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"texture for the entire window -- all rendering is done onto this texture, which is then published into the window"`
 	EventSigs         [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	EventMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects event sending"`
 	OverTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
 	OverlayVp         *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
 	Sprites           map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
-	SpritesBg         map[string]oswin.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
+	SpritesBg         map[string]image.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
 	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
 	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	LastModBits       int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
@@ -298,11 +297,6 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	win.OSWin, err = oswin.TheApp.NewWindow(opts)
 	if err != nil {
 		fmt.Printf("GoGi NewWindow error: %v \n", err)
-		return nil
-	}
-	win.WinTex, err = oswin.TheApp.NewTexture(win.OSWin, opts.Size) // note size will be in dots
-	if err != nil {
-		fmt.Printf("GoGi NewTexture error: %v \n", err)
 		return nil
 	}
 	win.OSWin.SetName(title)
@@ -595,13 +589,9 @@ func (w *Window) Resized(sz image.Point) {
 	if WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
-	if w.WinTex != nil {
-		w.WinTex.Release()
-	}
 	if w.OverTex != nil {
-		w.OverTex.Release()
+		w.OverTex.Delete()
 	}
-	w.WinTex, _ = oswin.TheApp.NewTexture(w.OSWin, sz)
 	w.OverTex = nil // dynamically allocated when needed
 	w.ClearFlag(int(WinFlagOverTexActive), int(WinFlagOverlayVpCleared))
 	w.Viewport.Resize(sz)
@@ -645,7 +635,6 @@ func (w *Window) Closed() {
 	w.SetInactive() // marks as closed
 	w.FocusInactivate()
 	// these are managed by the window itself
-	w.WinTex = nil
 	w.OverTex = nil
 	if w.OverlayVp != nil {
 		w.OverlayVp.Destroy()
@@ -655,15 +644,13 @@ func (w *Window) Closed() {
 		sp.Destroy()
 	}
 	w.Sprites = nil
-	for _, sp := range w.SpritesBg {
-		sp.Release()
-	}
+	w.SpritesBg = nil
 	w.UpMu.Unlock()
 }
 
 // IsClosed reports if the window has been closed
 func (w *Window) IsClosed() bool {
-	if w.WinTex == nil || w.IsInactive() || w.Viewport == nil {
+	if w.IsInactive() || w.Viewport == nil {
 		return true
 	}
 	return false
@@ -868,9 +855,9 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	w.SetWinUpdating()
 	pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.WinTex.Bounds())
+		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
 	}
-	w.WinTex.Upload(winBBox.Min, vp.OSImage, vpBBox)
+	w.OSWin.SetWinTexSubImage(winBBox.Min, vp.OSImage, vpBBox)
 	pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -891,9 +878,9 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.OSImage.Bounds(), w.WinTex.Bounds())
+		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.OSImage.Bounds(), w.OSWin.WinTex().Bounds())
 	}
-	w.WinTex.Upload(offset, vp.OSImage, vp.OSImage.Bounds())
+	w.OSWin.SetWinTexSubImage(offset, vp.OSImage, vp.OSImage.Bounds())
 	pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -916,9 +903,9 @@ func (w *Window) UploadAllViewports() {
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.WinTex.Bounds())
+		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.OSWin.WinTex().Bounds())
 	}
-	w.WinTex.Upload(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
+	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
 	w.PopMu.RLock()
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
@@ -931,7 +918,7 @@ func (w *Window) UploadAllViewports() {
 				if Render2DTrace {
 					fmt.Printf("Window: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
 				}
-				w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
+				w.OSWin.SetWinTexSubImage(r.Min, vp.OSImage, vp.OSImage.Bounds())
 			}
 		}
 	}
@@ -943,7 +930,7 @@ func (w *Window) UploadAllViewports() {
 			if Render2DTrace || WinEventTrace {
 				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
 			}
-			w.WinTex.Upload(r.Min, vp.OSImage, vp.OSImage.Bounds())
+			w.OSWin.SetWinTexSubImage(r.Min, vp.OSImage, vp.OSImage.Bounds())
 		}
 	}
 	w.PopMu.RUnlock()
@@ -996,15 +983,18 @@ func (w *Window) Publish() {
 	if WinEventTrace {
 		fmt.Printf("Win %v doing publish\n", w.Nm)
 	}
-	pr := prof.Start("win.Publish.Copy")
-	w.OSWin.Copy(image.ZP, w.WinTex, w.WinTex.Bounds(), oswin.Src, nil)
-	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
-		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
-	}
+	pr := prof.Start("win.Publish")
+	w.OSWin.RunOnWin(func() {
+		w.OSWin.Activate()
+		wt := w.OSWin.WinTex()
+		w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
+		if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
+			w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
+		}
+		w.OSWin.Publish()
+		w.OSWin.DeActivate()
+	})
 	pr.End()
-	pr2 := prof.Start("win.Publish.Publish")
-	w.OSWin.Publish()
-	pr2.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 }
@@ -1065,12 +1055,12 @@ func (w *Window) RenderOverlays() {
 		return
 	}
 	updt := w.UpdateStart()
-	wsz := w.WinTex.Bounds().Size()
-	if w.OverTex == nil || w.OverTex.Bounds() != w.WinTex.Bounds() {
+	wsz := w.OSWin.WinTex().Size()
+	if w.OverTex == nil || w.OverTex.Size() != wsz {
 		if w.OverTex != nil {
-			w.OverTex.Release()
+			w.OverTex.Delete()
 		}
-		w.OverTex, _ = oswin.TheApp.NewTexture(w.OSWin, wsz)
+		w.OverTex = oswin.TheApp.NewTexture(w.OSWin, wsz)
 	}
 	w.OverlayVp.Win = w
 	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
@@ -1083,7 +1073,10 @@ func (w *Window) RenderOverlays() {
 			w.ClearFlag(int(WinFlagOverlayVpCleared))
 		}
 	}
-	w.OverTex.Upload(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+	w.OSWin.RunOnWin(func() {
+		w.OSWin.Activate()
+		w.OverTex.SetSubImage(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+	})
 
 	if w.ActiveSprites > 0 {
 		for _, sp := range w.Sprites {
@@ -1125,7 +1118,7 @@ func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport
 
 	if w.Sprites == nil {
 		w.Sprites = make(map[string]*Viewport2D)
-		w.SpritesBg = make(map[string]oswin.Image)
+		w.SpritesBg = make(map[string]image.Image)
 	}
 	if exsp, has := w.Sprites[nm]; has {
 		return exsp
@@ -1191,20 +1184,22 @@ func (w *Window) RenderSprite(sp *Viewport2D) {
 	sp.Render2D()
 	bg, ok := w.SpritesBg[sp.Nm]
 	if !ok {
-		bg, _ = oswin.TheApp.NewImage(sp.Geom.Size)
+		bg = image.NewRGBA(image.Rectangle{Max: sp.Geom.Size})
 		w.SpritesBg[sp.Nm] = bg
-	} else if bg.Size() != sp.Geom.Size {
-		bg.Release()
-		bg, _ = oswin.TheApp.NewImage(sp.Geom.Size)
+	} else if bg.Bounds().Size() != sp.Geom.Size {
+		bg = image.NewRGBA(image.Rectangle{Max: sp.Geom.Size})
 		w.SpritesBg[sp.Nm] = bg
 	}
-	bgi := bg.RGBA()
+	bgi := bg.(*image.RGBA)
 	// grab source from viewport
 	draw.Draw(bgi, bgi.Bounds(), w.Viewport.Pixels, sp.Geom.Pos, draw.Src)
 	// draw sprite over
 	draw.Draw(bgi, bgi.Bounds(), sp.Pixels, image.ZP, draw.Over)
 	// note: already under RenderOverlays mutex protection
-	w.OverTex.Upload(sp.Geom.Pos, bg, bg.Bounds())
+	w.OSWin.RunOnWin(func() {
+		w.OSWin.Activate()
+		w.OverTex.SetSubImage(sp.Geom.Pos, bg, bg.Bounds())
+	})
 }
 
 /////////////////////////////////////////////////////////////////////////////

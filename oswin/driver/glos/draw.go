@@ -14,11 +14,9 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
-	"golang.org/x/image/math/f64"
 )
 
 func (app *appImpl) initDrawProgs() error {
@@ -47,13 +45,15 @@ func (app *appImpl) initDrawProgs() error {
 		return err
 	}
 	app.drawProg = p
+	gpu.TheGPU.ErrCheck("initDrawProgs -- draw compile")
 
 	b := theGPU.NewBufferMgr()
 	vb := b.AddVectorsBuffer(gpu.StaticDraw)
 	vb.AddVectors(pv, false)
 	vb.SetLen(len(quadCoords))
 	vb.SetAllData(quadCoords)
-	vb.Activate()
+	b.Activate()
+	gpu.TheGPU.ErrCheck("initDrawProgs -- b activate")
 	app.drawQuads = b
 
 	p = theGPU.NewProgram("fill")
@@ -77,13 +77,14 @@ func (app *appImpl) initDrawProgs() error {
 		return err
 	}
 	app.fillProg = p
+	gpu.TheGPU.ErrCheck("initDrawProgs -- fill compile")
 
 	b = theGPU.NewBufferMgr()
 	vb = b.AddVectorsBuffer(gpu.StaticDraw)
 	vb.AddVectors(pv, false)
 	vb.SetLen(len(quadCoords))
 	vb.SetAllData(quadCoords)
-	vb.Activate()
+	b.Activate()
 	app.fillQuads = b
 
 	err = gpu.TheGPU.ErrCheck("initDrawProgs")
@@ -122,7 +123,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
 	)
-	app.drawProg.UniformByName("mvp").SetVal(matMVP)
+	app.drawProg.UniformByName("mvp").SetValue(matMVP)
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -159,10 +160,10 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 		0, sy - py,
 		px, py,
 	}
-	app.drawProg.UniformByName("uvp").SetVal(matUVP)
+	app.drawProg.UniformByName("uvp").SetValue(matUVP)
 
 	t.Activate(0)
-	app.drawProg.UniformByName("sample").SetVal(0)
+	app.drawProg.UniformByName("sample").SetValue(0)
 
 	app.drawQuads.Activate()
 	gpu.Draw.TriangleStrips(0, 4)
@@ -171,9 +172,6 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 // fill fills to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
 func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op) {
-	useOp(op)
-	gl.UseProgram(app.fill.program)
-
 	gpu.Draw.Op(op)
 	app.fillProg.Activate()
 
@@ -210,7 +208,7 @@ func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Co
 }
 
 // drawUniform does a fill-like uniform color fill but with an arbitrary src2dst transform
-func (app *ampImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	minX := float32(sr.Min.X)
 	minY := float32(sr.Min.Y)
 	maxX := float32(sr.Max.X)
@@ -240,7 +238,7 @@ func (app *ampImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src co
 //
 // In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
-func calcMVP(widthPx, hightPxY int, tlx, tly, trx, try, blx, bly float32) mat32.Matrix3 {
+func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) mat32.Matrix3 {
 	// Convert from pixel coords to vertex shader coords.
 	invHalfWidth := +2 / float32(widthPx)
 	invHalfHeight := -2 / float32(heightPx)
@@ -255,25 +253,11 @@ func calcMVP(widthPx, hightPxY int, tlx, tly, trx, try, blx, bly float32) mat32.
 	//	- maps (0, 0) to (tlx, tly).
 	//	- maps (1, 0) to (trx, try).
 	//	- maps (0, 1) to (blx, bly).
-	return f64.Aff3{
-		trx - tlx, blx - tlx, tlx,
-		try - tly, bly - tly, tly,
+	return mat32.Matrix3{
+		trx - tlx, try - tly,
+		blx - tlx, bly - tly,
+		tlx, tly,
 	}
-}
-
-func writeAff3(u int32, a f64.Aff3) {
-	var m [9]float32
-	m[0*3+0] = float32(a[0*3+0])
-	m[0*3+1] = float32(a[1*3+0])
-	m[0*3+2] = 0
-	m[1*3+0] = float32(a[0*3+1])
-	m[1*3+1] = float32(a[1*3+1])
-	m[1*3+2] = 0
-	m[2*3+0] = float32(a[0*3+2])
-	m[2*3+1] = float32(a[1*3+2])
-	m[2*3+2] = 1
-	gl.UniformMatrix3fv(u, 1, false, &m[0])
-	gpu.TheGPU.ErrCheck("writeaff3")
 }
 
 var quadCoords = mat32.ArrayF32{

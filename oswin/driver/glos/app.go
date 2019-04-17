@@ -22,7 +22,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
@@ -35,6 +34,10 @@ func init() {
 }
 
 var glosDebug = true
+
+// 4.1 is max supported on macos
+var glosGlMajor = 4
+var glosGlMinor = 1
 
 // var glosDebug = false
 
@@ -148,6 +151,10 @@ func (app *appImpl) initGl() {
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.Visible, glfw.False)
+	glfw.WindowHint(glfw.ContextVersionMajor, glosGlMajor) // 4.1 is max supported on macos
+	glfw.WindowHint(glfw.ContextVersionMinor, glosGlMinor)
+	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 	var err error
 	app.shareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
@@ -181,13 +188,13 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	if err != nil {
 		return nil, err
 	}
+
 	w := &windowImpl{
 		app:         app,
 		glw:         glw,
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
 		publishDone: make(chan struct{}),
-		drawDone:    make(chan struct{}),
 		WindowBase: oswin.WindowBase{
 			Titl: opts.GetTitle(),
 			Flag: opts.Flags,
@@ -199,7 +206,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
-	go w.winLoop() // start window's own dedicated loop
+	w.winTex = &textureImpl{size: opts.Size}
 
 	glw.SetPosCallback(w.moved)
 	glw.SetSizeCallback(w.winResized)
@@ -219,6 +226,8 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	w.getScreen()
 	w.show()
+
+	go w.winLoop() // start window's own dedicated loop
 
 	return w, nil
 }
@@ -305,59 +314,15 @@ func (app *appImpl) ContextWindow() oswin.Window {
 	return cw
 }
 
-func (app *appImpl) NewImage(size image.Point) (retBuf oswin.Image, retErr error) {
-	m := image.NewRGBA(image.Rectangle{Max: size})
-	return &imageImpl{
-		buf:  m.Pix,
-		rgba: *m,
-		size: size,
-	}, nil
-}
-
-func (app *appImpl) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
-	var t oswin.Texture
-	var err error
-	app.RunOnMain(func() {
-		t, err = app.newTexture(win, size)
+func (app *appImpl) NewTexture(win oswin.Window, size image.Point) oswin.Texture {
+	var tx *textureImpl
+	win.RunOnWin(func() {
+		win.Activate()
+		tx = &textureImpl{size: size}
+		tx.Activate(0)
+		win.DeActivate()
 	})
-	return t, err
-}
-
-func (app *appImpl) newTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
-	w := win.(*windowImpl)
-
-	theGPU.UseContext(w)
-	defer theGPU.ClearContext(w)
-
-	var tex uint32
-	gl.GenTextures(1, &tex)
-
-	t := &textureImpl{
-		w:    w,
-		id:   tex,
-		size: size,
-	}
-
-	gl.ActiveTexture(gl.TEXTURE0)
-	gl.BindTexture(gl.TEXTURE_2D, t.id)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-	gl.TexImage2D(
-		gl.TEXTURE_2D,
-		0,
-		gl.RGBA,
-		int32(size.X),
-		int32(size.Y),
-		0,
-		gl.RGBA,
-		gl.UNSIGNED_BYTE,
-		gl.Ptr(nil))
-
-	w.AddTexture(t)
-
-	return t, nil
+	return tx
 }
 
 func (app *appImpl) Name() string {

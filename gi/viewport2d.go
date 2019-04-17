@@ -14,7 +14,6 @@ import (
 	"log"
 	"sync"
 
-	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -36,7 +35,7 @@ type Viewport2D struct {
 	Geom         Geom2DInt    `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Render       RenderState  `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 	Pixels       *image.RGBA  `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage      oswin.Image  `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
+	OSImage      image.Image  `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
 	Win          *Window      `json:"-" xml:"-" desc:"our parent window that we render into"`
 	CurStyleNode Node2D       `json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 	CurColor     Color        `json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
@@ -57,13 +56,8 @@ func NewViewport2D(width, height int) *Viewport2D {
 	vp := &Viewport2D{
 		Geom: Geom2DInt{Size: sz},
 	}
-	var err error
-	vp.OSImage, err = oswin.TheApp.NewImage(sz)
-	if err != nil {
-		log.Printf("%v", err)
-		return nil
-	}
-	vp.Pixels = vp.OSImage.RGBA()
+	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
+	vp.OSImage = vp.Pixels
 	vp.Render.Init(width, height, vp.Pixels)
 	return vp
 }
@@ -81,15 +75,11 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 		}
 	}
 	if vp.OSImage != nil {
-		vp.OSImage.Release()
+		vp.OSImage = nil
+		vp.Pixels = nil
 	}
-	var err error
-	vp.OSImage, err = oswin.TheApp.NewImage(nwsz)
-	if err != nil {
-		log.Printf("%v", err)
-		return
-	}
-	vp.Pixels = vp.OSImage.RGBA()
+	vp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	vp.OSImage = vp.Pixels
 	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
 	vp.Geom.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())

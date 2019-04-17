@@ -165,21 +165,40 @@ type Window interface {
 	Close()
 
 	// RunOnWin runs given function on the window's unique locked thread.
+	// All GPU-related calls must be run via this method:
+	//
+	// win.RunOnWin(func() {
+	//    win.Activate()
+	//    // do GPU calls here
+	// })
+	//
 	RunOnWin(f func())
 
 	// GoRunOnWin runs given function on the window's unique locked thread
 	// and returns immediately.
 	GoRunOnWin(f func())
 
-	// Handle returns the driver-specific handle for this window.
-	// Currently, for all platforms, this is *glfw.Window, but that
-	// cannot always be assumed.  Only provided for unforseen emergency use --
-	// please file an Issue for anything that should be added to Window
-	// interface.
-	Handle() interface{}
-
 	//////////////////////////////////
 	// 		Rendering / Updating
+
+	// Activate() sets this window as the current render target for gpu rendering
+	// functions, and the current context for gpu state (equivalent to
+	// MakeCurrentContext on OpenGL).
+	// Must call this on window's unique locked thread using RunOnWin.
+	//
+	// win.RunOnWin(func() {
+	//    win.Activate()
+	//    // do GPU calls here
+	// })
+	//
+	Activate()
+
+	// DeActivate() clears the current render target and gpu rendering context.
+	// Generally more efficient to NOT call this and just be sure to call
+	// Activate where relevant, so that if the window is already current context
+	// no switching is required.
+	// Must call this on window's unique locked thread using RunOnWin.
+	DeActivate()
 
 	// Publish does the equivalent of SwapBuffers on OpenGL: pushes the
 	// current rendered back-buffer to the front (and ensures that any
@@ -190,14 +209,6 @@ type Window interface {
 	// calls Publish() -- this is the typical update call.
 	PublishTex()
 
-	// Activate() sets this window as the current render target for gpu rendering
-	// functions, and the current context for gpu state (equivalent to
-	// MakeCurrentContext on OpenGL).
-	Activate()
-
-	// DeActivate() clears the current render target and gpu rendering context
-	DeActivate()
-
 	// WinTex() returns the current Texture of the same size as the window that
 	// is typically used to update the window contents.
 	// Use the various Drawer and SetSubImage methods to update this Texture, and
@@ -206,6 +217,18 @@ type Window interface {
 	// when that occurs, existing contents are lost -- a full update of the
 	// Texture at the current size is required at that point.
 	WinTex() Texture
+
+	// SetWinTexSubImage calls SetSubImage on WinTex with given parameters.
+	// convenience routine that activates the window context and runs on the
+	// window's thread.
+	SetWinTexSubImage(dp image.Point, src image.Image, sr image.Rectangle) error
+
+	// Handle returns the driver-specific handle for this window.
+	// Currently, for all platforms, this is *glfw.Window, but that
+	// cannot always be assumed.  Only provided for unforseen emergency use --
+	// please file an Issue for anything that should be added to Window
+	// interface.
+	Handle() interface{}
 
 	EventDeque
 

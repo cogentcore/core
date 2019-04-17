@@ -70,17 +70,10 @@ type App interface {
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)
 
-	// NewImage returns a new Image for this screen.  Images can be drawn upon
-	// directly using image and other packages, and have an accessible []byte
-	// slice holding the image data.
-	NewImage(size image.Point) (Image, error)
-
-	// NewTexture returns a new Texture for the given window.  Textures are opaque
-	// and could be non-local, but very fast for rendering to windows --
-	// typically create a texture of each window and render to that texture,
-	// then Draw that texture to the window when it is time to update (call
-	// Publish on window after drawing).
-	NewTexture(win Window, size image.Point) (Texture, error)
+	// NewTexture returns a new oswin-level GPU Texture for the given window.
+	// This Texture will automatically be Activate()'d.
+	// See also gpu.TheGPU.NewTexture2D for creating textures for GPU 3D-specific uses.
+	NewTexture(win Window, size image.Point) Texture
 
 	// ClipBoard returns the clip.Board handler for the system, in context of given window.
 	ClipBoard(win Window) clip.Board

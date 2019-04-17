@@ -10,6 +10,9 @@ import "image"
 // gi3d renders exclusively to a Framebuffer, which is then copied to
 // the overall oswin.Window.WinTex texture that backs the window for
 // final display to the user.
+// Use gpu.TheGPU.NewFramebuffer for a new freestanding framebuffer,
+// or gpu.Texture2D.ActivateFramebuffer to activate for rendering
+// onto an existing texture.
 type Framebuffer interface {
 	// Name returns the name of the framebuffer
 	Name() string
@@ -33,6 +36,9 @@ type Framebuffer interface {
 	// the recommended number is 4 to produce much better-looking results.
 	// If just using as an intermediate render buffer, then you may
 	// want to turn off by setting to 0.
+	// Setting to a number > 0 automatically disables use of external
+	// Texture2D that might have previously been set by SetTexture --
+	// must call Texture() to get downsampled texture instead.
 	SetSamples(samples int)
 
 	// Samples returns the number of multi-sample samples
@@ -41,6 +47,8 @@ type Framebuffer interface {
 	// SetTexture sets an existing Texture2D to serve as the color buffer target
 	// for this framebuffer.  This also implies SetSamples(0), and that
 	// the Texture() method just directly returns the texture set here.
+	// If we have a non-zero size, then the texture is automatically resized
+	// to the size of the framebuffer, otherwise the fb inherits size of texture.
 	SetTexture(tex Texture2D)
 
 	// Texture returns the current contents of the framebuffer as a Texture2D.

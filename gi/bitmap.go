@@ -5,11 +5,14 @@
 package gi
 
 import (
+	"fmt"
 	"image"
-	_ "image/jpeg" // force include of jpeg decoder
+	"image/jpeg"
 	"image/png"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -141,6 +144,7 @@ func (bm *Bitmap) Render2D() {
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
 
+// OpenImage opens an image from given path filename -- format is inferred automatically.
 func OpenImage(path string) (image.Image, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -151,6 +155,25 @@ func OpenImage(path string) (image.Image, error) {
 	return im, err
 }
 
+// SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
+// supported by default.
+func SaveImage(path string, im image.Image) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == ".png" {
+		return png.Encode(file, im)
+	} else if ext == ".jpg" || ext == ".jpeg" {
+		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
+	} else {
+		return fmt.Errorf("gi.SaveImage: extention: %s not recognized -- only .png and .jpg / jpeg supported", ext)
+	}
+}
+
+// OpenPNG opens an image encoded in the PNG format
 func OpenPNG(path string) (image.Image, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -160,6 +183,7 @@ func OpenPNG(path string) (image.Image, error) {
 	return png.Decode(file)
 }
 
+// SavePNG saves an image encoded in the PNG format
 func SavePNG(path string, im image.Image) error {
 	file, err := os.Create(path)
 	if err != nil {

@@ -6,13 +6,12 @@ package glos
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"sync"
 	"unsafe"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/glgpu"
 	"github.com/goki/gi/oswin/gpu"
 )
@@ -26,7 +25,7 @@ var glTypes = map[gpu.Types]uint32{
 	gpu.UndefType: gl.FLOAT,
 	gpu.Bool:      gl.BOOL,
 	gpu.Int:       gl.INT,
-	gpu.UInt:      gl.UINT,
+	gpu.UInt:      gl.UNSIGNED_INT,
 	gpu.Float32:   gl.FLOAT,
 	gpu.Float64:   gl.DOUBLE,
 }
@@ -103,16 +102,8 @@ func (gp *gpuImpl) ErrCheck(ctxt string) error {
 	return err
 }
 
-func (gp *gpuImpl) UseContext(win oswin.Window) {
-	w := win.(*windowImpl)
-	w.glctxMu.Lock()
-	w.glw.MakeContextCurrent()
-}
-
-func (gp *gpuImpl) ClearContext(win oswin.Window) {
-	w := win.(*windowImpl)
-	glfw.DetachCurrentContext()
-	w.glctxMu.Unlock()
+func (gp *gpuImpl) RenderToWindow() {
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 }
 
 func (gp *gpuImpl) Type(typ gpu.Types) uint32 {
@@ -138,6 +129,27 @@ func (gp *gpuImpl) NewPipeline(name string) gpu.Pipeline {
 func (gp *gpuImpl) NewBufferMgr() gpu.BufferMgr {
 	bm := &glgpu.BufferMgr{}
 	return bm
+}
+
+// NewTexture2D returns a new Texture2D with given name (optional).
+// These Texture2D's must be Activate()'d and Delete()'d and otherwise managed
+// (no further tracking is done by the gpu framework)
+func (gp *gpuImpl) NewTexture2D(name string) gpu.Texture2D {
+	tx := &textureImpl{name: name}
+	return tx
+}
+
+// NewFramebuffer returns a new Framebuffer for rendering directly
+// onto a texture instead of onto the Window (i.e., for offscreen rendering).
+// samples is typically 4 for multisampling anti-aliasing (generally recommended).
+// See also Texture2D.ActivateFramebuffer to activate a framebuffer for rendering
+// to an existing texture.
+func (gp *gpuImpl) NewFramebuffer(name string, size image.Point, samples int) gpu.Framebuffer {
+	fb := &glgpu.Framebuffer{}
+	fb.SetName(name)
+	fb.SetSize(size)
+	fb.SetSamples(samples)
+	return fb
 }
 
 // 	NextUniformBindingPoint returns the next avail uniform binding point.

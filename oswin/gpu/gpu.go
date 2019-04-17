@@ -5,17 +5,25 @@
 package gpu
 
 import (
-	"github.com/goki/gi/oswin"
+	"image"
 )
 
 // TheGPU is the current oswin GPU instance
 var TheGPU GPU
 
 // GPU provides the main interface to the GPU hardware.
-// currently based on OpenGL.
+// Currently based on OpenGL.
 // All calls apply to the current context, which must be set with
-// UseContext call, and cleared after with ClearContext, in strict
-// pairing as there is a mutex locked and unlocked with each call.
+// Activate() call on relevant oswin.Window.  Framebuffer.Activate() will
+// also set the rendering target to a framebuffer instead of the window.
+// Furthermore, all GPU calls must be embedded in oswin.Window.RunOnWin
+// function call to run on the thread associated with that window:
+//
+// win.RunOnWin(func() {
+//    win.Activate()
+//    // do GPU calls here
+// })
+//
 type GPU interface {
 	// Init initializes the GPU framework etc
 	// if debug is true, then it turns on debugging mode
@@ -34,16 +42,11 @@ type GPU interface {
 	// also automatically logged when they occur.
 	ErrCheck(ctxt string) error
 
-	// UseContext sets the current OpenGL context to be that of given window.
-	// All methods in GPU operate on the current context.
-	// Also locks a per-window mutex, as GL calls are not threadsafe -- MUST
-	// call ClearContext after every call to UseContext
-	UseContext(win oswin.Window)
-
-	// ClearContext unsets the current OpenGL context for given window
-	// and unlocks the per-window mutex.
-	// Assumes that UseContext was previously called on window.
-	ClearContext(win oswin.Window)
+	// RenderToWindow sets the current context's window as the
+	// render target (i.e., the default framebuffer 0).
+	// This can be used if a Framebuffer was previously active.
+	// Automatically called during UseContext to make sure.
+	RenderToWindow()
 
 	// Type returns the GPU data type id for given type
 	Type(typ Types) uint32
@@ -57,6 +60,18 @@ type GPU interface {
 
 	// NewBufferMgr returns a new BufferMgr for managing Vectors and Indexes for rendering.
 	NewBufferMgr() BufferMgr
+
+	// NewTexture2D returns a new Texture2D with given name (optional).
+	// These Texture2D's must be Activate()'d and Delete()'d and otherwise managed
+	// (no further tracking is done by the gpu framework)
+	NewTexture2D(name string) Texture2D
+
+	// NewFramebuffer returns a new Framebuffer for rendering directly
+	// onto a texture instead of onto the Window (i.e., for offscreen rendering).
+	// samples is typically 4 for multisampling anti-aliasing (generally recommended).
+	// See also Texture2D.ActivateFramebuffer to activate a framebuffer for rendering
+	// to an existing texture.
+	NewFramebuffer(name string, size image.Point, samples int) Framebuffer
 
 	// 	NextUniformBindingPoint returns the next avail uniform binding point.
 	// Counts up from 0 -- this call increments for next call.

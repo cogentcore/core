@@ -17,4 +17,9 @@ import "github.com/goki/gi/oswin"
 //
 type Texture2D interface {
 	oswin.Texture
+
+	// Framebuffer returns a framebuffer for rendering onto this
+	// texture -- calls ActivateFramebuffer() if one is not
+	// already activated.
+	Framebuffer() Framebuffer
 }

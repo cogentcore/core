@@ -53,3 +53,9 @@ func (pl *Pipeline) ProgramByName(name string) gpu.Program {
 func (pl *Pipeline) Programs() []gpu.Program {
 	return nil
 }
+
+func (pl *Pipeline) Delete() {
+	for _, pr := range pl.progs {
+		pr.Delete()
+	}
+}
