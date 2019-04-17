@@ -22,9 +22,9 @@ import (
 // the Draw method of that same interface.
 func Copy(dst oswin.Drawer, dp image.Point, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	dst.Draw(mat32.Matrix3{
-		1, 0,
-		0, 1,
-		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y),
+		1, 0, 0,
+		0, 1, 0,
+		float32(dp.X - sr.Min.X), float32(dp.Y - sr.Min.Y), 1,
 	}, src, sr, op, opts)
 }
 
@@ -34,9 +34,8 @@ func Scale(dst oswin.Drawer, dr image.Rectangle, src oswin.Texture, sr image.Rec
 	rx := float32(dr.Dx()) / float32(sr.Dx())
 	ry := float32(dr.Dy()) / float32(sr.Dy())
 	dst.Draw(mat32.Matrix3{
-		rx, 0,
-		0, ry,
-		float32(dr.Min.X) - rx*float32(sr.Min.X),
-		float32(dr.Min.Y) - ry*float32(sr.Min.Y),
+		rx, 0, 0,
+		0, ry, 0,
+		float32(dr.Min.X) - rx*float32(sr.Min.X), float32(dr.Min.Y) - ry*float32(sr.Min.Y), 1,
 	}, src, sr, op, opts)
 }

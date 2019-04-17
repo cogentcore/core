@@ -162,8 +162,6 @@ func (tx *textureImpl) SetSubImage(dp image.Point, src image.Image, sr image.Rec
 	width := dr.Dx()
 	if width*4 == rgba.Stride {
 		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(dr.Min.Y), int32(width), int32(dr.Dy()), gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix))
-		gpu.TheGPU.ErrCheck("tex subimg")
-		fmt.Printf("uploaded tex: dr: %+v\n", dr)
 		return nil
 	}
 	// TODO: can we use GL_UNPACK_ROW_LENGTH with glPixelStorei for stride in
@@ -172,7 +170,6 @@ func (tx *textureImpl) SetSubImage(dp image.Point, src image.Image, sr image.Rec
 		gl.TexSubImage2D(gl.TEXTURE_2D, 0, int32(dr.Min.X), int32(y), int32(width), 1, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(pix[p:]))
 		p += rgba.Stride
 	}
-	fmt.Printf("uploaded tex: dr: %+v\n", dr)
 	return nil
 }
 

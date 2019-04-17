@@ -35,7 +35,7 @@ func (app *appImpl) initDrawProgs() error {
 	}
 	p.AddUniform("mvp", gpu.UniType{Type: gpu.Float32, Mat: 3}, false, 0)
 	p.AddUniform("uvp", gpu.UniType{Type: gpu.Float32, Mat: 3}, false, 0)
-	p.AddUniform("sample", gpu.UniType{Type: gpu.Int}, false, 0)
+	p.AddUniform("tex", gpu.UniType{Type: gpu.Int}, false, 0)
 
 	pv := p.AddInput("pos", gpu.VectorType{Type: gpu.Float32, Vec: 2}, gpu.VertexPosition)
 
@@ -46,7 +46,6 @@ func (app *appImpl) initDrawProgs() error {
 		return err
 	}
 	app.drawProg = p
-	gpu.TheGPU.ErrCheck("initDrawProgs -- draw compile")
 
 	b := theGPU.NewBufferMgr()
 	vb := b.AddVectorsBuffer(gpu.StaticDraw)
@@ -55,7 +54,6 @@ func (app *appImpl) initDrawProgs() error {
 	vb.SetAllData(quadCoords)
 	b.Activate()
 	b.TransferAll()
-	gpu.TheGPU.ErrCheck("initDrawProgs -- b activate")
 	app.drawQuads = b
 
 	p = theGPU.NewProgram("fill")
@@ -79,7 +77,6 @@ func (app *appImpl) initDrawProgs() error {
 		return err
 	}
 	app.fillProg = p
-	gpu.TheGPU.ErrCheck("initDrawProgs -- fill compile")
 
 	b = theGPU.NewBufferMgr()
 	vb = b.AddVectorsBuffer(gpu.StaticDraw)
@@ -90,7 +87,6 @@ func (app *appImpl) initDrawProgs() error {
 	b.TransferAll()
 	app.fillQuads = b
 
-	err = gpu.TheGPU.ErrCheck("initDrawProgs")
 	if err != nil {
 		return err
 	}
@@ -102,8 +98,8 @@ func (app *appImpl) initDrawProgs() error {
 // proper context must have already been established outside this call!
 func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 
-	t := src.(*textureImpl)
-	sr = sr.Intersect(t.Bounds())
+	tx := src.(*textureImpl)
+	sr = sr.Intersect(tx.Bounds())
 	if sr.Empty() {
 		return
 	}
@@ -146,8 +142,8 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	//
 	// The PQRS quad is always axis-aligned. First of all, convert
 	// from pixel space to texture space.
-	tw := float32(t.size.X)
-	th := float32(t.size.Y)
+	tw := float32(tx.size.X)
+	th := float32(tx.size.Y)
 	px := float32(sr.Min.X-0) / tw
 	py := float32(sr.Min.Y-0) / th
 	qx := float32(sr.Max.X-0) / tw
@@ -162,25 +158,22 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
 	matUVP := mat32.Matrix3{
-		qx - px, 0,
-		0, sy - py,
-		px, py,
+		qx - px, 0, 0,
+		0, sy - py, 0,
+		px, py, 1,
 	}
 	err = app.drawProg.UniformByName("uvp").SetValue(matUVP)
 	if err != nil {
 		log.Println(err)
 	}
-	gpu.TheGPU.ErrCheck("draw -- uvp")
 
-	t.Activate(0)
-	err = app.drawProg.UniformByName("sample").SetValue(int32(0))
+	tx.Activate(0)
+	err = app.drawProg.UniformByName("tex").SetValue(int32(0))
 	if err != nil {
 		log.Println(err)
 	}
-	gpu.TheGPU.ErrCheck("draw -- sample")
 
 	app.drawQuads.Activate()
-	gpu.TheGPU.ErrCheck("draw -- quads")
 	gpu.Draw.TriangleStrips(0, 4)
 }
 
@@ -269,9 +262,9 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) mat32.
 	//	- maps (1, 0) to (trx, try).
 	//	- maps (0, 1) to (blx, bly).
 	return mat32.Matrix3{
-		trx - tlx, try - tly,
-		blx - tlx, bly - tly,
-		tlx, tly,
+		trx - tlx, try - tly, 0,
+		blx - tlx, bly - tly, 0,
+		tlx, tly, 1,
 	}
 }
 
@@ -283,7 +276,7 @@ var quadCoords = mat32.ArrayF32{
 }
 
 const drawVertSrc = `
-#version 330
+#version 410
 
 uniform mat3 mvp;
 uniform mat3 uvp;
@@ -300,23 +293,23 @@ void main() {
 ` + "\x00"
 
 const drawFragSrc = `
-#version 330
+#version 410
 
 precision mediump float;
 
-uniform sampler2D sample;
+uniform sampler2D tex;
 
 in vec2 uv;
 
 out vec4 outputColor;
 
 void main() {
-	outputColor = texture(sample, uv);
+	outputColor = texture(tex, uv);
 }
 ` + "\x00"
 
 const fillVertSrc = `
-#version 330
+#version 410
 
 uniform mat3 mvp;
 
@@ -329,7 +322,7 @@ void main() {
 ` + "\x00"
 
 const fillFragSrc = `
-#version 330
+#version 410
 
 precision mediump float;
 
