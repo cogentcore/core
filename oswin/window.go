@@ -34,12 +34,11 @@ import (
 // interfaces -- call Activate() on the window to make it the current context and
 // render target (equivalent to MakeCurrentContext OpenGL call).
 //
-// Each window has its own locked processing thread, which maintains its
-// own GPU context state, and is where e.g., Publish() is actually
-// executed.  IMPORTANT: ALL GPU (e.g., OPENGL) CALLS MUST USE RunOnWin()
-// to execute on this thread!!  Note that this is not the main thread for
-// the overall app itself, which is available via TheApp.RunOnMain() --
-// the App locks this main thread and runs the overall event loop there.
+// Each window has a separate goroutine where Publish() is actually
+// executed.
+//
+// IMPORTANT: ALL GPU (e.g., OPENGL) CALLS MUST USE oswin.TheApp.RunOnMain()
+// to execute on the main thread!!
 //
 type Window interface {
 
@@ -164,14 +163,7 @@ type Window interface {
 	// is undefined.  See App.Quit methods to quit overall app.
 	Close()
 
-	// RunOnWin runs given function on the window's unique locked thread.
-	// All GPU-related calls must be run via this method:
-	//
-	// win.RunOnWin(func() {
-	//    win.Activate()
-	//    // do GPU calls here
-	// })
-	//
+	// RunOnWin runs given function on the window's own separate goroutine
 	RunOnWin(f func())
 
 	// GoRunOnWin runs given function on the window's unique locked thread
@@ -184,9 +176,9 @@ type Window interface {
 	// Activate() sets this window as the current render target for gpu rendering
 	// functions, and the current context for gpu state (equivalent to
 	// MakeCurrentContext on OpenGL).
-	// Must call this on window's unique locked thread using RunOnWin.
+	// Must call this on app main thread using oswin.TheApp.RunOnMain
 	//
-	// win.RunOnWin(func() {
+	// oswin.TheApp.RunOnMain(func() {
 	//    win.Activate()
 	//    // do GPU calls here
 	// })
@@ -197,7 +189,7 @@ type Window interface {
 	// Generally more efficient to NOT call this and just be sure to call
 	// Activate where relevant, so that if the window is already current context
 	// no switching is required.
-	// Must call this on window's unique locked thread using RunOnWin.
+	// Must call this on app main thread using oswin.TheApp.RunOnMain
 	DeActivate()
 
 	// Publish does the equivalent of SwapBuffers on OpenGL: pushes the

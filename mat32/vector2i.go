@@ -10,26 +10,26 @@
 
 package mat32
 
-// Vector2 is a 2D vector/point with X and Y components.
-type Vector2 struct {
-	X float32
-	Y float32
+// Vector2i is a 2D vector/point with X and Y integer32 components
+type Vector2i struct {
+	X int32
+	Y int32
 }
 
-// NewVector2 creates and returns a pointer to a new Vector2 with
+// NewVector2i creates and returns a pointer to a new Vector2i with
 // the specified x and y components
-func NewVector2(x, y float32) *Vector2 {
-	return &Vector2{X: x, Y: y}
+func NewVector2i(x, y int32) *Vector2i {
+	return &Vector2i{X: x, Y: y}
 }
 
-// NewVec2 creates and returns a pointer to a new zero-ed Vector2.
-func NewVec2() *Vector2 {
-	return &Vector2{X: 0, Y: 0}
+// NewVec2i creates and returns a pointer to a new zero-ed Vector2i.
+func NewVec2i() *Vector2i {
+	return &Vector2i{X: 0, Y: 0}
 }
 
 // Set sets this vector X and Y components.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Set(x, y float32) *Vector2 {
+func (v *Vector2i) Set(x, y int32) *Vector2i {
 	v.X = x
 	v.Y = y
 	return v
@@ -37,21 +37,21 @@ func (v *Vector2) Set(x, y float32) *Vector2 {
 
 // SetX sets this vector X component.
 // Returns the pointer to this updated Vector.
-func (v *Vector2) SetX(x float32) *Vector2 {
+func (v *Vector2i) SetX(x int32) *Vector2i {
 	v.X = x
 	return v
 }
 
 // SetY sets this vector Y component.
 // Returns the pointer to this updated vector.
-func (v *Vector2) SetY(y float32) *Vector2 {
+func (v *Vector2i) SetY(y int32) *Vector2i {
 	v.Y = y
 	return v
 }
 
 // SetComponent sets this vector component value by its index: 0 for X, 1 for Y.
 // Returns the pointer to this updated vector
-func (v *Vector2) SetComponent(index int, value float32) *Vector2 {
+func (v *Vector2i) SetComponent(index int, value int32) *Vector2i {
 	switch index {
 	case 0:
 		v.X = value
@@ -64,7 +64,7 @@ func (v *Vector2) SetComponent(index int, value float32) *Vector2 {
 }
 
 // Component returns this vector component by its index: 0 for X, 1 for Y
-func (v *Vector2) Component(index int) float32 {
+func (v *Vector2i) Component(index int) int32 {
 	switch index {
 	case 0:
 		return v.X
@@ -76,20 +76,20 @@ func (v *Vector2) Component(index int) float32 {
 }
 
 // SetByName sets this vector component value by its case insensitive name: "x" or "y".
-func (v *Vector2) SetByName(name string, value float32) {
+func (v *Vector2i) SetByName(name string, value int32) {
 	switch name {
 	case "x", "X":
 		v.X = value
 	case "y", "Y":
 		v.Y = value
 	default:
-		panic("Invalid Vector2 component name: " + name)
+		panic("Invalid Vector2i component name: " + name)
 	}
 }
 
 // Zero sets this vector X and Y components to be zero.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Zero() *Vector2 {
+func (v *Vector2i) Zero() *Vector2i {
 	v.X = 0
 	v.Y = 0
 	return v
@@ -98,7 +98,7 @@ func (v *Vector2) Zero() *Vector2 {
 // Copy copies other vector to this one.
 // It is equivalent to: *v = *other.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Copy(other *Vector2) *Vector2 {
+func (v *Vector2i) Copy(other *Vector2i) *Vector2i {
 	v.X = other.X
 	v.Y = other.Y
 	return v
@@ -106,7 +106,7 @@ func (v *Vector2) Copy(other *Vector2) *Vector2 {
 
 // Add adds other vector to this one.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Add(other *Vector2) *Vector2 {
+func (v *Vector2i) Add(other *Vector2i) *Vector2i {
 	v.X += other.X
 	v.Y += other.Y
 	return v
@@ -114,7 +114,7 @@ func (v *Vector2) Add(other *Vector2) *Vector2 {
 
 // AddScalar adds scalar s to each component of this vector.
 // Returns the pointer to this updated vector.
-func (v *Vector2) AddScalar(s float32) *Vector2 {
+func (v *Vector2i) AddScalar(s int32) *Vector2i {
 	v.X += s
 	v.Y += s
 	return v
@@ -122,7 +122,7 @@ func (v *Vector2) AddScalar(s float32) *Vector2 {
 
 // AddVectors adds vectors a and b to this one.
 // Returns the pointer to this updated vector.
-func (v *Vector2) AddVectors(a, b *Vector2) *Vector2 {
+func (v *Vector2i) AddVectors(a, b *Vector2i) *Vector2i {
 	v.X = a.X + b.X
 	v.Y = a.Y + b.Y
 	return v
@@ -130,7 +130,7 @@ func (v *Vector2) AddVectors(a, b *Vector2) *Vector2 {
 
 // Sub subtracts other vector from this one.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Sub(other *Vector2) *Vector2 {
+func (v *Vector2i) Sub(other *Vector2i) *Vector2i {
 	v.X -= other.X
 	v.Y -= other.Y
 	return v
@@ -138,7 +138,7 @@ func (v *Vector2) Sub(other *Vector2) *Vector2 {
 
 // SubScalar subtracts scalar s from each component of this vector.
 // Returns the pointer to this updated vector.
-func (v *Vector2) SubScalar(s float32) *Vector2 {
+func (v *Vector2i) SubScalar(s int32) *Vector2i {
 	v.X -= s
 	v.Y -= s
 	return v
@@ -146,7 +146,7 @@ func (v *Vector2) SubScalar(s float32) *Vector2 {
 
 // SubVectors sets this vector to a - b.
 // Returns the pointer to this updated vector.
-func (v *Vector2) SubVectors(a, b *Vector2) *Vector2 {
+func (v *Vector2i) SubVectors(a, b *Vector2i) *Vector2i {
 	v.X = a.X - b.X
 	v.Y = a.Y - b.Y
 	return v
@@ -154,7 +154,7 @@ func (v *Vector2) SubVectors(a, b *Vector2) *Vector2 {
 
 // Multiply multiplies each component of this vector by the corresponding one from other vector.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Multiply(other *Vector2) *Vector2 {
+func (v *Vector2i) Multiply(other *Vector2i) *Vector2i {
 	v.X *= other.X
 	v.Y *= other.Y
 	return v
@@ -162,7 +162,7 @@ func (v *Vector2) Multiply(other *Vector2) *Vector2 {
 
 // MultiplyScalar multiplies each component of this vector by the scalar s.
 // Returns the pointer to this updated vector.
-func (v *Vector2) MultiplyScalar(s float32) *Vector2 {
+func (v *Vector2i) MultiplyScalar(s int32) *Vector2i {
 	v.X *= s
 	v.Y *= s
 	return v
@@ -170,7 +170,7 @@ func (v *Vector2) MultiplyScalar(s float32) *Vector2 {
 
 // Divide divides each component of this vector by the corresponding one from other vector.
 // Returns the pointer to this updated vector
-func (v *Vector2) Divide(other *Vector2) *Vector2 {
+func (v *Vector2i) Divide(other *Vector2i) *Vector2i {
 	v.X /= other.X
 	v.Y /= other.Y
 	return v
@@ -179,7 +179,7 @@ func (v *Vector2) Divide(other *Vector2) *Vector2 {
 // DivideScalar divides each component of this vector by the scalar s.
 // If scalar is zero, sets this vector to zero.
 // Returns the pointer to this updated vector.
-func (v *Vector2) DivideScalar(scalar float32) *Vector2 {
+func (v *Vector2i) DivideScalar(scalar int32) *Vector2i {
 	if scalar != 0 {
 		invScalar := 1 / scalar
 		v.X *= invScalar
@@ -193,7 +193,7 @@ func (v *Vector2) DivideScalar(scalar float32) *Vector2 {
 
 // Min sets this vector components to the minimum values of itself and other vector.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Min(other *Vector2) *Vector2 {
+func (v *Vector2i) Min(other *Vector2i) *Vector2i {
 	if v.X > other.X {
 		v.X = other.X
 	}
@@ -205,7 +205,7 @@ func (v *Vector2) Min(other *Vector2) *Vector2 {
 
 // Max sets this vector components to the maximum value of itself and other vector.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Max(other *Vector2) *Vector2 {
+func (v *Vector2i) Max(other *Vector2i) *Vector2i {
 	if v.X < other.X {
 		v.X = other.X
 	}
@@ -219,7 +219,7 @@ func (v *Vector2) Max(other *Vector2) *Vector2 {
 // and not greater than the corresponding components of max.
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Clamp(min, max *Vector2) *Vector2 {
+func (v *Vector2i) Clamp(min, max *Vector2i) *Vector2i {
 	if v.X < min.X {
 		v.X = min.X
 	} else if v.X > max.X {
@@ -236,7 +236,7 @@ func (v *Vector2) Clamp(min, max *Vector2) *Vector2 {
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 // Returns the pointer to this updated vector.
-func (v *Vector2) ClampScalar(minVal, maxVal float32) *Vector2 {
+func (v *Vector2i) ClampScalar(minVal, maxVal int32) *Vector2i {
 	if v.X < minVal {
 		v.X = minVal
 	} else if v.X > maxVal {
@@ -251,100 +251,22 @@ func (v *Vector2) ClampScalar(minVal, maxVal float32) *Vector2 {
 	return v
 }
 
-// Floor applies mat32.Floor() to each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vector2) Floor() *Vector2 {
-	v.X = Floor(v.X)
-	v.Y = Floor(v.Y)
-	return v
-}
-
-// Ceil applies mat32.Ceil() to each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vector2) Ceil() *Vector2 {
-	v.X = Ceil(v.X)
-	v.Y = Ceil(v.Y)
-	return v
-}
-
-// Round rounds each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vector2) Round() *Vector2 {
-	v.X = Floor(v.X + 0.5)
-	v.Y = Floor(v.Y + 0.5)
-	return v
-}
-
 // Negate negates each of this vector's components.
 // Returns the pointer to this updated vector.
-func (v *Vector2) Negate() *Vector2 {
+func (v *Vector2i) Negate() *Vector2i {
 	v.X = -v.X
 	v.Y = -v.Y
 	return v
 }
 
-// Dot returns the dot product of this vector with other.
-// None of the vectors are changed.
-func (v *Vector2) Dot(other *Vector2) float32 {
-	return v.X*other.X + v.Y*other.Y
-}
-
-// LengthSq returns the length squared of this vector.
-// LengthSq can be used to compare vectors' lengths without the need to perform a square root.
-func (v *Vector2) LengthSq() float32 {
-	return v.X*v.X + v.Y*v.Y
-}
-
-// Length returns the length of this vector.
-func (v *Vector2) Length() float32 {
-	return Sqrt(v.X*v.X + v.Y*v.Y)
-}
-
-// Normalize normalizes this vector so its length will be 1.
-// Returns the pointer to this updated vector.
-func (v *Vector2) Normalize() *Vector2 {
-	return v.DivideScalar(v.Length())
-}
-
-// DistanceTo returns the distance of this point to other.
-func (v *Vector2) DistanceTo(other *Vector2) float32 {
-	return Sqrt(v.DistanceToSquared(other))
-}
-
-// DistanceToSquared returns the distance squared of this point to other.
-func (v *Vector2) DistanceToSquared(other *Vector2) float32 {
-	dx := v.X - other.X
-	dy := v.Y - other.Y
-	return dx*dx + dy*dy
-}
-
-// SetLength sets this vector to have the specified length.
-// Returns the pointer to this updated vector.
-func (v *Vector2) SetLength(l float32) *Vector2 {
-	oldLength := v.Length()
-	if oldLength != 0 && l != oldLength {
-		v.MultiplyScalar(l / oldLength)
-	}
-	return v
-}
-
-// Lerp sets each of this vector's components to the linear interpolated value of
-// alpha between ifself and the corresponding other component.
-// Returns the pointer to this updated vector.
-func (v *Vector2) Lerp(other *Vector2, alpha float32) *Vector2 {
-	v.X += (other.X - v.X) * alpha
-	v.Y += (other.Y - v.Y) * alpha
-	return v
-}
-
 // Equals returns if this vector is equal to other.
-func (v *Vector2) Equals(other *Vector2) bool {
+func (v *Vector2i) Equals(other *Vector2i) bool {
 	return (other.X == v.X) && (other.Y == v.Y)
 }
 
 // FromArray sets this vector's components from the specified array and offset
 // Returns the pointer to this updated vector.
-func (v *Vector2) FromArray(array []float32, offset int) *Vector2 {
+func (v *Vector2i) FromArray(array []int32, offset int) *Vector2i {
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	return v
@@ -352,21 +274,8 @@ func (v *Vector2) FromArray(array []float32, offset int) *Vector2 {
 
 // ToArray copies this vector's components to array starting at offset.
 // Returns the array.
-func (v *Vector2) ToArray(array []float32, offset int) []float32 {
+func (v *Vector2i) ToArray(array []int32, offset int) []int32 {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	return array
-}
-
-// InTriangle returns whether the vector is inside the specified triangle.
-func (v *Vector2) InTriangle(p0, p1, p2 *Vector2) bool {
-	A := 0.5 * (-p1.Y*p2.X + p0.Y*(-p1.X+p2.X) + p0.X*(p1.Y-p2.Y) + p1.X*p2.Y)
-	sign := float32(1)
-	if A < 0 {
-		sign = float32(-1)
-	}
-	s := (p0.Y*p2.X - p0.X*p2.Y + (p2.Y-p0.Y)*v.X + (p0.X-p2.X)*v.Y) * sign
-	t := (p0.X*p1.Y - p0.Y*p1.X + (p0.Y-p1.Y)*v.X + (p1.X-p0.X)*v.Y) * sign
-
-	return s >= 0 && t >= 0 && (s+t) < 2*A*sign
 }

@@ -20,20 +20,17 @@ type Vector3 struct {
 // NewVector3 creates and returns a pointer to a new Vector3 with
 // the specified x, y and y components
 func NewVector3(x, y, z float32) *Vector3 {
-
 	return &Vector3{X: x, Y: y, Z: z}
 }
 
 // NewVec3 creates and returns a pointer to a new zero-ed Vector3.
 func NewVec3() *Vector3 {
-
 	return &Vector3{X: 0, Y: 0, Z: 0}
 }
 
 // Set sets this vector X, Y and Z components.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Set(x, y, z float32) *Vector3 {
-
 	v.X = x
 	v.Y = y
 	v.Z = z
@@ -43,7 +40,6 @@ func (v *Vector3) Set(x, y, z float32) *Vector3 {
 // SetX sets this vector X component.
 // Returns the pointer to this updated Vector.
 func (v *Vector3) SetX(x float32) *Vector3 {
-
 	v.X = x
 	return v
 }
@@ -51,7 +47,6 @@ func (v *Vector3) SetX(x float32) *Vector3 {
 // SetY sets this vector Y component.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SetY(y float32) *Vector3 {
-
 	v.Y = y
 	return v
 }
@@ -59,7 +54,6 @@ func (v *Vector3) SetY(y float32) *Vector3 {
 // SetZ sets this vector Z component.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SetZ(z float32) *Vector3 {
-
 	v.Z = z
 	return v
 }
@@ -67,7 +61,6 @@ func (v *Vector3) SetZ(z float32) *Vector3 {
 // SetComponent sets this vector component value by its index: 0 for X, 1 for Y, 2 for Z.
 // Returns the pointer to this updated vector
 func (v *Vector3) SetComponent(index int, value float32) {
-
 	switch index {
 	case 0:
 		v.X = value
@@ -82,7 +75,6 @@ func (v *Vector3) SetComponent(index int, value float32) {
 
 // Component returns this vector component by its index: 0 for X, 1 for Y, 2 for Z.
 func (v *Vector3) Component(index int) float32 {
-
 	switch index {
 	case 0:
 		return v.X
@@ -97,7 +89,6 @@ func (v *Vector3) Component(index int) float32 {
 
 // SetByName sets this vector component value by its case insensitive name: "x", "y", or "z".
 func (v *Vector3) SetByName(name string, value float32) {
-
 	switch name {
 	case "x", "X":
 		v.X = value
@@ -113,7 +104,6 @@ func (v *Vector3) SetByName(name string, value float32) {
 // Zero sets this vector X, Y and Z components to be zero.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Zero() *Vector3 {
-
 	v.X = 0
 	v.Y = 0
 	v.Z = 0
@@ -124,7 +114,6 @@ func (v *Vector3) Zero() *Vector3 {
 // It is equivalent to: *v = *other.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Copy(other *Vector3) *Vector3 {
-
 	*v = *other
 	return v
 }
@@ -132,7 +121,6 @@ func (v *Vector3) Copy(other *Vector3) *Vector3 {
 // Add adds other vector to this one.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Add(other *Vector3) *Vector3 {
-
 	v.X += other.X
 	v.Y += other.Y
 	v.Z += other.Z
@@ -142,7 +130,6 @@ func (v *Vector3) Add(other *Vector3) *Vector3 {
 // AddScalar adds scalar s to each component of this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) AddScalar(s float32) *Vector3 {
-
 	v.X += s
 	v.Y += s
 	v.Z += s
@@ -152,7 +139,6 @@ func (v *Vector3) AddScalar(s float32) *Vector3 {
 // AddVectors adds vectors a and b to this one.
 // Returns the pointer to this updated vector.
 func (v *Vector3) AddVectors(a, b *Vector3) *Vector3 {
-
 	v.X = a.X + b.X
 	v.Y = a.Y + b.Y
 	v.Z = a.Z + b.Z
@@ -162,7 +148,6 @@ func (v *Vector3) AddVectors(a, b *Vector3) *Vector3 {
 // Sub subtracts other vector from this one.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Sub(other *Vector3) *Vector3 {
-
 	v.X -= other.X
 	v.Y -= other.Y
 	v.Z -= other.Z
@@ -172,7 +157,6 @@ func (v *Vector3) Sub(other *Vector3) *Vector3 {
 // SubScalar subtracts scalar s from each component of this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SubScalar(s float32) *Vector3 {
-
 	v.X -= s
 	v.Y -= s
 	v.Z -= s
@@ -182,7 +166,6 @@ func (v *Vector3) SubScalar(s float32) *Vector3 {
 // SubVectors sets this vector to a - b.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SubVectors(a, b *Vector3) *Vector3 {
-
 	v.X = a.X - b.X
 	v.Y = a.Y - b.Y
 	v.Z = a.Z - b.Z
@@ -192,7 +175,6 @@ func (v *Vector3) SubVectors(a, b *Vector3) *Vector3 {
 // Multiply multiplies each component of this vector by the corresponding one from other vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Multiply(other *Vector3) *Vector3 {
-
 	v.X *= other.X
 	v.Y *= other.Y
 	v.Z *= other.Z
@@ -202,7 +184,6 @@ func (v *Vector3) Multiply(other *Vector3) *Vector3 {
 // MultiplyScalar multiplies each component of this vector by the scalar s.
 // Returns the pointer to this updated vector.
 func (v *Vector3) MultiplyScalar(s float32) *Vector3 {
-
 	v.X *= s
 	v.Y *= s
 	v.Z *= s
@@ -212,7 +193,6 @@ func (v *Vector3) MultiplyScalar(s float32) *Vector3 {
 // Divide divides each component of this vector by the corresponding one from other vector.
 // Returns the pointer to this updated vector
 func (v *Vector3) Divide(other *Vector3) *Vector3 {
-
 	v.X /= other.X
 	v.Y /= other.Y
 	v.Z /= other.Z
@@ -223,7 +203,6 @@ func (v *Vector3) Divide(other *Vector3) *Vector3 {
 // If scalar is zero, sets this vector to zero.
 // Returns the pointer to this updated vector.
 func (v *Vector3) DivideScalar(scalar float32) *Vector3 {
-
 	if scalar != 0 {
 		invScalar := 1 / scalar
 		v.X *= invScalar
@@ -240,7 +219,6 @@ func (v *Vector3) DivideScalar(scalar float32) *Vector3 {
 // Min sets this vector components to the minimum values of itself and other vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Min(other *Vector3) *Vector3 {
-
 	if v.X > other.X {
 		v.X = other.X
 	}
@@ -256,7 +234,6 @@ func (v *Vector3) Min(other *Vector3) *Vector3 {
 // Max sets this vector components to the maximum value of itself and other vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Max(other *Vector3) *Vector3 {
-
 	if v.X < other.X {
 		v.X = other.X
 	}
@@ -274,7 +251,6 @@ func (v *Vector3) Max(other *Vector3) *Vector3 {
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Clamp(min, max *Vector3) *Vector3 {
-
 	if v.X < min.X {
 		v.X = min.X
 	} else if v.X > max.X {
@@ -298,7 +274,6 @@ func (v *Vector3) Clamp(min, max *Vector3) *Vector3 {
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ClampScalar(minVal, maxVal float32) *Vector3 {
-
 	min := NewVector3(minVal, minVal, minVal)
 	max := NewVector3(maxVal, maxVal, maxVal)
 	return v.Clamp(min, max)
@@ -307,7 +282,6 @@ func (v *Vector3) ClampScalar(minVal, maxVal float32) *Vector3 {
 // Floor applies mat32.Floor() to each of this vector's components.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Floor() *Vector3 {
-
 	v.X = Floor(v.X)
 	v.Y = Floor(v.Y)
 	v.Z = Floor(v.Z)
@@ -317,7 +291,6 @@ func (v *Vector3) Floor() *Vector3 {
 // Ceil applies mat32.Ceil() to each of this vector's components.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Ceil() *Vector3 {
-
 	v.X = Ceil(v.X)
 	v.Y = Ceil(v.Y)
 	v.Z = Ceil(v.Z)
@@ -327,7 +300,6 @@ func (v *Vector3) Ceil() *Vector3 {
 // Round rounds each of this vector's components.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Round() *Vector3 {
-
 	v.X = Floor(v.X + 0.5)
 	v.Y = Floor(v.Y + 0.5)
 	v.Z = Floor(v.Z + 0.5)
@@ -337,7 +309,6 @@ func (v *Vector3) Round() *Vector3 {
 // Negate negates each of this vector's components.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Negate() *Vector3 {
-
 	v.X = -v.X
 	v.Y = -v.Y
 	v.Z = -v.Z
@@ -347,39 +318,33 @@ func (v *Vector3) Negate() *Vector3 {
 // Dot returns the dot product of this vector with other.
 // None of the vectors are changed.
 func (v *Vector3) Dot(other *Vector3) float32 {
-
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z
 }
 
 // LengthSq returns the length squared of this vector.
 // LengthSq can be used to compare vectors' lengths without the need to perform a square root.
 func (v *Vector3) LengthSq() float32 {
-
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
 }
 
 // Length returns the length of this vector.
 func (v *Vector3) Length() float32 {
-
 	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z)
 }
 
 // Normalize normalizes this vector so its length will be 1.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Normalize() *Vector3 {
-
 	return v.DivideScalar(v.Length())
 }
 
 // DistanceTo returns the distance of this point to other.
 func (v *Vector3) DistanceTo(other *Vector3) float32 {
-
 	return Sqrt(v.DistanceToSquared(other))
 }
 
 // DistanceToSquared returns the distance squared of this point to other.
 func (v *Vector3) DistanceToSquared(other *Vector3) float32 {
-
 	dx := v.X - other.X
 	dy := v.Y - other.Y
 	dz := v.Z - other.Z
@@ -390,7 +355,6 @@ func (v *Vector3) DistanceToSquared(other *Vector3) float32 {
 // If the current length is zero, does nothing.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SetLength(l float32) *Vector3 {
-
 	oldLength := v.Length()
 	if oldLength != 0 && l != oldLength {
 		v.MultiplyScalar(l / oldLength)
@@ -402,7 +366,6 @@ func (v *Vector3) SetLength(l float32) *Vector3 {
 // alpha between ifself and the corresponding other component.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Lerp(other *Vector3, alpha float32) *Vector3 {
-
 	v.X += (other.X - v.X) * alpha
 	v.Y += (other.Y - v.Y) * alpha
 	v.Z += (other.Z - v.Z) * alpha
@@ -411,14 +374,12 @@ func (v *Vector3) Lerp(other *Vector3, alpha float32) *Vector3 {
 
 // Equals returns if this vector is equal to other.
 func (v *Vector3) Equals(other *Vector3) bool {
-
 	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z)
 }
 
 // FromArray sets this vector's components from the specified array and offset
 // Returns the pointer to this updated vector.
 func (v *Vector3) FromArray(array []float32, offset int) *Vector3 {
-
 	v.X = array[offset]
 	v.Y = array[offset+1]
 	v.Z = array[offset+2]
@@ -428,7 +389,6 @@ func (v *Vector3) FromArray(array []float32, offset int) *Vector3 {
 // ToArray copies this vector's components to array starting at offset.
 // Returns the array.
 func (v *Vector3) ToArray(array []float32, offset int) []float32 {
-
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
@@ -438,7 +398,6 @@ func (v *Vector3) ToArray(array []float32, offset int) []float32 {
 // MultiplyVectors multiply vectors a and b storing the result in this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) MultiplyVectors(a, b *Vector3) *Vector3 {
-
 	v.X = a.X * b.X
 	v.Y = a.Y * b.Y
 	v.Z = a.Z * b.Z
@@ -448,7 +407,6 @@ func (v *Vector3) MultiplyVectors(a, b *Vector3) *Vector3 {
 // ApplyAxisAngle rotates the vector around axis by angle.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ApplyAxisAngle(axis *Vector3, angle float32) *Vector3 {
-
 	var quaternion Quaternion
 	v.ApplyQuaternion(quaternion.SetFromAxisAngle(axis, angle))
 	return v
@@ -457,7 +415,6 @@ func (v *Vector3) ApplyAxisAngle(axis *Vector3, angle float32) *Vector3 {
 // ApplyMatrix3 multiplies the specified 3x3 matrix by this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ApplyMatrix3(m *Matrix3) *Vector3 {
-
 	x := v.X
 	y := v.Y
 	z := v.Z
@@ -470,7 +427,6 @@ func (v *Vector3) ApplyMatrix3(m *Matrix3) *Vector3 {
 // ApplyMatrix4 multiplies the specified 4x4 matrix by this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ApplyMatrix4(m *Matrix4) *Vector3 {
-
 	x := v.X
 	y := v.Y
 	z := v.Z
@@ -483,7 +439,6 @@ func (v *Vector3) ApplyMatrix4(m *Matrix4) *Vector3 {
 // ApplyProjection applies the projection matrix m to this vector
 // Returns the pointer to this updated vector.
 func (v *Vector3) ApplyProjection(m *Matrix4) *Vector3 {
-
 	x := v.X
 	y := v.Y
 	z := v.Z
@@ -499,7 +454,6 @@ func (v *Vector3) ApplyProjection(m *Matrix4) *Vector3 {
 // It basically applies the rotation encoded in the quaternion to this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
-
 	x := v.X
 	y := v.Y
 	z := v.Z
@@ -523,7 +477,6 @@ func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
 
 // Cross calculates the cross product of this vector with other and returns the result vector.
 func (v *Vector3) Cross(other *Vector3) *Vector3 {
-
 	cx := v.Y*other.Z - v.Z*other.Y
 	cy := v.Z*other.X - v.X*other.Z
 	cz := v.X*other.Y - v.Y*other.X
@@ -536,7 +489,6 @@ func (v *Vector3) Cross(other *Vector3) *Vector3 {
 // CrossVectors calculates the cross product of a and b storing the result in this vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) CrossVectors(a, b *Vector3) *Vector3 {
-
 	cx := a.Y*b.Z - a.Z*b.Y
 	cy := a.Z*b.X - a.X*b.Z
 	cz := a.X*b.Y - a.Y*b.X
@@ -549,7 +501,6 @@ func (v *Vector3) CrossVectors(a, b *Vector3) *Vector3 {
 // ProjectOnVector sets this vector to its projection on other vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ProjectOnVector(other *Vector3) *Vector3 {
-
 	var on Vector3
 	on.Copy(other).Normalize()
 	dot := v.Dot(&on)
@@ -560,7 +511,6 @@ func (v *Vector3) ProjectOnVector(other *Vector3) *Vector3 {
 // specified by its normal vector.
 // Returns the pointer to this updated vector.
 func (v *Vector3) ProjectOnPlane(planeNormal *Vector3) *Vector3 {
-
 	var tmp Vector3
 	tmp.Copy(v).ProjectOnVector(planeNormal)
 	return v.Sub(&tmp)
@@ -570,14 +520,12 @@ func (v *Vector3) ProjectOnPlane(planeNormal *Vector3) *Vector3 {
 // The normal vector is assumed to be normalized.
 // Returns the pointer to this updated vector.
 func (v *Vector3) Reflect(normal *Vector3) *Vector3 {
-
 	var tmp Vector3
 	return v.Sub(tmp.Copy(normal).MultiplyScalar(2 * v.Dot(normal)))
 }
 
 // AngleTo returns the angle between this vector and other
 func (v *Vector3) AngleTo(other *Vector3) float32 {
-
 	theta := v.Dot(other) / (v.Length() * other.Length())
 	// clamp, to handle numerical problems
 	return Acos(Clamp(theta, -1, 1))
@@ -586,7 +534,6 @@ func (v *Vector3) AngleTo(other *Vector3) float32 {
 // SetFromMatrixPosition set this vector from the translation coordinates
 // in the specified transformation matrix.
 func (v *Vector3) SetFromMatrixPosition(m *Matrix4) *Vector3 {
-
 	v.X = m[12]
 	v.Y = m[13]
 	v.Z = m[14]
@@ -596,7 +543,6 @@ func (v *Vector3) SetFromMatrixPosition(m *Matrix4) *Vector3 {
 // SetFromMatrixColumn set this vector with the column at index of the m matrix.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SetFromMatrixColumn(index int, m *Matrix4) *Vector3 {
-
 	offset := index * 4
 	v.X = m[offset]
 	v.Y = m[offset+1]
@@ -606,7 +552,6 @@ func (v *Vector3) SetFromMatrixColumn(index int, m *Matrix4) *Vector3 {
 
 // Clone returns a copy of this vector
 func (v *Vector3) Clone() *Vector3 {
-
 	return NewVector3(v.X, v.Y, v.Z)
 }
 
@@ -614,7 +559,6 @@ func (v *Vector3) Clone() *Vector3 {
 // from the specified pure rotation matrix.
 // Returns the pointer to this updated vector.
 func (v *Vector3) SetFromRotationMatrix(m *Matrix4) *Vector3 {
-
 	m11 := m[0]
 	m12 := m[4]
 	m13 := m[8]
@@ -638,7 +582,6 @@ func (v *Vector3) SetFromRotationMatrix(m *Matrix4) *Vector3 {
 // from the specified quaternion
 // Returns the pointer to this updated vector.
 func (v *Vector3) SetFromQuaternion(q *Quaternion) *Vector3 {
-
 	matrix := NewMatrix4()
 	matrix.MakeRotationFromQuaternion(q)
 	v.SetFromRotationMatrix(matrix)
@@ -647,7 +590,6 @@ func (v *Vector3) SetFromQuaternion(q *Quaternion) *Vector3 {
 
 // RandomTangents computes and returns two arbitrary tangents to the vector.
 func (v *Vector3) RandomTangents() (*Vector3, *Vector3) {
-
 	t1 := NewVector3(0, 0, 0)
 	t2 := NewVector3(0, 0, 0)
 	length := v.Length()
@@ -676,7 +618,6 @@ func (v *Vector3) RandomTangents() (*Vector3, *Vector3) {
 // TODO: implement similar methods for Vector2 and Vector4
 // AlmostEquals returns whether the vector is almost equal to another vector within the specified tolerance.
 func (v *Vector3) AlmostEquals(other *Vector3, tolerance float32) bool {
-
 	if (Abs(v.X-other.X) < tolerance) &&
 		(Abs(v.Y-other.Y) < tolerance) &&
 		(Abs(v.Z-other.Z) < tolerance) {

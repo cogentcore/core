@@ -13,10 +13,8 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"runtime"
 	"sync"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
@@ -54,9 +52,9 @@ func (w *windowImpl) Handle() interface{} {
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
 // MakeCurrentContext on OpenGL).
-// Must call this on window's unique locked thread using RunOnWin.
+// Must call this on app main thread using oswin.TheApp.RunOnMain
 //
-// win.RunOnWin(func() {
+// oswin.TheApp.RunOnMain(func() {
 //    win.Activate()
 //    // do GPU calls here
 // })
@@ -69,7 +67,7 @@ func (w *windowImpl) Activate() {
 // Generally more efficient to NOT call this and just be sure to call
 // Activate where relevant, so that if the window is already current context
 // no switching is required.
-// Must call this on window's unique locked thread using RunOnWin.
+// Must call this on app main thread using oswin.TheApp.RunOnMain
 func (w *windowImpl) DeActivate() {
 	glfw.DetachCurrentContext()
 }
@@ -124,13 +122,7 @@ func (w *windowImpl) NextEvent() oswin.Event {
 }
 
 // winLoop is the window's own locked processing loop.
-// all gl processing should be done on this loop by calling RunOnWin
-// or GoRunOnWin.
 func (w *windowImpl) winLoop() {
-	runtime.LockOSThread()
-	w.Activate()
-	gl.Init() // call to init in each context
-	w.winTex.Activate(0)
 outer:
 	for {
 		select {
@@ -142,23 +134,18 @@ outer:
 				f.done <- true
 			}
 		case <-w.publish:
-			w.Activate()
-			w.glw.SwapBuffers() // note: implicitly does a flush
-			// note: generally don't need this:
-			// theGPU.Clear(true, true)
+			theApp.RunOnMain(func() {
+				w.Activate()
+				w.glw.SwapBuffers() // note: implicitly does a flush
+				// note: generally don't need this:
+				// theGPU.Clear(true, true)
+			})
 			w.publishDone <- struct{}{}
 		}
 	}
 }
 
 // RunOnWin runs given function on the window's unique locked thread.
-// All GPU-related calls must be run via this method:
-//
-// win.RunOnWin(func() {
-//    win.Activate()
-//    // do GPU calls here
-// })
-//
 func (w *windowImpl) RunOnWin(f func()) {
 	done := make(chan bool)
 	w.runQueue <- funcRun{f: f, done: done}
@@ -183,7 +170,7 @@ func (w *windowImpl) Publish() {
 // PublishTex draws the current WinTex texture to the window and then
 // calls Publish() -- this is the typical update call.
 func (w *windowImpl) PublishTex() {
-	w.RunOnWin(func() {
+	theApp.RunOnMain(func() {
 		w.Activate()
 		w.Copy(image.ZP, w.winTex, w.winTex.Bounds(), oswin.Src, nil)
 	})
@@ -206,7 +193,7 @@ func (w *windowImpl) WinTex() oswin.Texture {
 // window's thread.
 func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image.Rectangle) error {
 	var err error
-	w.RunOnWin(func() {
+	theApp.RunOnMain(func() {
 		w.Activate()
 		wt := w.winTex
 		err = wt.SetSubImage(dp, src, sr)
@@ -218,7 +205,7 @@ func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image
 //   Drawer wrappers
 
 func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	w.RunOnWin(func() {
+	theApp.RunOnMain(func() {
 		w.Activate()
 		sz := w.Size()
 		theApp.draw(sz, src2dst, src, sr, op, opts)
@@ -226,7 +213,7 @@ func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rec
 }
 
 func (w *windowImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
-	w.RunOnWin(func() {
+	theApp.RunOnMain(func() {
 		w.Activate()
 		sz := w.Size()
 		theApp.drawUniform(sz, src2dst, src, sr, op, opts)
@@ -242,7 +229,7 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 }
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
-	w.RunOnWin(func() {
+	theApp.RunOnMain(func() {
 		w.Activate()
 		sz := w.Size()
 		theApp.fillRect(sz, dr, src, op)

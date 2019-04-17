@@ -984,16 +984,12 @@ func (w *Window) Publish() {
 		fmt.Printf("Win %v doing publish\n", w.Nm)
 	}
 	pr := prof.Start("win.Publish")
-	w.OSWin.RunOnWin(func() {
-		w.OSWin.Activate()
-		wt := w.OSWin.WinTex()
-		w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
-		if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
-			w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
-		}
-		w.OSWin.Publish()
-		w.OSWin.DeActivate()
-	})
+	wt := w.OSWin.WinTex()
+	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
+	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
+		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
+	}
+	w.OSWin.Publish()
 	pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -1073,7 +1069,7 @@ func (w *Window) RenderOverlays() {
 			w.ClearFlag(int(WinFlagOverlayVpCleared))
 		}
 	}
-	w.OSWin.RunOnWin(func() {
+	oswin.TheApp.RunOnMain(func() {
 		w.OSWin.Activate()
 		w.OverTex.SetSubImage(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
 	})
@@ -1196,7 +1192,7 @@ func (w *Window) RenderSprite(sp *Viewport2D) {
 	// draw sprite over
 	draw.Draw(bgi, bgi.Bounds(), sp.Pixels, image.ZP, draw.Over)
 	// note: already under RenderOverlays mutex protection
-	w.OSWin.RunOnWin(func() {
+	oswin.TheApp.RunOnMain(func() {
 		w.OSWin.Activate()
 		w.OverTex.SetSubImage(sp.Geom.Pos, bg, bg.Bounds())
 	})

@@ -293,6 +293,7 @@ func (pr *Program) Compile() error {
 			log.Println(err)
 			return err
 		}
+		u.init = true
 	}
 	// bind ubos
 	for _, u := range pr.ubos {
@@ -315,6 +316,7 @@ func (pr *Program) Compile() error {
 			log.Println(err)
 			return err
 		}
+		v.init = true
 	}
 	// bind outputs
 	for _, v := range pr.outs {
@@ -324,6 +326,7 @@ func (pr *Program) Compile() error {
 			log.Println(err)
 			return err
 		}
+		v.init = true
 	}
 	if pr.fragDataVar != "" {
 		gl.BindFragDataLocation(handle, 0, gl.Str(gpu.CString(pr.fragDataVar)))

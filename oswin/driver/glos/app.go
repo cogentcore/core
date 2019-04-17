@@ -22,6 +22,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
@@ -206,7 +207,12 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
-	w.winTex = &textureImpl{size: opts.Size}
+	app.RunOnMain(func() {
+		w.Activate()
+		gl.Init() // call to init in each context
+		w.winTex = &textureImpl{size: opts.Size}
+		w.winTex.Activate(0)
+	})
 
 	glw.SetPosCallback(w.moved)
 	glw.SetSizeCallback(w.winResized)
@@ -227,7 +233,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	w.getScreen()
 	w.show()
 
-	go w.winLoop() // start window's own dedicated loop
+	go w.winLoop() // start window's own dedicated publish update loop
 
 	return w, nil
 }
@@ -316,11 +322,10 @@ func (app *appImpl) ContextWindow() oswin.Window {
 
 func (app *appImpl) NewTexture(win oswin.Window, size image.Point) oswin.Texture {
 	var tx *textureImpl
-	win.RunOnWin(func() {
+	app.RunOnMain(func() {
 		win.Activate()
 		tx = &textureImpl{size: size}
 		tx.Activate(0)
-		win.DeActivate()
 	})
 	return tx
 }

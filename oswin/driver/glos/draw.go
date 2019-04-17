@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
@@ -123,7 +124,10 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
 	)
-	app.drawProg.UniformByName("mvp").SetValue(matMVP)
+	err := app.drawProg.UniformByName("mvp").SetValue(matMVP)
+	if err != nil {
+		log.Println(err)
+	}
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -160,10 +164,18 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 		0, sy - py,
 		px, py,
 	}
-	app.drawProg.UniformByName("uvp").SetValue(matUVP)
+	err = app.drawProg.UniformByName("uvp").SetValue(matUVP)
+	if err != nil {
+		log.Println(err)
+	}
+	gpu.TheGPU.ErrCheck("draw -- uvp")
 
 	t.Activate(0)
-	app.drawProg.UniformByName("sample").SetValue(0)
+	err = app.drawProg.UniformByName("sample").SetValue(int32(0))
+	if err != nil {
+		log.Println(err)
+	}
+	gpu.TheGPU.ErrCheck("draw -- sample")
 
 	app.drawQuads.Activate()
 	gpu.Draw.TriangleStrips(0, 4)

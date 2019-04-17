@@ -220,6 +220,101 @@ func (un *Uniform) SetValue(val interface{}) error {
 				}
 			}
 		}
+	case gpu.Int:
+		if un.array {
+			switch {
+			case un.typ.Vec == 2:
+				fv, ok := val.([]mat32.Vector2i)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector2i", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.Uniform2iv(un.handle, int32(un.ln), &fv[0].X)
+				}
+			case un.typ.Vec == 3:
+				fv, ok := val.([]mat32.Vector3i)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector3i", un.name)
+				}
+				if un.ubo != nil {
+					// need separate writes b/c alignment is vec4
+					for i := 0; i < un.ln; i++ {
+						gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset+i*4*4, 4*3, gl.Ptr(fv[i]))
+					}
+				} else {
+					gl.Uniform3iv(un.handle, int32(un.ln), &fv[0].X)
+				}
+			// case un.typ.Vec == 4:
+			// 	fv, ok := val.([]mat32.Vector4)
+			// 	if !ok || len(fv) != un.ln {
+			// 		return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector4", un.name)
+			// 	}
+			// 	if un.ubo != nil {
+			// 		gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0].X))
+			// 	} else {
+			// 		gl.Uniform4fv(un.handle, int32(un.ln), &fv[0].X)
+			// 	}
+			case un.typ.Vec == 0:
+				fv, ok := val.([]int32)
+				if !ok || len(fv) != un.ln {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []int32", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+				} else {
+					gl.Uniform1iv(un.handle, int32(un.ln), &fv[0])
+				}
+			}
+		} else {
+			switch {
+			case un.typ.Vec == 2:
+				fv, ok := val.(mat32.Vector2i)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector2i", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform2i(un.handle, fv.X, fv.Y)
+				}
+			case un.typ.Vec == 3:
+				fv, ok := val.(mat32.Vector3i)
+				if !ok {
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector3i", un.name)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform3i(un.handle, fv.X, fv.Y, fv.Z)
+				}
+			// case un.typ.Vec == 4:
+			// 	fv, ok := val.(mat32.Vector4)
+			// 	if !ok {
+			// 		return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector4", un.name)
+			// 	}
+			// 	if un.ubo != nil {
+			// 		gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+			// 	} else {
+			// 		gl.Uniform4f(un.handle, fv.X, fv.Y, fv.Z, fv.W)
+			// 	}
+			case un.typ.Vec == 0:
+				fv, ok := val.(int32)
+				if !ok {
+					fvi, ok := val.(int)
+					if !ok {
+						return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be int32", un.name)
+					}
+					fv = int32(fvi)
+				}
+				if un.ubo != nil {
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
+				} else {
+					gl.Uniform1i(un.handle, fv)
+				}
+			}
+		}
 	}
 	return nil
 }

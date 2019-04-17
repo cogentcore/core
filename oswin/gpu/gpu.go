@@ -16,10 +16,10 @@ var TheGPU GPU
 // All calls apply to the current context, which must be set with
 // Activate() call on relevant oswin.Window.  Framebuffer.Activate() will
 // also set the rendering target to a framebuffer instead of the window.
-// Furthermore, all GPU calls must be embedded in oswin.Window.RunOnWin
-// function call to run on the thread associated with that window:
+// Furthermore, all GPU calls must be embedded in oswin.TheApp.RunOnMain
+// function call to run on the main thread:
 //
-// win.RunOnWin(func() {
+// oswin.TheApp.RunOnMain(func() {
 //    win.Activate()
 //    // do GPU calls here
 // })
