@@ -63,14 +63,30 @@ func (bm *BufferMgr) Handle() uint32 {
 	return bm.handle
 }
 
-// Transfer transfers all buffer data to GPU -- Activate must have been called
-// with no other such buffers activated in between.
-func (bm *BufferMgr) Transfer() {
+// TransferAll transfers all buffer data to GPU (e.g., for initial upload).
+// Activate must have been called with no other such buffers activated in between.
+func (bm *BufferMgr) TransferAll() {
 	if bm.idxs != nil {
 		bm.idxs.Transfer()
 	}
 	if bm.vecs != nil {
 		bm.vecs.Transfer()
+	}
+}
+
+// TransferVectors transfers vectors buffer data to GPU -- if vector data has changed.
+// Activate must have been called with no other such buffers activated in between.
+func (bm *BufferMgr) TransferVectors() {
+	if bm.vecs != nil {
+		bm.vecs.Transfer()
+	}
+}
+
+// TransferIndexes transfers indexes buffer data to GPU -- if indexes data has changed.
+// Activate must have been called with no other such buffers activated in between.
+func (bm *BufferMgr) TransferIndexes() {
+	if bm.idxs != nil {
+		bm.idxs.Transfer()
 	}
 }
 

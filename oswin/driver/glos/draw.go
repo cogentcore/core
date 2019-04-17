@@ -51,9 +51,10 @@ func (app *appImpl) initDrawProgs() error {
 	b := theGPU.NewBufferMgr()
 	vb := b.AddVectorsBuffer(gpu.StaticDraw)
 	vb.AddVectors(pv, false)
-	vb.SetLen(len(quadCoords))
+	vb.SetLen(4)
 	vb.SetAllData(quadCoords)
 	b.Activate()
+	b.TransferAll()
 	gpu.TheGPU.ErrCheck("initDrawProgs -- b activate")
 	app.drawQuads = b
 
@@ -83,9 +84,10 @@ func (app *appImpl) initDrawProgs() error {
 	b = theGPU.NewBufferMgr()
 	vb = b.AddVectorsBuffer(gpu.StaticDraw)
 	vb.AddVectors(pv, false)
-	vb.SetLen(len(quadCoords))
+	vb.SetLen(4) // 4 pairs of coords
 	vb.SetAllData(quadCoords)
 	b.Activate()
+	b.TransferAll()
 	app.fillQuads = b
 
 	err = gpu.TheGPU.ErrCheck("initDrawProgs")
@@ -178,6 +180,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	gpu.TheGPU.ErrCheck("draw -- sample")
 
 	app.drawQuads.Activate()
+	gpu.TheGPU.ErrCheck("draw -- quads")
 	gpu.Draw.TriangleStrips(0, 4)
 }
 

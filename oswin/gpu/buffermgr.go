@@ -28,9 +28,17 @@ type BufferMgr interface {
 	// this is the VAO
 	Handle() uint32
 
-	// Transfer transfers all buffer data to GPU -- Activate must have been called
-	// with no other such buffers activated in between.
-	Transfer()
+	// Transfer transfers all buffer data to GPU (e.g., for initial upload).
+	// Activate must have been called with no other such buffers activated in between.
+	TransferAll()
+
+	// TransferVectors transfers vectors buffer data to GPU -- if vector data has changed.
+	// Activate must have been called with no other such buffers activated in between.
+	TransferVectors()
+
+	// TransferIndexes transfers indexes buffer data to GPU -- if indexes data has changed.
+	// Activate must have been called with no other such buffers activated in between.
+	TransferIndexes()
 
 	// Delete deletes the GPU resources associated with this buffer
 	// (requires Activate to re-establish a new one).
