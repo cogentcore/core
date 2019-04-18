@@ -28,6 +28,7 @@ import (
 	"github.com/goki/gi/oswin/clip"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/gi/oswin/window"
 )
 
 func init() {
@@ -234,6 +235,9 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	w.show()
 
 	go w.winLoop() // start window's own dedicated publish update loop
+
+	w.sendWindowEvent(window.Paint)
+	w.sendWindowEvent(window.Paint)
 
 	return w, nil
 }

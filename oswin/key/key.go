@@ -134,6 +134,9 @@ type Chord string
 // the "Code" prefix.
 func (e *Event) Chord() Chord {
 	modstr := ModsString(e.Modifiers)
+	if e.Code == CodeSpacebar {
+		fmt.Printf("spacebar, modstr: %s\n", modstr)
+	}
 	if modstr != "" && e.Code == CodeSpacebar { // modified space is not regular space
 		return Chord(modstr + "Spacebar")
 	}
@@ -438,4 +441,65 @@ var _ oswin.Event = &Event{}
 
 func (ev ChordEvent) Type() oswin.EventType {
 	return oswin.KeyChordEvent
+}
+
+var CodeRuneMap = map[Codes]rune{
+	CodeA: 'A',
+	CodeB: 'B',
+	CodeC: 'C',
+	CodeD: 'D',
+	CodeE: 'E',
+	CodeF: 'F',
+	CodeG: 'G',
+	CodeH: 'H',
+	CodeI: 'I',
+	CodeJ: 'J',
+	CodeK: 'K',
+	CodeL: 'L',
+	CodeM: 'M',
+	CodeN: 'N',
+	CodeO: 'O',
+	CodeP: 'P',
+	CodeQ: 'Q',
+	CodeR: 'R',
+	CodeS: 'S',
+	CodeT: 'T',
+	CodeU: 'U',
+	CodeV: 'V',
+	CodeW: 'W',
+	CodeX: 'X',
+	CodeY: 'Y',
+	CodeZ: 'Z',
+
+	Code1: '1',
+	Code2: '2',
+	Code3: '3',
+	Code4: '4',
+	Code5: '5',
+	Code6: '6',
+	Code7: '7',
+	Code8: '8',
+	Code9: '9',
+	Code0: '0',
+
+	CodeTab:                '\t',
+	CodeSpacebar:           ' ',
+	CodeHyphenMinus:        '-',
+	CodeEqualSign:          '=',
+	CodeLeftSquareBracket:  '[',
+	CodeRightSquareBracket: ']',
+	CodeBackslash:          '\\',
+	CodeSemicolon:          ';',
+	CodeApostrophe:         '\'',
+	CodeGraveAccent:        '`',
+	CodeComma:              ',',
+	CodeFullStop:           '.',
+	CodeSlash:              '/',
+
+	CodeKeypadSlash:       '/',
+	CodeKeypadAsterisk:    '*',
+	CodeKeypadHyphenMinus: '-',
+	CodeKeypadPlusSign:    '+',
+	CodeKeypadFullStop:    '.',
+	CodeKeypadEqualSign:   '=',
 }

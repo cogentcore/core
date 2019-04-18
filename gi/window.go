@@ -980,9 +980,9 @@ func (w *Window) Publish() {
 	}
 
 	w.SetWinUpdating()
-	if WinEventTrace {
-		fmt.Printf("Win %v doing publish\n", w.Nm)
-	}
+	// if WinEventTrace {
+	// 	fmt.Printf("Win %v doing publish\n", w.Nm)
+	// }
 	pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
 	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)

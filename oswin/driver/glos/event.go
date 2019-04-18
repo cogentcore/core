@@ -21,16 +21,16 @@ var lastKey key.Codes
 
 func glfwMods(mod glfw.ModifierKey) int32 {
 	m := int32(0)
-	if mod&glfw.ModShift == 0 {
+	if mod&glfw.ModShift != 0 {
 		m |= 1 << uint32(key.Shift)
 	}
-	if mod&glfw.ModControl == 0 {
+	if mod&glfw.ModControl != 0 {
 		m |= 1 << uint32(key.Control)
 	}
-	if mod&glfw.ModAlt == 0 {
+	if mod&glfw.ModAlt != 0 {
 		m |= 1 << uint32(key.Alt)
 	}
-	if mod&glfw.ModSuper == 0 {
+	if mod&glfw.ModSuper != 0 {
 		m |= 1 << uint32(key.Meta)
 	}
 	return m
@@ -42,6 +42,7 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	lastMods = em
 	ec := glfwKeyCode(ky)
 	lastKey = ec
+	rn, mapped := key.CodeRuneMap[ec]
 	act := key.Press
 	if action == glfw.Release {
 		act = key.Release
@@ -51,11 +52,26 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 
 	event := &key.Event{
 		Code:      ec,
+		Rune:      rn,
 		Modifiers: em,
 		Action:    act,
 	}
 	event.Init()
 	w.Send(event)
+
+	if act == key.Press &&
+		(key.HasAnyModifierBits(em, key.Control, key.Alt, key.Meta) ||
+			!mapped) {
+		che := &key.ChordEvent{
+			Event: key.Event{
+				Code:      ec,
+				Rune:      rn,
+				Modifiers: em,
+				Action:    act,
+			},
+		}
+		w.Send(che)
+	}
 }
 
 // char input

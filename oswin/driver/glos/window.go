@@ -371,11 +371,11 @@ func (w *windowImpl) Close() {
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
 	w.sendWindowEvent(window.Close)
-	if w.winTex != nil {
-		w.winTex.Delete()
-		w.winTex = nil
-	}
 	w.app.RunOnMain(func() {
+		if w.winTex != nil {
+			w.winTex.Delete()
+			w.winTex = nil
+		}
 		w.glw.Destroy()
 	})
 	// 	closeWindow(w.id)
