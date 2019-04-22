@@ -44,7 +44,8 @@ func (app *appImpl) getScreens() {
 		dpi := 25.4 * float32(vm.Width) / float32(pw)
 		sc.PhysicalDPI = dpi
 		sc.LogicalDPI = dpi
-		// todo: mac device pixel ratio!
+		sc.DevicePixelRatio = 1
+		// todo: 3.3 has content ratio
 		sc.RefreshRate = float32(vm.RefreshRate)
 	}
 }

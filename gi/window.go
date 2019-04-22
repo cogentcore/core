@@ -552,8 +552,11 @@ func (w *Window) WinViewport2D() *Viewport2D {
 	return vp
 }
 
-// SetSize requests that the window be resized to the given size -- it will
-// trigger a resize event and be processed that way when it occurs.
+// SetSize requests that the window be resized to the given size
+// in OS window manager specific coordinates, which may be different
+// from the underlying pixel-level resolution of the window.
+// This will trigger a resize event and be processed
+// that way when it occurs.
 func (w *Window) SetSize(sz image.Point) {
 	w.OSWin.SetSize(sz)
 }
@@ -590,7 +593,9 @@ func (w *Window) Resized(sz image.Point) {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
 	if w.OverTex != nil {
-		w.OverTex.Delete()
+		oswin.TheApp.RunOnMain(func() {
+			w.OverTex.Delete()
+		})
 	}
 	w.OverTex = nil // dynamically allocated when needed
 	w.ClearFlag(int(WinFlagOverTexActive), int(WinFlagOverlayVpCleared))
@@ -831,6 +836,9 @@ func (w *Window) FullReRender() {
 	if !w.IsVisible() {
 		return
 	}
+	if WinEventTrace {
+		fmt.Printf("Win: %v FullReRender (w.Viewport.FullRender2DTree)\n", w.Nm)
+	}
 	w.Viewport.FullRender2DTree()
 	if w.CurFocus() == nil {
 		if !w.ActivateStartFocus() {
@@ -903,7 +911,7 @@ func (w *Window) UploadAllViewports() {
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.OSWin.WinTex().Bounds())
+		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.OSWin.WinTex().Bounds(), updt)
 	}
 	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
 	// then all the current popups
@@ -980,9 +988,9 @@ func (w *Window) Publish() {
 	}
 
 	w.SetWinUpdating()
-	// if WinEventTrace {
-	// 	fmt.Printf("Win %v doing publish\n", w.Nm)
-	// }
+	if WinEventTrace {
+		fmt.Printf("Win %v doing publish\n", w.Nm)
+	}
 	pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
 	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
@@ -999,10 +1007,10 @@ func (w *Window) Publish() {
 // window updates when the window update signal (UpdateEnd) occurs
 func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.Embed(KiT_Window).(*Window)
-	if Render2DTrace {
+	if WinEventTrace || Render2DTrace {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
-	if !win.IsVisible() || win.IsResizing() || win.IsWinUpdating() {
+	if !win.IsVisible() || win.IsWinUpdating() { // win.IsResizing() ||
 		return
 	}
 	win.Publish()
@@ -1054,7 +1062,9 @@ func (w *Window) RenderOverlays() {
 	wsz := w.OSWin.WinTex().Size()
 	if w.OverTex == nil || w.OverTex.Size() != wsz {
 		if w.OverTex != nil {
-			w.OverTex.Delete()
+			oswin.TheApp.RunOnMain(func() {
+				w.OverTex.Delete()
+			})
 		}
 		w.OverTex = oswin.TheApp.NewTexture(w.OSWin, wsz)
 	}

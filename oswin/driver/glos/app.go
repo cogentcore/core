@@ -219,7 +219,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetSizeCallback(w.winResized)
 	glw.SetFramebufferSizeCallback(w.fbResized)
 	glw.SetCloseCallback(w.closeReq)
-	glw.SetRefreshCallback(w.refresh)
+	//	glw.SetRefreshCallback(w.refresh)
 	glw.SetFocusCallback(w.focus)
 	glw.SetIconifyCallback(w.iconify)
 
@@ -231,8 +231,10 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetCursorEnterCallback(w.cursorEnterEvent)
 	glw.SetDropCallback(w.dropEvent)
 
-	w.getScreen()
 	w.show()
+	app.RunOnMain(func() {
+		w.updtGeom()
+	})
 
 	go w.winLoop() // start window's own dedicated publish update loop
 

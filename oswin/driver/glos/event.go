@@ -16,6 +16,7 @@ import (
 var lastMouseClickTime time.Time
 var lastMousePos image.Point
 var lastMouseButton mouse.Buttons
+var lastMouseAction mouse.Actions
 var lastMods int32
 var lastKey key.Codes
 
@@ -114,6 +115,7 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 		but = mouse.Right
 	}
 	lastMouseButton = but
+	lastMouseAction = act
 	event := &mouse.Event{
 		Where:     lastMousePos,
 		Button:    but,
@@ -142,20 +144,36 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 }
 
 func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
-	where := image.Point{int(x), int(y)}
+	where := image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
 	from := lastMousePos
 	lastMousePos = where
-	event := &mouse.MoveEvent{
-		Event: mouse.Event{
-			Where:     where,
-			Button:    lastMouseButton,
-			Action:    mouse.Move,
-			Modifiers: lastMods,
-		},
-		From: from,
+	if lastMouseAction == mouse.Press {
+		event := &mouse.DragEvent{
+			MoveEvent: mouse.MoveEvent{
+				Event: mouse.Event{
+					Where:     where,
+					Button:    lastMouseButton,
+					Action:    mouse.Drag,
+					Modifiers: lastMods,
+				},
+				From: from,
+			},
+		}
+		event.Init()
+		w.Send(event)
+	} else {
+		event := &mouse.MoveEvent{
+			Event: mouse.Event{
+				Where:     where,
+				Button:    mouse.NoButton,
+				Action:    mouse.Move,
+				Modifiers: lastMods,
+			},
+			From: from,
+		}
+		event.Init()
+		w.Send(event)
 	}
-	event.Init()
-	w.Send(event)
 }
 
 func (w *windowImpl) cursorEnterEvent(gw *glfw.Window, entered bool) {

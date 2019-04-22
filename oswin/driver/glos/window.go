@@ -98,7 +98,13 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	win, err := glfw.CreateWindow(opts.Size.X, opts.Size.Y, opts.GetTitle(), nil, theApp.shareWin)
+	sc := theApp.screens[0]
+	sz := opts.Size
+	if sc.DevicePixelRatio != 1.0 {
+		sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
+		sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
+	}
+	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, theApp.shareWin)
 	if err != nil {
 		return win, err
 	}
@@ -250,12 +256,11 @@ func (w *windowImpl) Screen() *oswin.Screen {
 }
 
 func (w *windowImpl) Size() image.Point {
-	w.mu.Lock()
-	var sz image.Point
-	sz.X, sz.Y = w.glw.GetSize()
-	w.Sz = sz
-	w.mu.Unlock()
-	return sz
+	return w.PxSize
+}
+
+func (w *windowImpl) WinSize() image.Point {
+	return w.WnSize
 }
 
 func (w *windowImpl) Position() image.Point {
@@ -411,15 +416,41 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 }
 
 func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
-	w.mu.Lock()
-	w.Sz = image.Point{width, height}
-	w.winTex.SetSize(w.Sz)
-	w.mu.Unlock()
+	w.updtGeom()
+}
+
+func (w *windowImpl) updtGeom() {
 	w.getScreen()
+	w.mu.Lock()
+	var wsz image.Point
+	wsz.X, wsz.Y = w.glw.GetSize()
+	w.WnSize = wsz
+	var fbsz image.Point
+	fbsz.X, fbsz.Y = w.glw.GetFramebufferSize()
+	w.PxSize = fbsz
+	if w.PxSize != w.WnSize {
+		w.DevPixRatio = float32(w.PxSize.X) / float32(w.WnSize.X)
+	} else {
+		w.DevPixRatio = 1
+	}
+	if w.DevPixRatio != w.Scrn.DevicePixelRatio {
+		rr := w.DevPixRatio / w.Scrn.DevicePixelRatio
+		w.Scrn.PhysicalDPI *= rr
+		w.Scrn.LogicalDPI *= rr
+		w.Scrn.DevicePixelRatio = w.DevPixRatio
+	}
+	w.PhysDPI = w.Scrn.PhysicalDPI
+	w.LogDPI = w.Scrn.LogicalDPI
+	w.winTex.SetSize(w.PxSize)
+	w.mu.Unlock()
 	w.sendWindowEvent(window.Resize)
 }
 
 func (w *windowImpl) fbResized(gw *glfw.Window, width, height int) {
+	fbsz := image.Point{width, height}
+	if w.PxSize != fbsz {
+		w.updtGeom()
+	}
 }
 
 func (w *windowImpl) closeReq(gw *glfw.Window) {

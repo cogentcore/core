@@ -56,19 +56,25 @@ type Window interface {
 	// SetTitle sets the current title of the window, which is displayed in the GUI.
 	SetTitle(title string)
 
-	// Size returns the current size of the window, in raw underlying dots / pixels.
+	// Size returns the current size of the window, in raw underlying dots / pixels -- this includes any high DPI factors that may not be used in OS window sizing (see WinSize for that size).
 	Size() image.Point
 
-	// SetSize sets the size of the window, in raw underlying dots / pixels.
+	// WinSize returns the current size of the window, in OS-specific window manager units that may not include any high DPI factors.
+	WinSize() image.Point
+
+	// Position returns the current left-top position of the window relative to
+	// underlying screen, in OS-specific window manager coordinates.
+	Position() image.Point
+
+	// SetSize sets the size of the window, in OS-specific window manager units that may not include any high DPI factors (i.e., the same units as returned in WinSize)
 	SetSize(sz image.Point)
 
-	// SetPos sets the position of the window, in raw underlying dots /
-	// pixels.
+	// SetPos sets the position of the window, in OS window manager coordinates, which may be different from Size() coordinates that reflect high DPI
 	SetPos(pos image.Point)
 
 	// SetGeom sets the position and size in one call -- use this if doing
 	// both because sequential calls to SetPos and SetSize might fail on some
-	// platforms
+	// platforms.  Uses OS-specific window manager units that may not include any high DPI factors (i.e., the same units as returned in WinSize, Pos())
 	SetGeom(pos image.Point, sz image.Point)
 
 	// Raise requests that the window be at the top of the stack of windows,
@@ -79,10 +85,6 @@ type Window interface {
 	// Minimize requests that the window be iconified, making it no longer
 	// visible or active -- rendering should not occur for minimized windows.
 	Minimize()
-
-	// Position returns the current lef-top position of the window relative to
-	// underlying screen, in raw underlying dots / pixels.
-	Position() image.Point
 
 	// PhysicalDPI is the physical dots per inch of the window, for generating
 	// true-to-physical-size output, for example -- see the gi/units package for
@@ -230,15 +232,17 @@ type Window interface {
 // WindowBase provides a base-level implementation of the generic data aspects
 // of the window, including maintaining the current window size and dpi
 type WindowBase struct {
-	Nm      string
-	Titl    string
-	Sz      image.Point
-	Pos     image.Point
-	PhysDPI float32
-	LogDPI  float32
-	Scrn    *Screen
-	Par     interface{}
-	Flag    int64
+	Nm          string
+	Titl        string
+	Pos         image.Point
+	WnSize      image.Point // window-manager coords
+	PxSize      image.Point // pixel size
+	DevPixRatio float32
+	PhysDPI     float32
+	LogDPI      float32
+	Scrn        *Screen
+	Par         interface{}
+	Flag        int64
 }
 
 func (w WindowBase) Name() string {
