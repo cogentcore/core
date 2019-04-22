@@ -247,44 +247,76 @@ void showCursor() {
 
 // qtbase/src/plugins/platforms/cocoa/qcocoamenu.mm
 
-// todo: get NSWindow from GetCocoaWindnow from glfw window
+@interface MenuDelegate : NSObject <NSMenuDelegate> {
+    NSWindow* _view;
+    NSMenu* _mainMenu;
+}
 
-// called during expose or focus
-void menuSetAsMain(NSWindow* view) {
-	/* while (view.menuUpdtMu == YES) { }; // busy wait..
-   view.menuUpdtMu = YES; // locked
-	NSMenu* men = [view mainMenu];
+@property (atomic, retain) NSWindow *view;
+@property (atomic, retain) NSMenu *mainMenu;
+
+@end
+
+@implementation MenuDelegate
+
+@synthesize view = _view;
+@synthesize mainMenu = _mainMenu;
+
+- (void) itemFired:(NSMenuItem*) item
+{
+    NSString* title = [item title];
+    const char* utf8_title = [title UTF8String];
+    long tag = (long)[item tag];
+
+    NSWindow* vw = [self view];
+    
+    int tilen = (int)strlen(utf8_title);
+    menuFired((GoUintptr)vw, (char*)utf8_title, tilen, tag);
+}
+
+// Cocoa will query the menu item's target for the worksWhenModal selector.
+// So we need to implement this to allow the items to be handled correctly
+// when a modal dialog is visible.
+- (BOOL)worksWhenModal
+{
+    return YES;
+}
+
+@end
+
+MenuDelegate* newMainMenu(NSWindow* view) {
+	NSMenu* mm = [[NSMenu alloc] init];
+	MenuDelegate* md = [[MenuDelegate alloc] init];
+	[md retain];
+	[mm retain];
+	[md setView: view];
+ 	[md setMainMenu: mm];
+ 	[mm setAutoenablesItems:NO];
+	uintptr_t sm = doAddSubMenu((uintptr_t)mm, "app");
+	doAddMenuItem((uintptr_t)view, sm, (uintptr_t)md, "app", "", false, false, false, false, 0, false);
+	return md;
+}
+
+uintptr_t doNewMainMenu(uintptr_t viewID) {
+	NSWindow* view = (NSWindow*)viewID;
+	MenuDelegate* md = newMainMenu(view);
+	return (uintptr_t)md;
+}
+
+uintptr_t mainMenuFromDelegate(uintptr_t delID) {
+	MenuDelegate* md = (MenuDelegate*)delID;
+	NSMenu* mm = md.mainMenu;
+	return (uintptr_t)mm;
+}
+
+void menuSetAsMain(NSWindow* view, NSMenu* men) {
  	[NSApp setMainMenu: men];
-   view.menuUpdtMu = NO; // unlocked
-	*/
 }
 
-void doSetMainMenu(uintptr_t viewID) {
-	/* ScreenGLView* view = (ScreenGLView*)viewID;
-	menuSetAsMain(view);
-	*/
-}
-
-uintptr_t doGetMainMenu(uintptr_t viewID) {
-	/* ScreenGLView* view = (ScreenGLView*)viewID;
-	NSMenu* men = [view mainMenu];
-	return (uintptr_t)men; */
-	return (uintptr_t)0;
-}
-
-uintptr_t doGetMainMenuLock(uintptr_t viewID) {
-	/* ScreenGLView* view = (ScreenGLView*)viewID;
-	while (view.menuUpdtMu == YES) { }; // busy wait..
-   view.menuUpdtMu = YES; // locked
-	NSMenu* men = [view mainMenu];
-	return (uintptr_t)men; */
-	return (uintptr_t)0;
-}
-
-void doMainMenuUnlock(uintptr_t viewID) {
-	/* ScreenGLView* view = (ScreenGLView*)viewID;
-   view.menuUpdtMu = NO; // unlocked
-	*/
+void doSetMainMenu(uintptr_t viewID, uintptr_t menID) {
+	NSWindow* view = (NSWindow*)viewID;
+	NSMenu* men = (NSMenu*)menID;
+	menuSetAsMain(view, men);
 }
 
 void doMenuReset(uintptr_t menuID) {
@@ -301,14 +333,14 @@ uintptr_t doAddSubMenu(uintptr_t menuID, char* mnm) {
    smen.submenu = ssmen;
    [ssmen setAutoenablesItems:NO];
 	[title release];
-	[ssmen release]; // really?
+	[ssmen release]; // yes really!
    return (uintptr_t)ssmen;
 }
 
-uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag, bool active) {
- 	/*  ScreenGLView* view = (ScreenGLView*)viewID;
+uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, uintptr_t delID, char* itmnm, char* sc, bool scShift, bool scCommand, bool scAlt, bool scControl, int tag, bool active) {
+ 	 NSWindow* view = (NSWindow*)viewID;
     NSMenu* subm  = (NSMenu*)submID;
-    MenuDelegate* md = [view menuDel];
+    MenuDelegate* md = (MenuDelegate*)delID;
     NSString* title = [[NSString alloc] initWithUTF8String:itmnm];
     NSString* scut = [[NSString alloc] initWithUTF8String:sc];
 
@@ -339,9 +371,6 @@ uintptr_t doAddMenuItem(uintptr_t viewID, uintptr_t submID, char* itmnm, char* s
 	[title release];
 	[scut release];
     return (uintptr_t)mi;
-	*/
-	return (uintptr_t)0;
-
 }
 
 void doAddSeparator(uintptr_t menuID) {

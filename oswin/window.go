@@ -224,6 +224,12 @@ type Window interface {
 	// interface.
 	Handle() interface{}
 
+	// OSHandle returns the OS-specific underlying window handle:
+	// MacOS: NSWindow*
+	// Windows:  HWND
+	// LinuxX11: X11Window
+	OSHandle() uintptr
+
 	EventDeque
 
 	Drawer

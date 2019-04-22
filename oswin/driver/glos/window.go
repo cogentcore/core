@@ -318,15 +318,6 @@ func (w *windowImpl) SetGeom(pos image.Point, sz image.Point) {
 	})
 }
 
-func (w *windowImpl) MainMenu() oswin.MainMenu {
-	return nil
-	// if w.mainMenu == nil {
-	// 	mm := &mainMenuImpl{win: w}
-	// 	w.mainMenu = mm
-	// }
-	// return w.mainMenu.(*mainMenuImpl)
-}
-
 func (w *windowImpl) show() {
 	w.app.RunOnMain(func() {
 		w.glw.Show()
@@ -335,13 +326,17 @@ func (w *windowImpl) show() {
 
 func (w *windowImpl) Raise() {
 	w.app.RunOnMain(func() {
-		w.glw.Restore()
+		if bitflag.HasAtomic(&w.Flag, int(oswin.Minimized)) {
+			w.glw.Restore()
+		} else {
+			w.glw.Focus()
+		}
 	})
 }
 
 func (w *windowImpl) Minimize() {
 	w.app.RunOnMain(func() {
-		w.glw.Hide()
+		w.glw.Iconify()
 	})
 }
 

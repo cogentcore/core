@@ -45,6 +45,7 @@ var glosGlMinor = 1
 
 var theApp = &appImpl{
 	windows:      make(map[*glfw.Window]*windowImpl),
+	oswindows:    make(map[uintptr]*windowImpl),
 	winlist:      make([]*windowImpl, 0),
 	screens:      make([]*oswin.Screen, 0),
 	name:         "GoGi",
@@ -57,6 +58,7 @@ type appImpl struct {
 	mainDone      chan struct{}
 	shareWin      *glfw.Window // a non-visible, always-present window that all windows share gl context with
 	windows       map[*glfw.Window]*windowImpl
+	oswindows     map[uintptr]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
 	ctxtwin       *windowImpl // context window, dynamically set, for e.g., pointer and other methods
@@ -205,6 +207,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 
 	app.mu.Lock()
 	app.windows[glw] = w
+	app.oswindows[w.OSHandle()] = w
 	app.winlist = append(app.winlist, w)
 	app.mu.Unlock()
 
