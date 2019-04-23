@@ -355,10 +355,6 @@ func (app *appImpl) SetAbout(about string) {
 	app.about = about
 }
 
-func (app *appImpl) Platform() oswin.Platforms {
-	return oswin.MacOS
-}
-
 func (app *appImpl) PrefsDir() string {
 	usr, err := user.Current()
 	if err != nil {

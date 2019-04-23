@@ -30,6 +30,10 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
+func (app *appImpl) Platform() oswin.Platforms {
+	return oswin.LinuxX11
+}
+
 // this is the main call to create the main menu if not exist
 func (w *windowImpl) MainMenu() oswin.MainMenu {
 	return nil

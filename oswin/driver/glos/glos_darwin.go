@@ -53,6 +53,10 @@ import (
 /////////////////////////////////////////////////////////////////
 // OS-specific methods
 
+func (app *appImpl) Platform() oswin.Platforms {
+	return oswin.MacOS
+}
+
 // this is the main call to create the main menu if not exist
 func (w *windowImpl) MainMenu() oswin.MainMenu {
 	if w.mainMenu == nil {
