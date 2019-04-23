@@ -9,6 +9,7 @@ package glos
 import (
 	"sync"
 
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mimedata"
@@ -68,15 +69,16 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 		if err != nil || len(str) == 0 {
 			return nil
 		}
-		isMulti, mediaType, boundary, body := mimedata.IsMultipart(str)
+		bstr := []byte(str)
+		isMulti, mediaType, boundary, body := mimedata.IsMultipart(bstr)
 		if isMulti {
 			return mimedata.FromMultipart(body, boundary)
 		} else {
 			if mediaType != "" { // found a mime type encoding
-				return mimedata.NewMime(mediaType, str)
+				return mimedata.NewMime(mediaType, bstr)
 			} else {
 				// we can't really figure out type, so just assume..
-				return mimedata.NewMime(types[0], str)
+				return mimedata.NewMime(types[0], bstr)
 			}
 		}
 	} else {
@@ -92,11 +94,11 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	w := theApp.ctxtwin
 	if len(data) > 1 { // multipart
 		mpd := data.ToMultipart()
-		w.wgl.SetClipboardString(string(mpd))
+		w.glw.SetClipboardString(string(mpd))
 	} else {
 		d := data[0]
 		if mimedata.IsText(d.Type) {
-			w.wgl.SetClipboardString(string(d.Data))
+			w.glw.SetClipboardString(string(d.Data))
 		}
 	}
 	return nil
@@ -114,7 +116,7 @@ func (ci *clipImpl) Clear() {
 
 var cursorMap = map[cursor.Shapes]glfw.StandardCursor{
 	cursor.Arrow:        glfw.ArrowCursor,
-	cursor.Cross:        glfw.CRosshairCursor,
+	cursor.Cross:        glfw.CrosshairCursor,
 	cursor.DragCopy:     glfw.HandCursor,
 	cursor.DragMove:     glfw.HandCursor,
 	cursor.DragLink:     glfw.HandCursor,
@@ -190,7 +192,7 @@ func (c *cursorImpl) Hide() {
 	}
 	c.Vis = false
 	w := theApp.ctxtwin
-	w.glw.SetInputMode(glfw.CursorHidden)
+	w.glw.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 	c.mu.Unlock()
 }
 
@@ -202,7 +204,7 @@ func (c *cursorImpl) Show() {
 	}
 	c.Vis = true
 	w := theApp.ctxtwin
-	w.glw.SetInputMode(glfw.CursorNormal)
+	w.glw.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
 	c.mu.Unlock()
 }
 
