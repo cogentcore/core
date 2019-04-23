@@ -49,7 +49,8 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-	return uintptr(w.glw.GetWin32Window())
+     // todo: fixme:
+	return uintptr(0)
 }
 
 /////////////////////////////////////////////////////////////////
