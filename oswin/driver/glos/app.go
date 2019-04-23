@@ -16,7 +16,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"os/user"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -355,15 +354,6 @@ func (app *appImpl) SetAbout(about string) {
 	app.about = about
 }
 
-func (app *appImpl) PrefsDir() string {
-	usr, err := user.Current()
-	if err != nil {
-		log.Print(err)
-		return "/tmp"
-	}
-	return filepath.Join(usr.HomeDir, "Library")
-}
-
 func (app *appImpl) GoGiPrefsDir() string {
 	pdir := filepath.Join(app.PrefsDir(), "GoGi")
 	os.MkdirAll(pdir, 0755)
@@ -387,10 +377,6 @@ func SrcDir(dir string) (absDir string, err error) {
 		}
 	}
 	return "", fmt.Errorf("unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
-}
-
-func (app *appImpl) FontPaths() []string {
-	return []string{"/System/Library/Fonts", "/Library/Fonts"}
 }
 
 func (app *appImpl) ClipBoard(win oswin.Window) clip.Board {

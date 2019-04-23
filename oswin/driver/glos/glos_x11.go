@@ -7,6 +7,9 @@
 package glos
 
 import (
+	"log"
+	"os/user"
+	"path/filepath"
 	"sync"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -32,6 +35,19 @@ import (
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.LinuxX11
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"/usr/share/fonts/truetype"}
+}
+
+func (app *appImpl) PrefsDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, ".config")
 }
 
 // this is the main call to create the main menu if not exist

@@ -7,6 +7,9 @@
 package glos
 
 import (
+	"log"
+	"os/user"
+	"path/filepath"
 	"sync"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -20,6 +23,24 @@ import (
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.Windows
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"C:\\Windows\\Fonts"}
+}
+
+func (app *appImpl) PrefsDir() string {
+	// todo: could use a more official windows protocol to get this stuff..
+	// https://msdn.microsoft.com/en-us/library/bb762188%28VS.85%29.aspx
+	// with FOLDERID_RoamingAppData
+	// https://stackoverflow.com/questions/6883779/what-are-the-best-practices-for-storing-user-preferences-and-settings-in-win32-d
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, "AppData", "Roaming")
+	// todo: convention is "manufacturer" before app -- not sure what that means in this context -- "Go"?
 }
 
 // this is the main call to create the main menu if not exist

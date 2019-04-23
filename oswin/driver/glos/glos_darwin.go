@@ -39,6 +39,9 @@ void doSetMenuItemActive(uintptr_t mitmID, bool active);
 import "C"
 
 import (
+	"log"
+	"os/user"
+	"path/filepath"
 	"strings"
 	"sync"
 	"unsafe"
@@ -55,6 +58,19 @@ import (
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.MacOS
+}
+
+func (app *appImpl) FontPaths() []string {
+	return []string{"/System/Library/Fonts", "/Library/Fonts"}
+}
+
+func (app *appImpl) PrefsDir() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Print(err)
+		return "/tmp"
+	}
+	return filepath.Join(usr.HomeDir, "Library")
 }
 
 // this is the main call to create the main menu if not exist
