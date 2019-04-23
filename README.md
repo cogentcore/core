@@ -11,7 +11,7 @@ NOTE: Requires Go version `1.10+` due to use of `math.Round`.
 
 See the [Wiki](https://github.com/goki/gi/wiki) for more docs,   [Install](https://github.com/goki/gi/wiki/Install) instructions (just standard `go get ...`), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
-GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a simple, elegant GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers, supporting MacOS, Linux, and Windows).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (planned) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile. 
+GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a simple, elegant GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers, supporting MacOS, Linux, and Windows).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (in progress) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile. 
 
 See [Gide](https://github.com/goki/gide) for a complete, complex application written in GoGi (an IDE), and the various examples in this repository for lots of useful demonstrations -- start with the  [Widgets](https://github.com/goki/gi/tree/master/examples/widgets) example which has a bit of a tutorial introduction.
 
@@ -23,7 +23,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 * CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc), and even include links.
 
-* Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and is **fully Go-native with no cgo dependency** on Linux and Windows, and minimal cgo (necessary) on MacOS.  *This is the only complete Go GUI framework that is entirely Go-based, without dependency on other C-based toolkits.*
+* Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and with  minimal cgo dependency.  As of April 2019 we now depend on the [glfw](https://github.com/go-gl/glfw) cross-platform GUI infrastructure system, and the [go-gl/gl](https://github.com/go-gl/gl) OpenGL bindings, to support the 3D (`gi3d`) aspect of the framework.
 
 * Fully self-contained -- does *not* use OS-specific native widgets -- results in simple, elegant, consistent code across platforms, and is fully `HiDPI` capable and scalable using standard `Ctrl/Cmd+Plus or Minus` key, and in `Preferences`.
 
@@ -57,7 +57,9 @@ The best way to see how the system works are in the `examples` directory, and by
 
 # Status
 
-As of 11/2018 it is now at a **beta** level:
+As of 4/22/2019 there will be a period of relative instability during the development of the 3D `gi3d` component of the framework, and switch to using `glfw`.  Active users should join [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list to receive more detailed status updates.
+
+For the 2D framework:
 
 * All major functionality is in place, and API is stable and only minor changes are anticipated going forward.  The system is now ready for wider adoption.
 
