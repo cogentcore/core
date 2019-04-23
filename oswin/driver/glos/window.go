@@ -20,6 +20,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
+	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
 )
@@ -213,6 +214,7 @@ func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image
 func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	theApp.RunOnMain(func() {
 		w.Activate()
+		gpu.TheGPU.RenderToWindow()
 		sz := w.Size()
 		theApp.draw(sz, src2dst, src, sr, op, opts)
 	})
@@ -221,6 +223,7 @@ func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rec
 func (w *windowImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	theApp.RunOnMain(func() {
 		w.Activate()
+		gpu.TheGPU.RenderToWindow()
 		sz := w.Size()
 		theApp.drawUniform(sz, src2dst, src, sr, op, opts)
 	})
