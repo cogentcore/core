@@ -7,9 +7,9 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/gi)](https://goreportcard.com/report/github.com/goki/gi)
 [![GoDoc](https://godoc.org/github.com/goki/gi?status.svg)](https://godoc.org/github.com/goki/gi)
 
-NOTE: Requires Go version `1.10+` due to use of `math.Round`.
+NOTE: Requires Go version `1.11+` due to use of `math.Round` and `os.UserCacheDir`.
 
-See the [Wiki](https://github.com/goki/gi/wiki) for more docs,   [Install](https://github.com/goki/gi/wiki/Install) instructions (just standard `go get ...`), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
+See the [Wiki](https://github.com/goki/gi/wiki) for more docs,   [Install](https://github.com/goki/gi/wiki/Install) instructions (mostly just standard `go get ...`, but does now depend on `cgo` so see details for each platform), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
 GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a simple, elegant GUI framework in full native idiomatic Go (with minimal OS-specific backend interfaces based on the Shiny drivers, supporting MacOS, Linux, and Windows).  The overall design is an attempt to integrate existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  This 2D framework also integrates with a (in progress) 3D scenegraph, supporting interesting combinations of these frameworks.  Currently GoGi is focused on desktop systems, but nothing prevents adaptation to mobile. 
 

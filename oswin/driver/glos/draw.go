@@ -15,7 +15,7 @@ import (
 	"image/draw"
 	"log"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
@@ -28,7 +28,7 @@ func (app *appImpl) initDrawProgs() error {
 	p := theGPU.NewProgram("draw")
 	_, err := p.AddShader(gpu.VertexShader, "draw-vert",
 		`
-#version 410
+#version 330
 uniform mat3 mvp;
 uniform mat3 uvp;
 in vec2 pos;
@@ -44,7 +44,7 @@ void main() {
 	}
 	_, err = p.AddShader(gpu.FragmentShader, "draw-frag",
 		`
-#version 410
+#version 330
 precision mediump float;
 uniform sampler2D tex;
 in vec2 uv;
@@ -73,7 +73,7 @@ void main() {
 	p = theGPU.NewProgram("fill")
 	_, err = p.AddShader(gpu.VertexShader, "fill-vert",
 		`
-#version 410
+#version 330
 uniform mat3 mvp;
 in vec2 pos;
 void main() {
@@ -86,7 +86,7 @@ void main() {
 	}
 	_, err = p.AddShader(gpu.FragmentShader, "fill-frag",
 		`
-#version 410
+#version 330
 precision mediump float;
 uniform vec4 color;
 out vec4 outputColor;

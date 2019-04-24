@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/clip"
@@ -34,13 +34,13 @@ func init() {
 	runtime.LockOSThread()
 }
 
+// var glosDebug = false
 var glosDebug = true
 
+// 3.3 is pretty similar to 4.1 and more widely supported (e.g., crostini)
 // 4.1 is max supported on macos
-var glosGlMajor = 4
-var glosGlMinor = 1
-
-// var glosDebug = false
+var glosGlMajor = 3
+var glosGlMinor = 3
 
 var theApp = &appImpl{
 	windows:      make(map[*glfw.Window]*windowImpl),
@@ -152,7 +152,7 @@ func (app *appImpl) initGl() {
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.Visible, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, glosGlMajor) // 4.1 is max supported on macos
+	glfw.WindowHint(glfw.ContextVersionMajor, glosGlMajor)
 	glfw.WindowHint(glfw.ContextVersionMinor, glosGlMinor)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)

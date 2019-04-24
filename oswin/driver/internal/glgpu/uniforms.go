@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/gpu"
 )

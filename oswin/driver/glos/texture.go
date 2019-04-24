@@ -16,7 +16,7 @@ import (
 	"image/draw"
 	"os"
 
-	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
@@ -193,7 +193,7 @@ func (tx *textureImpl) SetSize(size image.Point) {
 		return
 	}
 	wasInit := tx.init
-	if tx.init {
+	if wasInit {
 		tx.Delete()
 	}
 	tx.size = size
