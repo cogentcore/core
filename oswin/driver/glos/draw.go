@@ -25,11 +25,33 @@ func (app *appImpl) initDrawProgs() error {
 		return nil
 	}
 	p := theGPU.NewProgram("draw")
-	_, err := p.AddShader(gpu.VertexShader, "draw-vert", drawVertSrc)
+	_, err := p.AddShader(gpu.VertexShader, "draw-vert",
+		`
+#version 410
+uniform mat3 mvp;
+uniform mat3 uvp;
+in vec2 pos;
+out vec2 uv;
+void main() {
+	vec3 p = vec3(pos, 1);
+	gl_Position = vec4(mvp * p, 1);
+	uv = (uvp * vec3(pos, 1)).xy;
+}
+`+"\x00")
 	if err != nil {
 		return err
 	}
-	_, err = p.AddShader(gpu.FragmentShader, "draw-frag", drawFragSrc)
+	_, err = p.AddShader(gpu.FragmentShader, "draw-frag",
+		`
+#version 410
+precision mediump float;
+uniform sampler2D tex;
+in vec2 uv;
+out vec4 outputColor;
+void main() {
+	outputColor = texture(tex, uv);
+}
+`+"\x00")
 	if err != nil {
 		return err
 	}
@@ -37,7 +59,7 @@ func (app *appImpl) initDrawProgs() error {
 	p.AddUniform("uvp", gpu.UniType{Type: gpu.Float32, Mat: 3}, false, 0)
 	p.AddUniform("tex", gpu.UniType{Type: gpu.Int}, false, 0)
 
-	pv := p.AddInput("pos", gpu.VectorType{Type: gpu.Float32, Vec: 2}, gpu.VertexPosition)
+	p.AddInput("pos", gpu.VectorType{Type: gpu.Float32, Vec: 2}, gpu.VertexPosition)
 
 	p.SetFragDataVar("outputColor")
 
@@ -47,21 +69,30 @@ func (app *appImpl) initDrawProgs() error {
 	}
 	app.drawProg = p
 
-	b := theGPU.NewBufferMgr()
-	vb := b.AddVectorsBuffer(gpu.StaticDraw)
-	vb.AddVectors(pv, false)
-	vb.SetLen(4)
-	vb.SetAllData(quadCoords)
-	b.Activate()
-	b.TransferAll()
-	app.drawQuads = b
-
 	p = theGPU.NewProgram("fill")
-	_, err = p.AddShader(gpu.VertexShader, "fill-vert", fillVertSrc)
+	_, err = p.AddShader(gpu.VertexShader, "fill-vert",
+		`
+#version 410
+uniform mat3 mvp;
+in vec2 pos;
+void main() {
+	vec3 p = vec3(pos, 1);
+	gl_Position = vec4(mvp * p, 1);
+}
+`+"\x00")
 	if err != nil {
 		return err
 	}
-	_, err = p.AddShader(gpu.FragmentShader, "fill-frag", fillFragSrc)
+	_, err = p.AddShader(gpu.FragmentShader, "fill-frag",
+		`
+#version 410
+precision mediump float;
+uniform vec4 color;
+out vec4 outputColor;
+void main() {
+	outputColor = color;
+}
+`+"\x00")
 	if err != nil {
 		return err
 	}
@@ -77,16 +108,6 @@ func (app *appImpl) initDrawProgs() error {
 		return err
 	}
 	app.fillProg = p
-
-	b = theGPU.NewBufferMgr()
-	vb = b.AddVectorsBuffer(gpu.StaticDraw)
-	vb.AddVectors(pv, false)
-	vb.SetLen(4) // 4 pairs of coords
-	vb.SetAllData(quadCoords)
-	b.Activate()
-	b.TransferAll()
-	app.fillQuads = b
-
 	if err != nil {
 		return err
 	}
@@ -94,9 +115,35 @@ func (app *appImpl) initDrawProgs() error {
 	return nil
 }
 
+// drawQuadsBuff returns a gpu.BufferMgr for the quads verticies for drawing on window
+func (app *appImpl) drawQuadsBuff() gpu.BufferMgr {
+	pv := app.drawProg.InputByName("pos")
+	b := theGPU.NewBufferMgr()
+	vb := b.AddVectorsBuffer(gpu.StaticDraw)
+	vb.AddVectors(pv, false)
+	vb.SetLen(4)
+	vb.SetAllData(quadCoords)
+	b.Activate()
+	b.TransferAll()
+	return b
+}
+
+// fillQuadsBuff returns a gpu.BufferMgr for the quads verticies for filling window
+func (app *appImpl) fillQuadsBuff() gpu.BufferMgr {
+	pv := app.fillProg.InputByName("pos")
+	b := theGPU.NewBufferMgr()
+	vb := b.AddVectorsBuffer(gpu.StaticDraw)
+	vb.AddVectors(pv, false)
+	vb.SetLen(4)
+	vb.SetAllData(quadCoords)
+	b.Activate()
+	b.TransferAll()
+	return b
+}
+
 // draw draws to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
 
 	tx := src.(*textureImpl)
 	sr = sr.Intersect(tx.Bounds())
@@ -126,6 +173,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	if err != nil {
 		log.Println(err)
 	}
+	// fmt.Printf("matMVP: %v\n", matMVP)
 
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -166,6 +214,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	if err != nil {
 		log.Println(err)
 	}
+	// fmt.Printf("matUVP: %v\n", matUVP)
 
 	tx.Activate(0)
 	err = app.drawProg.UniformByName("tex").SetValue(int32(0))
@@ -173,13 +222,13 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 		log.Println(err)
 	}
 
-	app.drawQuads.Activate()
+	qbuff.Activate()
 	gpu.Draw.TriangleStrips(0, 4)
 }
 
 // fill fills to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op) {
+func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op, qbuff gpu.BufferMgr) {
 	gpu.Draw.Op(op)
 	app.fillProg.Activate()
 
@@ -196,12 +245,12 @@ func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op) {
 
 	app.fillProg.UniformByName("color").SetValue(clvec4)
 
-	app.fillQuads.Activate()
+	qbuff.Activate()
 	gpu.Draw.TriangleStrips(0, 4)
 }
 
 // fillRect fills given rectangle, where dstSz is overall size of the destination (e.g., window)
-func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Color, op draw.Op) {
+func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Color, op draw.Op, qbuff gpu.BufferMgr) {
 	minX := float32(dr.Min.X)
 	minY := float32(dr.Min.Y)
 	maxX := float32(dr.Max.X)
@@ -212,11 +261,11 @@ func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Co
 		maxX, minY,
 		minX, maxY,
 	)
-	app.fill(mvp, src, op)
+	app.fill(mvp, src, op, qbuff)
 }
 
 // drawUniform does a fill-like uniform color fill but with an arbitrary src2dst transform
-func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
 	minX := float32(sr.Min.X)
 	minY := float32(sr.Min.Y)
 	maxX := float32(sr.Max.X)
@@ -231,7 +280,7 @@ func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src co
 		src2dst[0]*minX+src2dst[3]*maxY+src2dst[6],
 		src2dst[1]*minX+src2dst[4]*maxY+src2dst[7],
 	)
-	app.fill(mvp, src, op)
+	app.fill(mvp, src, op, qbuff)
 }
 
 // calcMVP returns the Model View Projection matrix that maps the quadCoords
@@ -274,63 +323,3 @@ var quadCoords = mat32.ArrayF32{
 	0, 1, // bottom left
 	1, 1, // bottom right
 }
-
-const drawVertSrc = `
-#version 410
-
-uniform mat3 mvp;
-uniform mat3 uvp;
-
-in vec2 pos;
-
-out vec2 uv;
-
-void main() {
-	vec3 p = vec3(pos, 1);
-	gl_Position = vec4(mvp * p, 1);
-	uv = (uvp * vec3(pos, 1)).xy;
-}
-` + "\x00"
-
-const drawFragSrc = `
-#version 410
-
-precision mediump float;
-
-uniform sampler2D tex;
-
-in vec2 uv;
-
-out vec4 outputColor;
-
-void main() {
-	outputColor = texture(tex, uv);
-}
-` + "\x00"
-
-const fillVertSrc = `
-#version 410
-
-uniform mat3 mvp;
-
-in vec2 pos;
-
-void main() {
-	vec3 p = vec3(pos, 1);
-	gl_Position = vec4(mvp * p, 1);
-}
-` + "\x00"
-
-const fillFragSrc = `
-#version 410
-
-precision mediump float;
-
-uniform vec4 color;
-
-out vec4 outputColor;
-
-void main() {
-	outputColor = color;
-}
-` + "\x00"

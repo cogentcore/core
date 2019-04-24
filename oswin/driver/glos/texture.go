@@ -30,12 +30,14 @@ import (
 // textureImpl manages a texture, including loading from an image file
 // and activating on GPU
 type textureImpl struct {
-	init   bool
-	handle uint32
-	name   string
-	size   image.Point
-	img    *image.RGBA // when loaded
-	fbuff  gpu.Framebuffer
+	init      bool
+	handle    uint32
+	name      string
+	size      image.Point
+	img       *image.RGBA // when loaded
+	fbuff     gpu.Framebuffer
+	drawQuads gpu.BufferMgr
+	fillQuads gpu.BufferMgr
 	// magFilter uint32 // magnification filter
 	// minFilter uint32 // minification filter
 	// wrapS     uint32 // wrap mode for s coordinate
@@ -245,6 +247,15 @@ func (tx *textureImpl) Delete() {
 	if !tx.init {
 		return
 	}
+	if tx.drawQuads != nil {
+		tx.drawQuads.Delete()
+		tx.drawQuads = nil
+	}
+	if tx.fillQuads != nil {
+		tx.fillQuads.Delete()
+		tx.fillQuads = nil
+	}
+	tx.DeleteFramebuffer()
 	gl.DeleteTextures(1, &tx.handle)
 	tx.init = false
 }
@@ -292,14 +303,20 @@ func (tx *textureImpl) DeleteFramebuffer() {
 func (tx *textureImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
-	theApp.draw(sz, src2dst, src, sr, op, opts)
+	if tx.drawQuads == nil {
+		tx.drawQuads = theApp.drawQuadsBuff()
+	}
+	theApp.draw(sz, src2dst, src, sr, op, opts, tx.drawQuads)
 	tx.DeActivateFramebuffer()
 }
 
 func (tx *textureImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
-	theApp.drawUniform(sz, src2dst, src, sr, op, opts)
+	if tx.fillQuads == nil {
+		tx.fillQuads = theApp.fillQuadsBuff()
+	}
+	theApp.drawUniform(sz, src2dst, src, sr, op, opts, tx.fillQuads)
 	tx.DeActivateFramebuffer()
 }
 
@@ -314,6 +331,9 @@ func (tx *textureImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Rec
 func (tx *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
-	theApp.fillRect(sz, dr, src, op)
+	if tx.fillQuads == nil {
+		tx.fillQuads = theApp.fillQuadsBuff()
+	}
+	theApp.fillRect(sz, dr, src, op, tx.fillQuads)
 	tx.DeActivateFramebuffer()
 }

@@ -7,6 +7,7 @@ package gpu
 // BufferMgr maintains VectorsBuffer and IndexesBuffer and also the critical
 // VAO (Vertex Array Object) for OpenGL which holds these active buffer pointers.
 // A typical Shape / Object / Geom will just have this.
+// IMPORTANT: BufferMgr cannot be shared across contexts (windows)!
 // TheGPU.NewBufferMgr() returns a new buffer manager.
 type BufferMgr interface {
 	// AddVectorsBuffer makes a new VectorsBuffer to contain Vectors.

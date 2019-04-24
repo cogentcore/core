@@ -124,7 +124,7 @@ func (pr *Program) AddUniforms(unis gpu.Uniforms) {
 func (pr *Program) UniformByName(name string) gpu.Uniform {
 	u, ok := pr.unis[name]
 	if !ok {
-		log.Printf("glgpu Program UniformByName: name %s not found in %s\n", name, pr.name)
+		log.Printf("glgpu Program: %v UniformByName: name %s not found\n", pr.name, name)
 		return nil
 	}
 	return u
@@ -135,7 +135,7 @@ func (pr *Program) UniformByName(name string) gpu.Uniform {
 func (pr *Program) UniformsByName(name string) gpu.Uniforms {
 	us, ok := pr.ubos[name]
 	if !ok {
-		log.Printf("glgpu Program UniformsByName: name %s not found in %s\n", name, pr.name)
+		log.Printf("glgpu Program: %v UniformsByName: name %s not found\n", pr.name, name)
 		return nil
 	}
 	return us
@@ -198,7 +198,7 @@ func (pr *Program) Outputs() []gpu.Vectors {
 func (pr *Program) InputByName(name string) gpu.Vectors {
 	v, ok := pr.ins[name]
 	if !ok {
-		log.Printf("glgpu Program InputByName: name %s not found in %s\n", name, pr.name)
+		log.Printf("glgpu Program: %v InputByName: name %s not found\n", pr.name, name)
 		return nil
 	}
 	return v
@@ -209,7 +209,7 @@ func (pr *Program) InputByName(name string) gpu.Vectors {
 func (pr *Program) OutputByName(name string) gpu.Vectors {
 	v, ok := pr.outs[name]
 	if !ok {
-		log.Printf("glgpu Program OutputByName: name %s not found in %s\n", name, pr.name)
+		log.Printf("glgpu Program: %v OutputByName: name %s not found\n", pr.name, name)
 		return nil
 	}
 	return v
@@ -223,7 +223,7 @@ func (pr *Program) InputByRole(role gpu.VectorRoles) gpu.Vectors {
 			return v
 		}
 	}
-	log.Printf("glgpu Program InputByRole: role %s not found in %s\n", role, pr.name)
+	log.Printf("glgpu Program: %v InputByRole: role %s not found\n", pr.name, role)
 	return nil
 }
 
@@ -235,7 +235,7 @@ func (pr *Program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
 			return v
 		}
 	}
-	log.Printf("glgpu Program OutputByRole: role %s not found in %s\n", role, pr.name)
+	log.Printf("glgpu Program: %v OutputByRole: role %s not found\n", pr.name, role)
 	return nil
 }
 
@@ -280,7 +280,7 @@ func (pr *Program) Compile() error {
 		lg := strings.Repeat("\x00", int(lgLength+1))
 		gl.GetProgramInfoLog(handle, lgLength, nil, gl.Str(lg))
 
-		err := fmt.Errorf("glgpu Program %s Compile: failed to link Program: %v", lg)
+		err := fmt.Errorf("glgpu Program: %s Compile: failed to link Program: %v", pr.name, lg)
 		log.Println(err)
 		return err
 	}
@@ -289,7 +289,7 @@ func (pr *Program) Compile() error {
 	for _, u := range pr.unis {
 		u.handle = gl.GetUniformLocation(handle, gl.Str(gpu.CString(u.name)))
 		if u.handle < 0 {
-			err := fmt.Errorf("glgpu Program %s Compile: Uniform named: %s not found", u.name)
+			err := fmt.Errorf("glgpu Program: %s Compile: Uniform named: %s not found", pr.name, u.name)
 			log.Println(err)
 			return err
 		}
@@ -312,7 +312,7 @@ func (pr *Program) Compile() error {
 	for _, v := range pr.ins {
 		v.handle = uint32(gl.GetAttribLocation(handle, gl.Str(gpu.CString(v.name))))
 		if v.handle < 0 {
-			err := fmt.Errorf("glgpu Program %s Compile: input Vectors named: %s not found", v.name)
+			err := fmt.Errorf("glgpu Program: %s Compile: input Vectors named: %s not found", pr.name, v.name)
 			log.Println(err)
 			return err
 		}
@@ -322,7 +322,7 @@ func (pr *Program) Compile() error {
 	for _, v := range pr.outs {
 		v.handle = uint32(gl.GetAttribLocation(handle, gl.Str(gpu.CString(v.name))))
 		if v.handle < 0 {
-			err := fmt.Errorf("glgpu Program %s Compile: output Vectors named: %s not found", v.name)
+			err := fmt.Errorf("glgpu Program: %s Compile: output Vectors named: %s not found", pr.name, v.name)
 			log.Println(err)
 			return err
 		}

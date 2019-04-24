@@ -69,11 +69,9 @@ type appImpl struct {
 	quitCleanFunc func()
 
 	// gl drawing programs
-	progInit  bool
-	drawProg  gpu.Program
-	drawQuads gpu.BufferMgr
-	fillProg  gpu.Program
-	fillQuads gpu.BufferMgr
+	progInit bool
+	drawProg gpu.Program
+	fillProg gpu.Program
 }
 
 var mainCallback func(oswin.App)

@@ -39,6 +39,8 @@ type windowImpl struct {
 	mainMenu       oswin.MainMenu
 	closeReqFunc   func(win oswin.Window)
 	closeCleanFunc func(win oswin.Window)
+	drawQuads      gpu.BufferMgr
+	fillQuads      gpu.BufferMgr
 }
 
 // Handle returns the driver-specific handle for this window.
@@ -215,8 +217,11 @@ func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rec
 	theApp.RunOnMain(func() {
 		w.Activate()
 		gpu.TheGPU.RenderToWindow()
+		if w.drawQuads == nil {
+			w.drawQuads = theApp.drawQuadsBuff()
+		}
 		sz := w.Size()
-		theApp.draw(sz, src2dst, src, sr, op, opts)
+		theApp.draw(sz, src2dst, src, sr, op, opts, w.drawQuads)
 	})
 }
 
@@ -224,8 +229,11 @@ func (w *windowImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr imag
 	theApp.RunOnMain(func() {
 		w.Activate()
 		gpu.TheGPU.RenderToWindow()
+		if w.fillQuads == nil {
+			w.fillQuads = theApp.fillQuadsBuff()
+		}
 		sz := w.Size()
-		theApp.drawUniform(sz, src2dst, src, sr, op, opts)
+		theApp.drawUniform(sz, src2dst, src, sr, op, opts, w.fillQuads)
 	})
 }
 
@@ -240,8 +248,11 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	theApp.RunOnMain(func() {
 		w.Activate()
+		if w.fillQuads == nil {
+			w.fillQuads = theApp.fillQuadsBuff()
+		}
 		sz := w.Size()
-		theApp.fillRect(sz, dr, src, op)
+		theApp.fillRect(sz, dr, src, op, w.fillQuads)
 	})
 }
 
@@ -378,6 +389,14 @@ func (w *windowImpl) Close() {
 		if w.winTex != nil {
 			w.winTex.Delete()
 			w.winTex = nil
+		}
+		if w.drawQuads != nil {
+			w.drawQuads.Delete()
+			w.drawQuads = nil
+		}
+		if w.fillQuads != nil {
+			w.fillQuads.Delete()
+			w.fillQuads = nil
 		}
 		w.glw.Destroy()
 	})
