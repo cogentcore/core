@@ -12,7 +12,7 @@
 package glos
 
 /*
-#cgo CFLAGS: -x objective-c
+#cgo CFLAGS: -x objective-c -Wno-deprecated-declarations
 #cgo LDFLAGS: -framework Cocoa
 #import <Cocoa/Cocoa.h>
 void clipClear();
