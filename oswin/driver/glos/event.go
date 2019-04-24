@@ -132,7 +132,7 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	mods := lastMods
-	if theApp.Platform == oswin.Windows { // windows has very low scroll multiplier
+	if theApp.Platform() == oswin.Windows { // windows has very low scroll multiplier
 		xoff *= 40
 		yoff *= 40
 	}
