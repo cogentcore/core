@@ -134,9 +134,6 @@ type Chord string
 // the "Code" prefix.
 func (e *Event) Chord() Chord {
 	modstr := ModsString(e.Modifiers)
-	if e.Code == CodeSpacebar {
-		fmt.Printf("spacebar, modstr: %s\n", modstr)
-	}
 	if modstr != "" && e.Code == CodeSpacebar { // modified space is not regular space
 		return Chord(modstr + "Spacebar")
 	}

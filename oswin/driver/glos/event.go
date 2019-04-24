@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 )
@@ -131,6 +132,10 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	mods := lastMods
+	if theApp.Platform == oswin.Windows { // windows has very low scroll multiplier
+		xoff *= 40
+		yoff *= 40
+	}
 	event := &mouse.ScrollEvent{
 		Event: mouse.Event{
 			Where:     lastMousePos,
