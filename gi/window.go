@@ -626,6 +626,9 @@ func (w *Window) Closed() {
 	AllWindows.Delete(w)
 	MainWindows.Delete(w)
 	DialogWindows.Delete(w)
+	WindowGlobalMu.Lock()
+	StringsDelete(&FocusWindows, w.Name())
+	WindowGlobalMu.Unlock()
 	WinNewCloseStamp()
 	if WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.Nm)
@@ -639,6 +642,17 @@ func (w *Window) Closed() {
 	}
 	w.SetInactive() // marks as closed
 	w.FocusInactivate()
+	WindowGlobalMu.Lock()
+	if len(FocusWindows) > 0 {
+		pf := FocusWindows[0]
+		WindowGlobalMu.Unlock()
+		pfw, has := AllWindows.FindName(pf)
+		if has {
+			pfw.OSWin.Raise()
+		}
+	} else {
+		WindowGlobalMu.Unlock()
+	}
 	// these are managed by the window itself
 	w.OverTex = nil
 	if w.OverlayVp != nil {
@@ -1594,19 +1608,26 @@ mainloop:
 					WinGeomPrefs.RecordPref(w)
 				}
 			case window.Focus:
+				StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 				if !w.HasFlag(int(WinFlagGotFocus)) {
 					w.SetFlag(int(WinFlagGotFocus))
 					w.SendWinFocusEvent(window.Focus)
-					// fmt.Printf("win foc: %v\n", w.Nm)
+					if WinEventTrace {
+						fmt.Printf("Win: %v got focus\n", w.Nm)
+					}
 				} else {
-					// fmt.Printf("win extra foc: %v\n", w.Nm)
+					if WinEventTrace {
+						fmt.Printf("Win: %v got extra focus\n", w.Nm)
+					}
 					if w.NeedWinMenuUpdate() {
 						w.MainMenuUpdateWindows()
 					}
 					w.MainMenuSet()
 				}
 			case window.DeFocus:
-				// fmt.Printf("win de-foc: %v\n", w.Nm)
+				if WinEventTrace {
+					fmt.Printf("Win: %v lost focus\n", w.Nm)
+				}
 				w.ClearFlag(int(WinFlagGotFocus))
 				w.SendWinFocusEvent(window.DeFocus)
 			}
@@ -2528,7 +2549,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	return true
 }
 
-// FocusNext sets the focus on the next item that can accept focus after the
+// 	FocusNext sets the focus on the next item that can accept focus after the
 // given item (can be nil) -- returns true if a focus item found.
 func (w *Window) FocusNext(foc ki.Ki) bool {
 	gotFocus := false
@@ -3163,7 +3184,7 @@ func (wl *WindowList) FindName(name string) (*Window, bool) {
 	return nil, false
 }
 
-// Len() returns the length of the list, concurrent-safe
+// Len returns the length of the list, concurrent-safe
 func (wl *WindowList) Len() int {
 	WindowGlobalMu.Lock()
 	defer WindowGlobalMu.Unlock()
@@ -3233,6 +3254,12 @@ var DialogWindows WindowList
 // MainWindows is the list of main windows (non-dialogs) that have been
 // created.
 var MainWindows WindowList
+
+// FocusWindows is a "recents" stack of window names that have focus
+// when a window gets focus, it pops to the top of this list
+// when a window is closed, it is removed from the list, and the top item
+// on the list gets focused.
+var FocusWindows []string
 
 //////////////////////////////////////////////////////////////////////////////////
 //  WindowGeom

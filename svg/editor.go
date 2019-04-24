@@ -101,6 +101,10 @@ func (svg *Editor) EditorEvents() {
 	})
 }
 
+func (svg *Editor) ConnectEvents2D() {
+	svg.EditorEvents()
+}
+
 // InitScale ensures that Scale is initialized and non-zero
 func (svg *Editor) InitScale() {
 	if svg.Scale == 0 {
@@ -121,7 +125,7 @@ func (svg *Editor) SetTransform() {
 func (svg *Editor) Render2D() {
 	if svg.PushBounds() {
 		rs := &svg.Render
-		svg.EditorEvents()
+		svg.This().(gi.Node2D).ConnectEvents2D()
 		if svg.Fill {
 			svg.FillViewport()
 		}

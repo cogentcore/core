@@ -61,9 +61,10 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	event.Init()
 	w.Send(event)
 
-	if act == key.Press &&
+	if act == key.Press && ec < key.CodeLeftControl &&
 		(key.HasAnyModifierBits(em, key.Control, key.Alt, key.Meta) ||
-			!mapped) {
+			!mapped || ec == key.CodeTab) {
+		// fmt.Printf("chord ky	: %v ec	: %v\n	", ky, ec)
 		che := &key.ChordEvent{
 			Event: key.Event{
 				Code:      ec,

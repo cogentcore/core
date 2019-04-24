@@ -459,6 +459,16 @@ func StringsInsertFirstUnique(strs *[]string, str string, max int) {
 	}
 }
 
+// StringsDelete deletes item from strings list
+func StringsDelete(strs *[]string, str string) {
+	for i, s := range *strs {
+		if s == str {
+			*strs = append((*strs)[:i], (*strs)[i+1:]...)
+			return
+		}
+	}
+}
+
 // StringsAppendIfUnique append str to strs if not already in slice
 func StringsAppendIfUnique(strs *[]string, str string, max int) {
 	if strs == nil {
