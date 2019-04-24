@@ -15,6 +15,7 @@ import (
 	"image/draw"
 	"sync"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
@@ -147,7 +148,7 @@ outer:
 				w.Activate()
 				w.glw.SwapBuffers() // note: implicitly does a flush
 				// note: generally don't need this:
-				// theGPU.Clear(true, true)
+				// gpu.Draw.Clear(true, true)
 			})
 			w.publishDone <- struct{}{}
 		}
@@ -458,6 +459,8 @@ func (w *windowImpl) updtGeom() {
 	}
 	w.PhysDPI = w.Scrn.PhysicalDPI
 	w.LogDPI = w.Scrn.LogicalDPI
+	w.Activate()
+	gl.Viewport(0, 0, int32(w.PxSize.X), int32(w.PxSize.Y))
 	w.winTex.SetSize(w.PxSize)
 	w.mu.Unlock()
 	w.sendWindowEvent(window.Resize)

@@ -15,6 +15,7 @@ import (
 	"image/draw"
 	"log"
 
+	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
@@ -152,6 +153,8 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	}
 
 	gpu.Draw.Op(op)
+	gl.Disable(gl.DEPTH_TEST) // in case these were turned on elsewhere
+	gl.Disable(gl.STENCIL_TEST)
 	app.drawProg.Activate()
 
 	// Start with src-space left, top, right and bottom.
@@ -230,6 +233,8 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 // proper context must have already been established outside this call!
 func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op, qbuff gpu.BufferMgr) {
 	gpu.Draw.Op(op)
+	gl.Disable(gl.DEPTH_TEST) // in case these were turned on elsewhere
+	gl.Disable(gl.STENCIL_TEST)
 	app.fillProg.Activate()
 
 	app.fillProg.UniformByName("mvp").SetValue(mvp)
