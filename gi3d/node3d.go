@@ -15,18 +15,12 @@ import (
 // relative to parent, and computed bounding boxes, etc
 type Node3DBase struct {
 	NodeBase
-	Pos         mat32.Vector3
-	Scale       mat32.Vector3    // Node scale (relative to parent)
-	Dir         mat32.Vector3    // Initial direction (relative to parent)
-	Rot         mat32.Vector3    // Node rotation specified in Euler angles (relative to parent)
-	Quat        mat32.Quaternion // Node rotation specified as a Quaternion (relative to parent)
-	Xform       mat32.Matrix4    // Local transform matrix. Contains all position/rotation/scale information (relative to parent)
-	WorldXform  mat32.Matrix4    // World transform matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)	Pos   mat32.Vector3
-	BoundBox    mat32.Box3       // Last calculated bounding box
-	BoundSphere mat32.Sphere     // Last calculated bounding sphere
-	Area        float32          // Last calculated area
-	Volume      float32          // Last calculated volume
-	RotInertia  mat32.Matrix3    // Last calculated rotational inertia matrix
+	Pose        Pose          // complete specification of position and orientation
+	BoundBox    mat32.Box3    // Last calculated bounding box
+	BoundSphere mat32.Sphere  // Last calculated bounding sphere
+	Area        float32       // Last calculated area
+	Volume      float32       // Last calculated volume
+	RotInertia  mat32.Matrix3 // Last calculated rotational inertia matrix
 
 	Scene *Scene `json:"-" xml:"-" view:"-" desc:"our sceneviewport -- set in Init2D (Base typically) and used thereafter"`
 }

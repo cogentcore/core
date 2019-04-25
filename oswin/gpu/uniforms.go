@@ -56,6 +56,9 @@ type Uniforms interface {
 	// Name returns the name of this set of uniforms
 	Name() string
 
+	// SetName sets the name of this set of uniforms
+	SetName(name string)
+
 	// AddUniform adds a uniform variable to this collection of uniforms of given type
 	AddUniform(name string, typ UniType, ary bool, ln int) Uniform
 

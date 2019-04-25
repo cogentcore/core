@@ -56,11 +56,11 @@ void main() {
 	if err != nil {
 		return err
 	}
-	p.AddUniform("mvp", gpu.UniType{Type: gpu.Float32, Mat: 3}, false, 0)
-	p.AddUniform("uvp", gpu.UniType{Type: gpu.Float32, Mat: 3}, false, 0)
-	p.AddUniform("tex", gpu.UniType{Type: gpu.Int}, false, 0)
+	p.AddUniform("mvp", gpu.Mat3fUniType, false, 0)
+	p.AddUniform("uvp", gpu.Mat3fUniType, false, 0)
+	p.AddUniform("tex", gpu.IUniType, false, 0)
 
-	p.AddInput("pos", gpu.VectorType{Type: gpu.Float32, Vec: 2}, gpu.VertexPosition)
+	p.AddInput("pos", gpu.Vec2fVecType, gpu.VertexPosition)
 
 	p.SetFragDataVar("outputColor")
 
@@ -97,10 +97,10 @@ void main() {
 	if err != nil {
 		return err
 	}
-	p.AddUniform("mvp", gpu.UniType{Type: gpu.Float32, Mat: 3}, false, 0)
-	p.AddUniform("color", gpu.UniType{Type: gpu.Float32, Vec: 4}, false, 0)
+	p.AddUniform("mvp", gpu.Mat3fUniType, false, 0)
+	p.AddUniform("color", gpu.Vec4fUniType, false, 0)
 
-	p.AddInput("pos", gpu.VectorType{Type: gpu.Float32, Vec: 2}, gpu.VertexPosition)
+	p.AddInput("pos", gpu.Vec2fVecType, gpu.VertexPosition)
 
 	p.SetFragDataVar("outputColor")
 

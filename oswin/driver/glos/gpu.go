@@ -73,6 +73,20 @@ func (gp *gpuImpl) Init(debug bool) error {
 	return nil
 }
 
+// ActivateShared activates the invisible shared context
+// which is shared across all other window / offscreen
+// rendering contexts, and should be used as the context
+// for initializing shared resources.
+func (gp *gpuImpl) ActivateShared() error {
+	if theApp.shareWin == nil {
+		err := fmt.Errorf("glos GPU.ActivateShared -- gl not yet Initialized and shareWin is nil")
+		log.Println(err)
+		return err
+	}
+	theApp.shareWin.MakeContextCurrent()
+	return nil
+}
+
 // IsDebug returns true if debug mode is on
 func (gp *gpuImpl) IsDebug() bool {
 	return gp.debug
@@ -150,6 +164,16 @@ func (gp *gpuImpl) NewFramebuffer(name string, size image.Point, samples int) gp
 	fb.SetSize(size)
 	fb.SetSamples(samples)
 	return fb
+}
+
+// NewUniforms makes a new named set of uniforms (i.e,. a Uniform Buffer Object)
+// These uniforms can be bound to programs -- first add all the uniform variables
+// and then AddUniforms to each program that uses it.
+// Uniforms will be bound etc when the program is compiled.
+func (gp *gpuImpl) NewUniforms(name string) gpu.Uniforms {
+	us := &glgpu.Uniforms{}
+	us.SetName(name)
+	return us
 }
 
 // 	NextUniformBindingPoint returns the next avail uniform binding point.

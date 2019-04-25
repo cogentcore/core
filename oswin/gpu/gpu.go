@@ -33,6 +33,12 @@ type GPU interface {
 	// but it is a NOP if the callback method is avail.
 	Init(debug bool) error
 
+	// ActivateShared activates the invisible shared context
+	// which is shared across all other window / offscreen
+	// rendering contexts, and should be used as the context
+	// for initializing shared resources.
+	ActivateShared() error
+
 	// IsDebug returns true if debug mode is on
 	IsDebug() bool
 
@@ -72,6 +78,12 @@ type GPU interface {
 	// See also Texture2D.ActivateFramebuffer to activate a framebuffer for rendering
 	// to an existing texture.
 	NewFramebuffer(name string, size image.Point, samples int) Framebuffer
+
+	// NewUniforms makes a new named set of uniforms (i.e,. a Uniform Buffer Object)
+	// These uniforms can be bound to programs -- first add all the uniform variables
+	// and then AddUniforms to each program that uses it.
+	// Uniforms will be bound etc when the program is compiled.
+	NewUniforms(name string) Uniforms
 
 	// 	NextUniformBindingPoint returns the next avail uniform binding point.
 	// Counts up from 0 -- this call increments for next call.

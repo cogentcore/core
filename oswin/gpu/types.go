@@ -54,6 +54,29 @@ type UniType struct {
 	Mat  int   `desc:"square matrix dimensions, if a matrix (valid values are 3,4)"`
 }
 
+// Commonly-used types:
+
+// FUniType is a single float32
+var FUniType = UniType{Type: Float32}
+
+// IUniType is a single int32
+var IUniType = UniType{Type: Int}
+
+// Vec2fUniType is a 2-vector of float32
+var Vec2fUniType = UniType{Type: Float32, Vec: 2}
+
+// Vec3fUniType is a 3-vector of float32
+var Vec3fUniType = UniType{Type: Float32, Vec: 3}
+
+// Vec4fUniType is a 4-vector of float32
+var Vec4fUniType = UniType{Type: Float32, Vec: 4}
+
+// Mat3fUniType is a 3x3 matrix of float32
+var Mat3fUniType = UniType{Type: Float32, Mat: 3}
+
+// Mat4fUniType is a 4x4 matrix of float32
+var Mat4fUniType = UniType{Type: Float32, Mat: 4}
+
 // Name returns the full GLSL type name for the type
 func (ty *UniType) Name() string {
 	if ty.Vec == 0 && ty.Mat == 0 {
@@ -92,6 +115,17 @@ type VectorType struct {
 	Type Types `desc:"data type"`
 	Vec  int   `desc:"length of vector (valid values are 2,3,4)"`
 }
+
+// commonly-used vector types:
+
+// Vec2fVecType is a 2-vector of float32
+var Vec2fVecType = VectorType{Type: Float32, Vec: 2}
+
+// Vec3fVecType is a 3-vector of float32
+var Vec3fVecType = VectorType{Type: Float32, Vec: 3}
+
+// Vec4fVecType is a 4-vector of float32
+var Vec4fVecType = VectorType{Type: Float32, Vec: 4}
 
 // Bytes returns number of bytes per Vector element (len * 4 basically)
 func (ty *VectorType) Bytes() int {

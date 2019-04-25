@@ -7,6 +7,7 @@ package gi3d
 import (
 	"github.com/g3n/engine/math32"
 	"github.com/goki/gi"
+	"github.com/goki/gi/oswin/gpu"
 )
 
 // https://learnopengl.com/Lighting/Basic-Lighting
@@ -46,19 +47,42 @@ type Material interface {
 
 	// Phong returns the phong lighting parameters
 	Phong() Phong
+
+	// SetShininess sets the phong shininess of the material
+	SetShininess(shininess float32)
 }
 
 // Design note: all vertex data must be in ONE gpu.VectorsBuffer, and the cost of
 // consolidating a bunch of vector data dynamically on the CPU is going to be
 // way higher than buffer switching on the GPU and re-running the same program
 // so basically the gpu.VectorsBuffer must be assembled at the Object level
-// and, yeah, each object rendered separately -- no aggrgation is sensible.
+// and, yeah, each object rendered separately -- no aggragation is sensible.
 
 // Base material type
 type MaterialBase struct {
 	Nm   string
 	Phng Phong
 	Pipe gpu.Pipeline // todo: program abstraction, has multiple gpu.Program's
+}
+
+func (mb *MaterialBase) Name() string {
+	return mb.Nm
+}
+
+func (mb *MaterialBase) TypeOrder() int {
+	return 0
+}
+
+func (mb *MaterialBase) ItemOrder() int {
+	return 0
+}
+
+func (mb *MaterialBase) Phong() Phong {
+	return mb.Phng
+}
+
+func (mb *MaterialBase) SetShininess(shininess float32) {
+	mb.Phng.Shininess = shininess
 }
 
 // ColorOpaqueVertex is a material with opaque color parameters per vertex.

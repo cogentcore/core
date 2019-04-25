@@ -350,6 +350,11 @@ func (un *Uniforms) Name() string {
 	return un.name
 }
 
+// SetName sets the name of this set of uniforms
+func (un *Uniforms) SetName(name string) {
+	un.name = name
+}
+
 // AddUniform adds a Uniform variable to this collection of Uniforms of given type
 func (un *Uniforms) AddUniform(name string, typ gpu.UniType, ary bool, ln int) gpu.Uniform {
 	if un.unis == nil {
@@ -386,6 +391,12 @@ func (un *Uniforms) getSize() int {
 	sz := 0
 	for i, u := range un.uniOrd {
 		u.ubo = un
+		if u.array && u.ln == 0 {
+			u.offset = 0
+			u.handle = 0
+			u.size = 0
+			continue
+		}
 		u.offset = sz
 		u.handle = int32(i)
 		u.size = u.typ.Bytes()
