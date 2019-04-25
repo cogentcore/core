@@ -9,7 +9,6 @@ import (
 	"image/color"
 	"log"
 
-	"github.com/goki/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
@@ -18,35 +17,44 @@ import (
 // https://learnopengl.com/Lighting/Basic-Lighting
 // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
 
-// MatTypes is the global registry of material types.
-// external packages can add to this list, after calling
-// InitMatTypes after the GPU system has been properly initialized.
-var MatTypes map[string]MatType
+// Renderers is the container for all GPU rendering Programs
+// Each scene requires its own version of these because
+// the programs need to be recompiled for each specific set
+// of lights.
+type Renderers struct {
+	Unis    map[string]gpu.Uniforms `desc:"uniforms shared across code"`
+	Renders map[string]Render       `desc:"collection of Render items"`
+}
 
-// MatTypeUnis are shared Uniforms (UBO's) that are used across
-// multiple programs: "Lights" and "Camera"
-var MatTypeUnis map[string]gpu.Uniforms
+// SetLights sets the lights and recompiles the programs accordingly
+func (rn *Renderers) SetLights(lights Lights) {
+	for _, rd := range rn.Renders {
+		rd.SetLights(lights)
+	}
+}
 
-// InitMatTypes initializes the default MatTypes registry of core
-// material types (and uniforms) that are built-in to the gi3d system.
+// SetCamera sets the overall camera view matrix
+func (rn *Renderers) SetCamera(camview mat32.Matrix4) {
+	for _, rd := range rn.Renders {
+		rd.SetCamera(camview)
+	}
+}
+
+// Init initializes the Render programs.
+// Must be called with appropriate context (window) activated.
 // Returns true if wasn't already initialized, and error
 // if there is some kind of error during initialization.
-func InitMatTypes() (bool, error) {
-	if MatTypes != nil {
+func (rn *Renderers) Init() (bool, error) {
+	if Renders != nil {
 		return false, nil
 	}
 	var err error
 	oswin.TheApp.RunOnMain(func() {
-		err = gpu.ActivateShared()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		err = initMatTypeUnis()
+		err = rn.InitUnis()
 		if err != nil {
 			log.Println(err)
 		}
-		err = initMatTypesImpl()
+		err = rn.InitRenders()
 		if err != nil {
 			log.Println(err)
 		}
@@ -54,31 +62,28 @@ func InitMatTypes() (bool, error) {
 	return true, err
 }
 
-func initMatTypeUnis() error {
-	MatTypeUnis = make(map[string]gpu.Uniforms)
+func (rn *Renderers) InitUnis() error {
+	rn.Unis = make(map[string]gpu.Uniforms)
 
 	camera := gpu.TheGPU.NewUniforms("Camera")
 	camera.AddUniform("CamViewMatrix", gpu.Mat4fUniType, false, 0)
 	camera.AddUniform("NormMatrix", gpu.Mat3fUniType, false, 0)
-	MatTypeUnis[camera.Name()] = camera
+	rn.Unis[camera.Name()] = camera
 
 	lights := gpu.TheGPU.NewUniforms("Lights")
 	lights.AddUniform("AmbLights", gpu.Vec3fUniType, true, 0)   // 1 per
 	lights.AddUniform("DirLights", gpu.Vec3fUniType, true, 0)   // 2 per
 	lights.AddUniform("PointLights", gpu.Vec3fUniType, true, 0) // 3 per
 	lights.AddUniform("SpotLights", gpu.Vec3fUniType, true, 0)  // 5 per
-	MatTypeUnis[lights.Name()] = lights
+	rn.Unis[lights.Name()] = lights
 }
 
-func initMatTypesImpl() error {
-	MatTypes = make(map[string]MatType)
+func (rn *Renderers) InitRenders() error {
+	Renders = make(map[string]Render)
 	var errs []error
-	AddNewMatType(&ColorOpaqueVertexType{}, &errs)
-	AddNewMatType(&ColorOpaqueUniformType{}, &errs)
-	AddNewMatType(&ColorTransVertexType{}, &errs)
-	AddNewMatType(&ColorTransUniformType{}, &errs)
-	AddNewMatType(&TextureType{}, &errs)
-	AddNewMatType(&TextureGi2DType{}, &errs)
+	rn.AddNewRender(&RenderUniformColor{}, &errs)
+	rn.AddNewRender(&RenderVertexColor{}, &errs)
+	rn.AddNewRender(&RenderTexture{}, &errs)
 
 	var erstr string
 	for _, er := range errs {
@@ -90,11 +95,11 @@ func initMatTypesImpl() error {
 	return nil
 }
 
-// AddNewMatType compiles the given MatType and adds any errors to error list
-// and adds it to the global MatTypes map, by Name()
-func AddNewMatType(mt MatType, errs *[]error) {
+// AddNewRender compiles the given Render and adds any errors to error list
+// and adds it to the global Renders map, by Name()
+func (rn *Renderers) AddNewRender(mt Render, errs *[]error) {
 	err := mt.Compile()
-	MatTypes[mt.Name()] = mt
+	Renders[mt.Name()] = mt
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -108,24 +113,16 @@ func AddNewMatType(mt MatType, errs *[]error) {
 // todo: some methods to set / add etc camera
 
 //////////////////////////////////////////////////////////////////////
-//   MatType
+//   Render
 
-// MatType is the interface for material types, which each such type
-// managing a GPU Pipeline that implements the shaders to render
-// a given material.  MatTypes are initialized once and live in
-// a global list of MatTypes, named after their type names.
-// Material's use a specific MatType to achieve their rendering.
-type MatType interface {
-	// Name returns the material type's name, which is the same as
-	// the Go type name of the MatType
+// Render is the interface for a render program, with each managing a
+// GPU Pipeline that implements the shaders to render a given material.
+// Material's use a specific Render to achieve their rendering.
+type Render interface {
+	// Name returns the render name, which is the same as the Go type name
 	Name() string
 
-	// TypeOrder represents the outer-loop material type ordering.
-	// It is fixed and determined by the type of material (e.g., transparent
-	// comes after opaque)
-	TypeOrder() int
-
-	// Pipeline returns the gpu.Pipeline that renders this material
+	// Pipeline returns the gpu.Pipeline for rendering
 	Pipeline() gpu.Pipeline
 
 	// VtxFragProg returns the gpu.Program for Vertex and Fragment shaders
@@ -135,44 +132,44 @@ type MatType interface {
 	// Compile compiles the gpu.Pipeline programs and shaders for
 	// this material -- called during initialization.
 	Compile()
+
+	// SetLights sets the lights and recompiles the programs accordingly
+	SetLights(lights Lights)
+
+	// SetCamera sets the overall camera view matrix
+	SetCamera(camview mat32.Matrix4)
 }
 
-// Base material type
-type MatTypeBase struct {
-	Nm    string
-	Order int
-	Pipe  gpu.Pipeline
+// Base render type
+type RenderBase struct {
+	Nm   string
+	Pipe gpu.Pipeline
 }
 
-func (mt *MatTypeBase) Name() string {
+func (mt *RenderBase) Name() string {
 	return mb.Nm
 }
 
-func (mt *MatTypeBase) TypeOrder() int {
-	return mb.Order
-}
-
-func (mt *MatTypeBase) Pipeline() gpu.Pipeline {
+func (mt *RenderBase) Pipeline() gpu.Pipeline {
 	return mb.Pipe
 }
 
-func (mt *MatTypeBase) VtxFragProg() gpu.Program {
+func (mt *RenderBase) VtxFragProg() gpu.Program {
 	return mb.Pipe.ProgramByName("VtxFrag")
 }
 
 //////////////////////////////////////////////////////////////////////////
-//    Types
+//    RenderUniformColor
 
-// ColorOpaqueUniformType is a material with one set of opaque color parameters
-// for entire object.  There is one of these per color.
+// RenderUniformColor renders a material with one color for entire object.
 // This uses the standard Phong color model, with color computed in the
 // fragment shader (more accurate, more expensive).
-type ColorOpaqueUniformType struct {
-	MatTypeBase
+type RenderUniformColor struct {
+	RenderBase
 }
 
-func (mt *ColorOpaqueUniformType) Compile() error {
-	mt.Nm = "ColorOpaqueUniformType"
+func (mt *RenderUniformColor) Compile() error {
+	mt.Nm = "RenderUniformColor"
 	mt.Order = 1
 	if mt.Pipe != nil {
 		mt.Pipe = gpu.NewPipeline(mt.Nm)
@@ -183,8 +180,10 @@ func (mt *ColorOpaqueUniformType) Compile() error {
 	_, err := pr.AddShader(gpu.VertexShader, "Vtx",
 		`
 #version 330
-`+MatTypeUniCamera+MatTypeVtxInPosNorm+MatTypeVtxInColor+
+`+RenderUniCamera+
 			`
+in vec3 VtxPos;
+in vec3 VtxNorm;
 out vec4 Pos;
 out vec3 Norm;
 out vec3 CamDir;
@@ -200,40 +199,44 @@ void main() {
 	if err != nil {
 		return err
 	}
+
 	_, err = pr.AddShader(gpu.FragmentShader, "Frag",
 		`
 #version 330
 precision mediump float;
-`+MatTypeUniLights+
+`+RenderUniLights+
 			`
-uniform vec3 Color;
+uniform vec4 Color;
 uniform float Shininess;
 in vec4 Pos;
 in vec3 Norm;
 in vec3 CamDir;
 out vec4 outputColor;
-`+MatTypePhong+
+`+RenderPhong+
 			`
 void main() {
     // Inverts the fragment normal if not FrontFacing
-    vec3 fragNormal = Normal;
+    vec3 fragNormal = Norm;
     if (!gl_FrontFacing) {
         fragNormal = -fragNormal;
     }
-
+    float opacity = Color.a;
+    vec3 clr = Color.rgb;	
+	
     // Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
     vec3 Ambdiff, Spec;
-    phongModel(Pos, fragNormal, CamDir, Color, Color, Ambdiff, Spec);
+    phongModel(Pos, fragNormal, CamDir, clr, clr, Ambdiff, Spec);
 
     // Final fragment color
-    outputColor = min(vec4(Ambdiff + Spec, 1.0), vec4(1.0));
+    outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
 }
 `+"\x00")
 	if err != nil {
 		return err
 	}
-	pr.AddUniforms(MatTypeUnis["Camera"])
-	pr.AddUniforms(MatTypeUnis["Lights"])
+
+	pr.AddUniforms(rn.Unis["Camera"])
+	pr.AddUniforms(rn.Unis["Lights"])
 	pr.AddUniform("Color", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shininess", gpu.FUniType, false, 0)
 
@@ -244,85 +247,58 @@ void main() {
 	return nil
 }
 
-func (mt *ColorOpaqueUniformType) SetColor(color color.Color) error {
+func (mt *RenderUniformColor) SetColor(color color.Color) error {
 	pr := mt.VtxFragProg()
 	clr := pr.UniformByName("Color")
+	// todo: convert to float
 	clr.SetValue()
 }
 
-func (mt *ColorOpaqueUniformType) SetColorF(color mat32.Color) error {
+func (mt *RenderUniformColor) SetColorF(color mat32.Color) error {
 	pr := mt.VtxFragProg()
 	clr := pr.UniformByName("Color")
 	clr.SetValue(color)
 }
 
-// ColorTransUniformType is a material with one set of transparent color parameters
-// for entire object. There is one of these per color.
+//////////////////////////////////////////////////////////////////////////
+//    RenderVertexColor
+
+// todo: how to do per-face color?
+
+// RenderVertexColor renders color parameters per vertex.
 // This uses the standard Phong color model, with color computed in the
 // fragment shader (more accurate, more expensive).
-type ColorTransUniformType struct {
-	MatTypeBase
+type RenderVertexColor struct {
+	RenderBase
 }
 
-// ColorOpaqueVertexType is a material with opaque color parameters per vertex.
-// This uses the standard Phong color model, with color computed in the
-// fragment shader (more accurate, more expensive).
-type ColorOpaqueVertexType struct {
-	MatTypeBase
-}
-
-func (mt *ColorOpaqueVertexType) Compile() error {
-	mt.Nm = "ColorOpaqueVertexType"
+func (mt *RenderVertexColor) Compile() error {
+	mt.Nm = "RenderVertexColor"
 	mt.Order = 1
 	pl := gpu.NewPipeline(mt.Nm)
-	pr := pl.AddProgram("MainVertFrag")
+	pr := pl.AddProgram("VtxFrag")
 	mt.Pipe = pl
 }
 
-// ColorTransVertexType is a material with transparent color parameters per vertex.
-// This uses the standard Phong color model, with color computed in the
-// fragment shader (more accurate, more expensive).
-// Verticies are automatically depth-sorted using GPU-computed depth map.
-type ColorTransVertexType struct {
-	MatTypeBase
-}
+//////////////////////////////////////////////////////////////////////////
+//    RenderTexture
 
-// Texture is a texture material -- any objects using the same texture can be rendered
-// at the same time.  This is a static texture.
-type Texture struct {
-	MatTypeBase
-	TextureFile string
-}
-
-// TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport
-// anything rendered to the viewport will be projected onto the surface of any
-// object using this texture.
-type TextureGi2D struct {
-	MatTypeBase
-	Viewport *gi.Viewport2D
+// RenderTexture renders a texture material.
+type RenderTexture struct {
+	RenderBase
 }
 
 //////////////////////////////////////////////////////////////////////
 //  Shader code elements
 
-var MatTypeVtxInPosNorm = `in vec3 VtxPos;
-in vec3 VtxNorm;
-`
-
-var MatTypeVtxInColor = `in vec3 VtxColor;
-`
-
-var MatTypeVtxInTex = `in vec2 VtxTex;
-`
-
-var MatTypeUniCamera = `layout (std140) uniform Camera
+var RenderUniCamera = `layout (std140) uniform Camera
 {
     mat4 CamViewMatrix;
     mat3 NormMatrix;
 };
 `
 
-var MatTypeUniLights = `layout (std140) uniform Lights
+var RenderUniLights = `layout (std140) uniform Lights
 {
 #if AmbLights_LEN>0
     vec3 AmbLights[AmbLights_LEN];
@@ -352,7 +328,7 @@ var MatTypeUniLights = `layout (std140) uniform Lights
 };
 `
 
-var MatTypePhong = `
+var RenderPhong = `
 /***
  phong lighting model
  Parameters:

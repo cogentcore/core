@@ -14,6 +14,10 @@ import (
 type Light interface {
 }
 
+// Lights is the container (map of names) for the lights
+type Lights map[string]Light
+
+// LightBase provides the base implementation for Light interface
 type LightBase struct {
 	On      bool
 	Color   gi.Color
