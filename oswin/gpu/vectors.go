@@ -106,10 +106,10 @@ type VectorsBuffer interface {
 	VecData(vec Vectors) mat32.ArrayF32
 
 	// Vec3Func iterates over all values of given vec3 Vectors
-	// and calls the specified callback function with a pointer to each item as a Vector3.
+	// and calls the specified callback function with a pointer to each item as a Vec3.
 	// Modifications to vec will be applied to the buffer at each iteration.
 	// The callback function returns false to break or true to continue.
-	Vec3Func(vec Vectors, fun func(vec *mat32.Vector3) bool)
+	Vec3Func(vec Vectors, fun func(vec *mat32.Vec3) bool)
 
 	// Activate binds buffer as active one, and configures it per all existing settings
 	Activate()

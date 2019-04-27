@@ -12,15 +12,15 @@ package mat32
 
 // Ray represents an oriented 3D line segment defined by an origin point and a direction vector.
 type Ray struct {
-	origin    Vector3
-	direction Vector3
+	origin    Vec3
+	direction Vec3
 }
 
 // NewRay creates and returns a pointer to a Ray object with
 // the specified origin and direction vectors.
 // If a nil pointer is supplied for any of the parameters,
 // the zero vector will be used.
-func NewRay(origin *Vector3, direction *Vector3) *Ray {
+func NewRay(origin *Vec3, direction *Vec3) *Ray {
 
 	ray := new(Ray)
 	if origin != nil {
@@ -33,7 +33,7 @@ func NewRay(origin *Vector3, direction *Vector3) *Ray {
 }
 
 // Set sets the origin and direction vectors of this Ray.
-func (ray *Ray) Set(origin, direction *Vector3) *Ray {
+func (ray *Ray) Set(origin, direction *Vec3) *Ray {
 
 	ray.origin = *origin
 	ray.direction = *direction
@@ -48,13 +48,13 @@ func (ray *Ray) Copy(other *Ray) *Ray {
 }
 
 // Origin returns a copy of this ray current origin.
-func (ray *Ray) Origin() Vector3 {
+func (ray *Ray) Origin() Vec3 {
 
 	return ray.origin
 }
 
 // Direction returns a copy of this ray current direction.
-func (ray *Ray) Direction() Vector3 {
+func (ray *Ray) Direction() Vec3 {
 
 	return ray.direction
 }
@@ -62,13 +62,13 @@ func (ray *Ray) Direction() Vector3 {
 // At calculates the point in the ray which is at the specified t distance from the origin
 // along its direction.
 // The calculated point is stored in optionalTarget, if not nil, and also returned.
-func (ray *Ray) At(t float32, optionalTarget *Vector3) *Vector3 {
+func (ray *Ray) At(t float32, optionalTarget *Vec3) *Vec3 {
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget != nil {
 		result = optionalTarget
 	} else {
-		result = &Vector3{}
+		result = &Vec3{}
 	}
 	return result.Copy(&ray.direction).MultiplyScalar(t).Add(&ray.origin)
 }
@@ -77,20 +77,20 @@ func (ray *Ray) At(t float32, optionalTarget *Vector3) *Vector3 {
 // from its origin along its direction.
 func (ray *Ray) Recast(t float32) *Ray {
 
-	var v1 Vector3
+	var v1 Vec3
 	ray.origin.Copy(ray.At(t, &v1))
 	return ray
 }
 
 // ClosestPointToPoint calculates the point in the ray which is closest to the specified point.
 // The calculated point is stored in optionalTarget, if not nil, and also returned.
-func (ray *Ray) ClosestPointToPoint(point, optionalTarget *Vector3) *Vector3 {
+func (ray *Ray) ClosestPointToPoint(point, optionalTarget *Vec3) *Vec3 {
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget != nil {
 		result = optionalTarget
 	} else {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	}
 	result.SubVectors(point, &ray.origin)
 	directionDistance := result.Dot(&ray.direction)
@@ -103,7 +103,7 @@ func (ray *Ray) ClosestPointToPoint(point, optionalTarget *Vector3) *Vector3 {
 
 // DistanceToPoint returns the smallest distance
 // from the ray direction vector to the specified point.
-func (ray *Ray) DistanceToPoint(point *Vector3) float32 {
+func (ray *Ray) DistanceToPoint(point *Vec3) float32 {
 
 	return Sqrt(ray.DistanceSqToPoint(point))
 }
@@ -111,9 +111,9 @@ func (ray *Ray) DistanceToPoint(point *Vector3) float32 {
 // DistanceSqToPoint returns the smallest squared distance
 // from the ray direction vector to the specified point.
 // If the ray was pointed directly at the point this distance would be 0.
-func (ray *Ray) DistanceSqToPoint(point *Vector3) float32 {
+func (ray *Ray) DistanceSqToPoint(point *Vec3) float32 {
 
-	var v1 Vector3
+	var v1 Vec3
 
 	directionDistance := v1.SubVectors(point, &ray.origin).Dot(&ray.direction)
 	// point behind the ray
@@ -126,15 +126,15 @@ func (ray *Ray) DistanceSqToPoint(point *Vector3) float32 {
 
 // DistanceSqToSegment returns the smallest squared distance
 // from this ray to the line segment from v0 to v1.
-// If optionalPointOnRay Vector3 is not nil,
+// If optionalPointOnRay Vec3 is not nil,
 // it is set with the coordinates of the point on the ray.
-// if optionalPointOnSegment Vector3 is not nil,
+// if optionalPointOnSegment Vec3 is not nil,
 // it is set with the coordinates of the point on the segment.
-func (ray *Ray) DistanceSqToSegment(v0, v1, optionalPointOnRay, optionalPointOnSegment *Vector3) float32 {
+func (ray *Ray) DistanceSqToSegment(v0, v1, optionalPointOnRay, optionalPointOnSegment *Vec3) float32 {
 
-	var segCenter Vector3
-	var segDir Vector3
-	var diff Vector3
+	var segCenter Vec3
+	var segDir Vec3
+	var diff Vec3
 
 	segCenter.Copy(v0).Add(v1).MultiplyScalar(0.5)
 	segDir.Copy(v1).Sub(v0).Normalize()
@@ -247,9 +247,9 @@ func (ray *Ray) IsIntersectionSphere(sphere *Sphere) bool {
 // IntersectSphere calculates the point which is the intersection of this ray with the specified sphere.
 // The calculated point is stored in optionalTarget, it not nil, and also returned.
 // If no intersection is found the calculated point is set to nil.
-func (ray *Ray) IntersectSphere(sphere *Sphere, optionalTarget *Vector3) *Vector3 {
+func (ray *Ray) IntersectSphere(sphere *Sphere, optionalTarget *Vec3) *Vec3 {
 
-	var v1 Vector3
+	var v1 Vec3
 
 	v1.SubVectors(&sphere.Center, &ray.origin)
 	tca := v1.Dot(&ray.direction)
@@ -324,7 +324,7 @@ func (ray *Ray) DistanceToPlane(plane *Plane) float32 {
 // IntersectPlane calculates the point which is the intersection of this ray with the specified plane.
 // The calculated point is stored in optionalTarget, if not nil, and also returned.
 // If no intersection is found the calculated point is set to nil.
-func (ray *Ray) IntersectPlane(plane *Plane, optionalTarget *Vector3) *Vector3 {
+func (ray *Ray) IntersectPlane(plane *Plane, optionalTarget *Vec3) *Vec3 {
 
 	t := ray.DistanceToPlane(plane)
 
@@ -339,7 +339,7 @@ func (ray *Ray) IntersectPlane(plane *Plane, optionalTarget *Vector3) *Vector3 {
 // IsIntersectionBox returns if this ray intersects the specified box.
 func (ray *Ray) IsIntersectionBox(box *Box3) bool {
 
-	var v Vector3
+	var v Vec3
 
 	if ray.IntersectBox(box, &v) != nil {
 		return true
@@ -350,7 +350,7 @@ func (ray *Ray) IsIntersectionBox(box *Box3) bool {
 // IntersectBox calculates the point which is the intersection of this ray with the specified box.
 // The calculated point is stored in optionalTarget, it not nil, and also returned.
 // If no intersection is found the calculated point is set to nil.
-func (ray *Ray) IntersectBox(box *Box3, optionalTarget *Vector3) *Vector3 {
+func (ray *Ray) IntersectBox(box *Box3, optionalTarget *Vec3) *Vec3 {
 
 	// http://www.scratchapixel.com/lessons/3d-basic-lessons/lesson-7-intersecting-simple-shapes/ray-box-intersection/
 
@@ -430,12 +430,12 @@ func (ray *Ray) IntersectBox(box *Box3, optionalTarget *Vector3) *Vector3 {
 // parameter with the intersected point coordinates.
 // If backfaceCulling is false it ignores the intersection if the face is not oriented
 // in the ray direction.
-func (ray *Ray) IntersectTriangle(a, b, c *Vector3, backfaceCulling bool, point *Vector3) bool {
+func (ray *Ray) IntersectTriangle(a, b, c *Vec3, backfaceCulling bool, point *Vec3) bool {
 
-	var diff Vector3
-	var edge1 Vector3
-	var edge2 Vector3
-	var normal Vector3
+	var diff Vec3
+	var edge1 Vec3
+	var edge2 Vec3
+	var normal Vec3
 
 	edge1.SubVectors(b, a)
 	edge2.SubVectors(c, a)
@@ -493,12 +493,12 @@ func (ray *Ray) IntersectTriangle(a, b, c *Vector3, backfaceCulling bool, point 
 	return true
 }
 
-// ApplyMatrix4 multiplies this ray origin and direction
+// ApplyMat4 multiplies this ray origin and direction
 // by the specified matrix4, basically transforming this ray coordinates.
-func (ray *Ray) ApplyMatrix4(matrix4 *Matrix4) *Ray {
+func (ray *Ray) ApplyMat4(matrix4 *Mat4) *Ray {
 
-	ray.direction.Add(&ray.origin).ApplyMatrix4(matrix4)
-	ray.origin.ApplyMatrix4(matrix4)
+	ray.direction.Add(&ray.origin).ApplyMat4(matrix4)
+	ray.origin.ApplyMat4(matrix4)
 	ray.direction.Sub(&ray.origin)
 	ray.direction.Normalize()
 	return ray

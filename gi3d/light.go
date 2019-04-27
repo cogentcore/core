@@ -19,9 +19,9 @@ type Lights map[string]Light
 
 // LightBase provides the base implementation for Light interface
 type LightBase struct {
-	On      bool
-	Color   gi.Color
-	Intense float32
+	On     bool
+	Color  gi.Color
+	Lumens float32 'desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
 }
 
 // AmbientLight provides diffuse uniform lighting -- there can only be one of these
@@ -39,7 +39,7 @@ type DirLight struct {
 // and associated decay factors
 type PointLight struct {
 	LightBase
-	Pos            mat32.Vector3 // position of light
+	Pos            mat32.Vec3 // position of light
 	LinearDecay    float32       // Distance linear decay factor
 	QuadraticDecay float32       // Distance quadratic decay factor
 }

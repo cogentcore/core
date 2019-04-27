@@ -214,7 +214,7 @@ func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image
 ////////////////////////////////////////////////
 //   Drawer wrappers
 
-func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	theApp.RunOnMain(func() {
 		w.Activate()
 		gpu.TheGPU.RenderToWindow()
@@ -226,7 +226,7 @@ func (w *windowImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rec
 	})
 }
 
-func (w *windowImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (w *windowImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	theApp.RunOnMain(func() {
 		w.Activate()
 		gpu.TheGPU.RenderToWindow()

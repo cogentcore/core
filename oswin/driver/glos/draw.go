@@ -144,7 +144,7 @@ func (app *appImpl) fillQuadsBuff() gpu.BufferMgr {
 
 // draw draws to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
+func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
 
 	tx := src.(*textureImpl)
 	sr = sr.Intersect(tx.Bounds())
@@ -208,7 +208,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 	//	a10 +   0 + a12 = qy = py
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
-	matUVP := mat32.Matrix3{
+	matUVP := mat32.Mat3{
 		qx - px, 0, 0,
 		0, sy - py, 0,
 		px, py, 1,
@@ -231,7 +231,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Matrix3, src oswin.Tex
 
 // fill fills to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op, qbuff gpu.BufferMgr) {
+func (app *appImpl) fill(mvp mat32.Mat3, src color.Color, op draw.Op, qbuff gpu.BufferMgr) {
 	gpu.Draw.Op(op)
 	gl.Disable(gl.DEPTH_TEST) // in case these were turned on elsewhere
 	gl.Disable(gl.STENCIL_TEST)
@@ -241,7 +241,7 @@ func (app *appImpl) fill(mvp mat32.Matrix3, src color.Color, op draw.Op, qbuff g
 
 	r, g, b, a := src.RGBA()
 
-	clvec4 := mat32.NewVector4(
+	clvec4 := mat32.NewVec4(
 		float32(r)/65535,
 		float32(g)/65535,
 		float32(b)/65535,
@@ -270,7 +270,7 @@ func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Co
 }
 
 // drawUniform does a fill-like uniform color fill but with an arbitrary src2dst transform
-func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
+func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
 	minX := float32(sr.Min.X)
 	minY := float32(sr.Min.Y)
 	maxX := float32(sr.Max.X)
@@ -300,7 +300,7 @@ func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Matrix3, src co
 //
 // In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
-func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) mat32.Matrix3 {
+func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) mat32.Mat3 {
 	// Convert from pixel coords to vertex shader coords.
 	invHalfWidth := +2 / float32(widthPx)
 	invHalfHeight := -2 / float32(heightPx)
@@ -315,7 +315,7 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) mat32.
 	//	- maps (0, 0) to (tlx, tly).
 	//	- maps (1, 0) to (trx, try).
 	//	- maps (0, 1) to (blx, bly).
-	return mat32.Matrix3{
+	return mat32.Mat3{
 		trx - tlx, try - tly, 0,
 		blx - tlx, bly - tly, 0,
 		tlx, tly, 1,

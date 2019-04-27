@@ -13,13 +13,13 @@ package mat32
 // Box2 represents a 2D bounding box defined by two points:
 // the point with minimum coordinates and the point with maximum coordinates.
 type Box2 struct {
-	min Vector2
-	max Vector2
+	min Vec2
+	max Vec2
 }
 
 // NewBox2 creates and returns a pointer to a new Box2 defined
 // by its minimum and maximum coordinates.
-func NewBox2(min, max *Vector2) *Box2 {
+func NewBox2(min, max *Vec2) *Box2 {
 
 	b := new(Box2)
 	b.Set(min, max)
@@ -28,7 +28,7 @@ func NewBox2(min, max *Vector2) *Box2 {
 
 // Set sets this bounding box minimum and maximum coordinates.
 // Returns pointer to this updated bounding box.
-func (b *Box2) Set(min, max *Vector2) *Box2 {
+func (b *Box2) Set(min, max *Vec2) *Box2 {
 
 	if min != nil {
 		b.min = *min
@@ -45,7 +45,7 @@ func (b *Box2) Set(min, max *Vector2) *Box2 {
 
 // SetFromPoints set this bounding box from the specified array of points.
 // Returns pointer to this updated bounding box.
-func (b *Box2) SetFromPoints(points []*Vector2) *Box2 {
+func (b *Box2) SetFromPoints(points []*Vec2) *Box2 {
 
 	b.MakeEmpty()
 	for i := 0; i < len(points); i++ {
@@ -57,9 +57,9 @@ func (b *Box2) SetFromPoints(points []*Vector2) *Box2 {
 // SetFromCenterAndSize set this bounding box from a center point and size.
 // Size is a vector from the minimum point to the maximum point.
 // Returns pointer to this updated bounding box.
-func (b *Box2) SetFromCenterAndSize(center, size *Vector2) *Box2 {
+func (b *Box2) SetFromCenterAndSize(center, size *Vec2) *Box2 {
 
-	var v1 Vector2
+	var v1 Vec2
 	halfSize := v1.Copy(size).MultiplyScalar(0.5)
 	b.min.Copy(center).Sub(halfSize)
 	b.max.Copy(center).Add(halfSize)
@@ -94,11 +94,11 @@ func (b *Box2) Empty() bool {
 
 // Center calculates the center point of this bounding box and
 // stores its pointer to optionalTarget, if not nil, and also returns it.
-func (b *Box2) Center(optionalTarget *Vector2) *Vector2 {
+func (b *Box2) Center(optionalTarget *Vec2) *Vec2 {
 
-	var result *Vector2
+	var result *Vec2
 	if optionalTarget == nil {
-		result = NewVector2(0, 0)
+		result = NewVec2(0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -109,11 +109,11 @@ func (b *Box2) Center(optionalTarget *Vector2) *Vector2 {
 // its minimum point to its maximum point.
 // Store pointer to the calculated size into optionalTarget, if not nil,
 // and also returns it.
-func (b *Box2) Size(optionalTarget *Vector2) *Vector2 {
+func (b *Box2) Size(optionalTarget *Vec2) *Vec2 {
 
-	var result *Vector2
+	var result *Vec2
 	if optionalTarget == nil {
-		result = NewVector2(0, 0)
+		result = NewVec2(0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -122,7 +122,7 @@ func (b *Box2) Size(optionalTarget *Vector2) *Vector2 {
 
 // ExpandByPoint may expand this bounding box to include the specified point.
 // Returns pointer to this updated bounding box.
-func (b *Box2) ExpandByPoint(point *Vector2) *Box2 {
+func (b *Box2) ExpandByPoint(point *Vec2) *Box2 {
 
 	b.min.Min(point)
 	b.max.Max(point)
@@ -131,7 +131,7 @@ func (b *Box2) ExpandByPoint(point *Vector2) *Box2 {
 
 // ExpandByVector expands this bounding box by the specified vector.
 // Returns pointer to this updated bounding box.
-func (b *Box2) ExpandByVector(vector *Vector2) *Box2 {
+func (b *Box2) ExpandByVector(vector *Vec2) *Box2 {
 
 	b.min.Sub(vector)
 	b.max.Add(vector)
@@ -148,7 +148,7 @@ func (b *Box2) ExpandByScalar(scalar float32) *Box2 {
 }
 
 // ContainsPoint returns if this bounding box contains the specified point.
-func (b *Box2) ContainsPoint(point *Vector2) bool {
+func (b *Box2) ContainsPoint(point *Vec2) bool {
 
 	if point.X < b.min.X || point.X > b.max.X ||
 		point.Y < b.min.Y || point.Y > b.max.Y {
@@ -181,11 +181,11 @@ func (b *Box2) IsIntersectionBox(other *Box2) bool {
 
 // ClampPoint calculates a new point which is the specified point clamped inside this box.
 // Stores the pointer to this new point into optionaTarget, if not nil, and also returns it.
-func (b *Box2) ClampPoint(point *Vector2, optionalTarget *Vector2) *Vector2 {
+func (b *Box2) ClampPoint(point *Vec2, optionalTarget *Vec2) *Vec2 {
 
-	var result *Vector2
+	var result *Vec2
 	if optionalTarget == nil {
-		result = NewVector2(0, 0)
+		result = NewVec2(0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -193,9 +193,9 @@ func (b *Box2) ClampPoint(point *Vector2, optionalTarget *Vector2) *Vector2 {
 }
 
 // DistanceToPoint returns the distance from this box to the specified point.
-func (b *Box2) DistanceToPoint(point *Vector2) float32 {
+func (b *Box2) DistanceToPoint(point *Vec2) float32 {
 
-	v1 := NewVector2(0, 0)
+	v1 := NewVec2(0, 0)
 	clampedPoint := v1.Copy(point).Clamp(&b.min, &b.max)
 	return clampedPoint.Sub(point).Length()
 }
@@ -220,7 +220,7 @@ func (b *Box2) Union(other *Box2) *Box2 {
 
 // Translate translates the position of this box by offset.
 // Returns pointer to this updated box.
-func (b *Box2) Translate(offset *Vector2) *Box2 {
+func (b *Box2) Translate(offset *Vec2) *Box2 {
 
 	b.min.Add(offset)
 	b.max.Add(offset)

@@ -103,6 +103,7 @@ func (app *appImpl) RunOnMain(f func()) {
 		done := make(chan bool)
 		app.mainQueue <- funcRun{f: f, done: done}
 		<-done
+		glfw.PostEmptyEvent()
 	}
 }
 
@@ -111,6 +112,7 @@ func (app *appImpl) GoRunOnMain(f func()) {
 	go func() {
 		glfw.PostEmptyEvent()
 		app.mainQueue <- funcRun{f: f, done: nil}
+		glfw.PostEmptyEvent()
 	}()
 }
 

@@ -300,7 +300,7 @@ func (tx *textureImpl) DeleteFramebuffer() {
 ////////////////////////////////////////////////
 //   Drawer wrappers
 
-func (tx *textureImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (tx *textureImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
 	if tx.drawQuads == nil {
@@ -310,7 +310,7 @@ func (tx *textureImpl) Draw(src2dst mat32.Matrix3, src oswin.Texture, sr image.R
 	tx.DeActivateFramebuffer()
 }
 
-func (tx *textureImpl) DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
+func (tx *textureImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
 	if tx.fillQuads == nil {

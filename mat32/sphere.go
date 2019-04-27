@@ -12,13 +12,13 @@ package mat32
 
 // Sphere represents a 3D sphere defined by its center point and a radius
 type Sphere struct {
-	Center Vector3 // center of the sphere
+	Center Vec3    // center of the sphere
 	Radius float32 // radius of the sphere
 }
 
 // NewSphere creates and returns a pointer to a new sphere with
 // the specified center and radius.
-func NewSphere(center *Vector3, radius float32) *Sphere {
+func NewSphere(center *Vec3, radius float32) *Sphere {
 
 	s := new(Sphere)
 	s.Center = *center
@@ -28,7 +28,7 @@ func NewSphere(center *Vector3, radius float32) *Sphere {
 
 // Set sets the center and radius of this sphere.
 // Returns pointer to this update sphere.
-func (s *Sphere) Set(center *Vector3, radius float32) *Sphere {
+func (s *Sphere) Set(center *Vec3, radius float32) *Sphere {
 
 	s.Center = *center
 	s.Radius = radius
@@ -37,7 +37,7 @@ func (s *Sphere) Set(center *Vector3, radius float32) *Sphere {
 
 // SetFromPoints sets this sphere from the specified points array and optional center.
 // Returns pointer to this update sphere.
-func (s *Sphere) SetFromPoints(points []Vector3, optionalCenter *Vector3) *Sphere {
+func (s *Sphere) SetFromPoints(points []Vec3, optionalCenter *Vec3) *Sphere {
 
 	box := NewBox3(nil, nil)
 
@@ -72,7 +72,7 @@ func (s *Sphere) Empty(sphere *Sphere) bool {
 }
 
 // ContainsPoint returns if this sphere contains the specified point.
-func (s *Sphere) ContainsPoint(point *Vector3) bool {
+func (s *Sphere) ContainsPoint(point *Vec3) bool {
 
 	if point.DistanceToSquared(&s.Center) <= (s.Radius * s.Radius) {
 		return true
@@ -81,7 +81,7 @@ func (s *Sphere) ContainsPoint(point *Vector3) bool {
 }
 
 // DistanceToPoint returns the distance from the sphere surface to the specified point.
-func (s *Sphere) DistanceToPoint(point *Vector3) float32 {
+func (s *Sphere) DistanceToPoint(point *Vec3) float32 {
 
 	return point.DistanceTo(&s.Center) - s.Radius
 }
@@ -101,15 +101,15 @@ func (s *Sphere) IntersectSphere(other *Sphere) bool {
 // Otherwise the clamped point is the the point in the sphere surface in the
 // nearest of the specified point.
 // The clamped point is stored in optionalTarget, if not nil, and returned.
-func (s *Sphere) ClampPoint(point *Vector3, optionalTarget *Vector3) *Vector3 {
+func (s *Sphere) ClampPoint(point *Vec3, optionalTarget *Vec3) *Vec3 {
 
 	deltaLengthSq := s.Center.DistanceToSquared(point)
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget != nil {
 		result = optionalTarget
 	} else {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	}
 	result.Copy(point)
 
@@ -136,18 +136,18 @@ func (s *Sphere) GetBoundingBox(optionalTarget *Box3) *Box3 {
 	return box
 }
 
-// ApplyMatrix4 applies the specified matrix transform to this sphere.
+// ApplyMat4 applies the specified matrix transform to this sphere.
 // Returns pointer to this updated sphere.
-func (s *Sphere) ApplyMatrix4(matrix *Matrix4) *Sphere {
+func (s *Sphere) ApplyMat4(matrix *Mat4) *Sphere {
 
-	s.Center.ApplyMatrix4(matrix)
+	s.Center.ApplyMat4(matrix)
 	s.Radius = s.Radius * matrix.GetMaxScaleOnAxis()
 	return s
 }
 
 // Translate translates this sphere by the specified offset.
 // Returns pointer to this updated sphere.
-func (s *Sphere) Translate(offset *Vector3) *Sphere {
+func (s *Sphere) Translate(offset *Vec3) *Sphere {
 
 	s.Center.Add(offset)
 	return s

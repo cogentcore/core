@@ -12,13 +12,13 @@ package mat32
 
 // Triangle represents a triangle made of three vertices.
 type Triangle struct {
-	a Vector3
-	b Vector3
-	c Vector3
+	a Vec3
+	b Vec3
+	c Vec3
 }
 
 // NewTriangle returns a pointer to a new Triangle object.
-func NewTriangle(a, b, c *Vector3) *Triangle {
+func NewTriangle(a, b, c *Vec3) *Triangle {
 
 	t := new(Triangle)
 	if a != nil {
@@ -34,14 +34,14 @@ func NewTriangle(a, b, c *Vector3) *Triangle {
 }
 
 // Normal returns the triangle's normal.
-func Normal(a, b, c, optionalTarget *Vector3) *Vector3 {
+func Normal(a, b, c, optionalTarget *Vec3) *Vec3 {
 
-	var v0 Vector3
-	var result *Vector3
+	var v0 Vec3
+	var result *Vec3
 	if optionalTarget != nil {
 		result = optionalTarget
 	} else {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	}
 
 	result.SubVectors(c, b)
@@ -56,11 +56,11 @@ func Normal(a, b, c, optionalTarget *Vector3) *Vector3 {
 }
 
 // BarycoordFromPoint returns the barycentric coordinates for the specified point.
-func BarycoordFromPoint(point, a, b, c, optionalTarget *Vector3) *Vector3 {
+func BarycoordFromPoint(point, a, b, c, optionalTarget *Vec3) *Vec3 {
 
-	var v0 Vector3
-	var v1 Vector3
-	var v2 Vector3
+	var v0 Vec3
+	var v1 Vec3
+	var v2 Vec3
 
 	v0.SubVectors(c, a)
 	v1.SubVectors(b, a)
@@ -74,11 +74,11 @@ func BarycoordFromPoint(point, a, b, c, optionalTarget *Vector3) *Vector3 {
 
 	denom := dot00*dot11 - dot01*dot01
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget != nil {
 		result = optionalTarget
 	} else {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	}
 
 	// colinear or singular triangle
@@ -98,16 +98,16 @@ func BarycoordFromPoint(point, a, b, c, optionalTarget *Vector3) *Vector3 {
 }
 
 // ContainsPoint returns whether a triangle contains a point.
-func ContainsPoint(point, a, b, c *Vector3) bool {
+func ContainsPoint(point, a, b, c *Vec3) bool {
 
-	var v1 Vector3
+	var v1 Vec3
 	result := BarycoordFromPoint(point, a, b, c, &v1)
 
 	return (result.X >= 0) && (result.Y >= 0) && ((result.X + result.Y) <= 1)
 }
 
 // Set sets the triangle's three vertices.
-func (t *Triangle) Set(a, b, c *Vector3) *Triangle {
+func (t *Triangle) Set(a, b, c *Vec3) *Triangle {
 
 	t.a = *a
 	t.b = *b
@@ -116,7 +116,7 @@ func (t *Triangle) Set(a, b, c *Vector3) *Triangle {
 }
 
 // SetFromPointsAndIndices sets the triangle's vertices based on the specified points and indices.
-func (t *Triangle) SetFromPointsAndIndices(points []*Vector3, i0, i1, i2 int) *Triangle {
+func (t *Triangle) SetFromPointsAndIndices(points []*Vec3, i0, i1, i2 int) *Triangle {
 
 	t.a = *points[i0]
 	t.b = *points[i1]
@@ -134,8 +134,8 @@ func (t *Triangle) Copy(triangle *Triangle) *Triangle {
 // Area returns the triangle's area.
 func (t *Triangle) Area() float32 {
 
-	var v0 Vector3
-	var v1 Vector3
+	var v0 Vec3
+	var v1 Vec3
 
 	v0.SubVectors(&t.c, &t.b)
 	v1.SubVectors(&t.a, &t.b)
@@ -143,19 +143,19 @@ func (t *Triangle) Area() float32 {
 }
 
 // Midpoint returns the triangle's midpoint.
-func (t *Triangle) Midpoint(optionalTarget *Vector3) *Vector3 {
+func (t *Triangle) Midpoint(optionalTarget *Vec3) *Vec3 {
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget != nil {
 		result = optionalTarget
 	} else {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	}
 	return result.AddVectors(&t.a, &t.b).Add(&t.c).MultiplyScalar(1 / 3)
 }
 
 // Normal returns the triangle's normal.
-func (t *Triangle) Normal(optionalTarget *Vector3) *Vector3 {
+func (t *Triangle) Normal(optionalTarget *Vec3) *Vec3 {
 
 	return Normal(&t.a, &t.b, &t.c, optionalTarget)
 }
@@ -173,13 +173,13 @@ func (t *Triangle) Plane(optionalTarget *Plane) *Plane {
 }
 
 // BarycoordFromPoint returns the barycentric coordinates for the specified point.
-func (t *Triangle) BarycoordFromPoint(point, optionalTarget *Vector3) *Vector3 {
+func (t *Triangle) BarycoordFromPoint(point, optionalTarget *Vec3) *Vec3 {
 
 	return BarycoordFromPoint(point, &t.a, &t.b, &t.c, optionalTarget)
 }
 
 // ContainsPoint returns whether the triangle contains a point.
-func (t *Triangle) ContainsPoint(point *Vector3) bool {
+func (t *Triangle) ContainsPoint(point *Vec3) bool {
 
 	return ContainsPoint(point, &t.a, &t.b, &t.c)
 }

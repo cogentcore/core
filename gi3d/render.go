@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"log"
 
+	"github.com/goki/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
@@ -27,14 +28,19 @@ type Renderers struct {
 }
 
 // SetLights sets the lights and recompiles the programs accordingly
+// Must be called with proper context activated
 func (rn *Renderers) SetLights(lights Lights) {
-	for _, rd := range rn.Renders {
-		rd.SetLights(lights)
-	}
+	oswin.TheApp.RunOnMain(func() {
+		rn.SetLightsUnis(lights)
+		for _, rd := range rn.Renders {
+			rd.Compile()
+		}
+	})
 }
 
 // SetCamera sets the overall camera view matrix
-func (rn *Renderers) SetCamera(camview mat32.Matrix4) {
+// Must be called with proper context activated
+func (rn *Renderers) SetCamera(camview mat32.Mat4) {
 	for _, rd := range rn.Renders {
 		rd.SetCamera(camview)
 	}
@@ -105,12 +111,43 @@ func (rn *Renderers) AddNewRender(mt Render, errs *[]error) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////
-//   Lights
+// todo: delete mat32.color, mat32.color4
 
-// todo: some methods to set / add etc lights
+// ColorToVec4f converts given gi.Color to mat32.Vec4 float32's
+func ColorToVec4f(clr gi.Color) mat32.Vec4 {
+	v := mat32.Vec4{}
+	v.X, v.Y, v.Z, v.W = clr.ToFloat32()
+	return v
+}
 
-// todo: some methods to set / add etc camera
+// ColorToVec3f converts given gi.Color to mat32.Vec3 float32's
+func ColorToVec3f(clr gi.Color) mat32.Vec3 {
+	v := mat32.Vec3{}
+	v.X, v.Y, v.Z, _ = clr.ToFloat32()
+	return v
+}
+
+// SetLightsUnis sets the lights and recompiles the programs accordingly
+// Must be called with proper context activated
+func (rn *Renderers) SetLightsUnis(lights Lights) {
+	lu, ok := rn.Unis["Lights"]
+	if !ok {
+		return
+	}
+	var ambs []mat32.Vec3
+	var dirs []mat32.Vec3
+	var points []mat32.Vec3
+	var spots []mat32.Vec3
+	for _, lt := range lights {
+		switch l := lt.(type) {
+		case *AmbientLight:
+			ambs = append(ambs, ColorToVec3f(l.Color).MultiplyScalar(l.Lumens))
+		case *DirLight:
+			dirs = append(dirs, ColorToVec3f(l.Color).MultiplyScalar(l.Lumens))
+		}
+	}
+
+}
 
 //////////////////////////////////////////////////////////////////////
 //   Render
@@ -137,7 +174,7 @@ type Render interface {
 	SetLights(lights Lights)
 
 	// SetCamera sets the overall camera view matrix
-	SetCamera(camview mat32.Matrix4)
+	SetCamera(camview mat32.Mat4)
 }
 
 // Base render type

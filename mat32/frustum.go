@@ -16,7 +16,7 @@ type Frustum struct {
 }
 
 // NewFrustumFromMatrix creates and returns a Frustum based on the provided matrix
-func NewFrustumFromMatrix(m *Matrix4) *Frustum {
+func NewFrustumFromMatrix(m *Mat4) *Frustum {
 	f := new(Frustum)
 	f.planes = make([]Plane, 6)
 	f.SetFromMatrix(m)
@@ -65,8 +65,8 @@ func (f *Frustum) Copy(frustum *Frustum) *Frustum {
 	return f
 }
 
-// SetFromMatrix sets the frustum's planes based on the specified Matrix4
-func (f *Frustum) SetFromMatrix(m *Matrix4) *Frustum {
+// SetFromMatrix sets the frustum's planes based on the specified Mat4
+func (f *Frustum) SetFromMatrix(m *Mat4) *Frustum {
 
 	planes := f.planes
 	me0 := m[0]
@@ -124,8 +124,8 @@ func (f *Frustum) IntersectsSphere(sphere *Sphere) bool {
 // IntersectsBox determines whether the specified box is intersecting the frustum
 func (f *Frustum) IntersectsBox(box *Box3) bool {
 
-	var p1 Vector3
-	var p2 Vector3
+	var p1 Vec3
+	var p2 Vec3
 
 	for i := 0; i < 6; i++ {
 		plane := &f.planes[i]
@@ -174,7 +174,7 @@ func (f *Frustum) IntersectsBox(box *Box3) bool {
 }
 
 // ContainsPoint determines whether the frustum contains the specified point
-func (f *Frustum) ContainsPoint(point *Vector3) bool {
+func (f *Frustum) ContainsPoint(point *Vec3) bool {
 
 	for i := 0; i < 6; i++ {
 		if f.planes[i].DistanceToPoint(point) < 0 {

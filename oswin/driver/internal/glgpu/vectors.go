@@ -288,10 +288,10 @@ func (vb *VectorsBuffer) VecData(vec gpu.Vectors) mat32.ArrayF32 {
 }
 
 // Vec3Func iterates over all values of given vec3 vector
-// and calls the specified callback function with a pointer to each item as a Vector3.
+// and calls the specified callback function with a pointer to each item as a Vec3.
 // Modifications to vec will be applied to the buffer at each iteration.
 // The callback function returns false to break or true to continue.
-func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vector3) bool) {
+func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vec3) bool) {
 	i, v := vb.vec(vec)
 	if i < 0 {
 		return
@@ -302,12 +302,12 @@ func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vector3) 
 	if i < vb.nInter {
 		str = vb.stride
 	}
-	var v3 mat32.Vector3
+	var v3 mat32.Vec3
 	for i := 0; i < vb.ln; i++ {
 		bidx := off + i*str
-		vb.buff.GetVector3(bidx, &v3)
+		vb.buff.GetVec3(bidx, &v3)
 		cont := fun(&v3)
-		vb.buff.SetVector3(bidx, &v3)
+		vb.buff.SetVec3(bidx, &v3)
 		if !cont {
 			break
 		}

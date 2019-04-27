@@ -12,14 +12,13 @@ package mat32
 
 import "errors"
 
-// Matrix4 is 4x4 matrix organized internally as column matrix.
-type Matrix4 [16]float32
+// Mat4 is 4x4 matrix organized internally as column matrix.
+type Mat4 [16]float32
 
-// NewMatrix4 creates and returns a pointer to a new Matrix4
+// NewMat4 creates and returns a pointer to a new Mat4
 // initialized as the identity matrix.
-func NewMatrix4() *Matrix4 {
-
-	var mat Matrix4
+func NewMat4() *Mat4 {
+	var mat Mat4
 	mat.Identity()
 	return &mat
 }
@@ -27,8 +26,7 @@ func NewMatrix4() *Matrix4 {
 // Set sets all the elements of this matrix row by row starting at row1, column1,
 // row1, column2, row1, column3 and so forth.
 // Returns pointer to this updated Matrix.
-func (m *Matrix4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 float32) *Matrix4 {
-
+func (m *Mat4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44 float32) *Mat4 {
 	m[0] = n11
 	m[4] = n12
 	m[8] = n13
@@ -50,8 +48,7 @@ func (m *Matrix4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34
 
 // Identity sets this matrix as the identity matrix.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) Identity() *Matrix4 {
-
+func (m *Mat4) Identity() *Mat4 {
 	m.Set(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -63,8 +60,7 @@ func (m *Matrix4) Identity() *Matrix4 {
 
 // Zero sets this matrix as the zero matrix.
 // Returns the pointer to this updated matrix.
-func (m *Matrix4) Zero() *Matrix4 {
-
+func (m *Mat4) Zero() *Mat4 {
 	m.Set(
 		0, 0, 0, 0,
 		0, 0, 0, 0,
@@ -76,16 +72,14 @@ func (m *Matrix4) Zero() *Matrix4 {
 
 // Copy copies src matrix into this one.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) Copy(src *Matrix4) *Matrix4 {
-
+func (m *Mat4) Copy(src *Mat4) *Mat4 {
 	*m = *src
 	return m
 }
 
 // CopyPosition copies the position elements of the src matrix into this one.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) CopyPosition(src *Matrix4) *Matrix4 {
-
+func (m *Mat4) CopyPosition(src *Mat4) *Mat4 {
 	m[12] = src[12]
 	m[13] = src[13]
 	m[14] = src[14]
@@ -94,8 +88,7 @@ func (m *Matrix4) CopyPosition(src *Matrix4) *Matrix4 {
 
 // ExtractBasis updates the specified vectors with the basis vectors of this matrix.
 // Returns pointer to this unchanged matrix.
-func (m *Matrix4) ExtractBasis(xAxis, yAxis, zAxis *Vector3) *Matrix4 {
-
+func (m *Mat4) ExtractBasis(xAxis, yAxis, zAxis *Vec3) *Mat4 {
 	xAxis.Set(m[0], m[1], m[2])
 	yAxis.Set(m[4], m[5], m[6])
 	zAxis.Set(m[8], m[9], m[10])
@@ -104,8 +97,7 @@ func (m *Matrix4) ExtractBasis(xAxis, yAxis, zAxis *Vector3) *Matrix4 {
 
 // MakeBasis sets this matrix basis vectors from the specified vectors.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeBasis(xAxis, yAxis, zAxis *Vector3) *Matrix4 {
-
+func (m *Mat4) MakeBasis(xAxis, yAxis, zAxis *Vec3) *Mat4 {
 	m.Set(
 		xAxis.X, yAxis.X, zAxis.X, 0,
 		xAxis.Y, yAxis.Y, zAxis.Y, 0,
@@ -117,9 +109,8 @@ func (m *Matrix4) MakeBasis(xAxis, yAxis, zAxis *Vector3) *Matrix4 {
 
 // ExtractRotation set this matrix as rotation matrix from the src transformation matrix.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) ExtractRotation(src *Matrix4) *Matrix4 {
-
-	var v1 Vector3
+func (m *Mat4) ExtractRotation(src *Mat4) *Mat4 {
+	var v1 Vec3
 
 	scaleX := 1 / v1.Set(src[0], src[1], src[2]).Length()
 	scaleY := 1 / v1.Set(src[4], src[5], src[6]).Length()
@@ -141,8 +132,7 @@ func (m *Matrix4) ExtractRotation(src *Matrix4) *Matrix4 {
 
 // MakeRotationFromEuler set this a matrix as a rotation matrix from the specified euler angles.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeRotationFromEuler(euler *Vector3) *Matrix4 {
-
+func (m *Mat4) MakeRotationFromEuler(euler *Vec3) *Mat4 {
 	x := euler.X
 	y := euler.Y
 	z := euler.Z
@@ -179,10 +169,9 @@ func (m *Matrix4) MakeRotationFromEuler(euler *Vector3) *Matrix4 {
 	return m
 }
 
-// MakeRotationFromQuaternion sets this matrix as a rotation matrix from the specified quaternion.
+// MakeRotationFromQuat sets this matrix as a rotation matrix from the specified quaternion.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeRotationFromQuaternion(q *Quaternion) *Matrix4 {
-
+func (m *Mat4) MakeRotationFromQuat(q *Quat) *Mat4 {
 	x := q.X
 	y := q.Y
 	z := q.Z
@@ -228,9 +217,8 @@ func (m *Matrix4) MakeRotationFromQuaternion(q *Quaternion) *Matrix4 {
 // LookAt sets this matrix as view transform matrix with origin at eye,
 // looking at target and using the up vector.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) LookAt(eye, target, up *Vector3) *Matrix4 {
-
-	var x, y, z Vector3
+func (m *Mat4) LookAt(eye, target, up *Vec3) *Mat4 {
+	var x, y, z Vec3
 
 	z.SubVectors(eye, target)
 	if z.LengthSq() == 0 {
@@ -271,15 +259,13 @@ func (m *Matrix4) LookAt(eye, target, up *Vector3) *Matrix4 {
 
 // Multiply multiply this matrix by the other matrix
 // Returns pointer to this updated matrix.
-func (m *Matrix4) Multiply(other *Matrix4) *Matrix4 {
-
+func (m *Mat4) Multiply(other *Mat4) *Mat4 {
 	return m.MultiplyMatrices(m, other)
 }
 
 // MultiplyMatrices multiply matrix a by b (i.e. b*a) storing the result in this matrix.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MultiplyMatrices(a, b *Matrix4) *Matrix4 {
-
+func (m *Mat4) MultiplyMatrices(a, b *Mat4) *Mat4 {
 	a11 := a[0]
 	a12 := a[4]
 	a13 := a[8]
@@ -339,8 +325,7 @@ func (m *Matrix4) MultiplyMatrices(a, b *Matrix4) *Matrix4 {
 
 // MultiplyScalar multiplies each element of this matrix by the specified scalar.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MultiplyScalar(s float32) *Matrix4 {
-
+func (m *Mat4) MultiplyScalar(s float32) *Mat4 {
 	m[0] *= s
 	m[4] *= s
 	m[8] *= s
@@ -360,19 +345,18 @@ func (m *Matrix4) MultiplyScalar(s float32) *Matrix4 {
 	return m
 }
 
-// ApplyToVector3Array multiplies length vectors in the array starting at offset by this matrix.
+// ApplyToVec3Array multiplies length vectors in the array starting at offset by this matrix.
 // Returns pointer to the updated array.
 // This matrix is unchanged.
-func (m *Matrix4) ApplyToVector3Array(array []float32, offset int, length int) []float32 {
-
-	var v1 Vector3
+func (m *Mat4) ApplyToVec3Array(array []float32, offset int, length int) []float32 {
+	var v1 Vec3
 	j := offset
 	for i := 0; i < length; i += 3 {
 		v1.X = array[j]
 		v1.Y = array[j+1]
 		v1.Z = array[j+2]
 
-		v1.ApplyMatrix4(m)
+		v1.ApplyMat4(m)
 
 		array[j] = v1.X
 		array[j+1] = v1.Y
@@ -383,8 +367,7 @@ func (m *Matrix4) ApplyToVector3Array(array []float32, offset int, length int) [
 }
 
 // Determinant calculates and returns the determinat of this matrix.
-func (m *Matrix4) Determinant() float32 {
-
+func (m *Mat4) Determinant() float32 {
 	n11 := m[0]
 	n12 := m[4]
 	n13 := m[8]
@@ -411,7 +394,7 @@ func (m *Matrix4) Determinant() float32 {
 
 // Transpose transposes this matrix.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) Transpose() *Matrix4 {
+func (m *Mat4) Transpose() *Mat4 {
 	m[1], m[4] = m[4], m[1]
 	m[2], m[8] = m[8], m[2]
 	m[6], m[9] = m[9], m[6]
@@ -423,7 +406,7 @@ func (m *Matrix4) Transpose() *Matrix4 {
 
 // SetPosition sets this transformation matrix position fields from the specified vector v.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) SetPosition(v *Vector3) *Matrix4 {
+func (m *Mat4) SetPosition(v *Vec3) *Mat4 {
 	m[12] = v.X
 	m[13] = v.Y
 	m[14] = v.Z
@@ -433,7 +416,7 @@ func (m *Matrix4) SetPosition(v *Vector3) *Matrix4 {
 // GetInverse sets this matrix to the inverse of the src matrix.
 // If the src matrix cannot be inverted returns error and
 // sets this matrix to the identity matrix.
-func (m *Matrix4) GetInverse(src *Matrix4) error {
+func (m *Mat4) GetInverse(src *Mat4) error {
 	n11 := src[0]
 	n12 := src[4]
 	n13 := src[8]
@@ -492,7 +475,7 @@ func (m *Matrix4) GetInverse(src *Matrix4) error {
 // the second column by the vector Y component and the third column by
 // the vector Z component. The matrix fourth column is unchanged.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) Scale(v *Vector3) *Matrix4 {
+func (m *Mat4) Scale(v *Vec3) *Mat4 {
 	m[0] *= v.X
 	m[4] *= v.Y
 	m[8] *= v.Z
@@ -509,7 +492,7 @@ func (m *Matrix4) Scale(v *Vector3) *Matrix4 {
 }
 
 // GetMaxScaleOnAxis returns the maximum scale value of the 3 axes.
-func (m *Matrix4) GetMaxScaleOnAxis() float32 {
+func (m *Mat4) GetMaxScaleOnAxis() float32 {
 	scaleXSq := m[0]*m[0] + m[1]*m[1] + m[2]*m[2]
 	scaleYSq := m[4]*m[4] + m[5]*m[5] + m[6]*m[6]
 	scaleZSq := m[8]*m[8] + m[9]*m[9] + m[10]*m[10]
@@ -518,8 +501,7 @@ func (m *Matrix4) GetMaxScaleOnAxis() float32 {
 
 // MakeTranslation sets this matrix to a translation matrix from the specified x, y and z values.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeTranslation(x, y, z float32) *Matrix4 {
-
+func (m *Mat4) MakeTranslation(x, y, z float32) *Mat4 {
 	m.Set(
 		1, 0, 0, x,
 		0, 1, 0, y,
@@ -531,7 +513,7 @@ func (m *Matrix4) MakeTranslation(x, y, z float32) *Matrix4 {
 
 // MakeRotationX sets this matrix to a rotation matrix of angle theta around the X axis.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeRotationX(theta float32) *Matrix4 {
+func (m *Mat4) MakeRotationX(theta float32) *Mat4 {
 	c := Cos(theta)
 	s := Sin(theta)
 
@@ -546,7 +528,7 @@ func (m *Matrix4) MakeRotationX(theta float32) *Matrix4 {
 
 // MakeRotationY sets this matrix to a rotation matrix of angle theta around the Y axis.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeRotationY(theta float32) *Matrix4 {
+func (m *Mat4) MakeRotationY(theta float32) *Mat4 {
 	c := Cos(theta)
 	s := Sin(theta)
 	m.Set(
@@ -560,7 +542,7 @@ func (m *Matrix4) MakeRotationY(theta float32) *Matrix4 {
 
 // MakeRotationZ sets this matrix to a rotation matrix of angle theta around the Z axis.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeRotationZ(theta float32) *Matrix4 {
+func (m *Mat4) MakeRotationZ(theta float32) *Mat4 {
 	c := Cos(theta)
 	s := Sin(theta)
 	m.Set(
@@ -574,7 +556,7 @@ func (m *Matrix4) MakeRotationZ(theta float32) *Matrix4 {
 
 // MakeRotationAxis sets this matrix to a rotation matrix of the specified angle around the specified axis.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeRotationAxis(axis *Vector3, angle float32) *Matrix4 {
+func (m *Mat4) MakeRotationAxis(axis *Vec3, angle float32) *Mat4 {
 	c := Cos(angle)
 	s := Sin(angle)
 	t := 1 - c
@@ -594,7 +576,7 @@ func (m *Matrix4) MakeRotationAxis(axis *Vector3, angle float32) *Matrix4 {
 
 // MakeScale sets this matrix to a scale transformation matrix using the specified x, y and z values.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeScale(x, y, z float32) *Matrix4 {
+func (m *Mat4) MakeScale(x, y, z float32) *Mat4 {
 	m.Set(
 		x, 0, 0, 0,
 		0, y, 0, 0,
@@ -607,8 +589,8 @@ func (m *Matrix4) MakeScale(x, y, z float32) *Matrix4 {
 // Compose sets this matrix to a transformation matrix for the specified position,
 // rotation specified by the quaternion and scale.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) Compose(position *Vector3, quaternion *Quaternion, scale *Vector3) *Matrix4 {
-	m.MakeRotationFromQuaternion(quaternion)
+func (m *Mat4) Compose(position *Vec3, quaternion *Quat, scale *Vec3) *Mat4 {
+	m.MakeRotationFromQuat(quaternion)
 	m.Scale(scale)
 	m.SetPosition(position)
 	return m
@@ -616,9 +598,8 @@ func (m *Matrix4) Compose(position *Vector3, quaternion *Quaternion, scale *Vect
 
 // Decompose updates the position vector, quaternion and scale from this transformation matrix.
 // Returns pointer to this unchanged matrix.
-func (m *Matrix4) Decompose(position *Vector3, quaternion *Quaternion, scale *Vector3) *Matrix4 {
-
-	var vector Vector3
+func (m *Mat4) Decompose(position *Vec3, quaternion *Quat, scale *Vec3) *Mat4 {
+	var vector Vec3
 	var matrix = *m
 
 	sx := vector.Set(m[0], m[1], m[2]).Length()
@@ -662,8 +643,7 @@ func (m *Matrix4) Decompose(position *Vector3, quaternion *Quaternion, scale *Ve
 
 // MakeFrustum sets this matrix to a projection frustum matrix bounded by the specified planes.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeFrustum(left, right, bottom, top, near, far float32) *Matrix4 {
-
+func (m *Mat4) MakeFrustum(left, right, bottom, top, near, far float32) *Mat4 {
 	m[0] = 2 * near / (right - left)
 	m[1] = 0
 	m[2] = 0
@@ -687,8 +667,7 @@ func (m *Matrix4) MakeFrustum(left, right, bottom, top, near, far float32) *Matr
 // with the specified field of view in degrees,
 // aspect ratio (width/height) and near and far planes.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakePerspective(fov, aspect, near, far float32) *Matrix4 {
-
+func (m *Mat4) MakePerspective(fov, aspect, near, far float32) *Mat4 {
 	ymax := near * Tan(DegToRad(fov*0.5))
 	ymin := -ymax
 	xmin := ymin * aspect
@@ -696,27 +675,20 @@ func (m *Matrix4) MakePerspective(fov, aspect, near, far float32) *Matrix4 {
 	return m.MakeFrustum(xmin, xmax, ymin, ymax, near, far)
 }
 
-// MakeOrthographic sets this matrix to an orthographic projection matrix
-// bounded by the specified planes.
+// MakeOrthographic sets this matrix to an orthographic projection matrix.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) MakeOrthographic(left, right, top, bottom, near, far float32) *Matrix4 {
-
-	w := right - left
-	h := top - bottom
+func (m *Mat4) MakeOrthographic(width, height, near, far float32) *Mat4 {
 	p := far - near
-
-	x := (right + left) / w
-	y := (top + bottom) / h
 	z := (far + near) / p
 
-	m[0] = 2 / w
+	m[0] = 2 / width
 	m[4] = 0
 	m[8] = 0
-	m[12] = -x
+	m[12] = 0
 	m[1] = 0
-	m[5] = 2 / h
+	m[5] = 2 / height
 	m[9] = 0
-	m[13] = -y
+	m[13] = 0
 	m[2] = 0
 	m[6] = 0
 	m[10] = -2 / p
@@ -730,24 +702,21 @@ func (m *Matrix4) MakeOrthographic(left, right, top, bottom, near, far float32) 
 
 // FromArray set this matrix elements from the array starting at offset.
 // Returns pointer to this updated matrix.
-func (m *Matrix4) FromArray(array []float32, offset int) *Matrix4 {
-
+func (m *Mat4) FromArray(array []float32, offset int) *Mat4 {
 	copy(m[:], array[offset:offset+16])
 	return m
 }
 
 // ToArray copies this matrix elements to array starting at offset.
 // Returns pointer to the updated array.
-func (m *Matrix4) ToArray(array []float32, offset int) []float32 {
-
+func (m *Mat4) ToArray(array []float32, offset int) []float32 {
 	copy(array[offset:], m[:])
 	return array
 }
 
 // Clone creates and returns a pointer to a copy of this matrix.
-func (m *Matrix4) Clone() *Matrix4 {
-
-	var cloned Matrix4
+func (m *Mat4) Clone() *Mat4 {
+	var cloned Mat4
 	cloned = *m
 	return &cloned
 }

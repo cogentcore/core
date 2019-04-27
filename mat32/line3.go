@@ -12,13 +12,13 @@ package mat32
 
 // Line3 represents a 3D line segment defined by a start and an end point.
 type Line3 struct {
-	start Vector3
-	end   Vector3
+	start Vec3
+	end   Vec3
 }
 
 // NewLine3 creates and returns a pointer to a new Line3 with the
 // specified start and end points.
-func NewLine3(start, end *Vector3) *Line3 {
+func NewLine3(start, end *Vec3) *Line3 {
 
 	l := new(Line3)
 	l.Set(start, end)
@@ -27,7 +27,7 @@ func NewLine3(start, end *Vector3) *Line3 {
 
 // Set sets this line segment start and end points.
 // Returns pointer to this updated line segment.
-func (l *Line3) Set(start, end *Vector3) *Line3 {
+func (l *Line3) Set(start, end *Vec3) *Line3 {
 
 	if start != nil {
 		l.start = *start
@@ -48,11 +48,11 @@ func (l *Line3) Copy(other *Line3) *Line3 {
 
 // Center calculates this line segment center point.
 // Store its pointer into optionalTarget, if not nil, and also returns it.
-func (l *Line3) Center(optionalTarget *Vector3) *Vector3 {
+func (l *Line3) Center(optionalTarget *Vec3) *Vec3 {
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget == nil {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -61,11 +61,11 @@ func (l *Line3) Center(optionalTarget *Vector3) *Vector3 {
 
 // Delta calculates the vector from the start to end point of this line segment.
 // Store its pointer in optionalTarget, if not nil, and also returns it.
-func (l *Line3) Delta(optionalTarget *Vector3) *Vector3 {
+func (l *Line3) Delta(optionalTarget *Vec3) *Vec3 {
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget == nil {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -84,12 +84,12 @@ func (l *Line3) Distance() float32 {
 	return l.start.DistanceTo(&l.end)
 }
 
-// ApplyMatrix4 applies the specified matrix to this line segment start and end points.
+// ApplyMat4 applies the specified matrix to this line segment start and end points.
 // Returns pointer to this updated line segment.
-func (l *Line3) ApplyMatrix4(matrix *Matrix4) *Line3 {
+func (l *Line3) ApplyMat4(matrix *Mat4) *Line3 {
 
-	l.start.ApplyMatrix4(matrix)
-	l.end.ApplyMatrix4(matrix)
+	l.start.ApplyMat4(matrix)
+	l.end.ApplyMat4(matrix)
 	return l
 }
 

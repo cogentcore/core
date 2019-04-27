@@ -161,12 +161,12 @@ type Drawer interface {
 	// then the src-space point (sx, sy) maps to the dst-space point
 	// (m00*sx + m01*sy + m02, m10*sx + m11*sy + m12).
 	// Must be called with a valid gpu context and on proper thread for that context.
-	Draw(src2dst mat32.Matrix3, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
+	Draw(src2dst mat32.Mat3, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// DrawUniform is like Draw except that the src is a uniform color instead
 	// of a Texture.
 	// Must be called with a valid gpu context and on proper thread for that context.
-	DrawUniform(src2dst mat32.Matrix3, src color.Color, sr image.Rectangle, op draw.Op, opts *DrawOptions)
+	DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// Copy copies the sub-Texture defined by src and sr to the destination
 	// (the method receiver), such that sr.Min in src-space aligns with dp in

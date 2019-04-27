@@ -93,9 +93,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 		if un.array {
 			switch {
 			case un.typ.Mat == 3:
-				fv, ok := val.([]mat32.Matrix3)
+				fv, ok := val.([]mat32.Mat3)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Matrix3", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Mat3", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
@@ -103,9 +103,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.UniformMatrix3fv(un.handle, int32(un.ln), false, &fv[0][0])
 				}
 			case un.typ.Mat == 4:
-				fv, ok := val.([]mat32.Matrix4)
+				fv, ok := val.([]mat32.Mat4)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Matrix4", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Mat4", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
@@ -113,9 +113,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.UniformMatrix4fv(un.handle, int32(un.ln), false, &fv[0][0])
 				}
 			case un.typ.Vec == 2:
-				fv, ok := val.([]mat32.Vector2)
+				fv, ok := val.([]mat32.Vec2)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector2", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vec2", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
@@ -123,9 +123,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform2fv(un.handle, int32(un.ln), &fv[0].X)
 				}
 			case un.typ.Vec == 3:
-				fv, ok := val.([]mat32.Vector3)
+				fv, ok := val.([]mat32.Vec3)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector3", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vec3", un.name)
 				}
 				if un.ubo != nil {
 					// need separate writes b/c alignment is vec4
@@ -136,9 +136,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform3fv(un.handle, int32(un.ln), &fv[0].X)
 				}
 			case un.typ.Vec == 4:
-				fv, ok := val.([]mat32.Vector4)
+				fv, ok := val.([]mat32.Vec4)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector4", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vec4", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0].X))
@@ -159,9 +159,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 		} else {
 			switch {
 			case un.typ.Mat == 3:
-				fv, ok := val.(mat32.Matrix3)
+				fv, ok := val.(mat32.Mat3)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Matrix3", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Mat3", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
@@ -169,9 +169,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.UniformMatrix3fv(un.handle, 1, false, &fv[0])
 				}
 			case un.typ.Mat == 4:
-				fv, ok := val.(mat32.Matrix4)
+				fv, ok := val.(mat32.Mat4)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Matrix4", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Mat4", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
@@ -179,9 +179,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.UniformMatrix4fv(un.handle, 1, false, &fv[0])
 				}
 			case un.typ.Vec == 2:
-				fv, ok := val.(mat32.Vector2)
+				fv, ok := val.(mat32.Vec2)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector2", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec2", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
@@ -189,9 +189,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform2f(un.handle, fv.X, fv.Y)
 				}
 			case un.typ.Vec == 3:
-				fv, ok := val.(mat32.Vector3)
+				fv, ok := val.(mat32.Vec3)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector3", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec3", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
@@ -199,9 +199,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform3f(un.handle, fv.X, fv.Y, fv.Z)
 				}
 			case un.typ.Vec == 4:
-				fv, ok := val.(mat32.Vector4)
+				fv, ok := val.(mat32.Vec4)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector4", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec4", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
@@ -224,9 +224,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 		if un.array {
 			switch {
 			case un.typ.Vec == 2:
-				fv, ok := val.([]mat32.Vector2i)
+				fv, ok := val.([]mat32.Vec2i)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector2i", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vec2i", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
@@ -234,9 +234,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform2iv(un.handle, int32(un.ln), &fv[0].X)
 				}
 			case un.typ.Vec == 3:
-				fv, ok := val.([]mat32.Vector3i)
+				fv, ok := val.([]mat32.Vec3i)
 				if !ok || len(fv) != un.ln {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector3i", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vec3i", un.name)
 				}
 				if un.ubo != nil {
 					// need separate writes b/c alignment is vec4
@@ -247,9 +247,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform3iv(un.handle, int32(un.ln), &fv[0].X)
 				}
 			// case un.typ.Vec == 4:
-			// 	fv, ok := val.([]mat32.Vector4)
+			// 	fv, ok := val.([]mat32.Vec4)
 			// 	if !ok || len(fv) != un.ln {
-			// 		return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vector4", un.name)
+			// 		return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Vec4", un.name)
 			// 	}
 			// 	if un.ubo != nil {
 			// 		gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0].X))
@@ -270,9 +270,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 		} else {
 			switch {
 			case un.typ.Vec == 2:
-				fv, ok := val.(mat32.Vector2i)
+				fv, ok := val.(mat32.Vec2i)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector2i", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec2i", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
@@ -280,9 +280,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform2i(un.handle, fv.X, fv.Y)
 				}
 			case un.typ.Vec == 3:
-				fv, ok := val.(mat32.Vector3i)
+				fv, ok := val.(mat32.Vec3i)
 				if !ok {
-					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector3i", un.name)
+					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec3i", un.name)
 				}
 				if un.ubo != nil {
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
@@ -290,9 +290,9 @@ func (un *Uniform) SetValue(val interface{}) error {
 					gl.Uniform3i(un.handle, fv.X, fv.Y, fv.Z)
 				}
 			// case un.typ.Vec == 4:
-			// 	fv, ok := val.(mat32.Vector4)
+			// 	fv, ok := val.(mat32.Vec4)
 			// 	if !ok {
-			// 		return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vector4", un.name)
+			// 		return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec4", un.name)
 			// 	}
 			// 	if un.ubo != nil {
 			// 		gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))

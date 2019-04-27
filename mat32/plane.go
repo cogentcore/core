@@ -13,12 +13,12 @@ package mat32
 // Plane represents a plane in 3D space by its normal vector and a constant.
 // When the the normal vector is the unit vector the constant is the distance from the origin.
 type Plane struct {
-	normal   Vector3
+	normal   Vec3
 	constant float32
 }
 
 // NewPlane creates and returns a new plane from a normal vector and a constant.
-func NewPlane(normal *Vector3, constant float32) *Plane {
+func NewPlane(normal *Vec3, constant float32) *Plane {
 
 	p := new(Plane)
 	if normal != nil {
@@ -30,7 +30,7 @@ func NewPlane(normal *Vector3, constant float32) *Plane {
 
 // Set sets this plane normal vector and constant.
 // Returns pointer to this updated plane.
-func (p *Plane) Set(normal *Vector3, constant float32) *Plane {
+func (p *Plane) Set(normal *Vec3, constant float32) *Plane {
 
 	p.normal = *normal
 	p.constant = constant
@@ -48,7 +48,7 @@ func (p *Plane) SetComponents(x, y, z, w float32) *Plane {
 
 // SetFromNormalAndCoplanarPoint sets this plane from a normal vector and a point on the plane.
 // Returns pointer to this updated plane.
-func (p *Plane) SetFromNormalAndCoplanarPoint(normal *Vector3, point *Vector3) *Plane {
+func (p *Plane) SetFromNormalAndCoplanarPoint(normal *Vec3, point *Vec3) *Plane {
 
 	p.normal = *normal
 	p.constant = -point.Dot(&p.normal)
@@ -57,10 +57,10 @@ func (p *Plane) SetFromNormalAndCoplanarPoint(normal *Vector3, point *Vector3) *
 
 // SetFromCoplanarPoints sets this plane from three coplanar points.
 // Returns pointer to this updated plane.
-func (p *Plane) SetFromCoplanarPoints(a, b, c *Vector3) *Plane {
+func (p *Plane) SetFromCoplanarPoints(a, b, c *Vec3) *Plane {
 
-	var v1 Vector3
-	var v2 Vector3
+	var v1 Vec3
+	var v2 Vec3
 
 	normal := v1.SubVectors(c, b).Cross(v2.SubVectors(a, b)).Normalize()
 	// Q: should an error be thrown if normal is zero (e.g. degenerate plane)?
@@ -98,7 +98,7 @@ func (p *Plane) Negate() *Plane {
 }
 
 // DistanceToPoint returns the distance of this plane from point.
-func (p *Plane) DistanceToPoint(point *Vector3) float32 {
+func (p *Plane) DistanceToPoint(point *Vec3) float32 {
 
 	return p.normal.Dot(point) + p.constant
 }
@@ -120,12 +120,12 @@ func (p *Plane) IsIntersectionLine(line *Line3) bool {
 // IntersectLine calculates the point in the plane which intersets the specified line.
 // Sets the optionalTarget, if not nil to this point, and also returns it.
 // Returns nil if the line does not intersects the plane.
-func (p *Plane) IntersectLine(line *Line3, optionalTarget *Vector3) *Vector3 {
+func (p *Plane) IntersectLine(line *Line3, optionalTarget *Vec3) *Vec3 {
 
-	var v1 Vector3
-	var result *Vector3
+	var v1 Vec3
+	var result *Vec3
 	if optionalTarget == nil {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -150,11 +150,11 @@ func (p *Plane) IntersectLine(line *Line3, optionalTarget *Vector3) *Vector3 {
 
 // CoplanarPoint sets the optionalTarget to a point in the plane and also returns it.
 // The point set and returned is the closest point from the origin.
-func (p *Plane) CoplanarPoint(optionalTarget *Vector3) *Vector3 {
+func (p *Plane) CoplanarPoint(optionalTarget *Vec3) *Vec3 {
 
-	var result *Vector3
+	var result *Vec3
 	if optionalTarget == nil {
-		result = NewVector3(0, 0, 0)
+		result = NewVec3(0, 0, 0)
 	} else {
 		result = optionalTarget
 	}
@@ -163,7 +163,7 @@ func (p *Plane) CoplanarPoint(optionalTarget *Vector3) *Vector3 {
 
 // Translate translates this plane in the direction of its normal by offset.
 // Returns pointer to this updated plane.
-func (p *Plane) Translate(offset *Vector3) *Plane {
+func (p *Plane) Translate(offset *Vec3) *Plane {
 
 	p.constant = p.constant - offset.Dot(&p.normal)
 	return p
