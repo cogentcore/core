@@ -11,8 +11,11 @@ package gi3d
 // The material is fully responsible for rendering the object.
 type Object struct {
 	Node3DBase
-	Mat  MatName  `desc:"name of the material used for rendering this object -- all materials are collected on the Scene"`
-	Mesh MeshName `desc:"name of the mesh shape information used for rendering this object -- all meshes are collected on the Scene"`
+	Mat      MatName   `desc:"name of the material used for rendering this object -- all materials are collected on the Scene"`
+	Mesh     MeshName  `desc:"name of the mesh shape information used for rendering this object -- all meshes are collected on the Scene"`
+	Surface  Surface   `desc:"properties of the surface (color, shininess, etc)"`
+	Material *Material `view:"-" desc:"pointer to material"`
+	Mesh     *Mesh     `view:"-" desc:"pointer to mesh"`
 }
 
 // update triggers recompute of Vtx, Norm from mesh, and then re-render of scene @ parent
@@ -20,16 +23,6 @@ type Object struct {
 // relevant, but gl-level render always needs to be complete re-render of entire scene..
 
 // todo: compute vtx, bbox, etc
-
-// Material returns the material for this object, based on MatName
-func (ob *Object) Material(sc *Scene) Material {
-	//
-}
-
-// Mesh returns the mesh for this object, based on MeshName
-func (ob *Object) Material(sc *Scene) Mesh {
-	//
-}
 
 func (ob *Object) Render() {
 	//

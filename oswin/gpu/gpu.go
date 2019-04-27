@@ -67,6 +67,11 @@ type GPU interface {
 	// NewBufferMgr returns a new BufferMgr for managing Vectors and Indexes for rendering.
 	NewBufferMgr() BufferMgr
 
+	// NewInputVectors returns a new Vectors input variable that has a pre-specified
+	// layout(location = X) in programs -- allows same inputs to be used across a set
+	// of programs that all use the same locations.
+	NewInputVectors(name string, loc int, typ VectorType, role VectorRoles) Vectors
+
 	// NewTexture2D returns a new Texture2D with given name (optional).
 	// These Texture2D's must be Activate()'d and Delete()'d and otherwise managed
 	// (no further tracking is done by the gpu framework)

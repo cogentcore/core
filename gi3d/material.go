@@ -15,12 +15,27 @@ import (
 
 // todo: add shadows..
 
-// Phong lighting parameters -- all color comes from color of light
-// and color of object -- otherwise it is just the shininess of the object
-// that needs to be specified.  The specular color is always white multiplied
-// by the light color and object color.
-type Phong struct {
-	Shininess float32 // Specular shininess factor
+// Surface describes the properties of a surface (colors, shininess)
+// i.e., phong lighting parameters.
+// Main color is used for both ambient and diffuse color, and alpha component
+// is used for opacity.  The Emissive color is only for glowing objects.
+// The Specular color is always white (multiplied by light color).
+type Surface struct {
+	Color     gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	Emissive  gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Shininess float32  `desc:"specular shininess factor -- how strongly the surface shines back directional light -- this is an exponential factor -- 0 = not at all shiny, and 128 is a typical maximum"`
+}
+
+// Defaults sets default surface parameters
+func (sf *Surface) Defaults() {
+	sf.Color.Set(128, 128, 128, 255)
+	sf.Emissive.Set(0, 0, 0, 0)
+	sf.Shininess = 1
+}
+
+// Transparent returns true if color has alpha < 255
+func (sf *Surface) Transparent() bool {
+	return sf.Color.A < 255
 }
 
 // MatName is a material name -- provides an automatic gui chooser for materials
@@ -44,12 +59,6 @@ type Material interface {
 	// the type.  For Transparent items, this depends on overall object
 	// distances.
 	ItemOrder() int
-
-	// Phong returns the phong lighting parameters
-	Phong() Phong
-
-	// SetShininess sets the phong shininess of the material
-	SetShininess(shininess float32)
 }
 
 // Design note: all vertex data must be in ONE gpu.VectorsBuffer, and the cost of

@@ -18,12 +18,26 @@ import (
 // https://learnopengl.com/Lighting/Basic-Lighting
 // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
 
+// RenderInputs define the locations of the Vectors inputs to the rendering programs
+// All Vectors must use these locations so that Mesh data does not depend on which
+// program is being used to render it.
+type RenderInputs int32
+
+const (
+	InVtxPos RenderInputs = iota
+	InVtxNorm
+	InVtxTexUV
+	InVtxColor
+	RenderInputsN
+)
+
 // Renderers is the container for all GPU rendering Programs
 // Each scene requires its own version of these because
 // the programs need to be recompiled for each specific set
 // of lights.
 type Renderers struct {
 	Unis    map[string]gpu.Uniforms `desc:"uniforms shared across code"`
+	Vectors []gpu.Vectors           `desc:"input vectors shared across code, indexed by RenderInputs"`
 	Renders map[string]Render       `desc:"collection of Render items"`
 }
 
@@ -56,6 +70,7 @@ func (rn *Renderers) Init() (bool, error) {
 	}
 	var err error
 	oswin.TheApp.RunOnMain(func() {
+		rn.InitVectors()
 		err = rn.InitUnis()
 		if err != nil {
 			log.Println(err)
@@ -68,12 +83,21 @@ func (rn *Renderers) Init() (bool, error) {
 	return true, err
 }
 
+func (rn *Renderers) InitVectors() {
+	rn.Vectors = make([]gpu.Vectors, RenderInputsN)
+	rn.Vectors[InVtxPos] = gpu.TheGPU.NewInputVectors("InVtxPos", int(InVtxPos), gpu.Vec3fVecType, gpu.VertexPosition)
+	rn.Vectors[InVtxNorm] = gpu.TheGPU.NewInputVectors("InVtxNorm", int(InVtxNorm), gpu.Vec3fVecType, gpu.VertexNormal)
+	rn.Vectors[InVtxTexUV] = gpu.TheGPU.NewInputVectors("InVtxTexUV", int(InVtxTexUv), gpu.Vec2fVecType, gpu.VertexTexcoord)
+	rn.Vectors[InVtxColor] = gpu.TheGPU.NewInputVectors("InVtxColor", int(InVtxColor), gpu.Vec4fVecType, gpu.VertexColor)
+}
+
 func (rn *Renderers) InitUnis() error {
 	rn.Unis = make(map[string]gpu.Uniforms)
 
 	camera := gpu.TheGPU.NewUniforms("Camera")
-	camera.AddUniform("CamViewMatrix", gpu.Mat4fUniType, false, 0)
+	camera.AddUniform("MVMatrix", gpu.Mat4fUniType, false, 0)
 	camera.AddUniform("NormMatrix", gpu.Mat3fUniType, false, 0)
+	camera.AddUniform("MVPMatrix", gpu.Mat4fUniType, false, 0)
 	rn.Unis[camera.Name()] = camera
 
 	lights := gpu.TheGPU.NewUniforms("Lights")
@@ -219,18 +243,19 @@ func (mt *RenderUniformColor) Compile() error {
 #version 330
 `+RenderUniCamera+
 			`
-in vec3 VtxPos;
-in vec3 VtxNorm;
+layout(location = 0) in vec3 VtxPos;
+layout(location = 1) in vec3 VtxNorm;
 out vec4 Pos;
 out vec3 Norm;
 out vec3 CamDir;
 
 void main() {
-	Pos = CamViewMatrix * vec4(VtxPos, 1.0);
+	vPos = vec4(VtxPos, 1.0);
+	Pos = MVMatrix * vPos;
 	Norm = normalize(NormMatrix * VtxNorm);
 	CamDir = normalize(-Pos.xyz);
 	
-	gl_Position = Pos;
+	gl_Position = MVPMatrix * vPos;
 }
 `+"\x00")
 	if err != nil {
@@ -276,9 +301,6 @@ void main() {
 	pr.AddUniforms(rn.Unis["Lights"])
 	pr.AddUniform("Color", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shininess", gpu.FUniType, false, 0)
-
-	pr.AddInput("VtxPos", gpu.Vec3fVecType, gpu.VertexPosition)
-	pr.AddInput("VtxNorm", gpu.Vec3fVecType, gpu.VertexNormal)
 
 	pr.SetFragDataVar("outputColor")
 	return nil
@@ -330,8 +352,9 @@ type RenderTexture struct {
 
 var RenderUniCamera = `layout (std140) uniform Camera
 {
-    mat4 CamViewMatrix;
+    mat4 MVMatrix;
     mat3 NormMatrix;
+    mat4 MVPMatrix;
 };
 `
 

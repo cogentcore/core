@@ -24,7 +24,12 @@ type Vectors interface {
 	Role() VectorRoles
 
 	// Handle returns the unique handle for these vectors within the program where it is used
+	// Can also be specified using layout(location = X) specifier.
 	Handle() uint32
+
+	// Set sets all the parameters of the Vectors, and flags it as init -- when
+	// created for predefined locations.
+	Set(name string, handle uint32, typ VectorType, role VectorRoles)
 }
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
@@ -57,6 +62,9 @@ type VectorsBuffer interface {
 	// Add all Vectors before setting the length, which then computes offset and strides
 	// for each vector.
 	AddVectors(vec Vectors, interleave bool)
+
+	// NumVectors returns number of vectors in the buffer
+	NumVectors() int
 
 	// Vectors returns a list (slice) of all the vectors in the buffer, in order.
 	Vectors() []Vectors
@@ -133,6 +141,15 @@ type VectorsBuffer interface {
 	// Should be called prior to Go object being deleted
 	// (ref counting can be done externally).
 	Delete()
+
+	// DeleteAllVectors deletes all Vectors defined for this buffer (calls Delete first)
+	DeleteAllVectors()
+
+	// DeleteVectorsByName deletes Vectors of given name (calls Delete first)
+	DeleteVectorsByName(name string)
+
+	// DeleteVectorsByRole deletes Vectors of given role (calls Delete first)
+	DeleteVectorsByRole(role VectorRoles)
 
 	// GPUUsage returns the GPU vector usage id for given usage
 	GPUUsage(usg VectorUsages) uint32

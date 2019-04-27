@@ -70,34 +70,34 @@ func (v *Vec4) SetW(w float32) *Vec4 {
 	return v
 }
 
-// SetComponent sets this vector component value by its index: 0 for X, 1 for Y, 2 for Z, 3 for W.
+// SetComponent sets this vector component value by component index.
 // Returns the pointer to this updated vector
-func (v *Vec4) SetComponent(index int, value float32) *Vec4 {
-	switch index {
-	case 0:
+func (v *Vec4) SetComponent(comp Components, value float32) *Vec4 {
+	switch comp {
+	case X:
 		v.X = value
-	case 1:
+	case Y:
 		v.Y = value
-	case 2:
+	case Z:
 		v.Z = value
-	case 3:
-		v.Z = value
+	case W:
+		v.W = value
 	default:
 		panic("index is out of range")
 	}
 	return v
 }
 
-// Component returns this vector component by its index: 0 for X, 1 for Y, 2 for Z, 3 for W.
-func (v *Vec4) Component(index int) float32 {
-	switch index {
-	case 0:
+// Component returns this vector component.
+func (v *Vec4) Component(comp Components) float32 {
+	switch comp {
+	case X:
 		return v.X
-	case 1:
+	case Y:
 		return v.Y
-	case 2:
+	case Z:
 		return v.Z
-	case 3:
+	case W:
 		return v.W
 	default:
 		panic("index is out of range")

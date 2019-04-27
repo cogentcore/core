@@ -44,6 +44,16 @@ func (ve *Vectors) Handle() uint32 {
 	return ve.handle
 }
 
+// Set sets all the parameters of the Vectors, and flags it as init -- when
+// created for predefined locations.
+func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.VectorRoles) {
+	ve.name = name
+	ve.handle = handle
+	ve.typ = typ
+	ve.role = role
+	ve.init = true
+}
+
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
 // https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object
 // critical points:
@@ -105,6 +115,11 @@ func (vb *VectorsBuffer) AddVectors(vec gpu.Vectors, interleave bool) {
 			vb.nInter++
 		}
 	}
+}
+
+// NumVectors returns number of vectors in the buffer
+func (vb *VectorsBuffer) NumVectors() int {
+	return len(vb.vecs)
 }
 
 // Vectors returns a list (slice) of all the Vectors in the buffer, in order.
@@ -373,6 +388,41 @@ func (vb *VectorsBuffer) Delete() {
 	gl.DeleteBuffers(1, &vb.handle)
 	vb.handle = 0
 	vb.init = false
+}
+
+// DeleteAllVectors deletes all Vectors defined for this buffer (calls Delete first)
+func (vb *VectorsBuffer) DeleteAllVectors() {
+	vb.Delete()
+	vb.vecs = nil
+	vb.stride = 0
+	vb.offs = nil
+	vb.nInter = 0
+	vb.ln = 0
+	vb.totLn = 0
+}
+
+// DeleteVectorsByName deletes Vectors of given name (calls Delete first)
+func (vb *VectorsBuffer) DeleteVectorsByName(name string) {
+	vb.Delete()
+	for i, v := range vb.vecs {
+		if v.name == name {
+			vb.vecs = append(vb.vecs[:i], vb.vecs[i+1:]...)
+			return
+		}
+	}
+	log.Printf("glos.VectorsBuffer DeleteVectorsByName: name %v not found\n", name)
+}
+
+// DeleteVectorsByRole deletes Vectors of given role (calls Delete first)
+func (vb *VectorsBuffer) DeleteVectorsByRole(role gpu.VectorRoles) {
+	vb.Delete()
+	for i, v := range vb.vecs {
+		if v.role == role {
+			vb.vecs = append(vb.vecs[:i], vb.vecs[i+1:]...)
+			return
+		}
+	}
+	log.Printf("glos.VectorsBuffer DeleteVectorsByRole: role %v not found\n", role)
 }
 
 var glUsages = map[gpu.VectorUsages]uint32{

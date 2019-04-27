@@ -221,7 +221,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	glw.SetSizeCallback(w.winResized)
 	glw.SetFramebufferSizeCallback(w.fbResized)
 	glw.SetCloseCallback(w.closeReq)
-	//	glw.SetRefreshCallback(w.refresh)
+	// glw.SetRefreshCallback(w.refresh)
 	glw.SetFocusCallback(w.focus)
 	glw.SetIconifyCallback(w.iconify)
 

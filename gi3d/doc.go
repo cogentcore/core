@@ -5,13 +5,19 @@
 /*
 Package gi3d provides a 3D scenegraph for the GoGi GUI framework.
 
-The scenegraph is rooted at a gi3d.Scene node which is a gi.Viewport where the scene
-is rendered, similar to the svg.SVG node which is also a gi.Viewport where SVG drawings
+The scenegraph is rooted at a gi3d.Scene node which is a gi.Viewport2D where the scene
+is rendered, similar to the svg.SVG node which is also a gi.Viewport2D where SVG drawings
 are rendered.
 
 Children of the Scene are either Group or Object -- Group applies a transform (position
 size, rotation etc) to everything under it, while Object has its own transform
 and a Material and Mesh which define the color / texture and shape of the object.
+
+Solid shapes that are have uniform Surface (color) properties on all surfaces can
+be a single Object, but if you need e.g., different textures for each side of a box
+then that must be represented as a Group of Objects using Plane Mesh's, each of
+which can then bind to a different texture.
+
 All Meshes are indexed triangles.  Objects have computed bounding boxes and can be
 selected etc, and maintain their own verticies and normals that reflect their specific
 transform relative to the standard Mesh object (which maintains the rest of the relevant

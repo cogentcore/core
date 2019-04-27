@@ -44,13 +44,13 @@ func (v *Vec2) SetY(y float32) *Vec2 {
 	return v
 }
 
-// SetComponent sets this vector component value by its index: 0 for X, 1 for Y.
+// SetComponent sets this vector component value by its component index.
 // Returns the pointer to this updated vector
-func (v *Vec2) SetComponent(index int, value float32) *Vec2 {
-	switch index {
-	case 0:
+func (v *Vec2) SetComponent(comp Components, value float32) *Vec2 {
+	switch comp {
+	case X:
 		v.X = value
-	case 1:
+	case Y:
 		v.Y = value
 	default:
 		panic("index is out of range")
@@ -58,12 +58,12 @@ func (v *Vec2) SetComponent(index int, value float32) *Vec2 {
 	return v
 }
 
-// Component returns this vector component by its index: 0 for X, 1 for Y
-func (v *Vec2) Component(index int) float32 {
-	switch index {
-	case 0:
+// Component returns this vector component.
+func (v *Vec2) Component(comp Components) float32 {
+	switch comp {
+	case X:
 		return v.X
-	case 1:
+	case Y:
 		return v.Y
 	default:
 		panic("index is out of range")

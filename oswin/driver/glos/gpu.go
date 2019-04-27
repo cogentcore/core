@@ -145,6 +145,15 @@ func (gp *gpuImpl) NewBufferMgr() gpu.BufferMgr {
 	return bm
 }
 
+// NewInputVectors returns a new Vectors input variable that has a pre-specified
+// layout(location = X) in programs -- allows same inputs to be used across a set
+// of programs that all use the same locations.
+func (gp *gpuImpl) NewInputVectors(name string, loc int, typ gpu.VectorType, role gpu.VectorRoles) gpu.Vectors {
+	v := &glgpu.Vectors{}
+	v.Set(name, uint32(loc), typ, role)
+	return v
+}
+
 // NewTexture2D returns a new Texture2D with given name (optional).
 // These Texture2D's must be Activate()'d and Delete()'d and otherwise managed
 // (no further tracking is done by the gpu framework)

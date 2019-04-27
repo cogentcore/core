@@ -5,6 +5,7 @@
 package glos
 
 import (
+	"fmt"
 	"image"
 	"time"
 
@@ -64,6 +65,9 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	if act == key.Press && ec < key.CodeLeftControl &&
 		(key.HasAnyModifierBits(em, key.Control, key.Alt, key.Meta) ||
 			!mapped || ec == key.CodeTab) {
+		if key.HasAllModifierBits(em, key.Control) && ec == key.CodeY {
+			fmt.Printf("Ctrl-Y win: %v\n", w.Nm)
+		}
 		// fmt.Printf("chord ky	: %v ec	: %v\n	", ky, ec)
 		che := &key.ChordEvent{
 			Event: key.Event{

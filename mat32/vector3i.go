@@ -53,29 +53,29 @@ func (v *Vec3i) SetZ(z int32) *Vec3i {
 	return v
 }
 
-// SetComponent sets this vector component value by its index: 0 for X, 1 for Y, 2 for Z.
+// SetComponent sets this vector component value by component index.
 // Returns the pointer to this updated vector
-func (v *Vec3i) SetComponent(index int, value int32) {
-	switch index {
-	case 0:
+func (v *Vec3i) SetComponent(comp Components, value int32) {
+	switch comp {
+	case X:
 		v.X = value
-	case 1:
+	case Y:
 		v.Y = value
-	case 2:
+	case Z:
 		v.Z = value
 	default:
 		panic("index is out of range: ")
 	}
 }
 
-// Component returns this vector component by its index: 0 for X, 1 for Y, 2 for Z.
-func (v *Vec3i) Component(index int) int32 {
-	switch index {
-	case 0:
+// Component returns this vector component
+func (v *Vec3i) Component(comp Components) int32 {
+	switch comp {
+	case X:
 		return v.X
-	case 1:
+	case Y:
 		return v.Y
-	case 2:
+	case Z:
 		return v.Z
 	default:
 		panic("index is out of range")
