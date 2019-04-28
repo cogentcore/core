@@ -33,6 +33,11 @@ func (dr *Drawing) Clear(color, depth bool) {
 	gl.Clear(bits)
 }
 
+// ClearColor sets the color to draw when clear is called
+func (dr *Drawing) ClearColor(r, g, b float32) {
+	gl.ClearColor(r, g, b, 1)
+}
+
 // DepthTest turns on / off depth testing
 func (dr *Drawing) DepthTest(on bool) {
 	if on {

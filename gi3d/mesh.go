@@ -10,7 +10,6 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
@@ -135,25 +134,25 @@ func (ms *MeshBase) Reset() {
 // Validate checks if all the vertex data is valid
 // any errors are logged
 func (ms *MeshBase) Validate() error {
-	vln := len(ms.Vtx)
+	vln := len(ms.Vtx) / 3
 	if vln == 0 {
 		err := fmt.Errorf("gi3d.Mesh: %v has no verticies", ms.Name)
 		log.Println(err)
 		return err
 	}
-	nln := len(ms.Norm)
+	nln := len(ms.Norm) / 3
 	if nln != vln {
 		err := fmt.Errorf("gi3d.Mesh: %v number of Norms: %d != Vtx: %d", ms.Name, nln, vln)
 		log.Println(err)
 		return err
 	}
-	tln := len(ms.TexUV)
+	tln := len(ms.TexUV) / 2
 	if tln != vln {
 		err := fmt.Errorf("gi3d.Mesh: %v number of TexUV: %d != Vtx: %d", ms.Name, tln, vln)
 		log.Println(err)
 		return err
 	}
-	cln := len(ms.Color)
+	cln := len(ms.Color) / 4
 	if cln == 0 {
 		return nil
 	}
@@ -166,19 +165,12 @@ func (ms *MeshBase) Validate() error {
 }
 
 // MakeVectors compiles the existing mesh data into the Vectors for GPU rendering
-// Must be called with relevant context active
+// Must be called with relevant context active on main thread
 func (ms *MeshBase) MakeVectors(sc *Scene) error {
 	err := ms.Validate()
 	if err != nil {
 		return err
 	}
-	oswin.TheApp.RunOnMain(func() {
-		ms.MakeVectorsImpl(sc)
-	})
-	return nil
-}
-
-func (ms *MeshBase) MakeVectorsImpl(sc *Scene) {
 	var vbuf gpu.VectorsBuffer
 	var ibuf gpu.IndexesBuffer
 	if ms.Buff == nil {
@@ -199,10 +191,10 @@ func (ms *MeshBase) MakeVectorsImpl(sc *Scene) {
 		hasColor = true
 		nvec++
 	}
-	vtx := sc.Rends.Vectors[InVtxPos]
-	nrm := sc.Rends.Vectors[InVtxNorm]
-	tex := sc.Rends.Vectors[InVtxTexUV]
-	clr := sc.Rends.Vectors[InVtxColor]
+	vtx := sc.Renders.Vectors[InVtxPos]
+	nrm := sc.Renders.Vectors[InVtxNorm]
+	tex := sc.Renders.Vectors[InVtxTexUV]
+	clr := sc.Renders.Vectors[InVtxColor]
 	if vbuf.NumVectors() != nvec {
 		vbuf.DeleteAllVectors()
 		vbuf.AddVectors(vtx, true) // interleave
@@ -223,17 +215,16 @@ func (ms *MeshBase) MakeVectorsImpl(sc *Scene) {
 	iln := len(ms.Idx)
 	ibuf.SetLen(iln)
 	ibuf.Set(ms.Idx)
+	return nil
 }
 
 // Activate activates the mesh Vectors on the GPU
-// Must be called with relevant context active
+// Must be called with relevant context active on main thread
 func (ms *MeshBase) Activate(sc *Scene) {
 	if ms.Buff == nil {
 		ms.MakeVectors(sc)
 	}
-	oswin.TheApp.RunOnMain(func() {
-		ms.Buff.Activate()
-	})
+	ms.Buff.Activate()
 }
 
 // TransferAll transfer all buffer data to GPU (vectors and indexes)

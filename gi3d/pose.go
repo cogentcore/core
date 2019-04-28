@@ -10,11 +10,13 @@ import "github.com/goki/gi/mat32"
 type Pose struct {
 	Pos         mat32.Vec3 `desc:"position of center of object"`
 	Scale       mat32.Vec3 `desc:"scale (relative to parent)"`
-	Quat        mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
-	Matrix      mat32.Mat4 `desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
-	WorldMatrix mat32.Mat4 `desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
-	MVMatrix    mat32.Mat4 `desc:"model * view matrix -- tranforms into camera-centered coords"`
-	MVPMatrix   mat32.Mat4 `desc:"model * view * projection matrix -- full final render matrix"`
+	Quat        mat32.Quat `view:"-" desc:"Node rotation specified as a Quat (relative to parent)"`
+	Matrix      mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
+	ParMatrix   mat32.Mat4 `view:"-" desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`
+	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
+	MVMatrix    mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`
+	MVPMatrix   mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`
+	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix based on MVMatrix"`
 }
 
 // UpdateMatrix updates the local transform matrix based on its position, quaternion, and scale.
@@ -26,6 +28,7 @@ func (ps *Pose) UpdateMatrix() {
 // Also calls UpdateMatrix
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	ps.UpdateMatrix()
+	ps.ParMatrix.Copy(parWorld)
 	ps.WorldMatrix.MultiplyMatrices(parWorld, &ps.Matrix)
 }
 
@@ -34,6 +37,7 @@ func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 	ps.MVMatrix.MultiplyMatrices(viewMat, &ps.WorldMatrix)
 	ps.MVPMatrix.MultiplyMatrices(prjnMat, &ps.MVMatrix)
+	ps.NormMatrix.GetNormalMatrix(&ps.MVMatrix)
 }
 
 // MoveOnAxis moves (translates) the specified distance on the specified local axis.

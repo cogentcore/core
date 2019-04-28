@@ -169,8 +169,8 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	}
 	var ambs []mat32.Vec3
 	var dirs []mat32.Vec3
-	var points []mat32.Vec3
-	var spots []mat32.Vec3
+	// var points []mat32.Vec3
+	// var spots []mat32.Vec3
 	for _, lt := range sc.Lights {
 		clr := ColorToVec3f(lt.Color())
 		clr.MultiplyScalar(lt.Lumens())

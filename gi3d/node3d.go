@@ -5,6 +5,8 @@
 package gi3d
 
 import (
+	"fmt"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
@@ -63,9 +65,12 @@ type Node3D interface {
 	// IsTransparent returns true if object has transparent color
 	IsTransparent() bool
 
+	// Init3D does 3D intialization
+	Init3D(sc *Scene)
+
 	// Render3D is called by Scene Render3D on main thread,
 	// everything ready to go..
-	Render3D(sc *Scene)
+	Render3D(sc *Scene, rc RenderClasses, rnd Render)
 }
 
 // Node3DBase is the basic 3D scenegraph node, which has the full transform information
@@ -169,6 +174,19 @@ func (nb *Node3DBase) UpdateWorldMatrixChildren() {
 // Called during rendering.
 func (nb *Node3DBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
+}
+
+func (nb *Node3DBase) Init3D(sc *Scene) {
+	nb.NodeSig.Connect(nb.This(), func(recnb, sendk ki.Ki, sig int64, data interface{}) {
+		rnbi, rnb := KiToNode3D(recnb)
+		if Update3DTrace {
+			fmt.Printf("Update: Node: %v update world matrix due to signal: %v from node: %v\n", rnbi.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
+		}
+		if !rnb.IsDeleted() && !rnb.IsDestroyed() {
+			rnb.UpdateWorldMatrix(&rnb.Pose.ParMatrix)
+			rnb.UpdateWorldMatrixChildren()
+		}
+	})
 }
 
 func (nb *Node3DBase) Render3D(sc *Scene) {

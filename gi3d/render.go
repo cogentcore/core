@@ -30,6 +30,18 @@ const (
 	RenderInputsN
 )
 
+// RenderClasses define the different classes of rendering
+type RenderClasses int32
+
+const (
+	RClassOpaqueUniform RenderClasses = iota
+	RClassOpaqueVertex
+	RClassTexture
+	RClassTransUniform
+	RClassTransVertex
+	RenderClassesN
+)
+
 // Renderers is the container for all GPU rendering Programs
 // Each scene requires its own version of these because
 // the programs need to be recompiled for each specific set
@@ -46,21 +58,21 @@ func (rn *Renderers) SetLights(sc *Scene) {
 	oswin.TheApp.RunOnMain(func() {
 		rn.SetLightsUnis(sc)
 		for _, rd := range rn.Renders {
-			rd.Compile()
+			rd.Compile(rn)
 		}
 	})
 }
 
 // SetMatrix sets the view etc matrix uniforms
 // Must be called with appropriate context (window) activated and already on main.
-func (rn *Renderers) SetMatrix(mvMat, mvpMat mat32.Mat4, normMat mat32.Mat3) {
-	cu, ok := rn.Unis["Camera"]
+func (rn *Renderers) SetMatrix(pose *Pose) {
+	cu := rn.Unis["Camera"]
 	mvu := cu.UniformByName("MVMatrix")
-	mvu.SetValue(mvMat)
+	mvu.SetValue(pose.MVMatrix)
 	mvpu := cu.UniformByName("MVPMatrix")
-	mvpu.SetValue(mvpMat)
+	mvpu.SetValue(pose.MVPMatrix)
 	nu := cu.UniformByName("NormMatrix")
-	nu.SetValue(normMat)
+	nu.SetValue(pose.NormMatrix)
 }
 
 // Init initializes the Render programs.
@@ -132,7 +144,7 @@ func (rn *Renderers) InitRenders() error {
 // AddNewRender compiles the given Render and adds any errors to error list
 // and adds it to the global Renders map, by Name()
 func (rn *Renderers) AddNewRender(mt Render, errs *[]error) {
-	err := mt.Compile()
+	err := mt.Compile(rn)
 	rn.Renders[mt.Name()] = mt
 	if err != nil {
 		*errs = append(*errs, err)
@@ -174,7 +186,7 @@ type Render interface {
 
 	// Compile compiles the gpu.Pipeline programs and shaders for
 	// this material -- called during initialization.
-	Compile() error
+	Compile(rn *Renderers) error
 }
 
 // Base render type
@@ -183,16 +195,16 @@ type RenderBase struct {
 	Pipe gpu.Pipeline
 }
 
-func (mt *RenderBase) Name() string {
-	return mt.Nm
+func (rb *RenderBase) Name() string {
+	return rb.Nm
 }
 
-func (mt *RenderBase) Pipeline() gpu.Pipeline {
-	return mt.Pipe
+func (rb *RenderBase) Pipeline() gpu.Pipeline {
+	return rb.Pipe
 }
 
-func (mt *RenderBase) VtxFragProg() gpu.Program {
-	return mt.Pipe.ProgramByName("VtxFrag")
+func (rb *RenderBase) VtxFragProg() gpu.Program {
+	return rb.Pipe.ProgramByName("VtxFrag")
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -205,13 +217,13 @@ type RenderUniformColor struct {
 	RenderBase
 }
 
-func (mt *RenderUniformColor) Compile() error {
-	mt.Nm = "RenderUniformColor"
-	if mt.Pipe != nil {
-		mt.Pipe = gpu.TheGPU.NewPipeline(mt.Nm)
-		mt.Pipe.AddProgram("VtxFrag")
+func (rb *RenderUniformColor) Compile(rn *Renderers) error {
+	rb.Nm = "RenderUniformColor"
+	if rb.Pipe == nil {
+		rb.Pipe = gpu.TheGPU.NewPipeline(rb.Nm)
+		rb.Pipe.AddProgram("VtxFrag")
 	}
-	pl := mt.Pipe
+	pl := rb.Pipe
 	pr := pl.ProgramByName("VtxFrag")
 	_, err := pr.AddShader(gpu.VertexShader, "Vtx",
 		`
@@ -283,12 +295,12 @@ void main() {
 	return nil
 }
 
-func (mt *RenderUniformColor) SetColors(clr, emmis gi.Color) error {
-	pr := mt.VtxFragProg()
+func (rb *RenderUniformColor) SetColors(clr, emmis gi.Color) error {
+	pr := rb.VtxFragProg()
 	clru := pr.UniformByName("Color")
 	clrv := ColorToVec4f(clr)
 	clru.SetValue(clrv)
-	emsu := pr.UniformByName("EmmisiveColor")
+	emsu := pr.UniformByName("EmissiveColor")
 	emsv := ColorToVec3f(emmis)
 	emsu.SetValue(emsv)
 	return nil
@@ -306,11 +318,11 @@ type RenderVertexColor struct {
 	RenderBase
 }
 
-func (mt *RenderVertexColor) Compile() error {
-	mt.Nm = "RenderVertexColor"
-	pl := gpu.TheGPU.NewPipeline(mt.Nm)
-	pr := pl.AddProgram("VtxFrag")
-	mt.Pipe = pl
+func (rb *RenderVertexColor) Compile(rn *Renderers) error {
+	rb.Nm = "RenderVertexColor"
+	pl := gpu.TheGPU.NewPipeline(rb.Nm)
+	pl.AddProgram("VtxFrag")
+	rb.Pipe = pl
 	return nil
 }
 
@@ -322,11 +334,11 @@ type RenderTexture struct {
 	RenderBase
 }
 
-func (mt *RenderTexture) Compile() error {
-	mt.Nm = "RenderTexture"
-	pl := gpu.TheGPU.NewPipeline(mt.Nm)
-	pr := pl.AddProgram("VtxFrag")
-	mt.Pipe = pl
+func (rb *RenderTexture) Compile(rn *Renderers) error {
+	rb.Nm = "RenderTexture"
+	pl := gpu.TheGPU.NewPipeline(rb.Nm)
+	pl.AddProgram("VtxFrag")
+	rb.Pipe = pl
 	return nil
 }
 

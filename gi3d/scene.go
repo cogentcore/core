@@ -18,6 +18,9 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+// Set Update3DTrace to true to get a trace of 3D updating
+var Update3DTrace = false
+
 // Scene is the overall scenegraph containing nodes as children.
 // It renders to its own Framebuffer, which is then drawn directly onto the window.
 type Scene struct {
@@ -28,11 +31,16 @@ type Scene struct {
 	Lights   map[string]Light    `desc:"all lights used in the scene"`
 	Meshes   map[string]Mesh     `desc:"all meshes used in the scene"`
 	Textures map[string]*Texture `desc:"all textures used in the scene"`
-	Rends    Renderers           `desc:"rendering programs"`
+	Renders  Renderers           `desc:"rendering programs"`
 	Frame    gpu.Framebuffer     `view:"-" desc:"direct render target for scene"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
+
+// AddNewScene adds a new scene to given parent node, with given name.
+func AddNewScene(parent ki.Ki, name string) *Scene {
+	return parent.AddNewChild(KiT_Scene, name).(*Scene)
+}
 
 // AddMesh adds given mesh to mesh collection
 // see AddNewX for convenience methods to add specific shapes
@@ -131,6 +139,24 @@ func (sc *Scene) SetCurWin() {
 	}
 }
 
+func (sc *Scene) Resize(nwsz image.Point) {
+	if nwsz.X == 0 || nwsz.Y == 0 {
+		return
+	}
+	if sc.Frame != nil {
+		csz := sc.Frame.Size()
+		if csz == nwsz {
+			sc.Geom.Size = nwsz // make sure
+			return              // already good
+		}
+	}
+	if sc.Frame != nil {
+		sc.Frame.SetSize(nwsz)
+	}
+	sc.Geom.Size = nwsz // make sure
+	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.Pixels.Bounds())
+}
+
 func (sc *Scene) Init2D() {
 	sc.Init2DWidget()
 	sc.SetCurWin()
@@ -138,19 +164,21 @@ func (sc *Scene) Init2D() {
 	sc.NodeSig.Connect(sc.This(), func(recsc, sendk ki.Ki, sig int64, data interface{}) {
 		rsci, _ := gi.KiToNode2D(recsc)
 		rsc := rsci.(*Scene)
-		if gi.Update2DTrace {
+		if Update3DTrace {
 			fmt.Printf("Update: Scene: %v full render due to signal: %v from node: %v\n", rsc.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
 		}
 		if !sc.IsDeleted() && !sc.IsDestroyed() {
 			sc.Render()
 		}
 	})
+	sc.Init3D()
 }
 
 func (sc *Scene) Style2D() {
 	sc.SetCurWin()
 	sc.Style2DWidget()
 	sc.LayData.SetFromStyle(&sc.Sty.Layout) // also does reset
+	sc.Init3D()                             // todo: is this needed??
 }
 
 func (sc *Scene) Size2D(iter int) {
@@ -263,40 +291,71 @@ func (sc *Scene) ActivateFrame() bool {
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 		sc.Frame.Activate()
+		gpu.Draw.ClearColor(0.5, 0.2, 0.2)
 		gpu.Draw.Clear(true, true) // clear color and depth
 		gpu.Draw.DepthTest(true)
 	})
 	return true
 }
 
-// UploadToWin uploads our viewport image into the parent window -- e.g., called
-// by popups when updating separately
-func (sc *Scene) UploadToWin() {
-	if sc.Win == nil {
-		return
-	}
-	// todo: fix this!
-	// 	sc.Win.Uploadsc(sc, sc.WinBBox.Min)
-}
-
-// OpenTextures opens all the textures if not already opened, and establishes
+// InitTextures opens all the textures if not already opened, and establishes
 // the GPU resources for them.  Must be called with context on main thread.
-func (sc *Scene) OpenTextures() bool {
+func (sc *Scene) InitTextures() bool {
 	// todo
 	return true
 }
 
-// PrepMeshes makes sure all the Meshes are ready for rendering
+// InitMeshes makes sure all the Meshes are ready for rendering
 // called on main thread with context
-func (sc *Scene) PrepMeshes() bool {
+func (sc *Scene) InitMeshes() bool {
 	for _, ms := range sc.Meshes {
-		// todo: here is where we need some kind of dirty bit.
-		// basic logic should be to only make if not made at all
-		// updating from that point is job of user
 		ms.Make()
-		ms.MakeVectorsImpl(sc)
+		ms.MakeVectors(sc)
+		ms.Activate(sc)
+		ms.TransferAll()
 	}
 	return true
+}
+
+// UpdateWorldMatrix updates the world matrix for all scene elements
+// called during Init3D and subsequent updates are triggered by local
+// update signals on each node
+func (sc *Scene) UpdateWorldMatrix() {
+	idmtx := mat32.Mat4{}
+	idmtx.Identity()
+	for _, kid := range sc.Kids {
+		nii, _ := KiToNode3D(kid)
+		if nii != nil {
+			nii.UpdateWorldMatrix(&idmtx)
+			nii.UpdateWorldMatrixChildren()
+		}
+	}
+}
+
+func (sc *Scene) Init3D() {
+	sc.UpdateWorldMatrix()
+	if !sc.ActivateWin() {
+		return
+	}
+	_, err := sc.Renders.Init()
+	if err != nil {
+		log.Println(err)
+	}
+	oswin.TheApp.RunOnMain(func() {
+		sc.InitTextures()
+		sc.InitMeshes()
+	})
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == sc.This() {
+			return true
+		}
+		nii, _ := KiToNode3D(k)
+		if nii == nil {
+			return false // going into a different type of thing, bail
+		}
+		nii.Init3D(sc)
+		return true
+	})
 }
 
 // Render renders the scene to the Frame framebuffer
@@ -305,33 +364,32 @@ func (sc *Scene) Render() bool {
 	if !sc.ActivateFrame() {
 		return false
 	}
-	_, err := sc.Rends.Init()
-	if err != nil {
-		return false
-	}
 	sc.Camera.UpdateMatrix()
+	var tex gpu.Texture2D
+	clr, _ := gi.ColorFromString("red", nil)
 	oswin.TheApp.RunOnMain(func() {
-		sc.Rends.SetLightsUnis(sc)
-		sc.OpenTextures()
-		sc.PrepMeshes()
+		sc.Renders.SetLightsUnis(sc)
 		sc.Render3D()
-		sc.UploadToWin()
+		tex = sc.Frame.Texture()
+		tex.Fill(tex.Bounds(), clr, draw.Over)
 	})
+	fmt.Printf("copy to window at: %v, bounds: %v\n", sc.WinBBox.Min, tex.Bounds())
+	sc.Win.OSWin.Copy(sc.WinBBox.Min, tex, tex.Bounds(), draw.Over, nil)
+	sc.Win.OSWin.Publish()
 	return true
 }
 
 // Render3D renders the scene to the framebuffer
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D() {
-	opaque := make([]*Object, 100)
-	trans := make([]*Object, 100)
+	var rcs [RenderClassesN][]*Object
 
 	// Prepare for frustum culling
 	var proj mat32.Mat4
 	proj.MultiplyMatrices(&sc.Camera.PrjnMatrix, &sc.Camera.ViewMatrix)
 	frustum := mat32.NewFrustumFromMatrix(&proj)
 
-	nb.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
 			return true
 		}
@@ -351,22 +409,39 @@ func (sc *Scene) Render3D() {
 		bb := bba.BBox
 		bb.ApplyMat4(&ni.Pose.WorldMatrix)
 		if true || frustum.IntersectsBox(&bb) { // todo: remove true..
-			if nii.IsTransparent() {
-				trans = append(trans, obj)
-			} else {
-				opaque = append(opaque, obj)
-			}
+			rc := obj.RenderClass()
+			rcs[rc] = append(rcs[rc], obj)
 		}
 		return true
 	})
 
-	// todo: zsort objects?
-	gpu.Draw.Op(draw.Src)
-	for _, obj := range opaque {
-		obj.This().(Node3D).Render3D(sc)
-	}
-	gpu.Draw.Op(draw.Over) // alpha
-	for _, obj := range trans {
-		obj.This().(Node3D).Render3D(sc)
+	// todo: zsort objects..  opaque front-to-back, trans back-to-front
+	for rci, objs := range rcs {
+		rc := RenderClasses(rci)
+		if len(objs) == 0 {
+			continue
+		}
+		var rnd Render
+		switch rc {
+		case RClassOpaqueUniform:
+			rnd = sc.Renders.Renders["RenderUniformColor"]
+			gpu.Draw.Op(draw.Src)
+		case RClassTransUniform:
+			rnd = sc.Renders.Renders["RenderUniformColor"]
+			gpu.Draw.Op(draw.Over) // alpha
+		case RClassTexture:
+			rnd = sc.Renders.Renders["RenderTexture"]
+			gpu.Draw.Op(draw.Src)
+		case RClassOpaqueVertex:
+			rnd = sc.Renders.Renders["RenderVertexColor"]
+			gpu.Draw.Op(draw.Src)
+		case RClassTransVertex:
+			rnd = sc.Renders.Renders["RenderVertexColor"]
+			gpu.Draw.Op(draw.Over) // alpha
+		}
+		rnd.VtxFragProg().Activate() // use same program for all..
+		for _, obj := range objs {
+			obj.This().(Node3D).Render3D(sc, rc, rnd)
+		}
 	}
 }

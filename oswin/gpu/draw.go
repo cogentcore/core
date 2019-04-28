@@ -20,6 +20,9 @@ type Drawing interface {
 	// Clear clears the given properties of the current render target
 	Clear(color, depth bool)
 
+	// ClearColor sets the color to draw when clear is called
+	ClearColor(r, g, b float32)
+
 	// DepthTest turns on / off depth testing
 	DepthTest(on bool)
 

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
 )
 
@@ -56,6 +55,14 @@ func (obj *Object) SetMesh(sc *Scene, meshName string) error {
 	}
 	obj.MeshPtr = ms
 	return nil
+}
+
+func (obj *Object) Init3D(sc *Scene) {
+	err := obj.Validate(sc)
+	if err != nil {
+		obj.SetInvisible()
+	}
+	obj.Node3DBase.Init3D(sc)
 }
 
 // Validate checks that object has valid mesh and texture settings, etc
@@ -122,26 +129,36 @@ func (obj *Object) TrackLight(sc *Scene, lightName string) {
 /////////////////////////////////////////////////////////////////////////////
 //   Rendering
 
-// Render3D is called by Scene Render3D on main thread,
-// everything ready to go..
-func (obj *Object) Render3D(sc *Scene) {
-	var nm mat32.Mat3
-	nm.GetNormalMatrix(&obj.Pose.MVMatrix)
-	sc.Rends.SetMatrix(obj.Pose.MVMatrix, obj.Pose.MVPMatrix, nm)
-	obj.MeshPtr.Activate(sc)  // meshes have al been prep'd
-	obj.MeshPtr.TransferAll() // todo: need to optimize
-	var rnd Render
+// RenderClass returns the class of rendering for this object
+// used for organizing the ordering of rendering
+func (obj *Object) RenderClass() RenderClasses {
 	switch {
 	case obj.Mat.TexPtr != nil:
-		// obj.Mat.TexPtr.Activate()
-		rnd = sc.Rends.Renders["RenderTexture"]
+		return RClassTexture
 	case obj.MeshPtr.HasColor():
-		rnd = sc.Rends.Renders["RenderVertexColor"]
+		if obj.MeshPtr.IsTransparent() {
+			return RClassTransVertex
+		}
+		return RClassOpaqueVertex
 	default:
-		rndu := sc.Rends.Renders["RenderUniformColor"].(*RenderUniformColor)
-		rndu.SetColors(obj.Mat.Color, obj.Mat.Emissive)
-		rnd = rndu
+		if obj.Mat.IsTransparent() {
+			return RClassTransUniform
+		}
+		return RClassOpaqueUniform
 	}
-	rnd.VtxFragProg().Activate()
+}
+
+// Render3D activates this object for rendering ()
+func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
+	switch rc {
+	case RClassOpaqueUniform, RClassTransUniform:
+		rndu := rnd.(*RenderUniformColor)
+		rndu.SetColors(obj.Mat.Color, obj.Mat.Emissive)
+	case RClassTexture:
+		// obj.Mat.TexPtr.Activate()
+	}
+	sc.Renders.SetMatrix(&obj.Pose)
+	obj.MeshPtr.Activate(sc) // meshes have all been prep'd
+	// obj.MeshPtr.TransferAll() // todo: need to optimize
 	obj.MeshPtr.Render3D()
 }
