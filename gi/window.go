@@ -879,7 +879,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
 	}
-	w.OSWin.SetWinTexSubImage(winBBox.Min, vp.OSImage, vpBBox)
+	w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
 	pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -900,9 +900,9 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	updt := w.UpdateStart()
 	pr := prof.Start("win.UploadVp")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.OSImage.Bounds(), w.OSWin.WinTex().Bounds())
+		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
 	}
-	w.OSWin.SetWinTexSubImage(offset, vp.OSImage, vp.OSImage.Bounds())
+	w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
 	pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -925,9 +925,9 @@ func (w *Window) UploadAllViewports() {
 	pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.OSImage.Bounds(), w.OSWin.WinTex().Bounds(), updt)
+		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
 	}
-	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.OSImage, w.Viewport.OSImage.Bounds())
+	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
 	// then all the current popups
 	w.PopMu.RLock()
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
@@ -938,9 +938,9 @@ func (w *Window) UploadAllViewports() {
 				vp := gii.AsViewport2D()
 				r := vp.Geom.Bounds()
 				if Render2DTrace {
-					fmt.Printf("Window: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
+					fmt.Printf("Window: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
 				}
-				w.OSWin.SetWinTexSubImage(r.Min, vp.OSImage, vp.OSImage.Bounds())
+				w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
 			}
 		}
 	}
@@ -950,9 +950,9 @@ func (w *Window) UploadAllViewports() {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
 			if Render2DTrace || WinEventTrace {
-				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.OSImage.Bounds())
+				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
 			}
-			w.OSWin.SetWinTexSubImage(r.Min, vp.OSImage, vp.OSImage.Bounds())
+			w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
 		}
 	}
 	w.PopMu.RUnlock()
@@ -1095,7 +1095,7 @@ func (w *Window) RenderOverlays() {
 	}
 	oswin.TheApp.RunOnMain(func() {
 		w.OSWin.Activate()
-		w.OverTex.SetSubImage(image.ZP, w.OverlayVp.OSImage, w.OverlayVp.OSImage.Bounds())
+		w.OverTex.SetSubImage(image.ZP, w.OverlayVp.Pixels, w.OverlayVp.Pixels.Bounds())
 	})
 
 	if w.ActiveSprites > 0 {

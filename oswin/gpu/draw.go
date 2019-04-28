@@ -20,6 +20,9 @@ type Drawing interface {
 	// Clear clears the given properties of the current render target
 	Clear(color, depth bool)
 
+	// DepthTest turns on / off depth testing
+	DepthTest(on bool)
+
 	// Op sets the blend function based on go standard draw operation
 	// Src disables blending, and Over uses alpha-blending
 	Op(op draw.Op)

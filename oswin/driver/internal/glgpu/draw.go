@@ -33,6 +33,15 @@ func (dr *Drawing) Clear(color, depth bool) {
 	gl.Clear(bits)
 }
 
+// DepthTest turns on / off depth testing
+func (dr *Drawing) DepthTest(on bool) {
+	if on {
+		gl.Enable(gl.DEPTH_TEST)
+	} else {
+		gl.Disable(gl.DEPTH_TEST)
+	}
+}
+
 // Op sets the blend function based on go standard draw operation
 // Src disables blending, and Over uses alpha-blending
 func (dr *Drawing) Op(op draw.Op) {

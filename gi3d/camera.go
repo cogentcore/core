@@ -14,8 +14,8 @@ type Camera struct {
 	Aspect     float32    `desc:"aspect ratio (width/height)"`
 	Near       float32    `desc:"near plane z coordinate"`
 	Far        float32    `desc:"far plane z coordinate"`
-	ViewMatrix mth32.Mat4 `desc:"view matrix (inverse of the Pose.Matrix)"`
-	PrjnMatrix mth32.Mat4 `desc:"projection matrix, defining the camera perspective / ortho transform"`
+	ViewMatrix mat32.Mat4 `desc:"view matrix (inverse of the Pose.Matrix)"`
+	PrjnMatrix mat32.Mat4 `desc:"projection matrix, defining the camera perspective / ortho transform"`
 }
 
 func (cm *Camera) Defaults() {
@@ -40,6 +40,6 @@ func (cm *Camera) UpdateMatrix() {
 // updates the internal Quat rotation vector
 func (cm *Camera) LookAt(target, upDir *mat32.Vec3) {
 	rotMat := mat32.Mat4{}
-	rotMat.LookAt(&cm.Pos, target, upDir)
-	cm.Quat.SetFromRotationMat(rotMat)
+	rotMat.LookAt(&cm.Pose.Pos, target, upDir)
+	cm.Pose.Quat.SetFromRotationMatrix(&rotMat)
 }

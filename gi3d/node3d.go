@@ -16,10 +16,19 @@ type Node3D interface {
 	// all Node3D elements.
 	ki.Ki
 
+	// IsObject returns true if this is an Object node (else a Group)
+	IsObject() bool
+
 	// AsNode3D returns a generic Node3DBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
 	// interface methods.
 	AsNode3D() *Node3DBase
+
+	// AsObject returns a node as Object (nil if not)
+	AsObject() *Object
+
+	// Validate checks that scene element is valid
+	Validate(sc *Scene) error
 
 	// UpdateWorldMatrix updates this node's local and world matrix based on parent's world matrix
 	// This sets the WorldMatrixUpdated flag but does not check that flag -- calling
@@ -32,6 +41,9 @@ type Node3D interface {
 	// UpdateMVPMatrix updates this node's MVP matrix based on given view and prjn matrix from camera
 	// Called during rendering.
 	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
+
+	// BBox returns the bounding box information for this node -- from Mesh or aggregate for groups
+	BBox() *BBox
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
@@ -47,19 +59,21 @@ type Node3D interface {
 	// very challenging without mistakenly overwriting invisibility at various
 	// levels.
 	IsVisible() bool
+
+	// IsTransparent returns true if object has transparent color
+	IsTransparent() bool
+
+	// Render3D is called by Scene Render3D on main thread,
+	// everything ready to go..
+	Render3D(sc *Scene)
 }
 
 // Node3DBase is the basic 3D scenegraph node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
 // There are only two different kinds of Nodes: Group and Object
 type Node3DBase struct {
-	NodeBase
-	Pose        Pose         `desc:"complete specification of position and orientation"`
-	BoundBox    mat32.Box3   `desc:"Last calculated bounding box in local coords"`
-	BoundSphere mat32.Sphere `desc:"Last calculated bounding sphere in local coords"`
-	Area        float32      `desc:"Last calculated area"`
-	Volume      float32      `desc:"Last calculated volume"`
-	RotInertia  mat32.Mat3   `desc:"Last calculated rotational inertia matrix in local coords"`
+	gi.NodeBase
+	Pose Pose `desc:"complete specification of position and orientation"`
 }
 
 // gi3d.NodeFlags extend gi.NodeFlags to hold 3D node state
@@ -91,6 +105,25 @@ func KiToNode3DBase(k ki.Ki) *Node3DBase {
 	return k.(Node3D).AsNode3D()
 }
 
+// AsNode3D returns a generic Node3DBase for our node -- gives generic
+// access to all the base-level data structures without requiring
+// interface methods.
+func (nb *Node3DBase) AsNode3D() *Node3DBase {
+	return nb
+}
+
+func (nb *Node3DBase) IsObject() bool {
+	return false
+}
+
+func (nb *Node3DBase) AsObject() *Object {
+	return nil
+}
+
+func (nb *Node3DBase) Validate(sc *Scene) error {
+	return nil
+}
+
 func (nb *Node3DBase) IsVisible() bool {
 	if nb == nil || nb.This() == nil || nb.IsInvisible() {
 		return false
@@ -98,17 +131,14 @@ func (nb *Node3DBase) IsVisible() bool {
 	if nb.Par == nil || nb.Par.This() == nil {
 		return false
 	}
-	if nb.Par == nb.Scene { // cutoff at top
-		return true
-	}
+	// if nb.Par == nb.Scene { // cutoff at top
+	// 	return true
+	// }
 	return nb.Par.This().(Node3D).IsVisible()
 }
 
-// AsNode3D returns a generic Node3DBase for our node -- gives generic
-// access to all the base-level data structures without requiring
-// interface methods.
-func (nb *Node3DBase) AsNode3D() *Node3DBase {
-	return nb
+func (nb *Node3DBase) IsTransparent() bool {
+	return false
 }
 
 func (nb *Node3DBase) WorldMatrixUpdated() bool {
@@ -127,7 +157,7 @@ func (nb *Node3DBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 // (and their children, and so on..)
 func (nb *Node3DBase) UpdateWorldMatrixChildren() {
 	for _, kid := range nb.Kids {
-		nii, _ := KiToNode3D(k)
+		nii, _ := KiToNode3D(kid)
 		if nii != nil {
 			nii.UpdateWorldMatrix(&nb.Pose.WorldMatrix)
 			nii.UpdateWorldMatrixChildren()
@@ -139,4 +169,8 @@ func (nb *Node3DBase) UpdateWorldMatrixChildren() {
 // Called during rendering.
 func (nb *Node3DBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
+}
+
+func (nb *Node3DBase) Render3D(sc *Scene) {
+	// nop
 }

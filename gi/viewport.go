@@ -34,8 +34,7 @@ type Viewport2D struct {
 	Fill         bool         `desc:"fill the viewport with background-color from style"`
 	Geom         Geom2DInt    `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Render       RenderState  `json:"-" xml:"-" view:"-" desc:"render state for rendering"`
-	Pixels       *image.RGBA  `json:"-" xml:"-" view:"-" desc:"live pixels that we render into, from OSImage"`
-	OSImage      image.Image  `json:"-" xml:"-" view:"-" desc:"the oswin.Image that owns our pixels"`
+	Pixels       *image.RGBA  `json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 	Win          *Window      `json:"-" xml:"-" desc:"our parent window that we render into"`
 	CurStyleNode Node2D       `json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 	CurColor     Color        `json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
@@ -49,7 +48,7 @@ var Viewport2DProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
 }
 
-// NewViewport2D creates a new OSImage with the specified width and height,
+// NewViewport2D creates a new Pixels Image with the specified width and height,
 // and initializes the renderer etc
 func NewViewport2D(width, height int) *Viewport2D {
 	sz := image.Point{width, height}
@@ -57,7 +56,6 @@ func NewViewport2D(width, height int) *Viewport2D {
 		Geom: Geom2DInt{Size: sz},
 	}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	vp.OSImage = vp.Pixels
 	vp.Render.Init(width, height, vp.Pixels)
 	return vp
 }
@@ -74,15 +72,13 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 			return              // already good
 		}
 	}
-	if vp.OSImage != nil {
-		vp.OSImage = nil
+	if vp.Pixels != nil {
 		vp.Pixels = nil
 	}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	vp.OSImage = vp.Pixels
 	vp.Render.Init(nwsz.X, nwsz.Y, vp.Pixels)
 	vp.Geom.Size = nwsz // make sure
-	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.OSImage.Bounds())
+	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.Pixels.Bounds())
 }
 
 // VpFlag flags extend NodeBase NodeFlags to hold viewport state

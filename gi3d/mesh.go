@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ints"
+	"github.com/goki/ki/kit"
 )
 
-// todo: need to be able to trigger update based just on updating colors (e.g. netview render)
-
 // MeshName is a mesh name -- provides an automatic gui chooser for meshes
+// Used on Object to link to meshes by name.
 type MeshName string
 
 // Mesh holds the mesh-based shape used for rendering an object.
@@ -25,6 +25,9 @@ type MeshName string
 // All Mesh's must define Vtx, Norm, TexUV (stored interleaved), and Idx components.
 // Per-vertex Color is optional, and is appended to the vertex buffer non-interleaved if present.
 type Mesh interface {
+	// Name returns name of the mesh
+	Name() string
+
 	// AsMeshBase returns the MeshBase for this Mesh
 	AsMeshBase() *MeshBase
 
@@ -49,8 +52,15 @@ type Mesh interface {
 	// any errors are logged
 	Validate() error
 
+	// HasColor returns true if this mesh has vertex-specific colors available
+	HasColor() bool
+
+	// IsTransparent returns true if this mesh has vertex-specific colors available
+	// and at least some are transparent.
+	IsTransparent() bool
+
 	// MakeVectors compiles the existing mesh data into the Vectors for GPU rendering
-	// Must be called with relevant context active
+	// Must be called with relevant context active.
 	MakeVectors(sc *Scene) error
 
 	// Activate activates the mesh Vectors on the GPU
@@ -68,20 +78,52 @@ type Mesh interface {
 	// TransferIndexes transfer vectors buffer data to GPU (if index data has changed)
 	// Activate must have just been called
 	TransferIndexes()
+
+	// Render3D calls gpu.TrianglesIndexed to render the mesh
+	// Activate must have just been called, assumed to be on main with context
+	Render3D()
 }
 
 // MeshBase provides the core implementation of Mesh interface
 type MeshBase struct {
-	Name    string
+	Nm      string         `desc:"name of mesh -- meshes are linked to objects by name so this matters"`
 	Dynamic bool           `desc:"if true, this mesh changes frequently -- otherwise considered to be static"`
+	Trans   bool           `desc:"set to true if color has transparency -- not worth checking manually"`
 	Vtx     mat32.ArrayF32 `desc:"verticies for triangle shapes that make up the mesh -- all mesh structures must use indexed triangle meshes"`
 	Norm    mat32.ArrayF32 `desc:"computed normals for each vertex"`
 	TexUV   mat32.ArrayF32 `desc:"texture U,V coordinates for mapping textures onto vertexes"`
 	Idx     mat32.ArrayU32 `desc:"indexes that sequentially in groups of 3 define the actual triangle faces"`
 	Color   mat32.ArrayF32 `desc:"if per-vertex color material type is used for this mesh, then these are the per-vertex colors -- may not be defined in which case per-vertex materials are not possible for such meshes"`
+	BBox    BBox           `desc:"computed bounding-box and other gross object properties"`
 	Buff    gpu.BufferMgr  `view:"-" desc:"buffer holding computed verticies, normals, indices, etc for rendering"`
 }
 
+var KiT_MeshBase = kit.Types.AddType(&MeshBase{}, nil)
+
+func (ms *MeshBase) Name() string {
+	return ms.Nm
+}
+
+func (ms *MeshBase) HasColor() bool {
+	return len(ms.Color) > 0
+}
+
+func (ms *MeshBase) IsTransparent() bool {
+	if !ms.HasColor() {
+		return false
+	}
+	return ms.Trans
+}
+
+func (ms *MeshBase) ComputeNorms() {
+}
+
+// AsMeshBase returns the MeshBase for this Mesh
+func (ms *MeshBase) AsMeshBase() *MeshBase {
+	return ms
+}
+
+// Reset resets all of the vector and index data for this mesh (to start fresh)
 func (ms *MeshBase) Reset() {
 	ms.Vtx = nil
 	ms.Norm = nil
@@ -101,7 +143,7 @@ func (ms *MeshBase) Validate() error {
 	}
 	nln := len(ms.Norm)
 	if nln != vln {
-		err := vmt.Errorf("gi3d.Mesh: %v number of Norms: %d != Vtx: %d", ms.Name, nln, vln)
+		err := fmt.Errorf("gi3d.Mesh: %v number of Norms: %d != Vtx: %d", ms.Name, nln, vln)
 		log.Println(err)
 		return err
 	}
@@ -112,7 +154,7 @@ func (ms *MeshBase) Validate() error {
 		return err
 	}
 	cln := len(ms.Color)
-	if clr == 0 {
+	if cln == 0 {
 		return nil
 	}
 	if cln != vln {
@@ -133,6 +175,7 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 	oswin.TheApp.RunOnMain(func() {
 		ms.MakeVectorsImpl(sc)
 	})
+	return nil
 }
 
 func (ms *MeshBase) MakeVectorsImpl(sc *Scene) {
@@ -140,7 +183,7 @@ func (ms *MeshBase) MakeVectorsImpl(sc *Scene) {
 	var ibuf gpu.IndexesBuffer
 	if ms.Buff == nil {
 		ms.Buff = gpu.TheGPU.NewBufferMgr()
-		usg := pu.StaticDraw
+		usg := gpu.StaticDraw
 		if ms.Dynamic {
 			usg = gpu.DynamicDraw
 		}
@@ -151,8 +194,8 @@ func (ms *MeshBase) MakeVectorsImpl(sc *Scene) {
 		ibuf = ms.Buff.IndexesBuffer()
 	}
 	nvec := 3
-	hasColor := false
-	if len(ms.Color) > 0 {
+	hasColor := ms.HasColor()
+	if hasColor {
 		hasColor = true
 		nvec++
 	}
@@ -194,27 +237,28 @@ func (ms *MeshBase) Activate(sc *Scene) {
 }
 
 // TransferAll transfer all buffer data to GPU (vectors and indexes)
-// Activate must have just been called
+// Activate must have just been called, assumed to be on main with context
 func (ms *MeshBase) TransferAll() {
-	oswin.TheApp.RunOnMain(func() {
-		ms.Buff.TransferAll()
-	})
+	ms.Buff.TransferAll()
 }
 
 // TransferVectors transfer vectors buffer data to GPU (if vector data has changed)
-// Activate must have just been called
+// Activate must have just been called, assumed to be on main with context
 func (ms *MeshBase) TransferVectors() {
-	oswin.TheApp.RunOnMain(func() {
-		ms.Buff.TransferVectors()
-	})
+	ms.Buff.TransferVectors()
 }
 
 // TransferIndexes transfer vectors buffer data to GPU (if index data has changed)
-// Activate must have just been called
+// Activate must have just been called, assumed to be on main with context
 func (ms *MeshBase) TransferIndexes() {
-	oswin.TheApp.RunOnMain(func() {
-		ms.Buff.TransferIndexes()
-	})
+	ms.Buff.TransferIndexes()
+}
+
+// Render3D calls gpu.TrianglesIndexed to render the mesh
+// Activate must have just been called, assumed to be on main with context
+func (ms *MeshBase) Render3D() {
+	ibuf := ms.Buff.IndexesBuffer()
+	gpu.Draw.TrianglesIndexed(ibuf.Len(), ibuf.Indexes())
 }
 
 /////////////////////////////////////////////////////////////////////

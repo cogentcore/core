@@ -13,8 +13,8 @@ type Pose struct {
 	Quat        mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
 	Matrix      mat32.Mat4 `desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
 	WorldMatrix mat32.Mat4 `desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
-	MVMatrix    mth32.Mat4 `desc:"model * view matrix -- tranforms into camera-centered coords"`
-	MVPMatrix   mth32.Mat4 `desc:"model * view * projection matrix -- full final render matrix"`
+	MVMatrix    mat32.Mat4 `desc:"model * view matrix -- tranforms into camera-centered coords"`
+	MVPMatrix   mat32.Mat4 `desc:"model * view * projection matrix -- full final render matrix"`
 }
 
 // UpdateMatrix updates the local transform matrix based on its position, quaternion, and scale.
@@ -26,14 +26,14 @@ func (ps *Pose) UpdateMatrix() {
 // Also calls UpdateMatrix
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	ps.UpdateMatrix()
-	ps.WorldMatrix.MultiplyMatricies(parWorld, &ps.Matrix)
+	ps.WorldMatrix.MultiplyMatrices(parWorld, &ps.Matrix)
 }
 
 // UpdateMVPMatrix updates the model * view, * projection matricies based on camera view, prjn matricies
 // Assumes that WorldMatrix has been updated
 func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
-	ps.MVMatrix.MultiplyMatricies(viewMat, &ps.WorldMatrix)
-	ps.MVPMatrix.MultiplyMatricies(prjnMat, &ps.MVMatrix)
+	ps.MVMatrix.MultiplyMatrices(viewMat, &ps.WorldMatrix)
+	ps.MVPMatrix.MultiplyMatrices(prjnMat, &ps.MVMatrix)
 }
 
 // MoveOnAxis moves (translates) the specified distance on the specified local axis.
@@ -60,7 +60,7 @@ func (ps *Pose) EulerRotation() mat32.Vec3 {
 // SetAxisRotation sets rotation from local axis and angle in radians.
 func (ps *Pose) SetAxisRotation(x, y, z, angle float32) {
 	axis := mat32.NewVec3(x, y, z)
-	ps.Quat.SetFromAxisAngle(&axis, angle)
+	ps.Quat.SetFromAxisAngle(axis, angle)
 }
 
 // RotateOnAxis rotates around the specified local axis the specified angle in radians.
@@ -68,7 +68,7 @@ func (ps *Pose) RotateOnAxis(x, y, z, angle float32) {
 	axis := mat32.NewVec3(x, y, z)
 	rotQuat := &mat32.Quat{}
 	rotQuat.SetFromAxisAngle(axis, angle)
-	ps.Quat.Multiply(&rotQuat)
+	ps.Quat.Multiply(rotQuat)
 }
 
 // SetMatrix sets the local transformation matrix and updates Pos, Scale, Quat.
@@ -95,10 +95,8 @@ func (ps *Pose) WorldQuat() mat32.Quat {
 
 // WorldRotation returns the current world rotation in Euler angles.
 func (ps *Pose) WorldRotation() mat32.Vec3 {
-	quat := mat32.Quat{}
-	ps.WorldQuat(&quat)
 	ang := mat32.Vec3{}
-	ang.SetFromQuat(&quat)
+	ang.SetFromQuat(&ps.Quat)
 	return ang
 }
 

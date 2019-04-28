@@ -6,10 +6,9 @@ package gi3d
 
 import (
 	"errors"
-	"image/color"
 	"log"
 
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
@@ -43,21 +42,25 @@ type Renderers struct {
 
 // SetLights sets the lights and recompiles the programs accordingly
 // Must be called with proper context activated
-func (rn *Renderers) SetLights(lights Lights) {
+func (rn *Renderers) SetLights(sc *Scene) {
 	oswin.TheApp.RunOnMain(func() {
-		rn.SetLightsUnis(lights)
+		rn.SetLightsUnis(sc)
 		for _, rd := range rn.Renders {
 			rd.Compile()
 		}
 	})
 }
 
-// SetCamera sets the overall camera view matrix
-// Must be called with proper context activated
-func (rn *Renderers) SetCamera(camview mat32.Mat4) {
-	for _, rd := range rn.Renders {
-		rd.SetCamera(camview)
-	}
+// SetMatrix sets the view etc matrix uniforms
+// Must be called with appropriate context (window) activated and already on main.
+func (rn *Renderers) SetMatrix(mvMat, mvpMat mat32.Mat4, normMat mat32.Mat3) {
+	cu, ok := rn.Unis["Camera"]
+	mvu := cu.UniformByName("MVMatrix")
+	mvu.SetValue(mvMat)
+	mvpu := cu.UniformByName("MVPMatrix")
+	mvpu.SetValue(mvpMat)
+	nu := cu.UniformByName("NormMatrix")
+	nu.SetValue(normMat)
 }
 
 // Init initializes the Render programs.
@@ -65,7 +68,7 @@ func (rn *Renderers) SetCamera(camview mat32.Mat4) {
 // Returns true if wasn't already initialized, and error
 // if there is some kind of error during initialization.
 func (rn *Renderers) Init() (bool, error) {
-	if Renders != nil {
+	if rn.Renders != nil {
 		return false, nil
 	}
 	var err error
@@ -87,7 +90,7 @@ func (rn *Renderers) InitVectors() {
 	rn.Vectors = make([]gpu.Vectors, RenderInputsN)
 	rn.Vectors[InVtxPos] = gpu.TheGPU.NewInputVectors("InVtxPos", int(InVtxPos), gpu.Vec3fVecType, gpu.VertexPosition)
 	rn.Vectors[InVtxNorm] = gpu.TheGPU.NewInputVectors("InVtxNorm", int(InVtxNorm), gpu.Vec3fVecType, gpu.VertexNormal)
-	rn.Vectors[InVtxTexUV] = gpu.TheGPU.NewInputVectors("InVtxTexUV", int(InVtxTexUv), gpu.Vec2fVecType, gpu.VertexTexcoord)
+	rn.Vectors[InVtxTexUV] = gpu.TheGPU.NewInputVectors("InVtxTexUV", int(InVtxTexUV), gpu.Vec2fVecType, gpu.VertexTexcoord)
 	rn.Vectors[InVtxColor] = gpu.TheGPU.NewInputVectors("InVtxColor", int(InVtxColor), gpu.Vec4fVecType, gpu.VertexColor)
 }
 
@@ -106,10 +109,11 @@ func (rn *Renderers) InitUnis() error {
 	lights.AddUniform("PointLights", gpu.Vec3fUniType, true, 0) // 3 per
 	lights.AddUniform("SpotLights", gpu.Vec3fUniType, true, 0)  // 5 per
 	rn.Unis[lights.Name()] = lights
+	return nil
 }
 
 func (rn *Renderers) InitRenders() error {
-	Renders = make(map[string]Render)
+	rn.Renders = make(map[string]Render)
 	var errs []error
 	rn.AddNewRender(&RenderUniformColor{}, &errs)
 	rn.AddNewRender(&RenderVertexColor{}, &errs)
@@ -129,7 +133,7 @@ func (rn *Renderers) InitRenders() error {
 // and adds it to the global Renders map, by Name()
 func (rn *Renderers) AddNewRender(mt Render, errs *[]error) {
 	err := mt.Compile()
-	Renders[mt.Name()] = mt
+	rn.Renders[mt.Name()] = mt
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -151,28 +155,6 @@ func ColorToVec3f(clr gi.Color) mat32.Vec3 {
 	return v
 }
 
-// SetLightsUnis sets the lights and recompiles the programs accordingly
-// Must be called with proper context activated
-func (rn *Renderers) SetLightsUnis(lights Lights) {
-	lu, ok := rn.Unis["Lights"]
-	if !ok {
-		return
-	}
-	var ambs []mat32.Vec3
-	var dirs []mat32.Vec3
-	var points []mat32.Vec3
-	var spots []mat32.Vec3
-	for _, lt := range lights {
-		switch l := lt.(type) {
-		case *AmbientLight:
-			ambs = append(ambs, ColorToVec3f(l.Color).MultiplyScalar(l.Lumens))
-		case *DirLight:
-			dirs = append(dirs, ColorToVec3f(l.Color).MultiplyScalar(l.Lumens))
-		}
-	}
-
-}
-
 //////////////////////////////////////////////////////////////////////
 //   Render
 
@@ -192,13 +174,7 @@ type Render interface {
 
 	// Compile compiles the gpu.Pipeline programs and shaders for
 	// this material -- called during initialization.
-	Compile()
-
-	// SetLights sets the lights and recompiles the programs accordingly
-	SetLights(lights Lights)
-
-	// SetCamera sets the overall camera view matrix
-	SetCamera(camview mat32.Mat4)
+	Compile() error
 }
 
 // Base render type
@@ -208,15 +184,15 @@ type RenderBase struct {
 }
 
 func (mt *RenderBase) Name() string {
-	return mb.Nm
+	return mt.Nm
 }
 
 func (mt *RenderBase) Pipeline() gpu.Pipeline {
-	return mb.Pipe
+	return mt.Pipe
 }
 
 func (mt *RenderBase) VtxFragProg() gpu.Program {
-	return mb.Pipe.ProgramByName("VtxFrag")
+	return mt.Pipe.ProgramByName("VtxFrag")
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -231,9 +207,8 @@ type RenderUniformColor struct {
 
 func (mt *RenderUniformColor) Compile() error {
 	mt.Nm = "RenderUniformColor"
-	mt.Order = 1
 	if mt.Pipe != nil {
-		mt.Pipe = gpu.NewPipeline(mt.Nm)
+		mt.Pipe = gpu.TheGPU.NewPipeline(mt.Nm)
 		mt.Pipe.AddProgram("VtxFrag")
 	}
 	pl := mt.Pipe
@@ -269,6 +244,7 @@ precision mediump float;
 `+RenderUniLights+
 			`
 uniform vec4 Color;
+uniform vec3 EmissiveColor;
 uniform float Shininess;
 in vec4 Pos;
 in vec3 Norm;
@@ -300,23 +276,22 @@ void main() {
 	pr.AddUniforms(rn.Unis["Camera"])
 	pr.AddUniforms(rn.Unis["Lights"])
 	pr.AddUniform("Color", gpu.Vec3fUniType, false, 0)
+	pr.AddUniform("EmissiveColor", gpu.Vec4fUniType, false, 0)
 	pr.AddUniform("Shininess", gpu.FUniType, false, 0)
 
 	pr.SetFragDataVar("outputColor")
 	return nil
 }
 
-func (mt *RenderUniformColor) SetColor(color color.Color) error {
+func (mt *RenderUniformColor) SetColors(clr, emmis gi.Color) error {
 	pr := mt.VtxFragProg()
-	clr := pr.UniformByName("Color")
-	// todo: convert to float
-	clr.SetValue()
-}
-
-func (mt *RenderUniformColor) SetColorF(color mat32.Color) error {
-	pr := mt.VtxFragProg()
-	clr := pr.UniformByName("Color")
-	clr.SetValue(color)
+	clru := pr.UniformByName("Color")
+	clrv := ColorToVec4f(clr)
+	clru.SetValue(clrv)
+	emsu := pr.UniformByName("EmmisiveColor")
+	emsv := ColorToVec3f(emmis)
+	emsu.SetValue(emsv)
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -333,10 +308,10 @@ type RenderVertexColor struct {
 
 func (mt *RenderVertexColor) Compile() error {
 	mt.Nm = "RenderVertexColor"
-	mt.Order = 1
-	pl := gpu.NewPipeline(mt.Nm)
+	pl := gpu.TheGPU.NewPipeline(mt.Nm)
 	pr := pl.AddProgram("VtxFrag")
 	mt.Pipe = pl
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -345,6 +320,14 @@ func (mt *RenderVertexColor) Compile() error {
 // RenderTexture renders a texture material.
 type RenderTexture struct {
 	RenderBase
+}
+
+func (mt *RenderTexture) Compile() error {
+	mt.Nm = "RenderTexture"
+	pl := gpu.TheGPU.NewPipeline(mt.Nm)
+	pr := pl.AddProgram("VtxFrag")
+	mt.Pipe = pl
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -366,7 +349,7 @@ var RenderUniLights = `layout (std140) uniform Lights
 #if DirLights_LEN>0
     vec3 DirLights[DirLights_LEN];
     #define DirLightColor(a) DirLights[2*a]
-    #define DirLightPos(a) DirLights[2*a+1]
+    #define DirLightDir(a) DirLights[2*a+1]
 #endif
 #if PointLights_LEN>0
     vec3 PointLights[PointLights_LEN];
@@ -420,8 +403,8 @@ void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDif
     int ndir = DirLights_LEN / 2;
     for (int i = 0; i < ndir; i++) {
         // Diffuse reflection
-        // DirLightPos is the direction of the current light
-        vec3 lightDir = normalize(DirLightPos(i));
+        // DirLightDir is the negated position = direction of the current light
+        vec3 lightDir = normalize(DirLightDir(i));
         // Calculates the dot product between the light direction and this vertex normal.
         float dotNormal = max(dot(lightDir, normal), 0.0);
         diffuseTotal += DirLightColor(i) * matDiffuse * dotNormal;
@@ -494,7 +477,7 @@ void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDif
 #endif
 
     // Sets output colors
-    ambdiff = ambientTotal + diffuseTotal; // note: missing emissive color
+    ambdiff = ambientTotal + EmissiveColor + diffuseTotal;
     spec = specularTotal;
 }
 `

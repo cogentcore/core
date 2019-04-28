@@ -5,8 +5,9 @@
 package gi3d
 
 import (
-	"github.com/goki/gi"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
+	"github.com/goki/ki/kit"
 )
 
 // shapes define different standard mesh shapes
@@ -18,6 +19,17 @@ type Box struct {
 	Segs mat32.Vec3i `desc:"number of segments to divide each plane into (enforced to be at least 1)"`
 }
 
+var KiT_Box = kit.Types.AddType(&Box{}, nil)
+
+// AddNewBox adds Box mesh to given scene, with given name and size
+func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
+	bx := &Box{}
+	bx.Nm = name
+	bx.Size.Set(width, height, depth)
+	sc.AddMesh(bx)
+	return bx
+}
+
 func (bx *Box) Make() {
 	bx.Reset()
 
@@ -27,10 +39,18 @@ func (bx *Box) Make() {
 	clr := gi.Color{}
 
 	// start with neg z as typically back
-	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -halfSz.Z, bx.Segs.X, bx.Segs.Y, clr) // nz
-	bx.AddPlane(mat32.Z, mat32.Y, -1, -1, bx.Size.Z, bx.Size.Y, halfSz.X, bx.Segs.Z, bx.Segs.Y, clr)  // px
-	bx.AddPlane(mat32.Z, mat32.Y, 1, -1, bx.Size.Z, bx.Size.Y, -halfSz.X, bx.Segs.Z, bx.Segs.Y, clr)  // nx
-	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, halfSz.Y, bx.Segs.X, bx.Segs.Z, clr)    // py
-	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -halfSz.Y, bx.Segs.X, bx.Segs.Z, clr)  // ny
-	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, halfSz.Z, bx.Segs.X, bx.Segs.Y, clr)   // pz
+	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -halfSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr) // nz
+	bx.AddPlane(mat32.Z, mat32.Y, -1, -1, bx.Size.Z, bx.Size.Y, halfSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // px
+	bx.AddPlane(mat32.Z, mat32.Y, 1, -1, bx.Size.Z, bx.Size.Y, -halfSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // nx
+	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)    // py
+	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)  // ny
+	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, halfSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
+
+	bx.BBox.BBox.Min = halfSz
+	bx.BBox.BBox.Min.Negate()
+	bx.BBox.BBox.Max = halfSz
+
+	bx.BBox.BSphere.Radius = halfSz.Length()
+	bx.BBox.Area = 2*bx.Size.X + 2*bx.Size.Y + 2*bx.Size.Z
+	bx.BBox.Volume = bx.Size.X * bx.Size.Y * bx.Size.Z
 }
