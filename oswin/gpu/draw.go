@@ -13,7 +13,7 @@ import (
 // Call methods as, e.g.: gpu.Draw.Triangles(..) etc..
 var Draw Drawing
 
-// Drawing provides commonly-used GPU drawing functions
+// Drawing provides commonly-used GPU drawing functions and state settings that affect drawing.
 // All operate on the current context with current program, target, etc
 type Drawing interface {
 	// Clear clears the given properties of the current render target
@@ -22,11 +22,19 @@ type Drawing interface {
 	// ClearColor sets the color to draw when clear is called
 	ClearColor(r, g, b float32)
 
-	// DepthTest turns on / off depth testing
+	// DepthTest turns on / off depth testing (standard less-than-or-equal depth assumed).
 	DepthTest(on bool)
 
 	// StencilTest turns on / off stencil testing
 	StencilTest(on bool)
+
+	// CullFace sets face culling, for front and / or back faces (back typical).
+	// If you don't do this, rendering of standard Phong model will not work.
+	// Standard CCW face ordering assumed.
+	CullFace(on, front, back bool)
+
+	// Multisample turns on or off multisampling (antialiasing)
+	Multisample(on bool)
 
 	// Op sets the blend function based on go standard draw operation
 	// Src disables blending, and Over uses alpha-blending

@@ -164,7 +164,12 @@ func (rn *Renderers) AddNewRender(rb Render, errs *[]error) {
 	}
 }
 
-// todo: delete mat32.color, mat32.color4
+// DrawState configures the draw state for rendering -- call when first starting rendering
+func (rn *Renderers) DrawState() {
+	gpu.Draw.DepthTest(true)
+	gpu.Draw.CullFace(true, false, true) // back face culling
+	gpu.Draw.Multisample(true)
+}
 
 // ColorToVec4f converts given gi.Color to mat32.Vec4 float32's
 func ColorToVec4f(clr gi.Color) mat32.Vec4 {
@@ -280,7 +285,8 @@ out vec3 CamDir;
 void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);
 	Pos = MVMatrix * vPos;
-	Norm = normalize(NormMatrix * VtxNorm);
+	// Norm = normalize(NormMatrix * VtxNorm);
+	Norm = normalize(VtxNorm);
 	CamDir = normalize(-Pos.xyz);
 	
 	gl_Position = MVPMatrix * vPos;
@@ -292,7 +298,7 @@ void main() {
 
 	_, err = pr.AddShader(gpu.FragmentShader, "Frag",
 		`
-precision mediump float;
+// precision mediump float;
 `+RenderUniLights+
 			`
 uniform vec4 Color;
@@ -305,21 +311,21 @@ out vec4 outputColor;
 `+RenderPhong+
 			`
 void main() {
-    // Inverts the fragment normal if not FrontFacing
-    vec3 fragNormal = Norm;
-    float shiny = ShinyV.x;
-    if (!gl_FrontFacing) {
-        fragNormal = -fragNormal;
-    }
-    float opacity = Color.a;
-    vec3 clr = Color.rgb;	
+	// Inverts the fragment normal if not FrontFacing
+	vec3 fragNorm = Norm;
+	if (!gl_FrontFacing) {
+	 	fragNorm = -fragNorm;
+	}
+	float shiny = ShinyV.x;
+	float opacity = Color.a;
+	vec3 clr = Color.rgb;	
 	
-    // Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
-    vec3 Ambdiff, Spec;
-    phongModel(Pos, fragNormal, CamDir, clr, clr, shiny, Ambdiff, Spec);
+	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
+	vec3 Ambdiff, Spec;
+	phongModel(Pos, fragNorm, CamDir, clr, clr, shiny, Ambdiff, Spec);
 
-    // Final fragment color
-    outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
+	// Final fragment color
+	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
 }
 `+"\x00")
 	if err != nil {
@@ -403,126 +409,121 @@ var RenderUniLights = `
 layout (std140) uniform Lights
 {
 #if AMBLIGHTS_LEN>0
-    vec3 AmbLights[AMBLIGHTS_LEN];
+	vec3 AmbLights[AMBLIGHTS_LEN];
 #endif
 #if DIRLIGHTS_LEN>0
-    vec3 DirLights[DIRLIGHTS_LEN];
-    #define DirLightColor(a) DirLights[2*a]
-    #define DirLightDir(a) DirLights[2*a+1]
+	vec3 DirLights[DIRLIGHTS_LEN];
+	#define DirLightColor(a) DirLights[2*a]
+	#define DirLightDir(a) DirLights[2*a+1]
 #endif
 #if POINTLIGHTS_LEN>0
-    vec3 PointLights[POINTLIGHTS_LEN];
-    #define PointLightColor(a)     PointLights[3*a]
-    #define PointLightPos(a)       PointLights[3*a+1]
-    #define PointLightLinDecay(a)	  PointLights[3*a+2].x
-    #define PointLightQuadDecay(a)	 PointLights[3*a+2].y
+	vec3 PointLights[POINTLIGHTS_LEN];
+	#define PointLightColor(a)     PointLights[3*a]
+	#define PointLightPos(a)       PointLights[3*a+1]
+	#define PointLightLinDecay(a)	  PointLights[3*a+2].x
+	#define PointLightQuadDecay(a)	 PointLights[3*a+2].y
 #endif
 #if SPOTLIGHTS_LEN>0
-    vec3 SpotLights[SPOTLIGHTS_LEN];
-    #define SpotLightColor(a)     SpotLights[5*a]
-    #define SpotLightPos(a)       	SpotLights[5*a+1]
-    #define SpotLightDir(a)		       SpotLights[5*a+2]
-    #define SpotLightAngDecay(a)  	SpotLights[5*a+3].x
-    #define SpotLightCutAngle(a)  SpotLights[5*a+3].y
-    #define SpotLightLinDecay(a)  SpotLights[5*a+3].z
-    #define SpotLightQuadDecay(a) 	SpotLights[5*a+4].x
+	vec3 SpotLights[SPOTLIGHTS_LEN];
+	#define SpotLightColor(a)     SpotLights[5*a]
+	#define SpotLightPos(a)       	SpotLights[5*a+1]
+	#define SpotLightDir(a)		       SpotLights[5*a+2]
+	#define SpotLightAngDecay(a)  	SpotLights[5*a+3].x
+	#define SpotLightCutAngle(a)  SpotLights[5*a+3].y
+	#define SpotLightLinDecay(a)  SpotLights[5*a+3].z
+	#define SpotLightQuadDecay(a) 	SpotLights[5*a+4].x
 #endif
 };
 `
 
 var RenderPhong = `
-void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, float shiny, out vec3 ambdiff, out vec3 spec) {
+void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, float shiny, out vec3 ambdiff, out vec3 spec) {
 
-    vec3 specularColor = vec3(1.0); // always white anyway
-    vec3 ambientTotal  = vec3(0.0);
-    vec3 diffuseTotal  = vec3(0.0);
-    vec3 specularTotal = vec3(0.0);
+	vec3 specularColor = vec3(1.0); // always white anyway
+	vec3 ambientTotal  = vec3(0.0);
+	vec3 diffuseTotal  = vec3(0.0);
+	vec3 specularTotal = vec3(0.0);
 
 #if AMBLIGHTS_LEN>0
-    for (int i = 0; i < AMBLIGHTS_LEN; i++) {
-        ambientTotal += AmbLights[i] * matAmbient;
-    }
+	for (int i = 0; i < AMBLIGHTS_LEN; i++) {
+		ambientTotal += AmbLights[i] * matAmbient;
+	}
 #endif
 
 #if DIRLIGHTS_LEN>0
-    int ndir = DIRLIGHTS_LEN / 2;
-    for (int i = 0; i < ndir; i++) {
-        // Diffuse reflection
-        // DirLightDir is the negated position = direction of the current light
-        vec3 lightDir = normalize(DirLightDir(i));
-        // Calculates the dot product between the light direction and this vertex normal.
-        float dotNormal = max(dot(lightDir, normal), 0.0);
-        diffuseTotal += DirLightColor(i) * matDiffuse * dotNormal;
-        // Specular reflection
-        // Calculates the light reflection vector
-        vec3 ref = reflect(-lightDir, normal);
-        if (dotNormal > 0.0) {
-            specularTotal += DirLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny);
-        }
-    }
+	int ndir = DIRLIGHTS_LEN / 2;
+	for (int i = 0; i < ndir; i++) {
+		// DirLightDir is the negated position = direction of the current light
+		vec3 lightDir = normalize(DirLightDir(i));
+		// Calculates the dot product between the light direction and this vertex normal.
+		float dotNormal = max(dot(lightDir, norm), 0.0);
+		diffuseTotal += DirLightColor(i) * matDiffuse * dotNormal;
+		// Specular reflection -- calculates the light reflection vector
+		vec3 ref = reflect(-lightDir, norm);
+		if (dotNormal > 0.0) {
+			specularTotal += DirLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny);
+		}
+	}
 #endif
 
 #if POINTLIGHTS_LEN>0
-    int npoint = POINTLIGHTS_LEN / 3;
-    for (int i = 0; i < npoint; i++) {
-        // Common calculations
-        // Calculates the direction and distance from the current vertex to this point light.
-        vec3 lightDir = PointLightPos(i) - vec3(pos);
-        float lightDist = length(lightDir);
-        // Normalizes the lightDir
-        lightDir = lightDir / lightDist;
-        // Calculates the attenuation due to the distance of the light
-        float attenuation = 1.0 / (1.0 + PointLightLinDecay(i) * lightDist +
-            PointLightQuadDecay(i) * lightDist * lightDist);
-        // Diffuse reflection
-        float dotNormal = max(dot(lightDir, normal), 0.0);
-        diffuseTotal += PointLightColor(i) * matDiffuse * dotNormal * attenuation;
-        // Specular reflection
-        // Calculates the light reflection vector
-        vec3 ref = reflect(-lightDir, normal);
-        if (dotNormal > 0.0) {
-            specularTotal += PointLightColor(i) * specularColor *
-                pow(max(dot(ref, camDir), 0.0), shiny) * attenuation;
-        }
-    }
+	int npoint = POINTLIGHTS_LEN / 3;
+	for (int i = 0; i < npoint; i++) {
+		// Calculates the direction and distance from the current vertex to this point light.
+		vec3 lightDir = PointLightPos(i) - vec3(pos);
+		float lightDist = length(lightDir);
+		// Normalizes the lightDir
+		lightDir = lightDir / lightDist;
+		// Calculates the attenuation due to the distance of the light
+		float attenuation = 1.0 / (1.0 + PointLightLinDecay(i) * lightDist +
+			PointLightQuadDecay(i) * lightDist * lightDist);
+		// Diffuse reflection
+		float dotNormal = max(dot(lightDir, norm), 0.0);
+		diffuseTotal += PointLightColor(i) * matDiffuse * dotNormal * attenuation;
+		// Specular reflection -- calculates the light reflection vector
+		vec3 ref = reflect(-lightDir, norm);
+		if (dotNormal > 0.0) {
+			specularTotal += PointLightColor(i) * specularColor *
+				pow(max(dot(ref, camDir), 0.0), shiny) * attenuation;
+		}
+	}
 #endif
 
 #if SPOTLIGHTS_LEN>0
-    int nspot = Spotights_LEN / 5;
-    for (int i = 0; i < nspot; i++) {
-        // Calculates the direction and distance from the current vertex to this spot light.
-        vec3 lightDir = SpotLightPos(i) - vec3(pos);
-        float lightDist = length(lightDir);
-        lightDir = lightDir / lightDist;
+	int nspot = Spotights_LEN / 5;
+	for (int i = 0; i < nspot; i++) {
+		// Calculates the direction and distance from the current vertex to this spot light.
+		vec3 lightDir = SpotLightPos(i) - vec3(pos);
+		float lightDist = length(lightDir);
+		lightDir = lightDir / lightDist;
 
-        // Calculates the attenuation due to the distance of the light
-        float attenuation = 1.0 / (1.0 + SpotLightLinDecay(i) * lightDist +
-            SpotLightQuadDecay(i) * lightDist * lightDist);
+		// Calculates the attenuation due to the distance of the light
+		float attenuation = 1.0 / (1.0 + SpotLightLinDecay(i) * lightDist +
+			SpotLightQuadDecay(i) * lightDist * lightDist);
 
-        // Calculates the angle between the vertex direction and spot direction
-        // If this angle is greater than the cutoff the spotlight will not contribute
-        // to the final color.
-        float angle = acos(dot(-lightDir, SpotLightDir(i)));
-        float cutoff = radians(clamp(SpotLightCutAngle(i), 0.0, 90.0));
+		// Calculates the angle between the vertex direction and spot direction
+		// If this angle is greater than the cutoff the spotlight will not contribute
+		// to the final color.
+		float angle = acos(dot(-lightDir, SpotLightDir(i)));
+		float cutoff = radians(clamp(SpotLightCutAngle(i), 0.0, 90.0));
 
-        if (angle < cutoff) {
-            float spotFactor = pow(dot(-lightDir, SpotLightDir(i)), SpotLightAngDecay(i));
+		if (angle < cutoff) {
+			float spotFactor = pow(dot(-lightDir, SpotLightDir(i)), SpotLightAngDecay(i));
 
-            // Diffuse reflection
-            float dotNormal = max(dot(lightDir, normal), 0.0);
-            diffuseTotal += SpotLightColor(i) * matDiffuse * dotNormal * attenuation * spotFactor;
+			// Diffuse reflection
+			float dotNormal = max(dot(lightDir, norm), 0.0);
+			diffuseTotal += SpotLightColor(i) * matDiffuse * dotNormal * attenuation * spotFactor;
 
-            // Specular reflection
-            vec3 ref = reflect(-lightDir, normal);
-            if (dotNormal > 0.0) {
-                specularTotal += SpotLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
-            }
-        }
-    }
+			// Specular reflection
+			vec3 ref = reflect(-lightDir, norm);
+			if (dotNormal > 0.0) {
+				specularTotal += SpotLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
+			}
+		}
+	}
 #endif
 
-    // Sets output colors
-    ambdiff = ambientTotal + Emissive + diffuseTotal;
-    spec = specularTotal;
+	ambdiff = ambientTotal + Emissive + diffuseTotal;
+	spec = specularTotal;
 }
 `

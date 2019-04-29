@@ -41,6 +41,7 @@ func (dr *Drawing) ClearColor(r, g, b float32) {
 // DepthTest turns on / off depth testing
 func (dr *Drawing) DepthTest(on bool) {
 	if on {
+		gl.DepthFunc(gl.LEQUAL)
 		gl.Enable(gl.DEPTH_TEST)
 	} else {
 		gl.Disable(gl.DEPTH_TEST)
@@ -56,12 +57,41 @@ func (dr *Drawing) StencilTest(on bool) {
 	}
 }
 
+// CullFace sets face culling, for front and / or back faces (back typical).
+// If you don't do this, rendering of standard Phong model will not work.
+func (dr *Drawing) CullFace(on, front, back bool) {
+	if on {
+		gl.FrontFace(gl.CCW)
+		switch {
+		case front && back:
+			gl.CullFace(gl.FRONT_AND_BACK)
+		case front:
+			gl.CullFace(gl.FRONT)
+		case back:
+			gl.CullFace(gl.BACK)
+		}
+		gl.Enable(gl.CULL_FACE)
+	} else {
+		gl.Disable(gl.CULL_FACE)
+	}
+}
+
+// Multisample turns on or off multisampling (antialiasing)
+func (dr *Drawing) Multisample(on bool) {
+	if on {
+		gl.Enable(gl.MULTISAMPLE)
+	} else {
+		gl.Disable(gl.MULTISAMPLE)
+	}
+}
+
 // Op sets the blend function based on go standard draw operation
 // Src disables blending, and Over uses alpha-blending
 func (dr *Drawing) Op(op draw.Op) {
 	if op == draw.Over {
 		gl.Enable(gl.BLEND)
-		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+		gl.BlendEquation(gl.FUNC_ADD)
+		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 	} else {
 		gl.Disable(gl.BLEND)
 	}

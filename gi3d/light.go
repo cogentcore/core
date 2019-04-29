@@ -135,6 +135,7 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 	lt.Clr = LightColorMap[color]
 	lt.Lumns = lumens
 	lt.Pos.Y = 1
+	lt.Pos.Z = 1
 	sc.AddLight(lt)
 	return lt
 }
@@ -143,7 +144,7 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 func (dl *DirLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
 	dir := mat32.Vec4{}
 	dir.SetVec3(&dl.Pos, 0)
-	dir.Negate()
+	// dir.Negate() // this is problematic
 	dir.ApplyMat4(&viewMat)
 	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
 	dir3.Normalize()

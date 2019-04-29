@@ -41,10 +41,10 @@ func (bx *Box) Make() {
 
 	// start with neg z as typically back
 	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -halfSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr) // nz
+	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)  // ny
 	bx.AddPlane(mat32.Z, mat32.Y, -1, -1, bx.Size.Z, bx.Size.Y, halfSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // px
 	bx.AddPlane(mat32.Z, mat32.Y, 1, -1, bx.Size.Z, bx.Size.Y, -halfSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // nx
 	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)    // py
-	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)  // ny
 	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, halfSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
 
 	bx.BBox.BBox.Min = halfSz

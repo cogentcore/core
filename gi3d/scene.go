@@ -413,10 +413,10 @@ func (sc *Scene) ActivateFrame() bool {
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 		sc.Frame.Activate()
+		sc.Renders.DrawState()
 		clr := ColorToVec3f(sc.BgColor)
 		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
 		gpu.Draw.Clear(true, true) // clear color and depth
-		gpu.Draw.DepthTest(false)
 	})
 	return true
 }

@@ -149,7 +149,9 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 
 	gpu.Draw.Op(op)
 	gpu.Draw.DepthTest(false)
+	gpu.Draw.CullFace(true, false, true) // back face culling
 	gpu.Draw.StencilTest(false)
+	gpu.Draw.Multisample(false)
 	app.drawProg.Activate()
 
 	// Start with src-space left, top, right and bottom.
@@ -317,9 +319,10 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32) mat32.
 	}
 }
 
+// Note: arranged in CCW order
 var quadCoords = mat32.ArrayF32{
 	0, 0, // top left
-	1, 0, // top right
 	0, 1, // bottom left
+	1, 0, // top right
 	1, 1, // bottom right
 }
