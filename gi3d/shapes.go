@@ -26,6 +26,7 @@ func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	bx := &Box{}
 	bx.Nm = name
 	bx.Size.Set(width, height, depth)
+	bx.Segs.Set(10, 10, 10)
 	sc.AddMesh(bx)
 	return bx
 }

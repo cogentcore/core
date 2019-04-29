@@ -23,6 +23,14 @@ func NewVec4(x, y, z, w float32) *Vec4 {
 	return &Vec4{X: x, Y: y, Z: z, W: w}
 }
 
+// IsNil returns true if all values are 0 (uninitialized).
+func (v *Vec4) IsNil() bool {
+	if v.X == 0 && v.Y == 0 && v.Z == 0 && v.W == 0 {
+		return true
+	}
+	return false
+}
+
 // Set sets this vector X, Y, Z and W components.
 // Returns the pointer to this updated vector.
 func (v *Vec4) Set(x, y, z, w float32) *Vec4 {

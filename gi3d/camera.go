@@ -19,7 +19,12 @@ type Camera struct {
 }
 
 func (cm *Camera) Defaults() {
-	cm.Pose.Pos.Set(0, 0, -10)
+	cm.Pose.Defaults()
+	cm.Pose.Pos.Set(0, 0, 10)
+	cm.FOV = 90
+	cm.Aspect = 1.5
+	cm.Near = .1
+	cm.Far = 1000
 	cm.LookAt(&mat32.Vec3{0, 0, 0}, &mat32.Vec3{0, 1, 0})
 }
 
@@ -42,4 +47,5 @@ func (cm *Camera) LookAt(target, upDir *mat32.Vec3) {
 	rotMat := mat32.Mat4{}
 	rotMat.LookAt(&cm.Pose.Pos, target, upDir)
 	cm.Pose.Quat.SetFromRotationMatrix(&rotMat)
+	cm.UpdateMatrix()
 }

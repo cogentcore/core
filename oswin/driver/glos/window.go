@@ -15,7 +15,6 @@ import (
 	"image/draw"
 	"sync"
 
-	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
@@ -218,6 +217,7 @@ func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectan
 	theApp.RunOnMain(func() {
 		w.Activate()
 		gpu.TheGPU.RenderToWindow()
+		gpu.Draw.Viewport(image.Rectangle{Max: w.PxSize})
 		if w.drawQuads == nil {
 			w.drawQuads = theApp.drawQuadsBuff()
 		}
@@ -230,6 +230,7 @@ func (w *windowImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.R
 	theApp.RunOnMain(func() {
 		w.Activate()
 		gpu.TheGPU.RenderToWindow()
+		gpu.Draw.Viewport(image.Rectangle{Max: w.PxSize})
 		if w.fillQuads == nil {
 			w.fillQuads = theApp.fillQuadsBuff()
 		}
@@ -249,6 +250,8 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	theApp.RunOnMain(func() {
 		w.Activate()
+		gpu.TheGPU.RenderToWindow()
+		gpu.Draw.Viewport(image.Rectangle{Max: w.PxSize})
 		if w.fillQuads == nil {
 			w.fillQuads = theApp.fillQuadsBuff()
 		}
@@ -460,7 +463,6 @@ func (w *windowImpl) updtGeom() {
 	w.PhysDPI = w.Scrn.PhysicalDPI
 	w.LogDPI = w.Scrn.LogicalDPI
 	w.Activate()
-	gl.Viewport(0, 0, int32(w.PxSize.X), int32(w.PxSize.Y))
 	w.winTex.SetSize(w.PxSize)
 	w.mu.Unlock()
 	w.sendWindowEvent(window.Resize)

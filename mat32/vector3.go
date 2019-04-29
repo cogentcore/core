@@ -23,6 +23,14 @@ func NewVec3(x, y, z float32) *Vec3 {
 	return &Vec3{X: x, Y: y, Z: z}
 }
 
+// IsNil returns true if all values are 0 (uninitialized).
+func (v *Vec3) IsNil() bool {
+	if v.X == 0 && v.Y == 0 && v.Z == 0 {
+		return true
+	}
+	return false
+}
+
 // Set sets this vector X, Y and Z components.
 // Returns the pointer to this updated vector.
 func (v *Vec3) Set(x, y, z float32) *Vec3 {

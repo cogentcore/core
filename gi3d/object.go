@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/kit"
 )
 
@@ -32,16 +33,26 @@ func (obj *Object) AsObject() *Object {
 	return obj
 }
 
+// Defaults sets default initial settings for object params -- important
+// to call this before setting specific values, as the initial zero
+// values for some parameters are degenerate
+func (obj *Object) Defaults() {
+	obj.Pose.Defaults()
+	obj.Mat.Defaults()
+}
+
 // AddNewObject adds a new object of given name and mesh
 func (obj *Object) AddNewObject(sc *Scene, name string, meshName string) *Object {
 	nobj := obj.AddNewChild(KiT_Object, name).(*Object)
 	nobj.SetMesh(sc, meshName)
+	nobj.Defaults()
 	return nobj
 }
 
 // AddNewGroup adds a new group of given name and mesh
 func (obj *Object) AddNewGroup(name string) *Group {
 	ngp := obj.AddNewChild(KiT_Group, name).(*Group)
+	ngp.Defaults()
 	return ngp
 }
 
@@ -153,7 +164,7 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	switch rc {
 	case RClassOpaqueUniform, RClassTransUniform:
 		rndu := rnd.(*RenderUniformColor)
-		rndu.SetColors(obj.Mat.Color, obj.Mat.Emissive)
+		rndu.SetMat(&obj.Mat)
 	case RClassTexture:
 		// obj.Mat.TexPtr.Activate()
 	}
@@ -161,4 +172,5 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	obj.MeshPtr.Activate(sc) // meshes have all been prep'd
 	// obj.MeshPtr.TransferAll() // todo: need to optimize
 	obj.MeshPtr.Render3D()
+	gpu.TheGPU.ErrCheck("obj render")
 }

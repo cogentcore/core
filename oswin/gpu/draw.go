@@ -5,9 +5,8 @@
 package gpu
 
 import (
+	"image"
 	"image/draw"
-
-	"github.com/goki/gi/mat32"
 )
 
 // Draw is the current oswin gpu Drawing instance.
@@ -26,9 +25,16 @@ type Drawing interface {
 	// DepthTest turns on / off depth testing
 	DepthTest(on bool)
 
+	// StencilTest turns on / off stencil testing
+	StencilTest(on bool)
+
 	// Op sets the blend function based on go standard draw operation
 	// Src disables blending, and Over uses alpha-blending
 	Op(op draw.Op)
+
+	// Viewport sets the rendering viewport to given rectangle.
+	// It is important to update this for each render -- cannot assume it.
+	Viewport(rect image.Rectangle)
 
 	// Triangles uses all existing settings to draw Triangles
 	// (non-indexed)
@@ -38,11 +44,20 @@ type Drawing interface {
 	// (non-indexed)
 	TriangleStrips(start, count int)
 
-	// TrianglesIndexed uses all existing settings to draw Triangles
-	// Indexed
-	TrianglesIndexed(count int, idxs mat32.ArrayU32)
+	// TrianglesIndexed uses all existing settings to draw Triangles Indexed.
+	// You must have activated an IndexesBuffer that supplies
+	// the indexes, and start + count determine range of such indexes
+	// to use, and must be within bounds for that.
+	TrianglesIndexed(start, count int)
 
-	// TriangleStripsIndexed uses all existing settings to draw Triangle Strips
-	// Indexed
-	TriangleStripsIndexed(count int, idxs mat32.ArrayU32)
+	// TriangleStripsIndexed uses all existing settings to draw Triangle Strips Indexed.
+	// You must have activated an IndexesBuffer that supplies
+	// the indexes, and start + count determine range of such indexes
+	// to use, and must be within bounds for that.
+	TriangleStripsIndexed(start, count int)
+
+	// Flush ensures that all rendering is pushed to current render target.
+	// Especially useful for rendering to framebuffers (Window SwapBuffer
+	// automatically does a flush)
+	Flush()
 }

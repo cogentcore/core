@@ -68,8 +68,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sc.SetStretchMaxHeight()
 
 	// first, add lights, set camera
-	gi3d.AddNewAmbientLight(sc, "ambient", 1, gi3d.DirectSun)
+	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
+	gi3d.AddNewAmbientLight(sc, "ambient", 0.5, gi3d.DirectSun)
+	// gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
 	sc.Camera.Defaults()
+	sc.Camera.Pose.Pos.Z = 5 // zoom in a bit
 
 	cbm := gi3d.AddNewBox(sc, "cube1", 1, 1, 1)
 

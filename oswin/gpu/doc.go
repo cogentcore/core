@@ -5,7 +5,7 @@
 /*
 Package gpu provides an abstract interface to a graphical processing unit (GPU).
 
-Currently it is only supporting OpenGL (version 4.1), but the design should be sufficiently
+Currently it is only supporting OpenGL (version 3.3), but the design should be sufficiently
 general to accommodate Vulkan with not too many changes.  Those are the primary
 cross-platform GPU systems.
 
@@ -15,9 +15,11 @@ system, defining different Shader programs that run on the GPU.
 
 Each Program has Uniform variables (constants across all GPU cores) and Input
 Vectors which are the vectorized data that each GPU core computes in parallel.
-For graphics, the Vectors are verticies, normals, etc, but the framework is
-sufficiently general as to support any vectorized computation (i.e., a simplified
-CUDA or OpenCL-like framework).  There are also Output vectors.
+For graphics, the Vectors are verticies, normals, etc.
+The Output vectors transfer information from one shader program to another
+(e.g., the Vertex shader sends output to the Fragment shader).
+Programs should be written in 3.3 GLSL but DO NOT include the version info
+as it will be automatically added.
 
 All Vectors processed by a Program must be contained in a SINGLE VectorsBuffer
 which can interleave or just append the data from multiple Vectors into a single

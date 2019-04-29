@@ -41,7 +41,21 @@ var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, false, nil)
 // LightColorMap provides a map of named light colors
 // todo: fill out rest
 var LightColorMap = map[LightColors]gi.Color{
-	DirectSun: {255, 255, 255, 255},
+	DirectSun:    {255, 255, 255, 255},
+	CarbonArc:    {255, 250, 244, 255},
+	Halogen:      {255, 241, 224, 255},
+	Tungsten100W: {255, 214, 170, 255},
+	Tungsten40W:  {255, 197, 143, 255},
+	Candle:       {255, 147, 41, 255},
+	Overcast:     {201, 226, 255, 255},
+	FluorWarm:    {255, 244, 229, 255},
+	FluorStd:     {244, 255, 250, 255},
+	FluorCool:    {212, 235, 255, 255},
+	FluorFull:    {255, 244, 242, 255},
+	FluorGrow:    {255, 239, 247, 255},
+	MercuryVapor: {216, 247, 255, 255},
+	SodiumVapor:  {255, 209, 178, 255},
+	MetalHalide:  {242, 252, 255, 255},
 }
 
 // Light represents a light that illuminates a scene
@@ -182,13 +196,18 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 			dirs = append(dirs, l.Dir(sc.Camera.ViewMatrix))
 		}
 	}
+
+	// set new lengths first
 	ambu := lu.UniformByName("AmbLights")
 	ambu.SetLen(len(ambs))
+	diru := lu.UniformByName("DirLights")
+	diru.SetLen(len(dirs))
+
+	lu.Resize()
+
 	if len(ambs) > 0 {
 		ambu.SetValue(ambs)
 	}
-	diru := lu.UniformByName("DirLights")
-	diru.SetLen(len(dirs))
 	if len(dirs) > 0 {
 		diru.SetValue(dirs)
 	}

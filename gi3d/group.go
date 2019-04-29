@@ -19,12 +19,14 @@ var KiT_Group = kit.Types.AddType(&Group{}, nil)
 func (gp *Group) AddNewObject(name string, meshName string) *Object {
 	obj := gp.AddNewChild(KiT_Object, name).(*Object)
 	obj.Mesh = MeshName(meshName)
+	obj.Defaults()
 	return obj
 }
 
 // AddNewGroup adds a new group of given name and mesh
 func (gp *Group) AddNewGroup(name string) *Group {
 	ngp := gp.AddNewChild(KiT_Group, name).(*Group)
+	ngp.Defaults()
 	return ngp
 }
 
@@ -32,4 +34,8 @@ func (gp *Group) AddNewGroup(name string) *Group {
 func (gp *Group) BBox() *BBox {
 	// todo: compute bbox
 	return &gp.BBx
+}
+
+func (gp *Group) Defaults() {
+	gp.Pose.Defaults()
 }

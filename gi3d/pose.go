@@ -10,17 +10,29 @@ import "github.com/goki/gi/mat32"
 type Pose struct {
 	Pos         mat32.Vec3 `desc:"position of center of object"`
 	Scale       mat32.Vec3 `desc:"scale (relative to parent)"`
-	Quat        mat32.Quat `view:"-" desc:"Node rotation specified as a Quat (relative to parent)"`
-	Matrix      mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
-	ParMatrix   mat32.Mat4 `view:"-" desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`
-	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
-	MVMatrix    mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`
-	MVPMatrix   mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`
-	NormMatrix  mat32.Mat3 `view:"-" desc:"normal matrix based on MVMatrix"`
+	Quat        mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
+	Matrix      mat32.Mat4 `desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
+	ParMatrix   mat32.Mat4 `desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`
+	WorldMatrix mat32.Mat4 `desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
+	MVMatrix    mat32.Mat4 `desc:"model * view matrix -- tranforms into camera-centered coords"`
+	MVPMatrix   mat32.Mat4 `desc:"model * view * projection matrix -- full final render matrix"`
+	NormMatrix  mat32.Mat3 `desc:"normal matrix based on MVMatrix"`
+}
+
+func (ps *Pose) Defaults() {
+	ps.Scale.Set(1, 1, 1)
+	ps.Quat.SetIdentity()
 }
 
 // UpdateMatrix updates the local transform matrix based on its position, quaternion, and scale.
+// Also checks for degenerate nil values
 func (ps *Pose) UpdateMatrix() {
+	if ps.Scale.IsNil() {
+		ps.Scale.Set(1, 1, 1)
+	}
+	if ps.Quat.IsNil() {
+		ps.Quat.SetIdentity()
+	}
 	ps.Matrix.Compose(&ps.Pos, &ps.Quat, &ps.Scale)
 }
 

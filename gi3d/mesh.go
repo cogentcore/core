@@ -204,7 +204,7 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 			vbuf.AddVectors(clr, false) // NO interleave
 		}
 	}
-	vln := len(ms.Vtx)
+	vln := len(ms.Vtx) / 3
 	vbuf.SetLen(vln)
 	vbuf.SetVecData(vtx, ms.Vtx)
 	vbuf.SetVecData(nrm, ms.Norm)
@@ -249,7 +249,9 @@ func (ms *MeshBase) TransferIndexes() {
 // Activate must have just been called, assumed to be on main with context
 func (ms *MeshBase) Render3D() {
 	ibuf := ms.Buff.IndexesBuffer()
-	gpu.Draw.TrianglesIndexed(ibuf.Len(), ibuf.Indexes())
+	ibuf.Activate()
+	// ibuf.Transfer()
+	gpu.Draw.TrianglesIndexed(0, ibuf.Len())
 }
 
 /////////////////////////////////////////////////////////////////////

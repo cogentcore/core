@@ -72,6 +72,10 @@ type Uniforms interface {
 	// Activate generates the Uniform Buffer Object structure and reserves the binding point
 	Activate() error
 
+	// Resize resizes the buffer if needed -- call if any of the member uniforms
+	// might have been resized.  Calls Activate if not already activated.
+	Resize() error
+
 	// Bind binds the Uniform Buffer Object structure to given program
 	Bind(prog Program) error
 

@@ -21,7 +21,7 @@ type Editor struct {
 	SVG
 	Trans         gi.Vec2D `desc:"view translation offset (from dragging)"`
 	Scale         float32  `desc:"view scaling (from zooming)"`
-	SetDragCursor bool     `desc:"has dragging cursor been set yet?"`
+	SetDragCursor bool     `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
 var KiT_Editor = kit.Types.AddType(&Editor{}, nil)

@@ -13,7 +13,10 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -28,11 +31,16 @@ type Scene struct {
 	Geom     gi.Geom2DInt        `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Win      *gi.Window          `json:"-" xml:"-" desc:"our parent window that we render into"`
 	Camera   Camera              `desc:"camera determines view onto scene"`
+	BgColor  gi.Color            `desc:"background color"`
 	Lights   map[string]Light    `desc:"all lights used in the scene"`
 	Meshes   map[string]Mesh     `desc:"all meshes used in the scene"`
 	Textures map[string]*Texture `desc:"all textures used in the scene"`
-	Renders  Renderers           `desc:"rendering programs"`
-	Frame    gpu.Framebuffer     `view:"-" desc:"direct render target for scene"`
+	NoNav    bool                `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+
+	Renders       Renderers       `desc:"rendering programs"`
+	Frame         gpu.Framebuffer `view:"-" desc:"direct render target for scene"`
+	Tex           gpu.Texture2D   `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
+	SetDragCursor bool            `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
@@ -74,12 +82,14 @@ func (sc *Scene) AddNewTexture(name string, filename string) *Texture {
 func (sc *Scene) AddNewObject(name string, meshName string) *Object {
 	obj := sc.AddNewChild(KiT_Object, name).(*Object)
 	obj.Mesh = MeshName(meshName)
+	obj.Defaults()
 	return obj
 }
 
 // AddNewGroup adds a new group of given name and mesh
 func (sc *Scene) AddNewGroup(name string) *Group {
 	ngp := sc.AddNewChild(KiT_Group, name).(*Group)
+	ngp.Defaults()
 	return ngp
 }
 
@@ -172,9 +182,11 @@ func (sc *Scene) Init2D() {
 		}
 	})
 	sc.Init3D()
+	sc.Win.AddDirectUploader(sc)
 }
 
 func (sc *Scene) Style2D() {
+	sc.SetCanFocusIfActive()
 	sc.SetCurWin()
 	sc.Style2DWidget()
 	sc.LayData.SetFromStyle(&sc.Sty.Layout) // also does reset
@@ -257,9 +269,119 @@ func (sc *Scene) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (sc *Scene) Render2D() {
 	if sc.PushBounds() {
+		if !sc.NoNav {
+			sc.NavEvents()
+		}
 		sc.Render()
 		sc.PopBounds()
 	}
+}
+
+// NavEvents handles standard viewer navigation events
+func (sc *Scene) NavEvents() {
+	sc.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.DragEvent)
+		me.SetProcessed()
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.IsDragging() {
+			if !ssc.SetDragCursor {
+				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
+				ssc.SetDragCursor = true
+			}
+			del := me.Where.Sub(me.From)
+			switch {
+			case key.HasAllModifierBits(me.Modifiers, key.Shift): // todo: something else?
+				ssc.Camera.Pose.Pos.X -= float32(del.X) * .1
+				ssc.Camera.Pose.Pos.Y -= float32(del.Y) * .1
+			default:
+				ssc.Camera.Pose.Pos.X -= float32(del.X) * .1
+				ssc.Camera.Pose.Pos.Y -= float32(del.Y) * .1
+			}
+			ssc.UpdateSig()
+		} else {
+			if ssc.SetDragCursor {
+				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+				ssc.SetDragCursor = false
+			}
+		}
+	})
+	sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		me.SetProcessed()
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.SetDragCursor {
+			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+			ssc.SetDragCursor = false
+		}
+		ssc.Camera.Pose.Pos.Z += float32(me.NonZeroDelta(false)) / 20
+		ssc.UpdateSig()
+	})
+	sc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		me.SetProcessed()
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.SetDragCursor {
+			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+			ssc.SetDragCursor = false
+		}
+		// obj := ssc.FirstContainingPoint(me.Where, true)
+		// if me.Action == mouse.Release && me.Button == mouse.Right {
+		// 	me.SetProcessed()
+		// 	if obj != nil {
+		// 		giv.StructViewDialog(ssc.Viewport, obj, giv.DlgOpts{Title: "sc Element View"}, nil, nil)
+		// 	}
+		// }
+	})
+	sc.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.HoverEvent)
+		me.SetProcessed()
+		// ssc := recv.Embed(KiT_Scene).(*Scene)
+		// obj := ssc.FirstContainingPoint(me.Where, true)
+		// if obj != nil {
+		// 	pos := me.Where
+		// 	ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
+		// 	gi.PopupTooltip(obj.Name(), pos.X, pos.Y, sc.Viewport, ttxt)
+		// }
+	})
+	sc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		kt := d.(*key.ChordEvent)
+		ch := string(kt.Chord())
+		// fmt.Printf(ch)
+		switch ch {
+		case "UpArrow":
+			ssc.Camera.Pose.Pos.Y += 0.1 // todo: rotate
+			kt.SetProcessed()
+		case "Shift+UpArrow":
+			ssc.Camera.Pose.Pos.Y += 0.1
+			kt.SetProcessed()
+		case "DownArrow":
+			ssc.Camera.Pose.Pos.Y -= 0.1 // todo: rotate
+			kt.SetProcessed()
+		case "Shift+DownArrow":
+			ssc.Camera.Pose.Pos.Y -= 0.1
+			kt.SetProcessed()
+		case "LeftArrow":
+			ssc.Camera.Pose.Pos.X += 0.1 // todo: rotate
+			kt.SetProcessed()
+		case "Shift+LeftArrow":
+			ssc.Camera.Pose.Pos.X += 0.1
+			kt.SetProcessed()
+		case "RightArrow":
+			ssc.Camera.Pose.Pos.X -= 0.1 // todo: rotate
+			kt.SetProcessed()
+		case "Shift+RightArrow":
+			ssc.Camera.Pose.Pos.X -= 0.1
+			kt.SetProcessed()
+		case "+", "=":
+			ssc.Camera.Pose.Pos.Z -= 0.1
+			kt.SetProcessed()
+		case "-", "_":
+			ssc.Camera.Pose.Pos.Z += 0.1
+			kt.SetProcessed()
+		}
+		ssc.UpdateSig()
+	})
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -291,9 +413,10 @@ func (sc *Scene) ActivateFrame() bool {
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 		sc.Frame.Activate()
-		gpu.Draw.ClearColor(0.5, 0.2, 0.2)
+		clr := ColorToVec3f(sc.BgColor)
+		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
 		gpu.Draw.Clear(true, true) // clear color and depth
-		gpu.Draw.DepthTest(true)
+		gpu.Draw.DepthTest(false)
 	})
 	return true
 }
@@ -337,7 +460,7 @@ func (sc *Scene) Init3D() {
 	if !sc.ActivateWin() {
 		return
 	}
-	_, err := sc.Renders.Init()
+	_, err := sc.Renders.Init(sc)
 	if err != nil {
 		log.Println(err)
 	}
@@ -365,17 +488,26 @@ func (sc *Scene) Render() bool {
 		return false
 	}
 	sc.Camera.UpdateMatrix()
-	var tex gpu.Texture2D
-	clr, _ := gi.ColorFromString("red", nil)
 	oswin.TheApp.RunOnMain(func() {
+		// sc.Win.OSWin.Activate() // render to screen..
 		sc.Renders.SetLightsUnis(sc)
+		gpu.TheGPU.ErrCheck("scene set light")
 		sc.Render3D()
-		tex = sc.Frame.Texture()
-		tex.Fill(tex.Bounds(), clr, draw.Over)
+		gpu.TheGPU.ErrCheck("scene render3d")
+		gpu.Draw.Flush()
+		sc.Tex = sc.Frame.Texture()
 	})
-	fmt.Printf("copy to window at: %v, bounds: %v\n", sc.WinBBox.Min, tex.Bounds())
-	sc.Win.OSWin.Copy(sc.WinBBox.Min, tex, tex.Bounds(), draw.Over, nil)
-	sc.Win.OSWin.Publish()
+	return true
+}
+
+func (sc *Scene) DirectWinUpload(win *gi.Window) bool {
+	if sc.Tex == nil || !sc.IsVisible() {
+		return false
+	}
+	if Update3DTrace {
+		fmt.Printf("Update: Window %s from Scene: %s at: %v, bounds: %v\n", win.Nm, sc.Nm, sc.WinBBox.Min, sc.Tex.Bounds())
+	}
+	win.OSWin.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, nil)
 	return true
 }
 
@@ -384,6 +516,7 @@ func (sc *Scene) Render() bool {
 func (sc *Scene) Render3D() {
 	var rcs [RenderClassesN][]*Object
 
+	sc.Camera.Pose.UpdateMatrix()
 	// Prepare for frustum culling
 	var proj mat32.Mat4
 	proj.MultiplyMatrices(&sc.Camera.PrjnMatrix, &sc.Camera.ViewMatrix)
@@ -439,7 +572,7 @@ func (sc *Scene) Render3D() {
 			rnd = sc.Renders.Renders["RenderVertexColor"]
 			gpu.Draw.Op(draw.Over) // alpha
 		}
-		rnd.VtxFragProg().Activate() // use same program for all..
+		rnd.Activate(&sc.Renders) // use same program for all..
 		for _, obj := range objs {
 			obj.This().(Node3D).Render3D(sc, rc, rnd)
 		}

@@ -18,7 +18,8 @@ type Program interface {
 	// AddShader adds shader of given type, unique name and source code.
 	// Any array uniform's will add their #define NAME_LEN's to the top
 	// of the source code automatically, so the source can assume those exist
-	// when compiled.
+	// when compiled (NAME is uppper-cased version of variable name).
+	// Also the appropriate #version is added automatically.
 	AddShader(typ ShaderTypes, name string, src string) (Shader, error)
 
 	// ShaderByName returns shader by its unique name
@@ -88,7 +89,9 @@ type Program interface {
 	// and input / output vector variables, etc.
 	// This must be called after setting the lengths of any array uniforms (e.g.,
 	// the number of lights)
-	Compile() error
+	// showSrc arg prints out the final compiled source, including automatic
+	// defines etc at the top, even if there are no errors, which can be useful for debugging.
+	Compile(showSrc bool) error
 
 	// Handle returns the handle for the program -- only valid after a Compile call
 	Handle() uint32

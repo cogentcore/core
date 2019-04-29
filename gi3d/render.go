@@ -50,23 +50,31 @@ type Renderers struct {
 	Unis    map[string]gpu.Uniforms `desc:"uniforms shared across code"`
 	Vectors []gpu.Vectors           `desc:"input vectors shared across code, indexed by RenderInputs"`
 	Renders map[string]Render       `desc:"collection of Render items"`
+	NLights int                     `view:"-" desc:"the number of lights when the rendering programs were last compiled -- need to recompile when number of lights change"`
 }
 
 // SetLights sets the lights and recompiles the programs accordingly
 // Must be called with proper context activated
 func (rn *Renderers) SetLights(sc *Scene) {
+	if rn.NLights == len(sc.Lights) {
+		return
+	}
 	oswin.TheApp.RunOnMain(func() {
 		rn.SetLightsUnis(sc)
 		for _, rd := range rn.Renders {
-			rd.Compile(rn)
+			if rd.Name() == "RenderUniformColor" { // todo: add others..
+				rd.Compile(rn)
+			}
 		}
 	})
+	rn.NLights = len(sc.Lights)
 }
 
 // SetMatrix sets the view etc matrix uniforms
 // Must be called with appropriate context (window) activated and already on main.
 func (rn *Renderers) SetMatrix(pose *Pose) {
 	cu := rn.Unis["Camera"]
+	cu.Activate()
 	mvu := cu.UniformByName("MVMatrix")
 	mvu.SetValue(pose.MVMatrix)
 	mvpu := cu.UniformByName("MVPMatrix")
@@ -79,7 +87,7 @@ func (rn *Renderers) SetMatrix(pose *Pose) {
 // Must be called with appropriate context (window) activated.
 // Returns true if wasn't already initialized, and error
 // if there is some kind of error during initialization.
-func (rn *Renderers) Init() (bool, error) {
+func (rn *Renderers) Init(sc *Scene) (bool, error) {
 	if rn.Renders != nil {
 		return false, nil
 	}
@@ -95,6 +103,7 @@ func (rn *Renderers) Init() (bool, error) {
 			log.Println(err)
 		}
 	})
+	rn.SetLights(sc) // compiles the shaders assuming lights exist
 	return true, err
 }
 
@@ -111,8 +120,10 @@ func (rn *Renderers) InitUnis() error {
 
 	camera := gpu.TheGPU.NewUniforms("Camera")
 	camera.AddUniform("MVMatrix", gpu.Mat4fUniType, false, 0)
-	camera.AddUniform("NormMatrix", gpu.Mat3fUniType, false, 0)
 	camera.AddUniform("MVPMatrix", gpu.Mat4fUniType, false, 0)
+	camera.AddUniform("NormMatrix", gpu.Mat3fUniType, false, 0)
+	camera.Activate()
+	gpu.TheGPU.ErrCheck("camera unis activate")
 	rn.Unis[camera.Name()] = camera
 
 	lights := gpu.TheGPU.NewUniforms("Lights")
@@ -120,6 +131,8 @@ func (rn *Renderers) InitUnis() error {
 	lights.AddUniform("DirLights", gpu.Vec3fUniType, true, 0)   // 2 per
 	lights.AddUniform("PointLights", gpu.Vec3fUniType, true, 0) // 3 per
 	lights.AddUniform("SpotLights", gpu.Vec3fUniType, true, 0)  // 5 per
+	lights.Activate()
+	gpu.TheGPU.ErrCheck("lights unis activate")
 	rn.Unis[lights.Name()] = lights
 	return nil
 }
@@ -143,9 +156,9 @@ func (rn *Renderers) InitRenders() error {
 
 // AddNewRender compiles the given Render and adds any errors to error list
 // and adds it to the global Renders map, by Name()
-func (rn *Renderers) AddNewRender(mt Render, errs *[]error) {
-	err := mt.Compile(rn)
-	rn.Renders[mt.Name()] = mt
+func (rn *Renderers) AddNewRender(rb Render, errs *[]error) {
+	err := rb.Init(rn)
+	rn.Renders[rb.Name()] = rb
 	if err != nil {
 		*errs = append(*errs, err)
 	}
@@ -184,9 +197,14 @@ type Render interface {
 	// named "VtxFrag"
 	VtxFragProg() gpu.Program
 
-	// Compile compiles the gpu.Pipeline programs and shaders for
-	// this material -- called during initialization.
+	// Init initializes the gpu.Pipeline programs and shaders.
+	Init(rn *Renderers) error
+
+	// Compile compiles the gpu.Pipeline programs and shaders.
 	Compile(rn *Renderers) error
+
+	// Activate activates this renderer for rendering
+	Activate(rn *Renderers)
 }
 
 // Base render type
@@ -207,6 +225,31 @@ func (rb *RenderBase) VtxFragProg() gpu.Program {
 	return rb.Pipe.ProgramByName("VtxFrag")
 }
 
+func (rb *RenderBase) Compile(rn *Renderers) error {
+	pr := rb.VtxFragProg()
+	err := pr.Compile(false) // showSrc -- good for debugging
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rb *RenderBase) Activate(rn *Renderers) {
+	// fmt.Printf("activating program: %v\n", rb.Nm)
+	pr := rb.VtxFragProg()
+	pr.Activate()
+	gpu.TheGPU.ErrCheck("vtx frag prog activate")
+	cmu := rn.Unis["Camera"]
+	cmu.Activate()
+	cmu.Bind(pr)
+	gpu.TheGPU.ErrCheck("camera bind")
+	ltu := rn.Unis["Lights"]
+	ltu.Activate()
+	ltu.Bind(pr)
+	gpu.TheGPU.ErrCheck("lights bind")
+	pr.Activate()
+}
+
 //////////////////////////////////////////////////////////////////////////
 //    RenderUniformColor
 
@@ -217,7 +260,7 @@ type RenderUniformColor struct {
 	RenderBase
 }
 
-func (rb *RenderUniformColor) Compile(rn *Renderers) error {
+func (rb *RenderUniformColor) Init(rn *Renderers) error {
 	rb.Nm = "RenderUniformColor"
 	if rb.Pipe == nil {
 		rb.Pipe = gpu.TheGPU.NewPipeline(rb.Nm)
@@ -225,19 +268,17 @@ func (rb *RenderUniformColor) Compile(rn *Renderers) error {
 	}
 	pl := rb.Pipe
 	pr := pl.ProgramByName("VtxFrag")
-	_, err := pr.AddShader(gpu.VertexShader, "Vtx",
+	_, err := pr.AddShader(gpu.VertexShader, "Vtx", RenderUniCamera+
 		`
-#version 330
-`+RenderUniCamera+
-			`
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
+// layout(location = 2) in vec2 TexUV;
 out vec4 Pos;
 out vec3 Norm;
 out vec3 CamDir;
 
 void main() {
-	vPos = vec4(VtxPos, 1.0);
+	vec4 vPos = vec4(VtxPos, 1.0);
 	Pos = MVMatrix * vPos;
 	Norm = normalize(NormMatrix * VtxNorm);
 	CamDir = normalize(-Pos.xyz);
@@ -251,13 +292,12 @@ void main() {
 
 	_, err = pr.AddShader(gpu.FragmentShader, "Frag",
 		`
-#version 330
 precision mediump float;
 `+RenderUniLights+
 			`
 uniform vec4 Color;
-uniform vec3 EmissiveColor;
-uniform float Shininess;
+uniform vec3 Emissive;
+uniform vec2 ShinyV;
 in vec4 Pos;
 in vec3 Norm;
 in vec3 CamDir;
@@ -267,6 +307,7 @@ out vec4 outputColor;
 void main() {
     // Inverts the fragment normal if not FrontFacing
     vec3 fragNormal = Norm;
+    float shiny = ShinyV.x;
     if (!gl_FrontFacing) {
         fragNormal = -fragNormal;
     }
@@ -275,7 +316,7 @@ void main() {
 	
     // Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
     vec3 Ambdiff, Spec;
-    phongModel(Pos, fragNormal, CamDir, clr, clr, Ambdiff, Spec);
+    phongModel(Pos, fragNormal, CamDir, clr, clr, shiny, Ambdiff, Spec);
 
     // Final fragment color
     outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
@@ -287,22 +328,26 @@ void main() {
 
 	pr.AddUniforms(rn.Unis["Camera"])
 	pr.AddUniforms(rn.Unis["Lights"])
-	pr.AddUniform("Color", gpu.Vec3fUniType, false, 0)
-	pr.AddUniform("EmissiveColor", gpu.Vec4fUniType, false, 0)
-	pr.AddUniform("Shininess", gpu.FUniType, false, 0)
+	pr.AddUniform("Color", gpu.Vec4fUniType, false, 0)
+	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
+	pr.AddUniform("ShinyV", gpu.Vec2fUniType, false, 0) // note: using vec2 b/c float is buggy..
 
 	pr.SetFragDataVar("outputColor")
+
 	return nil
 }
 
-func (rb *RenderUniformColor) SetColors(clr, emmis gi.Color) error {
+func (rb *RenderUniformColor) SetMat(mat *Material) error {
 	pr := rb.VtxFragProg()
 	clru := pr.UniformByName("Color")
-	clrv := ColorToVec4f(clr)
+	clrv := ColorToVec4f(mat.Color)
 	clru.SetValue(clrv)
-	emsu := pr.UniformByName("EmissiveColor")
-	emsv := ColorToVec3f(emmis)
+	emsu := pr.UniformByName("Emissive")
+	emsv := ColorToVec3f(mat.Emissive)
 	emsu.SetValue(emsv)
+	shu := pr.UniformByName("ShinyV")
+	shv := mat32.Vec2{mat.Shiny, 0}
+	shu.SetValue(shv)
 	return nil
 }
 
@@ -318,7 +363,7 @@ type RenderVertexColor struct {
 	RenderBase
 }
 
-func (rb *RenderVertexColor) Compile(rn *Renderers) error {
+func (rb *RenderVertexColor) Init(rn *Renderers) error {
 	rb.Nm = "RenderVertexColor"
 	pl := gpu.TheGPU.NewPipeline(rb.Nm)
 	pl.AddProgram("VtxFrag")
@@ -334,7 +379,7 @@ type RenderTexture struct {
 	RenderBase
 }
 
-func (rb *RenderTexture) Compile(rn *Renderers) error {
+func (rb *RenderTexture) Init(rn *Renderers) error {
 	rb.Nm = "RenderTexture"
 	pl := gpu.TheGPU.NewPipeline(rb.Nm)
 	pl.AddProgram("VtxFrag")
@@ -345,33 +390,35 @@ func (rb *RenderTexture) Compile(rn *Renderers) error {
 //////////////////////////////////////////////////////////////////////
 //  Shader code elements
 
-var RenderUniCamera = `layout (std140) uniform Camera
+var RenderUniCamera = `
+layout (std140) uniform Camera
 {
     mat4 MVMatrix;
-    mat3 NormMatrix;
     mat4 MVPMatrix;
+    mat3 NormMatrix;
 };
 `
 
-var RenderUniLights = `layout (std140) uniform Lights
+var RenderUniLights = `
+layout (std140) uniform Lights
 {
-#if AmbLights_LEN>0
-    vec3 AmbLights[AmbLights_LEN];
+#if AMBLIGHTS_LEN>0
+    vec3 AmbLights[AMBLIGHTS_LEN];
 #endif
-#if DirLights_LEN>0
-    vec3 DirLights[DirLights_LEN];
+#if DIRLIGHTS_LEN>0
+    vec3 DirLights[DIRLIGHTS_LEN];
     #define DirLightColor(a) DirLights[2*a]
     #define DirLightDir(a) DirLights[2*a+1]
 #endif
-#if PointLights_LEN>0
-    vec3 PointLights[PointLights_LEN];
+#if POINTLIGHTS_LEN>0
+    vec3 PointLights[POINTLIGHTS_LEN];
     #define PointLightColor(a)     PointLights[3*a]
     #define PointLightPos(a)       PointLights[3*a+1]
     #define PointLightLinDecay(a)	  PointLights[3*a+2].x
     #define PointLightQuadDecay(a)	 PointLights[3*a+2].y
 #endif
-#if SpotLights_LEN>0
-    vec3 SpotLights[SpotLights_LEN];
+#if SPOTLIGHTS_LEN>0
+    vec3 SpotLights[SPOTLIGHTS_LEN];
     #define SpotLightColor(a)     SpotLights[5*a]
     #define SpotLightPos(a)       	SpotLights[5*a+1]
     #define SpotLightDir(a)		       SpotLights[5*a+2]
@@ -384,35 +431,21 @@ var RenderUniLights = `layout (std140) uniform Lights
 `
 
 var RenderPhong = `
-/***
- phong lighting model
- Parameters:
-    pos:        input vertex position in camera coordinates
-    normal:     input vertex normal in camera coordinates
-    camDir:     input camera directions
-    matAmbient: input material ambient color
-    matDiffuse: input material diffuse color
-    ambdiff:    output ambient+diffuse color
-    spec:       output specular color
- Uniforms:
-    Lights
-    Shininess
-*****/
-void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, out vec3 ambdiff, out vec3 spec) {
+void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, float shiny, out vec3 ambdiff, out vec3 spec) {
 
     vec3 specularColor = vec3(1.0); // always white anyway
     vec3 ambientTotal  = vec3(0.0);
     vec3 diffuseTotal  = vec3(0.0);
     vec3 specularTotal = vec3(0.0);
 
-#if AmbLights_LEN>0
-    for (int i = 0; i < AmbLights_LEN; i++) {
+#if AMBLIGHTS_LEN>0
+    for (int i = 0; i < AMBLIGHTS_LEN; i++) {
         ambientTotal += AmbLights[i] * matAmbient;
     }
 #endif
 
-#if DirLights_LEN>0
-    int ndir = DirLights_LEN / 2;
+#if DIRLIGHTS_LEN>0
+    int ndir = DIRLIGHTS_LEN / 2;
     for (int i = 0; i < ndir; i++) {
         // Diffuse reflection
         // DirLightDir is the negated position = direction of the current light
@@ -424,13 +457,13 @@ void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDif
         // Calculates the light reflection vector
         vec3 ref = reflect(-lightDir, normal);
         if (dotNormal > 0.0) {
-            specularTotal += DirLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), Shininess);
+            specularTotal += DirLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny);
         }
     }
 #endif
 
-#if PointLights_LEN>0
-    int npoint = PointLights_LEN / 3;
+#if POINTLIGHTS_LEN>0
+    int npoint = POINTLIGHTS_LEN / 3;
     for (int i = 0; i < npoint; i++) {
         // Common calculations
         // Calculates the direction and distance from the current vertex to this point light.
@@ -449,12 +482,12 @@ void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDif
         vec3 ref = reflect(-lightDir, normal);
         if (dotNormal > 0.0) {
             specularTotal += PointLightColor(i) * specularColor *
-                pow(max(dot(ref, camDir), 0.0), Shininess) * attenuation;
+                pow(max(dot(ref, camDir), 0.0), shiny) * attenuation;
         }
     }
 #endif
 
-#if SpotLights_LEN>0
+#if SPOTLIGHTS_LEN>0
     int nspot = Spotights_LEN / 5;
     for (int i = 0; i < nspot; i++) {
         // Calculates the direction and distance from the current vertex to this spot light.
@@ -482,14 +515,14 @@ void phongModel(vec4 pos, vec3 normal, vec3 camDir, vec3 matAmbient, vec3 matDif
             // Specular reflection
             vec3 ref = reflect(-lightDir, normal);
             if (dotNormal > 0.0) {
-                specularTotal += SpotLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), Shininess) * attenuation * spotFactor;
+                specularTotal += SpotLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
             }
         }
     }
 #endif
 
     // Sets output colors
-    ambdiff = ambientTotal + EmissiveColor + diffuseTotal;
+    ambdiff = ambientTotal + Emissive + diffuseTotal;
     spec = specularTotal;
 }
 `

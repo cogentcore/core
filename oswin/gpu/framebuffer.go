@@ -53,8 +53,10 @@ type Framebuffer interface {
 
 	// Texture returns the current contents of the framebuffer as a Texture2D.
 	// For Samples() > 0 this reduces the optimized internal render buffer to a
-	// standard 2D texture.  If SetTexture was called, then it just returns that
-	// texture which was directly rendered to.
+	// standard 2D texture -- the return texture is owned and managed by the
+	// framebuffer, and re-used every time Texture() is called.
+	// If SetTexture was called, then it just returns that texture
+	// which was directly rendered to.
 	Texture() Texture2D
 
 	// todo: methods to get the depth, stencil buffer output as well..

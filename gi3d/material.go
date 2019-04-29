@@ -18,18 +18,18 @@ import (
 // The Specular color is always white (multiplied by light color).
 // Textures are stored on the Scene and accessed by name
 type Material struct {
-	Color     gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
-	Emissive  gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
-	Shininess float32  `desc:"specular shininess factor -- how strongly the surface shines back directional light -- this is an exponential factor -- 0 = not at all shiny, and 128 is a typical maximum"`
-	Texture   TexName  `desc:"texture to provide color for the surface"`
-	TexPtr    *Texture `view:"-" desc:"pointer to texture"`
+	Color    gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	Emissive gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Shiny    float32  `desc:"specular shininess factor -- how strongly the surface shines back directional light -- this is an exponential factor -- 0 = not at all shiny, and 128 is a typical maximum"`
+	Texture  TexName  `desc:"texture to provide color for the surface"`
+	TexPtr   *Texture `view:"-" desc:"pointer to texture"`
 }
 
 // Defaults sets default surface parameters
 func (mt *Material) Defaults() {
-	mt.Color.SetInt(128, 128, 128, 255)
-	mt.Emissive.SetInt(0, 0, 0, 0)
-	mt.Shininess = 1
+	mt.Color.SetUInt8(128, 128, 128, 255)
+	mt.Emissive.SetUInt8(0, 0, 0, 0)
+	mt.Shiny = 1
 }
 
 // IsTransparent returns true if color has alpha < 255

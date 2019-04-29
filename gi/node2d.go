@@ -219,6 +219,11 @@ type Node2D interface {
 	// very challenging without mistakenly overwriting invisibility at various
 	// levels.
 	IsVisible() bool
+
+	// DirectWinUpload does a direct upload of contents to the window
+	// Called at the appropriate point during the overall window publish update process
+	// For e.g., gi3d.Scene which renders directly to the window for maximum efficiency
+	DirectWinUpload(win *Window) bool
 }
 
 // FocusChanges are the kinds of changes that can be reported via
@@ -414,6 +419,10 @@ func (nb *Node2DBase) IsVisible() bool {
 		return false
 	}
 	return nb.Par.This().(Node2D).IsVisible()
+}
+
+func (nb *Node2DBase) DirectWinUpload(win *Window) bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

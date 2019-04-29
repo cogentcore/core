@@ -48,7 +48,7 @@ func (pr *Program) AddShader(typ gpu.ShaderTypes, name string, src string) (gpu.
 		pr.shaders = make(map[gpu.ShaderTypes]*Shader)
 	}
 	if _, has := pr.shaders[typ]; has {
-		err := fmt.Errorf("glos gpu.AddShader: shader of that type: %s already added!", typ)
+		err := fmt.Errorf("glgpu gpu.AddShader: shader of that type: %s already added!", typ)
 		log.Println(err)
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func (pr *Program) ShaderByName(name string) gpu.Shader {
 			return sh
 		}
 	}
-	log.Println("glos gpu.AddShader: shader of name: %s not added\n", name)
+	log.Println("glos gpu.AddShader: shader of name: %s not found!\n", name)
 	return nil
 }
 
@@ -72,7 +72,7 @@ func (pr *Program) ShaderByName(name string) gpu.Shader {
 func (pr *Program) ShaderByType(typ gpu.ShaderTypes) gpu.Shader {
 	sh, ok := pr.shaders[typ]
 	if !ok {
-		log.Println("glos gpu.AddShader: shader of that type: %s not added\n", typ)
+		log.Println("glos gpu.AddShader: shader of that type: %s not found!\n", typ)
 		return nil
 	}
 	return sh
@@ -242,9 +242,11 @@ func (pr *Program) OutputByRole(role gpu.VectorRoles) gpu.Vectors {
 // Compile compiles all the shaders and links the Program, binds the Uniforms
 // and input / output vector variables, etc.
 // This must be called after setting the lengths of any array Uniforms (e.g.,
-// the number of lights)
-func (pr *Program) Compile() error {
-	defs := ""
+// the number of lights).
+// showSrc arg prints out the final compiled source, including automatic
+// defines etc at the top, even if there are no errors, which can be useful for debugging.
+func (pr *Program) Compile(showSrc bool) error {
+	defs := "#version 330\n" // we have to append this as it must appear at the top of the program
 	for _, u := range pr.unis {
 		defs += u.LenDefine()
 	}
@@ -266,7 +268,14 @@ func (pr *Program) Compile() error {
 	gl.ValidateProgram(handle)
 	// }
 
+	// handle is needed for other steps, set now!
+	pr.handle = handle
+	pr.init = true
+
 	for _, sh := range pr.shaders {
+		if showSrc {
+			fmt.Printf("\n#################################\nglgpu Shader: %v Source:\n%s\n", sh.name, sh.Source())
+		}
 		gl.DetachShader(handle, sh.handle)
 		sh.Delete()
 	}
@@ -332,8 +341,6 @@ func (pr *Program) Compile() error {
 		gl.BindFragDataLocation(handle, 0, gl.Str(gpu.CString(pr.fragDataVar)))
 	}
 
-	pr.handle = handle
-	pr.init = true
 	return nil
 }
 

@@ -5,10 +5,10 @@
 package glgpu
 
 import (
+	"image"
 	"image/draw"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/gpu"
 )
 
@@ -47,6 +47,15 @@ func (dr *Drawing) DepthTest(on bool) {
 	}
 }
 
+// StencilTest turns on / off stencil testing
+func (dr *Drawing) StencilTest(on bool) {
+	if on {
+		gl.Enable(gl.STENCIL_TEST)
+	} else {
+		gl.Disable(gl.STENCIL_TEST)
+	}
+}
+
 // Op sets the blend function based on go standard draw operation
 // Src disables blending, and Over uses alpha-blending
 func (dr *Drawing) Op(op draw.Op) {
@@ -56,6 +65,12 @@ func (dr *Drawing) Op(op draw.Op) {
 	} else {
 		gl.Disable(gl.BLEND)
 	}
+}
+
+// Viewport sets the rendering viewport to given rectangle.
+// It is important to update this for each render -- cannot assume it.
+func (dr *Drawing) Viewport(rect image.Rectangle) {
+	gl.Viewport(int32(rect.Min.X), int32(rect.Min.Y), int32(rect.Max.X), int32(rect.Max.Y))
 }
 
 // Triangles uses all existing settings to draw Triangles
@@ -70,14 +85,25 @@ func (dr *Drawing) TriangleStrips(start, count int) {
 	gl.DrawArrays(gl.TRIANGLE_STRIP, int32(start), int32(count))
 }
 
-// TrianglesIndexed uses all existing settings to draw Triangles
-// Indexed
-func (dr *Drawing) TrianglesIndexed(count int, idxs mat32.ArrayU32) {
-	gl.DrawElements(gl.TRIANGLES, int32(count), gl.UNSIGNED_INT, gl.Ptr(idxs))
+// TrianglesIndexed uses all existing settings to draw Triangles Indexed.
+// You must have activated an IndexesBuffer that supplies
+// the indexes, and start + count determine range of such indexes
+// to use, and must be within bounds for that.
+func (dr *Drawing) TrianglesIndexed(start, count int) {
+	gl.DrawElements(gl.TRIANGLES, int32(count), gl.UNSIGNED_INT, gl.PtrOffset(start*4))
 }
 
-// TriangleStripsIndexed uses all existing settings to draw Triangles
-// Indexed
-func (dr *Drawing) TriangleStripsIndexed(count int, idxs mat32.ArrayU32) {
-	gl.DrawElements(gl.TRIANGLE_STRIP, int32(count), gl.UNSIGNED_INT, gl.Ptr(idxs))
+// TriangleStripsIndexed uses all existing settings to draw Triangle Strips Indexed.
+// You must have activated an IndexesBuffer that supplies
+// the indexes, and start + count determine range of such indexes
+// to use, and must be within bounds for that.
+func (dr *Drawing) TriangleStripsIndexed(start, count int) {
+	gl.DrawElements(gl.TRIANGLE_STRIP, int32(count), gl.UNSIGNED_INT, gl.PtrOffset(start*4))
+}
+
+// Flush ensures that all rendering is pushed to current render target.
+// Especially useful for rendering to framebuffers (Window SwapBuffer
+// automatically does a flush)
+func (dr *Drawing) Flush() {
+	gl.Flush()
 }

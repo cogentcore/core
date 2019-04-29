@@ -58,6 +58,7 @@ func (un *Uniform) Len() int {
 
 // SetLen sets the number of array elements -- if this is changed, then the associated
 // Shader program needs to be re-generated and recompiled.
+// Unless this is in a Uniforms, must be recompiled before calling SetValue
 func (un *Uniform) SetLen(ln int) {
 	un.ln = ln
 }
@@ -70,7 +71,9 @@ func (un *Uniform) Offset() int {
 // Size() returns byte-wise size of this Uniform, *including padding*,
 // as determined by the std140 standard opengl layout
 func (un *Uniform) Size() int {
-	if un.size == 0 {
+	if un.array {
+		un.size = un.ln * un.typ.Bytes()
+	} else {
 		un.size = un.typ.Bytes()
 	}
 	return un.size
@@ -85,6 +88,14 @@ func (un *Uniform) Handle() int32 {
 // SetValue sets the value of the Uniform to given value, which must be of the corresponding
 // elemental or mat32.Vector or mat32.Matrix type.  Proper context must be bound, etc.
 func (un *Uniform) SetValue(val interface{}) error {
+	err := un.SetValueImpl(val)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+func (un *Uniform) SetValueImpl(val interface{}) error {
 	if un.ubo != nil {
 		un.ubo.Activate()
 	}
@@ -130,7 +141,7 @@ func (un *Uniform) SetValue(val interface{}) error {
 				if un.ubo != nil {
 					// need separate writes b/c alignment is vec4
 					for i := 0; i < un.ln; i++ {
-						gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset+i*4*4, 4*3, gl.Ptr(fv[i]))
+						gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset+i*4*4, 4*3, gl.Ptr(&fv[i].X))
 					}
 				} else {
 					gl.Uniform3fv(un.handle, int32(un.ln), &fv[0].X)
@@ -164,7 +175,7 @@ func (un *Uniform) SetValue(val interface{}) error {
 					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Mat3", un.name)
 				}
 				if un.ubo != nil {
-					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0]))
 				} else {
 					gl.UniformMatrix3fv(un.handle, 1, false, &fv[0])
 				}
@@ -174,7 +185,7 @@ func (un *Uniform) SetValue(val interface{}) error {
 					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Mat4", un.name)
 				}
 				if un.ubo != nil {
-					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0]))
 				} else {
 					gl.UniformMatrix4fv(un.handle, 1, false, &fv[0])
 				}
@@ -316,6 +327,7 @@ func (un *Uniform) SetValue(val interface{}) error {
 			}
 		}
 	}
+	gpu.TheGPU.ErrCheck(fmt.Sprintf("Uniform SetValue: %v type: %v", un.name, un.typ))
 	return nil
 }
 
@@ -391,18 +403,33 @@ func (un *Uniforms) getSize() int {
 	sz := 0
 	for i, u := range un.uniOrd {
 		u.ubo = un
-		if u.array && u.ln == 0 {
+		usz := u.Size()
+		if usz == 0 {
 			u.offset = 0
 			u.handle = 0
-			u.size = 0
 			continue
 		}
 		u.offset = sz
 		u.handle = int32(i)
-		u.size = u.typ.Bytes()
-		sz += u.size
+		sz += usz
 	}
 	return sz
+}
+
+// Resize resizes the buffer if needed -- call if any of the member uniforms
+// might have been resized.  Calls Activate if not already activated.
+func (un *Uniforms) Resize() error {
+	err := un.Activate()
+	if err != nil {
+		return err
+	}
+	nwsz := un.getSize()
+	if nwsz == un.size {
+		return nil
+	}
+	un.size = nwsz
+	gl.BufferData(gl.UNIFORM_BUFFER, un.size, nil, gl.STATIC_DRAW)
+	return nil
 }
 
 // Activate generates the Uniform Buffer Object structure and reserves the binding point
@@ -425,14 +452,18 @@ func (un *Uniforms) Activate() error {
 // Activate must be called first
 func (un *Uniforms) Bind(prog gpu.Program) error {
 	pr := prog.(*Program)
-	ubidx := gl.GetUniformBlockIndex(pr.handle, gl.Str(un.name))
-	if ubidx < 0 {
-		return fmt.Errorf("glgpu Uniforms named: %s not found in Program: %v", un.name, pr.name)
+	ubidx := gl.GetUniformBlockIndex(pr.handle, gl.Str(gpu.CString(un.name)))
+	if ubidx == gl.INVALID_INDEX {
+		err := fmt.Errorf("glgpu Uniforms named: %s not found in Program: %v", un.name, pr.name)
+		log.Println(err)
+		return err
 	}
 	if !un.init {
 		un.Activate()
 	}
+	pr.Activate()
 	gl.UniformBlockBinding(pr.handle, ubidx, un.bindPt)
+	gpu.TheGPU.ErrCheck("uniforms bind to program")
 	return nil
 }
 

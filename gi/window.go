@@ -130,6 +130,7 @@ type Window struct {
 	Sprites           map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
 	SpritesBg         map[string]image.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
 	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	DirectUps         map[Node2D]Node2D                       `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
 	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	LastModBits       int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
 	LastSelMode       mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
@@ -1008,6 +1009,13 @@ func (w *Window) Publish() {
 	pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
 	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
+	for _, du := range w.DirectUps {
+		if du.IsDestroyed() {
+			delete(w.DirectUps, du)
+			continue
+		}
+		du.DirectWinUpload(w)
+	}
 	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
 	}
@@ -1028,6 +1036,30 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 		return
 	}
 	win.Publish()
+}
+
+// AddDirectUploader adds given node to those that have a DirectWinUpload method
+// and directly render to the window, instead of rendering to the WinTex texture
+// which is then uploaded
+func (w *Window) AddDirectUploader(node Node2D) {
+	w.UpMu.Lock()
+	if w.DirectUps == nil {
+		w.DirectUps = make(map[Node2D]Node2D)
+	}
+	w.DirectUps[node] = node
+	w.UpMu.Unlock()
+}
+
+// DeleteDirectUploader removes given node to those that have a DirectWinUpload method
+// and directly render to the window, instead of rendering to the WinTex texture
+// which is then uploaded
+func (w *Window) DeleteDirectUploader(node Node2D) {
+	if w.DirectUps == nil {
+		return
+	}
+	w.UpMu.Lock()
+	delete(w.DirectUps, node)
+	w.UpMu.Unlock()
 }
 
 /////////////////////////////////////////////////////////////////////////////

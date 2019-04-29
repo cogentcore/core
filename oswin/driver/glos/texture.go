@@ -303,6 +303,7 @@ func (tx *textureImpl) DeleteFramebuffer() {
 func (tx *textureImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
+	gpu.Draw.Viewport(tx.Bounds())
 	if tx.drawQuads == nil {
 		tx.drawQuads = theApp.drawQuadsBuff()
 	}
@@ -313,6 +314,7 @@ func (tx *textureImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rect
 func (tx *textureImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
+	gpu.Draw.Viewport(tx.Bounds())
 	if tx.fillQuads == nil {
 		tx.fillQuads = theApp.fillQuadsBuff()
 	}
@@ -331,6 +333,7 @@ func (tx *textureImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Rec
 func (tx *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	sz := tx.Size()
 	tx.ActivateFramebuffer()
+	gpu.Draw.Viewport(tx.Bounds())
 	if tx.fillQuads == nil {
 		tx.fillQuads = theApp.fillQuadsBuff()
 	}

@@ -344,7 +344,7 @@ func (vb *VectorsBuffer) Activate() {
 		}
 		off := vb.offs[i]
 		gl.EnableVertexAttribArray(uint32(v.handle))
-		gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str), gl.PtrOffset(off))
+		gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
 	}
 }
 

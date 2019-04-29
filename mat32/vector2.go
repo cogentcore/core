@@ -22,6 +22,14 @@ func NewVec2(x, y float32) *Vec2 {
 	return &Vec2{X: x, Y: y}
 }
 
+// IsNil returns true if all values are 0 (uninitialized).
+func (v *Vec2) IsNil() bool {
+	if v.X == 0 && v.Y == 0 {
+		return true
+	}
+	return false
+}
+
 // Set sets this vector X and Y components.
 // Returns the pointer to this updated vector.
 func (v *Vec2) Set(x, y float32) *Vec2 {

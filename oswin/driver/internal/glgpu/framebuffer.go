@@ -121,20 +121,22 @@ func (fb *Framebuffer) SetTexture(tex gpu.Texture2D) {
 
 // Texture returns the current contents of the framebuffer as a Texture2D.
 // For Samples() > 0 this reduces the optimized internal render buffer to a
-// standard 2D texture.  If SetTexture was called, then it just returns that
-// texture which was directly rendered to.
+// standard 2D texture -- the return texture is owned and managed by the
+// framebuffer, and re-used every time Texture() is called.
+// If SetTexture was called, then it just returns that texture
+// which was directly rendered to.
 func (fb *Framebuffer) Texture() gpu.Texture2D {
 	if fb.tex != nil {
 		return fb.tex
 	}
 	if fb.nsamp >= 0 {
+		gl.Flush() // make sure
 		szx := int32(fb.size.X)
 		szy := int32(fb.size.Y)
 		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, fb.handle)
 		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fb.dsampFbo)
 		gl.BlitFramebuffer(0, 0, szx, szy, 0, 0, szx, szy, gl.COLOR_BUFFER_BIT, gl.NEAREST)
 		// copies into cTex
-		gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
 	}
 	return fb.cTex
 }
@@ -182,6 +184,10 @@ func (fb *Framebuffer) Activate() {
 	} else {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, fb.handle)
 	}
+	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
+		fmt.Printf("glgpu gpu.Framebuffer: %s not complete\n", fb.name)
+	}
+	gl.Viewport(0, 0, int32(fb.size.X), int32(fb.size.Y))
 }
 
 // Handle returns the GPU handle for the framebuffer -- only
