@@ -326,7 +326,7 @@ void main() {
 
 	// Final fragment color
 	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
-	//outputColor = min(vec4(Ambdiff, opacity), vec4(1.0));
+	// debugVec3(Norm, outputColor);
 }
 `+"\x00")
 	if err != nil {
@@ -438,6 +438,12 @@ layout (std140) uniform Lights
 `
 
 var RenderPhong = `
+// debugVec3 renders vector to color for debugging values
+void debugVec3(vec3 val, out vec4 clr) {
+	clr = vec4(0.5 + 0.5 * val, 1.0);
+}
+
+
 void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, float shiny, out vec3 ambdiff, out vec3 spec) {
 
 	vec3 specularColor = vec3(1.0); // always white anyway

@@ -212,6 +212,8 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 	if hasColor {
 		vbuf.SetVecData(clr, ms.Color)
 	}
+	// fmt.Printf("mesh %v vecs:\n%v\n", ms.Nm, vbuf.AllData())
+
 	iln := len(ms.Idx)
 	ibuf.SetLen(iln)
 	ibuf.Set(ms.Idx)

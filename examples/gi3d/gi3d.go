@@ -71,22 +71,23 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.1, gi3d.DirectSun)
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
-	dir.Pos.Set(0, 1, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+	dir.Pos.Set(0, 0, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	sc.Camera.Defaults()
 
 	cbm := gi3d.AddNewBox(sc, "cube1", 1, 1, 1)
-	// cbm.Segs.Set(10, 10, 10) // looks funny -- something wrong with norms
-	cbm.Segs.Set(1, 1, 1)
+	cbm.Segs.Set(10, 10, 10) // smoother
+	// cbm.Segs.Set(1, 1, 1)
 
 	rcb := sc.AddNewObject("red-cube", cbm.Name())
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.Mat.Color.SetString("red", nil)
-	// rcb.Mat.Shiny = 128
+	rcb.Mat.Shiny = 500
 
 	bcb := sc.AddNewObject("blue-cube", cbm.Name())
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Mat.Color.SetString("blue", nil)
+	bcb.Mat.Shiny = 10
 
 	win.MainMenuUpdated()
 	vp.UpdateEndNoSig(updt)

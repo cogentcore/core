@@ -70,16 +70,17 @@ func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.
 // It is created in BufferMgr.AddVectorsBuffer -- the Mgr is essential for managing buffers.
 // The buffer maintains its own internal memory storage (mat32.ArrayF32)
 // which can be operated upon or set from external sources.
+// Note: all arrangement data is in *float* units, not *byte* units -- multiply * 4 to get bytes.
 type VectorsBuffer struct {
 	init   bool
 	handle uint32
 	usage  gpu.VectorUsages
 	vecs   []*Vectors
-	stride int   // float elements stride
-	offs   []int // byte offsets per vector
+	stride int   // number of float elements stride for interleaved (*not in bytes*)
+	offs   []int // float offsets per vector in floats  (*not in bytes*)
 	nInter int   // number of interleaved
 	ln     int   // number of elements per vector
-	totLn  int   // total length of buffer in floats
+	totLn  int   // total length of buffer in floats (*not in bytes*)
 	buff   mat32.ArrayF32
 }
 
@@ -170,19 +171,19 @@ func (vb *VectorsBuffer) updtVecs() {
 		str := 0
 		for i := 0; i < vb.nInter; i++ {
 			v := vb.vecs[i]
-			vb.offs[i] = str * 4
+			vb.offs[i] = str
 			str += v.typ.Vec
 		}
 		vb.stride = str
 		vb.totLn = vb.stride * vb.ln
 	}
-	off := vb.totLn * 4
+	off := vb.totLn
 	for i := vb.nInter; i < sz; i++ {
 		v := vb.vecs[i]
 		vb.offs[i] = off
-		off += vb.ln * v.typ.Bytes()
+		off += vb.ln * v.typ.Vec
 	}
-	vb.totLn = off / 4
+	vb.totLn = off
 	if len(vb.buff) != vb.totLn {
 		vb.buff = make(mat32.ArrayF32, vb.totLn)
 	}
@@ -215,14 +216,14 @@ func (vb *VectorsBuffer) vec(vec gpu.Vectors) (int, *Vectors) {
 func (vb *VectorsBuffer) ByteOffset(vec gpu.Vectors) int {
 	i, _ := vb.vec(vec)
 	if i >= 0 {
-		return vb.offs[i]
+		return vb.offs[i] * 4
 	}
 	return 0
 }
 
 // Offset returns the float element wise starting offset of given Vectors in buffer
 func (vb *VectorsBuffer) Offset(vec gpu.Vectors) int {
-	return vb.Offset(vec) / 4
+	return vb.Offset(vec)
 }
 
 // Stride returns the float-element-wise stride of given Vectors
@@ -259,7 +260,7 @@ func (vb *VectorsBuffer) SetVecData(vec gpu.Vectors, data mat32.ArrayF32) {
 	if i < 0 {
 		return
 	}
-	off := vb.offs[i] / 4
+	off := vb.offs[i]
 	els := v.typ.Vec
 	str := els
 	if i < vb.nInter {
@@ -284,7 +285,7 @@ func (vb *VectorsBuffer) VecData(vec gpu.Vectors) mat32.ArrayF32 {
 	if i < 0 {
 		return nil
 	}
-	off := vb.offs[i] / 4
+	off := vb.offs[i]
 	els := v.typ.Vec
 	sz := els * vb.ln
 	if i >= vb.nInter {
@@ -311,7 +312,7 @@ func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vec3) boo
 	if i < 0 {
 		return
 	}
-	off := vb.offs[i] / 4
+	off := vb.offs[i]
 	els := v.typ.Vec
 	str := els
 	if i < vb.nInter {
@@ -345,6 +346,7 @@ func (vb *VectorsBuffer) Activate() {
 		off := vb.offs[i]
 		gl.EnableVertexAttribArray(uint32(v.handle))
 		gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
+		// fmt.Printf("vec: %v str: %v off: %v\n", v.name, str*4, off*4)
 	}
 }
 
@@ -369,8 +371,8 @@ func (vb *VectorsBuffer) TransferVec(vec gpu.Vectors) {
 	if i < vb.nInter {
 		return
 	}
-	offb := vb.offs[i]
-	off := offb / 4
+	off := vb.offs[i]
+	offb := off * 4
 	els := v.typ.Vec
 	sz := els * vb.ln
 	bf := vb.buff[off : off+sz]

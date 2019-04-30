@@ -284,6 +284,7 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.IsDragging() {
+			mdel := float32(0.01)
 			if !ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
 				ssc.SetDragCursor = true
@@ -291,11 +292,11 @@ func (sc *Scene) NavEvents() {
 			del := me.Where.Sub(me.From)
 			switch {
 			case key.HasAllModifierBits(me.Modifiers, key.Shift): // todo: something else?
-				ssc.Camera.Pose.Pos.X -= float32(del.X) * .1
-				ssc.Camera.Pose.Pos.Y -= float32(del.Y) * .1
+				ssc.Camera.Pose.Pos.X -= float32(del.X) * mdel
+				ssc.Camera.Pose.Pos.Y += float32(del.Y) * mdel
 			default:
-				ssc.Camera.Pose.Pos.X -= float32(del.X) * .1
-				ssc.Camera.Pose.Pos.Y -= float32(del.Y) * .1
+				ssc.Camera.Pose.Pos.X -= float32(del.X) * mdel
+				ssc.Camera.Pose.Pos.Y += float32(del.Y) * mdel
 			}
 			ssc.UpdateSig()
 		} else {
@@ -413,6 +414,7 @@ func (sc *Scene) ActivateFrame() bool {
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 		sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+		// fmt.Printf("aspect ratio: %v\n", sc.Camera.Aspect)
 		sc.Frame.Activate()
 		sc.Renders.DrawState()
 		clr := ColorToVec3f(sc.BgColor)
@@ -508,7 +510,13 @@ func (sc *Scene) DirectWinUpload(win *gi.Window) bool {
 	if Update3DTrace {
 		fmt.Printf("Update: Window %s from Scene: %s at: %v, bounds: %v\n", win.Nm, sc.Nm, sc.WinBBox.Min, sc.Tex.Bounds())
 	}
-	win.OSWin.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, &oswin.DrawOptions{NoStretch: true, FlipSrcY: true})
+
+	// https://learnopengl.com/Advanced-Lighting/Gamma-Correction
+	// todo: will need to mess with gamma correction -- can already see that colors
+	// are too bright..  generate some good test inputs (just a bunch of greyscale cubes)
+	// render in svg at top of screen too for comparison
+
+	win.OSWin.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, &oswin.DrawOptions{FlipSrcY: true})
 	return true
 }
 
