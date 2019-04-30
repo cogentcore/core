@@ -23,7 +23,6 @@ import (
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
-	"github.com/goki/ki/ints"
 )
 
 type windowImpl struct {
@@ -223,11 +222,6 @@ func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectan
 			w.drawQuads = theApp.drawQuadsBuff()
 		}
 		sz := w.Size()
-		ssz := sr.Size()
-		if opts != nil && opts.NoStretch {
-			sz.X = ints.MinInt(sz.X, ssz.X)
-			sz.Y = ints.MinInt(sz.Y, ssz.Y)
-		}
 		theApp.draw(sz, src2dst, src, sr, op, opts, w.drawQuads)
 	})
 }

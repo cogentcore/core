@@ -197,10 +197,8 @@ const (
 
 // DrawOptions are optional arguments to Draw.
 type DrawOptions struct {
-	// NoStretch means do not up-scale the source image to fit the size of the target
-	// Appropriate for sub-regions rendered into a larger surface
-	NoStretch bool
-
 	// FlipSrcY means flip the Y (vertical) axis of the source when rendering into target
+	// this is critical for e.g., rendering framebuffer output to a window, because
+	// framebuffer has bottom-left as start of texture, but window render designed for top-left.
 	FlipSrcY bool
 }

@@ -8,10 +8,6 @@
 // license that can be found in the LICENSE file.
 // with modifications needed to suit GoGi functionality.
 
-// Package  implements basic math functions which operate
-// directly on float32 numbers without casting and contains
-// types of common entities used in 3D Graphics such as vectors,
-// matrices, quaternions and others.
 package mat32
 
 import (
@@ -111,6 +107,8 @@ func Sin(v float32) float32 {
 func Sqrt(v float32) float32 {
 	return float32(math.Sqrt(float64(v)))
 }
+
+// note: it's surprisingly complicated..
 
 func Max(a, b float32) float32 {
 	return float32(math.Max(float64(a), float64(b)))

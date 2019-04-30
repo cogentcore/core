@@ -18,60 +18,48 @@ type Quat struct {
 	W float32
 }
 
-// NewQuat creates and returns a pointer to a new quaternion
-// from the specified components.
-func NewQuat(x, y, z, w float32) *Quat {
-	return &Quat{
-		X: x, Y: y, Z: z, W: w,
-	}
+// NewQuat returns a new quaternion from the specified components.
+func NewQuat(x, y, z, w float32) Quat {
+	return Quat{X: x, Y: y, Z: z, W: w}
 }
 
-// SetX sets this quaternion's X component.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetX(val float32) *Quat {
-	q.X = val
-	return q
-}
-
-// SetY sets this quaternion's Y component.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetY(val float32) *Quat {
-	q.Y = val
-	return q
-}
-
-// SetZ sets this quaternion's Z component.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetZ(val float32) *Quat {
-	q.Z = val
-	return q
-}
-
-// SetW sets this quaternion's W component.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetW(val float32) *Quat {
-	q.W = val
-	return q
+// NewQuatAxisAngle returns a new quaternion from given axis and angle rotation
+func NewQuatAxisAngle(axis Vec3, angle float32) Quat {
+	nq := Quat{}
+	nq.SetFromAxisAngle(axis, angle)
+	return nq
 }
 
 // Set sets this quaternion's components.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Set(x, y, z, w float32) *Quat {
+func (q *Quat) Set(x, y, z, w float32) {
 	q.X = x
 	q.Y = y
 	q.Z = z
 	q.W = w
-	return q
+}
+
+// FromArray sets this quaternion's components from array starting at offset.
+func (q *Quat) FromArray(array []float32, offset int) {
+	q.X = array[offset]
+	q.Y = array[offset+1]
+	q.Z = array[offset+2]
+	q.W = array[offset+3]
+}
+
+// ToArray copies this quaternions's components to array starting at offset.
+func (q *Quat) ToArray(array []float32, offset int) {
+	array[offset] = q.X
+	array[offset+1] = q.Y
+	array[offset+2] = q.Z
+	array[offset+3] = q.W
 }
 
 // SetIdentity sets this quanternion to the identity quaternion.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetIdentity() *Quat {
+func (q *Quat) SetIdentity() {
 	q.X = 0
 	q.Y = 0
 	q.Z = 0
 	q.W = 1
-	return q
 }
 
 // IsIdentity returns if this is an identity quaternion.
@@ -90,18 +78,10 @@ func (q *Quat) IsNil() bool {
 	return false
 }
 
-// Copy copies the other quaternion into this one.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Copy(other *Quat) *Quat {
-	*q = *other
-	return q
-}
-
 // SetFromEuler sets this quaternion from the specified vector with
 // euler angles for each axis. It is assumed that the Euler angles
 // are in XYZ order.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetFromEuler(euler *Vec3) *Quat {
+func (q *Quat) SetFromEuler(euler Vec3) {
 	c1 := Cos(euler.X / 2)
 	c2 := Cos(euler.Y / 2)
 	c3 := Cos(euler.Z / 2)
@@ -113,26 +93,21 @@ func (q *Quat) SetFromEuler(euler *Vec3) *Quat {
 	q.Y = c1*s2*c3 + s1*c2*s3
 	q.Z = c1*c2*s3 - s1*s2*c3
 	q.W = c1*c2*c3 + s1*s2*s3
-
-	return q
 }
 
 // SetFromAxisAngle sets this quaternion with the rotation
 // specified by the given axis and angle.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetFromAxisAngle(axis *Vec3, angle float32) *Quat {
+func (q *Quat) SetFromAxisAngle(axis Vec3, angle float32) {
 	halfAngle := angle / 2
 	s := Sin(halfAngle)
 	q.X = axis.X * s
 	q.Y = axis.Y * s
 	q.Z = axis.Z * s
 	q.W = Cos(halfAngle)
-	return q
 }
 
 // SetFromRotationMatrix sets this quaternion from the specified rotation matrix.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetFromRotationMatrix(m *Mat4) *Quat {
+func (q *Quat) SetFromRotationMatrix(m *Mat4) {
 	m11 := m[0]
 	m12 := m[4]
 	m13 := m[8]
@@ -170,19 +145,16 @@ func (q *Quat) SetFromRotationMatrix(m *Mat4) *Quat {
 		q.Y = (m23 + m32) / s
 		q.Z = 0.25 * s
 	}
-	return q
 }
 
 // SetFromUnitVectors sets this quaternion to the rotation from vector vFrom to vTo.
 // The vectors must be normalized.
-// Returns pointer to this updated quaternion.
-func (q *Quat) SetFromUnitVectors(vFrom, vTo *Vec3) *Quat {
+func (q *Quat) SetFromUnitVectors(vFrom, vTo Vec3) {
 	var v1 Vec3
 	var EPS float32 = 0.000001
 
 	r := vFrom.Dot(vTo) + 1
 	if r < EPS {
-
 		r = 0
 		if Abs(vFrom.X) > Abs(vFrom.Z) {
 			v1.Set(-vFrom.Y, vFrom.X, 0)
@@ -191,9 +163,7 @@ func (q *Quat) SetFromUnitVectors(vFrom, vTo *Vec3) *Quat {
 		}
 
 	} else {
-
-		v1.CrossVectors(vFrom, vTo)
-
+		v1 = vFrom.Cross(vTo)
 	}
 	q.X = v1.X
 	q.Y = v1.Y
@@ -201,44 +171,52 @@ func (q *Quat) SetFromUnitVectors(vFrom, vTo *Vec3) *Quat {
 	q.W = r
 
 	q.Normalize()
-
-	return q
 }
 
-// Inverse sets this quaternion to its inverse.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Inverse() *Quat {
-	q.Conjugate().Normalize()
-	return q
+// SetInverse sets this quaternion to its inverse.
+func (q *Quat) SetInverse() {
+	q.SetConjugate()
+	q.Normalize()
 }
 
-// Conjugate sets this quaternion to its conjugate.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Conjugate() *Quat {
+// Inverse returns the inverse of this quaternion.
+func (q *Quat) Inverse() Quat {
+	nq := *q
+	nq.SetInverse()
+	return nq
+}
+
+// SetConjugate sets this quaternion to its conjugate.
+func (q *Quat) SetConjugate() {
 	q.X *= -1
 	q.Y *= -1
 	q.Z *= -1
-	return q
+}
+
+// Conjugate returns the conjugate of this quaternion.
+func (q *Quat) Conjugate() Quat {
+	nq := *q
+	nq.SetConjugate()
+	return nq
 }
 
 // Dot returns the dot products of this quaternion with other.
-func (q *Quat) Dot(other *Quat) float32 {
+func (q *Quat) Dot(other Quat) float32 {
 	return q.X*other.X + q.Y*other.Y + q.Z*other.Z + q.W*other.W
 }
 
 // LengthSq returns this quanternion's length squared
-func (q *Quat) lengthSq() float32 {
+func (q Quat) LengthSq() float32 {
 	return q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W
 }
 
 // Length returns the length of this quaternion
-func (q *Quat) Length() float32 {
+func (q Quat) Length() float32 {
 	return Sqrt(q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W)
 }
 
 // Normalize normalizes this quaternion.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Normalize() *Quat {
+func (q *Quat) Normalize() {
 	l := q.Length()
 	if l == 0 {
 		q.X = 0
@@ -252,13 +230,11 @@ func (q *Quat) Normalize() *Quat {
 		q.Z *= l
 		q.W *= l
 	}
-	return q
 }
 
 // NormalizeFast approximates normalizing this quaternion.
 // Works best when the quaternion is already almost-normalized.
-// Returns pointer to this updated quaternion.
-func (q *Quat) NormalizeFast() *Quat {
+func (q *Quat) NormalizeFast() {
 	f := (3.0 - (q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W)) / 2.0
 	if f == 0 {
 		q.X = 0
@@ -271,18 +247,10 @@ func (q *Quat) NormalizeFast() *Quat {
 		q.Z *= f
 		q.W *= f
 	}
-	return q
 }
 
-// Multiply sets this quaternion to the multiplication of itself by other.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Multiply(other *Quat) *Quat {
-	return q.MultiplyQuats(q, other)
-}
-
-// MultiplyQuats set this quaternion to the multiplication of a by b.
-// Returns pointer to this updated quaternion.
-func (q *Quat) MultiplyQuats(a, b *Quat) *Quat {
+// MulQuats set this quaternion to the multiplication of a by b.
+func (q *Quat) MulQuats(a, b Quat) {
 	// from http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
 	qax := a.X
 	qay := a.Y
@@ -297,18 +265,29 @@ func (q *Quat) MultiplyQuats(a, b *Quat) *Quat {
 	q.Y = qay*qbw + qaw*qby + qaz*qbx - qax*qbz
 	q.Z = qaz*qbw + qaw*qbz + qax*qby - qay*qbx
 	q.W = qaw*qbw - qax*qbx - qay*qby - qaz*qbz
-	return q
+}
+
+// SetMul sets this quaternion to the multiplication of itself by other.
+func (q *Quat) SetMul(other Quat) {
+	q.MulQuats(*q, other)
+}
+
+// Mul returns returns multiplication of this quaternion with other
+func (q *Quat) Mul(other Quat) Quat {
+	nq := *q
+	nq.SetMul(other)
+	return nq
 }
 
 // Slerp sets this quaternion to another quaternion which is the spherically linear interpolation
 // from this quaternion to other using t.
-// Returns pointer to this updated quaternion.
-func (q *Quat) Slerp(other *Quat, t float32) *Quat {
+func (q *Quat) Slerp(other Quat, t float32) {
 	if t == 0 {
-		return q
+		return
 	}
 	if t == 1 {
-		return q.Copy(other)
+		*q = other
+		return
 	}
 
 	x := q.X
@@ -325,7 +304,7 @@ func (q *Quat) Slerp(other *Quat, t float32) *Quat {
 		q.Z = -other.Z
 		cosHalfTheta = -cosHalfTheta
 	} else {
-		q.Copy(other)
+		*q = other
 	}
 
 	if cosHalfTheta >= 1.0 {
@@ -333,7 +312,7 @@ func (q *Quat) Slerp(other *Quat, t float32) *Quat {
 		q.X = x
 		q.Y = y
 		q.Z = z
-		return q
+		return
 	}
 
 	sqrSinHalfTheta := 1.0 - cosHalfTheta*cosHalfTheta
@@ -343,7 +322,8 @@ func (q *Quat) Slerp(other *Quat, t float32) *Quat {
 		q.X = s*x + t*q.X
 		q.Y = s*y + t*q.Y
 		q.Z = s*z + t*q.Z
-		return q.Normalize()
+		q.Normalize()
+		return
 	}
 
 	sinHalfTheta := Sqrt(sqrSinHalfTheta)
@@ -355,37 +335,9 @@ func (q *Quat) Slerp(other *Quat, t float32) *Quat {
 	q.X = x*ratioA + q.X*ratioB
 	q.Y = y*ratioA + q.Y*ratioB
 	q.Z = z*ratioA + q.Z*ratioB
-
-	return q
 }
 
-// Equals returns if this quaternion is equal to other.
-func (q *Quat) Equals(other *Quat) bool {
+// IsEqual returns if this quaternion is equal to other.
+func (q *Quat) IsEqual(other Quat) bool {
 	return (other.X == q.X) && (other.Y == q.Y) && (other.Z == q.Z) && (other.W == q.W)
-}
-
-// FromArray sets this quaternion's components from array starting at offset.
-// Returns pointer to this updated quaternion.
-func (q *Quat) FromArray(array []float32, offset int) *Quat {
-	q.X = array[offset]
-	q.Y = array[offset+1]
-	q.Z = array[offset+2]
-	q.W = array[offset+3]
-	return q
-}
-
-// ToArray copies this quaternions's components to array starting at offset.
-// Returns pointer to this updated array.
-func (q *Quat) ToArray(array []float32, offset int) []float32 {
-	array[offset] = q.X
-	array[offset+1] = q.Y
-	array[offset+2] = q.Z
-	array[offset+3] = q.W
-
-	return array
-}
-
-// Clone returns a copy of this quaternion
-func (q *Quat) Clone() *Quat {
-	return NewQuat(q.X, q.Y, q.Z, q.W)
 }

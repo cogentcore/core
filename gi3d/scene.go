@@ -447,12 +447,11 @@ func (sc *Scene) InitMeshes() bool {
 // called during Init3D and subsequent updates are triggered by local
 // update signals on each node
 func (sc *Scene) UpdateWorldMatrix() {
-	idmtx := mat32.Mat4{}
-	idmtx.Identity()
+	idmtx := mat32.NewMat4()
 	for _, kid := range sc.Kids {
 		nii, _ := KiToNode3D(kid)
 		if nii != nil {
-			nii.UpdateWorldMatrix(&idmtx)
+			nii.UpdateWorldMatrix(idmtx)
 			nii.UpdateWorldMatrixChildren()
 		}
 	}
@@ -527,9 +526,8 @@ func (sc *Scene) Render3D() {
 
 	sc.Camera.Pose.UpdateMatrix()
 	// Prepare for frustum culling
-	var proj mat32.Mat4
-	proj.MultiplyMatrices(&sc.Camera.PrjnMatrix, &sc.Camera.ViewMatrix)
-	frustum := mat32.NewFrustumFromMatrix(&proj)
+	proj := sc.Camera.PrjnMatrix.Mul(&sc.Camera.ViewMatrix)
+	frustum := mat32.NewFrustumFromMatrix(proj)
 
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
@@ -549,8 +547,8 @@ func (sc *Scene) Render3D() {
 		nii.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
 		bba := nii.BBox()
 		bb := bba.BBox
-		bb.ApplyMat4(&ni.Pose.WorldMatrix)
-		if true || frustum.IntersectsBox(&bb) { // todo: remove true..
+		bb.MulMat4(&ni.Pose.WorldMatrix)
+		if true || frustum.IntersectsBox(bb) { // todo: remove true..
 			rc := obj.RenderClass()
 			rcs[rc] = append(rcs[rc], obj)
 		}

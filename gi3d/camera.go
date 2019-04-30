@@ -25,27 +25,27 @@ func (cm *Camera) Defaults() {
 	cm.Aspect = 1.5
 	cm.Near = .01
 	cm.Far = 1000
-	cm.LookAt(&mat32.Vec3{0, 0, 0}, &mat32.Vec3{0, 1, 0})
+	cm.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0})
 }
 
 // UpdateMatrix updates the view and prjn matricies
 func (cm *Camera) UpdateMatrix() {
 	cm.Pose.UpdateMatrix()
-	cm.ViewMatrix.GetInverse(&cm.Pose.Matrix)
+	cm.ViewMatrix.SetInverse(&cm.Pose.Matrix)
 	if cm.Ortho {
 		height := 2 * cm.Far * mat32.Tan(mat32.DegToRad(cm.FOV*0.5))
 		width := cm.Aspect * height
-		cm.PrjnMatrix.MakeOrthographic(width, height, cm.Near, cm.Far)
+		cm.PrjnMatrix.SetOrthographic(width, height, cm.Near, cm.Far)
 	} else {
-		cm.PrjnMatrix.MakePerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)
+		cm.PrjnMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)
 	}
 }
 
 // LookAt points the camera at given target location, using given up direction
 // updates the internal Quat rotation vector
-func (cm *Camera) LookAt(target, upDir *mat32.Vec3) {
+func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 	rotMat := mat32.Mat4{}
-	rotMat.LookAt(&cm.Pose.Pos, target, upDir)
+	rotMat.LookAt(cm.Pose.Pos, target, upDir)
 	cm.Pose.Quat.SetFromRotationMatrix(&rotMat)
 	cm.UpdateMatrix()
 }

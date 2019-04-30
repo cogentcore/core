@@ -144,7 +144,7 @@ func (dl *DirLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
 	dir.SetVec3(&dl.Pos, 0)
 	dir.ApplyMat4(&viewMat)
 	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
-	dir3.Normalize()
+	dir3.SetNormal()
 	return dir3
 }
 
@@ -180,7 +180,7 @@ func (dl *PointLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
 	dir.SetVec3(&dl.Pos, 0)
 	dir.ApplyMat4(&viewMat)
 	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
-	dir3.Normalize()
+	dir3.SetNormal()
 	return dir3
 }
 
@@ -209,8 +209,7 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	// var points []mat32.Vec3
 	// var spots []mat32.Vec3
 	for _, lt := range sc.Lights {
-		clr := ColorToVec3f(lt.Color())
-		clr.MultiplyScalar(lt.Lumens())
+		clr := ColorToVec3f(lt.Color()).MulScalar(lt.Lumens())
 		switch l := lt.(type) {
 		case *AmbientLight:
 			ambs = append(ambs, clr)

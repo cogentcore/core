@@ -303,6 +303,7 @@ void main() {
 			`
 uniform vec4 Color;
 uniform vec3 Emissive;
+uniform vec3 Specular;
 uniform vec2 ShinyV;
 in vec4 Pos;
 in vec3 Norm;
@@ -322,7 +323,7 @@ void main() {
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	vec3 Ambdiff, Spec;
-	phongModel(Pos, fragNorm, CamDir, clr, clr, shiny, Ambdiff, Spec);
+	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, shiny, Ambdiff, Spec);
 
 	// Final fragment color
 	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
@@ -337,7 +338,9 @@ void main() {
 	pr.AddUniforms(rn.Unis["Lights"])
 	pr.AddUniform("Color", gpu.Vec4fUniType, false, 0)
 	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
+	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("ShinyV", gpu.Vec2fUniType, false, 0) // note: using vec2 b/c float is buggy..
+	// todo: could have been something else -- retry as float!
 
 	pr.SetFragDataVar("outputColor")
 
@@ -352,6 +355,9 @@ func (rb *RenderUniformColor) SetMat(mat *Material) error {
 	emsu := pr.UniformByName("Emissive")
 	emsv := ColorToVec3f(mat.Emissive)
 	emsu.SetValue(emsv)
+	spcu := pr.UniformByName("Specular")
+	spcv := ColorToVec3f(mat.Specular)
+	spcu.SetValue(spcv)
 	shu := pr.UniformByName("ShinyV")
 	shv := mat32.Vec2{mat.Shiny, 0}
 	shu.SetValue(shv)
@@ -444,9 +450,8 @@ void debugVec3(vec3 val, out vec4 clr) {
 }
 
 
-void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, float shiny, out vec3 ambdiff, out vec3 spec) {
+void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, out vec3 ambdiff, out vec3 spec) {
 
-	vec3 specularColor = vec3(1.0); // always white anyway
 	vec3 ambientTotal  = vec3(0.0);
 	vec3 diffuseTotal  = vec3(0.0);
 	vec3 specularTotal = vec3(0.0);
@@ -469,7 +474,7 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		// Specular reflection -- calculates the light reflection vector
 		vec3 ref = reflect(-lightDir, norm);
 		if (dotNormal > 0.0) {
-			specularTotal += DirLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny);
+			specularTotal += DirLightColor(i) * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 #endif
@@ -491,7 +496,7 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		// Specular reflection -- calculates the light reflection vector
 		vec3 ref = reflect(-lightDir, norm);
 		if (dotNormal > 0.0) {
-			specularTotal += PointLightColor(i) * specularColor *
+			specularTotal += PointLightColor(i) * matSpecular *
 				pow(max(dot(ref, camDir), 0.0), shiny) * attenuation;
 		}
 	}
@@ -525,7 +530,7 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 			// Specular reflection
 			vec3 ref = reflect(-lightDir, norm);
 			if (dotNormal > 0.0) {
-				specularTotal += SpotLightColor(i) * specularColor * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
+				specularTotal += SpotLightColor(i) * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
 			}
 		}
 	}

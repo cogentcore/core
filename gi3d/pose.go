@@ -33,31 +33,28 @@ func (ps *Pose) UpdateMatrix() {
 	if ps.Quat.IsNil() {
 		ps.Quat.SetIdentity()
 	}
-	ps.Matrix.Compose(&ps.Pos, &ps.Quat, &ps.Scale)
+	ps.Matrix.SetTransform(ps.Pos, ps.Quat, ps.Scale)
 }
 
 // UpdateWorldMatrix updates the world transform matrix based on Matrix and parent's WorldMatrix.
 // Also calls UpdateMatrix
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	ps.UpdateMatrix()
-	ps.ParMatrix.Copy(parWorld)
-	ps.WorldMatrix.MultiplyMatrices(parWorld, &ps.Matrix)
+	ps.ParMatrix = *parWorld
+	ps.WorldMatrix.MulMatrices(parWorld, &ps.Matrix)
 }
 
 // UpdateMVPMatrix updates the model * view, * projection matricies based on camera view, prjn matricies
 // Assumes that WorldMatrix has been updated
 func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
-	ps.MVMatrix.MultiplyMatrices(viewMat, &ps.WorldMatrix)
-	ps.NormMatrix.GetNormalMatrix(&ps.MVMatrix)
-	ps.MVPMatrix.MultiplyMatrices(prjnMat, &ps.MVMatrix)
+	ps.MVMatrix.MulMatrices(viewMat, &ps.WorldMatrix)
+	ps.NormMatrix.SetNormalMatrix(&ps.MVMatrix)
+	ps.MVPMatrix.MulMatrices(prjnMat, &ps.MVMatrix)
 }
 
 // MoveOnAxis moves (translates) the specified distance on the specified local axis.
 func (ps *Pose) MoveOnAxis(x, y, z, dist float32) {
-	v := mat32.NewVec3(x, y, z)
-	v.ApplyQuat(&ps.Quat)
-	v.MultiplyScalar(dist)
-	ps.Pos.Add(v)
+	ps.Pos.SetAdd(mat32.NewVec3(x, y, z).MulQuat(ps.Quat).MulScalar(dist))
 }
 
 // SetEulerRotation sets the rotation in Euler angles (radians).
@@ -69,7 +66,7 @@ func (ps *Pose) SetEulerRotation(x, y, z float32) {
 // EulerRotation returns the current rotation in Euler angles (radians).
 func (ps *Pose) EulerRotation() mat32.Vec3 {
 	rot := mat32.Vec3{}
-	rot.SetFromQuat(&ps.Quat)
+	rot.SetEulerAnglesFromQuat(ps.Quat)
 	return rot
 }
 
@@ -82,45 +79,39 @@ func (ps *Pose) SetAxisRotation(x, y, z, angle float32) {
 // RotateOnAxis rotates around the specified local axis the specified angle in radians.
 func (ps *Pose) RotateOnAxis(x, y, z, angle float32) {
 	axis := mat32.NewVec3(x, y, z)
-	rotQuat := &mat32.Quat{}
+	rotQuat := mat32.Quat{}
 	rotQuat.SetFromAxisAngle(axis, angle)
-	ps.Quat.Multiply(rotQuat)
+	ps.Quat.Mul(rotQuat)
 }
 
 // SetMatrix sets the local transformation matrix and updates Pos, Scale, Quat.
 func (ps *Pose) SetMatrix(m *mat32.Mat4) {
 	ps.Matrix = *m
-	ps.Matrix.Decompose(&ps.Pos, &ps.Quat, &ps.Scale)
+	ps.Pos, ps.Quat, ps.Scale = ps.Matrix.Decompose()
 }
 
 // WorldPos returns the current world position.
 func (ps *Pose) WorldPos() mat32.Vec3 {
 	pos := mat32.Vec3{}
-	pos.SetFromMatrixPosition(&ps.WorldMatrix)
+	pos.SetFromMatrixPos(&ps.WorldMatrix)
 	return pos
 }
 
 // WorldQuat returns the current world quaternion.
 func (ps *Pose) WorldQuat() mat32.Quat {
-	pos := mat32.Vec3{}
-	scale := mat32.Vec3{}
-	quat := mat32.Quat{}
-	ps.WorldMatrix.Decompose(&pos, &quat, &scale)
+	_, quat, _ := ps.WorldMatrix.Decompose()
 	return quat
 }
 
-// WorldRotation returns the current world rotation in Euler angles.
-func (ps *Pose) WorldRotation() mat32.Vec3 {
+// WorldEulerRotation returns the current world rotation in Euler angles.
+func (ps *Pose) WorldEulerRotation() mat32.Vec3 {
 	ang := mat32.Vec3{}
-	ang.SetFromQuat(&ps.Quat)
+	ang.SetEulerAnglesFromQuat(ps.Quat)
 	return ang
 }
 
 // WorldScale returns he current world scale.
 func (ps *Pose) WorldScale() mat32.Vec3 {
-	pos := mat32.Vec3{}
-	scale := mat32.Vec3{}
-	quat := mat32.Quat{}
-	ps.WorldMatrix.Decompose(&pos, &quat, &scale)
+	_, _, scale := ps.WorldMatrix.Decompose()
 	return scale
 }

@@ -20,6 +20,7 @@ import (
 type Material struct {
 	Color    gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
 	Emissive gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Specular gi.Color `desc:"shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
 	Shiny    float32  `desc:"specular shininess factor -- how strongly the surface shines back directional light -- this is an exponential factor -- 0 = not at all shiny, and 128 is a typical maximum"`
 	Texture  TexName  `desc:"texture to provide color for the surface"`
 	TexPtr   *Texture `view:"-" desc:"pointer to texture"`
@@ -29,6 +30,7 @@ type Material struct {
 func (mt *Material) Defaults() {
 	mt.Color.SetUInt8(128, 128, 128, 255)
 	mt.Emissive.SetUInt8(0, 0, 0, 0)
+	mt.Specular.SetUInt8(255, 255, 255, 255)
 	mt.Shiny = 30
 }
 

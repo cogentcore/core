@@ -15,18 +15,16 @@ import "errors"
 // Mat3 is 3x3 matrix organized internally as column matrix
 type Mat3 [9]float32
 
-// NewMat3 creates and returns a pointer to a new Mat3
-// initialized as the identity matrix.
+// NewMat3 creates and returns a pointer to a new Mat3 initialized as the identity matrix.
 func NewMat3() *Mat3 {
-	var m Mat3
-	m.Identity()
-	return &m
+	m := &Mat3{}
+	m.SetIdentity()
+	return m
 }
 
 // Set sets all the elements of the matrix row by row starting at row1, column1,
 // row1, column2, row1, column3 and so forth.
-// Returns the pointer to this updated Matrix.
-func (m *Mat3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) *Mat3 {
+func (m *Mat3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) {
 	m[0] = n11
 	m[3] = n12
 	m[6] = n13
@@ -36,110 +34,47 @@ func (m *Mat3) Set(n11, n12, n13, n21, n22, n23, n31, n32, n33 float32) *Mat3 {
 	m[2] = n31
 	m[5] = n32
 	m[8] = n33
-	return m
 }
 
 // SetFromMat4 sets the matrix elements based on a Mat4.
-func (m *Mat3) SetFromMat4(src *Mat4) *Mat3 {
+func (m *Mat3) SetFromMat4(src *Mat4) {
 	m.Set(
 		src[0], src[4], src[8],
 		src[1], src[5], src[9],
 		src[2], src[6], src[10],
 	)
-	return m
 }
 
-// Identity sets this matrix as the identity matrix.
-// Returns the pointer to this updated matrix.
-func (m *Mat3) Identity() *Mat3 {
+// FromArray sets this matrix array starting at offset.
+func (m *Mat3) FromArray(array []float32, offset int) {
+	copy(m[:], array[offset:])
+}
+
+// ToArray copies this matrix to array starting at offset.
+func (m *Mat3) ToArray(array []float32, offset int) {
+	copy(array[offset:], m[:])
+}
+
+// SetIdentity sets this matrix as the identity matrix.
+func (m *Mat3) SetIdentity() {
 	m.Set(
 		1, 0, 0,
 		0, 1, 0,
 		0, 0, 1,
 	)
-	return m
 }
 
-// Zero sets this matrix as the zero matrix.
-// Returns the pointer to this updated matrix.
-func (m *Mat3) Zero() *Mat3 {
+// SetZero sets this matrix as the zero matrix.
+func (m *Mat3) SetZero() {
 	m.Set(
 		0, 0, 0,
 		0, 0, 0,
 		0, 0, 0,
 	)
-	return m
 }
 
-// Copy copies src matrix into this one.
-// Returns the pointer to this updated matrix.
-func (m *Mat3) Copy(src *Mat3) *Mat3 {
-	*m = *src
-	return m
-}
-
-// MakeRotationFromQuat sets this matrix as a rotation matrix from the specified quaternion.
-// Returns pointer to this updated matrix.
-func (m *Mat3) MakeRotationFromQuat(q *Quat) *Mat3 {
-	x := q.X
-	y := q.Y
-	z := q.Z
-	w := q.W
-	x2 := x + x
-	y2 := y + y
-	z2 := z + z
-	xx := x * x2
-	xy := x * y2
-	xz := x * z2
-	yy := y * y2
-	yz := y * z2
-	zz := z * z2
-	wx := w * x2
-	wy := w * y2
-	wz := w * z2
-
-	m[0] = 1 - (yy + zz)
-	m[3] = xy - wz
-	m[6] = xz + wy
-
-	m[1] = xy + wz
-	m[4] = 1 - (xx + zz)
-	m[7] = yz - wx
-
-	m[2] = xz - wy
-	m[5] = yz + wx
-	m[8] = 1 - (xx + yy)
-
-	return m
-}
-
-// ApplyToVec3Array multiplies length vectors in the array starting at offset by this matrix.
-// Returns pointer to the updated array.
-// This matrix is unchanged.
-func (m *Mat3) ApplyToVec3Array(array []float32, offset int, length int) []float32 {
-	var v1 Vec3
-	j := offset
-	for i := 0; i < length; i += 3 {
-		v1.X = array[j]
-		v1.Y = array[j+1]
-		v1.Z = array[j+2]
-		v1.ApplyMat3(m)
-		array[j] = v1.X
-		array[j+1] = v1.Y
-		array[j+2] = v1.Z
-	}
-	return array
-}
-
-// Multiply multiply this matrix by the other matrix
-// Returns pointer to this updated matrix.
-func (m *Mat3) Multiply(other *Mat3) *Mat3 {
-	return m.MultiplyMatrices(m, other)
-}
-
-// MultiplyMatrices multiply matrix a by b storing the result in this matrix.
-// Returns pointer to this updated matrix.
-func (m *Mat3) MultiplyMatrices(a, b *Mat3) *Mat3 {
+// MulMatrices sets ths matrix as matrix multiplication a by b (i.e., b*a).
+func (m *Mat3) MulMatrices(a, b *Mat3) {
 	a11 := a[0]
 	a12 := a[3]
 	a13 := a[6]
@@ -171,13 +106,28 @@ func (m *Mat3) MultiplyMatrices(a, b *Mat3) *Mat3 {
 	m[2] = a31*b11 + a32*b21 + a33*b31
 	m[5] = a31*b12 + a32*b22 + a33*b32
 	m[8] = a31*b13 + a32*b23 + a33*b33
-
-	return m
 }
 
-// MultiplyScalar multiplies each of this matrix's components by the specified scalar.
-// Returns pointer to this updated matrix.
-func (m *Mat3) MultiplyScalar(s float32) *Mat3 {
+// Mul returns this matrix times other matrix (this matrix is unchanged)
+func (m *Mat3) Mul(other *Mat3) *Mat3 {
+	nm := &Mat3{}
+	nm.MulMatrices(m, other)
+	return nm
+}
+
+// SetMul sets this matrix to this matrix * other
+func (m *Mat3) SetMul(other *Mat3) {
+	m.MulMatrices(m, other)
+}
+
+// MulScalar returns each of this matrix's components multiplied by the specified scalar.
+func (m *Mat3) MulScalar(s float32) {
+	nm := &Mat3{}
+	nm.SetMulScalar(s)
+}
+
+// SetMulScalar multiplies each of this matrix's components by the specified scalar.
+func (m *Mat3) SetMulScalar(s float32) {
 	m[0] *= s
 	m[3] *= s
 	m[6] *= s
@@ -187,23 +137,19 @@ func (m *Mat3) MultiplyScalar(s float32) *Mat3 {
 	m[2] *= s
 	m[5] *= s
 	m[8] *= s
-	return m
 }
 
-// ScaleColumns multiplies the matrix columns by the vector components.
-// This can be used when multiplying this matrix by a diagonal matrix if we store the diagonal components as a vector.
-// Returns pointer to this updated matrix.
-func (m *Mat3) ScaleColumns(v *Vec3) *Mat3 {
-	m[0] *= v.X
-	m[1] *= v.X
-	m[2] *= v.X
-	m[3] *= v.Y
-	m[4] *= v.Y
-	m[5] *= v.Y
-	m[6] *= v.Z
-	m[7] *= v.Z
-	m[8] *= v.Z
-	return m
+// MulVec3Array multiplies count vectors (i.e., 3 sequential array values per each increment in count)
+// in the array starting at start index by this matrix.
+func (m *Mat3) MulVec3Array(array []float32, start, count int) {
+	var v1 Vec3
+	j := start
+	for i := 0; i < count; i++ {
+		v1.FromArray(array, j)
+		mv := v1.MulMat3(m)
+		mv.ToArray(array, j)
+		j += 3
+	}
 }
 
 // Determinant calculates and returns the determinant of this matrix.
@@ -216,10 +162,10 @@ func (m *Mat3) Determinant() float32 {
 		m[2]*m[4]*m[6]
 }
 
-// GetInverse sets this matrix to the inverse of the src matrix.
+// SetInverse sets this matrix to the inverse of the src matrix.
 // If the src matrix cannot be inverted returns error and
 // sets this matrix to the identity matrix.
-func (m *Mat3) GetInverse(src *Mat3) error {
+func (m *Mat3) SetInverse(src *Mat3) error {
 	n11 := src[0]
 	n21 := src[1]
 	n31 := src[2]
@@ -238,8 +184,8 @@ func (m *Mat3) GetInverse(src *Mat3) error {
 
 	// no inverse
 	if det == 0 {
-		m.Identity()
-		return errors.New("cannot invert matrix")
+		m.SetIdentity()
+		return errors.New("cannot invert matrix, determinant is 0")
 	}
 
 	detInv := 1 / det
@@ -257,42 +203,94 @@ func (m *Mat3) GetInverse(src *Mat3) error {
 	return nil
 }
 
-// Transpose transposes this matrix.
-// Returns pointer to this updated matrix.
-func (m *Mat3) Transpose() *Mat3 {
+// Inverse returns the inverse of this matrix.
+// If the matrix cannot be inverted returns error and
+// sets this matrix to the identity matrix.
+func (m *Mat3) Inverse() (*Mat3, error) {
+	nm := &Mat3{}
+	err := nm.SetInverse(m)
+	return nm, err
+}
+
+// SetTranspose transposes this matrix.
+func (m *Mat3) SetTranspose() {
 	m[1], m[3] = m[3], m[1]
 	m[2], m[6] = m[6], m[2]
 	m[5], m[7] = m[7], m[5]
-	return m
 }
 
-// GetNormalMatrix set this matrix to the matrix to transform the normal vectors
-// from the src matrix to transform the vertices.
+// Transpose returns the transpose of this matrix.
+func (m *Mat3) Transpose() *Mat3 {
+	nm := *m
+	nm.Transpose()
+	return &nm
+}
+
+// ScaleCols returns matrix with columns multiplied by the vector components.
+// This can be used when multiplying this matrix by a diagonal matrix if we store
+// the diagonal components as a vector.
+func (m *Mat3) ScaleCols(v Vec3) *Mat3 {
+	nm := &Mat3{}
+	nm.SetScaleCols(v)
+	return nm
+}
+
+// SetScaleCols multiplies the matrix columns by the vector components.
+// This can be used when multiplying this matrix by a diagonal matrix if we store
+// the diagonal components as a vector.
+func (m *Mat3) SetScaleCols(v Vec3) {
+	m[0] *= v.X
+	m[1] *= v.X
+	m[2] *= v.X
+	m[3] *= v.Y
+	m[4] *= v.Y
+	m[5] *= v.Y
+	m[6] *= v.Z
+	m[7] *= v.Z
+	m[8] *= v.Z
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//   Special functions
+
+// SetNormalMatrix set this matrix to the matrix that can transform the normal vectors
+// from the src matrix which is used transform the vertices (e.g., a ModelView matrix).
 // If the src matrix cannot be inverted returns error.
-func (m *Mat3) GetNormalMatrix(src *Mat4) error {
+func (m *Mat3) SetNormalMatrix(src *Mat4) error {
 	m.SetFromMat4(src)
-	err := m.GetInverse(m)
-	m.Transpose()
+	err := m.SetInverse(m)
+	m.SetTranspose()
 	return err
 }
 
-// FromArray set this matrix array starting at offset.
-// Returns pointer to this updated matrix.
-func (m *Mat3) FromArray(array []float32, offset int) *Mat3 {
-	copy(m[:], array[offset:offset+9])
-	return m
-}
+// SetRotationFromQuat sets this matrix as a rotation matrix from the specified quaternion.
+func (m *Mat3) SetRotationFromQuat(q Quat) {
+	x := q.X
+	y := q.Y
+	z := q.Z
+	w := q.W
+	x2 := x + x
+	y2 := y + y
+	z2 := z + z
+	xx := x * x2
+	xy := x * y2
+	xz := x * z2
+	yy := y * y2
+	yz := y * z2
+	zz := z * z2
+	wx := w * x2
+	wy := w * y2
+	wz := w * z2
 
-// ToArray copies this matrix to array starting at offset.
-// Returns pointer to the updated array.
-func (m *Mat3) ToArray(array []float32, offset int) []float32 {
-	copy(array[offset:], m[:])
-	return array
-}
+	m[0] = 1 - (yy + zz)
+	m[3] = xy - wz
+	m[6] = xz + wy
 
-// Clone creates and returns a pointer to a copy of this matrix.
-func (m *Mat3) Clone() *Mat3 {
-	var cloned Mat3
-	cloned = *m
-	return &cloned
+	m[1] = xy + wz
+	m[4] = 1 - (xx + zz)
+	m[7] = yz - wx
+
+	m[2] = xz - wy
+	m[5] = yz + wx
+	m[8] = 1 - (xx + yy)
 }

@@ -34,8 +34,7 @@ func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
 func (bx *Box) Make() {
 	bx.Reset()
 
-	halfSz := bx.Size
-	halfSz.DivideScalar(2)
+	halfSz := bx.Size.DivScalar(2)
 
 	clr := gi.Color{}
 

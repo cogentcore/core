@@ -10,157 +10,111 @@
 
 package mat32
 
-// Plane represents a plane in 3D space by its normal vector and a constant.
-// When the the normal vector is the unit vector the constant is the distance from the origin.
+import "log"
+
+// Plane represents a plane in 3D space by its normal vector and a constant offset.
+// When the the normal vector is the unit vector the offset is the distance from the origin.
 type Plane struct {
-	normal   Vec3
-	constant float32
+	Norm Vec3
+	Off  float32
 }
 
-// NewPlane creates and returns a new plane from a normal vector and a constant.
-func NewPlane(normal *Vec3, constant float32) *Plane {
-	p := new(Plane)
-	if normal != nil {
-		p.normal = *normal
-	}
-	p.constant = constant
+// NewPlane creates and returns a new plane from a normal vector and a offset.
+func NewPlane(normal Vec3, offset float32) *Plane {
+	p := &Plane{normal, offset}
 	return p
 }
 
-// Set sets this plane normal vector and constant.
-// Returns pointer to this updated plane.
-func (p *Plane) Set(normal *Vec3, constant float32) *Plane {
-	p.normal = *normal
-	p.constant = constant
-	return p
+// Set sets this plane normal vector and offset.
+func (p *Plane) Set(normal Vec3, offset float32) {
+	p.Norm = normal
+	p.Off = offset
 }
 
-// SetComponents sets this plane normal vector components and constant.
-// Returns pointer to this updated plane.
-func (p *Plane) SetComponents(x, y, z, w float32) *Plane {
-	p.normal.Set(x, y, z)
-	p.constant = w
-	return p
+// SetComponents sets this plane normal vector components and offset.
+func (p *Plane) SetComponents(x, y, z, w float32) {
+	p.Norm.Set(x, y, z)
+	p.Off = w
 }
 
 // SetFromNormalAndCoplanarPoint sets this plane from a normal vector and a point on the plane.
-// Returns pointer to this updated plane.
-func (p *Plane) SetFromNormalAndCoplanarPoint(normal *Vec3, point *Vec3) *Plane {
-	p.normal = *normal
-	p.constant = -point.Dot(&p.normal)
-	return p
+func (p *Plane) SetFromNormalAndCoplanarPoint(normal Vec3, point Vec3) {
+	p.Norm = normal
+	p.Off = -point.Dot(p.Norm)
 }
 
 // SetFromCoplanarPoints sets this plane from three coplanar points.
-// Returns pointer to this updated plane.
-func (p *Plane) SetFromCoplanarPoints(a, b, c *Vec3) *Plane {
-	var v1 Vec3
-	var v2 Vec3
-
-	normal := v1.SubVectors(c, b).Cross(v2.SubVectors(a, b)).Normalize()
-	// Q: should an error be thrown if normal is zero (e.g. degenerate plane)?
-	p.SetFromNormalAndCoplanarPoint(normal, a)
-	return p
+func (p *Plane) SetFromCoplanarPoints(a, b, c Vec3) {
+	norm := c.Sub(b).Cross(a.Sub(b))
+	norm.SetNormal()
+	if norm.IsNil() {
+		log.Printf("mat32.SetFromCoplanarPonts: points not actually coplanar: %v %v %v\n", a, b, c)
+	}
+	p.SetFromNormalAndCoplanarPoint(norm, a)
 }
 
-// Copy sets this plane to a copy of other.
-// Returns pointer to this updated plane.
-func (p *Plane) Copy(other *Plane) *Plane {
-	p.normal.Copy(&other.normal)
-	p.constant = other.constant
-	return p
-}
-
-// Normalize normalizes this plane normal vector and adjusts the constant.
+// Normalize normalizes this plane normal vector and adjusts the offset.
 // Note: will lead to a divide by zero if the plane is invalid.
-// Returns pointer to this updated plane.
-func (p *Plane) Normalize() *Plane {
-	inverseNormalLength := 1.0 / p.normal.Length()
-	p.normal.MultiplyScalar(inverseNormalLength)
-	p.constant *= inverseNormalLength
-	return p
+func (p *Plane) Normalize() {
+	invLen := 1.0 / p.Norm.Length()
+	p.Norm.MulScalar(invLen)
+	p.Off *= invLen
 }
 
 // Negate negates this plane normal.
-// Returns pointer to this updated plane.
-func (p *Plane) Negate() *Plane {
-	p.constant *= -1
-	p.normal.Negate()
-	return p
+func (p *Plane) Negate() {
+	p.Off *= -1
+	p.Norm.SetNegate()
 }
 
-// DistanceToPoint returns the distance of this plane from point.
-func (p *Plane) DistanceToPoint(point *Vec3) float32 {
-	return p.normal.Dot(point) + p.constant
+// DistToPoint returns the distance of this plane from point.
+func (p *Plane) DistToPoint(point Vec3) float32 {
+	return p.Norm.Dot(point) + p.Off
 }
 
-// DistanceToSphere returns the distance of this place from the sphere.
-func (p *Plane) DistanceToSphere(sphere *Sphere) float32 {
-	return p.DistanceToPoint(&sphere.Center) - sphere.Radius
+// DistToSphere returns the distance of this place from the sphere.
+func (p *Plane) DistToSphere(sphere Sphere) float32 {
+	return p.DistToPoint(sphere.Center) - sphere.Radius
 }
 
 // IsIntersectionLine returns the line intersects this plane.
-func (p *Plane) IsIntersectionLine(line *Line3) bool {
-	startSign := p.DistanceToPoint(&line.start)
-	endSign := p.DistanceToPoint(&line.end)
+func (p *Plane) IsIntersectionLine(line Line3) bool {
+	startSign := p.DistToPoint(line.Start)
+	endSign := p.DistToPoint(line.End)
 	return (startSign < 0 && endSign > 0) || (endSign < 0 && startSign > 0)
 }
 
 // IntersectLine calculates the point in the plane which intersets the specified line.
-// Sets the optionalTarget, if not nil to this point, and also returns it.
-// Returns nil if the line does not intersects the plane.
-func (p *Plane) IntersectLine(line *Line3, optionalTarget *Vec3) *Vec3 {
-	var v1 Vec3
-	var result *Vec3
-	if optionalTarget == nil {
-		result = NewVec3(0, 0, 0)
-	} else {
-		result = optionalTarget
-	}
-
-	direction := line.Delta(&v1)
-	denominator := p.normal.Dot(direction)
-	if denominator == 0 {
+// Returns false if the line does not intersects the plane.
+func (p *Plane) IntersectLine(line Line3) (Vec3, bool) {
+	dir := line.Delta()
+	denom := p.Norm.Dot(dir)
+	if denom == 0 {
 		// line is coplanar, return origin
-		if p.DistanceToPoint(&line.start) == 0 {
-			return result.Copy(&line.start)
+		if p.DistToPoint(line.Start) == 0 {
+			return line.Start, true
 		}
 		// Unsure if this is the correct method to handle this case.
-		return nil
+		return dir, false
 	}
-
-	var t = -(line.start.Dot(&p.normal) + p.constant) / denominator
+	var t = -(line.Start.Dot(p.Norm) + p.Off) / denom
 	if t < 0 || t > 1 {
-		return nil
+		return dir, false
 	}
-	return result.Copy(direction).MultiplyScalar(t).Add(&line.start)
+	return dir.MulScalar(t).Add(line.Start), true
 }
 
-// CoplanarPoint sets the optionalTarget to a point in the plane and also returns it.
-// The point set and returned is the closest point from the origin.
-func (p *Plane) CoplanarPoint(optionalTarget *Vec3) *Vec3 {
-	var result *Vec3
-	if optionalTarget == nil {
-		result = NewVec3(0, 0, 0)
-	} else {
-		result = optionalTarget
-	}
-	return result.Copy(&p.normal).MultiplyScalar(-p.constant)
+// CoplanarPoint returns a point in the plane that is the closest point from the origin.
+func (p *Plane) CoplanarPoint() Vec3 {
+	return p.Norm.MulScalar(-p.Off)
 }
 
-// Translate translates this plane in the direction of its normal by offset.
-// Returns pointer to this updated plane.
-func (p *Plane) Translate(offset *Vec3) *Plane {
-	p.constant = p.constant - offset.Dot(&p.normal)
-	return p
+// SetTranslate translates this plane in the direction of its normal by offset.
+func (p *Plane) SetTranslate(offset Vec3) {
+	p.Off -= offset.Dot(p.Norm)
 }
 
-// Equals returns if this plane is equal to other
-func (p *Plane) Equals(other *Plane) bool {
-	return other.normal.Equals(&p.normal) && (other.constant == p.constant)
-}
-
-// Clone creates and returns a pointer to a copy of this plane.
-func (p *Plane) Clone(plane *Plane) *Plane {
-	return NewPlane(&plane.normal, plane.constant)
+// IsEqual returns if this plane is equal to other
+func (p *Plane) IsEqual(other *Plane) bool {
+	return other.Norm.IsEqual(p.Norm) && (other.Off == p.Off)
 }

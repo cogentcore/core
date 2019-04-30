@@ -69,7 +69,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
-	gi3d.AddNewAmbientLight(sc, "ambient", 0.1, gi3d.DirectSun)
+	gi3d.AddNewAmbientLight(sc, "ambient", 0.5, gi3d.DirectSun)
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
 	dir.Pos.Set(0, 0, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
@@ -88,6 +88,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Mat.Color.SetString("blue", nil)
 	bcb.Mat.Shiny = 10
+	// bcb.Mat.Specular.SetString("blue", nil) // how you get rid of specular highlights
 
 	win.MainMenuUpdated()
 	vp.UpdateEndNoSig(updt)
