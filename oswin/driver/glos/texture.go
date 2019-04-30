@@ -21,6 +21,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/ki/ints"
 )
 
 // note: use a different interface for different formats of "textures" such as a
@@ -302,6 +303,12 @@ func (tx *textureImpl) DeleteFramebuffer() {
 
 func (tx *textureImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	sz := tx.Size()
+	ssz := sr.Size()
+	if opts != nil && opts.NoStretch {
+		sz.X = ints.MinInt(sz.X, ssz.X)
+		sz.Y = ints.MinInt(sz.Y, ssz.Y)
+	}
+
 	tx.ActivateFramebuffer()
 	gpu.Draw.Viewport(tx.Bounds())
 	if tx.drawQuads == nil {

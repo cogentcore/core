@@ -46,6 +46,17 @@ func (m *Mat4) Set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n
 	return m
 }
 
+// SetFromMat3 sets the matrix elements based on a Mat3, filling in 0's for missing elements
+func (m *Mat4) SetFromMat3(src *Mat3) *Mat4 {
+	m.Set(
+		src[0], src[3], src[6], 0,
+		src[1], src[4], src[7], 0,
+		src[2], src[5], src[8], 0,
+		0, 0, 0, 0,
+	)
+	return m
+}
+
 // Identity sets this matrix as the identity matrix.
 // Returns pointer to this updated matrix.
 func (m *Mat4) Identity() *Mat4 {

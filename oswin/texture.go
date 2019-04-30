@@ -169,8 +169,7 @@ type Drawer interface {
 	DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
 	// Copy copies the sub-Texture defined by src and sr to the destination
-	// (the method receiver), such that sr.Min in src-space aligns with dp in
-	// dst-space.
+	// (the method receiver), such that sr.Min in src-space aligns with dp in dst-space.
 	// Must be called with a valid gpu context and on proper thread for that context.
 	Copy(dp image.Point, src Texture, sr image.Rectangle, op draw.Op, opts *DrawOptions)
 
@@ -198,6 +197,10 @@ const (
 
 // DrawOptions are optional arguments to Draw.
 type DrawOptions struct {
-	// TODO: transparency in [0x0000, 0xffff]?
-	// TODO: scaler (nearest neighbor vs linear)?
+	// NoStretch means do not up-scale the source image to fit the size of the target
+	// Appropriate for sub-regions rendered into a larger surface
+	NoStretch bool
+
+	// FlipSrcY means flip the Y (vertical) axis of the source when rendering into target
+	FlipSrcY bool
 }

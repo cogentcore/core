@@ -39,7 +39,6 @@ const (
 var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, false, nil)
 
 // LightColorMap provides a map of named light colors
-// todo: fill out rest
 var LightColorMap = map[LightColors]gi.Color{
 	DirectSun:    {255, 255, 255, 255},
 	CarbonArc:    {255, 250, 244, 255},
@@ -127,15 +126,14 @@ type DirLight struct {
 var KiT_DirLight = kit.Types.AddType(&DirLight{}, nil)
 
 // AddNewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
-// By default it is located directly overhead (Y = 1) -- change Pos otherwise
+// By default it is located overhead and toward the default camera (0, 1, 1) -- change Pos otherwise
 func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *DirLight {
 	lt := &DirLight{}
 	lt.Nm = name
 	lt.On = true
 	lt.Clr = LightColorMap[color]
 	lt.Lumns = lumens
-	lt.Pos.Y = 1
-	lt.Pos.Z = 1
+	lt.Pos.Set(0, 1, 1)
 	sc.AddLight(lt)
 	return lt
 }
@@ -144,7 +142,6 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 func (dl *DirLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
 	dir := mat32.Vec4{}
 	dir.SetVec3(&dl.Pos, 0)
-	// dir.Negate() // this is problematic
 	dir.ApplyMat4(&viewMat)
 	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
 	dir3.Normalize()
@@ -155,12 +152,37 @@ func (dl *DirLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
 // and associated decay factors
 type PointLight struct {
 	LightBase
-	Pos            mat32.Vec3 // position of light
-	LinearDecay    float32    // Distance linear decay factor
-	QuadraticDecay float32    // Distance quadratic decay factor
+	Pos       mat32.Vec3 // position of light
+	LinDecay  float32    // Distance linear decay factor
+	QuadDecay float32    // Distance quadratic decay factor
 }
 
 var KiT_PointLight = kit.Types.AddType(&PointLight{}, nil)
+
+// AddNewPointLight adds point light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// By default it is located near the default camera position -- change Pos otherwise
+func AddNewPointLight(sc *Scene, name string, lumens float32, color LightColors) *PointLight {
+	lt := &PointLight{}
+	lt.Nm = name
+	lt.On = true
+	lt.Clr = LightColorMap[color]
+	lt.Lumns = lumens
+	lt.LinDecay = 1
+	lt.QuadDecay = 1
+	lt.Pos.Set(0, 5, 5)
+	sc.AddLight(lt)
+	return lt
+}
+
+// Dir gets the direction normal vector, pre-computing the view transform
+func (dl *PointLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
+	dir := mat32.Vec4{}
+	dir.SetVec3(&dl.Pos, 0)
+	dir.ApplyMat4(&viewMat)
+	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
+	dir3.Normalize()
+	return dir3
+}
 
 // Spotlight is a light with a position and direction
 // and associated decay factors and angles

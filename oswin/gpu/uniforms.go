@@ -34,9 +34,12 @@ type Uniform interface {
 	// Offset returns byte-wise offset into the UBO where this uniform starts (only for UBO's)
 	Offset() int
 
-	// Size() returns byte-wise size of this uniform, *including padding*,
-	// as determined by the std140 standard opengl layout
+	// Size() returns actual byte-wise size of this uniform raw data (c.f., StdSize)
 	Size() int
+
+	// StdSize() returns byte-wise size of this uniform, *including padding* for representation
+	// on the GPU -- e.g., as determined by the std140 standard opengl layout
+	StdSize() int
 
 	// Handle() returns the unique id for this uniform.
 	// if in a UBO, then this is the index of the item within the list of UBO's

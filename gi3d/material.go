@@ -29,7 +29,7 @@ type Material struct {
 func (mt *Material) Defaults() {
 	mt.Color.SetUInt8(128, 128, 128, 255)
 	mt.Emissive.SetUInt8(0, 0, 0, 0)
-	mt.Shiny = 1
+	mt.Shiny = 30
 }
 
 // IsTransparent returns true if color has alpha < 255

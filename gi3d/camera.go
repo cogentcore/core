@@ -21,9 +21,9 @@ type Camera struct {
 func (cm *Camera) Defaults() {
 	cm.Pose.Defaults()
 	cm.Pose.Pos.Set(0, 0, 10)
-	cm.FOV = 90
+	cm.FOV = 30
 	cm.Aspect = 1.5
-	cm.Near = .1
+	cm.Near = .01
 	cm.Far = 1000
 	cm.LookAt(&mat32.Vec3{0, 0, 0}, &mat32.Vec3{0, 1, 0})
 }

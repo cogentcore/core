@@ -350,16 +350,16 @@ func (sc *Scene) NavEvents() {
 		// fmt.Printf(ch)
 		switch ch {
 		case "UpArrow":
-			ssc.Camera.Pose.Pos.Y += 0.1 // todo: rotate
-			kt.SetProcessed()
-		case "Shift+UpArrow":
-			ssc.Camera.Pose.Pos.Y += 0.1
-			kt.SetProcessed()
-		case "DownArrow":
 			ssc.Camera.Pose.Pos.Y -= 0.1 // todo: rotate
 			kt.SetProcessed()
-		case "Shift+DownArrow":
+		case "Shift+UpArrow":
 			ssc.Camera.Pose.Pos.Y -= 0.1
+			kt.SetProcessed()
+		case "DownArrow":
+			ssc.Camera.Pose.Pos.Y += 0.1 // todo: rotate
+			kt.SetProcessed()
+		case "Shift+DownArrow":
+			ssc.Camera.Pose.Pos.Y += 0.1
 			kt.SetProcessed()
 		case "LeftArrow":
 			ssc.Camera.Pose.Pos.X += 0.1 // todo: rotate
@@ -412,6 +412,7 @@ func (sc *Scene) ActivateFrame() bool {
 			sc.Frame = gpu.TheGPU.NewFramebuffer(sc.Nm+"-frame", sc.Geom.Size, 4) // 4 samples default
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
+		sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
 		sc.Frame.Activate()
 		sc.Renders.DrawState()
 		clr := ColorToVec3f(sc.BgColor)
@@ -507,7 +508,7 @@ func (sc *Scene) DirectWinUpload(win *gi.Window) bool {
 	if Update3DTrace {
 		fmt.Printf("Update: Window %s from Scene: %s at: %v, bounds: %v\n", win.Nm, sc.Nm, sc.WinBBox.Min, sc.Tex.Bounds())
 	}
-	win.OSWin.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, nil)
+	win.OSWin.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, &oswin.DrawOptions{NoStretch: true, FlipSrcY: true})
 	return true
 }
 

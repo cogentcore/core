@@ -140,7 +140,6 @@ func (app *appImpl) fillQuadsBuff() gpu.BufferMgr {
 // draw draws to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
 func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr) {
-
 	tx := src.(*textureImpl)
 	sr = sr.Intersect(tx.Bounds())
 	if sr.Empty() {
@@ -205,10 +204,19 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 	//	a10 +   0 + a12 = qy = py
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
-	matUVP := mat32.Mat3{
-		qx - px, 0, 0,
-		0, sy - py, 0,
-		px, py, 1,
+	var matUVP mat32.Mat3
+
+	if opts != nil && opts.FlipSrcY {
+		matUVP = mat32.Mat3{
+			qx - px, 0, 0,
+			0, py - sy, 0,
+			px, sy, 1}
+	} else {
+		matUVP = mat32.Mat3{
+			qx - px, 0, 0,
+			0, sy - py, 0,
+			px, py, 1,
+		}
 	}
 	err = app.drawProg.UniformByName("uvp").SetValue(matUVP)
 	if err != nil {

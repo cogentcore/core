@@ -48,8 +48,8 @@ func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 // Assumes that WorldMatrix has been updated
 func (ps *Pose) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 	ps.MVMatrix.MultiplyMatrices(viewMat, &ps.WorldMatrix)
-	ps.MVPMatrix.MultiplyMatrices(prjnMat, &ps.MVMatrix)
 	ps.NormMatrix.GetNormalMatrix(&ps.MVMatrix)
+	ps.MVPMatrix.MultiplyMatrices(prjnMat, &ps.MVMatrix)
 }
 
 // MoveOnAxis moves (translates) the specified distance on the specified local axis.

@@ -22,15 +22,16 @@ import (
 // See Program.AddUniform to create a new standalone one, and
 // Program.NewUniforms to create a new set of them (i.e., Uniform Buffer Object)
 type Uniform struct {
-	init   bool
-	name   string
-	handle int32
-	typ    gpu.UniType
-	array  bool
-	ln     int
-	offset int
-	size   int
-	ubo    *Uniforms // set if a member of a ubo
+	init    bool
+	name    string
+	handle  int32
+	typ     gpu.UniType
+	array   bool
+	ln      int
+	offset  int
+	size    int       // only set if part of a Uniforms UBO
+	stdSize int       // ditto
+	ubo     *Uniforms // set if a member of a ubo
 }
 
 // Name returns name of the Uniform
@@ -68,8 +69,7 @@ func (un *Uniform) Offset() int {
 	return un.offset
 }
 
-// Size() returns byte-wise size of this Uniform, *including padding*,
-// as determined by the std140 standard opengl layout
+// Size() returns actual byte-wise size of this uniform raw data (c.f., StdSize)
 func (un *Uniform) Size() int {
 	if un.array {
 		un.size = un.ln * un.typ.Bytes()
@@ -77,6 +77,17 @@ func (un *Uniform) Size() int {
 		un.size = un.typ.Bytes()
 	}
 	return un.size
+}
+
+// StdSize() returns byte-wise size of this uniform, *including padding* for representation
+// on the GPU -- e.g., as determined by the std140 standard opengl layout
+func (un *Uniform) StdSize() int {
+	if un.array {
+		un.stdSize = un.ln * un.typ.StdBytes()
+	} else {
+		un.stdSize = un.typ.StdBytes()
+	}
+	return un.stdSize
 }
 
 // Handle() returns the unique id for this Uniform.
@@ -109,6 +120,7 @@ func (un *Uniform) SetValueImpl(val interface{}) error {
 					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be []mat32.Mat3", un.name)
 				}
 				if un.ubo != nil {
+					// todo: this is incorrect!  mat3 needs to be converted to mat4
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(fv))
 				} else {
 					gl.UniformMatrix3fv(un.handle, int32(un.ln), false, &fv[0][0])
@@ -175,7 +187,9 @@ func (un *Uniform) SetValueImpl(val interface{}) error {
 					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Mat3", un.name)
 				}
 				if un.ubo != nil {
-					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv[0]))
+					m4 := mat32.Mat4{} // stored internally as effectively a mat4 without the last column
+					m4.SetFromMat3(&fv)
+					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.stdSize, gl.Ptr(&m4[0]))
 				} else {
 					gl.UniformMatrix3fv(un.handle, 1, false, &fv[0])
 				}
@@ -204,7 +218,7 @@ func (un *Uniform) SetValueImpl(val interface{}) error {
 				if !ok {
 					return fmt.Errorf("glgpu Uniform SetValue: Uniform: %s val must be mat32.Vec3", un.name)
 				}
-				if un.ubo != nil {
+				if un.ubo != nil { // note: stored as vec4 but only transfer 3
 					gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset, un.size, gl.Ptr(&fv))
 				} else {
 					gl.Uniform3f(un.handle, fv.X, fv.Y, fv.Z)
@@ -252,7 +266,7 @@ func (un *Uniform) SetValueImpl(val interface{}) error {
 				if un.ubo != nil {
 					// need separate writes b/c alignment is vec4
 					for i := 0; i < un.ln; i++ {
-						gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset+i*4*4, 4*3, gl.Ptr(fv[i]))
+						gl.BufferSubData(gl.UNIFORM_BUFFER, un.offset+i*4*4, 4*3, gl.Ptr(&fv[i].X))
 					}
 				} else {
 					gl.Uniform3iv(un.handle, int32(un.ln), &fv[0].X)
@@ -354,7 +368,7 @@ type Uniforms struct {
 	bindPt uint32
 	unis   map[string]*Uniform
 	uniOrd []*Uniform
-	size   int
+	size   int // overall size of buffer, accumulating stdSize of elements
 }
 
 // Name returns the name of this set of Uniforms
@@ -403,7 +417,8 @@ func (un *Uniforms) getSize() int {
 	sz := 0
 	for i, u := range un.uniOrd {
 		u.ubo = un
-		usz := u.Size()
+		u.Size()           // compute actual size
+		usz := u.StdSize() // use std size
 		if usz == 0 {
 			u.offset = 0
 			u.handle = 0

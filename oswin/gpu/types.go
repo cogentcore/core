@@ -93,9 +93,21 @@ func (ty *UniType) Name() string {
 	}
 }
 
-// Bytes returns number of bytes taken up by this element, in std140 format (including padding)
-// https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
+// Bytes returns actual size of this element in bytes
 func (ty *UniType) Bytes() int {
+	n := TypeBytes(ty.Type)
+	if ty.Vec == 0 && ty.Mat == 0 {
+		return n
+	}
+	if ty.Vec > 0 {
+		return ty.Vec * n
+	}
+	return ty.Mat * ty.Mat * n
+}
+
+// StdBytes returns number of bytes taken up by this element, in std140 format (including padding)
+// https://learnopengl.com/Advanced-OpenGL/Advanced-GLSL
+func (ty *UniType) StdBytes() int {
 	n := TypeBytes(ty.Type)
 	if ty.Vec == 0 && ty.Mat == 0 {
 		return n
