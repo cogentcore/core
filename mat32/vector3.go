@@ -17,18 +17,25 @@ type Vec3 struct {
 	Z float32
 }
 
-// NewVec3 creates and returns a new Vec3 with the specified x, y and y components.
+// NewVec3 returns a new Vec3 with the specified x, y and y components.
 func NewVec3(x, y, z float32) Vec3 {
 	return Vec3{X: x, Y: y, Z: z}
 }
 
-// NewVec3Scalar creates and returns a new Vec3 with all components set to scalar.
+// NewVec3Scalar returns a new Vec3 with all components set to scalar.
 func NewVec3Scalar(s float32) Vec3 {
 	return Vec3{X: s, Y: s, Z: s}
 }
 
+// NewVec3FromVec4 returns a new Vec3 from a Vec4
+func NewVec3FromVec4(v Vec4) Vec3 {
+	nv := Vec3{}
+	nv.SetFromVec4(v)
+	return nv
+}
+
 // IsNil returns true if all values are 0 (uninitialized).
-func (v *Vec3) IsNil() bool {
+func (v Vec3) IsNil() bool {
 	if v.X == 0 && v.Y == 0 && v.Z == 0 {
 		return true
 	}
@@ -42,11 +49,25 @@ func (v *Vec3) Set(x, y, z float32) {
 	v.Z = z
 }
 
-// SetScalar sets all vector X, Y and Z components to same scalar value
+// SetScalar sets all vector X, Y and Z components to same scalar value.
 func (v *Vec3) SetScalar(s float32) {
 	v.X = s
 	v.Y = s
 	v.Z = s
+}
+
+// SetFromVec4 sets this vector from a Vec4
+func (v *Vec3) SetFromVec4(other Vec4) {
+	v.X = other.X
+	v.Y = other.Y
+	v.Z = other.Z
+}
+
+// SetFromVec3i sets from a Vec3i (int32) vector.
+func (v *Vec3) SetFromVec3i(vi Vec3i) {
+	v.X = float32(vi.X)
+	v.Y = float32(vi.Y)
+	v.Z = float32(vi.Z)
 }
 
 // SetComponent sets this vector component value by component index.
@@ -59,12 +80,12 @@ func (v *Vec3) SetComponent(comp Components, value float32) {
 	case Z:
 		v.Z = value
 	default:
-		panic("index is out of range: ")
+		panic("component is out of range: ")
 	}
 }
 
 // Component returns this vector component
-func (v *Vec3) Component(comp Components) float32 {
+func (v Vec3) Component(comp Components) float32 {
 	switch comp {
 	case X:
 		return v.X
@@ -73,7 +94,7 @@ func (v *Vec3) Component(comp Components) float32 {
 	case Z:
 		return v.Z
 	default:
-		panic("index is out of range")
+		panic("component is out of range")
 	}
 }
 
@@ -91,14 +112,12 @@ func (v *Vec3) SetByName(name string, value float32) {
 	}
 }
 
-// Zero sets this vector X, Y and Z components to be zero.
-func (v *Vec3) Zero() {
-	v.X = 0
-	v.Y = 0
-	v.Z = 0
+// SetZero sets this vector X, Y and Z components to be zero.
+func (v *Vec3) SetZero() {
+	v.SetScalar(0)
 }
 
-// FromArray sets this vector's components from the specified array and offset
+// FromArray sets this vector's components from the specified array and offset.
 func (v *Vec3) FromArray(array []float32, offset int) {
 	v.X = array[offset]
 	v.Y = array[offset+1]
@@ -106,14 +125,14 @@ func (v *Vec3) FromArray(array []float32, offset int) {
 }
 
 // ToArray copies this vector's components to array starting at offset.
-func (v *Vec3) ToArray(array []float32, offset int) {
+func (v Vec3) ToArray(array []float32, offset int) {
 	array[offset] = v.X
 	array[offset+1] = v.Y
 	array[offset+2] = v.Z
 }
 
 ///////////////////////////////////////////////////////////////////////
-//  Basic operations
+//  Basic math operations
 
 // Add adds other vector to this one and returns result in a new vector.
 func (v Vec3) Add(other Vec3) Vec3 {
@@ -216,7 +235,7 @@ func (v *Vec3) SetDivScalar(s float32) {
 	if s != 0 {
 		v.SetMulScalar(1 / s)
 	} else {
-		v.Zero()
+		v.SetZero()
 	}
 }
 
@@ -253,13 +272,11 @@ func (v *Vec3) Clamp(min, max Vec3) {
 	} else if v.X > max.X {
 		v.X = max.X
 	}
-
 	if v.Y < min.Y {
 		v.Y = min.Y
 	} else if v.Y > max.Y {
 		v.Y = max.Y
 	}
-
 	if v.Z < min.Z {
 		v.Z = min.Z
 	} else if v.Z > max.Z {
@@ -303,9 +320,9 @@ func (v Vec3) Round() Vec3 {
 
 // SetRound rounds each of this vector's components.
 func (v *Vec3) SetRound() {
-	v.X = Round(v.X + 0.5)
-	v.Y = Round(v.Y + 0.5)
-	v.Z = Round(v.Z + 0.5)
+	v.X = Round(v.X)
+	v.Y = Round(v.Y)
+	v.Z = Round(v.Z)
 }
 
 // Negate returns vector with each component negated.
@@ -361,6 +378,11 @@ func (v Vec3) Normal() Vec3 {
 
 // SetNormal normalizes this vector so its length will be 1.
 func (v *Vec3) SetNormal() {
+	v.SetDivScalar(v.Length())
+}
+
+// Normalize normalizes this vector so its length will be 1.
+func (v *Vec3) Normalize() {
 	v.SetDivScalar(v.Length())
 }
 

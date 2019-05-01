@@ -17,40 +17,43 @@ type Vec3i struct {
 	Z int32
 }
 
-// NewVec3i creates and returns a pointer to a new Vec3i with
-// the specified x, y and y components
-func NewVec3i(x, y, z int32) *Vec3i {
-	return &Vec3i{X: x, Y: y, Z: z}
+// NewVec3i returns a new Vec3i with the specified x, y and y components.
+func NewVec3i(x, y, z int32) Vec3i {
+	return Vec3i{X: x, Y: y, Z: z}
+}
+
+// NewVec3iScalar returns a new Vec3 with all components set to scalar.
+func NewVec3iScalar(s int32) Vec3i {
+	return Vec3i{X: s, Y: s, Z: s}
+}
+
+// IsNil returns true if all values are 0 (uninitialized).
+func (v Vec3i) IsNil() bool {
+	if v.X == 0 && v.Y == 0 && v.Z == 0 {
+		return true
+	}
+	return false
 }
 
 // Set sets this vector X, Y and Z components.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Set(x, y, z int32) *Vec3i {
+func (v *Vec3i) Set(x, y, z int32) {
 	v.X = x
 	v.Y = y
 	v.Z = z
-	return v
 }
 
-// SetX sets this vector X component.
-// Returns the pointer to this updated Vector.
-func (v *Vec3i) SetX(x int32) *Vec3i {
-	v.X = x
-	return v
+// SetScalar sets all vector X, Y and Z components to same scalar value.
+func (v *Vec3i) SetScalar(s int32) {
+	v.X = s
+	v.Y = s
+	v.Z = s
 }
 
-// SetY sets this vector Y component.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) SetY(y int32) *Vec3i {
-	v.Y = y
-	return v
-}
-
-// SetZ sets this vector Z component.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) SetZ(z int32) *Vec3i {
-	v.Z = z
-	return v
+// SetFromVec3 sets from a Vec3 (float32) vector.
+func (v *Vec3i) SetFromVec3(vf Vec3) {
+	v.X = int32(vf.X)
+	v.Y = int32(vf.Y)
+	v.Z = int32(vf.Z)
 }
 
 // SetComponent sets this vector component value by component index.
@@ -64,12 +67,12 @@ func (v *Vec3i) SetComponent(comp Components, value int32) {
 	case Z:
 		v.Z = value
 	default:
-		panic("index is out of range: ")
+		panic("component is out of range: ")
 	}
 }
 
 // Component returns this vector component
-func (v *Vec3i) Component(comp Components) int32 {
+func (v Vec3i) Component(comp Components) int32 {
 	switch comp {
 	case X:
 		return v.X
@@ -78,7 +81,7 @@ func (v *Vec3i) Component(comp Components) int32 {
 	case Z:
 		return v.Z
 	default:
-		panic("index is out of range")
+		panic("component is out of range")
 	}
 }
 
@@ -96,226 +99,196 @@ func (v *Vec3i) SetByName(name string, value int32) {
 	}
 }
 
-// Zero sets this vector X, Y and Z components to be zero.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Zero() *Vec3i {
-	v.X = 0
-	v.Y = 0
-	v.Z = 0
-	return v
+// SetZero sets this vector X, Y and Z components to be zero.
+func (v *Vec3i) SetZero() {
+	v.SetScalar(0)
 }
 
-// Copy copies other vector to this one.
-// It is equivalent to: *v = *other.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Copy(other *Vec3i) *Vec3i {
-	*v = *other
-	return v
+// FromArray sets this vector's components from the specified array and offset
+func (v *Vec3i) FromArray(array []int32, offset int) {
+	v.X = array[offset]
+	v.Y = array[offset+1]
+	v.Z = array[offset+2]
 }
 
-// Add adds other vector to this one.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Add(other *Vec3i) *Vec3i {
+// ToArray copies this vector's components to array starting at offset.
+func (v Vec3i) ToArray(array []int32, offset int) {
+	array[offset] = v.X
+	array[offset+1] = v.Y
+	array[offset+2] = v.Z
+}
+
+///////////////////////////////////////////////////////////////////////
+//  Basic math operations
+
+// Add adds other vector to this one and returns result in a new vector.
+func (v Vec3i) Add(other Vec3i) Vec3i {
+	return Vec3i{v.X + other.X, v.Y + other.Y, v.Z + other.Z}
+}
+
+// AddScalar adds scalar s to each component of this vector and returns new vector.
+func (v Vec3i) AddScalar(s int32) Vec3i {
+	return Vec3i{v.X + s, v.Y + s, v.Z + s}
+}
+
+// SetAdd sets this to addition with other vector (i.e., += or plus-equals).
+func (v *Vec3i) SetAdd(other Vec3i) {
 	v.X += other.X
 	v.Y += other.Y
 	v.Z += other.Z
-	return v
 }
 
-// AddScalar adds scalar s to each component of this vector.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) AddScalar(s int32) *Vec3i {
+// SetAddScalar sets this to addition with scalar.
+func (v *Vec3i) SetAddScalar(s int32) {
 	v.X += s
 	v.Y += s
 	v.Z += s
-	return v
 }
 
-// AddVectors adds vectors a and b to this one.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) AddVectors(a, b *Vec3i) *Vec3i {
-	v.X = a.X + b.X
-	v.Y = a.Y + b.Y
-	v.Z = a.Z + b.Z
-	return v
+// Sub subtracts other vector from this one and returns result in new vector.
+func (v Vec3i) Sub(other Vec3i) Vec3i {
+	return Vec3i{v.X - other.X, v.Y - other.Y, v.Z - other.Z}
 }
 
-// Sub subtracts other vector from this one.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Sub(other *Vec3i) *Vec3i {
+// SubScalar subtracts scalar s from each component of this vector and returns new vector.
+func (v Vec3i) SubScalar(s int32) Vec3i {
+	return Vec3i{v.X - s, v.Y - s, v.Z - s}
+}
+
+// SetSub sets this to subtraction with other vector (i.e., -= or minus-equals).
+func (v *Vec3i) SetSub(other Vec3i) {
 	v.X -= other.X
 	v.Y -= other.Y
 	v.Z -= other.Z
-	return v
 }
 
-// SubScalar subtracts scalar s from each component of this vector.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) SubScalar(s int32) *Vec3i {
+// SetSubScalar sets this to subtraction of scalar.
+func (v *Vec3i) SetSubScalar(s int32) {
 	v.X -= s
 	v.Y -= s
 	v.Z -= s
-	return v
 }
 
-// SubVectors sets this vector to a - b.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) SubVectors(a, b *Vec3i) *Vec3i {
-	v.X = a.X - b.X
-	v.Y = a.Y - b.Y
-	v.Z = a.Z - b.Z
-	return v
+// Mul multiplies each component of this vector by the corresponding one from other
+// and returns resulting vector.
+func (v Vec3i) Mul(other Vec3i) Vec3i {
+	return Vec3i{v.X * other.X, v.Y * other.Y, v.Z * other.Z}
 }
 
-// Multiply multiplies each component of this vector by the corresponding one from other vector.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Multiply(other *Vec3i) *Vec3i {
+// MulScalar multiplies each component of this vector by the scalar s and returns resulting vector.
+func (v Vec3i) MulScalar(s int32) Vec3i {
+	return Vec3i{v.X * s, v.Y * s, v.Z * s}
+}
+
+// SetMul sets this to multiplication with other vector (i.e., *= or times-equals).
+func (v *Vec3i) SetMul(other Vec3i) {
 	v.X *= other.X
 	v.Y *= other.Y
 	v.Z *= other.Z
-	return v
 }
 
-// MultiplyScalar multiplies each component of this vector by the scalar s.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) MultiplyScalar(s int32) *Vec3i {
+// SetMulScalar sets this to multiplication by scalar.
+func (v *Vec3i) SetMulScalar(s int32) {
 	v.X *= s
 	v.Y *= s
 	v.Z *= s
-	return v
 }
 
-// Divide divides each component of this vector by the corresponding one from other vector.
-// Returns the pointer to this updated vector
-func (v *Vec3i) Divide(other *Vec3i) *Vec3i {
+// Div divides each component of this vector by the corresponding one from other vector
+// and returns resulting vector.
+func (v Vec3i) Div(other Vec3i) Vec3i {
+	return Vec3i{v.X / other.X, v.Y / other.Y, v.Z / other.Z}
+}
+
+// DivScalar divides each component of this vector by the scalar s and returns resulting vector.
+// If scalar is zero, returns zero.
+func (v Vec3i) DivScalar(scalar int32) Vec3i {
+	if scalar != 0 {
+		return v.MulScalar(1 / scalar)
+	} else {
+		return Vec3i{}
+	}
+}
+
+// SetDiv sets this to division by other vector (i.e., /= or divide-equals).
+func (v *Vec3i) SetDiv(other Vec3i) {
 	v.X /= other.X
 	v.Y /= other.Y
 	v.Z /= other.Z
-	return v
 }
 
-// DivideScalar divides each component of this vector by the scalar s.
-// If scalar is zero, sets this vector to zero.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) DivideScalar(scalar int32) *Vec3i {
-	if scalar != 0 {
-		invScalar := 1 / scalar
-		v.X *= invScalar
-		v.Y *= invScalar
-		v.Z *= invScalar
+// SetDivScalar sets this to division by scalar.
+func (v *Vec3i) SetDivScalar(s int32) {
+	if s != 0 {
+		v.SetMulScalar(1 / s)
 	} else {
-		v.X = 0
-		v.Y = 0
-		v.Z = 0
+		v.SetZero()
 	}
-	return v
 }
 
-// Min sets this vector components to the minimum values of itself and other vector.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Min(other *Vec3i) *Vec3i {
-	if v.X > other.X {
-		v.X = other.X
-	}
-	if v.Y > other.Y {
-		v.Y = other.Y
-	}
-	if v.Z > other.Z {
-		v.Z = other.Z
-	}
-	return v
+// Min returns min of this vector components vs. other vector.
+func (v Vec3i) Min(other Vec3i) Vec3i {
+	return Vec3i{Min32i(v.X, other.X), Min32i(v.Y, other.Y), Min32i(v.Z, other.Z)}
 }
 
-// Max sets this vector components to the maximum value of itself and other vector.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Max(other *Vec3i) *Vec3i {
-	if v.X < other.X {
-		v.X = other.X
-	}
-	if v.Y < other.Y {
-		v.Y = other.Y
-	}
-	if v.Z < other.Z {
-		v.Z = other.Z
-	}
-	return v
+// SetMin sets this vector components to the minimum values of itself and other vector.
+func (v *Vec3i) SetMin(other Vec3i) {
+	v.X = Min32i(v.X, other.X)
+	v.Y = Min32i(v.Y, other.Y)
+	v.Z = Min32i(v.Z, other.Z)
+}
+
+// Max returns max of this vector components vs. other vector.
+func (v Vec3i) Max(other Vec3i) Vec3i {
+	return Vec3i{Max32i(v.X, other.X), Max32i(v.Y, other.Y), Max32i(v.Z, other.Z)}
+}
+
+// SetMax sets this vector components to the maximum value of itself and other vector.
+func (v *Vec3i) SetMax(other Vec3i) {
+	v.X = Max32i(v.X, other.X)
+	v.Y = Max32i(v.Y, other.Y)
+	v.Z = Max32i(v.Z, other.Z)
 }
 
 // Clamp sets this vector components to be no less than the corresponding components of min
 // and not greater than the corresponding component of max.
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Clamp(min, max *Vec3i) *Vec3i {
+func (v *Vec3i) Clamp(min, max Vec3i) {
 	if v.X < min.X {
 		v.X = min.X
 	} else if v.X > max.X {
 		v.X = max.X
 	}
-
 	if v.Y < min.Y {
 		v.Y = min.Y
 	} else if v.Y > max.Y {
 		v.Y = max.Y
 	}
-
 	if v.Z < min.Z {
 		v.Z = min.Z
 	} else if v.Z > max.Z {
 		v.Z = max.Z
 	}
-	return v
 }
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) ClampScalar(minVal, maxVal int32) *Vec3i {
-	min := NewVec3i(minVal, minVal, minVal)
-	max := NewVec3i(maxVal, maxVal, maxVal)
-	return v.Clamp(min, max)
+func (v *Vec3i) ClampScalar(minVal, maxVal int32) {
+	v.Clamp(NewVec3iScalar(minVal), NewVec3iScalar(maxVal))
 }
 
-// Negate negates each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) Negate() *Vec3i {
+// Negate returns vector with each component negated.
+func (v Vec3i) Negate() Vec3i {
+	return Vec3i{-v.X, -v.Y, -v.Z}
+}
+
+// SetNegate negates each of this vector's components.
+func (v *Vec3i) SetNegate() {
 	v.X = -v.X
 	v.Y = -v.Y
 	v.Z = -v.Z
-	return v
 }
 
-// Equals returns if this vector is equal to other.
-func (v *Vec3i) Equals(other *Vec3i) bool {
+// IsEqual returns if this vector is equal to other.
+func (v Vec3i) IsEqual(other Vec3i) bool {
 	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z)
-}
-
-// FromArray sets this vector's components from the specified array and offset
-// Returns the pointer to this updated vector.
-func (v *Vec3i) FromArray(array []int32, offset int) *Vec3i {
-	v.X = array[offset]
-	v.Y = array[offset+1]
-	v.Z = array[offset+2]
-	return v
-}
-
-// ToArray copies this vector's components to array starting at offset.
-// Returns the array.
-func (v *Vec3i) ToArray(array []int32, offset int) []int32 {
-	array[offset] = v.X
-	array[offset+1] = v.Y
-	array[offset+2] = v.Z
-	return array
-}
-
-// MultiplyVectors multiply vectors a and b storing the result in this vector.
-// Returns the pointer to this updated vector.
-func (v *Vec3i) MultiplyVectors(a, b *Vec3i) *Vec3i {
-	v.X = a.X * b.X
-	v.Y = a.Y * b.Y
-	v.Z = a.Z * b.Z
-	return v
-}
-
-// Clone returns a copy of this vector
-func (v *Vec3i) Clone() *Vec3i {
-	return NewVec3i(v.X, v.Y, v.Z)
 }

@@ -45,21 +45,21 @@ func (a *ArrayF32) Append(v ...float32) {
 }
 
 // AppendVec2 appends any number of Vec2 to the array
-func (a *ArrayF32) AppendVec2(v ...*Vec2) {
+func (a *ArrayF32) AppendVec2(v ...Vec2) {
 	for i := 0; i < len(v); i++ {
 		*a = append(*a, v[i].X, v[i].Y)
 	}
 }
 
 // AppendVec3 appends any number of Vec3 to the array
-func (a *ArrayF32) AppendVec3(v ...*Vec3) {
+func (a *ArrayF32) AppendVec3(v ...Vec3) {
 	for i := 0; i < len(v); i++ {
 		*a = append(*a, v[i].X, v[i].Y, v[i].Z)
 	}
 }
 
 // AppendVec4 appends any number of Vec4 to the array
-func (a *ArrayF32) AppendVec4(v ...*Vec4) {
+func (a *ArrayF32) AppendVec4(v ...Vec4) {
 	for i := 0; i < len(v); i++ {
 		*a = append(*a, v[i].X, v[i].Y, v[i].Z, v[i].W)
 	}
@@ -120,14 +120,14 @@ func (a ArrayF32) Set(pos int, v ...float32) {
 
 // SetVec2 sets the values of the array at the specified pos
 // from the XY values of the specified Vec2
-func (a ArrayF32) SetVec2(pos int, v *Vec2) {
+func (a ArrayF32) SetVec2(pos int, v Vec2) {
 	a[pos] = v.X
 	a[pos+1] = v.Y
 }
 
 // SetVec3 sets the values of the array at the specified pos
 // from the XYZ values of the specified Vec3
-func (a ArrayF32) SetVec3(pos int, v *Vec3) {
+func (a ArrayF32) SetVec3(pos int, v Vec3) {
 	a[pos] = v.X
 	a[pos+1] = v.Y
 	a[pos+2] = v.Z
@@ -135,7 +135,7 @@ func (a ArrayF32) SetVec3(pos int, v *Vec3) {
 
 // SetVec4 sets the values of the array at the specified pos
 // from the XYZ values of the specified Vec4
-func (a ArrayF32) SetVec4(pos int, v *Vec4) {
+func (a ArrayF32) SetVec4(pos int, v Vec4) {
 	a[pos] = v.X
 	a[pos+1] = v.Y
 	a[pos+2] = v.Z

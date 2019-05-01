@@ -299,12 +299,11 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Components, wdir, hdir int, widt
 			vtx.SetComponent(waxis, (float32(ix)*segWidth-wHalf)*float32(wdir))
 			vtx.SetComponent(haxis, (float32(iy)*segHeight-hHalf)*float32(hdir))
 			vtx.SetComponent(w, offset)
-			ms.Vtx.AppendVec3(&vtx)
-			ms.Norm.AppendVec3(&norm)
+			ms.Vtx.AppendVec3(vtx)
+			ms.Norm.AppendVec3(norm)
 			ms.TexUV.Append(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))
 			if !clr.IsNil() {
-				cv := ColorToVec4f(clr)
-				ms.Color.AppendVec4(&cv)
+				ms.Color.AppendVec4(ColorToVec4f(clr))
 			}
 		}
 	}

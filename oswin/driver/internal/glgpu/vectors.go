@@ -323,7 +323,7 @@ func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vec3) boo
 		bidx := off + i*str
 		vb.buff.GetVec3(bidx, &v3)
 		cont := fun(&v3)
-		vb.buff.SetVec3(bidx, &v3)
+		vb.buff.SetVec3(bidx, v3)
 		if !cont {
 			break
 		}

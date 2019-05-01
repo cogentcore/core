@@ -18,13 +18,25 @@ type Vec4 struct {
 	W float32
 }
 
-// NewVec4 creates and returns a pointer to a new Vec4
-func NewVec4(x, y, z, w float32) *Vec4 {
-	return &Vec4{X: x, Y: y, Z: z, W: w}
+// NewVec4 returns a new Vec4 with the specified components.
+func NewVec4(x, y, z, w float32) Vec4 {
+	return Vec4{X: x, Y: y, Z: z, W: w}
+}
+
+// NewVec4Scalar returns a new Vec4 with all components set to scalar.
+func NewVec4Scalar(s float32) Vec4 {
+	return Vec4{X: s, Y: s, Z: s, W: s}
+}
+
+// NewVec4FromVec3 returns a new Vec4 from a Vec3 and W
+func NewVec4FromVec3(v Vec3, w float32) Vec4 {
+	nv := Vec4{}
+	nv.SetFromVec3(v, w)
+	return nv
 }
 
 // IsNil returns true if all values are 0 (uninitialized).
-func (v *Vec4) IsNil() bool {
+func (v Vec4) IsNil() bool {
 	if v.X == 0 && v.Y == 0 && v.Z == 0 && v.W == 0 {
 		return true
 	}
@@ -32,55 +44,23 @@ func (v *Vec4) IsNil() bool {
 }
 
 // Set sets this vector X, Y, Z and W components.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Set(x, y, z, w float32) *Vec4 {
+func (v *Vec4) Set(x, y, z, w float32) {
 	v.X = x
 	v.Y = y
 	v.Z = z
 	v.W = w
-	return v
 }
 
-// SetVec3 sets this vector from another Vec3 and W
-func (v *Vec4) SetVec3(other *Vec3, w float32) *Vec4 {
+// SetFromVec3 sets this vector from a Vec3 and W
+func (v *Vec4) SetFromVec3(other Vec3, w float32) {
 	v.X = other.X
 	v.Y = other.Y
 	v.Z = other.Z
 	v.W = w
-	return v
-}
-
-// SetX sets this vector X component.
-// Returns the pointer to this updated Vector.
-func (v *Vec4) SetX(x float32) *Vec4 {
-	v.X = x
-	return v
-}
-
-// SetY sets this vector Y component.
-// Returns the pointer to this updated vector.
-func (v *Vec4) SetY(y float32) *Vec4 {
-	v.Y = y
-	return v
-}
-
-// SetZ sets this vector Z component.
-// Returns the pointer to this updated vector.
-func (v *Vec4) SetZ(z float32) *Vec4 {
-	v.Z = z
-	return v
-}
-
-// SetW sets this vector W component.
-// Returns the pointer to this updated vector.
-func (v *Vec4) SetW(w float32) *Vec4 {
-	v.W = w
-	return v
 }
 
 // SetComponent sets this vector component value by component index.
-// Returns the pointer to this updated vector
-func (v *Vec4) SetComponent(comp Components, value float32) *Vec4 {
+func (v *Vec4) SetComponent(comp Components, value float32) {
 	switch comp {
 	case X:
 		v.X = value
@@ -91,13 +71,12 @@ func (v *Vec4) SetComponent(comp Components, value float32) *Vec4 {
 	case W:
 		v.W = value
 	default:
-		panic("index is out of range")
+		panic("component is out of range")
 	}
-	return v
 }
 
 // Component returns this vector component.
-func (v *Vec4) Component(comp Components) float32 {
+func (v Vec4) Component(comp Components) float32 {
 	switch comp {
 	case X:
 		return v.X
@@ -128,336 +107,344 @@ func (v *Vec4) SetByName(name string, value float32) {
 	}
 }
 
-// Zero sets this vector X, Y and Z components to be zero and W to be one.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Zero() *Vec4 {
+// SetZero sets this vector X, Y and Z components to be zero and W to be one.
+func (v *Vec4) SetZero() {
 	v.X = 0
 	v.Y = 0
 	v.Z = 0
 	v.W = 1
-	return v
 }
 
-// Copy copies other vector to this one.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Copy(other *Vec4) *Vec4 {
-	*v = *other
-	return v
+// FromArray sets this vector's components from the specified array and offset
+func (v *Vec4) FromArray(array []float32, offset int) {
+	v.X = array[offset]
+	v.Y = array[offset+1]
+	v.Z = array[offset+2]
+	v.W = array[offset+3]
 }
 
-// Add adds other vector to this one.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Add(other *Vec4) *Vec4 {
+// ToArray copies this vector's components to array starting at offset.
+func (v Vec4) ToArray(array []float32, offset int) {
+	array[offset] = v.X
+	array[offset+1] = v.Y
+	array[offset+2] = v.Z
+	array[offset+3] = v.W
+}
+
+///////////////////////////////////////////////////////////////////////
+//  Basic math operations
+
+// Add adds other vector to this one and returns result in a new vector.
+func (v Vec4) Add(other Vec4) Vec4 {
+	return Vec4{v.X + other.X, v.Y + other.Y, v.Z + other.Z, v.W + other.W}
+}
+
+// AddScalar adds scalar s to each component of this vector and returns new vector.
+func (v Vec4) AddScalar(s float32) Vec4 {
+	return Vec4{v.X + s, v.Y + s, v.Z + s, v.W + s}
+}
+
+// SetAdd sets this to addition with other vector (i.e., += or plus-equals).
+func (v *Vec4) SetAdd(other Vec4) {
 	v.X += other.X
 	v.Y += other.Y
 	v.Z += other.Z
 	v.W += other.W
-	return v
 }
 
-// AddScalar adds scalar s to each component of this vector.
-// Returns the pointer to this updated vector.
-func (v *Vec4) AddScalar(s float32) *Vec4 {
+// SetAddScalar sets this to addition with scalar.
+func (v *Vec4) SetAddScalar(s float32) {
 	v.X += s
 	v.Y += s
 	v.Z += s
 	v.W += s
-	return v
 }
 
-// AddVectors adds vectors a and b to this one.
-// Returns the pointer to this updated vector.
-func (v *Vec4) AddVectors(a, b *Vec4) *Vec4 {
-	v.X = a.X + b.X
-	v.Y = a.Y + b.Y
-	v.Z = a.Z + b.Z
-	v.W = a.W + b.W
-	return v
+// Sub subtracts other vector from this one and returns result in new vector.
+func (v Vec4) Sub(other Vec4) Vec4 {
+	return Vec4{v.X - other.X, v.Y - other.Y, v.Z - other.Z, v.W - other.W}
 }
 
-// Sub subtracts other vector from this one.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Sub(other *Vec4) *Vec4 {
+// SubScalar subtracts scalar s from each component of this vector and returns new vector.
+func (v Vec4) SubScalar(s float32) Vec4 {
+	return Vec4{v.X - s, v.Y - s, v.Z - s, v.W - s}
+}
+
+// SetSub sets this to subtraction with other vector (i.e., -= or minus-equals).
+func (v *Vec4) SetSub(other Vec4) {
 	v.X -= other.X
 	v.Y -= other.Y
 	v.Z -= other.Z
 	v.W -= other.W
-	return v
 }
 
-// SubScalar subtracts scalar s from each component of this vector.
-// Returns the pointer to this updated vector.
-func (v *Vec4) SubScalar(s float32) *Vec4 {
+// SetSubScalar sets this to subtraction of scalar.
+func (v *Vec4) SetSubScalar(s float32) {
 	v.X -= s
 	v.Y -= s
 	v.Z -= s
 	v.W -= s
-	return v
 }
 
-// SubVectors sets this vector to a - b.
-// Returns the pointer to this updated vector.
-func (v *Vec4) SubVectors(a, b *Vec4) *Vec4 {
-	v.X = a.X - b.X
-	v.Y = a.Y - b.Y
-	v.Z = a.Y - b.Z
-	v.W = a.Y - b.W
-	return v
+// Mul multiplies each component of this vector by the corresponding one from other
+// and returns resulting vector.
+func (v Vec4) Mul(other Vec4) Vec4 {
+	return Vec4{v.X * other.X, v.Y * other.Y, v.Z * other.Z, v.W * other.W}
 }
 
-// Multiply multiplies each component of this vector by the corresponding one from other vector.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Multiply(other *Vec4) *Vec4 {
+// MulScalar multiplies each component of this vector by the scalar s and returns resulting vector.
+func (v Vec4) MulScalar(s float32) Vec4 {
+	return Vec4{v.X * s, v.Y * s, v.Z * s, v.W * s}
+}
+
+// SetMul sets this to multiplication with other vector (i.e., *= or times-equals).
+func (v *Vec4) SetMul(other Vec4) {
 	v.X *= other.X
 	v.Y *= other.Y
 	v.Z *= other.Z
 	v.W *= other.W
-	return v
 }
 
-// MultiplyScalar multiplies each component of this vector by the scalar s.
-// Returns the pointer to this updated vector.
-func (v *Vec4) MultiplyScalar(scalar float32) *Vec4 {
-	v.X *= scalar
-	v.Y *= scalar
-	v.Z *= scalar
-	v.W *= scalar
-	return v
+// SetMulScalar sets this to multiplication by scalar.
+func (v *Vec4) SetMulScalar(s float32) {
+	v.X *= s
+	v.Y *= s
+	v.Z *= s
+	v.W *= s
 }
 
-// Divide divides each component of this vector by the corresponding one from other vector.
-// Returns the pointer to this updated vector
-func (v *Vec4) Divide(other *Vec4) *Vec4 {
+// Div divides each component of this vector by the corresponding one from other vector
+// and returns resulting vector.
+func (v Vec4) Div(other Vec4) Vec4 {
+	return Vec4{v.X / other.X, v.Y / other.Y, v.Z / other.Z, v.W / other.W}
+}
+
+// DivScalar divides each component of this vector by the scalar s and returns resulting vector.
+// If scalar is zero, returns zero.
+func (v Vec4) DivScalar(scalar float32) Vec4 {
+	if scalar != 0 {
+		return v.MulScalar(1 / scalar)
+	} else {
+		return Vec4{}
+	}
+}
+
+// SetDiv sets this to division by other vector (i.e., /= or divide-equals).
+func (v *Vec4) SetDiv(other Vec4) {
 	v.X /= other.X
 	v.Y /= other.Y
 	v.Z /= other.Z
 	v.W /= other.W
-	return v
 }
 
-// DivideScalar divides each component of this vector by the scalar s.
-// If scalar is zero, sets this vector to zero.
-// Returns the pointer to this updated vector.
-func (v *Vec4) DivideScalar(scalar float32) *Vec4 {
-	if scalar != 0 {
-		invScalar := 1 / scalar
-		v.X *= invScalar
-		v.Y *= invScalar
-		v.Z *= invScalar
-		v.W *= invScalar
+// SetDivScalar sets this to division by scalar.
+func (v *Vec4) SetDivScalar(s float32) {
+	if s != 0 {
+		v.SetMulScalar(1 / s)
 	} else {
-		v.X = 0
-		v.Y = 0
-		v.Z = 0
-		v.W = 0
+		v.SetZero()
 	}
-	return v
 }
 
-// Min sets this vector components to the minimum values of itself and other vector.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Min(other *Vec4) *Vec4 {
-	if v.X > other.X {
-		v.X = other.X
-	}
-	if v.Y > other.Y {
-		v.Y = other.Y
-	}
-	if v.Z > other.Z {
-		v.Z = other.Z
-	}
-	if v.W > other.W {
-		v.W = other.W
-	}
-	return v
+// Min returns min of this vector components vs. other vector.
+func (v Vec4) Min(other Vec4) Vec4 {
+	return Vec4{Min(v.X, other.X), Min(v.Y, other.Y), Min(v.Z, other.Z), Min(v.W, other.W)}
 }
 
-// Max sets this vector components to the maximum value of itself and other vector.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Max(other *Vec4) *Vec4 {
-	if v.X < other.X {
-		v.X = other.X
-	}
-	if v.Y < other.Y {
-		v.Y = other.Y
-	}
-	if v.Z < other.Z {
-		v.Z = other.Z
-	}
-	if v.W < other.W {
-		v.W = other.W
-	}
-	return v
+// SetMin sets this vector components to the minimum values of itself and other vector.
+func (v *Vec4) SetMin(other Vec4) {
+	v.X = Min(v.X, other.X)
+	v.Y = Min(v.Y, other.Y)
+	v.Z = Min(v.Z, other.Z)
+	v.W = Min(v.W, other.W)
+}
+
+// Max returns max of this vector components vs. other vector.
+func (v Vec4) Max(other Vec4) Vec4 {
+	return Vec4{Max(v.X, other.X), Max(v.Y, other.Y), Max(v.Z, other.Z), Max(v.W, other.W)}
+}
+
+// SetMax sets this vector components to the maximum value of itself and other vector.
+func (v *Vec4) SetMax(other Vec4) {
+	v.X = Max(v.X, other.X)
+	v.Y = Max(v.Y, other.Y)
+	v.Z = Max(v.Z, other.Z)
+	v.W = Max(v.W, other.W)
 }
 
 // Clamp sets this vector components to be no less than the corresponding components of min
 // and not greater than the corresponding component of max.
 // Assumes min < max, if this assumption isn't true it will not operate correctly.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Clamp(min, max *Vec4) *Vec4 {
+func (v *Vec4) Clamp(min, max Vec4) {
 	if v.X < min.X {
 		v.X = min.X
 	} else if v.X > max.X {
 		v.X = max.X
 	}
-
 	if v.Y < min.Y {
 		v.Y = min.Y
 	} else if v.Y > max.Y {
 		v.Y = max.Y
 	}
-
 	if v.Z < min.Z {
 		v.Z = min.Z
 	} else if v.Z > max.Z {
 		v.Z = max.Z
 	}
-
 	if v.W < min.W {
 		v.W = min.W
 	} else if v.W > max.W {
 		v.W = max.W
 	}
-	return v
 }
 
 // ClampScalar sets this vector components to be no less than minVal and not greater than maxVal.
-// Returns the pointer to this updated vector.
-func (v *Vec4) ClampScalar(minVal, maxVal float32) *Vec4 {
-	min := NewVec4(minVal, minVal, minVal, minVal)
-	max := NewVec4(maxVal, maxVal, maxVal, maxVal)
-	return v.Clamp(min, max)
+func (v *Vec4) ClampScalar(minVal, maxVal float32) {
+	v.Clamp(NewVec4Scalar(minVal), NewVec4Scalar(maxVal))
 }
 
-// Floor applies mat32.Floor() to each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Floor() *Vec4 {
+// Floor returns vector with mat32.Floor() applied to each of this vector's components.
+func (v Vec4) Floor() Vec4 {
+	return Vec4{Floor(v.X), Floor(v.Y), Floor(v.Z), Floor(v.W)}
+}
+
+// SetFloor applies mat32.Floor() to each of this vector's components.
+func (v *Vec4) SetFloor() {
 	v.X = Floor(v.X)
 	v.Y = Floor(v.Y)
 	v.Z = Floor(v.Z)
 	v.W = Floor(v.W)
-	return v
 }
 
-// Ceil applies mat32.Ceil() to each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Ceil() *Vec4 {
+// Ceil returns vector with mat32.Ceil() applied to each of this vector's components.
+func (v Vec4) Ceil() Vec4 {
+	return Vec4{Ceil(v.X), Ceil(v.Y), Ceil(v.Z), Ceil(v.W)}
+}
+
+// SetCeil applies mat32.Ceil() to each of this vector's components.
+func (v *Vec4) SetCeil() {
 	v.X = Ceil(v.X)
 	v.Y = Ceil(v.Y)
 	v.Z = Ceil(v.Z)
 	v.W = Ceil(v.W)
-	return v
 }
 
-// Round rounds each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Round() *Vec4 {
-	v.X = Floor(v.X + 0.5)
-	v.Y = Floor(v.Y + 0.5)
-	v.Z = Floor(v.Z + 0.5)
-	v.W = Floor(v.W + 0.5)
-	return v
+// Round returns vector with mat32.Round() applied to each of this vector's components.
+func (v Vec4) Round() Vec4 {
+	return Vec4{Round(v.X), Round(v.Y), Round(v.Z), Round(v.W)}
 }
 
-// Negate negates each of this vector's components.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Negate() *Vec4 {
+// SetRound rounds each of this vector's components.
+func (v *Vec4) SetRound() {
+	v.X = Round(v.X)
+	v.Y = Round(v.Y)
+	v.Z = Round(v.Z)
+	v.W = Round(v.W)
+}
+
+// Negate returns vector with each component negated.
+func (v Vec4) Negate() Vec4 {
+	return Vec4{-v.X, -v.Y, -v.Z, -v.W}
+}
+
+// SetNegate negates each of this vector's components.
+func (v *Vec4) SetNegate() {
 	v.X = -v.X
 	v.Y = -v.Y
 	v.Z = -v.Z
 	v.W = -v.W
-	return v
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//  Distance, Norm
+
+// IsEqual returns if this vector is equal to other.
+func (v *Vec4) IsEqual(other Vec4) bool {
+	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z) && (other.W == v.W)
+}
+
+// AlmostEqual returns whether the vector is almost equal to another vector within the specified tolerance.
+func (v *Vec4) AlmostEqual(other Vec4, tol float32) bool {
+	if (Abs(v.X-other.X) < tol) &&
+		(Abs(v.Y-other.Y) < tol) &&
+		(Abs(v.Z-other.Z) < tol) &&
+		(Abs(v.W-other.W) < tol) {
+		return true
+	}
+	return false
 }
 
 // Dot returns the dot product of this vector with other.
-// None of the vectors are changed.
-func (v *Vec4) Dot(other *Vec4) float32 {
+func (v Vec4) Dot(other Vec4) float32 {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z + v.W*other.W
 }
 
 // LengthSq returns the length squared of this vector.
 // LengthSq can be used to compare vectors' lengths without the need to perform a square root.
-func (v *Vec4) LengthSq() float32 {
+func (v Vec4) LengthSq() float32 {
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W
 }
 
 // Length returns the length of this vector.
-func (v *Vec4) Length() float32 {
+func (v Vec4) Length() float32 {
 	return Sqrt(v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W)
 }
 
+// Normal returns this vector divided by its length
+func (v Vec4) Normal() Vec4 {
+	return v.DivScalar(v.Length())
+}
+
+// SetNormal normalizes this vector so its length will be 1.
+func (v *Vec4) SetNormal() {
+	v.SetDivScalar(v.Length())
+}
+
 // Normalize normalizes this vector so its length will be 1.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Normalize() *Vec4 {
-	return v.DivideScalar(v.Length())
+func (v *Vec4) Normalize() {
+	v.SetDivScalar(v.Length())
 }
 
 // SetLength sets this vector to have the specified length.
 // If the current length is zero, does nothing.
-// Returns the pointer to this updated vector.
-func (v *Vec4) SetLength(l float32) *Vec4 {
+func (v *Vec4) SetLength(l float32) {
 	oldLength := v.Length()
 	if oldLength != 0 && l != oldLength {
-		v.MultiplyScalar(l / oldLength)
+		v.SetMulScalar(l / oldLength)
 	}
-	return v
 }
 
-// Lerp sets each of this vector's components to the linear interpolated value of
+// Lerp returns vector with each components as the linear interpolated value of
+// alpha between itself and the corresponding other component.
+func (v Vec4) Lerp(other Vec4, alpha float32) Vec4 {
+	return Vec4{v.X + (other.X-v.X)*alpha, v.Y + (other.Y-v.Y)*alpha, v.Z + (other.Z-v.Z)*alpha,
+		v.W + (other.W-v.W)*alpha}
+}
+
+// SetLerp sets each of this vector's components to the linear interpolated value of
 // alpha between ifself and the corresponding other component.
-// Returns the pointer to this updated vector.
-func (v *Vec4) Lerp(other *Vec4, alpha float32) *Vec4 {
+func (v *Vec4) SetLerp(other *Vec4, alpha float32) {
 	v.X += (other.X - v.X) * alpha
 	v.Y += (other.Y - v.Y) * alpha
 	v.Z += (other.Z - v.Z) * alpha
 	v.W += (other.W - v.W) * alpha
-	return v
 }
 
-// Equals returns if this vector is equal to other.
-func (v *Vec4) Equals(other *Vec4) bool {
-	return (other.X == v.X) && (other.Y == v.Y) && (other.Z == v.Z) && (other.W == v.W)
+/////////////////////////////////////////////////////////////////////////////
+//  Matrix operations
+
+// MulMat4 returns vector multiplied by specified 4x4 matrix.
+func (v Vec4) MulMat4(m *Mat4) Vec4 {
+	return Vec4{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12]*v.W,
+		m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13]*v.W,
+		m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]*v.W,
+		m[3]*v.X + m[7]*v.Y + m[11]*v.Z + m[15]*v.W}
 }
 
-// FromArray sets this vector's components from the specified array and offset
-// Returns the pointer to this updated vector.
-func (v *Vec4) FromArray(array []float32, offset int) *Vec4 {
-	v.X = array[offset]
-	v.Y = array[offset+1]
-	v.Z = array[offset+2]
-	v.W = array[offset+3]
-	return v
-}
-
-// ToArray copies this vector's components to array starting at offset.
-// Returns the array.
-func (v *Vec4) ToArray(array []float32, offset int) []float32 {
-	array[offset] = v.X
-	array[offset+1] = v.Y
-	array[offset+2] = v.Z
-	array[offset+3] = v.W
-	return array
-}
-
-// ApplyMat4 multiplies the specified 4x4 matrix by this vector.
-// Returns the pointer to this updated vector.
-func (v *Vec4) ApplyMat4(m *Mat4) *Vec4 {
-	x := v.X
-	y := v.Y
-	z := v.Z
-	w := v.W
-
-	v.X = m[0]*x + m[4]*y + m[8]*z + m[12]*w
-	v.Y = m[1]*x + m[5]*y + m[9]*z + m[13]*w
-	v.Z = m[2]*x + m[6]*y + m[10]*z + m[14]*w
-	v.W = m[3]*x + m[7]*y + m[11]*z + m[15]*w
-
-	return v
-}
-
-// SetAxisAngleFromQuat set this vector to be the axis (x, y, z) and angle (w) of a rotation specified the quaternion q.
+// SetAxisAngleFromQuat set this vector to be the axis (x, y, z) and angle (w)
+// of a rotation specified the quaternion q.
 // Assumes q is normalized.
-func (v *Vec4) SetAxisAngleFromQuat(q *Quat) *Vec4 {
+func (v *Vec4) SetAxisAngleFromQuat(q Quat) {
 	// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
 	v.W = 2 * Acos(q.W)
 	s := Sqrt(1 - q.W*q.W)
@@ -470,12 +457,12 @@ func (v *Vec4) SetAxisAngleFromQuat(q *Quat) *Vec4 {
 		v.Y = q.Y / s
 		v.Z = q.Z / s
 	}
-	return v
 }
 
-// SetAxisFromRotationMatrix this vector to be the axis (x, y, z) and angle (w) of a rotation specified the matrix m.
+// SetAxisFromRotationMatrix sets this vector to be the axis (x, y, z) and angle (w)
+// of a rotation specified the matrix m.
 // Assumes the upper 3x3 of m is a pure rotation matrix (i.e, unscaled).
-func (v *Vec4) SetAxisFromRotationMatrix(m *Mat4) *Vec4 {
+func (v *Vec4) SetAxisFromRotationMatrix(m *Mat4) {
 	// http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToAngle/index.htm
 	var angle, x, y, z float32 // variables for result
 	var epsilon float32 = 0.01 // margin to allow for rounding errors
@@ -499,7 +486,6 @@ func (v *Vec4) SetAxisFromRotationMatrix(m *Mat4) *Vec4 {
 		if (Abs(m12+m21) < epsilon2) && (Abs(m13+m31) < epsilon2) && (Abs(m23+m32) < epsilon2) && (Abs(m11+m22+m33-3) < epsilon2) {
 			// v singularity is identity matrix so angle = 0
 			v.Set(1, 0, 0, 0)
-			return v // zero angle, arbitrary axis
 		}
 		// otherwise this singularity is angle = 180
 		angle = Pi
@@ -544,7 +530,6 @@ func (v *Vec4) SetAxisFromRotationMatrix(m *Mat4) *Vec4 {
 		}
 
 		v.Set(x, y, z, angle)
-		return v // return 180 deg rotation
 	}
 
 	// as we have reached here there are no singularities so we can handle normally
@@ -561,11 +546,4 @@ func (v *Vec4) SetAxisFromRotationMatrix(m *Mat4) *Vec4 {
 	v.Y = (m13 - m31) / s
 	v.Z = (m21 - m12) / s
 	v.W = Acos((m11 + m22 + m33 - 1) / 2)
-
-	return v
-}
-
-// Clone returns a copy of this vector
-func (v *Vec4) Clone() *Vec4 {
-	return NewVec4(v.X, v.Y, v.Z, v.W)
 }

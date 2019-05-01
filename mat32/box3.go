@@ -47,12 +47,12 @@ func (b *Box3) Set(min, max *Vec3) {
 	if min != nil {
 		b.Min = *min
 	} else {
-		b.Min.Set(Infinity, Infinity, Infinity)
+		b.Min.SetScalar(Infinity)
 	}
 	if max != nil {
 		b.Max = *max
 	} else {
-		b.Max.Set(-Infinity, -Infinity, -Infinity)
+		b.Max.SetScalar(-Infinity)
 	}
 }
 
@@ -119,7 +119,6 @@ func (b *Box3) ContainsBox(box Box3) bool {
 		(b.Min.Y <= box.Min.Y) && (box.Max.Y <= b.Max.Y) &&
 		(b.Min.Z <= box.Min.Z) && (box.Max.Z <= b.Max.Z) {
 		return true
-
 	}
 	return false
 }

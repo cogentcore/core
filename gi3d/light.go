@@ -139,13 +139,9 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 }
 
 // Dir gets the direction normal vector, pre-computing the view transform
-func (dl *DirLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
-	dir := mat32.Vec4{}
-	dir.SetVec3(&dl.Pos, 0)
-	dir.ApplyMat4(&viewMat)
-	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
-	dir3.SetNormal()
-	return dir3
+func (dl *DirLight) Dir(viewMat *mat32.Mat4) mat32.Vec3 {
+	dir4 := mat32.NewVec4FromVec3(dl.Pos, 0).MulMat4(viewMat)
+	return mat32.NewVec3FromVec4(dir4).Normal()
 }
 
 // PointLight is an omnidirectional light with a position
@@ -175,13 +171,9 @@ func AddNewPointLight(sc *Scene, name string, lumens float32, color LightColors)
 }
 
 // Dir gets the direction normal vector, pre-computing the view transform
-func (dl *PointLight) Dir(viewMat mat32.Mat4) mat32.Vec3 {
-	dir := mat32.Vec4{}
-	dir.SetVec3(&dl.Pos, 0)
-	dir.ApplyMat4(&viewMat)
-	dir3 := mat32.Vec3{dir.X, dir.Y, dir.Z}
-	dir3.SetNormal()
-	return dir3
+func (dl *PointLight) Dir(viewMat *mat32.Mat4) mat32.Vec3 {
+	dir4 := mat32.NewVec4FromVec3(dl.Pos, 0).MulMat4(viewMat)
+	return mat32.NewVec3FromVec4(dir4).Normal()
 }
 
 // Spotlight is a light with a position and direction
@@ -215,7 +207,7 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 			ambs = append(ambs, clr)
 		case *DirLight:
 			dirs = append(dirs, clr)
-			dirs = append(dirs, l.Dir(sc.Camera.ViewMatrix))
+			dirs = append(dirs, l.Dir(&sc.Camera.ViewMatrix))
 		}
 	}
 

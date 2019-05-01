@@ -93,7 +93,7 @@ func Inf(sign int) float32 {
 }
 
 func Round(v float32) float32 {
-	return Floor(v + 0.5)
+	return float32(math.Round(float64(v)))
 }
 
 func IsNaN(v float32) bool {

@@ -16,16 +16,14 @@ type Spline struct {
 	points []Vec3
 }
 
-func NewSpline(points []Vec3) *Spline {
-
-	this := new(Spline)
-	this.points = make([]Vec3, len(points))
-	copy(this.points, points)
-	return this
+func NewSpline(points []Vec3) Spline {
+	sp := Spline{}
+	sp.points = make([]Vec3, len(points))
+	copy(sp.points, points)
+	return sp
 }
 
-func (this *Spline) InitFromArray(a []float32) {
-
+func (sp *Spline) InitFromArray(a []float32) {
 	// PEND array of what ?
 	//this.points = [];
 	//for ( var i = 0; i < a.length; i ++ ) {
