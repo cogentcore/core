@@ -184,6 +184,7 @@ func (fb *Framebuffer) Activate() {
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb.cTex.Handle(), 0)
 			}
 		}
+		fb.init = true
 	} else {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, fb.handle)
 	}

@@ -150,7 +150,7 @@ func (sc *Scene) SetCurWin() {
 }
 
 func (sc *Scene) Resize(nwsz image.Point) {
-	if nwsz.X == 0 || nwsz.Y == 0 {
+	if nwsz.X == 0 || nwsz.Y == 0 || sc.Win == nil || !sc.Win.IsVisible() {
 		return
 	}
 	if sc.Frame != nil {
@@ -161,7 +161,10 @@ func (sc *Scene) Resize(nwsz image.Point) {
 		}
 	}
 	if sc.Frame != nil {
-		sc.Frame.SetSize(nwsz)
+		oswin.TheApp.RunOnMain(func() {
+			sc.Win.OSWin.Activate()
+			sc.Frame.SetSize(nwsz)
+		})
 	}
 	sc.Geom.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.Pixels.Bounds())
