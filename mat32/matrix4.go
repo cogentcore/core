@@ -625,6 +625,14 @@ func (m *Mat4) LookAt(eye, target, up Vec3) {
 	m[10] = z.Z
 }
 
+// NewLookAt returns Mat4 matrix as view transform matrix with origin at eye,
+// looking at target and using the up vector.
+func NewLookAt(eye, target, up Vec3) *Mat4 {
+	rotMat := &Mat4{}
+	rotMat.LookAt(eye, target, up)
+	return rotMat
+}
+
 // SetFrustum sets this matrix to a projection frustum matrix bounded by the specified planes.
 func (m *Mat4) SetFrustum(left, right, bottom, top, near, far float32) {
 	m[0] = 2 * near / (right - left)

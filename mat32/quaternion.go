@@ -23,10 +23,17 @@ func NewQuat(x, y, z, w float32) Quat {
 	return Quat{X: x, Y: y, Z: z, W: w}
 }
 
-// NewQuatAxisAngle returns a new quaternion from given axis and angle rotation
+// NewQuatAxisAngle returns a new quaternion from given axis and angle rotation (radians).
 func NewQuatAxisAngle(axis Vec3, angle float32) Quat {
 	nq := Quat{}
 	nq.SetFromAxisAngle(axis, angle)
+	return nq
+}
+
+// NewQuatEuler returns a new quaternion from given Euler angles.
+func NewQuatEuler(euler Vec3) Quat {
+	nq := Quat{}
+	nq.SetFromEuler(euler)
 	return nq
 }
 
@@ -79,7 +86,7 @@ func (q *Quat) IsNil() bool {
 }
 
 // SetFromEuler sets this quaternion from the specified vector with
-// euler angles for each axis. It is assumed that the Euler angles
+// Euler angles for each axis. It is assumed that the Euler angles
 // are in XYZ order.
 func (q *Quat) SetFromEuler(euler Vec3) {
 	c1 := Cos(euler.X / 2)

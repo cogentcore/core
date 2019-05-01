@@ -15,21 +15,19 @@ import (
 )
 
 const Pi = math.Pi
-const degreeToRadiansFactor = math.Pi / 180
-const radianToDegreesFactor = 180.0 / math.Pi
+const DegToRadFactor = math.Pi / 180
+const RadToDegFactor = 180.0 / math.Pi
 
 var Infinity = float32(math.Inf(1))
 
 // DegToRad converts a number from degrees to radians
 func DegToRad(degrees float32) float32 {
-
-	return degrees * degreeToRadiansFactor
+	return degrees * DegToRadFactor
 }
 
 // RadToDeg converts a number from radians to degrees
 func RadToDeg(radians float32) float32 {
-
-	return radians * radianToDegreesFactor
+	return radians * RadToDegFactor
 }
 
 // Clamp clamps x to the provided closed interval [a, b]

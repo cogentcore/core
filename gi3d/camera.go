@@ -8,8 +8,10 @@ import "github.com/goki/gi/mat32"
 
 // Camera defines the properties of the camera
 type Camera struct {
-	Pose       Pose       `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up direction"`
-	Ortho      bool       `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Far distance."`
+	Pose       Pose       `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`
+	Target     mat32.Vec3 `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`
+	UpDir      mat32.Vec3 `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`
+	Ortho      bool       `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."`
 	FOV        float32    `desc:"field of view in degrees "`
 	Aspect     float32    `desc:"aspect ratio (width/height)"`
 	Near       float32    `desc:"near plane z coordinate"`
@@ -24,8 +26,8 @@ func (cm *Camera) Defaults() {
 	cm.FOV = 30
 	cm.Aspect = 1.5
 	cm.Near = .01
-	cm.Far = 1000
-	cm.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0})
+	cm.Far = 100
+	cm.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0}) // sets Target and UpDir
 }
 
 // UpdateMatrix updates the view and prjn matricies
@@ -41,16 +43,53 @@ func (cm *Camera) UpdateMatrix() {
 	}
 }
 
-// LookAt points the camera at given target location, using given up direction
-// updates the internal Quat rotation vector
+// LookAt points the camera at given target location, using given up direction,
+// and sets the Target, UpDir fields for future camera movements.
 func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
-	rotMat := mat32.Mat4{}
-	rotMat.LookAt(cm.Pose.Pos, target, upDir)
-	cm.Pose.Quat.SetFromRotationMatrix(&rotMat)
+	cm.Target = target
+	cm.Pose.Quat.SetFromRotationMatrix(mat32.NewLookAt(cm.Pose.Pos, target, upDir))
 	cm.UpdateMatrix()
 }
 
-// OrbitMove
-// updates the internal Quat rotation vector
-func (cm *Camera) OrbitMove(target, upDir mat32.Vec3) {
+// OrbitMove moves the camera along the given 2D axes in degrees
+// (delX = left/right, delY = up/down),
+// relative to current position and orientation,
+// keeping the same distance from the Target, and calling LookAt again
+// at the target.
+func (cm *Camera) OrbitMove(delX, delY float32) {
+	ctaxis := cm.Pose.Pos.Sub(cm.Target)
+	if ctaxis.IsNil() {
+		ctaxis.Set(0, 0, 1)
+	}
+	dist := ctaxis.Length()
+	ctaxis.SetNormal()
+	axq := mat32.NewQuatAxisAngle(mat32.Vec3{0, 1, 0}, mat32.DegToRad(-delX))
+	axq.SetMul(mat32.NewQuatAxisAngle(mat32.Vec3{1, 0, 0}, mat32.DegToRad(delY)))
+	cm.Pose.Pos = cm.Target.Add(ctaxis.MulQuat(axq).MulScalar(dist))
+	cm.LookAt(cm.Target, cm.UpDir)
+}
+
+// PanMove moves the camera along the given 2D axes (left/right, up/down),
+// relative to current position and orientation,
+// and it moves the target by the same increment, changing the target position.
+func (cm *Camera) PanMove(delX, delY float32) {
+	dx := mat32.Vec3{-delX, 0, 0}.MulQuat(cm.Pose.Quat)
+	dy := mat32.Vec3{0, -delY, 0}.MulQuat(cm.Pose.Quat)
+	cm.Pose.Pos.SetAdd(dx.Add(dy))
+	cm.Target.SetAdd(dx.Add(dy))
+}
+
+// Zoom moves along axis given pct closer or further from the target
+// it always moves the target back also if it distance is < 1
+func (cm *Camera) Zoom(zoom float32) {
+	ctaxis := cm.Pose.Pos.Sub(cm.Target)
+	if ctaxis.IsNil() {
+		ctaxis.Set(0, 0, 1)
+	}
+	dist := ctaxis.Length()
+	del := ctaxis.MulScalar(zoom)
+	cm.Pose.Pos.SetAdd(del)
+	if zoom < 0 && dist < 1 {
+		cm.Target.SetAdd(del)
+	}
 }

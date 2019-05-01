@@ -36,7 +36,7 @@ type Scene struct {
 	Textures      map[string]*Texture `desc:"all textures used in the scene"`
 	NoNav         bool                `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
 	Win           *gi.Window          `json:"-" xml:"-" desc:"our parent window that we render into"`
-	Renders       Renderers           `desc:"rendering programs"`
+	Renders       Renderers           `view:"-" desc:"rendering programs"`
 	Frame         gpu.Framebuffer     `view:"-" desc:"direct render target for scene"`
 	Tex           gpu.Texture2D       `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
 	SetDragCursor bool                `view:"-" desc:"has dragging cursor been set yet?"`
@@ -286,19 +286,17 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.IsDragging() {
-			mdel := float32(0.01)
+			mdel := float32(.2)
 			if !ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
 				ssc.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
 			switch {
-			case key.HasAllModifierBits(me.Modifiers, key.Shift): // todo: something else?
-				ssc.Camera.Pose.Pos.X -= float32(del.X) * mdel
-				ssc.Camera.Pose.Pos.Y += float32(del.Y) * mdel
+			case key.HasAllModifierBits(me.Modifiers, key.Shift):
+				ssc.Camera.PanMove(float32(del.X)*mdel, float32(del.Y)*mdel)
 			default:
-				ssc.Camera.Pose.Pos.X -= float32(del.X) * mdel
-				ssc.Camera.Pose.Pos.Y += float32(del.Y) * mdel
+				ssc.Camera.OrbitMove(float32(del.X)*mdel, float32(del.Y)*mdel)
 			}
 			ssc.UpdateSig()
 		} else {
@@ -351,36 +349,39 @@ func (sc *Scene) NavEvents() {
 		kt := d.(*key.ChordEvent)
 		ch := string(kt.Chord())
 		// fmt.Printf(ch)
+		orbDeg := float32(5)
+		panDel := float32(.1)
+		zoomPct := float32(.1)
 		switch ch {
 		case "UpArrow":
-			ssc.Camera.Pose.Pos.Y -= 0.1 // todo: rotate
+			ssc.Camera.OrbitMove(0.0, orbDeg)
 			kt.SetProcessed()
 		case "Shift+UpArrow":
-			ssc.Camera.Pose.Pos.Y -= 0.1
+			ssc.Camera.PanMove(0.0, panDel)
 			kt.SetProcessed()
 		case "DownArrow":
-			ssc.Camera.Pose.Pos.Y += 0.1 // todo: rotate
+			ssc.Camera.OrbitMove(0, -orbDeg)
 			kt.SetProcessed()
 		case "Shift+DownArrow":
-			ssc.Camera.Pose.Pos.Y += 0.1
+			ssc.Camera.PanMove(0, -panDel)
 			kt.SetProcessed()
 		case "LeftArrow":
-			ssc.Camera.Pose.Pos.X += 0.1 // todo: rotate
+			ssc.Camera.OrbitMove(-orbDeg, 0)
 			kt.SetProcessed()
 		case "Shift+LeftArrow":
-			ssc.Camera.Pose.Pos.X += 0.1
+			ssc.Camera.PanMove(-panDel, 0)
 			kt.SetProcessed()
 		case "RightArrow":
-			ssc.Camera.Pose.Pos.X -= 0.1 // todo: rotate
+			ssc.Camera.OrbitMove(orbDeg, 0)
 			kt.SetProcessed()
 		case "Shift+RightArrow":
-			ssc.Camera.Pose.Pos.X -= 0.1
+			ssc.Camera.PanMove(panDel, 0)
 			kt.SetProcessed()
 		case "+", "=":
-			ssc.Camera.Pose.Pos.Z -= 0.1
+			ssc.Camera.Zoom(-zoomPct)
 			kt.SetProcessed()
 		case "-", "_":
-			ssc.Camera.Pose.Pos.Z += 0.1
+			ssc.Camera.Zoom(zoomPct)
 			kt.SetProcessed()
 		}
 		ssc.UpdateSig()
