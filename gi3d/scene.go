@@ -294,9 +294,9 @@ func (sc *Scene) NavEvents() {
 			del := me.Where.Sub(me.From)
 			switch {
 			case key.HasAllModifierBits(me.Modifiers, key.Shift):
-				ssc.Camera.PanMove(float32(del.X)*mdel, float32(del.Y)*mdel)
+				ssc.Camera.PanMove(float32(del.X)*mdel*.2, -float32(del.Y)*mdel*.2)
 			default:
-				ssc.Camera.OrbitMove(float32(del.X)*mdel, float32(del.Y)*mdel)
+				ssc.Camera.OrbitMove(float32(del.X)*mdel, -float32(del.Y)*mdel)
 			}
 			ssc.UpdateSig()
 		} else {
