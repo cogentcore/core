@@ -410,7 +410,11 @@ func (sc *Scene) ActivateFrame() bool {
 	}
 	oswin.TheApp.RunOnMain(func() {
 		if sc.Frame == nil {
-			sc.Frame = gpu.TheGPU.NewFramebuffer(sc.Nm+"-frame", sc.Geom.Size, 4) // 4 samples default
+			msamp := 4
+			if !gi.Prefs.Smooth3D {
+				msamp = 0
+			}
+			sc.Frame = gpu.TheGPU.NewFramebuffer(sc.Nm+"-frame", sc.Geom.Size, msamp)
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
 		sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)

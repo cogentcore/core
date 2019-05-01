@@ -33,6 +33,12 @@ func (app *appImpl) getScreens() {
 			app.screens[i] = sc
 		}
 		pw, ph := mon.GetPhysicalSize()
+		if pw == 0 {
+			pw = 1024
+		}
+		if ph == 0 {
+			ph = 768
+		}
 		x, y := mon.GetPos()
 		vm := mon.GetVideoMode()
 		sc.Name = mon.GetName()

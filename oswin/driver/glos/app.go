@@ -161,7 +161,9 @@ func (app *appImpl) initGl() {
 	var err error
 	app.shareWin, err = glfw.CreateWindow(16, 16, "Share Window", nil, nil)
 	if err != nil {
-		log.Fatalln("oswin.glos failed to create hidden share window:", err)
+		version := gl.GoStr(gl.GetString(gl.VERSION))
+		fmt.Println("OpenGL version", version)
+		log.Fatalln(fmt.Sprintf("oswin.glos failed to create hidden share window -- this usually means that the OpenGL version is not sufficient (should be at least: %d.%d):", glosGlMajor, glosGlMinor), err)
 	}
 	app.shareWin.MakeContextCurrent()
 	theGPU.Init(glosDebug)

@@ -3561,7 +3561,9 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 			closest = &wp
 		}
 	}
-
+	if closest == nil {
+		return nil
+	}
 	wp = *closest
 	rescale := trgdpi / closest.LogicalDPI
 	wp.Pos.X = int(float32(wp.Pos.X) * rescale)

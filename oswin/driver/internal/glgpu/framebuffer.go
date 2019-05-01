@@ -158,6 +158,7 @@ func (fb *Framebuffer) Activate() {
 		gl.BindRenderbuffer(gl.RENDERBUFFER, fb.drbo)
 		if fb.nsamp > 0 {
 			gl.RenderbufferStorageMultisample(gl.RENDERBUFFER, int32(fb.nsamp), gl.DEPTH24_STENCIL8, szx, szy)
+			// gpu.TheGPU.ErrCheck("framebuffer storage multisamp")
 		} else {
 			gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, szx, szy)
 		}
@@ -171,7 +172,9 @@ func (fb *Framebuffer) Activate() {
 				gl.GenTextures(1, &fb.msampTex)
 				gl.BindTexture(gl.TEXTURE_2D_MULTISAMPLE, fb.msampTex)
 				gl.TexImage2DMultisample(gl.TEXTURE_2D_MULTISAMPLE, int32(fb.nsamp), gl.RGBA, szx, szy, true)
+				// gpu.TheGPU.ErrCheck("framebuffer teximage 2d multisamp")
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D_MULTISAMPLE, fb.msampTex, 0)
+				// gpu.TheGPU.ErrCheck("framebuffer texture2d")
 				// downsampling fbo
 				gl.GenFramebuffers(1, &fb.dsampFbo)
 				gl.BindFramebuffer(gl.FRAMEBUFFER, fb.dsampFbo)
@@ -185,7 +188,7 @@ func (fb *Framebuffer) Activate() {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, fb.handle)
 	}
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		fmt.Printf("glgpu gpu.Framebuffer: %s not complete\n", fb.name)
+		fmt.Printf("glgpu gpu.Framebuffer: %s not complete -- this usually means you need to set your GoGi prefs to Smooth3D = off, and restart\n", fb.name)
 	}
 	gl.Viewport(0, 0, int32(fb.size.X), int32(fb.size.Y))
 }

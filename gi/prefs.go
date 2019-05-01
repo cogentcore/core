@@ -84,6 +84,7 @@ type Preferences struct {
 	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
 	FavPaths             FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
 	SavedPathsMax        int                    `desc:"maximum number of saved paths to save in FileView"`
+	Smooth3D             bool                   `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
 	FileViewSort         string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 	ColorFilename        FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
 	Changed              bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
@@ -146,6 +147,7 @@ func (pf *Preferences) Defaults() {
 	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Go"
 	pf.SavedPathsMax = 20
+	pf.Smooth3D = true
 	pf.KeyMap = DefaultKeyMap
 	pf.UpdateUser()
 }
