@@ -28,19 +28,18 @@ var Update3DTrace = false
 // It renders to its own Framebuffer, which is then drawn directly onto the window.
 type Scene struct {
 	gi.WidgetBase
-	Geom     gi.Geom2DInt        `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Win      *gi.Window          `json:"-" xml:"-" desc:"our parent window that we render into"`
-	Camera   Camera              `desc:"camera determines view onto scene"`
-	BgColor  gi.Color            `desc:"background color"`
-	Lights   map[string]Light    `desc:"all lights used in the scene"`
-	Meshes   map[string]Mesh     `desc:"all meshes used in the scene"`
-	Textures map[string]*Texture `desc:"all textures used in the scene"`
-	NoNav    bool                `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
-
-	Renders       Renderers       `desc:"rendering programs"`
-	Frame         gpu.Framebuffer `view:"-" desc:"direct render target for scene"`
-	Tex           gpu.Texture2D   `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
-	SetDragCursor bool            `view:"-" desc:"has dragging cursor been set yet?"`
+	Geom          gi.Geom2DInt        `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Camera        Camera              `view:"inline" desc:"camera determines view onto scene"`
+	BgColor       gi.Color            `desc:"background color"`
+	Lights        map[string]Light    `desc:"all lights used in the scene"`
+	Meshes        map[string]Mesh     `desc:"all meshes used in the scene"`
+	Textures      map[string]*Texture `desc:"all textures used in the scene"`
+	NoNav         bool                `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+	Win           *gi.Window          `json:"-" xml:"-" desc:"our parent window that we render into"`
+	Renders       Renderers           `desc:"rendering programs"`
+	Frame         gpu.Framebuffer     `view:"-" desc:"direct render target for scene"`
+	Tex           gpu.Texture2D       `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
+	SetDragCursor bool                `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)

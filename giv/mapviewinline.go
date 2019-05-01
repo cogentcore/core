@@ -72,7 +72,7 @@ func (mv *MapViewInline) ConfigParts() {
 		}
 		kv.SetMapKey(key, mv.Map, mv.TmpSave)
 
-		val := mpvnp.MapIndex(key)
+		val := kit.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
