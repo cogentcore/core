@@ -21,12 +21,18 @@ type Camera struct {
 }
 
 func (cm *Camera) Defaults() {
-	cm.Pose.Defaults()
-	cm.Pose.Pos.Set(0, 0, 10)
 	cm.FOV = 30
 	cm.Aspect = 1.5
 	cm.Near = .01
 	cm.Far = 100
+	cm.DefaultPose()
+}
+
+// DefaultPose resets the camera pose to default location and orientation, looking
+// at the origin from 0,0,10, with up Y axis
+func (cm *Camera) DefaultPose() {
+	cm.Pose.Defaults()
+	cm.Pose.Pos.Set(0, 0, 10)
 	cm.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0}) // sets Target and UpDir
 }
 
@@ -51,32 +57,58 @@ func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 	cm.UpdateMatrix()
 }
 
-// OrbitMove moves the camera along the given 2D axes in degrees
+// Orbit moves the camera along the given 2D axes in degrees
 // (delX = left/right, delY = up/down),
 // relative to current position and orientation,
-// keeping the same distance from the Target, and calling LookAt again
-// at the target.
-func (cm *Camera) OrbitMove(delX, delY float32) {
+// keeping the same distance from the Target, and rotating the camera and
+// the Up direction vector to keep looking at the target.
+func (cm *Camera) Orbit(delX, delY float32) {
 	ctaxis := cm.Pose.Pos.Sub(cm.Target)
 	if ctaxis.IsNil() {
 		ctaxis.Set(0, 0, 1)
 	}
 	dist := ctaxis.Length()
 	ctaxis.SetNormal()
+	// todo: maybe figure out euler angles and use those directly?
+	// axq := mat32.NewQuatAxisAngle(mat32.Vec3{0, 1, 0}, mat32.DegToRad(-delX))
+	// axq.SetMul(mat32.NewQuatAxisAngle(mat32.Vec3{1, 0, 0}, mat32.DegToRad(delY)))
 	axq := mat32.NewQuatAxisAngle(mat32.Vec3{0, 1, 0}, mat32.DegToRad(-delX))
 	axq.SetMul(mat32.NewQuatAxisAngle(mat32.Vec3{1, 0, 0}, mat32.DegToRad(delY)))
+	cm.Pose.Quat.SetMul(axq)
 	cm.Pose.Pos = cm.Target.Add(ctaxis.MulQuat(axq).MulScalar(dist))
-	cm.LookAt(cm.Target, cm.UpDir)
+	cm.UpDir.SetMulQuat(axq)
 }
 
-// PanMove moves the camera along the given 2D axes (left/right, up/down),
-// relative to current position and orientation,
+// Pan moves the camera along the given 2D axes (left/right, up/down),
+// relative to current position and orientation (i.e., in the plane of the
+// current window view)
 // and it moves the target by the same increment, changing the target position.
-func (cm *Camera) PanMove(delX, delY float32) {
+func (cm *Camera) Pan(delX, delY float32) {
 	dx := mat32.Vec3{-delX, 0, 0}.MulQuat(cm.Pose.Quat)
 	dy := mat32.Vec3{0, -delY, 0}.MulQuat(cm.Pose.Quat)
-	cm.Pose.Pos.SetAdd(dx.Add(dy))
-	cm.Target.SetAdd(dx.Add(dy))
+	td := dx.Add(dy)
+	cm.Pose.Pos.SetAdd(td)
+	cm.Target.SetAdd(td)
+}
+
+// PanAxis moves the camera and target along world X,Y axes
+func (cm *Camera) PanAxis(delX, delY float32) {
+	td := mat32.Vec3{-delX, -delY, 0}
+	cm.Pose.Pos.SetAdd(td)
+	cm.Target.SetAdd(td)
+}
+
+// PanTarget moves the target along world X,Y,Z axes and does LookAt
+// at the new target location.  It ensures that the target is not
+// identical to the camera position.
+func (cm *Camera) PanTarget(delX, delY, delZ float32) {
+	td := mat32.Vec3{-delX, -delY, delZ}
+	cm.Target.SetAdd(td)
+	dist := cm.Pose.Pos.Sub(cm.Target).Length()
+	if dist == 0 {
+		cm.Target.SetAdd(td)
+	}
+	cm.LookAt(cm.Target, cm.UpDir)
 }
 
 // Zoom moves along axis given pct closer or further from the target

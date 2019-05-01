@@ -430,6 +430,11 @@ func (v Vec3) RotateAxisAngle(axis Vec3, angle float32) Vec3 {
 	return v.MulQuat(NewQuatAxisAngle(axis, angle))
 }
 
+// SetRotateAxisAngle sets vector rotated around axis by angle.
+func (v *Vec3) SetRotateAxisAngle(axis Vec3, angle float32) {
+	*v = v.RotateAxisAngle(axis, angle)
+}
+
 // MulMat3 returns vector multiplied by specified 3x3 matrix.
 func (v Vec3) MulMat3(m *Mat3) Vec3 {
 	return Vec3{m[0]*v.X + m[3]*v.Y + m[6]*v.Z,
@@ -437,11 +442,21 @@ func (v Vec3) MulMat3(m *Mat3) Vec3 {
 		m[2]*v.X + m[5]*v.Y + m[8]*v.Z}
 }
 
+// SetMulMat3 sets vector multiplied by specified 3x3 matrix.
+func (v *Vec3) SetMulMat3(m *Mat3) {
+	*v = v.MulMat3(m)
+}
+
 // MulMat4 returns vector multiplied by specified 4x4 matrix.
 func (v Vec3) MulMat4(m *Mat4) Vec3 {
 	return Vec3{m[0]*v.X + m[4]*v.Y + m[8]*v.Z + m[12],
 		m[1]*v.X + m[5]*v.Y + m[9]*v.Z + m[13],
 		m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]}
+}
+
+// SetMulMat4 sets vector multiplied by specified 4x4 matrix.
+func (v *Vec3) SetMulMat4(m *Mat4) {
+	*v = v.MulMat4(m)
 }
 
 // MulProjection returns vector multiplied by the projection matrix m
@@ -469,6 +484,13 @@ func (v Vec3) MulQuat(q Quat) Vec3 {
 	return Vec3{ix*qw + iw*-qx + iy*-qz - iz*-qy,
 		iy*qw + iw*-qy + iz*-qx - ix*-qz,
 		iz*qw + iw*-qz + ix*-qy - iy*-qx}
+}
+
+// SetMulQuat multiplies vector by specified quaternion and
+// then by the quaternion inverse.
+// It basically applies the rotation encoded in the quaternion to this vector.
+func (v *Vec3) SetMulQuat(q Quat) {
+	*v = v.MulQuat(q)
 }
 
 // Cross returns the cross product of this vector with other.

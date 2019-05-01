@@ -10,53 +10,6 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// http://planetpixelemporium.com/tutorialpages/light.html
-
-// LightColors are standard light colors for different light sources
-type LightColors int
-
-const (
-	DirectSun LightColors = iota
-	CarbonArc
-	Halogen
-	Tungsten100W
-	Tungsten40W
-	Candle
-	Overcast
-	FluorWarm
-	FluorStd
-	FluorCool
-	FluorFull
-	FluorGrow
-	MercuryVapor
-	SodiumVapor
-	MetalHalide
-	LightColorsN
-)
-
-//go:generate stringer -type=LightColors
-
-var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, false, nil)
-
-// LightColorMap provides a map of named light colors
-var LightColorMap = map[LightColors]gi.Color{
-	DirectSun:    {255, 255, 255, 255},
-	CarbonArc:    {255, 250, 244, 255},
-	Halogen:      {255, 241, 224, 255},
-	Tungsten100W: {255, 214, 170, 255},
-	Tungsten40W:  {255, 197, 143, 255},
-	Candle:       {255, 147, 41, 255},
-	Overcast:     {201, 226, 255, 255},
-	FluorWarm:    {255, 244, 229, 255},
-	FluorStd:     {244, 255, 250, 255},
-	FluorCool:    {212, 235, 255, 255},
-	FluorFull:    {255, 244, 242, 255},
-	FluorGrow:    {255, 239, 247, 255},
-	MercuryVapor: {216, 247, 255, 255},
-	SodiumVapor:  {255, 209, 178, 255},
-	MetalHalide:  {242, 252, 255, 255},
-}
-
 // Light represents a light that illuminates a scene
 // these are stored on the overall scene object and not within the graph
 type Light interface {
@@ -180,14 +133,17 @@ func (dl *PointLight) Dir(viewMat *mat32.Mat4) mat32.Vec3 {
 // and associated decay factors and angles
 type SpotLight struct {
 	LightBase
-	Pose           Pose    // position and orientation
-	LinearDecay    float32 // Distance linear decay factor
-	QuadraticDecay float32 // Distance quadratic decay factor
-	AngularDecay   float32 // Angular decay factor
-	CutoffAngle    float32 // Cut off angle (in radians?)
+	Pose        Pose    // position and orientation
+	LinDecay    float32 // Distance linear decay factor
+	QuadDecay   float32 // Distance quadratic decay factor
+	AngDecay    float32 // Angular decay factor
+	CutoffAngle float32 // Cut off angle (in degrees)
 }
 
 var KiT_SpotLight = kit.Types.AddType(&SpotLight{}, nil)
+
+/////////////////////////////////////////////////////////////////////////\
+//  Set Lights to Renderers
 
 // SetLightsUnis sets the lights and recompiles the programs accordingly
 // Must be called with proper context activated, on main thread
@@ -225,4 +181,54 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	if len(dirs) > 0 {
 		diru.SetValue(dirs)
 	}
+}
+
+/////////////////////////////////////////////////////////////////////////\
+//  Standard Light Colors
+
+// http://planetpixelemporium.com/tutorialpages/light.html
+
+// LightColors are standard light colors for different light sources
+type LightColors int
+
+const (
+	DirectSun LightColors = iota
+	CarbonArc
+	Halogen
+	Tungsten100W
+	Tungsten40W
+	Candle
+	Overcast
+	FluorWarm
+	FluorStd
+	FluorCool
+	FluorFull
+	FluorGrow
+	MercuryVapor
+	SodiumVapor
+	MetalHalide
+	LightColorsN
+)
+
+//go:generate stringer -type=LightColors
+
+var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, false, nil)
+
+// LightColorMap provides a map of named light colors
+var LightColorMap = map[LightColors]gi.Color{
+	DirectSun:    {255, 255, 255, 255},
+	CarbonArc:    {255, 250, 244, 255},
+	Halogen:      {255, 241, 224, 255},
+	Tungsten100W: {255, 214, 170, 255},
+	Tungsten40W:  {255, 197, 143, 255},
+	Candle:       {255, 147, 41, 255},
+	Overcast:     {201, 226, 255, 255},
+	FluorWarm:    {255, 244, 229, 255},
+	FluorStd:     {244, 255, 250, 255},
+	FluorCool:    {212, 235, 255, 255},
+	FluorFull:    {255, 244, 242, 255},
+	FluorGrow:    {255, 239, 247, 255},
+	MercuryVapor: {216, 247, 255, 255},
+	SodiumVapor:  {255, 209, 178, 255},
+	MetalHalide:  {242, 252, 255, 255},
 }

@@ -188,7 +188,9 @@ func (sc *Scene) Init2D() {
 }
 
 func (sc *Scene) Style2D() {
-	sc.SetCanFocusIfActive()
+	if !sc.NoNav {
+		sc.SetCanFocusIfActive()
+	}
 	sc.SetCurWin()
 	sc.Style2DWidget()
 	sc.LayData.SetFromStyle(&sc.Sty.Layout) // also does reset
@@ -286,17 +288,29 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.IsDragging() {
-			mdel := float32(.2)
+			orbDel := float32(.2)
+			panDel := float32(.05)
 			if !ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
 				ssc.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
+			dx := float32(del.X)
+			dy := float32(del.Y)
 			switch {
 			case key.HasAllModifierBits(me.Modifiers, key.Shift):
-				ssc.Camera.PanMove(float32(del.X)*mdel*.2, -float32(del.Y)*mdel*.2)
+				ssc.Camera.Pan(dx*panDel, -dy*panDel)
+			case key.HasAllModifierBits(me.Modifiers, key.Control):
+				ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
+			case key.HasAllModifierBits(me.Modifiers, key.Alt):
+				ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
 			default:
-				ssc.Camera.OrbitMove(float32(del.X)*mdel, -float32(del.Y)*mdel)
+				if mat32.Abs(dx) > mat32.Abs(dy) {
+					dy = 0
+				} else {
+					dx = 0
+				}
+				ssc.Camera.Orbit(dx*orbDel, -dy*orbDel)
 			}
 			ssc.UpdateSig()
 		} else {
@@ -314,7 +328,15 @@ func (sc *Scene) NavEvents() {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 			ssc.SetDragCursor = false
 		}
-		ssc.Camera.Pose.Pos.Z += float32(me.NonZeroDelta(false)) / 20
+		zoom := float32(me.NonZeroDelta(false))
+		zoomPct := float32(.05)
+		zoomDel := float32(.05)
+		switch {
+		case key.HasAllModifierBits(me.Modifiers, key.Alt):
+			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
+		default:
+			ssc.Camera.Zoom(zoomPct * zoom)
+		}
 		ssc.UpdateSig()
 	})
 	sc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -324,6 +346,9 @@ func (sc *Scene) NavEvents() {
 		if ssc.SetDragCursor {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 			ssc.SetDragCursor = false
+		}
+		if !ssc.IsInactive() && !ssc.HasFocus() {
+			ssc.GrabFocus()
 		}
 		// obj := ssc.FirstContainingPoint(me.Where, true)
 		// if me.Action == mouse.Release && me.Button == mouse.Right {
@@ -347,45 +372,83 @@ func (sc *Scene) NavEvents() {
 	sc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		kt := d.(*key.ChordEvent)
-		ch := string(kt.Chord())
-		// fmt.Printf(ch)
-		orbDeg := float32(5)
-		panDel := float32(.1)
-		zoomPct := float32(.1)
-		switch ch {
-		case "UpArrow":
-			ssc.Camera.OrbitMove(0.0, orbDeg)
-			kt.SetProcessed()
-		case "Shift+UpArrow":
-			ssc.Camera.PanMove(0.0, panDel)
-			kt.SetProcessed()
-		case "DownArrow":
-			ssc.Camera.OrbitMove(0, -orbDeg)
-			kt.SetProcessed()
-		case "Shift+DownArrow":
-			ssc.Camera.PanMove(0, -panDel)
-			kt.SetProcessed()
-		case "LeftArrow":
-			ssc.Camera.OrbitMove(-orbDeg, 0)
-			kt.SetProcessed()
-		case "Shift+LeftArrow":
-			ssc.Camera.PanMove(-panDel, 0)
-			kt.SetProcessed()
-		case "RightArrow":
-			ssc.Camera.OrbitMove(orbDeg, 0)
-			kt.SetProcessed()
-		case "Shift+RightArrow":
-			ssc.Camera.PanMove(panDel, 0)
-			kt.SetProcessed()
-		case "+", "=":
-			ssc.Camera.Zoom(-zoomPct)
-			kt.SetProcessed()
-		case "-", "_":
-			ssc.Camera.Zoom(zoomPct)
-			kt.SetProcessed()
-		}
-		ssc.UpdateSig()
+		ssc.NavKeyEvents(kt)
 	})
+}
+
+// NavKeyEvents handles standard viewer keyboard navigation events
+func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
+	ch := string(kt.Chord())
+	// fmt.Printf(ch)
+	orbDeg := float32(5)
+	panDel := float32(.1)
+	zoomPct := float32(.1)
+	switch ch {
+	case "UpArrow":
+		sc.Camera.Orbit(0, orbDeg)
+		kt.SetProcessed()
+	case "Shift+UpArrow":
+		sc.Camera.Pan(0, panDel)
+		kt.SetProcessed()
+	case "Control+UpArrow":
+		sc.Camera.PanAxis(0, panDel)
+		kt.SetProcessed()
+	case "Alt+UpArrow":
+		sc.Camera.PanTarget(0, panDel, 0)
+		kt.SetProcessed()
+	case "DownArrow":
+		sc.Camera.Orbit(0, -orbDeg)
+		kt.SetProcessed()
+	case "Shift+DownArrow":
+		sc.Camera.Pan(0, -panDel)
+		kt.SetProcessed()
+	case "Control+DownArrow":
+		sc.Camera.PanAxis(0, -panDel)
+		kt.SetProcessed()
+	case "Alt+DownArrow":
+		sc.Camera.PanTarget(0, -panDel, 0)
+		kt.SetProcessed()
+	case "LeftArrow":
+		sc.Camera.Orbit(-orbDeg, 0)
+		kt.SetProcessed()
+	case "Shift+LeftArrow":
+		sc.Camera.Pan(-panDel, 0)
+		kt.SetProcessed()
+	case "Control+LeftArrow":
+		sc.Camera.PanAxis(-panDel, 0)
+		kt.SetProcessed()
+	case "Alt+LeftArrow":
+		sc.Camera.PanTarget(-panDel, 0, 0)
+		kt.SetProcessed()
+	case "RightArrow":
+		sc.Camera.Orbit(orbDeg, 0)
+		kt.SetProcessed()
+	case "Shift+RightArrow":
+		sc.Camera.Pan(panDel, 0)
+		kt.SetProcessed()
+	case "Control+RightArrow":
+		sc.Camera.PanAxis(panDel, 0)
+		kt.SetProcessed()
+	case "Alt+RightArrow":
+		sc.Camera.PanTarget(panDel, 0, 0)
+		kt.SetProcessed()
+	case "Alt++", "Alt+=":
+		sc.Camera.PanTarget(0, 0, panDel)
+		kt.SetProcessed()
+	case "Alt+-", "Alt+_":
+		sc.Camera.PanTarget(0, 0, -panDel)
+		kt.SetProcessed()
+	case "+", "=":
+		sc.Camera.Zoom(-zoomPct)
+		kt.SetProcessed()
+	case "-", "_":
+		sc.Camera.Zoom(zoomPct)
+		kt.SetProcessed()
+	case " ":
+		sc.Camera.DefaultPose()
+		kt.SetProcessed()
+	}
+	sc.UpdateSig()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

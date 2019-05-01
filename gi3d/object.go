@@ -19,7 +19,7 @@ import (
 type Object struct {
 	Node3DBase
 	Mesh    MeshName `desc:"name of the mesh shape information used for rendering this object -- all meshes are collected on the Scene"`
-	Mat     Material `view:"inline" desc:"material properties of the surface (color, shininess, texture, etc)"`
+	Mat     Material `desc:"material properties of the surface (color, shininess, texture, etc)"`
 	MeshPtr Mesh     `view:"-" desc:"cached pointer to mesh"`
 }
 
