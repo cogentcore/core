@@ -31,8 +31,8 @@ func (p *Plane) Set(normal Vec3, offset float32) {
 	p.Off = offset
 }
 
-// SetComponents sets this plane normal vector components and offset.
-func (p *Plane) SetComponents(x, y, z, w float32) {
+// SetDims sets this plane normal vector dimensions and offset.
+func (p *Plane) SetDims(x, y, z, w float32) {
 	p.Norm.Set(x, y, z)
 	p.Off = w
 }

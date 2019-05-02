@@ -52,28 +52,27 @@ func (v *Vec2i) SetFromVec3(vf Vec2) {
 	v.Y = int32(vf.Y)
 }
 
-// SetComponent sets this vector component value by its component index
-// Returns the pointer to this updated vector
-func (v *Vec2i) SetComponent(comp Components, value int32) {
-	switch comp {
+// SetDim sets this vector component value by its dimension index
+func (v *Vec2i) SetDim(dim Dims, value int32) {
+	switch dim {
 	case X:
 		v.X = value
 	case Y:
 		v.Y = value
 	default:
-		panic("component is out of range")
+		panic("dim is out of range")
 	}
 }
 
-// Component returns this vector component
-func (v Vec2i) Component(comp Components) int32 {
-	switch comp {
+// Dim returns this vector component
+func (v Vec2i) Dim(dim Dims) int32 {
+	switch dim {
 	case X:
 		return v.X
 	case Y:
 		return v.Y
 	default:
-		panic("component is out of range")
+		panic("dim is out of range")
 	}
 }
 

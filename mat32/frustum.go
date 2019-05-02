@@ -70,12 +70,12 @@ func (f *Frustum) SetFromMatrix(m *Mat4) {
 	me14 := m[14]
 	me15 := m[15]
 
-	f.Planes[0].SetComponents(me3-me0, me7-me4, me11-me8, me15-me12)
-	f.Planes[1].SetComponents(me3+me0, me7+me4, me11+me8, me15+me12)
-	f.Planes[2].SetComponents(me3+me1, me7+me5, me11+me9, me15+me13)
-	f.Planes[3].SetComponents(me3-me1, me7-me5, me11-me9, me15-me13)
-	f.Planes[4].SetComponents(me3-me2, me7-me6, me11-me10, me15-me14)
-	f.Planes[5].SetComponents(me3+me2, me7+me6, me11+me10, me15+me14)
+	f.Planes[0].SetDims(me3-me0, me7-me4, me11-me8, me15-me12)
+	f.Planes[1].SetDims(me3+me0, me7+me4, me11+me8, me15+me12)
+	f.Planes[2].SetDims(me3+me1, me7+me5, me11+me9, me15+me13)
+	f.Planes[3].SetDims(me3-me1, me7-me5, me11-me9, me15-me13)
+	f.Planes[4].SetDims(me3-me2, me7-me6, me11-me10, me15-me14)
+	f.Planes[5].SetDims(me3+me2, me7+me6, me11+me10, me15+me14)
 
 	for i := 0; i < 6; i++ {
 		f.Planes[i].Normalize()

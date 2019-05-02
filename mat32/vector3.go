@@ -70,9 +70,9 @@ func (v *Vec3) SetFromVec3i(vi Vec3i) {
 	v.Z = float32(vi.Z)
 }
 
-// SetComponent sets this vector component value by component index.
-func (v *Vec3) SetComponent(comp Components, value float32) {
-	switch comp {
+// SetDim sets this vector component value by dimension index.
+func (v *Vec3) SetDim(dim Dims, value float32) {
+	switch dim {
 	case X:
 		v.X = value
 	case Y:
@@ -80,13 +80,13 @@ func (v *Vec3) SetComponent(comp Components, value float32) {
 	case Z:
 		v.Z = value
 	default:
-		panic("component is out of range: ")
+		panic("dim is out of range: ")
 	}
 }
 
-// Component returns this vector component
-func (v Vec3) Component(comp Components) float32 {
-	switch comp {
+// Dim returns this vector component
+func (v Vec3) Dim(dim Dims) float32 {
+	switch dim {
 	case X:
 		return v.X
 	case Y:
@@ -94,7 +94,7 @@ func (v Vec3) Component(comp Components) float32 {
 	case Z:
 		return v.Z
 	default:
-		panic("component is out of range")
+		panic("dim is out of range")
 	}
 }
 

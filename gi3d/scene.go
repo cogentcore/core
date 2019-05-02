@@ -491,6 +491,7 @@ func (sc *Scene) ActivateFrame() bool {
 		clr := ColorToVec3f(sc.BgColor)
 		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
 		gpu.Draw.Clear(true, true) // clear color and depth
+		// gpu.Draw.DepthTest(false)
 	})
 	return true
 }
@@ -555,7 +556,6 @@ func (sc *Scene) Init3D() {
 }
 
 // Render renders the scene to the Frame framebuffer
-// Fully self-contained, including window update
 func (sc *Scene) Render() bool {
 	if !sc.ActivateFrame() {
 		return false

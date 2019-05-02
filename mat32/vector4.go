@@ -59,9 +59,9 @@ func (v *Vec4) SetFromVec3(other Vec3, w float32) {
 	v.W = w
 }
 
-// SetComponent sets this vector component value by component index.
-func (v *Vec4) SetComponent(comp Components, value float32) {
-	switch comp {
+// SetDim sets this vector component value by dimension index.
+func (v *Vec4) SetDim(dim Dims, value float32) {
+	switch dim {
 	case X:
 		v.X = value
 	case Y:
@@ -71,13 +71,13 @@ func (v *Vec4) SetComponent(comp Components, value float32) {
 	case W:
 		v.W = value
 	default:
-		panic("component is out of range")
+		panic("dim is out of range")
 	}
 }
 
-// Component returns this vector component.
-func (v Vec4) Component(comp Components) float32 {
-	switch comp {
+// Dim returns this vector component.
+func (v Vec4) Dim(dim Dims) float32 {
+	switch dim {
 	case X:
 		return v.X
 	case Y:
@@ -87,7 +87,7 @@ func (v Vec4) Component(comp Components) float32 {
 	case W:
 		return v.W
 	default:
-		panic("index is out of range")
+		panic("dim is out of range")
 	}
 }
 

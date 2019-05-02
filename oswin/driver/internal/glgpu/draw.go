@@ -41,8 +41,9 @@ func (dr *Drawing) ClearColor(r, g, b float32) {
 // DepthTest turns on / off depth testing
 func (dr *Drawing) DepthTest(on bool) {
 	if on {
-		gl.DepthFunc(gl.LEQUAL)
 		gl.Enable(gl.DEPTH_TEST)
+		gl.DepthFunc(gl.LESS)
+		gl.DepthMask(true)
 	} else {
 		gl.Disable(gl.DEPTH_TEST)
 	}

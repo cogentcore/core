@@ -6,17 +6,17 @@ package mat32
 
 import "github.com/goki/ki/kit"
 
-// Components is a list of vector component names
-type Components int
+// Dims is a list of vector dimension (component) names
+type Dims int
 
 const (
-	X Components = iota
+	X Dims = iota
 	Y
 	Z
 	W
-	ComponentsN
+	DimsN
 )
 
-//go:generate stringer -type=Components
+//go:generate stringer -type=Dims
 
-var KiT_Components = kit.Enums.AddEnum(ComponentsN, false, nil)
+var KiT_Dims = kit.Enums.AddEnum(DimsN, false, nil)

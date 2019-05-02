@@ -168,6 +168,7 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	case RClassTexture:
 		// obj.Mat.TexPtr.Activate()
 	}
+	// gpu.Draw.DepthTest(true)
 	sc.Renders.SetMatrix(&obj.Pose)
 	obj.MeshPtr.Activate(sc) // meshes have all been prep'd
 	// obj.MeshPtr.TransferAll() // todo: need to optimize

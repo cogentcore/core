@@ -311,6 +311,16 @@ in vec3 CamDir;
 out vec4 outputColor;
 `+RenderPhong+
 			`
+			
+float near = 0.1; 
+float far  = 100.0; 
+  
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
 void main() {
 	// Inverts the fragment normal if not FrontFacing
 	vec3 fragNorm = Norm;
@@ -328,6 +338,9 @@ void main() {
 	// Final fragment color
 	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
 	// debugVec3(Norm, outputColor);
+	
+    float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
+    outputColor = vec4(vec3(depth), 1.0);
 }
 `+"\x00")
 	if err != nil {

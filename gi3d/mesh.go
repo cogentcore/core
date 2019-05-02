@@ -45,7 +45,7 @@ type Mesh interface {
 	// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
 	// offset is the distance to place the plane along the orthogonal axis.
 	// if clr is non-Nil then it will be added
-	AddPlane(waxis, haxis mat32.Components, wdir, hdir int, width, height, offset float32, wsegs, hsegs int, clr gi.Color)
+	AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, offset float32, wsegs, hsegs int, clr gi.Color)
 
 	// Validate checks if all the vertex data is valid
 	// any errors are logged
@@ -264,7 +264,7 @@ func (ms *MeshBase) Render3D() {
 // wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
 // allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
-func (ms *MeshBase) AddPlane(waxis, haxis mat32.Components, wdir, hdir int, width, height, offset float32, wsegs, hsegs int, clr gi.Color) {
+func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, offset float32, wsegs, hsegs int, clr gi.Color) {
 	idxSt := ms.Vtx.Len() / 3 // starting index based on what's there already
 
 	w := mat32.Z
@@ -280,9 +280,9 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Components, wdir, hdir int, widt
 
 	norm := mat32.Vec3{}
 	if offset > 0 {
-		norm.SetComponent(w, 1)
+		norm.SetDim(w, 1)
 	} else {
-		norm.SetComponent(w, -1)
+		norm.SetDim(w, -1)
 	}
 
 	wHalf := width / 2
@@ -296,9 +296,9 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Components, wdir, hdir int, widt
 	for iy := 0; iy < hsegs1; iy++ {
 		for ix := 0; ix < wsegs1; ix++ {
 			vtx := mat32.Vec3{}
-			vtx.SetComponent(waxis, (float32(ix)*segWidth-wHalf)*float32(wdir))
-			vtx.SetComponent(haxis, (float32(iy)*segHeight-hHalf)*float32(hdir))
-			vtx.SetComponent(w, offset)
+			vtx.SetDim(waxis, (float32(ix)*segWidth-wHalf)*float32(wdir))
+			vtx.SetDim(haxis, (float32(iy)*segHeight-hHalf)*float32(hdir))
+			vtx.SetDim(w, offset)
 			ms.Vtx.AppendVec3(vtx)
 			ms.Norm.AppendVec3(norm)
 			ms.TexUV.Append(float32(ix)/float32(wsegs), float32(1)-(float32(iy)/float32(hsegs)))
