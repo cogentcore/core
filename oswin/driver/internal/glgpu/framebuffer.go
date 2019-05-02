@@ -162,6 +162,7 @@ func (fb *Framebuffer) Activate() {
 		} else {
 			gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, szx, szy)
 		}
+		gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, fb.drbo)
 		if fb.tex != nil {
 			gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb.tex.Handle(), 0)
 		} else {

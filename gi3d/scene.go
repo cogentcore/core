@@ -491,7 +491,6 @@ func (sc *Scene) ActivateFrame() bool {
 		clr := ColorToVec3f(sc.BgColor)
 		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
 		gpu.Draw.Clear(true, true) // clear color and depth
-		// gpu.Draw.DepthTest(false)
 	})
 	return true
 }
