@@ -434,7 +434,7 @@ layout (std140) uniform Lights
 	vec3 SpotLights[SPOTLIGHTS_LEN];
 	#define SpotLightColor(a)     SpotLights[5*a]
 	#define SpotLightPos(a)       	SpotLights[5*a+1]
-	#define SpotLightDir(a)		       SpotLights[5*a+2]
+	#define SpotLightDir(a)       SpotLights[5*a+2]
 	#define SpotLightAngDecay(a)  	SpotLights[5*a+3].x
 	#define SpotLightCutAngle(a)  SpotLights[5*a+3].y
 	#define SpotLightLinDecay(a)  SpotLights[5*a+3].z
@@ -503,7 +503,7 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 #endif
 
 #if SPOTLIGHTS_LEN>0
-	int nspot = Spotights_LEN / 5;
+	int nspot = SPOTLIGHTS_LEN / 5;
 	for (int i = 0; i < nspot; i++) {
 		// Calculates the direction and distance from the current vertex to this spot light.
 		vec3 lightDir = SpotLightPos(i) - vec3(pos);
@@ -533,6 +533,7 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 				specularTotal += SpotLightColor(i) * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
 			}
 		}
+		// ambientTotal = vec3(angle / 3.1415);
 	}
 #endif
 

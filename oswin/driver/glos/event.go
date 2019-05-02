@@ -77,6 +77,7 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 			},
 		}
 		w.Send(che)
+		glfw.PostEmptyEvent()
 	}
 }
 

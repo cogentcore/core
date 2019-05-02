@@ -30,7 +30,7 @@ func (cm *Camera) Defaults() {
 	cm.FOV = 30
 	cm.Aspect = 1.5
 	cm.Near = .01
-	cm.Far = 100
+	cm.Far = 1000
 	cm.DefaultPose()
 }
 
@@ -59,7 +59,11 @@ func (cm *Camera) UpdateMatrix() {
 // and sets the Target, UpDir fields for future camera movements.
 func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 	cm.Target = target
-	cm.Pose.Quat.SetFromRotationMatrix(mat32.NewLookAt(cm.Pose.Pos, target, upDir))
+	if upDir.IsNil() {
+		upDir = mat32.Vec3{0, 1, 0}
+	}
+	cm.UpDir = upDir
+	cm.Pose.LookAt(target, upDir)
 	cm.UpdateMatrix()
 }
 
@@ -140,7 +144,7 @@ var CameraProps = ki.Props{
 			"icon":  "reset",
 		}},
 		{"LookAt", ki.Props{
-			"icon": "update",
+			"icon": "rotate-3d",
 			"Args": ki.PropSlice{
 				{"Target", ki.BlankProp{}},
 				{"UpDir", ki.BlankProp{}},

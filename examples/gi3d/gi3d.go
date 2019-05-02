@@ -70,9 +70,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
-	gi3d.AddNewAmbientLight(sc, "ambient", 0.5, gi3d.DirectSun)
-	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
-	dir.Pos.Set(0, 0, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+	gi3d.AddNewAmbientLight(sc, "ambient", 0.2, gi3d.DirectSun)
+
+	// dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
+	// dir.Pos.Set(0, 0, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+
+	// point := gi3d.AddNewPointLight(sc, "point", 1, gi3d.DirectSun)
+	// point.Pos.Set(0, 5, 5)
+
+	spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
+	spot.Pose.Pos.Set(0, 5, 5)
 
 	sc.Camera.Defaults()
 

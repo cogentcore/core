@@ -454,6 +454,15 @@ func (v Vec3) MulMat4(m *Mat4) Vec3 {
 		m[2]*v.X + m[6]*v.Y + m[10]*v.Z + m[14]}
 }
 
+// MulMat4AsVec4 returns 3-dim vector multiplied by specified 4x4 matrix
+// using a 4-dim vector with given 4th dimensional value, then reduced back to
+// a 3-dimensional vector.  This is somehow different from just straight
+// MulMat4 on the 3-dim vector.  Use 0 for normals and 1 for positions
+// as the 4th dim to set.
+func (v Vec3) MulMat4AsVec4(m *Mat4, w float32) Vec3 {
+	return NewVec3FromVec4(NewVec4FromVec3(v, w).MulMat4(m))
+}
+
 // SetMulMat4 sets vector multiplied by specified 4x4 matrix.
 func (v *Vec3) SetMulMat4(m *Mat4) {
 	*v = v.MulMat4(m)

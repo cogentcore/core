@@ -134,6 +134,11 @@ func (ps *Pose) SetMatrix(m *mat32.Mat4) {
 	ps.Pos, ps.Quat, ps.Scale = ps.Matrix.Decompose()
 }
 
+// LookAt points the object at given target location using given up direction.
+func (ps *Pose) LookAt(target, upDir mat32.Vec3) {
+	ps.Quat.SetFromRotationMatrix(mat32.NewLookAt(ps.Pos, target, upDir))
+}
+
 ///////////////////////////////////////////////////////
 // 		World values
 
@@ -212,6 +217,13 @@ var PoseProps = ki.Props{
 				{"Y", ki.BlankProp{}},
 				{"Z", ki.BlankProp{}},
 				{"Angle", ki.BlankProp{}},
+			},
+		}},
+		{"LookAt", ki.Props{
+			"icon": "rotate-3d",
+			"Args": ki.PropSlice{
+				{"Target", ki.BlankProp{}},
+				{"UpDir", ki.BlankProp{}},
 			},
 		}},
 		{"EulerRotation", ki.Props{

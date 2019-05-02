@@ -28,6 +28,13 @@ import (
 // Textures can also be drawn onto Textures, and can grab rendered output
 // from 3D graphics rendering (e.g., via gpu.FrameBuffer and gi3d packages).
 //
+// Unlike Window, the Drawer interface for Texture does *not* manage the
+// TheApp.RunOnMain and context Activate steps needed to set GPU context properly -
+// these must be done prior to calling any of those routines.  Also, a
+// 0,0 = top, left coordinate system is assumed for all Draw routines, but
+// when drawing onto a Texture, its 0,0 is actually bottom, left, so that is
+// managed internally to preserve the same overall coordinate system.
+//
 // Please use the gpu.Texture2D version for GPU-based texture uses (3D rendering)
 // for greater clarity.
 //
@@ -35,9 +42,6 @@ import (
 // Activate(), which is when the GPU-side version of the texture is created
 // and configured.  Window-backing Textures are always Activated and are
 // automatically resized etc along with their parent window.
-//
-// When specifying a sub-Texture via Draw, a Texture's top-left pixel is always
-// (0, 0) in its own coordinate space.
 type Texture interface {
 	// Name returns the name of the texture (filename without extension
 	// by default)

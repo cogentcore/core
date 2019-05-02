@@ -139,7 +139,7 @@ func (app *appImpl) fillQuadsBuff() gpu.BufferMgr {
 
 // draw draws to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-// if target is a texture, then origin is at bottom-left, whereas window is top-left
+// if target is a texture (trgTex), then origin is at bottom-left, whereas window is top-left
 func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, trgTex bool) {
 	tx := src.(*textureImpl)
 	sr = sr.Intersect(tx.Bounds())

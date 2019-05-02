@@ -91,56 +91,92 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 	return lt
 }
 
-// Dir gets the direction normal vector, pre-computing the view transform
-func (dl *DirLight) Dir(viewMat *mat32.Mat4) mat32.Vec3 {
-	dir4 := mat32.NewVec4FromVec3(dl.Pos, 0).MulMat4(viewMat)
-	return mat32.NewVec3FromVec4(dir4).Normal()
+// ViewDir gets the direction normal vector, pre-computing the view transform
+func (dl *DirLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
+	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
+	return dl.Pos.MulMat4AsVec4(viewMat, 0).Normal()
 }
 
 // PointLight is an omnidirectional light with a position
-// and associated decay factors
+// and associated decay factors, which divide the light intensity as a function of
+// linear and quadratic distance.  The quadratic factor dominates at longer distances.
 type PointLight struct {
 	LightBase
-	Pos       mat32.Vec3 // position of light
-	LinDecay  float32    // Distance linear decay factor
-	QuadDecay float32    // Distance quadratic decay factor
+	Pos       mat32.Vec3 `desc:"position of light in world coordinates"`
+	LinDecay  float32    `desc:"Distance linear decay factor -- defaults to .1"`
+	QuadDecay float32    `desc:"Distance quadratic decay factor -- defaults to .01 -- this is "`
 }
 
 var KiT_PointLight = kit.Types.AddType(&PointLight{}, nil)
 
 // AddNewPointLight adds point light to given scene, with given name, standard color, and lumens (0-1 normalized)
-// By default it is located near the default camera position -- change Pos otherwise
+// By default it is located at 0,5,5 (up and between default camera and origin) -- set Pos to change.
 func AddNewPointLight(sc *Scene, name string, lumens float32, color LightColors) *PointLight {
 	lt := &PointLight{}
 	lt.Nm = name
 	lt.On = true
 	lt.Clr = LightColorMap[color]
 	lt.Lumns = lumens
-	lt.LinDecay = 1
-	lt.QuadDecay = 1
+	lt.LinDecay = .1
+	lt.QuadDecay = .01
 	lt.Pos.Set(0, 5, 5)
 	sc.AddLight(lt)
 	return lt
 }
 
-// Dir gets the direction normal vector, pre-computing the view transform
-func (dl *PointLight) Dir(viewMat *mat32.Mat4) mat32.Vec3 {
-	dir4 := mat32.NewVec4FromVec3(dl.Pos, 0).MulMat4(viewMat)
-	return mat32.NewVec3FromVec4(dir4).Normal()
+// ViewPos gets the position vector, pre-computing the view transform
+func (pl *PointLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
+	return pl.Pos.MulMat4AsVec4(viewMat, 1)
 }
 
-// Spotlight is a light with a position and direction
-// and associated decay factors and angles
+// Spotlight is a light with a position and direction and associated decay factors and angles.
+// which divide the light intensity as a function of linear and quadratic distance.
+// The quadratic factor dominates at longer distances.
 type SpotLight struct {
 	LightBase
 	Pose        Pose    // position and orientation
-	LinDecay    float32 // Distance linear decay factor
-	QuadDecay   float32 // Distance quadratic decay factor
-	AngDecay    float32 // Angular decay factor
-	CutoffAngle float32 // Cut off angle (in degrees)
+	AngDecay    float32 `desc:"Angular decay factor -- defaults to 15"`
+	CutoffAngle float32 `max:"90" min:"1" desc:"Cut off angle (in degrees) -- defaults to 45 -- max of 90"`
+	LinDecay    float32 `desc:"Distance linear decay factor -- defaults to 1"`
+	QuadDecay   float32 `desc:"Distance quadratic decay factor -- defaults to 1"`
 }
 
 var KiT_SpotLight = kit.Types.AddType(&SpotLight{}, nil)
+
+// AddNewSpotLight adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// By default it is located at 0,5,5 (up and between default camera and origin) and pointing at the origin.
+// Use the Pose LookAt function to point it at other locations.
+// In its unrotated state, it points down the -Z axis (i.e., into the scene using default view parameters)
+func AddNewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
+	lt := &SpotLight{}
+	lt.Nm = name
+	lt.On = true
+	lt.Clr = LightColorMap[color]
+	lt.Lumns = lumens
+	lt.AngDecay = 15
+	lt.CutoffAngle = 45
+	lt.LinDecay = .01
+	lt.QuadDecay = .001
+	lt.Pose.Defaults()
+	lt.Pose.Pos.Set(0, 5, 5)
+	lt.Pose.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0})
+	sc.AddLight(lt)
+	return lt
+}
+
+// ViewPos gets the position of the light, pre-computing the view transform
+func (dl *SpotLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
+	return dl.Pose.Pos.MulMat4AsVec4(viewMat, 1) // note: 1 and no Normal
+}
+
+// ViewDir gets the direction normal vector, pre-computing the view transform
+func (dl *SpotLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
+	idmat := mat32.NewMat4()
+	dl.Pose.UpdateWorldMatrix(idmat)
+	dl.Pose.UpdateMVPMatrix(viewMat, idmat)
+	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&dl.Pose.MVMatrix, 0).Normal()
+	return vd
+}
 
 /////////////////////////////////////////////////////////////////////////\
 //  Set Lights to Renderers
@@ -154,8 +190,8 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	}
 	var ambs []mat32.Vec3
 	var dirs []mat32.Vec3
-	// var points []mat32.Vec3
-	// var spots []mat32.Vec3
+	var points []mat32.Vec3
+	var spots []mat32.Vec3
 	for _, lt := range sc.Lights {
 		clr := ColorToVec3f(lt.Color()).MulScalar(lt.Lumens())
 		switch l := lt.(type) {
@@ -163,7 +199,17 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 			ambs = append(ambs, clr)
 		case *DirLight:
 			dirs = append(dirs, clr)
-			dirs = append(dirs, l.Dir(&sc.Camera.ViewMatrix))
+			dirs = append(dirs, l.ViewDir(&sc.Camera.ViewMatrix))
+		case *PointLight:
+			points = append(points, clr)
+			points = append(points, l.ViewPos(&sc.Camera.ViewMatrix))
+			points = append(points, mat32.Vec3{l.LinDecay, l.QuadDecay, 0})
+		case *SpotLight:
+			spots = append(spots, clr)
+			spots = append(spots, l.ViewPos(&sc.Camera.ViewMatrix))
+			spots = append(spots, l.ViewDir(&sc.Camera.ViewMatrix))
+			spots = append(spots, mat32.Vec3{l.AngDecay, l.CutoffAngle, l.LinDecay})
+			spots = append(spots, mat32.Vec3{l.QuadDecay, 0, 0})
 		}
 	}
 
@@ -172,6 +218,10 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	ambu.SetLen(len(ambs))
 	diru := lu.UniformByName("DirLights")
 	diru.SetLen(len(dirs))
+	ptu := lu.UniformByName("PointLights")
+	ptu.SetLen(len(points))
+	spu := lu.UniformByName("SpotLights")
+	spu.SetLen(len(spots))
 
 	lu.Resize()
 
@@ -180,6 +230,12 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	}
 	if len(dirs) > 0 {
 		diru.SetValue(dirs)
+	}
+	if len(points) > 0 {
+		ptu.SetValue(points)
+	}
+	if len(spots) > 0 {
+		spu.SetValue(spots)
 	}
 }
 
