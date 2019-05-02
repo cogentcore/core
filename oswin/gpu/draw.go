@@ -30,8 +30,8 @@ type Drawing interface {
 
 	// CullFace sets face culling, for front and / or back faces (back typical).
 	// If you don't do this, rendering of standard Phong model will not work.
-	// Standard CCW face ordering assumed.
-	CullFace(on, front, back bool)
+	// if ccw = true then standard CCW face ordering is used, else CW (clockwise).
+	CullFace(on, front, back, ccw bool)
 
 	// Multisample turns on or off multisampling (antialiasing)
 	Multisample(on bool)

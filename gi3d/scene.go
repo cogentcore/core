@@ -29,7 +29,7 @@ var Update3DTrace = false
 type Scene struct {
 	gi.WidgetBase
 	Geom          gi.Geom2DInt        `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Camera        Camera              `view:"inline" desc:"camera determines view onto scene"`
+	Camera        Camera              `desc:"camera determines view onto scene"`
 	BgColor       gi.Color            `desc:"background color"`
 	Lights        map[string]Light    `desc:"all lights used in the scene"`
 	Meshes        map[string]Mesh     `desc:"all meshes used in the scene"`
@@ -42,7 +42,7 @@ type Scene struct {
 	SetDragCursor bool                `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
-var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
+var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
 
 // AddNewScene adds a new scene to given parent node, with given name.
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -176,11 +176,12 @@ func (sc *Scene) Init2D() {
 	sc.NodeSig.Connect(sc.This(), func(recsc, sendk ki.Ki, sig int64, data interface{}) {
 		rsci, _ := gi.KiToNode2D(recsc)
 		rsc := rsci.(*Scene)
-		if Update3DTrace {
-			fmt.Printf("Update: Scene: %v full render due to signal: %v from node: %v\n", rsc.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
-		}
-		if !sc.IsDeleted() && !sc.IsDestroyed() {
-			sc.Render()
+		if rsc.IsVisible() {
+			if Update3DTrace {
+				fmt.Printf("Update: Scene: %v full render due to signal: %v from node: %v\n", rsc.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
+			}
+			rsc.Render()
+			rsc.Win.DirectUpdate(rsc)
 		}
 	})
 	sc.Init3D()
@@ -572,20 +573,28 @@ func (sc *Scene) Render() bool {
 	return true
 }
 
-func (sc *Scene) DirectWinUpload(win *gi.Window) bool {
+func (sc *Scene) IsDirectWinUpload() bool {
+	return true
+}
+
+func (sc *Scene) DirectWinUpload() bool {
 	if sc.Tex == nil || !sc.IsVisible() {
-		return false
+		return true
 	}
 	if Update3DTrace {
-		fmt.Printf("Update: Window %s from Scene: %s at: %v, bounds: %v\n", win.Nm, sc.Nm, sc.WinBBox.Min, sc.Tex.Bounds())
+		fmt.Printf("Update: Window %s from Scene: %s at: %v, bounds: %v\n", sc.Win.Nm, sc.Nm, sc.WinBBox.Min, sc.Tex.Bounds())
 	}
 
 	// https://learnopengl.com/Advanced-Lighting/Gamma-Correction
 	// todo: will need to mess with gamma correction -- can already see that colors
 	// are too bright..  generate some good test inputs (just a bunch of greyscale cubes)
 	// render in svg at top of screen too for comparison
-
-	win.OSWin.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, &oswin.DrawOptions{FlipSrcY: true})
+	wt := sc.Win.OSWin.WinTex()
+	oswin.TheApp.RunOnMain(func() {
+		sc.Win.OSWin.Activate()
+		// wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, &oswin.DrawOptions{FlipSrcY: true})
+		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, nil)
+	})
 	return true
 }
 
@@ -654,4 +663,14 @@ func (sc *Scene) Render3D() {
 			obj.This().(Node3D).Render3D(sc, rc, rnd)
 		}
 	}
+}
+
+// SceneProps define the ToolBar and MenuBar for StructView
+var SceneProps = ki.Props{
+	"ToolBar": ki.PropSlice{
+		{"UpdateSig", ki.Props{
+			"label": "Update",
+			"icon":  "update",
+		}},
+	},
 }

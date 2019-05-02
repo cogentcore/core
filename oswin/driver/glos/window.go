@@ -222,7 +222,7 @@ func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectan
 			w.drawQuads = theApp.drawQuadsBuff()
 		}
 		sz := w.Size()
-		theApp.draw(sz, src2dst, src, sr, op, opts, w.drawQuads)
+		theApp.draw(sz, src2dst, src, sr, op, opts, w.drawQuads, false)
 	})
 }
 
@@ -235,7 +235,7 @@ func (w *windowImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.R
 			w.fillQuads = theApp.fillQuadsBuff()
 		}
 		sz := w.Size()
-		theApp.drawUniform(sz, src2dst, src, sr, op, opts, w.fillQuads)
+		theApp.drawUniform(sz, src2dst, src, sr, op, opts, w.fillQuads, false)
 	})
 }
 
@@ -256,7 +256,7 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 			w.fillQuads = theApp.fillQuadsBuff()
 		}
 		sz := w.Size()
-		theApp.fillRect(sz, dr, src, op, w.fillQuads)
+		theApp.fillRect(sz, dr, src, op, w.fillQuads, false)
 	})
 }
 

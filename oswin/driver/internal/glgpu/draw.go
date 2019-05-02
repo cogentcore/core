@@ -59,9 +59,13 @@ func (dr *Drawing) StencilTest(on bool) {
 
 // CullFace sets face culling, for front and / or back faces (back typical).
 // If you don't do this, rendering of standard Phong model will not work.
-func (dr *Drawing) CullFace(on, front, back bool) {
+func (dr *Drawing) CullFace(on, front, back, ccw bool) {
 	if on {
-		gl.FrontFace(gl.CCW)
+		if ccw {
+			gl.FrontFace(gl.CCW)
+		} else {
+			gl.FrontFace(gl.CW)
+		}
 		switch {
 		case front && back:
 			gl.CullFace(gl.FRONT_AND_BACK)

@@ -220,10 +220,15 @@ type Node2D interface {
 	// levels.
 	IsVisible() bool
 
+	// IsDirectWinUpload returns true if this is a node that does a direct window upload
+	// e.g., for gi3d.Scene which renders directly to the window texture for maximum efficiency
+	IsDirectWinUpload() bool
+
 	// DirectWinUpload does a direct upload of contents to the window
 	// Called at the appropriate point during the overall window publish update process
-	// For e.g., gi3d.Scene which renders directly to the window for maximum efficiency
-	DirectWinUpload(win *Window) bool
+	// For e.g., gi3d.Scene which renders directly to the window texture for maximum efficiency
+	// Returns true if this is a type of node that does this (even if it didn't do it)
+	DirectWinUpload() bool
 }
 
 // FocusChanges are the kinds of changes that can be reported via
@@ -421,7 +426,11 @@ func (nb *Node2DBase) IsVisible() bool {
 	return nb.Par.This().(Node2D).IsVisible()
 }
 
-func (nb *Node2DBase) DirectWinUpload(win *Window) bool {
+func (nb *Node2DBase) IsDirectWinUpload() bool {
+	return false
+}
+
+func (nb *Node2DBase) DirectWinUpload() bool {
 	return false
 }
 

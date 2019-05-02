@@ -307,7 +307,7 @@ func (tx *textureImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rect
 	if tx.drawQuads == nil {
 		tx.drawQuads = theApp.drawQuadsBuff()
 	}
-	theApp.draw(sz, src2dst, src, sr, op, opts, tx.drawQuads)
+	theApp.draw(sz, src2dst, src, sr, op, opts, tx.drawQuads, true) // target is texture
 	tx.DeActivateFramebuffer()
 }
 
@@ -318,7 +318,7 @@ func (tx *textureImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image
 	if tx.fillQuads == nil {
 		tx.fillQuads = theApp.fillQuadsBuff()
 	}
-	theApp.drawUniform(sz, src2dst, src, sr, op, opts, tx.fillQuads)
+	theApp.drawUniform(sz, src2dst, src, sr, op, opts, tx.fillQuads, true)
 	tx.DeActivateFramebuffer()
 }
 
@@ -337,6 +337,6 @@ func (tx *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	if tx.fillQuads == nil {
 		tx.fillQuads = theApp.fillQuadsBuff()
 	}
-	theApp.fillRect(sz, dr, src, op, tx.fillQuads)
+	theApp.fillRect(sz, dr, src, op, tx.fillQuads, true)
 	tx.DeActivateFramebuffer()
 }

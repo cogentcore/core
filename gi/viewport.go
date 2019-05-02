@@ -554,10 +554,14 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 				vp.ReRender2DTree() // need to re-render entirely from us
 			}
 		} else {
-			if Update2DTrace {
-				fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), ni.PathUnique())
+			if nii.DirectWinUpload() {
+				vp.Win.UpdateSig()
+			} else {
+				if Update2DTrace {
+					fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), ni.PathUnique())
+				}
+				vp.ReRender2DNode(nii)
 			}
-			vp.ReRender2DNode(nii)
 		}
 	}
 	// don't do anything on deleting or destroying, and

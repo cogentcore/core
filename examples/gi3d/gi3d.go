@@ -25,6 +25,7 @@ func mainrun() {
 	// turn these on to see a traces of various stages of processing..
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
+	// gi3d.Update3DTrace = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes

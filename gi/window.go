@@ -98,17 +98,13 @@ var WinNewCloseTime time.Time
 // WindowGlobalMu is a mutex for any global state associated with windows
 var WindowGlobalMu sync.Mutex
 
-// notes: oswin/Image is the thing that a Vp should have uploader uploads the
-// buffer/image to the window -- can also render directly onto window using
-// textures using the drawer interface, but..
-
 // Window provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
 // There is a master Viewport that contains the full bitmap image of the
 // window, onto which most widgets render.  For main windows (not dialogs or
 // other popups), there is a master vertical layout under the Viewport
 // (MasterVLay), whose first element is the MainMenu for the window (which can
-// be empty, in which case it is not displayed).  On MacOS, this main menu is
+// be empty, in which case it is not displayed).  On MacOS, this main menu
 // updates the overall menubar, and also can show the local menu (on by default).
 //
 // Widgets should always use methods to access / set state, and generally should
@@ -116,6 +112,25 @@ var WindowGlobalMu sync.Mutex
 // guarded by various mutexes.  Leaving everything accessible so expert outside
 // access is still possible in a pinch, but again don't use it unless you know
 // what you're doing (and it might change over time too..)
+//
+// Rendering logic:
+// * oswin.Texture is a GPU Texture that can be uploaded very quickly to window
+//   or to another texture.  Viewport2D has image.RGBA Pixels that 2D draws onto,
+//   and this can be efficiently uploaded to Texture.
+//   (at some point, could consider GPU accelerated rendering but not necc and
+//    adds a lot of complexity and dependency -- very nice and simple to use basic
+///   CPU-based bitmap rendering)
+// * OSWin has a WinTex that is blitted up to actual window using GPU code (Draw).
+// * Master Viewport is uploaded to WinTex first as the "base layer"
+// * Then DirectUps (e.g., gi3d.Scene) directly upload their own texture to WinTex
+//   (note: cannot upload directly to window as this prevents popups and overlays)
+// * Then any Popups (which have their own Viewports) upload to WinTex.
+// * Finally if there are any overlays / sprites, then we need a separate
+//   transparent texture, OverTex, which critically allows WinTex to remain
+//   intact while overlays are updated.  TODO: currently this is backed by a
+//   OverlayVp viewport that is the same size as entire window, but it would be
+//   much more efficient to just render directly to OverTex via temporary images for
+//   each overlay item..
 type Window struct {
 	NodeBase
 	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
@@ -910,6 +925,36 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	w.UpdateEnd(updt) // drives publish
 }
 
+// DirectUploads tells directuploaders to upload to WinTex
+func (w *Window) DirectUploads() {
+	for _, du := range w.DirectUps {
+		if du.IsDestroyed() {
+			delete(w.DirectUps, du)
+			continue
+		}
+		du.DirectWinUpload() // upload directly to WinTex
+	}
+}
+
+// DirectUpdate is called when a DirectUpload node wants to update
+// on its own initiative (not as a result of larger update)
+// if there aren't any popups, it can just render, otherwise
+// needs to do UploadAllViewports
+func (w *Window) DirectUpdate(du Node2D) {
+	w.UpMu.Lock()
+	if !w.IsVisible() { // could have closed while we waited for lock
+		w.UpMu.Unlock()
+		return
+	}
+	if len(w.PopupStack) == 0 && w.Popup == nil {
+		du.DirectWinUpload() // upload directly to WinTex
+		w.UpMu.Unlock()
+		return
+	}
+	w.UpMu.Unlock()
+	w.UploadAllViewports()
+}
+
 // UploadAllViewports does a complete upload of all active viewports, in the
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
@@ -929,6 +974,8 @@ func (w *Window) UploadAllViewports() {
 		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
 	}
 	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
+	// next any direct uploaders
+	w.DirectUploads()
 	// then all the current popups
 	w.PopMu.RLock()
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
@@ -1009,13 +1056,6 @@ func (w *Window) Publish() {
 	pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
 	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
-	for _, du := range w.DirectUps {
-		if du.IsDestroyed() {
-			delete(w.DirectUps, du)
-			continue
-		}
-		du.DirectWinUpload(w)
-	}
 	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
 		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
 	}
@@ -1039,8 +1079,8 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 }
 
 // AddDirectUploader adds given node to those that have a DirectWinUpload method
-// and directly render to the window, instead of rendering to the WinTex texture
-// which is then uploaded
+// and directly render to the WinTex via their own method, without going via a
+// Viewport2D as is the case for 2D popups.  This is for gi3d.Scene for example.
 func (w *Window) AddDirectUploader(node Node2D) {
 	w.UpMu.Lock()
 	if w.DirectUps == nil {
@@ -1050,9 +1090,7 @@ func (w *Window) AddDirectUploader(node Node2D) {
 	w.UpMu.Unlock()
 }
 
-// DeleteDirectUploader removes given node to those that have a DirectWinUpload method
-// and directly render to the window, instead of rendering to the WinTex texture
-// which is then uploaded
+// DeleteDirectUploader removes given node to those that have a DirectWinUpload method.
 func (w *Window) DeleteDirectUploader(node Node2D) {
 	if w.DirectUps == nil {
 		return
@@ -1088,6 +1126,23 @@ func (w *Window) DeleteOverlay(nii Node2D) error {
 	return nil
 }
 
+// MakeOverTex makes the OverTex overlay texture if not already there and correct size
+// returns true if needed to make it
+// must be called under UpMu.Lock()
+func (w *Window) MakeOverTex() bool {
+	wsz := w.OSWin.WinTex().Size()
+	if w.OverTex == nil || w.OverTex.Size() != wsz {
+		if w.OverTex != nil {
+			oswin.TheApp.RunOnMain(func() {
+				w.OverTex.Delete()
+			})
+		}
+		w.OverTex = oswin.TheApp.NewTexture(w.OSWin, wsz)
+		return true
+	}
+	return false
+}
+
 // RenderOverlays renders overlays and sprites -- clears overlay viewport to
 // transparent, renders all overlays, uploads result to OverTex
 func (w *Window) RenderOverlays() {
@@ -1106,14 +1161,7 @@ func (w *Window) RenderOverlays() {
 	}
 	updt := w.UpdateStart()
 	wsz := w.OSWin.WinTex().Size()
-	if w.OverTex == nil || w.OverTex.Size() != wsz {
-		if w.OverTex != nil {
-			oswin.TheApp.RunOnMain(func() {
-				w.OverTex.Delete()
-			})
-		}
-		w.OverTex = oswin.TheApp.NewTexture(w.OSWin, wsz)
-	}
+	w.MakeOverTex()
 	w.OverlayVp.Win = w
 	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
 	if !w.OverlayVp.HasChildren() {

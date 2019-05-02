@@ -168,7 +168,7 @@ func (rn *Renderers) AddNewRender(rb Render, errs *[]error) {
 // DrawState configures the draw state for rendering -- call when first starting rendering
 func (rn *Renderers) DrawState() {
 	gpu.Draw.DepthTest(true)
-	gpu.Draw.CullFace(true, false, true) // back face culling
+	gpu.Draw.CullFace(true, false, true, true) // back face culling, std CCW ordering
 	gpu.Draw.Multisample(true)
 }
 

@@ -4,7 +4,11 @@
 
 package gi3d
 
-import "github.com/goki/gi/mat32"
+import (
+	"github.com/goki/gi/mat32"
+	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
+)
 
 // Camera defines the properties of the camera
 type Camera struct {
@@ -19,6 +23,8 @@ type Camera struct {
 	ViewMatrix mat32.Mat4 `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
 	PrjnMatrix mat32.Mat4 `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
 }
+
+var KiT_Camera = kit.Types.AddType(&Camera{}, CameraProps)
 
 func (cm *Camera) Defaults() {
 	cm.FOV = 30
@@ -113,15 +119,67 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 
 // Zoom moves along axis given pct closer or further from the target
 // it always moves the target back also if it distance is < 1
-func (cm *Camera) Zoom(zoom float32) {
+func (cm *Camera) Zoom(zoomPct float32) {
 	ctaxis := cm.Pose.Pos.Sub(cm.Target)
 	if ctaxis.IsNil() {
 		ctaxis.Set(0, 0, 1)
 	}
 	dist := ctaxis.Length()
-	del := ctaxis.MulScalar(zoom)
+	del := ctaxis.MulScalar(zoomPct)
 	cm.Pose.Pos.SetAdd(del)
-	if zoom < 0 && dist < 1 {
+	if zoomPct < 0 && dist < 1 {
 		cm.Target.SetAdd(del)
 	}
+}
+
+// CameraProps define the ToolBar and MenuBar for StructView
+var CameraProps = ki.Props{
+	"ToolBar": ki.PropSlice{
+		{"Defaults", ki.Props{
+			"label": "Defaults",
+			"icon":  "reset",
+		}},
+		{"LookAt", ki.Props{
+			"icon": "update",
+			"Args": ki.PropSlice{
+				{"Target", ki.BlankProp{}},
+				{"UpDir", ki.BlankProp{}},
+			},
+		}},
+		{"Orbit", ki.Props{
+			"icon": "rotate-3d",
+			"Args": ki.PropSlice{
+				{"DeltaX", ki.BlankProp{}},
+				{"DeltaY", ki.BlankProp{}},
+			},
+		}},
+		{"Pan", ki.Props{
+			"icon": "pan",
+			"Args": ki.PropSlice{
+				{"DeltaX", ki.BlankProp{}},
+				{"DeltaY", ki.BlankProp{}},
+			},
+		}},
+		{"PanAxis", ki.Props{
+			"icon": "pan",
+			"Args": ki.PropSlice{
+				{"DeltaX", ki.BlankProp{}},
+				{"DeltaY", ki.BlankProp{}},
+			},
+		}},
+		{"PanTarget", ki.Props{
+			"icon": "pan",
+			"Args": ki.PropSlice{
+				{"DeltaX", ki.BlankProp{}},
+				{"DeltaY", ki.BlankProp{}},
+				{"DeltaZ", ki.BlankProp{}},
+			},
+		}},
+		{"Zoom", ki.Props{
+			"icon": "zoom-in",
+			"Args": ki.PropSlice{
+				{"ZoomPct", ki.BlankProp{}},
+			},
+		}},
+	},
 }
