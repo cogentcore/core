@@ -246,20 +246,21 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	return w, nil
 }
 
-func (app *appImpl) DeleteWin(glw *glfw.Window) {
+func (app *appImpl) DeleteWin(w *windowImpl) {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	_, ok := app.windows[glw]
+	_, ok := app.windows[w.glw]
 	if !ok {
 		return
 	}
-	for i, w := range app.winlist {
-		if w.glw == glw {
+	for i, wl := range app.winlist {
+		if wl == w {
 			app.winlist = append(app.winlist[:i], app.winlist[i+1:]...)
 			break
 		}
 	}
-	delete(app.windows, glw)
+	delete(app.oswindows, w.OSHandle())
+	delete(app.windows, w.glw)
 }
 
 func (app *appImpl) NScreens() int {

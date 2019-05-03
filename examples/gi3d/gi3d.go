@@ -98,6 +98,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bcb.Mat.Shiny = 10
 	// bcb.Mat.Specular.SetString("blue", nil) // how you get rid of specular highlights
 
+	gcb := sc.AddNewObject("green-trans-cube", cbm.Name())
+	gcb.Pose.Pos.Set(0, 0, 1)
+	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
+
 	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})

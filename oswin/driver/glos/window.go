@@ -172,8 +172,10 @@ func (w *windowImpl) GoRunOnWin(f func()) {
 // current rendered back-buffer to the front (and ensures that any
 // ongoing rendering has completed) (see also PublishTex)
 func (w *windowImpl) Publish() {
+	glfw.PostEmptyEvent()
 	w.publish <- struct{}{}
 	<-w.publishDone
+	glfw.PostEmptyEvent()
 }
 
 // PublishTex draws the current WinTex texture to the window and then
@@ -389,6 +391,7 @@ func (w *windowImpl) Close() {
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
 	w.sendWindowEvent(window.Close)
+	theApp.DeleteWin(w)
 	w.app.RunOnMain(func() {
 		if w.winTex != nil {
 			w.winTex.Delete()
@@ -404,7 +407,6 @@ func (w *windowImpl) Close() {
 		}
 		w.glw.Destroy()
 	})
-	// 	closeWindow(w.id)
 }
 
 /////////////////////////////////////////////////////////
@@ -485,10 +487,12 @@ func (w *windowImpl) refresh(gw *glfw.Window) {
 
 func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 	if focused {
+		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(oswin.Focus)))
 		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
 		bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.Focus)
 	} else {
+		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(oswin.Focus)))
 		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.DeFocus)
 	}

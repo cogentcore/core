@@ -136,8 +136,7 @@ type Window interface {
 	// IsMinimized returns true if this window is minimized.
 	IsMinimized() bool
 
-	// IsFocused returns true if this window is focused (will receive keyboard
-	// input etc).
+	// IsFocus returns true if this window is focused (will receive keyboard input etc).
 	IsFocus() bool
 
 	// SetCloseReqFunc sets the function that is called whenever there is a

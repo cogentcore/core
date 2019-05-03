@@ -34,23 +34,22 @@ func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
 func (bx *Box) Make() {
 	bx.Reset()
 
-	halfSz := bx.Size.DivScalar(2)
+	hSz := bx.Size.DivScalar(2)
 
 	clr := gi.Color{}
 
 	// start with neg z as typically back
-	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -halfSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr) // nz
-	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)  // ny
-	bx.AddPlane(mat32.Z, mat32.Y, -1, -1, bx.Size.Z, bx.Size.Y, halfSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // px
-	bx.AddPlane(mat32.Z, mat32.Y, 1, -1, bx.Size.Z, bx.Size.Y, -halfSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // nx
-	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, halfSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)    // py
-	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, halfSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
+	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr) // nz
+	bx.AddPlane(mat32.X, mat32.Z, 1, -1, bx.Size.X, bx.Size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)  // ny
+	bx.AddPlane(mat32.Z, mat32.Y, -1, -1, bx.Size.Z, bx.Size.Y, -hSz.Z, -hSz.Y, hSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // px
+	bx.AddPlane(mat32.Z, mat32.Y, 1, -1, bx.Size.Z, bx.Size.Y, -hSz.Z, -hSz.Y, -hSz.X, int(bx.Segs.Z), int(bx.Segs.Y), clr)  // nx
+	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, -hSz.X, -hSz.Z, -hSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)   // py
+	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
 
-	bx.BBox.BBox.Min = halfSz
-	bx.BBox.BBox.Min.Negate()
-	bx.BBox.BBox.Max = halfSz
+	bx.BBox.BBox.Min = hSz.Negate()
+	bx.BBox.BBox.Max = hSz
 
-	bx.BBox.BSphere.Radius = halfSz.Length()
+	bx.BBox.BSphere.Radius = hSz.Length()
 	bx.BBox.Area = 2*bx.Size.X + 2*bx.Size.Y + 2*bx.Size.Z
 	bx.BBox.Volume = bx.Size.X * bx.Size.Y * bx.Size.Z
 }

@@ -52,6 +52,16 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 		act = key.Press
 	}
 
+	fw := theApp.WindowInFocus()
+	if w != fw {
+		if fw == nil {
+			// fmt.Printf("glos key event focus window is nil!  window: %v\n", w.Nm)
+			fw = w
+			// } else {
+			// 	fmt.Printf("glos key event window: %v != focus window: %v\n", w.Nm, fw.Name())
+		}
+	}
+
 	event := &key.Event{
 		Code:      ec,
 		Rune:      rn,
@@ -59,7 +69,8 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 		Action:    act,
 	}
 	event.Init()
-	w.Send(event)
+	fw.Send(event)
+	glfw.PostEmptyEvent()
 
 	if act == key.Press && ec < key.CodeLeftControl &&
 		(key.HasAnyModifierBits(em, key.Control, key.Alt, key.Meta) ||
@@ -76,7 +87,7 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 				Action:    act,
 			},
 		}
-		w.Send(che)
+		fw.Send(che)
 		glfw.PostEmptyEvent()
 	}
 }
@@ -92,7 +103,17 @@ func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey
 			Action:    act,
 		},
 	}
-	w.Send(che)
+	fw := theApp.WindowInFocus()
+	if w != fw {
+		if fw == nil {
+			// fmt.Printf("glos key event focus window is nil!  window: %v\n", w.Nm)
+			fw = w
+			// } else {
+			// 	fmt.Printf("glos char event window: %v != focus window: %v\n", w.Nm, fw.Name())
+		}
+	}
+	fw.Send(che)
+	glfw.PostEmptyEvent()
 }
 
 func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
@@ -133,6 +154,7 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 		lastMouseClickTime = event.Time()
 	}
 	w.Send(event)
+	glfw.PostEmptyEvent()
 }
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
@@ -151,6 +173,7 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	}
 	event.Init()
 	w.Send(event)
+	glfw.PostEmptyEvent()
 }
 
 func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
@@ -171,6 +194,7 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 		}
 		event.Init()
 		w.Send(event)
+		glfw.PostEmptyEvent()
 	} else {
 		event := &mouse.MoveEvent{
 			Event: mouse.Event{
@@ -183,6 +207,7 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 		}
 		event.Init()
 		w.Send(event)
+		glfw.PostEmptyEvent()
 	}
 }
 
