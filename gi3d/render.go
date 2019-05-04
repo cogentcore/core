@@ -62,9 +62,7 @@ func (rn *Renderers) SetLights(sc *Scene) {
 	oswin.TheApp.RunOnMain(func() {
 		rn.SetLightsUnis(sc)
 		for _, rd := range rn.Renders {
-			if rd.Name() == "RenderUniformColor" { // todo: add others..
-				rd.Compile(rn)
-			}
+			rd.Compile(rn)
 		}
 	})
 	rn.NLights = len(sc.Lights)
@@ -279,6 +277,7 @@ func (rb *RenderUniformColor) Init(rn *Renderers) error {
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
 // layout(location = 2) in vec2 TexUV;
+// layout(location = 3) in vec4 VtxColor;
 out vec4 Pos;
 out vec3 Norm;
 out vec3 CamDir;
@@ -316,7 +315,7 @@ void main() {
 	// Inverts the fragment normal if not FrontFacing
 	vec3 fragNorm = Norm;
 	if (!gl_FrontFacing) {
-	 	fragNorm = -fragNorm;
+		fragNorm = -fragNorm;
 	}
 	float opacity = Color.a;
 	vec3 clr = Color.rgb;	
@@ -364,8 +363,6 @@ func (rb *RenderUniformColor) SetMat(mat *Material) error {
 
 //////////////////////////////////////////////////////////////////////////
 //    RenderVertexColor
-
-// todo: how to do per-face color?
 
 // RenderVertexColor renders color parameters per vertex.
 // This uses the standard Phong color model, with color computed in the
@@ -449,8 +446,7 @@ void main() {
 	pr.AddUniforms(rn.Unis["Lights"])
 	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
-	pr.AddUniform("Shiny", gpu.FUniType, false, 0) // note: using vec2 b/c float is buggy..
-	// todo: could have been something else -- retry as float!
+	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
 
 	pr.SetFragDataVar("outputColor")
 
@@ -480,9 +476,98 @@ type RenderTexture struct {
 
 func (rb *RenderTexture) Init(rn *Renderers) error {
 	rb.Nm = "RenderTexture"
-	pl := gpu.TheGPU.NewPipeline(rb.Nm)
-	pl.AddProgram("VtxFrag")
-	rb.Pipe = pl
+	if rb.Pipe == nil {
+		rb.Pipe = gpu.TheGPU.NewPipeline(rb.Nm)
+		rb.Pipe.AddProgram("VtxFrag")
+	}
+	pl := rb.Pipe
+	pr := pl.ProgramByName("VtxFrag")
+	_, err := pr.AddShader(gpu.VertexShader, "Vtx", RenderUniCamera+
+		`
+layout(location = 0) in vec3 VtxPos;
+layout(location = 1) in vec3 VtxNorm;
+// layout(location = 2) in vec2 TexUV;
+// layout(location = 3) in vec4 VtxColor;
+out vec4 Pos;
+out vec3 Norm;
+out vec3 CamDir;
+
+void main() {
+	vec4 vPos = vec4(VtxPos, 1.0);
+	Pos = MVMatrix * vPos;
+	Norm = normalize(NormMatrix * VtxNorm);
+	CamDir = normalize(-Pos.xyz);
+	
+	gl_Position = MVPMatrix * vPos;
+}
+`+"\x00")
+	if err != nil {
+		return err
+	}
+
+	_, err = pr.AddShader(gpu.FragmentShader, "Frag",
+		`
+// precision mediump float;
+`+RenderUniLights+
+			`
+uniform vec4 Color;
+uniform vec3 Emissive;
+uniform vec3 Specular;
+uniform float Shiny;
+in vec4 Pos;
+in vec3 Norm;
+in vec3 CamDir;
+out vec4 outputColor;
+`+RenderPhong+
+			`
+			
+void main() {
+	// Inverts the fragment normal if not FrontFacing
+	vec3 fragNorm = Norm;
+	if (!gl_FrontFacing) {
+		fragNorm = -fragNorm;
+	}
+	float opacity = Color.a;
+	vec3 clr = Color.rgb;	
+	
+	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
+	vec3 Ambdiff, Spec;
+	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
+
+	// Final fragment color
+	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
+	// debugVec3(Norm, outputColor);
+}
+`+"\x00")
+	if err != nil {
+		return err
+	}
+
+	pr.AddUniforms(rn.Unis["Camera"])
+	pr.AddUniforms(rn.Unis["Lights"])
+	pr.AddUniform("Color", gpu.Vec4fUniType, false, 0)
+	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
+	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
+	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
+
+	pr.SetFragDataVar("outputColor")
+
+	return nil
+}
+
+func (rb *RenderTexture) SetMat(mat *Material) error {
+	pr := rb.VtxFragProg()
+	clru := pr.UniformByName("Color")
+	clrv := ColorToVec4f(mat.Color)
+	clru.SetValue(clrv)
+	emsu := pr.UniformByName("Emissive")
+	emsv := ColorToVec3f(mat.Emissive)
+	emsu.SetValue(emsv)
+	spcu := pr.UniformByName("Specular")
+	spcv := ColorToVec3f(mat.Specular)
+	spcu.SetValue(spcv)
+	shu := pr.UniformByName("Shiny")
+	shu.SetValue(mat.Shiny)
 	return nil
 }
 

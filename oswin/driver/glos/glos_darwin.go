@@ -39,6 +39,7 @@ void doSetMenuItemActive(uintptr_t mitmID, bool active);
 import "C"
 
 import (
+	"fmt"
 	"log"
 	"os/user"
 	"path/filepath"
@@ -290,6 +291,15 @@ func (mm *mainMenuImpl) SetFunc(fun func(win oswin.Window, title string, tag int
 func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
 	if mm.callback == nil {
 		return
+	}
+	fw := theApp.WindowInFocus()
+	if win != fw {
+		if fw == nil {
+			fmt.Printf("glos main menu event focus window is nil!  window: %v\n", win.Name())
+		} else {
+			fmt.Printf("glos main menu event window: %v != focus window: %v\n", win.Name(), fw.Name())
+			win = fw
+		}
 	}
 	mm.callback(win, title, tag)
 }

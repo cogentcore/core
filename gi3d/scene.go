@@ -46,7 +46,15 @@ var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
 
 // AddNewScene adds a new scene to given parent node, with given name.
 func AddNewScene(parent ki.Ki, name string) *Scene {
-	return parent.AddNewChild(KiT_Scene, name).(*Scene)
+	sc := parent.AddNewChild(KiT_Scene, name).(*Scene)
+	sc.Defaults()
+	return sc
+}
+
+// Defaults sets default scene params (camera, bg = white)
+func (sc *Scene) Defaults() {
+	sc.Camera.Defaults()
+	sc.BgColor.SetUInt8(255, 255, 255, 255)
 }
 
 // AddMesh adds given mesh to mesh collection
@@ -205,14 +213,11 @@ func (sc *Scene) Size2D(iter int) {
 	if pos != image.ZP {
 		sc.Geom.Pos = pos
 	}
-	if sc.Geom.Size != image.ZP {
-		sc.LayData.AllocSize.SetPoint(sc.Geom.Size)
-	}
 }
 
 func (sc *Scene) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sc.Layout2DBase(parBBox, true, iter)
-	return sc.Layout2DChildren(iter)
+	return false
 }
 
 func (sc *Scene) BBox2D() image.Rectangle {
@@ -503,7 +508,7 @@ func (sc *Scene) InitTextures() bool {
 }
 
 // InitMeshes makes sure all the Meshes are ready for rendering
-// called on main thread with context
+// Must be called on main thread with context
 func (sc *Scene) InitMeshes() bool {
 	for _, ms := range sc.Meshes {
 		ms.Make()
@@ -512,6 +517,17 @@ func (sc *Scene) InitMeshes() bool {
 		ms.TransferAll()
 	}
 	return true
+}
+
+// UpdateMeshes makes sure all the Meshes are ready for rendering
+// This is the version for external use -- can be called on any thread
+func (sc *Scene) UpdateMeshes() {
+	if !sc.ActivateWin() {
+		return
+	}
+	oswin.TheApp.RunOnMain(func() {
+		sc.InitMeshes()
+	})
 }
 
 // UpdateWorldMatrix updates the world matrix for all scene elements

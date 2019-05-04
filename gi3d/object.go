@@ -64,6 +64,7 @@ func (obj *Object) SetMesh(sc *Scene, meshName string) error {
 		log.Println(err)
 		return err
 	}
+	obj.Mesh = MeshName(meshName)
 	obj.MeshPtr = ms
 	return nil
 }

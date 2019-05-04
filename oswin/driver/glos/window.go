@@ -488,6 +488,9 @@ func (w *windowImpl) refresh(gw *glfw.Window) {
 func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 	if focused {
 		// fmt.Printf("foc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(oswin.Focus)))
+		if w.mainMenu != nil {
+			w.mainMenu.SetMenu()
+		}
 		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
 		bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.Focus)

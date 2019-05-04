@@ -47,6 +47,22 @@ type Mesh interface {
 	// if clr is non-Nil then it will be added
 	AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color)
 
+	// SetPlaneVtx sets plane vertex and (optional) color values starting at given starting index
+	// which is a *vertex* index (i.e., multiply this x3 to get actual float offset in Vtx array).
+	// This is for dynamically updating a mesh -- does not change the indexes, norms, or texture
+	// coordinates, which presumably remain static.  Compute the starting index using PlaneSize.
+	// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
+	// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
+	// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
+	// offset is the distance to place the plane along the orthogonal axis.
+	// if clr is non-Nil then it will be added
+	SetPlaneVtx(startIdx int, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color)
+
+	// PlaneSize returns the size of a single plane's worth of vertex data with given number of segments
+	// in *vertex* units, not float units (i.e., x3 to get actual float offset in Vtx array).
+	// Use for computing the starting index in SetPlaneVtx.
+	PlaneSize(wsegs, hsegs int) int
+
 	// Validate checks if all the vertex data is valid
 	// any errors are logged
 	Validate() error
@@ -290,12 +306,21 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, hei
 	segWidth := width / float32(wsegs)
 	segHeight := height / float32(hsegs)
 
+	fwdir := float32(wdir)
+	fhdir := float32(hdir)
+	if wdir < 0 {
+		woff = width + woff
+	}
+	if hdir < 0 {
+		hoff = height + hoff
+	}
+
 	// Generate the plane vertices, norms, and uv coordinates
 	for iy := 0; iy < hsegs1; iy++ {
 		for ix := 0; ix < wsegs1; ix++ {
 			vtx := mat32.Vec3{}
-			vtx.SetDim(waxis, (float32(ix)*segWidth+woff)*float32(wdir))
-			vtx.SetDim(haxis, (float32(iy)*segHeight+hoff)*float32(hdir))
+			vtx.SetDim(waxis, (float32(ix)*segWidth)*fwdir+woff)
+			vtx.SetDim(haxis, (float32(iy)*segHeight)*fhdir+hoff)
 			vtx.SetDim(w, zoff)
 			ms.Vtx.AppendVec3(vtx)
 			ms.Norm.AppendVec3(norm)
@@ -316,4 +341,58 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, hei
 			ms.Idx.Append(uint32(a+idxSt), uint32(b+idxSt), uint32(d+idxSt), uint32(b+idxSt), uint32(c+idxSt), uint32(d+idxSt))
 		}
 	}
+}
+
+// SetPlaneVtx sets plane vertex and (optional) color values starting at given starting index
+// which is a *vertex* index (i.e., multiply this x3 to get actual float offset in Vtx array).
+// This is for dynamically updating a mesh -- does not change the indexes, norms, or texture
+// coordinates, which presumably remain static.  Compute the starting index using PlaneSize.
+// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
+// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
+// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
+// offset is the distance to place the plane along the orthogonal axis.
+// if clr is non-Nil then it will be added
+func (ms *MeshBase) SetPlaneVtx(startIdx int, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color) {
+	w := mat32.Z
+	if (waxis == mat32.X && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.X) {
+		w = mat32.Z
+	} else if (waxis == mat32.X && haxis == mat32.Z) || (waxis == mat32.Z && haxis == mat32.X) {
+		w = mat32.Y
+	} else if (waxis == mat32.Z && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.Z) {
+		w = mat32.X
+	}
+	wsegs = ints.MaxInt(wsegs, 1)
+	hsegs = ints.MaxInt(hsegs, 1)
+
+	wsegs1 := wsegs + 1
+	hsegs1 := hsegs + 1
+	segWidth := width / float32(wsegs)
+	segHeight := height / float32(hsegs)
+
+	vidx := startIdx * 3
+	cidx := startIdx * 4
+	for iy := 0; iy < hsegs1; iy++ {
+		for ix := 0; ix < wsegs1; ix++ {
+			vtx := mat32.Vec3{}
+			vtx.SetDim(waxis, (float32(ix)*segWidth+woff)*float32(wdir))
+			vtx.SetDim(haxis, (float32(iy)*segHeight+hoff)*float32(hdir))
+			vtx.SetDim(w, zoff)
+			vtx.ToArray(ms.Vtx, vidx)
+			if !clr.IsNil() {
+				ColorToVec4f(clr).ToArray(ms.Color, cidx)
+				cidx += 4
+			}
+			vidx += 3
+		}
+	}
+}
+
+// PlaneSize returns the size of a single plane's worth of vertex data with given number of segments
+// in *vertex* units, not float units (i.e., x3 to get actual float offset in Vtx array).
+// Use for computing the starting index in SetPlaneVtx.
+// = (wsegs + 1) * (hsegs + 1)
+func (mb *MeshBase) PlaneSize(wsegs, hsegs int) int {
+	wsegs = ints.MaxInt(wsegs, 1)
+	hsegs = ints.MaxInt(hsegs, 1)
+	return (wsegs + 1) * (hsegs + 1)
 }

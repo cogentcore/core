@@ -2246,9 +2246,9 @@ func (w *Window) TriggerShortcut(chord key.Chord) bool {
 		return false
 	}
 
-	if KeyEventTrace {
-		fmt.Printf("Shortcut chord: %v, action: %v triggered\n", chord, sa.Text)
-	}
+	// if KeyEventTrace {
+	fmt.Printf("Window: %v Shortcut chord: %v, action: %v triggered\n", w.Nm, chord, sa.Text)
+	// }
 	sa.Trigger()
 	return true
 }

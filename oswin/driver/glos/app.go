@@ -28,6 +28,7 @@ import (
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/gi/oswin/window"
+	"github.com/goki/ki/bitflag"
 )
 
 func init() {
@@ -203,6 +204,8 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 			Flag: opts.Flags,
 		},
 	}
+
+	bitflag.SetAtomic(&w.Flag, int(oswin.Focus)) // starts out focused
 
 	app.mu.Lock()
 	app.windows[glw] = w
