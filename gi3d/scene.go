@@ -607,8 +607,8 @@ func (sc *Scene) DirectWinUpload() bool {
 	wt := sc.Win.OSWin.WinTex()
 	oswin.TheApp.RunOnMain(func() {
 		sc.Win.OSWin.Activate()
-		// wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, &oswin.DrawOptions{FlipSrcY: true})
-		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Over, nil)
+		// wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, &oswin.DrawOptions{FlipSrcY: true})
+		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, nil)
 	})
 	return true
 }
