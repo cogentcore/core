@@ -435,7 +435,6 @@ void main() {
 
 	// Final fragment color
 	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
-	// debugVec3(Norm, outputColor);
 }
 `+"\x00")
 	if err != nil {

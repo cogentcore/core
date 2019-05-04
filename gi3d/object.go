@@ -166,6 +166,9 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	case RClassOpaqueUniform, RClassTransUniform:
 		rndu := rnd.(*RenderUniformColor)
 		rndu.SetMat(&obj.Mat)
+	case RClassOpaqueVertex, RClassTransVertex:
+		rndv := rnd.(*RenderVertexColor)
+		rndv.SetMat(&obj.Mat)
 	case RClassTexture:
 		// obj.Mat.TexPtr.Activate()
 	}
