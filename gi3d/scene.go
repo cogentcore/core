@@ -239,11 +239,13 @@ func (sc *Scene) PushBounds() bool {
 	if sc.VpBBox.Empty() {
 		return false
 	}
+	if !sc.This().(gi.Node2D).IsVisible() {
+		return false
+	}
 	// if we are completely invisible, no point in rendering..
 	if sc.Viewport != nil {
 		wbi := sc.WinBBox.Intersect(sc.Viewport.WinBBox)
 		if wbi.Empty() {
-			fmt.Printf("not rendering sc %v bc empty winbox -- ours: %v par: %v\n", sc.Nm, sc.WinBBox, sc.Viewport.WinBBox)
 			return false
 		}
 	}
@@ -279,6 +281,8 @@ func (sc *Scene) Render2D() {
 		}
 		sc.Render()
 		sc.PopBounds()
+	} else {
+		sc.DisconnectAllEvents(gi.RegPri)
 	}
 }
 
