@@ -18,6 +18,14 @@ type Vec4 struct {
 	W float32
 }
 
+var (
+	Vec4Zero = Vec4{0, 0, 0, 0}
+	Vec4X    = Vec4{1, 0, 0, 0}
+	Vec4Y    = Vec4{0, 1, 0, 0}
+	Vec4Z    = Vec4{0, 0, 1, 0}
+	Vec4W    = Vec4{0, 0, 0, 1}
+)
+
 // NewVec4 returns a new Vec4 with the specified components.
 func NewVec4(x, y, z, w float32) Vec4 {
 	return Vec4{X: x, Y: y, Z: z, W: w}

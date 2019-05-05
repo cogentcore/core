@@ -241,6 +241,10 @@ const (
 	// is properly shown
 	WinFlagDoFullRender
 
+	// WinFlagDoingFullReRender indicates that a SetFullReRender was called on a node
+	// triggers a more complete update of window textures during final publish
+	WinFlagDoingFullReRender
+
 	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
 	WinFlagFocusActive
 
@@ -858,6 +862,13 @@ func (w *Window) SendWinFocusEvent(act window.Actions) {
 	w.SendEventSignal(&se, true) // popup = true by default
 }
 
+// NodeDoingFullReRender is called by SetFullReRender -- informs window to do a full
+// update during Publish -- especially important for DirectUpload cases which
+// may get overwritten
+func (w *Window) NodeDoingFullReRender() {
+	w.SetFlag(int(WinFlagDoingFullReRender))
+}
+
 // FullReRender performs a full re-render of the window -- each node renders
 // into its viewport, aggregating into the main window viewport, which will
 // drive an UploadAllViewports call after all the rendering is done, and
@@ -921,6 +932,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
 	pr.End()
 	w.ClearWinUpdating()
+	w.ClearFlag(int(WinFlagDoingFullReRender))
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives publish
 }
@@ -1007,6 +1019,7 @@ func (w *Window) UploadAllViewports() {
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
 	pr.End()
 	w.ClearWinUpdating()
+	w.ClearFlag(int(WinFlagDoingFullReRender))
 	w.UpMu.Unlock()   // need to unlock before publish
 	w.UpdateEnd(updt) // drives the publish
 }
@@ -1050,8 +1063,14 @@ func (w *Window) Publish() {
 	}
 
 	w.SetWinUpdating()
-	if WinEventTrace {
+	if Update2DTrace || WinEventTrace {
 		fmt.Printf("Win %v doing publish\n", w.Nm)
+	}
+	if w.HasFlag(int(WinFlagDoingFullReRender)) {
+		w.ClearFlag(int(WinFlagDoingFullReRender))
+		w.UpMu.Unlock()
+		w.UploadAllViewports()
+		w.UpMu.Lock()
 	}
 	pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
@@ -1191,6 +1210,7 @@ func (w *Window) RenderOverlays() {
 	} else {
 		w.SetFlag(int(WinFlagOverTexActive))
 	}
+	w.ClearFlag(int(WinFlagDoingFullReRender))
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives the publish
 }

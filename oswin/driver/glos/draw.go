@@ -149,7 +149,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 
 	gpu.Draw.Op(op)
 	gpu.Draw.DepthTest(false)
-	gpu.Draw.CullFace(true, false, true, !trgTex) // cull back face -- trgTex has CW ordering
+	gpu.Draw.CullFace(false, true, !trgTex) // cull back face -- trgTex has CW ordering
 	gpu.Draw.StencilTest(false)
 	gpu.Draw.Multisample(false)
 	app.drawProg.Activate()
@@ -245,7 +245,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 // proper context must have already been established outside this call!
 func (app *appImpl) fill(mvp mat32.Mat3, src color.Color, op draw.Op, qbuff gpu.BufferMgr, trgTex bool) {
 	gpu.Draw.Op(op)
-	gpu.Draw.CullFace(true, false, true, !trgTex) // cull back face -- trgTex has CW ordering
+	gpu.Draw.CullFace(false, true, !trgTex) // cull back face -- trgTex has CW ordering
 	gpu.Draw.DepthTest(false)
 	gpu.Draw.StencilTest(false)
 	gpu.Draw.Multisample(false)

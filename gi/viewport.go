@@ -426,6 +426,9 @@ func (vp *Viewport2D) PushBounds() bool {
 	if vp.VpBBox.Empty() {
 		return false
 	}
+	if !vp.This().(Node2D).IsVisible() {
+		return false
+	}
 	// if we are completely invisible, no point in rendering..
 	if vp.Viewport != nil {
 		wbi := vp.WinBBox.Intersect(vp.Viewport.WinBBox)
@@ -555,7 +558,9 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 			}
 		} else {
 			if nii.DirectWinUpload() {
-				vp.Win.UpdateSig()
+				if Update2DTrace {
+					fmt.Printf("Update: Viewport2D: %v DirectWinUpload on %v\n", vp.PathUnique(), ni.PathUnique())
+				}
 			} else {
 				if Update2DTrace {
 					fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), ni.PathUnique())

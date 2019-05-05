@@ -39,7 +39,7 @@ func (cm *Camera) Defaults() {
 func (cm *Camera) DefaultPose() {
 	cm.Pose.Defaults()
 	cm.Pose.Pos.Set(0, 0, 10)
-	cm.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0}) // sets Target and UpDir
+	cm.LookAtOrigin()
 }
 
 // UpdateMatrix updates the view and prjn matricies
@@ -60,11 +60,21 @@ func (cm *Camera) UpdateMatrix() {
 func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 	cm.Target = target
 	if upDir.IsNil() {
-		upDir = mat32.Vec3{0, 1, 0}
+		upDir = mat32.Vec3Y
 	}
 	cm.UpDir = upDir
 	cm.Pose.LookAt(target, upDir)
 	cm.UpdateMatrix()
+}
+
+// LookAtOrigin points the camera at origin with Y axis pointing Up (i.e., standard)
+func (cm *Camera) LookAtOrigin() {
+	cm.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
+}
+
+// LookAtTarget points the camera at current target using current up direction
+func (cm *Camera) LookAtTarget() {
+	cm.LookAt(cm.Target, cm.UpDir)
 }
 
 // Orbit moves the camera along the given 2D axes in degrees
@@ -73,20 +83,27 @@ func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
 // keeping the same distance from the Target, and rotating the camera and
 // the Up direction vector to keep looking at the target.
 func (cm *Camera) Orbit(delX, delY float32) {
-	ctaxis := cm.Pose.Pos.Sub(cm.Target)
-	if ctaxis.IsNil() {
-		ctaxis.Set(0, 0, 1)
+	ctdir := cm.Pose.Pos.Sub(cm.Target)
+	if ctdir.IsNil() {
+		ctdir.Set(0, 0, 1)
 	}
-	dist := ctaxis.Length()
-	ctaxis.SetNormal()
-	// todo: maybe figure out euler angles and use those directly?
-	// axq := mat32.NewQuatAxisAngle(mat32.Vec3{0, 1, 0}, mat32.DegToRad(-delX))
-	// axq.SetMul(mat32.NewQuatAxisAngle(mat32.Vec3{1, 0, 0}, mat32.DegToRad(delY)))
-	axq := mat32.NewQuatAxisAngle(mat32.Vec3{0, 1, 0}, mat32.DegToRad(-delX))
-	axq.SetMul(mat32.NewQuatAxisAngle(mat32.Vec3{1, 0, 0}, mat32.DegToRad(delY)))
-	cm.Pose.Quat.SetMul(axq)
-	cm.Pose.Pos = cm.Target.Add(ctaxis.MulQuat(axq).MulScalar(dist))
-	cm.UpDir.SetMulQuat(axq)
+	dir := ctdir.Normal()
+
+	up := cm.UpDir
+	right := cm.UpDir.Cross(dir).Normal()
+	// up := dir.Cross(right).Normal() // ensure ortho -- not needed
+
+	// delX rotates around the up vector
+	dxq := mat32.NewQuatAxisAngle(up, mat32.DegToRad(delX))
+	dx := ctdir.MulQuat(dxq).Sub(ctdir)
+	// delY rotates around the right vector
+	dyq := mat32.NewQuatAxisAngle(right, mat32.DegToRad(delY))
+	dy := ctdir.MulQuat(dyq).Sub(ctdir)
+
+	cm.Pose.Pos = cm.Pose.Pos.Add(dx).Add(dy)
+	cm.UpDir.SetMulQuat(dyq) // this is only one that affects up
+
+	cm.LookAtTarget()
 }
 
 // Pan moves the camera along the given 2D axes (left/right, up/down),
@@ -118,7 +135,7 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 	if dist == 0 {
 		cm.Target.SetAdd(td)
 	}
-	cm.LookAt(cm.Target, cm.UpDir)
+	cm.LookAtTarget()
 }
 
 // Zoom moves along axis given pct closer or further from the target

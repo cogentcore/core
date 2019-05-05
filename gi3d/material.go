@@ -18,12 +18,14 @@ import (
 // The Specular color is always white (multiplied by light color).
 // Textures are stored on the Scene and accessed by name
 type Material struct {
-	Color    gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
-	Emissive gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
-	Specular gi.Color `desc:"shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
-	Shiny    float32  `desc:"specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Specular color to affect overall shininess effect."`
-	Texture  TexName  `desc:"texture to provide color for the surface"`
-	TexPtr   *Texture `view:"-" desc:"pointer to texture"`
+	Color     gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	Emissive  gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Specular  gi.Color `desc:"shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
+	Shiny     float32  `desc:"specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Specular color to affect overall shininess effect."`
+	Texture   TexName  `desc:"texture to provide color for the surface"`
+	CullBack  bool     `desc:"cull the back-facing surfaces"`
+	CullFront bool     `desc:"cull the front-facing surfaces"`
+	TexPtr    *Texture `view:"-" desc:"pointer to texture"`
 }
 
 // Defaults sets default surface parameters
@@ -32,6 +34,7 @@ func (mt *Material) Defaults() {
 	mt.Emissive.SetUInt8(0, 0, 0, 0)
 	mt.Specular.SetUInt8(255, 255, 255, 255)
 	mt.Shiny = 30
+	mt.CullBack = true
 }
 
 // IsTransparent returns true if color has alpha < 255

@@ -166,7 +166,6 @@ func (rn *Renderers) AddNewRender(rb Render, errs *[]error) {
 // DrawState configures the draw state for rendering -- call when first starting rendering
 func (rn *Renderers) DrawState() {
 	gpu.Draw.DepthTest(true)
-	gpu.Draw.CullFace(true, false, true, true) // back face culling, std CCW ordering
 	gpu.Draw.Multisample(true)
 }
 
@@ -358,6 +357,7 @@ func (rb *RenderUniformColor) SetMat(mat *Material) error {
 	spcu.SetValue(spcv)
 	shu := pr.UniformByName("Shiny")
 	shu.SetValue(mat.Shiny)
+	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	return nil
 }
 
@@ -453,6 +453,7 @@ void main() {
 }
 
 func (rb *RenderVertexColor) SetMat(mat *Material) error {
+	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	pr := rb.VtxFragProg()
 	emsu := pr.UniformByName("Emissive")
 	emsv := ColorToVec3f(mat.Emissive)
@@ -567,6 +568,7 @@ func (rb *RenderTexture) SetMat(mat *Material) error {
 	spcu.SetValue(spcv)
 	shu := pr.UniformByName("Shiny")
 	shu.SetValue(mat.Shiny)
+	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	return nil
 }
 

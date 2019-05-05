@@ -8,6 +8,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -25,7 +26,8 @@ func mainrun() {
 	// turn these on to see a traces of various stages of processing..
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
-	// gi3d.Update3DTrace = true
+	gi3d.Update3DTrace = true
+	gi.Update2DTrace = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
@@ -96,11 +98,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bcb.Mat.Shiny = 10
 
 	// bcb.Mat.Specular.SetString("blue", nil) // how you get rid of specular highlights
-	//
 
 	gcb := sc.AddNewObject("green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
+
+	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu

@@ -144,7 +144,10 @@ func (sc *Scene) IsVisible() bool {
 	if sc == nil || sc.This() == nil || sc.IsInvisible() || sc.Win == nil {
 		return false
 	}
-	return sc.Win.IsVisible()
+	if sc.Par == nil || sc.Par.This() == nil {
+		return false
+	}
+	return sc.Par.This().(gi.Node2D).IsVisible()
 }
 
 // set our window pointer to point to the current window we are under
@@ -180,18 +183,7 @@ func (sc *Scene) Resize(nwsz image.Point) {
 func (sc *Scene) Init2D() {
 	sc.Init2DWidget()
 	sc.SetCurWin()
-	// we update ourselves whenever any node update event happens
-	sc.NodeSig.Connect(sc.This(), func(recsc, sendk ki.Ki, sig int64, data interface{}) {
-		rsci, _ := gi.KiToNode2D(recsc)
-		rsc := rsci.(*Scene)
-		if rsc.IsVisible() {
-			if Update3DTrace {
-				fmt.Printf("Update: Scene: %v full render due to signal: %v from node: %v\n", rsc.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
-			}
-			rsc.Render()
-			rsc.Win.DirectUpdate(rsc)
-		}
-	})
+	// note: Viewport will automatically update us for any update sigs
 	sc.Init3D()
 	sc.Win.AddDirectUploader(sc)
 }
@@ -282,6 +274,9 @@ func (sc *Scene) Render2D() {
 		if !sc.NoNav {
 			sc.NavEvents()
 		}
+		if gi.Render2DTrace {
+			fmt.Printf("3D Render2D: %v\n", sc.PathUnique())
+		}
 		sc.Render()
 		sc.PopBounds()
 	}
@@ -316,7 +311,7 @@ func (sc *Scene) NavEvents() {
 				} else {
 					dx = 0
 				}
-				ssc.Camera.Orbit(dx*orbDel, -dy*orbDel)
+				ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
 			}
 			ssc.UpdateSig()
 		} else {
@@ -415,7 +410,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		sc.Camera.PanTarget(0, -panDel, 0)
 		kt.SetProcessed()
 	case "LeftArrow":
-		sc.Camera.Orbit(-orbDeg, 0)
+		sc.Camera.Orbit(orbDeg, 0)
 		kt.SetProcessed()
 	case "Shift+LeftArrow":
 		sc.Camera.Pan(-panDel, 0)
@@ -427,7 +422,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		sc.Camera.PanTarget(-panDel, 0, 0)
 		kt.SetProcessed()
 	case "RightArrow":
-		sc.Camera.Orbit(orbDeg, 0)
+		sc.Camera.Orbit(-orbDeg, 0)
 		kt.SetProcessed()
 	case "Shift+RightArrow":
 		sc.Camera.Pan(panDel, 0)
@@ -453,6 +448,12 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	case " ":
 		sc.Camera.DefaultPose()
 		kt.SetProcessed()
+	case "t":
+		kt.SetProcessed()
+		obj := sc.Child(0).(*Object)
+		fmt.Printf("updated obj: %v\n", obj.PathUnique())
+		obj.UpdateSig()
+		return
 	}
 	sc.UpdateSig()
 }
@@ -593,12 +594,14 @@ func (sc *Scene) IsDirectWinUpload() bool {
 }
 
 func (sc *Scene) DirectWinUpload() bool {
-	if sc.Tex == nil || !sc.IsVisible() {
+	if !sc.IsVisible() {
 		return true
 	}
 	if Update3DTrace {
-		fmt.Printf("Update: Window %s from Scene: %s at: %v, bounds: %v\n", sc.Win.Nm, sc.Nm, sc.WinBBox.Min, sc.Tex.Bounds())
+		fmt.Printf("3D Update: Window %s from Scene: %s at: %v\n", sc.Win.Nm, sc.Nm, sc.WinBBox.Min)
 	}
+
+	sc.Render()
 
 	// https://learnopengl.com/Advanced-Lighting/Gamma-Correction
 	// todo: will need to mess with gamma correction -- can already see that colors
@@ -610,6 +613,7 @@ func (sc *Scene) DirectWinUpload() bool {
 		// wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, &oswin.DrawOptions{FlipSrcY: true})
 		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, nil)
 	})
+	sc.Win.UpdateSig() // trigger publish
 	return true
 }
 

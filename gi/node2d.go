@@ -434,6 +434,15 @@ func (nb *Node2DBase) DirectWinUpload() bool {
 	return false
 }
 
+// SetFullReRender sets node as needing a full ReRender
+func (nb *Node2DBase) SetFullReRender() {
+	win := nb.ParentWindow()
+	if win != nil {
+		win.NodeDoingFullReRender()
+	}
+	nb.SetFlag(int(FullReRender))
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 

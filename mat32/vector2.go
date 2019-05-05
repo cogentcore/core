@@ -16,6 +16,12 @@ type Vec2 struct {
 	Y float32
 }
 
+var (
+	Vec2Zero = Vec2{0, 0}
+	Vec2X    = Vec2{1, 0}
+	Vec2Y    = Vec2{0, 1}
+)
+
 // NewVec2 returns new Vec2 with the specified x and y components.
 func NewVec2(x, y float32) Vec2 {
 	return Vec2{X: x, Y: y}

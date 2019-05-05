@@ -158,24 +158,34 @@ func AddNewSpotLight(sc *Scene, name string, lumens float32, color LightColors) 
 	lt.LinDecay = .01
 	lt.QuadDecay = .001
 	lt.Pose.Defaults()
-	lt.Pose.Pos.Set(0, 5, 5)
-	lt.Pose.LookAt(mat32.Vec3{0, 0, 0}, mat32.Vec3{0, 1, 0})
+	lt.Pose.Pos.Set(0, 2, 5)
+	lt.LookAtOrigin()
 	sc.AddLight(lt)
 	return lt
 }
 
 // ViewPos gets the position of the light, pre-computing the view transform
-func (dl *SpotLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
-	return dl.Pose.Pos.MulMat4AsVec4(viewMat, 1) // note: 1 and no Normal
+func (sl *SpotLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
+	return sl.Pose.Pos.MulMat4AsVec4(viewMat, 1) // note: 1 and no Normal
 }
 
 // ViewDir gets the direction normal vector, pre-computing the view transform
-func (dl *SpotLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
+func (sl *SpotLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
 	idmat := mat32.NewMat4()
-	dl.Pose.UpdateWorldMatrix(idmat)
-	dl.Pose.UpdateMVPMatrix(viewMat, idmat)
-	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&dl.Pose.MVMatrix, 0).Normal()
+	sl.Pose.UpdateWorldMatrix(idmat)
+	sl.Pose.UpdateMVPMatrix(viewMat, idmat)
+	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&sl.Pose.MVMatrix, 0).Normal()
 	return vd
+}
+
+// LookAt points the spotlight at given target location, using given up direction.
+func (sl *SpotLight) LookAt(target, upDir mat32.Vec3) {
+	sl.Pose.LookAt(target, upDir)
+}
+
+// LookAtOrigin points the spotlight at origin with Y axis pointing Up (i.e., standard)
+func (sl *SpotLight) LookAtOrigin() {
+	sl.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
 }
 
 /////////////////////////////////////////////////////////////////////////\

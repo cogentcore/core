@@ -42,7 +42,7 @@ func (dr *Drawing) ClearColor(r, g, b float32) {
 func (dr *Drawing) DepthTest(on bool) {
 	if on {
 		gl.Enable(gl.DEPTH_TEST)
-		gl.DepthFunc(gl.LESS)
+		gl.DepthFunc(gl.LEQUAL)
 		gl.DepthMask(true)
 	} else {
 		gl.Disable(gl.DEPTH_TEST)
@@ -60,8 +60,8 @@ func (dr *Drawing) StencilTest(on bool) {
 
 // CullFace sets face culling, for front and / or back faces (back typical).
 // If you don't do this, rendering of standard Phong model will not work.
-func (dr *Drawing) CullFace(on, front, back, ccw bool) {
-	if on {
+func (dr *Drawing) CullFace(front, back, ccw bool) {
+	if front || back {
 		if ccw {
 			gl.FrontFace(gl.CCW)
 		} else {

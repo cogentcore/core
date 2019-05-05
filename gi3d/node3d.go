@@ -180,11 +180,13 @@ func (nb *Node3DBase) Init3D(sc *Scene) {
 	nb.NodeSig.Connect(nb.This(), func(recnb, sendk ki.Ki, sig int64, data interface{}) {
 		rnbi, rnb := KiToNode3D(recnb)
 		if Update3DTrace {
-			fmt.Printf("Update: Node: %v update world matrix due to signal: %v from node: %v\n", rnbi.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
+			fmt.Printf("3D Update: Node: %v update scene due to signal: %v from node: %v\n", rnbi.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
 		}
 		if !rnb.IsDeleted() && !rnb.IsDestroyed() {
-			rnb.UpdateWorldMatrix(&rnb.Pose.ParMatrix)
-			rnb.UpdateWorldMatrixChildren()
+			scci := rnb.ParentByType(KiT_Scene, true)
+			if scci != nil {
+				scci.(*Scene).DirectWinUpload()
+			}
 		}
 	})
 }

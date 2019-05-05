@@ -17,6 +17,13 @@ type Vec3 struct {
 	Z float32
 }
 
+var (
+	Vec3Zero = Vec3{0, 0, 0}
+	Vec3X    = Vec3{1, 0, 0}
+	Vec3Y    = Vec3{0, 1, 0}
+	Vec3Z    = Vec3{0, 0, 1}
+)
+
 // NewVec3 returns a new Vec3 with the specified x, y and y components.
 func NewVec3(x, y, z float32) Vec3 {
 	return Vec3{X: x, Y: y, Z: z}
@@ -524,11 +531,14 @@ func (v *Vec3) Reflect(normal Vec3) Vec3 {
 	return v.Sub(normal.MulScalar(2 * v.Dot(normal)))
 }
 
+// CosTo returns the cosine (normalized dot product) between this vector and other.
+func (v Vec3) CosTo(other Vec3) float32 {
+	return v.Dot(other) / (v.Length() * other.Length())
+}
+
 // AngleTo returns the angle between this vector and other.
 func (v Vec3) AngleTo(other Vec3) float32 {
-	theta := v.Dot(other) / (v.Length() * other.Length())
-	// clip, to handle numerical problems
-	return Acos(Clamp(theta, -1, 1))
+	return Acos(Clamp(v.CosTo(other), -1, 1))
 }
 
 // SetFromMatrixPos set this vector from the translation coordinates
