@@ -434,13 +434,14 @@ func (nb *Node2DBase) DirectWinUpload() bool {
 	return false
 }
 
-// SetFullReRender sets node as needing a full ReRender
-func (nb *Node2DBase) SetFullReRender() {
+// WinFullReRender tells the window to do a full re-render of everything on
+// next publish -- call this on containers that might contain DirectUpload
+// widgets.
+func (nb *Node2DBase) WinFullReRender() {
 	win := nb.ParentWindow()
 	if win != nil {
-		win.NodeDoingFullReRender()
+		win.PublishFullReRender()
 	}
-	nb.SetFlag(int(FullReRender))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
