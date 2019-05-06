@@ -442,13 +442,22 @@ func (ms *MeshBase) SetPlaneVtx(startIdx int, waxis, haxis mat32.Dims, wdir, hdi
 	segWidth := width / float32(wsegs)
 	segHeight := height / float32(hsegs)
 
+	fwdir := float32(wdir)
+	fhdir := float32(hdir)
+	if wdir < 0 {
+		woff = width + woff
+	}
+	if hdir < 0 {
+		hoff = height + hoff
+	}
+
 	vidx := startIdx * 3
 	cidx := startIdx * 4
 	for iy := 0; iy < hsegs1; iy++ {
 		for ix := 0; ix < wsegs1; ix++ {
 			vtx := mat32.Vec3{}
-			vtx.SetDim(waxis, (float32(ix)*segWidth+woff)*float32(wdir))
-			vtx.SetDim(haxis, (float32(iy)*segHeight+hoff)*float32(hdir))
+			vtx.SetDim(waxis, (float32(ix)*segWidth)*fwdir+woff)
+			vtx.SetDim(haxis, (float32(iy)*segHeight)*fhdir+hoff)
 			vtx.SetDim(w, zoff)
 			vtx.ToArray(ms.Vtx, vidx)
 			if !clr.IsNil() {
