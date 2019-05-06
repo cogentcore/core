@@ -273,7 +273,7 @@ func (pf *Preferences) Update() {
 
 	RebuildDefaultStyles = true
 	for _, w := range AllWindows {
-		w.FullReRender()
+		w.SetSize(w.OSWin.Size())
 	}
 	RebuildDefaultStyles = false
 	// needs another pass through to get it right..

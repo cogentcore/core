@@ -10,12 +10,12 @@ import (
 
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/window"
 )
 
 // This is called when a monitor is connected to or
 // disconnected from the system.
 func monitorChange(monitor *glfw.Monitor, event glfw.MonitorEvent) {
-	// todo: could update more strategically
 	theApp.getScreens()
 }
 
@@ -27,6 +27,7 @@ func (app *appImpl) getScreens() {
 		log.Printf("glos getScreens: no screens found!\n")
 		return
 	}
+	app.mu.Lock()
 	if len(app.screens) != sz {
 		app.screens = make([]*oswin.Screen, sz)
 	}
@@ -61,5 +62,13 @@ func (app *appImpl) getScreens() {
 		sc.DevicePixelRatio = 1
 		// todo: 3.3 has content ratio
 		sc.RefreshRate = float32(vm.RefreshRate)
+	}
+	if len(app.winlist) > 0 {
+		fw := app.winlist[0]
+		app.mu.Unlock()
+		// fmt.Printf("sending screen update\n")
+		fw.sendWindowEvent(window.ScreenUpdate)
+	} else {
+		app.mu.Unlock()
 	}
 }

@@ -1734,6 +1734,9 @@ mainloop:
 				}
 				w.ClearFlag(int(WinFlagGotFocus))
 				w.SendWinFocusEvent(window.DeFocus)
+			case window.ScreenUpdate:
+				Prefs.ApplyDPI()
+				Prefs.Update()
 			}
 			continue // don't do anything else!
 		case *mouse.DragEvent:

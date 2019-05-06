@@ -68,6 +68,11 @@ const (
 	// Show is for the WindowShow event
 	Show
 
+	// ScreenUpdate occurs when any of the screen information is updated
+	// This event is sent to the first window on the list of active windows
+	// and it should then perform any necessary updating
+	ScreenUpdate
+
 	ActionsN
 )
 
