@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"sync"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
@@ -418,11 +419,19 @@ func (w *windowImpl) getScreen() {
 	// that is super useless it seems.
 	if mon != nil {
 		sc := theApp.ScreenByName(mon.GetName())
-		w.Scrn = sc
-		w.PhysDPI = sc.PhysicalDPI
+		if sc != nil {
+			w.Scrn = sc
+			w.PhysDPI = sc.PhysicalDPI
+		} else {
+			log.Printf("glos getScreen: could not find screen of name: %v\n", mon.GetName())
+			w.Scrn = theApp.screens[0]
+			w.PhysDPI = w.Scrn.PhysicalDPI
+		}
 	} else {
-		w.Scrn = theApp.screens[0]
-		w.PhysDPI = w.Scrn.PhysicalDPI
+		if len(theApp.screens) > 0 {
+			w.Scrn = theApp.screens[0]
+			w.PhysDPI = w.Scrn.PhysicalDPI
+		}
 	}
 	if w.LogDPI == 0 {
 		w.LogDPI = w.Scrn.LogicalDPI

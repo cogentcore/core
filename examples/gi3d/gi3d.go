@@ -26,8 +26,8 @@ func mainrun() {
 	// turn these on to see a traces of various stages of processing..
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
-	gi3d.Update3DTrace = true
-	gi.Update2DTrace = true
+	// gi3d.Update3DTrace = true
+	// gi.Update2DTrace = true
 
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
@@ -72,16 +72,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
-	gi3d.AddNewAmbientLight(sc, "ambient", 0.2, gi3d.DirectSun)
+	gi3d.AddNewAmbientLight(sc, "ambient", 0.1, gi3d.DirectSun)
 
-	// dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
-	// dir.Pos.Set(0, 0, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
+	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// point := gi3d.AddNewPointLight(sc, "point", 1, gi3d.DirectSun)
 	// point.Pos.Set(0, 5, 5)
 
-	spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
-	spot.Pose.Pos.Set(0, 5, 5)
+	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
+	// spot.Pose.Pos.Set(0, 5, 5)
 
 	cbm := gi3d.AddNewBox(sc, "cube1", 1, 1, 1)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..

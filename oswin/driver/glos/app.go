@@ -279,6 +279,7 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 }
 
 func (app *appImpl) ScreenByName(name string) *oswin.Screen {
+	app.getScreens()
 	for _, sc := range app.screens {
 		if sc.Name == name {
 			return sc

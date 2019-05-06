@@ -94,7 +94,7 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 // ViewDir gets the direction normal vector, pre-computing the view transform
 func (dl *DirLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
 	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
-	return dl.Pos.MulMat4AsVec4(viewMat, 0).Normal()
+	return dl.Pos.Normal().MulMat4AsVec4(viewMat, 0)
 }
 
 // PointLight is an omnidirectional light with a position

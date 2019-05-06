@@ -14,3 +14,13 @@ type BBox struct {
 	Volume     float32      `desc:"Last calculated volume"`
 	RotInertia mat32.Mat3   `desc:"Last calculated rotational inertia matrix in local coords"`
 }
+
+// SetBounds sets BBox from min, max and updates other factors based on that
+func (bb *BBox) SetBounds(min, max mat32.Vec3) {
+	bb.BBox.Set(&min, &max)
+	bb.BSphere.SetFromBox(bb.BBox)
+	sz := bb.BBox.Size()
+	bb.Area = 2*sz.X + 2*sz.Y + 2*sz.Z
+	bb.Volume = sz.X * sz.Y * sz.Z
+	// todo: RotInertia
+}

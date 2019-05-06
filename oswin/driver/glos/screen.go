@@ -6,6 +6,7 @@ package glos
 
 import (
 	"image"
+	"log"
 
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/goki/gi/oswin"
@@ -22,6 +23,10 @@ func (app *appImpl) getScreens() {
 	glfw.SetMonitorCallback(monitorChange)
 	mons := glfw.GetMonitors()
 	sz := len(mons)
+	if sz == 0 {
+		log.Printf("glos getScreens: no screens found!\n")
+		return
+	}
 	if len(app.screens) != sz {
 		app.screens = make([]*oswin.Screen, sz)
 	}
@@ -31,6 +36,9 @@ func (app *appImpl) getScreens() {
 		if sc == nil {
 			sc = &oswin.Screen{}
 			app.screens[i] = sc
+		}
+		if sc.Name == mon.GetName() {
+			continue
 		}
 		pw, ph := mon.GetPhysicalSize()
 		if pw == 0 {

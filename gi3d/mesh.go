@@ -34,7 +34,16 @@ type Mesh interface {
 	Reset()
 
 	// Make makes the shape mesh (defined for specific shape types)
-	Make()
+	// This does not call any other gpu setup functions and should
+	// be runnable outside of gpu context and on any thread -- just
+	// sets the various Vtx etc Arrays, and doesn't touch the gpu Buffer
+	Make(sc *Scene)
+
+	// Update updates any dynamically changing meshes (can be optimized to only update
+	// relevant vertex data instead of the indexes, norms, and texture coords)
+	// Unlike Make, this is only called with context active on main thread
+	// and is responsible for calling any relevant Set*Data and Transfer method(s) to update the GPU.
+	Update(sc *Scene)
 
 	// ComputeNorms automatically computes the normals from existing vertex data
 	ComputeNorms()
@@ -97,6 +106,30 @@ type Mesh interface {
 	// Render3D calls gpu.TrianglesIndexed to render the mesh
 	// Activate must have just been called, assumed to be on main with context
 	Render3D()
+
+	// SetVtxData sets the (updated) Vtx data into the overall vector that
+	// will be transfered using the next TransferVectors call.
+	// It is essential that the length has not changed -- if length is changing
+	// then you must update everything and call MakeVectors.
+	// Use this for dynamically updating vertex data.
+	// has no constraints on where called.
+	SetVtxData(sc *Scene)
+
+	// SetNormData sets the (updated) Norm data into the overall vector that
+	// will be transfered using the next TransferVectors call.
+	// It is essential that the length has not changed -- if length is changing
+	// then you must update everything and call MakeVectors.
+	// Use this for dynamically updating vertex data.
+	// has no constraints on where called.
+	SetNormData(sc *Scene)
+
+	// SetColorData sets the (updated) Color data into the overall vector that
+	// will be transfered using the next TransferVectors call.
+	// It is essential that the length has not changed -- if length is changing
+	// then you must update everything and call MakeVectors.
+	// Use this for dynamically updating color data (only use if vertex color in use!)
+	// has no constraints on where called.
+	SetColorData(sc *Scene)
 }
 
 // MeshBase provides the core implementation of Mesh interface
@@ -128,6 +161,10 @@ func (ms *MeshBase) IsTransparent() bool {
 		return false
 	}
 	return ms.Trans
+}
+
+func (ms *MeshBase) Update(sc *Scene) {
+	// nop: default mesh is static, not dynamic
 }
 
 func (ms *MeshBase) ComputeNorms() {
@@ -234,6 +271,42 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 	ibuf.SetLen(iln)
 	ibuf.Set(ms.Idx)
 	return nil
+}
+
+// SetVtxData sets the (updated) Vtx data into the overall vector that
+// will be transfered using the next TransferVectors call.
+// It is essential that the length has not changed -- if length is changing
+// then you must update everything and call MakeVectors.
+// Use this for dynamically updating vertex data.
+// has no constraints on where called.
+func (ms *MeshBase) SetVtxData(sc *Scene) {
+	vbuf := ms.Buff.VectorsBuffer()
+	vtx := sc.Renders.Vectors[InVtxPos]
+	vbuf.SetVecData(vtx, ms.Vtx)
+}
+
+// SetNormData sets the (updated) Norm data into the overall vector that
+// will be transfered using the next TransferVectors call.
+// It is essential that the length has not changed -- if length is changing
+// then you must update everything and call MakeVectors.
+// Use this for dynamically updating vertex data.
+// has no constraints on where called.
+func (ms *MeshBase) SetNormData(sc *Scene) {
+	vbuf := ms.Buff.VectorsBuffer()
+	nrm := sc.Renders.Vectors[InVtxNorm]
+	vbuf.SetVecData(nrm, ms.Norm)
+}
+
+// SetColorData sets the (updated) Color data into the overall vector that
+// will be transfered using the next TransferVectors call.
+// It is essential that the length has not changed -- if length is changing
+// then you must update everything and call MakeVectors.
+// Use this for dynamically updating color data (only use if vertex color in use!)
+// has no constraints on where called.
+func (ms *MeshBase) SetColorData(sc *Scene) {
+	vbuf := ms.Buff.VectorsBuffer()
+	clr := sc.Renders.Vectors[InVtxColor]
+	vbuf.SetVecData(clr, ms.Color)
 }
 
 // Activate activates the mesh Vectors on the GPU

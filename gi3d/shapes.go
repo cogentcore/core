@@ -31,7 +31,7 @@ func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	return bx
 }
 
-func (bx *Box) Make() {
+func (bx *Box) Make(sc *Scene) {
 	bx.Reset()
 
 	hSz := bx.Size.DivScalar(2)
@@ -46,10 +46,5 @@ func (bx *Box) Make() {
 	bx.AddPlane(mat32.X, mat32.Z, 1, 1, bx.Size.X, bx.Size.Z, -hSz.X, -hSz.Z, hSz.Y, int(bx.Segs.X), int(bx.Segs.Z), clr)    // py
 	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
 
-	bx.BBox.BBox.Min = hSz.Negate()
-	bx.BBox.BBox.Max = hSz
-
-	bx.BBox.BSphere.Radius = hSz.Length()
-	bx.BBox.Area = 2*bx.Size.X + 2*bx.Size.Y + 2*bx.Size.Z
-	bx.BBox.Volume = bx.Size.X * bx.Size.Y * bx.Size.Z
+	bx.BBox.SetBounds(hSz.Negate(), hSz)
 }

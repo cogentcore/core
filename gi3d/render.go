@@ -639,7 +639,6 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 	for (int i = 0; i < ndir; i++) {
 		// DirLightDir is the negated position = direction of the current light
 		vec3 lightDir = normalize(DirLightDir(i));
-		// lightDir = vec3(0, 1, 0);
 		// Calculates the dot product between the light direction and this vertex normal.
 		float dotNormal = max(dot(lightDir, norm), 0.0);
 		diffuseTotal += DirLightColor(i) * matDiffuse * dotNormal;

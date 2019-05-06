@@ -505,18 +505,31 @@ func (sc *Scene) ActivateFrame() bool {
 	return true
 }
 
-// InitTextures opens all the textures if not already opened, and establishes
+// InitTexturesInCtxt opens all the textures if not already opened, and establishes
 // the GPU resources for them.  Must be called with context on main thread.
-func (sc *Scene) InitTextures() bool {
+func (sc *Scene) InitTexturesInCtxt() bool {
 	// todo
 	return true
 }
 
-// InitMeshes makes sure all the Meshes are ready for rendering
-// Must be called on main thread with context
-func (sc *Scene) InitMeshes() bool {
+// InitTextures opens all the textures if not already opened, and establishes
+// the GPU resources for them.  This version can be called externally and
+// activates the context and runs on main thread
+func (sc *Scene) InitTextures() bool {
+	if !sc.ActivateWin() {
+		return true
+	}
+	oswin.TheApp.RunOnMain(func() {
+		sc.InitTexturesInCtxt()
+	})
+	return true
+}
+
+// InitMeshesInCtxt does a full init and gpu transfer of all the meshes
+// This version must be called on main thread with context
+func (sc *Scene) InitMeshesInCtxt() bool {
 	for _, ms := range sc.Meshes {
-		ms.Make()
+		ms.Make(sc)
 		ms.MakeVectors(sc)
 		ms.Activate(sc)
 		ms.TransferAll()
@@ -524,14 +537,34 @@ func (sc *Scene) InitMeshes() bool {
 	return true
 }
 
-// UpdateMeshes makes sure all the Meshes are ready for rendering
-// This is the version for external use -- can be called on any thread
+// InitMeshes does a full init and gpu transfer of all the meshes
+// This version us to be used by external users -- sets context and runs on main
+func (sc *Scene) InitMeshes() {
+	if !sc.ActivateWin() {
+		return
+	}
+	oswin.TheApp.RunOnMain(func() {
+		sc.InitMeshesInCtxt()
+	})
+}
+
+// UpdateMeshesInCtxt calls Update on all the meshes in context on main thread
+// Update is responsible for doing any transfers
+func (sc *Scene) UpdateMeshesInCtxt() bool {
+	for _, ms := range sc.Meshes {
+		ms.Update(sc)
+	}
+	return true
+}
+
+// UpdateMeshes calls Update on all meshes
+// This version us to be used by external users -- sets context and runs on main
 func (sc *Scene) UpdateMeshes() {
 	if !sc.ActivateWin() {
 		return
 	}
 	oswin.TheApp.RunOnMain(func() {
-		sc.InitMeshes()
+		sc.UpdateMeshesInCtxt()
 	})
 }
 
@@ -559,8 +592,8 @@ func (sc *Scene) Init3D() {
 		log.Println(err)
 	}
 	oswin.TheApp.RunOnMain(func() {
-		sc.InitTextures()
-		sc.InitMeshes()
+		sc.InitTexturesInCtxt()
+		sc.InitMeshesInCtxt()
 	})
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {

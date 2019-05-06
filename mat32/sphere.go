@@ -28,6 +28,12 @@ func (s *Sphere) Set(center Vec3, radius float32) {
 	s.Radius = radius
 }
 
+// SetFromBox sets the center and radius of this sphere to surround given box
+func (s *Sphere) SetFromBox(box Box3) {
+	s.Center = box.Center()
+	s.Radius = 0.5 * box.Size().Length()
+}
+
 // SetFromPoints sets this sphere from the specified points array and optional center.
 func (s *Sphere) SetFromPoints(points []Vec3, optCenter *Vec3) {
 	box := NewEmptyBox3()
