@@ -1096,6 +1096,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
 	if !win.IsVisible() || win.IsWinUpdating() { // win.IsResizing() ||
+		// fmt.Printf("not updating as invisible or already updating\n")
 		return
 	}
 	win.Publish()

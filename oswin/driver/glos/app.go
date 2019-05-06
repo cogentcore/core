@@ -136,7 +136,8 @@ func (app *appImpl) mainLoop() {
 			if len(app.windows) == 0 {
 				time.Sleep(1)
 			} else {
-				glfw.WaitEvents()
+				glfw.WaitEventsTimeout(0.1) // maybe prevents hanging..
+				// glfw.WaitEvents()
 			}
 		}
 	}

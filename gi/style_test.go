@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/goki/gi/units"
-	"github.com/goki/ki"
+	"github.com/goki/ki/ki"
 )
 
 var fp = FontLibrary.AddFontPaths("/Library/Fonts")

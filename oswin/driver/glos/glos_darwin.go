@@ -366,7 +366,6 @@ func (mm *mainMenuImpl) ItemByTitle(men oswin.Menu, titles string) oswin.MenuIte
 	defer C.free(unsafe.Pointer(title))
 	mid := C.doMenuItemByTitle(C.uintptr_t(men), title)
 	return oswin.MenuItem(mid)
-	return oswin.MenuItem(0)
 }
 
 func (mm *mainMenuImpl) ItemByTag(men oswin.Menu, tag int) oswin.MenuItem {
