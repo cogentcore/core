@@ -200,9 +200,7 @@ func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 
 // TrackCamera moves this node to pose of camera
 func (nb *Node3DBase) TrackCamera(sc *Scene) {
-	pmat := nb.Pose.ParMatrix
-	nb.Pose = sc.Camera.Pose
-	nb.Pose.ParMatrix = pmat
+	nb.Pose.CopyFrom(&sc.Camera.Pose)
 	nb.UpdateWorldMatrix(nil)
 	nb.UpdateWorldMatrixChildren()
 }
@@ -221,7 +219,7 @@ func (nb *Node3DBase) TrackLight(sc *Scene, lightName string) error {
 	case *PointLight:
 		nb.Pose.Pos = l.Pos
 	case *SpotLight:
-		nb.Pose = l.Pose
+		nb.Pose.CopyFrom(&l.Pose)
 	}
 	return nil
 }

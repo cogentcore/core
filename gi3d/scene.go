@@ -332,7 +332,7 @@ func (sc *Scene) NavEvents() {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.IsDragging() {
 			orbDel := float32(.2)
-			panDel := float32(.05)
+			panDel := float32(.01)
 			if !ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
 				ssc.SetDragCursor = true
@@ -513,7 +513,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	case "-", "_", "Shift+-":
 		sc.Camera.Zoom(zoomPct)
 		kt.SetProcessed()
-	case " ":
+	case " ", "Escape":
 		err := sc.SetCamera("default")
 		if err != nil {
 			sc.Camera.DefaultPose()
@@ -697,14 +697,12 @@ func (sc *Scene) Render() bool {
 	if len(sc.SavedCams) == 0 {
 		sc.SaveCamera("default")
 	}
-	sc.TrackCamera()
 	sc.Camera.UpdateMatrix()
+	sc.TrackCamera()
+	sc.UpdateWorldMatrix() // inexpensive -- just do it to be sure..
 	oswin.TheApp.RunOnMain(func() {
-		// sc.Win.OSWin.Activate() // render to screen..
 		sc.Renders.SetLightsUnis(sc)
-		gpu.TheGPU.ErrCheck("scene set light")
 		sc.Render3D()
-		gpu.TheGPU.ErrCheck("scene render3d")
 		gpu.Draw.Flush()
 		sc.Tex = sc.Frame.Texture()
 	})

@@ -30,6 +30,15 @@ func (ps *Pose) Defaults() {
 	ps.Quat.SetIdentity()
 }
 
+// CopyFrom copies just the pose information from the other pose, critically
+// not copying the ParMatrix so that is preserved in the receiver.
+func (ps *Pose) CopyFrom(op *Pose) {
+	ps.Pos = op.Pos
+	ps.Scale = op.Scale
+	ps.Quat = op.Quat
+	ps.UpdateMatrix()
+}
+
 // UpdateMatrix updates the local transform matrix based on its position, quaternion, and scale.
 // Also checks for degenerate nil values
 func (ps *Pose) UpdateMatrix() {
