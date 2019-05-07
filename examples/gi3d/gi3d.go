@@ -103,6 +103,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
+	tcg := sc.AddNewGroup("TrackCamera") // automatically tracks camera -- FPS effect
+	fpgun := tcg.AddNewObject("first-person-gun", cbm.Name())
+	fpgun.Pose.Scale.Set(.1, .1, 1)
+	fpgun.Pose.Pos.Set(0, -1, -5)              // in front of camera
+	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
+
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
 
 	appnm := gi.AppName()

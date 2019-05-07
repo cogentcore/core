@@ -39,3 +39,6 @@ func (gp *Group) BBox() *BBox {
 func (gp *Group) Defaults() {
 	gp.Pose.Defaults()
 }
+
+// test for impl
+var _ Node3D = &Group{}

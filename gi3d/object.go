@@ -118,26 +118,6 @@ func (obj *Object) BBox() *BBox {
 	return &(obj.MeshPtr.AsMeshBase().BBox)
 }
 
-// TrackCamera moves this object to position of camera
-func (obj *Object) TrackCamera(sc *Scene) {
-	obj.Pose = sc.Camera.Pose
-}
-
-// TrackLight moves this object to position of light of given name
-// Does not work for Ambient Lights
-func (obj *Object) TrackLight(sc *Scene, lightName string) {
-	lt, ok := sc.Lights[lightName]
-	if !ok {
-		// todo: error
-		return
-	}
-	// todo: do rest..
-	switch l := lt.(type) {
-	case *DirLight:
-		obj.Pose.Pos = l.Pos
-	}
-}
-
 /////////////////////////////////////////////////////////////////////////////
 //   Rendering
 

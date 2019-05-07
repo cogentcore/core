@@ -151,6 +151,7 @@ func (nb *Node3DBase) WorldMatrixUpdated() bool {
 }
 
 // UpdateWorldMatrix updates this node's world matrix based on parent's world matrix.
+// If a nil matrix is passed, then the previously-set parent world matrix is used.
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
 func (nb *Node3DBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
@@ -185,12 +186,42 @@ func (nb *Node3DBase) Init3D(sc *Scene) {
 		if !rnb.IsDeleted() && !rnb.IsDestroyed() {
 			scci := rnb.ParentByType(KiT_Scene, true)
 			if scci != nil {
+				rnbi.UpdateWorldMatrix(nil)
+				rnbi.UpdateWorldMatrixChildren()
 				scci.(*Scene).DirectWinUpload()
 			}
 		}
 	})
 }
 
-func (nb *Node3DBase) Render3D(sc *Scene) {
+func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	// nop
+}
+
+// TrackCamera moves this node to pose of camera
+func (nb *Node3DBase) TrackCamera(sc *Scene) {
+	pmat := nb.Pose.ParMatrix
+	nb.Pose = sc.Camera.Pose
+	nb.Pose.ParMatrix = pmat
+	nb.UpdateWorldMatrix(nil)
+	nb.UpdateWorldMatrixChildren()
+}
+
+// TrackLight moves node to position of light of given name.
+// For SpotLight, copies entire Pose. Does not work for Ambient light
+// which has no position information.
+func (nb *Node3DBase) TrackLight(sc *Scene, lightName string) error {
+	lt, ok := sc.Lights[lightName]
+	if !ok {
+		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.PathUnique(), lightName)
+	}
+	switch l := lt.(type) {
+	case *DirLight:
+		nb.Pose.Pos = l.Pos
+	case *PointLight:
+		nb.Pose.Pos = l.Pos
+	case *SpotLight:
+		nb.Pose = l.Pose
+	}
+	return nil
 }

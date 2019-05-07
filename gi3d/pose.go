@@ -46,8 +46,10 @@ func (ps *Pose) UpdateMatrix() {
 // Also calls UpdateMatrix
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	ps.UpdateMatrix()
-	ps.ParMatrix = *parWorld
-	ps.WorldMatrix.MulMatrices(parWorld, &ps.Matrix)
+	if parWorld != nil {
+		ps.ParMatrix = *parWorld
+	}
+	ps.WorldMatrix.MulMatrices(&ps.ParMatrix, &ps.Matrix)
 }
 
 // UpdateMVPMatrix updates the model * view, * projection matricies based on camera view, prjn matricies

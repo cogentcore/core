@@ -1512,6 +1512,21 @@ mainloop:
 						}
 						lastSkipped = false
 					}
+				case oswin.MouseMoveEvent:
+					me := evi.(*mouse.MoveEvent)
+					if lagMs > EventSkipLagMSec {
+						// fmt.Printf("skipped et %v lag %v\n", et, lag)
+						if !lastSkipped {
+							skipDelta = me.From
+						}
+						lastSkipped = true
+						continue
+					} else {
+						if lastSkipped {
+							me.From = skipDelta
+						}
+						lastSkipped = false
+					}
 				case oswin.WindowResizeEvent:
 					w.SetFlag(int(WinFlagIsResizing))
 					we := evi.(*window.Event)

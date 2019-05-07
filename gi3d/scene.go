@@ -9,6 +9,7 @@ import (
 	"image"
 	"image/draw"
 	"log"
+	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
@@ -25,7 +26,19 @@ import (
 var Update3DTrace = false
 
 // Scene is the overall scenegraph containing nodes as children.
-// It renders to its own Framebuffer, which is then drawn directly onto the window.
+// It renders to its own Framebuffer, the Texture of which is then drawn
+// directly onto the window WinTex using the DirectWinUpload protocol.
+//
+// There is default navigation event processing (disabled by setting NoNav)
+// where mouse drag events Orbit the camera (Shift = Pan, Alt = PanTarget)
+// and arrow keys do Orbit, Pan, PanTarget with same key modifiers.
+// Spacebar restores original "default" camera, and numbers save (1st time)
+// or restore (subsequently) camera views (Control = always save)
+//
+// A Group at the top-level named "TrackCamera" will automatically track
+// the camera (i.e., its Pose is copied) -- Objects in that group can
+// set their relative Pos etc to display relative to the camera, to achieve
+// "first person" effects.
 type Scene struct {
 	gi.WidgetBase
 	Geom          gi.Geom2DInt        `desc:"Viewport-level viewbox within any parent Viewport2D"`
@@ -35,6 +48,7 @@ type Scene struct {
 	Meshes        map[string]Mesh     `desc:"all meshes used in the scene"`
 	Textures      map[string]*Texture `desc:"all textures used in the scene"`
 	NoNav         bool                `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+	SavedCams     map[string]Camera   `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
 	Win           *gi.Window          `json:"-" xml:"-" desc:"our parent window that we render into"`
 	Renders       Renderers           `view:"-" desc:"rendering programs"`
 	Frame         gpu.Framebuffer     `view:"-" desc:"direct render target for scene"`
@@ -98,6 +112,30 @@ func (sc *Scene) AddNewGroup(name string) *Group {
 	ngp := sc.AddNewChild(KiT_Group, name).(*Group)
 	ngp.Defaults()
 	return ngp
+}
+
+// SaveCamera saves the current camera with given name -- can be restored later with SetCamera.
+// "default" is a special name that is automatically saved on first render, and
+// restored with the spacebar under default NavEvents.
+// Numbered cameras 0-9 also saved / restored with corresponding keys.
+func (sc *Scene) SaveCamera(name string) {
+	if sc.SavedCams == nil {
+		sc.SavedCams = make(map[string]Camera)
+	}
+	sc.SavedCams[name] = sc.Camera
+}
+
+// SetCamera sets the current camera to that of given name -- error if not found.
+// "default" is a special name that is automatically saved on first render, and
+// restored with the spacebar under default NavEvents.
+// Numbered cameras 0-9 also saved / restored with corresponding keys.
+func (sc *Scene) SetCamera(name string) error {
+	cam, ok := sc.SavedCams[name]
+	if !ok {
+		return fmt.Errorf("gi3d.Scene: %v saved camera of name: %v not found", name)
+	}
+	sc.Camera = cam
+	return nil
 }
 
 // DeleteUnusedMeshes deletes all unused meshes
@@ -325,6 +363,32 @@ func (sc *Scene) NavEvents() {
 			}
 		}
 	})
+	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// 	me := d.(*mouse.MoveEvent)
+	// 	me.SetProcessed()
+	// 	ssc := recv.Embed(KiT_Scene).(*Scene)
+	// 	orbDel := float32(.2)
+	// 	panDel := float32(.05)
+	// 	del := me.Where.Sub(me.From)
+	// 	dx := float32(del.X)
+	// 	dy := float32(del.Y)
+	// 	switch {
+	// 	case key.HasAllModifierBits(me.Modifiers, key.Shift):
+	// 		ssc.Camera.Pan(dx*panDel, -dy*panDel)
+	// 	case key.HasAllModifierBits(me.Modifiers, key.Control):
+	// 		ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
+	// 	case key.HasAllModifierBits(me.Modifiers, key.Alt):
+	// 		ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
+	// 	default:
+	// 		if mat32.Abs(dx) > mat32.Abs(dy) {
+	// 			dy = 0
+	// 		} else {
+	// 			dx = 0
+	// 		}
+	// 		ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
+	// 	}
+	// 	ssc.UpdateSig()
+	// })
 	sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
@@ -443,14 +507,31 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	case "Alt+-", "Alt+_":
 		sc.Camera.PanTarget(0, 0, -panDel)
 		kt.SetProcessed()
-	case "+", "=":
+	case "+", "=", "Shift+=":
 		sc.Camera.Zoom(-zoomPct)
 		kt.SetProcessed()
-	case "-", "_":
+	case "-", "_", "Shift+-":
 		sc.Camera.Zoom(zoomPct)
 		kt.SetProcessed()
 	case " ":
-		sc.Camera.DefaultPose()
+		err := sc.SetCamera("default")
+		if err != nil {
+			sc.Camera.DefaultPose()
+		}
+		kt.SetProcessed()
+	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
+		err := sc.SetCamera(ch)
+		if err != nil {
+			sc.SaveCamera(ch)
+			fmt.Printf("Saved camera to: %v\n", ch)
+		} else {
+			fmt.Printf("Restored camera from: %v\n", ch)
+		}
+		kt.SetProcessed()
+	case "Control+0", "Control+1", "Control+2", "Control+3", "Control+4", "Control+5", "Control+6", "Control+7", "Control+8", "Control+9":
+		cnm := strings.TrimPrefix(ch, "Control+")
+		sc.SaveCamera(cnm)
+		fmt.Printf("Saved camera to: %v\n", cnm)
 		kt.SetProcessed()
 	case "t":
 		kt.SetProcessed()
@@ -613,6 +694,10 @@ func (sc *Scene) Render() bool {
 	if !sc.ActivateFrame() {
 		return false
 	}
+	if len(sc.SavedCams) == 0 {
+		sc.SaveCamera("default")
+	}
+	sc.TrackCamera()
 	sc.Camera.UpdateMatrix()
 	oswin.TheApp.RunOnMain(func() {
 		// sc.Win.OSWin.Activate() // render to screen..
@@ -719,6 +804,23 @@ func (sc *Scene) Render3D() {
 			obj.This().(Node3D).Render3D(sc, rc, rnd)
 		}
 	}
+}
+
+// TrackCamera -- a Group at the top-level named "TrackCamera"
+// will automatically track the camera (i.e., its Pose is copied).
+// Objects in that group can set their relative Pos etc to display
+// relative to the camera, to achieve "first person" effects.
+func (sc *Scene) TrackCamera() bool {
+	tci, err := sc.ChildByNameTry("TrackCamera", 0)
+	if err != nil {
+		return false
+	}
+	tc, ok := tci.(*Group)
+	if !ok {
+		return false
+	}
+	tc.TrackCamera(sc)
+	return true
 }
 
 // SceneProps define the ToolBar and MenuBar for StructView
