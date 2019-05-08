@@ -54,6 +54,7 @@ type Scene struct {
 	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
 	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
 	SetDragCursor bool               `view:"-" desc:"has dragging cursor been set yet?"`
+	RenderState   gi.RenderState     `json:"-" xml:"-" view:"-" desc:"render state for rendering 2d elements such as text2d"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
@@ -80,6 +81,20 @@ func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes[ms.Name()] = ms
 }
 
+// Text2DPlaneMesh returns the special Text2DPLane mesh (creating it if it does not yet exist).
+// This is a 1x1 plane with a normal pointing in positive Z direction used for all Text2D rendering
+func (sc *Scene) Text2DPlaneMesh() Mesh {
+	nm := "Text2DPlane"
+	tm, ok := sc.Meshes[nm]
+	if ok {
+		return tm
+	}
+	tmp := AddNewPlane(sc, nm, 1, 1)
+	tmp.NormAxis = mat32.Z
+	tmp.NormNeg = false
+	return tmp
+}
+
 // AddLight adds given light to lights
 // see AddNewX for convenience methods to add specific lights
 func (sc *Scene) AddLight(lt Light) {
@@ -96,21 +111,6 @@ func (sc *Scene) AddTexture(tx Texture) {
 		sc.Textures = make(map[string]Texture)
 	}
 	sc.Textures[tx.Name()] = tx
-}
-
-// AddNewObject adds a new object of given name and mesh
-func (sc *Scene) AddNewObject(name string, meshName string) *Object {
-	obj := sc.AddNewChild(KiT_Object, name).(*Object)
-	obj.Mesh = MeshName(meshName)
-	obj.Defaults()
-	return obj
-}
-
-// AddNewGroup adds a new group of given name and mesh
-func (sc *Scene) AddNewGroup(name string) *Group {
-	ngp := sc.AddNewChild(KiT_Group, name).(*Group)
-	ngp.Defaults()
-	return ngp
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.

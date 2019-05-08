@@ -86,12 +86,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	cbm := gi3d.AddNewBox(sc, "cube1", 1, 1, 1)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rcb := sc.AddNewObject("red-cube", cbm.Name())
+	rcb := gi3d.AddNewObject(sc, sc, "red-cube", cbm.Name())
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.Mat.Color.SetString("red", nil)
 	rcb.Mat.Shiny = 500
 
-	bcb := sc.AddNewObject("blue-cube", cbm.Name())
+	bcb := gi3d.AddNewObject(sc, sc, "blue-cube", cbm.Name())
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 	bcb.Mat.Color.SetString("blue", nil)
@@ -99,11 +99,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	// bcb.Mat.Specular.SetString("blue", nil) // how you get rid of specular highlights
 
-	gcb := sc.AddNewObject("green-trans-cube", cbm.Name())
+	gcb := gi3d.AddNewObject(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
-	tcg := sc.AddNewGroup("TrackCamera") // automatically tracks camera -- FPS effect
+	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
 	fpgun := tcg.AddNewObject("first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
@@ -113,7 +113,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-	floor := sc.AddNewObject("floor", floorp.Name())
+	floor := gi3d.AddNewObject(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	// floor.Mat.Color.SetString("tan", nil)
 	// floor.Mat.Emissive.SetString("brown", nil)
@@ -121,7 +121,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor.Mat.SetTexture(sc, grtx.Name())
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 
-	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
+	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu

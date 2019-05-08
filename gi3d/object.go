@@ -9,13 +9,15 @@ import (
 	"log"
 
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
 // https://www.khronos.org/opengl/wiki/Vertex_Specification_Best_Practices
 
 // Object represents an individual 3D object or object element.
-// It has its own unique transforms, and a material and mesh structure.
+// It has its own unique spatial transforms and material properties, and points
+// to a mesh structure.
 type Object struct {
 	Node3DBase
 	Mesh    MeshName `desc:"name of the mesh shape information used for rendering this object -- all meshes are collected on the Scene"`
@@ -24,6 +26,14 @@ type Object struct {
 }
 
 var KiT_Object = kit.Types.AddType(&Object{}, nil)
+
+// AddNewObject adds a new object of given name and mesh to given parent
+func AddNewObject(sc *Scene, parent ki.Ki, name string, meshName string) *Object {
+	obj := parent.AddNewChild(KiT_Object, name).(*Object)
+	obj.SetMesh(sc, meshName)
+	obj.Defaults()
+	return obj
+}
 
 func (obj *Object) IsObject() bool {
 	return true
@@ -39,21 +49,6 @@ func (obj *Object) AsObject() *Object {
 func (obj *Object) Defaults() {
 	obj.Pose.Defaults()
 	obj.Mat.Defaults()
-}
-
-// AddNewObject adds a new object of given name and mesh
-func (obj *Object) AddNewObject(sc *Scene, name string, meshName string) *Object {
-	nobj := obj.AddNewChild(KiT_Object, name).(*Object)
-	nobj.SetMesh(sc, meshName)
-	nobj.Defaults()
-	return nobj
-}
-
-// AddNewGroup adds a new group of given name and mesh
-func (obj *Object) AddNewGroup(name string) *Group {
-	ngp := obj.AddNewChild(KiT_Group, name).(*Group)
-	ngp.Defaults()
-	return ngp
 }
 
 // SetMesh sets mesh to given mesh name -- requires Scene to lookup mesh by name
