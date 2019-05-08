@@ -41,19 +41,19 @@ var Update3DTrace = false
 // "first person" effects.
 type Scene struct {
 	gi.WidgetBase
-	Geom          gi.Geom2DInt        `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Camera        Camera              `desc:"camera determines view onto scene"`
-	BgColor       gi.Color            `desc:"background color"`
-	Lights        map[string]Light    `desc:"all lights used in the scene"`
-	Meshes        map[string]Mesh     `desc:"all meshes used in the scene"`
-	Textures      map[string]*Texture `desc:"all textures used in the scene"`
-	NoNav         bool                `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
-	SavedCams     map[string]Camera   `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
-	Win           *gi.Window          `json:"-" xml:"-" desc:"our parent window that we render into"`
-	Renders       Renderers           `view:"-" desc:"rendering programs"`
-	Frame         gpu.Framebuffer     `view:"-" desc:"direct render target for scene"`
-	Tex           gpu.Texture2D       `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
-	SetDragCursor bool                `view:"-" desc:"has dragging cursor been set yet?"`
+	Geom          gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Camera        Camera             `desc:"camera determines view onto scene"`
+	BgColor       gi.Color           `desc:"background color"`
+	Lights        map[string]Light   `desc:"all lights used in the scene"`
+	Meshes        map[string]Mesh    `desc:"all meshes used in the scene"`
+	Textures      map[string]Texture `desc:"all textures used in the scene"`
+	NoNav         bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+	SavedCams     map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
+	Win           *gi.Window         `json:"-" xml:"-" desc:"our parent window that we render into"`
+	Renders       Renderers          `view:"-" desc:"rendering programs"`
+	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
+	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
+	SetDragCursor bool               `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
@@ -89,14 +89,13 @@ func (sc *Scene) AddLight(lt Light) {
 	sc.Lights[lt.Name()] = lt
 }
 
-// AddNewTexture adds a new texture of given name and filename
-func (sc *Scene) AddNewTexture(name string, filename string) *Texture {
+// AddTexture adds given texture to texture collection
+// see AddNewTextureFile to add a texture that loads from file
+func (sc *Scene) AddTexture(tx Texture) {
 	if sc.Textures == nil {
-		sc.Textures = make(map[string]*Texture)
+		sc.Textures = make(map[string]Texture)
 	}
-	tx := &Texture{Name: name, File: gi.FileName(filename)}
-	sc.Textures[name] = tx
-	return tx
+	sc.Textures[tx.Name()] = tx
 }
 
 // AddNewObject adds a new object of given name and mesh
@@ -589,7 +588,9 @@ func (sc *Scene) ActivateFrame() bool {
 // InitTexturesInCtxt opens all the textures if not already opened, and establishes
 // the GPU resources for them.  Must be called with context on main thread.
 func (sc *Scene) InitTexturesInCtxt() bool {
-	// todo
+	for _, tx := range sc.Textures {
+		tx.Init(sc)
+	}
 	return true
 }
 

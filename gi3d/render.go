@@ -344,7 +344,7 @@ void main() {
 	return nil
 }
 
-func (rb *RenderUniformColor) SetMat(mat *Material) error {
+func (rb *RenderUniformColor) SetMat(mat *Material, sc *Scene) error {
 	pr := rb.VtxFragProg()
 	clru := pr.UniformByName("Color")
 	clrv := ColorToVec4f(mat.Color)
@@ -452,7 +452,7 @@ void main() {
 	return nil
 }
 
-func (rb *RenderVertexColor) SetMat(mat *Material) error {
+func (rb *RenderVertexColor) SetMat(mat *Material, sc *Scene) error {
 	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	pr := rb.VtxFragProg()
 	emsu := pr.UniformByName("Emissive")
@@ -486,17 +486,19 @@ func (rb *RenderTexture) Init(rn *Renderers) error {
 		`
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
-// layout(location = 2) in vec2 TexUV;
+layout(location = 2) in vec2 TexUV;
 // layout(location = 3) in vec4 VtxColor;
 out vec4 Pos;
 out vec3 Norm;
 out vec3 CamDir;
+out vec2 TexCoord;
 
 void main() {
 	vec4 vPos = vec4(VtxPos, 1.0);
 	Pos = MVMatrix * vPos;
 	Norm = normalize(NormMatrix * VtxNorm);
 	CamDir = normalize(-Pos.xyz);
+	TexCoord = TexUV;
 	
 	gl_Position = MVPMatrix * vPos;
 }
@@ -510,13 +512,14 @@ void main() {
 // precision mediump float;
 `+RenderUniLights+
 			`
-uniform vec4 Color;
 uniform vec3 Emissive;
 uniform vec3 Specular;
 uniform float Shiny;
+uniform sampler2D Tex;
 in vec4 Pos;
 in vec3 Norm;
 in vec3 CamDir;
+in vec2 TexCoord;
 out vec4 outputColor;
 `+RenderPhong+
 			`
@@ -527,6 +530,7 @@ void main() {
 	if (!gl_FrontFacing) {
 		fragNorm = -fragNorm;
 	}
+	vec4 Color = texture(Tex, TexCoord);
 	float opacity = Color.a;
 	vec3 clr = Color.rgb;	
 	
@@ -536,7 +540,6 @@ void main() {
 
 	// Final fragment color
 	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
-	// debugVec3(Norm, outputColor);
 }
 `+"\x00")
 	if err != nil {
@@ -545,21 +548,21 @@ void main() {
 
 	pr.AddUniforms(rn.Unis["Camera"])
 	pr.AddUniforms(rn.Unis["Lights"])
-	pr.AddUniform("Color", gpu.Vec4fUniType, false, 0)
 	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
+	pr.AddUniform("Tex", gpu.IUniType, false, 0)
 
 	pr.SetFragDataVar("outputColor")
 
 	return nil
 }
 
-func (rb *RenderTexture) SetMat(mat *Material) error {
+func (rb *RenderTexture) SetMat(mat *Material, sc *Scene) error {
+	if mat.TexPtr != nil {
+		mat.TexPtr.Activate(sc)
+	}
 	pr := rb.VtxFragProg()
-	clru := pr.UniformByName("Color")
-	clrv := ColorToVec4f(mat.Color)
-	clru.SetValue(clrv)
 	emsu := pr.UniformByName("Emissive")
 	emsv := ColorToVec3f(mat.Emissive)
 	emsu.SetValue(emsv)
@@ -568,6 +571,8 @@ func (rb *RenderTexture) SetMat(mat *Material) error {
 	spcu.SetValue(spcv)
 	shu := pr.UniformByName("Shiny")
 	shu.SetValue(mat.Shiny)
+	txu := pr.UniformByName("Tex")
+	txu.SetValue(0)
 	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	return nil
 }

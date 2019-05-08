@@ -5,6 +5,9 @@
 package gi3d
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin/gpu"
 )
@@ -12,12 +15,65 @@ import (
 // TexName provides a GUI interface for choosing textures
 type TexName string
 
-// Texture is a texture material -- any objects using the same texture can be rendered
-// at the same time.  This is a static texture.
-type Texture struct {
-	Name string        `desc:"name of the texture -- textures are connected to material / objects by name"`
+type Texture interface {
+	// Name returns name of the texture
+	Name() string
+
+	// Init initializes the texture and uploads it to the GPU, so it is ready to use
+	// Must be called in context on main thread
+	Init(sc *Scene) error
+
+	// Activate activates this texture on the GPU, in preparation for rendering
+	// Must be called in context on main thread
+	Activate(sc *Scene)
+}
+
+// TextureFile is a texture loaded from a file
+type TextureFile struct {
+	Nm   string        `desc:"name of the texture -- textures are connected to material / objects by name"`
 	File gi.FileName   `desc:"filename for the texture"`
 	Tex  gpu.Texture2D `view:"-" desc:"gpu texture object"`
+}
+
+// AddNewTextureFile adds a new texture from file of given name and filename
+func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {
+	tx := &TextureFile{Nm: name, File: gi.FileName(filename)}
+	sc.AddTexture(tx)
+	return tx
+}
+
+func (tx *TextureFile) Name() string {
+	return tx.Nm
+}
+
+// Init initializes the texture, opens the file, and uploads it to the GPU
+// Must be called in context on main thread
+func (tx *TextureFile) Init(sc *Scene) error {
+	if tx.Tex != nil {
+		return nil
+	}
+	if tx.File == "" {
+		err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Name)
+		log.Println(err)
+		return err
+	}
+	tx.Tex = gpu.TheGPU.NewTexture2D(tx.Nm)
+	err := tx.Tex.Open(string(tx.File))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	tx.Tex.Activate(0)
+	return nil
+}
+
+// Activate activates this texture on the GPU, in preparation for rendering
+// Must be called in context on main thread
+func (tx *TextureFile) Activate(sc *Scene) {
+	if tx.Tex == nil {
+		tx.Init(sc)
+	}
+	tx.Tex.Activate(0)
 }
 
 // TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport

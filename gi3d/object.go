@@ -145,12 +145,13 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	switch rc {
 	case RClassOpaqueUniform, RClassTransUniform:
 		rndu := rnd.(*RenderUniformColor)
-		rndu.SetMat(&obj.Mat)
+		rndu.SetMat(&obj.Mat, sc)
 	case RClassOpaqueVertex, RClassTransVertex:
 		rndv := rnd.(*RenderVertexColor)
-		rndv.SetMat(&obj.Mat)
+		rndv.SetMat(&obj.Mat, sc)
 	case RClassTexture:
-		// obj.Mat.TexPtr.Activate()
+		rndt := rnd.(*RenderTexture)
+		rndt.SetMat(&obj.Mat, sc)
 	}
 	sc.Renders.SetMatrix(&obj.Pose)
 	obj.MeshPtr.Activate(sc) // meshes have all been prep'd

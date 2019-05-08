@@ -25,7 +25,7 @@ type Material struct {
 	Texture   TexName  `desc:"texture to provide color for the surface"`
 	CullBack  bool     `desc:"cull the back-facing surfaces"`
 	CullFront bool     `desc:"cull the front-facing surfaces"`
-	TexPtr    *Texture `view:"-" desc:"pointer to texture"`
+	TexPtr    Texture  `view:"-" desc:"pointer to texture"`
 }
 
 // Defaults sets default surface parameters
@@ -55,13 +55,14 @@ func (mt *Material) SetTexture(sc *Scene, texName string) error {
 		mt.NoTexture()
 		return nil
 	}
-	tex, ok := sc.Textures[texName]
+	tx, ok := sc.Textures[texName]
 	if !ok {
 		err := fmt.Errorf("gi3d.Material in Scene: %s SetTexture name: %s not found in scene", sc.PathUnique(), texName)
 		log.Println(err)
 		return err
 	}
-	mt.TexPtr = tex
+	mt.Texture = TexName(texName)
+	mt.TexPtr = tx
 	return nil
 }
 
@@ -71,7 +72,7 @@ func (mt *Material) Validate(sc *Scene) error {
 		mt.TexPtr = nil
 		return nil
 	}
-	if mt.TexPtr == nil || mt.TexPtr.Name != string(mt.Texture) {
+	if mt.TexPtr == nil || mt.TexPtr.Name() != string(mt.Texture) {
 		err := mt.SetTexture(sc, string(mt.Texture))
 		if err != nil {
 			return err

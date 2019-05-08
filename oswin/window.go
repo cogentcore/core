@@ -224,10 +224,11 @@ type Window interface {
 	Handle() interface{}
 
 	// OSHandle returns the OS-specific underlying window handle:
-	// MacOS: NSWindow*
-	// Windows:  HWND
-	// LinuxX11: X11Window
+	// MacOS: NSWindow*, Windows:  HWND, LinuxX11: X11Window
 	OSHandle() uintptr
+
+	// Sets the mouse position to given values
+	SetMousePos(x, y float64)
 
 	EventDeque
 

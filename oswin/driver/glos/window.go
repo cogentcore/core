@@ -263,6 +263,9 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	})
 }
 
+////////////////////////////////////////////////////////////
+//  Geom etc
+
 func (w *windowImpl) Screen() *oswin.Screen {
 	if w.Scrn == nil {
 		w.getScreen()
@@ -408,6 +411,10 @@ func (w *windowImpl) Close() {
 		}
 		w.glw.Destroy()
 	})
+}
+
+func (w *windowImpl) SetMousePos(x, y float64) {
+	w.glw.SetCursorPos(x, y)
 }
 
 /////////////////////////////////////////////////////////
