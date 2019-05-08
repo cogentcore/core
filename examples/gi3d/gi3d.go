@@ -75,7 +75,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
 	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
-	dir.Pos.Set(0, 2, 0) // default: 0,1,1 = above and behind us (we are at 0,0,X)
+	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
 	// point := gi3d.AddNewPointLight(sc, "point", 1, gi3d.DirectSun)
 	// point.Pos.Set(0, 5, 5)
@@ -110,13 +110,14 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
 
 	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
+	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
 	floor := sc.AddNewObject("floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	// floor.Mat.Color.SetString("tan", nil)
-	// floor.Mat.Emissive.SetString("tan", nil)
-	floor.Mat.Bright = 3
+	// floor.Mat.Emissive.SetString("brown", nil)
+	floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(sc, grtx.Name())
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 
