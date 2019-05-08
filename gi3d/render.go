@@ -303,6 +303,7 @@ uniform vec4 Color;
 uniform vec3 Emissive;
 uniform vec3 Specular;
 uniform float Shiny;
+uniform float Bright;
 in vec4 Pos;
 in vec3 Norm;
 in vec3 CamDir;
@@ -324,7 +325,7 @@ void main() {
 	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
 	// Final fragment color
-	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
+	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
 	// debugVec3(Norm, outputColor);
 }
 `+"\x00")
@@ -338,6 +339,7 @@ void main() {
 	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
+	pr.AddUniform("Bright", gpu.FUniType, false, 0)
 
 	pr.SetFragDataVar("outputColor")
 
@@ -357,6 +359,8 @@ func (rb *RenderUniformColor) SetMat(mat *Material, sc *Scene) error {
 	spcu.SetValue(spcv)
 	shu := pr.UniformByName("Shiny")
 	shu.SetValue(mat.Shiny)
+	btu := pr.UniformByName("Bright")
+	btu.SetValue(mat.Bright)
 	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	return nil
 }
@@ -412,6 +416,7 @@ void main() {
 uniform vec3 Emissive;
 uniform vec3 Specular;
 uniform float Shiny;
+uniform float Bright;
 in vec4 Pos;
 in vec3 Norm;
 in vec3 CamDir;
@@ -434,7 +439,7 @@ void main() {
 	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
 	// Final fragment color
-	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
+	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
 }
 `+"\x00")
 	if err != nil {
@@ -446,6 +451,7 @@ void main() {
 	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
+	pr.AddUniform("Bright", gpu.FUniType, false, 0)
 
 	pr.SetFragDataVar("outputColor")
 
@@ -463,6 +469,8 @@ func (rb *RenderVertexColor) SetMat(mat *Material, sc *Scene) error {
 	spcu.SetValue(spcv)
 	shu := pr.UniformByName("Shiny")
 	shu.SetValue(mat.Shiny)
+	btu := pr.UniformByName("Bright")
+	btu.SetValue(mat.Bright)
 	return nil
 }
 
@@ -515,7 +523,10 @@ void main() {
 uniform vec3 Emissive;
 uniform vec3 Specular;
 uniform float Shiny;
+uniform float Bright;
 uniform sampler2D Tex;
+uniform vec2 TexRepeat;
+uniform vec2 TexOff;
 in vec4 Pos;
 in vec3 Norm;
 in vec3 CamDir;
@@ -530,7 +541,7 @@ void main() {
 	if (!gl_FrontFacing) {
 		fragNorm = -fragNorm;
 	}
-	vec4 Color = texture(Tex, TexCoord);
+	vec4 Color = texture(Tex, TexCoord * TexRepeat + TexOff);
 	float opacity = Color.a;
 	vec3 clr = Color.rgb;	
 	
@@ -539,7 +550,7 @@ void main() {
 	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
 	// Final fragment color
-	outputColor = min(vec4(Ambdiff + Spec, opacity), vec4(1.0));
+	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
 }
 `+"\x00")
 	if err != nil {
@@ -551,7 +562,10 @@ void main() {
 	pr.AddUniform("Emissive", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
+	pr.AddUniform("Bright", gpu.FUniType, false, 0)
 	pr.AddUniform("Tex", gpu.IUniType, false, 0)
+	pr.AddUniform("TexRepeat", gpu.Vec2fUniType, false, 0)
+	pr.AddUniform("TexOff", gpu.Vec2fUniType, false, 0)
 
 	pr.SetFragDataVar("outputColor")
 
@@ -560,7 +574,7 @@ void main() {
 
 func (rb *RenderTexture) SetMat(mat *Material, sc *Scene) error {
 	if mat.TexPtr != nil {
-		mat.TexPtr.Activate(sc)
+		mat.TexPtr.Activate(sc, 0)
 	}
 	pr := rb.VtxFragProg()
 	emsu := pr.UniformByName("Emissive")
@@ -571,8 +585,14 @@ func (rb *RenderTexture) SetMat(mat *Material, sc *Scene) error {
 	spcu.SetValue(spcv)
 	shu := pr.UniformByName("Shiny")
 	shu.SetValue(mat.Shiny)
+	btu := pr.UniformByName("Bright")
+	btu.SetValue(mat.Bright)
 	txu := pr.UniformByName("Tex")
 	txu.SetValue(0)
+	rpu := pr.UniformByName("TexRepeat")
+	rpu.SetValue(mat.Tiling.Repeat)
+	ofu := pr.UniformByName("TexOff")
+	ofu.SetValue(mat.Tiling.Off)
 	gpu.Draw.CullFace(mat.CullFront, mat.CullBack, true) // back face culling, std CCW ordering
 	return nil
 }

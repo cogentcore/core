@@ -449,8 +449,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	ch := string(kt.Chord())
 	// fmt.Printf(ch)
 	orbDeg := float32(5)
-	panDel := float32(.1)
-	zoomPct := float32(.1)
+	panDel := float32(.2)
+	zoomPct := float32(.05)
 	switch ch {
 	case "UpArrow":
 		sc.Camera.Orbit(0, orbDeg)

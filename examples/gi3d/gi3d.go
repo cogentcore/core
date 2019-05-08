@@ -115,8 +115,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor := sc.AddNewObject("floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	// floor.Mat.Color.SetString("tan", nil)
-	floor.Mat.Emissive.SetString("tan", nil)
+	// floor.Mat.Emissive.SetString("tan", nil)
+	floor.Mat.Bright = 3
 	floor.Mat.SetTexture(sc, grtx.Name())
+	floor.Mat.Tiling.Repeat.Set(40, 40)
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y)
 

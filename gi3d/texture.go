@@ -23,9 +23,10 @@ type Texture interface {
 	// Must be called in context on main thread
 	Init(sc *Scene) error
 
-	// Activate activates this texture on the GPU, in preparation for rendering
+	// Activate activates this texture on the GPU, at given texture number.
+	// in preparation for rendering
 	// Must be called in context on main thread
-	Activate(sc *Scene)
+	Activate(sc *Scene, texNo int)
 }
 
 // TextureFile is a texture loaded from a file
@@ -69,11 +70,11 @@ func (tx *TextureFile) Init(sc *Scene) error {
 
 // Activate activates this texture on the GPU, in preparation for rendering
 // Must be called in context on main thread
-func (tx *TextureFile) Activate(sc *Scene) {
+func (tx *TextureFile) Activate(sc *Scene, texNo int) {
 	if tx.Tex == nil {
 		tx.Init(sc)
 	}
-	tx.Tex.Activate(0)
+	tx.Tex.Activate(texNo)
 }
 
 // TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport

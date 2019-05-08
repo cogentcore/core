@@ -9,7 +9,21 @@ import (
 	"log"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 )
+
+// Tiling are the texture tiling parameters
+type Tiling struct {
+	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
+	Off    mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
+}
+
+// Defaults sets default tiling params if not yet initialized
+func (tl *Tiling) Defaults() {
+	if tl.Repeat.IsNil() {
+		tl.Repeat.Set(1, 1)
+	}
+}
 
 // Material describes the material properties of a surface (colors, shininess, texture)
 // i.e., phong lighting parameters.
@@ -22,7 +36,9 @@ type Material struct {
 	Emissive  gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
 	Specular  gi.Color `desc:"shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
 	Shiny     float32  `desc:"specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Specular color to affect overall shininess effect."`
+	Bright    float32  `desc:"overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"`
 	Texture   TexName  `desc:"texture to provide color for the surface"`
+	Tiling    Tiling   `view:"inline" viewif:"Texture!=''" desc:"texture tiling parameters -- repeat and offset"`
 	CullBack  bool     `desc:"cull the back-facing surfaces"`
 	CullFront bool     `desc:"cull the front-facing surfaces"`
 	TexPtr    Texture  `view:"-" desc:"pointer to texture"`
@@ -34,6 +50,8 @@ func (mt *Material) Defaults() {
 	mt.Emissive.SetUInt8(0, 0, 0, 0)
 	mt.Specular.SetUInt8(255, 255, 255, 255)
 	mt.Shiny = 30
+	mt.Bright = 1
+	mt.Tiling.Defaults()
 	mt.CullBack = true
 }
 
@@ -66,13 +84,16 @@ func (mt *Material) SetTexture(sc *Scene, texName string) error {
 	return nil
 }
 
-// Validate checks that material texture is valid if set
+// Validate does overall material validation, including checking that material
+// texture is valid if set
 func (mt *Material) Validate(sc *Scene) error {
+	if mt.Bright == 0 {
+		mt.Bright = 1
+	}
+	mt.Tiling.Defaults()
 	if mt.Texture == "" {
 		mt.TexPtr = nil
-		return nil
-	}
-	if mt.TexPtr == nil || mt.TexPtr.Name() != string(mt.Texture) {
+	} else if mt.TexPtr == nil || mt.TexPtr.Name() != string(mt.Texture) {
 		err := mt.SetTexture(sc, string(mt.Texture))
 		if err != nil {
 			return err
