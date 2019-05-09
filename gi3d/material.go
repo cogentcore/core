@@ -66,9 +66,10 @@ func (mt *Material) NoTexture() {
 	mt.TexPtr = nil
 }
 
-// SetTexture sets material to use given texture name (textures are accessed by name on Scene)
-// if name is empty, then texture is reset
-func (mt *Material) SetTexture(sc *Scene, texName string) error {
+// SetTextureName sets material to use given texture name
+// (textures are accessed by name on Scene).
+// If name is empty, then texture is reset
+func (mt *Material) SetTextureName(sc *Scene, texName string) error {
 	if texName == "" {
 		mt.NoTexture()
 		return nil
@@ -84,6 +85,16 @@ func (mt *Material) SetTexture(sc *Scene, texName string) error {
 	return nil
 }
 
+// SetTexture sets material to use given texture
+func (mt *Material) SetTexture(sc *Scene, tex Texture) {
+	mt.TexPtr = tex
+	if mt.TexPtr != nil {
+		mt.Texture = TexName(mt.TexPtr.Name())
+	} else {
+		mt.Texture = ""
+	}
+}
+
 // Validate does overall material validation, including checking that material
 // texture is valid if set
 func (mt *Material) Validate(sc *Scene) error {
@@ -94,7 +105,7 @@ func (mt *Material) Validate(sc *Scene) error {
 	if mt.Texture == "" {
 		mt.TexPtr = nil
 	} else if mt.TexPtr == nil || mt.TexPtr.Name() != string(mt.Texture) {
-		err := mt.SetTexture(sc, string(mt.Texture))
+		err := mt.SetTextureName(sc, string(mt.Texture))
 		if err != nil {
 			return err
 		}

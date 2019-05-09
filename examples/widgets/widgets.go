@@ -42,7 +42,7 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo\x00", width, height, true) // true = pixel sizes
+	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
 
 	icnm := "widget-wedge-down"
 
@@ -70,7 +70,7 @@ func mainrun() {
 	vp.CSS = css
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewValue(1, units.Ex))
+	mfr.SetProp("spacing", units.NewEx(1))
 	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
 	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
@@ -107,15 +107,15 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	blab.Selectable = true
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-	brow.SetProp("spacing", units.NewValue(2, units.Ex))
+	brow.SetProp("spacing", units.NewEx(2))
 	brow.SetProp("horizontal-align", gi.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	brow.SetStretchMaxWidth()
 
 	button1 := gi.AddNewButton(brow, "button1")
 	button1.SetProp("#icon", ki.Props{ // note: must come before SetIcon
-		"width":  units.NewValue(1.5, units.Em),
-		"height": units.NewValue(1.5, units.Em),
+		"width":  units.NewEm(1.5),
+		"height": units.NewEm(1.5),
 	})
 	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
@@ -181,7 +181,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	gi.AddNewLabel(slrow, "slab", "Sliders:")
 
 	srow := gi.AddNewLayout(mfr, "srow", gi.LayoutHoriz)
-	srow.SetProp("spacing", units.NewValue(2, units.Ex))
+	srow.SetProp("spacing", units.NewEx(2))
 	srow.SetProp("horizontal-align", "left")
 	srow.SetStretchMaxWidth()
 
@@ -189,8 +189,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider1.Dim = gi.X
 	slider1.Class = "hslides"
 	slider1.Defaults()
-	slider1.SetMinPrefWidth(units.NewValue(20, units.Em))
-	slider1.SetMinPrefHeight(units.NewValue(2, units.Em))
+	slider1.SetMinPrefWidth(units.NewEm(20))
+	slider1.SetMinPrefHeight(units.NewEm(2))
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
@@ -199,8 +199,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = gi.Y
 	slider2.Defaults()
-	slider2.SetMinPrefHeight(units.NewValue(10, units.Em))
-	slider2.SetMinPrefWidth(units.NewValue(1, units.Em))
+	slider2.SetMinPrefHeight(units.NewEm(10))
+	slider2.SetMinPrefWidth(units.NewEm(1))
 	slider2.SetStretchMaxHeight()
 	slider2.SetValue(0.5)
 
@@ -216,8 +216,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar1.Dim = gi.X
 	scrollbar1.Class = "hslides"
 	scrollbar1.Defaults()
-	scrollbar1.SetMinPrefWidth(units.NewValue(20, units.Em))
-	scrollbar1.SetMinPrefHeight(units.NewValue(1, units.Em))
+	scrollbar1.SetMinPrefWidth(units.NewEm(20))
+	scrollbar1.SetMinPrefHeight(units.NewEm(1))
 	scrollbar1.SetThumbValue(0.25)
 	scrollbar1.SetValue(0.25)
 	// scrollbar1.Snap = true
@@ -229,8 +229,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar2 := gi.AddNewScrollBar(srow, "scrollbar2")
 	scrollbar2.Dim = gi.Y
 	scrollbar2.Defaults()
-	scrollbar2.SetMinPrefHeight(units.NewValue(10, units.Em))
-	scrollbar2.SetMinPrefWidth(units.NewValue(1, units.Em))
+	scrollbar2.SetMinPrefHeight(units.NewEm(10))
+	scrollbar2.SetMinPrefWidth(units.NewEm(1))
 	scrollbar2.SetStretchMaxHeight()
 	scrollbar2.SetThumbValue(0.1)
 	scrollbar2.SetValue(0.5)
@@ -245,7 +245,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	txlrow := gi.AddNewLayout(mfr, "txlrow", gi.LayoutHoriz)
 	gi.AddNewLabel(txlrow, "txlab", "Text Widgets:")
 	txrow := gi.AddNewLayout(mfr, "txrow", gi.LayoutHoriz)
-	txrow.SetProp("spacing", units.NewValue(2, units.Ex))
+	txrow.SetProp("spacing", units.NewEx(2))
 	// txrow.SetProp("horizontal-align", gi.AlignJustify)
 	txrow.SetStretchMaxWidth()
 

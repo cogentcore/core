@@ -25,9 +25,14 @@ type Pose struct {
 
 var KiT_Pose = kit.Types.AddType(&Pose{}, PoseProps)
 
+// Defaults sets defaults only if current values are nil
 func (ps *Pose) Defaults() {
-	ps.Scale.Set(1, 1, 1)
-	ps.Quat.SetIdentity()
+	if ps.Scale.IsNil() {
+		ps.Scale.Set(1, 1, 1)
+	}
+	if ps.Quat.IsNil() {
+		ps.Quat.SetIdentity()
+	}
 }
 
 // CopyFrom copies just the pose information from the other pose, critically
@@ -42,19 +47,13 @@ func (ps *Pose) CopyFrom(op *Pose) {
 // UpdateMatrix updates the local transform matrix based on its position, quaternion, and scale.
 // Also checks for degenerate nil values
 func (ps *Pose) UpdateMatrix() {
-	if ps.Scale.IsNil() {
-		ps.Scale.Set(1, 1, 1)
-	}
-	if ps.Quat.IsNil() {
-		ps.Quat.SetIdentity()
-	}
+	ps.Defaults()
 	ps.Matrix.SetTransform(ps.Pos, ps.Quat, ps.Scale)
 }
 
 // UpdateWorldMatrix updates the world transform matrix based on Matrix and parent's WorldMatrix.
-// Also calls UpdateMatrix
+// Does NOT call UpdateMatrix so that can include other factors as needed.
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
-	ps.UpdateMatrix()
 	if parWorld != nil {
 		ps.ParMatrix = *parWorld
 	}

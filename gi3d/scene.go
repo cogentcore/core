@@ -706,6 +706,7 @@ func (sc *Scene) Render() bool {
 		sc.Render3D()
 		gpu.Draw.Flush()
 		sc.Tex = sc.Frame.Texture()
+		sc.Tex.SetBotZero(true) // this has Y=0 at bottom!
 	})
 	return true
 }
@@ -731,8 +732,7 @@ func (sc *Scene) DirectWinUpload() bool {
 	wt := sc.Win.OSWin.WinTex()
 	oswin.TheApp.RunOnMain(func() {
 		sc.Win.OSWin.Activate()
-		// wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, &oswin.DrawOptions{FlipSrcY: true})
-		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, nil)
+		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, nil) // &oswin.DrawOptions{FlipY: true})
 	})
 	sc.Win.UpdateSig() // trigger publish
 	return true
@@ -741,7 +741,7 @@ func (sc *Scene) DirectWinUpload() bool {
 // Render3D renders the scene to the framebuffer
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D() {
-	var rcs [RenderClassesN][]*Object
+	var rcs [RenderClassesN][]Node3D
 
 	sc.Camera.Pose.UpdateMatrix()
 	// Prepare for frustum culling
@@ -762,14 +762,14 @@ func (sc *Scene) Render3D() {
 		if !nii.IsObject() {
 			return true
 		}
-		obj := nii.AsObject()
 		nii.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
+		wmat := nii.WorldMatrix()
 		bba := nii.BBox()
 		bb := bba.BBox
-		bb.MulMat4(&ni.Pose.WorldMatrix)
+		bb.MulMat4(wmat)
 		if true || frustum.IntersectsBox(bb) { // todo: remove true..
-			rc := obj.RenderClass()
-			rcs[rc] = append(rcs[rc], obj)
+			rc := nii.RenderClass()
+			rcs[rc] = append(rcs[rc], nii)
 		}
 		return true
 	})
@@ -788,7 +788,7 @@ func (sc *Scene) Render3D() {
 		case RClassTransUniform:
 			rnd = sc.Renders.Renders["RenderUniformColor"]
 			gpu.Draw.Op(draw.Over) // alpha
-		case RClassTexture:
+		case RClassOpaqueTexture:
 			rnd = sc.Renders.Renders["RenderTexture"]
 			gpu.Draw.Op(draw.Src)
 		case RClassOpaqueVertex:
@@ -797,10 +797,13 @@ func (sc *Scene) Render3D() {
 		case RClassTransVertex:
 			rnd = sc.Renders.Renders["RenderVertexColor"]
 			gpu.Draw.Op(draw.Over) // alpha
+		case RClassTransTexture:
+			rnd = sc.Renders.Renders["RenderTexture"]
+			gpu.Draw.Op(draw.Over) // alpha
 		}
 		rnd.Activate(&sc.Renders) // use same program for all..
 		for _, obj := range objs {
-			obj.This().(Node3D).Render3D(sc, rc, rnd)
+			obj.Render3D(sc, rc, rnd)
 		}
 	}
 }

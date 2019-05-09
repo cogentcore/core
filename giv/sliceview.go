@@ -228,8 +228,8 @@ func (sv *SliceView) ConfigSliceGrid(forceUpdt bool) {
 	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", nWidgPerRow)
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewValue(1.5, units.Em))
-	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
+	sg.SetMinPrefHeight(units.NewEm(1.5))
+	sg.SetMinPrefWidth(units.NewEm(10))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 

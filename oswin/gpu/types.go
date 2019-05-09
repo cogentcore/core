@@ -62,6 +62,9 @@ var FUniType = UniType{Type: Float32}
 // IUniType is a single int32
 var IUniType = UniType{Type: Int}
 
+// BUniType is a single bool
+var BUniType = UniType{Type: Bool}
+
 // Vec2fUniType is a 2-vector of float32
 var Vec2fUniType = UniType{Type: Float32, Vec: 2}
 

@@ -44,6 +44,9 @@ type Node3D interface {
 	// Called during rendering.
 	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
 
+	// WorldMatrix returns the world matrix for this node
+	WorldMatrix() *mat32.Mat4
+
 	// BBox returns the bounding box information for this node -- from Mesh or aggregate for groups
 	BBox() *BBox
 
@@ -67,6 +70,10 @@ type Node3D interface {
 
 	// Init3D does 3D intialization
 	Init3D(sc *Scene)
+
+	// RenderClass returns the class of rendering for this object
+	// used for organizing the ordering of rendering
+	RenderClass() RenderClasses
 
 	// Render3D is called by Scene Render3D on main thread,
 	// everything ready to go..
@@ -155,6 +162,8 @@ func (nb *Node3DBase) WorldMatrixUpdated() bool {
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
 func (nb *Node3DBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
+	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
+	// automatic transforms as needed
 	nb.Pose.UpdateWorldMatrix(parWorld)
 	nb.SetFlag(int(WorldMatrixUpdated))
 }
@@ -177,6 +186,11 @@ func (nb *Node3DBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
 }
 
+// WorldMatrix returns the world matrix for this node
+func (nb *Node3DBase) WorldMatrix() *mat32.Mat4 {
+	return &nb.Pose.WorldMatrix
+}
+
 func (nb *Node3DBase) Init3D(sc *Scene) {
 	nb.NodeSig.Connect(nb.This(), func(recnb, sendk ki.Ki, sig int64, data interface{}) {
 		rnbi, rnb := KiToNode3D(recnb)
@@ -186,7 +200,7 @@ func (nb *Node3DBase) Init3D(sc *Scene) {
 		if !rnb.IsDeleted() && !rnb.IsDestroyed() {
 			scci := rnb.ParentByType(KiT_Scene, true)
 			if scci != nil {
-				rnbi.UpdateWorldMatrix(nil)
+				rnbi.UpdateWorldMatrix(nil) // nil = use cached last one
 				rnbi.UpdateWorldMatrixChildren()
 				scci.(*Scene).DirectWinUpload()
 			}

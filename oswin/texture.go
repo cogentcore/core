@@ -53,7 +53,7 @@ type Texture interface {
 	// Open loads texture image from file.
 	// Format inferred from filename -- JPEG and PNG supported by default.
 	// Generally call this prior to doing Activate --
-	// If Activate()'d, then must be called with a valid gpu context
+	// if Activate()'d, then must be called with a valid gpu context
 	// and on proper thread for that context.
 	Open(path string) error
 
@@ -98,6 +98,16 @@ type Texture interface {
 	// Bounds returns the bounds of the Texture's image. It is equal to
 	// image.Rectangle{Max: t.Size()}.
 	Bounds() image.Rectangle
+
+	// BotZero returns true if this texture has the Y=0 pixels at the bottom
+	// of the image.  Otherwise, Y=0 is at the top, which is the default
+	// for most images loaded from files.
+	BotZero() bool
+
+	// SetBotZero sets whether this texture has the Y=0 pixels at the bottom
+	// of the image.  Otherwise, Y=0 is at the top, which is the default
+	// for most images loaded from files.
+	SetBotZero(botzero bool)
 
 	// Activate establishes the GPU resources and handle for the
 	// texture, using the given texture number (0-31 range).
@@ -149,10 +159,25 @@ type Texture interface {
 // Copy and Scale are more specific versions of Draw. The affected dst pixels
 // are an axis-aligned rectangle, quantized to the pixel grid. Copy copies
 // pixels in a 1:1 manner, Scale is more general. They have simpler parameters
-// than Draw, using ints instead of float64s.
+// than the full matrix used by Draw.
 //
 // When drawing on a Window, there will not be any visible effect until Publish
 // is called.
+//
+// Draw automatically takes into account the Y-axis orientation of the destination
+// and source textures.
+//
+// If the destination is a Window, then its Y=0 is always at the bottom.
+//
+// If the destination is a Texture, its BotZero parameter determines whether
+// Y=0 is at the bottom or top -- the default is Y=0 at the top, which is
+// true for textures loaded from images files or rendered with that standard.
+//
+// The source texture also has its own BotZero parameter, so that determines
+// whether it is flipped relative to the destination during the rendering.
+//
+// Finally, if the FlipY option is passed, the source is flipped relative to
+// that determined by the default rules above.
 type Drawer interface {
 	// Draw draws the sub-Texture defined by src and sr to the destination (the
 	// method receiver). src2dst defines how to transform src coordinates to
@@ -201,8 +226,7 @@ const (
 
 // DrawOptions are optional arguments to Draw.
 type DrawOptions struct {
-	// FlipSrcY means flip the Y (vertical) axis of the source when rendering into target
-	// this is critical for e.g., rendering framebuffer output to a window, because
-	// framebuffer has bottom-left as start of texture, but window render designed for top-left.
-	FlipSrcY bool
+	// FlipY means flip the Y (vertical) axis of the source when rendering into destination,
+	// relative to the default orientation of the source as determined by its BotZero setting.
+	FlipY bool
 }

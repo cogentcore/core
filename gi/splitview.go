@@ -46,7 +46,7 @@ func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 }
 
 var SplitViewProps = ki.Props{
-	"handle-size": units.NewValue(10, units.Px),
+	"handle-size": units.NewPx(10),
 	"max-width":   -1.0,
 	"max-height":  -1.0,
 	"margin":      0,
@@ -418,17 +418,17 @@ type Splitter struct {
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
-	"padding":          units.NewValue(6, units.Px),
-	"margin":           units.NewValue(0, units.Px),
+	"padding":          units.NewPx(6),
+	"margin":           units.NewPx(0),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"max-width":      units.NewValue(1, units.Em),
-		"max-height":     units.NewValue(5, units.Em),
-		"min-width":      units.NewValue(1, units.Em),
-		"min-height":     units.NewValue(5, units.Em),
-		"margin":         units.NewValue(0, units.Px),
-		"padding":        units.NewValue(0, units.Px),
+		"max-width":      units.NewEm(1),
+		"max-height":     units.NewEm(5),
+		"min-width":      units.NewEm(1),
+		"min-height":     units.NewEm(5),
+		"margin":         units.NewPx(0),
+		"padding":        units.NewPx(0),
 		"vertical-align": AlignMiddle,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
@@ -442,7 +442,7 @@ var SplitterProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
+		"border-width":     units.NewPx(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{},
@@ -458,7 +458,7 @@ var SplitterProps = ki.Props{
 
 func (sr *Splitter) Defaults() {
 	sr.ValThumb = false
-	sr.ThumbSize = units.NewValue(10, units.Px) // will be replaced by parent HandleSize
+	sr.ThumbSize = units.NewPx(10) // will be replaced by parent HandleSize
 	sr.Step = 0.01
 	sr.PageStep = 0.1
 	sr.Max = 1.0

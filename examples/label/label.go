@@ -81,7 +81,7 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	gi.AddNewLabel(mfr, "etxt", "this is to test bottom after word wrapped text")
 
 	str := gi.AddNewStretch(mfr, "str")
-	str.SetMinPrefHeight(units.NewValue(5, units.Em))
+	str.SetMinPrefHeight(units.NewEm(5))
 
 	gi.AddNewLabel(mfr, "etxt2", "this is after final stretch")
 

@@ -30,7 +30,7 @@ var KiT_Object = kit.Types.AddType(&Object{}, nil)
 // AddNewObject adds a new object of given name and mesh to given parent
 func AddNewObject(sc *Scene, parent ki.Ki, name string, meshName string) *Object {
 	obj := parent.AddNewChild(KiT_Object, name).(*Object)
-	obj.SetMesh(sc, meshName)
+	obj.SetMeshName(sc, meshName)
 	obj.Defaults()
 	return obj
 }
@@ -51,8 +51,8 @@ func (obj *Object) Defaults() {
 	obj.Mat.Defaults()
 }
 
-// SetMesh sets mesh to given mesh name -- requires Scene to lookup mesh by name
-func (obj *Object) SetMesh(sc *Scene, meshName string) error {
+// SetMeshName sets mesh to given mesh name.
+func (obj *Object) SetMeshName(sc *Scene, meshName string) error {
 	ms, ok := sc.Meshes[meshName]
 	if !ok {
 		err := fmt.Errorf("gi3d.Object: %s SetMesh name: %s not found in scene", obj.PathUnique(), meshName)
@@ -62,6 +62,16 @@ func (obj *Object) SetMesh(sc *Scene, meshName string) error {
 	obj.Mesh = MeshName(meshName)
 	obj.MeshPtr = ms
 	return nil
+}
+
+// SetMesh sets mesh
+func (obj *Object) SetMesh(sc *Scene, ms Mesh) {
+	obj.MeshPtr = ms
+	if obj.MeshPtr != nil {
+		obj.Mesh = MeshName(obj.MeshPtr.Name())
+	} else {
+		obj.Mesh = ""
+	}
 }
 
 func (obj *Object) Init3D(sc *Scene) {
@@ -80,7 +90,7 @@ func (obj *Object) Validate(sc *Scene) error {
 		return err
 	}
 	if obj.MeshPtr == nil || obj.MeshPtr.Name() != string(obj.Mesh) {
-		err := obj.SetMesh(sc, string(obj.Mesh))
+		err := obj.SetMeshName(sc, string(obj.Mesh))
 		if err != nil {
 			return err
 		}
@@ -121,7 +131,7 @@ func (obj *Object) BBox() *BBox {
 func (obj *Object) RenderClass() RenderClasses {
 	switch {
 	case obj.Mat.TexPtr != nil:
-		return RClassTexture
+		return RClassOpaqueTexture
 	case obj.MeshPtr.HasColor():
 		if obj.MeshPtr.IsTransparent() {
 			return RClassTransVertex
@@ -144,7 +154,7 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	case RClassOpaqueVertex, RClassTransVertex:
 		rndv := rnd.(*RenderVertexColor)
 		rndv.SetMat(&obj.Mat, sc)
-	case RClassTexture:
+	case RClassOpaqueTexture, RClassTransTexture:
 		rndt := rnd.(*RenderTexture)
 		rndt.SetMat(&obj.Mat, sc)
 	}

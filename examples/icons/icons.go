@@ -38,7 +38,7 @@ func mainrun() {
 	row1.SetStretchMaxWidth()
 
 	spc := gi.AddNewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
+	spc.SetFixedHeight(units.NewEm(2))
 
 	gi.AddNewStretch(row1, "str1")
 	lab1 := gi.AddNewLabel(row1, "lab1", "These are all the GoGi Icons, in a small and large size")
@@ -66,16 +66,16 @@ func mainrun() {
 		gi.AddNewLabel(vb, "lab1", icnms)
 
 		smico := gi.AddNewIcon(vb, icnms, icnms)
-		smico.SetMinPrefWidth(units.NewValue(20, units.Px))
-		smico.SetMinPrefHeight(units.NewValue(20, units.Px))
+		smico.SetMinPrefWidth(units.NewPx(20))
+		smico.SetMinPrefHeight(units.NewPx(20))
 		smico.SetProp("background-color", color.Transparent)
 		smico.SetProp("fill", "#88F")
 		smico.SetProp("stroke", "black")
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
 		ico := gi.AddNewIcon(vb, icnms+"_big", icnms)
-		ico.SetMinPrefWidth(units.NewValue(100, units.Px))
-		ico.SetMinPrefHeight(units.NewValue(100, units.Px))
+		ico.SetMinPrefWidth(units.NewPx(100))
+		ico.SetMinPrefHeight(units.NewPx(100))
 		ico.SetProp("background-color", color.Transparent)
 		ico.SetProp("fill", "#88F")
 		ico.SetProp("stroke", "black")

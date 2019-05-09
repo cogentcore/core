@@ -89,11 +89,11 @@ var TextViewProps = ki.Props{
 	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
-	"cursor-width":     units.NewValue(3, units.Px),
+	"cursor-width":     units.NewPx(3),
 	"border-color":     &gi.Prefs.Colors.Border,
 	"border-style":     gi.BorderSolid,
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewPx(2),
+	"margin":           units.NewPx(2),
 	"vertical-align":   gi.AlignTop,
 	"text-align":       gi.AlignLeft,
 	"tab-size":         4,
@@ -1751,7 +1751,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 	tff := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+1, "find").(*gi.ComboBox)
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
-	tff.SetMinPrefWidth(units.NewValue(60, units.Ch))
+	tff.SetMinPrefWidth(units.NewCh(60))
 	tff.ConfigParts()
 	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
 	if find != "" {
@@ -1761,7 +1761,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 	tfr := frame.InsertNewChild(gi.KiT_ComboBox, prIdx+2, "repl").(*gi.ComboBox)
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
-	tfr.SetMinPrefWidth(units.NewValue(60, units.Ch))
+	tfr.SetMinPrefWidth(units.NewCh(60))
 	tfr.ConfigParts()
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 

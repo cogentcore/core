@@ -68,8 +68,8 @@ func mainrun() {
 	txly1 := splt.AddNewChild(gi.KiT_Layout, "view-layout-1").(*gi.Layout)
 	txly1.SetStretchMaxWidth()
 	txly1.SetStretchMaxHeight()
-	txly1.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	txly1.SetMinPrefHeight(units.NewValue(10, units.Ch))
+	txly1.SetMinPrefWidth(units.NewCh(20))
+	txly1.SetMinPrefHeight(units.NewCh(10))
 
 	txed1 := txly1.AddNewChild(giv.KiT_TextView, "textview-1").(*giv.TextView)
 	txed1.Viewport = vp
@@ -78,8 +78,8 @@ func mainrun() {
 	txly2 := splt.AddNewChild(gi.KiT_Layout, "view-layout-2").(*gi.Layout)
 	txly2.SetStretchMaxWidth()
 	txly2.SetStretchMaxHeight()
-	txly2.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	txly2.SetMinPrefHeight(units.NewValue(10, units.Ch))
+	txly2.SetMinPrefWidth(units.NewCh(20))
+	txly2.SetMinPrefHeight(units.NewCh(10))
 
 	txed2 := txly2.AddNewChild(giv.KiT_TextView, "textview-2").(*giv.TextView)
 	txed2.Viewport = vp

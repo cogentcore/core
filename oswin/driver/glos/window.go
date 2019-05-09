@@ -225,7 +225,7 @@ func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectan
 			w.drawQuads = theApp.drawQuadsBuff()
 		}
 		sz := w.Size()
-		theApp.draw(sz, src2dst, src, sr, op, opts, w.drawQuads, false)
+		theApp.draw(sz, src2dst, src, sr, op, opts, w.drawQuads, true) // true = dest has botZero
 	})
 }
 
@@ -238,7 +238,7 @@ func (w *windowImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.R
 			w.fillQuads = theApp.fillQuadsBuff()
 		}
 		sz := w.Size()
-		theApp.drawUniform(sz, src2dst, src, sr, op, opts, w.fillQuads, false)
+		theApp.drawUniform(sz, src2dst, src, sr, op, opts, w.fillQuads, true) // true = dest has botZero
 	})
 }
 
@@ -259,7 +259,7 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 			w.fillQuads = theApp.fillQuadsBuff()
 		}
 		sz := w.Size()
-		theApp.fillRect(sz, dr, src, op, w.fillQuads, false)
+		theApp.fillRect(sz, dr, src, op, w.fillQuads, true) // true = dest has botZero
 	})
 }
 

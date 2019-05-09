@@ -40,7 +40,7 @@ func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
 }
 
 var MapViewInlineProps = ki.Props{
-	"min-width": units.NewValue(60, units.Ex),
+	"min-width": units.NewEx(60),
 }
 
 // todo: maybe figure out a way to share some of this redundant code..

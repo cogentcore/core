@@ -34,9 +34,9 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 }
 
 var MenuBarProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(0, units.Px),
-	"spacing":          units.NewValue(4, units.Px),
+	"padding":          units.NewPx(2),
+	"margin":           units.NewPx(0),
+	"spacing":          units.NewPx(4),
 	"color":            &Prefs.Colors.Font,
 	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }
@@ -281,9 +281,9 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 }
 
 var ToolBarProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(0, units.Px),
-	"spacing":          units.NewValue(4, units.Px),
+	"padding":          units.NewPx(2),
+	"margin":           units.NewPx(0),
+	"spacing":          units.NewPx(4),
 	"color":            &Prefs.Colors.Font,
 	"background-color": "linear-gradient(pref(Control), highlight-10)",
 }

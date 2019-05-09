@@ -34,6 +34,7 @@ type textureImpl struct {
 	handle    uint32
 	name      string
 	size      image.Point
+	botZero   bool
 	img       *image.RGBA // when loaded
 	fbuff     gpu.Framebuffer
 	drawQuads gpu.BufferMgr
@@ -184,6 +185,20 @@ func (tx *textureImpl) Bounds() image.Rectangle {
 	return image.Rectangle{Max: tx.size}
 }
 
+// BotZero returns true if this texture has the Y=0 pixels at the bottom
+// of the image.  Otherwise, Y=0 is at the top, which is the default
+// for most images loaded from files.
+func (tx *textureImpl) BotZero() bool {
+	return tx.botZero
+}
+
+// SetBotZero sets whether this texture has the Y=0 pixels at the bottom
+// of the image.  Otherwise, Y=0 is at the top, which is the default
+// for most images loaded from files.
+func (tx *textureImpl) SetBotZero(botzero bool) {
+	tx.botZero = botzero
+}
+
 // SetSize sets the size of the texture.
 // If texture has been Activate'd, then this resizes the GPU side as well.
 // If Activate()'d, then must be called with a valid gpu context
@@ -307,7 +322,7 @@ func (tx *textureImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rect
 	if tx.drawQuads == nil {
 		tx.drawQuads = theApp.drawQuadsBuff()
 	}
-	theApp.draw(sz, src2dst, src, sr, op, opts, tx.drawQuads, true) // target is texture
+	theApp.draw(sz, src2dst, src, sr, op, opts, tx.drawQuads, tx.botZero)
 	tx.DeActivateFramebuffer()
 }
 
@@ -318,7 +333,7 @@ func (tx *textureImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image
 	if tx.fillQuads == nil {
 		tx.fillQuads = theApp.fillQuadsBuff()
 	}
-	theApp.drawUniform(sz, src2dst, src, sr, op, opts, tx.fillQuads, true)
+	theApp.drawUniform(sz, src2dst, src, sr, op, opts, tx.fillQuads, tx.botZero)
 	tx.DeActivateFramebuffer()
 }
 
@@ -337,6 +352,6 @@ func (tx *textureImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	if tx.fillQuads == nil {
 		tx.fillQuads = theApp.fillQuadsBuff()
 	}
-	theApp.fillRect(sz, dr, src, op, tx.fillQuads, true)
+	theApp.fillRect(sz, dr, src, op, tx.fillQuads, tx.botZero)
 	tx.DeActivateFramebuffer()
 }

@@ -85,8 +85,8 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 
 var LabelProps = ki.Props{
 	"white-space":      WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewPx(2),
+	"margin":           units.NewPx(2),
 	"vertical-align":   AlignTop,
 	"color":            &Prefs.Colors.Font,
 	"background-color": color.Transparent,

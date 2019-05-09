@@ -75,8 +75,8 @@ func (cv *ColorView) SliderLayConfig() {
 	v, _ := cv.Value()
 	if mods {
 		cv.ConfigSliderGrid()
-		v.SetProp("min-width", units.NewValue(6, units.Em))
-		v.SetProp("min-height", units.NewValue(6, units.Em))
+		v.SetProp("min-width", units.NewEm(6))
+		v.SetProp("min-height", units.NewEm(6))
 	} else {
 		updt = vl.UpdateStart()
 	}
@@ -187,8 +187,8 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = gi.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
+	sl.SetMinPrefWidth(units.NewCh(20))
+	sl.SetMinPrefHeight(units.NewEm(2))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
 			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
@@ -239,8 +239,8 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = gi.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SetMinPrefWidth(units.NewValue(20, units.Ch))
-	sl.SetMinPrefHeight(units.NewValue(2, units.Em))
+	sl.SetMinPrefWidth(units.NewCh(20))
+	sl.SetMinPrefHeight(units.NewEm(2))
 	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) {
 			cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)

@@ -462,13 +462,13 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 
 var TooltipFrameProps = ki.Props{
 	"background-color":    &Prefs.Colors.Highlight,
-	"border-width":        units.NewValue(0, units.Px),
+	"border-width":        units.NewPx(0),
 	"border-color":        "none",
-	"margin":              units.NewValue(0, units.Px),
-	"padding":             units.NewValue(2, units.Px),
-	"box-shadow.h-offset": units.NewValue(0, units.Px),
-	"box-shadow.v-offset": units.NewValue(0, units.Px),
-	"box-shadow.blur":     units.NewValue(0, units.Px),
+	"margin":              units.NewPx(0),
+	"padding":             units.NewPx(2),
+	"box-shadow.h-offset": units.NewPx(0),
+	"box-shadow.v-offset": units.NewPx(0),
+	"box-shadow.blur":     units.NewPx(0),
 	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
@@ -704,12 +704,12 @@ func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
 
 // SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
 func (wb *WidgetBase) SetStretchMaxWidth() {
-	wb.SetProp("max-width", units.NewValue(-1, units.Px))
+	wb.SetProp("max-width", units.NewPx(-1))
 }
 
 // SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
 func (wb *WidgetBase) SetStretchMaxHeight() {
-	wb.SetProp("max-height", units.NewValue(-1, units.Px))
+	wb.SetProp("max-height", units.NewPx(-1))
 }
 
 // SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value

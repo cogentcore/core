@@ -40,13 +40,13 @@ func AddNewTabView(parent ki.Ki, name string) *TabView {
 
 var TabViewProps = ki.Props{
 	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.NewValue(2, units.Px),
+	"border-width":     units.NewPx(2),
 	"background-color": &Prefs.Colors.Background,
 	"color":            &Prefs.Colors.Font,
 	"max-width":        -1,
 	"max-height":       -1,
-	"width":            units.NewValue(10, units.Em),
-	"height":           units.NewValue(10, units.Em),
+	"width":            units.NewEm(10),
+	"height":           units.NewEm(10),
 }
 
 // NTabs returns number of tabs
@@ -381,17 +381,17 @@ func (tv *TabView) InitTabView() {
 	tabs := AddNewFrame(tv, "tabs", LayoutHoriz)
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
-	// tabs.SetMinPrefWidth(units.NewValue(10, units.Em))
-	tabs.SetProp("height", units.NewValue(1.8, units.Em))
+	// tabs.SetMinPrefWidth(units.NewEm(10))
+	tabs.SetProp("height", units.NewEm(1.8))
 	tabs.SetProp("overflow", "hidden") // no scrollbars!
-	tabs.SetProp("padding", units.NewValue(0, units.Px))
-	tabs.SetProp("margin", units.NewValue(0, units.Px))
-	tabs.SetProp("spacing", units.NewValue(4, units.Px))
+	tabs.SetProp("padding", units.NewPx(0))
+	tabs.SetProp("margin", units.NewPx(0))
+	tabs.SetProp("spacing", units.NewPx(4))
 	tabs.SetProp("background-color", "linear-gradient(pref(Control), highlight-10)")
 
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
-	frame.SetMinPrefWidth(units.NewValue(10, units.Em))
-	frame.SetMinPrefHeight(units.NewValue(7, units.Em))
+	frame.SetMinPrefWidth(units.NewEm(10))
+	frame.SetMinPrefHeight(units.NewEm(7))
 	frame.SetStretchMaxWidth()
 	frame.SetStretchMaxHeight()
 
@@ -494,47 +494,47 @@ var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 var TabButtonMinWidth = float32(8)
 
 var TabButtonProps = ki.Props{
-	"min-width":        units.NewValue(TabButtonMinWidth, units.Ch),
-	"min-height":       units.NewValue(1.6, units.Em),
-	"border-width":     units.NewValue(0, units.Px),
-	"border-radius":    units.NewValue(0, units.Px),
+	"min-width":        units.NewCh(TabButtonMinWidth),
+	"min-height":       units.NewEm(1.6),
+	"border-width":     units.NewPx(0),
+	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
 	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
-	"padding":          units.NewValue(4, units.Px), // we go to edge of bar
-	"margin":           units.NewValue(0, units.Px),
+	"padding":          units.NewPx(4), // we go to edge of bar
+	"margin":           units.NewPx(0),
 	"indicator":        "close",
 	"#icon": ki.Props{
-		"width":   units.NewValue(1, units.Em),
-		"height":  units.NewValue(1, units.Em),
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
+		"width":   units.NewEm(1),
+		"height":  units.NewEm(1),
+		"margin":  units.NewPx(0),
+		"padding": units.NewPx(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
+		"margin":  units.NewPx(0),
+		"padding": units.NewPx(0),
 	},
 	"#close-stretch": ki.Props{
-		"width": units.NewValue(1, units.Ch),
+		"width": units.NewCh(1),
 	},
 	"#close": ki.Props{
-		"width":          units.NewValue(.5, units.Ex),
-		"height":         units.NewValue(.5, units.Ex),
-		"margin":         units.NewValue(0, units.Px),
-		"padding":        units.NewValue(0, units.Px),
+		"width":          units.NewEx(0.5),
+		"height":         units.NewEx(0.5),
+		"margin":         units.NewPx(0),
+		"padding":        units.NewPx(0),
 		"vertical-align": AlignBottom,
 	},
 	"#shortcut": ki.Props{
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
+		"margin":  units.NewPx(0),
+		"padding": units.NewPx(0),
 	},
 	"#sc-stretch": ki.Props{
-		"min-width": units.NewValue(2, units.Ch),
+		"min-width": units.NewCh(2),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -547,7 +547,7 @@ var TabButtonProps = ki.Props{
 		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
+		"border-width":     units.NewPx(2),
 		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{

@@ -34,11 +34,13 @@ const (
 type RenderClasses int32
 
 const (
-	RClassOpaqueUniform RenderClasses = iota
+	RClassNone RenderClasses = iota
+	RClassOpaqueUniform
 	RClassOpaqueVertex
-	RClassTexture
+	RClassOpaqueTexture
 	RClassTransUniform
 	RClassTransVertex
+	RClassTransTexture
 	RenderClassesN
 )
 
@@ -496,6 +498,7 @@ layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
 layout(location = 2) in vec2 TexUV;
 // layout(location = 3) in vec4 VtxColor;
+uniform bool FlipY;
 out vec4 Pos;
 out vec3 Norm;
 out vec3 CamDir;
@@ -507,6 +510,9 @@ void main() {
 	Norm = normalize(NormMatrix * VtxNorm);
 	CamDir = normalize(-Pos.xyz);
 	TexCoord = TexUV;
+	if(FlipY) {
+		TexCoord.y = 1 - TexCoord.y;
+	}
 	
 	gl_Position = MVPMatrix * vPos;
 }
@@ -563,6 +569,7 @@ void main() {
 	pr.AddUniform("Specular", gpu.Vec3fUniType, false, 0)
 	pr.AddUniform("Shiny", gpu.FUniType, false, 0)
 	pr.AddUniform("Bright", gpu.FUniType, false, 0)
+	pr.AddUniform("FlipY", gpu.BUniType, false, 0)
 	pr.AddUniform("Tex", gpu.IUniType, false, 0)
 	pr.AddUniform("TexRepeat", gpu.Vec2fUniType, false, 0)
 	pr.AddUniform("TexOff", gpu.Vec2fUniType, false, 0)
@@ -587,6 +594,8 @@ func (rb *RenderTexture) SetMat(mat *Material, sc *Scene) error {
 	shu.SetValue(mat.Shiny)
 	btu := pr.UniformByName("Bright")
 	btu.SetValue(mat.Bright)
+	flu := pr.UniformByName("FlipY")
+	flu.SetValue(!mat.TexPtr.BotZero()) // flip if not botzero..
 	txu := pr.UniformByName("Tex")
 	txu.SetValue(0)
 	rpu := pr.UniformByName("TexRepeat")

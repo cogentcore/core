@@ -139,17 +139,22 @@ func (app *appImpl) fillQuadsBuff() gpu.BufferMgr {
 
 // draw draws to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-// if target is a texture (trgTex), then origin is at bottom-left, whereas window is top-left
-func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, trgTex bool) {
+// dstBotZero is true if destination has Y=0 at bottom
+func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, dstBotZero bool) {
 	tx := src.(*textureImpl)
 	sr = sr.Intersect(tx.Bounds())
 	if sr.Empty() {
 		return
 	}
 
+	srcBotZero := src.BotZero()
+	if opts != nil && opts.FlipY {
+		srcBotZero = !srcBotZero
+	}
+
 	gpu.Draw.Op(op)
 	gpu.Draw.DepthTest(false)
-	gpu.Draw.CullFace(false, true, !trgTex) // cull back face -- trgTex has CW ordering
+	gpu.Draw.CullFace(false, true, dstBotZero) // cull back face -- dstBotZero = CCW, !dstBotZero = CW
 	gpu.Draw.StencilTest(false)
 	gpu.Draw.Multisample(false)
 	app.drawProg.Activate()
@@ -168,7 +173,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 		src2dst[1]*srcR+src2dst[4]*srcT+src2dst[7],
 		src2dst[0]*srcL+src2dst[3]*srcB+src2dst[6],
 		src2dst[1]*srcL+src2dst[4]*srcB+src2dst[7],
-		trgTex,
+		dstBotZero,
 	)
 	// fmt.Printf("trgTex: %v  matMVP: %v\n", trgTex, matMVP)
 
@@ -206,22 +211,17 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 	//	a10 +   0 + a12 = qy = py
 	//	  0 + a01 + a02 = sx = px
 	//	  0 + a11 + a12 = sy
+
 	var matUVP mat32.Mat3
-
-	flipy := false
-	if opts != nil && opts.FlipSrcY {
-		flipy = true
-	}
-
-	if (trgTex && !flipy) || (!trgTex && flipy) { // dir is flipped for trgtex
+	if srcBotZero {
 		matUVP = mat32.Mat3{
 			qx - px, 0, 0,
-			0, py - sy, 0,
+			0, py - sy, 0, // py - sy
 			px, sy, 1}
 	} else {
 		matUVP = mat32.Mat3{
 			qx - px, 0, 0,
-			0, sy - py, 0,
+			0, sy - py, 0, // sy - py
 			px, py, 1,
 		}
 	}
@@ -243,9 +243,10 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 
 // fill fills to current render target (could be window or framebuffer / texture)
 // proper context must have already been established outside this call!
-func (app *appImpl) fill(mvp mat32.Mat3, src color.Color, op draw.Op, qbuff gpu.BufferMgr, trgTex bool) {
+// dstBotZero is true if flipping Y axis
+func (app *appImpl) fill(mvp mat32.Mat3, src color.Color, op draw.Op, qbuff gpu.BufferMgr, dstBotZero bool) {
 	gpu.Draw.Op(op)
-	gpu.Draw.CullFace(false, true, !trgTex) // cull back face -- trgTex has CW ordering
+	gpu.Draw.CullFace(false, true, dstBotZero) // dstBotZero = CCW, else CW
 	gpu.Draw.DepthTest(false)
 	gpu.Draw.StencilTest(false)
 	gpu.Draw.Multisample(false)
@@ -269,7 +270,8 @@ func (app *appImpl) fill(mvp mat32.Mat3, src color.Color, op draw.Op, qbuff gpu.
 }
 
 // fillRect fills given rectangle, where dstSz is overall size of the destination (e.g., window)
-func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Color, op draw.Op, qbuff gpu.BufferMgr, trgTex bool) {
+// dstBotZero is true if destination has Y=0 at bottom
+func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Color, op draw.Op, qbuff gpu.BufferMgr, dstBotZero bool) {
 	minX := float32(dr.Min.X)
 	minY := float32(dr.Min.Y)
 	maxX := float32(dr.Max.X)
@@ -278,13 +280,14 @@ func (app *appImpl) fillRect(dstSz image.Point, dr image.Rectangle, src color.Co
 	mvp := calcMVP(dstSz.X, dstSz.Y,
 		minX, minY,
 		maxX, minY,
-		minX, maxY, trgTex,
+		minX, maxY, dstBotZero,
 	)
-	app.fill(mvp, src, op, qbuff, trgTex)
+	app.fill(mvp, src, op, qbuff, dstBotZero)
 }
 
 // drawUniform does a fill-like uniform color fill but with an arbitrary src2dst transform
-func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, trgTex bool) {
+// dstBotZero is true if destination has Y=0 at bottom
+func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions, qbuff gpu.BufferMgr, dstBotZero bool) {
 	minX := float32(sr.Min.X)
 	minY := float32(sr.Min.Y)
 	maxX := float32(sr.Max.X)
@@ -298,9 +301,9 @@ func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color
 		src2dst[1]*maxX+src2dst[4]*minY+src2dst[7],
 		src2dst[0]*minX+src2dst[3]*maxY+src2dst[6],
 		src2dst[1]*minX+src2dst[4]*maxY+src2dst[7],
-		trgTex,
+		dstBotZero,
 	)
-	app.fill(mvp, src, op, qbuff, trgTex)
+	app.fill(mvp, src, op, qbuff, dstBotZero)
 }
 
 // calcMVP returns the Model View Projection matrix that maps the quadCoords
@@ -311,28 +314,31 @@ func (app *appImpl) drawUniform(dstSz image.Point, src2dst mat32.Mat3, src color
 // no constraint that e.g. tlx < trx.
 //
 // In pixel space, the window ranges from (0, 0) to (widthPx, heightPx). The
-// Y-axis points downwards.
+// Y-axis points downwards (unless flipped).
 //
 // In vertex shader space, the window ranges from (-1, +1) to (+1, -1), which
 // is a 2-unit by 2-unit square. The Y-axis points upwards.
-func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, trgTex bool) mat32.Mat3 {
+//
+// if dstBotZero is true, then the y=0 is at bottom in dest, else top
+//
+func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, dstBotZero bool) mat32.Mat3 {
 	// Convert from pixel coords to vertex shader coords.
-	invHalfWidth := +2 / float32(widthPx)
-	invHalfHeight := -2 / float32(heightPx)
-	if trgTex {
+	invHalfWidth := 2 / float32(widthPx)
+	invHalfHeight := 2 / float32(heightPx)
+	if dstBotZero {
 		tlx = tlx*invHalfWidth - 1
-		tly = -1 - tly*invHalfHeight // -1 + min
+		tly = 1 - tly*invHalfHeight // 1 - min
 		trx = trx*invHalfWidth - 1
-		try = -1 - try*invHalfHeight
+		try = 1 - try*invHalfHeight // 1 - min
 		blx = blx*invHalfWidth - 1
-		bly = -1 - bly*invHalfHeight // -1 + min + max
+		bly = 1 - bly*invHalfHeight // 1 - (min + max)
 	} else {
 		tlx = tlx*invHalfWidth - 1
-		tly = tly*invHalfHeight + 1 // 1 - min
+		tly = tly*invHalfHeight - 1
 		trx = trx*invHalfWidth - 1
-		try = try*invHalfHeight + 1
+		try = try*invHalfHeight - 1
 		blx = blx*invHalfWidth - 1
-		bly = bly*invHalfHeight + 1 // 1 - (min + max)
+		bly = bly*invHalfHeight - 1
 	}
 
 	// The resultant affine matrix:
@@ -346,7 +352,8 @@ func calcMVP(widthPx, heightPx int, tlx, tly, trx, try, blx, bly float32, trgTex
 	}
 }
 
-// Note: arranged in CCW order
+// Note: arranged in CCW order for dstBotZero = true
+// if !dstBotZero then need to reverse culling!
 var quadCoords = mat32.ArrayF32{
 	0, 0, // top left
 	0, 1, // bottom left

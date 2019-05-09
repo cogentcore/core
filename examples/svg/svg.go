@@ -93,8 +93,8 @@ func mainrun() {
 	svge.InitScale()
 	svge.Fill = true
 	svge.SetProp("background-color", "white")
-	svge.SetProp("width", units.NewValue(float32(width-20), units.Px))
-	svge.SetProp("height", units.NewValue(float32(height-100), units.Px))
+	svge.SetProp("width", units.NewPx(float32(width-20)))
+	svge.SetProp("height", units.NewPx(float32(height-100)))
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
@@ -106,7 +106,7 @@ func mainrun() {
 
 	fnm := gi.AddNewTextField(tbar, "cur-fname")
 	TheFile = fnm
-	fnm.SetMinPrefWidth(units.NewValue(60, units.Ch))
+	fnm.SetMinPrefWidth(units.NewCh(60))
 
 	zmlb := gi.AddNewLabel(tbar, "zmlb", "Zoom: ")
 	zmlb.SetProp("vertical-align", gi.AlignMiddle)
@@ -120,11 +120,11 @@ func mainrun() {
 	zoomout.SetProp("margin", 0)
 	zoomout.SetProp("padding", 0)
 	zoomout.SetProp("#icon", ki.Props{
-		"width":  units.NewValue(1.5, units.Em),
-		"height": units.NewValue(1.5, units.Em),
+		"width":  units.NewEm(1.5),
+		"height": units.NewEm(1.5),
 	})
 	zoom := gi.AddNewSpinBox(tbar, "zoom")
-	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	// zoom.SetMinPrefWidth(units.NewEm(10))
 	zoom.SetValue(svge.Scale)
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
@@ -142,8 +142,8 @@ func mainrun() {
 	zoomin.SetProp("margin", 0)
 	zoomin.SetProp("padding", 0)
 	zoomin.SetProp("#icon", ki.Props{
-		"width":  units.NewValue(1.5, units.Em),
-		"height": units.NewValue(1.5, units.Em),
+		"width":  units.NewEm(1.5),
+		"height": units.NewEm(1.5),
 	})
 
 	gi.AddNewSpace(tbar, "spctr")
@@ -152,12 +152,12 @@ func mainrun() {
 	trlb.SetProp("vertical-align", gi.AlignMiddle)
 
 	trx := gi.AddNewSpinBox(tbar, "trx")
-	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	// zoom.SetMinPrefWidth(units.NewEm(10))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
 
 	try := gi.AddNewSpinBox(tbar, "try")
-	// zoom.SetMinPrefWidth(units.NewValue(10, units.Em))
+	// zoom.SetMinPrefWidth(units.NewEm(10))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
 

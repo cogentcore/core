@@ -1967,8 +1967,8 @@ func AddNewSpace(parent ki.Ki, name string) *Space {
 }
 
 var SpaceProps = ki.Props{
-	"width":  units.NewValue(1, units.Ch),
-	"height": units.NewValue(1, units.Em),
+	"width":  units.NewCh(1),
+	"height": units.NewEm(1),
 }
 
 func (sp *Space) Style2D() {

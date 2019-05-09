@@ -74,17 +74,17 @@ type KeyChordEdit struct {
 var KiT_KeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
 
 var KeyChordEditProps = ki.Props{
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewPx(2),
+	"margin":           units.NewPx(2),
 	"vertical-align":   gi.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Control,
-	"border-width":     units.NewValue(1, units.Px),
-	"border-radius":    units.NewValue(4, units.Px),
+	"border-width":     units.NewPx(1),
+	"border-radius":    units.NewPx(4),
 	"border-color":     &gi.Prefs.Colors.Border,
 	"border-style":     gi.BorderSolid,
-	"height":           units.NewValue(1, units.Em),
-	"width":            units.NewValue(20, units.Ch),
+	"height":           units.NewEm(1),
+	"width":            units.NewCh(20),
 	"max-width":        -1,
 	gi.LabelSelectors[gi.LabelActive]: ki.Props{
 		"background-color": "lighter-0",

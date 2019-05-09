@@ -29,12 +29,12 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 }
 
 var FrameProps = ki.Props{
-	"border-width":     units.NewValue(2, units.Px),
-	"border-radius":    units.NewValue(0, units.Px),
+	"border-width":     units.NewPx(2),
+	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(2, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewPx(2),
+	"margin":           units.NewPx(2),
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Background,
 }

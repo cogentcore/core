@@ -44,7 +44,7 @@ func (vv *HiStyleValueView) UpdateWidget() {
 func (vv *HiStyleValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_HiStyleValueView).(*HiStyleValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -98,7 +98,7 @@ func HiStylesView(st *histyle.Styles) {
 
 	title := mfr.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	title.SetText("Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
-	title.SetProp("width", units.NewValue(30, units.Ch)) // need for wrap
+	title.SetProp("width", units.NewCh(30)) // need for wrap
 	title.SetStretchMaxWidth()
 	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 

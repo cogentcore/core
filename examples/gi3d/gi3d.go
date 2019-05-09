@@ -36,13 +36,13 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
 
-	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo\x00", width, height, true) // true = pixel sizes
+	win := gi.NewWindow2D("gogi-gi3d-demo", "GoGi 3D Demo", width, height, true) // true = pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.NewValue(1, units.Ex))
+	mfr.SetProp("spacing", units.NewEx(1))
 
 	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
@@ -104,7 +104,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
 	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
-	fpgun := tcg.AddNewObject("first-person-gun", cbm.Name())
+	fpgun := gi3d.AddNewObject(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
@@ -118,8 +118,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// floor.Mat.Color.SetString("tan", nil)
 	// floor.Mat.Emissive.SetString("brown", nil)
 	floor.Mat.Bright = 2 // .5 for wood / brown
-	floor.Mat.SetTexture(sc, grtx.Name())
+	floor.Mat.SetTexture(sc, grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
+
+	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default
+	// txt.SetProp("background-color", "white")
+	// txt.SetProp("color", "black") // default
+	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
+	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt.Pose.Pos.Set(0, 2.2, 0)
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 

@@ -172,6 +172,7 @@ func (sl *SpotLight) ViewPos(viewMat *mat32.Mat4) mat32.Vec3 {
 // ViewDir gets the direction normal vector, pre-computing the view transform
 func (sl *SpotLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
 	idmat := mat32.NewMat4()
+	sl.Pose.UpdateMatrix()
 	sl.Pose.UpdateWorldMatrix(idmat)
 	sl.Pose.UpdateMVPMatrix(viewMat, idmat)
 	vd := mat32.Vec3{0, 0, -1}.MulMat4AsVec4(&sl.Pose.MVMatrix, 0).Normal()

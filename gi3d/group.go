@@ -35,5 +35,9 @@ func (gp *Group) Defaults() {
 	gp.Pose.Defaults()
 }
 
+func (gp *Group) RenderClass() RenderClasses {
+	return RClassNone
+}
+
 // test for impl
 var _ Node3D = &Group{}

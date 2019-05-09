@@ -37,7 +37,7 @@ func mainrun() {
 	row1.SetStretchMaxWidth()
 
 	spc := gi.AddNewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.NewValue(2.0, units.Em))
+	spc.SetFixedHeight(units.NewEm(2))
 
 	gi.AddNewStretch(row1, "str1")
 	lab1 := gi.AddNewLabel(row1, "lab1", "These are tests of the various GoGi Color functions")

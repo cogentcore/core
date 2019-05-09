@@ -79,7 +79,7 @@ type FontStyle struct {
 func (fs *FontStyle) Defaults() {
 	fs.Color.SetColor(color.Black)
 	fs.Opacity = 1.0
-	fs.Size = units.NewValue(12, units.Pt)
+	fs.Size = units.NewPt(12)
 }
 
 // SetStylePost does any updates after generic xml-tag property setting -- use
@@ -89,7 +89,7 @@ func (fs *FontStyle) SetStylePost(props ki.Props) {
 	if pfs, ok := props["font-size"]; ok {
 		if fsz, ok := pfs.(string); ok {
 			if psz, ok := FontSizePoints[fsz]; ok {
-				fs.Size = units.NewValue(psz, units.Pt)
+				fs.Size = units.NewPt(psz)
 			}
 		}
 	}

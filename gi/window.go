@@ -130,7 +130,9 @@ var WindowGlobalMu sync.Mutex
 //   intact while overlays are updated.  TODO: currently this is backed by a
 //   OverlayVp viewport that is the same size as entire window, but it would be
 //   much more efficient to just render directly to OverTex via temporary images for
-//   each overlay item..
+//   each overlay item.  Make a new collection of sprites that are just image + position
+//   and require any rendering to be done prior to that so there is no need for the
+//   overlayvp at all -- should be easy.
 type Window struct {
 	NodeBase
 	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`

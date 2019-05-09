@@ -323,7 +323,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		return
 	}
 	sg.Lay = gi.LayoutVert
-	sg.SetMinPrefWidth(units.NewValue(10, units.Em))
+	sg.SetMinPrefWidth(units.NewEm(10))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 
@@ -351,7 +351,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 	sgf.Stripes = gi.RowStripes
 
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sgf.SetMinPrefHeight(units.NewValue(10, units.Em))
+	sgf.SetMinPrefHeight(units.NewEm(10))
 	sgf.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sgf.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 	sgf.SetProp("columns", nWidgPerRow)

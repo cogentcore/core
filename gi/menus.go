@@ -312,13 +312,13 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // PopupMenu function
 
 var MenuFrameProps = ki.Props{
-	"border-width":        units.NewValue(0, units.Px),
+	"border-width":        units.NewPx(0),
 	"border-color":        "none",
-	"margin":              units.NewValue(4, units.Px),
-	"padding":             units.NewValue(2, units.Px),
-	"box-shadow.h-offset": units.NewValue(2, units.Px),
-	"box-shadow.v-offset": units.NewValue(2, units.Px),
-	"box-shadow.blur":     units.NewValue(2, units.Px),
+	"margin":              units.NewPx(4),
+	"padding":             units.NewPx(2),
+	"box-shadow.h-offset": units.NewPx(2),
+	"box-shadow.v-offset": units.NewPx(2),
+	"box-shadow.blur":     units.NewPx(2),
 	"box-shadow.color":    &Prefs.Colors.Shadow,
 }
 
@@ -516,39 +516,39 @@ func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
 }
 
 var MenuButtonProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
-	"border-radius":    units.NewValue(4, units.Px),
+	"border-width":     units.NewPx(1),
+	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(4, units.Px),
-	"margin":           units.NewValue(4, units.Px),
+	"padding":          units.NewPx(4),
+	"margin":           units.NewPx(4),
 	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"width":   units.NewValue(1, units.Em),
-		"height":  units.NewValue(1, units.Em),
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
+		"width":   units.NewEm(1),
+		"height":  units.NewEm(1),
+		"margin":  units.NewPx(0),
+		"padding": units.NewPx(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
 	"#label": ki.Props{
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
+		"margin":  units.NewPx(0),
+		"padding": units.NewPx(0),
 	},
 	"#indicator": ki.Props{
-		"width":          units.NewValue(1.5, units.Ex),
-		"height":         units.NewValue(1.5, units.Ex),
-		"margin":         units.NewValue(0, units.Px),
-		"padding":        units.NewValue(0, units.Px),
+		"width":          units.NewEx(1.5),
+		"height":         units.NewEx(1.5),
+		"margin":         units.NewPx(0),
+		"padding":        units.NewPx(0),
 		"vertical-align": AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
 	"#ind-stretch": ki.Props{
-		"width": units.NewValue(1, units.Em),
+		"width": units.NewEm(1),
 	},
 	ButtonSelectors[ButtonActive]: ki.Props{
 		"background-color": "linear-gradient(lighter-0, highlight-10)",
@@ -561,7 +561,7 @@ var MenuButtonProps = ki.Props{
 		"background-color": "linear-gradient(highlight-10, highlight-10)",
 	},
 	ButtonSelectors[ButtonFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
+		"border-width":     units.NewPx(2),
 		"background-color": "linear-gradient(samelight-50, highlight-10)",
 	},
 	ButtonSelectors[ButtonDown]: ki.Props{
@@ -611,12 +611,12 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 }
 
 var SeparatorProps = ki.Props{
-	"padding":          units.NewValue(0, units.Px),
-	"margin":           units.NewValue(0, units.Px),
+	"padding":          units.NewPx(0),
+	"margin":           units.NewPx(0),
 	"vertical-align":   AlignCenter,
 	"horizontal-align": AlignCenter,
 	"border-color":     &Prefs.Colors.Border,
-	"border-width":     units.NewValue(2, units.Px),
+	"border-width":     units.NewPx(2),
 	"background-color": &Prefs.Colors.Control,
 	// todo: dotted
 }
@@ -624,10 +624,10 @@ var SeparatorProps = ki.Props{
 func (sp *Separator) Style2D() {
 	if sp.Horiz {
 		sp.SetProp("max-width", -1)
-		sp.SetProp("min-height", units.NewValue(0.5, units.Ex))
+		sp.SetProp("min-height", units.NewEx(0.5))
 	} else {
 		sp.SetProp("max-height", -1)
-		sp.SetProp("min-width", units.NewValue(0.5, units.Ch))
+		sp.SetProp("min-width", units.NewCh(0.5))
 	}
 	sp.WidgetBase.Style2D()
 }

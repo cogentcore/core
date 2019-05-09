@@ -745,17 +745,17 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
-	tf.SetProp("min-width", units.NewValue(16, units.Ch))
+	tf.SetProp("min-width", units.NewCh(16))
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := kit.ToFloat32(widthtag)
 		if ok {
-			tf.SetMinPrefWidth(units.NewValue(width, units.Ch))
+			tf.SetMinPrefWidth(units.NewCh(width))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
 		width, ok := kit.ToFloat32(maxwidthtag)
 		if ok {
-			tf.SetProp("max-width", units.NewValue(width, units.Ch))
+			tf.SetProp("max-width", units.NewCh(width))
 		}
 	}
 	if completetag, ok := vv.Tag("complete"); ok {
@@ -889,7 +889,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_VersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)

@@ -217,7 +217,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	app.RunOnMain(func() {
 		w.Activate()
 		gl.Init() // call to init in each context
-		w.winTex = &textureImpl{size: opts.Size}
+		w.winTex = &textureImpl{name: "WinTex", size: opts.Size}
 		w.winTex.Activate(0)
 	})
 

@@ -117,7 +117,7 @@ const (
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":value", ":box"}
 
 func (sb *SliderBase) Defaults() { // todo: should just get these from props
-	sb.ThumbSize = units.NewValue(1, units.Em)
+	sb.ThumbSize = units.NewEm(1)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -508,19 +508,19 @@ func AddNewSlider(parent ki.Ki, name string) *Slider {
 }
 
 var SliderProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
-	"border-radius":    units.NewValue(4, units.Px),
+	"border-width":     units.NewPx(1),
+	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(6, units.Px),
-	"margin":           units.NewValue(4, units.Px),
+	"padding":          units.NewPx(6),
+	"margin":           units.NewPx(4),
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
-		"width":   units.NewValue(1, units.Em),
-		"height":  units.NewValue(1, units.Em),
-		"margin":  units.NewValue(0, units.Px),
-		"padding": units.NewValue(0, units.Px),
+		"width":   units.NewEm(1),
+		"height":  units.NewEm(1),
+		"margin":  units.NewPx(0),
+		"padding": units.NewPx(0),
 		"fill":    &Prefs.Colors.Icon,
 		"stroke":  &Prefs.Colors.Font,
 	},
@@ -535,7 +535,7 @@ var SliderProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
+		"border-width":     units.NewPx(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
@@ -552,7 +552,7 @@ var SliderProps = ki.Props{
 }
 
 func (sr *Slider) Defaults() {
-	sr.ThumbSize = units.NewValue(1.5, units.Em)
+	sr.ThumbSize = units.NewEm(1.5)
 	sr.ThSize = 25.0
 	sr.Step = 0.1
 	sr.PageStep = 0.2
@@ -720,12 +720,12 @@ func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
 }
 
 var ScrollBarProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
-	"border-radius":    units.NewValue(4, units.Px),
+	"border-width":     units.NewPx(1),
+	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(0, units.Px),
-	"margin":           units.NewValue(2, units.Px),
+	"padding":          units.NewPx(0),
+	"margin":           units.NewPx(2),
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	SliderSelectors[SliderActive]: ki.Props{
@@ -739,7 +739,7 @@ var ScrollBarProps = ki.Props{
 		"background-color": "highlight-10",
 	},
 	SliderSelectors[SliderFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
+		"border-width":     units.NewPx(2),
 		"background-color": "samelight-50",
 	},
 	SliderSelectors[SliderDown]: ki.Props{
@@ -757,7 +757,7 @@ var ScrollBarProps = ki.Props{
 
 func (sb *ScrollBar) Defaults() { // todo: should just get these from props
 	sb.ValThumb = true
-	sb.ThumbSize = units.NewValue(1, units.Ex)
+	sb.ThumbSize = units.NewEx(1)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0

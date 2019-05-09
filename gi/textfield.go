@@ -75,28 +75,28 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 }
 
 var TextFieldProps = ki.Props{
-	"border-width":     units.NewValue(1, units.Px),
-	"cursor-width":     units.NewValue(3, units.Px),
+	"border-width":     units.NewPx(1),
+	"cursor-width":     units.NewPx(3),
 	"border-color":     &Prefs.Colors.Border,
 	"border-style":     BorderSolid,
-	"padding":          units.NewValue(4, units.Px),
-	"margin":           units.NewValue(1, units.Px),
+	"padding":          units.NewPx(4),
+	"margin":           units.NewPx(1),
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
 	"clear-act":        true,
 	"#clear": ki.Props{
-		"width":          units.NewValue(.5, units.Ex),
-		"height":         units.NewValue(.5, units.Ex),
-		"margin":         units.NewValue(0, units.Px),
-		"padding":        units.NewValue(0, units.Px),
+		"width":          units.NewEx(0.5),
+		"height":         units.NewEx(0.5),
+		"margin":         units.NewPx(0),
+		"padding":        units.NewPx(0),
 		"vertical-align": AlignMiddle,
 	},
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"background-color": "lighter-0",
 	},
 	TextFieldSelectors[TextFieldFocus]: ki.Props{
-		"border-width":     units.NewValue(2, units.Px),
+		"border-width":     units.NewPx(2),
 		"background-color": "samelight-80",
 	},
 	TextFieldSelectors[TextFieldInactive]: ki.Props{

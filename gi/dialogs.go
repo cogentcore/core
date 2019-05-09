@@ -256,17 +256,17 @@ func (dlg *Dialog) Cancel() {
 var DialogProps = ki.Props{
 	"color": &Prefs.Colors.Font,
 	"#frame": ki.Props{
-		"border-width":        units.NewValue(2, units.Px),
-		"margin":              units.NewValue(8, units.Px),
-		"padding":             units.NewValue(4, units.Px),
-		"box-shadow.h-offset": units.NewValue(4, units.Px),
-		"box-shadow.v-offset": units.NewValue(4, units.Px),
-		"box-shadow.blur":     units.NewValue(4, units.Px),
+		"border-width":        units.NewPx(2),
+		"margin":              units.NewPx(8),
+		"padding":             units.NewPx(4),
+		"box-shadow.h-offset": units.NewPx(4),
+		"box-shadow.v-offset": units.NewPx(4),
+		"box-shadow.blur":     units.NewPx(4),
 		"box-shadow.color":    &Prefs.Colors.Shadow,
 	},
 	"#title": ki.Props{
 		// todo: add "bigger" font
-		"max-width":        units.NewValue(-1, units.Px),
+		"max-width":        units.NewPx(-1),
 		"text-align":       AlignCenter,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
@@ -275,7 +275,7 @@ var DialogProps = ki.Props{
 	"#prompt": ki.Props{
 		"white-space":      WhiteSpaceNormal, // wrap etc
 		"max-width":        -1,
-		"width":            units.NewValue(30, units.Ch),
+		"width":            units.NewCh(30),
 		"text-align":       AlignLeft,
 		"vertical-align":   AlignTop,
 		"background-color": "none",
@@ -548,7 +548,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	nsb.Step = 1
 
 	tspc := frame.InsertNewChild(KiT_Space, prIdx+3, "type-space").(*Space)
-	tspc.SetFixedHeight(units.NewValue(0.5, units.Em))
+	tspc.SetFixedHeight(units.NewEm(0.5))
 
 	trow := frame.InsertNewChild(KiT_Layout, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
@@ -597,7 +597,7 @@ func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpt
 	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
-	tf.SetMinPrefWidth(units.NewValue(40, units.Ch))
+	tf.SetMinPrefWidth(units.NewCh(40))
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)

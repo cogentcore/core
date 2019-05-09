@@ -51,7 +51,7 @@ func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 }
 
 var SliceViewInlineProps = ki.Props{
-	"min-width": units.NewValue(20, units.Ch),
+	"min-width": units.NewCh(20),
 }
 
 // ConfigParts configures Parts for the current slice

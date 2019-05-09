@@ -44,7 +44,7 @@ func (vv *FileValueView) UpdateWidget() {
 func (vv *FileValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_FileValueView).(*FileValueView)
 		ac := vvv.Widget.(*gi.Action)

@@ -58,9 +58,9 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.NewValue(2, units.Px))
-	ac.SetProp("margin", units.NewValue(2, units.Px))
-	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.SetProp("padding", units.NewPx(2))
+	ac.SetProp("margin", units.NewPx(2))
+	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -174,9 +174,9 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.ElIsStruct = (kit.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.NewValue(2, units.Px))
-	ac.SetProp("margin", units.NewValue(2, units.Px))
-	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.SetProp("padding", units.NewPx(2))
+	ac.SetProp("margin", units.NewPx(2))
+	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -305,9 +305,9 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.SetProp("padding", units.NewValue(2, units.Px))
-	ac.SetProp("margin", units.NewValue(2, units.Px))
-	ac.SetProp("border-radius", units.NewValue(4, units.Px))
+	ac.SetProp("padding", units.NewPx(2))
+	ac.SetProp("margin", units.NewPx(2))
+	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
@@ -440,8 +440,8 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip, _ = vv.Tag("desc")
-	mb.SetProp("padding", units.NewValue(2, units.Px))
-	mb.SetProp("margin", units.NewValue(2, units.Px))
+	mb.SetProp("padding", units.NewPx(2))
+	mb.SetProp("margin", units.NewPx(2))
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
 		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -560,7 +560,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	sb.SetProp("#textfield", ki.Props{
-		"width": units.NewValue(5, units.Ch),
+		"width": units.NewCh(5),
 	})
 	vk := vv.Value.Kind()
 	if vk >= reflect.Uint && vk <= reflect.Uint64 {
@@ -705,8 +705,8 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
-	cb.SetProp("padding", units.NewValue(2, units.Px))
-	cb.SetProp("margin", units.NewValue(2, units.Px))
+	cb.SetProp("padding", units.NewPx(2))
+	cb.SetProp("margin", units.NewPx(2))
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ, false, 50)
@@ -816,17 +816,17 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
-	tf.SetProp("min-width", units.NewValue(16, units.Ch))
+	tf.SetProp("min-width", units.NewCh(16))
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := kit.ToFloat32(widthtag)
 		if ok {
-			tf.SetMinPrefWidth(units.NewValue(width, units.Ch))
+			tf.SetMinPrefWidth(units.NewCh(width))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
 		width, ok := kit.ToFloat32(maxwidthtag)
 		if ok {
-			tf.SetProp("max-width", units.NewValue(width, units.Ch))
+			tf.SetProp("max-width", units.NewCh(width))
 		}
 	}
 
@@ -875,17 +875,17 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
-	tf.SetProp("min-width", units.NewValue(16, units.Ch))
+	tf.SetProp("min-width", units.NewCh(16))
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := kit.ToFloat32(widthtag)
 		if ok {
-			tf.SetMinPrefWidth(units.NewValue(width, units.Ch))
+			tf.SetMinPrefWidth(units.NewCh(width))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
 		width, ok := kit.ToFloat32(maxwidthtag)
 		if ok {
-			tf.SetProp("max-width", units.NewValue(width, units.Ch))
+			tf.SetProp("max-width", units.NewCh(width))
 		}
 	}
 

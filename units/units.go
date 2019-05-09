@@ -287,6 +287,41 @@ func NewValue(val float32, un Unit) Value {
 	return Value{val, un, 0.0}
 }
 
+// NewPx creates a new Px value
+func NewPx(val float32) Value {
+	return Value{val, Px, 0.0}
+}
+
+// NewEm creates a new Em value
+func NewEm(val float32) Value {
+	return Value{val, Em, 0.0}
+}
+
+// NewEx creates a new Ex value
+func NewEx(val float32) Value {
+	return Value{val, Ex, 0.0}
+}
+
+// NewCh creates a new Ch value
+func NewCh(val float32) Value {
+	return Value{val, Ch, 0.0}
+}
+
+// NewPt creates a new Pt value
+func NewPt(val float32) Value {
+	return Value{val, Pt, 0.0}
+}
+
+// NewPct creates a new Pct value
+func NewPct(val float32) Value {
+	return Value{val, Pct, 0.0}
+}
+
+// NewDp creates a new Dp value
+func NewDp(val float32) Value {
+	return Value{val, Dp, 0.0}
+}
+
 // Set sets value and units of an existing value
 func (v *Value) Set(val float32, un Unit) {
 	v.Val = val
