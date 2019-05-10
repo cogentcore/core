@@ -48,6 +48,10 @@ type Mesh interface {
 	// ComputeNorms automatically computes the normals from existing vertex data
 	ComputeNorms()
 
+	// Alloc allocates given number of vertex and index values, optionally including colors
+	// More efficient if number of such is known in advance
+	Alloc(vtxs, idxs int, color bool)
+
 	// AddPlane adds everything to render a plane with the given parameters.
 	// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
 	// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
@@ -357,6 +361,28 @@ func (ms *MeshBase) Render3D(sc *Scene) {
 
 /////////////////////////////////////////////////////////////////////
 //  Shape primitives
+
+// Alloc allocates given number of vertex and index values, optionally including colors
+// More efficient if number of such is known in advance
+func (ms *MeshBase) Alloc(vtxs, idxs int, color bool) {
+	if len(ms.Vtx) != vtxs*3 {
+		ms.Vtx = mat32.NewArrayF32(vtxs*3, vtxs*3)
+	}
+	if len(ms.Norm) != vtxs*3 {
+		ms.Norm = mat32.NewArrayF32(vtxs*3, vtxs*3)
+	}
+	if len(ms.Tex) != vtxs*2 {
+		ms.Tex = mat32.NewArrayF32(vtxs*2, vtxs*2)
+	}
+	if color {
+		if len(ms.Color) != vtxs*4 {
+			ms.Color = mat32.NewArrayF32(vtxs*4, vtxs*4)
+		}
+	}
+	if len(ms.Idx) != idxs {
+		ms.Idx = mat32.NewArrayU32(idxs, idxs)
+	}
+}
 
 // AddPlane adds everything to render a plane with the given parameters (convenience wrapper around
 // SetPlane method).
