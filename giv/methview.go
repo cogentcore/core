@@ -239,6 +239,10 @@ func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 // MethViewSetActionData sets the MethViewData associated with the given action
 // with values updated from the given val and viewport
 func MethViewSetActionData(ac *gi.Action, val interface{}, vp *gi.Viewport2D) {
+	if ac.Data == nil {
+		fmt.Printf("giv.MethView no MethViewData on action: %v\n", ac.Nm)
+		return
+	}
 	md := ac.Data.(*MethViewData)
 	md.Val = val
 	md.ValVal = reflect.ValueOf(val)

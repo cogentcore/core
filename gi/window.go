@@ -1074,17 +1074,16 @@ func (w *Window) Publish() {
 		// fmt.Printf("Win %v doing full re-render direct upload\n", w.Nm)
 		w.ClearFlag(int(WinFlagPublishFullReRender))
 		w.DirectUploads()
-		// w.UpMu.Unlock()
-		// w.UploadAllViewports()
-		// w.UpMu.Lock()
 	}
 	pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
-	w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
-	if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
-		w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
+	if wt != nil {
+		w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
+		if w.OverTex != nil && w.HasFlag(int(WinFlagOverTexActive)) {
+			w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
+		}
+		w.OSWin.Publish()
 	}
-	w.OSWin.Publish()
 	pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
