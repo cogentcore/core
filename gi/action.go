@@ -84,7 +84,7 @@ var ActionProps = ki.Props{
 		"padding":   units.NewPx(2),
 		"margin":    units.NewPx(0),
 		"max-width": -1,
-		"indicator": "widget-wedge-right",
+		"indicator": "wedge-right",
 		ButtonSelectors[ButtonActive]: ki.Props{
 			"background-color": "lighter-0",
 		},
@@ -313,7 +313,7 @@ func (ac *Action) ConfigParts() {
 			ac.Class = "menu-action"
 		}
 		if ac.Indicator == "" {
-			ac.Indicator = "widget-wedge-right"
+			ac.Indicator = "wedge-right"
 		}
 		ac.ConfigPartsMenuItem()
 	default:

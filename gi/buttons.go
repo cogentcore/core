@@ -370,7 +370,7 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	ic := bb.Parts.Child(indIdx).(*Icon)
 	icnm := string(bb.Indicator)
 	if IconName(icnm).IsNil() {
-		icnm = "widget-wedge-down"
+		icnm = "wedge-down"
 	}
 	if set, _ := IconName(icnm).SetIcon(ic); set {
 		bb.StylePart(bb.Parts.Child(indIdx - 1).(Node2D)) // also get the stretch
@@ -749,8 +749,8 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 }
 
 var CheckBoxProps = ki.Props{
-	"icon":             "widget-checked-box",
-	"icon-off":         "widget-unchecked-box",
+	"icon":             "checked-box",
+	"icon-off":         "unchecked-box",
 	"text-align":       AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
@@ -853,10 +853,10 @@ func (cb *CheckBox) StyleParts() {
 func (cb *CheckBox) ConfigParts() {
 	cb.SetCheckable(true)
 	if !cb.Icon.IsValid() {
-		cb.Icon = "widget-checked-box" // fallback
+		cb.Icon = "checked-box" // fallback
 	}
 	if !cb.IconOff.IsValid() {
-		cb.IconOff = "widget-unchecked-box"
+		cb.IconOff = "unchecked-box"
 	}
 	config := kit.TypeAndNameList{}
 	icIdx := 0 // always there

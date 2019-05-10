@@ -1449,8 +1449,8 @@ var FileTreeViewProps = ki.Props{
 		"stroke":  &gi.Prefs.Colors.Font,
 	},
 	"#branch": ki.Props{
-		"icon":             "widget-wedge-down",
-		"icon-off":         "widget-wedge-right",
+		"icon":             "wedge-down",
+		"icon-off":         "wedge-right",
 		"margin":           units.NewPx(0),
 		"padding":          units.NewPx(0),
 		"background-color": color.Transparent,

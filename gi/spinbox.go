@@ -32,8 +32,8 @@ type SpinBox struct {
 	Step       float32   `xml:"step" desc:"smallest step size to increment"`
 	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	UpIcon     IconName  `view:"show-name" desc:"icon to use for up button -- defaults to widget-wedge-up"`
-	DownIcon   IconName  `view:"show-name" desc:"icon to use for down button -- defaults to widget-wedge-down"`
+	UpIcon     IconName  `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
+	DownIcon   IconName  `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
 	SpinBoxSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
@@ -147,10 +147,10 @@ const (
 
 func (sb *SpinBox) ConfigParts() {
 	if sb.UpIcon.IsNil() {
-		sb.UpIcon = IconName("widget-wedge-up")
+		sb.UpIcon = IconName("wedge-up")
 	}
 	if sb.DownIcon.IsNil() {
-		sb.DownIcon = IconName("widget-wedge-down")
+		sb.DownIcon = IconName("wedge-down")
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", AlignMiddle)

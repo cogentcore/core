@@ -278,7 +278,7 @@ func (fv *FileView) ConfigPathRow() {
 		})
 
 		pu := pr.ChildByName("path-up", 0).(*gi.Action)
-		pu.Icon = gi.IconName("widget-wedge-up")
+		pu.Icon = gi.IconName("wedge-up")
 		pu.Tooltip = "go up one level into the parent folder"
 		pu.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)

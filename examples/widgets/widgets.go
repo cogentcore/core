@@ -44,7 +44,7 @@ func mainrun() {
 
 	win := gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, true) // true = pixel sizes
 
-	icnm := "widget-wedge-down"
+	icnm := "wedge-down"
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -194,7 +194,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
-	slider1.Icon = gi.IconName("widget-circlebutton-on")
+	slider1.Icon = gi.IconName("circlebutton-on")
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = gi.Y

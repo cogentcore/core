@@ -387,9 +387,9 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		hdr.SetText(fld.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
-				hdr.SetIcon("widget-wedge-down")
+				hdr.SetIcon("wedge-down")
 			} else {
-				hdr.SetIcon("widget-wedge-up")
+				hdr.SetIcon("wedge-up")
 			}
 		}
 		hdr.Data = fli
@@ -630,9 +630,9 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 				tv.SortDesc = false
 			}
 			if ascending {
-				hdr.SetIcon("widget-wedge-up")
+				hdr.SetIcon("wedge-up")
 			} else {
-				hdr.SetIcon("widget-wedge-down")
+				hdr.SetIcon("wedge-down")
 			}
 		} else {
 			hdr.SetIcon("none")

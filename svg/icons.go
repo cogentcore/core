@@ -258,7 +258,7 @@ func MakeDefaultIcons() *IconSet {
 	if true {
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-wedge-down")
+			ic.InitName(ic, "wedge-down")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			p := AddNewPath(ic, "p", "M 0.05 0.05 .95 0.05 .5 .95 Z")
 			p.SetProp("stroke-width", units.NewPct(1))
@@ -266,7 +266,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-wedge-up")
+			ic.InitName(ic, "wedge-up")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			p := AddNewPath(ic, "p", "M 0.05 0.95 .95 0.95 .5 .05 Z")
 			p.SetProp("stroke-width", units.NewPct(1))
@@ -274,7 +274,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-wedge-left")
+			ic.InitName(ic, "wedge-left")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			p := AddNewPath(ic, "p", "M 0.95 0.05 .95 0.95 .05 .5 Z")
 			p.SetProp("stroke-width", units.NewPct(1))
@@ -282,7 +282,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-wedge-right")
+			ic.InitName(ic, "wedge-right")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			p := AddNewPath(ic, "p", "M 0.05 0.05 .05 0.95 .95 .5 Z")
 			p.SetProp("stroke-width", units.NewPct(1))
@@ -290,7 +290,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-checkmark")
+			ic.InitName(ic, "checkmark")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			p := AddNewPath(ic, "p", "M 0.1 0.5 .5 0.9 .9 .1")
 			p.SetProp("stroke-width", units.NewPct(20))
@@ -299,7 +299,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-checked-box")
+			ic.InitName(ic, "checked-box")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
 			bx.SetProp("stroke-width", units.NewPct(5))
@@ -311,7 +311,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-unchecked-box")
+			ic.InitName(ic, "unchecked-box")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			bx := AddNewRect(ic, "bx", 0.05, 0.05, 0.9, 0.9)
 			bx.SetProp("stroke-width", units.NewPct(5))
@@ -320,7 +320,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-circlebutton-on")
+			ic.InitName(ic, "circlebutton-on")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
 			oc.SetProp("fill", "none")
@@ -331,7 +331,7 @@ func MakeDefaultIcons() *IconSet {
 		}
 		{
 			ic := &Icon{}
-			ic.InitName(ic, "widget-circlebutton-off")
+			ic.InitName(ic, "circlebutton-off")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			oc := AddNewCircle(ic, "oc", 0.5, 0.5, 0.4)
 			oc.SetProp("fill", "none")
@@ -341,7 +341,7 @@ func MakeDefaultIcons() *IconSet {
 		{
 			ic := &Icon{}
 			rad := gi.Vec2D{0.25, 0.12}
-			ic.InitName(ic, "widget-handle-circles-vert")
+			ic.InitName(ic, "handle-circles-vert")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			c0 := AddNewEllipse(ic, "c0", 0.5, 0.15, rad.X, rad.Y)
 			c0.SetProp("stroke-width", units.NewPct(5))
@@ -354,7 +354,7 @@ func MakeDefaultIcons() *IconSet {
 		{
 			ic := &Icon{}
 			rad := gi.Vec2D{0.12, 0.25}
-			ic.InitName(ic, "widget-handle-circles-horiz")
+			ic.InitName(ic, "handle-circles-horiz")
 			ic.ViewBox.Size = gi.Vec2D{1, 1}
 			c0 := AddNewEllipse(ic, "c0", 0.15, 0.5, rad.X, rad.Y)
 			c0.SetProp("stroke-width", units.NewPct(5))

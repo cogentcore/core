@@ -232,9 +232,9 @@ func (sv *SplitView) ConfigSplitters() {
 	mid := 0.5 * (sv.LayData.AllocSize.Dim(odim) - 2*spc)
 	spicon := IconName("")
 	if sv.Dim == X {
-		spicon = IconName("widget-handle-circles-vert")
+		spicon = IconName("handle-circles-vert")
 	} else {
-		spicon = IconName("widget-handle-circles-horiz")
+		spicon = IconName("handle-circles-horiz")
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)
