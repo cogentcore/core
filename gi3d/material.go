@@ -55,8 +55,11 @@ func (mt *Material) Defaults() {
 	mt.CullBack = true
 }
 
-// IsTransparent returns true if color has alpha < 255
+// IsTransparent returns true if texture says it is, or if color has alpha < 255
 func (mt *Material) IsTransparent() bool {
+	if mt.TexPtr != nil {
+		return mt.TexPtr.IsTransparent()
+	}
 	return mt.Color.A < 255
 }
 

@@ -15,12 +15,15 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Text2D presents 2D rendered text on a vertically-oriented plane.
-// Call RenderText to update if text changes.
-// This automatically multiplies scale by size of rendered text in pixels, so
-// a uniform scale multiplier should generally be set to achieve desired size (.005 default).
-// Standard styling properties can be set on the node to set font size etc
-// note that higher quality is achieved by using a larger font size (36 default).
+// Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.
+// Call SetText() which calls RenderText to update fortext changes (re-renders texture).
+// The native scale is such that a unit height value is the height of the default font set by the
+// font-size property, and the X axis is scaled proportionally based on the rendered text
+// size to maintain the aspect ratio.  Further scaling can be applied on top of that by
+// setting the Pose.Scale values as usual.
+// Standard styling properties can be set on the node to set font size, family, and text alignment
+// relative to the Pose.Pos position (e.g., Left, Top puts the upper-left corner of text at Pos).
+// Note that higher quality is achieved by using a larger font size (36 default).
 // The margin property creates blank margin of the background color around the text (2 px default)
 // and the background-color defaults to transparent but can be set to any color.
 type Text2D struct {
@@ -37,14 +40,14 @@ var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
 // AddNewText2D adds a new object of given name and text string to given parent
 func AddNewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
 	txt := parent.AddNewChild(KiT_Text2D, name).(*Text2D)
-	tm := sc.Text2DPlaneMesh()
-	txt.SetMesh(sc, tm)
-	txt.Defaults()
+	txt.Defaults(sc)
 	txt.Text = text
 	return txt
 }
 
-func (txt *Text2D) Defaults() {
+func (txt *Text2D) Defaults(sc *Scene) {
+	tm := sc.Text2DPlaneMesh()
+	txt.SetMesh(sc, tm)
 	txt.Object.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
 	txt.SetProp("font-size", units.NewPt(36))
@@ -52,6 +55,29 @@ func (txt *Text2D) Defaults() {
 	txt.SetProp("color", "black")
 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0})
 	txt.Mat.Bright = 5 // this is key for making e.g., a white background show up as white..
+}
+
+// SetText sets the text and renders it to the texture image
+func (txt *Text2D) SetText(sc *Scene, str string) {
+	txt.Text = str
+	txt.RenderText(sc)
+}
+
+// TextSize returns the size of the text plane, applying all *local* scaling factors
+// if nothing rendered yet, returns false
+func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
+	txt.Pose.Defaults() // only if nil
+	sz := mat32.Vec2{}
+	if txt.TxtTex == nil {
+		return sz, false
+	}
+	tsz := txt.TxtTex.Tex.Size()
+	fsz := float32(txt.Sty.Font.Size.Dots)
+	if fsz == 0 {
+		fsz = 36
+	}
+	sz.Set(txt.Pose.Scale.X*float32(tsz.X)/fsz, txt.Pose.Scale.Y*float32(tsz.Y)/fsz)
+	return sz, true
 }
 
 func (txt *Text2D) Init3D(sc *Scene) {
@@ -95,6 +121,9 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	sz.SetAddVal(2 * marg)
 	txt.TxtPos.SetVal(marg)
 	szpt := sz.ToPoint()
+	if szpt == image.ZP {
+		szpt = image.Point{10, 10}
+	}
 	bounds := image.Rectangle{Max: szpt}
 	var img *image.RGBA
 	if txt.TxtTex == nil {
@@ -103,7 +132,13 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		img = image.NewRGBA(bounds)
 		tx.SetImage(img)
 	} else {
-		img = txt.TxtTex.Tex.Image().(*image.RGBA)
+		im := txt.TxtTex.Tex.Image()
+		if im == nil {
+			img = image.NewRGBA(bounds)
+			txt.TxtTex.Tex.SetImage(img)
+		} else {
+			img = im.(*image.RGBA)
+		}
 	}
 	txt.TxtTex.Tex.SetSize(szpt)
 	rs := &sc.RenderState
@@ -114,7 +149,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	rs.PopBounds()
 	rs.Image = nil
 	txt.Mat.SetTexture(sc, txt.TxtTex)
-	gi.SavePNG("text-test.png", img)
+	// gi.SavePNG("text-test.png", img)
 }
 
 // Validate checks that object has valid mesh and texture settings, etc
@@ -124,11 +159,23 @@ func (txt *Text2D) Validate(sc *Scene) error {
 }
 
 func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
-	if txt.TxtTex != nil {
-		txt.Pose.Defaults()
-		tsz := txt.TxtTex.Tex.Size()
-		szsc := mat32.Vec3{float32(tsz.X), float32(tsz.Y), 1}.Mul(txt.Pose.Scale)
-		txt.Pose.Matrix.SetTransform(txt.Pose.Pos, txt.Pose.Quat, szsc)
+	sz, ok := txt.TextSize()
+	if ok {
+		sc := mat32.Vec3{sz.X, sz.Y, txt.Pose.Scale.Z}
+		ax, ay := txt.Sty.Text.AlignFactors()
+		al := txt.Sty.Text.AlignV
+		switch {
+		case gi.IsAlignStart(al):
+			ay = -0.5
+		case gi.IsAlignMiddle(al):
+			ay = 0
+		case gi.IsAlignEnd(al):
+			ay = 0.5
+		}
+		ps := txt.Pose.Pos
+		ps.X += (0.5 - ax) * sz.X
+		ps.Y += ay * sz.Y
+		txt.Pose.Matrix.SetTransform(ps, txt.Pose.Quat, sc)
 	} else {
 		txt.Pose.UpdateMatrix()
 	}

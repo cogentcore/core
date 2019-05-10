@@ -38,6 +38,14 @@ type Texture interface {
 	// of the image.  Otherwise, Y=0 is at the top, which is the default
 	// for most images loaded from files.
 	SetBotZero(botzero bool)
+
+	// IsTransparent returns true if there is any transparency present in the texture
+	// This is not auto-detected but rather must be set manually.
+	// It affects the rendering order -- transparent items are rendered last.
+	IsTransparent() bool
+
+	// SetTransparent sets the transparency flag for this texture.
+	SetTransparent(trans bool)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -45,9 +53,10 @@ type Texture interface {
 
 // TextureBase is the base texture implementation
 type TextureBase struct {
-	Nm   string        `desc:"name of the texture -- textures are connected to material / objects by name"`
-	Bot0 bool          `desc:"set to true if this texture has Y=0 at the bottom -- otherwise default is Y=0 is at top as is the case in most images loaded from files etc"`
-	Tex  gpu.Texture2D `view:"-" desc:"gpu texture object"`
+	Nm    string        `desc:"name of the texture -- textures are connected to material / objects by name"`
+	Bot0  bool          `desc:"set to true if this texture has Y=0 at the bottom -- otherwise default is Y=0 is at top as is the case in most images loaded from files etc"`
+	Trans bool          `desc:"set to true if texture has transparency"`
+	Tex   gpu.Texture2D `view:"-" desc:"gpu texture object"`
 }
 
 var KiT_TextureBase = kit.Types.AddType(&TextureBase{}, nil)
@@ -65,6 +74,14 @@ func (tx *TextureBase) SetBotZero(botzero bool) {
 	if tx.Tex != nil {
 		tx.Tex.SetBotZero(tx.Bot0)
 	}
+}
+
+func (tx *TextureBase) IsTransparent() bool {
+	return tx.Trans
+}
+
+func (tx *TextureBase) SetTransparent(trans bool) {
+	tx.Trans = trans
 }
 
 // makes a new gpu.Texture2D if Tex field is nil, and returns it in any case

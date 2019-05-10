@@ -127,6 +127,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// txt.SetProp("color", "black") // default
 	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
 	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin

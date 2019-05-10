@@ -506,10 +506,10 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	case "Alt+-", "Alt+_":
 		sc.Camera.PanTarget(0, 0, -panDel)
 		kt.SetProcessed()
-	case "+", "=", "Shift+=":
+	case "+", "=", "Shift++":
 		sc.Camera.Zoom(-zoomPct)
 		kt.SetProcessed()
-	case "-", "_", "Shift+-":
+	case "-", "_", "Shift+_":
 		sc.Camera.Zoom(zoomPct)
 		kt.SetProcessed()
 	case " ", "Escape":
