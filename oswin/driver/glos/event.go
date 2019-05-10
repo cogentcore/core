@@ -56,7 +56,7 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	fw := theApp.WindowInFocus()
 	if w != fw {
 		if fw == nil {
-			fmt.Printf("glos key event focus window is nil!  window: %v\n", w.Nm)
+			// fmt.Printf("glos key event focus window is nil!  window: %v\n", w.Nm)
 			fw = w
 			// } else {
 			// fmt.Printf("glos key event window: %v != focus window: %v\n", w.Nm, fw.Name())

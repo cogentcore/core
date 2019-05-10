@@ -91,7 +91,8 @@ type Mesh interface {
 
 	// Activate activates the mesh Vectors on the GPU
 	// Must be called with relevant context active
-	Activate(sc *Scene)
+	// returns false if there is no mesh defined
+	Activate(sc *Scene) bool
 
 	// TransferAll transfer all buffer data to GPU (vectors and indexes)
 	// Activate must have just been called
@@ -313,11 +314,15 @@ func (ms *MeshBase) SetColorData(sc *Scene) {
 
 // Activate activates the mesh Vectors on the GPU
 // Must be called with relevant context active on main thread
-func (ms *MeshBase) Activate(sc *Scene) {
+func (ms *MeshBase) Activate(sc *Scene) bool {
 	if ms.Buff == nil {
 		ms.MakeVectors(sc)
 	}
+	if ms.Buff == nil {
+		return false
+	}
 	ms.Buff.Activate()
+	return true
 }
 
 // TransferAll transfer all buffer data to GPU (vectors and indexes)
@@ -341,7 +346,10 @@ func (ms *MeshBase) TransferIndexes() {
 // Render3D calls gpu.TrianglesIndexed to render the mesh
 // Activate must have just been called, assumed to be on main with context
 func (ms *MeshBase) Render3D(sc *Scene) {
-	ms.Activate(sc)
+	ok := ms.Activate(sc)
+	if !ok {
+		return
+	}
 	ibuf := ms.Buff.IndexesBuffer()
 	// ibuf.Activate(sc)
 	gpu.Draw.TrianglesIndexed(0, ibuf.Len())

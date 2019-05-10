@@ -304,6 +304,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	ac := AddNewAction(tb, nm)
 	ac.Text = opts.Label
 	ac.Icon = IconName(opts.Icon)
+	ac.Tooltip = opts.Tooltip
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
