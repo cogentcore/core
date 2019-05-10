@@ -61,6 +61,7 @@ type appImpl struct {
 	oswindows     map[uintptr]*windowImpl
 	winlist       []*windowImpl
 	screens       []*oswin.Screen
+	noScreens     bool        // if all screens have been disconnected, don't do anything..
 	ctxtwin       *windowImpl // context window, dynamically set, for e.g., pointer and other methods
 	name          string
 	about         string
@@ -117,6 +118,13 @@ func (app *appImpl) GoRunOnMain(f func()) {
 	}()
 }
 
+// PollEvents tells the main event loop to check for any gui events right now.
+// Call this periodically from longer-running functions to ensure
+// GUI responsiveness.
+func (app *appImpl) PollEvents() {
+	app.RunOnMain(func() { glfw.PollEvents() })
+}
+
 // MainLoop starts running event loop on main thread (must be called
 // from the main thread).
 func (app *appImpl) mainLoop() {
@@ -132,12 +140,12 @@ func (app *appImpl) mainLoop() {
 			if f.done != nil {
 				f.done <- true
 			}
+			glfw.PollEvents() // this is key for preventing stalls -- tiny bit slower but worth it..
 		default:
-			if len(app.windows) == 0 {
+			if len(app.windows) == 0 { // starting up
 				time.Sleep(1)
 			} else {
-				glfw.WaitEventsTimeout(0.1) // maybe prevents hanging..
-				// glfw.WaitEvents()
+				glfw.WaitEvents()
 			}
 		}
 	}
@@ -287,6 +295,10 @@ func (app *appImpl) ScreenByName(name string) *oswin.Screen {
 		}
 	}
 	return nil
+}
+
+func (app *appImpl) NoScreens() bool {
+	return app.noScreens
 }
 
 func (app *appImpl) NWindows() int {

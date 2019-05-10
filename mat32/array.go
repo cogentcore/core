@@ -39,6 +39,11 @@ func (a *ArrayF32) Len() int {
 	return len(*a)
 }
 
+// Extend appends given number of new float elements to end of existing array
+func (a *ArrayF32) Extend(addLen int) {
+	*a = append(*a, make([]float32, addLen)...)
+}
+
 // Append appends any number of values to the array
 func (a *ArrayF32) Append(v ...float32) {
 	*a = append(*a, v...)
@@ -113,8 +118,8 @@ func (a ArrayF32) GetMat4(pos int, m *Mat4) {
 // Set sets the values of the array starting at the specified pos
 // from the specified values
 func (a ArrayF32) Set(pos int, v ...float32) {
-	for i := 0; i < len(v); i++ {
-		a[pos+i] = v[i]
+	for i, vv := range v {
+		a[pos+i] = vv
 	}
 }
 
@@ -141,6 +146,9 @@ func (a ArrayF32) SetVec4(pos int, v Vec4) {
 	a[pos+2] = v.Z
 	a[pos+3] = v.W
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+//   ArrayU32
 
 // ArrayU32 is a slice of uint32 with additional convenience methods
 type ArrayU32 []uint32
@@ -169,4 +177,17 @@ func (a *ArrayU32) Len() int {
 // Append appends n elements to the array updating the slice if necessary
 func (a *ArrayU32) Append(v ...uint32) {
 	*a = append(*a, v...)
+}
+
+// Extend appends given number of new elements to end of existing array
+func (a *ArrayU32) Extend(addLen int) {
+	*a = append(*a, make([]uint32, addLen)...)
+}
+
+// Set sets the values of the array starting at the specified pos
+// from the specified values
+func (a ArrayU32) Set(pos int, v ...uint32) {
+	for i, vv := range v {
+		a[pos+i] = vv
+	}
 }

@@ -47,6 +47,11 @@ type App interface {
 	// valid screen name.
 	ScreenByName(name string) *Screen
 
+	// NoScreens returns true if there are no active screens currently
+	// (e.g., for a closed laptop with no external monitor attached)
+	// The previous list of Screens is retained so this is the check.
+	NoScreens() bool
+
 	// NWindows returns the number of windows open for this app.
 	NWindows() int
 
@@ -145,6 +150,11 @@ type App interface {
 	// Some functions (GUI-specific etc) must run on this initial main thread for the
 	// overall app.
 	GoRunOnMain(f func())
+
+	// PollEvents tells the main event loop to check for any gui events right now.
+	// Call this periodically from longer-running functions to ensure
+	// GUI responsiveness.
+	PollEvents()
 }
 
 // Platforms are all the supported platforms for OSWin

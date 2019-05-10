@@ -73,6 +73,8 @@ func (ve *Vectors) Set(name string, handle uint32, typ gpu.VectorType, role gpu.
 // Note: all arrangement data is in *float* units, not *byte* units -- multiply * 4 to get bytes.
 type VectorsBuffer struct {
 	init   bool
+	trans  bool // was buffer already transferred up to device yet?
+	mod    bool // were vector params modified at all?
 	handle uint32
 	usage  gpu.VectorUsages
 	vecs   []*Vectors
@@ -101,6 +103,8 @@ func (vb *VectorsBuffer) SetUsage(usg gpu.VectorUsages) {
 // Add all Vectors before setting the length, which then computes offset and strides
 // for each vector.
 func (vb *VectorsBuffer) AddVectors(vec gpu.Vectors, interleave bool) {
+	vb.trans = false
+	vb.mod = true
 	v := vec.(*Vectors)
 	if v.typ.Type == gpu.Float64 {
 		log.Printf("glos.VectorsBuffer AddVectors: Float64 not supported for this buffer type\n")
@@ -193,6 +197,11 @@ func (vb *VectorsBuffer) updtVecs() {
 // Vectors type in buffer.  Also triggers computation of offsets and strides for each
 // vector -- call after having added all Vectors.
 func (vb *VectorsBuffer) SetLen(ln int) {
+	if vb.ln == ln {
+		return
+	}
+	vb.trans = false
+	vb.mod = true
 	vb.ln = ln
 	vb.updtVecs()
 }
@@ -332,22 +341,27 @@ func (vb *VectorsBuffer) Vec3Func(vec gpu.Vectors, fun func(vec *mat32.Vec3) boo
 
 // Activate binds buffer as active one, and configures it per all existing settings
 func (vb *VectorsBuffer) Activate() {
+	didInit := false
 	if !vb.init {
 		vb.updtVecs() // make sure
 		gl.GenBuffers(1, &vb.handle)
 		vb.init = true
+		didInit = true
 	}
 	gl.BindBuffer(gl.ARRAY_BUFFER, vb.handle)
-	for i, v := range vb.vecs {
-		str := 0
-		if i < vb.nInter {
-			str = vb.stride
+	if didInit || vb.mod {
+		for i, v := range vb.vecs {
+			str := 0
+			if i < vb.nInter {
+				str = vb.stride
+			}
+			off := vb.offs[i]
+			gl.EnableVertexAttribArray(uint32(v.handle))
+			gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
+			// fmt.Printf("vec: %v str: %v off: %v\n", v.name, str*4, off*4)
 		}
-		off := vb.offs[i]
-		gl.EnableVertexAttribArray(uint32(v.handle))
-		gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
-		// fmt.Printf("vec: %v str: %v off: %v\n", v.name, str*4, off*4)
 	}
+	vb.mod = false
 }
 
 // Handle returns the unique handle for this buffer -- only valid after Activate()
@@ -360,7 +374,11 @@ func (vb *VectorsBuffer) Handle() uint32 {
 // strategy per: https://www.khronos.org/opengl/wiki/Buffer_Object_Streaming
 // so it is safe if buffer was still being used from prior GL rendering call.
 func (vb *VectorsBuffer) Transfer() {
+	if vb.trans { // re-specification strategy: invalidate existing prior to changing
+		gl.BufferData(gl.ARRAY_BUFFER, vb.buff.Bytes(), gl.Ptr(nil), vb.GPUUsage(vb.usage))
+	}
 	gl.BufferData(gl.ARRAY_BUFFER, vb.buff.Bytes(), gl.Ptr(vb.buff), vb.GPUUsage(vb.usage))
+	vb.trans = true
 }
 
 // TransferVec transfers only data for given vector to GPU -- only valid

@@ -144,13 +144,15 @@ outer:
 				f.done <- true
 			}
 		case <-w.publish:
-			theApp.RunOnMain(func() {
-				w.Activate()
-				w.glw.SwapBuffers() // note: implicitly does a flush
-				// note: generally don't need this:
-				// gpu.Draw.Clear(true, true)
-			})
-			w.publishDone <- struct{}{}
+			if !theApp.noScreens {
+				theApp.RunOnMain(func() {
+					w.Activate()
+					w.glw.SwapBuffers() // note: implicitly does a flush
+					// note: generally don't need this:
+					// gpu.Draw.Clear(true, true)
+				})
+				w.publishDone <- struct{}{}
+			}
 		}
 	}
 }
@@ -182,6 +184,9 @@ func (w *windowImpl) Publish() {
 // PublishTex draws the current WinTex texture to the window and then
 // calls Publish() -- this is the typical update call.
 func (w *windowImpl) PublishTex() {
+	if theApp.noScreens {
+		return
+	}
 	theApp.RunOnMain(func() {
 		w.Activate()
 		w.Copy(image.ZP, w.winTex, w.winTex.Bounds(), oswin.Src, nil)

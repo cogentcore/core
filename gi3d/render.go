@@ -25,7 +25,7 @@ type RenderInputs int32
 const (
 	InVtxPos RenderInputs = iota
 	InVtxNorm
-	InVtxTexUV
+	InVtxTex
 	InVtxColor
 	RenderInputsN
 )
@@ -112,7 +112,7 @@ func (rn *Renderers) InitVectors() {
 	rn.Vectors = make([]gpu.Vectors, RenderInputsN)
 	rn.Vectors[InVtxPos] = gpu.TheGPU.NewInputVectors("InVtxPos", int(InVtxPos), gpu.Vec3fVecType, gpu.VertexPosition)
 	rn.Vectors[InVtxNorm] = gpu.TheGPU.NewInputVectors("InVtxNorm", int(InVtxNorm), gpu.Vec3fVecType, gpu.VertexNormal)
-	rn.Vectors[InVtxTexUV] = gpu.TheGPU.NewInputVectors("InVtxTexUV", int(InVtxTexUV), gpu.Vec2fVecType, gpu.VertexTexcoord)
+	rn.Vectors[InVtxTex] = gpu.TheGPU.NewInputVectors("InVtxTex", int(InVtxTex), gpu.Vec2fVecType, gpu.VertexTexcoord)
 	rn.Vectors[InVtxColor] = gpu.TheGPU.NewInputVectors("InVtxColor", int(InVtxColor), gpu.Vec4fVecType, gpu.VertexColor)
 }
 
@@ -277,7 +277,7 @@ func (rb *RenderUniformColor) Init(rn *Renderers) error {
 		`
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
-// layout(location = 2) in vec2 TexUV;
+// layout(location = 2) in vec2 VtxTex;
 // layout(location = 3) in vec4 VtxColor;
 out vec4 Pos;
 out vec3 Norm;
@@ -389,7 +389,7 @@ func (rb *RenderVertexColor) Init(rn *Renderers) error {
 		`
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
-// layout(location = 2) in vec2 TexUV;
+// layout(location = 2) in vec2 VtxTex;
 layout(location = 3) in vec4 VtxColor;
 out vec4 Pos;
 out vec3 Norm;
@@ -496,7 +496,7 @@ func (rb *RenderTexture) Init(rn *Renderers) error {
 		`
 layout(location = 0) in vec3 VtxPos;
 layout(location = 1) in vec3 VtxNorm;
-layout(location = 2) in vec2 TexUV;
+layout(location = 2) in vec2 VtxTex;
 // layout(location = 3) in vec4 VtxColor;
 uniform bool FlipY;
 out vec4 Pos;
@@ -509,7 +509,7 @@ void main() {
 	Pos = MVMatrix * vPos;
 	Norm = normalize(NormMatrix * VtxNorm);
 	CamDir = normalize(-Pos.xyz);
-	TexCoord = TexUV;
+	TexCoord = VtxTex;
 	if(FlipY) {
 		TexCoord.y = 1 - TexCoord.y;
 	}

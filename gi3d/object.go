@@ -159,7 +159,6 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 		rndt.SetMat(&obj.Mat, sc)
 	}
 	sc.Renders.SetMatrix(&obj.Pose)
-	obj.MeshPtr.Activate(sc) // meshes have all been prep'd
-	obj.MeshPtr.Render3D()
+	obj.MeshPtr.Render3D(sc)
 	gpu.TheGPU.ErrCheck("obj render")
 }
