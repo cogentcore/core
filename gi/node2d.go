@@ -541,6 +541,20 @@ func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poi
 // Tree-walking code for the init, style, layout, render passes
 //  typically called by Viewport but can be called by others
 
+// FullInit2DTree does a full reinitialization of the tree *below this node*
+// this should be called whenever the tree is dynamically updated and new
+// nodes are added below a given node -- e.g., loading a new SVG graph etc.
+// prepares everything to be rendered as usual.
+func (nb *Node2DBase) FullInit2DTree() {
+	for i := range nb.Kids {
+		kd := nb.Kids[i].(Node2D).AsNode2D()
+		kd.Init2DTree()
+		kd.Style2DTree()
+		kd.Size2DTree(0)
+		kd.Layout2DTree()
+	}
+}
+
 // FullRender2DTree does a full render of the tree
 func (nb *Node2DBase) FullRender2DTree() {
 	updt := nb.UpdateStart()

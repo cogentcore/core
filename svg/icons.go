@@ -60,6 +60,7 @@ func (ic *Icon) CopyFromIcon(cp *Icon) {
 		return
 	}
 	ic.CopyFrom(cp)
+	// ic.FullInit2DTree()
 	ic.Rendered = false
 }
 

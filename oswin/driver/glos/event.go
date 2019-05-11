@@ -5,7 +5,6 @@
 package glos
 
 import (
-	"fmt"
 	"image"
 	"time"
 
@@ -107,10 +106,10 @@ func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey
 	fw := theApp.WindowInFocus()
 	if w != fw {
 		if fw == nil {
-			fmt.Printf("glos char event focus window is nil!  window: %v\n", w.Nm)
+			// fmt.Printf("glos char event focus window is nil!  window: %v\n", w.Nm)
 			fw = w
 		} else {
-			fmt.Printf("glos char event window: %v != focus window: %v\n", w.Nm, fw.Name())
+			// fmt.Printf("glos char event window: %v != focus window: %v\n", w.Nm, fw.Name())
 			w = fw.(*windowImpl)
 		}
 	}

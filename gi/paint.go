@@ -558,6 +558,9 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 }
 
 func (pc *Paint) stroke(rs *RenderState) {
+	if rs.Raster == nil {
+		return
+	}
 	pr := prof.Start("Paint.stroke")
 
 	rs.RasterMu.Lock()
@@ -604,6 +607,9 @@ func (pc *Paint) stroke(rs *RenderState) {
 }
 
 func (pc *Paint) fill(rs *RenderState) {
+	if rs.Raster == nil {
+		return
+	}
 	pr := prof.Start("Paint.fill")
 
 	rs.RasterMu.Lock()
