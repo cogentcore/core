@@ -51,7 +51,9 @@ func (cv *ColorView) SetColor(clr color.Color, tmpSave ValueView) {
 func (cv *ColorView) Config() {
 	cv.Lay = gi.LayoutVert
 	cv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := cv.StdFrameConfig()
+	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_Layout, "slider-lay")
+	config.Add(gi.KiT_Layout, "num-lay")
 	mods, updt := cv.ConfigChildren(config, false)
 	if mods {
 		cv.SliderLayConfig()
@@ -64,15 +66,14 @@ func (cv *ColorView) Config() {
 
 // SliderLayConfig configures the sliders layout
 func (cv *ColorView) SliderLayConfig() {
-	vl, _ := cv.SliderLay()
-	if vl == nil {
-		return
-	}
+	vl := cv.SliderLay()
 	vl.Lay = gi.LayoutHoriz
 	vl.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := cv.StdSliderLayConfig()
+	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_Frame, "value")
+	config.Add(gi.KiT_Layout, "slider-grid")
 	mods, updt := vl.ConfigChildren(config, false)
-	v, _ := cv.Value()
+	v := cv.Value()
 	if mods {
 		cv.ConfigSliderGrid()
 		v.SetProp("min-width", units.NewEm(6))
@@ -83,60 +84,20 @@ func (cv *ColorView) SliderLayConfig() {
 	vl.UpdateEnd(updt)
 }
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (cv *ColorView) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Layout, "slider-lay")
-	config.Add(gi.KiT_Layout, "num-lay")
-	return config
+func (cv *ColorView) NumLay() *gi.Layout {
+	return cv.ChildByName("num-lay", 1).(*gi.Layout)
 }
 
-func (cv *ColorView) StdSliderLayConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Frame, "value")
-	config.Add(gi.KiT_Layout, "slider-grid")
-	return config
+func (cv *ColorView) SliderLay() *gi.Layout {
+	return cv.ChildByName("slider-lay", 0).(*gi.Layout)
 }
 
-func (cv *ColorView) NumLay() (*gi.Layout, int) {
-	idx, ok := cv.Children().IndexByName("num-lay", 1)
-	if !ok {
-		return nil, -1
-	}
-	return cv.Child(idx).(*gi.Layout), idx
+func (cv *ColorView) Value() *gi.Frame {
+	return cv.SliderLay().ChildByName("value", 0).(*gi.Frame)
 }
 
-func (cv *ColorView) SliderLay() (*gi.Layout, int) {
-	idx, ok := cv.Children().IndexByName("slider-lay", 0)
-	if !ok {
-		return nil, -1
-	}
-	return cv.Child(idx).(*gi.Layout), idx
-}
-
-func (cv *ColorView) Value() (*gi.Frame, int) {
-	vl, _ := cv.SliderLay()
-	if vl == nil {
-		return nil, -1
-	}
-	idx, ok := vl.Children().IndexByName("value", 0)
-	if !ok {
-		return nil, -1
-	}
-	return vl.Child(idx).(*gi.Frame), idx
-}
-
-func (cv *ColorView) SliderGrid() (*gi.Layout, int) {
-	vl, _ := cv.SliderLay()
-	if vl == nil {
-		return nil, -1
-	}
-	idx, ok := vl.Children().IndexByName("slider-grid", 0)
-	if !ok {
-		return nil, -1
-	}
-	return vl.Child(idx).(*gi.Layout), idx
+func (cv *ColorView) SliderGrid() *gi.Layout {
+	return cv.SliderLay().ChildByName("slider-grid", 0).(*gi.Layout)
 }
 
 // StdSliderConfig returns a TypeAndNameList for configuring a standard sliders
@@ -272,10 +233,7 @@ func (cv *ColorView) ConfigLabel(lab *gi.Label, txt string) {
 
 // ConfigSliderGrid configures the SliderGrid
 func (cv *ColorView) ConfigSliderGrid() {
-	sg, _ := cv.SliderGrid()
-	if sg == nil {
-		return
-	}
+	sg := cv.SliderGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", 4)
 	config := cv.StdSliderConfig()
@@ -303,10 +261,7 @@ func (cv *ColorView) ConfigSliderGrid() {
 }
 
 func (cv *ColorView) UpdateSliderGrid() {
-	sg, _ := cv.SliderGrid()
-	if sg == nil {
-		return
-	}
+	sg := cv.SliderGrid()
 	updt := sg.UpdateStart()
 	cv.UpdateRGBSlider(sg.ChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
 	cv.UpdateRGBSlider(sg.ChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
@@ -320,7 +275,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 
 // NumLayConfig configures the numerical layout
 func (cv *ColorView) NumLayConfig() {
-	nl, _ := cv.NumLay()
+	nl := cv.NumLay()
 	updt := nl.UpdateStart()
 	cv.NumView = ToValueView(&cv.Color, "")
 	cv.NumView.SetStandaloneValue(reflect.ValueOf(&cv.Color))
@@ -340,7 +295,7 @@ func (cv *ColorView) Update() {
 	updt := cv.UpdateStart()
 	cv.UpdateSliderGrid()
 	cv.NumView.UpdateWidget()
-	v, _ := cv.Value()
+	v := cv.Value()
 	v.Sty.Font.BgColor.Color = cv.Color // direct copy
 	cv.UpdateEnd(updt)
 }

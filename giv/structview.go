@@ -61,23 +61,8 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 		}
 	}
 	sv.TmpSave = tmpSave
-	sv.UpdateFromStruct()
+	sv.Config()
 	sv.UpdateEnd(updt)
-}
-
-// UpdateFromStruct updates full widget layout from structure
-func (sv *StructView) UpdateFromStruct() {
-	if ks, ok := sv.Struct.(ki.Ki); ok {
-		if ks.IsDeleted() || ks.IsDestroyed() {
-			return
-		}
-	}
-	mods, updt := sv.StdConfig()
-	sv.ConfigStructGrid()
-	sv.ConfigToolbar()
-	if mods {
-		sv.UpdateEnd(updt)
-	}
 }
 
 // UpdateFields updates each of the value-view widgets for the fields --
@@ -90,42 +75,34 @@ func (sv *StructView) UpdateFields() {
 	sv.UpdateEnd(updt)
 }
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (sv *StructView) StdFrameConfig() kit.TypeAndNameList {
+// Config configures the view
+func (sv *StructView) Config() {
+	if ks, ok := sv.Struct.(ki.Ki); ok {
+		if ks.IsDeleted() || ks.IsDestroyed() {
+			return
+		}
+	}
+	sv.Lay = gi.LayoutVert
+	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "struct-grid")
-	return config
-}
-
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (sv *StructView) StdConfig() (mods, updt bool) {
-	sv.Lay = gi.LayoutVert
-	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := sv.StdFrameConfig()
-	mods, updt = sv.ConfigChildren(config, false)
-	return
-}
-
-// StructGrid returns the grid layout widget, which contains all the fields
-// and values, and its index, within frame -- nil, -1 if not found
-func (sv *StructView) StructGrid() (*gi.Frame, int) {
-	idx, ok := sv.Children().IndexByName("struct-grid", 2)
-	if !ok {
-		return nil, -1
+	mods, updt := sv.ConfigChildren(config, false)
+	sv.ConfigStructGrid()
+	sv.ConfigToolbar()
+	if mods {
+		sv.UpdateEnd(updt)
 	}
-	return sv.Child(idx).(*gi.Frame), idx
+}
+
+// StructGrid returns the grid layout widget, which contains all the fields and values
+func (sv *StructView) StructGrid() *gi.Frame {
+	return sv.ChildByName("struct-grid", 2).(*gi.Frame)
 }
 
 // ToolBar returns the toolbar widget
 func (sv *StructView) ToolBar() *gi.ToolBar {
-	idx, ok := sv.Children().IndexByName("toolbar", 1)
-	if !ok {
-		return nil
-	}
-	return sv.Child(idx).(*gi.ToolBar)
+	return sv.ChildByName("toolbar", 1).(*gi.ToolBar)
 }
 
 // ConfigToolbar adds a toolbar based on the methview ToolBarView function, if
@@ -152,10 +129,7 @@ func (sv *StructView) ConfigStructGrid() {
 	if kit.IfaceIsNil(sv.Struct) {
 		return
 	}
-	sg, _ := sv.StructGrid()
-	if sg == nil {
-		return
-	}
+	sg := sv.StructGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
@@ -244,7 +218,7 @@ func (sv *StructView) ConfigStructGrid() {
 
 func (sv *StructView) Style2D() {
 	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
-		sv.UpdateFromStruct()
+		sv.Config()
 	}
 	sv.Frame.Style2D()
 }

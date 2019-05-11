@@ -44,58 +44,44 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 	updt := false
 	updt = av.UpdateStart()
 	av.Args = arg
-	av.UpdateFromArgs()
+	av.Config()
 	av.UpdateEnd(updt)
 }
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (av *ArgView) StdFrameConfig() kit.TypeAndNameList {
+// Config configures the view
+func (av *ArgView) Config() {
+	av.Lay = gi.LayoutVert
+	av.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "title")
 	config.Add(gi.KiT_Frame, "args-grid")
-	return config
+	mods, updt := av.ConfigChildren(config, false)
+	av.ConfigArgsGrid()
+	if mods {
+		av.UpdateEnd(updt)
+	}
 }
 
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (av *ArgView) StdConfig() (mods, updt bool) {
-	av.Lay = gi.LayoutVert
-	av.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := av.StdFrameConfig()
-	mods, updt = av.ConfigChildren(config, false)
-	return
+// Title returns the title label widget, and its index, within frame
+func (av *ArgView) TitleWidget() *gi.Label {
+	return av.ChildByName("title", 0).(*gi.Label)
+}
+
+// ArgsGrid returns the grid layout widget, which contains all the fields
+// and values, and its index, within frame
+func (av *ArgView) ArgsGrid() *gi.Frame {
+	return av.ChildByName("args-grid", 0).(*gi.Frame)
 }
 
 // SetTitle sets the optional title and updates the Title label
 func (av *ArgView) SetTitle(title string) {
 	av.Title = title
 	if av.Title != "" {
-		lab, _ := av.TitleWidget()
+		lab := av.TitleWidget()
 		if lab != nil {
 			lab.Text = title
 		}
 	}
-}
-
-// Title returns the title label widget, and its index, within frame -- nil,
-// -1 if not found
-func (av *ArgView) TitleWidget() (*gi.Label, int) {
-	idx, ok := av.Children().IndexByName("title", 0)
-	if !ok {
-		return nil, -1
-	}
-	return av.Child(idx).(*gi.Label), idx
-}
-
-// ArgsGrid returns the grid layout widget, which contains all the fields
-// and values, and its index, within frame -- nil, -1 if not found
-func (av *ArgView) ArgsGrid() (*gi.Frame, int) {
-	idx, ok := av.Children().IndexByName("args-grid", 0)
-	if !ok {
-		return nil, -1
-	}
-	return av.Child(idx).(*gi.Frame), idx
 }
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
@@ -103,10 +89,7 @@ func (av *ArgView) ConfigArgsGrid() {
 	if kit.IfaceIsNil(av.Args) {
 		return
 	}
-	sg, _ := av.ArgsGrid()
-	if sg == nil {
-		return
-	}
+	sg := av.ArgsGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
@@ -153,15 +136,6 @@ func (av *ArgView) ConfigArgsGrid() {
 		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
-}
-
-// UpdateFromArgs updates full widget layout from structure
-func (av *ArgView) UpdateFromArgs() {
-	mods, updt := av.StdConfig()
-	av.ConfigArgsGrid()
-	if mods {
-		av.UpdateEnd(updt)
-	}
 }
 
 // UpdateArgs updates each of the value-view widgets for the args

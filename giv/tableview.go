@@ -132,7 +132,7 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 		tv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
 	tv.TmpSave = tmpSave
-	tv.UpdateFromSlice()
+	tv.Config()
 	tv.UpdateEnd(updt)
 }
 
@@ -159,17 +159,6 @@ const (
 )
 
 //go:generate stringer -type=TableViewSignals
-
-// UpdateFromSlice does full update from current slice
-func (tv *TableView) UpdateFromSlice() {
-	mods, updt := tv.StdConfig()
-	tv.ConfigSliceGrid(true)
-	tv.ConfigToolbar()
-	if mods {
-		tv.SetFullReRender()
-		tv.UpdateEnd(updt)
-	}
-}
 
 // UpdateValues just updates rendered values
 func (tv *TableView) UpdateValues() {
@@ -214,69 +203,42 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (tv *TableView) StdFrameConfig() kit.TypeAndNameList {
+// Config configures the view
+func (tv *TableView) Config() {
+	tv.Lay = gi.LayoutVert
+	tv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "slice-frame")
-	return config
-}
-
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (tv *TableView) StdConfig() (mods, updt bool) {
-	tv.Lay = gi.LayoutVert
-	tv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := tv.StdFrameConfig()
-	mods, updt = tv.ConfigChildren(config, false)
-	return
+	mods, updt := tv.ConfigChildren(config, false)
+	tv.ConfigSliceGrid(true)
+	tv.ConfigToolbar()
+	if mods {
+		tv.SetFullReRender()
+		tv.UpdateEnd(updt)
+	}
 }
 
 // SliceFrame returns the outer frame widget, which contains all the header,
-// fields and values, and its index, within frame -- nil, -1 if not found
-func (tv *TableView) SliceFrame() (*gi.Frame, int) {
-	idx, ok := tv.Children().IndexByName("slice-frame", 0)
-	if !ok {
-		return nil, -1
-	}
-	return tv.Child(idx).(*gi.Frame), idx
+// fields and values
+func (tv *TableView) SliceFrame() *gi.Frame {
+	return tv.ChildByName("slice-frame", 0).(*gi.Frame)
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, within SliceFrame
 func (tv *TableView) SliceGrid() *gi.Frame {
-	sf, _ := tv.SliceFrame()
-	if sf == nil {
-		return nil
-	}
-	return sf.Child(1).(*gi.Frame)
+	return tv.SliceFrame().Child(1).(*gi.Frame)
 }
 
 // SliceHeader returns the Toolbar header for slice grid
 func (tv *TableView) SliceHeader() *gi.ToolBar {
-	sf, _ := tv.SliceFrame()
-	if sf == nil {
-		return nil
-	}
-	return sf.Child(0).(*gi.ToolBar)
+	return tv.SliceFrame().Child(0).(*gi.ToolBar)
 }
 
 // ToolBar returns the toolbar widget
 func (tv *TableView) ToolBar() *gi.ToolBar {
-	idx, ok := tv.Children().IndexByName("toolbar", 0)
-	if !ok {
-		return nil
-	}
-	return tv.Child(idx).(*gi.ToolBar)
-}
-
-// StdSliceFrameConfig returns a TypeAndNameList for configuring the slice-frame
-func (tv *TableView) StdSliceFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "header")
-	config.Add(gi.KiT_Frame, "grid")
-	return config
+	return tv.ChildByName("toolbar", 0).(*gi.ToolBar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -318,10 +280,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		tv.Values[fli] = make([]ValueView, sz)
 	}
 
-	sg, _ := tv.SliceFrame()
-	if sg == nil {
-		return
-	}
+	sg := tv.SliceFrame()
 	sg.Lay = gi.LayoutVert
 	sg.SetMinPrefWidth(units.NewEm(10))
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
@@ -332,7 +291,9 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 		defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
 	}
 
-	sgcfg := tv.StdSliceFrameConfig()
+	sgcfg := kit.TypeAndNameList{}
+	sgcfg.Add(gi.KiT_ToolBar, "header")
+	sgcfg.Add(gi.KiT_Frame, "grid")
 	modsg, updtg := sg.ConfigChildren(sgcfg, false)
 	if modsg {
 		sg.SetFullReRender()
@@ -717,7 +678,7 @@ func (tv *TableView) SetSortFieldName(nm string) {
 
 func (tv *TableView) Style2D() {
 	if tv.Viewport != nil && tv.Viewport.IsDoingFullRender() {
-		tv.UpdateFromSlice()
+		tv.Config()
 	}
 	tv.Frame.Style2D()
 	sg := tv.SliceGrid()
@@ -726,10 +687,6 @@ func (tv *TableView) Style2D() {
 
 func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	redo := tv.Frame.Layout2D(parBBox, iter)
-	sg, _ := tv.SliceFrame()
-	if sg == nil {
-		return redo
-	}
 	idxOff := 1
 	if !tv.ShowIndex {
 		idxOff = 0
@@ -824,10 +781,6 @@ func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, _ := tv.RowWidgetNs()
-	sg, _ := tv.SliceFrame()
-	if sg == nil {
-		return nil, false
-	}
 	sgf := tv.SliceGrid()
 	widg := sgf.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
 	return widg, true
@@ -840,10 +793,6 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg, _ := tv.SliceFrame()
-	if sg == nil {
-		return nil, false
-	}
 	sgf := tv.SliceGrid()
 	widg := sgf.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
 	if widg.VpBBox != image.ZR {
@@ -868,10 +817,6 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	}
 	// fmt.Printf("grab row focus: %v\n", row)
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	sg, _ := tv.SliceFrame()
-	if sg == nil {
-		return nil
-	}
 	ridx := nWidgPerRow * row
 	sgf := tv.SliceGrid()
 	// first check if we already have focus

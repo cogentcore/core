@@ -96,7 +96,7 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 		sv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
 	sv.TmpSave = tmpSave
-	sv.UpdateFromSlice()
+	sv.Config()
 	sv.UpdateEnd(updt)
 }
 
@@ -123,17 +123,6 @@ const (
 
 //go:generate stringer -type=SliceViewSignals
 
-// UpdateFromSlice performs overall configuration for given slice
-func (sv *SliceView) UpdateFromSlice() {
-	mods, updt := sv.StdConfig()
-	sv.ConfigSliceGrid(true)
-	sv.ConfigToolbar()
-	if mods {
-		sv.SetFullReRender()
-		sv.UpdateEnd(updt)
-	}
-}
-
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (sv *SliceView) UpdateValues() {
 	updt := sv.UpdateStart()
@@ -143,42 +132,31 @@ func (sv *SliceView) UpdateValues() {
 	sv.UpdateEnd(updt)
 }
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (sv *SliceView) StdFrameConfig() kit.TypeAndNameList {
+// Config configures a standard setup of the overall Frame
+func (sv *SliceView) Config() {
+	sv.Lay = gi.LayoutVert
+	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "slice-grid")
-	return config
-}
-
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (sv *SliceView) StdConfig() (mods, updt bool) {
-	sv.Lay = gi.LayoutVert
-	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := sv.StdFrameConfig()
-	mods, updt = sv.ConfigChildren(config, false)
-	return
+	mods, updt := sv.ConfigChildren(config, false)
+	sv.ConfigSliceGrid(true)
+	sv.ConfigToolbar()
+	if mods {
+		sv.SetFullReRender()
+		sv.UpdateEnd(updt)
+	}
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
-// fields and values, and its index, within frame -- nil, -1 if not found
-func (sv *SliceView) SliceGrid() (*gi.Frame, int) {
-	idx, ok := sv.Children().IndexByName("slice-grid", 0)
-	if !ok {
-		return nil, -1
-	}
-	return sv.Child(idx).(*gi.Frame), idx
+// fields and values
+func (sv *SliceView) SliceGrid() *gi.Frame {
+	return sv.ChildByName("slice-grid", 0).(*gi.Frame)
 }
 
 // ToolBar returns the toolbar widget
 func (sv *SliceView) ToolBar() *gi.ToolBar {
-	idx, ok := sv.Children().IndexByName("toolbar", 0)
-	if !ok {
-		return nil
-	}
-	return sv.Child(idx).(*gi.ToolBar)
+	return sv.ChildByName("toolbar", 0).(*gi.ToolBar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -215,10 +193,7 @@ func (sv *SliceView) ConfigSliceGrid(forceUpdt bool) {
 	sv.BuiltSlice = sv.Slice
 	sv.BuiltSize = sz
 
-	sg, _ := sv.SliceGrid()
-	if sg == nil {
-		return
-	}
+	sg := sv.SliceGrid()
 	updt := sg.UpdateStart()
 	sg.SetFullReRender()
 	defer sg.UpdateEnd(updt)
@@ -248,7 +223,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := kit.NonPtrValue(mv)
 	sz := mvnp.Len()
-	sg, _ := sv.SliceGrid()
+	sg := sv.SliceGrid()
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	updt := sg.UpdateStart()
@@ -496,9 +471,9 @@ func (sv *SliceView) ConfigToolbar() {
 
 func (sv *SliceView) Style2D() {
 	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
-		sv.UpdateFromSlice()
+		sv.Config()
 	}
-	sg, _ := sv.SliceGrid()
+	sg := sv.SliceGrid()
 	sg.StartFocus() // need to call this when window is actually active
 	sv.Frame.Style2D()
 }
@@ -570,10 +545,7 @@ func (sv *SliceView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 		return nil, false
 	}
 	nWidgPerRow, _ := sv.RowWidgetNs()
-	sg, _ := sv.SliceGrid()
-	if sg == nil {
-		return nil, false
-	}
+	sg := sv.SliceGrid()
 	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
 	return widg, true
 }
@@ -586,10 +558,7 @@ func (sv *SliceView) RowGrabFocus(row int) *gi.WidgetBase {
 		return nil
 	}
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
-	sg, _ := sv.SliceGrid()
-	if sg == nil {
-		return nil
-	}
+	sg := sv.SliceGrid()
 	ridx := nWidgPerRow * row
 	widg := sg.Child(ridx + idxOff).(gi.Node2D).AsWidget()
 	if widg.HasFocus() {
@@ -632,7 +601,7 @@ func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 // -- returns true if any scrolling was performed
 func (sv *SliceView) ScrollToRow(row int) bool {
 	row = ints.MinInt(row, sv.BuiltSize-1)
-	sg, _ := sv.SliceGrid()
+	sg := sv.SliceGrid()
 	if widg, ok := sv.RowFirstWidget(row); ok {
 		return sg.ScrollToItem(widg)
 	}
@@ -776,7 +745,7 @@ func (sv *SliceView) MovePageUpAction(selMode mouse.SelectModes) int {
 
 // SelectRowWidgets sets the selection state of given row of widgets
 func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
-	sg, _ := sv.SliceGrid()
+	sg := sv.SliceGrid()
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	rowidx := idx * nWidgPerRow
 	if sv.ShowIndex {

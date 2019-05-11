@@ -82,7 +82,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 		ge.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	ge.UpdateFromRoot()
+	ge.Config()
 	ge.UpdateEnd(updt)
 }
 
@@ -100,94 +100,56 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // 	})
 // }
 
-// UpdateFromRoot updates full widget layout
-func (ge *GiEditor) UpdateFromRoot() {
+// Config configures the widget
+func (ge *GiEditor) Config() {
 	if ge.KiRoot == nil {
 		return
 	}
-	mods, updt := ge.StdConfig()
+	ge.Lay = gi.LayoutVert
+	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
+	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_Label, "title")
+	config.Add(gi.KiT_ToolBar, "toolbar")
+	config.Add(gi.KiT_SplitView, "splitview")
+	mods, updt := ge.ConfigChildren(config, false)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
 	ge.ConfigSplitView()
 	ge.ConfigToolbar()
 	if mods {
 		ge.UpdateEnd(updt)
 	}
-}
-
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (ge *GiEditor) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "title")
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_SplitView, "splitview")
-	return config
-}
-
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (ge *GiEditor) StdConfig() (mods, updt bool) {
-	ge.Lay = gi.LayoutVert
-	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := ge.StdFrameConfig()
-	mods, updt = ge.ConfigChildren(config, false)
 	return
 }
 
 // SetTitle sets the optional title and updates the Title label
 func (ge *GiEditor) SetTitle(title string) {
-	lab, _ := ge.TitleWidget()
-	if lab != nil {
-		lab.Text = title
-	}
+	lab := ge.TitleWidget()
+	lab.Text = title
 }
 
-// Title returns the title label widget, and its index, within frame -- nil,
-// -1 if not found
-func (ge *GiEditor) TitleWidget() (*gi.Label, int) {
-	idx, ok := ge.Children().IndexByName("title", 0)
-	if !ok {
-		return nil, -1
-	}
-	return ge.Child(idx).(*gi.Label), idx
+// Title returns the title label widget, and its index, within frame
+func (ge *GiEditor) TitleWidget() *gi.Label {
+	return ge.ChildByName("title", 0).(*gi.Label)
 }
 
 // SplitView returns the main SplitView
-func (ge *GiEditor) SplitView() (*gi.SplitView, int) {
-	idx, ok := ge.Children().IndexByName("splitview", 2)
-	if !ok {
-		return nil, -1
-	}
-	return ge.Child(idx).(*gi.SplitView), idx
+func (ge *GiEditor) SplitView() *gi.SplitView {
+	return ge.ChildByName("splitview", 2).(*gi.SplitView)
 }
 
 // TreeView returns the main TreeView
 func (ge *GiEditor) TreeView() *TreeView {
-	split, _ := ge.SplitView()
-	if split != nil {
-		tv := split.Child(0).Child(0).(*TreeView)
-		return tv
-	}
-	return nil
+	return ge.SplitView().Child(0).Child(0).(*TreeView)
 }
 
 // StructView returns the main StructView
 func (ge *GiEditor) StructView() *StructView {
-	split, _ := ge.SplitView()
-	if split != nil {
-		sv := split.Child(1).(*StructView)
-		return sv
-	}
-	return nil
+	return ge.SplitView().Child(1).(*StructView)
 }
 
 // ToolBar returns the toolbar widget
 func (ge *GiEditor) ToolBar() *gi.ToolBar {
-	idx, ok := ge.Children().IndexByName("toolbar", 1)
-	if !ok {
-		return nil
-	}
-	return ge.Child(idx).(*gi.ToolBar)
+	return ge.ChildByName("toolbar", 1).(*gi.ToolBar)
 }
 
 // ConfigToolbar adds a GiEditor toolbar.
@@ -205,10 +167,7 @@ func (ge *GiEditor) ConfigSplitView() {
 	if ge.KiRoot == nil {
 		return
 	}
-	split, _ := ge.SplitView()
-	if split == nil {
-		return
-	}
+	split := ge.SplitView()
 	// split.Dim = gi.Y
 	split.Dim = gi.X
 

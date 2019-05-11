@@ -77,8 +77,7 @@ func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
 func (fv *FileView) SetFilename(filename, ext string) {
 	fv.DirPath, fv.SelFile = filepath.Split(filename)
 	fv.SetExt(ext)
-	// fv.UpdateFromPath()
-	fv.DoStdConfig()
+	fv.Config()
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
@@ -86,8 +85,7 @@ func (fv *FileView) SetPathFile(path, file, ext string) {
 	fv.DirPath = path
 	fv.SelFile = file
 	fv.SetExt(ext)
-	fv.DoStdConfig()
-	// fv.UpdateFromPath()
+	fv.Config()
 }
 
 // SelectedFile returns the full path to selected file
@@ -116,15 +114,6 @@ func (fv *FileView) SelectFile() {
 			return
 		}
 		fv.FileSig.Emit(fv.This(), int64(FileViewDoubleClicked), fv.SelectedFile())
-	}
-}
-
-// UpdateFromPath will update view based on current DirPath
-func (fv *FileView) UpdateFromPath() {
-	mods, updt := fv.StdConfig()
-	fv.UpdateFiles()
-	if mods {
-		fv.UpdateEnd(updt)
 	}
 }
 
@@ -192,35 +181,20 @@ func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 	}
 }
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (fv *FileView) StdFrameConfig() kit.TypeAndNameList {
+// Config configures the view
+func (fv *FileView) Config() {
+	fv.Lay = gi.LayoutVert
+	fv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "path-tbar")
 	config.Add(gi.KiT_Layout, "files-row")
 	config.Add(gi.KiT_Layout, "sel-row")
-	return config
-}
-
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (fv *FileView) StdConfig() (mods, updt bool) {
-	fv.Lay = gi.LayoutVert
-	fv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := fv.StdFrameConfig()
-	mods, updt = fv.ConfigChildren(config, true)
+	mods, updt := fv.ConfigChildren(config, true)
 	if mods {
 		fv.ConfigPathRow()
 		fv.ConfigFilesRow()
 		fv.ConfigSelRow()
-	}
-	return
-}
-
-// DoStdConfig does the standard configuration, but does not update files
-func (fv *FileView) DoStdConfig() {
-	mods, updt := fv.StdConfig()
-	if mods {
+		fv.UpdateFiles()
 		fv.UpdateEnd(updt)
 	}
 }
@@ -544,7 +518,7 @@ func (fv *FileView) UpdateFiles() {
 	sv := fv.FilesView()
 	sv.SelField = "Name"
 	sv.SelVal = fv.SelFile
-	sv.UpdateFromSlice()
+	sv.Config()
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
 		sv.ScrollToRow(sv.SelectedIdx)
@@ -554,7 +528,7 @@ func (fv *FileView) UpdateFiles() {
 // UpdateFavs updates list of files and other views for current path
 func (fv *FileView) UpdateFavs() {
 	sv := fv.FavsView()
-	sv.UpdateFromSlice()
+	sv.Config()
 }
 
 // AddPathToFavs adds the current path to favorites

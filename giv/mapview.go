@@ -44,7 +44,7 @@ func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.TmpSave = tmpSave
-	mv.UpdateFromMap()
+	mv.Config()
 }
 
 var MapViewProps = ki.Props{
@@ -53,9 +53,20 @@ var MapViewProps = ki.Props{
 	"max-height":       -1,
 }
 
-// UpdateFromMap does full updating from map
-func (mv *MapView) UpdateFromMap() {
-	mods, updt := mv.StdConfig()
+// UpdateValues updates the widget display of slice values, assuming same slice config
+func (mv *MapView) UpdateValues() {
+	// maps have to re-read their values -- can't get pointers
+	mv.ConfigMapGrid()
+}
+
+// Config configures the view
+func (mv *MapView) Config() {
+	mv.Lay = gi.LayoutVert
+	mv.SetProp("spacing", gi.StdDialogVSpaceUnits)
+	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_ToolBar, "toolbar")
+	config.Add(gi.KiT_Frame, "map-grid")
+	mods, updt := mv.ConfigChildren(config, false)
 	mv.ConfigMapGrid()
 	mv.ConfigToolbar()
 	if mods {
@@ -63,47 +74,14 @@ func (mv *MapView) UpdateFromMap() {
 	}
 }
 
-// UpdateValues updates the widget display of slice values, assuming same slice config
-func (mv *MapView) UpdateValues() {
-	// maps have to re-read their values -- can't get pointers
-	mv.ConfigMapGrid()
-}
-
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
-// -- can modify as desired before calling ConfigChildren on Frame using this
-func (mv *MapView) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Frame, "map-grid")
-	return config
-}
-
-// StdConfig configures a standard setup of the overall Frame -- returns mods,
-// updt from ConfigChildren and does NOT call UpdateEnd
-func (mv *MapView) StdConfig() (mods, updt bool) {
-	mv.Lay = gi.LayoutVert
-	mv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := mv.StdFrameConfig()
-	mods, updt = mv.ConfigChildren(config, false)
-	return
-}
-
-// MapGrid returns the MapGrid grid layout widget, which contains all the fields and values, and its index, within frame -- nil, -1 if not found
-func (mv *MapView) MapGrid() (*gi.Frame, int) {
-	idx, ok := mv.Children().IndexByName("map-grid", 0)
-	if !ok {
-		return nil, -1
-	}
-	return mv.Child(idx).(*gi.Frame), idx
+// MapGrid returns the MapGrid grid layout widget, which contains all the fields and values
+func (mv *MapView) MapGrid() *gi.Frame {
+	return mv.ChildByName("map-grid", 0).(*gi.Frame)
 }
 
 // ToolBar returns the toolbar widget
 func (mv *MapView) ToolBar() *gi.ToolBar {
-	idx, ok := mv.Children().IndexByName("toolbar", 0)
-	if !ok {
-		return nil
-	}
-	return mv.Child(idx).(*gi.ToolBar)
+	return mv.ChildByName("toolbar", 0).(*gi.ToolBar)
 }
 
 // KiPropTag returns the PropTag value from Ki owner of this map, if it is..
@@ -128,10 +106,7 @@ func (mv *MapView) ConfigMapGrid() {
 	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
-	sg, _ := mv.MapGrid()
-	if sg == nil {
-		return
-	}
+	sg := mv.MapGrid()
 	sg.Lay = gi.LayoutGrid
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(1.5))
@@ -371,7 +346,7 @@ func (mv *MapView) ConfigToolbar() {
 
 func (mv *MapView) Style2D() {
 	if mv.Viewport != nil && mv.Viewport.IsDoingFullRender() {
-		mv.UpdateFromMap()
+		mv.Config()
 	}
 	mv.Frame.Style2D()
 }
