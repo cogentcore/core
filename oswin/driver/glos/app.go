@@ -118,6 +118,13 @@ func (app *appImpl) GoRunOnMain(f func()) {
 	}()
 }
 
+// SendEmptyEvent sends an empty, blank event to global event processing
+// system, which has the effect of pushing the system along during cases when
+// the event loop needs to be "pinged" to get things moving along..
+func (app *appImpl) SendEmptyEvent() {
+	glfw.PostEmptyEvent()
+}
+
 // PollEvents tells the main event loop to check for any gui events right now.
 // Call this periodically from longer-running functions to ensure
 // GUI responsiveness.
@@ -140,12 +147,12 @@ func (app *appImpl) mainLoop() {
 			if f.done != nil {
 				f.done <- true
 			}
-			glfw.PollEvents() // this is key for preventing stalls -- tiny bit slower but worth it..
 		default:
 			if len(app.windows) == 0 { // starting up
 				time.Sleep(1)
 			} else {
-				glfw.WaitEvents()
+				// glfw.WaitEvents()
+				glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
 			}
 		}
 	}

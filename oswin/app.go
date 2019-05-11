@@ -151,6 +151,12 @@ type App interface {
 	// overall app.
 	GoRunOnMain(f func())
 
+	// SendEmptyEvent sends an empty, blank event to global event processing
+	// system, which has the effect of pushing the system along during cases when
+	// the event loop needs to be "pinged" to get things moving along.
+	// See also similar method on Window.
+	SendEmptyEvent()
+
 	// PollEvents tells the main event loop to check for any gui events right now.
 	// Call this periodically from longer-running functions to ensure
 	// GUI responsiveness.

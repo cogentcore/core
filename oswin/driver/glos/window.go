@@ -194,6 +194,14 @@ func (w *windowImpl) PublishTex() {
 	w.Publish()
 }
 
+// SendEmptyEvent sends an empty, blank event to this window, which just has
+// the effect of pushing the system along during cases when the window
+// event loop needs to be "pinged" to get things moving along..
+func (w *windowImpl) SendEmptyEvent() {
+	oswin.SendCustomEvent(w, nil)
+	glfw.PostEmptyEvent() // for good measure
+}
+
 // WinTex() returns the current Texture of the same size as the window that
 // is typically used to update the window contents.
 // Use the various Drawer and SetSubImage methods to update this Texture, and

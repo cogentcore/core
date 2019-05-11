@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -134,7 +133,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
 	pvp.SetFlag(int(VpFlagCompleter))
 	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	oswin.SendCustomEvent(vp.Win.OSWin, nil)    // needs an extra event to show popup
+	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
 }
 
 // Cancel cancels any pending completion -- call when new events nullify prior completions
