@@ -621,7 +621,7 @@ func (c *Color) Blend(pct float32, clr color.Color) Color {
 	pct = InRange32(pct, 0, 100.0)
 	oth := pct / 100.0
 	me := 1.0 - pct/100.0
-	f32.R = me*f32.A + oth*othc.R
+	f32.R = me*f32.R + oth*othc.R
 	f32.G = me*f32.G + oth*othc.G
 	f32.B = me*f32.B + oth*othc.B
 	f32.A = me*f32.A + oth*othc.A
