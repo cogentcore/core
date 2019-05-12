@@ -81,6 +81,21 @@ func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes[ms.Name()] = ms
 }
 
+// MeshList returns a list of available meshes (e.g., for chooser)
+func (sc *Scene) MeshList() []string {
+	sz := len(sc.Meshes)
+	if sz == 0 {
+		return nil
+	}
+	sl := make([]string, sz)
+	ctr := 0
+	for k := range sc.Meshes {
+		sl[ctr] = k
+		ctr++
+	}
+	return sl
+}
+
 // Text2DPlaneMesh returns the special Text2DPLane mesh (creating it if it does not yet exist).
 // This is a 1x1 plane with a normal pointing in positive Z direction used for all Text2D rendering
 func (sc *Scene) Text2DPlaneMesh() Mesh {
@@ -111,6 +126,21 @@ func (sc *Scene) AddTexture(tx Texture) {
 		sc.Textures = make(map[string]Texture)
 	}
 	sc.Textures[tx.Name()] = tx
+}
+
+// TextureList returns a list of available textures (e.g., for chooser)
+func (sc *Scene) TextureList() []string {
+	sz := len(sc.Textures)
+	if sz == 0 {
+		return nil
+	}
+	sl := make([]string, sz)
+	ctr := 0
+	for k := range sc.Textures {
+		sl[ctr] = k
+		ctr++
+	}
+	return sl
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.

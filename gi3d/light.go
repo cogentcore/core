@@ -27,7 +27,7 @@ type Light interface {
 type LightBase struct {
 	Nm    string   `desc:"name of light -- lights accessed by name so it matters"`
 	On    bool     `desc:"whether light is on or off"`
-	Lumns float32  `desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
+	Lumns float32  `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
 	Clr   gi.Color `desc:"color of light a full intensity"`
 }
 
@@ -94,7 +94,7 @@ func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *
 // ViewDir gets the direction normal vector, pre-computing the view transform
 func (dl *DirLight) ViewDir(viewMat *mat32.Mat4) mat32.Vec3 {
 	// adding the 0 in the 4-vector negates any translation factors from the 4 matrix
-	return dl.Pos.Normal().MulMat4AsVec4(viewMat, 0)
+	return dl.Pos.MulMat4AsVec4(viewMat, 0)
 }
 
 // PointLight is an omnidirectional light with a position

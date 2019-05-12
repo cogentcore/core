@@ -19,8 +19,8 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  HiStyleValueView
 
-// HiStyleValueView presents an action for displaying an KeyMapName and selecting
-// icons from KeyMapChooserDialog
+// HiStyleValueView presents an action for displaying a histyle.StyleName and selecting
+// from styles
 type HiStyleValueView struct {
 	ValueViewBase
 }

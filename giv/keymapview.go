@@ -88,8 +88,8 @@ func KeyMapsView(km *gi.KeyMaps) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  KeyMapValueView
 
-// KeyMapValueView presents an action for displaying an KeyMapName and selecting
-// icons from KeyMapChooserDialog
+// KeyMapValueView presents an action for displaying a KeyMapName and selecting
+// from chooser
 type KeyMapValueView struct {
 	ValueViewBase
 }

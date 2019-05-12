@@ -16,7 +16,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  FileValueView
 
-// FileValueView presents an action for displaying an FileName and selecting
+// FileValueView presents an action for displaying a FileName and selecting
 // icons from FileChooserDialog
 type FileValueView struct {
 	ValueViewBase
