@@ -177,14 +177,18 @@ type Window interface {
 	// Activate() sets this window as the current render target for gpu rendering
 	// functions, and the current context for gpu state (equivalent to
 	// MakeCurrentContext on OpenGL).
+	// If it returns false, then window is not visible / valid and
+	// nothing further should happen.
 	// Must call this on app main thread using oswin.TheApp.RunOnMain
 	//
 	// oswin.TheApp.RunOnMain(func() {
-	//    win.Activate()
+	//    if !win.Activate() {
+	//        return
+	//    }
 	//    // do GPU calls here
 	// })
 	//
-	Activate()
+	Activate() bool
 
 	// DeActivate() clears the current render target and gpu rendering context.
 	// Generally more efficient to NOT call this and just be sure to call

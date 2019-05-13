@@ -239,7 +239,9 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	}
 	if sc.Frame != nil {
 		oswin.TheApp.RunOnMain(func() {
-			sc.Win.OSWin.Activate()
+			if !sc.Win.OSWin.Activate() {
+				return
+			}
 			sc.Frame.SetSize(nwsz)
 		})
 	}
@@ -577,9 +579,9 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 
 // ActivateWin activates the window context for GPU rendering context (on the
 // main thread -- all GPU rendering actions must be performed on main thread)
-// returns false if not possible (i.e., Win nil)
+// returns false if not possible (i.e., Win nil, not visible)
 func (sc *Scene) ActivateWin() bool {
-	if sc.Win == nil {
+	if sc.Win == nil || !sc.Win.IsVisible() {
 		return false
 	}
 	oswin.TheApp.RunOnMain(func() {
@@ -760,10 +762,20 @@ func (sc *Scene) DirectWinUpload() bool {
 	// are too bright..  generate some good test inputs (just a bunch of greyscale cubes)
 	// render in svg at top of screen too for comparison
 	wt := sc.Win.OSWin.WinTex()
-	oswin.TheApp.RunOnMain(func() {
-		sc.Win.OSWin.Activate()
-		wt.Copy(sc.WinBBox.Min, sc.Tex, sc.Tex.Bounds(), draw.Src, nil) // &oswin.DrawOptions{FlipY: true})
-	})
+	if wt != nil {
+		oswin.TheApp.RunOnMain(func() {
+			if !sc.Win.OSWin.Activate() {
+				return
+			}
+			// limit upload to vpbbox region
+			rvp := sc.VpBBox
+			tvp := rvp
+			tvp.Max = tvp.Min.Add(sc.Tex.Size())
+			tvp = rvp.Intersect(tvp)
+			tb := image.Rectangle{Max: tvp.Size()}
+			wt.Copy(sc.WinBBox.Min, sc.Tex, tb, draw.Src, nil)
+		})
+	}
 	sc.Win.UpdateSig() // trigger publish
 	return true
 }

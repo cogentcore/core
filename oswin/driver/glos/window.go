@@ -56,15 +56,23 @@ func (w *windowImpl) Handle() interface{} {
 // Activate() sets this window as the current render target for gpu rendering
 // functions, and the current context for gpu state (equivalent to
 // MakeCurrentContext on OpenGL).
+// If it returns false, then window is not visible / valid and
+// nothing further should happen.
 // Must call this on app main thread using oswin.TheApp.RunOnMain
 //
 // oswin.TheApp.RunOnMain(func() {
-//    win.Activate()
+//    if !win.Activate() {
+//        return
+//    }
 //    // do GPU calls here
 // })
 //
-func (w *windowImpl) Activate() {
+func (w *windowImpl) Activate() bool {
+	if w == nil || w.glw == nil || w.IsMinimized() {
+		return false
+	}
 	w.glw.MakeContextCurrent()
+	return true
 }
 
 // DeActivate() clears the current render target and gpu rendering context.
@@ -139,14 +147,22 @@ outer:
 		case <-w.winClose:
 			break outer
 		case f := <-w.runQueue:
+			if w.glw == nil {
+				break outer
+			}
 			f.f()
 			if f.done != nil {
 				f.done <- true
 			}
 		case <-w.publish:
+			if w.glw == nil {
+				break outer
+			}
 			if !theApp.noScreens {
 				theApp.RunOnMain(func() {
-					w.Activate()
+					if !w.Activate() {
+						return
+					}
 					w.glw.SwapBuffers() // note: implicitly does a flush
 					// note: generally don't need this:
 					// gpu.Draw.Clear(true, true)
@@ -175,22 +191,33 @@ func (w *windowImpl) GoRunOnWin(f func()) {
 // current rendered back-buffer to the front (and ensures that any
 // ongoing rendering has completed) (see also PublishTex)
 func (w *windowImpl) Publish() {
+	w.mu.Lock()
+	if w.glw == nil || w.IsMinimized() {
+		w.mu.Unlock()
+		return
+	}
 	glfw.PostEmptyEvent()
 	w.publish <- struct{}{}
 	<-w.publishDone
 	glfw.PostEmptyEvent()
+	w.mu.Unlock()
 }
 
 // PublishTex draws the current WinTex texture to the window and then
 // calls Publish() -- this is the typical update call.
 func (w *windowImpl) PublishTex() {
-	if theApp.noScreens {
+	w.mu.Lock()
+	if theApp.noScreens || w.glw == nil || w.IsMinimized() {
+		w.mu.Unlock()
 		return
 	}
 	theApp.RunOnMain(func() {
-		w.Activate()
+		if !w.Activate() {
+			return
+		}
 		w.Copy(image.ZP, w.winTex, w.winTex.Bounds(), oswin.Src, nil)
 	})
+	w.mu.Unlock()
 	w.Publish()
 }
 
@@ -219,7 +246,9 @@ func (w *windowImpl) WinTex() oswin.Texture {
 func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image.Rectangle) error {
 	var err error
 	theApp.RunOnMain(func() {
-		w.Activate()
+		if !w.Activate() {
+			return
+		}
 		wt := w.winTex
 		err = wt.SetSubImage(dp, src, sr)
 	})
@@ -231,7 +260,9 @@ func (w *windowImpl) SetWinTexSubImage(dp image.Point, src image.Image, sr image
 
 func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	theApp.RunOnMain(func() {
-		w.Activate()
+		if !w.Activate() {
+			return
+		}
 		gpu.TheGPU.RenderToWindow()
 		gpu.Draw.Viewport(image.Rectangle{Max: w.PxSize})
 		if w.drawQuads == nil {
@@ -244,7 +275,9 @@ func (w *windowImpl) Draw(src2dst mat32.Mat3, src oswin.Texture, sr image.Rectan
 
 func (w *windowImpl) DrawUniform(src2dst mat32.Mat3, src color.Color, sr image.Rectangle, op draw.Op, opts *oswin.DrawOptions) {
 	theApp.RunOnMain(func() {
-		w.Activate()
+		if !w.Activate() {
+			return
+		}
 		gpu.TheGPU.RenderToWindow()
 		gpu.Draw.Viewport(image.Rectangle{Max: w.PxSize})
 		if w.fillQuads == nil {
@@ -265,7 +298,9 @@ func (w *windowImpl) Scale(dr image.Rectangle, src oswin.Texture, sr image.Recta
 
 func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 	theApp.RunOnMain(func() {
-		w.Activate()
+		if !w.Activate() {
+			return
+		}
 		gpu.TheGPU.RenderToWindow()
 		gpu.Draw.Viewport(image.Rectangle{Max: w.PxSize})
 		if w.fillQuads == nil {
@@ -404,6 +439,7 @@ func (w *windowImpl) CloseClean() {
 
 func (w *windowImpl) Close() {
 	// this is actually the final common pathway for closing here
+	w.mu.Lock()
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
@@ -423,7 +459,9 @@ func (w *windowImpl) Close() {
 			w.fillQuads = nil
 		}
 		w.glw.Destroy()
+		w.glw = nil
 	})
+	w.mu.Unlock()
 }
 
 func (w *windowImpl) SetMousePos(x, y float64) {
@@ -493,8 +531,9 @@ func (w *windowImpl) updtGeom() {
 	}
 	w.PhysDPI = w.Scrn.PhysicalDPI
 	w.LogDPI = w.Scrn.LogicalDPI
-	w.Activate()
-	w.winTex.SetSize(w.PxSize)
+	if w.Activate() {
+		w.winTex.SetSize(w.PxSize)
+	}
 	w.mu.Unlock()
 	w.sendWindowEvent(window.Resize)
 }

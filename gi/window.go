@@ -633,9 +633,10 @@ func (w *Window) Close() {
 	if w.IsClosing() {
 		return
 	}
-	w.UpMu.Lock() // allow other stuff to finish
+	// this causes hangs etc: not good
+	// w.UpMu.Lock() // allow other stuff to finish
 	w.SetFlag(int(WinFlagIsClosing))
-	w.UpMu.Unlock()
+	// w.UpMu.Unlock()
 	w.OSWin.Close()
 }
 
@@ -1201,8 +1202,9 @@ func (w *Window) RenderOverlays() {
 		}
 	}
 	oswin.TheApp.RunOnMain(func() {
-		w.OSWin.Activate()
-		w.OverTex.SetSubImage(image.ZP, w.OverlayVp.Pixels, w.OverlayVp.Pixels.Bounds())
+		if w.OSWin.Activate() {
+			w.OverTex.SetSubImage(image.ZP, w.OverlayVp.Pixels, w.OverlayVp.Pixels.Bounds())
+		}
 	})
 
 	if w.ActiveSprites > 0 {
@@ -1325,8 +1327,9 @@ func (w *Window) RenderSprite(sp *Viewport2D) {
 	draw.Draw(bgi, bgi.Bounds(), sp.Pixels, image.ZP, draw.Over)
 	// note: already under RenderOverlays mutex protection
 	oswin.TheApp.RunOnMain(func() {
-		w.OSWin.Activate()
-		w.OverTex.SetSubImage(sp.Geom.Pos, bg, bg.Bounds())
+		if w.OSWin.Activate() {
+			w.OverTex.SetSubImage(sp.Geom.Pos, bg, bg.Bounds())
+		}
 	})
 }
 

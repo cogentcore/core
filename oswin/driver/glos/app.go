@@ -356,9 +356,10 @@ func (app *appImpl) ContextWindow() oswin.Window {
 func (app *appImpl) NewTexture(win oswin.Window, size image.Point) oswin.Texture {
 	var tx *textureImpl
 	app.RunOnMain(func() {
-		win.Activate()
-		tx = &textureImpl{size: size}
-		tx.Activate(0)
+		if win.Activate() {
+			tx = &textureImpl{size: size}
+			tx.Activate(0)
+		}
 	})
 	return tx
 }
