@@ -18,7 +18,7 @@ script:
 notifications:
   email:
     recipients:
-	  - emergentdev@grey.colorado.edu
-	on_success: change
-	on_failure: always
+      - emergentdev@grey.colorado.edu
+    on_success: change
+    on_failure: always
 
