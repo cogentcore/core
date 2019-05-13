@@ -118,6 +118,11 @@ func ToValueView(it interface{}, tags string) ValueView {
 		vv.Init(&vv)
 		return &vv
 	}
+	if nptyp == reflect.TypeOf(gi.ColorName("")) {
+		vv := ColorNameValueView{}
+		vv.Init(&vv)
+		return &vv
+	}
 	if nptyp == reflect.TypeOf(key.Chord("")) {
 		vv := KeyChordValueView{}
 		vv.Init(&vv)

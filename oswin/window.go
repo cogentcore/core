@@ -133,11 +133,19 @@ type Window interface {
 	// IsFullscreen returns true if this is a fullscreen window.
 	IsFullscreen() bool
 
-	// IsMinimized returns true if this window is minimized.
+	// IsMinimized returns true if this window is minimized.  See also IsVisible()
 	IsMinimized() bool
 
 	// IsFocus returns true if this window is focused (will receive keyboard input etc).
 	IsFocus() bool
+
+	// IsClosed returns true if this window has been closed (but some threads
+	// may have not received the news yet)
+	IsClosed() bool
+
+	// IsVisible returns true if this window is not closed or minimized and
+	// there are active screens
+	IsVisible() bool
 
 	// SetCloseReqFunc sets the function that is called whenever there is a
 	// request to close the window (via a OS or a call to CloseReq() method).  That

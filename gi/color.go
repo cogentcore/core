@@ -146,6 +146,12 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform 
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//  Color
+
+// ColorName provides a value-view GUI lookup of valid color names
+type ColorName string
+
 // Color extends image/color.RGBA with more methods for converting to / from
 // strings etc -- it has standard uint8 0..255 color values
 type Color struct {

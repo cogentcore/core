@@ -720,7 +720,7 @@ func (w *Window) SetCloseCleanFunc(fun func(win *Window)) {
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!
 func (w *Window) IsVisible() bool {
-	if w == nil || w.This() == nil || w.OSWin == nil || w.IsClosed() || w.IsClosing() || w.OSWin.IsMinimized() || oswin.TheApp.NoScreens() {
+	if w == nil || w.This() == nil || w.OSWin == nil || w.IsClosed() || w.IsClosing() || !w.OSWin.IsVisible() {
 		return false
 	}
 	return true

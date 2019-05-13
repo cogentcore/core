@@ -8,11 +8,13 @@ import (
 	"image/color"
 	"log"
 	"reflect"
+	"sort"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"golang.org/x/image/colornames"
 )
 
 /////////////////////////////////////////////////////////////////////////////
@@ -444,6 +446,91 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 				cclr := ColorViewDialogValue(ddlg)
 				vv.SetColor(cclr)
 				vv.UpdateWidget()
+			}
+			if dlgRecv != nil && dlgFunc != nil {
+				dlgFunc(dlgRecv, send, sig, data)
+			}
+		})
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  ColorNameValueView
+
+// ColorNameValueView presents an action for displaying a ColorNameName and selecting
+// meshes from a ChooserDialog
+type ColorNameValueView struct {
+	ValueViewBase
+}
+
+var KiT_ColorNameValueView = kit.Types.AddType(&ColorNameValueView{}, nil)
+
+func (vv *ColorNameValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_Action
+	return vv.WidgetTyp
+}
+
+func (vv *ColorNameValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	ac := vv.Widget.(*gi.Action)
+	txt := kit.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "(none, click to select)"
+	}
+	ac.SetText(txt)
+}
+
+func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	ac := vv.Widget.(*gi.Action)
+	ac.SetProp("border-radius", units.NewPx(4))
+	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.Embed(KiT_ColorNameValueView).(*ColorNameValueView)
+		ac := vvv.Widget.(*gi.Action)
+		vvv.Activate(ac.Viewport, nil, nil)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *ColorNameValueView) HasAction() bool {
+	return true
+}
+
+func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+	if vv.IsInactive() {
+		return
+	}
+	cur := kit.ToString(vv.Value.Interface())
+	sl := make([]struct {
+		Name  string
+		Color gi.Color
+	}, len(colornames.Map))
+	ctr := 0
+	for k, v := range colornames.Map {
+		sl[ctr].Name = k
+		sl[ctr].Color.SetColor(v)
+		ctr++
+	}
+	sort.Slice(sl, func(i, j int) bool {
+		return sl[i].Name < sl[j].Name
+	})
+	curRow := -1
+	for i := range sl {
+		if sl[i].Name == cur {
+			curRow = i
+		}
+	}
+	desc, _ := vv.Tag("desc")
+	TableViewSelectDialog(vp, &sl, DlgOpts{Title: "Select a Color Name", Prompt: desc}, curRow, nil,
+		vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				si := TableViewSelectDialogValue(ddlg)
+				if si >= 0 {
+					vv.SetValue(sl[si].Name)
+					vv.UpdateWidget()
+				}
 			}
 			if dlgRecv != nil && dlgFunc != nil {
 				dlgFunc(dlgRecv, send, sig, data)
