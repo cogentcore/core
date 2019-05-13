@@ -122,6 +122,10 @@ type VectorsBuffer interface {
 	// Activate binds buffer as active one, and configures it per all existing settings
 	Activate()
 
+	// IsActive returns true if buffer has already been Activate'd
+	// and thus exists on the GPU
+	IsActive() bool
+
 	// Handle returns the unique handle for this buffer -- only valid after Activate()
 	Handle() uint32
 

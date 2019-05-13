@@ -11,6 +11,8 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -77,6 +79,18 @@ func init() {
 	}
 }
 
+// AvailColorMapsList returns a sorted list of color map names, e.g., for choosers
+func AvailColorMapsList() []string {
+	sl := make([]string, len(AvailColorMaps))
+	ctr := 0
+	for k := range AvailColorMaps {
+		sl[ctr] = k
+		ctr++
+	}
+	sort.Strings(sl)
+	return sl
+}
+
 // ColorMapName provides a gui chooser of maps in AvailColorMaps
 type ColorMapName string
 
@@ -87,8 +101,9 @@ type ColorMapName string
 // Note that this is not a ValueView widget
 type ColorMapView struct {
 	gi.WidgetBase
-	Orient gi.Dims2D `desc:"orientation along which to display the spectrum"`
-	Map    *ColorMap `desc:"the colormap that we view"`
+	Orient      gi.Dims2D `desc:"orientation along which to display the spectrum"`
+	Map         *ColorMap `desc:"the colormap that we view"`
+	ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
 }
 
 var KiT_ColorMapView = kit.Types.AddType(&ColorMapView{}, nil)
@@ -104,6 +119,58 @@ func AddNewColorMapView(parent ki.Ki, name string, cmap *ColorMap) *ColorMapView
 func (cv *ColorMapView) SetColorMap(cmap *ColorMap) {
 	cv.Map = cmap
 	cv.UpdateSig()
+}
+
+// SetColorMapAction sets the color map and triggers a display update
+// and signals the ColorMapSig signal
+func (cv *ColorMapView) SetColorMapAction(cmap *ColorMap) {
+	cv.Map = cmap
+	cv.ColorMapSig.Emit(cv.This(), 0, nil)
+	cv.UpdateSig()
+}
+
+// ChooseColorMap pulls up a chooser to select a color map
+func (cv *ColorMapView) ChooseColorMap() {
+	sl := AvailColorMapsList()
+	cur := ""
+	if cv.Map != nil {
+		cur = cv.Map.Name
+	}
+	SliceViewSelectDialog(cv.Viewport, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, nil,
+		cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.DialogAccepted) {
+				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
+				si := SliceViewSelectDialogValue(ddlg)
+				if si >= 0 {
+					nmap, ok := AvailColorMaps[sl[si]]
+					if ok {
+						cv.SetColorMapAction(nmap)
+					}
+				}
+			}
+		})
+}
+
+// MouseEvent handles button MouseEvent
+func (cv *ColorMapView) MouseEvent() {
+	cv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		cvv := recv.(*ColorMapView)
+		if me.Button == mouse.Left {
+			switch me.Action {
+			case mouse.DoubleClick: // we just count as a regular click
+				fallthrough
+			case mouse.Press:
+				me.SetProcessed()
+				cvv.ChooseColorMap()
+			}
+		}
+	})
+}
+
+func (cv *ColorMapView) ConnectEvents2D() {
+	cv.MouseEvent()
+	cv.HoverTooltipEvent()
 }
 
 func (cv *ColorMapView) RenderColorMap() {
@@ -211,14 +278,7 @@ func (vv *ColorMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc 
 	if vv.IsInactive() {
 		return
 	}
-	sl := make([]string, len(AvailColorMaps))
-	ctr := 0
-	for k := range AvailColorMaps {
-		sl[ctr] = k
-		ctr++
-	}
-	sort.Strings(sl)
-
+	sl := AvailColorMapsList()
 	cur := kit.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(vp, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, nil,

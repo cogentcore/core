@@ -364,6 +364,12 @@ func (vb *VectorsBuffer) Activate() {
 	vb.mod = false
 }
 
+// IsActive returns true if buffer has already been Activate'd
+// and thus exists on the GPU
+func (vb *VectorsBuffer) IsActive() bool {
+	return vb.init
+}
+
 // Handle returns the unique handle for this buffer -- only valid after Activate()
 func (vb *VectorsBuffer) Handle() uint32 {
 	return vb.handle

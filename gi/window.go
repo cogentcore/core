@@ -633,7 +633,9 @@ func (w *Window) Close() {
 	if w.IsClosing() {
 		return
 	}
+	w.UpMu.Lock() // allow other stuff to finish
 	w.SetFlag(int(WinFlagIsClosing))
+	w.UpMu.Unlock()
 	w.OSWin.Close()
 }
 

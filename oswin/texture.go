@@ -117,6 +117,10 @@ type Texture interface {
 	// Must be called with a valid gpu context and on proper thread for that context.
 	Activate(texNo int)
 
+	// IsActive returns true if texture has already been Activate'd
+	// and thus exists on the GPU
+	IsActive() bool
+
 	// Handle returns the GPU handle for the texture -- only
 	// valid after Activate.
 	Handle() uint32

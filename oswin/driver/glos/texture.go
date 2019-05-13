@@ -182,6 +182,9 @@ func (tx *textureImpl) Size() image.Point {
 }
 
 func (tx *textureImpl) Bounds() image.Rectangle {
+	if tx == nil {
+		return image.ZR
+	}
 	return image.Rectangle{Max: tx.size}
 }
 
@@ -245,6 +248,12 @@ func (tx *textureImpl) Activate(texNo int) {
 		gl.ActiveTexture(gl.TEXTURE0 + uint32(texNo))
 		gl.BindTexture(gl.TEXTURE_2D, tx.handle)
 	}
+}
+
+// IsActive returns true if texture has already been Activate'd
+// and thus exists on the GPU
+func (tx *textureImpl) IsActive() bool {
+	return tx.init
 }
 
 // Handle returns the GPU handle for the texture -- only

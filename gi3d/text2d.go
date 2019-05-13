@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
+	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -140,7 +141,14 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			img = im.(*image.RGBA)
 		}
 	}
-	txt.TxtTex.Tex.SetSize(szpt)
+	if txt.TxtTex.Tex.IsActive() {
+		oswin.TheApp.RunOnMain(func() {
+			sc.Win.OSWin.Activate()
+			txt.TxtTex.Tex.SetSize(szpt)
+		})
+	} else {
+		txt.TxtTex.Tex.SetSize(szpt)
+	}
 	rs := &sc.RenderState
 	rs.Init(szpt.X, szpt.Y, img)
 	rs.PushBounds(bounds)
