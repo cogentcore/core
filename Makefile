@@ -17,6 +17,8 @@ test:
 	$(GOTEST) -v $(DIRS)
 clean: 
 	$(GOCLEAN) ./...
+vet:
+	$(GOCMD) vet $(DIRS)
 	
 release:
 	$(MAKE) -C gi release
