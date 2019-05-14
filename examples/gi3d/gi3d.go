@@ -88,16 +88,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	rcb := gi3d.AddNewObject(sc, sc, "red-cube", cbm.Name())
 	rcb.Pose.Pos.Set(-1, 0, 0)
-	rcb.Mat.Color.SetString("red", nil)
+	rcb.Mat.Color.SetName("red")
 	rcb.Mat.Shiny = 500
 
 	bcb := gi3d.AddNewObject(sc, sc, "blue-cube", cbm.Name())
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
-	bcb.Mat.Color.SetString("blue", nil)
+	bcb.Mat.Color.SetName("blue")
 	bcb.Mat.Shiny = 10
 
-	// bcb.Mat.Specular.SetString("blue", nil) // how you get rid of specular highlights
+	// bcb.Mat.Specular.SetName("blue") // how you get rid of specular highlights
 
 	gcb := gi3d.AddNewObject(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
@@ -115,8 +115,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
 	floor := gi3d.AddNewObject(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
-	// floor.Mat.Color.SetString("tan", nil)
-	// floor.Mat.Emissive.SetString("brown", nil)
+	// floor.Mat.Color.SetName("tan")
+	// floor.Mat.Emissive.SetName("brown")
 	floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(sc, grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)

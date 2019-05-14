@@ -79,6 +79,10 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	olbl := vv.OwnerLabel()
 	if olbl != "" {
 		tynm += ": " + olbl
+		if len(olbl) > 30 {
+			llbl := vv.OwnerLabel()
+			fmt.Printf("err long olbl: %v\n", llbl)
+		}
 	}
 	desc, _ := vv.Tag("desc")
 	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)

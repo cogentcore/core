@@ -453,16 +453,23 @@ func (c *Color) SetString(str string, base color.Color) error {
 			c.SetUInt8(0xFF, 0xFF, 0xFF, 0)
 			return nil
 		default:
-			nc, ok := colornames.Map[low]
-			if !ok {
-				err := fmt.Errorf("gi Color String: name not found %v", str)
-				log.Printf("%v\n", err)
-				return err
-			} else {
-				c.SetUInt8(nc.R, nc.G, nc.B, nc.A)
-			}
+			return c.SetName(low)
 		}
 	}
+	return nil
+}
+
+// SetName sets color value from a standard color name.
+// returns error if name not found.
+// use ColorName type to present user with a chooser.
+func (c *Color) SetName(name string) error {
+	nc, ok := colornames.Map[name]
+	if !ok {
+		err := fmt.Errorf("gi Color Name: name not found %v", name)
+		log.Printf("%v\n", err)
+		return err
+	}
+	c.SetUInt8(nc.R, nc.G, nc.B, nc.A)
 	return nil
 }
 

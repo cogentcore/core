@@ -7,6 +7,8 @@ package giv
 import (
 	"fmt"
 	"reflect"
+	"strconv"
+	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
@@ -27,6 +29,7 @@ type StructView struct {
 	TmpSave       ValueView      `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig       ki.Signal      `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	ToolbarStru   interface{}    `desc:"the struct that we successfully set a toolbar for"`
+	HasDefs       bool           `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -174,44 +177,36 @@ func (sv *StructView) ConfigStructGrid() {
 	} else {
 		updt = sg.UpdateStart()
 	}
+	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			svv, _ := recv.Embed(KiT_StructView).(*StructView)
-			// note: updating vv here is redundant -- relevant field will have already updated
-			svv.Changed = true
-			if svv.ChangeFlag != nil {
-				svv.ChangeFlag.SetBool(true)
-			}
-			tb := svv.ToolBar()
-			if tb != nil {
-				tb.UpdateActions()
-			}
-			svv.ViewSig.Emit(svv.This(), 0, nil)
-			// vvv, _ := send.Embed(KiT_ValueViewBase).(*ValueViewBase)
-			// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
-		})
-		if lbltag, has := vvb.Tag("label"); has {
-			lbl.Text = lbltag
-		} else {
-			lbl.Text = vvb.Field.Name
-		}
 		lbl.Redrawable = true
-		if ttip, has := vvb.Tag("desc"); has {
-			lbl.Tooltip = ttip
-		}
 		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)
-
-		_, has := vvb.Tag("inactive")
-		if !has && sv.IsInactive() {
-			vv.SetTag("inactive", "true")
-		}
-		if has {
-			widg.AsNode2D().SetInactive()
+		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsInactive())
+		if hasDef {
+			sv.HasDefs = true
 		}
 		vv.ConfigWidget(widg)
+		if !sv.IsInactive() && !inactTag {
+			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv, _ := recv.Embed(KiT_StructView).(*StructView)
+				svv.UpdateDefaults()
+				// note: updating vv here is redundant -- relevant field will have already updated
+				svv.Changed = true
+				if svv.ChangeFlag != nil {
+					svv.ChangeFlag.SetBool(true)
+				}
+				tb := svv.ToolBar()
+				if tb != nil {
+					tb.UpdateActions()
+				}
+				svv.ViewSig.Emit(svv.This(), 0, nil)
+				// vvv, _ := send.Embed(KiT_ValueViewBase).(*ValueViewBase)
+				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
+			})
+		}
 	}
 	sg.UpdateEnd(updt)
 }
@@ -223,6 +218,19 @@ func (sv *StructView) Style2D() {
 	sv.Frame.Style2D()
 }
 
+func (sv *StructView) UpdateDefaults() {
+	if !sv.HasDefs {
+		return
+	}
+	sg := sv.StructGrid()
+	updt := sg.UpdateStart()
+	for i, vv := range sv.FieldViews {
+		lbl := sg.Child(i * 2).(*gi.Label)
+		StructViewFieldDefTag(vv, lbl)
+	}
+	sg.UpdateEnd(updt)
+}
+
 func (sv *StructView) Render2D() {
 	sv.ToolBar().UpdateActions()
 	if win := sv.ParentWindow(); win != nil {
@@ -231,4 +239,169 @@ func (sv *StructView) Render2D() {
 		}
 	}
 	sv.Frame.Render2D()
+}
+
+/////////////////////////////////////////////////////////////////////////
+//  Tag parsing
+
+// StructViewFieldTags processes the tags for a field in a struct view, setting
+// the properties on the label or widget appropriately
+// returns true if there were any "def" default tags -- if so, needs updating
+func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Node2D, isInact bool) (hasDef, inactTag bool) {
+	vvb := vv.AsValueViewBase()
+	if lbltag, has := vv.Tag("label"); has {
+		lbl.Text = lbltag
+	} else {
+		lbl.Text = vvb.Field.Name
+	}
+	if _, has := vv.Tag("inactive"); has {
+		inactTag = true
+		widg.AsNode2D().SetInactive()
+	} else {
+		if isInact {
+			widg.AsNode2D().SetInactive()
+			vv.SetTag("inactive", "true")
+		}
+	}
+	defStr := ""
+	hasDef, _, defStr = StructViewFieldDefTag(vv, lbl)
+	if ttip, has := vv.Tag("desc"); has {
+		lbl.Tooltip = defStr + ttip
+	}
+	return
+}
+
+// StructViewFieldDefTag processes the "def" tag for default values -- can be
+// called multiple times for updating as values change.
+// returns true if value is default, and string to add to tooltip for default vals
+func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
+	if dtag, has := vv.Tag("def"); has {
+		hasDef = true
+		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface())
+		if isDef {
+			lbl.CurBgColor = gi.Prefs.Colors.Background
+		} else {
+			lbl.CurBgColor.SetName("yellow")
+		}
+		return
+	}
+	return
+}
+
+// StructFieldIsDef processses "def" tag for default value(s) of field
+// defs = default values as strings as either comma-separated list of valid values
+// or low:high value range (only for int or float numeric types)
+// valPtr = pointer to value
+// returns true if value is default, and string to add to tooltip for default values
+func StructFieldIsDef(defs string, valPtr interface{}) (bool, string) {
+	defStr := "[Def: " + defs + "] "
+	def := false
+	if strings.Contains(defs, ":") {
+		dtags := strings.Split(defs, ":")
+		lo, _ := strconv.ParseFloat(dtags[0], 64)
+		hi, _ := strconv.ParseFloat(dtags[1], 64)
+		switch fv := valPtr.(type) {
+		case *float32:
+			if lo <= float64(*fv) && float64(*fv) <= hi {
+				def = true
+			}
+		case *float64:
+			if lo <= *fv && *fv <= hi {
+				def = true
+			}
+		case *int32:
+			if lo <= float64(*fv) && float64(*fv) <= hi {
+				def = true
+			}
+		case *int64:
+			if lo <= float64(*fv) && float64(*fv) <= hi {
+				def = true
+			}
+		case *int:
+			if lo <= float64(*fv) && float64(*fv) <= hi {
+				def = true
+			}
+		}
+	} else {
+		val := kit.ToStringPrec(valPtr, 6)
+		dtags := strings.Split(defs, ",")
+		for _, dv := range dtags {
+			if dv == strings.TrimSpace(val) {
+				def = true
+				break
+			}
+		}
+	}
+	return def, defStr
+}
+
+// StructFieldVals represents field values in a struct, at multiple
+// levels of depth potentially (represented by the Path field)
+// used for StructNonDefFields for example.
+type StructFieldVals struct {
+	Path  string              `desc:"path of field.field parent fields to this field"`
+	Field reflect.StructField `desc:"type information for field"`
+	Val   reflect.Value       `desc:"value of field (as a pointer)"`
+	Defs  string              `desc:"def tag information for default values"`
+}
+
+// StructNonDefFields processses "def" tag for default value(s)
+// of fields in given struct and starting path, and returns all
+// fields not at their default values.
+// See also StructNoDefFieldsStr for a string representation of this information.
+// Uses kit.FlatFieldsValueFunc to get all embedded fields.
+// Uses a recursive strategy -- any fields that are themselves structs are
+// expanded, and the field name represented by dots path separators.
+func StructNonDefFields(structPtr interface{}, path string) []StructFieldVals {
+	var flds []StructFieldVals
+	kit.FlatFieldsValueFunc(structPtr, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		vvp := fieldVal.Addr()
+		if field.Type.Kind() == reflect.Struct {
+			spath := path
+			if path != "" {
+				spath += "."
+			}
+			spath += field.Name
+			subs := StructNonDefFields(vvp.Interface(), spath)
+			if len(subs) > 0 {
+				flds = append(flds, subs...)
+			}
+			return true
+		}
+		dtag, got := field.Tag.Lookup("def")
+		if !got {
+			return true
+		}
+		def, defStr := StructFieldIsDef(dtag, vvp.Interface())
+		if def {
+			return true
+		}
+		flds = append(flds, StructFieldVals{Path: path, Field: field, Val: vvp, Defs: defStr})
+		return true
+	})
+	return flds
+}
+
+// StructNonDefFieldsStr processses "def" tag for default value(s) of fields in
+// given struct, and returns a string of all those not at their default values,
+// in format: Path.Field: val // default value(s)
+// Uses a recursive strategy -- any fields that are themselves structs are
+// expanded, and the field name represented by dots path separators.
+func StructNonDefFieldsStr(structPtr interface{}, path string) string {
+	flds := StructNonDefFields(structPtr, path)
+	if len(flds) == 0 {
+		return ""
+	}
+	str := ""
+	for _, fld := range flds {
+		pth := fld.Path
+		fnm := fld.Field.Name
+		val := kit.ToStringPrec(fld.Val.Interface(), 6)
+		dfs := fld.Defs
+		if len(pth) > 0 {
+			fnm = pth + "." + fnm
+		}
+		str += fmt.Sprintf("%s: %s // %s<br>\n", fnm, val, dfs)
+	}
+	return str
 }

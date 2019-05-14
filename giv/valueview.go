@@ -696,29 +696,34 @@ func (vv *ValueViewBase) AllTags() map[string]string {
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
 func (vv *ValueViewBase) OwnerLabel() string {
+	olbl := gi.ToLabeler(vv.Owner)
 	switch vv.OwnKind {
 	case reflect.Struct:
-		olbl := gi.ToLabeler(vv.Owner)
 		if olbl != "" {
 			return olbl + "." + vv.Field.Name
 		}
 		return vv.Field.Name
 	case reflect.Map:
+		kystr := ""
 		if vv.IsMapKey {
 			kv := kit.NonPtrValue(vv.Value)
-			return kit.ToString(kv.Interface())
+			kystr = kit.ToString(kv.Interface())
 		} else {
 			if vv.KeyView != nil {
 				ck := kit.NonPtrValue(vv.KeyView.Val()) // current key value
-				return kit.ToString(ck.Interface())
+				kystr = kit.ToString(ck.Interface())
 			} else {
-				return kit.ToString(vv.Key)
+				kystr = kit.ToString(vv.Key)
 			}
 		}
+		if kystr != "" {
+			return olbl + "[" + kystr + "]"
+		}
+		return olbl
 	case reflect.Slice:
-		return kit.ToString(kit.PtrValue(vv.Value).Interface())
+		return fmt.Sprintf("%s[%d]", olbl, vv.Idx)
 	}
-	return ""
+	return olbl
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
