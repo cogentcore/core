@@ -84,15 +84,15 @@ var testWts = []FontWeights{WeightNormal, WeightLight, WeightBold, WeightBlack}
 var testStys = []FontStyles{FontNormal, FontItalic, FontOblique}
 var testNms = []string{"serif", "sans-serif", "monospace", "courier", "cursive", "fantasy"}
 
-func TestFontFaceName(t *testing.T) {
-	for _, nm := range testNms {
-		for _, str := range testStrs {
-			for _, wt := range testWts {
-				for _, sty := range testStys {
-					fn := FontFaceName(nm, str, wt, sty)
-					fmt.Printf("FontName: nm:\t%v\t str:\t%v\t wt:\t%v\t sty:\t%v\t res:\t%v\n", nm, str, wt, sty, fn)
-				}
-			}
-		}
-	}
-}
+// func TestFontFaceName(t *testing.T) {
+// 	for _, nm := range testNms {
+// 		for _, str := range testStrs {
+// 			for _, wt := range testWts {
+// 				for _, sty := range testStys {
+// 					fn := FontFaceName(nm, str, wt, sty)
+// 					fmt.Printf("FontName: nm:\t%v\t str:\t%v\t wt:\t%v\t sty:\t%v\t res:\t%v\n", nm, str, wt, sty, fn)
+// 				}
+// 			}
+// 		}
+// 	}
+// }

@@ -143,7 +143,7 @@ func (tx *TextureFile) Init(sc *Scene) error {
 		return nil
 	}
 	if tx.File == "" {
-		err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Name)
+		err := fmt.Errorf("gi3d.Texture: %v File must be set to a filename to load texture from", tx.Nm)
 		log.Println(err)
 		return err
 	}

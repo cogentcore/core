@@ -196,19 +196,19 @@ func (ms *MeshBase) Reset() {
 func (ms *MeshBase) Validate() error {
 	vln := len(ms.Vtx) / 3
 	if vln == 0 {
-		err := fmt.Errorf("gi3d.Mesh: %v has no verticies", ms.Name)
+		err := fmt.Errorf("gi3d.Mesh: %v has no verticies", ms.Nm)
 		log.Println(err)
 		return err
 	}
 	nln := len(ms.Norm) / 3
 	if nln != vln {
-		err := fmt.Errorf("gi3d.Mesh: %v number of Norms: %d != Vtx: %d", ms.Name, nln, vln)
+		err := fmt.Errorf("gi3d.Mesh: %v number of Norms: %d != Vtx: %d", ms.Nm, nln, vln)
 		log.Println(err)
 		return err
 	}
 	tln := len(ms.Tex) / 2
 	if tln != vln {
-		err := fmt.Errorf("gi3d.Mesh: %v number of Tex: %d != Vtx: %d", ms.Name, tln, vln)
+		err := fmt.Errorf("gi3d.Mesh: %v number of Tex: %d != Vtx: %d", ms.Nm, tln, vln)
 		log.Println(err)
 		return err
 	}
@@ -217,7 +217,7 @@ func (ms *MeshBase) Validate() error {
 		return nil
 	}
 	if cln != vln {
-		err := fmt.Errorf("gi3d.Mesh: %v number of Colors: %d != Vtx: %d", ms.Name, cln, vln)
+		err := fmt.Errorf("gi3d.Mesh: %v number of Colors: %d != Vtx: %d", ms.Nm, cln, vln)
 		log.Println(err)
 		return err
 	}

@@ -161,7 +161,7 @@ func (sc *Scene) SaveCamera(name string) {
 func (sc *Scene) SetCamera(name string) error {
 	cam, ok := sc.SavedCams[name]
 	if !ok {
-		return fmt.Errorf("gi3d.Scene: %v saved camera of name: %v not found", name)
+		return fmt.Errorf("gi3d.Scene: %v saved camera of name: %v not found", sc.Nm, name)
 	}
 	sc.Camera = cam
 	return nil

@@ -18,7 +18,7 @@ import (
 // Plane is a flat 2D plane, which can be oriented along any axis facing either positive or negative
 type Plane struct {
 	MeshBase
-	NormAxis mat32.Dims  `desc:"axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z "ground" plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."`
+	NormAxis mat32.Dims  `desc:"axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."`
 	NormNeg  bool        `desc:"if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"`
 	Size     mat32.Vec2  `desc:"2D size of plane"`
 	Segs     mat32.Vec2i `desc:"number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
