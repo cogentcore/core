@@ -5,6 +5,11 @@ go:
   - 1.12.x
   - master
 
+addons:
+  apt_packages:
+    - libgl1-mesa-dev
+    - xorg-dev
+
 matrix:
   fast_finish: true
   allow_failures:
