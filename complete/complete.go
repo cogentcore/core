@@ -20,7 +20,7 @@ type Completion struct {
 	Text  string            `desc:"completion text -- what will actually be inserted if selected"`
 	Label string            `desc:"label to show the user -- only used for menu display if non-empty -- otherwise Text is used"`
 	Icon  string            `desc:"icon name"`
-	Desc  string            `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"	`
+	Desc  string            `desc:"possible extra information, e.g. type, arguments, etc. - not currently used"`
 	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
 }
 

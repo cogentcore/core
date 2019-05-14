@@ -236,6 +236,7 @@ const (
 	Uri
 	Color
 	GoGi
+	Yaml
 
 	// Text is some other kind of text file
 	AnyText
