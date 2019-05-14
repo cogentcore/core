@@ -257,6 +257,46 @@ func ToString(it interface{}) string {
 	}
 }
 
+// ToStringPrec robustly converts anything to a String using given precision
+// for converting floating values -- using a value like 6 truncates the
+// nuisance random imprecision of actual floating point values due to the
+// fact that they are represented with binary bits.  See ToString
+// for more info.
+func ToStringPrec(it interface{}, prec int) string {
+	if IfaceIsNil(it) {
+		return "nil"
+	}
+	if stringer, ok := it.(fmt.Stringer); ok {
+		return stringer.String()
+	}
+	v := NonPtrValue(reflect.ValueOf(it))
+	vk := v.Kind()
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Int64:
+		return strconv.FormatInt(v.Int(), 10)
+	case vk >= reflect.Uint && vk <= reflect.Uint64:
+		return strconv.FormatUint(v.Uint(), 10)
+	case vk == reflect.Bool:
+		return strconv.FormatBool(v.Bool())
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return strconv.FormatFloat(v.Float(), 'G', prec, 64)
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		cv := v.Complex()
+		rv := strconv.FormatFloat(real(cv), 'G', prec, 64) + "," + strconv.FormatFloat(imag(cv), 'G', prec, 64)
+		return rv
+	case vk == reflect.String:
+		return v.String()
+	case vk == reflect.Slice:
+		eltyp := SliceElType(it)
+		if eltyp.Kind() == reflect.Uint8 { // []byte
+			return string(it.([]byte))
+		}
+		fallthrough
+	default:
+		return fmt.Sprintf("%v", it)
+	}
+}
+
 // SetRobust robustly sets the to value from the from value -- to must be a
 // pointer-to -- only for basic field values -- use copier package for more
 // complex cases
