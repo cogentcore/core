@@ -31,7 +31,7 @@ func TestElInString(t *testing.T) {
 		t.Error(err)
 	}
 
-	gl := lp.Lang.(*GoLang)
+	// gl := lp.Lang.(*GoLang)
 
 	lp.Lang.ParseFile(fs)
 

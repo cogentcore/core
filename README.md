@@ -8,6 +8,7 @@ We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also bec
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/pi)](https://goreportcard.com/report/github.com/goki/pi)
 [![GoDoc](https://godoc.org/github.com/goki/pi?status.svg)](https://godoc.org/github.com/goki/pi)
+[![Travis](https://travis-ci.com/goki/pi.svg?branch=master)](https://travis-ci.com/goki/pi)
 
 See the [Wiki](https://github.com/goki/pi/wiki) for more detailed docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
