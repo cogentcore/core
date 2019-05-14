@@ -64,7 +64,7 @@ func (pr *Program) ShaderByName(name string) gpu.Shader {
 			return sh
 		}
 	}
-	log.Println("glos gpu.AddShader: shader of name: %s not found!\n", name)
+	log.Printf("glos gpu.AddShader: shader of name: %s not found!\n", name)
 	return nil
 }
 
@@ -72,7 +72,7 @@ func (pr *Program) ShaderByName(name string) gpu.Shader {
 func (pr *Program) ShaderByType(typ gpu.ShaderTypes) gpu.Shader {
 	sh, ok := pr.shaders[typ]
 	if !ok {
-		log.Println("glos gpu.AddShader: shader of that type: %s not found!\n", typ)
+		log.Printf("glos gpu.AddShader: shader of that type: %s not found!\n", typ)
 		return nil
 	}
 	return sh

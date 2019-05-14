@@ -74,7 +74,7 @@ func Train(file os.File, new bool) (err error) {
 	}
 
 	if err = scanner.Err(); err != nil {
-		log.Println(os.Stderr, "reading input: ", err)
+		log.Println(err)
 		return err
 	}
 	if new {
