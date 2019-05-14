@@ -16,7 +16,7 @@ matrix:
     - go: master
 
 script:
-  - go get -d -t -v
+  - go get -d -t -v ./...
   - go build -v `go list ./... | grep -v python`
   - go test `go list ./... | grep -v python`
 
