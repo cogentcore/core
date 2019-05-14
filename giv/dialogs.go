@@ -8,6 +8,8 @@ import (
 	"image"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -29,6 +31,43 @@ type DlgOpts struct {
 // ToGiOpts converts giv opts to gi opts
 func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, CSS: d.CSS}
+}
+
+// TextViewDialog opens a dialog for displaying multi-line text in a
+// non-editable TextView -- user can copy contents to clipboard etc.
+// there is no input from the user.
+func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	tb := &TextBuf{}
+	tb.InitName(tb, "text-view-dialog-buf")
+	tb.SetText(text)
+
+	tv := frame.InsertNewChild(KiT_TextView, prIdx+1, "text-view").(*TextView)
+	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	tv.SetInactive()
+	tv.SetBuf(tb)
+	tv.SetProp("width", units.NewEm(5))
+	tv.SetProp("height", units.NewEm(5))
+	tv.SetStretchMaxWidth()
+	tv.SetStretchMaxHeight()
+
+	bbox, _ := dlg.ButtonBox(frame)
+	cpb := gi.AddNewButton(bbox, "copy-to-clip")
+	cpb.SetText("Copy To Clipboard")
+	cpb.SetIcon("copy")
+	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
+			oswin.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
+		}
+	})
+
+	dlg.UpdateEndNoSig(true) // going to be shown
+	dlg.Open(0, 0, avp, nil)
 }
 
 //gopy:interface=handle StructViewDialog is for editing fields of a structure using a StructView --

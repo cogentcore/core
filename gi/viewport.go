@@ -371,6 +371,13 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 }
 
 func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
+	if vp.Pixels == nil {
+		sz := vp.Geom.Size
+		if sz != image.ZP {
+			return vp.Geom.Bounds()
+		}
+		return image.Rectangle{Max: image.Point{100, 100}}
+	}
 	return vp.Pixels.Bounds() // vp.VpBBox -- this is where we transition to new coordinates!
 }
 

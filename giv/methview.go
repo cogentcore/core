@@ -745,11 +745,17 @@ func MethViewShowValue(vp *gi.Viewport2D, val reflect.Value, title, prompt strin
 	case reflect.Struct:
 		StructViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil)
 	case reflect.Slice:
-		SliceViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil, nil)
+		if bs, ok := npv.Interface().([]byte); ok {
+			TextViewDialog(vp, bs, DlgOpts{Title: title, Prompt: prompt, Ok: true})
+		} else if bs, ok := val.Interface().([]byte); ok {
+			TextViewDialog(vp, bs, DlgOpts{Title: title, Prompt: prompt, Ok: true})
+		} else {
+			SliceViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil, nil)
+		}
 	case reflect.Map:
 		MapViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil)
 	default:
-		gi.PromptDialog(vp, gi.DlgOpts{Title: title, Prompt: npv.String()}, true, false, nil, nil)
+		TextViewDialog(vp, []byte(npv.String()), DlgOpts{Title: title, Prompt: prompt, Ok: true})
 	}
 
 }
