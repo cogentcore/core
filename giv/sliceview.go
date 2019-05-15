@@ -148,6 +148,14 @@ func (sv *SliceView) Config() {
 	}
 }
 
+// IsConfiged returns true if the widget is fully configured
+func (sv *SliceView) IsConfiged() bool {
+	if len(sv.Kids) == 0 {
+		return false
+	}
+	return true
+}
+
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values
 func (sv *SliceView) SliceGrid() *gi.Frame {
@@ -472,6 +480,9 @@ func (sv *SliceView) ConfigToolbar() {
 func (sv *SliceView) Style2D() {
 	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
 		sv.Config()
+	}
+	if !sv.IsConfiged() {
+		return
 	}
 	sg := sv.SliceGrid()
 	sg.StartFocus() // need to call this when window is actually active

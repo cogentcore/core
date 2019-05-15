@@ -74,6 +74,14 @@ func (mv *MapView) Config() {
 	}
 }
 
+// IsConfiged returns true if the widget is fully configured
+func (mv *MapView) IsConfiged() bool {
+	if len(mv.Kids) == 0 {
+		return false
+	}
+	return true
+}
+
 // MapGrid returns the MapGrid grid layout widget, which contains all the fields and values
 func (mv *MapView) MapGrid() *gi.Frame {
 	return mv.ChildByName("map-grid", 0).(*gi.Frame)

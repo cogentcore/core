@@ -219,6 +219,18 @@ func (tv *TableView) Config() {
 	}
 }
 
+// IsConfiged returns true if the widget is fully configured
+func (tv *TableView) IsConfiged() bool {
+	if len(tv.Kids) == 0 {
+		return false
+	}
+	sf := tv.SliceFrame()
+	if len(sf.Kids) == 0 {
+		return false
+	}
+	return true
+}
+
 // SliceFrame returns the outer frame widget, which contains all the header,
 // fields and values
 func (tv *TableView) SliceFrame() *gi.Frame {
@@ -680,6 +692,9 @@ func (tv *TableView) Style2D() {
 	if tv.Viewport != nil && tv.Viewport.IsDoingFullRender() {
 		tv.Config()
 	}
+	if !tv.IsConfiged() {
+		return
+	}
 	tv.Frame.Style2D()
 	sg := tv.SliceGrid()
 	sg.StartFocus() // need to call this when window is actually active
@@ -691,7 +706,9 @@ func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if !tv.ShowIndex {
 		idxOff = 0
 	}
-
+	if !tv.IsConfiged() {
+		return redo
+	}
 	nfld := tv.NVisFields + idxOff
 	sgh := tv.SliceHeader()
 	sgf := tv.SliceGrid()
@@ -725,6 +742,9 @@ func (tv *TableView) Render2D() {
 		}
 	}
 	if tv.FullReRenderIfNeeded() {
+		return
+	}
+	if !tv.IsConfiged() {
 		return
 	}
 	if tv.PushBounds() {

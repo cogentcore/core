@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/goki/gi/gi"
@@ -206,7 +207,12 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		tynm += ": " + olbl
 	}
 	desc, _ := vv.Tag("desc")
-	slci := vv.Value.Interface()
+	vvp := kit.OnePtrValue(vv.Value)
+	if vvp.Kind() != reflect.Ptr {
+		log.Printf("giv.SliceValueView: Cannot view slices with non-pointer struct elements\n")
+		return
+	}
+	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
 		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
 		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())

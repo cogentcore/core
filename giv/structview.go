@@ -98,6 +98,14 @@ func (sv *StructView) Config() {
 	}
 }
 
+// IsConfiged returns true if the widget is fully configured
+func (sv *StructView) IsConfiged() bool {
+	if len(sv.Kids) == 0 {
+		return false
+	}
+	return true
+}
+
 // StructGrid returns the grid layout widget, which contains all the fields and values
 func (sv *StructView) StructGrid() *gi.Frame {
 	return sv.ChildByName("struct-grid", 2).(*gi.Frame)
@@ -219,7 +227,7 @@ func (sv *StructView) Style2D() {
 }
 
 func (sv *StructView) UpdateDefaults() {
-	if !sv.HasDefs {
+	if !sv.HasDefs || !sv.IsConfiged() {
 		return
 	}
 	sg := sv.StructGrid()
