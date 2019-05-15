@@ -86,6 +86,18 @@ func (cv *ColorView) SliderLayConfig() {
 	vl.UpdateEnd(updt)
 }
 
+// IsConfiged returns true if widget is fully configured
+func (cv *ColorView) IsConfiged() bool {
+	if len(cv.Kids) == 0 {
+		return false
+	}
+	sl := cv.SliderLay()
+	if len(sl.Kids) == 0 {
+		return false
+	}
+	return true
+}
+
 func (cv *ColorView) NumLay() *gi.Layout {
 	return cv.ChildByName("num-lay", 1).(*gi.Layout)
 }
