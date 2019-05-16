@@ -360,6 +360,38 @@ func SetRobust(to, frm interface{}) bool {
 	return false
 }
 
+// SetMapRobust robustly sets a map value using reflect.Value representations
+// of the map, key, and value elements, ensuring that the proper types are
+// used for the key and value elements using sensible conversions.
+// map value must be a valid map value -- that is not checked.
+func SetMapRobust(mp, ky, val reflect.Value) bool {
+	mtyp := mp.Type()
+	if mtyp.Kind() != reflect.Map {
+		log.Printf("ki.SetMapRobust: map arg is not map, is: %v\n", mtyp.String())
+		return false
+	}
+	if !mp.CanSet() {
+		log.Printf("ki.SetMapRobust: map arg is not settable: %v\n", mtyp.String())
+		return false
+	}
+	ktyp := mtyp.Key()
+	etyp := mtyp.Elem()
+	if etyp.Kind() == val.Kind() && ky.Kind() == ktyp.Kind() {
+		mp.SetMapIndex(ky, val)
+		return true
+	}
+	if ky.Kind() == ktyp.Kind() {
+		mp.SetMapIndex(ky, val.Convert(etyp))
+		return true
+	}
+	if etyp.Kind() == val.Kind() {
+		mp.SetMapIndex(ky.Convert(ktyp), val)
+		return true
+	}
+	mp.SetMapIndex(ky.Convert(ktyp), val.Convert(etyp))
+	return true
+}
+
 // MakeMap makes a map that is actually addressable, getting around the hidden
 // interface{} that reflect.MakeMap makes, by calling UnhideIfaceValue (from ptrs.go)
 func MakeMap(typ reflect.Type) reflect.Value {
