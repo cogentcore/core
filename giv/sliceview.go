@@ -55,8 +55,8 @@ type SliceView struct {
 	ViewSig          ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	TmpSave          ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	BuiltSlice       interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
-	BuiltSize        int
-	ToolbarSlice     interface{} `desc:"the slice that we successfully set a toolbar for"`
+	BuiltSize        int                `view:"-" json:"-" xml:"-" desc:"the built size"`
+	ToolbarSlice     interface{}        `desc:"the slice that we successfully set a toolbar for"`
 	inFocusGrab      bool
 	curRow           int // temp row variable used e.g., in Drop method
 }
@@ -478,9 +478,11 @@ func (sv *SliceView) ConfigToolbar() {
 }
 
 func (sv *SliceView) Style2D() {
-	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
-		sv.Config()
-	}
+	// if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
+	// 	fmt.Printf("slice view doing full render\n")
+	// 	fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
+	// 	// sv.Config()
+	// }
 	if !sv.IsConfiged() {
 		return
 	}

@@ -689,9 +689,9 @@ func (tv *TableView) SetSortFieldName(nm string) {
 }
 
 func (tv *TableView) Style2D() {
-	if tv.Viewport != nil && tv.Viewport.IsDoingFullRender() {
-		tv.Config()
-	}
+	// if tv.Viewport != nil && tv.Viewport.IsDoingFullRender() {
+	// 	tv.Config()
+	// }
 	if !tv.IsConfiged() {
 		return
 	}

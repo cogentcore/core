@@ -220,9 +220,9 @@ func (sv *StructView) ConfigStructGrid() {
 }
 
 func (sv *StructView) Style2D() {
-	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
-		sv.Config()
-	}
+	// if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
+	// 	sv.Config()
+	// }
 	sv.Frame.Style2D()
 }
 

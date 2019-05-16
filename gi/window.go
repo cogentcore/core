@@ -1722,7 +1722,7 @@ mainloop:
 					if w.Viewport.Geom.Size != w.OSWin.Size() {
 						w.Resized(w.OSWin.Size())
 					} else {
-						w.FullReRender()
+						// w.FullReRender()
 					}
 					w.SendShowEvent() // happens AFTER full render
 				}
