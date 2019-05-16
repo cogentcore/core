@@ -588,12 +588,12 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 				vv.Value = nv                       // update value to new key
 				rval = true
 			} else {
-				vv.Value = reflect.ValueOf(val)
+				vv.Value = kit.NonPtrValue(reflect.ValueOf(val))
 				if vv.KeyView != nil {
 					ck := kit.NonPtrValue(vv.KeyView.Val()) // current key value
-					ov.SetMapIndex(ck, vv.Value)
+					kit.SetMapRobust(ov, ck, reflect.ValueOf(val))
 				} else { // static, key not editable?
-					ov.SetMapIndex(kit.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value)
+					kit.SetMapRobust(ov, kit.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value)
 				}
 				rval = true
 			}
@@ -622,10 +622,9 @@ func (vv *ValueViewBase) SaveTmp() {
 				ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
 				if vv.KeyView != nil {
 					ck := kit.NonPtrValue(vv.KeyView.Val())
-					ov.SetMapIndex(ck, kit.NonPtrValue(vv.Value))
-					// fmt.Printf("save tmp of struct value in key: %v\n", ck.Interface())
+					kit.SetMapRobust(ov, ck, kit.NonPtrValue(vv.Value))
 				} else {
-					ov.SetMapIndex(kit.NonPtrValue(reflect.ValueOf(vv.Key)), kit.NonPtrValue(vv.Value))
+					kit.SetMapRobust(ov, kit.NonPtrValue(reflect.ValueOf(vv.Key)), kit.NonPtrValue(vv.Value))
 					// fmt.Printf("save tmp of struct value in key: %v\n", vv.Key)
 				}
 			}
