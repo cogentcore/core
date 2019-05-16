@@ -315,7 +315,7 @@ func (tv *TableView) ConfigSliceGrid(forceUpdt bool) {
 
 	sgh := tv.SliceHeader()
 	sgh.Lay = gi.LayoutHoriz
-	sgh.SetProp("overflow", "hidden") // no scrollbars!
+	sgh.SetProp("overflow", gi.OverflowHidden) // no scrollbars!
 	sgh.SetProp("spacing", 0)
 	// sgh.SetStretchMaxWidth()
 

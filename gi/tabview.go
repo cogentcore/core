@@ -383,7 +383,7 @@ func (tv *TabView) InitTabView() {
 	// tabs.SetStretchMaxHeight()
 	// tabs.SetMinPrefWidth(units.NewEm(10))
 	tabs.SetProp("height", units.NewEm(1.8))
-	tabs.SetProp("overflow", "hidden") // no scrollbars!
+	tabs.SetProp("overflow", OverflowHidden) // no scrollbars!
 	tabs.SetProp("padding", units.NewPx(0))
 	tabs.SetProp("margin", units.NewPx(0))
 	tabs.SetProp("spacing", units.NewPx(4))
@@ -572,6 +572,7 @@ func (tb *TabButton) TabView() *TabView {
 }
 
 func (tb *TabButton) ConfigParts() {
+	tb.Parts.SetProp("overflow", OverflowHidden) // no scrollbars!
 	config := kit.TypeAndNameList{}
 	clsIdx := 0
 	config.Add(KiT_Action, "close")

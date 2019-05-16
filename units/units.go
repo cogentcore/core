@@ -20,6 +20,7 @@ package units
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/goki/ki/ki"
@@ -398,7 +399,8 @@ func StringToValue(str string) Value {
 }
 
 // SetIFace sets value from an interface value representation as from ki.Props
-func (v *Value) SetIFace(iface interface{}) error {
+// key is optional property key for error message -- always logs the error
+func (v *Value) SetIFace(iface interface{}, key string) error {
 	switch val := iface.(type) {
 	case string:
 		v.SetString(val)
@@ -411,7 +413,9 @@ func (v *Value) SetIFace(iface interface{}) error {
 		if ok {
 			v.Set(float32(valflt), Px)
 		} else {
-			return fmt.Errorf("units.Value could not set from: %v type: %T", val, val)
+			err := fmt.Errorf("units.Value could not set property: %v from: %v type: %T", key, val, val)
+			log.Println(err)
+			return err
 		}
 	}
 	return nil
@@ -425,7 +429,7 @@ func (v *Value) SetFmProp(key string, props ki.Props) (bool, error) {
 	if !ok {
 		return false, nil
 	}
-	return true, v.SetIFace(pv)
+	return true, v.SetIFace(pv, key)
 }
 
 // SetFmInheritProp sets value from property of given key name in inherited or
@@ -436,5 +440,5 @@ func (v *Value) SetFmInheritProp(key string, k ki.Ki, inherit, typ bool) (bool, 
 	if !ok {
 		return false, nil
 	}
-	return true, v.SetIFace(pv)
+	return true, v.SetIFace(pv, key)
 }

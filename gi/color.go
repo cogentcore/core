@@ -146,6 +146,22 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform 
 	}
 }
 
+// SetIFace sets the color spec from given interface value, e.g., for ki.Props
+// key is an optional property key for error -- always logs errors
+func (c *ColorSpec) SetIFace(val interface{}, vp *Viewport2D, key string) error {
+	switch valv := val.(type) {
+	case string:
+		c.SetString(valv, vp)
+	case *Color:
+		c.SetColor(*valv)
+	case *ColorSpec:
+		*c = *valv
+	case color.Color:
+		c.SetColor(valv)
+	}
+	return nil
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //  Color
 
@@ -639,6 +655,28 @@ func (c *Color) Blend(pct float32, clr color.Color) Color {
 	f32.B = me*f32.B + oth*othc.B
 	f32.A = me*f32.A + oth*othc.A
 	return ColorModel.Convert(f32).(Color)
+}
+
+// SetIFace sets the color from given interface value, e.g., for ki.Props
+// key is an optional property key for error -- always logs errors
+func (c *Color) SetIFace(val interface{}, vp *Viewport2D, key string) error {
+	switch valv := val.(type) {
+	case string:
+		err := c.SetStringStyle(valv, nil, vp)
+		if err != nil {
+			log.Printf("gi.Color SetIFace: %v\n", err)
+			return err
+		}
+	case *Color:
+		*c = *valv
+	case color.Color:
+		c.SetColor(valv)
+	default:
+		err := fmt.Errorf("gi.Color SetIFace: could not set Color key: %v from prop: %v type: %T\n", key, val, val)
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
 /////////////////////////////////////////////////////////////////////////////

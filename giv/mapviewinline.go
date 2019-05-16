@@ -51,7 +51,7 @@ func (mv *MapViewInline) ConfigParts() {
 		return
 	}
 	mv.Parts.Lay = gi.LayoutHoriz
-	mv.Parts.SetProp("overflow", "hidden") // no scrollbars!
+	mv.Parts.SetProp("overflow", gi.OverflowHidden) // no scrollbars!
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)

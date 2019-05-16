@@ -11,6 +11,55 @@
 	+ list Style2D to see all the stuff happening in Style2D
 	+ pprof -http=localhost:5555 cpu.prof
 
+## 2019 - 05 - 15 -- bespoke styling functions
+
+This is from the ra25 emergent leabra demo, pulling up the slice of verticies for Hidden2 layer, which is 2880 verticies.  It was horrendously long but then I removed redundant Config calls in Style2D and an extra rebuild during window presentation, and that helped a lot.  But it is still way too slow.
+
+```
+       Node2D.Init2DTree:	Tot:	     2156.69	Avg:	      431.34	N:	     5	Pct:	32.84
+      Node2D.Style2DTree:	Tot:	     2149.90	Avg:	      429.98	N:	     5	Pct:	32.74
+     Node2D.Layout2DTree:	Tot:	      883.03	Avg:	      220.76	N:	     4	Pct:	13.45
+       StyleFields.Style:	Tot:	      568.96	Avg:	        0.00	N:	443625	Pct:	 8.66
+       Node2D.Size2DTree:	Tot:	      282.20	Avg:	       47.03	N:	     6	Pct:	 4.30
+      StyleFields.ToDots:	Tot:	      259.09	Avg:	        0.00	N:	795073	Pct:	 3.95
+       TextField.Style2D:	Tot:	      113.57	Avg:	        0.02	N:	  5760	Pct:	 1.73
+             win.Publish:	Tot:	       75.45	Avg:	        7.54	N:	    10	Pct:	 1.15
+     Node2D.Render2DTree:	Tot:	       34.94	Avg:	        6.99	N:	     5	Pct:	 0.53
+        TextRenderLayout:	Tot:	       25.36	Avg:	        0.00	N:	  5770	Pct:	 0.39
+              Paint.fill:	Tot:	        8.35	Avg:	        0.03	N:	   241	Pct:	 0.13
+       vp.ReRender2DNode:	Tot:	        2.54	Avg:	        0.64	N:	     4	Pct:	 0.04
+            Paint.stroke:	Tot:	        2.49	Avg:	        0.01	N:	   307	Pct:	 0.04
+  win.UploadAllViewports:	Tot:	        2.34	Avg:	        2.34	N:	     1	Pct:	 0.04
+      win.UploadVpRegion:	Tot:	        1.28	Avg:	        0.32	N:	     4	Pct:	 0.02
+              RenderText:	Tot:	        0.54	Avg:	        0.01	N:	    64	Pct:	 0.01
+```
+
+I mistakenly thought the issue was styling because style2d seems to be taking so long, and I had long been suspicious of the reflect-based code.  but alas, after spending too long fixing that, it had relatively minor effects:
+
+```
+       Node2D.Init2DTree:	Tot:	     2164.90	Avg:	      240.54	N:	     9	Pct:	33.43
+      Node2D.Style2DTree:	Tot:	     2011.75	Avg:	      335.29	N:	     6	Pct:	31.07
+     Node2D.Layout2DTree:	Tot:	      934.22	Avg:	      133.46	N:	     7	Pct:	14.43
+          StyleFromProps:	Tot:	      452.55	Avg:	        0.00	N:	553079	Pct:	 6.99
+       Node2D.Size2DTree:	Tot:	      276.71	Avg:	       27.67	N:	    10	Pct:	 4.27
+      StyleFields.ToDots:	Tot:	      261.39	Avg:	        0.00	N:	795132	Pct:	 4.04
+             win.Publish:	Tot:	      137.09	Avg:	        5.71	N:	    24	Pct:	 2.12
+       TextField.Style2D:	Tot:	      107.41	Avg:	        0.02	N:	  5760	Pct:	 1.66
+     Node2D.Render2DTree:	Tot:	       41.46	Avg:	        4.61	N:	     9	Pct:	 0.64
+       StyleFields.Style:	Tot:	       35.65	Avg:	        0.00	N:	103717	Pct:	 0.55
+        TextRenderLayout:	Tot:	       24.20	Avg:	        0.00	N:	  5776	Pct:	 0.37
+              Paint.fill:	Tot:	        9.47	Avg:	        0.04	N:	   258	Pct:	 0.15
+  win.UploadAllViewports:	Tot:	        8.85	Avg:	        4.42	N:	     2	Pct:	 0.14
+       vp.ReRender2DNode:	Tot:	        3.82	Avg:	        0.64	N:	     6	Pct:	 0.06
+            Paint.stroke:	Tot:	        3.38	Avg:	        0.01	N:	   343	Pct:	 0.05
+      win.UploadVpRegion:	Tot:	        1.85	Avg:	        0.31	N:	     6	Pct:	 0.03
+              RenderText:	Tot:	        0.78	Avg:	        0.01	N:	    77	Pct:	 0.01
+            win.UploadVp:	Tot:	        0.30	Avg:	        0.30	N:	     1	Pct:	 0.00
+```
+            
+I now realize that the recursive iteration through the tree is the real problem.  have a good non-recursive no-extra-memory algorithm to do that!
+
+            
 ## 2018 - 05 - 29 -- switch to rasterx
 
 

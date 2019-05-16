@@ -1610,6 +1610,15 @@ type TextStyle struct {
 	// user-select -- can user select text?
 }
 
+func (ts *TextStyle) Defaults() {
+	ts.LineHeight = 1
+	ts.Align = AlignLeft
+	ts.AlignV = AlignBaseline
+	ts.Direction = LTR
+	ts.OrientationVert = 90
+	ts.TabSize = 4
+}
+
 // https://godoc.org/golang.org/x/text/unicode/bidi
 // UnicodeBidi determines how
 type UnicodeBidi int32
@@ -1731,15 +1740,6 @@ func (ts *TextStyle) HasPre() bool {
 	default:
 		return true
 	}
-}
-
-func (ts *TextStyle) Defaults() {
-	ts.LineHeight = 1
-	ts.Align = AlignLeft
-	ts.AlignV = AlignBaseline
-	ts.Direction = LTR
-	ts.OrientationVert = 90
-	ts.TabSize = 4
 }
 
 // SetStylePost applies any updates after generic xml-tag property setting

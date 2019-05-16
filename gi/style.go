@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 	"reflect"
 	"strings"
@@ -45,6 +44,18 @@ type Style struct {
 	PropsNil      bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
 	dotsSet       bool
 	lastUnCtxt    units.Context
+}
+
+func (s *Style) Defaults() {
+	// mostly all the defaults are 0 initial values, except these..
+	s.IsSet = false
+	s.UnContext.Defaults()
+	s.Outline.Style = BorderNone
+	s.Display = true
+	s.PointerEvents = true
+	s.Layout.Defaults()
+	s.Font.Defaults()
+	s.Text.Defaults()
 }
 
 // todo: Animation
@@ -187,17 +198,6 @@ func (s *ShadowStyle) HasShadow() bool {
 	return (s.HOffset.Dots > 0 || s.VOffset.Dots > 0)
 }
 
-func (s *Style) Defaults() {
-	// mostly all the defaults are 0 initial values, except these..
-	s.IsSet = false
-	s.UnContext.Defaults()
-	s.Outline.Style = BorderNone
-	s.PointerEvents = true
-	s.Layout.Defaults()
-	s.Font.Defaults()
-	s.Text.Defaults()
-}
-
 func NewStyle() Style {
 	s := Style{}
 	s.Defaults()
@@ -232,7 +232,8 @@ func (s *Style) SetStyleProps(par *Style, props ki.Props, vp *Viewport2D) {
 		// StyleFields.Inherit(s, par) // very slow for some mysterious reason
 		s.InheritFields(par)
 	}
-	StyleFields.Style(s, par, props, vp)
+	// StyleFields.Style(s, par, props, vp)
+	s.StyleFromProps(par, props, vp)
 	s.Text.AlignV = s.Layout.AlignV
 	if s.Layout.Margin.Val > 0 && s.Text.ParaSpacing.Val == 0 {
 		s.Text.ParaSpacing = s.Layout.Margin
@@ -663,46 +664,11 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 
 	switch fiv := fi.(type) {
 	case *ColorSpec:
-		switch valv := val.(type) {
-		case string:
-			fiv.SetString(valv, vp)
-		case *Color:
-			fiv.SetColor(*valv)
-		case *ColorSpec:
-			*fiv = *valv
-		case color.Color:
-			fiv.SetColor(valv)
-		}
+		fiv.SetIFace(val, vp, fld.Field.Name)
 	case *Color:
-		switch valv := val.(type) {
-		case string:
-			if idx := strings.Index(valv, "$"); idx > 0 {
-				oclr := valv[idx+1:]
-				valv = valv[:idx]
-				if vfld, nok := fields[oclr]; nok {
-					nclr, nok := vfld.FieldIface(objptr).(*Color)
-					if nok {
-						fiv.SetColor(nclr) // init from color
-						fmt.Printf("%v %v initialized to other color: %v val: %v\n", errstr, fld.Field.Name, oclr, fiv)
-					}
-				}
-			}
-			err := fiv.SetStringStyle(valv, nil, vp)
-			if err != nil {
-				log.Printf("StyleField: %v\n", err)
-			}
-		case *Color:
-			*fiv = *valv
-		case color.Color:
-			fiv.SetColor(valv)
-		default:
-			fmt.Printf("%v %v could not set Color from prop: %v type: %T\n", errstr, fld.Field.Name, val, val)
-		}
+		fiv.SetIFace(val, vp, fld.Field.Name)
 	case *units.Value:
-		err := fiv.SetIFace(val)
-		if err != nil {
-			fmt.Printf("%v %v %v\n", errstr, fld.Field.Name, err)
-		}
+		fiv.SetIFace(val, fld.Field.Name)
 	case *Matrix2D:
 		switch valv := val.(type) {
 		case string:
