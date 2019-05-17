@@ -198,7 +198,7 @@ func (p Props) MarshalJSON() ([]byte, error) {
 		vt := kit.NonPtrType(reflect.TypeOf(val))
 		vk := vt.Kind()
 		if vk == reflect.Struct {
-			knm := kit.FullTypeName(vt)
+			knm := kit.Types.TypeName(vt)
 			tstr := fmt.Sprintf("\"%v%v\": \"%v\",", struTypeKey, key, knm)
 			b = append(b, []byte(tstr)...)
 		}
@@ -212,7 +212,7 @@ func (p Props) MarshalJSON() ([]byte, error) {
 			log.Printf("output to point of error: %v\n", string(b))
 		} else {
 			if vk >= reflect.Int && vk <= reflect.Uint64 && kit.Enums.TypeRegistered(vt) {
-				knm := kit.FullTypeName(vt)
+				knm := kit.Types.TypeName(vt)
 				kb, _ = json.Marshal(val)
 				estr := fmt.Sprintf("\"%v(%v)%v\"", enumTypeKey, knm, string(bytes.Trim(kb, "\"")))
 				b = append(b, []byte(estr)...)

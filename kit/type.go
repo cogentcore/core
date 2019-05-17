@@ -18,9 +18,9 @@ type Type struct {
 	T reflect.Type
 }
 
-// the full name of the type: package name + "." + type name
-func (k Type) FullTypeName() string {
-	return FullTypeName(k.T)
+// ShortTypeName returns short package-qualified name of the type: package dir + "." + type name
+func (k Type) ShortTypeName() string {
+	return Types.TypeName(k.T)
 }
 
 // stringer interface
@@ -28,7 +28,7 @@ func String(k Type) string {
 	if k.T == nil {
 		return "nil"
 	}
-	return FullTypeName(k.T)
+	return k.ShortTypeName()
 }
 
 // MarshalJSON saves only the type name
@@ -37,7 +37,7 @@ func (k Type) MarshalJSON() ([]byte, error) {
 		b := []byte("null")
 		return b, nil
 	}
-	nm := "\"" + k.FullTypeName() + "\""
+	nm := "\"" + k.ShortTypeName() + "\""
 	b := []byte(nm)
 	return b, nil
 }
@@ -67,7 +67,7 @@ func (k Type) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if k.T == nil {
 		tokens = append(tokens, xml.CharData("null"))
 	} else {
-		tokens = append(tokens, xml.CharData(k.FullTypeName()))
+		tokens = append(tokens, xml.CharData(k.ShortTypeName()))
 	}
 	tokens = append(tokens, xml.EndElement{start.Name})
 	for _, t := range tokens {

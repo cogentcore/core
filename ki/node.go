@@ -28,6 +28,7 @@ import (
 
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
+	"github.com/goki/prof"
 	"github.com/jinzhu/copier"
 )
 
@@ -48,7 +49,11 @@ type Node struct {
 	Kids     Slice  `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
 	NodeSig  Signal `copy:"-" json:"-" xml:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
 	Ths      Ki     `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
-	index    int    `desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method"`
+
+	travField int       `copy:"-" json:"-" xml:"-" view:"-" desc:"current field index for tree traversal process -- see TravState and SetTravState methods"`
+	travChild int       `copy:"-" json:"-" xml:"-" view:"-" desc:"current child index for tree traversal process -- see TravState and SetTravState methods"`
+	index     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method"`
+	fieldOffs []uintptr `copy:"-" json:"-" xml:"-" view:"-" desc:"cached version of the field offsets relative to base Node address -- used in generic field access."`
 }
 
 // must register all new types so type names can be looked up by name -- also props
@@ -86,22 +91,21 @@ func (n *Node) This() Ki {
 // within struct, sets their names to the field name, and sets us as their
 // parent.
 func (n *Node) Init(this Ki) {
-	kitype := KiType
 	n.ClearFlagMask(int64(UpdateFlagsMask))
 	if n.Ths != this {
 		n.Ths = this
-		// we need to call this directly instead of FuncFields because we need the field name
-		FlatFieldsValueFunc(this, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
-				fk := kit.PtrValue(fieldVal).Interface().(Ki)
-				if fk != nil {
-					fk.SetFlag(int(IsField))
-					fk.InitName(fk, field.Name)
-					fk.SetParent(this)
-				}
-			}
-			return true
-		})
+		if !n.HasKiFields() {
+			return
+		}
+		fnms := n.KiFieldNames()
+		val := reflect.ValueOf(this).Elem()
+		for _, fnm := range fnms {
+			fldval := val.FieldByName(fnm)
+			fk := kit.PtrValue(fldval).Interface().(Ki)
+			fk.SetFlag(int(IsField))
+			fk.InitName(fk, fnm)
+			fk.SetParent(this)
+		}
 	}
 }
 
@@ -110,7 +114,8 @@ func (n *Node) Init(this Ki) {
 // happens in Add, Insert Child).
 func (n *Node) InitName(k Ki, name string) {
 	n.Init(k)
-	n.SetName(name)
+	n.SetNameRaw(name)
+	n.SetUniqueName(name)
 }
 
 // ThisCheck checks that the This pointer is set and issues a warning to
@@ -192,7 +197,7 @@ func (n *Node) SetName(name string) bool {
 		return false
 	}
 	n.Nm = name
-	n.SetUniqueName(name)
+	n.SetUniqueName(SafeUniqueName(name))
 	if n.Par != nil {
 		n.Par.UniquifyNames()
 	}
@@ -210,7 +215,13 @@ func (n *Node) SetNameRaw(name string) {
 // string -- does not do any further testing that the name is indeed
 // unique -- should generally only be used by UniquifyNames.
 func (n *Node) SetUniqueName(name string) {
-	n.UniqueNm = strings.Replace(strings.Replace(name, ".", "_", -1), "/", "_", -1)
+	n.UniqueNm = name
+}
+
+// SafeUniqueName returns a name that replaces any path delimiter symbols
+// . or / with underbars.
+func SafeUniqueName(name string) string {
+	return strings.Replace(strings.Replace(name, ".", "_", -1), "/", "_", -1)
 }
 
 // UniquifyPreserveNameLimit is the number of children below which a more
@@ -225,8 +236,8 @@ var UniquifyPreserveNameLimit = 100
 // 100), above which the index is appended, guaranteeing uniqueness at the
 // cost of making paths longer and less user-friendly
 func (n *Node) UniquifyNames() {
-	// pr := prof.Start("ki.Node.UniquifyNames")
-	// defer pr.End()
+	pr := prof.Start("ki.Node.UniquifyNames")
+	defer pr.End()
 
 	sz := len(n.Kids)
 	if sz > UniquifyPreserveNameLimit {
@@ -409,17 +420,65 @@ func (n *Node) ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error) {
 	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.PathUnique(), t)
 }
 
+// HasKiFields returns true if this node has Ki Node fields that are
+// included in recursive descent traversal of the tree.  This is very
+// efficient compared to accessing the field information on the type
+// so it should be checked first -- caches the info on the node in flags.
+func (n *Node) HasKiFields() bool {
+	if n.HasFlag(int(HasKiFields)) {
+		return true
+	}
+	if n.HasFlag(int(HasNoKiFields)) {
+		return false
+	}
+	foffs := n.KiFieldOffs()
+	if len(foffs) == 0 {
+		n.SetFlag(int(HasNoKiFields))
+		return false
+	}
+	n.SetFlag(int(HasKiFields))
+	return true
+}
+
+// NumKiFields returns the number of Ki Node fields on this node.
+// This calls HasKiFields first so it is also efficient.
+func (n *Node) NumKiFields() int {
+	if !n.HasKiFields() {
+		return 0
+	}
+	foffs := n.KiFieldOffs()
+	return len(foffs)
+}
+
+// KiField returns the Ki Node field at given index, from KiFieldOffs list.
+// Returns nil if index is out of range.  This is generally used for
+// generic traversal methods and thus does not have a Try version.
+func (n *Node) KiField(idx int) Ki {
+	if !n.HasKiFields() {
+		return nil
+	}
+	foffs := n.KiFieldOffs()
+	if idx >= len(foffs) || idx < 0 {
+		return nil
+	}
+	fn := (*Node)(unsafe.Pointer(uintptr(unsafe.Pointer(n)) + foffs[idx]))
+	return fn.This()
+}
+
 // KiFieldByName returns field Ki element by name -- returns false if not found.
 func (n *Node) KiFieldByName(name string) Ki {
-	v := reflect.ValueOf(n.This()).Elem()
-	f := v.FieldByName(name)
-	if !f.IsValid() {
+	if !n.HasKiFields() {
 		return nil
 	}
-	if !kit.EmbedImplements(f.Type(), KiType) {
-		return nil
+	foffs := n.KiFieldOffs()
+	op := uintptr(unsafe.Pointer(n))
+	for _, fo := range foffs {
+		fn := (*Node)(unsafe.Pointer(op + fo))
+		if fn.Nm == name {
+			return fn.This()
+		}
 	}
-	return kit.PtrValue(f).Interface().(Ki)
+	return nil
 }
 
 // KiFieldByNameTry returns field Ki element by name -- returns error if not found.
@@ -431,12 +490,63 @@ func (n *Node) KiFieldByNameTry(name string) (Ki, error) {
 	return nil, fmt.Errorf("ki %v: Ki Field named: %v not found", n.PathUnique(), name)
 }
 
+// KiFieldOffs returns the uintptr offsets for Ki fields of this Node.
+// Cached for fast access, but use HasKiFields for even faster checking.
+func (n *Node) KiFieldOffs() []uintptr {
+	if n.fieldOffs != nil {
+		return n.fieldOffs
+	}
+	// we store the offsets for the fields in type properties
+	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
+	pnm := "__FieldOffs"
+	if foff, ok := kit.TypeProp(tprops, pnm); ok {
+		n.fieldOffs = foff.([]uintptr)
+		return n.fieldOffs
+	}
+	foff := make([]uintptr, 0)
+	kitype := KiType
+	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
+			foff = append(foff, field.Offset)
+		}
+		return true
+	})
+	kit.SetTypeProp(tprops, pnm, foff)
+	n.fieldOffs = foff
+	return foff
+}
+
+// KiFieldNames returns the field names for Ki fields of this Node. Cached for fast access.
+func (n *Node) KiFieldNames() []string {
+	// we store the offsets for the fields in type properties
+	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
+	pnm := "__FieldNames"
+	if fnms, ok := kit.TypeProp(tprops, pnm); ok {
+		return fnms.([]string)
+	}
+	fnm := make([]string, 0)
+	kitype := KiType
+	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
+			fnm = append(fnm, field.Name)
+		}
+		return true
+	})
+	kit.SetTypeProp(tprops, pnm, fnm)
+	return fnm
+}
+
 //////////////////////////////////////////////////////////////////////////
 //  Children
 
 // HasChildren tests whether this node has children (i.e., non-terminal).
 func (n *Node) HasChildren() bool {
 	return len(n.Kids) > 0
+}
+
+// NumChildren returns the number of children of this node.
+func (n *Node) NumChildren() int {
+	return len(n.Kids)
 }
 
 // Children returns a pointer to the slice of children (Node.Kids) -- use
@@ -671,115 +781,9 @@ func (n *Node) SetChildType(t reflect.Type) error {
 	return nil
 }
 
-// AddChildCheck checks if it is safe to add child -- it cannot be a parent of us -- prevent loops!
-func (n *Node) AddChildCheck(kid Ki) error {
-	var err error
-	n.FuncUp(0, n, func(k Ki, level int, d interface{}) bool {
-		if k == kid {
-			err = fmt.Errorf("ki.Node Attempt to add child to node %v that is my own parent -- no cycles permitted", (d.(Ki)).PathUnique())
-			log.Println(err)
-			return false
-		}
-		return true
-	})
-	return err
-}
-
-// after adding child -- signals etc
-func (n *Node) addChildImplPost(kid Ki) {
-	oldPar := kid.Parent()
-	kid.SetParent(n.This()) // key to set new parent before deleting: indicates move instead of delete
-	if oldPar != nil {
-		oldPar.DeleteChild(kid, false)
-		kid.SetFlag(int(ChildMoved))
-	} else {
-		kid.SetFlag(int(ChildAdded))
-	}
-}
-
-// addChildImpl does the internal mechanics of adding a child
-func (n *Node) addChildImpl(kid Ki) error {
-	if err := n.ThisCheck(); err != nil {
-		return err
-	}
-	if err := n.AddChildCheck(kid); err != nil {
-		return err
-	}
-	kid.Init(kid)
-	n.Kids = append(n.Kids, kid)
-	n.addChildImplPost(kid)
-	return nil
-}
-
-// insertChildImpl does the internal mechanics of inserting a child
-func (n *Node) insertChildImpl(kid Ki, at int) error {
-	if err := n.ThisCheck(); err != nil {
-		return err
-	}
-	if err := n.AddChildCheck(kid); err != nil {
-		return err
-	}
-	kid.Init(kid)
-	n.Kids.Insert(kid, at)
-	n.addChildImplPost(kid)
-	return nil
-}
-
-// AddChild adds a new child at end of children list -- if child is in an
-// existing tree, it is removed from that parent, and a NodeMoved signal
-// is emitted for the child -- UniquifyNames is called after adding to
-// ensure name is unique (assumed to already have a name).
-func (n *Node) AddChild(kid Ki) error {
-	updt := n.UpdateStart()
-	err := n.addChildImpl(kid)
-	if err == nil {
-		n.SetFlag(int(ChildAdded))
-		if kid.UniqueName() == "" {
-			kid.SetUniqueName(kid.Name())
-		}
-		n.UniquifyNames()
-	}
-	n.UpdateEnd(updt)
-	return err
-}
-
-// AddChildFast adds a new child at end of children list in the fastest
-// way possible -- assumes InitName has already been run, and doesn't
-// ensure names are unique, or run other checks, including if child
-// already has a parent.
-func (n *Node) AddChildFast(kid Ki) {
-	updt := n.UpdateStart()
-	n.Kids = append(n.Kids, kid)
-	kid.SetParent(n.This())
-	kid.SetFlag(int(ChildAdded))
-	n.SetFlag(int(ChildAdded))
-	n.UpdateEnd(updt)
-}
-
-// InsertChild adds a new child at given position in children list -- if
-// child is in an existing tree, it is removed from that parent, and a
-// NodeMoved signal is emitted for the child -- UniquifyNames is called
-// after adding to ensure name is unique (assumed to already have a name).
-func (n *Node) InsertChild(kid Ki, at int) error {
-	updt := n.UpdateStart()
-	err := n.insertChildImpl(kid, at)
-	if err == nil {
-		n.SetFlag(int(ChildAdded))
-		if kid.UniqueName() == "" {
-			kid.SetUniqueName(kid.Name())
-		}
-		n.UniquifyNames()
-	}
-	n.UpdateEnd(updt)
-	return err
-}
-
 // NewOfType creates a new child of given type -- if nil, uses ChildType,
 // else uses the same type as this struct.
 func (n *Node) NewOfType(typ reflect.Type) Ki {
-	if err := n.ThisCheck(); err != nil {
-		return nil
-	}
 	if typ == nil {
 		ct, ok := n.PropInherit("ChildType", false, true) // no inherit but yes from type
 		if ok {
@@ -796,48 +800,184 @@ func (n *Node) NewOfType(typ reflect.Type) Ki {
 	return kid
 }
 
+// AddChildCheck checks if it is safe to add child -- it cannot be a parent of us -- prevent loops!
+func (n *Node) AddChildCheck(kid Ki) error {
+	var err error
+	n.FuncUp(0, n, func(k Ki, level int, d interface{}) bool {
+		if k == kid {
+			err = fmt.Errorf("ki.Node Attempt to add child to node %v that is my own parent -- no cycles permitted", (d.(Ki)).PathUnique())
+			log.Println(err)
+			return false
+		}
+		return true
+	})
+	return err
+}
+
+// AddChild adds given child at end of children list -- if child is in an
+// existing tree, it is removed from that parent, and a NodeMoved signal
+// is emitted for the child -- UniquifyNames is called after adding to
+// ensure name is unique (assumed to already have a name).
+// See Fast version if adding many children -- UniquifyNames can get
+// very expensive if called repeatedly on many nodes.
+func (n *Node) AddChild(kid Ki) error {
+	if err := n.ThisCheck(); err != nil {
+		return err
+	}
+	if err := n.AddChildCheck(kid); err != nil {
+		return err
+	}
+	updt := n.UpdateStart()
+	kid.Init(kid)
+	n.Kids = append(n.Kids, kid)
+	oldPar := kid.Parent()
+	kid.SetParent(n.This()) // key to set new parent before deleting: indicates move instead of delete
+	if oldPar != nil {
+		oldPar.DeleteChild(kid, false)
+		kid.SetFlag(int(ChildMoved))
+	} else {
+		kid.SetFlag(int(ChildAdded))
+	}
+	n.SetFlag(int(ChildAdded))
+	if kid.UniqueName() == "" {
+		kid.SetUniqueName(SafeUniqueName(kid.Name()))
+	}
+	n.UniquifyNames()
+	n.UpdateEnd(updt)
+	return nil
+}
+
 // AddNewChild creates a new child of given type -- if nil, uses
 // ChildType, else type of this struct -- and add at end of children list
 // -- assigns name (can be empty) and enforces UniqueName.
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
+	if err := n.ThisCheck(); err != nil {
+		return nil
+	}
 	updt := n.UpdateStart()
 	kid := n.NewOfType(typ)
-	err := n.addChildImpl(kid)
-	if err == nil {
-		kid.SetName(name)
-		n.SetFlag(int(ChildAdded))
-	}
+	kid.Init(kid)
+	n.Kids = append(n.Kids, kid)
+	kid.SetNameRaw(name)
+	kid.SetParent(n.This())
+	kid.SetFlag(int(ChildAdded))
+	n.SetFlag(int(ChildAdded))
+	kid.SetUniqueName(SafeUniqueName(name))
+	n.UniquifyNames() // this is the killer time-sync for large node-count
 	n.UpdateEnd(updt)
 	return kid
+}
+
+// AddChildFast adds a new child at end of children list in the fastest
+// way possible -- assumes InitName has already been run, and doesn't
+// ensure names are unique, or run other checks, including if child
+// already has a parent.
+func (n *Node) AddChildFast(kid Ki) {
+	if err := n.ThisCheck(); err != nil {
+		return
+	}
+	updt := n.UpdateStart()
+	n.Kids = append(n.Kids, kid)
+	kid.SetParent(n.This())
+	kid.SetFlag(int(ChildAdded))
+	n.SetFlag(int(ChildAdded))
+	n.UpdateEnd(updt)
+}
+
+// AddNewChildFast creates a new child of given type -- if nil, uses
+// ChildType, else type of this struct -- and add at end of children list
+// in the fastest way possible.  Name must non-empty and already unique.
+// Many functions depend on names being unique, so you must either ensure
+// that all the names are indeed unique when added, or call UniquifyNames
+// after adding all the nodes.
+func (n *Node) AddNewChildFast(typ reflect.Type, name string) Ki {
+	if err := n.ThisCheck(); err != nil {
+		return nil
+	}
+	updt := n.UpdateStart()
+	kid := n.NewOfType(typ)
+	kid.Init(kid)
+	kid.SetNameRaw(name)
+	n.Kids = append(n.Kids, kid)
+	kid.SetParent(n.This())
+	kid.SetFlag(int(ChildAdded))
+	n.SetFlag(int(ChildAdded))
+	kid.SetUniqueName(name)
+	n.UpdateEnd(updt)
+	return kid
+}
+
+// InsertChild adds a new child at given position in children list -- if
+// child is in an existing tree, it is removed from that parent, and a
+// NodeMoved signal is emitted for the child -- UniquifyNames is called
+// after adding to ensure name is unique (assumed to already have a name).
+func (n *Node) InsertChild(kid Ki, at int) error {
+	if err := n.ThisCheck(); err != nil {
+		return err
+	}
+	if err := n.AddChildCheck(kid); err != nil {
+		return err
+	}
+	updt := n.UpdateStart()
+	kid.Init(kid)
+	n.Kids.Insert(kid, at)
+	oldPar := kid.Parent()
+	kid.SetParent(n.This()) // key to set new parent before deleting: indicates move instead of delete
+	if oldPar != nil {
+		oldPar.DeleteChild(kid, false)
+		kid.SetFlag(int(ChildMoved))
+	} else {
+		kid.SetFlag(int(ChildAdded))
+	}
+	n.SetFlag(int(ChildAdded))
+	if kid.UniqueName() == "" {
+		kid.SetUniqueName(SafeUniqueName(kid.Name()))
+	}
+	n.UniquifyNames()
+	n.UpdateEnd(updt)
+	return nil
 }
 
 // InsertNewChild creates a new child of given type -- if nil, uses
 // ChildType, else type of this struct -- and add at given position in
 // children list -- assigns name (can be empty) and enforces UniqueName.
 func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
+	if err := n.ThisCheck(); err != nil {
+		return nil
+	}
 	updt := n.UpdateStart()
 	kid := n.NewOfType(typ)
-	err := n.insertChildImpl(kid, at)
-	if err == nil {
-		kid.SetName(name)
-		n.SetFlag(int(ChildAdded))
-	}
+	kid.Init(kid)
+	n.Kids.Insert(kid, at)
+	kid.SetNameRaw(name)
+	kid.SetParent(n.This())
+	kid.SetFlag(int(ChildAdded))
+	n.SetFlag(int(ChildAdded))
+	kid.SetUniqueName(SafeUniqueName(name))
+	n.UniquifyNames() // this is the killer time-sync for large node-count
 	n.UpdateEnd(updt)
 	return kid
 }
 
-// InsertNewChildUnique adds a new child at given position in children
-// list, and gives it a name, using SetNameRaw and SetUniqueName for the
-// name -- only when names are known to be unique (faster).
-func (n *Node) InsertNewChildUnique(typ reflect.Type, at int, name string) Ki {
+// InsertNewChildFast creates a new child of given type -- if nil, uses
+// ChildType, else type of this struct -- and insert at given position
+// in the fastest way possible.  Name must non-empty and already unique.
+// Many functions depend on names being unique, so you must either ensure
+// that all the names are indeed unique when added, or call UniquifyNames
+// after adding all the nodes.
+func (n *Node) InsertNewChildFast(typ reflect.Type, at int, name string) Ki {
+	if err := n.ThisCheck(); err != nil {
+		return nil
+	}
 	updt := n.UpdateStart()
 	kid := n.NewOfType(typ)
-	err := n.insertChildImpl(kid, at)
-	if err == nil {
-		kid.SetNameRaw(name)
-		kid.SetUniqueName(name)
-		n.SetFlag(int(ChildAdded))
-	}
+	kid.Init(kid)
+	kid.SetNameRaw(name)
+	n.Kids.Insert(kid, at)
+	kid.SetParent(n.This())
+	kid.SetFlag(int(ChildAdded))
+	n.SetFlag(int(ChildAdded))
+	kid.SetUniqueName(name)
 	n.UpdateEnd(updt)
 	return kid
 }
@@ -920,7 +1060,7 @@ func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, 
 			updt = n.UpdateStart()
 		}
 		nm := fmt.Sprintf("%v%v", nameStub, sz)
-		n.InsertNewChildUnique(typ, sz, nm)
+		n.InsertNewChildFast(typ, sz, nm)
 		sz++
 	}
 	return
@@ -1361,25 +1501,16 @@ func (n *Node) PropTag() string {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
-// Fields returns the uintptr offsets for Ki fields of this Node -- cached for fast
-// access
-func (n *Node) Fields() []uintptr {
-	// we store the offsets for the fields in type properties
-	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
-	pnm := "__FieldOffs"
-	if foff, ok := kit.TypeProp(tprops, pnm); ok {
-		return foff.([]uintptr)
-	}
-	foff := make([]uintptr, 0)
-	kitype := KiType
-	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
-			foff = append(foff, field.Offset)
-		}
-		return true
-	})
-	kit.SetTypeProp(tprops, pnm, foff)
-	return foff
+// TravState returns the current tree traversal state variables:
+// current field and child indexes -- used for efficient non-recursive
+// traversal of the tree.
+func (n *Node) TravState() (curField, curChild int) {
+	return n.travField, n.travChild
+}
+
+// SetTravState sets the new traversal state variables
+func (n *Node) SetTravState(curField, curChild int) {
+	n.travField, n.travChild = curField, curChild
 }
 
 // FlatFieldsValueFunc is the Node version of this function from kit/embeds.go
@@ -1420,8 +1551,8 @@ func (n *Node) FuncFields(level int, data interface{}, fun Func) {
 	if n.This() == nil {
 		return
 	}
-	op := reflect.ValueOf(n.This()).Pointer()
-	foffs := n.Fields()
+	op := uintptr(unsafe.Pointer(n))
+	foffs := n.KiFieldOffs()
 	for _, fo := range foffs {
 		fn := (*Node)(unsafe.Pointer(op + fo))
 		fun(fn.This(), level, data)
@@ -1435,7 +1566,7 @@ func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
 		return
 	}
 	op := reflect.ValueOf(n.This()).Pointer()
-	foffs := n.Fields()
+	foffs := n.KiFieldOffs()
 	for _, fo := range foffs {
 		fn := (*Node)(unsafe.Pointer(op + fo))
 		go fun(fn.This(), level, data)
@@ -1448,12 +1579,17 @@ func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
 func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
-	if !fun(n.This(), level, data) { // false return means stop
-		return false
-	}
-	level++
-	if n.Parent() != nil && n.Parent() != n.This() { // prevent loops
-		return n.Parent().FuncUp(level, data, fun)
+	cur := n.This()
+	for {
+		if !fun(cur, level, data) { // false return means stop
+			return false
+		}
+		level++
+		par := cur.Parent()
+		if par == nil || par == cur { // prevent loops
+			return true
+		}
+		cur = par
 	}
 	return true
 }
@@ -1467,37 +1603,89 @@ func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
 	if n.IsRoot() {
 		return true
 	}
-	if !fun(n.Parent(), level, data) { // false return means stop
-		return false
+	cur := n.Parent()
+	for {
+		if !fun(cur, level, data) { // false return means stop
+			return false
+		}
+		level++
+		par := cur.Parent()
+		if par == nil || par == cur { // prevent loops
+			return true
+		}
+		cur = par
 	}
-	level++
-	return n.Parent().FuncUpParent(level, data, fun)
+	return true
 }
 
-// FuncDownMeFirst calls function on this node (MeFirst) and then call
-// FuncDownMeFirst on all the children -- sequentially all in current go
-// routine -- level var is incremented before calling children -- if fun
-// returns false then any further traversal of that branch of the tree is
+// strategy -- same as used in TreeView:
+// https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
+
+// FuncDownMeFirst calls function on this node (MeFirst) and then recursively
+// in a depth-first manner on all the children.  Function calls are sequential
+// all in current go routine.  level var tracks overall depth in the tree.
+// If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
-// returns false, then returns false and children are not processed
-// further -- this is the fastest, most natural form of traversal.
+// returns false, children are not processed further.
 func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
 	if n.This() == nil {
 		return false
 	}
-	if !fun(n.This(), level, data) { // false return means stop
-		return false
-	}
-	level++
-	n.FuncFields(level, data, func(k Ki, level int, d interface{}) bool {
-		k.FuncDownMeFirst(level, data, fun)
-		return true
-	})
-	for _, child := range *n.Children() {
-		child.FuncDownMeFirst(level, data, fun) // don't care about their return values
+	start := n.This()
+	cur := start
+	cur.SetTravState(-1, -1)
+outer:
+	for {
+		if n.This() != nil && fun(cur, level, data) { // false return means stop
+			level++ // this is the descent branch
+			if cur.HasKiFields() {
+				cur.SetTravState(0, -1)
+				cur = cur.KiField(0)
+				cur.SetTravState(-1, -1)
+				continue
+			}
+			if cur.HasChildren() {
+				cur.SetTravState(0, 0) // 0 for no fields
+				cur = cur.Child(0)
+				cur.SetTravState(-1, -1)
+				continue
+			}
+		}
+		// if we get here, we're in the ascent branch -- move to the right and then up
+		for {
+			curField, curChild := cur.TravState()
+			if cur.HasKiFields() {
+				if (curField + 1) < cur.NumKiFields() {
+					curField++
+					cur.SetTravState(curField, curChild)
+					cur = cur.KiField(curField)
+					cur.SetTravState(-1, -1)
+					continue outer
+				}
+			}
+			if (curChild + 1) < cur.NumChildren() {
+				curChild++
+				cur.SetTravState(curField, curChild)
+				cur = cur.Child(curChild)
+				cur.SetTravState(-1, -1)
+				continue outer
+			}
+			// couldn't go right, move up..
+			if cur == start {
+				break outer // done!
+			}
+			level--
+			par := cur.Parent()
+			if par == nil { // shouldn't happen
+				break outer
+			}
+			cur = par
+		}
 	}
 	return true
 }
+
+// todo: change out for same FundDownMeFirst logic, except MeLast...
 
 // FuncDownDepthFirst calls FuncDownDepthFirst on all children, then calls
 // function on this node -- sequentially all in current go routine --
@@ -2072,7 +2260,7 @@ func (n *Node) WriteJSON(writer io.Writer, indent bool) error {
 		log.Println(err)
 		return err
 	}
-	knm := kit.FullTypeName(n.Type())
+	knm := kit.Types.TypeName(n.Type())
 	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
 	nwb := make([]byte, len(b)+len(tstr))
 	copy(nwb, []byte(tstr))

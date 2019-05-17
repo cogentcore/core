@@ -163,17 +163,39 @@ type Ki interface {
 	// type that embeds the given type at any level of anonymous embedding.
 	ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error)
 
+	// HasKiFields returns true if this node has Ki Node fields that are
+	// included in recursive descent traversal of the tree.  This is very
+	// efficient compared to accessing the field information on the type
+	// so it should be checked first -- caches the info on the node in flags.
+	HasKiFields() bool
+
+	// NumKiFields returns the number of Ki Node fields on this node.
+	// This calls HasKiFields first so it is also efficient.
+	NumKiFields() int
+
+	// KiField returns the Ki Node field at given index, from KiFieldOffs list.
+	// Returns nil if index is out of range.  This is generally used for
+	// generic traversal methods and thus does not have a Try version.
+	KiField(idx int) Ki
+
 	// KiFieldByName returns field Ki element by name -- returns nil if not found.
 	KiFieldByName(name string) Ki
 
 	// KiFieldByNameTry returns field Ki element by name -- returns error if not found.
 	KiFieldByNameTry(name string) (Ki, error)
 
+	// KiFieldOffs returns the uintptr offsets for Ki fields of this Node.
+	// Cached for fast access, but use HasKiFields for even faster checking.
+	KiFieldOffs() []uintptr
+
 	//////////////////////////////////////////////////////////////////////////
 	//  Children
 
 	// HasChildren tests whether this node has children (i.e., non-terminal).
 	HasChildren() bool
+
+	// NumChildren returns the number of children
+	NumChildren() int
 
 	// Children returns a pointer to the slice of children (Node.Kids) -- use
 	// methods on ki.Slice for further ways to access (ByName, ByType, etc).
@@ -267,18 +289,49 @@ type Ki interface {
 	// Ki type, and errors if not.
 	SetChildType(t reflect.Type) error
 
-	// AddChild adds a new child at end of children list -- if child is in an
+	// NewOfType creates a new child of given type -- if nil, uses ChildType,
+	// else uses the same type as this struct.
+	NewOfType(typ reflect.Type) Ki
+
+	// AddChild adds given child at end of children list -- if child is in an
 	// existing tree, it is removed from that parent, and a NodeMoved signal
 	// is emitted for the child -- UniquifyNames is called after adding to
 	// ensure name is unique (assumed to already have a name).
+	// See Fast version if adding many children -- UniquifyNames can get
+	// very expensive if called repeatedly on many nodes.
 	AddChild(kid Ki) error
 
-	// AddChildFast adds a new child at end of children list in the fastest
-	// way possible -- saves about 30% of time overall --
-	// assumes InitName has already been run, and doesn't
-	// ensure names are unique, or run other checks, including if child
-	// already has a parent.  Only use if you really need the speed..
+	// AddChildFast adds given child at end of children list in the fastest
+	// way possible -- essential for nodes with large numbers of children!
+	// Assumes InitName has already been run, and doesn't ensure names are
+	// unique, or run other checks, including if child already has a parent.
+	// Many functions depend on names being unique, so you must either ensure
+	// that all the names are indeed unique when added, or call UniquifyNames
+	// after adding all the nodes.
 	AddChildFast(kid Ki)
+
+	// AddNewChild creates a new child of given type -- if nil, uses
+	// ChildType, else type of this struct -- and add at end of children list
+	// -- assigns name (can be empty) and enforces UniqueName.
+	// See Fast version if adding many nodes -- UniquifyNames is very expensive
+	// if being called repeatedly as many nodes are added.
+	AddNewChild(typ reflect.Type, name string) Ki
+
+	// AddNewChildFast creates a new child of given type -- if nil, uses
+	// ChildType, else type of this struct -- and add at end of children list
+	// in the fastest way possible.  Name must non-empty and already unique.
+	// Many functions depend on names being unique, so you must either ensure
+	// that all the names are indeed unique when added, or call UniquifyNames
+	// after adding all the nodes.
+	AddNewChildFast(typ reflect.Type, name string) Ki
+
+	// SetChild sets child at given index to be the given item -- if name is
+	// non-empty then it sets the name of the child as well -- just calls Init
+	// (or InitName) on the child, and SetParent -- does NOT uniquify the
+	// names -- this is for high-volume pre-allocated child creation.
+	// Call UniquifyNames afterward if needed, but better to ensure that names
+	// are unique up front.
+	SetChild(kid Ki, idx int, name string) error
 
 	// InsertChild adds a new child at given position in children list -- if
 	// child is in an existing tree, it is removed from that parent, and a
@@ -286,26 +339,18 @@ type Ki interface {
 	// after adding to ensure name is unique (assumed to already have a name).
 	InsertChild(kid Ki, at int) error
 
-	// NewOfType creates a new child of given type -- if nil, uses ChildType,
-	// else uses the same type as this struct.
-	NewOfType(typ reflect.Type) Ki
-
-	// AddNewChild creates a new child of given type -- if nil, uses
-	// ChildType, else type of this struct -- and add at end of children list
-	// -- assigns name (can be empty) and enforces UniqueName.
-	AddNewChild(typ reflect.Type, name string) Ki
-
 	// InsertNewChild creates a new child of given type -- if nil, uses
 	// ChildType, else type of this struct -- and add at given position in
 	// children list -- assigns name (can be empty) and enforces UniqueName.
 	InsertNewChild(typ reflect.Type, at int, name string) Ki
 
-	// SetChild sets child at given index to be the given item -- if name is
-	// non-empty then it sets the name of the child as well -- just calls Init
-	// (or InitName) on the child, and SetParent -- does NOT uniquify the
-	// names -- this is for high-volume child creation -- call UniquifyNames
-	// afterward if needed, but better to ensure that names are unique up front.
-	SetChild(kid Ki, idx int, name string) error
+	// InsertNewChildFast creates a new child of given type -- if nil, uses
+	// ChildType, else type of this struct -- and insert at given position
+	// in the fastest way possible.  Name must non-empty and already unique.
+	// Many functions depend on names being unique, so you must either ensure
+	// that all the names are indeed unique when added, or call UniquifyNames
+	// after adding all the nodes.
+	InsertNewChildFast(typ reflect.Type, at int, name string) Ki
 
 	// MoveChild moves child from one position to another in the list of
 	// children (see also corresponding Slice method, which does not
@@ -528,6 +573,14 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths
 	//   note: always put functions last -- looks better for inline functions
+
+	// TravState returns the current tree traversal state variables:
+	// current field and child indexes -- used for efficient non-recursive
+	// traversal of the tree.
+	TravState() (curField, curChild int)
+
+	// SetTravState sets the new traversal state variables
+	SetTravState(curField, curChild int)
 
 	// FuncFields calls function on all Ki fields within this node.
 	FuncFields(level int, data interface{}, fun Func)
@@ -804,6 +857,16 @@ type Flags int32
 const (
 	// IsField indicates a node is a field in its parent node, not a child in children.
 	IsField Flags = iota
+
+	// HasKiFields indicates a node has Ki Node fields that will be processed in recursive descent.
+	// Use the HasFields() method to check as it will establish validity of flags on first call.
+	// If neither HasFields nor HasNoFields are set, then it knows to update flags.
+	HasKiFields
+
+	// HasNoKiFields indicates a node has NO Ki Node fields that will be processed in recursive descent.
+	// Use the HasFields() method to check as it will establish validity of flags on first call.
+	// If neither HasFields nor HasNoFields are set, then it knows to update flags.
+	HasNoKiFields
 
 	// Updating flag is set at UpdateStart and cleared if we were the first
 	// updater at UpdateEnd.

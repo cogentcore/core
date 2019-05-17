@@ -3,13 +3,15 @@
 package ki
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _Flags_name = "IsFieldUpdatingOnlySelfUpdateNodeAddedNodeCopiedNodeMovedNodeDeletedNodeDestroyedChildAddedChildMovedChildDeletedChildrenDeletedFieldUpdatedPropUpdatedFlagsN"
+var _ = errors.New("dummy error")
 
-var _Flags_index = [...]uint8{0, 7, 15, 29, 38, 48, 57, 68, 81, 91, 101, 113, 128, 140, 151, 157}
+const _Flags_name = "IsFieldHasKiFieldsHasNoKiFieldsUpdatingOnlySelfUpdateNodeAddedNodeCopiedNodeMovedNodeDeletedNodeDestroyedChildAddedChildMovedChildDeletedChildrenDeletedFieldUpdatedPropUpdatedFlagsN"
+
+var _Flags_index = [...]uint8{0, 7, 18, 31, 39, 53, 62, 72, 81, 92, 105, 115, 125, 137, 152, 164, 175, 181}
 
 func (i Flags) String() string {
 	if i < 0 || i >= Flags(len(_Flags_index)-1) {
@@ -25,5 +27,5 @@ func (i *Flags) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Flags", s)
+	return errors.New("String: " + s + " is not a valid option for type: Flags")
 }

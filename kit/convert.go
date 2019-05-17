@@ -84,6 +84,45 @@ func ValueIsZero(v reflect.Value) bool {
 
 // ToBool robustly converts anything to a bool
 func ToBool(it interface{}) (bool, bool) {
+	// first check for most likely cases for greatest efficiency
+	switch bt := it.(type) {
+	case bool:
+		return bt, true
+	case *bool:
+		return *bt, true
+	case int:
+		return bt != 0, true
+	case *int:
+		return *bt != 0, true
+	case int32:
+		return bt != 0, true
+	case int64:
+		return bt != 0, true
+	case byte:
+		return bt != 0, true
+	case float64:
+		return bt != 0, true
+	case *float64:
+		return *bt != 0, true
+	case float32:
+		return bt != 0, true
+	case *float32:
+		return *bt != 0, true
+	case string:
+		r, err := strconv.ParseBool(bt)
+		if err != nil {
+			return false, false
+		}
+		return r, true
+	case *string:
+		r, err := strconv.ParseBool(*bt)
+		if err != nil {
+			return false, false
+		}
+		return r, true
+	}
+
+	// then fall back on reflection
 	if IfaceIsNil(it) {
 		return false, false
 	}
@@ -111,9 +150,60 @@ func ToBool(it interface{}) (bool, bool) {
 	}
 }
 
-// ToInt robustlys converts anything to an int64 -- uses the ints.Inter ToInt
+// ToInt robustly converts anything to an int64 -- uses the ints.Inter ToInt
 // interface first if available
 func ToInt(it interface{}) (int64, bool) {
+	// first check for most likely cases for greatest efficiency
+	switch it := it.(type) {
+	case bool:
+		if it {
+			return 1, true
+		}
+		return 0, true
+	case *bool:
+		if *it {
+			return 1, true
+		}
+		return 0, true
+	case int:
+		return int64(it), true
+	case *int:
+		return int64(*it), true
+	case int32:
+		return int64(it), true
+	case *int32:
+		return int64(*it), true
+	case int64:
+		return it, true
+	case *int64:
+		return *it, true
+	case byte:
+		return int64(it), true
+	case *byte:
+		return int64(*it), true
+	case float64:
+		return int64(it), true
+	case *float64:
+		return int64(*it), true
+	case float32:
+		return int64(it), true
+	case *float32:
+		return int64(*it), true
+	case string:
+		r, err := strconv.ParseInt(it, 0, 64)
+		if err != nil {
+			return 0, false
+		}
+		return r, true
+	case *string:
+		r, err := strconv.ParseInt(*it, 0, 64)
+		if err != nil {
+			return 0, false
+		}
+		return r, true
+	}
+
+	// then fall back on reflection
 	if IfaceIsNil(it) {
 		return 0, false
 	}
@@ -150,11 +240,62 @@ func ToInt(it interface{}) (int64, bool) {
 // ToFloat robustly converts anything to a Float64 -- uses the floats.Floater Float()
 // interface first if available
 func ToFloat(it interface{}) (float64, bool) {
-	if IfaceIsNil(it) {
-		return 0.0, false
+	// first check for most likely cases for greatest efficiency
+	switch it := it.(type) {
+	case bool:
+		if it {
+			return 1, true
+		}
+		return 0, true
+	case *bool:
+		if *it {
+			return 1, true
+		}
+		return 0, true
+	case int:
+		return float64(it), true
+	case *int:
+		return float64(*it), true
+	case int32:
+		return float64(it), true
+	case *int32:
+		return float64(*it), true
+	case int64:
+		return float64(it), true
+	case *int64:
+		return float64(*it), true
+	case byte:
+		return float64(it), true
+	case *byte:
+		return float64(*it), true
+	case float64:
+		return it, true
+	case *float64:
+		return *it, true
+	case float32:
+		return float64(it), true
+	case *float32:
+		return float64(*it), true
+	case string:
+		r, err := strconv.ParseFloat(it, 64)
+		if err != nil {
+			return 0.0, false
+		}
+		return r, true
+	case *string:
+		r, err := strconv.ParseFloat(*it, 64)
+		if err != nil {
+			return 0.0, false
+		}
+		return r, true
 	}
+
 	if floater, ok := it.(floats.Floater); ok {
 		return floater.Float(), true
+	}
+	// then fall back on reflection
+	if IfaceIsNil(it) {
+		return 0.0, false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
@@ -183,14 +324,65 @@ func ToFloat(it interface{}) (float64, bool) {
 	}
 }
 
-// ToFloat32 robustly converts anything to a Float64 -- uses the floats.Floater Float()
+// ToFloat32 robustly converts anything to a Float32 -- uses the floats.Floater Float()
 // interface first if available
 func ToFloat32(it interface{}) (float32, bool) {
-	if IfaceIsNil(it) {
-		return float32(0.0), false
+	// first check for most likely cases for greatest efficiency
+	switch it := it.(type) {
+	case bool:
+		if it {
+			return 1, true
+		}
+		return 0, true
+	case *bool:
+		if *it {
+			return 1, true
+		}
+		return 0, true
+	case int:
+		return float32(it), true
+	case *int:
+		return float32(*it), true
+	case int32:
+		return float32(it), true
+	case *int32:
+		return float32(*it), true
+	case int64:
+		return float32(it), true
+	case *int64:
+		return float32(*it), true
+	case byte:
+		return float32(it), true
+	case *byte:
+		return float32(*it), true
+	case float64:
+		return float32(it), true
+	case *float64:
+		return float32(*it), true
+	case float32:
+		return it, true
+	case *float32:
+		return *it, true
+	case string:
+		r, err := strconv.ParseFloat(it, 32)
+		if err != nil {
+			return 0.0, false
+		}
+		return float32(r), true
+	case *string:
+		r, err := strconv.ParseFloat(*it, 32)
+		if err != nil {
+			return 0.0, false
+		}
+		return float32(r), true
 	}
+
 	if floater, ok := it.(floats.Floater); ok {
 		return float32(floater.Float()), true
+	}
+	// then fall back on reflection
+	if IfaceIsNil(it) {
+		return float32(0.0), false
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()
@@ -223,11 +415,53 @@ func ToFloat32(it interface{}) (float32, bool) {
 // ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
 // definitely work in all cases, so there is no bool return value
 func ToString(it interface{}) string {
-	if IfaceIsNil(it) {
-		return "nil"
+	// first check for most likely cases for greatest efficiency
+	switch it := it.(type) {
+	case string:
+		return it
+	case *string:
+		return *it
+	case bool:
+		if it {
+			return "true"
+		}
+		return "false"
+	case *bool:
+		if *it {
+			return "true"
+		}
+		return "false"
+	case int:
+		return strconv.FormatInt(int64(it), 10)
+	case *int:
+		return strconv.FormatInt(int64(*it), 10)
+	case int32:
+		return strconv.FormatInt(int64(it), 10)
+	case *int32:
+		return strconv.FormatInt(int64(*it), 10)
+	case int64:
+		return strconv.FormatInt(it, 10)
+	case *int64:
+		return strconv.FormatInt(*it, 10)
+	case byte:
+		return strconv.FormatInt(int64(it), 10)
+	case *byte:
+		return strconv.FormatInt(int64(*it), 10)
+	case float64:
+		return strconv.FormatFloat(it, 'G', -1, 64)
+	case *float64:
+		return strconv.FormatFloat(*it, 'G', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(it), 'G', -1, 32)
+	case *float32:
+		return strconv.FormatFloat(float64(*it), 'G', -1, 32)
 	}
+
 	if stringer, ok := it.(fmt.Stringer); ok {
 		return stringer.String()
+	}
+	if IfaceIsNil(it) {
+		return "nil"
 	}
 	v := NonPtrValue(reflect.ValueOf(it))
 	vk := v.Kind()

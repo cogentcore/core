@@ -138,7 +138,7 @@ func SliceSort(sl interface{}, ascending bool) error {
 			}
 		})
 		return nil
-	case vk == reflect.Struct && FullTypeName(elnptyp) == "time.Time":
+	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			iv := NonPtrValue(svnp.Index(i)).Interface().(time.Time)
 			jv := NonPtrValue(svnp.Index(j)).Interface().(time.Time)
@@ -276,7 +276,7 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			}
 		})
 		return nil
-	case vk == reflect.Struct && FullTypeName(fld.Type) == "time.Time":
+	case vk == reflect.Struct && ShortTypeName(fld.Type) == "time.Time":
 		sort.Slice(svnp.Interface(), func(i, j int) bool {
 			ival := OnePtrValue(svnp.Index(i))
 			iv := ival.Elem().FieldByIndex(fldIdx).Interface().(time.Time)
@@ -402,7 +402,7 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			}
 		})
 		return nil
-	case vk == reflect.Struct && FullTypeName(elnptyp) == "time.Time":
+	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
 		sort.Slice(sl, func(i, j int) bool {
 			iv := NonPtrValue(sl[i]).Interface().(time.Time)
 			jv := NonPtrValue(sl[j]).Interface().(time.Time)

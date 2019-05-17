@@ -311,7 +311,7 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			}
 		})
 		return nil
-	case vk == reflect.Struct && FullTypeName(elnptyp) == "time.Time":
+	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
 		sort.Slice(keys, func(i, j int) bool {
 			iv := NonPtrValue(mpvnp.MapIndex(keys[i])).Interface().(time.Time)
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(time.Time)

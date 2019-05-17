@@ -458,7 +458,7 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, up
 				nkid.SetNameRaw(tn.Name)
 				nkid.SetUniqueName(tn.Name)
 			} else {
-				nkid.SetName(tn.Name)
+				nkid.SetName(tn.Name) // triggers uniquify -- slow!
 			}
 		} else {
 			if kidx != i {
@@ -507,7 +507,7 @@ func (sl Slice) MarshalJSON() ([]byte, error) {
 	b = append(b, []byte(nstr)...)
 	for i, kid := range sl {
 		// fmt.Printf("json out of %v\n", kid.PathUnique())
-		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
+		knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
 		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.UniqueName()) // todo: escape names!
 		b = append(b, []byte(tstr)...)
 		if i < nk-1 {
@@ -625,7 +625,7 @@ func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	nt := xml.StartElement{Name: xml.Name{Space: "", Local: "N"}}
 	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{Name: nt.Name})
 	for _, kid := range sl {
-		knm := kit.FullTypeName(reflect.TypeOf(kid).Elem())
+		knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
 		t := xml.StartElement{Name: xml.Name{Space: "", Local: "Type"}}
 		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{Name: t.Name})
 	}
