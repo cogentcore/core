@@ -56,8 +56,37 @@ I mistakenly thought the issue was styling because style2d seems to be taking so
               RenderText:	Tot:	        0.78	Avg:	        0.01	N:	    77	Pct:	 0.01
             win.UploadVp:	Tot:	        0.30	Avg:	        0.30	N:	     1	Pct:	 0.00
 ```
-            
-I now realize that the recursive iteration through the tree is the real problem.  have a good non-recursive no-extra-memory algorithm to do that!
+
+A massive revisiting of all of the Ki code resulted in major speedups of tree traversal and re-recognition that the *Fast* versions of the AddNewChild methods are *essential* for doing things efficiently.  Actually the Config version is much better already -- but sliceview is not using that.
+Anyway, many orders of magnitude speedup are now at hand.  Details here:
+
+https://docs.google.com/spreadsheets/d/1WWorjrVao6sLRuwKguyRnnuY51DxsZOpokZHzGtmnbE/edit?usp=sharing
+
+And yet, all of this has not materially affected the actual perf -- it is NOT the 
+uniquify names that was killing it here.  Init is cut in half though so that's good.
+Something remains in style that we need to find..
+
+```
+      Node2D.Style2DTree:	Tot:	     2135.90	Avg:	      177.99	N:	    12	Pct:	40.08
+       Node2D.Init2DTree:	Tot:	     1155.99	Avg:	       96.33	N:	    12	Pct:	21.69
+     Node2D.Layout2DTree:	Tot:	      793.05	Avg:	       88.12	N:	     9	Pct:	14.88
+          StyleFromProps:	Tot:	      488.79	Avg:	        0.00	N:	553092	Pct:	 9.17
+      StyleFields.ToDots:	Tot:	      258.28	Avg:	        0.00	N:	795138	Pct:	 4.85
+       Node2D.Size2DTree:	Tot:	      182.03	Avg:	       14.00	N:	    13	Pct:	 3.42
+       TextField.Style2D:	Tot:	      113.92	Avg:	        0.02	N:	  5760	Pct:	 2.14
+             win.Publish:	Tot:	       75.81	Avg:	        3.99	N:	    19	Pct:	 1.42
+     Node2D.Render2DTree:	Tot:	       38.23	Avg:	        3.48	N:	    11	Pct:	 0.72
+       StyleFields.Style:	Tot:	       37.07	Avg:	        0.00	N:	103723	Pct:	 0.70
+        TextRenderLayout:	Tot:	       26.06	Avg:	        0.00	N:	  5775	Pct:	 0.49
+   ki.Node.UniquifyNames:	Tot:	        7.67	Avg:	        0.00	N:	 25936	Pct:	 0.14
+              Paint.fill:	Tot:	        7.48	Avg:	        0.03	N:	   248	Pct:	 0.14
+            Paint.stroke:	Tot:	        2.48	Avg:	        0.01	N:	   318	Pct:	 0.05
+       vp.ReRender2DNode:	Tot:	        2.13	Avg:	        0.27	N:	     8	Pct:	 0.04
+  win.UploadAllViewports:	Tot:	        2.04	Avg:	        2.04	N:	     1	Pct:	 0.04
+      win.UploadVpRegion:	Tot:	        1.60	Avg:	        0.20	N:	     8	Pct:	 0.03
+              RenderText:	Tot:	        0.61	Avg:	        0.01	N:	    66	Pct:	 0.01
+            win.UploadVp:	Tot:	        0.56	Avg:	        0.28	N:	     2	Pct:	 0.01
+```
 
             
 ## 2018 - 05 - 29 -- switch to rasterx
