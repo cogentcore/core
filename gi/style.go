@@ -687,7 +687,7 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 		if npk >= reflect.Int && npk <= reflect.Uint64 {
 			switch valv := val.(type) {
 			case string:
-				tn := kit.FullTypeName(fld.Field.Type)
+				tn := kit.LongTypeName(fld.Field.Type)
 				if kit.Enums.Enum(tn) != nil {
 					kit.Enums.SetAnyEnumIfaceFromString(fi, valv)
 				} else if tn == "..int" {
