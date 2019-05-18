@@ -53,6 +53,7 @@ type Node struct {
 	travField int       `copy:"-" json:"-" xml:"-" view:"-" desc:"current field index for tree traversal process -- see TravState and SetTravState methods"`
 	travChild int       `copy:"-" json:"-" xml:"-" view:"-" desc:"current child index for tree traversal process -- see TravState and SetTravState methods"`
 	index     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method"`
+	depth     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function"`
 	fieldOffs []uintptr `copy:"-" json:"-" xml:"-" view:"-" desc:"cached version of the field offsets relative to base Node address -- used in generic field access."`
 }
 
@@ -79,6 +80,11 @@ func (n *Node) This() Ki {
 		return nil
 	}
 	return n.Ths
+}
+
+// AsNode returns the *ki.Node base type for this node.
+func (n *Node) AsNode() *Node {
+	return n
 }
 
 // Init initializes the node -- automatically called during Add/Insert
@@ -1513,6 +1519,18 @@ func (n *Node) SetTravState(curField, curChild int) {
 	n.travField, n.travChild = curField, curChild
 }
 
+// Depth returns the current depth of the node.
+// This is only valid in a given context, not a stable
+// property of the node (e.g., used in FuncDownBreadthFirst).
+func (n *Node) Depth() int {
+	return n.depth
+}
+
+// SetDepth sets the current depth of the node to given value.
+func (n *Node) SetDepth(depth int) {
+	n.depth = depth
+}
+
 // FlatFieldsValueFunc is the Node version of this function from kit/embeds.go
 func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
@@ -1559,20 +1577,6 @@ func (n *Node) FuncFields(level int, data interface{}, fun Func) {
 	}
 }
 
-// GoFuncFields calls concurrent goroutine function on all Ki fields
-// within this node.
-func (n *Node) GoFuncFields(level int, data interface{}, fun Func) {
-	if n.This() == nil {
-		return
-	}
-	op := reflect.ValueOf(n.This()).Pointer()
-	foffs := n.KiFieldOffs()
-	for _, fo := range foffs {
-		fn := (*Node)(unsafe.Pointer(op + fo))
-		go fun(fn.This(), level, data)
-	}
-}
-
 // FuncUp calls function on given node and all the way up to its parents,
 // and so on -- sequentially all in current go routine (generally
 // necessary for going up, which is typicaly quite fast anyway) -- level
@@ -1615,28 +1619,32 @@ func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
 		}
 		cur = par
 	}
-	return true
 }
 
 // strategy -- same as used in TreeView:
 // https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
-// FuncDownMeFirst calls function on this node (MeFirst) and then recursively
-// in a depth-first manner on all the children.  Function calls are sequential
-// all in current go routine.  level var tracks overall depth in the tree.
+// FuncDownMeFirst calls function on this node (MeFirst) and then iterates
+// in a depth-first manner over all the children, including Ki Node fields,
+// which are processed first before children.
+// This uses node state information to manage the traversal and is very fast,
+// but can only be called by one thread at a time -- use a Mutex if there is
+// a chance of multiple threads running at the same time.
+// Function calls are sequential all in current go routine.
+// The level var tracks overall depth in the tree.
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
-func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) bool {
+func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) {
 	if n.This() == nil {
-		return false
+		return
 	}
 	start := n.This()
 	cur := start
 	cur.SetTravState(-1, -1)
 outer:
 	for {
-		if n.This() != nil && fun(cur, level, data) { // false return means stop
+		if cur.This() != nil && fun(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
 				cur.SetTravState(0, -1)
@@ -1676,110 +1684,122 @@ outer:
 			}
 			level--
 			par := cur.Parent()
-			if par == nil { // shouldn't happen
+			if par == nil || par == cur { // shouldn't happen
 				break outer
 			}
 			cur = par
 		}
 	}
-	return true
 }
 
-// todo: change out for same FundDownMeFirst logic, except MeLast...
-
-// FuncDownDepthFirst calls FuncDownDepthFirst on all children, then calls
-// function on this node -- sequentially all in current go routine --
-// level var is incremented before calling children -- runs
-// doChildTestFunc on each child first to determine if it should process
-// that child, and if that returns true, then it calls FuncDownDepthFirst
-// on that child.
-func (n *Node) FuncDownDepthFirst(level int, data interface{}, doChildTestFunc Func, fun Func) {
+// FuncDownMeLast iterates in a depth-first manner over the children, calling
+// doChildTestFunc on each node to test if processing should proceed (if it returns
+// false then that branch of the tree is not further processed), and then
+// calls given fun function after all of a node's children (including fields)
+// have been iterated over ("Me Last").
+// This uses node state information to manage the traversal and is very fast,
+// but can only be called by one thread at a time -- use a Mutex if there is
+// a chance of multiple threads running at the same time.
+// Function calls are sequential all in current go routine.
+// The level var tracks overall depth in the tree.
+func (n *Node) FuncDownMeLast(level int, data interface{}, doChildTestFunc Func, fun Func) {
 	if n.This() == nil {
 		return
 	}
-	level++
-	for _, child := range *n.Children() {
-		if child.This() != nil {
-			if doChildTestFunc(child.This(), level, data) { // test if we should run on this child
-				child.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
+	start := n.This()
+	cur := start
+	cur.SetTravState(-1, -1)
+outer:
+	for {
+		if cur.This() != nil && doChildTestFunc(cur, level, data) { // false return means stop
+			level++ // this is the descent branch
+			if cur.HasKiFields() {
+				cur.SetTravState(0, -1)
+				cur = cur.KiField(0)
+				cur.SetTravState(-1, -1)
+				continue
 			}
+			if cur.HasChildren() {
+				cur.SetTravState(0, 0) // 0 for no fields
+				cur = cur.Child(0)
+				cur.SetTravState(-1, -1)
+				continue
+			}
+		}
+		// if we get here, we're in the ascent branch -- move to the right and then up
+		for {
+			curField, curChild := cur.TravState()
+			if cur.HasKiFields() {
+				if (curField + 1) < cur.NumKiFields() {
+					curField++
+					cur.SetTravState(curField, curChild)
+					cur = cur.KiField(curField)
+					cur.SetTravState(-1, -1)
+					continue outer
+				}
+			}
+			if (curChild + 1) < cur.NumChildren() {
+				curChild++
+				cur.SetTravState(curField, curChild)
+				cur = cur.Child(curChild)
+				cur.SetTravState(-1, -1)
+				continue outer
+			}
+			level--
+			fun(cur, level, data) // now we call the function, last..
+			// couldn't go right, move up..
+			if cur == start {
+				break outer // done!
+			}
+			par := cur.Parent()
+			if par == nil || par == cur { // shouldn't happen
+				break outer
+			}
+			cur = par
 		}
 	}
-	n.FuncFields(level, data, func(k Ki, level int, d interface{}) bool {
-		if k.This() != nil {
-			if doChildTestFunc(k, level, data) { // test if we should run on this child
-				k.FuncDownDepthFirst(level, data, doChildTestFunc, fun)
-			}
-			fun(k, level, data)
-		}
-		return true
-	})
-	level--
-	fun(n.This(), level, data) // can't use the return value at this point
 }
 
-// FuncDownBreadthFirst calls function on all children, then calls
-// FuncDownBreadthFirst on all the children -- does NOT call on first node
-// where this method is first called, due to nature of recursive logic.
-// This is NOT a strict breadth-first search algorithm (which is computationally
-// expensive) but rather just a breadth-first variant of the recursive top-down
-// traversal, that first traverses all the children of a node before recursing.
-// The level var is incremented before calling children -- if fun returns
-// false then any further traversal of that branch of the tree is aborted,
-// but other branches can continue.
+// Note: it does not appear that there is a good recursive BFS search strategy
+// https://herringtondarkholme.github.io/2014/02/17/generator/
+// https://stackoverflow.com/questions/2549541/performing-breadth-first-search-recursively/2549825#2549825
+
+// FuncDownBreadthFirst calls function on all children in breadth-first order
+// using the standard queue strategy.  This depends on and updates the
+// Depth parameter of the node.  If fun returns false then any further
+// traversal of that branch of the tree is aborted, but other branches continue.
 func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
-	if n.This() == nil {
-		return
-	}
-	dontMap := make(map[int]struct{}) // map of who NOT to process further -- default is false for map so reverse
-	level++
-	for i, child := range *n.Children() {
-		if child.This() == nil || !fun(child, level, data) {
-			// false return means stop
-			dontMap[i] = struct{}{}
-		} else {
-			child.FuncFields(level+1, data, func(k Ki, level int, d interface{}) bool {
-				k.FuncDownBreadthFirst(level+1, data, fun)
-				fun(k, level+1, data)
-				return true
-			})
+	start := n.This()
+
+	start.SetDepth(level)
+	queue := make([]Ki, 1)
+	queue[0] = start
+
+	for {
+		if len(queue) == 0 {
+			break
+		}
+		cur := queue[0]
+		depth := cur.Depth()
+		queue = queue[1:]
+
+		if n.This() != nil && fun(cur, depth, data) { // false return means don't proceed
+			if cur.HasKiFields() {
+				cur.FuncFields(depth+1, data, func(k Ki, level int, d interface{}) bool {
+					k.SetDepth(level)
+					queue = append(queue, k)
+					return true
+				})
+			}
+			for _, k := range *cur.Children() {
+				if k.This() != nil {
+					k.SetDepth(depth + 1)
+					queue = append(queue, k)
+				}
+			}
 		}
 	}
-	for i, child := range *n.Children() {
-		if _, has := dontMap[i]; has {
-			continue
-		}
-		child.FuncDownBreadthFirst(level, data, fun)
-	}
 }
-
-// GoFuncDown calls concurrent goroutine function on given node and all
-// the way down to its children, and so on -- does not wait for completion
-// of the go routines -- returns immediately.
-func (n *Node) GoFuncDown(level int, data interface{}, fun Func) {
-	if n.This() == nil {
-		return
-	}
-	go fun(n.This(), level, data)
-	level++
-	n.GoFuncFields(level, data, fun)
-	for _, child := range *n.Children() {
-		child.GoFuncDown(level, data, fun)
-	}
-}
-
-// func (n *Node) GoFuncDownWait(level int, data interface{}, fun Func) {
-// if n.This() == nil {
-// 	return
-// }
-// 	// todo: use channel or something to wait
-// 	go fun(n.This(), level, data)
-// 	level++
-// 	n.GoFuncFields(level, data, fun)
-// 	for _, child := range *n.Children() {
-// 		child.GoFuncDown(level, data, fun)
-// 	}
-// }
 
 //////////////////////////////////////////////////////////////////////////
 //  State update signaling -- automatically consolidates all changes across

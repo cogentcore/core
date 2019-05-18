@@ -12,18 +12,40 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// The Ki interface provides the core functionality for the GoKi tree --
-// insipred by Qt QObject in specific and every other Tree everywhere in
-// general.
+// The Ki interface provides the core functionality for a GoKi tree.
+// Each Ki is a node in the tree and can have child nodes, and no cycles
+// are allowed (i.e., each node can only appear once in the tree).
+// All the usual methods are included for accessing and managing Children,
+// and efficiently traversing the tree and calling functions on the nodes.
+// In addition, Ki nodes can have Fields that are also Ki nodes that
+// are included in all the automatic tree traversal methods -- they are
+// effectively named fixed children that are automatically present.
 //
-// NOTE: The inability to have a field and a method of the same name makes it
-// so you either have to use private fields in a struct that implements this
-// interface (lowercase) or we have to use different names in the struct
-// vs. interface.  We want to export and use the direct fields, which are easy
-// to use, so we have different synonyms.
+// The Ki interface is designed to support virtual method calling in Go
+// and is only intended to be implemented once, by the ki.Node type
+// (as opposed to interfaces that are used for hiding multiple different
+// implementations of a common concept).  Thus, all of the fields in ki.Node
+// are exported (have captital names), to be accessed directly in types
+// that embed and extend the ki.Node. The Ki interface has the "formal" name
+// (e.g., Children) while the Node has the "nickname" (e.g., Kids).  See the
+// Naming Conventions on the GoKi Wiki for more details.
 //
-// Other key issues with the Ki design / Go: * All interfaces are implicitly
-// pointers: this is why you have to pass args with & address of.
+// Each Node stores the Ki interface version of itself, as This() / Ths
+// which enables full virtual function calling by calling the method
+// on that interface instead of directly on the receiver Node itself.
+// This requires proper initialization via Init method of the Ki interface.
+//
+// Ki nodes also support the following core functionality:
+// * UpdateStart() / UpdateEnd() to wrap around tree updating code, which then
+//   automatically triggers update signals at the highest level of the
+//   affected tree, resulting in efficient updating logic for arbitrary
+//   nested tree modifications.
+// * Signal framework for sending messages such as the Update signals, used
+//   extensively in the GoGi GUI framework for sending event messages etc.
+// * ConfigChildren system for minimally updating children to fit a given
+//   Name & Type template.
+// * Automatic JSON I/O of entire tree including type information.
+//
 type Ki interface {
 	// Init initializes the node -- automatically called during Add/Insert
 	// Child -- sets the This pointer for this node as a Ki interface (pass
@@ -46,6 +68,9 @@ type Ki interface {
 	// (e.g., in reflect calls).  Returns nil if node is nil,
 	// has been destroyed, or is improperly constructed.
 	This() Ki
+
+	// AsNode returns the *ki.Node base type for this node.
+	AsNode() *Node
 
 	// ThisCheck checks that the This pointer is set and issues a warning to
 	// log if not -- returns error if not set -- called when nodes are added
@@ -582,12 +607,16 @@ type Ki interface {
 	// SetTravState sets the new traversal state variables
 	SetTravState(curField, curChild int)
 
+	// Depth returns the current depth of the node.
+	// This is only valid in a given context, not a stable
+	// property of the node (e.g., used in FuncDownBreadthFirst).
+	Depth() int
+
+	// SetDepth sets the current depth of the node to given value.
+	SetDepth(depth int)
+
 	// FuncFields calls function on all Ki fields within this node.
 	FuncFields(level int, data interface{}, fun Func)
-
-	// GoFuncFields calls concurrent goroutine function on all Ki fields
-	// within this node.
-	GoFuncFields(level int, data interface{}, fun Func)
 
 	// FuncUp calls function on given node and all the way up to its parents,
 	// and so on -- sequentially all in current go routine (generally
@@ -603,40 +632,36 @@ type Ki interface {
 	// function -- returns false if fun aborts with false, else true.
 	FuncUpParent(level int, data interface{}, fun Func) bool
 
-	// FuncDownMeFirst calls function on this node (MeFirst) and then call
-	// FuncDownMeFirst on all the children -- sequentially all in current go
-	// routine -- level var is incremented before calling children -- if fun
-	// returns false then any further traversal of that branch of the tree is
+	// FuncDownMeFirst calls function on this node (MeFirst) and then iterates
+	// in a depth-first manner over all the children, including Ki Node fields,
+	// which are processed first before children.
+	// This uses node state information to manage the traversal and is very fast,
+	// but can only be called by one thread at a time -- use a Mutex if there is
+	// a chance of multiple threads running at the same time.
+	// Function calls are sequential all in current go routine.
+	// The level var tracks overall depth in the tree.
+	// If fun returns false then any further traversal of that branch of the tree is
 	// aborted, but other branches continue -- i.e., if fun on current node
-	// returns false, then returns false and children are not processed
-	// further -- this is the fastest, most natural form of traversal.
-	FuncDownMeFirst(level int, data interface{}, fun Func) bool
+	// returns false, children are not processed further.
+	FuncDownMeFirst(level int, data interface{}, fun Func)
 
-	// FuncDownDepthFirst calls FuncDownDepthFirst on all children, then calls
-	// function on this node -- sequentially all in current go routine --
-	// level var is incremented before calling children -- runs
-	// doChildTestFunc on each child first to determine if it should process
-	// that child, and if that returns true, then it calls FuncDownDepthFirst
-	// on that child.
-	FuncDownDepthFirst(level int, data interface{}, doChildTestFunc Func, fun Func)
+	// FuncDownMeLast iterates in a depth-first manner over the children, calling
+	// doChildTestFunc on each node to test if processing should proceed (if it returns
+	// false then that branch of the tree is not further processed), and then
+	// calls given fun function after all of a node's children (including fields)
+	// have been iterated over ("Me Last").
+	// This uses node state information to manage the traversal and is very fast,
+	// but can only be called by one thread at a time -- use a Mutex if there is
+	// a chance of multiple threads running at the same time.
+	// Function calls are sequential all in current go routine.
+	// The level var tracks overall depth in the tree.
+	FuncDownMeLast(level int, data interface{}, doChildTestFunc Func, fun Func)
 
-	// FuncDownBreadthFirst calls function on all children, then calls
-	// FuncDownBreadthFirst on all the children -- does NOT call on first node
-	// where this method is first called, due to nature of recursive logic --
-	// level var is incremented before calling children -- if fun returns
-	// false then any further traversal of that branch of the tree is aborted,
-	// but other branches can continue.
+	// FuncDownBreadthFirst calls function on all children in breadth-first order
+	// using the standard queue strategy.  This depends on and updates the
+	// Depth parameter of the node.  If fun returns false then any further
+	// traversal of that branch of the tree is aborted, but other branches continue.
 	FuncDownBreadthFirst(level int, data interface{}, fun Func)
-
-	// GoFuncDown calls concurrent goroutine function on given node and all
-	// the way down to its children, and so on -- does not wait for completion
-	// of the go routines -- returns immediately.
-	GoFuncDown(level int, data interface{}, fun Func)
-
-	// todo: GoFuncDownWait calls concurrent goroutine function on given node and
-	// all the way down to its children, and so on -- does wait for the
-	// completion of the go routines before returning.
-	// GoFuncDownWait(level int, data interface{}, fun Func)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  State update signaling -- automatically consolidates all changes across

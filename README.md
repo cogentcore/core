@@ -16,7 +16,7 @@ Much like LISP (a programming language built around the list data type), the key
 
 The goal of GoKi is to create a minimalist, elegant, and powerful environment (like Go itself) where the tree-based primitives are used to simplify otherwise complex operations.  Similar to MATLAB and matricies, you can perform major computational functions using just a few lines of GoKi code.  As is always the case in programming, using the right data structure that captures the underlying structure of the problem is essential, and in many cases, that structure is a tree.  Of necessity, much existing code incorporates tree structures, but the goal of GoKi is to provide a set of carefully thought-out primitive operations that effectively form a new mental basis set for programming.
 
-For example, GoKi provides functions that traverse the tree in all the relevant ways ("natural" me-first, breadth-first, depth-first, etc) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a very transparent and self-contained manner, like this:
+For example, GoKi provides functions that traverse the tree in the usual relevant ways ("natural" me-first depth-first, me-last depth-first, and breadth-first) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
 
 ```go
 func (n *MyNode) DoSomethingOnMyTree() {
@@ -35,7 +35,7 @@ Three other core features include:
 
 * `UpdateStart()` and `UpdateEnd()` functions that wrap around code that changes the tree structure or contents -- these automatically and efficiently determine the highest level node that was affected by changes, and only that highest node sends an `Updated` signal.  This allows arbitrarily nested modifications to proceed independently, each wrapped in their own Start / End blocks, with the optimal minimal update signaling automatically computed.
 
-* `ConfigChildren` uses a list of types and names and performs a minimal, efficient update of the children of a node to configure them to match (including no changes if already configured accordingly).  This is used during loading from JSON, and extensively in the `GoGi` GUI system to efficiently re-use existing tree elements.  There is often complex logic to determine what elements need to be present in a Widget, so separating that out from then configuring the elements that actually are present is very efficient and simplifies the code.
+* `ConfigChildren` uses a list of types and names and performs a minimal, efficient update of the children of a node to configure them to match (including no changes if already configured accordingly).  This is used during loading from JSON, and extensively in the `GoGi` GUI system to efficiently re-use existing tree elements.  There is often complex logic to determine what elements need to be present in a Widget, so separating that out from then configuring the elements that actually are present is efficient and simplifies the code.
 
 In addition, Ki nodes support a general-purpose `Props` property `map`, and the `kit` package provides a `TypeRegistry` and an `EnumRegistry`, along with various `reflect` utilities, to enable fully-automatic saving / loading of Ki trees from JSON or XML, including converting const int (enum) values to / from strings so those numeric values can change in the code without invalidating existing files.
 
