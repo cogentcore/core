@@ -26,6 +26,13 @@ func AddNewPolygon(parent ki.Ki, name string, points []gi.Vec2D) *Polygon {
 	return g
 }
 
+func (g *Polygon) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Polygon)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Points = make([]gi.Vec2D, len(fr.Points))
+	copy(g.Points, fr.Points)
+}
+
 func (g *Polygon) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

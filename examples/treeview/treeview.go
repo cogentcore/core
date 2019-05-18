@@ -120,7 +120,7 @@ func mainrun() {
 		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
 		svr, _ := recv.Embed(giv.KiT_StructView).(*giv.StructView)
 		if sig == int64(giv.TreeViewSelected) {
-			svr.SetStruct(tvn.SrcNode.Ptr, nil)
+			svr.SetStruct(tvn.SrcNode, nil)
 		}
 	})
 

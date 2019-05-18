@@ -25,6 +25,11 @@ func AddNewGroup(parent ki.Ki, name string) *Group {
 	return parent.AddNewChild(KiT_Group, name).(*Group)
 }
 
+func (g *Group) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Group)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+}
+
 // BBoxFromChildren sets the Group BBox from children
 func (g *Group) BBoxFromChildren() image.Rectangle {
 	bb := image.ZR

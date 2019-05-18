@@ -27,7 +27,7 @@ var SliderMinThumbSize = float32(8)
 type SliderBase struct {
 	PartsWidgetBase
 	Value       float32              `xml:"value" desc:"current value"`
-	EmitValue   float32              `xml:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+	EmitValue   float32              `copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
 	Min         float32              `xml:"min" desc:"minimum value in range"`
 	Max         float32              `xml:"max" desc:"maximum value in range"`
 	Step        float32              `xml:"step" desc:"smallest step size to increment"`
@@ -47,16 +47,38 @@ type SliderBase struct {
 	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
 	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
-	StateStyles [SliderStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	SliderSig   ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
+	StateStyles [SliderStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	SliderSig   ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
 	// todo: icon -- should be an xml
-	OrigWinBBox image.Rectangle `desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
+	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
 var SliderBaseProps = ki.Props{
 	"base-type": true,
+}
+
+func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*SliderBase)
+	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	nb.Value = fr.Value
+	nb.Min = fr.Min
+	nb.Max = fr.Max
+	nb.Step = fr.Step
+	nb.PageStep = fr.PageStep
+	nb.Size = fr.Size
+	nb.ThSize = fr.ThSize
+	nb.ThumbSize = fr.ThumbSize
+	nb.Prec = fr.Prec
+	nb.Icon = fr.Icon
+	nb.ValThumb = fr.ValThumb
+	nb.Pos = fr.Pos
+	nb.DragPos = fr.DragPos
+	nb.VisPos = fr.VisPos
+	nb.Tracking = fr.Tracking
+	nb.TrackThr = fr.TrackThr
+	nb.Snap = fr.Snap
 }
 
 // SliderSignals are signals that sliders can send
@@ -507,6 +529,11 @@ func AddNewSlider(parent ki.Ki, name string) *Slider {
 	return parent.AddNewChild(KiT_Slider, name).(*Slider)
 }
 
+func (nb *Slider) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Slider)
+	nb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+}
+
 var SliderProps = ki.Props{
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
@@ -717,6 +744,11 @@ var KiT_ScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
 // AddNewScrollBar adds a new scrollbar to given parent node, with given name.
 func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
 	return parent.AddNewChild(KiT_ScrollBar, name).(*ScrollBar)
+}
+
+func (nb *ScrollBar) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*ScrollBar)
+	nb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
 var ScrollBarProps = ki.Props{

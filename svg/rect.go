@@ -28,6 +28,14 @@ func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {
 	return g
 }
 
+func (g *Rect) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Rect)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Pos = fr.Pos
+	g.Size = fr.Size
+	g.Radius = fr.Radius
+}
+
 func (g *Rect) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

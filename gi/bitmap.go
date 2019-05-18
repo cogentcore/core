@@ -39,6 +39,12 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 	return parent.AddNewChild(KiT_Bitmap, name).(*Bitmap)
 }
 
+func (nb *Bitmap) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Bitmap)
+	nb.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
+	nb.Filename = fr.Filename
+}
+
 var BitmapProps = ki.Props{
 	"background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{

@@ -26,7 +26,7 @@ type ComboBox struct {
 	CurIndex  int           `json:"-" xml:"-" desc:"current index in list of possible items"`
 	Items     []interface{} `json:"-" xml:"-" desc:"items available for selection"`
 	ItemsMenu Menu          `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
-	ComboSig  ki.Signal     `json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+	ComboSig  ki.Signal     `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
 	MaxLength int           `desc:"maximum label length (in runes)"`
 }
 
@@ -35,6 +35,17 @@ var KiT_ComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
 // AddNewComboBox adds a new button to given parent node, with given name.
 func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
 	return parent.AddNewChild(KiT_ComboBox, name).(*ComboBox)
+}
+
+func (nb *ComboBox) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*ComboBox)
+	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	nb.Editable = fr.Editable
+	nb.CurVal = fr.CurVal
+	nb.CurIndex = fr.CurIndex
+	nb.Items = fr.Items
+	nb.ItemsMenu.CopyFrom(&fr.ItemsMenu)
+	nb.MaxLength = fr.MaxLength
 }
 
 var ComboBoxProps = ki.Props{

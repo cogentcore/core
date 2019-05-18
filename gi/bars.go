@@ -33,6 +33,12 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 	return parent.AddNewChild(KiT_MenuBar, name).(*MenuBar)
 }
 
+func (nb *MenuBar) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*MenuBar)
+	nb.Layout.CopyFieldsFrom(&fr.Layout)
+	nb.MainMenu = fr.MainMenu
+}
+
 var MenuBarProps = ki.Props{
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(0),
@@ -278,6 +284,11 @@ var KiT_ToolBar = kit.Types.AddType(&ToolBar{}, ToolBarProps)
 // AddNewToolBar adds a new toolbar to given parent node, with given name.
 func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 	return parent.AddNewChild(KiT_ToolBar, name).(*ToolBar)
+}
+
+func (nb *ToolBar) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*ToolBar)
+	nb.Layout.CopyFieldsFrom(&fr.Layout)
 }
 
 var ToolBarProps = ki.Props{

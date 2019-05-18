@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/prof"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
@@ -28,17 +29,27 @@ type ButtonBase struct {
 	Icon         IconName             `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 	Indicator    IconName             `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 	Shortcut     key.Chord            `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
-	StateStyles  [ButtonStatesN]Style `json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State        ButtonStates         `json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig    ki.Signal            `json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	StateStyles  [ButtonStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	State        ButtonStates         `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
+	ButtonSig    ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
 	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
-	MakeMenuFunc MakeMenuFunc         `json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+	MakeMenuFunc MakeMenuFunc         `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
 var ButtonBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
+}
+
+func (nb *ButtonBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*ButtonBase)
+	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	nb.Text = fr.Text
+	nb.Icon = fr.Icon
+	nb.Indicator = fr.Indicator
+	nb.Shortcut = fr.Shortcut
+	nb.Menu = fr.Menu
 }
 
 // these extend NodeBase NodeFlags to hold button state
@@ -191,13 +202,17 @@ func (bb *ButtonBase) Label() string {
 func (bb *ButtonBase) SetIcon(iconName string) {
 	updt := bb.UpdateStart()
 	if bb.Sty.Font.Size.Val == 0 { // not yet styled
+		pr := prof.Start("StyleButton")
 		bb.StyleButton()
+		pr.End()
 	}
 	if bb.Icon != IconName(iconName) {
 		bb.SetFullReRender()
 	}
 	bb.Icon = IconName(iconName)
+	pr := prof.Start("SetIcon")
 	bb.This().(ButtonWidget).ConfigParts()
+	pr.End()
 	bb.UpdateEnd(updt)
 }
 
@@ -658,6 +673,11 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 	return parent.AddNewChild(KiT_Button, name).(*Button)
 }
 
+func (nb *Button) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Button)
+	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+}
+
 var ButtonProps = ki.Props{
 	"border-width":  units.NewPx(1),
 	"border-radius": units.NewPx(4),
@@ -746,6 +766,12 @@ var KiT_CheckBox = kit.Types.AddType(&CheckBox{}, CheckBoxProps)
 // AddNewCheckBox adds a new button to given parent node, with given name.
 func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 	return parent.AddNewChild(KiT_CheckBox, name).(*CheckBox)
+}
+
+func (nb *CheckBox) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*CheckBox)
+	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	nb.IconOff = fr.IconOff
 }
 
 var CheckBoxProps = ki.Props{

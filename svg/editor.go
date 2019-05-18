@@ -31,6 +31,14 @@ func AddNewEditor(parent ki.Ki, name string) *Editor {
 	return parent.AddNewChild(KiT_Editor, name).(*Editor)
 }
 
+func (g *Editor) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Editor)
+	g.SVG.CopyFieldsFrom(&fr.SVG)
+	g.Trans = fr.Trans
+	g.Scale = fr.Scale
+	g.SetDragCursor = fr.SetDragCursor
+}
+
 // EditorEvents handles svg editing events
 func (svg *Editor) EditorEvents() {
 	svg.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

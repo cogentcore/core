@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/ki"
 )
 
 func main() {
@@ -58,6 +59,17 @@ func mainrun() {
 	spc.SetFixedHeight(units.NewEm(2))
 
 	gi.AddNewStretch(trow, "str1")
+	but := gi.AddNewButton(trow, "slice-test")
+	but.SetText("SliceTest")
+	but.Tooltip = "open a window of a slice view with a lot of elments, for performance testing"
+	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			sl := make([]float32, 2880)
+			gi.ProfileToggle()
+			giv.SliceViewDialog(vp, &sl, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, nil, nil, nil)
+		}
+	})
+
 	lab1 := gi.AddNewLabel(trow, "lab1", "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
 	lab1.SetProp("max-width", -1)
 	lab1.SetProp("text-align", "center")

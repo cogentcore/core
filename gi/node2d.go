@@ -62,13 +62,18 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
 */
 type Node2DBase struct {
 	NodeBase
-	Viewport *Viewport2D `json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
+	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
 
 var Node2DBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
+}
+
+func (nb *Node2DBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Node2DBase)
+	nb.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 }
 
 // Update2DTrace reports a trace of updates that trigger re-rendering -- can be set in PrefsDebug from prefs gui
@@ -843,3 +848,9 @@ type MetaData2D struct {
 }
 
 var KiT_MetaData2D = kit.Types.AddType(&MetaData2D{}, nil)
+
+func (g *MetaData2D) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*MetaData2D)
+	g.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	g.MetaData = fr.MetaData
+}

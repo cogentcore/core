@@ -297,17 +297,17 @@ type Layout struct {
 	Lay           Layouts             `xml:"lay" desc:"type of layout to use"`
 	Spacing       units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`
 	StackTop      int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
-	ChildSize     Vec2D               `json:"-" xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize     Vec2D               `json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasScroll     [Dims2DN]bool       `json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
-	Scrolls       [Dims2DN]*ScrollBar `json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
-	GridSize      image.Point         `json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
-	GridData      [RowColN][]GridData `json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
-	NeedsRedo     bool                `json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
-	FocusName     string              `json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
-	FocusNameTime time.Time           `json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
-	FocusNameLast ki.Ki               `json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
-	ScrollsOff    bool                `json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
+	ChildSize     Vec2D               `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize     Vec2D               `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasScroll     [Dims2DN]bool       `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+	Scrolls       [Dims2DN]*ScrollBar `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	GridSize      image.Point         `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	GridData      [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+	NeedsRedo     bool                `copy:"-" json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
+	FocusName     string              `copy:"-" json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
+	FocusNameTime time.Time           `copy:"-" json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
+	FocusNameLast ki.Ki               `copy:"-" json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
+	ScrollsOff    bool                `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
@@ -317,6 +317,14 @@ func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
 	ly := parent.AddNewChild(KiT_Layout, name).(*Layout)
 	ly.Lay = layout
 	return ly
+}
+
+func (nb *Layout) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Layout)
+	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	nb.Lay = fr.Lay
+	nb.Spacing = fr.Spacing
+	nb.StackTop = fr.StackTop
 }
 
 // Layouts are the different types of layouts
@@ -1939,6 +1947,11 @@ func AddNewStretch(parent ki.Ki, name string) *Stretch {
 	return parent.AddNewChild(KiT_Stretch, name).(*Stretch)
 }
 
+func (nb *Stretch) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Stretch)
+	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+}
+
 var StretchProps = ki.Props{
 	"max-width":  -1.0,
 	"max-height": -1.0,
@@ -1964,6 +1977,11 @@ var KiT_Space = kit.Types.AddType(&Space{}, SpaceProps)
 // AddNewSpace adds a new space to given parent node, with given name.
 func AddNewSpace(parent ki.Ki, name string) *Space {
 	return parent.AddNewChild(KiT_Space, name).(*Space)
+}
+
+func (nb *Space) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Space)
+	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
 var SpaceProps = ki.Props{

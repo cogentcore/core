@@ -27,6 +27,13 @@ func AddNewEllipse(parent ki.Ki, name string, x, y, rx, ry float32) *Ellipse {
 	return g
 }
 
+func (g *Ellipse) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Ellipse)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Pos = fr.Pos
+	g.Radii = fr.Radii
+}
+
 func (g *Ellipse) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

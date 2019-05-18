@@ -32,6 +32,12 @@ func AddNewAction(parent ki.Ki, name string) *Action {
 	return parent.AddNewChild(KiT_Action, name).(*Action)
 }
 
+func (nb *Action) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Action)
+	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	nb.Data = fr.Data
+}
+
 var ActionProps = ki.Props{
 	"border-width":     units.NewPx(0), // todo: should be default
 	"border-radius":    units.NewPx(0),

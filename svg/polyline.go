@@ -26,6 +26,13 @@ func AddNewPolyline(parent ki.Ki, name string, points []gi.Vec2D) *Polyline {
 	return g
 }
 
+func (g *Polyline) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Polyline)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Points = make([]gi.Vec2D, len(fr.Points))
+	copy(g.Points, fr.Points)
+}
+
 func (g *Polyline) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

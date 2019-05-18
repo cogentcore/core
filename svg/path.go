@@ -37,6 +37,16 @@ func AddNewPath(parent ki.Ki, name string, data string) *Path {
 	return g
 }
 
+func (g *Path) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Path)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Data = make([]PathData, len(fr.Data))
+	copy(g.Data, fr.Data)
+	g.DataStr = fr.DataStr
+	g.MinCoord = fr.MinCoord
+	g.MaxCoord = fr.MaxCoord
+}
+
 // SetData sets the path data to given string, parsing it into an optimized
 // form used for rendering
 func (g *Path) SetData(data string) error {

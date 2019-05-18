@@ -27,7 +27,6 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/f64"
@@ -684,8 +683,8 @@ func (tr *TextRender) InsertSpan(at int, ns *SpanRender) {
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking
 func (tr *TextRender) Render(rs *RenderState, pos Vec2D) {
-	pr := prof.Start("RenderText")
-	defer pr.End()
+	// pr := prof.Start("RenderText")
+	// defer pr.End()
 
 	rs.BackupPaint()
 	defer rs.RestorePaint()
@@ -1813,9 +1812,9 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		return Vec2DZero
 	}
 
-	pr := prof.Start("TextRenderLayout")
-	defer pr.End()
-
+	// pr := prof.Start("TextRenderLayout")
+	// defer pr.End()
+	//
 	tr.Dir = LRTB
 	fontSty.OpenFont(ctxt)
 	fht := fontSty.Height

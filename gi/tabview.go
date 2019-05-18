@@ -25,10 +25,10 @@ import (
 type TabView struct {
 	Layout
 	MaxChars     int          `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
-	TabViewSig   ki.Signal    `json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
+	TabViewSig   ki.Signal    `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 	NewTabButton bool         `desc:"show a new tab button at right of list of tabs"`
 	NewTabType   reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
-	Mu           sync.Mutex   `json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
+	Mu           sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 
 var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
@@ -36,6 +36,14 @@ var KiT_TabView = kit.Types.AddType(&TabView{}, TabViewProps)
 // AddNewTabView adds a new tabview to given parent node, with given name.
 func AddNewTabView(parent ki.Ki, name string) *TabView {
 	return parent.AddNewChild(KiT_TabView, name).(*TabView)
+}
+
+func (nb *TabView) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*TabView)
+	nb.Layout.CopyFieldsFrom(&fr.Layout)
+	nb.MaxChars = fr.MaxChars
+	nb.NewTabButton = fr.NewTabButton
+	nb.NewTabType = fr.NewTabType
 }
 
 var TabViewProps = ki.Props{

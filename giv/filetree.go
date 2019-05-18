@@ -940,7 +940,7 @@ func (ftv *FileTreeView) FileNode() *FileNode {
 	if ftv.This() == nil {
 		return nil
 	}
-	fn := ftv.SrcNode.Ptr.Embed(KiT_FileNode).(*FileNode)
+	fn := ftv.SrcNode.Embed(KiT_FileNode).(*FileNode)
 	return fn
 }
 
@@ -1280,7 +1280,7 @@ func (ftv *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 // PasteMime applies a paste / drop of mime data onto this node
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
-	sroot := ftv.RootView.SrcNode.Ptr
+	sroot := ftv.RootView.SrcNode
 	tfn := ftv.FileNode()
 	if tfn == nil {
 		return
@@ -1323,7 +1323,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 	if de.Mod != dnd.DropMove {
 		return
 	}
-	sroot := ftv.RootView.SrcNode.Ptr
+	sroot := ftv.RootView.SrcNode
 	tfn := ftv.FileNode()
 	if tfn == nil {
 		return

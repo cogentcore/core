@@ -21,3 +21,9 @@ var KiT_Flow = kit.Types.AddType(&Flow{}, nil)
 func AddNewFlow(parent ki.Ki, name string) *Flow {
 	return parent.AddNewChild(KiT_Flow, name).(*Flow)
 }
+
+func (g *Flow) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Flow)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.FlowType = fr.FlowType
+}

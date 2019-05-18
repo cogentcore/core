@@ -32,6 +32,11 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 	return ks.UnmarshalJSON(b)
 }
 
+func (m *Menu) CopyFrom(men *Menu) {
+	ks := (*ki.Slice)(m)
+	ks.CopyFrom((ki.Slice)(*men))
+}
+
 // MakeMenuFunc is a callback for making a menu on demand, receives the object
 // calling this function (typically an Action or Button) and the menu
 type MakeMenuFunc func(obj ki.Ki, m *Menu)
@@ -513,6 +518,11 @@ var KiT_MenuButton = kit.Types.AddType(&MenuButton{}, MenuButtonProps)
 // AddNewMenuButton adds a new button to given parent node, with given name.
 func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
 	return parent.AddNewChild(KiT_MenuButton, name).(*MenuButton)
+}
+
+func (nb *MenuButton) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*MenuButton)
+	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
 var MenuButtonProps = ki.Props{

@@ -28,6 +28,13 @@ func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {
 	return g
 }
 
+func (g *Line) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Line)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Start = fr.Start
+	g.End = fr.End
+}
+
 func (g *Line) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

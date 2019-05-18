@@ -48,23 +48,23 @@ type TextField struct {
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	EffSize      Vec2D                   `xml:"-" desc:"effective size, subtracting the close widget"`
-	StartPos     int                     `xml:"-" desc:"starting display position in the string"`
-	EndPos       int                     `xml:"-" desc:"ending display position in the string"`
-	CursorPos    int                     `xml:"-" desc:"current cursor position"`
-	CharWidth    int                     `xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart  int                     `xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd    int                     `xml:"-" desc:"ending position of selection in the string"`
-	SelectInit   int                     `xml:"-" desc:"initial selection position -- where it started"`
-	SelectMode   bool                    `xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal               `json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll    TextRender              `json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis    TextRender              `json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles  [TextFieldStatesN]Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight   float32                 `json:"-" xml:"-" desc:"font height, cached during styling"`
-	BlinkOn      bool                    `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
-	CursorMu     sync.Mutex              `json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
-	Complete     *Complete               `json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	EffSize      Vec2D                   `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
+	StartPos     int                     `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
+	EndPos       int                     `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`
+	CursorPos    int                     `copy:"-" json:"-" xml:"-" desc:"current cursor position"`
+	CharWidth    int                     `copy:"-" json:"-" xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart  int                     `copy:"-" json:"-" xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd    int                     `copy:"-" json:"-" xml:"-" desc:"ending position of selection in the string"`
+	SelectInit   int                     `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`
+	SelectMode   bool                    `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal               `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	RenderAll    TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles  [TextFieldStatesN]Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight   float32                 `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
+	BlinkOn      bool                    `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+	CursorMu     sync.Mutex              `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
+	Complete     *Complete               `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -72,6 +72,17 @@ var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
 // AddNewTextField adds a new textfield to given parent node, with given name.
 func AddNewTextField(parent ki.Ki, name string) *TextField {
 	return parent.AddNewChild(KiT_TextField, name).(*TextField)
+}
+
+func (nb *TextField) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*TextField)
+	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	nb.Txt = fr.Txt
+	nb.Placeholder = fr.Placeholder
+	nb.ClearAct = fr.ClearAct
+	nb.CursorWidth = fr.CursorWidth
+	nb.Edited = fr.Edited
+	nb.MaxWidthReq = fr.MaxWidthReq
 }
 
 var TextFieldProps = ki.Props{

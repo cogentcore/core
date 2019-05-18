@@ -27,6 +27,13 @@ func AddNewCircle(parent ki.Ki, name string, x, y, radius float32) *Circle {
 	return g
 }
 
+func (g *Circle) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Circle)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Pos = fr.Pos
+	g.Radius = fr.Radius
+}
+
 func (g *Circle) Render2D() {
 	if g.Viewport == nil {
 		g.This().(gi.Node2D).Init2D()

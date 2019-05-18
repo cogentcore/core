@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -39,6 +40,21 @@ func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {
 	g.Pos.Set(x, y)
 	g.Text = text
 	return g
+}
+
+func (g *Text) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Text)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.Pos = fr.Pos
+	g.Width = fr.Width
+	g.Text = fr.Text
+	mat32.CopyFloat32s(&g.CharPosX, fr.CharPosX)
+	mat32.CopyFloat32s(&g.CharPosY, fr.CharPosY)
+	mat32.CopyFloat32s(&g.CharPosDX, fr.CharPosDX)
+	mat32.CopyFloat32s(&g.CharPosDY, fr.CharPosDY)
+	mat32.CopyFloat32s(&g.CharRots, fr.CharRots)
+	g.TextLength = fr.TextLength
+	g.AdjustGlyphs = fr.AdjustGlyphs
 }
 
 func (g *Text) BBox2D() image.Rectangle {

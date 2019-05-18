@@ -28,16 +28,23 @@ type WidgetBase struct {
 	Node2DBase
 	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
 	Sty          Style        `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle     *Style       `view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
-	LayData      LayoutData   `json:"-" xml:"-" desc:"all the layout information for this item"`
-	WidgetSig    ki.Signal    `json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
-	CtxtMenuFunc CtxtMenuFunc `view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
+	DefStyle     *Style       `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	LayData      LayoutData   `copy:"-" json:"-" xml:"-" desc:"all the layout information for this item"`
+	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
+	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
 var WidgetBaseProps = ki.Props{
 	"base-type": true,
+}
+
+func (wb *WidgetBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*WidgetBase)
+	wb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	wb.Tooltip = fr.Tooltip
+	wb.Sty.CopyFrom(&fr.Sty)
 }
 
 func (wb *WidgetBase) AsWidget() *WidgetBase {
@@ -741,6 +748,12 @@ var KiT_PartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseP
 
 var PartsWidgetBaseProps = ki.Props{
 	"base-type": true,
+}
+
+func (wb *PartsWidgetBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*PartsWidgetBase)
+	wb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	// wb.Parts.CopyFrom(&fr.Parts) // managed by widget -- we don't copy..
 }
 
 // standard FunDownMeFirst etc operate automatically on Field structs such as

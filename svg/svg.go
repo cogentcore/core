@@ -37,9 +37,21 @@ func AddNewSVG(parent ki.Ki, name string) *SVG {
 	return parent.AddNewChild(KiT_SVG, name).(*SVG)
 }
 
+func (svg *SVG) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*SVG)
+	svg.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
+	svg.ViewBox = fr.ViewBox
+	svg.Norm = fr.Norm
+	svg.InvertY = fr.InvertY
+	svg.Pnt = fr.Pnt
+	svg.Defs.CopyFrom(&fr.Defs)
+	svg.Title = fr.Title
+	svg.Desc = fr.Desc
+}
+
 // Paint satisfies the painter interface
-func (g *SVG) Paint() *gi.Paint {
-	return &g.Pnt
+func (svg *SVG) Paint() *gi.Paint {
+	return &svg.Pnt
 }
 
 // DeleteAll deletes any existing elements in this svg

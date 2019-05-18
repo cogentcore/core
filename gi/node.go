@@ -18,17 +18,24 @@ type NodeBase struct {
 	ki.Node
 	Class   string          `desc:"user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"`
 	CSS     ki.Props        `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
-	CSSAgg  ki.Props        `json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
-	BBox    image.Rectangle `json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
-	ObjBBox image.Rectangle `json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
-	VpBBox  image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
-	WinBBox image.Rectangle `json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
+	CSSAgg  ki.Props        `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
+	BBox    image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
+	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
+	VpBBox  image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 }
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
 var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
+}
+
+func (nb *NodeBase) CopyFieldsFrom(frm interface{}) {
+	// note: not copying ki.Node as it doesn't have any copy fields
+	fr := frm.(*NodeBase)
+	nb.Class = fr.Class
+	nb.CSS.CopyFrom(fr.CSS, true)
 }
 
 // NodeFlags define gi node bitflags for tracking common high-frequency GUI

@@ -37,8 +37,8 @@ func init() {
 type Icon struct {
 	SVG
 	Filename string      `desc:"file name with full path for icon if loaded from file"`
-	Rendered bool        `json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
-	RendSize image.Point `json:"-" xml:"-" desc:"size at which we previously rendered"`
+	Rendered bool        `copy:"-" json:"-" xml:"-" desc:"we have already rendered at RenderedSize -- doesn't re-render at same size -- if the paint params change, set this to false to re-render"`
+	RendSize image.Point `copy:"-" json:"-" xml:"-" desc:"size at which we previously rendered"`
 }
 
 var KiT_Icon = kit.Types.AddType(&Icon{}, IconProps)
@@ -50,6 +50,12 @@ func AddNewIcon(parent ki.Ki, name string) *Icon {
 
 var IconProps = ki.Props{
 	"background-color": color.Transparent,
+}
+
+func (ic *Icon) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Icon)
+	ic.SVG.CopyFieldsFrom(&fr.SVG)
+	ic.Filename = fr.Filename
 }
 
 // CopyFromIcon copies from a source icon, typically one from a library --

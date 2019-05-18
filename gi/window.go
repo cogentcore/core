@@ -909,12 +909,12 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 		return
 	}
 	w.SetWinUpdating()
-	pr := prof.Start("win.UploadVpRegion")
+	// pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
 	}
 	w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
-	pr.End()
+	// pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 }
@@ -932,12 +932,12 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	}
 	w.SetWinUpdating()
 	updt := w.UpdateStart()
-	pr := prof.Start("win.UploadVp")
+	// pr := prof.Start("win.UploadVp")
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
 	}
 	w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
-	pr.End()
+	// pr.End()
 	w.ClearWinUpdating()
 	w.ClearFlag(int(WinFlagPublishFullReRender))
 	w.UpMu.Unlock()
@@ -987,7 +987,7 @@ func (w *Window) UploadAllViewports() {
 		return
 	}
 	w.SetWinUpdating()
-	pr := prof.Start("win.UploadAllViewports")
+	// pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
@@ -1024,7 +1024,7 @@ func (w *Window) UploadAllViewports() {
 	}
 	w.PopMu.RUnlock()
 	// fmt.Printf("upload all views pop unlocked: %v\n", w.Nm)
-	pr.End()
+	// pr.End()
 	w.ClearWinUpdating()
 	w.ClearFlag(int(WinFlagPublishFullReRender))
 	w.UpMu.Unlock()   // need to unlock before publish
@@ -1078,7 +1078,7 @@ func (w *Window) Publish() {
 		w.ClearFlag(int(WinFlagPublishFullReRender))
 		w.DirectUploads()
 	}
-	pr := prof.Start("win.Publish")
+	// pr := prof.Start("win.Publish")
 	wt := w.OSWin.WinTex()
 	if wt != nil {
 		w.OSWin.Copy(image.ZP, wt, wt.Bounds(), oswin.Src, nil)
@@ -1087,7 +1087,7 @@ func (w *Window) Publish() {
 		}
 		w.OSWin.Publish()
 	}
-	pr.End()
+	// pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 }

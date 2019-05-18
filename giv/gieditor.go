@@ -183,7 +183,7 @@ func (ge *GiEditor) ConfigSplitView() {
 			svr := gee.StructView()
 			tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 			if sig == int64(TreeViewSelected) {
-				svr.SetStruct(tvn.SrcNode.Ptr, nil)
+				svr.SetStruct(tvn.SrcNode, nil)
 			} else if sig == int64(TreeViewChanged) {
 				gee.SetChanged()
 			}

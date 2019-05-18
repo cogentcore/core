@@ -32,6 +32,21 @@ func AddNewMarker(parent ki.Ki, name string) *Marker {
 	return parent.AddNewChild(KiT_Marker, name).(*Marker)
 }
 
+func (g *Marker) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Marker)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.RefPos = fr.RefPos
+	g.Size = fr.Size
+	g.Units = fr.Units
+	g.ViewBox = fr.ViewBox
+	g.Orient = fr.Orient
+	g.VertexPos = fr.VertexPos
+	g.VertexAngle = fr.VertexAngle
+	g.StrokeWidth = fr.StrokeWidth
+	g.XForm = fr.XForm
+	g.EffSize = fr.EffSize
+}
+
 // MarkerUnits specifies units to use for svg marker elements
 type MarkerUnits int32
 

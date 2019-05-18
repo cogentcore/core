@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/prof"
 )
 
 // IconName is used to specify an icon -- currently just the unique name of
@@ -56,6 +57,12 @@ func AddNewIcon(parent ki.Ki, name string, icon string) *Icon {
 	return ic
 }
 
+func (nb *Icon) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Icon)
+	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	nb.Filename = fr.Filename
+}
+
 var IconProps = ki.Props{
 	"background-color": color.Transparent,
 }
@@ -72,7 +79,9 @@ func (ic *Icon) SetIcon(name string) (bool, error) {
 	if ic.HasChildren() && ic.UniqueNm == name {
 		return false, nil
 	}
+	pr := prof.Start("IconSetIcon")
 	err := TheIconMgr.SetIcon(ic, name)
+	pr.End()
 	if err == nil {
 		ic.UniqueNm = string(name)
 		return true, nil

@@ -36,7 +36,7 @@ import (
 // cut/copy/paste and menu actions.
 type TreeView struct {
 	gi.PartsWidgetBase
-	SrcNode          ki.Ptr                    `desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	SrcNode          ki.Ki                     `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
 	ShowViewCtxtMenu bool                      `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
 	ViewIdx          int                       `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
 	Indent           units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
@@ -65,9 +65,9 @@ func init() {
 // viewing, and builds-out the view of its tree
 func (tv *TreeView) SetRootNode(sk ki.Ki) {
 	updt := false
-	if tv.SrcNode.Ptr != sk {
+	if tv.SrcNode != sk {
 		updt = tv.UpdateStart()
-		tv.SrcNode.Ptr = sk
+		tv.SrcNode = sk
 		sk.NodeSignal().Connect(tv.This(), SrcNodeSignal) // we recv signals from source
 	}
 	tv.RootView = tv
@@ -79,9 +79,9 @@ func (tv *TreeView) SetRootNode(sk ki.Ki) {
 // SetSrcNode sets the source node that we are viewing, and builds-out the view of its tree
 func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
 	updt := false
-	if tv.SrcNode.Ptr != sk {
+	if tv.SrcNode != sk {
 		updt = tv.UpdateStart()
-		tv.SrcNode.Ptr = sk
+		tv.SrcNode = sk
 		sk.NodeSignal().Connect(tv.This(), SrcNodeSignal) // we recv signals from source
 	}
 	tv.SyncToSrc(tvIdx)
@@ -92,7 +92,7 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
 // ConfigChildren to maximally preserve existing tree elements
 func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	pr := prof.Start("TreeView.SyncToSrc")
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	nm := "tv_" + sk.UniqueName()
 	tv.SetNameRaw(nm) // guaranteed to be unique
 	tv.SetUniqueName(nm)
@@ -238,7 +238,7 @@ func (tv *TreeView) HasClosedParent() bool {
 
 // Label returns the display label for this node, satisfying the Labeler interface
 func (tv *TreeView) Label() string {
-	return tv.SrcNode.Ptr.Name()
+	return tv.SrcNode.Name()
 }
 
 // UpdateInactive updates the Inactive state based on SrcNode -- returns true if
@@ -248,10 +248,10 @@ func (tv *TreeView) Label() string {
 // read-only and non-modifiable)
 func (tv *TreeView) UpdateInactive() bool {
 	tv.ClearInactive()
-	if tv.SrcNode.Ptr == nil {
+	if tv.SrcNode == nil {
 		tv.SetInactive()
 	} else {
-		if inact, err := tv.SrcNode.Ptr.PropTry("inactive"); err == nil {
+		if inact, err := tv.SrcNode.PropTry("inactive"); err == nil {
 			if bo, ok := kit.ToBool(inact); bo && ok {
 				tv.SetInactive()
 			}
@@ -331,7 +331,7 @@ const (
 	// TreeViewFocus is in focus -- will respond to keyboard input
 	TreeViewFocus
 
-	// TreeViewInactive is inactive -- if SrcNode.Ptr is nil, or source has "inactive" property
+	// TreeViewInactive is inactive -- if SrcNode is nil, or source has "inactive" property
 	// set, or treeview node has inactive property set directly
 	TreeViewInactive
 
@@ -414,7 +414,7 @@ func (tv *TreeView) SelectedSrcNodes() ki.Slice {
 	sn := make(ki.Slice, 0)
 	sl := tv.SelectedViews()
 	for _, v := range sl {
-		sn = append(sn, v.SrcNode.Ptr)
+		sn = append(sn, v.SrcNode)
 	}
 	return sn
 }
@@ -927,7 +927,7 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 		tv.CtxtMenuFunc(tv.This().(gi.Node2D), m)
 	}
 	// note: root inactivity is relevant factor here..
-	if CtxtMenuView(tv.SrcNode.Ptr, tv.RootIsInactive(), tv.Viewport, m) { // our viewed obj's menu
+	if CtxtMenuView(tv.SrcNode, tv.RootIsInactive(), tv.Viewport, m) { // our viewed obj's menu
 		if tv.ShowViewCtxtMenu {
 			m.AddSeparator("sep-tvmenu")
 			CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Viewport, m)
@@ -943,7 +943,7 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 // of the operation being attempted -- otherwise it silently returns (suitable
 // for context menu UpdateFunc).
 func (tv *TreeView) IsRootOrField(op string) bool {
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView IsRootOrField nil SrcNode in: %v\n", tv.PathUnique())
 		return false
@@ -981,7 +981,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 	if tv.IsRootOrField(actNm) {
 		return
 	}
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", actNm, tv.PathUnique())
 		return
@@ -996,7 +996,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 		tv.Par.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-				par := tvv.SrcNode.Ptr
+				par := tvv.SrcNode
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := par.UpdateStart()
@@ -1024,7 +1024,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 // prompting the user for the type of node to add
 func (tv *TreeView) SrcAddChild() {
 	ttl := "Add Child"
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
 		return
@@ -1034,7 +1034,7 @@ func (tv *TreeView) SrcAddChild() {
 		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {
 				tvv, _ := recv.Embed(KiT_TreeView).(*TreeView)
-				sk := tvv.SrcNode.Ptr
+				sk := tvv.SrcNode
 				dlg, _ := send.(*gi.Dialog)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := sk.UpdateStart()
@@ -1068,7 +1068,7 @@ func (tv *TreeView) SrcDelete() {
 	if tv.MoveDown(mouse.SelectOne) == nil {
 		tv.MoveUp(mouse.SelectOne)
 	}
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
 		return
@@ -1085,7 +1085,7 @@ func (tv *TreeView) SrcDuplicate() {
 	if tv.IsRootOrField(ttl) {
 		return
 	}
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.PathUnique())
 		return
@@ -1094,7 +1094,7 @@ func (tv *TreeView) SrcDuplicate() {
 		return
 	}
 	tvpar := tv.Par.Embed(KiT_TreeView).(*TreeView)
-	par := tvpar.SrcNode.Ptr
+	par := tvpar.SrcNode
 	if par == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tvpar.PathUnique())
 		return
@@ -1116,21 +1116,21 @@ func (tv *TreeView) SrcDuplicate() {
 
 // SrcEdit pulls up a StructViewDialog window on the source object viewed by this node
 func (tv *TreeView) SrcEdit() {
-	if tv.SrcNode.Ptr == nil {
+	if tv.SrcNode == nil {
 		log.Printf("TreeView SrcEdit nil SrcNode in: %v\n", tv.PathUnique())
 		return
 	}
-	tynm := kit.NonPtrType(tv.SrcNode.Ptr.Type()).Name()
-	StructViewDialog(tv.Viewport, tv.SrcNode.Ptr, DlgOpts{Title: tynm}, nil, nil)
+	tynm := kit.NonPtrType(tv.SrcNode.Type()).Name()
+	StructViewDialog(tv.Viewport, tv.SrcNode, DlgOpts{Title: tynm}, nil, nil)
 }
 
 // SrcGoGiEditor pulls up a new GoGiEditor window on the source object viewed by this node
 func (tv *TreeView) SrcGoGiEditor() {
-	if tv.SrcNode.Ptr == nil {
+	if tv.SrcNode == nil {
 		log.Printf("TreeView SrcGoGiEditor nil SrcNode in: %v\n", tv.PathUnique())
 		return
 	}
-	GoGiEditorDialog(tv.SrcNode.Ptr)
+	GoGiEditorDialog(tv.SrcNode)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1139,8 +1139,8 @@ func (tv *TreeView) SrcGoGiEditor() {
 // MimeData adds mimedata for this node: a text/plain of the PathUnique, and
 // an application/json of the source node
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
-	sroot := tv.RootView.SrcNode.Ptr
-	src := tv.SrcNode.Ptr
+	sroot := tv.RootView.SrcNode
+	src := tv.SrcNode
 	*md = append(*md, mimedata.NewTextData(src.PathFromUnique(sroot)))
 	var buf bytes.Buffer
 	err := src.WriteJSON(&buf, true) // true = pretty for clipboard..
@@ -1270,7 +1270,7 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data interface{}) {
 // a menu to determine what specifically to do
 func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
-	if tv.SrcNode.Ptr == nil {
+	if tv.SrcNode == nil {
 		log.Printf("TreeView PasteMenu nil SrcNode in: %v\n", tv.PathUnique())
 		return
 	}
@@ -1286,7 +1286,7 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	if len(sl) == 0 {
 		return
 	}
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView PasteAssign nil SrcNode in: %v\n", tv.PathUnique())
 		return
@@ -1319,7 +1319,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 		return
 	}
 	tvpar := tv.Par.Embed(KiT_TreeView).(*TreeView)
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", actNm, tv.PathUnique())
 		return
@@ -1363,7 +1363,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
 	sl := tv.NodesFromMimeData(md)
 
-	sk := tv.SrcNode.Ptr
+	sk := tv.SrcNode
 	if sk == nil {
 		log.Printf("TreeView PasteChildren nil SrcNode in: %v\n", tv.PathUnique())
 		return
@@ -1432,7 +1432,7 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 	if de.Mod != dnd.DropMove {
 		return
 	}
-	sroot := tv.RootView.SrcNode.Ptr
+	sroot := tv.RootView.SrcNode
 	md := de.Data
 	for _, d := range md {
 		if d.Type == filecat.TextPlain { // link

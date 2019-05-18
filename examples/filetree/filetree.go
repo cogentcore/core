@@ -348,7 +348,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 			}
 			tvn, _ := data.(ki.Ki).Embed(giv.KiT_FileTreeView).(*giv.FileTreeView)
 			fbb, _ := recv.Embed(KiT_FileBrowse).(*FileBrowse)
-			fn := tvn.SrcNode.Ptr.Embed(giv.KiT_FileNode).(*giv.FileNode)
+			fn := tvn.SrcNode.Embed(giv.KiT_FileNode).(*giv.FileNode)
 			switch sig {
 			case int64(giv.TreeViewSelected):
 				fbb.FileNodeSelected(fn, tvn)

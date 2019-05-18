@@ -28,6 +28,12 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 	return fr
 }
 
+func (nb *Frame) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Frame)
+	nb.Layout.CopyFieldsFrom(&fr.Layout)
+	nb.Stripes = fr.Stripes
+}
+
 var FrameProps = ki.Props{
 	"border-width":     units.NewPx(2),
 	"border-radius":    units.NewPx(0),

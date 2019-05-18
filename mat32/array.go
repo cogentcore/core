@@ -70,6 +70,16 @@ func (a *ArrayF32) AppendVec4(v ...Vec4) {
 	}
 }
 
+// CopyFloat32s copies a []float32 slice from src into target
+func CopyFloat32s(trg *[]float32, src []float32) {
+	*trg = make([]float32, len(src))
+	copy(*trg, src)
+}
+
+func (a *ArrayF32) CopyFrom(src ArrayF32) {
+	CopyFloat32s((*[]float32)(a), src)
+}
+
 // GetVec2 stores in the specified Vec2 the
 // values from the array starting at the specified pos.
 func (a ArrayF32) GetVec2(pos int, v *Vec2) {

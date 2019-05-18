@@ -28,6 +28,12 @@ var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
 }
 
+func (g *NodeBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*NodeBase)
+	g.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	g.Pnt = fr.Pnt
+}
+
 func (g *NodeBase) AsSVGNode() *NodeBase {
 	return g
 }

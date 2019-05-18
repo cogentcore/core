@@ -21,3 +21,9 @@ var KiT_Filter = kit.Types.AddType(&Filter{}, nil)
 func AddNewFilter(parent ki.Ki, name string) *Filter {
 	return parent.AddNewChild(KiT_Filter, name).(*Filter)
 }
+
+func (g *Filter) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Filter)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	g.FilterType = fr.FilterType
+}

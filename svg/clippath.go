@@ -22,3 +22,8 @@ var KiT_ClipPath = kit.Types.AddType(&ClipPath{}, nil)
 func AddNewClipPath(parent ki.Ki, name string) *ClipPath {
 	return parent.AddNewChild(KiT_ClipPath, name).(*ClipPath)
 }
+
+func (g *ClipPath) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*ClipPath)
+	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+}

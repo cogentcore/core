@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -43,6 +44,15 @@ var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
 // AddNewSplitView adds a new splitview to given parent node, with given name.
 func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 	return parent.AddNewChild(KiT_SplitView, name).(*SplitView)
+}
+
+func (nb *SplitView) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*SplitView)
+	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	nb.HandleSize = fr.HandleSize
+	mat32.CopyFloat32s(&nb.Splits, fr.Splits)
+	mat32.CopyFloat32s(&nb.SavedSplits, fr.SavedSplits)
+	nb.Dim = fr.Dim
 }
 
 var SplitViewProps = ki.Props{

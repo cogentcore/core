@@ -34,7 +34,7 @@ type SpinBox struct {
 	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	UpIcon     IconName  `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
 	DownIcon   IconName  `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
-	SpinBoxSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
 var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
@@ -42,6 +42,21 @@ var KiT_SpinBox = kit.Types.AddType(&SpinBox{}, SpinBoxProps)
 // AddNewSpinBox adds a new spinbox to given parent node, with given name.
 func AddNewSpinBox(parent ki.Ki, name string) *SpinBox {
 	return parent.AddNewChild(KiT_SpinBox, name).(*SpinBox)
+}
+
+func (nb *SpinBox) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*SpinBox)
+	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	nb.Value = fr.Value
+	nb.HasMin = fr.HasMin
+	nb.Min = fr.Min
+	nb.HasMax = fr.HasMax
+	nb.Max = fr.Max
+	nb.Step = fr.Step
+	nb.PageStep = fr.PageStep
+	nb.Prec = fr.Prec
+	nb.UpIcon = fr.UpIcon
+	nb.DownIcon = fr.DownIcon
 }
 
 var SpinBoxProps = ki.Props{
