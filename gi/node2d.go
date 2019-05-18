@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
 	"reflect"
 
 	"github.com/goki/gi/oswin"
@@ -72,7 +73,12 @@ var Node2DBaseProps = ki.Props{
 }
 
 func (nb *Node2DBase) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*Node2DBase)
+	fr, ok := frm.(*Node2DBase)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Node2DBase one\n", nb.Type().Name())
+		ki.GenCopyFieldsFrom(nb.This(), frm)
+		return
+	}
 	nb.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 }
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
 	"strings"
 
 	"github.com/goki/gi/oswin"
@@ -43,7 +44,12 @@ var ButtonBaseProps = ki.Props{
 }
 
 func (nb *ButtonBase) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*ButtonBase)
+	fr, ok := frm.(*ButtonBase)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", nb.Type().Name())
+		ki.GenCopyFieldsFrom(nb.This(), frm)
+		return
+	}
 	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
 	nb.Text = fr.Text
 	nb.Icon = fr.Icon

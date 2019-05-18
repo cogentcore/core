@@ -41,7 +41,12 @@ var WidgetBaseProps = ki.Props{
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*WidgetBase)
+	fr, ok := frm.(*WidgetBase)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier WidgetBase one\n", wb.Type().Name())
+		ki.GenCopyFieldsFrom(wb.This(), frm)
+		return
+	}
 	wb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
 	wb.Tooltip = fr.Tooltip
 	wb.Sty.CopyFrom(&fr.Sty)
@@ -751,7 +756,12 @@ var PartsWidgetBaseProps = ki.Props{
 }
 
 func (wb *PartsWidgetBase) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*PartsWidgetBase)
+	fr, ok := frm.(*PartsWidgetBase)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier PartsWidgetBase one\n", wb.This().Name())
+		ki.GenCopyFieldsFrom(wb.This(), frm)
+		return
+	}
 	wb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	// wb.Parts.CopyFrom(&fr.Parts) // managed by widget -- we don't copy..
 }

@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
 	"strings"
 	"time"
 	"unicode"
@@ -320,7 +321,12 @@ func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
 }
 
 func (nb *Layout) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*Layout)
+	fr, ok := frm.(*Layout)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", nb.Type().Name())
+		ki.GenCopyFieldsFrom(nb.This(), frm)
+		return
+	}
 	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	nb.Lay = fr.Lay
 	nb.Spacing = fr.Spacing

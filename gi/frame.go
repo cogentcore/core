@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"log"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -29,7 +30,12 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 }
 
 func (nb *Frame) CopyFieldsFrom(frm interface{}) {
-	fr := frm.(*Frame)
+	fr, ok := frm.(*Frame)
+	if !ok {
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", nb.Type().Name())
+		ki.GenCopyFieldsFrom(nb.This(), frm)
+		return
+	}
 	nb.Layout.CopyFieldsFrom(&fr.Layout)
 	nb.Stripes = fr.Stripes
 }
