@@ -19,7 +19,6 @@ import (
 
 type NodeEmbed struct {
 	Node
-	Ptr  Ptr
 	Mbr1 string
 	Mbr2 int
 }
@@ -342,10 +341,7 @@ func TestNodeJSonSave(t *testing.T) {
 	var child2 = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
-	schild2 := child2.AddNewChild(nil, "subchild1")
-
-	parent.Ptr.Ptr = child2
-	child2.Ptr.Ptr = schild2
+	child2.AddNewChild(nil, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteJSON(&buf, true)
@@ -401,10 +397,7 @@ func TestNodeXMLSave(t *testing.T) {
 	var child2 = parent.AddNewChild(nil, "child1").(*NodeEmbed)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
-	schild2 := child2.AddNewChild(nil, "subchild1")
-
-	parent.Ptr.Ptr = child2
-	child2.Ptr.Ptr = schild2
+	child2.AddNewChild(nil, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteXML(&buf, true)
@@ -765,10 +758,7 @@ func TestNodeFieldJSonSave(t *testing.T) {
 	child2 := parent.AddNewChild(nil, "child1").(*NodeField2)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
-	schild2 := child2.AddNewChild(nil, "subchild1").(*NodeField2)
-
-	parent.Ptr.Ptr = &child2.Field1
-	child2.Ptr.Ptr = &schild2.Field2
+	child2.AddNewChild(nil, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteJSON(&buf, true)
@@ -826,10 +816,7 @@ func TestNodeFieldSet(t *testing.T) {
 	child2 := parent.AddNewChild(nil, "child1").(*NodeField2)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
-	schild2 := child2.AddNewChild(nil, "subchild1").(*NodeField2)
-
-	parent.Ptr.Ptr = &child2.Field1
-	child2.Ptr.Ptr = &schild2.Field2
+	child2.AddNewChild(nil, "subchild1")
 
 	ts := "child2 is nice"
 	err := child2.SetField("Mbr1", ts)
@@ -862,10 +849,7 @@ func TestClone(t *testing.T) {
 	child2 := parent.AddNewChild(nil, "child1").(*NodeField2)
 	// child3 :=
 	parent.AddNewChild(nil, "child1")
-	schild2 := child2.AddNewChild(nil, "subchild1").(*NodeField2)
-
-	parent.Ptr.Ptr = &child2.Field1
-	child2.Ptr.Ptr = &schild2.Field2
+	child2.AddNewChild(nil, "subchild1")
 
 	var buf bytes.Buffer
 	err := parent.WriteJSON(&buf, true)

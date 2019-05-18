@@ -60,8 +60,6 @@ The first and most important application of GoKi is the [GoGi](https://github.co
 
 * `signal.go` = `Signal` that calls function on a receiver Ki objects that have been previously `Connect`ed to the signal -- also supports signal type so the same signal sender can send different types of signals over the same connection -- used for signaling changes in tree structure, and more general tree updating signals.
 
-* `ptr.go` = `ki.Ptr` struct that supports saving / loading of pointers using paths.
-
 # Status and TODO
 
 Status: as of 11/2018, it is stable and feature-complete, supporting the full Gide app!

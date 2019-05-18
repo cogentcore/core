@@ -758,20 +758,9 @@ type Ki interface {
 	// nodes in the destination if they have the same name and type -- so a
 	// copy from a source to a target that only differ minimally will be
 	// minimally destructive.  Only copies to same types are supported.
-	// Pointers (Ptr) are copied by saving the current UniquePath and then
-	// SetPtrsFmPaths is called.  Signal connections are NOT copied.  No other
-	// Ki pointers are copied, and the field tag copy:"-" can be added for any
-	// other fields that should not be copied (unexported, lower-case fields
-	// are not copyable).
-	//
-	// When nodes are copied from one place to another within the same overall
-	// tree, paths are updated so that pointers to items within the copied
-	// sub-tree are updated to the new location there (i.e., the path to the
-	// old loation is replaced with that of the new destination location),
-	// whereas paths outside of the copied location are not changed and point
-	// as before.  See also MoveTo function for moving nodes to other parts of
-	// the tree.  Sequence of functions is: GetPtrPaths on from, CopyFromRaw,
-	// UpdtPtrPaths, then SetPtrsFmPaths.
+	// Signal connections are NOT copied.  No other Ki pointers are copied,
+	// and the field tag copy:"-" can be added for any other fields that
+	// should not be copied (unexported, lower-case fields are not copyable).
 	CopyFrom(frm Ki) error
 
 	// Clone creates and returns a deep copy of the tree from this node down.
@@ -780,24 +769,23 @@ type Ki interface {
 	Clone() Ki
 
 	// CopyFromRaw performs a raw copy that just does the deep copy of the
-	// bits and doesn't do anything with pointers.
+	// bits and doesn't do UpdateStart / End or set NodeCopied flag,
+	// which are done in top-level CopyFrom.
 	CopyFromRaw(frm Ki) error
 
-	// GetPtrPaths gets all Ptr path strings -- walks the tree down from
-	// current node and calls GetPath on all Ptr fields -- this is called
-	// prior to copying / moving.
-	GetPtrPaths()
-
-	// SetPtrsFmPaths walks the tree down from current node and calls
-	// PtrFromPath on all Ptr fields found -- called after Copy, Unmarshal* to
-	// recover pointers after entire structure is in place -- see
-	// UnmarshalPost.
-	SetPtrsFmPaths()
-
-	// UpdatePtrPaths updates Ptr paths, replacing any occurrence of oldPath with
-	// newPath, optionally only at the start of the path (typically true) --
-	// for all nodes down from this one.
-	UpdatePtrPaths(oldPath, newPath string, startOnly bool)
+	// CopyFieldsFrom is the base-level copy method that any copy-intensive
+	// nodes should implement directly to explicitly copy relevant fields
+	// that should be copied, avoiding any internal pointers etc.
+	// This is the performance bottleneck in copying -- the Node version
+	// uses generic GenCopyFieldsFrom method using reflection etc
+	// which is very slow.  It can be ~10x faster overall to use custom
+	// method that explicitly copies each field.  When doing so, you
+	// must explicitly call the CopyFieldsFrom method on any embedded
+	// Ki types that you inherit from, and, critically, NONE of those
+	// can rely on the generic Node-level version.  Furthermore, if the
+	// actual end type itself does not define a custom version of this method
+	// then the generic one will be called for everything.
+	CopyFieldsFrom(frm interface{})
 
 	//////////////////////////////////////////////////////////////////////////
 	//  IO: for JSON and XML formats -- see also Slice, Ptr

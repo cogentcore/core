@@ -492,6 +492,41 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 	kid.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
 }
 
+// CopyFrom another Slice.  It is efficient by using the Config method
+// which attempts to preserve any existing nodes in the destination
+// if they have the same name and type -- so a copy from a source to
+// a target that only differ minimally will be minimally destructive.
+func (sl *Slice) CopyFrom(frm Slice) {
+	sl.ConfigCopy(nil, frm)
+	for i, kid := range *sl {
+		fmk := frm[i]
+		kid.CopyFrom(fmk)
+	}
+}
+
+// ConfigCopy uses Config method to copy name / type config of Slice from source
+// If n is != nil then Update etc is called properly.
+func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
+	sz := len(frm)
+	if sz > 0 || n == nil {
+		cfg := make(kit.TypeAndNameList, sz)
+		for i, kid := range frm {
+			cfg[i].Type = kid.Type()
+			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
+		}
+		mods, updt := sl.Config(n, cfg, true) // use unique names -- this means name = uniquname
+		for i, kid := range frm {
+			mkid := (*sl)[i]
+			mkid.SetNameRaw(kid.Name()) // restore orig user-names
+		}
+		if mods && n != nil {
+			n.UpdateEnd(updt)
+		}
+	} else {
+		n.DeleteChildren(true)
+	}
+}
+
 // MarshalJSON saves the length and type, name information for each object in a
 // slice, as a separate struct-like record at the start, followed by the
 // structs for each element in the slice -- this allows the Unmarshal to first

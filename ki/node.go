@@ -242,8 +242,8 @@ var UniquifyPreserveNameLimit = 100
 // 100), above which the index is appended, guaranteeing uniqueness at the
 // cost of making paths longer and less user-friendly
 func (n *Node) UniquifyNames() {
-	pr := prof.Start("ki.Node.UniquifyNames")
-	defer pr.End()
+	// pr := prof.Start("ki.Node.UniquifyNames")
+	// defer pr.End()
 
 	sz := len(n.Kids)
 	if sz > UniquifyPreserveNameLimit {
@@ -1470,6 +1470,8 @@ func (n *Node) CopyPropsFrom(frm Ki, deep bool) error {
 	if *(frm.Properties()) == nil {
 		return nil
 	}
+	pr := prof.Start("CopyPropsFrom")
+	defer pr.End()
 	if n.Props == nil {
 		n.Props = make(Props)
 	}
@@ -1836,6 +1838,7 @@ func (n *Node) UpdateStart() bool {
 	if n.OnlySelfUpdate() {
 		n.SetFlag(int(Updating))
 	} else {
+		pr := prof.Start("ki.Node.UpdateStart")
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			if !k.IsUpdating() {
 				k.ClearFlagMask(int64(UpdateFlagsMask))
@@ -1845,6 +1848,7 @@ func (n *Node) UpdateStart() bool {
 				return false // bail -- already updating
 			}
 		})
+		pr.End()
 	}
 	return true
 }
@@ -1867,10 +1871,12 @@ func (n *Node) UpdateEnd(updt bool) {
 		n.ClearFlag(int(Updating))
 		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
+		pr := prof.Start("ki.Node.UpdateEnd")
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
+		pr.End()
 		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	}
 }
@@ -1944,10 +1950,6 @@ func (n *Node) Disconnect() {
 			if fs, ok := kit.PtrValue(fieldVal).Interface().(*Signal); ok {
 				// fmt.Printf("ki.Node: %v Type: %T Disconnecting signal field: %v\n", n.Name(), n.This(), field.Name)
 				fs.DisconnectAll()
-			}
-		case fieldVal.Type() == KiT_Ptr:
-			if pt, ok := kit.PtrValue(fieldVal).Interface().(*Ptr); ok {
-				pt.Reset()
 			}
 		}
 		return true
@@ -2046,49 +2048,27 @@ func (n *Node) FieldTag(field, tag string) string {
 // nodes in the destination if they have the same name and type -- so a
 // copy from a source to a target that only differ minimally will be
 // minimally destructive.  Only copies to same types are supported.
-// Pointers (Ptr) are copied by saving the current UniquePath and then
-// SetPtrsFmPaths is called.  Signal connections are NOT copied.  No other
-// Ki pointers are copied, and the field tag copy:"-" can be added for any
-// other fields that should not be copied (unexported, lower-case fields
-// are not copyable).
-//
-// When nodes are copied from one place to another within the same overall
-// tree, paths are updated so that pointers to items within the copied
-// sub-tree are updated to the new location there (i.e., the path to the
-// old loation is replaced with that of the new destination location),
-// whereas paths outside of the copied location are not changed and point
-// as before.  See also MoveTo function for moving nodes to other parts of
-// the tree.  Sequence of functions is: GetPtrPaths on from, CopyFromRaw,
-// UpdtPtrPaths, then SetPtrsFmPaths.
+// Signal connections are NOT copied.  No other Ki pointers are copied,
+// and the field tag copy:"-" can be added for any other fields that
+// should not be copied (unexported, lower-case fields are not copyable).
 func (n *Node) CopyFrom(frm Ki) error {
 	if frm == nil {
 		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.PathUnique())
 		log.Println(err)
 		return err
 	}
-	mypath := n.PathUnique()
-	fmpath := frm.PathUnique()
 	if n.Type() != frm.Type() {
-		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", mypath, fmpath, n.Type().Name(), frm.Type().Name())
+		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", n.PathUnique(), frm.PathUnique(), n.Type().Name(), frm.Type().Name())
 		log.Println(err)
 		return err
 	}
 	updt := n.UpdateStart()
+	defer n.UpdateEnd(updt)
 	n.SetFlag(int(NodeCopied))
-	sameTree := (n.Root() == frm.Root())
-	frm.GetPtrPaths()
+	pr := prof.Start("CopyFromRaw")
 	err := n.CopyFromRaw(frm)
-	// DelMgr.DestroyDeleted() // in case we deleted some kiddos
-	if err != nil {
-		n.UpdateEnd(updt)
-		return err
-	}
-	if sameTree {
-		n.UpdatePtrPaths(fmpath, mypath, true)
-	}
-	n.SetPtrsFmPaths()
-	n.UpdateEnd(updt)
-	return nil
+	pr.End()
+	return err
 }
 
 // Clone creates and returns a deep copy of the tree from this node down.
@@ -2101,35 +2081,40 @@ func (n *Node) Clone() Ki {
 	return nki
 }
 
-// CopyMakeChildrenFrom uses ConfigChildren to recreate source children
-func (n *Node) CopyMakeChildrenFrom(frm Ki) {
-	sz := len(*frm.Children())
-	if sz > 0 {
-		cfg := make(kit.TypeAndNameList, sz)
-		for i, kid := range *frm.Children() {
-			cfg[i].Type = kid.Type()
-			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
-		}
-		mods, updt := n.ConfigChildren(cfg, true) // use unique names -- this means name = uniquname
-		for i, kid := range *frm.Children() {
-			mkid := n.Kids[i]
-			mkid.SetNameRaw(kid.Name()) // restore orig user-names
-		}
-		if mods {
-			n.UpdateEnd(updt)
-		}
-	} else {
-		n.DeleteChildren(true)
+// CopyFromRaw performs a raw copy that just does the deep copy of the
+// bits and doesn't do anything with pointers.
+func (n *Node) CopyFromRaw(frm Ki) error {
+	n.Kids.ConfigCopy(n.This(), *frm.Children())
+	n.DeleteAllProps(len(*frm.Properties())) // start off fresh, allocated to size of from
+	n.CopyPropsFrom(frm, false)              // use shallow props copy by default
+	pr := prof.Start("CopyFieldsFrom")
+	n.This().CopyFieldsFrom(frm)
+	defer pr.End()
+	for i, kid := range n.Kids {
+		fmk := (*(frm.Children()))[i]
+		kid.CopyFromRaw(fmk)
 	}
+	return nil
 }
 
 // CopyFieldsFrom copies from primary fields of source object,
 // recursively following anonymous embedded structs
-func (n *Node) CopyFieldsFrom(to interface{}, frm interface{}) {
+func (n *Node) CopyFieldsFrom(frm interface{}) {
+	GenCopyFieldsFrom(n.This(), frm)
+}
+
+// GenCopyFieldsFrom is a general-purpose copy ofprimary fields
+// of source object, recursively following anonymous embedded structs
+func GenCopyFieldsFrom(to interface{}, frm interface{}) {
+	pr := prof.Start("GenCopyFieldsFrom")
+	defer pr.End()
 	kitype := KiType
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
 	sv := kit.NonPtrValue(reflect.ValueOf(frm))
 	typ := tv.Type()
+	if kit.ShortTypeName(typ) == "ki.Node" {
+		return // nothing to copy for base node!
+	}
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		tf := tv.Field(i)
@@ -2144,14 +2129,23 @@ func (n *Node) CopyFieldsFrom(to interface{}, frm interface{}) {
 		tfpi := kit.PtrValue(tf).Interface()
 		sfpi := kit.PtrValue(sf).Interface()
 		if f.Type.Kind() == reflect.Struct && f.Anonymous {
-			n.CopyFieldsFrom(tfpi, sfpi)
+			// the generic version cannot ever go back to the node-specific
+			// because the n.This() is ALWAYS the final type, not the intermediate
+			// embedded ones
+			GenCopyFieldsFrom(tfpi, sfpi)
+			// if tki, ok := tfpi.(Ki); ok {
+			// 	tki.CopyFieldsFrom(sfpi)
+			// } else {
+			// }
 		} else {
 			switch {
 			case sf.Kind() == reflect.Struct && kit.EmbedImplements(sf.Type(), kitype):
 				sfk := sfpi.(Ki)
 				tfk := tfpi.(Ki)
 				if tfk != nil && sfk != nil {
+					pr := prof.Start("Copy ki fields")
 					tfk.CopyFrom(sfk)
+					pr.End()
 				}
 			case f.Type == KiT_Signal: // todo: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):
@@ -2159,90 +2153,13 @@ func (n *Node) CopyFieldsFrom(to interface{}, frm interface{}) {
 				// kit.PtrValue(tf).Set(sf)
 			default:
 				// use copier https://github.com/jinzhu/copier which handles as much as possible..
+				pr := prof.Start("Copier")
 				copier.Copy(tfpi, sfpi)
+				pr.End()
 			}
 		}
 
 	}
-}
-
-// CopyFromRaw performs a raw copy that just does the deep copy of the
-// bits and doesn't do anything with pointers.
-func (n *Node) CopyFromRaw(frm Ki) error {
-	n.CopyMakeChildrenFrom(frm)
-	n.DeleteAllProps(len(*frm.Properties())) // start off fresh, allocated to size of from
-	n.CopyPropsFrom(frm, false)              // use shallow props copy by default
-	n.CopyFieldsFrom(n.This(), frm)
-	for i, kid := range n.Kids {
-		fmk := (*(frm.Children()))[i]
-		kid.CopyFromRaw(fmk)
-	}
-	return nil
-}
-
-// GetPtrPaths gets all Ptr path strings -- walks the tree down from
-// current node and calls GetPath on all Ptr fields -- this is called
-// prior to copying / moving.
-func (n *Node) GetPtrPaths() {
-	root := n.This()
-	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			if fieldVal.CanInterface() {
-				vfi := kit.PtrValue(fieldVal).Interface()
-				switch vfv := vfi.(type) {
-				case *Ptr:
-					vfv.GetPath()
-					// case *Signal:
-					// 	vfv.GetPaths()
-				}
-			}
-			return true
-		})
-		return true
-	})
-}
-
-// SetPtrsFmPaths walks the tree down from current node and calls
-// PtrFromPath on all Ptr fields found -- called after Copy, Unmarshal* to
-// recover pointers after entire structure is in place -- see
-// UnmarshalPost.
-func (n *Node) SetPtrsFmPaths() {
-	root := n.Root()
-	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			if fieldVal.CanInterface() {
-				vfi := kit.PtrValue(fieldVal).Interface()
-				switch vfv := vfi.(type) {
-				case *Ptr:
-					if err := vfv.PtrFmPath(root); err != nil {
-						log.Println(err)
-					}
-				}
-			}
-			return true
-		})
-		return true
-	})
-}
-
-// UpdatePtrPaths updates Ptr paths, replacing any occurrence of oldPath with
-// newPath, optionally only at the start of the path (typically true) --
-// for all nodes down from this one.
-func (n *Node) UpdatePtrPaths(oldPath, newPath string, startOnly bool) {
-	root := n.Root()
-	n.FuncDownMeFirst(0, root, func(k Ki, level int, d interface{}) bool {
-		FlatFieldsValueFunc(k, func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-			if fieldVal.CanInterface() {
-				vfi := kit.PtrValue(fieldVal).Interface()
-				switch vfv := vfi.(type) {
-				case *Ptr:
-					vfv.UpdatePath(oldPath, newPath, startOnly)
-				}
-			}
-			return true
-		})
-		return true
-	})
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2460,10 +2377,9 @@ func (n *Node) ParentAllChildren() {
 }
 
 // UnmarshalPost must be called after an Unmarshal -- calls
-// SetPtrsFmPaths and ParentAllChildren.
+// ParentAllChildren.
 func (n *Node) UnmarshalPost() {
 	n.ParentAllChildren()
-	n.SetPtrsFmPaths()
 }
 
 // Deleted manages all the deleted Ki elements, that are destined to then be
