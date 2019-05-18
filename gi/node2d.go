@@ -32,7 +32,7 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
 	Paint (SVG) or Style (Widget) object for each Node.  Only done once after
 	structural changes -- styles are not for dynamic changes.
 
-	2. Size2D: DepthFirst downward pass, each node first calls
+	2. Size2D: MeLast downward pass, each node first calls
 	g.Layout.Reset(), then sets their LayoutSize according to their own
 	intrinsic size parameters, and/or those of its children if it is a Layout.
 
@@ -116,7 +116,7 @@ type Node2D interface {
 	// changes -- styles are not for dynamic changes.
 	Style2D()
 
-	// Size2D: DepthFirst downward pass, each node first calls
+	// Size2D: MeLast downward pass, each node first calls
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
 	// Layout.
@@ -611,7 +611,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 		return
 	}
 	pr := prof.Start("Node2D.Size2DTree")
-	nb.FuncDownDepthFirst(0, nb.This(),
+	nb.FuncDownMeLast(0, nb.This(),
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
 			if nii == nil {
