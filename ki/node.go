@@ -28,7 +28,6 @@ import (
 
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 	"github.com/jinzhu/copier"
 )
 
@@ -1419,6 +1418,8 @@ func (n *Node) PropTry(key string) (interface{}, error) {
 // checks all parents.  If typ then checks property on type as well
 // (registered via KiT type registry).  Returns false if not set anywhere.
 func (n *Node) PropInherit(key string, inherit, typ bool) (interface{}, bool) {
+	// pr := prof.Start("PropInherit")
+	// defer pr.End()
 	v, ok := n.Props[key]
 	if ok {
 		return v, ok
@@ -1470,8 +1471,8 @@ func (n *Node) CopyPropsFrom(frm Ki, deep bool) error {
 	if *(frm.Properties()) == nil {
 		return nil
 	}
-	pr := prof.Start("CopyPropsFrom")
-	defer pr.End()
+	// pr := prof.Start("CopyPropsFrom")
+	// defer pr.End()
 	if n.Props == nil {
 		n.Props = make(Props)
 	}
@@ -1838,7 +1839,7 @@ func (n *Node) UpdateStart() bool {
 	if n.OnlySelfUpdate() {
 		n.SetFlag(int(Updating))
 	} else {
-		pr := prof.Start("ki.Node.UpdateStart")
+		// pr := prof.Start("ki.Node.UpdateStart")
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			if !k.IsUpdating() {
 				k.ClearFlagMask(int64(UpdateFlagsMask))
@@ -1848,7 +1849,7 @@ func (n *Node) UpdateStart() bool {
 				return false // bail -- already updating
 			}
 		})
-		pr.End()
+		// pr.End()
 	}
 	return true
 }
@@ -1871,12 +1872,12 @@ func (n *Node) UpdateEnd(updt bool) {
 		n.ClearFlag(int(Updating))
 		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
-		pr := prof.Start("ki.Node.UpdateEnd")
+		// pr := prof.Start("ki.Node.UpdateEnd")
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
 			return true
 		})
-		pr.End()
+		// pr.End()
 		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	}
 }
@@ -2065,9 +2066,7 @@ func (n *Node) CopyFrom(frm Ki) error {
 	updt := n.UpdateStart()
 	defer n.UpdateEnd(updt)
 	n.SetFlag(int(NodeCopied))
-	pr := prof.Start("CopyFromRaw")
 	err := n.CopyFromRaw(frm)
-	pr.End()
 	return err
 }
 
@@ -2087,9 +2086,7 @@ func (n *Node) CopyFromRaw(frm Ki) error {
 	n.Kids.ConfigCopy(n.This(), *frm.Children())
 	n.DeleteAllProps(len(*frm.Properties())) // start off fresh, allocated to size of from
 	n.CopyPropsFrom(frm, false)              // use shallow props copy by default
-	pr := prof.Start("CopyFieldsFrom")
 	n.This().CopyFieldsFrom(frm)
-	defer pr.End()
 	for i, kid := range n.Kids {
 		fmk := (*(frm.Children()))[i]
 		kid.CopyFromRaw(fmk)
@@ -2106,8 +2103,8 @@ func (n *Node) CopyFieldsFrom(frm interface{}) {
 // GenCopyFieldsFrom is a general-purpose copy ofprimary fields
 // of source object, recursively following anonymous embedded structs
 func GenCopyFieldsFrom(to interface{}, frm interface{}) {
-	pr := prof.Start("GenCopyFieldsFrom")
-	defer pr.End()
+	// pr := prof.Start("GenCopyFieldsFrom")
+	// defer pr.End()
 	kitype := KiType
 	tv := kit.NonPtrValue(reflect.ValueOf(to))
 	sv := kit.NonPtrValue(reflect.ValueOf(frm))
@@ -2133,19 +2130,13 @@ func GenCopyFieldsFrom(to interface{}, frm interface{}) {
 			// because the n.This() is ALWAYS the final type, not the intermediate
 			// embedded ones
 			GenCopyFieldsFrom(tfpi, sfpi)
-			// if tki, ok := tfpi.(Ki); ok {
-			// 	tki.CopyFieldsFrom(sfpi)
-			// } else {
-			// }
 		} else {
 			switch {
 			case sf.Kind() == reflect.Struct && kit.EmbedImplements(sf.Type(), kitype):
 				sfk := sfpi.(Ki)
 				tfk := tfpi.(Ki)
 				if tfk != nil && sfk != nil {
-					pr := prof.Start("Copy ki fields")
 					tfk.CopyFrom(sfk)
-					pr.End()
 				}
 			case f.Type == KiT_Signal: // todo: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):
@@ -2153,9 +2144,9 @@ func GenCopyFieldsFrom(to interface{}, frm interface{}) {
 				// kit.PtrValue(tf).Set(sf)
 			default:
 				// use copier https://github.com/jinzhu/copier which handles as much as possible..
-				pr := prof.Start("Copier")
+				// pr := prof.Start("Copier")
 				copier.Copy(tfpi, sfpi)
-				pr.End()
+				// pr.End()
 			}
 		}
 

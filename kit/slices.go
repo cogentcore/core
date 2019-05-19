@@ -23,6 +23,7 @@ import (
 // a pointer to a slice or a direct slice) -- just Elem() of slice type, but using
 // this function makes it more explicit what is going on.
 func SliceElType(sl interface{}) reflect.Type {
+	// todo: use OnePtrUnderlyingValue to get past an interface..
 	return NonPtrType(reflect.TypeOf(sl)).Elem()
 }
 
