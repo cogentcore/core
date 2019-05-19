@@ -76,6 +76,12 @@ func CopyFloat32s(trg *[]float32, src []float32) {
 	copy(*trg, src)
 }
 
+// CopyFloat64s copies a []float64 slice from src into target
+func CopyFloat64s(trg *[]float64, src []float64) {
+	*trg = make([]float64, len(src))
+	copy(*trg, src)
+}
+
 func (a *ArrayF32) CopyFrom(src ArrayF32) {
 	CopyFloat32s((*[]float32)(a), src)
 }

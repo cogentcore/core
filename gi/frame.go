@@ -44,7 +44,6 @@ var FrameProps = ki.Props{
 	"border-width":     units.NewPx(2),
 	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,
-	"border-style":     BorderSolid,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),
 	"color":            &Prefs.Colors.Font,

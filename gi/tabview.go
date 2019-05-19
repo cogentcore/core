@@ -507,8 +507,6 @@ var TabButtonProps = ki.Props{
 	"border-width":     units.NewPx(0),
 	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,
-	"border-style":     BorderSolid,
-	"box-shadow.color": &Prefs.Colors.Shadow,
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,

@@ -61,21 +61,21 @@ type Paint struct {
 	StyleSet    bool          `desc:"have the styles already been set?"`
 	PropsNil    bool          `desc:"set to true if parent node has no props -- allows optimization of styling"`
 	UnContext   units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
-	StrokeStyle StrokeStyle
-	FillStyle   FillStyle
-	FontStyle   FontStyle    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
-	TextStyle   TextStyle    `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
-	VecEff      VectorEffect `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
-	XForm       Matrix2D     `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
+	StrokeStyle StrokeStyle   `desc:"stroke (line drawing) parameters"`
+	FillStyle   FillStyle     `desc:"fill (region filling) parameters"`
+	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	TextStyle   TextStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	VecEff      VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
+	XForm       Matrix2D      `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
 	dotsSet     bool
 	lastUnCtxt  units.Context
 }
 
-// VectorEffect contains special effects for rendering
-type VectorEffect int32
+// VectorEffects contains special effects for rendering
+type VectorEffects int32
 
 const (
-	VecEffNone VectorEffect = iota
+	VecEffNone VectorEffects = iota
 
 	// VecEffNonScalingStroke means that the stroke width is not affected by
 	// transform properties
@@ -84,12 +84,12 @@ const (
 	VecEffN
 )
 
-//go:generate stringer -type=VectorEffect
+//go:generate stringer -type=VectorEffects
 
-var KiT_VectorEffect = kit.Enums.AddEnumAltLower(VecEffN, false, StylePropProps, "VecEff")
+var KiT_VectorEffects = kit.Enums.AddEnumAltLower(VecEffN, false, StylePropProps, "VecEff")
 
-func (ev VectorEffect) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *VectorEffect) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+func (ev VectorEffects) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *VectorEffects) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 func (pc *Paint) Defaults() {
 	pc.Off = false
@@ -129,11 +129,13 @@ func (pc *Paint) InheritFields(par *Paint) {
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
 func (pc *Paint) SetStyleProps(par *Paint, props ki.Props, vp *Viewport2D) {
+	pr := prof.Start("Paint.SetStyleProps")
+	defer pr.End()
 	if !pc.StyleSet && par != nil { // first time
-		// PaintFields.Inherit(pc, par) // very slow..
 		pc.InheritFields(par)
 	}
-	PaintFields.Style(pc, par, props, vp)
+	pc.StyleFromProps(par, props, vp)
+
 	pc.StrokeStyle.SetStylePost(props)
 	pc.FillStyle.SetStylePost(props)
 	pc.FontStyle.SetStylePost(props)
@@ -162,29 +164,10 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	pc.FontStyle.SetUnitContext(&pc.UnContext)
 
 	if !(pc.dotsSet && pc.UnContext == pc.lastUnCtxt && pc.PropsNil) {
-		pc.ToDots()
+		pc.ToDots(&pc.UnContext)
 		pc.dotsSet = true
 		pc.lastUnCtxt = pc.UnContext
 	}
-}
-
-// ToDots calls ToDots on all units.Value fields in the style (recursively) --
-// need to have set the UnContext first
-func (pc *Paint) ToDots() {
-	PaintFields.ToDots(pc, &pc.UnContext)
-}
-
-// PaintDefault is default style can be used when property specifies "default"
-var PaintDefault Paint
-
-// PaintFields contain the StyledFields for Paint type
-var PaintFields = initPaint()
-
-func initPaint() *StyledFields {
-	PaintDefault.Defaults()
-	sf := &StyledFields{}
-	sf.Init(&PaintDefault)
-	return sf
 }
 
 //////////////////////////////////////////////////////////////////////////////////

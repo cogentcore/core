@@ -437,6 +437,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			idxlab.Text = idxtxt
 			idxlab.SetProp("tv-index", i)
 			idxlab.Selectable = true
+			idxlab.Sty.Template = "TableView.IndexLabel"
 			idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
@@ -469,6 +470,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			vv.ConfigWidget(widg)
 			wb := widg.AsWidget()
 			if wb != nil {
+				// wb.Sty.Template = "TableViewView.ItemWidget"
 				wb.SetProp("tv-index", i)
 				wb.ClearSelected()
 				wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -502,6 +504,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				addact.SetIcon("plus")
 				addact.Tooltip = "insert a new element at this index"
 				addact.Data = i
+				addact.Sty.Template = "TableViewView.AddAction"
 				addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					tvv := recv.Embed(KiT_TableView).(*TableView)
@@ -510,6 +513,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 				delact.SetIcon("minus")
 				delact.Tooltip = "delete this element"
 				delact.Data = i
+				delact.Sty.Template = "TableView.DelAction"
 				delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					act := send.(*gi.Action)
 					tvv := recv.Embed(KiT_TableView).(*TableView)

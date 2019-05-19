@@ -207,8 +207,13 @@ func (bb *ButtonBase) Label() string {
 // updates the button
 func (bb *ButtonBase) SetIcon(iconName string) {
 	updt := bb.UpdateStart()
+	defer bb.UpdateEnd(updt)
+	if !bb.IsVisible() {
+		bb.Icon = IconName(iconName)
+		return
+	}
 	if bb.Sty.Font.Size.Val == 0 { // not yet styled
-		pr := prof.Start("StyleButton")
+		pr := prof.Start("SetIcon.StyleButton")
 		bb.StyleButton()
 		pr.End()
 	}
@@ -219,7 +224,6 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 	pr := prof.Start("SetIcon")
 	bb.This().(ButtonWidget).ConfigParts()
 	pr.End()
-	bb.UpdateEnd(updt)
 }
 
 // SetButtonState sets the button state -- returns true if state changed
@@ -578,7 +582,12 @@ func (bb *ButtonBase) ConfigPartsIfNeeded() {
 }
 
 func (bb *ButtonBase) StyleButton() {
-	bb.Style2DWidget()
+	pr := prof.Start("StyleButton")
+	defer pr.End()
+	hasTempl, saveTempl := bb.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		bb.Style2DWidget()
+	}
 	bb.This().(ButtonWidget).StyleParts()
 	if nf, err := bb.PropTry("no-focus"); err == nil {
 		bb.SetFlagState(!bb.IsInactive() && !nf.(bool), int(CanFocus))
@@ -591,15 +600,31 @@ func (bb *ButtonBase) StyleButton() {
 	if clspi, ok := bb.PropInherit(clsty, false, true); ok {
 		clsp, ok = clspi.(ki.Props)
 	}
-	for i := 0; i < int(ButtonStatesN); i++ {
-		bb.StateStyles[i].CopyFrom(&bb.Sty)
-		bb.StateStyles[i].SetStyleProps(pst, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
-		if clsp != nil {
-			if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
-				bb.StateStyles[i].SetStyleProps(pst, stclsp, bb.Viewport)
-			}
+	if hasTempl && saveTempl {
+		bb.Sty.SaveTemplate()
+	}
+	if hasTempl && !saveTempl {
+		for i := 0; i < int(ButtonStatesN); i++ {
+			bb.StateStyles[i].Template = bb.Sty.Template + ButtonSelectors[i]
+			bb.StateStyles[i].FromTemplate()
 		}
-		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
+	} else {
+		for i := 0; i < int(ButtonStatesN); i++ {
+			bb.StateStyles[i].CopyFrom(&bb.Sty)
+			bb.StateStyles[i].SetStyleProps(pst, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
+			if clsp != nil {
+				if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
+					bb.StateStyles[i].SetStyleProps(pst, stclsp, bb.Viewport)
+				}
+			}
+			bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
+		}
+	}
+	if hasTempl && saveTempl {
+		for i := 0; i < int(ButtonStatesN); i++ {
+			bb.StateStyles[i].Template = bb.Sty.Template + ButtonSelectors[i]
+			bb.StateStyles[i].SaveTemplate()
+		}
 	}
 }
 
@@ -685,18 +710,13 @@ func (nb *Button) CopyFieldsFrom(frm interface{}) {
 }
 
 var ButtonProps = ki.Props{
-	"border-width":  units.NewPx(1),
-	"border-radius": units.NewPx(4),
-	"border-color":  &Prefs.Colors.Border,
-	"border-style":  BorderSolid,
-	"padding":       units.NewPx(4),
-	"margin":        units.NewPx(2),
-	"min-width":     units.NewEm(1),
-	"min-height":    units.NewEm(1),
-	// "box-shadow.h-offset": units.NewPx(10),
-	// "box-shadow.v-offset": units.NewPx(10),
-	// "box-shadow.blur":     units.NewPx(4),
-	"box-shadow.color": &Prefs.Colors.Shadow,
+	"border-width":     units.NewPx(1),
+	"border-radius":    units.NewPx(4),
+	"border-color":     &Prefs.Colors.Border,
+	"padding":          units.NewPx(4),
+	"margin":           units.NewPx(2),
+	"min-width":        units.NewEm(1),
+	"min-height":       units.NewEm(1),
 	"text-align":       AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,

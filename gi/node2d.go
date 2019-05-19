@@ -610,7 +610,9 @@ func (nb *Node2DBase) Style2DTree() {
 		if nii == nil {
 			return false
 		}
+		// ppr := prof.Start("Style2DTree:" + nii.Type().Name())
 		nii.Style2D()
+		// ppr.End()
 		return true
 	})
 	pr.End()

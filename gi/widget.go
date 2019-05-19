@@ -16,6 +16,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/prof"
 )
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
@@ -139,6 +140,9 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 // Style2DWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes
 func (wb *WidgetBase) Style2DWidget() {
+	pr := prof.Start("Style2DWidget")
+	defer pr.End()
+
 	gii, _ := wb.This().(Node2D)
 	wb.Viewport.SetCurStyleNode(gii)
 	defer wb.Viewport.SetCurStyleNode(nil)
@@ -182,6 +186,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	if wb.Sty.Inactive {                          // inactive can only set, not clear
 		wb.SetInactive()
 	}
+
 	wb.Sty.Use(wb.Viewport) // activates currentColor etc
 }
 
@@ -198,6 +203,8 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	if pg == nil {
 		return
 	}
+	pr := prof.Start("StylePart")
+	defer pr.End()
 	// if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
 	// 	return
 	// }
@@ -230,7 +237,13 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 }
 
 func (wb *WidgetBase) Style2D() {
-	wb.Style2DWidget()
+	hasTempl, saveTempl := wb.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		wb.Style2DWidget()
+	}
+	if hasTempl && saveTempl {
+		wb.Sty.SaveTemplate()
+	}
 	wb.LayData.SetFromStyle(&wb.Sty.Layout) // also does reset
 }
 
@@ -827,6 +840,9 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 // and label left-to right in a row, based on whether items are nil or empty
 func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm string, txt string) (icIdx, lbIdx int) {
 	wb.Parts.SetProp("overflow", OverflowHidden) // no scrollbars!
+	if wb.Sty.Template != "" {
+		wb.Parts.Sty.Template = wb.Sty.Template + ".Parts"
+	}
 	icIdx = -1
 	lbIdx = -1
 	if IconName(icnm).IsValid() {
@@ -848,12 +864,18 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm string, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
+		if wb.Sty.Template != "" {
+			ic.Sty.Template = wb.Sty.Template + ".icon"
+		}
 		if set, _ := ic.SetIcon(icnm); set || wb.NeedsFullReRender() {
 			wb.StylePart(Node2D(ic))
 		}
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)
+		if wb.Sty.Template != "" {
+			lbl.Sty.Template = wb.Sty.Template + ".icon"
+		}
 		if lbl.Text != txt {
 			wb.StylePart(Node2D(lbl))
 			if icIdx >= 0 {

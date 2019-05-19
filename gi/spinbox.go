@@ -169,6 +169,9 @@ func (sb *SpinBox) ConfigParts() {
 	}
 	sb.Parts.Lay = LayoutHoriz
 	sb.Parts.SetProp("vertical-align", AlignMiddle)
+	if sb.Sty.Template != "" {
+		sb.Parts.Sty.Template = sb.Sty.Template + ".Parts"
+	}
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
 	config.Add(KiT_Space, "space")
@@ -186,6 +189,9 @@ func (sb *SpinBox) ConfigParts() {
 		// not compiled into style prop
 		up.SetFlagState(sb.IsInactive(), int(Inactive))
 		up.Icon = sb.UpIcon
+		if sb.Sty.Template != "" {
+			up.Sty.Template = sb.Sty.Template + ".up"
+		}
 		sb.StylePart(Node2D(up))
 		if !sb.IsInactive() {
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -200,6 +206,9 @@ func (sb *SpinBox) ConfigParts() {
 		dn.SetProp("no-focus", true)
 		dn.Icon = sb.DownIcon
 		sb.StylePart(Node2D(dn))
+		if sb.Sty.Template != "" {
+			dn.Sty.Template = sb.Sty.Template + ".dn"
+		}
 		if !sb.IsInactive() {
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
@@ -207,6 +216,10 @@ func (sb *SpinBox) ConfigParts() {
 			})
 		}
 		// space
+		sp := sb.Parts.Child(sbSpaceIdx).(*Space)
+		if sb.Sty.Template != "" {
+			sp.Sty.Template = sb.Sty.Template + ".space"
+		}
 		sb.StylePart(sb.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
 		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
@@ -214,6 +227,9 @@ func (sb *SpinBox) ConfigParts() {
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		tf.SetProp("clear-act", false)
+		if sb.Sty.Template != "" {
+			tf.Sty.Template = sb.Sty.Template + ".text"
+		}
 		sb.StylePart(Node2D(tf))
 		tf.Txt = fmt.Sprintf("%g", sb.Value)
 		if !sb.IsInactive() {
@@ -281,7 +297,16 @@ func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
+	// todo: this is not working..
+	// hasTempl, saveTempl := sb.Sty.FromTemplate()
+	// if !hasTempl || saveTempl {
 	sb.Style2DWidget()
+	// } else {
+	// 	sb.Sty.SetUnitContext(sb.Viewport, Vec2DZero)
+	// }
+	// if hasTempl && saveTempl {
+	// 	sb.Sty.SaveTemplate()
+	// }
 }
 
 func (sb *SpinBox) Style2D() {

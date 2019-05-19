@@ -19,6 +19,7 @@ import (
 	"github.com/chewxy/math32"
 	"github.com/fatih/camelcase"
 	"github.com/goki/freetype/truetype"
+	"github.com/goki/prof"
 	"github.com/iancoleman/strcase"
 	// "github.com/golang/freetype/truetype"
 	"github.com/goki/gi/units"
@@ -49,6 +50,8 @@ import (
 // family -- automatically provides a chooser menu for fonts using ValueView
 // system
 type FontName string
+
+// IMPORTANT: any changes here must be updated in stylefuncs.go StyleFontFuncs
 
 // FontStyle contains all font styling information, including everything that
 // is used in SVG text rendering -- used in Paint and in Style. Most of font
@@ -377,6 +380,8 @@ func (fs *FontStyle) ComputeMetrics(ctxt *units.Context) {
 	if fs.Face == nil {
 		return
 	}
+	pr := prof.Start("FontStyle.ComputeMetrics")
+	defer pr.End()
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
 	intDots := float32(math.Round(float64(fs.Size.Dots)))
@@ -429,34 +434,30 @@ func (fs *FontStyle) StyleCSS(tag string, cssAgg ki.Props, ctxt *units.Context, 
 	return true
 }
 
+func (fs *FontStyle) StyleFromProps(par *FontStyle, props ki.Props, vp *Viewport2D) {
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		if sfunc, ok := StyleFontFuncs[key]; ok {
+			sfunc(fs, key, val, par, vp)
+		}
+	}
+}
+
 // SetStyleProps sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
-// having a default style for the "initial" setting
+// having a default style for the "initial" setting.
 func (fs *FontStyle) SetStyleProps(parent *FontStyle, props ki.Props, vp *Viewport2D) {
 	// direct font styling is used only for special cases -- don't do this:
 	// if !fs.StyleSet && parent != nil { // first time
-	// 	FontStyleFields.Inherit(fs, parent)
+	// 	fs.InheritFields(parent)
 	// }
-	FontStyleFields.Style(fs, parent, props, vp)
+	fs.StyleFromProps(parent, props, vp)
 	fs.SetStylePost(props)
-}
-
-// ToDots calls ToDots on all units.Value fields in the style (recursively)
-func (fs *FontStyle) ToDots(ctxt *units.Context) {
-	FontStyleFields.ToDots(fs, ctxt)
-}
-
-// FontStyleDefault is default style can be used when property specifies "default"
-var FontStyleDefault FontStyle
-
-// FontStyleFields contain the StyledFields for FontStyle type
-var FontStyleFields = initFontStyle()
-
-func initFontStyle() *StyledFields {
-	FontStyleDefault.Defaults()
-	sf := &StyledFields{}
-	sf.Init(&FontStyleDefault)
-	return sf
 }
 
 //////////////////////////////////////////////////////////////////////////////////

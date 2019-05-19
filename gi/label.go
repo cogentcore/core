@@ -339,17 +339,36 @@ func (lb *Label) TextPos() Vec2D {
 }
 
 func (lb *Label) StyleLabel() {
-	lb.Style2DWidget()
-	if lb.Sty.Text.Align != AlignLeft && lb.Sty.Layout.AlignH == AlignLeft {
-		lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
-	} else if lb.Sty.Layout.AlignH != AlignLeft && lb.Sty.Text.Align == AlignLeft {
-		lb.Sty.Text.Align = lb.Sty.Layout.AlignH // keep them consistent -- this is what people expect
+	hasTempl, saveTempl := lb.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		lb.Style2DWidget()
+		if lb.Sty.Text.Align != AlignLeft && lb.Sty.Layout.AlignH == AlignLeft {
+			lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
+		} else if lb.Sty.Layout.AlignH != AlignLeft && lb.Sty.Text.Align == AlignLeft {
+			lb.Sty.Text.Align = lb.Sty.Layout.AlignH // keep them consistent -- this is what people expect
+		}
+	}
+	if hasTempl && saveTempl {
+		lb.Sty.SaveTemplate()
 	}
 	pst := lb.ParentStyle()
-	for i := 0; i < int(LabelStatesN); i++ {
-		lb.StateStyles[i].CopyFrom(&lb.Sty)
-		lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
-		lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
+	if hasTempl && !saveTempl {
+		for i := 0; i < int(LabelStatesN); i++ {
+			lb.StateStyles[i].Template = lb.Sty.Template + LabelSelectors[i]
+			lb.StateStyles[i].FromTemplate()
+		}
+	} else {
+		for i := 0; i < int(LabelStatesN); i++ {
+			lb.StateStyles[i].CopyFrom(&lb.Sty)
+			lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
+			lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
+		}
+	}
+	if hasTempl && saveTempl {
+		for i := 0; i < int(LabelStatesN); i++ {
+			lb.StateStyles[i].Template = lb.Sty.Template + LabelSelectors[i]
+			lb.StateStyles[i].SaveTemplate()
+		}
 	}
 }
 

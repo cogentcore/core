@@ -108,7 +108,13 @@ func (svg *SVG) Size2D(iter int) {
 }
 
 func (svg *SVG) StyleSVG() {
-	svg.Style2DWidget()
+	hasTempl, saveTempl := svg.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		svg.Style2DWidget()
+	}
+	if hasTempl && saveTempl {
+		svg.Sty.SaveTemplate()
+	}
 	svg.Pnt.Defaults()
 	StyleSVG(svg.This().(gi.Node2D))
 	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox

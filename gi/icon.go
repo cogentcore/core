@@ -110,7 +110,13 @@ func (ic *Icon) Size2D(iter int) {
 }
 
 func (ic *Icon) Style2D() {
-	ic.Style2DWidget()
+	hasTempl, saveTempl := ic.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		ic.Style2DWidget()
+	}
+	if hasTempl && saveTempl {
+		ic.Sty.SaveTemplate()
+	}
 	ic.LayData.SetFromStyle(&ic.Sty.Layout) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {

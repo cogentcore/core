@@ -89,7 +89,6 @@ var TextFieldProps = ki.Props{
 	"border-width":     units.NewPx(1),
 	"cursor-width":     units.NewPx(3),
 	"border-color":     &Prefs.Colors.Border,
-	"border-style":     BorderSolid,
 	"padding":          units.NewPx(4),
 	"margin":           units.NewPx(1),
 	"text-align":       AlignLeft,
@@ -1367,14 +1366,34 @@ func (tf *TextField) Init2D() {
 
 func (tf *TextField) StyleTextField() {
 	pr := prof.Start("TextField.Style2D")
+	defer pr.End()
 	tf.SetCanFocusIfActive()
-	tf.Style2DWidget()
+	hasTempl, saveTempl := tf.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		tf.Style2DWidget()
+	}
+	if hasTempl && saveTempl {
+		tf.Sty.SaveTemplate()
+	}
 	pst := &(tf.Par.(Node2D).AsWidget().Sty)
-	for i := 0; i < int(TextFieldStatesN); i++ {
-		tf.StateStyles[i].CopyFrom(&tf.Sty)
-		tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]), tf.Viewport)
-		tf.StateStyles[i].StyleCSS(tf.This().(Node2D), tf.CSSAgg, TextFieldSelectors[i], tf.Viewport)
-		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
+	if hasTempl && !saveTempl {
+		for i := 0; i < int(TextFieldStatesN); i++ {
+			tf.StateStyles[i].Template = tf.Sty.Template + TextFieldSelectors[i]
+			tf.StateStyles[i].FromTemplate()
+		}
+	} else {
+		for i := 0; i < int(TextFieldStatesN); i++ {
+			tf.StateStyles[i].CopyFrom(&tf.Sty)
+			tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]), tf.Viewport)
+			tf.StateStyles[i].StyleCSS(tf.This().(Node2D), tf.CSSAgg, TextFieldSelectors[i], tf.Viewport)
+			tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
+		}
+	}
+	if hasTempl && saveTempl {
+		for i := 0; i < int(TextFieldStatesN); i++ {
+			tf.StateStyles[i].Template = tf.Sty.Template + TextFieldSelectors[i]
+			tf.StateStyles[i].SaveTemplate()
+		}
 	}
 	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), true, true) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
@@ -1382,7 +1401,6 @@ func (tf *TextField) StyleTextField() {
 		tf.ClearAct, _ = kit.ToBool(pv)
 	}
 	tf.ConfigParts()
-	pr.End()
 }
 
 func (tf *TextField) Style2D() {

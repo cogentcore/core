@@ -34,7 +34,7 @@ import (
 // WidgetSelected signals when selection is updated
 type SliceView struct {
 	gi.Frame
-	Slice            interface{}        `desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	Slice            interface{}        `view:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
 	SliceValView     ValueView          `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	isArray          bool               `desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
 	AddOnly          bool               `desc:"can the user delete elements of the slice"`
@@ -56,7 +56,7 @@ type SliceView struct {
 	TmpSave          ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	BuiltSlice       interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
 	BuiltSize        int                `view:"-" json:"-" xml:"-" desc:"the built size"`
-	ToolbarSlice     interface{}        `desc:"the slice that we successfully set a toolbar for"`
+	ToolbarSlice     interface{}        `view:"-" desc:"the slice that we successfully set a toolbar for"`
 	inFocusGrab      bool
 	curRow           int // temp row variable used e.g., in Drop method
 }
@@ -262,6 +262,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			idxlab.Text = idxtxt
 			idxlab.SetProp("slv-index", i)
 			idxlab.Selectable = true
+			idxlab.Sty.Template = "SliceView.IndexLabel"
 			idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.WidgetSelected) {
 					wbb := send.(gi.Node2D).AsWidget()
@@ -280,10 +281,13 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			sg.SetChild(widg, ridx+idxOff, valnm)
 		}
 		vv.ConfigWidget(widg)
+		wb := widg.AsWidget()
+		// if wb != nil {
+		// 	wb.Sty.Template = "SliceView.ItemWidget"
+		// }
 
 		if sv.IsInactive() {
 			widg.AsNode2D().SetInactive()
-			wb := widg.AsWidget()
 			if wb != nil {
 				wb.SetProp("slv-index", i)
 				wb.ClearSelected()
@@ -313,6 +317,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 					addact.SetIcon("plus")
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
+					addact.Sty.Template = "SliceView.AddAction"
 					addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						act := send.(*gi.Action)
 						svv := recv.Embed(KiT_SliceView).(*SliceView)
@@ -329,6 +334,7 @@ func (sv *SliceView) ConfigSliceGridRows() {
 					delact.SetIcon("minus")
 					delact.Tooltip = "delete this element"
 					delact.Data = i
+					delact.Sty.Template = "SliceView.DelAction"
 					delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						act := send.(*gi.Action)
 						svv := recv.Embed(KiT_SliceView).(*SliceView)

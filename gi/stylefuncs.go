@@ -5,8 +5,12 @@
 package gi
 
 import (
+	"fmt"
 	"image/color"
 	"log"
+	"reflect"
+	"strings"
+	"unsafe"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -17,11 +21,11 @@ import (
 // this is an alternative manual styling strategy -- styling takes a lot of time
 // and this should be a lot faster
 
-func StyleInhInit(val interface{}) (inh, init bool) {
+func StyleInhInit(val, par interface{}) (inh, init bool) {
 	if str, ok := val.(string); ok {
 		switch str {
 		case "inherit":
-			return true, false
+			return !kit.IfaceIsNil(par), false
 		case "initial":
 			return false, true
 		default:
@@ -36,40 +40,12 @@ func StyleSetError(key string, val interface{}) {
 	log.Printf("gi.Style error: cannot set key: %s from value: %v\n", key, val)
 }
 
-type StyleFunc func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D)
+type StyleFunc func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D)
 
-// This is a compiled map of all style funcs for Style object -- compiled from
-// individual ones at startup
-var StyleAllStyleFuncs map[string]StyleFunc
-
+// StyleFromProps sets style field values based on ki.Props properties
 func (s *Style) StyleFromProps(par *Style, props ki.Props, vp *Viewport2D) {
-	if StyleAllStyleFuncs == nil {
-		StyleAllStyleFuncs = make(map[string]StyleFunc, 100)
-		for ky, fn := range StyleStyleFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		for ky, fn := range StyleLayoutFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		for ky, fn := range StyleFontFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		for ky, fn := range StyleTextFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		for ky, fn := range StyleBorderFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		for ky, fn := range StyleOutlineFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		for ky, fn := range StyleShadowFuncs {
-			StyleAllStyleFuncs[ky] = fn
-		}
-		// fmt.Printf("all style len: %d\n", len(StyleAllStyleFuncs))
-	}
-
-	pr := prof.Start("StyleFromProps")
+	// pr := prof.Start("StyleFromProps")
+	// defer pr.End()
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -77,11 +53,73 @@ func (s *Style) StyleFromProps(par *Style, props ki.Props, vp *Viewport2D) {
 		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
 			continue
 		}
-		if sfunc, ok := StyleAllStyleFuncs[key]; ok {
+		if sfunc, ok := StyleLayoutFuncs[key]; ok {
+			if par != nil {
+				sfunc(&s.Layout, key, val, &par.Layout, vp)
+			} else {
+				sfunc(&s.Layout, key, val, nil, vp)
+			}
+			continue
+		}
+		if sfunc, ok := StyleFontFuncs[key]; ok {
+			if par != nil {
+				sfunc(&s.Font, key, val, &par.Font, vp)
+			} else {
+				sfunc(&s.Font, key, val, nil, vp)
+			}
+			continue
+		}
+		if sfunc, ok := StyleTextFuncs[key]; ok {
+			if par != nil {
+				sfunc(&s.Text, key, val, &par.Text, vp)
+			} else {
+				sfunc(&s.Text, key, val, nil, vp)
+			}
+			continue
+		}
+		if sfunc, ok := StyleBorderFuncs[key]; ok {
+			if par != nil {
+				sfunc(&s.Border, key, val, &par.Border, vp)
+			} else {
+				sfunc(&s.Border, key, val, nil, vp)
+			}
+			continue
+		}
+		if sfunc, ok := StyleStyleFuncs[key]; ok {
 			sfunc(s, key, val, par, vp)
+			continue
+		}
+		if sfunc, ok := StyleOutlineFuncs[key]; ok {
+			if par != nil {
+				sfunc(&s.Outline, key, val, &par.Outline, vp)
+			} else {
+				sfunc(&s.Outline, key, val, nil, vp)
+			}
+			continue
+		}
+		if sfunc, ok := StyleShadowFuncs[key]; ok {
+			if par != nil {
+				sfunc(&s.BoxShadow, key, val, &par.BoxShadow, vp)
+			} else {
+				sfunc(&s.BoxShadow, key, val, nil, vp)
+			}
+			continue
 		}
 	}
-	pr.End()
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//  ToDots
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (s *Style) ToDots(uc *units.Context) {
+	s.StyleToDots(uc)
+	s.Layout.ToDots(uc)
+	s.Font.ToDots(uc)
+	s.Text.ToDots(uc)
+	s.Border.ToDots(uc)
+	s.Outline.ToDots(uc)
+	s.BoxShadow.ToDots(uc)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -89,10 +127,11 @@ func (s *Style) StyleFromProps(par *Style, props ki.Props, vp *Viewport2D) {
 
 // StyleStyleFuncs are functions for styling the Style object itself
 var StyleStyleFuncs = map[string]StyleFunc{
-	"display": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"display": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Display = par.Display
+				s.Display = par.(*Style).Display
 			} else if init {
 				s.Display = true
 			}
@@ -102,10 +141,11 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			s.Display = bv
 		}
 	},
-	"visible": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"visible": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Visible = par.Visible
+				s.Visible = par.(*Style).Visible
 			} else if init {
 				s.Visible = false
 			}
@@ -115,10 +155,11 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			s.Visible = bv
 		}
 	},
-	"inactive": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"inactive": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Inactive = par.Inactive
+				s.Inactive = par.(*Style).Inactive
 			} else if init {
 				s.Inactive = false
 			}
@@ -128,10 +169,11 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			s.Inactive = bv
 		}
 	},
-	"pointer-events": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"pointer-events": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		s := obj.(*Style)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.PointerEvents = par.PointerEvents
+				s.PointerEvents = par.(*Style).PointerEvents
 			} else if init {
 				s.PointerEvents = true
 			}
@@ -143,213 +185,316 @@ var StyleStyleFuncs = map[string]StyleFunc{
 	},
 }
 
+// StyleToDots runs ToDots on unit values, to compile down to raw pixels
+func (s *Style) StyleToDots(uc *units.Context) {
+	// none
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 //  Layout
 
 // StyleLayoutFuncs are functions for styling the LayoutStyle object
 var StyleLayoutFuncs = map[string]StyleFunc{
-	"z-index": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"z-index": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.ZIndex = par.Layout.ZIndex
+				ly.ZIndex = par.(*LayoutStyle).ZIndex
 			} else if init {
-				s.Layout.ZIndex = 0
+				ly.ZIndex = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			s.Layout.ZIndex = int(iv)
+			ly.ZIndex = int(iv)
 		}
 	},
-	"horizontal-align": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"horizontal-align": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.AlignH = par.Layout.AlignH
+				ly.AlignH = par.(*LayoutStyle).AlignH
 			} else if init {
-				s.Layout.AlignH = AlignLeft
+				ly.AlignH = AlignLeft
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Layout.AlignH.FromString(vt)
+			ly.AlignH.FromString(vt)
 		case Align:
-			s.Layout.AlignH = vt
+			ly.AlignH = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Layout.AlignH = Align(iv)
+				ly.AlignH = Align(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"vertical-align": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"vertical-align": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.AlignV = par.Layout.AlignV
+				ly.AlignV = par.(*LayoutStyle).AlignV
 			} else if init {
-				s.Layout.AlignV = AlignMiddle
+				ly.AlignV = AlignMiddle
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Layout.AlignV.FromString(vt)
+			ly.AlignV.FromString(vt)
 		case Align:
-			s.Layout.AlignV = vt
+			ly.AlignV = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Layout.AlignV = Align(iv)
+				ly.AlignV = Align(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"x": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"x": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.PosX = par.Layout.PosX
+				ly.PosX = par.(*LayoutStyle).PosX
 			} else if init {
-				s.Layout.PosX.Val = 0
+				ly.PosX.Val = 0
 			}
 			return
 		}
-		s.Layout.PosX.SetIFace(val, key)
+		ly.PosX.SetIFace(val, key)
 	},
-	"y": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"y": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.PosY = par.Layout.PosY
+				ly.PosY = par.(*LayoutStyle).PosY
 			} else if init {
-				s.Layout.PosY.Val = 0
+				ly.PosY.Val = 0
 			}
 			return
 		}
-		s.Layout.PosY.SetIFace(val, key)
+		ly.PosY.SetIFace(val, key)
 	},
-	"width": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"width": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.Width = par.Layout.Width
+				ly.Width = par.(*LayoutStyle).Width
 			} else if init {
-				s.Layout.Width.Val = 0
+				ly.Width.Val = 0
 			}
 			return
 		}
-		s.Layout.Width.SetIFace(val, key)
+		ly.Width.SetIFace(val, key)
 	},
-	"height": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"height": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.Height = par.Layout.Height
+				ly.Height = par.(*LayoutStyle).Height
 			} else if init {
-				s.Layout.Height.Val = 0
+				ly.Height.Val = 0
 			}
 			return
 		}
-		s.Layout.Height.SetIFace(val, key)
+		ly.Height.SetIFace(val, key)
 	},
-	"max-width": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"max-width": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.MaxWidth = par.Layout.MaxWidth
+				ly.MaxWidth = par.(*LayoutStyle).MaxWidth
 			} else if init {
-				s.Layout.MaxWidth.Val = 0
+				ly.MaxWidth.Val = 0
 			}
 			return
 		}
-		s.Layout.MaxWidth.SetIFace(val, key)
+		ly.MaxWidth.SetIFace(val, key)
 	},
-	"max-height": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"max-height": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.MaxHeight = par.Layout.MaxHeight
+				ly.MaxHeight = par.(*LayoutStyle).MaxHeight
 			} else if init {
-				s.Layout.MaxHeight.Val = 0
+				ly.MaxHeight.Val = 0
 			}
 			return
 		}
-		s.Layout.MaxHeight.SetIFace(val, key)
+		ly.MaxHeight.SetIFace(val, key)
 	},
-	"min-width": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"min-width": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.MinWidth = par.Layout.MinWidth
+				ly.MinWidth = par.(*LayoutStyle).MinWidth
 			} else if init {
-				s.Layout.MinWidth.Set(2, units.Px)
+				ly.MinWidth.Set(2, units.Px)
 			}
 			return
 		}
-		s.Layout.MinWidth.SetIFace(val, key)
+		ly.MinWidth.SetIFace(val, key)
 	},
-	"min-height": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"min-height": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.MinHeight = par.Layout.MinHeight
+				ly.MinHeight = par.(*LayoutStyle).MinHeight
 			} else if init {
-				s.Layout.MinHeight.Set(2, units.Px)
+				ly.MinHeight.Set(2, units.Px)
 			}
 			return
 		}
-		s.Layout.MinHeight.SetIFace(val, key)
+		ly.MinHeight.SetIFace(val, key)
 	},
-	"margin": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"margin": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.Margin = par.Layout.Margin
+				ly.Margin = par.(*LayoutStyle).Margin
 			} else if init {
-				s.Layout.Margin.Val = 0
+				ly.Margin.Val = 0
 			}
 			return
 		}
-		s.Layout.Margin.SetIFace(val, key)
+		ly.Margin.SetIFace(val, key)
 	},
-	"padding": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"padding": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.Padding = par.Layout.Padding
+				ly.Padding = par.(*LayoutStyle).Padding
 			} else if init {
-				s.Layout.Padding.Val = 0
+				ly.Padding.Val = 0
 			}
 			return
 		}
-		s.Layout.Padding.SetIFace(val, key)
+		ly.Padding.SetIFace(val, key)
 	},
-	"overflow": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"overflow": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.Overflow = par.Layout.Overflow
+				ly.Overflow = par.(*LayoutStyle).Overflow
 			} else if init {
-				s.Layout.Overflow = OverflowAuto
+				ly.Overflow = OverflowAuto
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Layout.Overflow.FromString(vt)
+			ly.Overflow.FromString(vt)
 		case Overflow:
-			s.Layout.Overflow = vt
+			ly.Overflow = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Layout.Overflow = Overflow(iv)
+				ly.Overflow = Overflow(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"columns": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"columns": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Layout.Columns = par.Layout.Columns
+				ly.Columns = par.(*LayoutStyle).Columns
 			} else if init {
-				s.Layout.Columns = 0
+				ly.Columns = 0
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			s.Layout.Columns = int(iv)
+			ly.Columns = int(iv)
 		}
 	},
+	"row": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				ly.Row = par.(*LayoutStyle).Row
+			} else if init {
+				ly.Row = 0
+			}
+			return
+		}
+		if iv, ok := kit.ToInt(val); ok {
+			ly.Row = int(iv)
+		}
+	},
+	"col": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				ly.Col = par.(*LayoutStyle).Col
+			} else if init {
+				ly.Col = 0
+			}
+			return
+		}
+		if iv, ok := kit.ToInt(val); ok {
+			ly.Col = int(iv)
+		}
+	},
+	"row-span": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				ly.RowSpan = par.(*LayoutStyle).RowSpan
+			} else if init {
+				ly.RowSpan = 0
+			}
+			return
+		}
+		if iv, ok := kit.ToInt(val); ok {
+			ly.RowSpan = int(iv)
+		}
+	},
+	"col-span": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				ly.ColSpan = par.(*LayoutStyle).ColSpan
+			} else if init {
+				ly.ColSpan = 0
+			}
+			return
+		}
+		if iv, ok := kit.ToInt(val); ok {
+			ly.ColSpan = int(iv)
+		}
+	},
+	"scrollbar-width": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ly := obj.(*LayoutStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				ly.ScrollBarWidth = par.(*LayoutStyle).ScrollBarWidth
+			} else if init {
+				ly.ScrollBarWidth.Val = 0
+			}
+			return
+		}
+		ly.ScrollBarWidth.SetIFace(val, key)
+	},
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (ly *LayoutStyle) ToDots(uc *units.Context) {
+	ly.PosX.ToDots(uc)
+	ly.PosY.ToDots(uc)
+	ly.Width.ToDots(uc)
+	ly.Height.ToDots(uc)
+	ly.MaxWidth.ToDots(uc)
+	ly.MaxHeight.ToDots(uc)
+	ly.MinWidth.ToDots(uc)
+	ly.MinHeight.ToDots(uc)
+	ly.Margin.ToDots(uc)
+	ly.Padding.ToDots(uc)
+	ly.ScrollBarWidth.ToDots(uc)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -357,195 +502,211 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 
 // StyleFontFuncs are functions for styling the FontStyle object
 var StyleFontFuncs = map[string]StyleFunc{
-	"color": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"color": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Color = par.Font.Color
+				fs.Color = par.(*FontStyle).Color
 			} else if init {
-				s.Font.Color.SetColor(color.Black)
+				fs.Color.SetColor(color.Black)
 			}
 			return
 		}
-		s.Font.Color.SetIFace(val, vp, key)
+		fs.Color.SetIFace(val, vp, key)
 	},
-	"background-color": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"background-color": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.BgColor = par.Font.BgColor
+				fs.BgColor = par.(*FontStyle).BgColor
 			} else if init {
-				s.Font.BgColor = ColorSpec{}
+				fs.BgColor = ColorSpec{}
 			}
 			return
 		}
-		s.Font.BgColor.SetIFace(val, vp, key)
+		fs.BgColor.SetIFace(val, vp, key)
 	},
-	"opacity": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"opacity": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Opacity = par.Font.Opacity
+				fs.Opacity = par.(*FontStyle).Opacity
 			} else if init {
-				s.Font.Opacity = 1
+				fs.Opacity = 1
 			}
 			return
 		}
 		if iv, ok := kit.ToFloat32(val); ok {
-			s.Font.Opacity = iv
+			fs.Opacity = iv
 		}
 	},
-	"font-size": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"font-size": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Size = par.Font.Size
+				fs.Size = par.(*FontStyle).Size
 			} else if init {
-				s.Font.Size.Set(12, units.Pt)
+				fs.Size.Set(12, units.Pt)
 			}
 			return
 		}
-		s.Font.Size.SetIFace(val, key)
+		fs.Size.SetIFace(val, key)
 	},
-	"font-family": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"font-family": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Family = par.Font.Family
+				fs.Family = par.(*FontStyle).Family
 			} else if init {
-				s.Font.Family = "" // font has defaults
+				fs.Family = "" // font has defaults
 			}
 			return
 		}
-		s.Font.Family = kit.ToString(val)
+		fs.Family = kit.ToString(val)
 	},
-	"font-style": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"font-style": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Style = par.Font.Style
+				fs.Style = par.(*FontStyle).Style
 			} else if init {
-				s.Font.Style = FontNormal
+				fs.Style = FontNormal
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Font.Style.FromString(vt)
+			fs.Style.FromString(vt)
 		case FontStyles:
-			s.Font.Style = vt
+			fs.Style = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Font.Style = FontStyles(iv)
+				fs.Style = FontStyles(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"font-weight": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"font-weight": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Weight = par.Font.Weight
+				fs.Weight = par.(*FontStyle).Weight
 			} else if init {
-				s.Font.Weight = WeightNormal
+				fs.Weight = WeightNormal
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Font.Weight.FromString(vt)
+			fs.Weight.FromString(vt)
 		case FontWeights:
-			s.Font.Weight = vt
+			fs.Weight = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Font.Weight = FontWeights(iv)
+				fs.Weight = FontWeights(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"font-stretch": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"font-stretch": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Stretch = par.Font.Stretch
+				fs.Stretch = par.(*FontStyle).Stretch
 			} else if init {
-				s.Font.Stretch = FontStrNormal
+				fs.Stretch = FontStrNormal
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Font.Stretch.FromString(vt)
+			fs.Stretch.FromString(vt)
 		case FontStretch:
-			s.Font.Stretch = vt
+			fs.Stretch = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Font.Stretch = FontStretch(iv)
+				fs.Stretch = FontStretch(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"font-variant": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"font-variant": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Variant = par.Font.Variant
+				fs.Variant = par.(*FontStyle).Variant
 			} else if init {
-				s.Font.Variant = FontVarNormal
+				fs.Variant = FontVarNormal
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Font.Variant.FromString(vt)
+			fs.Variant.FromString(vt)
 		case FontVariants:
-			s.Font.Variant = vt
+			fs.Variant = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Font.Variant = FontVariants(iv)
+				fs.Variant = FontVariants(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"text-decoration": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"text-decoration": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Deco = par.Font.Deco
+				fs.Deco = par.(*FontStyle).Deco
 			} else if init {
-				s.Font.Deco = DecoNone
+				fs.Deco = DecoNone
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Font.Deco.FromString(vt)
+			fs.Deco.FromString(vt)
 		case TextDecorations:
-			s.Font.Deco = vt
+			fs.Deco = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Font.Deco = TextDecorations(iv)
+				fs.Deco = TextDecorations(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"baseline-shift": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"baseline-shift": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		fs := obj.(*FontStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Font.Shift = par.Font.Shift
+				fs.Shift = par.(*FontStyle).Shift
 			} else if init {
-				s.Font.Shift = ShiftBaseline
+				fs.Shift = ShiftBaseline
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Font.Shift.FromString(vt)
+			fs.Shift.FromString(vt)
 		case BaselineShifts:
-			s.Font.Shift = vt
+			fs.Shift = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Font.Shift = BaselineShifts(iv)
+				fs.Shift = BaselineShifts(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (fs *FontStyle) ToDots(uc *units.Context) {
+	fs.Size.ToDots(uc)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -553,234 +714,256 @@ var StyleFontFuncs = map[string]StyleFunc{
 
 // StyleTextFuncs are functions for styling the TextStyle object
 var StyleTextFuncs = map[string]StyleFunc{
-	"text-align": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"text-align": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.Align = par.Text.Align
+				ts.Align = par.(*TextStyle).Align
 			} else if init {
-				s.Text.Align = AlignLeft
+				ts.Align = AlignLeft
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Text.Align.FromString(vt)
+			ts.Align.FromString(vt)
 		case Align:
-			s.Text.Align = vt
+			ts.Align = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Text.Align = Align(iv)
+				ts.Align = Align(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"text-anchor": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"text-anchor": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.Anchor = par.Text.Anchor
+				ts.Anchor = par.(*TextStyle).Anchor
 			} else if init {
-				s.Text.Anchor = AnchorStart
+				ts.Anchor = AnchorStart
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Text.Anchor.FromString(vt)
+			ts.Anchor.FromString(vt)
 		case TextAnchors:
-			s.Text.Anchor = vt
+			ts.Anchor = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Text.Anchor = TextAnchors(iv)
+				ts.Anchor = TextAnchors(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"letter-spacing": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"letter-spacing": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.LetterSpacing = par.Text.LetterSpacing
+				ts.LetterSpacing = par.(*TextStyle).LetterSpacing
 			} else if init {
-				s.Text.LetterSpacing.Val = 0
+				ts.LetterSpacing.Val = 0
 			}
 			return
 		}
-		s.Text.LetterSpacing.SetIFace(val, key)
+		ts.LetterSpacing.SetIFace(val, key)
 	},
-	"word-spacing": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"word-spacing": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.WordSpacing = par.Text.WordSpacing
+				ts.WordSpacing = par.(*TextStyle).WordSpacing
 			} else if init {
-				s.Text.WordSpacing.Val = 0
+				ts.WordSpacing.Val = 0
 			}
 			return
 		}
-		s.Text.WordSpacing.SetIFace(val, key)
+		ts.WordSpacing.SetIFace(val, key)
 	},
-	"line-height": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"line-height": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.LineHeight = par.Text.LineHeight
+				ts.LineHeight = par.(*TextStyle).LineHeight
 			} else if init {
-				s.Text.LineHeight = 1
+				ts.LineHeight = 1
 			}
 			return
 		}
 		if iv, ok := kit.ToFloat32(val); ok {
-			s.Text.LineHeight = iv
+			ts.LineHeight = iv
 		}
 	},
-	"white-space": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"white-space": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.WhiteSpace = par.Text.WhiteSpace
+				ts.WhiteSpace = par.(*TextStyle).WhiteSpace
 			} else if init {
-				s.Text.WhiteSpace = WhiteSpaceNormal
+				ts.WhiteSpace = WhiteSpaceNormal
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Text.WhiteSpace.FromString(vt)
+			ts.WhiteSpace.FromString(vt)
 		case WhiteSpaces:
-			s.Text.WhiteSpace = vt
+			ts.WhiteSpace = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Text.WhiteSpace = WhiteSpaces(iv)
+				ts.WhiteSpace = WhiteSpaces(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"unicode-bidi": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"unicode-bidi": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.UnicodeBidi = par.Text.UnicodeBidi
+				ts.UnicodeBidi = par.(*TextStyle).UnicodeBidi
 			} else if init {
-				s.Text.UnicodeBidi = BidiNormal
+				ts.UnicodeBidi = BidiNormal
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Text.UnicodeBidi.FromString(vt)
+			ts.UnicodeBidi.FromString(vt)
 		case UnicodeBidi:
-			s.Text.UnicodeBidi = vt
+			ts.UnicodeBidi = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Text.UnicodeBidi = UnicodeBidi(iv)
+				ts.UnicodeBidi = UnicodeBidi(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"direction": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"direction": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.Direction = par.Text.Direction
+				ts.Direction = par.(*TextStyle).Direction
 			} else if init {
-				s.Text.Direction = LRTB
+				ts.Direction = LRTB
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Text.Direction.FromString(vt)
+			ts.Direction.FromString(vt)
 		case TextDirections:
-			s.Text.Direction = vt
+			ts.Direction = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Text.Direction = TextDirections(iv)
+				ts.Direction = TextDirections(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"writing-mode": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"writing-mode": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.WritingMode = par.Text.WritingMode
+				ts.WritingMode = par.(*TextStyle).WritingMode
 			} else if init {
-				s.Text.WritingMode = LRTB
+				ts.WritingMode = LRTB
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Text.WritingMode.FromString(vt)
+			ts.WritingMode.FromString(vt)
 		case TextDirections:
-			s.Text.WritingMode = vt
+			ts.WritingMode = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Text.WritingMode = TextDirections(iv)
+				ts.WritingMode = TextDirections(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"glyph-orientation-vertical": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"glyph-orientation-vertical": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.OrientationVert = par.Text.OrientationVert
+				ts.OrientationVert = par.(*TextStyle).OrientationVert
 			} else if init {
-				s.Text.OrientationVert = 1
+				ts.OrientationVert = 1
 			}
 			return
 		}
 		if iv, ok := kit.ToFloat32(val); ok {
-			s.Text.OrientationVert = iv
+			ts.OrientationVert = iv
 		}
 	},
-	"glyph-orientation-horizontal": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"glyph-orientation-horizontal": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.OrientationHoriz = par.Text.OrientationHoriz
+				ts.OrientationHoriz = par.(*TextStyle).OrientationHoriz
 			} else if init {
-				s.Text.OrientationHoriz = 1
+				ts.OrientationHoriz = 1
 			}
 			return
 		}
 		if iv, ok := kit.ToFloat32(val); ok {
-			s.Text.OrientationHoriz = iv
+			ts.OrientationHoriz = iv
 		}
 	},
-	"text-indent": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"text-indent": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.Indent = par.Text.Indent
+				ts.Indent = par.(*TextStyle).Indent
 			} else if init {
-				s.Text.Indent.Val = 0
+				ts.Indent.Val = 0
 			}
 			return
 		}
-		s.Text.Indent.SetIFace(val, key)
+		ts.Indent.SetIFace(val, key)
 	},
-	"para-spacing": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"para-spacing": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.ParaSpacing = par.Text.ParaSpacing
+				ts.ParaSpacing = par.(*TextStyle).ParaSpacing
 			} else if init {
-				s.Text.ParaSpacing.Val = 0
+				ts.ParaSpacing.Val = 0
 			}
 			return
 		}
-		s.Text.ParaSpacing.SetIFace(val, key)
+		ts.ParaSpacing.SetIFace(val, key)
 	},
-	"tab-size": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"tab-size": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ts := obj.(*TextStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Text.TabSize = par.Text.TabSize
+				ts.TabSize = par.(*TextStyle).TabSize
 			} else if init {
-				s.Text.TabSize = 4
+				ts.TabSize = 4
 			}
 			return
 		}
 		if iv, ok := kit.ToInt(val); ok {
-			s.Text.TabSize = int(iv)
+			ts.TabSize = int(iv)
 		}
 	},
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (ts *TextStyle) ToDots(uc *units.Context) {
+	ts.LetterSpacing.ToDots(uc)
+	ts.WordSpacing.ToDots(uc)
+	ts.Indent.ToDots(uc)
+	ts.ParaSpacing.ToDots(uc)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -788,61 +971,71 @@ var StyleTextFuncs = map[string]StyleFunc{
 
 // StyleBorderFuncs are functions for styling the BorderStyle object
 var StyleBorderFuncs = map[string]StyleFunc{
-	"border-style": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"border-style": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Border.Style = par.Border.Style
+				bs.Style = par.(*BorderStyle).Style
 			} else if init {
-				s.Border.Style = BorderSolid
+				bs.Style = BorderSolid
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Border.Style.FromString(vt)
+			bs.Style.FromString(vt)
 		case BorderDrawStyle:
-			s.Border.Style = vt
+			bs.Style = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Border.Style = BorderDrawStyle(iv)
+				bs.Style = BorderDrawStyle(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"border-width": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"border-width": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Border.Width = par.Border.Width
+				bs.Width = par.(*BorderStyle).Width
 			} else if init {
-				s.Border.Width.Val = 0
+				bs.Width.Val = 0
 			}
 			return
 		}
-		s.Border.Width.SetIFace(val, key)
+		bs.Width.SetIFace(val, key)
 	},
-	"border-radius": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"border-radius": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Border.Radius = par.Border.Radius
+				bs.Radius = par.(*BorderStyle).Radius
 			} else if init {
-				s.Border.Radius.Val = 0
+				bs.Radius.Val = 0
 			}
 			return
 		}
-		s.Border.Radius.SetIFace(val, key)
+		bs.Radius.SetIFace(val, key)
 	},
-	"border-color": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"border-color": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Border.Color = par.Font.Color
+				bs.Color = par.(*BorderStyle).Color
 			} else if init {
-				s.Border.Color.SetColor(color.Black)
+				bs.Color.SetColor(color.Black)
 			}
 			return
 		}
-		s.Border.Color.SetIFace(val, vp, key)
+		bs.Color.SetIFace(val, vp, key)
 	},
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (bs *BorderStyle) ToDots(uc *units.Context) {
+	bs.Width.ToDots(uc)
+	bs.Radius.ToDots(uc)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -850,134 +1043,553 @@ var StyleBorderFuncs = map[string]StyleFunc{
 
 // StyleOutlineFuncs are functions for styling the OutlineStyle object
 var StyleOutlineFuncs = map[string]StyleFunc{
-	"outline-style": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"outline-style": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Outline.Style = par.Outline.Style
+				bs.Style = par.(*BorderStyle).Style
 			} else if init {
-				s.Outline.Style = BorderNone
+				bs.Style = BorderNone
 			}
 			return
 		}
 		switch vt := val.(type) {
 		case string:
-			s.Outline.Style.FromString(vt)
+			bs.Style.FromString(vt)
 		case BorderDrawStyle:
-			s.Outline.Style = vt
+			bs.Style = vt
 		default:
 			if iv, ok := kit.ToInt(val); ok {
-				s.Outline.Style = BorderDrawStyle(iv)
+				bs.Style = BorderDrawStyle(iv)
 			} else {
 				StyleSetError(key, val)
 			}
 		}
 	},
-	"outline-width": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"outline-width": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Outline.Width = par.Outline.Width
+				bs.Width = par.(*BorderStyle).Width
 			} else if init {
-				s.Outline.Width.Val = 0
+				bs.Width.Val = 0
 			}
 			return
 		}
-		s.Outline.Width.SetIFace(val, key)
+		bs.Width.SetIFace(val, key)
 	},
-	"outline-radius": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"outline-radius": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Outline.Radius = par.Outline.Radius
+				bs.Radius = par.(*BorderStyle).Radius
 			} else if init {
-				s.Outline.Radius.Val = 0
+				bs.Radius.Val = 0
 			}
 			return
 		}
-		s.Outline.Radius.SetIFace(val, key)
+		bs.Radius.SetIFace(val, key)
 	},
-	"outline-color": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"outline-color": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		bs := obj.(*BorderStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.Outline.Color = par.Font.Color
+				bs.Color = par.(*BorderStyle).Color
 			} else if init {
-				s.Outline.Color.SetColor(color.Black)
+				bs.Color.SetColor(color.Black)
 			}
 			return
 		}
-		s.Outline.Color.SetIFace(val, vp, key)
+		bs.Color.SetIFace(val, vp, key)
 	},
 }
+
+// Note: uses BorderStyle.ToDots for now
 
 /////////////////////////////////////////////////////////////////////////////////
 //  Shadow
 
 // StyleShadowFuncs are functions for styling the ShadowStyle object
 var StyleShadowFuncs = map[string]StyleFunc{
-	"box-shadow.h-offset": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"box-shadow.h-offset": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ss := obj.(*ShadowStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.BoxShadow.HOffset = par.BoxShadow.HOffset
+				ss.HOffset = par.(*ShadowStyle).HOffset
 			} else if init {
-				s.BoxShadow.HOffset.Val = 0
+				ss.HOffset.Val = 0
 			}
 			return
 		}
-		s.BoxShadow.HOffset.SetIFace(val, key)
+		ss.HOffset.SetIFace(val, key)
 	},
-	"box-shadow.v-offset": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"box-shadow.v-offset": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ss := obj.(*ShadowStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.BoxShadow.VOffset = par.BoxShadow.VOffset
+				ss.VOffset = par.(*ShadowStyle).VOffset
 			} else if init {
-				s.BoxShadow.VOffset.Val = 0
+				ss.VOffset.Val = 0
 			}
 			return
 		}
-		s.BoxShadow.VOffset.SetIFace(val, key)
+		ss.VOffset.SetIFace(val, key)
 	},
-	"box-shadow.blur": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"box-shadow.blur": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ss := obj.(*ShadowStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.BoxShadow.Blur = par.BoxShadow.Blur
+				ss.Blur = par.(*ShadowStyle).Blur
 			} else if init {
-				s.BoxShadow.Blur.Val = 0
+				ss.Blur.Val = 0
 			}
 			return
 		}
-		s.BoxShadow.Blur.SetIFace(val, key)
+		ss.Blur.SetIFace(val, key)
 	},
-	"box-shadow.spread": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"box-shadow.spread": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ss := obj.(*ShadowStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.BoxShadow.Spread = par.BoxShadow.Spread
+				ss.Spread = par.(*ShadowStyle).Spread
 			} else if init {
-				s.BoxShadow.Spread.Val = 0
+				ss.Spread.Val = 0
 			}
 			return
 		}
-		s.BoxShadow.Spread.SetIFace(val, key)
+		ss.Spread.SetIFace(val, key)
 	},
-	"box-shadow.color": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"box-shadow.color": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ss := obj.(*ShadowStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.BoxShadow.Color = par.Font.Color
+				ss.Color = par.(*ShadowStyle).Color
 			} else if init {
-				s.BoxShadow.Color.SetColor(color.Black)
+				ss.Color.SetColor(color.Black)
 			}
 			return
 		}
-		s.BoxShadow.Color.SetIFace(val, vp, key)
+		ss.Color.SetIFace(val, vp, key)
 	},
-	"box-shadow.inset": func(s *Style, key string, val interface{}, par *Style, vp *Viewport2D) {
-		if inh, init := StyleInhInit(val); inh || init {
+	"box-shadow.inset": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
+		ss := obj.(*ShadowStyle)
+		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
-				s.BoxShadow.Inset = par.BoxShadow.Inset
+				ss.Inset = par.(*ShadowStyle).Inset
 			} else if init {
-				s.BoxShadow.Inset = false
+				ss.Inset = false
 			}
 			return
 		}
 		if bv, ok := kit.ToBool(val); ok {
-			s.BoxShadow.Inset = bv
+			ss.Inset = bv
 		}
 	},
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (bs *ShadowStyle) ToDots(uc *units.Context) {
+	bs.HOffset.ToDots(uc)
+	bs.VOffset.ToDots(uc)
+	bs.Blur.ToDots(uc)
+	bs.Spread.ToDots(uc)
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  NOTE: all of below was first way of doing styling, automatically
+//  it is somewhat slower than the explicit manual code which is after
+//  all not that hard to write -- maintenance may be more of an issue..
+//  but given how time-critical styling is, it is worth it overall..
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   StyledFields
+
+// StyleFields contain the StyledFields for Style type
+var StyleFields = initStyle()
+
+func initStyle() *StyledFields {
+	StyleDefault.Defaults()
+	sf := &StyledFields{}
+	sf.Init(&StyleDefault)
+	return sf
+}
+
+// StyledFields contains fields of a struct that are styled -- create one
+// instance of this for each type that has styled fields (Style, Paint, and a
+// few with ad-hoc styled fields)
+type StyledFields struct {
+	Fields   map[string]*StyledField `desc:"the compiled stylable fields, mapped for the xml and alt tags for the field"`
+	Inherits []*StyledField          `desc:"the compiled stylable fields that have inherit:true tags and should thus be inherited from parent objects"`
+	Units    []*StyledField          `desc:"the compiled stylable fields of the unit.Value type, which should have ToDots run on them"`
+	Default  interface{}             `desc:"points to the Default instance of this type, initialized with the default values used for 'initial' keyword"`
+}
+
+func (sf *StyledFields) Init(df interface{}) {
+	sf.Default = df
+	sf.CompileFields(df)
+}
+
+// get the full effective tag based on outer tag plus given tag
+func StyleEffTag(tag, outerTag string) string {
+	tagEff := tag
+	if outerTag != "" && len(tag) > 0 {
+		if tag[0] == '.' {
+			tagEff = outerTag + tag
+		} else {
+			tagEff = outerTag + "-" + tag
+		}
+	}
+	return tagEff
+}
+
+// AddField adds a single field -- must be a direct field on the object and
+// not a field on an embedded type -- used for Widget objects where only one
+// or a few fields are styled
+func (sf *StyledFields) AddField(df interface{}, fieldName string) error {
+	valtyp := reflect.TypeOf(units.Value{})
+
+	if sf.Fields == nil {
+		sf.Fields = make(map[string]*StyledField, 5)
+		sf.Inherits = make([]*StyledField, 0, 5)
+		sf.Units = make([]*StyledField, 0, 5)
+	}
+	otp := reflect.TypeOf(df)
+	if otp.Kind() != reflect.Ptr {
+		err := fmt.Errorf("gi.StyleFields.AddField: must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())
+		log.Print(err)
+		return err
+	}
+	ot := otp.Elem()
+	if ot.Kind() != reflect.Struct {
+		err := fmt.Errorf("gi.StyleFields.AddField: only works on structs, not type: %v kind %v\n", ot, ot.Kind())
+		log.Print(err)
+		return err
+	}
+	vo := reflect.ValueOf(df).Elem()
+	struf, ok := ot.FieldByName(fieldName)
+	if !ok {
+		err := fmt.Errorf("gi.StyleFields.AddField: field name: %v not found in type %v\n", fieldName, ot.Name())
+		log.Print(err)
+		return err
+	}
+
+	vf := vo.FieldByName(fieldName)
+
+	styf := &StyledField{Field: struf, NetOff: struf.Offset, Default: vf}
+	tag := struf.Tag.Get("xml")
+	sf.Fields[tag] = styf
+	atags := struf.Tag.Get("alt")
+	if atags != "" {
+		atag := strings.Split(atags, ",")
+
+		for _, tg := range atag {
+			sf.Fields[tg] = styf
+		}
+	}
+	inhs := struf.Tag.Get("inherit")
+	if inhs == "true" {
+		sf.Inherits = append(sf.Inherits, styf)
+	}
+	if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
+		sf.Units = append(sf.Units, styf)
+	}
+	return nil
+}
+
+// CompileFields gathers all the fields with xml tag != "-", plus those
+// that are units.Value's for later optimized processing of styles
+func (sf *StyledFields) CompileFields(df interface{}) {
+	valtyp := reflect.TypeOf(units.Value{})
+
+	sf.Fields = make(map[string]*StyledField, 50)
+	sf.Inherits = make([]*StyledField, 0, 50)
+	sf.Units = make([]*StyledField, 0, 50)
+
+	WalkStyleStruct(df, "", uintptr(0),
+		func(struf reflect.StructField, vf reflect.Value, outerTag string, baseoff uintptr) {
+			styf := &StyledField{Field: struf, NetOff: baseoff + struf.Offset, Default: vf}
+			tag := StyleEffTag(struf.Tag.Get("xml"), outerTag)
+			if _, ok := sf.Fields[tag]; ok {
+				fmt.Printf("gi.StyledFileds.CompileFields: ERROR redundant tag found -- please only use unique tags! %v\n", tag)
+			}
+			sf.Fields[tag] = styf
+			atags := struf.Tag.Get("alt")
+			if atags != "" {
+				atag := strings.Split(atags, ",")
+
+				for _, tg := range atag {
+					tag = StyleEffTag(tg, outerTag)
+					sf.Fields[tag] = styf
+				}
+			}
+			inhs := struf.Tag.Get("inherit")
+			if inhs == "true" {
+				sf.Inherits = append(sf.Inherits, styf)
+			}
+			if vf.Kind() == reflect.Struct && vf.Type() == valtyp {
+				sf.Units = append(sf.Units, styf)
+			}
+		})
+	return
+}
+
+// Inherit copies all the values from par to obj for fields marked as
+// "inherit" -- inherited by default.  NOTE: No longer using this -- doing it
+// manually -- much faster
+func (sf *StyledFields) Inherit(obj, par interface{}, vp *Viewport2D) {
+	// pr := prof.Start("StyleFields.Inherit")
+	objptr := reflect.ValueOf(obj).Pointer()
+	hasPar := !kit.IfaceIsNil(par)
+	var parptr uintptr
+	if hasPar {
+		parptr = reflect.ValueOf(par).Pointer()
+	}
+	for _, fld := range sf.Inherits {
+		pfi := fld.FieldIface(parptr)
+		fld.FromProps(sf.Fields, objptr, parptr, pfi, hasPar, vp)
+		// fmt.Printf("inh: %v\n", fld.Field.Name)
+	}
+	// pr.End()
+}
+
+// Style applies styles to the fields from given properties for given object
+func (sf *StyledFields) Style(obj, par interface{}, props ki.Props, vp *Viewport2D) {
+	if props == nil {
+		return
+	}
+	pr := prof.Start("StyleFields.Style")
+	objptr := reflect.ValueOf(obj).Pointer()
+	hasPar := !kit.IfaceIsNil(par)
+	var parptr uintptr
+	if hasPar {
+		parptr = reflect.ValueOf(par).Pointer()
+	}
+	// fewer props than fields, esp with alts!
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		if vstr, ok := val.(string); ok {
+			if len(vstr) > 0 && vstr[0] == '$' { // special case to use other value
+				nkey := vstr[1:] // e.g., border-color has "$background-color" value
+				if vfld, nok := sf.Fields[nkey]; nok {
+					nval := vfld.FieldIface(objptr)
+					if fld, fok := sf.Fields[key]; fok {
+						fld.FromProps(sf.Fields, objptr, parptr, nval, hasPar, vp)
+						continue
+					}
+				}
+				fmt.Printf("gi.StyledFields.Style: redirect field not found: %v for key: %v\n", nkey, key)
+			}
+		}
+		fld, ok := sf.Fields[key]
+		if !ok {
+			// note: props can apply to Paint or Style and not easy to keep those
+			// precisely separated, so there will be mismatch..
+			// log.Printf("SetStyleFields: Property key: %v not among xml or alt field tags for styled obj: %T\n", key, obj)
+			continue
+		}
+		fld.FromProps(sf.Fields, objptr, parptr, val, hasPar, vp)
+	}
+	pr.End()
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (sf *StyledFields) ToDots(obj interface{}, uc *units.Context) {
+	// pr := prof.Start("StyleFields.ToDots")
+	objptr := reflect.ValueOf(obj).Pointer()
+	for _, fld := range sf.Units {
+		uv := fld.UnitsValue(objptr)
+		uv.ToDots(uc)
+	}
+	// pr.End()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   StyledField
+
+// StyledField contains the relevant data for a given stylable field in a struct
+type StyledField struct {
+	Field   reflect.StructField
+	NetOff  uintptr       `desc:"net accumulated offset from the overall main type, e.g., Style"`
+	Default reflect.Value `desc:"value of default value of this field"`
+}
+
+// FieldValue returns a reflect.Value for a given object, computed from NetOff
+// -- this is VERY expensive time-wise -- need to figure out a better solution..
+func (sf *StyledField) FieldValue(objptr uintptr) reflect.Value {
+	f := unsafe.Pointer(objptr + sf.NetOff)
+	nw := reflect.NewAt(sf.Field.Type, f)
+	return kit.UnhideIfaceValue(nw).Elem()
+}
+
+// FieldIface returns an interface{} for a given object, computed from NetOff
+// -- much faster -- use this
+func (sf *StyledField) FieldIface(objptr uintptr) interface{} {
+	npt := kit.NonPtrType(sf.Field.Type)
+	npk := npt.Kind()
+	switch {
+	case npt == KiT_Color:
+		return (*Color)(unsafe.Pointer(objptr + sf.NetOff))
+	case npt == KiT_ColorSpec:
+		return (*ColorSpec)(unsafe.Pointer(objptr + sf.NetOff))
+	case npt == KiT_Matrix2D:
+		return (*Matrix2D)(unsafe.Pointer(objptr + sf.NetOff))
+	case npt.Name() == "Value":
+		return (*units.Value)(unsafe.Pointer(objptr + sf.NetOff))
+	case npk >= reflect.Int && npk <= reflect.Uint64:
+		return sf.FieldValue(objptr).Interface() // no choice for enums
+	case npk == reflect.Float32:
+		return (*float32)(unsafe.Pointer(objptr + sf.NetOff))
+	case npk == reflect.Float64:
+		return (*float64)(unsafe.Pointer(objptr + sf.NetOff))
+	case npk == reflect.Bool:
+		return (*bool)(unsafe.Pointer(objptr + sf.NetOff))
+	case npk == reflect.String:
+		return (*string)(unsafe.Pointer(objptr + sf.NetOff))
+	case sf.Field.Name == "Dashes":
+		return (*[]float64)(unsafe.Pointer(objptr + sf.NetOff))
+	default:
+		fmt.Printf("Field: %v type %v not processed in StyledField.FieldIface -- fixme!\n", sf.Field.Name, npt.String())
+		return nil
+	}
+}
+
+// UnitsValue returns a units.Value for a field, which must be of that type..
+func (sf *StyledField) UnitsValue(objptr uintptr) *units.Value {
+	uv := (*units.Value)(unsafe.Pointer(objptr + sf.NetOff))
+	return uv
+}
+
+// FromProps styles given field from property value val, with optional parent object obj
+func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr uintptr, val interface{}, hasPar bool, vp *Viewport2D) {
+	errstr := "gi.StyledField FromProps: Field:"
+	fi := fld.FieldIface(objptr)
+	if kit.IfaceIsNil(fi) {
+		fmt.Printf("%v %v of type %v has nil value\n", errstr, fld.Field.Name, fld.Field.Type.String())
+		return
+	}
+	switch valv := val.(type) {
+	case string:
+		if valv == "inherit" {
+			if hasPar {
+				val = fld.FieldIface(parptr)
+				// fmt.Printf("%v %v set to inherited value: %v\n", errstr, fld.Field.Name, val)
+			} else {
+				// fmt.Printf("%v %v tried to inherit but par null: %v\n", errstr, fld.Field.Name, val)
+				return
+			}
+		}
+		if valv == "initial" {
+			val = fld.Default.Interface()
+			// fmt.Printf("%v set tag: %v to initial default value: %v\n", errstr, tag, df)
+		}
+	}
+	// todo: support keywords such as auto, normal, which should just set to 0
+
+	npt := kit.NonPtrType(reflect.TypeOf(fi))
+	npk := npt.Kind()
+
+	switch fiv := fi.(type) {
+	case *ColorSpec:
+		fiv.SetIFace(val, vp, fld.Field.Name)
+	case *Color:
+		fiv.SetIFace(val, vp, fld.Field.Name)
+	case *units.Value:
+		fiv.SetIFace(val, fld.Field.Name)
+	case *Matrix2D:
+		switch valv := val.(type) {
+		case string:
+			fiv.SetString(valv)
+		case *Matrix2D:
+			*fiv = *valv
+		}
+	case *[]float64:
+		switch valv := val.(type) {
+		case string:
+			*fiv = ParseDashesString(valv)
+		case *[]float64:
+			*fiv = *valv
+		}
+	default:
+		if npk >= reflect.Int && npk <= reflect.Uint64 {
+			switch valv := val.(type) {
+			case string:
+				tn := kit.ShortTypeName(fld.Field.Type)
+				if kit.Enums.Enum(tn) != nil {
+					kit.Enums.SetAnyEnumIfaceFromString(fi, valv)
+				} else if tn == "..int" {
+					kit.SetRobust(fi, val)
+				} else {
+					fmt.Printf("%v enum name not found %v for field %v\n", errstr, tn, fld.Field.Name)
+				}
+			default:
+				ival, ok := kit.ToInt(val)
+				if !ok {
+					log.Printf("%v for field: %v could not convert property to int: %v %T\n", errstr, fld.Field.Name, val, val)
+				} else {
+					kit.SetEnumIfaceFromInt64(fi, ival, npt)
+				}
+			}
+		} else {
+			kit.SetRobust(fi, val)
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//   WalkStyleStruct
+
+// this is the function to process a given field when walking the style
+type WalkStyleFieldFunc func(struf reflect.StructField, vf reflect.Value, tag string, baseoff uintptr)
+
+// StyleValueTypes is a map of types that are used as value types in style structures
+var StyleValueTypes = map[reflect.Type]struct{}{
+	units.KiT_Value: {},
+	KiT_Color:       {},
+	KiT_ColorSpec:   {},
+	KiT_Matrix2D:    {},
+}
+
+// WalkStyleStruct walks through a struct, calling a function on fields with
+// xml tags that are not "-", recursively through all the fields
+func WalkStyleStruct(obj interface{}, outerTag string, baseoff uintptr, fun WalkStyleFieldFunc) {
+	otp := reflect.TypeOf(obj)
+	if otp.Kind() != reflect.Ptr {
+		log.Printf("gi.WalkStyleStruct -- you must pass pointers to the structs, not type: %v kind %v\n", otp, otp.Kind())
+		return
+	}
+	ot := otp.Elem()
+	if ot.Kind() != reflect.Struct {
+		log.Printf("gi.WalkStyleStruct -- only works on structs, not type: %v kind %v\n", ot, ot.Kind())
+		return
+	}
+	vo := reflect.ValueOf(obj).Elem()
+	for i := 0; i < ot.NumField(); i++ {
+		struf := ot.Field(i)
+		if struf.PkgPath != "" { // skip unexported fields
+			continue
+		}
+		tag := struf.Tag.Get("xml")
+		if tag == "-" {
+			continue
+		}
+		ft := struf.Type
+		// note: need Addrs() to pass pointers to fields, not fields themselves
+		// fmt.Printf("processing field named: %v\n", struf.Nm)
+		vf := vo.Field(i)
+		vfi := vf.Addr().Interface()
+		_, styvaltype := StyleValueTypes[ft]
+		if ft.Kind() == reflect.Struct && !styvaltype {
+			WalkStyleStruct(vfi, tag, baseoff+struf.Offset, fun)
+		} else {
+			if tag == "" { // non-struct = don't process
+				continue
+			}
+			fun(struf, vf, outerTag, baseoff)
+		}
+	}
 }

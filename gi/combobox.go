@@ -52,7 +52,6 @@ var ComboBoxProps = ki.Props{
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
-	"border-style":     BorderSolid,
 	"padding":          units.NewPx(4),
 	"margin":           units.NewPx(4),
 	"text-align":       AlignCenter,

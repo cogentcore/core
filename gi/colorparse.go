@@ -35,10 +35,26 @@ func XMLAttr(name string, attrs []xml.Attr) string {
 	return ""
 }
 
+// ColorSpecCache is a cache of named color specs -- only a few are constantly re-used
+// so we save them in the cache instead of constantly recomputing!
+var ColorSpecCache map[string]*ColorSpec
+
 // SetString sets the color spec from a standard CSS-formatted string -- see
 // https://www.w3schools.com/css/css3_gradients.asp -- see UnmarshalXML for
 // XML-based version
 func (cs *ColorSpec) SetString(clrstr string, vp *Viewport2D) bool {
+	// pr := prof.Start("ColorSpec.SetString")
+	// defer pr.End()
+
+	if ColorSpecCache == nil {
+		ColorSpecCache = make(map[string]*ColorSpec)
+	}
+	fullnm := cs.Color.HexString() + clrstr
+	if ccg, ok := ColorSpecCache[fullnm]; ok {
+		cs.CopyFrom(ccg)
+		return true
+	}
+
 	clrstr = strings.TrimSpace(clrstr)
 	if strings.HasPrefix(clrstr, "url(") {
 		val := clrstr[4:]
@@ -90,6 +106,9 @@ func (cs *ColorSpec) SetString(clrstr string, vp *Viewport2D) bool {
 			cs.parseRadialGrad(pars)
 		}
 		FixGradientStops(cs.Gradient)
+		svcs := &ColorSpec{} // critical to save a copy..
+		svcs.CopyFrom(cs)
+		ColorSpecCache[fullnm] = svcs
 	} else {
 		cs.Gradient = nil
 		cs.Source = SolidColor

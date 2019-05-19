@@ -227,6 +227,13 @@ func (c *Color) String() string {
 	return fmt.Sprintf("R: %v G: %v B: %v A: %v", c.R, c.G, c.B, c.A)
 }
 
+func (c *Color) HexString() string {
+	if c == nil {
+		return "nil"
+	}
+	return fmt.Sprintf("#%X%X%X%X", c.R, c.G, c.B, c.A)
+}
+
 func (c *Color) SetToNil() {
 	c.R = 0
 	c.G = 0
@@ -341,6 +348,8 @@ func (c *Color) SetString(str string, base color.Color) error {
 		c.SetToNil()
 		return nil
 	}
+	// pr := prof.Start("Color.SetString")
+	// defer pr.End()
 	low := strings.ToLower(str)
 	switch {
 	case low[0] == '#':
