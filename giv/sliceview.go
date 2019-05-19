@@ -508,8 +508,8 @@ func (sv *SliceView) Render2D() {
 		return
 	}
 	if sv.PushBounds() {
-		if sv.Sty.Font.Height > 0 {
-			sv.VisRows = (sv.VpBBox.Max.Y - sv.VpBBox.Min.Y) / int(1.8*sv.Sty.Font.Height)
+		if sv.Sty.Font.Face.Metrics.Height > 0 {
+			sv.VisRows = (sv.VpBBox.Max.Y - sv.VpBBox.Min.Y) / int(1.8*sv.Sty.Font.Face.Metrics.Height)
 		} else {
 			sv.VisRows = 10
 		}

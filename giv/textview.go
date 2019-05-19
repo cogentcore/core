@@ -2792,7 +2792,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 			return spos
 		}
 	} else {
-		spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+		spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Face.Metrics().Descent)
 	}
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -2813,7 +2813,7 @@ func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
 		spos.X += tv.LineNoOff
 		return spos
 	}
-	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Metrics().Descent)
+	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Face.Metrics().Descent)
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -3212,7 +3212,7 @@ func (tv *TextView) VisSizes() {
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
 	sty.Font.OpenFont(&sty.UnContext)
-	tv.FontHeight = sty.Font.Height
+	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
 	sz := tv.VpBBox.Size()
 	if sz == image.ZP {
@@ -3220,12 +3220,12 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.X = 80
 	} else {
 		tv.VisSize.Y = int(math32.Floor(float32(sz.Y) / tv.LineHeight))
-		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Ch))
+		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
 	}
 	tv.LineNoDigs = ints.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
 	if tv.Buf != nil && tv.Buf.Opts.LineNos {
 		tv.SetFlag(int(TextViewHasLineNos))
-		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Ch + spc // space for icon
+		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc // space for icon
 	} else {
 		tv.ClearFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = 0
@@ -3372,7 +3372,7 @@ func (tv *TextView) RenderLineNo(ln int) {
 	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := tv.RenderStartPos()
 	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Metrics().Ascent) - +gi.FixedToFloat32(sty.Font.Face.Metrics().Descent)
+	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Face.Metrics().Ascent) - +gi.FixedToFloat32(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(tv.VpBBox.Min.X) + spc
 	tv.LineNoRender.Render(rs, pos)
 	// if ic, ok := tv.LineIcons[ln]; ok {
@@ -3573,7 +3573,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) TextPos {
 	xoff := float32(tv.WinBBox.Min.X)
 	scrl := tv.WinBBox.Min.X - tv.ObjBBox.Min.X
 	nolno := pt.X - int(tv.LineNoOff)
-	sc := int(float32(nolno+scrl) / sty.Font.Ch)
+	sc := int(float32(nolno+scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
 	sc = ints.MaxInt(0, sc)
 	cch := sc

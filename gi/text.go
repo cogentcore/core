@@ -239,7 +239,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 	r := nwr[0]
 	lastUc := false
 	if r > 0xFF && unicode.IsSymbol(r) {
-		rr.Face = ucfont.Face
+		rr.Face = ucfont.Face.Face
 		lastUc = true
 	}
 	sr.HasDecoUpdate(bg, deco)
@@ -250,7 +250,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 		if oswin.TheApp.Platform() == oswin.MacOS {
 			if r > 0xFF && unicode.IsSymbol(r) {
 				if !lastUc {
-					rp.Face = ucfont.Face
+					rp.Face = ucfont.Face.Face
 					lastUc = true
 				}
 			} else {
@@ -283,7 +283,7 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
-	sr.Render[0].Face = sty.Face
+	sr.Render[0].Face = sty.Face.Face
 	sr.Render[0].Color = sty.Color
 	sr.Render[0].BgColor = bgc
 	sr.Render[0].RotRad = rot
@@ -309,12 +309,12 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 	for i, r := range sr.Text {
 		if r > 0xFF && unicode.IsSymbol(r) {
 			if !lastUc {
-				sr.Render[i].Face = ucfont.Face
+				sr.Render[i].Face = ucfont.Face.Face
 				lastUc = true
 			}
 		} else {
 			if lastUc {
-				sr.Render[i].Face = sty.Face
+				sr.Render[i].Face = sty.Face.Face
 				lastUc = false
 			}
 		}
@@ -988,9 +988,9 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 	tr.Links = nil
 	sr := &(tr.Spans[0])
 	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
-	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
+	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
-	vht := fontSty.Face.Metrics().Height
+	vht := fontSty.Face.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 
 }
@@ -1009,9 +1009,9 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Conte
 	tr.Links = nil
 	sr := &(tr.Spans[0])
 	sr.SetRunes(str, fontSty, ctxt, noBG, rot, scalex)
-	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
+	sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 	ssz := sr.SizeHV()
-	vht := fontSty.Face.Metrics().Height
+	vht := fontSty.Face.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 }
 
@@ -1176,7 +1176,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 				case "q":
 					curf := fstack[len(fstack)-1]
 					atStart := len(curSp.Text) == 0
-					curSp.AppendRune('“', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+					curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
 					if nextIsParaStart && atStart {
 						curSp.SetNewPara()
 					}
@@ -1233,7 +1233,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 				curSp = &(tr.Spans[len(tr.Spans)-1])
 			case "q":
 				curf := fstack[len(fstack)-1]
-				curSp.AppendRune('”', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+				curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
 			case "a":
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
@@ -1254,7 +1254,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 					return unicode.IsSpace(r)
 				})
 			}
-			curSp.AppendString(sstr, curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+			curSp.AppendString(sstr, curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
 			if nextIsParaStart && atStart {
 				curSp.SetNewPara()
 			}
@@ -1313,7 +1313,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				bidx += eidx + 2
 			} else { // get past <
 				curf := fstack[len(fstack)-1]
-				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+				curSp.AppendString(string(str[bidx:bidx+1]), curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
 				bidx++
 			}
 		}
@@ -1337,7 +1337,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				// 	curSp = &(tr.Spans[len(tr.Spans)-1])
 				case "q":
 					curf := fstack[len(fstack)-1]
-					curSp.AppendRune('”', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+					curSp.AppendRune('”', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
 				case "a":
 					if curLinkIdx >= 0 {
 						tl := &tr.Links[curLinkIdx]
@@ -1392,7 +1392,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 					case "q":
 						curf := fstack[len(fstack)-1]
 						atStart := len(curSp.Text) == 0
-						curSp.AppendRune('“', curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
+						curSp.AppendRune('“', curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco)
 						if nextIsParaStart && atStart {
 							curSp.SetNewPara()
 						}
@@ -1468,7 +1468,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 					}
 				case '\n': // todo absorb other line endings
 					unestr := html.UnescapeString(string(tmpbuf))
-					curSp.AppendString(unestr, curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+					curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
 					tmpbuf = tmpbuf[0:0]
 					tr.Spans = append(tr.Spans, SpanRender{})
 					curSp = &(tr.Spans[len(tr.Spans)-1])
@@ -1481,7 +1481,7 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 			if !didNl {
 				unestr := html.UnescapeString(string(tmpbuf))
 				// fmt.Printf("%v added: %v\n", bidx, unestr)
-				curSp.AppendString(unestr, curf.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
+				curSp.AppendString(unestr, curf.Face.Face, curf.Color, curf.BgColor.ColorOrNil(), curf.Deco, font, ctxt)
 				if curLinkIdx >= 0 {
 					tl := &tr.Links[curLinkIdx]
 					tl.Label = unestr
@@ -1596,8 +1596,8 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	//
 	tr.Dir = LRTB
 	fontSty.OpenFont(ctxt)
-	fht := fontSty.Height
-	dsc := FixedToFloat32(fontSty.Face.Metrics().Descent)
+	fht := fontSty.Face.Metrics.Height
+	dsc := FixedToFloat32(fontSty.Face.Face.Metrics().Descent)
 	lspc := fht * txtSty.EffLineHeight()
 	lpad := (lspc - fht) / 2 // padding above / below text box for centering in line
 
@@ -1613,7 +1613,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 			continue
 		}
 		if sr.LastPos.X == 0 { // don't re-do unless necessary
-			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
+			sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 		}
 		if sr.IsNewPara() {
 			sr.RelPos.X = txtSty.Indent.Dots
@@ -1635,7 +1635,7 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 					}
 					si++
 					sr = &(tr.Spans[si]) // keep going with nsr
-					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Ch, txtSty.TabSize)
+					sr.SetRunePosLR(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
 					ssz = sr.SizeHV()
 
 					// fixup links

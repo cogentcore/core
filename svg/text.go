@@ -93,7 +93,7 @@ func (g *Text) Render2D() {
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
 		pc.FontStyle.OpenFont(&pc.UnContext)
 		sr := &(g.Render.Spans[0])
-		sr.Render[0].Face = pc.FontStyle.Face // upscale
+		sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 		for i := range sr.Render {
 			sr.Render[i].RelPos = rs.XForm.TransformVectorVec2D(sr.Render[i].RelPos)
 			sr.Render[i].Size.Y *= scy

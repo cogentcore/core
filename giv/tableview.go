@@ -752,8 +752,8 @@ func (tv *TableView) Render2D() {
 		return
 	}
 	if tv.PushBounds() {
-		if tv.Sty.Font.Height > 0 {
-			tv.VisRows = (tv.VpBBox.Max.Y - tv.VpBBox.Min.Y) / int(1.8*tv.Sty.Font.Height)
+		if tv.Sty.Font.Face.Metrics.Height > 0 {
+			tv.VisRows = (tv.VpBBox.Max.Y - tv.VpBBox.Min.Y) / int(1.8*tv.Sty.Font.Face.Metrics.Height)
 		} else {
 			tv.VisRows = 10
 		}

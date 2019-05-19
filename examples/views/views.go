@@ -65,7 +65,7 @@ func mainrun() {
 	but.Tooltip = "open a window of a slice view with a lot of elments, for performance testing"
 	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			sl := make([]float32, 10000)
+			sl := make([]float32, 2880)
 			gi.ProfileToggle()
 			gi.WindowOpenTimer = time.Now()
 			giv.SliceViewDialog(vp, &sl, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, nil, nil, nil)

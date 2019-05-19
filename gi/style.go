@@ -24,12 +24,12 @@ import (
 //   on objects that can be directly used during rendering
 // * good for basic rendering -- lots of additional things that could be extended later..
 
-// StyleTemplates are cached styles used for styling large numbers of identical
+// styleTemplates are cached styles used for styling large numbers of identical
 // elements in views
-var StyleTemplates map[string]*Style
+var styleTemplates map[string]*Style
 
-// StyleTemplatesMu is a mutex protecting updates to StyleTemplates
-var StyleTemplatesMu sync.RWMutex
+// styleTemplatesMu is a mutex protecting updates to styleTemplates
+var styleTemplatesMu sync.RWMutex
 
 // IMPORTANT: any changes here must be updated in stylefuncs.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
@@ -153,14 +153,9 @@ func (s *Style) FromTemplate() (hasTemplate bool, saveTemplate bool) {
 	if s.Template == "" {
 		return false, false
 	}
-	if StyleTemplates == nil {
-		StyleTemplatesMu.Lock()
-		StyleTemplates = make(map[string]*Style)
-		StyleTemplatesMu.Unlock()
-	}
-	StyleTemplatesMu.RLock()
-	defer StyleTemplatesMu.RUnlock()
-	if ts, has := StyleTemplates[s.Template]; has {
+	styleTemplatesMu.RLock()
+	defer styleTemplatesMu.RUnlock()
+	if ts, has := styleTemplates[s.Template]; has {
 		s.CopyFrom(ts)
 		s.IsSet = true
 		s.dotsSet = true
@@ -177,9 +172,12 @@ func (s *Style) SaveTemplate() {
 	ts.CopyFrom(s)
 	ts.lastUnCtxt = s.lastUnCtxt
 	ts.PropsNil = s.PropsNil
-	StyleTemplatesMu.Lock()
-	StyleTemplates[s.Template] = ts
-	StyleTemplatesMu.Unlock()
+	styleTemplatesMu.Lock()
+	if styleTemplates == nil {
+		styleTemplates = make(map[string]*Style)
+	}
+	styleTemplates[s.Template] = ts
+	styleTemplatesMu.Unlock()
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than
@@ -238,12 +236,16 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 		}
 	}
 	// todo font.computemetrics here is slow element here -- use caching..
+	prf := prof.Start("Style.OpenFont")
 	s.Font.OpenFont(&s.UnContext) // calls SetUnContext after updating metrics
+	prf.End()
 
 	// skipping this doesn't seem to be good:
 	// if !(s.dotsSet && s.UnContext == s.lastUnCtxt && s.PropsNil) {
 	// fmt.Printf("dotsSet: %v unctx: %v lst: %v  == %v  pn: %v\n", s.dotsSet, s.UnContext, s.lastUnCtxt, (s.UnContext == s.lastUnCtxt), s.PropsNil)
+	prd := prof.Start("Style.ToDots")
 	s.ToDots(&s.UnContext)
+	prd.End()
 	s.dotsSet = true
 	s.lastUnCtxt = s.UnContext
 	// } else {

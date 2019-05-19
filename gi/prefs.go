@@ -273,7 +273,7 @@ func (pf *Preferences) Update() {
 
 	RebuildDefaultStyles = true
 	ColorSpecCache = nil
-	StyleTemplates = nil
+	styleTemplates = nil
 	for _, w := range AllWindows {
 		w.SetSize(w.OSWin.Size())
 	}
