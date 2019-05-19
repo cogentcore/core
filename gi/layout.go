@@ -1512,11 +1512,16 @@ func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 		if !unicode.IsPrint(kt.Rune) || kt.Modifiers != 0 {
 			return false
 		}
-		ly.FocusName += string(kt.Rune)
-		ly.FocusNameLast = nil // only use last if tabbing
+		sr := string(kt.Rune)
+		if ly.FocusName == sr {
+			// re-search same letter
+		} else {
+			ly.FocusName += sr
+			ly.FocusNameLast = nil // only use last if tabbing
+		}
 	}
 	kt.SetProcessed()
-	// fmt.Printf("searching for: %v\n", ly.FocusName)
+	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel, found := ly.ChildByLabelStartsCanFocus(ly.FocusName, ly.FocusNameLast)
 	if found {
 		ly.ParentWindow().SetFocus(focel) // this will also scroll by default!
@@ -1540,6 +1545,9 @@ func (ly *Layout) ChildByLabelStartsCanFocus(name string, after ki.Ki) (ki.Ki, b
 	var rki ki.Ki
 	gotAfter := false
 	ly.FuncDownBreadthFirst(0, nil, func(k ki.Ki, level int, data interface{}) bool {
+		if k == ly.This() { // skip us
+			return true
+		}
 		_, ni := KiToNode2D(k)
 		if ni != nil && !ni.CanFocus() { // don't go any further
 			return false

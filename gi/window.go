@@ -98,6 +98,11 @@ var WinNewCloseTime time.Time
 // WindowGlobalMu is a mutex for any global state associated with windows
 var WindowGlobalMu sync.Mutex
 
+// WindowOpenTimer is used for profiling the open time of windows
+// if doing profiling, it will report the time elapsed in msec
+// to point of establishing initial focus in the window.
+var WindowOpenTimer time.Time
+
 // Window provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
 // There is a master Viewport that contains the full bitmap image of the
@@ -888,10 +893,21 @@ func (w *Window) FullReRender() {
 		fmt.Printf("Win: %v FullReRender (w.Viewport.FullRender2DTree)\n", w.Nm)
 	}
 	w.Viewport.FullRender2DTree()
+	w.InitialFocus()
+}
+
+// InitialFocus estabishes the initial focus for the window if no focus
+// is set -- uses ActivateStartFocus or FocusNext as backup.
+func (w *Window) InitialFocus() {
 	if w.CurFocus() == nil {
 		if !w.ActivateStartFocus() {
 			w.FocusNext(w.CurFocus())
 		}
+	}
+	if prof.Profiling {
+		now := time.Now()
+		opent := now.Sub(WindowOpenTimer)
+		fmt.Printf("Window: %v took: %v to open\n", w.Nm, opent)
 	}
 }
 
@@ -1722,7 +1738,11 @@ mainloop:
 					if w.Viewport.Geom.Size != w.OSWin.Size() {
 						w.Resized(w.OSWin.Size())
 					} else {
-						// w.FullReRender()
+						w.FullReRender() // note: this is currently needed for focus to actually
+						// take effect in a popup, and also ensures dynamically sized elements are
+						// properly sized.  It adds a bit of cost but really not that much and
+						// probably worth it overall, even if we can fix the initial focus issue
+						// w.InitialFocus()
 					}
 					w.SendShowEvent() // happens AFTER full render
 				}

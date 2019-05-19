@@ -15,7 +15,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 // this is an alternative manual styling strategy -- styling takes a lot of time
@@ -1204,15 +1203,15 @@ func (bs *ShadowStyle) ToDots(uc *units.Context) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //   StyledFields
 
-// StyleFields contain the StyledFields for Style type
-var StyleFields = initStyle()
-
-func initStyle() *StyledFields {
-	StyleDefault.Defaults()
-	sf := &StyledFields{}
-	sf.Init(&StyleDefault)
-	return sf
-}
+// // StyleFields contain the StyledFields for Style type
+// var StyleFields = initStyle()
+//
+// func initStyle() *StyledFields {
+// 	StyleDefault.Defaults()
+// 	sf := &StyledFields{}
+// 	sf.Init(&StyleDefault)
+// 	return sf
+// }
 
 // StyledFields contains fields of a struct that are styled -- create one
 // instance of this for each type that has styled fields (Style, Paint, and a
@@ -1338,6 +1337,7 @@ func (sf *StyledFields) CompileFields(df interface{}) {
 // manually -- much faster
 func (sf *StyledFields) Inherit(obj, par interface{}, vp *Viewport2D) {
 	// pr := prof.Start("StyleFields.Inherit")
+	// defer pr.End()
 	objptr := reflect.ValueOf(obj).Pointer()
 	hasPar := !kit.IfaceIsNil(par)
 	var parptr uintptr
@@ -1349,7 +1349,6 @@ func (sf *StyledFields) Inherit(obj, par interface{}, vp *Viewport2D) {
 		fld.FromProps(sf.Fields, objptr, parptr, pfi, hasPar, vp)
 		// fmt.Printf("inh: %v\n", fld.Field.Name)
 	}
-	// pr.End()
 }
 
 // Style applies styles to the fields from given properties for given object
@@ -1357,7 +1356,8 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props, vp *Viewport
 	if props == nil {
 		return
 	}
-	pr := prof.Start("StyleFields.Style")
+	// pr := prof.Start("StyleFields.Style")
+	// defer pr.End()
 	objptr := reflect.ValueOf(obj).Pointer()
 	hasPar := !kit.IfaceIsNil(par)
 	var parptr uintptr
@@ -1394,7 +1394,6 @@ func (sf *StyledFields) Style(obj, par interface{}, props ki.Props, vp *Viewport
 		}
 		fld.FromProps(sf.Fields, objptr, parptr, val, hasPar, vp)
 	}
-	pr.End()
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

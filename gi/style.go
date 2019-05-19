@@ -7,6 +7,7 @@ package gi
 import (
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -26,6 +27,9 @@ import (
 // StyleTemplates are cached styles used for styling large numbers of identical
 // elements in views
 var StyleTemplates map[string]*Style
+
+// StyleTemplatesMu is a mutex protecting updates to StyleTemplates
+var StyleTemplatesMu sync.RWMutex
 
 // IMPORTANT: any changes here must be updated in stylefuncs.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
@@ -150,8 +154,12 @@ func (s *Style) FromTemplate() (hasTemplate bool, saveTemplate bool) {
 		return false, false
 	}
 	if StyleTemplates == nil {
+		StyleTemplatesMu.Lock()
 		StyleTemplates = make(map[string]*Style)
+		StyleTemplatesMu.Unlock()
 	}
+	StyleTemplatesMu.RLock()
+	defer StyleTemplatesMu.RUnlock()
 	if ts, has := StyleTemplates[s.Template]; has {
 		s.CopyFrom(ts)
 		s.IsSet = true
@@ -169,7 +177,9 @@ func (s *Style) SaveTemplate() {
 	ts.CopyFrom(s)
 	ts.lastUnCtxt = s.lastUnCtxt
 	ts.PropsNil = s.PropsNil
+	StyleTemplatesMu.Lock()
 	StyleTemplates[s.Template] = ts
+	StyleTemplatesMu.Unlock()
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than
