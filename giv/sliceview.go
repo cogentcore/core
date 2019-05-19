@@ -282,9 +282,9 @@ func (sv *SliceView) ConfigSliceGridRows() {
 		}
 		vv.ConfigWidget(widg)
 		wb := widg.AsWidget()
-		// if wb != nil {
-		// 	wb.Sty.Template = "SliceView.ItemWidget"
-		// }
+		if wb != nil {
+			wb.Sty.Template = "SliceView.ItemWidget." + vtyp.Name()
+		}
 
 		if sv.IsInactive() {
 			widg.AsNode2D().SetInactive()

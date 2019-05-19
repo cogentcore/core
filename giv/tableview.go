@@ -470,7 +470,7 @@ func (tv *TableView) ConfigSliceGridRows() {
 			vv.ConfigWidget(widg)
 			wb := widg.AsWidget()
 			if wb != nil {
-				// wb.Sty.Template = "TableViewView.ItemWidget"
+				wb.Sty.Template = "TableViewView.ItemWidget." + vtyp.Name()
 				wb.SetProp("tv-index", i)
 				wb.ClearSelected()
 				wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

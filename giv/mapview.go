@@ -204,14 +204,14 @@ func (mv *MapView) ConfigMapGrid() {
 		})
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
-		// wb := widg.AsWidget()
-		// if wb != nil {
-		// 	wb.Sty.Template = "MapView.ItemWidget"
-		// }
-		// wb = keyw.AsWidget()
-		// if wb != nil {
-		// 	wb.Sty.Template = "MapView.KeyWidget"
-		// }
+		wb := widg.AsWidget()
+		if wb != nil {
+			wb.Sty.Template = "MapView.ItemWidget." + vv.WidgetType().Name()
+		}
+		wb = keyw.AsWidget()
+		if wb != nil {
+			wb.Sty.Template = "MapView.KeyWidget." + kv.WidgetType().Name()
+		}
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)

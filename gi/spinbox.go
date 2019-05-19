@@ -298,15 +298,15 @@ func (sb *SpinBox) StyleSpinBox() {
 		sb.Defaults()
 	}
 	// todo: this is not working..
-	// hasTempl, saveTempl := sb.Sty.FromTemplate()
-	// if !hasTempl || saveTempl {
-	sb.Style2DWidget()
-	// } else {
-	// 	sb.Sty.SetUnitContext(sb.Viewport, Vec2DZero)
-	// }
-	// if hasTempl && saveTempl {
-	// 	sb.Sty.SaveTemplate()
-	// }
+	hasTempl, saveTempl := sb.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		sb.Style2DWidget()
+	} else {
+		sb.Sty.SetUnitContext(sb.Viewport, Vec2DZero)
+	}
+	if hasTempl && saveTempl {
+		sb.Sty.SaveTemplate()
+	}
 }
 
 func (sb *SpinBox) Style2D() {
