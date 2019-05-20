@@ -585,13 +585,15 @@ func (nb *Node2DBase) Init2DTree() {
 	if nb.This() == nil {
 		return
 	}
-	pr := prof.Start("Node2D.Init2DTree")
+	pr := prof.Start("Node2D.Init2DTree." + nb.Type().Name())
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
 			return false
 		}
+		// ppr := prof.Start("Init2DTree:" + nii.Type().Name())
 		nii.Init2D()
+		// ppr.End()
 		return true
 	})
 	pr.End()
@@ -604,7 +606,7 @@ func (nb *Node2DBase) Style2DTree() {
 		return
 	}
 	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
-	pr := prof.Start("Node2D.Style2DTree")
+	pr := prof.Start("Node2D.Style2DTree." + nb.Type().Name())
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
@@ -623,7 +625,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 	if nb.This() == nil {
 		return
 	}
-	pr := prof.Start("Node2D.Size2DTree")
+	pr := prof.Start("Node2D.Size2DTree." + nb.Type().Name())
 	nb.FuncDownMeLast(0, nb.This(),
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
@@ -654,7 +656,7 @@ func (nb *Node2DBase) Layout2DTree() {
 	if nb.This() == nil || nb.HasNoLayout() {
 		return
 	}
-	pr := prof.Start("Node2D.Layout2DTree")
+	pr := prof.Start("Node2D.Layout2DTree." + nb.Type().Name())
 	parBBox := image.ZR
 	pni, _ := KiToNode2D(nb.Par)
 	if pni != nil {
@@ -676,6 +678,10 @@ func (nb *Node2DBase) Layout2DTree() {
 	pr.End()
 }
 
+// todo: this is a recursive stack that will be relatively slow compared to
+// FuncDownMeFirst -- reconsider using that with appropriate API to support
+// needed flexibility
+
 // Render2DTree just calls on parent node and it takes full responsibility for
 // managing the children -- this allows maximum flexibility for order etc of
 // rendering
@@ -683,9 +689,9 @@ func (nb *Node2DBase) Render2DTree() {
 	if nb.This() == nil {
 		return
 	}
-	pr := prof.Start("Node2D.Render2DTree")
+	// pr := prof.Start("Node2D.Render2DTree." + nb.Type().Name())
 	nb.This().(Node2D).Render2D() // important to use interface version to get interface!
-	pr.End()
+	// pr.End()
 }
 
 // Layout2DChildren does layout on all of node's children, giving them the

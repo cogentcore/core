@@ -17,7 +17,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
@@ -56,6 +55,11 @@ func (nb *ButtonBase) CopyFieldsFrom(frm interface{}) {
 	nb.Indicator = fr.Indicator
 	nb.Shortcut = fr.Shortcut
 	nb.Menu = fr.Menu
+}
+
+func (bb *ButtonBase) Disconnect() {
+	bb.PartsWidgetBase.Disconnect()
+	bb.ButtonSig.DisconnectAll()
 }
 
 // these extend NodeBase NodeFlags to hold button state
@@ -213,17 +217,13 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 		return
 	}
 	if bb.Sty.Font.Size.Val == 0 { // not yet styled
-		pr := prof.Start("SetIcon.StyleButton")
 		bb.StyleButton()
-		pr.End()
 	}
 	if bb.Icon != IconName(iconName) {
 		bb.SetFullReRender()
 	}
 	bb.Icon = IconName(iconName)
-	pr := prof.Start("SetIcon")
 	bb.This().(ButtonWidget).ConfigParts()
-	pr.End()
 }
 
 // SetButtonState sets the button state -- returns true if state changed
@@ -566,7 +566,7 @@ func (bb *ButtonBase) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, string(bb.Icon), bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
-	mods, updt := bb.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := bb.Parts.ConfigChildren(config, false)
 	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
@@ -582,8 +582,6 @@ func (bb *ButtonBase) ConfigPartsIfNeeded() {
 }
 
 func (bb *ButtonBase) StyleButton() {
-	pr := prof.Start("StyleButton")
-	defer pr.End()
 	hasTempl, saveTempl := bb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		bb.Style2DWidget()
@@ -919,7 +917,7 @@ func (cb *CheckBox) ConfigParts() {
 		lbIdx = len(config)
 		config.Add(KiT_Label, "label")
 	}
-	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := cb.Parts.ConfigChildren(config, false)
 	ist := cb.Parts.Child(icIdx).(*Layout)
 	if mods {
 		ist.Lay = LayoutStacked

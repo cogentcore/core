@@ -24,7 +24,6 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
-	"github.com/goki/prof"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +51,11 @@ var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 // AddNewTreeView adds a new treeview to given parent node, with given name.
 func AddNewTreeView(parent ki.Ki, name string) *TreeView {
 	return parent.AddNewChild(KiT_TreeView, name).(*TreeView)
+}
+
+func (tv *TreeView) Disconnect() {
+	tv.PartsWidgetBase.Disconnect()
+	tv.TreeViewSig.DisconnectAll()
 }
 
 func init() {
@@ -91,7 +95,8 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
 // SyncToSrc updates the view tree to match the source tree, using
 // ConfigChildren to maximally preserve existing tree elements
 func (tv *TreeView) SyncToSrc(tvIdx *int) {
-	pr := prof.Start("TreeView.SyncToSrc")
+	// pr := prof.Start("TreeView.SyncToSrc")
+	// defer pr.End()
 	sk := tv.SrcNode
 	nm := "tv_" + sk.UniqueName()
 	tv.SetNameRaw(nm) // guaranteed to be unique
@@ -158,7 +163,6 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		tv.SetClosed()
 	}
 	tv.UpdateEnd(updt)
-	pr.End()
 }
 
 // SrcNodeSignal is the function for receiving node signals from our SrcNode
@@ -1760,6 +1764,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = gi.LayoutHoriz
+	tv.Parts.Sty.Template = "TreeView.Parts"
 	config := kit.TypeAndNameList{}
 	if tv.HasChildren() {
 		config.Add(gi.KiT_CheckBox, "branch")
@@ -1775,6 +1780,7 @@ func (tv *TreeView) ConfigParts() {
 			wb.SetProp("#icon0", TVBranchProps)
 			wb.SetProp("#icon1", TVBranchProps)
 			wb.SetProp("no-focus", true) // note: cannot be in compiled props
+			wb.Sty.Template = "TreeView.Branch"
 			tv.StylePart(gi.Node2D(wb))
 			// unfortunately StylePart only handles default Style obj -- not
 			// these special styles.. todo: fix this somehow
@@ -1801,12 +1807,16 @@ func (tv *TreeView) ConfigParts() {
 	// }
 	if tv.Icon.IsValid() {
 		if ic, ok := tv.IconPart(); ok {
+			// this only works after a second redraw..
+			// ic.Sty.Template = "TreeView.Icon"
 			if set, _ := ic.SetIcon(string(tv.Icon)); set || tv.NeedsFullReRender() || mods {
 				tv.StylePart(gi.Node2D(ic))
 			}
 		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {
+		// this does not work! even with redraws
+		// lbl.Sty.Template = "TreeView.Label"
 		lbl.SetText(tv.Label())
 		if mods {
 			tv.StylePart(gi.Node2D(lbl))
@@ -1818,6 +1828,11 @@ func (tv *TreeView) ConfigParts() {
 func (tv *TreeView) ConfigPartsIfNeeded() {
 	if !tv.Parts.HasChildren() {
 		tv.ConfigParts()
+	}
+	if tv.Icon.IsValid() {
+		if ic, ok := tv.IconPart(); ok {
+			ic.SetIcon(string(tv.Icon))
+		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {
 		ltxt := tv.Label()
@@ -1974,6 +1989,7 @@ func (tv *TreeView) Init2D() {
 		tv.Viewport = tv.ParentViewport()
 	}
 	tv.Sty.Defaults()
+	tv.Sty.Template = "TreeView." + tv.Type().Name()
 	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	tv.ConnectToViewport()
@@ -1989,13 +2005,31 @@ func (tv *TreeView) StyleTreeView() {
 		return
 	}
 	tv.SetCanFocusIfActive()
-	tv.Style2DWidget() // todo: maybe don't use CSS here, for big trees?
-
+	hasTempl, saveTempl := tv.Sty.FromTemplate()
+	if !hasTempl || saveTempl {
+		tv.Style2DWidget()
+	}
+	if hasTempl && saveTempl {
+		tv.Sty.SaveTemplate()
+	}
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
-	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i].CopyFrom(&tv.Sty)
-		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]), tv.Viewport)
-		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
+	if hasTempl && !saveTempl {
+		for i := 0; i < int(TreeViewStatesN); i++ {
+			tv.StateStyles[i].Template = tv.Sty.Template + TreeViewSelectors[i]
+			tv.StateStyles[i].FromTemplate()
+		}
+	} else {
+		for i := 0; i < int(TreeViewStatesN); i++ {
+			tv.StateStyles[i].CopyFrom(&tv.Sty)
+			tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TreeViewSelectors[i]), tv.Viewport)
+			tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
+		}
+	}
+	if hasTempl && saveTempl {
+		for i := 0; i < int(TreeViewStatesN); i++ {
+			tv.StateStyles[i].Template = tv.Sty.Template + TreeViewSelectors[i]
+			tv.StateStyles[i].SaveTemplate()
+		}
 	}
 	tv.Indent.SetFmInheritProp("indent", tv.This(), false, true) // no inherit, yes type defaults
 	tv.Indent.ToDots(&tv.Sty.UnContext)

@@ -38,6 +38,11 @@ func (nb *Action) CopyFieldsFrom(frm interface{}) {
 	nb.Data = fr.Data
 }
 
+func (ac *Action) Disconnect() {
+	ac.ButtonBase.Disconnect()
+	ac.ActionSig.DisconnectAll()
+}
+
 var ActionProps = ki.Props{
 	"border-width":     units.NewPx(0), // todo: should be default
 	"border-radius":    units.NewPx(0),
@@ -262,7 +267,7 @@ func (ac *Action) ConfigPartsButton() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, string(ac.Icon), ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
-	mods, updt := ac.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := ac.Parts.ConfigChildren(config, false)
 	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	if mods {
@@ -281,7 +286,7 @@ func (ac *Action) ConfigPartsMenuItem() {
 	} else if ac.Shortcut != "" {
 		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", ac.Text)
 	}
-	mods, updt := ac.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := ac.Parts.ConfigChildren(config, false)
 	if mods {
 	}
 	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)

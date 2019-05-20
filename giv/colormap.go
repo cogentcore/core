@@ -115,6 +115,11 @@ func AddNewColorMapView(parent ki.Ki, name string, cmap *ColorMap) *ColorMapView
 	return cv
 }
 
+func (cv *ColorMapView) Disconnect() {
+	cv.WidgetBase.Disconnect()
+	cv.ColorMapSig.DisconnectAll()
+}
+
 // SetColorMap sets the color map and triggers a display update
 func (cv *ColorMapView) SetColorMap(cmap *ColorMap) {
 	cv.Map = cmap

@@ -68,6 +68,12 @@ func AddNewSliceView(parent ki.Ki, name string) *SliceView {
 	return parent.AddNewChild(KiT_SliceView, name).(*SliceView)
 }
 
+func (sv *SliceView) Disconnect() {
+	sv.Frame.Disconnect()
+	sv.SliceViewSig.DisconnectAll()
+	sv.ViewSig.DisconnectAll()
+}
+
 // SliceViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view
 type SliceViewStyleFunc func(sv *SliceView, slice interface{}, widg gi.Node2D, row int, vv ValueView)

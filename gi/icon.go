@@ -10,7 +10,6 @@ import (
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 // IconName is used to specify an icon -- currently just the unique name of
@@ -79,9 +78,9 @@ func (ic *Icon) SetIcon(name string) (bool, error) {
 	if ic.HasChildren() && ic.UniqueNm == name {
 		return false, nil
 	}
-	pr := prof.Start("IconSetIcon")
+	// pr := prof.Start("IconSetIcon")
+	// pr.End()
 	err := TheIconMgr.SetIcon(ic, name)
-	pr.End()
 	if err == nil {
 		ic.UniqueNm = string(name)
 		return true, nil

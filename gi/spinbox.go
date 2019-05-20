@@ -59,6 +59,11 @@ func (nb *SpinBox) CopyFieldsFrom(frm interface{}) {
 	nb.DownIcon = fr.DownIcon
 }
 
+func (sb *SpinBox) Disconnect() {
+	sb.PartsWidgetBase.Disconnect()
+	sb.SpinBoxSig.DisconnectAll()
+}
+
 var SpinBoxProps = ki.Props{
 	"#buttons": ki.Props{
 		"vertical-align": AlignMiddle,
@@ -176,7 +181,7 @@ func (sb *SpinBox) ConfigParts() {
 	config.Add(KiT_TextField, "text-field")
 	config.Add(KiT_Space, "space")
 	config.Add(KiT_Layout, "buttons")
-	mods, updt := sb.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := sb.Parts.ConfigChildren(config, false)
 	if mods || RebuildDefaultStyles {
 		buts := sb.Parts.Child(sbButtonsIdx).(*Layout)
 		buts.Lay = LayoutVert
@@ -297,7 +302,6 @@ func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
-	// todo: this is not working..
 	hasTempl, saveTempl := sb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()

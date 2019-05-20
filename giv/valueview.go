@@ -457,6 +457,11 @@ var ValueViewBaseProps = ki.Props{
 	"base-type": true,
 }
 
+func (vv *ValueViewBase) Disconnect() {
+	vv.Node.Disconnect()
+	vv.ViewSig.DisconnectAll()
+}
+
 func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 	return vv
 }

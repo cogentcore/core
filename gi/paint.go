@@ -16,7 +16,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 	"github.com/srwiley/rasterx"
 	"github.com/srwiley/scanx"
 	"golang.org/x/image/draw"
@@ -129,8 +128,6 @@ func (pc *Paint) InheritFields(par *Paint) {
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
 func (pc *Paint) SetStyleProps(par *Paint, props ki.Props, vp *Viewport2D) {
-	pr := prof.Start("Paint.SetStyleProps")
-	defer pr.End()
 	if !pc.StyleSet && par != nil { // first time
 		pc.InheritFields(par)
 	}
@@ -544,7 +541,8 @@ func (pc *Paint) stroke(rs *RenderState) {
 	if rs.Raster == nil {
 		return
 	}
-	pr := prof.Start("Paint.stroke")
+	// pr := prof.Start("Paint.stroke")
+	// defer pr.End()
 
 	rs.RasterMu.Lock()
 	defer rs.RasterMu.Unlock()
@@ -586,14 +584,14 @@ func (pc *Paint) stroke(rs *RenderState) {
 		rs.CompSpanner.Clear()
 	*/
 
-	pr.End()
 }
 
 func (pc *Paint) fill(rs *RenderState) {
 	if rs.Raster == nil {
 		return
 	}
-	pr := prof.Start("Paint.fill")
+	// pr := prof.Start("Paint.fill")
+	// pr.End()
 
 	rs.RasterMu.Lock()
 	defer rs.RasterMu.Unlock()
@@ -619,7 +617,6 @@ func (pc *Paint) fill(rs *RenderState) {
 		rs.CompSpanner.Clear()
 	*/
 
-	pr.End()
 }
 
 // StrokePreserve strokes the current path with the current color, line width,

@@ -39,6 +39,11 @@ func AddNewStructView(parent ki.Ki, name string) *StructView {
 	return parent.AddNewChild(KiT_StructView, name).(*StructView)
 }
 
+func (sv *StructView) Disconnect() {
+	sv.Frame.Disconnect()
+	sv.ViewSig.DisconnectAll()
+}
+
 var StructViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,

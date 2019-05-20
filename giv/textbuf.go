@@ -144,6 +144,11 @@ type TextBuf struct {
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
 
+func (tb *TextBuf) Disconnect() {
+	tb.Node.Disconnect()
+	tb.TextBufSig.DisconnectAll()
+}
+
 var TextBufProps = ki.Props{
 	"CallMethods": ki.PropSlice{
 		{"SaveAs", ki.Props{

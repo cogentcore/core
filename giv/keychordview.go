@@ -73,6 +73,11 @@ type KeyChordEdit struct {
 
 var KiT_KeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
 
+func (kc *KeyChordEdit) Disconnect() {
+	kc.Label.Disconnect()
+	kc.KeyChordSig.DisconnectAll()
+}
+
 var KeyChordEditProps = ki.Props{
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),

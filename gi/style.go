@@ -11,7 +11,6 @@ import (
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
-	"github.com/goki/prof"
 )
 
 // style implements CSS-based styling using ki.Props to hold name / vals
@@ -220,8 +219,6 @@ func (s *Style) Use(vp *Viewport2D) {
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
 func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
-	pr := prof.Start("Style.SetUnitContext")
-	defer pr.End()
 	// s.UnContext.Defaults()
 	if vp != nil {
 		if vp.Win != nil {
@@ -235,17 +232,12 @@ func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
 			s.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	// todo font.computemetrics here is slow element here -- use caching..
-	prf := prof.Start("Style.OpenFont")
 	s.Font.OpenFont(&s.UnContext) // calls SetUnContext after updating metrics
-	prf.End()
 
 	// skipping this doesn't seem to be good:
 	// if !(s.dotsSet && s.UnContext == s.lastUnCtxt && s.PropsNil) {
 	// fmt.Printf("dotsSet: %v unctx: %v lst: %v  == %v  pn: %v\n", s.dotsSet, s.UnContext, s.lastUnCtxt, (s.UnContext == s.lastUnCtxt), s.PropsNil)
-	prd := prof.Start("Style.ToDots")
 	s.ToDots(&s.UnContext)
-	prd.End()
 	s.dotsSet = true
 	s.lastUnCtxt = s.UnContext
 	// } else {
@@ -303,7 +295,6 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, vp *Vi
 // type, .class, and #name selectors, along with optional sub-selector
 // (:hover, :active etc)
 func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string, vp *Viewport2D) {
-	pr := prof.Start("StyleCSS")
 	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
 	s.ApplyCSS(node, css, tyn, selector, vp)
 	classes := strings.Split(strings.ToLower(node.AsNode2D().Class), " ")
@@ -313,7 +304,6 @@ func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string, vp *Viewpor
 	}
 	idnm := "#" + strings.ToLower(node.Name()) // then name
 	s.ApplyCSS(node, css, idnm, selector, vp)
-	pr.End()
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

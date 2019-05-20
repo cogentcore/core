@@ -81,6 +81,11 @@ func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
 	nb.Snap = fr.Snap
 }
 
+func (sb *SliderBase) Disconnect() {
+	sb.WidgetBase.Disconnect()
+	sb.SliderSig.DisconnectAll()
+}
+
 // SliderSignals are signals that sliders can send
 type SliderSignals int64
 
@@ -469,7 +474,7 @@ func (sb *SliderBase) ConfigParts() {
 	sb.Parts.Lay = LayoutNil
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, string(sb.Icon), "")
-	mods, updt := sb.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := sb.Parts.ConfigChildren(config, false)
 	sb.ConfigPartsSetIconLabel(string(sb.Icon), "", icIdx, lbIdx)
 	if mods {
 		sb.UpdateEnd(updt)

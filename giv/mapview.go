@@ -37,6 +37,11 @@ func AddNewMapView(parent ki.Ki, name string) *MapView {
 	return parent.AddNewChild(KiT_MapView, name).(*MapView)
 }
 
+func (mv *MapView) Disconnect() {
+	mv.Frame.Disconnect()
+	mv.ViewSig.DisconnectAll()
+}
+
 // SetMap sets the source map that we are viewing -- rebuilds the children to
 // represent this map
 func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {

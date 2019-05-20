@@ -46,6 +46,11 @@ func (nb *TabView) CopyFieldsFrom(frm interface{}) {
 	nb.NewTabType = fr.NewTabType
 }
 
+func (tv *TabView) Disconnect() {
+	tv.Layout.Disconnect()
+	tv.TabViewSig.DisconnectAll()
+}
+
 var TabViewProps = ki.Props{
 	"border-color":     &Prefs.Colors.Border,
 	"border-width":     units.NewPx(2),
@@ -584,7 +589,7 @@ func (tb *TabButton) ConfigParts() {
 	config.Add(KiT_Action, "close")
 	config.Add(KiT_Stretch, "close-stretch")
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, string(tb.Icon), tb.Text)
-	mods, updt := tb.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := tb.Parts.ConfigChildren(config, false)
 	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)

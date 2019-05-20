@@ -25,7 +25,6 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
-	"github.com/goki/prof"
 )
 
 const force = true
@@ -83,6 +82,11 @@ func (nb *TextField) CopyFieldsFrom(frm interface{}) {
 	nb.CursorWidth = fr.CursorWidth
 	nb.Edited = fr.Edited
 	nb.MaxWidthReq = fr.MaxWidthReq
+}
+
+func (tf *TextField) Disconnect() {
+	tf.PartsWidgetBase.Disconnect()
+	tf.TextFieldSig.DisconnectAll()
 }
 
 var TextFieldProps = ki.Props{
@@ -1338,7 +1342,7 @@ func (tf *TextField) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Stretch, "clr-str")
 	config.Add(KiT_Action, "clear")
-	mods, updt := tf.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := tf.Parts.ConfigChildren(config, false)
 	if mods {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
@@ -1365,8 +1369,6 @@ func (tf *TextField) Init2D() {
 }
 
 func (tf *TextField) StyleTextField() {
-	pr := prof.Start("TextField.Style2D")
-	defer pr.End()
 	tf.SetCanFocusIfActive()
 	hasTempl, saveTempl := tf.Sty.FromTemplate()
 	if !hasTempl || saveTempl {

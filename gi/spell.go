@@ -250,6 +250,11 @@ type SpellCorrect struct {
 
 var KiT_SpellCorrect = kit.Types.AddType(&SpellCorrect{}, nil)
 
+func (sc *SpellCorrect) Disconnect() {
+	sc.Node.Disconnect()
+	sc.SpellSig.DisconnectAll()
+}
+
 // SpellSignals are signals that are sent by SpellCorrect
 type SpellSignals int64
 

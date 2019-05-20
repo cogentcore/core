@@ -16,7 +16,6 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
@@ -51,6 +50,11 @@ func (wb *WidgetBase) CopyFieldsFrom(frm interface{}) {
 	wb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
 	wb.Tooltip = fr.Tooltip
 	wb.Sty.CopyFrom(&fr.Sty)
+}
+
+func (wb *WidgetBase) Disconnect() {
+	wb.Node2DBase.Disconnect()
+	wb.WidgetSig.DisconnectAll()
 }
 
 func (wb *WidgetBase) AsWidget() *WidgetBase {
@@ -140,8 +144,8 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 // Style2DWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes
 func (wb *WidgetBase) Style2DWidget() {
-	pr := prof.Start("Style2DWidget")
-	defer pr.End()
+	// pr := prof.Start("Style2DWidget")
+	// defer pr.End()
 
 	gii, _ := wb.This().(Node2D)
 	wb.Viewport.SetCurStyleNode(gii)
@@ -203,8 +207,8 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	if pg == nil {
 		return
 	}
-	pr := prof.Start("StylePart")
-	defer pr.End()
+	// pr := prof.Start("StylePart")
+	// defer pr.End()
 	// if pg.DefStyle != nil && !RebuildDefaultStyles { // already set
 	// 	return
 	// }

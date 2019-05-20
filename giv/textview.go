@@ -85,6 +85,12 @@ func AddNewTextView(parent ki.Ki, name string) *TextView {
 	return parent.AddNewChild(KiT_TextView, name).(*TextView)
 }
 
+func (tv *TextView) Disconnect() {
+	tv.WidgetBase.Disconnect()
+	tv.TextViewSig.DisconnectAll()
+	tv.LinkSig.DisconnectAll()
+}
+
 var TextViewProps = ki.Props{
 	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",

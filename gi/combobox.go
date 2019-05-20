@@ -48,6 +48,11 @@ func (nb *ComboBox) CopyFieldsFrom(frm interface{}) {
 	nb.MaxLength = fr.MaxLength
 }
 
+func (cb *ComboBox) Disconnect() {
+	cb.ButtonBase.Disconnect()
+	cb.ComboSig.DisconnectAll()
+}
+
 var ComboBoxProps = ki.Props{
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),

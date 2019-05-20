@@ -26,6 +26,11 @@ type ArgView struct {
 
 var KiT_ArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
+func (av *ArgView) Disconnect() {
+	av.Frame.Disconnect()
+	av.ViewSig.DisconnectAll()
+}
+
 var ArgViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,

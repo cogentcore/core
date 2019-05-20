@@ -205,8 +205,6 @@ func ParseDashesString(str string) []float64 {
 
 // StyleFromProps sets style field values based on ki.Props properties
 func (pc *Paint) StyleFromProps(par *Paint, props ki.Props, vp *Viewport2D) {
-	// pr := prof.Start("StyleFromProps")
-	// defer pr.End()
 	for key, val := range props {
 		if len(key) == 0 {
 			continue

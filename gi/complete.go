@@ -39,6 +39,11 @@ type Complete struct {
 
 var KiT_Complete = kit.Types.AddType(&Complete{}, nil)
 
+func (cm *Complete) Disconnect() {
+	cm.Node.Disconnect()
+	cm.CompleteSig.DisconnectAll()
+}
+
 // CompleteSignals are signals that are sent by Complete
 type CompleteSignals int64
 

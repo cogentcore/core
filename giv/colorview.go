@@ -36,6 +36,11 @@ func AddNewColorView(parent ki.Ki, name string) *ColorView {
 	return parent.AddNewChild(KiT_ColorView, name).(*ColorView)
 }
 
+func (cv *ColorView) Disconnect() {
+	cv.Frame.Disconnect()
+	cv.ViewSig.DisconnectAll()
+}
+
 var ColorViewProps = ki.Props{
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
@@ -112,26 +117,6 @@ func (cv *ColorView) Value() *gi.Frame {
 
 func (cv *ColorView) SliderGrid() *gi.Layout {
 	return cv.SliderLay().ChildByName("slider-grid", 0).(*gi.Layout)
-}
-
-// StdSliderConfig returns a TypeAndNameList for configuring a standard sliders
-func (cv *ColorView) StdSliderConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "rlab")
-	config.Add(gi.KiT_Slider, "red")
-	config.Add(gi.KiT_Label, "hlab")
-	config.Add(gi.KiT_Slider, "hue")
-	config.Add(gi.KiT_Label, "glab")
-	config.Add(gi.KiT_Slider, "green")
-	config.Add(gi.KiT_Label, "slab")
-	config.Add(gi.KiT_Slider, "sat")
-	config.Add(gi.KiT_Label, "blab")
-	config.Add(gi.KiT_Slider, "blue")
-	config.Add(gi.KiT_Label, "llab")
-	config.Add(gi.KiT_Slider, "light")
-	config.Add(gi.KiT_Label, "alab")
-	config.Add(gi.KiT_Slider, "alpha")
-	return config
 }
 
 func (cv *ColorView) SetRGBValue(val float32, rgb int) {
@@ -250,7 +235,21 @@ func (cv *ColorView) ConfigSliderGrid() {
 	sg := cv.SliderGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", 4)
-	config := cv.StdSliderConfig()
+	config := kit.TypeAndNameList{}
+	config.Add(gi.KiT_Label, "rlab")
+	config.Add(gi.KiT_Slider, "red")
+	config.Add(gi.KiT_Label, "hlab")
+	config.Add(gi.KiT_Slider, "hue")
+	config.Add(gi.KiT_Label, "glab")
+	config.Add(gi.KiT_Slider, "green")
+	config.Add(gi.KiT_Label, "slab")
+	config.Add(gi.KiT_Slider, "sat")
+	config.Add(gi.KiT_Label, "blab")
+	config.Add(gi.KiT_Slider, "blue")
+	config.Add(gi.KiT_Label, "llab")
+	config.Add(gi.KiT_Slider, "light")
+	config.Add(gi.KiT_Label, "alab")
+	config.Add(gi.KiT_Slider, "alpha")
 	mods, updt := sg.ConfigChildren(config, false)
 	if mods {
 		cv.ConfigLabel(sg.ChildByName("rlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Red:")

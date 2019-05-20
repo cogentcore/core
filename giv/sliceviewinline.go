@@ -32,6 +32,11 @@ type SliceViewInline struct {
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
 
+func (sv *SliceViewInline) Disconnect() {
+	sv.PartsWidgetBase.Disconnect()
+	sv.ViewSig.DisconnectAll()
+}
+
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 	updt := false

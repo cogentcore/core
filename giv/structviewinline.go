@@ -30,6 +30,11 @@ type StructViewInline struct {
 
 var KiT_StructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
 
+func (sv *StructViewInline) Disconnect() {
+	sv.PartsWidgetBase.Disconnect()
+	sv.ViewSig.DisconnectAll()
+}
+
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
 func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {

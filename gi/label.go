@@ -91,6 +91,11 @@ func (nb *Label) CopyFieldsFrom(frm interface{}) {
 	nb.Redrawable = fr.Redrawable
 }
 
+func (lb *Label) Disconnect() {
+	lb.WidgetBase.Disconnect()
+	lb.LinkSig.DisconnectAll()
+}
+
 var LabelProps = ki.Props{
 	"white-space":      WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	"padding":          units.NewPx(2),

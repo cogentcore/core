@@ -30,6 +30,15 @@ type MapViewInline struct {
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
 
+func (mv *MapViewInline) Disconnect() {
+	mv.PartsWidgetBase.Disconnect()
+	mv.ViewSig.DisconnectAll()
+}
+
+var MapViewInlineProps = ki.Props{
+	"min-width": units.NewEx(60),
+}
+
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
 func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
@@ -38,12 +47,6 @@ func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
 	mv.TmpSave = tmpSave
 	mv.UpdateFromMap()
 }
-
-var MapViewInlineProps = ki.Props{
-	"min-width": units.NewEx(60),
-}
-
-// todo: maybe figure out a way to share some of this redundant code..
 
 // ConfigParts configures Parts for the current map
 func (mv *MapViewInline) ConfigParts() {

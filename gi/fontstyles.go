@@ -17,7 +17,6 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 	"github.com/iancoleman/strcase"
 )
 
@@ -339,9 +338,7 @@ iterloop:
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
 func (fs *FontStyle) OpenFont(ctxt *units.Context) {
-	prf := prof.Start("OpenFont.FaceNm")
 	facenm := fs.FaceName()
-	prf.End()
 	if fs.Size.Dots == 0 {
 		fs.Size.ToDots(ctxt)
 	}

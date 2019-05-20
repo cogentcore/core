@@ -61,7 +61,8 @@ func mainrun() {
 			"color": "blue",
 		},
 	}
-	Vp.CSS = css
+	// Vp.CSS = css
+	_ = css
 
 	mfr := win.SetMainFrame()
 

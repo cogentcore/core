@@ -8,7 +8,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 // todo: for style
@@ -203,7 +202,6 @@ func (sp SizePrefs) CanStretchNeed(d Dims2D) bool {
 
 // StyleFromProps styles Layout-specific fields from ki.Prop properties
 func (ly *Layout) StyleFromProps(par *Layout, props ki.Props, vp *Viewport2D) {
-	pr := prof.Start("LayoutFromProps")
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -245,7 +243,6 @@ func (ly *Layout) StyleFromProps(par *Layout, props ki.Props, vp *Viewport2D) {
 			ly.Spacing.SetIFace(val, key)
 		}
 	}
-	pr.End()
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels

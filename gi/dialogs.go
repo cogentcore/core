@@ -69,6 +69,11 @@ type Dialog struct {
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
+func (dlg *Dialog) Disconnect() {
+	dlg.Viewport2D.Disconnect()
+	dlg.DialogSig.DisconnectAll()
+}
+
 // ValidViewport finds a non-nil viewport, either using the provided one, or
 // using the first main window's viewport
 func ValidViewport(avp *Viewport2D) *Viewport2D {
@@ -418,7 +423,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	}
 	bb := dlg.AddButtonBox(frame)
 	bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
-	mods, updt := bb.ConfigChildren(bbc, false)   // not unique names
+	mods, updt := bb.ConfigChildren(bbc, false)
 	dlg.StdButtonConnect(ok, cancel, bb)
 	dlg.SetFlag(int(VpFlagPopupDestroyAll)) // std is disposable
 	if mods {

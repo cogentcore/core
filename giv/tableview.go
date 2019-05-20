@@ -86,6 +86,12 @@ func AddNewTableView(parent ki.Ki, name string) *TableView {
 	return parent.AddNewChild(KiT_TableView, name).(*TableView)
 }
 
+func (tv *TableView) Disconnect() {
+	tv.Frame.Disconnect()
+	tv.TableViewSig.DisconnectAll()
+	tv.ViewSig.DisconnectAll()
+}
+
 // TableViewStyleFunc is a styling function for custom styling /
 // configuration of elements in the view
 type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView)

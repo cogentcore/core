@@ -49,8 +49,10 @@ type FileView struct {
 
 var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
 
-// Note: the overall strategy here is similar to Dialog, where we provide lots
-// of flexible configuration elements that can be easily extended and modified
+func (fv *FileView) Disconnect() {
+	fv.Frame.Disconnect()
+	fv.FileSig.DisconnectAll()
+}
 
 // FileViewFilterFunc is a filtering function for files -- returns true if the
 // file should be visible in the view, and false if not
