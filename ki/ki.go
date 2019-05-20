@@ -450,7 +450,7 @@ type Ki interface {
 	// child remains intact but parent is nil -- could be inserted elsewhere.
 	Delete(destroy bool)
 
-	// Destroy calls DisconnectAll to cut all pointers and signal connections,
+	// Destroy calls DisconnectAll to cut all signal connections,
 	// and remove all children and their childrens-children, etc.
 	Destroy()
 
@@ -713,9 +713,10 @@ type Ki interface {
 	// only call at a known point of non-updating.
 	UpdateReset()
 
-	// Disconnect disconnects node -- reset all ptrs to nil, and
-	// DisconnectAll() signals -- e.g., for freeing up all connnections so
-	// node can be destroyed and making GC easier.
+	// Disconnect disconnects this node, by calling DisconnectAll() on
+	// any Signal fields.  Any Node that adds a Signal must define an
+	// updated version of this method that calls its embedded parent's
+	// version and then calls DisconnectAll() on its Signal fields.
 	Disconnect()
 
 	// DisconnectAll disconnects all the way from me down the tree.

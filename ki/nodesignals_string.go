@@ -9,9 +9,9 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _NodeSignals_name = "NodeSignalNilNodeSignalUpdatedNodeSignalDeletingNodeSignalDestroyingNodeSignalsN"
+const _NodeSignals_name = "NodeSignalNilNodeSignalUpdatedNodeSignalDeletingNodeSignalsN"
 
-var _NodeSignals_index = [...]uint8{0, 13, 30, 48, 68, 80}
+var _NodeSignals_index = [...]uint8{0, 13, 30, 48, 60}
 
 func (i NodeSignals) String() string {
 	if i < 0 || i >= NodeSignals(len(_NodeSignals_index)-1) {

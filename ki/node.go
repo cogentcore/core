@@ -503,21 +503,11 @@ func (n *Node) KiFieldOffs() []uintptr {
 	}
 	// we store the offsets for the fields in type properties
 	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
-	pnm := "__FieldOffs"
-	if foff, ok := kit.TypeProp(tprops, pnm); ok {
+	if foff, ok := kit.TypeProp(tprops, "__FieldOffs"); ok {
 		n.fieldOffs = foff.([]uintptr)
 		return n.fieldOffs
 	}
-	foff := make([]uintptr, 0)
-	kitype := KiType
-	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
-			foff = append(foff, field.Offset)
-		}
-		return true
-	})
-	kit.SetTypeProp(tprops, pnm, foff)
-	n.fieldOffs = foff
+	foff, _ := n.KiFieldsInit()
 	return foff
 }
 
@@ -525,20 +515,31 @@ func (n *Node) KiFieldOffs() []uintptr {
 func (n *Node) KiFieldNames() []string {
 	// we store the offsets for the fields in type properties
 	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
-	pnm := "__FieldNames"
-	if fnms, ok := kit.TypeProp(tprops, pnm); ok {
+	if fnms, ok := kit.TypeProp(tprops, "__FieldNames"); ok {
 		return fnms.([]string)
 	}
-	fnm := make([]string, 0)
+	_, fnm := n.KiFieldsInit()
+	return fnm
+}
+
+// KiFieldsInit initializes cached data about the KiFields in this node
+// offsets and names -- returns them
+func (n *Node) KiFieldsInit() (foff []uintptr, fnm []string) {
+	foff = make([]uintptr, 0)
+	fnm = make([]string, 0)
 	kitype := KiType
 	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
+			foff = append(foff, field.Offset)
 			fnm = append(fnm, field.Name)
 		}
 		return true
 	})
-	kit.SetTypeProp(tprops, pnm, fnm)
-	return fnm
+	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
+	kit.SetTypeProp(tprops, "__FieldOffs", foff)
+	n.fieldOffs = foff
+	kit.SetTypeProp(tprops, "__FieldNames", fnm)
+	return
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1190,7 +1191,6 @@ func (n *Node) Destroy() {
 	if n.This() == nil { // already dead!
 		return
 	}
-	n.NodeSig.Emit(n.This(), int64(NodeSignalDestroying), nil)
 	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
 	// and destroy all my fields
@@ -1199,14 +1199,6 @@ func (n *Node) Destroy() {
 		return true
 	})
 	DelMgr.DestroyDeleted() // then destroy all those kids
-	// extra step to delete all the slices and maps -- super friendly to GC :)
-	// note: not safe at this point!
-	// FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-	// 	if fieldVal.Kind() == reflect.Slice || fieldVal.Kind() == reflect.Map {
-	// 		fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
-	// 	}
-	// 	return true
-	// })
 	n.SetFlag(int(NodeDestroyed))
 	n.Ths = nil // last gasp: lose our own sense of self..
 	// note: above is thread-safe because This() accessor checks Destroyed
@@ -1535,6 +1527,7 @@ func (n *Node) SetDepth(depth int) {
 }
 
 // FlatFieldsValueFunc is the Node version of this function from kit/embeds.go
+// it is very slow and should be avoided at all costs!
 func FlatFieldsValueFunc(stru interface{}, fun func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool) bool {
 	v := kit.NonPtrValue(reflect.ValueOf(stru))
 	typ := v.Type()
@@ -1934,27 +1927,12 @@ func (n *Node) UpdateReset() {
 	}
 }
 
-// Disconnect disconnects node -- reset all ptrs to nil, and
-// DisconnectAll() signals -- e.g., for freeing up all connnections so
-// node can be destroyed and making GC easier.
+// Disconnect disconnects this node, by calling DisconnectAll() on
+// any Signal fields.  Any Node that adds a Signal must define an
+// updated version of this method that calls its embedded parent's
+// version and then calls DisconnectAll() on its Signal fields.
 func (n *Node) Disconnect() {
 	n.NodeSig.DisconnectAll()
-	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		switch {
-		case fieldVal.Kind() == reflect.Interface:
-			if field.Name != "This" { // reserve that for last step in Destroy
-				fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
-			}
-		case fieldVal.Kind() == reflect.Ptr:
-			fieldVal.Set(reflect.Zero(fieldVal.Type())) // set to nil
-		case fieldVal.Type() == KiT_Signal:
-			if fs, ok := kit.PtrValue(fieldVal).Interface().(*Signal); ok {
-				// fmt.Printf("ki.Node: %v Type: %T Disconnecting signal field: %v\n", n.Name(), n.This(), field.Name)
-				fs.DisconnectAll()
-			}
-		}
-		return true
-	})
 }
 
 // DisconnectAll disconnects all the way from me down the tree.
@@ -2394,6 +2372,8 @@ func (dm *Deleted) Add(kis ...Ki) {
 }
 
 func (dm *Deleted) DestroyDeleted() {
+	// pr := prof.Start("ki.DestroyDeleted")
+	// defer pr.End()
 	dm.Mu.Lock()
 	curdels := make([]Ki, len(dm.Dels))
 	copy(curdels, dm.Dels)

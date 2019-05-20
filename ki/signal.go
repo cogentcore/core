@@ -32,14 +32,9 @@ const (
 
 	// NodeSignalDeleting indicates that the node is being deleted from its
 	// parent children list -- this is not blocked by Updating status and is
-	// delivered immediately
+	// delivered immediately.  No further notifications are sent -- assume
+	// it will be destroyed unless you hear from it again.
 	NodeSignalDeleting
-
-	// NodeSignalDestroying indicates that the node is about to be destroyed
-	// -- this is a second pass after removal from parent -- all of its
-	// children and Ki fields will be destroyed too -- not blocked by updating
-	// status and delivered immediately
-	NodeSignalDestroying
 
 	NodeSignalsN
 )

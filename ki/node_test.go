@@ -687,9 +687,7 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 1028
 	// fmt.Printf("#################################\n")
 
 	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: child12 sig: NodeSignalDestroying data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: subchild12 sig: NodeSignalDestroying data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalUpdated data: 8196
 ki.Signal Emit from: child12 sig: NodeSignalUpdated data: 8196
 ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 4100
