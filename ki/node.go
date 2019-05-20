@@ -1644,7 +1644,7 @@ outer:
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
 				cur.SetTravState(0, -1)
-				nxt := cur.KiField(0)
+				nxt := cur.KiField(0).This()
 				if nxt != nil {
 					cur = nxt
 					cur.SetTravState(-1, -1)
@@ -1653,7 +1653,7 @@ outer:
 			}
 			if cur.HasChildren() {
 				cur.SetTravState(0, 0) // 0 for no fields
-				nxt := cur.Child(0)
+				nxt := cur.Child(0).This()
 				if nxt != nil {
 					cur = nxt
 					cur.SetTravState(-1, -1)
@@ -1668,7 +1668,7 @@ outer:
 				if (curField + 1) < cur.NumKiFields() {
 					curField++
 					cur.SetTravState(curField, curChild)
-					nxt := cur.KiField(curField)
+					nxt := cur.KiField(curField).This()
 					if nxt != nil {
 						cur = nxt
 						cur.SetTravState(-1, -1)
@@ -1680,7 +1680,7 @@ outer:
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
 				cur.SetTravState(curField, curChild)
-				nxt := cur.Child(curChild)
+				nxt := cur.Child(curChild).This()
 				if nxt != nil {
 					cur = nxt
 					cur.SetTravState(-1, -1)
@@ -1725,7 +1725,7 @@ outer:
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
 				cur.SetTravState(0, -1)
-				nxt := cur.KiField(0)
+				nxt := cur.KiField(0).This()
 				if nxt != nil {
 					cur = nxt
 					cur.SetTravState(-1, -1)
@@ -1734,7 +1734,7 @@ outer:
 			}
 			if cur.HasChildren() {
 				cur.SetTravState(0, 0) // 0 for no fields
-				nxt := cur.Child(0)
+				nxt := cur.Child(0).This()
 				if nxt != nil {
 					cur = nxt
 					cur.SetTravState(-1, -1)
@@ -1749,7 +1749,7 @@ outer:
 				if (curField + 1) < cur.NumKiFields() {
 					curField++
 					cur.SetTravState(curField, curChild)
-					nxt := cur.KiField(curField)
+					nxt := cur.KiField(curField).This()
 					if nxt != nil {
 						cur = nxt
 						cur.SetTravState(-1, -1)
@@ -1761,7 +1761,7 @@ outer:
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
 				cur.SetTravState(curField, curChild)
-				nxt := cur.Child(curChild)
+				nxt := cur.Child(curChild).This()
 				if nxt != nil {
 					cur = nxt
 					cur.SetTravState(-1, -1)
