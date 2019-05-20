@@ -1644,15 +1644,21 @@ outer:
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
 				cur.SetTravState(0, -1)
-				cur = cur.KiField(0)
-				cur.SetTravState(-1, -1)
-				continue
+				nxt := cur.KiField(0)
+				if nxt != nil {
+					cur = nxt
+					cur.SetTravState(-1, -1)
+					continue
+				}
 			}
 			if cur.HasChildren() {
 				cur.SetTravState(0, 0) // 0 for no fields
-				cur = cur.Child(0)
-				cur.SetTravState(-1, -1)
-				continue
+				nxt := cur.Child(0)
+				if nxt != nil {
+					cur = nxt
+					cur.SetTravState(-1, -1)
+					continue
+				}
 			}
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
@@ -1662,17 +1668,25 @@ outer:
 				if (curField + 1) < cur.NumKiFields() {
 					curField++
 					cur.SetTravState(curField, curChild)
-					cur = cur.KiField(curField)
-					cur.SetTravState(-1, -1)
-					continue outer
+					nxt := cur.KiField(curField)
+					if nxt != nil {
+						cur = nxt
+						cur.SetTravState(-1, -1)
+						continue outer
+					}
+					continue
 				}
 			}
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
 				cur.SetTravState(curField, curChild)
-				cur = cur.Child(curChild)
-				cur.SetTravState(-1, -1)
-				continue outer
+				nxt := cur.Child(curChild)
+				if nxt != nil {
+					cur = nxt
+					cur.SetTravState(-1, -1)
+					continue outer
+				}
+				continue
 			}
 			// couldn't go right, move up..
 			if cur == start {
@@ -1711,15 +1725,21 @@ outer:
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
 				cur.SetTravState(0, -1)
-				cur = cur.KiField(0)
-				cur.SetTravState(-1, -1)
-				continue
+				nxt := cur.KiField(0)
+				if nxt != nil {
+					cur = nxt
+					cur.SetTravState(-1, -1)
+					continue
+				}
 			}
 			if cur.HasChildren() {
 				cur.SetTravState(0, 0) // 0 for no fields
-				cur = cur.Child(0)
-				cur.SetTravState(-1, -1)
-				continue
+				nxt := cur.Child(0)
+				if nxt != nil {
+					cur = nxt
+					cur.SetTravState(-1, -1)
+					continue
+				}
 			}
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
@@ -1729,17 +1749,25 @@ outer:
 				if (curField + 1) < cur.NumKiFields() {
 					curField++
 					cur.SetTravState(curField, curChild)
-					cur = cur.KiField(curField)
-					cur.SetTravState(-1, -1)
-					continue outer
+					nxt := cur.KiField(curField)
+					if nxt != nil {
+						cur = nxt
+						cur.SetTravState(-1, -1)
+						continue outer
+					}
+					continue
 				}
 			}
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
 				cur.SetTravState(curField, curChild)
-				cur = cur.Child(curChild)
-				cur.SetTravState(-1, -1)
-				continue outer
+				nxt := cur.Child(curChild)
+				if nxt != nil {
+					cur = nxt
+					cur.SetTravState(-1, -1)
+					continue outer
+				}
+				continue
 			}
 			level--
 			fun(cur, level, data) // now we call the function, last..
