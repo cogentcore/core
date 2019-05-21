@@ -426,7 +426,7 @@ func (bb *ButtonBase) MouseEvent() {
 	bb.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		bw := recv.(ButtonWidget)
-		bbb := bw.ButtonAsBase()
+		bbb := bw.AsButtonBase()
 		if me.Button == mouse.Left {
 			switch me.Action {
 			case mouse.DoubleClick: // we just count as a regular click
@@ -446,7 +446,7 @@ func (bb *ButtonBase) MouseEvent() {
 func (bb *ButtonBase) MouseFocusEvent() {
 	bb.ConnectEvent(oswin.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		bw := recv.(ButtonWidget)
-		bbb := bw.ButtonAsBase()
+		bbb := bw.AsButtonBase()
 		if bbb.IsInactive() {
 			return
 		}
@@ -464,7 +464,7 @@ func (bb *ButtonBase) MouseFocusEvent() {
 func (bb *ButtonBase) KeyChordEvent() {
 	bb.ConnectEvent(oswin.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		bw := recv.(ButtonWidget)
-		bbb := bw.ButtonAsBase()
+		bbb := bw.AsButtonBase()
 		if bbb.IsInactive() {
 			return
 		}
@@ -513,9 +513,9 @@ func (bb *ButtonBase) ButtonEvents() {
 // ButtonWidget is an interface for button widgets allowing ButtonBase
 // defaults to handle most cases.
 type ButtonWidget interface {
-	// ButtonAsBase gets the button base for most basic functions -- reduces
+	// AsButtonBase gets the button base for most basic functions -- reduces
 	// interface size.
-	ButtonAsBase() *ButtonBase
+	AsButtonBase() *ButtonBase
 
 	// ButtonRelease is called for release of button -- this is where buttons
 	// actually differ in functionality.
@@ -537,7 +537,7 @@ type ButtonWidget interface {
 ///////////////////////////////////////////////////////////
 // ButtonBase Node2D and ButtonwWidget interface
 
-func (bb *ButtonBase) ButtonAsBase() *ButtonBase {
+func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 	return bb
 }
 
@@ -770,12 +770,6 @@ var ButtonProps = ki.Props{
 	},
 }
 
-// ButtonWidget interface
-
-func (bb *Button) ButtonAsBase() *ButtonBase {
-	return &(bb.ButtonBase)
-}
-
 ///////////////////////////////////////////////////////////
 // CheckBox
 
@@ -857,7 +851,7 @@ var CheckBoxProps = ki.Props{
 
 // CheckBoxWidget interface
 
-func (cb *CheckBox) ButtonAsBase() *ButtonBase {
+func (cb *CheckBox) AsButtonBase() *ButtonBase {
 	return &(cb.ButtonBase)
 }
 

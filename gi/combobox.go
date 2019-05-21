@@ -118,10 +118,6 @@ var ComboBoxProps = ki.Props{
 
 // ButtonWidget interface
 
-func (cb *ComboBox) ButtonAsBase() *ButtonBase {
-	return &(cb.ButtonBase)
-}
-
 func (cb *ComboBox) ButtonRelease() {
 	if cb.IsInactive() {
 		return

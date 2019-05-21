@@ -197,10 +197,6 @@ var ActionProps = ki.Props{
 
 // ButtonWidget interface
 
-func (ac *Action) ButtonAsBase() *ButtonBase {
-	return &(ac.ButtonBase)
-}
-
 // Trigger triggers the action signal -- for external activation of action --
 // only works if action is not inactive
 func (ac *Action) Trigger() {

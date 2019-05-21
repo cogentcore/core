@@ -570,10 +570,6 @@ var TabButtonProps = ki.Props{
 	},
 }
 
-func (tb *TabButton) ButtonAsBase() *ButtonBase {
-	return &(tb.ButtonBase)
-}
-
 func (tb *TabButton) TabView() *TabView {
 	tv := tb.ParentByType(KiT_TabView, true)
 	if tv == nil {

@@ -583,10 +583,6 @@ var MenuButtonProps = ki.Props{
 	},
 }
 
-func (mb *MenuButton) ButtonAsBase() *ButtonBase {
-	return &(mb.ButtonBase)
-}
-
 func (mb *MenuButton) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, string(mb.Icon), mb.Text)

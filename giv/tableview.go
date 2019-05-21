@@ -679,7 +679,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				}
 			}
 			if tv.StyleFunc != nil {
-				tv.StyleFunc(tv, svnp.Interface(), widg, i, fli, vv)
+				tv.StyleFunc(tv, svnp.Interface(), widg, si, fli, vv)
 			}
 		}
 
@@ -994,16 +994,16 @@ func (tv *TableView) HasFocus2D() bool {
 //  Row access methods
 //  NOTE: row = physical GUI display row, idx = slice index -- not the same!
 
-// SliceStruct returns struct interface at given row
-func (tv *TableView) SliceStruct(idx int) interface{} {
+// SliceVal returns value interface at given slice index
+func (tv *TableView) SliceVal(idx int) interface{} {
 	svnp, sz := tv.SliceValueSize()
 	if idx < 0 || idx >= sz {
-		fmt.Printf("giv.TableView: slice index out of range: %v\n", idx)
+		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
 	val := kit.OnePtrUnderlyingValue(svnp.Index(idx)) // deal with pointer lists
-	stru := val.Interface()
-	return stru
+	vali := val.Interface()
+	return vali
 }
 
 // IsRowInBounds returns true if disp row is in bounds
@@ -1542,7 +1542,7 @@ func (tv *TableView) UnselectIdxAction(idx int) {
 
 // MimeDataIdx adds mimedata for given idx: an application/json of the struct
 func (tv *TableView) MimeDataIdx(md *mimedata.Mimes, idx int) {
-	stru := tv.SliceStruct(idx)
+	stru := tv.SliceVal(idx)
 	b, err := json.MarshalIndent(stru, "", "  ")
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: b})
@@ -1939,13 +1939,13 @@ func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 }
 
 func (tv *TableView) ItemCtxtMenu(idx int) {
-	stru := tv.SliceStruct(idx)
-	if stru == nil {
+	val := tv.SliceVal(idx)
+	if val == nil {
 		return
 	}
 	var men gi.Menu
 
-	if CtxtMenuView(stru, tv.IsInactive(), tv.Viewport, &men) {
+	if CtxtMenuView(val, tv.IsInactive(), tv.Viewport, &men) {
 		if tv.ShowViewCtxtMenu {
 			men.AddSeparator("sep-tvmenu")
 			tv.StdCtxtMenu(&men, idx)
@@ -2129,19 +2129,5 @@ func (tv *TableView) TableViewEvents() {
 				tvv.DragNDropSource(de)
 			}
 		})
-		sg := tv.SliceGrid()
-		if sg != nil {
-			sg.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-				de := d.(*dnd.FocusEvent)
-				switch de.Action {
-				case dnd.Enter:
-					tv.Viewport.Win.DNDSetCursor(de.Mod)
-				case dnd.Exit:
-					tv.Viewport.Win.DNDNotCursor()
-				case dnd.Hover:
-					// nothing here?
-				}
-			})
-		}
 	}
 }
