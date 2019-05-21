@@ -121,6 +121,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	sg := mv.MapGrid()
 	sg.Lay = gi.LayoutGrid
+	sg.Stripes = gi.RowStripes
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(1.5))
 	sg.SetMinPrefWidth(units.NewEm(10))

@@ -154,7 +154,10 @@ func (lb *Label) SetText(txt string) {
 	if lb.Sty.Font.Size.Val == 0 { // not yet styled
 		lb.StyleLabel()
 	}
+	lb.SetStateStyle()
 	lb.Text = txt
+	lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
+	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
 		lb.Render.SetHTML(" ", &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	} else {
@@ -378,6 +381,7 @@ func (lb *Label) StyleLabel() {
 }
 
 func (lb *Label) LayoutLabel() {
+	lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	spc := lb.Sty.BoxSpace()
 	sz := lb.LayData.SizePrefOrMax()
@@ -410,6 +414,7 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
 	if lb.Sty.Text.HasWordWrap() {
+		lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
 		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 		lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues

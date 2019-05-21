@@ -231,6 +231,11 @@ func (nb *NodeBase) SetCanFocusIfActive() {
 	nb.SetFlagState(!nb.IsInactive(), int(CanFocus))
 }
 
+// SetCanFocus sets CanFocus flag to true
+func (nb *NodeBase) SetCanFocus() {
+	nb.SetFlag(int(CanFocus))
+}
+
 // IsSelected tests if this node is flagged as Selected
 func (nb *NodeBase) IsSelected() bool {
 	return nb.HasFlag(int(Selected))

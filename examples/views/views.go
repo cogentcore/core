@@ -90,6 +90,7 @@ func mainrun() {
 	mv.SetStretchMaxHeight()
 
 	sv := giv.AddNewSliceView(svfr, "sv")
+	// sv.SetInactive()
 	sv.SetSlice(&tstslice, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()

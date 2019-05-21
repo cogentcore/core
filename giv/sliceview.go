@@ -237,6 +237,7 @@ func (sv *SliceView) ConfigGrid() {
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 
 	sg.Lay = gi.LayoutGrid
+	sg.Stripes = gi.RowStripes
 	sg.SetProp("columns", nWidgPerRow)
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(1.5))
@@ -339,7 +340,8 @@ func (sv *SliceView) UpdateScroll() {
 		sb.ThumbVal = 10
 	}
 	sb.TrackThr = sb.Step
-	sb.SetValue(float32(sv.StartIdx))
+	// 	sb.SetValue(float32(sv.StartIdx))
+	sb.Value = float32(sv.StartIdx)
 	sb.UpdateEnd(updt)
 }
 
@@ -383,7 +385,6 @@ func (sv *SliceView) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 	if sv.Values == nil || sg.NumChildren() != nWidg {
-		// sv.SetFullReRender()
 		sg.DeleteChildren(true)
 
 		sv.Values = make([]ValueView, sv.DispRows)
@@ -411,6 +412,7 @@ func (sv *SliceView) UpdateSliceGrid() {
 		return
 	}
 	sg := sv.SliceGrid()
+	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	updt := sg.UpdateStart()
@@ -429,6 +431,7 @@ func (sv *SliceView) UpdateSliceGrid() {
 		// fmt.Printf("scroll to: %v\n", sv.StartIdx)
 		lastSt := sz - sv.DispRows
 		sv.StartIdx = ints.MinInt(lastSt, sv.StartIdx)
+		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
 	} else {
 		sv.StartIdx = 0
 	}
@@ -437,6 +440,9 @@ func (sv *SliceView) UpdateSliceGrid() {
 		ridx := i * nWidgPerRow
 		si := sv.StartIdx + i // slice idx
 		issel := sv.IdxIsSelected(si)
+		// if issel {
+		// 	fmt.Printf("row: %v idx: %v is sel\n", i, si)
+		// }
 		val := kit.OnePtrUnderlyingValue(svnp.Index(si)) // deal with pointer lists
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
@@ -470,6 +476,7 @@ func (sv *SliceView) UpdateSliceGrid() {
 					}
 				})
 			}
+			idxlab.CurBgColor = gi.Prefs.Colors.Background
 			idxlab.SetText(sitxt)
 			idxlab.SetSelectedState(issel)
 		}
@@ -478,6 +485,9 @@ func (sv *SliceView) UpdateSliceGrid() {
 		if sg.Kids[ridx+idxOff] != nil {
 			widg = sg.Kids[ridx+idxOff].(gi.Node2D)
 			vv.ConfigWidget(widg) // note: update alone does not work here.
+			if sv.IsInactive() {
+				widg.AsNode2D().SetInactive()
+			}
 			widg.AsNode2D().SetSelectedState(issel)
 		} else {
 			widg = ki.NewOfType(vtyp).(gi.Node2D)
@@ -701,6 +711,9 @@ func (sv *SliceView) Style2D() {
 	if !sv.IsConfiged() {
 		return
 	}
+	if sv.IsInactive() {
+		sv.SetCanFocus()
+	}
 	sg := sv.SliceGrid()
 	sg.StartFocus() // need to call this when window is actually active
 	sv.Frame.Style2D()
@@ -722,6 +735,9 @@ func (sv *SliceView) Render2D() {
 			sv.UpdateSliceGrid()
 		}
 		sv.ReRender2DTree()
+		if sv.SelectedIdx > -1 {
+			sv.ScrollToIdx(sv.SelectedIdx)
+		}
 		return
 	}
 	if sv.FullReRenderIfNeeded() {
@@ -733,9 +749,6 @@ func (sv *SliceView) Render2D() {
 		sv.RenderScrolls()
 		sv.Render2DChildren()
 		sv.PopBounds()
-		if sv.SelectedIdx > -1 {
-			sv.ScrollToIdx(sv.SelectedIdx)
-		}
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
 	}
@@ -858,11 +871,14 @@ func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 func (sv *SliceView) ScrollToIdx(idx int) bool {
 	if idx < sv.StartIdx {
 		sv.StartIdx = idx
+		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+		sv.UpdateScroll()
 		sv.UpdateSliceGrid()
 		return true
-	} else if idx > sv.StartIdx+sv.DispRows {
-		sv.StartIdx = idx - sv.DispRows
+	} else if idx >= sv.StartIdx+sv.DispRows {
+		sv.StartIdx = idx - (sv.DispRows - 1)
 		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+		sv.UpdateScroll()
 		sv.UpdateSliceGrid()
 		return true
 	}
@@ -1752,12 +1768,12 @@ func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
 			kt.SetProcessed()
 		}
 	case kf == gi.KeyFunPageDown:
-		ni := ints.MinInt(idx+sv.VisRows, sv.SliceSize-1)
+		ni := ints.MinInt(idx+sv.VisRows-1, sv.SliceSize-1)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetProcessed()
 	case kf == gi.KeyFunPageUp:
-		ni := ints.MaxInt(idx-sv.VisRows, 0)
+		ni := ints.MaxInt(idx-(sv.VisRows-1), 0)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetProcessed()
@@ -1770,7 +1786,7 @@ func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
 func (sv *SliceView) SliceViewEvents() {
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
-			sv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 				svv := recv.Embed(KiT_SliceView).(*SliceView)
 				kt := d.(*key.ChordEvent)
 				svv.KeyInputInactive(kt)
@@ -1779,6 +1795,9 @@ func (sv *SliceView) SliceViewEvents() {
 		sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			me := d.(*mouse.Event)
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
+			if !svv.HasFocus() {
+				svv.GrabFocus()
+			}
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
 				svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), svv.SelectedIdx)
 				me.SetProcessed()
@@ -1797,7 +1816,7 @@ func (sv *SliceView) SliceViewEvents() {
 				me.SetProcessed()
 			}
 		})
-		sv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
 			kt := d.(*key.ChordEvent)
 			svv.KeyInputActive(kt)
