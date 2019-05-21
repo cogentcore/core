@@ -520,10 +520,14 @@ func (fv *FileView) UpdateFiles() {
 	sv := fv.FilesView()
 	sv.SelField = "Name"
 	sv.SelVal = fv.SelFile
-	sv.Config()
+	if !sv.IsConfiged() {
+		sv.Config()
+		sv.LayoutSliceGrid()
+	}
+	sv.UpdateSliceGrid()
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
-		sv.ScrollToRow(sv.SelectedIdx)
+		sv.ScrollToIdx(sv.SelectedIdx)
 	}
 }
 
