@@ -46,6 +46,7 @@ type SliderBase struct {
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
 	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
+	Off         bool                 `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
 	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
 	StateStyles [SliderStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	SliderSig   ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
@@ -79,6 +80,7 @@ func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
 	nb.Tracking = fr.Tracking
 	nb.TrackThr = fr.TrackThr
 	nb.Snap = fr.Snap
+	nb.Off = fr.Off
 }
 
 func (sb *SliderBase) Disconnect() {
@@ -648,7 +650,7 @@ func (sr *Slider) Render2D() {
 	if sr.FullReRenderIfNeeded() {
 		return
 	}
-	if sr.PushBounds() {
+	if !sr.Off && sr.PushBounds() {
 		sr.This().(Node2D).ConnectEvents2D()
 		sr.Render2DDefaultStyle()
 		sr.Render2DChildren()
@@ -845,7 +847,7 @@ func (sb *ScrollBar) Render2D() {
 	if sb.FullReRenderIfNeeded() {
 		return
 	}
-	if sb.PushBounds() {
+	if !sb.Off && sb.PushBounds() {
 		sb.This().(Node2D).ConnectEvents2D()
 		sb.Render2DDefaultStyle()
 		sb.Render2DChildren()

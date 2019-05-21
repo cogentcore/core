@@ -342,6 +342,11 @@ func (sv *SliceView) UpdateScroll() {
 	sb.TrackThr = sb.Step
 	// 	sb.SetValue(float32(sv.StartIdx))
 	sb.Value = float32(sv.StartIdx)
+	if sv.DispRows == sv.SliceSize {
+		sb.Off = true
+	} else {
+		sb.Off = false
+	}
 	sb.UpdateEnd(updt)
 }
 
@@ -821,12 +826,9 @@ func (sv *SliceView) RowGrabFocus(row int) *gi.WidgetBase {
 		return widg
 	}
 	sv.inFocusGrab = true
-	defer func() { sv.inFocusGrab = false }()
-	if widg.CanFocus() {
-		widg.GrabFocus()
-		return widg
-	}
-	return nil
+	widg.GrabFocus()
+	sv.inFocusGrab = false
+	return widg
 }
 
 // IdxGrabFocus grabs the focus for the first focusable widget in given idx --
@@ -1292,9 +1294,10 @@ func (sv *SliceView) Copy(reset bool) {
 	if nitms == 0 {
 		return
 	}
+	ixs := sv.SelectedIdxsList(false) // ascending
 	md := make(mimedata.Mimes, 0, nitms)
-	for r, _ := range sv.SelectedIdxs {
-		sv.MimeDataIdx(&md, r)
+	for _, i := range ixs {
+		sv.MimeDataIdx(&md, i)
 	}
 	oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Write(md)
 	if reset {
@@ -1708,11 +1711,11 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 		sv.SelectAllIdxs()
 		sv.SelectMode = false
 		kt.SetProcessed()
-	case gi.KeyFunDelete:
-		sv.SliceDeleteAt(sv.SelectedIdx, true)
-		sv.SelectMode = false
-		sv.SelectIdxAction(idx, mouse.SelectOne)
-		kt.SetProcessed()
+	// case gi.KeyFunDelete: // too dangerous
+	// 	sv.SliceDeleteAt(sv.SelectedIdx, true)
+	// 	sv.SelectMode = false
+	// 	sv.SelectIdxAction(idx, mouse.SelectOne)
+	// 	kt.SetProcessed()
 	case gi.KeyFunDuplicate:
 		nidx := sv.Duplicate()
 		sv.SelectMode = false

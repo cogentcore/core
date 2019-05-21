@@ -339,11 +339,26 @@ func (nb *Node2DBase) HasFocus2D() bool {
 	return nb.HasFocus()
 }
 
-// GrabFocus grabs the keyboard input focus on this item
+// GrabFocus grabs the keyboard input focus on this item or the first item within it
+// that can be focused (if none, then goes ahead and sets focus to this object)
 func (nb *Node2DBase) GrabFocus() {
+	foc := nb.This()
+	if !nb.CanFocus() {
+		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
+			_, ni := KiToNode2D(k)
+			if ni == nil || ni.This() == nil {
+				return true
+			}
+			if !ni.CanFocus() {
+				return true
+			}
+			foc = k
+			return false // done
+		})
+	}
 	win := nb.ParentWindow()
 	if win != nil {
-		win.SetFocus(nb.This())
+		win.SetFocus(foc)
 	}
 }
 
