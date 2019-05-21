@@ -1808,6 +1808,15 @@ func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
 }
 
 func (sv *SliceView) SliceViewEvents() {
+	// LowPri to allow other focal widgets to capture
+	sv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		svv := recv.Embed(KiT_SliceView).(*SliceView)
+		me.SetProcessed()
+		sbb := svv.ScrollBar()
+		cur := float32(sbb.Pos)
+		sbb.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+	})
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
 			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

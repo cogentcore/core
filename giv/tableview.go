@@ -652,7 +652,8 @@ func (tv *TableView) UpdateSliceGrid() {
 				vv.ConfigWidget(widg)
 				wb := widg.AsWidget()
 				if wb != nil {
-					wb.Sty.Template = "TableViewView.ItemWidget." + vtyp.Name()
+					// totally not worth it now:
+					// wb.Sty.Template = "TableViewView.ItemWidget." + vtyp.Name()
 					wb.SetProp("tv-row", i)
 					wb.ClearSelected()
 					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -1363,14 +1364,14 @@ func (tv *TableView) UpdateSelectIdx(idx int, sel bool) {
 }
 
 // IdxIsSelected returns the selected status of given slice index
-func (tv *TableView) IdxIsSelected(row int) bool {
-	if _, ok := tv.SelectedIdxs[row]; ok {
+func (tv *TableView) IdxIsSelected(idx int) bool {
+	if _, ok := tv.SelectedIdxs[idx]; ok {
 		return true
 	}
 	return false
 }
 
-// SelectedIdxsList returns list of selected rows, sorted either ascending or descending
+// SelectedIdxsList returns list of selected idxs, sorted either ascending or descending
 func (tv *TableView) SelectedIdxsList(descendingSort bool) []int {
 	rws := make([]int, len(tv.SelectedIdxs))
 	i := 0
@@ -1421,7 +1422,7 @@ func (tv *TableView) UnselectAllIdxs() {
 	}
 }
 
-// SelectAllIdxs selects all rows
+// SelectAllIdxs selects all idxs
 func (tv *TableView) SelectAllIdxs() {
 	win := tv.Viewport.Win
 	updt := false
@@ -2070,6 +2071,15 @@ func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
 }
 
 func (tv *TableView) TableViewEvents() {
+	// LowPri to allow other focal widgets to capture
+	tv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.ScrollEvent)
+		tvv := recv.Embed(KiT_TableView).(*TableView)
+		me.SetProcessed()
+		sbb := tvv.ScrollBar()
+		cur := float32(sbb.Pos)
+		sbb.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+	})
 	if tv.IsInactive() {
 		if tv.InactKeyNav {
 			tv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
