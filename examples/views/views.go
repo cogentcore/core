@@ -23,10 +23,10 @@ func main() {
 
 func mainrun() {
 
-	tstslice := make([]string, 10)
+	tstslice := make([]string, 40)
 
 	for i := 0; i < len(tstslice); i++ {
-		tstslice[i] = fmt.Sprintf("this is element: %v", i)
+		tstslice[i] = fmt.Sprintf("el: %v", i)
 	}
 
 	tstmap := make(map[string]string)
@@ -61,8 +61,8 @@ func mainrun() {
 
 	gi.AddNewStretch(trow, "str1")
 	but := gi.AddNewButton(trow, "slice-test")
-	but.SetText("SliceTest")
-	but.Tooltip = "open a window of a slice view with a lot of elments, for performance testing"
+	but.SetText("SliceDialog")
+	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
 	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			sl := make([]float32, 2880)

@@ -12,6 +12,7 @@ import (
 	"reflect"
 	"sort"
 
+	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -45,20 +46,25 @@ type SliceView struct {
 	Values           []ValueView        `json:"-" xml:"-" desc:"ValueView representations of the slice values"`
 	ShowIndex        bool               `xml:"index" desc:"whether to show index or not -- updated from 'index' property (bool)"`
 	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	VisRows          int                `desc:"number of rows visible in display"`
 	SelVal           interface{}        `view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
 	SelectedIdx      int                `json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	SelectMode       bool               `desc:"editing-mode select rows mode"`
-	SelectedRows     map[int]struct{}   `desc:"list of currently-selected rows"`
-	DraggedRows      []int              `desc:"list of currently-dragged rows"`
+	SelectedIdxs     map[int]struct{}   `desc:"list of currently-selected slice indexes"`
+	DraggedIdxs      []int              `desc:"list of currently-dragged indexes"`
 	SliceViewSig     ki.Signal          `json:"-" xml:"-" desc:"slice view interactive editing signals"`
 	ViewSig          ki.Signal          `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 	TmpSave          ValueView          `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	BuiltSlice       interface{}        `view:"-" json:"-" xml:"-" desc:"the built slice"`
-	BuiltSize        int                `view:"-" json:"-" xml:"-" desc:"the built size"`
 	ToolbarSlice     interface{}        `view:"-" desc:"the slice that we successfully set a toolbar for"`
-	inFocusGrab      bool
-	curRow           int // temp row variable used e.g., in Drop method
+
+	SliceSize    int     `view:"inactive" desc:"number of rows"`
+	DispRows     int     `view:"inactive" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
+	StartIdx     int     `view:"inactive" desc:"starting slice index of visible rows"`
+	RowHeight    float32 `view:"inactive" desc:"height of a single row"`
+	VisRows      int     `view:"inactive" desc:"total number of rows visible in allocated display size"`
+	layoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
+	renderedRows int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
+	inFocusGrab  bool
+	curIdx       int // temp idx variable used e.g., in Drop method
 }
 
 var KiT_SliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
@@ -84,12 +90,13 @@ func (sv *SliceView) SetSlice(sl interface{}, tmpSave ValueView) {
 	updt := false
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
+		sv.StartIdx = 0
 		sv.Slice = sl
 		sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		if !sv.IsInactive() {
 			sv.SelectedIdx = -1
 		}
-		sv.SelectedRows = make(map[int]struct{}, 10)
+		sv.SelectedIdxs = make(map[int]struct{})
 		sv.SelectMode = false
 		sv.SetFullReRender()
 	}
@@ -144,9 +151,19 @@ func (sv *SliceView) Config() {
 	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
-	config.Add(gi.KiT_Frame, "slice-grid")
-	mods, updt := sv.ConfigChildren(config, false)
-	sv.ConfigSliceGrid(true)
+	config.Add(gi.KiT_Layout, "grid-lay")
+	mods, updt := sv.ConfigChildren(config, true)
+
+	gl := sv.GridLayout()
+	gl.Lay = gi.LayoutHoriz
+	gl.SetStretchMaxHeight() // for this to work, ALL layers above need it too
+	gl.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
+	gconfig := kit.TypeAndNameList{}
+	gconfig.Add(gi.KiT_Frame, "grid")
+	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
+	gl.ConfigChildren(gconfig, true) // covered by above
+
+	sv.ConfigGrid()
 	sv.ConfigToolbar()
 	if mods {
 		sv.SetFullReRender()
@@ -162,15 +179,25 @@ func (sv *SliceView) IsConfiged() bool {
 	return true
 }
 
+// GridLayout returns the Layout containing the Grid and the scrollbar
+func (sv *SliceView) GridLayout() *gi.Layout {
+	return sv.ChildByName("grid-lay", 0).(*gi.Layout)
+}
+
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values
 func (sv *SliceView) SliceGrid() *gi.Frame {
-	return sv.ChildByName("slice-grid", 0).(*gi.Frame)
+	return sv.GridLayout().ChildByName("grid", 0).(*gi.Frame)
+}
+
+// ScrollBar returns the SliceGrid scrollbar
+func (sv *SliceView) ScrollBar() *gi.ScrollBar {
+	return sv.GridLayout().ChildByName("scrollbar", 0).(*gi.ScrollBar)
 }
 
 // ToolBar returns the toolbar widget
 func (sv *SliceView) ToolBar() *gi.ToolBar {
-	return sv.ChildByName("toolbar", 0).(*gi.ToolBar)
+	return sv.ChildByName("toolbar", 1).(*gi.ToolBar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -192,27 +219,22 @@ func (sv *SliceView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-// ConfigSliceGrid configures the SliceGrid for the current slice
-func (sv *SliceView) ConfigSliceGrid(forceUpdt bool) {
-	if kit.IfaceIsNil(sv.Slice) {
-		return
-	}
-	mv := reflect.ValueOf(sv.Slice)
-	mvnp := kit.NonPtrValue(mv)
-	sz := mvnp.Len()
+// SliceValueSize returns the reflect.Value and size of the slice
+// sets SliceSize always to current size
+func (sv *SliceView) SliceValueSize() (reflect.Value, int) {
+	svnp := kit.NonPtrValue(reflect.ValueOf(sv.Slice))
+	sz := svnp.Len()
+	sv.SliceSize = sz
+	return svnp, sz
+}
 
-	if !forceUpdt && sv.BuiltSlice == sv.Slice && sv.BuiltSize == sz {
-		return
-	}
-	sv.BuiltSlice = sv.Slice
-	sv.BuiltSize = sz
-
+// ConfigGrid configures the SliceGrid for the current slice
+func (sv *SliceView) ConfigGrid() {
 	sg := sv.SliceGrid()
 	updt := sg.UpdateStart()
-	sg.SetFullReRender()
 	defer sg.UpdateEnd(updt)
 
-	nWidgPerRow, _ := sv.RowWidgetNs()
+	nWidgPerRow, idxOff := sv.RowWidgetNs()
 
 	sg.Lay = gi.LayoutGrid
 	sg.SetProp("columns", nWidgPerRow)
@@ -222,40 +244,211 @@ func (sv *SliceView) ConfigSliceGrid(forceUpdt bool) {
 	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
 	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
 
-	sv.Values = make([]ValueView, sz)
+	if kit.IfaceIsNil(sv.Slice) {
+		return
+	}
+	svnp, sz := sv.SliceValueSize()
+	if sz == 0 {
+		return
+	}
 
-	sg.DeleteChildren(true)
-	sg.Kids = make(ki.Slice, nWidgPerRow*sz)
+	sg.Kids = make(ki.Slice, nWidgPerRow)
 
-	sv.ConfigSliceGridRows()
+	// at this point, we make one dummy row to get size of widgets
+	val := kit.OnePtrUnderlyingValue(svnp.Index(0)) // deal with pointer lists
+	vv := ToValueView(val.Interface(), "")
+	if vv == nil { // shouldn't happen
+		return
+	}
+	vv.SetSliceValue(val, sv.Slice, 0, sv.TmpSave)
+	vtyp := vv.WidgetType()
+	itxt := fmt.Sprintf("%05d", 0)
+	labnm := fmt.Sprintf("index-%v", itxt)
+	valnm := fmt.Sprintf("value-%v", itxt)
+
+	if sv.ShowIndex {
+		idxlab := &gi.Label{}
+		sg.SetChild(idxlab, 0, labnm)
+		idxlab.Text = itxt
+	}
+
+	widg := ki.NewOfType(vtyp).(gi.Node2D)
+	sg.SetChild(widg, idxOff, valnm)
+	vv.ConfigWidget(widg)
+
+	if !sv.IsInactive() && !sv.isArray {
+		cidx := idxOff
+		if !sv.DeleteOnly {
+			addnm := fmt.Sprintf("add-%v", itxt)
+			addact := gi.Action{}
+			cidx += 1
+			sg.SetChild(&addact, cidx, addnm)
+			addact.SetIcon("plus")
+		}
+		if !sv.AddOnly {
+			delnm := fmt.Sprintf("del-%v", itxt)
+			delact := gi.Action{}
+			cidx += 1
+			sg.SetChild(&delact, cidx, delnm)
+
+			delact.SetIcon("minus")
+		}
+	}
+	sv.ConfigScroll()
 }
 
-// ConfigSliceGridRows configures the SliceGrid rows for the current slice --
-// assumes .Kids is created at the right size -- only call this for a direct
-// re-render e.g., after sorting
-func (sv *SliceView) ConfigSliceGridRows() {
-	mv := reflect.ValueOf(sv.Slice)
-	mvnp := kit.NonPtrValue(mv)
-	sz := mvnp.Len()
+// ConfigScroll configures the scrollbar
+func (sv *SliceView) ConfigScroll() {
+	sb := sv.ScrollBar()
+	sb.Dim = gi.Y
+	sb.Defaults()
+	sb.Tracking = true
+	if sv.Sty.Layout.ScrollBarWidth.Dots == 0 {
+		sb.SetFixedWidth(units.NewPx(16))
+	} else {
+		sb.SetFixedWidth(sv.Sty.Layout.ScrollBarWidth)
+	}
+	sb.SetStretchMaxHeight()
+	sb.Min = 0
+	sb.Step = 1
+	sv.UpdateScroll()
+
+	sb.SliderSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig != int64(gi.SliderValueChanged) {
+			return
+		}
+		wupdt := sv.Viewport.Win.UpdateStart()
+		sv.UpdateSliceGrid()
+		// sv.SetFullReRender()
+		sv.Viewport.ReRender2DNode(sv)
+		sv.Viewport.Win.UpdateEnd(wupdt)
+	})
+}
+
+// UpdateScroll updates grid scrollbar based on display
+func (sv *SliceView) UpdateScroll() {
+	sb := sv.ScrollBar()
+	sb.SetFullReRender()
+	updt := sb.UpdateStart()
+	sb.Max = float32(sv.SliceSize)
+	if sv.DispRows > 0 {
+		sb.PageStep = float32(sv.DispRows) * sb.Step
+		sb.ThumbVal = float32(sv.DispRows)
+	} else {
+		sb.PageStep = 10 * sb.Step
+		sb.ThumbVal = 10
+	}
+	sb.TrackThr = sb.Step
+	sb.SetValue(float32(sv.StartIdx))
+	sb.UpdateEnd(updt)
+}
+
+func (sv *SliceView) AvailHeight() float32 {
+	sg := sv.SliceGrid()
+	sgHt := sg.LayData.AllocSize.Y
+	if sgHt == 0 {
+		return 0
+	}
+	sgHt -= sg.ExtraSize.Y + sg.Sty.BoxSpace()*2
+	return sgHt
+}
+
+// LayoutSliceGrid does the proper layout of slice grid depending on allocated size
+// returns true if UpdateSliceGrid should be called after this
+func (sv *SliceView) LayoutSliceGrid() bool {
+	sg := sv.SliceGrid()
+	if kit.IfaceIsNil(sv.Slice) {
+		sg.DeleteChildren(true)
+		return false
+	}
+	_, sz := sv.SliceValueSize()
+	if sz == 0 {
+		sg.DeleteChildren(true)
+		return false
+	}
+
+	sgHt := sv.AvailHeight()
+	sv.layoutHeight = sgHt
+	if sgHt == 0 {
+		return false
+	}
+
+	nWidgPerRow, _ := sv.RowWidgetNs()
+	sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
+	sv.VisRows = int(math32.Floor(sgHt / sv.RowHeight))
+	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
+
+	nWidg := nWidgPerRow * sv.DispRows
+
+	updt := sg.UpdateStart()
+	defer sg.UpdateEnd(updt)
+	if sv.Values == nil || sg.NumChildren() != nWidg {
+		// sv.SetFullReRender()
+		sg.DeleteChildren(true)
+
+		sv.Values = make([]ValueView, sv.DispRows)
+		sg.Kids = make(ki.Slice, nWidg)
+	}
+	sv.ConfigScroll()
+	return true
+}
+
+func (sv *SliceView) SliceGridNeedsLayout() bool {
+	sgHt := sv.AvailHeight()
+	if sgHt != sv.layoutHeight {
+		return true
+	}
+	return sv.renderedRows != sv.DispRows
+}
+
+// UpdateSliceGrid updates grid display -- robust to any time calling
+func (sv *SliceView) UpdateSliceGrid() {
+	if kit.IfaceIsNil(sv.Slice) {
+		return
+	}
+	svnp, sz := sv.SliceValueSize()
+	if sz == 0 {
+		return
+	}
 	sg := sv.SliceGrid()
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	for i := 0; i < sz; i++ {
+	nWidg := nWidgPerRow * sv.DispRows
+
+	if sv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
+		sv.LayoutSliceGrid()
+		nWidg = nWidgPerRow * sv.DispRows
+	}
+
+	if sz > sv.DispRows {
+		sb := sv.ScrollBar()
+		sv.StartIdx = int(sb.Value)
+		// fmt.Printf("scroll to: %v\n", sv.StartIdx)
+		lastSt := sz - sv.DispRows
+		sv.StartIdx = ints.MinInt(lastSt, sv.StartIdx)
+	} else {
+		sv.StartIdx = 0
+	}
+
+	for i := 0; i < sv.DispRows; i++ {
 		ridx := i * nWidgPerRow
-		val := kit.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
+		si := sv.StartIdx + i // slice idx
+		issel := sv.IdxIsSelected(si)
+		val := kit.OnePtrUnderlyingValue(svnp.Index(si)) // deal with pointer lists
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)
+		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave)
 		sv.Values[i] = vv
 		vtyp := vv.WidgetType()
-		idxtxt := fmt.Sprintf("%05d", i)
-		labnm := fmt.Sprintf("index-%v", idxtxt)
-		valnm := fmt.Sprintf("value-%v", idxtxt)
+		itxt := fmt.Sprintf("%05d", i)
+		sitxt := fmt.Sprintf("%05d", si)
+		labnm := fmt.Sprintf("index-%v", itxt)
+		valnm := fmt.Sprintf("value-%v", itxt)
 
 		if sv.ShowIndex {
 			var idxlab *gi.Label
@@ -264,102 +457,106 @@ func (sv *SliceView) ConfigSliceGridRows() {
 			} else {
 				idxlab = &gi.Label{}
 				sg.SetChild(idxlab, ridx, labnm)
+				idxlab.SetProp("slv-row", i) // all sigs deal with disp rows
+				idxlab.Selectable = true
+				idxlab.Redrawable = true
+				idxlab.Sty.Template = "SliceView.IndexLabel"
+				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.WidgetSelected) {
+						wbb := send.(gi.Node2D).AsWidget()
+						row := wbb.Prop("slv-row").(int)
+						svv := recv.Embed(KiT_SliceView).(*SliceView)
+						svv.UpdateSelectRow(row, wbb.IsSelected())
+					}
+				})
 			}
-			idxlab.Text = idxtxt
-			idxlab.SetProp("slv-index", i)
-			idxlab.Selectable = true
-			idxlab.Sty.Template = "SliceView.IndexLabel"
-			idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.WidgetSelected) {
-					wbb := send.(gi.Node2D).AsWidget()
-					idx := wbb.Prop("slv-index").(int)
-					svv := recv.Embed(KiT_SliceView).(*SliceView)
-					svv.UpdateSelect(idx, wbb.IsSelected())
-				}
-			})
+			idxlab.SetText(sitxt)
+			idxlab.SetSelectedState(issel)
 		}
 
 		var widg gi.Node2D
 		if sg.Kids[ridx+idxOff] != nil {
 			widg = sg.Kids[ridx+idxOff].(gi.Node2D)
+			vv.ConfigWidget(widg) // note: update alone does not work here.
+			widg.AsNode2D().SetSelectedState(issel)
 		} else {
 			widg = ki.NewOfType(vtyp).(gi.Node2D)
 			sg.SetChild(widg, ridx+idxOff, valnm)
-		}
-		vv.ConfigWidget(widg)
-		wb := widg.AsWidget()
-		if wb != nil {
-			wb.Sty.Template = "SliceView.ItemWidget." + vtyp.Name()
-		}
-
-		if sv.IsInactive() {
-			widg.AsNode2D().SetInactive()
+			vv.ConfigWidget(widg)
+			wb := widg.AsWidget()
 			if wb != nil {
-				wb.SetProp("slv-index", i)
-				wb.ClearSelected()
-				wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
-						wbb := send.(gi.Node2D).AsWidget()
-						idx := wbb.Prop("slv-index").(int)
-						svv := recv.Embed(KiT_SliceView).(*SliceView)
-						svv.UpdateSelect(idx, wbb.IsSelected())
-					}
-				})
+				wb.Sty.Template = "SliceView.ItemWidget." + vtyp.Name()
 			}
-		} else {
-			vvb := vv.AsValueViewBase()
-			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
-				svv.SetChanged()
-			})
-			if !sv.isArray {
-				cidx := ridx + idxOff
-				if !sv.DeleteOnly {
-					addnm := fmt.Sprintf("add-%v", idxtxt)
-					addact := gi.Action{}
-					cidx += 1
-					sg.SetChild(&addact, cidx, addnm)
 
-					addact.SetIcon("plus")
-					addact.Tooltip = "insert a new element at this index"
-					addact.Data = i
-					addact.Sty.Template = "SliceView.AddAction"
-					addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-						act := send.(*gi.Action)
-						svv := recv.Embed(KiT_SliceView).(*SliceView)
-						svv.SliceNewAt(act.Data.(int)+1, true)
+			if sv.IsInactive() {
+				widg.AsNode2D().SetInactive()
+				if wb != nil {
+					wb.SetProp("slv-row", i)
+					wb.ClearSelected()
+					wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
+							wbb := send.(gi.Node2D).AsWidget()
+							row := wbb.Prop("slv-row").(int)
+							svv := recv.Embed(KiT_SliceView).(*SliceView)
+							svv.UpdateSelectRow(row, wbb.IsSelected())
+						}
 					})
 				}
+			} else {
+				vvb := vv.AsValueViewBase()
+				vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					svv, _ := recv.Embed(KiT_SliceView).(*SliceView)
+					svv.SetChanged()
+				})
+				if !sv.isArray {
+					cidx := ridx + idxOff
+					if !sv.DeleteOnly {
+						addnm := fmt.Sprintf("add-%v", itxt)
+						addact := gi.Action{}
+						cidx += 1
+						sg.SetChild(&addact, cidx, addnm)
 
-				if !sv.AddOnly {
-					delnm := fmt.Sprintf("del-%v", idxtxt)
-					delact := gi.Action{}
-					cidx += 1
-					sg.SetChild(&delact, cidx, delnm)
+						addact.SetIcon("plus")
+						addact.Tooltip = "insert a new element at this index"
+						addact.Data = i
+						addact.Sty.Template = "SliceView.AddAction"
+						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+							act := send.(*gi.Action)
+							svv := recv.Embed(KiT_SliceView).(*SliceView)
+							svv.SliceNewAtRow(act.Data.(int)+1, true)
+						})
+					}
 
-					delact.SetIcon("minus")
-					delact.Tooltip = "delete this element"
-					delact.Data = i
-					delact.Sty.Template = "SliceView.DelAction"
-					delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-						act := send.(*gi.Action)
-						svv := recv.Embed(KiT_SliceView).(*SliceView)
-						svv.SliceDeleteAt(act.Data.(int), true)
-					})
+					if !sv.AddOnly {
+						delnm := fmt.Sprintf("del-%v", itxt)
+						delact := gi.Action{}
+						cidx += 1
+						sg.SetChild(&delact, cidx, delnm)
+
+						delact.SetIcon("minus")
+						delact.Tooltip = "delete this element"
+						delact.Data = i
+						delact.Sty.Template = "SliceView.DelAction"
+						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+							act := send.(*gi.Action)
+							svv := recv.Embed(KiT_SliceView).(*SliceView)
+							svv.SliceDeleteAtRow(act.Data.(int), true)
+						})
+					}
 				}
 			}
 		}
 		if sv.StyleFunc != nil {
-			sv.StyleFunc(sv, mvnp.Interface(), widg, i, vv)
+			sv.StyleFunc(sv, svnp.Interface(), widg, si, vv)
 		}
-
 	}
 	if sv.SelVal != nil {
-		sv.SelectedIdx, _ = SliceRowByValue(sv.Slice, sv.SelVal)
+		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 	}
 	if sv.IsInactive() && sv.SelectedIdx >= 0 {
-		sv.SelectRowWidgets(sv.SelectedIdx, true)
+		sv.SelectIdxWidgets(sv.SelectedIdx, true)
 	}
+	sv.UpdateScroll()
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -370,6 +567,11 @@ func (sv *SliceView) SetChanged() {
 	sv.Changed = true
 	sv.ViewSig.Emit(sv.This(), 0, nil)
 	sv.ToolBar().UpdateActions() // nil safe
+}
+
+// SliceNewAtRow inserts a new blank element at given display row
+func (sv *SliceView) SliceNewAtRow(row int, reconfig bool) {
+	sv.SliceNewAt(sv.StartIdx+row, reconfig)
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
@@ -387,7 +589,7 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
+	svnp, sz := sv.SliceValueSize()
 
 	if iski && sv.SliceValView != nil {
 		vvb := sv.SliceValView.AsValueViewBase()
@@ -416,7 +618,6 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 		if !slptr {
 			nval = nval.Elem() // use concrete value
 		}
-		sz := svnp.Len()
 		svnp = reflect.Append(svnp, nval)
 		if idx >= 0 && idx < sz {
 			reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
@@ -430,8 +631,14 @@ func (sv *SliceView) SliceNewAt(idx int, reconfig bool) {
 	}
 	sv.SetChanged()
 	if reconfig {
-		sv.ConfigSliceGrid(true)
+		sv.LayoutSliceGrid()
+		sv.UpdateSliceGrid()
 	}
+}
+
+// SliceDeleteAtRow deletes element at given display row
+func (sv *SliceView) SliceDeleteAtRow(row int, reconfig bool) {
+	sv.SliceDeleteAt(sv.StartIdx+row, reconfig)
 }
 
 // SliceDeleteAt deletes element at given index from slice
@@ -450,7 +657,8 @@ func (sv *SliceView) SliceDeleteAt(idx int, reconfig bool) {
 	}
 	sv.SetChanged()
 	if reconfig {
-		sv.ConfigSliceGrid(true)
+		sv.LayoutSliceGrid()
+		sv.UpdateSliceGrid()
 	}
 }
 
@@ -490,11 +698,6 @@ func (sv *SliceView) ConfigToolbar() {
 }
 
 func (sv *SliceView) Style2D() {
-	// if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
-	// 	fmt.Printf("slice view doing full render\n")
-	// 	fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
-	// 	// sv.Config()
-	// }
 	if !sv.IsConfiged() {
 		return
 	}
@@ -510,22 +713,28 @@ func (sv *SliceView) Render2D() {
 			win.MainMenuUpdateActives()
 		}
 	}
+	if sv.SliceGridNeedsLayout() {
+		// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
+		// as we don't yet know the size of grid -- so we catch it here at next step and just
+		// rebuild as needed.
+		sv.renderedRows = sv.DispRows
+		if sv.LayoutSliceGrid() {
+			sv.UpdateSliceGrid()
+		}
+		sv.ReRender2DTree()
+		return
+	}
 	if sv.FullReRenderIfNeeded() {
 		return
 	}
 	if sv.PushBounds() {
-		if sv.Sty.Font.Face.Metrics.Height > 0 {
-			sv.VisRows = (sv.VpBBox.Max.Y - sv.VpBBox.Min.Y) / int(1.8*sv.Sty.Font.Face.Metrics.Height)
-		} else {
-			sv.VisRows = 10
-		}
 		sv.FrameStdRender()
 		sv.This().(gi.Node2D).ConnectEvents2D()
 		sv.RenderScrolls()
 		sv.Render2DChildren()
 		sv.PopBounds()
 		if sv.SelectedIdx > -1 {
-			sv.ScrollToRow(sv.SelectedIdx)
+			sv.ScrollToIdx(sv.SelectedIdx)
 		}
 	} else {
 		sv.DisconnectAllEvents(gi.AllPris)
@@ -545,19 +754,28 @@ func (sv *SliceView) HasFocus2D() bool {
 
 //////////////////////////////////////////////////////////////////////////////
 //  Row access methods
+//  NOTE: row = physical GUI display row, idx = slice index -- not the same!
 
-// RowVal returns value interface at given row
-func (sv *SliceView) RowVal(row int) interface{} {
-	mv := reflect.ValueOf(sv.Slice)
-	mvnp := kit.NonPtrValue(mv)
-	sz := mvnp.Len()
-	if row < 0 || row >= sz {
-		fmt.Printf("giv.SliceView: row index out of range: %v\n", row)
+// SliceVal returns value interface at given slice index
+func (sv *SliceView) SliceVal(idx int) interface{} {
+	svnp, sz := sv.SliceValueSize()
+	if idx < 0 || idx >= sz {
+		fmt.Printf("giv.SliceView: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := kit.OnePtrUnderlyingValue(mvnp.Index(row)) // deal with pointer lists
+	val := kit.OnePtrUnderlyingValue(svnp.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
+}
+
+// IsRowInBounds returns true if disp row is in bounds
+func (sv *SliceView) IsRowInBounds(row int) bool {
+	return row >= 0 && row < sv.DispRows
+}
+
+// IsIdxVisible returns true if slice index is currently visible
+func (sv *SliceView) IsIdxVisible(idx int) bool {
+	return sv.IsRowInBounds(idx - sv.StartIdx)
 }
 
 // RowFirstWidget returns the first widget for given row (could be index or
@@ -566,7 +784,7 @@ func (sv *SliceView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	if !sv.ShowIndex {
 		return nil, false
 	}
-	if sv.RowVal(row) == nil { // range check
+	if !sv.IsRowInBounds(row) {
 		return nil, false
 	}
 	nWidgPerRow, _ := sv.RowWidgetNs()
@@ -579,7 +797,7 @@ func (sv *SliceView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
 func (sv *SliceView) RowGrabFocus(row int) *gi.WidgetBase {
-	if sv.RowVal(row) == nil || sv.inFocusGrab { // range check
+	if !sv.IsRowInBounds(row) || sv.inFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
@@ -598,8 +816,22 @@ func (sv *SliceView) RowGrabFocus(row int) *gi.WidgetBase {
 	return nil
 }
 
-// RowPos returns center of window position of index label for row (ContextMenuPos)
-func (sv *SliceView) RowPos(row int) image.Point {
+// IdxGrabFocus grabs the focus for the first focusable widget in given idx --
+// returns that element or nil if not successful
+func (sv *SliceView) IdxGrabFocus(idx int) *gi.WidgetBase {
+	sv.ScrollToIdx(idx)
+	return sv.RowGrabFocus(idx - sv.StartIdx)
+}
+
+// IdxPos returns center of window position of index label for idx (ContextMenuPos)
+func (sv *SliceView) IdxPos(idx int) image.Point {
+	row := idx - sv.StartIdx
+	if row < 0 {
+		row = 0
+	}
+	if row > sv.DispRows-1 {
+		row = sv.DispRows - 1
+	}
 	var pos image.Point
 	widg, ok := sv.RowFirstWidget(row)
 	if ok {
@@ -611,7 +843,7 @@ func (sv *SliceView) RowPos(row int) image.Point {
 // RowFromPos returns the row that contains given vertical position, false if not found
 func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 	// todo: could optimize search to approx loc, and search up / down from there
-	for rw := 0; rw < sv.BuiltSize; rw++ {
+	for rw := 0; rw < sv.DispRows; rw++ {
 		widg, ok := sv.RowFirstWidget(rw)
 		if ok {
 			if widg.WinBBox.Min.Y < posY && posY < widg.WinBBox.Max.Y {
@@ -622,13 +854,17 @@ func (sv *SliceView) RowFromPos(posY int) (int, bool) {
 	return -1, false
 }
 
-// ScrollToRow ensures that given row is visible by scrolling layout as needed
-// -- returns true if any scrolling was performed
-func (sv *SliceView) ScrollToRow(row int) bool {
-	row = ints.MinInt(row, sv.BuiltSize-1)
-	sg := sv.SliceGrid()
-	if widg, ok := sv.RowFirstWidget(row); ok {
-		return sg.ScrollToItem(widg)
+// ScrollToIdx ensures that given slice idx is visible by scrolling display as needed
+func (sv *SliceView) ScrollToIdx(idx int) bool {
+	if idx < sv.StartIdx {
+		sv.StartIdx = idx
+		sv.UpdateSliceGrid()
+		return true
+	} else if idx > sv.StartIdx+sv.DispRows {
+		sv.StartIdx = idx - sv.DispRows
+		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
+		sv.UpdateSliceGrid()
+		return true
 	}
 	return false
 }
@@ -639,24 +875,23 @@ func (sv *SliceView) ScrollToRow(row int) bool {
 func (sv *SliceView) SelectVal(val string) bool {
 	sv.SelVal = val
 	if sv.SelVal != nil {
-		idx, _ := SliceRowByValue(sv.Slice, sv.SelVal)
+		idx, _ := SliceIdxByValue(sv.Slice, sv.SelVal)
 		if idx >= 0 {
-			sv.ScrollToRow(idx)
-			sv.UpdateSelect(idx, true)
+			sv.ScrollToIdx(idx)
+			sv.UpdateSelectIdx(idx, true)
 			return true
 		}
 	}
 	return false
 }
 
-// SliceRowByValue searches for first row that contains given value in slice
+// SliceIdxByValue searches for first index that contains given value in slice
 // -- returns false if not found
-func SliceRowByValue(struSlice interface{}, fldVal interface{}) (int, bool) {
-	mv := reflect.ValueOf(struSlice)
-	mvnp := kit.NonPtrValue(mv)
-	sz := mvnp.Len()
+func SliceIdxByValue(slc interface{}, fldVal interface{}) (int, bool) {
+	svnp := kit.NonPtrValue(reflect.ValueOf(slc))
+	sz := svnp.Len()
 	for row := 0; row < sz; row++ {
-		rval := kit.NonPtrValue(mvnp.Index(row))
+		rval := kit.NonPtrValue(svnp.Index(row))
 		if rval.Interface() == fldVal {
 			return row, true
 		}
@@ -670,12 +905,12 @@ func SliceRowByValue(struSlice interface{}, fldVal interface{}) (int, bool) {
 // MoveDown moves the selection down to next row, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
 func (sv *SliceView) MoveDown(selMode mouse.SelectModes) int {
-	if sv.SelectedIdx >= sv.BuiltSize-1 {
-		sv.SelectedIdx = sv.BuiltSize - 1
+	if sv.SelectedIdx >= sv.SliceSize-1 {
+		sv.SelectedIdx = sv.SliceSize - 1
 		return -1
 	}
 	sv.SelectedIdx++
-	sv.SelectRowAction(sv.SelectedIdx, selMode)
+	sv.SelectIdxAction(sv.SelectedIdx, selMode)
 	return sv.SelectedIdx
 }
 
@@ -683,65 +918,63 @@ func (sv *SliceView) MoveDown(selMode mouse.SelectModes) int {
 // mode (from keyboard modifiers) -- and emits select event for newly selected
 // row
 func (sv *SliceView) MoveDownAction(selMode mouse.SelectModes) int {
-	nrow := sv.MoveDown(selMode)
-	if nrow >= 0 {
-		sv.ScrollToRow(nrow)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nrow)
+	nidx := sv.MoveDown(selMode)
+	if nidx >= 0 {
+		sv.ScrollToIdx(nidx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
 	}
-	return nrow
+	return nidx
 }
 
-// MoveUp moves the selection up to previous row, using given select mode
-// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+// MoveUp moves the selection up to previous idx, using given select mode
+// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceView) MoveUp(selMode mouse.SelectModes) int {
 	if sv.SelectedIdx <= 0 {
 		sv.SelectedIdx = 0
 		return -1
 	}
 	sv.SelectedIdx--
-	sv.SelectRowAction(sv.SelectedIdx, selMode)
+	sv.SelectIdxAction(sv.SelectedIdx, selMode)
 	return sv.SelectedIdx
 }
 
-// MoveUpAction moves the selection up to previous row, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected
-// row
+// MoveUpAction moves the selection up to previous idx, using given select
+// mode (from keyboard modifiers) -- and emits select event for newly selected idx
 func (sv *SliceView) MoveUpAction(selMode mouse.SelectModes) int {
-	nrow := sv.MoveUp(selMode)
-	if nrow >= 0 {
-		sv.ScrollToRow(nrow)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nrow)
+	nidx := sv.MoveUp(selMode)
+	if nidx >= 0 {
+		sv.ScrollToIdx(nidx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
 	}
-	return nrow
+	return nidx
 }
 
 // MovePageDown moves the selection down to next page, using given select mode
-// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceView) MovePageDown(selMode mouse.SelectModes) int {
-	if sv.SelectedIdx >= sv.BuiltSize-1 {
-		sv.SelectedIdx = sv.BuiltSize - 1
+	if sv.SelectedIdx >= sv.SliceSize-1 {
+		sv.SelectedIdx = sv.SliceSize - 1
 		return -1
 	}
 	sv.SelectedIdx += sv.VisRows
-	sv.SelectedIdx = ints.MinInt(sv.SelectedIdx, sv.BuiltSize-1)
-	sv.SelectRowAction(sv.SelectedIdx, selMode)
+	sv.SelectedIdx = ints.MinInt(sv.SelectedIdx, sv.SliceSize-1)
+	sv.SelectIdxAction(sv.SelectedIdx, selMode)
 	return sv.SelectedIdx
 }
 
 // MovePageDownAction moves the selection down to next page, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected
-// row
+// mode (from keyboard modifiers) -- and emits select event for newly selected idx
 func (sv *SliceView) MovePageDownAction(selMode mouse.SelectModes) int {
-	nrow := sv.MovePageDown(selMode)
-	if nrow >= 0 {
-		sv.ScrollToRow(nrow)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nrow)
+	nidx := sv.MovePageDown(selMode)
+	if nidx >= 0 {
+		sv.ScrollToIdx(nidx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
 	}
-	return nrow
+	return nidx
 }
 
 // MovePageUp moves the selection up to previous page, using given select mode
-// (from keyboard modifiers) -- returns newly selected row or -1 if failed
+// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
 func (sv *SliceView) MovePageUp(selMode mouse.SelectModes) int {
 	if sv.SelectedIdx <= 0 {
 		sv.SelectedIdx = 0
@@ -749,30 +982,29 @@ func (sv *SliceView) MovePageUp(selMode mouse.SelectModes) int {
 	}
 	sv.SelectedIdx -= sv.VisRows
 	sv.SelectedIdx = ints.MaxInt(0, sv.SelectedIdx)
-	sv.SelectRowAction(sv.SelectedIdx, selMode)
+	sv.SelectIdxAction(sv.SelectedIdx, selMode)
 	return sv.SelectedIdx
 }
 
 // MovePageUpAction moves the selection up to previous page, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected
-// row
+// mode (from keyboard modifiers) -- and emits select event for newly selected idx
 func (sv *SliceView) MovePageUpAction(selMode mouse.SelectModes) int {
-	nrow := sv.MovePageUp(selMode)
-	if nrow >= 0 {
-		sv.ScrollToRow(nrow)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nrow)
+	nidx := sv.MovePageUp(selMode)
+	if nidx >= 0 {
+		sv.ScrollToIdx(nidx)
+		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
 	}
-	return nrow
+	return nidx
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //    Selection: user operates on the index labels
 
 // SelectRowWidgets sets the selection state of given row of widgets
-func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
+func (sv *SliceView) SelectRowWidgets(row int, sel bool) {
 	sg := sv.SliceGrid()
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
-	rowidx := idx * nWidgPerRow
+	rowidx := row * nWidgPerRow
 	if sv.ShowIndex {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
 			widg := sg.Child(rowidx).(gi.Node2D).AsNode2D()
@@ -787,19 +1019,36 @@ func (sv *SliceView) SelectRowWidgets(idx int, sel bool) {
 	}
 }
 
-// UpdateSelect updates the selection for the given index -- callback from widgetsig select
-func (sv *SliceView) UpdateSelect(idx int, sel bool) {
+// SelectIdxWidgets sets the selection state of given slice index
+// returns false if index is not visible
+func (sv *SliceView) SelectIdxWidgets(idx int, sel bool) bool {
+	if !sv.IsIdxVisible(idx) {
+		return false
+	}
+	sv.SelectRowWidgets(idx-sv.StartIdx, sel)
+	return true
+}
+
+// UpdateSelectRow updates the selection for the given row
+// callback from widgetsig select
+func (sv *SliceView) UpdateSelectRow(row int, sel bool) {
+	idx := row + sv.StartIdx
+	sv.UpdateSelectIdx(idx, sel)
+}
+
+// UpdateSelectRow updates the selection for the given index
+func (sv *SliceView) UpdateSelectIdx(idx int, sel bool) {
 	if sv.IsInactive() {
 		if sv.SelectedIdx == idx { // never unselect
-			sv.SelectRowWidgets(sv.SelectedIdx, true)
+			sv.SelectIdxWidgets(sv.SelectedIdx, true)
 			return
 		}
 		if sv.SelectedIdx >= 0 { // unselect current
-			sv.SelectRowWidgets(sv.SelectedIdx, false)
+			sv.SelectIdxWidgets(sv.SelectedIdx, false)
 		}
 		if sel {
 			sv.SelectedIdx = idx
-			sv.SelectRowWidgets(sv.SelectedIdx, true)
+			sv.SelectIdxWidgets(sv.SelectedIdx, true)
 		}
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {
@@ -808,23 +1057,23 @@ func (sv *SliceView) UpdateSelect(idx int, sel bool) {
 		if win != nil {
 			selMode = win.LastSelMode
 		}
-		sv.SelectRowAction(idx, selMode)
+		sv.SelectIdxAction(idx, selMode)
 	}
 }
 
-// RowIsSelected returns the selected status of given row index
-func (sv *SliceView) RowIsSelected(row int) bool {
-	if _, ok := sv.SelectedRows[row]; ok {
+// IdxIsSelected returns the selected status of given slice index
+func (sv *SliceView) IdxIsSelected(idx int) bool {
+	if _, ok := sv.SelectedIdxs[idx]; ok {
 		return true
 	}
 	return false
 }
 
-// SelectedRowsList returns list of selected rows, sorted either ascending or descending
-func (sv *SliceView) SelectedRowsList(descendingSort bool) []int {
-	rws := make([]int, len(sv.SelectedRows))
+// SelectedIdxsList returns list of selected indexes, sorted either ascending or descending
+func (sv *SliceView) SelectedIdxsList(descendingSort bool) []int {
+	rws := make([]int, len(sv.SelectedIdxs))
 	i := 0
-	for r, _ := range sv.SelectedRows {
+	for r, _ := range sv.SelectedIdxs {
 		rws[i] = r
 		i++
 	}
@@ -840,66 +1089,67 @@ func (sv *SliceView) SelectedRowsList(descendingSort bool) []int {
 	return rws
 }
 
-// SelectRow selects given row (if not already selected) -- updates select
+// SelectIdx selects given idx (if not already selected) -- updates select
 // status of index label
-func (sv *SliceView) SelectRow(row int) {
-	sv.SelectedRows[row] = struct{}{}
-	sv.SelectRowWidgets(row, true)
+func (sv *SliceView) SelectIdx(idx int) {
+	sv.SelectedIdxs[idx] = struct{}{}
+	sv.SelectIdxWidgets(idx, true)
 }
 
-// UnselectRow unselects given row (if selected)
-func (sv *SliceView) UnselectRow(row int) {
-	if sv.RowIsSelected(row) {
-		delete(sv.SelectedRows, row)
+// UnselectIdx unselects given idx (if selected)
+func (sv *SliceView) UnselectIdx(idx int) {
+	if sv.IdxIsSelected(idx) {
+		delete(sv.SelectedIdxs, idx)
 	}
-	sv.SelectRowWidgets(row, false)
+	sv.SelectIdxWidgets(idx, false)
 }
 
-// UnselectAllRows unselects all selected rows
-func (sv *SliceView) UnselectAllRows() {
+// UnselectAllIdxs unselects all selected idxs
+func (sv *SliceView) UnselectAllIdxs() {
 	win := sv.Viewport.Win
 	updt := false
 	if win != nil {
 		updt = win.UpdateStart()
 	}
-	for r, _ := range sv.SelectedRows {
-		sv.SelectRowWidgets(r, false)
+	for r, _ := range sv.SelectedIdxs {
+		sv.SelectIdxWidgets(r, false)
 	}
-	sv.SelectedRows = make(map[int]struct{}, 10)
+	sv.SelectedIdxs = make(map[int]struct{})
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
 }
 
-// SelectAllRows selects all rows
-func (sv *SliceView) SelectAllRows() {
+// SelectAllIdxs selects all idxs
+func (sv *SliceView) SelectAllIdxs() {
 	win := sv.Viewport.Win
 	updt := false
 	if win != nil {
 		updt = win.UpdateStart()
 	}
-	sv.UnselectAllRows()
-	sv.SelectedRows = make(map[int]struct{}, sv.BuiltSize)
-	for row := 0; row < sv.BuiltSize; row++ {
-		sv.SelectedRows[row] = struct{}{}
-		sv.SelectRowWidgets(row, true)
+	sv.UnselectAllIdxs()
+	sv.SelectedIdxs = make(map[int]struct{}, sv.SliceSize)
+	for idx := 0; idx < sv.SliceSize; idx++ {
+		sv.SelectedIdxs[idx] = struct{}{}
+		sv.SelectIdxWidgets(idx, true)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
 }
 
-// SelectRowAction is called when a select action has been received (e.g., a
+// SelectIdxAction is called when a select action has been received (e.g., a
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
-func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
+func (sv *SliceView) SelectIdxAction(idx int, mode mouse.SelectModes) {
 	if mode == mouse.NoSelect {
 		return
 	}
-	row = ints.MinInt(row, sv.BuiltSize-1)
-	if row < 0 {
-		row = 0
+	idx = ints.MinInt(idx, sv.SliceSize-1)
+	if idx < 0 {
+		idx = 0
 	}
+	// row := idx - sv.StartIdx // note: could be out of bounds
 	win := sv.Viewport.Win
 	updt := false
 	if win != nil {
@@ -907,30 +1157,30 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 	}
 	switch mode {
 	case mouse.SelectOne:
-		if sv.RowIsSelected(row) {
-			if len(sv.SelectedRows) > 1 {
-				sv.UnselectAllRows()
+		if sv.IdxIsSelected(idx) {
+			if len(sv.SelectedIdxs) > 1 {
+				sv.UnselectAllIdxs()
 			}
-			sv.SelectedIdx = row
-			sv.SelectRow(row)
-			sv.RowGrabFocus(row)
+			sv.SelectedIdx = idx
+			sv.SelectIdx(idx)
+			sv.IdxGrabFocus(idx)
 		} else {
-			sv.UnselectAllRows()
-			sv.SelectedIdx = row
-			sv.SelectRow(row)
-			sv.RowGrabFocus(row)
+			sv.UnselectAllIdxs()
+			sv.SelectedIdx = idx
+			sv.SelectIdx(idx)
+			sv.IdxGrabFocus(idx)
 		}
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	case mouse.ExtendContinuous:
-		if len(sv.SelectedRows) == 0 {
-			sv.SelectedIdx = row
-			sv.SelectRow(row)
-			sv.RowGrabFocus(row)
+		if len(sv.SelectedIdxs) == 0 {
+			sv.SelectedIdx = idx
+			sv.SelectIdx(idx)
+			sv.IdxGrabFocus(idx)
 			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
-			for r, _ := range sv.SelectedRows {
+			for r, _ := range sv.SelectedIdxs {
 				if minIdx < 0 {
 					minIdx = r
 				} else {
@@ -938,60 +1188,60 @@ func (sv *SliceView) SelectRowAction(row int, mode mouse.SelectModes) {
 				}
 				maxIdx = ints.MaxInt(maxIdx, r)
 			}
-			cidx := row
-			sv.SelectedIdx = row
-			sv.SelectRow(row)
-			if row < minIdx {
+			cidx := idx
+			sv.SelectedIdx = idx
+			sv.SelectIdx(idx)
+			if idx < minIdx {
 				for cidx < minIdx {
 					r := sv.MoveDown(mouse.SelectQuiet) // just select
 					cidx = r
 				}
-			} else if row > maxIdx {
+			} else if idx > maxIdx {
 				for cidx > maxIdx {
 					r := sv.MoveUp(mouse.SelectQuiet) // just select
 					cidx = r
 				}
 			}
-			sv.RowGrabFocus(row)
+			sv.IdxGrabFocus(idx)
 			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		}
 	case mouse.ExtendOne:
-		if sv.RowIsSelected(row) {
-			sv.UnselectRowAction(row)
+		if sv.IdxIsSelected(idx) {
+			sv.UnselectIdxAction(idx)
 		} else {
-			sv.SelectedIdx = row
-			sv.SelectRow(row)
-			sv.RowGrabFocus(row)
+			sv.SelectedIdx = idx
+			sv.SelectIdx(idx)
+			sv.IdxGrabFocus(idx)
 			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		}
 	case mouse.Unselect:
-		sv.SelectedIdx = row
-		sv.UnselectRowAction(row)
+		sv.SelectedIdx = idx
+		sv.UnselectIdxAction(idx)
 	case mouse.SelectQuiet:
-		sv.SelectedIdx = row
-		sv.SelectRow(row)
+		sv.SelectedIdx = idx
+		sv.SelectIdx(idx)
 	case mouse.UnselectQuiet:
-		sv.SelectedIdx = row
-		sv.UnselectRow(row)
+		sv.SelectedIdx = idx
+		sv.UnselectIdx(idx)
 	}
 	if win != nil {
 		win.UpdateEnd(updt)
 	}
 }
 
-// UnselectRowAction unselects this row (if selected) -- and emits a signal
-func (sv *SliceView) UnselectRowAction(row int) {
-	if sv.RowIsSelected(row) {
-		sv.UnselectRow(row)
+// UnselectIdxAction unselects this idx (if selected) -- and emits a signal
+func (sv *SliceView) UnselectIdxAction(idx int) {
+	if sv.IdxIsSelected(idx) {
+		sv.UnselectIdx(idx)
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
-// MimeDataRow adds mimedata for given row: an application/json of the struct
-func (sv *SliceView) MimeDataRow(md *mimedata.Mimes, row int) {
-	val := sv.RowVal(row)
+// MimeDataRow adds mimedata for given idx: an application/json of the struct
+func (sv *SliceView) MimeDataIdx(md *mimedata.Mimes, idx int) {
+	val := sv.SliceVal(idx)
 	b, err := json.MarshalIndent(val, "", "  ")
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: b})
@@ -1000,10 +1250,9 @@ func (sv *SliceView) MimeDataRow(md *mimedata.Mimes, row int) {
 	}
 }
 
-// RowsFromMimeData creates a slice of structs from mime data
-func (sv *SliceView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
-	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
+// FromMimeData creates a slice of structs from mime data
+func (sv *SliceView) FromMimeData(md mimedata.Mimes) []interface{} {
+	svnp, _ := sv.SliceValueSize()
 	svtyp := svnp.Type()
 	sl := make([]interface{}, 0, len(md))
 	for _, d := range md {
@@ -1013,7 +1262,7 @@ func (sv *SliceView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
 			if err == nil {
 				sl = append(sl, nval)
 			} else {
-				log.Printf("gi.SliceView RowsFromMimeData: JSON load error: %v\n", err)
+				log.Printf("gi.SliceView FromMimeData: JSON load error: %v\n", err)
 			}
 		}
 	}
@@ -1023,22 +1272,22 @@ func (sv *SliceView) RowsFromMimeData(md mimedata.Mimes) []interface{} {
 // Copy copies selected rows to clip.Board, optionally resetting the selection
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceView) Copy(reset bool) {
-	nitms := len(sv.SelectedRows)
+	nitms := len(sv.SelectedIdxs)
 	if nitms == 0 {
 		return
 	}
 	md := make(mimedata.Mimes, 0, nitms)
-	for r, _ := range sv.SelectedRows {
-		sv.MimeDataRow(&md, r)
+	for r, _ := range sv.SelectedIdxs {
+		sv.MimeDataIdx(&md, r)
 	}
 	oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Write(md)
 	if reset {
-		sv.UnselectAllRows()
+		sv.UnselectAllIdxs()
 	}
 }
 
-// CopyRows copies selected rows to clip.Board, optionally resetting the selection
-func (sv *SliceView) CopyRows(reset bool) {
+// CopyIdxs copies selected idxs to clip.Board, optionally resetting the selection
+func (sv *SliceView) CopyIdxs(reset bool) {
 	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Copy(reset)
 	} else {
@@ -1046,43 +1295,43 @@ func (sv *SliceView) CopyRows(reset bool) {
 	}
 }
 
-// DeleteRows deletes all selected rows
-func (sv *SliceView) DeleteRows() {
-	if len(sv.SelectedRows) == 0 {
+// DeleteIdxs deletes all selected indexes
+func (sv *SliceView) DeleteIdxs() {
+	if len(sv.SelectedIdxs) == 0 {
 		return
 	}
 	updt := sv.UpdateStart()
-	rws := sv.SelectedRowsList(true) // descending sort
-	for _, r := range rws {
+	ixs := sv.SelectedIdxsList(true) // descending sort
+	for _, r := range ixs {
 		sv.SliceDeleteAt(r, false)
 	}
 	sv.SetChanged()
-	sv.ConfigSliceGrid(true)
+	sv.UpdateSliceGrid()
 	sv.UpdateEnd(updt)
 }
 
 // Cut copies selected rows to clip.Board and deletes selected rows
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceView) Cut() {
-	if len(sv.SelectedRows) == 0 {
+	if len(sv.SelectedIdxs) == 0 {
 		return
 	}
 	updt := sv.UpdateStart()
-	sv.CopyRows(false)
-	rws := sv.SelectedRowsList(true) // descending sort
-	row := rws[0]
-	sv.UnselectAllRows()
-	for _, r := range rws {
-		sv.SliceDeleteAt(r, false)
+	sv.CopyIdxs(false)
+	ixs := sv.SelectedIdxsList(true) // descending sort
+	idx := ixs[0]
+	sv.UnselectAllIdxs()
+	for _, i := range ixs {
+		sv.SliceDeleteAt(i, false)
 	}
 	sv.SetChanged()
-	sv.ConfigSliceGrid(true)
+	sv.UpdateSliceGrid()
 	sv.UpdateEnd(updt)
-	sv.SelectRowAction(row, mouse.SelectOne)
+	sv.SelectIdxAction(idx, mouse.SelectOne)
 }
 
-// CutRows copies selected rows to clip.Board and deletes selected rows
-func (sv *SliceView) CutRows() {
+// CutIdxs copies selected rows to clip.Board and deletes selected rows
+func (sv *SliceView) CutIdxs() {
 	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Cut()
 	} else {
@@ -1095,13 +1344,13 @@ func (sv *SliceView) CutRows() {
 func (sv *SliceView) Paste() {
 	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
-		sv.PasteMenu(md, sv.curRow)
+		sv.PasteMenu(md, sv.curIdx)
 	}
 }
 
-// PasteRow pastes clipboard at given row
-func (sv *SliceView) PasteRow(row int) {
-	sv.curRow = row
+// PasteIdx pastes clipboard at given idx
+func (sv *SliceView) PasteIdx(idx int) {
+	sv.curIdx = idx
 	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Paste()
 	} else {
@@ -1110,21 +1359,21 @@ func (sv *SliceView) PasteRow(row int) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (sv *SliceView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
+func (sv *SliceView) MakePasteMenu(m *gi.Menu, data interface{}, idx int) {
 	if len(*m) > 0 {
 		return
 	}
 	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv := recv.Embed(KiT_SliceView).(*SliceView)
-		svv.PasteAssign(data.(mimedata.Mimes), row)
+		svv.PasteAssign(data.(mimedata.Mimes), idx)
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv := recv.Embed(KiT_SliceView).(*SliceView)
-		svv.PasteAtRow(data.(mimedata.Mimes), row)
+		svv.PasteAtIdx(data.(mimedata.Mimes), idx)
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv := recv.Embed(KiT_SliceView).(*SliceView)
-		svv.PasteAtRow(data.(mimedata.Mimes), row+1)
+		svv.PasteAtIdx(data.(mimedata.Mimes), idx+1)
 	})
 	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
@@ -1132,20 +1381,19 @@ func (sv *SliceView) MakePasteMenu(m *gi.Menu, data interface{}, row int) {
 
 // PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
-func (sv *SliceView) PasteMenu(md mimedata.Mimes, row int) {
-	sv.UnselectAllRows()
+func (sv *SliceView) PasteMenu(md mimedata.Mimes, idx int) {
+	sv.UnselectAllIdxs()
 	var men gi.Menu
-	sv.MakePasteMenu(&men, md, row)
-	pos := sv.RowPos(row)
+	sv.MakePasteMenu(&men, md, idx)
+	pos := sv.IdxPos(idx)
 	gi.PopupMenu(men, pos.X, pos.Y, sv.Viewport, "svPasteMenu")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this row
 func (sv *SliceView) PasteAssign(md mimedata.Mimes, row int) {
-	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
+	svnp, _ := sv.SliceValueSize()
 
-	sl := sv.RowsFromMimeData(md)
+	sl := sv.FromMimeData(md)
 	updt := sv.UpdateStart()
 	if len(sl) == 0 {
 		return
@@ -1156,49 +1404,49 @@ func (sv *SliceView) PasteAssign(md mimedata.Mimes, row int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.ConfigSliceGrid(true)
+	sv.UpdateSliceGrid()
 	sv.UpdateEnd(updt)
 }
 
-// PasteAtRow inserts object(s) from mime data at (before) given row
-func (sv *SliceView) PasteAtRow(md mimedata.Mimes, row int) {
+// PasteAtIdx inserts object(s) from mime data at (before) given slice index
+func (sv *SliceView) PasteAtIdx(md mimedata.Mimes, idx int) {
+	svnp, _ := sv.SliceValueSize()
 	svl := reflect.ValueOf(sv.Slice)
-	svnp := kit.NonPtrValue(svl)
 
-	sl := sv.RowsFromMimeData(md)
+	sl := sv.FromMimeData(md)
 	updt := sv.UpdateStart()
 	for _, ns := range sl {
 		sz := svnp.Len()
 		svnp = reflect.Append(svnp, reflect.ValueOf(ns).Elem())
 		svl.Elem().Set(svnp)
-		if row >= 0 && row < sz {
-			reflect.Copy(svnp.Slice(row+1, sz+1), svnp.Slice(row, sz))
-			svnp.Index(row).Set(reflect.ValueOf(ns).Elem())
+		if idx >= 0 && idx < sz {
+			reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
+			svnp.Index(idx).Set(reflect.ValueOf(ns).Elem())
 			svl.Elem().Set(svnp)
 		}
-		row++
+		idx++
 	}
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.ConfigSliceGrid(true)
+	sv.UpdateSliceGrid()
 	sv.UpdateEnd(updt)
-	sv.SelectRowAction(row, mouse.SelectOne)
+	sv.SelectIdxAction(idx, mouse.SelectOne)
 }
 
 // Duplicate copies selected items and inserts them after current selection --
 // return row of start of duplicates if successful, else -1
 func (sv *SliceView) Duplicate() int {
-	nitms := len(sv.SelectedRows)
+	nitms := len(sv.SelectedIdxs)
 	if nitms == 0 {
 		return -1
 	}
-	rws := sv.SelectedRowsList(true) // descending sort -- last first
-	pasteAt := rws[0]
-	sv.CopyRows(true)
+	ixs := sv.SelectedIdxsList(true) // descending sort -- last first
+	pasteAt := ixs[0]
+	sv.CopyIdxs(true)
 	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
-	sv.PasteAtRow(md, pasteAt)
+	sv.PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
 
@@ -1207,16 +1455,16 @@ func (sv *SliceView) Duplicate() int {
 
 // DragNDropStart starts a drag-n-drop
 func (sv *SliceView) DragNDropStart() {
-	nitms := len(sv.SelectedRows)
+	nitms := len(sv.SelectedIdxs)
 	if nitms == 0 {
 		return
 	}
 	md := make(mimedata.Mimes, 0, nitms)
-	for r, _ := range sv.SelectedRows {
-		sv.MimeDataRow(&md, r)
+	for i, _ := range sv.SelectedIdxs {
+		sv.MimeDataIdx(&md, i)
 	}
-	rws := sv.SelectedRowsList(true) // descending sort
-	widg, ok := sv.RowFirstWidget(rws[0])
+	ixs := sv.SelectedIdxsList(true) // descending sort
+	widg, ok := sv.RowFirstWidget(ixs[0])
 	if ok {
 		bi := &gi.Bitmap{}
 		bi.InitName(bi, sv.UniqueName())
@@ -1235,7 +1483,7 @@ func (sv *SliceView) DragNDropTarget(de *dnd.Event) {
 	row, ok := sv.RowFromPos(de.Where.Y)
 	if ok {
 		de.SetProcessed()
-		sv.curRow = row
+		sv.curIdx = row
 		if dpr, ok := sv.This().(gi.DragNDropper); ok {
 			dpr.Drop(de.Data, de.Mod)
 		} else {
@@ -1279,14 +1527,14 @@ func (sv *SliceView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
-	sv.MakeDropMenu(&men, md, mod, sv.curRow)
-	pos := sv.RowPos(sv.curRow)
+	sv.MakeDropMenu(&men, md, mod, sv.curIdx)
+	pos := sv.IdxPos(sv.curIdx)
 	gi.PopupMenu(men, pos.X, pos.Y, sv.Viewport, "svDropMenu")
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
 func (sv *SliceView) DropAssign(md mimedata.Mimes, row int) {
-	sv.DraggedRows = nil
+	sv.DraggedIdxs = nil
 	sv.PasteAssign(md, row)
 	sv.DragNDropFinalize(dnd.DropCopy)
 }
@@ -1295,44 +1543,44 @@ func (sv *SliceView) DropAssign(md mimedata.Mimes, row int) {
 // performing target actions -- mod must indicate actual action taken by the
 // target, including ignore -- ends up calling DragNDropSource if us..
 func (sv *SliceView) DragNDropFinalize(mod dnd.DropMods) {
-	sv.UnselectAllRows()
+	sv.UnselectAllIdxs()
 	sv.Viewport.Win.FinalizeDragNDrop(mod)
 }
 
 // DragNDropSource is called after target accepts the drop -- we just remove
 // elements that were moved
 func (sv *SliceView) DragNDropSource(de *dnd.Event) {
-	if de.Mod != dnd.DropMove || len(sv.DraggedRows) == 0 {
+	if de.Mod != dnd.DropMove || len(sv.DraggedIdxs) == 0 {
 		return
 	}
 	updt := sv.UpdateStart()
-	sort.Slice(sv.DraggedRows, func(i, j int) bool {
-		return sv.DraggedRows[i] > sv.DraggedRows[j]
+	sort.Slice(sv.DraggedIdxs, func(i, j int) bool {
+		return sv.DraggedIdxs[i] > sv.DraggedIdxs[j]
 	})
-	row := sv.DraggedRows[0]
-	for _, r := range sv.DraggedRows {
+	row := sv.DraggedIdxs[0]
+	for _, r := range sv.DraggedIdxs {
 		sv.SliceDeleteAt(r, false)
 	}
-	sv.DraggedRows = nil
-	sv.ConfigSliceGrid(true)
+	sv.DraggedIdxs = nil
+	sv.UpdateSliceGrid()
 	sv.UpdateEnd(updt)
-	sv.SelectRowAction(row, mouse.SelectOne)
+	sv.SelectIdxAction(row, mouse.SelectOne)
 }
 
-// SaveDraggedRows saves selectedrows into dragged rows taking into account insertion at rows
-func (sv *SliceView) SaveDraggedRows(row int) {
-	sz := len(sv.SelectedRows)
+// SaveDraggedIdxs saves selectedrows into dragged rows taking into account insertion at rows
+func (sv *SliceView) SaveDraggedIdxs(row int) {
+	sz := len(sv.SelectedIdxs)
 	if sz == 0 {
-		sv.DraggedRows = nil
+		sv.DraggedIdxs = nil
 		return
 	}
-	sv.DraggedRows = make([]int, len(sv.SelectedRows))
+	sv.DraggedIdxs = make([]int, len(sv.SelectedIdxs))
 	idx := 0
-	for r, _ := range sv.SelectedRows {
+	for r, _ := range sv.SelectedIdxs {
 		if r > row {
-			sv.DraggedRows[idx] = r + sz // make room for insertion
+			sv.DraggedIdxs[idx] = r + sz // make room for insertion
 		} else {
-			sv.DraggedRows[idx] = r
+			sv.DraggedIdxs[idx] = r
 		}
 		idx++
 	}
@@ -1340,15 +1588,15 @@ func (sv *SliceView) SaveDraggedRows(row int) {
 
 // DropBefore inserts object(s) from mime data before this node
 func (sv *SliceView) DropBefore(md mimedata.Mimes, mod dnd.DropMods, row int) {
-	sv.SaveDraggedRows(row)
-	sv.PasteAtRow(md, row)
+	sv.SaveDraggedIdxs(row)
+	sv.PasteAtIdx(md, row)
 	sv.DragNDropFinalize(mod)
 }
 
 // DropAfter inserts object(s) from mime data after this node
 func (sv *SliceView) DropAfter(md mimedata.Mimes, mod dnd.DropMods, row int) {
-	sv.SaveDraggedRows(row + 1)
-	sv.PasteAtRow(md, row+1)
+	sv.SaveDraggedIdxs(row + 1)
+	sv.PasteAtIdx(md, row+1)
 	sv.DragNDropFinalize(mod)
 }
 
@@ -1368,17 +1616,17 @@ func (sv *SliceView) StdCtxtMenu(m *gi.Menu, row int) {
 	m.AddAction(gi.ActOpts{Label: "Copy", Data: row},
 		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
-			svv.CopyRows(true)
+			svv.CopyIdxs(true)
 		})
 	m.AddAction(gi.ActOpts{Label: "Cut", Data: row},
 		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
-			svv.CutRows()
+			svv.CutIdxs()
 		})
 	m.AddAction(gi.ActOpts{Label: "Paste", Data: row},
 		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SliceView).(*SliceView)
-			svv.PasteRow(data.(int))
+			svv.PasteIdx(data.(int))
 		})
 	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: row},
 		sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -1387,8 +1635,8 @@ func (sv *SliceView) StdCtxtMenu(m *gi.Menu, row int) {
 		})
 }
 
-func (sv *SliceView) ItemCtxtMenu(row int) {
-	val := sv.RowVal(row)
+func (sv *SliceView) ItemCtxtMenu(idx int) {
+	val := sv.SliceVal(idx)
 	if val == nil {
 		return
 	}
@@ -1397,13 +1645,13 @@ func (sv *SliceView) ItemCtxtMenu(row int) {
 	if CtxtMenuView(val, sv.IsInactive(), sv.Viewport, &men) {
 		if sv.ShowViewCtxtMenu {
 			men.AddSeparator("sep-svmenu")
-			sv.StdCtxtMenu(&men, row)
+			sv.StdCtxtMenu(&men, idx)
 		}
 	} else {
-		sv.StdCtxtMenu(&men, row)
+		sv.StdCtxtMenu(&men, idx)
 	}
 	if len(men) > 0 {
-		pos := sv.RowPos(row)
+		pos := sv.IdxPos(idx)
 		gi.PopupMenu(men, pos.X, pos.Y, sv.Viewport, sv.Nm+"-menu")
 	}
 }
@@ -1419,10 +1667,10 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 			selMode = mouse.ExtendContinuous
 		}
 	}
-	row := sv.SelectedIdx
+	idx := sv.SelectedIdx
 	switch kf {
 	case gi.KeyFunCancelSelect:
-		sv.UnselectAllRows()
+		sv.UnselectAllIdxs()
 		sv.SelectMode = false
 		kt.SetProcessed()
 	case gi.KeyFunMoveDown:
@@ -1441,42 +1689,42 @@ func (sv *SliceView) KeyInputActive(kt *key.ChordEvent) {
 		sv.SelectMode = !sv.SelectMode
 		kt.SetProcessed()
 	case gi.KeyFunSelectAll:
-		sv.SelectAllRows()
+		sv.SelectAllIdxs()
 		sv.SelectMode = false
 		kt.SetProcessed()
 	case gi.KeyFunDelete:
 		sv.SliceDeleteAt(sv.SelectedIdx, true)
 		sv.SelectMode = false
-		sv.SelectRowAction(row, mouse.SelectOne)
+		sv.SelectIdxAction(idx, mouse.SelectOne)
 		kt.SetProcessed()
 	case gi.KeyFunDuplicate:
-		nrow := sv.Duplicate()
+		nidx := sv.Duplicate()
 		sv.SelectMode = false
-		if nrow >= 0 {
-			sv.SelectRowAction(nrow, mouse.SelectOne)
+		if nidx >= 0 {
+			sv.SelectIdxAction(nidx, mouse.SelectOne)
 		}
 		kt.SetProcessed()
 	case gi.KeyFunInsert:
-		sv.SliceNewAt(row, true)
+		sv.SliceNewAt(idx, true)
 		sv.SelectMode = false
-		sv.SelectRowAction(row+1, mouse.SelectOne) // todo: somehow nrow not working
+		sv.SelectIdxAction(idx+1, mouse.SelectOne) // todo: somehow nidx not working
 		kt.SetProcessed()
 	case gi.KeyFunInsertAfter:
-		sv.SliceNewAt(row+1, true)
+		sv.SliceNewAt(idx+1, true)
 		sv.SelectMode = false
-		sv.SelectRowAction(row+1, mouse.SelectOne)
+		sv.SelectIdxAction(idx+1, mouse.SelectOne)
 		kt.SetProcessed()
 	case gi.KeyFunCopy:
-		sv.CopyRows(true)
+		sv.CopyIdxs(true)
 		sv.SelectMode = false
-		sv.SelectRowAction(row, mouse.SelectOne)
+		sv.SelectIdxAction(idx, mouse.SelectOne)
 		kt.SetProcessed()
 	case gi.KeyFunCut:
-		sv.CutRows()
+		sv.CutIdxs()
 		sv.SelectMode = false
 		kt.SetProcessed()
 	case gi.KeyFunPaste:
-		sv.PasteRow(sv.SelectedIdx)
+		sv.PasteIdx(sv.SelectedIdx)
 		sv.SelectMode = false
 		kt.SetProcessed()
 	}
@@ -1487,31 +1735,31 @@ func (sv *SliceView) KeyInputInactive(kt *key.ChordEvent) {
 		fmt.Printf("SliceView Inactive KeyInput: %v\n", sv.PathUnique())
 	}
 	kf := gi.KeyFun(kt.Chord())
-	row := sv.SelectedIdx
+	idx := sv.SelectedIdx
 	switch {
 	case kf == gi.KeyFunMoveDown:
-		nr := row + 1
-		if nr < sv.BuiltSize {
-			sv.ScrollToRow(nr)
-			sv.UpdateSelect(nr, true)
+		ni := idx + 1
+		if ni < sv.SliceSize {
+			sv.ScrollToIdx(ni)
+			sv.UpdateSelectIdx(ni, true)
 			kt.SetProcessed()
 		}
 	case kf == gi.KeyFunMoveUp:
-		nr := row - 1
-		if nr >= 0 {
-			sv.ScrollToRow(nr)
-			sv.UpdateSelect(nr, true)
+		ni := idx - 1
+		if ni >= 0 {
+			sv.ScrollToIdx(ni)
+			sv.UpdateSelectIdx(ni, true)
 			kt.SetProcessed()
 		}
 	case kf == gi.KeyFunPageDown:
-		nr := ints.MinInt(row+sv.VisRows, sv.BuiltSize-1)
-		sv.ScrollToRow(nr)
-		sv.UpdateSelect(nr, true)
+		ni := ints.MinInt(idx+sv.VisRows, sv.SliceSize-1)
+		sv.ScrollToIdx(ni)
+		sv.UpdateSelectIdx(ni, true)
 		kt.SetProcessed()
 	case kf == gi.KeyFunPageUp:
-		nr := ints.MaxInt(row-sv.VisRows, 0)
-		sv.ScrollToRow(nr)
-		sv.UpdateSelect(nr, true)
+		ni := ints.MaxInt(idx-sv.VisRows, 0)
+		sv.ScrollToIdx(ni)
+		sv.UpdateSelectIdx(ni, true)
 		kt.SetProcessed()
 	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
 		sv.SliceViewSig.Emit(sv.This(), int64(SliceViewDoubleClicked), sv.SelectedIdx)
