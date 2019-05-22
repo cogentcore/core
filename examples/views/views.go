@@ -21,6 +21,14 @@ func main() {
 	})
 }
 
+type TableStruct struct {
+	Icon       gi.IconName `desc:"an icon"`
+	IntField   int         `desc:"an integer field"`
+	FloatField float32     `desc:"a float field"`
+	StrField   string      `desc:"a string field"`
+	File       gi.FileName `desc:"a file"`
+}
+
 func mainrun() {
 
 	tstslice := make([]string, 40)
@@ -34,6 +42,13 @@ func mainrun() {
 	tstmap["mapkey1"] = "whatever"
 	tstmap["mapkey2"] = "testing"
 	tstmap["mapkey3"] = "boring"
+
+	tsttable := make([]*TableStruct, 100)
+
+	for i := range tsttable {
+		ts := &TableStruct{Icon: "go", IntField: i, FloatField: float32(i) / 10.0}
+		tsttable[i] = ts
+	}
 
 	// turn this on to see a trace of the rendering
 	// gi.Render2DTrace = true
@@ -80,20 +95,24 @@ func mainrun() {
 	split := gi.AddNewSplitView(mfr, "split")
 	split.Dim = gi.X
 
-	mvfr := gi.AddNewFrame(split, "mvfr", gi.LayoutHoriz)
-	svfr := gi.AddNewFrame(split, "svfr", gi.LayoutHoriz)
-	split.SetSplits(.5, .5)
-
-	mv := giv.AddNewMapView(mvfr, "mv")
+	mv := giv.AddNewMapView(split, "mv")
 	mv.SetMap(&tstmap, nil)
 	mv.SetStretchMaxWidth()
 	mv.SetStretchMaxHeight()
 
-	sv := giv.AddNewSliceView(svfr, "sv")
+	sv := giv.AddNewSliceView(split, "sv")
 	// sv.SetInactive()
 	sv.SetSlice(&tstslice, nil)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
+
+	tv := giv.AddNewTableView(split, "tv")
+	// sv.SetInactive()
+	tv.SetSlice(&tsttable, nil)
+	tv.SetStretchMaxWidth()
+	tv.SetStretchMaxHeight()
+
+	split.SetSplits(.2, .2, .6)
 
 	// main menu
 	appnm := gi.AppName()

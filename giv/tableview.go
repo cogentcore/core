@@ -5,27 +5,20 @@
 package giv
 
 import (
-	"encoding/json"
 	"fmt"
 	"image"
 	"log"
 	"reflect"
-	"sort"
 	"strings"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
-	"github.com/goki/gi/oswin/dnd"
-	"github.com/goki/gi/oswin/key"
-	"github.com/goki/gi/oswin/mimedata"
-	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/filecat"
 )
 
 // todo:
@@ -44,40 +37,14 @@ import (
 // multiple-selection, cut-and-paste, and drag-and-drop, reporting each action
 // taken using the TableViewSig signals
 type TableView struct {
-	gi.Frame
-	Slice            interface{}        `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
-	SliceValView     ValueView          `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
-	StyleFunc        TableViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
-	ShowViewCtxtMenu bool               `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
-	Changed          bool               `desc:"has the table been edited?"`
-	Values           [][]ValueView      `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice field values -- outer dimension is fields, inner is rows (generally more rows than fields, so this minimizes number of slices allocated)"`
-	ShowIndex        bool               `xml:"index" desc:"whether to show index or not (default true) -- updated from 'index' property (bool)"`
-	InactKeyNav      bool               `xml:"inact-key-nav" desc:"support key navigation when inactive (default true) -- updated from 'intact-key-nav' property (bool) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events"`
-	SelField         string             `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
-	SelVal           interface{}        `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value in SelField"`
-	SelectedIdx      int                `copy:"-" json:"-" xml:"-" desc:"index (row) of currently-selected item (-1 if none) -- see SelectedIdxs for full set of selected rows in active editing mode"`
-	SortIdx          int                `desc:"current sort index"`
-	SortDesc         bool               `desc:"whether current sort order is descending"`
-	SelectMode       bool               `desc:"editing-mode select rows mode"`
-	SelectedIdxs     map[int]struct{}   `copy:"-" desc:"list of currently-selected indexes"`
-	DraggedIdxs      []int              `copy:"-" desc:"list of currently-dragged indexes"`
-	TableViewSig     ki.Signal          `copy:"-" json:"-" xml:"-" desc:"table view interactive editing signals"`
-	ViewSig          ki.Signal          `copy:"-" json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	TmpSave          ValueView          `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ToolbarSlice     interface{}        `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
-
-	StruType     reflect.Type          `copy:"-" view:"-" json:"-" xml:"-" desc:"struct type for each row"`
-	NVisFields   int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
-	VisFields    []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-" desc:"the visible fields"`
-	SliceSize    int                   `view:"inactive" copy:"-" json:"-" xml:"-" desc:"size of slice"`
-	DispRows     int                   `view:"inactive" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
-	StartIdx     int                   `view:"inactive" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
-	RowHeight    float32               `view:"inactive" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
-	VisRows      int                   `view:"inactive" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
-	layoutHeight float32               `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
-	renderedRows int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
-	inFocusGrab  bool                  `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
-	curIdx       int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
+	SliceViewBase
+	StyleFunc  TableViewStyleFunc    `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	SelField   string                `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
+	SortIdx    int                   `desc:"current sort index"`
+	SortDesc   bool                  `desc:"whether current sort order is descending"`
+	StruType   reflect.Type          `copy:"-" view:"-" json:"-" xml:"-" desc:"struct type for each row"`
+	NVisFields int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
+	VisFields  []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-" desc:"the visible fields"`
 }
 
 var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
@@ -87,14 +54,13 @@ func AddNewTableView(parent ki.Ki, name string) *TableView {
 	return parent.AddNewChild(KiT_TableView, name).(*TableView)
 }
 
-func (tv *TableView) Disconnect() {
-	tv.Frame.Disconnect()
-	tv.TableViewSig.DisconnectAll()
-	tv.ViewSig.DisconnectAll()
-}
+// check for interface impl
+var _ SliceViewer = (*TableView)(nil)
 
 // TableViewStyleFunc is a styling function for custom styling /
-// configuration of elements in the view
+// configuration of elements in the view.  If style properties are set
+// then you must call widg.AsNode2dD().SetFullReRender() to trigger
+// re-styling during re-render
 type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
@@ -151,34 +117,6 @@ var TableViewProps = ki.Props{
 	"max-height":       -1,
 }
 
-// TableViewSignals are signals that tableview can send, mostly for editing
-// mode.  Selection events are sent on WidgetSig WidgetSelected signals in
-// both modes.
-type TableViewSignals int64
-
-const (
-	// TableViewDoubleClicked emitted during inactive mode when item
-	// double-clicked -- can be used for accepting dialog.
-	TableViewDoubleClicked TableViewSignals = iota
-
-	// todo: add more signals as needed
-
-	TableViewSignalsN
-)
-
-//go:generate stringer -type=TableViewSignals
-
-// UpdateValues just updates rendered values
-func (tv *TableView) UpdateValues() {
-	updt := tv.UpdateStart()
-	for _, vv := range tv.Values {
-		for _, vvf := range vv {
-			vvf.UpdateWidget()
-		}
-	}
-	tv.UpdateEnd(updt)
-}
-
 // StructType sets the StruType and returns the type of the struct within the
 // slice -- this is a non-ptr type even if slice has pointers to structs
 func (tv *TableView) StructType() reflect.Type {
@@ -211,6 +149,18 @@ func (tv *TableView) CacheVisFields() {
 	tv.NVisFields = len(tv.VisFields)
 }
 
+// IsConfiged returns true if the widget is fully configured
+func (tv *TableView) IsConfiged() bool {
+	if len(tv.Kids) == 0 {
+		return false
+	}
+	sf := tv.SliceFrame()
+	if len(sf.Kids) == 0 {
+		return false
+	}
+	return true
+}
+
 // Config configures the view
 func (tv *TableView) Config() {
 	tv.Lay = gi.LayoutVert
@@ -225,18 +175,6 @@ func (tv *TableView) Config() {
 		tv.SetFullReRender()
 		tv.UpdateEnd(updt)
 	}
-}
-
-// IsConfiged returns true if the widget is fully configured
-func (tv *TableView) IsConfiged() bool {
-	if len(tv.Kids) == 0 {
-		return false
-	}
-	sf := tv.SliceFrame()
-	if len(sf.Kids) == 0 {
-		return false
-	}
-	return true
 }
 
 // SliceFrame returns the outer frame widget, which contains all the header,
@@ -283,15 +221,6 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 		idxOff = 0
 	}
 	return
-}
-
-// SliceValueSize returns the reflect.Value and size of the slice
-// sets SliceSize always to current size
-func (tv *TableView) SliceValueSize() (reflect.Value, int) {
-	svnp := kit.NonPtrValue(reflect.ValueOf(tv.Slice))
-	sz := svnp.Len()
-	tv.SliceSize = sz
-	return svnp, sz
 }
 
 // ConfigSliceGrid configures the SliceGrid for the current slice
@@ -447,66 +376,6 @@ func (tv *TableView) ConfigSliceGrid() {
 	tv.ConfigScroll()
 }
 
-func (tv *TableView) ConfigScroll() {
-	sb := tv.ScrollBar()
-	sb.Dim = gi.Y
-	sb.Defaults()
-	sb.Tracking = true
-	if tv.Sty.Layout.ScrollBarWidth.Dots == 0 {
-		sb.SetFixedWidth(units.NewPx(16))
-	} else {
-		sb.SetFixedWidth(tv.Sty.Layout.ScrollBarWidth)
-	}
-	sb.SetStretchMaxHeight()
-	sb.Min = 0
-	sb.Step = 1
-	tv.UpdateScroll()
-
-	sb.SliderSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig != int64(gi.SliderValueChanged) {
-			return
-		}
-		wupdt := tv.Viewport.Win.UpdateStart()
-		tv.UpdateSliceGrid()
-		tv.Viewport.ReRender2DNode(tv)
-		tv.Viewport.Win.UpdateEnd(wupdt)
-	})
-}
-
-// UpdateScroll updates grid scrollbar based on display
-func (tv *TableView) UpdateScroll() {
-	sb := tv.ScrollBar()
-	sb.SetFullReRender()
-	updt := sb.UpdateStart()
-	sb.Max = float32(tv.SliceSize)
-	if tv.DispRows > 0 {
-		sb.PageStep = float32(tv.DispRows) * sb.Step
-		sb.ThumbVal = float32(tv.DispRows)
-	} else {
-		sb.PageStep = 10 * sb.Step
-		sb.ThumbVal = 10
-	}
-	sb.TrackThr = sb.Step
-	// 	sb.SetValue(float32(tv.StartIdx))
-	sb.Value = float32(tv.StartIdx)
-	if tv.DispRows == tv.SliceSize {
-		sb.Off = true
-	} else {
-		sb.Off = false
-	}
-	sb.UpdateEnd(updt)
-}
-
-func (tv *TableView) AvailHeight() float32 {
-	sg := tv.SliceGrid()
-	sgHt := sg.LayData.AllocSize.Y
-	if sgHt == 0 {
-		return 0
-	}
-	sgHt -= sg.ExtraSize.Y + sg.Sty.BoxSpace()*2
-	return sgHt
-}
-
 // LayoutSliceGrid does the proper layout of slice grid depending on allocated size
 // returns true if UpdateSliceGrid should be called after this
 func (tv *TableView) LayoutSliceGrid() bool {
@@ -539,22 +408,38 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if tv.Values == nil || sg.NumChildren() != nWidg {
 		sg.DeleteChildren(true)
 
-		tv.Values = make([][]ValueView, tv.NVisFields)
-		for fli := 0; fli < tv.NVisFields; fli++ {
-			tv.Values[fli] = make([]ValueView, tv.DispRows)
-		}
+		tv.Values = make([]ValueView, tv.NVisFields*tv.DispRows)
 		sg.Kids = make(ki.Slice, nWidg)
 	}
 	tv.ConfigScroll()
+	tv.LayoutHeader()
 	return true
 }
 
-func (tv *TableView) SliceGridNeedsLayout() bool {
-	sgHt := tv.AvailHeight()
-	if sgHt != tv.layoutHeight {
-		return true
+// LayoutHeader updates the header layout based on field widths
+func (tv *TableView) LayoutHeader() {
+	_, idxOff := tv.RowWidgetNs()
+	nfld := tv.NVisFields + idxOff
+	sgh := tv.SliceHeader()
+	sgf := tv.SliceGrid()
+	if len(sgf.Kids) >= nfld {
+		sumwd := float32(0)
+		for fli := 0; fli < nfld; fli++ {
+			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+			wd := sgf.GridData[gi.Col][fli].AllocSize
+			lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
+			sumwd += wd
+		}
+		if !tv.IsInactive() {
+			for fli := nfld; fli < nfld+2; fli++ {
+				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+				wd := sgf.GridData[gi.Col][fli].AllocSize
+				lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
+				sumwd += wd
+			}
+		}
+		sgh.SetMinPrefWidth(units.NewValue(sumwd, units.Dot))
 	}
-	return tv.renderedRows != tv.DispRows
 }
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
@@ -571,6 +456,11 @@ func (tv *TableView) UpdateSliceGrid() {
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	nWidg := nWidgPerRow * tv.DispRows
+
+	if tv.Viewport != nil && tv.Viewport.Win != nil {
+		wupdt := tv.Viewport.Win.UpdateStart()
+		defer tv.Viewport.Win.UpdateEnd(wupdt)
+	}
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
@@ -628,12 +518,15 @@ func (tv *TableView) UpdateSliceGrid() {
 		for fli := 0; fli < tv.NVisFields; fli++ {
 			field := tv.VisFields[fli]
 			fval := val.Elem().Field(field.Index[0])
-			vv := ToValueView(fval.Interface(), "")
-			if vv == nil { // shouldn't happen
-				continue
+			vvi := i*tv.NVisFields + fli
+			var vv ValueView
+			if tv.Values[vvi] == nil {
+				vv = ToValueView(fval.Interface(), "")
+				tv.Values[vvi] = vv
+			} else {
+				vv = tv.Values[vvi]
 			}
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave)
-			tv.Values[fli][i] = vv
 
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
@@ -641,7 +534,8 @@ func (tv *TableView) UpdateSliceGrid() {
 			var widg gi.Node2D
 			if sg.Kids[cidx] != nil {
 				widg = sg.Kids[cidx].(gi.Node2D)
-				vv.ConfigWidget(widg) // note: need config b/c vv is new
+				vv.UpdateWidget()
+				// vv.ConfigWidget(widg) // note: need config b/c vv is new
 				if tv.IsInactive() {
 					widg.AsNode2D().SetInactive()
 				}
@@ -678,37 +572,38 @@ func (tv *TableView) UpdateSliceGrid() {
 						})
 				}
 			}
-			if tv.StyleFunc != nil {
-				tv.StyleFunc(tv, svnp.Interface(), widg, si, fli, vv)
-			}
+			tv.This().(SliceViewer).StyleRow(svnp, widg, si, fli, vv)
 		}
 
 		if !tv.IsInactive() {
-			addnm := fmt.Sprintf("add-%v", itxt)
-			delnm := fmt.Sprintf("del-%v", itxt)
-			addact := gi.Action{}
-			delact := gi.Action{}
-			sg.SetChild(&addact, ridx+1+tv.NVisFields, addnm)
-			sg.SetChild(&delact, ridx+1+tv.NVisFields+1, delnm)
+			cidx := ridx + 1 + tv.NVisFields
+			if sg.Kids[cidx] == nil {
+				addnm := fmt.Sprintf("add-%v", itxt)
+				delnm := fmt.Sprintf("del-%v", itxt)
+				addact := gi.Action{}
+				delact := gi.Action{}
+				sg.SetChild(&addact, cidx, addnm)
+				sg.SetChild(&delact, cidx+1, delnm)
 
-			addact.SetIcon("plus")
-			addact.Tooltip = "insert a new element at this index"
-			addact.Data = i
-			addact.Sty.Template = "TableViewView.AddAction"
-			addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				act := send.(*gi.Action)
-				tvv := recv.Embed(KiT_TableView).(*TableView)
-				tvv.SliceNewAtRow(act.Data.(int)+1, true)
-			})
-			delact.SetIcon("minus")
-			delact.Tooltip = "delete this element"
-			delact.Data = i
-			delact.Sty.Template = "TableView.DelAction"
-			delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				act := send.(*gi.Action)
-				tvv := recv.Embed(KiT_TableView).(*TableView)
-				tvv.SliceDeleteAtRow(act.Data.(int), true)
-			})
+				addact.SetIcon("plus")
+				addact.Tooltip = "insert a new element at this index"
+				addact.Data = i
+				addact.Sty.Template = "TableViewView.AddAction"
+				addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					act := send.(*gi.Action)
+					tvv := recv.Embed(KiT_TableView).(*TableView)
+					tvv.SliceNewAtRow(act.Data.(int) + 1)
+				})
+				delact.SetIcon("minus")
+				delact.Tooltip = "delete this element"
+				delact.Data = i
+				delact.Sty.Template = "TableView.DelAction"
+				delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					act := send.(*gi.Action)
+					tvv := recv.Embed(KiT_TableView).(*TableView)
+					tvv.SliceDeleteAtRow(act.Data.(int), true)
+				})
+			}
 		}
 	}
 
@@ -721,24 +616,18 @@ func (tv *TableView) UpdateSliceGrid() {
 	tv.UpdateScroll()
 }
 
-// SetChanged sets the Changed flag and emits the ViewSig signal for the
-// TableView, indicating that some kind of edit / change has taken place to
-// the table data.  It isn't really practical to record all the different
-// types of changes, so this is just generic.
-func (tv *TableView) SetChanged() {
-	tv.Changed = true
-	tv.ViewSig.Emit(tv.This(), 0, nil)
-	tv.ToolBar().UpdateActions() // nil safe
-}
-
-// SliceNewAtRow inserts a new blank element at given display row
-func (tv *TableView) SliceNewAtRow(row int, reconfig bool) {
-	tv.SliceNewAt(tv.StartIdx+row, reconfig)
+func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Node2D, idx, fidx int, vv ValueView) {
+	if tv.StyleFunc != nil {
+		tv.StyleFunc(tv, svnp.Interface(), widg, idx, fidx, vv)
+	}
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
-// means the end -- reconfig means call UpdateSliceGrid to update display
-func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
+// means the end
+func (tv *TableView) SliceNewAt(idx int) {
+	wupdt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(wupdt)
+
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
@@ -748,23 +637,20 @@ func (tv *TableView) SliceNewAt(idx int, reconfig bool) {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
-	if reconfig {
-		tv.UpdateSliceGrid()
-	}
+	tv.This().(SliceViewer).LayoutSliceGrid()
+	tv.This().(SliceViewer).UpdateSliceGrid()
 	tv.ViewSig.Emit(tv.This(), 0, nil)
 }
 
-// SliceDeleteAtRow deletes element at given display row
-func (tv *TableView) SliceDeleteAtRow(row int, reconfig bool) {
-	tv.SliceDeleteAt(tv.StartIdx+row, reconfig)
-}
-
-// SliceDeleteAt deletes element at given index from slice -- reconfig means
+// SliceDeleteAt deletes element at given index from slice -- doupdt means
 // call UpdateSliceGrid to update display
-func (tv *TableView) SliceDeleteAt(idx int, reconfig bool) {
+func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	if idx < 0 {
 		return
 	}
+	wupdt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(wupdt)
+
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
@@ -774,8 +660,9 @@ func (tv *TableView) SliceDeleteAt(idx int, reconfig bool) {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
-	if reconfig {
-		tv.UpdateSliceGrid()
+	if doupdt {
+		tv.This().(SliceViewer).LayoutSliceGrid()
+		tv.This().(SliceViewer).UpdateSliceGrid()
 	}
 	tv.ViewSig.Emit(tv.This(), 0, nil)
 }
@@ -786,6 +673,10 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Push(cursor.Wait)
 	defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
 
+	wupdt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(wupdt)
+
+	updt := tv.UpdateStart()
 	sgh := tv.SliceHeader()
 	sgh.SetFullReRender()
 	idxOff := 1
@@ -817,11 +708,9 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	tv.SortIdx = fldIdx
 	rawIdx := tv.VisFields[fldIdx].Index
 
-	sgf := tv.SliceGrid()
-	sgf.SetFullReRender()
-
 	kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
 	tv.UpdateSliceGrid()
+	tv.UpdateEnd(updt)
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -838,7 +727,7 @@ func (tv *TableView) ConfigToolbar() {
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
-				tvv.SliceNewAt(-1, true)
+				tvv.SliceNewAt(-1)
 			})
 	}
 	sz := len(*tb.Children())
@@ -890,142 +779,14 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 }
 
-func (tv *TableView) Style2D() {
-	if !tv.IsConfiged() {
-		return
-	}
-	if tv.IsInactive() {
-		tv.SetCanFocus()
-	}
-	sg := tv.SliceGrid()
-	sg.StartFocus() // need to call this when window is actually active
-	tv.Frame.Style2D()
-}
-
 func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	redo := tv.Frame.Layout2D(parBBox, iter)
-	idxOff := 1
-	if !tv.ShowIndex {
-		idxOff = 0
-	}
 	if !tv.IsConfiged() {
 		return redo
 	}
-	nfld := tv.NVisFields + idxOff
-	sgh := tv.SliceHeader()
-	sgf := tv.SliceGrid()
-	if len(sgf.Kids) >= nfld {
-		sumwd := float32(0)
-		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
-			wd := sgf.GridData[gi.Col][fli].AllocSize
-			lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
-			sumwd += wd
-		}
-		if !tv.IsInactive() {
-			for fli := nfld; fli < nfld+2; fli++ {
-				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
-				wd := sgf.GridData[gi.Col][fli].AllocSize
-				lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
-				sumwd += wd
-			}
-		}
-		sgh.SetMinPrefWidth(units.NewValue(sumwd, units.Dot))
-		sgh.Layout2D(parBBox, iter)
-	}
+	tv.LayoutHeader()
+	tv.SliceHeader().Layout2D(parBBox, iter)
 	return redo
-}
-
-func (tv *TableView) Render2D() {
-	tv.ToolBar().UpdateActions()
-	if win := tv.ParentWindow(); win != nil {
-		if !win.IsResizing() {
-			win.MainMenuUpdateActives()
-		}
-	}
-	if tv.SliceGridNeedsLayout() {
-		// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
-		// as we don't yet know the size of grid -- so we catch it here at next step and just
-		// rebuild as needed.
-		tv.renderedRows = tv.DispRows
-		if tv.LayoutSliceGrid() {
-			tv.UpdateSliceGrid()
-		}
-		tv.ReRender2DTree()
-		if tv.SelectedIdx > -1 {
-			tv.ScrollToIdx(tv.SelectedIdx)
-		}
-		return
-	}
-	if tv.FullReRenderIfNeeded() {
-		return
-	}
-	if !tv.IsConfiged() {
-		return
-	}
-	if tv.PushBounds() {
-		if tv.Sty.Font.Face.Metrics.Height > 0 {
-			tv.VisRows = (tv.VpBBox.Max.Y - tv.VpBBox.Min.Y) / int(1.8*tv.Sty.Font.Face.Metrics.Height)
-		} else {
-			tv.VisRows = 10
-		}
-		tv.FrameStdRender()
-		tv.This().(gi.Node2D).ConnectEvents2D()
-		tv.RenderScrolls()
-		tv.Render2DChildren()
-		tv.PopBounds()
-	} else {
-		tv.DisconnectAllEvents(gi.AllPris)
-	}
-}
-
-func (tv *TableView) ConnectEvents2D() {
-	tv.TableViewEvents()
-}
-
-func (tv *TableView) HasFocus2D() bool {
-	if tv.IsInactive() {
-		return tv.InactKeyNav
-	}
-	return tv.ContainsFocus() // anyone within us gives us focus..
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  Row access methods
-//  NOTE: row = physical GUI display row, idx = slice index -- not the same!
-
-// SliceVal returns value interface at given slice index
-func (tv *TableView) SliceVal(idx int) interface{} {
-	svnp, sz := tv.SliceValueSize()
-	if idx < 0 || idx >= sz {
-		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
-		return nil
-	}
-	val := kit.OnePtrUnderlyingValue(svnp.Index(idx)) // deal with pointer lists
-	vali := val.Interface()
-	return vali
-}
-
-// IsRowInBounds returns true if disp row is in bounds
-func (tv *TableView) IsRowInBounds(row int) bool {
-	return row >= 0 && row < tv.DispRows
-}
-
-// IsIdxVisible returns true if slice index is currently visible
-func (tv *TableView) IsIdxVisible(idx int) bool {
-	return tv.IsRowInBounds(idx - tv.StartIdx)
-}
-
-// RowFirstWidget returns the first widget for given row (could be index or
-// not) -- false if out of range
-func (tv *TableView) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
-	if !tv.IsRowInBounds(row) {
-		return nil, false
-	}
-	nWidgPerRow, _ := tv.RowWidgetNs()
-	sg := tv.SliceGrid()
-	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
-	return widg, true
 }
 
 // RowFirstVisWidget returns the first visible widget for given row (could be
@@ -1063,7 +824,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
-		if widg.HasFocus() {
+		if widg.HasFocus() || widg.ContainsFocus() {
 			return widg
 		}
 	}
@@ -1079,69 +840,32 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	return nil
 }
 
-// IdxGrabFocus grabs the focus for the first focusable widget in given idx --
-// returns that element or nil if not successful
-func (tv *TableView) IdxGrabFocus(idx int) *gi.WidgetBase {
-	tv.ScrollToIdx(idx)
-	return tv.RowGrabFocus(idx - tv.StartIdx)
-}
-
-// IdxPos returns center of window position of index label for row (ContextMenuPos)
-func (tv *TableView) IdxPos(idx int) image.Point {
-	row := idx - tv.StartIdx
+// SelectRowWidgets sets the selection state of given row of widgets
+func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 	if row < 0 {
-		row = 0
+		return
 	}
-	if row > tv.DispRows-1 {
-		row = tv.DispRows - 1
-	}
-	var pos image.Point
-	widg, ok := tv.RowFirstVisWidget(row)
-	if ok {
-		pos = widg.ContextMenuPos()
-	}
-	return pos
-}
+	wupdt := tv.Viewport.Win.UpdateStart()
+	defer tv.Viewport.Win.UpdateEnd(wupdt)
 
-// RowFromPos returns the row that contains given vertical position, false if not found
-func (tv *TableView) RowFromPos(posY int) (int, bool) {
-	// todo: could optimize search to approx loc, and search up / down from there
-	for rw := 0; rw < tv.DispRows; rw++ {
-		widg, ok := tv.RowFirstWidget(rw)
-		if ok {
-			if widg.ObjBBox.Min.Y < posY && posY < widg.ObjBBox.Max.Y {
-				return rw, true
-			}
+	sg := tv.SliceGrid()
+	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	ridx := row * nWidgPerRow
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		seldx := ridx + idxOff + fli
+		if sg.Kids.IsValidIndex(seldx) == nil {
+			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
+			widg.SetSelectedState(sel)
+			widg.UpdateSig()
 		}
 	}
-	return -1, false
-}
-
-// IdxFromPos returns the idx that contains given vertical position, false if not found
-func (tv *TableView) IdxFromPos(posY int) (int, bool) {
-	row, ok := tv.RowFromPos(posY)
-	if !ok {
-		return -1, false
+	if tv.ShowIndex {
+		if sg.Kids.IsValidIndex(ridx) == nil {
+			widg := sg.Child(ridx).(gi.Node2D).AsNode2D()
+			widg.SetSelectedState(sel)
+			widg.UpdateSig()
+		}
 	}
-	return row + tv.StartIdx, true
-}
-
-// ScrollToIdx ensures that given slice idx is visible by scrolling display as needed
-func (tv *TableView) ScrollToIdx(idx int) bool {
-	if idx < tv.StartIdx {
-		tv.StartIdx = idx
-		tv.StartIdx = ints.MaxInt(0, tv.StartIdx)
-		tv.UpdateScroll()
-		tv.UpdateSliceGrid()
-		return true
-	} else if idx >= tv.StartIdx+tv.DispRows {
-		tv.StartIdx = idx - (tv.DispRows - 1)
-		tv.StartIdx = ints.MaxInt(0, tv.StartIdx)
-		tv.UpdateScroll()
-		tv.UpdateSliceGrid()
-		return true
-	}
-	return false
 }
 
 // SelectFieldVal sets SelField and SelVal and attempts to find corresponding
@@ -1182,952 +906,4 @@ func StructSliceIdxByValue(struSlice interface{}, fldName string, fldVal interfa
 		}
 	}
 	return -1, nil
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//    Moving
-
-// MoveDown moves the selection down to next idx, using given select mode
-// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (tv *TableView) MoveDown(selMode mouse.SelectModes) int {
-	if tv.SelectedIdx >= tv.SliceSize-1 {
-		tv.SelectedIdx = tv.SliceSize - 1
-		return -1
-	}
-	tv.SelectedIdx++
-	tv.SelectIdxAction(tv.SelectedIdx, selMode)
-	return tv.SelectedIdx
-}
-
-// MoveDownAction moves the selection down to next idx, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (tv *TableView) MoveDownAction(selMode mouse.SelectModes) int {
-	nidx := tv.MoveDown(selMode)
-	if nidx >= 0 {
-		tv.ScrollToIdx(nidx)
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nidx)
-	}
-	return nidx
-}
-
-// MoveUp moves the selection up to previous idx, using given select mode
-// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (tv *TableView) MoveUp(selMode mouse.SelectModes) int {
-	if tv.SelectedIdx <= 0 {
-		tv.SelectedIdx = 0
-		return -1
-	}
-	tv.SelectedIdx--
-	tv.SelectIdxAction(tv.SelectedIdx, selMode)
-	return tv.SelectedIdx
-}
-
-// MoveUpAction moves the selection up to previous idx, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (tv *TableView) MoveUpAction(selMode mouse.SelectModes) int {
-	nidx := tv.MoveUp(selMode)
-	if nidx >= 0 {
-		tv.ScrollToIdx(nidx)
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nidx)
-	}
-	return nidx
-}
-
-// MovePageDown moves the selection down to next page, using given select mode
-// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (tv *TableView) MovePageDown(selMode mouse.SelectModes) int {
-	if tv.SelectedIdx >= tv.SliceSize-1 {
-		tv.SelectedIdx = tv.SliceSize - 1
-		return -1
-	}
-	tv.SelectedIdx += tv.VisRows
-	tv.SelectedIdx = ints.MinInt(tv.SelectedIdx, tv.SliceSize-1)
-	tv.SelectIdxAction(tv.SelectedIdx, selMode)
-	return tv.SelectedIdx
-}
-
-// MovePageDownAction moves the selection down to next page, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (tv *TableView) MovePageDownAction(selMode mouse.SelectModes) int {
-	nidx := tv.MovePageDown(selMode)
-	if nidx >= 0 {
-		tv.ScrollToIdx(nidx)
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nidx)
-	}
-	return nidx
-}
-
-// MovePageUp moves the selection up to previous page, using given select mode
-// (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (tv *TableView) MovePageUp(selMode mouse.SelectModes) int {
-	if tv.SelectedIdx <= 0 {
-		tv.SelectedIdx = 0
-		return -1
-	}
-	tv.SelectedIdx -= tv.VisRows
-	tv.SelectedIdx = ints.MaxInt(0, tv.SelectedIdx)
-	tv.SelectIdxAction(tv.SelectedIdx, selMode)
-	return tv.SelectedIdx
-}
-
-// MovePageUpAction moves the selection up to previous page, using given select
-// mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (tv *TableView) MovePageUpAction(selMode mouse.SelectModes) int {
-	nidx := tv.MovePageUp(selMode)
-	if nidx >= 0 {
-		tv.ScrollToIdx(nidx)
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), nidx)
-	}
-	return nidx
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//    Selection: user operates on the index labels
-
-// SelectRowWidgets sets the selection state of given row of widgets
-func (tv *TableView) SelectRowWidgets(row int, sel bool) {
-	if row < 0 {
-		return
-	}
-	var win *gi.Window
-	if tv.Viewport != nil {
-		win = tv.Viewport.Win
-	}
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
-	sg := tv.SliceGrid()
-	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	ridx := row * nWidgPerRow
-	for fli := 0; fli < tv.NVisFields; fli++ {
-		seldx := ridx + idxOff + fli
-		if sg.Kids.IsValidIndex(seldx) == nil {
-			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
-			widg.SetSelectedState(sel)
-			widg.UpdateSig()
-		}
-	}
-	if tv.ShowIndex {
-		if sg.Kids.IsValidIndex(ridx) == nil {
-			widg := sg.Child(ridx).(gi.Node2D).AsNode2D()
-			widg.SetSelectedState(sel)
-			widg.UpdateSig()
-		}
-	}
-
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
-}
-
-// SelectIdxWidgets sets the selection state of given slice index
-// returns false if index is not visible
-func (tv *TableView) SelectIdxWidgets(idx int, sel bool) bool {
-	if !tv.IsIdxVisible(idx) {
-		return false
-	}
-	tv.SelectRowWidgets(idx-tv.StartIdx, sel)
-	return true
-}
-
-// UpdateSelectRow updates the selection for the given row
-// callback from widgetsig select
-func (tv *TableView) UpdateSelectRow(row int, sel bool) {
-	idx := row + tv.StartIdx
-	tv.UpdateSelectIdx(idx, sel)
-}
-
-// UpdateSelectIdx updates the selection for the given index
-func (tv *TableView) UpdateSelectIdx(idx int, sel bool) {
-	if tv.IsInactive() {
-		if tv.SelectedIdx == idx { // never unselect
-			tv.SelectIdxWidgets(tv.SelectedIdx, true)
-			return
-		}
-		if tv.SelectedIdx >= 0 { // unselect current
-			tv.SelectIdxWidgets(tv.SelectedIdx, false)
-		}
-		if sel {
-			tv.SelectedIdx = idx
-			tv.SelectIdxWidgets(tv.SelectedIdx, true)
-		}
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
-	} else {
-		selMode := mouse.SelectOne
-		win := tv.Viewport.Win
-		if win != nil {
-			selMode = win.LastSelMode
-		}
-		tv.SelectIdxAction(idx, selMode)
-	}
-}
-
-// IdxIsSelected returns the selected status of given slice index
-func (tv *TableView) IdxIsSelected(idx int) bool {
-	if _, ok := tv.SelectedIdxs[idx]; ok {
-		return true
-	}
-	return false
-}
-
-// SelectedIdxsList returns list of selected idxs, sorted either ascending or descending
-func (tv *TableView) SelectedIdxsList(descendingSort bool) []int {
-	rws := make([]int, len(tv.SelectedIdxs))
-	i := 0
-	for r, _ := range tv.SelectedIdxs {
-		rws[i] = r
-		i++
-	}
-	if descendingSort {
-		sort.Slice(rws, func(i, j int) bool {
-			return rws[i] > rws[j]
-		})
-	} else {
-		sort.Slice(rws, func(i, j int) bool {
-			return rws[i] < rws[j]
-		})
-	}
-	return rws
-}
-
-// SelectIdx selects given idx (if not already selected) -- updates select
-// status of index label
-func (tv *TableView) SelectIdx(idx int) {
-	tv.SelectedIdxs[idx] = struct{}{}
-	tv.SelectIdxWidgets(idx, true)
-}
-
-// UnselectIdx unselects given idx (if selected)
-func (tv *TableView) UnselectIdx(idx int) {
-	if tv.IdxIsSelected(idx) {
-		delete(tv.SelectedIdxs, idx)
-	}
-	tv.SelectIdxWidgets(idx, false)
-}
-
-// UnselectAllIdxs unselects all selected idxs
-func (tv *TableView) UnselectAllIdxs() {
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
-	for r, _ := range tv.SelectedIdxs {
-		tv.SelectIdxWidgets(r, false)
-	}
-	tv.SelectedIdxs = make(map[int]struct{})
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
-}
-
-// SelectAllIdxs selects all idxs
-func (tv *TableView) SelectAllIdxs() {
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
-	tv.UnselectAllIdxs()
-	tv.SelectedIdxs = make(map[int]struct{}, tv.SliceSize)
-	for row := 0; row < tv.SliceSize; row++ {
-		tv.SelectedIdxs[row] = struct{}{}
-		tv.SelectIdxWidgets(row, true)
-	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
-}
-
-// SelectIdxAction is called when a select action has been received (e.g., a
-// mouse click) -- translates into selection updates -- gets selection mode
-// from mouse event (ExtendContinuous, ExtendOne)
-func (tv *TableView) SelectIdxAction(idx int, mode mouse.SelectModes) {
-	if mode == mouse.NoSelect {
-		return
-	}
-	idx = ints.MinInt(idx, tv.SliceSize-1)
-	if idx < 0 {
-		idx = 0
-	}
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
-	switch mode {
-	case mouse.SelectOne:
-		if tv.IdxIsSelected(idx) {
-			if len(tv.SelectedIdxs) > 1 {
-				tv.UnselectAllIdxs()
-			}
-			tv.SelectedIdx = idx
-			tv.SelectIdx(idx)
-			tv.IdxGrabFocus(idx)
-		} else {
-			tv.UnselectAllIdxs()
-			tv.SelectedIdx = idx
-			tv.SelectIdx(idx)
-			tv.IdxGrabFocus(idx)
-		}
-		tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
-	case mouse.ExtendContinuous:
-		if len(tv.SelectedIdxs) == 0 {
-			tv.SelectedIdx = idx
-			tv.SelectIdx(idx)
-			tv.IdxGrabFocus(idx)
-			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
-		} else {
-			minIdx := -1
-			maxIdx := 0
-			for r, _ := range tv.SelectedIdxs {
-				if minIdx < 0 {
-					minIdx = r
-				} else {
-					minIdx = ints.MinInt(minIdx, r)
-				}
-				maxIdx = ints.MaxInt(maxIdx, r)
-			}
-			cidx := idx
-			tv.SelectedIdx = idx
-			tv.SelectIdx(idx)
-			if idx < minIdx {
-				for cidx < minIdx {
-					r := tv.MoveDown(mouse.SelectQuiet) // just select
-					cidx = r
-				}
-			} else if idx > maxIdx {
-				for cidx > maxIdx {
-					r := tv.MoveUp(mouse.SelectQuiet) // just select
-					cidx = r
-				}
-			}
-			tv.IdxGrabFocus(idx)
-			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
-		}
-	case mouse.ExtendOne:
-		if tv.IdxIsSelected(idx) {
-			tv.UnselectIdxAction(idx)
-		} else {
-			tv.SelectedIdx = idx
-			tv.SelectIdx(idx)
-			tv.IdxGrabFocus(idx)
-			tv.WidgetSig.Emit(tv.This(), int64(gi.WidgetSelected), tv.SelectedIdx)
-		}
-	case mouse.Unselect:
-		tv.SelectedIdx = idx
-		tv.UnselectIdxAction(idx)
-	case mouse.SelectQuiet:
-		tv.SelectedIdx = idx
-		tv.SelectIdx(idx)
-	case mouse.UnselectQuiet:
-		tv.SelectedIdx = idx
-		tv.UnselectIdx(idx)
-	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
-}
-
-// UnselectIdxAction unselects this idx (if selected) -- and emits a signal
-func (tv *TableView) UnselectIdxAction(idx int) {
-	if tv.IdxIsSelected(idx) {
-		tv.UnselectIdx(idx)
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//    Copy / Cut / Paste
-
-// MimeDataIdx adds mimedata for given idx: an application/json of the struct
-func (tv *TableView) MimeDataIdx(md *mimedata.Mimes, idx int) {
-	stru := tv.SliceVal(idx)
-	b, err := json.MarshalIndent(stru, "", "  ")
-	if err == nil {
-		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: b})
-	} else {
-		log.Printf("gi.TableView MimeData JSON Marshall error: %v\n", err)
-	}
-}
-
-// FromMimeData creates a slice of structs from mime data
-func (tv *TableView) FromMimeData(md mimedata.Mimes) []interface{} {
-	svnp, _ := tv.SliceValueSize()
-	svtyp := svnp.Type()
-	sl := make([]interface{}, 0, len(md))
-	for _, d := range md {
-		if d.Type == filecat.DataJson {
-			nval := reflect.New(svtyp.Elem()).Interface()
-			err := json.Unmarshal(d.Data, nval)
-			if err == nil {
-				sl = append(sl, nval)
-			} else {
-				log.Printf("gi.TableView FromMimeData: JSON load error: %v\n", err)
-			}
-		}
-	}
-	return sl
-}
-
-// Copy copies selected idxs to clip.Board, optionally resetting the selection
-// satisfies gi.Clipper interface and can be overridden by subtypes
-func (tv *TableView) Copy(reset bool) {
-	nitms := len(tv.SelectedIdxs)
-	if nitms == 0 {
-		return
-	}
-	ixs := tv.SelectedIdxsList(false) // ascending
-	md := make(mimedata.Mimes, 0, nitms)
-	for _, i := range ixs {
-		tv.MimeDataIdx(&md, i)
-	}
-	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(md)
-	if reset {
-		tv.UnselectAllIdxs()
-	}
-}
-
-// CopyIdxs copies selected indexes to clip.Board, optionally resetting the selection
-func (tv *TableView) CopyIdxs(reset bool) {
-	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Copy(reset)
-	} else {
-		tv.Copy(reset)
-	}
-}
-
-// DeleteIdxs deletes all selected indexes
-func (tv *TableView) DeleteIdxs() {
-	if len(tv.SelectedIdxs) == 0 {
-		return
-	}
-	updt := tv.UpdateStart()
-	ixs := tv.SelectedIdxsList(true) // descending sort
-	for _, i := range ixs {
-		tv.SliceDeleteAt(i, false)
-	}
-	tv.SetChanged()
-	tv.UpdateSliceGrid()
-	tv.UpdateEnd(updt)
-}
-
-// Cut copies selected indexes to clip.Board and deletes selected indexes
-// satisfies gi.Clipper interface and can be overridden by subtypes
-func (tv *TableView) Cut() {
-	if len(tv.SelectedIdxs) == 0 {
-		return
-	}
-	updt := tv.UpdateStart()
-	tv.CopyIdxs(false)
-	ixs := tv.SelectedIdxsList(true) // descending sort
-	idx := ixs[0]
-	tv.UnselectAllIdxs()
-	for _, i := range ixs {
-		tv.SliceDeleteAt(i, false)
-	}
-	tv.SetChanged()
-	tv.UpdateSliceGrid()
-	tv.UpdateEnd(updt)
-	tv.SelectIdxAction(idx, mouse.SelectOne)
-}
-
-// CutIdxs copies selected indexes to clip.Board and deletes selected indexes
-func (tv *TableView) CutIdxs() {
-	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Cut()
-	} else {
-		tv.Cut()
-	}
-}
-
-// Paste pastes clipboard at curIdx
-// satisfies gi.Clipper interface and can be overridden by subtypes
-func (tv *TableView) Paste() {
-	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
-	if md != nil {
-		tv.PasteMenu(md, tv.curIdx)
-	}
-}
-
-// PasteIdx pastes clipboard at given idx
-func (tv *TableView) PasteIdx(idx int) {
-	tv.curIdx = idx
-	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Paste()
-	} else {
-		tv.Paste()
-	}
-}
-
-// MakePasteMenu makes the menu of options for paste events
-func (tv *TableView) MakePasteMenu(m *gi.Menu, data interface{}, idx int) {
-	if len(*m) > 0 {
-		return
-	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		tvv.PasteAssign(data.(mimedata.Mimes), idx)
-	})
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		tvv.PasteAtIdx(data.(mimedata.Mimes), idx)
-	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		tvv.PasteAtIdx(data.(mimedata.Mimes), idx+1)
-	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	})
-}
-
-// PasteMenu performs a paste from the clipboard using given data -- pops up
-// a menu to determine what specifically to do
-func (tv *TableView) PasteMenu(md mimedata.Mimes, idx int) {
-	tv.UnselectAllIdxs()
-	var men gi.Menu
-	tv.MakePasteMenu(&men, md, idx)
-	pos := tv.IdxPos(idx)
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
-}
-
-// PasteAssign assigns mime data (only the first one!) to this idx
-func (tv *TableView) PasteAssign(md mimedata.Mimes, idx int) {
-	tvl := reflect.ValueOf(tv.Slice)
-	tvnp := kit.NonPtrValue(tvl)
-
-	sl := tv.FromMimeData(md)
-	updt := tv.UpdateStart()
-	if len(sl) == 0 {
-		return
-	}
-	ns := sl[0]
-	tvnp.Index(idx).Set(reflect.ValueOf(ns).Elem())
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
-	}
-	tv.SetChanged()
-	tv.UpdateSliceGrid()
-	tv.UpdateEnd(updt)
-}
-
-// PasteAtIdx inserts object(s) from mime data at (before) given idx
-func (tv *TableView) PasteAtIdx(md mimedata.Mimes, idx int) {
-	tvl := reflect.ValueOf(tv.Slice)
-	tvnp := kit.NonPtrValue(tvl)
-
-	sl := tv.FromMimeData(md)
-	updt := tv.UpdateStart()
-	for _, ns := range sl {
-		sz := tvnp.Len()
-		tvnp = reflect.Append(tvnp, reflect.ValueOf(ns).Elem())
-		tvl.Elem().Set(tvnp)
-		if idx >= 0 && idx < sz {
-			reflect.Copy(tvnp.Slice(idx+1, sz+1), tvnp.Slice(idx, sz))
-			tvnp.Index(idx).Set(reflect.ValueOf(ns).Elem())
-			tvl.Elem().Set(tvnp)
-		}
-		idx++
-	}
-	if tv.TmpSave != nil {
-		tv.TmpSave.SaveTmp()
-	}
-	tv.SetChanged()
-	tv.UpdateSliceGrid()
-	tv.UpdateEnd(updt)
-	tv.SelectIdxAction(idx, mouse.SelectOne)
-}
-
-// Duplicate copies selected items and inserts them after current selection --
-// return idx of start of duplicates if successful, else -1
-func (tv *TableView) Duplicate() int {
-	nitms := len(tv.SelectedIdxs)
-	if nitms == 0 {
-		return -1
-	}
-	ixs := tv.SelectedIdxsList(true) // descending sort -- last first
-	pasteAt := ixs[0]
-	tv.CopyIdxs(true)
-	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
-	tv.PasteAtIdx(md, pasteAt)
-	return pasteAt
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//    Drag-n-Drop
-
-// DragNDropStart starts a drag-n-drop
-func (tv *TableView) DragNDropStart() {
-	nitms := len(tv.SelectedIdxs)
-	if nitms == 0 {
-		return
-	}
-	md := make(mimedata.Mimes, 0, nitms)
-	for i, _ := range tv.SelectedIdxs {
-		tv.MimeDataIdx(&md, i)
-	}
-	ixs := tv.SelectedIdxsList(true) // descending sort
-	widg, ok := tv.RowFirstVisWidget(ixs[0])
-	if ok {
-		bi := &gi.Bitmap{}
-		bi.InitName(bi, tv.UniqueName())
-		if !bi.GrabRenderFrom(widg) { // offscreen!
-			log.Printf("giv.TableView: unexpected failure in getting widget pixels -- cannot start DND\n")
-			return
-		}
-		gi.ImageClearer(bi.Pixels, 50.0)
-		tv.Viewport.Win.StartDragNDrop(tv.This(), md, bi)
-	}
-}
-
-// DragNDropTarget handles a drag-n-drop drop
-func (tv *TableView) DragNDropTarget(de *dnd.Event) {
-	de.Target = tv.This()
-	if de.Mod == dnd.DropLink {
-		de.Mod = dnd.DropCopy // link not supported -- revert to copy
-	}
-	idx, ok := tv.IdxFromPos(de.Where.Y)
-	if ok {
-		de.SetProcessed()
-		tv.curIdx = idx
-		if dpr, ok := tv.This().(gi.DragNDropper); ok {
-			dpr.Drop(de.Data, de.Mod)
-		} else {
-			tv.Drop(de.Data, de.Mod)
-		}
-	}
-}
-
-// MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TableView) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.DropMods, idx int) {
-	if len(*m) > 0 {
-		return
-	}
-	switch mod {
-	case dnd.DropCopy:
-		m.AddLabel("Copy (Shift=Move):")
-	case dnd.DropMove:
-		m.AddLabel("Move:")
-	}
-	if mod == dnd.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			tvv.DropAssign(data.(mimedata.Mimes), idx)
-		})
-	}
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		tvv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
-	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		tvv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
-	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		tvv.DropCancel()
-	})
-}
-
-// Drop pops up a menu to determine what specifically to do with dropped items
-// this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
-func (tv *TableView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
-	var men gi.Menu
-	tv.MakeDropMenu(&men, md, mod, tv.curIdx)
-	pos := tv.IdxPos(tv.curIdx)
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
-}
-
-// DropAssign assigns mime data (only the first one!) to this node
-func (tv *TableView) DropAssign(md mimedata.Mimes, idx int) {
-	tv.DraggedIdxs = nil
-	tv.PasteAssign(md, idx)
-	tv.DragNDropFinalize(dnd.DropCopy)
-}
-
-// DragNDropFinalize is called to finalize actions on the Source node prior to
-// performing target actions -- mod must indicate actual action taken by the
-// target, including ignore -- ends up calling DragNDropSource if us..
-func (tv *TableView) DragNDropFinalize(mod dnd.DropMods) {
-	tv.UnselectAllIdxs()
-	tv.Viewport.Win.FinalizeDragNDrop(mod)
-}
-
-// DragNDropSource is called after target accepts the drop -- we just remove
-// elements that were moved
-func (tv *TableView) DragNDropSource(de *dnd.Event) {
-	if de.Mod != dnd.DropMove || len(tv.DraggedIdxs) == 0 {
-		return
-	}
-	updt := tv.UpdateStart()
-	sort.Slice(tv.DraggedIdxs, func(i, j int) bool {
-		return tv.DraggedIdxs[i] > tv.DraggedIdxs[j]
-	})
-	idx := tv.DraggedIdxs[0]
-	for _, i := range tv.DraggedIdxs {
-		tv.SliceDeleteAt(i, false)
-	}
-	tv.DraggedIdxs = nil
-	tv.UpdateSliceGrid()
-	tv.UpdateEnd(updt)
-	tv.SelectIdxAction(idx, mouse.SelectOne)
-}
-
-// SaveDraggedIdxs saves selectedindexes into dragged indexes taking into account insertion at indexes
-func (tv *TableView) SaveDraggedIdxs(idx int) {
-	sz := len(tv.SelectedIdxs)
-	if sz == 0 {
-		tv.DraggedIdxs = nil
-		return
-	}
-	tv.DraggedIdxs = make([]int, len(tv.SelectedIdxs))
-	idx = 0
-	for i, _ := range tv.SelectedIdxs {
-		if i > idx {
-			tv.DraggedIdxs[idx] = i + sz // make room for insertion
-		} else {
-			tv.DraggedIdxs[idx] = i
-		}
-		idx++
-	}
-}
-
-// DropBefore inserts object(s) from mime data before this node
-func (tv *TableView) DropBefore(md mimedata.Mimes, mod dnd.DropMods, idx int) {
-	tv.SaveDraggedIdxs(idx)
-	tv.PasteAtIdx(md, idx)
-	tv.DragNDropFinalize(mod)
-}
-
-// DropAfter inserts object(s) from mime data after this node
-func (tv *TableView) DropAfter(md mimedata.Mimes, mod dnd.DropMods, idx int) {
-	tv.SaveDraggedIdxs(idx + 1)
-	tv.PasteAtIdx(md, idx+1)
-	tv.DragNDropFinalize(mod)
-}
-
-// DropCancel cancels the drop action e.g., preventing deleting of source
-// items in a Move case
-func (tv *TableView) DropCancel() {
-	tv.DragNDropFinalize(dnd.DropIgnore)
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//    Events
-
-func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
-	m.AddAction(gi.ActOpts{Label: "Copy", Data: idx},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			tvv.CopyIdxs(true)
-		})
-	m.AddAction(gi.ActOpts{Label: "Cut", Data: idx},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			tvv.CutIdxs()
-		})
-	m.AddAction(gi.ActOpts{Label: "Paste", Data: idx},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			tvv.PasteIdx(data.(int))
-		})
-	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: idx},
-		tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			tvv.Duplicate()
-		})
-}
-
-func (tv *TableView) ItemCtxtMenu(idx int) {
-	val := tv.SliceVal(idx)
-	if val == nil {
-		return
-	}
-	var men gi.Menu
-
-	if CtxtMenuView(val, tv.IsInactive(), tv.Viewport, &men) {
-		if tv.ShowViewCtxtMenu {
-			men.AddSeparator("sep-tvmenu")
-			tv.StdCtxtMenu(&men, idx)
-		}
-	} else {
-		tv.StdCtxtMenu(&men, idx)
-	}
-	if len(men) > 0 {
-		pos := tv.IdxPos(idx)
-		gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, tv.Nm+"-menu")
-	}
-}
-
-func (tv *TableView) KeyInputActive(kt *key.ChordEvent) {
-	if gi.KeyEventTrace {
-		fmt.Printf("TableView KeyInput: %v\n", tv.PathUnique())
-	}
-	kf := gi.KeyFun(kt.Chord())
-	selMode := mouse.SelectModeBits(kt.Modifiers)
-	if selMode == mouse.SelectOne {
-		if tv.SelectMode {
-			selMode = mouse.ExtendContinuous
-		}
-	}
-	idx := tv.SelectedIdx
-	switch kf {
-	case gi.KeyFunCancelSelect:
-		tv.UnselectAllIdxs()
-		tv.SelectMode = false
-		kt.SetProcessed()
-	case gi.KeyFunMoveDown:
-		tv.MoveDownAction(selMode)
-		kt.SetProcessed()
-	case gi.KeyFunMoveUp:
-		tv.MoveUpAction(selMode)
-		kt.SetProcessed()
-	case gi.KeyFunPageDown:
-		tv.MovePageDownAction(selMode)
-		kt.SetProcessed()
-	case gi.KeyFunPageUp:
-		tv.MovePageUpAction(selMode)
-		kt.SetProcessed()
-	case gi.KeyFunSelectMode:
-		tv.SelectMode = !tv.SelectMode
-		kt.SetProcessed()
-	case gi.KeyFunSelectAll:
-		tv.SelectAllIdxs()
-		tv.SelectMode = false
-		kt.SetProcessed()
-	// case gi.KeyFunDelete: // too dangerous
-	// 	tv.SliceDelete(tv.SelectedIdx, true)
-	// 	tv.SelectMode = false
-	// 	tv.SelectIdxAction(idx, mouse.SelectOne)
-	// 	kt.SetProcessed()
-	case gi.KeyFunDuplicate:
-		nidx := tv.Duplicate()
-		tv.SelectMode = false
-		if nidx >= 0 {
-			tv.SelectIdxAction(nidx, mouse.SelectOne)
-		}
-		kt.SetProcessed()
-	case gi.KeyFunInsert:
-		tv.SliceNewAt(idx, true)
-		tv.SelectMode = false
-		tv.SelectIdxAction(idx+1, mouse.SelectOne) // todo: somehow nidx not working
-		kt.SetProcessed()
-	case gi.KeyFunInsertAfter:
-		tv.SliceNewAt(idx+1, true)
-		tv.SelectMode = false
-		tv.SelectIdxAction(idx+1, mouse.SelectOne)
-		kt.SetProcessed()
-	case gi.KeyFunCopy:
-		tv.CopyIdxs(true)
-		tv.SelectMode = false
-		tv.SelectIdxAction(idx, mouse.SelectOne)
-		kt.SetProcessed()
-	case gi.KeyFunCut:
-		tv.CutIdxs()
-		tv.SelectMode = false
-		kt.SetProcessed()
-	case gi.KeyFunPaste:
-		tv.PasteIdx(tv.SelectedIdx)
-		tv.SelectMode = false
-		kt.SetProcessed()
-	}
-}
-
-func (tv *TableView) KeyInputInactive(kt *key.ChordEvent) {
-	if gi.KeyEventTrace {
-		fmt.Printf("TableView Inactive KeyInput: %v\n", tv.PathUnique())
-	}
-	kf := gi.KeyFun(kt.Chord())
-	idx := tv.SelectedIdx
-	switch {
-	case kf == gi.KeyFunMoveDown:
-		ni := idx + 1
-		if ni < tv.SliceSize {
-			tv.ScrollToIdx(ni)
-			tv.UpdateSelectIdx(ni, true)
-			kt.SetProcessed()
-		}
-	case kf == gi.KeyFunMoveUp:
-		ni := idx - 1
-		if ni >= 0 {
-			tv.ScrollToIdx(ni)
-			tv.UpdateSelectIdx(ni, true)
-			kt.SetProcessed()
-		}
-	case kf == gi.KeyFunPageDown:
-		ni := ints.MinInt(idx+tv.VisRows, tv.SliceSize-1)
-		tv.ScrollToIdx(ni)
-		tv.UpdateSelectIdx(ni, true)
-		kt.SetProcessed()
-	case kf == gi.KeyFunPageUp:
-		ni := ints.MaxInt(idx-tv.VisRows, 0)
-		tv.ScrollToIdx(ni)
-		tv.UpdateSelectIdx(ni, true)
-		kt.SetProcessed()
-	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
-		tv.TableViewSig.Emit(tv.This(), int64(TableViewDoubleClicked), tv.SelectedIdx)
-		kt.SetProcessed()
-	}
-}
-
-func (tv *TableView) TableViewEvents() {
-	// LowPri to allow other focal widgets to capture
-	tv.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
-		tvv := recv.Embed(KiT_TableView).(*TableView)
-		me.SetProcessed()
-		sbb := tvv.ScrollBar()
-		cur := float32(sbb.Pos)
-		sbb.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
-	})
-	if tv.IsInactive() {
-		if tv.InactKeyNav {
-			tv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-				tvv := recv.Embed(KiT_TableView).(*TableView)
-				kt := d.(*key.ChordEvent)
-				tvv.KeyInputInactive(kt)
-			})
-		}
-		tv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.Event)
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			if !tvv.HasFocus() {
-				tvv.GrabFocus()
-			}
-			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-				tvv.TableViewSig.Emit(tvv.This(), int64(TableViewDoubleClicked), tvv.SelectedIdx)
-				me.SetProcessed()
-			}
-			if me.Button == mouse.Right && me.Action == mouse.Release {
-				tvv.ItemCtxtMenu(tvv.SelectedIdx)
-				me.SetProcessed()
-			}
-		})
-	} else {
-		tv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.Event)
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			if me.Button == mouse.Right && me.Action == mouse.Release {
-				tvv.ItemCtxtMenu(tvv.SelectedIdx)
-				me.SetProcessed()
-			}
-		})
-		tv.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			kt := d.(*key.ChordEvent)
-			tvv.KeyInputActive(kt)
-		})
-		tv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			de := d.(*dnd.Event)
-			tvv := recv.Embed(KiT_TableView).(*TableView)
-			switch de.Action {
-			case dnd.Start:
-				tvv.DragNDropStart()
-			case dnd.DropOnTarget:
-				tvv.DragNDropTarget(de)
-			case dnd.DropFmSource:
-				tvv.DragNDropSource(de)
-			}
-		})
-	}
 }

@@ -262,8 +262,8 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 	sv.SelectedIdx = initRow
 	sv.SetSlice(slcOfStru, nil)
 
-	sv.TableViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(TableViewDoubleClicked) {
+	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(SliceViewDoubleClicked) {
 			ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
 			ddlg.Accept()
 		}
@@ -314,6 +314,7 @@ func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 			widg.SetProp("font-weight", (finf)[row].Weight)
 			widg.SetProp("font-style", (finf)[row].Style)
 			widg.SetProp("font-size", units.NewPt(float32(FontChooserSize)))
+			widg.AsNode2D().SetFullReRender()
 		}
 	}
 }

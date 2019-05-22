@@ -321,7 +321,6 @@ func (sb *SpinBox) Style2D() {
 
 func (sb *SpinBox) Size2D(iter int) {
 	sb.Size2DParts(iter)
-	sb.ConfigParts()
 }
 
 func (sb *SpinBox) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -337,7 +336,6 @@ func (sb *SpinBox) Render2D() {
 	}
 	if sb.PushBounds() {
 		sb.This().(Node2D).ConnectEvents2D()
-		// sb.Sty = sb.StateStyles[sb.State] // get current styles
 		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
 		tf.SetSelectedState(sb.IsSelected())
 		sb.ConfigPartsIfNeeded()

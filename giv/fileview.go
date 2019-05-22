@@ -167,6 +167,9 @@ func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 	if ok {
 		wi := widg.AsNode2D()
 		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
+			if _, err := wi.PropTry("color"); err != nil {
+				wi.SetFullReRender()
+			}
 			wi.SetProp("color", clr)
 			return
 		}
@@ -175,9 +178,15 @@ func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 			fn := finf[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
 			if _, has := fv.ExtMap[ext]; has {
+				if _, err := wi.PropTry("color"); err != nil {
+					wi.SetFullReRender()
+				}
 				wi.SetProp("color", "pref(link)")
 				return
 			}
+		}
+		if _, err := wi.PropTry("color"); err == nil {
+			wi.SetFullReRender()
 		}
 		wi.DeleteProp("color")
 	}
@@ -289,7 +298,7 @@ func (fv *FileView) ConfigPathRow() {
 }
 
 func (fv *FileView) ConfigFilesRow() {
-	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
+	fr := fv.FilesRow()
 	fr.SetStretchMaxHeight()
 	fr.SetStretchMaxWidth()
 	fr.Lay = gi.LayoutHoriz
@@ -345,8 +354,8 @@ func (fv *FileView) ConfigFilesRow() {
 			fvv.FileSelectAction(svv.SelectedIdx)
 		}
 	})
-	sv.TableViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(TableViewDoubleClicked) {
+	sv.SliceViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(SliceViewDoubleClicked) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.SelectFile()
 		}
@@ -354,7 +363,7 @@ func (fv *FileView) ConfigFilesRow() {
 }
 
 func (fv *FileView) ConfigSelRow() {
-	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
+	sr := fv.SelRow()
 	sr.Lay = gi.LayoutHoriz
 	sr.SetProp("spacing", units.NewPx(4))
 	sr.SetStretchMaxWidth()
@@ -403,28 +412,32 @@ func (fv *FileView) PathField() *gi.ComboBox {
 	return pr.ChildByName("path", 1).(*gi.ComboBox)
 }
 
+func (fv *FileView) FilesRow() *gi.Layout {
+	return fv.ChildByName("files-row", 2).(*gi.Layout)
+}
+
 // FavsView returns the TableView of the favorites
 func (fv *FileView) FavsView() *TableView {
-	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
-	return fr.ChildByName("favs-view", 1).(*TableView)
+	return fv.FilesRow().ChildByName("favs-view", 1).(*TableView)
 }
 
 // FilesView returns the TableView of the files
 func (fv *FileView) FilesView() *TableView {
-	fr := fv.ChildByName("files-row", 2).(*gi.Layout)
-	return fr.ChildByName("files-view", 1).(*TableView)
+	return fv.FilesRow().ChildByName("files-view", 1).(*TableView)
+}
+
+func (fv *FileView) SelRow() *gi.Layout {
+	return fv.ChildByName("sel-row", 4).(*gi.Layout)
 }
 
 // SelField returns the TextField of the selected file
 func (fv *FileView) SelField() *gi.TextField {
-	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
-	return sr.ChildByName("sel", 1).(*gi.TextField)
+	return fv.SelRow().ChildByName("sel", 1).(*gi.TextField)
 }
 
 // ExtField returns the TextField of the extension
 func (fv *FileView) ExtField() *gi.TextField {
-	sr := fv.ChildByName("sel-row", 4).(*gi.Layout)
-	return sr.ChildByName("ext", 2).(*gi.TextField)
+	return fv.SelRow().ChildByName("ext", 2).(*gi.TextField)
 }
 
 // UpdatePath ensures that path is in abs form and ready to be used..
@@ -517,7 +530,11 @@ func (fv *FileView) UpdateFiles() {
 		return nil
 	})
 
+	fvv := fv.FavsView()
+	fvv.ResetSelectedIdxs()
+
 	sv := fv.FilesView()
+	sv.ResetSelectedIdxs()
 	sv.SelField = "Name"
 	sv.SelVal = fv.SelFile
 	if !sv.IsConfiged() {
@@ -534,7 +551,7 @@ func (fv *FileView) UpdateFiles() {
 // UpdateFavs updates list of files and other views for current path
 func (fv *FileView) UpdateFavs() {
 	sv := fv.FavsView()
-	sv.Config()
+	sv.UpdateSliceGrid()
 }
 
 // AddPathToFavs adds the current path to favorites
