@@ -221,7 +221,7 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Action, "path-ref")
 	config.Add(gi.KiT_Action, "path-fav")
 	config.Add(gi.KiT_Action, "new-folder")
-	mods, updt := pr.ConfigChildren(config, false) // already covered by parent update
+	mods, updt := pr.ConfigChildren(config, true) // already covered by parent update
 	if mods {
 		pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
 		pl.Text = "Path:"
@@ -305,7 +305,7 @@ func (fv *FileView) ConfigFilesRow() {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TableView, "favs-view")
 	config.Add(KiT_TableView, "files-view")
-	fr.ConfigChildren(config, false) // already covered by parent update
+	fr.ConfigChildren(config, true) // already covered by parent update
 
 	sv := fv.FavsView()
 	sv.CSS = ki.Props{
@@ -372,7 +372,7 @@ func (fv *FileView) ConfigSelRow() {
 	config.Add(gi.KiT_TextField, "sel")
 	config.Add(gi.KiT_Label, "ext-lbl")
 	config.Add(gi.KiT_TextField, "ext")
-	sr.ConfigChildren(config, false) // already covered by parent update
+	sr.ConfigChildren(config, true) // already covered by parent update
 
 	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"

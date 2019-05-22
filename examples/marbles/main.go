@@ -15,6 +15,8 @@ import (
 )
 
 var Vp *gi.Viewport2D
+var EqTable *giv.TableView
+var ParamsEdit *giv.StructView
 var SvgGraph *svg.SVG
 var SvgLines *svg.Group
 var SvgMarbles *svg.Group
@@ -71,10 +73,12 @@ func mainrun() {
 	gstru.Viewport = Vp // needs vp early for toolbar
 	gstru.SetProp("height", "4.5em")
 	gstru.SetStruct(&Gr, nil)
+	ParamsEdit = gstru
 
 	lns := giv.AddNewTableView(mfr, "lns")
 	lns.Viewport = Vp
 	lns.SetSlice(&Gr.Lines, nil)
+	EqTable = lns
 
 	frame := gi.AddNewFrame(mfr, "frame", gi.LayoutHoriz)
 

@@ -168,7 +168,7 @@ func (tv *TableView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "frame")
-	mods, updt := tv.ConfigChildren(config, false)
+	mods, updt := tv.ConfigChildren(config, true)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
 	if mods {
@@ -290,7 +290,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		hcfg.Add(gi.KiT_Label, "head-add")
 		hcfg.Add(gi.KiT_Label, "head-del")
 	}
-	sgh.ConfigChildren(hcfg, false)
+	sgh.ConfigChildren(hcfg, false) // headers SHOULD be unique, but with labels..
 
 	// at this point, we make one dummy row to get size of widgets
 

@@ -61,7 +61,7 @@ func (cv *ColorView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Layout, "slider-lay")
 	config.Add(gi.KiT_Layout, "num-lay")
-	mods, updt := cv.ConfigChildren(config, false)
+	mods, updt := cv.ConfigChildren(config, true)
 	if mods {
 		cv.SliderLayConfig()
 		cv.NumLayConfig()
@@ -79,7 +79,7 @@ func (cv *ColorView) SliderLayConfig() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Frame, "value")
 	config.Add(gi.KiT_Layout, "slider-grid")
-	mods, updt := vl.ConfigChildren(config, false)
+	mods, updt := vl.ConfigChildren(config, true)
 	v := cv.Value()
 	if mods {
 		cv.ConfigSliderGrid()
@@ -250,7 +250,7 @@ func (cv *ColorView) ConfigSliderGrid() {
 	config.Add(gi.KiT_Slider, "light")
 	config.Add(gi.KiT_Label, "alab")
 	config.Add(gi.KiT_Slider, "alpha")
-	mods, updt := sg.ConfigChildren(config, false)
+	mods, updt := sg.ConfigChildren(config, true)
 	if mods {
 		cv.ConfigLabel(sg.ChildByName("rlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Red:")
 		cv.ConfigLabel(sg.ChildByName("blab", 0).Embed(gi.KiT_Label).(*gi.Label), "Blue")
