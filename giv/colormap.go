@@ -194,22 +194,15 @@ func (cv *ColorMapView) RenderColorMap() {
 	if inc < 2 {
 		inc = 2
 	}
+	sr := sz
+	pr := pos
+	sp := pr.Dim(cv.Orient)
+	sr.SetDim(cv.Orient, inc)
 	for p := float32(0); p < lsz; p += inc {
 		val := p / (lsz - 1)
 		clr := cv.Map.Map(float64(val))
-		if cv.Orient == gi.X {
-			pr := pos
-			pr.X += p
-			sr := sz
-			sr.X = inc
-			pc.FillBoxColor(rs, pr, sr, clr)
-		} else {
-			pr := pos
-			pr.Y += p
-			sr := sz
-			sr.Y = inc
-			pc.FillBoxColor(rs, pr, sr, clr)
-		}
+		pr.SetDim(cv.Orient, sp+p)
+		pc.FillBoxColor(rs, pr, sr, clr)
 	}
 	rs.Unlock()
 }

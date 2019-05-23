@@ -45,9 +45,8 @@ type SliceViewer interface {
 	// RowWidgetNs returns number of widgets per row and offset for index label
 	RowWidgetNs() (nWidgPerRow, idxOff int)
 
-	// SliceValueSize returns the reflect.Value and size of the slice
-	// sets SliceSize always to current size
-	SliceValueSize() (reflect.Value, int)
+	// SliceSize returns the current size of the slice and sets SliceSize
+	UpdtSliceSize() int
 
 	// LayoutSliceGrid does the proper layout of slice grid depending on allocated size
 	// returns true if UpdateSliceGrid should be called after this
@@ -58,14 +57,6 @@ type SliceViewer interface {
 
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(svnp reflect.Value, widg gi.Node2D, idx, fidx int, vv ValueView)
-
-	// SliceNewAt inserts a new blank element at given index in the slice -- -1
-	// means the end
-	SliceNewAt(idx int)
-
-	// SliceDeleteAt deletes element at given index from slice
-	// if updt is true, then update the grid after
-	SliceDeleteAt(idx int, updt bool)
 
 	// RowFirstWidget returns the first widget for given row (could be index or
 	// not) -- false if out of range
@@ -78,6 +69,20 @@ type SliceViewer interface {
 
 	// SelectRowWidgets sets the selection state of given row of widgets
 	SelectRowWidgets(row int, sel bool)
+
+	// SliceNewAt inserts a new blank element at given index in the slice -- -1
+	// means the end
+	SliceNewAt(idx int)
+
+	// SliceDeleteAt deletes element at given index from slice
+	// if updt is true, then update the grid after
+	SliceDeleteAt(idx int, updt bool)
+
+	// PasteAssign assigns mime data (only the first one!) to this idx
+	PasteAssign(md mimedata.Mimes, idx int)
+
+	// PasteAtIdx inserts object(s) from mime data at (before) given slice index
+	PasteAtIdx(md mimedata.Mimes, idx int)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +97,7 @@ type SliceViewer interface {
 type SliceViewBase struct {
 	gi.Frame
 	Slice            interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	SliceNPVal       reflect.Value    `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
 	SliceValView     ValueView        `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	isArray          bool             `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
 	AddOnly          bool             `desc:"can the user delete elements of the slice"`
@@ -116,10 +122,10 @@ type SliceViewBase struct {
 	StartIdx     int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
 	RowHeight    float32 `view:"inactive" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
 	VisRows      int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
-	layoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
-	renderedRows int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
-	inFocusGrab  bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
-	curIdx       int     `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
+	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
+	RenderedRows int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
+	InFocusGrab  bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
+	CurIdx       int     `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
 }
 
 var KiT_SliceViewBase = kit.Types.AddType(&SliceViewBase{}, nil)
@@ -151,6 +157,7 @@ func (sv *SliceViewBase) SetSlice(sl interface{}, tmpSave ValueView) {
 		updt = sv.UpdateStart()
 		sv.StartIdx = 0
 		sv.Slice = sl
+		sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice))
 		sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		if !sv.IsInactive() {
 			sv.SelectedIdx = -1
@@ -272,13 +279,11 @@ func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	return
 }
 
-// SliceValueSize returns the reflect.Value and size of the slice
-// sets SliceSize always to current size
-func (sv *SliceViewBase) SliceValueSize() (reflect.Value, int) {
-	svnp := kit.NonPtrValue(reflect.ValueOf(sv.Slice))
-	sz := svnp.Len()
+// UpdtSliceSize updates and returns the size of the slice and sets SliceSize
+func (sv *SliceViewBase) UpdtSliceSize() int {
+	sz := sv.SliceNPVal.Len()
 	sv.SliceSize = sz
-	return svnp, sz
+	return sz
 }
 
 // ConfigSliceGrid configures the SliceGrid for the current slice
@@ -302,7 +307,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
-	svnp, sz := sv.This().(SliceViewer).SliceValueSize()
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		return
 	}
@@ -311,7 +316,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg.Kids = make(ki.Slice, nWidgPerRow)
 
 	// at this point, we make one dummy row to get size of widgets
-	val := kit.OnePtrUnderlyingValue(svnp.Index(0)) // deal with pointer lists
+	val := kit.OnePtrUnderlyingValue(sv.SliceNPVal.Index(0)) // deal with pointer lists
 	vv := ToValueView(val.Interface(), "")
 	if vv == nil { // shouldn't happen
 		return
@@ -421,14 +426,14 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sg.DeleteChildren(true)
 		return false
 	}
-	_, sz := sv.This().(SliceViewer).SliceValueSize()
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		sg.DeleteChildren(true)
 		return false
 	}
 
 	sgHt := sv.AvailHeight()
-	sv.layoutHeight = sgHt
+	sv.LayoutHeight = sgHt
 	if sgHt == 0 {
 		return false
 	}
@@ -454,10 +459,10 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 
 func (sv *SliceViewBase) SliceGridNeedsLayout() bool {
 	sgHt := sv.AvailHeight()
-	if sgHt != sv.layoutHeight {
+	if sgHt != sv.LayoutHeight {
 		return true
 	}
-	return sv.renderedRows != sv.DispRows
+	return sv.RenderedRows != sv.DispRows
 }
 
 // UpdateSliceGrid updates grid display -- robust to any time calling
@@ -465,7 +470,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
-	svnp, sz := sv.This().(SliceViewer).SliceValueSize()
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		return
 	}
@@ -502,7 +507,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		ridx := i * nWidgPerRow
 		si := sv.StartIdx + i // slice idx
 		issel := sv.IdxIsSelected(si)
-		val := kit.OnePtrUnderlyingValue(svnp.Index(si)) // deal with pointer lists
+		val := kit.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 		var vv ValueView
 		if sv.Values[i] == nil {
 			vv = ToValueView(val.Interface(), "")
@@ -546,7 +551,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		var widg gi.Node2D
 		if sg.Kids[ridx+idxOff] != nil {
 			widg = sg.Kids[ridx+idxOff].(gi.Node2D)
-			vv.ConfigWidget(widg) // note: need config b/c vv is new
+			vv.UpdateWidget()
 			if sv.IsInactive() {
 				widg.AsNode2D().SetInactive()
 			}
@@ -616,7 +621,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				}
 			}
 		}
-		sv.This().(SliceViewer).StyleRow(svnp, widg, si, 0, vv)
+		sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 	}
 	if sv.SelVal != nil {
 		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
@@ -657,7 +662,9 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	slptr := sltyp.Kind() == reflect.Ptr
 
 	svl := reflect.ValueOf(sv.Slice)
-	svnp, sz := sv.This().(SliceViewer).SliceValueSize()
+	sz := sv.SliceSize
+
+	svnp := sv.SliceNPVal
 
 	if iski && sv.SliceValView != nil {
 		vvb := sv.SliceValView.AsValueViewBase()
@@ -693,6 +700,8 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		}
 		svl.Elem().Set(svnp)
 	}
+
+	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
@@ -790,7 +799,7 @@ func (sv *SliceViewBase) Render2D() {
 		// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
 		// as we don't yet know the size of grid -- so we catch it here at next step and just
 		// rebuild as needed.
-		sv.renderedRows = sv.DispRows
+		sv.RenderedRows = sv.DispRows
 		if sv.This().(SliceViewer).LayoutSliceGrid() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
 		}
@@ -831,12 +840,11 @@ func (sv *SliceViewBase) HasFocus2D() bool {
 
 // SliceVal returns value interface at given slice index
 func (sv *SliceViewBase) SliceVal(idx int) interface{} {
-	svnp, sz := sv.This().(SliceViewer).SliceValueSize()
-	if idx < 0 || idx >= sz {
+	if idx < 0 || idx >= sv.SliceSize {
 		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := kit.OnePtrUnderlyingValue(svnp.Index(idx)) // deal with pointer lists
+	val := kit.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }
@@ -870,7 +878,7 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
 func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
-	if !sv.IsRowInBounds(row) || sv.inFocusGrab { // range check
+	if !sv.IsRowInBounds(row) || sv.InFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
@@ -880,9 +888,9 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	if widg.HasFocus() {
 		return widg
 	}
-	sv.inFocusGrab = true
+	sv.InFocusGrab = true
 	widg.GrabFocus()
-	sv.inFocusGrab = false
+	sv.InFocusGrab = false
 	return widg
 }
 
@@ -1352,8 +1360,7 @@ func (sv *SliceViewBase) MimeDataIdx(md *mimedata.Mimes, idx int) {
 
 // FromMimeData creates a slice of structs from mime data
 func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []interface{} {
-	svnp, _ := sv.This().(SliceViewer).SliceValueSize()
-	svtyp := svnp.Type()
+	svtyp := sv.SliceNPVal.Type()
 	sl := make([]interface{}, 0, len(md))
 	for _, d := range md {
 		if d.Type == filecat.DataJson {
@@ -1446,18 +1453,18 @@ func (sv *SliceViewBase) CutIdxs() {
 	}
 }
 
-// Paste pastes clipboard at curIdx
+// Paste pastes clipboard at CurIdx
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
 	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
-		sv.PasteMenu(md, sv.curIdx)
+		sv.PasteMenu(md, sv.CurIdx)
 	}
 }
 
 // PasteIdx pastes clipboard at given idx
 func (sv *SliceViewBase) PasteIdx(idx int) {
-	sv.curIdx = idx
+	sv.CurIdx = idx
 	if cpr, ok := sv.This().(gi.Clipper); ok { // should always be true, but justin case..
 		cpr.Paste()
 	} else {
@@ -1472,15 +1479,15 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data interface{}, idx int) {
 	}
 	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
-		svv.PasteAssign(data.(mimedata.Mimes), idx)
+		svv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
-		svv.PasteAtIdx(data.(mimedata.Mimes), idx)
+		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
 	})
 	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
-		svv.PasteAtIdx(data.(mimedata.Mimes), idx+1)
+		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
 	})
 	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	})
@@ -1498,15 +1505,13 @@ func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 
 // PasteAssign assigns mime data (only the first one!) to this idx
 func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
-	svnp, _ := sv.This().(SliceViewer).SliceValueSize()
-
 	sl := sv.FromMimeData(md)
 	updt := sv.UpdateStart()
 	if len(sl) == 0 {
 		return
 	}
 	ns := sl[0]
-	svnp.Index(idx).Set(reflect.ValueOf(ns).Elem())
+	sv.SliceNPVal.Index(idx).Set(reflect.ValueOf(ns).Elem())
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
@@ -1517,11 +1522,12 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 
 // PasteAtIdx inserts object(s) from mime data at (before) given slice index
 func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
-	svnp, _ := sv.This().(SliceViewer).SliceValueSize()
 	svl := reflect.ValueOf(sv.Slice)
 
 	wupdt := sv.Viewport.Win.UpdateStart()
 	defer sv.Viewport.Win.UpdateEnd(wupdt)
+
+	svnp := sv.SliceNPVal
 
 	sl := sv.FromMimeData(md)
 	updt := sv.UpdateStart()
@@ -1536,6 +1542,9 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 		}
 		idx++
 	}
+
+	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
@@ -1556,7 +1565,7 @@ func (sv *SliceViewBase) Duplicate() int {
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
 	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
-	sv.PasteAtIdx(md, pasteAt)
+	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
 
@@ -1593,7 +1602,7 @@ func (sv *SliceViewBase) DragNDropTarget(de *dnd.Event) {
 	idx, ok := sv.IdxFromPos(de.Where.Y)
 	if ok {
 		de.SetProcessed()
-		sv.curIdx = idx
+		sv.CurIdx = idx
 		if dpr, ok := sv.This().(gi.DragNDropper); ok {
 			dpr.Drop(de.Data, de.Mod)
 		} else {
@@ -1637,15 +1646,15 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data interface{}, mod dnd.Drop
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
-	sv.MakeDropMenu(&men, md, mod, sv.curIdx)
-	pos := sv.IdxPos(sv.curIdx)
+	sv.MakeDropMenu(&men, md, mod, sv.CurIdx)
+	pos := sv.IdxPos(sv.CurIdx)
 	gi.PopupMenu(men, pos.X, pos.Y, sv.Viewport, "svDropMenu")
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
 func (sv *SliceViewBase) DropAssign(md mimedata.Mimes, idx int) {
 	sv.DraggedIdxs = nil
-	sv.PasteAssign(md, idx)
+	sv.This().(SliceViewer).PasteAssign(md, idx)
 	sv.DragNDropFinalize(dnd.DropCopy)
 }
 
@@ -1703,14 +1712,14 @@ func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 // DropBefore inserts object(s) from mime data before this node
 func (sv *SliceViewBase) DropBefore(md mimedata.Mimes, mod dnd.DropMods, idx int) {
 	sv.SaveDraggedIdxs(idx)
-	sv.PasteAtIdx(md, idx)
+	sv.This().(SliceViewer).PasteAtIdx(md, idx)
 	sv.DragNDropFinalize(mod)
 }
 
 // DropAfter inserts object(s) from mime data after this node
 func (sv *SliceViewBase) DropAfter(md mimedata.Mimes, mod dnd.DropMods, idx int) {
 	sv.SaveDraggedIdxs(idx + 1)
-	sv.PasteAtIdx(md, idx+1)
+	sv.This().(SliceViewer).PasteAtIdx(md, idx+1)
 	sv.DragNDropFinalize(mod)
 }
 

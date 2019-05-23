@@ -26,7 +26,6 @@ import (
 // * popup menu option -- when user does right-mouse on item, a provided func is called
 //   -- use in fileview
 // * could have a native context menu for add / delete etc.
-// * emit TableViewSigs
 
 // TableView represents a slice-of-structs as a table, where the fields are
 // the columns, within an overall frame.  It has two modes, determined by
@@ -87,13 +86,14 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 			return
 		}
 		tv.Slice = sl
+		tv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(tv.Slice))
 		struTyp := tv.StructType()
 		if struTyp.Kind() != reflect.Struct {
 			log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
 			return
 		}
 		updt = tv.UpdateStart()
-		tv.SelectedIdxs = make(map[int]struct{})
+		tv.ResetSelectedIdxs()
 		tv.SelectMode = false
 		tv.SetFullReRender()
 	}
@@ -232,7 +232,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	tv.CacheVisFields()
 
-	svnp, sz := tv.SliceValueSize()
+	sz := tv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		return
 	}
@@ -333,7 +333,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			tvv.SortSliceAction(fldIdx)
 		})
 
-		val := kit.OnePtrUnderlyingValue(svnp.Index(0)) // deal with pointer lists
+		val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
 		stru := val.Interface()
 		fval := val.Elem().Field(field.Index[0])
 		vv := ToValueView(fval.Interface(), "")
@@ -384,14 +384,14 @@ func (tv *TableView) LayoutSliceGrid() bool {
 		sg.DeleteChildren(true)
 		return false
 	}
-	_, sz := tv.SliceValueSize()
+	sz := tv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		sg.DeleteChildren(true)
 		return false
 	}
 
 	sgHt := tv.AvailHeight()
-	tv.layoutHeight = sgHt
+	tv.LayoutHeight = sgHt
 	if sgHt == 0 {
 		return false
 	}
@@ -447,7 +447,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	if kit.IfaceIsNil(tv.Slice) {
 		return
 	}
-	svnp, sz := tv.SliceValueSize()
+	sz := tv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		return
 	}
@@ -484,7 +484,7 @@ func (tv *TableView) UpdateSliceGrid() {
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx
 		issel := tv.IdxIsSelected(si)
-		val := kit.OnePtrUnderlyingValue(svnp.Index(si)) // deal with pointer lists
+		val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 		stru := val.Interface()
 
 		itxt := fmt.Sprintf("%05d", i)
@@ -535,7 +535,6 @@ func (tv *TableView) UpdateSliceGrid() {
 			if sg.Kids[cidx] != nil {
 				widg = sg.Kids[cidx].(gi.Node2D)
 				vv.UpdateWidget()
-				// vv.ConfigWidget(widg) // note: need config b/c vv is new
 				if tv.IsInactive() {
 					widg.AsNode2D().SetInactive()
 				}
@@ -555,7 +554,7 @@ func (tv *TableView) UpdateSliceGrid() {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("tv-row").(int)
 							tvv := recv.Embed(KiT_TableView).(*TableView)
-							if sig != int64(gi.WidgetFocused) || !tvv.inFocusGrab {
+							if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
 								tvv.UpdateSelectRow(row, wbb.IsSelected())
 							}
 						}
@@ -572,7 +571,7 @@ func (tv *TableView) UpdateSliceGrid() {
 						})
 				}
 			}
-			tv.This().(SliceViewer).StyleRow(svnp, widg, si, fli, vv)
+			tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
 		}
 
 		if !tv.IsInactive() {
@@ -815,7 +814,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
 func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
-	if !tv.IsRowInBounds(row) || tv.inFocusGrab { // range check
+	if !tv.IsRowInBounds(row) || tv.InFocusGrab { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -828,8 +827,8 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 			return widg
 		}
 	}
-	tv.inFocusGrab = true
-	defer func() { tv.inFocusGrab = false }()
+	tv.InFocusGrab = true
+	defer func() { tv.InFocusGrab = false }()
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
 		if widg.CanFocus() {

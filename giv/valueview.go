@@ -21,6 +21,41 @@ import (
 
 func init() {
 	gi.TheViewIFace = &ViewIFace{}
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.IconName(""))), func() ValueView {
+		vv := &IconValueView{}
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() ValueView {
+		vv := &FontValueView{}
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() ValueView {
+		vv := &FileValueView{}
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() ValueView {
+		vv := &KeyMapValueView{}
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() ValueView {
+		vv := &ColorNameValueView{}
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(key.Chord(""))), func() ValueView {
+		vv := &KeyChordValueView{}
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(histyle.StyleName(""))), func() ValueView {
+		vv := &HiStyleValueView{}
+		vv.Init(vv)
+		return vv
+	})
 }
 
 // MapInlineLen is the number of map elements at or below which an inline
@@ -36,7 +71,7 @@ var StructInlineLen = 6
 var SliceInlineLen = 6
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  ValueView -- an interface for representing values (e.g., fields) in Views
+//  ValueViewer -- an interface for selecting ValueView GUI representation of types
 
 // ValueViewer interface supplies the appropriate type of ValueView -- called
 // on a given receiver item if defined for that receiver type (tries both
@@ -64,6 +99,32 @@ type ValueViewer interface {
 // the default ToValueView result
 type FieldValueViewer interface {
 	FieldValueView(field string, fval interface{}) ValueView
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  ValueViewMap -- alternative way to connect value view with type
+
+// ValueViewFunc is a function that returns a new initialized ValueView
+// of an appropriate type as registered in the ValueViewMap
+type ValueViewFunc func() ValueView
+
+// The ValueViewMap is used to connect type names with corresponding ValueView
+// representations of those types -- this can be used when it is not possible
+// to use the ValueViewer interface (e.g., interface methods can only be
+// defined within the package that defines the type -- so we need this for
+// all types in gi which don't know about giv).
+// You must use kit.LongTypeName (full package name + "." . type name) for
+// the type name, as that is how it will be looked up.
+var ValueViewMap map[string]ValueViewFunc
+
+// ValueViewMapAdd adds a ValueViewFunc for a given type name.
+// You must use kit.LongTypeName (full package name + "." . type name) for
+// the type name, as that is how it will be looked up.
+func ValueViewMapAdd(typeNm string, fun ValueViewFunc) {
+	if ValueViewMap == nil {
+		ValueViewMap = make(map[string]ValueViewFunc)
+	}
+	ValueViewMap[typeNm] = fun
 }
 
 // ToValueView returns the appropriate ValueView for given item, based only on
@@ -98,40 +159,10 @@ func ToValueView(it interface{}, tags string) ValueView {
 	vk := typ.Kind()
 	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
 
-	if nptyp == reflect.TypeOf(gi.IconName("")) {
-		vv := IconValueView{}
-		vv.Init(&vv)
-		return &vv
-	}
-	if nptyp == reflect.TypeOf(gi.FontName("")) {
-		vv := FontValueView{}
-		vv.Init(&vv)
-		return &vv
-	}
-	if nptyp == reflect.TypeOf(gi.FileName("")) {
-		vv := FileValueView{}
-		vv.Init(&vv)
-		return &vv
-	}
-	if nptyp == reflect.TypeOf(gi.KeyMapName("")) {
-		vv := KeyMapValueView{}
-		vv.Init(&vv)
-		return &vv
-	}
-	if nptyp == reflect.TypeOf(gi.ColorName("")) {
-		vv := ColorNameValueView{}
-		vv.Init(&vv)
-		return &vv
-	}
-	if nptyp == reflect.TypeOf(key.Chord("")) {
-		vv := KeyChordValueView{}
-		vv.Init(&vv)
-		return &vv
-	}
-	if nptyp == reflect.TypeOf(histyle.StyleName("")) {
-		vv := HiStyleValueView{}
-		vv.Init(&vv)
-		return &vv
+	nptypnm := kit.LongTypeName(nptyp)
+	if vvf, has := ValueViewMap[nptypnm]; has {
+		vv := vvf()
+		return vv
 	}
 
 	forceInline := false
@@ -162,44 +193,44 @@ func ToValueView(it interface{}, tags string) ValueView {
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
 		if kit.Enums.TypeRegistered(nptyp) { // todo: bitfield
-			vv := EnumValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &EnumValueView{}
+			vv.Init(vv)
+			return vv
 		} else if _, ok := it.(fmt.Stringer); ok { // use stringer
-			vv := ValueViewBase{}
-			vv.Init(&vv)
-			return &vv
+			vv := &ValueViewBase{}
+			vv.Init(vv)
+			return vv
 		} else {
-			vv := IntValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &IntValueView{}
+			vv.Init(vv)
+			return vv
 		}
 	case nptyp == reflect.TypeOf(time.Time{}): // todo: could do better..
-		vv := ValueViewBase{}
-		vv.Init(&vv)
-		return &vv
+		vv := &ValueViewBase{}
+		vv.Init(vv)
+		return vv
 	case nptyp == reflect.TypeOf(FileTime{}): // todo: could do better..
-		vv := ValueViewBase{}
-		vv.Init(&vv)
-		return &vv
+		vv := &ValueViewBase{}
+		vv.Init(vv)
+		return vv
 	case vk == reflect.Bool:
-		vv := BoolValueView{}
-		vv.Init(&vv)
-		return &vv
+		vv := &BoolValueView{}
+		vv.Init(vv)
+		return vv
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		vv := FloatValueView{} // handles step, min / max etc
-		vv.Init(&vv)
-		return &vv
+		vv := &FloatValueView{} // handles step, min / max etc
+		vv.Init(vv)
+		return vv
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// todo: special edit with 2 fields..
-		vv := ValueViewBase{}
-		vv.Init(&vv)
-		return &vv
+		vv := &ValueViewBase{}
+		vv.Init(vv)
+		return vv
 	case vk == reflect.Ptr:
 		if ki.IsKi(nptyp) {
-			vv := KiPtrValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &KiPtrValueView{}
+			vv.Init(vv)
+			return vv
 		}
 		if kit.IfaceIsNil(it) {
 			return nil
@@ -219,54 +250,54 @@ func ToValueView(it interface{}, tags string) ValueView {
 		sz := v.Len()
 		eltyp := kit.SliceElType(it)
 		if _, ok := it.([]byte); ok {
-			vv := ByteSliceValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &ByteSliceValueView{}
+			vv.Init(vv)
+			return vv
 		}
 		if _, ok := it.([]rune); ok {
-			vv := RuneSliceValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &RuneSliceValueView{}
+			vv.Init(vv)
+			return vv
 		}
 		isstru := (kit.NonPtrType(eltyp).Kind() == reflect.Struct)
 		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
-			vv := SliceInlineValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &SliceInlineValueView{}
+			vv.Init(vv)
+			return vv
 		} else {
-			vv := SliceValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &SliceValueView{}
+			vv.Init(vv)
+			return vv
 		}
 	case vk == reflect.Map:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
 		sz = kit.MapStructElsN(it)
 		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
-			vv := MapInlineValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &MapInlineValueView{}
+			vv.Init(vv)
+			return vv
 		} else {
-			vv := MapValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &MapValueView{}
+			vv.Init(vv)
+			return vv
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
 		if nptyp == gi.KiT_Color {
-			vv := ColorValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &ColorValueView{}
+			vv.Init(vv)
+			return vv
 		}
 		nfld := kit.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
-			vv := StructInlineValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &StructInlineValueView{}
+			vv.Init(vv)
+			return vv
 		} else {
-			vv := StructValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &StructValueView{}
+			vv.Init(vv)
+			return vv
 		}
 	case vk == reflect.Interface:
 		// note: we never get here -- all interfaces are captured by pointer kind above
@@ -274,15 +305,15 @@ func ToValueView(it interface{}, tags string) ValueView {
 		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
 		switch {
 		case nptyp == reflect.TypeOf((*reflect.Type)(nil)).Elem():
-			vv := TypeValueView{}
-			vv.Init(&vv)
-			return &vv
+			vv := &TypeValueView{}
+			vv.Init(vv)
+			return vv
 		}
 	}
 	// fallback.
-	vv := ValueViewBase{}
-	vv.Init(&vv)
-	return &vv
+	vv := &ValueViewBase{}
+	vv.Init(vv)
+	return vv
 }
 
 // FieldToValueView returns the appropriate ValueView for given field on a
