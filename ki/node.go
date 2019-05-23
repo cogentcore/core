@@ -128,7 +128,7 @@ func (n *Node) InitName(k Ki, name string) {
 // and inserted.
 func (n *Node) ThisCheck() error {
 	if n.This() == nil {
-		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", n.PathUnique())
+		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", n.Nm)
 		log.Print(err)
 		return err
 	}
@@ -392,7 +392,7 @@ func (n *Node) ParentByNameTry(name string) (Ki, error) {
 	if par != nil {
 		return par, nil
 	}
-	return nil, fmt.Errorf("ki %v: Parent name: %v not found", n.PathUnique(), name)
+	return nil, fmt.Errorf("ki %v: Parent name: %v not found", n.Nm, name)
 }
 
 // ParentByType finds parent recursively up hierarchy, by type, and
@@ -422,7 +422,7 @@ func (n *Node) ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error) {
 	if par != nil {
 		return par, nil
 	}
-	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.PathUnique(), t)
+	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.Nm, t)
 }
 
 // HasKiFields returns true if this node has Ki Node fields that are
@@ -492,7 +492,7 @@ func (n *Node) KiFieldByNameTry(name string) (Ki, error) {
 	if fld != nil {
 		return fld, nil
 	}
-	return nil, fmt.Errorf("ki %v: Ki Field named: %v not found", n.PathUnique(), name)
+	return nil, fmt.Errorf("ki %v: Ki Field named: %v not found", n.Nm, name)
 }
 
 // KiFieldOffs returns the uintptr offsets for Ki fields of this Node.
@@ -570,7 +570,7 @@ func (n *Node) IsValidIndex(idx int) error {
 	if idx >= 0 && idx < sz {
 		return nil
 	}
-	return fmt.Errorf("ki %v: invalid index: %v -- len = %v", n.PathUnique(), idx, sz)
+	return fmt.Errorf("ki %v: invalid index: %v -- len = %v", n.Nm, idx, sz)
 }
 
 // Child returns the child at given index -- will panic if index is invalid.
@@ -603,7 +603,7 @@ func (n *Node) ChildByName(name string, startIdx int) Ki {
 func (n *Node) ChildByNameTry(name string, startIdx int) (Ki, error) {
 	idx, ok := n.Kids.IndexByName(name, startIdx)
 	if !ok {
-		return nil, fmt.Errorf("ki %v: child named: %v not found", n.PathUnique(), name)
+		return nil, fmt.Errorf("ki %v: child named: %v not found", n.Nm, name)
 	}
 	return n.Kids[idx], nil
 }
@@ -628,7 +628,7 @@ func (n *Node) ChildByType(t reflect.Type, embeds bool, startIdx int) Ki {
 func (n *Node) ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, error) {
 	idx, ok := n.Kids.IndexByType(t, embeds, startIdx)
 	if !ok {
-		return nil, fmt.Errorf("ki %v: child of type: %t not found", n.PathUnique(), t)
+		return nil, fmt.Errorf("ki %v: child of type: %t not found", n.Nm, t)
 	}
 	return n.Kids[idx], nil
 }
@@ -768,7 +768,7 @@ func (n *Node) FindPathUniqueTry(path string) (Ki, error) {
 	if fk != nil {
 		return fk, nil
 	}
-	return nil, fmt.Errorf("ki %v: element at path: %v not found", n.PathUnique(), path)
+	return nil, fmt.Errorf("ki %v: element at path: %v not found", n.Nm, path)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1133,7 +1133,7 @@ func (n *Node) DeleteChild(child Ki, destroy bool) error {
 	}
 	idx, ok := n.Kids.IndexOf(child, 0)
 	if !ok {
-		return fmt.Errorf("ki %v: child: %v not found", n.PathUnique(), child.PathUnique())
+		return fmt.Errorf("ki %v: child: %v not found", n.Nm, child.PathUnique())
 	}
 	return n.DeleteChildAtIndex(idx, destroy)
 }
@@ -1145,7 +1145,7 @@ func (n *Node) DeleteChild(child Ki, destroy bool) error {
 func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
 	idx, ok := n.Kids.IndexByName(name, 0)
 	if !ok {
-		return nil, fmt.Errorf("ki %v: child named: %v not found", n.PathUnique(), name)
+		return nil, fmt.Errorf("ki %v: child named: %v not found", n.Nm, name)
 	}
 	child := n.Kids[idx]
 	return child, n.DeleteChildAtIndex(idx, destroy)
@@ -1187,7 +1187,7 @@ func (n *Node) Delete(destroy bool) {
 // Destroy calls DisconnectAll to cut all pointers and signal connections,
 // and remove all children and their childrens-children, etc.
 func (n *Node) Destroy() {
-	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.PathUnique(), n.This(), n.This(), len(n.Kids))
+	// fmt.Printf("Destroying: %v %T %p Kids: %v\n", n.Nm, n.This(), n.This(), len(n.Kids))
 	if n.This() == nil { // already dead!
 		return
 	}
@@ -1400,7 +1400,7 @@ func (n *Node) Prop(key string) interface{} {
 func (n *Node) PropTry(key string) (interface{}, error) {
 	v, ok := n.Props[key]
 	if !ok {
-		return v, fmt.Errorf("ki.PropTry, could not find property with key %v on node %v", key, n.PathUnique())
+		return v, fmt.Errorf("ki.PropTry, could not find property with key %v on node %v", key, n.Nm)
 	}
 	return v, nil
 }
@@ -1981,7 +1981,7 @@ func (n *Node) DisconnectAll() {
 func (n *Node) SetField(field string, val interface{}) error {
 	fv := kit.FlatFieldValueByName(n.This(), field)
 	if !fv.IsValid() {
-		return fmt.Errorf("ki.SetField, could not find field %v on node %v", field, n.PathUnique())
+		return fmt.Errorf("ki.SetField, could not find field %v on node %v", field, n.Nm)
 	}
 	updt := n.UpdateStart()
 	var err error
@@ -1992,7 +1992,7 @@ func (n *Node) SetField(field string, val interface{}) error {
 		if kit.SetRobust(kit.PtrValue(fv).Interface(), val) {
 			n.SetFlag(int(FieldUpdated))
 		} else {
-			err = fmt.Errorf("ki.SetField, SetRobust failed to set field %v on node %v to value: %v", field, n.PathUnique(), val)
+			err = fmt.Errorf("ki.SetField, SetRobust failed to set field %v on node %v to value: %v", field, n.Nm, val)
 		}
 	}
 	n.UpdateEnd(updt)
@@ -2034,7 +2034,7 @@ func (n *Node) FieldByNameTry(field string) (interface{}, error) {
 	if fld != nil {
 		return fld, nil
 	}
-	return nil, fmt.Errorf("ki %v: field named: %v not found", n.PathUnique(), field)
+	return nil, fmt.Errorf("ki %v: field named: %v not found", n.Nm, field)
 }
 
 // FieldTag returns given field tag for that field, or empty string if not
