@@ -256,12 +256,18 @@ func (n *Node) UniquifyNames() {
 			sfmt = "%v_%06d"
 		}
 		for i, child := range n.Kids {
+			if child == nil {
+				continue
+			}
 			child.SetUniqueName(fmt.Sprintf(sfmt, child.Name(), i))
 		}
 		return
 	}
 	nmap := make(map[string]int, sz)
 	for i, child := range n.Kids {
+		if child == nil {
+			continue
+		}
 		if len(child.UniqueName()) == 0 {
 			if n.Par != nil {
 				child.SetUniqueName(fmt.Sprintf("%v_%03d", n.Par.UniqueName(), i))
@@ -1159,6 +1165,9 @@ func (n *Node) DeleteChildren(destroy bool) {
 	updt := n.UpdateStart()
 	n.SetFlag(int(ChildrenDeleted))
 	for _, child := range n.Kids {
+		if child == nil {
+			continue
+		}
 		child.SetFlag(int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		child.SetParent(nil)
@@ -1653,9 +1662,9 @@ outer:
 			}
 			if cur.HasChildren() {
 				cur.SetTravState(0, 0) // 0 for no fields
-				nxt := cur.Child(0).This()
-				if nxt != nil {
-					cur = nxt
+				nxt := cur.Child(0)
+				if nxt != nil && nxt.This() != nil {
+					cur = nxt.This()
 					cur.SetTravState(-1, -1)
 					continue
 				}
@@ -1680,9 +1689,9 @@ outer:
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
 				cur.SetTravState(curField, curChild)
-				nxt := cur.Child(curChild).This()
-				if nxt != nil {
-					cur = nxt
+				nxt := cur.Child(curChild)
+				if nxt != nil && nxt.This() != nil {
+					cur = nxt.This()
 					cur.SetTravState(-1, -1)
 					continue outer
 				}
@@ -1734,9 +1743,9 @@ outer:
 			}
 			if cur.HasChildren() {
 				cur.SetTravState(0, 0) // 0 for no fields
-				nxt := cur.Child(0).This()
-				if nxt != nil {
-					cur = nxt
+				nxt := cur.Child(0)
+				if nxt != nil && nxt.This() != nil {
+					cur = nxt.This()
 					cur.SetTravState(-1, -1)
 					continue
 				}
@@ -1761,9 +1770,9 @@ outer:
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
 				cur.SetTravState(curField, curChild)
-				nxt := cur.Child(curChild).This()
-				if nxt != nil {
-					cur = nxt
+				nxt := cur.Child(curChild)
+				if nxt != nil && nxt.This() != nil {
+					cur = nxt.This()
 					cur.SetTravState(-1, -1)
 					continue outer
 				}
@@ -1816,7 +1825,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 				})
 			}
 			for _, k := range *cur.Children() {
-				if k.This() != nil {
+				if k != nil && k.This() != nil {
 					k.SetDepth(depth + 1)
 					queue = append(queue, k)
 				}
@@ -2408,6 +2417,9 @@ func (dm *Deleted) DestroyDeleted() {
 	dm.Dels = dm.Dels[:0]
 	dm.Mu.Unlock()
 	for _, k := range curdels {
+		if k == nil {
+			continue
+		}
 		k.Destroy() // destroy will add to the dels so we need to do this outside of lock
 	}
 }
