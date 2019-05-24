@@ -838,7 +838,7 @@ func (fv *FileView) EditPaths() {
 	tmp := make([]string, len(gi.SavedPaths))
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
-	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, DeleteOnly: true}
+	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, NoAdd: true}
 	SliceViewDialog(fv.Viewport, &tmp, opts,
 		nil, fv, func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.DialogAccepted) {

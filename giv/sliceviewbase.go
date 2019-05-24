@@ -100,8 +100,8 @@ type SliceViewBase struct {
 	SliceNPVal       reflect.Value    `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
 	SliceValView     ValueView        `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	isArray          bool             `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
-	AddOnly          bool             `desc:"can the user delete elements of the slice"`
-	DeleteOnly       bool             `desc:"can the user add elements to the slice"`
+	NoAdd            bool             `desc:"if true, user cannot add elements to the slice"`
+	NoDelete         bool             `desc:"if true, user cannot delete elements from the slice"`
 	ShowViewCtxtMenu bool             `desc:"if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?"`
 	Changed          bool             `desc:"has the slice been edited?"`
 	Values           []ValueView      `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`
@@ -264,10 +264,10 @@ func (sv *SliceViewBase) ToolBar() *gi.ToolBar {
 func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
 	if !sv.IsInactive() && !sv.isArray {
-		if !sv.AddOnly {
+		if !sv.NoAdd {
 			nWidgPerRow += 1
 		}
-		if !sv.DeleteOnly {
+		if !sv.NoDelete {
 			nWidgPerRow += 1
 		}
 	}
@@ -339,14 +339,14 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 
 	if !sv.IsInactive() && !sv.isArray {
 		cidx := idxOff
-		if !sv.DeleteOnly {
+		if !sv.NoAdd {
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
 			cidx += 1
 			sg.SetChild(&addact, cidx, addnm)
 			addact.SetIcon("plus")
 		}
-		if !sv.AddOnly {
+		if !sv.NoDelete {
 			delnm := fmt.Sprintf("del-%v", itxt)
 			delact := gi.Action{}
 			cidx += 1
@@ -585,7 +585,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				})
 				if !sv.isArray {
 					cidx := ridx + idxOff
-					if !sv.DeleteOnly {
+					if !sv.NoAdd {
 						addnm := fmt.Sprintf("add-%v", itxt)
 						addact := gi.Action{}
 						cidx += 1
@@ -602,7 +602,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						})
 					}
 
-					if !sv.AddOnly {
+					if !sv.NoAdd {
 						delnm := fmt.Sprintf("del-%v", itxt)
 						delact := gi.Action{}
 						cidx += 1
@@ -756,7 +756,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < nact {
 		tb.SetStretchMaxWidth()
-		if !sv.isArray && !sv.DeleteOnly {
+		if !sv.isArray && !sv.NoAdd {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
