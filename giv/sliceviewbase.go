@@ -384,7 +384,6 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Dim = gi.Y
 	sb.Defaults()
 	sb.Tracking = true
-	sb.SetFullReRender()
 	if sv.Sty.Layout.ScrollBarWidth.Dots == 0 {
 		sb.SetFixedWidth(units.NewPx(16))
 	} else {
@@ -728,6 +727,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
+	sv.ScrollBar().SetFullReRender()
 	sv.This().(SliceViewer).LayoutSliceGrid()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.ViewSig.Emit(sv.This(), 0, nil)
@@ -756,6 +756,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 	}
 	sv.SetChanged()
 	if doupdt {
+		sv.ScrollBar().SetFullReRender()
 		sv.This().(SliceViewer).LayoutSliceGrid()
 		sv.This().(SliceViewer).UpdateSliceGrid()
 	}

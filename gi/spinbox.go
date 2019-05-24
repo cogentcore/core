@@ -158,13 +158,6 @@ func (sb *SpinBox) IncrValue(steps float32) {
 	sb.SetValueAction(val)
 }
 
-// internal indexes for accessing elements of the widget
-const (
-	sbTextFieldIdx = iota
-	sbSpaceIdx
-	sbButtonsIdx
-)
-
 func (sb *SpinBox) ConfigParts() {
 	if sb.UpIcon.IsNil() {
 		sb.UpIcon = IconName("wedge-up")
@@ -179,55 +172,55 @@ func (sb *SpinBox) ConfigParts() {
 	}
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TextField, "text-field")
-	config.Add(KiT_Space, "space")
-	config.Add(KiT_Layout, "buttons")
+	if !sb.IsInactive() {
+		config.Add(KiT_Space, "space")
+		config.Add(KiT_Layout, "buttons")
+	}
 	mods, updt := sb.Parts.ConfigChildren(config, false)
 	if mods || RebuildDefaultStyles {
-		buts := sb.Parts.Child(sbButtonsIdx).(*Layout)
-		buts.Lay = LayoutVert
-		sb.StylePart(Node2D(buts))
-		buts.SetNChildren(2, KiT_Action, "but")
-		// up
-		up := buts.Child(0).(*Action)
-		up.SetName("up")
-		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
-		// not compiled into style prop
-		up.SetFlagState(sb.IsInactive(), int(Inactive))
-		up.Icon = sb.UpIcon
-		if sb.Sty.Template != "" {
-			up.Sty.Template = sb.Sty.Template + ".up"
-		}
-		sb.StylePart(Node2D(up))
 		if !sb.IsInactive() {
+			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)
+			buts.Lay = LayoutVert
+			sb.StylePart(Node2D(buts))
+			buts.SetNChildren(2, KiT_Action, "but")
+			// up
+			up := buts.Child(0).(*Action)
+			up.SetName("up")
+			up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
+			// not compiled into style prop
+			// up.SetFlagState(sb.IsInactive(), int(Inactive))
+			up.Icon = sb.UpIcon
+			if sb.Sty.Template != "" {
+				up.Sty.Template = sb.Sty.Template + ".up"
+			}
+			sb.StylePart(Node2D(up))
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sbb.IncrValue(1.0)
 			})
-		}
-		// dn
-		dn := buts.Child(1).(*Action)
-		dn.SetFlagState(sb.IsInactive(), int(Inactive))
-		dn.SetName("down")
-		dn.SetProp("no-focus", true)
-		dn.Icon = sb.DownIcon
-		sb.StylePart(Node2D(dn))
-		if sb.Sty.Template != "" {
-			dn.Sty.Template = sb.Sty.Template + ".dn"
-		}
-		if !sb.IsInactive() {
+			// dn
+			dn := buts.Child(1).(*Action)
+			// dn.SetFlagState(sb.IsInactive(), int(Inactive))
+			dn.SetName("down")
+			dn.SetProp("no-focus", true)
+			dn.Icon = sb.DownIcon
+			sb.StylePart(Node2D(dn))
+			if sb.Sty.Template != "" {
+				dn.Sty.Template = sb.Sty.Template + ".dn"
+			}
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 				sbb.IncrValue(-1.0)
 			})
+			// space
+			sp := sb.Parts.ChildByName("space", 2).(*Space)
+			if sb.Sty.Template != "" {
+				sp.Sty.Template = sb.Sty.Template + ".space"
+			}
+			sb.StylePart(sp) // also get the space
 		}
-		// space
-		sp := sb.Parts.Child(sbSpaceIdx).(*Space)
-		if sb.Sty.Template != "" {
-			sp.Sty.Template = sb.Sty.Template + ".space"
-		}
-		sb.StylePart(sb.Parts.Child(sbSpaceIdx).(Node2D)) // also get the space
 		// text-field
-		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
+		tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 		tf.SetFlagState(sb.IsInactive(), int(Inactive))
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
@@ -257,7 +250,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 	if !sb.Parts.HasChildren() {
 		sb.ConfigParts()
 	}
-	tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
+	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	txt := fmt.Sprintf("%g", sb.Value)
 	if tf.Txt != txt {
 		tf.SetText(txt)
@@ -277,7 +270,7 @@ func (sb *SpinBox) MouseScrollEvent() {
 }
 
 func (sb *SpinBox) TextFieldEvent() {
-	tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
+	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
@@ -336,7 +329,7 @@ func (sb *SpinBox) Render2D() {
 	}
 	if sb.PushBounds() {
 		sb.This().(Node2D).ConnectEvents2D()
-		tf := sb.Parts.Child(sbTextFieldIdx).(*TextField)
+		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
 		tf.SetSelectedState(sb.IsSelected())
 		sb.ConfigPartsIfNeeded()
 		sb.Render2DChildren()

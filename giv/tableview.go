@@ -654,6 +654,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
+	tv.ScrollBar().SetFullReRender()
 	tv.This().(SliceViewer).LayoutSliceGrid()
 	tv.This().(SliceViewer).UpdateSliceGrid()
 	tv.ViewSig.Emit(tv.This(), 0, nil)
@@ -678,6 +679,7 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	}
 	tv.SetChanged()
 	if doupdt {
+		tv.ScrollBar().SetFullReRender()
 		tv.This().(SliceViewer).LayoutSliceGrid()
 		tv.This().(SliceViewer).UpdateSliceGrid()
 	}

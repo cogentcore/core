@@ -82,8 +82,8 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 		tynm += ": " + olbl
 	}
 	desc, _ := vv.Tag("desc")
-	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
-	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
+	inact := vv.This().(ValueView).IsInactive()
+	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, recv, dlgFunc)
 	svk := dlg.Frame().ChildByType(KiT_StructView, true, 2)
 	if svk != nil {
 		sv := svk.(*StructView)
@@ -208,10 +208,10 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		log.Printf("giv.SliceValueView: Cannot view slices with non-pointer struct elements\n")
 		return
 	}
+	inact := vv.This().(ValueView).IsInactive()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
-		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
+		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, nil, recv, dlgFunc)
 		svk := dlg.Frame().ChildByType(KiT_TableView, true, 2)
 		if svk != nil {
 			sv := svk.(*TableView)
@@ -223,8 +223,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 			})
 		}
 	} else {
-		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, nil, recv, dlgFunc)
-		dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
+		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, nil, recv, dlgFunc)
 		svk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
 		if svk != nil {
 			sv := svk.(*SliceView)
@@ -338,8 +337,8 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	if olbl != "" {
 		tynm += ": " + olbl
 	}
-	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
-	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
+	inact := vv.This().(ValueView).IsInactive()
+	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, recv, dlgFunc)
 	mvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
 	if mvk != nil {
 		mv := mvk.(*MapView)
@@ -484,8 +483,8 @@ func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	if olbl != "" {
 		tynm += ": " + olbl
 	}
-	dlg := StructViewDialog(vp, k, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave}, recv, dlgFunc)
-	dlg.SetInactiveState(vv.This().(ValueView).IsInactive())
+	inact := vv.This().(ValueView).IsInactive()
+	StructViewDialog(vp, k, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, recv, dlgFunc)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
