@@ -78,6 +78,9 @@ type SliceViewer interface {
 	// if updt is true, then update the grid after
 	SliceDeleteAt(idx int, updt bool)
 
+	// CopySelToMime copies selected rows to mime data
+	CopySelToMime() mimedata.Mimes
+
 	// PasteAssign assigns mime data (only the first one!) to this idx
 	PasteAssign(md mimedata.Mimes, idx int)
 
@@ -340,16 +343,16 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	if !sv.IsInactive() && !sv.isArray {
 		cidx := idxOff
 		if !sv.NoAdd {
+			cidx++
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
-			cidx += 1
 			sg.SetChild(&addact, cidx, addnm)
 			addact.SetIcon("plus")
 		}
 		if !sv.NoDelete {
+			cidx++
 			delnm := fmt.Sprintf("del-%v", itxt)
 			delact := gi.Action{}
-			cidx += 1
 			sg.SetChild(&delact, cidx, delnm)
 
 			delact.SetIcon("minus")
@@ -534,7 +537,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				idxlab.SetProp("slv-row", i) // all sigs deal with disp rows
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.Sty.Template = "SliceViewBase.IndexLabel"
+				idxlab.Sty.Template = "giv.SliceViewBase.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -562,7 +565,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			sg.SetChild(widg, ridx+idxOff, valnm)
 			vv.ConfigWidget(widg)
 			wb := widg.AsWidget()
-			// wb.Sty.Template = "SliceViewBase.ItemWidget." + vtyp.Name()
+			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
 
 			if sv.IsInactive() {
 				widg.AsNode2D().SetInactive()
@@ -587,15 +590,15 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				if !sv.isArray {
 					cidx := ridx + idxOff
 					if !sv.NoAdd {
+						cidx++
 						addnm := fmt.Sprintf("add-%v", itxt)
 						addact := gi.Action{}
-						cidx += 1
 						sg.SetChild(&addact, cidx, addnm)
 
 						addact.SetIcon("plus")
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
-						addact.Sty.Template = "SliceViewBase.AddAction"
+						addact.Sty.Template = "giv.SliceViewBase.AddAction"
 						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -603,16 +606,16 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						})
 					}
 
-					if !sv.NoAdd {
+					if !sv.NoDelete {
+						cidx++
 						delnm := fmt.Sprintf("del-%v", itxt)
 						delact := gi.Action{}
-						cidx += 1
 						sg.SetChild(&delact, cidx, delnm)
 
 						delact.SetIcon("minus")
 						delact.Tooltip = "delete this element"
 						delact.Data = i
-						delact.Sty.Template = "SliceViewBase.DelAction"
+						delact.Sty.Template = "giv.SliceViewBase.DelAction"
 						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 							act := send.(*gi.Action)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -1377,6 +1380,20 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []interface{} {
 	return sl
 }
 
+// CopySelToMime copies selected rows to mime data
+func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
+	nitms := len(sv.SelectedIdxs)
+	if nitms == 0 {
+		return nil
+	}
+	ixs := sv.SelectedIdxsList(false) // ascending
+	md := make(mimedata.Mimes, 0, nitms)
+	for _, i := range ixs {
+		sv.MimeDataIdx(&md, i)
+	}
+	return md
+}
+
 // Copy copies selected rows to clip.Board, optionally resetting the selection
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Copy(reset bool) {
@@ -1384,12 +1401,10 @@ func (sv *SliceViewBase) Copy(reset bool) {
 	if nitms == 0 {
 		return
 	}
-	ixs := sv.SelectedIdxsList(false) // ascending
-	md := make(mimedata.Mimes, 0, nitms)
-	for _, i := range ixs {
-		sv.MimeDataIdx(&md, i)
+	md := sv.This().(SliceViewer).CopySelToMime()
+	if md != nil {
+		oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Write(md)
 	}
-	oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Write(md)
 	if reset {
 		sv.UnselectAllIdxs()
 	}
@@ -1579,11 +1594,8 @@ func (sv *SliceViewBase) DragNDropStart() {
 	if nitms == 0 {
 		return
 	}
+	md := sv.This().(SliceViewer).CopySelToMime()
 	ixs := sv.SelectedIdxsList(false) // ascending
-	md := make(mimedata.Mimes, 0, nitms)
-	for _, i := range ixs {
-		sv.MimeDataIdx(&md, i)
-	}
 	widg, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
 	if ok {
 		bi := &gi.Bitmap{}

@@ -213,7 +213,12 @@ func (tv *TableView) ToolBar() *gi.ToolBar {
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.NVisFields
 	if !tv.IsInactive() {
-		nWidgPerRow += 2
+		if !tv.NoAdd {
+			nWidgPerRow += 1
+		}
+		if !tv.NoDelete {
+			nWidgPerRow += 1
+		}
 	}
 	idxOff = 1
 	if !tv.ShowIndex {
@@ -350,23 +355,26 @@ func (tv *TableView) ConfigSliceGrid() {
 	}
 
 	if !tv.IsInactive() {
+		cidx := tv.NVisFields + idxOff
 		if !tv.NoAdd {
-			lbl := sgh.Child(tv.NVisFields + idxOff).(*gi.Label)
+			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
-			sgf.SetChild(&addact, idxOff+tv.NVisFields, addnm)
+			sgf.SetChild(&addact, cidx, addnm)
 			addact.SetIcon("plus")
+			cidx++
 		}
 		if !tv.NoDelete {
-			lbl := sgh.Child(tv.NVisFields + idxOff + 1).(*gi.Label)
+			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
 			delnm := fmt.Sprintf("del-%v", itxt)
 			delact := gi.Action{}
-			sgf.SetChild(&delact, idxOff+1+tv.NVisFields, delnm)
+			sgf.SetChild(&delact, cidx, delnm)
 			delact.SetIcon("minus")
+			cidx++
 		}
 	}
 
@@ -502,7 +510,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				idxlab.SetProp("tv-row", i)
 				idxlab.Selectable = true
 				idxlab.Redrawable = true
-				idxlab.Sty.Template = "TableView.IndexLabel"
+				idxlab.Sty.Template = "giv.TableView.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Node2D).AsWidget()
@@ -548,7 +556,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				wb := widg.AsWidget()
 				if wb != nil {
 					// totally not worth it now:
-					// wb.Sty.Template = "TableViewView.ItemWidget." + vtyp.Name()
+					// wb.Sty.Template = "giv.TableViewView.ItemWidget." + vtyp.Name()
 					wb.SetProp("tv-row", i)
 					wb.ClearSelected()
 					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -577,36 +585,40 @@ func (tv *TableView) UpdateSliceGrid() {
 		}
 
 		if !tv.IsInactive() {
-			cidx := ridx + 1 + tv.NVisFields
-			if sg.Kids[cidx] == nil {
-				if !tv.NoAdd {
+			cidx := ridx + tv.NVisFields + idxOff
+			if !tv.NoAdd {
+				if sg.Kids[cidx] == nil {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Action{}
 					sg.SetChild(&addact, cidx, addnm)
 					addact.SetIcon("plus")
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
-					addact.Sty.Template = "TableViewView.AddAction"
+					addact.Sty.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
 						tvv.SliceNewAtRow(act.Data.(int) + 1)
 					})
 				}
-				if !tv.NoDelete {
+				cidx++
+			}
+			if !tv.NoDelete {
+				if sg.Kids[cidx] == nil {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Action{}
-					sg.SetChild(&delact, cidx+1, delnm)
+					sg.SetChild(&delact, cidx, delnm)
 					delact.SetIcon("minus")
 					delact.Tooltip = "delete this element"
 					delact.Data = i
-					delact.Sty.Template = "TableView.DelAction"
+					delact.Sty.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 						act := send.(*gi.Action)
 						tvv := recv.Embed(KiT_TableView).(*TableView)
 						tvv.SliceDeleteAtRow(act.Data.(int), true)
 					})
 				}
+				cidx++
 			}
 		}
 	}

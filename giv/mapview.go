@@ -212,11 +212,11 @@ func (mv *MapView) ConfigMapGrid() {
 		vv.ConfigWidget(widg)
 		wb := widg.AsWidget()
 		if wb != nil {
-			wb.Sty.Template = "MapView.ItemWidget." + vv.WidgetType().Name()
+			wb.Sty.Template = "giv.MapView.ItemWidget." + vv.WidgetType().Name()
 		}
 		wb = keyw.AsWidget()
 		if wb != nil {
-			wb.Sty.Template = "MapView.KeyWidget." + kv.WidgetType().Name()
+			wb.Sty.Template = "giv.MapView.KeyWidget." + kv.WidgetType().Name()
 		}
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
@@ -239,7 +239,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delact.SetIcon("minus")
 		delact.Tooltip = "delete item"
 		delact.Data = kv
-		delact.Sty.Template = "MapView.DelAction"
+		delact.Sty.Template = "giv.MapView.DelAction"
 		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			act := send.(*gi.Action)
 			mvv := recv.Embed(KiT_MapView).(*MapView)

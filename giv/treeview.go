@@ -1764,7 +1764,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = gi.LayoutHoriz
-	tv.Parts.Sty.Template = "TreeView.Parts"
+	tv.Parts.Sty.Template = "giv.TreeView.Parts"
 	config := kit.TypeAndNameList{}
 	if tv.HasChildren() {
 		config.Add(gi.KiT_CheckBox, "branch")
@@ -1780,7 +1780,7 @@ func (tv *TreeView) ConfigParts() {
 			wb.SetProp("#icon0", TVBranchProps)
 			wb.SetProp("#icon1", TVBranchProps)
 			wb.SetProp("no-focus", true) // note: cannot be in compiled props
-			wb.Sty.Template = "TreeView.Branch"
+			wb.Sty.Template = "giv.TreeView.Branch"
 			tv.StylePart(gi.Node2D(wb))
 			// unfortunately StylePart only handles default Style obj -- not
 			// these special styles.. todo: fix this somehow
@@ -1808,7 +1808,7 @@ func (tv *TreeView) ConfigParts() {
 	if tv.Icon.IsValid() {
 		if ic, ok := tv.IconPart(); ok {
 			// this only works after a second redraw..
-			// ic.Sty.Template = "TreeView.Icon"
+			// ic.Sty.Template = "giv.TreeView.Icon"
 			if set, _ := ic.SetIcon(string(tv.Icon)); set || tv.NeedsFullReRender() || mods {
 				tv.StylePart(gi.Node2D(ic))
 			}
@@ -1816,7 +1816,7 @@ func (tv *TreeView) ConfigParts() {
 	}
 	if lbl, ok := tv.LabelPart(); ok {
 		// this does not work! even with redraws
-		// lbl.Sty.Template = "TreeView.Label"
+		// lbl.Sty.Template = "giv.TreeView.Label"
 		lbl.SetText(tv.Label())
 		if mods {
 			tv.StylePart(gi.Node2D(lbl))
@@ -1989,7 +1989,7 @@ func (tv *TreeView) Init2D() {
 		tv.Viewport = tv.ParentViewport()
 	}
 	tv.Sty.Defaults()
-	tv.Sty.Template = "TreeView." + tv.Type().Name()
+	tv.Sty.Template = "giv.TreeView." + tv.Type().Name()
 	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	tv.ConnectToViewport()
