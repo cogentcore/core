@@ -350,22 +350,24 @@ func (tv *TableView) ConfigSliceGrid() {
 	}
 
 	if !tv.IsInactive() {
-		lbl := sgh.Child(tv.NVisFields + idxOff).(*gi.Label)
-		lbl.Text = "+"
-		lbl.Tooltip = "insert row"
-		lbl = sgh.Child(tv.NVisFields + idxOff + 1).(*gi.Label)
-		lbl.Text = "-"
-		lbl.Tooltip = "delete row"
-
-		addnm := fmt.Sprintf("add-%v", itxt)
-		delnm := fmt.Sprintf("del-%v", itxt)
-		addact := gi.Action{}
-		delact := gi.Action{}
-		sgf.SetChild(&addact, idxOff+tv.NVisFields, addnm)
-		sgf.SetChild(&delact, idxOff+1+tv.NVisFields, delnm)
-
-		addact.SetIcon("plus")
-		delact.SetIcon("minus")
+		if !tv.NoAdd {
+			lbl := sgh.Child(tv.NVisFields + idxOff).(*gi.Label)
+			lbl.Text = "+"
+			lbl.Tooltip = "insert row"
+			addnm := fmt.Sprintf("add-%v", itxt)
+			addact := gi.Action{}
+			sgf.SetChild(&addact, idxOff+tv.NVisFields, addnm)
+			addact.SetIcon("plus")
+		}
+		if !tv.NoDelete {
+			lbl := sgh.Child(tv.NVisFields + idxOff + 1).(*gi.Label)
+			lbl.Text = "-"
+			lbl.Tooltip = "delete row"
+			delnm := fmt.Sprintf("del-%v", itxt)
+			delact := gi.Action{}
+			sgf.SetChild(&delact, idxOff+1+tv.NVisFields, delnm)
+			delact.SetIcon("minus")
+		}
 	}
 
 	if tv.SortIdx >= 0 {
@@ -577,31 +579,34 @@ func (tv *TableView) UpdateSliceGrid() {
 		if !tv.IsInactive() {
 			cidx := ridx + 1 + tv.NVisFields
 			if sg.Kids[cidx] == nil {
-				addnm := fmt.Sprintf("add-%v", itxt)
-				delnm := fmt.Sprintf("del-%v", itxt)
-				addact := gi.Action{}
-				delact := gi.Action{}
-				sg.SetChild(&addact, cidx, addnm)
-				sg.SetChild(&delact, cidx+1, delnm)
-
-				addact.SetIcon("plus")
-				addact.Tooltip = "insert a new element at this index"
-				addact.Data = i
-				addact.Sty.Template = "TableViewView.AddAction"
-				addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					act := send.(*gi.Action)
-					tvv := recv.Embed(KiT_TableView).(*TableView)
-					tvv.SliceNewAtRow(act.Data.(int) + 1)
-				})
-				delact.SetIcon("minus")
-				delact.Tooltip = "delete this element"
-				delact.Data = i
-				delact.Sty.Template = "TableView.DelAction"
-				delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					act := send.(*gi.Action)
-					tvv := recv.Embed(KiT_TableView).(*TableView)
-					tvv.SliceDeleteAtRow(act.Data.(int), true)
-				})
+				if !tv.NoAdd {
+					addnm := fmt.Sprintf("add-%v", itxt)
+					addact := gi.Action{}
+					sg.SetChild(&addact, cidx, addnm)
+					addact.SetIcon("plus")
+					addact.Tooltip = "insert a new element at this index"
+					addact.Data = i
+					addact.Sty.Template = "TableViewView.AddAction"
+					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						act := send.(*gi.Action)
+						tvv := recv.Embed(KiT_TableView).(*TableView)
+						tvv.SliceNewAtRow(act.Data.(int) + 1)
+					})
+				}
+				if !tv.NoDelete {
+					delnm := fmt.Sprintf("del-%v", itxt)
+					delact := gi.Action{}
+					sg.SetChild(&delact, cidx+1, delnm)
+					delact.SetIcon("minus")
+					delact.Tooltip = "delete this element"
+					delact.Data = i
+					delact.Sty.Template = "TableView.DelAction"
+					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+						act := send.(*gi.Action)
+						tvv := recv.Embed(KiT_TableView).(*TableView)
+						tvv.SliceDeleteAtRow(act.Data.(int), true)
+					})
+				}
 			}
 		}
 	}

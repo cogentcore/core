@@ -364,6 +364,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Dim = gi.Y
 	sb.Defaults()
 	sb.Tracking = true
+	sb.SetFullReRender()
 	if sv.Sty.Layout.ScrollBarWidth.Dots == 0 {
 		sb.SetFixedWidth(units.NewPx(16))
 	} else {
