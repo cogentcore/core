@@ -432,20 +432,21 @@ func (tv *TableView) LayoutHeader() {
 	nfld := tv.NVisFields + idxOff
 	sgh := tv.SliceHeader()
 	sgf := tv.SliceGrid()
+	spc := sgf.Spacing.Dots
 	if len(sgf.Kids) >= nfld {
 		sumwd := float32(0)
 		for fli := 0; fli < nfld; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 			wd := sgf.GridData[gi.Col][fli].AllocSize
-			lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
-			sumwd += wd
+			lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))
+			sumwd += wd + spc
 		}
 		if !tv.IsInactive() {
 			for fli := nfld; fli < nfld+2; fli++ {
 				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 				wd := sgf.GridData[gi.Col][fli].AllocSize
-				lbl.SetMinPrefWidth(units.NewValue(wd-sgf.Spacing.Dots, units.Dot))
-				sumwd += wd
+				lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))
+				sumwd += wd + spc
 			}
 		}
 		sgh.SetMinPrefWidth(units.NewValue(sumwd, units.Dot))
@@ -695,10 +696,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	updt := tv.UpdateStart()
 	sgh := tv.SliceHeader()
 	sgh.SetFullReRender()
-	idxOff := 1
-	if !tv.ShowIndex {
-		idxOff = 0
-	}
+	_, idxOff := tv.RowWidgetNs()
 
 	ascending := true
 

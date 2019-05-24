@@ -29,11 +29,12 @@ import (
 // and the background-color defaults to transparent but can be set to any color.
 type Text2D struct {
 	Object
-	Text      string        `desc:"the text string to display"`
-	Sty       gi.Style      `json:"-" xml:"-" desc:"styling settings for the text"`
-	TxtPos    gi.Vec2D      `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
-	TxtRender gi.TextRender `view:"-" xml:"-" json:"-" desc:"render data for text label"`
-	TxtTex    *TextureBase  `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
+	Text        string         `desc:"the text string to display"`
+	Sty         gi.Style       `json:"-" xml:"-" desc:"styling settings for the text"`
+	TxtPos      gi.Vec2D       `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+	TxtRender   gi.TextRender  `view:"-" xml:"-" json:"-" desc:"render data for text label"`
+	TxtTex      *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
+	RenderState gi.RenderState `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
@@ -149,10 +150,12 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	} else {
 		txt.TxtTex.Tex.SetSize(szpt)
 	}
-	rs := &sc.RenderState
-	rs.Init(szpt.X, szpt.Y, img)
+	rs := &txt.RenderState
+	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
+		rs.Init(szpt.X, szpt.Y, img)
+	}
 	rs.PushBounds(bounds)
-	draw.Draw(rs.Image, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
+	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 	rs.Image = nil

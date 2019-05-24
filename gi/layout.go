@@ -243,6 +243,9 @@ func (ly *Layout) GatherSizes() {
 
 	var sumPref, sumNeed, maxPref, maxNeed Vec2D
 	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -310,6 +313,9 @@ func (ly *Layout) GatherSizesGrid() {
 	sz := len(ly.Kids)
 	// collect overall size
 	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -357,6 +363,9 @@ func (ly *Layout) GatherSizesGrid() {
 	col := 0
 	row := 0
 	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -543,6 +552,9 @@ func (ly *Layout) LayoutSharedDim(dim Dims2D) {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -590,6 +602,9 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 	addSpace := false           // apply extra toward spacing -- for justify
 	if usePref && extra > 0.0 { // have some stretch extra
 		for _, c := range ly.Kids {
+			if c == nil {
+				continue
+			}
 			ni := c.(Node2D).AsWidget()
 			if ni == nil {
 				continue
@@ -604,6 +619,9 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 		}
 	} else if extra > 0.0 { // extra relative to Need
 		for _, c := range ly.Kids {
+			if c == nil {
+				continue
+			}
 			ni := c.(Node2D).AsWidget()
 			if ni == nil {
 				continue
@@ -638,6 +656,9 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 	}
 
 	for i, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -786,6 +807,9 @@ func (ly *Layout) LayoutGrid() {
 	cols := ly.GridSize.X
 	rows := ly.GridSize.Y
 	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -845,6 +869,9 @@ func (ly *Layout) LayoutGrid() {
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = Vec2DZero
 	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
 			continue
@@ -1103,6 +1130,9 @@ func (ly *Layout) Render2DChildren() {
 		// note: all nodes need to render to disconnect b/c of invisible
 	}
 	for _, kid := range ly.Kids {
+		if kid == nil {
+			continue
+		}
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
 			nii.Render2D()
@@ -1353,6 +1383,9 @@ func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
 		return nil, -1
 	}
 	for i, k := range ly.Kids {
+		if k == nil {
+			continue
+		}
 		_, ni := KiToNode2D(k)
 		if ni == nil {
 			continue

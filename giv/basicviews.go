@@ -649,6 +649,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 			sb.Max = maxv
 		}
 	}
+	sb.Step = .1 // smaller default
 	if steptag, ok := vv.Tag("step"); ok {
 		step, ok := kit.ToFloat32(steptag)
 		if ok {

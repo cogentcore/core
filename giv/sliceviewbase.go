@@ -35,6 +35,9 @@ type SliceViewer interface {
 	// AsSliceViewBase returns the base for direct access to relevant fields etc
 	AsSliceViewBase() *SliceViewBase
 
+	// IsConfiged returns true if is fully configured for display
+	IsConfiged() bool
+
 	// SliceGrid returns the SliceGrid grid frame widget, which contains all the
 	// fields and values
 	SliceGrid() *gi.Frame
@@ -86,6 +89,9 @@ type SliceViewer interface {
 
 	// PasteAtIdx inserts object(s) from mime data at (before) given slice index
 	PasteAtIdx(md mimedata.Mimes, idx int)
+
+	// ItemCtxtMenu pulls up the context menu for given slice index
+	ItemCtxtMenu(idx int)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -179,6 +185,17 @@ func (sv *SliceViewBase) SetSlice(sl interface{}, tmpSave ValueView) {
 	}
 	sv.TmpSave = tmpSave
 	sv.Config()
+	sv.UpdateEnd(updt)
+}
+
+// Update is the high-level update display call -- robust to any changes
+func (sv *SliceViewBase) Update() {
+	wupdt := sv.Viewport.Win.UpdateStart()
+	defer sv.Viewport.Win.UpdateEnd(wupdt)
+
+	updt := sv.UpdateStart()
+	sv.This().(SliceViewer).LayoutSliceGrid()
+	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
 }
 
@@ -781,7 +798,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 }
 
 func (sv *SliceViewBase) Style2D() {
-	if !sv.IsConfiged() {
+	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
 	if sv.IsInactive() {
@@ -798,6 +815,9 @@ func (sv *SliceViewBase) Render2D() {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
+	}
+	if !sv.This().(SliceViewer).IsConfiged() {
+		return
 	}
 	if sv.SliceGridNeedsLayout() {
 		// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
@@ -1932,7 +1952,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 				me.SetProcessed()
 			}
 			if me.Button == mouse.Right && me.Action == mouse.Release {
-				svv.ItemCtxtMenu(svv.SelectedIdx)
+				svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
 				me.SetProcessed()
 			}
 		})
@@ -1941,7 +1961,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 			me := d.(*mouse.Event)
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			if me.Button == mouse.Right && me.Action == mouse.Release {
-				svv.ItemCtxtMenu(svv.SelectedIdx)
+				svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
 				me.SetProcessed()
 			}
 		})

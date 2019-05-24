@@ -54,7 +54,6 @@ type Scene struct {
 	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
 	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
 	SetDragCursor bool               `view:"-" desc:"has dragging cursor been set yet?"`
-	RenderState   gi.RenderState     `json:"-" xml:"-" view:"-" desc:"render state for rendering 2d elements such as text2d"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
