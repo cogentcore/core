@@ -3,12 +3,12 @@
 // license that can be found in the LICENSE file.
 
 /*
-package slicecopy provides those basic slice copy methods that I finally got tired of
+package sliceclone provides those basic slice cloning methods that I finally got tired of
 rewriting all the time.
 */
-package slicecopy
+package sliceclone
 
-// String returns a copied version of the given string slice -- returns nil
+// String returns a cloned copy of the given string slice -- returns nil
 // if slice has zero length
 func String(sl []string) []string {
 	sz := len(sl)
@@ -20,7 +20,7 @@ func String(sl []string) []string {
 	return cp
 }
 
-// Bool returns a copied version of the given bool slice -- returns nil
+// Bool returns a cloned copy of the given bool slice -- returns nil
 // if slice has zero length
 func Bool(sl []bool) []bool {
 	sz := len(sl)
@@ -32,7 +32,7 @@ func Bool(sl []bool) []bool {
 	return cp
 }
 
-// Int returns a copied version of the given int slice -- returns nil
+// Int returns a cloned copy of the given int slice -- returns nil
 // if slice has zero length
 func Int(sl []int) []int {
 	sz := len(sl)
@@ -44,7 +44,7 @@ func Int(sl []int) []int {
 	return cp
 }
 
-// Int32 returns a copied version of the given int32 slice -- returns nil
+// Int32 returns a cloned copy of the given int32 slice -- returns nil
 // if slice has zero length
 func Int32(sl []int32) []int32 {
 	sz := len(sl)
@@ -56,7 +56,7 @@ func Int32(sl []int32) []int32 {
 	return cp
 }
 
-// Int64 returns a copied version of the given int64 slice -- returns nil
+// Int64 returns a cloned copy of the given int64 slice -- returns nil
 // if slice has zero length
 func Int64(sl []int64) []int64 {
 	sz := len(sl)
@@ -68,7 +68,7 @@ func Int64(sl []int64) []int64 {
 	return cp
 }
 
-// Float64 returns a copied version of the given float64 slice -- returns nil
+// Float64 returns a cloned copy of the given float64 slice -- returns nil
 // if slice has zero length
 func Float64(sl []float64) []float64 {
 	sz := len(sl)
@@ -80,7 +80,7 @@ func Float64(sl []float64) []float64 {
 	return cp
 }
 
-// Float32 returns a copied version of the given float32 slice -- returns nil
+// Float32 returns a cloned copy of the given float32 slice -- returns nil
 // if slice has zero length
 func Float32(sl []float32) []float32 {
 	sz := len(sl)
