@@ -35,6 +35,9 @@ type SliceViewer interface {
 	// AsSliceViewBase returns the base for direct access to relevant fields etc
 	AsSliceViewBase() *SliceViewBase
 
+	// Config configures the view
+	Config()
+
 	// IsConfiged returns true if is fully configured for display
 	IsConfiged() bool
 
@@ -801,6 +804,11 @@ func (sv *SliceViewBase) ConfigToolbar() {
 func (sv *SliceViewBase) Style2D() {
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
+	}
+	if sv.Viewport != nil && sv.Viewport.IsDoingFullRender() {
+		if sv.This().(SliceViewer).LayoutSliceGrid() {
+			sv.This().(SliceViewer).UpdateSliceGrid()
+		}
 	}
 	if sv.IsInactive() {
 		sv.SetCanFocus()

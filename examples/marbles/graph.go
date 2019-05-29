@@ -97,8 +97,6 @@ func (gr *Graph) OpenJSON(filename gi.FileName) error {
 		return err
 	}
 	err = json.Unmarshal(b, gr)
-	ParamsEdit.UpdateFields()
-	EqTable.UpdateSliceGrid()
 	gr.Graph()
 	return err
 }

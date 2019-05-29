@@ -75,6 +75,9 @@ func (vv *StructValueView) HasAction() bool {
 }
 
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+		return
+	}
 	opv := kit.OnePtrUnderlyingValue(vv.Value)
 	tynm := kit.NonPtrType(opv.Type()).Name()
 	olbl := vv.OwnerLabel()
@@ -191,6 +194,9 @@ func (vv *SliceValueView) HasAction() bool {
 }
 
 func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+		return
+	}
 	tynm := ""
 	if vv.IsArray {
 		tynm = "Array of "
@@ -326,6 +332,9 @@ func (vv *MapValueView) HasAction() bool {
 }
 
 func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+		return
+	}
 	tmptyp := kit.NonPtrType(vv.Value.Type())
 	desc, _ := vv.Tag("desc")
 	mpi := vv.Value.Interface()
@@ -473,6 +482,9 @@ func (vv *KiPtrValueView) HasAction() bool {
 }
 
 func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+		return
+	}
 	k := vv.KiStruct()
 	if k == nil {
 		return

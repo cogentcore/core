@@ -441,6 +441,9 @@ func (vv *ColorValueView) HasAction() bool {
 }
 
 func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+		return
+	}
 	if vv.IsInactive() {
 		return
 	}
