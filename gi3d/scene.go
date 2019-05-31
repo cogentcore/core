@@ -695,7 +695,7 @@ func (sc *Scene) DeleteResources() {
 		return
 	}
 	oswin.TheApp.RunOnMain(func() {
-		sc.Win.OSWin.Activate()
+		// sc.Win.OSWin.Activate()
 		for _, tx := range sc.Textures {
 			tx.Delete(sc)
 		}
