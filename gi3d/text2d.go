@@ -59,6 +59,22 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.Mat.Bright = 5 // this is key for making e.g., a white background show up as white..
 }
 
+func (txt *Text2D) Disconnect() {
+	if txt.TxtTex != nil && txt.TxtTex.Tex.IsActive() {
+		scc, err := txt.ParentByTypeTry(KiT_Scene, true)
+		if err == nil {
+			sc := scc.(*Scene)
+			if sc.Win != nil && sc.Win.IsVisible() {
+				oswin.TheApp.RunOnMain(func() {
+					sc.Win.OSWin.Activate()
+					txt.TxtTex.Tex.Delete()
+				})
+			}
+		}
+	}
+	txt.Object.Disconnect()
+}
+
 // SetText sets the text and renders it to the texture image
 func (txt *Text2D) SetText(sc *Scene, str string) {
 	txt.Text = str
@@ -128,27 +144,29 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	}
 	bounds := image.Rectangle{Max: szpt}
 	var img *image.RGBA
+	setImg := false
 	if txt.TxtTex == nil {
 		txt.TxtTex = &TextureBase{Nm: txt.Nm}
 		tx := txt.TxtTex.NewTex()
 		img = image.NewRGBA(bounds)
-		tx.SetImage(img)
+		tx.SetImage(img) // safe here
 	} else {
 		im := txt.TxtTex.Tex.Image()
 		if im == nil {
 			img = image.NewRGBA(bounds)
-			txt.TxtTex.Tex.SetImage(img)
+			setImg = true // needs to be set on main
 		} else {
 			img = im.(*image.RGBA)
+			if img == nil {
+				img = image.NewRGBA(bounds)
+				setImg = true
+			} else {
+				if img.Bounds() != bounds {
+					img = image.NewRGBA(bounds)
+					setImg = true
+				}
+			}
 		}
-	}
-	if txt.TxtTex.Tex.IsActive() {
-		oswin.TheApp.RunOnMain(func() {
-			sc.Win.OSWin.Activate()
-			txt.TxtTex.Tex.SetSize(szpt)
-		})
-	} else {
-		txt.TxtTex.Tex.SetSize(szpt)
 	}
 	rs := &txt.RenderState
 	if rs.Image != img || rs.Image.Bounds() != img.Bounds() {
@@ -158,7 +176,16 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	draw.Draw(img, bounds, &image.Uniform{txt.Sty.Font.BgColor.Color}, image.ZP, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
-	rs.Image = nil
+	if sc.Win != nil {
+		oswin.TheApp.RunOnMain(func() {
+			sc.Win.OSWin.Activate()
+			if setImg {
+				txt.TxtTex.Tex.SetImage(img) // does transfer if active
+			} else {
+				txt.TxtTex.Tex.Transfer(0) // update
+			}
+		})
+	}
 	txt.Mat.SetTexture(sc, txt.TxtTex)
 	// gi.SavePNG("text-test.png", img)
 }

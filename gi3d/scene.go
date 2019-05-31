@@ -71,6 +71,13 @@ func (sc *Scene) Defaults() {
 	sc.BgColor.SetUInt8(255, 255, 255, 255)
 }
 
+func (sc *Scene) Disconnect() {
+	if sc.Win != nil && sc.Win.IsVisible() {
+		sc.DeleteResources()
+	}
+	sc.WidgetBase.Disconnect()
+}
+
 // AddMesh adds given mesh to mesh collection
 // see AddNewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
@@ -678,6 +685,29 @@ func (sc *Scene) UpdateMeshes() {
 	}
 	oswin.TheApp.RunOnMain(func() {
 		sc.UpdateMeshesInCtxt()
+	})
+}
+
+// DeleteResources deletes all GPU resources -- sets context and runs on main
+// this is called during Disconnect and before the window is closed
+func (sc *Scene) DeleteResources() {
+	if sc.Win == nil {
+		return
+	}
+	oswin.TheApp.RunOnMain(func() {
+		sc.Win.OSWin.Activate()
+		for _, tx := range sc.Textures {
+			tx.Delete(sc)
+		}
+		for _, ms := range sc.Meshes {
+			ms.Delete(sc)
+		}
+		if sc.Tex != nil {
+			sc.Tex.Delete()
+		}
+		if sc.Frame != nil {
+			sc.Frame.Delete()
+		}
 	})
 }
 

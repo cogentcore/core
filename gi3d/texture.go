@@ -29,6 +29,9 @@ type Texture interface {
 	// Must be called in context on main thread
 	Activate(sc *Scene, texNo int)
 
+	// Delete deletes the texture GPU resources -- must be called in context on main thread
+	Delete(sc *Scene)
+
 	// BotZero returns true if this texture has the Y=0 pixels at the bottom
 	// of the image.  Otherwise, Y=0 is at the top, which is the default
 	// for most images loaded from files.
@@ -111,6 +114,13 @@ func (tx *TextureBase) Activate(sc *Scene, texNo int) {
 	if tx.Tex != nil {
 		tx.Tex.SetBotZero(tx.Bot0)
 		tx.Tex.Activate(texNo)
+	}
+}
+
+// Delete deletes the texture GPU resources -- must be called in context on main thread
+func (tx *TextureBase) Delete(sc *Scene) {
+	if tx.Tex != nil && tx.Tex.IsActive() {
+		tx.Tex.Delete()
 	}
 }
 

@@ -684,6 +684,14 @@ func (w *Window) Closed() {
 		WindowGlobalMu.Unlock()
 	}
 	// these are managed by the window itself
+	if w.OverTex != nil {
+		oswin.TheApp.RunOnMain(func() {
+			w.OverTex.Delete()
+			for _, du := range w.DirectUps {
+				du.This().Disconnect() // does delete
+			}
+		})
+	}
 	w.OverTex = nil
 	if w.OverlayVp != nil {
 		w.OverlayVp.Destroy()

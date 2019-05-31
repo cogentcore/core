@@ -98,6 +98,10 @@ type Mesh interface {
 	// returns false if there is no mesh defined
 	Activate(sc *Scene) bool
 
+	// Activate deletes the mesh Vectors on the GPU
+	// Must be called with relevant context active, on main thread
+	Delete(sc *Scene)
+
 	// TransferAll transfer all buffer data to GPU (vectors and indexes)
 	// Activate must have just been called
 	TransferAll()
@@ -327,6 +331,14 @@ func (ms *MeshBase) Activate(sc *Scene) bool {
 	}
 	ms.Buff.Activate()
 	return true
+}
+
+// Delete deletes the mesh Vectors on the GPU
+// Must be called with relevant context active on main thread
+func (ms *MeshBase) Delete(sc *Scene) {
+	if ms.Buff != nil {
+		ms.Buff.Delete()
+	}
 }
 
 // TransferAll transfer all buffer data to GPU (vectors and indexes)

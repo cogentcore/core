@@ -125,6 +125,11 @@ type Texture interface {
 	// valid after Activate.
 	Handle() uint32
 
+	// Transfer copies current image up to the GPU, activating on given
+	// texture number.  Returns false if there is no image to transfer.
+	// Must be called with a valid gpu context and on proper thread for that context.
+	Transfer(texNo int) bool
+
 	// Delete deletes the GPU resources associated with this texture
 	// (requires Activate to re-establish a new one).
 	// Should be called prior to Go object being deleted

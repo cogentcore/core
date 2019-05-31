@@ -171,6 +171,15 @@ func (rn *Renderers) DrawState() {
 	gpu.Draw.Multisample(true)
 }
 
+// Delete deletes GPU resources for renderers
+// must be called in context on main
+func (rn *Renderers) Delete() {
+	for _, rd := range rn.Renders {
+		rd.Delete(rn)
+	}
+	// note: Vectors, Unis don't have deletable resources beyond programs?
+}
+
 // ColorToVec4f converts given gi.Color to mat32.Vec4 float32's
 func ColorToVec4f(clr gi.Color) mat32.Vec4 {
 	v := mat32.Vec4{}
@@ -210,6 +219,9 @@ type Render interface {
 
 	// Activate activates this renderer for rendering
 	Activate(rn *Renderers)
+
+	// Delete deletes this renderer
+	Delete(rn *Renderers)
 }
 
 // Base render type
@@ -253,6 +265,10 @@ func (rb *RenderBase) Activate(rn *Renderers) {
 	ltu.Bind(pr)
 	gpu.TheGPU.ErrCheck("lights bind")
 	pr.Activate()
+}
+
+func (rb *RenderBase) Delete(rn *Renderers) {
+	rb.Pipe.Delete()
 }
 
 //////////////////////////////////////////////////////////////////////////

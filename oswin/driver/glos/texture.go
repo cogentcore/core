@@ -121,8 +121,7 @@ func (tx *textureImpl) SetImage(img image.Image) error {
 	tx.img = rgba
 	tx.size = rgba.Rect.Size()
 	if tx.init {
-		tx.Delete()
-		tx.Activate(0)
+		tx.Transfer(0)
 	}
 	return nil
 }
@@ -260,6 +259,25 @@ func (tx *textureImpl) IsActive() bool {
 // valid after Activate
 func (tx *textureImpl) Handle() uint32 {
 	return tx.handle
+}
+
+// Transfer copies current image up to the GPU, activating on given
+// texture number.  Returns false if there is no image to transfer.
+// Must be called with a valid gpu context and on proper thread for that context.
+func (tx *textureImpl) Transfer(texNo int) bool {
+	if tx.img == nil {
+		return false
+	}
+	if !tx.init {
+		tx.Activate(texNo) // does transfer
+		return true
+	}
+	tx.size = tx.img.Rect.Size()
+	tx.Activate(texNo)
+	szx := int32(tx.size.X)
+	szy := int32(tx.size.Y)
+	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, szx, szy, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(tx.img.Pix))
+	return true
 }
 
 // Delete deletes the GPU resources associated with this texture
