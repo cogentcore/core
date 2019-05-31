@@ -180,6 +180,9 @@ func (g *NodeBase) ChildrenBBox2D() image.Rectangle {
 // gui interaction -- can only be done in rendering because that is when all
 // the proper xforms are all in place -- VpBBox is intersected with parent SVG
 func (g *NodeBase) ComputeBBoxSVG() {
+	if g.This() == nil {
+		return
+	}
 	g.BBox = g.This().(gi.Node2D).BBox2D()
 	g.ObjBBox = g.BBox // no diff
 	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()

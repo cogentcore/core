@@ -49,7 +49,7 @@ type Scene struct {
 	Textures      map[string]Texture `desc:"all textures used in the scene"`
 	NoNav         bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
 	SavedCams     map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
-	Win           *gi.Window         `json:"-" xml:"-" desc:"our parent window that we render into"`
+	Win           *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 	Renders       Renderers          `view:"-" desc:"rendering programs"`
 	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
 	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`

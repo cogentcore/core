@@ -144,6 +144,7 @@ func (svg *Editor) Render2D() {
 		svg.Render2DChildren() // we must do children first, then us!
 		svg.PopBounds()
 		rs.PopXForm()
+		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)
 		svg.RenderViewport2D() // update our parent image
 	}
 }

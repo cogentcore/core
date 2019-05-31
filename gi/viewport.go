@@ -212,6 +212,10 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 		pni, _ := KiToNode2D(vp.Par)
 		nr := r.Intersect(pni.ChildrenBBox2D())
 		sp = nr.Min.Sub(r.Min)
+		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
+			fmt.Printf("aberrant sp: %v\n", sp)
+			return
+		}
 		r = nr
 	}
 	if Render2DTrace {
