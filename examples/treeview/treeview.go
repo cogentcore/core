@@ -110,7 +110,7 @@ func mainrun() {
 	sv := giv.AddNewStructView(svfr, "sv")
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
-	sv.SetStruct(&srctree, nil)
+	sv.SetStruct(&srctree)
 
 	tv.TreeViewSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if data == nil {
@@ -120,7 +120,7 @@ func mainrun() {
 		tvn, _ := data.(ki.Ki).Embed(giv.KiT_TreeView).(*giv.TreeView)
 		svr, _ := recv.Embed(giv.KiT_StructView).(*giv.StructView)
 		if sig == int64(giv.TreeViewSelected) {
-			svr.SetStruct(tvn.SrcNode, nil)
+			svr.SetStruct(tvn.SrcNode)
 		}
 	})
 

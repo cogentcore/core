@@ -72,12 +72,12 @@ func mainrun() {
 	gstru := giv.AddNewStructView(mfr, "gstru")
 	gstru.Viewport = Vp // needs vp early for toolbar
 	gstru.SetProp("height", "4.5em")
-	gstru.SetStruct(&Gr, nil)
+	gstru.SetStruct(&Gr)
 	ParamsEdit = gstru
 
 	lns := giv.AddNewTableView(mfr, "lns")
 	lns.Viewport = Vp
-	lns.SetSlice(&Gr.Lines, nil)
+	lns.SetSlice(&Gr.Lines)
 	EqTable = lns
 
 	frame := gi.AddNewFrame(mfr, "frame", gi.LayoutHoriz)

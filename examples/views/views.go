@@ -96,19 +96,19 @@ func mainrun() {
 	split.Dim = gi.X
 
 	mv := giv.AddNewMapView(split, "mv")
-	mv.SetMap(&tstmap, nil)
+	mv.SetMap(&tstmap)
 	mv.SetStretchMaxWidth()
 	mv.SetStretchMaxHeight()
 
 	sv := giv.AddNewSliceView(split, "sv")
 	// sv.SetInactive()
-	sv.SetSlice(&tstslice, nil)
+	sv.SetSlice(&tstslice)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
 	tv := giv.AddNewTableView(split, "tv")
 	// sv.SetInactive()
-	tv.SetSlice(&tsttable, nil)
+	tv.SetSlice(&tsttable)
 	tv.SetStretchMaxWidth()
 	tv.SetStretchMaxHeight()
 
