@@ -26,6 +26,7 @@ type MapViewInline struct {
 	Values     []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var KiT_MapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
@@ -40,11 +41,10 @@ var MapViewInlineProps = ki.Props{
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
-func (mv *MapViewInline) SetMap(mp interface{}, tmpSave ValueView) {
+func (mv *MapViewInline) SetMap(mp interface{}) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.TmpSave = tmpSave
 	mv.UpdateFromMap()
 }
 
@@ -80,7 +80,7 @@ func (mv *MapViewInline) ConfigParts() {
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave) // needs key value view to track updates
+		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
 
 		keytxt := kit.ToString(key.Interface())
 		keynm := fmt.Sprintf("key-%v", keytxt)
@@ -130,18 +130,24 @@ func (mv *MapViewInline) ConfigParts() {
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			mvv, _ := recv.Embed(KiT_MapViewInline).(*MapViewInline)
-			tmptyp := kit.NonPtrType(reflect.TypeOf(mvv.Map))
-			tynm := tmptyp.Name()
-			if tynm == "" {
-				tynm = tmptyp.String()
-			}
-			if mv.MapValView != nil {
-				olbl := mv.MapValView.AsValueViewBase().OwnerLabel()
-				if olbl != "" {
-					tynm += ": " + olbl
+			vpath := mvv.ViewPath
+			title := ""
+			if mvv.MapValView != nil {
+				noPath := ""
+				isZero := false
+				title, noPath, isZero = mvv.MapValView.AsValueViewBase().Label()
+				if isZero {
+					return
 				}
+				vpath = mvv.ViewPath + "/" + noPath
+			} else {
+				tmptyp := kit.NonPtrType(reflect.TypeOf(mvv.Map))
+				title = "Map of " + tmptyp.String()
+				// if tynm == "" {
+				// 	tynm = tmptyp.String()
+				// }
 			}
-			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: tynm, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave}, nil, nil)
+			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
 			mvvvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
 			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)

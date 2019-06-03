@@ -56,6 +56,16 @@ func init() {
 		vv.Init(vv)
 		return vv
 	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(time.Time{})), func() ValueView {
+		vv := &ValueViewBase{} // todo: could do better..
+		vv.Init(vv)
+		return vv
+	})
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(FileTime{})), func() ValueView {
+		vv := &ValueViewBase{} // todo: could do better..
+		vv.Init(vv)
+		return vv
+	})
 }
 
 // MapInlineLen is the number of map elements at or below which an inline
@@ -205,14 +215,6 @@ func ToValueView(it interface{}, tags string) ValueView {
 			vv.Init(vv)
 			return vv
 		}
-	case nptyp == reflect.TypeOf(time.Time{}): // todo: could do better..
-		vv := &ValueViewBase{}
-		vv.Init(vv)
-		return vv
-	case nptyp == reflect.TypeOf(FileTime{}): // todo: could do better..
-		vv := &ValueViewBase{}
-		vv.Init(vv)
-		return vv
 	case vk == reflect.Bool:
 		vv := &BoolValueView{}
 		vv.Init(vv)
@@ -360,7 +362,7 @@ type ValueView interface {
 	AsValueViewBase() *ValueViewBase
 
 	// SetStructValue sets the value, owner and field information for a struct field.
-	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView)
+	SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView, viewPath string)
 
 	// SetMapKey sets the key value and owner for a map key.
 	SetMapKey(val reflect.Value, owner interface{}, tmpSave ValueView)
@@ -368,10 +370,10 @@ type ValueView interface {
 	// SetMapValue sets the value, owner and map key information for a map
 	// element -- needs pointer to ValueView representation of key to track
 	// current key value.
-	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView)
+	SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView, viewPath string)
 
 	// SetSliceValue sets the value, owner and index information for a slice element.
-	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView)
+	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView, viewPath string)
 
 	// SetStandaloneValue sets the value for a singleton standalone value
 	// (e.g., for arg values).
@@ -471,6 +473,7 @@ type ValueViewBase struct {
 	Value     reflect.Value        `desc:"the reflect.Value representation of the value"`
 	OwnKind   reflect.Kind         `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
 	IsMapKey  bool                 `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
+	ViewPath  string               `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	Owner     interface{}          `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
 	Field     *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
 	Tags      map[string]string    `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`
@@ -497,12 +500,13 @@ func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 	return vv
 }
 
-func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView) {
+func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner interface{}, field *reflect.StructField, tmpSave ValueView, viewPath string) {
 	vv.OwnKind = reflect.Struct
 	vv.Value = val
 	vv.Owner = owner
 	vv.Field = field
 	vv.TmpSave = tmpSave
+	vv.ViewPath = viewPath + "." + field.Name
 	vv.SetName(field.Name)
 }
 
@@ -515,23 +519,27 @@ func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner interface{}, tmpSave
 	vv.SetName(kit.ToString(key.Interface()))
 }
 
-func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView) {
+func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner interface{}, key interface{}, keyView ValueView, tmpSave ValueView, viewPath string) {
 	vv.OwnKind = reflect.Map
 	vv.Value = val
 	vv.Owner = owner
 	vv.Key = key
 	vv.KeyView = keyView
 	vv.TmpSave = tmpSave
-	vv.SetName(kit.ToString(key))
+	keystr := kit.ToString(key)
+	vv.ViewPath = viewPath + "." + keystr
+	vv.SetName(keystr)
 }
 
-func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView) {
+func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView, viewPath string) {
 	vv.OwnKind = reflect.Slice
 	vv.Value = val
 	vv.Owner = owner
 	vv.Idx = idx
 	vv.TmpSave = tmpSave
-	vv.SetName(fmt.Sprintf("%v", idx))
+	idxstr := fmt.Sprintf("%v", idx)
+	vv.ViewPath = viewPath + "[" + idxstr + "]"
+	vv.SetName(idxstr)
 }
 
 func (vv *ValueViewBase) SetStandaloneValue(val reflect.Value) {
@@ -636,6 +644,9 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 		case reflect.Slice:
 			rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 		}
+		if updtr, ok := vv.Owner.(gi.Updater); ok {
+			updtr.Update()
+		}
 	} else {
 		rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 	}
@@ -731,6 +742,9 @@ func (vv *ValueViewBase) AllTags() map[string]string {
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
 func (vv *ValueViewBase) OwnerLabel() string {
+	if vv.Owner == nil {
+		return ""
+	}
 	olbl := gi.ToLabeler(vv.Owner)
 	switch vv.OwnKind {
 	case reflect.Struct:
@@ -759,6 +773,41 @@ func (vv *ValueViewBase) OwnerLabel() string {
 		return fmt.Sprintf("%s[%d]", olbl, vv.Idx)
 	}
 	return olbl
+}
+
+// Label returns a label for this item suitable for a window title etc.
+// Based on the underlying value type name, owner label, and ViewPath.
+// noPath returns the label without the path, for recursive path construction.
+// also includes zero value check reported in the isZero bool, which
+// can be used for not proceeding in case of non-value-based types.
+func (vv *ValueViewBase) Label() (label, noPath string, isZero bool) {
+	lbl := ""
+	var npt reflect.Type
+	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+		npt = kit.NonPtrType(vv.Value.Type())
+		isZero = true
+	} else {
+		opv := kit.OnePtrUnderlyingValue(vv.Value)
+		npt = kit.NonPtrType(opv.Type())
+	}
+	switch npt.Kind() {
+	case reflect.Array:
+		lbl = "Array of "
+	case reflect.Slice:
+		lbl = "Slice of "
+	case reflect.Map:
+		lbl = "Map of "
+	}
+	lbl += npt.String()
+	olbl := vv.OwnerLabel()
+	if olbl != "" {
+		lbl += ": " + olbl
+	}
+	noPath = lbl
+	if vv.ViewPath != "" {
+		lbl += " [" + vv.ViewPath + "]"
+	}
+	return lbl, noPath, isZero
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

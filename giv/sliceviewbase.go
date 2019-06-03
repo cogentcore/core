@@ -126,6 +126,7 @@ type SliceViewBase struct {
 	DraggedIdxs      []int            `copy:"-" desc:"list of currently-dragged indexes"`
 	SliceViewSig     ki.Signal        `copy:"-" json:"-" xml:"-" desc:"slice view interactive editing signals"`
 	ViewSig          ki.Signal        `copy:"-" json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath         string           `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	TmpSave          ValueView        `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ToolbarSlice     interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
 
@@ -163,7 +164,7 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
-func (sv *SliceViewBase) SetSlice(sl interface{}, tmpSave ValueView) {
+func (sv *SliceViewBase) SetSlice(sl interface{}) {
 	updt := false
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
@@ -186,7 +187,6 @@ func (sv *SliceViewBase) SetSlice(sl interface{}, tmpSave ValueView) {
 	if siknp, err := sv.PropTry("inact-key-nav"); err == nil {
 		sv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
-	sv.TmpSave = tmpSave
 	sv.Config()
 	sv.UpdateEnd(updt)
 }
@@ -344,7 +344,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	if vv == nil { // shouldn't happen
 		return
 	}
-	vv.SetSliceValue(val, sv.Slice, 0, sv.TmpSave)
+	vv.SetSliceValue(val, sv.Slice, 0, sv.TmpSave, sv.ViewPath)
 	vtyp := vv.WidgetType()
 	itxt := fmt.Sprintf("%05d", 0)
 	labnm := fmt.Sprintf("index-%v", itxt)
@@ -538,7 +538,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		} else {
 			vv = sv.Values[i]
 		}
-		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave)
+		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 
 		vtyp := vv.WidgetType()
 		itxt := fmt.Sprintf("%05d", i)

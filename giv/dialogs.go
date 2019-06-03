@@ -21,6 +21,7 @@ type DlgOpts struct {
 	Prompt   string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
 	CSS      ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
 	TmpSave  ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	Ok       bool      `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
 	Cancel   bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
 	NoAdd    bool      `desc:"if true, user cannot add elements of the slice"`
@@ -84,8 +85,9 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 	if opts.Inactive {
 		sv.SetInactive()
 	}
-	sv.SetStruct(stru, opts.TmpSave)
-
+	sv.ViewPath = opts.ViewPath
+	sv.TmpSave = opts.TmpSave
+	sv.SetStruct(stru)
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
@@ -109,7 +111,9 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 
 	sv := frame.InsertNewChild(KiT_MapView, prIdx+1, "map-view").(*MapView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetMap(mp, opts.TmpSave)
+	sv.ViewPath = opts.ViewPath
+	sv.TmpSave = opts.TmpSave
+	sv.SetMap(mp)
 
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
@@ -139,7 +143,9 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
-	sv.SetSlice(slice, opts.TmpSave)
+	sv.ViewPath = opts.ViewPath
+	sv.TmpSave = opts.TmpSave
+	sv.SetSlice(slice)
 
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
@@ -177,7 +183,8 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 	sv.SetInactiveState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
-	sv.SetSlice(slice, nil)
+	sv.ViewPath = opts.ViewPath
+	sv.SetSlice(slice)
 
 	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(SliceViewDoubleClicked) {
@@ -223,7 +230,9 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, st
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
-	sv.SetSlice(slcOfStru, opts.TmpSave)
+	sv.ViewPath = opts.ViewPath
+	sv.TmpSave = opts.TmpSave
+	sv.SetSlice(slcOfStru)
 
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
@@ -262,7 +271,8 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 	sv.SetInactiveState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
-	sv.SetSlice(slcOfStru, nil)
+	sv.ViewPath = opts.ViewPath
+	sv.SetSlice(slcOfStru)
 
 	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(SliceViewDoubleClicked) {
@@ -356,7 +366,9 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki,
 
 	sv := frame.InsertNewChild(KiT_ColorView, prIdx+1, "color-view").(*ColorView)
 	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
-	sv.SetColor(clr, opts.TmpSave)
+	sv.ViewPath = opts.ViewPath
+	sv.TmpSave = opts.TmpSave
+	sv.SetColor(clr)
 
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)

@@ -104,7 +104,7 @@ func HiStylesView(st *histyle.Styles) {
 
 	tv := mfr.AddNewChild(KiT_MapView, "tv").(*MapView)
 	tv.Viewport = vp
-	tv.SetMap(st, nil)
+	tv.SetMap(st)
 	tv.SetStretchMaxWidth()
 	tv.SetStretchMaxHeight()
 

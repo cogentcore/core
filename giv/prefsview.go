@@ -32,7 +32,7 @@ func PrefsView(pf *gi.Preferences) (*StructView, *gi.Window) {
 
 	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
-	sv.SetStruct(pf, nil)
+	sv.SetStruct(pf)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
@@ -95,7 +95,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) (*StructView, *gi.Window) {
 
 	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
-	sv.SetStruct(pf, nil)
+	sv.SetStruct(pf)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 
@@ -158,7 +158,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) (*StructView, *gi.Window) {
 
 	sv := AddNewStructView(mfr, "sv")
 	sv.Viewport = vp
-	sv.SetStruct(pf, nil)
+	sv.SetStruct(pf)
 	sv.SetStretchMaxWidth()
 	sv.SetStretchMaxHeight()
 

@@ -36,7 +36,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	tv := mfr.AddNewChild(KiT_TableView, "tv").(*TableView)
 	tv.Viewport = vp
-	tv.SetSlice(km, nil)
+	tv.SetSlice(km)
 	tv.SetStretchMaxWidth()
 	tv.SetStretchMaxHeight()
 

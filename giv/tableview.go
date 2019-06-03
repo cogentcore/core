@@ -64,7 +64,7 @@ type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, r
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
-func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
+func (tv *TableView) SetSlice(sl interface{}) {
 	updt := false
 	if kit.IfaceIsNil(sl) {
 		return
@@ -105,7 +105,6 @@ func (tv *TableView) SetSlice(sl interface{}, tmpSave ValueView) {
 	if siknp, err := tv.PropTry("inact-key-nav"); err == nil {
 		tv.InactKeyNav, _ = kit.ToBool(siknp)
 	}
-	tv.TmpSave = tmpSave
 	tv.Config()
 	tv.UpdateEnd(updt)
 }
@@ -345,7 +344,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave)
+		vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, tv.ViewPath)
 		vtyp := vv.WidgetType()
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 		cidx := idxOff + fli
@@ -526,6 +525,7 @@ func (tv *TableView) UpdateSliceGrid() {
 			idxlab.SetSelectedState(issel)
 		}
 
+		vpath := tv.ViewPath + "[" + sitxt + "]"
 		for fli := 0; fli < tv.NVisFields; fli++ {
 			field := tv.VisFields[fli]
 			fval := val.Elem().Field(field.Index[0])
@@ -537,7 +537,7 @@ func (tv *TableView) UpdateSliceGrid() {
 			} else {
 				vv = tv.Values[vvi]
 			}
-			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave)
+			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
 
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)

@@ -28,6 +28,7 @@ type StructView struct {
 	FieldViews    []ValueView    `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave       ValueView      `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig       ki.Signal      `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath      string         `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	ToolbarStru   interface{}    `desc:"the struct that we successfully set a toolbar for"`
 	HasDefs       bool           `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
 }
@@ -53,7 +54,7 @@ var StructViewProps = ki.Props{
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
-func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
+func (sv *StructView) SetStruct(st interface{}) {
 	updt := false
 	if sv.Struct != st {
 		sv.Changed = false
@@ -68,7 +69,6 @@ func (sv *StructView) SetStruct(st interface{}, tmpSave ValueView) {
 			})
 		}
 	}
-	sv.TmpSave = tmpSave
 	sv.Config()
 	sv.UpdateEnd(updt)
 }
@@ -174,7 +174,7 @@ func (sv *StructView) ConfigStructGrid() {
 			return true
 		}
 		vvp := fieldVal.Addr()
-		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave)
+		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
@@ -194,6 +194,7 @@ func (sv *StructView) ConfigStructGrid() {
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
+		vvb.ViewPath = sv.ViewPath
 		lbl.Redrawable = true
 		widg := sg.Child((i * 2) + 1).(gi.Node2D)
 		widg.SetProp("horizontal-align", gi.AlignLeft)

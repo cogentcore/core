@@ -75,18 +75,15 @@ func (vv *StructValueView) HasAction() bool {
 }
 
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+	title, noPath, isZero := vv.Label()
+	if isZero {
 		return
 	}
+	vpath := vv.ViewPath + "/" + noPath
 	opv := kit.OnePtrUnderlyingValue(vv.Value)
-	tynm := kit.NonPtrType(opv.Type()).Name()
-	olbl := vv.OwnerLabel()
-	if olbl != "" {
-		tynm += ": " + olbl
-	}
 	desc, _ := vv.Tag("desc")
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, recv, dlgFunc)
+	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
 	svk := dlg.Frame().ChildByType(KiT_StructView, true, 2)
 	if svk != nil {
 		sv := svk.(*StructView)
@@ -123,8 +120,10 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv := vv.Widget.(*StructViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.StructValView = vv
+	sv.ViewPath = vv.ViewPath
+	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
+	sv.SetStruct(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_StructInlineValueView).(*StructInlineValueView)
 		// vvv.UpdateWidget() // prob not necc..
@@ -194,20 +193,11 @@ func (vv *SliceValueView) HasAction() bool {
 }
 
 func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+	title, noPath, isZero := vv.Label()
+	if isZero {
 		return
 	}
-	tynm := ""
-	if vv.IsArray {
-		tynm = "Array of "
-	} else {
-		tynm = "Slice of "
-	}
-	tynm += kit.NonPtrType(vv.ElType).String()
-	olbl := vv.OwnerLabel()
-	if olbl != "" {
-		tynm += ": " + olbl
-	}
+	vpath := vv.ViewPath + "/" + noPath
 	desc, _ := vv.Tag("desc")
 	vvp := kit.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
@@ -217,7 +207,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	inact := vv.This().(ValueView).IsInactive()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		dlg := TableViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, nil, recv, dlgFunc)
+		dlg := TableViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
 		svk := dlg.Frame().ChildByType(KiT_TableView, true, 2)
 		if svk != nil {
 			sv := svk.(*TableView)
@@ -229,7 +219,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 			})
 		}
 	} else {
-		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, nil, recv, dlgFunc)
+		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
 		svk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
 		if svk != nil {
 			sv := svk.(*SliceView)
@@ -271,9 +261,11 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.SliceValView = vv
+	sv.ViewPath = vv.ViewPath
+	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
-	sv.SetSlice(vv.Value.Interface(), vv.TmpSave)
+	sv.SetSlice(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_SliceInlineValueView).(*SliceInlineValueView)
 		vvv.UpdateWidget()
@@ -332,22 +324,15 @@ func (vv *MapValueView) HasAction() bool {
 }
 
 func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+	title, noPath, isZero := vv.Label()
+	if isZero {
 		return
 	}
-	tmptyp := kit.NonPtrType(vv.Value.Type())
+	vpath := vv.ViewPath + "/" + noPath
 	desc, _ := vv.Tag("desc")
 	mpi := vv.Value.Interface()
-	tynm := tmptyp.Name()
-	if tynm == "" {
-		tynm = tmptyp.String()
-	}
-	olbl := vv.OwnerLabel()
-	if olbl != "" {
-		tynm += ": " + olbl
-	}
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, recv, dlgFunc)
+	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
 	mvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
 	if mvk != nil {
 		mv := mvk.(*MapView)
@@ -388,9 +373,11 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	sv := vv.Widget.(*MapViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.MapValView = vv
+	sv.ViewPath = vv.ViewPath
+	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
 	sv.SetInactiveState(vv.This().(ValueView).IsInactive())
-	sv.SetMap(vv.Value.Interface(), vv.TmpSave)
+	sv.SetMap(vv.Value.Interface())
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MapInlineValueView).(*MapInlineValueView)
 		vvv.UpdateWidget()
@@ -482,21 +469,18 @@ func (vv *KiPtrValueView) HasAction() bool {
 }
 
 func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+	title, noPath, isZero := vv.Label()
+	if isZero {
 		return
 	}
 	k := vv.KiStruct()
 	if k == nil {
 		return
 	}
+	vpath := vv.ViewPath + "/" + noPath
 	desc, _ := vv.Tag("desc")
-	tynm := kit.NonPtrType(vv.Value.Type()).Name()
-	olbl := vv.OwnerLabel()
-	if olbl != "" {
-		tynm += ": " + olbl
-	}
 	inact := vv.This().(ValueView).IsInactive()
-	StructViewDialog(vp, k, DlgOpts{Title: tynm, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact}, recv, dlgFunc)
+	StructViewDialog(vp, k, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

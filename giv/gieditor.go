@@ -183,7 +183,7 @@ func (ge *GiEditor) ConfigSplitView() {
 			svr := gee.StructView()
 			tvn, _ := data.(ki.Ki).Embed(KiT_TreeView).(*TreeView)
 			if sig == int64(TreeViewSelected) {
-				svr.SetStruct(tvn.SrcNode, nil)
+				svr.SetStruct(tvn.SrcNode)
 			} else if sig == int64(TreeViewChanged) {
 				gee.SetChanged()
 			}
@@ -197,7 +197,7 @@ func (ge *GiEditor) ConfigSplitView() {
 	tv := ge.TreeView()
 	tv.SetRootNode(ge.KiRoot)
 	sv := ge.StructView()
-	sv.SetStruct(ge.KiRoot, nil)
+	sv.SetStruct(ge.KiRoot)
 }
 
 func (ge *GiEditor) SetChanged() {

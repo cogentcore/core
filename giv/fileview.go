@@ -321,7 +321,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetProp("inact-key-nav", false) // can only have one active -- files..
 	sv.SetInactive()                   // select only
 	sv.SelectedIdx = -1
-	sv.SetSlice(&gi.Prefs.FavPaths, nil)
+	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.WidgetSelected) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
@@ -343,7 +343,7 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetStretchMaxWidth()
 	sv.SetInactive() // select only
 	sv.StyleFunc = FileViewStyleFunc
-	sv.SetSlice(&fv.Files, nil)
+	sv.SetSlice(&fv.Files)
 	if gi.Prefs.FileViewSort != "" {
 		sv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}

@@ -27,6 +27,7 @@ type MapView struct {
 	SortVals   bool        `desc:"sort by values instead of keys"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	ToolbarMap interface{} `desc:"the map that we successfully set a toolbar for"`
 }
 
@@ -44,11 +45,10 @@ func (mv *MapView) Disconnect() {
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to
 // represent this map
-func (mv *MapView) SetMap(mp interface{}, tmpSave ValueView) {
+func (mv *MapView) SetMap(mp interface{}) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.TmpSave = tmpSave
 	mv.Config()
 }
 
@@ -171,7 +171,7 @@ func (mv *MapView) ConfigMapGrid() {
 		if vv == nil { // shouldn't happen
 			continue
 		}
-		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave) // needs key value view to track updates
+		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
 
 		keytxt := kit.ToString(key.Interface())
 		keynm := fmt.Sprintf("key-%v", keytxt)

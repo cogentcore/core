@@ -28,6 +28,7 @@ type SliceViewInline struct {
 	Values       []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave      ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig      ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath     string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var KiT_SliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
@@ -38,7 +39,7 @@ func (sv *SliceViewInline) Disconnect() {
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
-func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
+func (sv *SliceViewInline) SetSlice(sl interface{}) {
 	updt := false
 	if sv.Slice != sl {
 		updt = sv.UpdateStart()
@@ -50,7 +51,6 @@ func (sv *SliceViewInline) SetSlice(sl interface{}, tmpSave ValueView) {
 		}
 		sv.SetFullReRender()
 	}
-	sv.TmpSave = tmpSave
 	sv.UpdateFromSlice()
 	sv.UpdateEnd(updt)
 }
@@ -81,7 +81,7 @@ func (sv *SliceViewInline) ConfigParts() {
 			fmt.Printf("nil value view!\n")
 			continue
 		}
-		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave)
+		vv.SetSliceValue(val, sv.Slice, i, sv.TmpSave, sv.ViewPath)
 		vtyp := vv.WidgetType()
 		idxtxt := fmt.Sprintf("%05d", i)
 		valnm := fmt.Sprintf("value-%v", idxtxt)
@@ -130,15 +130,21 @@ func (sv *SliceViewInline) ConfigParts() {
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_SliceViewInline).(*SliceViewInline)
-			elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
-			tynm := "Slice of " + kit.NonPtrType(elType).Name()
-			if sv.SliceValView != nil {
-				olbl := sv.SliceValView.AsValueViewBase().OwnerLabel()
-				if olbl != "" {
-					tynm += ": " + olbl
+			vpath := svv.ViewPath
+			title := ""
+			if svv.SliceValView != nil {
+				noPath := ""
+				isZero := false
+				title, noPath, isZero = svv.SliceValView.AsValueViewBase().Label()
+				if isZero {
+					return
 				}
+				vpath = svv.ViewPath + "/" + noPath
+			} else {
+				elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
+				title = "Slice of " + kit.NonPtrType(elType).Name()
 			}
-			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: tynm, TmpSave: svv.TmpSave}, nil, nil, nil)
+			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
 			svvvk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
 			if svvvk != nil {
 				svvv := svvvk.(*SliceView)

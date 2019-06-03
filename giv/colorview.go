@@ -23,10 +23,11 @@ import (
 // ColorView shows a color, using sliders to set values,
 type ColorView struct {
 	gi.Frame
-	Color   gi.Color  `desc:"the color that we view"`
-	NumView ValueView `desc:"inline struct view of the numbers"`
-	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	Color    gi.Color  `desc:"the color that we view"`
+	NumView  ValueView `desc:"inline struct view of the numbers"`
+	TmpSave  ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig  ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
@@ -47,10 +48,9 @@ var ColorViewProps = ki.Props{
 }
 
 // SetColor sets the source color
-func (cv *ColorView) SetColor(clr color.Color, tmpSave ValueView) {
+func (cv *ColorView) SetColor(clr color.Color) {
 	cv.Color.SetColor(clr)
 	cv.Config()
-	cv.TmpSave = tmpSave
 	cv.Update()
 }
 
@@ -415,8 +415,10 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 
 	sv := vv.Widget.(*StructViewInline)
 	sv.AddAction = true
+	sv.ViewPath = vv.ViewPath
+	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	sv.SetStruct(vv.Value.Interface(), vv.TmpSave)
+	sv.SetStruct(vv.Value.Interface())
 
 	edack, err := sv.Parts.Children().ElemFromEndTry(0) // action at end, from AddAction above
 	if err == nil {

@@ -25,6 +25,7 @@ type StructViewInline struct {
 	FieldViews    []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
 	TmpSave       ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig       ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath      string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	HasDefs       bool        `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
 }
 
@@ -37,7 +38,7 @@ func (sv *StructViewInline) Disconnect() {
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
-func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
+func (sv *StructViewInline) SetStruct(st interface{}) {
 	updt := false
 	if sv.Struct != st {
 		updt = sv.UpdateStart()
@@ -51,7 +52,6 @@ func (sv *StructViewInline) SetStruct(st interface{}, tmpSave ValueView) {
 			})
 		}
 	}
-	sv.TmpSave = tmpSave
 	sv.ConfigParts()
 	sv.UpdateEnd(updt)
 }
@@ -78,7 +78,7 @@ func (sv *StructViewInline) ConfigParts() {
 			return true
 		}
 		vvp := fieldVal.Addr()
-		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave)
+		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
 		vtyp := vv.WidgetType()
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
@@ -99,6 +99,7 @@ func (sv *StructViewInline) ConfigParts() {
 	for i, vv := range sv.FieldViews {
 		lbl := sv.Parts.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
+		vvb.ViewPath = sv.ViewPath
 		lbl.Redrawable = true
 		lbl.SetProp("horizontal-align", gi.AlignLeft)
 		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
