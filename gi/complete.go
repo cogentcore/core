@@ -15,6 +15,14 @@ import (
 	"github.com/goki/pi/complete"
 )
 
+// Completer interface supports the SetCompleter method for setting completer parameters
+// This is defined e.g., on TextField and TextBuf
+type Completer interface {
+	// SetCompleter sets completion functions so that completions will
+	// automatically be offered as the user types.  data provides context where being used.
+	SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc)
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Complete
 

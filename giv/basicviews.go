@@ -75,11 +75,11 @@ func (vv *StructValueView) HasAction() bool {
 }
 
 func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	title, noPath, isZero := vv.Label()
+	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
 	}
-	vpath := vv.ViewPath + "/" + noPath
+	vpath := vv.ViewPath + "/" + newPath
 	opv := kit.OnePtrUnderlyingValue(vv.Value)
 	desc, _ := vv.Tag("desc")
 	inact := vv.This().(ValueView).IsInactive()
@@ -193,11 +193,11 @@ func (vv *SliceValueView) HasAction() bool {
 }
 
 func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	title, noPath, isZero := vv.Label()
+	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
 	}
-	vpath := vv.ViewPath + "/" + noPath
+	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Tag("desc")
 	vvp := kit.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
@@ -324,11 +324,11 @@ func (vv *MapValueView) HasAction() bool {
 }
 
 func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	title, noPath, isZero := vv.Label()
+	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
 	}
-	vpath := vv.ViewPath + "/" + noPath
+	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Tag("desc")
 	mpi := vv.Value.Interface()
 	inact := vv.This().(ValueView).IsInactive()
@@ -469,7 +469,7 @@ func (vv *KiPtrValueView) HasAction() bool {
 }
 
 func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
-	title, noPath, isZero := vv.Label()
+	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
 	}
@@ -477,7 +477,7 @@ func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	if k == nil {
 		return
 	}
-	vpath := vv.ViewPath + "/" + noPath
+	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Tag("desc")
 	inact := vv.This().(ValueView).IsInactive()
 	StructViewDialog(vp, k, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)

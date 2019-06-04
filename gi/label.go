@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 	"image/color"
-	"reflect"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -16,43 +15,6 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Labeler Interface and ToLabel method
-
-// the labeler interface provides a GUI-appropriate label (todo: rich text
-// html tags!?) for an item -- use ToLabel converter to attempt to use this
-// interface and then fall back on Stringer via kit.ToString conversion
-// function
-type Labeler interface {
-	Label() string
-}
-
-// ToLabel returns the gui-appropriate label for an item, using the Labeler
-// interface if it is defined, and falling back on kit.ToString converter
-// otherwise -- also contains label impls for basic interface types for which
-// we cannot easily define the Labeler interface
-func ToLabel(it interface{}) string {
-	lbler, ok := it.(Labeler)
-	if !ok {
-		switch v := it.(type) {
-		case reflect.Type:
-			return v.Name()
-		case ki.Ki:
-			return v.Name()
-		}
-		return kit.ToString(it)
-	}
-	return lbler.Label()
-}
-
-// ToLabeler returns the Labeler label ONLY if it was defined, else ""
-func ToLabeler(it interface{}) string {
-	if lbler, ok := it.(Labeler); ok {
-		return lbler.Label()
-	}
-	return ""
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Label

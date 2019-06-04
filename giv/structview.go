@@ -205,12 +205,19 @@ func (sv *StructView) ConfigStructGrid() {
 		vv.ConfigWidget(widg)
 		if !sv.IsInactive() && !inactTag {
 			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				svv, _ := recv.Embed(KiT_StructView).(*StructView)
+				svv := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateDefaults()
 				// note: updating vv here is redundant -- relevant field will have already updated
 				svv.Changed = true
 				if svv.ChangeFlag != nil {
 					svv.ChangeFlag.SetBool(true)
+				}
+				vvv := send.(ValueView).AsValueViewBase()
+				if !kit.KindIsBasic(kit.NonPtrValue(vvv.Value).Kind()) {
+					if updtr, ok := svv.Struct.(gi.Updater); ok {
+						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
+						updtr.Update()
+					}
 				}
 				tb := svv.ToolBar()
 				if tb != nil {

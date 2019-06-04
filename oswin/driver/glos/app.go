@@ -466,6 +466,9 @@ func (app *appImpl) QuitClean() {
 }
 
 func (app *appImpl) Quit() {
+	if app.quitting {
+		return
+	}
 	app.QuitClean()
 	app.stopMain()
 }

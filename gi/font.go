@@ -186,7 +186,10 @@ func (fl *FontLib) Font(fontnm string, size int) (*FontFace, error) {
 		loadFontMu.RUnlock()
 		loadFontMu.Lock()
 		face, err := OpenFontFace(fontnm, path, size, 0)
-		if err != nil {
+		if err != nil || face == nil {
+			if err == nil {
+				err = fmt.Errorf("gi.FontLib: nil face with no error for: %v", fontnm)
+			}
 			log.Printf("gi.FontLib: error loading font %v, removed from list\n", fontnm)
 			loadFontMu.Unlock()
 			fl.DeleteFont(fontnm)

@@ -306,7 +306,9 @@ func SetQuitCleanFunc(fun func()) {
 
 // Quit closes all windows and exits the program.
 func Quit() {
-	oswin.TheApp.Quit()
+	if !oswin.TheApp.IsQuitting() {
+		oswin.TheApp.Quit()
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

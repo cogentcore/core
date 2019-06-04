@@ -538,7 +538,16 @@ func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx
 	vv.Idx = idx
 	vv.TmpSave = tmpSave
 	idxstr := fmt.Sprintf("%v", idx)
-	vv.ViewPath = viewPath + "[" + idxstr + "]"
+	vpath := "[" + idxstr + "]"
+	if vv.Owner != nil {
+		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
+			slbl := lblr.ElemLabel(idx)
+			if slbl != "" {
+				vpath = "[" + slbl + "]"
+			}
+		}
+	}
+	vv.ViewPath = viewPath + vpath
 	vv.SetName(idxstr)
 }
 
@@ -645,6 +654,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 			rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
 		}
 		if updtr, ok := vv.Owner.(gi.Updater); ok {
+			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
@@ -770,6 +780,12 @@ func (vv *ValueViewBase) OwnerLabel() string {
 		}
 		return olbl
 	case reflect.Slice:
+		if lblr, ok := vv.Owner.(gi.SliceLabeler); ok {
+			slbl := lblr.ElemLabel(vv.Idx)
+			if slbl != "" {
+				return fmt.Sprintf("%s[%s]", olbl, slbl)
+			}
+		}
 		return fmt.Sprintf("%s[%d]", olbl, vv.Idx)
 	}
 	return olbl
@@ -777,10 +793,10 @@ func (vv *ValueViewBase) OwnerLabel() string {
 
 // Label returns a label for this item suitable for a window title etc.
 // Based on the underlying value type name, owner label, and ViewPath.
-// noPath returns the label without the path, for recursive path construction.
+// newPath returns just what should be added to a ViewPath
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
-func (vv *ValueViewBase) Label() (label, noPath string, isZero bool) {
+func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
 	lbl := ""
 	var npt reflect.Type
 	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
@@ -790,24 +806,16 @@ func (vv *ValueViewBase) Label() (label, noPath string, isZero bool) {
 		opv := kit.OnePtrUnderlyingValue(vv.Value)
 		npt = kit.NonPtrType(opv.Type())
 	}
-	switch npt.Kind() {
-	case reflect.Array:
-		lbl = "Array of "
-	case reflect.Slice:
-		lbl = "Slice of "
-	case reflect.Map:
-		lbl = "Map of "
-	}
 	lbl += npt.String()
+	newPath = lbl
 	olbl := vv.OwnerLabel()
 	if olbl != "" {
 		lbl += ": " + olbl
 	}
-	noPath = lbl
 	if vv.ViewPath != "" {
 		lbl += " [" + vv.ViewPath + "]"
 	}
-	return lbl, noPath, isZero
+	return lbl, newPath, isZero
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -853,6 +861,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 	if completetag, ok := vv.Tag("complete"); ok {
+		// todo: this does not seem to be up-to-date and should use Completer interface..
 		in := []reflect.Value{reflect.ValueOf(tf)}
 		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
 		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")

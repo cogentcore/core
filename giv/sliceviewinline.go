@@ -133,13 +133,13 @@ func (sv *SliceViewInline) ConfigParts() {
 			vpath := svv.ViewPath
 			title := ""
 			if svv.SliceValView != nil {
-				noPath := ""
+				newPath := ""
 				isZero := false
-				title, noPath, isZero = svv.SliceValView.AsValueViewBase().Label()
+				title, newPath, isZero = svv.SliceValView.AsValueViewBase().Label()
 				if isZero {
 					return
 				}
-				vpath = svv.ViewPath + "/" + noPath
+				vpath = svv.ViewPath + "/" + newPath
 			} else {
 				elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
 				title = "Slice of " + kit.NonPtrType(elType).Name()

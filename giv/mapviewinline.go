@@ -133,13 +133,13 @@ func (mv *MapViewInline) ConfigParts() {
 			vpath := mvv.ViewPath
 			title := ""
 			if mvv.MapValView != nil {
-				noPath := ""
+				newPath := ""
 				isZero := false
-				title, noPath, isZero = mvv.MapValView.AsValueViewBase().Label()
+				title, newPath, isZero = mvv.MapValView.AsValueViewBase().Label()
 				if isZero {
 					return
 				}
-				vpath = mvv.ViewPath + "/" + noPath
+				vpath = mvv.ViewPath + "/" + newPath
 			} else {
 				tmptyp := kit.NonPtrType(reflect.TypeOf(mvv.Map))
 				title = "Map of " + tmptyp.String()

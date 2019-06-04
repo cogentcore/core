@@ -526,6 +526,12 @@ func (tv *TableView) UpdateSliceGrid() {
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"
+		if lblr, ok := tv.Slice.(gi.SliceLabeler); ok {
+			slbl := lblr.ElemLabel(si)
+			if slbl != "" {
+				vpath = tv.ViewPath + "[" + slbl + "]"
+			}
+		}
 		for fli := 0; fli < tv.NVisFields; fli++ {
 			field := tv.VisFields[fli]
 			fval := val.Elem().Field(field.Index[0])
