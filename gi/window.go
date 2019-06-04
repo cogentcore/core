@@ -621,6 +621,9 @@ func (w *Window) Resized(sz image.Point) {
 	if WinEventTrace {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
+	if curSz == image.ZP { // first open
+		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
+	}
 	if w.OverTex != nil {
 		oswin.TheApp.RunOnMain(func() {
 			w.OverTex.Delete()
@@ -680,6 +683,9 @@ func (w *Window) Closed() {
 		WindowGlobalMu.Unlock()
 		pfw, has := AllWindows.FindName(pf)
 		if has {
+			if WinEventTrace {
+				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Nm, w.Nm)
+			}
 			pfw.OSWin.Raise()
 		}
 	} else {
@@ -917,7 +923,7 @@ func (w *Window) InitialFocus() {
 	if prof.Profiling {
 		now := time.Now()
 		opent := now.Sub(WindowOpenTimer)
-		fmt.Printf("Window: %v took: %v to open\n", w.Nm, opent)
+		fmt.Printf("Win: %v took: %v to open\n", w.Nm, opent)
 	}
 }
 
@@ -937,7 +943,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
+		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
 	}
 	w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
 	// pr.End()
@@ -960,7 +966,7 @@ func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
 	updt := w.UpdateStart()
 	// pr := prof.Start("win.UploadVp")
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
+		fmt.Printf("Win: %v uploading Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vp.Pixels.Bounds(), w.OSWin.WinTex().Bounds())
 	}
 	w.OSWin.SetWinTexSubImage(offset, vp.Pixels, vp.Pixels.Bounds())
 	// pr.End()
@@ -1016,7 +1022,7 @@ func (w *Window) UploadAllViewports() {
 	// pr := prof.Start("win.UploadAllViewports")
 	updt := w.UpdateStart()
 	if Render2DTrace || WinEventTrace {
-		fmt.Printf("Window: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
+		fmt.Printf("Win: %v uploading full Vp, image bound: %v, wintex bounds: %v updt: %v\n", w.PathUnique(), w.Viewport.Pixels.Bounds(), w.OSWin.WinTex().Bounds(), updt)
 	}
 	w.OSWin.SetWinTexSubImage(image.ZP, w.Viewport.Pixels, w.Viewport.Pixels.Bounds())
 	// next any direct uploaders
@@ -1031,7 +1037,7 @@ func (w *Window) UploadAllViewports() {
 				vp := gii.AsViewport2D()
 				r := vp.Geom.Bounds()
 				if Render2DTrace {
-					fmt.Printf("Window: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
+					fmt.Printf("Win: %v uploading popup stack Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
 				}
 				w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
 			}
@@ -1043,7 +1049,7 @@ func (w *Window) UploadAllViewports() {
 			vp := gii.AsViewport2D()
 			r := vp.Geom.Bounds()
 			if Render2DTrace || WinEventTrace {
-				fmt.Printf("Window: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
+				fmt.Printf("Win: %v uploading top popup Vp %v, image bound: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), r.Min, vp.Pixels.Bounds())
 			}
 			w.OSWin.SetWinTexSubImage(r.Min, vp.Pixels, vp.Pixels.Bounds())
 		}
@@ -1123,7 +1129,7 @@ func (w *Window) Publish() {
 func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 	win := winki.Embed(KiT_Window).(*Window)
 	if WinEventTrace || Render2DTrace {
-		fmt.Printf("Window: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
+		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
 	if !win.IsVisible() || win.IsWinUpdating() { // win.IsResizing() ||
 		// fmt.Printf("not updating as invisible or already updating\n")
@@ -2326,7 +2332,7 @@ func (w *Window) TriggerShortcut(chord key.Chord) bool {
 	}
 
 	// if KeyEventTrace {
-	fmt.Printf("Window: %v Shortcut chord: %v, action: %v triggered\n", w.Nm, chord, sa.Text)
+	fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Nm, chord, sa.Text)
 	// }
 	sa.Trigger()
 	return true
@@ -2601,7 +2607,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		TheViewIFace.PrefsView(&Prefs)
 		e.SetProcessed()
 	case KeyFunRefresh:
-		fmt.Printf("Window: %v display refreshed\n", w.Nm)
+		fmt.Printf("Win: %v display refreshed\n", w.Nm)
 		w.FocusInactivate()
 		w.FullReRender()
 		// w.UploadAllViewports()
@@ -3259,7 +3265,7 @@ func (w *Window) ReportWinNodes() {
 		nn++
 		return true
 	})
-	fmt.Printf("Window: %v has: %v nodes\n", w.Nm, nn)
+	fmt.Printf("Win: %v has: %v nodes\n", w.Nm, nn)
 }
 
 // BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,

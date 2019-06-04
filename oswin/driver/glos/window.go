@@ -628,7 +628,7 @@ func (w *windowImpl) updtGeom() {
 	if w.Activate() {
 		w.winTex.SetSize(w.PxSize)
 	}
-	w.sendWindowEvent(window.Resize)
+	w.sendWindowEvent(window.Resize) // this will not get processed until the end
 }
 
 func (w *windowImpl) fbResized(gw *glfw.Window, width, height int) {
