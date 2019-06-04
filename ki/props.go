@@ -86,6 +86,11 @@ type PropStruct struct {
 // property to a PropSlice to create an ordered list of property values.
 type PropSlice []PropStruct
 
+// ElemLabel satisfies the gi.SliceLabeler interface to provide labels for slice elements
+func (ps *PropSlice) ElemLabel(idx int) string {
+	return (*ps)[idx].Name
+}
+
 // SliceProps returns a value that contains a PropSlice, or nil and false if it doesn't
 // exist or isn't a PropSlice
 func SliceProps(pr map[string]interface{}, key string) (PropSlice, bool) {
