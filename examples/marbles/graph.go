@@ -384,7 +384,12 @@ func ResetMarbles() {
 }
 
 func UpdateMarbles() {
+	if SvgGraph.Win != nil {
+		wupdt := SvgGraph.Win.UpdateStart()
+		defer SvgGraph.Win.UpdateEnd(wupdt)
+	}
 	updt := SvgGraph.UpdateStart()
+	defer SvgGraph.UpdateEnd(updt)
 
 	for i, m := range Marbles {
 
@@ -458,7 +463,6 @@ func UpdateMarbles() {
 		circle := SvgMarbles.Child(i).(*svg.Circle)
 		circle.Pos = m.Pos
 	}
-	SvgGraph.UpdateEnd(updt)
 }
 
 var Stop = false
