@@ -805,7 +805,9 @@ func (sc *Scene) DirectWinUpload() bool {
 			wt.Copy(sc.WinBBox.Min, sc.Tex, tb, draw.Src, nil)
 		})
 	}
-	sc.Win.UpdateSig() // trigger publish
+	if !sc.Win.IsUpdating() {
+		sc.Win.UpdateSig() // trigger publish
+	}
 	return true
 }
 

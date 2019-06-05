@@ -518,6 +518,7 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	if win != nil {
 		win.DisconnectAllEvents(nb.This(), pri)
 	}
+	nb.DisconnectViewport()
 }
 
 // DisconnectAllEventsTree disconnect node and all of its children (and so on)
@@ -535,13 +536,21 @@ func (nb *Node2DBase) DisconnectAllEventsTree(win *Window) {
 	})
 }
 
-// ConnectToViewport connects the view node's update signal to the viewport as
-// a receiver, so that when the view is updated, it triggers the viewport to
+// ConnectToViewport connects the node's update signal to the viewport as
+// a receiver, so that when the node is updated, it triggers the viewport to
 // re-render it -- this is automatically called in PushBounds, and
-// disconnected with DisconnectAllEvents, so it only occurs for rendered nodes
+// disconnected with DisconnectAllEvents, so it only occurs for rendered nodes.
 func (nb *Node2DBase) ConnectToViewport() {
 	if nb.Viewport != nil {
 		nb.NodeSig.Connect(nb.Viewport.This(), SignalViewport2D)
+	}
+}
+
+// DisconnectViewport disconnects the node's update signal to the viewport as
+// a receiver
+func (nb *Node2DBase) DisconnectViewport() {
+	if nb.Viewport != nil {
+		nb.NodeSig.Disconnect(nb.Viewport.This())
 	}
 }
 

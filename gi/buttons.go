@@ -543,6 +543,7 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 
 func (bb *ButtonBase) Init2D() {
 	bb.Init2DWidget()
+	bb.State = ButtonActive
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
@@ -630,7 +631,6 @@ func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
 	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
 	bb.This().(ButtonWidget).ConfigParts()
-	bb.SetButtonState(ButtonActive) // initial default
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())
 	}

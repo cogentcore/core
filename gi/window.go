@@ -906,9 +906,9 @@ func (w *Window) FullReRender() {
 		return
 	}
 	if WinEventTrace {
-		fmt.Printf("Win: %v FullReRender (w.Viewport.FullRender2DTree)\n", w.Nm)
+		fmt.Printf("Win: %v FullReRender (w.Viewport.SetNeedsFullRender)\n", w.Nm)
 	}
-	w.Viewport.FullRender2DTree()
+	w.Viewport.SetNeedsFullRender()
 	w.InitialFocus()
 }
 

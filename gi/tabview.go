@@ -192,13 +192,14 @@ func (tv *TabView) SelectTabIndex(idx int) (Node2D, bool) {
 		return widg, true
 	}
 	tv.Mu.Lock()
+	tv.Viewport.BlockUpdates()
 	updt := tv.UpdateStart()
 	tv.UnselectOtherTabs(idx)
 	tab.SetSelectedState(true)
 	fr.StackTop = idx
-	widg.AsNode2D().SetFullReRender()
+	fr.SetFullReRender()
 	tv.WinFullReRender() // tell window to do a full redraw
-	// frame  / layout will set invisible etc
+	tv.Viewport.UnblockUpdates()
 	tv.Mu.Unlock()
 	tv.UpdateEnd(updt)
 	return widg, true

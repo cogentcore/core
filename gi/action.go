@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/goki/gi/units"
@@ -209,6 +210,7 @@ func (ac *Action) Trigger() {
 // ButtonRelease triggers action signal
 func (ac *Action) ButtonRelease() {
 	if ac.IsInactive() {
+		fmt.Printf("action: %v inactive\n", ac.Nm)
 		return
 	}
 	wasPressed := (ac.State == ButtonDown)
@@ -220,6 +222,8 @@ func (ac *Action) ButtonRelease() {
 		ac.ActionSig.Emit(ac.This(), 0, ac.Data)
 		ac.ButtonSig.Emit(ac.This(), int64(ButtonClicked), ac.Data)
 		menOpen = ac.OpenMenu()
+	} else {
+		fmt.Printf("action: %v not was pressed\n", ac.Nm)
 	}
 	if !menOpen && ac.IsMenu() && ac.Viewport != nil {
 		win := ac.Viewport.Win

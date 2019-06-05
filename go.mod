@@ -11,6 +11,8 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
 	github.com/chewxy/math32 v1.0.0
 	github.com/fatih/camelcase v1.0.0
+	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
+	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1
 	github.com/go-gl/mathgl v0.0.0-20180804195959-cdf14b6b8f8a
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v0.9.7

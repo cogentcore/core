@@ -620,7 +620,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 							switch sig {
 							case 0:
 								if vp != nil {
-									vp.FullRender2DTree()
+									vp.SetNeedsFullRender()
 								}
 							case 1:
 								cv := ov.MapIndex(kv)               // get current value
@@ -630,7 +630,7 @@ func (vv *ValueViewBase) SetValue(val interface{}) bool {
 								vv.This().(ValueView).SaveTmp()
 								vv.ViewSig.Emit(vv.This(), 0, nil)
 								if vp != nil {
-									vp.FullRender2DTree()
+									vp.SetNeedsFullRender()
 								}
 							}
 						})

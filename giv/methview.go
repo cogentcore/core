@@ -722,7 +722,7 @@ func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Val
 func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 	rv := md.MethVal.Call(args)
 	if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
-		md.Vp.FullRender2DTree() // always update after all methods -- almost always want that
+		md.Vp.SetNeedsFullRender() // always update after all methods -- almost always want that
 	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
 		if len(rv) >= 1 {

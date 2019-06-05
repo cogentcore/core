@@ -38,6 +38,10 @@ type Viewport2D struct {
 	Win          *Window      `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 	CurStyleNode Node2D       `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 	CurColor     Color        `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
+	UpdtMu       sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`
+	UpdtStack    []Node2D     `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requring basic updating"`
+	ReStack      []Node2D     `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requiring a ReRender (i.e., anchors)"`
+	StackMu      sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"StackMu is mutex for adding to UpdtStack"`
 	StyleMu      sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
@@ -119,6 +123,16 @@ const (
 	// look for this for re-rendering
 	VpFlagSVG
 
+	// VpFlagUpdatingNode means that this viewport is currently handling the
+	// update of a node, and is under the UpdtMu mutex lock.
+	// This can be checked to see about whether to add another update or not.
+	VpFlagUpdatingNode
+
+	// VpFlagNeedsFullRender means that this viewport needs to do a full
+	// render -- this is set during signal processing and will preempt
+	// other lower-level updates etc.
+	VpFlagNeedsFullRender
+
 	// VpFlagDoingFullRender means that this viewport is currently doing a
 	// full render -- can be used by elements to drive deep rebuild in case
 	// underlying data has changed.
@@ -149,6 +163,14 @@ func (vp *Viewport2D) IsTooltip() bool {
 
 func (vp *Viewport2D) IsSVG() bool {
 	return vp.HasFlag(int(VpFlagSVG))
+}
+
+func (vp *Viewport2D) IsUpdatingNode() bool {
+	return vp.HasFlag(int(VpFlagUpdatingNode))
+}
+
+func (vp *Viewport2D) NeedsFullRender() bool {
+	return vp.HasFlag(int(VpFlagNeedsFullRender))
 }
 
 func (vp *Viewport2D) IsDoingFullRender() bool {
@@ -304,11 +326,7 @@ func (vp *Viewport2D) Init2D() {
 			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
 		}
 		if !vp.IsDeleted() && !vp.IsDestroyed() {
-			if vp.Viewport == nil {
-				rvp.FullRender2DTree()
-			} else {
-				rvp.ReRender2DTree()
-			}
+			vp.SetNeedsFullRender()
 		}
 	})
 }
@@ -507,7 +525,7 @@ func (vp *Viewport2D) Render2D() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
 
-// SignalViewport2D is called by each node in scenegraph through its UpdateSig
+// SignalViewport2D is called by each node in scenegraph through its NodeSig
 // signal to notify its parent viewport whenever it changes, causing a
 // re-render.
 func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
@@ -532,62 +550,173 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 	}
 
 	if Update2DTrace {
-		fmt.Printf("Update: Viewport2D: %v rendering (next line has specifics) due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), send.PathUnique())
+		fmt.Printf("Update: Viewport2D: %v NodeUpdated due to signal: %v from node: %v\n", vp.PathUnique(), ki.NodeSignals(sig), send.PathUnique())
 	}
 
-	fullRend := false
+	vp.NodeUpdated(nii, sig, data)
+}
+
+// NodeUpdated is called from SignalViewport2D when a valid node's NodeSig sent a signal
+// usually after UpdateEnd.
+func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data interface{}) {
+	if !vp.NeedsFullRender() {
+		vp.StackMu.Lock()
+		anchor, full := vp.UpdateLevel(nii, sig, data)
+		if anchor != nil {
+			already := false
+			for _, n := range vp.ReStack {
+				if n == anchor {
+					already = true
+					break
+				}
+			}
+			if !already {
+				vp.ReStack = append(vp.ReStack, anchor)
+			}
+		} else if full {
+			vp.SetFlag(int(VpFlagNeedsFullRender))
+		} else {
+			already := false
+			for _, n := range vp.UpdtStack {
+				if n == nii {
+					already = true
+					break
+				}
+			}
+			if !already {
+				for _, n := range vp.ReStack {
+					if nii.ParentLevel(n) >= 0 {
+						already = true
+						break
+					}
+				}
+			}
+			if !already {
+				vp.UpdtStack = append(vp.UpdtStack, nii)
+			}
+		}
+		vp.StackMu.Unlock()
+	}
+
+	if !vp.IsUpdatingNode() {
+		vp.UpdateNodes() // do all pending nodes
+	}
+}
+
+// SetNeedsFullRender sets the flag indicating that a full render of the viewport is needed
+// it will do this immediately pending aquisition of the lock and through the standard
+// updating channels, unless already updating.
+func (vp *Viewport2D) SetNeedsFullRender() {
+	if !vp.NeedsFullRender() {
+		vp.StackMu.Lock()
+		vp.SetFlag(int(VpFlagNeedsFullRender))
+		vp.StackMu.Unlock()
+	}
+	if !vp.IsUpdatingNode() {
+		vp.UpdateNodes() // do all pending nodes
+	}
+}
+
+// BlockUpdates uses the UpdtMu lock to block all updates to this viewport.
+// This is *ONLY* needed when structural updates to the scenegraph are being
+// made from a different goroutine outside of the one this window's event
+// loop is running on.  This prevents an update from happening in the
+// middle of the construction process and thus attempting to render garbage.
+// Must call UnblockUpdates after construction is done.
+func (vp *Viewport2D) BlockUpdates() {
+	// vp.UpdtMu.Lock()
+}
+
+// UnblockUpdates unblocks updating of this viewport -- see BlockUpdates()
+func (vp *Viewport2D) UnblockUpdates() {
+	// vp.UpdtMu.Unlock()
+}
+
+// UpdateNodes processes the current update signals and actually does the relevant updating
+func (vp *Viewport2D) UpdateNodes() {
+	vp.UpdtMu.Lock()
+	vp.SetFlag(int(VpFlagUpdatingNode))
+
+	for {
+		if vp.NeedsFullRender() {
+			vp.StackMu.Lock()
+			vp.ReStack = nil
+			vp.UpdtStack = nil
+			vp.ClearFlag(int(VpFlagNeedsFullRender))
+			vp.StackMu.Unlock()
+			if vp.Viewport == nil { // top level
+				vp.FullRender2DTree()
+			} else {
+				vp.ReRender2DTree() // embedded
+			}
+			break
+		}
+		vp.StackMu.Lock()
+		if len(vp.ReStack) == 0 && len(vp.UpdtStack) == 0 {
+			vp.StackMu.Unlock()
+			break
+		}
+		if len(vp.ReStack) > 0 {
+			nii := vp.ReStack[0]
+			vp.ReStack = vp.ReStack[1:]
+			vp.StackMu.Unlock()
+			vp.ReRender2DAnchor(nii)
+			continue
+		}
+		if len(vp.UpdtStack) > 0 {
+			nii := vp.UpdtStack[0]
+			vp.UpdtStack = vp.UpdtStack[1:]
+			vp.StackMu.Unlock()
+			vp.UpdateNode(nii)
+			continue
+		}
+	}
+
+	vp.ClearFlag(int(VpFlagUpdatingNode))
+	vp.UpdtMu.Unlock()
+}
+
+// UpdateLevel deteremines what level of updating a node requires
+func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anchor Node2D, full bool) {
+	ni := nii.AsNode2D()
 	if sig == int64(ki.NodeSignalUpdated) {
 		dflags := data.(int64)
 		vlupdt := bitflag.HasAnyMask(dflags, ki.ValUpdateFlagsMask)
 		strupdt := bitflag.HasAnyMask(dflags, ki.StruUpdateFlagsMask)
 		if vlupdt && !strupdt {
-			fullRend = false
+			full = false
 		} else if strupdt {
-			fullRend = true
+			full = true
 		}
 	} else {
-		fullRend = true
+		full = true
 	}
-
-	if fullRend {
+	if ni.NeedsFullReRender() {
+		ni.ClearFullReRender()
+		full = true
+	}
+	if full {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes)\n", vp.PathUnique())
+			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.PathUnique(), nii.PathUnique())
 		}
-		anchor := ni.ParentReRenderAnchor()
-		if anchor != nil {
-			vp.ReRender2DAnchor(anchor)
-		} else {
-			vp.FullRender2DTree()
+		anchor = ni.ParentReRenderAnchor()
+		return anchor, full
+	}
+	return nil, false
+}
+
+// UpdateNode is called under UpdtMu lock and does the actual steps to update a given node
+func (vp *Viewport2D) UpdateNode(nii Node2D) {
+	if nii.DirectWinUpload() {
+		if Update2DTrace {
+			fmt.Printf("Update: Viewport2D: %v DirectWinUpload on %v\n", vp.PathUnique(), nii.PathUnique())
 		}
 	} else {
-		if ni.NeedsFullReRender() {
-			ni.ClearFullReRender()
-			anchor := ni.ParentReRenderAnchor()
-			if anchor != nil {
-				if Update2DTrace {
-					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, found anchor, styling: %v, then doing ReRender2DTree on: %v\n", vp.PathUnique(), ni.PathUnique(), anchor.PathUnique())
-				}
-				vp.ReRender2DAnchor(anchor)
-			} else {
-				if Update2DTrace {
-					fmt.Printf("Update: Viewport2D: %v ReRender2D nil, styling: %v, then doing ReRender2DTree on us\n", vp.PathUnique(), ni.PathUnique())
-				}
-				vp.ReRender2DTree() // need to re-render entirely from us
-			}
-		} else {
-			if nii.DirectWinUpload() {
-				if Update2DTrace {
-					fmt.Printf("Update: Viewport2D: %v DirectWinUpload on %v\n", vp.PathUnique(), ni.PathUnique())
-				}
-			} else {
-				if Update2DTrace {
-					fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), ni.PathUnique())
-				}
-				vp.ReRender2DNode(nii)
-			}
+		if Update2DTrace {
+			fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), nii.PathUnique())
 		}
+		vp.ReRender2DNode(nii)
 	}
-	// don't do anything on deleting or destroying, and
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

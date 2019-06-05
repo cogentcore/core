@@ -500,7 +500,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 	}
 
 	frame := dlg.Frame()
-	bb, _ := dlg.ButtonBox(frame)
+	bb := dlg.AddButtonBox(frame) // not otherwise made because no buttons above
 	for i, ch := range choices {
 		chnm := strcase.ToKebab(ch)
 		b := AddNewButton(bb, chnm)

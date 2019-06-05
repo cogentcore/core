@@ -129,7 +129,7 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
 	sv.SetSplits(splits...)
 	sv.WinFullReRender() // tell window to do a full redraw
-	sv.Viewport.FullRender2DTree()
+	sv.Viewport.SetNeedsFullRender()
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -222,7 +222,7 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sv.Splits)
 	sv.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sv.Splits)
-	sv.Viewport.FullRender2DTree() // splits typically require full rebuild
+	sv.Viewport.SetNeedsFullRender() // splits typically require full rebuild
 }
 
 func (sv *SplitView) Init2D() {

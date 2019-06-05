@@ -1992,7 +1992,7 @@ func (tv *TreeView) Init2D() {
 	tv.Sty.Template = "giv.TreeView." + tv.Type().Name()
 	tv.LayData.Defaults() // doesn't overwrite
 	tv.ConfigParts()
-	tv.ConnectToViewport()
+	// tv.ConnectToViewport()
 }
 
 func (tv *TreeView) StyleTreeView() {
