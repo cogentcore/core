@@ -246,7 +246,10 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 	draw.Draw(parVp.Pixels, r, vp.Pixels, sp, draw.Over)
 }
 
-// ReRender2DNode re-renders a specific node
+// ReRender2DNode re-renders a specific node, including uploading updated bits to
+// the window texture using Window.UploadVpRegion call.
+// This should be covered by an outer UpdateStart / End bracket on Window to drive
+// publishing changes, with suitable grouping if multiple updates
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	if vp.Win == nil || vp.Win.IsClosed() || vp.Win.IsResizing() { // no node-triggered updates during resize..
 		return
@@ -258,15 +261,14 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	pr := prof.Start("vp.ReRender2DNode")
 	gn.Render2DTree()
 	pr.End()
-	if vp.Win != nil {
-		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, gn.VpBBox, gn.WinBBox)
-		vp.Win.UpdateEnd(updt)
-	}
+	vp.Win.UploadVpRegion(vp, gn.VpBBox, gn.WinBBox)
 }
 
 // ReRender2DAnchor re-renders an anchor node -- the KEY diff from
 // ReRender2DNode is that it calls ReRender2DTree and not just Render2DTree!
+// uploads updated bits to the window texture using Window.UploadVpRegion call.
+// This should be covered by an outer UpdateStart / End bracket on Window to drive
+// publishing changes, with suitable grouping if multiple updates
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	if vp.Win == nil || vp.Win.IsClosed() || vp.Win.IsResizing() { // no node-triggered updates during resize..
 		return
@@ -281,11 +283,7 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	pr := prof.Start("vp.ReRender2DNode")
 	pw.ReRender2DTree()
 	pr.End()
-	if vp.Win != nil {
-		updt := vp.Win.UpdateStart()
-		vp.Win.UploadVpRegion(vp, pw.VpBBox, pw.WinBBox)
-		vp.Win.UpdateEnd(updt)
-	}
+	vp.Win.UploadVpRegion(vp, pw.VpBBox, pw.WinBBox)
 }
 
 // Delete this popup viewport -- has already been disconnected from window
@@ -603,6 +601,35 @@ func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data interface{}) {
 	}
 }
 
+// UpdateLevel deteremines what level of updating a node requires
+func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anchor Node2D, full bool) {
+	ni := nii.AsNode2D()
+	if sig == int64(ki.NodeSignalUpdated) {
+		dflags := data.(int64)
+		vlupdt := bitflag.HasAnyMask(dflags, ki.ValUpdateFlagsMask)
+		strupdt := bitflag.HasAnyMask(dflags, ki.StruUpdateFlagsMask)
+		if vlupdt && !strupdt {
+			full = false
+		} else if strupdt {
+			full = true
+		}
+	} else {
+		full = true
+	}
+	if ni.NeedsFullReRender() {
+		ni.ClearFullReRender()
+		full = true
+	}
+	if full {
+		if Update2DTrace {
+			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.PathUnique(), nii.PathUnique())
+		}
+		anchor = ni.ParentReRenderAnchor()
+		return anchor, full
+	}
+	return nil, false
+}
+
 // SetNeedsFullRender sets the flag indicating that a full render of the viewport is needed
 // it will do this immediately pending aquisition of the lock and through the standard
 // updating channels, unless already updating.
@@ -636,6 +663,10 @@ func (vp *Viewport2D) UnblockUpdates() {
 func (vp *Viewport2D) UpdateNodes() {
 	vp.UpdtMu.Lock()
 	vp.SetFlag(int(VpFlagUpdatingNode))
+	if vp.Win != nil {
+		wupdt := vp.Win.UpdateStart()
+		defer vp.Win.UpdateEnd(wupdt)
+	}
 
 	for {
 		if vp.NeedsFullRender() {
@@ -674,35 +705,6 @@ func (vp *Viewport2D) UpdateNodes() {
 
 	vp.ClearFlag(int(VpFlagUpdatingNode))
 	vp.UpdtMu.Unlock()
-}
-
-// UpdateLevel deteremines what level of updating a node requires
-func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anchor Node2D, full bool) {
-	ni := nii.AsNode2D()
-	if sig == int64(ki.NodeSignalUpdated) {
-		dflags := data.(int64)
-		vlupdt := bitflag.HasAnyMask(dflags, ki.ValUpdateFlagsMask)
-		strupdt := bitflag.HasAnyMask(dflags, ki.StruUpdateFlagsMask)
-		if vlupdt && !strupdt {
-			full = false
-		} else if strupdt {
-			full = true
-		}
-	} else {
-		full = true
-	}
-	if ni.NeedsFullReRender() {
-		ni.ClearFullReRender()
-		full = true
-	}
-	if full {
-		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.PathUnique(), nii.PathUnique())
-		}
-		anchor = ni.ParentReRenderAnchor()
-		return anchor, full
-	}
-	return nil, false
 }
 
 // UpdateNode is called under UpdtMu lock and does the actual steps to update a given node

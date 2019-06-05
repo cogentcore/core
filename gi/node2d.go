@@ -512,26 +512,21 @@ func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
 }
 
 // DisconnectAllEvents disconnects node from all window events -- typically
-// disconnect when not visible -- pri is priority -- pass AllPris for all priorities
+// disconnect when not visible -- pri is priority -- pass AllPris for all priorities.
+// This goes down the entire tree from this node on down, as typically everything under
+// will not get an explicit disconnect call because no further updating will happen
 func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	win := nb.ParentWindow()
-	if win != nil {
-		win.DisconnectAllEvents(nb.This(), pri)
+	if win == nil {
+		return
 	}
-	nb.DisconnectViewport()
-}
-
-// DisconnectAllEventsTree disconnect node and all of its children (and so on)
-// from all events -- call for to-be-destroyed nodes (will happen in Ki
-// destroy anyway, but more efficient here)
-func (nb *Node2DBase) DisconnectAllEventsTree(win *Window) {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil {
 			return false // going into a different type of thing, bail
 		}
-		win.DisconnectAllEvents(ni.This(), AllPris)
-		ni.NodeSig.DisconnectAll()
+		ni.DisconnectViewport()
+		win.DisconnectAllEvents(ni.This(), pri)
 		return true
 	})
 }
@@ -826,11 +821,11 @@ func (nb *Node2DBase) ParentPaint() *Paint {
 	return nil
 }
 
-// ParentReRenderAnchor returns parent that is a ReRenderAnchor -- for
-// optimized re-rendering
+// ParentReRenderAnchor returns parent (including this node)
+// that is a ReRenderAnchor -- for optimized re-rendering
 func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 	var par Node2D
-	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+	nb.FuncUp(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
 			return false // don't keep going up
