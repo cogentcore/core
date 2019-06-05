@@ -11,7 +11,7 @@ var _ = errors.New("dummy error")
 
 const _LineJoins_name = "LineJoinMiterLineJoinMiterClipLineJoinRoundLineJoinBevelLineJoinArcsLineJoinArcsClipLineJoinsN"
 
-var _LineJoins_index = [...]uint8{0, 13, 30, 43, 56, 68, 84, 93}
+var _LineJoins_index = [...]uint8{0, 13, 30, 43, 56, 68, 84, 94}
 
 func (i LineJoins) String() string {
 	if i < 0 || i >= LineJoins(len(_LineJoins_index)-1) {

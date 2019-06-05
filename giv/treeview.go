@@ -1397,11 +1397,10 @@ func (tv *TreeView) DragNDropStart() {
 			}
 		}
 	}
-	bi := &gi.Bitmap{}
-	bi.InitName(bi, tv.UniqueName())
-	bi.GrabRenderFrom(tv) // todo: show number of items?
-	gi.ImageClearer(bi.Pixels, 50.0)
-	tv.Viewport.Win.StartDragNDrop(tv.This(), md, bi)
+	sp := &gi.Sprite{}
+	sp.GrabRenderFrom(tv) // todo: show number of items?
+	gi.ImageClearer(sp.Pixels, 50.0)
+	tv.Viewport.Win.StartDragNDrop(tv.This(), md, sp)
 }
 
 // DragNDropTarget handles a drag-n-drop onto this node

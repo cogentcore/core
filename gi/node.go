@@ -115,9 +115,6 @@ const (
 	// primarily about dragging (e.g., the Splitter handle)
 	InstaDrag
 
-	// Overlay indicates this node is an overlay -- affects how it renders
-	Overlay
-
 	// can extend node flags from here
 	NodeFlagsN
 )
@@ -279,18 +276,6 @@ func (nb *NodeBase) IsReRenderAnchor() bool {
 // SetReRenderAnchor sets node as a ReRenderAnchor
 func (nb *NodeBase) SetReRenderAnchor() {
 	nb.SetFlag(int(ReRenderAnchor))
-}
-
-// IsOverlay returns whether node is an overlay -- lives in special viewport
-// and renders without bounds
-func (nb *NodeBase) IsOverlay() bool {
-	return nb.HasFlag(int(Overlay))
-}
-
-// SetOverlay flags this node as an overlay -- lives in special viewport and
-// renders without bounds
-func (nb *NodeBase) SetAsOverlay() {
-	nb.SetFlag(int(Overlay))
 }
 
 // translate a point in global pixel coords into relative position within node

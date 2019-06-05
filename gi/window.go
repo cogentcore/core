@@ -156,7 +156,6 @@ type Window struct {
 	Shortcuts         Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	DNDData           mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDImage          ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop node with image of source, that is actually dragged -- typically a Bitmap but can be anything (that renders in Overlay for 2D)"`
 	DNDFinalEvent     *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
 	Dragging          ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
 	Scrolling         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
@@ -320,8 +319,6 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	win.OSWin.SetName(title)
 	win.OSWin.SetParent(win.This())
 	win.NodeSig.Connect(win.This(), SignalWindowPublish)
-	win.OverlayVp = &Viewport2D{}
-	win.OverlayVp.InitName(win.OverlayVp, "overlay-vp")
 	return win
 }
 
@@ -690,15 +687,7 @@ func (w *Window) Closed() {
 		})
 	}
 	w.OverTex = nil
-	if w.OverlayVp != nil {
-		w.OverlayVp.Destroy()
-		w.OverlayVp = nil
-	}
-	for _, sp := range w.Sprites {
-		sp.Destroy()
-	}
 	w.Sprites = nil
-	w.SpritesBg = nil
 	w.UpMu.Unlock()
 }
 
@@ -1184,9 +1173,8 @@ func (w *Window) RenderOverlays() {
 	}
 	w.SetFlag(int(WinFlagOverTexActive))
 	updt := w.UpdateStart()
-	w.MakeOverTex()
-	// clear the texture
-	oswin.TheApp.RunOnMain(func() {
+	w.MakeOverTex()                 // ensures correct size
+	oswin.TheApp.RunOnMain(func() { // clear the texture
 		if w.OSWin.Activate() {
 			w.OverTex.Fill(w.OverTex.Bounds(), color.Transparent, draw.Src)
 		}
@@ -1215,11 +1203,11 @@ func (w *Window) SpriteByName(nm string) (*Sprite, bool) {
 	return nil, false
 }
 
-// AddSprite adds a new sprite viewport with given name (which must remain
+// AddNewSprite adds a new sprite with given name, which must remain
 // invariant and unique among all sprites in use, and is used for all access
 // -- prefix with package and type name to ensure uniqueness.  Starts out in
 // inactive state -- must call ActivateSprite.
-func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Sprite {
+func (w *Window) AddNewSprite(nm string, sz image.Point, pos image.Point) *Sprite {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
@@ -1234,6 +1222,18 @@ func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Sprite {
 	sp.Geom.Pos = pos
 	w.Sprites[nm] = sp
 	return sp
+}
+
+// AddSprite adds an existing sprite to list of sprites, using the sprite.Name
+// as the unique name key.
+func (w *Window) AddSprite(sp *Sprite) {
+	if w.Sprites == nil {
+		w.Sprites = make(Sprites)
+	}
+	w.Sprites[sp.Name] = sp
+	if sp.On {
+		w.ActiveSprites++
+	}
 }
 
 // ActivateSprite clears the Inactive flag on the sprite, and increments
@@ -1281,7 +1281,8 @@ func (w *Window) InactivateAllSprites() {
 	}
 }
 
-// DeleteSprite deletes given sprite
+// DeleteSprite deletes given sprite, returns true if actually deleted
+// User should re-render overlay if returns true.
 func (w *Window) DeleteSprite(nm string) bool {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
@@ -1305,7 +1306,7 @@ func (w *Window) RenderSprite(sp *Sprite) {
 			if sp.Bg != nil {
 				w.OverTex.SetSubImage(sp.Geom.Pos, sp.Bg, sp.Bg.Bounds())
 			}
-			w.OverTex.SetSubImage(sp.Geom.Pos, sp.Image, sp.Image.Bounds())
+			w.OverTex.SetSubImage(sp.Geom.Pos, sp.Pixels, sp.Pixels.Bounds())
 		}
 	})
 }
@@ -2942,6 +2943,8 @@ func (w *Window) IsWindowInFocus() bool {
 /////////////////////////////////////////////////////////////////////////////
 //                   DND: Drag-n-Drop
 
+const DNDSpriteName = "gi.Window:DNDSprite"
+
 // DNDStartEvent handles drag-n-drop start events.
 func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
@@ -2953,32 +2956,32 @@ func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
 }
 
 // StartDragNDrop is called by a node to start a drag-n-drop operation on
-// given source node, which is responsible for providing the data and image
+// given source node, which is responsible for providing the data and Sprite
 // representation of the node.
-func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, img Node2D) {
+func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	// todo: 3d version later..
 	w.DNDSource = src
 	w.DNDData = data
-	wimg := img.AsWidget()
 	if _, sni := KiToNode2D(src); sni != nil { // 2d case
 		if sw := sni.AsWidget(); sw != nil {
-			wimg.LayData.AllocPos.SetPoint(sw.LayData.AllocPos.ToPoint())
+			sp.SetBottomPos(sw.LayData.AllocPos.ToPoint())
 		}
 	}
-	wimg.This().SetName(src.UniqueName())
-	w.AddOverlay(img)
-	w.DNDImage = wimg.This()
+	w.DeleteSprite(DNDSpriteName)
+	sp.Name = DNDSpriteName
+	sp.On = true
+	w.AddSprite(sp)
 	w.DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
+	w.RenderOverlays()
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
 func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
-	if nii, _ := KiToNode2D(w.DNDImage); nii != nil { // 2d case
-		if wg := nii.AsWidget(); wg != nil {
-			wg.LayData.AllocPos.SetPoint(e.Where)
-		}
-	} // else 3d..
+	sp, ok := w.SpriteByName(DNDSpriteName)
+	if ok {
+		sp.SetBottomPos(e.Where)
+	}
 	// todo: when e.Where goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening
 	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
@@ -3098,10 +3101,10 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 func (w *Window) ClearDragNDrop() {
 	w.DNDSource = nil
 	w.DNDData = nil
-	w.DeleteOverlay(w.DNDImage.(Node2D))
-	w.DNDImage = nil
+	w.DeleteSprite(DNDSpriteName)
 	w.DNDClearCursor()
 	w.Dragging = nil
+	w.RenderOverlays()
 }
 
 // DNDModCursor gets the appropriate cursor based on the DND event mod.

@@ -1627,11 +1627,10 @@ func (sv *SliceViewBase) DragNDropStart() {
 	ixs := sv.SelectedIdxsList(false) // ascending
 	widg, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
 	if ok {
-		bi := &gi.Bitmap{}
-		bi.InitName(bi, sv.UniqueName())
-		bi.GrabRenderFrom(widg)
-		gi.ImageClearer(bi.Pixels, 50.0)
-		sv.Viewport.Win.StartDragNDrop(sv.This(), md, bi)
+		sp := &gi.Sprite{}
+		sp.GrabRenderFrom(widg)
+		gi.ImageClearer(sp.Pixels, 50.0)
+		sv.Viewport.Win.StartDragNDrop(sv.This(), md, sp)
 	}
 }
 

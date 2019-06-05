@@ -9,14 +9,14 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleInactiveSelectedMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragOverlayButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagDoingFullRenderVpFlagNWinFlagGoLoopWinFlagStopEventLoopWinFlagDoFullRenderWinFlagFocusActiveWinFlagN"
+const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleInactiveSelectedMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagUpdatingNodeVpFlagNeedsFullRenderVpFlagDoingFullRenderVpFlagNWinFlagPublishFullReRenderWinFlagFocusActiveWinFlagN"
 
-var _NodeFlags_index = [...]uint16{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 105, 118, 130, 139, 146, 165, 182, 196, 208, 221, 242, 251, 272, 279, 292, 312, 331, 349, 357}
+var _NodeFlags_index = [...]uint16{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 105, 118, 130, 139, 158, 175, 189, 201, 214, 235, 244, 262, 283, 304, 311, 337, 355, 363}
 
 func (i NodeFlags) String() string {
-	i -= 14
+	i -= 16
 	if i < 0 || i >= NodeFlags(len(_NodeFlags_index)-1) {
-		return "NodeFlags(" + strconv.FormatInt(int64(i+14), 10) + ")"
+		return "NodeFlags(" + strconv.FormatInt(int64(i+16), 10) + ")"
 	}
 	return _NodeFlags_name[_NodeFlags_index[i]:_NodeFlags_index[i+1]]
 }
@@ -24,7 +24,7 @@ func (i NodeFlags) String() string {
 func StringToNodeFlags(s string) (NodeFlags, error) {
 	for i := 0; i < len(_NodeFlags_index)-1; i++ {
 		if s == _NodeFlags_name[_NodeFlags_index[i]:_NodeFlags_index[i+1]] {
-			return NodeFlags(i + 14), nil
+			return NodeFlags(i + 16), nil
 		}
 	}
 	return 0, errors.New("String: " + s + " is not a valid option for type: NodeFlags")

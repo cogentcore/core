@@ -11,7 +11,7 @@ var _ = errors.New("dummy error")
 
 const _LineCaps_name = "LineCapButtLineCapRoundLineCapSquareLineCapCubicLineCapQuadraticLineCapsN"
 
-var _LineCaps_index = [...]uint8{0, 11, 23, 36, 48, 64, 72}
+var _LineCaps_index = [...]uint8{0, 11, 23, 36, 48, 64, 73}
 
 func (i LineCaps) String() string {
 	if i < 0 || i >= LineCaps(len(_LineCaps_index)-1) {

@@ -364,14 +364,6 @@ func (wb *WidgetBase) PushBounds() bool {
 	if !wb.This().(Node2D).IsVisible() {
 		return false
 	}
-	if wb.IsOverlay() {
-		wb.ClearFullReRender()
-		if wb.Viewport != nil {
-			wb.ConnectToViewport()
-			wb.Viewport.Render.PushBounds(wb.Viewport.Pixels.Bounds())
-		}
-		return true
-	}
 	if wb.VpBBox.Empty() {
 		wb.ClearFullReRender()
 		return false

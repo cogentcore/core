@@ -561,18 +561,27 @@ func (sr *Splitter) UpdateSplitterPos() {
 	}
 	pos := off + int(sr.Pos-0.5*sz)
 	mxpos := off + int(sr.Pos+0.5*sz)
-	if sr.Dim == X {
-		sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
-		sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
+
+	if sr.IsDragging() {
+		win := sr.Viewport.Win
+		spnm := "gi.Splitter:" + sr.UniqueName()
+		spr, ok := win.SpriteByName(spnm)
+		if ok {
+			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + ispc}
+		}
 	} else {
-		sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
-		sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
+		if sr.Dim == X {
+			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
+			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
+		} else {
+			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
+			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
+		}
 	}
 }
 
 func (sr *Splitter) Render2D() {
-	vp := sr.Viewport
-	win := vp.Win
+	win := sr.Viewport.Win
 	sr.This().(Node2D).ConnectEvents2D()
 	spnm := "gi.Splitter:" + sr.UniqueName()
 	if sr.IsDragging() {
@@ -587,16 +596,17 @@ func (sr *Splitter) Render2D() {
 		}
 		spr, ok := win.SpriteByName(spnm)
 		if !ok {
-			spr = win.AddSprite(spnm, image.ZP, sr.VpBBox.Min)
+			spr = win.AddNewSprite(spnm, image.ZP, sr.VpBBox.Min)
 			spr.GrabRenderFrom(icvp.(Node2D))
+			win.ActivateSprite(spnm)
 		}
-		// ovb = ovk.(*Bitmap)
-		// ovb.LayData = ic.LayData // copy
 		sr.UpdateSplitterPos()
-		// ovb.LayData.AllocPos.SetPoint(sr.VpBBox.Min)
 		win.RenderOverlays()
 	} else {
-		win.DeleteSprite(spnm)
+		if win.DeleteSprite(spnm) {
+			win.RenderOverlays()
+		}
+		sr.UpdateSplitterPos()
 		if sr.FullReRenderIfNeeded() {
 			return
 		}

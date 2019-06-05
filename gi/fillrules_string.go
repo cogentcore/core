@@ -11,7 +11,7 @@ var _ = errors.New("dummy error")
 
 const _FillRules_name = "FillRuleNonZeroFillRuleEvenOddFillRulesN"
 
-var _FillRules_index = [...]uint8{0, 15, 30, 39}
+var _FillRules_index = [...]uint8{0, 15, 30, 40}
 
 func (i FillRules) String() string {
 	if i < 0 || i >= FillRules(len(_FillRules_index)-1) {

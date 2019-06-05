@@ -2955,19 +2955,19 @@ func (tv *TextView) RenderCursor(on bool) {
 	win := tv.Viewport.Win
 	sp := tv.CursorSprite()
 	if on {
-		win.ActivateSprite(sp.Nm)
+		win.ActivateSprite(sp.Name)
 	} else {
-		win.InactivateSprite(sp.Nm)
+		win.InactivateSprite(sp.Name)
 	}
 	sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
 	win.RenderOverlays() // needs an explicit call!
 	win.UpdateSig()      // publish
 }
 
-// CursorSprite returns the sprite Viewport2D that holds the cursor (which is
+// CursorSprite returns the sprite for the cursor, which is
 // only rendered once with a vertical bar, and just activated and inactivated
-// depending on render status)
-func (tv *TextView) CursorSprite() *gi.Viewport2D {
+// depending on render status.
+func (tv *TextView) CursorSprite() *gi.Sprite {
 	win := tv.Viewport.Win
 	if win == nil {
 		return nil
@@ -2980,7 +2980,7 @@ func (tv *TextView) CursorSprite() *gi.Viewport2D {
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
-		sp = win.AddSprite(spnm, bbsz, image.ZP)
+		sp = win.AddNewSprite(spnm, bbsz, image.ZP)
 		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
 	}
 	return sp

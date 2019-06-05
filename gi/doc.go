@@ -96,13 +96,11 @@ SVG (Structured Vector Graphics) is used icons, and for rendering any kind of
 graphical output (drawing a graph, dial, etc).  See svg sub-package, and
 examples/svg for an svg viewer, and examples/marbles for an svg animation.
 
-Overlay
+Overlays and Sprites
 
-The gi.Window contains an OverlayVp viewport with nodes that are rendered on
-top of the regular scenegraph -- this is used for drag-n-drop and other kinds
-of transient control / manipulation functionality.  Overlay elements are not
-subject to the standard layout constraints (via having the Overlay NodeFlag
-set)
+The gi.Window can render Sprite images to an OverTex overlay texture, which is
+cleared to be transparent prior to rendering any active sprites.  This is used
+for cursors (e.g., TextField, giv.TextView cursors), Drag-n-Drop, etc.
 
 */
 package gi

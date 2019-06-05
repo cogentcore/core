@@ -4,7 +4,11 @@
 
 package gi
 
-import "image"
+import (
+	"image"
+
+	"github.com/goki/ki/ints"
+)
 
 // A Sprite is just an image (with optional background) that can be drawn onto
 // the OverTex overlay texture of a window.  Sprites are used for cursors
@@ -26,13 +30,22 @@ func (sp *Sprite) Resize(nwsz image.Point) {
 		return
 	}
 	sp.Geom.Size = nwsz // always make sure
-	if sp.Pixels.Bounds().Size() == nwsz {
+	if sp.Pixels != nil && sp.Pixels.Bounds().Size() == nwsz {
 		return
 	}
 	sp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 	if sp.Bg != nil && sp.Bg.Bounds().Size() != nwsz {
 		sp.Bg = image.NewRGBA(image.Rectangle{Max: nwsz})
 	}
+}
+
+// SetBottomPos sets the sprite's bottom position to given point
+// the Geom.Pos represents its top position
+func (sp *Sprite) SetBottomPos(pos image.Point) {
+	sp.Geom.Pos = pos
+	sp.Geom.Pos.Y -= sp.Geom.Size.Y
+	sp.Geom.Pos.Y = ints.MaxInt(sp.Geom.Pos.Y, 0)
+	sp.Geom.Pos.X = ints.MaxInt(sp.Geom.Pos.X, 0)
 }
 
 // GrabRenderFrom grabs the rendered image from given node

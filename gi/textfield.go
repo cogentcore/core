@@ -878,9 +878,9 @@ func (tf *TextField) RenderCursor(on bool) {
 	win := tf.Viewport.Win
 	sp := tf.CursorSprite()
 	if on {
-		win.ActivateSprite(sp.Nm)
+		win.ActivateSprite(sp.Name)
 	} else {
-		win.InactivateSprite(sp.Nm)
+		win.InactivateSprite(sp.Name)
 	}
 	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos).ToPointFloor()
 	win.RenderOverlays() // needs an explicit call!
@@ -899,10 +899,10 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 	return ly.ScrollToBox(bbox)
 }
 
-// CursorSprite returns the sprite Viewport2D that holds the cursor (which is
+// CursorSprite returns the Sprite for the cursor (which is
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status)
-func (tf *TextField) CursorSprite() *Viewport2D {
+func (tf *TextField) CursorSprite() *Sprite {
 	win := tf.Viewport.Win
 	if win == nil {
 		return nil
@@ -915,7 +915,7 @@ func (tf *TextField) CursorSprite() *Viewport2D {
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
-		sp = win.AddSprite(spnm, bbsz, image.ZP)
+		sp = win.AddNewSprite(spnm, bbsz, image.ZP)
 		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{sty.Font.Color}, image.ZP, draw.Src)
 	}
 	return sp
