@@ -23,13 +23,15 @@ import (
 // bitmap contains various bitmap-related elements, including the Bitmap node
 // for showing bitmaps, and image processing utilities
 
-// Bitmap is a Viewport2D that is optimized to render a static bitmap image --
+// Bitmap is a Widget that is optimized to render a static bitmap image --
 // it expects to be a terminal node and does NOT call rendering etc on its
 // children.  It is particularly useful for overlays in drag-n-drop uses --
 // can grab the image of another vp and show that
 type Bitmap struct {
-	Viewport2D
-	Filename FileName `desc:"file name of image loaded -- set by OpenImage"`
+	WidgetBase
+	Filename FileName    `desc:"file name of image loaded -- set by OpenImage"`
+	Size     image.Point `desc:"size of the image"`
+	Pixels   *image.RGBA `copy:"-", view:"-", xml:"-" json:"-" desc:"the bitmap image"`
 }
 
 var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
@@ -41,30 +43,21 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 
 func (nb *Bitmap) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Bitmap)
-	nb.Viewport2D.CopyFieldsFrom(&fr.Viewport2D)
+	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	nb.Size = fr.Size
 	nb.Filename = fr.Filename
 }
 
-var BitmapProps = ki.Props{
-	"background-color": &Prefs.Colors.Background,
-	"ToolBar": ki.PropSlice{
-		{"OpenImage", ki.Props{
-			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
-			"icon": "file-open",
-			"Args": ki.PropSlice{
-				{"File Name", ki.Props{
-					"default-field": "Filename",
-					"ext":           ".png,.jpg",
-				}},
-				{"Width", ki.Props{
-					"desc": "width in raw display dots -- use image size if 0",
-				}},
-				{"Height", ki.Props{
-					"desc": "height in raw display dots -- use image size if 0",
-				}},
-			},
-		}},
-	},
+// Resize resizes bitmap to given size
+func (bm *Bitmap) Resize(nwsz image.Point) {
+	if nwsz.X == 0 || nwsz.Y == 0 {
+		return
+	}
+	bm.Size = nwsz // always make sure
+	if bm.Pixels.Bounds().Size() == nwsz {
+		return
+	}
+	bm.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
@@ -112,43 +105,65 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 	}
 }
 
-// GrabRenderFrom grabs the rendered image from given node -- copies the
-// vpBBox from parent viewport of node (or from viewport directly if node is a
-// viewport) -- returns success
-func (bm *Bitmap) GrabRenderFrom(nii Node2D) bool {
-	updt := bm.UpdateStart()
-	defer bm.UpdateEnd(updt)
-	ni := nii.AsNode2D()
-	nivp := nii.AsViewport2D()
-	if nivp != nil && nivp.Pixels != nil {
-		sz := nivp.Pixels.Bounds().Size()
-		bm.Resize(sz)
-		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), nivp.Pixels, image.ZP, draw.Src)
-		return true
+// GrabRenderFrom grabs the rendered image from given node
+func (bm *Bitmap) GrabRenderFrom(nii Node2D) {
+	img := GrabRenderFrom(nii)
+	if img != nil {
+		bm.Pixels = img
+		bm.Size = bm.Pixels.Bounds().Size()
 	}
-	nivp = ni.Viewport
-	if nivp == nil || nivp.Pixels == nil {
-		log.Printf("Bitmap GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", ni.PathUnique())
-		return false
+}
+
+func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
+	r := image.Rectangle{Max: bm.Size}
+	sp := image.ZP
+	if bm.Par != nil { // use parents children bbox to determine where we can draw
+		pni, _ := KiToNode2D(bm.Par)
+		nr := r.Intersect(pni.ChildrenBBox2D())
+		sp = nr.Min.Sub(r.Min)
+		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
+			fmt.Printf("aberrant sp: %v\n", sp)
+			return
+		}
+		r = nr
 	}
-	if ni.VpBBox.Empty() {
-		return false // offscreen -- can happen -- no warning -- just check rval
-	}
-	sz := ni.VpBBox.Size()
-	bm.Resize(sz)
-	draw.Draw(bm.Pixels, bm.Pixels.Bounds(), nivp.Pixels, ni.VpBBox.Min, draw.Src)
-	return true
+	draw.Draw(parVp.Pixels, r, bm.Pixels, sp, draw.Over)
 }
 
 func (bm *Bitmap) Render2D() {
 	if bm.PushBounds() {
-		bm.DrawIntoParent(bm.Viewport)
+		bm.DrawIntoViewport(bm.Viewport)
 		bm.PopBounds()
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 //  Image IO
+
+// GrabRenderFrom grabs the rendered image from given node
+// if nil, then image could not be grabbed
+func GrabRenderFrom(nii Node2D) *image.RGBA {
+	ni := nii.AsNode2D()
+	nivp := nii.AsViewport2D()
+	if nivp != nil && nivp.Pixels != nil {
+		sz := nivp.Pixels.Bounds().Size()
+		img := image.NewRGBA(image.Rectangle{Max: sz})
+		draw.Draw(img, img.Bounds(), nivp.Pixels, image.ZP, draw.Src)
+		return img
+	}
+	nivp = ni.Viewport
+	if nivp == nil || nivp.Pixels == nil {
+		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", ni.PathUnique())
+		return nil
+	}
+	if ni.VpBBox.Empty() {
+		return nil // offscreen -- can happen -- no warning -- just check rval
+	}
+	sz := ni.VpBBox.Size()
+	img := image.NewRGBA(image.Rectangle{Max: sz})
+	draw.Draw(img, img.Bounds(), nivp.Pixels, ni.VpBBox.Min, draw.Src)
+	return img
+}
 
 // OpenImage opens an image from given path filename -- format is inferred automatically.
 func OpenImage(path string) (image.Image, error) {
@@ -222,4 +237,29 @@ func ImageClearer(im *image.RGBA, pct float32) {
 			im.Set(x, y, f32)
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//  Props
+
+var BitmapProps = ki.Props{
+	"background-color": &Prefs.Colors.Background,
+	"ToolBar": ki.PropSlice{
+		{"OpenImage", ki.Props{
+			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
+			"icon": "file-open",
+			"Args": ki.PropSlice{
+				{"File Name", ki.Props{
+					"default-field": "Filename",
+					"ext":           ".png,.jpg",
+				}},
+				{"Width", ki.Props{
+					"desc": "width in raw display dots -- use image size if 0",
+				}},
+				{"Height", ki.Props{
+					"desc": "height in raw display dots -- use image size if 0",
+				}},
+			},
+		}},
+	},
 }

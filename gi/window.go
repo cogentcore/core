@@ -130,14 +130,9 @@ var WindowOpenTimer time.Time
 // * Then DirectUps (e.g., gi3d.Scene) directly upload their own texture to WinTex
 //   (note: cannot upload directly to window as this prevents popups and overlays)
 // * Then any Popups (which have their own Viewports) upload to WinTex.
-// * Finally if there are any overlays / sprites, then we need a separate
+// * Finally if there are any overlays (sprites), then we need a separate
 //   transparent texture, OverTex, which critically allows WinTex to remain
-//   intact while overlays are updated.  TODO: currently this is backed by a
-//   OverlayVp viewport that is the same size as entire window, but it would be
-//   much more efficient to just render directly to OverTex via temporary images for
-//   each overlay item.  Make a new collection of sprites that are just image + position
-//   and require any rendering to be done prior to that so there is no need for the
-//   overlayvp at all -- should be easy.
+//   intact while overlays are updated.
 type Window struct {
 	NodeBase
 	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
@@ -147,10 +142,8 @@ type Window struct {
 	MainMenu          *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
 	EventSigs         [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
 	EventMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects event sending"`
-	OverTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated by OverlayVp viewport"`
-	OverlayVp         *Viewport2D                             `json:"-" xml:"-" desc:"a separate collection of items to be rendered as overlays -- this viewport is cleared to transparent and all the elements in it are re-rendered if any of them needs to be updated -- generally each item should be manually positioned"`
-	Sprites           map[string]*Viewport2D                  `json:"-" xml:"-" desc:"sprites are named viewports that are rendered into the overlay.  If they are marked inactive then they are not rendered, otherwise automatically rendered."`
-	SpritesBg         map[string]image.Image                  `json:"-" xml:"-" view:"-" desc:"background image for sprite rendering -- one for each sprite -- source window image is first copied into here, then sprite is rendered Over it to support transparency, and then image is uploaded to OverTex."`
+	OverTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated from Sprites"`
+	Sprites           Sprites                                 `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
 	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
 	DirectUps         map[Node2D]Node2D                       `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
 	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
@@ -220,10 +213,6 @@ const (
 
 	// WinFlagIsResizing is atomic flag indicating window is resizing
 	WinFlagIsResizing
-
-	// WinFlagOverlayVpCleared true if OverlayVp has no kids and has already been cleared
-	// no need to keep clearing.
-	WinFlagOverlayVpCleared
 
 	// WinFlagOverTexActive is the overlay texture active and should be uploaded to window?
 	WinFlagOverTexActive
@@ -630,7 +619,7 @@ func (w *Window) Resized(sz image.Point) {
 		})
 	}
 	w.OverTex = nil // dynamically allocated when needed
-	w.ClearFlag(int(WinFlagOverTexActive), int(WinFlagOverlayVpCleared))
+	w.ClearFlag(int(WinFlagOverTexActive))
 	w.Viewport.Resize(sz)
 	WinGeomPrefs.RecordPref(w)
 	w.UpMu.Unlock()
@@ -1163,32 +1152,8 @@ func (w *Window) DeleteDirectUploader(node Node2D) {
 /////////////////////////////////////////////////////////////////////////////
 //                   Overlays and Sprites
 
-// AddOverlay adds the given node as an overlay to be rendered on top of the
-// main window viewport -- node must already be initialized as a Ki element
-// (e.g., call ki.InitName) -- typically it is a Bitmap and should have
-// the bitmap pixels set already
-func (w *Window) AddOverlay(nii Node2D) {
-	w.UpMu.Lock()
-	w.OverlayVp.AddOverlay(nii)
-	w.UpMu.Unlock()
-}
-
-// DeleteOverlay deletes given node from overlays, and re-renders the overlays to
-// update without it -- returns error if overlay was not found (in which case no update)
-func (w *Window) DeleteOverlay(nii Node2D) error {
-	w.UpMu.Lock()
-	err := w.OverlayVp.DeleteChild(nii, true)
-	w.UpMu.Unlock()
-	if err != nil {
-		return err
-	}
-	w.RenderOverlays()
-	return nil
-}
-
 // MakeOverTex makes the OverTex overlay texture if not already there and correct size
-// returns true if needed to make it
-// must be called under UpMu.Lock()
+// returns true if needed to make it.  must be called under UpMu.Lock()
 func (w *Window) MakeOverTex() bool {
 	wsz := w.OSWin.WinTex().Size()
 	if w.OverTex == nil || w.OverTex.Size() != wsz {
@@ -1203,54 +1168,34 @@ func (w *Window) MakeOverTex() bool {
 	return false
 }
 
-// RenderOverlays renders overlays and sprites -- clears overlay viewport to
-// transparent, renders all overlays, uploads result to OverTex
+// RenderOverlays renders sprites -- clears OverTex, uploads sprites to it
 func (w *Window) RenderOverlays() {
 	if !w.IsVisible() {
 		return
 	}
-	w.UpMu.Lock()
-	if w.OverlayVp == nil { // only if deleted -- shouldn't be but just in case..
+	if w.ActiveSprites == 0 || len(w.Sprites) == 0 {
 		w.ClearFlag(int(WinFlagOverTexActive))
-		w.UpMu.Unlock()
 		return
 	}
+	w.UpMu.Lock()
 	if !w.IsVisible() { // could have closed while we waited for lock
 		w.UpMu.Unlock()
 		return
 	}
+	w.SetFlag(int(WinFlagOverTexActive))
 	updt := w.UpdateStart()
-	wsz := w.OSWin.WinTex().Size()
 	w.MakeOverTex()
-	w.OverlayVp.Win = w
-	w.OverlayVp.RenderOverlays(wsz) // handles any resizing etc
-	if !w.OverlayVp.HasChildren() {
-		if !w.HasFlag(int(WinFlagOverlayVpCleared)) {
-			vp := w.OverlayVp
-			draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
-			w.SetFlag(int(WinFlagOverlayVpCleared))
-		} else {
-			w.ClearFlag(int(WinFlagOverlayVpCleared))
-		}
-	}
+	// clear the texture
 	oswin.TheApp.RunOnMain(func() {
 		if w.OSWin.Activate() {
-			w.OverTex.SetSubImage(image.ZP, w.OverlayVp.Pixels, w.OverlayVp.Pixels.Bounds())
+			w.OverTex.Fill(w.OverTex.Bounds(), color.Transparent, draw.Src)
 		}
 	})
-
-	if w.ActiveSprites > 0 {
-		for _, sp := range w.Sprites {
-			if sp.IsInactive() {
-				continue
-			}
-			w.RenderSprite(sp)
+	for _, sp := range w.Sprites {
+		if !sp.On {
+			continue
 		}
-	}
-	if !w.OverlayVp.HasChildren() && w.ActiveSprites == 0 {
-		w.ClearFlag(int(WinFlagOverTexActive))
-	} else {
-		w.SetFlag(int(WinFlagOverTexActive))
+		w.RenderSprite(sp)
 	}
 	w.ClearFlag(int(WinFlagPublishFullReRender))
 	w.UpMu.Unlock()
@@ -1258,7 +1203,7 @@ func (w *Window) RenderOverlays() {
 }
 
 // SpriteByName returns a sprite by name -- false if not created yet
-func (w *Window) SpriteByName(nm string) (*Viewport2D, bool) {
+func (w *Window) SpriteByName(nm string) (*Sprite, bool) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 	if w.Sprites == nil {
@@ -1274,24 +1219,19 @@ func (w *Window) SpriteByName(nm string) (*Viewport2D, bool) {
 // invariant and unique among all sprites in use, and is used for all access
 // -- prefix with package and type name to ensure uniqueness.  Starts out in
 // inactive state -- must call ActivateSprite.
-func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Viewport2D {
+func (w *Window) AddSprite(nm string, sz image.Point, pos image.Point) *Sprite {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
 	if w.Sprites == nil {
-		w.Sprites = make(map[string]*Viewport2D)
-		w.SpritesBg = make(map[string]image.Image)
+		w.Sprites = make(Sprites)
 	}
 	if exsp, has := w.Sprites[nm]; has {
 		return exsp
 	}
-	sp := &Viewport2D{}
-	sp.InitName(sp, nm)
-	sp.Win = w
+	sp := &Sprite{Name: nm}
 	sp.Resize(sz)
 	sp.Geom.Pos = pos
-	sp.SetAsOverlay()
-	sp.SetInactive() // sprites start inactive
 	w.Sprites[nm] = sp
 	return sp
 }
@@ -1306,8 +1246,8 @@ func (w *Window) ActivateSprite(nm string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
-	if sp.IsInactive() {
-		sp.SetActiveState(true)
+	if !sp.On {
+		sp.On = true
 		w.ActiveSprites++
 	}
 }
@@ -1322,8 +1262,8 @@ func (w *Window) InactivateSprite(nm string) {
 	if !ok {
 		return // not worth bothering about errs -- use a consistent string var!
 	}
-	if sp.IsActive() {
-		sp.SetInactive()
+	if sp.On {
+		sp.On = false
 		w.ActiveSprites--
 	}
 }
@@ -1334,33 +1274,38 @@ func (w *Window) InactivateAllSprites() {
 	defer w.UpMu.Unlock()
 
 	for _, sp := range w.Sprites {
-		if sp.IsActive() {
-			sp.SetInactive()
+		if sp.On {
+			sp.On = false
 			w.ActiveSprites--
 		}
 	}
 }
 
-// RenderSprite renders the sprite onto OverTex -- must be called within UpMu mutex lock
-func (w *Window) RenderSprite(sp *Viewport2D) {
-	sp.Render2D()
-	bg, ok := w.SpritesBg[sp.Nm]
-	if !ok {
-		bg = image.NewRGBA(image.Rectangle{Max: sp.Geom.Size})
-		w.SpritesBg[sp.Nm] = bg
-	} else if bg.Bounds().Size() != sp.Geom.Size {
-		bg = image.NewRGBA(image.Rectangle{Max: sp.Geom.Size})
-		w.SpritesBg[sp.Nm] = bg
+// DeleteSprite deletes given sprite
+func (w *Window) DeleteSprite(nm string) bool {
+	w.UpMu.Lock()
+	defer w.UpMu.Unlock()
+	if w.Sprites == nil {
+		return false
 	}
-	bgi := bg.(*image.RGBA)
-	// grab source from viewport
-	draw.Draw(bgi, bgi.Bounds(), w.Viewport.Pixels, sp.Geom.Pos, draw.Src)
-	// draw sprite over
-	draw.Draw(bgi, bgi.Bounds(), sp.Pixels, image.ZP, draw.Over)
-	// note: already under RenderOverlays mutex protection
+	if exsp, has := w.Sprites[nm]; has {
+		if exsp.On {
+			w.ActiveSprites--
+		}
+		delete(w.Sprites, nm)
+		return true
+	}
+	return false
+}
+
+// RenderSprite renders the sprite onto OverTex -- must be called within UpMu mutex lock
+func (w *Window) RenderSprite(sp *Sprite) {
 	oswin.TheApp.RunOnMain(func() {
 		if w.OSWin.Activate() {
-			w.OverTex.SetSubImage(sp.Geom.Pos, bg, bg.Bounds())
+			if sp.Bg != nil {
+				w.OverTex.SetSubImage(sp.Geom.Pos, sp.Bg, sp.Bg.Bounds())
+			}
+			w.OverTex.SetSubImage(sp.Geom.Pos, sp.Image, sp.Image.Bounds())
 		}
 	})
 }

@@ -574,6 +574,7 @@ func (sr *Splitter) Render2D() {
 	vp := sr.Viewport
 	win := vp.Win
 	sr.This().(Node2D).ConnectEvents2D()
+	spnm := "gi.Splitter:" + sr.UniqueName()
 	if sr.IsDragging() {
 		ick := sr.Parts.ChildByType(KiT_Icon, true, 0)
 		if ick == nil {
@@ -584,27 +585,18 @@ func (sr *Splitter) Render2D() {
 		if icvp == nil {
 			return
 		}
-		ovk := win.OverlayVp.ChildByName(sr.UniqueName(), 0)
-		var ovb *Bitmap
-		if ovk == nil {
-			ovb = &Bitmap{}
-			ovb.InitName(ovb, sr.UniqueName())
-			ovb.GrabRenderFrom(icvp.(Node2D))
-			ovk = ovb.This()
-			win.AddOverlay(ovk.(Node2D))
+		spr, ok := win.SpriteByName(spnm)
+		if !ok {
+			spr = win.AddSprite(spnm, image.ZP, sr.VpBBox.Min)
+			spr.GrabRenderFrom(icvp.(Node2D))
 		}
-		ovb = ovk.(*Bitmap)
-		ovb.LayData = ic.LayData // copy
+		// ovb = ovk.(*Bitmap)
+		// ovb.LayData = ic.LayData // copy
 		sr.UpdateSplitterPos()
-		ovb.LayData.AllocPos.SetPoint(sr.VpBBox.Min)
+		// ovb.LayData.AllocPos.SetPoint(sr.VpBBox.Min)
 		win.RenderOverlays()
 	} else {
-		ovidx, ok := win.OverlayVp.Children().IndexByName(sr.UniqueName(), 0)
-		if ok {
-			win.OverlayVp.DeleteChildAtIndex(ovidx, true)
-			win.RenderOverlays()
-		}
-		// todo: still not rendering properly
+		win.DeleteSprite(spnm)
 		if sr.FullReRenderIfNeeded() {
 			return
 		}

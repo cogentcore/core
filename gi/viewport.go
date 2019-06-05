@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"image/draw"
 	"image/png"
 	"io"
@@ -218,16 +217,6 @@ func (vp *Viewport2D) UploadToWin() {
 // DrawIntoParent draws our viewport image into parent's image -- this is the
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
 func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
-	if vp.IsOverlay() { // don't check for any parent bounds etc -- just draw entire pixels
-		if parVp == nil {
-			return
-		}
-		r := vp.Pixels.Bounds()
-		pos := vp.LayData.AllocPos.ToPoint() // get updated pos
-		r = r.Add(pos)
-		draw.Draw(parVp.Pixels, r, vp.Pixels, image.ZP, draw.Over)
-		return
-	}
 	r := vp.Geom.Bounds()
 	sp := image.ZP
 	if vp.Par != nil { // use parents children bbox to determine where we can draw
@@ -411,9 +400,6 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 // RenderViewport2D is the render action for the viewport itself -- either
 // uploads image to window or draws into parent viewport
 func (vp *Viewport2D) RenderViewport2D() {
-	if vp.IsOverlay() {
-		return
-	}
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if Render2DTrace {
@@ -451,12 +437,6 @@ func (vp *Viewport2D) FullRender2DTree() {
 
 // we use our own render for these -- Viewport member is our parent!
 func (vp *Viewport2D) PushBounds() bool {
-	if vp.IsOverlay() {
-		if vp.Viewport != nil {
-			vp.Viewport.Render.PushBounds(vp.Viewport.Pixels.Bounds())
-		}
-		return true
-	}
 	if vp.VpBBox.Empty() {
 		return false
 	}
@@ -481,12 +461,6 @@ func (vp *Viewport2D) PushBounds() bool {
 }
 
 func (vp *Viewport2D) PopBounds() {
-	if vp.IsOverlay() {
-		if vp.Viewport != nil {
-			vp.Viewport.Render.PopBounds()
-		}
-		return
-	}
 	rs := &vp.Render
 	rs.PopBounds()
 }
@@ -718,46 +692,6 @@ func (vp *Viewport2D) UpdateNode(nii Node2D) {
 			fmt.Printf("Update: Viewport2D: %v ReRender2D on %v\n", vp.PathUnique(), nii.PathUnique())
 		}
 		vp.ReRender2DNode(nii)
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  Overlay rendering
-
-// AddOverlay adds the given node as an overlay to be rendered on top of the
-// main window viewport -- node must already be initialized as a Ki element
-// (e.g., call ki.InitName) -- typically it is a Bitmap and should have
-// the bitmap pixels set already.  Sets overlay flag and calls init and style
-func (vp *Viewport2D) AddOverlay(nii Node2D) {
-	nii.AsNode2D().SetAsOverlay()
-	vp.AddChild(nii)
-	nii.Init2D()
-	nii.Style2D()
-}
-
-// RenderOverlays is main call from window for OverlayVp to render overlay nodes within it
-func (vp *Viewport2D) RenderOverlays(wsz image.Point) {
-	vp.SetAsOverlay()
-	vp.Resize(wsz)
-
-	if len(vp.Kids) > 0 {
-		// fill to transparent
-		draw.Draw(vp.Pixels, vp.Pixels.Bounds(), &image.Uniform{color.Transparent}, image.ZP, draw.Src)
-
-		// just do top-level objects here
-		for _, k := range vp.Kids {
-			nii, ni := KiToNode2D(k)
-			if nii == nil {
-				continue
-			}
-			if !ni.IsOverlay() { // has not been initialized
-				ni.SetAsOverlay()
-				nii.Init2D()
-				nii.Style2D()
-			}
-			// note: skipping sizing, layout -- use simple elements here, esp Bitmap
-			nii.Render2D()
-		}
 	}
 }
 
