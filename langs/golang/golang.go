@@ -393,6 +393,9 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 		if strings.HasSuffix(fnm, "_test.go") {
 			continue
 		}
+		if strings.Contains(fnm, "/image/font/gofont/") { // hack to prevent parsing those..
+			continue
+		}
 		fs := pi.NewFileState() // we use a separate fs for each file, so we have full ast
 		fss = append(fss, fs)
 		// optional monitoring of parsing

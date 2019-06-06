@@ -131,6 +131,7 @@ const (
 	TextPlain = "text/plain"
 	DataJson  = "application/json"
 	DataXml   = "application/xml"
+	DataCsv   = "text/csv"
 )
 
 // These are the supported file types, organized by category
