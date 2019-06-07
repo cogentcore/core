@@ -554,7 +554,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			if psz, ok := FontSizePoints[vt]; ok {
 				fs.Size = units.NewPt(psz)
 			} else {
-				fmt.Printf("Unknown font-size: %v\n", vt)
+				fs.Size.SetIFace(val, key) // also processes string
 			}
 		default:
 			fs.Size.SetIFace(val, key)
