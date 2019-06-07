@@ -77,7 +77,7 @@ def mainrun():
 
     win = gi.NewWindow2D("gogi-widgets-demo", "GoGi Widgets Demo", width, height, True) # True = pixel sizes
     
-    icnm = "widget-wedge-down"
+    icnm = "wedge-down"
 
     vp = win.WinViewport2D()
     updt = vp.UpdateStart()

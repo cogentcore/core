@@ -87,8 +87,9 @@ func mainrun() {
 <large>Shortcuts: <kbd>`+string(prsc)+`</kbd> = Preferences,
 <kbd>`+string(giedsc)+`</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`)
-	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
-	title.SetProp("text-align", gi.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+	// title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
+	title.SetProp("white-space", "normal")      // wrap
+	title.SetProp("text-align", gi.AlignCenter) // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
 	title.SetProp("vertical-align", gi.AlignCenter)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")

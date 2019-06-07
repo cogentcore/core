@@ -220,7 +220,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ly.AlignH.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ly.AlignH, vt)
 		case Align:
 			ly.AlignH = vt
 		default:
@@ -243,7 +243,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ly.AlignV.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ly.AlignV, vt)
 		case Align:
 			ly.AlignV = vt
 		default:
@@ -386,7 +386,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ly.Overflow.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ly.Overflow, vt)
 		case Overflow:
 			ly.Overflow = vt
 		default:
@@ -549,7 +549,16 @@ var StyleFontFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Size.SetIFace(val, key)
+		switch vt := val.(type) {
+		case string:
+			if psz, ok := FontSizePoints[vt]; ok {
+				fs.Size = units.NewPt(psz)
+			} else {
+				fmt.Printf("Unknown font-size: %v\n", vt)
+			}
+		default:
+			fs.Size.SetIFace(val, key)
+		}
 	},
 	"font-family": func(obj interface{}, key string, val interface{}, par interface{}, vp *Viewport2D) {
 		fs := obj.(*FontStyle)
@@ -575,7 +584,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Style.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&fs.Style, vt)
 		case FontStyles:
 			fs.Style = vt
 		default:
@@ -598,7 +607,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Weight.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&fs.Weight, vt)
 		case FontWeights:
 			fs.Weight = vt
 		default:
@@ -621,7 +630,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Stretch.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&fs.Stretch, vt)
 		case FontStretch:
 			fs.Stretch = vt
 		default:
@@ -644,7 +653,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Variant.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&fs.Variant, vt)
 		case FontVariants:
 			fs.Variant = vt
 		default:
@@ -667,7 +676,11 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Deco.FromString(vt)
+			if vt == "none" {
+				fs.Deco = DecoNone
+			} else {
+				kit.Enums.SetAnyEnumIfaceFromString(&fs.Deco, vt)
+			}
 		case TextDecorations:
 			fs.Deco = vt
 		default:
@@ -690,7 +703,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fs.Shift.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&fs.Shift, vt)
 		case BaselineShifts:
 			fs.Shift = vt
 		default:
@@ -725,7 +738,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ts.Align.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.Align, vt)
 		case Align:
 			ts.Align = vt
 		default:
@@ -748,7 +761,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ts.Anchor.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.Anchor, vt)
 		case TextAnchors:
 			ts.Anchor = vt
 		default:
@@ -809,7 +822,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ts.WhiteSpace.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.WhiteSpace, vt)
 		case WhiteSpaces:
 			ts.WhiteSpace = vt
 		default:
@@ -832,7 +845,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ts.UnicodeBidi.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.UnicodeBidi, vt)
 		case UnicodeBidi:
 			ts.UnicodeBidi = vt
 		default:
@@ -855,7 +868,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ts.Direction.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.Direction, vt)
 		case TextDirections:
 			ts.Direction = vt
 		default:
@@ -878,7 +891,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			ts.WritingMode.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.WritingMode, vt)
 		case TextDirections:
 			ts.WritingMode = vt
 		default:
@@ -982,7 +995,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			bs.Style.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&bs.Style, vt)
 		case BorderDrawStyle:
 			bs.Style = vt
 		default:
@@ -1054,7 +1067,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			bs.Style.FromString(vt)
+			kit.Enums.SetAnyEnumIfaceFromString(&bs.Style, vt)
 		case BorderDrawStyle:
 			bs.Style = vt
 		default:
