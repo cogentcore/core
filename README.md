@@ -1,29 +1,30 @@
 go-difflib
 ==========
 
-THIS PACKAGE IS NO LONGER MAINTAINED.
+The previous owner of this project (pmezard) did not have the time to continue
+working on it. Additionally I (ianbruene) needed additional ported features.
 
-At this point, I have no longer the time nor the interest to work on go-difflib. I apologize for the inconvenience.
+I have taken over maintenance and further development of the project
 
-[![GoDoc](https://godoc.org/github.com/pmezard/go-difflib/difflib?status.svg)](https://godoc.org/github.com/pmezard/go-difflib/difflib)
+[![GoDoc](https://godoc.org/github.com/ianbruene/go-difflib/difflib?status.svg)](https://godoc.org/github.com/ianbruene/go-difflib/difflib)
 
 Go-difflib is a partial port of python 3 difflib package. Its main goal
-was to make unified and context diff available in pure Go, mostly for
-testing purposes.
+is to make unified and context diff available in pure Go.
 
 The following class and functions (and related tests) have be ported:
 
 * `SequenceMatcher`
+* `Differ`
 * `unified_diff()`
 * `context_diff()`
 
 ## Installation
 
 ```bash
-$ go get github.com/pmezard/go-difflib/difflib
+$ go get github.com/ianbruene/go-difflib/difflib
 ```
 
-### Quick Start
+### UnifiedDiff Quick Start
 
 Diffs are configured with Unified (or ContextDiff) structures, and can
 be output to an io.Writer or returned as a string.
@@ -51,3 +52,23 @@ would output:
 +baz
 ```
 
+### Differ Quick Start
+
+Differ has been implemented primarily for the Compare() function at this time.
+
+```Go
+out, err := diff.Compare(
+    []string{"foo\n", "bar\n", "baz\n"},
+	[]string{"foo\n", "bar1\n", "asdf\n", "baz\n"})
+```
+
+would output:
+
+```
+  foo
+- bar
++ bar1
+?    +
++ asdf
+  baz
+```
