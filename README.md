@@ -57,6 +57,7 @@ would output:
 Differ has been implemented primarily for the Compare() function at this time.
 
 ```Go
+diff := difflib.NewDiffer()
 out, err := diff.Compare(
     []string{"foo\n", "bar\n", "baz\n"},
 	[]string{"foo\n", "bar1\n", "asdf\n", "baz\n"})
