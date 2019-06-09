@@ -125,11 +125,32 @@ func (app *appImpl) SendEmptyEvent() {
 	glfw.PostEmptyEvent()
 }
 
+// PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
+// and returning when there are no more events.
+func (app *appImpl) PollEventsOnMain() {
+outer:
+	for {
+		select {
+		case <-app.mainDone:
+			glfw.Terminate()
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		default:
+			glfw.PollEvents()
+			break outer
+		}
+	}
+}
+
 // PollEvents tells the main event loop to check for any gui events right now.
 // Call this periodically from longer-running functions to ensure
 // GUI responsiveness.
 func (app *appImpl) PollEvents() {
-	app.RunOnMain(func() { glfw.PollEvents() })
+	app.RunOnMain(func() { app.PollEventsOnMain() })
 }
 
 // MainLoop starts running event loop on main thread (must be called

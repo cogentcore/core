@@ -159,6 +159,36 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 	return dlg
 }
 
+//gopy:interface=handle SliceViewDialogNoStyle for editing elements of a slice using a SliceView --
+// optionally connects to given signal receiving object and function for
+// dialog signals (nil to ignore).  This version does not have the style function.
+func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	sv := frame.InsertNewChild(KiT_SliceView, prIdx+1, "slice-view").(*SliceView)
+	sv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
+	sv.SetInactiveState(false)
+	sv.NoAdd = opts.NoAdd
+	sv.NoDelete = opts.NoDelete
+	sv.ViewPath = opts.ViewPath
+	sv.TmpSave = opts.TmpSave
+	sv.SetSlice(slice)
+
+	if recv != nil && dlgFunc != nil {
+		dlg.DialogSig.Connect(recv, dlgFunc)
+	}
+	dlg.SetProp("min-width", units.NewEm(50))
+	dlg.SetProp("min-height", units.NewEm(30))
+	dlg.UpdateEndNoSig(true)
+	dlg.Open(0, 0, avp, func() {
+		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
+	})
+	return dlg
+}
+
 //gopy:interface=handle SliceViewSelectDialog for selecting one row from given slice -- connections
 // functions available for both the widget signal reporting selection events,
 // and the overall dialog signal.  Also has an optional styling function for

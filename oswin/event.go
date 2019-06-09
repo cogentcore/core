@@ -261,4 +261,8 @@ type EventDeque interface {
 	// NextEvent returns the next event in the deque. It blocks until such an
 	// event has been sent.
 	NextEvent() Event
+
+	// PollEvent returns the next event in the deque if available, returns true
+	// returns false and does not wait if no events currently available
+	PollEvent() (Event, bool)
 }

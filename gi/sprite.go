@@ -54,5 +54,7 @@ func (sp *Sprite) GrabRenderFrom(nii Node2D) {
 	if img != nil {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()
+	} else {
+		sp.Resize(image.Point{10, 10}) // just a blank something..
 	}
 }

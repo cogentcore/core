@@ -56,6 +56,28 @@ func (q *Deque) NextEvent() oswin.Event {
 	}
 }
 
+// PollEvent returns the next event in the deque if available, returns true
+// returns false and does not wait if no events currently available
+func (q *Deque) PollEvent() (oswin.Event, bool) {
+	q.lockAndInit()
+	defer q.mu.Unlock()
+
+	if n := len(q.front); n > 0 {
+		e := q.front[n-1]
+		q.front[n-1] = nil
+		q.front = q.front[:n-1]
+		return e, true
+	}
+
+	if n := len(q.back); n > 0 {
+		e := q.back[0]
+		q.back[0] = nil
+		q.back = q.back[1:]
+		return e, true
+	}
+	return nil, false
+}
+
 // Send implements the oswin.EventDeque interface.
 func (q *Deque) Send(event oswin.Event) {
 	q.lockAndInit()
