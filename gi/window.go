@@ -322,6 +322,13 @@ func PollEvents() {
 	oswin.TheApp.PollEvents()
 }
 
+// OpenURL opens the given URL in the user's default browser.  On Linux
+// this requires that xdg-utils package has been installed -- uses
+// xdg-open command.
+func OpenURL(url string) {
+	oswin.TheApp.OpenURL(url)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //                   New Windows and Init
 
