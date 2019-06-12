@@ -47,14 +47,15 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
 	tb.InitName(tb, "text-view-dialog-buf")
 	tb.SetText(text)
 
-	tv := frame.InsertNewChild(KiT_TextView, prIdx+1, "text-view").(*TextView)
+	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
+	tlv.SetProp("width", units.NewEm(5))
+	tlv.SetProp("height", units.NewEm(5))
+	tlv.SetStretchMaxWidth()
+	tlv.SetStretchMaxHeight()
+	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	tv.SetInactive()
 	tv.SetBuf(tb)
-	tv.SetProp("width", units.NewEm(5))
-	tv.SetProp("height", units.NewEm(5))
-	tv.SetStretchMaxWidth()
-	tv.SetStretchMaxHeight()
 
 	bbox, _ := dlg.ButtonBox(frame)
 	if bbox == nil {
