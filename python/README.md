@@ -1,27 +1,33 @@
 # Python wrapping of GoGi
 
-You can now run most of GoGi via Python, using a newly-updated version of the [gopy](https://github.com/goki/gopy) tool that automatically creates Python bindings for Go packages.  Hopefully the main repository of gopy in [go-python](https://github.com/go-python/gopy) will be updated to this new version soon.
+You can now run most of GoGi via Python, using a newly-updated version of the [gopy](https://github.com/go-python/gopy) tool that automatically creates Python bindings for Go packages.  Until the pull-request is merged into go-python, there is an updated README at the [goki fork](https://github.com/goki/gopy) (note: you can no longer build directly from this goki fork -- see instructions below for merging into go-python).
 
-Go incorporates many features found in Python, and provides a really natural "backend" language for computationally-intensive functionality such as a GUI.  Python provides a nice interactive "scripting" level interface for dynamically building GUI's, and can bring Go code to a much wider audience.  Thus, this represents an ideal combination of the two languages.  And you can build the entire stack, from the raw Go code in GoGi to the python bindings, in a tiny fraction of the time it takes to build something like Qt and the PySide or PyQt bindings.
+Go incorporates many features found in Python, and provides a really natural "backend" language for computationally-intensive functionality such as a GUI.  Python provides a nice interactive "scripting" level interface for dynamically building GUI's, and can bring Go code to a much wider audience.  Thus, this represents an ideal combination of the two languages.  And you can build the entire stack, from the raw Go code in GoGi to the Python bindings (which unfortunately are a bit slow because they rely on a C compiler..), in a tiny fraction of the time it takes to build something like Qt and the PySide or PyQt bindings.
 
 # Installation
 
 *Note: Windows is completely untested and very unlikely to work* -- there is nothing in principle preventing it from working, but it just requires a bunch of special stuff and we haven't had a chance to get to it.
 
-Python version 3 (3.6 has been well tested) is recommended.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+Python version 3 (3.6 has been well tested) is recommended, and the instructions assume that (you can probably get version 2 to work but it has not been tested).  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+
+**NOTE:** as of 6/12/2019, these instructions include some extra steps to merge the [pull request #180](https://github.com/go-python/gopy/pull/180) from goki into the go-python repository -- once the pull request is merged, those extra steps will be unnecessary (and will likely no longer work) -- we'll try to update this asap, but just in case..
 
 ```sh
 $ python3 -m pip install --upgrade pybindgen setuptools wheel
 $ go get golang.org/x/tools/cmd/goimports
-$ go get github.com/goki/gopy   # add -u ./... to ensure dependencies are updated
-$ cd ~/go/src/github.com/goki/gopy  # use $GOPATH instead of ~/go if somewhere else
-$ go install    # do go get -u ./... if this fails and try again
-$ cd ~/go/src/github.com/goki/gi/python
+$ go get github.com/go-python/gopy 
+$ cd ~/go/src/github.com/go-python/gopy  # use $GOPATH instead of ~/go if somewhere else
+$ git fetch origin pull/180/head:pr180  # this gets the pull-request #180, into branch pr180
+$ git checkout pr180  # switch to that branch
+$ go install    # do go get -u ./... if this fails and try again -- installs gopy exe in ~go/bin
+$ cd ~/go/src/github.com/goki/gi/python   # again, $GOPATH etc..
 $ make
 $ make install  # may need to do sudo make install -- installs into /usr/local/bin and python site-packages
 $ cd ../examples/widgets
 $ pygi   # this was installed during make install into /usr/local/bin
-$ import widgets  #this loads and runs widgets.py -- edit that and compare with widgets.go
+$ import widgets  # this loads and runs widgets.py -- view that and compare with widgets.go
+$ pygi -i widgets.py  # another way to start it
+$ ./widgets.py        # yet another way to start it, using #! comment magic at start
 ```
 
 If you get something like this error:
@@ -34,7 +40,7 @@ If `pkg-config` or some other misc command is not found, you can use `brew insta
 
 # How it works
 
-* `gopy` `exe` mode builds a standalone executable called `pygi` that combines the python interpreter and shell, with the GoGi go libraries.  This is needed because the GUI event loop must run on the main thread, which otherwise is taken by the python interpreter if you try to load GoGi as a library into the standard python executable (gopy can also do that for other cases where the thread conflict is not a problem).
+* `gopy` `exe` mode builds a standalone executable called `pygi` that combines the python interpreter and shell, with the GoGi Go libraries.  This is needed because the GUI event loop must run on the main thread, which otherwise is taken by the python interpreter if you try to load GoGi as a library into the standard python executable (gopy can also be loaded as a library for other cases where the thread conflict is not a problem).
 
 * The entire gi codebase is available via stub functions in a `_gi` module.  There are various `.py` python wrappers into that `_gi` module corresponding to each of the different packages in GoGi, such as `gi`, `giv`, `units`, etc.  These are all installed during `make install` into a single python module called `gi`.
 

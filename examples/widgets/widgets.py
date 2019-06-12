@@ -1,3 +1,5 @@
+#!/usr/local/bin/pygi -i
+
 # Copyright (c) 2019, The GoKi Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
@@ -14,14 +16,14 @@
 from gi import go, gi, giv, units, ki, gimain
 
 def strdlgcb(recv, send, sig, data):
-    dlg = gi.Dialog(handle=send)
+    dlg = gi.Dialog(handle=send)  # send is a raw int64 handle -- use it to initialize
     if sig == gi.DialogAccepted:
         val = gi.StringPromptDialogValue(dlg)
         print("got string value: ", val)
 
 def button1cb(recv, send, sig, data):
     """ callback for button1 press -- lambda functions in python are only 1 line.. """
-    sb = gi.Button(handle=send)
+    sb = gi.Button(handle=send)  # send is a raw int64 handle -- use it to initialize
     print("Received button signal:", sig, "from button:", sb.Name())
     if sig == gi.ButtonClicked: # note: 3 diff ButtonSig sig's possible -- important to check
         gi.StringPromptDialog(sb.Viewport, "", "Enter value here..",
