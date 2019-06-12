@@ -57,6 +57,9 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
 	tv.SetStretchMaxHeight()
 
 	bbox, _ := dlg.ButtonBox(frame)
+	if bbox == nil {
+		bbox = dlg.AddButtonBox(frame)
+	}
 	cpb := gi.AddNewButton(bbox, "copy-to-clip")
 	cpb.SetText("Copy To Clipboard")
 	cpb.SetIcon("copy")
