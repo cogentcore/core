@@ -26,4 +26,9 @@ notifications:
       - emergentdev@grey.colorado.edu
     on_success: change
     on_failure: always
+  webhooks:
+    urls:
+      - https://ccnlab.zulipchat.com/api/v1/external/travis?api_key=7lfyOrci6YROdaxqqdDvQnNMWWQBtNuW&stream=emergent&topic=travis
+    on_success: change
+    on_failure: always
 
