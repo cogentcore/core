@@ -112,7 +112,12 @@ func (vv *StructInlineValueView) UpdateWidget() {
 		return
 	}
 	sv := vv.Widget.(*StructViewInline)
-	sv.UpdateFields()
+	cst := vv.Value.Interface()
+	if sv.Struct != cst {
+		sv.SetStruct(cst)
+	} else {
+		sv.UpdateFields()
+	}
 }
 
 func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
@@ -253,7 +258,12 @@ func (vv *SliceInlineValueView) UpdateWidget() {
 		return
 	}
 	sv := vv.Widget.(*SliceViewInline)
-	sv.UpdateValues()
+	csl := vv.Value.Interface()
+	if sv.Slice != csl {
+		sv.SetSlice(csl)
+	} else {
+		sv.UpdateValues()
+	}
 }
 
 func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
@@ -365,7 +375,12 @@ func (vv *MapInlineValueView) UpdateWidget() {
 		return
 	}
 	sv := vv.Widget.(*MapViewInline)
-	sv.UpdateValues()
+	cmp := vv.Value.Interface()
+	if sv.Map != cmp {
+		sv.SetMap(cmp)
+	} else {
+		sv.UpdateValues()
+	}
 }
 
 func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
