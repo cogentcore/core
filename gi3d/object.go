@@ -115,12 +115,12 @@ func (obj *Object) IsTransparent() bool {
 	return obj.Mat.IsTransparent()
 }
 
-// BBox returns the bounding box information for this node -- from Mesh or aggregate for groups
-func (obj *Object) BBox() *BBox {
-	if obj.MeshPtr == nil {
-		return nil
+// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
+// groups aggregate over elements
+func (obj *Object) UpdateMeshBBox() {
+	if obj.MeshPtr != nil {
+		obj.MeshBBox = obj.MeshPtr.AsMeshBase().BBox
 	}
-	return &(obj.MeshPtr.AsMeshBase().BBox)
 }
 
 /////////////////////////////////////////////////////////////////////////////

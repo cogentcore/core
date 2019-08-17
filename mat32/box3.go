@@ -208,3 +208,25 @@ func (b *Box3) Translate(offset Vec3) Box3 {
 func (b *Box3) IsEqual(other Box3) bool {
 	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
 }
+
+// MVProjToNDC projects bounding box through given MVP model-view-projection Mat4
+// with perspective divide to return normalized display coordinates (NDC).
+func (b *Box3) MVProjToNDC(m *Mat4) Box3 {
+	// all corners: i = min, a = max
+	var cs [8]Vec3
+	cs[0] = Vec4{b.Min.X, b.Min.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
+	cs[1] = Vec4{b.Min.X, b.Min.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
+	cs[2] = Vec4{b.Min.X, b.Max.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
+	cs[3] = Vec4{b.Max.X, b.Min.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
+
+	cs[4] = Vec4{b.Max.X, b.Max.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
+	cs[5] = Vec4{b.Max.X, b.Max.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
+	cs[6] = Vec4{b.Max.X, b.Min.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
+	cs[7] = Vec4{b.Min.X, b.Max.Y, b.Max.Z, 1}.MulMat4(m).PerspDiv()
+
+	nb := NewEmptyBox3()
+	for i := 0; i < 8; i++ {
+		nb.ExpandByPoint(cs[i])
+	}
+	return nb
+}

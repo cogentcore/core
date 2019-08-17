@@ -447,7 +447,6 @@ func (sc *Scene) NavEvents() {
 	})
 	sc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
-		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.SetDragCursor {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
@@ -456,13 +455,19 @@ func (sc *Scene) NavEvents() {
 		if !ssc.IsInactive() && !ssc.HasFocus() {
 			ssc.GrabFocus()
 		}
-		// obj := ssc.FirstContainingPoint(me.Where, true)
-		// if me.Action == mouse.Release && me.Button == mouse.Right {
-		// 	me.SetProcessed()
-		// 	if obj != nil {
-		// 		giv.StructViewDialog(ssc.Viewport, obj, giv.DlgOpts{Title: "sc Element View"}, nil, nil)
-		// 	}
-		// }
+		if me.Action == mouse.Press {
+			switch {
+			case key.HasAllModifierBits(me.Modifiers, key.Shift):
+				objs := sc.ObjsIntersectingPoint(me.Where)
+				if len(objs) > 0 {
+					for i := range objs {
+						ni := objs[i].AsNode3D()
+						fmt.Printf("hit obj: %v  bbox: %v\n", objs[i].Name(), ni.BBox)
+					}
+					me.SetProcessed()
+				}
+			}
+		}
 	})
 	sc.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.HoverEvent)
@@ -717,11 +722,53 @@ func (sc *Scene) DeleteResources() {
 func (sc *Scene) UpdateWorldMatrix() {
 	idmtx := mat32.NewMat4()
 	for _, kid := range sc.Kids {
-		nii, _ := KiToNode3D(kid)
-		if nii != nil {
-			nii.UpdateWorldMatrix(idmtx)
-			nii.UpdateWorldMatrixChildren()
+		kii, _ := KiToNode3D(kid)
+		if kii == nil {
+			continue
 		}
+		kii.UpdateWorldMatrix(idmtx)
+		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d interface{}) bool {
+			if k == kid {
+				return true // skip, already did
+			}
+			nii, _ := KiToNode3D(k)
+			if nii == nil {
+				return false // going into a different type of thing, bail
+			}
+			pii, pi := KiToNode3D(k.Parent())
+			if pii == nil {
+				return false
+			}
+			nii.UpdateWorldMatrix(&pi.Pose.WorldMatrix)
+			return true
+		})
+	}
+}
+
+// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
+// groups aggregate over elements
+func (sc *Scene) UpdateMeshBBox() {
+	for _, kid := range sc.Kids {
+		kii, _ := KiToNode3D(kid)
+		if kii == nil {
+			continue
+		}
+		kii.FuncDownMeLast(0, kii.This(),
+			func(k ki.Ki, level int, d interface{}) bool {
+				nii, _ := KiToNode3D(k)
+				if nii == nil {
+					return false // going into a different type of thing, bail
+				}
+				return true
+			},
+			func(k ki.Ki, level int, d interface{}) bool {
+				nii, _ := KiToNode3D(k)
+				if nii == nil {
+					return false // going into a different type of thing, bail
+				}
+				nii.UpdateMeshBBox()
+				return true
+			})
 	}
 }
 
@@ -762,6 +809,7 @@ func (sc *Scene) Render() bool {
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
 	sc.UpdateWorldMatrix() // inexpensive -- just do it to be sure..
+	sc.UpdateMeshBBox()
 	oswin.TheApp.RunOnMain(func() {
 		sc.Renders.SetLightsUnis(sc)
 		sc.Render3D()
@@ -818,8 +866,12 @@ func (sc *Scene) Render3D() {
 
 	sc.Camera.Pose.UpdateMatrix()
 	// Prepare for frustum culling
-	proj := sc.Camera.PrjnMatrix.Mul(&sc.Camera.ViewMatrix)
-	frustum := mat32.NewFrustumFromMatrix(proj)
+	// proj := sc.Camera.PrjnMatrix.Mul(&sc.Camera.ViewMatrix)
+	// frustum := mat32.NewFrustumFromMatrix(proj)
+
+	sz := sc.Geom.Size
+	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
+	bounds := image.Rectangle{Max: sz}
 
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
@@ -836,13 +888,12 @@ func (sc *Scene) Render3D() {
 			return true
 		}
 		nii.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
-		wmat := nii.WorldMatrix()
-		bba := nii.BBox()
-		bb := bba.BBox
-		bb.MulMat4(wmat)
-		if true || frustum.IntersectsBox(bb) { // todo: remove true..
+		nii.UpdateBBox2D(size, sc)
+		if ni.BBox.Overlaps(bounds) { // render to texture based strictly on scene visibility, not vp etc
 			rc := nii.RenderClass()
 			rcs[rc] = append(rcs[rc], nii)
+			// } else {
+			// 	fmt.Printf("node bbox culled: %v  bbox: %v  vpbbox: %v\n", ni.Nm, ni.BBox, sc.VpBBox)
 		}
 		return true
 	})
@@ -896,6 +947,31 @@ func (sc *Scene) TrackCamera() bool {
 	}
 	tc.TrackCamera(sc)
 	return true
+}
+
+// ObjsIntersectingPoint finds all the objects that contain given 2D window coordinate
+func (sc *Scene) ObjsIntersectingPoint(pos image.Point) []Node3D {
+	var objs []Node3D
+	for _, kid := range sc.Kids {
+		kii, _ := KiToNode3D(kid)
+		if kii == nil {
+			continue
+		}
+		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d interface{}) bool {
+			nii, ni := KiToNode3D(k)
+			if nii == nil {
+				return false // going into a different type of thing, bail
+			}
+			if !nii.IsObject() {
+				return true
+			}
+			if pos.In(ni.WinBBox) {
+				objs = append(objs, nii)
+			}
+			return true
+		})
+	}
+	return objs
 }
 
 // SceneProps define the ToolBar and MenuBar for StructView

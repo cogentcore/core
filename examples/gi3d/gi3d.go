@@ -86,18 +86,20 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	cbm := gi3d.AddNewBox(sc, "cube1", 1, 1, 1)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rcb := gi3d.AddNewObject(sc, sc, "red-cube", cbm.Name())
+	rbgp := gi3d.AddNewGroup(sc, sc, "r-b-group")
+
+	rcb := gi3d.AddNewObject(sc, rbgp, "red-cube", cbm.Name())
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.Mat.Color.SetName("red")
 	rcb.Mat.Shiny = 500
 
-	bcb := gi3d.AddNewObject(sc, sc, "blue-cube", cbm.Name())
+	bcb := gi3d.AddNewObject(sc, rbgp, "blue-cube", cbm.Name())
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 	bcb.Mat.Color.SetName("blue")
 	bcb.Mat.Shiny = 10
 
-	// bcb.Mat.Specular.SetName("blue") // how you get rid of specular highlights
+	bcb.Mat.Specular.SetName("blue") // how you get rid of specular highlights
 
 	gcb := gi3d.AddNewObject(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)

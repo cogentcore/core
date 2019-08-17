@@ -13,7 +13,6 @@ import (
 // its own.  It does have a transform that applies to all nodes under it.
 type Group struct {
 	Node3DBase
-	BBx BBox `desc:"bounding box aggregated over all child nodes"`
 }
 
 var KiT_Group = kit.Types.AddType(&Group{}, nil)
@@ -25,10 +24,21 @@ func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
 	return gp
 }
 
-// BBox returns the bounding box information for this node -- from Mesh or aggregate for groups
-func (gp *Group) BBox() *BBox {
-	// todo: compute bbox
-	return &gp.BBx
+// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
+// groups aggregate over elements
+func (gp *Group) UpdateMeshBBox() {
+	// todo: radial, etc
+	gp.MeshBBox.BBox.SetEmpty()
+	for _, kid := range gp.Kids {
+		nii, ni := KiToNode3D(kid)
+		if nii == nil {
+			continue
+		}
+		nbb := ni.MeshBBox.BBox.MulMat4(&ni.Pose.Matrix)
+		gp.MeshBBox.BBox.ExpandByPoint(nbb.Min)
+		gp.MeshBBox.BBox.ExpandByPoint(nbb.Max)
+	}
+	// fmt.Printf("gp: %v  bbox: %v\n", gp.Nm, gp.MeshBBox.BBox)
 }
 
 func (gp *Group) Defaults() {

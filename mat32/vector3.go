@@ -475,6 +475,26 @@ func (v *Vec3) SetMulMat4(m *Mat4) {
 	*v = v.MulMat4(m)
 }
 
+// MVProjToNDC project given vector through given MVP model-view-projection Mat4
+// and do perspective divide to return normalized display coordinates (NDC).
+// w is value for 4th coordinate -- use 1 for positions, 0 for normals.
+func (v Vec3) MVProjToNDC(m *Mat4, w float32) Vec3 {
+	clip := NewVec4FromVec3(v, w).MulMat4(m)
+	return clip.PerspDiv()
+}
+
+// NDCToWindow converts normalized display coordinates (NDC) to window
+// (pixel) coordinates, using given window size parameters.
+// near, far are 0, 1 by default (glDepthRange defaults).
+func (v Vec3) NDCToWindow(size, off Vec2, near, far float32) Vec3 {
+	w := Vec3{}
+	half := size.MulScalar(0.5)
+	w.X = half.X*v.X + off.X + half.X
+	w.Y = half.Y*v.Y + off.Y + half.Y
+	w.Z = 0.5*(far-near)*v.Z + 0.5*(far+near)
+	return w
+}
+
 // MulProjection returns vector multiplied by the projection matrix m
 func (v Vec3) MulProjection(m *Mat4) Vec3 {
 	d := 1 / (m[3]*v.X + m[7]*v.Y + m[11]*v.Z + m[15]) // perspective divide

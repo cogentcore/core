@@ -6,6 +6,7 @@ package gi3d
 
 import (
 	"fmt"
+	"image"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
@@ -37,18 +38,20 @@ type Node3D interface {
 	// routine can optionally do so.
 	UpdateWorldMatrix(parWorld *mat32.Mat4)
 
-	// UpdateWorldMatrixChildren updates the world matrix for all children of this node
-	UpdateWorldMatrixChildren()
-
 	// UpdateMVPMatrix updates this node's MVP matrix based on given view and prjn matrix from camera
 	// Called during rendering.
 	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
 
+	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
+	// groups aggregate over elements
+	UpdateMeshBBox()
+
+	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
+	// size and other scene bbox info from scene
+	UpdateBBox2D(size mat32.Vec2, sc *Scene)
+
 	// WorldMatrix returns the world matrix for this node
 	WorldMatrix() *mat32.Mat4
-
-	// BBox returns the bounding box information for this node -- from Mesh or aggregate for groups
-	BBox() *BBox
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
@@ -85,7 +88,8 @@ type Node3D interface {
 // There are only two different kinds of Nodes: Group and Object
 type Node3DBase struct {
 	gi.NodeBase
-	Pose Pose `desc:"complete specification of position and orientation"`
+	Pose     Pose `desc:"complete specification of position and orientation"`
+	MeshBBox BBox `desc:"mesh-based local bounding box (aggregated for groups)"`
 }
 
 // gi3d.NodeFlags extend gi.NodeFlags to hold 3D node state
@@ -168,22 +172,31 @@ func (nb *Node3DBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	nb.SetFlag(int(WorldMatrixUpdated))
 }
 
-// UpdateWorldMatrixChildren updates the world matrix for all children of this node
-// (and their children, and so on..)
-func (nb *Node3DBase) UpdateWorldMatrixChildren() {
-	for _, kid := range nb.Kids {
-		nii, _ := KiToNode3D(kid)
-		if nii != nil {
-			nii.UpdateWorldMatrix(&nb.Pose.WorldMatrix)
-			nii.UpdateWorldMatrixChildren()
-		}
-	}
-}
-
-// UpdateMVPMatrix updates this node's MVP matrix based on given view, prjn matricies from camera
+// UpdateMVPMatrix updates this node's MVP matrix based on given view, prjn matricies from camera.
 // Called during rendering.
 func (nb *Node3DBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
+}
+
+// UpdateBBox2D updates this node's 2D bounding-box information based on scene
+// size and min offset position.
+func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
+	ymax := sc.Geom.Size.Y
+	off := mat32.Vec2{}
+	bbndc := nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
+	Wmin := bbndc.Min.NDCToWindow(size, off, 0, 1)
+	Wmax := bbndc.Max.NDCToWindow(size, off, 0, 1)
+	// note: flip Y coord
+	// BBox is always relative to scene
+	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), ymax - int(Wmax.Y)}, Max: image.Point{int(Wmax.X), ymax - int(Wmin.Y)}}
+	nb.ObjBBox = nb.BBox.Add(sc.ObjBBox.Min)
+	nb.VpBBox = nb.ObjBBox.Add(sc.VpBBox.Min.Sub(sc.ObjBBox.Min))
+	nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
+	if nb.VpBBox != image.ZR {
+		nb.WinBBox = nb.VpBBox.Add(sc.WinBBox.Min.Sub(sc.VpBBox.Min))
+	} else {
+		nb.WinBBox = nb.VpBBox
+	}
 }
 
 // WorldMatrix returns the world matrix for this node
@@ -192,20 +205,21 @@ func (nb *Node3DBase) WorldMatrix() *mat32.Mat4 {
 }
 
 func (nb *Node3DBase) Init3D(sc *Scene) {
-	nb.NodeSig.Connect(nb.This(), func(recnb, sendk ki.Ki, sig int64, data interface{}) {
-		rnbi, rnb := KiToNode3D(recnb)
-		if Update3DTrace {
-			fmt.Printf("3D Update: Node: %v update scene due to signal: %v from node: %v\n", rnbi.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
-		}
-		if !rnb.IsDeleted() && !rnb.IsDestroyed() {
-			scci := rnb.ParentByType(KiT_Scene, true)
-			if scci != nil {
-				rnbi.UpdateWorldMatrix(nil) // nil = use cached last one
-				rnbi.UpdateWorldMatrixChildren()
-				scci.(*Scene).DirectWinUpload()
-			}
-		}
-	})
+	// todo: instead, just trigger a scene update.
+	// nb.NodeSig.Connect(nb.This(), func(recnb, sendk ki.Ki, sig int64, data interface{}) {
+	// 	rnbi, rnb := KiToNode3D(recnb)
+	// 	if Update3DTrace {
+	// 		fmt.Printf("3D Update: Node: %v update scene due to signal: %v from node: %v\n", rnbi.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
+	// 	}
+	// 	if !rnb.IsDeleted() && !rnb.IsDestroyed() {
+	// 		scci := rnb.ParentByType(KiT_Scene, true)
+	// 		if scci != nil {
+	// 			rnbi.UpdateWorldMatrix(nil) // nil = use cached last one
+	// 			rnbi.UpdateWorldMatrixChildren()
+	// 			scci.(*Scene).DirectWinUpload()
+	// 		}
+	// 	}
+	// })
 }
 
 func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
@@ -215,8 +229,6 @@ func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 // TrackCamera moves this node to pose of camera
 func (nb *Node3DBase) TrackCamera(sc *Scene) {
 	nb.Pose.CopyFrom(&sc.Camera.Pose)
-	nb.UpdateWorldMatrix(nil)
-	nb.UpdateWorldMatrixChildren()
 }
 
 // TrackLight moves node to position of light of given name.

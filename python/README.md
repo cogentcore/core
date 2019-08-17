@@ -8,7 +8,13 @@ Go incorporates many features found in Python, and provides a really natural "ba
 
 *Note: Windows is completely untested and very unlikely to work* -- there is nothing in principle preventing it from working, but it just requires a bunch of special stuff and we haven't had a chance to get to it.
 
-Python version 3 (3.6 has been well tested) is recommended, and the instructions assume that (you can probably get version 2 to work but it has not been tested).  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+Python version 3 (3.6 has been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+
+On linux, you must ensure that the linker `ld` will look in the current directory for library files -- add this to your `.bashrc` file (and `source` that file after editing, or enter command locally):
+
+```sh
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+```
 
 **NOTE:** as of 6/12/2019, these instructions include some extra steps to merge the [pull request #180](https://github.com/go-python/gopy/pull/180) from goki into the go-python repository -- once the pull request is merged, those extra steps will be unnecessary (and will likely no longer work) -- we'll try to update this asap, but just in case..
 
