@@ -460,9 +460,15 @@ func (sc *Scene) NavEvents() {
 			case key.HasAllModifierBits(me.Modifiers, key.Shift):
 				objs := sc.ObjsIntersectingPoint(me.Where)
 				if len(objs) > 0 {
+					relpos := me.Where.Sub(sc.WinBBox.Min)
 					for i := range objs {
 						ni := objs[i].AsNode3D()
-						fmt.Printf("hit obj: %v  bbox: %v\n", objs[i].Name(), ni.BBox)
+						fmt.Printf("hit obj: %v  bbox: %v  pos: %v\n", objs[i].Name(), ni.BBox, relpos)
+						lpos, err := objs[i].Pos2DToObj3D(relpos, sc)
+						if err != nil {
+							log.Println(err)
+						}
+						fmt.Printf("lpos: %v  relpos: %v\n", lpos, relpos)
 					}
 					me.SetProcessed()
 				}
@@ -716,9 +722,35 @@ func (sc *Scene) DeleteResources() {
 	})
 }
 
+// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
+// groups aggregate over elements
+func (sc *Scene) UpdateMeshBBox() {
+	for _, kid := range sc.Kids {
+		kii, _ := KiToNode3D(kid)
+		if kii == nil {
+			continue
+		}
+		kii.FuncDownMeLast(0, kii.This(),
+			func(k ki.Ki, level int, d interface{}) bool {
+				nii, _ := KiToNode3D(k)
+				if nii == nil {
+					return false // going into a different type of thing, bail
+				}
+				return true
+			},
+			func(k ki.Ki, level int, d interface{}) bool {
+				nii, _ := KiToNode3D(k)
+				if nii == nil {
+					return false // going into a different type of thing, bail
+				}
+				nii.UpdateMeshBBox()
+				return true
+			})
+	}
+}
+
 // UpdateWorldMatrix updates the world matrix for all scene elements
-// called during Init3D and subsequent updates are triggered by local
-// update signals on each node
+// called during Init3D and rendering
 func (sc *Scene) UpdateWorldMatrix() {
 	idmtx := mat32.NewMat4()
 	for _, kid := range sc.Kids {
@@ -745,31 +777,25 @@ func (sc *Scene) UpdateWorldMatrix() {
 	}
 }
 
-// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
-// groups aggregate over elements
-func (sc *Scene) UpdateMeshBBox() {
-	for _, kid := range sc.Kids {
-		kii, _ := KiToNode3D(kid)
-		if kii == nil {
-			continue
+// UpdateMVPMatrix updates the Model-View-Projection matrix for all scene elements
+// and BBox2D
+func (sc *Scene) UpdateMVPMatrix() {
+	sc.Camera.Pose.UpdateMatrix()
+	sz := sc.Geom.Size
+	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
+
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == sc.This() {
+			return true
 		}
-		kii.FuncDownMeLast(0, kii.This(),
-			func(k ki.Ki, level int, d interface{}) bool {
-				nii, _ := KiToNode3D(k)
-				if nii == nil {
-					return false // going into a different type of thing, bail
-				}
-				return true
-			},
-			func(k ki.Ki, level int, d interface{}) bool {
-				nii, _ := KiToNode3D(k)
-				if nii == nil {
-					return false // going into a different type of thing, bail
-				}
-				nii.UpdateMeshBBox()
-				return true
-			})
-	}
+		nii, _ := KiToNode3D(k)
+		if nii == nil {
+			return false // going into a different type of thing, bail
+		}
+		nii.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
+		nii.UpdateBBox2D(size, sc)
+		return true
+	})
 }
 
 func (sc *Scene) Init3D() {
@@ -808,8 +834,9 @@ func (sc *Scene) Render() bool {
 	}
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
-	sc.UpdateWorldMatrix() // inexpensive -- just do it to be sure..
+	sc.UpdateWorldMatrix()
 	sc.UpdateMeshBBox()
+	sc.UpdateMVPMatrix()
 	oswin.TheApp.RunOnMain(func() {
 		sc.Renders.SetLightsUnis(sc)
 		sc.Render3D()
@@ -863,16 +890,7 @@ func (sc *Scene) DirectWinUpload() bool {
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D() {
 	var rcs [RenderClassesN][]Node3D
-
-	sc.Camera.Pose.UpdateMatrix()
-	// Prepare for frustum culling
-	// proj := sc.Camera.PrjnMatrix.Mul(&sc.Camera.ViewMatrix)
-	// frustum := mat32.NewFrustumFromMatrix(proj)
-
-	sz := sc.Geom.Size
-	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
-	bounds := image.Rectangle{Max: sz}
-
+	bounds := image.Rectangle{Max: sc.Geom.Size}
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
 			return true
@@ -887,8 +905,6 @@ func (sc *Scene) Render3D() {
 		if !nii.IsObject() {
 			return true
 		}
-		nii.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
-		nii.UpdateBBox2D(size, sc)
 		if ni.BBox.Overlaps(bounds) { // render to texture based strictly on scene visibility, not vp etc
 			rc := nii.RenderClass()
 			rcs[rc] = append(rcs[rc], nii)

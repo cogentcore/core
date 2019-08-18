@@ -10,6 +10,7 @@
 package glos
 
 import (
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -78,14 +79,22 @@ func (tx *textureImpl) Open(path string) error {
 // used as a rendering target.
 // If Activate()'d, then must be called with a valid gpu context
 // and on proper thread for that context.
-func (tx *textureImpl) Image() image.Image {
+func (tx *textureImpl) Image(noGet bool) image.Image {
 	if !tx.init {
 		if tx.img == nil {
 			return nil
 		}
 		return tx.img
 	}
-	// todo: get image from buffer
+	if noGet {
+		return nil
+	}
+	if tx.img == nil || tx.img.Bounds().Size() != tx.size {
+		tx.img = image.NewRGBA(image.Rectangle{Max: tx.size})
+	}
+
+	// 0 = level = base image
+	gl.GetTexImage(gl.TEXTURE_2D, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(tx.img.Pix))
 	return tx.img
 }
 
@@ -337,6 +346,18 @@ func (tx *textureImpl) DeleteFramebuffer() {
 		tx.fbuff.Delete()
 		tx.fbuff = nil
 	}
+}
+
+// FrameDepthAt return depth (0-1) at given pixel location from texture used as a framebuffer
+// Must be called with a valid gpu context and on proper thread for that context.
+func (tx *textureImpl) FrameDepthAt(x, y int) (float32, error) {
+	if tx.fbuff == nil {
+		return 0, errors.New("Texture does not have a framebuffer activated for it -- cannot read depth")
+	}
+	tx.ActivateFramebuffer()
+	var depth float32
+	gl.ReadPixels(int32(x), int32(y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
+	return depth, nil
 }
 
 ////////////////////////////////////////////////

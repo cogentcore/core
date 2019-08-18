@@ -68,4 +68,9 @@ type Drawing interface {
 	// Especially useful for rendering to framebuffers (Window SwapBuffer
 	// automatically does a flush)
 	Flush()
+
+	// FrameDepthAt return depth (0-1) at given pixel location from active framebuffer
+	// Must be called with a valid gpu context and on proper thread for that context,
+	// with framebuffer active.
+	FrameDepthAt(x, y int) float32
 }

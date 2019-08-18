@@ -60,10 +60,11 @@ type Texture interface {
 	// Image returns an Image of the texture, as an *image.RGBA.
 	// If this Texture has been Activate'd then this retrieves
 	// the current contents of the Texture, e.g., if it has been
-	// used as a rendering target.
+	// used as a rendering target (unless noGet is true, in which case
+	// only any existing image is returned).
 	// If Activate()'d, then must be called with a valid gpu context
 	// and on proper thread for that context.
-	Image() image.Image
+	Image(noGet bool) image.Image
 
 	// SetImage sets entire contents of the Texture from given image
 	// (including setting the size of the texture from that of the img).
@@ -155,6 +156,10 @@ type Texture interface {
 	// created during ActivateFramebuffer.
 	// Must be called with a valid gpu context and on proper thread for that context.
 	DeleteFramebuffer()
+
+	// FrameDepthAt return depth (0-1) at given pixel location from texture used as a framebuffer
+	// Must be called with a valid gpu context and on proper thread for that context.
+	FrameDepthAt(x, y int) (float32, error)
 
 	Drawer
 }

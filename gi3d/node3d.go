@@ -7,9 +7,12 @@ package gi3d
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
+	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ki"
 )
 
@@ -50,6 +53,10 @@ type Node3D interface {
 	// size and other scene bbox info from scene
 	UpdateBBox2D(size mat32.Vec2, sc *Scene)
 
+	// Pos2DToObj3D converts a given 2D point in scene image coordinates
+	// into a 3D point in the local coordinates of this node
+	Pos2DToObj3D(pos image.Point, sc *Scene) (mat32.Vec3, error)
+
 	// WorldMatrix returns the world matrix for this node
 	WorldMatrix() *mat32.Mat4
 
@@ -88,8 +95,10 @@ type Node3D interface {
 // There are only two different kinds of Nodes: Group and Object
 type Node3DBase struct {
 	gi.NodeBase
-	Pose     Pose `desc:"complete specification of position and orientation"`
-	MeshBBox BBox `desc:"mesh-based local bounding box (aggregated for groups)"`
+	Pose      Pose       `desc:"complete specification of position and orientation"`
+	MeshBBox  BBox       `desc:"mesh-based local bounding box (aggregated for groups)"`
+	WorldBBox BBox       `desc:"world coordinates bounding box"`
+	NDCBBox   mat32.Box3 `desc:"normalized display coordinates bounding box"`
 }
 
 // gi3d.NodeFlags extend gi.NodeFlags to hold 3D node state
@@ -181,14 +190,13 @@ func (nb *Node3DBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
 func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
-	ymax := sc.Geom.Size.Y
 	off := mat32.Vec2{}
-	bbndc := nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
-	Wmin := bbndc.Min.NDCToWindow(size, off, 0, 1)
-	Wmax := bbndc.Max.NDCToWindow(size, off, 0, 1)
-	// note: flip Y coord
+	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMat4(&nb.Pose.WorldMatrix)
+	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
+	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
+	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
-	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), ymax - int(Wmax.Y)}, Max: image.Point{int(Wmax.X), ymax - int(Wmin.Y)}}
+	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
 	nb.ObjBBox = nb.BBox.Add(sc.ObjBBox.Min)
 	nb.VpBBox = nb.ObjBBox.Add(sc.VpBBox.Min.Sub(sc.ObjBBox.Min))
 	nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
@@ -197,6 +205,37 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	} else {
 		nb.WinBBox = nb.VpBBox
 	}
+}
+
+// Pos2DToObj3D converts a given 2D point in scene image coordinates
+// into a 3D point in the local coordinates of this node
+func (nb *Node3DBase) Pos2DToObj3D(pos image.Point, sc *Scene) (mat32.Vec3, error) {
+	sz := sc.Geom.Size
+	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
+	fpos := mat32.Vec2{float32(pos.X), float32(pos.Y)}
+	ndc := fpos.WindowToNDC(size, mat32.Vec2{}, true) // flipY
+	var err error
+	sc.ActivateWin()
+	oswin.TheApp.RunOnMain(func() {
+		sc.Frame.Activate()
+		ndc.Z = gpu.Draw.FrameDepthAt(pos.X, pos.Y)
+	})
+	if ndc.Z == 0 {
+		ndc.Z = 0.5 * (nb.NDCBBox.Min.Z + nb.NDCBBox.Max.Z)
+	}
+	fmt.Printf("ndc: %v from pos: %v\n", ndc, pos)
+	inv, err := nb.Pose.MVPMatrix.Inverse()
+	if err != nil {
+		log.Println(err)
+	}
+	nd4 := mat32.NewVec4FromVec3(ndc, 1)
+	lpos := nd4.MulMat4(inv)
+	lpos.W = 1.0 / lpos.W
+	lpos.X *= lpos.W
+	lpos.Y *= lpos.W
+	lpos.Z *= lpos.W
+	fmt.Printf("lpos: %v\n", lpos)
+	return mat32.NewVec3FromVec4(lpos), err
 }
 
 // WorldMatrix returns the world matrix for this node
