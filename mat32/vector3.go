@@ -513,8 +513,8 @@ func (v Vec2) WindowToNDC(size, off Vec2, flipY bool) Vec3 {
 	if flipY {
 		n.Y = size.Y - n.Y
 	}
-	n.X = n.X/half.X - 0.5
-	n.Y = n.Y/half.Y - 0.5
+	n.X = n.X/half.X - 1
+	n.Y = n.Y/half.Y - 1
 	return n
 }
 

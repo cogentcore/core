@@ -12,7 +12,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ki"
 )
 
@@ -217,8 +216,10 @@ func (nb *Node3DBase) Pos2DToObj3D(pos image.Point, sc *Scene) (mat32.Vec3, erro
 	var err error
 	sc.ActivateWin()
 	oswin.TheApp.RunOnMain(func() {
-		sc.Frame.Activate()
-		ndc.Z = gpu.Draw.FrameDepthAt(pos.X, pos.Y)
+		dval := sc.Frame.DepthAt(pos.X, sz.Y-pos.Y)
+		if dval != 0 {
+			ndc.Z = 2*dval - 1
+		}
 	})
 	if ndc.Z == 0 {
 		ndc.Z = 0.5 * (nb.NDCBBox.Min.Z + nb.NDCBBox.Max.Z)
@@ -230,6 +231,7 @@ func (nb *Node3DBase) Pos2DToObj3D(pos image.Point, sc *Scene) (mat32.Vec3, erro
 	}
 	nd4 := mat32.NewVec4FromVec3(ndc, 1)
 	lpos := nd4.MulMat4(inv)
+	fmt.Printf("lpos pre: %v\n", lpos)
 	lpos.W = 1.0 / lpos.W
 	lpos.X *= lpos.W
 	lpos.Y *= lpos.W

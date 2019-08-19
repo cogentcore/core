@@ -59,13 +59,22 @@ type Framebuffer interface {
 	// which was directly rendered to.
 	Texture() Texture2D
 
-	// todo: methods to get the depth, stencil buffer output as well..
+	// DepthAt returns the depth-buffer value at given x,y coordinate in
+	// framebuffer coordinates (i.e., Y = 0 is at bottom).
+	// Must be called with a valid gpu context and on proper thread for that context,
+	// with framebuffer active.
+	DepthAt(x, y int) float32
 
 	// Activate establishes the GPU resources and handle for the
 	// framebuffer and all other associated buffers etc (if not already done).
 	// It then sets this as the current rendering target for subsequent
 	// gpu drawing commands.
 	Activate()
+
+	// Rendered should be called after rendering to the framebuffer,
+	// to ensure the update of data transferred from the framebuffer
+	// (texture, depth buffer)
+	Rendered()
 
 	// Handle returns the GPU handle for the framebuffer -- only
 	// valid after Activate.

@@ -29,6 +29,7 @@ func (dr *Drawing) Clear(color, depth bool) {
 	}
 	if depth {
 		bits |= gl.DEPTH_BUFFER_BIT
+		bits |= gl.STENCIL_BUFFER_BIT
 	}
 	gl.Clear(bits)
 }
@@ -141,14 +142,4 @@ func (dr *Drawing) TriangleStripsIndexed(start, count int) {
 // automatically does a flush)
 func (dr *Drawing) Flush() {
 	gl.Flush()
-}
-
-// FrameDepthAt return depth (0-1) at given pixel location from active framebuffer
-// Must be called with a valid gpu context and on proper thread for that context,
-// with framebuffer active.
-func (dr *Drawing) FrameDepthAt(x, y int) float32 {
-	var depth float32
-	gl.ReadPixels(int32(x), int32(y), 1, 1, gl.DEPTH_COMPONENT, gl.FLOAT, gl.Ptr(&depth))
-	gpu.TheGPU.ErrCheck("FrameDepthAt")
-	return depth
 }

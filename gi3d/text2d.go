@@ -151,7 +151,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		img = image.NewRGBA(bounds)
 		tx.SetImage(img) // safe here
 	} else {
-		im := txt.TxtTex.Tex.Image(true) // true = noGet = don't grab from opengl
+		im := txt.TxtTex.Tex.Image()
 		if im == nil {
 			img = image.NewRGBA(bounds)
 			setImg = true // needs to be set on main

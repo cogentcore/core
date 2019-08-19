@@ -73,25 +73,30 @@ func (tx *textureImpl) Open(path string) error {
 	return tx.SetImage(im)
 }
 
-// Image returns the image -- typically as an *image.RGBA
-// If this Texture has been Activate'd then this retrieves
-// the current contents of the Texture, e.g., if it has been
-// used as a rendering target.
-// If Activate()'d, then must be called with a valid gpu context
-// and on proper thread for that context.
-func (tx *textureImpl) Image(noGet bool) image.Image {
+// Image returns the current image -- typically as an *image.RGBA.
+// This is the image that was last set using Open, SetImage, or GrabImage.
+// Use GrabImage to get the current GPU-side image, e.g., for rendering targets.
+func (tx *textureImpl) Image() image.Image {
 	if !tx.init {
 		if tx.img == nil {
 			return nil
 		}
 		return tx.img
 	}
-	if noGet {
+	return nil
+}
+
+// GrabImage retrieves the current contents of the Texture, e.g., if it has been
+// used as a rendering target.  Returns nil if not initialized.
+// Must be called with a valid gpu context and on proper thread for that context.
+func (tx *textureImpl) GrabImage() image.Image {
+	if !tx.init {
 		return nil
 	}
 	if tx.img == nil || tx.img.Bounds().Size() != tx.size {
 		tx.img = image.NewRGBA(image.Rectangle{Max: tx.size})
 	}
+	tx.Activate(0)
 
 	// 0 = level = base image
 	gl.GetTexImage(gl.TEXTURE_2D, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(tx.img.Pix))

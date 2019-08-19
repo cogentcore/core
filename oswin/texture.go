@@ -57,14 +57,15 @@ type Texture interface {
 	// and on proper thread for that context.
 	Open(path string) error
 
-	// Image returns an Image of the texture, as an *image.RGBA.
-	// If this Texture has been Activate'd then this retrieves
-	// the current contents of the Texture, e.g., if it has been
-	// used as a rendering target (unless noGet is true, in which case
-	// only any existing image is returned).
-	// If Activate()'d, then must be called with a valid gpu context
-	// and on proper thread for that context.
-	Image(noGet bool) image.Image
+	// Image returns the current image -- typically as an *image.RGBA.
+	// This is the image that was last set using Open, SetImage, or GrabImage.
+	// Use GrabImage to get the current GPU-side image, e.g., for rendering targets.
+	Image() image.Image
+
+	// GrabImage retrieves the current contents of the Texture, e.g., if it has been
+	// used as a rendering target.  Returns nil if not initialized.
+	// Must be called with a valid gpu context and on proper thread for that context.
+	GrabImage() image.Image
 
 	// SetImage sets entire contents of the Texture from given image
 	// (including setting the size of the texture from that of the img).

@@ -17,16 +17,20 @@ import (
 // the overall oswin.Window.WinTex texture that backs the window for
 // final display to the user.
 type Framebuffer struct {
-	init     bool
-	handle   uint32
-	name     string
-	size     image.Point
-	nsamp    int
-	tex      gpu.Texture2D // externally-provided texture
-	drbo     uint32        // depth and stencil render buffer object
-	cTex     gpu.Texture2D // internal color-buffer texture returned from Texture()
-	msampTex uint32        // multi-sampled color texture when not using external tex
-	dsampFbo uint32        // down-sampling fbo
+	init         bool
+	handle       uint32
+	name         string
+	size         image.Point
+	nsamp        int
+	tex          gpu.Texture2D // externally-provided texture
+	drbo         uint32        // depth and stencil render buffer object
+	cTex         gpu.Texture2D // internal color-buffer texture returned from Texture()
+	msampTex     uint32        // multi-sampled color texture when not using external tex
+	dsampFbo     uint32        // down-sampling fbo
+	depthStenTex uint32        // depth + stencil 24_8 texture, either for downsample or nsamp = 0 case
+	depthStenDat []uint32      // depth + stencil 24_8 data transferred from GPU
+	texOld       bool          // texture is out-of-date since last render
+	depthOld     bool          // depth & stencil data is out-of-date since last render
 }
 
 // Name returns the name of the framebuffer
@@ -120,6 +124,7 @@ func (fb *Framebuffer) SetTexture(tex gpu.Texture2D) {
 }
 
 // Texture returns the current contents of the framebuffer as a Texture2D.
+// Returns nil if not activated.
 // For Samples() > 0 this reduces the optimized internal render buffer to a
 // standard 2D texture -- the return texture is owned and managed by the
 // framebuffer, and re-used every time Texture() is called.
@@ -129,19 +134,52 @@ func (fb *Framebuffer) Texture() gpu.Texture2D {
 	if fb.tex != nil {
 		return fb.tex
 	}
-	if fb.nsamp >= 0 {
-		gl.Flush() // make sure
+	if !fb.init {
+		return nil
+	}
+	if fb.nsamp > 0 && fb.texOld {
 		szx := int32(fb.size.X)
 		szy := int32(fb.size.Y)
 		gl.BindFramebuffer(gl.READ_FRAMEBUFFER, fb.handle)
 		gl.BindFramebuffer(gl.DRAW_FRAMEBUFFER, fb.dsampFbo)
-		gl.BlitFramebuffer(0, 0, szx, szy, 0, 0, szx, szy, gl.COLOR_BUFFER_BIT, gl.NEAREST)
-		// copies into cTex
+		gl.BlitFramebuffer(0, 0, szx, szy, 0, 0, szx, szy, gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT, gl.NEAREST)
+		// copies into cTex and depthStenTex
 	}
+	fb.texOld = false
 	return fb.cTex
 }
 
-// todo: methods to get the depth, stencil buffer output as well..
+// grabDepthSten gets the depth + stencil data from gpu
+func (fb *Framebuffer) grabDepthSten() {
+	if fb.nsamp > 0 {
+		fb.Texture() // update if needed
+	}
+	if fb.depthOld {
+		totn := fb.size.X * fb.size.Y
+		if len(fb.depthStenDat) != totn {
+			fb.depthStenDat = make([]uint32, totn)
+		}
+		gl.BindTexture(gl.TEXTURE_2D, fb.depthStenTex)
+		gl.GetTexImage(gl.TEXTURE_2D, 0, gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8, gl.Ptr(fb.depthStenDat))
+		fb.depthOld = false
+	}
+}
+
+// DepthAt returns the depth-buffer value at given x,y coordinate in
+// framebuffer coordinates (i.e., Y = 0 is at bottom).
+// Must be called with a valid gpu context and on proper thread for that context,
+// with framebuffer active.
+func (fb *Framebuffer) DepthAt(x, y int) float32 {
+	if !fb.init {
+		return 0
+	}
+	fb.grabDepthSten()
+	i := y*fb.size.X + x
+	val := fb.depthStenDat[i]
+	dval := float32(val&0xFFFFFF) / float32(0xFFFFFF)
+	// fmt.Printf("depth val at: %v, %v: val: %v, mask: %v  dval: %v\n", x, y, val, val&0xFFFFFF, dval)
+	return dval
+}
 
 // Activate establishes the GPU resources and handle for the
 // framebuffer and all other associated buffers etc (if not already done).
@@ -149,6 +187,8 @@ func (fb *Framebuffer) Texture() gpu.Texture2D {
 // gpu drawing commands.
 func (fb *Framebuffer) Activate() {
 	if !fb.init {
+		fb.texOld = true
+		fb.depthOld = true
 		szx := int32(fb.size.X)
 		szy := int32(fb.size.Y)
 		gl.GenFramebuffers(1, &fb.handle)
@@ -161,6 +201,10 @@ func (fb *Framebuffer) Activate() {
 			// gpu.TheGPU.ErrCheck("framebuffer storage multisamp")
 		} else {
 			gl.RenderbufferStorage(gl.RENDERBUFFER, gl.DEPTH24_STENCIL8, szx, szy)
+			// gl.GenTextures(1, &fb.depthStenTex)
+			// gl.BindTexture(gl.TEXTURE_2D, fb.depthStenTex)
+			// gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH24_STENCIL8, szx, szy, 0, gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8, gl.Ptr(nil))
+			// gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, fb.depthStenTex, 0)
 		}
 		gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, fb.drbo)
 		if fb.tex != nil {
@@ -176,10 +220,17 @@ func (fb *Framebuffer) Activate() {
 				// gpu.TheGPU.ErrCheck("framebuffer teximage 2d multisamp")
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D_MULTISAMPLE, fb.msampTex, 0)
 				// gpu.TheGPU.ErrCheck("framebuffer texture2d")
+
 				// downsampling fbo
 				gl.GenFramebuffers(1, &fb.dsampFbo)
 				gl.BindFramebuffer(gl.FRAMEBUFFER, fb.dsampFbo)
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb.cTex.Handle(), 0)
+
+				gl.GenTextures(1, &fb.depthStenTex)
+				gl.BindTexture(gl.TEXTURE_2D, fb.depthStenTex)
+				gl.TexImage2D(gl.TEXTURE_2D, 0, gl.DEPTH24_STENCIL8, szx, szy, 0, gl.DEPTH_STENCIL, gl.UNSIGNED_INT_24_8, gl.Ptr(nil))
+				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, fb.depthStenTex, 0)
+
 				gl.BindFramebuffer(gl.FRAMEBUFFER, fb.handle)
 			} else {
 				gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb.cTex.Handle(), 0)
@@ -199,6 +250,14 @@ func (fb *Framebuffer) Activate() {
 // valid after Activate.
 func (fb *Framebuffer) Handle() uint32 {
 	return fb.handle
+}
+
+// Rendered should be called after rendering to the framebuffer,
+// to ensure the update of data transferred from the framebuffer
+// (texture, depth buffer)
+func (fb *Framebuffer) Rendered() {
+	fb.texOld = true
+	fb.depthOld = true
 }
 
 // Delete deletes the GPU resources associated with this framebuffer

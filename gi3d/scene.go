@@ -841,6 +841,7 @@ func (sc *Scene) Render() bool {
 		sc.Renders.SetLightsUnis(sc)
 		sc.Render3D()
 		gpu.Draw.Flush()
+		sc.Frame.Rendered()
 		sc.Tex = sc.Frame.Texture()
 		sc.Tex.SetBotZero(true) // this has Y=0 at bottom!
 	})
