@@ -17,9 +17,7 @@ import (
 
 // Node3D is the common interface for all gi3d scenegraph nodes
 type Node3D interface {
-	// nodes are Ki elements -- this comes for free by embedding ki.Node in
-	// all Node3D elements.
-	ki.Ki
+	gi.Node
 
 	// IsObject returns true if this is an Object node (else a Group)
 	IsObject() bool
@@ -52,9 +50,12 @@ type Node3D interface {
 	// size and other scene bbox info from scene
 	UpdateBBox2D(size mat32.Vec2, sc *Scene)
 
-	// Pos2DToObj3D converts a given 2D point in scene image coordinates
-	// into a 3D point in the local coordinates of this node
-	Pos2DToObj3D(pos image.Point, sc *Scene) (mat32.Vec3, error)
+	// RayPick converts a given 2D point in scene image coordinates
+	// into a ray from the camera position pointing through line of sight of camera
+	// into *local* coordinates of the object.
+	// This can be used to find point of intersection in local coordinates relative
+	// to a given plane of interest, for example (see Ray methods for intersections)
+	RayPick(pos image.Point, sc *Scene) mat32.Ray
 
 	// WorldMatrix returns the world matrix for this node
 	WorldMatrix() *mat32.Mat4
@@ -87,6 +88,12 @@ type Node3D interface {
 	// Render3D is called by Scene Render3D on main thread,
 	// everything ready to go..
 	Render3D(sc *Scene, rc RenderClasses, rnd Render)
+
+	// ConnectEvents3D: setup connections to window events -- called in
+	// Render3D if in bounds.  It can be useful to create modular methods for
+	// different event types that can then be mix-and-matched in any more
+	// specialized types.
+	ConnectEvents3D(sc *Scene)
 }
 
 // Node3DBase is the basic 3D scenegraph node, which has the full transform information
@@ -196,48 +203,51 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
 	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
-	nb.ObjBBox = nb.BBox.Add(sc.ObjBBox.Min)
-	nb.VpBBox = nb.ObjBBox.Add(sc.VpBBox.Min.Sub(sc.ObjBBox.Min))
-	nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
-	if nb.VpBBox != image.ZR {
-		nb.WinBBox = nb.VpBBox.Add(sc.WinBBox.Min.Sub(sc.VpBBox.Min))
+	scbounds := image.Rectangle{Max: sc.Geom.Size}
+	bbvis := nb.BBox.Intersect(scbounds)
+	if bbvis != image.ZR { // filter out invisible at objbbox level
+		nb.ObjBBox = bbvis.Add(sc.ObjBBox.Min)
+		nb.VpBBox = nb.ObjBBox.Add(sc.VpBBox.Min.Sub(sc.ObjBBox.Min))
+		nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
+		if nb.VpBBox != image.ZR {
+			nb.WinBBox = nb.VpBBox.Add(sc.WinBBox.Min.Sub(sc.VpBBox.Min))
+		} else {
+			nb.WinBBox = nb.VpBBox
+		}
 	} else {
-		nb.WinBBox = nb.VpBBox
+		nb.ObjBBox = image.ZR
+		nb.VpBBox = image.ZR
+		nb.WinBBox = image.ZR
 	}
 }
 
-// Pos2DToObj3D converts a given 2D point in scene image coordinates
-// into a 3D point in the local coordinates of this node
-func (nb *Node3DBase) Pos2DToObj3D(pos image.Point, sc *Scene) (mat32.Vec3, error) {
+// RayPick converts a given 2D point in scene image coordinates
+// into a ray from the camera position pointing through line of sight of camera
+// into *local* coordinates of the object.
+// This can be used to find point of intersection in local coordinates relative
+// to a given plane of interest, for example (see Ray methods for intersections).
+func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 	fpos := mat32.Vec2{float32(pos.X), float32(pos.Y)}
 	ndc := fpos.WindowToNDC(size, mat32.Vec2{}, true) // flipY
 	var err error
-	sc.ActivateWin()
-	oswin.TheApp.RunOnMain(func() {
-		dval := sc.Frame.DepthAt(pos.X, sz.Y-pos.Y)
-		if dval != 0 {
-			ndc.Z = 2*dval - 1
-		}
-	})
-	if ndc.Z == 0 {
-		ndc.Z = 0.5 * (nb.NDCBBox.Min.Z + nb.NDCBBox.Max.Z)
-	}
-	fmt.Printf("ndc: %v from pos: %v\n", ndc, pos)
-	inv, err := nb.Pose.MVPMatrix.Inverse()
+	ndc.Z = -1 // at closest point
+	cdir := mat32.NewVec4FromVec3(ndc, 1).MulMat4(&sc.Camera.InvPrjnMatrix)
+	cdir.Z = -1
+	cdir.W = 0 // vec
+	// get world position / transform of camera: matrix is inverse of ViewMatrix
+	wdir := cdir.MulMat4(&sc.Camera.Pose.Matrix)
+	wpos := sc.Camera.Pose.Matrix.Pos()
+	invM, err := nb.Pose.WorldMatrix.Inverse()
 	if err != nil {
 		log.Println(err)
 	}
-	nd4 := mat32.NewVec4FromVec3(ndc, 1)
-	lpos := nd4.MulMat4(inv)
-	fmt.Printf("lpos pre: %v\n", lpos)
-	lpos.W = 1.0 / lpos.W
-	lpos.X *= lpos.W
-	lpos.Y *= lpos.W
-	lpos.Z *= lpos.W
-	fmt.Printf("lpos: %v\n", lpos)
-	return mat32.NewVec3FromVec4(lpos), err
+	lpos := mat32.NewVec4FromVec3(wpos, 1).MulMat4(invM)
+	ldir := wdir.MulMat4(invM)
+	ldir.SetNormal()
+	ray := mat32.NewRay(mat32.Vec3{lpos.X, lpos.Y, lpos.Z}, mat32.Vec3{ldir.X, ldir.Y, ldir.Z})
+	return *ray
 }
 
 // WorldMatrix returns the world matrix for this node
@@ -265,6 +275,42 @@ func (nb *Node3DBase) Init3D(sc *Scene) {
 
 func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	// nop
+}
+
+/////////////////////////////////////////////////////////////////
+// Events
+
+func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
+	// nop -- add connect event calls here as needed in derived types
+}
+
+// ConnectEvent connects this node to receive a given type of GUI event
+// signal from the parent window -- typically connect only visible nodes, and
+// disconnect when not visible
+func (nb *Node3DBase) ConnectEvent(win *gi.Window, et oswin.EventType, pri gi.EventPris, fun ki.RecvFunc) {
+	win.ConnectEvent(nb.This(), et, pri, fun)
+}
+
+// DisconnectEvent disconnects this receiver from receiving given event
+// type -- pri is priority -- pass AllPris for all priorities -- see also
+// DisconnectAllEvents
+func (nb *Node3DBase) DisconnectEvent(win *gi.Window, et oswin.EventType, pri gi.EventPris) {
+	win.DisconnectEvent(nb.This(), et, pri)
+}
+
+// DisconnectAllEvents disconnects node from all window events -- typically
+// disconnect when not visible -- pri is priority -- pass AllPris for all priorities.
+// This goes down the entire tree from this node on down, as typically everything under
+// will not get an explicit disconnect call because no further updating will happen
+func (nb *Node3DBase) DisconnectAllEvents(win *gi.Window, pri gi.EventPris) {
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+		_, ni := KiToNode3D(k)
+		if ni == nil {
+			return false // going into a different type of thing, bail
+		}
+		win.DisconnectAllEvents(ni.This(), pri)
+		return true
+	})
 }
 
 // TrackCamera moves this node to pose of camera

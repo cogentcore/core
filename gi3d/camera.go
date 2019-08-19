@@ -12,16 +12,17 @@ import (
 
 // Camera defines the properties of the camera
 type Camera struct {
-	Pose       Pose       `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`
-	Target     mat32.Vec3 `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`
-	UpDir      mat32.Vec3 `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`
-	Ortho      bool       `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."`
-	FOV        float32    `desc:"field of view in degrees "`
-	Aspect     float32    `desc:"aspect ratio (width/height)"`
-	Near       float32    `desc:"near plane z coordinate"`
-	Far        float32    `desc:"far plane z coordinate"`
-	ViewMatrix mat32.Mat4 `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
-	PrjnMatrix mat32.Mat4 `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
+	Pose          Pose       `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`
+	Target        mat32.Vec3 `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`
+	UpDir         mat32.Vec3 `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`
+	Ortho         bool       `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."`
+	FOV           float32    `desc:"field of view in degrees "`
+	Aspect        float32    `desc:"aspect ratio (width/height)"`
+	Near          float32    `desc:"near plane z coordinate"`
+	Far           float32    `desc:"far plane z coordinate"`
+	ViewMatrix    mat32.Mat4 `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
+	PrjnMatrix    mat32.Mat4 `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
+	InvPrjnMatrix mat32.Mat4 `view:"-" desc:"inverse of the projection matrix"`
 }
 
 var KiT_Camera = kit.Types.AddType(&Camera{}, CameraProps)
@@ -53,6 +54,7 @@ func (cm *Camera) UpdateMatrix() {
 	} else {
 		cm.PrjnMatrix.SetPerspective(cm.FOV, cm.Aspect, cm.Near, cm.Far)
 	}
+	cm.InvPrjnMatrix.SetInverse(&cm.PrjnMatrix)
 }
 
 // LookAt points the camera at given target location, using given up direction,

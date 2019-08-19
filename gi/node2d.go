@@ -96,9 +96,7 @@ var Layout2DTrace bool = false
 // Node2D is the interface for all 2D nodes -- defines the stages of building
 // and rendering the 2D scenegraph
 type Node2D interface {
-	// nodes are Ki elements -- this comes for free by embedding ki.Node in
-	// all Node2D elements.
-	ki.Ki
+	Node
 
 	// AsNode2D returns a generic Node2DBase for our node -- gives generic
 	// access to all the base-level data structures without requiring

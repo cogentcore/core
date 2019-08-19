@@ -439,6 +439,15 @@ func (m *Mat4) SetPos(v Vec3) {
 	m[14] = v.Z
 }
 
+// Pos returns the position component of the matrix
+func (m *Mat4) Pos() Vec3 {
+	pos := Vec3{}
+	pos.X = m[12]
+	pos.Y = m[13]
+	pos.Z = m[14]
+	return pos
+}
+
 // SetTransform sets this matrix to a transformation matrix for the specified position,
 // rotation specified by the quaternion and scale.
 func (m *Mat4) SetTransform(pos Vec3, quat Quat, scale Vec3) {

@@ -452,27 +452,11 @@ func (sc *Scene) NavEvents() {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 			ssc.SetDragCursor = false
 		}
+		if me.Action != mouse.Press {
+			return
+		}
 		if !ssc.IsInactive() && !ssc.HasFocus() {
 			ssc.GrabFocus()
-		}
-		if me.Action == mouse.Press {
-			switch {
-			case key.HasAllModifierBits(me.Modifiers, key.Shift):
-				objs := sc.ObjsIntersectingPoint(me.Where)
-				if len(objs) > 0 {
-					relpos := me.Where.Sub(sc.WinBBox.Min)
-					for i := range objs {
-						ni := objs[i].AsNode3D()
-						fmt.Printf("hit obj: %v  bbox: %v  pos: %v\n", objs[i].Name(), ni.BBox, relpos)
-						lpos, err := objs[i].Pos2DToObj3D(relpos, sc)
-						if err != nil {
-							log.Println(err)
-						}
-						fmt.Printf("lpos: %v  relpos: %v\n", lpos, relpos)
-					}
-					me.SetProcessed()
-				}
-			}
 		}
 	})
 	sc.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -891,7 +875,6 @@ func (sc *Scene) DirectWinUpload() bool {
 // all scene-level resources must be initialized and activated at this point
 func (sc *Scene) Render3D() {
 	var rcs [RenderClassesN][]Node3D
-	bounds := image.Rectangle{Max: sc.Geom.Size}
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
 			return true
@@ -900,18 +883,18 @@ func (sc *Scene) Render3D() {
 		if nii == nil {
 			return false // going into a different type of thing, bail
 		}
-		if ni.IsInvisible() {
+		if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
+			ni.DisconnectAllEvents(sc.Win, gi.AllPris)
 			return false
 		}
+		nii.ConnectEvents3D(sc) // only connect visible objects
 		if !nii.IsObject() {
 			return true
 		}
-		if ni.BBox.Overlaps(bounds) { // render to texture based strictly on scene visibility, not vp etc
-			rc := nii.RenderClass()
-			rcs[rc] = append(rcs[rc], nii)
-			// } else {
-			// 	fmt.Printf("node bbox culled: %v  bbox: %v  vpbbox: %v\n", ni.Nm, ni.BBox, sc.VpBBox)
-		}
+		rc := nii.RenderClass()
+		rcs[rc] = append(rcs[rc], nii)
+		// } else {
+		// 	fmt.Printf("node bbox culled: %v  bbox: %v  vpbbox: %v\n", ni.Nm, ni.BBox, sc.VpBBox)
 		return true
 	})
 

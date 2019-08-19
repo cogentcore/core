@@ -2026,54 +2026,56 @@ func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventR
 				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
 				nii.FocusChanged2D(FocusActive)
 			}
-		} else if evi.HasPos() {
-			pos := evi.Pos()
-			switch evi.(type) {
-			case *mouse.DragEvent:
-				if w.Dragging != nil {
-					if w.Dragging == ni.This() {
-						rvs.Add(recv, fun, 10000)
-						return false
-					} else {
-						return true
-					}
+		}
+	}
+	// remainder is done using generic node interface, for 2D and 3D
+	gni := recv.(Node)
+	gn := gni.AsGiNode()
+	// todo: need a focus concept for 3D
+	if evi.HasPos() {
+		pos := evi.Pos()
+		switch evi.(type) {
+		case *mouse.DragEvent:
+			if w.Dragging != nil {
+				if w.Dragging == gn.This() {
+					rvs.Add(recv, fun, 10000)
+					return false
 				} else {
-					if pos.In(ni.WinBBox) {
-						rvs.AddDepth(recv, fun, w)
-						return false
-					}
 					return true
 				}
-			case *mouse.ScrollEvent:
-				if w.Scrolling != nil {
-					if w.Scrolling == ni.This() {
-						rvs.Add(recv, fun, 10000)
-					} else {
-						return true
-					}
-				} else {
-					if pos.In(ni.WinBBox) {
-						rvs.AddDepth(recv, fun, w)
-						return false
-					}
-					return true
-				}
-			default:
-				if w.Dragging == ni.This() { // dragger always gets it
-					rvs.Add(recv, fun, 10000) // top priority -- can't steal!
+			} else {
+				if pos.In(gn.WinBBox) {
+					rvs.AddDepth(recv, fun, w)
 					return false
 				}
-				if !pos.In(ni.WinBBox) {
+				return true
+			}
+		case *mouse.ScrollEvent:
+			if w.Scrolling != nil {
+				if w.Scrolling == gn.This() {
+					rvs.Add(recv, fun, 10000)
+				} else {
 					return true
 				}
+			} else {
+				if pos.In(gn.WinBBox) {
+					rvs.AddDepth(recv, fun, w)
+					return false
+				}
+				return true
+			}
+		default:
+			if w.Dragging == gn.This() { // dragger always gets it
+				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
+				return false
+			}
+			if !pos.In(gn.WinBBox) {
+				return true
 			}
 		}
-		rvs.AddDepth(recv, fun, w)
-		return true
-	} else {
-		// todo: get a 3D
-		return true
 	}
+	rvs.AddDepth(recv, fun, w)
+	return true
 }
 
 // SendEventSignal sends given event signal to all receivers that want it --

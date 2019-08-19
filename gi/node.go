@@ -12,6 +12,17 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+// Node is the interface for all GoGi nodes (2D and 3D), for accessing as NodeBase
+type Node interface {
+	// nodes are Ki elements -- this comes for free by embedding ki.Node in NodeBase
+	ki.Ki
+
+	// AsGiNode returns a generic gi.NodeBase for our node -- gives generic
+	// access to all the base-level data structures without requiring
+	// interface methods.
+	AsGiNode() *NodeBase
+}
+
 // NodeBase is the base struct type for GoGi graphical interface system,
 // containing infrastructure for both 2D and 3D scene graph nodes
 type NodeBase struct {
@@ -29,6 +40,10 @@ var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
 var NodeBaseProps = ki.Props{
 	"base-type": true, // excludes type from user selections
+}
+
+func (nb *NodeBase) AsGiNode() *NodeBase {
+	return nb
 }
 
 func (nb *NodeBase) CopyFieldsFrom(frm interface{}) {
@@ -374,13 +389,3 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 // standard css properties on nodes apply, including visible, etc.
 
 // see node2d.go for 2d node
-
-////////////////////////////////////////////////////////////////////////////////////////
-// 3D  -- todo: move to node3d.go when actually start writing
-
-// basic component node for 3D rendering -- has a 3D transform
-type Node3DBase struct {
-	NodeBase
-}
-
-var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, nil)
