@@ -343,7 +343,10 @@ func (sc *Scene) Move2D(delta image.Point, parBBox image.Rectangle) {
 		return
 	}
 	sc.Move2DBase(delta, parBBox)
-	// sc.Move2DChildren(image.ZP) // reset delta here -- we absorb the delta in our placement relative to the parent
+	// note: children are automatically moved in Node3DBase.UpdateBBox2D
+	// by adding scene's ObjBBox.Min - BBox.Min offset in their own VpBBox computation
+	// publish makes the thing update after scrolling -- doesn't otherwise.
+	sc.Win.PublishFullReRender()
 }
 
 func (sc *Scene) Render2D() {
@@ -859,10 +862,17 @@ func (sc *Scene) DirectWinUpload() bool {
 			// limit upload to vpbbox region
 			rvp := sc.VpBBox
 			tvp := rvp
-			tvp.Max = tvp.Min.Add(sc.Tex.Size())
+			sz := sc.Tex.Size()
+			tvp.Max = tvp.Min.Add(sz)
 			tvp = rvp.Intersect(tvp)
-			tb := image.Rectangle{Max: tvp.Size()}
-			wt.Copy(sc.WinBBox.Min, sc.Tex, tb, draw.Src, nil)
+			// mvoff is amount left edge of scene has been clipped by VpBbox and is no longer
+			// visible -- thus how much the texture blit must move over accordingly.
+			mvoff := sc.VpBBox.Min.Sub(sc.ObjBBox.Min)
+			tb := image.Rectangle{Min: mvoff, Max: mvoff.Add(tvp.Size())}
+			fb := tb
+			fb.Min.Y = sz.Y - tb.Max.Y // flip Y
+			fb.Max.Y = sz.Y - tb.Min.Y
+			wt.Copy(sc.WinBBox.Min, sc.Tex, fb, draw.Src, nil)
 		})
 	}
 	if !sc.Win.IsUpdating() {

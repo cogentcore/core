@@ -206,8 +206,8 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	scbounds := image.Rectangle{Max: sc.Geom.Size}
 	bbvis := nb.BBox.Intersect(scbounds)
 	if bbvis != image.ZR { // filter out invisible at objbbox level
-		nb.ObjBBox = bbvis.Add(sc.ObjBBox.Min)
-		nb.VpBBox = nb.ObjBBox.Add(sc.VpBBox.Min.Sub(sc.ObjBBox.Min))
+		nb.ObjBBox = bbvis.Add(sc.BBox.Min)
+		nb.VpBBox = nb.ObjBBox.Add(sc.ObjBBox.Min.Sub(sc.BBox.Min)) // move amount
 		nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
 		if nb.VpBBox != image.ZR {
 			nb.WinBBox = nb.VpBBox.Add(sc.WinBBox.Min.Sub(sc.VpBBox.Min))
@@ -226,6 +226,8 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 // into *local* coordinates of the object.
 // This can be used to find point of intersection in local coordinates relative
 // to a given plane of interest, for example (see Ray methods for intersections).
+// To convert mouse window-relative coords into scene-relative coords
+// subtract the sc.ObjBBox.Min which includes any scrolling effects
 func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
