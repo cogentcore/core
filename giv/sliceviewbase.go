@@ -413,7 +413,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 func (sv *SliceViewBase) UpdateScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	updt := sb.UpdateStart()
-	sb.Max = float32(sv.SliceSize) + 0.5 // bit of extra to ensure last line always shows up
+	sb.Max = float32(sv.SliceSize) + 0.01 // bit of extra to ensure last line always shows up
 	if sv.DispRows > 0 {
 		sb.PageStep = float32(sv.DispRows) * sb.Step
 		sb.ThumbVal = float32(sv.DispRows)
