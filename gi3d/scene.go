@@ -87,6 +87,30 @@ func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes[ms.Name()] = ms
 }
 
+// MeshByName looks for mesh by name -- returns nil if not found
+func (sc *Scene) MeshByName(nm string) Mesh {
+	if sc.Meshes == nil {
+		sc.Meshes = make(map[string]Mesh)
+	}
+	ms, ok := sc.Meshes[nm]
+	if ok {
+		return ms
+	}
+	return nil
+}
+
+// MeshByNameTry looks for mesh by name -- returns error if not found
+func (sc *Scene) MeshByNameTry(nm string) (Mesh, error) {
+	if sc.Meshes == nil {
+		sc.Meshes = make(map[string]Mesh)
+	}
+	ms, ok := sc.Meshes[nm]
+	if ok {
+		return ms, nil
+	}
+	return nil, fmt.Errorf("Mesh named: %v not found in Scene: %v", nm, sc.Nm)
+}
+
 // MeshList returns a list of available meshes (e.g., for chooser)
 func (sc *Scene) MeshList() []string {
 	sz := len(sc.Meshes)
