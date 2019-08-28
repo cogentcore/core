@@ -16,19 +16,17 @@ On linux, you must ensure that the linker `ld` will look in the current director
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ```
 
-**NOTE:** as of 6/12/2019, these instructions include some extra steps to merge the [pull request #180](https://github.com/go-python/gopy/pull/180) from goki into the go-python repository -- once the pull request is merged, those extra steps will be unnecessary (and will likely no longer work) -- we'll try to update this asap, but just in case..
+**NOTE:** as of 8/28/2019, these instructions *no longer* include extra steps to update gopy as it has been updated in the go-python repository.
 
 ```sh
 $ python3 -m pip install --upgrade pybindgen setuptools wheel
 $ go get golang.org/x/tools/cmd/goimports
 $ go get github.com/go-python/gopy 
 $ cd ~/go/src/github.com/go-python/gopy  # use $GOPATH instead of ~/go if somewhere else
-$ git fetch origin pull/180/head:pr180  # this gets the pull-request #180, into branch pr180
-$ git checkout pr180  # switch to that branch
 $ go install    # do go get -u ./... if this fails and try again -- installs gopy exe in ~go/bin
 $ cd ~/go/src/github.com/goki/gi/python   # again, $GOPATH etc..
-$ make
-$ make install  # may need to do sudo make install -- installs into /usr/local/bin and python site-packages
+$ make  # if you get an error about not finding gopy, make sure ~/go/bin is on your path
+$ make install  # may need to do: sudo make install -- installs into /usr/local/bin and python site-packages
 $ cd ../examples/widgets
 $ pygi   # this was installed during make install into /usr/local/bin
 $ import widgets  # this loads and runs widgets.py -- view that and compare with widgets.go
