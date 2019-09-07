@@ -414,6 +414,145 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 	sr.LastPos.Y = 0
 }
 
+// SetRunePosTB sets relative positions of each rune using a flat
+// top-to-bottom text layout -- i.e., letters are in their normal
+// upright orientation, but arranged vertically.
+func (sr *SpanRender) SetRunePosTB(letterSpace, wordSpace, chsz float32, tabSize int) {
+	if err := sr.IsValid(); err != nil {
+		// log.Println(err)
+		return
+	}
+	sr.Dir = TB
+	sz := len(sr.Text)
+	lspc := letterSpace
+	wspc := wordSpace
+	if tabSize == 0 {
+		tabSize = 4
+	}
+	var fpos float32
+	curFace := sr.Render[0].Face
+	TextFontRenderMu.Lock()
+	defer TextFontRenderMu.Unlock()
+	col := 0 // current column position -- todo: does NOT deal with indent
+	for i, r := range sr.Text {
+		rr := &(sr.Render[i])
+		curFace = rr.CurFace(curFace)
+
+		fht := FixedToFloat32(curFace.Metrics().Height)
+		rr.RelPos.X = 0
+		rr.RelPos.Y = fpos
+
+		if bitflag.Has32(int32(rr.Deco), int(DecoSuper)) {
+			rr.RelPos.Y = -0.45 * FixedToFloat32(curFace.Metrics().Ascent)
+		}
+		if bitflag.Has32(int32(rr.Deco), int(DecoSub)) {
+			rr.RelPos.Y = 0.15 * FixedToFloat32(curFace.Metrics().Ascent)
+		}
+
+		// todo: could check for various types of special unicode space chars here
+		a, _ := curFace.GlyphAdvance(r)
+		a32 := FixedToFloat32(a)
+		if a32 == 0 {
+			a32 = .1 * fht // something..
+		}
+		rr.Size = Vec2D{a32, fht}
+
+		if r == '\t' {
+			curtab := col / tabSize
+			curtab++
+			col = curtab * tabSize
+			cpos := chsz * float32(col)
+			if cpos > fpos {
+				fpos = cpos
+			}
+		} else {
+			fpos += fht
+			col++
+			if i < sz-1 {
+				fpos += lspc
+				if unicode.IsSpace(r) {
+					fpos += wspc
+				}
+			}
+		}
+	}
+	sr.LastPos.Y = fpos
+	sr.LastPos.X = 0
+}
+
+// SetRunePosTBRot sets relative positions of each rune using a flat
+// top-to-bottom text layout, with characters rotated 90 degress
+// based on font size info and additional extra letter and word spacing
+// parameters (which can be negative)
+func (sr *SpanRender) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabSize int) {
+	if err := sr.IsValid(); err != nil {
+		// log.Println(err)
+		return
+	}
+	sr.Dir = TB
+	sz := len(sr.Text)
+	prevR := rune(-1)
+	lspc := letterSpace
+	wspc := wordSpace
+	if tabSize == 0 {
+		tabSize = 4
+	}
+	var fpos float32
+	curFace := sr.Render[0].Face
+	TextFontRenderMu.Lock()
+	defer TextFontRenderMu.Unlock()
+	col := 0 // current column position -- todo: does NOT deal with indent
+	for i, r := range sr.Text {
+		rr := &(sr.Render[i])
+		rr.RotRad = math32.Pi / 2
+		curFace = rr.CurFace(curFace)
+
+		fht := FixedToFloat32(curFace.Metrics().Height)
+		if prevR >= 0 {
+			fpos += FixedToFloat32(curFace.Kern(prevR, r))
+		}
+		rr.RelPos.Y = fpos
+		rr.RelPos.X = 0
+
+		if bitflag.Has32(int32(rr.Deco), int(DecoSuper)) {
+			rr.RelPos.X = -0.45 * FixedToFloat32(curFace.Metrics().Ascent)
+		}
+		if bitflag.Has32(int32(rr.Deco), int(DecoSub)) {
+			rr.RelPos.X = 0.15 * FixedToFloat32(curFace.Metrics().Ascent)
+		}
+
+		// todo: could check for various types of special unicode space chars here
+		a, _ := curFace.GlyphAdvance(r)
+		a32 := FixedToFloat32(a)
+		if a32 == 0 {
+			a32 = .1 * fht // something..
+		}
+		rr.Size = Vec2D{fht, a32}
+
+		if r == '\t' {
+			curtab := col / tabSize
+			curtab++
+			col = curtab * tabSize
+			cpos := chsz * float32(col)
+			if cpos > fpos {
+				fpos = cpos
+			}
+		} else {
+			fpos += a32
+			col++
+			if i < sz-1 {
+				fpos += lspc
+				if unicode.IsSpace(r) {
+					fpos += wspc
+				}
+			}
+		}
+		prevR = r
+	}
+	sr.LastPos.Y = fpos
+	sr.LastPos.X = 0
+}
+
 // FindWrapPosLR finds a position to do word wrapping to fit within trgSize --
 // RelPos positions must have already been set (e.g., SetRunePosLR)
 func (sr *SpanRender) FindWrapPosLR(trgSize, curSize float32) int {
@@ -993,6 +1132,25 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 	vht := fontSty.Face.Face.Metrics().Height
 	tr.Size = Vec2D{ssz.X, FixedToFloat32(vht)}
 
+}
+
+// SetStringRot90 is for basic text rendering with a single style of text (see
+// SetHTML for tag-formatted text) -- configures a single SpanRender with the
+// entire string, and does TB rotated layout (-90 deg).
+// Be sure that OpenFont has been run so a valid Face is available.
+// noBG ignores any BgColor in font style, and never renders background color
+func (tr *TextRender) SetStringRot90(str string, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, scalex float32) {
+	if len(tr.Spans) != 1 {
+		tr.Spans = make([]SpanRender, 1)
+	}
+	tr.Links = nil
+	sr := &(tr.Spans[0])
+	rot := math32.Pi / 2
+	sr.SetString(str, fontSty, ctxt, noBG, rot, scalex)
+	sr.SetRunePosTBRot(txtSty.LetterSpacing.Dots, txtSty.WordSpacing.Dots, fontSty.Face.Metrics.Ch, txtSty.TabSize)
+	ssz := sr.SizeHV()
+	vht := fontSty.Face.Face.Metrics().Height
+	tr.Size = Vec2D{FixedToFloat32(vht), ssz.Y}
 }
 
 // SetRunes is for basic text rendering with a single style of text (see
