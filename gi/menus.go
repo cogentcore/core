@@ -616,6 +616,12 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 	return sp
 }
 
+func (nb *Separator) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Separator)
+	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	nb.Horiz = fr.Horiz
+}
+
 var SeparatorProps = ki.Props{
 	"padding":          units.NewPx(0),
 	"margin":           units.NewPx(0),
