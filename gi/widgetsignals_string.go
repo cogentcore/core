@@ -9,6 +9,16 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[WidgetSelected-0]
+	_ = x[WidgetFocused-1]
+	_ = x[WidgetContextMenu-2]
+	_ = x[WidgetSignalsN-3]
+}
+
 const _WidgetSignals_name = "WidgetSelectedWidgetFocusedWidgetContextMenuWidgetSignalsN"
 
 var _WidgetSignals_index = [...]uint8{0, 14, 27, 44, 58}

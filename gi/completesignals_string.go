@@ -9,6 +9,14 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[CompleteSelect-0]
+	_ = x[CompleteExtend-1]
+}
+
 const _CompleteSignals_name = "CompleteSelectCompleteExtend"
 
 var _CompleteSignals_index = [...]uint8{0, 14, 28}

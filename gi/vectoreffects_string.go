@@ -9,6 +9,15 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[VecEffNone-0]
+	_ = x[VecEffNonScalingStroke-1]
+	_ = x[VecEffN-2]
+}
+
 const _VectorEffects_name = "VecEffNoneVecEffNonScalingStrokeVecEffN"
 
 var _VectorEffects_index = [...]uint8{0, 10, 32, 39}

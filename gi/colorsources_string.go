@@ -9,6 +9,16 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[SolidColor-0]
+	_ = x[LinearGradient-1]
+	_ = x[RadialGradient-2]
+	_ = x[ColorSourcesN-3]
+}
+
 const _ColorSources_name = "SolidColorLinearGradientRadialGradientColorSourcesN"
 
 var _ColorSources_index = [...]uint8{0, 10, 24, 38, 51}

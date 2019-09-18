@@ -9,6 +9,19 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[LineJoinMiter-0]
+	_ = x[LineJoinMiterClip-1]
+	_ = x[LineJoinRound-2]
+	_ = x[LineJoinBevel-3]
+	_ = x[LineJoinArcs-4]
+	_ = x[LineJoinArcsClip-5]
+	_ = x[LineJoinsN-6]
+}
+
 const _LineJoins_name = "LineJoinMiterLineJoinMiterClipLineJoinRoundLineJoinBevelLineJoinArcsLineJoinArcsClipLineJoinsN"
 
 var _LineJoins_index = [...]uint8{0, 13, 30, 43, 56, 68, 84, 94}

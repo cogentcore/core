@@ -9,6 +9,16 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[FontNormal-0]
+	_ = x[FontItalic-1]
+	_ = x[FontOblique-2]
+	_ = x[FontStylesN-3]
+}
+
 const _FontStyles_name = "FontNormalFontItalicFontObliqueFontStylesN"
 
 var _FontStyles_index = [...]uint8{0, 10, 20, 31, 42}

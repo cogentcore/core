@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[WhiteSpaceNormal-0]
+	_ = x[WhiteSpaceNowrap-1]
+	_ = x[WhiteSpacePre-2]
+	_ = x[WhiteSpacePreLine-3]
+	_ = x[WhiteSpacePreWrap-4]
+	_ = x[WhiteSpacesN-5]
+}
+
 const _WhiteSpaces_name = "WhiteSpaceNormalWhiteSpaceNowrapWhiteSpacePreWhiteSpacePreLineWhiteSpacePreWrapWhiteSpacesN"
 
 var _WhiteSpaces_index = [...]uint8{0, 16, 32, 45, 62, 79, 91}

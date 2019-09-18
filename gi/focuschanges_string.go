@@ -9,6 +9,17 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[FocusLost-0]
+	_ = x[FocusGot-1]
+	_ = x[FocusInactive-2]
+	_ = x[FocusActive-3]
+	_ = x[FocusChangesN-4]
+}
+
 const _FocusChanges_name = "FocusLostFocusGotFocusInactiveFocusActiveFocusChangesN"
 
 var _FocusChanges_index = [...]uint8{0, 9, 17, 30, 41, 54}

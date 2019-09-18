@@ -9,6 +9,56 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[ButtonFlagCheckable-29]
+	_ = x[ButtonFlagChecked-30]
+	_ = x[ButtonFlagMenu-31]
+	_ = x[ButtonFlagsN-32]
+	_ = x[NoLayout-16]
+	_ = x[EventsConnected-17]
+	_ = x[CanFocus-18]
+	_ = x[HasFocus-19]
+	_ = x[FullReRender-20]
+	_ = x[ReRenderAnchor-21]
+	_ = x[Invisible-22]
+	_ = x[Inactive-23]
+	_ = x[Selected-24]
+	_ = x[MouseHasEntered-25]
+	_ = x[DNDHasEntered-26]
+	_ = x[NodeDragging-27]
+	_ = x[InstaDrag-28]
+	_ = x[NodeFlagsN-29]
+	_ = x[TextFieldFocusActive-29]
+	_ = x[VpFlagPopup-29]
+	_ = x[VpFlagMenu-30]
+	_ = x[VpFlagCompleter-31]
+	_ = x[VpFlagCorrector-32]
+	_ = x[VpFlagTooltip-33]
+	_ = x[VpFlagPopupDestroyAll-34]
+	_ = x[VpFlagSVG-35]
+	_ = x[VpFlagUpdatingNode-36]
+	_ = x[VpFlagNeedsFullRender-37]
+	_ = x[VpFlagDoingFullRender-38]
+	_ = x[VpFlagN-39]
+	_ = x[WinFlagHasGeomPrefs-29]
+	_ = x[WinFlagUpdating-30]
+	_ = x[WinFlagIsClosing-31]
+	_ = x[WinFlagIsResizing-32]
+	_ = x[WinFlagOverTexActive-33]
+	_ = x[WinFlagGotPaint-34]
+	_ = x[WinFlagGotFocus-35]
+	_ = x[WinFlagSentShow-36]
+	_ = x[WinFlagGoLoop-37]
+	_ = x[WinFlagStopEventLoop-38]
+	_ = x[WinFlagDoFullRender-39]
+	_ = x[WinFlagPublishFullReRender-40]
+	_ = x[WinFlagFocusActive-41]
+	_ = x[WinFlagN-42]
+}
+
 const _NodeFlags_name = "NoLayoutEventsConnectedCanFocusHasFocusFullReRenderReRenderAnchorInvisibleInactiveSelectedMouseHasEnteredDNDHasEnteredNodeDraggingInstaDragButtonFlagCheckableButtonFlagCheckedButtonFlagMenuButtonFlagsNVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagUpdatingNodeVpFlagNeedsFullRenderVpFlagDoingFullRenderVpFlagNWinFlagPublishFullReRenderWinFlagFocusActiveWinFlagN"
 
 var _NodeFlags_index = [...]uint16{0, 8, 23, 31, 39, 51, 65, 74, 82, 90, 105, 118, 130, 139, 158, 175, 189, 201, 214, 235, 244, 262, 283, 304, 311, 337, 355, 363}

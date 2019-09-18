@@ -166,16 +166,17 @@ func (pf *Preferences) Open() error {
 	}
 	err = json.Unmarshal(b, pf)
 	if pf.SaveKeyMaps {
-		AvailKeyMaps.OpenPrefs()
+		err = AvailKeyMaps.OpenPrefs()
+		if err != nil {
+			pf.SaveKeyMaps = false
+		}
 	}
 	if pf.SaveDetailed {
 		PrefsDet.Open()
 	}
-
 	if pf.User.Username == "" {
 		pf.UpdateUser()
 	}
-
 	pf.Changed = false
 	return err
 }

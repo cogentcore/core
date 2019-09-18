@@ -9,6 +9,15 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[X-0]
+	_ = x[Y-1]
+	_ = x[Dims2DN-2]
+}
+
 const _Dims2D_name = "XYDims2DN"
 
 var _Dims2D_index = [...]uint8{0, 1, 2, 9}

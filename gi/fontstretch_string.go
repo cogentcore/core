@@ -9,6 +9,24 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[FontStrNormal-0]
+	_ = x[FontStrUltraCondensed-1]
+	_ = x[FontStrExtraCondensed-2]
+	_ = x[FontStrSemiCondensed-3]
+	_ = x[FontStrSemiExpanded-4]
+	_ = x[FontStrExtraExpanded-5]
+	_ = x[FontStrUltraExpanded-6]
+	_ = x[FontStrCondensed-7]
+	_ = x[FontStrExpanded-8]
+	_ = x[FontStrNarrower-9]
+	_ = x[FontStrWider-10]
+	_ = x[FontStretchN-11]
+}
+
 const _FontStretch_name = "FontStrNormalFontStrUltraCondensedFontStrExtraCondensedFontStrSemiCondensedFontStrSemiExpandedFontStrExtraExpandedFontStrUltraExpandedFontStrCondensedFontStrExpandedFontStrNarrowerFontStrWiderFontStretchN"
 
 var _FontStretch_index = [...]uint8{0, 13, 34, 55, 75, 94, 114, 134, 150, 165, 180, 192, 204}

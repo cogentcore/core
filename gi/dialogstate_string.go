@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[DialogExists-0]
+	_ = x[DialogOpenModal-1]
+	_ = x[DialogOpenModeless-2]
+	_ = x[DialogAccepted-3]
+	_ = x[DialogCanceled-4]
+	_ = x[DialogStateN-5]
+}
+
 const _DialogState_name = "DialogExistsDialogOpenModalDialogOpenModelessDialogAcceptedDialogCanceledDialogStateN"
 
 var _DialogState_index = [...]uint8{0, 12, 27, 45, 59, 73, 85}

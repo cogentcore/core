@@ -9,6 +9,19 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[ButtonActive-0]
+	_ = x[ButtonInactive-1]
+	_ = x[ButtonHover-2]
+	_ = x[ButtonFocus-3]
+	_ = x[ButtonDown-4]
+	_ = x[ButtonSelected-5]
+	_ = x[ButtonStatesN-6]
+}
+
 const _ButtonStates_name = "ButtonActiveButtonInactiveButtonHoverButtonFocusButtonDownButtonSelectedButtonStatesN"
 
 var _ButtonStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 72, 85}

@@ -9,9 +9,78 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunWinFocusNextKeyFunMenuNewKeyFunMenuNewAlt1KeyFunMenuNewAlt2KeyFunMenuOpenKeyFunMenuOpenAlt1KeyFunMenuOpenAlt2KeyFunMenuSaveKeyFunMenuSaveAsKeyFunMenuSaveAltKeyFunMenuCloseKeyFunMenuCloseAlt1KeyFunMenuCloseAlt2KeyFunsN"
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[KeyFunNil-0]
+	_ = x[KeyFunMoveUp-1]
+	_ = x[KeyFunMoveDown-2]
+	_ = x[KeyFunMoveRight-3]
+	_ = x[KeyFunMoveLeft-4]
+	_ = x[KeyFunPageUp-5]
+	_ = x[KeyFunPageDown-6]
+	_ = x[KeyFunHome-7]
+	_ = x[KeyFunEnd-8]
+	_ = x[KeyFunDocHome-9]
+	_ = x[KeyFunDocEnd-10]
+	_ = x[KeyFunWordRight-11]
+	_ = x[KeyFunWordLeft-12]
+	_ = x[KeyFunFocusNext-13]
+	_ = x[KeyFunFocusPrev-14]
+	_ = x[KeyFunEnter-15]
+	_ = x[KeyFunAccept-16]
+	_ = x[KeyFunCancelSelect-17]
+	_ = x[KeyFunSelectMode-18]
+	_ = x[KeyFunSelectAll-19]
+	_ = x[KeyFunAbort-20]
+	_ = x[KeyFunCopy-21]
+	_ = x[KeyFunCut-22]
+	_ = x[KeyFunPaste-23]
+	_ = x[KeyFunPasteHist-24]
+	_ = x[KeyFunBackspace-25]
+	_ = x[KeyFunBackspaceWord-26]
+	_ = x[KeyFunDelete-27]
+	_ = x[KeyFunDeleteWord-28]
+	_ = x[KeyFunKill-29]
+	_ = x[KeyFunDuplicate-30]
+	_ = x[KeyFunUndo-31]
+	_ = x[KeyFunRedo-32]
+	_ = x[KeyFunInsert-33]
+	_ = x[KeyFunInsertAfter-34]
+	_ = x[KeyFunGoGiEditor-35]
+	_ = x[KeyFunWinSnapshot-36]
+	_ = x[KeyFunZoomOut-37]
+	_ = x[KeyFunZoomIn-38]
+	_ = x[KeyFunPrefs-39]
+	_ = x[KeyFunRefresh-40]
+	_ = x[KeyFunRecenter-41]
+	_ = x[KeyFunComplete-42]
+	_ = x[KeyFunSearch-43]
+	_ = x[KeyFunFind-44]
+	_ = x[KeyFunReplace-45]
+	_ = x[KeyFunJump-46]
+	_ = x[KeyFunHistPrev-47]
+	_ = x[KeyFunHistNext-48]
+	_ = x[KeyFunWinFocusNext-49]
+	_ = x[KeyFunMenuNew-50]
+	_ = x[KeyFunMenuNewAlt1-51]
+	_ = x[KeyFunMenuNewAlt2-52]
+	_ = x[KeyFunMenuOpen-53]
+	_ = x[KeyFunMenuOpenAlt1-54]
+	_ = x[KeyFunMenuOpenAlt2-55]
+	_ = x[KeyFunMenuSave-56]
+	_ = x[KeyFunMenuSaveAs-57]
+	_ = x[KeyFunMenuSaveAlt-58]
+	_ = x[KeyFunMenuClose-59]
+	_ = x[KeyFunMenuCloseAlt1-60]
+	_ = x[KeyFunMenuCloseAlt2-61]
+	_ = x[KeyFunsN-62]
+}
 
-var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 100, 109, 122, 134, 149, 163, 178, 193, 204, 216, 234, 250, 265, 276, 286, 295, 306, 321, 336, 355, 367, 383, 393, 408, 418, 428, 440, 457, 473, 486, 498, 509, 522, 536, 550, 562, 572, 585, 595, 609, 623, 641, 654, 671, 688, 702, 720, 738, 752, 768, 785, 800, 819, 838, 846}
+const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunWinSnapshotKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunWinFocusNextKeyFunMenuNewKeyFunMenuNewAlt1KeyFunMenuNewAlt2KeyFunMenuOpenKeyFunMenuOpenAlt1KeyFunMenuOpenAlt2KeyFunMenuSaveKeyFunMenuSaveAsKeyFunMenuSaveAltKeyFunMenuCloseKeyFunMenuCloseAlt1KeyFunMenuCloseAlt2KeyFunsN"
+
+var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 100, 109, 122, 134, 149, 163, 178, 193, 204, 216, 234, 250, 265, 276, 286, 295, 306, 321, 336, 355, 367, 383, 393, 408, 418, 428, 440, 457, 473, 490, 503, 515, 526, 539, 553, 567, 579, 589, 602, 612, 626, 640, 658, 671, 688, 705, 719, 737, 755, 769, 785, 802, 817, 836, 855, 863}
 
 func (i KeyFuns) String() string {
 	if i < 0 || i >= KeyFuns(len(_KeyFuns_index)-1) {

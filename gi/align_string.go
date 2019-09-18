@@ -9,6 +9,28 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[AlignLeft-0]
+	_ = x[AlignTop-1]
+	_ = x[AlignCenter-2]
+	_ = x[AlignMiddle-3]
+	_ = x[AlignRight-4]
+	_ = x[AlignBottom-5]
+	_ = x[AlignBaseline-6]
+	_ = x[AlignJustify-7]
+	_ = x[AlignSpaceAround-8]
+	_ = x[AlignFlexStart-9]
+	_ = x[AlignFlexEnd-10]
+	_ = x[AlignTextTop-11]
+	_ = x[AlignTextBottom-12]
+	_ = x[AlignSub-13]
+	_ = x[AlignSuper-14]
+	_ = x[AlignN-15]
+}
+
 const _Align_name = "AlignLeftAlignTopAlignCenterAlignMiddleAlignRightAlignBottomAlignBaselineAlignJustifyAlignSpaceAroundAlignFlexStartAlignFlexEndAlignTextTopAlignTextBottomAlignSubAlignSuperAlignN"
 
 var _Align_index = [...]uint8{0, 9, 17, 28, 39, 49, 60, 73, 85, 101, 115, 127, 139, 154, 162, 172, 178}

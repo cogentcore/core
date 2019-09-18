@@ -9,6 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[SliderActive-0]
+	_ = x[SliderInactive-1]
+	_ = x[SliderHover-2]
+	_ = x[SliderFocus-3]
+	_ = x[SliderDown-4]
+	_ = x[SliderValue-5]
+	_ = x[SliderBox-6]
+	_ = x[SliderStatesN-7]
+}
+
 const _SliderStates_name = "SliderActiveSliderInactiveSliderHoverSliderFocusSliderDownSliderValueSliderBoxSliderStatesN"
 
 var _SliderStates_index = [...]uint8{0, 12, 26, 37, 48, 58, 69, 78, 91}

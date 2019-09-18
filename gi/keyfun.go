@@ -69,6 +69,7 @@ const (
 	KeyFunInsert
 	KeyFunInsertAfter
 	KeyFunGoGiEditor
+	KeyFunWinSnapshot
 	KeyFunZoomOut
 	KeyFunZoomIn
 	KeyFunPrefs
@@ -312,13 +313,14 @@ var PrefsKeyMapsFileName = "key_maps_prefs.json"
 
 // OpenJSON opens keymaps from a JSON-formatted file.
 func (km *KeyMaps) OpenJSON(filename FileName) error {
-	*km = make(KeyMaps, 0, 10) // reset
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
+		// Note: keymaps are opened at startup, and this can cause crash if called then
+		// PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
 		return err
 	}
+	*km = make(KeyMaps, 0, 10) // reset
 	return json.Unmarshal(b, km)
 }
 
@@ -331,7 +333,7 @@ func (km *KeyMaps) SaveJSON(filename FileName) error {
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		// PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
 	}
 	return err
@@ -565,6 +567,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+O":               KeyFunInsertAfter,
 		"Control+Alt+I":           KeyFunGoGiEditor,
 		"Shift+Control+I":         KeyFunGoGiEditor,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Shift+Meta+=":            KeyFunZoomIn,
 		"Meta+=":                  KeyFunZoomIn,
 		"Meta+-":                  KeyFunZoomOut,
@@ -692,6 +696,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+O":               KeyFunInsertAfter,
 		"Control+Alt+I":           KeyFunGoGiEditor,
 		"Shift+Control+I":         KeyFunGoGiEditor,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Shift+Meta+=":            KeyFunZoomIn,
 		"Meta+=":                  KeyFunZoomIn,
 		"Meta+-":                  KeyFunZoomOut,
@@ -812,6 +818,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+O":               KeyFunInsertAfter,
 		"Control+Alt+I":           KeyFunGoGiEditor,
 		"Shift+Control+I":         KeyFunGoGiEditor,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -892,6 +900,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+I":           KeyFunInsert,
 		"Control+Alt+O":           KeyFunInsertAfter,
 		"Shift+Control+I":         KeyFunGoGiEditor,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -974,6 +984,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+I":           KeyFunInsert,
 		"Control+Alt+O":           KeyFunInsertAfter,
 		"Shift+Control+I":         KeyFunGoGiEditor,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -1056,6 +1068,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+I":           KeyFunInsert,
 		"Control+Alt+O":           KeyFunInsertAfter,
 		"Shift+Control+I":         KeyFunGoGiEditor,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,

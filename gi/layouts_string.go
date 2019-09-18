@@ -9,6 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[LayoutHoriz-0]
+	_ = x[LayoutVert-1]
+	_ = x[LayoutGrid-2]
+	_ = x[LayoutHorizFlow-3]
+	_ = x[LayoutVertFlow-4]
+	_ = x[LayoutStacked-5]
+	_ = x[LayoutNil-6]
+	_ = x[LayoutsN-7]
+}
+
 const _Layouts_name = "LayoutHorizLayoutVertLayoutGridLayoutHorizFlowLayoutVertFlowLayoutStackedLayoutNilLayoutsN"
 
 var _Layouts_index = [...]uint8{0, 11, 21, 31, 46, 60, 73, 82, 90}

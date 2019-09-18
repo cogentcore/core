@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[LineCapButt-0]
+	_ = x[LineCapRound-1]
+	_ = x[LineCapSquare-2]
+	_ = x[LineCapCubic-3]
+	_ = x[LineCapQuadratic-4]
+	_ = x[LineCapsN-5]
+}
+
 const _LineCaps_name = "LineCapButtLineCapRoundLineCapSquareLineCapCubicLineCapQuadraticLineCapsN"
 
 var _LineCaps_index = [...]uint8{0, 11, 23, 36, 48, 64, 73}

@@ -2607,6 +2607,10 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	case KeyFunGoGiEditor:
 		TheViewIFace.GoGiEditor(w.Viewport.This())
 		e.SetProcessed()
+	case KeyFunWinSnapshot:
+		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
+		SaveImage("GrabOf_"+w.Nm+"_"+dstr+".png", w.Viewport.Pixels)
+		e.SetProcessed()
 	case KeyFunZoomIn:
 		w.ZoomDPI(1)
 		e.SetProcessed()
@@ -2633,7 +2637,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	case "Control+Alt+F":
 		w.BenchmarkFullRender()
 		e.SetProcessed()
-	case "Control+Alt+G":
+	case "Control+Alt+H":
 		w.BenchmarkReRender()
 		e.SetProcessed()
 	}

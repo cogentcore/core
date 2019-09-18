@@ -9,6 +9,16 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[TabSelected-0]
+	_ = x[TabAdded-1]
+	_ = x[TabDeleted-2]
+	_ = x[TabViewSignalsN-3]
+}
+
 const _TabViewSignals_name = "TabSelectedTabAddedTabDeletedTabViewSignalsN"
 
 var _TabViewSignals_index = [...]uint8{0, 11, 19, 29, 44}

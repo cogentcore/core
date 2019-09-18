@@ -9,6 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[TextFieldDone-0]
+	_ = x[TextFieldDeFocused-1]
+	_ = x[TextFieldSelected-2]
+	_ = x[TextFieldCleared-3]
+	_ = x[TextFieldInsert-4]
+	_ = x[TextFieldBackspace-5]
+	_ = x[TextFieldDelete-6]
+	_ = x[TextFieldSignalsN-7]
+}
+
 const _TextFieldSignals_name = "TextFieldDoneTextFieldDeFocusedTextFieldSelectedTextFieldClearedTextFieldInsertTextFieldBackspaceTextFieldDeleteTextFieldSignalsN"
 
 var _TextFieldSignals_index = [...]uint8{0, 13, 31, 48, 64, 79, 97, 112, 129}

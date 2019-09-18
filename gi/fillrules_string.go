@@ -9,6 +9,15 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[FillRuleNonZero-0]
+	_ = x[FillRuleEvenOdd-1]
+	_ = x[FillRulesN-2]
+}
+
 const _FillRules_name = "FillRuleNonZeroFillRuleEvenOddFillRulesN"
 
 var _FillRules_index = [...]uint8{0, 15, 30, 40}

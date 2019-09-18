@@ -9,6 +9,16 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[BidiNormal-0]
+	_ = x[BidiEmbed-1]
+	_ = x[BidiBidiOverride-2]
+	_ = x[UnicodeBidiN-3]
+}
+
 const _UnicodeBidi_name = "BidiNormalBidiEmbedBidiBidiOverrideUnicodeBidiN"
 
 var _UnicodeBidi_index = [...]uint8{0, 10, 19, 35, 47}
