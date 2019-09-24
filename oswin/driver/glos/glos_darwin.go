@@ -41,6 +41,7 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -59,6 +60,11 @@ import (
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.MacOS
+}
+
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("open", url)
+	cmd.Run()
 }
 
 func (app *appImpl) FontPaths() []string {

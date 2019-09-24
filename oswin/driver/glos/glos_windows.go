@@ -8,6 +8,7 @@ package glos
 
 import (
 	"log"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"sync"
@@ -23,6 +24,11 @@ import (
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.Windows
+}
+
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("explorer", url)
+	cmd.Run()
 }
 
 func (app *appImpl) FontPaths() []string {
@@ -49,7 +55,7 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-     // todo: fixme:
+	// todo: fixme:
 	return uintptr(0)
 }
 

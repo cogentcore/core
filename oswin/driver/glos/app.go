@@ -15,7 +15,6 @@ import (
 	"image"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -438,11 +437,6 @@ func (app *appImpl) Cursor(win oswin.Window) cursor.Cursor {
 	app.ctxtwin = win.(*windowImpl)
 	app.mu.Unlock()
 	return &theCursor
-}
-
-func (app *appImpl) OpenURL(url string) {
-	cmd := exec.Command("open", url)
-	cmd.Run()
 }
 
 func (app *appImpl) SetQuitReqFunc(fun func()) {

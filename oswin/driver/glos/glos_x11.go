@@ -8,6 +8,7 @@ package glos
 
 import (
 	"log"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"sync"
@@ -35,6 +36,11 @@ import (
 
 func (app *appImpl) Platform() oswin.Platforms {
 	return oswin.LinuxX11
+}
+
+func (app *appImpl) OpenURL(url string) {
+	cmd := exec.Command("xdg-open", url)
+	cmd.Run()
 }
 
 func (app *appImpl) FontPaths() []string {
