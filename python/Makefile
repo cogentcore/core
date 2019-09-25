@@ -10,7 +10,7 @@ all: gen
 install: install-pkg install-exe
 
 gen:
-	gopy exe -vm=python3 -exclude=driver,oswin -main="runtime.LockOSThread(); gimain.Main(func() {  GoPyMainRun() })" github.com/goki/gi github.com/goki/ki/ki
+	gopy exe -name=gi -vm=python3 -exclude=driver,oswin -main="runtime.LockOSThread(); gimain.Main(func() {  GoPyMainRun() })" github.com/goki/ki/ki github.com/goki/gi 
 
 build:
 	$(MAKE) -C gi build
