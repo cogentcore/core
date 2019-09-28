@@ -17,7 +17,7 @@ type Group struct {
 
 var KiT_Group = kit.Types.AddType(&Group{}, nil)
 
-// AddNewGroup adds a new group of given name and mesh to given parent
+// AddNewGroup adds a new group of given name to given parent
 func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
 	gp := parent.AddNewChild(KiT_Group, name).(*Group)
 	gp.Defaults()

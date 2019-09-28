@@ -165,7 +165,8 @@ func (b *Box3) Union(other Box3) Box3 {
 	return other
 }
 
-// MulMat4 multiplies the specified matrix to the vertices of this bounding box.
+// MulMat4 multiplies the specified matrix to the vertices of this bounding box
+// and computes the resulting spanning Box3 of the transformed points
 func (b *Box3) MulMat4(m *Mat4) Box3 {
 	xax := m[0] * b.Min.X
 	xay := m[1] * b.Min.X
@@ -193,6 +194,27 @@ func (b *Box3) MulMat4(m *Mat4) Box3 {
 	nb.Max.X = Max(xax, xbx) + Max(yax, ybx) + Max(zax, zbx) + m[12]
 	nb.Max.Y = Max(xay, xby) + Max(yay, yby) + Max(zay, zby) + m[13]
 	nb.Max.Z = Max(xaz, xbz) + Max(yaz, ybz) + Max(zaz, zbz) + m[14]
+	return nb
+}
+
+// MulQuat multiplies the specified quaternion to the vertices of this bounding box
+// and computes the resulting spanning Box3 of the transformed points
+func (b *Box3) MulQuat(q Quat) Box3 {
+	var cs [8]Vec3
+	cs[0] = Vec3{b.Min.X, b.Min.Y, b.Min.Z}.MulQuat(q)
+	cs[1] = Vec3{b.Min.X, b.Min.Y, b.Max.Z}.MulQuat(q)
+	cs[2] = Vec3{b.Min.X, b.Max.Y, b.Min.Z}.MulQuat(q)
+	cs[3] = Vec3{b.Max.X, b.Min.Y, b.Min.Z}.MulQuat(q)
+
+	cs[4] = Vec3{b.Max.X, b.Max.Y, b.Max.Z}.MulQuat(q)
+	cs[5] = Vec3{b.Max.X, b.Max.Y, b.Min.Z}.MulQuat(q)
+	cs[6] = Vec3{b.Max.X, b.Min.Y, b.Max.Z}.MulQuat(q)
+	cs[7] = Vec3{b.Min.X, b.Max.Y, b.Max.Z}.MulQuat(q)
+
+	nb := NewEmptyBox3()
+	for i := 0; i < 8; i++ {
+		nb.ExpandByPoint(cs[i])
+	}
 	return nb
 }
 

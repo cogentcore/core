@@ -29,3 +29,5 @@ require (
 	golang.org/x/image v0.0.0-20190523035834-f03afa92d3ff
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
 )
+
+go 1.13

@@ -43,7 +43,7 @@ type Node3D interface {
 	UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4)
 
 	// UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
-	// groups aggregate over elements
+	// groups aggregate over elements.  called from FuncDownMeLast traversal
 	UpdateMeshBBox()
 
 	// UpdateBBox2D updates this node's 2D bounding-box information based on scene
