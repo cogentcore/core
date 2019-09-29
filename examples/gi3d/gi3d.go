@@ -68,9 +68,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	gi.AddNewLabel(scrow, "tmp", "This is test text")
 
-	sc := gi3d.AddNewScene(scrow, "scene")
-	sc.SetStretchMaxWidth()
-	sc.SetStretchMaxHeight()
+	scvw := gi3d.AddNewSceneView(scrow, "sceneview")
+	scvw.SetStretchMaxWidth()
+	scvw.SetStretchMaxHeight()
+	scvw.Config()
+	sc := scvw.Scene()
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
