@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"golang.org/x/image/draw"
@@ -54,10 +55,17 @@ func (bm *Bitmap) Resize(nwsz image.Point) {
 		return
 	}
 	bm.Size = nwsz // always make sure
-	if bm.Pixels.Bounds().Size() == nwsz {
+	if bm.Pixels != nil && bm.Pixels.Bounds().Size() == nwsz {
 		return
 	}
 	bm.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+}
+
+// LayoutToImgSize sets the width, height properties to the current Size
+// so it will request that size during layout
+func (bm *Bitmap) LayoutToImgSize() {
+	bm.SetProp("width", units.NewValue(float32(bm.Size.X), units.Dot))
+	bm.SetProp("height", units.NewValue(float32(bm.Size.Y), units.Dot))
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
@@ -115,11 +123,17 @@ func (bm *Bitmap) GrabRenderFrom(nii Node2D) {
 }
 
 func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
-	r := image.Rectangle{Max: bm.Size}
+	if bm.Pixels == nil {
+		return
+	}
+	pos := bm.LayData.AllocPos.ToPointCeil()
+	max := pos.Add(bm.Size)
+	r := image.Rectangle{Min: pos, Max: max}
 	sp := image.ZP
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := KiToNode2D(bm.Par)
-		nr := r.Intersect(pni.ChildrenBBox2D())
+		pbb := pni.ChildrenBBox2D()
+		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
 			fmt.Printf("aberrant sp: %v\n", sp)

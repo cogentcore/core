@@ -645,6 +645,27 @@ func (sc *Scene) ActivateFrame() bool {
 	return true
 }
 
+// ActivateOffFrame creates (if necc) and activates given offscreen framebuffer
+// for GPU rendering context, of given size, and multisampling number (4 = default
+// for good antialiasing, 0 if not hardware accelerated).
+// returns false if not possible
+func (sc *Scene) ActivateOffFrame(frame *gpu.Framebuffer, name string, size image.Point, msamp int) bool {
+	oswin.TheApp.RunOnMain(func() {
+		if *frame == nil {
+			*frame = gpu.TheGPU.NewFramebuffer(name, size, msamp)
+		}
+		fr := *frame
+		fr.SetSize(size) // nop if same
+		sc.Camera.Aspect = float32(size.X) / float32(size.Y)
+		fr.Activate()
+		sc.Renders.DrawState()
+		clr := ColorToVec3f(sc.BgColor)
+		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
+		gpu.Draw.Clear(true, true) // clear color and depth
+	})
+	return true
+}
+
 // InitTexturesInCtxt opens all the textures if not already opened, and establishes
 // the GPU resources for them.  Must be called with context on main thread.
 func (sc *Scene) InitTexturesInCtxt() bool {
@@ -855,6 +876,22 @@ func (sc *Scene) Render() bool {
 		sc.Frame.Rendered()
 		sc.Tex = sc.Frame.Texture()
 		sc.Tex.SetBotZero(true) // this has Y=0 at bottom!
+	})
+	return true
+}
+
+// RenderOffFrame renders the scene to currently-activated offscreen framebuffer
+// must call ActivateOffFrame first
+func (sc *Scene) RenderOffFrame() bool {
+	sc.Camera.UpdateMatrix()
+	sc.TrackCamera()
+	sc.UpdateWorldMatrix()
+	sc.UpdateMeshBBox()
+	sc.UpdateMVPMatrix()
+	oswin.TheApp.RunOnMain(func() {
+		sc.Renders.SetLightsUnis(sc)
+		sc.Render3D()
+		gpu.Draw.Flush()
 	})
 	return true
 }
