@@ -881,7 +881,7 @@ func (sc *Scene) Render() bool {
 }
 
 // RenderOffFrame renders the scene to currently-activated offscreen framebuffer
-// must call ActivateOffFrame first
+// must call ActivateOffFrame first and call Frame.Rendered() after!
 func (sc *Scene) RenderOffFrame() bool {
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
