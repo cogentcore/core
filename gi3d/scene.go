@@ -831,6 +831,9 @@ func (sc *Scene) UpdateMVPMatrix() {
 }
 
 func (sc *Scene) Init3D() {
+	if sc.Camera.FOV == 0 {
+		sc.Defaults()
+	}
 	sc.UpdateWorldMatrix()
 	if !sc.ActivateWin() {
 		return

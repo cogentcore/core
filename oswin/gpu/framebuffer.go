@@ -65,6 +65,13 @@ type Framebuffer interface {
 	// with framebuffer active.
 	DepthAt(x, y int) float32
 
+	// DepthAll returns the entire depth buffer as a slice of float32 values
+	// of same size as framebuffer.  This slice is pointer to internal reused
+	// value -- copy to retain values or modify.
+	// Must be called with a valid gpu context and on proper thread for that context,
+	// with framebuffer active.
+	DepthAll() []float32
+
 	// Activate establishes the GPU resources and handle for the
 	// framebuffer and all other associated buffers etc (if not already done).
 	// It then sets this as the current rendering target for subsequent

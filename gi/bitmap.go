@@ -82,9 +82,9 @@ func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
 	return nil
 }
 
-// SetImage sets an image for the bitmap, and resizes to the size of the image
+// SetImage sets an image for the bitmap , and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
-// for that dimension
+// for that dimension.  Copies from given image into internal image for this bitmap.
 func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 	updt := bm.UpdateStart()
 	defer bm.UpdateEnd(updt)

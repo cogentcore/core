@@ -65,6 +65,8 @@ type Texture interface {
 	// GrabImage retrieves the current contents of the Texture, e.g., if it has been
 	// used as a rendering target.  Returns nil if not initialized.
 	// Must be called with a valid gpu context and on proper thread for that context.
+	// Returned image points to single internal image.RGBA used for this texture --
+	// copy before modifying and to retain values.
 	GrabImage() image.Image
 
 	// SetImage sets entire contents of the Texture from given image
