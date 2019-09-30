@@ -37,6 +37,7 @@ type textureImpl struct {
 	size      image.Point
 	botZero   bool
 	img       *image.RGBA // when loaded
+	imgTmp    *image.RGBA // for grab, prior to flip
 	fbuff     gpu.Framebuffer
 	drawQuads gpu.BufferMgr
 	fillQuads gpu.BufferMgr
@@ -87,7 +88,7 @@ func (tx *textureImpl) Image() image.Image {
 }
 
 // GrabImage retrieves the current contents of the Texture, e.g., if it has been
-// used as a rendering target.  Returns nil if not initialized.
+// used as a rendering target (Y axis flipped so top = 0).  Returns nil if not initialized.
 // Must be called with a valid gpu context and on proper thread for that context.
 // Returned image points to single internal image.RGBA used for this texture --
 // copy before modifying and to retain values.
@@ -98,11 +99,33 @@ func (tx *textureImpl) GrabImage() image.Image {
 	if tx.img == nil || tx.img.Bounds().Size() != tx.size {
 		tx.img = image.NewRGBA(image.Rectangle{Max: tx.size})
 	}
+	if tx.imgTmp == nil || tx.imgTmp.Bounds().Size() != tx.size {
+		tx.imgTmp = image.NewRGBA(image.Rectangle{Max: tx.size})
+	}
 	tx.Activate(0)
 
 	// 0 = level = base image
-	gl.GetTexImage(gl.TEXTURE_2D, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(tx.img.Pix))
+	gl.GetTexImage(gl.TEXTURE_2D, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(tx.imgTmp.Pix))
+	tx.ImageFlipY(tx.img, tx.imgTmp)
 	return tx.img
+}
+
+// ImageFlipY flips the Y axis from a source image.RGBA into a dest.
+// both must be the same size else it panics.  This utility function
+// is needed for GrabImage and is made avail for general use here.
+func (tx *textureImpl) ImageFlipY(dest, src *image.RGBA) {
+	if dest.Rect.Size() != src.Rect.Size() {
+		panic("ImageFlipY image sizes are not the same")
+	}
+	sz := dest.Rect.Size()
+	rsz := sz.X * 4
+	for y := 0; y < sz.Y; y++ {
+		sy := (y - src.Rect.Min.Y) * src.Stride
+		dy := (sz.Y - y - 1 - dest.Rect.Min.Y) * dest.Stride
+		srow := src.Pix[sy : sy+rsz]
+		drow := dest.Pix[dy : dy+rsz]
+		copy(drow, srow)
+	}
 }
 
 func rgbaImage(img image.Image) (*image.RGBA, error) {
@@ -122,7 +145,8 @@ func rgbaImage(img image.Image) (*image.RGBA, error) {
 // SetImage sets entire contents of the Texture from given image
 // (including setting the size of the texture from that of the img).
 // This is most efficiently done using an image.RGBA, but other
-// formats will be converted as necessary.
+// formats will be converted as necessary.  Image Y axis is automatically
+// flipped when transferred up to the texture, so texture has bottom = 0.
 // Can be called prior to doing Activate(), in which case the image
 // pixels will then initialize the GPU version of the texture.
 // If called after Activate then the image is copied up to the GPU
@@ -292,6 +316,7 @@ func (tx *textureImpl) Transfer(texNo int) bool {
 	tx.Activate(texNo)
 	szx := int32(tx.size.X)
 	szy := int32(tx.size.Y)
+	// note: TexImage2D automatically flips Y axis on way up to texture
 	gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, szx, szy, 0, gl.RGBA, gl.UNSIGNED_BYTE, gl.Ptr(tx.img.Pix))
 	return true
 }

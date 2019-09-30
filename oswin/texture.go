@@ -63,7 +63,7 @@ type Texture interface {
 	Image() image.Image
 
 	// GrabImage retrieves the current contents of the Texture, e.g., if it has been
-	// used as a rendering target.  Returns nil if not initialized.
+	// used as a rendering target (Y axis flipped so top = 0).  Returns nil if not initialized.
 	// Must be called with a valid gpu context and on proper thread for that context.
 	// Returned image points to single internal image.RGBA used for this texture --
 	// copy before modifying and to retain values.
@@ -72,7 +72,8 @@ type Texture interface {
 	// SetImage sets entire contents of the Texture from given image
 	// (including setting the size of the texture from that of the img).
 	// This is most efficiently done using an image.RGBA, but other
-	// formats will be converted as necessary.
+	// formats will be converted as necessary.  Image Y axis is automatically
+	// flipped when transferred up to the texture, so texture has bottom = 0.
 	// Can be called prior to doing Activate(), in which case the image
 	// pixels will then initialize the GPU version of the texture.
 	// (most efficient case for standard GPU / 3D usage).
@@ -81,6 +82,11 @@ type Texture interface {
 	// If Activate()'d, then must be called with a valid gpu context
 	// and on proper thread for that context.
 	SetImage(img image.Image) error
+
+	// ImageFlipY flips the Y axis from a source image.RGBA into a dest.
+	// both must be the same size else it panics.  This utility function
+	// is needed for GrabImage and is made avail for general use here.
+	ImageFlipY(dest, src *image.RGBA)
 
 	// SetSubImage uploads the sub-Image defined by src and sr to the texture.
 	// such that sr.Min in src-space aligns with dp in dst-space.
