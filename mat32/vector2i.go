@@ -47,7 +47,7 @@ func (v *Vec2i) SetScalar(s int32) {
 }
 
 // SetFromVec2 sets from a Vec2 (float32) vector.
-func (v *Vec2i) SetFromVec3(vf Vec2) {
+func (v *Vec2i) SetFromVec2(vf Vec2) {
 	v.X = int32(vf.X)
 	v.Y = int32(vf.Y)
 }
