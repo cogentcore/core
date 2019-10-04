@@ -102,6 +102,14 @@ func (q *Quat) SetFromEuler(euler Vec3) {
 	q.W = c1*c2*c3 + s1*s2*s3
 }
 
+// ToEuler returns a Vec3 with components as the Euler angles
+// from the given quaternion.
+func (q *Quat) ToEuler() Vec3 {
+	rot := Vec3{}
+	rot.SetEulerAnglesFromQuat(*q)
+	return rot
+}
+
 // SetFromAxisAngle sets this quaternion with the rotation
 // specified by the given axis and angle.
 func (q *Quat) SetFromAxisAngle(axis Vec3, angle float32) {
@@ -111,6 +119,13 @@ func (q *Quat) SetFromAxisAngle(axis Vec3, angle float32) {
 	q.Y = axis.Y * s
 	q.Z = axis.Z * s
 	q.W = Cos(halfAngle)
+}
+
+// ToAxisAngle returns the Vec4 holding axis and angle of this Quaternion
+func (q *Quat) ToAxisAngle() Vec4 {
+	aa := Vec4{}
+	aa.SetAxisAngleFromQuat(*q)
+	return aa
 }
 
 // SetFromRotationMatrix sets this quaternion from the specified rotation matrix.

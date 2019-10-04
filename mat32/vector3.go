@@ -637,14 +637,6 @@ func (v *Vec3) SetEulerAnglesFromQuat(q Quat) {
 	v.SetEulerAnglesFromMatrix(mat)
 }
 
-// NewEulerAnglesFromQuat returns a Vec3 with components as the Euler angles
-// from the specified quaternion.
-func NewEulerAnglesFromQuat(q Quat) Vec3 {
-	rot := Vec3{}
-	rot.SetEulerAnglesFromQuat(q)
-	return rot
-}
-
 // RandomTangents computes and returns two arbitrary tangents to the vector.
 func (v *Vec3) RandomTangents() (Vec3, Vec3) {
 	t1 := Vec3{}

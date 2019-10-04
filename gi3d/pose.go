@@ -100,12 +100,12 @@ func (ps *Pose) SetEulerRotationRad(x, y, z float32) {
 
 // EulerRotation returns the current rotation in Euler angles (degrees).
 func (ps *Pose) EulerRotation() mat32.Vec3 {
-	return mat32.NewEulerAnglesFromQuat(ps.Quat).MulScalar(mat32.RadToDegFactor)
+	return ps.Quat.ToEuler().MulScalar(mat32.RadToDegFactor)
 }
 
 // EulerRotationRad returns the current rotation in Euler angles (radians).
 func (ps *Pose) EulerRotationRad() mat32.Vec3 {
-	return mat32.NewEulerAnglesFromQuat(ps.Quat)
+	return ps.Quat.ToEuler()
 }
 
 // SetAxisRotation sets rotation from local axis and angle in degrees.
@@ -167,7 +167,7 @@ func (ps *Pose) WorldQuat() mat32.Quat {
 
 // WorldEulerRotation returns the current world rotation in Euler angles.
 func (ps *Pose) WorldEulerRotation() mat32.Vec3 {
-	return mat32.NewEulerAnglesFromQuat(ps.Quat)
+	return ps.Quat.ToEuler()
 }
 
 // WorldScale returns he current world scale.
