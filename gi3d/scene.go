@@ -182,7 +182,7 @@ func (sc *Scene) SaveCamera(name string) {
 		sc.SavedCams = make(map[string]Camera)
 	}
 	sc.SavedCams[name] = sc.Camera
-	fmt.Printf("saved camera %s: %v\n", name, sc.Camera.Pose.GenGoSet(".Pose"))
+	// fmt.Printf("saved camera %s: %v\n", name, sc.Camera.Pose.GenGoSet(".Pose"))
 }
 
 // SetCamera sets the current camera to that of given name -- error if not found.

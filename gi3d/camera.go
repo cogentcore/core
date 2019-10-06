@@ -43,6 +43,11 @@ func (cm *Camera) DefaultPose() {
 	cm.LookAtOrigin()
 }
 
+// GenGoSet returns code to set values in object at given path (var.member etc)
+func (cm *Camera) GenGoSet(path string) string {
+	return cm.Pose.GenGoSet(path+".Pose") + "; " + cm.Target.GenGoSet(path+".Target") + "; " + cm.UpDir.GenGoSet(path+".UpDir")
+}
+
 // UpdateMatrix updates the view and prjn matricies
 func (cm *Camera) UpdateMatrix() {
 	cm.Pose.UpdateMatrix()

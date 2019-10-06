@@ -5,6 +5,8 @@
 package gi3d
 
 import (
+	"fmt"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki/ki"
@@ -159,6 +161,7 @@ func (sv *SceneView) ToolbarConfig() {
 					scc.SaveCamera(cam)
 				}
 			}
+			fmt.Printf("Camera %s: %v\n", cam, scc.Camera.GenGoSet(""))
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Label: "2", Icon: "save", Tooltip: "first click saves current view, second click restores to saved state"}, sv.This(),
@@ -174,6 +177,7 @@ func (sv *SceneView) ToolbarConfig() {
 					scc.SaveCamera(cam)
 				}
 			}
+			fmt.Printf("Camera %s: %v\n", cam, scc.Camera.GenGoSet(""))
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Label: "3", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
@@ -189,6 +193,7 @@ func (sv *SceneView) ToolbarConfig() {
 					scc.SaveCamera(cam)
 				}
 			}
+			fmt.Printf("Camera %s: %v\n", cam, scc.Camera.GenGoSet(""))
 			scc.UpdateSig()
 		})
 	tbar.AddAction(gi.ActOpts{Label: "4", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
@@ -204,6 +209,7 @@ func (sv *SceneView) ToolbarConfig() {
 					scc.SaveCamera(cam)
 				}
 			}
+			fmt.Printf("Camera %s: %v\n", cam, scc.Camera.GenGoSet(""))
 			scc.UpdateSig()
 		})
 }
