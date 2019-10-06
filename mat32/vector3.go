@@ -10,6 +10,8 @@
 
 package mat32
 
+import "fmt"
+
 // Vec3 is a 3D vector/point with X, Y and Z components.
 type Vec3 struct {
 	X float32
@@ -117,6 +119,16 @@ func (v *Vec3) SetByName(name string, value float32) {
 	default:
 		panic("Invalid Vec3 component name: " + name)
 	}
+}
+
+// GenGoSet returns code to set values in object at given path (var.member etc)
+func (v *Vec3) GenGoSet(path string) string {
+	return fmt.Sprintf("%s.Set(%g, %g, %g)", path, v.X, v.Y, v.Z)
+}
+
+// GenGoNew returns code to create new
+func (v *Vec3) GenGoNew() string {
+	return fmt.Sprintf("mat32.Vec3{%g, %g, %g}", v.X, v.Y, v.Z)
 }
 
 // SetZero sets this vector X, Y and Z components to be zero.

@@ -44,6 +44,11 @@ func (ps *Pose) CopyFrom(op *Pose) {
 	ps.UpdateMatrix()
 }
 
+// GenGoSet returns code to set values in object at given path (var.member etc)
+func (ps *Pose) GenGoSet(path string) string {
+	return ps.Pos.GenGoSet(path+".Pos") + "; " + ps.Scale.GenGoSet(path+".Scale") + "; " + ps.Quat.GenGoSet(path+".Quat")
+}
+
 // UpdateMatrix updates the local transform matrix based on its position, quaternion, and scale.
 // Also checks for degenerate nil values
 func (ps *Pose) UpdateMatrix() {
