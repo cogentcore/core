@@ -454,8 +454,9 @@ func (v Vec4) MulMat4(m *Mat4) Vec4 {
 // Assumes q is normalized.
 func (v *Vec4) SetAxisAngleFromQuat(q Quat) {
 	// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
-	v.W = 2 * Acos(q.W)
-	s := Sqrt(1 - q.W*q.W)
+	qw := Clamp(q.W, -1, 1)
+	v.W = 2 * Acos(qw)
+	s := Sqrt(1 - qw*qw)
 	if s < 0.0001 {
 		v.X = 1
 		v.Y = 0
