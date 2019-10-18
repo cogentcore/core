@@ -329,6 +329,48 @@ func (v *Value) Set(val float32, un Unit) {
 	v.Un = un
 }
 
+// SetPx sets value in Px
+func (v *Value) SetPx(val float32) {
+	v.Val = val
+	v.Un = Px
+}
+
+// SetEm sets value in Em
+func (v *Value) SetEm(val float32) {
+	v.Val = val
+	v.Un = Em
+}
+
+// SetEx sets value in Ex
+func (v *Value) SetEx(val float32) {
+	v.Val = val
+	v.Un = Ex
+}
+
+// SetCh sets value in Ch
+func (v *Value) SetCh(val float32) {
+	v.Val = val
+	v.Un = Ch
+}
+
+// SetPt sets value in Pt
+func (v *Value) SetPt(val float32) {
+	v.Val = val
+	v.Un = Pt
+}
+
+// SetPct sets value in Pct
+func (v *Value) SetPct(val float32) {
+	v.Val = val
+	v.Un = Pct
+}
+
+// SetDp sets value in Dp
+func (v *Value) SetDp(val float32) {
+	v.Val = val
+	v.Un = Px
+}
+
 // ToDots converts value to raw display pixels (dots as in DPI), setting also
 // the Dots field
 func (v *Value) ToDots(ctxt *Context) float32 {

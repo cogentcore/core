@@ -167,6 +167,19 @@ func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
 	}
 }
 
+// SetUnitContextExt sets the unit context for external usage of paint
+// outside of a Viewport, based on overall size of painting canvas.
+// caches everything out in terms of raw pixel dots for rendering
+// call at start of render.
+func (pc *Paint) SetUnitContextExt(size image.Point) {
+	pc.UnContext.Defaults()
+	pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
+	pc.UnContext.SetSizes(float32(size.X), float32(size.Y), float32(size.X), float32(size.Y))
+	pc.FontStyle.SetUnitContext(&pc.UnContext)
+	pc.ToDots(&pc.UnContext)
+	pc.dotsSet = true
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 // State query
 

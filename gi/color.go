@@ -87,6 +87,13 @@ func (cs *ColorSpec) SetColor(cl color.Color) {
 	cs.Gradient = nil
 }
 
+// SetName sets a solid color by name
+func (cs *ColorSpec) SetName(name string) {
+	cs.Color.SetName(name)
+	cs.Source = SolidColor
+	cs.Gradient = nil
+}
+
 // Copy copies a gradient, making new copies of the stops instead of
 // re-using pointers
 func (cs *ColorSpec) CopyFrom(cp *ColorSpec) {
