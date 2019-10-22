@@ -151,8 +151,7 @@ func (sv *StructView) ConfigStructGrid() {
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(1.5))
 	sg.SetMinPrefWidth(units.NewEm(10))
-	sg.SetStretchMaxHeight() // for this to work, ALL layers above need it too
-	sg.SetStretchMaxWidth()  // for this to work, ALL layers above need it too
+	sg.SetStretchMax() // for this to work, ALL layers above need it too
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{}
 	// always start fresh!

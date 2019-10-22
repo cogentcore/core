@@ -55,22 +55,19 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	title.SetProp("vertical-align", gi.AlignCenter)
 	title.SetProp("font-size", "x-large")
 	title.SetProp("line-height", 1.5)
-	title.SetStretchMaxWidth()
-	title.SetStretchMaxHeight()
+	title.SetStretchMax()
 
 	//////////////////////////////////////////
 	//    Scene
 
 	gi.AddNewSpace(mfr, "scspc")
 	scrow := gi.AddNewLayout(mfr, "scrow", gi.LayoutHoriz)
-	scrow.SetStretchMaxWidth()
-	scrow.SetStretchMaxHeight()
+	scrow.SetStretchMax()
 
 	gi.AddNewLabel(scrow, "tmp", "This is test text")
 
 	scvw := gi3d.AddNewSceneView(scrow, "sceneview")
-	scvw.SetStretchMaxWidth()
-	scvw.SetStretchMaxHeight()
+	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
 

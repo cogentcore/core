@@ -37,8 +37,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	tv := mfr.AddNewChild(KiT_TableView, "tv").(*TableView)
 	tv.Viewport = vp
 	tv.SetSlice(km)
-	tv.SetStretchMaxWidth()
-	tv.SetStretchMaxHeight()
+	tv.SetStretchMax()
 
 	gi.AvailKeyMapsChanged = false
 	tv.ViewSig.Connect(mfr.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

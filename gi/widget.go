@@ -733,6 +733,12 @@ func (wb *WidgetBase) SetStretchMaxHeight() {
 	wb.SetProp("max-height", units.NewPx(-1))
 }
 
+// SetStretchMax sets stretchy max width and height (-1) -- can grow to take up avail room
+func (wb *WidgetBase) SetStretchMax() {
+	wb.SetStretchMaxWidth()
+	wb.SetStretchMaxHeight()
+}
+
 // SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value
 func (wb *WidgetBase) SetFixedWidth(val units.Value) {
 	wb.SetProp("width", val)

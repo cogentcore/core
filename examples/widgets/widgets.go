@@ -96,8 +96,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	// title.SetProp("font-size", "24pt")
 	// title.SetProp("letter-spacing", 2)
 	title.SetProp("line-height", 1.5)
-	title.SetStretchMaxWidth()
-	title.SetStretchMaxHeight()
+	title.SetStretchMax()
 
 	//////////////////////////////////////////
 	//      Buttons

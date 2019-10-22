@@ -105,8 +105,7 @@ func HiStylesView(st *histyle.Styles) {
 	tv := mfr.AddNewChild(KiT_MapView, "tv").(*MapView)
 	tv.Viewport = vp
 	tv.SetMap(st)
-	tv.SetStretchMaxWidth()
-	tv.SetStretchMaxHeight()
+	tv.SetStretchMax()
 
 	histyle.StylesChanged = false
 	tv.ViewSig.Connect(mfr.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

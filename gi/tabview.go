@@ -406,8 +406,7 @@ func (tv *TabView) InitTabView() {
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
 	frame.SetMinPrefWidth(units.NewEm(10))
 	frame.SetMinPrefHeight(units.NewEm(7))
-	frame.SetStretchMaxWidth()
-	frame.SetStretchMaxHeight()
+	frame.SetStretchMax()
 	frame.SetReRenderAnchor()
 
 	tv.ConfigNewTabButton()

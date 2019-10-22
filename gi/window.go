@@ -508,8 +508,7 @@ func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 func (w *Window) SetMainFrame() *Frame {
 	fr := w.SetMainWidgetType(KiT_Frame, "main-frame").(*Frame)
 	fr.Lay = LayoutVert
-	fr.SetStretchMaxWidth()
-	fr.SetStretchMaxHeight()
+	fr.SetStretchMax()
 	return fr
 }
 
@@ -518,8 +517,7 @@ func (w *Window) SetMainFrame() *Frame {
 func (w *Window) SetMainLayout() *Layout {
 	fr := w.SetMainWidgetType(KiT_Layout, "main-lay").(*Layout)
 	fr.Lay = LayoutVert
-	fr.SetStretchMaxWidth()
-	fr.SetStretchMaxHeight()
+	fr.SetStretchMax()
 	return fr
 }
 

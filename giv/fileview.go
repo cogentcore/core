@@ -299,8 +299,7 @@ func (fv *FileView) ConfigPathRow() {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
-	fr.SetStretchMaxHeight()
-	fr.SetStretchMaxWidth()
+	fr.SetStretchMax()
 	fr.Lay = gi.LayoutHoriz
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TableView, "favs-view")
@@ -339,8 +338,7 @@ func (fv *FileView) ConfigFilesRow() {
 		},
 	}
 	sv.SetProp("index", false) // no index
-	sv.SetStretchMaxHeight()
-	sv.SetStretchMaxWidth()
+	sv.SetStretchMax()
 	sv.SetInactive() // select only
 	sv.StyleFunc = FileViewStyleFunc
 	sv.SetSlice(&fv.Files)
