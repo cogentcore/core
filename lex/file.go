@@ -395,6 +395,12 @@ func (fl *File) RegSrc(reg Reg) string {
 		}
 	}
 	src := string((*fl.Lines)[reg.St.Ln][reg.St.Ch:])
+	nln := reg.Ed.Ln - reg.St.Ln
+	if nln > 10 {
+		src += "|>" + string((*fl.Lines)[reg.St.Ln+1]) + "..."
+		src += "|>" + string((*fl.Lines)[reg.St.Ln-1])
+		return src
+	}
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
 		src += "|>" + string((*fl.Lines)[ln])
 	}
