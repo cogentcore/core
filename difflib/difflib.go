@@ -816,14 +816,16 @@ type UnifiedDiff struct {
 // 'fromfile', 'tofile', 'fromfiledate', and 'tofiledate'.
 // The modification times are normally expressed in the ISO 8601 format.
 func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
-	buf := bufio.NewWriter(writer)
-	defer buf.Flush()
+	//buf := bufio.NewWriter(writer)
+	//defer buf.Flush()
+	var bld strings.Builder
+	bld.Reset()
 	wf := func(format string, args ...interface{}) error {
-		_, err := buf.WriteString(fmt.Sprintf(format, args...))
+		_, err := fmt.Fprintf(&bld, format, args...)
 		return err
 	}
 	ws := func(s string) error {
-		_, err := buf.WriteString(s)
+		_, err := bld.WriteString(s)
 		return err
 	}
 
@@ -887,6 +889,9 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 			}
 		}
 	}
+	buf := bufio.NewWriter(writer)
+	buf.WriteString(bld.String())
+	buf.Flush()
 	return nil
 }
 
