@@ -598,8 +598,13 @@ func (d *Differ) Dump(tag string, x []string, low int, high int) (out []string) 
 	// Generate comparison results for a same-tagged range.
 	sout := d.StructuredDump(tag[0], x, low, high)
 	out = make([]string, len(sout))
+	var bld strings.Builder
 	for i, line := range sout {
-		out[i] = fmt.Sprintf("%s %s", string(line.Tag), line.Line)
+		bld.Reset()
+		bld.WriteByte(line.Tag)
+		bld.WriteString(" ")
+		bld.WriteString(line.Line)
+		out[i] = bld.String()
 	}
 	return out
 }
