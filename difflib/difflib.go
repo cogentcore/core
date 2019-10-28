@@ -594,11 +594,12 @@ func (d *Differ) StructuredDump(tag byte, x []string, low int, high int) (out []
 	return out
 }
 
-func (d *Differ) Dump(tag string, x []string, lo int, hi int) (out []string) {
+func (d *Differ) Dump(tag string, x []string, low int, high int) (out []string) {
 	// Generate comparison results for a same-tagged range.
-	out = []string{}
-	for i := lo; i < hi; i++ {
-		out = append(out, fmt.Sprintf("%s %s", tag, x[i]))
+	sout := d.StructuredDump(tag[0], x, low, high)
+	out = make([]string, len(sout))
+	for i, line := range sout {
+		out[i] = fmt.Sprintf("%s %s", string(line.Tag), line.Line)
 	}
 	return out
 }
