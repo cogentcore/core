@@ -531,6 +531,18 @@ func count_leading(line string, ch byte) (count int) {
 	return count
 }
 
+type DiffLine struct {
+	Tag char
+	Line string
+}
+
+func NewDiffLine(tag char, line string) (l *DiffLine) {
+	l = &DiffLine{}
+	l.Tag = tag
+	l.Line = line
+	return l
+}
+
 type Differ struct {
 	Linejunk func(string) bool
 	Charjunk func(string) bool
