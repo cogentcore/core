@@ -4,14 +4,14 @@ go-difflib
 The previous owner of this project (pmezard) did not have the time to continue
 working on it. Additionally I (ianbruene) needed additional ported features.
 
-I have taken over maintenance and further development of the project
+For these reasons I have taken over maintenance and further development of the
+project.
 
 [![GoDoc](https://godoc.org/github.com/ianbruene/go-difflib/difflib?status.svg)](https://godoc.org/github.com/ianbruene/go-difflib/difflib)
 
-Go-difflib is a partial port of python 3 difflib package. Its main goal
-is to make unified and context diff available in pure Go.
+Go-difflib is an as yet partial port of python 3's difflib package.
 
-The following class and functions (and related tests) have be ported:
+The following publicly visible classes and functions have been ported:
 
 * `SequenceMatcher`
 * `Differ`
