@@ -599,6 +599,7 @@ func (d *Differ) Dump(tag string, x []string, low int, high int) (out []string) 
 	sout := d.StructuredDump(tag[0], x, low, high)
 	out = make([]string, len(sout))
 	var bld strings.Builder
+	bld.Grow(1024)
 	for i, line := range sout {
 		bld.Reset()
 		bld.WriteByte(line.Tag)
