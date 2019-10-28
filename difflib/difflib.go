@@ -532,12 +532,12 @@ func count_leading(line string, ch byte) (count int) {
 }
 
 type DiffLine struct {
-	Tag char
+	Tag  byte
 	Line string
 }
 
-func NewDiffLine(tag char, line string) (l *DiffLine) {
-	l = &DiffLine{}
+func NewDiffLine(tag byte, line string) (l DiffLine) {
+	l = DiffLine{}
 	l.Tag = tag
 	l.Line = line
 	return l
@@ -583,6 +583,15 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 		diffs = append(diffs, g...)
 	}
 	return diffs, nil
+}
+
+func (d *Differ) StructuredDump(tag byte, x []string, low int, high int) (out []DiffLine) {
+	size := high - low
+	out = make([]DiffLine, size)
+	for i := 0; i < size; i++ {
+		out[i] = NewDiffLine(tag, x[i + low])
+	}
+	return out
 }
 
 func (d *Differ) Dump(tag string, x []string, lo int, hi int) (out []string) {

@@ -453,6 +453,17 @@ func TestDifferCompare(t *testing.T) {
 	}
 }
 
+func TestDifferStructuredDump(t *testing.T) {
+	diff := NewDiffer()
+	out := diff.StructuredDump('+',
+		[]string{"foo", "bar", "baz", "quux", "qwerty"},
+		1, 3)
+	expected := []DiffLine{DiffLine{'+', "bar"}, DiffLine{'+', "baz"}}
+	if !reflect.DeepEqual(out, expected) {
+		t.Fatal("Differ StructuredDump failure:", out)
+	}
+}
+
 func TestDifferDump(t *testing.T) {
 	diff := NewDiffer()
 	out := diff.Dump("+",
