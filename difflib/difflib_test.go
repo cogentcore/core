@@ -558,3 +558,22 @@ func TestDifferQFormat(t *testing.T) {
 		t.Fatal("Differ QFormat() failure:", out)
 	}
 }
+
+func TestGetUnifiedDiffString(t *testing.T) {
+	A := "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\n"
+	B := "one\ntwo\nthr33\nfour\nfive\nsix\nseven\neight\nnine\nten\n"
+	// Build diff
+	diff := UnifiedDiff{A: SplitLines(A),
+		FromFile: "file", FromDate: "then",
+		B: SplitLines(B),
+		ToFile: "tile", ToDate: "now", Eol: "", Context: 1}
+	// Run test
+	diffStr, err := GetUnifiedDiffString(diff)
+	if err != nil {
+		t.Fatal("GetUnifiedDiffString error:", err)
+	}
+	exp := "--- file\tthen\n+++ tile\tnow\n@@ -2,3 +2,3 @@\n two\n-three\n+thr33\n four\n"
+	if diffStr != exp {
+		t.Fatal("GetUnifiedDiffString failure:", diffStr)
+	}
+}
