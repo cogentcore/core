@@ -15,3 +15,4 @@ test:
 	$(GOTEST) -v ./...
 clean: 
 	$(GOCLEAN)
+
