@@ -179,7 +179,7 @@ type SequenceMatcher struct {
 	bJunk          map[int32]struct{}
 	matchingBlocks []Match
 	fullBCount     map[int32]int
-	bPopular       map[string]struct{}
+	bPopular       []int
 	opCodes        []OpCode
 }
 
@@ -253,17 +253,17 @@ func (m *SequenceMatcher) chainB() {
 	}
 
 	// Purge remaining popular elements
-	popular := map[string]struct{}{}
+	popular := []int{}
 	n := len(m.b)
 	if m.autoJunk && n >= 200 {
 		ntest := n/100 + 1
 		b2j.iter(func (s string, indices []int){
 			if len(indices) > ntest {
-				popular[s] = struct{}{}
+				popular = append(popular, indices[0])
 			}
 		})
-		for s, _ := range popular {
-			b2j.delete(s)
+		for _, i := range popular {
+			b2j.delete(m.b[i])
 		}
 	}
 	m.bPopular = popular
