@@ -68,6 +68,37 @@ type OpCode struct {
 	J2  int
 }
 
+// This is essentially a map from lines to line numbers, so that later it can
+// be made a bit cleverer than the standard map in that it will not need to
+// store copies of the lines.
+// It needs to hold a reference to the underlying slice of lines.
+type B2J struct {
+	store map[string] []int
+	b []string
+}
+
+func newB2J (b []string) *B2J {
+	b2j := B2J{store: map[string] []int{}, b: b}
+	for i, s := range b {
+		b2j.store[s] = append(b2j.store[s], i)
+	}
+	return &b2j
+}
+
+func (b2j *B2J) get(s string) []int {
+	return b2j.store[s]
+}
+
+func (b2j *B2J) delete(s string) {
+	delete(b2j.store, s)
+}
+
+func (b2j *B2J) iter(hook func(string, []int)) {
+	for s, js := range b2j.store {
+		hook(s, js)
+	}
+}
+
 // SequenceMatcher compares sequence of strings. The basic
 // algorithm predates, and is a little fancier than, an algorithm
 // published in the late 1980's by Ratcliff and Obershelp under the
@@ -97,7 +128,7 @@ type OpCode struct {
 type SequenceMatcher struct {
 	a              []string
 	b              []string
-	b2j            map[string][]int
+	b2j            B2J
 	IsJunk         func(string) bool
 	autoJunk       bool
 	bJunk          map[string]struct{}
@@ -160,24 +191,19 @@ func (m *SequenceMatcher) SetSeq2(b []string) {
 
 func (m *SequenceMatcher) chainB() {
 	// Populate line -> index mapping
-	b2j := map[string][]int{}
-	for i, s := range m.b {
-		indices := b2j[s]
-		indices = append(indices, i)
-		b2j[s] = indices
-	}
+	b2j := *newB2J(m.b)
 
 	// Purge junk elements
 	m.bJunk = map[string]struct{}{}
 	if m.IsJunk != nil {
 		junk := m.bJunk
-		for s, _ := range b2j {
+		b2j.iter(func (s string, _ []int){
 			if m.IsJunk(s) {
 				junk[s] = struct{}{}
 			}
-		}
+		})
 		for s, _ := range junk {
-			delete(b2j, s)
+			b2j.delete(s)
 		}
 	}
 
@@ -186,13 +212,13 @@ func (m *SequenceMatcher) chainB() {
 	n := len(m.b)
 	if m.autoJunk && n >= 200 {
 		ntest := n/100 + 1
-		for s, indices := range b2j {
+		b2j.iter(func (s string, indices []int){
 			if len(indices) > ntest {
 				popular[s] = struct{}{}
 			}
-		}
+		})
 		for s, _ := range popular {
-			delete(b2j, s)
+			b2j.delete(s)
 		}
 	}
 	m.bPopular = popular
@@ -250,7 +276,7 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 		// look at all instances of a[i] in b; note that because
 		// b2j has no junk keys, the loop is skipped if a[i] is junk
 		newj2len := map[int]int{}
-		for _, j := range m.b2j[m.a[i]] {
+		for _, j := range m.b2j.get(m.a[i]) {
 			// a[i] matches b[j]
 			if j < blo {
 				continue
