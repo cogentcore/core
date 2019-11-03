@@ -174,7 +174,7 @@ type SequenceMatcher struct {
 	autoJunk       bool
 	bJunk          map[string]struct{}
 	matchingBlocks []Match
-	fullBCount     map[string]int
+	fullBCount     map[int32]int
 	bPopular       map[string]struct{}
 	opCodes        []OpCode
 }
@@ -554,24 +554,29 @@ func (m *SequenceMatcher) Ratio() float64 {
 func (m *SequenceMatcher) QuickRatio() float64 {
 	// viewing a and b as multisets, set matches to the cardinality
 	// of their intersection; this counts the number of matches
-	// without regard to order, so is clearly an upper bound
+	// without regard to order, so is clearly an upper bound. We do
+	// so on hashes of the lines themselves, so this might even be
+	// greater due hash collisions incurring false positives, but
+	// we don't care because we want an upper bound anyway.
 	if m.fullBCount == nil {
-		m.fullBCount = map[string]int{}
+		m.fullBCount = map[int32]int{}
 		for _, s := range m.b {
-			m.fullBCount[s] = m.fullBCount[s] + 1
+			h := _hash(s)
+			m.fullBCount[h] = m.fullBCount[h] + 1
 		}
 	}
 
 	// avail[x] is the number of times x appears in 'b' less the
 	// number of times we've seen it in 'a' so far ... kinda
-	avail := map[string]int{}
+	avail := map[int32]int{}
 	matches := 0
 	for _, s := range m.a {
-		n, ok := avail[s]
+		h := _hash(s)
+		n, ok := avail[h]
 		if !ok {
-			n = m.fullBCount[s]
+			n = m.fullBCount[h]
 		}
-		avail[s] = n - 1
+		avail[h] = n - 1
 		if n > 0 {
 			matches += 1
 		}
