@@ -23,6 +23,8 @@ import (
 	"io"
 	"strings"
 	"unicode"
+	"crypto/sha1"
+	"encoding/binary"
 )
 
 func min(a, b int) int {
@@ -73,29 +75,67 @@ type OpCode struct {
 // store copies of the lines.
 // It needs to hold a reference to the underlying slice of lines.
 type B2J struct {
-	store map[string] []int
+	store map[int32] [][]int
 	b []string
 }
 
+func _hash(line string) int32 {
+	hasher := sha1.New()
+	bytes.NewBufferString(line).WriteTo(hasher)
+	hash, _ := binary.ReadVarint(bytes.NewBuffer(hasher.Sum([]byte{})))
+	return int32(hash)
+}
+
 func newB2J (b []string) *B2J {
-	b2j := B2J{store: map[string] []int{}, b: b}
-	for i, s := range b {
-		b2j.store[s] = append(b2j.store[s], i)
+	b2j := B2J{store: map[int32] [][]int{}, b: b}
+	for lineno, line := range b {
+		h := _hash(line)
+		// Thanks to the qualities of sha1, the probability of having more than
+		// one line content with the same hash is very low. Nevertheless, store
+		// each of them in a different slot, that we can differentiate by
+		// looking at the line contents in the b slice.
+		for slotIndex, slot := range b2j.store[h] {
+			if line == b[slot[0]] {
+				// The content already has a slot in its hash bucket. Just
+				// append the newly seen index to the slice in that slot
+				b2j.store[h][slotIndex] = append(slot, lineno)
+				continue
+			}
+		}
+		// The line content still has no slot. Create one with a single value.
+		b2j.store[h] = append(b2j.store[h], []int{lineno})
 	}
 	return &b2j
 }
 
-func (b2j *B2J) get(s string) []int {
-	return b2j.store[s]
+func (b2j *B2J) get(line string) []int {
+	// Thanks to the qualities of sha1, there should be very few (zero or one)
+	// slots, so the following loop is fast.
+	for _, slot := range b2j.store[_hash(line)] {
+		if line == b2j.b[slot[0]] {
+			return slot
+		}
+	}
+	return []int{}
 }
 
-func (b2j *B2J) delete(s string) {
-	delete(b2j.store, s)
+func (b2j *B2J) delete(line string) {
+	h := _hash(line)
+	slots := b2j.store[h]
+	for slotIndex, slot := range slots {
+		if line == b2j.b[slot[0]] {
+			// Remove the whole slot from the list of slots
+			b2j.store[h] = append(slots[:slotIndex], slots[slotIndex+1:]...)
+			return
+		}
+	}
 }
 
 func (b2j *B2J) iter(hook func(string, []int)) {
-	for s, js := range b2j.store {
-		hook(s, js)
+	for _, slots := range b2j.store {
+		for _, slot := range slots {
+			hook(b2j.b[slot[0]], slot)
+		}
 	}
 }
 
