@@ -23,6 +23,8 @@ import (
 	"io"
 	"strings"
 	"unicode"
+	"crypto/sha1"
+	"encoding/binary"
 )
 
 func min(a, b int) int {
@@ -68,6 +70,75 @@ type OpCode struct {
 	J2  int
 }
 
+// This is essentially a map from lines to line numbers, so that later it can
+// be made a bit cleverer than the standard map in that it will not need to
+// store copies of the lines.
+// It needs to hold a reference to the underlying slice of lines.
+type B2J struct {
+	store map[int32] [][]int
+	b []string
+}
+
+func _hash(line string) int32 {
+	hasher := sha1.New()
+	bytes.NewBufferString(line).WriteTo(hasher)
+	hash, _ := binary.ReadVarint(bytes.NewBuffer(hasher.Sum([]byte{})))
+	return int32(hash)
+}
+
+func newB2J (b []string) *B2J {
+	b2j := B2J{store: map[int32] [][]int{}, b: b}
+	for lineno, line := range b {
+		h := _hash(line)
+		// Thanks to the qualities of sha1, the probability of having more than
+		// one line content with the same hash is very low. Nevertheless, store
+		// each of them in a different slot, that we can differentiate by
+		// looking at the line contents in the b slice.
+		for slotIndex, slot := range b2j.store[h] {
+			if line == b[slot[0]] {
+				// The content already has a slot in its hash bucket. Just
+				// append the newly seen index to the slice in that slot
+				b2j.store[h][slotIndex] = append(slot, lineno)
+				continue
+			}
+		}
+		// The line content still has no slot. Create one with a single value.
+		b2j.store[h] = append(b2j.store[h], []int{lineno})
+	}
+	return &b2j
+}
+
+func (b2j *B2J) get(line string) []int {
+	// Thanks to the qualities of sha1, there should be very few (zero or one)
+	// slots, so the following loop is fast.
+	for _, slot := range b2j.store[_hash(line)] {
+		if line == b2j.b[slot[0]] {
+			return slot
+		}
+	}
+	return []int{}
+}
+
+func (b2j *B2J) delete(line string) {
+	h := _hash(line)
+	slots := b2j.store[h]
+	for slotIndex, slot := range slots {
+		if line == b2j.b[slot[0]] {
+			// Remove the whole slot from the list of slots
+			b2j.store[h] = append(slots[:slotIndex], slots[slotIndex+1:]...)
+			return
+		}
+	}
+}
+
+func (b2j *B2J) iter(hook func(string, []int)) {
+	for _, slots := range b2j.store {
+		for _, slot := range slots {
+			hook(b2j.b[slot[0]], slot)
+		}
+	}
+}
+
 // SequenceMatcher compares sequence of strings. The basic
 // algorithm predates, and is a little fancier than, an algorithm
 // published in the late 1980's by Ratcliff and Obershelp under the
@@ -97,7 +168,7 @@ type OpCode struct {
 type SequenceMatcher struct {
 	a              []string
 	b              []string
-	b2j            map[string][]int
+	b2j            B2J
 	IsJunk         func(string) bool
 	autoJunk       bool
 	bJunk          map[string]struct{}
@@ -160,24 +231,19 @@ func (m *SequenceMatcher) SetSeq2(b []string) {
 
 func (m *SequenceMatcher) chainB() {
 	// Populate line -> index mapping
-	b2j := map[string][]int{}
-	for i, s := range m.b {
-		indices := b2j[s]
-		indices = append(indices, i)
-		b2j[s] = indices
-	}
+	b2j := *newB2J(m.b)
 
 	// Purge junk elements
 	m.bJunk = map[string]struct{}{}
 	if m.IsJunk != nil {
 		junk := m.bJunk
-		for s, _ := range b2j {
+		b2j.iter(func (s string, _ []int){
 			if m.IsJunk(s) {
 				junk[s] = struct{}{}
 			}
-		}
+		})
 		for s, _ := range junk {
-			delete(b2j, s)
+			b2j.delete(s)
 		}
 	}
 
@@ -186,13 +252,13 @@ func (m *SequenceMatcher) chainB() {
 	n := len(m.b)
 	if m.autoJunk && n >= 200 {
 		ntest := n/100 + 1
-		for s, indices := range b2j {
+		b2j.iter(func (s string, indices []int){
 			if len(indices) > ntest {
 				popular[s] = struct{}{}
 			}
-		}
+		})
 		for s, _ := range popular {
-			delete(b2j, s)
+			b2j.delete(s)
 		}
 	}
 	m.bPopular = popular
@@ -250,7 +316,7 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 		// look at all instances of a[i] in b; note that because
 		// b2j has no junk keys, the loop is skipped if a[i] is junk
 		newj2len := map[int]int{}
-		for _, j := range m.b2j[m.a[i]] {
+		for _, j := range m.b2j.get(m.a[i]) {
 			// a[i] matches b[j]
 			if j < blo {
 				continue
