@@ -132,6 +132,10 @@ func (b2j *B2J) delete(line string) {
 	}
 }
 
+func (b2j *B2J) deleteHash(h int32) {
+	delete(b2j.store, h)
+}
+
 func (b2j *B2J) iter(hook func(string, []int)) {
 	for _, slots := range b2j.store {
 		for _, slot := range slots {
@@ -172,7 +176,7 @@ type SequenceMatcher struct {
 	b2j            B2J
 	IsJunk         func(string) bool
 	autoJunk       bool
-	bJunk          map[string]struct{}
+	bJunk          map[int32]struct{}
 	matchingBlocks []Match
 	fullBCount     map[int32]int
 	bPopular       map[string]struct{}
@@ -235,16 +239,16 @@ func (m *SequenceMatcher) chainB() {
 	b2j := *newB2J(m.b)
 
 	// Purge junk elements
-	m.bJunk = map[string]struct{}{}
+	m.bJunk = map[int32]struct{}{}
 	if m.IsJunk != nil {
 		junk := m.bJunk
 		b2j.iter(func (s string, _ []int){
 			if m.IsJunk(s) {
-				junk[s] = struct{}{}
+				junk[_hash(s)] = struct{}{}
 			}
 		})
-		for s, _ := range junk {
-			b2j.delete(s)
+		for h, _ := range junk {
+			b2j.deleteHash(h)
 		}
 	}
 
@@ -267,7 +271,7 @@ func (m *SequenceMatcher) chainB() {
 }
 
 func (m *SequenceMatcher) isBJunk(s string) bool {
-	_, ok := m.bJunk[s]
+	_, ok := m.bJunk[_hash(s)]
 	return ok
 }
 
