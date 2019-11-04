@@ -99,11 +99,12 @@ func newB2J (b []string) *B2J {
 				// The content already has a slot in its hash bucket. Just
 				// append the newly seen index to the slice in that slot
 				b2j.store[h][slotIndex] = append(slot, lineno)
-				continue
+				goto cont
 			}
 		}
 		// The line content still has no slot. Create one with a single value.
 		b2j.store[h] = append(b2j.store[h], []int{lineno})
+		cont:
 	}
 	return &b2j
 }
