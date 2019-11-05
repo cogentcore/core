@@ -1,4 +1,4 @@
-package difflib
+package bytes
 
 import (
 	"bytes"
