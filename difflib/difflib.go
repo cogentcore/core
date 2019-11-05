@@ -70,6 +70,13 @@ type OpCode struct {
 	J2  int
 }
 
+func _hash(line string) int32 {
+	hasher := sha1.New()
+	bytes.NewBufferString(line).WriteTo(hasher)
+	hash, _ := binary.ReadVarint(bytes.NewBuffer(hasher.Sum([]byte{})))
+	return int32(hash)
+}
+
 // This is essentially a map from lines to line numbers, so that later it can
 // be made a bit cleverer than the standard map in that it will not need to
 // store copies of the lines.
@@ -77,13 +84,6 @@ type OpCode struct {
 type B2J struct {
 	store map[int32] [][]int
 	b []string
-}
-
-func _hash(line string) int32 {
-	hasher := sha1.New()
-	bytes.NewBufferString(line).WriteTo(hasher)
-	hash, _ := binary.ReadVarint(bytes.NewBuffer(hasher.Sum([]byte{})))
-	return int32(hash)
 }
 
 func newB2J (b []string) *B2J {
