@@ -264,18 +264,18 @@ func TestWithAsciiBJunk(t *testing.T) {
 	}
 	sm := NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)), true, isJunk)
-	assertEqual(t, sm.bJunk, map[int32]struct{}{})
+	assertEqual(t, sm.bJunk, map[lineHash]struct{}{})
 
 	sm = NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)+rep(" ", 20)), false, isJunk)
-	assertEqual(t, sm.bJunk, map[int32]struct{}{_hash(SPACE): struct{}{}})
+	assertEqual(t, sm.bJunk, map[lineHash]struct{}{_hash(SPACE): struct{}{}})
 
 	isJunk = func(s []byte) bool {
 		return len(s) == 1 && (s[0] == ' ' || s[0] == 'b')
 	}
 	sm = NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)+rep(" ", 20)), false, isJunk)
-	assertEqual(t, sm.bJunk, map[int32]struct{}{_hash(SPACE): struct{}{}, _hash([]byte{'b'}): struct{}{}})
+	assertEqual(t, sm.bJunk, map[lineHash]struct{}{_hash(SPACE): struct{}{}, _hash([]byte{'b'}): struct{}{}})
 }
 
 func TestSFBugsRatioForNullSeqn(t *testing.T) {

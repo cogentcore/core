@@ -23,7 +23,7 @@ import (
 	"io"
 	"strings"
 	"unicode"
-	"crypto/sha1"
+	"hash/adler32"
 )
 
 func min(a, b int) int {
@@ -69,9 +69,10 @@ type OpCode struct {
 	J2  int
 }
 
-func _hash(line []byte) int32 {
-	h := sha1.Sum(line)
-	return int32(h[0]) << 3*8 + int32(h[1]) << 2*8 + int32(h[2]) << 1*8 + int32(h[3])
+type lineHash uint32
+
+func _hash(line []byte) lineHash {
+	return lineHash(adler32.Checksum(line))
 }
 
 // This is essentially a map from lines to line numbers, so that later it can
@@ -79,12 +80,12 @@ func _hash(line []byte) int32 {
 // store copies of the lines.
 // It needs to hold a reference to the underlying slice of lines.
 type B2J struct {
-	store map[int32] [][]int
+	store map[lineHash] [][]int
 	b [][]byte
 }
 
 func newB2J (b [][]byte) *B2J {
-	b2j := B2J{store: map[int32] [][]int{}, b: b}
+	b2j := B2J{store: map[lineHash] [][]int{}, b: b}
 	for lineno, line := range b {
 		h := _hash(line)
 		// Thanks to the qualities of sha1, the probability of having more than
@@ -129,7 +130,7 @@ func (b2j *B2J) delete(line []byte) {
 	}
 }
 
-func (b2j *B2J) deleteHash(h int32) {
+func (b2j *B2J) deleteHash(h lineHash) {
 	delete(b2j.store, h)
 }
 
@@ -173,9 +174,9 @@ type SequenceMatcher struct {
 	b2j            B2J
 	IsJunk         func([]byte) bool
 	autoJunk       bool
-	bJunk          map[int32]struct{}
+	bJunk          map[lineHash]struct{}
 	matchingBlocks []Match
-	fullBCount     map[int32]int
+	fullBCount     map[lineHash]int
 	bPopular       []int
 	opCodes        []OpCode
 }
@@ -236,7 +237,7 @@ func (m *SequenceMatcher) chainB() {
 	b2j := *newB2J(m.b)
 
 	// Purge junk elements
-	m.bJunk = map[int32]struct{}{}
+	m.bJunk = map[lineHash]struct{}{}
 	if m.IsJunk != nil {
 		junk := m.bJunk
 		b2j.iter(func (s []byte, _ []int){
@@ -560,7 +561,7 @@ func (m *SequenceMatcher) QuickRatio() float64 {
 	// greater due hash collisions incurring false positives, but
 	// we don't care because we want an upper bound anyway.
 	if m.fullBCount == nil {
-		m.fullBCount = map[int32]int{}
+		m.fullBCount = map[lineHash]int{}
 		for _, s := range m.b {
 			h := _hash(s)
 			m.fullBCount[h] = m.fullBCount[h] + 1
@@ -569,7 +570,7 @@ func (m *SequenceMatcher) QuickRatio() float64 {
 
 	// avail[x] is the number of times x appears in 'b' less the
 	// number of times we've seen it in 'a' so far ... kinda
-	avail := map[int32]int{}
+	avail := map[lineHash]int{}
 	matches := 0
 	for _, s := range m.a {
 		h := _hash(s)
