@@ -48,10 +48,10 @@ func calculateRatio(matches, length int) float64 {
 	return 1.0
 }
 
-func listifyString(str string) (lst []string) {
-	lst = make([]string, len(str))
+func listifyString(str []byte) (lst [][]byte) {
+	lst = make([][]byte, len(str))
 	for i, c := range str {
-		lst[i] = string(c)
+		lst[i] = []byte{c}
 	}
 	return lst
 }
@@ -70,9 +70,9 @@ type OpCode struct {
 	J2  int
 }
 
-func _hash(line string) int32 {
+func _hash(line []byte) int32 {
 	hasher := sha1.New()
-	bytes.NewBufferString(line).WriteTo(hasher)
+	hasher.Write(line)
 	hash, _ := binary.ReadVarint(bytes.NewBuffer(hasher.Sum([]byte{})))
 	return int32(hash)
 }
@@ -83,10 +83,10 @@ func _hash(line string) int32 {
 // It needs to hold a reference to the underlying slice of lines.
 type B2J struct {
 	store map[int32] [][]int
-	b []string
+	b [][]byte
 }
 
-func newB2J (b []string) *B2J {
+func newB2J (b [][]byte) *B2J {
 	b2j := B2J{store: map[int32] [][]int{}, b: b}
 	for lineno, line := range b {
 		h := _hash(line)
@@ -95,7 +95,7 @@ func newB2J (b []string) *B2J {
 		// each of them in a different slot, that we can differentiate by
 		// looking at the line contents in the b slice.
 		for slotIndex, slot := range b2j.store[h] {
-			if line == b[slot[0]] {
+			if bytes.Equal(line, b[slot[0]]) {
 				// The content already has a slot in its hash bucket. Just
 				// append the newly seen index to the slice in that slot
 				b2j.store[h][slotIndex] = append(slot, lineno)
@@ -109,22 +109,22 @@ func newB2J (b []string) *B2J {
 	return &b2j
 }
 
-func (b2j *B2J) get(line string) []int {
+func (b2j *B2J) get(line []byte) []int {
 	// Thanks to the qualities of sha1, there should be very few (zero or one)
 	// slots, so the following loop is fast.
 	for _, slot := range b2j.store[_hash(line)] {
-		if line == b2j.b[slot[0]] {
+		if bytes.Equal(line, b2j.b[slot[0]]) {
 			return slot
 		}
 	}
 	return []int{}
 }
 
-func (b2j *B2J) delete(line string) {
+func (b2j *B2J) delete(line []byte) {
 	h := _hash(line)
 	slots := b2j.store[h]
 	for slotIndex, slot := range slots {
-		if line == b2j.b[slot[0]] {
+		if bytes.Equal(line, b2j.b[slot[0]]) {
 			// Remove the whole slot from the list of slots
 			b2j.store[h] = append(slots[:slotIndex], slots[slotIndex+1:]...)
 			return
@@ -136,7 +136,7 @@ func (b2j *B2J) deleteHash(h int32) {
 	delete(b2j.store, h)
 }
 
-func (b2j *B2J) iter(hook func(string, []int)) {
+func (b2j *B2J) iter(hook func([]byte, []int)) {
 	for _, slots := range b2j.store {
 		for _, slot := range slots {
 			hook(b2j.b[slot[0]], slot)
@@ -171,10 +171,10 @@ func (b2j *B2J) iter(hook func(string, []int)) {
 // expected-case behavior dependent in a complicated way on how many
 // elements the sequences have in common; best case time is linear.
 type SequenceMatcher struct {
-	a              []string
-	b              []string
+	a              [][]byte
+	b              [][]byte
 	b2j            B2J
-	IsJunk         func(string) bool
+	IsJunk         func([]byte) bool
 	autoJunk       bool
 	bJunk          map[int32]struct{}
 	matchingBlocks []Match
@@ -183,14 +183,14 @@ type SequenceMatcher struct {
 	opCodes        []OpCode
 }
 
-func NewMatcher(a, b []string) *SequenceMatcher {
+func NewMatcher(a, b [][]byte) *SequenceMatcher {
 	m := SequenceMatcher{autoJunk: true}
 	m.SetSeqs(a, b)
 	return &m
 }
 
-func NewMatcherWithJunk(a, b []string, autoJunk bool,
-	isJunk func(string) bool) *SequenceMatcher {
+func NewMatcherWithJunk(a, b [][]byte, autoJunk bool,
+	isJunk func([]byte) bool) *SequenceMatcher {
 
 	m := SequenceMatcher{IsJunk: isJunk, autoJunk: autoJunk}
 	m.SetSeqs(a, b)
@@ -198,7 +198,7 @@ func NewMatcherWithJunk(a, b []string, autoJunk bool,
 }
 
 // Set two sequences to be compared.
-func (m *SequenceMatcher) SetSeqs(a, b []string) {
+func (m *SequenceMatcher) SetSeqs(a, b [][]byte) {
 	m.SetSeq1(a)
 	m.SetSeq2(b)
 }
@@ -212,7 +212,7 @@ func (m *SequenceMatcher) SetSeqs(a, b []string) {
 // sequences.
 //
 // See also SetSeqs() and SetSeq2().
-func (m *SequenceMatcher) SetSeq1(a []string) {
+func (m *SequenceMatcher) SetSeq1(a [][]byte) {
 	if &a == &m.a {
 		return
 	}
@@ -223,7 +223,7 @@ func (m *SequenceMatcher) SetSeq1(a []string) {
 
 // Set the second sequence to be compared. The first sequence to be compared is
 // not changed.
-func (m *SequenceMatcher) SetSeq2(b []string) {
+func (m *SequenceMatcher) SetSeq2(b [][]byte) {
 	if &b == &m.b {
 		return
 	}
@@ -242,7 +242,7 @@ func (m *SequenceMatcher) chainB() {
 	m.bJunk = map[int32]struct{}{}
 	if m.IsJunk != nil {
 		junk := m.bJunk
-		b2j.iter(func (s string, _ []int){
+		b2j.iter(func (s []byte, _ []int){
 			if m.IsJunk(s) {
 				junk[_hash(s)] = struct{}{}
 			}
@@ -257,7 +257,7 @@ func (m *SequenceMatcher) chainB() {
 	n := len(m.b)
 	if m.autoJunk && n >= 200 {
 		ntest := n/100 + 1
-		b2j.iter(func (s string, indices []int){
+		b2j.iter(func (s []byte, indices []int){
 			if len(indices) > ntest {
 				popular = append(popular, indices[0])
 			}
@@ -270,7 +270,7 @@ func (m *SequenceMatcher) chainB() {
 	m.b2j = b2j
 }
 
-func (m *SequenceMatcher) isBJunk(s string) bool {
+func (m *SequenceMatcher) isBJunk(s []byte) bool {
 	_, ok := m.bJunk[_hash(s)]
 	return ok
 }
@@ -343,12 +343,12 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// the inner loop above, but also means "the best" match so far
 	// doesn't contain any junk *or* popular non-junk elements.
 	for besti > alo && bestj > blo && !m.isBJunk(m.b[bestj-1]) &&
-		m.a[besti-1] == m.b[bestj-1] {
+		bytes.Equal(m.a[besti-1], m.b[bestj-1]) {
 		besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
 	}
 	for besti+bestsize < ahi && bestj+bestsize < bhi &&
 		!m.isBJunk(m.b[bestj+bestsize]) &&
-		m.a[besti+bestsize] == m.b[bestj+bestsize] {
+		bytes.Equal(m.a[besti+bestsize], m.b[bestj+bestsize]) {
 		bestsize += 1
 	}
 
@@ -360,12 +360,12 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// interesting match, this is clearly the right thing to do,
 	// because no other kind of match is possible in the regions.
 	for besti > alo && bestj > blo && m.isBJunk(m.b[bestj-1]) &&
-		m.a[besti-1] == m.b[bestj-1] {
+		bytes.Equal(m.a[besti-1], m.b[bestj-1]) {
 		besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
 	}
 	for besti+bestsize < ahi && bestj+bestsize < bhi &&
 		m.isBJunk(m.b[bestj+bestsize]) &&
-		m.a[besti+bestsize] == m.b[bestj+bestsize] {
+		bytes.Equal(m.a[besti+bestsize], m.b[bestj+bestsize]) {
 		bestsize += 1
 	}
 
@@ -597,7 +597,7 @@ func (m *SequenceMatcher) RealQuickRatio() float64 {
 	return calculateRatio(min(la, lb), la+lb)
 }
 
-func count_leading(line string, ch byte) (count int) {
+func count_leading(line []byte, ch byte) (count int) {
 	// Return number of `ch` characters at the start of `line`.
 	count = 0
 	n := len(line)
@@ -609,10 +609,10 @@ func count_leading(line string, ch byte) (count int) {
 
 type DiffLine struct {
 	Tag  byte
-	Line string
+	Line []byte
 }
 
-func NewDiffLine(tag byte, line string) (l DiffLine) {
+func NewDiffLine(tag byte, line []byte) (l DiffLine) {
 	l = DiffLine{}
 	l.Tag = tag
 	l.Line = line
@@ -620,15 +620,20 @@ func NewDiffLine(tag byte, line string) (l DiffLine) {
 }
 
 type Differ struct {
-	Linejunk func(string) bool
-	Charjunk func(string) bool
+	Linejunk func([]byte) bool
+	Charjunk func([]byte) bool
 }
 
 func NewDiffer() *Differ {
 	return &Differ{}
 }
 
-func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
+var MINUS = []byte("-")
+var SPACE = []byte(" ")
+var PLUS  = []byte("+")
+var CARET = []byte("^")
+
+func (d *Differ) Compare(a [][]byte, b [][]byte) (diffs [][]byte, err error) {
 	// Compare two sequences of lines; generate the resulting delta.
 
 	// Each sequence must contain individual single-line strings ending with
@@ -636,7 +641,7 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 	// of file-like objects.  The delta generated also consists of newline-
 	// terminated strings, ready to be printed as-is via the writeline()
 	// method of a file-like object.
-	diffs = []string{}
+	diffs = [][]byte{}
 	cruncher := NewMatcherWithJunk(a, b, true, d.Linejunk)
 	opcodes := cruncher.GetOpCodes()
 	for _, current := range opcodes {
@@ -644,15 +649,15 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 		ahi := current.I2
 		blo := current.J1
 		bhi := current.J2
-		var g []string
+		var g [][]byte
 		if current.Tag == 'r' {
 			g, _ = d.FancyReplace(a, alo, ahi, b, blo, bhi)
 		} else if current.Tag == 'd' {
-			g = d.Dump("-", a, alo, ahi)
+			g = d.Dump(MINUS, a, alo, ahi)
 		} else if current.Tag == 'i' {
-			g = d.Dump("+", b, blo, bhi)
+			g = d.Dump(PLUS, b, blo, bhi)
 		} else if current.Tag == 'e' {
-			g = d.Dump(" ", a, alo, ahi)
+			g = d.Dump(SPACE, a, alo, ahi)
 		} else {
 			return nil, errors.New(fmt.Sprintf("unknown tag %q", current.Tag))
 		}
@@ -661,7 +666,7 @@ func (d *Differ) Compare(a []string, b []string) (diffs []string, err error) {
 	return diffs, nil
 }
 
-func (d *Differ) StructuredDump(tag byte, x []string, low int, high int) (out []DiffLine) {
+func (d *Differ) StructuredDump(tag byte, x [][]byte, low int, high int) (out []DiffLine) {
 	size := high - low
 	out = make([]DiffLine, size)
 	for i := 0; i < size; i++ {
@@ -670,39 +675,39 @@ func (d *Differ) StructuredDump(tag byte, x []string, low int, high int) (out []
 	return out
 }
 
-func (d *Differ) Dump(tag string, x []string, low int, high int) (out []string) {
+func (d *Differ) Dump(tag []byte, x [][]byte, low int, high int) (out [][]byte) {
 	// Generate comparison results for a same-tagged range.
 	sout := d.StructuredDump(tag[0], x, low, high)
-	out = make([]string, len(sout))
-	var bld strings.Builder
+	out = make([][]byte, len(sout))
+	var bld bytes.Buffer
 	bld.Grow(1024)
 	for i, line := range sout {
 		bld.Reset()
 		bld.WriteByte(line.Tag)
-		bld.WriteString(" ")
-		bld.WriteString(line.Line)
-		out[i] = bld.String()
+		bld.Write(SPACE)
+		bld.Write(line.Line)
+		out[i] = append(out[i], bld.Bytes()...)
 	}
 	return out
 }
 
-func (d *Differ) PlainReplace(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string, err error) {
+func (d *Differ) PlainReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int, bhi int) (out [][]byte, err error) {
 	if !(alo < ahi) || !(blo < bhi) { // assertion
 		return nil, errors.New("low greater than or equal to high")
 	}
 	// dump the shorter block first -- reduces the burden on short-term
 	// memory if the blocks are of very different sizes
 	if bhi-blo < ahi-alo {
-		out = d.Dump("+", b, blo, bhi)
-		out = append(out, d.Dump("-", a, alo, ahi)...)
+		out = d.Dump(PLUS, b, blo, bhi)
+		out = append(out, d.Dump(MINUS, a, alo, ahi)...)
 	} else {
-		out = d.Dump("-", a, alo, ahi)
-		out = append(out, d.Dump("+", b, blo, bhi)...)
+		out = d.Dump(MINUS, a, alo, ahi)
+		out = append(out, d.Dump(PLUS, b, blo, bhi)...)
 	}
 	return out, nil
 }
 
-func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string, err error) {
+func (d *Differ) FancyReplace(a [][]byte, alo int, ahi int, b [][]byte, blo int, bhi int) (out [][]byte, err error) {
 	// When replacing one block of lines with another, search the blocks
 	// for *similar* lines; the best-matching pair (if any) is used as a
 	// synch point, and intraline difference marking is done on the
@@ -715,7 +720,7 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 	cruncher := NewMatcherWithJunk(a, b, true, d.Charjunk)
 	eqi := -1 // 1st indices of equal lines (if any)
 	eqj := -1
-	out = []string{}
+	out = [][]byte{}
 
 	// search for the pair that matches best without being identical
 	// (identical lines must be junk lines, & we don't want to synch up
@@ -726,7 +731,7 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 		cruncher.SetSeq2(listifyString(bj))
 		for i := alo; i < ahi; i++ {
 			ai := a[i]
-			if ai == bj {
+			if bytes.Equal(ai, bj) {
 				if eqi == -1 {
 					eqi = i
 					eqj = j
@@ -774,7 +779,7 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 	aelt, belt := a[best_i], b[best_j]
 	if eqi == -1 {
 		// pump out a '-', '?', '+', '?' quad for the synched lines
-		var atags, btags string
+		var atags, btags []byte
 		cruncher.SetSeqs(listifyString(aelt), listifyString(belt))
 		opcodes := cruncher.GetOpCodes()
 		for _, current := range opcodes {
@@ -784,15 +789,15 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 			bj2 := current.J2
 			la, lb := ai2-ai1, bj2-bj1
 			if current.Tag == 'r' {
-				atags += strings.Repeat("^", la)
-				btags += strings.Repeat("^", lb)
+				atags = append(atags, bytes.Repeat(CARET, la)...)
+				btags = append(btags, bytes.Repeat(CARET, lb)...)
 			} else if current.Tag == 'd' {
-				atags += strings.Repeat("-", la)
+				atags = append(atags, bytes.Repeat(MINUS, la)...)
 			} else if current.Tag == 'i' {
-				btags += strings.Repeat("+", lb)
+				btags = append(btags, bytes.Repeat(PLUS, lb)...)
 			} else if current.Tag == 'e' {
-				atags += strings.Repeat(" ", la)
-				btags += strings.Repeat(" ", lb)
+				atags = append(atags, bytes.Repeat(SPACE, la)...)
+				btags = append(btags, bytes.Repeat(SPACE, lb)...)
 			} else {
 				return nil, errors.New(fmt.Sprintf("unknown tag %q",
 					current.Tag))
@@ -801,74 +806,86 @@ func (d *Differ) FancyReplace(a []string, alo int, ahi int, b []string, blo int,
 		out = append(out, d.QFormat(aelt, belt, atags, btags)...)
 	} else {
 		// the synch pair is identical
-		out = append(out, "  "+aelt)
+		out = append(out, append([]byte{' ', ' '}, aelt...))
 	}
 	// pump out diffs from after the synch point
 	out = append(out, d.fancyHelper(a, best_i+1, ahi, b, best_j+1, bhi)...)
 	return out, nil
 }
 
-func (d *Differ) fancyHelper(a []string, alo int, ahi int, b []string, blo int, bhi int) (out []string) {
+func (d *Differ) fancyHelper(a [][]byte, alo int, ahi int, b [][]byte, blo int, bhi int) (out [][]byte) {
 	if alo < ahi {
 		if blo < bhi {
 			out, _ = d.FancyReplace(a, alo, ahi, b, blo, bhi)
 		} else {
-			out = d.Dump("-", a, alo, ahi)
+			out = d.Dump(MINUS, a, alo, ahi)
 		}
 	} else if blo < bhi {
-		out = d.Dump("+", b, blo, bhi)
+		out = d.Dump(PLUS, b, blo, bhi)
 	} else {
-		out = []string{}
+		out = [][]byte{}
 	}
 	return out
 }
 
-func (d *Differ) QFormat(aline string, bline string, atags string, btags string) (out []string) {
+func (d *Differ) QFormat(aline []byte, bline []byte, atags []byte, btags []byte) (out [][]byte) {
 	// Format "?" output and deal with leading tabs.
 
 	// Can hurt, but will probably help most of the time.
 	common := min(count_leading(aline, '\t'), count_leading(bline, '\t'))
 	common = min(common, count_leading(atags[:common], ' '))
 	common = min(common, count_leading(btags[:common], ' '))
-	atags = strings.TrimRightFunc(atags[common:], unicode.IsSpace)
-	btags = strings.TrimRightFunc(btags[common:], unicode.IsSpace)
+	atags = bytes.TrimRightFunc(atags[common:], unicode.IsSpace)
+	btags = bytes.TrimRightFunc(btags[common:], unicode.IsSpace)
 
-	out = []string{"- " + aline}
+	out = [][]byte{append([]byte("- "), aline...)}
 	if len(atags) > 0 {
-		out = append(out, fmt.Sprintf("? %s%s\n",
-			strings.Repeat("\t", common), atags))
+		t := make([]byte, 0, len(atags) + common + 3)
+		t = append(t, []byte("? ")...)
+		for i := 0; i < common; i++ {
+			t = append(t, byte('\t'))
+		}
+		t = append(t, atags...)
+		t = append(t, byte('\n'))
+		out = append(out, t)
 	}
-	out = append(out, "+ "+bline)
+	out = append(out, append([]byte("+ "), bline...))
 	if len(btags) > 0 {
-		out = append(out, fmt.Sprintf("? %s%s\n",
-			strings.Repeat("\t", common), btags))
+		t := make([]byte, 0, len(btags) + common + 3)
+		t = append(t, []byte("? ")...)
+		for i := 0; i < common; i++ {
+			t = append(t, byte('\t'))
+		}
+		t = append(t, btags...)
+		t = append(t, byte('\n'))
+		out = append(out, t)
 	}
 	return out
 }
 
 // Convert range to the "ed" format
-func formatRangeUnified(start, stop int) string {
+func formatRangeUnified(start, stop int) []byte {
 	// Per the diff spec at http://www.unix.org/single_unix_specification/
 	beginning := start + 1 // lines start numbering with one
 	length := stop - start
 	if length == 1 {
-		return fmt.Sprintf("%d", beginning)
+		return []byte(fmt.Sprintf("%d", beginning))
 	}
 	if length == 0 {
 		beginning -= 1 // empty ranges begin at line just before the range
 	}
-	return fmt.Sprintf("%d,%d", beginning, length)
+	return []byte(fmt.Sprintf("%d,%d", beginning, length))
 }
 
 // Unified diff parameters
 type UnifiedDiff struct {
-	A        []string // First sequence lines
+	A        [][]byte // First sequence lines
 	FromFile string   // First file name
 	FromDate string   // First file time
-	B        []string // Second sequence lines
+	B        [][]byte // Second sequence lines
 	ToFile   string   // Second file name
 	ToDate   string   // Second file time
-	Eol      string   // Headers end of line, defaults to LF
+	Eol      []byte   // Headers end of line, defaults to LF
 	Context  int      // Number of context lines
 }
 
@@ -900,13 +917,13 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 		_, err := fmt.Fprintf(&bld, format, args...)
 		return err
 	}
-	ws := func(s string) error {
-		_, err := bld.WriteString(s)
+	ws := func(s []byte) error {
+		_, err := bld.Write(s)
 		return err
 	}
 
 	if len(diff.Eol) == 0 {
-		diff.Eol = "\n"
+		diff.Eol = []byte("\n")
 	}
 
 	started := false
@@ -943,7 +960,10 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 			i1, i2, j1, j2 := c.I1, c.I2, c.J1, c.J2
 			if c.Tag == 'e' {
 				for _, line := range diff.A[i1:i2] {
-					if err := ws(" " + line); err != nil {
+					if err := ws(SPACE); err != nil {
+						return err
+					}
+					if err := ws(line); err != nil {
 						return err
 					}
 				}
@@ -951,14 +971,20 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 			}
 			if c.Tag == 'r' || c.Tag == 'd' {
 				for _, line := range diff.A[i1:i2] {
-					if err := ws("-" + line); err != nil {
+					if err := ws(MINUS); err != nil {
+						return err
+					}
+					if err := ws(line); err != nil {
 						return err
 					}
 				}
 			}
 			if c.Tag == 'r' || c.Tag == 'i' {
 				for _, line := range diff.B[j1:j2] {
-					if err := ws("+" + line); err != nil {
+					if err := ws(PLUS); err != nil {
+						return err
+					}
+					if err := ws(line); err != nil {
 						return err
 					}
 				}
@@ -971,15 +997,15 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 	return nil
 }
 
-// Like WriteUnifiedDiff but returns the diff a string.
-func GetUnifiedDiffString(diff UnifiedDiff) (string, error) {
+// Like WriteUnifiedDiff but returns the diff a []byte.
+func GetUnifiedDiffString(diff UnifiedDiff) ([]byte, error) {
 	w := &bytes.Buffer{}
 	err := WriteUnifiedDiff(w, diff)
-	return string(w.Bytes()), err
+	return []byte(w.Bytes()), err
 }
 
 // Convert range to the "ed" format.
-func formatRangeContext(start, stop int) string {
+func formatRangeContext(start, stop int) []byte {
 	// Per the diff spec at http://www.unix.org/single_unix_specification/
 	beginning := start + 1 // lines start numbering with one
 	length := stop - start
@@ -987,9 +1013,9 @@ func formatRangeContext(start, stop int) string {
 		beginning -= 1 // empty ranges begin at line just before the range
 	}
 	if length <= 1 {
-		return fmt.Sprintf("%d", beginning)
+		return []byte(fmt.Sprintf("%d", beginning))
 	}
-	return fmt.Sprintf("%d,%d", beginning, beginning+length-1)
+	return []byte(fmt.Sprintf("%d,%d", beginning, beginning+length-1))
 }
 
 type ContextDiff UnifiedDiff
@@ -1021,22 +1047,22 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 			diffErr = err
 		}
 	}
-	ws := func(s string) {
-		_, err := buf.WriteString(s)
+	ws := func(s []byte) {
+		_, err := buf.Write(s)
 		if diffErr == nil && err != nil {
 			diffErr = err
 		}
 	}
 
 	if len(diff.Eol) == 0 {
-		diff.Eol = "\n"
+		diff.Eol = []byte("\n")
 	}
 
-	prefix := map[byte]string{
-		'i': "+ ",
-		'd': "- ",
-		'r': "! ",
-		'e': "  ",
+	prefix := map[byte][]byte{
+		'i': []byte("+ "),
+		'd': []byte("- "),
+		'r': []byte("! "),
+		'e': []byte("  "),
 	}
 
 	started := false
@@ -1059,7 +1085,8 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 		}
 
 		first, last := g[0], g[len(g)-1]
-		ws("***************" + diff.Eol)
+		ws([]byte("***************"))
+		ws(diff.Eol)
 
 		range1 := formatRangeContext(first.I1, last.I2)
 		wf("*** %s ****%s", range1, diff.Eol)
@@ -1070,7 +1097,8 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 						continue
 					}
 					for _, line := range diff.A[cc.I1:cc.I2] {
-						ws(prefix[cc.Tag] + line)
+						ws(prefix[cc.Tag])
+						ws(line)
 					}
 				}
 				break
@@ -1086,7 +1114,8 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 						continue
 					}
 					for _, line := range diff.B[cc.J1:cc.J2] {
-						ws(prefix[cc.Tag] + line)
+						ws(prefix[cc.Tag])
+						ws(line)
 					}
 				}
 				break
@@ -1096,17 +1125,17 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 	return diffErr
 }
 
-// Like WriteContextDiff but returns the diff a string.
-func GetContextDiffString(diff ContextDiff) (string, error) {
+// Like WriteContextDiff but returns the diff a []byte.
+func GetContextDiffString(diff ContextDiff) ([]byte, error) {
 	w := &bytes.Buffer{}
 	err := WriteContextDiff(w, diff)
-	return string(w.Bytes()), err
+	return []byte(w.Bytes()), err
 }
 
-// Split a string on "\n" while preserving them. The output can be used
+// Split a []byte on "\n" while preserving them. The output can be used
 // as input for UnifiedDiff and ContextDiff structures.
-func SplitLines(s string) []string {
-	lines := strings.SplitAfter(s, "\n")
-	lines[len(lines)-1] += "\n"
+func SplitLines(s []byte) [][]byte {
+	lines := bytes.SplitAfter(s, []byte("\n"))
+	lines[len(lines)-1] = append(lines[len(lines)-1], '\n')
 	return lines
 }
