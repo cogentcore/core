@@ -24,7 +24,6 @@ import (
 	"strings"
 	"unicode"
 	"crypto/sha1"
-	"encoding/binary"
 )
 
 func min(a, b int) int {
@@ -71,10 +70,8 @@ type OpCode struct {
 }
 
 func _hash(line []byte) int32 {
-	hasher := sha1.New()
-	hasher.Write(line)
-	hash, _ := binary.ReadVarint(bytes.NewBuffer(hasher.Sum([]byte{})))
-	return int32(hash)
+	h := sha1.Sum(line)
+	return int32(h[0]) << 3*8 + int32(h[1]) << 2*8 + int32(h[2]) << 1*8 + int32(h[3])
 }
 
 // This is essentially a map from lines to line numbers, so that later it can
