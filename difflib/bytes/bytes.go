@@ -253,10 +253,6 @@ func (m *SequenceMatcher) chainB() {
 	m.b2j = b2j
 }
 
-func (m *SequenceMatcher) isBJunk(s []byte) bool {
-	return m.b2j.isBJunk(s)
-}
-
 // Find longest matching block in a[alo:ahi] and b[blo:bhi].
 //
 // If IsJunk is not defined:
@@ -324,12 +320,12 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// "popular" non-junk elements aren't in b2j, which greatly speeds
 	// the inner loop above, but also means "the best" match so far
 	// doesn't contain any junk *or* popular non-junk elements.
-	for besti > alo && bestj > blo && !m.isBJunk(m.b[bestj-1]) &&
+	for besti > alo && bestj > blo && !m.b2j.isBJunk(m.b[bestj-1]) &&
 		bytes.Equal(m.a[besti-1], m.b[bestj-1]) {
 		besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
 	}
 	for besti+bestsize < ahi && bestj+bestsize < bhi &&
-		!m.isBJunk(m.b[bestj+bestsize]) &&
+		!m.b2j.isBJunk(m.b[bestj+bestsize]) &&
 		bytes.Equal(m.a[besti+bestsize], m.b[bestj+bestsize]) {
 		bestsize += 1
 	}
@@ -341,12 +337,12 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// figuring out what to do with it.  In the case of an empty
 	// interesting match, this is clearly the right thing to do,
 	// because no other kind of match is possible in the regions.
-	for besti > alo && bestj > blo && m.isBJunk(m.b[bestj-1]) &&
+	for besti > alo && bestj > blo && m.b2j.isBJunk(m.b[bestj-1]) &&
 		bytes.Equal(m.a[besti-1], m.b[bestj-1]) {
 		besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
 	}
 	for besti+bestsize < ahi && bestj+bestsize < bhi &&
-		m.isBJunk(m.b[bestj+bestsize]) &&
+		m.b2j.isBJunk(m.b[bestj+bestsize]) &&
 		bytes.Equal(m.a[besti+bestsize], m.b[bestj+bestsize]) {
 		bestsize += 1
 	}
