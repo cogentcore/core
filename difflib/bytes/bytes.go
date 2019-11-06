@@ -49,8 +49,8 @@ func calculateRatio(matches, length int) float64 {
 
 func listifyString(str []byte) (lst [][]byte) {
 	lst = make([][]byte, len(str))
-	for i, c := range str {
-		lst[i] = []byte{c}
+	for i := range str {
+		lst[i] = str[i:i+1]
 	}
 	return lst
 }
