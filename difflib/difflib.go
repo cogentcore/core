@@ -100,10 +100,10 @@ type SequenceMatcher struct {
 	b2j            map[string][]int
 	IsJunk         func(string) bool
 	autoJunk       bool
-	bJunk          map[string]struct{}
+	bJunk          map[string]bool
 	matchingBlocks []Match
 	fullBCount     map[string]int
-	bPopular       map[string]struct{}
+	bPopular       map[string]bool
 	opCodes        []OpCode
 }
 
@@ -161,42 +161,31 @@ func (m *SequenceMatcher) SetSeq2(b []string) {
 func (m *SequenceMatcher) chainB() {
 	// Populate line -> index mapping
 	b2j := map[string][]int{}
+	junk := map[string]bool{}
+	popular := map[string]bool{}
+	ntest := len(m.b)
+	if m.autoJunk && ntest >= 200 {
+		ntest = ntest/100 + 1
+	}
 	for i, s := range m.b {
-		indices := b2j[s]
-		indices = append(indices, i)
-		b2j[s] = indices
-	}
-
-	// Purge junk elements
-	m.bJunk = map[string]struct{}{}
-	if m.IsJunk != nil {
-		junk := m.bJunk
-		for s, _ := range b2j {
-			if m.IsJunk(s) {
-				junk[s] = struct{}{}
+		if !junk[s] {
+			if m.IsJunk != nil && m.IsJunk(s) {
+				junk[s] = true
+			} else if !popular[s] {
+				ids := append(b2j[s], i)
+				if len(ids) <= ntest {
+					b2j[s] = ids
+				} else {
+					delete(b2j, s)
+					popular[s] = true
+				}
 			}
-		}
-		for s, _ := range junk {
-			delete(b2j, s)
 		}
 	}
 
-	// Purge remaining popular elements
-	popular := map[string]struct{}{}
-	n := len(m.b)
-	if m.autoJunk && n >= 200 {
-		ntest := n/100 + 1
-		for s, indices := range b2j {
-			if len(indices) > ntest {
-				popular[s] = struct{}{}
-			}
-		}
-		for s, _ := range popular {
-			delete(b2j, s)
-		}
-	}
-	m.bPopular = popular
 	m.b2j = b2j
+	m.bJunk = junk
+	m.bPopular = popular
 }
 
 func (m *SequenceMatcher) isBJunk(s string) bool {

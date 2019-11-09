@@ -49,8 +49,8 @@ func calculateRatio(matches, length int) float64 {
 
 func listifyString(str []byte) (lst [][]byte) {
 	lst = make([][]byte, len(str))
-	for i, c := range str {
-		lst[i] = []byte{c}
+	for i := range str {
+		lst[i] = str[i:i+1]
 	}
 	return lst
 }
@@ -84,62 +84,79 @@ type B2J struct {
 	b [][]byte
 }
 
-func newB2J (b [][]byte) *B2J {
-	b2j := B2J{store: map[lineHash] [][]int{}, b: b}
-	for lineno, line := range b {
-		h := _hash(line)
+type lineType int8
+const (
+	lineNONE    lineType =  0
+	lineNORMAL  lineType =  1
+	lineJUNK    lineType = -1
+	linePOPULAR lineType = -2
+)
+
+func (b2j *B2J) _find(line *[]byte) (h lineHash, slotIndex int,
+                                     slot []int, lt lineType) {
+	h = _hash(*line)
+	for slotIndex, slot = range b2j.store[h] {
 		// Thanks to the qualities of sha1, the probability of having more than
 		// one line content with the same hash is very low. Nevertheless, store
 		// each of them in a different slot, that we can differentiate by
 		// looking at the line contents in the b slice.
-		for slotIndex, slot := range b2j.store[h] {
-			if bytes.Equal(line, b[slot[0]]) {
-				// The content already has a slot in its hash bucket. Just
-				// append the newly seen index to the slice in that slot
-				b2j.store[h][slotIndex] = append(slot, lineno)
-				goto cont
+		// In place of all the line numbers where the line appears, a slot can
+		// also contain [lineno, -1] if b[lineno] is junk.
+		if bytes.Equal(*line, b2j.b[slot[0]]) {
+			// The content already has a slot in its hash bucket.
+			if len(slot) == 2 && slot[1] < 0 {
+				lt = lineType(slot[1])
+			} else {
+				lt = lineNORMAL
 			}
+			return // every return variable has the correct value
 		}
-		// The line content still has no slot. Create one with a single value.
-		b2j.store[h] = append(b2j.store[h], []int{lineno})
-		cont:
+	}
+	// The line content still has no slot.
+	slotIndex = -1
+	slot = nil
+	lt = lineNONE
+	return
+}
+
+func newB2J (b [][]byte, isJunk func([]byte) bool, autoJunk bool) *B2J {
+	b2j := B2J{store: map[lineHash] [][]int{}, b: b}
+	ntest := len(b)
+	if autoJunk && ntest >= 200 {
+		ntest = ntest/100 + 1
+	}
+	for lineno, line := range b {
+		h, slotIndex, slot, lt := b2j._find(&line)
+		switch lt {
+		case lineNORMAL:
+			if len(slot) >= ntest {
+				b2j.store[h][slotIndex] = []int{slot[0], int(linePOPULAR)}
+			} else {
+				b2j.store[h][slotIndex] = append(slot, lineno)
+			}
+		case lineNONE:
+			if isJunk != nil && isJunk(line) {
+				b2j.store[h] = append(b2j.store[h], []int{lineno, int(lineJUNK)})
+			} else {
+				b2j.store[h] = append(b2j.store[h], []int{lineno})
+			}
+		default:
+		}
 	}
 	return &b2j
 }
 
 func (b2j *B2J) get(line []byte) []int {
-	// Thanks to the qualities of sha1, there should be very few (zero or one)
-	// slots, so the following loop is fast.
-	for _, slot := range b2j.store[_hash(line)] {
-		if bytes.Equal(line, b2j.b[slot[0]]) {
-			return slot
-		}
+	_, _, slot, lt := b2j._find(&line)
+	if lt == lineNORMAL {
+		return slot
 	}
 	return []int{}
 }
 
-func (b2j *B2J) delete(line []byte) {
-	h := _hash(line)
-	slots := b2j.store[h]
-	for slotIndex, slot := range slots {
-		if bytes.Equal(line, b2j.b[slot[0]]) {
-			// Remove the whole slot from the list of slots
-			b2j.store[h] = append(slots[:slotIndex], slots[slotIndex+1:]...)
-			return
-		}
-	}
-}
-
-func (b2j *B2J) deleteHash(h lineHash) {
-	delete(b2j.store, h)
-}
-
-func (b2j *B2J) iter(hook func([]byte, []int)) {
-	for _, slots := range b2j.store {
-		for _, slot := range slots {
-			hook(b2j.b[slot[0]], slot)
-		}
-	}
+func (b2j *B2J) isBJunk(line []byte) bool {
+	_, _, _, lt := b2j._find(&line)
+	return lt == lineJUNK
 }
 
 // SequenceMatcher compares sequence of strings. The basic
@@ -174,10 +191,8 @@ type SequenceMatcher struct {
 	b2j            B2J
 	IsJunk         func([]byte) bool
 	autoJunk       bool
-	bJunk          map[lineHash]struct{}
 	matchingBlocks []Match
 	fullBCount     map[lineHash]int
-	bPopular       []int
 	opCodes        []OpCode
 }
 
@@ -234,43 +249,8 @@ func (m *SequenceMatcher) SetSeq2(b [][]byte) {
 
 func (m *SequenceMatcher) chainB() {
 	// Populate line -> index mapping
-	b2j := *newB2J(m.b)
-
-	// Purge junk elements
-	m.bJunk = map[lineHash]struct{}{}
-	if m.IsJunk != nil {
-		junk := m.bJunk
-		b2j.iter(func (s []byte, _ []int){
-			if m.IsJunk(s) {
-				junk[_hash(s)] = struct{}{}
-			}
-		})
-		for h, _ := range junk {
-			b2j.deleteHash(h)
-		}
-	}
-
-	// Purge remaining popular elements
-	popular := []int{}
-	n := len(m.b)
-	if m.autoJunk && n >= 200 {
-		ntest := n/100 + 1
-		b2j.iter(func (s []byte, indices []int){
-			if len(indices) > ntest {
-				popular = append(popular, indices[0])
-			}
-		})
-		for _, i := range popular {
-			b2j.delete(m.b[i])
-		}
-	}
-	m.bPopular = popular
+	b2j := *newB2J(m.b, m.IsJunk, m.autoJunk)
 	m.b2j = b2j
-}
-
-func (m *SequenceMatcher) isBJunk(s []byte) bool {
-	_, ok := m.bJunk[_hash(s)]
-	return ok
 }
 
 // Find longest matching block in a[alo:ahi] and b[blo:bhi].
@@ -340,12 +320,12 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// "popular" non-junk elements aren't in b2j, which greatly speeds
 	// the inner loop above, but also means "the best" match so far
 	// doesn't contain any junk *or* popular non-junk elements.
-	for besti > alo && bestj > blo && !m.isBJunk(m.b[bestj-1]) &&
+	for besti > alo && bestj > blo && !m.b2j.isBJunk(m.b[bestj-1]) &&
 		bytes.Equal(m.a[besti-1], m.b[bestj-1]) {
 		besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
 	}
 	for besti+bestsize < ahi && bestj+bestsize < bhi &&
-		!m.isBJunk(m.b[bestj+bestsize]) &&
+		!m.b2j.isBJunk(m.b[bestj+bestsize]) &&
 		bytes.Equal(m.a[besti+bestsize], m.b[bestj+bestsize]) {
 		bestsize += 1
 	}
@@ -357,12 +337,12 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// figuring out what to do with it.  In the case of an empty
 	// interesting match, this is clearly the right thing to do,
 	// because no other kind of match is possible in the regions.
-	for besti > alo && bestj > blo && m.isBJunk(m.b[bestj-1]) &&
+	for besti > alo && bestj > blo && m.b2j.isBJunk(m.b[bestj-1]) &&
 		bytes.Equal(m.a[besti-1], m.b[bestj-1]) {
 		besti, bestj, bestsize = besti-1, bestj-1, bestsize+1
 	}
 	for besti+bestsize < ahi && bestj+bestsize < bhi &&
-		m.isBJunk(m.b[bestj+bestsize]) &&
+		m.b2j.isBJunk(m.b[bestj+bestsize]) &&
 		bytes.Equal(m.a[besti+bestsize], m.b[bestj+bestsize]) {
 		bestsize += 1
 	}

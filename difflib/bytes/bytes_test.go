@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"sort"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -234,20 +235,41 @@ func rep(s string, count int) string {
 	return strings.Repeat(s, count)
 }
 
+func getall(b2j *B2J, lt lineType) [][]byte {
+	result := []int{}
+	for _, slots := range b2j.store {
+		for _, slot := range slots {
+			slt := lineNORMAL
+			if len(slot) == 2 && slot[1] < 0 {
+				slt = lineType(slot[1])
+			}
+			if lt == slt {
+				result = append(result, slot[0])
+			}
+		}
+	}
+	sort.Ints(result)
+	lines := make([][]byte, len(result))
+	for i, lineno := range result {
+		lines[i] = b2j.b[lineno]
+	}
+	return lines
+}
+
 func TestWithAsciiOneInsert(t *testing.T) {
 	sm := NewMatcher(splitChars(rep("b", 100)),
 		splitChars("a"+rep("b", 100)))
 	assertAlmostEqual(t, sm.Ratio(), 0.995, 3)
 	assertEqual(t, sm.GetOpCodes(),
 		[]OpCode{{'i', 0, 0, 0, 1}, {'e', 0, 100, 1, 101}})
-	assertEqual(t, len(sm.bPopular), 0)
+	assertEqual(t, len(getall(&sm.b2j, linePOPULAR)), 0)
 
 	sm = NewMatcher(splitChars(rep("b", 100)),
 		splitChars(rep("b", 50)+"a"+rep("b", 50)))
 	assertAlmostEqual(t, sm.Ratio(), 0.995, 3)
 	assertEqual(t, sm.GetOpCodes(),
 		[]OpCode{{'e', 0, 50, 0, 50}, {'i', 50, 50, 50, 51}, {'e', 50, 100, 51, 101}})
-	assertEqual(t, len(sm.bPopular), 0)
+	assertEqual(t, len(getall(&sm.b2j, linePOPULAR)), 0)
 }
 
 func TestWithAsciiOnDelete(t *testing.T) {
@@ -264,18 +286,18 @@ func TestWithAsciiBJunk(t *testing.T) {
 	}
 	sm := NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)), true, isJunk)
-	assertEqual(t, sm.bJunk, map[lineHash]struct{}{})
+	assertEqual(t, getall(&sm.b2j, lineJUNK), [][]byte{})
 
 	sm = NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)+rep(" ", 20)), false, isJunk)
-	assertEqual(t, sm.bJunk, map[lineHash]struct{}{_hash(SPACE): struct{}{}})
+	assertEqual(t, getall(&sm.b2j, lineJUNK), [][]byte{SPACE})
 
 	isJunk = func(s []byte) bool {
 		return len(s) == 1 && (s[0] == ' ' || s[0] == 'b')
 	}
 	sm = NewMatcherWithJunk(splitChars(rep("a", 40)+rep("b", 40)),
 		splitChars(rep("a", 44)+rep("b", 40)+rep(" ", 20)), false, isJunk)
-	assertEqual(t, sm.bJunk, map[lineHash]struct{}{_hash(SPACE): struct{}{}, _hash([]byte{'b'}): struct{}{}})
+	assertEqual(t, getall(&sm.b2j, lineJUNK), [][]byte{[]byte{'b'}, SPACE})
 }
 
 func TestSFBugsRatioForNullSeqn(t *testing.T) {
