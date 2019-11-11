@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
+	"./tester"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -430,6 +432,41 @@ func BenchmarkSplitLines100(b *testing.B) {
 
 func BenchmarkSplitLines10000(b *testing.B) {
 	benchmarkSplitLines(b, 10000)
+}
+
+func prepareFilesToDiff(count, seed int) (As, Bs [][]string) {
+	defer runtime.GC()
+	return tester.PrepareStringsToDiff(count, seed)
+}
+
+func BenchmarkDiffer(b *testing.B) {
+	A, B := prepareFilesToDiff(b.N, 0)
+	fmt.Printf("\nDiff length:")
+	b.ResetTimer()
+	differ := NewDiffer()
+	for i := range A {
+		var x []string
+		for n := 0; n < 5; n++ {
+			x, _ = differ.Compare(A[i], B[i])
+		}
+		fmt.Printf(" %v", len(x))
+	}
+	fmt.Printf("\n")
+}
+
+func BenchmarkMatcher(b *testing.B) {
+	A, B := prepareFilesToDiff(b.N, 0)
+	fmt.Printf("\nOpcodes count:")
+	b.ResetTimer()
+	for i := range A {
+		var x []OpCode
+		for n := 0; n < 5; n++ {
+			sm := NewMatcher(A[i], B[i])
+			x = sm.GetOpCodes()
+		}
+		fmt.Printf(" %v", len(x))
+	}
+	fmt.Printf("\n")
 }
 
 func TestDifferCompare(t *testing.T) {
