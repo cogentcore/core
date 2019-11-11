@@ -234,12 +234,15 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 	// find longest junk-free match
 	// during an iteration of the loop, j2len[j] = length of longest
 	// junk-free match ending with a[i-1] and b[j]
-	j2len := map[int]int{}
+	N := bhi - blo
+	j2len := make([]int, N)
+	newj2len := make([]int, N)
+	var indices []int
 	for i := alo; i != ahi; i++ {
 		// look at all instances of a[i] in b; note that because
 		// b2j has no junk keys, the loop is skipped if a[i] is junk
-		newj2len := map[int]int{}
-		for _, j := range m.b2j[m.a[i]] {
+		newindices := m.b2j[m.a[i]]
+		for _, j := range newindices {
 			// a[i] matches b[j]
 			if j < blo {
 				continue
@@ -247,13 +250,27 @@ func (m *SequenceMatcher) findLongestMatch(alo, ahi, blo, bhi int) Match {
 			if j >= bhi {
 				break
 			}
-			k := j2len[j-1] + 1
-			newj2len[j] = k
+			k := 1
+			if j > blo {
+				k = j2len[j-1-blo] + 1
+			}
+			newj2len[j-blo] = k
 			if k > bestsize {
 				besti, bestj, bestsize = i-k+1, j-k+1, k
 			}
 		}
-		j2len = newj2len
+		// j2len = newj2len, clear and reuse j2len as newj2len
+		for _, j := range indices {
+			if j < blo {
+				continue
+			}
+			if j >= bhi {
+				break
+			}
+			j2len[j-blo] = 0
+		}
+		indices = newindices
+		j2len, newj2len = newj2len, j2len
 	}
 
 	// Extend the best by non-junk elements on each end.  In particular,
