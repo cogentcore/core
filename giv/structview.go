@@ -83,6 +83,18 @@ func (sv *StructView) UpdateFields() {
 	sv.UpdateEnd(updt)
 }
 
+// UpdateField updates the value-view widget for the named field
+func (sv *StructView) UpdateField(field string) {
+	updt := sv.UpdateStart()
+	for _, vv := range sv.FieldViews {
+		if vv.Name() == field {
+			vv.UpdateWidget()
+			break
+		}
+	}
+	sv.UpdateEnd(updt)
+}
+
 // Config configures the view
 func (sv *StructView) Config() {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
