@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"sort"
+	"../tester"
 )
 
 func assertAlmostEqual(t *testing.T, a, b float64, places int) {
@@ -470,6 +472,51 @@ func BenchmarkSplitLines100(b *testing.B) {
 
 func BenchmarkSplitLines10000(b *testing.B) {
 	benchmarkSplitLines(b, 10000)
+}
+
+func prepareFilesToDiff(count, seed int) (As, Bs [][][]byte) {
+	defer runtime.GC()
+	aux := func () { // to ensure temp variables go out of scope
+		stringsA, stringsB := tester.PrepareStringsToDiff(count, seed)
+		As = make([][][]byte, len(stringsA))
+		Bs = make([][][]byte, len(stringsB))
+		for i := range As {
+			As[i] = stringsToBytes(stringsA[i]...)
+			Bs[i] = stringsToBytes(stringsB[i]...)
+		}
+	}
+	aux()
+	return
+}
+
+func BenchmarkDiffer(b *testing.B) {
+	A, B := prepareFilesToDiff(b.N, 0)
+	fmt.Printf("\nDiff length:")
+	b.ResetTimer()
+	differ := NewDiffer()
+	for i := range A {
+		var x [][]byte
+		for n := 0; n < 5; n++ {
+			x, _ = differ.Compare(A[i], B[i])
+		}
+		fmt.Printf(" %v", len(x))
+	}
+	fmt.Printf("\n")
+}
+
+func BenchmarkMatcher(b *testing.B) {
+	As, Bs := prepareFilesToDiff(b.N, 0)
+	fmt.Printf("\nOpcodes count:")
+	b.ResetTimer()
+	for i := range As {
+		var x []OpCode
+		for n := 0; n < 5; n++ {
+			sm := NewMatcher(As[i], Bs[i])
+			x = sm.GetOpCodes()
+		}
+		fmt.Printf(" %v", len(x))
+	}
+	fmt.Printf("\n")
 }
 
 func TestDifferCompare(t *testing.T) {
