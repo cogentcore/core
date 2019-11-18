@@ -826,24 +826,24 @@ func (sv *SliceViewBase) Render2D() {
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
-	if sv.SliceGridNeedsLayout() {
-		// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
-		// as we don't yet know the size of grid -- so we catch it here at next step and just
-		// rebuild as needed.
-		sv.RenderedRows = sv.DispRows
-		if sv.This().(SliceViewer).LayoutSliceGrid() {
-			sv.This().(SliceViewer).UpdateSliceGrid()
-		}
-		sv.ReRender2DTree()
-		if sv.SelectedIdx > -1 {
-			sv.ScrollToIdx(sv.SelectedIdx)
-		}
-		return
-	}
-	if sv.FullReRenderIfNeeded() {
+	if !sv.SliceGridNeedsLayout() && sv.FullReRenderIfNeeded() {
 		return
 	}
 	if sv.PushBounds() {
+		if sv.SliceGridNeedsLayout() {
+			// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
+			// as we don't yet know the size of grid -- so we catch it here at next step and just
+			// rebuild as needed.
+			sv.RenderedRows = sv.DispRows
+			sv.This().(SliceViewer).LayoutSliceGrid()
+			// sv.This().(SliceViewer).UpdateSliceGrid()
+			sv.ReRender2DTree()
+			if sv.SelectedIdx > -1 {
+				sv.ScrollToIdx(sv.SelectedIdx)
+			}
+			sv.PopBounds()
+			return
+		}
 		sv.FrameStdRender()
 		sv.This().(gi.Node2D).ConnectEvents2D()
 		sv.RenderScrolls()

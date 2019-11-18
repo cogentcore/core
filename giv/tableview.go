@@ -375,8 +375,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	}
 
 	if tv.SortIdx >= 0 {
-		rawIdx := tv.VisFields[tv.SortIdx].Index
-		kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+		tv.SortSlice()
 	}
 
 	tv.ConfigScroll()
@@ -429,11 +428,15 @@ func (tv *TableView) LayoutHeader() {
 	sgh := tv.SliceHeader()
 	sgf := tv.SliceGrid()
 	spc := sgf.Spacing.Dots
+	gd := sgf.GridData[gi.Col]
+	if gd == nil {
+		return
+	}
 	if len(sgf.Kids) >= nfld {
 		sumwd := float32(0)
 		for fli := 0; fli < nfld; fli++ {
 			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
-			wd := sgf.GridData[gi.Col][fli].AllocSize
+			wd := gd[fli].AllocSize
 			lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))
 			lbl.SetProp("max-width", units.NewValue(wd+spc, units.Dot))
 			sumwd += wd + spc
@@ -690,6 +693,12 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	tv.ViewSig.Emit(tv.This(), 0, nil)
 }
 
+// SortSlice sorts the slice according to current settings
+func (tv *TableView) SortSlice() {
+	rawIdx := tv.VisFields[tv.SortIdx].Index
+	kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+}
+
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
@@ -726,9 +735,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	}
 
 	tv.SortIdx = fldIdx
-	rawIdx := tv.VisFields[fldIdx].Index
-
-	kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+	tv.SortSlice()
 	tv.UpdateSliceGrid()
 	tv.UpdateEnd(updt)
 }

@@ -538,8 +538,11 @@ func (fv *FileView) UpdateFiles() {
 	if !sv.IsConfiged() {
 		sv.Config()
 		sv.LayoutSliceGrid()
+	} else {
+		sv.SortSlice()
 	}
 	sv.UpdateSliceGrid()
+	sv.LayoutHeader()
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
 		sv.ScrollToIdx(sv.SelectedIdx)
@@ -707,9 +710,6 @@ func (fv *FileView) Style2D() {
 	fv.Frame.Style2D()
 	sf := fv.SelField()
 	sf.StartFocus() // need to call this when window is actually active
-	// if fv.Viewport != nil && fv.Viewport.IsDoingFullRender() {
-	// 	fv.UpdateFiles()
-	// }
 }
 
 func (fv *FileView) ConnectEvents2D() {
@@ -721,10 +721,6 @@ func (fv *FileView) FileViewEvents() {
 		fvv := recv.Embed(KiT_FileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)
-	})
-	fv.ConnectEvent(oswin.WindowShowEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		fvv := recv.Embed(KiT_FileView).(*FileView)
-		fvv.UpdateFilesAction()
 	})
 }
 
