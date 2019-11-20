@@ -166,7 +166,11 @@ func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[
 func (tr *EnumRegistry) AddEnumExt(parTyp reflect.Type, en interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
 	typ := tr.AddEnum(en, bitFlag, props)
 	snm := ShortTypeName(typ)
-	tr.SetProp(snm, "ParType", parTyp)
+	if parTyp == typ {
+		log.Printf("kit.Enums.AddEnumExt: parent type: %v is same as type being defined -- must be different!\n", parTyp.String())
+	} else {
+		tr.SetProp(snm, "ParType", parTyp)
+	}
 	return typ
 }
 
@@ -176,12 +180,11 @@ func (tr *EnumRegistry) AddEnumExt(parTyp reflect.Type, en interface{}, bitFlag 
 // given prefix removed (e.g., a type name-based prefix) and lower-cased.
 // Also requires the number of enums -- assumes starts at end of parent.
 func (tr *EnumRegistry) AddEnumExtAltLower(parTyp reflect.Type, en interface{}, bitFlag bool, props map[string]interface{}, prefix string) reflect.Type {
-	typ := tr.AddEnum(en, bitFlag, props)
+	typ := tr.AddEnumExt(parTyp, en, bitFlag, props)
 	n := EnumIfaceToInt64(en)
 	snm := ShortTypeName(typ)
 	alts := make(map[int64]string)
 	tp := tr.Properties(snm)
-	tp["ParType"] = parTyp
 	pnm := ShortTypeName(parTyp)
 	pp := tr.Properties(pnm)
 	pn, _ := ToInt(pp["N"])
@@ -624,7 +627,7 @@ func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 	n := tr.Prop(enumName, "N").(int64)
 	vals = make([]EnumValue, n)
 	st := 0
-	if pt != nil && pt != et {
+	if pt != nil {
 		ptv := tr.TypeValues(pt, alt)
 		copy(vals, ptv)
 		st = len(ptv)
