@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // Node3D is the common interface for all gi3d scenegraph nodes
@@ -107,10 +108,23 @@ type Node3DBase struct {
 	NDCBBox   mat32.Box3 `desc:"normalized display coordinates bounding box"`
 }
 
-// gi3d.NodeFlags extend gi.NodeFlags to hold 3D node state
+var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)
+
+var Node3DBaseProps = ki.Props{
+	"base-type":     true, // excludes type from user selections
+	"EnumType:Flag": KiT_NodeFlags,
+}
+
+// NodeFlags extend gi.NodeFlags to hold 3D node state
+type NodeFlags int
+
+//go:generate stringer -type=NodeFlags
+
+var KiT_NodeFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, NodeFlagsN, true, nil) // true = bitflags
+
 const (
 	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated
-	WorldMatrixUpdated gi.NodeFlags = gi.NodeFlagsN + iota
+	WorldMatrixUpdated NodeFlags = NodeFlags(gi.NodeFlagsN) + iota
 
 	// VectorsUpdated means that the rendering vectors information is updated
 	VectorsUpdated

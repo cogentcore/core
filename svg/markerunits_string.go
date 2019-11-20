@@ -3,9 +3,20 @@
 package svg
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[StrokeWidth-0]
+	_ = x[UserSpaceOnUse-1]
+	_ = x[MarkerUnitsN-2]
+}
 
 const _MarkerUnits_name = "StrokeWidthUserSpaceOnUseMarkerUnitsN"
 
@@ -25,5 +36,5 @@ func (i *MarkerUnits) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type MarkerUnits", s)
+	return errors.New("String: " + s + " is not a valid option for type: MarkerUnits")
 }

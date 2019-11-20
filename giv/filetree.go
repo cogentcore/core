@@ -48,7 +48,9 @@ type FileTree struct {
 
 var KiT_FileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
 
-var FileTreeProps = ki.Props{}
+var FileTreeProps = ki.Props{
+	"EnumType:Flag": KiT_FileNodeFlags,
+}
 
 // OpenPath opens a filetree at given directory path -- reads all the files at
 // given path into this tree -- uses config children to preserve extra info
@@ -774,6 +776,10 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 // and storage is an int64
 type FileNodeFlags int64
 
+//go:generate stringer -type=FileNodeFlags
+
+var KiT_FileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, true, nil) // true = bitflags
+
 const (
 	// FileNodeOpen means file is open -- for directories, this means that
 	// sub-files should be / have been loaded -- for files, means that they
@@ -786,10 +792,6 @@ const (
 
 	FileNodeFlagsN
 )
-
-//go:generate stringer -type=FileNodeFlags
-
-var KiT_FileNodeFlags = kit.Enums.AddEnum(FileNodeFlagsN, true, nil) // true = bitflags
 
 // FileNodeVcsStates are the possible version control states for a file
 type FileNodeVcsStates int32
@@ -817,6 +819,7 @@ const (
 var KiT_FileNodeVcsStates = kit.Enums.AddEnum(FileNodeVcsStatesN, false, nil)
 
 var FileNodeProps = ki.Props{
+	"EnumType:Flag": KiT_FileNodeFlags,
 	"CallMethods": ki.PropSlice{
 		{"RenameFile", ki.Props{
 			"label": "Rename...",
@@ -1418,6 +1421,7 @@ var VcsLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
 })
 
 var FileTreeViewProps = ki.Props{
+	"EnumType:Flag":    KiT_TreeViewFlags,
 	"indent":           units.NewCh(2),
 	"spacing":          units.NewCh(.5),
 	"border-width":     units.NewPx(0),

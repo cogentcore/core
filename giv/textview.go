@@ -92,6 +92,7 @@ func (tv *TextView) Disconnect() {
 }
 
 var TextViewProps = ki.Props{
+	"EnumType:Flag":    KiT_TextViewFlags,
 	"white-space":      gi.WhiteSpacePreWrap,
 	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
@@ -177,10 +178,16 @@ const (
 // Style selector names for the different states
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
-// these extend NodeBase NodeFlags to hold TextView state
+// TextViewFlags extend NodeBase NodeFlags to hold TextView state
+type TextViewFlags int
+
+//go:generate stringer -type=TextViewFlags
+
+var KiT_TextViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextViewFlagsN, true, nil) // true = bitflags
+
 const (
 	// TextViewNeedsRefresh indicates when refresh is required
-	TextViewNeedsRefresh gi.NodeFlags = gi.NodeFlagsN + iota
+	TextViewNeedsRefresh TextViewFlags = TextViewFlags(gi.NodeFlagsN) + iota
 
 	// TextViewInReLayout indicates that we are currently resizing ourselves via parent layout
 	TextViewInReLayout
@@ -199,6 +206,8 @@ const (
 
 	// TextViewLastWasUndo indicates that last key was an undo
 	TextViewLastWasUndo
+
+	TextViewFlagsN
 )
 
 // IsFocusActive returns true if we have active focus for keyboard input

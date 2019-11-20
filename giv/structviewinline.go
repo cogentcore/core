@@ -56,7 +56,9 @@ func (sv *StructViewInline) SetStruct(st interface{}) {
 	sv.UpdateEnd(updt)
 }
 
-var StructViewInlineProps = ki.Props{}
+var StructViewInlineProps = ki.Props{
+	"EnumType:Flag": gi.KiT_NodeFlags,
+}
 
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts() {

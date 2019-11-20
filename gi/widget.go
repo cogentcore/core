@@ -37,7 +37,8 @@ type WidgetBase struct {
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
 
 var WidgetBaseProps = ki.Props{
-	"base-type": true,
+	"base-type":     true,
+	"EnumType:Flag": KiT_NodeFlags,
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm interface{}) {
@@ -767,7 +768,8 @@ type PartsWidgetBase struct {
 var KiT_PartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseProps)
 
 var PartsWidgetBaseProps = ki.Props{
-	"base-type": true,
+	"base-type":     true,
+	"EnumType:Flag": KiT_NodeFlags,
 }
 
 func (wb *PartsWidgetBase) CopyFieldsFrom(frm interface{}) {

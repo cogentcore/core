@@ -79,6 +79,7 @@ func (kc *KeyChordEdit) Disconnect() {
 }
 
 var KeyChordEditProps = ki.Props{
+	"EnumType:Flag":    gi.KiT_NodeFlags,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),
 	"vertical-align":   gi.AlignTop,

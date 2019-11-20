@@ -257,6 +257,7 @@ func ImageClearer(im *image.RGBA, pct float32) {
 //  Props
 
 var BitmapProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"background-color": &Prefs.Colors.Background,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{

@@ -32,7 +32,7 @@ type Text struct {
 	AdjustGlyphs bool          `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
 }
 
-var KiT_Text = kit.Types.AddType(&Text{}, nil)
+var KiT_Text = kit.Types.AddType(&Text{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewText adds a new text to given parent node, with given name, pos and text.
 func AddNewText(parent ki.Ki, name string, x, y float32, text string) *Text {

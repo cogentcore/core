@@ -40,6 +40,7 @@ func (nb *MenuBar) CopyFieldsFrom(frm interface{}) {
 }
 
 var MenuBarProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(0),
 	"spacing":          units.NewPx(4),
@@ -292,6 +293,7 @@ func (nb *ToolBar) CopyFieldsFrom(frm interface{}) {
 }
 
 var ToolBarProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(0),
 	"spacing":          units.NewPx(4),

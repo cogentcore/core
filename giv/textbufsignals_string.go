@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[TextBufDone-0]
+	_ = x[TextBufNew-1]
+	_ = x[TextBufInsert-2]
+	_ = x[TextBufDelete-3]
+	_ = x[TextBufMarkUpdt-4]
+	_ = x[TextBufSignalsN-5]
+}
+
 const _TextBufSignals_name = "TextBufDoneTextBufNewTextBufInsertTextBufDeleteTextBufMarkUpdtTextBufSignalsN"
 
 var _TextBufSignals_index = [...]uint8{0, 11, 21, 34, 47, 62, 77}

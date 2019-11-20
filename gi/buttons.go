@@ -39,7 +39,8 @@ type ButtonBase struct {
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
 
 var ButtonBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
+	"base-type":     true, // excludes type from user selections
+	"EnumType:Flag": KiT_ButtonFlags,
 }
 
 func (nb *ButtonBase) CopyFieldsFrom(frm interface{}) {
@@ -62,10 +63,16 @@ func (bb *ButtonBase) Disconnect() {
 	bb.ButtonSig.DisconnectAll()
 }
 
-// these extend NodeBase NodeFlags to hold button state
+// ButtonFlags extend NodeBase NodeFlags to hold button state
+type ButtonFlags int
+
+//go:generate stringer -type=ButtonFlags
+
+var KiT_ButtonFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, ButtonFlagsN, true, nil) // true = bitflags
+
 const (
 	// button is checkable -- enables display of check control
-	ButtonFlagCheckable NodeFlags = NodeFlagsN + iota
+	ButtonFlagCheckable ButtonFlags = ButtonFlags(NodeFlagsN) + iota
 
 	// button is checked
 	ButtonFlagChecked
@@ -105,6 +112,13 @@ const (
 // mutually-exclusive button states -- determines appearance
 type ButtonStates int32
 
+//go:generate stringer -type=ButtonStates
+
+var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StylePropProps, "Button")
+
+func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 const (
 	// normal active state -- there but not being interacted with
 	ButtonActive ButtonStates = iota
@@ -128,13 +142,6 @@ const (
 	// total number of button states
 	ButtonStatesN
 )
-
-//go:generate stringer -type=ButtonStates
-
-var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StylePropProps, "Button")
-
-func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // Style selector names for the different states: https://www.w3schools.com/cssref/css_selectors.asp
 var ButtonSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected"}
@@ -708,6 +715,7 @@ func (nb *Button) CopyFieldsFrom(frm interface{}) {
 }
 
 var ButtonProps = ki.Props{
+	"EnumType:Flag":    KiT_ButtonFlags,
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
@@ -793,6 +801,7 @@ func (nb *CheckBox) CopyFieldsFrom(frm interface{}) {
 }
 
 var CheckBoxProps = ki.Props{
+	"EnumType:Flag":    KiT_ButtonFlags,
 	"icon":             "checked-box",
 	"icon-off":         "unchecked-box",
 	"text-align":       AlignLeft,

@@ -18,7 +18,7 @@ type Group struct {
 	NodeBase
 }
 
-var KiT_Group = kit.Types.AddType(&Group{}, nil)
+var KiT_Group = kit.Types.AddType(&Group{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewGroup adds a new group to given parent node, with given name.
 func AddNewGroup(parent ki.Ki, name string) *Group {

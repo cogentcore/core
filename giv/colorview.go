@@ -43,6 +43,7 @@ func (cv *ColorView) Disconnect() {
 }
 
 var ColorViewProps = ki.Props{
+	"EnumType:Flag":    gi.KiT_NodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"color":            &gi.Prefs.Colors.Font,
 }

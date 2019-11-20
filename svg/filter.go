@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -15,7 +16,7 @@ type Filter struct {
 	FilterType string
 }
 
-var KiT_Filter = kit.Types.AddType(&Filter{}, nil)
+var KiT_Filter = kit.Types.AddType(&Filter{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewFilter adds a new filter to given parent node, with given name.
 func AddNewFilter(parent ki.Ki, name string) *Filter {

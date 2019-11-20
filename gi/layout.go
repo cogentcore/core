@@ -123,7 +123,11 @@ type Layout struct {
 	ScrollsOff    bool                `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
 }
 
-var KiT_Layout = kit.Types.AddType(&Layout{}, nil)
+var KiT_Layout = kit.Types.AddType(&Layout{}, LayoutProps)
+
+var LayoutProps = ki.Props{
+	"EnumType:Flag": KiT_NodeFlags,
+}
 
 // AddNewLayout adds a new layout to given parent node, with given name and layout
 func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
@@ -1812,8 +1816,9 @@ func (nb *Stretch) CopyFieldsFrom(frm interface{}) {
 }
 
 var StretchProps = ki.Props{
-	"max-width":  -1.0,
-	"max-height": -1.0,
+	"EnumType:Flag": KiT_NodeFlags,
+	"max-width":     -1.0,
+	"max-height":    -1.0,
 }
 
 func (st *Stretch) Style2D() {
@@ -1851,8 +1856,9 @@ func (nb *Space) CopyFieldsFrom(frm interface{}) {
 }
 
 var SpaceProps = ki.Props{
-	"width":  units.NewCh(1),
-	"height": units.NewEm(1),
+	"EnumType:Flag": KiT_NodeFlags,
+	"width":         units.NewCh(1),
+	"height":        units.NewEm(1),
 }
 
 func (sp *Space) Style2D() {

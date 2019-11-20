@@ -683,6 +683,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 // EnumValueView presents a combobox for choosing enums
 type EnumValueView struct {
 	ValueViewBase
+	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
 var KiT_EnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
@@ -693,6 +694,9 @@ func (vv *EnumValueView) WidgetType() reflect.Type {
 }
 
 func (vv *EnumValueView) EnumType() reflect.Type {
+	if vv.AltType != nil {
+		return vv.AltType
+	}
 	// derive type indirectly from the interface instead of directly from the value
 	// because that works for interface{} types as in property maps
 	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
@@ -734,6 +738,74 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
 			vvv.UpdateWidget()
 		}
+	})
+	vv.UpdateWidget()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  BitFlagView
+
+// BitFlagView presents a ButtonBox for bitflags
+type BitFlagView struct {
+	ValueViewBase
+	AltType reflect.Type // alternative type, e.g., from EnumType: property
+}
+
+var KiT_BitFlagView = kit.Types.AddType(&BitFlagView{}, nil)
+
+func (vv *BitFlagView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_ButtonBox
+	return vv.WidgetTyp
+}
+
+func (vv *BitFlagView) EnumType() reflect.Type {
+	if vv.AltType != nil {
+		return vv.AltType
+	}
+	// derive type indirectly from the interface instead of directly from the value
+	// because that works for interface{} types as in property maps
+	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
+	return typ
+}
+
+func (vv *BitFlagView) SetEnumValueFromInt(ival int64) bool {
+	typ := vv.EnumType()
+	eval := kit.EnumIfaceFromInt64(ival, typ)
+	return vv.SetValue(eval)
+}
+
+func (vv *BitFlagView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	sb := vv.Widget.(*gi.ButtonBox)
+	npv := kit.NonPtrValue(vv.Value)
+	iv, ok := kit.ToInt(npv.Interface())
+	if ok {
+		typ := vv.EnumType()
+		sb.UpdateFromBitFlags(typ, int64(iv))
+	}
+}
+
+func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	cb := vv.Widget.(*gi.ButtonBox)
+	cb.Parts.Lay = gi.LayoutHoriz
+	cb.Tooltip, _ = vv.Tag("desc")
+	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
+	cb.SetProp("padding", units.NewPx(2))
+	cb.SetProp("margin", units.NewPx(2))
+
+	typ := vv.EnumType()
+	cb.ItemsFromEnum(typ)
+	cb.ConfigParts()
+	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		vvv, _ := recv.Embed(KiT_BitFlagView).(*BitFlagView)
+		cbb := vvv.Widget.(*gi.ButtonBox)
+		etyp := vvv.EnumType()
+		val := cbb.BitFlagsValue(etyp)
+		vvv.SetEnumValueFromInt(val)
+		// vvv.UpdateWidget()
 	})
 	vv.UpdateWidget()
 }

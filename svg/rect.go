@@ -18,7 +18,7 @@ type Rect struct {
 	Radius gi.Vec2D `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
 }
 
-var KiT_Rect = kit.Types.AddType(&Rect{}, nil)
+var KiT_Rect = kit.Types.AddType(&Rect{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewRect adds a new rectangle to given parent node, with given name, pos, and size.
 func AddNewRect(parent ki.Ki, name string, x, y, sx, sy float32) *Rect {

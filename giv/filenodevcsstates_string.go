@@ -9,9 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _FileNodeVcsStates_name = "FileNodeNotInVcsFileNodeInVcsFileNodeVcsModifiedFileNodeVcsAddedFileNodeVcsStatesN"
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[FileNodeNotInVcs-0]
+	_ = x[FileNodeVcsAdded-1]
+	_ = x[FileNodeInVcs-2]
+	_ = x[FileNodeVcsModified-3]
+	_ = x[FileNodeVcsStatesN-4]
+}
 
-var _FileNodeVcsStates_index = [...]uint8{0, 16, 29, 48, 64, 82}
+const _FileNodeVcsStates_name = "FileNodeNotInVcsFileNodeVcsAddedFileNodeInVcsFileNodeVcsModifiedFileNodeVcsStatesN"
+
+var _FileNodeVcsStates_index = [...]uint8{0, 16, 32, 45, 64, 82}
 
 func (i FileNodeVcsStates) String() string {
 	if i < 0 || i >= FileNodeVcsStates(len(_FileNodeVcsStates_index)-1) {

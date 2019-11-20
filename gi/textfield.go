@@ -90,6 +90,7 @@ func (tf *TextField) Disconnect() {
 }
 
 var TextFieldProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"border-width":     units.NewPx(1),
 	"cursor-width":     units.NewPx(3),
 	"border-color":     &Prefs.Colors.Border,

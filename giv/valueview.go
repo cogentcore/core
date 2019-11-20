@@ -202,10 +202,16 @@ func ToValueView(it interface{}, tags string) ValueView {
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
-		if kit.Enums.TypeRegistered(nptyp) { // todo: bitfield
-			vv := &EnumValueView{}
-			vv.Init(vv)
-			return vv
+		if kit.Enums.TypeRegistered(nptyp) {
+			if kit.Enums.IsBitFlag(nptyp) {
+				vv := &BitFlagView{}
+				vv.Init(vv)
+				return vv
+			} else {
+				vv := &EnumValueView{}
+				vv.Init(vv)
+				return vv
+			}
 		} else if _, ok := it.(fmt.Stringer); ok { // use stringer
 			vv := &ValueViewBase{}
 			vv.Init(vv)
@@ -341,6 +347,22 @@ func FieldToValueView(it interface{}, field string, fval interface{}) ValueView 
 
 	typ := reflect.TypeOf(it)
 	nptyp := kit.NonPtrType(typ)
+
+	if pv, has := kit.Types.Prop(nptyp, "EnumType:"+field); has {
+		et := pv.(reflect.Type)
+		if kit.Enums.IsBitFlag(et) {
+			vv := &BitFlagView{}
+			vv.AltType = et
+			vv.Init(vv)
+			return vv
+		} else {
+			vv := &EnumValueView{}
+			vv.AltType = et
+			vv.Init(vv)
+			return vv
+		}
+	}
+
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {
 		return ToValueView(fval, string(ftyp.Tag))

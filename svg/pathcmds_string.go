@@ -3,9 +3,38 @@
 package svg
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[PcM-0]
+	_ = x[Pcm-1]
+	_ = x[PcL-2]
+	_ = x[Pcl-3]
+	_ = x[PcH-4]
+	_ = x[Pch-5]
+	_ = x[PcV-6]
+	_ = x[Pcv-7]
+	_ = x[PcC-8]
+	_ = x[Pcc-9]
+	_ = x[PcS-10]
+	_ = x[Pcs-11]
+	_ = x[PcQ-12]
+	_ = x[Pcq-13]
+	_ = x[PcT-14]
+	_ = x[Pct-15]
+	_ = x[PcA-16]
+	_ = x[Pca-17]
+	_ = x[PcZ-18]
+	_ = x[Pcz-19]
+	_ = x[PcErr-20]
+}
 
 const _PathCmds_name = "PcMPcmPcLPclPcHPchPcVPcvPcCPccPcSPcsPcQPcqPcTPctPcAPcaPcZPczPcErr"
 
@@ -25,5 +54,5 @@ func (i *PathCmds) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type PathCmds", s)
+	return errors.New("String: " + s + " is not a valid option for type: PathCmds")
 }

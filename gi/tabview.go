@@ -52,6 +52,7 @@ func (tv *TabView) Disconnect() {
 }
 
 var TabViewProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"border-color":     &Prefs.Colors.Border,
 	"border-width":     units.NewPx(2),
 	"background-color": &Prefs.Colors.Background,
@@ -508,6 +509,7 @@ var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
 var TabButtonMinWidth = float32(8)
 
 var TabButtonProps = ki.Props{
+	"EnumType:Flag":    KiT_ButtonFlags,
 	"min-width":        units.NewCh(TabButtonMinWidth),
 	"min-height":       units.NewEm(1.6),
 	"border-width":     units.NewPx(0),

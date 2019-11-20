@@ -47,6 +47,7 @@ type Viewport2D struct {
 var KiT_Viewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
 
 var Viewport2DProps = ki.Props{
+	"EnumType:Flag":    KiT_VpFlags,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Background,
 }
@@ -91,11 +92,17 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.PathUnique(), nwsz, vp.Pixels.Bounds())
 }
 
-// VpFlag flags extend NodeBase NodeFlags to hold viewport state
+// VpFlags extend NodeBase NodeFlags to hold viewport state
+type VpFlags int
+
+//go:generate stringer -type=VpFlags
+
+var KiT_VpFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, VpFlagsN, true, nil) // true = bitflags
+
 const (
 	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey
 	// parent bounds (otherwise does)
-	VpFlagPopup NodeFlags = NodeFlagsN + iota
+	VpFlagPopup VpFlags = VpFlags(NodeFlagsN) + iota
 
 	// VpFlagMenu means viewport is serving as a popup menu -- affects how window
 	// processes clicks
@@ -137,7 +144,7 @@ const (
 	// underlying data has changed.
 	VpFlagDoingFullRender
 
-	VpFlagN
+	VpFlagsN
 )
 
 func (vp *Viewport2D) IsPopup() bool {

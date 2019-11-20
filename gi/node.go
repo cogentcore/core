@@ -39,7 +39,8 @@ type NodeBase struct {
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
 var NodeBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
+	"base-type":     true, // excludes type from user selections
+	"EnumType:Flag": KiT_NodeFlags,
 }
 
 func (nb *NodeBase) AsGiNode() *NodeBase {
@@ -57,6 +58,10 @@ func (nb *NodeBase) CopyFieldsFrom(frm interface{}) {
 // state, mostly having to do with event processing -- use properties map for
 // less frequently used information -- uses ki Flags field (64 bit capacity)
 type NodeFlags int
+
+//go:generate stringer -type=NodeFlags
+
+var KiT_NodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, true, nil) // true = bitflags
 
 const (
 	// NoLayout means that this node does not participate in the layout
@@ -133,10 +138,6 @@ const (
 	// can extend node flags from here
 	NodeFlagsN
 )
-
-//go:generate stringer -type=NodeFlags
-
-var KiT_NodeFlags = kit.Enums.AddEnum(NodeFlagsN, true, nil) // true = bitflags
 
 // HasNoLayout checks if the current node is flagged as not needing layout
 func (nb *NodeBase) HasNoLayout() bool {

@@ -42,6 +42,7 @@ var _ SliceViewer = (*SliceView)(nil)
 type SliceViewStyleFunc func(sv *SliceView, slice interface{}, widg gi.Node2D, row int, vv ValueView)
 
 var SliceViewProps = ki.Props{
+	"EnumType:Flag":    gi.KiT_NodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,
 	"max-height":       -1,

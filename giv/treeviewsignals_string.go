@@ -9,6 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[TreeViewSelected-0]
+	_ = x[TreeViewUnselected-1]
+	_ = x[TreeViewAllSelected-2]
+	_ = x[TreeViewAllUnselected-3]
+	_ = x[TreeViewOpened-4]
+	_ = x[TreeViewClosed-5]
+	_ = x[TreeViewChanged-6]
+	_ = x[TreeViewSignalsN-7]
+}
+
 const _TreeViewSignals_name = "TreeViewSelectedTreeViewUnselectedTreeViewAllSelectedTreeViewAllUnselectedTreeViewOpenedTreeViewClosedTreeViewChangedTreeViewSignalsN"
 
 var _TreeViewSignals_index = [...]uint8{0, 16, 34, 53, 74, 88, 102, 117, 133}

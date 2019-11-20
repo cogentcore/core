@@ -56,7 +56,8 @@ func (sv *SliceViewInline) SetSlice(sl interface{}) {
 }
 
 var SliceViewInlineProps = ki.Props{
-	"min-width": units.NewCh(20),
+	"EnumType:Flag": gi.KiT_NodeFlags,
+	"min-width":     units.NewCh(20),
 }
 
 // ConfigParts configures Parts for the current slice

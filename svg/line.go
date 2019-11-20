@@ -18,7 +18,7 @@ type Line struct {
 	End   gi.Vec2D `xml:"{x2,y2}" desc:"position of the end of the line"`
 }
 
-var KiT_Line = kit.Types.AddType(&Line{}, nil)
+var KiT_Line = kit.Types.AddType(&Line{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewLine adds a new line to given parent node, with given name, st and end.
 func AddNewLine(parent ki.Ki, name string, sx, sy, ex, ey float32) *Line {

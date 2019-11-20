@@ -53,6 +53,7 @@ func (mv *MapView) SetMap(mp interface{}) {
 }
 
 var MapViewProps = ki.Props{
+	"EnumType:Flag":    gi.KiT_NodeFlags,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,
 	"max-height":       -1,

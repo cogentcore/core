@@ -65,6 +65,7 @@ func (sb *SpinBox) Disconnect() {
 }
 
 var SpinBoxProps = ki.Props{
+	"EnumType:Flag": KiT_NodeFlags,
 	"#buttons": ki.Props{
 		"vertical-align": AlignMiddle,
 	},

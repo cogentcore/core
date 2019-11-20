@@ -3,9 +3,19 @@
 package svg
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Meet-0]
+	_ = x[Slice-1]
+}
 
 const _ViewBoxMeetOrSlice_name = "MeetSlice"
 
@@ -25,5 +35,5 @@ func (i *ViewBoxMeetOrSlice) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type ViewBoxMeetOrSlice", s)
+	return errors.New("String: " + s + " is not a valid option for type: ViewBoxMeetOrSlice")
 }

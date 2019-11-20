@@ -1051,6 +1051,7 @@ func (sc *Scene) ObjsIntersectingPoint(pos image.Point) []Node3D {
 
 // SceneProps define the ToolBar and MenuBar for StructView
 var SceneProps = ki.Props{
+	"EnumType:Flag": gi.KiT_NodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"UpdateSig", ki.Props{
 			"label": "Update",

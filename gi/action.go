@@ -44,6 +44,7 @@ func (ac *Action) Disconnect() {
 }
 
 var ActionProps = ki.Props{
+	"EnumType:Flag":    KiT_ButtonFlags,
 	"border-width":     units.NewPx(0), // todo: should be default
 	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,

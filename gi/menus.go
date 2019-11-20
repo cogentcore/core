@@ -526,6 +526,7 @@ func (nb *MenuButton) CopyFieldsFrom(frm interface{}) {
 }
 
 var MenuButtonProps = ki.Props{
+	"EnumType:Flag":    KiT_ButtonFlags,
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
@@ -623,6 +624,7 @@ func (nb *Separator) CopyFieldsFrom(frm interface{}) {
 }
 
 var SeparatorProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"padding":          units.NewPx(0),
 	"margin":           units.NewPx(0),
 	"vertical-align":   AlignCenter,

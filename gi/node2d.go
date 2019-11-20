@@ -69,7 +69,8 @@ type Node2DBase struct {
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
 
 var Node2DBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
+	"base-type":     true, // excludes type from user selections
+	"EnumType:Flag": KiT_NodeFlags,
 }
 
 func (nb *Node2DBase) CopyFieldsFrom(frm interface{}) {
@@ -244,6 +245,8 @@ type Node2D interface {
 // FocusChanged2D method
 type FocusChanges int32
 
+//go:generate stringer -type=FocusChanges
+
 const (
 	// FocusLost means that keyboard focus is on a different widget
 	// (typically) and this one lost focus
@@ -267,8 +270,6 @@ const (
 
 	FocusChangesN
 )
-
-//go:generate stringer -type=FocusChanges
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D impl for Node2DBase (nil)

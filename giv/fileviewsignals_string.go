@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[FileViewDoubleClicked-0]
+	_ = x[FileViewWillUpdate-1]
+	_ = x[FileViewUpdated-2]
+	_ = x[FileViewNewFolder-3]
+	_ = x[FileViewFavAdded-4]
+	_ = x[FileViewSignalsN-5]
+}
+
 const _FileViewSignals_name = "FileViewDoubleClickedFileViewWillUpdateFileViewUpdatedFileViewNewFolderFileViewFavAddedFileViewSignalsN"
 
 var _FileViewSignals_index = [...]uint8{0, 21, 39, 54, 71, 87, 103}

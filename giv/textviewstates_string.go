@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[TextViewActive-0]
+	_ = x[TextViewFocus-1]
+	_ = x[TextViewInactive-2]
+	_ = x[TextViewSel-3]
+	_ = x[TextViewHighlight-4]
+	_ = x[TextViewStatesN-5]
+}
+
 const _TextViewStates_name = "TextViewActiveTextViewFocusTextViewInactiveTextViewSelTextViewHighlightTextViewStatesN"
 
 var _TextViewStates_index = [...]uint8{0, 14, 27, 43, 54, 71, 86}

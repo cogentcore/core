@@ -24,7 +24,11 @@ type Editor struct {
 	SetDragCursor bool     `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
-var KiT_Editor = kit.Types.AddType(&Editor{}, nil)
+var KiT_Editor = kit.Types.AddType(&Editor{}, EditorProps)
+
+var EditorProps = ki.Props{
+	"EnumType:Flag": gi.KiT_VpFlags,
+}
 
 // AddNewEditor adds a new editor to given parent node, with given name.
 func AddNewEditor(parent ki.Ki, name string) *Editor {

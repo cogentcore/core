@@ -120,6 +120,7 @@ func (fv *FileView) SelectFile() {
 }
 
 var FileViewProps = ki.Props{
+	"EnumType:Flag":    gi.KiT_NodeFlags,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
 	"max-width":        -1,

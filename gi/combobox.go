@@ -54,6 +54,7 @@ func (cb *ComboBox) Disconnect() {
 }
 
 var ComboBoxProps = ki.Props{
+	"EnumType:Flag":    KiT_ButtonFlags,
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,

@@ -37,7 +37,8 @@ func (mv *MapViewInline) Disconnect() {
 }
 
 var MapViewInlineProps = ki.Props{
-	"min-width": units.NewEx(60),
+	"EnumType:Flag": gi.KiT_NodeFlags,
+	"min-width":     units.NewEx(60),
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map

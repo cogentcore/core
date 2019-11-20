@@ -17,7 +17,7 @@ type Polygon struct {
 	Points []gi.Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
-var KiT_Polygon = kit.Types.AddType(&Polygon{}, nil)
+var KiT_Polygon = kit.Types.AddType(&Polygon{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewPolygon adds a new polygon to given parent node, with given name and points.
 func AddNewPolygon(parent ki.Ki, name string, points []gi.Vec2D) *Polygon {

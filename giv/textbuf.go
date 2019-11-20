@@ -150,6 +150,7 @@ func (tb *TextBuf) Disconnect() {
 }
 
 var TextBufProps = ki.Props{
+	"EnumType:Flag": KiT_TextBufFlags,
 	"CallMethods": ki.PropSlice{
 		{"SaveAs", ki.Props{
 			"Args": ki.PropSlice{
@@ -193,10 +194,16 @@ const (
 
 //go:generate stringer -type=TextBufSignals
 
-// these extend NodeBase NodeFlags to hold TextBuf state
+// TextBufFlags extend NodeBase NodeFlags to hold TextBuf state
+type TextBufFlags int
+
+//go:generate stringer -type=TextBufFlags
+
+var KiT_TextBufFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextBufFlagsN, true, nil) // true = bitflags
+
 const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
-	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
+	TextBufAutoSaving TextBufFlags = TextBufFlags(gi.NodeFlagsN) + iota
 
 	// TextBufMarkingUp indicates current markup operation in progress -- don't redo
 	TextBufMarkingUp
@@ -208,6 +215,8 @@ const (
 	// TextBufFileModOk have already asked about fact that file has changed since being
 	// opened, user is ok
 	TextBufFileModOk
+
+	TextBufFlagsN
 )
 
 // IsChanged indicates if the text has been changed (edited) relative to

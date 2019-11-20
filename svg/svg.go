@@ -30,7 +30,11 @@ type SVG struct {
 	Desc    string   `xml:"desc" desc:"the description of the svg"`
 }
 
-var KiT_SVG = kit.Types.AddType(&SVG{}, nil)
+var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
+
+var SVGProps = ki.Props{
+	"EnumType:Flag": gi.KiT_VpFlags,
+}
 
 // AddNewSVG adds a new svg viewport to given parent node, with given name.
 func AddNewSVG(parent ki.Ki, name string) *SVG {

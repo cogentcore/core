@@ -9,6 +9,14 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[SliceViewDoubleClicked-0]
+	_ = x[SliceViewSignalsN-1]
+}
+
 const _SliceViewSignals_name = "SliceViewDoubleClickedSliceViewSignalsN"
 
 var _SliceViewSignals_index = [...]uint8{0, 22, 39}

@@ -311,15 +311,23 @@ const (
 
 //go:generate stringer -type=TreeViewSignals
 
-// these extend NodeBase NodeFlags to hold TreeView state
+// TreeViewFlags extend NodeBase NodeFlags to hold TreeView state
+type TreeViewFlags int
+
+//go:generate stringer -type=TreeViewFlags
+
+var KiT_TreeViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TreeViewFlagsN, true, nil) // true = bitflags
+
 const (
 	// TreeViewFlagClosed means node is toggled closed (children not visible)
-	TreeViewFlagClosed gi.NodeFlags = gi.NodeFlagsN + iota
+	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.NodeFlagsN) + iota
 
 	// TreeViewFlagChanged is updated on the root node whenever a gui edit is
 	// made through the tree view on the tree -- this does not track any other
 	// changes that might have occurred in the tree itself.  Also emits a TreeVi
 	TreeViewFlagChanged
+
+	TreeViewFlagsN
 )
 
 // TreeViewStates are mutually-exclusive tree view states -- determines appearance
@@ -1848,6 +1856,7 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 }
 
 var TreeViewProps = ki.Props{
+	"EnumType:Flag":    KiT_TreeViewFlags,
 	"indent":           units.NewCh(4),
 	"spacing":          units.NewCh(.5),
 	"border-width":     units.NewPx(0),

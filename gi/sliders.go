@@ -57,7 +57,8 @@ type SliderBase struct {
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
 
 var SliderBaseProps = ki.Props{
-	"base-type": true,
+	"base-type":     true,
+	"EnumType:Flag": KiT_NodeFlags,
 }
 
 func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
@@ -542,6 +543,7 @@ func (nb *Slider) CopyFieldsFrom(frm interface{}) {
 }
 
 var SliderProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
@@ -758,6 +760,7 @@ func (nb *ScrollBar) CopyFieldsFrom(frm interface{}) {
 }
 
 var ScrollBarProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,

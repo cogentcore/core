@@ -56,11 +56,12 @@ func (nb *SplitView) CopyFieldsFrom(frm interface{}) {
 }
 
 var SplitViewProps = ki.Props{
-	"handle-size": units.NewPx(10),
-	"max-width":   -1.0,
-	"max-height":  -1.0,
-	"margin":      0,
-	"padding":     0,
+	"EnumType:Flag": KiT_NodeFlags,
+	"handle-size":   units.NewPx(10),
+	"max-width":     -1.0,
+	"max-height":    -1.0,
+	"margin":        0,
+	"padding":       0,
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -428,6 +429,7 @@ type Splitter struct {
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
 
 var SplitterProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"padding":          units.NewPx(6),
 	"margin":           units.NewPx(0),
 	"background-color": &Prefs.Colors.Background,

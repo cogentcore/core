@@ -25,7 +25,8 @@ type NodeBase struct {
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
 
 var NodeBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
+	"base-type":     true, // excludes type from user selections
+	"EnumType:Flag": gi.KiT_NodeFlags,
 }
 
 func (g *NodeBase) CopyFieldsFrom(frm interface{}) {

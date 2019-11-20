@@ -59,6 +59,7 @@ func (lb *Label) Disconnect() {
 }
 
 var LabelProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"white-space":      WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),

@@ -63,6 +63,7 @@ func (nb *Icon) CopyFieldsFrom(frm interface{}) {
 }
 
 var IconProps = ki.Props{
+	"EnumType:Flag":    KiT_NodeFlags,
 	"background-color": color.Transparent,
 }
 

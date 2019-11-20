@@ -5,6 +5,7 @@
 package svg
 
 import (
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -15,7 +16,7 @@ type Flow struct {
 	FlowType string
 }
 
-var KiT_Flow = kit.Types.AddType(&Flow{}, nil)
+var KiT_Flow = kit.Types.AddType(&Flow{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewFlow adds a new flow to given parent node, with given name.
 func AddNewFlow(parent ki.Ki, name string) *Flow {

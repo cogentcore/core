@@ -186,7 +186,13 @@ type Window struct {
 	dndHoverTimer              *time.Timer
 }
 
-var KiT_Window = kit.Types.AddType(&Window{}, nil)
+var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
+
+var WindowProps = ki.Props{
+	"EnumType:Flag": KiT_WinFlags,
+}
+
+//go:generate stringer -type=EventPris
 
 // EventPris for different queues of event signals, processed in priority order
 type EventPris int32
@@ -213,12 +219,16 @@ const (
 	AllPris EventPris = -1
 )
 
-//go:generate stringer -type=EventPris
+// WinFlags extend NodeBase NodeFlags to hold Window state
+type WinFlags int
 
-// these extend NodeBase NodeFlags to hold Window state
+//go:generate stringer -type=WinFlags
+
+var KiT_WinFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, WinFlagsN, true, nil) // true = bitflags
+
 const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied
-	WinFlagHasGeomPrefs NodeFlags = NodeFlagsN + iota
+	WinFlagHasGeomPrefs WinFlags = WinFlags(NodeFlagsN) + iota
 
 	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
 	WinFlagUpdating
@@ -259,7 +269,7 @@ const (
 	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
 	WinFlagFocusActive
 
-	WinFlagN
+	WinFlagsN
 )
 
 // HasGeomPrefs returns true if geometry prefs were set already

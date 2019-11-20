@@ -26,7 +26,7 @@ type Path struct {
 	MaxCoord gi.Vec2D   `desc:"maximum coord in path -- computed in BBox2D"`
 }
 
-var KiT_Path = kit.Types.AddType(&Path{}, nil)
+var KiT_Path = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewPath adds a new button to given parent node, with given name and path data.
 func AddNewPath(parent ki.Ki, name string, data string) *Path {

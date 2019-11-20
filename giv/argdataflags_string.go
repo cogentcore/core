@@ -9,6 +9,15 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[ArgDataHasDef-0]
+	_ = x[ArgDataValSet-1]
+	_ = x[ArgDataFlagsN-2]
+}
+
 const _ArgDataFlags_name = "ArgDataHasDefArgDataValSetArgDataFlagsN"
 
 var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
