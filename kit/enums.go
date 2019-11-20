@@ -624,7 +624,7 @@ func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
 	n := tr.Prop(enumName, "N").(int64)
 	vals = make([]EnumValue, n)
 	st := 0
-	if pt != nil {
+	if pt != nil && pt != et {
 		ptv := tr.TypeValues(pt, alt)
 		copy(vals, ptv)
 		st = len(ptv)
