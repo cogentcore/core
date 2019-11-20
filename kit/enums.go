@@ -66,6 +66,8 @@ import (
 // * "AltStrings": map[int64]string -- provides an alternative string mapping for
 // the enum values
 //
+// * "ParType": reflect.Type -- parent type that this extends.
+//
 // Also recommend defining JSON I/O functions for each registered enum -- much
 // safer to save enums as strings than using their raw numerical values, which
 // can change over time:
@@ -155,6 +157,49 @@ func (tr *EnumRegistry) AddEnumAltLower(en interface{}, bitFlag bool, props map[
 	return typ
 }
 
+// AddEnumExt adds a given type to the registry that extends an existing parTyp enum.
+// Requires the N value to set N from and grab type info from.
+// if bitFlag then sets BitFlag property, and each value represents a bit in a set of bit
+// flags, so the string rep of a value contains an or-list of names for each bit set,
+// separated by | -- can also add additional properties -- they are copied so
+// can be re-used across enums
+func (tr *EnumRegistry) AddEnumExt(parTyp reflect.Type, en interface{}, bitFlag bool, props map[string]interface{}) reflect.Type {
+	typ := tr.AddEnum(en, bitFlag, props)
+	snm := ShortTypeName(typ)
+	tr.SetProp(snm, "ParType", parTyp)
+	return typ
+}
+
+// AddEnumExtAltLower adds a given type to the registry that extends an existing parTyp enum.
+// Requires the N value to set N from and grab type info from.
+// Automatically initializes AltStrings alternative string map based on the name with
+// given prefix removed (e.g., a type name-based prefix) and lower-cased.
+// Also requires the number of enums -- assumes starts at end of parent.
+func (tr *EnumRegistry) AddEnumExtAltLower(parTyp reflect.Type, en interface{}, bitFlag bool, props map[string]interface{}, prefix string) reflect.Type {
+	typ := tr.AddEnum(en, bitFlag, props)
+	n := EnumIfaceToInt64(en)
+	snm := ShortTypeName(typ)
+	alts := make(map[int64]string)
+	tp := tr.Properties(snm)
+	tp["ParType"] = parTyp
+	pnm := ShortTypeName(parTyp)
+	pp := tr.Properties(pnm)
+	pn, _ := ToInt(pp["N"])
+	if palti, ok := pp["AltStrings"]; ok {
+		palt := palti.(map[int64]string)
+		for k, v := range palt {
+			alts[k] = v
+		}
+	}
+	for i := int64(pn); i < n; i++ {
+		str := EnumInt64ToString(i, typ)
+		str = strings.ToLower(strings.TrimPrefix(str, prefix))
+		alts[i] = str
+	}
+	tp["AltStrings"] = alts
+	return typ
+}
+
 // Enum finds an enum type based on its *short* package-qualified type name
 // returns nil if not found.
 func (tr *EnumRegistry) Enum(name string) reflect.Type {
@@ -195,6 +240,12 @@ func (tr *EnumRegistry) Prop(enumName, propKey string) interface{} {
 	return p
 }
 
+// SetProp safely sets given property for given enum name
+func (tr *EnumRegistry) SetProp(enumName, propKey string, val interface{}) {
+	tp := tr.Properties(enumName)
+	tp[propKey] = val
+}
+
 // AltStrings returns optional alternative string map for enums -- e.g.,
 // lower-case, without prefixes etc -- can put multiple such alt strings in
 // the one string with your own separator, in a predefined order, if
@@ -213,10 +264,24 @@ func (tr *EnumRegistry) AltStrings(enumName string) map[int64]string {
 	return m
 }
 
+// ParType returns optional parent type that given type extends -- nil if not set.
+func (tr *EnumRegistry) ParType(enumName string) reflect.Type {
+	pti := tr.Prop(enumName, "ParType")
+	if pti == nil {
+		return nil
+	}
+	pt, ok := pti.(reflect.Type)
+	if !ok {
+		log.Printf("kit.EnumRegistry ParType error: ParType property must be a reflect.Type, is not -- is instead: %T\n", pt)
+		return nil
+	}
+	return pt
+}
+
 // NVals returns the number of defined enum values for given enum interface
 func (tr *EnumRegistry) NVals(eval interface{}) int64 {
 	typ := reflect.TypeOf(eval)
-	n, _ := ToInt(tr.Prop(ShortTypeName(typ), "N"))
+	n := tr.Prop(ShortTypeName(typ), "N").(int64)
 	return n
 }
 
@@ -546,15 +611,25 @@ func (ev EnumValue) String() string {
 // Values returns an EnumValue slice for all the values of an enum type -- if
 // alt is true and alt names exist, then those are used
 func (tr *EnumRegistry) Values(enumName string, alt bool) []EnumValue {
+	et, ok := tr.Enums[enumName]
+	if !ok {
+		return nil
+	}
 	vals, ok := tr.Vals[enumName]
 	if ok {
 		return vals
 	}
 	alts := tr.AltStrings(enumName)
-	et := tr.Enums[enumName]
+	pt := tr.ParType(enumName)
 	n := tr.Prop(enumName, "N").(int64)
 	vals = make([]EnumValue, n)
-	for i := int64(0); i < n; i++ {
+	st := 0
+	if pt != nil {
+		ptv := tr.TypeValues(pt, alt)
+		copy(vals, ptv)
+		st = len(ptv)
+	}
+	for i := int64(st); i < n; i++ {
 		str := EnumInt64ToString(i, et) // todo: what happens when no string for given values?
 		if alt && alts != nil {
 			str = alts[i]

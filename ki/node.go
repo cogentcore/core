@@ -42,7 +42,7 @@ import (
 type Node struct {
 	Nm       string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
 	UniqueNm string `copy:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag     int64  `copy:"-" json:"-" xml:"-" view:"-" desc:"bit flags for internal node state"`
+	Flag     int64  `copy:"-" json:"-" xml:"-" desc:"bit flags for internal node state"`
 	Props    Props  `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
 	Par      Ki     `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
 	Kids     Slice  `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
@@ -57,7 +57,8 @@ type Node struct {
 }
 
 // must register all new types so type names can be looked up by name -- also props
-var KiT_Node = kit.Types.AddType(&Node{}, nil)
+// EnumType:Flags registers KiT_Flags as type for Flags field for GUI views
+var KiT_Node = kit.Types.AddType(&Node{}, Props{"EnumType:Flag": KiT_Flags})
 
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
@@ -2115,7 +2116,7 @@ func (n *Node) CopyFieldsFrom(frm interface{}) {
 	GenCopyFieldsFrom(n.This(), frm)
 }
 
-// GenCopyFieldsFrom is a general-purpose copy ofprimary fields
+// GenCopyFieldsFrom is a general-purpose copy of primary fields
 // of source object, recursively following anonymous embedded structs
 func GenCopyFieldsFrom(to interface{}, frm interface{}) {
 	// pr := prof.Start("GenCopyFieldsFrom")
@@ -2173,8 +2174,8 @@ func GenCopyFieldsFrom(to interface{}, frm interface{}) {
 
 // see https://github.com/goki/ki/wiki/Naming for IO naming conventions
 
-// Note: it is unfortunate that [Un]MarshalJSON uses byte[] instead of
-// io.Reader / Writer..
+// TODO: switch to using Decode / Encode instead of
+// [Un]MarshalJSON which uses byte[] instead of io.Reader / Writer..
 
 // JSONTypePrefix is the first thing output in a ki tree JSON output file,
 // specifying the type of the root node of the ki tree -- this info appears
@@ -2253,6 +2254,7 @@ func (n *Node) ReadJSON(reader io.Reader) error {
 	if bytes.HasPrefix(b, JSONTypePrefix) { // skip type
 		stidx = bytes.Index(b, JSONTypeSuffix) + len(JSONTypeSuffix)
 	}
+	// todo: use json.NewDecoder, Decode instead -- need to deal with TypePrefix etc above
 	err = json.Unmarshal(b[stidx:], n.This()) // key use of this!
 	if err == nil {
 		n.UnmarshalPost()

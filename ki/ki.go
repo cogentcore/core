@@ -868,6 +868,10 @@ func NewOfType(typ reflect.Type) Ki {
 // package for using these ordinal values to manipulate bit flag field.
 type Flags int32
 
+//go:generate stringer -type=Flags
+
+var KiT_Flags = kit.Enums.AddEnum(FlagsN, true, nil) // true = bitflags
+
 const (
 	// IsField indicates a node is a field in its parent node, not a child in children.
 	IsField Flags = iota
@@ -949,7 +953,3 @@ const (
 	// excluded b/c otherwise it would get cleared.
 	UpdateFlagsMask = StruUpdateFlagsMask | ValUpdateFlagsMask
 )
-
-//go:generate stringer -type=Flags
-
-var KiT_Flags = kit.Enums.AddEnum(FlagsN, true, nil) // true = bitflags

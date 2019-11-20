@@ -37,9 +37,11 @@
 package kit
 
 import (
+	"fmt"
 	"log"
 	"path"
 	"reflect"
+	"strings"
 	"sync"
 )
 
@@ -141,7 +143,35 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	if props != nil {
 		tr.Props[lnm] = props
 	}
+	// tr.InheritTypeProps(typ) // not actually that useful due to order dependencies.
 	return typ
+}
+
+// InheritTypeProps attempts to inherit certain heritable type properties
+// from first embedded type.  Returns true if did.
+func (tr *TypeRegistry) InheritTypeProps(typ reflect.Type) bool {
+	if typ.Kind() != reflect.Struct || typ.NumField() == 0 {
+		return false
+	}
+	embfld := typ.Field(0) // check first embedded field
+	if !embfld.Anonymous {
+		return false
+	}
+	pp := tr.Properties(embfld.Type, false)
+	if pp == nil {
+		return false
+	}
+	var myp *map[string]interface{}
+	for k, v := range *pp {
+		if strings.HasPrefix(k, "EnumType:") {
+			if myp == nil {
+				myp = tr.Properties(typ, true)
+			}
+			SetTypeProp(*myp, k, v)
+			fmt.Printf("typ: %v inh: %v\n", ShortTypeName(typ), k)
+		}
+	}
+	return myp != nil
 }
 
 // TypeName returns the *short* package-qualified type name for given reflect.Type.
