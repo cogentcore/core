@@ -141,7 +141,12 @@ func (tr *TypeRegistry) AddType(obj interface{}, props map[string]interface{}) r
 	tr.Types[snm] = typ
 	tr.Insts[lnm] = obj
 	if props != nil {
-		tr.Props[lnm] = props
+		// make a copy of props for enums -- often shared
+		nwprops := make(map[string]interface{}, len(props))
+		for key, val := range props {
+			nwprops[key] = val
+		}
+		tr.Props[lnm] = nwprops
 	}
 	// tr.InheritTypeProps(typ) // not actually that useful due to order dependencies.
 	return typ
