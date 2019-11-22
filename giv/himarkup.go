@@ -100,7 +100,7 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
 
 	if hm.lexer != nil && hm.Lang != hm.lastLang {
 		hm.lexer = chroma.Coalesce(lexers.Get(hm.Lang))
-		hm.formatter = html.New(html.WithClasses(), html.TabWidth(hm.TabSize))
+		hm.formatter = html.New(html.WithClasses(true), html.TabWidth(hm.TabSize))
 		hm.lastLang = hm.Lang
 	}
 }
