@@ -55,8 +55,7 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-	// todo: fixme:
-	return uintptr(0)
+	return uintptr(w.glw.GetWin32Window())
 }
 
 /////////////////////////////////////////////////////////////////
@@ -69,8 +68,8 @@ type clipImpl struct {
 var theClip = clipImpl{}
 
 func (ci *clipImpl) IsEmpty() bool {
-	w := theApp.ctxtwin
-	str, err := w.glw.GetClipboardString()
+	// w := theApp.ctxtwin
+	str, err := glfw.GetClipboardString()
 	if err != nil || len(str) == 0 {
 		return true
 	}
@@ -78,14 +77,14 @@ func (ci *clipImpl) IsEmpty() bool {
 }
 
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
-	w := theApp.ctxtwin
-	str, err := w.glw.GetClipboardString()
+	// w := theApp.ctxtwin
+	str, err := glfw.GetClipboardString()
 	if err != nil || len(str) == 0 {
 		return nil
 	}
 	wantText := mimedata.IsText(types[0])
 	if wantText {
-		str, err := w.glw.GetClipboardString()
+		str, err := glfw.GetClipboardString()
 		if err != nil || len(str) == 0 {
 			return nil
 		}
@@ -111,14 +110,14 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 	if len(data) == 0 {
 		return nil
 	}
-	w := theApp.ctxtwin
+	// w := theApp.ctxtwin
 	if len(data) > 1 { // multipart
 		mpd := data.ToMultipart()
-		w.glw.SetClipboardString(string(mpd))
+		glfw.SetClipboardString(string(mpd))
 	} else {
 		d := data[0]
 		if mimedata.IsText(d.Type) {
-			w.glw.SetClipboardString(string(d.Data))
+			glfw.SetClipboardString(string(d.Data))
 		}
 	}
 	return nil
