@@ -68,24 +68,22 @@ type clipImpl struct {
 var theClip = clipImpl{}
 
 func (ci *clipImpl) IsEmpty() bool {
-	// w := theApp.ctxtwin
-	str, err := glfw.GetClipboardString()
-	if err != nil || len(str) == 0 {
+	str := glfw.GetClipboardString()
+	if len(str) == 0 {
 		return true
 	}
 	return false
 }
 
 func (ci *clipImpl) Read(types []string) mimedata.Mimes {
-	// w := theApp.ctxtwin
-	str, err := glfw.GetClipboardString()
-	if err != nil || len(str) == 0 {
+	str := glfw.GetClipboardString()
+	if len(str) == 0 {
 		return nil
 	}
 	wantText := mimedata.IsText(types[0])
 	if wantText {
-		str, err := glfw.GetClipboardString()
-		if err != nil || len(str) == 0 {
+		str := glfw.GetClipboardString()
+		if len(str) == 0 {
 			return nil
 		}
 		bstr := []byte(str)
