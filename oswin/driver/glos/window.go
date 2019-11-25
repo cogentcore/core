@@ -16,7 +16,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
@@ -110,6 +110,7 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 	glfw.WindowHint(glfw.Resizable, glfw.True)
 	glfw.WindowHint(glfw.Visible, glfw.False) // needed to position
 	glfw.WindowHint(glfw.Focused, glfw.True)
+	// glfw.WindowHint(glfw.ScaleToMonitor, glfw.True)
 	glfw.WindowHint(glfw.ContextVersionMajor, glosGlMajor)
 	glfw.WindowHint(glfw.ContextVersionMinor, glosGlMinor)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
@@ -569,6 +570,7 @@ func (w *windowImpl) getScreen() {
 	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems.
 	if mon != nil {
+		// fmt.Printf("got screen: %v\n", mon.GetName())
 		sc := theApp.ScreenByName(mon.GetName())
 		if sc != nil {
 			w.Scrn = sc
@@ -579,10 +581,17 @@ func (w *windowImpl) getScreen() {
 			w.PhysDPI = w.Scrn.PhysicalDPI
 		}
 	} else {
-		if len(theApp.screens) > 0 {
-			w.Scrn = theApp.screens[0]
-			w.PhysDPI = w.Scrn.PhysicalDPI
+		for _, sc := range theApp.screens {
+			if w.DevPixRatio == sc.DevicePixelRatio { // this works pretty well on mac at least.
+				// fmt.Printf("matched pix ratio %v for screen: %v\n", w.DevPixRatio, sc.Name)
+				w.Scrn = sc
+				w.PhysDPI = w.Scrn.PhysicalDPI
+			}
 		}
+	}
+	if w.Scrn == nil && len(theApp.screens) > 0 {
+		w.Scrn = theApp.screens[0]
+		w.PhysDPI = w.Scrn.PhysicalDPI
 	}
 	if w.LogDPI == 0 {
 		w.LogDPI = w.Scrn.LogicalDPI
@@ -603,25 +612,30 @@ func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
 }
 
 func (w *windowImpl) updtGeom() {
+	w.mu.Lock()
+	cscx, _ := w.glw.GetContentScale()
+	// curDevPixRatio := w.DevPixRatio
+	w.DevPixRatio = cscx
+	// if curDevPixRatio != w.DevPixRatio {
+	// 	fmt.Printf("got cont scale: %v\n", cscx)
+	// }
+	w.mu.Unlock()
 	w.getScreen()
 	w.mu.Lock()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.glw.GetSize()
+	// fmt.Printf("win size: %v\n", wsz)
 	w.WnSize = wsz
+	// todo: this doesn't work on mac -- ignores the size -- uses glw directly probably
+	// if curDevPixRatio != w.DevPixRatio && curDevPixRatio > 0 {
+	// 	rr := w.DevPixRatio / curDevPixRatio
+	// 	w.WnSize.X = int(float32(w.WnSize.X) * rr)
+	// 	w.WnSize.Y = int(float32(w.WnSize.Y) * rr)
+	// 	fmt.Printf("resized based on pix ratio: %v\n", w.WnSize)
+	// }
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.glw.GetFramebufferSize()
 	w.PxSize = fbsz
-	if w.PxSize != w.WnSize {
-		w.DevPixRatio = float32(w.PxSize.X) / float32(w.WnSize.X)
-	} else {
-		w.DevPixRatio = 1
-	}
-	if w.DevPixRatio != w.Scrn.DevicePixelRatio {
-		rr := w.DevPixRatio / w.Scrn.DevicePixelRatio
-		w.Scrn.PhysicalDPI *= rr
-		w.Scrn.LogicalDPI *= rr
-		w.Scrn.DevicePixelRatio = w.DevPixRatio
-	}
 	w.PhysDPI = w.Scrn.PhysicalDPI
 	w.LogDPI = w.Scrn.LogicalDPI
 	w.mu.Unlock()

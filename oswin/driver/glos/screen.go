@@ -7,14 +7,14 @@ package glos
 import (
 	"image"
 
-	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/window"
 )
 
 // This is called when a monitor is connected to or
 // disconnected from the system.
-func monitorChange(monitor *glfw.Monitor, event glfw.MonitorEvent) {
+func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 	theApp.getScreens()
 }
 
@@ -51,6 +51,7 @@ func (app *appImpl) getScreens() {
 		}
 		x, y := mon.GetPos()
 		vm := mon.GetVideoMode()
+		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
 		sc.Name = mon.GetName()
 		sc.ScreenNumber = i
 		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
@@ -60,8 +61,7 @@ func (app *appImpl) getScreens() {
 		dpi := 25.4 * float32(vm.Width) / float32(pw)
 		sc.PhysicalDPI = dpi
 		sc.LogicalDPI = dpi
-		sc.DevicePixelRatio = 1
-		// todo: 3.3 has content ratio
+		sc.DevicePixelRatio = cscx
 		sc.RefreshRate = float32(vm.RefreshRate)
 	}
 	if len(app.winlist) > 0 {

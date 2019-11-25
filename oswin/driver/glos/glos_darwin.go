@@ -85,7 +85,7 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 	if w.mainMenu == nil {
 		mm := &mainMenuImpl{win: w}
 		w.mainMenu = mm
-		vid := mm.win.glw.GetCocoaWindow()
+		vid := uintptr(mm.win.glw.GetCocoaWindow())
 		mm.delID = uintptr(C.doNewMainMenu(C.uintptr_t(vid)))
 		mm.menID = uintptr(C.mainMenuFromDelegate(C.uintptr_t(mm.delID)))
 	}
@@ -93,7 +93,7 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-	return w.glw.GetCocoaWindow()
+	return uintptr(w.glw.GetCocoaWindow())
 }
 
 /////////////////////////////////////////////////////////////////
@@ -315,7 +315,7 @@ func (mm *mainMenuImpl) Menu() oswin.Menu {
 }
 
 func (mm *mainMenuImpl) SetMenu() {
-	vid := mm.win.glw.GetCocoaWindow()
+	vid := uintptr(mm.win.glw.GetCocoaWindow())
 	C.doSetMainMenu(C.uintptr_t(vid), C.uintptr_t(mm.menID))
 }
 
@@ -358,7 +358,7 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
 
-	vid := mm.win.glw.GetCocoaWindow()
+	vid := uintptr(mm.win.glw.GetCocoaWindow())
 	mid := C.doAddMenuItem(C.uintptr_t(vid), C.uintptr_t(men), C.uintptr_t(mm.delID), title, scs, C.bool(scShift), C.bool(scCommand), C.bool(scAlt), C.bool(scControl), C.int(tag), C.bool(active))
 	return oswin.MenuItem(mid)
 }
