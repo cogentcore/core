@@ -696,6 +696,9 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 
 // SortSlice sorts the slice according to current settings
 func (tv *TableView) SortSlice() {
+	if tv.SortIdx < 0 || tv.SortIdx >= len(tv.VisFields) {
+		return
+	}
 	rawIdx := tv.VisFields[tv.SortIdx].Index
 	kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
 }
