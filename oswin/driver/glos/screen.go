@@ -54,6 +54,10 @@ func (app *appImpl) getScreens() {
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
 		sc.Name = mon.GetName()
 		sc.ScreenNumber = i
+		if cscx > 1 { // logical size
+			vm.Width = int(cscx * float32(vm.Width))
+			vm.Height = int(cscx * float32(vm.Height))
+		}
 		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
 		depth := vm.RedBits + vm.GreenBits + vm.BlueBits
 		sc.Depth = depth
