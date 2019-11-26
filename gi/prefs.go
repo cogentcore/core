@@ -255,6 +255,9 @@ func (pf *Preferences) ApplyDPI() {
 	n := oswin.TheApp.NScreens()
 	for i := 0; i < n; i++ {
 		sc := oswin.TheApp.Screen(i)
+		if sc == nil {
+			continue
+		}
 		if scp, ok := pf.ScreenPrefs[sc.Name]; ok {
 			sc.LogicalDPI = oswin.LogicalFmPhysicalDPI(ZoomFactor*scp.LogicalDPIScale, sc.PhysicalDPI)
 		} else {
