@@ -1899,8 +1899,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
-			Prefs.ApplyDPI()
-			Prefs.Update()
+			if !oswin.TheApp.NoScreens() {
+				Prefs.ApplyDPI()
+				Prefs.Update()
+			}
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:

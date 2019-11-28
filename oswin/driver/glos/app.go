@@ -188,6 +188,7 @@ func (app *appImpl) initGl() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("oswin.glos failed to initialize glfw:", err)
 	}
+	glfw.SetMonitorCallback(monitorChange)
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.Visible, glfw.False)
@@ -220,10 +221,19 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	opts.Fixup()
 	// can also apply further tuning here..
 
+	sc := app.screens[0]
+	pmon := glfw.GetPrimaryMonitor()
+	if pmon != nil {
+		psc := app.ScreenByName(pmon.GetName())
+		if psc != nil {
+			sc = psc
+		}
+	}
+
 	var glw *glfw.Window
 	var err error
 	app.RunOnMain(func() {
-		glw, err = newGLWindow(opts)
+		glw, err = newGLWindow(opts, sc)
 	})
 	if err != nil {
 		return nil, err
@@ -232,6 +242,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	w := &windowImpl{
 		app:         app,
 		glw:         glw,
+		scrnName:    sc.Name,
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
 		publishDone: make(chan struct{}),
@@ -315,7 +326,6 @@ func (app *appImpl) Screen(scrN int) *oswin.Screen {
 }
 
 func (app *appImpl) ScreenByName(name string) *oswin.Screen {
-	app.getScreens()
 	for _, sc := range app.screens {
 		if sc.Name == name {
 			return sc

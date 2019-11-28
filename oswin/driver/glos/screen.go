@@ -6,40 +6,71 @@ package glos
 
 import (
 	"image"
+	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/window"
 )
 
+// monitorDebug turns on various debugging statements about monitor changes
+// and updates from glfw.
+var monitorDebug = false
+
 // This is called when a monitor is connected to or
 // disconnected from the system.
 func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
+	if monitorDebug {
+		enm := ""
+		if event == glfw.Connected {
+			enm = "Connected"
+		} else {
+			enm = "Disconnected"
+		}
+		log.Printf("glos monitorChange: %v event: %v\n", monitor.GetName(), enm)
+	}
 	theApp.getScreens()
 }
 
 func (app *appImpl) getScreens() {
-	glfw.SetMonitorCallback(monitorChange)
 	mons := glfw.GetMonitors()
 	sz := len(mons)
 	if sz == 0 {
 		app.noScreens = true
-		// log.Printf("glos getScreens: no screens found!\n")
+		if monitorDebug {
+			log.Printf("glos getScreens: no screens found!\n")
+		}
 		return
 	}
 	app.mu.Lock()
 	app.noScreens = false
-	if len(app.screens) != sz {
-		app.screens = make([]*oswin.Screen, sz)
+	if cap(app.screens) < sz {
+		app.screens = make([]*oswin.Screen, 0, sz)
 	}
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
-		sc := app.screens[i]
+		if monitorDebug {
+			log.Printf("glos getScreens: mon number: %v name: %v\n", i, mon.GetName())
+		}
+		var sc *oswin.Screen
+		var sci int
+		for j, scc := range app.screens {
+			if scc != nil && scc.Name == mon.GetName() {
+				sc = scc
+				sci = j
+				break
+			}
+		}
 		if sc == nil {
 			sc = &oswin.Screen{}
-			app.screens[i] = sc
+			sci = len(app.screens)
+			app.screens = append(app.screens, sc)
 		}
-		if sc.Name == mon.GetName() {
+		vm := mon.GetVideoMode()
+		if vm.Width == 0 || vm.Height == 0 {
+			if monitorDebug {
+				log.Printf("glos getScreens: screen %v has no size -- skipping\n", sc.Name)
+			}
 			continue
 		}
 		pw, ph := mon.GetPhysicalSize()
@@ -50,10 +81,12 @@ func (app *appImpl) getScreens() {
 			ph = 768
 		}
 		x, y := mon.GetPos()
-		vm := mon.GetVideoMode()
 		cscx, _ := mon.GetContentScale() // note: requires glfw 3.3
+		if cscx < 1 {
+			cscx = 1
+		}
 		sc.Name = mon.GetName()
-		sc.ScreenNumber = i
+		sc.ScreenNumber = sci
 		if cscx > 1 { // logical size
 			vm.Width = int(cscx * float32(vm.Width))
 			vm.Height = int(cscx * float32(vm.Height))
@@ -71,7 +104,9 @@ func (app *appImpl) getScreens() {
 	if len(app.winlist) > 0 {
 		fw := app.winlist[0]
 		app.mu.Unlock()
-		// fmt.Printf("sending screen update\n")
+		if monitorDebug {
+			log.Printf("glos getScreens: sending screen update\n")
+		}
 		fw.sendWindowEvent(window.ScreenUpdate)
 	} else {
 		app.mu.Unlock()

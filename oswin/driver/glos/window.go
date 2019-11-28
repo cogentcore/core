@@ -31,6 +31,7 @@ type windowImpl struct {
 	event.Deque
 	app            *appImpl
 	glw            *glfw.Window
+	scrnName       string // last known screen name
 	runQueue       chan funcRun
 	publish        chan struct{}
 	publishDone    chan struct{}
@@ -104,7 +105,7 @@ func (w *windowImpl) DeActivate() {
 }
 
 // must be run on main
-func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
+func newGLWindow(opts *oswin.NewWindowOptions, sc *oswin.Screen) (*glfw.Window, error) {
 	_, _, tool, fullscreen := oswin.WindowFlagsToBool(opts.Flags)
 	glfw.DefaultWindowHints()
 	glfw.WindowHint(glfw.Resizable, glfw.True)
@@ -130,7 +131,6 @@ func newGLWindow(opts *oswin.NewWindowOptions) (*glfw.Window, error) {
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	sc := theApp.screens[0]
 	sz := opts.Size
 	if sc.DevicePixelRatio != 1.0 {
 		sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
@@ -355,15 +355,8 @@ func (w *windowImpl) Fill(dr image.Rectangle, src color.Color, op draw.Op) {
 //  Geom etc
 
 func (w *windowImpl) Screen() *oswin.Screen {
-	if w.Scrn == nil {
-		w.getScreen()
-	}
-	if w.Scrn == nil {
-		return theApp.screens[0]
-	}
-	w.mu.Lock()
-	defer w.mu.Unlock()
-	return w.Scrn
+	sc := w.getScreen()
+	return sc
 }
 
 func (w *windowImpl) Size() image.Point {
@@ -565,38 +558,52 @@ func (w *windowImpl) SetMousePos(x, y float64) {
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
-func (w *windowImpl) getScreen() {
+func (w *windowImpl) getScreen() *oswin.Screen {
 	w.mu.Lock()
+	var sc *oswin.Screen
 	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows
 	// that is super useless it seems.
 	if mon != nil {
-		// fmt.Printf("got screen: %v\n", mon.GetName())
-		sc := theApp.ScreenByName(mon.GetName())
-		if sc != nil {
-			w.Scrn = sc
-			w.PhysDPI = sc.PhysicalDPI
-		} else {
+		if monitorDebug {
+			log.Printf("glos window: %v getScreen() -- got screen: %v\n", w.Nm, mon.GetName())
+		}
+		sc = theApp.ScreenByName(mon.GetName())
+		if sc == nil {
 			log.Printf("glos getScreen: could not find screen of name: %v\n", mon.GetName())
-			w.Scrn = theApp.screens[0]
-			w.PhysDPI = w.Scrn.PhysicalDPI
+			sc = theApp.screens[0]
 		}
 	} else {
-		for _, sc := range theApp.screens {
-			if w.DevPixRatio == sc.DevicePixelRatio { // this works pretty well on mac at least.
-				// fmt.Printf("matched pix ratio %v for screen: %v\n", w.DevPixRatio, sc.Name)
-				w.Scrn = sc
-				w.PhysDPI = w.Scrn.PhysicalDPI
+		sc = theApp.ScreenByName(w.scrnName)
+		got := false
+		if sc == nil || w.DevPixRatio != sc.DevicePixelRatio {
+			for _, scc := range theApp.screens {
+				if w.DevPixRatio == scc.DevicePixelRatio {
+					sc = scc
+					got = true
+					if monitorDebug {
+						log.Printf("glos window: %v getScreen(): matched pix ratio %v for screen: %v\n", w.Nm, w.DevPixRatio, sc.Name)
+					}
+					w.LogDPI = sc.LogicalDPI
+					break
+				}
+			}
+			if !got {
+				sc = theApp.screens[0]
+				w.LogDPI = sc.LogicalDPI
+				if monitorDebug {
+					log.Printf("glos window: %v getScreen(): reverting to first screen %v\n", w.Nm, sc.Name)
+				}
 			}
 		}
 	}
-	if w.Scrn == nil && len(theApp.screens) > 0 {
-		w.Scrn = theApp.screens[0]
-		w.PhysDPI = w.Scrn.PhysicalDPI
-	}
+	w.scrnName = sc.Name
+	w.PhysDPI = sc.PhysicalDPI
+	w.DevPixRatio = sc.DevicePixelRatio
 	if w.LogDPI == 0 {
-		w.LogDPI = w.Scrn.LogicalDPI
+		w.LogDPI = sc.LogicalDPI
 	}
 	w.mu.Unlock()
+	return sc
 }
 
 func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
@@ -620,7 +627,7 @@ func (w *windowImpl) updtGeom() {
 	// 	fmt.Printf("got cont scale: %v\n", cscx)
 	// }
 	w.mu.Unlock()
-	w.getScreen()
+	sc := w.getScreen()
 	w.mu.Lock()
 	var wsz image.Point
 	wsz.X, wsz.Y = w.glw.GetSize()
@@ -636,8 +643,8 @@ func (w *windowImpl) updtGeom() {
 	var fbsz image.Point
 	fbsz.X, fbsz.Y = w.glw.GetFramebufferSize()
 	w.PxSize = fbsz
-	w.PhysDPI = w.Scrn.PhysicalDPI
-	w.LogDPI = w.Scrn.LogicalDPI
+	w.PhysDPI = sc.PhysicalDPI
+	w.LogDPI = sc.LogicalDPI
 	w.mu.Unlock()
 	if w.Activate() {
 		w.winTex.SetSize(w.PxSize)

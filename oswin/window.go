@@ -263,7 +263,6 @@ type WindowBase struct {
 	DevPixRatio float32
 	PhysDPI     float32
 	LogDPI      float32
-	Scrn        *Screen
 	Par         interface{}
 	Flag        int64
 }
