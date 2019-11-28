@@ -44,9 +44,7 @@ func (app *appImpl) getScreens() {
 	}
 	app.mu.Lock()
 	app.noScreens = false
-	if cap(app.screens) < sz {
-		app.screens = make([]*oswin.Screen, 0, sz)
-	}
+	gotNew := false
 	for i := 0; i < sz; i++ {
 		mon := mons[i]
 		if monitorDebug {
@@ -62,6 +60,7 @@ func (app *appImpl) getScreens() {
 			}
 		}
 		if sc == nil {
+			gotNew = true
 			sc = &oswin.Screen{}
 			sci = len(app.screens)
 			app.screens = append(app.screens, sc)
@@ -97,11 +96,13 @@ func (app *appImpl) getScreens() {
 		sc.PhysicalSize = image.Point{pw, ph}
 		dpi := 25.4 * float32(vm.Width) / float32(pw)
 		sc.PhysicalDPI = dpi
-		sc.LogicalDPI = dpi
+		if sc.LogicalDPI == 0 { // do not overwrite if already set
+			sc.LogicalDPI = dpi
+		}
 		sc.DevicePixelRatio = cscx
 		sc.RefreshRate = float32(vm.RefreshRate)
 	}
-	if len(app.winlist) > 0 {
+	if gotNew && len(app.winlist) > 0 {
 		fw := app.winlist[0]
 		app.mu.Unlock()
 		if monitorDebug {

@@ -626,6 +626,7 @@ func (w *windowImpl) updtGeom() {
 	// if curDevPixRatio != w.DevPixRatio {
 	// 	fmt.Printf("got cont scale: %v\n", cscx)
 	// }
+	cursc := w.scrnName
 	w.mu.Unlock()
 	sc := w.getScreen()
 	w.mu.Lock()
@@ -648,6 +649,11 @@ func (w *windowImpl) updtGeom() {
 	w.mu.Unlock()
 	if w.Activate() {
 		w.winTex.SetSize(w.PxSize)
+	}
+	if cursc != w.scrnName {
+		if monitorDebug {
+			log.Printf("glos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.scrnName, cursc)
+		}
 	}
 	w.sendWindowEvent(window.Resize) // this will not get processed until the end
 }

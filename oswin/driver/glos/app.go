@@ -221,6 +221,13 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 	opts.Fixup()
 	// can also apply further tuning here..
 
+	if len(app.winlist) == 0 && oswin.InitScreenLogicalDPIFunc != nil {
+		if monitorDebug {
+			log.Printf("app first new window calling InitScreenLogicalDPIFunc\n")
+		}
+		oswin.InitScreenLogicalDPIFunc()
+	}
+
 	sc := app.screens[0]
 	pmon := glfw.GetPrimaryMonitor()
 	if pmon != nil {

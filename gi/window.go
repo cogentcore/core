@@ -786,7 +786,8 @@ func Init() {
 		PrefsDbg.Connect()
 		Prefs.Open()
 		Prefs.Apply()
-		WinGeomPrefs.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+		oswin.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
+		WinGeomPrefs.NeedToReload()                     // gets time stamp associated with open, so it doesn't re-open
 		WinGeomPrefs.Open()
 	}
 }

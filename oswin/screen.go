@@ -112,3 +112,8 @@ func LogicalFmPhysicalDPI(logScale, pdpi float32) float32 {
 	mdpi *= 6
 	return float32(mdpi)
 }
+
+// InitScreenLogicalDPIFunc is a function that can be set to initialize the
+// screen LogicalDPI values based on user preferences etc.  Called just before
+// first window is opened.
+var InitScreenLogicalDPIFunc func()
