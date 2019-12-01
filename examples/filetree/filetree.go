@@ -500,7 +500,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 		if !inQuitPrompt {
 			inQuitPrompt = true
 			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-				Prompt: "Are you <i>sure</i> you want to quit?"}, true, true,
+				Prompt: "Are you <i>sure</i> you want to quit?"}, gi.AddOk, gi.AddCancel,
 				win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					if sig == int64(gi.DialogAccepted) {
 						gi.Quit()
