@@ -344,6 +344,9 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 func (tv *TextView) LinesInserted(tbe *TextBufEdit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+	if stln > len(tv.Renders) { // invalid
+		return
+	}
 
 	// Renders
 	tmprn := make([]gi.TextRender, nsz)
@@ -1758,7 +1761,7 @@ func (tv *TextView) QReplaceSig() {
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
 func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts, true, true)
+	dlg := gi.NewStdDialog(opts, gi.AddOk, gi.AddCancel)
 	dlg.Modal = true
 
 	frame := dlg.Frame()
@@ -2927,9 +2930,9 @@ func (tv *TextView) StopCursor() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
-		return
-	}
+	// if !tv.This().(gi.Node2D).IsVisible() {
+	// 	return
+	// }
 	TextViewBlinkMu.Lock()
 	if BlinkingTextView == tv {
 		BlinkingTextView = nil
@@ -4432,13 +4435,17 @@ func (tv *TextView) Render2D() {
 		}
 		tv.RenderAllLinesInBounds()
 		if tv.HasFocus() && tv.IsFocusActive() {
+			// fmt.Printf("tv render: %v  start cursor\n", tv.Nm)
 			tv.StartCursor()
 		} else {
+			// fmt.Printf("tv render: %v  stop cursor\n", tv.Nm)
 			tv.StopCursor()
 		}
 		tv.Render2DChildren()
 		tv.PopBounds()
 	} else {
+		// fmt.Printf("tv render: %v  not vis stop cursor\n", tv.Nm)
+		tv.StopCursor()
 		tv.DisconnectAllEvents(gi.RegPri)
 	}
 }
@@ -4463,6 +4470,7 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		// fmt.Printf("got focus: %v\n", tv.Nm)
 	case gi.FocusInactive:
 		tv.ClearFlag(int(TextViewFocusActive))
+		tv.StopCursor()
 		// tv.EditDone()
 		// tv.UpdateSig()
 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
@@ -4471,5 +4479,6 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 		tv.SetFlag(int(TextViewFocusActive))
 		// tv.UpdateSig()
 		// todo: see about cursor
+		tv.StartCursor()
 	}
 }

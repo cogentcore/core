@@ -368,7 +368,7 @@ func (pf *Preferences) UpdateUser() {
 func (pf *ColorPrefs) OpenJSON(filename FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
+		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
 		log.Println(err)
 		return err
 	}
@@ -384,7 +384,7 @@ func (pf *ColorPrefs) SaveJSON(filename FileName) error {
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
 		log.Println(err)
 	}
 	return err
@@ -573,7 +573,7 @@ var SavedPaths FilePaths
 func (pf *FilePaths) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		// PromptDialog(nil, "File Not Found", err.Error(), true, false, nil, nil, nil)
+		// PromptDialog(nil, "File Not Found", err.Error(), AddOk, NoCancel, nil, nil, nil)
 		// log.Println(err)
 		return err
 	}
@@ -589,7 +589,7 @@ func (pf *FilePaths) SaveJSON(filename string) error {
 	}
 	err = ioutil.WriteFile(filename, b, 0644)
 	if err != nil {
-		// PromptDialog(nil, "Could not Save to File", err.Error(), true, false, nil, nil, nil)
+		// PromptDialog(nil, "Could not Save to File", err.Error(), AddOk, NoCancel, nil, nil, nil)
 		log.Println(err)
 	}
 	return err

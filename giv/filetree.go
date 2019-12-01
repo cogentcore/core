@@ -562,7 +562,7 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 	np := filepath.Join(ppath, filename)
 	_, err := os.Create(np)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, true, false, nil, nil)
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, gi.AddOk, gi.NoCancel, nil, nil)
 		return
 	}
 	if addToVcs {
@@ -584,7 +584,7 @@ func (fn *FileNode) NewFolder(foldername string) {
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
 		emsg := fmt.Sprintf("giv.FileNode at: %q: Error: %v", ppath, err)
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg}, true, false, nil, nil)
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make Folder", Prompt: emsg}, gi.AddOk, gi.NoCancel, nil, nil)
 		return
 	}
 	fn.FRoot.UpdateNewFile(ppath)
@@ -1261,7 +1261,7 @@ func (ftv *FileTreeView) Cut() {
 	}
 	ftv.Copy(false)
 	// todo: in the future, move files somewhere temporary, then use those temps for paste..
-	gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, true, false, nil, nil)
+	gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
 }
 
 // Paste pastes clipboard at given node
@@ -1290,7 +1290,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	}
 	if !tfn.IsDir() {
 		if len(md) != 2 {
-			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/2)}, true, false, nil, nil)
+			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/2)}, gi.AddOk, gi.NoCancel, nil, nil)
 			return
 		}
 	}

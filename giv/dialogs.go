@@ -206,7 +206,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 			},
 		}
 	}
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), true, true)
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -294,7 +294,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 			},
 		}
 	}
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), true, true)
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -392,7 +392,7 @@ func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row 
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), true, true)
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -430,7 +430,7 @@ func ColorViewDialogValue(dlg *gi.Dialog) gi.Color {
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
 // directories) and FileViewExtOnlyFilter (for only showing directories).
 func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filterFunc FileViewFilterFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), true, true)
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
 	dlg.SetName("file-view") // use a consistent name for consistent sizing / placement
 
 	frame := dlg.Frame()
@@ -473,7 +473,7 @@ func FileViewDialogValue(dlg *gi.Dialog) string {
 
 // ArgViewDialog for editing args for a method call in the MethView system
 func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), true, true)
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

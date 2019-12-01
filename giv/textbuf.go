@@ -434,7 +434,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		vp := tb.ViewportFromView()
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, true, false, nil, nil)
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 		log.Println(err)
 		return err
 	}
@@ -484,7 +484,7 @@ func (tb *TextBuf) Revert() bool {
 		if err != nil {
 			vp := tb.ViewportFromView()
 			if vp != nil { // only if viewing
-				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, true, false, nil, nil)
+				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 			}
 			log.Println(err)
 			return false
@@ -548,7 +548,7 @@ func (tb *TextBuf) SaveAs(filename gi.FileName) {
 func (tb *TextBuf) SaveFile(filename gi.FileName) error {
 	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 		log.Println(err)
 	} else {
 		tb.Filename = filename

@@ -706,7 +706,7 @@ func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Val
 		return
 	}
 	if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, true, true,
+		gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
 			md.Vp.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, args)

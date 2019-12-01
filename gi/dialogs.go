@@ -364,6 +364,14 @@ func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
 	return frame.Child(idx).(*Layout), idx
 }
 
+// Dialog Ok, Cancel options
+const (
+	AddOk     bool = true
+	NoOk           = false
+	AddCancel      = true
+	NoCancel       = false
+)
+
 // StdButtonConfig returns a kit.TypeAndNameList for calling on ConfigChildren
 // of a button box, to create standard Ok, Cancel buttons (if true),
 // optionally starting with a Stretch element that will cause the buttons to
@@ -494,7 +502,7 @@ func PromptDialog(avp *Viewport2D, opts DlgOpts, ok, cancel bool, recv ki.Ki, fu
 // sent to the receiving object and function for dialog signals.  Viewport is
 // optional to properly contextualize dialog to given master window.
 func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, fun ki.RecvFunc) {
-	dlg := NewStdDialog(opts, false, false) // no buttons
+	dlg := NewStdDialog(opts, NoOk, NoCancel) // no buttons
 	dlg.Modal = true
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
@@ -538,7 +546,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
 func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog(opts, true, true)
+	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
 	frame := dlg.Frame()
@@ -596,7 +604,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 // (nil to ignore).  Viewport is optional to properly contextualize dialog to
 // given master window.
 func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog(opts, true, true)
+	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
 	frame := dlg.Frame()

@@ -98,7 +98,7 @@ func NewSpellModelFromText() error {
 	file, err := os.Open(bigdatafile)
 	if err != nil {
 		log.Printf("Could not open corpus file: %v. This file is used to create the spelling model.\n", err)
-		PromptDialog(nil, DlgOpts{Title: "Corpus File Not Found", Prompt: "You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on."}, true, false, nil, nil)
+		PromptDialog(nil, DlgOpts{Title: "Corpus File Not Found", Prompt: "You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on."}, AddOk, NoCancel, nil, nil)
 		return err
 	}
 

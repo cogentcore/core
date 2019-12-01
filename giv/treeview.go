@@ -962,13 +962,13 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 	}
 	if sk.IsField() {
 		if op != "" {
-			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, true, false, nil, nil)
+			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, gi.AddOk, gi.NoCancel, nil, nil)
 		}
 		return true
 	}
 	if tv.This() == tv.RootView.This() {
 		if op != "" {
-			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, true, false, nil, nil)
+			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, gi.AddOk, gi.NoCancel, nil, nil)
 		}
 		return true
 	}
@@ -1338,7 +1338,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	}
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree"}, true, false, nil, nil)
+		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree"}, gi.AddOk, gi.NoCancel, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
