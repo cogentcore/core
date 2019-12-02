@@ -648,6 +648,12 @@ type MethViewData struct {
 	Flags        MethViewFlags
 }
 
+func (md *MethViewData) MethName() string {
+	typnm := kit.ShortTypeName(md.ValVal.Type())
+	methnm := typnm + ":" + md.Method
+	return methnm
+}
+
 // MethViewCall is the receiver func for MethView actions that call a method
 // -- it uses the MethViewData to call the target method.
 func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
@@ -721,6 +727,15 @@ func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Val
 // results as specified in the MethViewData.
 func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 	rv := md.MethVal.Call(args)
+	methnm := md.MethName()
+	mtyp := md.MethTyp.Type
+	narg := mtyp.NumIn() - 1
+	for ai := 0; ai < narg; ai++ {
+		ap := md.ArgProps[ai]
+		argnm := methnm + "." + ap.Name
+		MethArgHist[argnm] = args[ai].Interface()
+	}
+
 	if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
 		md.Vp.SetNeedsFullRender() // always update after all methods -- almost always want that
 	}
@@ -802,6 +817,10 @@ func (ad *ArgData) HasValSet() bool {
 	return bitflag.Has32(int32(ad.Flags), int(ArgDataValSet))
 }
 
+// MethArgHist stores the history of method arg values -- used for setting defaults
+// for next time the method is called.  Key is type:method name
+var MethArgHist = map[string]interface{}{}
+
 // MethViewArgData gets the arg data for the method args, returns false if
 // errors -- nprompt is the number of args that require prompting from the
 // user (minus any cases with value: set directly)
@@ -813,6 +832,8 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 	nprompt = 0
 	ok = true
 
+	methnm := md.MethName()
+
 	for ai := 0; ai < narg; ai++ {
 		ad := &ads[ai]
 		atyp := mtyp.In(1 + ai)
@@ -822,6 +843,12 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 
 		aps := &md.ArgProps[ai]
 		ad.Name = aps.Name
+
+		argnm := methnm + "." + ad.Name
+		if def, has := MethArgHist[argnm]; has {
+			ad.Default = def
+			ad.SetHasDef()
+		}
 
 		ad.View = ToValueView(ad.Val.Interface(), "")
 		ad.View.SetStandaloneValue(ad.Val)
