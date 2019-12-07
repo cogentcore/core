@@ -181,6 +181,33 @@ func (sv *StructView) ConfigStructGrid() {
 		if vwtag == "-" {
 			return true
 		}
+		if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
+			fvalp := fieldVal.Addr().Interface()
+			kit.FlatFieldsValueFunc(fvalp, func(sfval interface{}, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
+				svwtag := sfield.Tag.Get("view")
+				if svwtag == "-" {
+					return true
+				}
+				svv := FieldToValueView(fvalp, sfield.Name, sfval)
+				if svv == nil { // shouldn't happen
+					return true
+				}
+				svvp := sfieldVal.Addr()
+				svv.SetStructValue(svvp, fvalp, &sfield, sv.TmpSave, sv.ViewPath)
+
+				svtyp := svv.WidgetType()
+				// todo: other things with view tag..
+				fnm := field.Name + "." + sfield.Name
+				svv.SetTag("label", fnm)
+				labnm := fmt.Sprintf("label-%v", fnm)
+				valnm := fmt.Sprintf("value-%v", fnm)
+				config.Add(gi.KiT_Label, labnm)
+				config.Add(svtyp, valnm) // todo: extend to diff types using interface..
+				sv.FieldViews = append(sv.FieldViews, svv)
+				return true
+			})
+			return true
+		}
 		vv := FieldToValueView(sv.Struct, field.Name, fval)
 		if vv == nil { // shouldn't happen
 			return true
