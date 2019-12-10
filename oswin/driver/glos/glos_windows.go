@@ -12,6 +12,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"sync"
+	"unsafe"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
@@ -55,7 +56,7 @@ func (w *windowImpl) MainMenu() oswin.MainMenu {
 }
 
 func (w *windowImpl) OSHandle() uintptr {
-	return uintptr(w.glw.GetWin32Window())
+	return uintptr(unsafe.Pointer(w.glw.GetWin32Window()))
 }
 
 /////////////////////////////////////////////////////////////////
