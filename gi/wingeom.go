@@ -338,7 +338,7 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		wdpi := wp.DPI / wp.DPR
 		if wdpi == trgdpi {
 			if WinGeomTrace {
-				fmt.Printf("WindowGeomPrefs for window: %v other screen pos: %v size: %v\n", winName, wp.Pos, wp.Size)
+				fmt.Printf("WindowGeomPrefs for window: %v other screen pos: %v size: %v\n", winName, wp.Pos(), wp.Size())
 			}
 			return &wp
 		}
