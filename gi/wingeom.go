@@ -22,9 +22,6 @@ import (
 	"github.com/goki/ki/ints"
 )
 
-//////////////////////////////////////////////////////////////////////////////////
-//  WindowGeom
-
 var WinGeomTrace = false
 
 var WinGeomPrefs = WindowGeomPrefs{}
