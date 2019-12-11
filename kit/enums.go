@@ -284,8 +284,14 @@ func (tr *EnumRegistry) ParType(enumName string) reflect.Type {
 // NVals returns the number of defined enum values for given enum interface
 func (tr *EnumRegistry) NVals(eval interface{}) int64 {
 	typ := reflect.TypeOf(eval)
-	n := tr.Prop(ShortTypeName(typ), "N").(int64)
-	return n
+	nm := ShortTypeName(typ)
+	n := tr.Prop(nm, "N")
+	if n != nil {
+		return n.(int64)
+	} else {
+		log.Printf("kit.EnumRegistry: no N registered for type: %v\n", nm)
+	}
+	return 0
 }
 
 // IsBitFlag checks if this enum is for bit flags instead of mutually-exclusive int
@@ -571,7 +577,7 @@ func (tr *EnumRegistry) SetAnyEnumValueFromString(eval reflect.Value, str string
 	et := etp.Elem()
 	if tr.IsBitFlag(et) {
 		var bf int64
-		err := tr.BitFlagsFromStringAltFirst(&bf, str, et, int(tr.NVals(eval.Interface())))
+		err := tr.BitFlagsFromStringAltFirst(&bf, str, et, int(tr.NVals(eval.Elem().Interface())))
 		if err != nil {
 			return err
 		}
