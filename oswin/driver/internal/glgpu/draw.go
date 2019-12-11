@@ -32,6 +32,9 @@ func (dr *Drawing) Clear(color, depth bool) {
 		bits |= gl.STENCIL_BUFFER_BIT
 	}
 	gl.Clear(bits)
+	gl.Enable(gl.POLYGON_OFFSET_FILL)
+	gl.Enable(gl.POLYGON_OFFSET_LINE)
+	gl.Enable(gl.POLYGON_OFFSET_POINT)
 }
 
 // ClearColor sets the color to draw when clear is called

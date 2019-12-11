@@ -330,17 +330,12 @@ out vec4 outputColor;
 			`
 			
 void main() {
-	// Inverts the fragment normal if not FrontFacing
-	vec3 fragNorm = Norm;
-	if (!gl_FrontFacing) {
-		fragNorm = -fragNorm;
-	}
 	float opacity = Color.a;
 	vec3 clr = Color.rgb;	
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	vec3 Ambdiff, Spec;
-	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
+	phongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
 	// Final fragment color
 	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
@@ -444,17 +439,12 @@ out vec4 outputColor;
 			`
 			
 void main() {
-	// Inverts the fragment normal if not FrontFacing
-	vec3 fragNorm = Norm;
-	if (!gl_FrontFacing) {
-	 	fragNorm = -fragNorm;
-	}
 	float opacity = Color.a;
 	vec3 clr = Color.rgb;	
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	vec3 Ambdiff, Spec;
-	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
+	phongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
 	// Final fragment color
 	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
@@ -558,18 +548,13 @@ out vec4 outputColor;
 			`
 			
 void main() {
-	// Inverts the fragment normal if not FrontFacing
-	vec3 fragNorm = Norm;
-	if (!gl_FrontFacing) {
-		fragNorm = -fragNorm;
-	}
 	vec4 Color = texture(Tex, TexCoord * TexRepeat + TexOff);
 	float opacity = Color.a;
 	vec3 clr = Color.rgb;	
 	
 	// Calculates the Ambient+Diffuse and Specular colors for this fragment using the Phong model.
 	vec3 Ambdiff, Spec;
-	phongModel(Pos, fragNorm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
+	phongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
 	// Final fragment color
 	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
@@ -678,6 +663,20 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 	vec3 diffuseTotal  = vec3(0.0);
 	vec3 specularTotal = vec3(0.0);
 
+	const float EPS = 0.00001;
+
+    // Workaround for gl_FrontFacing (buggy on Intel integrated GPU's)
+    vec3 fdx = dFdx(pos.xyz);
+    vec3 fdy = dFdy(pos.xyz);
+    vec3 faceNorm = normalize(cross(fdx,fdy));
+    if (dot(norm, faceNorm) < 0.0) { // Back-facing
+        norm = -norm;
+    }
+	// if (!gl_FrontFacing) {
+	// 	norm = -norm;
+	// }
+
+	
 #if AMBLIGHTS_LEN>0
 	for (int i = 0; i < AMBLIGHTS_LEN; i++) {
 		ambientTotal += AmbLights[i] * matAmbient;
@@ -690,11 +689,11 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		// DirLightDir is the position = direction of the current light
 		vec3 lightDir = normalize(DirLightDir(i));
 		// Calculates the dot product between the light direction and this vertex normal.
-		float dotNormal = max(dot(lightDir, norm), 0.0);
-		diffuseTotal += DirLightColor(i) * matDiffuse * dotNormal;
-		// Specular reflection -- calculates the light reflection vector
-		vec3 ref = reflect(-lightDir, norm);
-		if (dotNormal > 0.0) {
+		float dotNormal = dot(lightDir, norm);
+		if (dotNormal > EPS) {
+			diffuseTotal += DirLightColor(i) * matDiffuse * dotNormal;
+			// Specular reflection -- calculates the light reflection vector
+			vec3 ref = reflect(-lightDir, norm);
 			specularTotal += DirLightColor(i) * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
@@ -709,16 +708,16 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		// Normalizes the lightDir
 		lightDir = lightDir / lightDist;
 		// Calculates the attenuation due to the distance of the light
-		float attenuation = 1.0 / (1.0 + PointLightLinDecay(i) * lightDist +
-			PointLightQuadDecay(i) * lightDist * lightDist);
 		// Diffuse reflection
-		float dotNormal = max(dot(lightDir, norm), 0.0);
-		diffuseTotal += PointLightColor(i) * matDiffuse * dotNormal * attenuation;
-		// Specular reflection -- calculates the light reflection vector
-		vec3 ref = reflect(-lightDir, norm);
-		if (dotNormal > 0.0) {
-			specularTotal += PointLightColor(i) * matSpecular *
-				pow(max(dot(ref, camDir), 0.0), shiny) * attenuation;
+		float dotNormal = dot(lightDir, norm);
+		if (dotNormal > EPS) {
+			float attenuation = 1.0 / (1.0 + lightDist * (PointLightLinDecay(i) +
+				PointLightQuadDecay(i) * lightDist));
+			vec3 attenColor = PointLightColor(i) * attenuation;
+			diffuseTotal += attenColor * matDiffuse * dotNormal;
+			// Specular reflection -- calculates the light reflection vector
+			vec3 ref = reflect(-lightDir, norm);
+			specularTotal += attenColor * matSpecular *			pow(max(dot(ref, camDir), 0.0), shiny);
 		}
 	}
 #endif
@@ -731,10 +730,6 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		float lightDist = length(lightDir);
 		lightDir = lightDir / lightDist;
 
-		// Calculates the attenuation due to the distance of the light
-		float attenuation = 1.0 / (1.0 + SpotLightLinDecay(i) * lightDist +
-			SpotLightQuadDecay(i) * lightDist * lightDist);
-
 		// Calculates the angle between the vertex direction and spot direction
 		// If this angle is greater than the cutoff the spotlight will not contribute
 		// to the final color.
@@ -742,16 +737,18 @@ void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffu
 		float cutoff = radians(clamp(SpotLightCutAngle(i), 0.0, 90.0));
 
 		if (angle < cutoff) {
-			float spotFactor = pow(dot(-lightDir, SpotLightDir(i)), SpotLightAngDecay(i));
-
 			// Diffuse reflection
-			float dotNormal = max(dot(lightDir, norm), 0.0);
-			diffuseTotal += SpotLightColor(i) * matDiffuse * dotNormal * attenuation * spotFactor;
-
-			// Specular reflection
-			vec3 ref = reflect(-lightDir, norm);
-			if (dotNormal > 0.0) {
-				specularTotal += SpotLightColor(i) * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny) * attenuation * spotFactor;
+			float dotNormal = dot(lightDir, norm);
+			if (dotNormal > EPS) {
+				// Calculates the attenuation due to the distance of the light
+				float attenuation = 1.0 / (1.0 + lightDist * (SpotLightLinDecay(i) +
+					SpotLightQuadDecay(i) * lightDist));
+				float spotFactor = pow(dot(-lightDir, SpotLightDir(i)), SpotLightAngDecay(i));
+				vec3 attenColor = SpotLightColor(i) * attenuation * spotFactor;
+				diffuseTotal += attenColor * matDiffuse * dotNormal;
+				// Specular reflection
+				vec3 ref = reflect(-lightDir, norm);
+				specularTotal += attenColor * matSpecular * pow(max(dot(ref, camDir), 0.0), shiny);
 			}
 		}
 	}
