@@ -69,9 +69,9 @@ func MimeFromFile(fname string) (mtype, ext string, err error) {
 			isplain = true
 			ptyp = mtyp
 		} else if mtyp == "application/zip" {
-			nmtyp, ext, err := mimetype.DetectFile(fname) // can detect zipped types
-			if err == nil && nmtyp != "" {
-				return nmtyp, ext, err
+			mime, err := mimetype.DetectFile(fname) // can detect zipped types
+			if err == nil && mime.String() != "" {
+				return mime.String(), mime.Extension(), err
 			}
 			return mtyp, ext, nil
 		} else if mtyp != "" {
