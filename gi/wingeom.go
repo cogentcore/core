@@ -31,11 +31,51 @@ var WinGeomPrefs = WindowGeomPrefs{}
 
 // WindowGeom records the geometry settings used for a given window
 type WindowGeom struct {
-	WinName    string
-	Screen     string
-	LogicalDPI float32
-	Size       image.Point
-	Pos        image.Point
+	DPI float32
+	DPR float32
+	SX  int
+	SY  int
+	PX  int
+	PY  int
+}
+
+func (wg *WindowGeom) Size() image.Point {
+	return image.Point{wg.SX, wg.SY}
+}
+
+func (wg *WindowGeom) SetSize(sz image.Point) {
+	wg.SX = sz.X
+	wg.SY = sz.Y
+}
+
+func (wg *WindowGeom) ScaleSize(fact float32) {
+	wg.SX = int(float32(wg.SX) * fact)
+	wg.SY = int(float32(wg.SY) * fact)
+}
+
+func (wg *WindowGeom) Pos() image.Point {
+	return image.Point{wg.PX, wg.PY}
+}
+
+func (wg *WindowGeom) SetPos(ps image.Point) {
+	wg.PX = ps.X
+	wg.PY = ps.Y
+}
+
+func (wg *WindowGeom) ScalePos(fact float32) {
+	wg.PX = int(float32(wg.PX) * fact)
+	wg.PY = int(float32(wg.PY) * fact)
+}
+
+func (wg *WindowGeom) FitInSize(sz image.Point) {
+	wg.SX = ints.MinInt(wg.SX, sz.X)
+	wg.SY = ints.MinInt(wg.SY, sz.Y)
+	if wg.PX+wg.SX > sz.X {
+		wg.PX = sz.X - wg.SX
+	}
+	if wg.PY+wg.SY > sz.Y {
+		wg.PY = sz.Y - wg.SY
+	}
 }
 
 // WindowGeomPrefs records the window geometry by window name, screen name --
@@ -143,12 +183,27 @@ func (wg *WindowGeomPrefs) Open() error {
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".json")
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
-		log.Println(err)
+		// log.Println(err)
 		return err
 	}
 	err = json.Unmarshal(b, wg)
 	if err != nil {
 		log.Println(err)
+	}
+	oldFmt := false
+	for _, wps := range *wg {
+		for _, wp := range wps {
+			if wp.DPI == 0 && wp.DPR == 0 {
+				oldFmt = true
+			}
+			break
+		}
+		break
+	}
+	if oldFmt {
+		log.Printf("WindowGeomPrefs: resetting prefs for new format\n")
+		*wg = make(WindowGeomPrefs, 1000)
+		wg.Save() // overwrite
 	}
 	return err
 }
@@ -161,7 +216,7 @@ func (wg *WindowGeomPrefs) Save() error {
 	}
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, WinGeomPrefsFileName+".json")
-	b, err := json.MarshalIndent(wg, "", "  ")
+	b, err := json.MarshalIndent(wg, "", "\t")
 	if err != nil {
 		log.Println(err)
 		return err
@@ -177,6 +232,13 @@ func (wg *WindowGeomPrefs) Save() error {
 
 // RecordPref records current state of window as preference
 func (wg *WindowGeomPrefs) RecordPref(win *Window) {
+	wsz := win.OSWin.WinSize()
+	if wsz == image.ZP {
+		if WinGeomTrace {
+			fmt.Printf("WindowGeomPrefs: NOT storing null size for win: %v\n", win.Nm)
+		}
+		return
+	}
 	WinGeomPrefsMu.Lock()
 	if wg == nil {
 		*wg = make(WindowGeomPrefs, 100)
@@ -188,16 +250,9 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 		winName = winName[:ci]
 	}
 	sc := win.OSWin.Screen()
-	wgr := WindowGeom{WinName: winName, Screen: sc.Name, LogicalDPI: win.LogicalDPI()}
-	wgr.Pos = win.OSWin.Position()
-	wgr.Size = win.OSWin.Size()
-	if wgr.Size == image.ZP {
-		WinGeomPrefsMu.Unlock()
-		if WinGeomTrace {
-			fmt.Printf("WindowGeomPrefs: NOT storing null size for win: %v scrn: %v\n", winName, sc.Name)
-		}
-		return
-	}
+	wgr := WindowGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
+	wgr.SetPos(win.OSWin.Position())
+	wgr.SetSize(wsz)
 
 	wg.LockFile() // not going to change our behavior if we can't lock!
 	if wg.NeedToReload() {
@@ -209,7 +264,7 @@ func (wg *WindowGeomPrefs) RecordPref(win *Window) {
 	}
 	(*wg)[winName][sc.Name] = wgr
 	if WinGeomTrace {
-		fmt.Printf("WindowGeomPrefs Saving for window: %v pos: %v size: %v  screen: %v\n", winName, wgr.Pos, wgr.Size, sc.Name)
+		fmt.Printf("WindowGeomPrefs Saving for window: %v pos: %v size: %v  screen: %v\n", winName, wgr.Pos(), wgr.Size(), sc.Name)
 	}
 	wg.Save()
 	wg.UnlockFile()
@@ -238,32 +293,33 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 
 	if scrn == nil {
 		scrn = oswin.TheApp.Screen(0)
-		// fmt.Printf("Pref: using scrn 0: %v\n", scrn.Name)
+		if WinGeomTrace {
+			fmt.Printf("WindowGeomPrefs: scrn is nil, using scrn 0: %v\n", scrn.Name)
+		}
 	}
 	scsz := scrn.Geometry.Size()
 
 	wp, ok := wps[scrn.Name]
 	if ok {
-		if scrn.LogicalDPI == wp.LogicalDPI {
-			wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
-			wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
+		if scrn.LogicalDPI == wp.DPI && scrn.DevicePixelRatio == wp.DPR {
+			wp.FitInSize(scsz)
 			if WinGeomTrace {
-				fmt.Printf("WindowGeomPrefs for window: %v size: %v  screen: %v\n", winName, wp.Size, scrn.Name)
+				fmt.Printf("WindowGeomPrefs for window: %v size: %v  screen: %v\n", winName, wp.Size(), scrn.Name)
 			}
 			return &wp
 		} else {
-			if wp.LogicalDPI <= 0 {
-				wp.LogicalDPI = 96
+			if wp.DPI <= 0 {
+				wp.DPI = 96
 			}
 			if WinGeomTrace {
-				fmt.Printf("WindowGeomPrefs: rescaling scrn dpi: %v saved dpi: %v\n", scrn.LogicalDPI, wp.LogicalDPI)
+				fmt.Printf("WindowGeomPrefs: rescaling scrn dpi: %v saved dpi: %v\n", scrn.LogicalDPI, wp.DPI)
 			}
-			wp.Size.X = int(float32(wp.Size.X) * (scrn.LogicalDPI / wp.LogicalDPI))
-			wp.Size.Y = int(float32(wp.Size.Y) * (scrn.LogicalDPI / wp.LogicalDPI))
-			wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
-			wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
+			fact := (wp.DPR / wp.DPI) / (scrn.DevicePixelRatio / scrn.LogicalDPI)
+			wp.ScaleSize(fact)
+			wp.ScalePos(fact)
+			wp.FitInSize(scsz)
 			if WinGeomTrace {
-				fmt.Printf("WindowGeomPrefs for window: %v size: %v\n", winName, wp.Size)
+				fmt.Printf("WindowGeomPrefs for window: %v size: %v\n", winName, wp.Size())
 			}
 			return &wp
 		}
@@ -273,20 +329,23 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		return nil
 	}
 
-	trgdpi := scrn.LogicalDPI
-	// fmt.Printf("Pref: falling back on dpi conversion: %v\n", trgdpi)
+	trgdpi := scrn.LogicalDPI / scrn.DevicePixelRatio
+	if WinGeomTrace {
+		fmt.Printf("WindowGeomPrefs: falling back on dpi conversion: %v\n", trgdpi)
+	}
 
 	// try to find one with same logical dpi, else closest
 	var closest *WindowGeom
 	minDPId := float32(100000.0)
 	for _, wp = range wps {
-		if wp.LogicalDPI == trgdpi {
+		wdpi := wp.DPI / wp.DPR
+		if wdpi == trgdpi {
 			if WinGeomTrace {
 				fmt.Printf("WindowGeomPrefs for window: %v other screen pos: %v size: %v\n", winName, wp.Pos, wp.Size)
 			}
 			return &wp
 		}
-		dpid := math32.Abs(wp.LogicalDPI - trgdpi)
+		dpid := math32.Abs(wdpi - trgdpi)
 		if dpid < minDPId {
 			minDPId = dpid
 			closest = &wp
@@ -296,15 +355,13 @@ func (wg *WindowGeomPrefs) Pref(winName string, scrn *oswin.Screen) *WindowGeom 
 		return nil
 	}
 	wp = *closest
-	rescale := trgdpi / closest.LogicalDPI
-	wp.Pos.X = int(float32(wp.Pos.X) * rescale)
-	wp.Pos.Y = int(float32(wp.Pos.Y) * rescale)
-	wp.Size.X = int(float32(wp.Size.X) * rescale)
-	wp.Size.Y = int(float32(wp.Size.Y) * rescale)
-	wp.Size.X = ints.MinInt(wp.Size.X, scsz.X)
-	wp.Size.Y = ints.MinInt(wp.Size.Y, scsz.Y)
+
+	fact := (closest.DPR / closest.DPI) / (scrn.DevicePixelRatio / scrn.LogicalDPI)
+	wp.ScaleSize(fact)
+	wp.ScalePos(fact)
+	wp.FitInSize(scsz)
 	if WinGeomTrace {
-		fmt.Printf("WindowGeomPrefs for window: %v rescaled pos: %v size: %v\n", winName, wp.Pos, wp.Size)
+		fmt.Printf("WindowGeomPrefs for window: %v rescaled pos: %v size: %v\n   old dpi: %v cur dpi: %v  old size: %v\n", winName, wp.Pos(), wp.Size(), closest.DPI, scrn.LogicalDPI, closest.Size())
 	}
 	return &wp
 }

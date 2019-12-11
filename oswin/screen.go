@@ -24,32 +24,38 @@ type Screen struct {
 	// maintained under Screen.
 	ScreenNumber int
 
-	// Geometry contains the geometry of the screen in raw pixels -- all
-	// physical screens start at 0,0.
+	// Geometry contains the geometry of the screen in window manager
+	// size units, which may not be same as raw pixels
 	Geometry image.Rectangle
 
-	// Color depth of the screen, in bits.
-	Depth int
+	// DevicePixelRatio is a factor that scales the screen's
+	// "natural" pixel coordinates into actual device pixels.
+	// On OS-X  it is backingScaleFactor = 2.0 on "retina"
+	DevicePixelRatio float32
 
-	// LogicalDPI is the logical dots per inch of the screen, which is used for all
-	// rendering -- subject to zooming effects etc -- see the gi/units package
-	// for translating into various other units.
-	LogicalDPI float32
-
-	// PhysicalDPI is the physical dots per inch of the screen, for generating
-	// true-to-physical-size output, for example -- see the gi/units package for
-	// translating into various other units.
-	PhysicalDPI float32
+	//	PixSize is the number of actual pixels in the screen
+	// computed as Size * DevicePixelRatio
+	PixSize image.Point
 
 	// PhysicalSize is the actual physical size of the screen, in mm.
 	PhysicalSize image.Point
 
-	// DevicePixelRatio is a multiplier factor that scales the screen's
-	// "natural" pixel coordinates into actual device pixels.
-	//
-	// On OS-X  it is backingScaleFactor, which is 2.0 on "retina" displays.
-	DevicePixelRatio float32
+	// LogicalDPI is the logical dots per inch of the screen,
+	// which is used for all rendering -- subject to zooming
+	// effects etc -- see the gi/units package for translating
+	// into various other units.
+	LogicalDPI float32
 
+	// PhysicalDPI is the physical dots per inch of the screen,
+	// for generating true-to-physical-size output, for example
+	// see the gi/units package for translating into various other
+	// units.
+	PhysicalDPI float32
+
+	// Color depth of the screen, in bits.
+	Depth int
+
+	// Refresh rate in Hz
 	RefreshRate float32
 
 	// todo: not using these yet

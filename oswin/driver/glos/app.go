@@ -215,12 +215,6 @@ func (app *appImpl) initGl() {
 //  Window
 
 func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) {
-	if opts == nil {
-		opts = &oswin.NewWindowOptions{}
-	}
-	opts.Fixup()
-	// can also apply further tuning here..
-
 	if len(app.winlist) == 0 && oswin.InitScreenLogicalDPIFunc != nil {
 		if monitorDebug {
 			log.Printf("app first new window calling InitScreenLogicalDPIFunc\n")
@@ -236,6 +230,12 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 			sc = psc
 		}
 	}
+
+	if opts == nil {
+		opts = &oswin.NewWindowOptions{}
+	}
+	opts.Fixup()
+	// can also apply further tuning here..
 
 	var glw *glfw.Window
 	var err error

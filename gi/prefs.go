@@ -297,7 +297,7 @@ func (pf *Preferences) ScreenInfo() string {
 		if i > 0 {
 			scinfo += "<br><br>\n"
 		}
-		scinfo += fmt.Sprintf("Screen number: %v name: %v\n<br>    geom: %v, depth: %v, logical DPI: %v, physical DPI: %v, logical DPI scale: %v, physical size: %v\n<br>    device pixel ratio: %v, refresh rate: %v\n<br>    orientation: %v, native orientation: %v, primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.Depth, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.PhysicalSize, sc.DevicePixelRatio, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
+		scinfo += fmt.Sprintf("Screen number: %v Name: %v<br>\n    Geom: %v, DevPixRatio: %v<br>\n    Pixels: %v, Physical size: %v mm<br>\n    Logical DPI: %v, Physical DPI: %v, Logical DPI scale: %v<br>\n    Depth: %v, Refresh rate: %v<br>\n    Orientation: %v, Native orientation: %v, Primary orientation: %v<br>\n", i, sc.Name, sc.Geometry, sc.DevicePixelRatio, sc.PixSize, sc.PhysicalSize, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.Depth, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
 	}
 	return scinfo
 }

@@ -368,8 +368,8 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	}
 	wgp := WinGeomPrefs.Pref(name, nil)
 	if wgp != nil {
-		opts.Size = wgp.Size
-		opts.Pos = wgp.Pos
+		opts.Size = wgp.Size()
+		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
 		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
 		if _, found := AllWindows.FindName(name); found {
@@ -412,8 +412,8 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	}
 	wgp := WinGeomPrefs.Pref(name, nil)
 	if wgp != nil {
-		opts.Size = wgp.Size
-		opts.Pos = wgp.Pos
+		opts.Size = wgp.Size()
+		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
 	}
 	win := NewWindow(name, title, opts)
@@ -535,9 +535,9 @@ func (w *Window) SetName(name string) bool {
 	if rval && w.OSWin != nil {
 		wgp := WinGeomPrefs.Pref(name, nil)
 		if wgp != nil {
-			if w.OSWin.Size() != wgp.Size || w.OSWin.Position() != wgp.Pos {
+			if w.OSWin.Size() != wgp.Size() || w.OSWin.Position() != wgp.Pos() {
 				// fmt.Printf("setting geom to: %v %v\n", wgp.Pos, wgp.Size)
-				w.OSWin.SetGeom(wgp.Pos, wgp.Size)
+				w.OSWin.SetGeom(wgp.Pos(), wgp.Size())
 			}
 		}
 	}
@@ -573,7 +573,10 @@ func (w *Window) LogicalDPI() float32 {
 // in increments of 6 dots to keep fonts rendering clearly.
 func (w *Window) ZoomDPI(steps int) {
 	w.InactivateAllSprites()
-	sc := oswin.TheApp.Screen(0)
+	sc := w.OSWin.Screen()
+	if sc == nil {
+		sc = oswin.TheApp.Screen(0)
+	}
 	pdpi := sc.PhysicalDPI
 	// ldpi = pdpi * zoom * ldpi
 	cldpinet := sc.LogicalDPI
@@ -606,6 +609,13 @@ func (w *Window) WinViewport2D() *Viewport2D {
 // that way when it occurs.
 func (w *Window) SetSize(sz image.Point) {
 	w.OSWin.SetSize(sz)
+}
+
+// SetPixSize requests that the window be resized to the given size
+// in underlying pixel coordinates, which means that the requested
+// size is divided by the screen's DevicePixelRatio
+func (w *Window) SetPixSize(sz image.Point) {
+	w.OSWin.SetPixSize(sz)
 }
 
 // IsResizing means the window is actively being resized by user -- don't try

@@ -131,11 +131,7 @@ func newGLWindow(opts *oswin.NewWindowOptions, sc *oswin.Screen) (*glfw.Window, 
 		glfw.WindowHint(glfw.Decorated, glfw.True)
 	}
 	// todo: glfw.Floating for always-on-top -- could set for modal
-	sz := opts.Size
-	if sc.DevicePixelRatio != 1.0 {
-		sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
-		sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
-	}
+	sz := opts.Size // note: this is already in standard window size units!
 	win, err := glfw.CreateWindow(sz.X, sz.Y, opts.GetTitle(), nil, theApp.shareWin)
 	if err != nil {
 		return win, err
@@ -418,6 +414,16 @@ func (w *windowImpl) SetSize(sz image.Point) {
 		}
 		w.glw.SetSize(sz.X, sz.Y)
 	})
+}
+
+func (w *windowImpl) SetPixSize(sz image.Point) {
+	if w.IsClosed() {
+		return
+	}
+	sc := w.getScreen()
+	sz.X = int(float32(sz.X) / sc.DevicePixelRatio)
+	sz.Y = int(float32(sz.Y) / sc.DevicePixelRatio)
+	w.SetSize(sz)
 }
 
 func (w *windowImpl) SetPos(pos image.Point) {

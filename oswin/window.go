@@ -66,15 +66,25 @@ type Window interface {
 	// underlying screen, in OS-specific window manager coordinates.
 	Position() image.Point
 
-	// SetSize sets the size of the window, in OS-specific window manager units that may not include any high DPI factors (i.e., the same units as returned in WinSize)
+	// SetSize sets the size of the window, in OS-specific window manager
+	// units that may not include any high DPI factors (DevPixRatio)
+	// (i.e., the same units as returned in WinSize)
 	SetSize(sz image.Point)
 
-	// SetPos sets the position of the window, in OS window manager coordinates, which may be different from Size() coordinates that reflect high DPI
+	// SetPixSize sets the size of the window, in actual pixel units.
+	// Divides by DevPixRatio before calling SetSize.
+	SetPixSize(sz image.Point)
+
+	// SetPos sets the position of the window, in OS window manager
+	// coordinates, which may be different from Size() coordinates
+	// that reflect high DPI
 	SetPos(pos image.Point)
 
 	// SetGeom sets the position and size in one call -- use this if doing
 	// both because sequential calls to SetPos and SetSize might fail on some
-	// platforms.  Uses OS-specific window manager units that may not include any high DPI factors (i.e., the same units as returned in WinSize, Pos())
+	// platforms.  Uses OS-specific window manager units that may not include
+	// any high DPI factors (DevPixRatio)
+	// (i.e., the same units as returned in WinSize, Pos())
 	SetGeom(pos image.Point, sz image.Point)
 
 	// Raise requests that the window be at the top of the stack of windows,
@@ -445,11 +455,9 @@ func (o *NewWindowOptions) Fixup() {
 		o.Size.Y = int(0.8 * float32(scsz.Y))
 	}
 
-	if o.StdPixels {
-		winDPI := sc.LogicalDPI
-		o.Size.X = int(float32(o.Size.X) * (winDPI / 96.0))
-		o.Size.Y = int(float32(o.Size.Y) * (winDPI / 96.0))
-	}
+	// Note: StdPixels IS the default behavior at this point
+	// so we don't need to do any correction factors to deal
+	// with it!
 
 	if o.Size.X > scsz.X {
 		o.Size.X = scsz.X
@@ -462,7 +470,7 @@ func (o *NewWindowOptions) Fixup() {
 		nw := TheApp.NWindows()
 		if nw > 0 {
 			lastw := TheApp.Window(nw - 1)
-			lsz := lastw.Size()
+			lsz := lastw.WinSize()
 			lp := lastw.Position()
 
 			nwbig := o.Size.X > lsz.X || o.Size.Y > lsz.Y

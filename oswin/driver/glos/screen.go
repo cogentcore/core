@@ -86,20 +86,18 @@ func (app *appImpl) getScreens() {
 		}
 		sc.Name = mon.GetName()
 		sc.ScreenNumber = sci
-		if cscx > 1 { // logical size
-			vm.Width = int(cscx * float32(vm.Width))
-			vm.Height = int(cscx * float32(vm.Height))
-		}
 		sc.Geometry = image.Rectangle{Min: image.Point{x, y}, Max: image.Point{x + vm.Width, y + vm.Height}}
+		sc.DevicePixelRatio = cscx
+		sc.PixSize.X = int(float32(vm.Width) * cscx)
+		sc.PixSize.Y = int(float32(vm.Height) * cscx)
 		depth := vm.RedBits + vm.GreenBits + vm.BlueBits
 		sc.Depth = depth
 		sc.PhysicalSize = image.Point{pw, ph}
-		dpi := 25.4 * float32(vm.Width) / float32(pw)
+		dpi := 25.4 * float32(sc.PixSize.X) / float32(pw)
 		sc.PhysicalDPI = dpi
 		if sc.LogicalDPI == 0 { // do not overwrite if already set
 			sc.LogicalDPI = dpi
 		}
-		sc.DevicePixelRatio = cscx
 		sc.RefreshRate = float32(vm.RefreshRate)
 	}
 	if gotNew && len(app.winlist) > 0 {

@@ -189,9 +189,9 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 
 	if DialogsSepWindow {
 		dlg.UpdateEndNoSig(updt)
-		// fmt.Printf("setsz: %v\n", vpsz)
 		if !win.HasGeomPrefs() {
-			win.SetSize(vpsz)
+			// fmt.Printf("setsz: %v\n", vpsz)
+			win.SetPixSize(vpsz)
 		}
 		win.GoStartEventLoop()
 	} else {
