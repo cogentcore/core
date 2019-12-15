@@ -485,22 +485,15 @@ func (fv *FileView) UpdateFiles() {
 	oswin.TheApp.Cursor(win).Push(cursor.Wait)
 	defer oswin.TheApp.Cursor(win).Pop()
 
-	effpath := fv.DirPath
-	dpinfo, err := os.Lstat(effpath)
+	effpath, err := filepath.EvalSymlinks(fv.DirPath)
 	if err != nil {
 		log.Printf("gi.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
 		return
 	}
-	if dpinfo.Mode()&os.ModeSymlink != 0 {
-		path, _ := filepath.Split(effpath)
-		effpath, err = os.Readlink(effpath)
-		if err != nil {
-			log.Printf("gi.FileView Symbolic link path: %v could not be opened -- error: %v\n", effpath, err)
-			return
-		}
-		if effpath[0] != '/' {
-			effpath = filepath.Join(path, effpath)
-		}
+	_, err = os.Lstat(effpath)
+	if err != nil {
+		log.Printf("gi.FileView Path: %v could not be opened -- error: %v\n", effpath, err)
+		return
 	}
 
 	fv.Files = make([]*FileInfo, 0, 1000)
