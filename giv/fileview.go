@@ -498,7 +498,9 @@ func (fv *FileView) UpdateFiles() {
 			log.Printf("gi.FileView Symbolic link path: %v could not be opened -- error: %v\n", effpath, err)
 			return
 		}
-		effpath = filepath.Join(path, effpath)
+		if effpath[0] != '/' {
+			effpath = filepath.Join(path, effpath)
+		}
 	}
 
 	fv.Files = make([]*FileInfo, 0, 1000)
