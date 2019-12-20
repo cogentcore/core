@@ -141,6 +141,10 @@ func (tv *TableView) CacheVisFields() {
 				add = false
 			}
 		}
+		vtag := fld.Tag.Get("view")
+		if vtag == "-" {
+			add = false
+		}
 		if add {
 			tv.VisFields = append(tv.VisFields, fld)
 		}
@@ -544,6 +548,10 @@ func (tv *TableView) UpdateSliceGrid() {
 				tv.Values[vvi] = vv
 			} else {
 				vv = tv.Values[vvi]
+			}
+			if vv == nil {
+				fmt.Printf("field: %v %v has nil valueview: %v\n", fli, field.Name, fval.String())
+				continue
 			}
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
 
