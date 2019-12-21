@@ -42,7 +42,7 @@ import (
 type Node struct {
 	Nm       string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
 	UniqueNm string `copy:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag     int64  `copy:"-" json:"-" xml:"-" desc:"bit flags for internal node state"`
+	Flag     int64  `copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state"`
 	Props    Props  `xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
 	Par      Ki     `copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
 	Kids     Slice  `copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
