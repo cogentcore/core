@@ -56,6 +56,7 @@ func (vv *StructValueView) UpdateWidget() {
 
 func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
@@ -122,6 +123,7 @@ func (vv *StructInlineValueView) UpdateWidget() {
 
 func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.StructValView = vv
@@ -176,6 +178,7 @@ func (vv *SliceValueView) UpdateWidget() {
 
 func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	slci := vv.Value.Interface()
 	vv.IsArray = kit.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
 	vv.ElType = kit.SliceElType(slci)
@@ -268,6 +271,7 @@ func (vv *SliceInlineValueView) UpdateWidget() {
 
 func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*SliceViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.SliceValView = vv
@@ -316,6 +320,7 @@ func (vv *MapValueView) UpdateWidget() {
 
 func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.SetProp("padding", units.NewPx(2))
@@ -385,6 +390,7 @@ func (vv *MapInlineValueView) UpdateWidget() {
 
 func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*MapViewInline)
 	sv.Tooltip, _ = vv.Tag("desc")
 	sv.MapValView = vv
@@ -454,6 +460,7 @@ func (vv *KiPtrValueView) UpdateWidget() {
 
 func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.MenuButton)
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.SetProp("padding", units.NewPx(2))
@@ -525,6 +532,7 @@ func (vv *BoolValueView) UpdateWidget() {
 
 func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.CheckBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -569,6 +577,7 @@ func (vv *IntValueView) UpdateWidget() {
 
 func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -639,6 +648,7 @@ func (vv *FloatValueView) UpdateWidget() {
 
 func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -723,6 +733,7 @@ func (vv *EnumValueView) UpdateWidget() {
 
 func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -790,6 +801,7 @@ func (vv *BitFlagView) UpdateWidget() {
 func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ButtonBox)
+	vv.StdConfigWidget(&cb.Parts)
 	cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -839,6 +851,7 @@ func (vv *TypeValueView) UpdateWidget() {
 
 func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetInactiveState(vv.This().(ValueView).IsInactive())
@@ -901,23 +914,12 @@ func (vv *ByteSliceValueView) UpdateWidget() {
 
 func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
 	tf.SetProp("min-width", units.NewCh(16))
-	if widthtag, ok := vv.Tag("width"); ok {
-		width, ok := kit.ToFloat32(widthtag)
-		if ok {
-			tf.SetMinPrefWidth(units.NewCh(width))
-		}
-	}
-	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, ok := kit.ToFloat32(maxwidthtag)
-		if ok {
-			tf.SetProp("max-width", units.NewCh(width))
-		}
-	}
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
@@ -960,23 +962,12 @@ func (vv *RuneSliceValueView) UpdateWidget() {
 
 func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetStretchMaxWidth()
 	tf.SetProp("min-width", units.NewCh(16))
-	if widthtag, ok := vv.Tag("width"); ok {
-		width, ok := kit.ToFloat32(widthtag)
-		if ok {
-			tf.SetMinPrefWidth(units.NewCh(width))
-		}
-	}
-	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, ok := kit.ToFloat32(maxwidthtag)
-		if ok {
-			tf.SetProp("max-width", units.NewCh(width))
-		}
-	}
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {

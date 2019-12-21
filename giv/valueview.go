@@ -865,23 +865,12 @@ func (vv *ValueViewBase) UpdateWidget() {
 
 func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
 	tf.SetProp("min-width", units.NewCh(16))
-	if widthtag, ok := vv.Tag("width"); ok {
-		width, ok := kit.ToFloat32(widthtag)
-		if ok {
-			tf.SetMinPrefWidth(units.NewCh(width))
-		}
-	}
-	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, ok := kit.ToFloat32(maxwidthtag)
-		if ok {
-			tf.SetProp("max-width", units.NewCh(width))
-		}
-	}
 	if completetag, ok := vv.Tag("complete"); ok {
 		// todo: this does not seem to be up-to-date and should use Completer interface..
 		in := []reflect.Value{reflect.ValueOf(tf)}
@@ -904,6 +893,35 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 		}
 	})
 	vv.UpdateWidget()
+}
+
+// StdConfigWidget does all of the standard widget configuration tag options
+func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
+	nb := widg.AsNode2D()
+	if widthtag, ok := vv.Tag("width"); ok {
+		width, ok := kit.ToFloat32(widthtag)
+		if ok {
+			nb.SetMinPrefWidth(units.NewCh(width))
+		}
+	}
+	if maxwidthtag, ok := vv.Tag("max-width"); ok {
+		width, ok := kit.ToFloat32(maxwidthtag)
+		if ok {
+			nb.SetProp("max-width", units.NewCh(width))
+		}
+	}
+	if heighttag, ok := vv.Tag("height"); ok {
+		height, ok := kit.ToFloat32(heighttag)
+		if ok {
+			nb.SetMinPrefHeight(units.NewEm(height))
+		}
+	}
+	if maxheighttag, ok := vv.Tag("max-height"); ok {
+		height, ok := kit.ToFloat32(maxheighttag)
+		if ok {
+			nb.SetProp("max-height", units.NewEm(height))
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

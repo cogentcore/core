@@ -710,51 +710,6 @@ func (wb *WidgetBase) Size2DSubSpace() Vec2D {
 	return wb.LayData.AllocSize.SubVal(2 * spc)
 }
 
-// SetMinPrefWidth sets minimum and preferred width -- will get at least this
-// amount -- max unspecified
-func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
-	wb.SetProp("width", val)
-	wb.SetProp("min-width", val)
-}
-
-// SetMinPrefHeight sets minimum and preferred height -- will get at least this
-// amount -- max unspecified
-func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
-	wb.SetProp("height", val)
-	wb.SetProp("min-height", val)
-}
-
-// SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
-func (wb *WidgetBase) SetStretchMaxWidth() {
-	wb.SetProp("max-width", units.NewPx(-1))
-}
-
-// SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
-func (wb *WidgetBase) SetStretchMaxHeight() {
-	wb.SetProp("max-height", units.NewPx(-1))
-}
-
-// SetStretchMax sets stretchy max width and height (-1) -- can grow to take up avail room
-func (wb *WidgetBase) SetStretchMax() {
-	wb.SetStretchMaxWidth()
-	wb.SetStretchMaxHeight()
-}
-
-// SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value
-func (wb *WidgetBase) SetFixedWidth(val units.Value) {
-	wb.SetProp("width", val)
-	wb.SetProp("min-width", val)
-	wb.SetProp("max-width", val)
-}
-
-// SetFixedHeight sets all height options (height, min-height, max-height) to
-// a fixed height value
-func (wb *WidgetBase) SetFixedHeight(val units.Value) {
-	wb.SetProp("height", val)
-	wb.SetProp("min-height", val)
-	wb.SetProp("max-height", val)
-}
-
 ///////////////////////////////////////////////////////////////////
 // PartsWidgetBase
 

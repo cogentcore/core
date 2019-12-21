@@ -53,6 +53,7 @@ func (vv *IconValueView) UpdateWidget() {
 
 func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
 	ac.SetProp("padding", 0)

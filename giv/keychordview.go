@@ -43,6 +43,7 @@ func (vv *KeyChordValueView) UpdateWidget() {
 
 func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	kc := vv.Widget.(*KeyChordEdit)
 	kc.KeyChordSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_KeyChordValueView).(*KeyChordValueView)

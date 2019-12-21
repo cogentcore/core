@@ -41,6 +41,7 @@ func (vv *FontValueView) UpdateWidget() {
 
 func (vv *FontValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
 	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
