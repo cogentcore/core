@@ -346,7 +346,7 @@ func (mv *MapView) ConfigToolbar() {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.UpdateValues()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
+		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the map"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.MapAdd()

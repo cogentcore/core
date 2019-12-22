@@ -786,7 +786,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the slice"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)

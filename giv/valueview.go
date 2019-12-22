@@ -241,7 +241,9 @@ func ToValueView(it interface{}, tags string) ValueView {
 			return vv
 		}
 		if kit.IfaceIsNil(it) {
-			return nil
+			vv := NilValueView{}
+			vv.Init(&vv)
+			return &vv
 		}
 		v := reflect.ValueOf(it)
 		if !kit.ValueIsZero(v) {
@@ -250,7 +252,9 @@ func ToValueView(it interface{}, tags string) ValueView {
 			return ToValueView(v.Elem().Interface(), tags)
 		}
 	case nptyp == ki.KiT_Signal:
-		return nil
+		vv := NilValueView{}
+		vv.Init(&vv)
+		return &vv
 	case vk == reflect.Array:
 		fallthrough
 	case vk == reflect.Slice:

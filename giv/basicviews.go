@@ -983,3 +983,41 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	})
 	vv.UpdateWidget()
 }
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  NilValueView
+
+// NilValueView presents a label saying 'nil' -- for any nil or otherwise unrepresentable items
+type NilValueView struct {
+	ValueViewBase
+}
+
+var KiT_NilValueView = kit.Types.AddType(&NilValueView{}, nil)
+
+func (vv *NilValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_Label
+	return vv.WidgetTyp
+}
+
+func (vv *NilValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	sb := vv.Widget.(*gi.Label)
+	npv := kit.NonPtrValue(vv.Value)
+	tstr := ""
+	if !kit.ValueIsZero(npv) {
+		tstr = npv.String() // npv.Type().String()
+	} else if !kit.ValueIsZero(vv.Value) {
+		tstr = vv.Value.String() // vv.Value.Type().String()
+	}
+	sb.SetText("nil " + tstr)
+}
+
+func (vv *NilValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
+	sb := vv.Widget.(*gi.Label)
+	sb.Tooltip, _ = vv.Tag("desc")
+	vv.UpdateWidget()
+}

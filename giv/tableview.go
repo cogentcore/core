@@ -327,7 +327,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			}
 		}
 		hdr.Data = fli
-		hdr.Tooltip = "(click to sort / toggle sort direction by this column)"
+		hdr.Tooltip = field.Name + " (click to sort by)"
 		dsc := field.Tag.Get("desc")
 		if dsc != "" {
 			hdr.Tooltip += ": " + dsc
@@ -768,7 +768,7 @@ func (tv *TableView) ConfigToolbar() {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
+		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.SliceNewAt(-1)
