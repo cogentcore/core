@@ -97,6 +97,14 @@ type EnumRegistry struct {
 // Enums is master registry of enum types -- can also create your own package-specific ones
 var Enums EnumRegistry
 
+const (
+	// BitFlag is used for AddEnum to indicate that this is a bit flag enum
+	BitFlag = true
+
+	// NotBitFlag is used for AddEnum to indicate that this is NOT a bit flag enum
+	NotBitFlag = false
+)
+
 // AddEnum adds a given type to the registry -- requires the N value to set N
 // from and grab type info from -- if bitFlag then sets BitFlag property, and
 // each value represents a bit in a set of bit flags, so the string rep of a
@@ -742,7 +750,7 @@ const (
 
 //go:generate stringer -type=TestFlags
 
-var KiT_TestFlags = Enums.AddEnumAltLower(TestFlagsN, false, nil, "Test")
+var KiT_TestFlags = Enums.AddEnumAltLower(TestFlagsN, NotBitFlag, nil, "Test")
 
 func (ev TestFlags) MarshalJSON() ([]byte, error)  { return EnumMarshalJSON(ev) }
 func (ev *TestFlags) UnmarshalJSON(b []byte) error { return EnumUnmarshalJSON(ev, b) }

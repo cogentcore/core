@@ -870,7 +870,7 @@ type Flags int32
 
 //go:generate stringer -type=Flags
 
-var KiT_Flags = kit.Enums.AddEnum(FlagsN, true, nil) // true = bitflags
+var KiT_Flags = kit.Enums.AddEnum(FlagsN, kit.BitFlag, nil)
 
 const (
 	// IsField indicates a node is a field in its parent node, not a child in children.
