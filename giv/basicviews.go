@@ -83,6 +83,9 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	vpath := vv.ViewPath + "/" + newPath
 	opv := kit.OnePtrUnderlyingValue(vv.Value)
 	desc, _ := vv.Tag("desc")
+	if desc == "list" { // todo: not sure where this comes from but it is uninformative
+		desc = ""
+	}
 	inact := vv.This().(ValueView).IsInactive()
 	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
 	svk := dlg.Frame().ChildByType(KiT_StructView, true, 2)

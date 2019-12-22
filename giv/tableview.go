@@ -763,15 +763,21 @@ func (tv *TableView) ConfigToolbar() {
 	tb := tv.ToolBar()
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of table"},
+			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				tvv := recv.Embed(KiT_TableView).(*TableView)
+				tvv.UpdateSliceGrid()
+			})
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.SliceNewAt(-1)
 			})
 	}
+	ndef := 2 // number of default actions
 	sz := len(*tb.Children())
-	if sz > 1 {
-		for i := sz - 1; i >= 1; i-- {
+	if sz > ndef {
+		for i := sz - 1; i >= ndef; i-- {
 			tb.DeleteChildAtIndex(i, true)
 		}
 	}

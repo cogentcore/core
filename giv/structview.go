@@ -145,8 +145,21 @@ func (sv *StructView) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
-	tb.SetStretchMaxWidth()
-	tb.DeleteChildren(true)
+	if len(*tb.Children()) == 0 {
+		tb.SetStretchMaxWidth()
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of struct"},
+			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv := recv.Embed(KiT_StructView).(*StructView)
+				svv.UpdateFields()
+			})
+	}
+	ndef := 1 // number of default actions
+	sz := len(*tb.Children())
+	if sz > ndef {
+		for i := sz - 1; i >= ndef; i-- {
+			tb.DeleteChildAtIndex(i, true)
+		}
+	}
 	if HasToolBarView(sv.Struct) {
 		ToolBarView(sv.Struct, sv.Viewport, tb)
 	}

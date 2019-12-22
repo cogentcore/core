@@ -773,13 +773,19 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
-	nact := 1
-	if sv.isArray || sv.IsInactive() {
-		nact = 0
+	ndef := 2 // number of default actions
+	if sv.isArray || sv.IsInactive() || sv.NoAdd {
+		ndef = 1
 	}
-	if len(*tb.Children()) < nact {
+	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		if !sv.isArray && !sv.NoAdd {
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of slice"},
+			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+				svv.This().(SliceViewer).UpdateSliceGrid()
+
+			})
+		if ndef > 1 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 					svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
@@ -788,8 +794,8 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		}
 	}
 	sz := len(*tb.Children())
-	if sz > nact {
-		for i := sz - 1; i >= nact; i-- {
+	if sz > ndef {
+		for i := sz - 1; i >= ndef; i-- {
 			tb.DeleteChildAtIndex(i, true)
 		}
 	}

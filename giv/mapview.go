@@ -338,12 +338,14 @@ func (mv *MapView) ConfigToolbar() {
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
 	}
-
-	nBuiltin := 2
-
 	tb := mv.ToolBar()
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of map"},
+			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				mvv := recv.Embed(KiT_MapView).(*MapView)
+				mvv.UpdateValues()
+			})
 		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
@@ -355,9 +357,10 @@ func (mv *MapView) ConfigToolbar() {
 				mvv.ToggleSort()
 			})
 	}
+	ndef := 3 // number of default actions
 	sz := len(*tb.Children())
-	if sz > nBuiltin {
-		for i := sz - 1; i >= nBuiltin; i-- {
+	if sz > ndef {
+		for i := sz - 1; i >= ndef; i-- {
 			tb.DeleteChildAtIndex(i, true)
 		}
 	}
