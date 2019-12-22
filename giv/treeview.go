@@ -316,7 +316,7 @@ type TreeViewFlags int
 
 //go:generate stringer -type=TreeViewFlags
 
-var KiT_TreeViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TreeViewFlagsN, true, nil) // true = bitflags
+var KiT_TreeViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TreeViewFlagsN, kit.BitFlag, nil)
 
 const (
 	// TreeViewFlagClosed means node is toggled closed (children not visible)

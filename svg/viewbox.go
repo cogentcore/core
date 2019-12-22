@@ -4,7 +4,10 @@
 
 package svg
 
-import "github.com/goki/gi/gi"
+import (
+	"github.com/goki/gi/gi"
+	"github.com/goki/ki/kit"
+)
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // ViewBox defines the SVG viewbox
@@ -46,6 +49,11 @@ const (
 // ViewBoxMeetOrSlice defines values for the PreserveAspectRatio meet or slice factor
 type ViewBoxMeetOrSlice int32
 
+var KiT_ViewBoxMeetOrSlice = kit.Enums.AddEnumAltLower(ViewBoxMeetOrSliceN, kit.NotBitFlag, gi.StylePropProps, "")
+
+func (ev ViewBoxMeetOrSlice) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *ViewBoxMeetOrSlice) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
 const (
 	// Meet means the entire ViewBox is visible within Viewport, and it is
 	// scaled up as much as possible to meet the align constraints
@@ -55,6 +63,8 @@ const (
 	// ViewBox is scaled down as much as possible, while still meeting the
 	// align constraints
 	Slice
+
+	ViewBoxMeetOrSliceN
 )
 
 //go:generate stringer -type=ViewBoxMeetOrSlice

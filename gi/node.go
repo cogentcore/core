@@ -61,7 +61,7 @@ type NodeFlags int
 
 //go:generate stringer -type=NodeFlags
 
-var KiT_NodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, true, nil) // true = bitflags
+var KiT_NodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, kit.BitFlag, nil)
 
 const (
 	// NoLayout means that this node does not participate in the layout

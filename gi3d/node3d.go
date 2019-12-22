@@ -120,7 +120,7 @@ type NodeFlags int
 
 //go:generate stringer -type=NodeFlags
 
-var KiT_NodeFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, NodeFlagsN, true, nil) // true = bitflags
+var KiT_NodeFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, NodeFlagsN, kit.BitFlag, nil)
 
 const (
 	// WorldMatrixUpdated means that the Pose.WorldMatrix has been updated

@@ -127,7 +127,7 @@ const (
 
 //go:generate stringer -type=EventType
 
-var KiT_EventType = kit.Enums.AddEnum(EventTypeN, false, nil)
+var KiT_EventType = kit.Enums.AddEnum(EventTypeN, kit.NotBitFlag, nil)
 
 // Event is the interface for oswin GUI events.  also includes Stringer
 // to get a string description of the event

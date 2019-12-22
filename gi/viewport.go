@@ -97,7 +97,7 @@ type VpFlags int
 
 //go:generate stringer -type=VpFlags
 
-var KiT_VpFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, VpFlagsN, true, nil) // true = bitflags
+var KiT_VpFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, VpFlagsN, kit.BitFlag, nil)
 
 const (
 	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey

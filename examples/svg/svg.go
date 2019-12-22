@@ -72,7 +72,7 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
 <p>You can drag the image around and use the scroll wheel to zoom.</p>`)
 
-	win := gi.NewWindow2D("gogi-svg-viewer", "GoGi SVG Viewer", width, height, true)
+	win := gi.NewMainWindow("gogi-svg-viewer", "GoGi SVG Viewer", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

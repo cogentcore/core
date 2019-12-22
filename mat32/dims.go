@@ -19,4 +19,4 @@ const (
 
 //go:generate stringer -type=Dims
 
-var KiT_Dims = kit.Enums.AddEnum(DimsN, false, nil)
+var KiT_Dims = kit.Enums.AddEnum(DimsN, kit.NotBitFlag, nil)

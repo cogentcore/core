@@ -147,7 +147,7 @@ const (
 
 //go:generate stringer -type=Actions
 
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 // DropMods indicates the modifier associated with the drop action (affected by
 // holding down modifier keys), suggesting what to do with the dropped item,
@@ -180,7 +180,7 @@ const (
 
 //go:generate stringer -type=DropMods
 
-var KiT_DropMods = kit.Enums.AddEnum(DropModsN, false, nil)
+var KiT_DropMods = kit.Enums.AddEnum(DropModsN, kit.NotBitFlag, nil)
 
 /////////////////////////////
 // oswin.Event interface

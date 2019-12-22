@@ -13,16 +13,14 @@ import (
 )
 
 // PrefsView opens a view of user preferences
-func PrefsView(pf *gi.Preferences) (*StructView, *gi.Window) {
+func PrefsView(pf *gi.Preferences) *gi.Window {
 	winm := "gogi-prefs"
-	if w, ok := gi.MainWindows.FindName(winm); ok {
-		w.OSWin.Raise()
-		return nil, nil
-	}
-
 	width := 800
 	height := 800
-	win := gi.NewWindow2D(winm, "GoGi Preferences", width, height, true)
+	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Preferences", width, height)
+	if recyc {
+		return win
+	}
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -71,20 +69,18 @@ func PrefsView(pf *gi.Preferences) (*StructView, *gi.Window) {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
-	return sv, win
+	return win
 }
 
 // PrefsDetView opens a view of user detailed preferences
-func PrefsDetView(pf *gi.PrefsDetailed) (*StructView, *gi.Window) {
+func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 	winm := "gogi-prefs-det"
-	if w, ok := gi.MainWindows.FindName(winm); ok {
-		w.OSWin.Raise()
-		return nil, nil
-	}
-
 	width := 800
 	height := 800
-	win := gi.NewWindow2D(winm, "GoGi Detailed Preferences", width, height, true)
+	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Detailed Preferences", width, height)
+	if recyc {
+		return win
+	}
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -133,20 +129,18 @@ func PrefsDetView(pf *gi.PrefsDetailed) (*StructView, *gi.Window) {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
-	return sv, win
+	return win
 }
 
 // PrefsDbgView opens a view of user debugging preferences
-func PrefsDbgView(pf *gi.PrefsDebug) (*StructView, *gi.Window) {
+func PrefsDbgView(pf *gi.PrefsDebug) *gi.Window {
 	winm := "gogi-prefs-dbg"
-	if w, ok := gi.MainWindows.FindName(winm); ok {
-		w.OSWin.Raise()
-		return nil, nil
-	}
-
 	width := 800
 	height := 800
-	win := gi.NewWindow2D(winm, "GoGi Debugging Preferences", width, height, true)
+	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Debugging Preferences", width, height)
+	if recyc {
+		return win
+	}
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -166,5 +160,5 @@ func PrefsDbgView(pf *gi.PrefsDebug) (*StructView, *gi.Window) {
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()
-	return sv, win
+	return win
 }

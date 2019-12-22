@@ -458,7 +458,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 	width := 1280
 	height := 720
 
-	win := gi.NewWindow2D(winm, winm, width, height, true) // true = pixel sizes
+	win := gi.NewMainWindow(winm, winm, width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

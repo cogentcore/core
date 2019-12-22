@@ -279,7 +279,7 @@ const (
 
 //go:generate stringer -type=LightColors
 
-var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, false, nil)
+var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
 
 // LightColorMap provides a map of named light colors
 var LightColorMap = map[LightColors]gi.Color{

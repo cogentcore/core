@@ -177,7 +177,7 @@ const (
 
 //go:generate stringer -type=VectorRoles
 
-var KiT_VectorRoles = kit.Enums.AddEnum(VectorRolesN, false, nil)
+var KiT_VectorRoles = kit.Enums.AddEnum(VectorRolesN, kit.NotBitFlag, nil)
 
 // see: https://computergraphics.stackexchange.com/questions/5712/gl-static-draw-vs-gl-dynamic-draw-vs-gl-stream-draw-does-it-matter
 // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBufferData.xhtml
@@ -228,4 +228,4 @@ const (
 
 //go:generate stringer -type=VectorUsages
 
-var KiT_VectorUsages = kit.Enums.AddEnum(VectorUsagesN, false, nil)
+var KiT_VectorUsages = kit.Enums.AddEnum(VectorUsagesN, kit.NotBitFlag, nil)

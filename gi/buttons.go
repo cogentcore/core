@@ -68,7 +68,7 @@ type ButtonFlags int
 
 //go:generate stringer -type=ButtonFlags
 
-var KiT_ButtonFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, ButtonFlagsN, true, nil) // true = bitflags
+var KiT_ButtonFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, ButtonFlagsN, kit.BitFlag, nil)
 
 const (
 	// button is checkable -- enables display of check control
@@ -114,7 +114,7 @@ type ButtonStates int32
 
 //go:generate stringer -type=ButtonStates
 
-var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, false, StylePropProps, "Button")
+var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, StylePropProps, "Button")
 
 func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

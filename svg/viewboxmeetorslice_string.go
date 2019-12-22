@@ -15,11 +15,12 @@ func _() {
 	var x [1]struct{}
 	_ = x[Meet-0]
 	_ = x[Slice-1]
+	_ = x[ViewBoxMeetOrSliceN-2]
 }
 
-const _ViewBoxMeetOrSlice_name = "MeetSlice"
+const _ViewBoxMeetOrSlice_name = "MeetSliceViewBoxMeetOrSliceN"
 
-var _ViewBoxMeetOrSlice_index = [...]uint8{0, 4, 9}
+var _ViewBoxMeetOrSlice_index = [...]uint8{0, 4, 9, 28}
 
 func (i ViewBoxMeetOrSlice) String() string {
 	if i < 0 || i >= ViewBoxMeetOrSlice(len(_ViewBoxMeetOrSlice_index)-1) {

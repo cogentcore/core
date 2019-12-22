@@ -362,7 +362,7 @@ const (
 
 //go:generate stringer -type=WindowFlags
 
-var KiT_WindowFlags = kit.Enums.AddEnum(WindowFlagsN, true, nil) // bitflags
+var KiT_WindowFlags = kit.Enums.AddEnum(WindowFlagsN, kit.BitFlag, nil)
 
 // NewWindowOptions are optional arguments to NewWindow.
 type NewWindowOptions struct {

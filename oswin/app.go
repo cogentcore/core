@@ -181,4 +181,4 @@ const (
 
 //go:generate stringer -type=Platforms
 
-var KiT_Platforms = kit.Enums.AddEnum(PlatformsN, false, nil)
+var KiT_Platforms = kit.Enums.AddEnum(PlatformsN, kit.NotBitFlag, nil)

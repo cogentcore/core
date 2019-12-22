@@ -32,7 +32,7 @@ func mainrun() {
 	oswin.TheApp.SetName("text")
 	oswin.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-textedit-test", "GoGi TextEdit Test", width, height, true) // true = pixel sizes
+	win := gi.NewMainWindow("gogi-textedit-test", "GoGi TextEdit Test", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

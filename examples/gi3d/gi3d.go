@@ -36,7 +36,7 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the 3D graphics aspect of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">README</a> page for this example app has further info.</p>`)
 
-	win := gi.NewWindow2D("gogi-gi3d-demo", "GoGi 3D Demo", width, height, true) // true = pixel sizes
+	win := gi.NewMainWindow("gogi-gi3d-demo", "GoGi 3D Demo", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

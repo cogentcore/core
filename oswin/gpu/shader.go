@@ -56,4 +56,4 @@ const (
 
 //go:generate stringer -type=ShaderTypes
 
-var KiT_ShaderTypes = kit.Enums.AddEnum(ShaderTypesN, false, nil)
+var KiT_ShaderTypes = kit.Enums.AddEnum(ShaderTypesN, kit.NotBitFlag, nil)

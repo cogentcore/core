@@ -163,7 +163,7 @@ const (
 
 //go:generate stringer -type=PathCmds
 
-var KiT_PathCmds = kit.Enums.AddEnumAltLower(PcErr, false, nil, "Pc")
+var KiT_PathCmds = kit.Enums.AddEnumAltLower(PcErr, kit.NotBitFlag, nil, "Pc")
 
 func (ev PathCmds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *PathCmds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

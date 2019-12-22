@@ -30,7 +30,7 @@ func mainrun() {
 	gi.SetAppName("textview")
 	gi.SetAppAbout(`This is a demo of the TextView in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-textview-test", "GoGi TextView Test", width, height, true) // true = pixel sizes
+	win := gi.NewMainWindow("gogi-textview-test", "GoGi TextView Test", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

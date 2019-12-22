@@ -169,7 +169,7 @@ func (app *appImpl) mainLoop() {
 			}
 		default:
 			if len(app.windows) == 0 { // starting up
-				time.Sleep(1)
+				time.Sleep(50 * time.Millisecond)
 			} else {
 				// glfw.WaitEvents()
 				glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)

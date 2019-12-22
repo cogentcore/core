@@ -27,7 +27,7 @@ const (
 
 //go:generate stringer -type=Types
 
-var KiT_Types = kit.Enums.AddEnum(TypesN, false, nil)
+var KiT_Types = kit.Enums.AddEnum(TypesN, kit.NotBitFlag, nil)
 
 // GLSL type names
 var TypeNames = map[Types]string{

@@ -96,7 +96,7 @@ const (
 
 //go:generate stringer -type=LabelStates
 
-var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, false, StylePropProps, "Label")
+var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, StylePropProps, "Label")
 
 func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

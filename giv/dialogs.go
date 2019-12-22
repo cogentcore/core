@@ -78,7 +78,11 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	dlg, recyc := gi.RecycleStdDialog(stru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = stru
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -107,7 +111,11 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	dlg, recyc := gi.RecycleStdDialog(mp, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = mp
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -135,7 +143,11 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
 func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = slice
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -166,7 +178,11 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).  This version does not have the style function.
 func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = slice
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -206,7 +222,11 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 			},
 		}
 	}
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = slice
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -252,7 +272,11 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
 func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	dlg, recyc := gi.RecycleStdDialog(slcOfStru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = slcOfStru
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -294,7 +318,11 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 			},
 		}
 	}
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+	dlg, recyc := gi.RecycleStdDialog(slcOfStru, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = slcOfStru
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -392,7 +420,11 @@ func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row 
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+	dlg, recyc := gi.RecycleStdDialog(clr, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+	if recyc {
+		return dlg
+	}
+	dlg.Data = clr
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

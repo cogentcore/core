@@ -325,7 +325,13 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		wti += ": " + obj.Name()
 	}
 
-	win := gi.NewWindow2D(wnm, wti, width, height, true)
+	win, recyc := gi.RecycleMainWindow(obj, wnm, wti, width, height)
+	if recyc {
+		mfr, err := win.MainFrame()
+		if err == nil {
+			return mfr.Child(0).(*GiEditor)
+		}
+	}
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

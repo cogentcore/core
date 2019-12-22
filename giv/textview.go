@@ -183,7 +183,7 @@ type TextViewFlags int
 
 //go:generate stringer -type=TextViewFlags
 
-var KiT_TextViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextViewFlagsN, true, nil) // true = bitflags
+var KiT_TextViewFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextViewFlagsN, kit.BitFlag, nil)
 
 const (
 	// TextViewNeedsRefresh indicates when refresh is required

@@ -177,7 +177,7 @@ const (
 	Dims2DN
 )
 
-var KiT_Dims2D = kit.Enums.AddEnumAltLower(Dims2DN, false, nil, "")
+var KiT_Dims2D = kit.Enums.AddEnumAltLower(Dims2DN, kit.NotBitFlag, nil, "")
 
 func (ev Dims2D) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Dims2D) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

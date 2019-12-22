@@ -62,7 +62,7 @@ const (
 
 //go:generate stringer -type=UnicodeBidi
 
-var KiT_UnicodeBidi = kit.Enums.AddEnumAltLower(UnicodeBidiN, false, StylePropProps, "Bidi")
+var KiT_UnicodeBidi = kit.Enums.AddEnumAltLower(UnicodeBidiN, kit.NotBitFlag, StylePropProps, "Bidi")
 
 func (ev UnicodeBidi) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *UnicodeBidi) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -84,7 +84,7 @@ const (
 
 //go:generate stringer -type=TextDirections
 
-var KiT_TextDirections = kit.Enums.AddEnumAltLower(TextDirectionsN, false, StylePropProps, "")
+var KiT_TextDirections = kit.Enums.AddEnumAltLower(TextDirectionsN, kit.NotBitFlag, StylePropProps, "")
 
 func (ev TextDirections) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *TextDirections) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -101,7 +101,7 @@ const (
 
 //go:generate stringer -type=TextAnchors
 
-var KiT_TextAnchors = kit.Enums.AddEnumAltLower(TextAnchorsN, false, StylePropProps, "Anchor")
+var KiT_TextAnchors = kit.Enums.AddEnumAltLower(TextAnchorsN, kit.NotBitFlag, StylePropProps, "Anchor")
 
 func (ev TextAnchors) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *TextAnchors) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -139,7 +139,7 @@ const (
 
 //go:generate stringer -type=WhiteSpaces
 
-var KiT_WhiteSpaces = kit.Enums.AddEnumAltLower(WhiteSpacesN, false, StylePropProps, "WhiteSpace")
+var KiT_WhiteSpaces = kit.Enums.AddEnumAltLower(WhiteSpacesN, kit.NotBitFlag, StylePropProps, "WhiteSpace")
 
 func (ev WhiteSpaces) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *WhiteSpaces) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

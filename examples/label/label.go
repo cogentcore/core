@@ -26,7 +26,7 @@ func mainrun() {
 	gi.SetAppName("label")
 	gi.SetAppAbout(`This is a demo of the text rendering using labels in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-label-test", "GoGi Label Test", width, height, true) // true = pixel sizes
+	win := gi.NewMainWindow("gogi-label-test", "GoGi Label Test", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

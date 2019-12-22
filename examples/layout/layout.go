@@ -41,7 +41,7 @@ func mainrun() {
 	gi.SetAppName("layout")
 	gi.SetAppAbout(`This is a demo of the layout functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-layout-test", "GoGi Layout Test", width, height, true)
+	win := gi.NewMainWindow("gogi-layout-test", "GoGi Layout Test", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

@@ -85,7 +85,7 @@ const (
 
 //go:generate stringer -type=VectorEffects
 
-var KiT_VectorEffects = kit.Enums.AddEnumAltLower(VecEffN, false, StylePropProps, "VecEff")
+var KiT_VectorEffects = kit.Enums.AddEnumAltLower(VecEffN, kit.NotBitFlag, StylePropProps, "VecEff")
 
 func (ev VectorEffects) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *VectorEffects) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

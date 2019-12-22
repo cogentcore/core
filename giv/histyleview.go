@@ -89,7 +89,10 @@ func HiStylesView(st *histyle.Styles) {
 	winm := "hi-styles"
 	width := 800
 	height := 800
-	win := gi.NewWindow2D(winm, "Syntax Hilighting Styles", width, height, true)
+	win, recyc := gi.RecycleMainWindow(st, winm, "Syntax Hilighting Styles", width, height)
+	if recyc {
+		return
+	}
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

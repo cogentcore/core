@@ -23,7 +23,7 @@ organizing widgets / elements within the constraints of the display.
 Typically start with a vertical LayoutVert in the viewport, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
-	win := gi.NewWindow2D("test-window", "Test Window", width, height, true)
+	win := gi.NewMainWindow("test-window", "Test Window", width, height)
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
 

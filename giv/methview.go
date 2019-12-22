@@ -607,7 +607,7 @@ const (
 
 //go:generate stringer -type=MethViewFlags
 
-var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, true, nil, "MethView") // true = bitflags
+var KiT_MethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, nil, "MethView")
 
 // SubMenuFunc is a function that returns a string slice of submenu items
 // used in MethView submenu-func option
@@ -803,7 +803,7 @@ const (
 
 //go:generate stringer -type=ArgDataFlags
 
-var KiT_ArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, true, nil, "ArgData") // true = bitflags
+var KiT_ArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, kit.BitFlag, nil, "ArgData")
 
 func (ad *ArgData) HasDef() bool {
 	return bitflag.Has32(int32(ad.Flags), int(ArgDataHasDef))

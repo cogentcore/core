@@ -199,7 +199,7 @@ type TextBufFlags int
 
 //go:generate stringer -type=TextBufFlags
 
-var KiT_TextBufFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextBufFlagsN, true, nil) // true = bitflags
+var KiT_TextBufFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextBufFlagsN, kit.BitFlag, nil)
 
 const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving

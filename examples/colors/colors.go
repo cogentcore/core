@@ -23,7 +23,7 @@ func mainrun() {
 	gi.SetAppName("colors")
 	gi.SetAppAbout(`This is a demo of the color space functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewWindow2D("gogi-colors-test", "GoGi Colors Test", width, height, true)
+	win := gi.NewMainWindow("gogi-colors-test", "GoGi Colors Test", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

@@ -65,6 +65,7 @@ type Dialog struct {
 	State     DialogState `desc:"state of the dialog"`
 	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
 	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
+	Data      interface{} `desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)
@@ -113,6 +114,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 
 	if DialogsSepWindow {
 		win = NewDialogWin(dlg.Nm, dlg.Title, 100, 100, dlg.Modal)
+		win.Data = dlg.Data
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport2D
 		win.MasterVLay = dlg.Frame().Embed(KiT_Layout).(*Layout)
@@ -366,10 +368,10 @@ func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
 
 // Dialog Ok, Cancel options
 const (
-	AddOk     bool = true
-	NoOk           = false
-	AddCancel      = true
-	NoCancel       = false
+	AddOk     = true
+	NoOk      = false
+	AddCancel = true
+	NoCancel  = false
 )
 
 // StdButtonConfig returns a kit.TypeAndNameList for calling on ConfigChildren
@@ -454,6 +456,7 @@ type DlgOpts struct {
 // prompt, CSS styling) and whether ok, cancel buttons should be shown -- any
 // empty text will not be added -- returns with UpdateStart started but NOT
 // ended -- must call UpdateEnd(true) once done configuring!
+// Use AddOk / NoOk, AddCancel / NoCancel for bool args.
 func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
 	title := opts.Title
 	nm := strcase.ToKebab(title)
@@ -466,6 +469,22 @@ func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
 	dlg.CSS = opts.CSS
 	dlg.StdDialog(opts.Title, opts.Prompt, ok, cancel)
 	return &dlg
+}
+
+// RecycleStdDialog looks for existing dialog window with same Data --
+// if found brings that to the front, returns it, and true bool.
+// else (and if data is nil) calls NewStdDialog, returns false.
+func RecycleStdDialog(data interface{}, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
+	if data == nil {
+		return NewStdDialog(opts, ok, cancel), false
+	}
+	ew, has := DialogWindows.FindData(data)
+	if has && ew.NumChildren() > 0 {
+		ew.OSWin.Raise()
+		dlg := ew.Child(0).Embed(KiT_Dialog).(*Dialog)
+		return dlg, true
+	}
+	return NewStdDialog(opts, ok, cancel), false
 }
 
 //////////////////////////////////////////////////////////////////////////

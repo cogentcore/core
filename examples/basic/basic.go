@@ -18,7 +18,7 @@ func main() {
 func mainrun() {
 	width := 1024
 	height := 768
-	win := gi.NewWindow2D("gogi-basic", "Basic Test Window", width, height, true)
+	win := gi.NewMainWindow("gogi-basic", "Basic Test Window", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()

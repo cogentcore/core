@@ -130,6 +130,7 @@ var WindowOpenTimer time.Time
 type Window struct {
 	NodeBase
 	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	Data              interface{}                             `desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 	OSWin             oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	Viewport          *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
 	MasterVLay        *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
@@ -218,7 +219,7 @@ type WinFlags int
 
 //go:generate stringer -type=WinFlags
 
-var KiT_WinFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, WinFlagsN, true, nil) // true = bitflags
+var KiT_WinFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, WinFlagsN, kit.BitFlag, nil)
 
 const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied
@@ -356,15 +357,14 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	return win
 }
 
-// NewWindow2D creates a new standard 2D window with given internal handle
+// NewMainWindow creates a new standard main window with given internal handle
 // name, display name, and sizing, with default positioning, and initializes a
-// 2D viewport within it -- stdPixels means use standardized "pixel" units for
-// the display size (96 per inch), not the actual underlying raw display dot
-// pixels.
-func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window {
+// viewport within it. The width and height are in standardized "pixel" units
+// (96 per inch), not the actual underlying raw display dot pixels
+func NewMainWindow(name, title string, width, height int) *Window {
 	Init() // overall gogi system initialization, at latest possible moment
 	opts := &oswin.NewWindowOptions{
-		Title: title, Size: image.Point{width, height}, StdPixels: stdPixels,
+		Title: title, Size: image.Point{width, height}, StdPixels: true,
 	}
 	wgp := WinGeomPrefs.Pref(name, nil)
 	if wgp != nil {
@@ -398,6 +398,26 @@ func NewWindow2D(name, title string, width, height int, stdPixels bool) *Window 
 	return win
 }
 
+// RecycleMainWindow looks for existing window with same Data --
+// if found brings that to the front, returns true for bool.
+// else (and if data is nil) calls NewDialogWin, and returns false.
+func RecycleMainWindow(data interface{}, name, title string, width, height int) (*Window, bool) {
+	if data == nil {
+		return NewMainWindow(name, title, width, height), false
+	}
+	ew, has := MainWindows.FindData(data)
+	if has {
+		if WinEventTrace {
+			fmt.Printf("Win: %v getting recycled based on data match\n", ew.Nm)
+		}
+		ew.OSWin.Raise()
+		return ew, true
+	}
+	nw := NewMainWindow(name, title, width, height)
+	nw.Data = data
+	return nw, false
+}
+
 // NewDialogWin creates a new dialog window with given internal handle name,
 // display name, and sizing (assumed to be in raw dots), without setting its
 // main viewport -- user should do win.AddChild(vp); win.Viewport = vp to set
@@ -427,6 +447,26 @@ func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	DialogWindows.Add(win)
 	WinNewCloseStamp()
 	return win
+}
+
+// RecycleDialogWin looks for existing window with same Data --
+// if found brings that to the front, returns true for bool.
+// else (and if data is nil) calls NewDialogWin, and returns false.
+func RecycleDialogWin(data interface{}, name, title string, width, height int, modal bool) (*Window, bool) {
+	if data == nil {
+		return NewDialogWin(name, title, width, height, modal), false
+	}
+	ew, has := DialogWindows.FindData(data)
+	if has {
+		if WinEventTrace {
+			fmt.Printf("Win: %v getting recycled based on data match\n", ew.Nm)
+		}
+		ew.OSWin.Raise()
+		return ew, true
+	}
+	nw := NewDialogWin(name, title, width, height, modal)
+	nw.Data = data
+	return nw, false
 }
 
 // ConfigVLay creates and configures the vertical layout as first child of
@@ -514,6 +554,20 @@ func (w *Window) SetMainFrame() *Frame {
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
 	return fr
+}
+
+// MainFrame returns the main widget for this window as a Frame
+// returns error if not there, or not a frame.
+func (w *Window) MainFrame() (*Frame, error) {
+	kw, err := w.MainWidget()
+	if err != nil {
+		return nil, err
+	}
+	mf, ok := kw.(*Frame)
+	if ok {
+		return mf, nil
+	}
+	return nil, fmt.Errorf("Main Widget is not a Frame for Window: %s", w.Nm)
 }
 
 // SetMainLayout sets the main widget of this window as a Layout, with a default
@@ -3368,12 +3422,25 @@ func (wl *WindowList) Delete(w *Window) bool {
 }
 
 // FindName finds window with given name on list (case sensitive) -- returns
-// window and true if found, nil, false otherwise
+// window and true if found, nil, false otherwise.
 func (wl *WindowList) FindName(name string) (*Window, bool) {
 	WindowGlobalMu.Lock()
 	defer WindowGlobalMu.Unlock()
 	for _, wi := range *wl {
 		if wi.Nm == name {
+			return wi, true
+		}
+	}
+	return nil, false
+}
+
+// FindData finds window with given Data on list -- returns
+// window and true if found, nil, false otherwise.
+func (wl *WindowList) FindData(data interface{}) (*Window, bool) {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+	for _, wi := range *wl {
+		if wi.Data == data {
 			return wi, true
 		}
 	}

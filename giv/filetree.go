@@ -778,7 +778,7 @@ type FileNodeFlags int64
 
 //go:generate stringer -type=FileNodeFlags
 
-var KiT_FileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, true, nil) // true = bitflags
+var KiT_FileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, kit.BitFlag, nil)
 
 const (
 	// FileNodeOpen means file is open -- for directories, this means that
@@ -816,7 +816,7 @@ const (
 
 //go:generate stringer -type=FileNodeVcsStates
 
-var KiT_FileNodeVcsStates = kit.Enums.AddEnum(FileNodeVcsStatesN, false, nil)
+var KiT_FileNodeVcsStates = kit.Enums.AddEnum(FileNodeVcsStatesN, kit.NotBitFlag, nil)
 
 var FileNodeProps = ki.Props{
 	"EnumType:Flag": KiT_FileNodeFlags,

@@ -44,7 +44,7 @@ func (t Trilean) Prefix(s string) string {
 
 //go:generate stringer -type=Trilean
 
-var KiT_Trilean = kit.Enums.AddEnumAltLower(TrileanN, false, nil, "")
+var KiT_Trilean = kit.Enums.AddEnumAltLower(TrileanN, kit.NotBitFlag, nil, "")
 
 func (ev Trilean) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

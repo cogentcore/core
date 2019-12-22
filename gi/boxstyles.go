@@ -42,7 +42,7 @@ const (
 
 //go:generate stringer -type=BoxSides
 
-var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, false, StylePropProps, "Box")
+var KiT_BoxSides = kit.Enums.AddEnumAltLower(BoxN, kit.NotBitFlag, StylePropProps, "Box")
 
 func (ev BoxSides) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *BoxSides) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -66,7 +66,7 @@ const (
 
 //go:generate stringer -type=BorderDrawStyle
 
-var KiT_BorderDrawStyle = kit.Enums.AddEnumAltLower(BorderN, false, StylePropProps, "Border")
+var KiT_BorderDrawStyle = kit.Enums.AddEnumAltLower(BorderN, kit.NotBitFlag, StylePropProps, "Border")
 
 func (ev BorderDrawStyle) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *BorderDrawStyle) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

@@ -187,7 +187,7 @@ const (
 
 //go:generate stringer -type=Layouts
 
-var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, false, StylePropProps, "Layout")
+var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, StylePropProps, "Layout")
 
 func (ev Layouts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Layouts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -201,7 +201,7 @@ const (
 	RowColN
 )
 
-var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, false, StylePropProps, "")
+var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, StylePropProps, "")
 
 func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

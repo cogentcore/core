@@ -102,7 +102,7 @@ const (
 
 //go:generate stringer -type=KeyFuns
 
-var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, false, StylePropProps, "KeyFun")
+var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, StylePropProps, "KeyFun")
 
 func (kf KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
 func (kf *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }

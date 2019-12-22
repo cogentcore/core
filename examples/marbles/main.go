@@ -43,7 +43,7 @@ func mainrun() {
 	gi.SetAppName("marbles")
 	gi.SetAppAbout("marbles allows you to enter equations, which are graphed, and then marbles are dropped down on the resulting lines, and bounce around in very entertaining ways!")
 
-	win := gi.NewWindow2D("marbles", "Marbles", width, height, true) // true = pixel sizes
+	win := gi.NewMainWindow("marbles", "Marbles", width, height)
 
 	Vp = win.WinViewport2D()
 	updt := Vp.UpdateStart()
