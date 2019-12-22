@@ -22,7 +22,7 @@ type LangFlags int
 
 //go:generate stringer -type=LangFlags
 
-var KiT_LangFlags = kit.Enums.AddEnum(LangFlagsN, false, nil)
+var KiT_LangFlags = kit.Enums.AddEnum(LangFlagsN, kit.NotBitFlag, nil)
 
 func (ev LangFlags) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LangFlags) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

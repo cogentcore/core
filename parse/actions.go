@@ -17,7 +17,7 @@ type Actions int
 
 //go:generate stringer -type=Actions
 
-var KiT_Actions = kit.Enums.AddEnum(ActionsN, false, nil)
+var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 
 func (ev Actions) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Actions) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -120,7 +120,7 @@ type AstActs int
 
 //go:generate stringer -type=AstActs
 
-var KiT_AstActs = kit.Enums.AddEnum(AstActsN, false, nil)
+var KiT_AstActs = kit.Enums.AddEnum(AstActsN, kit.NotBitFlag, nil)
 
 func (ev AstActs) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *AstActs) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

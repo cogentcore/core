@@ -94,7 +94,7 @@ const (
 
 //go:generate stringer -type=Cat
 
-var KiT_Cat = kit.Enums.AddEnum(CatN, false, nil)
+var KiT_Cat = kit.Enums.AddEnum(CatN, kit.NotBitFlag, nil)
 
 func (kf Cat) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
 func (kf *Cat) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }

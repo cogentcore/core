@@ -28,7 +28,7 @@ type Tokens int
 
 //go:generate stringer -type=Tokens
 
-var KiT_Tokens = kit.Enums.AddEnum(TokensN, false, nil)
+var KiT_Tokens = kit.Enums.AddEnum(TokensN, kit.NotBitFlag, nil)
 
 func (ev Tokens) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Tokens) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

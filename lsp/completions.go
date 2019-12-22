@@ -14,7 +14,7 @@ type CompletionKind int
 
 //go:generate stringer -type=CompletionKind
 
-var KiT_CompletionKind = kit.Enums.AddEnumAltLower(CompletionKindN, false, nil, "Ck")
+var KiT_CompletionKind = kit.Enums.AddEnumAltLower(CompletionKindN, kit.NotBitFlag, nil, "Ck")
 
 func (ev CompletionKind) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *CompletionKind) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

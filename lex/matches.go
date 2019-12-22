@@ -16,7 +16,7 @@ type Matches int
 
 //go:generate stringer -type=Matches
 
-var KiT_Matches = kit.Enums.AddEnum(MatchesN, false, nil)
+var KiT_Matches = kit.Enums.AddEnum(MatchesN, kit.NotBitFlag, nil)
 
 func (ev Matches) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Matches) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -60,7 +60,7 @@ type MatchPos int
 
 //go:generate stringer -type=MatchPos
 
-var KiT_MatchPos = kit.Enums.AddEnum(MatchPosN, false, nil)
+var KiT_MatchPos = kit.Enums.AddEnum(MatchPosN, kit.NotBitFlag, nil)
 
 func (ev MatchPos) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *MatchPos) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

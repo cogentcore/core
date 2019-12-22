@@ -142,7 +142,7 @@ type Steps int
 
 //go:generate stringer -type=Steps
 
-var KiT_Steps = kit.Enums.AddEnum(StepsN, false, nil)
+var KiT_Steps = kit.Enums.AddEnum(StepsN, kit.NotBitFlag, nil)
 
 func (ev Steps) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Steps) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

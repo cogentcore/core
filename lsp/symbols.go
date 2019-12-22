@@ -19,7 +19,7 @@ type SymbolKind int
 
 //go:generate stringer -type=SymbolKind
 
-var KiT_SymbolKind = kit.Enums.AddEnum(SymbolKindN, false, nil)
+var KiT_SymbolKind = kit.Enums.AddEnum(SymbolKindN, kit.NotBitFlag, nil)
 
 func (ev SymbolKind) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *SymbolKind) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

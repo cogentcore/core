@@ -303,7 +303,7 @@ const (
 
 //go:generate stringer -type=Supported
 
-var KiT_Supported = kit.Enums.AddEnumAltLower(SupportedN, false, nil, "")
+var KiT_Supported = kit.Enums.AddEnumAltLower(SupportedN, kit.NotBitFlag, nil, "")
 
 func (kf Supported) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
 func (kf *Supported) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }

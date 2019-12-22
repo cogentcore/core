@@ -16,7 +16,7 @@ type Kinds int
 
 //go:generate stringer -type=Kinds
 
-var KiT_Kinds = kit.Enums.AddEnum(KindsN, false, nil)
+var KiT_Kinds = kit.Enums.AddEnum(KindsN, kit.NotBitFlag, nil)
 
 func (ev Kinds) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Kinds) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
