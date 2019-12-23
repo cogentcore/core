@@ -38,6 +38,10 @@ import (
 // event type (scroll, drag, resize) is skipped
 var EventSkipLagMSec = 50
 
+// FilterLaggyKeyEvents -- set to true to apply laggy filter to KeyEvents
+// (normally excluded)
+var FilterLaggyKeyEvents = false
+
 // DragStartMSec is the number of milliseconds to wait before initiating a
 // regular mouse drag event (as opposed to a basic mouse.Press)
 var DragStartMSec = 50
@@ -1546,7 +1550,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 			}
 		}
 	}
-	if et != oswin.KeyEvent { // don't filter key events
+	if FilterLaggyKeyEvents || et != oswin.KeyEvent { // don't filter key events
 		if !w.FilterEvent(evi) {
 			return
 		}
@@ -1761,6 +1765,14 @@ func (w *Window) FilterEvent(evi oswin.Event) bool {
 			w.lastSkipped = false
 			w.skippedResize = nil
 			return false
+		}
+	case oswin.KeyEvent:
+		if lagMs > EventSkipLagMSec {
+			// fmt.Printf("skipped et %v lag %v\n", et, lag)
+			w.lastSkipped = true
+			return false
+		} else {
+			w.lastSkipped = false
 		}
 	}
 	return true
