@@ -281,6 +281,8 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf.SetMinPrefHeight(units.NewEm(10))
 	sgf.SetStretchMax() // for this to work, ALL layers above need it too
 	sgf.SetProp("columns", nWidgPerRow)
+	// this causes everything to get off, especially resizing: not taking it into account presumably:
+	// sgf.SetProp("spacing", gi.StdDialogVSpaceUnits)
 
 	// Configure Header
 	hcfg := kit.TypeAndNameList{}
@@ -405,7 +407,6 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if sgHt == 0 {
 		return false
 	}
-
 	nWidgPerRow, _ := tv.RowWidgetNs()
 	tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	tv.VisRows = int(math32.Floor(sgHt / tv.RowHeight))
@@ -451,6 +452,7 @@ func (tv *TableView) LayoutHeader() {
 				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 				wd := sgf.GridData[gi.Col][fli].AllocSize
 				lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))
+				lbl.SetProp("max-width", units.NewValue(wd+spc, units.Dot))
 				sumwd += wd + spc
 			}
 		}
@@ -550,7 +552,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				vv = tv.Values[vvi]
 			}
 			if vv == nil {
-				fmt.Printf("field: %v %v has nil valueview: %v\n", fli, field.Name, fval.String())
+				fmt.Printf("field: %v %v has nil valueview: %v -- should not happen -- fix ToValueView\n", fli, field.Name, fval.String())
 				continue
 			}
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)

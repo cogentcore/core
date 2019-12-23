@@ -51,6 +51,7 @@ func mainrun() {
 	}
 
 	// turn this on to see a trace of the rendering
+	// gi.WinEventTrace = true
 	// gi.Render2DTrace = true
 	// gi.Layout2DTrace = true
 
@@ -84,6 +85,14 @@ func mainrun() {
 			gi.ProfileToggle()
 			gi.WindowOpenTimer = time.Now()
 			giv.SliceViewDialog(vp, &sl, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, nil, nil, nil)
+		}
+	})
+	but = gi.AddNewButton(trow, "table-test")
+	but.SetText("TableDialog")
+	but.Tooltip = "open a TableViewDialog view "
+	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			giv.TableViewDialog(vp, &tsttable, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, nil, nil, nil)
 		}
 	})
 

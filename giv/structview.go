@@ -145,9 +145,10 @@ func (sv *StructView) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
+	tb.SetStretchMaxWidth()
 	if len(*tb.Children()) == 0 {
-		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of struct"},
+		svtp := kit.NonPtrType(reflect.TypeOf(sv.Struct))
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of struct of type: " + svtp.String()},
 			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()

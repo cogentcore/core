@@ -283,7 +283,11 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
-	sr.Render[0].Face = sty.Face.Face
+	if sty.Face == nil {
+		sr.Render[0].Face = ucfont.Face.Face
+	} else {
+		sr.Render[0].Face = sty.Face.Face
+	}
 	sr.Render[0].Color = sty.Color
 	sr.Render[0].BgColor = bgc
 	sr.Render[0].RotRad = rot
