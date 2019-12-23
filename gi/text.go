@@ -367,7 +367,6 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 	curFace := sr.Render[0].Face
 	TextFontRenderMu.Lock()
 	defer TextFontRenderMu.Unlock()
-	col := 0 // current column position -- todo: does NOT deal with indent
 	for i, r := range sr.Text {
 		rr := &(sr.Render[i])
 		curFace = rr.CurFace(curFace)
@@ -395,6 +394,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 		rr.Size = Vec2D{a32, fht}
 
 		if r == '\t' {
+			col := int(math32.Ceil(fpos / chsz))
 			curtab := col / tabSize
 			curtab++
 			col = curtab * tabSize
@@ -404,7 +404,6 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 			}
 		} else {
 			fpos += a32
-			col++
 			if i < sz-1 {
 				fpos += lspc
 				if unicode.IsSpace(r) {
