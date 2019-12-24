@@ -401,9 +401,9 @@ type ValueView interface {
 	// SetSliceValue sets the value, owner and index information for a slice element.
 	SetSliceValue(val reflect.Value, owner interface{}, idx int, tmpSave ValueView, viewPath string)
 
-	// SetStandaloneValue sets the value for a singleton standalone value
+	// SetSoloValue sets the value for a singleton standalone value
 	// (e.g., for arg values).
-	SetStandaloneValue(val reflect.Value)
+	SetSoloValue(val reflect.Value)
 
 	// OwnerKind returns the reflect.Kind of the owner: Struct, Map, or Slice
 	// (or Invalid for standalone values such as args).
@@ -577,7 +577,7 @@ func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx
 	vv.SetName(idxstr)
 }
 
-func (vv *ValueViewBase) SetStandaloneValue(val reflect.Value) {
+func (vv *ValueViewBase) SetSoloValue(val reflect.Value) {
 	vv.OwnKind = reflect.Invalid
 	vv.Value = val
 }

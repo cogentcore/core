@@ -851,7 +851,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 		}
 
 		ad.View = ToValueView(ad.Val.Interface(), "")
-		ad.View.SetStandaloneValue(ad.Val)
+		ad.View.SetSoloValue(ad.Val)
 		ad.View.SetName(ad.Name)
 		nprompt++ // assume prompt
 

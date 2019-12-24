@@ -292,7 +292,7 @@ func (cv *ColorView) NumLayConfig() {
 	nl := cv.NumLay()
 	updt := nl.UpdateStart()
 	cv.NumView = ToValueView(&cv.Color, "")
-	cv.NumView.SetStandaloneValue(reflect.ValueOf(&cv.Color))
+	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
 	vtyp := cv.NumView.WidgetType()
 	widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
 	cv.NumView.ConfigWidget(widg)
