@@ -1555,10 +1555,10 @@ func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 // PasteAssign assigns mime data (only the first one!) to this idx
 func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 	sl := sv.FromMimeData(md)
-	updt := sv.UpdateStart()
 	if len(sl) == 0 {
 		return
 	}
+	updt := sv.UpdateStart()
 	ns := sl[0]
 	sv.SliceNPVal.Index(idx).Set(reflect.ValueOf(ns).Elem())
 	if sv.TmpSave != nil {
@@ -1571,14 +1571,14 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 
 // PasteAtIdx inserts object(s) from mime data at (before) given slice index
 func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
+	sl := sv.FromMimeData(md)
+	if len(sl) == 0 {
+		return
+	}
 	svl := reflect.ValueOf(sv.Slice)
-
+	svnp := sv.SliceNPVal
 	wupdt := sv.Viewport.Win.UpdateStart()
 	defer sv.Viewport.Win.UpdateEnd(wupdt)
-
-	svnp := sv.SliceNPVal
-
-	sl := sv.FromMimeData(md)
 	updt := sv.UpdateStart()
 	for _, ns := range sl {
 		sz := svnp.Len()
