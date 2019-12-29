@@ -84,6 +84,10 @@ type SliceViewer interface {
 	// if updt is true, then update the grid after
 	SliceDeleteAt(idx int, updt bool)
 
+	// MimeDataType returns the data type for mime clipboard (copy / paste) data
+	// e.g., filecat.DataJson
+	MimeDataType() string
+
 	// CopySelToMime copies selected rows to mime data
 	CopySelToMime() mimedata.Mimes
 
@@ -1413,6 +1417,12 @@ func (sv *SliceViewBase) FromMimeData(md mimedata.Mimes) []interface{} {
 	return sl
 }
 
+// MimeDataType returns the data type for mime clipboard (copy / paste) data
+// e.g., filecat.DataJson
+func (sv *SliceViewBase) MimeDataType() string {
+	return filecat.DataJson
+}
+
 // CopySelToMime copies selected rows to mime data
 func (sv *SliceViewBase) CopySelToMime() mimedata.Mimes {
 	nitms := len(sv.SelectedIdxs)
@@ -1505,7 +1515,8 @@ func (sv *SliceViewBase) CutIdxs() {
 // Paste pastes clipboard at CurIdx
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
-	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
+	dt := sv.This().(SliceViewer).MimeDataType()
+	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.CurIdx)
 	}
@@ -1613,7 +1624,8 @@ func (sv *SliceViewBase) Duplicate() int {
 	ixs := sv.SelectedIdxsList(true) // descending sort -- last first
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
-	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
+	dt := sv.This().(SliceViewer).MimeDataType()
+	md := oswin.TheApp.ClipBoard(sv.Viewport.Win.OSWin).Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
