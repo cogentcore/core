@@ -506,7 +506,9 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		return tv.ResizeIfNeeded(image.ZP)
 	}
 	if tv.Sty.Font.Size.Val == 0 { // not yet styled
-		tv.StyleTextView()
+		// fmt.Print("textview: no style\n")
+		return false
+		// tv.StyleTextView() // this fails on mac
 	}
 	tv.lastFilename = tv.Buf.Filename
 
