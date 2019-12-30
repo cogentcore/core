@@ -178,7 +178,12 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 }
 
 func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
-	where := image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
+	var where image.Point
+	if theApp.Platform() == oswin.MacOS {
+		where = image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
+	} else {
+		where = image.Point{int(x), int(y)}
+	}
 	from := lastMousePos
 	lastMousePos = where
 	if lastMouseAction == mouse.Press {
