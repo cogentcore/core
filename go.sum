@@ -7,6 +7,8 @@ github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38 h1:smF2tmSOzy2Mm
 github.com/alecthomas/assert v0.0.0-20170929043011-405dbfeb8e38/go.mod h1:r7bzyVFMNntcxPZXK3/+KdruV1H5KSlyVY0gc+NgInI=
 github.com/alecthomas/chroma v0.6.9 h1:afiCdwnNPo6fcyvoqqsXs78t7NbR9TuW4wDB7NJkcag=
 github.com/alecthomas/chroma v0.6.9/go.mod h1:1U/PfCsTALWWYHDnsIQkxEBM0+6LLe0v8+RSVMOwxeY=
+github.com/alecthomas/chroma v0.7.0 h1:z+0HgTUmkpRDRz0SRSdMaqOLfJV4F+N1FPDZUZIDUzw=
+github.com/alecthomas/chroma v0.7.0/go.mod h1:1U/PfCsTALWWYHDnsIQkxEBM0+6LLe0v8+RSVMOwxeY=
 github.com/alecthomas/colour v0.0.0-20160524082231-60882d9e2721 h1:JHZL0hZKJ1VENNfmXvHbgYlbUOvpzYzvy2aZU5gXVeo=
 github.com/alecthomas/colour v0.0.0-20160524082231-60882d9e2721/go.mod h1:QO9JBoKquHd+jz9nshCh40fOfO+JzsoXy8qTHF68zU0=
 github.com/alecthomas/kong v0.1.17-0.20190424132513-439c674f7ae0/go.mod h1:+inYUSluD+p4L8KdviBSgzcqEjUQOfC5fQDRFuc36lI=
@@ -26,10 +28,14 @@ github.com/dlclark/regexp2 v1.2.0 h1:8sAhBGEM0dRWogWqWyQeIJnxjWO6oIjl8FKqREDsGfk
 github.com/dlclark/regexp2 v1.2.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/gabriel-vasile/mimetype v0.3.22 h1:a41DjO1eMdhVj7kJFIhLVeHlInOIB5E3kqvpA+xSp70=
 github.com/gabriel-vasile/mimetype v0.3.22/go.mod h1:6CDPel/o/3/s4+bp6kIbsWATq8pmgOisOPG40CJa6To=
+github.com/gabriel-vasile/mimetype v1.0.1 h1:je1rhRaxux1UBDanAPhKwhroQKTU3q1VomrwqGWg93A=
+github.com/gabriel-vasile/mimetype v1.0.1/go.mod h1:6CDPel/o/3/s4+bp6kIbsWATq8pmgOisOPG40CJa6To=
 github.com/goki/ki v0.9.8 h1:SzVTxJrd0ZcnkRTinZdbc41nIFmocJ7pyllEyBzNmys=
 github.com/goki/ki v0.9.8/go.mod h1:8PA5euf9o8LdaDc0C/jLA3950FmBUYXLDQlaVJlXGkU=
 github.com/goki/ki v0.9.9 h1:rqC7rVxGkgkoDLFtWSpeztAXwkGH4+A02v/fm3Yq3ik=
 github.com/goki/ki v0.9.9/go.mod h1:Z2j8AhnY49FWfxENMhZMkQreulW+xPwsZ7F3Vi7h8OA=
+github.com/goki/ki v0.9.10 h1:8QHeZbny7eTV/1ImGxWPDJEJ8JDBCHRv7hsrLjd/XLI=
+github.com/goki/ki v0.9.10/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/gorilla/csrf v1.6.0/go.mod h1:7tSf8kmjNYr7IWDCYhd3U8Ck34iQ/Yw5CJu7bAkHEGI=
