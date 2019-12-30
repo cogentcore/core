@@ -89,10 +89,6 @@ func (ci *clipImpl) Read(types []string) mimedata.Mimes {
 	}
 	wantText := mimedata.IsText(types[0])
 	if wantText {
-		str := glfw.GetClipboardString()
-		if len(str) == 0 {
-			return nil
-		}
 		bstr := []byte(str)
 		isMulti, mediaType, boundary, body := mimedata.IsMultipart(bstr)
 		if isMulti {
