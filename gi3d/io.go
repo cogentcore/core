@@ -172,7 +172,10 @@ func (sc *Scene) ReadObj(ext string, rs []io.Reader, gp *Group) error {
 	if err != nil {
 		return err
 	}
+	updt := sc.UpdateStart()
 	dec.SetGroup(sc, gp)
+	sc.Init3D() // needed after loading
+	sc.UpdateEnd(updt)
 	return nil
 }
 
@@ -193,6 +196,9 @@ func (sc *Scene) ReadScene(ext string, rs []io.Reader, gp *Group) error {
 	if err != nil {
 		return err
 	}
+	updt := sc.UpdateStart()
 	dec.SetScene(sc)
+	sc.Init3D() // needed after loading
+	sc.UpdateEnd(updt)
 	return nil
 }
