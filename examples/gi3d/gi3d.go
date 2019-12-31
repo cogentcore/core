@@ -5,6 +5,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
@@ -112,17 +114,26 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 255) // alpha = .5
 
-	// grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
+	gopher := gi3d.AddNewGroup(sc, sc, "Gopher")
+	err := sc.OpenObj([]string{"gopher.obj", "gopher.mtl"}, gopher)
+	if err != nil {
+		log.Println(err)
+	}
+	gopher.Pose.Scale.Set(.5, .5, .5)
+	gopher.Pose.Pos.Set(2, -2.5, 0)
+	gopher.Pose.SetAxisRotation(0, 1, 0, -90)
+
+	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
-	// floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-	// floor := gi3d.AddNewObject(sc, sc, "floor", floorp.Name())
-	// floor.Pose.Pos.Set(0, -5, 0)
-	// // floor.Mat.Color.SetName("tan")
+	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
+	floor := gi3d.AddNewObject(sc, sc, "floor", floorp.Name())
+	floor.Pose.Pos.Set(0, -5, 0)
+	floor.Mat.Color.SetName("tan")
 	// // floor.Mat.Emissive.SetName("brown")
 	// floor.Mat.Bright = 2 // .5 for wood / brown
-	// floor.Mat.SetTexture(sc, grtx)
-	// floor.Mat.Tiling.Repeat.Set(40, 40)
+	floor.Mat.SetTexture(sc, grtx)
+	floor.Mat.Tiling.Repeat.Set(40, 40)
 
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default

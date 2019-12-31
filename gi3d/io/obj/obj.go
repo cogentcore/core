@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -26,6 +27,7 @@ import (
 	"github.com/goki/gi/mat32"
 )
 
+// note: gimain imports "github.com/goki/gi/gi3d/io/obj" to get this code
 func init() {
 	gi3d.Decoders[".obj"] = &Decoder{}
 }
@@ -34,7 +36,8 @@ func init() {
 // It also implements the gi3d.Decoder interface and an instance
 // is registered to handle .obj files.
 type Decoder struct {
-	Objfile       string
+	Objfile       string               // .obj filename (without path)
+	Objdir        string               // path to .obj file
 	Objects       []Object             // decoded objects
 	Matlib        string               // name of the material lib
 	Materials     map[string]*Material // maps material name to object
@@ -46,7 +49,18 @@ type Decoder struct {
 	objCurrent    *Object              // current object
 	matCurrent    *Material            // current material
 	smoothCurrent bool                 // current smooth state
-	mtlDir        string               // Directory of material file
+}
+
+func (di *Decoder) New() gi3d.Decoder {
+	dec := new(Decoder)
+	dec.Objects = make([]Object, 0)
+	dec.Warnings = make([]string, 0)
+	dec.Materials = make(map[string]*Material)
+	dec.Vertices = mat32.NewArrayF32(0, 0)
+	dec.Normals = mat32.NewArrayF32(0, 0)
+	dec.Uvs = mat32.NewArrayF32(0, 0)
+	dec.line = 1
+	return dec
 }
 
 func (dec *Decoder) Desc() string {
@@ -57,9 +71,13 @@ func (dec *Decoder) HasScene() bool {
 	return false
 }
 
-func (dec *Decoder) DefaultFiles(files []string) []string {
+func (dec *Decoder) SetFiles(files []string) []string {
 	nf := len(files)
-	if nf == 2 || nf == 0 {
+	if nf == 0 {
+		return files
+	}
+	dec.Objdir, dec.Objfile = filepath.Split(files[0])
+	if nf == 2 {
 		return files
 	}
 	mtlf := strings.TrimSuffix(files[0], ".obj") + ".mtl"
@@ -69,27 +87,17 @@ func (dec *Decoder) DefaultFiles(files []string) []string {
 	return fs
 }
 
-// Decode reads the given data and decodes it, returning a new instance
-// of the Decoder that contains all the decoded info.
+// Decode reads the given data and decodes into Decoder tmp vars.
 // if 2 args are passed, first is .obj and second is .mtl
-func (dl *Decoder) Decode(rs []io.Reader) (gi3d.Decoder, error) {
+func (dec *Decoder) Decode(rs []io.Reader) error {
 	nf := len(rs)
 	if nf == 0 {
-		return nil, errors.New("obj.Decoder: no readers passed")
+		return errors.New("obj.Decoder: no readers passed")
 	}
-	dec := new(Decoder)
-	dec.Objects = make([]Object, 0)
-	dec.Warnings = make([]string, 0)
-	dec.Materials = make(map[string]*Material)
-	dec.Vertices = mat32.NewArrayF32(0, 0)
-	dec.Normals = mat32.NewArrayF32(0, 0)
-	dec.Uvs = mat32.NewArrayF32(0, 0)
-	dec.line = 1
-
 	// Parses obj lines
 	err := dec.parse(rs[0], dec.parseObjLine)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	dec.matCurrent = nil
@@ -97,14 +105,14 @@ func (dl *Decoder) Decode(rs []io.Reader) (gi3d.Decoder, error) {
 	if nf > 1 {
 		err = dec.parse(rs[1], dec.parseMtlLine)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	} else { // use default material
 		for key := range dec.Materials {
 			dec.Materials[key] = defaultMat
 		}
 	}
-	return dec, nil
+	return nil
 }
 
 // Object contains all information about one decoded object
@@ -174,28 +182,40 @@ func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, obj *Object) {
 	var ob *gi3d.Object
 	var ms *gi3d.GenMesh
 	obidx := 0
+	idxs := make([]int, 0, 4)
 	for fi := range obj.Faces {
 		face := &obj.Faces[fi]
 		if face.Material != matName || ob == nil {
-			ms := &gi3d.GenMesh{}
-			ms.Nm = obj.Name
-			sc.AddMeshUnique(ms)
 			obnm := fmt.Sprintf("%s_%d", obj.Name, obidx)
+			ms = &gi3d.GenMesh{}
+			ms.Nm = obnm
+			sc.AddMeshUnique(ms)
 			ob = gi3d.AddNewObject(sc, objgp, obnm, ms.Nm)
 			matName = face.Material
 			dec.SetMat(sc, ob, matName)
 			obidx++
 		}
 		// Copy face vertices to geometry
+		// https://stackoverflow.com/questions/23723993/converting-quadriladerals-in-an-obj-file-into-triangles
+		// logic for 0, i, i+1
+
+		idxs = idxs[:1]
+		idxs[0] = dec.copyVertex(ms, face, 0)
 		for idx := 1; idx < len(face.Vertices)-1; idx++ {
-			dec.copyVertex(ms, face, 0)
-			dec.copyVertex(ms, face, idx)
-			dec.copyVertex(ms, face, idx+1)
+			if idx > 1 {
+				ms.Idx.Append(uint32(idxs[0]))
+			}
+			if len(idxs) > idx {
+				ms.Idx.Append(uint32(idxs[idx]))
+			} else {
+				idxs = append(idxs, dec.copyVertex(ms, face, idx))
+			}
+			idxs = append(idxs, dec.copyVertex(ms, face, idx+1))
 		}
 	}
 }
 
-func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) {
+func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) int {
 	var vec3 mat32.Vec3
 	var vec2 mat32.Vec2
 
@@ -217,6 +237,7 @@ func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) {
 		ms.Tex.AppendVec2(vec2)
 	}
 	ms.Idx.Append(uint32(vidx))
+	return vidx
 }
 
 // SetMat sets the material for object
@@ -230,42 +251,28 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, obj *gi3d.Object, matnm string) {
 	}
 	obj.Mat.Defaults()
 	obj.Mat.Color = mat.Diffuse
+	obj.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
 	obj.Mat.Specular = mat.Specular
 	obj.Mat.Shiny = mat.Shininess
 	// Loads material textures if specified
-	// err = dec.loadTex(&mat.Material, mat)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	dec.loadTex(sc, obj, mat.MapKd)
 }
 
-// // loadTex loads textures described in the material descriptor into the
-// // specified material
-// func (dec *Decoder) loadTex(mat *material.Material, desc *Material) error {
-//
-// 	// Checks if material descriptor specified texture
-// 	if desc.MapKd == "" {
-// 		return nil
-// 	}
-//
-// 	// Get texture file path
-// 	// If texture file path is not absolute assumes it is relative
-// 	// to the directory of the material file
-// 	var texPath string
-// 	if filepath.IsAbs(desc.MapKd) {
-// 		texPath = desc.MapKd
-// 	} else {
-// 		texPath = filepath.Join(dec.mtlDir, desc.MapKd)
-// 	}
-//
-// 	// Try to load texture from image file
-// 	tex, err := texture.NewTexture2DFromImage(texPath)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	mat.AddTexture(tex)
-// 	return nil
-// }
+// loadTex loads given texture file
+func (dec *Decoder) loadTex(sc *gi3d.Scene, obj *gi3d.Object, texfn string) {
+	if texfn == "" {
+		return
+	}
+	var texPath string
+	if filepath.IsAbs(texfn) {
+		texPath = texfn
+	} else {
+		texPath = filepath.Join(dec.Objdir, texfn)
+	}
+	_, tfn := filepath.Split(texPath)
+	tf := gi3d.AddNewTextureFile(sc, tfn, texPath)
+	obj.Mat.SetTexture(sc, tf)
+}
 
 // parse reads the lines from the specified reader and dispatch them
 // to the specified line parser.

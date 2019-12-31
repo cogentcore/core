@@ -15,20 +15,25 @@ import (
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.
 // This interface is implemented by the different format-specific decoders.
 type Decoder interface {
+	// New returns a new instance of the decoder used for a specific decoding
+	New() Decoder
+
 	// Desc returns the description of this decoder
 	Desc() string
 
-	// DefaultFiles potentially modifies a list of files to suggest other files
+	// SetFiles sets the file names being used for decoding -- needed in case
+	// of loading other files such as textures / materials from the same directory.
+	// Also potentially modifies the list of files to suggest other files
 	// that should be loaded along with those passed.
 	// For example, .obj decoder adds a corresponding .mtl file if one is not
 	// otherwise passed.
-	DefaultFiles(files []string) []string
+	SetFiles(files []string) []string
 
 	// Decode reads the given data and decodes it, returning a new instance
 	// of the Decoder that contains all the decoded info.
 	// Some formats (e.g., Wavefront .obj) have separate .obj and .mtl files
 	// which are passed as two reader args.
-	Decode(rs []io.Reader) (Decoder, error)
+	Decode(rs []io.Reader) error
 
 	// SetGroup sets the group to contain the decoded objects within the
 	// given scene.
@@ -59,10 +64,12 @@ func DecodeFile(files []string) (Decoder, error) {
 	}
 	fn := files[0]
 	ext := filepath.Ext(fn)
-	dec, has := Decoders[ext]
+	dt, has := Decoders[ext]
 	if !has {
 		return nil, fmt.Errorf("gi3d.DecodeFile: file extension: %v not found in Decoders list", ext)
 	}
+	dec := dt.New()
+	files = dec.SetFiles(files)
 
 	var err error
 	fs := make([]*os.File, nf)
@@ -82,11 +89,11 @@ func DecodeFile(files []string) (Decoder, error) {
 		}
 		rs[i] = fs[i]
 	}
-	di, err := dec.Decode(rs)
+	err = dec.Decode(rs)
 	if err != nil {
 		return nil, err
 	}
-	return di, nil
+	return dec, nil
 }
 
 // OpenObj open the given object(s) from given file(s) into given group in scene,
@@ -127,15 +134,16 @@ func (sc *Scene) OpenScene(files []string) error {
 //        be specified as second file name -- otherwise auto-searched based on
 //        .obj filename, or a default material is used.
 func (sc *Scene) ReadObj(ext string, rs []io.Reader, gp *Group) error {
-	dec, has := Decoders[ext]
+	dt, has := Decoders[ext]
 	if !has {
 		return fmt.Errorf("gi3d.ReadObj: file extension: %v not found in Decoders list", ext)
 	}
-	di, err := dec.Decode(rs)
+	dec := dt.New()
+	err := dec.Decode(rs)
 	if err != nil {
 		return err
 	}
-	di.SetGroup(sc, gp)
+	dec.SetGroup(sc, gp)
 	return nil
 }
 
@@ -147,14 +155,15 @@ func (sc *Scene) ReadObj(ext string, rs []io.Reader, gp *Group) error {
 //        .obj filename, or a default material is used.  Does not support full scene
 //        data so only objects are loaded into a new group in scene.
 func (sc *Scene) ReadScene(ext string, rs []io.Reader, gp *Group) error {
-	dec, has := Decoders[ext]
+	dt, has := Decoders[ext]
 	if !has {
 		return fmt.Errorf("gi3d.ReadScene: file extension: %v not found in Decoders list", ext)
 	}
-	di, err := dec.Decode(rs)
+	dec := dt.New()
+	err := dec.Decode(rs)
 	if err != nil {
 		return err
 	}
-	di.SetScene(sc)
+	dec.SetScene(sc)
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -25,7 +26,7 @@ type Object struct {
 	MeshPtr Mesh     `view:"-" desc:"cached pointer to mesh"`
 }
 
-var KiT_Object = kit.Types.AddType(&Object{}, nil)
+var KiT_Object = kit.Types.AddType(&Object{}, ObjectProps)
 
 // AddNewObject adds a new object of given name and mesh to given parent
 func AddNewObject(sc *Scene, parent ki.Ki, name string, meshName string) *Object {
@@ -161,4 +162,8 @@ func (obj *Object) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	sc.Renders.SetMatrix(&obj.Pose)
 	obj.MeshPtr.Render3D(sc)
 	gpu.TheGPU.ErrCheck("obj render")
+}
+
+var ObjectProps = ki.Props{
+	"EnumType:Flag": gi.KiT_NodeFlags,
 }

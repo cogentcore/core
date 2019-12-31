@@ -85,6 +85,9 @@ type Mesh interface {
 	// any errors are logged
 	Validate() error
 
+	// HasTex returns true if this mesh has texture coordinates
+	HasTex() bool
+
 	// HasColor returns true if this mesh has vertex-specific colors available
 	HasColor() bool
 
@@ -170,6 +173,10 @@ func (ms *MeshBase) SetName(nm string) {
 	ms.Nm = nm
 }
 
+func (ms *MeshBase) HasTex() bool {
+	return len(ms.Tex) > 0
+}
+
 func (ms *MeshBase) HasColor() bool {
 	return len(ms.Color) > 0
 }
@@ -218,16 +225,13 @@ func (ms *MeshBase) Validate() error {
 		return err
 	}
 	tln := len(ms.Tex) / 2
-	if tln != vln {
+	if tln != 0 && tln != vln {
 		err := fmt.Errorf("gi3d.Mesh: %v number of Tex: %d != Vtx: %d", ms.Nm, tln, vln)
 		log.Println(err)
 		return err
 	}
 	cln := len(ms.Color) / 4
-	if cln == 0 {
-		return nil
-	}
-	if cln != vln {
+	if cln != 0 && cln != vln {
 		err := fmt.Errorf("gi3d.Mesh: %v number of Colors: %d != Vtx: %d", ms.Nm, cln, vln)
 		log.Println(err)
 		return err
@@ -256,10 +260,13 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 		vbuf = ms.Buff.VectorsBuffer()
 		ibuf = ms.Buff.IndexesBuffer()
 	}
-	nvec := 3
+	nvec := 2
+	hasTex := ms.HasTex()
+	if hasTex {
+		nvec++
+	}
 	hasColor := ms.HasColor()
 	if hasColor {
-		hasColor = true
 		nvec++
 	}
 	vtx := sc.Renders.Vectors[InVtxPos]
@@ -270,7 +277,9 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 		vbuf.DeleteAllVectors()
 		vbuf.AddVectors(vtx, true) // interleave
 		vbuf.AddVectors(nrm, true) // interleave
-		vbuf.AddVectors(tex, true) // interleave
+		if hasTex {
+			vbuf.AddVectors(tex, true) // interleave
+		}
 		if hasColor {
 			vbuf.AddVectors(clr, false) // NO interleave
 		}
@@ -279,7 +288,9 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 	vbuf.SetLen(vln)
 	vbuf.SetVecData(vtx, ms.Vtx)
 	vbuf.SetVecData(nrm, ms.Norm)
-	vbuf.SetVecData(tex, ms.Tex)
+	if hasTex {
+		vbuf.SetVecData(tex, ms.Tex)
+	}
 	if hasColor {
 		vbuf.SetVecData(clr, ms.Color)
 	}
@@ -539,6 +550,15 @@ type GenMesh struct {
 }
 
 func (ms *GenMesh) Make(sc *Scene) {
+	bb := mat32.Box3{}
+	bb.SetEmpty()
+	var vec3 mat32.Vec3
+	n := ms.Vtx.Size() / 3
+	for i := 0; i < n; i++ {
+		ms.Vtx.GetVec3(3*i, &vec3)
+		bb.ExpandByPoint(vec3)
+	}
+	ms.BBox.SetBounds(bb.Min, bb.Max)
 }
 
 var KiT_GenMesh = kit.Types.AddType(&GenMesh{}, nil)

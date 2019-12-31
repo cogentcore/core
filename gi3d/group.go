@@ -5,6 +5,7 @@
 package gi3d
 
 import (
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -15,7 +16,7 @@ type Group struct {
 	Node3DBase
 }
 
-var KiT_Group = kit.Types.AddType(&Group{}, nil)
+var KiT_Group = kit.Types.AddType(&Group{}, GroupProps)
 
 // AddNewGroup adds a new group of given name to given parent
 func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
@@ -51,3 +52,7 @@ func (gp *Group) RenderClass() RenderClasses {
 
 // test for impl
 var _ Node3D = &Group{}
+
+var GroupProps = ki.Props{
+	"EnumType:Flag": gi.KiT_NodeFlags,
+}
