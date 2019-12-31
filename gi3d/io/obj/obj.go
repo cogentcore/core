@@ -171,6 +171,9 @@ func (dec *Decoder) SetScene(sc *gi3d.Scene) {
 func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
 	for i := range dec.Objects {
 		obj := &dec.Objects[i]
+		if len(obj.Faces) == 0 {
+			continue
+		}
 		objgp := gi3d.AddNewGroup(sc, gp, obj.Name)
 		dec.SetObject(sc, objgp, obj)
 	}
@@ -211,6 +214,19 @@ func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, obj *Object) {
 				idxs = append(idxs, dec.copyVertex(ms, face, idx))
 			}
 			idxs = append(idxs, dec.copyVertex(ms, face, idx+1))
+			if ms.Norm.Size() != ms.Vtx.Size() {
+				var a, b, c mat32.Vec3
+				ms.Vtx.GetVec3(3*idxs[0], &a)
+				ms.Vtx.GetVec3(3*idxs[idx], &b)
+				ms.Vtx.GetVec3(3*idxs[idx+1], &c)
+				nrm := mat32.Normal(a, b, c)
+				for {
+					ms.Norm.AppendVec3(nrm)
+					if ms.Norm.Size() >= ms.Vtx.Size() {
+						break
+					}
+				}
+			}
 		}
 	}
 }
@@ -226,14 +242,19 @@ func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) int {
 
 	// Copy vertex normal and append to geometry
 	if face.Normals[idx] != invINDEX {
-		dec.Normals.GetVec3(3*face.Normals[idx], &vec3)
+		i := 3 * face.Normals[idx]
+		if dec.Normals.Size() > i {
+			dec.Normals.GetVec3(i, &vec3)
+		}
 		ms.Norm.AppendVec3(vec3)
 	}
-	// todo: generate normals!!
 
 	// Copy vertex uv and append to geometry
 	if face.Uvs[idx] != invINDEX {
-		dec.Uvs.GetVec2(2*face.Uvs[idx], &vec2)
+		i := 2 * face.Uvs[idx]
+		if dec.Uvs.Size() > i {
+			dec.Uvs.GetVec2(i, &vec2)
+		}
 		ms.Tex.AppendVec2(vec2)
 	}
 	ms.Idx.Append(uint32(vidx))
@@ -251,7 +272,9 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, obj *gi3d.Object, matnm string) {
 	}
 	obj.Mat.Defaults()
 	obj.Mat.Color = mat.Diffuse
-	obj.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
+	if mat.Opacity > 0 {
+		obj.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
+	}
 	obj.Mat.Specular = mat.Specular
 	obj.Mat.Shiny = mat.Shininess
 	// Loads material textures if specified

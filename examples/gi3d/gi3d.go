@@ -115,10 +115,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 255) // alpha = .5
 
 	gopher := gi3d.AddNewGroup(sc, sc, "Gopher")
-	err := sc.OpenObj([]string{"gopher.obj", "gopher.mtl"}, gopher)
+	err := sc.OpenObj([]string{"gopher.obj"}, gopher)
 	if err != nil {
 		log.Println(err)
 	}
+	// gopher.Pose.Scale.Set(.0001, .0001, .0001)
 	gopher.Pose.Scale.Set(.5, .5, .5)
 	gopher.Pose.Pos.Set(2, -2.5, 0)
 	gopher.Pose.SetAxisRotation(0, 1, 0, -90)

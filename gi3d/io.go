@@ -70,6 +70,7 @@ func DecodeFile(files []string) (Decoder, error) {
 	}
 	dec := dt.New()
 	files = dec.SetFiles(files)
+	nf = len(files)
 
 	var err error
 	fs := make([]*os.File, nf)
