@@ -142,6 +142,21 @@ func (sc *Scene) MeshList() []string {
 	return sl
 }
 
+// DeleteMesh removes given mesh -- returns error if mesh not found
+func (sc *Scene) DeleteMesh(nm string) error {
+	_, ok := sc.Meshes[nm]
+	if ok {
+		delete(sc.Meshes, nm)
+		return nil
+	}
+	return fmt.Errorf("Mesh named: %v not found in Scene: %v", nm, sc.Nm)
+}
+
+// DeleteMeshes removes all meshes
+func (sc *Scene) DeleteMeshes() {
+	sc.Meshes = make(map[string]Mesh)
+}
+
 // Text2DPlaneMesh returns the special Text2DPLane mesh (creating it if it does not yet exist).
 // This is a 1x1 plane with a normal pointing in positive Z direction used for all Text2D rendering
 func (sc *Scene) Text2DPlaneMesh() Mesh {
@@ -187,6 +202,21 @@ func (sc *Scene) TextureList() []string {
 		ctr++
 	}
 	return sl
+}
+
+// DeleteTexture deletes texture of given name -- returns error if not found
+func (sc *Scene) DeleteTexture(nm string) error {
+	_, ok := sc.Textures[nm]
+	if ok {
+		delete(sc.Textures, nm)
+		return nil
+	}
+	return fmt.Errorf("Texture named: %v not found in Scene: %v", nm, sc.Nm)
+}
+
+// DeleteTextures removes all textures
+func (sc *Scene) DeleteTextures() {
+	sc.Textures = make(map[string]Texture)
 }
 
 // SaveCamera saves the current camera with given name -- can be restored later with SetCamera.

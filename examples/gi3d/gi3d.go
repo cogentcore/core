@@ -115,7 +115,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 255) // alpha = .5
 
 	gopher := gi3d.AddNewGroup(sc, sc, "Gopher")
-	err := sc.OpenObj([]string{"gopher.obj"}, gopher)
+	_, err := sc.OpenNewObj([]string{"gopher.obj"}, gopher)
 	if err != nil {
 		log.Println(err)
 	}

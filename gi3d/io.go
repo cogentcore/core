@@ -10,6 +10,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/goki/ki/ki"
 )
 
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.
@@ -108,8 +110,31 @@ func (sc *Scene) OpenObj(files []string, gp *Group) error {
 	if err != nil {
 		return err
 	}
+	updt := sc.UpdateStart()
 	dec.SetGroup(sc, gp)
+	sc.Init3D() // needed after loading
+	sc.UpdateEnd(updt)
 	return nil
+}
+
+// OpenNewObj open the given object(s) from given file(s) into a new group
+// under given parent, using the decoder based on the file extension in first file name.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
+//        be specified as second file name -- otherwise auto-searched based on
+//        .obj filename, or a default material is used.
+func (sc *Scene) OpenNewObj(files []string, parent ki.Ki) (*Group, error) {
+	dec, err := DecodeFile(files)
+	if err != nil {
+		return nil, err
+	}
+	updt := sc.UpdateStart()
+	_, fn := filepath.Split(files[0])
+	gp := AddNewGroup(sc, parent, fn)
+	dec.SetGroup(sc, gp)
+	sc.Init3D() // needed after loading
+	sc.UpdateEnd(updt)
+	return gp, nil
 }
 
 // OpenScene open the given scene from given file(s),
@@ -124,7 +149,10 @@ func (sc *Scene) OpenScene(files []string) error {
 	if err != nil {
 		return err
 	}
+	updt := sc.UpdateStart()
 	dec.SetScene(sc)
+	sc.Init3D() // needed after loading
+	sc.UpdateEnd(updt)
 	return nil
 }
 

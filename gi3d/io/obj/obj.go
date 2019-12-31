@@ -102,12 +102,14 @@ func (dec *Decoder) Decode(rs []io.Reader) error {
 
 	dec.matCurrent = nil
 	dec.line = 1
+	useDef := nf == 1
 	if nf > 1 {
 		err = dec.parse(rs[1], dec.parseMtlLine)
 		if err != nil {
-			return err
+			useDef = true
 		}
-	} else { // use default material
+	}
+	if useDef {
 		for key := range dec.Materials {
 			dec.Materials[key] = defaultMat
 		}
