@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -81,10 +82,15 @@ func (dec *Decoder) SetFiles(files []string) []string {
 		return files
 	}
 	mtlf := strings.TrimSuffix(files[0], ".obj") + ".mtl"
-	fs := make([]string, 2)
-	fs[0] = files[0]
-	fs[1] = mtlf
-	return fs
+
+	if _, err := os.Stat(mtlf); !os.IsNotExist(err) {
+		fs := make([]string, 2)
+		fs[0] = files[0]
+		fs[1] = mtlf
+		return fs
+	} else {
+		return files
+	}
 }
 
 // Decode reads the given data and decodes into Decoder tmp vars.
