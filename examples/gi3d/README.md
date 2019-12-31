@@ -2,6 +2,8 @@
 
 This demo shows the basic functionality of the 3D rendering framework in GoGi.  
 
+The gopher object that is imported is borrowed from: https://github.com/g3n/engine, which also served as the source / reference for a lot of the 3D code, including especially the mat32 math library, the file importing code, and the opengl shader programs.
+
 ## Installation
 
 The usual Go install procedure will work -- see [Install](https://github.com/goki/gi/wiki/Install) for details.

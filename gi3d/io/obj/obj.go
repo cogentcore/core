@@ -246,7 +246,7 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, obj *gi3d.Object, matnm string) {
 	if mat == nil {
 		mat = defaultMat
 		// log warning
-		msg := fmt.Sprintf("could not find material for %s. using default material.", obj.Name)
+		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, obj.Name())
 		dec.appendWarn(objType, msg)
 	}
 	obj.Mat.Defaults()
