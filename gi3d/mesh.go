@@ -27,6 +27,9 @@ type Mesh interface {
 	// Name returns name of the mesh
 	Name() string
 
+	// SetName sets the name of the mesh
+	SetName(nm string)
+
 	// AsMeshBase returns the MeshBase for this Mesh
 	AsMeshBase() *MeshBase
 
@@ -161,6 +164,10 @@ var KiT_MeshBase = kit.Types.AddType(&MeshBase{}, nil)
 
 func (ms *MeshBase) Name() string {
 	return ms.Nm
+}
+
+func (ms *MeshBase) SetName(nm string) {
+	ms.Nm = nm
 }
 
 func (ms *MeshBase) HasColor() bool {
@@ -525,3 +532,13 @@ func (ms *MeshBase) PlaneSize(wsegs, hsegs int) (vtxSize, idxSize int) {
 	idxSize = wsegs * hsegs * 6
 	return
 }
+
+// GenMesh is a generic, arbitrary Mesh
+type GenMesh struct {
+	MeshBase
+}
+
+func (ms *GenMesh) Make(sc *Scene) {
+}
+
+var KiT_GenMesh = kit.Types.AddType(&GenMesh{}, nil)

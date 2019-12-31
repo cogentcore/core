@@ -87,6 +87,22 @@ func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes[ms.Name()] = ms
 }
 
+// AddMeshUniqe adds given mesh to mesh collection, ensuring that it has
+// a unique name if one already exists.
+func (sc *Scene) AddMeshUnique(ms Mesh) {
+	nm := ms.Name()
+	if sc.Meshes == nil {
+		sc.Meshes = make(map[string]Mesh)
+		sc.Meshes[nm] = ms
+	}
+	_, has := sc.Meshes[nm]
+	if has {
+		nm += fmt.Sprintf("_%d", len(sc.Meshes))
+		ms.SetName(nm)
+	}
+	sc.Meshes[nm] = ms
+}
+
 // MeshByName looks for mesh by name -- returns nil if not found
 func (sc *Scene) MeshByName(nm string) Mesh {
 	if sc.Meshes == nil {
