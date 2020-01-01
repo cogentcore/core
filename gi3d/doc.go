@@ -8,22 +8,28 @@ Package gi3d provides a 3D scenegraph for the GoGi GUI framework.
 The scenegraph is rooted at a gi3d.Scene node which is like gi.Viewport2D,
 where the scene is rendered, similar to the svg.SVG node for SVG drawings.
 
-Children of the Scene are either Group or Solid -- Group applies a transform
-(position size, rotation etc) to everything under it, while Solid has its
-own transform and a Material and points to a Mesh which define the color /
-texture and shape of the solid.
+Children of the Scene are Node3D nodes, with Group and Solid as the main
+subtypes.  Node3DBase is the base implementation, which has a Pose for
+the full matrix transform of relative position, scale, rotation, and
+bounding boxes at multiple levels.
+
+* Group is a container -- most discrete objects should be organized
+into a Group, with Groups of Solids underneath.
+For maximum efficiency it is important to organize large scenegraphs
+into hierarchical groups by location, so that regions can be
+pruned for rendering.  The Pose on the Group is inherited by everything
+under it, so things can be transformed at different levels as well.
+
+* Solid has a Material to define the color / texture of the solid,
+and the name of a Mesh that defines the shape.
 
 Objects that have uniform Material color properties on all surfaces can
 be a single Solid, but if you need e.g., different textures for each side of a box
 then that must be represented as a Group of Solids using Plane Mesh's, each of
 which can then bind to a different Texture via their Material settings.
 
-Thus, in most cases, a discrete "object" is a Group, often with multiple levels of
-sub-Group's containing various Solids.
-
-Groups and Solids have computed bounding boxes, in both local and World reference
-frames, and can be selected etc.  Bounding boxes are used for visibility and event
-selection.
+Node bounding boxes are in both local and World reference frames, and are
+used for visibility and event selection.
 
 All Meshes are stored directly on the Scene, and must have unique names, as they
 are referenced from Solids by name.  The Mesh contains all the verticies, etc

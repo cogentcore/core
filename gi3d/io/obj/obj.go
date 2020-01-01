@@ -285,7 +285,9 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, sld *gi3d.Solid, matnm string) {
 		sld.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
 	}
 	sld.Mat.Specular = mat.Specular
-	sld.Mat.Shiny = mat.Shininess
+	if mat.Shininess != 0 {
+		sld.Mat.Shiny = mat.Shininess
+	}
 	// Loads material textures if specified
 	dec.loadTex(sc, sld, mat.MapKd, mat)
 }
