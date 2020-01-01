@@ -18,11 +18,11 @@ be a single Solid, but if you need e.g., different textures for each side of a b
 then that must be represented as a Group of Solids using Plane Mesh's, each of
 which can then bind to a different Texture via their Material settings.
 
-Thus, in most cases, a discrete Object is a Group, often with multiple levels of
+Thus, in most cases, a discrete "object" is a Group, often with multiple levels of
 sub-Group's containing various Solids.
 
 Groups and Solids have computed bounding boxes, in both local and World reference
-frames, and can be selected etc.  Bounding boxes are used for visibilty and event
+frames, and can be selected etc.  Bounding boxes are used for visibility and event
 selection.
 
 All Meshes are stored directly on the Scene, and must have unique names, as they

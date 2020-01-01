@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/goki/ki/ki"
 )
@@ -134,6 +135,29 @@ func (sc *Scene) OpenNewObj(files []string, parent ki.Ki) (*Group, error) {
 	dec.SetGroup(sc, gp)
 	sc.Init3D() // needed after loading
 	sc.UpdateEnd(updt)
+	return gp, nil
+}
+
+// OpenToLibrary open the given object(s) from given file(s) into the scene's Library
+// using the decoder based on the file extension in first file name.  The library
+// key name must be unique, and is given by libnm -- if empty, then the filename (only)
+// without extension is used.
+// Supported formats include:
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
+//        be specified as second file name -- otherwise auto-searched based on
+//        .obj filename, or a default material is used.
+func (sc *Scene) OpenToLibrary(libnm string, files []string) (*Group, error) {
+	dec, err := DecodeFile(files)
+	if err != nil {
+		return nil, err
+	}
+	if libnm == "" {
+		_, fn := filepath.Split(files[0])
+		ext := filepath.Ext(fn)
+		libnm = strings.TrimSuffix(fn, ext)
+	}
+	gp := sc.NewInLibrary(libnm)
+	dec.SetGroup(sc, gp)
 	return gp, nil
 }
 

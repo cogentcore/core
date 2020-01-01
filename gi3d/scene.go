@@ -48,6 +48,7 @@ type Scene struct {
 	Lights        map[string]Light   `desc:"all lights used in the scene"`
 	Meshes        map[string]Mesh    `desc:"all meshes used in the scene"`
 	Textures      map[string]Texture `desc:"all textures used in the scene"`
+	Library       map[string]*Group  `desc:"library of objects that can be used in the scene"`
 	NoNav         bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
 	SavedCams     map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
 	Win           *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
@@ -280,6 +281,42 @@ func (sc *Scene) Validate() error {
 		return fmt.Errorf("gi3d.Scene: %v Validate found at least one error (see log)", sc.PathUnique())
 	}
 	return nil
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+//  Library
+
+// AddToLibrary adds given Group to library, using group's name as unique key
+// in Library map.
+func (sc *Scene) AddToLibrary(gp *Group) {
+	if sc.Library == nil {
+		sc.Library = make(map[string]*Group)
+	}
+	sc.Library[gp.Name()] = gp
+}
+
+// NewInLibrary makes a new Group in library, using given name as unique key
+// in Library map.
+func (sc *Scene) NewInLibrary(nm string) *Group {
+	gp := &Group{}
+	gp.InitName(gp, nm)
+	sc.AddToLibrary(gp)
+	return gp
+}
+
+// AddFmLibrary adds a Clone of named item in the Library under given parent
+// in the scenegraph.  Returns an error if item not found.
+func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
+	gp, ok := sc.Library[nm]
+	if !ok {
+		return nil, fmt.Errorf("Scene AddFmLibrary: Library item: %s not found", nm)
+	}
+	updt := sc.UpdateStart()
+	nwgp := gp.Clone().(*Group)
+	parent.AddChild(nwgp)
+	sc.Init3D()
+	sc.UpdateEnd(updt)
+	return nwgp, nil
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
