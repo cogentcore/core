@@ -141,16 +141,17 @@ type Face struct {
 
 // Material contains all information about an object material
 type Material struct {
-	Name       string   // Material name
-	Illum      int      // Illumination model
-	Opacity    float32  // Opacity factor
-	Refraction float32  // Refraction factor
-	Shininess  float32  // Shininess (specular exponent)
-	Ambient    gi.Color // Ambient color reflectivity
-	Diffuse    gi.Color // Diffuse color reflectivity
-	Specular   gi.Color // Specular color reflectivity
-	Emissive   gi.Color // Emissive color
-	MapKd      string   // Texture file linked to diffuse color
+	Name       string      // Material name
+	Illum      int         // Illumination model
+	Opacity    float32     // Opacity factor
+	Refraction float32     // Refraction factor
+	Shininess  float32     // Shininess (specular exponent)
+	Ambient    gi.Color    // Ambient color reflectivity
+	Diffuse    gi.Color    // Diffuse color reflectivity
+	Specular   gi.Color    // Specular color reflectivity
+	Emissive   gi.Color    // Emissive color
+	MapKd      string      // Texture file linked to diffuse color
+	Tiling     gi3d.Tiling // Tiling parameters: repeat and offset
 }
 
 // Light gray default material used as when other materials cannot be loaded.
@@ -297,11 +298,11 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, obj *gi3d.Object, matnm string) {
 	obj.Mat.Specular = mat.Specular
 	obj.Mat.Shiny = mat.Shininess
 	// Loads material textures if specified
-	dec.loadTex(sc, obj, mat.MapKd)
+	dec.loadTex(sc, obj, mat.MapKd, mat)
 }
 
 // loadTex loads given texture file
-func (dec *Decoder) loadTex(sc *gi3d.Scene, obj *gi3d.Object, texfn string) {
+func (dec *Decoder) loadTex(sc *gi3d.Scene, obj *gi3d.Object, texfn string, mat *Material) {
 	if texfn == "" {
 		return
 	}
@@ -314,6 +315,10 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, obj *gi3d.Object, texfn string) {
 	_, tfn := filepath.Split(texPath)
 	tf := gi3d.AddNewTextureFile(sc, tfn, texPath)
 	obj.Mat.SetTexture(sc, tf)
+	if mat.Tiling.Repeat.X > 0 {
+		obj.Mat.Tiling.Repeat = mat.Tiling.Repeat
+	}
+	obj.Mat.Tiling.Off = mat.Tiling.Off
 }
 
 // parse reads the lines from the specified reader and dispatch them
@@ -478,7 +483,6 @@ func (dec *Decoder) parseTex(fields []string) error {
 // parseFace parses a face decription line:
 // f v1[/vt1][/vn1] v2[/vt2][/vn2] v3[/vt3][/vn3] ...
 func (dec *Decoder) parseFace(fields []string) error {
-
 	// NOTE(quillaja): this wasn't really part of the original issue-29
 	if dec.objCurrent == nil {
 		// if a face line is encountered before a group (g) or object (o),
@@ -510,7 +514,6 @@ func (dec *Decoder) parseFace(fields []string) error {
 	face.Smooth = dec.smoothCurrent
 
 	for pos, f := range fields {
-
 		// Separate the current field in its components: v vt vn
 		vfields := strings.Split(f, "/")
 		if len(vfields) < 1 {
@@ -587,7 +590,6 @@ func (dec *Decoder) parseFace(fields []string) error {
 // parseUsemtl parses a "usemtl" decription line:
 // usemtl <name>
 func (dec *Decoder) parseUsemtl(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("Usemtl with no fields")
 	}
@@ -615,7 +617,6 @@ func (dec *Decoder) parseUsemtl(fields []string) error {
 // parseSmooth parses a "s" decription line:
 // s <0|1>
 func (dec *Decoder) parseSmooth(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("'s' with no fields")
 	}
@@ -637,7 +638,6 @@ mtl parse functions
 
 // Parses material file line, dispatching to specific parsers
 func (dec *Decoder) parseMtlLine(line string) error {
-
 	// Ignore empty lines
 	fields := strings.Fields(line)
 	if len(fields) == 0 {
@@ -678,7 +678,6 @@ func (dec *Decoder) parseMtlLine(line string) error {
 // Parses new material definition
 // newmtl <mat_name>
 func (dec *Decoder) parseNewmtl(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("newmtl with no fields")
 	}
@@ -698,7 +697,6 @@ func (dec *Decoder) parseNewmtl(fields []string) error {
 // Parses the dissolve factor (opacity)
 // d <factor>
 func (dec *Decoder) parseDissolve(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("'d' with no fields")
 	}
@@ -713,7 +711,6 @@ func (dec *Decoder) parseDissolve(fields []string) error {
 // Parses ambient reflectivity:
 // Ka r g b
 func (dec *Decoder) parseKa(fields []string) error {
-
 	if len(fields) < 3 {
 		return dec.formatError("'Ka' with less than 3 fields")
 	}
@@ -732,7 +729,6 @@ func (dec *Decoder) parseKa(fields []string) error {
 // Parses diffuse reflectivity:
 // Kd r g b
 func (dec *Decoder) parseKd(fields []string) error {
-
 	if len(fields) < 3 {
 		return dec.formatError("'Kd' with less than 3 fields")
 	}
@@ -751,7 +747,6 @@ func (dec *Decoder) parseKd(fields []string) error {
 // Parses emissive color:
 // Ke r g b
 func (dec *Decoder) parseKe(fields []string) error {
-
 	if len(fields) < 3 {
 		return dec.formatError("'Ke' with less than 3 fields")
 	}
@@ -770,7 +765,6 @@ func (dec *Decoder) parseKe(fields []string) error {
 // Parses specular reflectivity:
 // Ks r g b
 func (dec *Decoder) parseKs(fields []string) error {
-
 	if len(fields) < 3 {
 		return dec.formatError("'Ks' with less than 3 fields")
 	}
@@ -789,7 +783,6 @@ func (dec *Decoder) parseKs(fields []string) error {
 // Parses optical density, also known as index of refraction
 // Ni <optical_density>
 func (dec *Decoder) parseNi(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("'Ni' with no fields")
 	}
@@ -804,7 +797,6 @@ func (dec *Decoder) parseNi(fields []string) error {
 // Parses specular exponent
 // Ns <specular_exponent>
 func (dec *Decoder) parseNs(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("'Ns' with no fields")
 	}
@@ -819,7 +811,6 @@ func (dec *Decoder) parseNs(fields []string) error {
 // Parses illumination model (0 to 10)
 // illum <ilum_#>
 func (dec *Decoder) parseIllum(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("'illum' with no fields")
 	}
@@ -834,16 +825,37 @@ func (dec *Decoder) parseIllum(fields []string) error {
 // Parses color texture linked to the diffuse reflectivity of the material
 // map_Kd [-options] <filename>
 func (dec *Decoder) parseMapKd(fields []string) error {
-
 	if len(fields) < 1 {
 		return dec.formatError("No fields")
 	}
-	dec.matCurrent.MapKd = fields[0]
+	for i, f := range fields {
+		if f[0] == '-' {
+			switch f {
+			case "-s":
+				r1, err := strconv.ParseFloat(fields[i+1], 32)
+				r2 := r1
+				rt, err := strconv.ParseFloat(fields[i+2], 32)
+				if err == nil {
+					r2 = rt
+				}
+				dec.matCurrent.Tiling.Repeat.Set(float32(r1), float32(r2))
+			case "-o":
+				r1, err := strconv.ParseFloat(fields[i+1], 32)
+				r2 := r1
+				rt, err := strconv.ParseFloat(fields[i+2], 32)
+				if err == nil {
+					r2 = rt
+				}
+				dec.matCurrent.Tiling.Off.Set(float32(r1), float32(r2))
+			}
+		} else {
+			dec.matCurrent.MapKd = f
+		}
+	}
 	return nil
 }
 
 func (dec *Decoder) formatError(msg string) error {
-
 	return fmt.Errorf("%s in line:%d", msg, dec.line)
 }
 
