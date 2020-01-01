@@ -1014,13 +1014,12 @@ func (sc *Scene) Render3D() {
 			return true
 		}
 		rc := nii.RenderClass()
+		if rc > RClassTransTexture { // all in one group of objects b/c z-sorting is key
+			rc = RClassTransTexture
+		}
 		rcs[rc] = append(rcs[rc], nii)
-		// } else {
-		// 	fmt.Printf("node bbox culled: %v  bbox: %v  vpbbox: %v\n", ni.Nm, ni.BBox, sc.VpBBox)
 		return true
 	})
-
-	// todo: for transparent, group all together -- otherwise use separate for non-trans
 
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
@@ -1031,7 +1030,7 @@ func (sc *Scene) Render3D() {
 			sort.Slice(objs, func(i, j int) bool {
 				return objs[i].AsNode3D().NDCBBox.Min.Z > objs[j].AsNode3D().NDCBBox.Min.Z
 			})
-		} else { // sort front-to-back to allow "early z rejection"
+		} else { // sort front-to-back for opaque to allow "early z rejection"
 			sort.Slice(objs, func(i, j int) bool {
 				return objs[i].AsNode3D().NDCBBox.Min.Z < objs[j].AsNode3D().NDCBBox.Min.Z
 			})
@@ -1042,28 +1041,34 @@ func (sc *Scene) Render3D() {
 		// }
 
 		var rnd Render
-		switch rc {
-		case RClassOpaqueTexture:
-			rnd = sc.Renders.Renders["RenderTexture"]
-			gpu.Draw.Op(draw.Src)
-		case RClassOpaqueUniform:
-			rnd = sc.Renders.Renders["RenderUniformColor"]
-			gpu.Draw.Op(draw.Src)
-		case RClassOpaqueVertex:
-			rnd = sc.Renders.Renders["RenderVertexColor"]
-			gpu.Draw.Op(draw.Src)
-		case RClassTransTexture:
-			rnd = sc.Renders.Renders["RenderTexture"]
-			gpu.Draw.Op(draw.Over) // alpha
-		case RClassTransUniform:
-			rnd = sc.Renders.Renders["RenderUniformColor"]
-			gpu.Draw.Op(draw.Over) // alpha
-		case RClassTransVertex:
-			rnd = sc.Renders.Renders["RenderVertexColor"]
-			gpu.Draw.Op(draw.Over) // alpha
+		if rc < RClassTransTexture {
+			switch rc {
+			case RClassOpaqueTexture:
+				rnd = sc.Renders.Renders["RenderTexture"]
+			case RClassOpaqueUniform:
+				rnd = sc.Renders.Renders["RenderUniformColor"]
+			case RClassOpaqueVertex:
+				rnd = sc.Renders.Renders["RenderVertexColor"]
+			}
+			gpu.Draw.Op(draw.Src)     // opaque
+			rnd.Activate(&sc.Renders) // use same program for all..
 		}
-		rnd.Activate(&sc.Renders) // use same program for all..
+		lastrc := RClassOpaqueVertex
 		for _, obj := range objs {
+			rc = obj.RenderClass()
+			if rc >= RClassTransTexture && rc != lastrc {
+				switch rc {
+				case RClassTransTexture:
+					rnd = sc.Renders.Renders["RenderTexture"]
+				case RClassTransUniform:
+					rnd = sc.Renders.Renders["RenderUniformColor"]
+				case RClassTransVertex:
+					rnd = sc.Renders.Renders["RenderVertexColor"]
+				}
+				gpu.Draw.Op(draw.Over) // alpha
+				rnd.Activate(&sc.Renders)
+				lastrc = rc
+			}
 			obj.Render3D(sc, rc, rnd)
 		}
 	}
