@@ -274,7 +274,7 @@ func (rb *RenderBase) Delete(rn *Renderers) {
 //////////////////////////////////////////////////////////////////////////
 //    RenderUniformColor
 
-// RenderUniformColor renders a material with one color for entire object.
+// RenderUniformColor renders a material with one color for entire solid.
 // This uses the standard Phong color model, with color computed in the
 // fragment shader (more accurate, more expensive).
 type RenderUniformColor struct {

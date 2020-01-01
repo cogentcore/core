@@ -6,7 +6,7 @@ package gi3d
 
 import "github.com/goki/gi/mat32"
 
-// BBox contains bounding box and other gross object properties
+// BBox contains bounding box and other gross solid properties
 type BBox struct {
 	BBox    mat32.Box3   `desc:"bounding box in local coords"`
 	BSphere mat32.Sphere `desc:"bounding sphere in local coords"`

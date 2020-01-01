@@ -56,7 +56,7 @@ type Texture interface {
 
 // TextureBase is the base texture implementation
 type TextureBase struct {
-	Nm    string        `desc:"name of the texture -- textures are connected to material / objects by name"`
+	Nm    string        `desc:"name of the texture -- textures are connected to material by name"`
 	Bot0  bool          `desc:"set to true if this texture has Y=0 at the bottom -- otherwise default is Y=0 is at top as is the case in most images loaded from files etc"`
 	Trans bool          `desc:"set to true if texture has transparency"`
 	Tex   gpu.Texture2D `view:"-" desc:"gpu texture object"`
@@ -180,7 +180,7 @@ func (tx *TextureFile) Activate(sc *Scene, texNo int) {
 
 // TextureGi2D is a dynamic texture material driven by a gi.Viewport2D viewport
 // anything rendered to the viewport will be projected onto the surface of any
-// object using this texture.
+// solid using this texture.
 type TextureGi2D struct {
 	TextureBase
 	Viewport *gi.Viewport2D

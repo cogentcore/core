@@ -18,17 +18,19 @@ import (
 
 // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.
 // Call SetText() which calls RenderText to update fortext changes (re-renders texture).
-// The native scale is such that a unit height value is the height of the default font set by the
-// font-size property, and the X axis is scaled proportionally based on the rendered text
-// size to maintain the aspect ratio.  Further scaling can be applied on top of that by
-// setting the Pose.Scale values as usual.
-// Standard styling properties can be set on the node to set font size, family, and text alignment
-// relative to the Pose.Pos position (e.g., Left, Top puts the upper-left corner of text at Pos).
+// The native scale is such that a unit height value is the height of the default font
+// set by the font-size property, and the X axis is scaled proportionally based on the
+// rendered text size to maintain the aspect ratio.  Further scaling can be applied on
+// top of that by setting the Pose.Scale values as usual.
+// Standard styling properties can be set on the node to set font size, family,
+// and text alignment relative to the Pose.Pos position (e.g., Left, Top puts the
+// upper-left corner of text at Pos).
 // Note that higher quality is achieved by using a larger font size (36 default).
-// The margin property creates blank margin of the background color around the text (2 px default)
-// and the background-color defaults to transparent but can be set to any color.
+// The margin property creates blank margin of the background color around the text
+// (2 px default) and the background-color defaults to transparent
+// but can be set to any color.
 type Text2D struct {
-	Object
+	Solid
 	Text        string         `desc:"the text string to display"`
 	Sty         gi.Style       `json:"-" xml:"-" desc:"styling settings for the text"`
 	TxtPos      gi.Vec2D       `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
@@ -37,9 +39,9 @@ type Text2D struct {
 	RenderState gi.RenderState `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
-var KiT_Text2D = kit.Types.AddType(&Text2D{}, nil)
+var KiT_Text2D = kit.Types.AddType(&Text2D{}, Text2DProps)
 
-// AddNewText2D adds a new object of given name and text string to given parent
+// AddNewText2D adds a new text of given name and text string to given parent
 func AddNewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
 	txt := parent.AddNewChild(KiT_Text2D, name).(*Text2D)
 	txt.Defaults(sc)
@@ -50,7 +52,7 @@ func AddNewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
 func (txt *Text2D) Defaults(sc *Scene) {
 	tm := sc.Text2DPlaneMesh()
 	txt.SetMesh(sc, tm)
-	txt.Object.Defaults()
+	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)
 	txt.SetProp("font-size", units.NewPt(36))
 	txt.SetProp("margin", units.NewPx(2))
@@ -72,7 +74,7 @@ func (txt *Text2D) Disconnect() {
 			}
 		}
 	}
-	txt.Object.Disconnect()
+	txt.Solid.Disconnect()
 }
 
 // SetText sets the text and renders it to the texture image
@@ -190,10 +192,10 @@ func (txt *Text2D) RenderText(sc *Scene) {
 	// gi.SavePNG("text-test.png", img)
 }
 
-// Validate checks that object has valid mesh and texture settings, etc
+// Validate checks that text has valid mesh and texture settings, etc
 func (txt *Text2D) Validate(sc *Scene) error {
 	// todo: validate more stuff here
-	return txt.Object.Validate(sc)
+	return txt.Solid.Validate(sc)
 }
 
 func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
@@ -233,4 +235,8 @@ func (txt *Text2D) RenderClass() RenderClasses {
 		return RClassTransTexture
 	}
 	return RClassOpaqueTexture
+}
+
+var Text2DProps = ki.Props{
+	"EnumType:Flag": gi.KiT_NodeFlags,
 }

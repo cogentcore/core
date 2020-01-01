@@ -43,7 +43,7 @@ func (cm *Camera) DefaultPose() {
 	cm.LookAtOrigin()
 }
 
-// GenGoSet returns code to set values in object at given path (var.member etc)
+// GenGoSet returns code to set values at given path (var.member etc)
 func (cm *Camera) GenGoSet(path string) string {
 	return cm.Pose.GenGoSet(path+".Pose") + "; " + cm.Target.GenGoSet(path+".Target") + "; " + cm.UpDir.GenGoSet(path+".UpDir")
 }

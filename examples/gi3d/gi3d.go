@@ -91,12 +91,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	rbgp := gi3d.AddNewGroup(sc, sc, "r-b-group")
 
-	rcb := gi3d.AddNewObject(sc, rbgp, "red-cube", cbm.Name())
+	rcb := gi3d.AddNewSolid(sc, rbgp, "red-cube", cbm.Name())
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.Mat.Color.SetName("red")
 	rcb.Mat.Shiny = 500
 
-	bcb := gi3d.AddNewObject(sc, rbgp, "blue-cube", cbm.Name())
+	bcb := gi3d.AddNewSolid(sc, rbgp, "blue-cube", cbm.Name())
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 	bcb.Mat.Color.SetName("blue")
@@ -104,12 +104,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	bcb.Mat.Specular.SetName("blue") // how you get rid of specular highlights
 
-	gcb := gi3d.AddNewObject(sc, sc, "green-trans-cube", cbm.Name())
+	gcb := gi3d.AddNewSolid(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
 	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
-	fpgun := gi3d.AddNewObject(sc, tcg, "first-person-gun", cbm.Name())
+	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 255) // alpha = .5
@@ -132,7 +132,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
 	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-	floor := gi3d.AddNewObject(sc, sc, "floor", floorp.Name())
+	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color.SetName("tan")
 	// // floor.Mat.Emissive.SetName("brown")

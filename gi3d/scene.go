@@ -37,7 +37,7 @@ var Update3DTrace = false
 // or restore (subsequently) camera views (Control = always save)
 //
 // A Group at the top-level named "TrackCamera" will automatically track
-// the camera (i.e., its Pose is copied) -- Objects in that group can
+// the camera (i.e., its Pose is copied) -- Solids in that group can
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
 type Scene struct {
@@ -642,7 +642,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case "t":
 		kt.SetProcessed()
-		obj := sc.Child(0).(*Object)
+		obj := sc.Child(0).(*Solid)
 		fmt.Printf("updated obj: %v\n", obj.PathUnique())
 		obj.UpdateSig()
 		return
@@ -1009,12 +1009,12 @@ func (sc *Scene) Render3D() {
 			ni.DisconnectAllEvents(sc.Win, gi.AllPris)
 			return false
 		}
-		nii.ConnectEvents3D(sc) // only connect visible objects
-		if !nii.IsObject() {
+		nii.ConnectEvents3D(sc) // only connect visible
+		if !nii.IsSolid() {
 			return true
 		}
 		rc := nii.RenderClass()
-		if rc > RClassTransTexture { // all in one group of objects b/c z-sorting is key
+		if rc > RClassTransTexture { // all in one group b/c z-sorting is key
 			rc = RClassTransTexture
 		}
 		rcs[rc] = append(rcs[rc], nii)
@@ -1076,7 +1076,7 @@ func (sc *Scene) Render3D() {
 
 // TrackCamera -- a Group at the top-level named "TrackCamera"
 // will automatically track the camera (i.e., its Pose is copied).
-// Objects in that group can set their relative Pos etc to display
+// Solids in that group can set their relative Pos etc to display
 // relative to the camera, to achieve "first person" effects.
 func (sc *Scene) TrackCamera() bool {
 	tci, err := sc.ChildByNameTry("TrackCamera", 0)
@@ -1091,8 +1091,8 @@ func (sc *Scene) TrackCamera() bool {
 	return true
 }
 
-// ObjsIntersectingPoint finds all the objects that contain given 2D window coordinate
-func (sc *Scene) ObjsIntersectingPoint(pos image.Point) []Node3D {
+// SolidsIntersectingPoint finds all the solids that contain given 2D window coordinate
+func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 	var objs []Node3D
 	for _, kid := range sc.Kids {
 		kii, _ := KiToNode3D(kid)
@@ -1104,7 +1104,7 @@ func (sc *Scene) ObjsIntersectingPoint(pos image.Point) []Node3D {
 			if nii == nil {
 				return false // going into a different type of thing, bail
 			}
-			if !nii.IsObject() {
+			if !nii.IsSolid() {
 				return true
 			}
 			if pos.In(ni.WinBBox) {

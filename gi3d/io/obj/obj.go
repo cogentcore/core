@@ -188,24 +188,24 @@ func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
 	}
 }
 
-// SetObject sets the object as a group with each gi3d.Object as a mesh with unique material
+// SetObject sets the object as a group with each gi3d.Solid as a mesh with unique material
 func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, obj *Object) {
 	matName := ""
-	var ob *gi3d.Object
+	var sld *gi3d.Solid
 	var ms *gi3d.GenMesh
-	obidx := 0
+	sldidx := 0
 	idxs := make([]int, 0, 4)
 	for fi := range obj.Faces {
 		face := &obj.Faces[fi]
-		if face.Material != matName || ob == nil {
-			obnm := fmt.Sprintf("%s_%d", obj.Name, obidx)
+		if face.Material != matName || sld == nil {
+			sldnm := fmt.Sprintf("%s_%d", obj.Name, sldidx)
 			ms = &gi3d.GenMesh{}
-			ms.Nm = obnm
+			ms.Nm = sldnm
 			sc.AddMeshUnique(ms)
-			ob = gi3d.AddNewObject(sc, objgp, obnm, ms.Nm)
+			sld = gi3d.AddNewSolid(sc, objgp, sldnm, ms.Nm)
 			matName = face.Material
-			dec.SetMat(sc, ob, matName)
-			obidx++
+			dec.SetMat(sc, sld, matName)
+			sldidx++
 		}
 		// Copy face vertices to geometry
 		// https://stackoverflow.com/questions/23723993/converting-quadriladerals-in-an-obj-file-into-triangles
@@ -282,27 +282,27 @@ func (dec *Decoder) copyVertex(ms *gi3d.GenMesh, face *Face, idx int) int {
 }
 
 // SetMat sets the material for object
-func (dec *Decoder) SetMat(sc *gi3d.Scene, obj *gi3d.Object, matnm string) {
+func (dec *Decoder) SetMat(sc *gi3d.Scene, sld *gi3d.Solid, matnm string) {
 	mat := dec.Materials[matnm]
 	if mat == nil {
 		mat = defaultMat
 		// log warning
-		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, obj.Name())
+		msg := fmt.Sprintf("could not find material: %s for object %s. using default material.", matnm, sld.Name())
 		dec.appendWarn(objType, msg)
 	}
-	obj.Mat.Defaults()
-	obj.Mat.Color = mat.Diffuse
+	sld.Mat.Defaults()
+	sld.Mat.Color = mat.Diffuse
 	if mat.Opacity > 0 {
-		obj.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
+		sld.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
 	}
-	obj.Mat.Specular = mat.Specular
-	obj.Mat.Shiny = mat.Shininess
+	sld.Mat.Specular = mat.Specular
+	sld.Mat.Shiny = mat.Shininess
 	// Loads material textures if specified
-	dec.loadTex(sc, obj, mat.MapKd, mat)
+	dec.loadTex(sc, sld, mat.MapKd, mat)
 }
 
 // loadTex loads given texture file
-func (dec *Decoder) loadTex(sc *gi3d.Scene, obj *gi3d.Object, texfn string, mat *Material) {
+func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *Material) {
 	if texfn == "" {
 		return
 	}
@@ -314,11 +314,11 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, obj *gi3d.Object, texfn string, mat 
 	}
 	_, tfn := filepath.Split(texPath)
 	tf := gi3d.AddNewTextureFile(sc, tfn, texPath)
-	obj.Mat.SetTexture(sc, tf)
+	sld.Mat.SetTexture(sc, tf)
 	if mat.Tiling.Repeat.X > 0 {
-		obj.Mat.Tiling.Repeat = mat.Tiling.Repeat
+		sld.Mat.Tiling.Repeat = mat.Tiling.Repeat
 	}
-	obj.Mat.Tiling.Off = mat.Tiling.Off
+	sld.Mat.Tiling.Off = mat.Tiling.Off
 }
 
 // parse reads the lines from the specified reader and dispatch them

@@ -20,16 +20,16 @@ import (
 type Node3D interface {
 	gi.Node
 
-	// IsObject returns true if this is an Object node (else a Group)
-	IsObject() bool
+	// IsSolid returns true if this is an Solid node (else a Group)
+	IsSolid() bool
 
 	// AsNode3D returns a generic Node3DBase for our node -- gives generic
 	// access to all the base-level data structures without requiring
 	// interface methods.
 	AsNode3D() *Node3DBase
 
-	// AsObject returns a node as Object (nil if not)
-	AsObject() *Object
+	// AsSolid returns a node as Solid (nil if not)
+	AsSolid() *Solid
 
 	// Validate checks that scene element is valid
 	Validate(sc *Scene) error
@@ -53,9 +53,9 @@ type Node3D interface {
 
 	// RayPick converts a given 2D point in scene image coordinates
 	// into a ray from the camera position pointing through line of sight of camera
-	// into *local* coordinates of the object.
+	// into *local* coordinates of the solid.
 	// This can be used to find point of intersection in local coordinates relative
-	// to a given plane of interest, for example (see Ray methods for intersections)
+	// to a given plane of interest, for example (see Ray methods for intersections).
 	RayPick(pos image.Point, sc *Scene) mat32.Ray
 
 	// WorldMatrix returns the world matrix for this node
@@ -76,13 +76,13 @@ type Node3D interface {
 	// levels.
 	IsVisible() bool
 
-	// IsTransparent returns true if object has transparent color
+	// IsTransparent returns true if solid has transparent color
 	IsTransparent() bool
 
 	// Init3D does 3D intialization
 	Init3D(sc *Scene)
 
-	// RenderClass returns the class of rendering for this object
+	// RenderClass returns the class of rendering for this solid.
 	// used for organizing the ordering of rendering
 	RenderClass() RenderClasses
 
@@ -99,7 +99,7 @@ type Node3D interface {
 
 // Node3DBase is the basic 3D scenegraph node, which has the full transform information
 // relative to parent, and computed bounding boxes, etc.
-// There are only two different kinds of Nodes: Group and Object
+// There are only two different kinds of Nodes: Group and Solid
 type Node3DBase struct {
 	gi.NodeBase
 	Pose      Pose       `desc:"complete specification of position and orientation"`
@@ -166,11 +166,11 @@ func (nb *Node3DBase) AsNode3D() *Node3DBase {
 	return nb
 }
 
-func (nb *Node3DBase) IsObject() bool {
+func (nb *Node3DBase) IsSolid() bool {
 	return false
 }
 
-func (nb *Node3DBase) AsObject() *Object {
+func (nb *Node3DBase) AsSolid() *Solid {
 	return nil
 }
 
@@ -246,7 +246,7 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 
 // RayPick converts a given 2D point in scene image coordinates
 // into a ray from the camera position pointing through line of sight of camera
-// into *local* coordinates of the object.
+// into *local* coordinates of the solid.
 // This can be used to find point of intersection in local coordinates relative
 // to a given plane of interest, for example (see Ray methods for intersections).
 // To convert mouse window-relative coords into scene-relative coords

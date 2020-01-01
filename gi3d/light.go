@@ -11,7 +11,7 @@ import (
 )
 
 // Light represents a light that illuminates a scene
-// these are stored on the overall scene object and not within the graph
+// these are stored on the overall scene and not within the graph
 type Light interface {
 	// Name returns name of the light -- lights are accessed by name
 	Name() string

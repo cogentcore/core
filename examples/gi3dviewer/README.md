@@ -4,7 +4,7 @@ This viewer allows you to open and view 3D objects, using the supported object f
 
 Currently, this is just:
 
-* `.obj` -- Wavefront .obj file format.
+* `.obj` -- Wavefront .obj file format -- widely supported.  The Blender app exports quads which work well.  For other apps, it is a good idea to export triangles or quads -- e.g., SketchUp has an option to export triangles and that should be selected.
 
 ## Installation
 
@@ -52,7 +52,7 @@ Use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you 
     
     + `Textures` are the library of `Texture` files that define more complex colored surfaces for objects.  These can be loaded from standard image files.
     
-    + `Object`s are the Children of the Scene, and actually determine the content of the 3D scene.  Each Object has a `Mesh` field with the name of the mesh that defines its shape, and a `Mat` field that determines its material properties (Color, Texture, etc).  In addition, each Object has its own `Pose` field that determines its position, scale and orientation within the scene.  Because each `Object` is a `ki.Ki` tree node, it can contain other scene elements as its Children -- they will inherit the `Pose` settings of the parent (and so-on up the tree -- all poses are cumulative) but *not* automatically any material settings.  You can call `CopyMatToChildren` if you want to apply the current materials to the children nodes.  And use Style parameters to set these according to node name or Class name.
+    + `Solid`s are the Children of the Scene, and actually determine the content of the 3D scene.  Each Solid has a `Mesh` field with the name of the mesh that defines its shape, and a `Mat` field that determines its material properties (Color, Texture, etc).  In addition, each Solid has its own `Pose` field that determines its position, scale and orientation within the scene.  Because each `Solid` is a `ki.Ki` tree node, it can contain other scene elements as its Children -- they will inherit the `Pose` settings of the parent (and so-on up the tree -- all poses are cumulative) but *not* automatically any material settings.  You can call `CopyMatToChildren` if you want to apply the current materials to the children nodes.  And use Style parameters to set these according to node name or Class name.
 
-    + `Group`s can be used to apply `Pose` settings to a set of Children that are all grouped together (e.g., a multi-part complex object can be moved together etc by putting a set of `Object`s into a Group)
+    + `Group`s can be used to apply `Pose` settings to a set of Children that are all grouped together (e.g., a multi-part complex object can be moved together etc by putting a set of `Solid`s into a Group)
    

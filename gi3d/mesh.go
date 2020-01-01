@@ -15,14 +15,17 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// MeshName is a mesh name -- provides an automatic gui chooser for meshes
-// Used on Object to link to meshes by name.
+// MeshName is a mesh name -- provides an automatic gui chooser for meshes.
+// Used on Solid to link to meshes by name.
 type MeshName string
 
-// Mesh holds the mesh-based shape used for rendering an object.
+// Mesh holds the mesh-based shape used for rendering a Solid.
 // Only indexed triangle meshes are supported.
-// All Mesh's must define Vtx, Norm, Tex (stored interleaved), and Idx components.
-// Per-vertex Color is optional, and is appended to the vertex buffer non-interleaved if present.
+// All Mesh's must define Vtx and Norm -- Tex is optional --
+// all are stored interleaved.  The Idx component points into
+// these elements as used in modern indexed VBO rendering.
+// Per-vertex Color is optional, and is appended to the vertex
+// buffer non-interleaved if present.
 type Mesh interface {
 	// Name returns name of the mesh
 	Name() string
@@ -42,40 +45,49 @@ type Mesh interface {
 	// sets the various Vtx etc Arrays, and doesn't touch the gpu Buffer
 	Make(sc *Scene)
 
-	// Update updates any dynamically changing meshes (can be optimized to only update
-	// relevant vertex data instead of the indexes, norms, and texture coords)
+	// Update updates any dynamically changing meshes (can be optimized
+	// to only update relevant vertex data instead of the indexes, norms,
+	// and texture coords).
 	// Unlike Make, this is only called with context active on main thread
-	// and is responsible for calling any relevant Set*Data and Transfer method(s) to update the GPU.
+	// and is responsible for calling any relevant Set*Data and Transfer
+	// method(s) to update the GPU.
 	Update(sc *Scene)
 
 	// ComputeNorms automatically computes the normals from existing vertex data
 	ComputeNorms()
 
-	// Alloc allocates given number of vertex and index values, optionally including colors
-	// More efficient if number of such is known in advance
+	// Alloc allocates given number of vertex and index values, optionally
+	// including colors.   More efficient if number of such is known in advance.
 	Alloc(vtxs, idxs int, color bool)
 
 	// AddPlane adds everything to render a plane with the given parameters.
-	// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
-	// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
-	// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
+	// waxis, haxis = width, height axis, wdir, hdir are the directions for
+	// width and height dimensions.
+	// wsegs, hsegs = number of segments to create in each dimension --
+	// more finely subdividing a plane allows for higher-quality lighting
+	// and texture rendering (minimum of 1 will be enforced).
 	// offset is the distance to place the plane along the orthogonal axis.
 	// if clr is non-Nil then it will be added
 	AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color)
 
-	// SetPlane sets plane vertex data (optionally norm, texUV, color, and indexes) at given starting
-	// *vertex* index (i.e., multiply this *3 to get actual float offset in Vtx array), and starting Idx index.
-	// If doing a dynamic updating, compute the starting index using PlaneSize (and typically don't update Idx).
-	// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
-	// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
-	// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
+	// SetPlane sets plane vertex data (optionally norm, texUV, color, and indexes)
+	// at given starting *vertex* index (i.e., multiply this *3 to get actual float
+	// offset in Vtx array), and starting Idx index.
+	// If doing a dynamic updating, compute the starting index using PlaneSize
+	// (and typically don't update Idx).
+	// waxis, haxis = width, height axis, wdir, hdir are the directions for width
+	// and height dimensions.
+	// wsegs, hsegs = number of segments to create in each dimension --
+	// more finely subdividing a plane allows for higher-quality lighting
+	// and texture rendering (minimum of 1 will be enforced).
 	// offset is the distance to place the plane along the orthogonal axis.
 	// if clr is non-Nil then it will be added
 	SetPlane(stVtxIdx, stIdxIdx int, setNorm, setTex, setIdx bool, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color)
 
 	// PlaneSize returns the size of a single plane's worth of vertex and index data
 	// with given number of segments.
-	// Note: In *vertex* units, not float units (i.e., x3 to get actual float offset in Vtx array).
+	// Note: In *vertex* units, not float units (i.e., x3 to get actual float offset
+	// in Vtx array).
 	// Use for computing the starting indexes in SetPlaneVtx.
 	// vtxSize = (wsegs + 1) * (hsegs + 1)
 	// idxSize = wsegs * hsegs * 6
@@ -112,16 +124,17 @@ type Mesh interface {
 	// Activate must have just been called
 	TransferAll()
 
-	// TransferVectors transfer vectors buffer data to GPU (if vector data has changed)
+	// TransferVectors transfer vectors buffer data to GPU (if vector data has changed).
 	// Activate must have just been called
 	TransferVectors()
 
-	// TransferIndexes transfer vectors buffer data to GPU (if index data has changed)
+	// TransferIndexes transfer vectors buffer data to GPU (if index data has changed).
 	// Activate must have just been called
 	TransferIndexes()
 
 	// Render3D calls gpu.TrianglesIndexed to render the mesh.
-	// Must be called in context on main thread -- does activate, then draw triangles indexed
+	// Must be called in context on main thread -- does activate,
+	// then draw triangles indexed.
 	Render3D(sc *Scene)
 
 	// SetVtxData sets the (updated) Vtx data into the overall vector that
@@ -151,7 +164,7 @@ type Mesh interface {
 
 // MeshBase provides the core implementation of Mesh interface
 type MeshBase struct {
-	Nm      string         `desc:"name of mesh -- meshes are linked to objects by name so this matters"`
+	Nm      string         `desc:"name of mesh -- meshes are linked to Solids by name so this matters"`
 	Dynamic bool           `desc:"if true, this mesh changes frequently -- otherwise considered to be static"`
 	Trans   bool           `desc:"set to true if color has transparency -- not worth checking manually"`
 	Vtx     mat32.ArrayF32 `desc:"verticies for triangle shapes that make up the mesh -- all mesh structures must use indexed triangle meshes"`
@@ -159,7 +172,7 @@ type MeshBase struct {
 	Tex     mat32.ArrayF32 `desc:"texture U,V coordinates for mapping textures onto vertexes"`
 	Idx     mat32.ArrayU32 `desc:"indexes that sequentially in groups of 3 define the actual triangle faces"`
 	Color   mat32.ArrayF32 `desc:"if per-vertex color material type is used for this mesh, then these are the per-vertex colors -- may not be defined in which case per-vertex materials are not possible for such meshes"`
-	BBox    BBox           `desc:"computed bounding-box and other gross object properties"`
+	BBox    BBox           `desc:"computed bounding-box and other gross solid properties"`
 	Buff    gpu.BufferMgr  `view:"-" desc:"buffer holding computed verticies, normals, indices, etc for rendering"`
 }
 
@@ -414,12 +427,14 @@ func (ms *MeshBase) Alloc(vtxs, idxs int, color bool) {
 	}
 }
 
-// AddPlane adds everything to render a plane with the given parameters (convenience wrapper around
-// SetPlane method).
-// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
-// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
-// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
+// AddPlane adds everything to render a plane with the given parameters.
+// waxis, haxis = width, height axis, wdir, hdir are the directions for
+// width and height dimensions.
+// wsegs, hsegs = number of segments to create in each dimension --
+// more finely subdividing a plane allows for higher-quality lighting
+// and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
+// if clr is non-Nil then it will be added
 func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color) {
 	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
 	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
@@ -427,12 +442,16 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, hei
 	ms.SetPlane(stVtxIdx, stIdxIdx, true, true, true, waxis, haxis, wdir, hdir, width, height, woff, hoff, zoff, wsegs, hsegs, clr)
 }
 
-// SetPlane sets plane vertex data (optionally norm, texUV, color, and indexes) at given starting
-// *vertex* index (i.e., multiply this *3 to get actual float offset in Vtx array), and starting Idx index.
-// If doing a dynamic updating, compute the starting index using PlaneSize (and typically don't update Idx).
-// waxis, haxis = width, height axis, wdir, hdir are the directions for width and height dimensions.
-// wsegs, hsegs = number of segments to create in each dimension -- more finely subdividing a plane
-// allows for higher-quality lighting and texture rendering (minimum of 1 will be enforced).
+// SetPlane sets plane vertex data (optionally norm, texUV, color, and indexes)
+// at given starting *vertex* index (i.e., multiply this *3 to get actual float
+// offset in Vtx array), and starting Idx index.
+// If doing a dynamic updating, compute the starting index using PlaneSize
+// (and typically don't update Idx).
+// waxis, haxis = width, height axis, wdir, hdir are the directions for width
+// and height dimensions.
+// wsegs, hsegs = number of segments to create in each dimension --
+// more finely subdividing a plane allows for higher-quality lighting
+// and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // if clr is non-Nil then it will be added
 func (ms *MeshBase) SetPlane(stVtxIdx, stIdxIdx int, setNorm, setTex, setIdx bool, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color) {

@@ -10,9 +10,10 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// Pose contains the full specification of a given object's position and orientation
+// Pose contains the full specification of position and orientation,
+// always relevant to the parent element.
 type Pose struct {
-	Pos         mat32.Vec3 `desc:"position of center of object"`
+	Pos         mat32.Vec3 `desc:"position of center of element (relative to parent)"`
 	Scale       mat32.Vec3 `desc:"scale (relative to parent)"`
 	Quat        mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
 	Matrix      mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
@@ -44,7 +45,7 @@ func (ps *Pose) CopyFrom(op *Pose) {
 	ps.UpdateMatrix()
 }
 
-// GenGoSet returns code to set values in object at given path (var.member etc)
+// GenGoSet returns code to set values at given path (var.member etc)
 func (ps *Pose) GenGoSet(path string) string {
 	return ps.Pos.GenGoSet(path+".Pos") + "; " + ps.Scale.GenGoSet(path+".Scale") + "; " + ps.Quat.GenGoSet(path+".Quat")
 }
@@ -149,7 +150,7 @@ func (ps *Pose) SetMatrix(m *mat32.Mat4) {
 	ps.Pos, ps.Quat, ps.Scale = ps.Matrix.Decompose()
 }
 
-// LookAt points the object at given target location using given up direction.
+// LookAt points the element at given target location using given up direction.
 func (ps *Pose) LookAt(target, upDir mat32.Vec3) {
 	ps.Quat.SetFromRotationMatrix(mat32.NewLookAt(ps.Pos, target, upDir))
 }
