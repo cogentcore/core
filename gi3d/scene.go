@@ -1028,7 +1028,7 @@ func (sc *Scene) Render3D() {
 		}
 		if rc >= RClassTransTexture { // sort back-to-front for transparent
 			sort.Slice(objs, func(i, j int) bool {
-				return objs[i].AsNode3D().NDCBBox.Min.Z > objs[j].AsNode3D().NDCBBox.Min.Z
+				return objs[i].AsNode3D().NDCBBox.Max.Z > objs[j].AsNode3D().NDCBBox.Max.Z
 			})
 		} else { // sort front-to-back for opaque to allow "early z rejection"
 			sort.Slice(objs, func(i, j int) bool {
