@@ -5,7 +5,6 @@
 package gi3d
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,13 +23,11 @@ type Decoder interface {
 	// Desc returns the description of this decoder
 	Desc() string
 
-	// SetFiles sets the file names being used for decoding -- needed in case
+	// SetFile sets the file name being used for decoding -- needed in case
 	// of loading other files such as textures / materials from the same directory.
-	// Also potentially modifies the list of files to suggest other files
-	// that should be loaded along with those passed.
-	// For example, .obj decoder adds a corresponding .mtl file if one is not
-	// otherwise passed.
-	SetFiles(files []string) []string
+	// Returns a list of files that should be loaded along with the main one, if needed.
+	// For example, .obj decoder adds a corresponding .mtl file.
+	SetFile(fname string) []string
 
 	// Decode reads the given data and decodes it, returning a new instance
 	// of the Decoder that contains all the decoded info.
@@ -54,26 +51,20 @@ type Decoder interface {
 // .obj = Wavefront object file -- only has mesh data, not scene info.
 var Decoders = map[string]Decoder{}
 
-// DecodeFile decodes the given file(s) using the decoder based on the file
-// extension in first file name.  Returns decoder instance with full decoded state.
+// DecodeFile decodes the given file using a decoder based on the file
+// extension.  Returns decoder instance with full decoded state.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.
-func DecodeFile(files []string) (Decoder, error) {
-	nf := len(files)
-	if nf == 0 {
-		return nil, errors.New("gi3d.DecodeFile: no files passed")
-	}
-	fn := files[0]
-	ext := filepath.Ext(fn)
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        must have same name as .obj, or a default material is used.
+func DecodeFile(fname string) (Decoder, error) {
+	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
-		return nil, fmt.Errorf("gi3d.DecodeFile: file extension: %v not found in Decoders list", ext)
+		return nil, fmt.Errorf("gi3d.DecodeFile: file extension: %v not found in Decoders list for file %v", ext, fname)
 	}
 	dec := dt.New()
-	files = dec.SetFiles(files)
-	nf = len(files)
+	files := dec.SetFile(fname)
+	nf := len(files)
 
 	var err error
 	fs := make([]*os.File, nf)
@@ -100,14 +91,13 @@ func DecodeFile(files []string) (Decoder, error) {
 	return dec, nil
 }
 
-// OpenObj open the given object(s) from given file(s) into given group in scene,
-// using the decoder based on the file extension in first file name.
+// OpenObj opens object(s) from given file into given group in scene,
+// using a decoder based on the file extension.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.
-func (sc *Scene) OpenObj(files []string, gp *Group) error {
-	dec, err := DecodeFile(files)
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenObj(fname string, gp *Group) error {
+	dec, err := DecodeFile(fname)
 	if err != nil {
 		return err
 	}
@@ -118,19 +108,18 @@ func (sc *Scene) OpenObj(files []string, gp *Group) error {
 	return nil
 }
 
-// OpenNewObj open the given object(s) from given file(s) into a new group
-// under given parent, using the decoder based on the file extension in first file name.
+// OpenNewObj opens object(s) from given file into a new group
+// under given parent, using a decoder based on the file extension.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.
-func (sc *Scene) OpenNewObj(files []string, parent ki.Ki) (*Group, error) {
-	dec, err := DecodeFile(files)
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenNewObj(fname string, parent ki.Ki) (*Group, error) {
+	dec, err := DecodeFile(fname)
 	if err != nil {
 		return nil, err
 	}
 	updt := sc.UpdateStart()
-	_, fn := filepath.Split(files[0])
+	_, fn := filepath.Split(fname)
 	gp := AddNewGroup(sc, parent, fn)
 	dec.SetGroup(sc, gp)
 	sc.Init3D() // needed after loading
@@ -138,21 +127,20 @@ func (sc *Scene) OpenNewObj(files []string, parent ki.Ki) (*Group, error) {
 	return gp, nil
 }
 
-// OpenToLibrary open the given object(s) from given file(s) into the scene's Library
-// using the decoder based on the file extension in first file name.  The library
-// key name must be unique, and is given by libnm -- if empty, then the filename (only)
+// OpenToLibrary opens object(s) from given file into the scene's Library
+// using a decoder based on the file extension.  The library key name
+// must be unique, and is given by libnm -- if empty, then the filename (only)
 // without extension is used.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.
-func (sc *Scene) OpenToLibrary(libnm string, files []string) (*Group, error) {
-	dec, err := DecodeFile(files)
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        must have same name as .obj, or a default material is used.
+func (sc *Scene) OpenToLibrary(fname string, libnm string) (*Group, error) {
+	dec, err := DecodeFile(fname)
 	if err != nil {
 		return nil, err
 	}
 	if libnm == "" {
-		_, fn := filepath.Split(files[0])
+		_, fn := filepath.Split(fname)
 		ext := filepath.Ext(fn)
 		libnm = strings.TrimSuffix(fn, ext)
 	}
@@ -161,15 +149,15 @@ func (sc *Scene) OpenToLibrary(libnm string, files []string) (*Group, error) {
 	return gp, nil
 }
 
-// OpenScene open the given scene from given file(s),
-// using the decoder based on the file extension in first file name.
+// OpenScene opens a scene from given file, using a decoder based on
+// the file extension in first file name.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.  Does not support full scene
-//        data so only objects are loaded into a new group in scene.
-func (sc *Scene) OpenScene(files []string) error {
-	dec, err := DecodeFile(files)
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        must have same name as .obj, or a default material is used.
+//        Does not support full scene data so only objects are loaded
+//        into a new group in scene.
+func (sc *Scene) OpenScene(fname string) error {
+	dec, err := DecodeFile(fname)
 	if err != nil {
 		return err
 	}
@@ -180,18 +168,22 @@ func (sc *Scene) OpenScene(files []string) error {
 	return nil
 }
 
-// ReadObj reads the given object(s) from given reader(s) into given group in scene,
-// using the decoder based on the given file extension.
+// ReadObj reads object(s) from given reader(s) into given group in scene,
+// using a decoder based on the extension of the given file name --
+// even though the file name is not directly used to read the file, it is
+// required for naming and decoding selection.  This method can be used
+// for loading data embedded in an executable for example.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.
-func (sc *Scene) ReadObj(ext string, rs []io.Reader, gp *Group) error {
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        is the 2nd reader arg, or a default material is used.
+func (sc *Scene) ReadObj(fname string, rs []io.Reader, gp *Group) error {
+	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
 		return fmt.Errorf("gi3d.ReadObj: file extension: %v not found in Decoders list", ext)
 	}
 	dec := dt.New()
+	dec.SetFile(fname)
 	err := dec.Decode(rs)
 	if err != nil {
 		return err
@@ -203,19 +195,23 @@ func (sc *Scene) ReadObj(ext string, rs []io.Reader, gp *Group) error {
 	return nil
 }
 
-// ReadScene open the given scene from given file(s),
-// using the decoder based on the file extension in first file name.
+// ReadScene reads scene from given reader(s), using a decoder based on the
+// file name extension -- even though the file name is not directly used
+// to read the file, it is required for naming and decoding selection.
+// This method can be used for loading data embedded in an executable for example.
 // Supported formats include:
-// .obj = Wavefront OBJ format, including associated materials (.mtl) which can
-//        be specified as second file name -- otherwise auto-searched based on
-//        .obj filename, or a default material is used.  Does not support full scene
-//        data so only objects are loaded into a new group in scene.
-func (sc *Scene) ReadScene(ext string, rs []io.Reader, gp *Group) error {
+// .obj = Wavefront OBJ format, including associated materials (.mtl) which
+//        must have same name as .obj, or a default material is used.
+//        Does not support full scene data so only objects are loaded
+//        into a new group in scene.
+func (sc *Scene) ReadScene(fname string, rs []io.Reader, gp *Group) error {
+	ext := filepath.Ext(fname)
 	dt, has := Decoders[ext]
 	if !has {
 		return fmt.Errorf("gi3d.ReadScene: file extension: %v not found in Decoders list", ext)
 	}
 	dec := dt.New()
+	dec.SetFile(fname)
 	err := dec.Decode(rs)
 	if err != nil {
 		return err

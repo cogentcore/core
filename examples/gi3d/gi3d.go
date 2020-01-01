@@ -116,7 +116,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	// Good strategy for objects if used in multiple places is to load
 	// into library, then add from there.
-	lgo, err := sc.OpenToLibrary("", []string{"gopher.obj"})
+	lgo, err := sc.OpenToLibrary("gopher.obj", "")
 	if err != nil {
 		log.Println(err)
 	}

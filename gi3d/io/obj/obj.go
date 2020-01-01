@@ -72,24 +72,13 @@ func (dec *Decoder) HasScene() bool {
 	return false
 }
 
-func (dec *Decoder) SetFiles(files []string) []string {
-	nf := len(files)
-	if nf == 0 {
-		return files
-	}
-	dec.Objdir, dec.Objfile = filepath.Split(files[0])
-	if nf == 2 {
-		return files
-	}
-	mtlf := strings.TrimSuffix(files[0], ".obj") + ".mtl"
-
+func (dec *Decoder) SetFile(fname string) []string {
+	dec.Objdir, dec.Objfile = filepath.Split(fname)
+	mtlf := strings.TrimSuffix(fname, ".obj") + ".mtl"
 	if _, err := os.Stat(mtlf); !os.IsNotExist(err) {
-		fs := make([]string, 2)
-		fs[0] = files[0]
-		fs[1] = mtlf
-		return fs
+		return []string{fname, mtlf}
 	} else {
-		return files
+		return []string{fname}
 	}
 }
 
@@ -324,7 +313,6 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *
 // parse reads the lines from the specified reader and dispatch them
 // to the specified line parser.
 func (dec *Decoder) parse(reader io.Reader, parseLine func(string) error) error {
-
 	bufin := bufio.NewReader(reader)
 	dec.line = 1
 	for {
@@ -350,7 +338,6 @@ func (dec *Decoder) parse(reader io.Reader, parseLine func(string) error) error 
 
 // Parses obj file line, dispatching to specific parsers
 func (dec *Decoder) parseObjLine(line string) error {
-
 	// Ignore empty lines
 	fields := strings.Fields(line)
 	if len(fields) == 0 {
@@ -399,7 +386,6 @@ func (dec *Decoder) parseObjLine(line string) error {
 // Parses a mtllib line:
 // mtllib <name>
 func (dec *Decoder) parseMatlib(fields []string) error {
-
 	if len(fields) < 1 {
 		return errors.New("Material library (mtllib) with no fields")
 	}
@@ -410,7 +396,6 @@ func (dec *Decoder) parseMatlib(fields []string) error {
 // Parses an object line:
 // o <name>
 func (dec *Decoder) parseObject(fields []string) error {
-
 	if len(fields) < 1 {
 		return errors.New("Object line (o) with no fields")
 	}
@@ -432,7 +417,6 @@ func makeObject(name string) Object {
 // Parses a vertex position line
 // v <x> <y> <z> [w]
 func (dec *Decoder) parseVertex(fields []string) error {
-
 	if len(fields) < 3 {
 		return errors.New("Less than 3 vertices in 'v' line")
 	}
@@ -449,7 +433,6 @@ func (dec *Decoder) parseVertex(fields []string) error {
 // Parses a vertex normal line
 // vn <x> <y> <z>
 func (dec *Decoder) parseNormal(fields []string) error {
-
 	if len(fields) < 3 {
 		return errors.New("Less than 3 normals in 'vn' line")
 	}
@@ -466,7 +449,6 @@ func (dec *Decoder) parseNormal(fields []string) error {
 // Parses a vertex texture coordinate line:
 // vt <u> <v> <w>
 func (dec *Decoder) parseTex(fields []string) error {
-
 	if len(fields) < 2 {
 		return errors.New("Less than 2 texture coords. in 'vt' line")
 	}
@@ -483,7 +465,6 @@ func (dec *Decoder) parseTex(fields []string) error {
 // parseFace parses a face decription line:
 // f v1[/vt1][/vn1] v2[/vt2][/vn2] v3[/vt3][/vn3] ...
 func (dec *Decoder) parseFace(fields []string) error {
-	// NOTE(quillaja): this wasn't really part of the original issue-29
 	if dec.objCurrent == nil {
 		// if a face line is encountered before a group (g) or object (o),
 		// create a new "default" object. This 'handles' the case when

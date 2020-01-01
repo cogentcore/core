@@ -84,7 +84,7 @@ func mainrun() {
 					objgp.DeleteChildren(true)
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
-					_, err := sc.OpenNewObj([]string{fn}, objgp)
+					_, err := sc.OpenNewObj(fn, objgp)
 					if err != nil {
 						log.Println(err)
 					}
