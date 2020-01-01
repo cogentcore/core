@@ -828,23 +828,33 @@ func (dec *Decoder) parseMapKd(fields []string) error {
 	if len(fields) < 1 {
 		return dec.formatError("No fields")
 	}
-	for i, f := range fields {
+	nf := len(fields)
+	for i := 0; i < nf; i++ {
+		f := fields[i]
 		if f[0] == '-' {
 			switch f {
 			case "-s":
-				r1, err := strconv.ParseFloat(fields[i+1], 32)
+				r1, _ := strconv.ParseFloat(fields[i+1], 32)
 				r2 := r1
-				rt, err := strconv.ParseFloat(fields[i+2], 32)
-				if err == nil {
-					r2 = rt
+				i++
+				if len(fields) > i+2 {
+					rt, err := strconv.ParseFloat(fields[i+2], 32)
+					if err == nil {
+						r2 = rt
+						i++
+					}
 				}
 				dec.matCurrent.Tiling.Repeat.Set(float32(r1), float32(r2))
 			case "-o":
-				r1, err := strconv.ParseFloat(fields[i+1], 32)
+				r1, _ := strconv.ParseFloat(fields[i+1], 32)
 				r2 := r1
-				rt, err := strconv.ParseFloat(fields[i+2], 32)
-				if err == nil {
-					r2 = rt
+				i++
+				if len(fields) > i+2 {
+					rt, err := strconv.ParseFloat(fields[i+2], 32)
+					if err == nil {
+						r2 = rt
+						i++
+					}
 				}
 				dec.matCurrent.Tiling.Off.Set(float32(r1), float32(r2))
 			}
