@@ -114,8 +114,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 255) // alpha = .5
 
-	gopher := gi3d.AddNewGroup(sc, sc, "Gopher")
-	_, err := sc.OpenNewObj([]string{"gopher.obj"}, gopher)
+	gopher, err := sc.OpenNewObj([]string{"gopher.obj"}, sc)
 	if err != nil {
 		log.Println(err)
 	}
@@ -123,6 +122,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gopher.Pose.Scale.Set(.5, .5, .5)
 	gopher.Pose.Pos.Set(2, -2.5, 0)
 	gopher.Pose.SetAxisRotation(0, 1, 0, -90)
+
+	gd := gopher.Clone().(*gi3d.Group)
+	sc.AddChild(gd)
+	gd.Pose.Pos.Set(-1.5, -2, 0)
+	gd.Pose.Scale.Set(.2, .2, .2)
 
 	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")

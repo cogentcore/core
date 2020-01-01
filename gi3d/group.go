@@ -25,6 +25,11 @@ func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
 	return gp
 }
 
+func (gp *Group) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Group)
+	gp.Node3DBase.CopyFieldsFrom(&fr.Node3DBase)
+}
+
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (gp *Group) UpdateMeshBBox() {

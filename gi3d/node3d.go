@@ -150,6 +150,15 @@ func KiToNode3DBase(k ki.Ki) *Node3DBase {
 	return k.(Node3D).AsNode3D()
 }
 
+func (nb *Node3DBase) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Node3DBase)
+	nb.NodeBase.CopyFieldsFrom(&fr.NodeBase)
+	nb.Pose = fr.Pose
+	nb.MeshBBox = fr.MeshBBox
+	nb.WorldBBox = fr.WorldBBox
+	nb.NDCBBox = fr.NDCBBox
+}
+
 // AsNode3D returns a generic Node3DBase for our node -- gives generic
 // access to all the base-level data structures without requiring
 // interface methods.

@@ -9,6 +9,7 @@ import (
 	"image"
 	"image/draw"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/goki/gi/gi"
@@ -1019,31 +1020,46 @@ func (sc *Scene) Render3D() {
 		return true
 	})
 
-	// todo: zsort objects..  opaque front-to-back, trans back-to-front
+	// todo: for transparent, group all together -- otherwise use separate for non-trans
+
 	for rci, objs := range rcs {
 		rc := RenderClasses(rci)
 		if len(objs) == 0 {
 			continue
 		}
+		if rc >= RClassTransTexture { // sort back-to-front for transparent
+			sort.Slice(objs, func(i, j int) bool {
+				return objs[i].AsNode3D().NDCBBox.Min.Z > objs[j].AsNode3D().NDCBBox.Min.Z
+			})
+		} else { // sort front-to-back to allow "early z rejection"
+			sort.Slice(objs, func(i, j int) bool {
+				return objs[i].AsNode3D().NDCBBox.Min.Z < objs[j].AsNode3D().NDCBBox.Min.Z
+			})
+		}
+		// fmt.Printf("\nRender class: %v\n", rc)
+		// for i := range objs {
+		// 	fmt.Printf("obj: %s  max z: %g   min z: %g\n", objs[i].Name(), objs[i].AsNode3D().NDCBBox.Max.Z, objs[i].AsNode3D().NDCBBox.Min.Z)
+		// }
+
 		var rnd Render
 		switch rc {
-		case RClassOpaqueUniform:
-			rnd = sc.Renders.Renders["RenderUniformColor"]
-			gpu.Draw.Op(draw.Src)
-		case RClassTransUniform:
-			rnd = sc.Renders.Renders["RenderUniformColor"]
-			gpu.Draw.Op(draw.Over) // alpha
 		case RClassOpaqueTexture:
 			rnd = sc.Renders.Renders["RenderTexture"]
+			gpu.Draw.Op(draw.Src)
+		case RClassOpaqueUniform:
+			rnd = sc.Renders.Renders["RenderUniformColor"]
 			gpu.Draw.Op(draw.Src)
 		case RClassOpaqueVertex:
 			rnd = sc.Renders.Renders["RenderVertexColor"]
 			gpu.Draw.Op(draw.Src)
-		case RClassTransVertex:
-			rnd = sc.Renders.Renders["RenderVertexColor"]
-			gpu.Draw.Op(draw.Over) // alpha
 		case RClassTransTexture:
 			rnd = sc.Renders.Renders["RenderTexture"]
+			gpu.Draw.Op(draw.Over) // alpha
+		case RClassTransUniform:
+			rnd = sc.Renders.Renders["RenderUniformColor"]
+			gpu.Draw.Op(draw.Over) // alpha
+		case RClassTransVertex:
+			rnd = sc.Renders.Renders["RenderVertexColor"]
 			gpu.Draw.Op(draw.Over) // alpha
 		}
 		rnd.Activate(&sc.Renders) // use same program for all..

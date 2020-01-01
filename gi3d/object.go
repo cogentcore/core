@@ -36,6 +36,14 @@ func AddNewObject(sc *Scene, parent ki.Ki, name string, meshName string) *Object
 	return obj
 }
 
+func (obj *Object) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*Object)
+	obj.Node3DBase.CopyFieldsFrom(&fr.Node3DBase)
+	obj.Mesh = fr.Mesh
+	obj.Mat = fr.Mat
+	obj.MeshPtr = fr.MeshPtr
+}
+
 func (obj *Object) IsObject() bool {
 	return true
 }

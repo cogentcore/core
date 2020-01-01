@@ -34,13 +34,13 @@ const (
 type RenderClasses int32
 
 const (
-	RClassNone RenderClasses = iota
+	RClassNone          RenderClasses = iota
+	RClassOpaqueTexture               // textures tend to be in background
 	RClassOpaqueUniform
 	RClassOpaqueVertex
-	RClassOpaqueTexture
+	RClassTransTexture
 	RClassTransUniform
 	RClassTransVertex
-	RClassTransTexture
 	RenderClassesN
 )
 

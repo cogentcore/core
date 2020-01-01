@@ -209,33 +209,44 @@ func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, obj *Object) {
 		// Copy face vertices to geometry
 		// https://stackoverflow.com/questions/23723993/converting-quadriladerals-in-an-obj-file-into-triangles
 		// logic for 0, i, i+1
+		// note: the last comment at the end is *incorrect* -- it really is the triangle fans as impl here:
 
-		idxs = idxs[:1]
+		idxs = idxs[:3]
 		idxs[0] = dec.copyVertex(ms, face, 0)
-		for idx := 1; idx < len(face.Vertices)-1; idx++ {
-			if idx > 1 {
-				ms.Idx.Append(uint32(idxs[0]))
-			}
-			if len(idxs) > idx {
-				ms.Idx.Append(uint32(idxs[idx]))
-			} else {
-				idxs = append(idxs, dec.copyVertex(ms, face, idx))
-			}
-			idxs = append(idxs, dec.copyVertex(ms, face, idx+1))
-			if ms.Norm.Size() != ms.Vtx.Size() {
-				var a, b, c mat32.Vec3
-				ms.Vtx.GetVec3(3*idxs[0], &a)
-				ms.Vtx.GetVec3(3*idxs[idx], &b)
-				ms.Vtx.GetVec3(3*idxs[idx+1], &c)
-				nrm := mat32.Normal(a, b, c)
-				for {
-					ms.Norm.AppendVec3(nrm)
-					if ms.Norm.Size() >= ms.Vtx.Size() {
-						break
-					}
-				}
-			}
+		idxs[1] = dec.copyVertex(ms, face, 1)
+		idxs[2] = dec.copyVertex(ms, face, 2)
+		dec.addNorms(ms, 0, 1, 2, idxs)
+		for idx := 2; idx < len(face.Vertices); idx++ {
+			dec.setIndex(ms, face, 0, &idxs)
+			dec.setIndex(ms, face, idx-1, &idxs)
+			dec.setIndex(ms, face, idx, &idxs)
+			dec.addNorms(ms, idx-3, idx-1, idx, idxs)
 		}
+	}
+}
+
+func (dec *Decoder) addNorms(ms *gi3d.GenMesh, ai, bi, ci int, idxs []int) {
+	if ms.Norm.Size() >= ms.Vtx.Size() {
+		return
+	}
+	var a, b, c mat32.Vec3
+	ms.Vtx.GetVec3(3*idxs[ai], &a)
+	ms.Vtx.GetVec3(3*idxs[bi], &b)
+	ms.Vtx.GetVec3(3*idxs[ci], &c)
+	nrm := mat32.Normal(a, b, c)
+	for {
+		ms.Norm.AppendVec3(nrm)
+		if ms.Norm.Size() >= ms.Vtx.Size() {
+			break
+		}
+	}
+}
+
+func (dec *Decoder) setIndex(ms *gi3d.GenMesh, face *Face, idx int, idxs *[]int) {
+	if len(*idxs) > idx {
+		ms.Idx.Append(uint32((*idxs)[idx]))
+	} else {
+		*idxs = append(*idxs, dec.copyVertex(ms, face, idx))
 	}
 }
 
