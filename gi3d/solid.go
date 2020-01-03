@@ -62,6 +62,9 @@ func (sld *Solid) Defaults() {
 
 // SetMeshName sets mesh to given mesh name.
 func (sld *Solid) SetMeshName(sc *Scene, meshName string) error {
+	if meshName == "" {
+		return nil
+	}
 	ms, ok := sc.Meshes[meshName]
 	if !ok {
 		err := fmt.Errorf("gi3d.Solid: %s SetMesh name: %s not found in scene", sld.PathUnique(), meshName)

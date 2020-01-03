@@ -3386,8 +3386,8 @@ func (tv *TextView) RenderLineNo(ln int) {
 	fst := sty.Font
 	fst.BgColor.SetColor(nil)
 	rs := &vp.Render
-	lfmt := fmt.Sprintf("%v", tv.LineNoDigs)
-	lfmt = "%0" + lfmt + "d"
+	lfmt := fmt.Sprintf("%d", tv.LineNoDigs)
+	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := tv.RenderStartPos()
