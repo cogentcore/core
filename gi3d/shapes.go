@@ -5,6 +5,10 @@
 package gi3d
 
 import (
+	"log"
+	"math"
+
+	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
@@ -122,59 +126,156 @@ func (bx *Box) Make(sc *Scene) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-//   Line
+//   Lines
 
-// Line is a long thin box defined by two end points and a line width.
-// Raw line rendering via OpenGL is not very effective -- lines are often
-// very thin and appearance is hardware dependent.
+// Note: Raw line rendering via OpenGL is not very effective
+// -- lines are often very thin and appearance is hardware dependent.
 // This approach produces consistent results across platforms,
 // is very fast, and is "good enough" for most purposes.
 // For high-quality vector rendering, render to a Viewport2D
 // and use that as a texture.
-type Line struct {
+
+// Lines are lines rendered as long thin boxes defined by points
+// and width parameters.
+type Lines struct {
 	MeshBase
-	Start mat32.Vec3 `desc:"starting point"`
-	End   mat32.Vec3 `desc:"ending point"`
-	Width float32    `desc:"line width"`
+	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`
+	Width  mat32.Vec2   `desc:"line width, Y = height perpendicular to line direction, and X = depth"`
+	Close  bool         `desc:"if true, connect the first and last points to form a closed shape"`
 }
 
-var KiT_Line = kit.Types.AddType(&Line{}, nil)
+var KiT_Lines = kit.Types.AddType(&Lines{}, nil)
 
-// AddNewLine adds Line mesh to given scene, with given start, end, and width
-func AddNewLine(sc *Scene, name string, start, end mat32.Vec3, width float32) *Line {
-	ln := &Line{}
+// AddNewLines adds Lines mesh to given scene, with given start, end, and width
+func AddNewLines(sc *Scene, name string, points []mat32.Vec3, width mat32.Vec2) *Lines {
+	ln := &Lines{}
 	ln.Nm = name
-	ln.Start = start
-	ln.End = end
+	ln.Points = points
 	ln.Width = width
 	sc.AddMesh(ln)
 	return ln
 }
 
-func (ln *Line) Make(sc *Scene) {
+func (ln *Lines) Make(sc *Scene) {
 	ln.Reset()
+
+	np := len(ln.Points)
+	if np < 2 {
+		log.Printf("gi3d.Lines: %v -- need 2 or more Points\n", ln.Name())
+		return
+	}
+
+	pts := ln.Points
+	if ln.Close {
+		pts = append(pts, ln.Points[0])
+		np++
+	}
 
 	clr := gi.Color{}
 
-	// todo: compute proper quad angle and add a type for that
-
-	spy := ln.Start
-	spy.Y += ln.Width
-	smy := ln.Start
-	smy.Y -= ln.Width
-
-	epy := ln.End
-	epy.Y += ln.Width
-	emy := ln.End
-	emy.Y -= ln.Width
-
-	// 1  3
-	// 2  4
-
-	ln.AddQuad([]mat32.Vec3{spy, smy, emy, epy}, mat32.Vec3{0, 0, 1}, nil, clr)
-
 	bb := mat32.Box3{}
-	bb.SetFromPoints([]mat32.Vec3{spy, smy, epy, emy})
+	bb.SetEmpty()
+
+	wdy := ln.Width.Y / 2
+	wdz := ln.Width.X / 2
+	_ = wdz
+
+	pi2 := float32(math.Pi / 2)
+
+	// logic for miter joins: https://math.stackexchange.com/questions/1849784/calculate-miter-points-of-stroked-vectors-in-cartesian-plane
+
+	for li := 0; li < np-1; li++ {
+		sp := pts[li]
+		ep := pts[li+1]
+		spSt := !ln.Close && li == 0
+		epEd := !ln.Close && li == np-2
+
+		v := ep.Sub(sp)
+		vn := v.Normal()
+		xyang := math32.Atan2(vn.Y, vn.X)
+		// xzang := math32.Atan2(vn.Z, vn.X)
+
+		xyp := mat32.Vec2{wdy * math32.Cos(xyang+pi2), wdy * math32.Sin(xyang+pi2)}
+		xym := mat32.Vec2{wdy * math32.Cos(xyang-pi2), wdy * math32.Sin(xyang-pi2)}
+
+		spp := sp
+		spm := sp
+		epp := ep
+		epm := ep
+
+		if spSt {
+			spp.X += xyp.X
+			spp.Y += xyp.Y
+			spm.X += xym.X
+			spm.Y += xym.Y
+		} else {
+			pp := sp
+			if ln.Close && li == 0 {
+				pp = pts[np-2]
+			} else {
+				pp = pts[li-1]
+			}
+			ppd := mat32.Vec2{pp.X - sp.X, pp.Y - sp.Y}
+			ppu := ppd.Normal()
+
+			epd := mat32.Vec2{ep.X - sp.X, ep.Y - sp.Y}
+			epv := epd.Normal()
+
+			dp := ppu.Dot(epv)
+			jang := mat32.Acos(dp)
+			wfact := wdy / math32.Sin(jang)
+
+			uv := ppu.MulScalar(wfact)
+			vv := epv.MulScalar(wfact)
+			sv := uv.Add(vv)
+			spp.Y -= sv.Y
+			spp.X -= sv.X
+			spm.Y += sv.Y
+			spm.X += sv.X
+		}
+
+		if epEd {
+			epp.X += xyp.X
+			epp.Y += xyp.Y
+			epm.X += xym.X
+			epm.Y += xym.Y
+		} else {
+			xp := ep
+			if ln.Close && li == np-2 {
+				xp = pts[1]
+			} else {
+				xp = pts[li+2]
+			}
+			npd := mat32.Vec2{xp.X - ep.X, xp.Y - ep.Y}
+			npu := npd.Normal()
+
+			epd := mat32.Vec2{sp.X - ep.X, sp.Y - ep.Y}
+			epv := epd.Normal()
+
+			dp := npu.Dot(epv)
+			jang := mat32.Acos(dp)
+			wfact := wdy / math32.Sin(jang)
+
+			uv := npu.MulScalar(wfact)
+			vv := epv.MulScalar(wfact)
+			sv := uv.Add(vv)
+			epp.X -= sv.X
+			epp.Y -= sv.Y
+			epm.X += sv.X
+			epm.Y += sv.Y
+		}
+
+		// 1  3
+		// 2  4
+
+		ln.AddQuad([]mat32.Vec3{spp, spm, epm, epp}, mat32.Vec3{0, 0, 1}, nil, clr)
+
+		bb.ExpandByPoints([]mat32.Vec3{spp, spm, epm, epp})
+	}
 	ln.BBox.BBox = bb
 	ln.BBox.UpdateFmBBox()
+
+	// if ln.Close {
+	// 	ln.Points = ln.Points[:np-1]
+	// }
 }

@@ -45,6 +45,7 @@ type Scene struct {
 	Geom          gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Camera        Camera             `desc:"camera determines view onto scene"`
 	BgColor       gi.Color           `desc:"background color"`
+	Wireframe     bool               `desc:"if true, render as wireframe instead of filled"`
 	Lights        map[string]Light   `desc:"all lights used in the scene"`
 	Meshes        map[string]Mesh    `desc:"all meshes used in the scene"`
 	Textures      map[string]Texture `desc:"all textures used in the scene"`
@@ -726,6 +727,7 @@ func (sc *Scene) ActivateFrame() bool {
 		clr := ColorToVec3f(sc.BgColor)
 		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
 		gpu.Draw.Clear(true, true) // clear color and depth
+		gpu.Draw.Wireframe(sc.Wireframe)
 	})
 	return true
 }
@@ -961,6 +963,7 @@ func (sc *Scene) Render() bool {
 		sc.Renders.SetLightsUnis(sc)
 		sc.Render3D()
 		gpu.Draw.Flush()
+		gpu.Draw.Wireframe(false)
 		sc.Frame.Rendered()
 		sc.Tex = sc.Frame.Texture()
 		sc.Tex.SetBotZero(true) // this has Y=0 at bottom!

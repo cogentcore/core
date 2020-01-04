@@ -40,6 +40,9 @@ type Drawing interface {
 	// Src disables blending, and Over uses alpha-blending
 	Op(op draw.Op)
 
+	// Wireframe sets the rendering to lines instead of fills if on = true
+	Wireframe(on bool)
+
 	// Viewport sets the rendering viewport to given rectangle.
 	// It is important to update this for each render -- cannot assume it.
 	Viewport(rect image.Rectangle)

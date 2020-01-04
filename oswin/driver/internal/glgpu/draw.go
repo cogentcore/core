@@ -106,6 +106,15 @@ func (dr *Drawing) Op(op draw.Op) {
 	}
 }
 
+// Wireframe sets the rendering to lines instead of fills if on = true
+func (dr *Drawing) Wireframe(on bool) {
+	if on {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.LINE)
+	} else {
+		gl.PolygonMode(gl.FRONT_AND_BACK, gl.FILL)
+	}
+}
+
 // Viewport sets the rendering viewport to given rectangle.
 // It is important to update this for each render -- cannot assume it.
 func (dr *Drawing) Viewport(rect image.Rectangle) {

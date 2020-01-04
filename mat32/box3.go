@@ -59,6 +59,11 @@ func (b *Box3) Set(min, max *Vec3) {
 // SetFromPoints sets this bounding box from the specified array of points.
 func (b *Box3) SetFromPoints(points []Vec3) {
 	b.SetEmpty()
+	b.ExpandByPoints(points)
+}
+
+// ExpandByPoints may expand this bounding box from the specified array of points.
+func (b *Box3) ExpandByPoints(points []Vec3) {
 	for i := 0; i < len(points); i++ {
 		b.ExpandByPoint(points[i])
 	}
