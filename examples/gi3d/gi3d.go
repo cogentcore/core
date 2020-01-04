@@ -108,6 +108,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
+	lnm1 := gi3d.AddNewLine(sc, "Line1", mat32.Vec3{-2, 0, 0}, mat32.Vec3{2, 1, 0}, .1)
+	ln1 := gi3d.AddNewSolid(sc, sc, "red-line", lnm1.Name())
+	ln1.Pose.Pos.Set(0, 0, 1)
+	ln1.Mat.Color.SetName("red")
+
 	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)

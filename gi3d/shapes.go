@@ -15,7 +15,8 @@ import (
 ///////////////////////////////////////////////////////////////////////////
 //   Plane
 
-// Plane is a flat 2D plane, which can be oriented along any axis facing either positive or negative
+// Plane is a flat 2D plane, which can be oriented along any
+// axis facing either positive or negative
 type Plane struct {
 	MeshBase
 	NormAxis mat32.Dims  `desc:"axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."`
@@ -27,8 +28,10 @@ type Plane struct {
 
 var KiT_Plane = kit.Types.AddType(&Plane{}, nil)
 
-// AddNewPlane adds Plane mesh to given scene, with given name and size, with its normal pointing by default
-// in the positive Y axis (i.e., a "ground" plane).  Offset is 0.
+// AddNewPlane adds Plane mesh to given scene,
+// with given name and size, with its normal pointing
+// by default in the positive Y axis (i.e., a "ground" plane).
+// Offset is 0.
 func AddNewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Nm = name
@@ -116,4 +119,62 @@ func (bx *Box) Make(sc *Scene) {
 	bx.AddPlane(mat32.X, mat32.Y, 1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr)   // pz
 
 	bx.BBox.SetBounds(hSz.Negate(), hSz)
+}
+
+///////////////////////////////////////////////////////////////////////////
+//   Line
+
+// Line is a long thin box defined by two end points and a line width.
+// Raw line rendering via OpenGL is not very effective -- lines are often
+// very thin and appearance is hardware dependent.
+// This approach produces consistent results across platforms,
+// is very fast, and is "good enough" for most purposes.
+// For high-quality vector rendering, render to a Viewport2D
+// and use that as a texture.
+type Line struct {
+	MeshBase
+	Start mat32.Vec3 `desc:"starting point"`
+	End   mat32.Vec3 `desc:"ending point"`
+	Width float32    `desc:"line width"`
+}
+
+var KiT_Line = kit.Types.AddType(&Line{}, nil)
+
+// AddNewLine adds Line mesh to given scene, with given start, end, and width
+func AddNewLine(sc *Scene, name string, start, end mat32.Vec3, width float32) *Line {
+	ln := &Line{}
+	ln.Nm = name
+	ln.Start = start
+	ln.End = end
+	ln.Width = width
+	sc.AddMesh(ln)
+	return ln
+}
+
+func (ln *Line) Make(sc *Scene) {
+	ln.Reset()
+
+	clr := gi.Color{}
+
+	// todo: compute proper quad angle and add a type for that
+
+	spy := ln.Start
+	spy.Y += ln.Width
+	smy := ln.Start
+	smy.Y -= ln.Width
+
+	epy := ln.End
+	epy.Y += ln.Width
+	emy := ln.End
+	emy.Y -= ln.Width
+
+	// 1  3
+	// 2  4
+
+	ln.AddQuad([]mat32.Vec3{spy, smy, emy, epy}, mat32.Vec3{0, 0, 1}, nil, clr)
+
+	bb := mat32.Box3{}
+	bb.SetFromPoints([]mat32.Vec3{spy, smy, epy, emy})
+	ln.BBox.BBox = bb
+	ln.BBox.UpdateFmBBox()
 }

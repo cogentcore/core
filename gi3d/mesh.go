@@ -563,6 +563,66 @@ func (ms *MeshBase) PlaneSize(wsegs, hsegs int) (vtxSize, idxSize int) {
 	return
 }
 
+// AddQuad adds quad vertex data (optionally texUV, color) to mesh.
+// must have 4 vtxs, 4 texs if !nil
+func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, norm mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
+	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
+	ms.SetQuad(stVtxIdx, stIdxIdx, true, vtxs, norm, texs, clr)
+}
+
+// SetQuad sets quad vertex data (optionally norm, texUV, color, and indexes)
+// at given starting *vertex* index (i.e., multiply this *3 to get actual float
+// offset in Vtx array), and starting Idx index.
+func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Vec3, norm mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+	hasTex := texs != nil
+	hasColor := !clr.IsNil()
+	sz := len(ms.Vtx) / 3
+	vtxSz, idxSz := 4, 6
+	if stVtxIdx+vtxSz > sz {
+		dif := (stVtxIdx + vtxSz) - sz
+		ms.Vtx.Extend(dif * 3)
+		ms.Norm.Extend(dif * 3) // assuming same
+		if hasTex {
+			ms.Tex.Extend(dif * 2) // assuming same
+		}
+		if hasColor {
+			ms.Color.Extend(dif * 4)
+		}
+	}
+
+	clrv := ColorToVec4f(clr)
+	vidx := stVtxIdx * 3
+	tidx := stVtxIdx * 2
+	cidx := stVtxIdx * 4
+	for vi := range vtxs {
+		vtxs[vi].ToArray(ms.Vtx, vidx)
+		norm.ToArray(ms.Norm, vidx)
+		vidx += 3
+		if hasTex {
+			texs[vi].ToArray(ms.Tex, tidx)
+			tidx += 2
+		}
+		if hasColor {
+			clrv.ToArray(ms.Color, cidx)
+			cidx += 4
+		}
+	}
+
+	if setIdx {
+		lidx := len(ms.Idx)
+		if stIdxIdx+idxSz > lidx {
+			ms.Idx.Extend((stIdxIdx + idxSz) - lidx)
+		}
+		sidx := stIdxIdx
+		ms.Idx.Set(sidx, uint32(stVtxIdx), uint32(stVtxIdx+1), uint32(stVtxIdx+2),
+			uint32(stVtxIdx), uint32(stVtxIdx+2), uint32(stVtxIdx+3))
+	}
+}
+
+///////////////////////////////////////////////////////////////
+// GenMesh
+
 // GenMesh is a generic, arbitrary Mesh
 type GenMesh struct {
 	MeshBase
