@@ -226,9 +226,11 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
 	nb.BBox = image.Rectangle{Min: image.Point{int(Wmin.X), int(Wmax.Y)}, Max: image.Point{int(Wmax.X), int(Wmin.Y)}}
-	scbounds := image.Rectangle{Max: sc.Geom.Size}
-	bbvis := nb.BBox.Intersect(scbounds)
-	if bbvis != image.ZR { // filter out invisible at objbbox level
+	// note: BBox is inaccurate for objects extending behind camera
+	isvis := sc.Camera.Frustum.IntersectsBox(nb.WorldBBox.BBox)
+	if isvis { // filter out invisible at objbbox level
+		scbounds := image.Rectangle{Max: sc.Geom.Size}
+		bbvis := nb.BBox.Intersect(scbounds)
 		nb.ObjBBox = bbvis.Add(sc.BBox.Min)
 		nb.VpBBox = nb.ObjBBox.Add(sc.ObjBBox.Min.Sub(sc.BBox.Min)) // move amount
 		nb.VpBBox = nb.VpBBox.Intersect(sc.VpBBox)
@@ -238,6 +240,7 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 			nb.WinBBox = nb.VpBBox
 		}
 	} else {
+		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name(), nb.WorldBBox.BBox)
 		nb.ObjBBox = image.ZR
 		nb.VpBBox = image.ZR
 		nb.WinBBox = image.ZR

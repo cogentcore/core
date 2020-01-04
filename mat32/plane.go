@@ -57,7 +57,7 @@ func (p *Plane) SetFromCoplanarPoints(a, b, c Vec3) {
 // Note: will lead to a divide by zero if the plane is invalid.
 func (p *Plane) Normalize() {
 	invLen := 1.0 / p.Norm.Length()
-	p.Norm.MulScalar(invLen)
+	p.Norm.SetMulScalar(invLen)
 	p.Off *= invLen
 }
 
