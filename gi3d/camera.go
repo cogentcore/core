@@ -23,7 +23,7 @@ type Camera struct {
 	ViewMatrix    mat32.Mat4     `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
 	PrjnMatrix    mat32.Mat4     `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
 	InvPrjnMatrix mat32.Mat4     `view:"-" desc:"inverse of the projection matrix"`
-	Frustum       *mat32.Frustum `desc:"frustum of projection -- viewable space"`
+	Frustum       *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`
 }
 
 var KiT_Camera = kit.Types.AddType(&Camera{}, CameraProps)
