@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// based on golang.org/x/exp/shiny:
+// originally based on golang.org/x/exp/shiny:
 // Copyright 2015 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -43,6 +43,8 @@ type windowImpl struct {
 	closeCleanFunc func(win oswin.Window)
 	drawQuads      gpu.BufferMgr
 	fillQuads      gpu.BufferMgr
+	mouseDisabled  bool
+	resettingPos   bool
 }
 
 // Handle returns the driver-specific handle for this window.
@@ -559,6 +561,19 @@ func (w *windowImpl) SetMousePos(x, y float64) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.glw.SetCursorPos(x, y)
+}
+
+func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
+	if enabled {
+		w.mouseDisabled = false
+		w.glw.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
+	} else {
+		w.mouseDisabled = true
+		w.glw.SetInputMode(glfw.CursorMode, glfw.CursorDisabled)
+		if raw && glfw.RawMouseMotionSupported() {
+			w.glw.SetInputMode(glfw.RawMouseMotion, glfw.True)
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////

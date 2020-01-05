@@ -257,6 +257,11 @@ type Window interface {
 	// Sets the mouse position to given values
 	SetMousePos(x, y float64)
 
+	// Sets the mouse cursor to be enabled (true by default) or disabled (false).
+	// If disabled, setting raw to true will enable raw mouse movement
+	// which can provide better control in a game environment (not avail on Mac).
+	SetCursorEnabled(enabled, raw bool)
+
 	EventDeque
 
 	Drawer
