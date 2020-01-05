@@ -108,8 +108,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
-	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-2, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{2, -1, 0}}, mat32.Vec2{.2, .1})
-	// lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{0, -1, 2}, mat32.Vec3{0, -1, -2}, mat32.Vec3{0, 1, -2}, mat32.Vec3{0, -1, 2}}, mat32.Vec2{.2, .1})
+	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1})
 	lnm1.Close = true
 	ln1 := gi3d.AddNewSolid(sc, sc, "hi-line", lnm1.Name())
 	ln1.Pose.Pos.Set(0, 0, 1)

@@ -116,7 +116,7 @@ type Mesh interface {
 	// returns false if there is no mesh defined
 	Activate(sc *Scene) bool
 
-	// Activate deletes the mesh Vectors on the GPU
+	// Delete deletes the mesh Vectors on the GPU
 	// Must be called with relevant context active, on main thread
 	Delete(sc *Scene)
 
@@ -211,6 +211,16 @@ func (ms *MeshBase) ComputeNorms() {
 // AsMeshBase returns the MeshBase for this Mesh
 func (ms *MeshBase) AsMeshBase() *MeshBase {
 	return ms
+}
+
+// InitMesh does the full initialization of the mesh:
+// Make, MakeVectors, Activate, TransferAll.
+// Must be called in context on main thread.
+func InitMesh(ms Mesh, sc *Scene) {
+	ms.Make(sc)
+	ms.MakeVectors(sc)
+	ms.Activate(sc)
+	ms.TransferAll()
 }
 
 // Reset resets all of the vector and index data for this mesh (to start fresh)
@@ -398,7 +408,6 @@ func (ms *MeshBase) Render3D(sc *Scene) {
 		return
 	}
 	ibuf := ms.Buff.IndexesBuffer()
-	// ibuf.Activate(sc)
 	gpu.Draw.TrianglesIndexed(0, ibuf.Len())
 }
 

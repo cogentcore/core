@@ -136,7 +136,9 @@ func (bx *Box) Make(sc *Scene) {
 // and use that as a texture.
 
 // Lines are lines rendered as long thin boxes defined by points
-// and width parameters.
+// and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0
+// or a constant unless specifically relevant to have full 3D variation).
+// Rotate the solid to put into other planes.
 type Lines struct {
 	MeshBase
 	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`
@@ -216,10 +218,7 @@ func (ln *Lines) Make(sc *Scene) {
 		v := ep.Sub(sp)
 		vn := v.Normal()
 		xyang := math32.Atan2(vn.Y, vn.X)
-		xzang := math32.Atan2(vn.Z, vn.X)
-
 		xy := mat32.Vec2{wdy * math32.Cos(xyang+pi2), wdy * math32.Sin(xyang+pi2)}
-		xz := mat32.Vec2{wdz * math32.Cos(xzang+pi2), wdz * math32.Sin(xzang+pi2)}
 
 		//   sypzm --- eypzm
 		//   / |        / |
@@ -249,21 +248,21 @@ func (ln *Lines) Make(sc *Scene) {
 			xy = MiterPts(pp.X, pp.Y, sp.X, sp.Y, ep.X, ep.Y, wdy)
 		}
 
-		sypzp.X += xy.X + xz.X
+		sypzp.X += xy.X
 		sypzp.Y += xy.Y
-		sypzp.Z += xz.Y
+		sypzp.Z += wdz
 
-		sypzm.X += xy.X - xz.X
+		sypzm.X += xy.X
 		sypzm.Y += xy.Y
-		sypzm.Z += -xz.Y
+		sypzm.Z += -wdz
 
-		symzp.X += -xy.X + xz.X
+		symzp.X += -xy.X
 		symzp.Y += -xy.Y
-		symzp.Z += xz.Y
+		symzp.Z += wdz
 
-		symzm.X += -xy.X - xz.X
+		symzm.X += -xy.X
 		symzm.Y += -xy.Y
-		symzm.Z += -xz.Y
+		symzm.Z += -wdz
 
 		if !epEd {
 			xp := ep
@@ -283,33 +282,37 @@ func (ln *Lines) Make(sc *Scene) {
 			xy = MiterPts(xp.X, xp.Y, ep.X, ep.Y, sp.X, sp.Y, wdy)
 		}
 
-		eypzp.X += xy.X + xz.X
+		eypzp.X += xy.X
 		eypzp.Y += xy.Y
-		eypzp.Z += xz.Y
+		eypzp.Z += wdz
 
-		eypzm.X += xy.X - xz.X
+		eypzm.X += xy.X
 		eypzm.Y += xy.Y
-		eypzm.Z += -xz.Y
+		eypzm.Z += -wdz
 
-		eymzp.X += -xy.X + xz.X
+		eymzp.X += -xy.X
 		eymzp.Y += -xy.Y
-		eymzp.Z += xz.Y
+		eymzp.Z += wdz
 
-		eymzm.X += -xy.X - xz.X
+		eymzm.X += -xy.X
 		eymzm.Y += -xy.Y
-		eymzm.Z += -xz.Y
+		eymzm.Z += -wdz
 
-		// normal    swap
+		// front     back
 		// 0  3      1  2
 		// 1  2      0  3
 		// two triangles are: 0,1,2;  0,2,3
 
 		if swap {
-			ln.AddQuad([]mat32.Vec3{symzp, sypzp, eypzp, eymzp}, nil, clr)
-			ln.AddQuad([]mat32.Vec3{sypzp, sypzm, eypzm, eypzp}, nil, clr)
+			ln.AddQuad([]mat32.Vec3{sypzm, symzm, eymzm, eypzm}, nil, clr) // back (zm)
+			ln.AddQuad([]mat32.Vec3{sypzp, sypzm, eypzm, eypzp}, nil, clr) // bottom (yp, upside down)
+			ln.AddQuad([]mat32.Vec3{symzm, symzp, eymzp, eymzm}, nil, clr) // top (ym)
+			ln.AddQuad([]mat32.Vec3{symzp, sypzp, eypzp, eymzp}, nil, clr) // front (zp)
 		} else {
-			ln.AddQuad([]mat32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, clr)
-			ln.AddQuad([]mat32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, clr)
+			ln.AddQuad([]mat32.Vec3{symzm, sypzm, eypzm, eymzm}, nil, clr) // back (zm)
+			ln.AddQuad([]mat32.Vec3{symzp, symzm, eymzm, eymzp}, nil, clr) // bottom (ym)
+			ln.AddQuad([]mat32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, clr) // top (yp)
+			ln.AddQuad([]mat32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, clr) // front (zp)
 		}
 
 		bb.ExpandByPoints([]mat32.Vec3{sypzp, symzp, eypzp, eymzp})

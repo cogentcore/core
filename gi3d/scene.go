@@ -145,10 +145,13 @@ func (sc *Scene) MeshList() []string {
 	return sl
 }
 
-// DeleteMesh removes given mesh -- returns error if mesh not found
+// DeleteMesh removes given mesh -- returns error if mesh not found.
 func (sc *Scene) DeleteMesh(nm string) error {
-	_, ok := sc.Meshes[nm]
+	ms, ok := sc.Meshes[nm]
 	if ok {
+		oswin.TheApp.RunOnMain(func() {
+			ms.Delete(sc)
+		})
 		delete(sc.Meshes, nm)
 		return nil
 	}
@@ -157,6 +160,11 @@ func (sc *Scene) DeleteMesh(nm string) error {
 
 // DeleteMeshes removes all meshes
 func (sc *Scene) DeleteMeshes() {
+	oswin.TheApp.RunOnMain(func() {
+		for _, ms := range sc.Meshes {
+			ms.Delete(sc)
+		}
+	})
 	sc.Meshes = make(map[string]Mesh)
 }
 
@@ -209,8 +217,11 @@ func (sc *Scene) TextureList() []string {
 
 // DeleteTexture deletes texture of given name -- returns error if not found
 func (sc *Scene) DeleteTexture(nm string) error {
-	_, ok := sc.Textures[nm]
+	tx, ok := sc.Textures[nm]
 	if ok {
+		oswin.TheApp.RunOnMain(func() {
+			tx.Delete(sc)
+		})
 		delete(sc.Textures, nm)
 		return nil
 	}
@@ -219,6 +230,11 @@ func (sc *Scene) DeleteTexture(nm string) error {
 
 // DeleteTextures removes all textures
 func (sc *Scene) DeleteTextures() {
+	oswin.TheApp.RunOnMain(func() {
+		for _, tx := range sc.Textures {
+			tx.Delete(sc)
+		}
+	})
 	sc.Textures = make(map[string]Texture)
 }
 
@@ -779,10 +795,7 @@ func (sc *Scene) InitTextures() bool {
 // This version must be called on main thread with context
 func (sc *Scene) InitMeshesInCtxt() bool {
 	for _, ms := range sc.Meshes {
-		ms.Make(sc)
-		ms.MakeVectors(sc)
-		ms.Activate(sc)
-		ms.TransferAll()
+		InitMesh(ms, sc)
 	}
 	return true
 }
@@ -798,8 +811,23 @@ func (sc *Scene) InitMeshes() {
 	})
 }
 
-// UpdateMeshesInCtxt calls Update on all the meshes in context on main thread
-// Update is responsible for doing any transfers
+// InitMesh does a full init and gpu transfer of the given mesh name.
+func (sc *Scene) InitMesh(nm string) error {
+	if !sc.ActivateWin() {
+		return fmt.Errorf("InitMesh: %v in Scene: %v  Could not activate window", nm, sc.Nm)
+	}
+	ms, ok := sc.Meshes[nm]
+	if ok {
+		oswin.TheApp.RunOnMain(func() {
+			InitMesh(ms, sc)
+		})
+		return nil
+	}
+	return fmt.Errorf("Mesh named: %v not found in Scene: %v", nm, sc.Nm)
+}
+
+// UpdateMeshesInCtxt calls Update on all the meshes in context on main thread.
+// Update is responsible for doing any transfers.
 func (sc *Scene) UpdateMeshesInCtxt() bool {
 	for _, ms := range sc.Meshes {
 		ms.Update(sc)
@@ -807,8 +835,8 @@ func (sc *Scene) UpdateMeshesInCtxt() bool {
 	return true
 }
 
-// UpdateMeshes calls Update on all meshes
-// This version us to be used by external users -- sets context and runs on main
+// UpdateMeshes calls Update on all meshes (for dynamically updating meshes).
+// This version is to be used by external users -- sets context and runs on main.
 func (sc *Scene) UpdateMeshes() {
 	if !sc.ActivateWin() {
 		return
@@ -818,8 +846,8 @@ func (sc *Scene) UpdateMeshes() {
 	})
 }
 
-// DeleteResources deletes all GPU resources -- sets context and runs on main
-// this is called during Disconnect and before the window is closed
+// DeleteResources deletes all GPU resources -- sets context and runs on main.
+// This is called during Disconnect and before the window is closed.
 func (sc *Scene) DeleteResources() {
 	if sc.Win == nil {
 		return
