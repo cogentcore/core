@@ -81,13 +81,21 @@ func (sc *Scene) Disconnect() {
 	sc.WidgetBase.Disconnect()
 }
 
-// AddMesh adds given mesh to mesh collection
+// AddMesh adds given mesh to mesh collection.  Any existing mesh of the
+// same name is deleted.
 // see AddNewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
 	if sc.Meshes == nil {
 		sc.Meshes = make(map[string]Mesh)
 	}
-	sc.Meshes[ms.Name()] = ms
+	nm := ms.Name()
+	ems, has := sc.Meshes[nm]
+	if has {
+		oswin.TheApp.RunOnMain(func() {
+			ems.Delete(sc)
+		})
+	}
+	sc.Meshes[nm] = ms
 }
 
 // AddMeshUniqe adds given mesh to mesh collection, ensuring that it has

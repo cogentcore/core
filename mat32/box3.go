@@ -75,6 +75,12 @@ func (b *Box3) ExpandByPoint(point Vec3) {
 	b.Max.SetMax(point)
 }
 
+// Expand may expand this bounding box to include the specified box
+func (b *Box3) Expand(box Box3) {
+	b.ExpandByPoint(box.Min)
+	b.ExpandByPoint(box.Max)
+}
+
 // ExpandByVector expands this bounding box by the specified vector
 // subtracting from min and adding to max.
 func (b *Box3) ExpandByVector(vector Vec3) {

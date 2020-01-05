@@ -25,7 +25,7 @@ type Cylinder struct {
 	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`
 	BotRad     float32 `desc:"radius of the bottom"`
 	Height     float32 `desc:"height of the cylinder"`
-	RadSegs    int     `desc:"number of radial segments"`
+	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 	HeightSegs int     `desc:"number of height segments"`
 	Top        bool    `desc:"render the top disc"`
 	Bottom     bool    `desc:"render the bottom disc"`
@@ -37,6 +37,7 @@ var KiT_Cylinder = kit.Types.AddType(&Cylinder{}, nil)
 
 // AddNewCone creates a cone mesh with the specified base radius, height,
 // number of radial segments, number of height segments, and presence of a bottom cap.
+// Height is along the Y axis.
 func AddNewCone(sc *Scene, name string, radius, height float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
 	return AddNewCylinderSector(sc, name, 0, radius, height, radialSegs, heightSegs, 0, 2*math.Pi, false, bottom)
 }
@@ -44,6 +45,7 @@ func AddNewCone(sc *Scene, name string, radius, height float32, radialSegs, heig
 // AddNewCylinder creates a cylinder mesh with the specified radius, height,
 // number of radial segments, number of height segments,
 // and presence of a top and/or bottom cap.
+// Height is along the Y axis.
 func AddNewCylinder(sc *Scene, name string, radius, height float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
 	return AddNewCylinderSector(sc, name, radius, radius, height, radialSegs, heightSegs, 0, 2*math.Pi, top, bottom)
 }
@@ -52,16 +54,17 @@ func AddNewCylinder(sc *Scene, name string, radius, height float32, radialSegs, 
 // with the specified top and bottom radii, height, number of radial segments,
 // number of height segments, sector start angle in radians,
 // sector size angle in radians, and presence of a top and/or bottom cap.
-func AddNewCylinderSector(sc *Scene, name string, radiusTop, radiusBottom, height float32, radialSegs, heightSegs int, angStart, angLength float32, top, bottom bool) *Cylinder {
+// Height is along the Y axis.
+func AddNewCylinderSector(sc *Scene, name string, topRad, botRad, height float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
 	cy := &Cylinder{}
 	cy.Nm = name
-	cy.TopRad = radiusTop
-	cy.BotRad = radiusBottom
+	cy.TopRad = topRad
+	cy.BotRad = botRad
 	cy.Height = height
-	cy.RadSegs = radialSegs
+	cy.RadialSegs = radialSegs
 	cy.HeightSegs = heightSegs
 	cy.AngStart = angStart
-	cy.AngLen = angLength
+	cy.AngLen = angLen
 	cy.Top = top
 	cy.Bottom = bottom
 	sc.AddMesh(cy)
@@ -70,34 +73,100 @@ func AddNewCylinderSector(sc *Scene, name string, radiusTop, radiusBottom, heigh
 
 func (cy *Cylinder) Make(sc *Scene) {
 	cy.Reset()
+	cy.AddCylinderSector(cy.TopRad, cy.BotRad, cy.Height, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, mat32.Vec3{})
+	cy.BBox.UpdateFmBBox()
+}
 
-	hHt := cy.Height / 2
-	vertices := [][]int{}
+//////////////////////////////////////////////////////////
+//  Capsule
+
+// Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
+// Supports different radii on each end.
+// Height is along the Y axis -- total height is Height + TopRad + BotRad.
+type Capsule struct {
+	MeshBase
+	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`
+	BotRad     float32 `desc:"radius of the bottom"`
+	Height     float32 `desc:"height of the cylinder"`
+	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
+	HeightSegs int     `desc:"number of height segments"`
+	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
+	AngStart   float32 `desc:"starting angle in radians"`
+	AngLen     float32 `desc:"total angle to generate in radians (max 2*Pi)"`
+}
+
+var KiT_Capsule = kit.Types.AddType(&Capsule{}, nil)
+
+// AddNewCapsule creates a generalized capsule mesh (cylinder + hemisphere caps)
+// with the specified top and bottom radii, height, number of radial, sphere segments,
+// and number of height segments
+// Height is along the Y axis.
+func AddNewCapsule(sc *Scene, name string, radius, height float32, segs, heightSegs int) *Capsule {
+	cp := &Capsule{}
+	cp.Nm = name
+	cp.TopRad = radius
+	cp.BotRad = radius
+	cp.Height = height
+	cp.RadialSegs = segs
+	cp.HeightSegs = heightSegs
+	cp.CapSegs = segs
+	cp.AngStart = 0
+	cp.AngLen = 2 * math.Pi
+	sc.AddMesh(cp)
+	return cp
+}
+
+func (cp *Capsule) Make(sc *Scene) {
+	cp.Reset()
+	cp.AddSphereSector(cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, math.Pi/2, math.Pi/2, mat32.Vec3{0, -cp.Height / 2, 0})
+	cp.AddCylinderSector(cp.TopRad, cp.BotRad, cp.Height, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, mat32.Vec3{})
+	cp.AddSphereSector(cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, math.Pi/2, mat32.Vec3{0, cp.Height / 2, 0})
+	cp.BBox.UpdateFmBBox()
+}
+
+//////////////////////////////////////////////////////////
+//  Mesh code
+
+// AddNewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
+// with the specified top and bottom radii, height, number of radial segments,
+// number of height segments, sector start angle in radians,
+// sector size angle in radians, and presence of a top and/or bottom cap.
+// Height is along the Y axis.
+// offset is an arbitrary offset (for composing shapes).
+func (ms *MeshBase) AddCylinderSector(topRad, botRad, height float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, offset mat32.Vec3) {
+	hHt := height / 2
+	vtxs := [][]int{}
 	uvsOrig := [][]mat32.Vec2{}
 
 	// Create buffer for vertex positions
 	pos := mat32.NewArrayF32(0, 0)
+	stidx := uint32(ms.Vtx.Len() / 3)
 
-	for y := 0; y <= cy.HeightSegs; y++ {
-		var verticesRow = []int{}
+	bb := mat32.Box3{}
+	bb.SetEmpty()
+
+	var pt mat32.Vec3
+	for y := 0; y <= heightSegs; y++ {
+		var vtxsRow = []int{}
 		var uvsRow = []mat32.Vec2{}
-		v := float32(y) / float32(cy.HeightSegs)
-		radius := v*(cy.BotRad-cy.TopRad) + cy.TopRad
-		for x := 0; x <= cy.RadSegs; x++ {
-			u := float32(x) / float32(cy.RadSegs)
-			var vtx mat32.Vec3
-			vtx.X = float32(radius * mat32.Sin(u*cy.AngLen+cy.AngStart))
-			vtx.Y = float32(-v*cy.Height + hHt)
-			vtx.Z = float32(radius * mat32.Cos(u*cy.AngLen+cy.AngStart))
-			pos.AppendVec3(vtx)
-			verticesRow = append(verticesRow, pos.Size()/3-1)
-			uvsRow = append(uvsRow, mat32.Vec2{float32(u), 1.0 - float32(v)})
+		v := float32(y) / float32(heightSegs)
+		radius := v*(botRad-topRad) + topRad
+		for x := 0; x <= radialSegs; x++ {
+			u := float32(x) / float32(radialSegs)
+			pt.X = radius * mat32.Sin(u*angLen+angStart)
+			pt.Y = -v*height + hHt
+			pt.Z = radius * mat32.Cos(u*angLen+angStart)
+			pt.SetAdd(offset)
+			pos.AppendVec3(pt)
+			bb.ExpandByPoint(pt)
+			vtxsRow = append(vtxsRow, pos.Size()/3-1)
+			uvsRow = append(uvsRow, mat32.Vec2{u, 1.0 - v})
 		}
-		vertices = append(vertices, verticesRow)
+		vtxs = append(vtxs, vtxsRow)
 		uvsOrig = append(uvsOrig, uvsRow)
 	}
 
-	tanTheta := (cy.BotRad - cy.TopRad) / cy.Height
+	tanTheta := (botRad - topRad) / height
 	var na, nb mat32.Vec3
 
 	// Create preallocated buffers for normals and uvs and buffer for indices
@@ -106,25 +175,25 @@ func (cy *Cylinder) Make(sc *Scene) {
 	uvs := mat32.NewArrayF32(2*npos/3, 2*npos/3)
 	idxs := mat32.NewArrayU32(0, 0)
 
-	for x := 0; x < cy.RadSegs; x++ {
-		if cy.TopRad != 0 {
-			pos.GetVec3(3*vertices[0][x], &na)
-			pos.GetVec3(3*vertices[0][x+1], &nb)
+	for x := 0; x < radialSegs; x++ {
+		if topRad != 0 {
+			pos.GetVec3(3*vtxs[0][x], &na)
+			pos.GetVec3(3*vtxs[0][x+1], &nb)
 		} else {
-			pos.GetVec3(3*vertices[1][x], &na)
-			pos.GetVec3(3*vertices[1][x+1], &nb)
+			pos.GetVec3(3*vtxs[1][x], &na)
+			pos.GetVec3(3*vtxs[1][x+1], &nb)
 		}
 
-		na.Y = math32.Sqrt(float32(na.X*na.X+na.Z*na.Z)) * tanTheta
+		na.Y = math32.Sqrt(na.X*na.X+na.Z*na.Z) * tanTheta
 		na.Normalize()
-		nb.Y = math32.Sqrt(float32(nb.X*nb.X+nb.Z*nb.Z)) * tanTheta
+		nb.Y = math32.Sqrt(nb.X*nb.X+nb.Z*nb.Z) * tanTheta
 		nb.Normalize()
 
-		for y := 0; y < cy.HeightSegs; y++ {
-			v1 := vertices[y][x]
-			v2 := vertices[y+1][x]
-			v3 := vertices[y+1][x+1]
-			v4 := vertices[y][x+1]
+		for y := 0; y < heightSegs; y++ {
+			v1 := vtxs[y][x]
+			v2 := vtxs[y+1][x]
+			v3 := vtxs[y+1][x+1]
+			v4 := vtxs[y][x+1]
 
 			n1 := na
 			n2 := na
@@ -136,12 +205,12 @@ func (cy *Cylinder) Make(sc *Scene) {
 			uv3 := uvsOrig[y+1][x+1]
 			uv4 := uvsOrig[y][x+1]
 
-			idxs.Append(uint32(v1), uint32(v2), uint32(v4))
+			idxs.Append(stidx+uint32(v1), stidx+uint32(v2), stidx+uint32(v4))
 			norms.SetVec3(3*v1, n1)
 			norms.SetVec3(3*v2, n2)
 			norms.SetVec3(3*v4, n4)
 
-			idxs.Append(uint32(v2), uint32(v3), uint32(v4))
+			idxs.Append(stidx+uint32(v2), stidx+uint32(v3), stidx+uint32(v4))
 			norms.SetVec3(3*v2, n2)
 			norms.SetVec3(3*v3, n3)
 			norms.SetVec3(3*v4, n4)
@@ -152,33 +221,28 @@ func (cy *Cylinder) Make(sc *Scene) {
 			uvs.SetVec2(2*v4, uv4)
 		}
 	}
-	// First group is the body of the cylinder
-	// without the caps
-	// c.AddGroup(0, idxs.Size(), 0)
-	// nextGroup := idxs.Size()
 
 	// Top cap
-	if cy.Top && cy.TopRad > 0 {
-
+	if top && topRad > 0 {
 		// Array of vertex indicesOrig to build used to build the faces.
 		idxsOrig := []uint32{}
 		nextidx := pos.Size() / 3
 
-		// Appends top segments vertices and builds array of its idxsOrig
+		// Appends top segments vtxs and builds array of its idxsOrig
 		var uv1, uv2, uv3 mat32.Vec2
-		for x := 0; x < cy.RadSegs; x++ {
+		for x := 0; x < radialSegs; x++ {
 			uv1 = uvsOrig[0][x]
 			uv2 = uvsOrig[0][x+1]
 			uv3 = mat32.Vec2{uv2.X, 0}
 			// Appends CENTER with its own UV.
-			pos.Append(0, float32(hHt), 0)
+			pos.Append(0, hHt, 0)
 			norms.Append(0, 1, 0)
 			uvs.AppendVec2(uv3)
 			idxsOrig = append(idxsOrig, uint32(nextidx))
 			nextidx++
 			// Appends vertex
 			v := mat32.Vec3{}
-			vi := vertices[0][x]
+			vi := vtxs[0][x]
 			pos.GetVec3(3*vi, &v)
 			pos.AppendVec3(v)
 			norms.Append(0, 1, 0)
@@ -187,61 +251,57 @@ func (cy *Cylinder) Make(sc *Scene) {
 			nextidx++
 		}
 		// Appends copy of first vertex (center)
-		var vtx, normal mat32.Vec3
+		var pt, norm mat32.Vec3
 		var uv mat32.Vec2
-		pos.GetVec3(3*int(idxsOrig[0]), &vtx)
-		norms.GetVec3(3*int(idxsOrig[0]), &normal)
+		pos.GetVec3(3*int(idxsOrig[0]), &pt)
+		norms.GetVec3(3*int(idxsOrig[0]), &norm)
 		uvs.GetVec2(2*int(idxsOrig[0]), &uv)
-		pos.AppendVec3(vtx)
-		norms.AppendVec3(normal)
+		pos.AppendVec3(pt)
+		norms.AppendVec3(norm)
 		uvs.AppendVec2(uv)
 		idxsOrig = append(idxsOrig, uint32(nextidx))
 		nextidx++
 
 		// Appends copy of second vertex (v1) USING LAST UV2
-		pos.GetVec3(3*int(idxsOrig[1]), &vtx)
-		norms.GetVec3(3*int(idxsOrig[1]), &normal)
-		pos.AppendVec3(vtx)
-		norms.AppendVec3(normal)
+		pos.GetVec3(3*int(idxsOrig[1]), &pt)
+		norms.GetVec3(3*int(idxsOrig[1]), &norm)
+		pos.AppendVec3(pt)
+		norms.AppendVec3(norm)
 		uvs.AppendVec2(uv2)
 		idxsOrig = append(idxsOrig, uint32(nextidx))
 		nextidx++
 
 		// Append faces idxsOrig
-		for x := 0; x < cy.RadSegs; x++ {
+		for x := 0; x < radialSegs; x++ {
 			pos := 2 * x
 			i1 := idxsOrig[pos]
 			i2 := idxsOrig[pos+1]
 			i3 := idxsOrig[pos+3]
-			idxs.Append(uint32(i1), uint32(i2), uint32(i3))
+			idxs.Append(uint32(stidx+i1), uint32(stidx+i2), uint32(stidx+i3))
 		}
-		// Second group is optional top cap of the cylinder
-		// c.AddGroup(nextGroup, idxs.Size()-nextGroup, 1)
-		// nextGroup = idxs.Size()
 	}
 
 	// Bottom cap
-	if cy.Bottom && cy.BotRad > 0 {
-
+	if bottom && botRad > 0 {
 		// Array of vertex idxsOrig to build used to build the faces.
 		idxsOrig := []uint32{}
 		nextidx := pos.Size() / 3
 
-		// Appends top segments vertices and builds array of its idxsOrig
+		// Appends top segments vtxs and builds array of its idxsOrig
 		var uv1, uv2, uv3 mat32.Vec2
-		for x := 0; x < cy.RadSegs; x++ {
-			uv1 = uvsOrig[cy.HeightSegs][x]
-			uv2 = uvsOrig[cy.HeightSegs][x+1]
+		for x := 0; x < radialSegs; x++ {
+			uv1 = uvsOrig[heightSegs][x]
+			uv2 = uvsOrig[heightSegs][x+1]
 			uv3 = mat32.Vec2{uv2.X, 1}
 			// Appends CENTER with its own UV.
-			pos.Append(0, float32(-hHt), 0)
+			pos.Append(0, -hHt, 0)
 			norms.Append(0, -1, 0)
 			uvs.AppendVec2(uv3)
 			idxsOrig = append(idxsOrig, uint32(nextidx))
 			nextidx++
 			// Appends vertex
 			v := mat32.Vec3{}
-			vi := vertices[cy.HeightSegs][x]
+			vi := vtxs[heightSegs][x]
 			pos.GetVec3(3*vi, &v)
 			pos.AppendVec3(v)
 			norms.Append(0, -1, 0)
@@ -251,40 +311,40 @@ func (cy *Cylinder) Make(sc *Scene) {
 		}
 
 		// Appends copy of first vertex (center)
-		var vtx, normal mat32.Vec3
+		var pt, norm mat32.Vec3
 		var uv mat32.Vec2
-		pos.GetVec3(3*int(idxsOrig[0]), &vtx)
-		norms.GetVec3(3*int(idxsOrig[0]), &normal)
+		pos.GetVec3(3*int(idxsOrig[0]), &pt)
+		norms.GetVec3(3*int(idxsOrig[0]), &norm)
 		uvs.GetVec2(2*int(idxsOrig[0]), &uv)
-		pos.AppendVec3(vtx)
-		norms.AppendVec3(normal)
+		pos.AppendVec3(pt)
+		norms.AppendVec3(norm)
 		uvs.AppendVec2(uv)
 		idxsOrig = append(idxsOrig, uint32(nextidx))
 		nextidx++
 
 		// Appends copy of second vertex (v1) USING LAST UV2
-		pos.GetVec3(3*int(idxsOrig[1]), &vtx)
-		norms.GetVec3(3*int(idxsOrig[1]), &normal)
-		pos.AppendVec3(vtx)
-		norms.AppendVec3(normal)
+		pos.GetVec3(3*int(idxsOrig[1]), &pt)
+		norms.GetVec3(3*int(idxsOrig[1]), &norm)
+		pos.AppendVec3(pt)
+		norms.AppendVec3(norm)
 		uvs.AppendVec2(uv2)
 		idxsOrig = append(idxsOrig, uint32(nextidx))
 		nextidx++
 
 		// Appends faces idxsOrig
-		for x := 0; x < cy.RadSegs; x++ {
+		for x := 0; x < radialSegs; x++ {
 			pos := 2 * x
 			i1 := idxsOrig[pos]
 			i2 := idxsOrig[pos+3]
 			i3 := idxsOrig[pos+1]
-			idxs.Append(uint32(i1), uint32(i2), uint32(i3))
+			idxs.Append(uint32(stidx+i1), uint32(stidx+i2), uint32(stidx+i3))
 		}
-		// Third group is optional bottom cap of the cylinder
-		// c.AddGroup(nextGroup, idxs.Size()-nextGroup, 2)
 	}
 
-	cy.Vtx = pos
-	cy.Idx = idxs
-	cy.Norm = norms
-	cy.Tex = uvs
+	ms.Vtx = append(ms.Vtx, pos...)
+	ms.Idx = append(ms.Idx, idxs...)
+	ms.Norm = append(ms.Norm, norms...)
+	ms.Tex = append(ms.Tex, uvs...)
+
+	ms.BBox.BBox.Expand(bb)
 }

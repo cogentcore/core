@@ -167,6 +167,17 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	cyl := gi3d.AddNewSolid(sc, sc, "cyl", cylm.Name())
 	cyl.Pose.Pos.Set(-2.25, 0, 0)
 
+	capm := gi3d.AddNewCapsule(sc, "cap", .5, 1.5, 32, 1)
+	caps := gi3d.AddNewSolid(sc, sc, "cap", capm.Name())
+	caps.Pose.Pos.Set(3.25, 0, 0)
+	caps.Mat.Color.SetName("tan")
+
+	sphm := gi3d.AddNewSphere(sc, "sph", .75, 32)
+	sph := gi3d.AddNewSolid(sc, sc, "sph", sphm.Name())
+	sph.Pose.Pos.Set(0, -2, 0)
+	sph.Mat.Color.SetName("orange")
+	sph.Mat.Color.A = 128
+
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	appnm := gi.AppName()
