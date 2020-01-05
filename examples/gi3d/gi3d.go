@@ -108,8 +108,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
-	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1})
-	lnm1.Close = true
+	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
 	ln1 := gi3d.AddNewSolid(sc, sc, "hi-line", lnm1.Name())
 	ln1.Pose.Pos.Set(0, 0, 1)
 	ln1.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
@@ -159,6 +158,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
+
+	bbclr := gi.Color{}
+	bbclr.SetUInt8(255, 255, 0, 255)
+	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 

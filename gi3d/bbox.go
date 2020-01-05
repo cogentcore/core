@@ -4,7 +4,9 @@
 
 package gi3d
 
-import "github.com/goki/gi/mat32"
+import (
+	"github.com/goki/gi/mat32"
+)
 
 // BBox contains bounding box and other gross solid properties
 type BBox struct {
