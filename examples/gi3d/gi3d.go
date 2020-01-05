@@ -163,6 +163,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bbclr.SetUInt8(255, 255, 0, 255)
 	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
 
+	cylm := gi3d.AddNewCylinder(sc, "cyl", .5, 1.5, 32, 1, true, true)
+	cyl := gi3d.AddNewSolid(sc, sc, "cyl", cylm.Name())
+	cyl.Pose.Pos.Set(-2.25, 0, 0)
+
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
 	appnm := gi.AppName()
