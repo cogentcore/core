@@ -156,6 +156,23 @@ func AddNewLines(sc *Scene, name string, points []mat32.Vec3, width mat32.Vec2) 
 	return ln
 }
 
+func MiterPts(ax, ay, bx, by, cx, cy, w2 float32) mat32.Vec2 {
+	ppd := mat32.Vec2{ax - bx, ay - by}
+	ppu := ppd.Normal()
+
+	epd := mat32.Vec2{cx - bx, cy - by}
+	epv := epd.Normal()
+
+	dp := ppu.Dot(epv)
+	jang := mat32.Acos(dp)
+	wfact := w2 / math32.Sin(jang)
+
+	uv := ppu.MulScalar(-wfact)
+	vv := epv.MulScalar(-wfact)
+	sv := uv.Add(vv)
+	return sv
+}
+
 func (ln *Lines) Make(sc *Scene) {
 	ln.Reset()
 
@@ -178,7 +195,6 @@ func (ln *Lines) Make(sc *Scene) {
 
 	wdy := ln.Width.Y / 2
 	wdz := ln.Width.X / 2
-	_ = wdz
 
 	pi2 := float32(math.Pi / 2)
 
@@ -190,92 +206,115 @@ func (ln *Lines) Make(sc *Scene) {
 		spSt := !ln.Close && li == 0
 		epEd := !ln.Close && li == np-2
 
+		swap := false
+		if ep.X < sp.X {
+			sp, ep = ep, sp
+			spSt, epEd = epEd, spSt
+			swap = true
+		}
+
 		v := ep.Sub(sp)
 		vn := v.Normal()
 		xyang := math32.Atan2(vn.Y, vn.X)
-		// xzang := math32.Atan2(vn.Z, vn.X)
+		xzang := math32.Atan2(vn.Z, vn.X)
 
-		xyp := mat32.Vec2{wdy * math32.Cos(xyang+pi2), wdy * math32.Sin(xyang+pi2)}
-		xym := mat32.Vec2{wdy * math32.Cos(xyang-pi2), wdy * math32.Sin(xyang-pi2)}
+		xy := mat32.Vec2{wdy * math32.Cos(xyang+pi2), wdy * math32.Sin(xyang+pi2)}
+		xz := mat32.Vec2{wdz * math32.Cos(xzang+pi2), wdz * math32.Sin(xzang+pi2)}
 
-		spp := sp
-		spm := sp
-		epp := ep
-		epm := ep
+		//   sypzm --- eypzm
+		//   / |        / |
+		// sypzp -- eypzp |
+		//  | symzm --| eymzm
+		//  | /       | /
+		// symzp -- eymzp
 
-		if spSt {
-			spp.X += xyp.X
-			spp.Y += xyp.Y
-			spm.X += xym.X
-			spm.Y += xym.Y
-		} else {
+		sypzp, sypzm, symzp, symzm := sp, sp, sp, sp
+		eypzp, eypzm, eymzp, eymzm := ep, ep, ep, ep
+
+		if !spSt {
 			pp := sp
-			if ln.Close && li == 0 {
-				pp = pts[np-2]
+			if swap {
+				if ln.Close && li == np-2 {
+					pp = pts[1]
+				} else {
+					pp = pts[li+2]
+				}
 			} else {
-				pp = pts[li-1]
+				if ln.Close && li == 0 {
+					pp = pts[np-2]
+				} else {
+					pp = pts[li-1]
+				}
 			}
-			ppd := mat32.Vec2{pp.X - sp.X, pp.Y - sp.Y}
-			ppu := ppd.Normal()
-
-			epd := mat32.Vec2{ep.X - sp.X, ep.Y - sp.Y}
-			epv := epd.Normal()
-
-			dp := ppu.Dot(epv)
-			jang := mat32.Acos(dp)
-			wfact := wdy / math32.Sin(jang)
-
-			uv := ppu.MulScalar(wfact)
-			vv := epv.MulScalar(wfact)
-			sv := uv.Add(vv)
-			spp.Y -= sv.Y
-			spp.X -= sv.X
-			spm.Y += sv.Y
-			spm.X += sv.X
+			xy = MiterPts(pp.X, pp.Y, sp.X, sp.Y, ep.X, ep.Y, wdy)
 		}
 
-		if epEd {
-			epp.X += xyp.X
-			epp.Y += xyp.Y
-			epm.X += xym.X
-			epm.Y += xym.Y
-		} else {
+		sypzp.X += xy.X + xz.X
+		sypzp.Y += xy.Y
+		sypzp.Z += xz.Y
+
+		sypzm.X += xy.X - xz.X
+		sypzm.Y += xy.Y
+		sypzm.Z += -xz.Y
+
+		symzp.X += -xy.X + xz.X
+		symzp.Y += -xy.Y
+		symzp.Z += xz.Y
+
+		symzm.X += -xy.X - xz.X
+		symzm.Y += -xy.Y
+		symzm.Z += -xz.Y
+
+		if !epEd {
 			xp := ep
-			if ln.Close && li == np-2 {
-				xp = pts[1]
+			if swap {
+				if ln.Close && li == 0 {
+					xp = pts[np-2]
+				} else {
+					xp = pts[li-1]
+				}
 			} else {
-				xp = pts[li+2]
+				if ln.Close && li == np-2 {
+					xp = pts[1]
+				} else {
+					xp = pts[li+2]
+				}
 			}
-			npd := mat32.Vec2{xp.X - ep.X, xp.Y - ep.Y}
-			npu := npd.Normal()
-
-			epd := mat32.Vec2{sp.X - ep.X, sp.Y - ep.Y}
-			epv := epd.Normal()
-
-			dp := npu.Dot(epv)
-			jang := mat32.Acos(dp)
-			wfact := wdy / math32.Sin(jang)
-
-			uv := npu.MulScalar(wfact)
-			vv := epv.MulScalar(wfact)
-			sv := uv.Add(vv)
-			epp.X -= sv.X
-			epp.Y -= sv.Y
-			epm.X += sv.X
-			epm.Y += sv.Y
+			xy = MiterPts(xp.X, xp.Y, ep.X, ep.Y, sp.X, sp.Y, wdy)
 		}
 
-		// 1  3
-		// 2  4
+		eypzp.X += xy.X + xz.X
+		eypzp.Y += xy.Y
+		eypzp.Z += xz.Y
 
-		ln.AddQuad([]mat32.Vec3{spp, spm, epm, epp}, mat32.Vec3{0, 0, 1}, nil, clr)
+		eypzm.X += xy.X - xz.X
+		eypzm.Y += xy.Y
+		eypzm.Z += -xz.Y
 
-		bb.ExpandByPoints([]mat32.Vec3{spp, spm, epm, epp})
+		eymzp.X += -xy.X + xz.X
+		eymzp.Y += -xy.Y
+		eymzp.Z += xz.Y
+
+		eymzm.X += -xy.X - xz.X
+		eymzm.Y += -xy.Y
+		eymzm.Z += -xz.Y
+
+		// normal    swap
+		// 0  3      1  2
+		// 1  2      0  3
+		// two triangles are: 0,1,2;  0,2,3
+
+		if swap {
+			ln.AddQuad([]mat32.Vec3{symzp, sypzp, eypzp, eymzp}, nil, clr)
+			ln.AddQuad([]mat32.Vec3{sypzp, sypzm, eypzm, eypzp}, nil, clr)
+		} else {
+			ln.AddQuad([]mat32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, clr)
+			ln.AddQuad([]mat32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, clr)
+		}
+
+		bb.ExpandByPoints([]mat32.Vec3{sypzp, symzp, eypzp, eymzp})
+		bb.ExpandByPoints([]mat32.Vec3{sypzm, symzm, eypzm, eymzm})
 	}
 	ln.BBox.BBox = bb
 	ln.BBox.UpdateFmBBox()
-
-	// if ln.Close {
-	// 	ln.Points = ln.Points[:np-1]
-	// }
 }

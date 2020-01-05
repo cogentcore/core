@@ -108,12 +108,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
-	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-2, 0, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, 0, 0}, mat32.Vec3{-2, -2, 0}}, mat32.Vec2{.2, .1})
+	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-2, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{2, -1, 0}}, mat32.Vec2{.2, .1})
+	// lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{0, -1, 2}, mat32.Vec3{0, -1, -2}, mat32.Vec3{0, 1, -2}, mat32.Vec3{0, -1, 2}}, mat32.Vec2{.2, .1})
 	lnm1.Close = true
 	ln1 := gi3d.AddNewSolid(sc, sc, "hi-line", lnm1.Name())
 	ln1.Pose.Pos.Set(0, 0, 1)
 	ln1.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
-	// sc.Wireframe = true                    // debugging
+	// sc.Wireframe = true                      // debugging
 
 	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
@@ -142,16 +143,14 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	grtx := gi3d.AddNewTextureFile(sc, "ground", "ground.png")
 	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
 
-	if false {
-		floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-		floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
-		floor.Pose.Pos.Set(0, -5, 0)
-		floor.Mat.Color.SetName("tan")
-		// // floor.Mat.Emissive.SetName("brown")
-		// floor.Mat.Bright = 2 // .5 for wood / brown
-		floor.Mat.SetTexture(sc, grtx)
-		floor.Mat.Tiling.Repeat.Set(40, 40)
-	}
+	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
+	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
+	floor.Pose.Pos.Set(0, -5, 0)
+	floor.Mat.Color.SetName("tan")
+	// // floor.Mat.Emissive.SetName("brown")
+	// floor.Mat.Bright = 2 // .5 for wood / brown
+	floor.Mat.SetTexture(sc, grtx)
+	floor.Mat.Tiling.Repeat.Set(40, 40)
 
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default

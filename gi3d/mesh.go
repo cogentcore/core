@@ -563,18 +563,19 @@ func (ms *MeshBase) PlaneSize(wsegs, hsegs int) (vtxSize, idxSize int) {
 	return
 }
 
-// AddQuad adds quad vertex data (optionally texUV, color) to mesh.
+// AddQuad adds quad vertex data (optionally texUV, color) to mesh (norm computed).
 // must have 4 vtxs, 4 texs if !nil
-func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, norm mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
 	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
 	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
-	ms.SetQuad(stVtxIdx, stIdxIdx, true, vtxs, norm, texs, clr)
+	ms.SetQuad(stVtxIdx, stIdxIdx, true, vtxs, texs, clr)
 }
 
-// SetQuad sets quad vertex data (optionally norm, texUV, color, and indexes)
+// SetQuad sets quad vertex data (optionally texUV, color, and indexes)
 // at given starting *vertex* index (i.e., multiply this *3 to get actual float
 // offset in Vtx array), and starting Idx index.
-func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Vec3, norm mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+// norm auto-computed.
+func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
 	hasTex := texs != nil
 	hasColor := !clr.IsNil()
 	sz := len(ms.Vtx) / 3
@@ -590,6 +591,8 @@ func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Ve
 			ms.Color.Extend(dif * 4)
 		}
 	}
+
+	norm := mat32.Normal(vtxs[0], vtxs[1], vtxs[2])
 
 	clrv := ColorToVec4f(clr)
 	vidx := stVtxIdx * 3
