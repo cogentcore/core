@@ -123,11 +123,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bbclr.SetUInt8(255, 255, 0, 255)
 	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
 
-	cylm := gi3d.AddNewCylinder(sc, "cyl", .5, 1.5, 32, 1, true, true)
+	cylm := gi3d.AddNewCylinder(sc, "cyl", 1.5, .5, 32, 1, true, true)
 	cyl := gi3d.AddNewSolid(sc, sc, "cyl", cylm.Name())
 	cyl.Pose.Pos.Set(-2.25, 0, 0)
 
-	capm := gi3d.AddNewCapsule(sc, "cap", .5, 1.5, 32, 1)
+	capm := gi3d.AddNewCapsule(sc, "cap", 1.5, .5, 32, 1)
 	caps := gi3d.AddNewSolid(sc, sc, "cap", capm.Name())
 	caps.Pose.Pos.Set(3.25, 0, 0)
 	caps.Mat.Color.SetName("tan")

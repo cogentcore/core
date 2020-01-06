@@ -22,9 +22,9 @@ import (
 // or truncated cone by having different size circles at either end.
 type Cylinder struct {
 	MeshBase
+	Height     float32 `desc:"height of the cylinder"`
 	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`
 	BotRad     float32 `desc:"radius of the bottom"`
-	Height     float32 `desc:"height of the cylinder"`
 	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 	HeightSegs int     `desc:"number of height segments"`
 	Top        bool    `desc:"render the top disc"`
@@ -38,16 +38,16 @@ var KiT_Cylinder = kit.Types.AddType(&Cylinder{}, nil)
 // AddNewCone creates a cone mesh with the specified base radius, height,
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
-func AddNewCone(sc *Scene, name string, radius, height float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
-	return AddNewCylinderSector(sc, name, 0, radius, height, radialSegs, heightSegs, 0, 2*math.Pi, false, bottom)
+func AddNewCone(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
+	return AddNewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 2*math.Pi, false, bottom)
 }
 
 // AddNewCylinder creates a cylinder mesh with the specified radius, height,
 // number of radial segments, number of height segments,
 // and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func AddNewCylinder(sc *Scene, name string, radius, height float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
-	return AddNewCylinderSector(sc, name, radius, radius, height, radialSegs, heightSegs, 0, 2*math.Pi, top, bottom)
+func AddNewCylinder(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
+	return AddNewCylinderSector(sc, name, height, radius, radius, radialSegs, heightSegs, 0, 2*math.Pi, top, bottom)
 }
 
 // AddNewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
@@ -55,12 +55,12 @@ func AddNewCylinder(sc *Scene, name string, radius, height float32, radialSegs, 
 // number of height segments, sector start angle in radians,
 // sector size angle in radians, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func AddNewCylinderSector(sc *Scene, name string, topRad, botRad, height float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
+func AddNewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
 	cy := &Cylinder{}
 	cy.Nm = name
+	cy.Height = height
 	cy.TopRad = topRad
 	cy.BotRad = botRad
-	cy.Height = height
 	cy.RadialSegs = radialSegs
 	cy.HeightSegs = heightSegs
 	cy.AngStart = angStart
@@ -73,7 +73,7 @@ func AddNewCylinderSector(sc *Scene, name string, topRad, botRad, height float32
 
 func (cy *Cylinder) Make(sc *Scene) {
 	cy.Reset()
-	cy.AddCylinderSector(cy.TopRad, cy.BotRad, cy.Height, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, mat32.Vec3{})
+	cy.AddCylinderSector(cy.Height, cy.TopRad, cy.BotRad, cy.RadialSegs, cy.HeightSegs, cy.AngStart, cy.AngLen, cy.Top, cy.Bottom, mat32.Vec3{})
 	cy.BBox.UpdateFmBBox()
 }
 
@@ -85,9 +85,9 @@ func (cy *Cylinder) Make(sc *Scene) {
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
 type Capsule struct {
 	MeshBase
+	Height     float32 `desc:"height of the cylinder portion"`
 	TopRad     float32 `desc:"radius of the top -- set to 0 for a cone"`
 	BotRad     float32 `desc:"radius of the bottom"`
-	Height     float32 `desc:"height of the cylinder"`
 	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 	HeightSegs int     `desc:"number of height segments"`
 	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
@@ -98,15 +98,15 @@ type Capsule struct {
 var KiT_Capsule = kit.Types.AddType(&Capsule{}, nil)
 
 // AddNewCapsule creates a generalized capsule mesh (cylinder + hemisphere caps)
-// with the specified top and bottom radii, height, number of radial, sphere segments,
+// with the specified height and radius, number of radial, sphere segments,
 // and number of height segments
 // Height is along the Y axis.
-func AddNewCapsule(sc *Scene, name string, radius, height float32, segs, heightSegs int) *Capsule {
+func AddNewCapsule(sc *Scene, name string, height, radius float32, segs, heightSegs int) *Capsule {
 	cp := &Capsule{}
 	cp.Nm = name
+	cp.Height = height
 	cp.TopRad = radius
 	cp.BotRad = radius
-	cp.Height = height
 	cp.RadialSegs = segs
 	cp.HeightSegs = heightSegs
 	cp.CapSegs = segs
@@ -118,9 +118,13 @@ func AddNewCapsule(sc *Scene, name string, radius, height float32, segs, heightS
 
 func (cp *Capsule) Make(sc *Scene) {
 	cp.Reset()
-	cp.AddSphereSector(cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, math.Pi/2, math.Pi/2, mat32.Vec3{0, -cp.Height / 2, 0})
-	cp.AddCylinderSector(cp.TopRad, cp.BotRad, cp.Height, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, mat32.Vec3{})
-	cp.AddSphereSector(cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, math.Pi/2, mat32.Vec3{0, cp.Height / 2, 0})
+	if cp.BotRad > 0 {
+		cp.AddSphereSector(cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, math.Pi/2, math.Pi/2, mat32.Vec3{0, -cp.Height / 2, 0})
+	}
+	cp.AddCylinderSector(cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, mat32.Vec3{})
+	if cp.TopRad > 0 {
+		cp.AddSphereSector(cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, math.Pi/2, mat32.Vec3{0, cp.Height / 2, 0})
+	}
 	cp.BBox.UpdateFmBBox()
 }
 
@@ -133,7 +137,7 @@ func (cp *Capsule) Make(sc *Scene) {
 // sector size angle in radians, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 // offset is an arbitrary offset (for composing shapes).
-func (ms *MeshBase) AddCylinderSector(topRad, botRad, height float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, offset mat32.Vec3) {
+func (ms *MeshBase) AddCylinderSector(height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, offset mat32.Vec3) {
 	hHt := height / 2
 	vtxs := [][]int{}
 	uvsOrig := [][]mat32.Vec2{}
