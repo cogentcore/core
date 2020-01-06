@@ -108,17 +108,35 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
 
-	lnm1 := gi3d.AddNewLines(sc, "Line1", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
-	ln1 := gi3d.AddNewSolid(sc, sc, "hi-line", lnm1.Name())
-	ln1.Pose.Pos.Set(0, 0, 1)
-	ln1.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
+	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
+	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
+	lns.Pose.Pos.Set(0, 0, 1)
+	lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
 	// sc.Wireframe = true                      // debugging
 
-	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
-	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
-	fpgun.Pose.Scale.Set(.1, .1, 1)
-	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
-	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
+	// this line should go from lower left front of red cube to upper vertex of above hi-line
+	cyan := gi.Color{}
+	cyan.SetUInt8(0, 255, 255, 255)
+	gi3d.AddNewLine(sc, sc, "UnitLineW.05", "one-line", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan)
+
+	bbclr := gi.Color{}
+	bbclr.SetUInt8(255, 255, 0, 255)
+	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
+
+	cylm := gi3d.AddNewCylinder(sc, "cyl", .5, 1.5, 32, 1, true, true)
+	cyl := gi3d.AddNewSolid(sc, sc, "cyl", cylm.Name())
+	cyl.Pose.Pos.Set(-2.25, 0, 0)
+
+	capm := gi3d.AddNewCapsule(sc, "cap", .5, 1.5, 32, 1)
+	caps := gi3d.AddNewSolid(sc, sc, "cap", capm.Name())
+	caps.Pose.Pos.Set(3.25, 0, 0)
+	caps.Mat.Color.SetName("tan")
+
+	sphm := gi3d.AddNewSphere(sc, "sph", .75, 32)
+	sph := gi3d.AddNewSolid(sc, sc, "sph", sphm.Name())
+	sph.Pose.Pos.Set(0, -2, 0)
+	sph.Mat.Color.SetName("orange")
+	sph.Mat.Color.A = 200
 
 	// Good strategy for objects if used in multiple places is to load
 	// into library, then add from there.
@@ -159,24 +177,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
 
-	bbclr := gi.Color{}
-	bbclr.SetUInt8(255, 255, 0, 255)
-	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
-
-	cylm := gi3d.AddNewCylinder(sc, "cyl", .5, 1.5, 32, 1, true, true)
-	cyl := gi3d.AddNewSolid(sc, sc, "cyl", cylm.Name())
-	cyl.Pose.Pos.Set(-2.25, 0, 0)
-
-	capm := gi3d.AddNewCapsule(sc, "cap", .5, 1.5, 32, 1)
-	caps := gi3d.AddNewSolid(sc, sc, "cap", capm.Name())
-	caps.Pose.Pos.Set(3.25, 0, 0)
-	caps.Mat.Color.SetName("tan")
-
-	sphm := gi3d.AddNewSphere(sc, "sph", .75, 32)
-	sph := gi3d.AddNewSolid(sc, sc, "sph", sphm.Name())
-	sph.Pose.Pos.Set(0, -2, 0)
-	sph.Mat.Color.SetName("orange")
-	sph.Mat.Color.A = 128
+	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
+	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
+	fpgun.Pose.Scale.Set(.1, .1, 1)
+	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
+	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 

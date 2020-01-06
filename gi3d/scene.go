@@ -827,6 +827,7 @@ func (sc *Scene) InitMesh(nm string) error {
 	ms, ok := sc.Meshes[nm]
 	if ok {
 		oswin.TheApp.RunOnMain(func() {
+			fmt.Printf("init mesh: %v\n", ms.Name())
 			InitMesh(ms, sc)
 		})
 		return nil

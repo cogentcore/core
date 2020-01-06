@@ -63,6 +63,26 @@ func (ln *Lines) Make(sc *Scene) {
 	ln.BBox.UpdateFmBBox()
 }
 
+// AddNewLine adds a new line between two specified points, using a potentially-shared
+// unit mesh unit line, which is rotated and positioned to go between the designated points.
+// if the mesh already exists, it is not re-created, so ensure that it is likely to be correct.
+func AddNewLine(sc *Scene, parent ki.Ki, meshNm, lineNm string, st, ed mat32.Vec3, width float32, clr gi.Color) *Solid {
+	lm := sc.MeshByName(meshNm)
+	if lm == nil {
+		lm = AddNewLines(sc, meshNm, []mat32.Vec3{mat32.Vec3{-.5, 0, 0}, mat32.Vec3{.5, 0, 0}}, mat32.Vec2{width, width}, OpenLines)
+	}
+	ln := AddNewSolid(sc, parent, lineNm, meshNm)
+	d := ed.Sub(st)
+	midp := st.Add(d.DivScalar(2))
+	ln.Pose.Pos = midp
+	dst := st.DistTo(ed)
+	ln.Pose.Scale.Set(dst, 1, 1)
+	dn := d.Normal()
+	ln.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
+	ln.Mat.Color = clr
+	return ln
+}
+
 // AddNewLineBox adds a new Group with Solid's and two Meshes defining the edges of a Box.
 // This can be used for drawing a selection box around a Node in the scene, for example.
 // offset is an arbitrary offset (for composing shapes).
@@ -272,6 +292,13 @@ func (ms *MeshBase) AddLines(points []mat32.Vec3, width mat32.Vec2, closed bool,
 			ms.AddQuad([]mat32.Vec3{symzp, symzm, eymzm, eymzp}, nil, clr) // bottom (ym)
 			ms.AddQuad([]mat32.Vec3{sypzm, sypzp, eypzp, eypzm}, nil, clr) // top (yp)
 			ms.AddQuad([]mat32.Vec3{sypzp, symzp, eymzp, eypzp}, nil, clr) // front (zp)
+		}
+
+		if spSt { // do cap
+			ms.AddQuad([]mat32.Vec3{sypzm, symzm, symzp, sypzp}, nil, clr)
+		}
+		if epEd {
+			ms.AddQuad([]mat32.Vec3{eypzp, eymzp, eymzm, eypzm}, nil, clr)
 		}
 	}
 }
