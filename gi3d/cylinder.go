@@ -28,7 +28,7 @@ type Cylinder struct {
 	HeightSegs int     `desc:"number of height segments"`
 	Top        bool    `desc:"render the top disc"`
 	Bottom     bool    `desc:"render the bottom disc"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
@@ -90,7 +90,7 @@ type Capsule struct {
 	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 	HeightSegs int     `desc:"number of height segments"`
 	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
@@ -132,7 +132,7 @@ func (cp *Capsule) Make(sc *Scene) {
 
 // AddNewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
 // with the specified top and bottom radii, height, number of radial segments,
-// number of height segments, sector start angle in degrees,
+// number of height segments, sector start angle in degrees (start = -1,0,0)
 // sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 // offset is an arbitrary offset (for composing shapes).
@@ -159,9 +159,9 @@ func (ms *MeshBase) AddCylinderSector(height, topRad, botRad float32, radialSegs
 		radius := v*(botRad-topRad) + topRad
 		for x := 0; x <= radialSegs; x++ {
 			u := float32(x) / float32(radialSegs)
-			pt.X = radius * mat32.Sin(u*angLenRad+angStRad)
+			pt.X = -radius * mat32.Cos(u*angLenRad+angStRad)
 			pt.Y = -v*height + hHt
-			pt.Z = radius * mat32.Cos(u*angLenRad+angStRad)
+			pt.Z = radius * mat32.Sin(u*angLenRad+angStRad)
 			pt.SetAdd(offset)
 			pos.AppendVec3(pt)
 			bb.ExpandByPoint(pt)

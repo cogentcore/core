@@ -18,10 +18,10 @@ type Sphere struct {
 	Radius     float32 `desc:"radius of the sphere"`
 	WidthSegs  int     `min:"3" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`
 	HeightSegs int     `min:"3" desc:"number of height segments (32 is reasonable default for full height)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees"`
-	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in radians (max = 2*Pi)"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees, relative to -1,0,0 left side starting point"`
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
 	ElevStart  float32 `min:"0" max:"180" step:"5" desc:"starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"`
-	ElevLen    float32 `desc:"total angle to generate in radians (max = Pi)"`
+	ElevLen    float32 `min:"0" max:"180" step:"5" desc:"total angle to generate in degrees (max = 180)"`
 }
 
 var KiT_Sphere = kit.Types.AddType(&Sphere{}, nil)
@@ -50,8 +50,8 @@ func (sp *Sphere) Make(sc *Scene) {
 
 // AddSphereSector creates a sphere sector mesh
 // with the specified radius, number of radial segments in each dimension,
-// radial sector start angle and length in degrees (0 -360)
-// elevation start angle and length in degrees (0 - 180),
+// radial sector start angle and length in degrees (0 - 360), start = -1,0,0,
+// elevation start angle and length in degrees (0 - 180), top = 0, bot = 180,
 // offset is an arbitrary offset (for composing shapes).
 func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, angStart, angLen, elevStart, elevLen float32, offset mat32.Vec3) {
 	nVtx := (widthSegs + 1) * (heightSegs + 1)

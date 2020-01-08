@@ -81,6 +81,13 @@ func (sc *Scene) Disconnect() {
 	sc.WidgetBase.Disconnect()
 }
 
+// Update is a global update of everything: Init3D and re-render
+func (sc *Scene) Update() {
+	updt := sc.UpdateStart()
+	sc.Init3D()
+	sc.UpdateEnd(updt)
+}
+
 // AddMesh adds given mesh to mesh collection.  Any existing mesh of the
 // same name is deleted.
 // see AddNewX for convenience methods to add specific shapes
@@ -1197,9 +1204,8 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 var SceneProps = ki.Props{
 	"EnumType:Flag": gi.KiT_NodeFlags,
 	"ToolBar": ki.PropSlice{
-		{"UpdateSig", ki.Props{
-			"label": "Update",
-			"icon":  "update",
+		{"Update", ki.Props{
+			"icon": "update",
 		}},
 	},
 }

@@ -123,17 +123,17 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	bbclr.SetUInt8(255, 255, 0, 255)
 	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
 
-	cylm := gi3d.AddNewCylinder(sc, "cyl", 1.5, .5, 32, 1, true, true)
-	cyl := gi3d.AddNewSolid(sc, sc, "cyl", cylm.Name())
+	cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+	cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
 	cyl.Pose.Pos.Set(-2.25, 0, 0)
 
-	capm := gi3d.AddNewCapsule(sc, "cap", 1.5, .5, 32, 1)
-	caps := gi3d.AddNewSolid(sc, sc, "cap", capm.Name())
+	capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
+	caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
 	caps.Pose.Pos.Set(3.25, 0, 0)
 	caps.Mat.Color.SetName("tan")
 
-	sphm := gi3d.AddNewSphere(sc, "sph", .75, 32)
-	sph := gi3d.AddNewSolid(sc, sc, "sph", sphm.Name())
+	sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
+	sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
 	sph.Pose.Pos.Set(0, -2, 0)
 	sph.Mat.Color.SetName("orange")
 	sph.Mat.Color.A = 200
@@ -156,8 +156,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sgo.Pose.Pos.Set(-1.5, -2, 0)
 	sgo.Pose.Scale.Set(.2, .2, .2)
 
-	trsm := gi3d.AddNewTorus(sc, "trs", .75, .1, 32)
-	trs := gi3d.AddNewSolid(sc, sc, "trs", trsm.Name())
+	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
+	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
 	trs.Pose.Pos.Set(-1.5, -1.5, 0)
 	trs.Pose.SetAxisRotation(1, 0, 0, 90)
 	trs.Mat.Color.SetName("white")

@@ -32,7 +32,11 @@ Here are the default bindings (you can see the `gi3d.Scene NavEvents` method in 
 
 ## Inspect and Edit the Scene
 
-Use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the scene and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
+Use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the `scene` and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
+
+For example, you can click on `Meshes`, and edit the parameters of any of the various mesh objects, cutting the sphere into a sliver, experimenting with different numbers of segments which determines how smooth the curved shapes are, etc.
+
+Changing colors in the materials, and turning off `Mat.CullBack` are also useful and informative, especially in combination with various mesh manipulations that result in partial shape rendering (e.g., sphere slivers, the cylinder without a top or bottom, etc) -- being able to see the back sides of those shapes makes them look less strange.
 
 ## Scenegraph Structure
 

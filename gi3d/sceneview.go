@@ -65,12 +65,12 @@ func (sv *SceneView) ToolbarConfig() {
 		return
 	}
 	tbar.SetStretchMaxWidth()
-	tbar.AddAction(gi.ActOpts{Icon: "update", Tooltip: "reset to default initial display"}, sv.This(),
+	tbar.AddAction(gi.ActOpts{Icon: "update", Tooltip: "reset to default initial display, and rebuild everything"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
 			scc := svv.Scene()
 			scc.SetCamera("default")
-			scc.UpdateSig()
+			scc.Update()
 		})
 	tbar.AddAction(gi.ActOpts{Icon: "zoom-in", Tooltip: "zoom in"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data interface{}) {

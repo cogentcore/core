@@ -20,7 +20,7 @@ type Torus struct {
 	TubeRadius float32 `desc:"radius of the solid tube"`
 	RadialSegs int     `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"`
 	TubeSegs   int     `min:"1" desc:"number of segments for the tube itself (32 is reasonable default for full height)"`
-	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees relative to 1,0,0 starting point"`
 	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
 }
 
