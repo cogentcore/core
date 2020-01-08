@@ -11,8 +11,6 @@
 package gi3d
 
 import (
-	"math"
-
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
@@ -20,6 +18,7 @@ import (
 
 // Cylinder is a generalized cylinder shape, including a cone
 // or truncated cone by having different size circles at either end.
+// Height is up along the Y axis.
 type Cylinder struct {
 	MeshBase
 	Height     float32 `desc:"height of the cylinder"`
@@ -29,8 +28,8 @@ type Cylinder struct {
 	HeightSegs int     `desc:"number of height segments"`
 	Top        bool    `desc:"render the top disc"`
 	Bottom     bool    `desc:"render the bottom disc"`
-	AngStart   float32 `desc:"starting angle in radians"`
-	AngLen     float32 `desc:"total angle to generate in radians (max 2*Pi)"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees"`
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
 var KiT_Cylinder = kit.Types.AddType(&Cylinder{}, nil)
@@ -39,7 +38,7 @@ var KiT_Cylinder = kit.Types.AddType(&Cylinder{}, nil)
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
 func AddNewCone(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
-	return AddNewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 2*math.Pi, false, bottom)
+	return AddNewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom)
 }
 
 // AddNewCylinder creates a cylinder mesh with the specified radius, height,
@@ -47,13 +46,13 @@ func AddNewCone(sc *Scene, name string, height, radius float32, radialSegs, heig
 // and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 func AddNewCylinder(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
-	return AddNewCylinderSector(sc, name, height, radius, radius, radialSegs, heightSegs, 0, 2*math.Pi, top, bottom)
+	return AddNewCylinderSector(sc, name, height, radius, radius, radialSegs, heightSegs, 0, 360, top, bottom)
 }
 
 // AddNewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
 // with the specified top and bottom radii, height, number of radial segments,
-// number of height segments, sector start angle in radians,
-// sector size angle in radians, and presence of a top and/or bottom cap.
+// number of height segments, sector start angle in degrees,
+// sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 func AddNewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
 	cy := &Cylinder{}
@@ -91,8 +90,8 @@ type Capsule struct {
 	RadialSegs int     `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
 	HeightSegs int     `desc:"number of height segments"`
 	CapSegs    int     `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
-	AngStart   float32 `desc:"starting angle in radians"`
-	AngLen     float32 `desc:"total angle to generate in radians (max 2*Pi)"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees"`
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
 }
 
 var KiT_Capsule = kit.Types.AddType(&Capsule{}, nil)
@@ -111,7 +110,7 @@ func AddNewCapsule(sc *Scene, name string, height, radius float32, segs, heightS
 	cp.HeightSegs = heightSegs
 	cp.CapSegs = segs
 	cp.AngStart = 0
-	cp.AngLen = 2 * math.Pi
+	cp.AngLen = 360
 	sc.AddMesh(cp)
 	return cp
 }
@@ -119,11 +118,11 @@ func AddNewCapsule(sc *Scene, name string, height, radius float32, segs, heightS
 func (cp *Capsule) Make(sc *Scene) {
 	cp.Reset()
 	if cp.BotRad > 0 {
-		cp.AddSphereSector(cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, math.Pi/2, math.Pi/2, mat32.Vec3{0, -cp.Height / 2, 0})
+		cp.AddSphereSector(cp.BotRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 90, 90, mat32.Vec3{0, -cp.Height / 2, 0})
 	}
 	cp.AddCylinderSector(cp.Height, cp.TopRad, cp.BotRad, cp.RadialSegs, cp.HeightSegs, cp.AngStart, cp.AngLen, false, false, mat32.Vec3{})
 	if cp.TopRad > 0 {
-		cp.AddSphereSector(cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, math.Pi/2, mat32.Vec3{0, cp.Height / 2, 0})
+		cp.AddSphereSector(cp.TopRad, cp.RadialSegs, cp.CapSegs, cp.AngStart, cp.AngLen, 0, 90, mat32.Vec3{0, cp.Height / 2, 0})
 	}
 	cp.BBox.UpdateFmBBox()
 }
@@ -133,14 +132,17 @@ func (cp *Capsule) Make(sc *Scene) {
 
 // AddNewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
 // with the specified top and bottom radii, height, number of radial segments,
-// number of height segments, sector start angle in radians,
-// sector size angle in radians, and presence of a top and/or bottom cap.
+// number of height segments, sector start angle in degrees,
+// sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
 // offset is an arbitrary offset (for composing shapes).
 func (ms *MeshBase) AddCylinderSector(height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool, offset mat32.Vec3) {
 	hHt := height / 2
 	vtxs := [][]int{}
 	uvsOrig := [][]mat32.Vec2{}
+
+	angStRad := mat32.DegToRad(angStart)
+	angLenRad := mat32.DegToRad(angLen)
 
 	// Create buffer for vertex positions
 	pos := mat32.NewArrayF32(0, 0)
@@ -157,9 +159,9 @@ func (ms *MeshBase) AddCylinderSector(height, topRad, botRad float32, radialSegs
 		radius := v*(botRad-topRad) + topRad
 		for x := 0; x <= radialSegs; x++ {
 			u := float32(x) / float32(radialSegs)
-			pt.X = radius * mat32.Sin(u*angLen+angStart)
+			pt.X = radius * mat32.Sin(u*angLenRad+angStRad)
 			pt.Y = -v*height + hHt
-			pt.Z = radius * mat32.Cos(u*angLen+angStart)
+			pt.Z = radius * mat32.Cos(u*angLenRad+angStRad)
 			pt.SetAdd(offset)
 			pos.AppendVec3(pt)
 			bb.ExpandByPoint(pt)

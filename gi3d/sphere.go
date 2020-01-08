@@ -16,11 +16,11 @@ import (
 type Sphere struct {
 	MeshBase
 	Radius     float32 `desc:"radius of the sphere"`
-	WidthSegs  int     `min:"1" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`
-	HeightSegs int     `min:"1" desc:"number of height segments (32 is reasonable default for full height)"`
-	AngStart   float32 `desc:"starting radial angle in radians"`
-	AngLen     float32 `desc:"total radial angle to generate in radians (max = 2*Pi)"`
-	ElevStart  float32 `desc:"starting elevation (height) angle in radians"`
+	WidthSegs  int     `min:"3" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`
+	HeightSegs int     `min:"3" desc:"number of height segments (32 is reasonable default for full height)"`
+	AngStart   float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees"`
+	AngLen     float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in radians (max = 2*Pi)"`
+	ElevStart  float32 `min:"0" max:"180" step:"5" desc:"starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"`
 	ElevLen    float32 `desc:"total angle to generate in radians (max = Pi)"`
 }
 
@@ -35,9 +35,9 @@ func AddNewSphere(sc *Scene, name string, radius float32, segs int) *Sphere {
 	sp.WidthSegs = segs
 	sp.HeightSegs = segs
 	sp.AngStart = 0
-	sp.AngLen = math.Pi * 2
+	sp.AngLen = 360
 	sp.ElevStart = 0
-	sp.ElevLen = math.Pi
+	sp.ElevLen = 180
 	sc.AddMesh(sp)
 	return sp
 }
@@ -50,12 +50,17 @@ func (sp *Sphere) Make(sc *Scene) {
 
 // AddSphereSector creates a sphere sector mesh
 // with the specified radius, number of radial segments in each dimension,
-// radial sector start angle and length in radians.
-// elevation start angle and length in radians,
+// radial sector start angle and length in degrees (0 -360)
+// elevation start angle and length in degrees (0 - 180),
 // offset is an arbitrary offset (for composing shapes).
 func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, angStart, angLen, elevStart, elevLen float32, offset mat32.Vec3) {
-	elevEnd := elevStart + elevLen
 	nVtx := (widthSegs + 1) * (heightSegs + 1)
+
+	angStRad := mat32.DegToRad(angStart)
+	angLenRad := mat32.DegToRad(angLen)
+	elevStRad := mat32.DegToRad(elevStart)
+	elevLenRad := mat32.DegToRad(elevLen)
+	elevEndRad := elevStRad + elevLenRad
 
 	// Create buffers
 	pos := mat32.NewArrayF32(nVtx*3, nVtx*3)
@@ -76,9 +81,9 @@ func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, a
 		v := float32(y) / float32(heightSegs)
 		for x := 0; x <= widthSegs; x++ {
 			u := float32(x) / float32(widthSegs)
-			px := -radius * math32.Cos(angStart+u*angLen) * math32.Sin(elevStart+v*elevLen)
-			py := radius * math32.Cos(elevStart+v*elevLen)
-			pz := radius * math32.Sin(angStart+u*angLen) * math32.Sin(elevStart+v*elevLen)
+			px := -radius * math32.Cos(angStRad+u*angLenRad) * math32.Sin(elevStRad+v*elevLenRad)
+			py := radius * math32.Cos(elevStRad+v*elevLenRad)
+			pz := radius * math32.Sin(angStRad+u*angLenRad) * math32.Sin(elevStRad+v*elevLenRad)
 			pt.Set(px, py, pz)
 			pt.SetAdd(offset)
 			norm.Set(px, py, pz)
@@ -100,10 +105,10 @@ func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, a
 			v2 := vtxs[y][x]
 			v3 := vtxs[y+1][x]
 			v4 := vtxs[y+1][x+1]
-			if y != 0 || elevStart > 0 {
+			if y != 0 || elevStRad > 0 {
 				idxs.Append(stidx+v1, stidx+v2, stidx+v4)
 			}
-			if y != heightSegs-1 || elevEnd < math.Pi {
+			if y != heightSegs-1 || elevEndRad < math.Pi {
 				idxs.Append(stidx+v2, stidx+v3, stidx+v4)
 			}
 		}
@@ -119,14 +124,16 @@ func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, a
 
 // AddDiskSector creates a disk (filled circle) or disk sector mesh
 // with the specified radius, number of radial segments (minimum 3),
-// sector start angle and angle length in radians.
+// sector start angle and angle length in degrees.
 // The center of the disk is at the origin,
 // and angle runs counter-clockwise on the XY plane, starting at (x,y,z)=(1,0,0).
-func (ms *MeshBase) AddDiskSector(radius float32, segs int, angStart, angLen float32) {
+func (ms *MeshBase) AddDiskSector(radius float32, segs int, angStart, angLen float32, offset mat32.Vec3) {
 	// Validate arguments
 	if segs < 3 {
 		panic("Invalid argument: segments. The number of segments needs to be greater or equal to 3.")
 	}
+	angStRad := mat32.DegToRad(angStart)
+	angLenRad := mat32.DegToRad(angLen)
 
 	// Create buffers
 	pos := mat32.NewArrayF32(0, 16)
@@ -154,10 +161,11 @@ func (ms *MeshBase) AddDiskSector(radius float32, segs int, angStart, angLen flo
 	var pt mat32.Vec3
 	// Generate the segments
 	for i := 0; i <= segs; i++ {
-		segment := angStart + float32(i)/float32(segs)*angLen
+		segment := angStRad + float32(i)/float32(segs)*angLenRad
 		vx := float32(radius * mat32.Cos(segment))
 		vy := float32(radius * mat32.Sin(segment))
 		pt.Set(vx, vy, 0)
+		pt.SetAdd(offset)
 
 		// Appends vertex position, norm and uv coordinates
 		pos.Append(vx, vy, 0)
