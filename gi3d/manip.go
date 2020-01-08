@@ -5,8 +5,6 @@
 package gi3d
 
 import (
-	"fmt"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
@@ -166,7 +164,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		}
 		scc := sci.Embed(KiT_Scene).(*Scene)
 		scc.SetManipPt(mpt)
-		fmt.Printf("set manip: %v\n", recv.Name())
+		me.SetProcessed()
 	})
 	mpt.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
