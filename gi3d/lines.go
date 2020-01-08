@@ -83,10 +83,10 @@ func AddNewLine(sc *Scene, parent ki.Ki, meshNm, lineNm string, st, ed mat32.Vec
 	return ln
 }
 
-// AddNewLineBox adds a new Group with Solid's and two Meshes defining the edges of a Box.
-// This can be used for drawing a selection box around a Node in the scene, for example.
-// offset is an arbitrary offset (for composing shapes).
-func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr gi.Color) *Group {
+// AddNewLineBoxMeshes adds two Meshes defining the edges of a Box.
+// Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
+// initialized, e.g., using sc.InitMesh()
+func AddNewLineBoxMeshes(sc *Scene, meshNm string, bbox mat32.Box3, width float32) {
 	wd := mat32.Vec2{width, width}
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
@@ -96,37 +96,68 @@ func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box
 	ftl := mat32.Vec3{-hSz.X, hSz.Y, 0}
 	ftr := mat32.Vec3{hSz.X, hSz.Y, 0}
 	fbr := mat32.Vec3{hSz.X, -hSz.Y, 0}
-	frm := AddNewLines(sc, meshNm+"-front", []mat32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
+	AddNewLines(sc, meshNm+"-front", []mat32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
 
 	// side mesh in XY plane, Z -> X
 	sbl := mat32.Vec3{-hSz.Z, -hSz.Y, 0}
 	stl := mat32.Vec3{-hSz.Z, hSz.Y, 0}
 	str := mat32.Vec3{hSz.Z, hSz.Y, 0}
 	sbr := mat32.Vec3{hSz.Z, -hSz.Y, 0}
+	AddNewLines(sc, meshNm+"-side", []mat32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
+}
 
-	sdm := AddNewLines(sc, meshNm+"-side", []mat32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
+const (
+	// Inactive is used for args indicating if node should be inactive
+	Inactive = true
+
+	// Active is used for args indicating if node should be inactive or not
+	Active = false
+)
+
+// AddNewLineBox adds a new Group with Solid's and two Meshes defining the edges of a Box.
+// This can be used for drawing a selection box around a Node in the scene, for example.
+// offset is an arbitrary offset (for composing shapes).
+// Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
+// initialized, e.g., using sc.InitMesh()
+// inactive indicates whether the box and solids should be flagged as inactive
+// (not selectable).
+func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr gi.Color, inactive bool) *Group {
+	sz := bbox.Size()
+	hSz := sz.MulScalar(0.5)
+
+	AddNewLineBoxMeshes(sc, meshNm, bbox, width)
+	frmnm := meshNm + "-front"
+	sdmnm := meshNm + "-side"
 
 	ctr := bbox.Min.Add(hSz)
 	bgp := AddNewGroup(sc, parent, boxNm)
 	bgp.Pose.Pos = ctr
 
-	bs := AddNewSolid(sc, bgp, boxNm+"-back", frm.Name())
+	bs := AddNewSolid(sc, bgp, boxNm+"-back", frmnm)
 	bs.Mat.Color = clr
 	bs.Pose.Pos.Set(0, 0, -hSz.Z)
 
-	ls := AddNewSolid(sc, bgp, boxNm+"-left", sdm.Name())
+	ls := AddNewSolid(sc, bgp, boxNm+"-left", sdmnm)
 	ls.Mat.Color = clr
 	ls.Pose.Pos.Set(-hSz.X, 0, 0)
 	ls.Pose.SetAxisRotation(0, 1, 0, 90)
 
-	rs := AddNewSolid(sc, bgp, boxNm+"-right", sdm.Name())
+	rs := AddNewSolid(sc, bgp, boxNm+"-right", sdmnm)
 	rs.Mat.Color = clr
 	rs.Pose.Pos.Set(hSz.X, 0, 0)
 	rs.Pose.SetAxisRotation(0, 1, 0, -90)
 
-	fs := AddNewSolid(sc, bgp, boxNm+"-front", frm.Name())
+	fs := AddNewSolid(sc, bgp, boxNm+"-front", frmnm)
 	fs.Mat.Color = clr
 	fs.Pose.Pos.Set(0, 0, hSz.Z)
+
+	if inactive {
+		bgp.SetInactive()
+		bs.SetInactive()
+		ls.SetInactive()
+		rs.SetInactive()
+		fs.SetInactive()
+	}
 
 	return bgp
 }

@@ -78,6 +78,7 @@ func (ms *MeshBase) AddTorusSector(radius, tubeRadius float32, radialSegs, tubeS
 			pt.Z = tubeRadius * math32.Sin(v)
 			pt.SetAdd(offset)
 			pos.AppendVec3(pt)
+			bb.ExpandByPoint(pt)
 
 			uvs.Append(float32(i)/float32(tubeSegs), float32(j)/float32(radialSegs))
 			norms.AppendVec3(pt.Sub(center).Normal())

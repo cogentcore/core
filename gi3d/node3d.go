@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -185,9 +186,10 @@ func (nb *Node3DBase) IsVisible() bool {
 	if nb.Par == nil || nb.Par.This() == nil {
 		return false
 	}
-	// if nb.Par == nb.Scene { // cutoff at top
-	// 	return true
-	// }
+	sc := nb.Par.Embed(KiT_Scene)
+	if sc != nil {
+		return sc.(*Scene).IsVisible()
+	}
 	return nb.Par.This().(Node3D).IsVisible()
 }
 
@@ -308,8 +310,25 @@ func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 /////////////////////////////////////////////////////////////////
 // Events
 
+// Default node can be selected / manipulated per the Scene SelMode settings
 func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
-	// nop -- add connect event calls here as needed in derived types
+	nb.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsInactive() {
+			return
+		}
+		sci, err := recv.ParentByTypeTry(KiT_Scene, false)
+		if err != nil {
+			return
+		}
+		scc := sci.Embed(KiT_Scene).(*Scene)
+		ni := nb.This().(Node3D)
+		if scc.CurSel != ni {
+			// fmt.Printf("selecting: %v  mouse: %v   win bbox: %v  obj bbox: %v\n", nb.Nm, me.Where, nb.WinBBox, nb.ObjBBox)
+			scc.SetSel(ni)
+			me.SetProcessed()
+		}
+	})
 }
 
 // ConnectEvent connects this node to receive a given type of GUI event

@@ -119,9 +119,9 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	cyan.SetUInt8(0, 255, 255, 255)
 	gi3d.AddNewLine(sc, sc, "UnitLineW.05", "one-line", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan)
 
-	bbclr := gi.Color{}
-	bbclr.SetUInt8(255, 255, 0, 255)
-	gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr)
+	// bbclr := gi.Color{}
+	// bbclr.SetUInt8(255, 255, 0, 255)
+	// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
 
 	cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
 	cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
@@ -174,6 +174,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// floor.Mat.Bright = 2 // .5 for wood / brown
 	floor.Mat.SetTexture(sc, grtx)
 	floor.Mat.Tiling.Repeat.Set(40, 40)
+	floor.SetInactive() // not selectable
 
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default
@@ -184,13 +185,16 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
 
-	tcg := gi3d.AddNewGroup(sc, sc, "TrackCamera") // automatically tracks camera -- FPS effect
+	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
+
+	//	sc.SelMode = gi3d.SelectionBox
+	sc.SelMode = gi3d.Manipulable
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu

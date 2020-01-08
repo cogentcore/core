@@ -23,6 +23,21 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+const (
+	// TrackCameraName is a reserved top-level Group name -- this group
+	// will have its Pose updated to match that of the camera automatically.
+	TrackCameraName = "TrackCamera"
+
+	// SelBoxName is the reserved top-level Group name for holding
+	// a bounding box or manipulator for currently selected object.
+	// also used for meshes representing the box.
+	SelBoxName = "__SelectedBox"
+
+	// ManipBoxName is the reserved top-level name for meshes
+	// representing the manipulation box.
+	ManipBoxName = "__ManipBox"
+)
+
 // Set Update3DTrace to true to get a trace of 3D updating
 var Update3DTrace = false
 
@@ -42,21 +57,25 @@ var Update3DTrace = false
 // "first person" effects.
 type Scene struct {
 	gi.WidgetBase
-	Geom          gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Camera        Camera             `desc:"camera determines view onto scene"`
-	BgColor       gi.Color           `desc:"background color"`
-	Wireframe     bool               `desc:"if true, render as wireframe instead of filled"`
-	Lights        map[string]Light   `desc:"all lights used in the scene"`
-	Meshes        map[string]Mesh    `desc:"all meshes used in the scene"`
-	Textures      map[string]Texture `desc:"all textures used in the scene"`
-	Library       map[string]*Group  `desc:"library of objects that can be used in the scene"`
-	NoNav         bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
-	SavedCams     map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
-	Win           *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
-	Renders       Renderers          `view:"-" desc:"rendering programs"`
-	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
-	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
-	SetDragCursor bool               `view:"-" desc:"has dragging cursor been set yet?"`
+	Geom            gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Camera          Camera             `desc:"camera determines view onto scene"`
+	BgColor         gi.Color           `desc:"background color"`
+	Wireframe       bool               `desc:"if true, render as wireframe instead of filled"`
+	Lights          map[string]Light   `desc:"all lights used in the scene"`
+	Meshes          map[string]Mesh    `desc:"all meshes used in the scene"`
+	Textures        map[string]Texture `desc:"all textures used in the scene"`
+	Library         map[string]*Group  `desc:"library of objects that can be used in the scene"`
+	NoNav           bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+	SavedCams       map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
+	Win             *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
+	Renders         Renderers          `view:"-" desc:"rendering programs"`
+	Frame           gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
+	Tex             gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
+	SetDragCursor   bool               `view:"-" desc:"has dragging cursor been set yet?"`
+	SelMode         SelMode            `desc:"how to deal with selection / manipulation events"`
+	CurSel          Node3D             `copy:"-" json:"-" xml:"-" desc:"currently selected node"`
+	CurManipPt      *ManipPt           `copy:"-" json:"-" xml:"-" desc:"currently selected manipulation control point"`
+	SelBoxColorName gi.ColorName       `desc:"name of color to use for selection box (default yellow)"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
@@ -72,6 +91,9 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (sc *Scene) Defaults() {
 	sc.Camera.Defaults()
 	sc.BgColor.SetUInt8(255, 255, 255, 255)
+	if sc.SelBoxColorName == "" {
+		sc.SelBoxColorName = gi.ColorName("yellow")
+	}
 }
 
 func (sc *Scene) Disconnect() {
@@ -602,17 +624,9 @@ func (sc *Scene) NavEvents() {
 		if !ssc.IsInactive() && !ssc.HasFocus() {
 			ssc.GrabFocus()
 		}
-	})
-	sc.ConnectEvent(oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.HoverEvent)
-		me.SetProcessed()
-		// ssc := recv.Embed(KiT_Scene).(*Scene)
-		// obj := ssc.FirstContainingPoint(me.Where, true)
-		// if obj != nil {
-		// 	pos := me.Where
-		// 	ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
-		// 	gi.PopupTooltip(obj.Name(), pos.X, pos.Y, sc.Viewport, ttxt)
-		// }
+		if ssc.CurManipPt == nil {
+			ssc.SetSel(nil) // clear any selection at this point
+		}
 	})
 	sc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
@@ -834,7 +848,6 @@ func (sc *Scene) InitMesh(nm string) error {
 	ms, ok := sc.Meshes[nm]
 	if ok {
 		oswin.TheApp.RunOnMain(func() {
-			fmt.Printf("init mesh: %v\n", ms.Name())
 			InitMesh(ms, sc)
 		})
 		return nil

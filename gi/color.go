@@ -535,6 +535,13 @@ func ColorFromString(str string, base color.Color) (Color, error) {
 	return c, err
 }
 
+// ColorFromName returns a new color set from given name.
+func ColorFromName(name string) (Color, error) {
+	var c Color
+	err := c.SetName(name)
+	return c, err
+}
+
 // parse Hex color -- this is from fogleman/gg I think..
 func (c *Color) ParseHex(x string) error {
 	x = strings.TrimPrefix(x, "#")
