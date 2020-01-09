@@ -88,13 +88,34 @@ func (cm *Camera) LookAtTarget() {
 	cm.LookAt(cm.Target, cm.UpDir)
 }
 
+// ViewVector is the vector between the camera position and target
+func (cm *Camera) ViewVector() mat32.Vec3 {
+	return cm.Pose.Pos.Sub(cm.Target)
+}
+
+// ViewMainAxis returns the dimension along which the view vector is largest
+// along with the sign of that axis (+1 for positive, -1 for negative).
+// this is useful for determining how manipulations should function, for example.
+func (cm *Camera) ViewMainAxis() (dim mat32.Dims, sign float32) {
+	vv := cm.ViewVector()
+	va := vv.Abs()
+	switch {
+	case va.X > va.Y && va.X > va.Z:
+		return mat32.X, mat32.Sign(vv.X)
+	case va.Y > va.X && va.Y > va.Z:
+		return mat32.Y, mat32.Sign(vv.Y)
+	default:
+		return mat32.Z, mat32.Sign(vv.Z)
+	}
+}
+
 // Orbit moves the camera along the given 2D axes in degrees
 // (delX = left/right, delY = up/down),
 // relative to current position and orientation,
 // keeping the same distance from the Target, and rotating the camera and
 // the Up direction vector to keep looking at the target.
 func (cm *Camera) Orbit(delX, delY float32) {
-	ctdir := cm.Pose.Pos.Sub(cm.Target)
+	ctdir := cm.ViewVector()
 	if ctdir.IsNil() {
 		ctdir.Set(0, 0, 1)
 	}
@@ -142,7 +163,7 @@ func (cm *Camera) PanAxis(delX, delY float32) {
 func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 	td := mat32.Vec3{-delX, -delY, delZ}
 	cm.Target.SetAdd(td)
-	dist := cm.Pose.Pos.Sub(cm.Target).Length()
+	dist := cm.ViewVector().Length()
 	if dist == 0 {
 		cm.Target.SetAdd(td)
 	}
@@ -152,7 +173,7 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 // Zoom moves along axis given pct closer or further from the target
 // it always moves the target back also if it distance is < 1
 func (cm *Camera) Zoom(zoomPct float32) {
-	ctaxis := cm.Pose.Pos.Sub(cm.Target)
+	ctaxis := cm.ViewVector()
 	if ctaxis.IsNil() {
 		ctaxis.Set(0, 0, 1)
 	}

@@ -30,9 +30,24 @@ Here are the default bindings (you can see the `gi3d.Scene NavEvents` method in 
 * `Alt++` / `Alt+-` = *TargetPan* along depth Z axis
 * `Space` = reset to the Defaults initial camera location (+10 in Z, Up is +Y, and looking at origin)
 
+These controls are also present at the bottom of the `gi3d.SceneView` used here, which provides a basic gui around the 3D Scene.
+
+## Selecting and Manipulating
+
+There is a selector at the bottom of the SceneView where you can change the selection behavior.  It defaults to `NotSelectable`, but if you change it to `SelectionBox` or `Manipulable`, then you can click on different objects (and parts of objects) and see a selection box or manipulation box around them.
+
+Selected objects can be edited using the `Edit` button, and the overall `Scene` can be edited using the `Edit Scene` button.
+
+In `Manipulable` mode, you can change the Pose of objects by dragging on the different control spheres, using the following keyboard modifiers:
+* none = Move -- moves in dominant plane -- orbit camera to enable moving in other planes.
+* `Ctrl` = scale -- scales along the relevant dimensions.
+* `Alt` = rotate -- rotates in current "depth" plane (again move camera to rotate in other planes).
+
+The code for all of this is in `gi3d/manip.go` -- it is relatively straightforward, leveraging the GoGi event system, based on bounding boxes for directing events, and having builtin support for dragging etc.  The `ManipPt` manipulation points receive mouse events directly and translate movements into the respective transformations.
+
 ## Inspect and Edit the Scene
 
-Use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the `scene` and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
+You can also use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the `scene` and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.
 
 For example, you can click on `Meshes`, and edit the parameters of any of the various mesh objects, cutting the sphere into a sliver, experimenting with different numbers of segments which determines how smooth the curved shapes are, etc.
 

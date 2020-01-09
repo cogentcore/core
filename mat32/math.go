@@ -32,7 +32,6 @@ func RadToDeg(radians float32) float32 {
 
 // Clamp clamps x to the provided closed interval [a, b]
 func Clamp(x, a, b float32) float32 {
-
 	if x < a {
 		return a
 	}
@@ -44,7 +43,6 @@ func Clamp(x, a, b float32) float32 {
 
 // ClampInt clamps x to the provided closed interval [a, b]
 func ClampInt(x, a, b int) int {
-
 	if x < a {
 		return a
 	}
@@ -56,6 +54,13 @@ func ClampInt(x, a, b int) int {
 
 func Abs(v float32) float32 {
 	return float32(math.Abs(float64(v)))
+}
+
+func Sign(v float32) float32 {
+	if v < 0 {
+		return -1
+	}
+	return 1
 }
 
 func Acos(v float32) float32 {

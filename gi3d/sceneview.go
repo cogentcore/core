@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -211,5 +212,30 @@ func (sv *SceneView) ToolbarConfig() {
 			}
 			fmt.Printf("Camera %s: %v\n", cam, scc.Camera.GenGoSet(""))
 			scc.UpdateSig()
+		})
+	tbar.AddSeparator("sel")
+	cb := gi.AddNewComboBox(tbar, "selmode")
+	cb.ItemsFromEnum(KiT_SelModes, true, 25)
+	cb.SetCurIndex(int(sv.Scene().SelMode))
+	cb.ComboSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		svv := recv.Embed(KiT_SceneView).(*SceneView)
+		cbb := send.(*gi.ComboBox)
+		scc := svv.Scene()
+		scc.SelMode = SelModes(cbb.CurIndex)
+		scc.UpdateSig()
+	})
+	tbar.AddAction(gi.ActOpts{Label: "Edit", Icon: "edit", Tooltip: "edit the currently-selected object"}, sv.This(),
+		func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv := recv.Embed(KiT_SceneView).(*SceneView)
+			scc := svv.Scene()
+			if scc.CurSel != nil {
+				giv.StructViewDialog(svv.Viewport, scc.CurSel, giv.DlgOpts{Title: "Select Node"}, nil, nil)
+			}
+		})
+	tbar.AddAction(gi.ActOpts{Label: "Edit Scene", Icon: "edit", Tooltip: "edit the overall scene object (for access to meshes, etc)"}, sv.This(),
+		func(recv, send ki.Ki, sig int64, data interface{}) {
+			svv := recv.Embed(KiT_SceneView).(*SceneView)
+			scc := svv.Scene()
+			giv.StructViewDialog(svv.Viewport, scc, giv.DlgOpts{Title: "Scene"}, nil, nil)
 		})
 }

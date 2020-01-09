@@ -15,12 +15,12 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-// SelMode are selection modes for Scene
-type SelMode int
+// SelModes are selection modes for Scene
+type SelModes int
 
 const (
 	// NotSelectable means that selection events are ignored entirely
-	NotSelectable SelMode = iota
+	NotSelectable SelModes = iota
 
 	// Selectable means that nodes can be selected but no visible consequence occurs
 	Selectable
@@ -32,12 +32,25 @@ const (
 	// which can update the Pose parameters dynamically.
 	Manipulable
 
-	SelModeN
+	SelModesN
 )
 
-//go:generate stringer -type=SelMode
+//go:generate stringer -type=SelModes
 
-var KiT_SelMode = kit.Enums.AddEnum(SelModeN, kit.NotBitFlag, nil)
+var KiT_SelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
+
+// SelParams are parameters for selection / manipulation box
+type SelParams struct {
+	Color  gi.ColorName `desc:"name of color to use for selection box (default yellow)"`
+	Width  float32      `desc:"width of the box lines (.01 default)"`
+	Radius float32      `desc:"radius of the manipulation control point spheres"`
+}
+
+func (sp *SelParams) Defaults() {
+	sp.Color = gi.ColorName("yellow")
+	sp.Width = .01
+	sp.Radius = .05
+}
 
 /////////////////////////////////////////////////////////////////////////////////////
 // 		Scene interface
@@ -85,8 +98,8 @@ func (sc *Scene) SelectBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(SelBoxName, true) // get rid of existing
-	clr, _ := gi.ColorFromName(string(sc.SelBoxColorName))
-	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, .01, clr, Inactive)
+	clr, _ := gi.ColorFromName(string(sc.SelParams.Color))
+	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 	sc.InitMesh(SelBoxName + "-front")
 	sc.InitMesh(SelBoxName + "-side")
 }
@@ -103,12 +116,12 @@ func (sc *Scene) ManipBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(nm, true) // get rid of existing
-	clr, _ := gi.ColorFromName(string(sc.SelBoxColorName))
+	clr, _ := gi.ColorFromName(string(sc.SelParams.Color))
 
 	bbox := nb.WorldBBox.BBox
-	mb := AddNewLineBox(sc, sc, nm, nm, bbox, .01, clr, Inactive)
+	mb := AddNewLineBox(sc, sc, nm, nm, bbox, sc.SelParams.Width, clr, Inactive)
 
-	mbspm := AddNewSphere(sc, nm+"-pt", 0.05, 16)
+	mbspm := AddNewSphere(sc, nm+"-pt", sc.SelParams.Radius, 16)
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
@@ -162,8 +175,8 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		if err != nil {
 			return
 		}
-		scc := sci.Embed(KiT_Scene).(*Scene)
-		scc.SetManipPt(mpt)
+		ssc := sci.Embed(KiT_Scene).(*Scene)
+		ssc.SetManipPt(mpt)
 		me.SetProcessed()
 	})
 	mpt.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -180,44 +193,78 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 			return
 		}
 		sn := ssc.CurSel.AsNode3D()
-		updt := ssc.UpdateStart()
-		if mpt.IsDragging() {
-			scDel := float32(.01)
-			panDel := float32(.01)
-			if !ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
-				ssc.SetDragCursor = true
-			}
-			del := me.Where.Sub(me.From)
-			dx := float32(del.X)
-			dy := float32(del.Y)
-			switch {
-			case key.HasAllModifierBits(me.Modifiers, key.Shift):
-				ssc.Camera.Pan(dx*panDel, -dy*panDel)
-			case key.HasAllModifierBits(me.Modifiers, key.Control):
-				sn.Pose.Scale.X += dx * scDel
-				sn.Pose.Scale.Y += -dy * scDel
-				mb.Pose.Scale.X += dx * scDel
-				mb.Pose.Scale.Y += -dy * scDel
-			case key.HasAllModifierBits(me.Modifiers, key.Alt):
-				ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-			default:
-				// if mat32.Abs(dx) > mat32.Abs(dy) {
-				// 	dy = 0
-				// } else {
-				// 	dx = 0
-				// }
-				// ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-				sn.Pose.Pos.X += dx * panDel
-				sn.Pose.Pos.Y += -dy * panDel
-				mb.Pose.Pos.X += dx * panDel
-				mb.Pose.Pos.Y += -dy * panDel
-			}
-		} else {
+		if !mpt.IsDragging() {
 			if ssc.SetDragCursor {
 				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 				ssc.SetDragCursor = false
 			}
+			return
+		}
+		if !ssc.SetDragCursor {
+			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
+			ssc.SetDragCursor = true
+		}
+		del := me.Where.Sub(me.From)
+		dx := float32(del.X)
+		dy := float32(del.Y)
+		mpos := mpt.Nm[len(ManipBoxName)+1:] // has ull etc for where positioned
+		camd, sgn := ssc.Camera.ViewMainAxis()
+		var dm mat32.Vec3 // delta multiplier
+		if mpos[mat32.X] == 'u' {
+			dm.X = 1
+		} else {
+			dm.X = -1
+		}
+		if mpos[mat32.Y] == 'u' {
+			dm.Y = 1
+		} else {
+			dm.Y = -1
+		}
+		if mpos[mat32.Z] == 'u' {
+			dm.Z = 1
+		} else {
+			dm.Z = -1
+		}
+		var dd mat32.Vec3
+		switch camd {
+		case mat32.X:
+			dd.Z = -sgn * dx
+			dd.Y = -dy
+		case mat32.Y:
+			dd.X = dx
+			dd.Z = sgn * dy
+		case mat32.Z:
+			dd.X = sgn * dx
+			dd.Y = -dy
+		}
+		// fmt.Printf("mpos: %v  camd: %v  sgn: %v  dm: %v\n", mpos, camd, sgn, dm)
+		updt := ssc.UpdateStart()
+		scDel := float32(.01)
+		panDel := float32(.01)
+		switch {
+		case key.HasAllModifierBits(me.Modifiers, key.Control): // scale
+			dsc := dd.Mul(dm).MulScalar(scDel)
+			mb.Pose.Scale.SetAdd(dsc)
+			msc := dsc.MulMat4AsVec4(&sn.Pose.ParMatrix, 0) // this is not quite right but close enough
+			sn.Pose.Scale.SetAdd(msc)
+		case key.HasAllModifierBits(me.Modifiers, key.Alt): // rotation
+			dang := -sgn * dm.Y * (dx + dy)
+			if camd == mat32.Y {
+				dang = -sgn * dm.X * (dy + dx)
+			}
+			var rvec mat32.Vec3
+			rvec.SetDim(camd, 1)
+			mb.Pose.RotateOnAxis(rvec.X, rvec.Y, rvec.Z, dang)
+			inv, _ := sn.Pose.WorldMatrix.Inverse() // undo full transform
+			mvec := rvec.MulMat4AsVec4(inv, 0)
+			sn.Pose.RotateOnAxis(mvec.X, mvec.Y, mvec.Z, dang)
+		// case key.HasAllModifierBits(me.Modifiers, key.Shift):
+		default: // position
+			dpos := dd.MulScalar(panDel)
+			inv, _ := sn.Pose.ParMatrix.Inverse() // undo parent's transform
+			mpos := dpos.MulMat4AsVec4(inv, 0)
+			sn.Pose.Pos.SetAdd(mpos)
+			mb.Pose.Pos.SetAdd(dpos)
 		}
 		ssc.UpdateEnd(updt)
 	})

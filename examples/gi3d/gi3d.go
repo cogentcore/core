@@ -66,7 +66,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	scrow := gi.AddNewLayout(mfr, "scrow", gi.LayoutHoriz)
 	scrow.SetStretchMax()
 
-	gi.AddNewLabel(scrow, "tmp", "This is test text")
+	// gi.AddNewLabel(scrow, "tmp", "This is test text")
 
 	scvw := gi3d.AddNewSceneView(scrow, "sceneview")
 	scvw.SetStretchMax()
@@ -191,10 +191,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
 	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
 
+	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
-
-	//	sc.SelMode = gi3d.SelectionBox
-	sc.SelMode = gi3d.Manipulable
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu

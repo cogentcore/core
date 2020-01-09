@@ -57,25 +57,25 @@ var Update3DTrace = false
 // "first person" effects.
 type Scene struct {
 	gi.WidgetBase
-	Geom            gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Camera          Camera             `desc:"camera determines view onto scene"`
-	BgColor         gi.Color           `desc:"background color"`
-	Wireframe       bool               `desc:"if true, render as wireframe instead of filled"`
-	Lights          map[string]Light   `desc:"all lights used in the scene"`
-	Meshes          map[string]Mesh    `desc:"all meshes used in the scene"`
-	Textures        map[string]Texture `desc:"all textures used in the scene"`
-	Library         map[string]*Group  `desc:"library of objects that can be used in the scene"`
-	NoNav           bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
-	SavedCams       map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
-	Win             *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
-	Renders         Renderers          `view:"-" desc:"rendering programs"`
-	Frame           gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
-	Tex             gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
-	SetDragCursor   bool               `view:"-" desc:"has dragging cursor been set yet?"`
-	SelMode         SelMode            `desc:"how to deal with selection / manipulation events"`
-	CurSel          Node3D             `copy:"-" json:"-" xml:"-" desc:"currently selected node"`
-	CurManipPt      *ManipPt           `copy:"-" json:"-" xml:"-" desc:"currently selected manipulation control point"`
-	SelBoxColorName gi.ColorName       `desc:"name of color to use for selection box (default yellow)"`
+	Geom          gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	Camera        Camera             `desc:"camera determines view onto scene"`
+	BgColor       gi.Color           `desc:"background color"`
+	Wireframe     bool               `desc:"if true, render as wireframe instead of filled"`
+	Lights        map[string]Light   `desc:"all lights used in the scene"`
+	Meshes        map[string]Mesh    `desc:"all meshes used in the scene"`
+	Textures      map[string]Texture `desc:"all textures used in the scene"`
+	Library       map[string]*Group  `desc:"library of objects that can be used in the scene"`
+	NoNav         bool               `desc:"don't activate the standard navigation keyboard and mouse event processing to move around the camera in the scene"`
+	SavedCams     map[string]Camera  `desc:"saved cameras -- can Save and Set these to view the scene from different angles"`
+	Win           *gi.Window         `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
+	Renders       Renderers          `view:"-" desc:"rendering programs"`
+	Frame         gpu.Framebuffer    `view:"-" desc:"direct render target for scene"`
+	Tex           gpu.Texture2D      `view:"-" desc:"the texture that the framebuffer returns, which should be rendered into the window"`
+	SetDragCursor bool               `view:"-" desc:"has dragging cursor been set yet?"`
+	SelMode       SelModes           `desc:"how to deal with selection / manipulation events"`
+	CurSel        Node3D             `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected node"`
+	CurManipPt    *ManipPt           `copy:"-" json:"-" xml:"-" view:"-" desc:"currently selected manipulation control point"`
+	SelParams     SelParams          `view:"inline" desc:"parameters for selection / manipulation box"`
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, SceneProps)
@@ -91,9 +91,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (sc *Scene) Defaults() {
 	sc.Camera.Defaults()
 	sc.BgColor.SetUInt8(255, 255, 255, 255)
-	if sc.SelBoxColorName == "" {
-		sc.SelBoxColorName = gi.ColorName("yellow")
-	}
+	sc.SelParams.Defaults()
 }
 
 func (sc *Scene) Disconnect() {
@@ -624,9 +622,9 @@ func (sc *Scene) NavEvents() {
 		if !ssc.IsInactive() && !ssc.HasFocus() {
 			ssc.GrabFocus()
 		}
-		if ssc.CurManipPt == nil {
-			ssc.SetSel(nil) // clear any selection at this point
-		}
+		// if ssc.CurManipPt == nil {
+		ssc.SetSel(nil) // clear any selection at this point
+		// }
 	})
 	sc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)

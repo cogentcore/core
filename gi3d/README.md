@@ -50,3 +50,7 @@ See [EVE](https://github.com/emer/eve) (emergent Virtual Engine) for a physics e
 
     + `Group`s can be used to apply `Pose` settings to a set of Children that are all grouped together (e.g., a multi-part complex object can be moved together etc by putting a set of `Solid`s into a Group)
 
+# Events, Selection, Manipulation
+
+Mouse events are handled by the standard GoGi Window event dispatching methods, based on bounding boxes which are always updated -- this greatly simplifies gui interactions.  There is default support for selection and `Pose` manipulation handling -- see `manip.go` code and `Node3DBase`'s `ConnectEvents3D` which responds to mouse clicks.
+

@@ -65,6 +65,13 @@ Pipelines to do the actual rendering, depending on Material and Mesh properties
 (e.g., uniform vs per-vertex color vs. texture).
 
 Any change to the Mesh after first initialization (Init3D) must be activated
-by calling Scene.InitMesh(nm) or Scene.InitMeshes() to redo all.
+by calling Scene.InitMesh(nm) or Scene.InitMeshes() to redo all.  The Update
+method on the Scene does Init3D and re-renders.
+
+Mouse events are handled by the standard GoGi Window event dispatching
+methods, based on bounding boxes which are always updated -- this greatly
+simplifies gui interactions.  There is default support for selection and
+Pose manipulation handling -- see manip.go code and Node3DBase's
+ConnectEvents3D which responds to mouse clicks.
 */
 package gi3d

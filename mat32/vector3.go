@@ -356,6 +356,11 @@ func (v *Vec3) SetNegate() {
 	v.Z = -v.Z
 }
 
+// Abs returns vector with Abs of each component.
+func (v Vec3) Abs() Vec3 {
+	return Vec3{Abs(v.X), Abs(v.Y), Abs(v.Z)}
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //  Distance, Norm
 

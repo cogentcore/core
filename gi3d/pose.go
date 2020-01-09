@@ -57,6 +57,16 @@ func (ps *Pose) UpdateMatrix() {
 	ps.Matrix.SetTransform(ps.Pos, ps.Quat, ps.Scale)
 }
 
+// MulMatrix multiplies current pose Matrix by given Matrix, and re-extracts the
+// Pos, Scale, Quat from resulting matrix.
+func (ps *Pose) MulMatrix(mat *mat32.Mat4) {
+	ps.Matrix.SetMul(mat)
+	pos, quat, sc := ps.Matrix.Decompose()
+	ps.Pos = pos
+	ps.Quat = quat
+	ps.Scale = sc
+}
+
 // UpdateWorldMatrix updates the world transform matrix based on Matrix and parent's WorldMatrix.
 // Does NOT call UpdateMatrix so that can include other factors as needed.
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
