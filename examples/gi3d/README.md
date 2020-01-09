@@ -45,6 +45,8 @@ In `Manipulable` mode, you can change the Pose of objects by dragging on the dif
 
 The code for all of this is in `gi3d/manip.go` -- it is relatively straightforward, leveraging the GoGi event system, based on bounding boxes for directing events, and having builtin support for dragging etc.  The `ManipPt` manipulation points receive mouse events directly and translate movements into the respective transformations.
 
+You can generate Go code for the Pose produced by manipulating, by clicking on the Pose field in the Edit dialog of a Node, and then clicking on the `Go Code` button in the toolbar.
+
 ## Inspect and Edit the Scene
 
 You can also use the standard GoGi `Ctrl+Alt+I` shortcut to invoke the `GoGi Editor` and you can click on the `scene` and other elements of the scenegraph and edit / inspect them.  Toolbar actions have been enabled on everything to call useful methods, so you can pretty much configure the entire scene dynamically on the fly.

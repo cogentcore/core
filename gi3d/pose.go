@@ -195,6 +195,15 @@ func (ps *Pose) WorldScale() mat32.Vec3 {
 // PoseProps define the ToolBar and MenuBar for StructView
 var PoseProps = ki.Props{
 	"ToolBar": ki.PropSlice{
+		{"GenGoSet", ki.Props{
+			"label":       "Go Code",
+			"desc":        "returns Go Code that sets the current Pose, based on given path to Pose.",
+			"icon":        "edit",
+			"show-return": true,
+			"Args": ki.PropSlice{
+				{"Path", ki.BlankProp{}},
+			},
+		}},
 		{"SetEulerRotation", ki.Props{
 			"desc": "Set the local rotation (relative to parent) using Euler angles, in degrees.",
 			"icon": "rotate-3d",
