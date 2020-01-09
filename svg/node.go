@@ -83,7 +83,7 @@ func StyleSVG(gii gi.Node2D) {
 	} else {
 		pc.SetStyleProps(nil, *gii.Properties(), g.Viewport)
 	}
-	// pc.SetUnitContext(g.Viewport, gi.Vec2DZero)
+	// pc.SetUnitContext(g.Viewport, mat32.Vec2Zero)
 	pc.ToDots(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
 	pagg := g.ParentCSSAgg()

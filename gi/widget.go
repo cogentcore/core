@@ -10,6 +10,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -187,8 +188,8 @@ func (wb *WidgetBase) Style2DWidget() {
 	AggCSS(&wb.CSSAgg, wb.CSS)
 	wb.Sty.StyleCSS(gii, wb.CSSAgg, "", wb.Viewport)
 
-	wb.Sty.SetUnitContext(wb.Viewport, Vec2DZero) // todo: test for use of el-relative
-	if wb.Sty.Inactive {                          // inactive can only set, not clear
+	wb.Sty.SetUnitContext(wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
+	if wb.Sty.Inactive {                               // inactive can only set, not clear
 		wb.SetInactive()
 	}
 
@@ -269,7 +270,7 @@ func (wb *WidgetBase) Size2D(iter int) {
 // layout computations are all relative to parent position, so they are
 // finally cached out at this stage also returns the size of the parent for
 // setting units context relative to parent objects
-func (wb *WidgetBase) AddParentPos() Vec2D {
+func (wb *WidgetBase) AddParentPos() mat32.Vec2 {
 	if pni, _ := KiToNode2D(wb.Par); pni != nil {
 		if pw := pni.AsWidget(); pw != nil {
 			if !wb.IsField() {
@@ -278,12 +279,12 @@ func (wb *WidgetBase) AddParentPos() Vec2D {
 			return pw.LayData.AllocSize
 		}
 	}
-	return Vec2DZero
+	return mat32.Vec2Zero
 }
 
 // BBoxFromAlloc gets our bbox from Layout allocation.
 func (wb *WidgetBase) BBoxFromAlloc() image.Rectangle {
-	return RectFromPosSizeMax(wb.LayData.AllocPos, wb.LayData.AllocSize)
+	return mat32.RectFromPosSizeMax(wb.LayData.AllocPos, wb.LayData.AllocSize)
 }
 
 func (wb *WidgetBase) BBox2D() image.Rectangle {
@@ -419,7 +420,7 @@ func (wb *WidgetBase) ReRender2DTree() {
 	wb.Size2DTree(0)
 	wb.LayData = ld // restore
 	wb.Layout2DTree()
-	if !delta.IsZero() {
+	if !delta.IsNil() {
 		wb.Move2D(delta.ToPointFloor(), parBBox)
 	}
 	wb.Render2DTree()
@@ -428,7 +429,7 @@ func (wb *WidgetBase) ReRender2DTree() {
 
 // Move2DBase does the basic move on this node
 func (wb *WidgetBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
-	wb.LayData.AllocPos = wb.LayData.AllocPosOrig.Add(NewVec2DFmPoint(delta))
+	wb.LayData.AllocPos = wb.LayData.AllocPosOrig.Add(mat32.NewVec2FmPoint(delta))
 	wb.This().(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
@@ -516,7 +517,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	lbl.SetProp("white-space", WhiteSpaceNormal) // wrap
 
 	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)
-	mwdots = Min32(mwdots, float32(mainVp.Geom.Size.X-20))
+	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
 	lbl.SetProp("max-width", units.NewValue(mwdots, units.Dot))
 	lbl.Text = tooltip
@@ -632,7 +633,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(pos Vec2D, sz Vec2D, rad float32) {
+func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 	if rad == 0.0 {
@@ -648,13 +649,13 @@ func (wb *WidgetBase) RenderStdBox(st *Style) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
-	pos := wb.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
-	sz := wb.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+	pos := wb.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
+	sz := wb.LayData.AllocSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
 	rad := st.Border.Radius.Dots
 
 	// first do any shadow
 	if st.BoxShadow.HasShadow() {
-		spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.Color.SetShadowGradient(st.BoxShadow.Color, "")
 		// todo: this is not rendering a transparent gradient
@@ -677,8 +678,8 @@ func (wb *WidgetBase) RenderStdBox(st *Style) {
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	pc.StrokeStyle.Width = st.Border.Width
 	// pc.FillStyle.SetColor(&st.Font.BgColor)
-	pos = pos.AddVal(0.5 * st.Border.Width.Dots)
-	sz = sz.SubVal(st.Border.Width.Dots)
+	pos = pos.AddScalar(0.5 * st.Border.Width.Dots)
+	sz = sz.SubScalar(st.Border.Width.Dots)
 	pc.FillStyle.SetColor(nil)
 	wb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
@@ -687,27 +688,27 @@ func (wb *WidgetBase) RenderStdBox(st *Style) {
 func (wb *WidgetBase) Size2DFromWH(w, h float32) {
 	st := &wb.Sty
 	if st.Layout.Width.Dots > 0 {
-		w = Max32(st.Layout.Width.Dots, w)
+		w = mat32.Max(st.Layout.Width.Dots, w)
 	}
 	if st.Layout.Height.Dots > 0 {
-		h = Max32(st.Layout.Height.Dots, h)
+		h = mat32.Max(st.Layout.Height.Dots, h)
 	}
 	spc := st.BoxSpace()
 	w += 2.0 * spc
 	h += 2.0 * spc
-	wb.LayData.AllocSize = Vec2D{w, h}
+	wb.LayData.AllocSize = mat32.Vec2{w, h}
 }
 
 // Size2DAddSpace adds space to existing AllocSize
 func (wb *WidgetBase) Size2DAddSpace() {
 	spc := wb.Sty.BoxSpace()
-	wb.LayData.AllocSize.SetAddVal(2 * spc)
+	wb.LayData.AllocSize.SetAddScalar(2 * spc)
 }
 
 // Size2DSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
-func (wb *WidgetBase) Size2DSubSpace() Vec2D {
+func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 	spc := wb.Sty.BoxSpace()
-	return wb.LayData.AllocSize.SubVal(2 * spc)
+	return wb.LayData.AllocSize.SubScalar(2 * spc)
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -771,8 +772,8 @@ func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Po
 
 func (wb *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := wb.Sty.BoxSpace()
-	wb.Parts.LayData.AllocPos = wb.LayData.AllocPos.AddVal(spc)
-	wb.Parts.LayData.AllocSize = wb.LayData.AllocSize.AddVal(-2.0 * spc)
+	wb.Parts.LayData.AllocPos = wb.LayData.AllocPos.AddScalar(spc)
+	wb.Parts.LayData.AllocSize = wb.LayData.AllocSize.AddScalar(-2.0 * spc)
 	wb.Parts.Layout2D(parBBox, iter)
 }
 

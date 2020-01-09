@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -13,16 +14,16 @@ import (
 // Marker represents marker elements that can be drawn along paths (arrow heads, etc)
 type Marker struct {
 	NodeBase
-	RefPos      gi.Vec2D    `xml:"{refX,refY}" desc:"reference position to align the vertex position with, specified in ViewBox coordinates"`
-	Size        gi.Vec2D    `xml:"{markerWidth,markerHeight}" desc:"size of marker to render, in Units units"`
+	RefPos      mat32.Vec2  `xml:"{refX,refY}" desc:"reference position to align the vertex position with, specified in ViewBox coordinates"`
+	Size        mat32.Vec2  `xml:"{markerWidth,markerHeight}" desc:"size of marker to render, in Units units"`
 	Units       MarkerUnits `xml:"markerUnits" desc:"units to use"`
 	ViewBox     ViewBox     `desc:"viewbox defines the internal coordinate system for the drawing elements within the marker"`
 	Orient      string      `xml:"orient" desc:"orientation of the marker -- either 'auto' or an angle"`
-	VertexPos   gi.Vec2D    `desc:"current vertex position"`
+	VertexPos   mat32.Vec2  `desc:"current vertex position"`
 	VertexAngle float32     `desc:"current vertex angle in radians"`
 	StrokeWidth float32     `desc:"current stroke width"`
-	XForm       gi.Matrix2D `desc:"net transform computed from settings and current values -- applied prior to rendering"`
-	EffSize     gi.Vec2D    `desc:"effective size for actual rendering"`
+	XForm       mat32.Mat2  `desc:"net transform computed from settings and current values -- applied prior to rendering"`
+	EffSize     mat32.Vec2  `desc:"effective size for actual rendering"`
 }
 
 var KiT_Marker = kit.Types.AddType(&Marker{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
@@ -65,24 +66,24 @@ func (ev *MarkerUnits) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJ
 
 // RenderMarker renders the marker using given vertex position, angle (in
 // radians), and stroke width
-func (mrk *Marker) RenderMarker(vertexPos gi.Vec2D, vertexAng, strokeWidth float32) {
+func (mrk *Marker) RenderMarker(vertexPos mat32.Vec2, vertexAng, strokeWidth float32) {
 	mrk.VertexPos = vertexPos
 	mrk.VertexAngle = vertexAng
 	mrk.StrokeWidth = strokeWidth
 	if mrk.Units == StrokeWidth {
-		mrk.EffSize = mrk.Size.MulVal(strokeWidth)
+		mrk.EffSize = mrk.Size.MulScalar(strokeWidth)
 	} else {
 		mrk.EffSize = mrk.Size
 	}
 
 	ang := vertexAng
 	if mrk.Orient != "auto" {
-		ang, _ = gi.ParseAngle32(mrk.Orient)
+		ang, _ = mat32.ParseAngle32(mrk.Orient)
 	}
-	if mrk.ViewBox.Size.IsZero() {
-		mrk.ViewBox.Size = gi.Vec2D{3, 3}
+	if mrk.ViewBox.Size.IsNil() {
+		mrk.ViewBox.Size = mat32.Vec2{3, 3}
 	}
-	mrk.XForm = gi.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
+	mrk.XForm = mat32.Rotate2D(ang).Scale(mrk.EffSize.X/mrk.ViewBox.Size.X, mrk.EffSize.Y/mrk.ViewBox.Size.Y).Translate(-mrk.RefPos.X, -mrk.RefPos.Y)
 	mrk.XForm.X0 += vertexPos.X
 	mrk.XForm.Y0 += vertexPos.Y
 

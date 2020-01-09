@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -168,8 +169,8 @@ func (ge *GiEditor) ConfigSplitView() {
 		return
 	}
 	split := ge.SplitView()
-	// split.Dim = gi.Y
-	split.Dim = gi.X
+	// split.Dim = mat32.Y
+	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
 		tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)

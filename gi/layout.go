@@ -13,6 +13,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -27,12 +28,12 @@ import (
 // within a layout -- includes computed values of style prefs -- everything is
 // concrete and specified here, whereas style may not be fully resolved
 type LayoutData struct {
-	Size          SizePrefs `desc:"size constraints for this item -- from layout style"`
-	AllocSize     Vec2D     `desc:"allocated size of this item, by the parent layout"`
-	AllocPos      Vec2D     `desc:"position of this item, computed by adding in the AllocPosRel to parent position"`
-	AllocPosRel   Vec2D     `desc:"allocated relative position of this item, computed by the parent layout"`
-	AllocSizeOrig Vec2D     `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
-	AllocPosOrig  Vec2D     `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
+	Size          SizePrefs  `desc:"size constraints for this item -- from layout style"`
+	AllocSize     mat32.Vec2 `desc:"allocated size of this item, by the parent layout"`
+	AllocPos      mat32.Vec2 `desc:"position of this item, computed by adding in the AllocPosRel to parent position"`
+	AllocPosRel   mat32.Vec2 `desc:"allocated relative position of this item, computed by the parent layout"`
+	AllocSizeOrig mat32.Vec2 `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
+	AllocPosOrig  mat32.Vec2 `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
 }
 
 // todo: not using yet:
@@ -57,15 +58,15 @@ func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
 
 // SizePrefOrMax returns the pref size if non-zero, else the max-size -- use
 // for style-based constraints during initial sizing (e.g., word wrapping)
-func (ld *LayoutData) SizePrefOrMax() Vec2D {
+func (ld *LayoutData) SizePrefOrMax() mat32.Vec2 {
 	return ld.Size.Pref.MinPos(ld.Size.Max)
 }
 
 // Reset is called at start of layout process -- resets all values back to 0
 func (ld *LayoutData) Reset() {
-	ld.AllocSize = Vec2DZero
-	ld.AllocPos = Vec2DZero
-	ld.AllocPosRel = Vec2DZero
+	ld.AllocSize = mat32.Vec2Zero
+	ld.AllocPos = mat32.Vec2Zero
+	ld.AllocPosRel = mat32.Vec2Zero
 }
 
 // UpdateSizes updates our sizes based on AllocSize and Max constraints, etc
@@ -110,10 +111,10 @@ type Layout struct {
 	Lay           Layouts             `xml:"lay" desc:"type of layout to use"`
 	Spacing       units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`
 	StackTop      int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
-	ChildSize     Vec2D               `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`
-	ExtraSize     Vec2D               `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
-	HasScroll     [Dims2DN]bool       `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
-	Scrolls       [Dims2DN]*ScrollBar `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	ChildSize     mat32.Vec2          `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`
+	ExtraSize     mat32.Vec2          `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	HasScroll     [2]bool             `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+	Scrolls       [2]*ScrollBar       `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
 	GridSize      image.Point         `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
 	GridData      [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
 	NeedsRedo     bool                `copy:"-" json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
@@ -213,19 +214,19 @@ var LayoutDefault Layout
 
 // SumDim returns whether we sum up elements along given dimension?  else use
 // max for shared dimension.
-func (ly *Layout) SumDim(d Dims2D) bool {
-	if (d == X && ly.Lay == LayoutHoriz) || (d == Y && ly.Lay == LayoutVert) {
+func (ly *Layout) SumDim(d mat32.Dims) bool {
+	if (d == mat32.X && ly.Lay == LayoutHoriz) || (d == mat32.Y && ly.Lay == LayoutVert) {
 		return true
 	}
 	return false
 }
 
 // SummedDim returns the dimension along which layout is summing.
-func (ly *Layout) SummedDim() Dims2D {
+func (ly *Layout) SummedDim() mat32.Dims {
 	if ly.Lay == LayoutHoriz {
-		return X
+		return mat32.X
 	}
-	return Y
+	return mat32.Y
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -245,7 +246,7 @@ func (ly *Layout) GatherSizes() {
 		return
 	}
 
-	var sumPref, sumNeed, maxPref, maxNeed Vec2D
+	var sumPref, sumNeed, maxPref, maxNeed mat32.Vec2
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -265,7 +266,7 @@ func (ly *Layout) GatherSizes() {
 		}
 	}
 
-	for d := X; d <= Y; d++ {
+	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.LayData.Size.Pref.Dim(d) == 0 {
 			if ly.SumDim(d) { // our layout now updated to sum
 				ly.LayData.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
@@ -280,18 +281,18 @@ func (ly *Layout) GatherSizes() {
 	}
 
 	spc := ly.Sty.BoxSpace()
-	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
-	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
+	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
+	ly.LayData.Size.Pref.SetAddScalar(2.0 * spc)
 
 	elspc := float32(0.0)
 	if sz >= 2 {
 		elspc = float32(sz-1) * ly.Spacing.Dots
 	}
-	if ly.SumDim(X) {
+	if ly.SumDim(mat32.X) {
 		ly.LayData.Size.Need.X += elspc
 		ly.LayData.Size.Pref.X += elspc
 	}
-	if ly.SumDim(Y) {
+	if ly.SumDim(mat32.Y) {
 		ly.LayData.Size.Need.Y += elspc
 		ly.LayData.Size.Pref.Y += elspc
 	}
@@ -393,24 +394,24 @@ func (ly *Layout) GatherSizesGrid() {
 		cgd := &(ly.GridData[Col][col])
 
 		// todo: need to deal with span in sums..
-		SetMax32(&(rgd.SizeNeed), ni.LayData.Size.Need.Y)
-		SetMax32(&(rgd.SizePref), ni.LayData.Size.Pref.Y)
-		SetMax32(&(cgd.SizeNeed), ni.LayData.Size.Need.X)
-		SetMax32(&(cgd.SizePref), ni.LayData.Size.Pref.X)
+		mat32.SetMax(&(rgd.SizeNeed), ni.LayData.Size.Need.Y)
+		mat32.SetMax(&(rgd.SizePref), ni.LayData.Size.Pref.Y)
+		mat32.SetMax(&(cgd.SizeNeed), ni.LayData.Size.Need.X)
+		mat32.SetMax(&(cgd.SizePref), ni.LayData.Size.Pref.X)
 
 		// for max: any -1 stretch dominates, else accumulate any max
 		if rgd.SizeMax >= 0 {
 			if ni.LayData.Size.Max.Y < 0 { // stretch
 				rgd.SizeMax = -1
 			} else {
-				SetMax32(&(rgd.SizeMax), ni.LayData.Size.Max.Y)
+				mat32.SetMax(&(rgd.SizeMax), ni.LayData.Size.Max.Y)
 			}
 		}
 		if cgd.SizeMax >= 0 {
 			if ni.LayData.Size.Max.Y < 0 { // stretch
 				cgd.SizeMax = -1
 			} else {
-				SetMax32(&(cgd.SizeMax), ni.LayData.Size.Max.X)
+				mat32.SetMax(&(cgd.SizeMax), ni.LayData.Size.Max.X)
 			}
 		}
 
@@ -425,33 +426,33 @@ func (ly *Layout) GatherSizesGrid() {
 	}
 
 	// Y = sum across rows which have max's
-	var sumPref, sumNeed Vec2D
+	var sumPref, sumNeed mat32.Vec2
 	for _, gd := range ly.GridData[Row] {
-		sumNeed.SetAddDim(Y, gd.SizeNeed)
-		sumPref.SetAddDim(Y, gd.SizePref)
+		sumNeed.SetAddDim(mat32.Y, gd.SizeNeed)
+		sumPref.SetAddDim(mat32.Y, gd.SizePref)
 	}
 	// X = sum across cols which have max's
 	for _, gd := range ly.GridData[Col] {
-		sumNeed.SetAddDim(X, gd.SizeNeed)
-		sumPref.SetAddDim(X, gd.SizePref)
+		sumNeed.SetAddDim(mat32.X, gd.SizeNeed)
+		sumPref.SetAddDim(mat32.X, gd.SizePref)
 	}
 
 	if ly.LayData.Size.Pref.X == 0 {
-		ly.LayData.Size.Need.X = Max32(ly.LayData.Size.Need.X, sumNeed.X)
-		ly.LayData.Size.Pref.X = Max32(ly.LayData.Size.Pref.X, sumPref.X)
+		ly.LayData.Size.Need.X = mat32.Max(ly.LayData.Size.Need.X, sumNeed.X)
+		ly.LayData.Size.Pref.X = mat32.Max(ly.LayData.Size.Pref.X, sumPref.X)
 	} else { // use target size from style otherwise
 		ly.LayData.Size.Need.X = ly.LayData.Size.Pref.X
 	}
 	if ly.LayData.Size.Pref.Y == 0 {
-		ly.LayData.Size.Need.Y = Max32(ly.LayData.Size.Need.Y, sumNeed.Y)
-		ly.LayData.Size.Pref.Y = Max32(ly.LayData.Size.Pref.Y, sumPref.Y)
+		ly.LayData.Size.Need.Y = mat32.Max(ly.LayData.Size.Need.Y, sumNeed.Y)
+		ly.LayData.Size.Pref.Y = mat32.Max(ly.LayData.Size.Pref.Y, sumPref.Y)
 	} else { // use target size from style otherwise
 		ly.LayData.Size.Need.Y = ly.LayData.Size.Pref.Y
 	}
 
 	spc := ly.Sty.BoxSpace()
-	ly.LayData.Size.Need.SetAddVal(2.0 * spc)
-	ly.LayData.Size.Pref.SetAddVal(2.0 * spc)
+	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
+	ly.LayData.Size.Pref.SetAddScalar(2.0 * spc)
 
 	ly.LayData.Size.Need.X += float32(cols-1) * ly.Spacing.Dots
 	ly.LayData.Size.Pref.X += float32(cols-1) * ly.Spacing.Dots
@@ -467,7 +468,7 @@ func (ly *Layout) GatherSizesGrid() {
 // AllocFromParent: if we are not a child of a layout, then get allocation
 // from a parent obj that has a layout size
 func (ly *Layout) AllocFromParent() {
-	if ly.Par == nil || ly.Viewport == nil || !ly.LayData.AllocSize.IsZero() {
+	if ly.Par == nil || ly.Viewport == nil || !ly.LayData.AllocSize.IsNil() {
 		return
 	}
 	if ly.Par != ly.Viewport.This() {
@@ -487,7 +488,7 @@ func (ly *Layout) AllocFromParent() {
 			if pg == nil {
 				return false
 			}
-			if !pg.LayData.AllocSize.IsZero() {
+			if !pg.LayData.AllocSize.IsNil() {
 				ly.LayData.AllocSize = pg.LayData.AllocSize
 				if Layout2DTrace {
 					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.PathUnique(), ly.LayData.AllocSize, pg.PathUnique())
@@ -513,7 +514,7 @@ func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Al
 		targ = need
 		extra = avail - targ
 	}
-	extra = Max32(extra, 0.0) // no negatives
+	extra = mat32.Max(extra, 0.0) // no negatives
 
 	stretchNeed := false // stretch relative to need
 	stretchMax := false  // only stretch Max = neg
@@ -552,7 +553,7 @@ func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Al
 
 // LayoutSharedDim lays out items along a shared dimension, where all elements
 // share the same space, e.g., Horiz for a Vert layout, and vice-versa.
-func (ly *Layout) LayoutSharedDim(dim Dims2D) {
+func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
 	spc := ly.Sty.BoxSpace()
 	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
@@ -575,7 +576,7 @@ func (ly *Layout) LayoutSharedDim(dim Dims2D) {
 
 // LayoutAlongDim lays out all children along given dim -- only affects that dim --
 // e.g., use LayoutSharedDim for other dim.
-func (ly *Layout) LayoutAlongDim(dim Dims2D) {
+func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 	sz := len(ly.Kids)
 	if sz == 0 {
 		return
@@ -597,7 +598,7 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 		targ = need
 		extra = avail - targ
 	}
-	extra = Max32(extra, 0.0) // no negatives
+	extra = mat32.Max(extra, 0.0) // no negatives
 
 	nstretch := 0
 	stretchTot := float32(0.0)
@@ -697,7 +698,7 @@ func (ly *Layout) LayoutAlongDim(dim Dims2D) {
 // LayoutGridDim lays out grid data along each dimension (row, Y; col, X),
 // same as LayoutAlongDim.  For cols, X has width prefs of each -- turn that
 // into an actual allocated width for each column, and likewise for rows.
-func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
+func (ly *Layout) LayoutGridDim(rowcol RowCol, dim mat32.Dims) {
 	gds := ly.GridData[rowcol]
 	sz := len(gds)
 	if sz == 0 {
@@ -719,7 +720,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim Dims2D) {
 		targ = need
 		extra = avail - targ
 	}
-	extra = Max32(extra, 0.0) // no negatives
+	extra = mat32.Max(extra, 0.0) // no negatives
 
 	nstretch := 0
 	stretchTot := float32(0.0)
@@ -803,8 +804,8 @@ func (ly *Layout) LayoutGrid() {
 		return
 	}
 
-	ly.LayoutGridDim(Row, Y)
-	ly.LayoutGridDim(Col, X)
+	ly.LayoutGridDim(Row, mat32.Y)
+	ly.LayoutGridDim(Col, mat32.X)
 
 	col := 0
 	row := 0
@@ -828,7 +829,7 @@ func (ly *Layout) LayoutGrid() {
 		}
 
 		{ // col, X dim
-			dim := X
+			dim := mat32.X
 			gd := ly.GridData[Col][col]
 			avail := gd.AllocSize
 			al := lst.AlignDim(dim)
@@ -841,7 +842,7 @@ func (ly *Layout) LayoutGrid() {
 
 		}
 		{ // row, Y dim
-			dim := Y
+			dim := mat32.Y
 			gd := ly.GridData[Row][row]
 			avail := gd.AllocSize
 			al := lst.AlignDim(dim)
@@ -871,7 +872,7 @@ func (ly *Layout) LayoutGrid() {
 // FinalizeLayout is final pass through children to finalize the layout,
 // computing summary size stats
 func (ly *Layout) FinalizeLayout() {
-	ly.ChildSize = Vec2DZero
+	ly.ChildSize = mat32.Vec2Zero
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -888,15 +889,15 @@ func (ly *Layout) FinalizeLayout() {
 // AvailSize returns the total size avail to this layout -- typically
 // AllocSize except for top-level layout which uses VpBBox in case less is
 // avail
-func (ly *Layout) AvailSize() Vec2D {
+func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.Sty.BoxSpace()
-	avail := ly.LayData.AllocSize.SubVal(spc) // spc is for right size space
+	avail := ly.LayData.AllocSize.SubScalar(spc) // spc is for right size space
 	parni, _ := KiToNode2D(ly.Par)
 	if parni != nil {
 		vp := parni.AsViewport2D()
 		if vp != nil {
 			if vp.Viewport == nil {
-				avail = NewVec2DFmPoint(ly.VpBBox.Size()).SubVal(spc)
+				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc)
 				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.PathUnique(), vp.PathUnique(), avail)
 			}
 		}
@@ -916,15 +917,15 @@ func (ly *Layout) ManageOverflow() {
 	}
 	avail := ly.AvailSize()
 
-	ly.ExtraSize.SetVal(0.0)
-	for d := X; d < Dims2DN; d++ {
+	ly.ExtraSize.SetScalar(0)
+	for d := mat32.X; d <= mat32.Y; d++ {
 		ly.HasScroll[d] = false
 	}
 
 	if ly.Sty.Layout.Overflow != OverflowHidden {
 		sbw := ly.Sty.Layout.ScrollBarWidth.Dots
-		for d := X; d < Dims2DN; d++ {
-			odim := OtherDim(d)
+		for d := mat32.X; d <= mat32.Y; d++ {
+			odim := mat32.OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
 				// if wasscof {
 				// 	fmt.Printf("overflow, setting scb: %v\n", d)
@@ -933,7 +934,7 @@ func (ly *Layout) ManageOverflow() {
 				ly.ExtraSize.SetAddDim(odim, sbw)
 			}
 		}
-		for d := X; d < Dims2DN; d++ {
+		for d := mat32.X; d <= mat32.Y; d++ {
 			if ly.HasScroll[d] {
 				ly.SetScroll(d)
 			}
@@ -944,11 +945,11 @@ func (ly *Layout) ManageOverflow() {
 
 // HasAnyScroll returns true if layout has
 func (ly *Layout) HasAnyScroll() bool {
-	return ly.HasScroll[X] || ly.HasScroll[Y]
+	return ly.HasScroll[mat32.X] || ly.HasScroll[mat32.Y]
 }
 
 // SetScroll sets a scrollbar along given dimension
-func (ly *Layout) SetScroll(d Dims2D) {
+func (ly *Layout) SetScroll(d mat32.Dims) {
 	if ly.Scrolls[d] == nil {
 		ly.Scrolls[d] = &ScrollBar{}
 		sc := ly.Scrolls[d]
@@ -961,9 +962,9 @@ func (ly *Layout) SetScroll(d Dims2D) {
 		sc.Min = 0.0
 	}
 	spc := ly.Sty.BoxSpace()
-	avail := ly.AvailSize().SubVal(spc * 2.0)
+	avail := ly.AvailSize().SubScalar(spc * 2.0)
 	sc := ly.Scrolls[d]
-	if d == X {
+	if d == mat32.X {
 		sc.SetFixedHeight(ly.Sty.Layout.ScrollBarWidth)
 		sc.SetFixedWidth(units.NewValue(avail.Dim(d), units.Dot))
 	} else {
@@ -976,7 +977,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
 	sc.ThumbVal = avail.Dim(d) - spc
 	sc.TrackThr = sc.Step
-	sc.Value = Min32(sc.Value, sc.Max-sc.ThumbVal) // keep in range
+	sc.Value = mat32.Min(sc.Value, sc.Max-sc.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.PathUnique(), sc.Max, sc.Value)
 	sc.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig != int64(SliderValueChanged) {
@@ -997,7 +998,7 @@ func (ly *Layout) SetScroll(d Dims2D) {
 
 // DeleteScroll deletes scrollbar along given dimesion.  todo: we are leaking
 // the scrollbars -- move into a container Field
-func (ly *Layout) DeleteScroll(d Dims2D) {
+func (ly *Layout) DeleteScroll(d mat32.Dims) {
 	if ly.Scrolls[d] == nil {
 		return
 	}
@@ -1009,8 +1010,8 @@ func (ly *Layout) DeleteScroll(d Dims2D) {
 
 // DeactivateScroll turns off given scrollbar, without deleting, so it can be easily re-used
 func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
-	sc.LayData.AllocPos = Vec2DZero
-	sc.LayData.AllocSize = Vec2DZero
+	sc.LayData.AllocPos = mat32.Vec2Zero
+	sc.LayData.AllocSize = mat32.Vec2Zero
 	sc.VpBBox = image.ZR
 	sc.WinBBox = image.ZR
 }
@@ -1021,8 +1022,8 @@ func (ly *Layout) LayoutScrolls() {
 
 	spc := ly.Sty.BoxSpace()
 	avail := ly.AvailSize()
-	for d := X; d < Dims2DN; d++ {
-		odim := OtherDim(d)
+	for d := mat32.X; d <= mat32.Y; d++ {
+		odim := mat32.OtherDim(d)
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
 			sc.Size2D(0)
@@ -1044,7 +1045,7 @@ func (ly *Layout) LayoutScrolls() {
 
 // RenderScrolls draws the scrollbars
 func (ly *Layout) RenderScrolls() {
-	for d := X; d < Dims2DN; d++ {
+	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
 			ly.Scrolls[d].Render2D()
 		}
@@ -1061,7 +1062,7 @@ func (ly *Layout) ReRenderScrolls() {
 
 // SetScrollsOff turns off the scrolls -- e.g., when layout is not visible
 func (ly *Layout) SetScrollsOff() {
-	for d := X; d < Dims2DN; d++ {
+	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
 			// fmt.Printf("turning scroll off for :%v dim: %v\n", ly.PathUnique(), d)
 			ly.ScrollsOff = true
@@ -1077,7 +1078,7 @@ func (ly *Layout) SetScrollsOff() {
 // layouts -- critical to call this BEFORE we add our own delta, which is
 // generated from these very same scrollbars.
 func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
-	for d := X; d < Dims2DN; d++ {
+	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
 			ly.Scrolls[d].Move2D(delta, parBBox)
 		}
@@ -1090,30 +1091,30 @@ func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
 // remainder.
 func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	del := me.Delta
-	if ly.HasScroll[Y] && ly.HasScroll[X] {
+	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
-		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
-		ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.X))
+		ly.Scrolls[mat32.Y].SetValueAction(ly.Scrolls[mat32.Y].Value + float32(del.Y))
+		ly.Scrolls[mat32.X].SetValueAction(ly.Scrolls[mat32.X].Value + float32(del.X))
 		me.SetProcessed()
-	} else if ly.HasScroll[Y] {
+	} else if ly.HasScroll[mat32.Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
-		ly.Scrolls[Y].SetValueAction(ly.Scrolls[Y].Value + float32(del.Y))
+		ly.Scrolls[mat32.Y].SetValueAction(ly.Scrolls[mat32.Y].Value + float32(del.Y))
 		if del.X != 0 {
 			me.Delta.Y = 0
 		} else {
 			me.SetProcessed()
 		}
-	} else if ly.HasScroll[X] {
+	} else if ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
 		if del.X != 0 {
-			ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.X))
+			ly.Scrolls[mat32.X].SetValueAction(ly.Scrolls[mat32.X].Value + float32(del.X))
 			if del.Y != 0 {
 				me.Delta.X = 0
 			} else {
 				me.SetProcessed()
 			}
 		} else { // use Y instead as mouse wheels typically on have this
-			ly.Scrolls[X].SetValueAction(ly.Scrolls[X].Value + float32(del.Y))
+			ly.Scrolls[mat32.X].SetValueAction(ly.Scrolls[mat32.X].Value + float32(del.Y))
 			me.SetProcessed()
 		}
 	}
@@ -1167,7 +1168,7 @@ func (ly *Layout) Move2DChildren(delta image.Point) {
 var AutoScrollRate = float32(1.0)
 
 // AutoScrollDim auto-scrolls along one dimension
-func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) bool {
+func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
@@ -1181,14 +1182,14 @@ func (ly *Layout) AutoScrollDim(dim Dims2D, st, pos int) bool {
 	if mind <= maxd {
 		pct := float32(mind) / float32(vissz)
 		if pct < .1 && sc.Value > 0 {
-			dst = Min32(dst, sc.Value)
+			dst = mat32.Min(dst, sc.Value)
 			sc.SetValueAction(sc.Value - dst)
 			return true
 		}
 	} else {
 		pct := float32(maxd) / float32(vissz)
 		if pct < .1 && sc.Value < scrange {
-			dst = Min32(dst, (scrange - sc.Value))
+			dst = mat32.Min(dst, (scrange - sc.Value))
 			sc.SetValueAction(sc.Value + dst)
 			return true
 		}
@@ -1210,13 +1211,13 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 		return false
 	}
 	did := false
-	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		did = ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
-		did = did || ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
-	} else if ly.HasScroll[Y] {
-		did = ly.AutoScrollDim(Y, ly.WinBBox.Min.Y, pos.Y)
-	} else if ly.HasScroll[X] {
-		did = ly.AutoScrollDim(X, ly.WinBBox.Min.X, pos.X)
+	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
+		did = ly.AutoScrollDim(mat32.Y, ly.WinBBox.Min.Y, pos.Y)
+		did = did || ly.AutoScrollDim(mat32.X, ly.WinBBox.Min.X, pos.X)
+	} else if ly.HasScroll[mat32.Y] {
+		did = ly.AutoScrollDim(mat32.Y, ly.WinBBox.Min.Y, pos.Y)
+	} else if ly.HasScroll[mat32.X] {
+		did = ly.AutoScrollDim(mat32.X, ly.WinBBox.Min.X, pos.X)
 	}
 	if did {
 		LayoutLastAutoScroll = time.Now()
@@ -1226,12 +1227,12 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 
 // ScrollToBoxDim scrolls to ensure that given rect box along one dimension is
 // in view -- returns true if scrolling was needed
-func (ly *Layout) ScrollToBoxDim(dim Dims2D, minBox, maxBox int) bool {
+func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
 	vpMin := ly.VpBBox.Min.X
-	if dim == Y {
+	if dim == mat32.Y {
 		vpMin = ly.VpBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
@@ -1269,13 +1270,13 @@ func (ly *Layout) ScrollToBoxDim(dim Dims2D, minBox, maxBox int) bool {
 // returns true if scrolling was needed
 func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 	did := false
-	if ly.HasScroll[Y] && ly.HasScroll[X] {
-		did = ly.ScrollToBoxDim(Y, box.Min.Y, box.Max.Y)
-		did = did || ly.ScrollToBoxDim(X, box.Min.X, box.Max.X)
-	} else if ly.HasScroll[Y] {
-		did = ly.ScrollToBoxDim(Y, box.Min.Y, box.Max.Y)
-	} else if ly.HasScroll[X] {
-		did = ly.ScrollToBoxDim(X, box.Min.X, box.Max.X)
+	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
+		did = ly.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
+		did = did || ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
+	} else if ly.HasScroll[mat32.Y] {
+		did = ly.ScrollToBoxDim(mat32.Y, box.Min.Y, box.Max.Y)
+	} else if ly.HasScroll[mat32.X] {
+		did = ly.ScrollToBoxDim(mat32.X, box.Min.X, box.Max.X)
 	}
 	return did
 }
@@ -1289,12 +1290,12 @@ func (ly *Layout) ScrollToItem(ni Node2D) bool {
 // ScrollDimToStart scrolls to put the given child coordinate position (eg.,
 // top / left of a view box) at the start (top / left) of our scroll area, to
 // the extent possible -- returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToStart(dim Dims2D, pos int) bool {
+func (ly *Layout) ScrollDimToStart(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
 	vpMin := ly.VpBBox.Min.X
-	if dim == Y {
+	if dim == mat32.Y {
 		vpMin = ly.VpBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
@@ -1319,12 +1320,12 @@ func (ly *Layout) ScrollDimToStart(dim Dims2D, pos int) bool {
 // ScrollDimToEnd scrolls to put the given child coordinate position (eg.,
 // bottom / right of a view box) at the end (bottom / right) of our scroll
 // area, to the extent possible -- returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToEnd(dim Dims2D, pos int) bool {
+func (ly *Layout) ScrollDimToEnd(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
 	vpMin := ly.VpBBox.Min.X
-	if dim == Y {
+	if dim == mat32.Y {
 		vpMin = ly.VpBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
@@ -1350,12 +1351,12 @@ func (ly *Layout) ScrollDimToEnd(dim Dims2D, pos int) bool {
 // ScrollDimToCenter scrolls to put the given child coordinate position (eg.,
 // middle of a view box) at the center of our scroll area, to the extent
 // possible -- returns true if scrolling was needed.
-func (ly *Layout) ScrollDimToCenter(dim Dims2D, pos int) bool {
+func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
 	vpMin := ly.VpBBox.Min.X
-	if dim == Y {
+	if dim == mat32.Y {
 		vpMin = ly.VpBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
@@ -1675,7 +1676,7 @@ func (ly *Layout) StyleLayout() {
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
 		// } else {
-		// 	ly.Sty.SetUnitContext(ly.Viewport, Vec2DZero)
+		// 	ly.Sty.SetUnitContext(ly.Viewport, mat32.Vec2Zero)
 	}
 	tprops := *kit.Types.Properties(ly.Type(), true) // true = makeNew
 	if len(tprops) > 0 {
@@ -1714,16 +1715,16 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ly.Layout2DBase(parBBox, true, iter) // init style
 	switch ly.Lay {
 	case LayoutHoriz:
-		ly.LayoutAlongDim(X)
-		ly.LayoutSharedDim(Y)
+		ly.LayoutAlongDim(mat32.X)
+		ly.LayoutSharedDim(mat32.Y)
 	case LayoutVert:
-		ly.LayoutAlongDim(Y)
-		ly.LayoutSharedDim(X)
+		ly.LayoutAlongDim(mat32.Y)
+		ly.LayoutSharedDim(mat32.X)
 	case LayoutGrid:
 		ly.LayoutGrid()
 	case LayoutStacked:
-		ly.LayoutSharedDim(X)
-		ly.LayoutSharedDim(Y)
+		ly.LayoutSharedDim(mat32.X)
+		ly.LayoutSharedDim(mat32.Y)
 	case LayoutNil:
 		// nothing
 	}
@@ -1742,12 +1743,12 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 // we add our own offset here
 func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
-	if ly.HasScroll[X] {
-		off := ly.Scrolls[X].Value
+	if ly.HasScroll[mat32.X] {
+		off := ly.Scrolls[mat32.X].Value
 		delta.X -= int(off)
 	}
-	if ly.HasScroll[Y] {
-		off := ly.Scrolls[Y].Value
+	if ly.HasScroll[mat32.Y] {
+		off := ly.Scrolls[mat32.Y].Value
 		delta.Y -= int(off)
 	}
 	return delta

@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"golang.org/x/net/html/charset"
 )
@@ -144,7 +145,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "viewBox":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
 							return paramMismatchError
 						}
@@ -194,17 +195,17 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						x, err = gi.ParseFloat32(attr.Value)
+						x, err = mat32.ParseFloat32(attr.Value)
 					case "y":
-						y, err = gi.ParseFloat32(attr.Value)
+						y, err = mat32.ParseFloat32(attr.Value)
 					case "width":
-						w, err = gi.ParseFloat32(attr.Value)
+						w, err = mat32.ParseFloat32(attr.Value)
 					case "height":
-						h, err = gi.ParseFloat32(attr.Value)
+						h, err = mat32.ParseFloat32(attr.Value)
 					case "rx":
-						rx, err = gi.ParseFloat32(attr.Value)
+						rx, err = mat32.ParseFloat32(attr.Value)
 					case "ry":
-						ry, err = gi.ParseFloat32(attr.Value)
+						ry, err = mat32.ParseFloat32(attr.Value)
 					default:
 						rect.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -224,11 +225,11 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "cx":
-						cx, err = gi.ParseFloat32(attr.Value)
+						cx, err = mat32.ParseFloat32(attr.Value)
 					case "cy":
-						cy, err = gi.ParseFloat32(attr.Value)
+						cy, err = mat32.ParseFloat32(attr.Value)
 					case "r":
-						r, err = gi.ParseFloat32(attr.Value)
+						r, err = mat32.ParseFloat32(attr.Value)
 					default:
 						circle.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -247,13 +248,13 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "cx":
-						cx, err = gi.ParseFloat32(attr.Value)
+						cx, err = mat32.ParseFloat32(attr.Value)
 					case "cy":
-						cy, err = gi.ParseFloat32(attr.Value)
+						cy, err = mat32.ParseFloat32(attr.Value)
 					case "rx":
-						rx, err = gi.ParseFloat32(attr.Value)
+						rx, err = mat32.ParseFloat32(attr.Value)
 					case "ry":
-						ry, err = gi.ParseFloat32(attr.Value)
+						ry, err = mat32.ParseFloat32(attr.Value)
 					default:
 						ellipse.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -272,13 +273,13 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x1":
-						x1, err = gi.ParseFloat32(attr.Value)
+						x1, err = mat32.ParseFloat32(attr.Value)
 					case "y1":
-						y1, err = gi.ParseFloat32(attr.Value)
+						y1, err = mat32.ParseFloat32(attr.Value)
 					case "x2":
-						x2, err = gi.ParseFloat32(attr.Value)
+						x2, err = mat32.ParseFloat32(attr.Value)
 					case "y2":
-						y2, err = gi.ParseFloat32(attr.Value)
+						y2, err = mat32.ParseFloat32(attr.Value)
 					default:
 						line.SetProp(attr.Name.Local, attr.Value)
 					}
@@ -296,7 +297,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "points":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
@@ -304,7 +305,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Println(err)
 								return err
 							}
-							pvec := make([]gi.Vec2D, sz/2)
+							pvec := make([]mat32.Vec2, sz/2)
 							for ci := 0; ci < sz/2; ci++ {
 								pvec[ci].Set(pts[ci*2], pts[ci*2+1])
 							}
@@ -325,7 +326,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "points":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if pts != nil {
 							sz := len(pts)
 							if sz%2 != 0 {
@@ -333,7 +334,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Println(err)
 								return err
 							}
-							pvec := make([]gi.Vec2D, sz/2)
+							pvec := make([]mat32.Vec2, sz/2)
 							for ci := 0; ci < sz/2; ci++ {
 								pvec[ci].Set(pts[ci*2], pts[ci*2+1])
 							}
@@ -386,36 +387,36 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "x":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosX = pts
 						} else if len(pts) == 1 {
 							txt.Pos.X = pts[0]
 						}
 					case "y":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) > 1 {
 							txt.CharPosY = pts
 						} else if len(pts) == 1 {
 							txt.Pos.Y = pts[0]
 						}
 					case "dx":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) > 0 {
 							txt.CharPosDX = pts
 						}
 					case "dy":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) > 0 {
 							txt.CharPosDY = pts
 						}
 					case "rotate":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) > 0 {
 							txt.CharRots = pts
 						}
 					case "textLength":
-						tl, err := gi.ParseFloat32(attr.Value)
+						tl, err := mat32.ParseFloat32(attr.Value)
 						if err != nil {
 							txt.TextLength = tl
 						}
@@ -516,13 +517,13 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					}
 					switch attr.Name.Local {
 					case "refX":
-						rx, err = gi.ParseFloat32(attr.Value)
+						rx, err = mat32.ParseFloat32(attr.Value)
 					case "refY":
-						ry, err = gi.ParseFloat32(attr.Value)
+						ry, err = mat32.ParseFloat32(attr.Value)
 					case "markerWidth":
-						szx, err = gi.ParseFloat32(attr.Value)
+						szx, err = mat32.ParseFloat32(attr.Value)
 					case "markerHeight":
-						szy, err = gi.ParseFloat32(attr.Value)
+						szy, err = mat32.ParseFloat32(attr.Value)
 					case "matrixUnits":
 						if attr.Value == "strokeWidth" {
 							mrk.Units = StrokeWidth
@@ -530,7 +531,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 							mrk.Units = UserSpaceOnUse
 						}
 					case "viewBox":
-						pts := gi.ReadPoints(attr.Value)
+						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
 							return paramMismatchError
 						}

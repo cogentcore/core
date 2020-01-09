@@ -374,7 +374,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Win = nil
 	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
 	frame.LayData.Size.Pref.X += scextra // make room for scrollbar..
-	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize.MulVal(.9)).ToPoint()
+	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize.MulScalar(.9)).ToPoint()
 	maxht := int(32 * frame.Sty.Font.Face.Metrics.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
@@ -653,8 +653,8 @@ func (sp *Separator) Render2D() {
 		pc := &rs.Paint
 		st := &sp.Sty
 
-		pos := sp.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
-		sz := sp.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+		pos := sp.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
+		sz := sp.LayData.AllocSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
 
 		if !st.Font.BgColor.IsNil() {
 			pc.FillBox(rs, pos, sz, &st.Font.BgColor)

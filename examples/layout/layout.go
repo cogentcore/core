@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 )
 
@@ -24,14 +25,14 @@ func mainrun() {
 
 	gi.Layout2DTrace = true
 
-	frsz := [5]gi.Vec2D{
+	frsz := [5]mat32.Vec2{
 		{20, 100},
 		{80, 20},
 		{60, 80},
 		{40, 120},
 		{150, 100},
 	}
-	// frsz := [4]gi.Vec2D{
+	// frsz := [4]mat32.Vec2{
 	// 	{100, 100},
 	// 	{100, 100},
 	// 	{100, 100},

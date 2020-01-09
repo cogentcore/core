@@ -16,6 +16,7 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -314,14 +315,14 @@ func InitCoords() {
 //  Marbles
 
 type Marble struct {
-	Pos    gi.Vec2D
-	Vel    gi.Vec2D
-	PrvPos gi.Vec2D
+	Pos    mat32.Vec2
+	Vel    mat32.Vec2
+	PrvPos mat32.Vec2
 }
 
 func (mb *Marble) Init(diff float32) {
-	mb.Pos = gi.Vec2D{0, 10 - diff}
-	mb.Vel = gi.Vec2D{0, float32(-Gr.Params.StartSpeed)}
+	mb.Pos = mat32.Vec2{0, 10 - diff}
+	mb.Vel = mat32.Vec2{0, float32(-Gr.Params.StartSpeed)}
 	mb.PrvPos = mb.Pos
 }
 
@@ -394,7 +395,7 @@ func UpdateMarbles() {
 	for i, m := range Marbles {
 
 		m.Vel.Y -= Gr.Params.Gravity
-		npos := m.Pos.Add(m.Vel.MulVal(Gr.Params.UpdtRate))
+		npos := m.Pos.Add(m.Vel.MulScalar(Gr.Params.UpdtRate))
 		ppos := m.Pos
 
 		for _, ln := range Gr.Lines {
@@ -450,15 +451,15 @@ func UpdateMarbles() {
 				nvx := ln.Bounce * (m.Vel.X*math32.Cos(angR) - m.Vel.Y*math32.Sin(angR))
 				nvy := ln.Bounce * (m.Vel.X*math32.Sin(angR) + m.Vel.Y*math32.Cos(angR))
 
-				m.Vel = gi.Vec2D{nvx, nvy}
+				m.Vel = mat32.Vec2{nvx, nvy}
 
-				m.Pos = gi.Vec2D{xi, yi}
+				m.Pos = mat32.Vec2{xi, yi}
 
 			}
 		}
 
 		m.PrvPos = ppos
-		m.Pos = m.Pos.Add(m.Vel.MulVal(Gr.Params.UpdtRate))
+		m.Pos = m.Pos.Add(m.Vel.MulScalar(Gr.Params.UpdtRate))
 
 		circle := SvgMarbles.Child(i).(*svg.Circle)
 		circle.Pos = m.Pos

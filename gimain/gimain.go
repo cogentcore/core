@@ -19,7 +19,7 @@ import (
 )
 
 // these dummy variables force inclusion of relevant packages
-var dummyGi gi.Vec2D
+var dummyGi gi.Node
 var dummSvg svg.Line
 var dummyVV giv.ValueViewBase
 

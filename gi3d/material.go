@@ -32,15 +32,15 @@ func (tl *Tiling) Defaults() {
 // The Specular color is always white (multiplied by light color).
 // Textures are stored on the Scene and accessed by name
 type Material struct {
-	Color     gi.Color `desc:"main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
-	Emissive  gi.Color `desc:"color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
-	Specular  gi.Color `desc:"shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
-	Shiny     float32  `desc:"specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Specular color to affect overall shininess effect."`
-	Bright    float32  `desc:"overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"`
-	Texture   TexName  `desc:"texture to provide color for the surface"`
+	Color     gi.Color `xml:"color" desc:"prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	Emissive  gi.Color `xml:"emissive" desc:"prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Specular  gi.Color `xml:"specular" desc:"prop: specular = shiny reflective color of surface -- set to white for shiny objects and to Color for non-shiny objects"`
+	Shiny     float32  `xml:"shiny" desc:"prop: shiny = specular shininess factor -- how focally the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Specular color to affect overall shininess effect."`
+	Bright    float32  `xml:"bright" desc:"prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"`
+	Texture   TexName  `xml:"texture" desc:"prop: texture = texture to provide color for the surface"`
 	Tiling    Tiling   `view:"inline" viewif:"Texture!=''" desc:"texture tiling parameters -- repeat and offset"`
-	CullBack  bool     `desc:"cull the back-facing surfaces"`
-	CullFront bool     `desc:"cull the front-facing surfaces"`
+	CullBack  bool     `xml:"cull-back" desc:"prop: cull-back = cull the back-facing surfaces"`
+	CullFront bool     `xml:"cull-front" desc:"prop: cull-front = cull the front-facing surfaces"`
 	TexPtr    Texture  `view:"-" desc:"pointer to texture"`
 }
 

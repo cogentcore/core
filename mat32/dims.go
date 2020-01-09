@@ -20,3 +20,13 @@ const (
 //go:generate stringer -type=Dims
 
 var KiT_Dims = kit.Enums.AddEnum(DimsN, kit.NotBitFlag, nil)
+
+// OtherDim returns the other dimension for 2D X,Y
+func OtherDim(d Dims) Dims {
+	switch d {
+	case X:
+		return Y
+	default:
+		return X
+	}
+}

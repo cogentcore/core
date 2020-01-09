@@ -10,6 +10,14 @@
 
 package mat32
 
+import (
+	"fmt"
+	"image"
+
+	"github.com/chewxy/math32"
+	"golang.org/x/image/math/fixed"
+)
+
 // Vec2 is a 2D vector/point with X and Y components.
 type Vec2 struct {
 	X float32
@@ -30,6 +38,18 @@ func NewVec2(x, y float32) Vec2 {
 // NewVec2Scalar returns a new Vec2 with all components set to scalar.
 func NewVec2Scalar(s float32) Vec2 {
 	return Vec2{X: s, Y: s}
+}
+
+func NewVec2FmPoint(pt image.Point) Vec2 {
+	v := Vec2{}
+	v.SetPoint(pt)
+	return v
+}
+
+func NewVec2FmFixed(pt fixed.Point26_6) Vec2 {
+	v := Vec2{}
+	v.SetFixed(pt)
+	return v
 }
 
 // IsNil returns true if all values are 0 (uninitialized).
@@ -92,6 +112,122 @@ func (v *Vec2) SetByName(name string, value float32) {
 	default:
 		panic("Invalid Vec2 component name: " + name)
 	}
+}
+
+func (a Vec2) String() string {
+	return fmt.Sprintf("(%v, %v)", a.X, a.Y)
+}
+
+func (a Vec2) Fixed() fixed.Point26_6 {
+	return ToFixedPoint(a.X, a.Y)
+}
+
+func (a *Vec2) SetAddDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X += val
+	case Y:
+		a.Y += val
+	}
+}
+
+func (a *Vec2) SetSubDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X -= val
+	case Y:
+		a.Y -= val
+	}
+}
+
+func (a *Vec2) SetMulDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X *= val
+	case Y:
+		a.Y *= val
+	}
+}
+
+func (a *Vec2) SetDivDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X /= val
+	case Y:
+		a.Y /= val
+	}
+}
+
+// set the value along a given dimension to max of current val and new val
+func (a *Vec2) SetMaxDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X = Max(a.X, val)
+	case Y:
+		a.Y = Max(a.Y, val)
+	}
+}
+
+// set the value along a given dimension to min of current val and new val
+func (a *Vec2) SetMinDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X = Min(a.X, val)
+	case Y:
+		a.Y = Min(a.Y, val)
+	}
+}
+
+// set the value along a given dimension to min of current val and new val
+func (a *Vec2) SetMinPosDim(d Dims, val float32) {
+	switch d {
+	case X:
+		a.X = MinPos(val, a.X)
+	case Y:
+		a.Y = MinPos(val, a.Y)
+	}
+}
+
+func (a *Vec2) SetPoint(pt image.Point) {
+	a.X = float32(pt.X)
+	a.Y = float32(pt.Y)
+}
+
+func (a *Vec2) SetFixed(pt fixed.Point26_6) {
+	a.X = FromFixed(pt.X)
+	a.Y = FromFixed(pt.Y)
+}
+
+func (a Vec2) ToPoint() image.Point {
+	return image.Point{int(a.X), int(a.Y)}
+}
+
+func (a Vec2) ToPointCeil() image.Point {
+	return image.Point{int(math32.Ceil(a.X)), int(math32.Ceil(a.Y))}
+}
+
+func (a Vec2) ToPointFloor() image.Point {
+	return image.Point{int(math32.Floor(a.X)), int(math32.Floor(a.Y))}
+}
+
+func (a Vec2) ToPointRound() image.Point {
+	return image.Point{int(Round(a.X)), int(Round(a.Y))}
+}
+
+// RectFromPosSizeMax returns an image.Rectangle from max dims of pos, size
+// (floor on pos, ceil on size)
+func RectFromPosSizeMax(pos, sz Vec2) image.Rectangle {
+	tp := pos.ToPointFloor()
+	ts := sz.ToPointCeil()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+}
+
+// RectFromPosSizeMin returns an image.Rectangle from min dims of pos, size
+// (ceil on pos, floor on size)
+func RectFromPosSizeMin(pos, sz Vec2) image.Rectangle {
+	tp := pos.ToPointCeil()
+	ts := sz.ToPointFloor()
+	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
 // SetZero sets this vector X and Y components to be zero.
@@ -212,6 +348,11 @@ func (v *Vec2) SetDivScalar(s float32) {
 	}
 }
 
+// Abs returns the absolute value for each dimension
+func (v Vec2) Abs() Vec2 {
+	return Vec2{Abs(v.X), Abs(v.Y)}
+}
+
 // Min returns min of this vector components vs. other vector.
 func (v Vec2) Min(other Vec2) Vec2 {
 	return Vec2{Min(v.X, other.X), Min(v.Y, other.Y)}
@@ -232,6 +373,35 @@ func (v Vec2) Max(other Vec2) Vec2 {
 func (v *Vec2) SetMax(other Vec2) {
 	v.X = Max(v.X, other.X)
 	v.Y = Max(v.Y, other.Y)
+}
+
+// MinPos returns minimum of all positive (> 0) numbers
+func (a Vec2) MinPos(b Vec2) Vec2 {
+	return Vec2{MinPos(a.X, b.X), MinPos(a.Y, b.Y)}
+}
+
+// SetMinPos set to minpos of current vs. other
+func (v *Vec2) SetMinPos(b Vec2) {
+	v.X = MinPos(v.X, b.X)
+	v.Y = MinPos(v.Y, b.Y)
+}
+
+// SetMaxScalar sets to max of current value and scalar val
+func (v *Vec2) SetMaxScalar(val float32) {
+	v.X = Max(v.X, val)
+	v.Y = Max(v.Y, val)
+}
+
+// SetMinScalar sets to min of current value and scalar val
+func (v *Vec2) SetMinScalar(val float32) {
+	v.X = Min(v.X, val)
+	v.Y = Min(v.Y, val)
+}
+
+// SetMinPosScalar sets to minpos of current value and scalar val
+func (v *Vec2) SetMinPosScalar(val float32) {
+	v.X = MinPos(v.X, val)
+	v.Y = MinPos(v.Y, val)
 }
 
 // Clamp sets this vector components to be no less than the corresponding components of min

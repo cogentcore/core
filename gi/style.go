@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -218,7 +219,7 @@ func (s *Style) Use(vp *Viewport2D) {
 // SetUnitContext sets the unit context based on size of viewport and parent
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (s *Style) SetUnitContext(vp *Viewport2D, el Vec2D) {
+func (s *Style) SetUnitContext(vp *Viewport2D, el mat32.Vec2) {
 	// s.UnContext.Defaults()
 	if vp != nil {
 		if vp.Win != nil {

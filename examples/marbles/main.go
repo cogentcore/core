@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
 )
@@ -22,7 +23,7 @@ var SvgLines *svg.Group
 var SvgMarbles *svg.Group
 var SvgCoords *svg.Group
 
-var gmin, gmax, gsz, ginc gi.Vec2D
+var gmin, gmax, gsz, ginc mat32.Vec2
 var GraphSize float32 = 800
 
 func main() {
@@ -92,10 +93,10 @@ func mainrun() {
 	SvgMarbles = svg.AddNewGroup(SvgGraph, "SvgMarbles")
 	SvgCoords = svg.AddNewGroup(SvgGraph, "SvgCoords")
 
-	gmin = gi.Vec2D{-10, -10}
-	gmax = gi.Vec2D{10, 10}
+	gmin = mat32.Vec2{-10, -10}
+	gmax = mat32.Vec2{10, 10}
 	gsz = gmax.Sub(gmin)
-	ginc = gsz.DivVal(GraphSize)
+	ginc = gsz.DivScalar(GraphSize)
 
 	SvgGraph.ViewBox.Min = gmin
 	SvgGraph.ViewBox.Size = gsz

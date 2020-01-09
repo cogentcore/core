@@ -16,6 +16,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/freetype/truetype"
+	"github.com/goki/gi/mat32"
 	// "github.com/golang/freetype/truetype"
 
 	"golang.org/x/image/font"
@@ -75,17 +76,17 @@ type FontMetrics struct {
 func (fs *FontFace) ComputeMetrics() {
 	// apd := fs.Face.Metrics().Ascent + fs.Face.Metrics().Descent
 	fmet := fs.Face.Metrics()
-	fs.Metrics.Height = math32.Ceil(FixedToFloat32(fmet.Height))
+	fs.Metrics.Height = math32.Ceil(mat32.FromFixed(fmet.Height))
 	fs.Metrics.Em = float32(fs.Size) // conventional definition
 	xb, _, ok := fs.Face.GlyphBounds('x')
 	if ok {
-		fs.Metrics.Ex = FixedToFloat32(xb.Max.Y - xb.Min.Y)
+		fs.Metrics.Ex = mat32.FromFixed(xb.Max.Y - xb.Min.Y)
 		// note: metric.Ex is typically 0?
 		// if fs.Metrics.Ex != metex {
 		// 	fmt.Printf("computed Ex: %v  metric ex: %v\n", fs.Metrics.Ex, metex)
 		// }
 	} else {
-		metex := FixedToFloat32(fmet.XHeight)
+		metex := mat32.FromFixed(fmet.XHeight)
 		if metex != 0 {
 			fs.Metrics.Ex = metex
 		} else {
@@ -94,7 +95,7 @@ func (fs *FontFace) ComputeMetrics() {
 	}
 	xb, _, ok = fs.Face.GlyphBounds('0')
 	if ok {
-		fs.Metrics.Ch = FixedToFloat32(xb.Max.X - xb.Min.X)
+		fs.Metrics.Ch = mat32.FromFixed(xb.Max.X - xb.Min.X)
 	} else {
 		fs.Metrics.Ch = 0.5 * fs.Metrics.Em
 	}

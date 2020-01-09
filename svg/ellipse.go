@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -13,8 +14,8 @@ import (
 // Ellipse is a SVG ellipse
 type Ellipse struct {
 	NodeBase
-	Pos   gi.Vec2D `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
-	Radii gi.Vec2D `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
+	Pos   mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
+	Radii mat32.Vec2 `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
 }
 
 var KiT_Ellipse = kit.Types.AddType(&Ellipse{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})

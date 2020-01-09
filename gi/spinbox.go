@@ -10,6 +10,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -138,12 +139,12 @@ func (sb *SpinBox) SetValue(val float32) {
 	}
 	sb.Value = val
 	if sb.HasMax {
-		sb.Value = Min32(sb.Value, sb.Max)
+		sb.Value = mat32.Min(sb.Value, sb.Max)
 	}
 	if sb.HasMin {
-		sb.Value = Max32(sb.Value, sb.Min)
+		sb.Value = mat32.Max(sb.Value, sb.Min)
 	}
-	sb.Value = Truncate32(sb.Value, sb.Prec)
+	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
 }
 
 // SetValueAction calls SetValue and also emits the signal
@@ -155,7 +156,7 @@ func (sb *SpinBox) SetValueAction(val float32) {
 // IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
 func (sb *SpinBox) IncrValue(steps float32) {
 	val := sb.Value + steps*sb.Step
-	val = FloatMod32(val, sb.Step)
+	val = mat32.Mod(val, sb.Step)
 	sb.SetValueAction(val)
 }
 
@@ -300,7 +301,7 @@ func (sb *SpinBox) StyleSpinBox() {
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		sb.Sty.SetUnitContext(sb.Viewport, Vec2DZero)
+		sb.Sty.SetUnitContext(sb.Viewport, mat32.Vec2Zero)
 	}
 	if hasTempl && saveTempl {
 		sb.Sty.SaveTemplate()

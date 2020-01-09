@@ -36,7 +36,7 @@ type SplitView struct {
 	HandleSize  units.Value `xml:"handle-size" desc:"size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this"`
 	Splits      []float32   `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
 	SavedSplits []float32   `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
-	Dim         Dims2D      `desc:"dimension along which to split the space"`
+	Dim         mat32.Dims  `desc:"dimension along which to split the space"`
 }
 
 var KiT_SplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
@@ -236,13 +236,13 @@ func (sv *SplitView) Init2D() {
 func (sv *SplitView) ConfigSplitters() {
 	sz := len(sv.Kids)
 	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
-	odim := OtherDim(sv.Dim)
+	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.Sty.BoxSpace()
 	size := sv.LayData.AllocSize.Dim(sv.Dim) - 2*spc
 	handsz := sv.HandleSize.Dots
 	mid := 0.5 * (sv.LayData.AllocSize.Dim(odim) - 2*spc)
 	spicon := IconName("")
-	if sv.Dim == X {
+	if sv.Dim == mat32.X {
 		spicon = IconName("handle-circles-vert")
 	} else {
 		spicon = IconName("handle-circles-horiz")
@@ -346,7 +346,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	handsz := sv.HandleSize.Dots
 	// fmt.Printf("handsz: %v\n", handsz)
 	sz := len(sv.Kids)
-	odim := OtherDim(sv.Dim)
+	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.Sty.BoxSpace()
 	size := sv.LayData.AllocSize.Dim(sv.Dim) - 2*spc
 	avail := size - handsz*float32(sz-1)
@@ -499,7 +499,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	ic := ick.(*Icon)
 	handsz := sr.ThumbSize.Dots
 	spc := sr.Sty.BoxSpace()
-	odim := OtherDim(sr.Dim)
+	odim := mat32.OtherDim(sr.Dim)
 	sr.LayData.AllocSize.SetDim(odim, 2*(handsz+2*spc))
 	sr.LayData.AllocSizeOrig = sr.LayData.AllocSize
 
@@ -552,7 +552,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	ispc := int(spc)
 	handsz := sr.ThumbSize.Dots
 	off := 0
-	if sr.Dim == X {
+	if sr.Dim == mat32.X {
 		off = sr.OrigWinBBox.Min.X
 	} else {
 		off = sr.OrigWinBBox.Min.Y
@@ -572,7 +572,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + ispc}
 		}
 	} else {
-		if sr.Dim == X {
+		if sr.Dim == mat32.X {
 			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
 			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
 		} else {
@@ -635,9 +635,9 @@ func (sr *Splitter) Render2DDefaultStyle() {
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
-		pos := NewVec2DFmPoint(sr.VpBBox.Min)
-		pos.SetSubDim(OtherDim(sr.Dim), 10.0)
-		sz := NewVec2DFmPoint(sr.VpBBox.Size())
+		pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
+		pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
+		sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
 		sr.RenderBoxImpl(pos, sz, 0)
 	}
 }

@@ -13,6 +13,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -22,8 +23,8 @@ type Path struct {
 	NodeBase
 	Data     []PathData `xml:"-" desc:"the path data to render -- path commands and numbers are serialized, with each command specifying the number of floating-point coord data points that follow"`
 	DataStr  string     `xml:"d" desc:"string version of the path data"`
-	MinCoord gi.Vec2D   `desc:"minimum coord in path -- computed in BBox2D"`
-	MaxCoord gi.Vec2D   `desc:"maximum coord in path -- computed in BBox2D"`
+	MinCoord mat32.Vec2 `desc:"minimum coord in path -- computed in BBox2D"`
+	MaxCoord mat32.Vec2 `desc:"maximum coord in path -- computed in BBox2D"`
 }
 
 var KiT_Path = kit.Types.AddType(&Path{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
@@ -89,12 +90,12 @@ func (g *Path) Render2D() {
 		mrk.RenderMarker(env, ang, g.Pnt.StrokeStyle.Width.Dots)
 	}
 	if mrk := g.Marker("marker-mid"); mrk != nil {
-		var ptm2, ptm1, pt gi.Vec2D
+		var ptm2, ptm1, pt mat32.Vec2
 		gotidx := 0
 		PathDataIterFunc(g.Data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
 			ptm2 = ptm1
 			ptm1 = pt
-			pt = gi.Vec2D{cx, cy}
+			pt = mat32.Vec2{cx, cy}
 			if gotidx < 2 {
 				gotidx++
 				return true
@@ -587,10 +588,10 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 }
 
 // PathDataMinMax traverses the path data and extracts the min and max point coords
-func PathDataMinMax(data []PathData) (min, max gi.Vec2D) {
+func PathDataMinMax(data []PathData) (min, max mat32.Vec2) {
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
-		c := gi.Vec2D{cx, cy}
-		if min == gi.Vec2DZero && max == gi.Vec2DZero {
+		c := mat32.Vec2{cx, cy}
+		if min == mat32.Vec2Zero && max == mat32.Vec2Zero {
 			min = c
 			max = c
 		} else {
@@ -603,10 +604,10 @@ func PathDataMinMax(data []PathData) (min, max gi.Vec2D) {
 }
 
 // PathDataStart gets the starting coords and angle from the path
-func PathDataStart(data []PathData) (vec gi.Vec2D, ang float32) {
+func PathDataStart(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSt := false
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
-		c := gi.Vec2D{cx, cy}
+		c := mat32.Vec2{cx, cy}
 		if gotSt {
 			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
 			return false // stop
@@ -619,10 +620,10 @@ func PathDataStart(data []PathData) (vec gi.Vec2D, ang float32) {
 }
 
 // PathDataEnd gets the ending coords and angle from the path
-func PathDataEnd(data []PathData) (vec gi.Vec2D, ang float32) {
+func PathDataEnd(data []PathData) (vec mat32.Vec2, ang float32) {
 	gotSome := false
 	PathDataIterFunc(data, func(idx int, cmd PathCmds, ptIdx int, cx, cy float32) bool {
-		c := gi.Vec2D{cx, cy}
+		c := mat32.Vec2{cx, cy}
 		if gotSome {
 			ang = math32.Atan2(c.Y-vec.Y, c.X-vec.X)
 		}

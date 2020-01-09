@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -65,7 +66,7 @@ type Paint struct {
 	FontStyle   FontStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	TextStyle   TextStyle     `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
 	VecEff      VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
-	XForm       Matrix2D      `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
+	XForm       mat32.Mat2    `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
 	dotsSet     bool
 	lastUnCtxt  units.Context
 }
@@ -97,7 +98,7 @@ func (pc *Paint) Defaults() {
 	pc.FillStyle.Defaults()
 	pc.FontStyle.Defaults()
 	pc.TextStyle.Defaults()
-	pc.XForm = Identity2D()
+	pc.XForm = mat32.Identity2D()
 }
 
 func NewPaint() Paint {
@@ -144,7 +145,7 @@ func (pc *Paint) SetStyleProps(par *Paint, props ki.Props, vp *Viewport2D) {
 // SetUnitContext sets the unit context based on size of viewport and parent
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (pc *Paint) SetUnitContext(vp *Viewport2D, el Vec2D) {
+func (pc *Paint) SetUnitContext(vp *Viewport2D, el mat32.Vec2) {
 	pc.UnContext.Defaults()
 	if vp != nil {
 		pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
@@ -216,21 +217,21 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 // while painting -- a viewport just has one of these
 type RenderState struct {
 	Paint  Paint           `desc:"communal painter -- for widgets -- SVG have their own"`
-	XForm  Matrix2D        `desc:"current transform"`
+	XForm  mat32.Mat2      `desc:"current transform"`
 	Path   rasterx.Path    `desc:"current path"`
 	Raster *rasterx.Dasher `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
 	//	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
 	// CompSpanner    *scanx.CompressSpanner `desc:"spanner for scanx"`
 	Scanner        *scanx.Scanner    `desc:"scanner for scanx"`
 	ImgSpanner     *scanx.ImgSpanner `desc:"spanner for scanx"`
-	Start          Vec2D             `desc:"starting point, for close path"`
-	Current        Vec2D             `desc:"current point"`
+	Start          mat32.Vec2        `desc:"starting point, for close path"`
+	Current        mat32.Vec2        `desc:"current point"`
 	HasCurrent     bool              `desc:"is current point current?"`
 	Image          *image.RGBA       `desc:"pointer to image to render into"`
 	Mask           *image.Alpha      `desc:"current mask"`
 	Bounds         image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
 	LastRenderBBox image.Rectangle   `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`
-	XFormStack     []Matrix2D        `desc:"stack of transforms"`
+	XFormStack     []mat32.Mat2      `desc:"stack of transforms"`
 	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
 	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
 	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
@@ -241,7 +242,7 @@ type RenderState struct {
 // Init initializes RenderState -- must be called whenever image size changes
 func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 	rs.Paint.Defaults()
-	rs.XForm = Identity2D()
+	rs.XForm = mat32.Identity2D()
 	rs.Image = img
 	// to use the golang.org/x/image/vector scanner, do this:
 	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
@@ -262,17 +263,17 @@ func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 
 // PushXForm pushes current xform onto stack and apply new xform on top of it
 // must protect within render mutex lock (see Lock version)
-func (rs *RenderState) PushXForm(xf Matrix2D) {
+func (rs *RenderState) PushXForm(xf mat32.Mat2) {
 	if rs.XFormStack == nil {
-		rs.XFormStack = make([]Matrix2D, 0, 100)
+		rs.XFormStack = make([]mat32.Mat2, 0, 100)
 	}
 	rs.XFormStack = append(rs.XFormStack, rs.XForm)
-	rs.XForm = xf.Multiply(rs.XForm)
+	rs.XForm = xf.Mul(rs.XForm)
 }
 
 // PushXFormLock pushes current xform onto stack and apply new xform on top of it
 // protects within render mutex lock
-func (rs *RenderState) PushXFormLock(xf Matrix2D) {
+func (rs *RenderState) PushXFormLock(xf mat32.Mat2) {
 	rs.RenderMu.Lock()
 	rs.PushXForm(xf)
 	rs.RenderMu.Unlock()
@@ -284,7 +285,7 @@ func (rs *RenderState) PopXForm() {
 	sz := len(rs.XFormStack)
 	if sz == 0 {
 		log.Printf("gi.RenderState PopXForm: stack is empty -- programmer error\n")
-		rs.XForm = Identity2D()
+		rs.XForm = mat32.Identity2D()
 		return
 	}
 	rs.XForm = rs.XFormStack[sz-1]
@@ -385,9 +386,8 @@ func (rs *RenderState) RestorePaint() {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Paint) TransformPoint(rs *RenderState, x, y float32) Vec2D {
-	tx, ty := rs.XForm.TransformPoint(x, y)
-	return Vec2D{tx, ty}
+func (pc *Paint) TransformPoint(rs *RenderState, x, y float32) mat32.Vec2 {
+	return rs.XForm.MulVec2AsPt(mat32.Vec2{x, y})
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
@@ -397,15 +397,15 @@ func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) im
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeWidth(rs)
 	}
-	tx1, ty1 := rs.XForm.TransformPoint(minX, minY)
-	tx2, ty2 := rs.XForm.TransformPoint(maxX, maxY)
-	tp1 := NewVec2D(tx1-sw, ty1-sw).ToPointFloor()
-	tp2 := NewVec2D(tx2+sw, ty2+sw).ToPointCeil()
+	tmin := rs.XForm.MulVec2AsPt(mat32.Vec2{minX, minY})
+	tmax := rs.XForm.MulVec2AsPt(mat32.Vec2{maxX, maxY})
+	tp1 := mat32.NewVec2(tmin.X-sw, tmin.Y-sw).ToPointFloor()
+	tp2 := mat32.NewVec2(tmax.X+sw, tmax.Y+sw).ToPointCeil()
 	return image.Rect(tp1.X, tp1.Y, tp2.X, tp2.Y)
 }
 
 // BoundingBoxFromPoints computes the bounding box for a slice of points
-func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []Vec2D) image.Rectangle {
+func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []mat32.Vec2) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
@@ -546,7 +546,7 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 	}
 	scx, scy := rs.XForm.ExtractScale()
 	sc := 0.5 * (math32.Abs(scx) + math32.Abs(scy))
-	lw := Max32(sc*dw, pc.StrokeStyle.MinWidth.Dots)
+	lw := mat32.Max(sc*dw, pc.StrokeStyle.MinWidth.Dots)
 	return lw
 }
 
@@ -578,8 +578,8 @@ func (pc *Paint) stroke(rs *RenderState) {
 	}
 
 	rs.Raster.SetStroke(
-		Float32ToFixed(pc.StrokeWidth(rs)),
-		Float32ToFixed(pc.StrokeStyle.MiterLimit),
+		mat32.ToFixed(pc.StrokeWidth(rs)),
+		mat32.ToFixed(pc.StrokeStyle.MiterLimit),
 		pc.capfunc(), nil, nil, pc.joinmode(), // todo: supports leading / trailing caps, and "gaps"
 		dash, 0)
 	rs.Scanner.SetClip(rs.Bounds)
@@ -662,9 +662,9 @@ func (pc *Paint) Fill(rs *RenderState) {
 
 // FillBox is an optimized fill of a square region with a uniform color if
 // the given color spec is a solid color
-func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
+func (pc *Paint) FillBox(rs *RenderState, pos, size mat32.Vec2, clr *ColorSpec) {
 	if clr.Source == SolidColor {
-		b := rs.Bounds.Intersect(RectFromPosSizeMax(pos, size))
+		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
 	} else {
 		pc.FillStyle.SetColorSpec(clr)
@@ -674,8 +674,8 @@ func (pc *Paint) FillBox(rs *RenderState, pos, size Vec2D, clr *ColorSpec) {
 }
 
 // FillBoxColor is an optimized fill of a square region with given uniform color
-func (pc *Paint) FillBoxColor(rs *RenderState, pos, size Vec2D, clr color.Color) {
-	b := rs.Bounds.Intersect(RectFromPosSizeMax(pos, size))
+func (pc *Paint) FillBoxColor(rs *RenderState, pos, size mat32.Vec2, clr color.Color) {
+	b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
 }
 
@@ -748,7 +748,7 @@ func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float32) {
 	pc.LineTo(rs, x2, y2)
 }
 
-func (pc *Paint) DrawPolyline(rs *RenderState, points []Vec2D) {
+func (pc *Paint) DrawPolyline(rs *RenderState, points []mat32.Vec2) {
 	sz := len(points)
 	if sz < 2 {
 		return
@@ -759,7 +759,7 @@ func (pc *Paint) DrawPolyline(rs *RenderState, points []Vec2D) {
 	}
 }
 
-func (pc *Paint) DrawPolylinePxToDots(rs *RenderState, points []Vec2D) {
+func (pc *Paint) DrawPolylinePxToDots(rs *RenderState, points []mat32.Vec2) {
 	pu := &pc.UnContext
 	sz := len(points)
 	if sz < 2 {
@@ -771,12 +771,12 @@ func (pc *Paint) DrawPolylinePxToDots(rs *RenderState, points []Vec2D) {
 	}
 }
 
-func (pc *Paint) DrawPolygon(rs *RenderState, points []Vec2D) {
+func (pc *Paint) DrawPolygon(rs *RenderState, points []mat32.Vec2) {
 	pc.DrawPolyline(rs, points)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawPolygonPxToDots(rs *RenderState, points []Vec2D) {
+func (pc *Paint) DrawPolygonPxToDots(rs *RenderState, points []mat32.Vec2) {
 	pc.DrawPolylinePxToDots(rs, points)
 	pc.ClosePath(rs)
 }
@@ -796,13 +796,13 @@ func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float32) {
 	pc.NewSubPath(rs)
 	pc.MoveTo(rs, x1, y0)
 	pc.LineTo(rs, x2, y0)
-	pc.DrawArc(rs, x2, y1, r, Radians(270), Radians(360))
+	pc.DrawArc(rs, x2, y1, r, mat32.DegToRad(270), mat32.DegToRad(360))
 	pc.LineTo(rs, x3, y2)
-	pc.DrawArc(rs, x2, y2, r, Radians(0), Radians(90))
+	pc.DrawArc(rs, x2, y2, r, mat32.DegToRad(0), mat32.DegToRad(90))
 	pc.LineTo(rs, x1, y3)
-	pc.DrawArc(rs, x1, y2, r, Radians(90), Radians(180))
+	pc.DrawArc(rs, x1, y2, r, mat32.DegToRad(90), mat32.DegToRad(180))
 	pc.LineTo(rs, x0, y1)
-	pc.DrawArc(rs, x1, y1, r, Radians(180), Radians(270))
+	pc.DrawArc(rs, x1, y1, r, mat32.DegToRad(180), mat32.DegToRad(270))
 	pc.ClosePath(rs)
 }
 
@@ -1029,7 +1029,7 @@ func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, 
 // Identity resets the current transformation matrix to the identity matrix.
 // This results in no translating, scaling, rotating, or shearing.
 func (pc *Paint) Identity() {
-	pc.XForm = Identity2D()
+	pc.XForm = mat32.Identity2D()
 }
 
 // Translate updates the current matrix with a translation.

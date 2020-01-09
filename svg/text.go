@@ -19,7 +19,7 @@ import (
 // just nested under a parent text)
 type Text struct {
 	NodeBase
-	Pos          gi.Vec2D      `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Pos          mat32.Vec2    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
 	Width        float32       `xml:"width" desc:"width of text to render if using word-wrapping"`
 	Text         string        `xml:"text" desc:"text string to render"`
 	Render       gi.TextRender `xml:"-" json:"-" desc:"render version of text"`
@@ -72,7 +72,7 @@ func (g *Text) Render2D() {
 	rs.PushXForm(pc.XForm)
 	if len(g.Text) > 0 {
 		orgsz := pc.FontStyle.Size
-		pos := rs.XForm.TransformPointVec2D(gi.Vec2D{g.Pos.X, g.Pos.Y})
+		pos := rs.XForm.MulVec2AsPt(mat32.Vec2{g.Pos.X, g.Pos.Y})
 		rot := rs.XForm.ExtractRot()
 		scx, scy := rs.XForm.ExtractScale()
 		scalex := scx / scy
@@ -84,7 +84,7 @@ func (g *Text) Render2D() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
 		g.Render.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
-		g.Render.Size = g.Render.Size.Mul(gi.Vec2D{scx, scy})
+		g.Render.Size = g.Render.Size.Mul(mat32.Vec2{scx, scy})
 		if gi.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorMiddle {
 			pos.X -= g.Render.Size.X * .5
 		} else if gi.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorEnd {
@@ -95,7 +95,7 @@ func (g *Text) Render2D() {
 		sr := &(g.Render.Spans[0])
 		sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 		for i := range sr.Render {
-			sr.Render[i].RelPos = rs.XForm.TransformVectorVec2D(sr.Render[i].RelPos)
+			sr.Render[i].RelPos = rs.XForm.MulVec2AsVec(sr.Render[i].RelPos)
 			sr.Render[i].Size.Y *= scy
 			sr.Render[i].Size.X *= scx
 		}
@@ -104,34 +104,36 @@ func (g *Text) Render2D() {
 			mx := ints.MinInt(len(g.CharPosX), len(sr.Render))
 			for i := 0; i < mx; i++ {
 				// todo: this may not be fully correct, given relativity constraints
-				sr.Render[i].RelPos.X, _ = rs.XForm.TransformVector(g.CharPosX[i], 0)
+				cpx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosX[i], 0})
+				sr.Render[i].RelPos.X = cpx.X
 			}
 		}
 		if len(g.CharPosY) > 0 {
 			mx := ints.MinInt(len(g.CharPosY), len(sr.Render))
 			for i := 0; i < mx; i++ {
-				_, sr.Render[i].RelPos.Y = rs.XForm.TransformPoint(g.CharPosY[i], 0)
+				cpy := rs.XForm.MulVec2AsPt(mat32.Vec2{g.CharPosY[i], 0})
+				sr.Render[i].RelPos.Y = cpy.Y
 			}
 		}
 		if len(g.CharPosDX) > 0 {
 			mx := ints.MinInt(len(g.CharPosDX), len(sr.Render))
 			for i := 0; i < mx; i++ {
-				dx, _ := rs.XForm.TransformVector(g.CharPosDX[i], 0)
+				dx := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDX[i], 0})
 				if i > 0 {
-					sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx
+					sr.Render[i].RelPos.X = sr.Render[i-1].RelPos.X + dx.X
 				} else {
-					sr.Render[i].RelPos.X = dx // todo: not sure this is right
+					sr.Render[i].RelPos.X = dx.X // todo: not sure this is right
 				}
 			}
 		}
 		if len(g.CharPosDY) > 0 {
 			mx := ints.MinInt(len(g.CharPosDY), len(sr.Render))
 			for i := 0; i < mx; i++ {
-				dy, _ := rs.XForm.TransformVector(g.CharPosDY[i], 0)
+				dy := rs.XForm.MulVec2AsVec(mat32.Vec2{g.CharPosDY[i], 0})
 				if i > 0 {
-					sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy
+					sr.Render[i].RelPos.Y = sr.Render[i-1].RelPos.Y + dy.Y
 				} else {
-					sr.Render[i].RelPos.Y = dy // todo: not sure this is right
+					sr.Render[i].RelPos.Y = dy.Y // todo: not sure this is right
 				}
 			}
 		}

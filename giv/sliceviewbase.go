@@ -14,6 +14,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -386,7 +387,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 // ConfigScroll configures the scrollbar
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
-	sb.Dim = gi.Y
+	sb.Dim = mat32.Y
 	sb.Defaults()
 	sb.Tracking = true
 	if sv.Sty.Layout.ScrollBarWidth.Dots == 0 {

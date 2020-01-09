@@ -13,6 +13,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -41,7 +42,7 @@ type TreeView struct {
 	Indent           units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
 	TreeViewSig      ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles      [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	WidgetSize       gi.Vec2D                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	WidgetSize       mat32.Vec2                `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 	Icon             gi.IconName               `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
 	RootView         *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
 }
@@ -2073,18 +2074,18 @@ func (tv *TreeView) Size2D(iter int) {
 				continue
 			}
 			h += math32.Ceil(gis.LayData.AllocSize.Y)
-			w = gi.Max32(w, tv.Indent.Dots+gis.LayData.AllocSize.X)
+			w = mat32.Max(w, tv.Indent.Dots+gis.LayData.AllocSize.X)
 		}
 	}
-	tv.LayData.AllocSize = gi.Vec2D{w, h}
+	tv.LayData.AllocSize = mat32.Vec2{w, h}
 	tv.WidgetSize.X = w // stretch
 }
 
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := tv.Sty.BoxSpace()
-	tv.Parts.LayData.AllocPos = tv.LayData.AllocPos.AddVal(spc)
+	tv.Parts.LayData.AllocPos = tv.LayData.AllocPos.AddScalar(spc)
 	tv.Parts.LayData.AllocPosOrig = tv.Parts.LayData.AllocPos
-	tv.Parts.LayData.AllocSize = tv.WidgetSize.AddVal(-2.0 * spc)
+	tv.Parts.LayData.AllocSize = tv.WidgetSize.AddScalar(-2.0 * spc)
 	tv.Parts.Layout2D(parBBox, iter)
 }
 
@@ -2195,8 +2196,8 @@ func (tv *TreeView) Render2D() {
 		pc.StrokeStyle.Width = st.Border.Width
 		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 		// tv.RenderStdBox()
-		pos := tv.LayData.AllocPos.AddVal(st.Layout.Margin.Dots)
-		sz := tv.WidgetSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+		pos := tv.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
+		sz := tv.WidgetSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
 		tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 		rs.Unlock()
 		tv.Render2DParts()

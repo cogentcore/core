@@ -14,6 +14,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/cursor"
 
 	"github.com/chewxy/math32"
@@ -50,7 +51,7 @@ type TextView struct {
 	LineNoOff      float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
 	LineNoRender   gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
 	LinesSize      image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz       gi.Vec2D                  `json:"-" xml:"-" desc:"size params to use in render call"`
+	RenderSz       mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
 	CursorPos      TextPos                   `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol      int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
 	CorrectPos     TextPos                   `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
@@ -448,30 +449,30 @@ func (tv *TextView) ParentLayout() *gi.Layout {
 }
 
 // RenderSize is the size we should pass to text rendering, based on alloc
-func (tv *TextView) RenderSize() gi.Vec2D {
+func (tv *TextView) RenderSize() mat32.Vec2 {
 	spc := tv.Sty.BoxSpace()
 	if tv.Par == nil {
-		return gi.Vec2DZero
+		return mat32.Vec2Zero
 	}
 	parw := tv.ParentLayout()
 	if parw == nil {
 		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", tv.Par.Type(), tv.PathUnique())
-		return gi.Vec2DZero
+		return mat32.Vec2Zero
 	}
 	parw.SetReRenderAnchor()
 	paloc := parw.LayData.AllocSizeOrig
-	if !paloc.IsZero() {
+	if !paloc.IsNil() {
 		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
-		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubVal(spc * 2)
+		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubScalar(spc * 2)
 		tv.RenderSz.X -= spc // extra space
 		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	} else {
 		sz := tv.LayData.AllocSizeOrig
-		if sz.IsZero() {
+		if sz.IsNil() {
 			sz = tv.LayData.SizePrefOrMax()
 		}
-		if !sz.IsZero() {
-			sz.SetSubVal(2 * spc)
+		if !sz.IsNil() {
+			sz.SetSubScalar(2 * spc)
 		}
 		tv.RenderSz = sz
 		// fmt.Printf("fallback rendersz: %v\n", tv.RenderSz)
@@ -548,14 +549,14 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 			tv.HasLinks = true
 		}
 		tv.Offs[ln] = off
-		lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
+		lsz := mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 		off += lsz
-		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
+		mxwd = mat32.Max(mxwd, tv.Renders[ln].Size.X)
 	}
 	tv.Buf.MarkupMu.RUnlock()
 
 	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-	nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+	nwSz := mat32.Vec2{mxwd, off + extraHalf}.ToPointCeil()
 	// fmt.Printf("lay lines: diff: %v  old: %v  new: %v\n", diff, tv.LinesSize, nwSz)
 	if inLayout {
 		tv.LinesSize = nwSz
@@ -570,8 +571,8 @@ func (tv *TextView) SetSize() bool {
 	spc := sty.BoxSpace()
 	rndsz := tv.RenderSz
 	rndsz.X += tv.LineNoOff
-	netsz := gi.Vec2D{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
-	cursz := tv.LayData.AllocSize.SubVal(2 * spc)
+	netsz := mat32.Vec2{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
+	cursz := tv.LayData.AllocSize.SubScalar(2 * spc)
 	if cursz.X < 10 || cursz.Y < 10 {
 		nwsz := netsz.Max(rndsz)
 		tv.Size2DFromWH(nwsz.X, nwsz.Y)
@@ -643,7 +644,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
 			rerend = true
 		}
-		mxwd = gi.Max32(mxwd, tv.Renders[ln].Size.X)
+		mxwd = mat32.Max(mxwd, tv.Renders[ln].Size.X)
 	}
 	tv.Buf.MarkupMu.RUnlock()
 
@@ -656,14 +657,14 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 		off := tv.Offs[ofst]
 		for ln := ofst; ln < tv.NLines; ln++ {
 			tv.Offs[ln] = off
-			lsz := gi.Max32(tv.Renders[ln].Size.Y, tv.LineHeight)
+			lsz := mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 			off += lsz
 		}
 		extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-		nwSz := gi.Vec2D{mxwd, off + extraHalf}.ToPointCeil()
+		nwSz := mat32.Vec2{mxwd, off + extraHalf}.ToPointCeil()
 		tv.ResizeIfNeeded(nwSz)
 	} else {
-		nwSz := gi.Vec2D{mxwd, 0}.ToPointCeil()
+		nwSz := mat32.Vec2{mxwd, 0}.ToPointCeil()
 		nwSz.Y = tv.LinesSize.Y
 		tv.ResizeIfNeeded(nwSz)
 	}
@@ -2685,7 +2686,7 @@ func (tv *TextView) ScrollToTop(pos int) bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollDimToStart(gi.Y, pos)
+	return ly.ScrollDimToStart(mat32.Y, pos)
 }
 
 // ScrollCursorToTop tells any parent scroll layout to scroll to get cursor
@@ -2703,7 +2704,7 @@ func (tv *TextView) ScrollToBottom(pos int) bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollDimToEnd(gi.Y, pos)
+	return ly.ScrollDimToEnd(mat32.Y, pos)
 }
 
 // ScrollCursorToBottom tells any parent scroll layout to scroll to get cursor
@@ -2721,7 +2722,7 @@ func (tv *TextView) ScrollToVertCenter(pos int) bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollDimToCenter(gi.Y, pos)
+	return ly.ScrollDimToCenter(mat32.Y, pos)
 }
 
 // ScrollCursorToVertCenter tells any parent scroll layout to scroll to get
@@ -2744,7 +2745,7 @@ func (tv *TextView) ScrollToLeft(pos int) bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollDimToStart(gi.X, pos)
+	return ly.ScrollDimToStart(mat32.X, pos)
 }
 
 // ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
@@ -2766,7 +2767,7 @@ func (tv *TextView) ScrollToRight(pos int) bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollDimToEnd(gi.X, pos)
+	return ly.ScrollDimToEnd(mat32.X, pos)
 }
 
 // ScrollCursorToRight tells any parent scroll layout to scroll to get cursor
@@ -2784,7 +2785,7 @@ func (tv *TextView) ScrollToHorizCenter(pos int) bool {
 	if ly == nil {
 		return false
 	}
-	return ly.ScrollDimToCenter(gi.X, pos)
+	return ly.ScrollDimToCenter(mat32.X, pos)
 }
 
 // ScrollCursorToHorizCenter tells any parent scroll layout to scroll to get
@@ -2802,7 +2803,7 @@ func (tv *TextView) ScrollCursorToHorizCenter() bool {
 // CharStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
+func (tv *TextView) CharStartPos(pos TextPos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
 	spos.X += tv.LineNoOff
 	if pos.Ln >= len(tv.Offs) {
@@ -2812,7 +2813,7 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 			return spos
 		}
 	} else {
-		spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Face.Metrics().Descent)
+		spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Sty.Font.Face.Face.Metrics().Descent)
 	}
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -2826,14 +2827,14 @@ func (tv *TextView) CharStartPos(pos TextPos) gi.Vec2D {
 // CharEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (tv *TextView) CharEndPos(pos TextPos) gi.Vec2D {
+func (tv *TextView) CharEndPos(pos TextPos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
 	if pos.Ln >= tv.NLines {
 		spos.Y += float32(tv.LinesSize.Y)
 		spos.X += tv.LineNoOff
 		return spos
 	}
-	spos.Y += tv.Offs[pos.Ln] + gi.FixedToFloat32(tv.Sty.Font.Face.Face.Metrics().Descent)
+	spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Sty.Font.Face.Face.Metrics().Descent)
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -2945,8 +2946,8 @@ func (tv *TextView) StopCursor() {
 // CursorBBox returns a bounding-box for a cursor at given position
 func (tv *TextView) CursorBBox(pos TextPos) image.Rectangle {
 	cpos := tv.CharStartPos(pos)
-	cbmin := cpos.SubVal(tv.CursorWidth.Dots)
-	cbmax := cpos.AddVal(tv.CursorWidth.Dots)
+	cbmin := cpos.SubScalar(tv.CursorWidth.Dots)
+	cbmax := cpos.AddScalar(tv.CursorWidth.Dots)
 	cbmax.Y += tv.FontHeight
 	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
 	return curBBox
@@ -3217,10 +3218,10 @@ func (tv *TextView) RenderRegionToEnd(st TextPos, sty *gi.Style, bgclr *gi.Color
 }
 
 // RenderStartPos is absolute rendering start position from our allocpos
-func (tv *TextView) RenderStartPos() gi.Vec2D {
+func (tv *TextView) RenderStartPos() mat32.Vec2 {
 	st := &tv.Sty
 	spc := st.BoxSpace()
-	pos := tv.LayData.AllocPos.AddVal(spc)
+	pos := tv.LayData.AllocPos.AddScalar(spc)
 	return pos
 }
 
@@ -3282,8 +3283,8 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	pc := &rs.Paint
 	sty := &tv.Sty
 	tv.VisSizes()
-	pos := gi.NewVec2DFmPoint(tv.VpBBox.Min)
-	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
+	pos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
+	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.Font.BgColor)
 	pos = tv.RenderStartPos()
 	stln := -1
@@ -3350,8 +3351,8 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
 	clr := sty.Font.BgColor.Color.Highlight(10)
-	spos := gi.NewVec2DFmPoint(tv.VpBBox.Min)
-	epos := gi.NewVec2DFmPoint(tv.VpBBox.Max)
+	spos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
+	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
 	epos.X = spos.X + tv.LineNoOff - spc
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), clr)
 }
@@ -3392,7 +3393,7 @@ func (tv *TextView) RenderLineNo(ln int) {
 	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := tv.RenderStartPos()
 	lst := tv.CharStartPos(TextPos{Ln: ln}).Y // note: charstart pos includes descent
-	pos.Y = lst + gi.FixedToFloat32(sty.Font.Face.Face.Metrics().Ascent) - +gi.FixedToFloat32(sty.Font.Face.Face.Metrics().Descent)
+	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(tv.VpBBox.Min.X) + spc
 	tv.LineNoRender.Render(rs, pos)
 	// if ic, ok := tv.LineIcons[ln]; ok {
@@ -3435,7 +3436,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	rs := &vp.Render
 	pc := &rs.Paint
 	pos := tv.RenderStartPos()
-	var boxMin, boxMax gi.Vec2D
+	var boxMin, boxMax mat32.Vec2
 	rs.PushBounds(tv.VpBBox)
 	// first get the box to fill
 	visSt := -1

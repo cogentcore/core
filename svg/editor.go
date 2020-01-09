@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
@@ -19,9 +20,9 @@ import (
 // Editor supports editing of SVG elements
 type Editor struct {
 	SVG
-	Trans         gi.Vec2D `desc:"view translation offset (from dragging)"`
-	Scale         float32  `desc:"view scaling (from zooming)"`
-	SetDragCursor bool     `view:"-" desc:"has dragging cursor been set yet?"`
+	Trans         mat32.Vec2 `desc:"view translation offset (from dragging)"`
+	Scale         float32    `desc:"view scaling (from zooming)"`
+	SetDragCursor bool       `view:"-" desc:"has dragging cursor been set yet?"`
 }
 
 var KiT_Editor = kit.Types.AddType(&Editor{}, EditorProps)

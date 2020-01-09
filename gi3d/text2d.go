@@ -33,7 +33,7 @@ type Text2D struct {
 	Solid
 	Text        string         `desc:"the text string to display"`
 	Sty         gi.Style       `json:"-" xml:"-" desc:"styling settings for the text"`
-	TxtPos      gi.Vec2D       `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+	TxtPos      mat32.Vec2     `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
 	TxtRender   gi.TextRender  `view:"-" xml:"-" json:"-" desc:"render data for text label"`
 	TxtTex      *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
 	RenderState gi.RenderState `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
@@ -122,7 +122,7 @@ func (txt *Text2D) StyleText(sc *Scene) {
 	// css stuff only works for node2d
 	// gi.AggCSS(&txt.CSSAgg, txt.CSS)
 	// txt.Sty.StyleCSS(txt.This().(gi.Node2D), txt.CSSAgg, "", sc.Viewport)
-	txt.Sty.SetUnitContext(sc.Viewport, gi.Vec2DZero)
+	txt.Sty.SetUnitContext(sc.Viewport, mat32.Vec2Zero)
 }
 
 func (txt *Text2D) RenderText(sc *Scene) {
@@ -138,8 +138,8 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		}
 	}
 	marg := txt.Sty.Layout.Margin.Dots
-	sz.SetAddVal(2 * marg)
-	txt.TxtPos.SetVal(marg)
+	sz.SetAddScalar(2 * marg)
+	txt.TxtPos.SetScalar(marg)
 	szpt := sz.ToPoint()
 	if szpt == image.ZP {
 		szpt = image.Point{10, 10}

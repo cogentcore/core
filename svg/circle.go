@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -13,8 +14,8 @@ import (
 // Circle is a SVG circle
 type Circle struct {
 	NodeBase
-	Pos    gi.Vec2D `xml:"{cx,cy}" desc:"position of the center of the circle"`
-	Radius float32  `xml:"r" desc:"radius of the circle"`
+	Pos    mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the circle"`
+	Radius float32    `xml:"r" desc:"radius of the circle"`
 }
 
 var KiT_Circle = kit.Types.AddType(&Circle{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})

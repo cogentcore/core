@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -136,7 +137,7 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ic.Layout2DBase(parBBox, true, iter)
 	if sic != nil {
 		sic.LayData = ic.LayData
-		sic.LayData.AllocPosRel = Vec2DZero
+		sic.LayData.AllocPosRel = mat32.Vec2Zero
 	}
 	return ic.Layout2DChildren(iter)
 }

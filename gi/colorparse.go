@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
 	// "github.com/rcoreilly/rasterx"
 	"github.com/srwiley/rasterx"
@@ -506,9 +507,9 @@ func readFraction(v string) (f float64, err error) {
 func (cs *ColorSpec) ReadGradAttr(attr xml.Attr) (err error) {
 	switch attr.Name.Local {
 	case "gradientTransform":
-		tx := Identity2D()
+		tx := mat32.Identity2D()
 		tx.SetString(attr.Value)
-		cs.Gradient.Matrix = tx.ToRasterx() // todo: not working
+		cs.Gradient.Matrix = MatToRasterx(&tx) // todo: not working
 	case "gradientUnits":
 		switch strings.TrimSpace(attr.Value) {
 		case "userSpaceOnUse":

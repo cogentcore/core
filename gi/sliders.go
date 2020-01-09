@@ -9,6 +9,7 @@ import (
 	"image"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -42,7 +43,7 @@ type SliderBase struct {
 	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
 	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
-	Dim         Dims2D               `desc:"dimension along which the slider slides"`
+	Dim         mat32.Dims           `desc:"dimension along which the slider slides"`
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
 	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
 	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
@@ -157,8 +158,8 @@ func (sb *SliderBase) Defaults() { // todo: should just get these from props
 // SnapValue snaps the value to step sizes if snap option is set
 func (sb *SliderBase) SnapValue() {
 	if sb.Snap {
-		sb.Value = FloatMod32(sb.Value, sb.Step)
-		sb.Value = Truncate32(sb.Value, sb.Prec)
+		sb.Value = mat32.Mod(sb.Value, sb.Step)
+		sb.Value = mat32.Truncate(sb.Value, sb.Prec)
 	}
 }
 
@@ -218,7 +219,7 @@ func (sb *SliderBase) SliderExitHover() {
 
 // SizeFromAlloc gets size from allocation
 func (sb *SliderBase) SizeFromAlloc() {
-	if sb.LayData.AllocSize.IsZero() {
+	if sb.LayData.AllocSize.IsNil() {
 		return
 	}
 	if sb.Min == 0 && sb.Max == 0 { // uninit
@@ -241,13 +242,13 @@ func (sb *SliderBase) SizeFromAlloc() {
 func (sb *SliderBase) SetSliderPos(pos float32) {
 	updt := sb.UpdateStart()
 	sb.Pos = pos
-	sb.Pos = Min32(sb.Size, sb.Pos)
+	sb.Pos = mat32.Min(sb.Size, sb.Pos)
 	if sb.ValThumb {
 		sb.UpdateThumbValSize()
-		sb.Pos = Min32(sb.Size-sb.ThSize, sb.Pos)
+		sb.Pos = mat32.Min(sb.Size-sb.ThSize, sb.Pos)
 	}
-	sb.Pos = Max32(0, sb.Pos)
-	sb.Value = Truncate32(sb.Min+(sb.Max-sb.Min)*(sb.Pos/sb.Size), sb.Prec)
+	sb.Pos = mat32.Max(0, sb.Pos)
+	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/sb.Size), sb.Prec)
 	sb.DragPos = sb.Pos
 	if sb.Snap {
 		sb.SnapValue()
@@ -283,11 +284,11 @@ func (sb *SliderBase) UpdatePosFromValue() {
 // emit an updated signal (see SetValueAction)
 func (sb *SliderBase) SetValue(val float32) {
 	updt := sb.UpdateStart()
-	val = Min32(val, sb.Max)
+	val = mat32.Min(val, sb.Max)
 	if sb.ValThumb {
-		val = Min32(val, sb.Max-sb.ThumbVal)
+		val = mat32.Min(val, sb.Max-sb.ThumbVal)
 	}
-	val = Max32(val, sb.Min)
+	val = mat32.Max(val, sb.Min)
 	if sb.Value != val {
 		sb.Value = val
 		sb.UpdatePosFromValue()
@@ -310,8 +311,8 @@ func (sb *SliderBase) SetValueAction(val float32) {
 // -- for scrollbar-style sliders where the thumb size represents visible range
 func (sb *SliderBase) SetThumbValue(val float32) {
 	updt := sb.UpdateStart()
-	sb.ThumbVal = Min32(val, sb.Max)
-	sb.ThumbVal = Max32(sb.ThumbVal, sb.Min)
+	sb.ThumbVal = mat32.Min(val, sb.Max)
+	sb.ThumbVal = mat32.Max(sb.ThumbVal, sb.Min)
 	sb.UpdateThumbValSize()
 	sb.UpdateEnd(updt)
 }
@@ -320,10 +321,10 @@ func (sb *SliderBase) SetThumbValue(val float32) {
 // visible in scrollbar) -- max's out to full size
 func (sb *SliderBase) UpdateThumbValSize() {
 	sb.ThSize = ((sb.ThumbVal - sb.Min) / (sb.Max - sb.Min))
-	sb.ThSize = Min32(sb.ThSize, 1.0)
-	sb.ThSize = Max32(sb.ThSize, 0.0)
+	sb.ThSize = mat32.Min(sb.ThSize, 1.0)
+	sb.ThSize = mat32.Max(sb.ThSize, 0.0)
 	sb.ThSize *= sb.Size
-	sb.ThSize = Max32(sb.ThSize, SliderMinThumbSize)
+	sb.ThSize = mat32.Max(sb.ThSize, SliderMinThumbSize)
 }
 
 func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
@@ -381,7 +382,7 @@ func (sb *SliderBase) MouseDragEvent() {
 		me.SetProcessed()
 		st := sbb.PointToRelPos(me.From)
 		ed := sbb.PointToRelPos(me.Where)
-		if sbb.Dim == X {
+		if sbb.Dim == mat32.X {
 			sbb.SliderMoved(float32(st.X), float32(ed.X))
 		} else {
 			sbb.SliderMoved(float32(st.Y), float32(ed.Y))
@@ -405,7 +406,7 @@ func (sb *SliderBase) MouseEvent() {
 					ed := sbb.PointToRelPos(me.Where)
 					st := &sbb.Sty
 					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSize
-					if sbb.Dim == X {
+					if sbb.Dim == mat32.X {
 						sbb.SliderPressed(float32(ed.X) - spc)
 					} else {
 						sbb.SliderPressed(float32(ed.Y) - spc)
@@ -443,7 +444,7 @@ func (sb *SliderBase) MouseScrollEvent() {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		cur := float32(sbb.Pos)
-		if sbb.Dim == X {
+		if sbb.Dim == mat32.X {
 			sbb.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
 		} else {
 			sbb.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
@@ -495,7 +496,7 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 			mrg := sb.Sty.Layout.Margin.Dots
 			pad := sb.Sty.Layout.Padding.Dots
 			spc := mrg + pad
-			odim := OtherDim(sb.Dim)
+			odim := mat32.OtherDim(sb.Dim)
 			ic.LayData.AllocPosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
 			ic.LayData.AllocPosRel.SetDim(odim, -pad)
 			ic.LayData.AllocSize.X = sb.ThSize
@@ -628,7 +629,7 @@ func (sr *Slider) Size2D(iter int) {
 	st := &sr.Sty
 	// get at least thumbsize + margin + border.size
 	sz := sr.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
-	sr.LayData.AllocSize.SetDim(OtherDim(sr.Dim), sz)
+	sr.LayData.AllocSize.SetDim(mat32.OtherDim(sr.Dim), sz)
 }
 
 func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -695,7 +696,7 @@ func (sr *Slider) Render2DDefaultStyle() {
 
 	ht := 0.5 * sr.ThSize
 
-	odim := OtherDim(sr.Dim)
+	odim := mat32.OtherDim(sr.Dim)
 	bpos.SetAddDim(odim, spc)
 	bsz.SetSubDim(odim, 2.0*spc)
 	bpos.SetAddDim(sr.Dim, spc+ht)
@@ -876,8 +877,8 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
-	pos := sb.LayData.AllocPos.AddVal(spc)
-	sz := sb.LayData.AllocSize.SubVal(2.0 * spc)
+	pos := sb.LayData.AllocPos.AddScalar(spc)
+	sz := sb.LayData.AllocSize.SubScalar(2.0 * spc)
 
 	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
 	pos.SetAddDim(sb.Dim, sb.Pos)                    // start of thumb

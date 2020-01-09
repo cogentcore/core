@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -107,7 +108,7 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 			tsz.Y = int(height)
 		}
 		bm.Resize(tsz)
-		m := Scale2D(scx, scy)
+		m := mat32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(bm.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
 	}
@@ -241,7 +242,7 @@ func SavePNG(path string, im image.Image) error {
 // affects the image itself -- make a copy if you want to keep the original
 // or see bild/blend/multiply -- this is specifically used for gi DND etc
 func ImageClearer(im *image.RGBA, pct float32) {
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	fact := pct / 100.0
 	sz := im.Bounds().Size()
 	for y := 0; y < sz.Y; y++ {

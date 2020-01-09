@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
@@ -32,7 +33,7 @@ type Label struct {
 	LinkSig     ki.Signal           `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 	StateStyles [LabelStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      TextRender          `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
-	RenderPos   Vec2D               `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
+	RenderPos   mat32.Vec2          `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
 	CurBgColor  Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
@@ -128,11 +129,11 @@ func (lb *Label) SetText(txt string) {
 	}
 	spc := lb.Sty.BoxSpace()
 	sz := lb.LayData.AllocSize
-	if sz.IsZero() {
+	if sz.IsNil() {
 		sz = lb.LayData.SizePrefOrMax()
 	}
-	if !sz.IsZero() {
-		sz.SetSubVal(2 * spc)
+	if !sz.IsNil() {
+		sz.SetSubScalar(2 * spc)
 	}
 	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 	lb.UpdateEnd(updt)
@@ -287,9 +288,9 @@ func (lb *Label) GrabCurBgColor() {
 	lb.CurBgColor.SetColor(clr)
 }
 
-func (lb *Label) TextPos() Vec2D {
+func (lb *Label) TextPos() mat32.Vec2 {
 	sty := &lb.Sty
-	pos := lb.LayData.AllocPos.AddVal(sty.BoxSpace())
+	pos := lb.LayData.AllocPos.AddScalar(sty.BoxSpace())
 	if !sty.Text.HasWordWrap() { // word-wrap case already deals with this b/c it has final alloc size -- otherwise it lays out "blind" and can't do this.
 		if lb.LayData.AllocSize.X > lb.Render.Size.X {
 			if IsAlignMiddle(sty.Layout.AlignH) {
@@ -348,8 +349,8 @@ func (lb *Label) LayoutLabel() {
 	lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	spc := lb.Sty.BoxSpace()
 	sz := lb.LayData.SizePrefOrMax()
-	if !sz.IsZero() {
-		sz.SetSubVal(2 * spc)
+	if !sz.IsNil() {
+		sz.SetSubScalar(2 * spc)
 	}
 	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 }

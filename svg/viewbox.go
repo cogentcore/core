@@ -6,6 +6,7 @@ package svg
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
 )
 
@@ -14,8 +15,8 @@ import (
 
 // ViewBox is used in SVG to define the coordinate system
 type ViewBox struct {
-	Min                 gi.Vec2D                   `desc:"offset or starting point in parent Viewport2D"`
-	Size                gi.Vec2D                   `desc:"size of viewbox within parent Viewport2D"`
+	Min                 mat32.Vec2                 `desc:"offset or starting point in parent Viewport2D"`
+	Size                mat32.Vec2                 `desc:"size of viewbox within parent Viewport2D"`
 	PreserveAspectRatio ViewBoxPreserveAspectRatio `desc:"how to scale the view box within parent Viewport2D"`
 }
 
@@ -23,8 +24,8 @@ type ViewBox struct {
 
 // Defaults returns viewbox to defaults
 func (vb *ViewBox) Defaults() {
-	vb.Min = gi.Vec2DZero
-	vb.Size = gi.Vec2DZero
+	vb.Min = mat32.Vec2Zero
+	vb.Size = mat32.Vec2Zero
 	vb.PreserveAspectRatio.Align = NoAlign
 	vb.PreserveAspectRatio.MeetOrSlice = Meet
 }

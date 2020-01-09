@@ -7,6 +7,7 @@ package svg
 import (
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -14,13 +15,13 @@ import (
 // Polygon is a SVG polygon
 type Polygon struct {
 	NodeBase
-	Points []gi.Vec2D `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
+	Points []mat32.Vec2 `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest, then does a closepath at the end"`
 }
 
 var KiT_Polygon = kit.Types.AddType(&Polygon{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
 
 // AddNewPolygon adds a new polygon to given parent node, with given name and points.
-func AddNewPolygon(parent ki.Ki, name string, points []gi.Vec2D) *Polygon {
+func AddNewPolygon(parent ki.Ki, name string, points []mat32.Vec2) *Polygon {
 	g := parent.AddNewChild(KiT_Polygon, name).(*Polygon)
 	g.Points = points
 	return g
@@ -29,7 +30,7 @@ func AddNewPolygon(parent ki.Ki, name string, points []gi.Vec2D) *Polygon {
 func (g *Polygon) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Polygon)
 	g.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-	g.Points = make([]gi.Vec2D, len(fr.Points))
+	g.Points = make([]mat32.Vec2, len(fr.Points))
 	copy(g.Points, fr.Points)
 }
 

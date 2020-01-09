@@ -13,9 +13,9 @@ import (
 	"strings"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	// "github.com/rcoreilly/rasterx"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/image/colornames"
 )
@@ -137,9 +137,13 @@ func CopyGradient(dst, src *rasterx.Gradient) {
 	copy(dst.Stops, src.Stops)
 }
 
+func MatToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
+	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
+}
+
 // RenderColor gets the color for rendering, applying opacity and bounds for
 // gradients
-func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform Matrix2D) interface{} {
+func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) interface{} {
 	if cs.Source == SolidColor || cs.Gradient == nil {
 		return rasterx.ApplyOpacity(cs.Color, float64(opacity))
 	} else {
@@ -149,7 +153,7 @@ func (cs *ColorSpec) RenderColor(opacity float32, bounds image.Rectangle, xform 
 			cs.Gradient.IsRadial = false
 		}
 		SetGradientBounds(cs.Gradient, bounds)
-		return cs.Gradient.GetColorFunctionUS(float64(opacity), xform.ToRasterx())
+		return cs.Gradient.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
 	}
 }
 
@@ -583,7 +587,7 @@ func (c *Color) ParseHex(x string) error {
 // multiplies the L factor, and then converts back to RGBA
 func (c *Color) Lighter(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.L += (1.0 - hsl.L) * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
 }
@@ -593,7 +597,7 @@ func (c *Color) Lighter(pct float32) Color {
 // multiplies the L factor, and then converts back to RGBA
 func (c *Color) Darker(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.L -= hsl.L * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
 }
@@ -604,7 +608,7 @@ func (c *Color) Darker(pct float32) Color {
 // darker, and vice-versa
 func (c *Color) Highlight(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	if hsl.L > .5 {
 		hsl.L -= hsl.L * (pct / 100.0)
 	} else {
@@ -617,7 +621,7 @@ func (c *Color) Highlight(pct float32) Color {
 // darker than 50%, and lighter if already lighter than 50%
 func (c *Color) Samelight(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	if hsl.L > .5 {
 		hsl.L += (1.0 - hsl.L) * (pct / 100.0)
 	} else {
@@ -631,7 +635,7 @@ func (c *Color) Samelight(pct float32) Color {
 // then converts back to RGBA
 func (c *Color) Saturate(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.S += (1.0 - hsl.S) * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
 }
@@ -641,7 +645,7 @@ func (c *Color) Saturate(pct float32) Color {
 // multiplies the S factor, and then converts back to RGBA
 func (c *Color) Pastel(pct float32) Color {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	hsl.S -= hsl.S * (pct / 100.0)
 	return ColorModel.Convert(hsl).(Color)
 }
@@ -650,7 +654,7 @@ func (c *Color) Pastel(pct float32) Color {
 // value) relative to current alpha level
 func (c *Color) Clearer(pct float32) Color {
 	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	f32.A -= f32.A * (pct / 100.0)
 	return ColorModel.Convert(f32).(Color)
 }
@@ -659,7 +663,7 @@ func (c *Color) Clearer(pct float32) Color {
 // value) relative to current alpha level
 func (c *Color) Opaquer(pct float32) Color {
 	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	f32.A += (1.0 - f32.A) * (pct / 100.0)
 	return ColorModel.Convert(f32).(Color)
 }
@@ -670,7 +674,7 @@ func (c *Color) Opaquer(pct float32) Color {
 func (c *Color) Blend(pct float32, clr color.Color) Color {
 	f32 := NRGBAf32Model.Convert(*c).(NRGBAf32)
 	othc := NRGBAf32Model.Convert(clr).(NRGBAf32)
-	pct = InRange32(pct, 0, 100.0)
+	pct = mat32.Clamp(pct, 0, 100.0)
 	oth := pct / 100.0
 	me := 1.0 - pct/100.0
 	f32.R = me*f32.R + oth*othc.R

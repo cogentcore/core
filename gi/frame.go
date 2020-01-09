@@ -8,6 +8,7 @@ import (
 	"image"
 	"log"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -81,12 +82,12 @@ func (fr *Frame) FrameStdRender() {
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
 	rad := st.Border.Radius.Dots
-	pos = pos.AddVal(st.Layout.Margin.Dots).SubVal(0.5 * st.Border.Width.Dots)
-	sz = sz.SubVal(2.0 * st.Layout.Margin.Dots).AddVal(st.Border.Width.Dots)
+	pos = pos.AddScalar(st.Layout.Margin.Dots).SubScalar(0.5 * st.Border.Width.Dots)
+	sz = sz.SubScalar(2.0 * st.Layout.Margin.Dots).AddScalar(st.Border.Width.Dots)
 
 	// then any shadow -- todo: optimize!
 	if st.BoxShadow.HasShadow() {
-		spos := pos.Add(Vec2D{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
+		spos := pos.Add(mat32.Vec2{st.BoxShadow.HOffset.Dots, st.BoxShadow.VOffset.Dots})
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColor(&st.BoxShadow.Color)
 		if rad == 0.0 {

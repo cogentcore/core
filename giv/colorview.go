@@ -11,6 +11,7 @@ import (
 	"sort"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -145,7 +146,7 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Step = 1
 	sl.PageStep = 16
 	sl.Prec = 3
-	sl.Dim = gi.X
+	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewCh(20))
@@ -197,7 +198,7 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Step = 1
 	sl.PageStep = 15
 	sl.Prec = 3
-	sl.Dim = gi.X
+	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.SetMinPrefWidth(units.NewCh(20))

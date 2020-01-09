@@ -13,6 +13,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -352,7 +353,7 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	if vp.Viewport == nil || vp.IsPopup() { // top level viewport
 		// viewport ignores any parent parent bbox info!
 		if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
-			if !vp.LayData.AllocSize.IsZero() {
+			if !vp.LayData.AllocSize.IsNil() {
 				asz := vp.LayData.AllocSize.ToPointCeil()
 				vp.Resize(asz)
 			} else if vp.Pixels == nil {
@@ -483,7 +484,7 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 func (vp *Viewport2D) FillViewport() {
 	rs := &vp.Render
 	rs.Lock()
-	rs.Paint.FillBox(&vp.Render, Vec2DZero, NewVec2DFmPoint(vp.Geom.Size), &vp.Sty.Font.BgColor)
+	rs.Paint.FillBox(&vp.Render, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &vp.Sty.Font.BgColor)
 	rs.Unlock()
 }
 

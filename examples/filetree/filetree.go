@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -317,8 +318,8 @@ func (fb *FileBrowse) ConfigSplitView() {
 	if split == nil {
 		return
 	}
-	split.Dim = gi.X
-	//	split.Dim = gi.Y
+	split.Dim = mat32.X
+	//	split.Dim = mat32.Y
 
 	split.SetProp("white-space", gi.WhiteSpacePreWrap)
 	split.SetProp("tab-size", 4)

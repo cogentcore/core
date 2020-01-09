@@ -473,7 +473,7 @@ func (tv *TabView) RenderTabSeps() {
 		ni := tb.AsWidget()
 
 		pos := ni.LayData.AllocPos
-		sz := ni.LayData.AllocSize.AddVal(-2.0 * st.Layout.Margin.Dots)
+		sz := ni.LayData.AllocSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
 		pc.DrawLine(rs, pos.X-bw, pos.Y, pos.X-bw, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)

@@ -11,6 +11,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -106,9 +107,9 @@ type ColorMapName string
 // Note that this is not a ValueView widget
 type ColorMapView struct {
 	gi.WidgetBase
-	Orient      gi.Dims2D `desc:"orientation along which to display the spectrum"`
-	Map         *ColorMap `desc:"the colormap that we view"`
-	ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
+	Orient      mat32.Dims `desc:"orientation along which to display the spectrum"`
+	Map         *ColorMap  `desc:"the colormap that we view"`
+	ColorMapSig ki.Signal  `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
 }
 
 var KiT_ColorMapView = kit.Types.AddType(&ColorMapView{}, nil)

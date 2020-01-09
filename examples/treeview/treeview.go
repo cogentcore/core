@@ -10,6 +10,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -24,7 +25,7 @@ type TestNodeA struct {
 	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`
 	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"`
 	BoolField  bool            `desc:"a bool"`
-	Vec        gi.Vec2D        `desc:"a vec"`
+	Vec        mat32.Vec2      `desc:"a vec"`
 	Rect       image.Rectangle `desc:"rect"`
 }
 
@@ -37,7 +38,7 @@ type TestNodeB struct {
 	IntField   int             `min:"5" max:"25" step:"5" desc:"an int"`
 	FloatField float64         `min:"-1" max:"1" step:".25" desc:"a float"`
 	BoolField  bool            `desc:"a bool"`
-	Vec        gi.Vec2D        `desc:"a vec"`
+	Vec        mat32.Vec2      `desc:"a vec"`
 	Rect       image.Rectangle `desc:"rect"`
 	SubObj     TestNodeA       `desc:"a sub-object"`
 }
@@ -98,7 +99,7 @@ func mainrun() {
 	gi.AddNewStretch(trow, "str2")
 
 	split := gi.AddNewSplitView(mfr, "split")
-	split.Dim = gi.X
+	split.Dim = mat32.X
 
 	tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)
 	svfr := gi.AddNewFrame(split, "svfr", gi.LayoutHoriz)

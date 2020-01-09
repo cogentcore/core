@@ -14,6 +14,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -47,7 +48,7 @@ type TextField struct {
 	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
 	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	EffSize      Vec2D                   `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
+	EffSize      mat32.Vec2              `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
 	StartPos     int                     `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
 	EndPos       int                     `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`
 	CursorPos    int                     `copy:"-" json:"-" xml:"-" desc:"current cursor position"`
@@ -751,12 +752,12 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 // CharStartPos returns the starting render coords for the given character
 // position in string -- makes no attempt to rationalize that pos (i.e., if
 // not in visible range, position will be out of range too)
-func (tf *TextField) CharStartPos(charidx int) Vec2D {
+func (tf *TextField) CharStartPos(charidx int) mat32.Vec2 {
 	st := &tf.Sty
 	spc := st.BoxSpace()
-	pos := tf.LayData.AllocPos.AddVal(spc)
+	pos := tf.LayData.AllocPos.AddScalar(spc)
 	cpos := tf.TextWidth(tf.StartPos, charidx)
-	return Vec2D{pos.X + cpos, pos.Y}
+	return mat32.Vec2{pos.X + cpos, pos.Y}
 }
 
 // TextFieldBlinkMu is mutex protecting TextFieldBlink updating and access
@@ -945,7 +946,7 @@ func (tf *TextField) RenderSelect() {
 	pc := &rs.Paint
 	st := &tf.StateStyles[TextFieldSel]
 	tsz := tf.TextWidth(effst, effed)
-	pc.FillBox(rs, spos, Vec2D{tsz, tf.FontHeight}, &st.Font.BgColor)
+	pc.FillBox(rs, spos, mat32.Vec2{tsz, tf.FontHeight}, &st.Font.BgColor)
 }
 
 // AutoScroll scrolls the starting position to keep the cursor visible
@@ -973,7 +974,7 @@ func (tf *TextField) AutoScroll() {
 	if tf.StartPos >= tf.EndPos {
 		tf.StartPos = ints.MaxInt(0, tf.EndPos-tf.CharWidth)
 	}
-	tf.CursorPos = InRangeInt(tf.CursorPos, 0, sz)
+	tf.CursorPos = mat32.ClampInt(tf.CursorPos, 0, sz)
 
 	inc := int(math32.Ceil(.1 * float32(tf.CharWidth)))
 	inc = ints.MaxInt(4, inc)
@@ -1491,7 +1492,7 @@ func (tf *TextField) Render2D() {
 		tf.RenderStdBox(st)
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
-		pos := tf.LayData.AllocPos.AddVal(st.BoxSpace())
+		pos := tf.LayData.AllocPos.AddScalar(st.BoxSpace())
 		if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 			st.Font.Color = st.Font.Color.Highlight(50)
 			tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)

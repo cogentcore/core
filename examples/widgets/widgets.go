@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -186,7 +187,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	srow.SetStretchMaxWidth()
 
 	slider1 := gi.AddNewSlider(srow, "slider1")
-	slider1.Dim = gi.X
+	slider1.Dim = mat32.X
 	slider1.Class = "hslides"
 	slider1.Defaults()
 	slider1.SetMinPrefWidth(units.NewEm(20))
@@ -197,7 +198,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	slider1.Icon = gi.IconName("circlebutton-on")
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
-	slider2.Dim = gi.Y
+	slider2.Dim = mat32.Y
 	slider2.Defaults()
 	slider2.SetMinPrefHeight(units.NewEm(10))
 	slider2.SetMinPrefWidth(units.NewEm(1))
@@ -213,7 +214,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	})
 
 	scrollbar1 := gi.AddNewScrollBar(srow, "scrollbar1")
-	scrollbar1.Dim = gi.X
+	scrollbar1.Dim = mat32.X
 	scrollbar1.Class = "hslides"
 	scrollbar1.Defaults()
 	scrollbar1.SetMinPrefWidth(units.NewEm(20))
@@ -227,7 +228,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	})
 
 	scrollbar2 := gi.AddNewScrollBar(srow, "scrollbar2")
-	scrollbar2.Dim = gi.Y
+	scrollbar2.Dim = mat32.Y
 	scrollbar2.Defaults()
 	scrollbar2.SetMinPrefHeight(units.NewEm(10))
 	scrollbar2.SetMinPrefWidth(units.NewEm(1))

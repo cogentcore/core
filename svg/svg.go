@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -73,8 +74,8 @@ func (svg *SVG) DeleteAll() {
 // SetNormXForm sets a scaling transform to make the entire viewbox to fit the viewport
 func (svg *SVG) SetNormXForm() {
 	pc := &svg.Pnt
-	pc.XForm = gi.Identity2D()
-	if svg.ViewBox.Size != gi.Vec2DZero {
+	pc.XForm = mat32.Identity2D()
+	if svg.ViewBox.Size != mat32.Vec2Zero {
 		// todo: deal with all the other options!
 		vpsX := float32(svg.Geom.Size.X) / svg.ViewBox.Size.X
 		vpsY := float32(svg.Geom.Size.Y) / svg.ViewBox.Size.Y
@@ -93,7 +94,7 @@ func (svg *SVG) SetNormXForm() {
 func (svg *SVG) SetDPIXForm() {
 	pc := &svg.Pnt
 	dpisc := svg.Viewport.Win.LogicalDPI() / 96.0
-	pc.XForm = gi.Scale2D(dpisc, dpisc)
+	pc.XForm = mat32.Scale2D(dpisc, dpisc)
 }
 
 func (svg *SVG) Init2D() {
@@ -105,7 +106,7 @@ func (svg *SVG) Init2D() {
 
 func (svg *SVG) Size2D(iter int) {
 	svg.InitLayout2D()
-	if svg.ViewBox.Size != gi.Vec2DZero {
+	if svg.ViewBox.Size != mat32.Vec2Zero {
 		svg.LayData.AllocSize = svg.ViewBox.Size
 	}
 	svg.Size2DAddSpace()

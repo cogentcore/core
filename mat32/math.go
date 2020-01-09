@@ -12,6 +12,7 @@ package mat32
 
 import (
 	"math"
+	"strconv"
 )
 
 const Pi = math.Pi
@@ -121,6 +122,28 @@ func Min(a, b float32) float32 {
 	return float32(math.Min(float64(a), float64(b)))
 }
 
+// SetMax sets a to Max(a,b)
+func SetMax(a *float32, b float32) {
+	*a = Max(*a, b)
+}
+
+// SetMin sets a to Min(a,b)
+func SetMin(a *float32, b float32) {
+	*a = Min(*a, b)
+}
+
+// MinPos returns the minimum of the two values, excluding any that are <= 0
+func MinPos(a, b float32) float32 {
+	if a > 0 && b > 0 {
+		return Min(a, b)
+	} else if a > 0 {
+		return a
+	} else if b > 0 {
+		return b
+	}
+	return a
+}
+
 func Mod(a, b float32) float32 {
 	return float32(math.Mod(float64(a), float64(b)))
 }
@@ -135,4 +158,20 @@ func Pow(a, b float32) float32 {
 
 func Tan(v float32) float32 {
 	return float32(math.Tan(float64(v)))
+}
+
+// Truncate64 truncates a floating point number to given level of precision
+// -- slow.. uses string conversion
+func Truncate64(val float64, prec int) float64 {
+	frep := strconv.FormatFloat(val, 'g', prec, 64)
+	val, _ = strconv.ParseFloat(frep, 64)
+	return val
+}
+
+// Truncate truncates a floating point number to given level of precision
+// -- slow.. uses string conversion
+func Truncate(val float32, prec int) float32 {
+	frep := strconv.FormatFloat(float64(val), 'g', prec, 32)
+	tval, _ := strconv.ParseFloat(frep, 32)
+	return float32(tval)
 }

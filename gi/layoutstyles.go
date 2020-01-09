@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -65,9 +66,9 @@ func (ls *LayoutStyle) SetStylePost(props ki.Props) {
 }
 
 // return the alignment for given dimension
-func (ls *LayoutStyle) AlignDim(d Dims2D) Align {
+func (ls *LayoutStyle) AlignDim(d mat32.Dims) Align {
 	switch d {
-	case X:
+	case mat32.X:
 		return ls.AlignH
 	default:
 		return ls.AlignV
@@ -75,23 +76,23 @@ func (ls *LayoutStyle) AlignDim(d Dims2D) Align {
 }
 
 // position settings, in dots
-func (ls *LayoutStyle) PosDots() Vec2D {
-	return NewVec2D(ls.PosX.Dots, ls.PosY.Dots)
+func (ls *LayoutStyle) PosDots() mat32.Vec2 {
+	return mat32.NewVec2(ls.PosX.Dots, ls.PosY.Dots)
 }
 
 // size settings, in dots
-func (ls *LayoutStyle) SizeDots() Vec2D {
-	return NewVec2D(ls.Width.Dots, ls.Height.Dots)
+func (ls *LayoutStyle) SizeDots() mat32.Vec2 {
+	return mat32.NewVec2(ls.Width.Dots, ls.Height.Dots)
 }
 
 // size max settings, in dots
-func (ls *LayoutStyle) MaxSizeDots() Vec2D {
-	return NewVec2D(ls.MaxWidth.Dots, ls.MaxHeight.Dots)
+func (ls *LayoutStyle) MaxSizeDots() mat32.Vec2 {
+	return mat32.NewVec2(ls.MaxWidth.Dots, ls.MaxHeight.Dots)
 }
 
 // size min settings, in dots
-func (ls *LayoutStyle) MinSizeDots() Vec2D {
-	return NewVec2D(ls.MinWidth.Dots, ls.MinHeight.Dots)
+func (ls *LayoutStyle) MinSizeDots() mat32.Vec2 {
+	return mat32.NewVec2(ls.MinWidth.Dots, ls.MinHeight.Dots)
 }
 
 // Align has all different types of alignment -- only some are applicable to
@@ -172,18 +173,18 @@ func (ev *Overflow) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON
 
 // SizePrefs represents size preferences
 type SizePrefs struct {
-	Need Vec2D `desc:"minimum size needed -- set to at least computed allocsize"`
-	Pref Vec2D `desc:"preferred size -- start here for layout"`
-	Max  Vec2D `desc:"maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch"`
+	Need mat32.Vec2 `desc:"minimum size needed -- set to at least computed allocsize"`
+	Pref mat32.Vec2 `desc:"preferred size -- start here for layout"`
+	Max  mat32.Vec2 `desc:"maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch"`
 }
 
 // return true if Max < 0 meaning can stretch infinitely along given dimension
-func (sp SizePrefs) HasMaxStretch(d Dims2D) bool {
+func (sp SizePrefs) HasMaxStretch(d mat32.Dims) bool {
 	return (sp.Max.Dim(d) < 0.0)
 }
 
 // return true if Pref > Need meaning can stretch more along given dimension
-func (sp SizePrefs) CanStretchNeed(d Dims2D) bool {
+func (sp SizePrefs) CanStretchNeed(d mat32.Dims) bool {
 	return (sp.Pref.Dim(d) > sp.Need.Dim(d))
 }
 

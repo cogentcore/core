@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
@@ -317,13 +318,13 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 		if !ok {
 			sp = ScreenPrefs{}
 		}
-		sp.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
+		sp.LogicalDPIScale = mat32.Truncate(sc.LogicalDPI/sc.PhysicalDPI, 2)
 		if pf.ScreenPrefs == nil {
 			pf.ScreenPrefs = make(map[string]ScreenPrefs)
 		}
 		pf.ScreenPrefs[sc.Name] = sp
 	} else {
-		pf.LogicalDPIScale = Truncate32(sc.LogicalDPI/sc.PhysicalDPI, 2)
+		pf.LogicalDPIScale = mat32.Truncate(sc.LogicalDPI/sc.PhysicalDPI, 2)
 	}
 	pf.Save()
 }

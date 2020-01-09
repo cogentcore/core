@@ -12,6 +12,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -20,6 +21,8 @@ import (
 // this is an alternative manual styling strategy -- styling takes a lot of time
 // and this should be a lot faster
 
+// StyleInhInit detects the style values of "inherit" and "initial",
+// setting the corresponding bool return values
 func StyleInhInit(val, par interface{}) (inh, init bool) {
 	if str, ok := val.(string); ok {
 		switch str {
@@ -1448,8 +1451,8 @@ func (sf *StyledField) FieldIface(objptr uintptr) interface{} {
 		return (*Color)(unsafe.Pointer(objptr + sf.NetOff))
 	case npt == KiT_ColorSpec:
 		return (*ColorSpec)(unsafe.Pointer(objptr + sf.NetOff))
-	case npt == KiT_Matrix2D:
-		return (*Matrix2D)(unsafe.Pointer(objptr + sf.NetOff))
+	// case npt == mat32.KiT_Mat2:
+	// 	return (*mat32.Mat2)(unsafe.Pointer(objptr + sf.NetOff))
 	case npt.Name() == "Value":
 		return (*units.Value)(unsafe.Pointer(objptr + sf.NetOff))
 	case npk >= reflect.Int && npk <= reflect.Uint64:
@@ -1512,11 +1515,11 @@ func (fld *StyledField) FromProps(fields map[string]*StyledField, objptr, parptr
 		fiv.SetIFace(val, vp, fld.Field.Name)
 	case *units.Value:
 		fiv.SetIFace(val, fld.Field.Name)
-	case *Matrix2D:
+	case *mat32.Mat2:
 		switch valv := val.(type) {
 		case string:
 			fiv.SetString(valv)
-		case *Matrix2D:
+		case *mat32.Mat2:
 			*fiv = *valv
 		}
 	case *[]float64:
@@ -1563,7 +1566,6 @@ var StyleValueTypes = map[reflect.Type]struct{}{
 	units.KiT_Value: {},
 	KiT_Color:       {},
 	KiT_ColorSpec:   {},
-	KiT_Matrix2D:    {},
 }
 
 // WalkStyleStruct walks through a struct, calling a function on fields with
