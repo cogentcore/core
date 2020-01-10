@@ -83,6 +83,9 @@ type Node3D interface {
 	// Init3D does 3D intialization
 	Init3D(sc *Scene)
 
+	// Style3D does 3D styling using property values on nodes
+	Style3D(sc *Scene)
+
 	// RenderClass returns the class of rendering for this solid.
 	// used for organizing the ordering of rendering
 	RenderClass() RenderClasses
@@ -286,21 +289,17 @@ func (nb *Node3DBase) WorldMatrix() *mat32.Mat4 {
 }
 
 func (nb *Node3DBase) Init3D(sc *Scene) {
-	// todo: instead, just trigger a scene update.
-	// nb.NodeSig.Connect(nb.This(), func(recnb, sendk ki.Ki, sig int64, data interface{}) {
-	// 	rnbi, rnb := KiToNode3D(recnb)
-	// 	if Update3DTrace {
-	// 		fmt.Printf("3D Update: Node: %v update scene due to signal: %v from node: %v\n", rnbi.PathUnique(), ki.NodeSignals(sig), sendk.PathUnique())
-	// 	}
-	// 	if !rnb.IsDeleted() && !rnb.IsDestroyed() {
-	// 		scci := rnb.ParentByType(KiT_Scene, true)
-	// 		if scci != nil {
-	// 			rnbi.UpdateWorldMatrix(nil) // nil = use cached last one
-	// 			rnbi.UpdateWorldMatrixChildren()
-	// 			scci.(*Scene).DirectWinUpload()
-	// 		}
-	// 	}
-	// })
+	// nop by default -- could connect to scene for update signals or something
+}
+
+func (nb *Node3DBase) Style3D(sc *Scene) {
+	pagg := nb.ParentCSSAgg()
+	if pagg != nil {
+		gi.AggCSS(&nb.CSSAgg, *pagg)
+	} else {
+		nb.CSSAgg = nil // restart
+	}
+	gi.AggCSS(&nb.CSSAgg, nb.CSS)
 }
 
 func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {

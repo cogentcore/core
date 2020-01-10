@@ -94,6 +94,33 @@ func (sld *Solid) Init3D(sc *Scene) {
 	sld.Node3DBase.Init3D(sc)
 }
 
+// ParentMaterial returns parent's material or nil if not avail
+func (sld *Solid) ParentMaterial() *Material {
+	if sld.Par == nil {
+		return nil
+	}
+	psi := sld.Par.Embed(KiT_Solid)
+	if psi == nil {
+		return nil
+	}
+	return &(psi.(*Solid).Mat)
+}
+
+func (sld *Solid) Style3D(sc *Scene) {
+	styprops := *sld.Properties()
+	parMat := sld.ParentMaterial()
+	sld.Mat.SetMatProps(parMat, styprops, sc.Viewport)
+
+	pagg := sld.ParentCSSAgg()
+	if pagg != nil {
+		gi.AggCSS(&sld.CSSAgg, *pagg)
+	} else {
+		sld.CSSAgg = nil // restart
+	}
+	gi.AggCSS(&sld.CSSAgg, sld.CSS)
+	sld.Mat.StyleCSS(sld.This().(Node3D), sld.CSSAgg, "", sc.Viewport)
+}
+
 // Validate checks that solid has valid mesh and texture settings, etc
 func (sld *Solid) Validate(sc *Scene) error {
 	if sld.Mesh == "" {

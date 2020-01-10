@@ -91,22 +91,34 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	rbgp := gi3d.AddNewGroup(sc, sc, "r-b-group")
 
+	// style sheet
+	var css = ki.Props{
+		".cube": ki.Props{
+			"shiny": 20,
+		},
+	}
+	sc.CSS = css
+
 	rcb := gi3d.AddNewSolid(sc, rbgp, "red-cube", cbm.Name())
+	rcb.Class = "cube"
 	rcb.Pose.Pos.Set(-1, 0, 0)
+	rcb.SetProp("color", "red")
+	rcb.SetProp("shiny", 500) // note: this will be overridden by the css sheet
 	rcb.Mat.Color.SetName("red")
-	rcb.Mat.Shiny = 500
 
 	bcb := gi3d.AddNewSolid(sc, rbgp, "blue-cube", cbm.Name())
+	bcb.Class = "cube"
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
 	bcb.Mat.Color.SetName("blue")
-	bcb.Mat.Shiny = 10
+	bcb.Mat.Shiny = 10 // note: this will be overridden by the css sheet
 
 	bcb.Mat.Specular.SetName("blue") // how you get rid of specular highlights
 
 	gcb := gi3d.AddNewSolid(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
+	gcb.Class = "cube"
 
 	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
 	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())

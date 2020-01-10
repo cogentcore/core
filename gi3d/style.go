@@ -5,9 +5,67 @@
 package gi3d
 
 import (
+	"strings"
+
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
+
+// SetMatProps sets Material values based on ki.Props properties
+func (mt *Material) SetMatProps(par *Material, props ki.Props, vp *gi.Viewport2D) {
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		if sfunc, ok := StyleMatFuncs[key]; ok {
+			sfunc(mt, key, val, par, vp)
+			continue
+		}
+	}
+}
+
+// todo: could generalize this logic and pass in functions.
+
+// ApplyCSS applies css styles for given node, using key to select sub-props
+// from overall properties list, and optional selector to select a further
+// :name selector within that key
+func (mt *Material) ApplyCSS(node Node3D, css ki.Props, key, selector string, vp *gi.Viewport2D) bool {
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+	if selector != "" {
+		pmap, ok = gi.SubProps(pmap, selector)
+		if !ok {
+			return false
+		}
+	}
+	mt.SetMatProps(nil, pmap, vp)
+	return true
+}
+
+// StyleCSS applies css style properties to given node, parsing out
+// type, .class, and #name selectors, along with optional sub-selector
+// (:hover, :active etc)
+func (mt *Material) StyleCSS(node Node3D, css ki.Props, selector string, vp *gi.Viewport2D) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	mt.ApplyCSS(node, css, tyn, selector, vp)
+	classes := strings.Split(strings.ToLower(node.AsNode3D().Class), " ")
+	for _, cl := range classes {
+		cln := "." + strings.TrimSpace(cl)
+		mt.ApplyCSS(node, css, cln, selector, vp)
+	}
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	mt.ApplyCSS(node, css, idnm, selector, vp)
+}
 
 // StyleMatFuncs are functions for styling the Material
 var StyleMatFuncs = map[string]gi.StyleFunc{

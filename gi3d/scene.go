@@ -431,7 +431,7 @@ func (sc *Scene) Style2D() {
 	sc.SetCurWin()
 	sc.Style2DWidget()
 	sc.LayData.SetFromStyle(&sc.Sty.Layout) // also does reset
-	sc.Init3D()                             // todo: is this needed??
+	// note: we do Style3D in Init3D
 }
 
 func (sc *Scene) Size2D(iter int) {
@@ -997,6 +997,21 @@ func (sc *Scene) Init3D() {
 			return false // going into a different type of thing, bail
 		}
 		nii.Init3D(sc)
+		return true
+	})
+	sc.Style3D()
+}
+
+func (sc *Scene) Style3D() {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == sc.This() {
+			return true
+		}
+		nii, _ := KiToNode3D(k)
+		if nii == nil {
+			return false // going into a different type of thing, bail
+		}
+		nii.Style3D(sc)
 		return true
 	})
 }
