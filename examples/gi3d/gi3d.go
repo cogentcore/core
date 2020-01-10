@@ -5,7 +5,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math"
+	"time"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
@@ -19,6 +22,67 @@ func main() {
 	gimain.Main(func() {
 		mainrun()
 	})
+}
+
+// AnimateTicker is the time.Ticker for animating the scene
+var AnimateTicker *time.Ticker
+
+var DoAnimation = false
+
+var TheScene *gi3d.Scene
+
+func Animate() {
+	torAng := float32(0)
+	var torPosOrig, gophPosOrig mat32.Vec3
+	for {
+		if AnimateTicker == nil || TheScene == nil {
+			return
+		}
+		<-AnimateTicker.C // wait for tick
+		if !DoAnimation || TheScene == nil {
+			continue
+		}
+		torusi := TheScene.ChildByName("torus", 0)
+		if torusi == nil {
+			continue
+		}
+		torus := torusi.(*gi3d.Solid)
+		if torPosOrig.IsNil() {
+			torPosOrig = torus.Pose.Pos
+		}
+		ggp := TheScene.ChildByName("go-group", 0)
+		if ggp == nil {
+			continue
+		}
+		gophi := ggp.Child(1)
+		if gophi == nil {
+			continue
+		}
+		goph := gophi.(*gi3d.Group)
+		if gophPosOrig.IsNil() {
+			gophPosOrig = goph.Pose.Pos
+		}
+		updt := TheScene.UpdateStart()
+		radius := float32(0.3)
+		tdx := radius * mat32.Cos(torAng)
+		tdz := radius * mat32.Sin(torAng)
+
+		gdx := 0.1 * radius * mat32.Cos(torAng+math.Pi)
+		gdz := 0.1 * radius * mat32.Sin(torAng+math.Pi)
+
+		torAng += .1
+		tp := torPosOrig
+		tp.X += tdx
+		tp.Z += tdz
+		torus.Pose.Pos = tp
+
+		gp := gophPosOrig
+		gp.X += gdx
+		gp.Z += gdz
+		goph.Pose.Pos = gp
+
+		TheScene.UpdateEnd(updt) // triggers re-render -- don't need a full Update() which updates meshes
+	}
 }
 
 func mainrun() {
@@ -72,6 +136,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
+	TheScene = sc
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
@@ -162,7 +227,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	bgo, _ := sc.AddFmLibrary("gopher", gogp)
 	bgo.Pose.Scale.Set(.5, .5, .5)
-	bgo.Pose.Pos.Set(2, -2.5, 0)
+	bgo.Pose.Pos.Set(1.4, -2.5, 0)
+	bgo.Pose.SetAxisRotation(0, 1, 0, -160)
 
 	sgo, _ := sc.AddFmLibrary("gopher", gogp)
 	sgo.Pose.Pos.Set(-1.5, -2, 0)
@@ -170,7 +236,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
 	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
-	trs.Pose.Pos.Set(-1.5, -1.5, 0)
+	trs.Pose.Pos.Set(-1.6, -1.6, -.2)
 	trs.Pose.SetAxisRotation(1, 0, 0, 90)
 	trs.Mat.Color.SetName("white")
 	trs.Mat.Color.A = 200
@@ -212,8 +278,31 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu.AddAppMenu(win)
-
 	win.MainMenuUpdated()
+
+	abut := gi.AddNewCheckBox(mfr, "anim-but")
+	abut.SetText("Animate")
+	abut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			DoAnimation = !abut.IsChecked() // note: not yet updated so status is opposite!
+		}
+	})
+
+	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 100, 50)
+	emb.Pose.Pos.Set(-2, 2, 0)
+	// eabut := gi.AddNewCheckBox(emb.Viewport, "anim-but")
+	eabut := gi.AddNewButton(emb.Viewport, "anim-but")
+	eabut.SetText("Animate")
+	eabut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			fmt.Printf("embedded button!")
+			// DoAnimation = !eabut.IsChecked() // note: not yet updated so status is opposite!
+		}
+	})
+
+	AnimateTicker = time.NewTicker(10 * time.Millisecond)
+	go Animate()
+
 	vp.UpdateEndNoSig(updt)
 	win.StartEventLoop()
 }

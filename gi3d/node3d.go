@@ -86,6 +86,9 @@ type Node3D interface {
 	// Style3D does 3D styling using property values on nodes
 	Style3D(sc *Scene)
 
+	// UpdateNode3D does arbitrary node updating during render process
+	UpdateNode3D(sc *Scene)
+
 	// RenderClass returns the class of rendering for this solid.
 	// used for organizing the ordering of rendering
 	RenderClass() RenderClasses
@@ -302,6 +305,9 @@ func (nb *Node3DBase) Style3D(sc *Scene) {
 	gi.AggCSS(&nb.CSSAgg, nb.CSS)
 }
 
+func (nb *Node3DBase) UpdateNode3D(sc *Scene) {
+}
+
 func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	// nop
 }
@@ -334,14 +340,14 @@ func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
 // signal from the parent window -- typically connect only visible nodes, and
 // disconnect when not visible
 func (nb *Node3DBase) ConnectEvent(win *gi.Window, et oswin.EventType, pri gi.EventPris, fun ki.RecvFunc) {
-	win.ConnectEvent(nb.This(), et, pri, fun)
+	win.EventMgr.ConnectEvent(nb.This(), et, pri, fun)
 }
 
 // DisconnectEvent disconnects this receiver from receiving given event
 // type -- pri is priority -- pass AllPris for all priorities -- see also
 // DisconnectAllEvents
 func (nb *Node3DBase) DisconnectEvent(win *gi.Window, et oswin.EventType, pri gi.EventPris) {
-	win.DisconnectEvent(nb.This(), et, pri)
+	win.EventMgr.DisconnectEvent(nb.This(), et, pri)
 }
 
 // DisconnectAllEvents disconnects node from all window events -- typically
@@ -354,7 +360,7 @@ func (nb *Node3DBase) DisconnectAllEvents(win *gi.Window, pri gi.EventPris) {
 		if ni == nil {
 			return false // going into a different type of thing, bail
 		}
-		win.DisconnectAllEvents(ni.This(), pri)
+		win.EventMgr.DisconnectAllEvents(ni.This(), pri)
 		return true
 	})
 }

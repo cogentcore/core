@@ -476,8 +476,8 @@ func (tv *TableView) UpdateSliceGrid() {
 	nWidg := nWidgPerRow * tv.DispRows
 
 	if tv.Viewport != nil && tv.Viewport.Win != nil {
-		wupdt := tv.Viewport.Win.UpdateStart()
-		defer tv.Viewport.Win.UpdateEnd(wupdt)
+		wupdt := tv.TopUpdateStart()
+		defer tv.TopUpdateEnd(wupdt)
 	}
 
 	updt := sg.UpdateStart()
@@ -660,8 +660,8 @@ func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Node2D, idx, fidx int,
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (tv *TableView) SliceNewAt(idx int) {
-	wupdt := tv.Viewport.Win.UpdateStart()
-	defer tv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
@@ -684,8 +684,8 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	if idx < 0 {
 		return
 	}
-	wupdt := tv.Viewport.Win.UpdateStart()
-	defer tv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
@@ -719,8 +719,8 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Push(cursor.Wait)
 	defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
 
-	wupdt := tv.Viewport.Win.UpdateStart()
-	defer tv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	updt := tv.UpdateStart()
 	sgh := tv.SliceHeader()
@@ -892,8 +892,8 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 	if row < 0 {
 		return
 	}
-	wupdt := tv.Viewport.Win.UpdateStart()
-	defer tv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	sg := tv.SliceGrid()
 	nWidgPerRow, idxOff := tv.RowWidgetNs()

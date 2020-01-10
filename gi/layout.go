@@ -986,10 +986,10 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		li, _ := KiToNode2D(recv)
 		ls := li.AsLayout2D()
 		if !ls.IsUpdating() {
-			wupdt := ls.Viewport.Win.UpdateStart()
+			wupdt := ls.TopUpdateStart()
 			ls.Move2DTree()
 			ls.Viewport.ReRender2DNode(li)
-			ls.Viewport.Win.UpdateEnd(wupdt)
+			ls.TopUpdateEnd(wupdt)
 			// } else {
 			// 	fmt.Printf("not ready to update\n")
 		}

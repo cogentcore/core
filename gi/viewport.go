@@ -27,6 +27,25 @@ import (
 // events come through the Window in terms of the root VP coords.  Thus, nodes
 // require a  WinBBox for events and a VpBBox for their parent Viewport.
 
+// Viewport provides an interface for viewports,
+// supporting overall management functions that can be
+// provided by more embedded viewports for example.
+type Viewport interface {
+	// VpTop returns the top-level Viewport, which could be this one
+	// or a higher one.  VpTopNode and VpEventMgr should be called on
+	// on the Viewport returned by this method.  For popups
+	// this *not* the popup viewport but rather the window top viewport.
+	VpTop() Viewport
+
+	// VpTopNode returns the top node for this viewport.
+	// must be called on VpTop()
+	VpTopNode() Node
+
+	// VpEventMgr returns the event manager for this viewport.
+	// Must be called on VpTop().  Can be nil.
+	VpEventMgr() *EventMgr
+}
+
 // Viewport2D provides an image and a stack of Paint contexts for drawing onto the image
 // with a convenience forwarding of the Paint methods operating on the current Paint
 type Viewport2D struct {
@@ -185,10 +204,49 @@ func (vp *Viewport2D) IsDoingFullRender() bool {
 }
 
 func (vp *Viewport2D) IsVisible() bool {
-	if vp == nil || vp.This() == nil || vp.IsInvisible() || vp.Win == nil {
+	if vp == nil || vp.This() == nil || vp.IsInvisible() {
+		return false
+	}
+	if vp.Par == nil { // standalone
+		return true
+	}
+	if vp.Win == nil {
 		return false
 	}
 	return vp.Win.IsVisible()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Viewport interface implementation
+
+func (vp *Viewport2D) VpTop() Viewport {
+	if vp.Win != nil {
+		return vp.Win.Viewport
+	}
+	if vp.Par == nil {
+		return vp.This().(Viewport)
+	}
+	pvp := vp.ParentViewport()
+	if pvp != nil {
+		return pvp.This().(Viewport)
+	}
+	return vp.This().(Viewport)
+}
+
+func (vp *Viewport2D) VpTopNode() Node {
+	if vp.Win != nil {
+		return vp.Win
+	}
+	return vp.This().(Node)
+}
+
+// note: if not a standard viewport in a window, this method must be redefined!
+
+func (vp *Viewport2D) VpEventMgr() *EventMgr {
+	if vp.Win != nil {
+		return &vp.Win.EventMgr
+	}
+	return nil
 }
 
 // set our window pointer to point to the current window we are under

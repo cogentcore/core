@@ -198,8 +198,8 @@ func (sv *SliceViewBase) SetSlice(sl interface{}) {
 
 // Update is the high-level update display call -- robust to any changes
 func (sv *SliceViewBase) Update() {
-	wupdt := sv.Viewport.Win.UpdateStart()
-	defer sv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sv.UpdateStart()
 	sv.This().(SliceViewer).LayoutSliceGrid()
@@ -405,10 +405,10 @@ func (sv *SliceViewBase) ConfigScroll() {
 			return
 		}
 		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
-		wupdt := sv.Viewport.Win.UpdateStart()
+		wupdt := sv.TopUpdateStart()
 		svv.This().(SliceViewer).UpdateSliceGrid()
 		svv.Viewport.ReRender2DNode(svv.This().(gi.Node2D))
-		svv.Viewport.Win.UpdateEnd(wupdt)
+		svv.TopUpdateEnd(wupdt)
 	})
 }
 
@@ -507,8 +507,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	nWidg := nWidgPerRow * sv.DispRows
 
 	if sv.Viewport != nil && sv.Viewport.Win != nil {
-		wupdt := sv.Viewport.Win.UpdateStart()
-		defer sv.Viewport.Win.UpdateEnd(wupdt)
+		wupdt := sv.TopUpdateStart()
+		defer sv.TopUpdateEnd(wupdt)
 	}
 
 	updt := sg.UpdateStart()
@@ -1468,8 +1468,8 @@ func (sv *SliceViewBase) DeleteIdxs() {
 	if len(sv.SelectedIdxs) == 0 {
 		return
 	}
-	wupdt := sv.Viewport.Win.UpdateStart()
-	defer sv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sv.UpdateStart()
 	ixs := sv.SelectedIdxsList(true) // descending sort
@@ -1487,8 +1487,8 @@ func (sv *SliceViewBase) Cut() {
 	if len(sv.SelectedIdxs) == 0 {
 		return
 	}
-	wupdt := sv.Viewport.Win.UpdateStart()
-	defer sv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sv.UpdateStart()
 	sv.CopyIdxs(false)
@@ -1589,8 +1589,8 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	}
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := sv.SliceNPVal
-	wupdt := sv.Viewport.Win.UpdateStart()
-	defer sv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
 	updt := sv.UpdateStart()
 	for _, ns := range sl {
 		sz := svnp.Len()
@@ -1731,8 +1731,8 @@ func (sv *SliceViewBase) DragNDropSource(de *dnd.Event) {
 		return
 	}
 
-	wupdt := sv.Viewport.Win.UpdateStart()
-	defer sv.Viewport.Win.UpdateEnd(wupdt)
+	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sv.UpdateStart()
 	sort.Slice(sv.DraggedIdxs, func(i, j int) bool {

@@ -50,7 +50,7 @@ func AddNewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
 }
 
 func (txt *Text2D) Defaults(sc *Scene) {
-	tm := sc.Text2DPlaneMesh()
+	tm := sc.PlaneMesh2D()
 	txt.SetMesh(sc, tm)
 	txt.Solid.Defaults()
 	txt.Pose.Scale.SetScalar(.005)

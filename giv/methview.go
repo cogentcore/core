@@ -707,7 +707,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data interface{}) {
 func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Value) {
 	if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
 		if md.Vp != nil && md.Vp.Win != nil {
-			md.Vp.Win.SendKeyFunEvent(md.KeyFun, false)
+			md.Vp.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
 		}
 		return
 	}

@@ -392,8 +392,8 @@ func (tb *ToolBar) UpdateActions() {
 		return
 	}
 	if tb.Viewport != nil && tb.Viewport.Win != nil {
-		wupdt := tb.Viewport.Win.UpdateStart()
-		defer tb.Viewport.Win.UpdateEnd(wupdt)
+		wupdt := tb.TopUpdateStart()
+		defer tb.TopUpdateEnd(wupdt)
 	}
 	for _, mi := range tb.Kids {
 		if mi.TypeEmbeds(KiT_Action) {

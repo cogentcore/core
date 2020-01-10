@@ -215,19 +215,19 @@ func (m *Menu) AddCopyCutPaste(win *Window) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
-			ww.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
+			ww.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Cut", ShortcutKey: KeyFunCut},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
-			ww.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
+			ww.EventMgr.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
 			ac.SetInactiveState(oswin.TheApp.ClipBoard(win.OSWin).IsEmpty())
 		}}, win, func(recv, send ki.Ki, sig int64, data interface{}) {
 		ww := recv.Embed(KiT_Window).(*Window)
-		ww.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
+		ww.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
 	})
 }
 
@@ -240,7 +240,7 @@ func (m *Menu) AddCopyCutPasteDupe(win *Window) {
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
 		win, func(recv, send ki.Ki, sig int64, data interface{}) {
 			ww := recv.Embed(KiT_Window).(*Window)
-			ww.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
+			ww.EventMgr.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
 		})
 }
 

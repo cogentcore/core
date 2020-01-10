@@ -153,7 +153,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 	vpsz.Y = ints.MaxInt(vpsz.Y, sth)
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {
@@ -166,7 +166,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 			kt.SetProcessed()
 		}
 	})
-	win.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		kt := d.(*key.ChordEvent)
 		ddlg, _ := recv.Embed(KiT_Dialog).(*Dialog)
 		if KeyEventTrace {

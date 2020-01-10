@@ -491,13 +491,90 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 	return k.(Node2D).AsNode2D()
 }
 
+// TopNode2D() returns the top-level node of the 2D tree, which
+// can be either a Window or a Viewport typically.  This is used
+// for UpdateStart / End around multiple dispersed updates to
+// properly batch everything and prevent redundant updates.
+func (nb *Node2DBase) TopNode2D() Node {
+	if nb.Viewport == nil {
+		return nil
+	}
+	return nb.Viewport.This().(Viewport).VpTop().VpTopNode()
+}
+
+// EventMgr2D() returns the event manager for this node.
+// Can be nil.
+func (nb *Node2DBase) EventMgr2D() *EventMgr {
+	if nb.Viewport == nil {
+		return nil
+	}
+	return nb.Viewport.This().(Viewport).VpTop().VpEventMgr()
+}
+
+// TopUpdateStart calls UpdateStart on TopNode2D().  Use this
+// for TopUpdateStart / End around multiple dispersed updates to
+// properly batch everything and prevent redundant updates.
+func (nb *Node2DBase) TopUpdateStart() bool {
+	tn := nb.TopNode2D()
+	if tn == nil {
+		return false
+	}
+	return tn.UpdateStart()
+}
+
+// TopUpdateEnd calls UpdateEnd on TopNode2D().  Use this
+// for TopUpdateStart / End around multiple dispersed updates to
+// properly batch everything and prevent redundant updates.
+func (nb *Node2DBase) TopUpdateEnd(updt bool) {
+	if !updt {
+		return
+	}
+	tn := nb.TopNode2D()
+	if tn == nil {
+		return
+	}
+	tn.UpdateEnd(updt)
+}
+
+// ParentWindow returns the parent window for this node
+func (nb *Node2DBase) ParentWindow() *Window {
+	if nb.Viewport != nil && nb.Viewport.Win != nil {
+		return nb.Viewport.Win
+	}
+	wini, err := nb.ParentByTypeTry(KiT_Window, true)
+	if err != nil {
+		// log.Println(err)
+		return nil
+	}
+	return wini.Embed(KiT_Window).(*Window)
+}
+
+// ParentViewport returns the parent viewport -- uses AsViewport2D() method on
+// Node2D interface
+func (nb *Node2DBase) ParentViewport() *Viewport2D {
+	var parVp *Viewport2D
+	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+		nii, ok := k.(Node2D)
+		if !ok {
+			return false // don't keep going up
+		}
+		vp := nii.AsViewport2D()
+		if vp != nil {
+			parVp = vp
+			return false // done
+		}
+		return true
+	})
+	return parVp
+}
+
 // ConnectEvent connects this node to receive a given type of GUI event
 // signal from the parent window -- typically connect only visible nodes, and
 // disconnect when not visible
 func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
-	win := nb.ParentWindow()
-	if win != nil {
-		win.ConnectEvent(nb.This(), et, pri, fun)
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.ConnectEvent(nb.This(), et, pri, fun)
 	}
 }
 
@@ -505,9 +582,9 @@ func (nb *Node2DBase) ConnectEvent(et oswin.EventType, pri EventPris, fun ki.Rec
 // type -- pri is priority -- pass AllPris for all priorities -- see also
 // DisconnectAllEvents
 func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
-	win := nb.ParentWindow()
-	if win != nil {
-		win.DisconnectEvent(nb.This(), et, pri)
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.DisconnectEvent(nb.This(), et, pri)
 	}
 }
 
@@ -516,8 +593,8 @@ func (nb *Node2DBase) DisconnectEvent(et oswin.EventType, pri EventPris) {
 // This goes down the entire tree from this node on down, as typically everything under
 // will not get an explicit disconnect call because no further updating will happen
 func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
-	win := nb.ParentWindow()
-	if win == nil {
+	em := nb.EventMgr2D()
+	if em == nil {
 		return
 	}
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
@@ -526,7 +603,7 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 			return false // going into a different type of thing, bail
 		}
 		ni.DisconnectViewport()
-		win.DisconnectAllEvents(ni.This(), pri)
+		em.DisconnectAllEvents(ni.This(), pri)
 		return true
 	})
 }
@@ -765,38 +842,6 @@ func (nb *Node2DBase) BBoxReport() string {
 		return true
 	})
 	return rpt
-}
-
-// ParentWindow returns the parent window for this node
-func (nb *Node2DBase) ParentWindow() *Window {
-	if nb.Viewport != nil && nb.Viewport.Win != nil {
-		return nb.Viewport.Win
-	}
-	wini, err := nb.ParentByTypeTry(KiT_Window, true)
-	if err != nil {
-		// log.Println(err)
-		return nil
-	}
-	return wini.Embed(KiT_Window).(*Window)
-}
-
-// ParentViewport returns the parent viewport -- uses AsViewport2D() method on
-// Node2D interface
-func (nb *Node2DBase) ParentViewport() *Viewport2D {
-	var parVp *Viewport2D
-	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
-		nii, ok := k.(Node2D)
-		if !ok {
-			return false // don't keep going up
-		}
-		vp := nii.AsViewport2D()
-		if vp != nil {
-			parVp = vp
-			return false // done
-		}
-		return true
-	})
-	return parVp
 }
 
 // ParentStyle returns parent's style or nil if not avail

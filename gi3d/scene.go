@@ -36,6 +36,10 @@ const (
 	// ManipBoxName is the reserved top-level name for meshes
 	// representing the manipulation box.
 	ManipBoxName = "__ManipBox"
+
+	// Plane2DMeshName is the reserved name for the 2D plane mesh
+	// used for Text2D and Embed2D
+	Plane2DMeshName = "__Plane2D"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating
@@ -203,10 +207,11 @@ func (sc *Scene) DeleteMeshes() {
 	sc.Meshes = make(map[string]Mesh)
 }
 
-// Text2DPlaneMesh returns the special Text2DPLane mesh (creating it if it does not yet exist).
-// This is a 1x1 plane with a normal pointing in positive Z direction used for all Text2D rendering
-func (sc *Scene) Text2DPlaneMesh() Mesh {
-	nm := "Text2DPlane"
+// PlaneMesh2D returns the special Plane mesh used for Text2D and Embed2D
+// (creating it if it does not yet exist).
+// This is a 1x1 plane with a normal pointing in +Z direction.
+func (sc *Scene) PlaneMesh2D() Mesh {
+	nm := Plane2DMeshName
 	tm, ok := sc.Meshes[nm]
 	if ok {
 		return tm
@@ -1016,6 +1021,20 @@ func (sc *Scene) Style3D() {
 	})
 }
 
+func (sc *Scene) UpdateNodes3D() {
+	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == sc.This() {
+			return true
+		}
+		nii, _ := KiToNode3D(k)
+		if nii == nil {
+			return false // going into a different type of thing, bail
+		}
+		nii.UpdateNode3D(sc)
+		return true
+	})
+}
+
 // Render renders the scene to the Frame framebuffer
 func (sc *Scene) Render() bool {
 	if !sc.ActivateFrame() {
@@ -1026,6 +1045,7 @@ func (sc *Scene) Render() bool {
 	}
 	sc.Camera.UpdateMatrix()
 	sc.TrackCamera()
+	sc.UpdateNodes3D()
 	sc.UpdateWorldMatrix()
 	sc.UpdateMeshBBox()
 	sc.UpdateMVPMatrix()

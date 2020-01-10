@@ -15,11 +15,9 @@ import (
 	"runtime"
 	"runtime/debug"
 	"runtime/pprof"
-	"sort"
 	"sync"
 	"time"
 
-	"github.com/chewxy/math32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/dnd"
@@ -133,56 +131,39 @@ var WindowOpenTimer time.Time
 //   intact while overlays are updated.
 type Window struct {
 	NodeBase
-	Title             string                                  `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	Data              interface{}                             `desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
-	OSWin             oswin.Window                            `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
-	Viewport          *Viewport2D                             `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
-	MasterVLay        *Layout                                 `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
-	MainMenu          *MenuBar                                `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
-	EventSigs         [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
-	EventMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects event sending"`
-	OverTex           oswin.Texture                           `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated from Sprites"`
-	Sprites           Sprites                                 `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
-	ActiveSprites     int                                     `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
-	DirectUps         map[Node2D]Node2D                       `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
-	UpMu              sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
-	LastModBits       int32                                   `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-	LastSelMode       mouse.SelectModes                       `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	LastMousePos      image.Point                             `json:"-" xml:"-" desc:"Last mouse position from most recent Mouse events"`
-	Focus             ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
-	StartFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
-	FocusMu           sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
-	Shortcuts         Shortcuts                               `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-	DNDData           mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource         ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDFinalEvent     *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Dragging          ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
-	Scrolling         ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
-	Popup             ki.Ki                                   `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-	PopupStack        []ki.Ki                                 `json:"-" xml:"-" desc:"stack of popups"`
-	FocusStack        []ki.Ki                                 `json:"-" xml:"-" desc:"stack of focus"`
-	NextPopup         ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
-	PopupFocus        ki.Ki                                   `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
-	DelPopup          ki.Ki                                   `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
-	PopMu             sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
-	TimerMu           sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
+	Title             string            `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	Data              interface{}       `desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	OSWin             oswin.Window      `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	EventMgr          EventMgr          `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
+	Viewport          *Viewport2D       `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	MasterVLay        *Layout           `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	MainMenu          *MenuBar          `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	OverTex           oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated from Sprites"`
+	Sprites           Sprites           `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
+	ActiveSprites     int               `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	DirectUps         map[Node2D]Node2D `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
+	UpMu              sync.Mutex        `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
+	LastModBits       int32             `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastSelMode       mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	LastMousePos      image.Point       `json:"-" xml:"-" desc:"Last mouse position from most recent Mouse events"`
+	Focus             ki.Ki             `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+	StartFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+	FocusMu           sync.RWMutex      `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
+	Shortcuts         Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	Popup             ki.Ki             `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
+	PopupStack        []ki.Ki           `json:"-" xml:"-" desc:"stack of popups"`
+	FocusStack        []ki.Ki           `json:"-" xml:"-" desc:"stack of focus"`
+	NextPopup         ki.Ki             `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
+	PopupFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
+	DelPopup          ki.Ki             `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
+	PopMu             sync.RWMutex      `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
 	lastWinMenuUpdate time.Time
 	// below are a bunch of internal vars used during the event loop
-	delPop                     bool
-	skippedResize              *window.Event
-	lastEt                     oswin.EventType
-	skipDelta                  image.Point
-	lastSkipped                bool
-	startDrag                  *mouse.DragEvent
-	dragStarted                bool
-	startDND                   *mouse.DragEvent
-	dndStarted                 bool
-	startHover, curHover       *mouse.MoveEvent
-	hoverStarted               bool
-	hoverTimer                 *time.Timer
-	startDNDHover, curDNDHover *mouse.DragEvent
-	dndHoverStarted            bool
-	dndHoverTimer              *time.Timer
+	delPop        bool
+	skippedResize *window.Event
+	lastEt        oswin.EventType
+	skipDelta     image.Point
+	lastSkipped   bool
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
@@ -190,33 +171,6 @@ var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
 var WindowProps = ki.Props{
 	"EnumType:Flag": KiT_WinFlags,
 }
-
-//go:generate stringer -type=EventPris
-
-// EventPris for different queues of event signals, processed in priority order
-type EventPris int32
-
-const (
-	// HiPri = high priority -- event receivers processed first -- can be used
-	// to override default behavior
-	HiPri EventPris = iota
-
-	// RegPri = default regular priority -- most should be here
-	RegPri
-
-	// LowPri = low priority -- processed last -- typically for containers /
-	// dialogs etc
-	LowPri
-
-	// LowRawPri = unfiltered (raw) low priority -- ignores whether the event
-	// was already processed.
-	LowRawPri
-
-	EventPrisN
-
-	// AllPris = -1 = all priorities (for delete cases only)
-	AllPris EventPris = -1
-)
 
 // WinFlags extend NodeBase NodeFlags to hold Window state
 type WinFlags int
@@ -280,6 +234,16 @@ func (w *Window) HasGeomPrefs() bool {
 // attempt to update it any further
 func (w *Window) IsClosing() bool {
 	return w.HasFlag(int(WinFlagIsClosing))
+}
+
+// IsFocusActive returns true if window has focus active flag set
+func (w *Window) IsFocusActive() bool {
+	return w.HasFlag(int(WinFlagFocusActive))
+}
+
+// SetFocusActiveState sets focus active flag to given state
+func (w *Window) SetFocusActiveState(active bool) {
+	w.SetFlagState(active, int(WinFlagFocusActive))
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -347,6 +311,7 @@ func NewWindow(name, title string, opts *oswin.NewWindowOptions) *Window {
 	Init() // overall gogi system initialization
 	win := &Window{}
 	win.InitName(win, name)
+	win.EventMgr.Master = win
 	win.Title = title
 	win.SetOnlySelfUpdate() // has its own PublishImage update logic
 	var err error
@@ -893,48 +858,6 @@ func (w *Window) StopEventLoop() {
 	w.SetFlag(int(WinFlagStopEventLoop))
 }
 
-// ConnectEvent adds a Signal connection for given event type and
-// priority to given receiver
-func (w *Window) ConnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris, fun ki.RecvFunc) {
-	if et >= oswin.EventTypeN {
-		log.Printf("Window ConnectEvent type: %v is not a known event type\n", et)
-		return
-	}
-	w.EventSigs[et][pri].Connect(recv, fun)
-}
-
-// DisconnectEvent removes Signal connection for given event type to given
-// receiver -- pri is priority -- pass AllPris for all priorities
-func (w *Window) DisconnectEvent(recv ki.Ki, et oswin.EventType, pri EventPris) {
-	if et >= oswin.EventTypeN {
-		log.Printf("Window DisconnectEvent type: %v is not a known event type\n", et)
-		return
-	}
-	if pri == AllPris {
-		for p := HiPri; p < EventPrisN; p++ {
-			w.EventSigs[et][p].Disconnect(recv)
-		}
-	} else {
-		w.EventSigs[et][pri].Disconnect(recv)
-	}
-}
-
-// DisconnectAllEvents disconnect node from all event signals -- pri is
-// priority -- pass AllPris for all priorities
-func (w *Window) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
-	if pri == AllPris {
-		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
-			for p := HiPri; p < EventPrisN; p++ {
-				w.EventSigs[et][p].Disconnect(recv)
-			}
-		}
-	} else {
-		for et := oswin.EventType(0); et < oswin.EventTypeN; et++ {
-			w.EventSigs[et][pri].Disconnect(recv)
-		}
-	}
-}
-
 // SendCustomEvent sends a custom event with given data to this window -- widgets can connect
 // to receive CustomEventType events to receive them.  Sometimes it is useful
 // to send a custom event just to trigger a pass through the event loop, even
@@ -956,7 +879,7 @@ func (w *Window) SendShowEvent() {
 	se := window.ShowEvent{}
 	se.Action = window.Show
 	se.Init()
-	w.SendEventSignal(&se, true) // popup = true by default
+	w.EventMgr.SendEventSignal(&se, true) // popup = true by default
 }
 
 // SendWinFocusEvent sends the WindowFocusEvent to widgets
@@ -964,7 +887,7 @@ func (w *Window) SendWinFocusEvent(act window.Actions) {
 	se := window.FocusEvent{}
 	se.Action = act
 	se.Init()
-	w.SendEventSignal(&se, true) // popup = true by default
+	w.EventMgr.SendEventSignal(&se, true) // popup = true by default
 }
 
 // PublishFullReRender is called by WinFullReRender on Node2DBase
@@ -1568,17 +1491,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 		w.ClearFlag(int(WinFlagIsResizing))
 	}
 
-	if et == oswin.MouseDragEvent {
-		w.MouseDragEvents(evi)
-	} else if et != oswin.KeyEvent { // allow modifier keypress
-		w.ResetMouseDrag()
-	}
-
-	if et == oswin.MouseMoveEvent {
-		w.MouseMoveEvents(evi)
-	} else {
-		w.ResetMouseMove()
-	}
+	w.EventMgr.MouseEvents(evi)
 
 	if !w.HiPriorityEvents(evi) {
 		return
@@ -1589,9 +1502,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 
 	if !evi.IsProcessed() && w.HasFlag(int(WinFlagGotFocus)) {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
-		w.SendEventSignal(evi, evToPopup)
+		w.EventMgr.SendEventSignal(evi, evToPopup)
 		if !w.delPop && et == oswin.MouseMoveEvent {
-			didFocus := w.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
+			didFocus := w.EventMgr.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
 			if didFocus && w.CurPopupIsTooltip() {
 				w.delPop = true
 			}
@@ -1611,14 +1524,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 		}
 	}
 
-	// reset "catch" events (Dragging, Scrolling)
-	if w.Dragging != nil && et != oswin.MouseDragEvent {
-		w.Dragging.ClearFlag(int(NodeDragging))
-		w.Dragging = nil
-	}
-	if w.Scrolling != nil && et != oswin.MouseScrollEvent {
-		w.Scrolling = nil
-	}
+	w.EventMgr.MouseEventReset(evi)
 
 	////////////////////////////////////////////////////////////////////////////
 	// Delete popup?
@@ -1641,9 +1547,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 			if PopupIsCompleter(cpop) {
 				fsz := len(w.FocusStack)
 				if fsz > 0 && et == oswin.KeyChordEvent {
-					for pri := HiPri; pri < EventPrisN; pri++ {
-						w.EventSigs[et][pri].SendSig(w.FocusStack[fsz-1], cpop, int64(et), evi)
-					}
+					w.EventMgr.SendSig(w.FocusStack[fsz-1], cpop, evi)
 				}
 			}
 		}
@@ -1778,143 +1682,6 @@ func (w *Window) FilterEvent(evi oswin.Event) bool {
 	return true
 }
 
-// MouseDragEvents processes MouseDragEvent to Detect start of drag and DND.
-// These require timing and delays, e.g., due to minor wiggles when pressing
-// the mouse button
-func (w *Window) MouseDragEvents(evi oswin.Event) {
-	now := time.Now()
-	if !w.dragStarted {
-		if w.startDrag == nil {
-			w.startDrag = evi.(*mouse.DragEvent)
-		} else {
-			if w.DoInstaDrag(w.startDrag, !w.CurPopupIsTooltip()) {
-				w.dragStarted = true
-				w.startDrag = nil
-			} else {
-				delayMs := int(now.Sub(w.startDrag.Time()) / time.Millisecond)
-				if delayMs >= DragStartMSec {
-					dst := int(math32.Hypot(float32(w.startDrag.Where.X-evi.Pos().X), float32(w.startDrag.Where.Y-evi.Pos().Y)))
-					if dst >= DragStartPix {
-						w.dragStarted = true
-						w.startDrag = nil
-					}
-				}
-			}
-		}
-	}
-	if w.Dragging == nil && !w.dndStarted {
-		if w.startDND == nil {
-			w.startDND = evi.(*mouse.DragEvent)
-		} else {
-			delayMs := int(now.Sub(w.startDND.Time()) / time.Millisecond)
-			if delayMs >= DNDStartMSec {
-				dst := int(math32.Hypot(float32(w.startDND.Where.X-evi.Pos().X), float32(w.startDND.Where.Y-evi.Pos().Y)))
-				if dst >= DNDStartPix {
-					w.dndStarted = true
-					w.DNDStartEvent(w.startDND)
-					w.startDND = nil
-				}
-			}
-		}
-	} else { // w.dndStarted
-		w.TimerMu.Lock()
-		if !w.dndHoverStarted {
-			w.dndHoverStarted = true
-			w.startDNDHover = evi.(*mouse.DragEvent)
-			w.curDNDHover = w.startDNDHover
-			w.dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
-				w.TimerMu.Lock()
-				hoe := w.curDNDHover
-				w.dndHoverStarted = false
-				w.startDNDHover = nil
-				w.curDNDHover = nil
-				w.dndHoverTimer = nil
-				w.TimerMu.Unlock()
-				w.SendDNDHoverEvent(hoe)
-			})
-		} else {
-			dst := int(math32.Hypot(float32(w.startDNDHover.Where.X-evi.Pos().X), float32(w.startDNDHover.Where.Y-evi.Pos().Y)))
-			if dst > HoverMaxPix {
-				w.dndHoverTimer.Stop()
-				w.dndHoverStarted = false
-				w.startDNDHover = nil
-				w.dndHoverTimer = nil
-			} else {
-				w.curDNDHover = evi.(*mouse.DragEvent)
-			}
-		}
-		w.TimerMu.Unlock()
-	}
-}
-
-// ResetMouseDrag resets all the mouse dragging variables after last drag
-func (w *Window) ResetMouseDrag() {
-	w.dragStarted = false
-	w.startDrag = nil
-	w.dndStarted = false
-	w.startDND = nil
-
-	w.TimerMu.Lock()
-	w.dndHoverStarted = false
-	w.startDNDHover = nil
-	w.curDNDHover = nil
-	if w.dndHoverTimer != nil {
-		w.dndHoverTimer.Stop()
-		w.dndHoverTimer = nil
-	}
-	w.TimerMu.Unlock()
-}
-
-// MouseMoveEvents processes MouseMoveEvent to detect start of hover events.
-// These require timing and delays
-func (w *Window) MouseMoveEvents(evi oswin.Event) {
-	w.TimerMu.Lock()
-	if !w.hoverStarted {
-		w.hoverStarted = true
-		w.startHover = evi.(*mouse.MoveEvent)
-		w.curHover = w.startHover
-		w.hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
-			w.TimerMu.Lock()
-			hoe := w.curHover
-			w.hoverStarted = false
-			w.startHover = nil
-			w.curHover = nil
-			w.hoverTimer = nil
-			w.TimerMu.Unlock()
-			w.SendHoverEvent(hoe)
-		})
-	} else {
-		dst := int(math32.Hypot(float32(w.startHover.Where.X-evi.Pos().X), float32(w.startHover.Where.Y-evi.Pos().Y)))
-		if dst > HoverMaxPix {
-			w.hoverTimer.Stop()
-			w.hoverStarted = false
-			w.startHover = nil
-			w.hoverTimer = nil
-			w.PopMu.RLock()
-			if w.CurPopupIsTooltip() {
-				w.delPop = true
-			}
-			w.PopMu.RUnlock()
-		} else {
-			w.curHover = evi.(*mouse.MoveEvent)
-		}
-	}
-	w.TimerMu.Unlock()
-}
-
-// ResetMouseMove resets all the mouse moving variables after last move
-func (w *Window) ResetMouseMove() {
-	w.TimerMu.Lock()
-	w.hoverStarted = false
-	w.startHover = nil
-	w.curHover = nil
-	if w.hoverTimer != nil {
-		w.hoverTimer.Stop()
-		w.hoverTimer = nil
-	}
-	w.TimerMu.Unlock()
-}
-
 // HiProrityEvents processes High-priority events for Window.
 // Window gets first crack at these events, and handles window-specific ones
 // returns true if processing should continue and false if was handled
@@ -1987,10 +1754,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		w.LastModBits = e.Modifiers
 		w.LastSelMode = e.SelectMode()
 		w.LastMousePos = e.Pos()
-		if w.DNDData != nil {
+		if w.EventMgr.DNDData != nil {
 			w.DNDMoveEvent(e)
 		} else {
-			if !w.dragStarted {
+			if !w.EventMgr.dragStarted {
 				e.SetProcessed() // ignore
 			}
 		}
@@ -1998,7 +1765,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		w.LastModBits = e.Modifiers
 		w.LastSelMode = e.SelectMode()
 		w.LastMousePos = e.Pos()
-		if w.DNDData != nil && e.Action == mouse.Release {
+		if w.EventMgr.DNDData != nil && e.Action == mouse.Release {
 			w.DNDDropEvent(e)
 		}
 		w.FocusActiveClick(e)
@@ -2039,6 +1806,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 /////////////////////////////////////////////////////////////////////////////
 //                   Sending Events
 
+func (w *Window) EventTopNode() ki.Ki {
+	return w.This()
+}
+
 // IsInScope returns true if the given object is in scope for receiving events.
 // If popup is true, then only items on popup are in scope, otherwise
 // items NOT on popup are in scope (if no popup, everything is in scope).
@@ -2057,328 +1828,6 @@ func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 		return popup
 	}
 	return !popup
-}
-
-// WinEventRecv is used to hold info about widgets receiving event signals to
-// given function, used for sorting and delayed sending.
-type WinEventRecv struct {
-	Recv ki.Ki
-	Func ki.RecvFunc
-	Data int
-}
-
-// Set sets the recv and fun
-func (we *WinEventRecv) Set(r ki.Ki, f ki.RecvFunc, data int) {
-	we.Recv = r
-	we.Func = f
-	we.Data = data
-}
-
-// Call calls the function on the recv with the args
-func (we *WinEventRecv) Call(send ki.Ki, sig int64, data interface{}) {
-	we.Func(we.Recv, send, sig, data)
-}
-
-type WinEventRecvList []WinEventRecv
-
-func (wl *WinEventRecvList) Add(recv ki.Ki, fun ki.RecvFunc, data int) {
-	rr := WinEventRecv{recv, fun, data}
-	*wl = append(*wl, rr)
-}
-
-func (wl *WinEventRecvList) AddDepth(recv ki.Ki, fun ki.RecvFunc, w *Window) {
-	wl.Add(recv, fun, recv.ParentLevel(w.This()))
-}
-
-// SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
-// map iterator locking logic in a cleaner way.  Returns true to continue, false to break
-func (w *Window) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventRecvList, recv ki.Ki, fun ki.RecvFunc) bool {
-	nii, ni := KiToNode2D(recv)
-	if ni != nil {
-		if !w.IsInScope(ni, popup) {
-			return true
-		}
-		if evi.OnFocus() {
-			if !nii.HasFocus2D() {
-				return true
-			}
-			if !w.HasFlag(int(WinFlagFocusActive)) { // reactivate on keyboard input
-				w.SetFlag(int(WinFlagFocusActive))
-				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
-				nii.FocusChanged2D(FocusActive)
-			}
-		}
-	}
-	// remainder is done using generic node interface, for 2D and 3D
-	gni := recv.(Node)
-	gn := gni.AsGiNode()
-	// todo: need a focus concept for 3D
-	if evi.HasPos() {
-		pos := evi.Pos()
-		switch evi.(type) {
-		case *mouse.DragEvent:
-			if w.Dragging != nil {
-				if w.Dragging == gn.This() {
-					rvs.Add(recv, fun, 10000)
-					return false
-				} else {
-					return true
-				}
-			} else {
-				if pos.In(gn.WinBBox) {
-					rvs.AddDepth(recv, fun, w)
-					return false
-				}
-				return true
-			}
-		case *mouse.ScrollEvent:
-			if w.Scrolling != nil {
-				if w.Scrolling == gn.This() {
-					rvs.Add(recv, fun, 10000)
-				} else {
-					return true
-				}
-			} else {
-				if pos.In(gn.WinBBox) {
-					rvs.AddDepth(recv, fun, w)
-					return false
-				}
-				return true
-			}
-		default:
-			if w.Dragging == gn.This() { // dragger always gets it
-				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
-				return false
-			}
-			if !pos.In(gn.WinBBox) {
-				return true
-			}
-		}
-	}
-	rvs.AddDepth(recv, fun, w)
-	return true
-}
-
-// SendEventSignal sends given event signal to all receivers that want it --
-// note that because there is a different EventSig for each event type, we are
-// ONLY looking at nodes that have registered to receive that type of event --
-// the further filtering is just to ensure that they are in the right position
-// to receive the event (focus, popup filtering, etc).  If popup is true, then
-// only items on popup are in scope, otherwise items NOT on popup are in scope
-// (if no popup, everything is in scope).
-func (w *Window) SendEventSignal(evi oswin.Event, popup bool) {
-	et := evi.Type()
-	if et > oswin.EventTypeN || et < 0 {
-		return // can't handle other types of events here due to EventSigs[et] size
-	}
-
-	w.EventMu.Lock()
-
-	// fmt.Printf("got event type: %v\n", et)
-	for pri := HiPri; pri < EventPrisN; pri++ {
-		if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
-			continue
-		}
-
-		// we take control of signal process to sort elements by depth, and
-		// dispatch to inner-most one first
-		rvs := make(WinEventRecvList, 0, 10)
-
-		esig := &w.EventSigs[et][pri]
-
-		esig.Mu.RLock()
-		for recv, fun := range esig.Cons {
-			if recv.IsDestroyed() {
-				// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
-				delete(esig.Cons, recv)
-				continue
-			}
-			if recv.IsDeleted() {
-				continue
-			}
-			esig.Mu.RUnlock()
-			cont := w.SendEventSignalFunc(evi, popup, &rvs, recv, fun)
-			esig.Mu.RLock()
-			if !cont {
-				break
-			}
-		}
-		esig.Mu.RUnlock()
-
-		if len(rvs) == 0 {
-			continue
-		}
-
-		// deepest first
-		sort.Slice(rvs, func(i, j int) bool {
-			return rvs[i].Data > rvs[j].Data
-		})
-
-		for _, rr := range rvs {
-			switch evi.(type) {
-			case *mouse.DragEvent:
-				if w.Dragging == nil {
-					rr.Recv.SetFlag(int(NodeDragging)) // PROVISIONAL!
-				}
-			}
-			w.EventMu.Unlock()
-			rr.Call(w.This(), int64(et), evi) // could call further event loops..
-			w.EventMu.Lock()
-			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
-				switch evi.(type) { // only grab events if processed
-				case *mouse.DragEvent:
-					if w.Dragging == nil {
-						w.Dragging = rr.Recv
-						rr.Recv.SetFlag(int(NodeDragging))
-					}
-				case *mouse.ScrollEvent:
-					if w.Scrolling == nil {
-						w.Scrolling = rr.Recv
-					}
-				}
-				break
-			} else {
-				switch evi.(type) {
-				case *mouse.DragEvent:
-					if w.Dragging == nil {
-						rr.Recv.ClearFlag(int(NodeDragging)) // clear provisional
-					}
-				}
-			}
-		}
-	}
-	w.EventMu.Unlock()
-}
-
-// GenMouseFocusEvents processes mouse.MoveEvent to generate mouse.FocusEvent
-// events -- returns true if any such events were sent.  If popup is true,
-// then only items on popup are in scope, otherwise items NOT on popup are in
-// scope (if no popup, everything is in scope).
-func (w *Window) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
-	fe := mouse.FocusEvent{Event: mev.Event}
-	pos := mev.Pos()
-	ftyp := oswin.MouseFocusEvent
-	updated := false
-	updt := false
-	for pri := HiPri; pri < EventPrisN; pri++ {
-		w.EventSigs[ftyp][pri].EmitFiltered(w.This(), int64(ftyp), &fe, func(k ki.Ki) bool {
-			if k.IsDeleted() { // destroyed is filtered upstream
-				return false
-			}
-			_, ni := KiToNode2D(k)
-			if ni != nil {
-				if !w.IsInScope(ni, popup) {
-					return false
-				}
-				in := pos.In(ni.WinBBox)
-				if in {
-					if !ni.HasFlag(int(MouseHasEntered)) {
-						fe.Action = mouse.Enter
-						ni.SetFlag(int(MouseHasEntered))
-						if !updated {
-							updt = w.UpdateStart()
-							updated = true
-						}
-						return true // send event
-					} else {
-						return false // already in
-					}
-				} else { // mouse not in object
-					if ni.HasFlag(int(MouseHasEntered)) {
-						fe.Action = mouse.Exit
-						ni.ClearFlag(int(MouseHasEntered))
-						if !updated {
-							updt = w.UpdateStart()
-							updated = true
-						}
-						return true // send event
-					} else {
-						return false // already out
-					}
-				}
-			} else {
-				// todo: 3D
-				return false
-			}
-		})
-	}
-	if updated {
-		w.UpdateEnd(updt)
-	}
-	return updated
-}
-
-// DoInstaDrag tests whether the given mouse DragEvent is on a widget marked
-// with InstaDrag
-func (w *Window) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
-	et := me.Type()
-	for pri := HiPri; pri < EventPrisN; pri++ {
-		esig := &w.EventSigs[et][pri]
-		for recv, _ := range esig.Cons {
-			if recv.IsDestroyed() {
-				delete(esig.Cons, recv)
-				continue
-			}
-			if recv.IsDeleted() {
-				continue
-			}
-			_, ni := KiToNode2D(recv)
-			if ni != nil {
-				if !w.IsInScope(ni, popup) {
-					continue
-				}
-				pos := me.Pos()
-				if pos.In(ni.WinBBox) {
-					if ni.IsInstaDrag() {
-						w.Dragging = ni.This()
-						ni.SetFlag(int(NodeDragging))
-						return true
-					}
-				}
-			}
-		}
-	}
-	return false
-}
-
-// SendHoverEvent sends mouse hover event, based on last mouse move event
-func (w *Window) SendHoverEvent(e *mouse.MoveEvent) {
-	he := mouse.HoverEvent{Event: e.Event}
-	he.Processed = false
-	he.Action = mouse.Hover
-	w.SendEventSignal(&he, true) // popup = true by default
-}
-
-// SendKeyChordEvent sends a KeyChord event with given values.  If popup is
-// true, then only items on popup are in scope, otherwise items NOT on popup
-// are in scope (if no popup, everything is in scope).
-func (w *Window) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
-	ke := key.ChordEvent{}
-	ke.SetTime()
-	ke.SetModifiers(mods...)
-	ke.Rune = r
-	ke.Action = key.Press
-	w.SendEventSignal(&ke, popup)
-}
-
-// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
-// If popup is true, then only items on popup are in scope, otherwise items
-// NOT on popup are in scope (if no popup, everything is in scope).
-func (w *Window) SendKeyFunEvent(kf KeyFuns, popup bool) {
-	chord := ActiveKeyMap.ChordForFun(kf)
-	if chord == "" {
-		return
-	}
-	r, mods, err := chord.Decode()
-	if err != nil {
-		return
-	}
-	ke := key.ChordEvent{}
-	ke.SetTime()
-	ke.Modifiers = mods
-	ke.Rune = r
-	ke.Action = key.Press
-	w.SendEventSignal(&ke, popup)
 }
 
 // AddShortcut adds given shortcut -- will issue warning about conflicting
@@ -2521,6 +1970,15 @@ func (w *Window) CurPopupIsTooltip() bool {
 	return PopupIsTooltip(w.CurPopup())
 }
 
+// DeleteTooltip deletes any tooltip popup (called when hover ends)
+func (w *Window) DeleteTooltip() {
+	w.PopMu.RLock()
+	if w.CurPopupIsTooltip() {
+		w.delPop = true
+	}
+	w.PopMu.RUnlock()
+}
+
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
 func (w *Window) SetNextPopup(pop, focus ki.Ki) {
 	w.PopMu.Lock()
@@ -2544,7 +2002,7 @@ func (w *Window) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	if w.NextPopup != nil && PopupIsMenu(w.NextPopup) { // popping up another menu
 		return false
 	}
-	if me.Button != mouse.Left && w.Dragging == nil { // probably menu activation in first place
+	if me.Button != mouse.Left && w.EventMgr.Dragging == nil { // probably menu activation in first place
 		return false
 	}
 	return true
@@ -2576,7 +2034,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 
 // DisconnectPopup disconnects given popup -- typically the current one.
 func (w *Window) DisconnectPopup(pop ki.Ki) {
-	w.DisconnectAllEvents(pop, AllPris)
+	w.EventMgr.DisconnectAllEvents(pop, AllPris)
 	pop.SetParent(nil) // don't redraw the popup anymore
 }
 
@@ -3094,23 +2552,13 @@ func (w *Window) IsWindowInFocus() bool {
 
 const DNDSpriteName = "gi.Window:DNDSprite"
 
-// DNDStartEvent handles drag-n-drop start events.
-func (w *Window) DNDStartEvent(e *mouse.DragEvent) {
-	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
-	de.Processed = false
-	de.Action = dnd.Start
-	de.DefaultMod()               // based on current key modifiers
-	w.SendEventSignal(&de, false) // popup = false: ignore any popups
-	// now up to receiver to call StartDragNDrop if they want to..
-}
-
 // StartDragNDrop is called by a node to start a drag-n-drop operation on
 // given source node, which is responsible for providing the data and Sprite
 // representation of the node.
 func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	// todo: 3d version later..
-	w.DNDSource = src
-	w.DNDData = data
+	w.EventMgr.DNDSource = src
+	w.EventMgr.DNDData = data
 	if _, sni := KiToNode2D(src); sni != nil { // 2d case
 		if sw := sni.AsWidget(); sw != nil {
 			sp.SetBottomPos(sw.LayData.AllocPos.ToPoint())
@@ -3131,128 +2579,40 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 	if ok {
 		sp.SetBottomPos(e.Where)
 	}
-	// todo: when e.Where goes negative, transition to OS DND
-	// todo: send move / enter / exit events to anyone listening
-	de := dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
-	de.Processed = false
-	de.DefaultMod() // based on current key modifiers
-	de.Action = dnd.Move
-	w.SendEventSignal(&de, false) // popup = false: ignore any popups
-	w.GenDNDFocusEvents(&de, false)
+	de := w.EventMgr.SendDNDMoveEvent(e)
 	w.DNDUpdateCursor(de.Mod)
 	w.RenderOverlays()
 	e.SetProcessed()
 }
 
-// GenDNDFocusEvents processes mouse.MoveEvent to generate dnd.FocusEvent
-// events -- returns true if any such events were sent.  If popup is true,
-// then only items on popup are in scope, otherwise items NOT on popup are in
-// scope (if no popup, everything is in scope).  Extra work is done to ensure
-// that Exit from prior widget is always sent before Enter to next one.
-func (w *Window) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
-	fe := dnd.FocusEvent{Event: mev.Event}
-	pos := mev.Pos()
-	ftyp := oswin.DNDFocusEvent
-
-	// first pass is just to get all the ins and outs
-	var ins, outs WinEventRecvList
-
-	for pri := HiPri; pri < EventPrisN; pri++ {
-		esig := &w.EventSigs[ftyp][pri]
-		for recv, fun := range esig.Cons {
-			if recv.IsDeleted() { // destroyed is filtered upstream
-				continue
-			}
-			_, ni := KiToNode2D(recv)
-			if ni != nil {
-				if !w.IsInScope(ni, popup) {
-					continue
-				}
-				in := pos.In(ni.WinBBox)
-				if in {
-					if !ni.HasFlag(int(DNDHasEntered)) {
-						ni.SetFlag(int(DNDHasEntered))
-						ins.Add(recv, fun, 0)
-					}
-				} else { // mouse not in object
-					if ni.HasFlag(int(DNDHasEntered)) {
-						ni.ClearFlag(int(DNDHasEntered))
-						outs.Add(recv, fun, 0)
-					}
-				}
-			} else {
-				// todo: 3D
-			}
-		}
-	}
-	if len(outs)+len(ins) > 0 {
-		updt := w.UpdateStart()
-		// now send all the exits before the enters..
-		fe.Action = dnd.Exit
-		for i := range outs {
-			outs[i].Call(w.This(), int64(ftyp), &fe)
-		}
-		fe.Action = dnd.Enter
-		for i := range ins {
-			ins[i].Call(w.This(), int64(ftyp), &fe)
-		}
-		w.UpdateEnd(updt)
-		return true
-	}
-	return false
-}
-
-// SendDNDHoverEvent sends DND hover event, based on last mouse move event
-func (w *Window) SendDNDHoverEvent(e *mouse.DragEvent) {
-	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
-	he.Processed = false
-	he.Action = dnd.Hover
-	w.SendEventSignal(&he, false) // popup = false by default
-}
-
 // DNDDropEvent handles drag-n-drop drop event (action = release).
 func (w *Window) DNDDropEvent(e *mouse.Event) {
-	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
-	de.Processed = false
-	de.DefaultMod()
-	de.Action = dnd.DropOnTarget
-	de.Data = w.DNDData
-	de.Source = w.DNDSource
-	w.DNDSource.ClearFlag(int(NodeDragging))
-	w.Dragging = nil
-	w.SendEventSignal(&de, false) // popup = false: ignore any popups
-	w.DNDFinalEvent = &de
+	w.EventMgr.SendDNDDropEvent(e)
 	w.ClearDragNDrop()
-	e.SetProcessed()
 }
 
 // FinalizeDragNDrop is called by a node to finalize the drag-n-drop
 // operation, after given action has been performed on the target -- allows
 // target to cancel, by sending dnd.DropIgnore.
 func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
-	if w.DNDFinalEvent == nil { // shouldn't happen...
+	if w.EventMgr.DNDFinalEvent == nil { // shouldn't happen...
 		return
 	}
-	de := w.DNDFinalEvent
+	de := w.EventMgr.DNDFinalEvent
 	de.Processed = false
 	de.Mod = action
 	if de.Source != nil {
-		et := de.Type()
 		de.Action = dnd.DropFmSource
-		for pri := HiPri; pri < EventPrisN; pri++ {
-			w.EventSigs[et][pri].SendSig(de.Source, w, int64(et), (oswin.Event)(de))
-		}
+		w.EventMgr.SendSig(de.Source, w, de)
 	}
-	w.DNDFinalEvent = nil
+	w.EventMgr.DNDFinalEvent = nil
 }
 
 // ClearDragNDrop clears any existing DND values.
 func (w *Window) ClearDragNDrop() {
-	w.DNDSource = nil
-	w.DNDData = nil
+	w.EventMgr.ClearDND()
 	w.DeleteSprite(DNDSpriteName)
 	w.DNDClearCursor()
-	w.Dragging = nil
 	w.RenderOverlays()
 }
 
