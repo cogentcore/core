@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 	"sort"
 	"sync"
@@ -46,6 +47,8 @@ const (
 	AllPris EventPris = -1
 )
 
+// EventMgr is an event manager that handles distributing events to nodes.
+// It relies on the EventMaster for a few things outside of its scope.
 type EventMgr struct {
 	Master          EventMaster                             `json:"-" xml:"-" view:"-" desc:"master of this event mangager -- handles broader scope issues"`
 	EventSigs       [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
@@ -87,6 +90,9 @@ func (we *WinEventRecv) Set(r ki.Ki, f ki.RecvFunc, data int) {
 
 // Call calls the function on the recv with the args
 func (we *WinEventRecv) Call(send ki.Ki, sig int64, data interface{}) {
+	if EventTrace {
+		fmt.Printf("calling event: %v method on: %v\n", data, we.Recv.Path())
+	}
 	we.Func(we.Recv, send, sig, data)
 }
 

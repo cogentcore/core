@@ -497,6 +497,10 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 // properly batch everything and prevent redundant updates.
 func (nb *Node2DBase) TopNode2D() Node {
 	if nb.Viewport == nil {
+		vp := nb.This().(Node2D).AsViewport2D()
+		if vp != nil {
+			return vp.This().(Viewport).VpTop().VpTopNode()
+		}
 		return nil
 	}
 	return nb.Viewport.This().(Viewport).VpTop().VpTopNode()

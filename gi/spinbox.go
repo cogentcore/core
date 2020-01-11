@@ -156,7 +156,7 @@ func (sb *SpinBox) SetValueAction(val float32) {
 // IncrValue increments the value by given number of steps (+ or -), and enforces it to be an even multiple of the step size (snap-to-value), and emits the signal
 func (sb *SpinBox) IncrValue(steps float32) {
 	val := sb.Value + steps*sb.Step
-	val = mat32.Mod(val, sb.Step)
+	val = mat32.IntMultiple(val, sb.Step)
 	sb.SetValueAction(val)
 }
 

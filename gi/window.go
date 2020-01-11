@@ -87,6 +87,10 @@ var WinPublishTrace = false
 // can be set in PrefsDebug from prefs gui
 var KeyEventTrace = false
 
+// EventTrace reports a trace of event handing to stdout.
+// can be set in PrefsDebug from prefs gui
+var EventTrace = false
+
 // WinNewCloseTime records last time a new window was opened or another
 // closed -- used to trigger updating of Window menus on each window.
 var WinNewCloseTime time.Time
@@ -1503,7 +1507,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	if !evi.IsProcessed() && w.HasFlag(int(WinFlagGotFocus)) {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 		w.EventMgr.SendEventSignal(evi, evToPopup)
-		if !w.delPop && et == oswin.MouseMoveEvent {
+		if !w.delPop && et == oswin.MouseMoveEvent && !evi.IsProcessed() {
 			didFocus := w.EventMgr.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
 			if didFocus && w.CurPopupIsTooltip() {
 				w.delPop = true
@@ -2233,7 +2237,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		if k != nil {
 			_, ni := KiToNode2D(k)
 			if ni != nil && ni.This() != nil {
-				ni.SetFlag(int(HasFocus)) // ensure focus flag always set
+				ni.SetFocusState(true) // ensure focus flag always set
 			}
 		}
 		return false
@@ -2245,7 +2249,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 	if cfoc != nil {
 		nii, ni := KiToNode2D(cfoc)
 		if ni != nil && ni.This() != nil {
-			ni.ClearFlag(int(HasFocus))
+			ni.SetFocusState(false)
 			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
 			nii.FocusChanged2D(FocusLost)
 		}
@@ -2259,7 +2263,7 @@ func (w *Window) SetFocus(k ki.Ki) bool {
 		w.setFocusPtr(nil)
 		return false
 	}
-	ni.SetFlag(int(HasFocus))
+	ni.SetFocusState(true)
 	w.SetFlag(int(WinFlagFocusActive))
 	// fmt.Printf("set foc: %v\n", ni.PathUnique())
 	w.ClearNonFocus(k) // shouldn't need this but actually sometimes do

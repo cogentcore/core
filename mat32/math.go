@@ -148,6 +148,18 @@ func Mod(a, b float32) float32 {
 	return float32(math.Mod(float64(a), float64(b)))
 }
 
+// IntMultiple returns the interger multiple of mod closest to given value:
+// int(Round(val / mod)) * mod
+func IntMultiple(val, mod float32) float32 {
+	return float32(int(math.Round(float64(val/mod)))) * mod
+}
+
+// IntMultiple64 returns the interger multiple of mod closest to given value:
+// int(Round(val / mod)) * mod
+func IntMultiple64(val, mod float64) float64 {
+	return float64(int(math.Round(float64(val/mod)))) * mod
+}
+
 func NaN() float32 {
 	return float32(math.NaN())
 }

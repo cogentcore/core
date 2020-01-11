@@ -158,7 +158,7 @@ func (sb *SliderBase) Defaults() { // todo: should just get these from props
 // SnapValue snaps the value to step sizes if snap option is set
 func (sb *SliderBase) SnapValue() {
 	if sb.Snap {
-		sb.Value = mat32.Mod(sb.Value, sb.Step)
+		sb.Value = mat32.IntMultiple(sb.Value, sb.Step)
 		sb.Value = mat32.Truncate(sb.Value, sb.Prec)
 	}
 }

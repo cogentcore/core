@@ -5,12 +5,12 @@
 package gi3d
 
 import (
-	"fmt"
 	"image"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -23,7 +23,8 @@ import (
 // top of that by setting the Pose.Scale values as usual.
 type Embed2D struct {
 	Solid
-	Viewport *gi.Viewport2D `desc:"the viewport to display"`
+	Viewport *EmbedViewport `desc:"the embedded viewport to display"`
+	Zoom     float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
 	Tex      *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object -- this is used directly instead of pointing to the Scene Texture resources"`
 }
 
@@ -33,8 +34,8 @@ var KiT_Embed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
 func AddNewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int) *Embed2D {
 	em := parent.AddNewChild(KiT_Embed2D, name).(*Embed2D)
 	em.Defaults(sc)
-	em.Viewport = gi.NewViewport2D(width, height)
-	em.Viewport.InitName(em.Viewport, name)
+	em.Viewport = NewEmbedViewport(sc, em, name, width, height)
+	em.Viewport.Fill = true
 	return em
 }
 
@@ -42,8 +43,8 @@ func (em *Embed2D) Defaults(sc *Scene) {
 	tm := sc.PlaneMesh2D()
 	em.SetMesh(sc, tm)
 	em.Solid.Defaults()
-	em.Pose.Scale.SetScalar(.005)
-	em.Mat.Bright = 1.5 // this is key for making e.g., a white background show up as white..
+	em.Zoom = 1
+	em.Mat.Bright = 1.4 // this is key for making e.g., a white background show up as white..
 }
 
 func (em *Embed2D) Disconnect() {
@@ -63,7 +64,10 @@ func (em *Embed2D) Disconnect() {
 }
 
 func (em *Embed2D) Init3D(sc *Scene) {
-	em.RenderView(sc)
+	em.Viewport.SetWin(sc.Win) // make sure
+	em.Viewport.FullRender2DTree()
+	em.UploadViewTex(sc)
+	em.Mat.SetTexture(sc, em.Tex)
 	err := em.Validate(sc)
 	if err != nil {
 		em.SetInvisible()
@@ -71,42 +75,21 @@ func (em *Embed2D) Init3D(sc *Scene) {
 	em.Node3DBase.Init3D(sc)
 }
 
-func (em *Embed2D) RenderView(sc *Scene) {
-	em.Viewport.FullRender2DTree()
+// UploadViewTex uploads the viewport image to the texture
+func (em *Embed2D) UploadViewTex(sc *Scene) {
 	img := em.Viewport.Pixels
-	bounds := em.Viewport.Pixels.Bounds()
-	setImg := false
 	if em.Tex == nil {
 		em.Tex = &TextureBase{Nm: em.Nm}
 		tx := em.Tex.NewTex()
 		tx.SetImage(img) // safe here
-	} else {
-		im := em.Tex.Tex.Image()
-		if im == nil {
-			setImg = true // needs to be set on main
-		} else {
-			tim := im.(*image.RGBA)
-			if tim == nil {
-				setImg = true
-			} else {
-				if tim.Bounds() != bounds {
-					setImg = true
-				}
-			}
-		}
 	}
 	if sc.Win != nil {
 		oswin.TheApp.RunOnMain(func() {
 			sc.Win.OSWin.Activate()
-			if setImg {
-				em.Tex.Tex.SetImage(img) // does transfer if active
-			} else {
-				em.Tex.Tex.Transfer(0) // update
-			}
+			em.Tex.Tex.SetImage(img) // does transfer if active
 		})
 	}
-	em.Mat.SetTexture(sc, em.Tex)
-	// gi.SavePNG("text-test.png", img)
+	// gi.SavePNG("emb-test.png", img)
 }
 
 // Validate checks that text has valid mesh and texture settings, etc
@@ -118,7 +101,7 @@ func (em *Embed2D) Validate(sc *Scene) error {
 func (em *Embed2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	if em.Viewport != nil {
 		sz := em.Viewport.Geom.Size
-		sc := mat32.Vec3{.01 * float32(sz.X), .01 * float32(sz.Y), em.Pose.Scale.Z}
+		sc := mat32.Vec3{.006 * em.Zoom * float32(sz.X), .006 * em.Zoom * float32(sz.Y), em.Pose.Scale.Z}
 		em.Pose.Matrix.SetTransform(em.Pose.Pos, em.Pose.Quat, sc)
 	} else {
 		em.Pose.UpdateMatrix()
@@ -127,8 +110,22 @@ func (em *Embed2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	em.SetFlag(int(WorldMatrixUpdated))
 }
 
-func (em *Embed2D) UpdateNode3D(sc *Scene) {
-	// em.RenderView(sc)
+func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
+	em.Solid.UpdateBBox2D(size, sc)
+	em.Viewport.Geom.Pos = em.WinBBox.Min
+	em.Viewport.WinBBox.Min = em.WinBBox.Min
+	em.Viewport.WinBBox.Max = em.WinBBox.Min.Add(em.Viewport.Geom.Size)
+	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k ki.Ki, level int, d interface{}) bool {
+		if k == em.Viewport.This() {
+			return true
+		}
+		_, ni := gi.KiToNode2D(k)
+		if ni == nil {
+			return false // going into a different type of thing, bail
+		}
+		ni.SetWinBBox()
+		return true
+	})
 }
 
 func (em *Embed2D) RenderClass() RenderClasses {
@@ -155,14 +152,17 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 	}
 	ppt.X = int((ispt.X + 0.5) * float32(sz.X))
 	ppt.Y = int((ispt.Y + 0.5) * float32(sz.Y))
-	fmt.Printf("ispt: %v   ppt: %v\n", ispt, ppt)
 	if ppt.X < 0 || ppt.Y < 0 {
 		return ppt, false
 	}
+	ppt.Y = sz.Y - ppt.Y // top-zero
+	// fmt.Printf("ppt: %v\n", ppt)
+	ppt = ppt.Add(em.Viewport.Geom.Pos)
 	return ppt, true
 }
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
+	em.SetCanFocus()
 	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		if !sc.IsVisible() {
 			return
@@ -173,18 +173,189 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		if !ok {
 			return
 		}
-		_ = ppt
+		md := &mouse.Event{}
+		*md = *me
+		md.Where = ppt
+		em.Viewport.EventMgr.MouseEvents(md)
+		em.Viewport.EventMgr.SendEventSignal(md, false)
+		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		if !sc.IsVisible() {
 			return
 		}
-		me := d.(*mouse.HoverEvent)
+		me := d.(*mouse.MoveEvent)
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ppt, ok := emm.Project2D(sc, me.Where)
 		if !ok {
 			return
 		}
-		_ = ppt
+		md := &mouse.MoveEvent{}
+		*md = *me
+		del := ppt.Sub(me.Where)
+		md.Where = ppt
+		md.From.Add(del)
+		em.Viewport.EventMgr.MouseEvents(md)
+		em.Viewport.EventMgr.SendEventSignal(md, false)
+		em.Viewport.EventMgr.GenMouseFocusEvents(md, false)
+		me.SetProcessed() // must always
 	})
+	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		if !sc.IsVisible() {
+			return
+		}
+		me := d.(*mouse.DragEvent)
+		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		ppt, ok := emm.Project2D(sc, me.Where)
+		if !ok {
+			return
+		}
+		md := &mouse.DragEvent{}
+		*md = *me
+		del := ppt.Sub(me.Where)
+		md.Where = ppt
+		md.From.Add(del)
+		em.Viewport.EventMgr.MouseEvents(md)
+		em.Viewport.EventMgr.SendEventSignal(md, false)
+		me.SetProcessed() // must always
+	})
+	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		if !sc.IsVisible() {
+			return
+		}
+		kt := d.(*key.ChordEvent)
+		em.Viewport.EventMgr.SendEventSignal(kt, false)
+		kt.SetProcessed() // must always
+	})
+	// em.ConnectEvent(sc.Win, oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// 	if !sc.IsVisible() {
+	// 		return
+	// 	}
+	// 	me := d.(*mouse.HoverEvent)
+	// 	emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+	// 	ppt, ok := emm.Project2D(sc, me.Where)
+	// 	if !ok {
+	// 		return
+	// 	}
+	// 	_ = ppt
+	// })
+}
+
+///////////////////////////////////////////////////////////////////
+//  EmbedViewport
+
+// EmbedViewport is an embedded viewport with its own event manager to handle
+// events instead of using the Window.
+type EmbedViewport struct {
+	gi.Viewport2D
+	EventMgr gi.EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
+	Scene    *Scene      `json:"-" xml:"-" desc:"parent scene -- trigger updates"`
+	EmbedPar *Embed2D    `json:"-" xml:"-" desc:"parent Embed2D -- render updates"`
+}
+
+var KiT_EmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)
+
+var EmbedViewportProps = ki.Props{
+	"EnumType:Flag":    gi.KiT_VpFlags,
+	"color":            &gi.Prefs.Colors.Font,
+	"background-color": &gi.Prefs.Colors.Background,
+}
+
+// NewEmbedViewport creates a new Pixels Image with the specified width and height,
+// and initializes the renderer etc
+func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *EmbedViewport {
+	sz := image.Point{width, height}
+	vp := &EmbedViewport{}
+	vp.Geom = gi.Geom2DInt{Size: sz}
+	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
+	vp.Render.Init(width, height, vp.Pixels)
+	vp.InitName(vp, name)
+	vp.Scene = sc
+	vp.EmbedPar = em
+	vp.Win = vp.Scene.Win
+	vp.EventMgr.Master = vp.Win
+	return vp
+}
+
+func (vp *EmbedViewport) SetWin(win *gi.Window) {
+	vp.Win = win
+	vp.EventMgr.Master = win
+}
+
+func (vp *EmbedViewport) VpTop() gi.Viewport {
+	return vp.This().(gi.Viewport)
+}
+
+func (vp *EmbedViewport) VpTopNode() gi.Node {
+	return vp.This().(gi.Node)
+}
+
+func (vp *EmbedViewport) VpEventMgr() *gi.EventMgr {
+	return &vp.EventMgr
+}
+
+func (vp *EmbedViewport) VpIsVisible() bool {
+	if vp.Scene == nil || vp.EmbedPar == nil {
+		return false
+	}
+	return vp.Scene.IsVisible()
+}
+
+func (vp *EmbedViewport) VpUploadAll() {
+	if !vp.This().(gi.Viewport).VpIsVisible() {
+		return
+	}
+	vp.EmbedPar.UploadViewTex(vp.Scene)
+	vp.Scene.UpdateSig() // todo: maybe go up to its viewport?
+}
+
+// VpUploadVp uploads our viewport image into the parent window -- e.g., called
+// by popups when updating separately
+func (vp *EmbedViewport) VpUploadVp() {
+	if !vp.This().(gi.Viewport).VpIsVisible() {
+		return
+	}
+	vp.EmbedPar.UploadViewTex(vp.Scene)
+	vp.Scene.UpdateSig()
+}
+
+// VpUploadRegion uploads node region of our viewport image
+func (vp *EmbedViewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
+	if !vp.This().(gi.Viewport).VpIsVisible() {
+		return
+	}
+	vp.EmbedPar.UploadViewTex(vp.Scene)
+	vp.Scene.UpdateSig()
+}
+
+///////////////////////////////////////
+//  EventMaster API
+
+func (vp *EmbedViewport) EventTopNode() ki.Ki {
+	return vp
+}
+
+// IsInScope returns whether given node is in scope for receiving events
+func (vp *EmbedViewport) IsInScope(node *gi.Node2DBase, popup bool) bool {
+	return true // no popups as yet
+}
+
+// CurPopupIsTooltip returns true if current popup is a tooltip
+func (vp *EmbedViewport) CurPopupIsTooltip() bool {
+	return false
+}
+
+// DeleteTooltip deletes any tooltip popup (called when hover ends)
+func (vp *EmbedViewport) DeleteTooltip() {
+
+}
+
+// IsFocusActive returns true if focus is active in this master
+func (vp *EmbedViewport) IsFocusActive() bool {
+	return vp.HasFocus()
+}
+
+// SetFocusActiveState sets focus active state
+func (vp *EmbedViewport) SetFocusActiveState(active bool) {
+	vp.SetFocusState(active)
 }

@@ -3265,13 +3265,12 @@ func (tv *TextView) RenderAllLines() {
 	}
 	rs := &tv.Viewport.Render
 	rs.PushBounds(tv.VpBBox)
-	vp := tv.Viewport
-	updt := vp.Win.UpdateStart()
+	updt := tv.TopUpdateStart()
 	tv.RenderAllLinesInBounds()
 	tv.PopBounds()
-	vp.Win.UploadVpRegion(vp, tv.VpBBox, tv.WinBBox)
+	tv.Viewport.This().(gi.Viewport).VpUploadRegion(tv.VpBBox, tv.WinBBox)
 	tv.RenderScrolls()
-	vp.Win.UpdateEnd(updt)
+	tv.TopUpdateEnd(updt)
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
@@ -3431,7 +3430,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		return false
 	}
 	vp := tv.Viewport
-	updt := vp.Win.UpdateStart()
+	updt := tv.TopUpdateStart()
 	sty := &tv.Sty
 	rs := &vp.Render
 	pc := &rs.Paint
@@ -3498,12 +3497,12 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
 		vprel := tBBox.Min.Sub(tv.VpBBox.Min)
 		tWinBBox := tv.WinBBox.Add(vprel)
-		vp.Win.UploadVpRegion(vp, tBBox, tWinBBox)
+		vp.This().(gi.Viewport).VpUploadRegion(tBBox, tWinBBox)
 		// fmt.Printf("tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
 	}
 	tv.PopBounds()
 	tv.RenderScrolls()
-	vp.Win.UpdateEnd(updt)
+	tv.TopUpdateEnd(updt)
 	return true
 }
 
@@ -4390,7 +4389,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	if tv.Viewport.Win != nil && !tv.Viewport.Win.IsResizing() &&
+	if tv.Viewport.Win != nil &&
 		(tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..

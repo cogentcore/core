@@ -460,8 +460,14 @@ func (bb *ButtonBase) MouseFocusEvent() {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		if me.Action == mouse.Enter {
+			if EventTrace {
+				fmt.Printf("bb focus enter: %v\n", bbb.Name())
+			}
 			bbb.ButtonEnterHover()
 		} else {
+			if EventTrace {
+				fmt.Printf("bb focus exit: %v\n", bbb.Name())
+			}
 			bbb.ButtonExitHover()
 		}
 	})

@@ -280,24 +280,48 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	amen.Menu.AddAppMenu(win)
 	win.MainMenuUpdated()
 
-	abut := gi.AddNewCheckBox(mfr, "anim-but")
-	abut.SetText("Animate")
-	abut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 160, 100)
+	emb.Pose.Pos.Set(-2, 2, 0)
+	// emb.Zoom = 1.5   // this is how to rescale overall size
+	evlay := gi.AddNewLayout(emb.Viewport, "vlay", gi.LayoutVert)
+
+	eabut := gi.AddNewCheckBox(evlay, "anim-but")
+	eabut.SetText("Animate")
+	eabut.Tooltip = "this button will toggle animations on and off"
+	eabut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			DoAnimation = !abut.IsChecked() // note: not yet updated so status is opposite!
+			DoAnimation = !eabut.IsChecked()
 		}
 	})
 
-	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 100, 50)
-	emb.Pose.Pos.Set(-2, 2, 0)
-	// eabut := gi.AddNewCheckBox(emb.Viewport, "anim-but")
-	eabut := gi.AddNewButton(emb.Viewport, "anim-but")
-	eabut.SetText("Animate")
-	eabut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			fmt.Printf("embedded button!")
-			// DoAnimation = !eabut.IsChecked() // note: not yet updated so status is opposite!
-		}
+	// note: receiver for menu items with shortcuts must be a Node2D or Window
+	mb1 := gi.AddNewMenuButton(evlay, "menubutton1")
+	mb1.SetText("Menu Button")
+	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	mb1.Menu.AddSeparator("sep1")
+
+	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+		})
+
+	sb := gi.AddNewSpinBox(evlay, "spin")
+	sb.Defaults()
+	sb.HasMin = true
+	sb.Min = 0.0
+	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
 	})
 
 	AnimateTicker = time.NewTicker(10 * time.Millisecond)

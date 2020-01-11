@@ -17,7 +17,6 @@ import (
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
@@ -44,6 +43,22 @@ type Viewport interface {
 	// VpEventMgr returns the event manager for this viewport.
 	// Must be called on VpTop().  Can be nil.
 	VpEventMgr() *EventMgr
+
+	// VpIsVisible returns true if this viewport is visible.
+	// If false, rendering is aborted
+	VpIsVisible() bool
+
+	// VpUploadAll is the update call for the main viewport for a window --
+	// calls UploadAllViewports in parent window, which uploads the main viewport
+	// and any active popups etc over the top of that
+	VpUploadAll()
+
+	// VpUploadVp uploads our viewport image into the parent window -- e.g., called
+	// by popups when updating separately
+	VpUploadVp()
+
+	// VpUploadRegion uploads node region of our viewport image
+	VpUploadRegion(vpBBox, winBBox image.Rectangle)
 }
 
 // Viewport2D provides an image and a stack of Paint contexts for drawing onto the image
@@ -207,13 +222,7 @@ func (vp *Viewport2D) IsVisible() bool {
 	if vp == nil || vp.This() == nil || vp.IsInvisible() {
 		return false
 	}
-	if vp.Par == nil { // standalone
-		return true
-	}
-	if vp.Win == nil {
-		return false
-	}
-	return vp.Win.IsVisible()
+	return vp.This().(Viewport).VpIsVisible()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -237,7 +246,7 @@ func (vp *Viewport2D) VpTopNode() Node {
 	if vp.Win != nil {
 		return vp.Win
 	}
-	return vp.This().(Node)
+	return nil
 }
 
 // note: if not a standard viewport in a window, this method must be redefined!
@@ -249,6 +258,43 @@ func (vp *Viewport2D) VpEventMgr() *EventMgr {
 	return nil
 }
 
+func (vp *Viewport2D) VpIsVisible() bool {
+	if vp.Win == nil {
+		return false
+	}
+	return vp.Win.IsVisible()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Main Rendering code
+
+// VpUploadAll is the update call for the main viewport for a window --
+// calls UploadAllViewports in parent window, which uploads the main viewport
+// and any active popups etc over the top of that
+func (vp *Viewport2D) VpUploadAll() {
+	if !vp.This().(Viewport).VpIsVisible() {
+		return
+	}
+	vp.Win.UploadAllViewports()
+}
+
+// VpUploadVp uploads our viewport image into the parent window -- e.g., called
+// by popups when updating separately
+func (vp *Viewport2D) VpUploadVp() {
+	if !vp.This().(Viewport).VpIsVisible() {
+		return
+	}
+	vp.Win.UploadVp(vp, vp.WinBBox.Min)
+}
+
+// VpUploadRegion uploads node region of our viewport image
+func (vp *Viewport2D) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
+	if !vp.This().(Viewport).VpIsVisible() {
+		return
+	}
+	vp.Win.UploadVpRegion(vp, vpBBox, winBBox)
+}
+
 // set our window pointer to point to the current window we are under
 func (vp *Viewport2D) SetCurWin() {
 	pwin := vp.ParentWindow()
@@ -256,28 +302,6 @@ func (vp *Viewport2D) SetCurWin() {
 		// temporarily to give access to DPI etc
 		vp.Win = pwin
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  Main Rendering code
-
-// UploadMainToWin is the update call for the main viewport for a window --
-// calls UploadAllViewports in parent window, which uploads the main viewport
-// and any active popups etc over the top of that
-func (vp *Viewport2D) UploadMainToWin() {
-	if vp.Win == nil {
-		return
-	}
-	vp.Win.UploadAllViewports()
-}
-
-// UploadToWin uploads our viewport image into the parent window -- e.g., called
-// by popups when updating separately
-func (vp *Viewport2D) UploadToWin() {
-	if vp.Win == nil {
-		return
-	}
-	vp.Win.UploadVp(vp, vp.WinBBox.Min)
 }
 
 // DrawIntoParent draws our viewport image into parent's image -- this is the
@@ -306,17 +330,17 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 // This should be covered by an outer UpdateStart / End bracket on Window to drive
 // publishing changes, with suitable grouping if multiple updates
 func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
-	if vp.Win == nil || vp.Win.IsClosed() || vp.Win.IsResizing() { // no node-triggered updates during resize..
+	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
 	gn := gni.AsNode2D()
 	if Render2DTrace {
 		fmt.Printf("Render: vp re-render: %v node: %v\n", vp.PathUnique(), gn.PathUnique())
 	}
-	pr := prof.Start("vp.ReRender2DNode")
+	// pr := prof.Start("vp.ReRender2DNode")
 	gn.Render2DTree()
-	pr.End()
-	vp.Win.UploadVpRegion(vp, gn.VpBBox, gn.WinBBox)
+	// pr.End()
+	vp.This().(Viewport).VpUploadRegion(gn.VpBBox, gn.WinBBox)
 }
 
 // ReRender2DAnchor re-renders an anchor node -- the KEY diff from
@@ -325,7 +349,7 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 // This should be covered by an outer UpdateStart / End bracket on Window to drive
 // publishing changes, with suitable grouping if multiple updates
 func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
-	if vp.Win == nil || vp.Win.IsClosed() || vp.Win.IsResizing() { // no node-triggered updates during resize..
+	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
 	pw := gni.AsWidget()
@@ -335,10 +359,10 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	if Render2DTrace {
 		fmt.Printf("Render: vp anchor re-render: %v node: %v\n", vp.PathUnique(), pw.PathUnique())
 	}
-	pr := prof.Start("vp.ReRender2DNode")
+	// pr := prof.Start("vp.ReRender2DNode")
 	pw.ReRender2DTree()
-	pr.End()
-	vp.Win.UploadVpRegion(vp, pw.VpBBox, pw.WinBBox)
+	// pr.End()
+	vp.This().(Viewport).VpUploadRegion(pw.VpBBox, pw.WinBBox)
 }
 
 // Delete this popup viewport -- has already been disconnected from window
@@ -469,9 +493,9 @@ func (vp *Viewport2D) RenderViewport2D() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if Render2DTrace {
-			fmt.Printf("Render: %v at Popup UploadToWin\n", vp.PathUnique())
+			fmt.Printf("Render: %v at Popup VpUploadVp\n", vp.PathUnique())
 		}
-		vp.UploadToWin()
+		vp.This().(Viewport).VpUploadVp()
 	} else if vp.Viewport != nil { // sub-vp
 		if Render2DTrace {
 			fmt.Printf("Render: %v at %v DrawIntoParent\n", vp.PathUnique(), vp.VpBBox)
@@ -479,9 +503,9 @@ func (vp *Viewport2D) RenderViewport2D() {
 		vp.DrawIntoParent(vp.Viewport)
 	} else { // we are the main vp
 		if Render2DTrace {
-			fmt.Printf("Render: %v at %v UploadMainToWin\n", vp.PathUnique(), vp.VpBBox)
+			fmt.Printf("Render: %v at %v VpUploadAll\n", vp.PathUnique(), vp.VpBBox)
 		}
-		vp.UploadMainToWin()
+		vp.This().(Viewport).VpUploadAll()
 	}
 }
 
@@ -703,11 +727,11 @@ func (vp *Viewport2D) UnblockUpdates() {
 func (vp *Viewport2D) UpdateNodes() {
 	vp.UpdtMu.Lock()
 	vp.SetFlag(int(VpFlagUpdatingNode))
-	if vp.Win != nil {
-		wupdt := vp.Win.UpdateStart()
-		defer vp.Win.UpdateEnd(wupdt)
+	tn := vp.TopNode2D()
+	if tn != nil && tn != vp.This().(Node) {
+		wupdt := tn.UpdateStart()
+		defer tn.UpdateEnd(wupdt)
 	}
-
 	for {
 		if vp.NeedsFullRender() {
 			vp.StackMu.Lock()

@@ -154,6 +154,11 @@ func (nb *NodeBase) HasFocus() bool {
 	return nb.HasFlag(int(HasFocus))
 }
 
+// SetFocusState sets current HasFocus state
+func (nb *NodeBase) SetFocusState(focus bool) {
+	nb.SetFlagState(focus, int(HasFocus))
+}
+
 // IsDragging tests if the current node is currently flagged as receiving
 // dragging events -- flag set by window
 func (nb *NodeBase) IsDragging() bool {
