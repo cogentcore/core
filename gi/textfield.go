@@ -755,7 +755,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 func (tf *TextField) CharStartPos(charidx int) mat32.Vec2 {
 	st := &tf.Sty
 	spc := st.BoxSpace()
-	pos := tf.LayData.AllocPos.AddScalar(spc)
+	pos := tf.LayData.AllocPos.AddScalar(spc).Add(mat32.NewVec2FmPoint(tf.Viewport.WinBBox.Min))
 	cpos := tf.TextWidth(tf.StartPos, charidx)
 	return mat32.Vec2{pos.X + cpos, pos.Y}
 }

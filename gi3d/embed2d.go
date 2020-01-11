@@ -175,9 +175,13 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		md := &mouse.Event{}
 		*md = *me
-		md.Where = ppt
+		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
+		if !evToPopup {
+			md.Where = ppt
+			sc.Win.SetFocus(em)
+		}
 		em.Viewport.EventMgr.MouseEvents(md)
-		em.Viewport.EventMgr.SendEventSignal(md, false)
+		em.Viewport.EventMgr.SendEventSignal(md, evToPopup)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -192,12 +196,15 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		md := &mouse.MoveEvent{}
 		*md = *me
-		del := ppt.Sub(me.Where)
-		md.Where = ppt
-		md.From.Add(del)
+		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
+		if !evToPopup {
+			del := ppt.Sub(me.Where)
+			md.Where = ppt
+			md.From.Add(del)
+		}
 		em.Viewport.EventMgr.MouseEvents(md)
-		em.Viewport.EventMgr.SendEventSignal(md, false)
-		em.Viewport.EventMgr.GenMouseFocusEvents(md, false)
+		em.Viewport.EventMgr.SendEventSignal(md, evToPopup)
+		em.Viewport.EventMgr.GenMouseFocusEvents(md, evToPopup)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -212,11 +219,14 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		}
 		md := &mouse.DragEvent{}
 		*md = *me
-		del := ppt.Sub(me.Where)
-		md.Where = ppt
-		md.From.Add(del)
+		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
+		if !evToPopup {
+			del := ppt.Sub(me.Where)
+			md.Where = ppt
+			md.From.Add(del)
+		}
 		em.Viewport.EventMgr.MouseEvents(md)
-		em.Viewport.EventMgr.SendEventSignal(md, false)
+		em.Viewport.EventMgr.SendEventSignal(md, evToPopup)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -224,7 +234,8 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 			return
 		}
 		kt := d.(*key.ChordEvent)
-		em.Viewport.EventMgr.SendEventSignal(kt, false)
+		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
+		em.Viewport.EventMgr.SendEventSignal(kt, evToPopup)
 		kt.SetProcessed() // must always
 	})
 	// em.ConnectEvent(sc.Win, oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
