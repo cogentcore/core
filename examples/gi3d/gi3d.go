@@ -319,7 +319,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	cmb := gi.AddNewMenuButton(evlay, "anim-ctrl")
 	cmb.SetText("Anim Ctrl")
-	cmb.Tooltip = "options for what is animated"
+	cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
 	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
 		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			anim.DoTorus = !anim.DoTorus
