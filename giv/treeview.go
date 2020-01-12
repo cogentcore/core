@@ -467,20 +467,14 @@ func (tv *TreeView) UnselectAll() {
 	if tv.Viewport == nil {
 		return
 	}
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	sl := tv.SelectedViews()
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		v.ClearSelected()
 		v.UpdateSig()
 	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	tv.TopUpdateEnd(wupdt)
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewAllUnselected), tv.This())
 }
 
@@ -489,20 +483,14 @@ func (tv *TreeView) SelectAll() {
 	if tv.Viewport == nil {
 		return
 	}
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	tv.UnselectAll()
 	nn := tv.RootView
 	nn.Select()
 	for nn != nil {
 		nn = nn.MoveDown(mouse.SelectQuiet)
 	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	tv.TopUpdateEnd(wupdt)
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewAllSelected), tv.This())
 }
 
@@ -512,11 +500,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 	if mode == mouse.NoSelect {
 		return false
 	}
-	win := tv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	sel := false
 	switch mode {
 	case mouse.SelectOne:
@@ -581,9 +565,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 		tv.Unselect()
 		// not sel -- no signal..
 	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	tv.TopUpdateEnd(wupdt)
 	return sel
 }
 
@@ -705,11 +687,7 @@ var TreeViewPageSteps = 10
 // MovePageUpAction moves the selection up to previous TreeViewPageSteps elements in the tree,
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
-	win := tv.Viewport.Win
-	winUpdt := false
-	if win != nil {
-		winUpdt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	mvMode := selMode
 	if selMode == mouse.SelectOne {
 		mvMode = mouse.NoSelect
@@ -732,20 +710,14 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
-	if win != nil {
-		win.UpdateEnd(winUpdt)
-	}
+	tv.TopUpdateEnd(wupdt)
 	return fnn
 }
 
 // MovePageDownAction moves the selection up to previous TreeViewPageSteps elements in the tree,
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
 func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
-	win := tv.Viewport.Win
-	winUpdt := false
-	if win != nil {
-		winUpdt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	mvMode := selMode
 	if selMode == mouse.SelectOne {
 		mvMode = mouse.NoSelect
@@ -768,9 +740,7 @@ func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
-	if win != nil {
-		win.UpdateEnd(winUpdt)
-	}
+	tv.TopUpdateEnd(wupdt)
 	return fnn
 }
 
@@ -808,11 +778,7 @@ func (tv *TreeView) MoveHomeAction(selMode mouse.SelectModes) *TreeView {
 // using given select mode (from keyboard modifiers) -- and emits select event
 // for newly selected item
 func (tv *TreeView) MoveEndAction(selMode mouse.SelectModes) *TreeView {
-	win := tv.Viewport.Win
-	winUpdt := false
-	if win != nil {
-		winUpdt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	mvMode := selMode
 	if selMode == mouse.SelectOne {
 		mvMode = mouse.NoSelect
@@ -835,9 +801,7 @@ func (tv *TreeView) MoveEndAction(selMode mouse.SelectModes) *TreeView {
 		fnn.ScrollToMe()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), fnn.This())
 	}
-	if win != nil {
-		win.UpdateEnd(winUpdt)
-	}
+	tv.TopUpdateEnd(wupdt)
 	return fnn
 }
 
@@ -881,11 +845,7 @@ func (tv *TreeView) ToggleClose() {
 
 // OpenAll opens the given node and all of its sub-nodes
 func (tv *TreeView) OpenAll() {
-	win := tv.Viewport.Win
-	winUpdt := false
-	if win != nil {
-		winUpdt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
@@ -897,18 +857,12 @@ func (tv *TreeView) OpenAll() {
 	})
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
 	tv.UpdateEnd(updt)
-	if win != nil {
-		win.UpdateEnd(winUpdt)
-	}
+	tv.TopUpdateEnd(wupdt)
 }
 
 // CloseAll closes the given node and all of its sub-nodes
 func (tv *TreeView) CloseAll() {
-	win := tv.Viewport.Win
-	winUpdt := false
-	if win != nil {
-		winUpdt = win.UpdateStart()
-	}
+	wupdt := tv.TopUpdateStart()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d interface{}) bool {
@@ -920,9 +874,7 @@ func (tv *TreeView) CloseAll() {
 	})
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewClosed), tv.This())
 	tv.UpdateEnd(updt)
-	if win != nil {
-		win.UpdateEnd(winUpdt)
-	}
+	tv.TopUpdateEnd(wupdt)
 }
 
 //////////////////////////////////////////////////////////////////////////////

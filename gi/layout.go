@@ -1383,8 +1383,8 @@ func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.
 func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
-	win := ly.ParentWindow()
-	if win == nil {
+	em := ly.EventMgr2D()
+	if em == nil {
 		return nil, -1
 	}
 	for i, k := range ly.Kids {
@@ -1413,19 +1413,19 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	if foc == nil {
 		return false
 	}
-	win := ly.ParentWindow()
-	cur := win.CurFocus()
+	em := ly.EventMgr2D()
+	cur := em.CurFocus()
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
 		nxti = idx + ly.Sty.Layout.Columns
 	}
 	did := false
 	if nxti < sz {
-		did = win.FocusOnOrNext(ly.Child(nxti))
+		did = em.FocusOnOrNext(ly.Child(nxti))
 	} else {
-		did = win.FocusOnOrNext(ly.Child(0))
+		did = em.FocusOnOrNext(ly.Child(0))
 	}
-	if !did || win.CurFocus() == cur {
+	if !did || em.CurFocus() == cur {
 		return false
 	}
 	return true
@@ -1442,19 +1442,19 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	if foc == nil {
 		return false
 	}
-	win := ly.ParentWindow()
-	cur := win.CurFocus()
+	em := ly.EventMgr2D()
+	cur := em.CurFocus()
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
 		nxti = idx - ly.Sty.Layout.Columns
 	}
 	did := false
 	if nxti >= 0 {
-		did = win.FocusOnOrPrev(ly.Child(nxti))
+		did = em.FocusOnOrPrev(ly.Child(nxti))
 	} else {
-		did = win.FocusOnOrPrev(ly.Child(sz - 1))
+		did = em.FocusOnOrPrev(ly.Child(sz - 1))
 	}
-	if !did || win.CurFocus() == cur {
+	if !did || em.CurFocus() == cur {
 		return false
 	}
 	return true
@@ -1562,7 +1562,10 @@ func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel, found := ly.ChildByLabelStartsCanFocus(ly.FocusName, ly.FocusNameLast)
 	if found {
-		ly.ParentWindow().SetFocus(focel) // this will also scroll by default!
+		em := ly.EventMgr2D()
+		if em != nil {
+			em.SetFocus(focel) // this will also scroll by default!
+		}
 		ly.FocusNameLast = focel
 		return true
 	} else {

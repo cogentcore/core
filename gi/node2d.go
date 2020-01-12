@@ -356,44 +356,44 @@ func (nb *Node2DBase) GrabFocus() {
 			return false // done
 		})
 	}
-	win := nb.ParentWindow()
-	if win != nil {
-		win.SetFocus(foc)
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.SetFocus(foc)
 	}
 }
 
 // FocusNext moves the focus onto the next item
 func (nb *Node2DBase) FocusNext() {
-	win := nb.ParentWindow()
-	if win != nil {
-		win.FocusNext(win.CurFocus())
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.FocusNext(em.CurFocus())
 	}
 }
 
 // FocusPrev moves the focus onto the previous item
 func (nb *Node2DBase) FocusPrev() {
-	win := nb.ParentWindow()
-	if win != nil {
-		win.FocusPrev(win.CurFocus())
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.FocusPrev(em.CurFocus())
 	}
 }
 
 // StartFocus specifies this widget to give focus to when the window opens
 func (nb *Node2DBase) StartFocus() {
-	win := nb.ParentWindow()
-	if win != nil {
-		win.SetStartFocus(nb.This())
+	em := nb.EventMgr2D()
+	if em != nil {
+		// em.SetStartFocus(nb.This())
 	}
 }
 
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the Window
 func (nb *Node2DBase) ContainsFocus() bool {
-	win := nb.ParentWindow()
-	if win == nil {
+	em := nb.EventMgr2D()
+	if em == nil {
 		return false
 	}
-	cur := win.CurFocus()
+	cur := em.CurFocus()
 	if cur == nil {
 		return false
 	}
@@ -443,7 +443,7 @@ func (nb *Node2DBase) ContextMenu() {
 }
 
 func (nb *Node2DBase) IsVisible() bool {
-	if nb == nil || nb.This() == nil || nb.IsInvisible() || nb.Viewport == nil {
+	if nb == nil || nb.This() == nil || nb.IsInvisible() || nb.Viewport == nil || nb.Viewport.This() == nil {
 		return false
 	}
 	if nb.Par == nil || nb.Par.This() == nil {
@@ -496,34 +496,44 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 // for UpdateStart / End around multiple dispersed updates to
 // properly batch everything and prevent redundant updates.
 func (nb *Node2DBase) TopNode2D() Node {
-	if nb.Viewport == nil {
+	if nb.Viewport == nil || nb.Viewport.This() == nil {
 		vp := nb.This().(Node2D).AsViewport2D()
 		if vp != nil {
-			return vp.This().(Viewport).VpTop().VpTopNode()
+			top := vp.This().(Viewport).VpTop()
+			if top != nil {
+				return top.VpTopNode()
+			}
 		}
 		return nil
 	}
-	return nb.Viewport.This().(Viewport).VpTop().VpTopNode()
+	top := nb.Viewport.This().(Viewport).VpTop()
+	if top != nil {
+		return top.VpTopNode()
+	}
+	return nil
 }
 
 // EventMgr2D() returns the event manager for this node.
 // Can be nil.
 func (nb *Node2DBase) EventMgr2D() *EventMgr {
-	if nb.Viewport == nil {
+	if nb.Viewport == nil || nb.Viewport.This() == nil {
 		return nil
 	}
-	return nb.Viewport.This().(Viewport).VpTop().VpEventMgr()
+	top := nb.Viewport.This().(Viewport).VpTop()
+	if top == nil {
+		return nil
+	}
+	return top.VpEventMgr()
 }
 
 // TopUpdateStart calls UpdateStart on TopNode2D().  Use this
 // for TopUpdateStart / End around multiple dispersed updates to
 // properly batch everything and prevent redundant updates.
 func (nb *Node2DBase) TopUpdateStart() bool {
-	tn := nb.TopNode2D()
-	if tn == nil {
+	if nb.Viewport == nil || nb.Viewport.This() == nil {
 		return false
 	}
-	return tn.UpdateStart()
+	return nb.Viewport.This().(Viewport).VpTopUpdateStart()
 }
 
 // TopUpdateEnd calls UpdateEnd on TopNode2D().  Use this
@@ -533,11 +543,10 @@ func (nb *Node2DBase) TopUpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
-	tn := nb.TopNode2D()
-	if tn == nil {
+	if nb.Viewport == nil || nb.Viewport.This() == nil {
 		return
 	}
-	tn.UpdateEnd(updt)
+	nb.Viewport.This().(Viewport).VpTopUpdateEnd(updt)
 }
 
 // ParentWindow returns the parent window for this node
@@ -617,7 +626,7 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 // re-render it -- this is automatically called in PushBounds, and
 // disconnected with DisconnectAllEvents, so it only occurs for rendered nodes.
 func (nb *Node2DBase) ConnectToViewport() {
-	if nb.Viewport != nil {
+	if nb.Viewport != nil && nb.Viewport.This() != nil {
 		nb.NodeSig.Connect(nb.Viewport.This(), SignalViewport2D)
 	}
 }
@@ -625,7 +634,7 @@ func (nb *Node2DBase) ConnectToViewport() {
 // DisconnectViewport disconnects the node's update signal to the viewport as
 // a receiver
 func (nb *Node2DBase) DisconnectViewport() {
-	if nb.Viewport != nil {
+	if nb.Viewport != nil && nb.Viewport.This() != nil {
 		nb.NodeSig.Disconnect(nb.Viewport.This())
 	}
 }

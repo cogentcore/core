@@ -5,6 +5,7 @@
 package gi3d
 
 import (
+	"fmt"
 	"image"
 
 	"github.com/goki/gi/gi"
@@ -164,92 +165,92 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 	em.SetCanFocus()
 	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		if !sc.IsVisible() {
+		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		ssc := emm.Viewport.Scene
+		if !ssc.IsVisible() {
 			return
 		}
+		cpop := ssc.Win.CurPopup()
+		if cpop != nil && !ssc.Win.CurPopupIsTooltip() {
+			return // let window handle popups
+		}
 		me := d.(*mouse.Event)
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
-		ppt, ok := emm.Project2D(sc, me.Where)
+		ppt, ok := emm.Project2D(ssc, me.Where)
 		if !ok {
 			return
 		}
 		md := &mouse.Event{}
 		*md = *me
-		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
-		if !evToPopup {
-			md.Where = ppt
-			sc.Win.SetFocus(em)
-		}
-		em.Viewport.EventMgr.MouseEvents(md)
-		em.Viewport.EventMgr.SendEventSignal(md, evToPopup)
+		md.Where = ppt
+		ssc.Win.EventMgr.SetFocus(emm)
+		emm.Viewport.EventMgr.MouseEvents(md)
+		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		if !sc.IsVisible() {
+		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		ssc := emm.Viewport.Scene
+		if !ssc.IsVisible() {
 			return
 		}
+		cpop := ssc.Win.CurPopup()
+		if cpop != nil && !ssc.Win.CurPopupIsTooltip() {
+			return // let window handle popups
+		}
 		me := d.(*mouse.MoveEvent)
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
-		ppt, ok := emm.Project2D(sc, me.Where)
+		ppt, ok := emm.Project2D(ssc, me.Where)
 		if !ok {
 			return
 		}
 		md := &mouse.MoveEvent{}
 		*md = *me
-		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
-		if !evToPopup {
-			del := ppt.Sub(me.Where)
-			md.Where = ppt
-			md.From.Add(del)
-		}
-		em.Viewport.EventMgr.MouseEvents(md)
-		em.Viewport.EventMgr.SendEventSignal(md, evToPopup)
-		em.Viewport.EventMgr.GenMouseFocusEvents(md, evToPopup)
+		del := ppt.Sub(me.Where)
+		md.Where = ppt
+		md.From.Add(del)
+		emm.Viewport.EventMgr.MouseEvents(md)
+		emm.Viewport.EventMgr.SendEventSignal(md, false)
+		emm.Viewport.EventMgr.GenMouseFocusEvents(md, false)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		if !sc.IsVisible() {
+		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		ssc := emm.Viewport.Scene
+		if !ssc.IsVisible() {
 			return
 		}
+		cpop := ssc.Win.CurPopup()
+		if cpop != nil && !ssc.Win.CurPopupIsTooltip() {
+			return // let window handle popups
+		}
 		me := d.(*mouse.DragEvent)
-		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
-		ppt, ok := emm.Project2D(sc, me.Where)
+		ppt, ok := emm.Project2D(ssc, me.Where)
 		if !ok {
 			return
 		}
 		md := &mouse.DragEvent{}
 		*md = *me
-		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
-		if !evToPopup {
-			del := ppt.Sub(me.Where)
-			md.Where = ppt
-			md.From.Add(del)
-		}
-		em.Viewport.EventMgr.MouseEvents(md)
-		em.Viewport.EventMgr.SendEventSignal(md, evToPopup)
+		del := ppt.Sub(me.Where)
+		md.Where = ppt
+		md.From.Add(del)
+		emm.Viewport.EventMgr.MouseEvents(md)
+		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		if !sc.IsVisible() {
+		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
+		ssc := emm.Viewport.Scene
+		if !ssc.IsVisible() {
 			return
 		}
+		cpop := ssc.Win.CurPopup()
+		if cpop != nil && !ssc.Win.CurPopupIsTooltip() {
+			return // let window handle popups
+		}
 		kt := d.(*key.ChordEvent)
-		evToPopup := !sc.Win.CurPopupIsTooltip() // don't send events to tooltips!
-		em.Viewport.EventMgr.SendEventSignal(kt, evToPopup)
+		fmt.Printf("key event: %v\n", kt.String())
+		emm.Viewport.EventMgr.SendEventSignal(kt, false)
 		kt.SetProcessed() // must always
 	})
-	// em.ConnectEvent(sc.Win, oswin.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-	// 	if !sc.IsVisible() {
-	// 		return
-	// 	}
-	// 	me := d.(*mouse.HoverEvent)
-	// 	emm := recv.Embed(KiT_Embed2D).(*Embed2D)
-	// 	ppt, ok := emm.Project2D(sc, me.Where)
-	// 	if !ok {
-	// 		return
-	// 	}
-	// 	_ = ppt
-	// })
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -284,7 +285,7 @@ func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *E
 	vp.Scene = sc
 	vp.EmbedPar = em
 	vp.Win = vp.Scene.Win
-	vp.EventMgr.Master = vp.Win
+	vp.EventMgr.Master = vp
 	return vp
 }
 
@@ -299,6 +300,13 @@ func (vp *EmbedViewport) VpTop() gi.Viewport {
 
 func (vp *EmbedViewport) VpTopNode() gi.Node {
 	return vp.This().(gi.Node)
+}
+
+func (vp *EmbedViewport) VpTopUpdateStart() bool {
+	return false
+}
+
+func (vp *EmbedViewport) VpTopUpdateEnd(updt bool) {
 }
 
 func (vp *EmbedViewport) VpEventMgr() *gi.EventMgr {
@@ -346,12 +354,15 @@ func (vp *EmbedViewport) EventTopNode() ki.Ki {
 	return vp
 }
 
-// IsInScope returns whether given node is in scope for receiving events
-func (vp *EmbedViewport) IsInScope(node *gi.Node2DBase, popup bool) bool {
-	return true // no popups as yet
+func (vp *EmbedViewport) FocusTopNode() ki.Ki {
+	return vp
 }
 
-// CurPopupIsTooltip returns true if current popup is a tooltip
+// IsInScope returns whether given node is in scope for receiving events
+func (vp *EmbedViewport) IsInScope(node *gi.Node2DBase, popup bool) bool {
+	return true // no popups for embedded
+}
+
 func (vp *EmbedViewport) CurPopupIsTooltip() bool {
 	return false
 }
@@ -363,10 +374,9 @@ func (vp *EmbedViewport) DeleteTooltip() {
 
 // IsFocusActive returns true if focus is active in this master
 func (vp *EmbedViewport) IsFocusActive() bool {
-	return vp.HasFocus()
+	return true
 }
 
 // SetFocusActiveState sets focus active state
 func (vp *EmbedViewport) SetFocusActiveState(active bool) {
-	vp.SetFocusState(active)
 }

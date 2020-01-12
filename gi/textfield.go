@@ -277,10 +277,10 @@ func (tf *TextField) Clear() {
 
 // CursorForward moves the cursor forward
 func (tf *TextField) CursorForward(steps int) {
-	wupdt := tf.TopUpdateStart()
-	defer tf.TopUpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
+	wupdt := tf.TopUpdateStart()
+	defer tf.TopUpdateEnd(wupdt)
 	tf.CursorPos += steps
 	if tf.CursorPos > len(tf.EditTxt) {
 		tf.CursorPos = len(tf.EditTxt)
@@ -296,10 +296,10 @@ func (tf *TextField) CursorForward(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tf *TextField) CursorBackward(steps int) {
-	wupdt := tf.TopUpdateStart()
-	defer tf.TopUpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
+	wupdt := tf.TopUpdateStart()
+	defer tf.TopUpdateEnd(wupdt)
 	tf.CursorPos -= steps
 	if tf.CursorPos < 0 {
 		tf.CursorPos = 0
@@ -316,10 +316,10 @@ func (tf *TextField) CursorBackward(steps int) {
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tf *TextField) CursorStart() {
-	wupdt := tf.TopUpdateStart()
-	defer tf.TopUpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
+	wupdt := tf.TopUpdateStart()
+	defer tf.TopUpdateEnd(wupdt)
 	tf.CursorPos = 0
 	tf.StartPos = 0
 	tf.EndPos = ints.MinInt(len(tf.EditTxt), tf.StartPos+tf.CharWidth)
@@ -330,10 +330,10 @@ func (tf *TextField) CursorStart() {
 
 // CursorEnd moves the cursor to the end of the text
 func (tf *TextField) CursorEnd() {
-	wupdt := tf.TopUpdateStart()
-	defer tf.TopUpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
+	wupdt := tf.TopUpdateStart()
+	defer tf.TopUpdateEnd(wupdt)
 	ed := len(tf.EditTxt)
 	tf.CursorPos = ed
 	tf.EndPos = len(tf.EditTxt) // try -- display will adjust
@@ -605,10 +605,10 @@ func (tf *TextField) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tf *TextField) InsertAtCursor(str string) {
-	wupdt := tf.TopUpdateStart()
-	defer tf.TopUpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
+	wupdt := tf.TopUpdateStart()
+	defer tf.TopUpdateEnd(wupdt)
 	if tf.HasSelection() {
 		tf.Cut()
 	}
@@ -621,7 +621,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
-	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.Txt)
+	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.EditTxt)
 }
 
 // cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
@@ -1087,10 +1087,10 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 	if tf.Viewport == nil || tf.Viewport.Win == nil {
 		return
 	}
-	wupdt := tf.TopUpdateStart()
-	defer tf.TopUpdateEnd(wupdt)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEnd(updt)
+	wupdt := tf.TopUpdateStart()
+	defer tf.TopUpdateEnd(wupdt)
 	oldPos := tf.CursorPos
 	tf.CursorPos = tf.PixelToCursor(pixOff)
 	if tf.SelectMode || selMode != mouse.SelectOne {

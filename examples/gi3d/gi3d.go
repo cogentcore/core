@@ -182,13 +182,13 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 
 	gcb := gi3d.AddNewSolid(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
-	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5
+	gcb.Mat.Color.SetUInt8(0, 128, 0, 128) // alpha = .5
 	gcb.Class = "cube"
 
 	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
 	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
 	lns.Pose.Pos.Set(0, 0, 1)
-	lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5
+	lns.Mat.Color.SetUInt8(128, 128, 0, 128) // alpha = .5
 	// sc.Wireframe = true                      // debugging
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
@@ -267,7 +267,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)          // in front of camera
-	fpgun.Mat.Color.SetUInt8(255, 0, 255, 128) // alpha = .5
+	fpgun.Mat.Color.SetUInt8(128, 0, 128, 128) // alpha = .5
 
 	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin

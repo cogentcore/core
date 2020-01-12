@@ -59,6 +59,9 @@ type EventMgr struct {
 	DNDData         mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource       ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
 	DNDFinalEvent   *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
+	Focus           ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+	FocusMu         sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
+	FocusStack      []ki.Ki                                 `json:"-" xml:"-" desc:"stack of focus"`
 	startDrag       *mouse.DragEvent
 	dragStarted     bool
 	startDND        *mouse.DragEvent
@@ -732,6 +735,274 @@ func (em *EventMgr) SendKeyFunEvent(kf KeyFuns, popup bool) {
 	em.SendEventSignal(&ke, popup)
 }
 
+// CurFocus gets the current focus node under mutex protection
+func (em *EventMgr) CurFocus() ki.Ki {
+	em.FocusMu.RLock()
+	defer em.FocusMu.RUnlock()
+	return em.Focus
+}
+
+// setFocusPtr JUST sets the focus pointer under mutex protection --
+// use SetFocus for end-user setting of focus
+func (em *EventMgr) setFocusPtr(k ki.Ki) {
+	em.FocusMu.Lock()
+	em.Focus = k
+	em.FocusMu.Unlock()
+}
+
+// SetFocus sets focus to given item -- returns true if focus changed.
+func (em *EventMgr) SetFocus(k ki.Ki) bool {
+	cfoc := em.CurFocus()
+	if cfoc == k {
+		if k != nil {
+			_, ni := KiToNode2D(k)
+			if ni != nil && ni.This() != nil {
+				ni.SetFocusState(true) // ensure focus flag always set
+			}
+		}
+		return false
+	}
+
+	top := em.Master.EventTopNode()
+	updt := top.UpdateStart()
+	defer top.UpdateEnd(updt)
+
+	if cfoc != nil {
+		nii, ni := KiToNode2D(cfoc)
+		if ni != nil && ni.This() != nil {
+			ni.SetFocusState(false)
+			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
+			nii.FocusChanged2D(FocusLost)
+		}
+	}
+	em.setFocusPtr(k)
+	if k == nil {
+		return true
+	}
+	nii, ni := KiToNode2D(k)
+	if ni == nil || ni.This() == nil { // only 2d for now
+		em.setFocusPtr(nil)
+		return false
+	}
+	ni.SetFocusState(true)
+	em.Master.SetFocusActiveState(true)
+	// fmt.Printf("set foc: %v\n", ni.PathUnique())
+	em.ClearNonFocus(k) // shouldn't need this but actually sometimes do
+	nii.FocusChanged2D(FocusGot)
+	return true
+}
+
+// 	FocusNext sets the focus on the next item that can accept focus after the
+// given item (can be nil) -- returns true if a focus item found.
+func (em *EventMgr) FocusNext(foc ki.Ki) bool {
+	gotFocus := false
+	focusNext := false // get the next guy
+	if foc == nil {
+		focusNext = true
+	}
+
+	focRoot := em.Master.FocusTopNode()
+
+	for i := 0; i < 2; i++ {
+		focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+			if gotFocus {
+				return false
+			}
+			_, ni := KiToNode2D(k)
+			if ni == nil || ni.This() == nil {
+				return true
+			}
+			if foc == k { // current focus can be a non-can-focus item
+				focusNext = true
+				return true
+			}
+			if !focusNext {
+				return true
+			}
+			if !ni.CanFocus() {
+				return true
+			}
+			em.SetFocus(k)
+			gotFocus = true
+			return false // done
+		})
+		if gotFocus {
+			return true
+		}
+		focusNext = true // this time around, just get the first one
+	}
+	return gotFocus
+}
+
+// FocusOnOrNext sets the focus on the given item, or the next one that can
+// accept focus -- returns true if a new focus item found.
+func (em *EventMgr) FocusOnOrNext(foc ki.Ki) bool {
+	cfoc := em.CurFocus()
+	if cfoc == foc {
+		return true
+	}
+	_, ni := KiToNode2D(foc)
+	if ni == nil || ni.This() == nil {
+		return false
+	}
+	if ni.CanFocus() {
+		em.SetFocus(foc)
+		return true
+	}
+	return em.FocusNext(foc)
+}
+
+// FocusOnOrPrev sets the focus on the given item, or the previous one that can
+// accept focus -- returns true if a new focus item found.
+func (em *EventMgr) FocusOnOrPrev(foc ki.Ki) bool {
+	cfoc := em.CurFocus()
+	if cfoc == foc {
+		return true
+	}
+	_, ni := KiToNode2D(foc)
+	if ni == nil || ni.This() == nil {
+		return false
+	}
+	if ni.CanFocus() {
+		em.SetFocus(foc)
+		return true
+	}
+	return em.FocusPrev(foc)
+}
+
+// FocusPrev sets the focus on the previous item before the given item (can be nil)
+func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
+	if foc == nil { // must have a current item here
+		em.FocusLast()
+		return false
+	}
+
+	gotFocus := false
+	var prevItem ki.Ki
+
+	focRoot := em.Master.FocusTopNode()
+
+	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+		if gotFocus {
+			return false
+		}
+		// todo: see about 3D guys
+		_, ni := KiToNode2D(k)
+		if ni == nil || ni.This() == nil {
+			return true
+		}
+		if foc == k {
+			gotFocus = true
+			return false
+		}
+		if !ni.CanFocus() {
+			return true
+		}
+		prevItem = k
+		return true
+	})
+	if gotFocus && prevItem != nil {
+		em.SetFocus(prevItem)
+		return true
+	} else {
+		return em.FocusLast()
+	}
+}
+
+// FocusLast sets the focus on the last item in the tree -- returns true if a
+// focusable item was found
+func (em *EventMgr) FocusLast() bool {
+	var lastItem ki.Ki
+
+	focRoot := em.Master.FocusTopNode()
+
+	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+		// todo: see about 3D guys
+		_, ni := KiToNode2D(k)
+		if ni == nil || ni.This() == nil {
+			return true
+		}
+		if !ni.CanFocus() {
+			return true
+		}
+		lastItem = k
+		return true
+	})
+	em.SetFocus(lastItem)
+	if lastItem == nil {
+		return false
+	}
+	return true
+}
+
+// ClearNonFocus clears the focus of any non-w.Focus item.
+func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
+	focRoot := em.Master.FocusTopNode()
+
+	top := em.Master.EventTopNode()
+	updated := false
+	updt := false
+
+	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
+		if k == focRoot { // skip top-level
+			return true
+		}
+		// todo: see about 3D guys
+		nii, ni := KiToNode2D(k)
+		if ni == nil || ni.This() == nil {
+			return true
+		}
+		if foc == k {
+			return true
+		}
+		if ni.HasFocus() {
+			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
+			if !updated {
+				updated = true
+				updt = top.UpdateStart()
+			}
+			ni.ClearFlag(int(HasFocus))
+			nii.FocusChanged2D(FocusLost)
+		}
+		return true
+	})
+	if updated {
+		top.UpdateEnd(updt)
+	}
+}
+
+// PushFocus pushes current focus onto stack and sets new focus.
+func (em *EventMgr) PushFocus(p ki.Ki) {
+	em.FocusMu.Lock()
+	if em.FocusStack == nil {
+		em.FocusStack = make([]ki.Ki, 0, 50)
+	}
+	em.FocusStack = append(em.FocusStack, em.Focus)
+	em.Focus = nil // don't un-focus on prior item when pushing
+	em.FocusMu.Unlock()
+	em.FocusOnOrNext(p)
+}
+
+// PopFocus pops off the focus stack and sets prev to current focus.
+func (em *EventMgr) PopFocus() {
+	em.FocusMu.Lock()
+	if em.FocusStack == nil || len(em.FocusStack) == 0 {
+		em.Focus = nil
+		return
+	}
+	sz := len(em.FocusStack)
+	em.Focus = nil
+	nxtf := em.FocusStack[sz-1]
+	_, ni := KiToNode2D(nxtf)
+	if ni != nil && ni.This() != nil {
+		em.FocusMu.Unlock()
+		em.SetFocus(nxtf)
+		em.FocusMu.Lock()
+	}
+	em.FocusStack = em.FocusStack[:sz-1]
+	em.FocusMu.Unlock()
+}
+
 ///////////////////////////////////////////////////////////////////
 //   Master interface
 
@@ -742,6 +1013,9 @@ type EventMaster interface {
 	// This is also the node that serves as the event sender.
 	// By default it is the Window
 	EventTopNode() ki.Ki
+
+	// FocusTopNode returns the top-level node for key event focusing.
+	FocusTopNode() ki.Ki
 
 	// IsInScope returns whether given node is in scope for receiving events
 	IsInScope(node *Node2DBase, popup bool) bool

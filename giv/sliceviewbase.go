@@ -506,10 +506,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	nWidg := nWidgPerRow * sv.DispRows
 
-	if sv.Viewport != nil && sv.Viewport.Win != nil {
-		wupdt := sv.TopUpdateStart()
-		defer sv.TopUpdateEnd(wupdt)
-	}
+	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
@@ -1137,14 +1135,7 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	if row < 0 {
 		return
 	}
-	var win *gi.Window
-	if sv.Viewport != nil {
-		win = sv.Viewport.Win
-	}
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := sv.TopUpdateStart()
 	sg := sv.This().(SliceViewer).SliceGrid()
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
 	rowidx := row * nWidgPerRow
@@ -1160,9 +1151,7 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 		widg.SetSelectedState(sel)
 		widg.UpdateSig()
 	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	sv.TopUpdateEnd(wupdt)
 }
 
 // SelectIdxWidgets sets the selection state of given slice index
@@ -1256,36 +1245,24 @@ func (sv *SliceViewBase) UnselectIdx(idx int) {
 
 // UnselectAllIdxs unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIdxs() {
-	win := sv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := sv.TopUpdateStart()
 	for r, _ := range sv.SelectedIdxs {
 		sv.SelectIdxWidgets(r, false)
 	}
 	sv.ResetSelectedIdxs()
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	sv.TopUpdateEnd(wupdt)
 }
 
 // SelectAllIdxs selects all idxs
 func (sv *SliceViewBase) SelectAllIdxs() {
-	win := sv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := sv.TopUpdateStart()
 	sv.UnselectAllIdxs()
 	sv.SelectedIdxs = make(map[int]struct{}, sv.SliceSize)
 	for idx := 0; idx < sv.SliceSize; idx++ {
 		sv.SelectedIdxs[idx] = struct{}{}
 		sv.SelectIdxWidgets(idx, true)
 	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	sv.TopUpdateEnd(wupdt)
 }
 
 // SelectIdxAction is called when a select action has been received (e.g., a
@@ -1300,11 +1277,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 		idx = 0
 	}
 	// row := idx - sv.StartIdx // note: could be out of bounds
-	win := sv.Viewport.Win
-	updt := false
-	if win != nil {
-		updt = win.UpdateStart()
-	}
+	wupdt := sv.TopUpdateStart()
 	switch mode {
 	case mouse.SelectOne:
 		if sv.IdxIsSelected(idx) {
@@ -1374,9 +1347,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 		sv.SelectedIdx = idx
 		sv.UnselectIdx(idx)
 	}
-	if win != nil {
-		win.UpdateEnd(updt)
-	}
+	sv.TopUpdateEnd(wupdt)
 }
 
 // UnselectIdxAction unselects this idx (if selected) -- and emits a signal

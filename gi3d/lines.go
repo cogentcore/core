@@ -19,8 +19,7 @@ import (
 // -- lines are often very thin and appearance is hardware dependent.
 // This approach produces consistent results across platforms,
 // is very fast, and is "good enough" for most purposes.
-// For high-quality vector rendering, render to a Viewport2D
-// and use that as a texture.
+// For high-quality vector rendering, use Embed2D with SVG etc.
 
 // Lines are lines rendered as long thin boxes defined by points
 // and width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0

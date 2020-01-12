@@ -150,13 +150,10 @@ type Window struct {
 	LastModBits       int32             `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
 	LastSelMode       mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
 	LastMousePos      image.Point       `json:"-" xml:"-" desc:"Last mouse position from most recent Mouse events"`
-	Focus             ki.Ki             `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
 	StartFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
-	FocusMu           sync.RWMutex      `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
 	Shortcuts         Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	Popup             ki.Ki             `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack        []ki.Ki           `json:"-" xml:"-" desc:"stack of popups"`
-	FocusStack        []ki.Ki           `json:"-" xml:"-" desc:"stack of focus"`
 	NextPopup         ki.Ki             `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
 	PopupFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
 	DelPopup          ki.Ki             `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
@@ -921,9 +918,9 @@ func (w *Window) FullReRender() {
 // InitialFocus estabishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (w *Window) InitialFocus() {
-	if w.CurFocus() == nil {
+	if w.EventMgr.CurFocus() == nil {
 		if !w.ActivateStartFocus() {
-			w.FocusNext(w.CurFocus())
+			w.EventMgr.FocusNext(w.EventMgr.CurFocus())
 		}
 	}
 	if prof.Profiling {
@@ -1549,9 +1546,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 			}
 
 			if PopupIsCompleter(cpop) {
-				fsz := len(w.FocusStack)
+				fsz := len(w.EventMgr.FocusStack)
 				if fsz > 0 && et == oswin.KeyChordEvent {
-					w.EventMgr.SendSig(w.FocusStack[fsz-1], cpop, evi)
+					w.EventMgr.SendSig(w.EventMgr.FocusStack[fsz-1], cpop, evi)
 				}
 			}
 		}
@@ -1794,7 +1791,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				w.MainMenuUpdateWindows()
 				w.MainMenuSet()
 			}
-			if w.CurFocus() == nil {
+			if w.EventMgr.CurFocus() == nil {
 				w.ActivateStartFocus()
 			}
 		}
@@ -1812,6 +1809,14 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 
 func (w *Window) EventTopNode() ki.Ki {
 	return w.This()
+}
+
+func (w *Window) FocusTopNode() ki.Ki {
+	cpop := w.CurPopup()
+	if cpop != nil {
+		return cpop
+	}
+	return w.Viewport.This()
 }
 
 // IsInScope returns true if the given object is in scope for receiving events.
@@ -2030,9 +2035,9 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	w.PopupFocus = nil
 	w.PopMu.Unlock()
 	if pfoc != nil {
-		w.PushFocus(pfoc)
+		w.EventMgr.PushFocus(pfoc)
 	} else {
-		w.PushFocus(pop)
+		w.EventMgr.PushFocus(pop)
 	}
 }
 
@@ -2055,7 +2060,7 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 	popped := w.PopPopup(pop)
 	w.PopMu.Unlock()
 	if popped {
-		w.PopFocus()
+		w.EventMgr.PopFocus()
 	}
 	w.UploadAllViewports()
 	return true
@@ -2142,10 +2147,10 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	}
 	switch kf {
 	case KeyFunFocusNext: // tab
-		w.FocusNext(w.CurFocus())
+		w.EventMgr.FocusNext(w.EventMgr.CurFocus())
 		e.SetProcessed()
 	case KeyFunFocusPrev: // shift-tab
-		w.FocusPrev(w.CurFocus())
+		w.EventMgr.FocusPrev(w.EventMgr.CurFocus())
 		e.SetProcessed()
 	case KeyFunGoGiEditor:
 		TheViewIFace.GoGiEditor(w.Viewport.This())
@@ -2193,314 +2198,32 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 
 // SetStartFocus sets the given item to be first focus when window opens.
 func (w *Window) SetStartFocus(k ki.Ki) {
-	w.FocusMu.Lock()
+	w.EventMgr.FocusMu.Lock()
 	w.StartFocus = k
-	w.FocusMu.Unlock()
-}
-
-// CurFocus gets the current focus node under mutex protection
-func (w *Window) CurFocus() ki.Ki {
-	w.FocusMu.RLock()
-	defer w.FocusMu.RUnlock()
-	return w.Focus
+	w.EventMgr.FocusMu.Unlock()
 }
 
 // ActivateStartFocus activates start focus if there is no current focus
 // and StartFocus is set -- returns true if activated
 func (w *Window) ActivateStartFocus() bool {
-	w.FocusMu.RLock()
+	w.EventMgr.FocusMu.RLock()
 	if w.StartFocus == nil {
-		w.FocusMu.RUnlock()
+		w.EventMgr.FocusMu.RUnlock()
 		return false
 	}
-	w.FocusMu.RUnlock()
-	w.FocusMu.Lock()
+	w.EventMgr.FocusMu.RUnlock()
+	w.EventMgr.FocusMu.Lock()
 	sf := w.StartFocus
 	w.StartFocus = nil
-	w.FocusMu.Unlock()
-	w.FocusOnOrNext(sf)
+	w.EventMgr.FocusMu.Unlock()
+	w.EventMgr.FocusOnOrNext(sf)
 	return true
-}
-
-// setFocusPtr JUST sets the focus pointer under mutex protection --
-// use SetFocus for end-user setting of focus
-func (w *Window) setFocusPtr(k ki.Ki) {
-	w.FocusMu.Lock()
-	w.Focus = k
-	w.FocusMu.Unlock()
-}
-
-// SetFocus sets focus to given item -- returns true if focus changed.
-func (w *Window) SetFocus(k ki.Ki) bool {
-	cfoc := w.CurFocus()
-	if cfoc == k {
-		if k != nil {
-			_, ni := KiToNode2D(k)
-			if ni != nil && ni.This() != nil {
-				ni.SetFocusState(true) // ensure focus flag always set
-			}
-		}
-		return false
-	}
-
-	updt := w.UpdateStart()
-	defer w.UpdateEnd(updt)
-
-	if cfoc != nil {
-		nii, ni := KiToNode2D(cfoc)
-		if ni != nil && ni.This() != nil {
-			ni.SetFocusState(false)
-			// fmt.Printf("clear foc: %v\n", ni.PathUnique())
-			nii.FocusChanged2D(FocusLost)
-		}
-	}
-	w.setFocusPtr(k)
-	if k == nil {
-		return true
-	}
-	nii, ni := KiToNode2D(k)
-	if ni == nil || ni.This() == nil { // only 2d for now
-		w.setFocusPtr(nil)
-		return false
-	}
-	ni.SetFocusState(true)
-	w.SetFlag(int(WinFlagFocusActive))
-	// fmt.Printf("set foc: %v\n", ni.PathUnique())
-	w.ClearNonFocus(k) // shouldn't need this but actually sometimes do
-	nii.FocusChanged2D(FocusGot)
-	return true
-}
-
-// 	FocusNext sets the focus on the next item that can accept focus after the
-// given item (can be nil) -- returns true if a focus item found.
-func (w *Window) FocusNext(foc ki.Ki) bool {
-	gotFocus := false
-	focusNext := false // get the next guy
-	if foc == nil {
-		focusNext = true
-	}
-
-	focRoot := w.Viewport.This()
-	cpop := w.CurPopup()
-	if cpop != nil {
-		focRoot = cpop
-	}
-
-	for i := 0; i < 2; i++ {
-		focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
-			if gotFocus {
-				return false
-			}
-			_, ni := KiToNode2D(k)
-			if ni == nil || ni.This() == nil {
-				return true
-			}
-			if foc == k { // current focus can be a non-can-focus item
-				focusNext = true
-				return true
-			}
-			if !focusNext {
-				return true
-			}
-			if !ni.CanFocus() {
-				return true
-			}
-			w.SetFocus(k)
-			gotFocus = true
-			return false // done
-		})
-		if gotFocus {
-			return true
-		}
-		focusNext = true // this time around, just get the first one
-	}
-	return gotFocus
-}
-
-// FocusOnOrNext sets the focus on the given item, or the next one that can
-// accept focus -- returns true if a new focus item found.
-func (w *Window) FocusOnOrNext(foc ki.Ki) bool {
-	cfoc := w.CurFocus()
-	if cfoc == foc {
-		return true
-	}
-	_, ni := KiToNode2D(foc)
-	if ni == nil || ni.This() == nil {
-		return false
-	}
-	if ni.CanFocus() {
-		w.SetFocus(foc)
-		return true
-	}
-	return w.FocusNext(foc)
-}
-
-// FocusOnOrPrev sets the focus on the given item, or the previous one that can
-// accept focus -- returns true if a new focus item found.
-func (w *Window) FocusOnOrPrev(foc ki.Ki) bool {
-	cfoc := w.CurFocus()
-	if cfoc == foc {
-		return true
-	}
-	_, ni := KiToNode2D(foc)
-	if ni == nil || ni.This() == nil {
-		return false
-	}
-	if ni.CanFocus() {
-		w.SetFocus(foc)
-		return true
-	}
-	return w.FocusPrev(foc)
-}
-
-// FocusPrev sets the focus on the previous item before the given item (can be nil)
-func (w *Window) FocusPrev(foc ki.Ki) bool {
-	if foc == nil { // must have a current item here
-		w.FocusLast()
-		return false
-	}
-
-	gotFocus := false
-	var prevItem ki.Ki
-
-	focRoot := w.Viewport.This()
-	cpop := w.CurPopup()
-	if cpop != nil {
-		focRoot = cpop
-	}
-
-	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
-		if gotFocus {
-			return false
-		}
-		// todo: see about 3D guys
-		_, ni := KiToNode2D(k)
-		if ni == nil || ni.This() == nil {
-			return true
-		}
-		if foc == k {
-			gotFocus = true
-			return false
-		}
-		if !ni.CanFocus() {
-			return true
-		}
-		prevItem = k
-		return true
-	})
-	if gotFocus && prevItem != nil {
-		w.SetFocus(prevItem)
-		return true
-	} else {
-		return w.FocusLast()
-	}
-}
-
-// FocusLast sets the focus on the last item in the tree -- returns true if a
-// focusable item was found
-func (w *Window) FocusLast() bool {
-	var lastItem ki.Ki
-
-	focRoot := w.Viewport.This()
-	cpop := w.CurPopup()
-	if cpop != nil {
-		focRoot = cpop
-	}
-
-	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
-		// todo: see about 3D guys
-		_, ni := KiToNode2D(k)
-		if ni == nil || ni.This() == nil {
-			return true
-		}
-		if !ni.CanFocus() {
-			return true
-		}
-		lastItem = k
-		return true
-	})
-	w.SetFocus(lastItem)
-	if lastItem == nil {
-		return false
-	}
-	return true
-}
-
-// ClearNonFocus clears the focus of any non-w.Focus item.
-func (w *Window) ClearNonFocus(foc ki.Ki) {
-	focRoot := w.Viewport.This()
-	cpop := w.CurPopup()
-	if cpop != nil {
-		focRoot = cpop
-	}
-
-	updated := false
-	updt := false
-
-	focRoot.FuncDownMeFirst(0, w, func(k ki.Ki, level int, d interface{}) bool {
-		if k == focRoot { // skip top-level
-			return true
-		}
-		// todo: see about 3D guys
-		nii, ni := KiToNode2D(k)
-		if ni == nil || ni.This() == nil {
-			return true
-		}
-		if foc == k {
-			return true
-		}
-		if ni.HasFocus() {
-			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
-			if !updated {
-				updated = true
-				updt = w.UpdateStart()
-			}
-			ni.ClearFlag(int(HasFocus))
-			nii.FocusChanged2D(FocusLost)
-		}
-		return true
-	})
-	if updated {
-		w.UpdateEnd(updt)
-	}
-}
-
-// PushFocus pushes current focus onto stack and sets new focus.
-func (w *Window) PushFocus(p ki.Ki) {
-	w.FocusMu.Lock()
-	if w.FocusStack == nil {
-		w.FocusStack = make([]ki.Ki, 0, 50)
-	}
-	w.FocusStack = append(w.FocusStack, w.Focus)
-	w.Focus = nil // don't un-focus on prior item when pushing
-	w.FocusMu.Unlock()
-	w.FocusOnOrNext(p)
-}
-
-// PopFocus pops off the focus stack and sets prev to current focus.
-func (w *Window) PopFocus() {
-	w.FocusMu.Lock()
-	if w.FocusStack == nil || len(w.FocusStack) == 0 {
-		w.Focus = nil
-		return
-	}
-	sz := len(w.FocusStack)
-	w.Focus = nil
-	nxtf := w.FocusStack[sz-1]
-	_, ni := KiToNode2D(nxtf)
-	if ni != nil && ni.This() != nil {
-		w.FocusMu.Unlock()
-		w.SetFocus(nxtf)
-		w.FocusMu.Lock()
-	}
-	w.FocusStack = w.FocusStack[:sz-1]
-	w.FocusMu.Unlock()
 }
 
 // FocusActiveClick updates the FocusActive status based on mouse clicks in
 // or out of the focused item
 func (w *Window) FocusActiveClick(e *mouse.Event) {
-	cfoc := w.CurFocus()
+	cfoc := w.EventMgr.CurFocus()
 	if cfoc == nil || e.Button != mouse.Left || e.Action != mouse.Press {
 		return
 	}
@@ -2531,7 +2254,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 
 // FocusInactivate inactivates the current focus element
 func (w *Window) FocusInactivate() {
-	cfoc := w.CurFocus()
+	cfoc := w.EventMgr.CurFocus()
 	if cfoc == nil || !w.HasFlag(int(WinFlagFocusActive)) {
 		return
 	}

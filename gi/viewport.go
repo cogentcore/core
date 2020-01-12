@@ -40,6 +40,16 @@ type Viewport interface {
 	// must be called on VpTop()
 	VpTopNode() Node
 
+	// VpTopUpdateStart calls UpdateStart on VpTopNode2D().  Use this
+	// for TopUpdateStart / End around multiple dispersed updates to
+	// properly batch everything and prevent redundant updates.
+	VpTopUpdateStart() bool
+
+	// VpTopUpdateEnd calls UpdateEnd on VpTopNode2D().  Use this
+	// for TopUpdateStart / End around multiple dispersed updates to
+	// properly batch everything and prevent redundant updates.
+	VpTopUpdateEnd(updt bool)
+
 	// VpEventMgr returns the event manager for this viewport.
 	// Must be called on VpTop().  Can be nil.
 	VpEventMgr() *EventMgr
@@ -249,6 +259,22 @@ func (vp *Viewport2D) VpTopNode() Node {
 	return nil
 }
 
+func (vp *Viewport2D) VpTopUpdateStart() bool {
+	if vp.Win != nil {
+		return vp.Win.UpdateStart()
+	}
+	return false
+}
+
+func (vp *Viewport2D) VpTopUpdateEnd(updt bool) {
+	if !updt {
+		return
+	}
+	if vp.Win != nil {
+		vp.Win.UpdateEnd(updt)
+	}
+}
+
 // note: if not a standard viewport in a window, this method must be redefined!
 
 func (vp *Viewport2D) VpEventMgr() *EventMgr {
@@ -395,17 +421,17 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 func (vp *Viewport2D) Init2D() {
 	vp.Init2DWidget()
 	vp.SetCurWin()
-	// we update ourselves whenever any node update event happens
-	vp.NodeSig.Connect(vp.This(), func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
-		rvpi, _ := KiToNode2D(recvp)
-		rvp := rvpi.AsViewport2D()
-		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
-		}
-		if !vp.IsDeleted() && !vp.IsDestroyed() {
-			vp.SetNeedsFullRender()
-		}
-	})
+	// // we update ourselves whenever any node update event happens
+	// vp.NodeSig.Connect(vp.This(), func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
+	// 	rvpi, _ := KiToNode2D(recvp)
+	// 	rvp := rvpi.AsViewport2D()
+	// 	if Update2DTrace {
+	// 		fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
+	// 	}
+	// 	if !vp.IsDeleted() && !vp.IsDestroyed() {
+	// 		vp.SetNeedsFullRender()
+	// 	}
+	// })
 }
 
 func (vp *Viewport2D) Style2D() {

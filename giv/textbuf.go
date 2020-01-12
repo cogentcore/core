@@ -860,10 +860,10 @@ func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
 	autoSave = tb.AutoSaveOff()
 	winUpdt = false
 	vp := tb.ViewportFromView()
-	if vp == nil || vp.Win == nil {
+	if vp == nil {
 		return
 	}
-	winUpdt = vp.Win.UpdateStart()
+	winUpdt = vp.TopUpdateStart()
 	return
 }
 
@@ -872,8 +872,8 @@ func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 	tb.AutoSaveRestore(autoSave)
 	if winUpdt {
 		vp := tb.ViewportFromView()
-		if vp != nil && vp.Win != nil {
-			vp.Win.UpdateEnd(winUpdt)
+		if vp != nil {
+			vp.TopUpdateEnd(winUpdt)
 		}
 	}
 	tb.UpdateEnd(bufUpdt) // nobody listening probably, but flag avail for testing

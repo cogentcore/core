@@ -839,8 +839,8 @@ func (tv *TextView) CursorSelect(org TextPos) {
 
 // CursorForward moves the cursor forward
 func (tv *TextView) CursorForward(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -861,8 +861,8 @@ func (tv *TextView) CursorForward(steps int) {
 
 // CursorForwardWord moves the cursor forward by words
 func (tv *TextView) CursorForwardWord(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -913,8 +913,8 @@ func (tv *TextView) CursorForwardWord(steps int) {
 
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -960,8 +960,8 @@ func (tv *TextView) CursorDown(steps int) {
 // CursorPageDown moves the cursor down page(s), where a page is defined abcdef
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageDown(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -980,8 +980,8 @@ func (tv *TextView) CursorPageDown(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tv *TextView) CursorBackward(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1002,8 +1002,8 @@ func (tv *TextView) CursorBackward(steps int) {
 
 // CursorBackwardWord moves the cursor backward by words
 func (tv *TextView) CursorBackwardWord(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1057,8 +1057,8 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 
 // CursorUp moves the cursor up line(s)
 func (tv *TextView) CursorUp(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1102,8 +1102,8 @@ func (tv *TextView) CursorUp(steps int) {
 // CursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageUp(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1140,8 +1140,8 @@ func (tv *TextView) CursorRecenter() {
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartLine() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1172,8 +1172,8 @@ func (tv *TextView) CursorStartLine() {
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartDoc() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = 0
@@ -1187,8 +1187,8 @@ func (tv *TextView) CursorStartDoc() {
 
 // CursorEndLine moves the cursor to the end of the text
 func (tv *TextView) CursorEndLine() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1220,8 +1220,8 @@ func (tv *TextView) CursorEndLine() {
 // CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
 func (tv *TextView) CursorEndDoc() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = ints.MaxInt(tv.NLines-1, 0)
@@ -1239,8 +1239,8 @@ func (tv *TextView) CursorEndDoc() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tv *TextView) CursorBackspace(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.HasSelection() {
@@ -1258,8 +1258,8 @@ func (tv *TextView) CursorBackspace(steps int) {
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (tv *TextView) CursorDelete(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	if tv.HasSelection() {
 		tv.DeleteSelection()
@@ -1274,8 +1274,8 @@ func (tv *TextView) CursorDelete(steps int) {
 
 // CursorBackspaceWord deletes words(s) immediately before cursor
 func (tv *TextView) CursorBackspaceWord(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.HasSelection() {
@@ -1292,8 +1292,8 @@ func (tv *TextView) CursorBackspaceWord(steps int) {
 
 // CursorDeleteWord deletes word(s) immediately after the cursor
 func (tv *TextView) CursorDeleteWord(steps int) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	if tv.HasSelection() {
 		tv.DeleteSelection()
@@ -1308,8 +1308,8 @@ func (tv *TextView) CursorDeleteWord(steps int) {
 
 // CursorKill deletes text from cursor to end of text
 func (tv *TextView) CursorKill() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1354,10 +1354,10 @@ func (tv *TextView) JumpToLinePrompt() {
 
 // JumpToLine jumps to given line number (minus 1)
 func (tv *TextView) JumpToLine(ln int) {
-	updt := tv.TopUpdateStart()
+	wupdt := tv.TopUpdateStart()
 	tv.SetCursorShow(TextPos{Ln: ln - 1})
 	tv.SavePosHistory(tv.CursorPos)
-	tv.TopUpdateEnd(updt)
+	tv.TopUpdateEnd(wupdt)
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
@@ -1441,8 +1441,8 @@ func (tv *TextView) CursorNextLink(wraparound bool) bool {
 			return false
 		}
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.HighlightRegion(reg)
 	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -1466,8 +1466,8 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 			return false
 		}
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.HighlightRegion(reg)
 	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -1479,8 +1479,8 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 
 // Undo undoes previous action
 func (tv *TextView) Undo() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tbe := tv.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
@@ -1497,8 +1497,8 @@ func (tv *TextView) Undo() {
 
 // Redo redoes previously undone action
 func (tv *TextView) Redo() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tbe := tv.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
@@ -1625,8 +1625,8 @@ func (tv *TextView) ISearchSig() {
 // ISearchStart is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
 func (tv *TextView) ISearchStart() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	if tv.ISearch.On {
 		if tv.ISearch.Find != "" { // already searching -- find next
 			sz := len(tv.ISearch.Matches)
@@ -1664,8 +1664,8 @@ func (tv *TextView) ISearchStart() {
 // when keys are typed while in search mode
 func (tv *TextView) ISearchKeyInput(kt *key.ChordEvent) {
 	r := kt.Rune
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	// if tv.ISearch.Find == PrevISearchString { // undo starting point
 	// 	tv.ISearch.Find = ""
 	// }
@@ -1685,8 +1685,8 @@ func (tv *TextView) ISearchKeyInput(kt *key.ChordEvent) {
 
 // ISearchBackspace gets rid of one item in search string
 func (tv *TextView) ISearchBackspace() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	if tv.ISearch.Find == PrevISearchString { // undo starting point
 		tv.ISearch.Find = ""
 		tv.ISearch.UseCase = false
@@ -1718,8 +1718,8 @@ func (tv *TextView) ISearchCancel() {
 	if !tv.ISearch.On {
 		return
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	if tv.ISearch.Find != "" {
 		PrevISearchString = tv.ISearch.Find
 	}
@@ -1913,8 +1913,8 @@ func (tv *TextView) QReplaceReplaceAll(midx int) {
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
 func (tv *TextView) QReplaceKeyInput(kt *key.ChordEvent) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	switch {
 	case kt.Rune == 'y':
@@ -1939,8 +1939,8 @@ func (tv *TextView) QReplaceCancel() {
 	if !tv.QReplace.On {
 		return
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.QReplace.On = false
 	tv.QReplace.Pos = -1
 	tv.QReplace.Matches = nil
@@ -1953,8 +1953,8 @@ func (tv *TextView) QReplaceCancel() {
 
 // EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
 func (tv *TextView) EscPressed() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	switch {
 	case tv.ISearch.On:
 		tv.ISearchCancel()
@@ -2010,8 +2010,8 @@ func (tv *TextView) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (tv *TextView) SelectAll() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.SelectReg.Start = TextPosZero
 	tv.SelectReg.End = tv.Buf.EndPos()
 	tv.RenderAllLines()
@@ -2304,8 +2304,8 @@ func (tv *TextView) PasteHist() {
 		idx := ac.Data.(int)
 		clip := TextViewClipHistory[idx]
 		if clip != nil {
-			updt := tv.TopUpdateStart()
-			defer tv.TopUpdateEnd(updt)
+			wupdt := tv.TopUpdateStart()
+			defer tv.TopUpdateEnd(wupdt)
 			oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
@@ -2318,8 +2318,8 @@ func (tv *TextView) Cut() *TextBufEdit {
 	if !tv.HasSelection() {
 		return nil
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	org := tv.SelectReg.Start
 	cut := tv.DeleteSelection()
 	if cut != nil {
@@ -2347,8 +2347,8 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	if tbe == nil {
 		return nil
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
 	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
@@ -2361,8 +2361,8 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 
 // Paste inserts text from the clipboard at current cursor position
 func (tv *TextView) Paste() {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
@@ -2372,8 +2372,8 @@ func (tv *TextView) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tv *TextView) InsertAtCursor(txt []byte) {
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	if tv.HasSelection() {
 		tbe := tv.DeleteSelection()
 		tv.CursorPos = tbe.AdjustPos(tv.CursorPos, AdjustPosDelStart) // move to start if in reg
@@ -3127,8 +3127,8 @@ func (tv *TextView) ClearHighlights() {
 	if len(tv.Highlights) == 0 {
 		return
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	tv.Highlights = tv.Highlights[:0]
 	tv.RenderAllLines()
 }
@@ -3138,8 +3138,8 @@ func (tv *TextView) ClearScopelights() {
 	if len(tv.Scopelights) == 0 {
 		return
 	}
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 	sl := make([]TextRegion, len(tv.Scopelights))
 	copy(sl, tv.Scopelights)
 	tv.Scopelights = tv.Scopelights[:0]
@@ -3265,12 +3265,12 @@ func (tv *TextView) RenderAllLines() {
 	}
 	rs := &tv.Viewport.Render
 	rs.PushBounds(tv.VpBBox)
-	updt := tv.TopUpdateStart()
+	wupdt := tv.TopUpdateStart()
 	tv.RenderAllLinesInBounds()
 	tv.PopBounds()
 	tv.Viewport.This().(gi.Viewport).VpUploadRegion(tv.VpBBox, tv.WinBBox)
 	tv.RenderScrolls()
-	tv.TopUpdateEnd(updt)
+	tv.TopUpdateEnd(wupdt)
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
@@ -3430,7 +3430,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		return false
 	}
 	vp := tv.Viewport
-	updt := tv.TopUpdateStart()
+	wupdt := tv.TopUpdateStart()
 	sty := &tv.Sty
 	rs := &vp.Render
 	pc := &rs.Paint
@@ -3502,7 +3502,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	}
 	tv.PopBounds()
 	tv.RenderScrolls()
-	tv.TopUpdateEnd(updt)
+	tv.TopUpdateEnd(wupdt)
 	return true
 }
 
@@ -3678,8 +3678,8 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos TextPos, selMode m
 		return
 	}
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
-	updt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(updt)
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	if !tv.SelectMode && selMode == mouse.ExtendContinuous {
 		if tv.SelectReg == TextRegionNil {
@@ -4039,7 +4039,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetProcessed()
-			updt := tv.TopUpdateStart()
+			wupdt := tv.TopUpdateStart()
 			lasttab := tv.HasFlag(int(TextViewLastWasTabAI))
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
@@ -4051,7 +4051,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Sty.Text.TabSize))
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
-			tv.TopUpdateEnd(updt)
+			tv.TopUpdateEnd(wupdt)
 			tv.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunNil:

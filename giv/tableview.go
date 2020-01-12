@@ -475,10 +475,8 @@ func (tv *TableView) UpdateSliceGrid() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	nWidg := nWidgPerRow * tv.DispRows
 
-	if tv.Viewport != nil && tv.Viewport.Win != nil {
-		wupdt := tv.TopUpdateStart()
-		defer tv.TopUpdateEnd(wupdt)
-	}
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
