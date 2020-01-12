@@ -5,7 +5,6 @@
 package gi3d
 
 import (
-	"fmt"
 	"image"
 
 	"github.com/goki/gi/gi"
@@ -65,7 +64,7 @@ func (em *Embed2D) Disconnect() {
 }
 
 func (em *Embed2D) Init3D(sc *Scene) {
-	em.Viewport.SetWin(sc.Win) // make sure
+	em.Viewport.Win = sc.Win // make sure
 	em.Viewport.FullRender2DTree()
 	em.UploadViewTex(sc)
 	em.Mat.SetTexture(sc, em.Tex)
@@ -163,7 +162,6 @@ func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 }
 
 func (em *Embed2D) ConnectEvents3D(sc *Scene) {
-	em.SetCanFocus()
 	em.ConnectEvent(sc.Win, oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
@@ -179,10 +177,12 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		if !ok {
 			return
 		}
+		if !ssc.HasFocus2D() {
+			ssc.GrabFocus()
+		}
 		md := &mouse.Event{}
 		*md = *me
 		md.Where = ppt
-		ssc.Win.EventMgr.SetFocus(emm)
 		emm.Viewport.EventMgr.MouseEvents(md)
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		me.SetProcessed() // must always
@@ -236,10 +236,11 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		me.SetProcessed() // must always
 	})
-	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		// note: registering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(KiT_Embed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
-		if !ssc.IsVisible() {
+		if !ssc.IsVisible() || !ssc.HasFocus2D() {
 			return
 		}
 		cpop := ssc.Win.CurPopup()
@@ -247,9 +248,12 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 			return // let window handle popups
 		}
 		kt := d.(*key.ChordEvent)
-		fmt.Printf("key event: %v\n", kt.String())
+		// fmt.Printf("key event: %v\n", kt.String())
+		emm.Viewport.EventMgr.MouseEvents(kt) // also handles key..
 		emm.Viewport.EventMgr.SendEventSignal(kt, false)
-		kt.SetProcessed() // must always
+		if !kt.IsProcessed() {
+			emm.Viewport.EventMgr.ManagerKeyChordEvents(kt)
+		}
 	})
 }
 
@@ -260,9 +264,10 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 // events instead of using the Window.
 type EmbedViewport struct {
 	gi.Viewport2D
-	EventMgr gi.EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
-	Scene    *Scene      `json:"-" xml:"-" desc:"parent scene -- trigger updates"`
-	EmbedPar *Embed2D    `json:"-" xml:"-" desc:"parent Embed2D -- render updates"`
+	EventMgr   gi.EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
+	Scene      *Scene      `json:"-" xml:"-" desc:"parent scene -- trigger updates"`
+	EmbedPar   *Embed2D    `json:"-" xml:"-" desc:"parent Embed2D -- render updates"`
+	TopUpdated bool        `json:"-" xml:"-" desc:"update flag for top-level updates"`
 }
 
 var KiT_EmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)
@@ -289,11 +294,6 @@ func NewEmbedViewport(sc *Scene, em *Embed2D, name string, width, height int) *E
 	return vp
 }
 
-func (vp *EmbedViewport) SetWin(win *gi.Window) {
-	vp.Win = win
-	vp.EventMgr.Master = win
-}
-
 func (vp *EmbedViewport) VpTop() gi.Viewport {
 	return vp.This().(gi.Viewport)
 }
@@ -303,10 +303,20 @@ func (vp *EmbedViewport) VpTopNode() gi.Node {
 }
 
 func (vp *EmbedViewport) VpTopUpdateStart() bool {
-	return false
+	if vp.TopUpdated {
+		return false
+	}
+	vp.TopUpdated = true
+	return true
 }
 
 func (vp *EmbedViewport) VpTopUpdateEnd(updt bool) {
+	if !updt {
+		return
+	}
+	vp.EmbedPar.UploadViewTex(vp.Scene)
+	vp.Scene.UpdateSig() // todo: maybe go up to its viewport?
+	vp.TopUpdated = false
 }
 
 func (vp *EmbedViewport) VpEventMgr() *gi.EventMgr {
@@ -324,6 +334,7 @@ func (vp *EmbedViewport) VpUploadAll() {
 	if !vp.This().(gi.Viewport).VpIsVisible() {
 		return
 	}
+	// fmt.Printf("embed vp upload all\n")
 	vp.EmbedPar.UploadViewTex(vp.Scene)
 	vp.Scene.UpdateSig() // todo: maybe go up to its viewport?
 }
@@ -334,6 +345,7 @@ func (vp *EmbedViewport) VpUploadVp() {
 	if !vp.This().(gi.Viewport).VpIsVisible() {
 		return
 	}
+	// fmt.Printf("embed vp upload vp\n")
 	vp.EmbedPar.UploadViewTex(vp.Scene)
 	vp.Scene.UpdateSig()
 }
@@ -343,6 +355,7 @@ func (vp *EmbedViewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
 	if !vp.This().(gi.Viewport).VpIsVisible() {
 		return
 	}
+	// fmt.Printf("embed vp upload region\n")
 	vp.EmbedPar.UploadViewTex(vp.Scene)
 	vp.Scene.UpdateSig()
 }
@@ -356,6 +369,14 @@ func (vp *EmbedViewport) EventTopNode() ki.Ki {
 
 func (vp *EmbedViewport) FocusTopNode() ki.Ki {
 	return vp
+}
+
+func (vp *EmbedViewport) EventTopUpdateStart() bool {
+	return vp.VpTopUpdateStart()
+}
+
+func (vp *EmbedViewport) EventTopUpdateEnd(updt bool) {
+	vp.VpTopUpdateEnd(updt)
 }
 
 // IsInScope returns whether given node is in scope for receiving events

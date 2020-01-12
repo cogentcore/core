@@ -1188,9 +1188,9 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {
 		selMode := mouse.SelectOne
-		win := sv.Viewport.Win
-		if win != nil {
-			selMode = win.LastSelMode
+		em := sv.EventMgr2D()
+		if em != nil {
+			selMode = em.LastSelMode
 		}
 		sv.SelectIdxAction(idx, selMode)
 	}

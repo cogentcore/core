@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"sort"
 	"sync"
@@ -50,18 +51,24 @@ const (
 // EventMgr is an event manager that handles distributing events to nodes.
 // It relies on the EventMaster for a few things outside of its scope.
 type EventMgr struct {
-	Master          EventMaster                             `json:"-" xml:"-" view:"-" desc:"master of this event mangager -- handles broader scope issues"`
-	EventSigs       [oswin.EventTypeN][EventPrisN]ki.Signal `json:"-" xml:"-" view:"-" desc:"signals for communicating each type of event, organized by priority"`
-	EventMu         sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects event sending"`
-	TimerMu         sync.Mutex                              `json:"-" xml:"-" view:"-" desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
-	Dragging        ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
-	Scrolling       ki.Ki                                   `json:"-" xml:"-" desc:"node receiving mouse scrolling events -- anchor to same"`
-	DNDData         mimedata.Mimes                          `json:"-" xml:"-" desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-	DNDSource       ki.Ki                                   `json:"-" xml:"-" desc:"drag-n-drop source node"`
-	DNDFinalEvent   *dnd.Event                              `json:"-" xml:"-" view:"-" desc:"final event for DND which is sent if a finalize is received"`
-	Focus           ki.Ki                                   `json:"-" xml:"-" desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
-	FocusMu         sync.RWMutex                            `json:"-" xml:"-" view:"-" desc:"mutex that protects focus updating"`
-	FocusStack      []ki.Ki                                 `json:"-" xml:"-" desc:"stack of focus"`
+	Master          EventMaster                             `desc:"master of this event mangager -- handles broader scope issues"`
+	EventSigs       [oswin.EventTypeN][EventPrisN]ki.Signal `desc:"signals for communicating each type of event, organized by priority"`
+	EventMu         sync.Mutex                              `desc:"mutex that protects event sending"`
+	TimerMu         sync.Mutex                              `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
+	Dragging        ki.Ki                                   `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	Scrolling       ki.Ki                                   `desc:"node receiving mouse scrolling events -- anchor to same"`
+	DNDData         mimedata.Mimes                          `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	DNDSource       ki.Ki                                   `desc:"drag-n-drop source node"`
+	DNDFinalEvent   *dnd.Event                              `desc:"final event for DND which is sent if a finalize is received"`
+	Focus           ki.Ki                                   `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+	FocusMu         sync.RWMutex                            `desc:"mutex that protects focus updating"`
+	FocusStack      []ki.Ki                                 `desc:"stack of focus"`
+	StartFocus      ki.Ki                                   `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+	LastModBits     int32                                   `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastSelMode     mouse.SelectModes                       `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	LastMousePos    image.Point                             `desc:"Last mouse position from most recent Mouse events"`
+	LagSkipDeltaPos image.Point                             `desc:"change in position accumulated from skipped-over laggy mouse move events"`
+	LagLastSkipped  bool                                    `desc:"true if last event was skipped due to lag"`
 	startDrag       *mouse.DragEvent
 	dragStarted     bool
 	startDND        *mouse.DragEvent
@@ -341,6 +348,18 @@ func (em *EventMgr) MouseEvents(evi oswin.Event) {
 	} else {
 		em.ResetMouseMove()
 	}
+
+	if et == oswin.MouseEvent {
+		me := evi.(*mouse.Event)
+		em.LastModBits = me.Modifiers
+		em.LastSelMode = me.SelectMode()
+		em.LastMousePos = me.Pos()
+	}
+	if et == oswin.KeyChordEvent {
+		ke := evi.(*key.ChordEvent)
+		em.LastModBits = ke.Modifiers
+		em.LastSelMode = mouse.SelectModeBits(ke.Modifiers)
+	}
 }
 
 // MouseEventReset resets state for "catch" events (Dragging, Scrolling)
@@ -359,10 +378,14 @@ func (em *EventMgr) MouseEventReset(evi oswin.Event) {
 // These require timing and delays, e.g., due to minor wiggles when pressing
 // the mouse button
 func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
+	me := evi.(*mouse.DragEvent)
+	em.LastModBits = me.Modifiers
+	em.LastSelMode = me.SelectMode()
+	em.LastMousePos = me.Pos()
 	now := time.Now()
 	if !em.dragStarted {
 		if em.startDrag == nil {
-			em.startDrag = evi.(*mouse.DragEvent)
+			em.startDrag = me
 		} else {
 			if em.DoInstaDrag(em.startDrag, !em.Master.CurPopupIsTooltip()) {
 				em.dragStarted = true
@@ -370,7 +393,7 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 			} else {
 				delayMs := int(now.Sub(em.startDrag.Time()) / time.Millisecond)
 				if delayMs >= DragStartMSec {
-					dst := int(math32.Hypot(float32(em.startDrag.Where.X-evi.Pos().X), float32(em.startDrag.Where.Y-evi.Pos().Y)))
+					dst := int(math32.Hypot(float32(em.startDrag.Where.X-me.Pos().X), float32(em.startDrag.Where.Y-me.Pos().Y)))
 					if dst >= DragStartPix {
 						em.dragStarted = true
 						em.startDrag = nil
@@ -381,11 +404,11 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 	}
 	if em.Dragging == nil && !em.dndStarted {
 		if em.startDND == nil {
-			em.startDND = evi.(*mouse.DragEvent)
+			em.startDND = me
 		} else {
 			delayMs := int(now.Sub(em.startDND.Time()) / time.Millisecond)
 			if delayMs >= DNDStartMSec {
-				dst := int(math32.Hypot(float32(em.startDND.Where.X-evi.Pos().X), float32(em.startDND.Where.Y-evi.Pos().Y)))
+				dst := int(math32.Hypot(float32(em.startDND.Where.X-me.Pos().X), float32(em.startDND.Where.Y-me.Pos().Y)))
 				if dst >= DNDStartPix {
 					em.dndStarted = true
 					em.DNDStartEvent(em.startDND)
@@ -397,7 +420,7 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 		em.TimerMu.Lock()
 		if !em.dndHoverStarted {
 			em.dndHoverStarted = true
-			em.startDNDHover = evi.(*mouse.DragEvent)
+			em.startDNDHover = me
 			em.curDNDHover = em.startDNDHover
 			em.dndHoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 				em.TimerMu.Lock()
@@ -410,14 +433,14 @@ func (em *EventMgr) MouseDragEvents(evi oswin.Event) {
 				em.SendDNDHoverEvent(hoe)
 			})
 		} else {
-			dst := int(math32.Hypot(float32(em.startDNDHover.Where.X-evi.Pos().X), float32(em.startDNDHover.Where.Y-evi.Pos().Y)))
+			dst := int(math32.Hypot(float32(em.startDNDHover.Where.X-me.Pos().X), float32(em.startDNDHover.Where.Y-me.Pos().Y)))
 			if dst > HoverMaxPix {
 				em.dndHoverTimer.Stop()
 				em.dndHoverStarted = false
 				em.startDNDHover = nil
 				em.dndHoverTimer = nil
 			} else {
-				em.curDNDHover = evi.(*mouse.DragEvent)
+				em.curDNDHover = me
 			}
 		}
 		em.TimerMu.Unlock()
@@ -445,10 +468,14 @@ func (em *EventMgr) ResetMouseDrag() {
 // MouseMoveEvents processes MouseMoveEvent to detect start of hover events.
 // These require timing and delays
 func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
+	me := evi.(*mouse.MoveEvent)
+	em.LastModBits = me.Modifiers
+	em.LastSelMode = me.SelectMode()
+	em.LastMousePos = me.Pos()
 	em.TimerMu.Lock()
 	if !em.hoverStarted {
 		em.hoverStarted = true
-		em.startHover = evi.(*mouse.MoveEvent)
+		em.startHover = me
 		em.curHover = em.startHover
 		em.hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 			em.TimerMu.Lock()
@@ -461,7 +488,7 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			em.SendHoverEvent(hoe)
 		})
 	} else {
-		dst := int(math32.Hypot(float32(em.startHover.Where.X-evi.Pos().X), float32(em.startHover.Where.Y-evi.Pos().Y)))
+		dst := int(math32.Hypot(float32(em.startHover.Where.X-me.Pos().X), float32(em.startHover.Where.Y-me.Pos().Y)))
 		if dst > HoverMaxPix {
 			em.hoverTimer.Stop()
 			em.hoverStarted = false
@@ -469,7 +496,7 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			em.hoverTimer = nil
 			em.Master.DeleteTooltip()
 		} else {
-			em.curHover = evi.(*mouse.MoveEvent)
+			em.curHover = me
 		}
 	}
 	em.TimerMu.Unlock()
@@ -515,7 +542,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 						fe.Action = mouse.Enter
 						ni.SetFlag(int(MouseHasEntered))
 						if !updated {
-							updt = send.UpdateStart()
+							updt = em.Master.EventTopUpdateStart()
 							updated = true
 						}
 						return true // send event
@@ -527,7 +554,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 						fe.Action = mouse.Exit
 						ni.ClearFlag(int(MouseHasEntered))
 						if !updated {
-							updt = send.UpdateStart()
+							updt = em.Master.EventTopUpdateStart()
 							updated = true
 						}
 						return true // send event
@@ -542,7 +569,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 		})
 	}
 	if updated {
-		send.UpdateEnd(updt)
+		em.Master.EventTopUpdateEnd(updt)
 	}
 	return updated
 }
@@ -684,7 +711,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 		}
 	}
 	if len(outs)+len(ins) > 0 {
-		updt := send.UpdateStart()
+		updt := em.Master.EventTopUpdateStart()
 		// now send all the exits before the enters..
 		fe.Action = dnd.Exit
 		for i := range outs {
@@ -694,7 +721,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 		for i := range ins {
 			ins[i].Call(send, int64(ftyp), &fe)
 		}
-		send.UpdateEnd(updt)
+		em.Master.EventTopUpdateEnd(updt)
 		return true
 	}
 	return false
@@ -763,9 +790,8 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 		return false
 	}
 
-	top := em.Master.EventTopNode()
-	updt := top.UpdateStart()
-	defer top.UpdateEnd(updt)
+	updt := em.Master.EventTopUpdateStart()
+	defer em.Master.EventTopUpdateEnd(updt)
 
 	if cfoc != nil {
 		nii, ni := KiToNode2D(cfoc)
@@ -939,7 +965,6 @@ func (em *EventMgr) FocusLast() bool {
 func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 	focRoot := em.Master.FocusTopNode()
 
-	top := em.Master.EventTopNode()
 	updated := false
 	updt := false
 
@@ -959,7 +984,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
 			if !updated {
 				updated = true
-				updt = top.UpdateStart()
+				updt = em.Master.EventTopUpdateStart()
 			}
 			ni.ClearFlag(int(HasFocus))
 			nii.FocusChanged2D(FocusLost)
@@ -967,7 +992,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 		return true
 	})
 	if updated {
-		top.UpdateEnd(updt)
+		em.Master.EventTopUpdateEnd(updt)
 	}
 }
 
@@ -1003,6 +1028,141 @@ func (em *EventMgr) PopFocus() {
 	em.FocusMu.Unlock()
 }
 
+// SetStartFocus sets the given item to be first focus when window opens.
+func (em *EventMgr) SetStartFocus(k ki.Ki) {
+	em.FocusMu.Lock()
+	em.StartFocus = k
+	em.FocusMu.Unlock()
+}
+
+// ActivateStartFocus activates start focus if there is no current focus
+// and StartFocus is set -- returns true if activated
+func (em *EventMgr) ActivateStartFocus() bool {
+	em.FocusMu.RLock()
+	if em.StartFocus == nil {
+		em.FocusMu.RUnlock()
+		return false
+	}
+	em.FocusMu.RUnlock()
+	em.FocusMu.Lock()
+	sf := em.StartFocus
+	em.StartFocus = nil
+	em.FocusMu.Unlock()
+	em.FocusOnOrNext(sf)
+	return true
+}
+
+// InitialFocus estabishes the initial focus for the window if no focus
+// is set -- uses ActivateStartFocus or FocusNext as backup.
+func (em *EventMgr) InitialFocus() {
+	if em.CurFocus() == nil {
+		if !em.ActivateStartFocus() {
+			em.FocusNext(em.CurFocus())
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////
+//   Filter Laggy Events
+
+// FilterLaggyEvents filters repeated laggy events -- key for responsive resize, scroll, etc
+// returns false if event should not be processed further, and true if it should.
+// Should only be called when the current event is the same type as last time.
+// Accumulates mouse deltas in LagSkipDeltaPos.
+func (em *EventMgr) FilterLaggyEvents(evi oswin.Event) bool {
+	et := evi.Type()
+	now := time.Now()
+	lag := now.Sub(evi.Time())
+	lagMs := int(lag / time.Millisecond)
+
+	switch et {
+	case oswin.MouseScrollEvent:
+		me := evi.(*mouse.ScrollEvent)
+		if lagMs > EventSkipLagMSec {
+			// fmt.Printf("skipped et %v lag %v\n", et, lag)
+			if !em.LagLastSkipped {
+				em.LagSkipDeltaPos = me.Delta
+			} else {
+				em.LagSkipDeltaPos = em.LagSkipDeltaPos.Add(me.Delta)
+			}
+			em.LagLastSkipped = true
+			return false
+		} else {
+			if em.LagLastSkipped {
+				me.Delta = em.LagSkipDeltaPos.Add(me.Delta)
+			}
+			em.LagLastSkipped = false
+		}
+	case oswin.MouseDragEvent:
+		me := evi.(*mouse.DragEvent)
+		if lagMs > EventSkipLagMSec {
+			// fmt.Printf("skipped et %v lag %v\n", et, lag)
+			if !em.LagLastSkipped {
+				em.LagSkipDeltaPos = me.From
+			}
+			em.LagLastSkipped = true
+			return false
+		} else {
+			if em.LagLastSkipped {
+				me.From = em.LagSkipDeltaPos
+			}
+			em.LagLastSkipped = false
+		}
+	case oswin.MouseMoveEvent:
+		me := evi.(*mouse.MoveEvent)
+		if lagMs > EventSkipLagMSec {
+			// fmt.Printf("skipped et %v lag %v\n", et, lag)
+			if !em.LagLastSkipped {
+				em.LagSkipDeltaPos = me.From
+			}
+			em.LagLastSkipped = true
+			return false
+		} else {
+			if em.LagLastSkipped {
+				me.From = em.LagSkipDeltaPos
+			}
+			em.LagLastSkipped = false
+		}
+	case oswin.KeyEvent:
+		if lagMs > EventSkipLagMSec {
+			// fmt.Printf("skipped et %v lag %v\n", et, lag)
+			em.LagLastSkipped = true
+			return false
+		} else {
+			em.LagLastSkipped = false
+		}
+	}
+	return true
+}
+
+///////////////////////////////////////////////////////////////////
+//   Manager-level event processing
+
+// MangerKeyChordEvents handles lower-priority manager-level key events.
+// Mainly tab, shift-tab, and GoGiEditor and Prefs.
+// event will be marked as processed if handled here.
+func (em *EventMgr) ManagerKeyChordEvents(e *key.ChordEvent) {
+	if e.IsProcessed() {
+		return
+	}
+	cs := e.Chord()
+	kf := KeyFun(cs)
+	switch kf {
+	case KeyFunFocusNext: // tab
+		em.FocusNext(em.CurFocus())
+		e.SetProcessed()
+	case KeyFunFocusPrev: // shift-tab
+		em.FocusPrev(em.CurFocus())
+		e.SetProcessed()
+	case KeyFunGoGiEditor:
+		TheViewIFace.GoGiEditor(em.Master.FocusTopNode())
+		e.SetProcessed()
+	case KeyFunPrefs:
+		TheViewIFace.PrefsView(&Prefs)
+		e.SetProcessed()
+	}
+}
+
 ///////////////////////////////////////////////////////////////////
 //   Master interface
 
@@ -1011,11 +1171,21 @@ func (em *EventMgr) PopFocus() {
 type EventMaster interface {
 	// EventTopNode returns the top-level node for this event scope.
 	// This is also the node that serves as the event sender.
-	// By default it is the Window
+	// By default it is the Window.
 	EventTopNode() ki.Ki
 
 	// FocusTopNode returns the top-level node for key event focusing.
 	FocusTopNode() ki.Ki
+
+	// EventTopUpdateStart does an UpdateStart on top-level node, for batch updates.
+	// This may not be identical to EventTopNode().UpdateStart() for
+	// embedded case where Viewport is the EventTopNode.
+	EventTopUpdateStart() bool
+
+	// EventTopUpdateEnd does an UpdateEnd on top-level node, for batch updates.
+	// This may not be identical to EventTopNode().UpdateEnd() for
+	// embedded case where Viewport is the EventTopNode.
+	EventTopUpdateEnd(updt bool)
 
 	// IsInScope returns whether given node is in scope for receiving events
 	IsInScope(node *Node2DBase, popup bool) bool

@@ -382,7 +382,7 @@ func (nb *Node2DBase) FocusPrev() {
 func (nb *Node2DBase) StartFocus() {
 	em := nb.EventMgr2D()
 	if em != nil {
-		// em.SetStartFocus(nb.This())
+		em.SetStartFocus(nb.This())
 	}
 }
 

@@ -152,9 +152,10 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddAction(gi.ActOpts{Label: "1", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
+			em := svv.EventMgr2D()
 			scc := svv.Scene()
 			cam := "1"
-			if key.HasAllModifierBits(scc.Win.LastModBits, key.Shift) {
+			if key.HasAllModifierBits(em.LastModBits, key.Shift) {
 				scc.SaveCamera(cam)
 			} else {
 				err := scc.SetCamera(cam)
@@ -168,9 +169,10 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddAction(gi.ActOpts{Label: "2", Icon: "save", Tooltip: "first click saves current view, second click restores to saved state"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
+			em := svv.EventMgr2D()
 			scc := svv.Scene()
 			cam := "2"
-			if key.HasAllModifierBits(scc.Win.LastModBits, key.Shift) {
+			if key.HasAllModifierBits(em.LastModBits, key.Shift) {
 				scc.SaveCamera(cam)
 			} else {
 				err := scc.SetCamera(cam)
@@ -184,9 +186,10 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddAction(gi.ActOpts{Label: "3", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
+			em := svv.EventMgr2D()
 			scc := svv.Scene()
 			cam := "3"
-			if key.HasAllModifierBits(scc.Win.LastModBits, key.Shift) {
+			if key.HasAllModifierBits(em.LastModBits, key.Shift) {
 				scc.SaveCamera(cam)
 			} else {
 				err := scc.SetCamera(cam)
@@ -200,9 +203,10 @@ func (sv *SceneView) ToolbarConfig() {
 	tbar.AddAction(gi.ActOpts{Label: "4", Icon: "save", Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv := recv.Embed(KiT_SceneView).(*SceneView)
+			em := svv.EventMgr2D()
 			scc := svv.Scene()
 			cam := "4"
-			if key.HasAllModifierBits(scc.Win.LastModBits, key.Shift) {
+			if key.HasAllModifierBits(em.LastModBits, key.Shift) {
 				scc.SaveCamera(cam)
 			} else {
 				err := scc.SetCamera(cam)

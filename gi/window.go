@@ -147,10 +147,6 @@ type Window struct {
 	ActiveSprites     int               `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
 	DirectUps         map[Node2D]Node2D `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
 	UpMu              sync.Mutex        `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
-	LastModBits       int32             `json:"-" xml:"-" desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-	LastSelMode       mouse.SelectModes `json:"-" xml:"-" desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-	LastMousePos      image.Point       `json:"-" xml:"-" desc:"Last mouse position from most recent Mouse events"`
-	StartFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
 	Shortcuts         Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
 	Popup             ki.Ki             `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
 	PopupStack        []ki.Ki           `json:"-" xml:"-" desc:"stack of popups"`
@@ -159,12 +155,10 @@ type Window struct {
 	DelPopup          ki.Ki             `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 	PopMu             sync.RWMutex      `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
 	lastWinMenuUpdate time.Time
-	// below are a bunch of internal vars used during the event loop
+	// below are internal vars used during the event loop
 	delPop        bool
 	skippedResize *window.Event
 	lastEt        oswin.EventType
-	skipDelta     image.Point
-	lastSkipped   bool
 }
 
 var KiT_Window = kit.Types.AddType(&Window{}, WindowProps)
@@ -918,11 +912,7 @@ func (w *Window) FullReRender() {
 // InitialFocus estabishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (w *Window) InitialFocus() {
-	if w.EventMgr.CurFocus() == nil {
-		if !w.ActivateStartFocus() {
-			w.EventMgr.FocusNext(w.EventMgr.CurFocus())
-		}
-	}
+	w.EventMgr.InitialFocus()
 	if prof.Profiling {
 		now := time.Now()
 		opent := now.Sub(WindowOpenTimer)
@@ -1479,7 +1469,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 			return
 		}
 	}
-	w.lastSkipped = false
+	w.EventMgr.LagLastSkipped = false
 	w.lastEt = et
 
 	if w.skippedResize != nil || w.Viewport.Geom.Size != w.OSWin.Size() {
@@ -1582,14 +1572,6 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 // returns false if event should not be processed further, and true if it should.
 func (w *Window) FilterEvent(evi oswin.Event) bool {
 	et := evi.Type()
-	now := time.Now()
-	lag := now.Sub(evi.Time())
-	lagMs := int(lag / time.Millisecond)
-	if WinEventTrace {
-		if et != oswin.MouseMoveEvent {
-			fmt.Printf("Win: %v Event: %v  Lag: %v\n", w.Nm, evi.String(), lag)
-		}
-	}
 
 	if w.HasFlag(int(WinFlagGotPaint)) && et == oswin.WindowPaintEvent && w.lastEt == oswin.WindowResizeEvent {
 		if WinEventTrace {
@@ -1602,58 +1584,12 @@ func (w *Window) FilterEvent(evi oswin.Event) bool {
 
 	if et != w.lastEt && w.lastEt != oswin.WindowResizeEvent {
 		return true // non-repeat
-
 	}
 
-	switch et {
-	case oswin.MouseScrollEvent:
-		me := evi.(*mouse.ScrollEvent)
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			if !w.lastSkipped {
-				w.skipDelta = me.Delta
-			} else {
-				w.skipDelta = w.skipDelta.Add(me.Delta)
-			}
-			w.lastSkipped = true
-			return false
-		} else {
-			if w.lastSkipped {
-				me.Delta = w.skipDelta.Add(me.Delta)
-			}
-			w.lastSkipped = false
-		}
-	case oswin.MouseDragEvent:
-		me := evi.(*mouse.DragEvent)
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			if !w.lastSkipped {
-				w.skipDelta = me.From
-			}
-			w.lastSkipped = true
-			return false
-		} else {
-			if w.lastSkipped {
-				me.From = w.skipDelta
-			}
-			w.lastSkipped = false
-		}
-	case oswin.MouseMoveEvent:
-		me := evi.(*mouse.MoveEvent)
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			if !w.lastSkipped {
-				w.skipDelta = me.From
-			}
-			w.lastSkipped = true
-			return false
-		} else {
-			if w.lastSkipped {
-				me.From = w.skipDelta
-			}
-			w.lastSkipped = false
-		}
-	case oswin.WindowResizeEvent:
+	if et == oswin.WindowResizeEvent {
+		now := time.Now()
+		lag := now.Sub(evi.Time())
+		lagMs := int(lag / time.Millisecond)
 		w.SetFlag(int(WinFlagIsResizing))
 		we := evi.(*window.Event)
 		// fmt.Printf("resize\n")
@@ -1661,26 +1597,18 @@ func (w *Window) FilterEvent(evi oswin.Event) bool {
 			if WinEventTrace {
 				fmt.Printf("Win: %v skipped et %v lag %v size: %v\n", w.Nm, et, lag, w.OSWin.Size())
 			}
-			w.lastSkipped = true
+			w.EventMgr.LagLastSkipped = true
 			w.skippedResize = we
 			return false
 		} else {
 			we.SetProcessed()
 			w.Resized(w.OSWin.Size())
-			w.lastSkipped = false
+			w.EventMgr.LagLastSkipped = false
 			w.skippedResize = nil
 			return false
 		}
-	case oswin.KeyEvent:
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			w.lastSkipped = true
-			return false
-		} else {
-			w.lastSkipped = false
-		}
 	}
-	return true
+	return w.EventMgr.FilterLaggyEvents(evi)
 }
 
 // HiProrityEvents processes High-priority events for Window.
@@ -1751,10 +1679,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:
-		// note: used to have ActivateStartFocus() here -- not sure why tho..
-		w.LastModBits = e.Modifiers
-		w.LastSelMode = e.SelectMode()
-		w.LastMousePos = e.Pos()
 		if w.EventMgr.DNDData != nil {
 			w.DNDMoveEvent(e)
 		} else {
@@ -1763,17 +1687,11 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			}
 		}
 	case *mouse.Event:
-		w.LastModBits = e.Modifiers
-		w.LastSelMode = e.SelectMode()
-		w.LastMousePos = e.Pos()
 		if w.EventMgr.DNDData != nil && e.Action == mouse.Release {
 			w.DNDDropEvent(e)
 		}
 		w.FocusActiveClick(e)
 	case *mouse.MoveEvent:
-		w.LastModBits = e.Modifiers
-		w.LastSelMode = e.SelectMode()
-		w.LastMousePos = e.Pos()
 		if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 			if w.HasFlag(int(WinFlagDoFullRender)) {
 				w.ClearFlag(int(WinFlagDoFullRender))
@@ -1792,7 +1710,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				w.MainMenuSet()
 			}
 			if w.EventMgr.CurFocus() == nil {
-				w.ActivateStartFocus()
+				w.EventMgr.ActivateStartFocus()
 			}
 		}
 	case *key.ChordEvent:
@@ -1807,6 +1725,8 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 /////////////////////////////////////////////////////////////////////////////
 //                   Sending Events
 
+// Most of event stuff is in events.go, controlled by EventMgr
+
 func (w *Window) EventTopNode() ki.Ki {
 	return w.This()
 }
@@ -1817,6 +1737,14 @@ func (w *Window) FocusTopNode() ki.Ki {
 		return cpop
 	}
 	return w.Viewport.This()
+}
+
+func (w *Window) EventTopUpdateStart() bool {
+	return w.UpdateStart()
+}
+
+func (w *Window) EventTopUpdateEnd(updt bool) {
+	w.UpdateEnd(updt)
 }
 
 // IsInScope returns true if the given object is in scope for receiving events.
@@ -2105,16 +2033,14 @@ func (w *Window) PopPopup(pop ki.Ki) bool {
 // events, returning its input on whether any existing popup should be deleted
 func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	delPop := false
-	cs := e.Chord()
 	if KeyEventTrace {
 		fmt.Printf("Window HiPri KeyInput: %v event: %v\n", w.PathUnique(), e.String())
 	}
-	kf := KeyFun(cs)
-	w.LastModBits = e.Modifiers
-	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
 	if e.IsProcessed() {
 		return false
 	}
+	cs := e.Chord()
+	kf := KeyFun(cs)
 	cpop := w.CurPopup()
 	switch kf {
 	case KeyFunAbort:
@@ -2134,27 +2060,17 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 // KeyChordEventLowPri handles all the lower-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
 func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
-	delPop := false
-	cs := e.Chord()
-	if KeyEventTrace {
-		fmt.Printf("Window LowPri KeyInput: %v\n", w.PathUnique())
-	}
-	kf := KeyFun(cs)
-	w.LastModBits = e.Modifiers
-	w.LastSelMode = mouse.SelectModeBits(e.Modifiers)
 	if e.IsProcessed() {
 		return false
 	}
+	w.EventMgr.ManagerKeyChordEvents(e)
+	if e.IsProcessed() {
+		return false
+	}
+	cs := e.Chord()
+	kf := KeyFun(cs)
+	delPop := false
 	switch kf {
-	case KeyFunFocusNext: // tab
-		w.EventMgr.FocusNext(w.EventMgr.CurFocus())
-		e.SetProcessed()
-	case KeyFunFocusPrev: // shift-tab
-		w.EventMgr.FocusPrev(w.EventMgr.CurFocus())
-		e.SetProcessed()
-	case KeyFunGoGiEditor:
-		TheViewIFace.GoGiEditor(w.Viewport.This())
-		e.SetProcessed()
 	case KeyFunWinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		SaveImage("GrabOf_"+w.Nm+"_"+dstr+".png", w.Viewport.Pixels)
@@ -2164,9 +2080,6 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		e.SetProcessed()
 	case KeyFunZoomOut:
 		w.ZoomDPI(-1)
-		e.SetProcessed()
-	case KeyFunPrefs:
-		TheViewIFace.PrefsView(&Prefs)
 		e.SetProcessed()
 	case KeyFunRefresh:
 		fmt.Printf("Win: %v display refreshed\n", w.Nm)
@@ -2195,30 +2108,6 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Key Focus
-
-// SetStartFocus sets the given item to be first focus when window opens.
-func (w *Window) SetStartFocus(k ki.Ki) {
-	w.EventMgr.FocusMu.Lock()
-	w.StartFocus = k
-	w.EventMgr.FocusMu.Unlock()
-}
-
-// ActivateStartFocus activates start focus if there is no current focus
-// and StartFocus is set -- returns true if activated
-func (w *Window) ActivateStartFocus() bool {
-	w.EventMgr.FocusMu.RLock()
-	if w.StartFocus == nil {
-		w.EventMgr.FocusMu.RUnlock()
-		return false
-	}
-	w.EventMgr.FocusMu.RUnlock()
-	w.EventMgr.FocusMu.Lock()
-	sf := w.StartFocus
-	w.StartFocus = nil
-	w.EventMgr.FocusMu.Unlock()
-	w.EventMgr.FocusOnOrNext(sf)
-	return true
-}
 
 // FocusActiveClick updates the FocusActive status based on mouse clicks in
 // or out of the focused item
@@ -2295,7 +2184,7 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	sp.Name = DNDSpriteName
 	sp.On = true
 	w.AddSprite(sp)
-	w.DNDSetCursor(dnd.DefaultModBits(w.LastModBits))
+	w.DNDSetCursor(dnd.DefaultModBits(w.EventMgr.LastModBits))
 	w.RenderOverlays()
 	// fmt.Printf("starting dnd: %v\n", src.Name())
 }

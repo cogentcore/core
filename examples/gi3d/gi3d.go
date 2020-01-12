@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -24,64 +24,89 @@ func main() {
 	})
 }
 
-// AnimateTicker is the time.Ticker for animating the scene
-var AnimateTicker *time.Ticker
+// Anim has control for animating
+type Anim struct {
+	On            bool         `desc:"run the animation"`
+	Speed         float32      `desc:"angular speed"`
+	DoTorus       bool         `desc:"animate the torus"`
+	DoGopher      bool         `desc:"animate the gopher"`
+	Ang           float32      `desc:"current angle"`
+	Ticker        *time.Ticker `view:"-" desc:"the time.Ticker for animating the scene"`
+	Scene         *gi3d.Scene  `desc:"the scene"`
+	Torus         *gi3d.Solid  `desc:"the torus"`
+	Gopher        *gi3d.Group  `desc:"the gopher"`
+	TorusPosOrig  mat32.Vec3   `desc:"original position"`
+	GopherPosOrig mat32.Vec3   `desc:"original position"`
+}
 
-var DoAnimation = false
+// Start starts the animation ticker timer -- if on is true, then
+// animation will actually start too.
+func (an *Anim) Start(sc *gi3d.Scene, on bool) {
+	an.Scene = sc
+	an.On = on
+	an.DoTorus = true
+	an.DoGopher = true
+	an.Speed = .1
+	an.GetObjs()
+	an.Ticker = time.NewTicker(10 * time.Millisecond) // 100 fps max
+	go an.Animate()
+}
 
-var TheScene *gi3d.Scene
+// GetObjs gets the objects to animate
+func (an *Anim) GetObjs() {
+	torusi := an.Scene.ChildByName("torus", 0)
+	if torusi == nil {
+		return
+	}
+	an.Torus = torusi.(*gi3d.Solid)
+	an.TorusPosOrig = an.Torus.Pose.Pos
 
-func Animate() {
-	torAng := float32(0)
-	var torPosOrig, gophPosOrig mat32.Vec3
+	ggp := an.Scene.ChildByName("go-group", 0)
+	if ggp == nil {
+		return
+	}
+	gophi := ggp.Child(1)
+	if gophi == nil {
+		return
+	}
+	an.Gopher = gophi.(*gi3d.Group)
+	an.GopherPosOrig = an.Gopher.Pose.Pos
+}
+
+// Animate
+func (an *Anim) Animate() {
 	for {
-		if AnimateTicker == nil || TheScene == nil {
+		if an.Ticker == nil || an.Scene == nil {
 			return
 		}
-		<-AnimateTicker.C // wait for tick
-		if !DoAnimation || TheScene == nil {
+		<-an.Ticker.C // wait for tick
+		if !an.On || an.Scene == nil || an.Torus == nil || an.Gopher == nil {
 			continue
 		}
-		torusi := TheScene.ChildByName("torus", 0)
-		if torusi == nil {
-			continue
-		}
-		torus := torusi.(*gi3d.Solid)
-		if torPosOrig.IsNil() {
-			torPosOrig = torus.Pose.Pos
-		}
-		ggp := TheScene.ChildByName("go-group", 0)
-		if ggp == nil {
-			continue
-		}
-		gophi := ggp.Child(1)
-		if gophi == nil {
-			continue
-		}
-		goph := gophi.(*gi3d.Group)
-		if gophPosOrig.IsNil() {
-			gophPosOrig = goph.Pose.Pos
-		}
-		updt := TheScene.UpdateStart()
+
+		updt := an.Scene.UpdateStart()
 		radius := float32(0.3)
-		tdx := radius * mat32.Cos(torAng)
-		tdz := radius * mat32.Sin(torAng)
 
-		gdx := 0.1 * radius * mat32.Cos(torAng+math.Pi)
-		gdz := 0.1 * radius * mat32.Sin(torAng+math.Pi)
+		if an.DoTorus {
+			tdx := radius * mat32.Cos(an.Ang)
+			tdz := radius * mat32.Sin(an.Ang)
+			tp := an.TorusPosOrig
+			tp.X += tdx
+			tp.Z += tdz
+			an.Torus.Pose.Pos = tp
+		}
 
-		torAng += .1
-		tp := torPosOrig
-		tp.X += tdx
-		tp.Z += tdz
-		torus.Pose.Pos = tp
+		if an.DoGopher {
+			gdx := 0.1 * radius * mat32.Cos(an.Ang+math.Pi)
+			gdz := 0.1 * radius * mat32.Sin(an.Ang+math.Pi)
+			gp := an.GopherPosOrig
+			gp.X += gdx
+			gp.Z += gdz
+			an.Gopher.Pose.Pos = gp
+		}
 
-		gp := gophPosOrig
-		gp.X += gdx
-		gp.Z += gdz
-		goph.Pose.Pos = gp
-
-		TheScene.UpdateEnd(updt) // triggers re-render -- don't need a full Update() which updates meshes
+		an.Scene.UpdateEnd(updt) // triggers re-render -- don't need a full Update() which updates meshes
+		an.Ang += an.Speed
 	}
 }
 
@@ -136,7 +161,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
-	TheScene = sc
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
@@ -272,6 +296,58 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sc.Camera.Pose.Pos.Set(0, 0, 10)              // default position
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
+	///////////////////////////////////////////////////
+	//  Animation & Embedded controls
+
+	anim := &Anim{}
+	anim.Start(sc, false) // start without animation running
+
+	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 180, 120)
+	emb.Pose.Pos.Set(-2, 2, 0)
+	// emb.Zoom = 1.5   // this is how to rescale overall size
+	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
+	evlay.SetProp("margin", units.NewEx(1))
+
+	eabut := gi.AddNewCheckBox(evlay, "anim-but")
+	eabut.SetText("Animate")
+	eabut.Tooltip = "toggle animation on and off"
+	eabut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			anim.On = !eabut.IsChecked()
+		}
+	})
+
+	cmb := gi.AddNewMenuButton(evlay, "anim-ctrl")
+	cmb.SetText("Anim Ctrl")
+	cmb.Tooltip = "options for what is animated"
+	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			anim.DoTorus = !anim.DoTorus
+		})
+	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Gopher"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			anim.DoGopher = !anim.DoGopher
+		})
+	cmb.Menu.AddAction(gi.ActOpts{Label: "Edit Anim"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
+		})
+
+	sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
+	gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
+	sb := gi.AddNewSpinBox(sprw, "anim-speed")
+	sb.Defaults()
+	sb.HasMin = true
+	sb.Min = 0.01
+	sb.Step = 0.01
+	sb.SetValue(anim.Speed)
+	sb.Tooltip = "determines the speed of rotation (step size)"
+	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		anim.Speed = sb.Value
+	})
+
+	//	menu config etc
+
 	appnm := gi.AppName()
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
@@ -279,53 +355,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu.AddAppMenu(win)
 	win.MainMenuUpdated()
-
-	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 160, 100)
-	emb.Pose.Pos.Set(-2, 2, 0)
-	// emb.Zoom = 1.5   // this is how to rescale overall size
-	evlay := gi.AddNewLayout(emb.Viewport, "vlay", gi.LayoutVert)
-
-	eabut := gi.AddNewCheckBox(evlay, "anim-but")
-	eabut.SetText("Animate")
-	eabut.Tooltip = "this button will toggle animations on and off"
-	eabut.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			DoAnimation = !eabut.IsChecked()
-		}
-	})
-
-	// note: receiver for menu items with shortcuts must be a Node2D or Window
-	mb1 := gi.AddNewMenuButton(evlay, "menubutton1")
-	mb1.SetText("Menu Button")
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
-
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mb1.Menu.AddSeparator("sep1")
-
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	sb := gi.AddNewSpinBox(evlay, "spin")
-	sb.Defaults()
-	sb.HasMin = true
-	sb.Min = 0.0
-	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
-	})
-
-	AnimateTicker = time.NewTicker(10 * time.Millisecond)
-	go Animate()
 
 	vp.UpdateEndNoSig(updt)
 	win.StartEventLoop()

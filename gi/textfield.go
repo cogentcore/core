@@ -624,8 +624,6 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.EditTxt)
 }
 
-// cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
-
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
@@ -688,7 +686,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 		return
 	}
 	s := string(tf.EditTxt[0:tf.CursorPos])
-	cpos := tf.CharStartPos(tf.CursorPos).ToPoint()
+	cpos := tf.CharStartPos(tf.CursorPos, true).ToPoint()
 	cpos.X += 5
 	cpos.Y += 10
 	tf.Complete.Show(s, 0, tf.CursorPos, tf.Viewport, cpos, forceComplete)
@@ -751,11 +749,15 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 
 // CharStartPos returns the starting render coords for the given character
 // position in string -- makes no attempt to rationalize that pos (i.e., if
-// not in visible range, position will be out of range too)
-func (tf *TextField) CharStartPos(charidx int) mat32.Vec2 {
+// not in visible range, position will be out of range too).
+// if wincoords is true, then adds window box offset -- for cursor, popups
+func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	st := &tf.Sty
 	spc := st.BoxSpace()
-	pos := tf.LayData.AllocPos.AddScalar(spc).Add(mat32.NewVec2FmPoint(tf.Viewport.WinBBox.Min))
+	pos := tf.LayData.AllocPos.AddScalar(spc)
+	if wincoords {
+		pos = pos.Add(mat32.NewVec2FmPoint(tf.Viewport.WinBBox.Min))
+	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
 	return mat32.Vec2{pos.X + cpos, pos.Y}
 }
@@ -884,7 +886,7 @@ func (tf *TextField) RenderCursor(on bool) {
 	} else {
 		win.InactivateSprite(sp.Name)
 	}
-	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos).ToPointFloor()
+	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos, true).ToPointFloor()
 	win.RenderOverlays() // needs an explicit call!
 	win.UpdateSig()      // publish
 }
@@ -895,7 +897,7 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 	if ly == nil {
 		return false
 	}
-	cpos := tf.CharStartPos(tf.CursorPos).ToPointFloor()
+	cpos := tf.CharStartPos(tf.CursorPos, false).ToPointFloor()
 	bbsz := image.Point{int(math32.Ceil(tf.CursorWidth.Dots)), int(math32.Ceil(tf.FontHeight))}
 	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
 	return ly.ScrollToBox(bbox)
@@ -940,7 +942,7 @@ func (tf *TextField) RenderSelect() {
 		return
 	}
 
-	spos := tf.CharStartPos(effst)
+	spos := tf.CharStartPos(effst, false)
 
 	rs := &tf.Viewport.Render
 	pc := &rs.Paint

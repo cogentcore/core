@@ -430,9 +430,7 @@ func (sc *Scene) Init2D() {
 }
 
 func (sc *Scene) Style2D() {
-	if !sc.NoNav {
-		sc.SetCanFocusIfActive()
-	}
+	sc.SetCanFocusIfActive() // we get all key events
 	sc.SetCurWin()
 	sc.Style2DWidget()
 	sc.LayData.SetFromStyle(&sc.Sty.Layout) // also does reset

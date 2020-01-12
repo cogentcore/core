@@ -2404,7 +2404,11 @@ func (tv *TextView) ContextMenu() {
 
 // ContextMenuPos returns the position of the context menu
 func (tv *TextView) ContextMenuPos() (pos image.Point) {
-	return tv.Viewport.Win.LastMousePos
+	em := tv.EventMgr2D()
+	if em != nil {
+		return em.LastMousePos
+	}
+	return image.Point{100, 100}
 }
 
 // MakeContextMenu builds the textview context menu
