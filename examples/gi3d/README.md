@@ -8,6 +8,10 @@ The gopher object that is imported is borrowed from: https://github.com/g3n/engi
 
 The usual Go install procedure will work -- see [Install](https://github.com/goki/gi/wiki/Install) for details.
 
+## Animation and embedded 2D GUI
+
+As you can see, a 2D gui can be embedded within the 3D scene, in this case to control the animation.  This affords unique opportunities for embedding active gui elements within scenes.  Technically, it is achieved by updating a texture projected on a flat plane surface, which is rendered by the 2D gui.  The 2D framework is sufficiently encapsulated that it can be embedded like this with just a bit of surrounding code to manage events within the altered geometry (which nevertheless causes some remaining challenges for elements like popups and the cursor which operate strictly in the overlaying 2D).
+
 ## Camera Navigation
 
 The default camera navigation controls allow you to move around the scene.  To get the keyboard versions to work, you need to set the focus on the 3D scene, which can be done by clicking into it or tabbing or using the arrow keys as usual in GoGi.  These are the different modes of movement:

@@ -100,7 +100,7 @@ func (dr *Drawing) Op(op draw.Op) {
 	if op == draw.Over {
 		gl.Enable(gl.BLEND)
 		gl.BlendEquation(gl.FUNC_ADD)
-		gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+		gl.BlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 	} else {
 		gl.Disable(gl.BLEND)
 	}

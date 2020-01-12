@@ -337,8 +337,8 @@ void main() {
 	vec3 Ambdiff, Spec;
 	phongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
-	// Final fragment color
-	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
+	// Final fragment color -- premultiplied alpha
+	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
 	// debugVec3(Norm, outputColor);
 }
 `+"\x00")
@@ -446,8 +446,8 @@ void main() {
 	vec3 Ambdiff, Spec;
 	phongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
-	// Final fragment color
-	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
+	// Final fragment color -- premultiplied alpha
+	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
 }
 `+"\x00")
 	if err != nil {
@@ -556,8 +556,8 @@ void main() {
 	vec3 Ambdiff, Spec;
 	phongModel(Pos, Norm, CamDir, clr, clr, Specular, Shiny, Ambdiff, Spec);
 
-	// Final fragment color
-	outputColor = min(vec4(Bright * Ambdiff + Spec, opacity), vec4(1.0));
+	// Final fragment color -- premultiplied alpha
+	outputColor = min(vec4((Bright * Ambdiff + Spec) * opacity, opacity), vec4(1.0));
 }
 `+"\x00")
 	if err != nil {
@@ -652,9 +652,9 @@ layout (std140) uniform Lights
 
 var RenderPhong = `
 // debugVec3 renders vector to color for debugging values
-void debugVec3(vec3 val, out vec4 clr) {
-	clr = vec4(0.5 + 0.5 * val, 1.0);
-}
+// void debugVec3(vec3 val, out vec4 clr) {
+// 	clr = vec4(0.5 + 0.5 * val, 1.0);
+// }
 
 
 void phongModel(vec4 pos, vec3 norm, vec3 camDir, vec3 matAmbient, vec3 matDiffuse, vec3 matSpecular, float shiny, out vec3 ambdiff, out vec3 spec) {
