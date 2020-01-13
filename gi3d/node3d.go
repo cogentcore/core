@@ -326,11 +326,10 @@ func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
 		if err != nil {
 			return
 		}
-		scc := sci.Embed(KiT_Scene).(*Scene)
+		ssc := sci.Embed(KiT_Scene).(*Scene)
 		ni := nb.This().(Node3D)
-		if scc.CurSel != ni {
-			// fmt.Printf("selecting: %v  mouse: %v   win bbox: %v  obj bbox: %v\n", nb.Nm, me.Where, nb.WinBBox, nb.ObjBBox)
-			scc.SetSel(ni)
+		if ssc.CurSel != ni {
+			ssc.SetSel(ni)
 			me.SetProcessed()
 		}
 	})

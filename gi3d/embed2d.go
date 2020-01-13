@@ -271,6 +271,12 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.MouseEvents(md)
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		emm.Viewport.EventMgr.MouseEventReset(md)
+		if !md.IsProcessed() {
+			ni := em.This().(Node3D)
+			if ssc.CurSel != ni {
+				ssc.SetSel(ni)
+			}
+		}
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

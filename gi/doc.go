@@ -5,8 +5,9 @@
 /*
 Package Gi (GoGi) provides a Graphical Interface based on GoKi Tree Node structs
 
-2D and 3D (TBD) scenegraphs supported, each rendering to respective Viewport
-which in turn can be integrated within the other type of scenegraph.
+2D and 3D (in gi3d) scenegraphs supported, each rendering to respective
+Viewport or Scene.  Scene is a 2D element that embeds the 3D scene, and
+a 2D Viewport can in turn be embedded within the 3D scene.
 
 The 2D scenegraph supports:
 

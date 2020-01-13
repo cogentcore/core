@@ -16,11 +16,11 @@ Node bounding boxes are in both local and World reference frames, and are used f
 
 All Meshes are stored directly on the Scene, and must have unique names, as they are referenced from Solids by name.  The Mesh contains all the verticies, etc that define a shape, and are the major memory-consuming elements of the scene (along with textures).  Thus, the Solid is very lightweight and just points to the Mesh, so Meshes can be reused across multiple Solids for efficiency.
 
-Meshes are only indexed triangles, and there are standard shapes such as Box, Sphere, Cylinder, Capsule, and Line (rendered as a thin Box with end points specified).
+Meshes are *only* indexed triangles, and there are standard shapes such as `Box`, `Sphere`, `Cylinder`, `Capsule`, and `Lines` (rendered as thin boxes with end points specified).
 
-Textures are also stored by unique names on the Scene, and the Material can optionally refer to a texture -- likewise allowing efficient re-use across different Solids.
+`Texture`s are also stored by unique names on the Scene, and the Material can optionally refer to a texture -- likewise allowing efficient re-use across different Solids.
 
-The Scene also contains a Library of uniquely-named "objects" (Groups) which can be loaded from 3D object files, and then added into the scenegraph as needed.  Thus, a typical, efficient workflow is to initialize a Library of such objects, and then configure the specific scene from these objects.  The library objects are Cloned into the scenegraph -- because the Group and Solid nodes are lightweight, this is all very efficient.
+The Scene also contains a `Library` of uniquely-named "objects" (Groups) which can be loaded from 3D object files, and then added into the scenegraph as needed.  Thus, a typical, efficient workflow is to initialize a Library of such objects, and then configure the specific scene from these objects.  The library objects are Cloned into the scenegraph -- because the Group and Solid nodes are lightweight, this is all very efficient.
 
 The Scene also holds the Camera and Lights for rendering -- there is no point in putting these out in the scenegraph -- if you want to add a Solid representing one of these elements, you can easily do so.
 
@@ -53,4 +53,11 @@ See [EVE](https://github.com/emer/eve) (emergent Virtual Engine) for a physics e
 # Events, Selection, Manipulation
 
 Mouse events are handled by the standard GoGi Window event dispatching methods, based on bounding boxes which are always updated -- this greatly simplifies gui interactions.  There is default support for selection and `Pose` manipulation handling -- see `manip.go` code and `Node3DBase`'s `ConnectEvents3D` which responds to mouse clicks.
+
+# Embedded 2D Viewport
+
+A full 2D GUI can be embedded within a 3D scene using the `Embed2D` Node type, which renders a `Viewport2D` onto a Texture projected onto a Plane.  It captures events within its own bounding box, and translates them into coordinates for the 2D embedded gui. This allows full 2D interactive control within whatever perspective is presentin the 3D scene.  However, things like cursors and popups render in the flat 2D screen and are only approximately located.
+
+In addition to interactive guis, the embedded 2D node can be used for rendering full SVG graphics to a texture.
+
 
