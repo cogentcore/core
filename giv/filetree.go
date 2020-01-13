@@ -767,7 +767,9 @@ func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileS
 		ln++
 	}
 	if err := scan.Err(); err != nil {
-		log.Printf("gide.FileSearch error: %v\n", err)
+		// note: we expect: bufio.Scanner: token too long  when reading binary files
+		// not worth printing here.  otherwise is very reliable.
+		// log.Printf("giv.FileSearch error: %v\n", err)
 	}
 	return cnt, matches
 }

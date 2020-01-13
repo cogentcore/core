@@ -40,6 +40,13 @@ const (
 	// Plane2DMeshName is the reserved name for the 2D plane mesh
 	// used for Text2D and Embed2D
 	Plane2DMeshName = "__Plane2D"
+
+	// LineMeshName is the reserved name for a unit-sized Line segment
+	LineMeshName = "__UnitLine"
+
+	// ConeMeshName is the reserved name for a unit-sized Cone segment.
+	// Has the number of segments appended.
+	ConeMeshName = "__UnitCone"
 )
 
 // Set Update3DTrace to true to get a trace of 3D updating

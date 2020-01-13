@@ -219,7 +219,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := gi.Color{}
 	cyan.SetUInt8(0, 255, 255, 255)
-	gi3d.AddNewLine(sc, sc, "UnitLineW.05", "one-line", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan)
+	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
 
 	// bbclr := gi.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)

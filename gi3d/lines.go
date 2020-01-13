@@ -5,6 +5,7 @@
 package gi3d
 
 import (
+	"fmt"
 	"log"
 	"math"
 
@@ -17,7 +18,8 @@ import (
 
 // Note: Raw line rendering via OpenGL is not very effective
 // -- lines are often very thin and appearance is hardware dependent.
-// This approach produces consistent results across platforms,
+//
+// The approach below produces consistent results across platforms,
 // is very fast, and is "good enough" for most purposes.
 // For high-quality vector rendering, use Embed2D with SVG etc.
 
@@ -62,24 +64,98 @@ func (ln *Lines) Make(sc *Scene) {
 	ln.BBox.UpdateFmBBox()
 }
 
-// AddNewLine adds a new line between two specified points, using a potentially-shared
-// unit mesh unit line, which is rotated and positioned to go between the designated points.
-// if the mesh already exists, it is not re-created, so ensure that it is likely to be correct.
-func AddNewLine(sc *Scene, parent ki.Ki, meshNm, lineNm string, st, ed mat32.Vec3, width float32, clr gi.Color) *Solid {
-	lm := sc.MeshByName(meshNm)
-	if lm == nil {
-		lm = AddNewLines(sc, meshNm, []mat32.Vec3{mat32.Vec3{-.5, 0, 0}, mat32.Vec3{.5, 0, 0}}, mat32.Vec2{width, width}, OpenLines)
+// UnitLineMesh returns the unit-sized line mesh, of name LineMeshName
+func UnitLineMesh(sc *Scene) *Lines {
+	lm := sc.MeshByName(LineMeshName)
+	if lm != nil {
+		return lm.(*Lines)
 	}
-	ln := AddNewSolid(sc, parent, lineNm, meshNm)
+	lmm := AddNewLines(sc, LineMeshName, []mat32.Vec3{mat32.Vec3{-.5, 0, 0}, mat32.Vec3{.5, 0, 0}}, mat32.Vec2{1, 1}, OpenLines)
+	return lmm
+}
+
+// UnitConeMesh returns the unit-sized cone mesh, of name ConeMeshName-segs
+func UnitConeMesh(sc *Scene, segs int) *Cylinder {
+	nm := fmt.Sprintf("%s-%d", ConeMeshName, segs)
+	cm := sc.MeshByName(nm)
+	if cm != nil {
+		return cm.(*Cylinder)
+	}
+	cmm := AddNewCone(sc, nm, 1, 1, segs, 1, true)
+	return cmm
+}
+
+// AddNewLine adds a new line between two specified points, using a shared
+// mesh unit line, which is rotated and positioned to go between the designated points.
+func AddNewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gi.Color) *Solid {
+	lm := UnitLineMesh(sc)
+	ln := AddNewSolid(sc, parent, name, lm.Name())
 	d := ed.Sub(st)
 	midp := st.Add(d.DivScalar(2))
 	ln.Pose.Pos = midp
 	dst := st.DistTo(ed)
-	ln.Pose.Scale.Set(dst, 1, 1)
+	ln.Pose.Scale.Set(dst, width, width)
 	dn := d.Normal()
 	ln.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
 	ln.Mat.Color = clr
 	return ln
+}
+
+const (
+	// StartArrow specifies to add a starting arrow
+	StartArrow = true
+
+	// NoStartArrow specifies not to add a starting arrow
+	NoStartArrow = false
+
+	// EndArrow specifies to add a ending arrow
+	EndArrow = true
+
+	// EndArrow specifies not to add a ending arrow
+	NoEndArrow = false
+)
+
+// AddNewArrow adds a group with a new line + cone between two specified points, using shared
+// mesh unit line and arrow heads, which are rotated and positioned to go between the designated points.
+// The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
+// providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
+// arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
+func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gi.Color, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
+	cm := UnitConeMesh(sc, arrowSegs)
+	gp := AddNewGroup(sc, parent, name)
+
+	asz := arrowSize * width
+	awd := arrowWidth * asz
+	d := ed.Sub(st)
+	dn := d.Normal()
+
+	lst := st
+	led := ed
+	if startArrow {
+		lst.SetAdd(dn.MulScalar(asz))
+	}
+	if endArrow {
+		led.SetAdd(dn.MulScalar(-asz))
+	}
+	ln := AddNewLine(sc, gp, name+"-line", lst, led, width, clr)
+
+	if startArrow {
+		ar := AddNewSolid(sc, gp, name+"-start-arrow", cm.Name())
+		ar.Pose.Scale.Set(awd, asz, awd)                              // Y is up
+		ar.Pose.Quat.SetFromAxisAngle(mat32.Vec3{0, 0, 1}, math.Pi/2) // rotate from XY up to -X
+		ar.Pose.Quat.SetMul(ln.Pose.Quat)
+		ar.Pose.Pos = st.Add(dn.MulScalar(.5 * asz))
+		ar.Mat.Color = clr
+	}
+	if endArrow {
+		ar := AddNewSolid(sc, gp, name+"-end-arrow", cm.Name())
+		ar.Pose.Scale.Set(awd, asz, awd)
+		ar.Pose.Quat.SetFromAxisAngle(mat32.Vec3{0, 0, 1}, -math.Pi/2) // rotate from XY up to +X
+		ar.Pose.Quat.SetMul(ln.Pose.Quat)
+		ar.Pose.Pos = ed.Add(dn.MulScalar(-.5 * asz))
+		ar.Mat.Color = clr
+	}
+	return gp
 }
 
 // AddNewLineBoxMeshes adds two Meshes defining the edges of a Box.
@@ -227,7 +303,7 @@ func (ms *MeshBase) AddLines(points []mat32.Vec3, width mat32.Vec2, closed bool,
 
 		//   sypzm --- eypzm
 		//   / |        / |
-		// sypzp -- eypzp |
+		// sypzp -- eypzp |// ToAlphaPreMult converts a non-alpha-premultiplied color to a premultiplied one.
 		//  | symzm --| eymzm
 		//  | /       | /
 		// symzp -- eymzp

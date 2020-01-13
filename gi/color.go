@@ -231,6 +231,7 @@ func (c *Color) IsBlack() bool {
 	return false
 }
 
+// String returns a human-readable R,G,B,A output
 func (c *Color) String() string {
 	if c == nil {
 		return "nil"
@@ -238,6 +239,7 @@ func (c *Color) String() string {
 	return fmt.Sprintf("R: %v G: %v B: %v A: %v", c.R, c.G, c.B, c.A)
 }
 
+// HexString returns colors using standard 2-hexidecimal-digits-per-component string
 func (c *Color) HexString() string {
 	if c == nil {
 		return "nil"
@@ -245,6 +247,7 @@ func (c *Color) HexString() string {
 	return fmt.Sprintf("#%X%X%X%X", c.R, c.G, c.B, c.A)
 }
 
+// SetToNil sets to initial all-zero state
 func (c *Color) SetToNil() {
 	c.R = 0
 	c.G = 0
@@ -252,6 +255,7 @@ func (c *Color) SetToNil() {
 	c.A = 0
 }
 
+// SetColor sets from a standard color.Color
 func (c *Color) SetColor(ci color.Color) {
 	if ci == nil {
 		c.SetToNil()
@@ -262,6 +266,7 @@ func (c *Color) SetColor(ci color.Color) {
 	c.SetUInt32(r, g, b, a)
 }
 
+// SetUInt8 sets components from unsigned 8 bit integers (alpha-premultiplied)
 func (c *Color) SetUInt8(r, g, b, a uint8) {
 	c.R = r
 	c.G = g
@@ -269,6 +274,7 @@ func (c *Color) SetUInt8(r, g, b, a uint8) {
 	c.A = a
 }
 
+// SetUInt32 sets components from unsigned 32bit integers (alpha-premultiplied)
 func (c *Color) SetUInt32(r, g, b, a uint32) {
 	c.R = uint8(r >> 8) // convert back to uint8
 	c.G = uint8(g >> 8)
@@ -276,21 +282,22 @@ func (c *Color) SetUInt32(r, g, b, a uint32) {
 	c.A = uint8(a >> 8)
 }
 
+// SetInt sets components from integers (alpha-premultiplied)
 func (c *Color) SetInt(r, g, b, a int) {
 	c.SetUInt32(uint32(r), uint32(g), uint32(b), uint32(a))
 }
 
-// Convert from 0-1 normalized floating point numbers
+// SetFloat64 convert from 0-1 normalized floating point numbers (alpha-premultiplied)
 func (c *Color) SetFloat64(r, g, b, a float64) {
 	c.SetUInt8(uint8(r*255.0), uint8(g*255.0), uint8(b*255.0), uint8(a*255.0))
 }
 
-// Convert from 0-1 normalized floating point numbers
+// SetFloat32 converts from 0-1 normalized floating point numbers (alpha-premultiplied)
 func (c *Color) SetFloat32(r, g, b, a float32) {
 	c.SetUInt8(uint8(r*255.0), uint8(g*255.0), uint8(b*255.0), uint8(a*255.0))
 }
 
-// Convert from 0-1 normalized floating point numbers, non alpha-premultiplied
+// SetNPFloat converts from 0-1 normalized floating point numbers, non alpha-premultiplied
 func (c *Color) SetNPFloat32(r, g, b, a float32) {
 	r *= a
 	g *= a
@@ -298,8 +305,8 @@ func (c *Color) SetNPFloat32(r, g, b, a float32) {
 	c.SetFloat32(r, g, b, a)
 }
 
-// Convert to 0-1 normalized floating point numbers, still alpha-premultiplied
-func (c Color) ToFloat32() (r, g, b, a float32) {
+// ToFloat32 converts to 0-1 normalized floating point numbers, still alpha-premultiplied
+func (c *Color) ToFloat32() (r, g, b, a float32) {
 	r = float32(c.R) / 255.0
 	g = float32(c.G) / 255.0
 	b = float32(c.B) / 255.0
@@ -307,8 +314,8 @@ func (c Color) ToFloat32() (r, g, b, a float32) {
 	return
 }
 
-// Convert to 0-1 normalized floating point numbers, not alpha premultiplied
-func (c Color) ToNPFloat32() (r, g, b, a float32) {
+// ToNPFloat32 converts to 0-1 normalized floating point numbers, not alpha premultiplied
+func (c *Color) ToNPFloat32() (r, g, b, a float32) {
 	r, g, b, a = c.ToFloat32()
 	if a != 0 {
 		r /= a
@@ -318,21 +325,57 @@ func (c Color) ToNPFloat32() (r, g, b, a float32) {
 	return
 }
 
-// Convert from HSLA: [0..360], Saturation [0..1], and Luminance
+// SetAlphaPreMult converts a non-alpha-premultiplied color to a premultiplied one.
+// Returns true if a change was made (i.e., if A < 255).
+func (c *Color) SetAlphaPreMult() bool {
+	if c.A == 255 {
+		return false
+	}
+	r, g, b, a := c.ToFloat32()
+	c.SetNPFloat32(r, g, b, a)
+	return true
+}
+
+// SetNotAlphaPreMult converts a alpha-premultiplied color to a non-premultiplied one.
+// Returns true if a change was made (i.e., if A < 255).
+func (c *Color) SetNotAlphaPreMult() bool {
+	if c.A == 255 {
+		return false
+	}
+	r, g, b, a := c.ToNPFloat32()
+	c.SetFloat32(r, g, b, a)
+	return true
+}
+
+// AlphaPreFix detects if the color is not alpha-premultiplied
+// (i.e., any RGB > A), and converts to alpha-premultiplied if so.
+// Returns true if fixed.
+func (c *Color) SetAlphaPreFix() bool {
+	if c.A == 255 {
+		return false
+	}
+	if c.R > c.A || c.G > c.A || c.B > c.A {
+		c.SetAlphaPreMult()
+		return true
+	}
+	return false
+}
+
+// SetHSLA converts from HSLA: [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 func (c *Color) SetHSLA(h, s, l, a float32) {
 	r, g, b := HSLtoRGBf32(h, s, l)
 	c.SetNPFloat32(r, g, b, a)
 }
 
-// Convert from HSL: [0..360], Saturation [0..1], and Luminance
+// SetHSL converts from HSL: [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 func (c *Color) SetHSL(h, s, l float32) {
 	r, g, b := HSLtoRGBf32(h, s, l)
 	c.SetNPFloat32(r, g, b, float32(c.A)/255.0)
 }
 
-// Convert to HSLA: [0..360], Saturation [0..1], and Luminance
+// ToHSLA converts to HSLA: [0..360], Saturation [0..1], and Luminance
 // (lightness) [0..1] of the color using float32 values
 func (c *Color) ToHSLA() (h, s, l, a float32) {
 	r, g, b, a := c.ToNPFloat32()

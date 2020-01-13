@@ -871,24 +871,18 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 					ad.Desc = kit.ToString(pv)
 					ad.View.SetTag("desc", ad.Desc)
 				case "default":
-					if !ad.HasDef() {
-						ad.Default = pv
-						ad.SetHasDef()
-					}
+					ad.Default = pv
+					ad.SetHasDef()
 				case "value":
-					if !ad.HasDef() {
-						ad.Default = pv
-						ad.SetHasDef()
-						bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
-						nprompt--
-					}
+					ad.Default = pv
+					ad.SetHasDef()
+					bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
+					nprompt--
 				case "default-field":
-					if !ad.HasDef() {
-						field := pv.(string)
-						if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
-							ad.Default = flv.Interface()
-							ad.SetHasDef()
-						}
+					field := pv.(string)
+					if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
+						ad.Default = flv.Interface()
+						ad.SetHasDef()
 					}
 				default:
 					ad.View.SetTag(pk, kit.ToString(pv))
