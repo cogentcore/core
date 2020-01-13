@@ -343,9 +343,6 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sb.Step = 0.01
 	sb.SetValue(anim.Speed)
 	sb.Tooltip = "determines the speed of rotation (step size)"
-	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		anim.Speed = sb.Value
-	})
 
 	spsld := gi.AddNewSlider(evlay, "speed-slider")
 	spsld.Dim = mat32.X
@@ -360,6 +357,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// spsld.Tracking = true
 	spsld.Icon = gi.IconName("circlebutton-on")
 
+	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		anim.Speed = sb.Value
+		spsld.SetValue(anim.Speed)
+	})
 	spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if gi.SliderSignals(sig) == gi.SliderValueChanged {
 			anim.Speed = data.(float32)
