@@ -56,10 +56,13 @@ type Window interface {
 	// SetTitle sets the current title of the window, which is displayed in the GUI.
 	SetTitle(title string)
 
-	// Size returns the current size of the window, in raw underlying dots / pixels -- this includes any high DPI factors that may not be used in OS window sizing (see WinSize for that size).
+	// Size returns the current size of the window, in raw underlying dots / pixels.
+	// This includes any high DPI factors that may not be used in OS window sizing
+	//  (see WinSize for that size).
 	Size() image.Point
 
-	// WinSize returns the current size of the window, in OS-specific window manager units that may not include any high DPI factors.
+	// WinSize returns the current size of the window, in OS-specific window manager
+	// units that may not include any high DPI factors.
 	WinSize() image.Point
 
 	// Position returns the current left-top position of the window relative to

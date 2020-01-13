@@ -161,6 +161,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
+	// sc.NoNav = true
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
@@ -302,7 +303,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	anim := &Anim{}
 	anim.Start(sc, false) // start without animation running
 
-	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 180, 120)
+	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 	emb.Pose.Pos.Set(-2, 2, 0)
 	// emb.Zoom = 1.5   // this is how to rescale overall size
 	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
@@ -344,6 +345,26 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	sb.Tooltip = "determines the speed of rotation (step size)"
 	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		anim.Speed = sb.Value
+	})
+
+	spsld := gi.AddNewSlider(evlay, "speed-slider")
+	spsld.Dim = mat32.X
+	spsld.Defaults()
+	spsld.Min = 0.01
+	spsld.Max = 1
+	spsld.Step = 0.01
+	spsld.PageStep = 0.1
+	spsld.SetMinPrefWidth(units.NewEm(20))
+	spsld.SetMinPrefHeight(units.NewEm(2))
+	spsld.SetValue(anim.Speed)
+	// spsld.Tracking = true
+	spsld.Icon = gi.IconName("circlebutton-on")
+
+	spsld.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if gi.SliderSignals(sig) == gi.SliderValueChanged {
+			anim.Speed = data.(float32)
+			sb.SetValue(anim.Speed)
+		}
 	})
 
 	//	menu config etc

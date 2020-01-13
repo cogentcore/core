@@ -5,37 +5,58 @@
 package gi3d
 
 import (
+	"errors"
 	"image"
+	"log"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
 // Embed2D embeds a 2D Viewport on a vertically-oriented plane, using a texture.
-// The native scale is such that a unit height value is the height of the default font
-// set by the font-size property, and the X axis is scaled proportionally based on the
-// rendered text size to maintain the aspect ratio.  Further scaling can be applied on
-// top of that by setting the Pose.Scale values as usual.
+// The embedded viewport contains its own 2D scenegraph and receives events, with
+// mouse coordinates translated into the 3D plane space.  The full range of GoGi
+// 2D elements can be embedded.
 type Embed2D struct {
 	Solid
-	Viewport *EmbedViewport `desc:"the embedded viewport to display"`
-	Zoom     float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
-	Tex      *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object -- this is used directly instead of pointing to the Scene Texture resources"`
+	Viewport   *EmbedViewport `desc:"the embedded viewport to display"`
+	Zoom       float32        `desc:"overall scaling factor relative to an arbitrary but sensible default scale based on size of viewport -- increase to increase size of view"`
+	Tex        *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object -- this is used directly instead of pointing to the Scene Texture resources"`
+	FitContent bool           `desc:"if true, will be resized to fit its contents during initialization (though it will never get smaller than original size specified at creation) -- this requires having a gi.Layout element (or derivative, such as gi.Frame) as the first and only child of the Viewport"`
+	StdSize    image.Point    `desc:"original standardized 96 DPI size -- the original size specified on creation -- actual size is affected by device pixel ratio and resizing due to FitContent"`
+	DPISize    image.Point    `desc:"original size scaled according to logical dpi"`
 }
 
 var KiT_Embed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
 
-// AddNewEmbed2D adds a new embedded 2D viewport of given name and size
-func AddNewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int) *Embed2D {
+const (
+	// FitContent is used as arg for NewEmbed2D to specify that plane should be resized
+	// to fit content.
+	FitContent = true
+
+	// FixesSize is used as arg for NewEmbed2D to specify that plane should remain a
+	// specified fixed size (using )
+	FixedSize = false
+)
+
+// AddNewEmbed2D adds a new embedded 2D viewport of given name and nominal size
+// according to the standard 96 dpi resolution (i.e., actual size is adjusted relative
+// to that using window's current Logical DPI scaling).  If fitContent is true and
+// first and only element in Viewport is a gi.Layout, then it will be resized
+// to fit content size (though no smaller than given size).
+func AddNewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int, fitContent bool) *Embed2D {
 	em := parent.AddNewChild(KiT_Embed2D, name).(*Embed2D)
 	em.Defaults(sc)
+	em.StdSize = image.Point{width, height}
 	em.Viewport = NewEmbedViewport(sc, em, name, width, height)
 	em.Viewport.Fill = true
+	em.FitContent = fitContent
 	return em
 }
 
@@ -63,10 +84,74 @@ func (em *Embed2D) Disconnect() {
 	em.Solid.Disconnect()
 }
 
-func (em *Embed2D) Init3D(sc *Scene) {
-	em.Viewport.Win = sc.Win // make sure
+// ResizeToFit resizes viewport and texture to fit the content
+func (em *Embed2D) ResizeToFit() error {
+	if em.Viewport.NumChildren() != 1 {
+		err := errors.New("Embed2D: ResizeToFit requires 1 child of Viewport")
+		log.Println(err)
+		return err
+	}
+	layi := em.Viewport.Child(0).Embed(gi.KiT_Layout)
+	if layi == nil {
+		err := errors.New("Embed2D: ResizeToFit requires 1 Viewport child to be a gi.Layout type")
+		log.Println(err)
+		return err
+	}
+	lay := layi.(*gi.Layout)
+	lay.Init2DTree()
+	lay.Style2DTree()
+	lay.LayData.AllocSize = em.Viewport.Scene.Viewport.LayData.AllocSize // give it the whole vp initially
+	lay.Size2DTree(0)
+	sz := lay.LayData.Size.Pref.ToPoint()
+	sz.X = ints.MaxInt(em.DPISize.X, sz.X)
+	sz.Y = ints.MaxInt(em.DPISize.Y, sz.Y)
+	em.Viewport.Resize(sz)
 	em.Viewport.FullRender2DTree()
-	em.UploadViewTex(sc)
+	em.UploadViewTex(em.Viewport.Scene)
+	return nil
+}
+
+// Resize resizes viewport and texture to given standardized 96 DPI size,
+// which becomes the specified new size.
+func (em *Embed2D) Resize(width, height int) {
+	em.StdSize = image.Point{width, height}
+	em.SetDPISize()
+	em.Viewport.Resize(em.DPISize)
+	em.Viewport.FullRender2DTree()
+	em.UploadViewTex(em.Viewport.Scene)
+}
+
+// SetDPISize sets the DPI-adjusted size using LogicalDPI from window.
+// Window must be non-nil.   Als
+func (em *Embed2D) SetDPISize() {
+	if em.Viewport.Win == nil {
+		return
+	}
+	ldpi := em.Viewport.Win.LogicalDPI()
+	scr := ldpi / 96.0
+	em.Zoom = 1.0 / scr
+	// fmt.Printf("init ldpi: %v  scr: %v\n", ldpi, scr)
+	sz := em.StdSize
+	sz.X = int(float32(sz.X) * scr)
+	sz.Y = int(float32(sz.Y) * scr)
+	em.DPISize = sz
+}
+
+func (em *Embed2D) Init3D(sc *Scene) {
+	if sc.Win != nil && em.Viewport.Win == nil {
+		em.Viewport.Win = sc.Win
+		em.SetDPISize()
+		if em.FitContent {
+			em.ResizeToFit()
+		} else {
+			em.Viewport.Resize(em.DPISize)
+			em.Viewport.FullRender2DTree()
+			em.UploadViewTex(sc)
+		}
+	} else {
+		em.Viewport.FullRender2DTree()
+		em.UploadViewTex(sc)
+	}
 	em.Mat.SetTexture(sc, em.Tex)
 	err := em.Validate(sc)
 	if err != nil {
@@ -185,6 +270,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		md.Where = ppt
 		emm.Viewport.EventMgr.MouseEvents(md)
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
+		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -206,10 +292,11 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		*md = *me
 		del := ppt.Sub(me.Where)
 		md.Where = ppt
-		md.From.Add(del)
+		md.From = md.From.Add(del)
 		emm.Viewport.EventMgr.MouseEvents(md)
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		emm.Viewport.EventMgr.GenMouseFocusEvents(md, false)
+		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -231,9 +318,10 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		*md = *me
 		del := ppt.Sub(me.Where)
 		md.Where = ppt
-		md.From.Add(del)
+		md.From = md.From.Add(del)
 		emm.Viewport.EventMgr.MouseEvents(md)
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
+		emm.Viewport.EventMgr.MouseEventReset(md)
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -254,6 +342,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		if !kt.IsProcessed() {
 			emm.Viewport.EventMgr.ManagerKeyChordEvents(kt)
 		}
+		emm.Viewport.EventMgr.MouseEventReset(kt)
 	})
 }
 

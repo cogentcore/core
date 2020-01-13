@@ -423,7 +423,8 @@ func (sv *SplitView) HasFocus2D() bool {
 // layout of the SplitView -- based on SliderBase
 type Splitter struct {
 	SliderBase
-	SplitterNo int `desc:"splitter number this one is"`
+	SplitterNo  int             `desc:"splitter number this one is"`
+	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
 }
 
 var KiT_Splitter = kit.Types.AddType(&Splitter{}, SplitterProps)
@@ -545,6 +546,11 @@ func (sr *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sr.DragPos = sr.Pos
 	sr.OrigWinBBox = sr.WinBBox
 	return sr.Layout2DChildren(iter)
+}
+
+func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
+	// this updates the SliderPositioner interface to use OrigWinBBox
+	return pt.Sub(sr.OrigWinBBox.Min)
 }
 
 func (sr *Splitter) UpdateSplitterPos() {

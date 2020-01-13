@@ -515,9 +515,7 @@ func (sc *Scene) Move2D(delta image.Point, parBBox image.Rectangle) {
 
 func (sc *Scene) Render2D() {
 	if sc.PushBounds() {
-		if !sc.NoNav {
-			sc.NavEvents()
-		}
+		sc.NavEvents()
 		if gi.Render2DTrace {
 			fmt.Printf("3D Render2D: %v\n", sc.PathUnique())
 		}
@@ -530,10 +528,13 @@ func (sc *Scene) Render2D() {
 
 // NavEvents handles standard viewer navigation events
 func (sc *Scene) NavEvents() {
-	sc.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.NoNav {
+			return
+		}
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.IsDragging() {
 			orbDel := float32(.2)
 			panDel := float32(.01)
@@ -567,7 +568,7 @@ func (sc *Scene) NavEvents() {
 			}
 		}
 	})
-	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 	// 	me := d.(*mouse.MoveEvent)
 	// 	me.SetProcessed()
 	// 	ssc := recv.Embed(KiT_Scene).(*Scene)
@@ -593,10 +594,13 @@ func (sc *Scene) NavEvents() {
 	// 	}
 	// 	ssc.UpdateSig()
 	// })
-	sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.NoNav {
+			return
+		}
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
-		ssc := recv.Embed(KiT_Scene).(*Scene)
 		if ssc.SetDragCursor {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 			ssc.SetDragCursor = false
@@ -612,9 +616,12 @@ func (sc *Scene) NavEvents() {
 		}
 		ssc.UpdateSig()
 	})
-	sc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.Event)
+	sc.ConnectEvent(oswin.MouseEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.NoNav {
+			return
+		}
+		me := d.(*mouse.Event)
 		if ssc.SetDragCursor {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 			ssc.SetDragCursor = false
@@ -629,8 +636,11 @@ func (sc *Scene) NavEvents() {
 		ssc.SetSel(nil) // clear any selection at this point
 		// }
 	})
-	sc.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	sc.ConnectEvent(oswin.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		ssc := recv.Embed(KiT_Scene).(*Scene)
+		if ssc.NoNav {
+			return
+		}
 		kt := d.(*key.ChordEvent)
 		ssc.NavKeyEvents(kt)
 	})

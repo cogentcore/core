@@ -21,6 +21,15 @@ import (
 // SliderMinThumbSize is the minimum thumb size, even if computed value would make it smaller
 var SliderMinThumbSize = float32(8)
 
+// SliderPositioner is a minor interface for functions related to
+// computing slider positions.  Needed for more complex sliders
+// such as Splitters that do this computation in a different way.
+type SliderPositioner interface {
+	// PointToRelPos translates a point in global pixel coords into relative
+	// position within node
+	PointToRelPos(pt image.Point) image.Point
+}
+
 // SliderBase has common slider functionality -- two major modes: ValThumb =
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
 // that represents a value, as in a scrollbar, and the scrolling range is size
@@ -51,8 +60,6 @@ type SliderBase struct {
 	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
 	StateStyles [SliderStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	SliderSig   ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
-	// todo: icon -- should be an xml
-	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events for cases like splitter where the bbox is restricted to the slider itself"`
 }
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
@@ -96,7 +103,7 @@ type SliderSignals int64
 const (
 	// SliderValueChanged indicates that the value has changed -- if tracking
 	// is enabled, then this tracks online changes -- otherwise only at the
-	// end.
+	// end.  The data on the signal is the float32 Value.
 	SliderValueChanged SliderSignals = iota
 
 	// SliderPressed means slider was pushed down but not yet up.
@@ -367,9 +374,9 @@ func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
 }
 
 // PointToRelPos translates a point in global pixel coords into relative
-// position within node
+// position within node.  This satisfies the SliderPositioner interface.
 func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
-	return pt.Sub(sb.OrigWinBBox.Min)
+	return pt.Sub(sb.WinBBox.Min)
 }
 
 func (sb *SliderBase) MouseDragEvent() {
@@ -380,8 +387,8 @@ func (sb *SliderBase) MouseDragEvent() {
 			return
 		}
 		me.SetProcessed()
-		st := sbb.PointToRelPos(me.From)
-		ed := sbb.PointToRelPos(me.Where)
+		st := sbb.This().(SliderPositioner).PointToRelPos(me.From)
+		ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 		if sbb.Dim == mat32.X {
 			sbb.SliderMoved(float32(st.X), float32(ed.X))
 		} else {
@@ -403,7 +410,7 @@ func (sb *SliderBase) MouseEvent() {
 			if me.Button == mouse.Left {
 				me.SetProcessed()
 				if me.Action == mouse.Press {
-					ed := sbb.PointToRelPos(me.Where)
+					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &sbb.Sty
 					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSize
 					if sbb.Dim == mat32.X {
@@ -640,13 +647,11 @@ func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
 		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
 	}
 	sr.SizeFromAlloc()
-	sr.OrigWinBBox = sr.WinBBox
 	return sr.Layout2DChildren(iter)
 }
 
 func (sr *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
 	sr.SliderBase.Move2D(delta, parBBox)
-	sr.OrigWinBBox = sr.WinBBox
 }
 
 func (sr *Slider) Render2D() {
@@ -838,13 +843,11 @@ func (sb *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
 		sb.StateStyles[i].CopyUnitContext(&sb.Sty.UnContext)
 	}
 	sb.SizeFromAlloc()
-	sb.OrigWinBBox = sb.WinBBox
 	return sb.Layout2DChildren(iter)
 }
 
 func (sb *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
 	sb.SliderBase.Move2D(delta, parBBox)
-	sb.OrigWinBBox = sb.WinBBox
 }
 
 func (sb *ScrollBar) Render2D() {
