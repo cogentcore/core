@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/Masterminds/vcs"
@@ -25,9 +26,11 @@ type SvnRepo struct {
 func (gr *SvnRepo) Files() (Files, error) {
 	f := make(Files, 1000)
 
-	allfs, err := dirs.AllFiles(gr.LocalPath()) // much faster than svn list --recursive
+	lpath := gr.LocalPath()
+	allfs, err := dirs.AllFiles(lpath) // much faster than svn list --recursive
 	for _, fn := range allfs {
-		f[fn] = Stored
+		rpath, _ := filepath.Rel(lpath, fn)
+		f[rpath] = Stored
 	}
 
 	out, err := gr.RunFromDir("svn", "status", "-u")

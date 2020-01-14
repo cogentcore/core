@@ -229,15 +229,14 @@ func (fn *FileNode) ReadDir(path string) error {
 		sf.FRoot = fn.FRoot
 		fp := filepath.Join(path, sf.Nm)
 		sf.SetNodePath(fp)
-		if repo != nil {
+		if sf.IsDir() {
+			sf.Info.Vcs = vci.Stored // always
+		} else if repo != nil {
 			relpath := rnode.RelPath(sf.FPath)
 			rstat := rnode.RepoFiles.Status(relpath)
-			if rstat != vci.Stored {
-				fmt.Printf("relpath: %v   stat: %v\n", relpath, rstat)
-			}
 			sf.Info.Vcs = rstat
 		} else {
-			sf.Info.Vcs = vci.Untracked
+			sf.Info.Vcs = vci.Stored
 		}
 	}
 	if mods {
@@ -576,14 +575,13 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 		gi.PromptDialog(nil, gi.DlgOpts{Title: "Couldn't Make File", Prompt: fmt.Sprintf("Could not make new file at: %v, err: %v", np, err)}, gi.AddOk, gi.NoCancel, nil, nil)
 		return
 	}
+	fn.FRoot.UpdateNewFile(np)
 	if addToVcs {
 		nfn, ok := fn.FRoot.FindFile(np)
 		if ok && nfn.This() != fn.FRoot.This() {
-			fmt.Printf("adding to vcs: %v\n", nfn.FPath)
 			nfn.AddToVcs()
 		}
 	}
-	fn.FRoot.UpdateNewFile(np)
 }
 
 // NewFolder makes a new folder (directory) in given selected directory node
@@ -1460,13 +1458,22 @@ var FileTreeViewProps = ki.Props{
 		"font-style": gi.FontItalic,
 	},
 	".untracked": ki.Props{
-		"color": "#ce4252",
+		"color": "#808080",
 	},
 	".modified": ki.Props{
 		"color": "#4b7fd1",
 	},
 	".added": ki.Props{
-		"color": "#4b7fd1",
+		"color": "#208020",
+	},
+	".deleted": ki.Props{
+		"color": "#ff4252",
+	},
+	".conflicted": ki.Props{
+		"color": "#ce8020",
+	},
+	".updated": ki.Props{
+		"color": "#008060",
 	},
 	"#icon": ki.Props{
 		"width":   units.NewEm(1),
@@ -1611,6 +1618,12 @@ func (ft *FileTreeView) Style2D() {
 				ft.AddClass("modified")
 			case vci.Added:
 				ft.AddClass("added")
+			case vci.Deleted:
+				ft.AddClass("deleted")
+			case vci.Conflicted:
+				ft.AddClass("conflicted")
+			case vci.Updated:
+				ft.AddClass("updated")
 			}
 		}
 		ft.StyleTreeView()

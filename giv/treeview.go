@@ -1777,7 +1777,7 @@ func (tv *TreeView) ConfigParts() {
 	if lbl, ok := tv.LabelPart(); ok {
 		// this does not work! even with redraws
 		// lbl.Sty.Template = "giv.TreeView.Label"
-		lbl.SetProp("color", tv.Sty.Font.Color)
+		tv.Sty.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
 		if mods {
 			tv.StylePart(gi.Node2D(lbl))

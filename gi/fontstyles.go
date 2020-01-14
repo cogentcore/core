@@ -400,6 +400,41 @@ func (fs *FontStyle) SetStyleProps(parent *FontStyle, props ki.Props, vp *Viewpo
 	fs.SetStylePost(props)
 }
 
+// CopyNonDefaultProps does SetProp on given node for all of the style settings
+// that are not at their default values.
+func (fs *FontStyle) CopyNonDefaultProps(node ki.Ki) {
+	if fs.Color != Prefs.Colors.Font {
+		node.SetProp("color", fs.Color)
+	}
+	if !fs.BgColor.Color.IsNil() {
+		node.SetProp("background-color", fs.BgColor.Color)
+	}
+	if fs.Opacity != 1 {
+		node.SetProp("opacity", fs.Opacity)
+	}
+	if fs.Family != "" && fs.Family != string(Prefs.FontFamily) {
+		node.SetProp("font-family", fs.Family)
+	}
+	if fs.Style != FontNormal {
+		node.SetProp("font-style", fs.Style)
+	}
+	if fs.Weight != WeightNormal {
+		node.SetProp("font-weight", fs.Weight)
+	}
+	if fs.Stretch != FontStrNormal {
+		node.SetProp("font-stretch", fs.Stretch)
+	}
+	if fs.Variant != FontVarNormal {
+		node.SetProp("font-variant", fs.Variant)
+	}
+	if fs.Deco != DecoNone {
+		node.SetProp("font-decoration", fs.Deco)
+	}
+	if fs.Shift != ShiftBaseline {
+		node.SetProp("baseline-shift", fs.Shift)
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 // Font Style enums
 
