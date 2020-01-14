@@ -5,99 +5,72 @@
 package vci
 
 import (
-	"fmt"
+	"bufio"
+	"bytes"
+	"log"
 	"os/exec"
 	"strings"
 
 	"github.com/Masterminds/vcs"
+	"github.com/goki/ki/dirs"
 )
 
 type SvnRepo struct {
-	vcs.Repo
-	FilesAll      map[string]struct{}
-	FilesModified map[string]struct{}
-	FilesAdded    map[string]struct{}
+	vcs.SvnRepo
 }
 
-func (gr *SvnRepo) CacheFileNames() {
-	gr.FilesAll = make(map[string]struct{}, 1000)
-	cmd := exec.Command("svn", "list", "--recursive")
-	cmd.Dir = gr.LocalPath()
-	bytes, _ := cmd.Output()
-	sep := byte(10) // Linefeed is the separator - will this work cross platform?
-	names := strings.Split(string(bytes), string(sep))
-	for _, n := range names {
-		gr.FilesAll[n] = struct{}{}
+// M            11491   COPYING
+// ?                    build_dbg
+
+func (gr *SvnRepo) Files() (Files, error) {
+	f := make(Files, 1000)
+
+	allfs, err := dirs.AllFiles(gr.LocalPath()) // much faster than svn list --recursive
+	for _, fn := range allfs {
+		f[fn] = Stored
 	}
-}
 
-func (gr *SvnRepo) CacheFilesModified() {
-	return
-	gr.FilesModified = make(map[string]struct{}, 100)
-	cmd := exec.Command("svn", "diff", "--summarize")
-	cmd.Dir = gr.LocalPath()
-	bytes, _ := cmd.Output()
-	sep := byte(10) // Linefeed is the separator - will this work cross platform?
-	names := strings.Split(string(bytes), string(sep))
-	for _, n := range names {
-		gr.FilesModified[n] = struct{}{}
+	out, err := gr.RunFromDir("svn", "status", "-u")
+	if err != nil {
+		return nil, err
 	}
-}
-
-func (gr *SvnRepo) CacheFilesAdded() {
-	return
-	gr.FilesAdded = make(map[string]struct{}, 100)
-	cmd := exec.Command("svn", "diff", "--summarize") // todo: couldn't find this command
-	cmd.Dir = gr.LocalPath()
-	bytes, _ := cmd.Output()
-	sep := byte(10) // Linefeed is the separator - will this work cross platform?
-	names := strings.Split(string(bytes), string(sep))
-	_ = names
-	// for _, n := range names {
-	// 	gr.FilesAdded[n] = struct{}{}
-	// }
-}
-
-func (gr *SvnRepo) CacheRefresh() {
-	gr.CacheFileNames()
-	gr.CacheFilesAdded()
-	gr.CacheFilesModified()
-}
-
-func (gr *SvnRepo) InRepo(filename string) bool {
-	if len(gr.FilesAll) == 0 {
-		gr.CacheFileNames()
+	scan := bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		ln := string(scan.Bytes())
+		flds := strings.Fields(ln)
+		if len(flds) < 2 {
+			continue // shouldn't happend
+		}
+		stat := flds[0][0]
+		fn := flds[len(flds)-1]
+		switch stat {
+		case 'M', 'R':
+			f[fn] = Modified
+		case 'A':
+			f[fn] = Added
+		case 'D', '!':
+			f[fn] = Deleted
+		case 'C':
+			f[fn] = Conflicted
+		case '?', 'I':
+			f[fn] = Untracked
+		case '*':
+			f[fn] = Updated
+		default:
+			f[fn] = Stored
+		}
 	}
-	_, has := gr.FilesAll[filename]
-	return has
-}
-
-func (gr *SvnRepo) IsModified(filename string) bool {
-	if len(gr.FilesModified) == 0 {
-		gr.CacheFilesModified()
-	}
-	_, has := gr.FilesModified[filename]
-	return has
-}
-
-func (gr *SvnRepo) IsAdded(filename string) bool {
-	if len(gr.FilesAdded) == 0 {
-		gr.CacheFilesAdded()
-	}
-	_, has := gr.FilesAdded[filename]
-	return has
+	return f, nil
 }
 
 // Add adds the file to the repo
 func (gr *SvnRepo) Add(filename string) error {
 	oscmd := exec.Command("svn", "add", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
-
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(stdoutStderr))
 		return err
 	}
-	gr.CacheFilesAdded()
 	return nil
 }
 
@@ -105,37 +78,32 @@ func (gr *SvnRepo) Add(filename string) error {
 func (gr *SvnRepo) Move(oldpath, newpath string) error {
 	oscmd := exec.Command("svn", "mv", oldpath, newpath)
 	stdoutStderr, err := oscmd.CombinedOutput()
-
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(stdoutStderr))
 		return err
 	}
 	return nil
 }
 
-// Remove removes the file from the repo
-func (gr *SvnRepo) Remove(filename string) error {
+// Delete removes the file from the repo
+func (gr *SvnRepo) Delete(filename string) error {
 	oscmd := exec.Command("svn", "rm", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
-
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(stdoutStderr))
 		return err
 	}
-	gr.CacheRefresh()
 	return nil
 }
 
-// Remove removes the file from the repo
-func (gr *SvnRepo) RemoveKeepLocal(filename string) error {
+// Delete removes the file from the repo
+func (gr *SvnRepo) DeleteKeepLocal(filename string) error {
 	oscmd := exec.Command("svn", "delete", "--keep-local", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
-
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(stdoutStderr))
 		return err
 	}
-	gr.CacheRefresh()
 	return nil
 }
 
@@ -144,10 +112,9 @@ func (gr *SvnRepo) CommitFile(filename string, message string) error {
 	oscmd := exec.Command("svn", "commit", filename, "-m", message)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(stdoutStderr))
 		return err
 	}
-	gr.CacheRefresh()
 	return nil
 }
 
@@ -156,9 +123,8 @@ func (gr *SvnRepo) RevertFile(filename string) error {
 	oscmd := exec.Command("svn", "revert", filename)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(stdoutStderr))
 		return err
 	}
-	gr.CacheFilesModified()
 	return nil
 }

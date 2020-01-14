@@ -328,6 +328,11 @@ const (
 	// changes that might have occurred in the tree itself.  Also emits a TreeVi
 	TreeViewFlagChanged
 
+	// TreeViewFlagNoTemplates indicates to not use style templates for this view.
+	// Style templates can greatly speed rendering but prevent custom styling of
+	// individual nodes
+	TreeViewFlagNoTemplates
+
 	TreeViewFlagsN
 )
 
@@ -1795,11 +1800,11 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {
+		lbl.StateStyles[gi.LabelActive].Font.Color = tv.Sty.Font.Color
 		ltxt := tv.Label()
 		if lbl.Text != ltxt {
 			lbl.SetText(ltxt)
 		}
-		lbl.Sty.Font.Color = tv.Sty.Font.Color
 	}
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
@@ -1966,7 +1971,10 @@ func (tv *TreeView) StyleTreeView() {
 		return
 	}
 	tv.SetCanFocusIfActive()
-	hasTempl, saveTempl := tv.Sty.FromTemplate()
+	hasTempl, saveTempl := false, false
+	// if !tv.HasFlag(int(TreeViewFlagNoTemplates)) {
+	// 	hasTempl, saveTempl = tv.Sty.FromTemplate()
+	// }
 	if !hasTempl || saveTempl {
 		tv.Style2DWidget()
 	}
@@ -1994,6 +2002,7 @@ func (tv *TreeView) StyleTreeView() {
 	}
 	tv.Indent.SetFmInheritProp("indent", tv.This(), false, true) // no inherit, yes type defaults
 	tv.Indent.ToDots(&tv.Sty.UnContext)
+	tv.Parts.Sty.InheritFields(&tv.Sty)
 	if spc, ok := tv.PropInherit("spacing", false, true); ok { // no inherit, yes type
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}

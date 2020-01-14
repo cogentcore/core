@@ -5,157 +5,142 @@
 package vci
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
-	"os/exec"
-	"strings"
+	"log"
 
 	"github.com/Masterminds/vcs"
 )
 
 type GitRepo struct {
-	vcs.Repo
-	FilesAll      map[string]struct{}
-	FilesModified map[string]struct{}
-	FilesAdded    map[string]struct{}
+	vcs.GitRepo
 }
 
-func (gr *GitRepo) CacheFileNames() {
-	gr.FilesAll = make(map[string]struct{}, 1000)
-	cmd := exec.Command("git", "ls-files")
-	cmd.Dir = gr.LocalPath()
-	bytes, _ := cmd.Output()
-	sep := byte(10) // Linefeed is the separator - will this work cross platform?
-	names := strings.Split(string(bytes), string(sep))
-	for _, n := range names {
-		gr.FilesAll[n] = struct{}{}
+func (gr *GitRepo) Files() (Files, error) {
+	f := make(Files, 1000)
+
+	out, err := gr.RunFromDir("git", "ls-files", "-o") // other -- untracked
+	if err != nil {
+		return nil, err
 	}
-}
-
-func (gr *GitRepo) CacheFilesModified() {
-	gr.FilesModified = make(map[string]struct{}, 100)
-	cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=M", "HEAD")
-	cmd.Dir = gr.LocalPath()
-	bytes, _ := cmd.Output()
-	sep := byte(10) // Linefeed is the separator - will this work cross platform?
-	names := strings.Split(string(bytes), string(sep))
-	for _, n := range names {
-		gr.FilesModified[n] = struct{}{}
+	scan := bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		fn := string(scan.Bytes())
+		f[fn] = Untracked
 	}
-}
 
-func (gr *GitRepo) CacheFilesAdded() {
-	gr.FilesAdded = make(map[string]struct{}, 100)
-	cmd := exec.Command("git", "diff", "--name-only", "--diff-filter=A", "HEAD")
-	cmd.Dir = gr.LocalPath()
-	bytes, _ := cmd.Output()
-	sep := byte(10) // Linefeed is the separator - will this work cross platform?
-	names := strings.Split(string(bytes), string(sep))
-	for _, n := range names {
-		gr.FilesAdded[n] = struct{}{}
+	out, err = gr.RunFromDir("git", "ls-files", "-c") // cached = all in repo
+	if err != nil {
+		return nil, err
 	}
-}
-
-func (gr *GitRepo) CacheRefresh() {
-	gr.CacheFileNames()
-	gr.CacheFilesAdded()
-	gr.CacheFilesModified()
-}
-
-func (gr *GitRepo) InRepo(filename string) bool {
-	if len(gr.FilesAll) == 0 {
-		gr.CacheFileNames()
+	scan = bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		fn := string(scan.Bytes())
+		f[fn] = Stored
 	}
-	_, has := gr.FilesAll[filename]
-	return has
-}
 
-func (gr *GitRepo) IsModified(filename string) bool {
-	if len(gr.FilesModified) == 0 {
-		gr.CacheFilesModified()
+	out, err = gr.RunFromDir("git", "ls-files", "-m") // modified
+	if err != nil {
+		return nil, err
 	}
-	_, has := gr.FilesModified[filename]
-	return has
-}
+	scan = bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		fn := string(scan.Bytes())
+		f[fn] = Modified
+	}
 
-func (gr *GitRepo) IsAdded(filename string) bool {
-	if len(gr.FilesAdded) == 0 {
-		gr.CacheFilesAdded()
+	out, err = gr.RunFromDir("git", "ls-files", "-d") // deleted
+	if err != nil {
+		return nil, err
 	}
-	_, has := gr.FilesAdded[filename]
-	return has
+	scan = bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		fn := string(scan.Bytes())
+		f[fn] = Deleted
+	}
+
+	out, err = gr.RunFromDir("git", "ls-files", "-u") // unmerged
+	if err != nil {
+		return nil, err
+	}
+	scan = bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		fn := string(scan.Bytes())
+		f[fn] = Conflicted
+	}
+
+	out, err = gr.RunFromDir("git", "diff", "--name-only", "--diff-filter=A", "HEAD") // deleted
+	if err != nil {
+		return nil, err
+	}
+	scan = bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		fn := string(scan.Bytes())
+		f[fn] = Added
+	}
+
+	return f, nil
 }
 
 // Add adds the file to the repo
 func (gr *GitRepo) Add(filename string) error {
-	oscmd := exec.Command("git", "add", filename)
-	stdoutStderr, err := oscmd.CombinedOutput()
-
+	out, err := gr.RunFromDir("git", "add", filename)
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(out))
 		return err
 	}
-	gr.CacheFilesAdded()
 	return nil
 }
 
 // Move moves updates the repo with the rename
 func (gr *GitRepo) Move(oldpath, newpath string) error {
-	oscmd := exec.Command("git", "mv", oldpath, newpath)
-	stdoutStderr, err := oscmd.CombinedOutput()
-
+	out, err := gr.RunFromDir("git", "mv", oldpath, newpath)
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(out))
+		fmt.Printf("%s\n", out)
 		return err
 	}
 	return nil
 }
 
-// Remove removes the file from the repo
-func (gr *GitRepo) Remove(filename string) error {
-	oscmd := exec.Command("git", "rm", filename)
-	stdoutStderr, err := oscmd.CombinedOutput()
-
+// Delete removes the file from the repo
+func (gr *GitRepo) Delete(filename string) error {
+	out, err := gr.RunFromDir("git", "rm", filename)
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(out))
+		fmt.Printf("%s\n", out)
 		return err
 	}
-	gr.CacheRefresh()
 	return nil
 }
 
-// Remove removes the file from the repo
-func (gr *GitRepo) RemoveKeepLocal(filename string) error {
-	oscmd := exec.Command("git", "rm", "--cached", filename)
-	stdoutStderr, err := oscmd.CombinedOutput()
-
+// Delete removes the file from the repo
+func (gr *GitRepo) DeleteKeepLocal(filename string) error {
+	out, err := gr.RunFromDir("git", "rm", "--cached", filename)
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(out))
 		return err
 	}
-	gr.CacheRefresh()
 	return nil
 }
 
 // CommitFile commits single file to repo staging
 func (gr *GitRepo) CommitFile(filename string, message string) error {
-	oscmd := exec.Command("git", "commit", filename, "-m", message)
-	stdoutStderr, err := oscmd.CombinedOutput()
+	out, err := gr.RunFromDir("git", "commit", filename, "-m", message)
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(out))
 		return err
 	}
-	gr.CacheRefresh()
 	return nil
 }
 
 // RevertFile reverts a single file to last commit of master
 func (gr *GitRepo) RevertFile(filename string) error {
-	oscmd := exec.Command("git", "checkout", filename)
-	stdoutStderr, err := oscmd.CombinedOutput()
+	out, err := gr.RunFromDir("git", "checkout", filename)
 	if err != nil {
-		fmt.Printf("%s\n", stdoutStderr)
+		log.Println(string(out))
 		return err
 	}
-	gr.CacheFilesModified()
 	return nil
 }

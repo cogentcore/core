@@ -18,6 +18,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
@@ -42,8 +43,6 @@ type FileTree struct {
 	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
 	NodeType  reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
-	Repo      vci.Repo     `view:"-" json:"-" xml:"-" desc:"interface for version control system calls"`
-	RepoType  string       `desc:"the repository type, git, svn, etc cached for performance"`
 }
 
 var KiT_FileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
@@ -52,25 +51,17 @@ var FileTreeProps = ki.Props{
 	"EnumType:Flag": KiT_FileNodeFlags,
 }
 
+func (ft *FileTree) CopyFieldsFrom(frm interface{}) {
+	fr := frm.(*FileTree)
+	ft.FileNode.CopyFieldsFrom(&fr.FileNode)
+	ft.DirsOnTop = fr.DirsOnTop
+	ft.NodeType = fr.NodeType
+}
+
 // OpenPath opens a filetree at given directory path -- reads all the files at
 // given path into this tree -- uses config children to preserve extra info
 // already stored about files.  Only paths listed in OpenDirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
-	if ft.Repo == nil {
-		repo, err := vci.NewRepo("origin", path)
-		if err == nil {
-			ft.Repo = repo
-			ft.RepoType = string(repo.Vcs())
-			ft.Repo.CacheFileNames()
-			ft.Repo.CacheFilesModified()
-			ft.Repo.CacheFilesAdded()
-		}
-	} else {
-		ft.Repo.CacheFileNames() // refresh
-		ft.Repo.CacheFilesModified()
-		ft.Repo.CacheFilesAdded()
-	}
-
 	ft.FRoot = ft // we are our own root..
 	if ft.NodeType == nil {
 		ft.NodeType = KiT_FileNode
@@ -127,14 +118,21 @@ var FileNodeHiStyle = histyle.StyleDefault
 // the name of the file.  Folders have children containing further nodes.
 type FileNode struct {
 	ki.Node
-	FPath    gi.FileName       `desc:"full path to this file"`
-	Info     FileInfo          `desc:"full standard file info about this file"`
-	Buf      *TextBuf          `json:"-" xml:"-" desc:"file buffer for editing this file"`
-	FRoot    *FileTree         `json:"-" xml:"-" desc:"root of the tree -- has global state"`
-	VcsState FileNodeVcsStates `json:"-" xml:"-" desc:"status of file in regards to version control"`
+	FPath     gi.FileName `json:"-" xml:"-" copy:"-" desc:"full path to this file"`
+	Info      FileInfo    `json:"-" xml:"-" copy:"-" desc:"full standard file info about this file"`
+	Buf       *TextBuf    `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`
+	FRoot     *FileTree   `json:"-" xml:"-" copy:"-" desc:"root of the tree -- has global state"`
+	DirRepo   vci.Repo    `json:"-" xml:"-" copy:"-" desc:"version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control"`
+	RepoFiles vci.Files   `json:"-" xml:"-" copy:"-" desc:"version control system repository file status -- only valid during ReadDir"`
 }
 
 var KiT_FileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
+
+func (fn *FileNode) CopyFieldsFrom(frm interface{}) {
+	// note: not copying ki.Node as it doesn't have any copy fields
+	// fr := frm.(*FileNode)
+	// and indeed nothing here should be copied!
+}
 
 // IsDir returns true if file is a directory (folder)
 func (fn *FileNode) IsDir() bool {
@@ -208,6 +206,20 @@ func (fn *FileNode) ReadDir(path string) error {
 		log.Printf("giv.FileTree: could not read directory: %v err: %v\n", fn.FPath, err)
 		return err
 	}
+
+	repo, rnode := fn.Repo()
+	if repo == nil {
+		rtyp := vci.DetectRepo(path)
+		if rtyp != vcs.NoVCS {
+			repo, err = vci.NewRepo("origin", path)
+			if err == nil {
+				fn.DirRepo = repo
+				fn.RepoFiles, _ = repo.Files()
+				rnode = fn
+			}
+		}
+	}
+
 	fn.SetOpen()
 	config := fn.ConfigOfFiles(path)
 	mods, updt := fn.ConfigChildren(config, false) // NOT unique names
@@ -217,18 +229,15 @@ func (fn *FileNode) ReadDir(path string) error {
 		sf.FRoot = fn.FRoot
 		fp := filepath.Join(path, sf.Nm)
 		sf.SetNodePath(fp)
-		if sf.Repo() != nil {
-			prefix := string(fn.FRoot.FPath) + "/"
-			relpth := strings.TrimPrefix(fp, prefix)
-			if sf.Repo().IsAdded(string(relpth)) {
-				sf.VcsState = FileNodeVcsAdded
-			} else if sf.Repo().IsModified(string(relpth)) {
-				sf.VcsState = FileNodeVcsModified
-			} else if sf.Repo().InRepo(string(relpth)) {
-				sf.VcsState = FileNodeInVcs
-			} else {
-				sf.VcsState = FileNodeNotInVcs
+		if repo != nil {
+			relpath := rnode.RelPath(sf.FPath)
+			rstat := rnode.RepoFiles.Status(relpath)
+			if rstat != vci.Stored {
+				fmt.Printf("relpath: %v   stat: %v\n", relpath, rstat)
 			}
+			sf.Info.Vcs = rstat
+		} else {
+			sf.Info.Vcs = vci.Untracked
 		}
 	}
 	if mods {
@@ -520,8 +529,9 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
-	if fn.VcsState >= FileNodeInVcs {
-		err = fn.Repo().Remove(string(fn.FPath))
+	repo, _ := fn.Repo()
+	if repo != nil && fn.Info.Vcs >= vci.Stored {
+		err = repo.Delete(string(fn.FPath))
 	} else {
 		err = fn.Info.Delete()
 	}
@@ -537,8 +547,9 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 	if len(newpath) == 0 || err != nil {
 		return err
 	}
-	if fn.FRoot.Repo != nil && fn.VcsState >= FileNodeVcsAdded {
-		err = fn.Repo().Move(string(fn.FPath), newpath)
+	repo, _ := fn.Repo()
+	if repo != nil && fn.Info.Vcs >= vci.Stored {
+		err = repo.Move(string(fn.FPath), newpath)
 	} else {
 		err = os.Rename(string(fn.FPath), newpath)
 	}
@@ -567,7 +578,8 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 	}
 	if addToVcs {
 		nfn, ok := fn.FRoot.FindFile(np)
-		if ok {
+		if ok && nfn.This() != fn.FRoot.This() {
+			fmt.Printf("adding to vcs: %v\n", nfn.FPath)
 			nfn.AddToVcs()
 		}
 	}
@@ -600,9 +612,9 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 		CopyFile(tpath, filename, perm)
 		fn.FRoot.UpdateNewFile(ppath)
 		ofn, ok := fn.FRoot.FindFile(filename)
-		if ok && ofn.VcsState > FileNodeNotInVcs {
+		if ok && ofn.Info.Vcs >= vci.Stored {
 			nfn, ok := fn.FRoot.FindFile(tpath)
-			if ok {
+			if ok && nfn.This() != fn.FRoot.This() {
 				nfn.AddToVcs()
 				nfn.UpdateNode()
 			}
@@ -642,41 +654,57 @@ func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
 //////////////////////////////////////////////////////////////////////////////
 //    File VCS ops
 
-// VcsRepo
-func (fn *FileNode) Repo() vci.Repo {
-	return fn.FRoot.Repo
-}
-
-// VcsRepoType
-func (fn *FileNode) RepoType() string {
-	return fn.FRoot.RepoType
+// Repo returns the version control repository associated with this file,
+// and the node for the directory where the repo is based.
+// Goes up the tree until a repository is found.
+func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
+	var repo vci.Repo
+	var rnode *FileNode
+	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfni := k.Embed(KiT_FileNode)
+		if sfni == nil {
+			return false
+		}
+		sfn := sfni.(*FileNode)
+		if sfn.DirRepo != nil {
+			repo = sfn.DirRepo
+			rnode = sfn
+			return false
+		}
+		return true
+	})
+	return repo, rnode
 }
 
 // AddToVcs adds file to version control
 func (fn *FileNode) AddToVcs() {
-	if fn.Repo() == nil {
+	repo, _ := fn.Repo()
+	if repo == nil {
 		return
 	}
-	err := fn.Repo().Add(string(fn.FPath))
+	err := repo.Add(string(fn.FPath))
 	if err == nil {
-		fn.VcsState = FileNodeVcsAdded
-		dpath, _ := filepath.Split(string(fn.FPath))
-		fn.ReadDir(string(dpath))
+		fn.Info.Vcs = vci.Added
+		// dpath, _ := filepath.Split(string(fn.FPath))
+		// fn.ReadDir(string(dpath))
+		fn.UpdateSig()
 		return
 	}
 	fmt.Println(err)
 }
 
-// RemoveFromVcs removes file from version control
-func (fn *FileNode) RemoveFromVcs() {
-	if fn.Repo() == nil {
+// DeleteFromVcs removes file from version control
+func (fn *FileNode) DeleteFromVcs() {
+	repo, _ := fn.Repo()
+	if repo == nil {
 		return
 	}
-	err := fn.Repo().RemoveKeepLocal(string(fn.FPath))
+	err := repo.DeleteKeepLocal(string(fn.FPath))
 	if fn != nil && err == nil {
-		fn.VcsState = FileNodeNotInVcs
-		dpath, _ := filepath.Split(string(fn.FPath))
-		fn.ReadDir(string(dpath))
+		fn.Info.Vcs = vci.Deleted
+		// dpath, _ := filepath.Split(string(fn.FPath))
+		// fn.ReadDir(string(dpath))
+		fn.UpdateSig()
 		return
 	}
 	fmt.Println(err)
@@ -684,12 +712,16 @@ func (fn *FileNode) RemoveFromVcs() {
 
 // CommitToVcs commits file changes to version control system
 func (fn *FileNode) CommitToVcs(message string) (err error) {
-	if fn.Repo() == nil || fn.VcsState == FileNodeNotInVcs {
-		return errors.New("Repo nil or file not in repo")
+	repo, _ := fn.Repo()
+	if repo == nil {
+		return
 	}
-	err = fn.Repo().CommitFile(string(fn.FPath), message)
+	if fn.Info.Vcs == vci.Untracked {
+		return errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	err = repo.CommitFile(string(fn.FPath), message)
 	if err == nil {
-		fn.VcsState = FileNodeInVcs
+		fn.Info.Vcs = vci.Stored
 		fn.UpdateSig()
 	}
 	return err
@@ -697,14 +729,18 @@ func (fn *FileNode) CommitToVcs(message string) (err error) {
 
 // RevertVcs reverts file changes since last commit
 func (fn *FileNode) RevertVcs() (err error) {
-	if fn.Repo() == nil || fn.VcsState == FileNodeNotInVcs {
-		return errors.New("Repo nil or file not in repo")
+	repo, _ := fn.Repo()
+	if repo == nil {
+		return
 	}
-	err = fn.Repo().RevertFile(string(fn.FPath))
+	if fn.Info.Vcs == vci.Untracked {
+		return errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	err = repo.RevertFile(string(fn.FPath))
 	if err == nil {
-		if fn.VcsState == FileNodeVcsModified {
-			fn.VcsState = FileNodeInVcs
-		} else if fn.VcsState == FileNodeVcsAdded {
+		if fn.Info.Vcs == vci.Modified {
+			fn.Info.Vcs = vci.Stored
+		} else if fn.Info.Vcs == vci.Added {
 			// do nothing - leave in "added" state
 		}
 		if fn.Buf != nil {
@@ -795,31 +831,6 @@ const (
 	FileNodeFlagsN
 )
 
-// FileNodeVcsStates are the possible version control states for a file
-type FileNodeVcsStates int32
-
-const (
-	// FileNodeNotInVcs means that the project files are using version control but
-	// this file is not in the repository
-	FileNodeNotInVcs FileNodeVcsStates = iota
-
-	// FileNodeVcsAdded means the file has been marked to add when a commit is done
-	FileNodeVcsAdded
-
-	// FileNodeInVcs means the file is in the repository and unmodified compared to last commit
-	FileNodeInVcs
-
-	// FileNodeVcsModified means the file is in the repository and modified since last commit
-	FileNodeVcsModified
-
-	// FileNodeVcsStatesN is the number of FileNodeVcsStates
-	FileNodeVcsStatesN
-)
-
-//go:generate stringer -type=FileNodeVcsStates
-
-var KiT_FileNodeVcsStates = kit.Enums.AddEnum(FileNodeVcsStatesN, kit.NotBitFlag, nil)
-
 var FileNodeProps = ki.Props{
 	"EnumType:Flag": KiT_FileNodeFlags,
 	"CallMethods": ki.PropSlice{
@@ -902,7 +913,7 @@ func (dm *OpenDirMap) SetClosed(path string) {
 }
 
 // ClearFlags sets all the bool flags to false -- do this prior to traversing
-// full set of active paths -- can then call RemoveStale to get rid of unused paths
+// full set of active paths -- can then call DeleteStale to get rid of unused paths
 func (dm *OpenDirMap) ClearFlags() {
 	dm.Init()
 	for key, _ := range *dm {
@@ -910,9 +921,9 @@ func (dm *OpenDirMap) ClearFlags() {
 	}
 }
 
-// RemoveStale removes all entries with a bool = false value indicating that
+// DeleteStale removes all entries with a bool = false value indicating that
 // they have not been accessed since ClearFlags was called.
-func (dm *OpenDirMap) RemoveStale() {
+func (dm *OpenDirMap) DeleteStale() {
 	dm.Init()
 	for key, val := range *dm {
 		if !val {
@@ -933,7 +944,9 @@ var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, nil)
 
 // AddNewFileTreeView adds a new filetreeview to given parent node, with given name.
 func AddNewFileTreeView(parent ki.Ki, name string) *FileTreeView {
-	return parent.AddNewChild(KiT_FileTreeView, name).(*FileTreeView)
+	tv := parent.AddNewChild(KiT_FileTreeView, name).(*FileTreeView)
+	tv.SetFlag(int(TreeViewFlagNoTemplates)) // need templates for custom styling
+	return tv
 }
 
 func init() {
@@ -1210,8 +1223,8 @@ func (ftv *FileTreeView) AddToVcs() {
 	}
 }
 
-// RemoveFromVcs removes the file from version control system
-func (ftv *FileTreeView) RemoveFromVcs() {
+// DeleteFromVcs removes the file from version control system
+func (ftv *FileTreeView) DeleteFromVcs() {
 	sels := ftv.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -1221,7 +1234,7 @@ func (ftv *FileTreeView) RemoveFromVcs() {
 	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		fn.RemoveFromVcs()
+		fn.DeleteFromVcs()
 	}
 }
 
@@ -1376,11 +1389,12 @@ var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		if fn.Repo() == nil || fn.IsDir() {
+		repo, _ := fn.Repo()
+		if repo == nil || fn.IsDir() {
 			act.SetActiveState((false))
 			return
 		}
-		act.SetActiveState((fn.VcsState == FileNodeNotInVcs))
+		act.SetActiveState((fn.Info.Vcs == vci.Untracked))
 	}
 })
 
@@ -1389,11 +1403,12 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		if fn.Repo() == nil || fn.IsDir() {
+		repo, _ := fn.Repo()
+		if repo == nil || fn.IsDir() {
 			act.SetActiveState((false))
 			return
 		}
-		act.SetActiveState((fn.VcsState >= FileNodeVcsAdded))
+		act.SetActiveState((fn.Info.Vcs >= vci.Stored))
 	}
 })
 
@@ -1403,11 +1418,12 @@ var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni interface{}, act
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		if fn.Repo() == nil || fn.IsDir() {
+		repo, _ := fn.Repo()
+		if repo == nil || fn.IsDir() {
 			act.SetActiveState((false))
 			return
 		}
-		act.SetActiveState((fn.VcsState == FileNodeVcsModified || fn.VcsState == FileNodeVcsAdded))
+		act.SetActiveState((fn.Info.Vcs == vci.Modified || fn.Info.Vcs == vci.Added))
 	}
 })
 
@@ -1417,7 +1433,10 @@ var VcsLabelFunc = LabelFunc(func(fni interface{}, act *gi.Action) string {
 	fn := ftv.FileNode()
 	label := act.Text
 	if fn != nil {
-		label = strings.Replace(label, "Vcs", fn.RepoType(), 1)
+		repo, _ := fn.Repo()
+		if repo != nil {
+			label = strings.Replace(label, "Vcs", string(repo.Vcs()), 1)
+		}
 	}
 	return label
 })
@@ -1440,10 +1459,13 @@ var FileTreeViewProps = ki.Props{
 	".open": ki.Props{
 		"font-style": gi.FontItalic,
 	},
-	".notinvcs": ki.Props{
+	".untracked": ki.Props{
 		"color": "#ce4252",
 	},
-	".changed": ki.Props{
+	".modified": ki.Props{
+		"color": "#4b7fd1",
+	},
+	".added": ki.Props{
 		"color": "#4b7fd1",
 	},
 	"#icon": ki.Props{
@@ -1534,8 +1556,8 @@ var FileTreeViewProps = ki.Props{
 			"updtfunc":   FileTreeActiveNotInVcsFunc,
 			"label-func": VcsLabelFunc,
 		}},
-		{"RemoveFromVcs", ki.Props{
-			"desc":       "Remove file from version control",
+		{"DeleteFromVcs", ki.Props{
+			"desc":       "Delete file from version control",
 			"updtfunc":   FileTreeActiveInVcsFunc,
 			"label-func": VcsLabelFunc,
 		}},
@@ -1580,17 +1602,15 @@ func (ft *FileTreeView) Style2D() {
 			if fn.IsOpen() {
 				ft.AddClass("open")
 			}
-			if fn.Repo() != nil {
-				switch fn.VcsState {
-				case FileNodeNotInVcs:
-					ft.AddClass("notinvcs")
-				case FileNodeInVcs:
-					ft.AddClass("invcs")
-				case FileNodeVcsModified:
-					ft.AddClass("modified")
-				case FileNodeVcsAdded:
-					ft.AddClass("added")
-				}
+			switch fn.Info.Vcs {
+			case vci.Untracked:
+				ft.AddClass("untracked")
+			case vci.Stored:
+				ft.AddClass("stored")
+			case vci.Modified:
+				ft.AddClass("modified")
+			case vci.Added:
+				ft.AddClass("added")
 			}
 		}
 		ft.StyleTreeView()
@@ -1603,8 +1623,8 @@ func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 	fn := rvwki.Embed(KiT_FileNode).(*FileNode)
 	switch TextBufSignals(sig) {
 	case TextBufDone, TextBufInsert, TextBufDelete:
-		if fn.VcsState == FileNodeInVcs {
-			fn.VcsState = FileNodeVcsModified
+		if fn.Info.Vcs == vci.Stored {
+			fn.Info.Vcs = vci.Modified
 		}
 	}
 }

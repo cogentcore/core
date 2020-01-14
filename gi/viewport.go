@@ -421,17 +421,7 @@ func (vp *Viewport2D) AsViewport2D() *Viewport2D {
 func (vp *Viewport2D) Init2D() {
 	vp.Init2DWidget()
 	vp.SetCurWin()
-	// // we update ourselves whenever any node update event happens
-	// vp.NodeSig.Connect(vp.This(), func(recvp, sendvp ki.Ki, sig int64, data interface{}) {
-	// 	rvpi, _ := KiToNode2D(recvp)
-	// 	rvp := rvpi.AsViewport2D()
-	// 	if Update2DTrace {
-	// 		fmt.Printf("Update: Viewport2D: %v full render due to signal: %v from node: %v\n", rvp.PathUnique(), ki.NodeSignals(sig), sendvp.PathUnique())
-	// 	}
-	// 	if !vp.IsDeleted() && !vp.IsDestroyed() {
-	// 		vp.SetNeedsFullRender()
-	// 	}
-	// })
+	// note: used to have a NodeSig update here but was redundant -- already handled.
 }
 
 func (vp *Viewport2D) Style2D() {

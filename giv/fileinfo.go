@@ -17,6 +17,7 @@ import (
 
 	"github.com/c2h5oh/datasize"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/vci"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
@@ -34,6 +35,7 @@ type FileInfo struct {
 	Sup     filecat.Supported `tableview:"-" desc:"supported file type"`
 	Mode    os.FileMode       `desc:"file mode bits"`
 	ModTime FileTime          `desc:"time that contents (only) were last modified"`
+	Vcs     vci.FileStatus    `tableview:"-" desc:"version control system status, when enabled"`
 	Path    string            `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
 }
 

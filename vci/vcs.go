@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The Gide Authors. All rights reserved.
+// Copyright (c) 2018, The GoGi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/vcs"
+	"github.com/goki/ki/dirs"
 )
 
 var (
@@ -16,52 +17,33 @@ var (
 	ErrUnknownVCS = errors.New("Unknown VCS")
 )
 
-// Repo provides an interface that parallels vcs.Repo (https://github.com/Masterminds/vcs)
-// with some additional functions
+// Repo provides an interface extending vcs.Repo
+// (https://github.com/Masterminds/vcs)
+// with support for file status information and operations.
 type Repo interface {
 	// vcs.Repo includes those interface functions
 	vcs.Repo
 
-	// CacheFileNames reads all of the file names stored in the repository
-	// into a local cache to speed checking whether a file is in the repository or not.
-	CacheFileNames()
-
-	// CacheFilesModified gets a list of files in repository changed since last commit
-	CacheFilesModified()
-
-	// CacheFilesAdded gets a list of files added to repository but not yet committed
-	CacheFilesAdded()
-
-	// CacheRefresh calls all of the Cache functions
-	CacheRefresh()
-
-	// InRepo returns true if filename is in the repository -- uses CacheFileNames --
-	// will do that automatically but if cache might be stale, call it to refresh
-	InRepo(filename string) bool
-
-	// IsModified checks against the cached list to see if the file is modified since the last commit
-	// IsDirty() will check with the repo rather than the cached list
-	IsModified(filename string) bool
-
-	// IsAdded checks for the file in the cached FilesAdded list
-	IsAdded(filename string) bool
+	// Files returns a map of the current files and their status.
+	Files() (Files, error)
 
 	// Add adds the file to the repo
 	Add(filename string) error
 
-	// Move moves updates the repo with the rename
+	// Move moves the file using VCS command to keep it updated
 	Move(oldpath, newpath string) error
 
-	// Remove removes the file from the repo
-	Remove(filename string) error
+	// Delete removes the file from the repo and working copy
+	Delete(filename string) error
 
-	// RemoveKeepLocal removes the file from the repo but keeps the file itself
-	RemoveKeepLocal(filename string) error
+	// DeleteKeepLocal removes the file from the repo but keeps the local file itself
+	DeleteKeepLocal(filename string) error
 
 	// CommitFile commits a single file
 	CommitFile(filename string, message string) error
 
-	// RevertFile reverts a single file
+	// RevertFile reverts a single file to the version that it was last in VCS,
+	// losing any local changes (destructive!)
 	RevertFile(filename string) error
 }
 
@@ -71,11 +53,11 @@ func NewRepo(remote, local string) (Repo, error) {
 		switch repo.Vcs() {
 		case vcs.Git:
 			r := &GitRepo{}
-			r.Repo = repo
+			r.GitRepo = *(repo.(*vcs.GitRepo))
 			return r, err
 		case vcs.Svn:
 			r := &SvnRepo{}
-			r.Repo = repo
+			r.SvnRepo = *(repo.(*vcs.SvnRepo))
 			return r, err
 		case vcs.Hg:
 			err = fmt.Errorf("Hg version control not yet supported")
@@ -84,4 +66,20 @@ func NewRepo(remote, local string) (Repo, error) {
 		}
 	}
 	return nil, err
+}
+
+// DetectRepo attemps to detect the presence of a repository at the given
+// directory path -- returns type of repository if found, else vcs.NoVCS.
+// Very quickly just looks for signature file name:
+// .git for git
+// .svn for svn -- but note that this will find any subdir in svn repo
+func DetectRepo(path string) vcs.Type {
+	if dirs.HasFile(path, ".git") {
+		return vcs.Git
+	}
+	if dirs.HasFile(path, ".svn") {
+		return vcs.Svn
+	}
+	// todo: rest later..
+	return vcs.NoVCS
 }
