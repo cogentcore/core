@@ -133,3 +133,30 @@ func LatestMod(path string, exts []string) time.Time {
 	}
 	return tm
 }
+
+// AllFiles returns a slice of all the files, recursively, within a given directory
+func AllFiles(path string) ([]string, error) {
+	var fnms []string
+	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		fnms = append(fnms, path)
+		return nil
+	})
+	return fnms, er
+}
+
+// HasFile returns true if given directory has given file (exact match)
+func HasFile(path, file string) bool {
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return false
+	}
+	for _, fn := range files {
+		if fn.Name() == file {
+			return true
+		}
+	}
+	return false
+}
