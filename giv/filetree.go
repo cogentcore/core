@@ -945,7 +945,6 @@ var KiT_FileTreeView = kit.Types.AddType(&FileTreeView{}, nil)
 // AddNewFileTreeView adds a new filetreeview to given parent node, with given name.
 func AddNewFileTreeView(parent ki.Ki, name string) *FileTreeView {
 	tv := parent.AddNewChild(KiT_FileTreeView, name).(*FileTreeView)
-	tv.SetFlag(int(TreeViewFlagNoTemplates)) // need templates for custom styling
 	return tv
 }
 
@@ -1452,6 +1451,7 @@ var FileTreeViewProps = ki.Props{
 	"text-align":       gi.AlignLeft,
 	"vertical-align":   gi.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
+	"no-templates":     true, // key to prevent treeview from using templates
 	"background-color": "inherit",
 	".exec": ki.Props{
 		"font-weight": gi.WeightBold,

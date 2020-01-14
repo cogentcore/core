@@ -328,11 +328,6 @@ const (
 	// changes that might have occurred in the tree itself.  Also emits a TreeVi
 	TreeViewFlagChanged
 
-	// TreeViewFlagNoTemplates indicates to not use style templates for this view.
-	// Style templates can greatly speed rendering but prevent custom styling of
-	// individual nodes
-	TreeViewFlagNoTemplates
-
 	TreeViewFlagsN
 )
 
@@ -1782,6 +1777,7 @@ func (tv *TreeView) ConfigParts() {
 	if lbl, ok := tv.LabelPart(); ok {
 		// this does not work! even with redraws
 		// lbl.Sty.Template = "giv.TreeView.Label"
+		lbl.SetProp("color", tv.Sty.Font.Color)
 		lbl.SetText(tv.Label())
 		if mods {
 			tv.StylePart(gi.Node2D(lbl))
@@ -1800,7 +1796,6 @@ func (tv *TreeView) ConfigPartsIfNeeded() {
 		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {
-		lbl.StateStyles[gi.LabelActive].Font.Color = tv.Sty.Font.Color
 		ltxt := tv.Label()
 		if lbl.Text != ltxt {
 			lbl.SetText(ltxt)
@@ -1972,9 +1967,9 @@ func (tv *TreeView) StyleTreeView() {
 	}
 	tv.SetCanFocusIfActive()
 	hasTempl, saveTempl := false, false
-	// if !tv.HasFlag(int(TreeViewFlagNoTemplates)) {
-	// 	hasTempl, saveTempl = tv.Sty.FromTemplate()
-	// }
+	if _, err := tv.PropTry("no-templates"); err == nil {
+		hasTempl, saveTempl = tv.Sty.FromTemplate()
+	}
 	if !hasTempl || saveTempl {
 		tv.Style2DWidget()
 	}
