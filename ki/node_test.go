@@ -196,15 +196,15 @@ func TestNodeFindType(t *testing.T) {
 	parent.InitName(&parent, "par")
 	parent.AddNewChild(KiT_NodeEmbed, "child1")
 	parent.AddNewChild(KiT_Node, "child2")
-	idx, ok := parent.Children().IndexByType(KiT_NodeEmbed, false, 0)
+	idx, ok := parent.Children().IndexByType(KiT_NodeEmbed, NoEmbeds, 0)
 	if !ok || idx != 0 {
 		t.Errorf("find index was not correct val of %d, was %d", 0, idx)
 	}
-	idx, ok = parent.Children().IndexByType(KiT_Node, false, 0)
+	idx, ok = parent.Children().IndexByType(KiT_Node, NoEmbeds, 0)
 	if !ok || idx != 1 {
 		t.Errorf("find index was not correct val of %d, was %d", 1, idx)
 	}
-	_, err := parent.Children().ElemByTypeTry(KiT_Node, false, 0)
+	_, err := parent.Children().ElemByTypeTry(KiT_Node, NoEmbeds, 0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -282,7 +282,7 @@ func TestNodeConfig(t *testing.T) {
 
 	// bf := fmt.Sprintf("mv before:\n%v\n", parent.Kids)
 
-	mods, updt := parent.ConfigChildren(config1, false)
+	mods, updt := parent.ConfigChildren(config1, NonUniqueNames)
 	if mods {
 		parent.UpdateEnd(updt)
 	}
@@ -306,7 +306,7 @@ func TestNodeConfig(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	mods, updt = parent.ConfigChildren(config3, false)
+	mods, updt = parent.ConfigChildren(config3, NonUniqueNames)
 	if mods {
 		parent.UpdateEnd(updt)
 	}
@@ -583,7 +583,7 @@ func TestProps(t *testing.T) {
 	if !ok || pprop != 42 {
 		t.Errorf("TestProps error -- pprop %v != %v\n", pprop, 42)
 	}
-	sprop, ok := schild2.PropInherit("intprop", true, false)
+	sprop, ok := schild2.PropInherit("intprop", Inherit, NoTypeProps)
 	if !ok {
 		t.Errorf("TestProps error -- intprop inherited not found\n")
 	}
@@ -591,13 +591,13 @@ func TestProps(t *testing.T) {
 	if !ok || sprop != 42 {
 		t.Errorf("TestProps error -- intprop inherited %v != %v\n", sint, 42)
 	}
-	sprop, ok = schild2.PropInherit("intprop", false, false)
+	sprop, ok = schild2.PropInherit("intprop", NoInherit, NoTypeProps)
 	if ok {
 		t.Errorf("TestProps error -- intprop should not be found!  was: %v\n", sprop)
 	}
 
 	parent.SetProp("floatprop", 42.0)
-	sprop, ok = schild2.PropInherit("floatprop", true, false)
+	sprop, ok = schild2.PropInherit("floatprop", Inherit, NoTypeProps)
 	if !ok {
 		t.Errorf("TestProps error -- floatprop inherited not found\n")
 	}
@@ -608,7 +608,7 @@ func TestProps(t *testing.T) {
 
 	tstr := "test string"
 	parent.SetProp("stringprop", tstr)
-	sprop, ok = schild2.PropInherit("stringprop", true, false)
+	sprop, ok = schild2.PropInherit("stringprop", Inherit, NoTypeProps)
 	if !ok {
 		t.Errorf("TestProps error -- stringprop not found\n")
 	}
@@ -618,12 +618,12 @@ func TestProps(t *testing.T) {
 	}
 
 	parent.DeleteProp("floatprop")
-	sprop, ok = schild2.PropInherit("floatprop", true, false)
+	sprop, ok = schild2.PropInherit("floatprop", Inherit, NoTypeProps)
 	if ok {
 		t.Errorf("TestProps error -- floatprop should be gone\n")
 	}
 
-	sprop, ok = parent.PropInherit("floatprop", true, true)
+	sprop, ok = parent.PropInherit("floatprop", Inherit, TypeProps)
 	if !ok {
 		t.Errorf("TestProps error -- floatprop on type not found\n")
 	}

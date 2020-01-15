@@ -2101,7 +2101,7 @@ func (n *Node) Clone() Ki {
 func (n *Node) CopyFromRaw(frm Ki) error {
 	n.Kids.ConfigCopy(n.This(), *frm.Children())
 	n.DeleteAllProps(len(*frm.Properties())) // start off fresh, allocated to size of from
-	n.CopyPropsFrom(frm, false)              // use shallow props copy by default
+	n.CopyPropsFrom(frm, NoDeepCopy)         // use shallow props copy by default
 	n.This().CopyFieldsFrom(frm)
 	for i, kid := range n.Kids {
 		fmk := (*(frm.Children()))[i]
@@ -2225,7 +2225,7 @@ func (n *Node) SaveJSON(filename string) error {
 		log.Println(err)
 		return err
 	}
-	err = n.WriteJSON(fp, true) // use indent by default
+	err = n.WriteJSON(fp, Indent) // use indent by default
 	if err != nil {
 		log.Println(err)
 	}
