@@ -446,7 +446,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki,
 // ColorViewDialogValue gets the color from the dialog
 func ColorViewDialogValue(dlg *gi.Dialog) gi.Color {
 	frame := dlg.Frame()
-	cvvvk := frame.ChildByType(KiT_ColorView, true, 2)
+	cvvvk := frame.ChildByType(KiT_ColorView, ki.Embeds, 2)
 	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
 		return cvvv.Color

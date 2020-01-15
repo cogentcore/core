@@ -62,10 +62,10 @@ func (svg *SVG) Paint() *gi.Paint {
 // DeleteAll deletes any existing elements in this svg
 func (svg *SVG) DeleteAll() {
 	updt := svg.UpdateStart()
-	svg.DeleteChildren(true)
+	svg.DeleteChildren(ki.DestroyKids)
 	svg.ViewBox.Defaults()
 	svg.Pnt.Defaults()
-	svg.Defs.DeleteChildren(true)
+	svg.Defs.DeleteChildren(ki.DestroyKids)
 	svg.Title = ""
 	svg.Desc = ""
 	svg.UpdateEnd(updt)

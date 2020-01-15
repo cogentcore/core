@@ -565,11 +565,11 @@ func (bb *ButtonBase) ButtonRelease() {
 }
 
 func (bb *ButtonBase) StyleParts() {
-	if pv, ok := bb.PropInherit("indicator", false, true); ok { // no inh, yes type
+	if pv, ok := bb.PropInherit("indicator", ki.NoInherit, ki.TypeProps); ok {
 		pvs := kit.ToString(pv)
 		bb.Indicator = IconName(pvs)
 	}
-	if pv, ok := bb.PropInherit("icon", false, true); ok { // no inh, yes type
+	if pv, ok := bb.PropInherit("icon", ki.NoInherit, ki.TypeProps); ok {
 		pvs := kit.ToString(pv)
 		bb.Icon = IconName(pvs)
 	}
@@ -580,7 +580,7 @@ func (bb *ButtonBase) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, string(bb.Icon), bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
-	mods, updt := bb.Parts.ConfigChildren(config, false)
+	mods, updt := bb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	bb.ConfigPartsSetIconLabel(string(bb.Icon), bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
@@ -609,7 +609,7 @@ func (bb *ButtonBase) StyleButton() {
 	pst := bb.ParentStyle()
 	clsty := "." + bb.Class
 	var clsp ki.Props
-	if clspi, ok := bb.PropInherit(clsty, false, true); ok {
+	if clspi, ok := bb.PropInherit(clsty, ki.NoInherit, ki.TypeProps); ok {
 		clsp, ok = clspi.(ki.Props)
 	}
 	if hasTempl && saveTempl {
@@ -926,7 +926,7 @@ func (cb *CheckBox) ConfigParts() {
 		lbIdx = len(config)
 		config.Add(KiT_Label, "label")
 	}
-	mods, updt := cb.Parts.ConfigChildren(config, false)
+	mods, updt := cb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	ist := cb.Parts.Child(icIdx).(*Layout)
 	if mods {
 		ist.Lay = LayoutStacked

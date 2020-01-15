@@ -93,7 +93,7 @@ func (sv *StructViewInline) ConfigParts() {
 	if sv.AddAction {
 		config.Add(gi.KiT_Action, "edit-action")
 	}
-	mods, updt := sv.Parts.ConfigChildren(config, false)
+	mods, updt := sv.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
 	}

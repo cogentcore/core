@@ -174,7 +174,7 @@ func FileViewStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, co
 			wi.SetProp("color", clr)
 			return
 		}
-		if fvv := tv.ParentByType(KiT_FileView, true); fvv != nil {
+		if fvv := tv.ParentByType(KiT_FileView, ki.Embeds); fvv != nil {
 			fv := fvv.Embed(KiT_FileView).(*FileView)
 			fn := finf[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
@@ -201,7 +201,7 @@ func (fv *FileView) Config() {
 	config.Add(gi.KiT_ToolBar, "path-tbar")
 	config.Add(gi.KiT_Layout, "files-row")
 	config.Add(gi.KiT_Layout, "sel-row")
-	mods, updt := fv.ConfigChildren(config, true)
+	mods, updt := fv.ConfigChildren(config, ki.UniqueNames)
 	if mods {
 		fv.ConfigPathRow()
 		fv.ConfigFilesRow()
@@ -222,7 +222,7 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Action, "path-ref")
 	config.Add(gi.KiT_Action, "path-fav")
 	config.Add(gi.KiT_Action, "new-folder")
-	mods, updt := pr.ConfigChildren(config, true) // already covered by parent update
+	mods, updt := pr.ConfigChildren(config, ki.UniqueNames) // already covered by parent update
 	if mods {
 		pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
 		pl.Text = "Path:"
@@ -305,7 +305,7 @@ func (fv *FileView) ConfigFilesRow() {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_TableView, "favs-view")
 	config.Add(KiT_TableView, "files-view")
-	fr.ConfigChildren(config, true) // already covered by parent update
+	fr.ConfigChildren(config, ki.UniqueNames) // already covered by parent update
 
 	sv := fv.FavsView()
 	sv.CSS = ki.Props{
@@ -371,7 +371,7 @@ func (fv *FileView) ConfigSelRow() {
 	config.Add(gi.KiT_TextField, "sel")
 	config.Add(gi.KiT_Label, "ext-lbl")
 	config.Add(gi.KiT_TextField, "ext")
-	sr.ConfigChildren(config, true) // already covered by parent update
+	sr.ConfigChildren(config, ki.UniqueNames) // already covered by parent update
 
 	sl := sr.ChildByName("sel-lbl", 0).(*gi.Label)
 	sl.Text = "File:"

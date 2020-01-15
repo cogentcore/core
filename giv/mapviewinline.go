@@ -94,7 +94,7 @@ func (mv *MapViewInline) ConfigParts() {
 	}
 	config.Add(gi.KiT_Action, "add-action")
 	config.Add(gi.KiT_Action, "edit-action")
-	mods, updt := mv.Parts.ConfigChildren(config, false)
+	mods, updt := mv.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	if !mods {
 		updt = mv.Parts.UpdateStart()
 	}
@@ -149,7 +149,7 @@ func (mv *MapViewInline) ConfigParts() {
 				// }
 			}
 			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
-			mvvvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
+			mvvvk := dlg.Frame().ChildByType(KiT_MapView, ki.Embeds, 2)
 			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)
 				mvvv.MapValView = mvv.MapValView

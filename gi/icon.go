@@ -74,7 +74,7 @@ var IconProps = ki.Props{
 // children if name is nil / none (both cases return false for new icon)
 func (ic *Icon) SetIcon(name string) (bool, error) {
 	if IconName(name).IsNil() {
-		ic.DeleteChildren(true)
+		ic.DeleteChildren(ki.DestroyKids)
 		return false, nil
 	}
 	if ic.HasChildren() && ic.UniqueNm == name {

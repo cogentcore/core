@@ -435,7 +435,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	if ok || cancel {
 		bb := dlg.AddButtonBox(frame)
 		bbc := dlg.StdButtonConfig(false, ok, cancel) // no stretch -- left better
-		mods, updt := bb.ConfigChildren(bbc, false)
+		mods, updt := bb.ConfigChildren(bbc, ki.NonUniqueNames)
 		dlg.StdButtonConnect(ok, cancel, bb)
 		if mods {
 			bb.UpdateEnd(updt)

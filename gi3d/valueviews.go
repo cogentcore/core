@@ -78,12 +78,12 @@ func (vv *MeshValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	if !ok {
 		return
 	}
-	sci, err := ndi.ParentByTypeTry(KiT_Scene, false)
+	sci, err := ndi.ParentByTypeTry(KiT_Scene, ki.Embeds)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	sc := sci.(*Scene)
+	sc := sci.Embed(KiT_Scene).(*Scene)
 	sl := sc.MeshList()
 	sort.Strings(sl)
 
@@ -172,12 +172,12 @@ func (vv *TexValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.Re
 	if !ok {
 		return
 	}
-	sci, err := ndi.ParentByTypeTry(KiT_Scene, false)
+	sci, err := ndi.ParentByTypeTry(KiT_Scene, ki.Embeds)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	sc := sci.(*Scene)
+	sc := sci.Embed(KiT_Scene).(*Scene)
 	sl := sc.TextureList()
 	sort.Strings(sl)
 

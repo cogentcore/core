@@ -155,7 +155,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	}
 	tnl[sz].Type = KiT_Stretch
 	tnl[sz].Name = "menstr"
-	_, updt := mb.ConfigChildren(tnl, false)
+	_, updt := mb.ConfigChildren(tnl, ki.NonUniqueNames)
 	for i, m := range menus {
 		mi := mb.Kids[i]
 		if mi.TypeEmbeds(KiT_Action) {

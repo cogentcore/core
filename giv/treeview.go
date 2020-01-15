@@ -34,6 +34,11 @@ import (
 // (which can be any type of Ki nodes), providing full manipulation abilities
 // of that source tree (move, cut, add, etc) through drag-n-drop and
 // cut/copy/paste and menu actions.
+//
+// There are special style Props interpreted by these nodes:
+// * no-templates -- if present (assumed to be true) then style templates are
+//   not used to optimize rendering speed.  Set this for nodes that have
+//   styling applied differentially to individual nodes (e.g., FileNode).
 type TreeView struct {
 	gi.PartsWidgetBase
 	SrcNode          ki.Ki                     `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
@@ -73,7 +78,7 @@ func (tv *TreeView) SetRootNode(sk ki.Ki) {
 	if tv.SrcNode != sk {
 		updt = tv.UpdateStart()
 		tv.SrcNode = sk
-		sk.NodeSignal().Connect(tv.This(), SrcNodeSignal) // we recv signals from source
+		sk.NodeSignal().Connect(tv.This(), SrcNodeSignalFunc) // we recv signals from source
 	}
 	tv.RootView = tv
 	tvIdx := 0
@@ -87,7 +92,7 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
 	if tv.SrcNode != sk {
 		updt = tv.UpdateStart()
 		tv.SrcNode = sk
-		sk.NodeSignal().Connect(tv.This(), SrcNodeSignal) // we recv signals from source
+		sk.NodeSignal().Connect(tv.This(), SrcNodeSignalFunc) // we recv signals from source
 	}
 	tv.SyncToSrc(tvIdx)
 	tv.UpdateEnd(updt)
@@ -122,7 +127,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		if vc, ok := kit.ToBool(ft); ok && vc {
 			cls = true
 		} else {
-			if vcp, ok := k.PropInherit(vcprop, false, true); ok {
+			if vcp, ok := k.PropInherit(vcprop, ki.NoInherit, ki.TypeProps); ok {
 				if vc, ok := kit.ToBool(vcp); vc && ok {
 					cls = true
 				}
@@ -134,7 +139,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	for _, skid := range skids {
 		tnl.Add(typ, "tv_"+skid.UniqueName())
 	}
-	mods, updt := tv.ConfigChildren(tnl, false) // false = don't use unique names -- needs to!
+	mods, updt := tv.ConfigChildren(tnl, ki.NonUniqueNames) // false = don't use unique names -- needs to!
 	if mods {
 		tv.SetFullReRender()
 		// fmt.Printf("got mod on %v\n", tv.PathUnique())
@@ -152,7 +157,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 		vk := tv.Kids[idx].Embed(KiT_TreeView).(*TreeView)
 		vk.SetSrcNode(skid, tvIdx)
 		if mods {
-			if vcp, ok := skid.PropInherit(vcprop, false, true); ok {
+			if vcp, ok := skid.PropInherit(vcprop, ki.NoInherit, ki.TypeProps); ok {
 				if vc, ok := kit.ToBool(vcp); vc && ok {
 					vk.SetClosed()
 				}
@@ -166,8 +171,8 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	tv.UpdateEnd(updt)
 }
 
-// SrcNodeSignal is the function for receiving node signals from our SrcNode
-func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
+// SrcNodeSignalFunc is the function for receiving node signals from our SrcNode
+func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data interface{}) {
 	tv := tvki.Embed(KiT_TreeView).(*TreeView)
 	if data != nil {
 		dflags := data.(int64)
@@ -177,7 +182,7 @@ func SrcNodeSignal(tvki, send ki.Ki, sig int64, data interface{}) {
 		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
 			tvIdx := tv.ViewIdx
 			tv.SyncToSrc(&tvIdx)
-		} else if bitflag.HasAnyMask(dflags, int64(ki.ValUpdateFlagsMask)) {
+		} else {
 			tv.UpdateSig()
 		}
 	}
@@ -325,7 +330,8 @@ const (
 
 	// TreeViewFlagChanged is updated on the root node whenever a gui edit is
 	// made through the tree view on the tree -- this does not track any other
-	// changes that might have occurred in the tree itself.  Also emits a TreeVi
+	// changes that might have occurred in the tree itself.
+	// Also emits a TreeViewChanged signal on the root node.
 	TreeViewFlagChanged
 
 	TreeViewFlagsN
@@ -1108,7 +1114,7 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	src := tv.SrcNode
 	*md = append(*md, mimedata.NewTextData(src.PathFromUnique(sroot)))
 	var buf bytes.Buffer
-	err := src.WriteJSON(&buf, true) // true = pretty for clipboard..
+	err := src.WriteJSON(&buf, ki.Indent) // true = pretty for clipboard..
 	if err == nil {
 		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: buf.Bytes()})
 	} else {
@@ -1733,7 +1739,7 @@ func (tv *TreeView) ConfigParts() {
 		config.Add(gi.KiT_Icon, "icon")
 	}
 	config.Add(gi.KiT_Label, "label")
-	mods, updt := tv.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := tv.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	// if mods {
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
@@ -1777,6 +1783,7 @@ func (tv *TreeView) ConfigParts() {
 	if lbl, ok := tv.LabelPart(); ok {
 		// this does not work! even with redraws
 		// lbl.Sty.Template = "giv.TreeView.Label"
+		lbl.Props = nil
 		tv.Sty.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
 		if mods {
@@ -1967,7 +1974,7 @@ func (tv *TreeView) StyleTreeView() {
 	}
 	tv.SetCanFocusIfActive()
 	hasTempl, saveTempl := false, false
-	if _, err := tv.PropTry("no-templates"); err == nil {
+	if _, has := tv.PropInherit("no-templates", ki.NoInherit, ki.TypeProps); !has {
 		hasTempl, saveTempl = tv.Sty.FromTemplate()
 	}
 	if !hasTempl || saveTempl {
@@ -1995,10 +2002,10 @@ func (tv *TreeView) StyleTreeView() {
 			tv.StateStyles[i].SaveTemplate()
 		}
 	}
-	tv.Indent.SetFmInheritProp("indent", tv.This(), false, true) // no inherit, yes type defaults
+	tv.Indent.SetFmInheritProp("indent", tv.This(), ki.NoInherit, ki.TypeProps)
 	tv.Indent.ToDots(&tv.Sty.UnContext)
 	tv.Parts.Sty.InheritFields(&tv.Sty)
-	if spc, ok := tv.PropInherit("spacing", false, true); ok { // no inherit, yes type
+	if spc, ok := tv.PropInherit("spacing", ki.NoInherit, ki.TypeProps); ok {
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}
 	tv.ConfigParts()

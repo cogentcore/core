@@ -172,7 +172,7 @@ func (tv *TableView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "frame")
-	mods, updt := tv.ConfigChildren(config, true)
+	mods, updt := tv.ConfigChildren(config, ki.UniqueNames)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
 	if mods {
@@ -259,7 +259,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgcfg := kit.TypeAndNameList{}
 	sgcfg.Add(gi.KiT_ToolBar, "header")
 	sgcfg.Add(gi.KiT_Layout, "grid-lay")
-	sg.ConfigChildren(sgcfg, true)
+	sg.ConfigChildren(sgcfg, ki.UniqueNames)
 
 	sgh := tv.SliceHeader()
 	sgh.Lay = gi.LayoutHoriz
@@ -273,7 +273,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	gconfig := kit.TypeAndNameList{}
 	gconfig.Add(gi.KiT_Frame, "grid")
 	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
-	gl.ConfigChildren(gconfig, true) // covered by above
+	gl.ConfigChildren(gconfig, ki.UniqueNames) // covered by above
 
 	sgf := tv.SliceGrid()
 	sgf.Lay = gi.LayoutGrid
@@ -298,11 +298,11 @@ func (tv *TableView) ConfigSliceGrid() {
 		hcfg.Add(gi.KiT_Label, "head-add")
 		hcfg.Add(gi.KiT_Label, "head-del")
 	}
-	sgh.ConfigChildren(hcfg, false) // headers SHOULD be unique, but with labels..
+	sgh.ConfigChildren(hcfg, ki.NonUniqueNames) // headers SHOULD be unique, but with labels..
 
 	// at this point, we make one dummy row to get size of widgets
 
-	sgf.DeleteChildren(true)
+	sgf.DeleteChildren(ki.DestroyKids)
 	sgf.Kids = make(ki.Slice, nWidgPerRow)
 
 	itxt := fmt.Sprintf("%05d", 0)
@@ -393,12 +393,12 @@ func (tv *TableView) ConfigSliceGrid() {
 func (tv *TableView) LayoutSliceGrid() bool {
 	sg := tv.SliceGrid()
 	if kit.IfaceIsNil(tv.Slice) {
-		sg.DeleteChildren(true)
+		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
 	sz := tv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
-		sg.DeleteChildren(true)
+		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
 
@@ -417,7 +417,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 	if tv.Values == nil || sg.NumChildren() != nWidg {
-		sg.DeleteChildren(true)
+		sg.DeleteChildren(ki.DestroyKids)
 
 		tv.Values = make([]ValueView, tv.NVisFields*tv.DispRows)
 		sg.Kids = make(ki.Slice, nWidg)
@@ -778,7 +778,7 @@ func (tv *TableView) ConfigToolbar() {
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, true)
+			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
 	if HasToolBarView(tv.Slice) {

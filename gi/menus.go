@@ -356,7 +356,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
 	frame := AddNewFrame(pvp, "Frame", LayoutVert)
-	frame.SetProps(MenuFrameProps, false)
+	frame.SetProps(MenuFrameProps, ki.NoUpdate)
 	var focus ki.Ki
 	for _, ac := range menu {
 		acn, ac := KiToNode2D(ac)
@@ -588,7 +588,7 @@ func (mb *MenuButton) ConfigParts() {
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := mb.ConfigPartsIconLabel(&config, string(mb.Icon), mb.Text)
 	indIdx := mb.ConfigPartsAddIndicator(&config, true) // default on
-	mods, updt := mb.Parts.ConfigChildren(config, false)
+	mods, updt := mb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	mb.ConfigPartsSetIconLabel(string(mb.Icon), mb.Text, icIdx, lbIdx)
 	mb.ConfigPartsIndicator(indIdx)
 	if mods {

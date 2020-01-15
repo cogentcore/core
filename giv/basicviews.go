@@ -88,7 +88,7 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 	}
 	inact := vv.This().(ValueView).IsInactive()
 	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	svk := dlg.Frame().ChildByType(KiT_StructView, true, 2)
+	svk := dlg.Frame().ChildByType(KiT_StructView, ki.Embeds, 2)
 	if svk != nil {
 		sv := svk.(*StructView)
 		sv.StructValView = vv
@@ -219,7 +219,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
 		dlg := TableViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
-		svk := dlg.Frame().ChildByType(KiT_TableView, true, 2)
+		svk := dlg.Frame().ChildByType(KiT_TableView, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*TableView)
 			sv.SliceValView = vv
@@ -231,7 +231,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 		}
 	} else {
 		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
-		svk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
+		svk := dlg.Frame().ChildByType(KiT_SliceView, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*SliceView)
 			sv.SliceValView = vv
@@ -351,7 +351,7 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 	mpi := vv.Value.Interface()
 	inact := vv.This().(ValueView).IsInactive()
 	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	mvk := dlg.Frame().ChildByType(KiT_MapView, true, 2)
+	mvk := dlg.Frame().ChildByType(KiT_MapView, ki.Embeds, 2)
 	if mvk != nil {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
@@ -861,7 +861,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 
 	typEmbeds := ki.KiT_Node
 	if kiv, ok := vv.Owner.(ki.Ki); ok {
-		if tep, ok := kiv.PropInherit("type-embeds", true, true); ok {
+		if tep, ok := kiv.PropInherit("type-embeds", ki.Inherit, ki.TypeProps); ok {
 			if te, ok := tep.(reflect.Type); ok {
 				typEmbeds = te
 			}

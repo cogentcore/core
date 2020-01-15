@@ -490,7 +490,7 @@ func (w *Window) SetMainWidget(mw ki.Ki) {
 	}
 	cmw := w.MasterVLay.Child(1)
 	if cmw != mw {
-		w.MasterVLay.DeleteChildAtIndex(1, true)
+		w.MasterVLay.DeleteChildAtIndex(1, ki.DestroyKids)
 		w.MasterVLay.InsertChild(mw, 1)
 	}
 }
@@ -505,7 +505,7 @@ func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 	}
 	cmw := w.MasterVLay.Child(1)
 	if cmw.Type() != typ {
-		w.MasterVLay.DeleteChildAtIndex(1, true)
+		w.MasterVLay.DeleteChildAtIndex(1, ki.DestroyKids)
 		return w.MasterVLay.InsertNewChild(typ, 1, name)
 	}
 	return cmw
@@ -612,7 +612,7 @@ func (w *Window) ZoomDPI(steps int) {
 // WinViewport2D returns the viewport directly under this window that serves
 // as the master viewport for the entire window.
 func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.ChildByType(KiT_Viewport2D, true, 0)
+	vpi := w.ChildByType(KiT_Viewport2D, ki.Embeds, 0)
 	if vpi == nil { // shouldn't happen
 		return nil
 	}

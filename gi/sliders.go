@@ -485,7 +485,7 @@ func (sb *SliderBase) ConfigParts() {
 	sb.Parts.Lay = LayoutNil
 	config := kit.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, string(sb.Icon), "")
-	mods, updt := sb.Parts.ConfigChildren(config, false)
+	mods, updt := sb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	sb.ConfigPartsSetIconLabel(string(sb.Icon), "", icIdx, lbIdx)
 	if mods {
 		sb.UpdateEnd(updt)
@@ -497,7 +497,7 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 		sb.ConfigParts()
 	}
 	if sb.Icon.IsValid() && sb.Parts.HasChildren() {
-		ick := sb.Parts.ChildByType(KiT_Icon, true, 0)
+		ick := sb.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick != nil {
 			ic := ick.(*Icon)
 			mrg := sb.Sty.Layout.Margin.Dots

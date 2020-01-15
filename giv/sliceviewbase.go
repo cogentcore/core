@@ -240,7 +240,7 @@ func (sv *SliceViewBase) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Layout, "grid-lay")
-	mods, updt := sv.ConfigChildren(config, true)
+	mods, updt := sv.ConfigChildren(config, ki.UniqueNames)
 
 	gl := sv.GridLayout()
 	gl.Lay = gi.LayoutHoriz
@@ -248,7 +248,7 @@ func (sv *SliceViewBase) Config() {
 	gconfig := kit.TypeAndNameList{}
 	gconfig.Add(gi.KiT_Frame, "grid")
 	gconfig.Add(gi.KiT_ScrollBar, "scrollbar")
-	gl.ConfigChildren(gconfig, true) // covered by above
+	gl.ConfigChildren(gconfig, ki.UniqueNames) // covered by above
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
@@ -338,7 +338,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 		return
 	}
 
-	sg.DeleteChildren(true)
+	sg.DeleteChildren(ki.DestroyKids)
 	sg.Kids = make(ki.Slice, nWidgPerRow)
 
 	// at this point, we make one dummy row to get size of widgets
@@ -449,12 +449,12 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if kit.IfaceIsNil(sv.Slice) {
-		sg.DeleteChildren(true)
+		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
-		sg.DeleteChildren(true)
+		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
 
@@ -474,7 +474,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 	if sv.Values == nil || sg.NumChildren() != nWidg {
-		sg.DeleteChildren(true)
+		sg.DeleteChildren(ki.DestroyKids)
 
 		sv.Values = make([]ValueView, sv.DispRows)
 		sg.Kids = make(ki.Slice, nWidg)
@@ -799,7 +799,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, true)
+			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
 	if HasToolBarView(sv.Slice) {

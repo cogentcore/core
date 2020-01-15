@@ -70,9 +70,9 @@ func (em *Embed2D) Defaults(sc *Scene) {
 
 func (em *Embed2D) Disconnect() {
 	if em.Tex != nil && em.Tex.Tex.IsActive() {
-		scc, err := em.ParentByTypeTry(KiT_Scene, true)
+		scc, err := em.ParentByTypeTry(KiT_Scene, ki.Embeds)
 		if err == nil {
-			sc := scc.(*Scene)
+			sc := scc.Embed(KiT_Scene).(*Scene)
 			if sc.Win != nil && sc.Win.IsVisible() {
 				oswin.TheApp.RunOnMain(func() {
 					sc.Win.OSWin.Activate()

@@ -207,6 +207,14 @@ func (fn *FileNode) ReadDir(path string) error {
 		return err
 	}
 
+	fn.UpdateDir()
+	return nil
+}
+
+// UpdateDir updates the directory and all the nodes under it
+func (fn *FileNode) UpdateDir() {
+	path := string(fn.FPath)
+	var err error
 	repo, rnode := fn.Repo()
 	if repo == nil {
 		rtyp := vci.DetectRepo(path)
@@ -214,7 +222,7 @@ func (fn *FileNode) ReadDir(path string) error {
 			repo, err = vci.NewRepo("origin", path)
 			if err == nil {
 				fn.DirRepo = repo
-				fn.RepoFiles, _ = repo.Files()
+				fn.UpdateRepoFiles()
 				rnode = fn
 			}
 		}
@@ -222,7 +230,10 @@ func (fn *FileNode) ReadDir(path string) error {
 
 	fn.SetOpen()
 	config := fn.ConfigOfFiles(path)
-	mods, updt := fn.ConfigChildren(config, false) // NOT unique names
+	mods, updt := fn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
+	if !mods {
+		updt = fn.UpdateStart()
+	}
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
 		sf := sfk.Embed(KiT_FileNode).(*FileNode)
@@ -232,17 +243,13 @@ func (fn *FileNode) ReadDir(path string) error {
 		if sf.IsDir() {
 			sf.Info.Vcs = vci.Stored // always
 		} else if repo != nil {
-			relpath := rnode.RelPath(sf.FPath)
-			rstat := rnode.RepoFiles.Status(relpath)
+			rstat := rnode.RepoFiles.Status(repo, string(sf.FPath))
 			sf.Info.Vcs = rstat
 		} else {
 			sf.Info.Vcs = vci.Stored
 		}
 	}
-	if mods {
-		fn.UpdateEnd(updt)
-	}
-	return nil
+	fn.UpdateEnd(updt)
 }
 
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
@@ -290,21 +297,51 @@ func (fn *FileNode) SetNodePath(path string) error {
 		return err
 	}
 	fn.FPath = gi.FileName(pth)
-	return fn.UpdateNode()
-}
-
-// UpdateNode updates information in node based on its associated file in FPath
-func (fn *FileNode) UpdateNode() error {
-	err := fn.Info.InitFile(string(fn.FPath))
+	err = fn.InitFileInfo()
 	if err != nil {
-		emsg := fmt.Errorf("giv.FileNode UpdateNode Path %q: Error: %v", fn.FPath, err)
-		log.Println(emsg)
-		return emsg
+		return err
 	}
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
+	}
+	return nil
+}
+
+// InitFileInfo initializes file info
+func (fn *FileNode) InitFileInfo() error {
+	err := fn.Info.InitFile(string(fn.FPath))
+	if err != nil {
+		emsg := fmt.Errorf("giv.FileNode InitFileInfo Path %q: Error: %v", fn.FPath, err)
+		log.Println(emsg)
+		return emsg
+	}
+	return nil
+}
+
+// UpdateNode updates information in node based on its associated file in FPath.
+// This is intended to be called ad-hoc for individual nodes that might need
+// updating -- use ReadDir for mass updates as it is more efficient.
+func (fn *FileNode) UpdateNode() error {
+	err := fn.InitFileInfo()
+	if err != nil {
+		return err
+	}
+	if fn.IsDir() {
+		if fn.FRoot.IsDirOpen(fn.FPath) {
+			repo, rnode := fn.Repo()
+			if repo != nil {
+				rnode.UpdateRepoFiles()
+			}
+			fn.UpdateDir()
+		}
+	} else {
+		repo, _ := fn.Repo()
+		if repo != nil {
+			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
+		}
+		fn.UpdateSig()
 	}
 	return nil
 }
@@ -530,8 +567,10 @@ func (fn *FileNode) DuplicateFile() error {
 func (fn *FileNode) DeleteFile() (err error) {
 	repo, _ := fn.Repo()
 	if repo != nil && fn.Info.Vcs >= vci.Stored {
+		fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.FPath))
 	} else {
+		fmt.Printf("del raw: %v\n", fn.FPath)
 		err = fn.Info.Delete()
 	}
 	if err == nil {
@@ -674,17 +713,23 @@ func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
 	return repo, rnode
 }
 
+func (fn *FileNode) UpdateRepoFiles() {
+	if fn.DirRepo == nil {
+		return
+	}
+	fn.RepoFiles, _ = fn.DirRepo.Files()
+}
+
 // AddToVcs adds file to version control
 func (fn *FileNode) AddToVcs() {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return
 	}
+	fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.FPath))
 	if err == nil {
 		fn.Info.Vcs = vci.Added
-		// dpath, _ := filepath.Split(string(fn.FPath))
-		// fn.ReadDir(string(dpath))
 		fn.UpdateSig()
 		return
 	}
@@ -697,11 +742,10 @@ func (fn *FileNode) DeleteFromVcs() {
 	if repo == nil {
 		return
 	}
-	err := repo.DeleteKeepLocal(string(fn.FPath))
+	fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
+	err := repo.DeleteRemote(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.Info.Vcs = vci.Deleted
-		// dpath, _ := filepath.Split(string(fn.FPath))
-		// fn.ReadDir(string(dpath))
 		fn.UpdateSig()
 		return
 	}
@@ -1449,8 +1493,8 @@ var FileTreeViewProps = ki.Props{
 	"text-align":       gi.AlignLeft,
 	"vertical-align":   gi.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
-	"no-templates":     true, // key to prevent treeview from using templates
 	"background-color": "inherit",
+	"no-templates":     true,
 	".exec": ki.Props{
 		"font-weight": gi.WeightBold,
 	},
@@ -1626,6 +1670,7 @@ func (ft *FileTreeView) Style2D() {
 				ft.AddClass("updated")
 			}
 		}
+		// fmt.Printf("sty: %v\n", ft.Nm)
 		ft.StyleTreeView()
 		ft.LayData.SetFromStyle(&ft.Sty.Layout) // also does reset
 	}

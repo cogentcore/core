@@ -318,7 +318,7 @@ func (nb *NodeBase) AddClass(cls string) {
 // convention is to prefix this selector with a : and use lower-case names, so
 // we follow that.
 func (nb *NodeBase) StyleProps(selector string) ki.Props {
-	sp, ok := nb.PropInherit(selector, false, true) // yeah, use type's
+	sp, ok := nb.PropInherit(selector, ki.NoInherit, ki.TypeProps) // yeah, use type's
 	if !ok {
 		return nil
 	}

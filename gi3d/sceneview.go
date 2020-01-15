@@ -33,7 +33,7 @@ func (sv *SceneView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Scene, "scene")
 	config.Add(gi.KiT_ToolBar, "tbar")
-	mods, updt := sv.ConfigChildren(config, false)
+	mods, updt := sv.ConfigChildren(config, ki.NonUniqueNames)
 	if mods {
 		sc := sv.Scene()
 		sc.Defaults()

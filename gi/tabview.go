@@ -309,7 +309,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) 
 		}
 	}
 	fr.DeleteChildAtIndex(idx, destroy)
-	tb.DeleteChildAtIndex(idx, true) // always destroy -- we manage
+	tb.DeleteChildAtIndex(idx, ki.DestroyKids) // always destroy -- we manage
 	tv.RenumberTabs()
 	tv.Mu.Unlock()
 	if nxtidx >= 0 {
@@ -358,7 +358,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		if ntb == sz {
 			return false
 		}
-		tb.DeleteChildAtIndex(ntb-1, true) // always destroy -- we manage
+		tb.DeleteChildAtIndex(ntb-1, ki.DestroyKids) // always destroy -- we manage
 		return true
 	}
 }
@@ -574,7 +574,7 @@ var TabButtonProps = ki.Props{
 }
 
 func (tb *TabButton) TabView() *TabView {
-	tv := tb.ParentByType(KiT_TabView, true)
+	tv := tb.ParentByType(KiT_TabView, ki.Embeds)
 	if tv == nil {
 		return nil
 	}
@@ -588,7 +588,7 @@ func (tb *TabButton) ConfigParts() {
 	config.Add(KiT_Action, "close")
 	config.Add(KiT_Stretch, "close-stretch")
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, string(tb.Icon), tb.Text)
-	mods, updt := tb.Parts.ConfigChildren(config, false)
+	mods, updt := tb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	tb.ConfigPartsSetIconLabel(string(tb.Icon), tb.Text, icIdx, lbIdx)
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)

@@ -171,14 +171,14 @@ func (bb *ButtonBox) ConfigItems() {
 
 func (bb *ButtonBox) ConfigParts() {
 	if len(bb.Items) == 0 {
-		bb.Parts.DeleteChildren(true)
+		bb.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := kit.TypeAndNameList{}
 	for _, lb := range bb.Items {
 		config.Add(KiT_CheckBox, lb)
 	}
-	mods, updt := bb.Parts.ConfigChildren(config, false)
+	mods, updt := bb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	if mods {
 		bb.ConfigItems()
 		bb.UpdateEnd(updt)

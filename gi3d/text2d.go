@@ -63,9 +63,9 @@ func (txt *Text2D) Defaults(sc *Scene) {
 
 func (txt *Text2D) Disconnect() {
 	if txt.TxtTex != nil && txt.TxtTex.Tex.IsActive() {
-		scc, err := txt.ParentByTypeTry(KiT_Scene, true)
+		scc, err := txt.ParentByTypeTry(KiT_Scene, ki.Embeds)
 		if err == nil {
-			sc := scc.(*Scene)
+			sc := scc.Embed(KiT_Scene).(*Scene)
 			if sc.Win != nil && sc.Win.IsVisible() {
 				oswin.TheApp.RunOnMain(func() {
 					sc.Win.OSWin.Activate()

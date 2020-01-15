@@ -322,7 +322,7 @@ func (nb *Node3DBase) ConnectEvents3D(sc *Scene) {
 		if me.Action != mouse.Press || !nb.IsVisible() || nb.IsInactive() {
 			return
 		}
-		sci, err := recv.ParentByTypeTry(KiT_Scene, false)
+		sci, err := recv.ParentByTypeTry(KiT_Scene, ki.Embeds)
 		if err != nil {
 			return
 		}

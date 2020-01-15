@@ -235,7 +235,7 @@ func (cb *ComboBox) ConfigParts() {
 		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, string(cb.Icon), cb.Text)
 		indIdx = cb.ConfigPartsAddIndicator(&config, true) // default on
 	}
-	mods, updt := cb.Parts.ConfigChildren(config, false) // not unique names
+	mods, updt := cb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	cb.ConfigPartsSetIconLabel(string(cb.Icon), cb.Text, icIdx, lbIdx)
 	cb.ConfigPartsIndicator(indIdx)
 	if txIdx >= 0 {

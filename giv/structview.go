@@ -108,7 +108,7 @@ func (sv *StructView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "struct-grid")
-	mods, updt := sv.ConfigChildren(config, true)
+	mods, updt := sv.ConfigChildren(config, ki.UniqueNames)
 	sv.ConfigStructGrid()
 	sv.ConfigToolbar()
 	if mods {
@@ -158,7 +158,7 @@ func (sv *StructView) ConfigToolbar() {
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, true)
+			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
 	if HasToolBarView(sv.Struct) {
@@ -237,7 +237,7 @@ func (sv *StructView) ConfigStructGrid() {
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
-	mods, updt := sg.ConfigChildren(config, false) // fields could be non-unique with labels..
+	mods, updt := sg.ConfigChildren(config, ki.NonUniqueNames) // fields could be non-unique with labels..
 	if mods {
 		sg.SetFullReRender()
 	} else {

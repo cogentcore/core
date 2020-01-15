@@ -22,6 +22,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/ki"
 	"golang.org/x/net/html/charset"
 )
 
@@ -675,7 +676,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				if curPar == svg.This() {
 					break
 				}
-				curSvgk := curPar.ParentByType(KiT_SVG, true)
+				curSvgk := curPar.ParentByType(KiT_SVG, ki.Embeds)
 				if curSvgk != nil {
 					curSvg = curSvgk.Embed(KiT_SVG).(*SVG)
 				}

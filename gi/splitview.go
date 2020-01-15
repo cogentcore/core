@@ -325,8 +325,8 @@ func (sv *SplitView) SplitViewEvents() {
 
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
-	sv.LayData.SetFromStyle(&sv.Sty.Layout)                               // also does reset
-	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), false, true) // no inherit, yes type defaults
+	sv.LayData.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
 	sv.HandleSize.ToDots(&sv.Sty.UnContext)
 }
 
@@ -493,7 +493,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	if !sr.Icon.IsValid() || !sr.Parts.HasChildren() {
 		return
 	}
-	ick := sr.Parts.ChildByType(KiT_Icon, true, 0)
+	ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 	if ick == nil {
 		return
 	}
@@ -593,12 +593,12 @@ func (sr *Splitter) Render2D() {
 	sr.This().(Node2D).ConnectEvents2D()
 	spnm := "gi.Splitter:" + sr.UniqueName()
 	if sr.IsDragging() {
-		ick := sr.Parts.ChildByType(KiT_Icon, true, 0)
+		ick := sr.Parts.ChildByType(KiT_Icon, ki.Embeds, 0)
 		if ick == nil {
 			return
 		}
 		ic := ick.(*Icon)
-		icvp := ic.ChildByType(KiT_Viewport2D, true, 0)
+		icvp := ic.ChildByType(KiT_Viewport2D, ki.Embeds, 0)
 		if icvp == nil {
 			return
 		}

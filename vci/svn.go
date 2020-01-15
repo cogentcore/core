@@ -20,8 +20,25 @@ type SvnRepo struct {
 	vcs.SvnRepo
 }
 
-// M            11491   COPYING
-// ?                    build_dbg
+func (gr *SvnRepo) CharToStat(stat byte) FileStatus {
+	switch stat {
+	case 'M', 'R':
+		return Modified
+	case 'A':
+		return Added
+	case 'D', '!':
+		return Deleted
+	case 'C':
+		return Conflicted
+	case '?', 'I':
+		return Untracked
+	case '*':
+		return Updated
+	default:
+		return Stored
+	}
+	return Untracked
+}
 
 func (gr *SvnRepo) Files() (Files, error) {
 	f := make(Files, 1000)
@@ -46,29 +63,32 @@ func (gr *SvnRepo) Files() (Files, error) {
 		}
 		stat := flds[0][0]
 		fn := flds[len(flds)-1]
-		switch stat {
-		case 'M', 'R':
-			f[fn] = Modified
-		case 'A':
-			f[fn] = Added
-		case 'D', '!':
-			f[fn] = Deleted
-		case 'C':
-			f[fn] = Conflicted
-		case '?', 'I':
-			f[fn] = Untracked
-		case '*':
-			f[fn] = Updated
-		default:
-			f[fn] = Stored
-		}
+		f[fn] = gr.CharToStat(stat)
 	}
 	return f, nil
 }
 
+// Status returns status of given file -- returns Untracked on any error
+func (gr *SvnRepo) Status(fname string) (FileStatus, string) {
+	out, err := gr.RunFromDir("svn", "status", RelPath(gr, fname))
+	if err != nil {
+		return Untracked, err.Error()
+	}
+	ostr := string(out)
+	if ostr == "" {
+		return Stored, ""
+	}
+	sf := strings.Fields(ostr)
+	if len(sf) < 2 {
+		return Stored, ostr
+	}
+	stat := sf[0][0]
+	return gr.CharToStat(stat), ostr
+}
+
 // Add adds the file to the repo
-func (gr *SvnRepo) Add(filename string) error {
-	oscmd := exec.Command("svn", "add", filename)
+func (gr *SvnRepo) Add(fname string) error {
+	oscmd := exec.Command("svn", "add", RelPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -89,8 +109,8 @@ func (gr *SvnRepo) Move(oldpath, newpath string) error {
 }
 
 // Delete removes the file from the repo
-func (gr *SvnRepo) Delete(filename string) error {
-	oscmd := exec.Command("svn", "rm", filename)
+func (gr *SvnRepo) Delete(fname string) error {
+	oscmd := exec.Command("svn", "rm", RelPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -99,9 +119,9 @@ func (gr *SvnRepo) Delete(filename string) error {
 	return nil
 }
 
-// Delete removes the file from the repo
-func (gr *SvnRepo) DeleteKeepLocal(filename string) error {
-	oscmd := exec.Command("svn", "delete", "--keep-local", filename)
+// DeleteRemote removes the file from the repo, but keeps local copy
+func (gr *SvnRepo) DeleteRemote(fname string) error {
+	oscmd := exec.Command("svn", "delete", "--keep-local", RelPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -111,8 +131,8 @@ func (gr *SvnRepo) DeleteKeepLocal(filename string) error {
 }
 
 // CommitFile commits single file to repo staging
-func (gr *SvnRepo) CommitFile(filename string, message string) error {
-	oscmd := exec.Command("svn", "commit", filename, "-m", message)
+func (gr *SvnRepo) CommitFile(fname string, message string) error {
+	oscmd := exec.Command("svn", "commit", RelPath(gr, fname), "-m", message)
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))
@@ -122,8 +142,8 @@ func (gr *SvnRepo) CommitFile(filename string, message string) error {
 }
 
 // RevertFile reverts a single file to last commit of master
-func (gr *SvnRepo) RevertFile(filename string) error {
-	oscmd := exec.Command("svn", "revert", filename)
+func (gr *SvnRepo) RevertFile(fname string) error {
+	oscmd := exec.Command("svn", "revert", RelPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))

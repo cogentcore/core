@@ -7,6 +7,7 @@ package vci
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/ki/dirs"
@@ -27,24 +28,30 @@ type Repo interface {
 	// Files returns a map of the current files and their status.
 	Files() (Files, error)
 
+	// Status returns status of given file -- returns Untracked and error
+	// message on any error. FileStatus is a summary status category,
+	// and string return value is more detailed status information formatted
+	// according to standard conventions of given VCS.
+	Status(fname string) (FileStatus, string)
+
 	// Add adds the file to the repo
-	Add(filename string) error
+	Add(fname string) error
 
 	// Move moves the file using VCS command to keep it updated
 	Move(oldpath, newpath string) error
 
 	// Delete removes the file from the repo and working copy
-	Delete(filename string) error
+	Delete(fname string) error
 
-	// DeleteKeepLocal removes the file from the repo but keeps the local file itself
-	DeleteKeepLocal(filename string) error
+	// DeleteRemote removes the file from the repo but keeps the local file itself
+	DeleteRemote(fname string) error
 
 	// CommitFile commits a single file
-	CommitFile(filename string, message string) error
+	CommitFile(fname string, message string) error
 
 	// RevertFile reverts a single file to the version that it was last in VCS,
 	// losing any local changes (destructive!)
-	RevertFile(filename string) error
+	RevertFile(fname string) error
 }
 
 func NewRepo(remote, local string) (Repo, error) {
@@ -82,4 +89,10 @@ func DetectRepo(path string) vcs.Type {
 	}
 	// todo: rest later..
 	return vcs.NoVCS
+}
+
+// RelPath return the path relative to the repository LocalPath()
+func RelPath(repo Repo, path string) string {
+	relpath, _ := filepath.Rel(repo.LocalPath(), path)
+	return relpath
 }

@@ -71,8 +71,8 @@ func (sc *Scene) SetSel(nd Node3D) {
 		sc.CurManipPt = nil
 		sc.CurSel = nil
 		updt := sc.UpdateStart()
-		sc.DeleteChildByName(SelBoxName, true)
-		sc.DeleteChildByName(ManipBoxName, true)
+		sc.DeleteChildByName(SelBoxName, ki.DestroyKids)
+		sc.DeleteChildByName(ManipBoxName, ki.DestroyKids)
 		sc.UpdateEnd(updt)
 		return
 	}
@@ -97,7 +97,7 @@ func (sc *Scene) SelectBox() {
 	defer sc.UpdateEnd(updt)
 
 	nb := sc.CurSel.AsNode3D()
-	sc.DeleteChildByName(SelBoxName, true) // get rid of existing
+	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
 	clr, _ := gi.ColorFromName(string(sc.SelParams.Color))
 	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 	sc.InitMesh(SelBoxName + "-front")
@@ -115,7 +115,7 @@ func (sc *Scene) ManipBox() {
 	nm := ManipBoxName
 
 	nb := sc.CurSel.AsNode3D()
-	sc.DeleteChildByName(nm, true) // get rid of existing
+	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
 	clr, _ := gi.ColorFromName(string(sc.SelParams.Color))
 
 	bbox := nb.WorldBBox.BBox
@@ -171,7 +171,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		if me.Action != mouse.Press || !sc.IsVisible() {
 			return
 		}
-		sci, err := recv.ParentByTypeTry(KiT_Scene, false)
+		sci, err := recv.ParentByTypeTry(KiT_Scene, ki.Embeds)
 		if err != nil {
 			return
 		}
@@ -184,7 +184,7 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		me.SetProcessed()
 		mpt := recv.Embed(KiT_ManipPt).(*ManipPt)
 		mb := mpt.Par.(*Group)
-		sci, err := mpt.ParentByTypeTry(KiT_Scene, false)
+		sci, err := mpt.ParentByTypeTry(KiT_Scene, ki.Embeds)
 		if err != nil {
 			return
 		}

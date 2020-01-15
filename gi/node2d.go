@@ -554,7 +554,7 @@ func (nb *Node2DBase) ParentWindow() *Window {
 	if nb.Viewport != nil && nb.Viewport.Win != nil {
 		return nb.Viewport.Win
 	}
-	wini, err := nb.ParentByTypeTry(KiT_Window, true)
+	wini, err := nb.ParentByTypeTry(KiT_Window, ki.Embeds)
 	if err != nil {
 		// log.Println(err)
 		return nil
@@ -899,7 +899,7 @@ func (nb *Node2DBase) ParentReRenderAnchor() Node2D {
 
 // ParentLayout returns the parent layout
 func (nb *Node2DBase) ParentLayout() *Layout {
-	ly := nb.ParentByType(KiT_Layout, true)
+	ly := nb.ParentByType(KiT_Layout, ki.Embeds)
 	if ly == nil {
 		return nil
 	}
@@ -908,7 +908,7 @@ func (nb *Node2DBase) ParentLayout() *Layout {
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
 func (nb *Node2DBase) ParentScrollLayout() *Layout {
-	lyk := nb.ParentByType(KiT_Layout, true)
+	lyk := nb.ParentByType(KiT_Layout, ki.Embeds)
 	if lyk == nil {
 		return nil
 	}

@@ -20,6 +20,8 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+//
+
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
@@ -42,7 +44,9 @@ func AddNewFileBrowse(parent ki.Ki, name string) *FileBrowse {
 
 // UpdateFiles updates the list of files saved in project
 func (fb *FileBrowse) UpdateFiles() {
+	wupdt := fb.TopUpdateStart()
 	fb.Files.OpenPath(string(fb.ProjRoot))
+	fb.TopUpdateEnd(wupdt)
 }
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
@@ -222,7 +226,7 @@ func (fb *FileBrowse) StdConfig() (mods, updt bool) {
 	fb.Lay = gi.LayoutVert
 	fb.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := fb.StdFrameConfig()
-	mods, updt = fb.ConfigChildren(config, false)
+	mods, updt = fb.ConfigChildren(config, ki.NonUniqueNames)
 	return
 }
 
@@ -326,7 +330,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 	split.SetProp("font-family", "Go Mono")
 
 	config := fb.SplitViewConfig()
-	mods, updt := split.ConfigChildren(config, true)
+	mods, updt := split.ConfigChildren(config, ki.UniqueNames)
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
 		ft := giv.AddNewFileTreeView(ftfr, "filetree")
@@ -368,6 +372,8 @@ func (fb *FileBrowse) FileNodeSelected(fn *giv.FileNode, tvn *giv.FileTreeView) 
 	if fn.IsDir() {
 	} else {
 		fb.ViewFileNode(fn)
+		fn.SetOpen()
+		fn.UpdateSig()
 	}
 }
 

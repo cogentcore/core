@@ -404,7 +404,7 @@ func (vp *Viewport2D) DeletePopup() {
 			cli, _ := KiToNode2D(vp.Child(0))
 			ly := cli.AsLayout2D()
 			if ly != nil {
-				ly.DeleteChildren(false) // do NOT destroy children -- just delete them
+				ly.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
 			}
 		}
 	}

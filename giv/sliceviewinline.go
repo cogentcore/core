@@ -93,7 +93,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		config.Add(gi.KiT_Action, "add-action")
 	}
 	config.Add(gi.KiT_Action, "edit-action")
-	mods, updt := sv.Parts.ConfigChildren(config, true)
+	mods, updt := sv.Parts.ConfigChildren(config, ki.UniqueNames)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
 	}
@@ -146,7 +146,7 @@ func (sv *SliceViewInline) ConfigParts() {
 				title = "Slice of " + kit.NonPtrType(elType).Name()
 			}
 			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
-			svvvk := dlg.Frame().ChildByType(KiT_SliceView, true, 2)
+			svvvk := dlg.Frame().ChildByType(KiT_SliceView, ki.Embeds, 2)
 			if svvvk != nil {
 				svvv := svvvk.(*SliceView)
 				svvv.SliceValView = svv.SliceValView

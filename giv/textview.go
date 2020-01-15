@@ -4362,7 +4362,7 @@ func (tv *TextView) StyleTextView() {
 		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i], tv.Viewport)
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
-	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), true, true) // inherit and get type defaults
+	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), ki.Inherit, ki.TypeProps)
 	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
 }
 

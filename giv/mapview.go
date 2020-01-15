@@ -72,7 +72,7 @@ func (mv *MapView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_ToolBar, "toolbar")
 	config.Add(gi.KiT_Frame, "map-grid")
-	mods, updt := mv.ConfigChildren(config, true)
+	mods, updt := mv.ConfigChildren(config, ki.UniqueNames)
 	mv.ConfigMapGrid()
 	mv.ConfigToolbar()
 	if mods {
@@ -188,7 +188,7 @@ func (mv *MapView) ConfigMapGrid() {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	mods, updt := sg.ConfigChildren(config, true)
+	mods, updt := sg.ConfigChildren(config, ki.UniqueNames)
 	if mods {
 		sg.SetFullReRender()
 	} else {
@@ -361,7 +361,7 @@ func (mv *MapView) ConfigToolbar() {
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {
-			tb.DeleteChildAtIndex(i, true)
+			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
 	if HasToolBarView(mv.Map) {

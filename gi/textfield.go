@@ -1340,13 +1340,13 @@ func (tf *TextField) TextFieldEvents() {
 func (tf *TextField) ConfigParts() {
 	tf.Parts.Lay = LayoutHoriz
 	if !tf.ClearAct || tf.IsInactive() {
-		tf.Parts.DeleteChildren(true)
+		tf.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := kit.TypeAndNameList{}
 	config.Add(KiT_Stretch, "clr-str")
 	config.Add(KiT_Action, "clear")
-	mods, updt := tf.Parts.ConfigChildren(config, false)
+	mods, updt := tf.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	if mods {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
@@ -1401,9 +1401,9 @@ func (tf *TextField) StyleTextField() {
 			tf.StateStyles[i].SaveTemplate()
 		}
 	}
-	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), true, true) // get type defaults
+	tf.CursorWidth.SetFmInheritProp("cursor-width", tf.This(), ki.Inherit, ki.TypeProps) // get type defaults
 	tf.CursorWidth.ToDots(&tf.Sty.UnContext)
-	if pv, ok := tf.PropInherit("clear-act", true, true); ok {
+	if pv, ok := tf.PropInherit("clear-act", ki.Inherit, ki.TypeProps); ok {
 		tf.ClearAct, _ = kit.ToBool(pv)
 	}
 	tf.ConfigParts()

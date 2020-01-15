@@ -62,7 +62,7 @@ func (av *ArgView) Config() {
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "title")
 	config.Add(gi.KiT_Frame, "args-grid")
-	mods, updt := av.ConfigChildren(config, true)
+	mods, updt := av.ConfigChildren(config, ki.UniqueNames)
 	av.ConfigArgsGrid()
 	if mods {
 		av.UpdateEnd(updt)
@@ -117,7 +117,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		config.Add(gi.KiT_Label, labnm)
 		config.Add(vtyp, valnm)
 	}
-	mods, updt := sg.ConfigChildren(config, false) // not sure if always unique?
+	mods, updt := sg.ConfigChildren(config, ki.NonUniqueNames) // not sure if always unique?
 	if mods {
 		av.SetFullReRender()
 	} else {
