@@ -108,9 +108,9 @@ func (gr *SvnRepo) Move(oldpath, newpath string) error {
 	return nil
 }
 
-// Delete removes the file from the repo
+// Delete removes the file from the repo -- uses "force" option to ensure deletion
 func (gr *SvnRepo) Delete(fname string) error {
-	oscmd := exec.Command("svn", "rm", RelPath(gr, fname))
+	oscmd := exec.Command("svn", "rm", "-f", RelPath(gr, fname))
 	stdoutStderr, err := oscmd.CombinedOutput()
 	if err != nil {
 		log.Println(string(stdoutStderr))

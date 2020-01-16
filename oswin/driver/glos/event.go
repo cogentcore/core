@@ -160,9 +160,12 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	mods := lastMods
-	if theApp.Platform() != oswin.MacOS { // others have low multipliers
-		xoff *= 40
-		yoff *= 40
+	if theApp.Platform() == oswin.MacOS {
+		xoff *= .5 * float64(mouse.ScrollWheelSpeed)
+		yoff *= .5 * float64(mouse.ScrollWheelSpeed)
+	} else { // others have lower multipliers in general
+		xoff *= 2 * float64(mouse.ScrollWheelSpeed)
+		yoff *= 2 * float64(mouse.ScrollWheelSpeed)
 	}
 	event := &mouse.ScrollEvent{
 		Event: mouse.Event{

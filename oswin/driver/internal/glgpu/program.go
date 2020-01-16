@@ -264,9 +264,7 @@ func (pr *Program) Compile(showSrc bool) error {
 		gl.AttachShader(handle, sh.handle)
 	}
 	gl.LinkProgram(handle)
-	// if glosDebug {
 	gl.ValidateProgram(handle)
-	// }
 
 	// handle is needed for other steps, set now!
 	pr.handle = handle

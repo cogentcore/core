@@ -55,9 +55,9 @@ type ColorPrefs struct {
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct {
-	DoubleClickMSec int  `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelRate int  `min:"1" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step -- only used for OS's that do not have a native preference for this (e.g., X11)"`
-	LocalMainMenu   bool `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
+	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
+	LocalMainMenu    bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
 }
 
 // User basic user information that might be needed for different apps
@@ -137,7 +137,7 @@ func (pf *ColorPrefs) PrefColor(clrName string) *Color {
 
 func (pf *ParamPrefs) Defaults() {
 	pf.DoubleClickMSec = 500
-	pf.ScrollWheelRate = 20
+	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
 }
 
@@ -232,7 +232,7 @@ func (pf *Preferences) Apply() {
 	}
 
 	mouse.DoubleClickMSec = pf.Params.DoubleClickMSec
-	mouse.ScrollWheelRate = pf.Params.ScrollWheelRate
+	mouse.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
 
 	if pf.KeyMap != "" {

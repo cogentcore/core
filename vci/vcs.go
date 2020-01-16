@@ -40,7 +40,8 @@ type Repo interface {
 	// Move moves the file using VCS command to keep it updated
 	Move(oldpath, newpath string) error
 
-	// Delete removes the file from the repo and working copy
+	// Delete removes the file from the repo and working copy.
+	// Uses "force" option to ensure deletion.
 	Delete(fname string) error
 
 	// DeleteRemote removes the file from the repo but keeps the local file itself

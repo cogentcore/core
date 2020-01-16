@@ -220,6 +220,7 @@ type Node2D interface {
 	// is currently visible.  It is only entirely valid after a render pass
 	// for widgets in a visible window, but it checks the window and viewport
 	// for their visibility status as well, which is available always.
+	// This does *not* check for VpBBox level visibility, which is a further check.
 	// Non-visible nodes are automatically not rendered and not connected to
 	// window events.  The Invisible flag is one key element of the IsVisible
 	// calculus -- it is set by e.g., TabView for invisible tabs, and is also

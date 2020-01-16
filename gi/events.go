@@ -48,6 +48,14 @@ const (
 	AllPris EventPris = -1
 )
 
+const (
+	// Popups means include popups
+	Popups = true
+
+	// NoPopups means exclude popups
+	NoPopups = false
+)
+
 // EventMgr is an event manager that handles distributing events to nodes.
 // It relies on the EventMaster for a few things outside of its scope.
 type EventMgr struct {
@@ -57,6 +65,7 @@ type EventMgr struct {
 	TimerMu         sync.Mutex                              `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
 	Dragging        ki.Ki                                   `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
 	Scrolling       ki.Ki                                   `desc:"node receiving mouse scrolling events -- anchor to same"`
+	DNDStage        DNDStages                               `desc:"stage of DND process"`
 	DNDData         mimedata.Mimes                          `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource       ki.Ki                                   `desc:"drag-n-drop source node"`
 	DNDFinalEvent   *dnd.Event                              `desc:"final event for DND which is sent if a finalize is received"`
@@ -612,17 +621,59 @@ func (em *EventMgr) SendHoverEvent(e *mouse.MoveEvent) {
 	he := mouse.HoverEvent{Event: e.Event}
 	he.Processed = false
 	he.Action = mouse.Hover
-	em.SendEventSignal(&he, true) // popup = true by default
+	em.SendEventSignal(&he, Popups)
 }
+
+//////////////////////////////////////////////////////////////////////
+//  Drag-n-Drop = DND
+
+//go:generate stringer -type=DNDStages
+
+// DNDStages indicates stage of DND process
+type DNDStages int32
+
+const (
+	// DNDNotStarted = nothing happening
+	DNDNotStarted DNDStages = iota
+
+	// DNDStartSent means that the Start event was sent out, but receiver has
+	// not yet started the DND on its end by calling StartDragNDrop
+	DNDStartSent
+
+	// DNDStarted means that a node called StartDragNDrop
+	DNDStarted
+
+	// DNDDropped means that drop event has been sent
+	DNDDropped
+
+	DNDStagesN
+)
+
+// DNDTrace can be set to true to get a trace of the DND process
+var DNDTrace = false
 
 // DNDStartEvent handles drag-n-drop start events.
 func (em *EventMgr) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
 	de.Action = dnd.Start
-	de.DefaultMod()                // based on current key modifiers
-	em.SendEventSignal(&de, false) // popup = false: ignore any popups
+	de.DefaultMod() // based on current key modifiers
+	em.DNDStage = DNDStartSent
+	if DNDTrace {
+		fmt.Printf("\nDNDStartSent\n")
+	}
+	em.SendEventSignal(&de, NoPopups)
 	// now up to receiver to call StartDragNDrop if they want to..
+}
+
+// DNDStart is driven by node responding to start event, actually starts DND
+func (em *EventMgr) DNDStart(src ki.Ki, data mimedata.Mimes) {
+	em.DNDStage = DNDStarted
+	em.DNDSource = src
+	em.DNDData = data
+	if DNDTrace {
+		fmt.Printf("DNDStarted on: %v\n", src.PathUnique())
+	}
 }
 
 // SendDNDHoverEvent sends DND hover event, based on last mouse move event
@@ -630,7 +681,7 @@ func (em *EventMgr) SendDNDHoverEvent(e *mouse.DragEvent) {
 	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
 	he.Processed = false
 	he.Action = dnd.Hover
-	em.SendEventSignal(&he, false) // popup = false by default
+	em.SendEventSignal(&he, NoPopups)
 }
 
 // SendDNDMoveEvent sends DND move event
@@ -641,8 +692,8 @@ func (em *EventMgr) SendDNDMoveEvent(e *mouse.DragEvent) *dnd.MoveEvent {
 	de.Processed = false
 	de.DefaultMod() // based on current key modifiers
 	de.Action = dnd.Move
-	em.SendEventSignal(de, false) // popup = false: ignore any popups
-	em.GenDNDFocusEvents(de, false)
+	em.SendEventSignal(de, NoPopups)
+	em.GenDNDFocusEvents(de, NoPopups)
 	return de
 }
 
@@ -656,16 +707,24 @@ func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) {
 	de.Source = em.DNDSource
 	em.DNDSource.ClearFlag(int(NodeDragging))
 	em.Dragging = nil
-	em.SendEventSignal(&de, false) // popup = false: ignore any popups
 	em.DNDFinalEvent = &de
+	em.DNDStage = DNDDropped
+	if DNDTrace {
+		fmt.Printf("DNDDropped\n")
+	}
+	em.SendEventSignal(&de, NoPopups)
 	e.SetProcessed()
 }
 
 // ClearDND clears DND state
 func (em *EventMgr) ClearDND() {
+	em.DNDStage = DNDNotStarted
 	em.DNDSource = nil
 	em.DNDData = nil
 	em.Dragging = nil
+	if DNDTrace {
+		fmt.Printf("DNDCleared\n")
+	}
 }
 
 // GenDNDFocusEvents processes mouse.MoveEvent to generate dnd.FocusEvent

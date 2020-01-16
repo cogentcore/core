@@ -139,9 +139,9 @@ func (gr *GitRepo) Move(oldpath, newpath string) error {
 	return nil
 }
 
-// Delete removes the file from the repo
+// Delete removes the file from the repo -- uses "force" option to ensure deletion
 func (gr *GitRepo) Delete(fname string) error {
-	out, err := gr.RunFromDir("git", "rm", RelPath(gr, fname))
+	out, err := gr.RunFromDir("git", "rm", "-f", RelPath(gr, fname))
 	if err != nil {
 		log.Println(string(out))
 		fmt.Printf("%s\n", out)

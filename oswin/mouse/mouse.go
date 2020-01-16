@@ -38,11 +38,11 @@ var DoubleClickMSec = 500
 // https://blogs.msdn.microsoft.com/oldnewthing/20041015-00/?p=37553
 var DoubleClickWait = false
 
-// ScrollWheelRate controls how fast the scroll wheel moves (typically
+// ScrollWheelSpeed controls how fast the scroll wheel moves (typically
 // interpreted as pixels per wheel step) -- only relevant for some OS's which
 // do not have a native preference for this setting, e.g., X11
 // This is also in gi.Prefs and updated from there
-var ScrollWheelRate = 20
+var ScrollWheelSpeed = float32(20)
 
 // mouse.Event is a basic mouse event for button presses, but not motion or scrolling
 type Event struct {

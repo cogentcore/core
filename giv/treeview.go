@@ -179,6 +179,10 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data interface{}) {
 		if gi.Update2DTrace {
 			fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(send.Flags(), ki.FlagsN))
 		}
+		if tv.This() == tv.RootView.This() {
+			// fmt.Printf("root full rerender\n")
+			tv.SetFullReRender() // re-render for any updates on root node
+		}
 		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
 			tvIdx := tv.ViewIdx
 			tv.SyncToSrc(&tvIdx)
@@ -2114,7 +2118,7 @@ func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 }
 
 func (tv *TreeView) IsVisible() bool {
-	if tv == nil || tv.This() == nil || tv.IsInvisible() || tv.Viewport == nil {
+	if tv == nil || tv.This() == nil || tv.Viewport == nil {
 		return false
 	}
 	if tv.RootView == nil || tv.RootView.This() == nil {
@@ -2123,7 +2127,33 @@ func (tv *TreeView) IsVisible() bool {
 	if tv.RootView.Par == nil || tv.RootView.Par.This() == nil {
 		return false
 	}
+	if tv.This() == tv.RootView.This() { // root is ALWAYS visible so updates there work
+		return true
+	}
+	if tv.IsInvisible() {
+		return false
+	}
 	return tv.RootView.Par.This().(gi.Node2D).IsVisible()
+}
+
+func (tv *TreeView) PushBounds() bool {
+	if tv == nil || tv.This() == nil {
+		return false
+	}
+	if !tv.This().(gi.Node2D).IsVisible() {
+		return false
+	}
+	if tv.VpBBox.Empty() && tv.This() != tv.RootView.This() { // root must always connect!
+		tv.ClearFullReRender()
+		return false
+	}
+	rs := &tv.Viewport.Render
+	rs.PushBounds(tv.VpBBox)
+	tv.ConnectToViewport()
+	if gi.Render2DTrace {
+		fmt.Printf("Render: %v at %v\n", tv.PathUnique(), tv.VpBBox)
+	}
+	return true
 }
 
 func (tv *TreeView) Render2D() {
@@ -2131,39 +2161,41 @@ func (tv *TreeView) Render2D() {
 		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing
 	}
-	// if tv.FullReRenderIfNeeded() { // custom stuff here
+	// if tv.FullReRenderIfNeeded() { // nn
 	// 	return
 	// }
 	// fmt.Printf("tv rend: %v\n", tv.Nm)
 	if tv.PushBounds() {
-		tv.UpdateInactive()
-		if tv.IsSelected() {
-			tv.Sty = tv.StateStyles[TreeViewSel]
-		} else if tv.HasFocus() {
-			tv.Sty = tv.StateStyles[TreeViewFocus]
-		} else if tv.IsInactive() {
-			tv.Sty = tv.StateStyles[TreeViewInactive]
-		} else {
-			tv.Sty = tv.StateStyles[TreeViewActive]
-		}
-		tv.ConfigPartsIfNeeded()
-		tv.This().(gi.Node2D).ConnectEvents2D()
+		if !tv.VpBBox.Empty() { // we are root and just here for the connections :)
+			tv.UpdateInactive()
+			if tv.IsSelected() {
+				tv.Sty = tv.StateStyles[TreeViewSel]
+			} else if tv.HasFocus() {
+				tv.Sty = tv.StateStyles[TreeViewFocus]
+			} else if tv.IsInactive() {
+				tv.Sty = tv.StateStyles[TreeViewInactive]
+			} else {
+				tv.Sty = tv.StateStyles[TreeViewActive]
+			}
+			tv.ConfigPartsIfNeeded()
+			tv.This().(gi.Node2D).ConnectEvents2D()
 
-		// note: this is std except using WidgetSize instead of AllocSize
-		rs := &tv.Viewport.Render
-		rs.Lock()
-		pc := &rs.Paint
-		st := &tv.Sty
-		pc.FontStyle = st.Font
-		pc.StrokeStyle.SetColor(&st.Border.Color)
-		pc.StrokeStyle.Width = st.Border.Width
-		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
-		// tv.RenderStdBox()
-		pos := tv.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
-		sz := tv.WidgetSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
-		tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-		rs.Unlock()
-		tv.Render2DParts()
+			// note: this is std except using WidgetSize instead of AllocSize
+			rs := &tv.Viewport.Render
+			rs.Lock()
+			pc := &rs.Paint
+			st := &tv.Sty
+			pc.FontStyle = st.Font
+			pc.StrokeStyle.SetColor(&st.Border.Color)
+			pc.StrokeStyle.Width = st.Border.Width
+			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
+			// tv.RenderStdBox()
+			pos := tv.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
+			sz := tv.WidgetSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
+			tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
+			rs.Unlock()
+			tv.Render2DParts()
+		}
 		tv.PopBounds()
 	} else {
 		tv.DisconnectAllEvents(gi.AllPris)

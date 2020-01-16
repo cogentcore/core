@@ -342,6 +342,7 @@ func (fn *FileNode) UpdateNode() error {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
 		fn.UpdateSig()
+		fn.FRoot.UpdateSig()
 	}
 	return nil
 }
@@ -599,6 +600,7 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 		fn.SetName(fn.Info.Name)
 	}
 	fn.UpdateSig()
+	fn.FRoot.UpdateSig()
 	return err
 }
 
@@ -640,8 +642,9 @@ func (fn *FileNode) NewFolder(foldername string) {
 }
 
 // CopyFileToDir copies given file path into node that is a directory
-// prompts before overwriting any existing
-func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
+// prompts before overwriting any existing.
+// returns true if everything completed without any need for further prompts.
+func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode, ftv *FileTreeView) bool {
 	ppath := string(fn.FPath)
 	_, sfn := filepath.Split(filename)
 	tpath := filepath.Join(ppath, sfn)
@@ -656,6 +659,7 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 				nfn.UpdateNode()
 			}
 		}
+		return true
 	} else {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File: %v exists, do you want to overwrite it with: %v?", tpath, filename)},
@@ -663,17 +667,23 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 			fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
-					// cancel
+					if ftv != nil {
+						ftv.DNDCancel() // cancel if happening
+					}
 				case 1:
 					CopyFile(tpath, filename, perm)
+					if ftv != nil {
+						ftv.DNDFinalize()
+					}
 				}
 			})
+		return false
 	}
 }
 
 // CopyFileToFile copies given file path into node that is an existing file
 // prompts before doing so
-func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
+func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode, ftv *FileTreeView) {
 	tpath := string(fn.FPath)
 	gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 		Prompt: fmt.Sprintf("Are you sure you want to overwrite file: %v with: %v?", tpath, filename)},
@@ -681,9 +691,15 @@ func (fn *FileNode) CopyFileToFile(filename string, perm os.FileMode) {
 		fn.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
-			// cancel
+				// cancel
+				if ftv != nil {
+					ftv.DNDCancel() // cancel if happening
+				}
 			case 1:
 				CopyFile(tpath, filename, perm)
+				if ftv != nil {
+					ftv.DNDFinalize()
+				}
 			}
 		})
 }
@@ -731,6 +747,7 @@ func (fn *FileNode) AddToVcs() {
 	if err == nil {
 		fn.Info.Vcs = vci.Added
 		fn.UpdateSig()
+		fn.FRoot.UpdateSig()
 		return
 	}
 	fmt.Println(err)
@@ -747,6 +764,7 @@ func (fn *FileNode) DeleteFromVcs() {
 	if fn != nil && err == nil {
 		fn.Info.Vcs = vci.Deleted
 		fn.UpdateSig()
+		fn.FRoot.UpdateSig()
 		return
 	}
 	fmt.Println(err)
@@ -765,6 +783,7 @@ func (fn *FileNode) CommitToVcs(message string) (err error) {
 	if err == nil {
 		fn.Info.Vcs = vci.Stored
 		fn.UpdateSig()
+		fn.FRoot.UpdateSig()
 	}
 	return err
 }
@@ -789,6 +808,7 @@ func (fn *FileNode) RevertVcs() (err error) {
 			fn.Buf.Revert()
 		}
 		fn.UpdateSig()
+		fn.FRoot.UpdateSig()
 	}
 	return err
 }
@@ -1329,11 +1349,34 @@ func (ftv *FileTreeView) Paste() {
 	}
 }
 
+// FileTreeViewDNDFinalMod is the final drag-n-drop modifier for current drop operation.
+// this must be global given differences in where the events happen.
+var FileTreeViewDNDFinalMod dnd.DropMods
+
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
+	FileTreeViewDNDFinalMod = mod
+	fmt.Printf("drop mod: %v\n", mod)
 	ftv.PasteMime(md)
-	ftv.DragNDropFinalize(mod)
+}
+
+// DNDCancel cancels a drag-n-drop if it is taking place
+func (ftv *FileTreeView) DNDCancel() {
+	fmt.Printf("canceling dnd: %v \n", ftv.Nm)
+	win := ftv.Viewport.Win
+	win.ClearDragNDrop()
+}
+
+// DNDFinalize finalizes a drag-n-drop if it is taking place
+func (ftv *FileTreeView) DNDFinalize() {
+	fmt.Printf("finalize dnd: %v \n", ftv.Nm)
+	win := ftv.Viewport.Win
+	if win.EventMgr.DNDStage == gi.DNDDropped {
+		mod := FileTreeViewDNDFinalMod
+		fmt.Printf("doing finalize dnd: %v mod: %v\n", ftv.Nm, mod)
+		ftv.DragNDropFinalize(mod)
+	}
 }
 
 // PasteMime applies a paste / drop of mime data onto this node
@@ -1366,9 +1409,12 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 			continue
 		}
 		if tfn.IsDir() {
-			tfn.CopyFileToDir(string(sfn.FPath), sfn.Info.Mode)
+			did := tfn.CopyFileToDir(string(sfn.FPath), sfn.Info.Mode, ftv)
+			if did {
+				ftv.DNDFinalize()
+			}
 		} else {
-			tfn.CopyFileToFile(string(sfn.FPath), sfn.Info.Mode)
+			tfn.CopyFileToFile(string(sfn.FPath), sfn.Info.Mode, ftv)
 		}
 	}
 	tfn.UpdateNode()
@@ -1393,6 +1439,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 			continue
 		}
 		path := string(d.Data)
+		fmt.Printf("path: %v\n", path)
 		sfni, err := sroot.FindPathUniqueTry(path)
 		if err != nil {
 			fmt.Println(err)
@@ -1402,7 +1449,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 		if sfn == nil {
 			continue
 		}
-		// fmt.Printf("deleting: %v  path: %v\n", sfn.PathUnique(), sfn.FPath)
+		fmt.Printf("dnd deleting: %v  path: %v\n", sfn.PathUnique(), sfn.FPath)
 		sfn.DeleteFile()
 	}
 }
@@ -1508,7 +1555,7 @@ var FileTreeViewProps = ki.Props{
 		"color": "#4b7fd1",
 	},
 	".added": ki.Props{
-		"color": "#208020",
+		"color": "#008800",
 	},
 	".deleted": ki.Props{
 		"color": "#ff4252",

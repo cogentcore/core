@@ -874,7 +874,7 @@ func (w *Window) SendShowEvent() {
 	se := window.ShowEvent{}
 	se.Action = window.Show
 	se.Init()
-	w.EventMgr.SendEventSignal(&se, true) // popup = true by default
+	w.EventMgr.SendEventSignal(&se, Popups)
 }
 
 // SendWinFocusEvent sends the WindowFocusEvent to widgets
@@ -882,7 +882,7 @@ func (w *Window) SendWinFocusEvent(act window.Actions) {
 	se := window.FocusEvent{}
 	se.Action = act
 	se.Init()
-	w.EventMgr.SendEventSignal(&se, true) // popup = true by default
+	w.EventMgr.SendEventSignal(&se, Popups)
 }
 
 // PublishFullReRender is called by WinFullReRender on Node2DBase
@@ -1679,7 +1679,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		}
 		return false // don't do anything else!
 	case *mouse.DragEvent:
-		if w.EventMgr.DNDData != nil {
+		if w.EventMgr.DNDStage == DNDStarted {
 			w.DNDMoveEvent(e)
 		} else {
 			if !w.EventMgr.dragStarted {
@@ -1687,7 +1687,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			}
 		}
 	case *mouse.Event:
-		if w.EventMgr.DNDData != nil && e.Action == mouse.Release {
+		if w.EventMgr.DNDStage == DNDStarted && e.Action == mouse.Release {
 			w.DNDDropEvent(e)
 		}
 		w.FocusActiveClick(e)
@@ -2172,9 +2172,7 @@ const DNDSpriteName = "gi.Window:DNDSprite"
 // given source node, which is responsible for providing the data and Sprite
 // representation of the node.
 func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
-	// todo: 3d version later..
-	w.EventMgr.DNDSource = src
-	w.EventMgr.DNDData = data
+	w.EventMgr.DNDStart(src, data)
 	if _, sni := KiToNode2D(src); sni != nil { // 2d case
 		if sw := sni.AsWidget(); sw != nil {
 			sp.SetBottomPos(sw.LayData.AllocPos.ToPoint())
@@ -2186,7 +2184,6 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.AddSprite(sp)
 	w.DNDSetCursor(dnd.DefaultModBits(w.EventMgr.LastModBits))
 	w.RenderOverlays()
-	// fmt.Printf("starting dnd: %v\n", src.Name())
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
@@ -2204,7 +2201,6 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 // DNDDropEvent handles drag-n-drop drop event (action = release).
 func (w *Window) DNDDropEvent(e *mouse.Event) {
 	w.EventMgr.SendDNDDropEvent(e)
-	w.ClearDragNDrop()
 }
 
 // FinalizeDragNDrop is called by a node to finalize the drag-n-drop
@@ -2212,16 +2208,22 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 // target to cancel, by sending dnd.DropIgnore.
 func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	if w.EventMgr.DNDFinalEvent == nil { // shouldn't happen...
+		fmt.Printf("final event nil\n")
+		w.ClearDragNDrop()
 		return
 	}
 	de := w.EventMgr.DNDFinalEvent
 	de.Processed = false
 	de.Mod = action
 	if de.Source != nil {
+		fmt.Printf("sent final event\n")
 		de.Action = dnd.DropFmSource
 		w.EventMgr.SendSig(de.Source, w, de)
+	} else {
+		fmt.Printf("source nil\n")
 	}
 	w.EventMgr.DNDFinalEvent = nil
+	w.ClearDragNDrop()
 }
 
 // ClearDragNDrop clears any existing DND values.

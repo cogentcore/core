@@ -20,19 +20,18 @@ import (
 	"github.com/goki/ki/kit"
 )
 
-//
-
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
 // IDE framework, and remains simple to test / demo the file tree component.
 type FileBrowse struct {
 	gi.Frame
-	ProjRoot          gi.FileName  `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
-	ActiveFilename    gi.FileName  `desc:"filename of the currently-active textview"`
-	Changed           bool         `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
-	Files             giv.FileTree `desc:"all the files in the project directory and subdirectories"`
-	NTextViews        int          `xml:"n-text-views" desc:"number of textviews available for editing files (default 2) -- configurable with n-text-views property"`
-	ActiveTextViewIdx int          `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`
+	ProjRoot          gi.FileName       `desc:"root directory for the project -- all projects must be organized within a top-level root directory, with all the files therein constituting the scope of the project -- by default it is the path for ProjFilename"`
+	ActiveFilename    gi.FileName       `desc:"filename of the currently-active textview"`
+	Changed           bool              `json:"-" desc:"has the root changed?  we receive update signals from root for changes"`
+	Files             giv.FileTree      `desc:"all the files in the project directory and subdirectories"`
+	FilesView         *giv.FileTreeView `desc:"treeview of all the files in the project directory and subdirectories"`
+	NTextViews        int               `xml:"n-text-views" desc:"number of textviews available for editing files (default 2) -- configurable with n-text-views property"`
+	ActiveTextViewIdx int               `json:"-" desc:"index of the currently-active textview -- new files will be viewed in other views if available"`
 }
 
 var KiT_FileBrowse = kit.Types.AddType(&FileBrowse{}, FileBrowseProps)
@@ -44,9 +43,14 @@ func AddNewFileBrowse(parent ki.Ki, name string) *FileBrowse {
 
 // UpdateFiles updates the list of files saved in project
 func (fb *FileBrowse) UpdateFiles() {
-	wupdt := fb.TopUpdateStart()
-	fb.Files.OpenPath(string(fb.ProjRoot))
-	fb.TopUpdateEnd(wupdt)
+	if fb.FilesView == nil {
+		fb.Files.OpenPath(string(fb.ProjRoot))
+	} else {
+		updt := fb.FilesView.UpdateStart()
+		fb.FilesView.SetFullReRender()
+		fb.Files.OpenPath(string(fb.ProjRoot))
+		fb.FilesView.UpdateEnd(updt)
+	}
 }
 
 // IsEmpty returns true if given FileBrowse project is empty -- has not been set to a valid path
@@ -78,6 +82,7 @@ func (fb *FileBrowse) OpenPath(path gi.FileName) {
 		if fnm != "" {
 			fb.ViewFile(fnm)
 		}
+		fb.UpdateFiles()
 	}
 }
 
@@ -161,6 +166,7 @@ func (fb *FileBrowse) SaveActiveView() {
 	tv := fb.ActiveTextView()
 	if tv.Buf != nil {
 		tv.Buf.Save() // todo: errs..
+		fb.UpdateFiles()
 	}
 }
 
@@ -184,6 +190,7 @@ func (fb *FileBrowse) ViewFileNode(fn *giv.FileNode) {
 		nv.SetBuf(fn.Buf)
 		fn.Buf.Hi.Style = "emacs" // todo prefs
 		fb.SetActiveTextView(nidx)
+		fb.UpdateFiles()
 	}
 }
 
@@ -257,16 +264,6 @@ func (fb *FileBrowse) SplitView() (*gi.SplitView, int) {
 	return fb.Child(idx).(*gi.SplitView), idx
 }
 
-// FileTree returns the main FileTree
-func (fb *FileBrowse) FileTree() *giv.TreeView {
-	split, _ := fb.SplitView()
-	if split != nil {
-		tv := split.Child(0).Child(0).(*giv.TreeView)
-		return tv
-	}
-	return nil
-}
-
 // TextViewByIndex returns the TextView by index, nil if not found
 func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
 	if idx < 0 || idx >= fb.NTextViews {
@@ -334,6 +331,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)
 		ft := giv.AddNewFileTreeView(ftfr, "filetree")
+		fb.FilesView = ft
 		ft.SetRootNode(&fb.Files)
 
 		for i := 0; i < fb.NTextViews; i++ {

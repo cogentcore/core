@@ -34,8 +34,9 @@ func init() {
 	runtime.LockOSThread()
 }
 
-// var glosDebug = false
-var glosDebug = true
+var glosDebug = false
+
+// var glosDebug = true
 
 // 3.3 is pretty similar to 4.1 and more widely supported (e.g., crostini)
 // 4.1 is max supported on macos
