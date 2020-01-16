@@ -1399,6 +1399,16 @@ func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
 	tv.Viewport.Win.FinalizeDragNDrop(mod)
 }
 
+// DragNDropFinalizeDefMod is called to finalize actions on the Source node prior to
+// performing target actions -- uses default drop mod in place when event was dropped.
+func (tv *TreeView) DragNDropFinalizeDefMod() {
+	if tv.Viewport == nil || tv.Viewport.Win == nil {
+		return
+	}
+	tv.UnselectAll()
+	tv.Viewport.Win.FinalizeDragNDrop(tv.Viewport.Win.EventMgr.DNDDropMod)
+}
+
 // Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
 // satisfies gi.DragNDropper interface and can be overridden by subtypes

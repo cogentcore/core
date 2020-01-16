@@ -69,6 +69,7 @@ type EventMgr struct {
 	DNDData         mimedata.Mimes                          `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 	DNDSource       ki.Ki                                   `desc:"drag-n-drop source node"`
 	DNDFinalEvent   *dnd.Event                              `desc:"final event for DND which is sent if a finalize is received"`
+	DNDDropMod      dnd.DropMods                            `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
 	Focus           ki.Ki                                   `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
 	FocusMu         sync.RWMutex                            `desc:"mutex that protects focus updating"`
 	FocusStack      []ki.Ki                                 `desc:"stack of focus"`
@@ -708,6 +709,7 @@ func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) {
 	em.DNDSource.ClearFlag(int(NodeDragging))
 	em.Dragging = nil
 	em.DNDFinalEvent = &de
+	em.DNDDropMod = de.Mod
 	em.DNDStage = DNDDropped
 	if DNDTrace {
 		fmt.Printf("DNDDropped\n")
@@ -722,6 +724,7 @@ func (em *EventMgr) ClearDND() {
 	em.DNDSource = nil
 	em.DNDData = nil
 	em.Dragging = nil
+	em.DNDFinalEvent = nil
 	if DNDTrace {
 		fmt.Printf("DNDCleared\n")
 	}

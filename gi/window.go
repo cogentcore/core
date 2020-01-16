@@ -2207,8 +2207,11 @@ func (w *Window) DNDDropEvent(e *mouse.Event) {
 // operation, after given action has been performed on the target -- allows
 // target to cancel, by sending dnd.DropIgnore.
 func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
+	if w.EventMgr.DNDStage != DNDDropped {
+		w.ClearDragNDrop()
+		return
+	}
 	if w.EventMgr.DNDFinalEvent == nil { // shouldn't happen...
-		fmt.Printf("final event nil\n")
 		w.ClearDragNDrop()
 		return
 	}
@@ -2216,13 +2219,9 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 	de.Processed = false
 	de.Mod = action
 	if de.Source != nil {
-		fmt.Printf("sent final event\n")
 		de.Action = dnd.DropFmSource
 		w.EventMgr.SendSig(de.Source, w, de)
-	} else {
-		fmt.Printf("source nil\n")
 	}
-	w.EventMgr.DNDFinalEvent = nil
 	w.ClearDragNDrop()
 }
 
