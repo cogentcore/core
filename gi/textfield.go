@@ -538,15 +538,14 @@ func (tf *TextField) SelectUpdate() {
 	}
 }
 
-// Cut cuts any selected text and adds it to the clipboard, also returns cut text
-func (tf *TextField) Cut() string {
+// Cut cuts any selected text and adds it to the clipboard
+func (tf *TextField) Cut() {
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
 	cut := tf.DeleteSelection()
 	if cut != "" {
 		oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(mimedata.NewText(cut))
 	}
-	return cut
 }
 
 // DeleteSelection deletes any selected text, without adding to clipboard --

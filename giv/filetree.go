@@ -215,6 +215,7 @@ func (fn *FileNode) ReadDir(path string) error {
 // UpdateDir updates the directory and all the nodes under it
 func (fn *FileNode) UpdateDir() {
 	path := string(fn.FPath)
+	// fmt.Printf("path: %v  node: %v\n", path, fn.PathUnique())
 	var err error
 	repo, rnode := fn.Repo()
 	if repo == nil {
@@ -240,6 +241,9 @@ func (fn *FileNode) UpdateDir() {
 		sf := sfk.Embed(KiT_FileNode).(*FileNode)
 		sf.FRoot = fn.FRoot
 		fp := filepath.Join(path, sf.Nm)
+		// if sf.Buf != nil {
+		// 	fmt.Printf("fp: %v  nm: %v\n", fp, sf.Nm)
+		// }
 		sf.SetNodePath(fp)
 		if sf.IsDir() {
 			sf.Info.Vcs = vci.Stored // always
@@ -583,15 +587,21 @@ func (fn *FileNode) DeleteFile() (err error) {
 
 // RenameFile renames file to new name
 func (fn *FileNode) RenameFile(newpath string) (err error) {
+	orgpath := fn.FPath
 	newpath, err = fn.Info.Rename(newpath)
 	if len(newpath) == 0 || err != nil {
 		return err
 	}
+	if fn.IsDir() {
+		if fn.FRoot.IsDirOpen(orgpath) {
+			fn.FRoot.SetDirOpen(gi.FileName(newpath))
+		}
+	}
 	repo, _ := fn.Repo()
 	if repo != nil && fn.Info.Vcs >= vci.Stored {
-		err = repo.Move(string(fn.FPath), newpath)
+		err = repo.Move(string(orgpath), newpath)
 	} else {
-		err = os.Rename(string(fn.FPath), newpath)
+		err = os.Rename(string(orgpath), newpath)
 	}
 	if err == nil {
 		err = fn.Info.InitFile(newpath)
@@ -601,7 +611,7 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 		fn.SetName(fn.Info.Name)
 	}
 	fn.UpdateSig()
-	fn.FRoot.UpdateSig()
+	fn.FRoot.UpdateDir() // need full update
 	return err
 }
 
@@ -982,6 +992,13 @@ func (ftv *FileTreeView) FileNode() *FileNode {
 	return fni.(*FileNode)
 }
 
+func (ftv *FileTreeView) UpdateAllFiles() {
+	fn := ftv.FileNode()
+	if fn != nil {
+		fn.FRoot.UpdateDir()
+	}
+}
+
 func (ftv *FileTreeView) ConnectEvents2D() {
 	ftv.FileTreeViewEvents()
 }
@@ -994,7 +1011,11 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	})
 	ftv.ConnectEvent(oswin.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.Event)
-		tvv := recv.Embed(KiT_FileTreeView).(*FileTreeView)
+		tvvi := recv.Embed(KiT_FileTreeView)
+		if tvvi == nil {
+			return
+		}
+		tvv := tvvi.(*FileTreeView)
 		switch de.Action {
 		case dnd.Start:
 			tvv.DragNDropStart()
@@ -1008,7 +1029,11 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	})
 	ftv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		de := d.(*dnd.FocusEvent)
-		tvv := recv.Embed(KiT_FileTreeView).(*FileTreeView)
+		tvvi := recv.Embed(KiT_FileTreeView)
+		if tvvi == nil {
+			return
+		}
+		tvv := tvvi.(*FileTreeView)
 		switch de.Action {
 		case dnd.Enter:
 			tvv.Viewport.Win.DNDSetCursor(de.Mod)
@@ -1123,51 +1148,56 @@ func (ftv *FileTreeView) DuplicateFiles() {
 	}
 }
 
+// DeleteFilesImpl does the actual deletion, no prompts
+func (ftv *FileTreeView) DeleteFilesImpl() {
+	sels := ftv.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn == nil {
+			return
+		}
+		if fn.Info.IsDir() {
+			openList := []string{}
+			var fns []string
+			fn.Info.FileNames(&fns)
+			ft := fn.FRoot
+			for _, filename := range fns {
+				fn, ok := ft.FindFile(filename)
+				if !ok {
+					return
+				}
+				if fn.Buf != nil {
+					openList = append(openList, filename)
+				}
+			}
+			if len(openList) > 0 {
+				for _, filename := range openList {
+					fn, _ := ft.FindFile(filename)
+					fn.CloseBuf()
+				}
+			}
+			fn.DeleteFile()
+		} else {
+			if fn.Buf != nil {
+				fn.CloseBuf()
+			}
+			fn.DeleteFile()
+		}
+	}
+}
+
 // DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
 // all files and subdirectories are also deleted.
 func (ftv *FileTreeView) DeleteFiles() {
-	sels := ftv.SelectedViews()
 	gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Files?",
 		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
 		[]string{"Delete Files", "Cancel"},
 		ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			switch sig {
 			case 0:
-				for i := len(sels) - 1; i >= 0; i-- {
-					sn := sels[i]
-					ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-					fn := ftvv.FileNode()
-					if fn == nil {
-						return
-					}
-					if fn.Info.IsDir() {
-						openList := []string{}
-						var fns []string
-						fn.Info.FileNames(&fns)
-						ft := fn.FRoot
-						for _, filename := range fns {
-							fn, ok := ft.FindFile(filename)
-							if !ok {
-								return
-							}
-							if fn.Buf != nil {
-								openList = append(openList, filename)
-							}
-						}
-						if len(openList) > 0 {
-							for _, filename := range openList {
-								fn, _ := ft.FindFile(filename)
-								fn.CloseBuf()
-							}
-						}
-						fn.DeleteFile()
-					} else {
-						if fn.Buf != nil {
-							fn.CloseBuf()
-						}
-						fn.DeleteFile()
-					}
-				}
+				ftv.DeleteFilesImpl()
 			case 1:
 				// do nothing
 			}

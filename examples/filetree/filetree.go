@@ -367,12 +367,6 @@ func (fb *FileBrowse) ConfigSplitView() {
 }
 
 func (fb *FileBrowse) FileNodeSelected(fn *giv.FileNode, tvn *giv.FileTreeView) {
-	if fn.IsDir() {
-	} else {
-		fb.ViewFileNode(fn)
-		fn.SetOpen()
-		fn.UpdateSig()
-	}
 }
 
 func (fb *FileBrowse) FileNodeOpened(fn *giv.FileNode, tvn *giv.FileTreeView) {
@@ -381,6 +375,10 @@ func (fb *FileBrowse) FileNodeOpened(fn *giv.FileNode, tvn *giv.FileTreeView) {
 			tvn.SetOpen()
 			fn.OpenDir()
 		}
+	} else {
+		fb.ViewFileNode(fn)
+		fn.SetOpen()
+		fn.UpdateNode()
 	}
 }
 

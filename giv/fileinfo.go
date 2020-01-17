@@ -36,7 +36,7 @@ type FileInfo struct {
 	Mode    os.FileMode       `desc:"file mode bits"`
 	ModTime FileTime          `desc:"time that contents (only) were last modified"`
 	Vcs     vci.FileStatus    `tableview:"-" desc:"version control system status, when enabled"`
-	Path    string            `view:"-" tableview:"-" desc:"full path to file, including name -- for file functions"`
+	Path    string            `tableview:"-" desc:"full path to file, including name -- for file functions"`
 }
 
 var KiT_FileInfo = kit.Types.AddType(&FileInfo{}, FileInfoProps)
@@ -145,6 +145,15 @@ func (fi *FileInfo) Duplicate() (string, error) {
 	ext := filepath.Ext(fi.Path)
 	noext := strings.TrimSuffix(fi.Path, ext)
 	dst := noext + "_Copy" + ext
+	cpcnt := 0
+	for {
+		if _, err := os.Stat(dst); !os.IsNotExist(err) {
+			cpcnt++
+			dst = noext + fmt.Sprintf("_Copy%d", cpcnt) + ext
+		} else {
+			break
+		}
+	}
 	return dst, CopyFile(dst, fi.Path, fi.Mode)
 }
 
