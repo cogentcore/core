@@ -127,6 +127,9 @@ const (
 	// itself in this case.
 	DropFmSource
 
+	// External is triggered from an external drop event
+	External
+
 	// Move is sent whenever mouse is moving while dragging -- usually not needed.
 	Move
 

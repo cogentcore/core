@@ -1713,6 +1713,10 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 				w.EventMgr.ActivateStartFocus()
 			}
 		}
+	case *dnd.Event:
+		if e.Action == dnd.External {
+			w.EventMgr.DNDDropMod = e.Mod
+		}
 	case *key.ChordEvent:
 		keyDelPop := w.KeyChordEventHiPri(e)
 		if keyDelPop {

@@ -58,6 +58,7 @@ type ParamPrefs struct {
 	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
 	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
 	LocalMainMenu    bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
+	BigFileSize      int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
 }
 
 // User basic user information that might be needed for different apps
@@ -139,6 +140,7 @@ func (pf *ParamPrefs) Defaults() {
 	pf.DoubleClickMSec = 500
 	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
+	pf.BigFileSize = 10000000
 }
 
 func (pf *Preferences) Defaults() {

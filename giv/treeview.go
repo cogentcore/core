@@ -1112,7 +1112,8 @@ func (tv *TreeView) SrcGoGiEditor() {
 //    Copy / Cut / Paste
 
 // MimeData adds mimedata for this node: a text/plain of the PathUnique, and
-// an application/json of the source node
+// an application/json of the source node.
+// satisfies Clipper.MimeData interface
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	sroot := tv.RootView.SrcNode
 	src := tv.SrcNode
@@ -1148,26 +1149,17 @@ func (tv *TreeView) Copy(reset bool) {
 	sels := tv.SelectedViews()
 	nitms := ints.MaxInt(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.MimeData(&md) // source is always first..
+	tv.This().(gi.Clipper).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
-				sn.MimeData(&md)
+				sn.This().(gi.Clipper).MimeData(&md)
 			}
 		}
 	}
 	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(md)
 	if reset {
 		tv.UnselectAll()
-	}
-}
-
-// CopyAction copies to clip.Board, optionally resetting the selection-- calls Clipper copy
-func (tv *TreeView) CopyAction(reset bool) {
-	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Copy(reset)
-	} else {
-		tv.Copy(reset)
 	}
 }
 
@@ -1186,30 +1178,12 @@ func (tv *TreeView) Cut() {
 	tv.SetChanged()
 }
 
-// CutAction copies to clip.Board and deletes selected items -- calls Clipper cut
-func (tv *TreeView) CutAction() {
-	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Cut()
-	} else {
-		tv.Cut()
-	}
-}
-
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
 	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
-	}
-}
-
-// PasteAction pastes clipboard at given node -- calls Clipper paste
-func (tv *TreeView) PasteAction() {
-	if cpr, ok := tv.This().(gi.Clipper); ok { // should always be true, but justin case..
-		cpr.Paste()
-	} else {
-		tv.Paste()
 	}
 }
 
@@ -1360,11 +1334,11 @@ func (tv *TreeView) DragNDropStart() {
 	sels := tv.SelectedViews()
 	nitms := ints.MaxInt(1, len(sels))
 	md := make(mimedata.Mimes, 0, 2*nitms)
-	tv.MimeData(&md) // source is always first..
+	tv.This().(gi.Clipper).MimeData(&md) // source is always first..
 	if nitms > 1 {
 		for _, sn := range sels {
 			if sn.This() != tv.This() {
-				sn.MimeData(&md)
+				sn.This().(gi.Clipper).MimeData(&md)
 			}
 		}
 	}
@@ -1381,11 +1355,17 @@ func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
 	de.SetProcessed()
-	if dpr, ok := tv.This().(gi.DragNDropper); ok {
-		dpr.Drop(de.Data, de.Mod)
-	} else {
-		tv.Drop(de.Data, de.Mod)
+	tv.This().(gi.DragNDropper).Drop(de.Data, de.Mod)
+}
+
+// DragNDropExternal handles a drag-n-drop external drop onto this node
+func (tv *TreeView) DragNDropExternal(de *dnd.Event) {
+	de.Target = tv.This()
+	if de.Mod == dnd.DropLink {
+		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
+	de.SetProcessed()
+	tv.This().(gi.DragNDropper).DropExternal(de.Data, de.Mod)
 }
 
 // DragNDropFinalize is called to finalize actions on the Source node prior to
@@ -1426,17 +1406,6 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 				sn.Delete(true)
 			}
 		}
-	}
-}
-
-// DragNDropSource is called after target accepts the drop -- we just remove
-// elements that were moved
-func (tv *TreeView) DragNDropSource(de *dnd.Event) {
-	// fmt.Printf("tv src: %v\n", tv.PathUnique())
-	if dpr, ok := tv.This().(gi.DragNDropper); ok {
-		dpr.Dragged(de)
-	} else {
-		tv.Dragged(de)
 	}
 }
 
@@ -1485,6 +1454,11 @@ func (tv *TreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	tv.MakeDropMenu(&men, md, mod)
 	pos := tv.ContextMenuPos()
 	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
+}
+
+// DropExternal is not handled by base case but could be in derived
+func (tv *TreeView) DropExternal(md mimedata.Mimes, mod dnd.DropMods) {
+	tv.DropCancel()
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
@@ -1604,7 +1578,7 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 		tv.ToggleClose()
 		kt.SetProcessed()
 	case gi.KeyFunCopy:
-		tv.CopyAction(true)
+		tv.This().(gi.Clipper).Copy(true)
 		kt.SetProcessed()
 	}
 	if !tv.RootIsInactive() && !kt.IsProcessed() {
@@ -1622,10 +1596,10 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 			tv.SrcInsertAfter()
 			kt.SetProcessed()
 		case gi.KeyFunCut:
-			tv.CutAction()
+			tv.This().(gi.Clipper).Cut()
 			kt.SetProcessed()
 		case gi.KeyFunPaste:
-			tv.PasteAction()
+			tv.This().(gi.Clipper).Paste()
 			kt.SetProcessed()
 		}
 	}
@@ -1649,7 +1623,9 @@ func (tv *TreeView) TreeViewEvents() {
 		case dnd.DropOnTarget:
 			tvv.DragNDropTarget(de)
 		case dnd.DropFmSource:
-			tvv.DragNDropSource(de)
+			tvv.This().(gi.DragNDropper).Dragged(de)
+		case dnd.External:
+			tvv.DragNDropExternal(de)
 		}
 	})
 	tv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {

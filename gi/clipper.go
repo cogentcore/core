@@ -13,6 +13,9 @@ import (
 // Types can use this interface to support extensible clip functionality
 // used in all relevant valueview types in giv package (e.g., TreeView)
 type Clipper interface {
+	// MimeData adds mimedata  to given record to represent item on clipboard
+	MimeData(md *mimedata.Mimes)
+
 	// Copy copies item to the clipboard
 	// e.g., use oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(md)
 	// where md is mime-encoded data for the object
@@ -41,4 +44,13 @@ type DragNDropper interface {
 
 	// Dragged is called on source of drag-n-drop after the drop is finalized
 	Dragged(de *dnd.Event)
+
+	// DropExternal is called when something is dropped on this item from
+	// an external source (not within same app).
+	// the mod is either dnd.DropCopy for a copy-like operation (the default)
+	// or dnd.Move for a move-like operation (with Shift key held down)
+	// drop DOES NOT need to call Window.FinalizeDragNDrop with the mod actually used
+	// to have the source update itself -- no harm if it does however, as the source
+	// will be nil.
+	DropExternal(md mimedata.Mimes, mod dnd.DropMods)
 }

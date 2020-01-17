@@ -158,6 +158,7 @@ func (app *appImpl) PollEvents() {
 func (app *appImpl) mainLoop() {
 	app.mainQueue = make(chan funcRun)
 	app.mainDone = make(chan struct{})
+	hasStarted := false
 	for {
 		select {
 		case <-app.mainDone:
@@ -169,10 +170,11 @@ func (app *appImpl) mainLoop() {
 				f.done <- true
 			}
 		default:
-			if len(app.windows) == 0 { // starting up
+			if !hasStarted && len(app.windows) == 0 { // starting up
 				time.Sleep(50 * time.Millisecond)
 			} else {
 				// glfw.WaitEvents()
+				hasStarted = true
 				glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
 			}
 		}

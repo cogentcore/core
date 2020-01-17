@@ -572,25 +572,34 @@ func (tf *TextField) DeleteSelection() string {
 	return cut
 }
 
-// Copy copies any selected text to the clipboard, and returns that text,
+// MimeData adds selection to mimedata.
+// Satisfies Clipper interface -- can be extended in subtypes.
+func (tf *TextField) MimeData(md *mimedata.Mimes) {
+	cpy := tf.Selection()
+	*md = append(*md, mimedata.NewTextData(cpy))
+}
+
+// Copy copies any selected text to the clipboard.
+// Satisfies Clipper interface -- can be extended in subtypes.
 // optionally resetting the current selection
-func (tf *TextField) Copy(reset bool) string {
+func (tf *TextField) Copy(reset bool) {
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
 	tf.SelectUpdate()
 	if !tf.HasSelection() {
-		return ""
+		return
 	}
-	cpy := tf.Selection()
-	oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(mimedata.NewText(cpy))
+	md := mimedata.NewMimes(0, 1)
+	tf.This().(Clipper).MimeData(&md)
+	oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(md)
 	if reset {
 		tf.SelectReset()
 	}
-	return cpy
 }
 
 // Paste inserts text from the clipboard at current cursor position -- if
-// cursor is within a current selection, that selection is
+// cursor is within a current selection, that selection is replaced.
+// Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
@@ -629,7 +638,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
 		tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			tff := recv.Embed(KiT_TextField).(*TextField)
-			tff.Copy(true)
+			tff.This().(Clipper).Copy(true)
 		})
 	ac.SetActiveState(tf.HasSelection())
 	if !tf.IsInactive() {
@@ -638,13 +647,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
-				tff.Cut()
+				tff.This().(Clipper).Cut()
 			})
 		ac.SetActiveState(tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
-				tff.Paste()
+				tff.This().(Clipper).Paste()
 			})
 		ac.SetInactiveState(oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).IsEmpty())
 	}
@@ -1166,7 +1175,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunCopy:
 		kt.SetProcessed()
 		tf.CancelComplete()
-		tf.Copy(true) // reset
+		tf.This().(Clipper).Copy(true) // reset
 	}
 	if tf.IsInactive() || kt.IsProcessed() {
 		return
@@ -1205,11 +1214,11 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunCut:
 		kt.SetProcessed()
 		tf.CancelComplete()
-		tf.Cut()
+		tf.This().(Clipper).Cut()
 	case KeyFunPaste:
 		kt.SetProcessed()
 		tf.CancelComplete()
-		tf.Paste()
+		tf.This().(Clipper).Paste()
 	case KeyFunComplete:
 		kt.SetProcessed()
 		tf.OfferComplete(force)

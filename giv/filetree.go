@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"image/color"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -568,10 +569,10 @@ func (fn *FileNode) DuplicateFile() error {
 func (fn *FileNode) DeleteFile() (err error) {
 	repo, _ := fn.Repo()
 	if repo != nil && fn.Info.Vcs >= vci.Stored {
-		fmt.Printf("del repo: %v\n", fn.FPath)
+		// fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.FPath))
 	} else {
-		fmt.Printf("del raw: %v\n", fn.FPath)
+		// fmt.Printf("del raw: %v\n", fn.FPath)
 		err = fn.Info.Delete()
 	}
 	if err == nil {
@@ -697,7 +698,7 @@ func (fn *FileNode) AddToVcs() {
 	if repo == nil {
 		return
 	}
-	fmt.Printf("adding to vcs: %v\n", fn.FPath)
+	// fmt.Printf("adding to vcs: %v\n", fn.FPath)
 	err := repo.Add(string(fn.FPath))
 	if err == nil {
 		fn.Info.Vcs = vci.Added
@@ -714,7 +715,7 @@ func (fn *FileNode) DeleteFromVcs() {
 	if repo == nil {
 		return
 	}
-	fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
+	// fmt.Printf("deleting remote from vcs: %v\n", fn.FPath)
 	err := repo.DeleteRemote(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.Info.Vcs = vci.Deleted
@@ -974,8 +975,11 @@ func (ftv *FileTreeView) FileNode() *FileNode {
 	if ftv.This() == nil {
 		return nil
 	}
-	fn := ftv.SrcNode.Embed(KiT_FileNode).(*FileNode)
-	return fn
+	fni := ftv.SrcNode.Embed(KiT_FileNode)
+	if fni == nil {
+		return nil
+	}
+	return fni.(*FileNode)
 }
 
 func (ftv *FileTreeView) ConnectEvents2D() {
@@ -997,7 +1001,9 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 		case dnd.DropOnTarget:
 			tvv.DragNDropTarget(de)
 		case dnd.DropFmSource:
-			tvv.DragNDropSource(de)
+			tvv.This().(gi.DragNDropper).Dragged(de)
+		case dnd.External:
+			tvv.DragNDropExternal(de)
 		}
 	})
 	ftv.ConnectEvent(oswin.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -1284,6 +1290,35 @@ func (ftv *FileTreeView) RevertVcs() {
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//   Clipboard
+
+// MimeData adds mimedata for this node: a text/plain of the PathUnique,
+// text/plain of filename, and text/
+func (ftv *FileTreeView) MimeData(md *mimedata.Mimes) {
+	sroot := ftv.RootView.SrcNode
+	fn := ftv.SrcNode.Embed(KiT_FileNode).(*FileNode)
+	path := string(fn.FPath)
+	*md = append(*md, mimedata.NewTextData(fn.PathFromUnique(sroot)))
+	*md = append(*md, mimedata.NewTextData(path))
+	if int(fn.Info.Size) < gi.Prefs.Params.BigFileSize {
+		in, err := os.Open(path)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		b, err := ioutil.ReadAll(in)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fd := &mimedata.Data{fn.Info.Mime, b}
+		*md = append(*md, fd)
+	} else {
+		*md = append(*md, mimedata.NewTextData("File exceeds BigFileSize"))
+	}
+}
+
 // Cut copies to clip.Board and deletes selected items
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Cut() {
@@ -1310,46 +1345,104 @@ func (ftv *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	ftv.PasteMime(md)
 }
 
-// PasteCopyFiles copies files in given data into given target directory
-func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
+// DropExternal is not handled by base case but could be in derived
+func (ftv *FileTreeView) DropExternal(md mimedata.Mimes, mod dnd.DropMods) {
+	ftv.PasteMime(md)
+}
+
+// PasteCheckExisting checks for existing files in target node directory if
+// that is non-nil (otherwise just uses absolute path), and returns list of existing
+// and node for last one if exists.
+func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([]string, *FileNode) {
 	sroot := ftv.RootView.SrcNode
-	for _, d := range md {
+	tpath := ""
+	if tfn != nil {
+		tpath = string(tfn.FPath)
+	}
+	intl := ftv.Viewport.Win.EventMgr.DNDIsInternalSrc()
+	nf := len(md)
+	if intl {
+		nf /= 3
+	}
+	var sfn *FileNode
+	var existing []string
+	for i := 0; i < nf; i++ {
+		var d *mimedata.Data
+		if intl {
+			d = md[i*3+1]
+			npath := string(md[i*3].Data)
+			sfni, err := sroot.FindPathUniqueTry(npath)
+			if err == nil {
+				sfn = sfni.Embed(KiT_FileNode).(*FileNode)
+			}
+		} else {
+			d = md[i] // just a list
+		}
 		if d.Type != filecat.TextPlain {
 			continue
 		}
-		// todo: process file:/// kinds of paths..
 		path := string(d.Data)
-		sfni, err := sroot.FindPathUniqueTry(path)
-		if err != nil {
-			fmt.Println(err)
+		if strings.HasPrefix(path, "file://") {
+			path = path[7:]
+		}
+		if tfn != nil {
+			_, fnm := filepath.Split(path)
+			path = filepath.Join(tpath, fnm)
+		}
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			existing = append(existing, path)
+		}
+	}
+	return existing, sfn
+}
+
+// PasteCopyFiles copies files in given data into given target directory
+func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
+	sroot := ftv.RootView.SrcNode
+	intl := ftv.Viewport.Win.EventMgr.DNDIsInternalSrc()
+	nf := len(md)
+	if intl {
+		nf /= 3
+	}
+	for i := 0; i < nf; i++ {
+		var d *mimedata.Data
+		mode := os.FileMode(0664)
+		if intl {
+			d = md[i*3+1]
+			npath := string(md[i*3].Data)
+			sfni, err := sroot.FindPathUniqueTry(npath)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			sfn := sfni.Embed(KiT_FileNode).(*FileNode)
+			mode = sfn.Info.Mode
+		} else {
+			d = md[i] // just a list
+		}
+		if d.Type != filecat.TextPlain {
 			continue
 		}
-		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
-		tdir.CopyFileToDir(string(sfn.FPath), sfn.Info.Mode)
+		path := string(d.Data)
+		if strings.HasPrefix(path, "file://") {
+			path = path[7:]
+		}
+		tdir.CopyFileToDir(path, mode)
 	}
 }
 
 // PasteMime applies a paste / drop of mime data onto this node
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
-	sroot := ftv.RootView.SrcNode
 	tfn := ftv.FileNode()
 	if tfn == nil {
 		return
 	}
+	tupdt := ftv.RootView.UpdateStart()
+	defer ftv.RootView.UpdateEnd(tupdt)
 	tpath := string(tfn.FPath)
 	if tfn.IsDir() {
-		var existing []string
-		for _, d := range md {
-			if d.Type != filecat.TextPlain {
-				continue
-			}
-			// todo: process file:/// kinds of paths..
-			path := string(d.Data)
-			if _, err := os.Stat(path); !os.IsNotExist(err) {
-				existing = append(existing, path)
-			}
-		}
+		existing, _ := ftv.PasteCheckExisting(tfn, md)
 		if len(existing) > 0 {
 			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File(s) Exist in Target Dir, Overwrite?",
 				Prompt: fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing)},
@@ -1368,25 +1461,20 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 			ftv.DragNDropFinalizeDefMod()
 		}
 	} else { // dropping on top of existing file
-		if len(md) != 2 {
-			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/2)}, gi.AddOk, gi.NoCancel, nil, nil)
+		if len(md) > 3 {
+			gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Can Only Copy 1 File", Prompt: fmt.Sprintf("Only one file can be copied target file: %v -- currently have: %v", tfn.Name(), len(md)/3)}, gi.AddOk, gi.NoCancel, nil, nil)
 			ftv.DropCancel()
 			return
 		}
-		d := md[0]
-		if d.Type != filecat.TextPlain {
-			ftv.DropCancel()
+		existing, sfn := ftv.PasteCheckExisting(nil, md)
+		if len(existing) != 1 {
 			return
 		}
-		// todo: process file:/// kinds of paths..
-		path := string(d.Data)
-		sfni, err := sroot.FindPathUniqueTry(path)
-		if err != nil {
-			fmt.Println(err)
-			ftv.DropCancel()
-			return
+		path := existing[0]
+		mode := os.FileMode(0664)
+		if sfn != nil {
+			mode = sfn.Info.Mode
 		}
-		sfn := sfni.Embed(KiT_FileNode).(*FileNode)
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Are you sure you want to overwrite file: %v with: %v?", tpath, path)},
 			[]string{"No, Cancel", "Yes, Overwrite"},
@@ -1395,7 +1483,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 				case 0:
 					ftv.DropCancel()
 				case 1:
-					CopyFile(tpath, path, sfn.Info.Mode)
+					CopyFile(tpath, path, mode)
 					ftv.DragNDropFinalizeDefMod()
 				}
 			})
@@ -1416,13 +1504,10 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 		return
 	}
 	md := de.Data
-	for _, d := range md {
-		if d.Type != filecat.TextPlain {
-			continue
-		}
-		path := string(d.Data)
-		fmt.Printf("path: %v\n", path)
-		sfni, err := sroot.FindPathUniqueTry(path)
+	nf := len(md) / 3 // always internal
+	for i := 0; i < nf; i++ {
+		npath := string(md[i*3].Data)
+		sfni, err := sroot.FindPathUniqueTry(npath)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -1431,7 +1516,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 		if sfn == nil {
 			continue
 		}
-		fmt.Printf("dnd deleting: %v  path: %v\n", sfn.PathUnique(), sfn.FPath)
+		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.PathUnique(), sfn.FPath)
 		sfn.DeleteFile()
 	}
 }
@@ -1699,7 +1784,6 @@ func (ft *FileTreeView) Style2D() {
 				ft.AddClass("updated")
 			}
 		}
-		// fmt.Printf("sty: %v\n", ft.Nm)
 		ft.StyleTreeView()
 		ft.LayData.SetFromStyle(&ft.Sty.Layout) // also does reset
 	}

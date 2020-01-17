@@ -551,6 +551,9 @@ func (w *windowImpl) Close() {
 		w.glw.Destroy()
 		w.glw = nil // marks as closed for all other calls
 	})
+	if theApp.quitting {
+		theApp.quitCloseCnt <- struct{}{}
+	}
 	w.mu.Unlock()
 }
 

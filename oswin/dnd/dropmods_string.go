@@ -3,9 +3,23 @@
 package dnd
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[NoDropMod-0]
+	_ = x[DropCopy-1]
+	_ = x[DropMove-2]
+	_ = x[DropLink-3]
+	_ = x[DropIgnore-4]
+	_ = x[DropModsN-5]
+}
 
 const _DropMods_name = "NoDropModDropCopyDropMoveDropLinkDropIgnoreDropModsN"
 
@@ -25,5 +39,5 @@ func (i *DropMods) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type DropMods", s)
+	return errors.New("String: " + s + " is not a valid option for type: DropMods")
 }

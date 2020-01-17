@@ -58,7 +58,8 @@ func NewTextDataBytes(text []byte) *Data {
 	return &Data{filecat.TextPlain, text}
 }
 
-// IsText returns true if type is any of the text/ types (literally looks for that at start of Type) or is another known text type (e.g., AppJSON, XML)
+// IsText returns true if type is any of the text/ types (literally looks for that
+// at start of Type) or is another known text type (e.g., AppJSON, XML)
 func IsText(typ string) bool {
 	if strings.HasPrefix(typ, "text/") {
 		return true
@@ -69,10 +70,18 @@ func IsText(typ string) bool {
 	return false
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//    Mimes
+
 // Mimes is a slice of mime data, potentially encoding the same data in
 // different formats -- this is used for all oswin API's for maximum
 // flexibility
 type Mimes []*Data
+
+// NewMimes returns a new Mimes slice of given length and capacity
+func NewMimes(ln, cp int) Mimes {
+	return make(Mimes, ln, cp)
+}
 
 // NewText returns a Mimes representation of the string as a single text/plain Data
 func NewText(text string) Mimes {

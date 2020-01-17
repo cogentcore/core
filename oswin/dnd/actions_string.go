@@ -3,13 +3,31 @@
 package dnd
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
-const _Actions_name = "NoActionStartDropOnTargetDropFmSourceMoveEnterExitHoverActionsN"
+var _ = errors.New("dummy error")
 
-var _Actions_index = [...]uint8{0, 8, 13, 25, 37, 41, 46, 50, 55, 63}
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[NoAction-0]
+	_ = x[Start-1]
+	_ = x[DropOnTarget-2]
+	_ = x[DropFmSource-3]
+	_ = x[External-4]
+	_ = x[Move-5]
+	_ = x[Enter-6]
+	_ = x[Exit-7]
+	_ = x[Hover-8]
+	_ = x[ActionsN-9]
+}
+
+const _Actions_name = "NoActionStartDropOnTargetDropFmSourceExternalMoveEnterExitHoverActionsN"
+
+var _Actions_index = [...]uint8{0, 8, 13, 25, 37, 45, 49, 54, 58, 63, 71}
 
 func (i Actions) String() string {
 	if i < 0 || i >= Actions(len(_Actions_index)-1) {
@@ -25,5 +43,5 @@ func (i *Actions) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Actions", s)
+	return errors.New("String: " + s + " is not a valid option for type: Actions")
 }

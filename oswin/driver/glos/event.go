@@ -10,7 +10,9 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 )
 
@@ -233,6 +235,23 @@ func (w *windowImpl) cursorEnterEvent(gw *glfw.Window, entered bool) {
 }
 
 func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
+	ln := len(names)
+	if ln == 0 {
+		return
+	}
+	md := mimedata.NewMimes(ln, ln)
+	for i, s := range names {
+		md[i] = mimedata.NewTextData(s)
+	}
+	event := &dnd.Event{
+		Action:    dnd.External,
+		Where:     lastMousePos,
+		Modifiers: lastMods,
+		Data:      md,
+	}
+	event.DefaultMod()
+	event.Init()
+	w.Send(event)
 }
 
 func glfwKeyCode(kcode glfw.Key) key.Codes {

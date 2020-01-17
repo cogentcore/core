@@ -677,6 +677,12 @@ func (em *EventMgr) DNDStart(src ki.Ki, data mimedata.Mimes) {
 	}
 }
 
+// DNDIsInternalSrc returns true if the source of the DND operation is internal to GoGi
+// system -- otherwise it originated from external OS source.
+func (em *EventMgr) DNDIsInternalSrc() bool {
+	return em.DNDSource != nil
+}
+
 // SendDNDHoverEvent sends DND hover event, based on last mouse move event
 func (em *EventMgr) SendDNDHoverEvent(e *mouse.DragEvent) {
 	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
