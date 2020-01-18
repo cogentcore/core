@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
+	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -129,7 +130,7 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 // child entirely -- does full rebuild at level of viewport
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
 	sv.SetSplits(splits...)
-	sv.WinFullReRender() // tell window to do a full redraw
+	// sv.WinFullReRender() // tell window to do a full redraw
 	sv.Viewport.SetNeedsFullRender()
 }
 
@@ -150,7 +151,7 @@ func (sv *SplitView) RestoreSplits() {
 	if sv.SavedSplits == nil {
 		return
 	}
-	sv.SetSplits(sv.SavedSplits...)
+	sv.SetSplitsAction(sv.SavedSplits...)
 }
 
 // CollapseChild collapses given child(ren) (sets split proportion to 0),
@@ -168,6 +169,7 @@ func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
+	sv.Viewport.SetNeedsFullRender() // splits typically require full rebuild
 	sv.UpdateEnd(updt)
 }
 
@@ -181,7 +183,17 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
+	sv.Viewport.SetNeedsFullRender() // splits typically require full rebuild
 	sv.UpdateEnd(updt)
+}
+
+// IsCollapsed returns true if given split number is collapsed
+func (sv *SplitView) IsCollapsed(idx int) bool {
+	sz := len(sv.Kids)
+	if idx >= 0 && idx < sz {
+		return sv.Splits[idx] < 0.01
+	}
+	return false
 }
 
 // SetSplitAction sets the new splitter value, for given splitter -- new
@@ -257,7 +269,7 @@ func (sv *SplitView) ConfigSplitters() {
 		sp.LayData.AllocSize.SetDim(odim, handsz*2)
 		sp.LayData.AllocSizeOrig = sp.LayData.AllocSize
 		sp.LayData.AllocPosRel.SetDim(sv.Dim, 0)
-		sp.LayData.AllocPosRel.SetDim(odim, mid-handsz)
+		sp.LayData.AllocPosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
 		sp.LayData.AllocPosOrig = sp.LayData.AllocPosRel
 		sp.Min = 0.0
 		sp.Max = 1.0
@@ -588,6 +600,68 @@ func (sr *Splitter) UpdateSplitterPos() {
 	}
 }
 
+// SplitView returns our parent split view
+func (sr *Splitter) SplitView() *SplitView {
+	if sr.Par == nil || sr.Par.Parent() == nil {
+		return nil
+	}
+	svi := sr.Par.Parent().Embed(KiT_SplitView)
+	if svi == nil {
+		return nil
+	}
+	return svi.(*SplitView)
+}
+
+func (sr *Splitter) MouseEvent() {
+	sr.ConnectEvent(oswin.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		srr := recv.Embed(KiT_Splitter).(*Splitter)
+		if srr.IsInactive() {
+			me.SetProcessed()
+			srr.SetSelectedState(!srr.IsSelected())
+			srr.EmitSelectedSignal()
+			srr.UpdateSig()
+		} else {
+			if me.Button == mouse.Left {
+				me.SetProcessed()
+				if me.Action == mouse.Press {
+					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
+					st := &srr.Sty
+					spc := st.Layout.Margin.Dots + 0.5*srr.ThSize
+					if srr.Dim == mat32.X {
+						srr.SliderPressed(float32(ed.X) - spc)
+					} else {
+						srr.SliderPressed(float32(ed.Y) - spc)
+					}
+				} else if me.Action == mouse.DoubleClick {
+					sv := srr.SplitView()
+					if sv != nil {
+						if sv.IsCollapsed(srr.SplitterNo) {
+							sv.RestoreSplits()
+						} else {
+							sv.CollapseChild(true, srr.SplitterNo)
+						}
+					}
+				} else {
+					srr.SliderReleased()
+				}
+			}
+		}
+	})
+}
+
+func (sr *Splitter) SplitterEvents() {
+	sr.MouseDragEvent()
+	sr.MouseEvent()
+	sr.MouseFocusEvent()
+	sr.MouseScrollEvent()
+	sr.KeyChordEvent()
+}
+
+func (sr *Splitter) ConnectEvents2D() {
+	sr.SplitterEvents()
+}
+
 func (sr *Splitter) Render2D() {
 	win := sr.Viewport.Win
 	sr.This().(Node2D).ConnectEvents2D()
@@ -646,10 +720,6 @@ func (sr *Splitter) Render2DDefaultStyle() {
 		sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
 		sr.RenderBoxImpl(pos, sz, 0)
 	}
-}
-
-func (sr *Splitter) ConnectEvents2D() {
-	sr.SliderEvents()
 }
 
 func (sr *Splitter) FocusChanged2D(change FocusChanges) {
