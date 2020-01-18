@@ -2167,6 +2167,14 @@ func (w *Window) IsWindowInFocus() bool {
 	return false
 }
 
+// WindowInFocus returns the window in focus according to oswin.
+// There is a small chance it could be nil.
+func WindowInFocus() *Window {
+	fwin := oswin.TheApp.WindowInFocus()
+	fw, _ := AllWindows.FindOSWin(fwin)
+	return fw
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //                   DND: Drag-n-Drop
 
@@ -2434,6 +2442,19 @@ func (wl *WindowList) FindData(data interface{}) (*Window, bool) {
 	defer WindowGlobalMu.Unlock()
 	for _, wi := range *wl {
 		if wi.Data == data {
+			return wi, true
+		}
+	}
+	return nil, false
+}
+
+// FindOSWin finds window with given oswin.Window on list -- returns
+// window and true if found, nil, false otherwise.
+func (wl *WindowList) FindOSWin(osw oswin.Window) (*Window, bool) {
+	WindowGlobalMu.Lock()
+	defer WindowGlobalMu.Unlock()
+	for _, wi := range *wl {
+		if wi.OSWin == osw {
 			return wi, true
 		}
 	}

@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"github.com/Masterminds/vcs"
@@ -27,7 +28,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	}
 	scan := bufio.NewScanner(bytes.NewReader(out))
 	for scan.Scan() {
-		fn := string(scan.Bytes())
+		fn := filepath.FromSlash(string(scan.Bytes()))
 		f[fn] = Untracked
 	}
 
@@ -37,7 +38,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	}
 	scan = bufio.NewScanner(bytes.NewReader(out))
 	for scan.Scan() {
-		fn := string(scan.Bytes())
+		fn := filepath.FromSlash(string(scan.Bytes()))
 		f[fn] = Stored
 	}
 
@@ -47,7 +48,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	}
 	scan = bufio.NewScanner(bytes.NewReader(out))
 	for scan.Scan() {
-		fn := string(scan.Bytes())
+		fn := filepath.FromSlash(string(scan.Bytes()))
 		f[fn] = Modified
 	}
 
@@ -57,7 +58,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	}
 	scan = bufio.NewScanner(bytes.NewReader(out))
 	for scan.Scan() {
-		fn := string(scan.Bytes())
+		fn := filepath.FromSlash(string(scan.Bytes()))
 		f[fn] = Deleted
 	}
 
@@ -67,7 +68,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	}
 	scan = bufio.NewScanner(bytes.NewReader(out))
 	for scan.Scan() {
-		fn := string(scan.Bytes())
+		fn := filepath.FromSlash(string(scan.Bytes()))
 		f[fn] = Conflicted
 	}
 
@@ -77,7 +78,7 @@ func (gr *GitRepo) Files() (Files, error) {
 	}
 	scan = bufio.NewScanner(bytes.NewReader(out))
 	for scan.Scan() {
-		fn := string(scan.Bytes())
+		fn := filepath.FromSlash(string(scan.Bytes()))
 		f[fn] = Added
 	}
 

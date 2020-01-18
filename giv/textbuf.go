@@ -245,12 +245,10 @@ func (tb *TextBuf) SetText(txt []byte) {
 
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
-	if tb.IsChanged() {
-		tb.AutoSaveDelete()
-		tb.ClearChanged()
-		tb.LinesToBytes()
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
-	}
+	tb.AutoSaveDelete()
+	tb.ClearChanged()
+	tb.LinesToBytes()
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
 }
 
 // Text returns the current text as a []byte array, applying all current

@@ -256,7 +256,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	edit1.SetProp("min-width", "20em")
 	edit1.SetCompleter(edit1, Complete, CompleteEdit) // gets us word demo completion
 	edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), data)
+		fmt.Printf("Received line edit signal: %v from edit: %v with data: %v\n", gi.TextFieldSignals(sig), send.Name(), string(data))
 	})
 	// edit1.SetProp("inactive", true)
 

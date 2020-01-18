@@ -304,7 +304,7 @@ func (mm *mainMenuImpl) Triggered(win oswin.Window, title string, tag int) {
 			fmt.Printf("glos main menu event focus window is nil!  window: %v\n", win.Name())
 		} else {
 			fmt.Printf("glos main menu event window: %v != focus window: %v\n", win.Name(), fw.Name())
-			win = fw
+			// win = fw // this doesn't work because focus window doesn't have menu most of time
 		}
 	}
 	mm.callback(win, title, tag)
@@ -345,15 +345,21 @@ func (mm *mainMenuImpl) AddItem(men oswin.Menu, titles string, shortcut string, 
 	defer C.free(unsafe.Pointer(title))
 
 	sc := ""
-	r, mods, err := key.Chord(shortcut).Decode()
-	if err == nil {
-		sc = strings.ToLower(string(r))
+	scShift := false
+	scControl := false
+	scAlt := false
+	scCommand := false
+	// don't register shortcuts on main menu -- just causes problems!
+	if false {
+		r, mods, err := key.Chord(shortcut).Decode()
+		if err == nil {
+			sc = strings.ToLower(string(r))
+		}
+		scShift = (mods&(1<<uint32(key.Shift)) != 0)
+		scControl = (mods&(1<<uint32(key.Control)) != 0)
+		scAlt = (mods&(1<<uint32(key.Alt)) != 0)
+		scCommand = (mods&(1<<uint32(key.Meta)) != 0)
 	}
-
-	scShift := (mods&(1<<uint32(key.Shift)) != 0)
-	scControl := (mods&(1<<uint32(key.Control)) != 0)
-	scAlt := (mods&(1<<uint32(key.Alt)) != 0)
-	scCommand := (mods&(1<<uint32(key.Meta)) != 0)
 
 	scs := C.CString(sc)
 	defer C.free(unsafe.Pointer(scs))
