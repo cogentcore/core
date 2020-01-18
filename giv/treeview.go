@@ -185,6 +185,7 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data interface{}) {
 		}
 		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
 			tvIdx := tv.ViewIdx
+			// fmt.Printf("full sync, idx: %v  %v", tvIdx, tv.PathUnique())
 			tv.SyncToSrc(&tvIdx)
 		} else {
 			tv.UpdateSig()

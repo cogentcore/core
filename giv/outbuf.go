@@ -52,16 +52,19 @@ func (ob *OutBuf) MonOut() {
 	ob.CurOutMus = make([][]byte, 0, 100)
 	for outscan.Scan() {
 		b := outscan.Bytes()
-		bc := HTMLEscapeBytes(b) // automatically copies bytes -- outscan bytes are temp
+		bc := make([]byte, len(b))
+		copy(bc, b) // outscan bytes are temp
+		bec := HTMLEscapeBytes(bc)
+
 		ob.Mu.Lock()
 		if ob.AfterTimer != nil {
 			ob.AfterTimer.Stop()
 			ob.AfterTimer = nil
 		}
 		ob.CurOutLns = append(ob.CurOutLns, bc)
-		mup := bc
+		mup := bec
 		if ob.MarkupFun != nil {
-			mup = ob.MarkupFun(bc)
+			mup = ob.MarkupFun(bec)
 		}
 		ob.CurOutMus = append(ob.CurOutMus, mup)
 		now := time.Now()

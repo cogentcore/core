@@ -233,8 +233,8 @@ func (fn *FileNode) UpdateDir() {
 	fn.SetOpen()
 	config := fn.ConfigOfFiles(path)
 	mods, updt := fn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
-	if !mods {
-		updt = fn.UpdateStart()
+	if mods {
+		// fmt.Printf("got mods: %v\n", path)
 	}
 	// always go through kids, regardless of mods
 	for _, sfk := range fn.Kids {
@@ -254,7 +254,9 @@ func (fn *FileNode) UpdateDir() {
 			sf.Info.Vcs = vci.Stored
 		}
 	}
-	fn.UpdateEnd(updt)
+	if mods {
+		fn.UpdateEnd(updt)
+	}
 }
 
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on

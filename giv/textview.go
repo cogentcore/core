@@ -6,7 +6,6 @@ package giv
 
 import (
 	"fmt"
-	"html"
 	"image"
 	"image/draw"
 	"log"
@@ -2350,7 +2349,7 @@ func (tv *TextView) Copy(reset bool) *TextBufEdit {
 	}
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	cb := []byte(html.UnescapeString(string(tbe.ToBytes())))
+	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
 	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
