@@ -28,7 +28,7 @@ import (
 // Set GuiActive to true if the gui (piview) is active -- ensures that the
 // Ast tree is updated when nodes are swapped in reverse mode, and maybe
 // other things
-var GuiActive = false
+var GuiActive = true // false
 
 // DepthLimit is the infinite recursion prevention cutoff
 var DepthLimit = 10000

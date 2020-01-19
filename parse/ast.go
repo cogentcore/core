@@ -72,6 +72,7 @@ func (ast *Ast) WriteTree(out io.Writer, depth int) {
 }
 
 var AstProps = ki.Props{
+	"EnumType:Flag": ki.KiT_Flags,
 	// "CallMethods": ki.PropSlice{
 	// 	{"SaveAs", ki.Props{
 	// 		"Args": ki.PropSlice{

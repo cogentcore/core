@@ -14,9 +14,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/goki/ki/dirs"
+	"github.com/goki/ki/walki"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
@@ -29,6 +31,9 @@ type GoLang struct {
 
 // TheGoLang is the instance variable providing support for the Go language
 var TheGoLang = GoLang{}
+
+var LineParseState *pi.FileState
+var FileParseState *pi.FileState
 
 func init() {
 	pi.StdLangProps[filecat.Go].Lang = &TheGoLang
@@ -112,22 +117,48 @@ func (gl *GoLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	}
 }
 
+// WalkUpExpr walks up the AST expression and returns a list of strings that are selectors
+// in the expression.
+func (gl *GoLang) WalkUpExpr(ast *parse.Ast) []string {
+	var nms []string
+	curi := walki.Last(ast)
+	if curi == nil {
+		return nms
+	}
+	cur := curi.(*parse.Ast)
+	for {
+		switch {
+		case cur.Nm == "Name":
+			nms = append(nms, cur.Src)
+		case cur.Nm == "Selector":
+			if cur.NumChildren() == 1 {
+				nms = append(nms[:len(nms)-1], "", nms[len(nms)-1]) // insert blank
+			}
+		}
+		curi = walki.Prev(cur.This())
+		if curi == nil {
+			break
+		}
+		cur = curi.(*parse.Ast)
+	}
+	if nms == nil {
+		return nms
+	}
+	nnm := len(nms)
+	rnm := make([]string, nnm)
+	for i, nm := range nms {
+		rnm[nnm-i-1] = nm
+	}
+	return rnm
+}
+
 // PathNamesInString returns the package, scope (type, fun) and
 // element names in given string (line of code) at given position
-func (gl *GoLang) PathNamesInString(fs *pi.FileState, str string, pos lex.Pos) (pkg, scope, name string, tok token.KeyToken) {
-	pr := gl.Parser()
-	if pr == nil {
-		return
-	}
-	lfs := pr.ParseString(str, fs.Src.Filename, fs.Src.Sup)
-	if lfs == nil {
-		return
-	}
+func (gl *GoLang) PathNamesInString(lfs, fs *pi.FileState, str string, pos lex.Pos) (pkg, scope, name string, tok token.KeyToken) {
 	// pkg := fs.Syms.First()
 
 	// lxstr := lfs.Src.LexTagSrc()
 	// fmt.Println(lxstr)
-	// lfs.Ast.WriteTree(os.Stdout, 0)
 
 	lxs := lfs.Src.Lexs[0]
 	sz := len(lxs)
@@ -198,51 +229,157 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	}
 	fs.SymsMu.RLock()
 	defer fs.SymsMu.RUnlock()
-	pkg, scope, name, _ := gl.PathNamesInString(fs, str, pos)
-	if pkg == "" && name == "" && scope == "" {
+
+	FileParseState = fs
+
+	pr := gl.Parser()
+	if pr == nil {
 		return
 	}
-	if pkg != "" {
-		return gl.CompleteLinePkg(fs, str, pos, pkg, scope, name)
+	lfs := pr.ParseString(str, fs.Src.Filename, fs.Src.Sup)
+	if lfs == nil {
+		return
 	}
-	if scope != "" {
-		md.Seed = scope + "." + name
-	} else {
-		md.Seed = name
-	}
+	LineParseState = lfs
+	lfs.Ast.WriteTree(os.Stdout, 0)
 
 	var conts syms.SymMap // containers of given region -- local scoping
 	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
 
-	var matches syms.SymMap
-	if scope != "" {
-		scsym, got := fs.FindNameScoped(scope, conts)
-		if got {
-			gotKids := fs.FindChildren(scsym, name, conts, &matches)
-			if !gotKids {
+	nms := gl.WalkUpExpr(lfs.ParseState.Ast)
+	fmt.Printf("nms: %v\n", nms)
+
+	if len(nms) <= 1 {
+		// deal with one thing
+		return
+	}
+
+	fnm := nms[0]
+	scsym, got := fs.FindNameScoped(fnm, conts)
+	if got {
+		if scsym.Type != "" {
+			return gl.CompleteTypeName(fs, scsym.Type, nms[1:])
+		}
+	}
+	return
+
+	/*
+		pkg, scope, name, _ := gl.PathNamesInString(lfs, fs, str, pos)
+		fmt.Printf("pkg: %v  scope: %v  name: %v\n", pkg, scope, name)
+
+		if pkg == "" && name == "" && scope == "" {
+			return
+		}
+		if pkg != "" {
+			return gl.CompleteLinePkg(fs, pkg, scope, name)
+		}
+		if scope != "" {
+			md.Seed = scope + "." + name
+		} else {
+			md.Seed = name
+		}
+
+		fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
+
+		var matches syms.SymMap
+		if scope != "" {
+			scsym, got := fs.FindNameScoped(scope, conts)
+			if got {
+				gotKids := fs.FindChildren(scsym, name, conts, &matches)
+				if !gotKids {
+					scope = ""
+					md.Seed = name
+				}
+			} else {
 				scope = ""
 				md.Seed = name
 			}
+		}
+
+		if scope == "" && name == "" {
+			return md
+		}
+
+		if len(matches) == 0 { // look just at name if nothing from scope
+			nmsym, got := fs.FindNameScoped(name, conts)
+			if got {
+				fs.FindAnyChildren(nmsym, name, conts, &matches)
+			}
+			if len(matches) == 0 {
+				fs.FindNamePrefixScoped(name, conts, &matches)
+			}
+		}
+		gl.CompleteReturnMatches(matches, scope, &md)
+		return
+	*/
+}
+
+// CompleteTypeName
+func (gl *GoLang) CompleteTypeName(fs *pi.FileState, typ string, nms []string) (md complete.MatchData) {
+	fs.SymsMu.RLock()
+	defer fs.SymsMu.RUnlock()
+
+	tsp := strings.Split(typ, ".")
+	pnm := ""
+	tnm := ""
+	if len(tsp) == 2 {
+		pnm = tsp[0]
+		tnm = tsp[1]
+	} else {
+		tnm = tsp[0]
+	}
+	var tsym *syms.Symbol
+	var got bool
+	if pnm != "" {
+		psym, _ := gl.ExtsPkg(fs, pnm)
+		tsym, got = psym.Children.FindNameScoped(tnm)
+	} else {
+		tsym, got = fs.Syms.FindNameScoped(tnm)
+	}
+	if !got {
+		fmt.Printf("type name not found: %v\n", tnm)
+	}
+	fmt.Printf("type sym: %v\n", tsym)
+
+	// now we can just iterate over names to trace down members from this starting point
+	// can call this method recursively whenever we get a new type name
+
+	/*
+		if scope != "" {
+			md.Seed = scope + "." + name
 		} else {
-			scope = ""
 			md.Seed = name
 		}
-	}
-
-	if scope == "" && name == "" {
-		return md
-	}
-
-	if len(matches) == 0 { // look just at name if nothing from scope
-		nmsym, got := fs.FindNameScoped(name, conts)
-		if got {
-			fs.FindAnyChildren(nmsym, name, conts, &matches)
+		var matches syms.SymMap
+		if scope != "" {
+			scsym, got := psym.Children.FindNameScoped(scope)
+			if got {
+				gotKids := scsym.FindAnyChildren(name, psym.Children, nil, &matches)
+				if !gotKids {
+					scope = ""
+					md.Seed = name
+				}
+			} else {
+				scope = ""
+				md.Seed = name
+			}
 		}
-		if len(matches) == 0 {
-			fs.FindNamePrefixScoped(name, conts, &matches)
+		if len(matches) == 0 { // look just at name if nothing from scope
+			nmsym, got := psym.Children.FindNameScoped(name)
+			if got {
+				nmsym.FindAnyChildren("", psym.Children, nil, &matches)
+			}
+			if len(matches) == 0 {
+				psym.Children.FindNamePrefixScoped(name, &matches)
+			}
 		}
-	}
-	gl.CompleteReturnMatches(matches, scope, &md)
+		md.Seed = pkg + "." + md.Seed
+		effscp := pkg
+		if scope != "" {
+			effscp += "." + scope
+		}
+		gl.CompleteReturnMatches(matches, effscp, &md)
+	*/
 	return
 }
 
@@ -271,7 +408,7 @@ func (gl *GoLang) CompleteReturnMatches(matches syms.SymMap, scope string, md *c
 
 // CompleteLinePkg returns completion for symbol in given external
 // package
-func (gl *GoLang) CompleteLinePkg(fs *pi.FileState, str string, pos lex.Pos, pkg, scope, name string) (md complete.MatchData) {
+func (gl *GoLang) CompleteLinePkg(fs *pi.FileState, pkg, scope, name string) (md complete.MatchData) {
 	fs.SymsMu.RLock()
 	defer fs.SymsMu.RUnlock()
 	psym, _ := gl.ExtsPkg(fs, pkg)
