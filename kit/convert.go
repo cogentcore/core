@@ -10,6 +10,7 @@ import (
 	"math"
 	"reflect"
 	"strconv"
+	"unicode"
 
 	"github.com/goki/ki/floats"
 	"github.com/goki/ki/ints"
@@ -706,4 +707,14 @@ func MinPos32(a, b float32) float32 {
 		return b
 	}
 	return a
+}
+
+// HasUpperCase returns true if string has an upper-case letter
+func HasUpperCase(str string) bool {
+	for _, r := range str {
+		if unicode.IsUpper(r) {
+			return true
+		}
+	}
+	return false
 }

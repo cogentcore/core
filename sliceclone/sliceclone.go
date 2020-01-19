@@ -20,6 +20,18 @@ func String(sl []string) []string {
 	return cp
 }
 
+// Byte returns a cloned copy of the given byte slice -- returns nil
+// if slice has zero length
+func Byte(sl []byte) []byte {
+	sz := len(sl)
+	if sz == 0 {
+		return nil
+	}
+	cp := make([]byte, sz)
+	copy(cp, sl)
+	return cp
+}
+
 // Bool returns a cloned copy of the given bool slice -- returns nil
 // if slice has zero length
 func Bool(sl []bool) []bool {
