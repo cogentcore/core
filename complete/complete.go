@@ -13,6 +13,9 @@ import (
 	"unicode"
 
 	"github.com/akutz/sortfold"
+	"github.com/goki/ki/kit"
+	"github.com/goki/pi/syms"
+	"github.com/goki/pi/token"
 )
 
 // Completion holds one potential completion
@@ -72,7 +75,7 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 			break
 		}
 		var noCase = true
-		if HasUpperCase(seed) {
+		if kit.HasUpperCase(seed) {
 			noCase = false
 		}
 		text := s
@@ -121,7 +124,7 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 	}
 
 	var noCase = true
-	if HasUpperCase(seed) {
+	if kit.HasUpperCase(seed) {
 		noCase = false
 	}
 	for i, c := range completions {
@@ -218,12 +221,35 @@ func EditWord(text string, cp int, completion string, seed string) (ed EditData)
 	return ed
 }
 
-// HasUpperCase returns true if string has an upper-case letter
-func HasUpperCase(str string) bool {
-	for _, r := range str {
-		if unicode.IsUpper(r) {
-			return true
-		}
+// AddSyms adds given symbols as matches in the given match data
+func AddSyms(sym syms.SymMap, scope string, md *MatchData) {
+	if len(sym) == 0 {
+		return
 	}
-	return false
+	sys := sym.Slice(true) // sorted
+	for _, sy := range sys {
+		if sy.Name[0] == '_' || sy.Kind == token.NameLibrary { // internal / import
+			continue
+		}
+		nm := sy.Name
+		lbl := sy.Name
+		if scope != "" {
+			lbl = nm + " (." + scope + ")"
+			nm = scope + "." + nm
+		}
+		c := Completion{Text: nm, Label: lbl, Icon: sy.Kind.IconName(), Desc: sy.Detail}
+		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
+		md.Matches = append(md.Matches, c)
+	}
+}
+
+// AddSymsPrefix adds subset of symbols that match seed prefix to given match data
+func AddSymsPrefix(sym syms.SymMap, scope, seed string, md *MatchData) {
+	matches := &sym
+	if seed != "" {
+		matches = &syms.SymMap{}
+		md.Seed = seed
+		sym.FindNamePrefix(seed, matches)
+	}
+	AddSyms(*matches, scope, md)
 }

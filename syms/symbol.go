@@ -102,9 +102,7 @@ func (sy *Symbol) AddChild(child *Symbol) bool {
 	sy.Children.Alloc()
 	_, on := sy.Children[child.Name]
 	idx := len(sy.Children)
-	if sy.Kind.SubCat() == token.NameType {
-		child.Index = idx
-	}
+	child.Index = idx // always record index
 	sy.Children[child.Name] = child
 	return !on
 }
