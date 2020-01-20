@@ -10,6 +10,8 @@ import (
 	"io"
 	"sync"
 	"time"
+
+	"github.com/goki/ki/sliceclone"
 )
 
 // OutBufMarkupFunc is a function that returns a marked-up version of a given line of
@@ -52,8 +54,7 @@ func (ob *OutBuf) MonOut() {
 	ob.CurOutMus = make([][]byte, 0, 100)
 	for outscan.Scan() {
 		b := outscan.Bytes()
-		bc := make([]byte, len(b))
-		copy(bc, b) // outscan bytes are temp
+		bc := sliceclone.Byte(b) // outscan bytes are temp
 		bec := HTMLEscapeBytes(bc)
 
 		ob.Mu.Lock()

@@ -6,7 +6,9 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/pi/complete"
+	"github.com/goki/pi/langs/golang"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
 )
 
@@ -27,7 +29,20 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 	if lp.Lang == nil {
 		return md
 	}
-	return lp.Lang.CompleteLine(sfs, text, lex.Pos{posLn, posCh})
+
+	// note: must have this set to ture to allow viewing of AST
+	// must set it in pi/parse directly -- so it is changed in the fileparse too
+	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
+
+	md = lp.Lang.CompleteLine(sfs, text, lex.Pos{posLn, posCh})
+
+	if golang.FileParseState != nil {
+		StructViewDialog(nil, golang.FileParseState, DlgOpts{Title: "File FileState", TmpSave: nil}, nil, nil)
+	}
+	if golang.LineParseState != nil {
+		StructViewDialog(nil, golang.LineParseState, DlgOpts{Title: "Line FileState", TmpSave: nil}, nil, nil)
+	}
+	return md
 }
 
 // CompleteEditPi uses the selected completion to edit the text

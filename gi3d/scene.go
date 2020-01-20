@@ -613,8 +613,8 @@ func (sc *Scene) NavEvents() {
 			ssc.SetDragCursor = false
 		}
 		zoom := float32(me.NonZeroDelta(false))
-		zoomPct := float32(.05)
-		zoomDel := float32(.05)
+		zoomPct := float32(.01)
+		zoomDel := float32(.01)
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Alt):
 			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)

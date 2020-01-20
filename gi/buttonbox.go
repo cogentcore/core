@@ -14,6 +14,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/ki/sliceclone"
 )
 
 // ButtonBox is a widget for containing a set of CheckBox buttons.
@@ -37,8 +38,7 @@ func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
 func (nb *ButtonBox) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*ButtonBox)
 	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.Items = make([]string, len(fr.Items))
-	copy(nb.Items, fr.Items)
+	nb.Items = sliceclone.String(fr.Items)
 }
 
 func (bb *ButtonBox) Disconnect() {
