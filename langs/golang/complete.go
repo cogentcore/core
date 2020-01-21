@@ -5,6 +5,8 @@
 package golang
 
 import (
+	"fmt"
+	"os"
 	"strings"
 	"unicode"
 
@@ -21,6 +23,16 @@ var LineParseState *pi.FileState
 var FileParseState *pi.FileState
 var CompleteSym *syms.Symbol
 var CompleteSyms *syms.SymMap
+
+var CompleteTrace = true
+
+// todo:
+// switch over to using type-based methods
+// go up ast to find right point, and skip over the final element if it is a Name
+// so you get the type up to the point of the last element, then just look in
+// stuff on that.
+// note: methods are not going to be found, so need to go back to the symbol once
+// we have the type name to get the methods etc.
 
 // CompleteLine is the main api called by completion code in giv/complete.go
 func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
@@ -46,15 +58,19 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 
 	// FileParseState = fs
 	// LineParseState = lfs
-	// lfs.Ast.WriteTree(os.Stdout, 0)
-	// lfs.LexState.Errs.Report(20, "", true, true)
-	// lfs.ParseState.Errs.Report(20, "", true, true)
+	if CompleteTrace {
+		lfs.Ast.WriteTree(os.Stdout, 0)
+		lfs.LexState.Errs.Report(20, "", true, true)
+		lfs.ParseState.Errs.Report(20, "", true, true)
+	}
 
 	var conts syms.SymMap // containers of given region -- local scoping
 	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
 
 	nms := gl.WalkUpExpr(lfs.ParseState.Ast)
-	// fmt.Printf("nms: %v\n", nms)
+	if CompleteTrace {
+		fmt.Printf("nms: %v\n", nms)
+	}
 
 	if len(nms) == 0 {
 		return
@@ -65,6 +81,12 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	if got {
 		return gl.CompleteSym(fs, fs.Syms, scsym, nms[1:])
 	}
+
+	if CompleteTrace {
+		fmt.Printf("name: %v not found\n", fnm)
+		CompleteSyms = &conts
+	}
+
 	return
 }
 
@@ -99,41 +121,25 @@ func (gl *GoLang) CompleteSym(fs *pi.FileState, psyms syms.SymMap, sym *syms.Sym
 			}
 		}
 		// default: // last restort: try looking up a package name indirectly
-		// 	psym, has := gl.CompletePkgSyms(fs, psyms, pnm)
+		// 	psym, has := gl.PkgSyms(fs, psyms, pnm)
 		// if !has {
 		// 	return
 		// }
 
 	}
-	// CompleteSym = sym
-	// fmt.Printf("sym: %+v  nms: %v\n", sym, nms)
+	if CompleteTrace {
+		CompleteSym = sym
+		fmt.Printf("sym: %+v  nms: %v\n", sym, nms)
+	}
 	return
-}
-
-// CompletePkgSyms attempts to find package symbols for given package name.
-// Is also passed any current package symbol context in psyms which might be
-// different from default filestate context.
-func (gl *GoLang) CompletePkgSyms(fs *pi.FileState, psyms syms.SymMap, pnm string) (*syms.Symbol, bool) {
-	psym, has := gl.ExtsPkg(fs, pnm)
-	if has {
-		return psym, has
-	}
-	ipsym, has := gl.FindImportPkg(fs, psyms, pnm) // look for import within psyms package symbols
-	if has {
-		fs.SymsMu.RUnlock()
-		gl.AddImportToExts(fs, ipsym.Name)
-		fs.SymsMu.RLock()
-		psym, has = gl.ExtsPkg(fs, pnm)
-		if !has {
-			CompleteSyms = &psyms
-		}
-	}
-	return psym, has
 }
 
 // CompleteTypeName completes to given type name using following names from that type.
 // psyms is the package syms currently in effect based on prior context.
 func (gl *GoLang) CompleteTypeName(fs *pi.FileState, psyms syms.SymMap, typ string, sym *syms.Symbol, nms []string) (md complete.MatchData) {
+	if typ[0] == '*' {
+		typ = typ[1:]
+	}
 	tsp := strings.Split(typ, ".")
 	pnm := ""
 	tnm := ""
@@ -146,7 +152,7 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, psyms syms.SymMap, typ stri
 	var tsym *syms.Symbol
 	var got bool
 	if pnm != "" {
-		psym, has := gl.CompletePkgSyms(fs, psyms, pnm)
+		psym, has := gl.PkgSyms(fs, psyms, pnm)
 		if !has {
 			CompleteSyms = &psyms
 			return
@@ -156,12 +162,16 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, psyms syms.SymMap, typ stri
 	tsym, got = psyms.FindNameScoped(tnm)
 	if !got {
 		// ok, maybe it was not a type after all
-		// fmt.Printf("type name not found: %v\n", tnm)
-		// CompleteSym = sym
+		if CompleteTrace {
+			fmt.Printf("type name not found: %v\n", tnm)
+			CompleteSym = sym
+		}
 		return
 	}
-	// fmt.Printf("type sym: %v\n", tsym)
-	// CompleteSym = tsym
+	if CompleteTrace {
+		fmt.Printf("type sym: %v\n", tsym)
+		// CompleteSym = tsym
+	}
 
 	nnm := len(nms)
 	switch nnm {
@@ -226,8 +236,15 @@ func (gl *GoLang) WalkUpExpr(ast *parse.Ast) []string {
 	}
 	cur := curi.(*parse.Ast)
 	for {
+		var par *parse.Ast
+		if cur.Par != nil {
+			par = cur.Par.(*parse.Ast)
+		}
 		switch {
 		case cur.Nm == "Name":
+			if par != nil && (par.Nm[:4] == "Asgn" || strings.HasSuffix(par.Nm, "Expr")) {
+				break
+			}
 			nms = append(nms, cur.Src)
 		case cur.Nm == "Selector":
 			if cur.NumChildren() == 1 {

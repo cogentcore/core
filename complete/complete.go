@@ -233,6 +233,10 @@ func AddSyms(sym syms.SymMap, scope string, md *MatchData) {
 		}
 		nm := sy.Name
 		lbl := sy.Name
+		if sy.Kind.SubCat() == token.NameFunction {
+			nm += "()"
+			lbl += "()"
+		}
 		if scope != "" {
 			lbl = nm + " (." + scope + ")"
 			nm = scope + "." + nm

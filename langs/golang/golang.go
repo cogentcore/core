@@ -48,6 +48,17 @@ func (gl *GoLang) Parser() *pi.Parser {
 	return gl.Pr
 }
 
+// todo: the SymsMu lock for FileState is very unclear.  We are forking off parallel
+// imports of symbols, with lots of potential for collision as mutual dependencies are
+// processed in other threads.
+
+// In addition, all the type resolution is done in parallel and writing symbols!
+// need some kind of global per-import-path locking mechanism, so any given
+// import is only ever being done once at a time.
+
+// It doesn't seem like the fs is updated properly either.  all very confusing.
+// need to get back to this after getting basic stuff working.
+
 func (gl *GoLang) ParseFile(fs *pi.FileState) {
 	pr := gl.Parser()
 	if pr == nil {
@@ -268,19 +279,33 @@ func (gl *GoLang) AddPkgToExts(fs *pi.FileState, pkg *syms.Symbol) bool {
 	return has
 }
 
-// ExtsPkg returns the symbol in fs.ExtSyms for given name that
-// is a package -- false if not found -- assumed to be called under
-// SymsMu lock
-func (gl *GoLang) ExtsPkg(fs *pi.FileState, nm string) (*syms.Symbol, bool) {
-	sy, has := fs.ExtSyms[nm]
-	return sy, has
+// PkgSyms attempts to find package symbols for given package name.
+// Is also passed any current package symbol context in psyms which might be
+// different from default filestate context.
+func (gl *GoLang) PkgSyms(fs *pi.FileState, psyms syms.SymMap, pnm string) (*syms.Symbol, bool) {
+	fs.SymsMu.RLock()
+	psym, has := fs.ExtSyms[pnm]
+	fs.SymsMu.RUnlock()
+	if has {
+		return psym, has
+	}
+	fs.SymsMu.RLock()
+	ipsym, has := gl.FindImportPkg(fs, psyms, pnm) // look for import within psyms package symbols
+	fs.SymsMu.RUnlock()
+	if has {
+		gl.AddImportToExts(fs, ipsym.Name)
+		fs.SymsMu.RLock()
+		psym, has = fs.ExtSyms[pnm]
+		fs.SymsMu.RUnlock()
+	}
+	return psym, has
 }
 
 // AddImportsToExts adds imports from given package into pi.FileState.ExtSyms list
 // imports are coded as NameLibrary symbols with names = import path
 func (gl *GoLang) AddImportsToExts(fs *pi.FileState, pkg *syms.Symbol) {
-	fs.SymsMu.RLock()
 	var imps syms.SymMap
+	fs.SymsMu.RLock()
 	pkg.Children.FindKindScoped(token.NameLibrary, &imps)
 	fs.SymsMu.RUnlock()
 	if len(imps) == 0 {

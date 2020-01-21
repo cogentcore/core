@@ -1687,7 +1687,10 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 				continue
 			}
 			ty := syms.NewType(n, syms.Unknown)
+			ty.Filename = ps.Src.Filename
+			ty.Region = ast.SrcReg
 			ty.Ast = useAst.This()
+			ty.AddScopesStack(ps.Scopes)
 			scp.Types.Add(ty)
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Added type: %v from path: %v = %v in node: %v", ty.String(), act.Path, n, apath))
