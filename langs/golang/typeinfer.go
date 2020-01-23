@@ -18,7 +18,9 @@ import (
 var TypeErr = "<err>"
 
 // InferSymbolType infers the symbol types for given symbol and all of its children
-func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.Symbol) {
+// funInternal determines whether to include function-internal symbols
+// (e.g., variables within function scope -- only for local files).
+func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.Symbol, funInternal bool) {
 	if sy.Ast != nil {
 		ast := sy.Ast.(*parse.Ast)
 		switch {
@@ -42,7 +44,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
-			vty, ok := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1) // type always last thing
+			vty, ok := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1, false) // type always last thing
 			if ok {
 				sy.Type = vty.Name
 				if TraceTypes {
@@ -65,9 +67,13 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			}
 		}
 	}
-	for _, ss := range sy.Children {
-		if ss != sy {
-			gl.InferSymbolType(ss, fs, pkg)
+	if !funInternal && sy.Kind.SubCat() == token.NameFunction {
+		sy.Children = nil // nuke!
+	} else {
+		for _, ss := range sy.Children {
+			if ss != sy {
+				gl.InferSymbolType(ss, fs, pkg, funInternal)
+			}
 		}
 	}
 }

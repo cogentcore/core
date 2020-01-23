@@ -79,7 +79,7 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 			go gl.AddPathToExts(fs, path)
 		}
 		gl.AddImportsToExts(fs, pkg)
-		gl.ResolveTypes(fs, pkg)
+		gl.ResolveTypes(fs, pkg, true) // true = do include function-internal scope items
 	}
 }
 
@@ -208,8 +208,8 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	if pkgsym == nil {
 		return nil
 	}
-	pfs := pi.NewFileState() // master overall package file state
-	gl.ResolveTypes(pfs, pkgsym)
+	pfs := pi.NewFileState()            // master overall package file state
+	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, filecat.Go, path)
 	}

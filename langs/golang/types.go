@@ -17,17 +17,30 @@ import (
 	"github.com/goki/pi/token"
 )
 
-var TraceTypes = true
+var TraceTypes = false
 
-// todo: when do we bind kind of type for external refs (qualified names)
-// need to import everything (recursively) to get to the bottom of anything
-// if we don't, then we have to do it repeatedly live -- would be better to
-// do it and cache the results?  but only a problem when we have types
-// defined in terms of other types -- maybe not all that relevant?
+// QualifyType returns the type name tnm qualified by pkgnm if it is non-empty
+// and only if tnm is not a basic type name
+func (gl *GoLang) QualifyType(pkgnm, tnm string) string {
+	if pkgnm == "" || strings.Index(tnm, ".") > 0 {
+		return tnm
+	}
+	if _, btyp := BuiltinTypes[tnm]; btyp {
+		return tnm
+	}
+	return pkgnm + "." + tnm
+}
+
+// UnQualifyType returns the type name with any qualifier removed
+func (gl *GoLang) UnQualifyType(tnm string) string {
+	pi := strings.Index(tnm, ".")
+	if pi < 0 {
+		return tnm
+	}
+	return tnm[pi+1:]
+}
 
 // FindTypeName finds given type name in pkg and in broader context
-// assumed to be called under 	fs.SymsMu.RLock()
-//	defer fs.SymsMu.RUnlock()
 // returns new package symbol if type name is in a different package
 // else returns pkg arg.
 func (gl *GoLang) FindTypeName(tynm string, fs *pi.FileState, pkg *syms.Symbol) (*syms.Type, *syms.Symbol) {
@@ -66,25 +79,15 @@ func (gl *GoLang) FindTypeName(tynm string, fs *pi.FileState, pkg *syms.Symbol) 
 	return nil, pkg
 }
 
-// QualifyType returns the type name tnm qualified by pkgnm if it is non-empty
-// and only if tnm is not a basic type name
-func (gl *GoLang) QualifyType(pkgnm, tnm string) string {
-	if pkgnm == "" || strings.Index(tnm, ".") > 0 {
-		return tnm
-	}
-	if _, btyp := BuiltinTypes[tnm]; btyp {
-		return tnm
-	}
-	return pkgnm + "." + tnm
-}
-
 // ResolveTypes initializes all user-defined types from Ast data
 // and then resolves types of symbols.  The pkg must be a single
 // package symbol i.e., the children there are all the elements of the
 // package and the types are all the global types within the package.
-func (gl *GoLang) ResolveTypes(fs *pi.FileState, pkg *syms.Symbol) {
+// funInternal determines whether to include function-internal symbols
+// (e.g., variables within function scope -- only for local files).
+func (gl *GoLang) ResolveTypes(fs *pi.FileState, pkg *syms.Symbol, funInternal bool) {
 	gl.TypesFromAst(fs, pkg)
-	gl.InferSymbolType(pkg, fs, pkg)
+	gl.InferSymbolType(pkg, fs, pkg, funInternal)
 }
 
 // TypesFromAst initializes the types from their Ast parse
@@ -99,13 +102,14 @@ func (gl *GoLang) TypesFromAst(fs *pi.FileState, pkg *syms.Symbol) {
 		if err != nil {
 			continue
 		}
-		gl.TypeFromAst(fs, pkg, ty, tyast)
+		gl.TypeFromAst(fs, pkg, ty, tyast, true)
 	}
 }
 
 // TypeFromAst initializes the types from their Ast parse -- returns true if successful
 // if ty arg is nil, an new type is created, otherwise existing one is filled in.
-func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
+// getMeths means try to add methods for these types (only for top-level type processing).
+func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast, getMeths bool) (*syms.Type, bool) {
 	if ty == nil {
 		ty = &syms.Type{}
 	}
@@ -125,11 +129,20 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 			return ty, false
 		}
 	case "TypeNm":
-		if btyp, ok := pkg.Types[src]; ok {
+		if btyp, ok := BuiltinTypes[src]; ok {
 			ty.Kind = btyp.Kind
 			ty.Els.Add("par", btyp.Name) // parent type
 			if ty.Name == "" {
 				ty.Name = btyp.Name
+			}
+		} else if btyp, ok := pkg.Types[src]; ok {
+			ty.Kind = btyp.Kind
+			ty.Els.Add("par", btyp.Name) // parent type
+			if ty.Name == "" {
+				ty.Name = btyp.Name
+			}
+			if getMeths {
+				gl.TypeMeths(fs, pkg, ty)
 			}
 		} else {
 			if TraceTypes {
@@ -148,7 +161,7 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 		pkg.Types.Add(ty)
 	case "PointerType":
 		ty.Kind = syms.Ptr
-		if sty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 0); ok {
+		if sty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 0, false); ok {
 			ty.Els.Add("ptr", sty.Name)
 			if ty.Name == "" {
 				ty.Name = "*" + sty.Name
@@ -159,8 +172,8 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 		}
 	case "MapType":
 		ty.Kind = syms.Map
-		keyty, kok := gl.SubTypeFromAst(fs, pkg, tyast, 0)
-		valty, vok := gl.SubTypeFromAst(fs, pkg, tyast, 1)
+		keyty, kok := gl.SubTypeFromAst(fs, pkg, tyast, 0, false)
+		valty, vok := gl.SubTypeFromAst(fs, pkg, tyast, 1, false)
 		if kok && vok {
 			ty.Els.Add("key", keyty.Name)
 			ty.Els.Add("val", valty.Name)
@@ -168,29 +181,38 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 				ty.Name = "map[" + keyty.Name + "]" + valty.Name
 				pkg.Types.Add(ty)
 			}
+			if getMeths {
+				gl.TypeMeths(fs, pkg, ty)
+			}
 		} else {
 			return ty, false
 		}
 	case "SliceType":
 		ty.Kind = syms.List
-		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 0)
+		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 0, false)
 		if ok {
 			ty.Els.Add("val", valty.Name)
 			if ty.Name == "" {
 				ty.Name = "[]" + valty.Name
 				pkg.Types.Add(ty)
 			}
+			if getMeths {
+				gl.TypeMeths(fs, pkg, ty)
+			}
 		} else {
 			return ty, false
 		}
 	case "ArrayType":
 		ty.Kind = syms.Array
-		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 1)
+		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 1, false)
 		if ok {
 			ty.Els.Add("val", valty.Name)
 			if ty.Name == "" {
 				ty.Name = "[]" + valty.Name // todo: get size from child0, set to Size
 				pkg.Types.Add(ty)
+			}
+			if getMeths {
+				gl.TypeMeths(fs, pkg, ty)
 			}
 		} else {
 			return ty, false
@@ -212,7 +234,7 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 					ty.Els.Add(fsrc, fsrc) // anon two are same
 					continue
 				}
-				fldty, ok := gl.SubTypeFromAst(fs, pkg, fld, 1)
+				fldty, ok := gl.SubTypeFromAst(fs, pkg, fld, 1, false)
 				if ok {
 					nms := gl.NamesFromAst(fs, pkg, fld, 0)
 					for _, nm := range nms {
@@ -228,6 +250,9 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 		}
 		if ty.Name == "" {
 			ty.Name = "struct{" + tynm + "}"
+		}
+		if getMeths {
+			gl.TypeMeths(fs, pkg, ty)
 		}
 	case "InterfaceType":
 		ty.Kind = syms.Interface
@@ -265,7 +290,8 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 }
 
 // SubTypeFromAst returns a subtype from child ast at given index, nil if failed
-func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) (*syms.Type, bool) {
+// getMeths means try to add methods for these types (only for top-level type processing)
+func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int, getMeths bool) (*syms.Type, bool) {
 	sast, err := ast.ChildAstTry(idx)
 	if err != nil {
 		if TraceTypes {
@@ -273,7 +299,7 @@ func (gl *GoLang) SubTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.
 		}
 		return nil, false
 	}
-	return gl.TypeFromAst(fs, pkg, nil, sast)
+	return gl.TypeFromAst(fs, pkg, nil, sast, getMeths)
 }
 
 // TypeFromAstExpr starts walking the ast expression to find the type
@@ -282,7 +308,10 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 	var conts syms.SymMap // containers of given region -- local scoping
 	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
 
-	tyast.WriteTree(os.Stdout, 0)
+	if TraceTypes {
+		tyast.WriteTree(os.Stdout, 0)
+	}
+
 	last := walki.NextSibling(tyast)
 	// fmt.Printf("last: %v \n", last.PathUnique())
 
@@ -346,13 +375,20 @@ func (gl *GoLang) TypeFromAstSym(fs *pi.FileState, origPkg, pkg *syms.Symbol, ty
 		if TraceTypes {
 			fmt.Printf("TExpr: trying to infer type\n")
 		}
-		gl.InferSymbolType(sym, fs, pkg)
+		gl.InferSymbolType(sym, fs, pkg, true)
 	}
 	if sym.Type == TypeErr {
 		if TraceTypes {
 			fmt.Printf("TExpr: source symbol has type err: %v  kind: %v\n", sym.Name, sym.Kind)
-			return nil, false
 		}
+		return nil, false
+	}
+	if sym.Type == "" { // shouldn't happen
+		sym.Type = TypeErr
+		if TraceTypes {
+			fmt.Printf("TExpr: source symbol has type err (but wasn't marked): %v  kind: %v\n", sym.Name, sym.Kind)
+		}
+		return nil, false
 	}
 	tnm := sym.Type
 	return gl.TypeFromAstType(fs, origPkg, pkg, tyast, last, tnm)
@@ -422,31 +458,28 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 				fmt.Printf("TExpr: slice operator not on slice: %v\n", ttp.Name)
 			}
 		case nxt.Nm == "FuncCall":
-			tnm := ttp.Name
-			if pi := strings.Index(tnm, "."); pi > 0 {
-				tnm = tnm[pi+1:]
+			// ttp is the function type name
+			if TraceTypes {
+				fmt.Printf("FuncCall: got type sym: %v\n", ttp.Name)
 			}
-			tsym, got := pkg.Children.FindNameScoped(tnm)
-			if got {
-				fmt.Printf("got type sym: %v\n", tsym)
-				nxti := walki.Next(nxt)
-				if nxti == nil || nxti == last {
-					return ttp, true
-				}
-				fun := nxti.(*parse.Ast)
-				funm := fun.Src
+			nxti := walki.Next(nxt)
+			if nxti == nil || nxti == last {
+				return ttp, true
+			}
+			fun := nxti.(*parse.Ast)
+			funm := fun.Src
+			if TraceTypes {
 				fmt.Printf("looking for function symbol: %v\n", funm)
-				fsym, got := tsym.Children.FindNameScoped(funm)
-				if got {
-					fmt.Printf("got function sym: %v\n", fsym)
-					// todo: get return value
-					// multiple return values are going to be a pita.
-				} else {
-					fmt.Printf("did NOT get function sym: %v in pkg: %v\n", funm, pkg.Name)
-				}
-			} else {
-				fmt.Printf("did NOT get type sym: %v in pkg: %v\n", tnm, pkg.Name)
 			}
+			// todo: look in ttp.Meths..
+			// fsym, got := tsym.Children.FindNameScoped(funm)
+			// if got {
+			// 	fmt.Printf("got function sym: %v\n", fsym)
+			// 	// todo: get return value
+			// 	// multiple return values are going to be a pita.
+			// } else {
+			// 	fmt.Printf("did NOT get function sym: %v in pkg: %v\n", funm, pkg.Name)
+			// }
 		}
 		if brk {
 			break
@@ -468,119 +501,4 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		ttp.WriteDoc(os.Stdout, 0)
 	}
 	return nil, false
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//  Function / Params
-
-// NamesFromAst returns a slice of name(s) from namelist nodes
-func (gl *GoLang) NamesFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, idx int) []string {
-	sast, err := ast.ChildAstTry(idx)
-	if err != nil {
-		if TraceTypes {
-			fmt.Println(err)
-		}
-		return nil
-	}
-	var sary []string
-	if sast.HasChildren() {
-		for i := range sast.Kids {
-			sary = append(sary, gl.NamesFromAst(fs, pkg, sast, i)...)
-		}
-	} else {
-		sary = append(sary, sast.Src)
-	}
-	return sary
-}
-
-// FuncTypeFromAst initializes a function type from ast -- type can either be anon
-// or a named type -- if anon then the name is the full type signature without param names
-func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse.Ast, fty *syms.Type) {
-	pars, err := ast.ChildAstTry(0)
-	if err != nil {
-		if TraceTypes {
-			fmt.Println(err)
-		}
-		return
-	}
-	poff := 0
-	if pars.Nm == "Name" && len(ast.Kids) > 1 {
-		poff = 1
-		pars = ast.ChildAst(1)
-	}
-	npars := len(pars.Kids)
-	if npars > 0 && pars.Nm == "SigParams" {
-		npars = 0 // not really
-	}
-	if npars > 0 {
-		gl.ParamsFromAst(fs, pkg, pars, fty)
-		npars = len(fty.Els) // how many we added..
-	}
-	nrvals := 0
-	if len(ast.Kids) >= poff+2 {
-		rvals := ast.ChildAst(poff + 1)
-		nrvals := len(rvals.Kids)
-		if nrvals == 1 { // single rval, unnamed, has type directly..
-			rval := rvals.ChildAst(0)
-			if rval.Nm != "ParName" {
-				nrvals = 1
-				rtyp, ok := gl.SubTypeFromAst(fs, pkg, rvals, 0)
-				if ok {
-					fty.Els.Add("rval", rtyp.Name)
-					goto finalize
-				}
-			}
-		}
-		gl.ParamsFromAst(fs, pkg, rvals, fty)
-		nrvals = len(fty.Els) - npars // how many we added..
-	}
-finalize:
-	fty.Size = []int{npars, nrvals}
-}
-
-// ParamsFromAst sets params as Els for given function type (also for return types)
-func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.Ast, fty *syms.Type) {
-	npars := len(pars.Kids)
-	var pnames []string // param names that all share same type
-	for i := 0; i < npars; i++ {
-		par := pars.Kids[i].(*parse.Ast)
-		psz := len(par.Kids)
-		if par.Nm == "ParType" && psz == 1 {
-			ptypa := par.Kids[0].(*parse.Ast)
-			if ptypa.Nm == "TypeNm" { // could be multiple args with same type or a separate type-only arg
-				if _, istyp := pkg.Types[par.Src]; istyp {
-					fty.Els.Add(fmt.Sprintf("par_%v", i), par.Src)
-					continue
-				}
-				pnames = append(pnames, par.Src) // add to later type
-			} else {
-				ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 0)
-				if ok {
-					pnsz := len(pnames)
-					if pnsz > 0 {
-						for _, pn := range pnames {
-							fty.Els.Add(pn, ptyp.Name)
-						}
-					}
-					fty.Els.Add(fmt.Sprintf("par_%v", i), ptyp.Name)
-					continue
-				}
-				pnames = nil
-			}
-		} else if psz == 2 { // ParName
-			pnm := par.Kids[0].(*parse.Ast)
-			ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 1)
-			if ok {
-				pnsz := len(pnames)
-				if pnsz > 0 {
-					for _, pn := range pnames {
-						fty.Els.Add(pn, ptyp.Name)
-					}
-				}
-				fty.Els.Add(pnm.Src, ptyp.Name)
-				continue
-			}
-			pnames = nil
-		}
-	}
 }
