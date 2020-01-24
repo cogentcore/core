@@ -66,7 +66,7 @@ func (ty *Type) String() string {
 		if ty.Kind.SubCat() == Method {
 			str += "(" + ty.Els.StringRange(0, 1) + ") " + ty.Name + "(" + ty.Els.StringRange(1, npars-1) + ")"
 		} else {
-			str += "(" + ty.Els.StringRange(0, npars) + ")"
+			str += ty.Name + "(" + ty.Els.StringRange(0, npars) + ")"
 		}
 		nrets := ty.Size[1]
 		if nrets == 1 {
@@ -78,10 +78,41 @@ func (ty *Type) String() string {
 		return str
 	case ty.Kind.SubCat() == Map:
 		return "map[" + ty.Els[0].Type + "]" + ty.Els[1].Type
+	case ty.Kind == String:
+		return "string"
 	case ty.Kind.SubCat() == List:
 		return "[]" + ty.Els[0].Type
 	}
 	return ty.Name + ": " + ty.Kind.String()
+}
+
+// ArgString() returns string of args to function if it is a function type
+func (ty *Type) ArgString() string {
+	if ty.Kind.Cat() != Function {
+		return ""
+	}
+	npars := ty.Size[0]
+	if ty.Kind.SubCat() == Method {
+		return ty.Els.StringRange(1, npars-1)
+	} else {
+		return ty.Els.StringRange(0, npars)
+	}
+}
+
+// ReturnString() returns string of return vals of function if it is a function type
+func (ty *Type) ReturnString() string {
+	if ty.Kind.Cat() != Function {
+		return ""
+	}
+	npars := ty.Size[0]
+	nrets := ty.Size[1]
+	if nrets == 1 {
+		tel := ty.Els[npars]
+		return tel.Type
+	} else if nrets > 1 {
+		return "(" + ty.Els.StringRange(npars, nrets) + ")"
+	}
+	return ""
 }
 
 // NonPtrType returns the non-pointer name of this type, if it is a pointer type

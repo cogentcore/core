@@ -222,6 +222,7 @@ func EditWord(text string, cp int, completion string, seed string) (ed EditData)
 }
 
 // AddSyms adds given symbols as matches in the given match data
+// Scope is e.g., type name (label only)
 func AddSyms(sym syms.SymMap, scope string, md *MatchData) {
 	if len(sym) == 0 {
 		return
@@ -238,12 +239,54 @@ func AddSyms(sym syms.SymMap, scope string, md *MatchData) {
 			lbl += "()"
 		}
 		if scope != "" {
-			lbl = nm + " (." + scope + ")"
-			nm = scope + "." + nm
+			lbl = lbl + " (" + scope + ".)"
 		}
 		c := Completion{Text: nm, Label: lbl, Icon: sy.Kind.IconName(), Desc: sy.Detail}
 		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
 		md.Matches = append(md.Matches, c)
+	}
+}
+
+// AddTypeNames adds names from given type as matches in the given match data
+// Scope is e.g., type name (label only), and seed is prefix filter for names
+func AddTypeNames(typ *syms.Type, scope, seed string, md *MatchData) {
+	md.Seed = seed
+	for _, te := range typ.Els {
+		nm := te.Name
+		if seed != "" {
+			if !strings.HasPrefix(nm, seed) {
+				continue
+			}
+		}
+		lbl := nm
+		if scope != "" {
+			lbl = lbl + " (" + scope + ".)"
+		}
+		icon := "field" // assume..
+		c := Completion{Text: nm, Label: lbl, Icon: icon}
+		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
+		md.Matches = append(md.Matches, c)
+	}
+	for _, mt := range typ.Meths {
+		nm := mt.Name
+		if seed != "" {
+			if !strings.HasPrefix(nm, seed) {
+				continue
+			}
+		}
+		lbl := nm + "(" + mt.ArgString() + ") " + mt.ReturnString()
+		if scope != "" {
+			lbl = lbl + " (" + scope + ".)"
+		}
+		icon := "method" // assume..
+		c := Completion{Text: nm, Label: lbl, Icon: icon}
+		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
+		md.Matches = append(md.Matches, c)
+	}
+	if len(md.Matches) == 1 {
+		if md.Matches[0].Text == md.Seed {
+			md.Seed = ""
+		}
 	}
 }
 
@@ -253,7 +296,12 @@ func AddSymsPrefix(sym syms.SymMap, scope, seed string, md *MatchData) {
 	if seed != "" {
 		matches = &syms.SymMap{}
 		md.Seed = seed
-		sym.FindNamePrefix(seed, matches)
+		sym.FindNamePrefixRecursive(seed, matches)
 	}
 	AddSyms(*matches, scope, md)
+	if len(md.Matches) == 1 {
+		if md.Matches[0].Text == md.Seed {
+			md.Seed = ""
+		}
+	}
 }

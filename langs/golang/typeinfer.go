@@ -44,6 +44,10 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
+			// todo: unclear why NameVarGlobal types not working here
+			// if sy.Kind == token.NameVarGlobal {
+			// 	fmt.Printf("processing NVG: %v\n", sy.String())
+			// }
 			vty, ok := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1)
 			if ok {
 				sy.Type = vty.Name

@@ -163,7 +163,8 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 	tnm := gl.AstTypeName(tyast)
 	bkind, ok := TypeToKindMap[tnm]
 	if !ok { // must be some kind of expression
-		return gl.TypeFromAstExpr(fs, pkg, pkg, tyast)
+		sty, _, got := gl.TypeFromAstExpr(fs, pkg, pkg, tyast)
+		return sty, got
 	}
 	switch bkind {
 	case syms.Primitive:
@@ -179,9 +180,24 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 func (gl *GoLang) TypeFromAstPrim(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
 	tnm := gl.AstTypeName(tyast)
 	src := tyast.Src
-	etyp, _ := gl.FindTypeName(src, fs, pkg)
+	etyp, tpkg := gl.FindTypeName(src, fs, pkg)
 	if etyp != nil {
 		if ty == nil { // if we can find an existing type, and not filling in global, use it
+			if tpkg != pkg {
+				pkgnm := tpkg.Name
+				qtnm := gl.QualifyType(pkgnm, etyp.Name)
+				if qtnm != etyp.Name {
+					if letyp, ok := pkg.Types[qtnm]; ok {
+						etyp = letyp
+					} else {
+						ntyp := &syms.Type{}
+						*ntyp = *etyp
+						ntyp.Name = qtnm
+						pkg.Types.Add(ntyp)
+						etyp = ntyp
+					}
+				}
+			}
 			return etyp, true
 		}
 	} else {

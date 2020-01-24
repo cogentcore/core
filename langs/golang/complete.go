@@ -19,20 +19,18 @@ import (
 	"github.com/goki/pi/token"
 )
 
+// todo: fix completer logic when seed == only item -- should still show it!
+// * also need to fix NameVarGlobal in typeinfer
+// * transitive nxx1 or fffb stuff not getting pulled in from leabra (pools)
+// * var := expr not stopping at right spot for completion -- easy
+// * other files in *same package* not getting included in fs. syms -- need to add
+
 var LineParseState *pi.FileState
 var FileParseState *pi.FileState
 var CompleteSym *syms.Symbol
 var CompleteSyms *syms.SymMap
 
-var CompleteTrace = true
-
-// todo:
-// switch over to using type-based methods
-// go up ast to find right point, and skip over the final element if it is a Name
-// so you get the type up to the point of the last element, then just look in
-// stuff on that.
-// note: methods are not going to be found, so need to go back to the symbol once
-// we have the type name to get the methods etc.
+var CompleteTrace = false
 
 // CompleteLine is the main api called by completion code in giv/complete.go
 func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
@@ -59,134 +57,109 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	// FileParseState = fs
 	// LineParseState = lfs
 	if CompleteTrace {
-		lfs.Ast.WriteTree(os.Stdout, 0)
+		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
 		lfs.LexState.Errs.Report(20, "", true, true)
 		lfs.ParseState.Errs.Report(20, "", true, true)
 	}
 
-	var conts syms.SymMap // containers of given region -- local scoping
-	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
-
-	nms := gl.WalkUpExpr(lfs.ParseState.Ast)
+	start, last := gl.CompleteAstStart(lfs.ParseState.Ast)
 	if CompleteTrace {
-		fmt.Printf("nms: %v\n", nms)
-	}
-
-	if len(nms) == 0 {
-		return
-	}
-
-	fnm := nms[0]
-	scsym, got := fs.FindNameScoped(fnm, conts)
-	if got {
-		return gl.CompleteSym(fs, fs.Syms, scsym, nms[1:])
-	}
-
-	if CompleteTrace {
-		fmt.Printf("name: %v not found\n", fnm)
-		CompleteSyms = &conts
-	}
-
-	return
-}
-
-// CompleteSym completes to given symbol using following names also.
-// psyms is the package syms currently in effect based on prior context.
-func (gl *GoLang) CompleteSym(fs *pi.FileState, psyms syms.SymMap, sym *syms.Symbol, nms []string) (md complete.MatchData) {
-	nnm := len(nms)
-	switch {
-	case sym.Type != "":
-		return gl.CompleteTypeName(fs, psyms, sym.Type, sym, nms)
-	case sym.Kind == token.NameMethod:
-		ps := gl.FuncParams(sym)
-		if len(ps) > 0 {
-			pstr := strings.Join(ps, ", ")
-			c := complete.Completion{Text: pstr, Label: pstr, Icon: sym.Kind.IconName(), Desc: pstr}
-			md.Matches = append(md.Matches, c)
-			md.Seed = ""
+		if start == nil {
+			fmt.Printf("start = nil\n")
+			return
 		}
+		fmt.Printf("completion start:\n")
+		start.WriteTree(os.Stdout, 0)
+	}
+
+	pkg := fs.ParseState.Scopes[0]
+	// CompleteSym = pkg
+	start.SrcReg.St = pos
+
+	if start == last {
+		str := start.Src
+		if CompleteTrace {
+			fmt.Printf("start == last: %v\n", str)
+		}
+
+		var conts syms.SymMap // containers of given region -- local scoping
+		fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
+		complete.AddSymsPrefix(conts, "", str, &md)
+		var matches syms.SymMap
+		pkg.Children.FindNamePrefixScoped(str, &matches)
+		complete.AddSyms(matches, "", &md)
 		return
-	case sym.Kind == token.NamePackage:
-		switch nnm {
-		case 0:
-			complete.AddSyms(sym.Children, "", &md)
-			return
-		case 1:
-			complete.AddSymsPrefix(sym.Children, "", nms[0], &md)
-			return
-		default:
-			ssym, got := fs.FindNameScoped(nms[0], sym.Children)
-			if got {
-				return gl.CompleteSym(fs, sym.Children, ssym, nms[1:])
+	}
+
+	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
+	lststr := ""
+	if nxt != nil {
+		lststr = nxt.Src
+	}
+	if got {
+		// fmt.Printf("got completion type: %v, last str: %v\n", typ.String(), lststr)
+		complete.AddTypeNames(typ, typ.Name, lststr, &md)
+	} else {
+		// see if it starts with a package name..
+		snxt := start.NextAst()
+		if snxt != nil && snxt.Src != "" {
+			ststr := snxt.Src
+			psym, has := gl.PkgSyms(fs, pkg.Children, ststr)
+			if has {
+				lststr := last.Src
+				if lststr != "" && lststr != ststr {
+					var matches syms.SymMap
+					psym.Children.FindNamePrefixScoped(lststr, &matches)
+					complete.AddSyms(matches, ststr, &md)
+					md.Seed = lststr
+				} else {
+					complete.AddSyms(psym.Children, ststr, &md)
+				}
+				return
 			}
 		}
-		// default: // last restort: try looking up a package name indirectly
-		// 	psym, has := gl.PkgSyms(fs, psyms, pnm)
-		// if !has {
-		// 	return
-		// }
+		if CompleteTrace {
+			fmt.Printf("completion type not found\n")
+		}
+	}
 
-	}
-	if CompleteTrace {
-		CompleteSym = sym
-		fmt.Printf("sym: %+v  nms: %v\n", sym, nms)
-	}
 	return
 }
 
-// CompleteTypeName completes to given type name using following names from that type.
-// psyms is the package syms currently in effect based on prior context.
-func (gl *GoLang) CompleteTypeName(fs *pi.FileState, psyms syms.SymMap, typ string, sym *syms.Symbol, nms []string) (md complete.MatchData) {
-	if typ[0] == '*' {
-		typ = typ[1:]
-	}
-	tsp := strings.Split(typ, ".")
-	pnm := ""
-	tnm := ""
-	if len(tsp) == 2 {
-		pnm = tsp[0]
-		tnm = tsp[1]
-	} else {
-		tnm = tsp[0]
-	}
-	var tsym *syms.Symbol
-	var got bool
-	if pnm != "" {
-		psym, has := gl.PkgSyms(fs, psyms, pnm)
-		if !has {
-			CompleteSyms = &psyms
-			return
-		}
-		psyms = psym.Children // update...
-	}
-	tsym, got = psyms.FindNameScoped(tnm)
-	if !got {
-		// ok, maybe it was not a type after all
-		if CompleteTrace {
-			fmt.Printf("type name not found: %v\n", tnm)
-			CompleteSym = sym
-		}
+// CompleteAstStart finds the best starting point in the given current-line Ast
+// to start completion process, which walks back down from that starting point
+func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
+	curi := walki.Last(ast)
+	if curi == nil {
 		return
 	}
-	if CompleteTrace {
-		fmt.Printf("type sym: %v\n", tsym)
-		// CompleteSym = tsym
-	}
-
-	nnm := len(nms)
-	switch nnm {
-	case 0:
-		complete.AddSyms(tsym.Children, "", &md)
-	case 1:
-		complete.AddSymsPrefix(tsym.Children, "", nms[0], &md)
-	default:
-		cnm := nms[0]
-		csym, got := tsym.Children.FindNameScoped(cnm)
-		if got {
-			return gl.CompleteSym(fs, psyms, csym, nms[1:])
+	cur := curi.(*parse.Ast)
+	last = cur
+	start = cur
+	prv := cur
+	for {
+		var par *parse.Ast
+		if cur.Par != nil {
+			par = cur.Par.(*parse.Ast)
 		}
+		switch {
+		case cur.Nm == "Name":
+			if par != nil && (par.Nm[:4] == "Asgn" || strings.HasSuffix(par.Nm, "Expr")) {
+				return cur, last
+			}
+		case cur.Nm == "ExprStmt":
+			if cur.Src != "(" {
+				return prv, last
+			}
+		}
+		nxt := cur.PrevAst()
+		if nxt == nil {
+			return cur, last
+		}
+		prv = cur
+		cur = nxt
 	}
-	return
+	return cur, last
 }
 
 // CompleteEdit returns the completion edit data for integrating the selected completion
@@ -225,95 +198,3 @@ func (gl *GoLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp compl
 	ed.ForwardDelete = len(s2)
 	return ed
 }
-
-// WalkUpExpr walks up the AST expression and returns a list of strings that are selectors
-// in the expression.
-func (gl *GoLang) WalkUpExpr(ast *parse.Ast) []string {
-	var nms []string
-	curi := walki.Last(ast)
-	if curi == nil {
-		return nms
-	}
-	cur := curi.(*parse.Ast)
-	for {
-		var par *parse.Ast
-		if cur.Par != nil {
-			par = cur.Par.(*parse.Ast)
-		}
-		switch {
-		case cur.Nm == "Name":
-			if par != nil && (par.Nm[:4] == "Asgn" || strings.HasSuffix(par.Nm, "Expr")) {
-				break
-			}
-			nms = append(nms, cur.Src)
-		case cur.Nm == "Selector":
-			if cur.NumChildren() == 1 {
-				nms = append(nms[:len(nms)-1], "", nms[len(nms)-1]) // insert blank
-			}
-		case cur.Nm == "ExprStmt":
-			if len(nms) > 0 {
-				break
-			}
-			switch cur.Src {
-			case "(": // pass through so completion processes as a function
-				nms = append(nms, cur.Src)
-			case "[":
-				nms = nil // nothing to do here
-				break
-			}
-			// case cur.Nm == "Slice":
-			// nop
-		}
-		curi = walki.Prev(cur.This())
-		if curi == nil {
-			break
-		}
-		cur = curi.(*parse.Ast)
-	}
-	if nms == nil {
-		return nms
-	}
-	nnm := len(nms)
-	rnm := make([]string, nnm)
-	for i, nm := range nms {
-		rnm[nnm-i-1] = nm
-	}
-	return rnm
-}
-
-/*
-	if scope != "" {
-		md.Seed = scope + "." + name
-	} else {
-		md.Seed = name
-	}
-	var matches syms.SymMap
-	if scope != "" {
-		scsym, got := psym.Children.FindNameScoped(scope)
-		if got {
-			gotKids := scsym.FindAnyChildren(name, psym.Children, nil, &matches)
-			if !gotKids {
-				scope = ""
-				md.Seed = name
-			}
-		} else {
-			scope = ""
-			md.Seed = name
-		}
-	}
-	if len(matches) == 0 { // look just at name if nothing from scope
-		nmsym, got := psym.Children.FindNameScoped(name)
-		if got {
-			nmsym.FindAnyChildren("", psym.Children, nil, &matches)
-		}
-		if len(matches) == 0 {
-			psym.Children.FindNamePrefixScoped(name, &matches)
-		}
-	}
-	md.Seed = pkg + "." + md.Seed
-	effscp := pkg
-	if scope != "" {
-		effscp += "." + scope
-	}
-	gl.CompleteReturnMatches(matches, effscp, &md)
-*/
