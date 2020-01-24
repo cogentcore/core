@@ -12,6 +12,7 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/ki/walki"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/syms"
 )
@@ -43,6 +44,33 @@ func (ast *Ast) ChildAstTry(idx int) (*Ast, error) {
 		return nil, err
 	}
 	return asti.(*Ast), nil
+}
+
+// NextAst returns the next node in the Ast tree, or nil if none
+func (ast *Ast) NextAst() *Ast {
+	nxti := walki.Next(ast)
+	if nxti == nil {
+		return nil
+	}
+	return nxti.(*Ast)
+}
+
+// NextSiblingAst returns the next sibling node in the Ast tree, or nil if none
+func (ast *Ast) NextSiblingAst() *Ast {
+	nxti := walki.NextSibling(ast)
+	if nxti == nil {
+		return nil
+	}
+	return nxti.(*Ast)
+}
+
+// PrevAst returns the previous node in the Ast tree, or nil if none
+func (ast *Ast) PrevAst() *Ast {
+	nxti := walki.Prev(ast)
+	if nxti == nil {
+		return nil
+	}
+	return nxti.(*Ast)
 }
 
 // SetTokReg sets the token region for this rule to given region

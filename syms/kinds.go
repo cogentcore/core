@@ -166,6 +166,7 @@ const (
 	Tensor
 
 	// SubCat: Map -- an associative array / hash map / dictionary
+	// Type.Els first el is key, second is type
 	Map
 
 	// SubCat: Set -- typically a degenerate form of hash map with no value
@@ -190,7 +191,7 @@ const (
 	// SubCat: Func -- a standalone function
 	Func
 
-	// 	SubCat: Method -- a function with a specific receiver (e.g., on a Class in C++,
+	// SubCat: Method -- a function with a specific receiver (e.g., on a Class in C++,
 	// or on any type in Go).
 	// First Type.Els is receiver param -- included in Size[0]
 	Method

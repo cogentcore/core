@@ -5,6 +5,9 @@
 package pi
 
 import (
+	"fmt"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/goki/pi/filecat"
@@ -33,6 +36,7 @@ type FileState struct {
 	Syms       syms.SymMap  `json:"-" xml:"-" desc:"symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface."`
 	ExtSyms    syms.SymMap  `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
 	SymsMu     sync.RWMutex `json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
+	AnonCtr    int          `json:"-" xml:"-" desc:"anonymous counter -- counts up "`
 }
 
 // Init initializes the file state
@@ -44,6 +48,7 @@ func (fs *FileState) Init() {
 	fs.SymsMu.Lock()
 	fs.Syms = make(syms.SymMap)
 	fs.SymsMu.Unlock()
+	fs.AnonCtr = 0
 }
 
 // NewFileState returns a new initialized file state
@@ -235,4 +240,15 @@ func (fs *FileState) FindNamePrefixScoped(seed string, scope syms.SymMap, matche
 		return
 	}
 	fs.ExtSyms.FindNamePrefixScoped(seed, matches)
+}
+
+// NextAnonName returns the next anonymous name for this file, using counter
+func (fs *FileState) NextAnonName() string {
+	fs.AnonCtr++
+	fn := filepath.Base(fs.Src.Filename)
+	ext := filepath.Ext(fn)
+	if ext != "" {
+		fn = strings.TrimSuffix(fn, ext)
+	}
+	return fmt.Sprintf("anon_%s_%d", fn, fs.AnonCtr)
 }

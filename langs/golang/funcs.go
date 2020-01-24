@@ -6,7 +6,6 @@ package golang
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
@@ -24,9 +23,6 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 		}
 		return
 	}
-	if TraceTypes {
-		fmt.Printf("TypeMeths: got type sym: %v\n", tsym)
-	}
 	for _, sy := range tsym.Children {
 		if sy.Kind.SubCat() != token.NameFunction || sy.Ast == nil {
 			continue
@@ -37,10 +33,9 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 			fty.Kind = syms.Method
 			fty.Name = sy.Name
 			ty.Meths.Add(fty)
-			if TraceTypes {
-				fmt.Printf("TypeMeths: Added method: %v\n", fty)
-				fty.WriteDoc(os.Stdout, 1)
-			}
+			// if TraceTypes {
+			// 	fmt.Printf("TypeMeths: Added method: %v\n", fty)
+			// }
 		} else {
 			if TraceTypes {
 				fmt.Printf("TypeMeths: method failed: %v\n", sy.Name)
@@ -87,6 +82,9 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 	}
 	poff := 0
 	if pars.Nm == "MethRecvName" && len(ast.Kids) > 2 {
+		rcv := pars.Kids[0].(*parse.Ast)
+		rtyp := pars.Kids[1].(*parse.Ast)
+		fty.Els.Add(rcv.Src, rtyp.Src)
 		poff = 2
 		pars = ast.ChildAst(2)
 	} else if pars.Nm == "Name" && len(ast.Kids) > 1 {
@@ -138,7 +136,7 @@ func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.
 				}
 				pnames = append(pnames, par.Src) // add to later type
 			} else {
-				ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 0, false) // don't get meths!
+				ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 0)
 				if ok {
 					pnsz := len(pnames)
 					if pnsz > 0 {
@@ -153,7 +151,7 @@ func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.
 			}
 		} else if psz == 2 { // ParName
 			pnm := par.Kids[0].(*parse.Ast)
-			ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 1, false) // don't get meths!
+			ptyp, ok := gl.SubTypeFromAst(fs, pkg, par, 1)
 			if ok {
 				pnsz := len(pnames)
 				if pnsz > 0 {
@@ -176,7 +174,7 @@ func (gl *GoLang) RvalsFromAst(fs *pi.FileState, pkg *syms.Symbol, rvals *parse.
 		rval := rvals.ChildAst(0)
 		if rval.Nm != "ParName" {
 			nrvals = 1
-			rtyp, ok := gl.SubTypeFromAst(fs, pkg, rvals, 0, false) // don't get meths!
+			rtyp, ok := gl.SubTypeFromAst(fs, pkg, rvals, 0)
 			if ok {
 				fty.Els.Add("rval", rtyp.Name)
 				return

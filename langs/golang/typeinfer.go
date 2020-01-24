@@ -44,18 +44,18 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
-			vty, ok := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1, false) // type always last thing
+			vty, ok := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1)
 			if ok {
 				sy.Type = vty.Name
-				if TraceTypes {
-					fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
-				}
+				// if TraceTypes {
+				// 	fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
+				// }
 			} else {
 				sy.Type = TypeErr // actively mark as err so not re-processed
 				if TraceTypes {
 					astyp := ast.Kids[len(ast.Kids)-1]
-					fmt.Printf("namevar: %v NOT from ast: %v\n", sy.Name, astyp.PathUnique())
-					ast.WriteTree(os.Stdout, 0)
+					fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+					ast.WriteTree(os.Stdout, 1)
 				}
 			}
 		case sy.Kind.SubCat() == token.NameType:
@@ -65,6 +65,16 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			} else {
 				sy.Type = sy.Name // should be anyway..
 			}
+		case sy.Kind == token.NameFunction:
+			ftyp := gl.FuncTypeFromAst(fs, pkg, ast, nil)
+			if ftyp != nil {
+				ftyp.Name = "func " + sy.Name
+				sy.Type = ftyp.Name
+				pkg.Types.Add(ftyp)
+				// if TraceTypes {
+				// 	fmt.Printf("InferSymbolType: added function type: %v  %v\n", ftyp.Name, ftyp.String())
+				// }
+			}
 		}
 	}
 	if !funInternal && sy.Kind.SubCat() == token.NameFunction {
@@ -72,6 +82,9 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 	} else {
 		for _, ss := range sy.Children {
 			if ss != sy {
+				// if TraceTypes {
+				// 	fmt.Printf("InferSymbolType: processing child: %v\n", ss)
+				// }
 				gl.InferSymbolType(ss, fs, pkg, funInternal)
 			}
 		}

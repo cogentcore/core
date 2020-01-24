@@ -171,6 +171,7 @@ func (pr *Parser) LexAll(fs *FileState) {
 
 // ParserInit initializes the parser prior to running
 func (pr *Parser) ParserInit(fs *FileState) bool {
+	fs.AnonCtr = 0
 	fs.ParseState.Init(&fs.Src, &fs.Ast)
 	return true
 }

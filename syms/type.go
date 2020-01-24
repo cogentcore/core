@@ -59,6 +59,28 @@ func (ty *Type) AddScopesStack(ss SymStack) {
 
 // String() satisfies the fmt.Stringer interface
 func (ty *Type) String() string {
+	switch {
+	case ty.Kind.Cat() == Function:
+		str := "func "
+		npars := ty.Size[0]
+		if ty.Kind.SubCat() == Method {
+			str += "(" + ty.Els.StringRange(0, 1) + ") " + ty.Name + "(" + ty.Els.StringRange(1, npars-1) + ")"
+		} else {
+			str += "(" + ty.Els.StringRange(0, npars) + ")"
+		}
+		nrets := ty.Size[1]
+		if nrets == 1 {
+			tel := ty.Els[npars]
+			str += " " + tel.Type
+		} else if nrets > 1 {
+			str += " (" + ty.Els.StringRange(npars, nrets) + ")"
+		}
+		return str
+	case ty.Kind.SubCat() == Map:
+		return "map[" + ty.Els[0].Type + "]" + ty.Els[1].Type
+	case ty.Kind.SubCat() == List:
+		return "[]" + ty.Els[0].Type
+	}
 	return ty.Name + ": " + ty.Kind.String()
 }
 
@@ -87,11 +109,21 @@ func (ty *Type) WriteDoc(out io.Writer, depth int) {
 		}
 		fmt.Fprint(out, " }")
 	}
-	if len(ty.Els) > 0 {
+	if ty.Kind.SubCat() == Struct && len(ty.Els) > 0 {
 		fmt.Fprint(out, " {\n")
 		indp := indent.Tabs(depth + 1)
 		for i := range ty.Els {
-			fmt.Fprintf(out, "%v%v: %v\n", indp, ty.Els[i].Name, ty.Els[i].Type)
+			fmt.Fprintf(out, "%v%v\n", indp, ty.Els[i].String())
+		}
+		fmt.Fprintf(out, "%v}\n", ind)
+	} else {
+		fmt.Fprint(out, "\n")
+	}
+	if len(ty.Meths) > 0 {
+		fmt.Fprint(out, "Methods: {\n")
+		indp := indent.Tabs(depth + 1)
+		for _, m := range ty.Meths {
+			fmt.Fprintf(out, "%v%v\n", indp, m.String())
 		}
 		fmt.Fprintf(out, "%v}\n", ind)
 	} else {
@@ -109,12 +141,27 @@ type TypeEl struct {
 	Type string `desc:"type name -- looked up on relevant lists -- includes scoping / package / namespace name as appropriate"`
 }
 
+// String() satisfies the fmt.Stringer interface
+func (tel *TypeEl) String() string {
+	if tel.Name != "" {
+		return tel.Name + " " + tel.Type
+	}
+	return tel.Type
+}
+
 // TypeEls are the type elements for types
 type TypeEls []TypeEl
 
 // Add adds a new type element
 func (te *TypeEls) Add(nm, typ string) {
 	(*te) = append(*te, TypeEl{Name: nm, Type: typ})
+}
+
+// CopyFrom copies from another list
+func (te *TypeEls) CopyFrom(cp TypeEls) {
+	for _, t := range cp {
+		(*te) = append(*te, t)
+	}
 }
 
 // ByName returns type el with given name, nil if not there
@@ -137,4 +184,22 @@ func (te *TypeEls) ByType(typ string) *TypeEl {
 		}
 	}
 	return nil
+}
+
+// String() satisfies the fmt.Stringer interface
+func (te *TypeEls) String() string {
+	return te.StringRange(0, len(*te))
+}
+
+// StringRange() returns a string rep of range of items
+func (te *TypeEls) StringRange(st, n int) string {
+	str := ""
+	for i := 0; i < n; i++ {
+		tel := (*te)[st+i]
+		str += tel.String()
+		if i < n-1 {
+			str += ", "
+		}
+	}
+	return str
 }
