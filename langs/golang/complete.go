@@ -24,6 +24,7 @@ import (
 // * transitive nxx1 or fffb stuff not getting pulled in from leabra (pools)
 // * var := expr not stopping at right spot for completion -- easy
 // * other files in *same package* not getting included in fs. syms -- need to add
+// * edit needs to be fixed to properly insert completions and retain remaining parts etc
 
 var LineParseState *pi.FileState
 var FileParseState *pi.FileState

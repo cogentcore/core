@@ -78,8 +78,8 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		sym, got := fs.FindNameScoped(snm, conts)
 		if got {
 			return gl.TypeFromAstSym(fs, origPkg, pkg, tnmA, last, sym)
-		} else {
-			CompleteSyms = &conts
+			// } else {
+			// 	CompleteSyms = &conts
 		}
 		// maybe it is a package name
 		psym, has := gl.PkgSyms(fs, pkg.Children, snm)
