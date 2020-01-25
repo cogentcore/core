@@ -388,7 +388,7 @@ func (tb *TextBuf) ConfigSupported() bool {
 			tb.SetSpellCorrect(tb, SpellCorrectEdit)
 		}
 		if tb.Complete == nil {
-			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi)
+			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi, LookupPi)
 		}
 		return tb.Opts.ConfigSupported(tb.Info.Sup)
 	}
@@ -2263,7 +2263,8 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 
 // SetCompleter sets completion functions so that completions will
 // automatically be offered as the user types
-func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc,
+	lookupFun complete.LookupFunc) {
 	if matchFun == nil || editFun == nil {
 		if tb.Complete != nil {
 			tb.Complete.CompleteSig.Disconnect(tb.This())
@@ -2276,6 +2277,7 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 		if tb.Complete.Context == data {
 			tb.Complete.MatchFunc = matchFun
 			tb.Complete.EditFunc = editFun
+			tb.Complete.LookupFunc = lookupFun
 			return
 		}
 	}
@@ -2284,6 +2286,7 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 	tb.Complete.Context = data
 	tb.Complete.MatchFunc = matchFun
 	tb.Complete.EditFunc = editFun
+	tb.Complete.LookupFunc = lookupFun
 	// note: only need to connect once..
 	tb.Complete.CompleteSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
