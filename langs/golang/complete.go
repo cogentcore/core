@@ -7,6 +7,7 @@ package golang
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode"
 
@@ -23,7 +24,6 @@ import (
 // * also need to fix NameVarGlobal in typeinfer
 // * transitive nxx1 or fffb stuff not getting pulled in from leabra (pools)
 // * var := expr not stopping at right spot for completion -- easy
-// * other files in *same package* not getting included in fs. syms -- need to add
 // * edit needs to be fixed to properly insert completions and retain remaining parts etc
 
 var LineParseState *pi.FileState
@@ -45,7 +45,8 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	if pr == nil {
 		return
 	}
-	lfs := pr.ParseString(str, fs.Src.Filename, fs.Src.Sup)
+	fpath, _ := filepath.Abs(fs.Src.Filename)
+	lfs := pr.ParseString(str, fpath, fs.Src.Sup)
 	if lfs == nil {
 		return
 	}
@@ -84,7 +85,11 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		}
 
 		var conts syms.SymMap // containers of given region -- local scoping
-		fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
+		fs.Syms.FindContainsRegion(fpath, pos, token.NameFunction, &conts)
+		if len(conts) == 0 {
+			fmt.Printf("no conts for fpath: %v  pos: %v\n", fpath, pos)
+			CompleteSym = pkg
+		}
 		complete.AddSymsPrefix(conts, "", str, &md)
 		var matches syms.SymMap
 		pkg.Children.FindNamePrefixScoped(str, &matches)
@@ -120,6 +125,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			}
 		}
 		if CompleteTrace {
+			CompleteSym = pkg
 			fmt.Printf("completion type not found\n")
 		}
 	}
@@ -145,13 +151,20 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 		}
 		switch {
 		case cur.Nm == "Name":
-			if par != nil && (par.Nm[:4] == "Asgn" || strings.HasSuffix(par.Nm, "Expr")) {
-				return cur, last
+			if par != nil {
+				if par.Nm[:4] == "Asgn" {
+					return prv, last
+				}
+				if strings.HasSuffix(par.Nm, "Expr") {
+					return cur, last
+				}
 			}
 		case cur.Nm == "ExprStmt":
 			if cur.Src != "(" {
 				return prv, last
 			}
+		case strings.HasSuffix(cur.Nm, "Stmt"):
+			return prv, last
 		}
 		nxt := cur.PrevAst()
 		if nxt == nil {
@@ -189,13 +202,13 @@ func (gl *GoLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp compl
 		}
 	}
 
-	var new = comp.Text
+	var nw = comp.Text
 	// todo: only do if parens not already there
 	//class, ok := comp.Extra["class"]
 	//if ok && class == "func" {
 	//	new = new + "()"
 	//}
-	ed.NewText = new
+	ed.NewText = nw
 	ed.ForwardDelete = len(s2)
 	return ed
 }

@@ -35,8 +35,8 @@ type FileState struct {
 	Ast        parse.Ast    `json:"-" xml:"-" desc:"ast output tree from parsing"`
 	Syms       syms.SymMap  `json:"-" xml:"-" desc:"symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface."`
 	ExtSyms    syms.SymMap  `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
-	SymsMu     sync.RWMutex `json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
-	AnonCtr    int          `json:"-" xml:"-" desc:"anonymous counter -- counts up "`
+	SymsMu     sync.RWMutex `view:"-" json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
+	AnonCtr    int          `view:"-" json:"-" xml:"-" desc:"anonymous counter -- counts up "`
 }
 
 // Init initializes the file state

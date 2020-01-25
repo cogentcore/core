@@ -7,6 +7,7 @@ package golang
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/goki/pi/parse"
@@ -19,10 +20,11 @@ import (
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
 func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, tyast *parse.Ast) (*syms.Type, *parse.Ast, bool) {
 	pos := tyast.SrcReg.St
+	fpath, _ := filepath.Abs(fs.Src.Filename)
 	var conts syms.SymMap // containers of given region -- local scoping
-	fs.Syms.FindContainsRegion(pos, token.NameFunction, &conts)
+	fs.Syms.FindContainsRegion(fpath, pos, token.NameFunction, &conts)
 	if TraceTypes && len(conts) == 0 {
-		fmt.Printf("no conts for pos: %v\n", pos)
+		fmt.Printf("no conts for fpath: %v  pos: %v\n", fpath, pos)
 	}
 
 	// if TraceTypes {
@@ -321,7 +323,7 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 	}
 	if TraceTypes {
 		fmt.Printf("TExpr: error -- Name: %v not found in type els\n", nm)
-		ttp.WriteDoc(os.Stdout, 0)
+		// ttp.WriteDoc(os.Stdout, 0)
 	}
 	return ttp, nxt, true // robust, needed for completion
 }

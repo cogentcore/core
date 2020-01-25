@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 
@@ -48,17 +49,7 @@ func (gl *GoLang) Parser() *pi.Parser {
 	return gl.Pr
 }
 
-// todo: the SymsMu lock for FileState is very unclear.  We are forking off parallel
-// imports of symbols, with lots of potential for collision as mutual dependencies are
-// processed in other threads.
-
-// In addition, all the type resolution is done in parallel and writing symbols!
-// need some kind of global per-import-path locking mechanism, so any given
-// import is only ever being done once at a time.
-
-// It doesn't seem like the fs is updated properly either.  all very confusing.
-// need to get back to this after getting basic stuff working.
-
+// ParseFile is the main point of entry for external calls into the parser
 func (gl *GoLang) ParseFile(fs *pi.FileState) {
 	pr := gl.Parser()
 	if pr == nil {
@@ -75,8 +66,11 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 		path, _ := filepath.Split(fs.Src.Filename)
 		pkg := fs.ParseState.Scopes[0]
 		fs.Syms[pkg.Name] = pkg // keep around..
+		// fmt.Printf("main pkg name: %v\n", pkg.Name)
 		if len(fs.ExtSyms) == 0 {
-			go gl.AddPathToExts(fs, path)
+			path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
+			// fmt.Printf("importing path: %v\n", path)
+			gl.AddPathToSyms(fs, path)
 		}
 		gl.AddImportsToExts(fs, pkg)
 		gl.ResolveTypes(fs, pkg, true) // true = do include function-internal scope items
@@ -122,12 +116,55 @@ func (gl *GoLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	}
 }
 
+// ParseDirLock provides a lock protecting parsing of a package directory
+type ParseDirLock struct {
+	Path string
+	Mu   sync.Mutex `json:"-" xml:"-" desc:"mutex protecting processing of this path"`
+}
+
+// ParseDirLocks manages locking for parsing package directories
+type ParseDirLocks struct {
+	Dirs map[string]*ParseDirLock `desc:"map of paths with processing status"`
+	Mu   sync.Mutex               `json:"-" xml:"-" desc:"mutex protecting access to Dirs"`
+}
+
+// TheParseDirs is the parse dirs locking manager
+var TheParseDirs ParseDirLocks
+
+// ParseDir is how you call ParseDir on a given path in a secure way that is
+// managed for multiple accesses.  If dir is currently being parsed, then
+// the mutex is locked and caller will wait until that is done -- at which point
+// the next one should be able to load parsed symbols instead of parsing fresh.
+// Once the symbols are returned, then the local FileState SymsMu lock must be
+// used when integrating any external symbols back into another filestate.
+// As long as all the symbol resolution etc is all happening outside of the
+// external syms linking, then it does not need to be protected.
+func (pd *ParseDirLocks) ParseDir(gl *GoLang, path string, opts pi.LangDirOpts) *syms.Symbol {
+	if path == "C" {
+		return nil
+	}
+	pd.Mu.Lock()
+	if pd.Dirs == nil {
+		pd.Dirs = make(map[string]*ParseDirLock)
+	}
+	ds, has := pd.Dirs[path]
+	if !has {
+		ds = &ParseDirLock{Path: path}
+		pd.Dirs[path] = ds
+	}
+	pd.Mu.Unlock()
+	ds.Mu.Lock()
+	rsym := gl.ParseDir(path, opts)
+	ds.Mu.Unlock()
+	return rsym
+}
+
 func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		path, err = dirs.GoSrcDir(path)
 		if err != nil {
-			// log.Println(err)
+			log.Println(err)
 			return nil
 		}
 	} else if err != nil {
@@ -135,10 +172,11 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 		return nil
 	}
 	path, _ = filepath.Abs(path)
-	// fmt.Printf("Parsing / loading path: %v\n", path)
+	// fmt.Printf("Parsing, loading path: %v\n", path)
 
 	fls := dirs.ExtFileNames(path, []string{".go"})
 	if len(fls) == 0 {
+		// fmt.Printf("No go files, bailing\n")
 		return nil
 	}
 
@@ -165,7 +203,9 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 		if strings.HasSuffix(fnm, "_test.go") {
 			continue
 		}
-		if strings.Contains(fnm, "/image/font/gofont/") { // hack to prevent parsing those..
+		fpath := filepath.Join(path, fnm)
+		// avoid processing long slow files that aren't needed anyway:
+		if strings.Contains(fpath, "/image/font/gofont/") || strings.Contains(fpath, "zerrors_") || strings.Contains(fpath, "unicode/tables.go") || strings.Contains(fpath, "filecat/mimetype.go") {
 			continue
 		}
 		fs := pi.NewFileState() // we use a separate fs for each file, so we have full ast
@@ -177,7 +217,6 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 		// fs.ParseState.Trace.Run = true
 		// fs.ParseState.Trace.RunAct = true
 		// fs.ParseState.Trace.StdOut()
-		fpath := filepath.Join(path, fnm)
 		err = fs.Src.OpenFile(fpath)
 		if err != nil {
 			continue
@@ -187,14 +226,13 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 		pr.LexAll(fs)
 		// lxdur := time.Now().Sub(stt)
 		pr.ParseAll(fs)
-		// prdur := time.Now().Sub(stt)
-		// fmt.Printf("\tlex: %v full parse: %v\n", lxdur, prdur-lxdur)
+		// prdur := time.Now().Sub(stt) / time.Millisecond
+		// if prdur > 500 {
+		// 	fmt.Printf("file: %s full parse msec: %v\n", fpath, prdur)
+		// }
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
-			if pkg.Name == "main" { // todo: not sure about skipping this..
-				continue
-			}
-			gl.DeleteUnexported(pkg)
+			gl.DeleteUnexported(pkg, pkg.Name)
 			if pkgsym == nil {
 				pkgsym = pkg
 			} else {
@@ -210,6 +248,7 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	}
 	pfs := pi.NewFileState()            // master overall package file state
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
+	gl.DeleteExternalTypes(pkgsym)
 	if !opts.Nocache {
 		syms.SaveSymCache(pkgsym, filecat.Go, path)
 	}
@@ -221,23 +260,46 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 
 // DeleteUnexported deletes lower-case unexported items from map, and
 // children of symbols on map
-func (gl *GoLang) DeleteUnexported(sy *syms.Symbol) {
+func (gl *GoLang) DeleteUnexported(sy *syms.Symbol, pkgsc string) {
 	if sy.Kind.SubCat() != token.NameScope { // only for top-level scopes
 		return
 	}
 	for nm, ss := range sy.Children {
 		if ss == sy {
 			fmt.Printf("warning: child is self!: %v\n", sy.String())
+			delete(sy.Children, nm)
 			continue
 		}
 		if ss.Kind.SubCat() != token.NameScope { // typically lowercase
 			rn, _ := utf8.DecodeRuneInString(nm)
 			if nm == "" || unicode.IsLower(rn) {
 				delete(sy.Children, nm)
+				continue
 			}
+			// sc, has := ss.Scopes[token.NamePackage]
+			// if has && sc != pkgsc {
+			// 	fmt.Printf("excluding out-of-scope symbol: %v  %v\n", sc, ss.String())
+			// 	delete(sy.Children, nm)
+			// 	continue
+			// }
 		}
 		if ss.HasChildren() {
-			gl.DeleteUnexported(ss)
+			gl.DeleteUnexported(ss, pkgsc)
+		}
+	}
+}
+
+// DeleteExternalTypes deletes types from outside current package scope.
+// These can be created during ResolveTypes but should be deleted before
+// saving symbol type.
+func (gl *GoLang) DeleteExternalTypes(sy *syms.Symbol) {
+	pkgsc := sy.Name
+	for nm, ty := range sy.Types {
+		sc, has := ty.Scopes[token.NamePackage]
+		if has && sc != pkgsc {
+			// fmt.Printf("excluding out-of-scope type: %v  %v\n", sc, ty.String())
+			delete(sy.Types, nm)
+			continue
 		}
 	}
 }
@@ -251,7 +313,7 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	psy, has := fs.Syms[pkg.Name]
 	if has {
 		psy.Children.CopyFrom(pkg.Children)
-		pkg = psy
+		psy.Types.CopyFrom(pkg.Types)
 	} else {
 		fs.Syms[pkg.Name] = pkg
 	}
@@ -338,7 +400,7 @@ func (gl *GoLang) ImportPathPkg(im string) (path, base, pkg string) {
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddImportToExts(fs *pi.FileState, im string) {
 	im, _, pkg := gl.ImportPathPkg(im)
-	psym := gl.ParseDir(im, pi.LangDirOpts{})
+	psym := TheParseDirs.ParseDir(gl, im, pi.LangDirOpts{})
 	if psym != nil {
 		psym.Name = pkg
 		gl.AddPkgToExts(fs, psym)
@@ -348,7 +410,7 @@ func (gl *GoLang) AddImportToExts(fs *pi.FileState, im string) {
 // AddPathToSyms adds given path into pi.FileState.Syms list
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
-	psym := gl.ParseDir(path, pi.LangDirOpts{})
+	psym := TheParseDirs.ParseDir(gl, path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
 	}
@@ -357,7 +419,7 @@ func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
 // AddPathToExts adds given path into pi.FileState.ExtSyms list
 // assumed to be called as a separate goroutine
 func (gl *GoLang) AddPathToExts(fs *pi.FileState, path string) {
-	psym := gl.ParseDir(path, pi.LangDirOpts{})
+	psym := TheParseDirs.ParseDir(gl, path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToExts(fs, psym)
 	}

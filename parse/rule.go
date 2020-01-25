@@ -1618,9 +1618,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	case PushScope:
 		sy, has := ps.FindNameScoped(nm)
 		if !has {
-			// tmps should be overwritten automatically?
-			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, lex.RegZero) // zero = tmp
-			ps.Syms.Add(sy)
+			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg) // lex.RegZero) // zero = tmp
+			added := sy.AddScopesStack(ps.Scopes)
+			if !added {
+				ps.Syms.Add(sy)
+			}
 		}
 		ps.Scopes.Push(sy)
 		useAst.Syms.Push(sy)
@@ -1630,14 +1632,13 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 	case PushNewScope:
 		// add plus push
 		sy, has := ps.FindNameScoped(nm)
-		added := false
 		if has {
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Push New sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
 			}
 		} else {
 			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg)
-			added = sy.AddScopesStack(ps.Scopes)
+			added := sy.AddScopesStack(ps.Scopes)
 			if !added {
 				ps.Syms.Add(sy)
 			}

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -176,18 +177,20 @@ func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
 }
 
 // FindContainsRegion looks for given symbol kind that contains the given
-// source code position, looking at all children.  Assumes that you've already
-// localized the search to a map containing symbols from target file name, as
-// filename matching can be somewhat tricky in the general case.
+// source file path (must be filepath.Abs file path) and position.
 // Returns all instances found.  Uses cat / subcat based token matching -- if you
 // specify a category-level or subcategory level token, it will match everything
 // in that group.  if you specify kind = token.None then all tokens that contain
 // region will be returned.
-func (sm *SymMap) FindContainsRegion(pos lex.Pos, kind token.Tokens, matches *SymMap) {
+func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, kind token.Tokens, matches *SymMap) {
 	if *sm == nil {
 		return
 	}
 	for _, sy := range *sm {
+		fp, _ := filepath.Abs(sy.Filename)
+		if fp != fpath {
+			continue
+		}
 		if !sy.Region.Contains(pos) {
 			continue
 		}
@@ -199,7 +202,7 @@ func (sm *SymMap) FindContainsRegion(pos lex.Pos, kind token.Tokens, matches *Sy
 		}
 	}
 	for _, ss := range *sm {
-		ss.Children.FindContainsRegion(pos, kind, matches)
+		ss.Children.FindContainsRegion(fpath, pos, kind, matches)
 	}
 }
 
