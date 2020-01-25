@@ -76,6 +76,7 @@ const (
 	KeyFunRefresh
 	KeyFunRecenter // Ctrl+L in emacs
 	KeyFunComplete
+	KeyFunLookup
 	KeyFunSearch // Ctrl+S in emacs -- more interactive type of search
 	KeyFunFind   // Command+F full-dialog find
 	KeyFunReplace
@@ -581,6 +582,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Alt+.":                   KeyFunLookup,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
 		"Meta+R":                  KeyFunReplace,
@@ -710,6 +712,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Alt+.":                   KeyFunLookup,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
 		"Meta+R":                  KeyFunReplace,
@@ -828,6 +831,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Alt+.":                   KeyFunLookup,
 		"Control+S":               KeyFunSearch,
 		"Alt+F":                   KeyFunFind,
 		"Control+R":               KeyFunReplace,
@@ -911,6 +915,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Alt+.":                   KeyFunLookup,
 		"Alt+S":                   KeyFunSearch,
 		"Control+F":               KeyFunFind,
 		"Control+H":               KeyFunReplace,
@@ -995,6 +1000,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Alt+.":                   KeyFunLookup,
 		"Alt+S":                   KeyFunSearch,
 		"Control+F":               KeyFunFind,
 		"Control+H":               KeyFunReplace,
@@ -1079,6 +1085,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
+		"Alt+.":                   KeyFunLookup,
 		"Alt+S":                   KeyFunSearch,
 		"Control+F":               KeyFunFind,
 		"Control+H":               KeyFunReplace,

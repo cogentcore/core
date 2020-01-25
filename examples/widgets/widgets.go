@@ -371,7 +371,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	fmt.Printf("main loop ended\n")
 }
 
-func Complete(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
+func Complete(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = complete.SeedWhiteSpace(text)
 	if md.Seed == "" {
 		return md
@@ -384,7 +384,7 @@ func Complete(data interface{}, text string, posLn, posCh int) (md complete.Matc
 	return md
 }
 
-func CompleteEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.EditData) {
+func CompleteEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, completion.Text, seed)
 	return ed
 }

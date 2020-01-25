@@ -56,31 +56,32 @@ func _() {
 	_ = x[KeyFunRefresh-40]
 	_ = x[KeyFunRecenter-41]
 	_ = x[KeyFunComplete-42]
-	_ = x[KeyFunSearch-43]
-	_ = x[KeyFunFind-44]
-	_ = x[KeyFunReplace-45]
-	_ = x[KeyFunJump-46]
-	_ = x[KeyFunHistPrev-47]
-	_ = x[KeyFunHistNext-48]
-	_ = x[KeyFunWinFocusNext-49]
-	_ = x[KeyFunMenuNew-50]
-	_ = x[KeyFunMenuNewAlt1-51]
-	_ = x[KeyFunMenuNewAlt2-52]
-	_ = x[KeyFunMenuOpen-53]
-	_ = x[KeyFunMenuOpenAlt1-54]
-	_ = x[KeyFunMenuOpenAlt2-55]
-	_ = x[KeyFunMenuSave-56]
-	_ = x[KeyFunMenuSaveAs-57]
-	_ = x[KeyFunMenuSaveAlt-58]
-	_ = x[KeyFunMenuClose-59]
-	_ = x[KeyFunMenuCloseAlt1-60]
-	_ = x[KeyFunMenuCloseAlt2-61]
-	_ = x[KeyFunsN-62]
+	_ = x[KeyFunLookup-43]
+	_ = x[KeyFunSearch-44]
+	_ = x[KeyFunFind-45]
+	_ = x[KeyFunReplace-46]
+	_ = x[KeyFunJump-47]
+	_ = x[KeyFunHistPrev-48]
+	_ = x[KeyFunHistNext-49]
+	_ = x[KeyFunWinFocusNext-50]
+	_ = x[KeyFunMenuNew-51]
+	_ = x[KeyFunMenuNewAlt1-52]
+	_ = x[KeyFunMenuNewAlt2-53]
+	_ = x[KeyFunMenuOpen-54]
+	_ = x[KeyFunMenuOpenAlt1-55]
+	_ = x[KeyFunMenuOpenAlt2-56]
+	_ = x[KeyFunMenuSave-57]
+	_ = x[KeyFunMenuSaveAs-58]
+	_ = x[KeyFunMenuSaveAlt-59]
+	_ = x[KeyFunMenuClose-60]
+	_ = x[KeyFunMenuCloseAlt1-61]
+	_ = x[KeyFunMenuCloseAlt2-62]
+	_ = x[KeyFunsN-63]
 }
 
-const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunWinSnapshotKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunWinFocusNextKeyFunMenuNewKeyFunMenuNewAlt1KeyFunMenuNewAlt2KeyFunMenuOpenKeyFunMenuOpenAlt1KeyFunMenuOpenAlt2KeyFunMenuSaveKeyFunMenuSaveAsKeyFunMenuSaveAltKeyFunMenuCloseKeyFunMenuCloseAlt1KeyFunMenuCloseAlt2KeyFunsN"
+const _KeyFuns_name = "KeyFunNilKeyFunMoveUpKeyFunMoveDownKeyFunMoveRightKeyFunMoveLeftKeyFunPageUpKeyFunPageDownKeyFunHomeKeyFunEndKeyFunDocHomeKeyFunDocEndKeyFunWordRightKeyFunWordLeftKeyFunFocusNextKeyFunFocusPrevKeyFunEnterKeyFunAcceptKeyFunCancelSelectKeyFunSelectModeKeyFunSelectAllKeyFunAbortKeyFunCopyKeyFunCutKeyFunPasteKeyFunPasteHistKeyFunBackspaceKeyFunBackspaceWordKeyFunDeleteKeyFunDeleteWordKeyFunKillKeyFunDuplicateKeyFunUndoKeyFunRedoKeyFunInsertKeyFunInsertAfterKeyFunGoGiEditorKeyFunWinSnapshotKeyFunZoomOutKeyFunZoomInKeyFunPrefsKeyFunRefreshKeyFunRecenterKeyFunCompleteKeyFunLookupKeyFunSearchKeyFunFindKeyFunReplaceKeyFunJumpKeyFunHistPrevKeyFunHistNextKeyFunWinFocusNextKeyFunMenuNewKeyFunMenuNewAlt1KeyFunMenuNewAlt2KeyFunMenuOpenKeyFunMenuOpenAlt1KeyFunMenuOpenAlt2KeyFunMenuSaveKeyFunMenuSaveAsKeyFunMenuSaveAltKeyFunMenuCloseKeyFunMenuCloseAlt1KeyFunMenuCloseAlt2KeyFunsN"
 
-var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 100, 109, 122, 134, 149, 163, 178, 193, 204, 216, 234, 250, 265, 276, 286, 295, 306, 321, 336, 355, 367, 383, 393, 408, 418, 428, 440, 457, 473, 490, 503, 515, 526, 539, 553, 567, 579, 589, 602, 612, 626, 640, 658, 671, 688, 705, 719, 737, 755, 769, 785, 802, 817, 836, 855, 863}
+var _KeyFuns_index = [...]uint16{0, 9, 21, 35, 50, 64, 76, 90, 100, 109, 122, 134, 149, 163, 178, 193, 204, 216, 234, 250, 265, 276, 286, 295, 306, 321, 336, 355, 367, 383, 393, 408, 418, 428, 440, 457, 473, 490, 503, 515, 526, 539, 553, 567, 579, 591, 601, 614, 624, 638, 652, 670, 683, 700, 717, 731, 749, 767, 781, 797, 814, 829, 848, 867, 875}
 
 func (i KeyFuns) String() string {
 	if i < 0 || i >= KeyFuns(len(_KeyFuns_index)-1) {

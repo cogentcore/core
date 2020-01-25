@@ -2487,6 +2487,33 @@ func (tv *TextView) CancelComplete() {
 	tv.Buf.Complete.Cancel()
 }
 
+// Lookup attempts to lookup symbol at current location, popping up a window
+// if something is found
+func (tv *TextView) Lookup() {
+	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+		return
+	}
+
+	tv.Buf.Complete.SrcLn = tv.CursorPos.Ln
+	tv.Buf.Complete.SrcCh = tv.CursorPos.Ch
+	st := TextPos{tv.CursorPos.Ln, 0}
+	en := TextPos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	tbe := tv.Buf.Region(st, en)
+	var s string
+	if tbe != nil {
+		s = string(tbe.ToBytes())
+		s = strings.TrimLeft(s, " \t") // trim ' ' and '\t'
+	}
+
+	//	count := tv.Buf.ByteOffs[tv.CursorPos.Ln] + tv.CursorPos.Ch
+	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
+	cpos.X += 5
+	cpos.Y += 10
+	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
+	tv.Buf.CurView = tv
+	tv.Buf.Complete.Lookup(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Viewport, cpos, tv.ForceComplete)
+}
+
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
 func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
@@ -4020,6 +4047,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.OfferComplete()
 			tv.ForceComplete = false // ROR: I definitely don't like this option!  want it just when I want it!
 		}
+	case gi.KeyFunLookup:
+		tv.ISearchCancel()
+		kt.SetProcessed()
+		tv.Lookup()
 	case gi.KeyFunEnter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {

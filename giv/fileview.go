@@ -752,7 +752,7 @@ func (fv *FileView) HasFocus2D() bool {
 //  Completion
 
 // FileComplete finds the possible completions for the file field
-func (fv *FileView) FileComplete(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
+func (fv *FileView) FileComplete(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
 	seedStart := 0
 	for i := len(text) - 1; i >= 0; i-- {
 		r := rune(text[i])
@@ -780,7 +780,7 @@ func (fv *FileView) FileComplete(data interface{}, text string, posLn, posCh int
 }
 
 // PathComplete finds the possible completions for the path field
-func (fv *FileView) PathComplete(data interface{}, path string, posLn, posCh int) (md complete.MatchData) {
+func (fv *FileView) PathComplete(data interface{}, path string, posLn, posCh int) (md complete.Matches) {
 	dir, seed := filepath.Split(path)
 	md.Seed = seed
 	d, err := os.Open(dir)
@@ -809,7 +809,7 @@ func (fv *FileView) PathComplete(data interface{}, path string, posLn, posCh int
 }
 
 // PathCompleteEdit is the editing function called when inserting the completion selection in the path field
-func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
+func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	path := ed.NewText + string(filepath.Separator)
 	ed.NewText = path
@@ -818,7 +818,7 @@ func (fv *FileView) PathCompleteEdit(data interface{}, text string, cursorPos in
 }
 
 // FileCompleteEdit is the editing function called when inserting the completion selection in the file field
-func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.EditData) {
+func (fv *FileView) FileCompleteEdit(data interface{}, text string, cursorPos int, c complete.Completion, seed string) (ed complete.Edit) {
 	ed = complete.EditWord(text, cursorPos, c.Text, seed)
 	return ed
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/sajari/fuzzy"
 )
 
-type EditData struct {
+type Edit struct {
 	NewText string `desc:"spelling correction text after special edits if needed"`
 }
 
@@ -26,7 +26,7 @@ type EditData struct {
 //  spell check returning suggestions using github.com/sajari/fuzzy
 
 // EditFunc is passed the current word and the selected correction for text editing.
-type EditFunc func(data interface{}, new string, old string) EditData
+type EditFunc func(data interface{}, new string, old string) Edit
 
 var inited bool
 var model *fuzzy.Model
@@ -122,7 +122,7 @@ func Complete(s string) (result []string, err error) {
 
 // CorrectText replaces the old unknown word with the new word chosen from the list of corrections
 // delta is the change in cursor position (cp).
-func CorrectText(old string, new string) (ed EditData) {
+func CorrectText(old string, new string) (ed Edit) {
 	// do what is possible to keep the casing of old string
 	oldlc := strings.ToLower(old)
 	min := len(old)

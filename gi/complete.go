@@ -31,6 +31,7 @@ type Completer interface {
 type Complete struct {
 	ki.Node
 	MatchFunc   complete.MatchFunc   `desc:"function to get the list of possible completions"`
+	LookupFunc  complete.LookupFunc  `desc:"function to get the text to show for lookup"`
 	EditFunc    complete.EditFunc    `desc:"function to edit text using the selected completion"`
 	Context     interface{}          `desc:"the object that implements complete.Func"`
 	SrcLn       int                  `desc:"line number in source that completion is operating on, if relevant"`
@@ -171,6 +172,17 @@ func (c *Complete) Cancel() bool {
 	return false
 }
 
+// Lookup is the main call for doing lookups
+func (c *Complete) Lookup(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool) {
+	if c.LookupFunc == nil || vp == nil || vp.Win == nil {
+		return
+	}
+	c.Vp = nil
+	ld := c.LookupFunc(c.Context, text, posLn, posCh)
+	_ = ld
+	// todo: process result
+}
+
 // Complete emits a signal to let subscribers know that the user has made a
 // selection from the list of possible completions
 func (c *Complete) Complete(s string) {
@@ -221,7 +233,7 @@ func CompleteText(s string) (result []string, err error) {
 }
 
 // CompleteEditText is a chance to modify the completion selection before it is inserted
-func CompleteEditText(text string, cp int, completion string, seed string) (ed complete.EditData) {
+func CompleteEditText(text string, cp int, completion string, seed string) (ed complete.Edit) {
 	ed.NewText = completion
 	return ed
 }

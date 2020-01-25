@@ -15,7 +15,7 @@ import (
 // CompletePi uses GoPi symbols and language -- the string is a line of text
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
-func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
+func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
 	sfs := data.(*pi.FileState)
 	if sfs == nil {
 		log.Printf("CompletePi: data is nil not FileState or is nil - can't complete\n")
@@ -52,7 +52,7 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 }
 
 // CompleteEditPi uses the selected completion to edit the text
-func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.EditData) {
+func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
 	sfs := data.(*pi.FileState)
 	if sfs == nil {
 		log.Printf("CompleteEditPi: data is nil not FileState or is nil - can't complete\n")
@@ -69,8 +69,47 @@ func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.
 	return lp.Lang.CompleteEdit(sfs, text, cursorPos, comp, seed)
 }
 
+// LookupPi uses GoPi symbols and language -- the string is a line of text
+// up to point where user has typed.
+// The data must be the *FileState from which the language type is obtained.
+func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Lookup) {
+	sfs := data.(*pi.FileState)
+	if sfs == nil {
+		log.Printf("LookupPi: data is nil not FileState or is nil - can't complete\n")
+		return ld
+	}
+	lp, err := pi.LangSupport.Props(sfs.Src.Sup)
+	if err != nil {
+		log.Printf("LookupPi: %v\n", err)
+		return ld
+	}
+	if lp.Lang == nil {
+		return ld
+	}
+
+	// note: must have this set to ture to allow viewing of AST
+	// must set it in pi/parse directly -- so it is changed in the fileparse too
+	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
+
+	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
+
+	if golang.FileParseState != nil {
+		StructViewDialog(nil, golang.FileParseState, DlgOpts{Title: "File FileState"}, nil, nil)
+	}
+	if golang.LineParseState != nil {
+		StructViewDialog(nil, golang.LineParseState, DlgOpts{Title: "Line FileState"}, nil, nil)
+	}
+	if golang.CompleteSym != nil {
+		StructViewDialog(nil, golang.CompleteSym, DlgOpts{Title: "Complete Sym"}, nil, nil)
+	}
+	if golang.CompleteSyms != nil {
+		MapViewDialog(nil, golang.CompleteSyms, DlgOpts{Title: "Complete Syms"}, nil, nil)
+	}
+	return ld
+}
+
 // CompleteText does completion for text files
-func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.MatchData) {
+func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
 	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
 	if err != nil {
 		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
@@ -95,7 +134,7 @@ func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.
 }
 
 // CompleteTextEdit uses the selected completion to edit the text
-func CompleteTextEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.EditData) {
+func CompleteTextEdit(data interface{}, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	ed = gi.CompleteEditText(text, cursorPos, completion.Text, seed)
 	return ed
 }
