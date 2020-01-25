@@ -28,6 +28,15 @@ func GoSrcDir(dir string) (absDir string, err error) {
 			return absDir, nil
 		}
 	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	absDir = filepath.Join(filepath.Join(filepath.Join(home, "go"), "src"), dir)
+	finfo, err := os.Stat(absDir)
+	if err == nil && finfo.IsDir() {
+		return absDir, nil
+	}
 	return "", fmt.Errorf("kit.GoSrcDir: unable to locate directory (%q) in GOPATH/src/ (%q) or GOROOT/src/pkg/ (%q)", dir, os.Getenv("GOPATH"), os.Getenv("GOROOT"))
 }
 
