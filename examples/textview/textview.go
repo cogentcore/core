@@ -117,7 +117,7 @@ func mainrun() {
 }
 
 // SpellCorrectEdit uses the selected correction to edit the text
-func SpellCorrectEdit(data interface{}, new string, old string) (ed spell.EditData) {
+func SpellCorrectEdit(data interface{}, new string, old string) (ed spell.Edit) {
 	ed = spell.CorrectText(old, new)
 	return ed
 }
