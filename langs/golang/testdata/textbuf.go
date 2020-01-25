@@ -15,17 +15,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goki/gi/complete"
-	"github.com/goki/gi/filecat"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
-	"github.com/goki/ki"
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
+	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/ki/nptime"
 	"github.com/goki/ki/runes"
+	"github.com/goki/pi/complete"
+	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
@@ -50,6 +50,14 @@ type TextBufOpts struct {
 
 // MaxScopeLines	 is the maximum lines to search for a scope marker, e.g. '}'
 var MaxScopeLines = 100
+
+// TextBufDiffRevertLines is max number of lines to use the diff-based revert, which results
+// in faster reverts but only if the file isn't too big..
+var TextBufDiffRevertLines = 10000
+
+// TextBufDiffRevertDiffs is max number of difference regions to apply for diff-based revert
+// otherwise just reopens file
+var TextBufDiffRevertDiffs = 20
 
 // CommentStrs returns the comment start and end strings, using line-based CommentLn first if set
 // and falling back on multi-line / general purpose start / end syntax
@@ -136,7 +144,13 @@ type TextBuf struct {
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
 
+func (tb *TextBuf) Disconnect() {
+	tb.Node.Disconnect()
+	tb.TextBufSig.DisconnectAll()
+}
+
 var TextBufProps = ki.Props{
+	"EnumType:Flag": KiT_TextBufFlags,
 	"CallMethods": ki.PropSlice{
 		{"SaveAs", ki.Props{
 			"Args": ki.PropSlice{
@@ -180,10 +194,16 @@ const (
 
 //go:generate stringer -type=TextBufSignals
 
-// these extend NodeBase NodeFlags to hold TextBuf state
+// TextBufFlags extend NodeBase NodeFlags to hold TextBuf state
+type TextBufFlags int
+
+//go:generate stringer -type=TextBufFlags
+
+var KiT_TextBufFlags = kit.Enums.AddEnumExt(gi.KiT_NodeFlags, TextBufFlagsN, kit.BitFlag, nil)
+
 const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
-	TextBufAutoSaving gi.NodeFlags = gi.NodeFlagsN + iota
+	TextBufAutoSaving TextBufFlags = TextBufFlags(gi.NodeFlagsN) + iota
 
 	// TextBufMarkingUp indicates current markup operation in progress -- don't redo
 	TextBufMarkingUp
@@ -195,6 +215,8 @@ const (
 	// TextBufFileModOk have already asked about fact that file has changed since being
 	// opened, user is ok
 	TextBufFileModOk
+
+	TextBufFlagsN
 )
 
 // IsChanged indicates if the text has been changed (edited) relative to
@@ -223,12 +245,10 @@ func (tb *TextBuf) SetText(txt []byte) {
 
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
-	if tb.IsChanged() {
-		tb.AutoSaveDelete()
-		tb.ClearChanged()
-		tb.LinesToBytes()
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
-	}
+	tb.AutoSaveDelete()
+	tb.ClearChanged()
+	tb.LinesToBytes()
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
 }
 
 // Text returns the current text as a []byte array, applying all current
@@ -341,7 +361,7 @@ func (tb *TextBuf) New(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(&tb.Lines, string(tb.Filename))
+	tb.PiState.SetSrc(&tb.Lines, string(tb.Filename), tb.Info.Sup)
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 
 	tb.MarkupMu.Unlock()
@@ -364,6 +384,12 @@ func (tb *TextBuf) Stat() error {
 // returns true if supported
 func (tb *TextBuf) ConfigSupported() bool {
 	if tb.Info.Sup != filecat.NoSupport {
+		if tb.SpellCorrect == nil {
+			tb.SetSpellCorrect(tb, SpellCorrectEdit)
+		}
+		if tb.Complete == nil {
+			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi, LookupPi)
+		}
 		return tb.Opts.ConfigSupported(tb.Info.Sup)
 	}
 	return false
@@ -406,7 +432,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		vp := tb.ViewportFromView()
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, true, false, nil, nil)
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 		log.Println(err)
 		return err
 	}
@@ -414,7 +440,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 
 	// markup the first 100 lines
 	mxhi := ints.MinInt(100, tb.NLines-1)
-	tb.MarkupLines(0, mxhi)
+	tb.MarkupLinesLock(0, mxhi)
 
 	// update views
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
@@ -448,20 +474,31 @@ func (tb *TextBuf) Revert() bool {
 		return false
 	}
 
-	ob := &TextBuf{}
-	ob.InitName(ob, "revert-tmp")
-	err := ob.OpenFile(tb.Filename)
-	if err != nil {
-		vp := tb.ViewportFromView()
-		if vp != nil { // only if viewing
-			gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, true, false, nil, nil)
+	didDiff := false
+	if tb.NLines < TextBufDiffRevertLines {
+		ob := &TextBuf{}
+		ob.InitName(ob, "revert-tmp")
+		err := ob.OpenFile(tb.Filename)
+		if err != nil {
+			vp := tb.ViewportFromView()
+			if vp != nil { // only if viewing
+				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
+			}
+			log.Println(err)
+			return false
 		}
-		log.Println(err)
-		return false
+		tb.Stat() // "own" the new file..
+		if ob.NLines < TextBufDiffRevertLines {
+			diffs := tb.DiffBufs(ob)
+			if len(diffs) < TextBufDiffRevertDiffs {
+				tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
+				didDiff = true
+			}
+		}
 	}
-	tb.Stat() // "own" the new file..
-	diffs := tb.DiffBufs(ob)
-	tb.PatchFromBuf(ob, diffs, true) // true = send sigs for each update -- better than full, assuming changes are minor
+	if !didDiff {
+		tb.OpenFile(tb.Filename)
+	}
 	tb.ClearChanged()
 	tb.AutoSaveDelete()
 	tb.ReMarkup()
@@ -509,7 +546,7 @@ func (tb *TextBuf) SaveAs(filename gi.FileName) {
 func (tb *TextBuf) SaveFile(filename gi.FileName) error {
 	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 		log.Println(err)
 	} else {
 		tb.Filename = filename
@@ -821,10 +858,10 @@ func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
 	autoSave = tb.AutoSaveOff()
 	winUpdt = false
 	vp := tb.ViewportFromView()
-	if vp == nil || vp.Win == nil {
+	if vp == nil {
 		return
 	}
-	winUpdt = vp.Win.UpdateStart()
+	winUpdt = vp.TopUpdateStart()
 	return
 }
 
@@ -833,11 +870,16 @@ func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 	tb.AutoSaveRestore(autoSave)
 	if winUpdt {
 		vp := tb.ViewportFromView()
-		if vp != nil && vp.Win != nil {
-			vp.Win.UpdateEnd(winUpdt)
+		if vp != nil {
+			vp.TopUpdateEnd(winUpdt)
 		}
 	}
 	tb.UpdateEnd(bufUpdt) // nobody listening probably, but flag avail for testing
+}
+
+// AddFileNode adds the FileNode to the list or receivers of changes to buffer
+func (tb *TextBuf) AddFileNode(fn *FileNode) {
+	tb.TextBufSig.Connect(fn.This(), FileNodeBufSigRecv)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -917,7 +959,7 @@ func (tb *TextBuf) BytesToLines() {
 		tb.Lines[ln] = bytes.Runes(txt)
 		tb.LineBytes[ln] = make([]byte, len(txt))
 		copy(tb.LineBytes[ln], txt)
-		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
 		bo += len(txt) + 1 // lf
 	}
 	tb.TotalBytes = bo
@@ -1334,6 +1376,7 @@ func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
 		}
 	} else {
 		for l := ln; l >= 0; l-- {
+			ch = ints.MinInt(ch, len(txt))
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
 					right++
@@ -1634,7 +1677,7 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
 		tb.ByteOffs[ln] = bo
 		bo += len(tb.LineBytes[ln]) + 1
 	}
@@ -1662,7 +1705,7 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 
 	st := tbe.Reg.Start.Ln
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
-	tb.Markup[st] = tb.LineBytes[st]
+	tb.Markup[st] = HTMLEscapeBytes(tb.LineBytes[st])
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -1678,7 +1721,7 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = tb.LineBytes[ln]
+		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
@@ -1738,6 +1781,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	tb.MarkupMu.Lock()
 	mtags, err := tb.Hi.MarkupTagsAll(tb.Txt)
 	if err != nil {
+		tb.MarkupMu.Unlock()
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
@@ -1796,11 +1840,18 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 			tb.HiTags[ln] = mt
 			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.AdjustedTags(ln))
 		} else {
-			tb.Markup[ln] = ltxt
+			tb.Markup[ln] = HTMLEscapeBytes(ltxt)
 			allgood = false
 		}
 	}
 	return allgood
+}
+
+// MarkupLinesLock does MarkupLines and gets the mutex lock first
+func (tb *TextBuf) MarkupLinesLock(st, ed int) bool {
+	tb.MarkupMu.Lock()
+	defer tb.MarkupMu.Unlock()
+	return tb.MarkupLines(st, ed)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1910,7 +1961,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 	if !tb.IsValidLine(ln) {
 		return
 	}
-	tr := lex.NewLex(tag, st, ed)
+	tr := lex.NewLex(token.KeyToken{Tok: tag}, st, ed)
 	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
 		tb.Tags[ln] = append(tb.Tags[ln], tr)
@@ -1918,7 +1969,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 		tb.Tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
 		tb.Tags[ln].AddSort(tr)
 	}
-	tb.MarkupLines(ln, ln)
+	tb.MarkupLinesLock(ln, ln)
 }
 
 // AddTagEdit adds a new custom tag for given line, using TextBufEdit for location
@@ -1949,7 +2000,7 @@ func (tb *TextBuf) RemoveTag(pos TextPos, tag token.Tokens) (reg lex.Lex, ok boo
 	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range tb.Tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
-			if tag > 0 && t.Tok != tag {
+			if tag > 0 && t.Tok.Tok != tag {
 				continue
 			}
 			tb.Tags[pos.Ln] = append(tb.Tags[pos.Ln][:i], tb.Tags[pos.Ln][i+1:]...)
@@ -1959,7 +2010,7 @@ func (tb *TextBuf) RemoveTag(pos TextPos, tag token.Tokens) (reg lex.Lex, ok boo
 		}
 	}
 	if ok {
-		tb.MarkupLines(pos.Ln, pos.Ln)
+		tb.MarkupLinesLock(pos.Ln, pos.Ln)
 	}
 	return
 }
@@ -1997,6 +2048,8 @@ func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, ichr indent.Char) {
 				return
 			}
 		}
+		n /= tabSz
+		return
 	} else {
 		for i := 1; i < sz; i++ {
 			if txt[i] == '\t' {
@@ -2210,7 +2263,8 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 
 // SetCompleter sets completion functions so that completions will
 // automatically be offered as the user types
-func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc) {
+func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc,
+	lookupFun complete.LookupFunc) {
 	if matchFun == nil || editFun == nil {
 		if tb.Complete != nil {
 			tb.Complete.CompleteSig.Disconnect(tb.This())
@@ -2223,6 +2277,7 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 		if tb.Complete.Context == data {
 			tb.Complete.MatchFunc = matchFun
 			tb.Complete.EditFunc = editFun
+			tb.Complete.LookupFunc = lookupFun
 			return
 		}
 	}
@@ -2231,6 +2286,7 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 	tb.Complete.Context = data
 	tb.Complete.MatchFunc = matchFun
 	tb.Complete.EditFunc = editFun
+	tb.Complete.LookupFunc = lookupFun
 	// note: only need to connect once..
 	tb.Complete.CompleteSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
