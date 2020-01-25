@@ -33,8 +33,13 @@ var CompleteSyms *syms.SymMap
 
 var CompleteTrace = false
 
+// Lookup is the main api called by completion code in giv/complete.go to lookup item
+func (gl *GoLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete.Lookup) {
+	return
+}
+
 // CompleteLine is the main api called by completion code in giv/complete.go
-func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
+func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.Matches) {
 	if str == "" {
 		return
 	}
@@ -178,7 +183,7 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 
 // CompleteEdit returns the completion edit data for integrating the selected completion
 // into the source
-func (gl *GoLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData) {
+func (gl *GoLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
 	// if the original is ChildByName() and the cursor is between d and B and the comp is Children,
 	// then delete the portion after "Child" and return the new comp and the number or runes past
 	// the cursor to delete

@@ -64,13 +64,17 @@ type Lang interface {
 	// which is at given position within the file.
 	// Typically the language will call ParseLine on that line, and use the Ast
 	// to guide the selection of relevant symbols that can complete the code at
-	// the given point.  A stack (slice) of symbols is returned so that the completer
-	// can control the order of items presented, as compared to the SymMap.
-	CompleteLine(fs *FileState, text string, pos lex.Pos) complete.MatchData
+	// the given point.
+	CompleteLine(fs *FileState, text string, pos lex.Pos) complete.Matches
 
-	// CompleteEdit returns the completion edit data for integrating the selected completion
-	// into the source
-	CompleteEdit(fs *FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData)
+	// CompleteEdit returns the completion edit data for integrating the
+	// selected completion into the source
+	CompleteEdit(fs *FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit)
+
+	// Lookup returns lookup results for given text which is at given position
+	// within the file.  This can either be a file and position in file to
+	// open and view, or direct text to show.
+	Lookup(fs *FileState, text string, pos lex.Pos) complete.Lookup
 
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),

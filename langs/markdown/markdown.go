@@ -65,12 +65,17 @@ func (ml *MarkdownLang) HiLine(fs *pi.FileState, line int) lex.Line {
 	return ml.LexLine(fs, line)
 }
 
-func (ml *MarkdownLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.MatchData) {
+func (ml *MarkdownLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.Matches) {
 	// n/a
 	return md
 }
 
-func (ml *MarkdownLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.EditData) {
+// Lookup is the main api called by completion code in giv/complete.go to lookup item
+func (gl *MarkdownLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete.Lookup) {
+	return
+}
+
+func (ml *MarkdownLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
 	// n/a
 	return ed
 }

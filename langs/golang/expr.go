@@ -45,7 +45,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		if got && sym.Type != "" {
 			ftnm := sym.Type
 			ftyp, _ := gl.FindTypeName(ftnm, fs, pkg)
-			if ftyp != nil {
+			if ftyp != nil && len(ftyp.Size) == 2 {
 				npars := ftyp.Size[0] // first size is number of params
 				nrval := ftyp.Size[1] // second size is number of return values
 				if nrval == 0 {

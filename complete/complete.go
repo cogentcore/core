@@ -30,26 +30,40 @@ type Completion struct {
 // Completions is a full list (slice) of completion options
 type Completions []Completion
 
-// MatchData is used for passing completions around -- contains seed in addition to completions
-type MatchData struct {
+// Matches is used for passing completions around.
+// contains seed in addition to completions
+type Matches struct {
 	Matches Completions `desc:"the matches based on seed"`
 	Seed    string      `desc:"seed is the prefix we use to find possible completions"`
 }
 
-// EditData is returned from completion edit function to incorporate the selected completion
-type EditData struct {
+// Lookup is used for returning lookup results
+type Lookup struct {
+	Filename string `desc:"if non-empty, the result is to view this file (full path)"`
+	LineNo   int    `desc:"line number within file to scroll display to"`
+	Text     string `desc:"if filename is empty, this is raw text to display for lookup result"`
+}
+
+// Edit is returned from completion edit function
+// to incorporate the selected completion
+type Edit struct {
 	NewText       string `desc:"completion text after special edits"`
 	ForwardDelete int    `desc:"number of runes, past the cursor, to delete, if any"`
 	CursorAdjust  int    `desc:"cursor adjustment if cursor should be placed in a location other than at end of newText"`
 }
 
 // MatchFunc is the function called to get the list of possible completions
-// and also determines the correct seed based on the text passed as a parameter of CompletionFunc
-type MatchFunc func(data interface{}, text string, posLn, posCh int) MatchData
+// and also determines the correct seed based on the text
+// passed as a parameter of CompletionFunc
+type MatchFunc func(data interface{}, text string, posLn, posCh int) Matches
+
+// LookupFunc is the function called to get the lookup results for given
+// input test and position.
+type LookupFunc func(data interface{}, text string, posLn, posCh int) Lookup
 
 // EditFunc is passed the current text and the selected completion for text editing.
 // Allows for other editing, e.g. adding "()" or adding "/", etc.
-type EditFunc func(data interface{}, text string, cursorPos int, completion Completion, seed string) EditData
+type EditFunc func(data interface{}, text string, cursorPos int, comp Completion, seed string) Edit
 
 // MatchSeed returns a list of matches given a list of string possibilities and a seed.
 // The seed is basically a prefix.
@@ -200,7 +214,7 @@ func SeedWhiteSpace(text string) string {
 }
 
 // EditWord replaces the completion seed and any text up to the next whitespace with completion
-func EditWord(text string, cp int, completion string, seed string) (ed EditData) {
+func EditWord(text string, cp int, completion string, seed string) (ed Edit) {
 	s2 := string(text[cp:])
 
 	var fd = 0 // number of characters past seed in word to be deleted (forward delete)]
@@ -223,7 +237,7 @@ func EditWord(text string, cp int, completion string, seed string) (ed EditData)
 
 // AddSyms adds given symbols as matches in the given match data
 // Scope is e.g., type name (label only)
-func AddSyms(sym syms.SymMap, scope string, md *MatchData) {
+func AddSyms(sym syms.SymMap, scope string, md *Matches) {
 	if len(sym) == 0 {
 		return
 	}
@@ -249,7 +263,7 @@ func AddSyms(sym syms.SymMap, scope string, md *MatchData) {
 
 // AddTypeNames adds names from given type as matches in the given match data
 // Scope is e.g., type name (label only), and seed is prefix filter for names
-func AddTypeNames(typ *syms.Type, scope, seed string, md *MatchData) {
+func AddTypeNames(typ *syms.Type, scope, seed string, md *Matches) {
 	md.Seed = seed
 	for _, te := range typ.Els {
 		nm := te.Name
@@ -291,7 +305,7 @@ func AddTypeNames(typ *syms.Type, scope, seed string, md *MatchData) {
 }
 
 // AddSymsPrefix adds subset of symbols that match seed prefix to given match data
-func AddSymsPrefix(sym syms.SymMap, scope, seed string, md *MatchData) {
+func AddSymsPrefix(sym syms.SymMap, scope, seed string, md *Matches) {
 	matches := &sym
 	if seed != "" {
 		matches = &syms.SymMap{}

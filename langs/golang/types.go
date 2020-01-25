@@ -86,8 +86,10 @@ func (gl *GoLang) FindTypeName(tynm string, fs *pi.FileState, pkg *syms.Symbol) 
 // funInternal determines whether to include function-internal symbols
 // (e.g., variables within function scope -- only for local files).
 func (gl *GoLang) ResolveTypes(fs *pi.FileState, pkg *syms.Symbol, funInternal bool) {
+	fs.SymsMu.Lock()
 	gl.TypesFromAst(fs, pkg)
 	gl.InferSymbolType(pkg, fs, pkg, funInternal)
+	fs.SymsMu.Unlock()
 }
 
 // TypesFromAst initializes the types from their Ast parse

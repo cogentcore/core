@@ -60,7 +60,7 @@ func (ty *Type) AddScopesStack(ss SymStack) {
 // String() satisfies the fmt.Stringer interface
 func (ty *Type) String() string {
 	switch {
-	case ty.Kind.Cat() == Function:
+	case ty.Kind.Cat() == Function && len(ty.Size) == 2:
 		str := "func "
 		npars := ty.Size[0]
 		if ty.Kind.SubCat() == Method {
@@ -88,7 +88,7 @@ func (ty *Type) String() string {
 
 // ArgString() returns string of args to function if it is a function type
 func (ty *Type) ArgString() string {
-	if ty.Kind.Cat() != Function {
+	if ty.Kind.Cat() != Function || len(ty.Size) != 2 {
 		return ""
 	}
 	npars := ty.Size[0]
@@ -101,7 +101,7 @@ func (ty *Type) ArgString() string {
 
 // ReturnString() returns string of return vals of function if it is a function type
 func (ty *Type) ReturnString() string {
-	if ty.Kind.Cat() != Function {
+	if ty.Kind.Cat() != Function || len(ty.Size) != 2 {
 		return ""
 	}
 	npars := ty.Size[0]
