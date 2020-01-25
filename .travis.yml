@@ -1,6 +1,7 @@
 language: go
 
 go:
+  - 1.11.x
   - 1.12.x
   - 1.13.x
   - master
@@ -15,6 +16,9 @@ matrix:
   allow_failures:
     - go: master
 
+env:
+  - GO111MODULE=off
+
 script:
   - go get -d -t -v ./...
   - go build -v ./...
@@ -23,7 +27,7 @@ script:
 notifications:
   email:
     recipients:
-      - emergentdev@grey.colorado.edu
+      - oreilly@ucdavis.edu
     on_success: change
     on_failure: always
   webhooks:
