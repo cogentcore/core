@@ -71,10 +71,10 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 		if len(fs.ExtSyms) == 0 {
 			path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
 			// fmt.Printf("importing path: %v\n", path)
+			fs.WaitGp.Add(1)
 			go gl.AddPathToSyms(fs, path)
 		}
-		gl.AddImportsToExts(fs, pkg)
-		gl.ResolveTypes(fs, pkg, true) // true = do include function-internal scope items
+		go gl.AddImportsToExts(fs, pkg) // will do ResolveTypes when it finishes
 	}
 }
 
@@ -266,10 +266,10 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 			// 	fmt.Printf("\tno parse state scopes!\n")
 		}
 	}
-	if pkgsym == nil {
+	if pkgsym == nil || len(fss) == 0 {
 		return nil
 	}
-	pfs := pi.NewFileState()            // master overall package file state
+	pfs := fss[0]                       // pi.NewFileState()            // master overall package file state
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
 	if !opts.Nocache {
@@ -327,6 +327,21 @@ func (gl *GoLang) DeleteExternalTypes(sy *syms.Symbol) {
 	}
 }
 
+// ImportPathPkg returns the package (last dir) and base of import path
+// from import path string -- removes any quotes around path first.
+func (gl *GoLang) ImportPathPkg(im string) (path, base, pkg string) {
+	sz := len(im)
+	if sz == 0 {
+		return
+	}
+	path = im
+	if im[0] == '"' {
+		path = im[1 : sz-1]
+	}
+	base, pkg = filepath.Split(path)
+	return
+}
+
 // AddPkgToSyms adds given package symbol, with children from package
 // to pi.FileState.Syms map -- merges with anything already there
 // does NOT add imports -- that is an optional second step.
@@ -337,12 +352,10 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	if has {
 		psy.Children.CopyFrom(pkg.Children)
 		psy.Types.CopyFrom(pkg.Types)
-		fs.SymsMu.Unlock()
-		gl.ResolveTypes(fs, psy, true)
 	} else {
 		fs.Syms[pkg.Name] = pkg
-		fs.SymsMu.Unlock()
 	}
+	fs.SymsMu.Unlock()
 	return has
 }
 
@@ -394,23 +407,15 @@ func (gl *GoLang) AddImportsToExts(fs *pi.FileState, pkg *syms.Symbol) {
 		if im.Name == "C" {
 			continue
 		}
+		fs.WaitGp.Add(1)
 		go gl.AddImportToExts(fs, im.Name, true) // lock
 	}
-}
-
-// ImportPathPkg returns the package (last dir) and base of import path
-// from import path string -- removes any quotes around path first.
-func (gl *GoLang) ImportPathPkg(im string) (path, base, pkg string) {
-	sz := len(im)
-	if sz == 0 {
-		return
+	fs.WaitGp.Wait() // each goroutine will do done when done..
+	// now all the info is in place: parse it
+	if TraceTypes {
+		fmt.Printf("\n#####################\nResolving Types now for: %v\n", fs.Src.Filename)
 	}
-	path = im
-	if im[0] == '"' {
-		path = im[1 : sz-1]
-	}
-	base, pkg = filepath.Split(path)
-	return
+	gl.ResolveTypes(fs, pkg, true) // true = do include function-internal scope items
 }
 
 // AddImportToExts adds given import into pi.FileState.ExtSyms list
@@ -428,15 +433,19 @@ func (gl *GoLang) AddImportToExts(fs *pi.FileState, im string, lock bool) {
 			fs.SymsMu.Unlock()
 		}
 	}
+	if lock {
+		fs.WaitGp.Done()
+	}
 }
 
 // AddPathToSyms adds given path into pi.FileState.Syms list
-// assumed to be called as a separate goroutine
+// Is called as a separate goroutine in ParseFile with WaitGp
 func (gl *GoLang) AddPathToSyms(fs *pi.FileState, path string) {
 	psym := TheParseDirs.ParseDir(gl, path, pi.LangDirOpts{})
 	if psym != nil {
 		gl.AddPkgToSyms(fs, psym)
 	}
+	fs.WaitGp.Done()
 }
 
 // AddPathToExts adds given path into pi.FileState.ExtSyms list

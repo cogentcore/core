@@ -28,15 +28,16 @@ import (
 // remaining passes.  It has everything that is maintained at a line-by-line level.
 //
 type FileState struct {
-	Src        lex.File     `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
-	LexState   lex.State    `json:"_" xml:"-" desc:"state for lexing"`
-	TwoState   lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
-	ParseState parse.State  `json:"-" xml:"-" desc:"state for parsing"`
-	Ast        parse.Ast    `json:"-" xml:"-" desc:"ast output tree from parsing"`
-	Syms       syms.SymMap  `json:"-" xml:"-" desc:"symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface."`
-	ExtSyms    syms.SymMap  `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
-	SymsMu     sync.RWMutex `view:"-" json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
-	AnonCtr    int          `view:"-" json:"-" xml:"-" desc:"anonymous counter -- counts up "`
+	Src        lex.File       `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
+	LexState   lex.State      `json:"_" xml:"-" desc:"state for lexing"`
+	TwoState   lex.TwoState   `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
+	ParseState parse.State    `json:"-" xml:"-" desc:"state for parsing"`
+	Ast        parse.Ast      `json:"-" xml:"-" desc:"ast output tree from parsing"`
+	Syms       syms.SymMap    `json:"-" xml:"-" desc:"symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface."`
+	ExtSyms    syms.SymMap    `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
+	SymsMu     sync.RWMutex   `view:"-" json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
+	WaitGp     sync.WaitGroup `view:"-" json:"-" xml:"-" desc:"waitgroup for coordinating processing of other items"`
+	AnonCtr    int            `view:"-" json:"-" xml:"-" desc:"anonymous counter -- counts up "`
 }
 
 // Init initializes the file state
@@ -242,13 +243,14 @@ func (fs *FileState) FindNamePrefixScoped(seed string, scope syms.SymMap, matche
 	fs.ExtSyms.FindNamePrefixScoped(seed, matches)
 }
 
-// NextAnonName returns the next anonymous name for this file, using counter
-func (fs *FileState) NextAnonName() string {
+// NextAnonName returns the next anonymous name for this file, using counter here
+// and given context name (e.g., package name)
+func (fs *FileState) NextAnonName(ctxt string) string {
 	fs.AnonCtr++
 	fn := filepath.Base(fs.Src.Filename)
 	ext := filepath.Ext(fn)
 	if ext != "" {
 		fn = strings.TrimSuffix(fn, ext)
 	}
-	return fmt.Sprintf("anon_%s_%d", fn, fs.AnonCtr)
+	return fmt.Sprintf("anon_%s_%d", ctxt, fs.AnonCtr)
 }

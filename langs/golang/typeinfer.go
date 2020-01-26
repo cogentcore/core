@@ -45,10 +45,11 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			}
 		case sy.Kind.SubCat() == token.NameVar:
 			// todo: unclear why NameVarGlobal types not working here
-			// if sy.Kind == token.NameVarGlobal {
+			// if TraceTypes && sy.Kind == token.NameVarGlobal {
 			// 	fmt.Printf("processing NVG: %v\n", sy.String())
 			// }
-			vty, ok := gl.SubTypeFromAst(fs, pkg, ast, len(ast.Kids)-1)
+			astyp := ast.ChildAst(len(ast.Kids) - 1)
+			vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
 			if ok {
 				sy.Type = vty.Name
 				// if TraceTypes {
@@ -57,7 +58,6 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			} else {
 				sy.Type = TypeErr // actively mark as err so not re-processed
 				if TraceTypes {
-					astyp := ast.ChildAst(len(ast.Kids) - 1)
 					fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
 					astyp.WriteTree(os.Stdout, 1)
 				}
@@ -67,7 +67,27 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			if vty != nil {
 				sy.Type = vty.Name
 			} else {
-				sy.Type = sy.Name // should be anyway..
+				// if TraceTypes {
+				// 	fmt.Printf("InferSymbolType: NameType: %v\n", sy.Name)
+				// }
+				astyp := ast.ChildAst(len(ast.Kids) - 1)
+				if astyp.Nm == "FieldTag" {
+					// ast.WriteTree(os.Stdout, 1)
+					astyp = ast.ChildAst(len(ast.Kids) - 2)
+				}
+				vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+				if ok {
+					sy.Type = vty.Name
+					// if TraceTypes {
+					// 	fmt.Printf("InferSymbolType: NameType: %v  type: %v from ast\n", sy.Name, sy.Type)
+					// }
+				} else {
+					sy.Type = TypeErr // actively mark as err so not re-processed
+					if TraceTypes {
+						fmt.Printf("InferSymbolType: NameType: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+						ast.WriteTree(os.Stdout, 1)
+					}
+				}
 			}
 		case sy.Kind == token.NameFunction:
 			ftyp := gl.FuncTypeFromAst(fs, pkg, ast, nil)
@@ -75,6 +95,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				ftyp.Name = "func " + sy.Name
 				sy.Type = ftyp.Name
 				pkg.Types.Add(ftyp)
+				sy.Detail = ftyp.String()
 				// if TraceTypes {
 				// 	fmt.Printf("InferSymbolType: added function type: %v  %v\n", ftyp.Name, ftyp.String())
 				// }

@@ -15,10 +15,20 @@ import (
 
 var TraceTypes = false
 
+// IsQualifiedType returns true if type is qualified by a package prefix
+// is sensitive to [] prefix so it does NOT report as a qualified type in that
+// case -- it is a compound local type defined in terms of a qualified type..
+func IsQualifiedType(tnm string) bool {
+	if strings.HasPrefix(tnm, "[]") {
+		return false
+	}
+	return strings.Index(tnm, ".") > 0
+}
+
 // QualifyType returns the type name tnm qualified by pkgnm if it is non-empty
 // and only if tnm is not a basic type name
-func (gl *GoLang) QualifyType(pkgnm, tnm string) string {
-	if pkgnm == "" || strings.Index(tnm, ".") > 0 {
+func QualifyType(pkgnm, tnm string) string {
+	if pkgnm == "" || IsQualifiedType(tnm) {
 		return tnm
 	}
 	if _, btyp := BuiltinTypes[tnm]; btyp {
@@ -27,13 +37,22 @@ func (gl *GoLang) QualifyType(pkgnm, tnm string) string {
 	return pkgnm + "." + tnm
 }
 
-// UnQualifyType returns the type name with any qualifier removed
-func (gl *GoLang) UnQualifyType(tnm string) string {
-	pi := strings.Index(tnm, ".")
-	if pi < 0 {
-		return tnm
+// SplitType returns the package and type names from a potentially qualified
+// type name -- if it is not qualified, package name is empty.
+// is sensitive to [] prefix so it does NOT split in that case
+func SplitType(nm string) (pkgnm, tnm string) {
+	if !IsQualifiedType(nm) {
+		return "", nm
 	}
-	return tnm[pi+1:]
+	sci := strings.Index(nm, ".")
+	return nm[:sci], nm[sci+1:]
+}
+
+// PrefixType returns the type name prefixed with given prefix -- keeps any
+// package name as the outer scope.
+func PrefixType(pfx, nm string) string {
+	pkgnm, tnm := SplitType(nm)
+	return QualifyType(pkgnm, pfx+tnm)
 }
 
 // FindTypeName finds given type name in pkg and in broader context
@@ -46,22 +65,20 @@ func (gl *GoLang) FindTypeName(tynm string, fs *pi.FileState, pkg *syms.Symbol) 
 	if tynm[0] == '*' {
 		tynm = tynm[1:]
 	}
-	sci := strings.Index(tynm, ".")
-	if sci < 0 {
-		if btyp, ok := BuiltinTypes[tynm]; ok {
+	pnm, tnm := SplitType(tynm)
+	if pnm == "" {
+		if btyp, ok := BuiltinTypes[tnm]; ok {
 			return btyp, pkg
 		}
-		if gtyp, ok := pkg.Types[tynm]; ok {
+		if gtyp, ok := pkg.Types[tnm]; ok {
 			return gtyp, pkg
 		}
-		if TraceTypes {
-			fmt.Printf("FindTypeName: unqualified type name: %v not found in package: %v\n", tynm, pkg.Name)
-		}
+		// if TraceTypes {
+		// 	fmt.Printf("FindTypeName: unqualified type name: %v not found in package: %v\n", tnm, pkg.Name)
+		// }
 		return nil, pkg
 	}
-	pnm := tynm[:sci]
 	if npkg, ok := gl.PkgSyms(fs, pkg.Children, pnm); ok {
-		tnm := tynm[sci+1:]
 		if gtyp, ok := npkg.Types[tnm]; ok {
 			return gtyp, npkg
 		}
@@ -140,6 +157,12 @@ var TypeToKindMap = map[string]syms.Kinds{
 	"StructType":    syms.Composite,
 	"InterfaceType": syms.Composite,
 	"FuncType":      syms.Composite,
+	"StringDbl":     syms.KindsN, // note: Lit is removed by AstTypeName
+	"StringTicks":   syms.KindsN,
+	"Rune":          syms.KindsN,
+	"NumInteger":    syms.KindsN,
+	"NumFloat":      syms.KindsN,
+	"NumImag":       syms.KindsN,
 }
 
 // AstTypeName returns the effective type name from ast node
@@ -173,7 +196,8 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 		return gl.TypeFromAstPrim(fs, pkg, ty, tyast)
 	case syms.Composite:
 		return gl.TypeFromAstComp(fs, pkg, ty, tyast)
-
+	case syms.KindsN:
+		return gl.TypeFromAstLit(fs, pkg, ty, tyast)
 	}
 	return nil, false
 }
@@ -187,7 +211,7 @@ func (gl *GoLang) TypeFromAstPrim(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		if ty == nil { // if we can find an existing type, and not filling in global, use it
 			if tpkg != pkg {
 				pkgnm := tpkg.Name
-				qtnm := gl.QualifyType(pkgnm, etyp.Name)
+				qtnm := QualifyType(pkgnm, etyp.Name)
 				if qtnm != etyp.Name {
 					if letyp, ok := pkg.Types[qtnm]; ok {
 						etyp = letyp
@@ -240,7 +264,7 @@ func (gl *GoLang) TypeFromAstPrim(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 				ty.Name = "*" + sty.Name
 				pkg.Types.Add(ty) // add pointers so we don't have to keep redefining
 				if TraceTypes {
-					fmt.Printf("TypeFromAst: Adding PointerType %v\n", ty.String())
+					fmt.Printf("TypeFromAst: Adding PointerType: %v\n", ty.String())
 				}
 			}
 			return ty, true
@@ -257,21 +281,17 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 	newTy := false
 	if ty == nil {
 		newTy = true
-		tn := fs.NextAnonName()
-		ty = &syms.Type{Name: tn}
+		ty = &syms.Type{}
 	}
 	switch tnm {
 	case "MapType":
 		ty.Kind = syms.Map
-		if newTy {
-			ty.Name += "_map"
-		}
 		keyty, kok := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		valty, vok := gl.SubTypeFromAst(fs, pkg, tyast, 1)
 		if kok && vok {
 			ty.Els.Add("key", keyty.Name)
 			ty.Els.Add("val", valty.Name)
-			if ty.Name == "" {
+			if newTy {
 				ty.Name = "map[" + keyty.Name + "]" + valty.Name
 			}
 		} else {
@@ -279,13 +299,10 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		}
 	case "SliceType":
 		ty.Kind = syms.List
-		if newTy {
-			ty.Name += "_slice"
-		}
 		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		if ok {
 			ty.Els.Add("val", valty.Name)
-			if ty.Name == "" {
+			if newTy {
 				ty.Name = "[]" + valty.Name
 			}
 		} else {
@@ -293,13 +310,10 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		}
 	case "ArrayType":
 		ty.Kind = syms.Array
-		if newTy {
-			ty.Name += "_array"
-		}
 		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 1)
 		if ok {
 			ty.Els.Add("val", valty.Name)
-			if ty.Name == "" {
+			if newTy {
 				ty.Name = "[]" + valty.Name // todo: get size from child0, set to Size
 			}
 		} else {
@@ -307,19 +321,14 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		}
 	case "StructType":
 		ty.Kind = syms.Struct
-		if newTy {
-			ty.Name += "_struct"
-		}
 		nfld := len(tyast.Kids)
+		if nfld == 0 {
+			return BuiltinTypes["struct{}"], true
+		}
 		ty.Size = []int{nfld}
-		tynm := ""
-		hasName := ty.Name != ""
 		for i := 0; i < nfld; i++ {
 			fld := tyast.Kids[i].(*parse.Ast)
 			fsrc := fld.Src
-			if !hasName {
-				tynm += fsrc + ";"
-			}
 			switch fld.Nm {
 			case "NamedField":
 				if len(fld.Kids) <= 1 { // anonymous, non-qualified
@@ -344,9 +353,6 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 				}
 			case "AnonQualField":
 				ty.Els.Add(fsrc, fsrc) // anon two are same
-				if !hasName {
-					tynm += fsrc + ";"
-				}
 				atyp, _ := gl.FindTypeName(fsrc, fs, pkg)
 				if atyp != nil {
 					ty.Els.CopyFrom(atyp.Els)
@@ -358,8 +364,8 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 				}
 			}
 		}
-		if !hasName {
-			ty.Name = "struct{" + tynm + "}"
+		if newTy {
+			ty.Name = fs.NextAnonName(pkg.Name + "_struct")
 		}
 		// if TraceTypes {
 		// 	fmt.Printf("TypeFromAst: New struct type defined: %v\n", ty.Name)
@@ -367,10 +373,10 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		// }
 	case "InterfaceType":
 		ty.Kind = syms.Interface
-		if newTy {
-			ty.Name += "_interface"
-		}
 		nmth := len(tyast.Kids)
+		if nmth == 0 {
+			return BuiltinTypes["interface{}"], true
+		}
 		ty.Size = []int{nmth}
 		for i := 0; i < nmth; i++ {
 			fld := tyast.Kids[i].(*parse.Ast)
@@ -389,15 +395,62 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 				}
 			}
 		}
+		if newTy {
+			if nmth == 0 {
+				ty.Name = "interface{}"
+			} else {
+				ty.Name = fs.NextAnonName(pkg.Name + "_interface")
+			}
+		}
 	case "FuncType":
 		ty.Kind = syms.Func
-		if newTy {
-			ty.Name += "_func"
-		}
 		gl.FuncTypeFromAst(fs, pkg, tyast, ty)
+		if newTy {
+			if len(ty.Els) == 0 {
+				ty.Name = "func()"
+			} else {
+				ty.Name = fs.NextAnonName(pkg.Name + "_func")
+			}
+		}
 	}
-	// if TraceTypes && newTy {
-	// 	fmt.Printf("TypeFromAstComp: Created new composite type: %s\n", ty.String())
-	// }
+	if newTy {
+		etyp, has := pkg.Types[ty.Name]
+		if has {
+			return etyp, true
+		}
+		pkg.Types.Add(ty) // add anon composite types
+		// if TraceTypes {
+		// 	fmt.Printf("TypeFromAstComp: Created new anon composite type: %v %s\n", ty.Name, ty.String())
+		// }
+	}
 	return ty, true // fallthrough is true..
+}
+
+// TypeFromAstLit gets type from literals
+func (gl *GoLang) TypeFromAstLit(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, tyast *parse.Ast) (*syms.Type, bool) {
+	tnm := tyast.Nm
+	var bty *syms.Type
+	switch tnm {
+	case "LitStringDbl":
+		bty = BuiltinTypes["string"]
+	case "LitStringTicks":
+		bty = BuiltinTypes["string"]
+	case "LitRune":
+		bty = BuiltinTypes["rune"]
+	case "LitNumInteger":
+		bty = BuiltinTypes["int"]
+	case "LitNumFloat":
+		bty = BuiltinTypes["float64"]
+	case "LitNumImag":
+		bty = BuiltinTypes["complex128"]
+	}
+	if bty == nil {
+		return nil, false
+	}
+	if ty == nil {
+		return bty, true
+	}
+	ty.Kind = bty.Kind
+	ty.Els.Add("par", bty.Name) // parent type
+	return ty, true
 }

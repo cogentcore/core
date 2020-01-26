@@ -15,7 +15,7 @@ import (
 
 // TypeMeths gathers method types from the type symbol's children
 func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
-	tnm := gl.UnQualifyType(ty.Name)
+	_, tnm := SplitType(ty.Name)
 	tsym, got := pkg.Children.FindNameScoped(tnm)
 	if !got {
 		if TraceTypes {

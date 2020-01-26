@@ -54,4 +54,7 @@ var BuiltinTypeKind = []syms.TypeKindSize{
 	{"string", syms.String, 0},
 
 	{"error", syms.Interface, 0},
+
+	{"struct{}", syms.Struct, 0},
+	{"interface{}", syms.Interface, 0},
 }

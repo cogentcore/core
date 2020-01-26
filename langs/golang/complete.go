@@ -21,9 +21,10 @@ import (
 )
 
 // todo: fix completer logic when seed == only item -- should still show it!
-// * also need to fix NameVarGlobal in typeinfer
+// * try complete in struct context for member types -- many other complete cases need fixing
+// * type conversion: rune(val), TypeAssert: complete.go
+// * parser is not registering variables defined in if / for loop
 // * transitive nxx1 or fffb stuff not getting pulled in from leabra (pools)
-// * var := expr not stopping at right spot for completion -- easy
 // * edit needs to be fixed to properly insert completions and retain remaining parts etc
 
 var LineParseState *pi.FileState
@@ -165,7 +166,7 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 				}
 			}
 		case cur.Nm == "ExprStmt":
-			if cur.Src != "(" {
+			if cur.Src != "(" && prv != last {
 				return prv, last
 			}
 		case strings.HasSuffix(cur.Nm, "Stmt"):
