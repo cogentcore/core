@@ -55,6 +55,14 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			if funm == "len" || funm == "cap" {
 				return BuiltinTypes["int"], nil, true
 			}
+			if funm == "append" {
+				farg := fun.NextAst().NextAst()
+				return gl.TypeFromAstExpr(fs, origPkg, pkg, farg)
+			}
+			ctyp, _ := gl.FindTypeName(funm, fs, pkg) // conversion
+			if ctyp != nil {
+				return ctyp, nil, true
+			}
 			if TraceTypes {
 				fmt.Printf("TExpr: FuncCall: could not find function: %v\n", funm)
 			}
@@ -178,6 +186,14 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		// note: could figure out actual numerical type, but in practice we don't care
 		// for lookup / completion, so ignoring for now.
 		return BuiltinTypes["float64"], nil, true
+	case tnm == "TypeAssert":
+		nxt := tyast.NextAst().NextAst() // skip assert and name
+		sty, got := gl.TypeFromAst(fs, pkg, nil, nxt)
+		return sty, nil, got
+	case tnm == "MakeCall":
+		nxt := tyast.NextAst()
+		sty, got := gl.TypeFromAst(fs, pkg, nil, nxt)
+		return sty, nil, got
 	default:
 		if TraceTypes {
 			fmt.Printf("TExpr: cannot start with: %v\n", tyast.Nm)

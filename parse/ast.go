@@ -46,6 +46,15 @@ func (ast *Ast) ChildAstTry(idx int) (*Ast, error) {
 	return asti.(*Ast), nil
 }
 
+// ParAst returns the Parent as an Ast.
+func (ast *Ast) ParAst() *Ast {
+	pki := ast.Par.This()
+	if pki == nil {
+		return nil
+	}
+	return pki.(*Ast)
+}
+
 // NextAst returns the next node in the Ast tree, or nil if none
 func (ast *Ast) NextAst() *Ast {
 	nxti := walki.Next(ast)

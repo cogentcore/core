@@ -68,12 +68,9 @@ func (gl *GoLang) ParseFile(fs *pi.FileState) {
 		pkg := fs.ParseState.Scopes[0]
 		fs.Syms[pkg.Name] = pkg // keep around..
 		// fmt.Printf("main pkg name: %v\n", pkg.Name)
-		if len(fs.ExtSyms) == 0 {
-			path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
-			// fmt.Printf("importing path: %v\n", path)
-			fs.WaitGp.Add(1)
-			go gl.AddPathToSyms(fs, path)
-		}
+		path = strings.TrimSuffix(path, string([]rune{filepath.Separator}))
+		fs.WaitGp.Add(1)
+		go gl.AddPathToSyms(fs, path)
 		go gl.AddImportsToExts(fs, pkg) // will do ResolveTypes when it finishes
 	}
 }
@@ -350,6 +347,7 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	fs.SymsMu.Lock()
 	psy, has := fs.Syms[pkg.Name]
 	if has {
+		// fmt.Printf("importing pkg types: %v\n", pkg.Name)
 		psy.Children.CopyFrom(pkg.Children)
 		psy.Types.CopyFrom(pkg.Types)
 	} else {

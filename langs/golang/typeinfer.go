@@ -62,6 +62,27 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 					astyp.WriteTree(os.Stdout, 1)
 				}
 			}
+		case sy.Kind == token.NameConstant:
+			par := ast.ParAst()
+			if par != nil {
+				fc := par.ChildAst(0)
+				ffc := fc.ChildAst(0)
+				if ffc.Nm == "Name" {
+					ffc = ffc.NextAst()
+				}
+				vty, ok := gl.TypeFromAst(fs, pkg, nil, ffc)
+				if ok {
+					sy.Type = vty.Name
+				} else {
+					sy.Type = TypeErr
+					if TraceTypes {
+						fmt.Printf("InferSymbolType: NameConstant: %v NOT resolved from ast: %v\n", sy.Name, ffc.PathUnique())
+						ffc.WriteTree(os.Stdout, 1)
+					}
+				}
+			} else {
+				sy.Type = TypeErr
+			}
 		case sy.Kind.SubCat() == token.NameType:
 			vty, _ := gl.FindTypeName(sy.Name, fs, pkg)
 			if vty != nil {
@@ -95,7 +116,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				ftyp.Name = "func " + sy.Name
 				sy.Type = ftyp.Name
 				pkg.Types.Add(ftyp)
-				sy.Detail = ftyp.ArgString() + " " + ftyp.ReturnString()
+				sy.Detail = "(" + ftyp.ArgString() + ") " + ftyp.ReturnString()
 				// if TraceTypes {
 				// 	fmt.Printf("InferSymbolType: added function type: %v  %v\n", ftyp.Name, ftyp.String())
 				// }
