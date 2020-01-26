@@ -23,8 +23,8 @@ import (
 // todo: fix completer logic when seed == only item -- should still show it!
 // * try complete in struct context for member types -- many other complete cases need fixing
 // * type conversion: rune(val), TypeAssert: complete.go
+// * val = strings. doesn't work -- needs first letter..
 // * parser is not registering variables defined in if / for loop
-// * transitive nxx1 or fffb stuff not getting pulled in from leabra (pools)
 // * edit needs to be fixed to properly insert completions and retain remaining parts etc
 
 var LineParseState *pi.FileState

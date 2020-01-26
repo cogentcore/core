@@ -95,7 +95,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				ftyp.Name = "func " + sy.Name
 				sy.Type = ftyp.Name
 				pkg.Types.Add(ftyp)
-				sy.Detail = ftyp.String()
+				sy.Detail = ftyp.ArgString() + " " + ftyp.ReturnString()
 				// if TraceTypes {
 				// 	fmt.Printf("InferSymbolType: added function type: %v  %v\n", ftyp.Name, ftyp.String())
 				// }
