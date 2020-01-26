@@ -23,7 +23,7 @@ type Type struct {
 	Desc     string   `desc:"documentation about this type, extracted from code"`
 	Els      TypeEls  `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
 	Meths    TypeMap  `desc:"methods defined for this type"`
-	Size     []int    `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] and return vals is [1])"`
+	Size     []int    `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])"`
 	Filename string   `desc:"full filename / URI of source where type is defined (may be empty for auto types)"`
 	Region   lex.Reg  `desc:"region in source encompassing this type"`
 	Scopes   SymNames `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`

@@ -79,9 +79,10 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		snm := tnmA.Src
 		sym, got := fs.FindNameScoped(snm, conts)
 		if got {
-			return gl.TypeFromAstSym(fs, origPkg, pkg, tnmA, last, sym)
-			// } else {
-			// 	CompleteSyms = &conts
+			tsym, nnxt, got := gl.TypeFromAstSym(fs, origPkg, pkg, tnmA, last, sym)
+			if got {
+				return tsym, nnxt, got
+			}
 		}
 		// maybe it is a package name
 		psym, has := gl.PkgSyms(fs, pkg.Children, snm)
@@ -130,6 +131,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			}
 		}
 		return nil, tyast, false
+	case strings.HasSuffix(tnm, "AutoType"):
+		sty, got := gl.SubTypeFromAst(fs, pkg, tyast, 0)
+		return sty, nil, got
 	case tnm == "CompositeLit":
 		sty, got := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		return sty, nil, got
@@ -182,6 +186,9 @@ func (gl *GoLang) TypeFromAstSym(fs *pi.FileState, origPkg, pkg *syms.Symbol, ty
 	// if TraceTypes {
 	// 	fmt.Printf("TExpr: sym named: %v  kind: %v  type: %v\n", sym.Name, sym.Kind, sym.Type)
 	// }
+	if sym.Kind.SubCat() == token.NameScope {
+		return nil, nil, false // higher-level will catch it
+	}
 	if sym.Type == "" { // hasn't happened yet
 		// if TraceTypes {
 		// 	fmt.Printf("TExpr: trying to infer type\n")
@@ -285,10 +292,13 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			// if TraceTypes && nxt != nil {
 			// 	nxt.WriteTree(os.Stdout, 0)
 			// }
-			if got {
+			if got && len(ftyp.Size) == 2 {
 				npars := ftyp.Size[0] // first size is number of params
 				nrval := ftyp.Size[1] // second size is number of return values
 				if nrval == 0 {
+					if TraceTypes {
+						fmt.Printf("TExpr: FuncCall: %v on type: %v has no return value\n", ftyp.Name, ttp.Name)
+					}
 					return nil, nxt, false // no return -- shouldn't happen
 				}
 				rtyp := ftyp.Els[npars] // first return

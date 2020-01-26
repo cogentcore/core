@@ -13,7 +13,7 @@ import (
 	"github.com/goki/pi/syms"
 )
 
-var TraceTypes = false
+var TraceTypes = true
 
 // QualifyType returns the type name tnm qualified by pkgnm if it is non-empty
 // and only if tnm is not a basic type name

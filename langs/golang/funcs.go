@@ -81,7 +81,9 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 		fty.Kind = syms.Func
 	}
 	poff := 0
+	isMeth := false
 	if pars.Nm == "MethRecvName" && len(ast.Kids) > 2 {
+		isMeth = true
 		rcv := pars.Kids[0].(*parse.Ast)
 		rtyp := pars.Kids[1].(*parse.Ast)
 		fty.Els.Add(rcv.Src, rtyp.Src)
@@ -104,7 +106,11 @@ func (gl *GoLang) FuncTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ast *parse
 	}
 	if npars > 0 {
 		gl.ParamsFromAst(fs, pkg, pars, fty, "param")
-		npars = len(fty.Els) // how many we added..
+		npars = len(fty.Els) // how many we added -- auto-includes receiver for method
+	} else {
+		if isMeth {
+			npars = 1
+		}
 	}
 	nrvals := 0
 	if sigpars != nil && len(sigpars.Kids) >= 2 {
@@ -169,6 +175,9 @@ func (gl *GoLang) ParamsFromAst(fs *pi.FileState, pkg *syms.Symbol, pars *parse.
 
 // RvalsFromAst sets return value(s) as Els for given function type
 func (gl *GoLang) RvalsFromAst(fs *pi.FileState, pkg *syms.Symbol, rvals *parse.Ast, fty *syms.Type) {
+	if rvals.Nm == "Block" { // todo: maybe others
+		return
+	}
 	nrvals := len(rvals.Kids)
 	if nrvals == 1 { // single rval, unnamed, has type directly..
 		rval := rvals.ChildAst(0)
