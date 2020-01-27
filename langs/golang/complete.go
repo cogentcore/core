@@ -156,7 +156,23 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 			par = cur.Par.(*parse.Ast)
 		}
 		switch {
+		case cur.Nm == "Selector":
+			if par != nil {
+				if par.Nm[:4] == "Asgn" {
+					return cur, last
+				}
+				if strings.HasSuffix(par.Nm, "Expr") {
+					return cur, last
+				}
+			} else {
+				flds := strings.Fields(cur.Src)
+				cur.Src = flds[len(flds)-1] // skip any spaces
+				return cur, last
+			}
 		case cur.Nm == "Name":
+			if cur.Nm == "if" { // weird parsing if incomplete
+				return prv, last
+			}
 			if par != nil {
 				if par.Nm[:4] == "Asgn" {
 					return prv, last

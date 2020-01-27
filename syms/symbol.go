@@ -63,10 +63,6 @@ type Symbol struct {
 
 var KiT_Symbol = kit.Types.AddType(&Symbol{}, nil)
 
-// SymNames provides a map-list of symbol names, indexed by their token kinds.
-// Used primarily for specifying Scopes
-type SymNames map[token.Tokens]string
-
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region
 func NewSymbol(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
 	sy := &Symbol{Name: name, Kind: kind, Filename: fname, Region: reg, SelectReg: reg}
@@ -221,4 +217,21 @@ func (sy *Symbol) WriteDoc(out io.Writer, depth int) {
 	} else {
 		fmt.Fprint(out, "\n")
 	}
+}
+
+//////////////////////////////////////////////////////////////////
+// SymNames
+
+// SymNames provides a map-list of symbol names, indexed by their token kinds.
+// Used primarily for specifying Scopes
+type SymNames map[token.Tokens]string
+
+// SubCat returns a scope with the given SubCat type, or false if not found
+func (sn *SymNames) SubCat(sc token.Tokens) (string, bool) {
+	for tk, nm := range *sn {
+		if tk.SubCat() == sc {
+			return nm, true
+		}
+	}
+	return "", false
 }

@@ -16,10 +16,10 @@ import (
 var TraceTypes = false
 
 // IsQualifiedType returns true if type is qualified by a package prefix
-// is sensitive to [] prefix so it does NOT report as a qualified type in that
-// case -- it is a compound local type defined in terms of a qualified type..
+// is sensitive to [] or map[ prefix so it does NOT report as a qualified type in that
+// case -- it is a compound local type defined in terms of a qualified type.
 func IsQualifiedType(tnm string) bool {
-	if strings.HasPrefix(tnm, "[]") {
+	if strings.HasPrefix(tnm, "[]") || strings.HasPrefix(tnm, "map[") {
 		return false
 	}
 	return strings.Index(tnm, ".") > 0

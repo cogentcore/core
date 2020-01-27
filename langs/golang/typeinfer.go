@@ -21,6 +21,14 @@ var TypeErr = "<err>"
 // funInternal determines whether to include function-internal symbols
 // (e.g., variables within function scope -- only for local files).
 func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.Symbol, funInternal bool) {
+	if sy.Name == "" {
+		sy.Type = TypeErr
+		return
+	}
+	if sy.Name[0] == '_' {
+		sy.Type = TypeErr
+		return
+	}
 	if sy.Ast != nil {
 		ast := sy.Ast.(*parse.Ast)
 		switch {
@@ -39,19 +47,15 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				}
 			}
 		case sy.Kind == token.NameVarClass: // method receiver
-			stsc, ok := sy.Scopes[token.NameStruct]
+			stsc, ok := sy.Scopes.SubCat(token.NameType)
 			if ok {
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
-			// todo: unclear why NameVarGlobal types not working here
-			// if TraceTypes && sy.Kind == token.NameVarGlobal {
-			// 	fmt.Printf("processing NVG: %v\n", sy.String())
-			// }
 			astyp := ast.ChildAst(len(ast.Kids) - 1)
 			vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
 			if ok {
-				sy.Type = vty.Name
+				sy.Type = SymTypeNameForPkg(vty, pkg)
 				// if TraceTypes {
 				// 	fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
 				// }
@@ -72,7 +76,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				}
 				vty, ok := gl.TypeFromAst(fs, pkg, nil, ffc)
 				if ok {
-					sy.Type = vty.Name
+					sy.Type = SymTypeNameForPkg(vty, pkg)
 				} else {
 					sy.Type = TypeErr
 					if TraceTypes {
@@ -86,7 +90,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 		case sy.Kind.SubCat() == token.NameType:
 			vty, _ := gl.FindTypeName(sy.Name, fs, pkg)
 			if vty != nil {
-				sy.Type = vty.Name
+				sy.Type = SymTypeNameForPkg(vty, pkg)
 			} else {
 				// if TraceTypes {
 				// 	fmt.Printf("InferSymbolType: NameType: %v\n", sy.Name)
@@ -98,7 +102,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				}
 				vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
 				if ok {
-					sy.Type = vty.Name
+					sy.Type = SymTypeNameForPkg(vty, pkg)
 					// if TraceTypes {
 					// 	fmt.Printf("InferSymbolType: NameType: %v  type: %v from ast\n", sy.Name, sy.Type)
 					// }
@@ -135,4 +139,37 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			}
 		}
 	}
+}
+
+// InferEmptySymbolType ensures that any empty symbol type is resolved during
+// processing of other type information -- returns true if was able to resolve
+func (gl *GoLang) InferEmptySymbolType(sym *syms.Symbol, fs *pi.FileState, pkg *syms.Symbol) bool {
+	if sym.Type == "" { // hasn't happened yet
+		// if TraceTypes {
+		// 	fmt.Printf("TExpr: trying to infer type\n")
+		// }
+		gl.InferSymbolType(sym, fs, pkg, true)
+	}
+	if sym.Type == TypeErr {
+		if TraceTypes {
+			fmt.Printf("TExpr: source symbol has type err: %v  kind: %v\n", sym.Name, sym.Kind)
+		}
+		return false
+	}
+	if sym.Type == "" { // shouldn't happen
+		sym.Type = TypeErr
+		if TraceTypes {
+			fmt.Printf("TExpr: source symbol has type err (but wasn't marked): %v  kind: %v\n", sym.Name, sym.Kind)
+		}
+		return false
+	}
+	return true
+}
+
+func SymTypeNameForPkg(ty *syms.Type, pkg *syms.Symbol) string {
+	sc, has := ty.Scopes[token.NamePackage]
+	if has && sc != pkg.Name {
+		return QualifyType(sc, ty.Name)
+	}
+	return ty.Name
 }

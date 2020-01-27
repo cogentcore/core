@@ -6,6 +6,7 @@ package golang
 
 import (
 	"fmt"
+	"unicode"
 
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
@@ -18,7 +19,7 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 	_, tnm := SplitType(ty.Name)
 	tsym, got := pkg.Children.FindNameScoped(tnm)
 	if !got {
-		if TraceTypes {
+		if !unicode.IsLower(rune(tnm[0])) && TraceTypes {
 			fmt.Printf("TypeMeths: error -- did NOT get type sym: %v in pkg: %v\n", tnm, pkg.Name)
 		}
 		return
