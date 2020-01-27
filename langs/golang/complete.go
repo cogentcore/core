@@ -94,7 +94,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		fs.Syms.FindContainsRegion(fpath, pos, token.NameFunction, &conts)
 		if len(conts) == 0 {
 			fmt.Printf("no conts for fpath: %v  pos: %v\n", fpath, pos)
-			CompleteSym = pkg
+			// CompleteSym = pkg
 		}
 		complete.AddSymsPrefix(conts, "", str, &md)
 		var matches syms.SymMap

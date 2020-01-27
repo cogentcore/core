@@ -235,3 +235,16 @@ func (sn *SymNames) SubCat(sc token.Tokens) (string, bool) {
 	}
 	return "", false
 }
+
+// Clone returns a clone copy of this map (nil if empty)
+func (sn *SymNames) Clone() SymNames {
+	sz := len(*sn)
+	if sz == 0 {
+		return nil
+	}
+	nsn := make(SymNames, sz)
+	for tk, nm := range *sn {
+		nsn[tk] = nm
+	}
+	return nsn
+}

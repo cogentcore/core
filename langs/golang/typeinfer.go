@@ -7,6 +7,7 @@ package golang
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
@@ -52,7 +53,13 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				sy.Type = stsc
 			}
 		case sy.Kind.SubCat() == token.NameVar:
-			astyp := ast.ChildAst(len(ast.Kids) - 1)
+			var astyp *parse.Ast
+			if strings.HasPrefix(ast.Nm, "ForRange") {
+				// vars are in first child, type is in second child, rest of code is on last node
+				astyp = ast.ChildAst(1)
+			} else {
+				astyp = ast.ChildAst(len(ast.Kids) - 1)
+			}
 			vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
 			if ok {
 				sy.Type = SymTypeNameForPkg(vty, pkg)
@@ -63,10 +70,16 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				sy.Type = TypeErr // actively mark as err so not re-processed
 				if TraceTypes {
 					fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
-					astyp.WriteTree(os.Stdout, 1)
+					astyp.WriteTree(os.Stdout, 0)
 				}
 			}
 		case sy.Kind == token.NameConstant:
+			if !strings.HasPrefix(ast.Nm, "ConstSpec") {
+				if TraceTypes {
+					fmt.Printf("InferSymbolType: NameConstant: %v not a const: %v\n", sy.Name, ast.Nm)
+				}
+				return
+			}
 			par := ast.ParAst()
 			if par != nil {
 				fc := par.ChildAst(0)

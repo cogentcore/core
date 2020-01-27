@@ -11,6 +11,7 @@ import (
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
+	"github.com/goki/pi/token"
 )
 
 var TraceTypes = false
@@ -114,22 +115,40 @@ func (gl *GoLang) TypesFromAst(fs *pi.FileState, pkg *syms.Symbol) {
 	InstallBuiltinTypes()
 
 	for _, ty := range pkg.Types {
-		if ty.Ast == nil {
-			continue // shouldn't be
-		}
-		tyast, err := ty.Ast.(*parse.Ast).ChildAstTry(1)
-		if err != nil {
-			continue
-		}
-		if ty.Name == "" {
-			if TraceTypes {
-				fmt.Printf("TypesFromAst: Type has no name! %v\n", ty.String())
-			}
-			continue
-		}
-		gl.TypeFromAst(fs, pkg, ty, tyast)
-		gl.TypeMeths(fs, pkg, ty) // all top-level named types might have methods
+		gl.InitTypeFromAst(fs, pkg, ty)
 	}
+}
+
+// InitTypeFromAst initializes given type from ast
+func (gl *GoLang) InitTypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
+	if ty.Ast == nil {
+		// if TraceTypes {
+		// 	fmt.Printf("TypesFromAst: Type has nil Ast! %v\n", ty.String())
+		// }
+		return
+	}
+	tyast, err := ty.Ast.(*parse.Ast).ChildAstTry(1)
+	if err != nil {
+		if TraceTypes {
+			fmt.Printf("TypesFromAst: Type has invalid Ast! %v  %v\n", ty.String(), err)
+		}
+		return
+	}
+	if ty.Name == "" {
+		if TraceTypes {
+			fmt.Printf("TypesFromAst: Type has no name! %v\n", ty.String())
+		}
+		return
+	}
+	if ty.Inited {
+		// if TraceTypes {
+		// 	fmt.Printf("Type: %v already initialized\n", ty.Name)
+		// }
+		return
+	}
+	gl.TypeFromAst(fs, pkg, ty, tyast)
+	gl.TypeMeths(fs, pkg, ty) // all top-level named types might have methods
+	ty.Inited = true
 }
 
 // SubTypeFromAst returns a subtype from child ast at given index, nil if failed
@@ -333,15 +352,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 			case "NamedField":
 				if len(fld.Kids) <= 1 { // anonymous, non-qualified
 					ty.Els.Add(fsrc, fsrc)
-					atyp, _ := gl.FindTypeName(fsrc, fs, pkg)
-					if atyp != nil {
-						ty.Els.CopyFrom(atyp.Els)
-						ty.Size[0] += len(atyp.Els)
-						ty.Meths.CopyFrom(atyp.Meths)
-						// if TraceTypes {
-						// 	fmt.Printf("Struct Type: %v inheriting from: %v\n", ty.Name, atyp.Name)
-						// }
-					}
+					gl.StructInheritEls(fs, pkg, ty, fsrc)
 					continue
 				}
 				fldty, ok := gl.SubTypeFromAst(fs, pkg, fld, 1)
@@ -353,15 +364,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 				}
 			case "AnonQualField":
 				ty.Els.Add(fsrc, fsrc) // anon two are same
-				atyp, _ := gl.FindTypeName(fsrc, fs, pkg)
-				if atyp != nil {
-					ty.Els.CopyFrom(atyp.Els)
-					ty.Size[0] += len(atyp.Els)
-					ty.Meths.CopyFrom(atyp.Meths)
-					// if TraceTypes {
-					// 	fmt.Printf("Struct Type: %v inheriting from: %v\n", ty.Name, atyp.Name)
-					// }
-				}
+				gl.StructInheritEls(fs, pkg, ty, fsrc)
 			}
 		}
 		if newTy {
@@ -453,4 +456,65 @@ func (gl *GoLang) TypeFromAstLit(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Ty
 	ty.Kind = bty.Kind
 	ty.Els.Add("par", bty.Name) // parent type
 	return ty, true
+}
+
+// StructInheritEls inherits struct fields and meths from given embedded type.
+// Ensures that copied values are properly qualified if from another package.
+func (gl *GoLang) StructInheritEls(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type, etynm string) {
+	ety, _ := gl.FindTypeName(etynm, fs, pkg)
+	if ety == nil {
+		if TraceTypes {
+			fmt.Printf("Embedded struct type not found: %v for type: %v\n", etynm, ty.Name)
+		}
+		return
+	}
+	if !ety.Inited {
+		// if TraceTypes {
+		// 	fmt.Printf("Embedded struct type not yet initialized, initializing: %v for type: %v\n", ety.Name, ty.Name)
+		// }
+		gl.InitTypeFromAst(fs, pkg, ety)
+	}
+	pkgnm := pkg.Name
+	diffPkg := false
+	epkg, has := ety.Scopes[token.NamePackage]
+	if has && epkg != pkgnm {
+		diffPkg = true
+	}
+	if diffPkg {
+		for i := range ety.Els {
+			nt := ety.Els[i].Clone()
+			tnm := nt.Type
+			_, isb := BuiltinTypes[tnm]
+			if !isb && !IsQualifiedType(tnm) {
+				tnm = QualifyType(epkg, tnm)
+				// fmt.Printf("Fixed type: %v to %v\n", ety.Els[i].Type, tnm)
+			}
+			nt.Type = tnm
+			ty.Els = append(ty.Els, *nt)
+		}
+		nmt := len(ety.Meths)
+		if nmt > 0 {
+			ty.Meths = make(syms.TypeMap, nmt)
+			for mn, mt := range ety.Meths {
+				nmt := mt.Clone()
+				for i := range nmt.Els {
+					t := &nmt.Els[i]
+					tnm := t.Type
+					_, isb := BuiltinTypes[tnm]
+					if !isb && !IsQualifiedType(tnm) {
+						tnm = QualifyType(epkg, tnm)
+					}
+					t.Type = tnm
+				}
+				ty.Meths[mn] = nmt
+			}
+		}
+	} else {
+		ty.Els.CopyFrom(ety.Els)
+		ty.Meths.CopyFrom(ety.Meths)
+	}
+	ty.Size[0] += len(ety.Els)
+	// if TraceTypes {
+	// 	fmt.Printf("Struct Type: %v inheriting from: %v\n", ty.Name, ety.Name)
+	// }
 }

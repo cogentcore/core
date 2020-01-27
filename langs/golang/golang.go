@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -138,7 +137,7 @@ var TheParseDirs ParseDirLocks
 // As long as all the symbol resolution etc is all happening outside of the
 // external syms linking, then it does not need to be protected.
 func (pd *ParseDirLocks) ParseDir(gl *GoLang, path string, opts pi.LangDirOpts) *syms.Symbol {
-	if path == "C" {
+	if path == "C" || path[0] == '_' {
 		return nil
 	}
 	pd.Mu.Lock()
@@ -241,15 +240,15 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 			continue
 		}
 		// fmt.Printf("parsing file: %v\n", fnm)
-		stt := time.Now()
+		// stt := time.Now()
 		pr.LexAll(fs)
 		// lxdur := time.Now().Sub(stt)
 		pr.ParseAll(fs)
-		prdur := time.Now().Sub(stt)
-		pdms := prdur / time.Millisecond
-		if pdms > 500 {
-			fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
-		}
+		// prdur := time.Now().Sub(stt)
+		// pdms := prdur / time.Millisecond
+		// if pdms > 500 {
+		// 	fmt.Printf("file: %s full parse: %v\n", fpath, prdur)
+		// }
 		if len(fs.ParseState.Scopes) > 0 { // should be
 			pkg := fs.ParseState.Scopes[0]
 			gl.DeleteUnexported(pkg, pkg.Name)

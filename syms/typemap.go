@@ -39,6 +39,20 @@ func (tm *TypeMap) CopyFrom(src TypeMap) {
 	}
 }
 
+// Clone returns deep copy of this type map -- types are Clone() copies.
+// returns nil if this map is empty
+func (tm *TypeMap) Clone() TypeMap {
+	sz := len(*tm)
+	if sz == 0 {
+		return nil
+	}
+	ntm := make(TypeMap, sz)
+	for nm, sty := range *tm {
+		ntm[nm] = sty.Clone()
+	}
+	return ntm
+}
+
 // Names returns a slice of the names in this map, optionally sorted
 func (tm *TypeMap) Names(sorted bool) []string {
 	nms := make([]string, len(*tm))

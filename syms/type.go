@@ -9,7 +9,9 @@ import (
 	"io"
 
 	"github.com/goki/ki/indent"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
+	"github.com/goki/ki/sliceclone"
 	"github.com/goki/pi/lex"
 )
 
@@ -21,6 +23,7 @@ type Type struct {
 	Name     string   `desc:"name of the type -- can be the name of a field or the role for a type element"`
 	Kind     Kinds    `desc:"kind of type -- overall nature of the type"`
 	Desc     string   `desc:"documentation about this type, extracted from code"`
+	Inited   bool     `inactive:"-" desc:"set to true after type has been initialized during post-parse processing"`
 	Els      TypeEls  `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
 	Meths    TypeMap  `desc:"methods defined for this type"`
 	Size     []int    `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])"`
@@ -42,6 +45,19 @@ func (ty *Type) AllocScopes() {
 	if ty.Scopes == nil {
 		ty.Scopes = make(SymNames)
 	}
+}
+
+// Clone returns a deep copy of this type, cloning / copying all sub-elements
+// except the Ast, and Inited
+func (ty *Type) Clone() *Type {
+	// note: not copying Inited
+	nty := &Type{Name: ty.Name, Kind: ty.Kind, Desc: ty.Desc, Filename: ty.Filename, Region: ty.Region, Ast: ty.Ast}
+	nty.Els.CopyFrom(ty.Els)
+	nty.Meths = ty.Meths.Clone()
+	nty.Size = sliceclone.Int(ty.Size)
+	nty.Scopes = ty.Scopes.Clone()
+	nty.Props.CopyFrom(ty.Props, true)
+	return nty
 }
 
 // AddScopesStack adds a given scope element(s) from stack to this Type.
@@ -180,6 +196,12 @@ func (tel *TypeEl) String() string {
 	return tel.Type
 }
 
+// Clone() returns a copy of this el
+func (tel *TypeEl) Clone() *TypeEl {
+	te := &TypeEl{Name: tel.Name, Type: tel.Type}
+	return te
+}
+
 // TypeEls are the type elements for types
 type TypeEls []TypeEl
 
@@ -224,6 +246,7 @@ func (te *TypeEls) String() string {
 
 // StringRange() returns a string rep of range of items
 func (te *TypeEls) StringRange(st, n int) string {
+	n = ints.MinInt(n, len(*te))
 	str := ""
 	for i := 0; i < n; i++ {
 		tel := (*te)[st+i]

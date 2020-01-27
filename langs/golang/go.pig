@@ -1,6 +1,6 @@
 // /Users/oreilly/goki/pi/langs/golang/go.pig Lexer
 
-// InCommentMulti all CurState must be at top!  any multi-line requires state 
+// InCommentMulti all CurState must be at top -- any multi-line requires state 
 InCommentMulti:		 CommentMultiline		 if CurState == "CommentMulti" {
     EndMulti:                CommentMultiline       if String == "*/"   do: PopState; Next; 
     StartEmbededMulti:       CommentMultiline       if String == "/*"   do: PushState: CommentMulti; Next; 
@@ -517,9 +517,9 @@ StmtRules {
             ForRangeExisting:  'key:for' ExprList '=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             // ForRangeNewLit composite lit will match but brackets won't be absorbed -- this does that.. 
             ForRangeNewLit:  'key:for' NameList ':=' 'key:range' @CompositeLit '{' ?BlockList -'}' 'EOS'  >Ast
-            --->Acts:{ -1:ChgToken:"NameListEls":NameVar; }
+            --->Acts:{ -1:ChgToken:"[0]":NameVar; -1:AddSymbol:"[0]":NameVar; }
             ForRangeNew:  'key:for' NameList ':=' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
-            --->Acts:{ -1:ChgToken:"NameListEls":NameVar; }
+            --->Acts:{ -1:ChgToken:"[0]":NameVar; -1:AddSymbol:"[0]":NameVar; }
             ForRangeOnly:  'key:for' 'key:range' Expr '{' ?BlockList -'}' 'EOS'  >Ast
             --->Acts:{ -1:ChgToken:"NameListEls":NameVar; }
             // ForExpr most general at end 

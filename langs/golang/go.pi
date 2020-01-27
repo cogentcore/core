@@ -7475,7 +7475,14 @@
                       {
                         "RunIdx": -1,
                         "Act": "ChgToken",
-                        "Path": "NameListEls",
+                        "Path": "[0]",
+                        "Tok": "NameVar",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
                         "Tok": "NameVar",
                         "FmTok": "None"
                       }
@@ -7497,7 +7504,14 @@
                       {
                         "RunIdx": -1,
                         "Act": "ChgToken",
-                        "Path": "NameListEls",
+                        "Path": "[0]",
+                        "Tok": "NameVar",
+                        "FmTok": "None"
+                      },
+                      {
+                        "RunIdx": -1,
+                        "Act": "AddSymbol",
+                        "Path": "[0]",
                         "Tok": "NameVar",
                         "FmTok": "None"
                       }
