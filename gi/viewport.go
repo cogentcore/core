@@ -586,6 +586,22 @@ func (vp *Viewport2D) FillViewport() {
 	rs.Unlock()
 }
 
+func (vp *Viewport2D) FullReRenderIfNeeded() bool {
+	vpDoing := false
+	if vp.Viewport != nil && vp.Viewport.IsDoingFullRender() {
+		vpDoing = true
+	}
+	if vp.This().(Node2D).IsVisible() && vp.NeedsFullReRender() && !vpDoing {
+		if Render2DTrace {
+			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", vp.PathUnique(), vp.VpBBox)
+		}
+		vp.ClearFullReRender()
+		vp.ReRender2DTree()
+		return true
+	}
+	return false
+}
+
 func (vp *Viewport2D) Render2D() {
 	if vp.FullReRenderIfNeeded() {
 		return
