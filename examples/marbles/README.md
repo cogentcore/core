@@ -1,6 +1,6 @@
 # GoGi Marbles Example
 
-This is a fun interactive app, based on the marble version of [desmos](https://www.desmos.com/).  Originally written by Kai O'Reilly with some help from his dad :)  See [kplat1](https://github.com/kplat1) for his github page.
+This is a fun interactive app, based on the marble version of [desmos](https://www.desmos.com/).  Originally written by [kplat1](https://github.com/kplat1).
 
 ## Installation
 
