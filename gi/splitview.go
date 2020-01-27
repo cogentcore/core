@@ -629,9 +629,9 @@ func (sr *Splitter) MouseEvent() {
 					st := &srr.Sty
 					spc := st.Layout.Margin.Dots + 0.5*srr.ThSize
 					if srr.Dim == mat32.X {
-						srr.SliderPressed(float32(ed.X) - spc)
+						srr.SliderPress(float32(ed.X) - spc)
 					} else {
-						srr.SliderPressed(float32(ed.Y) - spc)
+						srr.SliderPress(float32(ed.Y) - spc)
 					}
 				} else if me.Action == mouse.DoubleClick {
 					sv := srr.SplitView()
@@ -643,7 +643,7 @@ func (sr *Splitter) MouseEvent() {
 						}
 					}
 				} else {
-					srr.SliderReleased()
+					srr.SliderRelease()
 				}
 			}
 		}

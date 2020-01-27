@@ -289,10 +289,10 @@ func (bb *ButtonBase) UpdateButtonStyle() bool {
 	return false
 }
 
-// ButtonPressed sets the button in the down state -- mouse clicked down but
+// ButtonPress sets the button in the down state -- mouse clicked down but
 // not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
 // ButtonClicked is down and up
-func (bb *ButtonBase) ButtonPressed() {
+func (bb *ButtonBase) ButtonPress() {
 	updt := bb.UpdateStart()
 	if bb.IsInactive() {
 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
@@ -307,10 +307,10 @@ func (bb *ButtonBase) ButtonPressed() {
 	bb.UpdateEnd(updt)
 }
 
-// ButtonReleased action: the button has just been released -- sends a released
+// BaseButtonRelease action: the button has just been released -- sends a released
 // signal and returns state to normal, and emits clicked signal if if it was
 // previously in pressed state
-func (bb *ButtonBase) ButtonReleased() {
+func (bb *ButtonBase) BaseButtonRelease() {
 	if bb.IsInactive() {
 		return
 	}
@@ -440,7 +440,7 @@ func (bb *ButtonBase) MouseEvent() {
 				fallthrough
 			case mouse.Press:
 				me.SetProcessed()
-				bbb.ButtonPressed()
+				bbb.ButtonPress()
 			case mouse.Release:
 				me.SetProcessed()
 				bw.ButtonRelease()
@@ -489,7 +489,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		if kf == KeyFunEnter || kt.Rune == ' ' {
 			if !(kt.Rune == ' ' && bbb.Viewport.IsCompleter()) {
 				kt.SetProcessed()
-				bbb.ButtonPressed()
+				bbb.ButtonPress()
 				bw.ButtonRelease()
 			}
 		}
@@ -561,7 +561,7 @@ func (bb *ButtonBase) Init2D() {
 }
 
 func (bb *ButtonBase) ButtonRelease() {
-	bb.ButtonReleased() // do base
+	bb.BaseButtonRelease() // do base
 }
 
 func (bb *ButtonBase) StyleParts() {
@@ -871,7 +871,7 @@ func (cb *CheckBox) AsButtonBase() *ButtonBase {
 }
 
 func (cb *CheckBox) ButtonRelease() {
-	cb.ButtonReleased()
+	cb.BaseButtonRelease()
 }
 
 // SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)

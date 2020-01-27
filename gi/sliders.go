@@ -179,9 +179,9 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 	sb.Sty = sb.StateStyles[state] // get relevant styles
 }
 
-// SliderPressed sets the slider in the down state -- mouse clicked down but
-// not yet up -- emits SliderPressed signal
-func (sb *SliderBase) SliderPressed(pos float32) {
+// SliderPress sets the slider in the down state -- mouse clicked down but
+// not yet up -- emits SliderPress signal
+func (sb *SliderBase) SliderPress(pos float32) {
 	sb.EmitValue = sb.Min - 1.0 // invalid value
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderDown)
@@ -191,10 +191,10 @@ func (sb *SliderBase) SliderPressed(pos float32) {
 	sb.UpdateEnd(updt)
 }
 
-// SliderReleased called when the slider has just been released -- sends a
+// SliderRelease called when the slider has just been released -- sends a
 // released signal and returns state to normal, and emits clicked signal if if
 // it was previously in pressed state
-func (sb *SliderBase) SliderReleased() {
+func (sb *SliderBase) SliderRelease() {
 	wasPressed := (sb.State == SliderDown)
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderActive)
@@ -270,8 +270,8 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 	sb.UpdateEnd(updt)
 }
 
-// SliderMoved called when slider moved along relevant axis
-func (sb *SliderBase) SliderMoved(start, end float32) {
+// SliderMove called when slider moved along relevant axis
+func (sb *SliderBase) SliderMove(start, end float32) {
 	del := end - start
 	sb.SetSliderPos(sb.DragPos + del)
 }
@@ -390,9 +390,9 @@ func (sb *SliderBase) MouseDragEvent() {
 		st := sbb.This().(SliderPositioner).PointToRelPos(me.From)
 		ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 		if sbb.Dim == mat32.X {
-			sbb.SliderMoved(float32(st.X), float32(ed.X))
+			sbb.SliderMove(float32(st.X), float32(ed.X))
 		} else {
-			sbb.SliderMoved(float32(st.Y), float32(ed.Y))
+			sbb.SliderMove(float32(st.Y), float32(ed.Y))
 		}
 	})
 }
@@ -414,12 +414,12 @@ func (sb *SliderBase) MouseEvent() {
 					st := &sbb.Sty
 					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSize
 					if sbb.Dim == mat32.X {
-						sbb.SliderPressed(float32(ed.X) - spc)
+						sbb.SliderPress(float32(ed.X) - spc)
 					} else {
-						sbb.SliderPressed(float32(ed.Y) - spc)
+						sbb.SliderPress(float32(ed.Y) - spc)
 					}
 				} else {
-					sbb.SliderReleased()
+					sbb.SliderRelease()
 				}
 			}
 		}
@@ -452,9 +452,9 @@ func (sb *SliderBase) MouseScrollEvent() {
 		me.SetProcessed()
 		cur := float32(sbb.Pos)
 		if sbb.Dim == mat32.X {
-			sbb.SliderMoved(cur, cur+float32(me.NonZeroDelta(true))) // preferX
+			sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(true))) // preferX
 		} else {
-			sbb.SliderMoved(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+			sbb.SliderMove(cur, cur-float32(me.NonZeroDelta(false))) // preferY
 		}
 	})
 }

@@ -1927,7 +1927,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		me.SetProcessed()
 		sbb := svv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
-		sbb.SliderMoved(cur, cur+float32(me.NonZeroDelta(false))) // preferY
+		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
