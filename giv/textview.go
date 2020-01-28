@@ -2449,6 +2449,7 @@ func (tv *TextView) OfferComplete() {
 	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return
 	}
+	tv.Buf.Complete.Cancel()
 	if !tv.Buf.Opts.Completion && !tv.ForceComplete {
 		return
 	}
@@ -2478,9 +2479,6 @@ func (tv *TextView) OfferComplete() {
 func (tv *TextView) CancelComplete() {
 	tv.ForceComplete = false
 	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On {
-		return
-	}
-	if !tv.Buf.Opts.Completion {
 		return
 	}
 	tv.Buf.CurView = nil

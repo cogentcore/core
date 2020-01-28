@@ -126,9 +126,15 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 	c.Completions = md.Matches
 	c.Seed = md.Seed
 	count := len(c.Completions)
-	if count == 0 || (count == 1 && c.Completions[0].Text == c.Seed) || (count > CompleteMaxItems && !force) {
+	if count == 0 {
 		return
 	}
+	if !force {
+		if count > CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
+			return
+		}
+	}
+
 	var m Menu
 	for i := 0; i < count; i++ {
 		cmp := &c.Completions[i]
