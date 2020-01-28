@@ -181,8 +181,9 @@ func (sm *SymMap) FindKindScoped(kind token.Tokens, matches *SymMap) {
 // Returns all instances found.  Uses cat / subcat based token matching -- if you
 // specify a category-level or subcategory level token, it will match everything
 // in that group.  if you specify kind = token.None then all tokens that contain
-// region will be returned.
-func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, kind token.Tokens, matches *SymMap) {
+// region will be returned.  extraLns are extra lines added to the symbol region
+// for purposes of matching.
+func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, extraLns int, kind token.Tokens, matches *SymMap) {
 	if *sm == nil {
 		return
 	}
@@ -191,7 +192,11 @@ func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, kind token.Token
 		if fp != fpath {
 			continue
 		}
-		if !sy.Region.Contains(pos) {
+		reg := sy.Region
+		if extraLns > 0 {
+			reg.Ed.Ln += extraLns
+		}
+		if !reg.Contains(pos) {
 			continue
 		}
 		if kind == token.None || kind.Match(sy.Kind) {
@@ -202,7 +207,7 @@ func (sm *SymMap) FindContainsRegion(fpath string, pos lex.Pos, kind token.Token
 		}
 	}
 	for _, ss := range *sm {
-		ss.Children.FindContainsRegion(fpath, pos, kind, matches)
+		ss.Children.FindContainsRegion(fpath, pos, extraLns, kind, matches)
 	}
 }
 
@@ -323,6 +328,12 @@ func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
 	}
 	for _, sy := range *sm {
 		nm := sy.Name
+		if nm[0] == '"' {
+			nm = strings.Trim(nm, `"`) // path names may be quoted
+			nm = filepath.Base(nm)     // sorry, this is a bit of a Go-specific hack to look at package names only
+			sy = sy.Clone()
+			sy.Name = nm
+		}
 		if noCase {
 			nm = strings.ToLower(nm)
 		}
@@ -330,7 +341,7 @@ func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
 			if *matches == nil {
 				*matches = make(SymMap)
 			}
-			(*matches)[sy.Name] = sy
+			(*matches)[nm] = sy
 		}
 	}
 	for _, ss := range *sm {

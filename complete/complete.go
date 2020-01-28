@@ -112,7 +112,7 @@ func MatchSeedString(completions []string, seed string) (matches []string) {
 		end = len(completions)
 	}
 
-	//fmt.Printf("match start: %d, end: %d", start, end)
+	// fmt.Printf("match start: %d, end: %d", start, end)
 	if start > -1 && end > -1 {
 		matches = completions[start:end]
 	}
@@ -165,7 +165,7 @@ func MatchSeedCompletion(completions []Completion, seed string) (matches []Compl
 		end = len(completions)
 	}
 
-	//fmt.Printf("match start: %d, end: %d", start, end)
+	// fmt.Printf("match start: %d, end: %d", start, end)
 	if start > -1 && end > -1 {
 		matches = completions[start:end]
 	}
@@ -243,11 +243,11 @@ func AddSyms(sym syms.SymMap, scope string, md *Matches) {
 	}
 	sys := sym.Slice(true) // sorted
 	for _, sy := range sys {
-		if sy.Name[0] == '_' || sy.Kind == token.NameLibrary { // internal / import
+		if sy.Name[0] == '_' { // internal / import
 			continue
 		}
 		nm := sy.Name
-		lbl := sy.Name
+		lbl := nm
 		if sy.Kind.SubCat() == token.NameFunction {
 			nm += "()"
 			if sy.Detail != "" {
@@ -301,11 +301,6 @@ func AddTypeNames(typ *syms.Type, scope, seed string, md *Matches) {
 		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)
 		md.Matches = append(md.Matches, c)
 	}
-	if len(md.Matches) == 1 {
-		if md.Matches[0].Text == md.Seed {
-			md.Seed = ""
-		}
-	}
 }
 
 // AddSymsPrefix adds subset of symbols that match seed prefix to given match data
@@ -317,9 +312,4 @@ func AddSymsPrefix(sym syms.SymMap, scope, seed string, md *Matches) {
 		sym.FindNamePrefixRecursive(seed, matches)
 	}
 	AddSyms(*matches, scope, md)
-	if len(md.Matches) == 1 {
-		if md.Matches[0].Text == md.Seed {
-			md.Seed = ""
-		}
-	}
 }

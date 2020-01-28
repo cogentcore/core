@@ -85,6 +85,15 @@ func (sy *Symbol) String() string {
 	return fmt.Sprintf("%v: %v (%v)", sy.Name, sy.Kind, sy.Region)
 }
 
+// Clone returns a clone copy of this symbol.
+// Does NOT copy the Children or Types -- caller can decide about that.
+func (sy *Symbol) Clone() *Symbol {
+	nsy := &Symbol{Name: sy.Name, Detail: sy.Detail, Kind: sy.Kind, Type: sy.Type, Index: sy.Index, Filename: sy.Filename, Region: sy.Region, SelectReg: sy.SelectReg}
+	nsy.Scopes = sy.Scopes.Clone()
+	nsy.Ast = sy.Ast
+	return nsy
+}
+
 // AddChild adds a child symbol, if this parent symbol is not temporary
 // returns true if item name was added and NOT already on the map,
 // and false if it was already or parent is temp.

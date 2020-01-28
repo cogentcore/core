@@ -18,6 +18,7 @@ import (
 
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // In an ErrorList, an error is represented by an *Error.
@@ -57,7 +58,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 		}
 	}
 	str := fnm + ":" + e.Pos.String() + ": " + e.Msg
-	if showRule && e.Rule != nil {
+	if showRule && !kit.IfaceIsNil(e.Rule) {
 		str += fmt.Sprintf(" (rule: %v)", e.Rule.Name())
 	}
 	ssz := len(e.Src)

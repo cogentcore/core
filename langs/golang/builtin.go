@@ -5,8 +5,11 @@
 package golang
 
 import (
+	"strings"
 	"unsafe"
 
+	"github.com/goki/pi/complete"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 )
 
@@ -21,6 +24,34 @@ func InstallBuiltinTypes() {
 		ty := syms.NewType(tk.Name, tk.Kind)
 		ty.Size = []int{tk.Size}
 		BuiltinTypes.Add(ty)
+	}
+}
+
+func (gl *GoLang) CompleteBuiltins(fs *pi.FileState, seed string, md *complete.Matches) {
+	for _, tk := range BuiltinTypeKind {
+		if strings.HasPrefix(tk.Name, seed) {
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: "type"}
+			md.Matches = append(md.Matches, c)
+		}
+	}
+	for _, bs := range BuiltinMisc {
+		if strings.HasPrefix(bs, seed) {
+			c := complete.Completion{Text: bs, Label: bs, Icon: "var"}
+			md.Matches = append(md.Matches, c)
+		}
+	}
+	for _, bs := range BuiltinFuncs {
+		if strings.HasPrefix(bs, seed) {
+			bs = bs + "()"
+			c := complete.Completion{Text: bs, Label: bs, Icon: "function"}
+			md.Matches = append(md.Matches, c)
+		}
+	}
+	for _, bs := range BuiltinPackages {
+		if strings.HasPrefix(bs, seed) {
+			c := complete.Completion{Text: bs, Label: bs, Icon: "types"}
+			md.Matches = append(md.Matches, c)
+		}
 	}
 }
 
@@ -57,4 +88,165 @@ var BuiltinTypeKind = []syms.TypeKindSize{
 
 	{"struct{}", syms.Struct, 0},
 	{"interface{}", syms.Interface, 0},
+}
+
+// BuiltinMisc are misc builtin items
+var BuiltinMisc = []string{
+	"true",
+	"false",
+}
+
+// BuiltinFuncs are functions builtin to the Go language
+var BuiltinFuncs = []string{
+	"append",
+	"copy",
+	"delete",
+	"len",
+	"cap",
+	"make",
+	"new",
+	"complex",
+	"real",
+	"imag",
+	"close",
+	"panic",
+	"recover",
+}
+
+// BuiltinPackages are the standard library packages
+var BuiltinPackages = []string{
+	"bufio",
+	"bytes",
+	"context",
+	"crypto",
+	"compress",
+	"encoding",
+	"errors",
+	"expvar",
+	"flag",
+	"fmt",
+	"hash",
+	"html",
+	"image",
+	"io",
+	"log",
+	"math",
+	"mime",
+	"net",
+	"os",
+	"path",
+	"plugin",
+	"reflect",
+	"regexp",
+	"runtime",
+	"sort",
+	"strconv",
+	"strings",
+	"sync",
+	"syscall",
+	"testing",
+	"time",
+	"unicode",
+	"unsafe",
+	"tar",
+	"zip",
+	"bzip2",
+	"flate",
+	"gzip",
+	"lzw",
+	"zlib",
+	"heap",
+	"list",
+	"ring",
+	"aes",
+	"cipher",
+	"des",
+	"dsa",
+	"ecdsa",
+	"ed25519",
+	"elliptic",
+	"hmac",
+	"md5",
+	"rc4",
+	"rsa",
+	"sha1",
+	"sha256",
+	"sha512",
+	"tls",
+	"x509",
+	"sql",
+	"ascii85",
+	"asn1",
+	"base32",
+	"base64",
+	"binary",
+	"csv",
+	"gob",
+	"hex",
+	"json",
+	"pem",
+	"xml",
+	"ast",
+	"build",
+	"constant",
+	"doc",
+	"format",
+	"importer",
+	"parser",
+	"printer",
+	"scanner",
+	"token",
+	"types",
+	"adler32",
+	"crc32",
+	"crc64",
+	"fnv",
+	"template",
+	"color",
+	"draw",
+	"gif",
+	"jpeg",
+	"png",
+	"suffixarray",
+	"ioutil",
+	"syslog",
+	"big",
+	"bits",
+	"cmplx",
+	"rand",
+	"multipart",
+	"quotedprintable",
+	"http",
+	"cookiejar",
+	"cgi",
+	"httptrace",
+	"httputil",
+	"pprof",
+	"socktest",
+	"mail",
+	"rpc",
+	"jsonrpc",
+	"smtp",
+	"textproto",
+	"url",
+	"exec",
+	"signal",
+	"user",
+	"filepath",
+	"syntax",
+	"cgo",
+	"debug",
+	"atomic",
+	"math",
+	"sys",
+	"msan",
+	"race",
+	"trace",
+	"atomic",
+	"js",
+	"scanner",
+	"tabwriter",
+	"template",
+	"utf16",
+	"utf8",
 }

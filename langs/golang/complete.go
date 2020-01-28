@@ -20,10 +20,7 @@ import (
 	"github.com/goki/pi/token"
 )
 
-// todo: fix completer logic when seed == only item -- should still show it!
-// * try complete in struct context for member types -- many other complete cases need fixing
 // * val = strings. doesn't work -- needs first letter..
-// * parser is not registering variables defined in if / for loop
 // * second or later vars in multiple assign is not implemented
 // * edit needs to be fixed to properly insert completions and retain remaining parts etc
 
@@ -70,13 +67,18 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		lfs.ParseState.Errs.Report(20, "", true, true)
 	}
 
-	start, last := gl.CompleteAstStart(lfs.ParseState.Ast)
+	var scopes syms.SymMap // scope(s) for position, fname
+	scope := gl.CompletePosScope(fs, pos, fpath, &scopes)
+
+	start, last := gl.CompleteAstStart(lfs.ParseState.Ast, scope)
 	if CompleteTrace {
 		if start == nil {
 			fmt.Printf("start = nil\n")
 			return
 		}
-		fmt.Printf("completion start:\n")
+		fmt.Printf("\n####################\ncompletion start in scope: %v\n", scope)
+		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		fmt.Printf("Start tree:\n")
 		start.WriteTree(os.Stdout, 0)
 	}
 
@@ -84,22 +86,21 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	// CompleteSym = pkg
 	start.SrcReg.St = pos
 
-	if start == last {
-		str := start.Src
+	if start == last { // single-item
+		seed := start.Src
 		if CompleteTrace {
-			fmt.Printf("start == last: %v\n", str)
+			fmt.Printf("start == last: %v\n", seed)
 		}
-
-		var conts syms.SymMap // containers of given region -- local scoping
-		fs.Syms.FindContainsRegion(fpath, pos, token.NameFunction, &conts)
-		if len(conts) == 0 {
-			fmt.Printf("no conts for fpath: %v  pos: %v\n", fpath, pos)
-			// CompleteSym = pkg
+		md.Seed = seed
+		if start.Nm == "TypeNm" {
+			gl.CompleteTypeName(fs, pkg, seed, &md)
+			return
 		}
-		complete.AddSymsPrefix(conts, "", str, &md)
-		var matches syms.SymMap
-		pkg.Children.FindNamePrefixScoped(str, &matches)
-		complete.AddSyms(matches, "", &md)
+		if len(scopes) > 0 {
+			complete.AddSymsPrefix(scopes, "", seed, &md)
+		}
+		gl.CompletePkgSyms(fs, pkg, seed, &md)
+		gl.CompleteBuiltins(fs, seed, &md)
 		return
 	}
 
@@ -131,7 +132,7 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			}
 		}
 		if CompleteTrace {
-			CompleteSym = pkg
+			// CompleteSym = pkg
 			fmt.Printf("completion type not found\n")
 		}
 	}
@@ -139,9 +140,55 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	return
 }
 
+// CompletePosScope returns the scope for given position in given filename,
+// and fills in the scoping symbol(s) in scMap
+func (gl *GoLang) CompletePosScope(fs *pi.FileState, pos lex.Pos, fpath string, scopes *syms.SymMap) token.Tokens {
+	fs.Syms.FindContainsRegion(fpath, pos, 2, token.None, scopes) // None matches any, 2 extra lines to add for new typing
+	if len(*scopes) == 0 {
+		return token.None
+	}
+	if len(*scopes) == 1 {
+		for _, sy := range *scopes {
+			return sy.Kind
+		}
+	}
+	fmt.Printf(" > 1 scopes!\n")
+	scopes.WriteDoc(os.Stdout, 0)
+	return token.None
+}
+
+// CompletePkgSyms matches all package symbols using seed
+func (gl *GoLang) CompletePkgSyms(fs *pi.FileState, pkg *syms.Symbol, seed string, md *complete.Matches) {
+	md.Seed = seed
+	var matches syms.SymMap
+	pkg.Children.FindNamePrefixScoped(seed, &matches)
+	complete.AddSyms(matches, "", md)
+}
+
+// CompleteTypeName matches builtin and package type names to seed
+func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed string, md *complete.Matches) {
+	md.Seed = seed
+	for _, tk := range BuiltinTypeKind {
+		if strings.HasPrefix(tk.Name, seed) {
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: "type"}
+			md.Matches = append(md.Matches, c)
+		}
+	}
+	sfunc := strings.HasPrefix(seed, "func ")
+	for _, tk := range pkg.Types {
+		if !sfunc && strings.HasPrefix(tk.Name, "func ") {
+			continue
+		}
+		if strings.HasPrefix(tk.Name, seed) {
+			c := complete.Completion{Text: tk.Name, Label: tk.Name, Icon: "type"}
+			md.Matches = append(md.Matches, c)
+		}
+	}
+}
+
 // CompleteAstStart finds the best starting point in the given current-line Ast
 // to start completion process, which walks back down from that starting point
-func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
+func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, last *parse.Ast) {
 	curi := walki.Last(ast)
 	if curi == nil {
 		return
@@ -156,6 +203,13 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 			par = cur.Par.(*parse.Ast)
 		}
 		switch {
+		case cur.Nm == "TypeNm":
+			return cur, last
+		case cur.Nm == "File":
+			if prv != last && prv.Src == last.Src {
+				return last, last // triggers single-item completion
+			}
+			return prv, last
 		case cur.Nm == "Selector":
 			if par != nil {
 				if par.Nm[:4] == "Asgn" {
@@ -170,7 +224,10 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 				return cur, last
 			}
 		case cur.Nm == "Name":
-			if cur.Nm == "if" { // weird parsing if incomplete
+			if cur.Src == "if" { // weird parsing if incomplete
+				if prv != last && prv.Src == last.Src {
+					return last, last // triggers single-item completion
+				}
 				return prv, last
 			}
 			if par != nil {
@@ -182,6 +239,12 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast) (start, last *parse.Ast) {
 				}
 			}
 		case cur.Nm == "ExprStmt":
+			if scope == token.None {
+				return prv, last
+			}
+			if cur.Src == prv.Src {
+				return prv, last
+			}
 			if cur.Src != "(" && prv != last {
 				return prv, last
 			}

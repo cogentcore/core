@@ -22,7 +22,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 	pos := tyast.SrcReg.St
 	fpath, _ := filepath.Abs(fs.Src.Filename)
 	var conts syms.SymMap // containers of given region -- local scoping
-	fs.Syms.FindContainsRegion(fpath, pos, token.NameFunction, &conts)
+	fs.Syms.FindContainsRegion(fpath, pos, 0, token.NameFunction, &conts)
 	// if TraceTypes && len(conts) == 0 {
 	// 	fmt.Printf("TExpr: no conts for fpath: %v  pos: %v\n", fpath, pos)
 	// }
@@ -116,6 +116,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		sty, got := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		return sty, nil, got
 	case tnm == "AddrExpr":
+		if !tyast.HasChildren() {
+			return nil, nil, false
+		}
 		ch := tyast.ChildAst(0)
 		snm := tyast.Src[1:] // after &
 		var sty *syms.Type
@@ -328,8 +331,8 @@ func (gl *GoLang) TypeFromFuncCall(fs *pi.FileState, origPkg, pkg *syms.Symbol, 
 		}
 		return nil, nxt, false // no return -- shouldn't happen
 	}
-	rtyp := ftyp.Els[npars] // first return
-	if nxt.Nm == "Name" {   // direct de-ref on function return value -- AstType assumes nxt is type el
+	rtyp := ftyp.Els[npars]             // first return
+	if nxt != nil && nxt.Nm == "Name" { // direct de-ref on function return value -- AstType assumes nxt is type el
 		prv := nxt.PrevAst()
 		if prv != tyast {
 			nxt = prv
