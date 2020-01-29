@@ -2047,6 +2047,14 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	kf := KeyFun(cs)
 	cpop := w.CurPopup()
 	switch kf {
+	case KeyFunWinClose:
+		w.CloseReq()
+		e.SetProcessed()
+	case KeyFunMenu:
+		if w.MainMenu != nil {
+			w.MainMenu.GrabFocus()
+			e.SetProcessed()
+		}
 	case KeyFunAbort:
 		if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
 			delPop = true

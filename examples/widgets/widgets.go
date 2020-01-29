@@ -311,7 +311,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 			fmt.Printf("File:SaveAs menu action triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunMenuClose},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
 		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			win.CloseReq()
 		})

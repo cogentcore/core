@@ -184,9 +184,7 @@ func (c *Complete) Lookup(text string, posLn, posCh int, vp *Viewport2D, pt imag
 		return
 	}
 	c.Vp = nil
-	ld := c.LookupFunc(c.Context, text, posLn, posCh)
-	_ = ld
-	// todo: process result
+	c.LookupFunc(c.Context, text, posLn, posCh) // this processes result directly
 }
 
 // Complete emits a signal to let subscribers know that the user has made a

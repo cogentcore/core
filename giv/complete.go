@@ -1,12 +1,15 @@
 package giv
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ints"
 	"github.com/goki/pi/complete"
-	"github.com/goki/pi/langs/golang"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
@@ -23,7 +26,7 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 	}
 	lp, err := pi.LangSupport.Props(sfs.Src.Sup)
 	if err != nil {
-		log.Printf("CompletePi: %v\n", err)
+		log.Print("CompletePi: %v\n", err)
 		return md
 	}
 	if lp.Lang == nil {
@@ -35,19 +38,6 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
 	md = lp.Lang.CompleteLine(sfs, text, lex.Pos{posLn, posCh})
-
-	if golang.FileParseState != nil {
-		StructViewDialog(nil, golang.FileParseState, DlgOpts{Title: "File FileState"}, nil, nil)
-	}
-	if golang.LineParseState != nil {
-		StructViewDialog(nil, golang.LineParseState, DlgOpts{Title: "Line FileState"}, nil, nil)
-	}
-	if golang.CompleteSym != nil {
-		StructViewDialog(nil, golang.CompleteSym, DlgOpts{Title: "Complete Sym"}, nil, nil)
-	}
-	if golang.CompleteSyms != nil {
-		MapViewDialog(nil, golang.CompleteSyms, DlgOpts{Title: "Complete Syms"}, nil, nil)
-	}
 	return md
 }
 
@@ -92,19 +82,40 @@ func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Look
 	parse.GuiActive = true // note: this is key for debugging -- runs slower but makes the tree unique
 
 	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
+	if len(ld.Text) > 0 {
+		TextViewDialog(nil, ld.Text, DlgOpts{Title: "Lookup: " + text})
+		return ld
+	}
+	if ld.Filename != "" {
+		fp, err := os.Open(ld.Filename)
+		if err != nil {
+			log.Println(err)
+			return ld
+		}
+		txt, err := ioutil.ReadAll(fp)
+		fp.Close()
+		if err != nil {
+			log.Println(err)
+			return ld
+		}
+		if ld.StLine > 0 || ld.EdLine > 0 {
+			lns := bytes.Split(txt, []byte("\n"))
+			nln := len(lns)
+			if ld.EdLine > 0 && ld.EdLine > ld.StLine && ld.EdLine < nln {
+				el := ints.MinInt(ld.EdLine+1, nln-1)
+				lns = lns[:el]
+			}
+			if ld.StLine > 0 && ld.StLine < len(lns) {
+				lns = lns[ld.StLine:]
+			}
+			txt = bytes.Join(lns, []byte("\n"))
+			txt = append(txt, '\n')
+		}
+		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
+		TextViewDialog(nil, []byte(txt), DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true})
+		return ld
+	}
 
-	if golang.FileParseState != nil {
-		StructViewDialog(nil, golang.FileParseState, DlgOpts{Title: "File FileState"}, nil, nil)
-	}
-	if golang.LineParseState != nil {
-		StructViewDialog(nil, golang.LineParseState, DlgOpts{Title: "Line FileState"}, nil, nil)
-	}
-	if golang.CompleteSym != nil {
-		StructViewDialog(nil, golang.CompleteSym, DlgOpts{Title: "Complete Sym"}, nil, nil)
-	}
-	if golang.CompleteSyms != nil {
-		MapViewDialog(nil, golang.CompleteSyms, DlgOpts{Title: "Complete Syms"}, nil, nil)
-	}
 	return ld
 }
 

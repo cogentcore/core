@@ -418,7 +418,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 	// special action names
 	switch ac.Nm {
 	case "Close Window":
-		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunMenuClose)
+		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunWinClose)
 		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			vp.Win.CloseReq()
 		})

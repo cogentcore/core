@@ -3961,6 +3961,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorToHistNext()
+	case gi.KeyFunLookup:
+		cancelAll()
+		kt.SetProcessed()
+		tv.Lookup()
 	}
 	if tv.IsInactive() {
 		switch {
@@ -4045,10 +4049,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			tv.OfferComplete()
 			tv.ForceComplete = false // ROR: I definitely don't like this option!  want it just when I want it!
 		}
-	case gi.KeyFunLookup:
-		tv.ISearchCancel()
-		kt.SetProcessed()
-		tv.Lookup()
 	case gi.KeyFunEnter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {

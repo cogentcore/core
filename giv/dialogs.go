@@ -11,6 +11,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 )
 
@@ -27,6 +28,8 @@ type DlgOpts struct {
 	NoAdd    bool      `desc:"if true, user cannot add elements of the slice"`
 	NoDelete bool      `desc:"if true, user cannot delete elements of the slice"`
 	Inactive bool      `desc:"if true all fields will be inactive"`
+	Filename string    `desc:"filename, e.g., for TextView, to get highlighting"`
+	LineNos  bool      `desc:"include line numbers for TextView"`
 }
 
 // ToGiOpts converts giv opts to gi opts
@@ -37,7 +40,7 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // TextViewDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
+func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()
@@ -45,7 +48,14 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
 
 	tb := &TextBuf{}
 	tb.InitName(tb, "text-view-dialog-buf")
+	tb.Filename = gi.FileName(opts.Filename)
+	tb.Hi.Style = "emacs2"
+	tb.Opts.LineNos = opts.LineNos
+	tb.Stat() // update markup
 	tb.SetText(text)
+	// markup the first 100 lines
+	mxhi := ints.MinInt(100, tb.NLines-1)
+	tb.MarkupLinesLock(0, mxhi)
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
 	tlv.SetProp("width", units.NewEm(5))
@@ -54,6 +64,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
 	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	tv.SetInactive()
+	tv.SetProp("font-family", "Go Mono")
 	tv.SetBuf(tb)
 
 	bbox, _ := dlg.ButtonBox(frame)
@@ -72,6 +83,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) {
 
 	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)
+	return tv
 }
 
 //gopy:interface=handle StructViewDialog is for editing fields of a structure using a StructView --

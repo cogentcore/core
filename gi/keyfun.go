@@ -68,8 +68,6 @@ const (
 	KeyFunRedo
 	KeyFunInsert
 	KeyFunInsertAfter
-	KeyFunGoGiEditor
-	KeyFunWinSnapshot
 	KeyFunZoomOut
 	KeyFunZoomIn
 	KeyFunPrefs
@@ -83,7 +81,11 @@ const (
 	KeyFunJump // jump to line
 	KeyFunHistPrev
 	KeyFunHistNext
+	KeyFunMenu // put focus on menu
 	KeyFunWinFocusNext
+	KeyFunWinClose
+	KeyFunWinSnapshot
+	KeyFunGoGiEditor
 	// Below are menu specific functions -- use these as shortcuts for menu actions
 	// allows uniqueness of mapping and easy customization of all key actions
 	KeyFunMenuNew
@@ -94,8 +96,7 @@ const (
 	KeyFunMenuOpenAlt2 // alternative version (e.g., alt)
 	KeyFunMenuSave
 	KeyFunMenuSaveAs
-	KeyFunMenuSaveAlt // another alt (e.g., alt)
-	KeyFunMenuClose
+	KeyFunMenuSaveAlt   // another alt (e.g., alt)
 	KeyFunMenuCloseAlt1 // alternative version (e.g., shift)
 	KeyFunMenuCloseAlt2 // alternative version (e.g., alt)
 	KeyFunsN
@@ -566,10 +567,6 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Meta+Z":            KeyFunRedo,
 		"Control+I":               KeyFunInsert,
 		"Control+O":               KeyFunInsertAfter,
-		"Control+Alt+I":           KeyFunGoGiEditor,
-		"Shift+Control+I":         KeyFunGoGiEditor,
-		"Control+Alt+G":           KeyFunWinSnapshot,
-		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Shift+Meta+=":            KeyFunZoomIn,
 		"Meta+=":                  KeyFunZoomIn,
 		"Meta+-":                  KeyFunZoomOut,
@@ -582,7 +579,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
-		"Alt+.":                   KeyFunLookup,
+		"Alt+≤":                   KeyFunLookup,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
 		"Meta+R":                  KeyFunReplace,
@@ -591,7 +588,13 @@ var StdKeyMaps = KeyMaps{
 		"Control+]":               KeyFunHistNext,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
+		"F10":                     KeyFunMenu,
 		"Meta+`":                  KeyFunWinFocusNext,
+		"Meta+W":                  KeyFunWinClose,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
+		"Control+Alt+I":           KeyFunGoGiEditor,
+		"Shift+Control+I":         KeyFunGoGiEditor,
 		"Meta+N":                  KeyFunMenuNew,
 		"Shift+Meta+N":            KeyFunMenuNewAlt1,
 		"Alt+Meta+N":              KeyFunMenuNewAlt2,
@@ -601,7 +604,6 @@ var StdKeyMaps = KeyMaps{
 		"Meta+S":                  KeyFunMenuSave,
 		"Shift+Meta+S":            KeyFunMenuSaveAs,
 		"Alt+Meta+S":              KeyFunMenuSaveAlt,
-		"Meta+W":                  KeyFunMenuClose,
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
@@ -638,7 +640,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+PageDown":          KeyFunPageDown,
 		"Control+DownArrow":       KeyFunPageDown,
 		"Shift+Control+V":         KeyFunPageDown,
-		"Alt+V":                   KeyFunPageDown,
+		"Alt+√":                   KeyFunPageDown,
 		"Control+V":               KeyFunPageDown,
 		"Control+RightArrow":      KeyFunWordRight,
 		"Control+LeftArrow":       KeyFunWordLeft,
@@ -662,7 +664,7 @@ var StdKeyMaps = KeyMaps{
 		"Meta+L":                  KeyFunDocEnd,
 		"Control+Alt+E":           KeyFunDocEnd,
 		"Alt+Ƒ":                   KeyFunWordRight,
-		"Alt+B":                   KeyFunWordLeft,
+		"Alt+∫":                   KeyFunWordLeft,
 		"Tab":                     KeyFunFocusNext,
 		"Shift+Tab":               KeyFunFocusPrev,
 		"ReturnEnter":             KeyFunEnter,
@@ -680,7 +682,7 @@ var StdKeyMaps = KeyMaps{
 		"Alt+DeleteForward":       KeyFunDeleteWord,
 		"Control+D":               KeyFunDelete,
 		"Control+K":               KeyFunKill,
-		"Alt+W":                   KeyFunCopy,
+		"Alt+∑":                   KeyFunCopy,
 		"Meta+C":                  KeyFunCopy,
 		"Control+W":               KeyFunCut,
 		"Meta+X":                  KeyFunCut,
@@ -688,7 +690,7 @@ var StdKeyMaps = KeyMaps{
 		"Meta+V":                  KeyFunPaste,
 		"Shift+Meta+V":            KeyFunPasteHist,
 		"Shift+Control+Y":         KeyFunPasteHist,
-		"Alt+D":                   KeyFunDuplicate,
+		"Alt+∂":                   KeyFunDuplicate,
 		"Control+Z":               KeyFunUndo,
 		"Meta+Z":                  KeyFunUndo,
 		"Control+/":               KeyFunUndo,
@@ -696,10 +698,6 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Meta+Z":            KeyFunRedo,
 		"Control+I":               KeyFunInsert,
 		"Control+O":               KeyFunInsertAfter,
-		"Control+Alt+I":           KeyFunGoGiEditor,
-		"Shift+Control+I":         KeyFunGoGiEditor,
-		"Control+Alt+G":           KeyFunWinSnapshot,
-		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Shift+Meta+=":            KeyFunZoomIn,
 		"Meta+=":                  KeyFunZoomIn,
 		"Meta+-":                  KeyFunZoomOut,
@@ -712,7 +710,7 @@ var StdKeyMaps = KeyMaps{
 		"F5":                      KeyFunRefresh,
 		"Control+L":               KeyFunRecenter,
 		"Control+.":               KeyFunComplete,
-		"Alt+.":                   KeyFunLookup,
+		"Alt+≥":                   KeyFunLookup,
 		"Control+S":               KeyFunSearch,
 		"Meta+F":                  KeyFunFind,
 		"Meta+R":                  KeyFunReplace,
@@ -722,7 +720,13 @@ var StdKeyMaps = KeyMaps{
 		"Control+]":               KeyFunHistNext,
 		"Meta+[":                  KeyFunHistPrev,
 		"Meta+]":                  KeyFunHistNext,
+		"F10":                     KeyFunMenu,
 		"Meta+`":                  KeyFunWinFocusNext,
+		"Meta+W":                  KeyFunWinClose,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
+		"Control+Alt+I":           KeyFunGoGiEditor,
+		"Shift+Control+I":         KeyFunGoGiEditor,
 		"Meta+N":                  KeyFunMenuNew,
 		"Shift+Meta+N":            KeyFunMenuNewAlt1,
 		"Alt+Meta+N":              KeyFunMenuNewAlt2,
@@ -732,7 +736,6 @@ var StdKeyMaps = KeyMaps{
 		"Meta+S":                  KeyFunMenuSave,
 		"Shift+Meta+S":            KeyFunMenuSaveAs,
 		"Alt+Meta+S":              KeyFunMenuSaveAlt,
-		"Meta+W":                  KeyFunMenuClose,
 		"Shift+Meta+W":            KeyFunMenuCloseAlt1,
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
@@ -819,10 +822,6 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+Z":         KeyFunRedo,
 		"Control+I":               KeyFunInsert,
 		"Control+O":               KeyFunInsertAfter,
-		"Control+Alt+I":           KeyFunGoGiEditor,
-		"Shift+Control+I":         KeyFunGoGiEditor,
-		"Control+Alt+G":           KeyFunWinSnapshot,
-		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -838,7 +837,13 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"F10":                     KeyFunMenu,
 		"Alt+F6":                  KeyFunWinFocusNext,
+		"Shift+Control+W":         KeyFunWinClose,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
+		"Control+Alt+I":           KeyFunGoGiEditor,
+		"Shift+Control+I":         KeyFunGoGiEditor,
 		"Alt+N":                   KeyFunMenuNew, // ctrl keys conflict..
 		"Shift+Alt+N":             KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
@@ -848,7 +853,6 @@ var StdKeyMaps = KeyMaps{
 		"Alt+S":                   KeyFunMenuSave,
 		"Shift+Alt+S":             KeyFunMenuSaveAs,
 		"Control+Alt+S":           KeyFunMenuSaveAlt,
-		"Shift+Control+W":         KeyFunMenuClose,
 		"Shift+Alt+W":             KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
@@ -903,9 +907,6 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+Z":         KeyFunRedo,
 		"Control+Alt+I":           KeyFunInsert,
 		"Control+Alt+O":           KeyFunInsertAfter,
-		"Shift+Control+I":         KeyFunGoGiEditor,
-		"Control+Alt+G":           KeyFunWinSnapshot,
-		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -924,7 +925,12 @@ var StdKeyMaps = KeyMaps{
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
 		"Control+N":               KeyFunMenuNew,
+		"F10":                     KeyFunMenu,
 		"Alt+F6":                  KeyFunWinFocusNext,
+		"Control+W":               KeyFunWinClose,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
+		"Shift+Control+I":         KeyFunGoGiEditor,
 		"Shift+Control+N":         KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
 		"Control+O":               KeyFunMenuOpen,
@@ -933,7 +939,6 @@ var StdKeyMaps = KeyMaps{
 		"Control+S":               KeyFunMenuSave,
 		"Shift+Control+S":         KeyFunMenuSaveAs,
 		"Control+Alt+S":           KeyFunMenuSaveAlt,
-		"Control+W":               KeyFunMenuClose,
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
@@ -988,9 +993,6 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+Z":         KeyFunRedo,
 		"Control+Alt+I":           KeyFunInsert,
 		"Control+Alt+O":           KeyFunInsertAfter,
-		"Shift+Control+I":         KeyFunGoGiEditor,
-		"Control+Alt+G":           KeyFunWinSnapshot,
-		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -1008,7 +1010,12 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"F10":                     KeyFunMenu,
 		"Alt+F6":                  KeyFunWinFocusNext,
+		"Control+W":               KeyFunWinClose,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
+		"Shift+Control+I":         KeyFunGoGiEditor,
 		"Control+N":               KeyFunMenuNew,
 		"Shift+Control+N":         KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
@@ -1018,7 +1025,6 @@ var StdKeyMaps = KeyMaps{
 		"Control+S":               KeyFunMenuSave,
 		"Shift+Control+S":         KeyFunMenuSaveAs,
 		"Control+Alt+S":           KeyFunMenuSaveAlt,
-		"Control+W":               KeyFunMenuClose,
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
@@ -1073,9 +1079,6 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+Z":         KeyFunRedo,
 		"Control+Alt+I":           KeyFunInsert,
 		"Control+Alt+O":           KeyFunInsertAfter,
-		"Shift+Control+I":         KeyFunGoGiEditor,
-		"Control+Alt+G":           KeyFunWinSnapshot,
-		"Shift+Control+G":         KeyFunWinSnapshot,
 		"Control+=":               KeyFunZoomIn,
 		"Shift+Control++":         KeyFunZoomIn,
 		"Control+-":               KeyFunZoomOut,
@@ -1093,7 +1096,12 @@ var StdKeyMaps = KeyMaps{
 		"Control+J":               KeyFunJump,
 		"Control+[":               KeyFunHistPrev,
 		"Control+]":               KeyFunHistNext,
+		"F10":                     KeyFunMenu,
 		"Alt+F6":                  KeyFunWinFocusNext,
+		"Control+W":               KeyFunWinClose,
+		"Control+Alt+G":           KeyFunWinSnapshot,
+		"Shift+Control+G":         KeyFunWinSnapshot,
+		"Shift+Control+I":         KeyFunGoGiEditor,
 		"Control+N":               KeyFunMenuNew,
 		"Shift+Control+N":         KeyFunMenuNewAlt1,
 		"Control+Alt+N":           KeyFunMenuNewAlt2,
@@ -1103,7 +1111,6 @@ var StdKeyMaps = KeyMaps{
 		"Control+S":               KeyFunMenuSave,
 		"Shift+Control+S":         KeyFunMenuSaveAs,
 		"Control+Alt+S":           KeyFunMenuSaveAlt,
-		"Control+W":               KeyFunMenuClose,
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},

@@ -1844,6 +1844,8 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 			allgood = false
 		}
 	}
+	// todo: trigger a background reparse of everything in a separate pi.FilesState
+	// that gets switched into the current.
 	return allgood
 }
 

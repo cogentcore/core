@@ -75,12 +75,12 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	glfw.PostEmptyEvent()
 
 	if act == key.Press && ec < key.CodeLeftControl &&
-		(key.HasAnyModifierBits(em, key.Control, key.Alt, key.Meta) ||
+		(key.HasAnyModifierBits(em, key.Control, key.Meta) || // don't include alt here
 			!mapped || ec == key.CodeTab) {
 		// if key.HasAllModifierBits(em, key.Control) && ec == key.CodeY {
 		// 	fmt.Printf("Ctrl-Y win: %v\n", w.Nm)
 		// }
-		// fmt.Printf("chord ky	: %v ec	: %v\n	", ky, ec)
+		// fmt.Printf("chord ky	: %v ec	: %v   mapped: %v\n", ky, ec, mapped)
 		che := &key.ChordEvent{
 			Event: key.Event{
 				Code:      ec,
@@ -105,6 +105,7 @@ func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey
 			Action:    act,
 		},
 	}
+	// fmt.Printf("che: %v\n", che)
 	fw := theApp.WindowInFocus()
 	if w != fw {
 		if fw == nil {
