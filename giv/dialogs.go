@@ -49,7 +49,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb := &TextBuf{}
 	tb.InitName(tb, "text-view-dialog-buf")
 	tb.Filename = gi.FileName(opts.Filename)
-	tb.Hi.Style = "emacs2"
+	tb.Hi.Style = "emacs"
 	tb.Opts.LineNos = opts.LineNos
 	tb.Stat() // update markup
 	tb.SetText(text)
