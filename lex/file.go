@@ -398,7 +398,7 @@ func (fl *File) RegSrc(reg Reg) string {
 	nln := reg.Ed.Ln - reg.St.Ln
 	if nln > 10 {
 		src += "|>" + string((*fl.Lines)[reg.St.Ln+1]) + "..."
-		src += "|>" + string((*fl.Lines)[reg.St.Ln-1])
+		src += "|>" + string((*fl.Lines)[reg.Ed.Ln-1])
 		return src
 	}
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {

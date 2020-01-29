@@ -54,24 +54,28 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			}
 		case sy.Kind.SubCat() == token.NameVar:
 			var astyp *parse.Ast
-			if strings.HasPrefix(ast.Nm, "ForRange") {
-				// vars are in first child, type is in second child, rest of code is on last node
-				astyp = ast.ChildAst(1)
-			} else {
-				astyp = ast.ChildAst(len(ast.Kids) - 1)
-			}
-			vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
-			if ok {
-				sy.Type = SymTypeNameForPkg(vty, pkg)
-				// if TraceTypes {
-				// 	fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
-				// }
-			} else {
-				sy.Type = TypeErr // actively mark as err so not re-processed
-				if TraceTypes {
-					fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
-					astyp.WriteTree(os.Stdout, 0)
+			if ast.HasChildren() {
+				if strings.HasPrefix(ast.Nm, "ForRange") {
+					// vars are in first child, type is in second child, rest of code is on last node
+					astyp = ast.ChildAst(1)
+				} else {
+					astyp = ast.ChildAst(len(ast.Kids) - 1)
 				}
+				vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+				if ok {
+					sy.Type = SymTypeNameForPkg(vty, pkg)
+					// if TraceTypes {
+					// 	fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
+					// }
+				} else {
+					sy.Type = TypeErr // actively mark as err so not re-processed
+					if TraceTypes {
+						fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+						astyp.WriteTree(os.Stdout, 0)
+					}
+				}
+			} else {
+				sy.Type = TypeErr
 			}
 		case sy.Kind == token.NameConstant:
 			if !strings.HasPrefix(ast.Nm, "ConstSpec") {
@@ -81,21 +85,25 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				return
 			}
 			par := ast.ParAst()
-			if par != nil {
+			if par != nil && par.HasChildren() {
 				fc := par.ChildAst(0)
-				ffc := fc.ChildAst(0)
-				if ffc.Nm == "Name" {
-					ffc = ffc.NextAst()
-				}
-				vty, ok := gl.TypeFromAst(fs, pkg, nil, ffc)
-				if ok {
-					sy.Type = SymTypeNameForPkg(vty, pkg)
+				if fc.HasChildren() {
+					ffc := fc.ChildAst(0)
+					if ffc.Nm == "Name" {
+						ffc = ffc.NextAst()
+					}
+					vty, ok := gl.TypeFromAst(fs, pkg, nil, ffc)
+					if ok {
+						sy.Type = SymTypeNameForPkg(vty, pkg)
+					} else {
+						sy.Type = TypeErr
+						if TraceTypes {
+							fmt.Printf("InferSymbolType: NameConstant: %v NOT resolved from ast: %v\n", sy.Name, ffc.PathUnique())
+							ffc.WriteTree(os.Stdout, 1)
+						}
+					}
 				} else {
 					sy.Type = TypeErr
-					if TraceTypes {
-						fmt.Printf("InferSymbolType: NameConstant: %v NOT resolved from ast: %v\n", sy.Name, ffc.PathUnique())
-						ffc.WriteTree(os.Stdout, 1)
-					}
 				}
 			} else {
 				sy.Type = TypeErr
@@ -108,23 +116,27 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 				// if TraceTypes {
 				// 	fmt.Printf("InferSymbolType: NameType: %v\n", sy.Name)
 				// }
-				astyp := ast.ChildAst(len(ast.Kids) - 1)
-				if astyp.Nm == "FieldTag" {
-					// ast.WriteTree(os.Stdout, 1)
-					astyp = ast.ChildAst(len(ast.Kids) - 2)
-				}
-				vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
-				if ok {
-					sy.Type = SymTypeNameForPkg(vty, pkg)
-					// if TraceTypes {
-					// 	fmt.Printf("InferSymbolType: NameType: %v  type: %v from ast\n", sy.Name, sy.Type)
-					// }
-				} else {
-					sy.Type = TypeErr // actively mark as err so not re-processed
-					if TraceTypes {
-						fmt.Printf("InferSymbolType: NameType: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
-						ast.WriteTree(os.Stdout, 1)
+				if ast.HasChildren() {
+					astyp := ast.ChildAst(len(ast.Kids) - 1)
+					if astyp.Nm == "FieldTag" {
+						// ast.WriteTree(os.Stdout, 1)
+						astyp = ast.ChildAst(len(ast.Kids) - 2)
 					}
+					vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+					if ok {
+						sy.Type = SymTypeNameForPkg(vty, pkg)
+						// if TraceTypes {
+						// 	fmt.Printf("InferSymbolType: NameType: %v  type: %v from ast\n", sy.Name, sy.Type)
+						// }
+					} else {
+						sy.Type = TypeErr // actively mark as err so not re-processed
+						if TraceTypes {
+							fmt.Printf("InferSymbolType: NameType: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+							ast.WriteTree(os.Stdout, 1)
+						}
+					}
+				} else {
+					sy.Type = TypeErr
 				}
 			}
 		case sy.Kind == token.NameFunction:

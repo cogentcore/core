@@ -40,8 +40,9 @@ type Matches struct {
 // Lookup is used for returning lookup results
 type Lookup struct {
 	Filename string `desc:"if non-empty, the result is to view this file (full path)"`
-	LineNo   int    `desc:"line number within file to scroll display to"`
-	Text     string `desc:"if filename is empty, this is raw text to display for lookup result"`
+	StLine   int    `desc:"starting line number within file to display"`
+	EdLine   int    `desc:"ending line number within file"`
+	Text     []byte `desc:"if filename is empty, this is raw text to display for lookup result"`
 }
 
 // Edit is returned from completion edit function

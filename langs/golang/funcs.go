@@ -33,6 +33,8 @@ func (gl *GoLang) TypeMeths(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type) {
 		if fty != nil {
 			fty.Kind = syms.Method
 			fty.Name = sy.Name
+			fty.Filename = sy.Filename
+			fty.Region = sy.Region
 			ty.Meths.Add(fty)
 			// if TraceTypes {
 			// 	fmt.Printf("TypeMeths: Added method: %v\n", fty)

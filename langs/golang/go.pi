@@ -185,7 +185,7 @@
             },
             "Kids": null,
             "Off": true,
-            "Desc": "backtick actually has NO escape!",
+            "Desc": "backtick actually has NO escape",
             "Token": "LitStrBacktick",
             "Match": "String",
             "Pos": "AnyPos",

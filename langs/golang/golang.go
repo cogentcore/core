@@ -107,6 +107,7 @@ func (gl *GoLang) HiLine(fs *pi.FileState, line int) lex.Line {
 			initDepth := fs.Src.PrevDepth(line)
 			pr.PassTwo.NestDepthLine(mc, initDepth)
 		}
+		lfs.Syms.WriteDoc(os.Stdout, 0)
 		return mc
 	} else {
 		return ll
@@ -139,6 +140,10 @@ var TheParseDirs ParseDirLocks
 func (pd *ParseDirLocks) ParseDir(gl *GoLang, path string, opts pi.LangDirOpts) *syms.Symbol {
 	if path == "C" || path[0] == '_' {
 		return nil
+	}
+	pfld := strings.Fields(path)
+	if len(pfld) > 1 { // remove first alias
+		path = pfld[1]
 	}
 	pd.Mu.Lock()
 	if pd.Dirs == nil {

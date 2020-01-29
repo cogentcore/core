@@ -20,24 +20,15 @@ import (
 	"github.com/goki/pi/token"
 )
 
+// * completion on new code != saved code -- really needs to do full reparse more frequently
 // * val = strings. doesn't work -- needs first letter..
 // * second or later vars in multiple assign is not implemented
 // * edit needs to be fixed to properly insert completions and retain remaining parts etc
-
-var LineParseState *pi.FileState
-var FileParseState *pi.FileState
-var CompleteSym *syms.Symbol
-var CompleteSyms *syms.SymMap
 
 var CompleteTrace = false
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
 func (gl *GoLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete.Lookup) {
-	return
-}
-
-// CompleteLine is the main api called by completion code in giv/complete.go
-func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.Matches) {
 	if str == "" {
 		return
 	}
@@ -54,13 +45,6 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 		return
 	}
 
-	FileParseState = nil
-	LineParseState = nil
-	CompleteSym = nil
-	CompleteSyms = nil
-
-	// FileParseState = fs
-	// LineParseState = lfs
 	if CompleteTrace {
 		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
 		lfs.LexState.Errs.Report(20, "", true, true)
@@ -83,7 +67,116 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 	}
 
 	pkg := fs.ParseState.Scopes[0]
-	// CompleteSym = pkg
+	start.SrcReg.St = pos
+
+	if start == last { // single-item
+		if CompleteTrace {
+			fmt.Printf("start == last: nothing to lookup\n")
+		}
+		return
+	}
+
+	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
+	lststr := ""
+	if nxt != nil {
+		lststr = nxt.Src
+	}
+	if got {
+		if lststr != "" {
+			for _, mt := range typ.Meths {
+				nm := mt.Name
+				if !strings.HasPrefix(nm, lststr) {
+					continue
+				}
+				if mt.Filename != "" {
+					ld.Filename = mt.Filename
+					ld.StLine = mt.Region.St.Ln
+					ld.EdLine = mt.Region.Ed.Ln
+					return
+				}
+			}
+		}
+		// fmt.Printf("got completion type: %v, last str: %v\n", typ.String(), lststr)
+		ld.Filename = typ.Filename
+		ld.StLine = typ.Region.St.Ln
+		ld.EdLine = typ.Region.Ed.Ln
+		return
+	}
+	// see if it starts with a package name..
+	snxt := start.NextAst()
+	if snxt != nil && snxt.Src != "" {
+		ststr := snxt.Src
+		psym, has := gl.PkgSyms(fs, pkg.Children, ststr)
+		if has {
+			lststr := last.Src
+			if lststr != "" && lststr != ststr {
+				var matches syms.SymMap
+				psym.Children.FindNamePrefixScoped(lststr, &matches)
+				if len(matches) == 1 {
+					var psy *syms.Symbol
+					for _, sy := range matches {
+						psy = sy
+					}
+					ld.Filename = psy.Filename
+					ld.StLine = psy.Region.St.Ln
+					ld.EdLine = psy.Region.Ed.Ln
+					return
+				}
+			}
+		}
+	}
+	if CompleteTrace {
+		fmt.Printf("lookup type not found\n")
+	}
+	return
+}
+
+// CompleteLine is the main api called by completion code in giv/complete.go
+func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.Matches) {
+	if str == "" {
+		return
+	}
+	fs.SymsMu.RLock()
+	defer fs.SymsMu.RUnlock()
+
+	pr := gl.Parser()
+	if pr == nil {
+		return
+	}
+	fpath, _ := filepath.Abs(fs.Src.Filename)
+
+	strFlds := strings.Fields(str)
+	strp := strFlds[len(strFlds)-1]
+	if CompleteTrace {
+		fmt.Printf("complete str:\n%v\n%v\n", str, strp)
+	}
+	lfs := pr.ParseString(strp, fpath, fs.Src.Sup)
+	if lfs == nil {
+		return
+	}
+
+	if CompleteTrace {
+		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		lfs.LexState.Errs.Report(20, "", true, true)
+		lfs.ParseState.Errs.Report(20, "", true, true)
+	}
+
+	var scopes syms.SymMap // scope(s) for position, fname
+	scope := gl.CompletePosScope(fs, pos, fpath, &scopes)
+
+	start, last := gl.CompleteAstStart(lfs.ParseState.Ast, scope)
+	if CompleteTrace {
+		if start == nil {
+			fmt.Printf("start = nil\n")
+			return
+		}
+		fmt.Printf("\n####################\ncompletion start in scope: %v\n", scope)
+		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+		fmt.Printf("Start tree:\n")
+		start.WriteTree(os.Stdout, 0)
+	}
+
+	pkg := fs.ParseState.Scopes[0]
 	start.SrcReg.St = pos
 
 	if start == last { // single-item
@@ -132,7 +225,6 @@ func (gl *GoLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md co
 			}
 		}
 		if CompleteTrace {
-			// CompleteSym = pkg
 			fmt.Printf("completion type not found\n")
 		}
 	}
@@ -152,9 +244,18 @@ func (gl *GoLang) CompletePosScope(fs *pi.FileState, pos lex.Pos, fpath string, 
 			return sy.Kind
 		}
 	}
-	fmt.Printf(" > 1 scopes!\n")
-	scopes.WriteDoc(os.Stdout, 0)
-	return token.None
+	var last *syms.Symbol
+	for _, sy := range *scopes {
+		if sy.Kind.SubCat() == token.NameFunction {
+			return sy.Kind
+		}
+		last = sy
+	}
+	if CompleteTrace {
+		fmt.Printf(" > 1 scopes!\n")
+		scopes.WriteDoc(os.Stdout, 0)
+	}
+	return last.Kind
 }
 
 // CompletePkgSyms matches all package symbols using seed
