@@ -26,7 +26,7 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 	}
 	lp, err := pi.LangSupport.Props(sfs.Src.Sup)
 	if err != nil {
-		log.Print("CompletePi: %v\n", err)
+		log.Printf("CompletePi: %v\n", err)
 		return md
 	}
 	if lp.Lang == nil {
