@@ -959,7 +959,7 @@ func (tb *TextBuf) BytesToLines() {
 		tb.Lines[ln] = bytes.Runes(txt)
 		tb.LineBytes[ln] = make([]byte, len(txt))
 		copy(tb.LineBytes[ln], txt)
-		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
+		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 		bo += len(txt) + 1 // lf
 	}
 	tb.TotalBytes = bo
@@ -1677,7 +1677,7 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
+		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 		tb.ByteOffs[ln] = bo
 		bo += len(tb.LineBytes[ln]) + 1
 	}
@@ -1705,7 +1705,7 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 
 	st := tbe.Reg.Start.Ln
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
-	tb.Markup[st] = HTMLEscapeBytes(tb.LineBytes[st])
+	tb.Markup[st] = HTMLEscapeRunes(tb.Lines[st])
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
@@ -1721,7 +1721,7 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	for ln := st; ln <= ed; ln++ {
 		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = HTMLEscapeBytes(tb.LineBytes[ln])
+		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
@@ -1798,7 +1798,7 @@ func (tb *TextBuf) MarkupAllLines() {
 	}
 	for ln := 0; ln < maxln; ln++ {
 		tb.Tags[ln] = tb.AdjustedTags(ln)
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], tb.HiTags[ln], tb.Tags[ln])
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], tb.Tags[ln])
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
@@ -1815,7 +1815,7 @@ func (tb *TextBuf) MarkupFromTags() {
 
 	maxln := ints.MinInt(len(tb.HiTags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
-		tb.Markup[ln] = tb.Hi.MarkupLine(tb.LineBytes[ln], tb.HiTags[ln], nil)
+		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], nil)
 	}
 	tb.MarkupMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
@@ -1834,13 +1834,13 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 	}
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
-		ltxt := tb.LineBytes[ln]
+		ltxt := tb.Lines[ln]
 		mt, err := tb.Hi.MarkupTagsLine(ln, ltxt)
 		if err == nil {
 			tb.HiTags[ln] = mt
 			tb.Markup[ln] = tb.Hi.MarkupLine(ltxt, mt, tb.AdjustedTags(ln))
 		} else {
-			tb.Markup[ln] = HTMLEscapeBytes(ltxt)
+			tb.Markup[ln] = HTMLEscapeRunes(ltxt)
 			allgood = false
 		}
 	}

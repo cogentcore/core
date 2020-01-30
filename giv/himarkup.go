@@ -122,7 +122,7 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 
 // MarkupTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) MarkupTagsLine(ln int, txt []byte) (lex.Line, error) {
+func (hm *HiMarkup) MarkupTagsLine(ln int, txt []rune) (lex.Line, error) {
 	if hm.Off {
 		return nil, nil
 	}
@@ -139,7 +139,7 @@ func (hm *HiMarkup) MarkupTagsLine(ln int, txt []byte) (lex.Line, error) {
 func (hm *HiMarkup) ChromaTagsForLine(tags *lex.Line, toks []chroma.Token) {
 	cp := 0
 	for _, tok := range toks {
-		str := strings.TrimSuffix(tok.Value, "\n")
+		str := []rune(strings.TrimSuffix(tok.Value, "\n"))
 		slen := len(str)
 		if slen == 0 {
 			continue
@@ -177,7 +177,7 @@ func (hm *HiMarkup) ChromaTagsAll(txt []byte) ([]lex.Line, error) {
 
 // ChromaTagsLine returns tags for one line according to current
 // syntax highlighting settings
-func (hm *HiMarkup) ChromaTagsLine(txt []byte) (lex.Line, error) {
+func (hm *HiMarkup) ChromaTagsLine(txt []rune) (lex.Line, error) {
 	txtstr := string(txt) + "\n"
 	iterator, err := hm.lexer.Tokenise(nil, txtstr)
 	if err != nil {
@@ -193,15 +193,15 @@ func (hm *HiMarkup) ChromaTagsLine(txt []byte) (lex.Line, error) {
 // MarkupLine returns the line with html class tags added for each tag
 // takes both the hi tags and extra tags.  Only fully nested tags are supported --
 // any dangling ends are truncated.
-func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
+func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	sz := len(txt)
 	if sz == 0 {
-		return txt
+		return nil
 	}
 	ttags := lex.MergeLines(hitags, tags)
 	nt := len(ttags)
 	if nt == 0 {
-		return HTMLEscapeBytes(txt)
+		return HTMLEscapeRunes(txt)
 	}
 	sps := []byte(`<span class="`)
 	sps2 := []byte(`">`)
@@ -222,7 +222,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 			if ts.Ed <= tr.St {
 				ep := ints.MinInt(sz, ts.Ed)
 				if cp < ep {
-					mu = append(mu, HTMLEscapeBytes(txt[cp:ep])...)
+					mu = append(mu, HTMLEscapeRunes(txt[cp:ep])...)
 					cp = ep
 				}
 				mu = append(mu, spe...)
@@ -233,7 +233,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 			break
 		}
 		if tr.St > cp {
-			mu = append(mu, HTMLEscapeBytes(txt[cp:tr.St])...)
+			mu = append(mu, HTMLEscapeRunes(txt[cp:tr.St])...)
 		}
 		mu = append(mu, sps...)
 		clsnm := tr.Tok.Tok.StyleName()
@@ -262,7 +262,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 		}
 		ep = ints.MinInt(len(txt), ep)
 		if tr.St < ep {
-			mu = append(mu, HTMLEscapeBytes(txt[tr.St:ep])...)
+			mu = append(mu, HTMLEscapeRunes(txt[tr.St:ep])...)
 		}
 		if addEnd {
 			mu = append(mu, spe...)
@@ -270,7 +270,7 @@ func (hm *HiMarkup) MarkupLine(txt []byte, hitags, tags lex.Line) []byte {
 		cp = ep
 	}
 	if sz > cp {
-		mu = append(mu, HTMLEscapeBytes(txt[cp:sz])...)
+		mu = append(mu, HTMLEscapeRunes(txt[cp:sz])...)
 	}
 	// pop any left on stack..
 	for si := len(tstack) - 1; si >= 0; si-- {
@@ -303,4 +303,12 @@ func HTMLEscapeBytes(b []byte) []byte {
 	// copy(bc, b)
 	// return htmlEscaper.Replace(bc)
 	return []byte(stdhtml.EscapeString(string(b)))
+}
+
+// HTMLEscapeRunes escapes special characters like "<" to become "&lt;". It
+// escapes only five such characters: <, >, &, ' and ".
+// It operates on a *copy* of the byte string and does not modify the input!
+// otherwise it causes major problems..
+func HTMLEscapeRunes(r []rune) []byte {
+	return []byte(stdhtml.EscapeString(string(r)))
 }
