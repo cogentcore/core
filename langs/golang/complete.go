@@ -69,13 +69,15 @@ func (gl *GoLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete
 	pkg := fs.ParseState.Scopes[0]
 	start.SrcReg.St = pos
 
+	flds := strings.Fields(str)
+	lstfld := flds[len(flds)-1]
+
 	if start == last { // single-item
 		seed := start.Src
 		if seed != "" {
 			return gl.LookupString(fs, pkg, seed)
 		}
-		flds := strings.Fields(str)
-		return gl.LookupString(fs, pkg, flds[len(flds)-1])
+		return gl.LookupString(fs, pkg, lstfld)
 	}
 
 	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
@@ -106,7 +108,10 @@ func (gl *GoLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete
 	if snxt != nil && snxt.Src != "" {
 		ststr := snxt.Src
 		if lststr != "" && lststr != ststr {
-			return gl.LookupString(fs, pkg, ststr+"."+lststr)
+			ld = gl.LookupString(fs, pkg, ststr+"."+lststr)
+			if ld.Filename == "" { // didn't work
+				ld = gl.LookupString(fs, pkg, lstfld)
+			}
 		}
 		return gl.LookupString(fs, pkg, ststr)
 	} else {
