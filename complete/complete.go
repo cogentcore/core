@@ -45,6 +45,13 @@ type Lookup struct {
 	Text     []byte `desc:"if filename is empty, this is raw text to display for lookup result"`
 }
 
+// SetFile sets file info
+func (lk *Lookup) SetFile(fname string, st, ed int) {
+	lk.Filename = fname
+	lk.StLine = st
+	lk.EdLine = ed
+}
+
 // Edit is returned from completion edit function
 // to incorporate the selected completion
 type Edit struct {

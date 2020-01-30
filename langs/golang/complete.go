@@ -70,10 +70,12 @@ func (gl *GoLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete
 	start.SrcReg.St = pos
 
 	if start == last { // single-item
-		if CompleteTrace {
-			fmt.Printf("start == last: nothing to lookup\n")
+		seed := start.Src
+		if seed != "" {
+			return gl.LookupString(fs, pkg, seed)
 		}
-		return
+		flds := strings.Fields(str)
+		return gl.LookupString(fs, pkg, flds[len(flds)-1])
 	}
 
 	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
@@ -89,46 +91,27 @@ func (gl *GoLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete
 					continue
 				}
 				if mt.Filename != "" {
-					ld.Filename = mt.Filename
-					ld.StLine = mt.Region.St.Ln
-					ld.EdLine = mt.Region.Ed.Ln
+					ld.SetFile(mt.Filename, mt.Region.St.Ln, mt.Region.Ed.Ln)
 					return
 				}
 			}
 		}
 		// fmt.Printf("got completion type: %v, last str: %v\n", typ.String(), lststr)
-		ld.Filename = typ.Filename
-		ld.StLine = typ.Region.St.Ln
-		ld.EdLine = typ.Region.Ed.Ln
+		ld.SetFile(typ.Filename, typ.Region.St.Ln, typ.Region.Ed.Ln)
 		return
 	}
 	// see if it starts with a package name..
 	snxt := start.NextAst()
+	lststr = last.Src
 	if snxt != nil && snxt.Src != "" {
 		ststr := snxt.Src
-		psym, has := gl.PkgSyms(fs, pkg.Children, ststr)
-		if has {
-			lststr := last.Src
-			if lststr != "" && lststr != ststr {
-				var matches syms.SymMap
-				psym.Children.FindNamePrefixScoped(lststr, &matches)
-				if len(matches) == 1 {
-					var psy *syms.Symbol
-					for _, sy := range matches {
-						psy = sy
-					}
-					ld.Filename = psy.Filename
-					ld.StLine = psy.Region.St.Ln
-					ld.EdLine = psy.Region.Ed.Ln
-					return
-				}
-			}
+		if lststr != "" && lststr != ststr {
+			return gl.LookupString(fs, pkg, ststr+"."+lststr)
 		}
+		return gl.LookupString(fs, pkg, ststr)
+	} else {
+		return gl.LookupString(fs, pkg, lststr)
 	}
-	if CompleteTrace {
-		fmt.Printf("lookup type not found\n")
-	}
-	return
 }
 
 // CompleteLine is the main api called by completion code in giv/complete.go
@@ -287,6 +270,61 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed stri
 	}
 }
 
+// LookupString attempts to lookup a string, which could be a type name,
+// (with package qualifier), could be partial, etc
+func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, str string) (ld complete.Lookup) {
+	str = TrimLeftToAlpha(str)
+	pnm, tnm := SplitType(str)
+	if pnm != "" && tnm != "" {
+		psym, has := gl.PkgSyms(fs, pkg.Children, pnm)
+		if has {
+			tnm = TrimLeftToAlpha(tnm)
+			var matches syms.SymMap
+			psym.Children.FindNamePrefixScoped(tnm, &matches)
+			if len(matches) == 1 {
+				var psy *syms.Symbol
+				for _, sy := range matches {
+					psy = sy
+				}
+				ld.SetFile(psy.Filename, psy.Region.St.Ln, psy.Region.Ed.Ln)
+				return
+			}
+		}
+		if CompleteTrace {
+			fmt.Printf("Lookup: package-qualified string not found: %v\n", str)
+		}
+		return
+	}
+	// try types to str:
+	var tym *syms.Type
+	nmatch := 0
+	for _, tk := range pkg.Types {
+		if strings.HasPrefix(tk.Name, str) {
+			tym = tk
+			nmatch++
+		}
+	}
+	if nmatch == 1 {
+		ld.SetFile(tym.Filename, tym.Region.St.Ln, tym.Region.Ed.Ln)
+		return
+	}
+	// then try any symbol
+	var matches syms.SymMap
+	pkg.Children.FindNamePrefixScoped(str, &matches)
+	if len(matches) == 1 {
+		var psy *syms.Symbol
+		for _, sy := range matches {
+			psy = sy
+		}
+		ld.SetFile(psy.Filename, psy.Region.St.Ln, psy.Region.Ed.Ln)
+		return
+	}
+	if CompleteTrace {
+		fmt.Printf("Lookup: string not found: %v\n", str)
+	}
+	return
+}
+
 // CompleteAstStart finds the best starting point in the given current-line Ast
 // to start completion process, which walks back down from that starting point
 func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, last *parse.Ast) {
@@ -343,7 +381,7 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, l
 			if scope == token.None {
 				return prv, last
 			}
-			if cur.Src == prv.Src {
+			if cur.Src != "(" && cur.Src == prv.Src {
 				return prv, last
 			}
 			if cur.Src != "(" && prv != last {
