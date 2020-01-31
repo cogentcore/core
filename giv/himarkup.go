@@ -22,13 +22,6 @@ import (
 	"github.com/goki/pi/token"
 )
 
-// Overall Strategy:
-// * separate syntax highlighting markup from deeper semantic analysis (full parsing)
-// 		+ use chroma as a fallback for highlighting
-// 		+ and the client-server-based system for fallback semantics
-// * issue is that these are linked in Pi so how to also keep them separate?
-//		+ just assume that hi pass has happened already I guess?
-
 // HiMarkup manages the syntax highlighting state for TextBuf
 // it uses Pi if available, otherwise falls back on chroma
 type HiMarkup struct {
@@ -38,7 +31,7 @@ type HiMarkup struct {
 	Has       bool              `desc:"true if both lang and style are set"`
 	TabSize   int               `desc:"tab size, in chars"`
 	CSSProps  ki.Props          `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
-	PiState   *pi.FileState     `desc:"pi parser state info"`
+	PiState   *pi.FileStates    `desc:"pi parser state info"`
 	PiLang    pi.Lang           `desc:"if supported, this is the pi Lang support for parsing"`
 	HiStyle   histyle.Style     `desc:"current highlighting style"`
 	Off       bool              `desc:"external toggle to turn off automatic highlighting"`
@@ -60,7 +53,7 @@ func (hm *HiMarkup) UsingPi() bool {
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileState) {
+func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileStates) {
 	hm.Info = info
 	hm.PiState = pist
 
@@ -112,8 +105,8 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 		return nil, nil
 	}
 	if hm.PiLang != nil {
-		hm.PiLang.ParseFile(hm.PiState)
-		return hm.PiState.Src.Lexs, nil
+		hm.PiLang.ParseFile(hm.PiState, txt)   // processes in Proc(), does Switch()
+		return hm.PiState.Done().Src.Lexs, nil // Done() is always current
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsAll(txt)
 	}

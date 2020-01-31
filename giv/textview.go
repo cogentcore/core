@@ -714,6 +714,7 @@ func (tv *TextView) SetCursor(pos TextPos) {
 	}
 	tv.ClearScopelights()
 	tv.CursorPos = tv.Buf.ValidPos(pos)
+	tv.Buf.MarkupLine(tv.CursorPos.Ln)
 	tv.CursorMovedSig()
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	ch := tv.CursorPos.Ch

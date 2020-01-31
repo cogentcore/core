@@ -119,7 +119,7 @@ type TextBuf struct {
 	Opts         TextBufOpts      `desc:"options for how text editing / viewing works"`
 	Filename     gi.FileName      `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Info         FileInfo         `desc:"full info about file"`
-	PiState      pi.FileState     `desc:"Pi parsing state info for file"`
+	PiState      pi.FileStates    `desc:"Pi parsing state info for file"`
 	Hi           HiMarkup         `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
 	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
@@ -127,6 +127,7 @@ type TextBuf struct {
 	Tags         []lex.Line       `json:"extra custom tagged regions for each line"`
 	HiTags       []lex.Line       `json:"syntax highlighting tags -- auto-generated"`
 	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
+	MarkupEdits  []*TextBufEdit   `json:"-" xml:"-" desc:"edits that have been made since last full markup"`
 	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
 	LinesMu      sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating lines"`
@@ -235,11 +236,26 @@ func (tb *TextBuf) ClearChanged() {
 	tb.ClearFlag(int(TextBufChanged))
 }
 
+// InitialMarkup does the first-pass markup on the file
+func (tb *TextBuf) InitialMarkup() {
+	tb.LinesMu.Lock()
+	tb.MarkupMu.Lock()
+	if tb.Hi.UsingPi() {
+		fs := tb.PiState.Done() // initialize
+		fs.Src.SetBytes(tb.Txt)
+	}
+	mxhi := ints.MinInt(100, tb.NLines-1)
+	tb.MarkupLines(0, mxhi) // this will triger a full re-markup too
+	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
+}
+
 // SetText sets the text to given bytes
 func (tb *TextBuf) SetText(txt []byte) {
 	tb.Defaults()
 	tb.Txt = txt
 	tb.BytesToLines()
+	tb.InitialMarkup()
 	tb.Refresh()
 }
 
@@ -361,7 +377,7 @@ func (tb *TextBuf) New(nlines int) {
 
 	tb.NLines = nlines
 
-	tb.PiState.SetSrc(&tb.Lines, string(tb.Filename), tb.Info.Sup)
+	tb.PiState.SetSrc(string(tb.Filename), "", tb.Info.Sup)
 	tb.Hi.Init(&tb.Info, &tb.PiState)
 
 	tb.MarkupMu.Unlock()
@@ -438,15 +454,12 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	}
 	tb.SetName(string(filename)) // todo: modify in any way?
 
-	// markup the first 100 lines
-	mxhi := ints.MinInt(100, tb.NLines-1)
-	tb.MarkupLinesLock(0, mxhi)
+	tb.InitialMarkup()
 
 	// update views
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
 
-	// do slow full update in background
-	tb.ReMarkup()
+	tb.ReMarkup() // redo full
 	return nil
 }
 
@@ -897,6 +910,9 @@ func (tb *TextBuf) SetByteOffs() {
 
 // LinesToBytes converts current Lines back to the Txt slice of bytes.
 func (tb *TextBuf) LinesToBytes() {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+
 	if tb.NLines == 0 {
 		if tb.Txt != nil {
 			tb.Txt = tb.Txt[:0]
@@ -904,24 +920,9 @@ func (tb *TextBuf) LinesToBytes() {
 		return
 	}
 
-	tb.Txt = tb.LinesToBytesCopy()
-
-	// the following does not work because LineBytes is just pointers into txt!
-	// tb.SetByteOffs()
-	// totsz := tb.TotalBytes
-
-	// if cap(tb.Txt) < totsz {
-	// 	tb.Txt = make([]byte, totsz)
-	// } else {
-	// 	tb.Txt = tb.Txt[:totsz]
-	// }
-
-	// for ln := range tb.Lines {
-	// 	bo := tb.ByteOffs[ln]
-	// 	lsz := len(tb.LineBytes[ln])
-	// 	copy(tb.Txt[bo:bo+lsz], tb.LineBytes[ln])
-	// 	tb.Txt[bo+lsz] = '\n'
-	// }
+	txt := bytes.Join(tb.LineBytes, []byte("\n"))
+	txt = append(txt, '\n')
+	tb.Txt = txt
 }
 
 // LinesToBytesCopy converts current Lines into a separate text byte copy --
@@ -1636,6 +1637,8 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
+	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
+
 	// LineBytes
 	tmplb := make([][]byte, nsz)
 	nlb := append(tb.LineBytes, tmplb...)
@@ -1671,8 +1674,6 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	copy(nof[stln:], tmpof)
 	tb.ByteOffs = nof
 
-	tb.PiState.Src.LinesInserted(stln, nsz)
-
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
@@ -1684,6 +1685,7 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
+	tb.ReMarkup() // redo full
 }
 
 // LinesDeleted deletes lines in Markup corresponding to lines
@@ -1691,6 +1693,8 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
+
+	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
 
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
@@ -1701,15 +1705,13 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
 
-	tb.PiState.Src.LinesDeleted(stln, edln)
-
 	st := tbe.Reg.Start.Ln
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
 	tb.Markup[st] = HTMLEscapeRunes(tb.Lines[st])
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
-	// probably don't need to do global markup here..
+	tb.ReMarkup() // redo full
 }
 
 // LinesEdited re-marks-up lines in edit (typically only 1).  Locks and
@@ -1727,6 +1729,20 @@ func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
 	// probably don't need to do global markup here..
+}
+
+// MarkupLine does markup on a single line
+func (tb *TextBuf) MarkupLine(ln int) {
+	tb.LinesMu.Lock()
+	tb.MarkupMu.Lock()
+
+	if ln >= 0 && ln < len(tb.Markup) {
+		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+		tb.MarkupLines(ln, ln)
+	}
+	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 }
 
 // IsMarkingUp is true if the MarkupAllLines process is currently running
@@ -1777,21 +1793,65 @@ func (tb *TextBuf) MarkupAllLines() {
 	}
 	tb.SetFlag(int(TextBufMarkingUp))
 
-	tb.LinesToBytes()
 	tb.MarkupMu.Lock()
-	mtags, err := tb.Hi.MarkupTagsAll(tb.Txt)
+	tb.MarkupEdits = nil
+	tb.MarkupMu.Unlock()
+
+	txt := tb.LinesToBytesCopy()
+	mtags, err := tb.Hi.MarkupTagsAll(txt) // does full parse, outside of markup lock
 	if err != nil {
-		tb.MarkupMu.Unlock()
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
 
-	maxln := ints.MinInt(len(mtags), tb.NLines)
+	// ok, by this point mtags could be out of sync with deletes that have happend
+	tb.LinesMu.Lock()
+	tb.MarkupMu.Lock()
+
+	maxln := ints.MinInt(len(tb.Markup), tb.NLines)
+
 	if tb.Hi.UsingPi() {
+		pfs := tb.PiState.Done()
+		// first update mtags with any changes since it was generated
+		for _, tbe := range tb.MarkupEdits {
+			if tbe.Delete {
+				stln := tbe.Reg.Start.Ln
+				edln := tbe.Reg.End.Ln
+				pfs.Src.LinesDeleted(stln, edln)
+			} else {
+				stln := tbe.Reg.Start.Ln + 1
+				nlns := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+				pfs.Src.LinesInserted(stln, nlns)
+			}
+		}
+		tb.MarkupEdits = nil
+		if len(pfs.Src.Lexs)-1 != maxln {
+			fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
+		}
 		for ln := 0; ln < maxln; ln++ {
-			tb.HiTags[ln] = tb.PiState.LexLine(ln) // does clone, combines comments too
+			tb.HiTags[ln] = pfs.LexLine(ln) // does clone, combines comments too
 		}
 	} else {
+		// first update mtags with any changes since it was generated
+		for _, tbe := range tb.MarkupEdits {
+			if tbe.Delete {
+				stln := tbe.Reg.Start.Ln
+				edln := tbe.Reg.End.Ln
+				mtags = append(mtags[:stln], mtags[edln:]...)
+			} else {
+				stln := tbe.Reg.Start.Ln + 1
+				nlns := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
+				tmpht := make([]lex.Line, nlns)
+				nht := append(mtags, tmpht...)
+				copy(nht[stln+nlns:], nht[stln:])
+				copy(nht[stln:], tmpht)
+				mtags = nht
+			}
+		}
+		tb.MarkupEdits = nil
+		if len(mtags) != maxln {
+			fmt.Printf("error: markup out of sync: %v != len(mtags)\n", maxln, len(mtags))
+		}
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
 		}
@@ -1801,6 +1861,7 @@ func (tb *TextBuf) MarkupAllLines() {
 		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], tb.Tags[ln])
 	}
 	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
 }
@@ -1844,7 +1905,7 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 			allgood = false
 		}
 	}
-	// todo: trigger a background reparse of everything in a separate pi.FilesState
+	// Now we trigger a background reparse of everything in a separate pi.FilesState
 	// that gets switched into the current.
 	return allgood
 }

@@ -19,12 +19,12 @@ import (
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
 func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
-	sfs := data.(*pi.FileState)
+	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("CompletePi: data is nil not FileState or is nil - can't complete\n")
+		log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
 		return md
 	}
-	lp, err := pi.LangSupport.Props(sfs.Src.Sup)
+	lp, err := pi.LangSupport.Props(sfs.Sup)
 	if err != nil {
 		log.Printf("CompletePi: %v\n", err)
 		return md
@@ -43,12 +43,12 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 
 // CompleteEditPi uses the selected completion to edit the text
 func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
-	sfs := data.(*pi.FileState)
+	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("CompleteEditPi: data is nil not FileState or is nil - can't complete\n")
+		log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
 		return ed
 	}
-	lp, err := pi.LangSupport.Props(sfs.Src.Sup)
+	lp, err := pi.LangSupport.Props(sfs.Sup)
 	if err != nil {
 		log.Printf("CompleteEditPi: %v\n", err)
 		return ed
@@ -63,12 +63,12 @@ func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.
 // up to point where user has typed.
 // The data must be the *FileState from which the language type is obtained.
 func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Lookup) {
-	sfs := data.(*pi.FileState)
+	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("LookupPi: data is nil not FileState or is nil - can't complete\n")
+		log.Printf("LookupPi: data is nil not FileStates or is nil - can't complete\n")
 		return ld
 	}
-	lp, err := pi.LangSupport.Props(sfs.Src.Sup)
+	lp, err := pi.LangSupport.Props(sfs.Sup)
 	if err != nil {
 		log.Printf("LookupPi: %v\n", err)
 		return ld
