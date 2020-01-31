@@ -1674,6 +1674,11 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	copy(nof[stln:], tmpof)
 	tb.ByteOffs = nof
 
+	if tb.Hi.UsingPi() {
+		pfs := tb.PiState.Done()
+		pfs.Src.LinesInserted(stln, nsz)
+	}
+
 	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
 	bo := tb.ByteOffs[st]
 	for ln := st; ln <= ed; ln++ {
@@ -1704,6 +1709,11 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.Tags = append(tb.Tags[:stln], tb.Tags[edln:]...)
 	tb.HiTags = append(tb.HiTags[:stln], tb.HiTags[edln:]...)
 	tb.ByteOffs = append(tb.ByteOffs[:stln], tb.ByteOffs[edln:]...)
+
+	if tb.Hi.UsingPi() {
+		pfs := tb.PiState.Done()
+		pfs.Src.LinesDeleted(stln, edln)
+	}
 
 	st := tbe.Reg.Start.Ln
 	tb.LineBytes[st] = []byte(string(tb.Lines[st]))
@@ -1850,7 +1860,7 @@ func (tb *TextBuf) MarkupAllLines() {
 		}
 		tb.MarkupEdits = nil
 		if len(mtags) != maxln {
-			fmt.Printf("error: markup out of sync: %v != len(mtags)\n", maxln, len(mtags))
+			fmt.Printf("error: markup out of sync: %v != %v len(mtags)\n", maxln, len(mtags))
 		}
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
@@ -1893,6 +1903,15 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 	if ed >= tb.NLines {
 		ed = tb.NLines - 1
 	}
+
+	if tb.Hi.UsingPi() {
+		maxln := tb.NLines
+		pfs := tb.PiState.Done()
+		if len(pfs.Src.Lexs)-1 != maxln {
+			fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
+		}
+	}
+
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
 		ltxt := tb.Lines[ln]
