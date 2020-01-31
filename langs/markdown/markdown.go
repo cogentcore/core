@@ -50,12 +50,12 @@ func (ml *MarkdownLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	// no parser
 }
 
-func (ml *MarkdownLang) LexLine(fs *pi.FileState, line int) lex.Line {
+func (ml *MarkdownLang) LexLine(fs *pi.FileState, line int, txt []rune) lex.Line {
 	pr := ml.Parser()
 	if pr == nil {
 		return nil
 	}
-	return pr.LexLine(fs, line)
+	return pr.LexLine(fs, line, txt)
 }
 
 func (ml *MarkdownLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
@@ -63,9 +63,9 @@ func (ml *MarkdownLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return nil
 }
 
-func (ml *MarkdownLang) HiLine(fss *pi.FileStates, line int) lex.Line {
+func (ml *MarkdownLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 	fs := fss.Done()
-	return ml.LexLine(fs, line)
+	return ml.LexLine(fs, line, txt)
 }
 
 func (ml *MarkdownLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {

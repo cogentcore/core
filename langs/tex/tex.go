@@ -46,12 +46,12 @@ func (tl *TexLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	// no parser
 }
 
-func (tl *TexLang) LexLine(fs *pi.FileState, line int) lex.Line {
+func (tl *TexLang) LexLine(fs *pi.FileState, line int, txt []rune) lex.Line {
 	pr := tl.Parser()
 	if pr == nil {
 		return nil
 	}
-	return pr.LexLine(fs, line)
+	return pr.LexLine(fs, line, txt)
 }
 
 func (tl *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
@@ -59,9 +59,9 @@ func (tl *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return nil
 }
 
-func (tl *TexLang) HiLine(fss *pi.FileStates, line int) lex.Line {
+func (tl *TexLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 	fs := fss.Done()
-	return tl.LexLine(fs, line)
+	return tl.LexLine(fs, line, txt)
 }
 
 func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {

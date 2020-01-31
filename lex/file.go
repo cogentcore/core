@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/goki/ki/sliceclone"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/token"
 )
@@ -142,6 +143,17 @@ func (fl *File) SetBytes(txt []byte) {
 	rns := RunesFromBytes(txt)
 	fl.Lines = &rns
 	fl.AllocLines()
+}
+
+// SetLineSrc sets source runes from given line of runes.
+// Returns false if out of range.
+func (fl *File) SetLineSrc(ln int, txt []rune) bool {
+	nlines := fl.NLines()
+	if ln >= nlines || ln < 0 {
+		return false
+	}
+	(*fl.Lines)[ln] = sliceclone.Rune(txt)
+	return true
 }
 
 // InitFromLine initializes from one line of source file

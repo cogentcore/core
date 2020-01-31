@@ -76,12 +76,12 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	}
 }
 
-func (gl *GoLang) LexLine(fs *pi.FileState, line int) lex.Line {
+func (gl *GoLang) LexLine(fs *pi.FileState, line int, txt []rune) lex.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
 	}
-	return pr.LexLine(fs, line)
+	return pr.LexLine(fs, line, txt)
 }
 
 func (gl *GoLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
@@ -93,15 +93,13 @@ func (gl *GoLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return lfs
 }
 
-func (gl *GoLang) HiLine(fss *pi.FileStates, line int) lex.Line {
+func (gl *GoLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 	pr := gl.Parser()
 	if pr == nil {
 		return nil
 	}
 	pfs := fss.Done()
-	if pfs.Src.Lines == nil {
-	}
-	ll := pr.LexLine(pfs, line)
+	ll := pr.LexLine(pfs, line, txt)
 	lfs := pr.ParseLine(pfs, line)
 	if lfs != nil {
 		ll = lfs.Src.Lexs[0]

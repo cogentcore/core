@@ -32,6 +32,10 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 	if str == "" {
 		return
 	}
+	flds := strings.Fields(str)
+	// origStr := str
+	str = flds[len(flds)-1] // just use last one
+
 	fs := fss.Done()
 
 	fs.SymsMu.RLock()
@@ -71,15 +75,12 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 	pkg := fs.ParseState.Scopes[0]
 	start.SrcReg.St = pos
 
-	flds := strings.Fields(str)
-	lstfld := flds[len(flds)-1]
-
 	if start == last { // single-item
 		seed := start.Src
 		if seed != "" {
 			return gl.LookupString(fs, pkg, seed)
 		}
-		return gl.LookupString(fs, pkg, lstfld)
+		return gl.LookupString(fs, pkg, str)
 	}
 
 	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
@@ -111,14 +112,16 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 		ststr := snxt.Src
 		if lststr != "" && lststr != ststr {
 			ld = gl.LookupString(fs, pkg, ststr+"."+lststr)
-			if ld.Filename == "" { // didn't work
-				ld = gl.LookupString(fs, pkg, lstfld)
-			}
+		} else {
+			ld = gl.LookupString(fs, pkg, ststr)
 		}
-		return gl.LookupString(fs, pkg, ststr)
 	} else {
-		return gl.LookupString(fs, pkg, lststr)
+		ld = gl.LookupString(fs, pkg, lststr)
 	}
+	if ld.Filename == "" { // didn't work
+		ld = gl.LookupString(fs, pkg, str)
+	}
+	return
 }
 
 // CompleteLine is the main api called by completion code in giv/complete.go
@@ -126,6 +129,10 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 	if str == "" {
 		return
 	}
+	flds := strings.Fields(str)
+	origStr := str
+	str = flds[len(flds)-1] // just use last one
+
 	fs := fss.Done()
 
 	fs.SymsMu.RLock()
@@ -137,12 +144,10 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 	}
 	fpath, _ := filepath.Abs(fs.Src.Filename)
 
-	strFlds := strings.Fields(str)
-	strp := strFlds[len(strFlds)-1]
 	if CompleteTrace {
-		fmt.Printf("complete str:\n%v\n%v\n", str, strp)
+		fmt.Printf("complete str:  %v  orig: %v\n", str, origStr)
 	}
-	lfs := pr.ParseString(strp, fpath, fs.Src.Sup)
+	lfs := pr.ParseString(str, fpath, fs.Src.Sup)
 	if lfs == nil {
 		return
 	}
@@ -199,6 +204,7 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 		complete.AddTypeNames(typ, typ.Name, lststr, &md)
 	} else {
 		// see if it starts with a package name..
+		// todo: move this to a function as in lookup
 		snxt := start.NextAst()
 		if snxt != nil && snxt.Src != "" {
 			ststr := snxt.Src

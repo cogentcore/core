@@ -121,13 +121,15 @@ func (pr *Parser) LexRun(fs *FileState) {
 	}
 }
 
-// LexLine runs lexer for given single line of source, returns merged
-// regular and token comment lines, cloned and ready for use
-func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
+// LexLine runs lexer for given single line of source, which is updated
+// from the given text.
+// Returns merged regular and token comment lines, cloned and ready for use.
+func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lex.Line {
 	nlines := fs.Src.NLines()
 	if ln >= nlines || ln < 0 {
 		return nil
 	}
+	fs.Src.SetLineSrc(ln, txt)
 	fs.LexState.SetLine((*fs.Src.Lines)[ln])
 	pst := fs.Src.PrevStack(ln)
 	fs.LexState.Stack = pst.Clone()

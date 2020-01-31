@@ -44,10 +44,11 @@ type Lang interface {
 
 	// HiLine does the lexing and potentially parsing of a given line of the file,
 	// for purposes of syntax highlighting -- uses Done() FileState of existing context
-	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
-	// The rune source information is assumed to have already been updated in FileState.
-	// languages can run the parser on the line to augment the lex token output as appropriate.
-	HiLine(fs *FileStates, line int) lex.Line
+	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes,
+	// and provides relevant context for the overall parsing, which is performed
+	// on the given line of text runes, and also updates corresponding source in FileState
+	// (via a copy).
+	HiLine(fs *FileStates, line int, txt []rune) lex.Line
 
 	// CompleteLine provides the list of relevant completions for given text
 	// which is at given position within the file.
@@ -75,10 +76,10 @@ type Lang interface {
 
 	// LexLine is a lower-level call (mostly used internally to the language) that
 	// does just the lexing of a given line of the file, using existing context
-	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
-	// The rune source information is assumed to have already been updated in FileState.
-	// languages can run the parser on the line to augment the lex token output as appropriate.
-	LexLine(fs *FileState, line int) lex.Line
+	// if available from prior lexing / parsing.
+	// Line is in 0-indexed "internal" line indexes.
+	// The rune source is updated from the given text.
+	LexLine(fs *FileState, line int, txt []rune) lex.Line
 
 	// ParseLine is a lower-level call (mostly used internally to the language) that
 	// does complete parser processing of a single line from given file, and returns
