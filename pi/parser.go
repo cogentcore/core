@@ -125,7 +125,7 @@ func (pr *Parser) LexRun(fs *FileState) {
 // regular and token comment lines, cloned and ready for use
 func (pr *Parser) LexLine(fs *FileState, ln int) lex.Line {
 	nlines := fs.Src.NLines()
-	if ln > nlines || ln < 0 {
+	if ln >= nlines || ln < 0 {
 		return nil
 	}
 	fs.LexState.SetLine((*fs.Src.Lines)[ln])
@@ -234,7 +234,7 @@ func (pr *Parser) ParseAll(fs *FileState) {
 // been run on given line.
 func (pr *Parser) ParseLine(fs *FileState, ln int) *FileState {
 	nlines := fs.Src.NLines()
-	if ln > nlines || ln < 0 {
+	if ln >= nlines || ln < 0 {
 		return nil
 	}
 	lfs := NewFileState()

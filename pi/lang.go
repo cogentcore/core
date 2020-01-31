@@ -34,47 +34,36 @@ type Lang interface {
 	// Parser returns the pi.Parser for this language
 	Parser() *Parser
 
-	// ParseFile does the complete processing of a given single file, as appropriate
-	// for the language -- e.g., runs the lexer followed by the parser, and
+	// ParseFile does the complete processing of a given single file, given by txt bytes,
+	// as appropriate for the language -- e.g., runs the lexer followed by the parser, and
 	// manages any symbol output from parsing as appropriate for the language / format.
-	ParseFile(fs *FileState)
-
-	// LexLine does just the lexing of a given line of the file, using existing context
-	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
-	// The rune source information is assumed to have already been updated in FileState.
-	// languages can run the parser on the line to augment the lex token output as appropriate.
-	LexLine(fs *FileState, line int) lex.Line
-
-	// ParseLine does complete parser processing of a single line from given file, and returns
-	// the FileState for just that line.  Line is in 0-indexed "internal" line indexes.
-	// The rune source information is assumed to have already been updated in FileState
-	// Existing context information from full-file parsing is used as appropriate, but
-	// the results will NOT be used to update any existing full-file Ast representation --
-	// should call ParseFile to update that as appropriate.
-	ParseLine(fs *FileState, line int) *FileState
+	// This is to be used for files of "primary interest" -- it does full type inference
+	// and symbol resolution etc.  The Proc() FileState is locked during parsing,
+	// and Switch is called after, so Done() will contain the processed info after this call.
+	ParseFile(fs *FileStates, txt []byte)
 
 	// HiLine does the lexing and potentially parsing of a given line of the file,
-	// for purposes of syntax highlighting -- uses existing context
+	// for purposes of syntax highlighting -- uses Done() FileState of existing context
 	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
 	// The rune source information is assumed to have already been updated in FileState.
 	// languages can run the parser on the line to augment the lex token output as appropriate.
-	HiLine(fs *FileState, line int) lex.Line
+	HiLine(fs *FileStates, line int) lex.Line
 
 	// CompleteLine provides the list of relevant completions for given text
 	// which is at given position within the file.
 	// Typically the language will call ParseLine on that line, and use the Ast
 	// to guide the selection of relevant symbols that can complete the code at
 	// the given point.
-	CompleteLine(fs *FileState, text string, pos lex.Pos) complete.Matches
+	CompleteLine(fs *FileStates, text string, pos lex.Pos) complete.Matches
 
 	// CompleteEdit returns the completion edit data for integrating the
 	// selected completion into the source
-	CompleteEdit(fs *FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit)
+	CompleteEdit(fs *FileStates, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit)
 
 	// Lookup returns lookup results for given text which is at given position
 	// within the file.  This can either be a file and position in file to
 	// open and view, or direct text to show.
-	Lookup(fs *FileState, text string, pos lex.Pos) complete.Lookup
+	Lookup(fs *FileStates, text string, pos lex.Pos) complete.Lookup
 
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),
@@ -83,6 +72,22 @@ type Lang interface {
 	// language-appropriate set of symbols for the directory(s), which could then provide
 	// the symbols for a given package, library, or module at that path.
 	ParseDir(path string, opts LangDirOpts) *syms.Symbol
+
+	// LexLine is a lower-level call (mostly used internally to the language) that
+	// does just the lexing of a given line of the file, using existing context
+	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes.
+	// The rune source information is assumed to have already been updated in FileState.
+	// languages can run the parser on the line to augment the lex token output as appropriate.
+	LexLine(fs *FileState, line int) lex.Line
+
+	// ParseLine is a lower-level call (mostly used internally to the language) that
+	// does complete parser processing of a single line from given file, and returns
+	// the FileState for just that line.  Line is in 0-indexed "internal" line indexes.
+	// The rune source information is assumed to have already been updated in FileState
+	// Existing context information from full-file parsing is used as appropriate, but
+	// the results will NOT be used to update any existing full-file Ast representation --
+	// should call ParseFile to update that as appropriate.
+	ParseLine(fs *FileState, line int) *FileState
 }
 
 // LangDirOpts provides options for Lang ParseDir method

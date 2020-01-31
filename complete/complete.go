@@ -304,6 +304,7 @@ func AddTypeNames(typ *syms.Type, scope, seed string, md *Matches) {
 		if scope != "" {
 			lbl = lbl + " (" + scope + ".)"
 		}
+		nm += "()"
 		icon := "method" // assume..
 		c := Completion{Text: nm, Label: lbl, Icon: icon}
 		// fmt.Printf("nm: %v  kind: %v  icon: %v\n", nm, sy.Kind, c.Icon)

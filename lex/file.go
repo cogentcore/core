@@ -31,8 +31,11 @@ type File struct {
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
 // then it is set to the path for the filename
-func (fl *File) SetSrc(src *[][]rune, fname string, sup filecat.Supported) {
+func (fl *File) SetSrc(src *[][]rune, fname, basepath string, sup filecat.Supported) {
 	fl.Filename = fname
+	if basepath != "" {
+		fl.BasePath = basepath
+	}
 	fl.Sup = sup
 	fl.Lines = src
 	fl.AllocLines()
@@ -53,32 +56,32 @@ func (fl *File) AllocLines() {
 
 // LinesInserted inserts new lines -- called e.g., by giv.TextBuf to sync
 // the markup with ongoing edits
-func (fl *File) LinesInserted(stln, nsz int) {
+func (fl *File) LinesInserted(stln, nlns int) {
 	// Lexs
-	tmplx := make([]Line, nsz)
+	tmplx := make([]Line, nlns)
 	nlx := append(fl.Lexs, tmplx...)
-	copy(nlx[stln+nsz:], nlx[stln:])
+	copy(nlx[stln+nlns:], nlx[stln:])
 	copy(nlx[stln:], tmplx)
 	fl.Lexs = nlx
 
 	// Comments
-	tmpcm := make([]Line, nsz)
+	tmpcm := make([]Line, nlns)
 	ncm := append(fl.Comments, tmpcm...)
-	copy(ncm[stln+nsz:], ncm[stln:])
+	copy(ncm[stln+nlns:], ncm[stln:])
 	copy(ncm[stln:], tmpcm)
 	fl.Comments = ncm
 
 	// LastStacks
-	tmpls := make([]Stack, nsz)
+	tmpls := make([]Stack, nlns)
 	nls := append(fl.LastStacks, tmpls...)
-	copy(nls[stln+nsz:], nls[stln:])
+	copy(nls[stln+nlns:], nls[stln:])
 	copy(nls[stln:], tmpls)
 	fl.LastStacks = nls
 
 	// EosPos
-	tmpep := make([]EosPos, nsz)
+	tmpep := make([]EosPos, nlns)
 	nep := append(fl.EosPos, tmpep...)
-	copy(nep[stln+nsz:], nep[stln:])
+	copy(nep[stln+nlns:], nep[stln:])
 	copy(nep[stln:], tmpep)
 	fl.EosPos = nep
 }
@@ -130,18 +133,25 @@ func (fl *File) OpenFile(fname string) error {
 	}
 	rns := RunesFromBytes(alltxt)
 	sup := filecat.SupportedFromFile(fname)
-	fl.SetSrc(&rns, fname, sup)
+	fl.SetSrc(&rns, fname, "", sup)
 	return nil
+}
+
+// SetBytes sets source to be parsed from given bytes
+func (fl *File) SetBytes(txt []byte) {
+	rns := RunesFromBytes(txt)
+	fl.Lines = &rns
+	fl.AllocLines()
 }
 
 // InitFromLine initializes from one line of source file
 func (fl *File) InitFromLine(sfl *File, ln int) bool {
 	nlines := sfl.NLines()
-	if ln > nlines || ln < 0 {
+	if ln >= nlines || ln < 0 {
 		return false
 	}
 	src := [][]rune{(*sfl.Lines)[ln], []rune{}} // need extra blank
-	fl.SetSrc(&src, sfl.Filename, sfl.Sup)
+	fl.SetSrc(&src, sfl.Filename, sfl.BasePath, sfl.Sup)
 	fl.Lexs = []Line{sfl.Lexs[ln], Line{}}
 	fl.Comments = []Line{sfl.Comments[ln], Line{}}
 	fl.EosPos = []EosPos{sfl.EosPos[ln], EosPos{}}
@@ -157,7 +167,7 @@ func (fl *File) InitFromString(str string, fname string, sup filecat.Supported) 
 	if len(src) == 1 { // need more than 1 line
 		src = append(src, []rune{})
 	}
-	fl.SetSrc(&src, fname, sup)
+	fl.SetSrc(&src, fname, "", sup)
 	return true
 }
 

@@ -39,12 +39,14 @@ func (ml *MarkdownLang) Parser() *pi.Parser {
 	return ml.Pr
 }
 
-func (ml *MarkdownLang) ParseFile(fs *pi.FileState) {
+func (ml *MarkdownLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	pr := ml.Parser()
 	if pr == nil {
 		return
 	}
-	pr.LexAll(fs)
+	pfs := fss.StartProc(txt) // current processing one
+	pr.LexAll(pfs)
+	fss.EndProc() // now done
 	// no parser
 }
 
@@ -61,21 +63,22 @@ func (ml *MarkdownLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return nil
 }
 
-func (ml *MarkdownLang) HiLine(fs *pi.FileState, line int) lex.Line {
+func (ml *MarkdownLang) HiLine(fss *pi.FileStates, line int) lex.Line {
+	fs := fss.Done()
 	return ml.LexLine(fs, line)
 }
 
-func (ml *MarkdownLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.Matches) {
+func (ml *MarkdownLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
 	// n/a
 	return md
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (gl *MarkdownLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete.Lookup) {
+func (gl *MarkdownLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
 	return
 }
 
-func (ml *MarkdownLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
+func (ml *MarkdownLang) CompleteEdit(fs *pi.FileStates, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
 	// n/a
 	return ed
 }

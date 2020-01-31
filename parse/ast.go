@@ -48,6 +48,9 @@ func (ast *Ast) ChildAstTry(idx int) (*Ast, error) {
 
 // ParAst returns the Parent as an Ast.
 func (ast *Ast) ParAst() *Ast {
+	if ast.Par == nil {
+		return nil
+	}
 	pki := ast.Par.This()
 	if pki == nil {
 		return nil

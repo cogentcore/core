@@ -35,12 +35,14 @@ func (tl *TexLang) Parser() *pi.Parser {
 	return tl.Pr
 }
 
-func (tl *TexLang) ParseFile(fs *pi.FileState) {
+func (tl *TexLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	pr := tl.Parser()
 	if pr == nil {
 		return
 	}
-	pr.LexAll(fs)
+	pfs := fss.StartProc(txt) // current processing one
+	pr.LexAll(pfs)
+	fss.EndProc() // now done
 	// no parser
 }
 
@@ -57,21 +59,22 @@ func (tl *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 	return nil
 }
 
-func (tl *TexLang) HiLine(fs *pi.FileState, line int) lex.Line {
+func (tl *TexLang) HiLine(fss *pi.FileStates, line int) lex.Line {
+	fs := fss.Done()
 	return tl.LexLine(fs, line)
 }
 
-func (tl *TexLang) CompleteLine(fs *pi.FileState, str string, pos lex.Pos) (md complete.Matches) {
+func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
 	// n/a
 	return md
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (gl *TexLang) Lookup(fs *pi.FileState, str string, pos lex.Pos) (ld complete.Lookup) {
+func (gl *TexLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
 	return
 }
 
-func (tl *TexLang) CompleteEdit(fs *pi.FileState, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
+func (tl *TexLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
 	// n/a
 	return ed
 }
