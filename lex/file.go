@@ -119,17 +119,26 @@ func RunesFromString(str string) [][]rune {
 	return rns
 }
 
-// OpenFile sets source to be parsed from given filename
-func (fl *File) OpenFile(fname string) error {
+// OpenFileBytes returns bytes in given file, and logs any errors as well
+func OpenFileBytes(fname string) ([]byte, error) {
 	fp, err := os.Open(fname)
 	if err != nil {
 		log.Println(err.Error())
-		return err
+		return nil, err
 	}
 	alltxt, err := ioutil.ReadAll(fp)
 	fp.Close()
 	if err != nil {
 		log.Println(err.Error())
+		return nil, err
+	}
+	return alltxt, nil
+}
+
+// OpenFile sets source to be parsed from given filename
+func (fl *File) OpenFile(fname string) error {
+	alltxt, err := OpenFileBytes(fname)
+	if err != nil {
 		return err
 	}
 	rns := RunesFromBytes(alltxt)
@@ -140,6 +149,9 @@ func (fl *File) OpenFile(fname string) error {
 
 // SetBytes sets source to be parsed from given bytes
 func (fl *File) SetBytes(txt []byte) {
+	if txt == nil {
+		return
+	}
 	fl.Lines = RunesFromBytes(txt)
 	fl.AllocLines()
 }
@@ -148,7 +160,7 @@ func (fl *File) SetBytes(txt []byte) {
 // Returns false if out of range.
 func (fl *File) SetLineSrc(ln int, txt []rune) bool {
 	nlines := fl.NLines()
-	if ln >= nlines || ln < 0 {
+	if ln >= nlines || ln < 0 || txt == nil {
 		return false
 	}
 	fl.Lines[ln] = sliceclone.Rune(txt)

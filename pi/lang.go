@@ -40,6 +40,7 @@ type Lang interface {
 	// This is to be used for files of "primary interest" -- it does full type inference
 	// and symbol resolution etc.  The Proc() FileState is locked during parsing,
 	// and Switch is called after, so Done() will contain the processed info after this call.
+	// If txt is nil then any existing source in fs is used.
 	ParseFile(fs *FileStates, txt []byte)
 
 	// HiLine does the lexing and potentially parsing of a given line of the file,
@@ -47,7 +48,7 @@ type Lang interface {
 	// if available from prior lexing / parsing. Line is in 0-indexed "internal" line indexes,
 	// and provides relevant context for the overall parsing, which is performed
 	// on the given line of text runes, and also updates corresponding source in FileState
-	// (via a copy).
+	// (via a copy).  If txt is nil then any existing source in fs is used.
 	HiLine(fs *FileStates, line int, txt []rune) lex.Line
 
 	// CompleteLine provides the list of relevant completions for given text
@@ -78,7 +79,7 @@ type Lang interface {
 	// does just the lexing of a given line of the file, using existing context
 	// if available from prior lexing / parsing.
 	// Line is in 0-indexed "internal" line indexes.
-	// The rune source is updated from the given text.
+	// The rune source is updated from the given text if non-nil.
 	LexLine(fs *FileState, line int, txt []rune) lex.Line
 
 	// ParseLine is a lower-level call (mostly used internally to the language) that

@@ -25,6 +25,14 @@ type FileStates struct {
 	ProcMu   sync.Mutex        `desc:"mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching"`
 }
 
+// NewFileStates returns a new FileStates for given filename, basepath,
+// and supported file type.
+func NewFileStates(fname, basepath string, sup filecat.Supported) *FileStates {
+	fs := &FileStates{}
+	fs.SetSrc(fname, basepath, sup)
+	return fs
+}
+
 // SetSrc sets the source that is processed by this FileStates
 // if basepath is empty then it is set to the path for the filename.
 func (fs *FileStates) SetSrc(fname, basepath string, sup filecat.Supported) {

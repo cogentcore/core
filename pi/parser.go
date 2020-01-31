@@ -122,7 +122,7 @@ func (pr *Parser) LexRun(fs *FileState) {
 }
 
 // LexLine runs lexer for given single line of source, which is updated
-// from the given text.
+// from the given text (if non-nil)
 // Returns merged regular and token comment lines, cloned and ready for use.
 func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lex.Line {
 	nlines := fs.Src.NLines()

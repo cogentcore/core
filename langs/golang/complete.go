@@ -27,15 +27,69 @@ import (
 
 var CompleteTrace = false
 
+// InnerBracketScope returns the inner-scope for given bracket type
+// if it is imbalanced -- it is important to do completion based
+// just on that inner scope if that is where the user is at.
+func InnerBracketScope(str string, brl, brr string) string {
+	nlb := strings.Count(str, brl)
+	nrb := strings.Count(str, brr)
+	if nlb == nrb {
+		return str
+	}
+	if nlb > nrb {
+		li := strings.LastIndex(str, brl)
+		if li == len(str)-1 {
+			return InnerBracketScope(str[:li], brl, brr) // get rid of open ending and try again
+		}
+		str = str[li+1:]
+		ri := strings.Index(str, brr)
+		if ri < 0 {
+			return str
+		}
+		return str[:ri]
+	}
+	// nrb > nlb -- we're missing the left guys -- go to first rb
+	ri := strings.Index(str, brr)
+	if ri == 0 {
+		return InnerBracketScope(str[1:], brl, brr) // get rid of opening and try again
+	}
+	str = str[:ri]
+	li := strings.Index(str, brl)
+	if li < 0 {
+		return str
+	}
+	return str[li+1:]
+}
+
+// TargetString returns the target string for lookup and parsing, removing
+// extra irrelevant aspects and scoping appropriately.
+func TargetString(str string) string {
+	flds := strings.Fields(str)
+	str = flds[len(flds)-1] // just use last one
+	bstr := str
+	str = InnerBracketScope(str, "{", "}")
+	str = InnerBracketScope(str, "(", ")")
+	str = InnerBracketScope(str, "[", "]")
+	if str == "" {
+		return bstr
+	}
+	str = TrimLeftToAlpha(str)
+	if str == "" {
+		str = TrimLeftToAlpha(bstr)
+		if str == "" {
+			return bstr
+		}
+	}
+	return str
+}
+
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
 func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
 	if str == "" {
 		return
 	}
-	flds := strings.Fields(str)
-	// origStr := str
-	str = flds[len(flds)-1] // just use last one
-
+	origStr := str
+	str = TargetString(str)
 	fs := fss.Done()
 
 	fs.SymsMu.RLock()
@@ -46,6 +100,10 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 		return
 	}
 	fpath, _ := filepath.Abs(fs.Src.Filename)
+
+	if CompleteTrace {
+		fmt.Printf("lookup str:  %v  orig: %v\n", str, origStr)
+	}
 	lfs := pr.ParseString(str, fpath, fs.Src.Sup)
 	if lfs == nil {
 		return
@@ -129,9 +187,8 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 	if str == "" {
 		return
 	}
-	flds := strings.Fields(str)
 	origStr := str
-	str = flds[len(flds)-1] // just use last one
+	str = TargetString(str)
 
 	fs := fss.Done()
 
@@ -403,6 +460,8 @@ func (gl *GoLang) CompleteAstStart(ast *parse.Ast, scope token.Tokens) (start, l
 				return prv, last
 			}
 		case strings.HasSuffix(cur.Nm, "Stmt"):
+			return prv, last
+		case cur.Nm == "Args":
 			return prv, last
 		}
 		nxt := cur.PrevAst()
