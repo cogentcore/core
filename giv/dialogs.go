@@ -11,7 +11,6 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
-	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 )
 
@@ -53,9 +52,6 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Opts.LineNos = opts.LineNos
 	tb.Stat() // update markup
 	tb.SetText(text)
-	// markup the first 100 lines
-	mxhi := ints.MinInt(100, tb.NLines-1)
-	tb.MarkupLinesLock(0, mxhi)
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
 	tlv.SetProp("width", units.NewEm(5))

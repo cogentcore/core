@@ -546,9 +546,17 @@ func (w *Window) SetMainLayout() *Layout {
 // SetName sets name of this window and also the OSWin, and applies any window
 // geometry settings associated with the new name if it is different from before
 func (w *Window) SetName(name string) bool {
+	curnm := w.Name()
 	rval := w.NodeBase.SetName(name)
 	if w.OSWin != nil {
 		w.OSWin.SetName(name)
+	}
+	if rval {
+		for i, fw := range FocusWindows { // rename focus windows so we get focus later..
+			if fw == curnm {
+				FocusWindows[i] = name
+			}
+		}
 	}
 	if rval && w.OSWin != nil {
 		wgp := WinGeomPrefs.Pref(name, nil)
@@ -733,6 +741,10 @@ func (w *Window) Closed() {
 				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Nm, w.Nm)
 			}
 			pfw.OSWin.Raise()
+		} else {
+			if WinEventTrace {
+				fmt.Printf("Win: %v not found to restored focus: %v closed\n", pf, w.Nm)
+			}
 		}
 	} else {
 		WindowGlobalMu.Unlock()
@@ -1812,9 +1824,9 @@ func (w *Window) TriggerShortcut(chord key.Chord) bool {
 		return false
 	}
 
-	// if KeyEventTrace {
-	fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Nm, chord, sa.Text)
-	// }
+	if KeyEventTrace {
+		fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Nm, chord, sa.Text)
+	}
 	sa.Trigger()
 	return true
 }

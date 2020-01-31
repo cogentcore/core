@@ -171,7 +171,7 @@ func (app *appImpl) mainLoop() {
 			}
 		default:
 			if !hasStarted && len(app.windows) == 0 { // starting up
-				time.Sleep(50 * time.Millisecond)
+				time.Sleep(100 * time.Millisecond) // 50 msec is too fast -- still get crash on mac..
 			} else {
 				// glfw.WaitEvents()
 				hasStarted = true

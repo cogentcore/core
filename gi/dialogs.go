@@ -197,6 +197,8 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		}
 		win.GoStartEventLoop()
 	} else {
+		x = ints.MaxInt(0, x)
+		y = ints.MaxInt(0, y)
 		if x == 0 && y == 0 {
 			x = win.Viewport.Geom.Size.X / 3
 			y = win.Viewport.Geom.Size.Y / 3

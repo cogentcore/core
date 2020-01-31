@@ -377,6 +377,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize.MulScalar(.9)).ToPoint()
 	maxht := int(32 * frame.Sty.Font.Face.Metrics.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
+	x = ints.MaxInt(0, x)
+	y = ints.MaxInt(0, y)
 	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
 	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
