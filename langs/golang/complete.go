@@ -20,11 +20,6 @@ import (
 	"github.com/goki/pi/token"
 )
 
-// * completion on new code != saved code -- really needs to do full reparse more frequently
-// * val = strings. doesn't work -- needs first letter..
-// * second or later vars in multiple assign is not implemented
-// * edit needs to be fixed to properly insert completions and retain remaining parts etc
-
 var CompleteTrace = false
 
 // InnerBracketScope returns the inner-scope for given bracket type
@@ -80,7 +75,8 @@ func TargetString(str string) string {
 			return bstr
 		}
 	}
-	return str
+	flds = strings.Split(str, ",")
+	return flds[len(flds)-1]
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
@@ -284,6 +280,11 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 		}
 	}
 
+	// if len(md.Matches) == 0 {
+	// 	fmt.Printf("complete str:  %v  orig: %v\n", str, origStr)
+	// 	lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
+	// }
+
 	return
 }
 
@@ -481,31 +482,30 @@ func (gl *GoLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp com
 	// then delete the portion after "Child" and return the new comp and the number or runes past
 	// the cursor to delete
 	s2 := text[cp:]
-	if len(s2) > 0 {
-		r := rune(s2[0])
-		// find the next whitespace or end of text
-		if !(unicode.IsSpace(r)) {
-			count := len(s2)
-			for i, c := range s2 {
-				r = rune(c)
-				if unicode.IsSpace(r) || r == rune('(') || r == rune('.') || r == rune('[') || r == rune('&') || r == rune('*') {
-					s2 = s2[0:i]
-					break
-				}
-				// might be last word
-				if i == count-1 {
-					break
-				}
+	gotParen := false
+	if len(s2) > 0 && lex.IsLetterOrDigit(rune(s2[0])) {
+		for i, c := range s2 {
+			if c == '(' {
+				gotParen = true
+				s2 = s2[:i]
+				break
+			}
+			isalnum := c == '_' || unicode.IsLetter(c) || unicode.IsDigit(c)
+			if !isalnum {
+				s2 = s2[:i]
+				break
 			}
 		}
+	} else {
+		s2 = ""
 	}
 
 	var nw = comp.Text
-	// todo: only do if parens not already there
-	//class, ok := comp.Extra["class"]
-	//if ok && class == "func" {
-	//	new = new + "()"
-	//}
+	if gotParen && strings.HasSuffix(nw, "()") {
+		nw = nw[:len(nw)-2]
+	}
+
+	// fmt.Printf("text: %v|%v  comp: %v  s2: %v\n", text[:cp], text[cp:], nw, s2)
 	ed.NewText = nw
 	ed.ForwardDelete = len(s2)
 	return ed

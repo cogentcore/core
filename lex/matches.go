@@ -102,6 +102,10 @@ func IsDigit(ch rune) bool {
 	return '0' <= ch && ch <= '9' || ch >= utf8.RuneSelf && unicode.IsDigit(ch)
 }
 
+func IsLetterOrDigit(ch rune) bool {
+	return IsLetter(ch) || IsDigit(ch)
+}
+
 func IsWhiteSpace(ch rune) bool {
 	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'
 }

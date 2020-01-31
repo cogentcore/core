@@ -190,7 +190,7 @@ func (ls *State) ReadName() {
 	sz := len(ls.Src)
 	for ls.Pos < sz {
 		rn := ls.Src[ls.Pos]
-		if IsLetter(rn) || IsDigit(rn) {
+		if IsLetterOrDigit(rn) {
 			str += string(rn)
 			ls.Pos++
 		} else {
