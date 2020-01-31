@@ -29,7 +29,7 @@ import (
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
-	"github.com/pmezard/go-difflib/difflib"
+	"github.com/ianbruene/go-difflib/difflib"
 )
 
 // TextBufOpts contains options for TextBufs -- contains everything necessary to
@@ -2596,19 +2596,19 @@ func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool 
 		df := diffs[i]
 		switch df.Tag {
 		case 'r':
-			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)
+			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, true, signal)
 			// fmt.Printf("patch rep del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
-			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false, signal)
+			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), true, signal)
 			// fmt.Printf("patch rep ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'd':
-			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, false, signal)
+			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, true, signal)
 			// fmt.Printf("patch del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'i':
 			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
-			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), false, signal)
+			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), true, signal)
 			// fmt.Printf("patch ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		}
