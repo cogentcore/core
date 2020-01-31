@@ -27,12 +27,12 @@ type File struct {
 	Comments   []Line            `desc:"comment tokens are stored separately here, so parser doesn't need to worry about them, but they are available for highlighting and other uses"`
 	LastStacks []Stack           `desc:"stack present at the end of each line -- needed for contextualizing line-at-time lexing while editing"`
 	EosPos     []EosPos          `desc:"token positions per line for the EOS (end of statement) tokens -- very important for scoping top-down parsing"`
-	Lines      *[][]rune         `desc:"contents of the file as lines of runes"`
+	Lines      [][]rune          `desc:"contents of the file as lines of runes"`
 }
 
 // SetSrc sets the source to given content, and alloc Lexs -- if basepath is empty
 // then it is set to the path for the filename
-func (fl *File) SetSrc(src *[][]rune, fname, basepath string, sup filecat.Supported) {
+func (fl *File) SetSrc(src [][]rune, fname, basepath string, sup filecat.Supported) {
 	fl.Filename = fname
 	if basepath != "" {
 		fl.BasePath = basepath
@@ -134,14 +134,13 @@ func (fl *File) OpenFile(fname string) error {
 	}
 	rns := RunesFromBytes(alltxt)
 	sup := filecat.SupportedFromFile(fname)
-	fl.SetSrc(&rns, fname, "", sup)
+	fl.SetSrc(rns, fname, "", sup)
 	return nil
 }
 
 // SetBytes sets source to be parsed from given bytes
 func (fl *File) SetBytes(txt []byte) {
-	rns := RunesFromBytes(txt)
-	fl.Lines = &rns
+	fl.Lines = RunesFromBytes(txt)
 	fl.AllocLines()
 }
 
@@ -152,7 +151,7 @@ func (fl *File) SetLineSrc(ln int, txt []rune) bool {
 	if ln >= nlines || ln < 0 {
 		return false
 	}
-	(*fl.Lines)[ln] = sliceclone.Rune(txt)
+	fl.Lines[ln] = sliceclone.Rune(txt)
 	return true
 }
 
@@ -162,8 +161,8 @@ func (fl *File) InitFromLine(sfl *File, ln int) bool {
 	if ln >= nlines || ln < 0 {
 		return false
 	}
-	src := [][]rune{(*sfl.Lines)[ln], []rune{}} // need extra blank
-	fl.SetSrc(&src, sfl.Filename, sfl.BasePath, sfl.Sup)
+	src := [][]rune{sfl.Lines[ln], []rune{}} // need extra blank
+	fl.SetSrc(src, sfl.Filename, sfl.BasePath, sfl.Sup)
 	fl.Lexs = []Line{sfl.Lexs[ln], Line{}}
 	fl.Comments = []Line{sfl.Comments[ln], Line{}}
 	fl.EosPos = []EosPos{sfl.EosPos[ln], EosPos{}}
@@ -179,7 +178,7 @@ func (fl *File) InitFromString(str string, fname string, sup filecat.Supported) 
 	if len(src) == 1 { // need more than 1 line
 		src = append(src, []rune{})
 	}
-	fl.SetSrc(&src, fname, "", sup)
+	fl.SetSrc(src, fname, "", sup)
 	return true
 }
 
@@ -191,7 +190,7 @@ func (fl *File) NLines() int {
 	if fl.Lines == nil {
 		return 0
 	}
-	return len(*fl.Lines)
+	return len(fl.Lines)
 }
 
 // SrcLine returns given line of source, as a string, or "" if out of range
@@ -200,7 +199,7 @@ func (fl *File) SrcLine(ln int) string {
 	if ln < 0 || ln >= nlines {
 		return ""
 	}
-	return string((*fl.Lines)[ln])
+	return string(fl.Lines[ln])
 }
 
 // SetLine sets the line data from the lexer -- does a clone to keep the copy
@@ -384,7 +383,7 @@ func (fl *File) TokenSrc(pos Pos) []rune {
 		return nil
 	}
 	lx := fl.Lexs[pos.Ln][pos.Ch]
-	return (*fl.Lines)[pos.Ln][lx.St:lx.Ed]
+	return fl.Lines[pos.Ln][lx.St:lx.Ed]
 }
 
 // TokenSrcPos returns source reg associated with lex token at given token position
@@ -411,22 +410,22 @@ func (fl *File) TokenSrcReg(reg Reg) Reg {
 func (fl *File) RegSrc(reg Reg) string {
 	if reg.Ed.Ln == reg.St.Ln {
 		if reg.Ed.Ch > reg.St.Ch {
-			return string((*fl.Lines)[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
+			return string(fl.Lines[reg.Ed.Ln][reg.St.Ch:reg.Ed.Ch])
 		} else {
 			return ""
 		}
 	}
-	src := string((*fl.Lines)[reg.St.Ln][reg.St.Ch:])
+	src := string(fl.Lines[reg.St.Ln][reg.St.Ch:])
 	nln := reg.Ed.Ln - reg.St.Ln
 	if nln > 10 {
-		src += "|>" + string((*fl.Lines)[reg.St.Ln+1]) + "..."
-		src += "|>" + string((*fl.Lines)[reg.Ed.Ln-1])
+		src += "|>" + string(fl.Lines[reg.St.Ln+1]) + "..."
+		src += "|>" + string(fl.Lines[reg.Ed.Ln-1])
 		return src
 	}
 	for ln := reg.St.Ln + 1; ln < reg.Ed.Ln; ln++ {
-		src += "|>" + string((*fl.Lines)[ln])
+		src += "|>" + string(fl.Lines[ln])
 	}
-	src += "|>" + string((*fl.Lines)[reg.Ed.Ln][:reg.Ed.Ch])
+	src += "|>" + string(fl.Lines[reg.Ed.Ln][:reg.Ed.Ch])
 	return src
 }
 
@@ -441,7 +440,7 @@ func (fl *File) TokenRegSrc(reg Reg) string {
 
 // LexTagSrcLn returns the lex'd tagged source line for given line
 func (fl *File) LexTagSrcLn(ln int) string {
-	return fl.Lexs[ln].TagSrc((*fl.Lines)[ln])
+	return fl.Lexs[ln].TagSrc(fl.Lines[ln])
 }
 
 // LexTagSrc returns the lex'd tagged source for entire source

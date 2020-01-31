@@ -57,7 +57,7 @@ func (pr *Parser) LexInit(fs *FileState) {
 	fs.LexState.Time.Now()
 	fs.TwoState.Init()
 	if fs.Src.NLines() > 0 {
-		fs.LexState.SetLine((*fs.Src.Lines)[0])
+		fs.LexState.SetLine(fs.Src.Lines[0])
 	}
 }
 
@@ -74,7 +74,7 @@ func (pr *Parser) LexNext(fs *FileState) *lex.Rule {
 			if fs.LexState.Ln >= fs.Src.NLines() {
 				return nil
 			}
-			fs.LexState.SetLine((*fs.Src.Lines)[fs.LexState.Ln])
+			fs.LexState.SetLine(fs.Src.Lines[fs.LexState.Ln])
 		}
 		mrule := pr.Lexer.LexStart(&fs.LexState)
 		if mrule != nil {
@@ -101,7 +101,7 @@ func (pr *Parser) LexNextLine(fs *FileState) *lex.Rule {
 			if fs.LexState.Ln >= fs.Src.NLines() {
 				return nil
 			}
-			fs.LexState.SetLine((*fs.Src.Lines)[fs.LexState.Ln])
+			fs.LexState.SetLine(fs.Src.Lines[fs.LexState.Ln])
 			return mrule
 		}
 		mrule = pr.Lexer.LexStart(&fs.LexState)
@@ -130,7 +130,7 @@ func (pr *Parser) LexLine(fs *FileState, ln int, txt []rune) lex.Line {
 		return nil
 	}
 	fs.Src.SetLineSrc(ln, txt)
-	fs.LexState.SetLine((*fs.Src.Lines)[ln])
+	fs.LexState.SetLine(fs.Src.Lines[ln])
 	pst := fs.Src.PrevStack(ln)
 	fs.LexState.Stack = pst.Clone()
 	for !fs.LexState.AtEol() {
