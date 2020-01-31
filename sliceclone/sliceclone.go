@@ -32,6 +32,18 @@ func Byte(sl []byte) []byte {
 	return cp
 }
 
+// Rune returns a cloned copy of the given rune slice -- returns nil
+// if slice has zero length
+func Rune(sl []rune) []rune {
+	sz := len(sl)
+	if sz == 0 {
+		return nil
+	}
+	cp := make([]rune, sz)
+	copy(cp, sl)
+	return cp
+}
+
 // Bool returns a cloned copy of the given bool slice -- returns nil
 // if slice has zero length
 func Bool(sl []bool) []bool {
