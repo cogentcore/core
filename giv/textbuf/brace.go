@@ -72,8 +72,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 				found = true
 				break
 			}
-			ln++
-			txt = src[ln]
+			txt = src[l]
 			ch = -1
 		}
 	} else {
@@ -97,8 +96,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 				found = true
 				break
 			}
-			ln--
-			txt = src[ln]
+			txt = src[l]
 			ch = len(txt)
 		}
 	}

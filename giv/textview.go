@@ -2458,6 +2458,9 @@ func (tv *TextView) OfferComplete() {
 	if !tv.Buf.Opts.Completion && !tv.ForceComplete {
 		return
 	}
+	if tv.Buf.InComment(tv.CursorPos) {
+		return
+	}
 
 	tv.Buf.Complete.SrcLn = tv.CursorPos.Ln
 	tv.Buf.Complete.SrcCh = tv.CursorPos.Ch
@@ -2483,11 +2486,12 @@ func (tv *TextView) OfferComplete() {
 // have moved beyond any prior completion scenario
 func (tv *TextView) CancelComplete() {
 	tv.ForceComplete = false
-	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On {
+	if tv.Buf.Complete == nil {
 		return
 	}
-	tv.Buf.CurView = nil
-	tv.Buf.Complete.Cancel()
+	if tv.Buf.Complete.Cancel() {
+		tv.Buf.CurView = nil
+	}
 }
 
 // Lookup attempts to lookup symbol at current location, popping up a window
@@ -3843,34 +3847,30 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case gi.KeyFunMoveRight:
-		tv.ISearchCancel() // note: may need to generalize to cancel more stuff
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForward(1)
 		tv.ShiftSelectExtend(kt)
-		tv.OfferComplete()
 		tv.ISpellKeyInput(kt)
 	case gi.KeyFunWordRight:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorForwardWord(1)
 		tv.ShiftSelectExtend(kt)
-		tv.OfferComplete()
 	case gi.KeyFunMoveLeft:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackward(1)
 		tv.ShiftSelectExtend(kt)
-		tv.OfferComplete()
 	case gi.KeyFunWordLeft:
-		tv.ISearchCancel()
+		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorBackwardWord(1)
 		tv.ShiftSelectExtend(kt)
-		tv.OfferComplete()
 	case gi.KeyFunMoveUp:
 		cancelAll()
 		kt.SetProcessed()
@@ -3951,12 +3951,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ISearchCancel()
 		tv.QReplacePrompt()
 	case gi.KeyFunAbort:
+		cancelAll()
 		kt.SetProcessed()
-		tv.CancelComplete()
 		tv.EscPressed()
 	case gi.KeyFunJump:
-		kt.SetProcessed()
 		cancelAll()
+		kt.SetProcessed()
 		tv.JumpToLinePrompt()
 	case gi.KeyFunHistPrev:
 		cancelAll()
@@ -4018,7 +4018,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorBackspaceWord(1)
-		tv.OfferComplete()
 	case gi.KeyFunDeleteWord:
 		cancelAll()
 		kt.SetProcessed()

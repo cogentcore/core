@@ -83,7 +83,7 @@ func (un *Undo) UndoPop() *Edit {
 	return tbe
 }
 
-// UndoPopIfGroup pops the top item off of the stack if its the same as given group
+// UndoPopIfGroup pops the top item off of the stack if it is the same as given group
 func (un *Undo) UndoPopIfGroup(gp int) *Edit {
 	if un.Off {
 		return nil
@@ -145,7 +145,29 @@ func (un *Undo) RedoNext() *Edit {
 	}
 	tbe := un.Stack[un.Pos]
 	if UndoTrace {
-		fmt.Printf("Undo: RedoNext at pos: %v delete? %v at: %v text: %v\n", un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
+		fmt.Printf("Undo: RedoNext of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
+	}
+	un.Pos++
+	return tbe
+}
+
+// RedoNextIfGroup returns the current item on Stack for Redo if it is same group
+// and increments the position. returns nil if at end of stack.
+func (un *Undo) RedoNextIfGroup(gp int) *Edit {
+	if un.Off {
+		return nil
+	}
+	un.Mu.Lock()
+	defer un.Mu.Unlock()
+	if un.Pos >= len(un.Stack) {
+		return nil
+	}
+	tbe := un.Stack[un.Pos]
+	if tbe.Group != gp {
+		return nil
+	}
+	if UndoTrace {
+		fmt.Printf("Undo: RedoNextIfGroup of Gp: %v at pos: %v delete? %v at: %v text: %v\n", un.Group, un.Pos, tbe.Delete, tbe.Reg, string(tbe.ToBytes()))
 	}
 	un.Pos++
 	return tbe

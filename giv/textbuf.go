@@ -1520,7 +1520,6 @@ func (tb *TextBuf) Undo() *textbuf.Edit {
 	stgp := tbe.Group
 	last := tbe
 	for {
-		// todo: iterate over multiple grouped undos here..
 		if tbe.Delete {
 			utbe := tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 			utbe.Group = tbe.Group
@@ -1563,7 +1562,8 @@ func (tb *TextBuf) EmacsUndoSave() {
 	tb.Undos.UndoStackSave()
 }
 
-// Redo redoes next item on the undo stack, and returns that record, nil if no more
+// Redo redoes next group of items on the undo stack,
+// and returns the last record, nil if no more
 func (tb *TextBuf) Redo() *textbuf.Edit {
 	tb.LinesMu.Lock()
 	tbe := tb.Undos.RedoNext()
@@ -1573,17 +1573,27 @@ func (tb *TextBuf) Redo() *textbuf.Edit {
 	}
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
-	// todo: iterate over multiple grouped redos here..
-	if tbe.Delete {
-		tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
-		tb.LinesMu.Unlock()
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
-	} else {
-		tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
-		tb.LinesMu.Unlock()
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe) // todo: ok under LinesMu?
+	stgp := tbe.Group
+	last := tbe
+	for {
+		if tbe.Delete {
+			tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+			tb.LinesMu.Unlock()
+			tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
+		} else {
+			tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+			tb.LinesMu.Unlock()
+			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+		}
+		tb.LinesMu.Lock()
+		tbe = tb.Undos.RedoNextIfGroup(stgp)
+		if tbe == nil {
+			break
+		}
+		last = tbe
 	}
-	return tbe
+	tb.LinesMu.Unlock()
+	return last
 }
 
 // AdjustPos adjusts given text position, which was recorded at given time

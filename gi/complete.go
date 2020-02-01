@@ -156,16 +156,25 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
 }
 
-// Cancel cancels any pending completion -- call when new events nullify prior completions
-// returns true if canceled
+// Cancel cancels any existing *or* pending completion.
+// Call when new events nullify prior completions.
+// Returns true if canceled.
 func (c *Complete) Cancel() bool {
-	if c.Vp == nil || c.Vp.Win == nil {
-		return false
+	did := false
+	if c.Vp != nil && c.Vp.Win != nil {
+		cpop := c.Vp.Win.CurPopup()
+		if PopupIsCompleter(cpop) {
+			c.Vp.Win.SetDelPopup(cpop)
+			did = true
+		}
 	}
-	cpop := c.Vp.Win.CurPopup()
-	if PopupIsCompleter(cpop) {
-		c.Vp.Win.SetDelPopup(cpop)
-	}
+	ab := c.Abort()
+	return did || ab
+}
+
+// Abort aborts *only* pending completions, but does not close existing window.
+// Returns true if aborted.
+func (c *Complete) Abort() bool {
 	c.DelayMu.Lock()
 	c.Vp = nil
 	if c.DelayTimer != nil {
