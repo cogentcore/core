@@ -16,37 +16,20 @@ import (
 	"time"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/ki/nptime"
 	"github.com/goki/ki/runes"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
-	"github.com/ianbruene/go-difflib/difflib"
 )
-
-// TextBufOpts contains options for TextBufs -- contains everything necessary to
-// conditionalize editing of a given text file
-type TextBufOpts struct {
-	SpaceIndent  bool   `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
-	TabSize      int    `desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	AutoIndent   bool   `desc:"auto-indent on newline (enter) or tab"`
-	LineNos      bool   `desc:"show line numbers at left end of editor"`
-	Completion   bool   `desc:"use the completion system to suggest options while typing"`
-	SpellCorrect bool   `desc:"use spell checking to suggest corrections while typing"`
-	EmacsUndo    bool   `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
-	DepthColor   bool   `desc:"colorize the background according to nesting depth"`
-	CommentLn    string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
-	CommentSt    string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
-	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
-}
 
 // MaxScopeLines	 is the maximum lines to search for a scope marker, e.g. '}'
 var MaxScopeLines = 100
@@ -58,49 +41,6 @@ var TextBufDiffRevertLines = 10000
 // TextBufDiffRevertDiffs is max number of difference regions to apply for diff-based revert
 // otherwise just reopens file
 var TextBufDiffRevertDiffs = 20
-
-// CommentStrs returns the comment start and end strings, using line-based CommentLn first if set
-// and falling back on multi-line / general purpose start / end syntax
-func (tb *TextBufOpts) CommentStrs() (comst, comed string) {
-	comst = tb.CommentLn
-	if comst == "" {
-		comst = tb.CommentSt
-		comed = tb.CommentEd
-	}
-	return
-}
-
-// IndentChar returns the indent character based on SpaceIndent option
-func (tb *TextBufOpts) IndentChar() indent.Char {
-	if tb.SpaceIndent {
-		return indent.Space
-	}
-	return indent.Tab
-}
-
-// ConfigSupported configures options based on the supported language info in GoPi
-// returns true if supported
-func (tb *TextBufOpts) ConfigSupported(sup filecat.Supported) bool {
-	if sup == filecat.NoSupport {
-		return false
-	}
-	lp, ok := pi.StdLangProps[sup]
-	if !ok {
-		return false
-	}
-	tb.CommentLn = lp.CommentLn
-	tb.CommentSt = lp.CommentSt
-	tb.CommentEd = lp.CommentEd
-	for _, flg := range lp.Flags {
-		switch flg {
-		case pi.IndentSpace:
-			tb.SpaceIndent = true
-		case pi.IndentTab:
-			tb.SpaceIndent = false
-		}
-	}
-	return true
-}
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
 // the raw text lines (in original string and rune formats, and marked-up from
@@ -116,7 +56,7 @@ type TextBuf struct {
 	ki.Node
 	Txt          []byte           `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
 	Autosave     bool             `desc:"if true, auto-save file after changes (in a separate routine)"`
-	Opts         TextBufOpts      `desc:"options for how text editing / viewing works"`
+	Opts         textbuf.Opts     `desc:"options for how text editing / viewing works"`
 	Filename     gi.FileName      `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 	Info         FileInfo         `desc:"full info about file"`
 	PiState      pi.FileStates    `desc:"Pi parsing state info for file"`
@@ -127,17 +67,15 @@ type TextBuf struct {
 	Tags         []lex.Line       `json:"extra custom tagged regions for each line"`
 	HiTags       []lex.Line       `json:"syntax highlighting tags -- auto-generated"`
 	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
-	MarkupEdits  []*TextBufEdit   `json:"-" xml:"-" desc:"edits that have been made since last full markup"`
+	MarkupEdits  []*textbuf.Edit  `json:"-" xml:"-" desc:"edits that have been made since last full markup"`
 	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
 	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
 	LinesMu      sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating lines"`
 	MarkupMu     sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
 	TextBufSig   ki.Signal        `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views        []*TextView      `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
-	Undos        []*TextBufEdit   `json:"-" xml:"-" desc:"undo stack of edits"`
-	UndoUndos    []*TextBufEdit   `json:"-" xml:"-" desc:"undo stack of *undo* edits -- added to "`
-	UndoPos      int              `json:"-" xml:"-" desc:"undo position"`
-	PosHistory   []TextPos        `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+	Undos        textbuf.Undo     `json:"-" xml:"-" desc:"undo manager"`
+	PosHistory   []textbuf.Pos    `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 	Complete     *gi.Complete     `json:"-" xml:"-" desc:"functions and data for text completion"`
 	SpellCorrect *gi.SpellCorrect `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 	CurView      *TextView        `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
@@ -176,12 +114,12 @@ const (
 	TextBufNew
 
 	// TextBufInsert signals that some text was inserted -- data is
-	// TextBufEdit describing change -- the TextBuf always reflects the
+	// textbuf.Edit describing change -- the TextBuf always reflects the
 	// current state *after* the edit.
 	TextBufInsert
 
 	// TextBufDelete signals that some text was deleted -- data is
-	// TextBufEdit describing change -- the TextBuf always reflects the
+	// textbuf.Edit describing change -- the TextBuf always reflects the
 	// current state *after* the edit.
 	TextBufDelete
 
@@ -234,20 +172,6 @@ func (tb *TextBuf) SetChanged() {
 // ClearChanged marks buffer as un-changed
 func (tb *TextBuf) ClearChanged() {
 	tb.ClearFlag(int(TextBufChanged))
-}
-
-// InitialMarkup does the first-pass markup on the file
-func (tb *TextBuf) InitialMarkup() {
-	tb.LinesMu.Lock()
-	tb.MarkupMu.Lock()
-	if tb.Hi.UsingPi() {
-		fs := tb.PiState.Done() // initialize
-		fs.Src.SetBytes(tb.Txt)
-	}
-	mxhi := ints.MinInt(100, tb.NLines-1)
-	tb.MarkupLines(0, mxhi) // this will triger a full re-markup too
-	tb.MarkupMu.Unlock()
-	tb.LinesMu.Unlock()
 }
 
 // SetText sets the text to given bytes
@@ -345,6 +269,12 @@ func (tb *TextBuf) Defaults() {
 // Refresh signals any views to refresh views
 func (tb *TextBuf) Refresh() {
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
+}
+
+// SetInactive sets the buffer in an inactive state if inactive = true
+// otherwise is in active state.  Inactive = don't save Undos.
+func (tb *TextBuf) SetInactive(inactive bool) {
+	tb.Undos.Off = inactive
 }
 
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --
@@ -714,30 +644,30 @@ func (tb *TextBuf) AutoSaveCheck() bool {
 //   Appending Lines
 
 // EndPos returns the ending position at end of buffer
-func (tb *TextBuf) EndPos() TextPos {
+func (tb *TextBuf) EndPos() textbuf.Pos {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
 	if tb.NLines == 0 {
-		return TextPosZero
+		return textbuf.PosZero
 	}
-	ed := TextPos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
+	ed := textbuf.Pos{tb.NLines - 1, len(tb.Lines[tb.NLines-1])}
 	return ed
 }
 
 // AppendText appends new text to end of buffer, using insert, returns edit
-func (tb *TextBuf) AppendText(text []byte, saveUndo, signal bool) *TextBufEdit {
+func (tb *TextBuf) AppendText(text []byte, signal bool) *textbuf.Edit {
 	if len(text) == 0 {
-		return &TextBufEdit{}
+		return &textbuf.Edit{}
 	}
 	ed := tb.EndPos()
-	return tb.InsertText(ed, text, saveUndo, signal)
+	return tb.InsertText(ed, text, signal)
 }
 
 // AppendTextLine appends one line of new text to end of buffer, using insert,
 // and appending a LF at the end of the line if it doesn't already have one.
 // Returns the edit region.
-func (tb *TextBuf) AppendTextLine(text []byte, saveUndo, signal bool) *TextBufEdit {
+func (tb *TextBuf) AppendTextLine(text []byte, signal bool) *textbuf.Edit {
 	ed := tb.EndPos()
 	sz := len(text)
 	addLF := false
@@ -755,18 +685,18 @@ func (tb *TextBuf) AppendTextLine(text []byte, saveUndo, signal bool) *TextBufEd
 		tcpy[sz] = '\n'
 		efft = tcpy
 	}
-	tbe := tb.InsertText(ed, efft, saveUndo, signal)
+	tbe := tb.InsertText(ed, efft, signal)
 	return tbe
 }
 
 // AppendTextMarkup appends new text to end of buffer, using insert, returns
 // edit, and uses supplied markup to render it
-func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, saveUndo, signal bool) *TextBufEdit {
+func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, signal bool) *textbuf.Edit {
 	if len(text) == 0 {
-		return &TextBufEdit{}
+		return &textbuf.Edit{}
 	}
 	ed := tb.EndPos()
-	tbe := tb.InsertText(ed, text, saveUndo, false) // no sig -- we do later
+	tbe := tb.InsertText(ed, text, false) // no sig -- we do later
 
 	st := tbe.Reg.Start.Ln
 	el := tbe.Reg.End.Ln
@@ -788,7 +718,7 @@ func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, saveUndo, signal
 // AppendTextLineMarkup appends one line of new text to end of buffer, using
 // insert, and appending a LF at the end of the line if it doesn't already
 // have one.  user-supplied markup is used.  Returns the edit region.
-func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, saveUndo, signal bool) *TextBufEdit {
+func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *textbuf.Edit {
 	ed := tb.EndPos()
 	sz := len(text)
 	addLF := false
@@ -806,7 +736,7 @@ func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, saveUndo, si
 		tcpy[sz] = '\n'
 		efft = tcpy
 	}
-	tbe := tb.InsertText(ed, efft, saveUndo, false)
+	tbe := tb.InsertText(ed, efft, false)
 	tb.Markup[tbe.Reg.Start.Ln] = markup
 	if signal {
 		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
@@ -867,6 +797,7 @@ func (tb *TextBuf) RefreshViews() {
 // Returns buf updt, win updt and autosave restore state.
 // Must call BatchUpdateEnd at end with the result of this call.
 func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
+	tb.Undos.NewGroup()
 	bufUpdt = tb.UpdateStart()
 	autoSave = tb.AutoSaveOff()
 	winUpdt = false
@@ -967,453 +898,48 @@ func (tb *TextBuf) BytesToLines() {
 	tb.LinesMu.Unlock()
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   Search
-
-// FileSearchMatch records one match for search within file
-type FileSearchMatch struct {
-	Reg  TextRegion `desc:"region surrounding the match"`
-	Text []byte     `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
-}
-
-// FileSearchContext is how much text to include on either side of the search match
-var FileSearchContext = 30
-
-var mst = []byte("<mark>")
-var mstsz = len(mst)
-var med = []byte("</mark>")
-var medsz = len(med)
-
-// NewFileSearchMatch returns a new FileSearchMatch entry for given rune line with match starting
-// at st and ending before ed, on given line
-func NewFileSearchMatch(rn []rune, st, ed, ln int) FileSearchMatch {
-	sz := len(rn)
-	reg := NewTextRegion(ln, st, ln, ed)
-	cist := ints.MaxInt(st-FileSearchContext, 0)
-	cied := ints.MinInt(ed+FileSearchContext, sz)
-	sctx := []byte(string(rn[cist:st]))
-	fstr := []byte(string(rn[st:ed]))
-	ectx := []byte(string(rn[ed:cied]))
-	tlen := mstsz + medsz + len(sctx) + len(fstr) + len(ectx)
-	txt := make([]byte, tlen)
-	copy(txt, sctx)
-	ti := st - cist
-	copy(txt[ti:], mst)
-	ti += mstsz
-	copy(txt[ti:], fstr)
-	ti += len(fstr)
-	copy(txt[ti:], med)
-	ti += medsz
-	copy(txt[ti:], ectx)
-	return FileSearchMatch{Reg: reg, Text: txt}
-}
-
-// Search looks for a string (no regexp) within buffer, with given case-sensitivity
-// returning number of occurrences and specific match position list.
-// column positions are in runes
-func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []FileSearchMatch) {
-	fr := bytes.Runes(find)
-	fsz := len(fr)
-	if fsz == 0 {
-		return 0, nil
-	}
+// Strings returns the current text as []string array.
+// If addNewLn is true, each string line has a \n appended at end.
+func (tb *TextBuf) Strings(addNewLn bool) []string {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	cnt := 0
-	var matches []FileSearchMatch
-	for ln, rn := range tb.Lines {
-		sz := len(rn)
-		ci := 0
-		for ci < sz {
-			var i int
-			if ignoreCase {
-				i = runes.IndexFold(rn[ci:], fr)
-			} else {
-				i = runes.Index(rn[ci:], fr)
-			}
-			if i < 0 {
-				break
-			}
-			i += ci
-			ci = i + fsz
-			mat := NewFileSearchMatch(rn, i, ci, ln)
-			matches = append(matches, mat)
-			cnt++
+	str := make([]string, tb.NLines)
+	for i, l := range tb.Lines {
+		str[i] = string(l)
+		if addNewLn {
+			str[i] += "\n"
 		}
 	}
-	return cnt, matches
+	return str
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//   TextPos, TextRegion, TextBufEdit
-
-// TextPos represents line, character positions within the TextBuf and TextView
-// the Ch character position is in *runes* not bytes!
-type TextPos struct {
-	Ln, Ch int
-}
-
-// TextPosZero is the uninitialized zero text position (which is
-// still a valid position)
-var TextPosZero = TextPos{}
-
-// TextPosErr represents an error text position (-1 for both line and char)
-// used as a return value for cases where error positions are possible
-var TextPosErr = TextPos{-1, -1}
-
-// IsLess returns true if receiver position is less than given comparison
-func (tp *TextPos) IsLess(cmp TextPos) bool {
-	switch {
-	case tp.Ln < cmp.Ln:
-		return true
-	case tp.Ln == cmp.Ln:
-		return tp.Ch < cmp.Ch
-	default:
-		return false
-	}
-}
-
-// FromString decodes text position from a string representation of form:
-// [#]LxxCxx -- used in e.g., URL links -- returns true if successful
-func (tp *TextPos) FromString(link string) bool {
-	link = strings.TrimPrefix(link, "#")
-	lidx := strings.Index(link, "L")
-	cidx := strings.Index(link, "C")
-
-	switch {
-	case lidx >= 0 && cidx >= 0:
-		fmt.Sscanf(link, "L%dC%d", &tp.Ln, &tp.Ch)
-		tp.Ln-- // link is 1-based, we use 0-based
-		tp.Ch-- // ditto
-	case lidx >= 0:
-		fmt.Sscanf(link, "L%d", &tp.Ln)
-		tp.Ln-- // link is 1-based, we use 0-based
-	case cidx >= 0:
-		fmt.Sscanf(link, "C%d", &tp.Ch)
-		tp.Ch--
-	default:
-		// todo: could support other formats
-		return false
-	}
-	return true
-}
-
-// TextRegion represents a text region as a start / end position, and includes
-// a Time stamp for when the region was created as valid positions into the TextBuf.
-// The character end position is an *exclusive* position (i.e., the region ends at
-// the character just prior to that character) but the lines are always *inclusive*
-// (i.e., it is the actual line, not the next line).
-type TextRegion struct {
-	Start TextPos
-	End   TextPos
-	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
-}
-
-// TextRegionNil is the empty (zero) text region -- all zeros
-var TextRegionNil TextRegion
-
-// IsNil checks if the region is empty, because the start is after or equal to the end
-func (tr *TextRegion) IsNil() bool {
-	return !tr.Start.IsLess(tr.End)
-}
-
-// TimeNow grabs the current time as the edit time
-func (tr *TextRegion) TimeNow() {
-	tr.Time.Now()
-}
-
-// NewTextRegion creates a new text region using separate line and char
-// values for start and end, and also sets the time stamp to now
-func NewTextRegion(stLn, stCh, edLn, edCh int) TextRegion {
-	tr := TextRegion{Start: TextPos{Ln: stLn, Ch: stCh}, End: TextPos{Ln: edLn, Ch: edCh}}
-	tr.TimeNow()
-	return tr
-}
-
-// NewTextRegionPos creates a new text region using position values
-// and also sets the time stamp to now
-func NewTextRegionPos(st, ed TextPos) TextRegion {
-	tr := TextRegion{Start: st, End: ed}
-	tr.TimeNow()
-	return tr
-}
-
-// IsAfterTime reports if this region's time stamp is after given time value
-// if region Time stamp has not been set, it always returns true
-func (tr *TextRegion) IsAfterTime(t time.Time) bool {
-	if tr.Time.IsZero() {
-		return true
-	}
-	return tr.Time.Time().After(t)
-}
-
-// FromString decodes text region from a string representation of form:
-// [#]LxxCxx-LxxCxx -- used in e.g., URL links -- returns true if successful
-func (tr *TextRegion) FromString(link string) bool {
-	link = strings.TrimPrefix(link, "#")
-	fmt.Sscanf(link, "L%dC%d-L%dC%d", &tr.Start.Ln, &tr.Start.Ch, &tr.End.Ln, &tr.End.Ch)
-	tr.Start.Ln--
-	tr.Start.Ch--
-	tr.End.Ln--
-	tr.End.Ch--
-	return true
-}
-
-// NewTextRegionLen makes a new TextRegion from a starting point and a length
-// along same line
-func NewTextRegionLen(start TextPos, len int) TextRegion {
-	reg := TextRegion{}
-	reg.Start = start
-	reg.End = start
-	reg.End.Ch += len
-	return reg
-}
-
-// TextBufEdit describes an edit action to a buffer -- this is the data passed
-// via signals to viewers of the buffer.  Actions are only deletions and
-// insertions (a change is a sequence of those, given normal editing
-// processes).  The TextBuf always reflects the current state *after* the
-// edit.
-type TextBufEdit struct {
-	Reg    TextRegion `desc:"region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit."`
-	Delete bool       `desc:"action is either a deletion or an insertion"`
-	Text   [][]rune   `desc:"text to be inserted"`
-}
-
-// ToBytes returns the Text of this edit record to a byte string, with
-// newlines at end of each line -- nil if Text is empty
-func (te *TextBufEdit) ToBytes() []byte {
-	if te == nil {
-		return nil
-	}
-	sz := len(te.Text)
-	if sz == 0 {
-		return nil
-	}
-	if sz == 1 {
-		return []byte(string(te.Text[0]))
-	}
-	tsz := 0
-	for i := range te.Text {
-		tsz += len(te.Text[i]) + 10 // don't bother converting to runes, just extra slack
-	}
-	b := make([]byte, 0, tsz)
-	for i := range te.Text {
-		b = append(b, []byte(string(te.Text[i]))...)
-		if i < sz-1 {
-			b = append(b, '\n')
-		}
-	}
-	return b
-}
-
-// AdjustPosDel determines what to do with positions within deleted region
-type AdjustPosDel int
-
-// these are options for what to do with positions within deleted region
-// for the AdjustPos function
-const (
-	// AdjustPosDelErr means return a TextPosErr when in deleted region
-	AdjustPosDelErr AdjustPosDel = iota
-
-	// AdjustPosDelStart means return start of deleted region
-	AdjustPosDelStart
-
-	// AdjustPosDelEnd means return end of deleted region
-	AdjustPosDelEnd
-)
-
-// AdjustPos adjusts the given text position as a function of the edit.
-// if the position was within a deleted region of text, del determines
-// what is returned
-func (te *TextBufEdit) AdjustPos(pos TextPos, del AdjustPosDel) TextPos {
-	if te == nil {
-		return pos
-	}
-	if pos.IsLess(te.Reg.Start) || pos == te.Reg.Start {
-		return pos
-	}
-	dl := te.Reg.End.Ln - te.Reg.Start.Ln
-	if pos.Ln > te.Reg.End.Ln {
-		if te.Delete {
-			pos.Ln -= dl
-		} else {
-			pos.Ln += dl
-		}
-		return pos
-	}
-	if te.Delete {
-		if pos.Ln < te.Reg.End.Ln || pos.Ch < te.Reg.End.Ch {
-			switch del {
-			case AdjustPosDelStart:
-				return te.Reg.Start
-			case AdjustPosDelEnd:
-				return te.Reg.End
-			case AdjustPosDelErr:
-				return TextPosErr
-			}
-		}
-		// this means pos.Ln == te.Reg.End.Ln, Ch >= end
-		if dl == 0 {
-			pos.Ch -= (te.Reg.End.Ch - te.Reg.Start.Ch)
-		} else {
-			pos.Ch -= te.Reg.End.Ch
-		}
-	} else {
-		if dl == 0 {
-			pos.Ch += (te.Reg.End.Ch - te.Reg.Start.Ch)
-		} else {
-			pos.Ln += dl
-		}
-	}
-	return pos
-}
-
-// AdjustPosIfAfterTime checks the time stamp and IfAfterTime,
-// it adjusts the given text position as a function of the edit
-// del determines what to do with positions within a deleted region
-// either move to start or end of the region, or return an error.
-func (te *TextBufEdit) AdjustPosIfAfterTime(pos TextPos, t time.Time, del AdjustPosDel) TextPos {
-	if te == nil {
-		return pos
-	}
-	if te.Reg.IsAfterTime(t) {
-		return te.AdjustPos(pos, del)
-	}
-	return pos
-}
-
-// AdjustReg adjusts the given text region as a function of the edit, including
-// checking that the timestamp on the region is after the edit time, if
-// the region has a valid Time stamp (otherwise always does adjustment).
-// If the starting position is within a deleted region, it is moved to the
-// end of the deleted region, and if the ending position was within a deleted
-// region, it is moved to the start.  If the region becomes empty, TextRegionNil
-// will be returned.
-func (te *TextBufEdit) AdjustReg(reg TextRegion) TextRegion {
-	if te == nil {
-		return reg
-	}
-	if !reg.Time.IsZero() && !te.Reg.IsAfterTime(reg.Time.Time()) {
-		return reg
-	}
-	reg.Start = te.AdjustPos(reg.Start, AdjustPosDelEnd)
-	reg.End = te.AdjustPos(reg.End, AdjustPosDelStart)
-	if reg.IsNil() {
-		return TextRegionNil
-	}
-	return reg
-}
-
-// PunctGpMatch returns the matching grouping punctuation for given rune, which must be
-// a left or right brace {}, bracket [] or paren () -- also returns true if it is *right*
-func PunctGpMatch(r rune) (match rune, right bool) {
-	right = false
-	switch r {
-	case '{':
-		match = '}'
-	case '}':
-		right = true
-		match = '{'
-	case '(':
-		match = ')'
-	case ')':
-		right = true
-		match = '('
-	case '[':
-		match = ']'
-	case ']':
-		right = true
-		match = '['
-	}
-	return
-}
-
-// FindScopeMatch finds the brace or parenthesis that is the partner of the one passed to function
-func (tb *TextBuf) FindScopeMatch(r rune, st TextPos) (en TextPos, found bool) {
+// Search looks for a string (no regexp) within buffer,
+// with given case-sensitivity, returning number of occurrences
+// and specific match position list. column positions are in runes.
+func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []textbuf.Match) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
+	return textbuf.SearchRuneLines(tb.Lines, find, ignoreCase)
+}
 
-	en.Ln = -1
-	found = false
-	match, rt := PunctGpMatch(r)
-	var left int
-	var right int
-	if rt {
-		right++
-	} else {
-		left++
-	}
-	ch := st.Ch
-	ln := st.Ln
-	max := tb.NLines - ln
-	if MaxScopeLines < tb.NLines {
-		max = ln + MaxScopeLines
-	}
-	txt := tb.Line(ln)
-	if left > right {
-		for l := ln; l < max; l++ {
-			for i := ch + 1; i < len(txt); i++ {
-				if txt[i] == r {
-					left++
-					continue
-				}
-				if txt[i] == match {
-					right++
-					if left == right {
-						en.Ln = l
-						en.Ch = i
-						break
-					}
-				}
-			}
-			if en.Ln >= 0 {
-				found = true
-				break
-			}
-			ln++
-			txt = tb.Line(ln)
-			ch = -1
-		}
-	} else {
-		for l := ln; l >= 0; l-- {
-			ch = ints.MinInt(ch, len(txt))
-			for i := ch - 1; i >= 0; i-- {
-				if txt[i] == r {
-					right++
-					continue
-				}
-				if txt[i] == match {
-					left++
-					if left == right {
-						en.Ln = l
-						en.Ch = i
-						break
-					}
-				}
-			}
-			if en.Ln >= 0 {
-				found = true
-				break
-			}
-			ln--
-			txt = tb.Line(ln)
-			ch = len(txt)
-		}
-	}
-	return en, found
+// BraceMatch finds the brace, bracket, or parens that is the partner
+// of the one passed to function.
+func (tb *TextBuf) BraceMatch(r rune, st textbuf.Pos) (en textbuf.Pos, found bool) {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return textbuf.BraceMatch(tb.Lines, r, st, MaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //   Edits
 
 // ValidPos returns a position that is in a valid range
-func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
+func (tb *TextBuf) ValidPos(pos textbuf.Pos) textbuf.Pos {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 
 	if tb.NLines == 0 {
-		return TextPosZero
+		return textbuf.PosZero
 	}
 	if pos.Ln < 0 {
 		pos.Ln = 0
@@ -1427,10 +953,49 @@ func (tb *TextBuf) ValidPos(pos TextPos) TextPos {
 	return pos
 }
 
-// DeleteText deletes region of text between start and end positions, signaling
-// views after text lines have been updated.  Sets the timestamp on resulting TextBufEdit
-// to now
-func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdit {
+const (
+	// EditSignal is used as an arg for edit methods with a signal arg, indicating
+	// that a signal should be emitted.
+	EditSignal = true
+
+	// EditNoSignal is used as an arg for edit methods with a signal arg, indicating
+	// that a signal should NOT be emitted.
+	EditNoSignal = false
+)
+
+// InsertText is the primary method for inserting text into the buffer.
+// It inserts new text at given starting position, optionally signaling
+// views after text has been inserted.  Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
+func (tb *TextBuf) InsertText(st textbuf.Pos, text []byte, signal bool) *textbuf.Edit {
+	if len(text) == 0 {
+		return nil
+	}
+	st = tb.ValidPos(st) // todo: this might be causing some issues?
+	tb.FileModCheck()    // will just revert changes if shouldn't have changed
+	tb.SetChanged()
+	if len(tb.Lines) == 0 {
+		tb.New(1)
+	}
+	tb.LinesMu.Lock()
+	tbe := tb.InsertTextImpl(st, text)
+	tb.SaveUndo(tbe)
+	tb.LinesMu.Unlock()
+	if signal {
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+	}
+	if tb.Autosave {
+		go tb.AutoSave()
+	}
+	return tbe
+}
+
+// DeleteText is the primary method for deleting text from the buffer.
+// It deletes region of text between start and end positions,
+// optionally signaling views after text lines have been updated.
+// Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
+func (tb *TextBuf) DeleteText(st, ed textbuf.Pos, signal bool) *textbuf.Edit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
 	if st == ed {
@@ -1440,17 +1005,29 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 		log.Printf("giv.TextBuf DeleteText: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tb.FileModCheck() // note: could bail if modified but not clear that is better?
-	tbe := tb.Region(st, ed)
+	tb.FileModCheck()
 	tb.SetChanged()
 	tb.LinesMu.Lock()
+	tbe := tb.DeleteTextImpl(st, ed)
+	tb.SaveUndo(tbe)
+	tb.LinesMu.Unlock()
+	if signal {
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
+	}
+	if tb.Autosave {
+		go tb.AutoSave()
+	}
+	return tbe
+}
+
+// DeleteTextImpl deletes region of text between start and end positions.
+// Sets the timestamp on resulting textbuf.Edit to now.  Must be called under
+// LinesMu.Lock.
+func (tb *TextBuf) DeleteTextImpl(st, ed textbuf.Pos) *textbuf.Edit {
+	tbe := tb.RegionImpl(st, ed)
 	tbe.Delete = true
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
-		tb.LinesMu.Unlock()
-		if saveUndo {
-			tb.SaveUndo(tbe)
-		}
 		tb.LinesEdited(tbe)
 	} else {
 		// first get chars on start and end
@@ -1468,52 +1045,27 @@ func (tb *TextBuf) DeleteText(st, ed TextPos, saveUndo, signal bool) *TextBufEdi
 			tb.Lines[cpln] = append(tb.Lines[cpln], eoed...)
 		}
 		tb.NLines = len(tb.Lines)
-		tb.LinesMu.Unlock()
-		if saveUndo {
-			tb.SaveUndo(tbe)
-		}
 		tb.LinesDeleted(tbe)
-	}
-
-	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
-	}
-	if tb.Autosave {
-		go tb.AutoSave()
 	}
 	return tbe
 }
 
-// Insert inserts new text at given starting position, signaling views after
-// text has been inserted.  Sets the timestamp on resulting TextBufEdit to now
-func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *TextBufEdit {
-	if len(text) == 0 {
-		return nil
-	}
-	if len(tb.Lines) == 0 {
-		tb.New(1)
-	}
-	st = tb.ValidPos(st)
-	tb.FileModCheck()
-	tb.LinesMu.Lock()
-	tb.SetChanged()
+// InsertTextImpl does the raw insert of new text at given starting position, returning
+// a new Edit with timestamp of Now.  LinesMu must be locked surrounding this call.
+func (tb *TextBuf) InsertTextImpl(st textbuf.Pos, text []byte) *textbuf.Edit {
 	lns := bytes.Split(text, []byte("\n"))
 	sz := len(lns)
 	rs := bytes.Runes(lns[0])
 	rsz := len(rs)
 	ed := st
-	var tbe *TextBufEdit
+	var tbe *textbuf.Edit
 	if sz == 1 {
 		nt := append(tb.Lines[st.Ln], rs...) // first append to end to extend capacity
 		copy(nt[st.Ch+rsz:], nt[st.Ch:])     // move stuff to end
 		copy(nt[st.Ch:], rs)                 // copy into position
 		tb.Lines[st.Ln] = nt
 		ed.Ch += rsz
-		tb.LinesMu.Unlock()
-		tbe = tb.Region(st, ed)
-		if saveUndo {
-			tb.SaveUndo(tbe)
-		}
+		tbe = tb.RegionImpl(st, ed)
 		tb.LinesEdited(tbe)
 	} else {
 		if tb.Lines[st.Ln] == nil {
@@ -1542,37 +1094,35 @@ func (tb *TextBuf) InsertText(st TextPos, text []byte, saveUndo, signal bool) *T
 		if eost != nil {
 			tb.Lines[ed.Ln] = append(tb.Lines[ed.Ln], eost...)
 		}
-		tb.LinesMu.Unlock()
-		tbe = tb.Region(st, ed)
-		if saveUndo {
-			tb.SaveUndo(tbe)
-		}
+		tbe = tb.RegionImpl(st, ed)
 		tb.LinesInserted(tbe)
-	}
-	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
-	}
-	if tb.Autosave {
-		go tb.AutoSave()
 	}
 	return tbe
 }
 
-// Region returns a TextBufEdit representation of text between start and end positions
-// returns nil if not a valid region.  sets the timestamp on the TextBufEdit to now
-func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
+// Region returns a textbuf.Edit representation of text between start and end positions
+// returns nil if not a valid region.  sets the timestamp on the textbuf.Edit to now
+func (tb *TextBuf) Region(st, ed textbuf.Pos) *textbuf.Edit {
 	st = tb.ValidPos(st)
 	ed = tb.ValidPos(ed)
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return tb.RegionImpl(st, ed)
+}
+
+// RegionImpl returns a textbuf.Edit representation of text between
+// start and end positions. Returns nil if not a valid region.
+// Sets the timestamp on the textbuf.Edit to now.
+// Impl version must be called under LinesMu.RLock or Lock
+func (tb *TextBuf) RegionImpl(st, ed textbuf.Pos) *textbuf.Edit {
 	if st == ed {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.TextBuf : starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("giv.TextBuf: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
-	tbe := &TextBufEdit{Reg: NewTextRegionPos(st, ed)}
-	tb.LinesMu.RLock()
-	defer tb.LinesMu.RUnlock()
+	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
 	if ed.Ln == st.Ln {
 		sz := ed.Ch - st.Ch
 		tbe.Text = make([][]rune, 1)
@@ -1610,9 +1160,9 @@ func (tb *TextBuf) Region(st, ed TextPos) *TextBufEdit {
 
 // SavePosHistory saves the cursor position in history stack of cursor positions --
 // tracks across views -- returns false if position was on same line as last one saved
-func (tb *TextBuf) SavePosHistory(pos TextPos) bool {
+func (tb *TextBuf) SavePosHistory(pos textbuf.Pos) bool {
 	if tb.PosHistory == nil {
-		tb.PosHistory = make([]TextPos, 0, 1000)
+		tb.PosHistory = make([]textbuf.Pos, 0, 1000)
 	}
 	sz := len(tb.PosHistory)
 	if sz > 0 {
@@ -1628,15 +1178,28 @@ func (tb *TextBuf) SavePosHistory(pos TextPos) bool {
 /////////////////////////////////////////////////////////////////////////////
 //   Syntax Highlighting Markup
 
+// LinesEdited re-marks-up lines in edit (typically only 1).  Locks and
+// unlocks the Markup mutex.  Must be called under Lines mutex lock.
+func (tb *TextBuf) LinesEdited(tbe *textbuf.Edit) {
+	tb.MarkupMu.Lock()
+	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
+	for ln := st; ln <= ed; ln++ {
+		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
+		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+	}
+	tb.MarkupLines(st, ed)
+	tb.MarkupMu.Unlock()
+	// note: not calling ReMarkup here
+}
+
 // LinesInserted inserts new lines in Markup corresponding to lines
-// inserted in Lines text.  Locks and unlocks the Markup mutex
-func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
+// inserted in Lines text.  Locks and unlocks the Markup mutex, and
+// must be called under lines mutex
+func (tb *TextBuf) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 
-	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
-
 	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
 
 	// LineBytes
@@ -1689,14 +1252,13 @@ func (tb *TextBuf) LinesInserted(tbe *TextBufEdit) {
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
-	tb.LinesMu.Unlock()
 	tb.ReMarkup() // redo full
 }
 
 // LinesDeleted deletes lines in Markup corresponding to lines
-// deleted in Lines text.  Locks and unlocks the Markup mutex.
-func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
-	tb.LinesMu.Lock()
+// deleted in Lines text.  Locks and unlocks the Markup mutex, and
+// must be called under lines mutex.
+func (tb *TextBuf) LinesDeleted(tbe *textbuf.Edit) {
 	tb.MarkupMu.Lock()
 
 	tb.MarkupEdits = append(tb.MarkupEdits, tbe)
@@ -1720,26 +1282,11 @@ func (tb *TextBuf) LinesDeleted(tbe *TextBufEdit) {
 	tb.Markup[st] = HTMLEscapeRunes(tb.Lines[st])
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
-	tb.LinesMu.Unlock()
 	tb.ReMarkup() // redo full
 }
 
-// LinesEdited re-marks-up lines in edit (typically only 1).  Locks and
-// unlocks the Markup mutex.
-func (tb *TextBuf) LinesEdited(tbe *TextBufEdit) {
-	tb.LinesMu.Lock()
-	tb.MarkupMu.Lock()
-
-	st, ed := tbe.Reg.Start.Ln, tbe.Reg.End.Ln
-	for ln := st; ln <= ed; ln++ {
-		tb.LineBytes[ln] = []byte(string(tb.Lines[ln]))
-		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
-	}
-	tb.MarkupLines(st, ed)
-	tb.MarkupMu.Unlock()
-	tb.LinesMu.Unlock()
-	// probably don't need to do global markup here..
-}
+//////////////////////////////////////////////////////////////////////////////////////////////////
+//  Markup
 
 // MarkupLine does markup on a single line
 func (tb *TextBuf) MarkupLine(ln int) {
@@ -1758,6 +1305,20 @@ func (tb *TextBuf) MarkupLine(ln int) {
 // IsMarkingUp is true if the MarkupAllLines process is currently running
 func (tb *TextBuf) IsMarkingUp() bool {
 	return tb.HasFlag(int(TextBufMarkingUp))
+}
+
+// InitialMarkup does the first-pass markup on the file
+func (tb *TextBuf) InitialMarkup() {
+	tb.LinesMu.Lock()
+	tb.MarkupMu.Lock()
+	if tb.Hi.UsingPi() {
+		fs := tb.PiState.Done() // initialize
+		fs.Src.SetBytes(tb.Txt)
+	}
+	mxhi := ints.MinInt(100, tb.NLines-1)
+	tb.MarkupLines(0, mxhi) // this will triger a full re-markup too
+	tb.MarkupMu.Unlock()
+	tb.LinesMu.Unlock()
 }
 
 // ReMarkup runs re-markup on text in background
@@ -1779,9 +1340,9 @@ func (tb *TextBuf) AdjustedTags(ln int) lex.Line {
 	}
 	ntags := make(lex.Line, 0, sz)
 	for _, tg := range tb.Tags[ln] {
-		reg := TextRegion{Start: TextPos{Ln: ln, Ch: tg.St}, End: TextPos{Ln: ln, Ch: tg.Ed}}
+		reg := textbuf.Region{Start: textbuf.Pos{Ln: ln, Ch: tg.St}, End: textbuf.Pos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
-		reg = tb.AdjustReg(reg)
+		reg = tb.Undos.AdjustReg(reg)
 		if !reg.IsNil() {
 			ntr := ntags.AddLex(tg.Tok, reg.Start.Ch, reg.End.Ch)
 			ntr.Time.Now()
@@ -1814,7 +1375,7 @@ func (tb *TextBuf) MarkupAllLines() {
 		return
 	}
 
-	// ok, by this point mtags could be out of sync with deletes that have happend
+	// by this point mtags could be out of sync with deletes that have happend
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
@@ -1835,9 +1396,9 @@ func (tb *TextBuf) MarkupAllLines() {
 			}
 		}
 		tb.MarkupEdits = nil
-		if len(pfs.Src.Lexs)-1 != maxln {
-			fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
-		}
+		// if maxln > 1 && len(pfs.Src.Lexs)-1 != maxln {
+		// 	fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
+		// }
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = pfs.LexLine(ln) // does clone, combines comments too
 		}
@@ -1859,9 +1420,9 @@ func (tb *TextBuf) MarkupAllLines() {
 			}
 		}
 		tb.MarkupEdits = nil
-		if len(mtags) != maxln {
-			fmt.Printf("error: markup out of sync: %v != %v len(mtags)\n", maxln, len(mtags))
-		}
+		// if maxln > 0 && len(mtags) != maxln {
+		// 	fmt.Printf("error: markup out of sync: %v != %v len(mtags)\n", maxln, len(mtags))
+		// }
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
 		}
@@ -1904,13 +1465,13 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 		ed = tb.NLines - 1
 	}
 
-	if tb.Hi.UsingPi() {
-		maxln := tb.NLines
-		pfs := tb.PiState.Done()
-		if len(pfs.Src.Lexs)-1 != maxln {
-			fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
-		}
-	}
+	// if tb.Hi.UsingPi() {
+	// 	maxln := tb.NLines
+	// 	pfs := tb.PiState.Done()
+	// 	if maxln > 1 && len(pfs.Src.Lexs)-1 != maxln {
+	// 		fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
+	// 	}
+	// }
 
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
@@ -1940,70 +1501,88 @@ func (tb *TextBuf) MarkupLinesLock(st, ed int) bool {
 //   Undo
 
 // SaveUndo saves given edit to undo stack
-func (tb *TextBuf) SaveUndo(tbe *TextBufEdit) {
-	if tb.UndoPos < len(tb.Undos) {
-		// fmt.Printf("undo resetting to pos: %v len was: %v\n", tb.UndoPos, len(tb.Undos))
-		tb.Undos = tb.Undos[:tb.UndoPos]
-	}
-	// fmt.Printf("save undo pos: %v: %v\n", tb.UndoPos, string(tbe.ToBytes()))
-	tb.Undos = append(tb.Undos, tbe)
-	tb.UndoPos = len(tb.Undos)
+func (tb *TextBuf) SaveUndo(tbe *textbuf.Edit) {
+	tb.Undos.Save(tbe)
 }
 
-// Undo undoes next item on the undo stack, and returns that record -- nil if no more
-func (tb *TextBuf) Undo() *TextBufEdit {
-	if tb.UndoPos == 0 {
+// Undo undoes next group of items on the undo stack
+func (tb *TextBuf) Undo() *textbuf.Edit {
+	tb.LinesMu.Lock()
+	tbe := tb.Undos.UndoPop()
+	if tbe == nil {
+		tb.LinesMu.Unlock()
 		tb.ClearChanged()
 		tb.AutoSaveDelete()
 		return nil
 	}
-	tb.UndoPos--
-	tbe := tb.Undos[tb.UndoPos]
-	if tbe == nil {
-		return nil
-	}
-	if tbe.Delete {
-		// fmt.Printf("undo pos: %v undoing delete at: %v text: %v\n", tb.UndoPos, tbe.Reg, string(tbe.ToBytes()))
-		tbe := tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true) // don't save to reg und
-		if tb.Opts.EmacsUndo {
-			tb.UndoUndos = append(tb.UndoUndos, tbe)
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+	stgp := tbe.Group
+	last := tbe
+	for {
+		// todo: iterate over multiple grouped undos here..
+		if tbe.Delete {
+			utbe := tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+			utbe.Group = tbe.Group
+			if tb.Opts.EmacsUndo {
+				tb.Undos.SaveUndo(utbe)
+			}
+			tb.LinesMu.Unlock()
+			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), utbe)
+		} else {
+			utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+			utbe.Group = tbe.Group
+			if tb.Opts.EmacsUndo {
+				tb.Undos.SaveUndo(utbe)
+			}
+			tb.LinesMu.Unlock()
+			tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), utbe)
 		}
-	} else {
-		// fmt.Printf("undo pos: %v undoing insert at: %v text: %v\n", tb.UndoPos, tbe.Reg, string(tbe.ToBytes()))
-		tbe := tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false, true)
-		if tb.Opts.EmacsUndo {
-			tb.UndoUndos = append(tb.UndoUndos, tbe)
+		tb.LinesMu.Lock()
+		tbe = tb.Undos.UndoPopIfGroup(stgp)
+		if tbe == nil {
+			break
 		}
+		last = tbe
 	}
-	return tbe
+	tb.LinesMu.Unlock()
+	if tb.Undos.Pos == 0 {
+		tb.ClearChanged()
+		tb.AutoSaveDelete()
+	}
+	return last
 }
 
-// EmacsUndoSave if EmacsUndo mode is active, saves the UndoUndos to the regular Undo stack
-// at the end, and moves undo to the very end -- undo is a constant stream..
+// EmacsUndoSave is called by TextView at end of latest set of undo commands.
+// If EmacsUndo mode is active, saves the current UndoStack to the regular Undo stack
+// at the end, and moves undo to the very end -- undo is a constant stream.
 func (tb *TextBuf) EmacsUndoSave() {
-	if !tb.Opts.EmacsUndo || len(tb.UndoUndos) == 0 {
+	if !tb.Opts.EmacsUndo {
 		return
 	}
-	for _, utbe := range tb.UndoUndos {
-		tb.Undos = append(tb.Undos, utbe)
-	}
-	tb.UndoPos = len(tb.Undos)
-	// fmt.Printf("emacs undo save new pos: %v\n", tb.UndoPos)
-	tb.UndoUndos = nil
+	tb.Undos.UndoStackSave()
 }
 
 // Redo redoes next item on the undo stack, and returns that record, nil if no more
-func (tb *TextBuf) Redo() *TextBufEdit {
-	if tb.UndoPos >= len(tb.Undos) {
+func (tb *TextBuf) Redo() *textbuf.Edit {
+	tb.LinesMu.Lock()
+	tbe := tb.Undos.RedoNext()
+	if tbe == nil {
+		tb.LinesMu.Unlock()
 		return nil
 	}
-	tbe := tb.Undos[tb.UndoPos]
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+	// todo: iterate over multiple grouped redos here..
 	if tbe.Delete {
-		tb.DeleteText(tbe.Reg.Start, tbe.Reg.End, false, true)
+		tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+		tb.LinesMu.Unlock()
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
 	} else {
-		tb.InsertText(tbe.Reg.Start, tbe.ToBytes(), false, true)
+		tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+		tb.LinesMu.Unlock()
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe) // todo: ok under LinesMu?
 	}
-	tb.UndoPos++
 	return tbe
 }
 
@@ -2011,28 +1590,16 @@ func (tb *TextBuf) Redo() *TextBufEdit {
 // for any edits that have taken place since that time (using the Undo stack).
 // del determines what to do with positions within a deleted region -- either move
 // to start or end of the region, or return an error
-func (tb *TextBuf) AdjustPos(pos TextPos, t time.Time, del AdjustPosDel) TextPos {
-	for _, utbe := range tb.Undos {
-		pos = utbe.AdjustPosIfAfterTime(pos, t, del)
-		if pos == TextPosErr {
-			return pos
-		}
-	}
-	return pos
+func (tb *TextBuf) AdjustPos(pos textbuf.Pos, t time.Time, del textbuf.AdjustPosDel) textbuf.Pos {
+	return tb.Undos.AdjustPos(pos, t, del)
 }
 
 // AdjustReg adjusts given text region for any edits that
-// have taken place since time stamp on region (using the Undo stack)
-// If region was wholly within a deleted region, then TextRegionNil will be
+// have taken place since time stamp on region (using the Undo stack).
+// If region was wholly within a deleted region, then RegionNil will be
 // returned -- otherwise it is clipped appropriately as function of deletes.
-func (tb *TextBuf) AdjustReg(reg TextRegion) TextRegion {
-	for _, utbe := range tb.Undos {
-		reg = utbe.AdjustReg(reg)
-		if reg == TextRegionNil {
-			return reg
-		}
-	}
-	return reg
+func (tb *TextBuf) AdjustReg(reg textbuf.Region) textbuf.Region {
+	return tb.Undos.AdjustReg(reg)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2054,13 +1621,13 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 	tb.MarkupLinesLock(ln, ln)
 }
 
-// AddTagEdit adds a new custom tag for given line, using TextBufEdit for location
-func (tb *TextBuf) AddTagEdit(tbe *TextBufEdit, tag token.Tokens) {
+// AddTagEdit adds a new custom tag for given line, using textbuf.Edit for location
+func (tb *TextBuf) AddTagEdit(tbe *textbuf.Edit, tag token.Tokens) {
 	tb.AddTag(tbe.Reg.Start.Ln, tbe.Reg.Start.Ch, tbe.Reg.End.Ch, tag)
 }
 
 // TagAt returns tag at given text position, if one exists -- returns false if not
-func (tb *TextBuf) TagAt(pos TextPos) (reg lex.Lex, ok bool) {
+func (tb *TextBuf) TagAt(pos textbuf.Pos) (reg lex.Lex, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
@@ -2075,7 +1642,7 @@ func (tb *TextBuf) TagAt(pos TextPos) (reg lex.Lex, ok bool) {
 
 // RemoveTag removes tag (optionally only given tag if non-zero) at given position
 // if it exists -- returns tag
-func (tb *TextBuf) RemoveTag(pos TextPos, tag token.Tokens) (reg lex.Lex, ok bool) {
+func (tb *TextBuf) RemoveTag(pos textbuf.Pos, tag token.Tokens) (reg lex.Lex, ok bool) {
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
@@ -2147,7 +1714,7 @@ func (tb *TextBuf) LineIndent(ln int, tabSz int) (n int, ichr indent.Char) {
 // IndentLine indents line by given number of tab stops, using tabs or spaces,
 // for given tab size (if using spaces) -- either inserts or deletes to reach
 // target
-func (tb *TextBuf) IndentLine(ln, n int) *TextBufEdit {
+func (tb *TextBuf) IndentLine(ln, n int) *textbuf.Edit {
 	asv := tb.AutoSaveOff()
 	defer tb.AutoSaveRestore(asv)
 
@@ -2160,11 +1727,11 @@ func (tb *TextBuf) IndentLine(ln, n int) *TextBufEdit {
 	curli, _ := tb.LineIndent(ln, tabSz)
 	if n > curli {
 		// fmt.Printf("autoindent: ins %v\n", n)
-		return tb.InsertText(TextPos{Ln: ln}, indent.Bytes(ichr, n-curli, tabSz), true, true)
+		return tb.InsertText(textbuf.Pos{Ln: ln}, indent.Bytes(ichr, n-curli, tabSz), EditSignal)
 	} else if n < curli {
 		spos := indent.Len(ichr, n, tabSz)
 		cpos := indent.Len(ichr, curli, tabSz)
-		tb.DeleteText(TextPos{Ln: ln, Ch: spos}, TextPos{Ln: ln, Ch: cpos}, true, true)
+		tb.DeleteText(textbuf.Pos{Ln: ln, Ch: spos}, textbuf.Pos{Ln: ln, Ch: cpos}, EditSignal)
 		// fmt.Printf("IndentLine deleted: %v at: %v\n", string(tbe.ToBytes()), tbe.Reg)
 	}
 	return nil
@@ -2201,7 +1768,7 @@ func (tb *TextBuf) PrevLineIndent(ln int) (n int, ichr indent.Char, txt string) 
 // unindent but this will do for now.  Returns any edit that took place (could
 // be nil), along with the auto-indented level and character position for the
 // indent of the current line.
-func (tb *TextBuf) AutoIndent(ln int, indents, unindents []string) (tbe *TextBufEdit, indLev, chPos int) {
+func (tb *TextBuf) AutoIndent(ln int, indents, unindents []string) (tbe *textbuf.Edit, indLev, chPos int) {
 	tabSz := tb.Opts.TabSize
 	ichr := tb.Opts.IndentChar()
 
@@ -2265,7 +1832,7 @@ func (tb *TextBuf) CommentStart(ln int) int {
 }
 
 // InComment returns true if the given text position is within a commented region
-func (tb *TextBuf) InComment(pos TextPos) bool {
+func (tb *TextBuf) InComment(pos textbuf.Pos) bool {
 	cs := tb.CommentStart(pos.Ln)
 	if cs < 0 {
 		return false
@@ -2320,20 +1887,20 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 
 	for ln := st; ln < eln; ln++ {
 		if doCom {
-			tb.InsertText(TextPos{Ln: ln, Ch: ch}, []byte(comst), true, true)
+			tb.InsertText(textbuf.Pos{Ln: ln, Ch: ch}, []byte(comst), EditSignal)
 			if comed != "" {
 				lln := len(tb.Lines[ln])
-				tb.InsertText(TextPos{Ln: ln, Ch: lln}, []byte(comed), true, true)
+				tb.InsertText(textbuf.Pos{Ln: ln, Ch: lln}, []byte(comed), EditSignal)
 			}
 		} else {
 			idx := tb.CommentStart(ln)
 			if idx >= 0 {
-				tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + len(comst)}, true, true)
+				tb.DeleteText(textbuf.Pos{Ln: ln, Ch: idx}, textbuf.Pos{Ln: ln, Ch: idx + len(comst)}, EditSignal)
 			}
 			if comed != "" {
 				idx := runes.IndexFold(tb.Line(ln), []rune(comed))
 				if idx >= 0 {
-					tb.DeleteText(TextPos{Ln: ln, Ch: idx}, TextPos{Ln: ln, Ch: idx + len(comed)}, true, true)
+					tb.DeleteText(textbuf.Pos{Ln: ln, Ch: idx}, textbuf.Pos{Ln: ln, Ch: idx + len(comed)}, EditSignal)
 				}
 			}
 		}
@@ -2387,25 +1954,25 @@ func (tb *TextBuf) CompleteText(s string) {
 	}
 	// give the completer a chance to edit the completion before insert,
 	// also it return a number of runes past the cursor to delete
-	st := TextPos{tb.Complete.SrcLn, 0}
-	en := TextPos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
+	st := textbuf.Pos{tb.Complete.SrcLn, 0}
+	en := textbuf.Pos{tb.Complete.SrcLn, tb.LineLen(tb.Complete.SrcLn)}
 	var tbes string
 	tbe := tb.Region(st, en)
 	if tbe != nil {
 		tbes = string(tbe.ToBytes())
 	}
 	c := tb.Complete.GetCompletion(s)
-	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := textbuf.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	ed := tb.Complete.EditFunc(tb.Complete.Context, tbes, tb.Complete.SrcCh, c, tb.Complete.Seed)
 	if ed.ForwardDelete > 0 {
-		delEn := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
-		tb.DeleteText(pos, delEn, true, false)
+		delEn := textbuf.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh + ed.ForwardDelete}
+		tb.DeleteText(pos, delEn, EditNoSignal)
 	}
 	// now the normal completion insertion
 	st = pos
 	st.Ch -= len(tb.Complete.Seed)
-	tb.DeleteText(st, pos, true, false)
-	tb.InsertText(st, []byte(ed.NewText), true, true)
+	tb.DeleteText(st, pos, EditNoSignal)
+	tb.InsertText(st, []byte(ed.NewText), EditSignal)
 	if tb.CurView != nil {
 		ep := st
 		ep.Ch += len(ed.NewText) + ed.CursorAdjust
@@ -2419,11 +1986,11 @@ func (tb *TextBuf) CompleteExtend(s string) {
 	if s == "" {
 		return
 	}
-	pos := TextPos{tb.Complete.SrcLn, tb.Complete.SrcCh}
+	pos := textbuf.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	st := pos
 	st.Ch -= len(tb.Complete.Seed)
-	tb.DeleteText(st, pos, true, false)
-	tb.InsertText(st, []byte(s), true, true)
+	tb.DeleteText(st, pos, EditNoSignal)
+	tb.InsertText(st, []byte(s), EditSignal)
 	if tb.CurView != nil {
 		ep := st
 		ep.Ch += len(s)
@@ -2435,7 +2002,7 @@ func (tb *TextBuf) CompleteExtend(s string) {
 // IsSpellCorrectEnabled returns true if spelling correction is enabled,
 // taking into account given position in text if it is relevant for cases
 // where it is only conditionally enabled
-func (tb *TextBuf) IsSpellCorrectEnabled(pos TextPos) bool {
+func (tb *TextBuf) IsSpellCorrectEnabled(pos textbuf.Pos) bool {
 	if tb.SpellCorrect == nil || !tb.Opts.SpellCorrect {
 		return false
 	}
@@ -2485,13 +2052,13 @@ func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
 
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *TextBuf) CorrectText(s string) {
-	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
+	st := textbuf.Pos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Ch += len(tb.SpellCorrect.Word)
 	ed := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)
-	tb.DeleteText(st, oend, true, true)
-	tb.InsertText(st, []byte(ed.NewText), true, true)
+	tb.DeleteText(st, oend, EditSignal)
+	tb.InsertText(st, []byte(ed.NewText), EditSignal)
 	if tb.CurView != nil {
 		ep := st
 		ep.Ch += len(ed.NewText)
@@ -2501,92 +2068,36 @@ func (tb *TextBuf) CorrectText(s string) {
 }
 
 func (tb *TextBuf) CorrectClear(s string) {
-	st := TextPos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
+	st := textbuf.Pos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 }
-
-////////////////////////////////////////////////////////////////////////////
-//   Diffs
-
-// TextDiffs are raw differences between text, in terms of lines, reporting a
-// sequence of operations that would convert one buffer (a) into the other
-// buffer (b).  Each operation is either an 'r' (replace), 'd' (delete), 'i'
-// (insert) or 'e' (equal).
-type TextDiffs []difflib.OpCode
 
 // DiffBufs computes the diff between this buffer and the other buffer,
 // reporting a sequence of operations that would convert this buffer (a) into
 // the other buffer (b).  Each operation is either an 'r' (replace), 'd'
 // (delete), 'i' (insert) or 'e' (equal).  Everything is line-based (0, offset).
-func (tb *TextBuf) DiffBufs(ob *TextBuf) TextDiffs {
-	tb.LinesMu.RLock()
-	ob.LinesMu.RLock()
-	defer tb.LinesMu.RUnlock()
-	defer ob.LinesMu.RUnlock()
-	if tb.NLines == 0 || ob.NLines == 0 {
-		return nil
-	}
-	astr := make([]string, tb.NLines)
-	bstr := make([]string, ob.NLines)
-
-	for ai, al := range tb.Lines {
-		astr[ai] = string(al)
-	}
-	for bi, bl := range ob.Lines {
-		bstr[bi] = string(bl)
-	}
-
-	m := difflib.NewMatcherWithJunk(astr, bstr, false, nil) // no junk
-	return m.GetOpCodes()
+func (tb *TextBuf) DiffBufs(ob *TextBuf) textbuf.Diffs {
+	astr := tb.Strings(false)
+	bstr := ob.Strings(false)
+	return textbuf.DiffLines(astr, bstr)
 }
 
 // DiffBufsUnified computes the diff between this buffer and the other buffer,
 // returning a unified diff with given amount of context (default of 3 will be
 // used if -1)
 func (tb *TextBuf) DiffBufsUnified(ob *TextBuf, context int) []byte {
-	tb.LinesMu.RLock()
-	ob.LinesMu.RLock()
-	defer tb.LinesMu.RUnlock()
-	defer ob.LinesMu.RUnlock()
-	if tb.NLines == 0 || ob.NLines == 0 {
-		return nil
-	}
-	astr := make([]string, tb.NLines)
-	bstr := make([]string, ob.NLines)
+	astr := tb.Strings(true) // needs newlines for some reason
+	bstr := ob.Strings(true)
 
-	for ai, al := range tb.Lines {
-		astr[ai] = string(al) + "\n"
-	}
-	for bi, bl := range ob.Lines {
-		bstr[bi] = string(bl) + "\n"
-	}
-
-	ud := difflib.UnifiedDiff{A: astr, FromFile: string(tb.Filename), FromDate: tb.Info.ModTime.String(),
-		B: bstr, ToFile: string(ob.Filename), ToDate: ob.Info.ModTime.String(), Context: context}
-	var buf bytes.Buffer
-	difflib.WriteUnifiedDiff(&buf, ud)
-	return buf.Bytes()
-}
-
-// PrintDiffs prints out the diffs
-func PrintDiffs(diffs TextDiffs) {
-	for _, df := range diffs {
-		switch df.Tag {
-		case 'r':
-			fmt.Printf("delete lines: %v - %v, insert lines: %v - %v\n", df.I1, df.I2, df.J1, df.J2)
-		case 'd':
-			fmt.Printf("delete lines: %v - %v\n", df.I1, df.I2)
-		case 'i':
-			fmt.Printf("insert lines at %v: %v - %v\n", df.I1, df.J1, df.J2)
-		}
-	}
+	return textbuf.DiffLinesUnified(astr, bstr, context, string(tb.Filename), tb.Info.ModTime.String(),
+		string(ob.Filename), ob.Info.ModTime.String())
 }
 
 // PatchFromBuf patches (edits) this buffer using content from other buffer,
 // according to diff operations (e.g., as generated from DiffBufs).  signal
 // determines whether each patch is signaled -- if an overall signal will be
 // sent at the end, then that would not be necessary (typical)
-func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool {
+func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs textbuf.Diffs, signal bool) bool {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
@@ -2596,19 +2107,19 @@ func (tb *TextBuf) PatchFromBuf(ob *TextBuf, diffs TextDiffs, signal bool) bool 
 		df := diffs[i]
 		switch df.Tag {
 		case 'r':
-			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, true, signal)
+			tb.DeleteText(textbuf.Pos{Ln: df.I1}, textbuf.Pos{Ln: df.I2}, signal)
 			// fmt.Printf("patch rep del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
-			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
-			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), true, signal)
+			ot := ob.Region(textbuf.Pos{Ln: df.J1}, textbuf.Pos{Ln: df.J2})
+			tb.InsertText(textbuf.Pos{Ln: df.I1}, ot.ToBytes(), signal)
 			// fmt.Printf("patch rep ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'd':
-			tb.DeleteText(TextPos{Ln: df.I1}, TextPos{Ln: df.I2}, true, signal)
+			tb.DeleteText(textbuf.Pos{Ln: df.I1}, textbuf.Pos{Ln: df.I2}, signal)
 			// fmt.Printf("patch del: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		case 'i':
-			ot := ob.Region(TextPos{Ln: df.J1}, TextPos{Ln: df.J2})
-			tb.InsertText(TextPos{Ln: df.I1}, ot.ToBytes(), true, signal)
+			ot := ob.Region(textbuf.Pos{Ln: df.J1}, textbuf.Pos{Ln: df.J2})
+			tb.InsertText(textbuf.Pos{Ln: df.I1}, ot.ToBytes(), signal)
 			// fmt.Printf("patch ins: %v %v\n", tbe.Reg, string(tbe.ToBytes()))
 			mods = true
 		}

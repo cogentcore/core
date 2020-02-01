@@ -5,12 +5,9 @@
 package giv
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"image/color"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -31,7 +28,6 @@ import (
 	"github.com/goki/gi/vci"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/ki/runes"
 	"github.com/goki/pi/filecat"
 )
 
@@ -779,65 +775,6 @@ func (fn *FileNode) RevertVcs() (err error) {
 		fn.FRoot.UpdateSig()
 	}
 	return err
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  Search
-
-// FileSearch looks for a string (no regexp) within a file, in a
-// case-sensitive way, returning number of occurrences and specific match
-// position list -- column positions are in bytes, not runes.
-func FileSearch(filename string, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
-	fp, err := os.Open(filename)
-	if err != nil {
-		log.Printf("gide.FileSearch file open error: %v\n", err)
-		return 0, nil
-	}
-	defer fp.Close()
-	return ByteBufSearch(fp, find, ignoreCase)
-}
-
-// ByteBufSearch looks for a string (no regexp) within a byte buffer, with
-// given case-sensitivity, returning number of occurrences and specific match
-// position list -- column positions are in runes
-func ByteBufSearch(reader io.Reader, find []byte, ignoreCase bool) (int, []FileSearchMatch) {
-	fsz := len(find)
-	if fsz == 0 {
-		return 0, nil
-	}
-	fr := bytes.Runes(find)
-	cnt := 0
-	var matches []FileSearchMatch
-	scan := bufio.NewScanner(reader)
-	ln := 0
-	for scan.Scan() {
-		rn := bytes.Runes(scan.Bytes()) // note: temp -- must copy -- convert to runes anyway
-		sz := len(rn)
-		ci := 0
-		for ci < sz {
-			var i int
-			if ignoreCase {
-				i = runes.IndexFold(rn[ci:], fr)
-			} else {
-				i = runes.Index(rn[ci:], fr)
-			}
-			if i < 0 {
-				break
-			}
-			i += ci
-			ci = i + fsz
-			mat := NewFileSearchMatch(rn, i, ci, ln)
-			matches = append(matches, mat)
-			cnt++
-		}
-		ln++
-	}
-	if err := scan.Err(); err != nil {
-		// note: we expect: bufio.Scanner: token too long  when reading binary files
-		// not worth printing here.  otherwise is very reliable.
-		// log.Printf("giv.FileSearch error: %v\n", err)
-	}
-	return cnt, matches
 }
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
