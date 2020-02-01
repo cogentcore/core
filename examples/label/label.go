@@ -47,7 +47,7 @@ func mainrun() {
 	hdrText := `This is a <b>test</b> of the
 	 <span style="color:red">various</span> <i>GoGi</i> Text elements<br>
 	 <large>Shortcuts: <kbd>Ctrl+Alt+P</kbd> = Preferences,
-	 <kbd>Ctrl+Alt+E</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
+	 <kbd>Ctrl+Shift+I</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 	 Other styles: <u>underlining</u> and <abbr>abbr dotted uline</abbr> and <strike>strikethrough</strike><br>
 	 <q>and</q> <mark>marked text</mark> and <span style="text-decoration:overline">overline</span>
 	 and Sub<sub>script</sub> and Super<sup>script</sup>`
