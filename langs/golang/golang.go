@@ -63,9 +63,9 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	// pprf := prof.Start("ParseAll")
 	pr.ParseAll(pfs)
 	// pprf.End()
-	fss.EndProc()                       // only symbols still need locking, done separately
+	fss.EndProc() // only symbols still need locking, done separately
+	path, _ := filepath.Split(pfs.Src.Filename)
 	if len(pfs.ParseState.Scopes) > 0 { // should be for complete files, not for snippets
-		path, _ := filepath.Split(pfs.Src.Filename)
 		pkg := pfs.ParseState.Scopes[0]
 		pfs.Syms[pkg.Name] = pkg // keep around..
 		// fmt.Printf("main pkg name: %v\n", pkg.Name)
@@ -73,6 +73,8 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		pfs.WaitGp.Add(1)
 		go gl.AddPathToSyms(pfs, path)
 		go gl.AddImportsToExts(fss, pfs, pkg) // will do ResolveTypes when it finishes
+	} else {
+		fmt.Printf("not importing scope for: %v\n", path)
 	}
 }
 
@@ -431,7 +433,7 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	fs.SymsMu.Lock()
 	psy, has := fs.Syms[pkg.Name]
 	if has {
-		// fmt.Printf("importing pkg types: %v\n", pkg.Name)
+		// fmt.Printf("AddPkgToSyms: importing pkg types: %v\n", pkg.Name)
 		psy.Children.CopyFrom(pkg.Children)
 		psy.Types.CopyFrom(pkg.Types)
 	} else {

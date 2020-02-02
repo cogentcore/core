@@ -18,6 +18,10 @@ import (
 // TypeErr indicates is the type name we use to indicate that the type could not be inferred
 var TypeErr = "<err>"
 
+// TypeInProcess indicates is the type name we use to indicate that the type
+// is currently being processed -- prevents loops
+var TypeInProcess = "<in-process>"
+
 // InferSymbolType infers the symbol types for given symbol and all of its children
 // funInternal determines whether to include function-internal symbols
 // (e.g., variables within function scope -- only for local files).
@@ -173,7 +177,15 @@ func (gl *GoLang) InferEmptySymbolType(sym *syms.Symbol, fs *pi.FileState, pkg *
 		// if TraceTypes {
 		// 	fmt.Printf("TExpr: trying to infer type\n")
 		// }
+		sym.Type = TypeInProcess
 		gl.InferSymbolType(sym, fs, pkg, true)
+	}
+	if sym.Type == TypeInProcess {
+		if TraceTypes {
+			fmt.Printf("TExpr: source symbol is in process -- we have a loop: %v  kind: %v\n", sym.Name, sym.Kind)
+		}
+		sym.Type = TypeErr
+		return false
 	}
 	if sym.Type == TypeErr {
 		if TraceTypes {

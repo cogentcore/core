@@ -126,7 +126,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		case "CompositeLit":
 			sty, _ = gl.SubTypeFromAst(fs, pkg, ch, 0)
 		case "Selector":
-			sty, _ = gl.SubTypeFromAst(fs, pkg, ch, 0)
+			sty, _ = gl.TypeFromAst(fs, pkg, nil, ch)
 		case "Name":
 			sym, got := fs.FindNameScoped(snm, conts)
 			if got {
