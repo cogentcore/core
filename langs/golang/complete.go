@@ -87,6 +87,9 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 	origStr := str
 	str = TargetString(str)
 	fs := fss.Done()
+	if len(fs.ParseState.Scopes) == 0 {
+		return // need a package
+	}
 
 	fs.SymsMu.RLock()
 	defer fs.SymsMu.RUnlock()
@@ -187,6 +190,9 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 	str = TargetString(str)
 
 	fs := fss.Done()
+	if len(fs.ParseState.Scopes) == 0 {
+		return // need a package
+	}
 
 	fs.SymsMu.RLock()
 	defer fs.SymsMu.RUnlock()

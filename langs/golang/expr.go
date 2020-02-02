@@ -143,8 +143,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		if sty != nil {
 			ty := &syms.Type{}
 			ty.Kind = syms.Ptr
-			ty.Name = "*" + sty.Name
-			ty.Els.Add("ptr", sty.Name)
+			tynm := SymTypeNameForPkg(sty, pkg)
+			ty.Name = "*" + tynm
+			ty.Els.Add("ptr", tynm)
 			return ty, nil, true
 		}
 		if TraceTypes {
