@@ -4,7 +4,9 @@
 
 package textbuf
 
-import "github.com/goki/ki/ints"
+import (
+	"github.com/goki/ki/ints"
+)
 
 // BracePair returns the matching brace-like punctuation for given rune,
 // which must be a left or right brace {}, bracket [] or paren ().
@@ -47,13 +49,11 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 	ch := st.Ch
 	ln := st.Ln
 	nln := len(src)
-	max := nln - ln
-	if maxLns < nln {
-		max = ln + maxLns
-	}
+	max := ints.MinInt(nln-ln, maxLns)
+	min := ints.MinInt(ln, maxLns)
 	txt := src[ln]
 	if left > right {
-		for l := ln; l < max; l++ {
+		for l := ln + 1; l < ln+max; l++ {
 			for i := ch + 1; i < len(txt); i++ {
 				if txt[i] == r {
 					left++
@@ -62,7 +62,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 				if txt[i] == match {
 					right++
 					if left == right {
-						en.Ln = l
+						en.Ln = l - 1
 						en.Ch = i
 						break
 					}
@@ -76,7 +76,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 			ch = -1
 		}
 	} else {
-		for l := ln; l >= 0; l-- {
+		for l := ln - 1; l >= ln-min; l-- {
 			ch = ints.MinInt(ch, len(txt))
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
@@ -86,7 +86,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 				if txt[i] == match {
 					left++
 					if left == right {
-						en.Ln = l
+						en.Ln = l + 1
 						en.Ch = i
 						break
 					}
