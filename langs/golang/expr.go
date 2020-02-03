@@ -163,6 +163,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 	case tnm == "MakeCall":
 		sty, got := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		return sty, nil, got
+	case strings.Contains(tnm, "Chan"):
+		sty, got := gl.SubTypeFromAst(fs, pkg, tyast, 0)
+		return sty, nil, got
 	default:
 		if TraceTypes {
 			fmt.Printf("TExpr: cannot start with: %v\n", tyast.Nm)

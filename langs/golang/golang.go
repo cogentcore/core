@@ -273,6 +273,9 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 			} else {
 				pkgsym.Children.CopyFrom(pkg.Children)
 				pkgsym.Types.CopyFrom(pkg.Types)
+				if TraceTypes {
+					pkgsym.Types.PrintUnknowns()
+				}
 			}
 			// } else {
 			// 	fmt.Printf("\tno parse state scopes!\n")
@@ -436,6 +439,9 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 		// fmt.Printf("AddPkgToSyms: importing pkg types: %v\n", pkg.Name)
 		psy.Children.CopyFrom(pkg.Children)
 		psy.Types.CopyFrom(pkg.Types)
+		if TraceTypes {
+			psy.Types.PrintUnknowns()
+		}
 	} else {
 		fs.Syms[pkg.Name] = pkg
 	}

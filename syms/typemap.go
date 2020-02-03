@@ -5,6 +5,7 @@
 package syms
 
 import (
+	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -26,16 +27,28 @@ func (tm *TypeMap) Add(ty *Type) {
 	(*tm)[ty.Name] = ty
 }
 
-// CopyFrom copies all the types from given source map into this one
+// CopyFrom copies all the types from given source map into this one.
+// Types that have Kind != Unknown are retained over unknown ones.
 func (tm *TypeMap) CopyFrom(src TypeMap) {
 	tm.Alloc()
 	for nm, sty := range src {
-		_, has := (*tm)[nm]
+		ety, has := (*tm)[nm]
 		if !has {
 			(*tm)[nm] = sty
 			continue
 		}
-		// todo: any merging?
+		if ety.Kind != Unknown {
+			// if len(sty.Els) > 0 && len(sty.Els) != len(ety.Els) {
+			// 	fmt.Printf("TypeMap dupe type: %v existing kind: %v els: %v new els: %v  kind: %v\n", nm, ety.Kind, len(ety.Els), len(sty.Els), sty.Kind)
+			// }
+		} else if sty.Kind != Unknown {
+			// if len(ety.Els) > 0 && len(sty.Els) != len(ety.Els) {
+			// 	fmt.Printf("TypeMap dupe type: %v new kind: %v els: %v existing els: %v\n", nm, sty.Kind, len(sty.Els), len(ety.Els))
+			// }
+			(*tm)[nm] = sty
+			// } else {
+			// 	fmt.Printf("TypeMap dupe type: %v both unknown: existing els: %v new els: %v\n", nm, len(ety.Els), len(sty.Els))
+		}
 	}
 }
 
@@ -79,6 +92,17 @@ func (tm *TypeMap) KindNames(sorted bool) []string {
 		sort.StringSlice(nms).Sort()
 	}
 	return nms
+}
+
+// PrintUnknowns prints all the types that have a Kind = Unknown
+// indicates an error in type resolution
+func (tm *TypeMap) PrintUnknowns() {
+	for _, ty := range *tm {
+		if ty.Kind != Unknown {
+			continue
+		}
+		fmt.Printf("Type named: %v has Kind = Unknown!  From file: %v:%v\n", ty.Name, ty.Filename, ty.Region)
+	}
 }
 
 // WriteDoc writes basic doc info, sorted by kind and name

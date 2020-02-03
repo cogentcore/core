@@ -53,7 +53,8 @@ func (sm *SymMap) Reset() {
 }
 
 // CopyFrom copies all the symbols from given source map into this one,
-// including merging everything from common elements
+// including merging everything from common elements.
+// Symbols with Type resolved are retained when there are duplicates.
 func (sm *SymMap) CopyFrom(src SymMap) {
 	sm.Alloc()
 	for nm, ssy := range src {
@@ -62,10 +63,15 @@ func (sm *SymMap) CopyFrom(src SymMap) {
 			(*sm)[nm] = ssy
 			continue
 		}
-		if dsy.IsTemp() {
+		if dsy.Type != "" {
+			// fmt.Printf("dupe sym: %v, using existing with type: %v\n", nm, dsy.Type)
+			dsy.Children.CopyFrom(ssy.Children)
+		} else if ssy.Type != "" {
+			// fmt.Printf("dupe sym: %v, using new with type: %v\n", nm, ssy.Type)
 			ssy.Children.CopyFrom(dsy.Children)
 			(*sm)[nm] = ssy
 		} else {
+			// fmt.Printf("dupe sym: %v neither has type\n", nm)
 			dsy.Children.CopyFrom(ssy.Children)
 		}
 	}

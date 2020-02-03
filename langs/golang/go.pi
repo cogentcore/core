@@ -3616,7 +3616,7 @@
             "Props": null,
             "Kids": null,
             "Off": false,
-            "Desc": "this allows direct parsing of anything -- for one-line parsing",
+            "Desc": "this allows direct parsing of anything, for one-line parsing",
             "Rule": "Stmt 'EOS'",
             "StackMatch": "",
             "Ast": "NoAst",

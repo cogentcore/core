@@ -45,10 +45,22 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 					fldel := stty.Els.ByName(sy.Name)
 					if fldel != nil {
 						sy.Type = fldel.Type
+					} else {
+						if TraceTypes {
+							fmt.Printf("InferSymbolType: field named: %v not found in struct type: %v\n", sy.Name, stty.Name)
+						}
+					}
+				} else {
+					if TraceTypes {
+						fmt.Printf("InferSymbolType: field named: %v struct type: %v not found\n", sy.Name, stsc)
 					}
 				}
 				if sy.Type == "" {
 					sy.Type = stsc + "." + sy.Name
+				}
+			} else {
+				if TraceTypes {
+					fmt.Printf("InferSymbolType: field named: %v doesn't have NameStruct scope\n", sy.Name)
 				}
 			}
 		case sy.Kind == token.NameVarClass: // method receiver
