@@ -408,7 +408,7 @@ func (vp *Viewport2D) DeletePopup() {
 			}
 		}
 	}
-	vp.Destroy() // nuke everything else in us
+	vp.This().Destroy() // nuke everything else in us
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -284,7 +284,11 @@ func (sv *SliceViewBase) ScrollBar() *gi.ScrollBar {
 
 // ToolBar returns the toolbar widget
 func (sv *SliceViewBase) ToolBar() *gi.ToolBar {
-	return sv.ChildByName("toolbar", 1).(*gi.ToolBar)
+	tbi := sv.ChildByName("toolbar", 1)
+	if tbi == nil {
+		return nil
+	}
+	return tbi.(*gi.ToolBar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label

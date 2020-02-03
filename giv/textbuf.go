@@ -19,6 +19,7 @@ import (
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/spell"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -54,31 +55,33 @@ var TextBufDiffRevertDiffs = 20
 // Windows/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
-	Txt          []byte           `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
-	Autosave     bool             `desc:"if true, auto-save file after changes (in a separate routine)"`
-	Opts         textbuf.Opts     `desc:"options for how text editing / viewing works"`
-	Filename     gi.FileName      `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
-	Info         FileInfo         `desc:"full info about file"`
-	PiState      pi.FileStates    `desc:"Pi parsing state info for file"`
-	Hi           HiMarkup         `desc:"syntax highlighting markup parameters (language, style, etc)"`
-	NLines       int              `json:"-" xml:"-" desc:"number of lines"`
-	Lines        [][]rune         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
-	LineBytes    [][]byte         `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
-	Tags         []lex.Line       `json:"extra custom tagged regions for each line"`
-	HiTags       []lex.Line       `json:"syntax highlighting tags -- auto-generated"`
-	Markup       [][]byte         `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
-	MarkupEdits  []*textbuf.Edit  `json:"-" xml:"-" desc:"edits that have been made since last full markup"`
-	ByteOffs     []int            `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
-	TotalBytes   int              `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
-	LinesMu      sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating lines"`
-	MarkupMu     sync.RWMutex     `json:"-" xml:"-" desc:"mutex for updating markup"`
-	TextBufSig   ki.Signal        `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
-	Views        []*TextView      `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
-	Undos        textbuf.Undo     `json:"-" xml:"-" desc:"undo manager"`
-	PosHistory   []textbuf.Pos    `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
-	Complete     *gi.Complete     `json:"-" xml:"-" desc:"functions and data for text completion"`
-	SpellCorrect *gi.SpellCorrect `json:"-" xml:"-" desc:"functions and data for spelling correction"`
-	CurView      *TextView        `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
+	Txt          []byte              `json:"-" xml:"text" desc:"the current value of the entire text being edited -- using []byte slice for greater efficiency"`
+	Autosave     bool                `desc:"if true, auto-save file after changes (in a separate routine)"`
+	Opts         textbuf.Opts        `desc:"options for how text editing / viewing works"`
+	Filename     gi.FileName         `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
+	Info         FileInfo            `desc:"full info about file"`
+	PiState      pi.FileStates       `desc:"Pi parsing state info for file"`
+	Hi           HiMarkup            `desc:"syntax highlighting markup parameters (language, style, etc)"`
+	NLines       int                 `json:"-" xml:"-" desc:"number of lines"`
+	LineIcons    map[int]string      `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
+	Icons        map[string]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
+	Lines        [][]rune            `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
+	LineBytes    [][]byte            `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
+	Tags         []lex.Line          `json:"extra custom tagged regions for each line"`
+	HiTags       []lex.Line          `json:"syntax highlighting tags -- auto-generated"`
+	Markup       [][]byte            `json:"-" xml:"-" desc:"marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered"`
+	MarkupEdits  []*textbuf.Edit     `json:"-" xml:"-" desc:"edits that have been made since last full markup"`
+	ByteOffs     []int               `json:"-" xml:"-" desc:"offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines"`
+	TotalBytes   int                 `json:"-" xml:"-" desc:"total bytes in document -- see ByteOffs for when it is updated"`
+	LinesMu      sync.RWMutex        `json:"-" xml:"-" desc:"mutex for updating lines"`
+	MarkupMu     sync.RWMutex        `json:"-" xml:"-" desc:"mutex for updating markup"`
+	TextBufSig   ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
+	Views        []*TextView         `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
+	Undos        textbuf.Undo        `json:"-" xml:"-" desc:"undo manager"`
+	PosHistory   []textbuf.Pos       `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
+	Complete     *gi.Complete        `json:"-" xml:"-" desc:"functions and data for text completion"`
+	SpellCorrect *gi.SpellCorrect    `json:"-" xml:"-" desc:"functions and data for spelling correction"`
+	CurView      *TextView           `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
 var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
@@ -1672,6 +1675,39 @@ func (tb *TextBuf) RemoveTag(pos textbuf.Pos, tag token.Tokens) (reg lex.Lex, ok
 		tb.MarkupLinesLock(pos.Ln, pos.Ln)
 	}
 	return
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//   LineIcons
+
+// SetLineIcon sets given icon at given line (0 starting)
+func (tb *TextBuf) SetLineIcon(ln int, icon string) {
+	tb.LinesMu.Lock()
+	defer tb.LinesMu.Unlock()
+	if tb.LineIcons == nil {
+		tb.LineIcons = make(map[int]string)
+		tb.Icons = make(map[string]*gi.Icon)
+	}
+	tb.LineIcons[ln] = icon
+	ic, has := tb.Icons[icon]
+	if !has {
+		ic = &gi.Icon{}
+		ic.InitName(ic, icon)
+		ic.SetIcon(icon)
+		ic.SetProp("width", units.NewEm(1))
+		ic.SetProp("height", units.NewEm(1))
+		tb.Icons[icon] = ic
+	}
+}
+
+// DeleteLineIcon deletes any icon at given line (0 starting)
+func (tb *TextBuf) DeleteLineIcon(ln int) {
+	tb.LinesMu.Lock()
+	defer tb.LinesMu.Unlock()
+	if tb.LineIcons == nil {
+		return
+	}
+	delete(tb.LineIcons, ln)
 }
 
 /////////////////////////////////////////////////////////////////////////////

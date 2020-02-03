@@ -57,7 +57,11 @@ func (sv *SceneView) Scene() *Scene {
 }
 
 func (sv *SceneView) Toolbar() *gi.ToolBar {
-	return sv.ChildByName("tbar", 1).(*gi.ToolBar)
+	tbi := sv.ChildByName("tbar", 1)
+	if tbi == nil {
+		return nil
+	}
+	return tbi.(*gi.ToolBar)
 }
 
 func (sv *SceneView) ToolbarConfig() {

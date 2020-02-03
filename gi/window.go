@@ -1451,7 +1451,7 @@ func (w *Window) EventLoop() {
 		WinWait.Done()
 	}
 	// our last act must be self destruction!
-	w.Destroy()
+	w.This().Destroy()
 }
 
 // ProcessEvent processes given oswin.Event

@@ -1004,7 +1004,7 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 	}
 	sc := ly.Scrolls[d]
 	sc.DisconnectAllEvents(AllPris)
-	sc.Destroy()
+	sc.This().Destroy()
 	ly.Scrolls[d] = nil
 }
 

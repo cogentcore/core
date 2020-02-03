@@ -44,7 +44,6 @@ type TextView struct {
 	Buf            *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
 	Placeholder    string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 	CursorWidth    units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	LineIcons      map[int]gi.IconName       `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
 	NLines         int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
 	Renders        []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 	Offs           []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
@@ -3433,9 +3432,19 @@ func (tv *TextView) RenderLineNo(ln int) {
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(tv.VpBBox.Min.X) + spc
 	tv.LineNoRender.Render(rs, pos)
-	// if ic, ok := tv.LineIcons[ln]; ok {
-	// 	// todo: render icon!
-	// }
+	if icnm, ok := tv.Buf.LineIcons[ln]; ok {
+		ic := tv.Buf.Icons[icnm]
+		ic.Par = tv
+		ic.Viewport = tv.Viewport
+		// pos.X += 20 // todo
+		sic := ic.SVGIcon()
+		sic.Resize(image.Point{20, 20})
+		sic.FullRender2DTree()
+		pps := pos.ToPointFloor()
+		max := pps.Add(sic.Geom.Size)
+		r := image.Rectangle{Min: pps, Max: max}
+		draw.Draw(tv.Viewport.Pixels, r, sic.Pixels, image.ZP, draw.Over)
+	}
 }
 
 // RenderScrolls renders scrollbars if needed

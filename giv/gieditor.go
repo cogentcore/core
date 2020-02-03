@@ -156,7 +156,7 @@ func (ge *GiEditor) ToolBar() *gi.ToolBar {
 // ConfigToolbar adds a GiEditor toolbar.
 func (ge *GiEditor) ConfigToolbar() {
 	tb := ge.ToolBar()
-	if tb.HasChildren() {
+	if tb != nil && tb.HasChildren() {
 		return
 	}
 	tb.SetStretchMaxWidth()

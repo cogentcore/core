@@ -409,6 +409,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	}
 	nWidgPerRow, _ := tv.RowWidgetNs()
 	tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
+	tv.RowHeight = math32.Max(tv.RowHeight, tv.Sty.Font.Face.Metrics.Height)
 	tv.VisRows = int(math32.Floor(sgHt / tv.RowHeight))
 	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
 
