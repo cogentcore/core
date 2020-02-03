@@ -285,6 +285,24 @@ func (tv *TabView) SelectTabByNameTry(label string) (Node2D, error) {
 	return nil, err
 }
 
+// RecycleTab returns a tab with given name, first by looking for an existing one,
+// and if not found, making a new one with widget of given type.
+// If sel, then select it.  returns widget for tab.
+func (tv *TabView) RecycleTab(label string, typ reflect.Type, sel bool) Node2D {
+	widg, err := tv.TabByNameTry(label)
+	if err == nil {
+		if sel {
+			tv.SelectTabByName(label)
+		}
+		return widg
+	}
+	widg = tv.AddNewTab(typ, label)
+	if sel {
+		tv.SelectTabByName(label)
+	}
+	return widg
+}
+
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
 // tab contents -- returns widget if destroy == false, tab name, and bool success
 func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) {
