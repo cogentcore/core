@@ -65,7 +65,7 @@ var KiT_Node = kit.Types.AddType(&Node{}, Props{"EnumType:Flag": KiT_Flags})
 
 // String implements the fmt.stringer interface -- returns the PathUnique of the node
 func (n Node) String() string {
-	return n.PathUnique()
+	return n.This().PathUnique()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -771,7 +771,7 @@ func (n *Node) FindPathUnique(path string) Ki {
 // element, for cases when indexes are more useful than names.
 // Returns error if not found.
 func (n *Node) FindPathUniqueTry(path string) (Ki, error) {
-	fk := n.FindPathUnique(path)
+	fk := n.This().FindPathUnique(path)
 	if fk != nil {
 		return fk, nil
 	}
@@ -1187,7 +1187,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 func (n *Node) Delete(destroy bool) {
 	if n.Par == nil {
 		if destroy {
-			n.Destroy()
+			n.This().Destroy()
 		}
 	} else {
 		n.Par.DeleteChild(n.This(), destroy)
