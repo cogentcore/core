@@ -63,7 +63,8 @@ type TextBuf struct {
 	PiState      pi.FileStates       `desc:"Pi parsing state info for file"`
 	Hi           HiMarkup            `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines       int                 `json:"-" xml:"-" desc:"number of lines"`
-	LineIcons    map[int]string      `desc:"icons for each line -- use SetLineIcon and DeleteLineIcon"`
+	LineIcons    map[int]string      `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`
+	LineColors   map[int]gi.Color    `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
 	Icons        map[string]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
 	Lines        [][]rune            `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
 	LineBytes    [][]byte            `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
@@ -1678,7 +1679,7 @@ func (tb *TextBuf) RemoveTag(pos textbuf.Pos, tag token.Tokens) (reg lex.Lex, ok
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//   LineIcons
+//   LineIcons / Colors
 
 // SetLineIcon sets given icon at given line (0 starting)
 func (tb *TextBuf) SetLineIcon(ln int, icon string) {
@@ -1708,6 +1709,27 @@ func (tb *TextBuf) DeleteLineIcon(ln int) {
 		return
 	}
 	delete(tb.LineIcons, ln)
+}
+
+// SetLineColor sets given color (name or hex string) at given line (0 starting)
+func (tb *TextBuf) SetLineColor(ln int, color string) {
+	tb.LinesMu.Lock()
+	defer tb.LinesMu.Unlock()
+	if tb.LineColors == nil {
+		tb.LineColors = make(map[int]gi.Color)
+	}
+	clr, _ := gi.ColorFromString(color, nil)
+	tb.LineColors[ln] = clr
+}
+
+// DeleteLineColor deletes any color at given line (0 starting)
+func (tb *TextBuf) DeleteLineColor(ln int) {
+	tb.LinesMu.Lock()
+	defer tb.LinesMu.Unlock()
+	if tb.LineColors == nil {
+		return
+	}
+	delete(tb.LineColors, ln)
 }
 
 /////////////////////////////////////////////////////////////////////////////

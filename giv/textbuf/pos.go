@@ -69,8 +69,8 @@ func (tp *Pos) FromString(link string) bool {
 // the character just prior to that character) but the lines are always *inclusive*
 // (i.e., it is the actual line, not the next line).
 type Region struct {
-	Start Pos
-	End   Pos
+	Start Pos         `desc:"starting position"`
+	End   Pos         `desc:"ending position: line number is *inclusive* but character position is *exclusive* (-1)"`
 	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
@@ -85,6 +85,14 @@ func (tr *Region) IsNil() bool {
 // IsSameLine returns true if region starts and ends on the same line
 func (tr *Region) IsSameLine() bool {
 	return tr.Start.Ln == tr.End.Ln
+}
+
+// Contains returns true if line is within region
+func (tr *Region) Contains(ln int) bool {
+	if tr.Start.Ln >= ln && ln <= tr.End.Ln {
+		return true
+	}
+	return false
 }
 
 // TimeNow grabs the current time as the edit time

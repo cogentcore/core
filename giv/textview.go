@@ -715,8 +715,20 @@ func (tv *TextView) SetCursor(pos textbuf.Pos) {
 		tv.CursorPos = textbuf.PosZero
 		return
 	}
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
+	cpln := tv.CursorPos.Ln
 	tv.ClearScopelights()
 	tv.CursorPos = tv.Buf.ValidPos(pos)
+	if cpln != tv.CursorPos.Ln && tv.HasLineNos() { // update cursor position highlight
+		rs := &tv.Viewport.Render
+		rs.PushBounds(tv.VpBBox)
+		rs.Lock()
+		tv.RenderLineNo(cpln, true, true) // render bg, and do vpupload
+		tv.RenderLineNo(tv.CursorPos.Ln, true, true)
+		rs.Unlock()
+		tv.Viewport.Render.PopBounds()
+	}
 	tv.Buf.MarkupLine(tv.CursorPos.Ln)
 	tv.CursorMovedSig()
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
@@ -3347,9 +3359,8 @@ func (tv *TextView) RenderAllLinesInBounds() {
 
 	if tv.HasLineNos() {
 		tv.RenderLineNosBoxAll()
-
 		for ln := stln; ln <= edln; ln++ {
-			tv.RenderLineNo(ln)
+			tv.RenderLineNo(ln, false, false) // don't re-render std fill boxes, no separate vp upload
 		}
 	}
 
@@ -3413,24 +3424,57 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 }
 
 // RenderLineNo renders given line number -- called within context of other render
-func (tv *TextView) RenderLineNo(ln int) {
+// if defFill is true, it fills box color for default background color (use false for batch mode)
+// and if vpUpload is true it uploads the rendered region to viewport directly
+// (only if totally separate from other updates)
+func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	if !tv.HasLineNos() {
 		return
 	}
+
 	vp := tv.Viewport
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
 	fst := sty.Font
-	fst.BgColor.SetColor(nil)
 	rs := &vp.Render
+	pc := &rs.Paint
+
+	// render fillbox
+	sbox := tv.CharStartPos(textbuf.Pos{Ln: ln})
+	sbox.X = float32(tv.VpBBox.Min.X)
+	ebox := tv.CharEndPos(textbuf.Pos{Ln: ln + 1})
+	ebox.Y -= tv.LineHeight
+	ebox.X = sbox.X + tv.LineNoOff - spc
+	bsz := ebox.Sub(sbox)
+	lclr, hasLClr := tv.Buf.LineColors[ln]
+	if tv.CursorPos.Ln == ln {
+		if hasLClr { // split the diff!
+			bszhlf := bsz
+			bszhlf.X /= 2
+			pc.FillBoxColor(rs, sbox, bszhlf, lclr)
+			nsp := sbox
+			nsp.X += bszhlf.X
+			pc.FillBoxColor(rs, nsp, bszhlf, gi.Prefs.Colors.Highlight)
+		} else {
+			pc.FillBoxColor(rs, sbox, bsz, gi.Prefs.Colors.Highlight)
+		}
+	} else if hasLClr {
+		pc.FillBoxColor(rs, sbox, bsz, lclr)
+	} else if defFill {
+		bgclr := fst.BgColor.Color.Highlight(10)
+		pc.FillBoxColor(rs, sbox, bsz, bgclr)
+	}
+
+	fst.BgColor.SetColor(nil)
 	lfmt := fmt.Sprintf("%d", tv.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
-	pos := tv.RenderStartPos()
+	pos := mat32.Vec2{}
 	lst := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(tv.VpBBox.Min.X) + spc
+
 	tv.LineNoRender.Render(rs, pos)
 	if icnm, ok := tv.Buf.LineIcons[ln]; ok {
 		ic := tv.Buf.Icons[icnm]
@@ -3440,10 +3484,20 @@ func (tv *TextView) RenderLineNo(ln int) {
 		sic := ic.SVGIcon()
 		sic.Resize(image.Point{20, 20})
 		sic.FullRender2DTree()
-		pps := pos.ToPointFloor()
-		max := pps.Add(sic.Geom.Size)
-		r := image.Rectangle{Min: pps, Max: max}
+		ist := sbox.ToPointFloor()
+		ied := ebox.ToPointFloor()
+		ied.X += int(spc)
+		ist.X = ied.X - 20
+		r := image.Rectangle{Min: ist, Max: ied}
+		sic.Sty.Font.BgColor.SetName("black")
+		sic.FillViewport()
 		draw.Draw(tv.Viewport.Pixels, r, sic.Pixels, image.ZP, draw.Over)
+	}
+	if vpUpload {
+		tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
+		vprel := tBBox.Min.Sub(tv.VpBBox.Min)
+		tWinBBox := tv.WinBBox.Add(vprel)
+		vp.This().(gi.Viewport).VpUploadRegion(tBBox, tWinBBox)
 	}
 }
 
@@ -3521,7 +3575,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 
 		if tv.HasLineNos() {
 			for ln := visSt; ln <= visEd; ln++ {
-				tv.RenderLineNo(ln)
+				tv.RenderLineNo(ln, true, false)
 			}
 			tbb := tv.VpBBox
 			tbb.Min.X += int(tv.LineNoOff)
@@ -4337,10 +4391,7 @@ func (tv *TextView) MouseMoveEvent() {
 	})
 }
 
-// TextViewEvents sets connections between mouse and key events and actions
-func (tv *TextView) TextViewEvents() {
-	tv.HoverTooltipEvent()
-	tv.MouseMoveEvent()
+func (tv *TextView) MouseDragEvent() {
 	tv.ConnectEvent(oswin.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
@@ -4352,11 +4403,9 @@ func (tv *TextView) TextViewEvents() {
 		newPos := txf.PixelToCursor(pt)
 		txf.SetCursorFromMouse(pt, newPos, mouse.SelectOne)
 	})
-	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		txf := recv.Embed(KiT_TextView).(*TextView)
-		me := d.(*mouse.Event)
-		txf.MouseEvent(me)
-	})
+}
+
+func (tv *TextView) MouseFocusEvent() {
 	tv.ConnectEvent(oswin.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
 		if txf.IsInactive() {
@@ -4371,6 +4420,19 @@ func (tv *TextView) TextViewEvents() {
 			oswin.TheApp.Cursor(txf.Viewport.Win.OSWin).PopIf(cursor.IBeam)
 		}
 	})
+}
+
+// TextViewEvents sets connections between mouse and key events and actions
+func (tv *TextView) TextViewEvents() {
+	tv.HoverTooltipEvent()
+	tv.MouseMoveEvent()
+	tv.MouseDragEvent()
+	tv.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		txf := recv.Embed(KiT_TextView).(*TextView)
+		me := d.(*mouse.Event)
+		txf.MouseEvent(me)
+	})
+	tv.MouseFocusEvent()
 	tv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		txf := recv.Embed(KiT_TextView).(*TextView)
 		kt := d.(*key.ChordEvent)
