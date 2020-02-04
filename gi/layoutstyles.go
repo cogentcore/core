@@ -202,24 +202,16 @@ func (sp SizePrefs) CanStretchNeed(d mat32.Dims) bool {
 // }
 
 // StyleFromProps styles Layout-specific fields from ki.Prop properties
-func (ly *Layout) StyleFromProps(par *Layout, props ki.Props, vp *Viewport2D) {
-	for key, val := range props {
-		if len(key) == 0 {
-			continue
-		}
-		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+// doesn't support inherit or default
+func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport2D) {
+	keys := []string{"lay", "spacing"}
+	for _, key := range keys {
+		val, has := props[key]
+		if !has {
 			continue
 		}
 		switch key {
 		case "lay":
-			if inh, init := StyleInhInit(val, par); inh || init {
-				if inh {
-					ly.Lay = par.Lay
-				} else if init {
-					ly.Lay = LayoutHoriz
-				}
-				return
-			}
 			switch vt := val.(type) {
 			case string:
 				ly.Lay.FromString(vt)
@@ -233,14 +225,6 @@ func (ly *Layout) StyleFromProps(par *Layout, props ki.Props, vp *Viewport2D) {
 				}
 			}
 		case "spacing":
-			if inh, init := StyleInhInit(val, par); inh || init {
-				if inh {
-					ly.Spacing = par.Spacing
-				} else if init {
-					ly.Spacing.Val = 0
-				}
-				return
-			}
 			ly.Spacing.SetIFace(val, key)
 		}
 	}

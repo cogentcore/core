@@ -527,17 +527,8 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 
 func (sr *Splitter) Style2D() {
 	sr.ClearFlag(int(CanFocus))
-	sr.Style2DWidget()
+	sr.StyleSlider()
 	sr.LayData.SetFromStyle(&sr.Sty.Layout) // also does reset
-	pst := &(sr.Par.(Node2D).AsWidget().Sty)
-	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyFrom(&sr.Sty)
-		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
-		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
-	}
-	SliderFields.Style(sr, nil, sr.Props, sr.Viewport)
-	SliderFields.ToDots(sr, &sr.Sty.UnContext)
-	sr.ThSize = sr.ThumbSize.Dots
 	sr.ConfigParts()
 }
 

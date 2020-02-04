@@ -268,6 +268,10 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	sb := gi.AddNewSpinBox(txrow, "spin")
 	sb.Defaults()
+	sb.SetProp("has-max", true)
+	sb.SetProp("max", 255)
+	sb.SetProp("step", 1)
+	sb.SetProp("format", "%X")
 	sb.HasMin = true
 	sb.Min = 0.0
 	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

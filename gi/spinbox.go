@@ -33,6 +33,7 @@ type SpinBox struct {
 	Step       float32   `xml:"step" desc:"smallest step size to increment"`
 	PageStep   float32   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Prec       int       `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	Format     string    `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
 	UpIcon     IconName  `view:"show-name" desc:"icon to use for up button -- defaults to wedge-up"`
 	DownIcon   IconName  `view:"show-name" desc:"icon to use for down button -- defaults to wedge-down"`
 	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
@@ -231,15 +232,15 @@ func (sb *SpinBox) ConfigParts() {
 			tf.Sty.Template = sb.Sty.Template + ".text"
 		}
 		sb.StylePart(Node2D(tf))
-		tf.Txt = fmt.Sprintf("%g", sb.Value)
+		tf.Txt = sb.ValToString(sb.Value)
 		if !sb.IsInactive() {
 			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
 					sbb := recv.Embed(KiT_SpinBox).(*SpinBox)
 					tf := send.(*TextField)
-					vl, err := strconv.ParseFloat(tf.Text(), 32)
+					vl, err := sb.StringToVal(tf.Text())
 					if err == nil {
-						sbb.SetValueAction(float32(vl))
+						sbb.SetValueAction(vl)
 					}
 				}
 			})
@@ -248,12 +249,55 @@ func (sb *SpinBox) ConfigParts() {
 	}
 }
 
+// FormatIsInt returns true if the format string requires an integer value
+func (sb *SpinBox) FormatIsInt() bool {
+	if sb.Format == "" {
+		return false
+	}
+	fc := sb.Format[len(sb.Format)-1]
+	switch fc {
+	case 'd', 'b', 'c', 'o', 'O', 'q', 'x', 'X', 'U':
+		return true
+	}
+	return false
+}
+
+// ValToString converts the value to the string representation thereof
+func (sb *SpinBox) ValToString(val float32) string {
+	if sb.Format == "" {
+		return fmt.Sprintf("%g", val)
+	}
+	if sb.FormatIsInt() {
+		return fmt.Sprintf(sb.Format, int64(val))
+	}
+	return fmt.Sprintf(sb.Format, val)
+}
+
+// StringToVal converts the string field back to float value
+func (sb *SpinBox) StringToVal(str string) (float32, error) {
+	var fval float32
+	var err error
+	if sb.FormatIsInt() {
+		var iv int64
+		iv, err = strconv.ParseInt(str, 0, 64)
+		fval = float32(iv)
+	} else {
+		var fv float64
+		fv, err = strconv.ParseFloat(str, 32)
+		fval = float32(fv)
+	}
+	if err != nil {
+		log.Println(err)
+	}
+	return fval, err
+}
+
 func (sb *SpinBox) ConfigPartsIfNeeded() {
 	if !sb.Parts.HasChildren() {
 		sb.ConfigParts()
 	}
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-	txt := fmt.Sprintf("%g", sb.Value)
+	txt := sb.ValToString(sb.Value)
 	if tf.Txt != txt {
 		tf.SetText(txt)
 	}
@@ -293,6 +337,55 @@ func (sb *SpinBox) Init2D() {
 	sb.ConfigParts()
 }
 
+// StyleFromProps styles SpinBox-specific fields from ki.Prop properties
+// doesn't support inherit or default
+func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport2D) {
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		switch key {
+		case "value":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sb.Value = iv
+			}
+		case "min":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sb.Min = iv
+			}
+		case "max":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sb.Max = iv
+			}
+		case "step":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sb.Step = iv
+			}
+		case "pagestep":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sb.PageStep = iv
+			}
+		case "prec":
+			if iv, ok := kit.ToInt(val); ok {
+				sb.Prec = int(iv)
+			}
+		case "has-min":
+			if bv, ok := kit.ToBool(val); ok {
+				sb.HasMin = bv
+			}
+		case "has-max":
+			if bv, ok := kit.ToBool(val); ok {
+				sb.HasMax = bv
+			}
+		case "format":
+			sb.Format = kit.ToString(val)
+		}
+	}
+}
+
 func (sb *SpinBox) StyleSpinBox() {
 	if sb.Step == 0 {
 		sb.Defaults()
@@ -306,6 +399,7 @@ func (sb *SpinBox) StyleSpinBox() {
 	if hasTempl && saveTempl {
 		sb.Sty.SaveTemplate()
 	}
+	sb.StyleFromProps(sb.Props, sb.Viewport)
 }
 
 func (sb *SpinBox) Style2D() {

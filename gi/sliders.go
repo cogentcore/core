@@ -49,7 +49,7 @@ type SliderBase struct {
 	Icon        IconName             `view:"show-name" desc:"optional icon for the dragging knob"`
 	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
 	ThumbVal    float32              `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
-	Pos         float32              `xml:"pos" desc:"logical position of the slider relative to Size"`
+	Pos         float32              `xml:"-" desc:"logical position of the slider relative to Size"`
 	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
 	Dim         mat32.Dims           `desc:"dimension along which the slider slides"`
@@ -515,18 +515,97 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 	}
 }
 
-// SliderDefault is default obj that can be used when property specifies "default"
-var SliderDefault SliderBase
+// StyleFromProps styles Slider-specific fields from ki.Prop properties
+// doesn't support inherit or default
+func (sr *SliderBase) StyleFromProps(props ki.Props, vp *Viewport2D) {
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		switch key {
+		case "value":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.Value = iv
+			}
+		case "min":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.Min = iv
+			}
+		case "max":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.Max = iv
+			}
+		case "step":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.Step = iv
+			}
+		case "pagestep":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.PageStep = iv
+			}
+		case "size":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.Size = iv
+			}
+		case "thumb-size":
+			sr.ThumbSize.SetIFace(val, key)
+		case "thumb-val":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.ThumbVal = iv
+			}
+		case "track-thr":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.TrackThr = iv
+			}
+		case "vispos":
+			if iv, ok := kit.ToFloat32(val); ok {
+				sr.VisPos = iv
+			}
+		case "prec":
+			if iv, ok := kit.ToInt(val); ok {
+				sr.Prec = int(iv)
+			}
+		case "val-thumb":
+			if bv, ok := kit.ToBool(val); ok {
+				sr.ValThumb = bv
+			}
+		case "tracking":
+			if bv, ok := kit.ToBool(val); ok {
+				sr.Tracking = bv
+			}
+		case "snap":
+			if bv, ok := kit.ToBool(val); ok {
+				sr.Snap = bv
+			}
+		}
+	}
+}
 
-// SliderFields contain the StyledFields for Slider type
-var SliderFields = initSlider()
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (sr *SliderBase) StyleToDots(uc *units.Context) {
+	sr.ThumbSize.ToDots(uc)
+}
 
-func initSlider() *StyledFields {
-	SliderDefault = SliderBase{}
-	SliderDefault.Defaults()
-	sf := &StyledFields{}
-	sf.Init(&SliderDefault)
-	return sf
+func (sr *SliderBase) StyleSlider() {
+	sr.Style2DWidget()
+	pst := &(sr.Par.(Node2D).AsWidget().Sty)
+	for i := 0; i < int(SliderStatesN); i++ {
+		sr.StateStyles[i].CopyFrom(&sr.Sty)
+		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
+		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
+	}
+	sr.StyleFromProps(sr.Props, sr.Viewport)         // does all the min / max / step etc
+	tprops := *kit.Types.Properties(sr.Type(), true) // true = makeNew
+	if len(tprops) > 0 {
+		kit.TypesMu.RLock()
+		sr.StyleFromProps(tprops, sr.Viewport)
+		kit.TypesMu.RUnlock()
+	}
+	sr.StyleToDots(&sr.Sty.UnContext)
+	sr.ThSize = sr.ThumbSize.Dots
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -606,19 +685,6 @@ func (sr *Slider) Defaults() {
 func (sr *Slider) Init2D() {
 	sr.Init2DSlider()
 	sr.ConfigParts()
-}
-
-func (sr *Slider) StyleSlider() {
-	sr.Style2DWidget()
-	pst := &(sr.Par.(Node2D).AsWidget().Sty)
-	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyFrom(&sr.Sty)
-		sr.StateStyles[i].SetStyleProps(pst, sr.StyleProps(SliderSelectors[i]), sr.Viewport)
-		sr.StateStyles[i].CopyUnitContext(&sr.Sty.UnContext)
-	}
-	SliderFields.Style(sr, nil, sr.Props, sr.Viewport)
-	SliderFields.ToDots(sr, &sr.Sty.UnContext)
-	sr.ThSize = sr.ThumbSize.Dots
 }
 
 func (sr *Slider) Style2D() {
@@ -814,22 +880,11 @@ func (sb *ScrollBar) Init2D() {
 	sb.Init2DSlider()
 }
 
-func (sb *ScrollBar) StyleScrollBar() {
-	sb.Style2DWidget()
-	pst := &(sb.Par.(Node2D).AsWidget().Sty)
-	for i := 0; i < int(SliderStatesN); i++ {
-		sb.StateStyles[i].CopyFrom(&sb.Sty)
-		sb.StateStyles[i].SetStyleProps(pst, sb.StyleProps(SliderSelectors[i]), sb.Viewport)
-		sb.StateStyles[i].CopyUnitContext(&sb.Sty.UnContext)
-	}
-	SliderFields.Style(sb, nil, sb.Props, sb.Viewport)
-	SliderFields.ToDots(sb, &sb.Sty.UnContext)
-}
-
 func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
-	sb.StyleScrollBar()
+	sb.StyleSlider()
 	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.ConfigParts()
 }
 
 func (sb *ScrollBar) Size2D(iter int) {

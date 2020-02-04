@@ -1678,16 +1678,14 @@ func (ly *Layout) StyleLayout() {
 	hasTempl, saveTempl := ly.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
-		// } else {
-		// 	ly.Sty.SetUnitContext(ly.Viewport, mat32.Vec2Zero)
 	}
+	ly.StyleFromProps(ly.Props, ly.Viewport)         // does "lay" and "spacing", in layoutstyles.go
 	tprops := *kit.Types.Properties(ly.Type(), true) // true = makeNew
 	if len(tprops) > 0 {
 		kit.TypesMu.RLock()
-		ly.StyleFromProps(nil, tprops, ly.Viewport)
+		ly.StyleFromProps(tprops, ly.Viewport)
 		kit.TypesMu.RUnlock()
 	}
-	ly.StyleFromProps(nil, ly.Props, ly.Viewport)
 	ly.StyleToDots(&ly.Sty.UnContext)
 	if hasTempl && saveTempl {
 		ly.Sty.SaveTemplate()
