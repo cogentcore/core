@@ -1683,7 +1683,6 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			}
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
-			w.EventMgr.SetFocus(nil)
 		case window.ScreenUpdate:
 			if !oswin.TheApp.NoScreens() {
 				Prefs.ApplyDPI()
