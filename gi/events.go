@@ -274,9 +274,19 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 			if !nii.HasFocus2D() {
 				return true
 			}
+			if recv != em.Focus { // out-of-whack
+				ni.SetFocusState(false)
+				nii.FocusChanged2D(FocusLost)
+				if EventTrace {
+					fmt.Printf("Event: cleared focus event receiver != Focus item: %v\n", ni.PathUnique())
+				}
+				return true
+			}
 			if !em.Master.IsFocusActive() { // reactivate on keyboard input
 				em.Master.SetFocusActiveState(true)
-				// fmt.Printf("set foc active: %v\n", ni.PathUnique())
+				if EventTrace {
+					fmt.Printf("Event: set focus active, was not: %v\n", ni.PathUnique())
+				}
 				nii.FocusChanged2D(FocusActive)
 			}
 		}
@@ -285,13 +295,15 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 	// remainder is done using generic node interface, for 2D and 3D
 	gni := recv.(Node)
 	gn := gni.AsGiNode()
-	// todo: need a focus concept for 3D
 	if evi.HasPos() {
 		pos := evi.Pos()
 		switch evi.(type) {
 		case *mouse.DragEvent:
 			if em.Dragging != nil {
 				if em.Dragging == gn.This() {
+					if EventTrace {
+						fmt.Printf("Event: dragging top pri: %v\n", recv.PathUnique())
+					}
 					rvs.Add(recv, fun, 10000)
 					return false
 				} else {
@@ -307,6 +319,9 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 		case *mouse.ScrollEvent:
 			if em.Scrolling != nil {
 				if em.Scrolling == gn.This() {
+					if EventTrace {
+						fmt.Printf("Event: scrolling top pri: %v\n", recv.PathUnique())
+					}
 					rvs.Add(recv, fun, 10000)
 				} else {
 					return true
@@ -320,6 +335,9 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 			}
 		default:
 			if em.Dragging == gn.This() { // dragger always gets it
+				if EventTrace {
+					fmt.Printf("Event: dragging, non drag top pri: %v\n", recv.PathUnique())
+				}
 				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
 				return false
 			}
@@ -846,6 +864,7 @@ func (em *EventMgr) setFocusPtr(k ki.Ki) {
 }
 
 // SetFocus sets focus to given item -- returns true if focus changed.
+// If item is nil, then nothing has focus.
 func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	cfoc := em.CurFocus()
 	if cfoc == k {
@@ -1049,7 +1068,9 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 			return true
 		}
 		if ni.HasFocus() {
-			// fmt.Printf("ClearNonFocus: %v\n", ni.PathUnique())
+			if EventTrace {
+				fmt.Printf("ClearNonFocus: had focus: %v\n", ni.PathUnique())
+			}
 			if !updated {
 				updated = true
 				updt = em.Master.EventTopUpdateStart()

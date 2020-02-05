@@ -34,6 +34,7 @@ func mainrun() {
 	// gi.Layout2DTrace = true
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
+	gi.EventTrace = false
 	// gi.KeyEventTrace = true
 
 	rec := ki.Node{}          // receiver for events

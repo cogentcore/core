@@ -1702,9 +1702,14 @@ func (tb *TextBuf) SetLineIcon(ln int, icon string) {
 }
 
 // DeleteLineIcon deletes any icon at given line (0 starting)
+// if ln = -1 then delete all line icons.
 func (tb *TextBuf) DeleteLineIcon(ln int) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
+	if ln < 0 {
+		tb.LineIcons = nil
+		return
+	}
 	if tb.LineIcons == nil {
 		return
 	}
@@ -1722,10 +1727,15 @@ func (tb *TextBuf) SetLineColor(ln int, color string) {
 	tb.LineColors[ln] = clr
 }
 
-// DeleteLineColor deletes any color at given line (0 starting)
+// DeleteLineColor deletes any color at given line (0 starting).
+// if ln = -1 then delete all line colors.
 func (tb *TextBuf) DeleteLineColor(ln int) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
+	if ln < 0 {
+		tb.LineColors = nil
+		return
+	}
 	if tb.LineColors == nil {
 		return
 	}

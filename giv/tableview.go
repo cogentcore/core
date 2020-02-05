@@ -63,40 +63,43 @@ var _ SliceViewer = (*TableView)(nil)
 type TableViewStyleFunc func(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView)
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
-// to represent this slice
+// to represent this slice (does Update if already viewing).
 func (tv *TableView) SetSlice(sl interface{}) {
-	updt := false
 	if kit.IfaceIsNil(sl) {
+		tv.Slice = nil
 		return
 	}
-	if tv.Slice != sl {
-		if !tv.IsInactive() {
-			tv.SelectedIdx = -1
-		}
-		tv.StartIdx = 0
-		tv.SortIdx = -1
-		tv.SortDesc = false
-		slpTyp := reflect.TypeOf(sl)
-		if slpTyp.Kind() != reflect.Ptr {
-			log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- type is not a Ptr: %v\n", slpTyp.String())
-			return
-		}
-		if slpTyp.Elem().Kind() != reflect.Slice {
-			log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- ptr doesn't point to a slice: %v\n", slpTyp.Elem().String())
-			return
-		}
-		tv.Slice = sl
-		tv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(tv.Slice))
-		struTyp := tv.StructType()
-		if struTyp.Kind() != reflect.Struct {
-			log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
-			return
-		}
-		updt = tv.UpdateStart()
-		tv.ResetSelectedIdxs()
-		tv.SelectMode = false
-		tv.SetFullReRender()
+	if tv.Slice == sl && tv.IsConfiged() {
+		tv.Update()
+		return
 	}
+	if !tv.IsInactive() {
+		tv.SelectedIdx = -1
+	}
+	tv.StartIdx = 0
+	tv.SortIdx = -1
+	tv.SortDesc = false
+	slpTyp := reflect.TypeOf(sl)
+	if slpTyp.Kind() != reflect.Ptr {
+		log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- type is not a Ptr: %v\n", slpTyp.String())
+		return
+	}
+	if slpTyp.Elem().Kind() != reflect.Slice {
+		log.Printf("TableView requires that you pass a pointer to a slice of struct elements -- ptr doesn't point to a slice: %v\n", slpTyp.Elem().String())
+		return
+	}
+	tv.Slice = sl
+	tv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(tv.Slice))
+	struTyp := tv.StructType()
+	if struTyp.Kind() != reflect.Struct {
+		log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
+		return
+	}
+	updt := tv.UpdateStart()
+	tv.ResetSelectedIdxs()
+	tv.SelectMode = false
+	tv.SetFullReRender()
+
 	tv.ShowIndex = true
 	if sidxp, err := tv.PropTry("index"); err == nil {
 		tv.ShowIndex, _ = kit.ToBool(sidxp)

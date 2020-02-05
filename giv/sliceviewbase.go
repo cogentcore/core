@@ -170,20 +170,25 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
 func (sv *SliceViewBase) SetSlice(sl interface{}) {
-	updt := false
-	if sv.Slice != sl {
-		updt = sv.UpdateStart()
-		sv.StartIdx = 0
-		sv.Slice = sl
-		sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice))
-		sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
-		if !sv.IsInactive() {
-			sv.SelectedIdx = -1
-		}
-		sv.ResetSelectedIdxs()
-		sv.SelectMode = false
-		sv.SetFullReRender()
+	if kit.IfaceIsNil(sl) {
+		sv.Slice = nil
+		return
 	}
+	if sv.Slice == sl && sv.IsConfiged() {
+		sv.Update()
+		return
+	}
+	updt := sv.UpdateStart()
+	sv.StartIdx = 0
+	sv.Slice = sl
+	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice))
+	sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	if !sv.IsInactive() {
+		sv.SelectedIdx = -1
+	}
+	sv.ResetSelectedIdxs()
+	sv.SelectMode = false
+	sv.SetFullReRender()
 	sv.ShowIndex = true
 	if sidxp, err := sv.PropTry("index"); err == nil {
 		sv.ShowIndex, _ = kit.ToBool(sidxp)
@@ -1948,7 +1953,10 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 			// 	svv.GrabFocus()
 			// }
 			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-				svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), svv.SelectedIdx)
+				si := svv.SelectedIdx
+				svv.UnselectAllIdxs()
+				svv.SelectIdx(si)
+				svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), si)
 				me.SetProcessed()
 			}
 			if me.Button == mouse.Right && me.Action == mouse.Release {
