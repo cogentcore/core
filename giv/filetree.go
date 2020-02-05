@@ -570,7 +570,7 @@ func (fn *FileNode) DuplicateFile() error {
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
 	repo, _ := fn.Repo()
-	if repo != nil && fn.Info.Vcs >= vci.Stored {
+	if !fn.Info.IsDir() && repo != nil && fn.Info.Vcs >= vci.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
 		err = repo.Delete(string(fn.FPath))
 	} else {
