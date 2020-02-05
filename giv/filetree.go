@@ -596,7 +596,9 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 		}
 	}
 	repo, _ := fn.Repo()
-	if repo != nil && fn.Info.Vcs >= vci.Stored {
+	if fn.Kids == nil || len(fn.Kids) == 0 {
+		err = os.Rename(string(orgpath), newpath)
+	} else if repo != nil && fn.Info.Vcs >= vci.Stored {
 		err = repo.Move(string(orgpath), newpath)
 	} else {
 		err = os.Rename(string(orgpath), newpath)
