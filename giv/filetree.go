@@ -31,12 +31,34 @@ import (
 	"github.com/goki/pi/filecat"
 )
 
+// DirAndFile returns the final dir and file name.
+func DirAndFile(file string) string {
+	dir, fnm := filepath.Split(file)
+	return filepath.Join(filepath.Base(dir), fnm)
+}
+
+// RelFilePath returns the file name relative to given root file path, if it is
+// under that root -- otherwise it returns the final dir and file name.
+func RelFilePath(file, root string) string {
+	rp, err := filepath.Rel(root, file)
+	if err == nil && !strings.HasPrefix(rp, "..") {
+		return rp
+	}
+	return DirAndFile(file)
+}
+
+const (
+	// FileTreeExtFilesName is the name of the node that represents external files
+	FileTreeExtFilesName = "[external files]"
+)
+
 // FileTree is the root of a tree representing files in a given directory (and
 // subdirectories thereof), and has some overall management state for how to
 // view things.  The FileTree can be viewed by a TreeView to provide a GUI
 // interface into it.
 type FileTree struct {
 	FileNode
+	ExtFiles  []string     `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`
 	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
 	NodeType  reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
@@ -104,6 +126,80 @@ func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
 	ft.OpenDirs.SetClosed(ft.RelPath(fpath))
 }
 
+// AddExtFile adds an external file outside of root of file tree
+// and triggers an update, returning the FileNode for it, or
+// error if filepath.Abs fails.
+func (ft *FileTree) AddExtFile(fpath string) (*FileNode, error) {
+	pth, err := filepath.Abs(fpath)
+	if err != nil {
+		return nil, err
+	}
+	if has, _ := ft.HasExtFile(pth); has {
+		return ft.ExtFileNodeByPath(pth)
+	}
+	ft.ExtFiles = append(ft.ExtFiles, pth)
+	ft.UpdateDir()
+	return ft.ExtFileNodeByPath(pth)
+}
+
+// HasExtFile returns true and index if given abs path exists on ExtFiles list.
+// false and -1 if not.
+func (ft *FileTree) HasExtFile(fpath string) (bool, int) {
+	for i, f := range ft.ExtFiles {
+		if f == fpath {
+			return true, i
+		}
+	}
+	return false, -1
+}
+
+// ExtFileNodeByPath returns FileNode for given file path, and true, if it
+// exists in the external files list.  Otherwise returns nil, false.
+func (ft *FileTree) ExtFileNodeByPath(fpath string) (*FileNode, error) {
+	ehas, i := ft.HasExtFile(fpath)
+	if !ehas {
+		return nil, fmt.Errorf("ExtFile not found on list: %v", fpath)
+	}
+	ekid, err := ft.ChildByNameTry(FileTreeExtFilesName, 0)
+	if err != nil {
+		return nil, fmt.Errorf("ExtFile not updated -- no ExtFiles node")
+	}
+	ekids := *ekid.Children()
+	err = ekids.IsValidIndex(i)
+	if err == nil {
+		kn := ekids.Elem(i).Embed(KiT_FileNode).(*FileNode)
+		return kn, nil
+	}
+	return nil, fmt.Errorf("ExtFile not updated: %v", err)
+}
+
+// UpdateExtFiles returns a type-and-name list for configuring nodes
+// for ExtFiles
+func (ft *FileTree) UpdateExtFiles(efn *FileNode) {
+	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
+	efn.SetOpen()
+	config := kit.TypeAndNameList{}
+	typ := ft.NodeType
+	for _, f := range ft.ExtFiles {
+		config.Add(typ, DirAndFile(f))
+	}
+	mods, updt := efn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
+	if mods {
+		// fmt.Printf("got mods: %v\n", path)
+	}
+	// always go through kids, regardless of mods
+	for i, sfk := range efn.Kids {
+		sf := sfk.Embed(KiT_FileNode).(*FileNode)
+		sf.FRoot = ft
+		fp := ft.ExtFiles[i]
+		sf.SetNodePath(fp)
+		sf.Info.Vcs = vci.Stored // no vcs in general
+	}
+	if mods {
+		efn.UpdateEnd(updt)
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    FileNode
 
@@ -134,6 +230,11 @@ func (fn *FileNode) CopyFieldsFrom(frm interface{}) {
 // IsDir returns true if file is a directory (folder)
 func (fn *FileNode) IsDir() bool {
 	return fn.Info.IsDir()
+}
+
+// IsIrregular  returns true if file is a special "Irregular" node
+func (fn *FileNode) IsIrregular() bool {
+	return (fn.Info.Mode & os.ModeIrregular) != 0
 }
 
 // IsSymLink returns true if file is a symlink
@@ -179,11 +280,10 @@ func (fn *FileNode) IsAutoSave() bool {
 
 // MyRelPath returns the relative path from root for this node
 func (fn *FileNode) MyRelPath() string {
-	rpath, err := filepath.Rel(string(fn.FRoot.FPath), string(fn.FPath))
-	if err != nil {
-		log.Printf("giv.FileNode RelPath error: %v\n", err.Error())
+	if fn.IsIrregular() {
+		return fn.Nm
 	}
-	return rpath
+	return RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
 
 // ReadDir reads all the files at given directory into this directory node --
@@ -228,6 +328,13 @@ func (fn *FileNode) UpdateDir() {
 
 	fn.SetOpen()
 	config := fn.ConfigOfFiles(path)
+	hasExtFiles := false
+	if fn.This() == fn.FRoot.This() {
+		if len(fn.FRoot.ExtFiles) > 0 {
+			config = append([]kit.TypeAndName{kit.TypeAndName{Type: fn.FRoot.NodeType, Name: FileTreeExtFilesName}}, config...)
+			hasExtFiles = true
+		}
+	}
 	mods, updt := fn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
 	if mods {
 		// fmt.Printf("got mods: %v\n", path)
@@ -236,6 +343,10 @@ func (fn *FileNode) UpdateDir() {
 	for _, sfk := range fn.Kids {
 		sf := sfk.Embed(KiT_FileNode).(*FileNode)
 		sf.FRoot = fn.FRoot
+		if hasExtFiles && sf.Nm == FileTreeExtFilesName {
+			fn.FRoot.UpdateExtFiles(sf)
+			continue
+		}
 		fp := filepath.Join(path, sf.Nm)
 		// if sf.Buf != nil {
 		// 	fmt.Printf("fp: %v  nm: %v\n", fp, sf.Nm)
@@ -304,7 +415,7 @@ func (fn *FileNode) SetNodePath(path string) error {
 	if err != nil {
 		return err
 	}
-	if fn.IsDir() {
+	if fn.IsDir() && !fn.IsIrregular() {
 		if fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
@@ -330,6 +441,9 @@ func (fn *FileNode) UpdateNode() error {
 	err := fn.InitFileInfo()
 	if err != nil {
 		return err
+	}
+	if fn.IsIrregular() {
+		return nil
 	}
 	if fn.IsDir() {
 		if fn.FRoot.IsDirOpen(fn.FPath) {
@@ -397,12 +511,7 @@ func (fn *FileNode) CloseBuf() bool {
 
 // RelPath returns the relative path from node for given full path
 func (fn *FileNode) RelPath(fpath gi.FileName) string {
-	rpath, err := filepath.Rel(string(fn.FPath), string(fpath))
-	if err != nil {
-		log.Printf("giv.FileNode RelPath error: %v\n", err.Error())
-		return ""
-	}
-	return rpath
+	return RelFilePath(string(fpath), string(fn.FPath))
 }
 
 // OpenDirsTo opens all the directories above the given filename, and returns the node
@@ -472,6 +581,10 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 				break
 			}
 		}
+	}
+
+	if efn, err := fn.FRoot.ExtFileNodeByPath(fnm); err == nil {
+		return efn, true
 	}
 
 	if strings.HasPrefix(fneff, string(fn.FPath)) { // full path
@@ -569,6 +682,9 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
+	if fn.IsIrregular() {
+		return nil
+	}
 	repo, _ := fn.Repo()
 	if !fn.Info.IsDir() && repo != nil && fn.Info.Vcs >= vci.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
@@ -585,6 +701,9 @@ func (fn *FileNode) DeleteFile() (err error) {
 
 // RenameFile renames file to new name
 func (fn *FileNode) RenameFile(newpath string) (err error) {
+	if fn.IsIrregular() {
+		return nil
+	}
 	orgpath := fn.FPath
 	newpath, err = fn.Info.Rename(newpath)
 	if len(newpath) == 0 || err != nil {
@@ -617,6 +736,9 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 
 // NewFile makes a new file in given selected directory node
 func (fn *FileNode) NewFile(filename string, addToVcs bool) {
+	if fn.IsIrregular() {
+		return
+	}
 	ppath := string(fn.FPath)
 	if !fn.IsDir() {
 		ppath, _ = filepath.Split(ppath)
@@ -638,6 +760,9 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 
 // NewFolder makes a new folder (directory) in given selected directory node
 func (fn *FileNode) NewFolder(foldername string) {
+	if fn.IsIrregular() {
+		return
+	}
 	ppath := string(fn.FPath)
 	if !fn.IsDir() {
 		ppath, _ = filepath.Split(ppath)
@@ -655,6 +780,9 @@ func (fn *FileNode) NewFolder(foldername string) {
 // CopyFileToDir copies given file path into node that is a directory.
 // This does NOT check for overwriting -- that must be done at higher level!
 func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
+	if fn.IsIrregular() {
+		return
+	}
 	ppath := string(fn.FPath)
 	_, sfn := filepath.Split(filename)
 	tpath := filepath.Join(ppath, sfn)
@@ -685,6 +813,9 @@ func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
 			return false
 		}
 		sfn := sfni.(*FileNode)
+		if sfn.IsIrregular() {
+			return false
+		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
@@ -1406,7 +1537,7 @@ func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	tfn := ftv.FileNode()
-	if tfn == nil {
+	if tfn == nil || tfn.IsIrregular() {
 		return
 	}
 	tupdt := ftv.RootView.UpdateStart()
@@ -1471,7 +1602,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 	}
 	sroot := ftv.RootView.SrcNode
 	tfn := ftv.FileNode()
-	if tfn == nil {
+	if tfn == nil || tfn.IsIrregular() {
 		return
 	}
 	md := de.Data
@@ -1492,6 +1623,15 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 	}
 }
 
+// FileTreeInactiveIrregFunc is an ActionUpdateFunc that inactivates action if node is irregular
+var FileTreeInactiveIrregFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		act.SetInactiveState(fn.IsIrregular())
+	}
+})
+
 // FileTreeInactiveDirFunc is an ActionUpdateFunc that inactivates action if node is a dir
 var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
@@ -1506,7 +1646,7 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Actio
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetActiveState(fn.IsDir())
+		act.SetActiveState(fn.IsDir() && !fn.IsIrregular())
 	}
 })
 
@@ -1651,11 +1791,13 @@ var FileTreeViewProps = ki.Props{
 		{"DeleteFiles", ki.Props{
 			"label":    "Delete",
 			"desc":     "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
+			"updtfunc": FileTreeInactiveIrregFunc,
 			"shortcut": gi.KeyFunDelete,
 		}},
 		{"RenameFiles", ki.Props{
-			"label": "Rename",
-			"desc":  "Rename file to new file name",
+			"label":    "Rename",
+			"desc":     "Rename file to new file name",
+			"updtfunc": FileTreeInactiveIrregFunc,
 		}},
 		{"sep-open", ki.BlankProp{}},
 		{"OpenDirs", ki.Props{

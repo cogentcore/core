@@ -2878,11 +2878,17 @@ func (tv *TextView) CharStartPos(pos textbuf.Pos) mat32.Vec2 {
 // visible range, position will be out of range too)
 func (tv *TextView) CharEndPos(pos textbuf.Pos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
-	if pos.Ln >= tv.NLines {
+	pos.Ln = ints.MinInt(pos.Ln, tv.NLines-1)
+	if pos.Ln < 0 {
 		spos.Y += float32(tv.LinesSize.Y)
 		spos.X += tv.LineNoOff
 		return spos
 	}
+	// if pos.Ln >= tv.NLines {
+	// 	spos.Y += float32(tv.LinesSize.Y)
+	// 	spos.X += tv.LineNoOff
+	// 	return spos
+	// }
 	spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Sty.Font.Face.Face.Metrics().Descent)
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
