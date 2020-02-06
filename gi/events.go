@@ -274,14 +274,18 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 			if !nii.HasFocus2D() {
 				return true
 			}
-			if recv != em.Focus { // out-of-whack
-				ni.SetFocusState(false)
-				nii.FocusChanged2D(FocusLost)
-				if EventTrace {
-					fmt.Printf("Event: cleared focus event receiver != Focus item: %v\n", ni.PathUnique())
-				}
-				return true
-			}
+			// if recv != em.Focus { // out-of-whack
+			// note: definitely need multi-level key events -- this is not a usable solution
+			// for example in gide the multi-key sequences route thorugh overall gideview object
+			// that gets key events IN ADDITION to the focus item.  the problem happens when this
+			// mechanism gets off track -- need to do more to debug that.
+			// 	ni.SetFocusState(false)
+			// 	nii.FocusChanged2D(FocusLost)
+			// 	if EventTrace {
+			// 		fmt.Printf("Event: cleared focus event receiver != Focus item: %v\n", ni.PathUnique())
+			// 	}
+			// 	return true
+			// }
 			if !em.Master.IsFocusActive() { // reactivate on keyboard input
 				em.Master.SetFocusActiveState(true)
 				if EventTrace {
