@@ -464,7 +464,7 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 		return nil, false
 	}
 	fneff := fnm
-	if fneff[:2] == ".." { // relative path -- get rid of it and just look for relative part
+	if len(fneff) > 2 && fneff[:2] == ".." { // relative path -- get rid of it and just look for relative part
 		dirs := strings.Split(fneff, string(filepath.Separator))
 		for i, dr := range dirs {
 			if dr != ".." {
