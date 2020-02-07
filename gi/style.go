@@ -153,6 +153,9 @@ func (s *Style) FromTemplate() (hasTemplate bool, saveTemplate bool) {
 	if s.Template == "" {
 		return false, false
 	}
+	if RebuildDefaultStyles {
+		return false, true
+	}
 	styleTemplatesMu.RLock()
 	defer styleTemplatesMu.RUnlock()
 	if ts, has := styleTemplates[s.Template]; has {

@@ -39,20 +39,6 @@ type ScreenPrefs struct {
 	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."`
 }
 
-// ColorPrefs specify colors for all major categories of GUI elements, and are
-// used in the default styles.
-type ColorPrefs struct {
-	Font       Color `desc:"default font / pen color"`
-	Background Color `desc:"default background color"`
-	Shadow     Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	Border     Color `desc:"default border color, for button, frame borders, etc"`
-	Control    Color `desc:"default main color for controls: buttons, etc"`
-	Icon       Color `desc:"color for icons or other solidly-colored, small elements"`
-	Select     Color `desc:"color for selected elements"`
-	Highlight  Color `desc:"color for highlight background"`
-	Link       Color `desc:"color for links in text etc"`
-}
-
 // ParamPrefs contains misc parameters controlling GUI behavior.
 type ParamPrefs struct {
 	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
@@ -74,7 +60,8 @@ type User struct {
 type Preferences struct {
 	LogicalDPIScale      float32                `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-	Colors               ColorPrefs             `desc:"color preferences"`
+	Colors               ColorPrefs             `desc:"active color preferences"`
+	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
 	Params               ParamPrefs             `desc:"parameters controlling GUI behavior"`
 	KeyMap               KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
 	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
@@ -97,45 +84,6 @@ var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 // Prefs are the overall preferences
 var Prefs = Preferences{}
 
-func (pf *ColorPrefs) Defaults() {
-	pf.Font.SetColor(color.Black)
-	pf.Border.SetString("#666", nil)
-	pf.Background.SetColor(color.White)
-	pf.Shadow.SetString("darker-10", &pf.Background)
-	pf.Control.SetString("#F8F8F8", nil)
-	pf.Icon.SetString("highlight-30", pf.Control)
-	pf.Select.SetString("#CFC", nil)
-	pf.Highlight.SetString("#FFA", nil)
-	pf.Link.SetString("#00F", nil)
-}
-
-// PrefColor returns preference color of given name (case insensitive)
-func (pf *ColorPrefs) PrefColor(clrName string) *Color {
-	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
-	switch lc {
-	case "font":
-		return &pf.Font
-	case "background":
-		return &pf.Background
-	case "shadow":
-		return &pf.Shadow
-	case "border":
-		return &pf.Border
-	case "control":
-		return &pf.Control
-	case "icon":
-		return &pf.Icon
-	case "select":
-		return &pf.Select
-	case "highlight":
-		return &pf.Highlight
-	case "link":
-		return &pf.Link
-	}
-	log.Printf("Preference color %v (simplified to: %v) not found\n", clrName, lc)
-	return nil
-}
-
 func (pf *ParamPrefs) Defaults() {
 	pf.DoubleClickMSec = 500
 	pf.ScrollWheelSpeed = 20
@@ -146,6 +94,7 @@ func (pf *ParamPrefs) Defaults() {
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
 	pf.Colors.Defaults()
+	pf.ColorSchemes = DefaultColorSchemes()
 	pf.Params.Defaults()
 	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Go"
@@ -224,6 +173,28 @@ func (pf *Preferences) SaveColors(filename FileName) error {
 	return pf.Colors.SaveJSON(filename)
 }
 
+// LightMode sets colors to light mode
+func (pf *Preferences) LightMode() {
+	lc, ok := pf.ColorSchemes["Light"]
+	if !ok {
+		log.Printf("Light ColorScheme not found\n")
+		return
+	}
+	pf.Colors = *lc
+	pf.Update()
+}
+
+// DarkMode sets colors to dark mode
+func (pf *Preferences) DarkMode() {
+	lc, ok := pf.ColorSchemes["Dark"]
+	if !ok {
+		log.Printf("Dark ColorScheme not found\n")
+		return
+	}
+	pf.Colors = *lc
+	pf.Update()
+}
+
 // Apply preferences to all the relevant settings.
 func (pf *Preferences) Apply() {
 	np := len(pf.FavPaths)
@@ -284,11 +255,11 @@ func (pf *Preferences) Update() {
 	for _, w := range AllWindows {
 		w.SetSize(w.OSWin.Size())
 	}
-	RebuildDefaultStyles = false
 	// needs another pass through to get it right..
 	for _, w := range AllWindows {
 		w.FullReRender()
 	}
+	RebuildDefaultStyles = false
 }
 
 // ScreenInfo returns screen info for all screens on the console.
@@ -367,32 +338,6 @@ func (pf *Preferences) UpdateUser() {
 	}
 }
 
-// OpenJSON opens colors from a JSON-formatted file.
-func (pf *ColorPrefs) OpenJSON(filename FileName) error {
-	b, err := ioutil.ReadFile(string(filename))
-	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
-		log.Println(err)
-		return err
-	}
-	return json.Unmarshal(b, pf)
-}
-
-// SaveJSON saves colors to a JSON-formatted file.
-func (pf *ColorPrefs) SaveJSON(filename FileName) error {
-	b, err := json.MarshalIndent(pf, "", "  ")
-	if err != nil {
-		log.Println(err) // unlikely
-		return err
-	}
-	err = ioutil.WriteFile(string(filename), b, 0644)
-	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
-		log.Println(err)
-	}
-	return err
-}
-
 // PreferencesProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
 var PreferencesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
@@ -410,24 +355,8 @@ var PreferencesProps = ki.Props{
 				},
 			}},
 			{"sep-color", ki.BlankProp{}},
-			{"OpenColors", ki.Props{
-				"desc": "open set of colors from a json-formatted file",
-				"Args": ki.PropSlice{
-					{"Color File Name", ki.Props{
-						"default-field": "ColorFilename",
-						"ext":           ".json",
-					}},
-				},
-			}},
-			{"SaveColors", ki.Props{
-				"desc": "save set of colors to a json-formatted file, for sharing",
-				"Args": ki.PropSlice{
-					{"Color File Name", ki.Props{
-						"default-field": "ColorFilename",
-						"ext":           ".json",
-					}},
-				},
-			}},
+			{"LightMode", ki.Props{}},
+			{"DarkMode", ki.Props{}},
 			{"sep-misc", ki.BlankProp{}},
 			{"SaveZoom", ki.Props{
 				"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
@@ -462,27 +391,13 @@ var PreferencesProps = ki.Props{
 			},
 		}},
 		{"sep-color", ki.BlankProp{}},
-		{"Colors", ki.PropSlice{ // sub-menu
-			{"OpenColors", ki.Props{
-				"icon": "file-open",
-				"desc": "open set of colors from a json-formatted file",
-				"Args": ki.PropSlice{
-					{"Color File Name", ki.Props{
-						"default-field": "ColorFilename",
-						"ext":           ".json",
-					}},
-				},
-			}},
-			{"SaveColors", ki.Props{
-				"icon": "file-save",
-				"desc": "save set of colors to a json-formatted file, for sharing",
-				"Args": ki.PropSlice{
-					{"Color File Name", ki.Props{
-						"default-field": "ColorFilename",
-						"ext":           ".json",
-					}},
-				},
-			}},
+		{"LightMode", ki.Props{
+			"desc": "Set color mode to Light mode as defined in ColorSchemes",
+			"icon": "color",
+		}},
+		{"DarkMode", ki.Props{
+			"desc": "Set color mode to Dark mode as defined in ColorSchemes",
+			"icon": "color",
 		}},
 		{"sep-scrn", ki.BlankProp{}},
 		{"SaveZoom", ki.Props{
@@ -516,6 +431,139 @@ var PreferencesProps = ki.Props{
 		{"EditDebug", ki.Props{
 			"icon": "file-binary",
 			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
+		}},
+	},
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+//   ColorPrefs
+
+// ColorPrefs specify colors for all major categories of GUI elements, and are
+// used in the default styles.
+type ColorPrefs struct {
+	Font       Color `desc:"default font / pen color"`
+	Background Color `desc:"default background color"`
+	Shadow     Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	Border     Color `desc:"default border color, for button, frame borders, etc"`
+	Control    Color `desc:"default main color for controls: buttons, etc"`
+	Icon       Color `desc:"color for icons or other solidly-colored, small elements"`
+	Select     Color `desc:"color for selected elements"`
+	Highlight  Color `desc:"color for highlight background"`
+	Link       Color `desc:"color for links in text etc"`
+}
+
+var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
+
+func (pf *ColorPrefs) Defaults() {
+	pf.Font.SetColor(color.Black)
+	pf.Border.SetString("#666", nil)
+	pf.Background.SetColor(color.White)
+	pf.Shadow.SetString("darker-10", &pf.Background)
+	pf.Control.SetString("#F8F8F8", nil)
+	pf.Icon.SetString("highlight-30", pf.Control)
+	pf.Select.SetString("#CFC", nil)
+	pf.Highlight.SetString("#FFA", nil)
+	pf.Link.SetString("#00F", nil)
+}
+
+func (pf *ColorPrefs) DarkDefaults() {
+	pf.Font.SetUInt8(196, 199, 199, 255)
+	pf.Background.SetUInt8(64, 64, 92, 255)
+	pf.Shadow.SetUInt8(64, 64, 64, 255)
+	pf.Border.SetUInt8(102, 102, 102, 255)
+	pf.Control.SetUInt8(49, 88, 91, 255)
+	pf.Icon.SetUInt8(41, 41, 116, 255)
+	pf.Select.SetUInt8(52, 125, 129, 255)
+	pf.Highlight.SetUInt8(103, 70, 0, 255)
+	pf.Link.SetUInt8(117, 117, 249, 255)
+}
+
+func DefaultColorSchemes() map[string]*ColorPrefs {
+	cs := map[string]*ColorPrefs{}
+	lc := &ColorPrefs{}
+	lc.Defaults()
+	cs["Light"] = lc
+	dc := &ColorPrefs{}
+	dc.DarkDefaults()
+	cs["Dark"] = dc
+	return cs
+}
+
+// PrefColor returns preference color of given name (case insensitive)
+func (pf *ColorPrefs) PrefColor(clrName string) *Color {
+	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
+	switch lc {
+	case "font":
+		return &pf.Font
+	case "background":
+		return &pf.Background
+	case "shadow":
+		return &pf.Shadow
+	case "border":
+		return &pf.Border
+	case "control":
+		return &pf.Control
+	case "icon":
+		return &pf.Icon
+	case "select":
+		return &pf.Select
+	case "highlight":
+		return &pf.Highlight
+	case "link":
+		return &pf.Link
+	}
+	log.Printf("Preference color %v (simplified to: %v) not found\n", clrName, lc)
+	return nil
+}
+
+// OpenJSON opens colors from a JSON-formatted file.
+func (pf *ColorPrefs) OpenJSON(filename FileName) error {
+	b, err := ioutil.ReadFile(string(filename))
+	if err != nil {
+		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
+		log.Println(err)
+		return err
+	}
+	return json.Unmarshal(b, pf)
+}
+
+// SaveJSON saves colors to a JSON-formatted file.
+func (pf *ColorPrefs) SaveJSON(filename FileName) error {
+	b, err := json.MarshalIndent(pf, "", "  ")
+	if err != nil {
+		log.Println(err) // unlikely
+		return err
+	}
+	err = ioutil.WriteFile(string(filename), b, 0644)
+	if err != nil {
+		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
+		log.Println(err)
+	}
+	return err
+}
+
+// ColorPrefsProps defines the ToolBar
+var ColorPrefsProps = ki.Props{
+	"ToolBar": ki.PropSlice{
+		{"OpenJSON", ki.Props{
+			"label": "Open...",
+			"icon":  "file-open",
+			"desc":  "open set of colors from a json-formatted file",
+			"Args": ki.PropSlice{
+				{"Color File Name", ki.Props{
+					"ext": ".json",
+				}},
+			},
+		}},
+		{"SaveJSON", ki.Props{
+			"label": "Save As...",
+			"desc":  "Saves colors to JSON formatted file.",
+			"icon":  "file-save",
+			"Args": ki.PropSlice{
+				{"Color File Name", ki.Props{
+					"ext": ".json",
+				}},
+			},
 		}},
 	},
 }
