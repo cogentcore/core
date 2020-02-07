@@ -1686,7 +1686,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		case window.ScreenUpdate:
 			if !oswin.TheApp.NoScreens() {
 				Prefs.ApplyDPI()
-				Prefs.Update()
+				Prefs.UpdateAll()
 			}
 		}
 		return false // don't do anything else!

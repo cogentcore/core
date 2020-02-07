@@ -160,7 +160,7 @@ func (pf *Preferences) Save() error {
 func (pf *Preferences) OpenColors(filename FileName) error {
 	err := pf.Colors.OpenJSON(filename)
 	// if err == nil {
-	// 	pf.Update() // no!  this recolors the dialog as it is closing!  do it separately
+	// 	pf.UpdateAll() // no!  this recolors the dialog as it is closing!  do it separately
 	// }
 	pf.Changed = true
 	return err
@@ -181,7 +181,7 @@ func (pf *Preferences) LightMode() {
 		return
 	}
 	pf.Colors = *lc
-	pf.Update()
+	pf.UpdateAll()
 }
 
 // DarkMode sets colors to dark mode
@@ -192,7 +192,7 @@ func (pf *Preferences) DarkMode() {
 		return
 	}
 	pf.Colors = *lc
-	pf.Update()
+	pf.UpdateAll()
 }
 
 // Apply preferences to all the relevant settings.
@@ -243,9 +243,9 @@ func (pf *Preferences) ApplyDPI() {
 	}
 }
 
-// Update updates all open windows with current preferences -- triggers
+// UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
-func (pf *Preferences) Update() {
+func (pf *Preferences) UpdateAll() {
 	ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 
@@ -343,7 +343,7 @@ var PreferencesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
-			{"Update", ki.Props{}},
+			{"UpdateAll", ki.Props{}},
 			{"Open", ki.Props{
 				"shortcut": KeyFunMenuOpen,
 			}},
@@ -377,7 +377,7 @@ var PreferencesProps = ki.Props{
 		{"Window", "Windows"},
 	},
 	"ToolBar": ki.PropSlice{
-		{"Update", ki.Props{
+		{"UpdateAll", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
 			"icon": "update",
 		}},
@@ -542,6 +542,13 @@ func (pf *ColorPrefs) SaveJSON(filename FileName) error {
 	return err
 }
 
+// SetToPrefs sets this color scheme as the current active setting in overall
+// default prefs.
+func (pf *ColorPrefs) SetToPrefs() {
+	Prefs.Colors = *pf
+	Prefs.UpdateAll()
+}
+
 // ColorPrefsProps defines the ToolBar
 var ColorPrefsProps = ki.Props{
 	"ToolBar": ki.PropSlice{
@@ -564,6 +571,10 @@ var ColorPrefsProps = ki.Props{
 					"ext": ".json",
 				}},
 			},
+		}},
+		{"SetToPrefs", ki.Props{
+			"desc": "Sets this color scheme as the current active color scheme in Prefs.",
+			"icon": "reset",
 		}},
 	},
 }
