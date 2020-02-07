@@ -633,11 +633,3 @@ func (tb *TabButton) ConfigParts() {
 		tb.UpdateEnd(updt)
 	}
 }
-
-func (tb *TabButton) Size2D(iter int) {
-	ppref := tb.Parts.LayData.Size.Pref // get from parts
-	spc := tb.Sty.BoxSpace()
-	tb.SetProp("width", units.NewValue(ppref.X+2*spc, units.Dot))
-	tb.SetProp("height", units.NewValue(ppref.Y+2*spc, units.Dot))
-	tb.InitLayout2D() // sets from props
-}
