@@ -526,11 +526,6 @@ func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
 	if rpath == "." {
 		return fn, nil
 	}
-	if rpath == "" {
-		err := fmt.Errorf("giv.FileNode OpenDirsTo path %v is not within file tree path: %v", pth, fn.FPath)
-		log.Println(err)
-		return nil, err
-	}
 	dirs := strings.Split(rpath, string(filepath.Separator))
 	cfn := fn
 	sz := len(dirs)
@@ -542,7 +537,7 @@ func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
 				return cfn, nil
 			} else {
 				err = fmt.Errorf("giv.FileNode could not find node %v in: %v", dr, cfn.FPath)
-				log.Println(err)
+				// log.Println(err)
 				return nil, err
 			}
 		}

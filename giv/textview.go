@@ -3063,11 +3063,11 @@ var TextViewDepthColors = []gi.Color{
 	{5, 5, 0, 0},
 	{15, 15, 0, 0},
 	{5, 15, 0, 0},
-	{0, 15, 0, 0},
 	{0, 15, 5, 0},
 	{0, 15, 15, 0},
 	{0, 5, 15, 0},
-	{0, 0, 15, 0},
+	{5, 0, 15, 0},
+	{5, 0, 5, 0},
 }
 
 // RenderDepthBg renders the depth background color
