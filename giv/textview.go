@@ -3056,34 +3056,19 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 	return sp
 }
 
+// TextViewDepthOffsets are changes in color values from default background for different
+// depths.  For dark mode, these are increments, for light mode they are decrements.
 var TextViewDepthColors = []gi.Color{
-	{255, 255, 255, 255},
-	{250, 250, 255, 255},
-	{240, 240, 255, 255},
-	{250, 240, 255, 255},
-	{255, 240, 255, 255},
-	{255, 240, 240, 255},
-	{255, 240, 240, 255},
-	{255, 250, 240, 255},
-	{255, 255, 240, 255},
+	{0, 0, 0, 0},
+	{5, 5, 0, 0},
+	{15, 15, 0, 0},
+	{5, 15, 0, 0},
+	{0, 15, 0, 0},
+	{0, 15, 5, 0},
+	{0, 15, 15, 0},
+	{0, 5, 15, 0},
+	{0, 0, 15, 0},
 }
-
-// var TextViewDepthColors = []gi.Color{
-// 	{255, 255, 255, 255},
-// 	{250, 250, 255, 255},
-// 	{245, 245, 255, 255},
-// 	{240, 240, 255, 255},
-// 	{245, 240, 255, 255},
-// 	{250, 240, 255, 255},
-// 	{255, 240, 255, 255},
-// 	{255, 240, 250, 255},
-// 	{255, 240, 245, 255},
-// 	{255, 240, 240, 255},
-// 	{255, 240, 240, 255},
-// 	{255, 245, 240, 255},
-// 	{255, 250, 240, 255},
-// 	{255, 255, 240, 255},
-// }
 
 // RenderDepthBg renders the depth background color
 func (tv *TextView) RenderDepthBg(stln, edln int) {
@@ -3097,6 +3082,8 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	defer tv.Buf.MarkupMu.RUnlock()
 	sty := &tv.Sty
 	cspec := sty.Font.BgColor
+	bg := cspec.Color
+	isDark := bg.IsDark()
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y // note: charstart pos includes descent
@@ -3115,7 +3102,12 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 		for ti := range ht {
 			lx := &ht[ti]
 			if lx.Tok.Depth > 0 {
-				cspec.Color = TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)]
+				cspec.Color = bg
+				if isDark {
+					cspec.Color.Add(TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)])
+				} else {
+					cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)])
+				}
 				st := ints.MinInt(lsted, lx.St)
 				reg := textbuf.Region{Start: textbuf.Pos{Ln: ln, Ch: st}, End: textbuf.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed

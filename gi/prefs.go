@@ -156,6 +156,11 @@ func (pf *Preferences) Save() error {
 	return err
 }
 
+// IsDarkMode returns true if the current background color preference is dark
+func (pf *Preferences) IsDarkMode() bool {
+	return pf.Colors.Background.IsDark()
+}
+
 // OpenColors colors from a JSON-formatted file.
 func (pf *Preferences) OpenColors(filename FileName) error {
 	err := pf.Colors.OpenJSON(filename)
@@ -260,6 +265,10 @@ func (pf *Preferences) UpdateAll() {
 		w.FullReRender()
 	}
 	RebuildDefaultStyles = false
+	// and another without rebuilding?
+	for _, w := range AllWindows {
+		w.FullReRender()
+	}
 }
 
 // ScreenInfo returns screen info for all screens on the console.
