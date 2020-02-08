@@ -86,6 +86,14 @@ func (tk Kinds) InSub2Cat(other Kinds) bool {
 	return tk.Sub2Cat() == other.Sub2Cat()
 }
 
+func (tk Kinds) IsPtr() bool {
+	return tk >= Ptr && tk <= UnsafePtr
+}
+
+func (tk Kinds) IsPrimitiveNonPtr() bool {
+	return tk.Cat() == Primitive && !tk.IsPtr()
+}
+
 // The list of Kinds
 const (
 	// Unknown is the nil kind -- kinds should be known in general..
@@ -335,6 +343,7 @@ var ReflectKindMap = map[reflect.Kind]Kinds{
 	reflect.Float64:       Float64,
 	reflect.Complex64:     Complex64,
 	reflect.Complex128:    Complex128,
+	reflect.Bool:          Bool,
 	reflect.Array:         Array,
 	reflect.Chan:          Chan,
 	reflect.Func:          Func,
