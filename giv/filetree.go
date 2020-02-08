@@ -425,7 +425,13 @@ func (fn *FileNode) SetNodePath(path string) error {
 
 // InitFileInfo initializes file info
 func (fn *FileNode) InitFileInfo() error {
-	err := fn.Info.InitFile(string(fn.FPath))
+	effpath, err := filepath.EvalSymlinks(string(fn.FPath))
+	if err != nil {
+		log.Printf("giv.FileNode Path: %v could not be opened -- error: %v\n", effpath, err)
+		return err
+	}
+	fn.FPath = gi.FileName(effpath)
+	err = fn.Info.InitFile(string(fn.FPath))
 	if err != nil {
 		emsg := fmt.Errorf("giv.FileNode InitFileInfo Path %q: Error: %v", fn.FPath, err)
 		log.Println(emsg)
@@ -459,7 +465,7 @@ func (fn *FileNode) UpdateNode() error {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
 		fn.UpdateSig()
-		fn.FRoot.UpdateSig()
+			fn.FRoot.UpdateSig()
 	}
 	return nil
 }
