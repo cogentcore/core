@@ -45,6 +45,7 @@ type TreeView struct {
 	ShowViewCtxtMenu bool                      `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
 	ViewIdx          int                       `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
 	Indent           units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
+	OpenDepth        int                       `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`
 	TreeViewSig      ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 	StateStyles      [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 	WidgetSize       mat32.Vec2                `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
@@ -56,7 +57,9 @@ var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
 
 // AddNewTreeView adds a new treeview to given parent node, with given name.
 func AddNewTreeView(parent ki.Ki, name string) *TreeView {
-	return parent.AddNewChild(KiT_TreeView, name).(*TreeView)
+	tv := parent.AddNewChild(KiT_TreeView, name).(*TreeView)
+	tv.OpenDepth = 4
+	return tv
 }
 
 func (tv *TreeView) Disconnect() {
@@ -82,25 +85,29 @@ func (tv *TreeView) SetRootNode(sk ki.Ki) {
 	}
 	tv.RootView = tv
 	tvIdx := 0
-	tv.SyncToSrc(&tvIdx)
+	tv.SyncToSrc(&tvIdx, true, 0)
 	tv.UpdateEnd(updt)
 }
 
-// SetSrcNode sets the source node that we are viewing, and builds-out the view of its tree
-func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int) {
+// SetSrcNode sets the source node that we are viewing,
+// and builds-out the view of its tree.  It is called routinely
+// via SyncToSrc during tree updating.
+func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int, init bool, depth int) {
 	updt := false
 	if tv.SrcNode != sk {
 		updt = tv.UpdateStart()
 		tv.SrcNode = sk
 		sk.NodeSignal().Connect(tv.This(), SrcNodeSignalFunc) // we recv signals from source
 	}
-	tv.SyncToSrc(tvIdx)
+	tv.SyncToSrc(tvIdx, init, depth)
 	tv.UpdateEnd(updt)
 }
 
 // SyncToSrc updates the view tree to match the source tree, using
-// ConfigChildren to maximally preserve existing tree elements
-func (tv *TreeView) SyncToSrc(tvIdx *int) {
+// ConfigChildren to maximally preserve existing tree elements.
+// init means we are doing initial build, and depth tracks depth
+// (only during init).
+func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	// pr := prof.Start("TreeView.SyncToSrc")
 	// defer pr.End()
 	sk := tv.SrcNode
@@ -112,6 +119,9 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	tvPar := tv.TreeViewParent()
 	if tvPar != nil {
 		tv.RootView = tvPar.RootView
+		if init && depth >= tv.RootView.OpenDepth {
+			tv.SetClosed()
+		}
 	}
 	vcprop := "view-closed"
 	skids := *sk.Children()
@@ -147,7 +157,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	idx := 0
 	for i, fld := range flds {
 		vk := tv.Kids[idx].Embed(KiT_TreeView).(*TreeView)
-		vk.SetSrcNode(fld, tvIdx)
+		vk.SetSrcNode(fld, tvIdx, init, depth+1)
 		if mods {
 			vk.SetClosedState(fldClosed[i])
 		}
@@ -155,7 +165,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int) {
 	}
 	for _, skid := range *sk.Children() {
 		vk := tv.Kids[idx].Embed(KiT_TreeView).(*TreeView)
-		vk.SetSrcNode(skid, tvIdx)
+		vk.SetSrcNode(skid, tvIdx, init, depth+1)
 		if mods {
 			if vcp, ok := skid.PropInherit(vcprop, ki.NoInherit, ki.TypeProps); ok {
 				if vc, ok := kit.ToBool(vcp); vc && ok {
@@ -186,7 +196,7 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data interface{}) {
 		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
 			tvIdx := tv.ViewIdx
 			// fmt.Printf("full sync, idx: %v  %v", tvIdx, tv.PathUnique())
-			tv.SyncToSrc(&tvIdx)
+			tv.SyncToSrc(&tvIdx, false, 0)
 		} else {
 			tv.UpdateSig()
 		}
@@ -1991,6 +2001,12 @@ func (tv *TreeView) StyleTreeView() {
 		for i := 0; i < int(TreeViewStatesN); i++ {
 			tv.StateStyles[i].Template = tv.Sty.Template + TreeViewSelectors[i]
 			tv.StateStyles[i].SaveTemplate()
+		}
+	}
+	val, has := tv.Props["open-depth"]
+	if has {
+		if iv, ok := kit.ToInt(val); ok {
+			tv.OpenDepth = int(iv)
 		}
 	}
 	tv.Indent.SetFmInheritProp("indent", tv.This(), ki.NoInherit, ki.TypeProps)
