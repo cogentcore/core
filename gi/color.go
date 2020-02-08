@@ -231,6 +231,12 @@ func (c *Color) IsBlack() bool {
 	return false
 }
 
+// IsDark checks if HSL lightness value is < .5
+func (c *Color) IsDark() bool {
+	hsl := HSLAModel.Convert(*c).(HSLA)
+	return hsl.L < .5
+}
+
 // String returns a human-readable R,G,B,A output
 func (c *Color) String() string {
 	if c == nil {
@@ -261,8 +267,7 @@ func (c *Color) SetColor(ci color.Color) {
 		c.SetToNil()
 		return
 	}
-	var r, g, b, a uint32
-	r, g, b, a = ci.RGBA()
+	r, g, b, a := ci.RGBA()
 	c.SetUInt32(r, g, b, a)
 }
 
@@ -381,6 +386,50 @@ func (c *Color) ToHSLA() (h, s, l, a float32) {
 	r, g, b, a := c.ToNPFloat32()
 	h, s, l = RGBtoHSLf32(r, g, b)
 	return
+}
+
+// Add adds given color deltas to this color, safely avoiding overflow > 255
+func (c *Color) Add(dc Color) {
+	r, g, b, a := c.RGBA() // uint32
+	r = (r >> 8) + uint32(dc.R)
+	g = (g >> 8) + uint32(dc.G)
+	b = (b >> 8) + uint32(dc.B)
+	a = (a >> 8) + uint32(dc.A)
+	if r > 255 {
+		r = 255
+	}
+	if g > 255 {
+		g = 255
+	}
+	if b > 255 {
+		b = 255
+	}
+	if a > 255 {
+		a = 255
+	}
+	c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
+}
+
+// Sub subtracts given color deltas from this color, safely avoiding underflow < 0
+func (c *Color) Sub(dc Color) {
+	r, g, b, a := c.RGBA() // uint32
+	r = (r >> 8) - uint32(dc.R)
+	g = (g >> 8) - uint32(dc.G)
+	b = (b >> 8) - uint32(dc.B)
+	a = (a >> 8) - uint32(dc.A)
+	if r > 255 { // overflow
+		r = 0
+	}
+	if g > 255 {
+		g = 0
+	}
+	if b > 255 {
+		b = 0
+	}
+	if a > 255 {
+		a = 0
+	}
+	c.SetUInt8(uint8(r), uint8(g), uint8(b), uint8(a))
 }
 
 func cvtPctStringErr(gotpct bool, pctstr string) {

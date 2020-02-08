@@ -1,14 +1,11 @@
 package giv
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/ki/ints"
+	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/parse"
@@ -65,7 +62,7 @@ func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.
 func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Lookup) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("LookupPi: data is nil not FileStates or is nil - can't complete\n")
+		log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
 		return ld
 	}
 	lp, err := pi.LangSupport.Props(sfs.Sup)
@@ -87,32 +84,9 @@ func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Look
 		return ld
 	}
 	if ld.Filename != "" {
-		fp, err := os.Open(ld.Filename)
-		if err != nil {
-			log.Println(err)
-			return ld
-		}
-		txt, err := ioutil.ReadAll(fp)
-		fp.Close()
-		if err != nil {
-			log.Println(err)
-			return ld
-		}
-		if ld.StLine > 0 || ld.EdLine > 0 {
-			lns := bytes.Split(txt, []byte("\n"))
-			nln := len(lns)
-			if ld.EdLine > 0 && ld.EdLine > ld.StLine && ld.EdLine < nln {
-				el := ints.MinInt(ld.EdLine+1, nln-1)
-				lns = lns[:el]
-			}
-			if ld.StLine > 0 && ld.StLine < len(lns) {
-				lns = lns[ld.StLine:]
-			}
-			txt = bytes.Join(lns, []byte("\n"))
-			txt = append(txt, '\n')
-		}
+		txt := textbuf.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
-		TextViewDialog(nil, []byte(txt), DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true})
+		TextViewDialog(nil, txt, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true})
 		return ld
 	}
 

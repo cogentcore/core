@@ -68,3 +68,27 @@ func (tb *Opts) ConfigSupported(sup filecat.Supported) bool {
 	}
 	return true
 }
+
+// SupportedComments returns the comment strings for supported file types,
+// and returns the standard C-style comments otherwise.
+func SupportedComments(fpath string) (comLn, comSt, comEd string) {
+	comLn = "//"
+	comSt = "/*"
+	comEd = "*/"
+	mtyp, _, err := filecat.MimeFromFile(fpath)
+	if err != nil {
+		return
+	}
+	sup := filecat.MimeSupported(mtyp)
+	if sup == filecat.NoSupport {
+		return
+	}
+	lp, ok := pi.StdLangProps[sup]
+	if !ok {
+		return
+	}
+	comLn = lp.CommentLn
+	comSt = lp.CommentSt
+	comEd = lp.CommentEd
+	return
+}
