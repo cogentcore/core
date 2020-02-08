@@ -102,8 +102,8 @@ func (ft *FileTree) UpdateNewFile(filename string) {
 	} else if fn, ok := ft.FindFile(fpath); ok {
 		// fmt.Printf("updating node for path: %v\n", fpath)
 		fn.UpdateNode()
-	} else {
-		log.Printf("giv.FileTree UpdateNewFile: no node found for path to update: %v\n", filename)
+		// } else {
+		// log.Printf("giv.FileTree UpdateNewFile: no node found for path to update: %v\n", filename)
 	}
 }
 
@@ -465,7 +465,7 @@ func (fn *FileNode) UpdateNode() error {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
 		fn.UpdateSig()
-			fn.FRoot.UpdateSig()
+		fn.FRoot.UpdateSig()
 	}
 	return nil
 }

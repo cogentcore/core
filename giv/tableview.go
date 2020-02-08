@@ -149,7 +149,16 @@ func (tv *TableView) CacheVisFields() {
 			add = false
 		}
 		if add {
-			tv.VisFields = append(tv.VisFields, fld)
+			if typ != styp {
+				rfld, has := styp.FieldByName(fld.Name)
+				if has {
+					tv.VisFields = append(tv.VisFields, rfld)
+				} else {
+					fmt.Printf("TableView: Field name: %v is ambiguous from base struct type: %v, cannot be used in view!\n", fld.Name, styp.String())
+				}
+			} else {
+				tv.VisFields = append(tv.VisFields, fld)
+			}
 		}
 		return true
 	})
@@ -346,7 +355,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 		val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
 		stru := val.Interface()
-		fval := val.Elem().Field(field.Index[0])
+		fval := val.Elem().FieldByIndex(field.Index)
 		vv := ToValueView(fval.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
@@ -544,7 +553,7 @@ func (tv *TableView) UpdateSliceGrid() {
 		}
 		for fli := 0; fli < tv.NVisFields; fli++ {
 			field := tv.VisFields[fli]
-			fval := val.Elem().Field(field.Index[0])
+			fval := val.Elem().FieldByIndex(field.Index)
 			vvi := i*tv.NVisFields + fli
 			var vv ValueView
 			if tv.Values[vvi] == nil {
@@ -946,10 +955,10 @@ func StructSliceIdxByValue(struSlice interface{}, fldName string, fldVal interfa
 		log.Println(err)
 		return -1, err
 	}
-	fldIdx := fld.Index[0]
+	fldIdx := fld.Index
 	for idx := 0; idx < sz; idx++ {
 		rval := kit.OnePtrUnderlyingValue(svnp.Index(idx))
-		fval := rval.Elem().Field(fldIdx)
+		fval := rval.Elem().FieldByIndex(fldIdx)
 		if fval.Interface() == fldVal {
 			return idx, nil
 		}

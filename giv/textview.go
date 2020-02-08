@@ -3441,7 +3441,9 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	sbox := tv.CharStartPos(textbuf.Pos{Ln: ln})
 	sbox.X = float32(tv.VpBBox.Min.X)
 	ebox := tv.CharEndPos(textbuf.Pos{Ln: ln + 1})
-	ebox.Y -= tv.LineHeight
+	if ln < tv.NLines-1 {
+		ebox.Y -= tv.LineHeight
+	}
 	ebox.X = sbox.X + tv.LineNoOff - spc
 	bsz := ebox.Sub(sbox)
 	lclr, hasLClr := tv.Buf.LineColors[ln]

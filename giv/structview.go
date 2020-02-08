@@ -21,16 +21,17 @@ import (
 // each field, within an overall frame.
 type StructView struct {
 	gi.Frame
-	Struct        interface{}    `desc:"the struct that we are a view onto"`
-	StructValView ValueView      `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
-	Changed       bool           `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
-	ChangeFlag    *reflect.Value `json:"-" xml:"-" desc:"ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
-	FieldViews    []ValueView    `json:"-" xml:"-" desc:"ValueView representations of the fields"`
-	TmpSave       ValueView      `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig       ki.Signal      `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ViewPath      string         `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	ToolbarStru   interface{}    `desc:"the struct that we successfully set a toolbar for"`
-	HasDefs       bool           `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
+	Struct        interface{}       `desc:"the struct that we are a view onto"`
+	StructValView ValueView         `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
+	Changed       bool              `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
+	ChangeFlag    *reflect.Value    `json:"-" xml:"-" desc:"ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
+	FieldViews    []ValueView       `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	TmpSave       ValueView         `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig       ki.Signal         `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath      string            `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ToolbarStru   interface{}       `desc:"the struct that we successfully set a toolbar for"`
+	HasDefs       bool              `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
+	TypeFieldTags map[string]string `json:"-" xml:"-" view:"inactive" desc:"extra tags by field name -- from type properties"`
 }
 
 var KiT_StructView = kit.Types.AddType(&StructView{}, StructViewProps)
@@ -61,6 +62,16 @@ func (sv *StructView) SetStruct(st interface{}) {
 		sv.Changed = false
 		updt = sv.UpdateStart()
 		sv.Struct = st
+		tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
+		if tp != nil {
+			if sfp, has := ki.SubTypeProps(*tp, "StructViewFields"); has {
+				sv.TypeFieldTags = make(map[string]string)
+				for k, v := range sfp {
+					vs := kit.ToString(v)
+					sv.TypeFieldTags[k] = vs
+				}
+			}
+		}
 		if k, ok := st.(ki.Ki); ok {
 			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				// todo: check for delete??
@@ -167,6 +178,18 @@ func (sv *StructView) ConfigToolbar() {
 	sv.ToolbarStru = sv.Struct
 }
 
+// FieldTags returns the integrated tags for this field
+func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
+	if sv.TypeFieldTags == nil {
+		return fld.Tag
+	}
+	ft, has := sv.TypeFieldTags[fld.Name]
+	if !has {
+		return fld.Tag
+	}
+	return fld.Tag + " " + reflect.StructTag(ft)
+}
+
 // ConfigStructGrid configures the StructGrid for the current struct
 func (sv *StructView) ConfigStructGrid() {
 	if kit.IfaceIsNil(sv.Struct) {
@@ -185,13 +208,14 @@ func (sv *StructView) ConfigStructGrid() {
 	sv.FieldViews = make([]ValueView, 0)
 	kit.FlatFieldsValueFunc(sv.Struct, func(fval interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
-		_, got := field.Tag.Lookup("changeflag")
+		ftags := sv.FieldTags(field)
+		_, got := ftags.Lookup("changeflag")
 		if got {
 			if field.Type.Kind() == reflect.Bool {
 				sv.ChangeFlag = &fieldVal
 			}
 		}
-		vwtag := field.Tag.Get("view")
+		vwtag := ftags.Get("view")
 		if vwtag == "-" {
 			return true
 		}
