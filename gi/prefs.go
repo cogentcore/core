@@ -32,27 +32,6 @@ type FileName string
 // with this current factor.
 var ZoomFactor = float32(1.0)
 
-// ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
-// info on the different screens -- these prefs are indexed by the Screen.Name
-// -- settings here override those in the global preferences.
-type ScreenPrefs struct {
-	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."`
-}
-
-// ParamPrefs contains misc parameters controlling GUI behavior.
-type ParamPrefs struct {
-	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
-	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
-	LocalMainMenu    bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
-	BigFileSize      int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
-}
-
-// User basic user information that might be needed for different apps
-type User struct {
-	user.User
-	Email string `desc:"default email address -- e.g., for recording changes in a version control system"`
-}
-
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
@@ -62,7 +41,8 @@ type Preferences struct {
 	ScreenPrefs          map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 	Colors               ColorPrefs             `desc:"active color preferences"`
 	ColorSchemes         map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
-	Params               ParamPrefs             `desc:"parameters controlling GUI behavior"`
+	Params               ParamPrefs             `view:"inline" desc:"parameters controlling GUI behavior"`
+	Editor               EditorPrefs            `view:"inline" desc:"editor preferences -- for TextView etc"`
 	KeyMap               KeyMapName             `desc:"select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list"`
 	SaveKeyMaps          bool                   `desc:"if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords"`
 	SaveDetailed         bool                   `desc:"if set, the detailed preferences are saved and loaded at startup -- only "`
@@ -72,8 +52,6 @@ type Preferences struct {
 	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
 	FavPaths             FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
-	SavedPathsMax        int                    `desc:"maximum number of saved paths to save in FileView"`
-	Smooth3D             bool                   `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
 	FileViewSort         string                 `view:"-" desc:"column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView"`
 	ColorFilename        FileName               `view:"-" ext:".json" desc:"filename for saving / loading colors"`
 	Changed              bool                   `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
@@ -84,22 +62,14 @@ var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 // Prefs are the overall preferences
 var Prefs = Preferences{}
 
-func (pf *ParamPrefs) Defaults() {
-	pf.DoubleClickMSec = 500
-	pf.ScrollWheelSpeed = 20
-	pf.LocalMainMenu = true // much better
-	pf.BigFileSize = 10000000
-}
-
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
 	pf.Colors.Defaults()
 	pf.ColorSchemes = DefaultColorSchemes()
 	pf.Params.Defaults()
+	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Go"
-	pf.SavedPathsMax = 20
-	pf.Smooth3D = true
 	pf.KeyMap = DefaultKeyMap
 	pf.UpdateUser()
 }
@@ -208,7 +178,20 @@ func (pf *Preferences) Apply() {
 			pf.FavPaths[i].Ic = "folder"
 		}
 	}
+	if pf.Colors.HiStyle == "" {
+		pf.Colors.HiStyle = "emacs"
+	}
+	if len(pf.ColorSchemes) < 2 {
+		pf.ColorSchemes = DefaultColorSchemes()
+	}
+	if pf.ColorSchemes["Light"].HiStyle == "" {
+		pf.ColorSchemes["Light"].HiStyle = "emacs"
+	}
+	if pf.ColorSchemes["Dark"].HiStyle == "" {
+		pf.ColorSchemes["Dark"].HiStyle = "monokai"
+	}
 
+	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
 	mouse.DoubleClickMSec = pf.Params.DoubleClickMSec
 	mouse.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
@@ -327,6 +310,11 @@ func (pf *Preferences) EditKeyMaps() {
 	TheViewIFace.KeyMapsView(&AvailKeyMaps)
 }
 
+// EditHiStyles opens the HiStyleView editor to customize highlighting styles
+func (pf *Preferences) EditHiStyles() {
+	TheViewIFace.HiStylesView(false) // false = custom
+}
+
 // EditDetailed opens the PrefsDetView editor to edit detailed params
 func (pf *Preferences) EditDetailed() {
 	pf.SaveDetailed = true
@@ -433,6 +421,10 @@ var PreferencesProps = ki.Props{
 			"icon": "keyboard",
 			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
 		}},
+		{"EditHiStyles", ki.Props{
+			"icon": "file-binary",
+			"desc": "opens the HiStylesView editor of highlighting styles.",
+		}},
 		{"EditDetailed", ki.Props{
 			"icon": "file-binary",
 			"desc": "opens the PrefsDetView editor to edit detailed params that are not typically user-modified, but can be if you really care..  Turns on the SaveDetailed flag so these will be saved and loaded automatically -- can toggle that back off if you don't actually want to.",
@@ -447,23 +439,28 @@ var PreferencesProps = ki.Props{
 /////////////////////////////////////////////////////////////////////////////////
 //   ColorPrefs
 
+// HiStyleName is a highlighting style name
+type HiStyleName string
+
 // ColorPrefs specify colors for all major categories of GUI elements, and are
 // used in the default styles.
 type ColorPrefs struct {
-	Font       Color `desc:"default font / pen color"`
-	Background Color `desc:"default background color"`
-	Shadow     Color `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	Border     Color `desc:"default border color, for button, frame borders, etc"`
-	Control    Color `desc:"default main color for controls: buttons, etc"`
-	Icon       Color `desc:"color for icons or other solidly-colored, small elements"`
-	Select     Color `desc:"color for selected elements"`
-	Highlight  Color `desc:"color for highlight background"`
-	Link       Color `desc:"color for links in text etc"`
+	HiStyle    HiStyleName `desc:"text highilighting style / theme"`
+	Font       Color       `desc:"default font / pen color"`
+	Background Color       `desc:"default background color"`
+	Shadow     Color       `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	Border     Color       `desc:"default border color, for button, frame borders, etc"`
+	Control    Color       `desc:"default main color for controls: buttons, etc"`
+	Icon       Color       `desc:"color for icons or other solidly-colored, small elements"`
+	Select     Color       `desc:"color for selected elements"`
+	Highlight  Color       `desc:"color for highlight background"`
+	Link       Color       `desc:"color for links in text etc"`
 }
 
 var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 
 func (pf *ColorPrefs) Defaults() {
+	pf.HiStyle = "emacs"
 	pf.Font.SetColor(color.Black)
 	pf.Border.SetString("#666", nil)
 	pf.Background.SetColor(color.White)
@@ -476,11 +473,12 @@ func (pf *ColorPrefs) Defaults() {
 }
 
 func (pf *ColorPrefs) DarkDefaults() {
+	pf.HiStyle = "monokai"
 	pf.Font.SetUInt8(196, 199, 199, 255)
-	pf.Background.SetUInt8(64, 64, 92, 255)
+	pf.Background.SetUInt8(0, 0, 0, 255)
 	pf.Shadow.SetUInt8(64, 64, 64, 255)
 	pf.Border.SetUInt8(102, 102, 102, 255)
-	pf.Control.SetUInt8(49, 88, 91, 255)
+	pf.Control.SetUInt8(17, 57, 57, 255)
 	pf.Icon.SetUInt8(41, 41, 116, 255)
 	pf.Select.SetUInt8(52, 125, 129, 255)
 	pf.Highlight.SetUInt8(103, 70, 0, 255)
@@ -586,6 +584,68 @@ var ColorPrefsProps = ki.Props{
 			"icon": "reset",
 		}},
 	},
+}
+
+//////////////////////////////////////////////////////////////////
+//  ParamPrefs
+
+// ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
+// info on the different screens -- these prefs are indexed by the Screen.Name
+// -- settings here override those in the global preferences.
+type ScreenPrefs struct {
+	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient."`
+}
+
+// ParamPrefs contains misc parameters controlling GUI behavior.
+type ParamPrefs struct {
+	DoubleClickMSec  int     `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
+	LocalMainMenu    bool    `desc:"controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there."`
+	BigFileSize      int     `def:"10000000" desc:"the limit of file size, above which user will be prompted before opening / copying, etc."`
+	SavedPathsMax    int     `desc:"maximum number of saved paths to save in FileView"`
+	Smooth3D         bool    `desc:"turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)"`
+}
+
+func (pf *ParamPrefs) Defaults() {
+	pf.DoubleClickMSec = 500
+	pf.ScrollWheelSpeed = 20
+	pf.LocalMainMenu = true // much better
+	pf.BigFileSize = 10000000
+	pf.SavedPathsMax = 50
+	pf.Smooth3D = true
+}
+
+// User basic user information that might be needed for different apps
+type User struct {
+	user.User
+	Email string `desc:"default email address -- e.g., for recording changes in a version control system"`
+}
+
+//////////////////////////////////////////////////////////////////
+//  EditorPrefs
+
+// EditorPrefs contains editor preferences
+type EditorPrefs struct {
+	TabSize      int  `desc:"size of a tab, in chars -- also determines indent level for space indent"`
+	SpaceIndent  bool `desc:"use spaces for indentation, otherwise tabs"`
+	WordWrap     bool `desc:"wrap lines at word boundaries -- otherwise long lines scroll off the end"`
+	LineNos      bool `desc:"show line numbers"`
+	Completion   bool `desc:"use the completion system to suggest options while typing"`
+	SpellCorrect bool `desc:"suggest corrections for unknown words while typing"`
+	AutoIndent   bool `desc:"automatically indent lines when enter, tab, }, etc pressed"`
+	EmacsUndo    bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+	DepthColor   bool `desc:"colorize the background according to nesting depth"`
+}
+
+// Defaults are the defaults for EditorPrefs
+func (pf *EditorPrefs) Defaults() {
+	pf.TabSize = 4
+	pf.WordWrap = true
+	pf.LineNos = true
+	pf.Completion = true
+	pf.SpellCorrect = true
+	pf.AutoIndent = true
+	pf.DepthColor = true
 }
 
 //////////////////////////////////////////////////////////////////

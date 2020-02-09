@@ -34,18 +34,15 @@ var CustomStyles = Styles{}
 // AvailStyles are all highlighting styles
 var AvailStyles Styles
 
-// StyleName is a highlighting style name
-type StyleName string
-
 // StyleDefault is the default highlighting style name -- can set this to whatever you want
-var StyleDefault = StyleName("emacs")
+var StyleDefault = gi.HiStyleName("emacs")
 
 // StyleNames are all the names of all the available highlighting styles
 var StyleNames []string
 
 // AvailStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
-func AvailStyle(nm StyleName) Style {
+func AvailStyle(nm gi.HiStyleName) Style {
 	if AvailStyles == nil {
 		Init()
 	}
@@ -169,7 +166,7 @@ func (hs *Styles) Names() []string {
 // ViewStd shows the standard styles that are compiled into the program via
 // chroma package
 func (hs *Styles) ViewStd() {
-	gi.TheViewIFace.HiStylesView(&StdStyles)
+	gi.TheViewIFace.HiStylesView(true)
 }
 
 // Init must be called to initialize the hi styles -- post startup

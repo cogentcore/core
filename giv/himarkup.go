@@ -12,6 +12,7 @@ import (
 	"github.com/alecthomas/chroma"
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
+	"github.com/goki/gi/gi"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -25,18 +26,18 @@ import (
 // HiMarkup manages the syntax highlighting state for TextBuf
 // it uses Pi if available, otherwise falls back on chroma
 type HiMarkup struct {
-	Info      *FileInfo         `desc:"full info about the file including category etc"`
-	Style     histyle.StyleName `desc:"syntax highlighting style"`
-	Lang      string            `desc:"chroma-based language name for syntax highlighting the code"`
-	Has       bool              `desc:"true if both lang and style are set"`
-	TabSize   int               `desc:"tab size, in chars"`
-	CSSProps  ki.Props          `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
-	PiState   *pi.FileStates    `desc:"pi parser state info"`
-	PiLang    pi.Lang           `desc:"if supported, this is the pi Lang support for parsing"`
-	HiStyle   histyle.Style     `desc:"current highlighting style"`
-	Off       bool              `desc:"external toggle to turn off automatic highlighting"`
+	Info      *FileInfo      `desc:"full info about the file including category etc"`
+	Style     gi.HiStyleName `desc:"syntax highlighting style"`
+	Lang      string         `desc:"chroma-based language name for syntax highlighting the code"`
+	Has       bool           `desc:"true if both lang and style are set"`
+	TabSize   int            `desc:"tab size, in chars"`
+	CSSProps  ki.Props       `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
+	PiState   *pi.FileStates `desc:"pi parser state info"`
+	PiLang    pi.Lang        `desc:"if supported, this is the pi Lang support for parsing"`
+	HiStyle   histyle.Style  `desc:"current highlighting style"`
+	Off       bool           `desc:"external toggle to turn off automatic highlighting"`
 	lastLang  string
-	lastStyle histyle.StyleName
+	lastStyle gi.HiStyleName
 	lexer     chroma.Lexer
 	formatter *html.Formatter
 }
@@ -96,6 +97,14 @@ func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileStates) {
 		hm.formatter = html.New(html.WithClasses(true), html.TabWidth(hm.TabSize))
 		hm.lastLang = hm.Lang
 	}
+}
+
+// SetHiStyle sets the highlighting style and updates corresponding settings
+func (hm *HiMarkup) SetHiStyle(style gi.HiStyleName) {
+	hm.Style = style
+	hm.HiStyle = histyle.AvailStyle(hm.Style)
+	hm.CSSProps = hm.HiStyle.ToProps()
+	hm.lastStyle = hm.Style
 }
 
 // MarkupTagsAll returns all the markup tags according to current

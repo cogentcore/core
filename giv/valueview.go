@@ -51,7 +51,7 @@ func init() {
 		vv.Init(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(histyle.StyleName(""))), func() ValueView {
+	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() ValueView {
 		vv := &HiStyleValueView{}
 		vv.Init(vv)
 		return vv
@@ -955,8 +955,20 @@ func (vi *ViewIFace) PrefsDetView(prefs *gi.PrefsDetailed) {
 	PrefsDetView(prefs)
 }
 
-func (vi *ViewIFace) HiStylesView(styles interface{}) {
-	HiStylesView(styles.(*histyle.Styles))
+func (vi *ViewIFace) HiStylesView(std bool) {
+	if std {
+		HiStylesView(&histyle.StdStyles)
+	} else {
+		HiStylesView(&histyle.CustomStyles)
+	}
+}
+
+func (vi *ViewIFace) HiStyleInit() {
+	histyle.Init()
+}
+
+func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
+	histyle.StyleDefault = hsty
 }
 
 func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {

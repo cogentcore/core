@@ -777,7 +777,7 @@ func (sc *Scene) ActivateFrame() bool {
 	oswin.TheApp.RunOnMain(func() {
 		if sc.Frame == nil {
 			msamp := 4
-			if !gi.Prefs.Smooth3D {
+			if !gi.Prefs.Params.Smooth3D {
 				msamp = 0
 			}
 			sc.Frame = gpu.TheGPU.NewFramebuffer(sc.Nm+"-frame", sc.Geom.Size, msamp)

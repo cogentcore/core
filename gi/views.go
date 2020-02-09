@@ -34,9 +34,14 @@ type ViewIFace interface {
 	// PrefsDetView opens an interactive view of given detailed preferences object
 	PrefsDetView(prefs *PrefsDetailed)
 
-	// HiStylesView opens an interactive view of given highlighting styles
-	// (passed as interface due to package inclusion issues)
-	HiStylesView(styles interface{})
+	// HiStylesView opens an interactive view of custom or std highlighting styles.
+	HiStylesView(std bool)
+
+	// SetHiStyleDefault sets the current default histyle.StyleDefault
+	SetHiStyleDefault(hsty HiStyleName)
+
+	// HiStyleInit initializes the histyle package -- called during overall gi init.
+	HiStyleInit()
 
 	// PrefsDetDefaults gets current detailed prefs values as defaults
 	PrefsDetDefaults(prefs *PrefsDetailed)

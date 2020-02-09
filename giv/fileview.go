@@ -249,7 +249,7 @@ func (fv *FileView) ConfigPathRow() {
 			pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
 			sp := data.(string)
 			if sp == gi.FileViewResetPaths {
-				gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.SavedPathsMax)
+				gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.Params.SavedPathsMax)
 				gi.SavedPaths[0] = fvv.DirPath
 				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
 				gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
@@ -475,7 +475,7 @@ func (fv *FileView) UpdateFiles() {
 	if len(gi.SavedPaths) == 0 {
 		gi.OpenPaths()
 	}
-	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.SavedPathsMax)
+	gi.SavedPaths.AddPath(fv.DirPath, gi.Prefs.Params.SavedPathsMax)
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
 	pf.ItemsFromStringList(sp, true, 0)

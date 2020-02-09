@@ -34,6 +34,12 @@ func (un *Undo) NewGroup() {
 	un.Mu.Unlock()
 }
 
+// Reset clears all undo records
+func (un *Undo) Reset() {
+	un.Stack = nil
+	un.UndoStack = nil
+}
+
 // Save saves given edit to undo stack, with current group marker unless timer interval
 // exceeds UndoGroupDelayMSec since last item.
 func (un *Undo) Save(tbe *Edit) {

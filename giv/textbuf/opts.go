@@ -5,6 +5,7 @@
 package textbuf
 
 import (
+	"github.com/goki/gi/gi"
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/pi"
@@ -13,17 +14,10 @@ import (
 // Opts contains options for TextBufs -- contains everything necessary to
 // conditionalize editing of a given text file
 type Opts struct {
-	SpaceIndent  bool   `desc:"use spaces, not tabs, for indentation -- tab-size property in TextStyle has the tab size, used for either tabs or spaces"`
-	TabSize      int    `desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	AutoIndent   bool   `desc:"auto-indent on newline (enter) or tab"`
-	LineNos      bool   `desc:"show line numbers at left end of editor"`
-	Completion   bool   `desc:"use the completion system to suggest options while typing"`
-	SpellCorrect bool   `desc:"use spell checking to suggest corrections while typing"`
-	EmacsUndo    bool   `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
-	DepthColor   bool   `desc:"colorize the background according to nesting depth"`
-	CommentLn    string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
-	CommentSt    string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
-	CommentEd    string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+	gi.EditorPrefs `desc:"editor prefs from gogi prefs"`
+	CommentLn      string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+	CommentSt      string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+	CommentEd      string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
 }
 
 // CommentStrs returns the comment start and end strings, using line-based CommentLn first if set

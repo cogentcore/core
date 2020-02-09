@@ -15,6 +15,7 @@ import (
 	"unicode"
 
 	"github.com/goki/gi/giv/textbuf"
+	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/cursor"
 
@@ -1850,8 +1851,8 @@ func (tv *TextView) QReplaceStart(find, repl string) {
 	tv.QReplace.Matches = nil
 	tv.QReplace.Pos = -1
 
-	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.Prefs.SavedPathsMax)
-	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.Prefs.SavedPathsMax)
+	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.Prefs.Params.SavedPathsMax)
+	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.Prefs.Params.SavedPathsMax)
 
 	tv.QReplaceMatches()
 	tv.QReplace.Pos, _ = tv.MatchFromPos(tv.QReplace.Matches, tv.CursorPos)
@@ -3034,6 +3035,12 @@ func (tv *TextView) RenderCursor(on bool) {
 	win.UpdateSig()      // publish
 }
 
+// CursorSpriteName returns the name of the cursor sprite
+func (tv *TextView) CursorSpriteName() string {
+	spnm := fmt.Sprintf("%v-%v", TextViewSpriteName, tv.FontHeight)
+	return spnm
+}
+
 // CursorSprite returns the sprite for the cursor, which is
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
@@ -3043,7 +3050,7 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 		return nil
 	}
 	sty := &tv.StateStyles[TextViewActive]
-	spnm := fmt.Sprintf("%v-%v", TextViewSpriteName, tv.FontHeight)
+	spnm := tv.CursorSpriteName()
 	sp, ok := win.SpriteByName(spnm)
 	if !ok {
 		bbsz := image.Point{int(math32.Ceil(tv.CursorWidth.Dots)), int(math32.Ceil(tv.FontHeight))}
@@ -4458,6 +4465,15 @@ func (tv *TextView) Init2D() {
 
 // StyleTextView sets the style of widget
 func (tv *TextView) StyleTextView() {
+	if gi.RebuildDefaultStyles {
+		if tv.Buf != nil {
+			tv.Buf.SetHiStyle(histyle.StyleDefault)
+		}
+		if tv.Viewport != nil && tv.Viewport.Win != nil {
+			spnm := tv.CursorSpriteName()
+			tv.Viewport.Win.DeleteSprite(spnm)
+		}
+	}
 	tv.Style2DWidget()
 	pst := &(tv.Par.(gi.Node2D).AsWidget().Sty)
 	for i := 0; i < int(TextViewStatesN); i++ {

@@ -253,9 +253,9 @@ func (tb *TextBuf) BytesLine(ln int) []byte {
 }
 
 // SetHiStyle sets the highlighting style -- needs to be protected by mutex
-func (tb *TextBuf) SetHiStyle(style histyle.StyleName) {
+func (tb *TextBuf) SetHiStyle(style gi.HiStyleName) {
 	tb.MarkupMu.Lock()
-	tb.Hi.Style = style
+	tb.Hi.SetHiStyle(style)
 	tb.MarkupMu.Unlock()
 }
 
@@ -266,8 +266,7 @@ func (tb *TextBuf) Defaults() {
 		return
 	}
 	tb.SetHiStyle(histyle.StyleDefault)
-	tb.Opts.AutoIndent = true
-	tb.Opts.TabSize = 4
+	tb.Opts.EditorPrefs = gi.Prefs.Editor
 }
 
 // Refresh signals any views to refresh views
@@ -290,6 +289,7 @@ func (tb *TextBuf) New(nlines int) {
 	nlines = ints.MaxInt(nlines, 1)
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
+	tb.Undos.Reset()
 	tb.Lines = make([][]rune, nlines)
 	tb.LineBytes = make([][]byte, nlines)
 	tb.Tags = make([]lex.Line, nlines)
@@ -1526,7 +1526,7 @@ func (tb *TextBuf) Undo() *textbuf.Edit {
 	for {
 		if tbe.Delete {
 			utbe := tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
-			utbe.Group = tbe.Group
+			utbe.Group = stgp + tbe.Group
 			if tb.Opts.EmacsUndo {
 				tb.Undos.SaveUndo(utbe)
 			}
@@ -1534,7 +1534,7 @@ func (tb *TextBuf) Undo() *textbuf.Edit {
 			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), utbe)
 		} else {
 			utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
-			utbe.Group = tbe.Group
+			utbe.Group = stgp + tbe.Group
 			if tb.Opts.EmacsUndo {
 				tb.Undos.SaveUndo(utbe)
 			}

@@ -19,7 +19,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////////////
 //  HiStyleValueView
 
-// HiStyleValueView presents an action for displaying a histyle.StyleName and selecting
+// HiStyleValueView presents an action for displaying a mat32.Y and selecting
 // from styles
 type HiStyleValueView struct {
 	ValueViewBase
