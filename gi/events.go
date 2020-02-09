@@ -271,21 +271,12 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 			return true
 		}
 		if evi.OnFocus() {
-			if !nii.HasFocus2D() {
+			if !nii.HasFocus2D() { // note: HasFocus2D is a separate interface method, containers also set to true
 				return true
 			}
-			// if recv != em.Focus { // out-of-whack
-			// note: definitely need multi-level key events -- this is not a usable solution
-			// for example in gide the multi-key sequences route thorugh overall gideview object
-			// that gets key events IN ADDITION to the focus item.  the problem happens when this
-			// mechanism gets off track -- need to do more to debug that.
-			// 	ni.SetFocusState(false)
-			// 	nii.FocusChanged2D(FocusLost)
-			// 	if EventTrace {
-			// 		fmt.Printf("Event: cleared focus event receiver != Focus item: %v\n", ni.PathUnique())
-			// 	}
-			// 	return true
-			// }
+			if EventTrace && recv == em.CurFocus() {
+				fmt.Printf("Event: cur focus: %v\n", recv.PathUnique())
+			}
 			if !em.Master.IsFocusActive() { // reactivate on keyboard input
 				em.Master.SetFocusActiveState(true)
 				if EventTrace {
@@ -1003,7 +994,6 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 		if gotFocus {
 			return false
 		}
-		// todo: see about 3D guys
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
 			return true
@@ -1034,7 +1024,6 @@ func (em *EventMgr) FocusLast() bool {
 	focRoot := em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
-		// todo: see about 3D guys
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
 			return true
@@ -1063,7 +1052,6 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 		if k == focRoot { // skip top-level
 			return true
 		}
-		// todo: see about 3D guys
 		nii, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
 			return true
@@ -1072,7 +1060,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 			return true
 		}
 		if ni.HasFocus() {
-			if EventTrace {
+			if true || EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", ni.PathUnique())
 			}
 			if !updated {

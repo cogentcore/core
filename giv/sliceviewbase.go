@@ -880,10 +880,13 @@ func (sv *SliceViewBase) ConnectEvents2D() {
 }
 
 func (sv *SliceViewBase) HasFocus2D() bool {
+	if !sv.ContainsFocus() {
+		return false
+	}
 	if sv.IsInactive() {
 		return sv.InactKeyNav
 	}
-	return sv.ContainsFocus() // anyone within us gives us focus..
+	return true
 }
 
 //////////////////////////////////////////////////////////////////////////////
