@@ -135,15 +135,16 @@ type SliceViewBase struct {
 	TmpSave          ValueView        `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ToolbarSlice     interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
 
-	SliceSize    int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"size of slice"`
-	DispRows     int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
-	StartIdx     int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
-	RowHeight    float32 `view:"inactive" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
-	VisRows      int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
-	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
-	RenderedRows int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
-	InFocusGrab  bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
-	CurIdx       int     `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
+	SliceSize     int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"size of slice"`
+	DispRows      int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"actual number of rows displayed = min(VisRows, SliceSize)"`
+	StartIdx      int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"starting slice index of visible rows"`
+	RowHeight     float32 `view:"inactive" copy:"-" json:"-" xml:"-" desc:"height of a single row"`
+	VisRows       int     `view:"inactive" copy:"-" json:"-" xml:"-" desc:"total number of rows visible in allocated display size"`
+	LayoutHeight  float32 `copy:"-" view:"-" json:"-" xml:"-" desc:"the height of grid from last layout -- determines when update needed"`
+	RenderedRows  int     `copy:"-" view:"-" json:"-" xml:"-" desc:"the number of rows rendered -- determines update"`
+	InFocusGrab   bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive focus grabbing"`
+	InFullRebuild bool    `copy:"-" view:"-" json:"-" xml:"-" desc:"guard for recursive rebuild"`
+	CurIdx        int     `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
 }
 
 var KiT_SliceViewBase = kit.Types.AddType(&SliceViewBase{}, nil)
@@ -848,14 +849,16 @@ func (sv *SliceViewBase) Render2D() {
 		return
 	}
 	if sv.PushBounds() {
-		if sv.SliceGridNeedsLayout() {
+		if !sv.InFullRebuild && sv.SliceGridNeedsLayout() {
 			// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
 			// as we don't yet know the size of grid -- so we catch it here at next step and just
 			// rebuild as needed.
 			sv.RenderedRows = sv.DispRows
 			sv.This().(SliceViewer).LayoutSliceGrid()
-			// sv.This().(SliceViewer).UpdateSliceGrid()
+			// sv.This().(SliceViewer).UpdateSliceGrid() // not updating
+			sv.InFullRebuild = true
 			sv.ReRender2DTree()
+			sv.InFullRebuild = false
 			if sv.SelectedIdx > -1 {
 				sv.ScrollToIdx(sv.SelectedIdx)
 			}
