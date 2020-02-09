@@ -179,7 +179,7 @@ var ParseDirExcludes = []string{
 
 // ParseDir is the interface call for parsing a directory
 func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
-	if path == "C" || path[0] == '_' {
+	if path == "" || path == "C" || path[0] == '_' {
 		return nil
 	}
 	return TheParseDirs.ParseDir(gl, path, opts)
@@ -191,7 +191,9 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 	if os.IsNotExist(err) {
 		path, err = dirs.GoSrcDir(path)
 		if err != nil {
-			log.Println(err)
+			if TraceTypes {
+				log.Println(err)
+			}
 			return nil
 		}
 	} else if err != nil {
