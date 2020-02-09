@@ -56,7 +56,7 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.Pose.Scale.SetScalar(.005)
 	txt.SetProp("font-size", units.NewPt(36))
 	txt.SetProp("margin", units.NewPx(2))
-	txt.SetProp("color", "black")
+	txt.SetProp("color", &gi.Prefs.Colors.Font)
 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0})
 	txt.Mat.Bright = 5 // this is key for making e.g., a white background show up as white..
 }
