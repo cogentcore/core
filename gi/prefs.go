@@ -474,14 +474,14 @@ func (pf *ColorPrefs) Defaults() {
 
 func (pf *ColorPrefs) DarkDefaults() {
 	pf.HiStyle = "monokai"
-	pf.Font.SetUInt8(196, 199, 199, 255)
+	pf.Font.SetUInt8(175, 175, 175, 255)
 	pf.Background.SetUInt8(0, 0, 0, 255)
 	pf.Shadow.SetUInt8(64, 64, 64, 255)
 	pf.Border.SetUInt8(102, 102, 102, 255)
 	pf.Control.SetUInt8(17, 57, 57, 255)
 	pf.Icon.SetUInt8(41, 41, 116, 255)
-	pf.Select.SetUInt8(52, 125, 129, 255)
-	pf.Highlight.SetUInt8(103, 70, 0, 255)
+	pf.Select.SetUInt8(17, 100, 100, 255)
+	pf.Highlight.SetUInt8(66, 82, 0, 255)
 	pf.Link.SetUInt8(117, 117, 249, 255)
 }
 
