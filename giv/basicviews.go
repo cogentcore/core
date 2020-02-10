@@ -612,6 +612,9 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 			sb.Step = step
 		}
 	}
+	if fmttag, ok := vv.Tag("format"); ok {
+		sb.Format = fmttag
+	}
 	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_IntValueView).(*IntValueView)
 		sbb := vvv.Widget.(*gi.SpinBox)
@@ -678,6 +681,9 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 		if ok {
 			sb.Step = step
 		}
+	}
+	if fmttag, ok := vv.Tag("format"); ok {
+		sb.Format = fmttag
 	}
 
 	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
