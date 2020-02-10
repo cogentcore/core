@@ -240,15 +240,15 @@ func (pf *Preferences) UpdateAll() {
 	RebuildDefaultStyles = true
 	ColorSpecCache = nil
 	styleTemplates = nil
-	for _, w := range AllWindows {
-		w.SetSize(w.OSWin.Size())
-	}
+	// for _, w := range AllWindows {  // no need and just messes stuff up!
+	// 	w.SetSize(w.OSWin.Size())
+	// }
 	// needs another pass through to get it right..
 	for _, w := range AllWindows {
 		w.FullReRender()
 	}
 	RebuildDefaultStyles = false
-	// and another without rebuilding?
+	// and another without rebuilding?  yep all are required
 	for _, w := range AllWindows {
 		w.FullReRender()
 	}
