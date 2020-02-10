@@ -624,17 +624,18 @@ type User struct {
 //////////////////////////////////////////////////////////////////
 //  EditorPrefs
 
-// EditorPrefs contains editor preferences
+// EditorPrefs contains editor preferences.  It can also be set
+// from ki.Props style properties.
 type EditorPrefs struct {
-	TabSize      int  `desc:"size of a tab, in chars -- also determines indent level for space indent"`
-	SpaceIndent  bool `desc:"use spaces for indentation, otherwise tabs"`
-	WordWrap     bool `desc:"wrap lines at word boundaries -- otherwise long lines scroll off the end"`
-	LineNos      bool `desc:"show line numbers"`
-	Completion   bool `desc:"use the completion system to suggest options while typing"`
-	SpellCorrect bool `desc:"suggest corrections for unknown words while typing"`
-	AutoIndent   bool `desc:"automatically indent lines when enter, tab, }, etc pressed"`
-	EmacsUndo    bool `desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
-	DepthColor   bool `desc:"colorize the background according to nesting depth"`
+	TabSize      int  `xml:"tab-size" desc:"size of a tab, in chars -- also determines indent level for space indent"`
+	SpaceIndent  bool `xml:"space-indent" desc:"use spaces for indentation, otherwise tabs"`
+	WordWrap     bool `xml:"word-wrap" desc:"wrap lines at word boundaries -- otherwise long lines scroll off the end"`
+	LineNos      bool `xml:"line-nos" desc:"show line numbers"`
+	Completion   bool `xml:"completion" desc:"use the completion system to suggest options while typing"`
+	SpellCorrect bool `xml:"spell-correct" desc:"suggest corrections for unknown words while typing"`
+	AutoIndent   bool `xml:"auto-indent" desc:"automatically indent lines when enter, tab, }, etc pressed"`
+	EmacsUndo    bool `xml:"emacs-undo" desc:"use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo"`
+	DepthColor   bool `xml:"depth-color" desc:"colorize the background according to nesting depth"`
 }
 
 // Defaults are the defaults for EditorPrefs
@@ -646,6 +647,57 @@ func (pf *EditorPrefs) Defaults() {
 	pf.SpellCorrect = true
 	pf.AutoIndent = true
 	pf.DepthColor = true
+}
+
+// StyleFromProps styles Slider-specific fields from ki.Prop properties
+// doesn't support inherit or default
+func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		switch key {
+		case "tab-size":
+			if iv, ok := kit.ToInt(val); ok {
+				pf.TabSize = int(iv)
+			}
+		case "space-indent":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.SpaceIndent = iv
+			}
+		case "word-wrap":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.WordWrap = iv
+			}
+		case "line-nos":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.LineNos = iv
+			}
+		case "completion":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.Completion = iv
+			}
+		case "spell-correct":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.SpellCorrect = iv
+			}
+		case "auto-indent":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.AutoIndent = iv
+			}
+		case "emacs-undo":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.EmacsUndo = iv
+			}
+		case "depth-color":
+			if iv, ok := kit.ToBool(val); ok {
+				pf.DepthColor = iv
+			}
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////

@@ -3433,7 +3433,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 // and if vpUpload is true it uploads the rendered region to viewport directly
 // (only if totally separate from other updates)
 func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
-	if !tv.HasLineNos() {
+	if !tv.HasLineNos() || tv.Buf == nil {
 		return
 	}
 
@@ -4484,6 +4484,9 @@ func (tv *TextView) StyleTextView() {
 	}
 	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), ki.Inherit, ki.TypeProps)
 	tv.CursorWidth.ToDots(&tv.Sty.UnContext)
+	if tv.Buf != nil {
+		tv.Buf.Opts.StyleFromProps(tv.Props)
+	}
 }
 
 // Style2D calls StyleTextView and sets the style

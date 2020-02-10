@@ -89,8 +89,6 @@ func mainrun() {
 	txed2.SetBuf(txbuf)
 
 	txbuf.Hi.Lang = "Go"
-	txbuf.Hi.Style = "emacs"
-	txbuf.Opts.LineNos = true
 	txbuf.Open(samplefile)
 
 	// main menu

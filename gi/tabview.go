@@ -27,6 +27,7 @@ type TabView struct {
 	MaxChars     int          `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
 	TabViewSig   ki.Signal    `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 	NewTabButton bool         `desc:"show a new tab button at right of list of tabs"`
+	NoDeleteTabs bool         `desc:"if true, tabs are not user-deleteable"`
 	NewTabType   reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
 	Mu           sync.Mutex   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
@@ -104,6 +105,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 	tab := tb.InsertNewChild(KiT_TabButton, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.Tooltip = label
+	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
 	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		tvv := recv.Embed(KiT_TabView).(*TabView)
@@ -519,6 +521,7 @@ func (tv *TabView) Render2D() {
 // icon is used for close icon.
 type TabButton struct {
 	Action
+	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
 }
 
 var KiT_TabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
@@ -601,6 +604,14 @@ func (tb *TabButton) TabView() *TabView {
 
 func (tb *TabButton) ConfigParts() {
 	tb.Parts.SetProp("overflow", OverflowHidden) // no scrollbars!
+	if !tb.NoDelete {
+		tb.ConfigPartsDeleteButton()
+		return
+	}
+	tb.Action.ConfigParts() // regular
+}
+
+func (tb *TabButton) ConfigPartsDeleteButton() {
 	config := kit.TypeAndNameList{}
 	clsIdx := 0
 	config.Add(KiT_Action, "close")

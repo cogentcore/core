@@ -237,6 +237,24 @@ func (fn *FileNode) IsIrregular() bool {
 	return (fn.Info.Mode & os.ModeIrregular) != 0
 }
 
+// IsExternal returns true if file is external to main file tree
+func (fn *FileNode) IsExternal() bool {
+	isExt := false
+	fn.FuncUp(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfni := k.Embed(KiT_FileNode)
+		if sfni == nil {
+			return false
+		}
+		sfn := sfni.(*FileNode)
+		if sfn.IsIrregular() {
+			isExt = true
+			return false
+		}
+		return true
+	})
+	return isExt
+}
+
 // IsSymLink returns true if file is a symlink
 func (fn *FileNode) IsSymLink() bool {
 	return fn.HasFlag(int(FileNodeSymLink))
@@ -683,9 +701,10 @@ func (fn *FileNode) DuplicateFile() error {
 
 // DeleteFile deletes this file
 func (fn *FileNode) DeleteFile() (err error) {
-	if fn.IsIrregular() {
+	if fn.IsExternal() {
 		return nil
 	}
+	fn.CloseBuf()
 	repo, _ := fn.Repo()
 	if !fn.Info.IsDir() && repo != nil && fn.Info.Vcs >= vci.Stored {
 		// fmt.Printf("del repo: %v\n", fn.FPath)
@@ -702,9 +721,10 @@ func (fn *FileNode) DeleteFile() (err error) {
 
 // RenameFile renames file to new name
 func (fn *FileNode) RenameFile(newpath string) (err error) {
-	if fn.IsIrregular() {
+	if fn.IsExternal() {
 		return nil
 	}
+	fn.CloseBuf() // invalid after this point
 	orgpath := fn.FPath
 	newpath, err = fn.Info.Rename(newpath)
 	if len(newpath) == 0 || err != nil {
@@ -737,7 +757,7 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 
 // NewFile makes a new file in given selected directory node
 func (fn *FileNode) NewFile(filename string, addToVcs bool) {
-	if fn.IsIrregular() {
+	if fn.IsExternal() {
 		return
 	}
 	ppath := string(fn.FPath)
@@ -761,7 +781,7 @@ func (fn *FileNode) NewFile(filename string, addToVcs bool) {
 
 // NewFolder makes a new folder (directory) in given selected directory node
 func (fn *FileNode) NewFolder(foldername string) {
-	if fn.IsIrregular() {
+	if fn.IsExternal() {
 		return
 	}
 	ppath := string(fn.FPath)
@@ -781,7 +801,7 @@ func (fn *FileNode) NewFolder(foldername string) {
 // CopyFileToDir copies given file path into node that is a directory.
 // This does NOT check for overwriting -- that must be done at higher level!
 func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
-	if fn.IsIrregular() {
+	if fn.IsExternal() {
 		return
 	}
 	ppath := string(fn.FPath)
@@ -806,6 +826,9 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 // and the node for the directory where the repo is based.
 // Goes up the tree until a repository is found.
 func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
+	if fn.IsExternal() {
+		return nil, nil
+	}
 	var repo vci.Repo
 	var rnode *FileNode
 	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
@@ -1254,9 +1277,6 @@ func (ftv *FileTreeView) DeleteFilesImpl() {
 			}
 			fn.DeleteFile()
 		} else {
-			if fn.Buf != nil {
-				fn.CloseBuf()
-			}
 			fn.DeleteFile()
 		}
 	}
@@ -1286,6 +1306,9 @@ func (ftv *FileTreeView) RenameFiles() {
 		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := ftvv.FileNode()
 		if fn != nil {
+			if fn.IsExternal() {
+				continue
+			}
 			CallMethod(fn, "RenameFile", ftv.Viewport)
 		}
 	}
@@ -1391,6 +1414,20 @@ func (ftv *FileTreeView) RevertVcs() {
 	fn := ftvv.FileNode()
 	if fn != nil {
 		fn.RevertVcs()
+	}
+}
+
+// RemoveFromExterns removes file from list of external files
+func (ftv *FileTreeView) RemoveFromExterns() {
+	sels := ftv.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil && fn.IsExternal() {
+			fn.CloseBuf()
+			fn.Delete(true)
+		}
 	}
 }
 
@@ -1539,7 +1576,7 @@ func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	tfn := ftv.FileNode()
-	if tfn == nil || tfn.IsIrregular() {
+	if tfn == nil || tfn.IsExternal() {
 		return
 	}
 	tupdt := ftv.RootView.UpdateStart()
@@ -1604,7 +1641,7 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 	}
 	sroot := ftv.RootView.SrcNode
 	tfn := ftv.FileNode()
-	if tfn == nil || tfn.IsIrregular() {
+	if tfn == nil || tfn.IsExternal() {
 		return
 	}
 	md := de.Data
@@ -1625,12 +1662,21 @@ func (ftv *FileTreeView) Dragged(de *dnd.Event) {
 	}
 }
 
-// FileTreeInactiveIrregFunc is an ActionUpdateFunc that inactivates action if node is irregular
-var FileTreeInactiveIrregFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+// FileTreeInactiveExternFunc is an ActionUpdateFunc that inactivates action if node is external
+var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetInactiveState(fn.IsIrregular())
+		act.SetInactiveState(fn.IsExternal())
+	}
+})
+
+// FileTreeActiveExternFunc is an ActionUpdateFunc that activates action if node is external
+var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Action) {
+	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
+	fn := ftv.FileNode()
+	if fn != nil {
+		act.SetActiveState(fn.IsExternal() && !fn.IsIrregular())
 	}
 })
 
@@ -1639,7 +1685,7 @@ var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Act
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetInactiveState(fn.IsDir())
+		act.SetInactiveState(fn.IsDir() || fn.IsExternal())
 	}
 })
 
@@ -1648,7 +1694,7 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni interface{}, act *gi.Actio
 	ftv := fni.(ki.Ki).Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetActiveState(fn.IsDir() && !fn.IsIrregular())
+		act.SetActiveState(fn.IsDir() && !fn.IsExternal())
 	}
 })
 
@@ -1793,13 +1839,13 @@ var FileTreeViewProps = ki.Props{
 		{"DeleteFiles", ki.Props{
 			"label":    "Delete",
 			"desc":     "Ok to delete file(s)?  This is not undoable and is not moving to trash / recycle bin",
-			"updtfunc": FileTreeInactiveIrregFunc,
+			"updtfunc": FileTreeInactiveExternFunc,
 			"shortcut": gi.KeyFunDelete,
 		}},
 		{"RenameFiles", ki.Props{
 			"label":    "Rename",
 			"desc":     "Rename file to new file name",
-			"updtfunc": FileTreeInactiveIrregFunc,
+			"updtfunc": FileTreeInactiveExternFunc,
 		}},
 		{"sep-open", ki.BlankProp{}},
 		{"OpenDirs", ki.Props{
@@ -1849,6 +1895,12 @@ var FileTreeViewProps = ki.Props{
 		{"RevertVcs", ki.Props{
 			"desc":       "Revert file to last commit",
 			"updtfunc":   FileTreeActiveInVcsModifiedFunc,
+			"label-func": VcsLabelFunc,
+		}},
+		{"sep-extrn", ki.BlankProp{}},
+		{"RemoveFromExterns", ki.Props{
+			"desc":       "Remove file from external files listt",
+			"updtfunc":   FileTreeActiveExternFunc,
 			"label-func": VcsLabelFunc,
 		}},
 	},
