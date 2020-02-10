@@ -479,7 +479,7 @@ func (pf *ColorPrefs) DarkDefaults() {
 	pf.Shadow.SetUInt8(64, 64, 64, 255)
 	pf.Border.SetUInt8(102, 102, 102, 255)
 	pf.Control.SetUInt8(17, 57, 57, 255)
-	pf.Icon.SetUInt8(41, 41, 116, 255)
+	pf.Icon.SetUInt8(70, 70, 192, 255)
 	pf.Select.SetUInt8(17, 100, 100, 255)
 	pf.Highlight.SetUInt8(66, 82, 0, 255)
 	pf.Link.SetUInt8(117, 117, 249, 255)
