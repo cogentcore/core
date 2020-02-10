@@ -39,6 +39,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 	switch {
 	case tnm == "FuncCall":
 		fun := tyast.NextAst()
+		if fun == nil {
+			return nil, nil, false
+		}
 		funm := fun.Src
 		sym, got := fs.FindNameScoped(funm, conts)
 		if got {
@@ -78,6 +81,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			return nil, fun, false
 		}
 	case tnm == "Selector":
+		if tyast.NumChildren() == 0 { // incomplete
+			return nil, nil, false
+		}
 		tnmA := tyast.ChildAst(0)
 		if tnmA.Nm != "Name" {
 			if TraceTypes {
@@ -88,6 +94,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		}
 		return gl.TypeFromAstName(fs, origPkg, pkg, tnmA, last, conts)
 	case tnm == "Slice": // strings.HasPrefix(tnm, "Slice"):
+		if tyast.NumChildren() == 0 { // incomplete
+			return nil, nil, false
+		}
 		tnmA := tyast.ChildAst(0)
 		if tnmA.Nm != "Name" {
 			if TraceTypes {
