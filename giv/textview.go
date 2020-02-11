@@ -42,42 +42,43 @@ import (
 // require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
-	Buf            *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder    string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	CursorWidth    units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	NLines         int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Renders        []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs           []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs     int                       `json:"-" xml:"-" desc:"number of line number digits needed"`
-	LineNoOff      float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
-	LineNoRender   gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
-	LinesSize      image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz       mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos      textbuf.Pos               `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol      int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	CorrectPos     textbuf.Pos               `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
-	PosHistIdx     int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
-	SelectStart    textbuf.Pos               `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
-	SelectReg      textbuf.Region            `json:"-" xml:"-" desc:"current selection region"`
-	PrevSelectReg  textbuf.Region            `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	Highlights     []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
-	Scopelights    []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
-	SelectMode     bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-	ForceComplete  bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
-	ISearch        ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
-	QReplace       QReplace                  `json:"-" xml:"-" desc:"query replace data"`
-	TextViewSig    ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
-	LinkSig        ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles    [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight     float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight     float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize        image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn        bool                      `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
-	CursorMu       sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
-	HasLinks       bool                      `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
-	lastRecenter   int
-	lastAutoInsert rune
-	lastFilename   gi.FileName
+	Buf                    *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder            string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	CursorWidth            units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	NLines                 int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	Renders                []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs                   []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LineNoDigs             int                       `json:"-" xml:"-" desc:"number of line number digits needed"`
+	LineNoOff              float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoRender           gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
+	LinesSize              image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz               mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
+	CursorPos              textbuf.Pos               `json:"-" xml:"-" desc:"current cursor position"`
+	CursorCol              int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	CorrectPos             textbuf.Pos               `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
+	ScrollToCursorOnRender bool                      `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
+	PosHistIdx             int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
+	SelectStart            textbuf.Pos               `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+	SelectReg              textbuf.Region            `json:"-" xml:"-" desc:"current selection region"`
+	PrevSelectReg          textbuf.Region            `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	Highlights             []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
+	Scopelights            []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
+	SelectMode             bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	ForceComplete          bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
+	ISearch                ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
+	QReplace               QReplace                  `json:"-" xml:"-" desc:"query replace data"`
+	TextViewSig            ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
+	LinkSig                ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	StateStyles            [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight             float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight             float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize                image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn                bool                      `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+	CursorMu               sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
+	HasLinks               bool                      `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+	lastRecenter           int
+	lastAutoInsert         rune
+	lastFilename           gi.FileName
 }
 
 var KiT_TextView = kit.Types.AddType(&TextView{}, TextViewProps)
@@ -3492,23 +3493,25 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	pos.X = float32(tv.VpBBox.Min.X) + spc
 
 	tv.LineNoRender.Render(rs, pos)
-	if icnm, ok := tv.Buf.LineIcons[ln]; ok {
-		ic := tv.Buf.Icons[icnm]
-		ic.Par = tv
-		ic.Viewport = tv.Viewport
-		// pos.X += 20 // todo
-		sic := ic.SVGIcon()
-		sic.Resize(image.Point{20, 20})
-		sic.FullRender2DTree()
-		ist := sbox.ToPointFloor()
-		ied := ebox.ToPointFloor()
-		ied.X += int(spc)
-		ist.X = ied.X - 20
-		r := image.Rectangle{Min: ist, Max: ied}
-		sic.Sty.Font.BgColor.SetName("black")
-		sic.FillViewport()
-		draw.Draw(tv.Viewport.Pixels, r, sic.Pixels, image.ZP, draw.Over)
-	}
+	// todo: need an SvgRender interface that just takes an svg file or object
+	// and renders it to a given bitmap, and then just keep that around.
+	// if icnm, ok := tv.Buf.LineIcons[ln]; ok {
+	// 	ic := tv.Buf.Icons[icnm]
+	// 	ic.Par = tv
+	// 	ic.Viewport = tv.Viewport
+	// 	// pos.X += 20 // todo
+	// 	sic := ic.SVGIcon()
+	// 	sic.Resize(image.Point{20, 20})
+	// 	sic.FullRender2DTree()
+	// 	ist := sbox.ToPointFloor()
+	// 	ied := ebox.ToPointFloor()
+	// 	ied.X += int(spc)
+	// 	ist.X = ied.X - 20
+	// 	r := image.Rectangle{Min: ist, Max: ied}
+	// 	sic.Sty.Font.BgColor.SetName("black")
+	// 	sic.FillViewport()
+	// 	draw.Draw(tv.Viewport.Pixels, r, sic.Pixels, image.ZP, draw.Over)
+	// }
 	if vpUpload {
 		tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
 		vprel := tBBox.Min.Sub(tv.VpBBox.Min)
@@ -4571,6 +4574,11 @@ func (tv *TextView) Render2D() {
 		} else {
 			tv.Sty = tv.StateStyles[TextViewActive]
 		}
+		if tv.ScrollToCursorOnRender {
+			tv.ScrollToCursorOnRender = false
+			tv.ScrollCursorToTop()
+		}
+
 		tv.RenderAllLinesInBounds()
 		if tv.HasFocus() && tv.IsFocusActive() {
 			// fmt.Printf("tv render: %v  start cursor\n", tv.Nm)

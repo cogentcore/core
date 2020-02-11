@@ -14,13 +14,8 @@ import (
 	"github.com/goki/ki/ints"
 )
 
-// FileRegionBytes returns the bytes of given file within given
-// start / end lines, either of which might be 0 (in which case full file
-// is returned).
-// If preComments is true, it also automatically includes any comments
-// that might exist just prior to the start line if stLn is > 0, going back
-// a maximum of lnBack lines.
-func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int) []byte {
+// FileBytes returns the bytes of given file.
+func FileBytes(fpath string) []byte {
 	fp, err := os.Open(fpath)
 	if err != nil {
 		log.Println(err)
@@ -30,6 +25,20 @@ func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int)
 	fp.Close()
 	if err != nil {
 		log.Println(err)
+		return nil
+	}
+	return txt
+}
+
+// FileRegionBytes returns the bytes of given file within given
+// start / end lines, either of which might be 0 (in which case full file
+// is returned).
+// If preComments is true, it also automatically includes any comments
+// that might exist just prior to the start line if stLn is > 0, going back
+// a maximum of lnBack lines.
+func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int) []byte {
+	txt := FileBytes(fpath)
+	if txt == nil {
 		return txt
 	}
 	if stLn == 0 && edLn == 0 {
@@ -44,7 +53,7 @@ func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int)
 	}
 	if preComments && stLn > 0 && stLn < nln {
 		comLn, comSt, comEd := SupportedComments(fpath)
-		stLn = PreCommentStart(lns, stLn, comLn, comSt, comEd, 10) // just go back 10 max
+		stLn = PreCommentStart(lns, stLn, comLn, comSt, comEd, lnBack)
 	}
 
 	if stLn > 0 && stLn < len(lns) {

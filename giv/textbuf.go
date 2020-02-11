@@ -195,6 +195,35 @@ func (tb *TextBuf) SetText(txt []byte) {
 	tb.Refresh()
 }
 
+// SetTextLines sets the text to given lines of bytes
+// if cpy is true, make a copy of bytes -- otherwise use
+func (tb *TextBuf) SetTextLines(lns [][]byte, cpy bool) {
+	tb.Defaults()
+	tb.LinesMu.Lock()
+	tb.NLines = len(lns)
+	tb.LinesMu.Unlock()
+	tb.New(tb.NLines)
+	tb.LinesMu.Lock()
+	bo := 0
+	for ln, txt := range lns {
+		tb.ByteOffs[ln] = bo
+		tb.Lines[ln] = bytes.Runes(txt)
+		if cpy {
+			tb.LineBytes[ln] = make([]byte, len(txt))
+			copy(tb.LineBytes[ln], txt)
+		} else {
+			tb.LineBytes[ln] = txt
+		}
+		tb.Markup[ln] = HTMLEscapeRunes(tb.Lines[ln])
+		bo += len(txt) + 1 // lf
+	}
+	tb.TotalBytes = bo
+	tb.LinesMu.Unlock()
+	tb.LinesToBytes()
+	tb.InitialMarkup()
+	tb.Refresh()
+}
+
 // EditDone finalizes any current editing, sends signal
 func (tb *TextBuf) EditDone() {
 	tb.AutoSaveDelete()
@@ -1341,8 +1370,21 @@ func (tb *TextBuf) InitialMarkup() {
 func (tb *TextBuf) StartDelayedReMarkup() {
 	tb.MarkupDelayMu.Lock()
 	defer tb.MarkupDelayMu.Unlock()
+	if !tb.Hi.HasHi() || tb.NLines == 0 {
+		return
+	}
 	if tb.MarkupDelayTimer != nil {
 		tb.MarkupDelayTimer.Stop()
+	}
+	if tb.IsMarkingUp() {
+		return
+	}
+	vp := tb.ViewportFromView()
+	if vp != nil {
+		cpop := vp.Win.CurPopup()
+		if gi.PopupIsCompleter(cpop) {
+			return
+		}
 	}
 	tb.MarkupDelayTimer = time.AfterFunc(time.Duration(TextBufMarkupDelayMSec)*time.Millisecond,
 		func() {

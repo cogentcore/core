@@ -9,12 +9,10 @@ All of the code is in the sub-packages within this repository:
 
 * gi: contains the main 2D GUI code
 
-* gi3d: contains the 3D scenegraph framework, that interoperates seamlessly with the 2D.
-
 * giv: are more complex Views of Go data structures, built out of gi widgets, supporting
 the Model-View paradigm.
 
-* svg: provides a full SVG rendering framework, used for Icons, and in its own right.
+* svg is something: provides a full SVG rendering framework, used for Icons, and in its own right.
 
 * oswin: is the OS-specific framework, originally based on Shiny, that provides all the
 gory guts for dealing with different OS's.
