@@ -1535,13 +1535,13 @@ func (tv *TextView) Redo() {
 // FindMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
-func (tv *TextView) FindMatches(find string, useCase bool) ([]textbuf.Match, bool) {
+func (tv *TextView) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Match, bool) {
 	fsz := len(find)
 	if fsz == 0 {
 		tv.Highlights = nil
 		return nil, false
 	}
-	_, matches := tv.Buf.Search([]byte(find), !useCase)
+	_, matches := tv.Buf.Search([]byte(find), !useCase, lexItems)
 	if len(matches) == 0 {
 		tv.Highlights = nil
 		tv.RenderAllLines()
@@ -1600,7 +1600,7 @@ func HasUpperCase(str string) bool {
 // ISearchMatches finds ISearch matches -- returns true if there are any
 func (tv *TextView) ISearchMatches() bool {
 	got := false
-	tv.ISearch.Matches, got = tv.FindMatches(tv.ISearch.Find, tv.ISearch.UseCase)
+	tv.ISearch.Matches, got = tv.FindMatches(tv.ISearch.Find, tv.ISearch.UseCase, false)
 	return got
 }
 
@@ -1762,6 +1762,7 @@ type QReplace struct {
 	Find     string          `json:"-" xml:"-" desc:"current interactive search string"`
 	Replace  string          `json:"-" xml:"-" desc:"current interactive search string"`
 	UseCase  bool            `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	LexItems bool            `json:"-" xml:"-" desc:"search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i"`
 	Matches  []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
 	Pos      int             `json:"-" xml:"-" desc:"position within isearch matches"`
 	PrevPos  int             `json:"-" xml:"-" desc:"position in search list from previous search"`
@@ -1780,7 +1781,7 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func QReplaceDialog(avp *gi.Viewport2D, find string, lexitems bool, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog(opts, gi.AddOk, gi.AddCancel)
 	dlg.Modal = true
 
@@ -1803,6 +1804,11 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 	tfr.ConfigParts()
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
+	lb := frame.InsertNewChild(gi.KiT_CheckBox, prIdx+3, "lexb").(*gi.CheckBox)
+	lb.SetText("Lexical Items")
+	lb.SetChecked(lexitems)
+	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
+
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
@@ -1812,7 +1818,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, opts gi.DlgOpts, recv ki.Ki
 }
 
 // QReplaceDialogValues gets the string values
-func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string) {
+func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 	frame := dlg.Frame()
 	tff := frame.ChildByName("find", 1).(*gi.ComboBox)
 	if tf, found := tff.TextField(); found {
@@ -1822,6 +1828,8 @@ func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string) {
 	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}
+	lb := frame.ChildByName("lexb", 3).(*gi.CheckBox)
+	lexItems = lb.IsChecked()
 	return
 }
 
@@ -1832,20 +1840,21 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv.Viewport, find, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	QReplaceDialog(tv.Viewport, find, tv.QReplace.LexItems, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		dlg := send.(*gi.Dialog)
 		if sig == int64(gi.DialogAccepted) {
-			find, repl := QReplaceDialogValues(dlg)
-			tv.QReplaceStart(find, repl)
+			find, repl, lexItems := QReplaceDialogValues(dlg)
+			tv.QReplaceStart(find, repl, lexItems)
 		}
 	})
 }
 
 // QReplaceStart starts query-replace using given find, replace strings
-func (tv *TextView) QReplaceStart(find, repl string) {
+func (tv *TextView) QReplaceStart(find, repl string, lexItems bool) {
 	tv.QReplace.On = true
 	tv.QReplace.Find = find
 	tv.QReplace.Replace = repl
+	tv.QReplace.LexItems = lexItems
 	tv.QReplace.StartPos = tv.CursorPos
 	tv.QReplace.UseCase = HasUpperCase(find)
 	tv.QReplace.Matches = nil
@@ -1863,7 +1872,7 @@ func (tv *TextView) QReplaceStart(find, repl string) {
 // QReplaceMatches finds QReplace matches -- returns true if there are any
 func (tv *TextView) QReplaceMatches() bool {
 	got := false
-	tv.QReplace.Matches, got = tv.FindMatches(tv.QReplace.Find, tv.QReplace.UseCase)
+	tv.QReplace.Matches, got = tv.FindMatches(tv.QReplace.Find, tv.QReplace.UseCase, tv.QReplace.LexItems)
 	return got
 }
 

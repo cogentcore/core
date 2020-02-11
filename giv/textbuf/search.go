@@ -13,11 +13,12 @@ import (
 
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/runes"
+	"github.com/goki/pi/lex"
 )
 
-// Match records one match for search within file
+// Match records one match for search within file, positions in runes
 type Match struct {
-	Reg  Region `desc:"region surrounding the match"`
+	Reg  Region `desc:"region surrounding the match -- column positions are in runes, not bytes"`
 	Text []byte `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
 }
 
@@ -88,6 +89,45 @@ func SearchRuneLines(src [][]rune, find []byte, ignoreCase bool) (int, []Match) 
 			i += ci
 			ci = i + fsz
 			mat := NewMatch(rn, i, ci, ln)
+			matches = append(matches, mat)
+			cnt++
+		}
+	}
+	return cnt, matches
+}
+
+// SearchLexItems looks for a string (no regexp),
+// as entire lexically tagged items,
+// with given case-sensitivity returning number of occurrences
+// and specific match position list.  Column positions are in runes.
+func SearchLexItems(src [][]rune, lexs []lex.Line, find []byte, ignoreCase bool) (int, []Match) {
+	fr := bytes.Runes(find)
+	fsz := len(fr)
+	if fsz == 0 {
+		return 0, nil
+	}
+	cnt := 0
+	var matches []Match
+	mx := ints.MinInt(len(src), len(lexs))
+	for ln := 0; ln < mx; ln++ {
+		rln := src[ln]
+		lxln := lexs[ln]
+		for _, lx := range lxln {
+			sz := lx.Ed - lx.St
+			if sz != fsz {
+				continue
+			}
+			rn := rln[lx.St:lx.Ed]
+			var i int
+			if ignoreCase {
+				i = runes.IndexFold(rn, fr)
+			} else {
+				i = runes.Index(rn, fr)
+			}
+			if i < 0 {
+				continue
+			}
+			mat := NewMatch(rln, lx.St, lx.Ed, ln)
 			matches = append(matches, mat)
 			cnt++
 		}

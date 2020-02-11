@@ -928,10 +928,14 @@ func (tb *TextBuf) Strings(addNewLn bool) []string {
 // Search looks for a string (no regexp) within buffer,
 // with given case-sensitivity, returning number of occurrences
 // and specific match position list. column positions are in runes.
-func (tb *TextBuf) Search(find []byte, ignoreCase bool) (int, []textbuf.Match) {
+func (tb *TextBuf) Search(find []byte, ignoreCase, lexItems bool) (int, []textbuf.Match) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return textbuf.SearchRuneLines(tb.Lines, find, ignoreCase)
+	if lexItems {
+		return textbuf.SearchLexItems(tb.Lines, tb.HiTags, find, ignoreCase)
+	} else {
+		return textbuf.SearchRuneLines(tb.Lines, find, ignoreCase)
+	}
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner
