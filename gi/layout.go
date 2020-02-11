@@ -811,6 +811,11 @@ func (ly *Layout) LayoutGrid() {
 	row := 0
 	cols := ly.GridSize.X
 	rows := ly.GridSize.Y
+
+	if cols*rows != ly.NumChildren() {
+		ly.GatherSizesGrid()
+	}
+
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
