@@ -855,13 +855,6 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 		ad.View.SetName(ad.Name)
 		nprompt++ // assume prompt
 
-		if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenuVal)) {
-			ad.Default = md.SubMenuVal
-			ad.SetHasDef()
-			bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
-			nprompt--
-		}
-
 		switch apv := aps.Value.(type) {
 		case ki.BlankProp:
 		case ki.Props:
@@ -889,6 +882,14 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 				}
 			}
 		}
+
+		if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenuVal)) {
+			ad.Default = md.SubMenuVal
+			ad.SetHasDef()
+			bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
+			nprompt--
+		}
+
 		if ad.HasDef() {
 			ad.View.SetValue(ad.Default)
 		}
@@ -977,6 +978,7 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	*m = make(gi.Menu, sz)
 	for i := 0; i < sz; i++ {
 		val := mvnp.Index(i)
+		vi := val.Interface()
 		nm := kit.ToString(val)
 		if nm == gi.MenuTextSeparator {
 			sp := &gi.Separator{}
@@ -991,9 +993,8 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 		nac.SetAsMenu()
 		nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
 		nd := *md // copy
-		nd.SubMenuVal = val
+		nd.SubMenuVal = vi
 		if gotDef {
-			vi := val.Interface()
 			if kit.ToString(vi) == defstr {
 				nac.SetSelected()
 			}
