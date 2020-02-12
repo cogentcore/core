@@ -201,12 +201,18 @@ func (tv *TableView) SliceFrame() *gi.Frame {
 
 // GridLayout returns the SliceGrid grid-layout widget, with grid and scrollbar
 func (tv *TableView) GridLayout() *gi.Layout {
+	if !tv.IsConfiged() {
+		return nil
+	}
 	return tv.SliceFrame().ChildByName("grid-lay", 0).(*gi.Layout)
 }
 
 // SliceGrid returns the SliceGrid grid frame widget, which contains all the
 // fields and values, within SliceFrame
 func (tv *TableView) SliceGrid() *gi.Frame {
+	if !tv.IsConfiged() {
+		return nil
+	}
 	return tv.GridLayout().ChildByName("grid", 0).(*gi.Frame)
 }
 
@@ -405,7 +411,12 @@ func (tv *TableView) ConfigSliceGrid() {
 func (tv *TableView) LayoutSliceGrid() bool {
 	sg := tv.SliceGrid()
 	if kit.IfaceIsNil(tv.Slice) {
-		sg.DeleteChildren(ki.DestroyKids)
+		if sg != nil {
+			sg.DeleteChildren(ki.DestroyKids)
+		}
+		return false
+	}
+	if sg == nil {
 		return false
 	}
 	sz := tv.This().(SliceViewer).UpdtSliceSize()

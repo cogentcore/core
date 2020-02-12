@@ -21,7 +21,7 @@ import (
 )
 
 // Styles is a collection of styles
-type Styles map[string]Style
+type Styles map[string]*Style
 
 var KiT_Styles = kit.Types.AddType(&Styles{}, StylesProps)
 
@@ -42,7 +42,7 @@ var StyleNames []string
 
 // AvailStyle returns a style by name from the AvailStyles list -- if not found
 // default is used as a fallback
-func AvailStyle(nm gi.HiStyleName) Style {
+func AvailStyle(nm gi.HiStyleName) *Style {
 	if AvailStyles == nil {
 		Init()
 	}
@@ -53,8 +53,8 @@ func AvailStyle(nm gi.HiStyleName) Style {
 }
 
 // Add adds a new style to the list
-func (hs *Styles) Add() Style {
-	hse := Style{}
+func (hs *Styles) Add() *Style {
+	hse := &Style{}
 	nm := fmt.Sprintf("NewStyle_%v", len(*hs))
 	(*hs)[nm] = hse
 	return hse
@@ -176,7 +176,7 @@ func Init() {
 	StdStyles.OpenDefaults()
 	CustomStyles.OpenPrefs()
 	if len(CustomStyles) == 0 {
-		cs := Style{}
+		cs := &Style{}
 		cs.CopyFrom(StdStyles[string(StyleDefault)])
 		CustomStyles["custom-sample"] = cs
 	}

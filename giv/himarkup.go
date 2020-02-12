@@ -34,7 +34,7 @@ type HiMarkup struct {
 	CSSProps  ki.Props       `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
 	PiState   *pi.FileStates `desc:"pi parser state info"`
 	PiLang    pi.Lang        `desc:"if supported, this is the pi Lang support for parsing"`
-	HiStyle   histyle.Style  `desc:"current highlighting style"`
+	HiStyle   *histyle.Style `desc:"current highlighting style"`
 	Off       bool           `desc:"external toggle to turn off automatic highlighting"`
 	lastLang  string
 	lastStyle gi.HiStyleName

@@ -3101,6 +3101,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	cspec := sty.Font.BgColor
 	bg := cspec.Color
 	isDark := bg.IsDark()
+	nclrs := len(TextViewDepthColors)
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
 		lst := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y // note: charstart pos includes descent
@@ -3121,9 +3122,10 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 			if lx.Tok.Depth > 0 {
 				cspec.Color = bg
 				if isDark {
-					cspec.Color.Add(TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)])
+					// reverse order too
+					cspec.Color.Add(TextViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
 				} else {
-					cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%len(TextViewDepthColors)])
+					cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%nclrs])
 				}
 				st := ints.MinInt(lsted, lx.St)
 				reg := textbuf.Region{Start: textbuf.Pos{Ln: ln, Ch: st}, End: textbuf.Pos{Ln: ln, Ch: lx.Ed}}

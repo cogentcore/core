@@ -229,14 +229,14 @@ func (s StyleEntry) IsZero() bool {
 //  Style
 
 // Style is a full style map of styles for different token.Tokens tag values
-type Style map[token.Tokens]StyleEntry
+type Style map[token.Tokens]*StyleEntry
 
 var KiT_Style = kit.Types.AddType(&Style{}, StyleProps)
 
 // CopyFrom copies a style from source style
-func (hs *Style) CopyFrom(ss Style) {
-	*hs = make(Style, len(ss))
-	for k, v := range ss {
+func (hs *Style) CopyFrom(ss *Style) {
+	*hs = make(Style, len(*ss))
+	for k, v := range *ss {
 		(*hs)[k] = v
 	}
 }
@@ -247,7 +247,10 @@ func (hs Style) TagRaw(tag token.Tokens) StyleEntry {
 	if len(hs) == 0 {
 		return StyleEntry{}
 	}
-	return hs[tag]
+	if se, has := hs[tag]; has {
+		return *se
+	}
+	return StyleEntry{}
 }
 
 // Tag returns a StyleEntry for given Tag.

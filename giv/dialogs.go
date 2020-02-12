@@ -6,6 +6,7 @@ package giv
 
 import (
 	"image"
+	"reflect"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
@@ -119,11 +120,13 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(mp, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	// note: map is not directly comparable, so we have to use the pointer here..
+	mptr := reflect.ValueOf(mp).Pointer()
+	dlg, recyc := gi.RecycleStdDialog(mptr, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
 		return dlg
 	}
-	dlg.Data = mp
+	dlg.Data = mptr
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

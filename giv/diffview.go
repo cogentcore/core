@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"bytes"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/units"
@@ -87,11 +89,11 @@ func (dv *DiffView) ConfigTexts() {
 		updt = lay.UpdateStart()
 	} else {
 		al.SetStretchMax()
-		al.SetMinPrefWidth(units.NewCh(20))
-		al.SetMinPrefHeight(units.NewCh(10))
+		al.SetMinPrefWidth(units.NewEm(10))
+		al.SetMinPrefHeight(units.NewEm(10))
 		bl.SetStretchMax()
-		bl.SetMinPrefWidth(units.NewCh(20))
-		bl.SetMinPrefHeight(units.NewCh(10))
+		bl.SetMinPrefWidth(units.NewEm(10))
+		bl.SetMinPrefHeight(units.NewEm(10))
 
 		av := AddNewTextView(al, "text-a")
 		bv := AddNewTextView(bl, "text-b")
@@ -125,6 +127,7 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	dv.Diffs = textbuf.DiffLines(astr, bstr)
 	var ab, bb [][]byte
 	absln := 0
+	bspc := []byte(" ")
 	for _, df := range dv.Diffs {
 		switch df.Tag {
 		case 'r':
@@ -134,15 +137,22 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			for i := 0; i < mx; i++ {
 				dv.BufA.SetLineColor(absln+i, chg)
 				dv.BufB.SetLineColor(absln+i, chg)
+				blen := 0
+				alen := 0
 				if i < di {
-					ab = append(ab, []byte(astr[df.I1+i]))
-				} else {
-					ab = append(ab, []byte(""))
+					aln := []byte(astr[df.I1+i])
+					alen = len(aln)
+					ab = append(ab, aln)
 				}
 				if i < dj {
-					bb = append(bb, []byte(bstr[df.J1+i]))
+					bln := []byte(bstr[df.J1+i])
+					blen = len(bln)
+					bb = append(bb, bln)
 				} else {
-					bb = append(bb, []byte(""))
+					bb = append(bb, bytes.Repeat(bspc, alen))
+				}
+				if i >= di {
+					ab = append(ab, bytes.Repeat(bspc, blen))
 				}
 			}
 			absln += mx
@@ -151,8 +161,10 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			for i := 0; i < di; i++ {
 				dv.BufA.SetLineColor(absln+i, del)
 				dv.BufB.SetLineColor(absln+i, ins)
-				ab = append(ab, []byte(astr[df.I1+i]))
-				bb = append(bb, []byte(""))
+				aln := []byte(astr[df.I1+i])
+				alen := len(aln)
+				ab = append(ab, aln)
+				bb = append(bb, bytes.Repeat(bspc, alen))
 			}
 			absln += di
 		case 'i':
@@ -160,27 +172,19 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 			for i := 0; i < dj; i++ {
 				dv.BufA.SetLineColor(absln+i, ins)
 				dv.BufB.SetLineColor(absln+i, del)
-				bb = append(bb, []byte(bstr[df.J1+i]))
-				ab = append(ab, []byte(""))
+				bln := []byte(bstr[df.J1+i])
+				blen := len(bln)
+				bb = append(bb, bln)
+				ab = append(ab, bytes.Repeat(bspc, blen))
 			}
 			absln += dj
 		case 'e':
 			di := df.I2 - df.I1
-			dj := df.J2 - df.J1
-			mx := ints.MaxInt(di, dj) // must be the same!
-			for i := 0; i < mx; i++ {
-				if i < di {
-					ab = append(ab, []byte(astr[df.I1+i]))
-				} else {
-					ab = append(ab, []byte(""))
-				}
-				if i < dj {
-					bb = append(bb, []byte(bstr[df.J1+i]))
-				} else {
-					bb = append(bb, []byte(""))
-				}
+			for i := 0; i < di; i++ {
+				ab = append(ab, []byte(astr[df.I1+i]))
+				bb = append(bb, []byte(bstr[df.J1+i]))
 			}
-			absln += mx
+			absln += di
 		}
 	}
 	dv.BufA.SetTextLines(ab, false) // don't copy
@@ -204,8 +208,8 @@ func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile string
 	_, prIdx := dlg.PromptWidget(frame)
 
 	dv := frame.InsertNewChild(KiT_DiffView, prIdx+1, "diff-view").(*DiffView)
-	dv.SetProp("width", units.NewEm(5))
-	dv.SetProp("height", units.NewEm(5))
+	dv.SetProp("width", units.NewEm(20))
+	dv.SetProp("height", units.NewEm(10))
 	dv.SetStretchMax()
 	dv.FileA = afile
 	dv.FileB = bfile
