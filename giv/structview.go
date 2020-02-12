@@ -379,7 +379,7 @@ func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool
 		if isDef {
 			lbl.CurBgColor = gi.Prefs.Colors.Background
 		} else {
-			lbl.CurBgColor.SetName("yellow")
+			lbl.CurBgColor = gi.Prefs.Colors.Highlight
 		}
 		return
 	}

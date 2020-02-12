@@ -156,6 +156,7 @@ func (pf *Preferences) LightMode() {
 		return
 	}
 	pf.Colors = *lc
+	pf.Save()
 	pf.UpdateAll()
 }
 
@@ -167,6 +168,7 @@ func (pf *Preferences) DarkMode() {
 		return
 	}
 	pf.Colors = *lc
+	pf.Save()
 	pf.UpdateAll()
 }
 
@@ -389,11 +391,11 @@ var PreferencesProps = ki.Props{
 		}},
 		{"sep-color", ki.BlankProp{}},
 		{"LightMode", ki.Props{
-			"desc": "Set color mode to Light mode as defined in ColorSchemes",
+			"desc": "Set color mode to Light mode as defined in ColorSchemes -- automatically does Save and UpdateAll ",
 			"icon": "color",
 		}},
 		{"DarkMode", ki.Props{
-			"desc": "Set color mode to Dark mode as defined in ColorSchemes",
+			"desc": "Set color mode to Dark mode as defined in ColorSchemes -- automatically does Save and UpdateAll",
 			"icon": "color",
 		}},
 		{"sep-scrn", ki.BlankProp{}},

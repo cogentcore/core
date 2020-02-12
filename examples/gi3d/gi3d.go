@@ -282,7 +282,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
 	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default
 	// txt.SetProp("background-color", "white")
-	// txt.SetProp("color", "black") // default
+	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
 	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
 	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
 	txt.Pose.Scale.SetScalar(0.2)
