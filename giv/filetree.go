@@ -1963,7 +1963,7 @@ var FileTreeViewProps = ki.Props{
 		}},
 		{"DiffVcs", ki.Props{
 			"desc":       "show the differences between this file and HEAD (default for empty revision) or other VCS revision -- use -1, -2 etc for prior revisions.",
-			"updtfunc":   FileTreeActiveInVcsModifiedFunc,
+			"updtfunc":   FileTreeActiveInVcsFunc,
 			"label-func": VcsLabelFunc,
 			"Args": ki.PropSlice{
 				{"VCS Revision", ki.Props{}},
