@@ -49,6 +49,7 @@ type Preferences struct {
 	CustomStyles         ki.Props               `desc:"a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive"`
 	CustomStylesOverride bool                   `desc:"if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first)."`
 	FontFamily           FontName               `desc:"default font family when otherwise not specified"`
+	MonoFont             FontName               `desc:"default mono-spaced font family"`
 	FontPaths            []string               `desc:"extra font paths, beyond system defaults -- searched first"`
 	User                 User                   `desc:"user info -- partially filled-out automatically if empty / when prefs first created"`
 	FavPaths             FavPaths               `desc:"favorite paths, shown in FileViewer and also editable there"`
@@ -70,6 +71,7 @@ func (pf *Preferences) Defaults() {
 	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
 	pf.FontFamily = "Go"
+	pf.MonoFont = "Go Mono"
 	pf.KeyMap = DefaultKeyMap
 	pf.UpdateUser()
 }

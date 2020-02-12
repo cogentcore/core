@@ -12080,656 +12080,1040 @@
     }
   },
   "monokai": {
+  "Background": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
     "Background": {
-      "Color": {
-        "R": 248,
-        "G": 248,
-        "B": 242,
-        "A": 255
-      },
-      "Background": {
-        "R": 39,
-        "G": 40,
-        "B": 34,
-        "A": 255
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
+      "R": 39,
+      "G": 40,
+      "B": 34,
+      "A": 255
     },
-    "Comment": {
-      "Color": {
-        "R": 117,
-        "G": 113,
-        "B": 94,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
     },
-    "Error": {
-      "Color": {
-        "R": 150,
-        "G": 0,
-        "B": 80,
-        "A": 255
-      },
-      "Background": {
-        "R": 30,
-        "G": 0,
-        "B": 16,
-        "A": 255
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "TextStyleDeleted": {
-      "Color": {
-        "R": 249,
-        "G": 38,
-        "B": 114,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "TextStyleEmph": {
-      "Color": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Yes",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "TextStyleInserted": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "TextStyleStrong": {
-      "Color": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Yes",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "TextStyleSubheading": {
-      "Color": {
-        "R": 117,
-        "G": 113,
-        "B": 94,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "Keyword": {
-      "Color": {
-        "R": 102,
-        "G": 217,
-        "B": 239,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "KeywordNamespace": {
-      "Color": {
-        "R": 249,
-        "G": 38,
-        "B": 114,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "Literal": {
-      "Color": {
-        "R": 174,
-        "G": 129,
-        "B": 255,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "LiteralDate": {
-      "Color": {
-        "R": 230,
-        "G": 219,
-        "B": 116,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "LitNum": {
-      "Color": {
-        "R": 174,
-        "G": 129,
-        "B": 255,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "LitStr": {
-      "Color": {
-        "R": 230,
-        "G": 219,
-        "B": 116,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "LitStrEscape": {
-      "Color": {
-        "R": 174,
-        "G": 129,
-        "B": 255,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "Name": {
-      "Color": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameAttribute": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameClass": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameConstant": {
-      "Color": {
-        "R": 102,
-        "G": 217,
-        "B": 239,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameDecorator": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameException": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameFunction": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameOther": {
-      "Color": {
-        "R": 166,
-        "G": 226,
-        "B": 46,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "NameTag": {
-      "Color": {
-        "R": 180,
-        "G": 4,
-        "B": 70,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "Operator": {
-      "Color": {
-        "R": 249,
-        "G": 38,
-        "B": 114,
-        "A": 255
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "Punctuation": {
-      "Color": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    },
-    "Text": {
-      "Color": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Background": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Border": {
-        "R": 0,
-        "G": 0,
-        "B": 0,
-        "A": 0
-      },
-      "Bold": "Pass",
-      "Italic": "Pass",
-      "Underline": "Pass",
-      "NoInherit": false
-    }
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
   },
-  "monokailight": {
+  "Comment": {
+    "Color": {
+      "R": 117,
+      "G": 113,
+      "B": 94,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Yes",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "CommentPreproc": {
+    "Color": {
+      "R": 120,
+      "G": 116,
+      "B": 97,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "No",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "CommentSpecial": {
+    "Color": {
+      "R": 117,
+      "G": 113,
+      "B": 94,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "No",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "Error": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Background": {
+      "R": 30,
+      "G": 0,
+      "B": 16,
+      "A": 255
+    },
+    "Border": {
+      "R": 255,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "Keyword": {
+    "Color": {
+      "R": 28,
+      "G": 161,
+      "B": 191,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "KeywordPseudo": {
+    "Color": {
+      "R": 28,
+      "G": 161,
+      "B": 191,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "No",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "KeywordType": {
+    "Color": {
+      "R": 0,
+      "G": 187,
+      "B": 0,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitNum": {
+    "Color": {
+      "R": 102,
+      "G": 102,
+      "B": 102,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStr": {
+    "Color": {
+      "R": 230,
+      "G": 219,
+      "B": 116,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrBacktick": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Background": {
+      "R": 50,
+      "G": 50,
+      "B": 50,
+      "A": 255
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrDoc": {
+    "Color": {
+      "R": 187,
+      "G": 68,
+      "B": 68,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Yes",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrEscape": {
+    "Color": {
+      "R": 187,
+      "G": 102,
+      "B": 34,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrInterpol": {
+    "Color": {
+      "R": 187,
+      "G": 102,
+      "B": 136,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrOther": {
+    "Color": {
+      "R": 0,
+      "G": 128,
+      "B": 0,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrRegex": {
+    "Color": {
+      "R": 187,
+      "G": 102,
+      "B": 136,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "LitStrSymbol": {
+    "Color": {
+      "R": 184,
+      "G": 134,
+      "B": 11,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameAttribute": {
+    "Color": {
+      "R": 187,
+      "G": 68,
+      "B": 68,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameBuiltin": {
+    "Color": {
+      "R": 170,
+      "G": 34,
+      "B": 255,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameConstant": {
+    "Color": {
+      "R": 136,
+      "G": 0,
+      "B": 0,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameDecorator": {
+    "Color": {
+      "R": 170,
+      "G": 34,
+      "B": 255,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameEntity": {
+    "Color": {
+      "R": 153,
+      "G": 153,
+      "B": 153,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameException": {
+    "Color": {
+      "R": 190,
+      "G": 48,
+      "B": 42,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameFunction": {
+    "Color": {
+      "R": 166,
+      "G": 226,
+      "B": 46,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameLabel": {
+    "Color": {
+      "R": 160,
+      "G": 160,
+      "B": 0,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameScope": {
+    "Color": {
+      "R": 42,
+      "G": 42,
+      "B": 177,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameTag": {
+    "Color": {
+      "R": 182,
+      "G": 58,
+      "B": 113,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameType": {
+    "Color": {
+      "R": 69,
+      "G": 69,
+      "B": 210,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "NameVar": {
+    "Color": {
+      "R": 184,
+      "G": 134,
+      "B": 11,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "Operator": {
+    "Color": {
+      "R": 249,
+      "G": 38,
+      "B": 114,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "OperatorWord": {
+    "Color": {
+      "R": 249,
+      "G": 38,
+      "B": 114,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleDeleted": {
+    "Color": {
+      "R": 249,
+      "G": 38,
+      "B": 114,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleEmph": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Yes",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleError": {
+    "Color": {
+      "R": 166,
+      "G": 48,
+      "B": 48,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleHeading": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 128,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleInserted": {
+    "Color": {
+      "R": 166,
+      "G": 226,
+      "B": 46,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleOutput": {
+    "Color": {
+      "R": 136,
+      "G": 136,
+      "B": 136,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStylePrompt": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 128,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleStrong": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleSubheading": {
+    "Color": {
+      "R": 128,
+      "G": 0,
+      "B": 128,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Yes",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleTraceback": {
+    "Color": {
+      "R": 0,
+      "G": 68,
+      "B": 221,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  },
+  "TextStyleUnderline": {
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Yes",
+    "NoInherit": false
+  },
+  "TextWhitespace": {
+    "Color": {
+      "R": 127,
+      "G": 127,
+      "B": 127,
+      "A": 255
+    },
+    "Background": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Border": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Bold": "Pass",
+    "Italic": "Pass",
+    "Underline": "Pass",
+    "NoInherit": false
+  }
+ },
+ "monokailight": {
     "Background": {
       "Color": {
         "R": 39,

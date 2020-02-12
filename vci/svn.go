@@ -151,3 +151,23 @@ func (gr *SvnRepo) RevertFile(fname string) error {
 	}
 	return nil
 }
+
+// FileContents returns the contents of given file, as a []byte array
+// at given revision specifier (if empty, defaults to current HEAD).
+// -1, -2 etc also work as universal ways of specifying prior revisions.
+func (gr *SvnRepo) FileContents(fname string, rev string) ([]byte, error) {
+	if rev == "" {
+		rev = "HEAD"
+		// } else if rev[0] == '-' { // no support at this point..
+		// 	rsp, err := strconv.Atoi(rev)
+		// 	if err == nil && rsp < 0 {
+		// 		rev = fmt.Sprintf("HEAD~%d:", rsp)
+		// 	}
+	}
+	out, err := gr.RunFromDir("svn", "-r", "rev", "cat", RelPath(gr, fname))
+	if err != nil {
+		log.Println(string(out))
+		return nil, err
+	}
+	return out, nil
+}

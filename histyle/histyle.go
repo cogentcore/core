@@ -235,6 +235,9 @@ var KiT_Style = kit.Types.AddType(&Style{}, StyleProps)
 
 // CopyFrom copies a style from source style
 func (hs *Style) CopyFrom(ss *Style) {
+	if ss == nil {
+		return
+	}
 	*hs = make(Style, len(*ss))
 	for k, v := range *ss {
 		(*hs)[k] = v

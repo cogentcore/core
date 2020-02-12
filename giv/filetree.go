@@ -18,6 +18,7 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -901,11 +902,12 @@ func (fn *FileNode) CommitToVcs(message string) (err error) {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	err = repo.CommitFile(string(fn.FPath), message)
-	if err == nil {
-		fn.Info.Vcs = vci.Stored
-		fn.UpdateSig()
-		fn.FRoot.UpdateSig()
+	if err != nil {
+		return err
 	}
+	fn.Info.Vcs = vci.Stored
+	fn.UpdateSig()
+	fn.FRoot.UpdateSig()
 	return err
 }
 
@@ -919,19 +921,55 @@ func (fn *FileNode) RevertVcs() (err error) {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	err = repo.RevertFile(string(fn.FPath))
-	if err == nil {
-		if fn.Info.Vcs == vci.Modified {
-			fn.Info.Vcs = vci.Stored
-		} else if fn.Info.Vcs == vci.Added {
-			// do nothing - leave in "added" state
-		}
-		if fn.Buf != nil {
-			fn.Buf.Revert()
-		}
-		fn.UpdateSig()
-		fn.FRoot.UpdateSig()
+	if err != nil {
+		return err
 	}
+	if fn.Info.Vcs == vci.Modified {
+		fn.Info.Vcs = vci.Stored
+	} else if fn.Info.Vcs == vci.Added {
+		// do nothing - leave in "added" state
+	}
+	if fn.Buf != nil {
+		fn.Buf.Revert()
+	}
+	fn.UpdateSig()
+	fn.FRoot.UpdateSig()
 	return err
+}
+
+// DiffVcs shows the diffs between the current version of this file and the version
+// given by the revision specifier -- if empty, defaults to current HEAD.
+// -1, -2 etc also work as universal ways of specifying prior revisions.
+// Diffs are shown in a DiffViewDialog
+func (fn *FileNode) DiffVcs(rev string) error {
+	repo, _ := fn.Repo()
+	if repo == nil {
+		return errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	if fn.Info.Vcs == vci.Untracked {
+		return errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	head, err := repo.FileContents(string(fn.FPath), rev)
+	if err != nil {
+		return err
+	}
+	hstr := textbuf.BytesToLineStrings(head, false) // don't add new lines
+	var cstr []string
+	if fn.Buf != nil {
+		cstr = fn.Buf.Strings(false)
+	} else {
+		fb, err := textbuf.FileBytes(string(fn.FPath))
+		if err != nil {
+			return err
+		}
+		cstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+	}
+	rstr := rev
+	if rstr == "" {
+		rstr = "HEAD"
+	}
+	DiffViewDialog(nil, hstr, cstr, rstr+":"+fn.Nm, string(fn.FPath), DlgOpts{Title: "DiffVcs: " + fn.Nm})
+	return nil
 }
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
@@ -1364,11 +1402,13 @@ func (ftv *FileTreeView) AddToVcs() {
 	if sz == 0 { // shouldn't happen
 		return
 	}
-	sn := sels[sz-1]
-	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ftvv.FileNode()
-	if fn != nil {
-		fn.AddToVcs()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.AddToVcs()
+		}
 	}
 }
 
@@ -1379,15 +1419,17 @@ func (ftv *FileTreeView) DeleteFromVcs() {
 	if sz == 0 { // shouldn't happen
 		return
 	}
-	sn := sels[sz-1]
-	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ftvv.FileNode()
-	if fn != nil {
-		fn.DeleteFromVcs()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.DeleteFromVcs()
+		}
 	}
 }
 
-// CommitToVcs removes the file from version control system
+// CommitToVcs commits the file from version control system
 func (ftv *FileTreeView) CommitToVcs() {
 	sels := ftv.SelectedViews()
 	sz := len(sels)
@@ -1409,11 +1451,33 @@ func (ftv *FileTreeView) RevertVcs() {
 	if sz == 0 { // shouldn't happen
 		return
 	}
-	sn := sels[sz-1]
-	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
-	fn := ftvv.FileNode()
-	if fn != nil {
-		fn.RevertVcs()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.RevertVcs()
+		}
+	}
+}
+
+// DiffVcs shows the diffs between the current version of this file and the version
+// given by the revision specifier -- if empty, defaults to current HEAD.
+// -1, -2 etc also work as universal ways of specifying prior revisions.
+// Diffs are shown in a DiffViewDialog
+func (ftv *FileTreeView) DiffVcs(rev string) {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.DiffVcs(rev)
+		}
 	}
 }
 
@@ -1896,6 +1960,14 @@ var FileTreeViewProps = ki.Props{
 			"desc":       "Revert file to last commit",
 			"updtfunc":   FileTreeActiveInVcsModifiedFunc,
 			"label-func": VcsLabelFunc,
+		}},
+		{"DiffVcs", ki.Props{
+			"desc":       "show the differences between this file and HEAD (default for empty revision) or other VCS revision -- use -1, -2 etc for prior revisions.",
+			"updtfunc":   FileTreeActiveInVcsModifiedFunc,
+			"label-func": VcsLabelFunc,
+			"Args": ki.PropSlice{
+				{"VCS Revision", ki.Props{}},
+			},
 		}},
 		{"sep-extrn", ki.BlankProp{}},
 		{"RemoveFromExterns", ki.Props{

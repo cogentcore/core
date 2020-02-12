@@ -53,6 +53,11 @@ type Repo interface {
 	// RevertFile reverts a single file to the version that it was last in VCS,
 	// losing any local changes (destructive!)
 	RevertFile(fname string) error
+
+	// FileContents returns the contents of given file, as a []byte array
+	// at given revision specifier (if empty, defaults to current HEAD).
+	// -1, -2 etc also work as universal ways of specifying prior revisions.
+	FileContents(fname string, rev string) ([]byte, error)
 }
 
 func NewRepo(remote, local string) (Repo, error) {

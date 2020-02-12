@@ -14,20 +14,38 @@ import (
 	"github.com/goki/ki/ints"
 )
 
+// BytesToLineStrings returns []string lines
+// If addNewLn is true, each string line has a \n appended at end.
+func BytesToLineStrings(txt []byte, addNewLn bool) []string {
+	lns := bytes.Split(txt, []byte("\n"))
+	nl := len(lns)
+	if nl == 0 {
+		return nil
+	}
+	str := make([]string, nl)
+	for i, l := range lns {
+		str[i] = string(l)
+		if addNewLn {
+			str[i] += "\n"
+		}
+	}
+	return str
+}
+
 // FileBytes returns the bytes of given file.
-func FileBytes(fpath string) []byte {
+func FileBytes(fpath string) ([]byte, error) {
 	fp, err := os.Open(fpath)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
 	txt, err := ioutil.ReadAll(fp)
 	fp.Close()
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
-	return txt
+	return txt, nil
 }
 
 // FileRegionBytes returns the bytes of given file within given
@@ -37,9 +55,9 @@ func FileBytes(fpath string) []byte {
 // that might exist just prior to the start line if stLn is > 0, going back
 // a maximum of lnBack lines.
 func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int) []byte {
-	txt := FileBytes(fpath)
-	if txt == nil {
-		return txt
+	txt, err := FileBytes(fpath)
+	if err != nil {
+		return nil
 	}
 	if stLn == 0 && edLn == 0 {
 		return txt

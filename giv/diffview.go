@@ -9,12 +9,19 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv/textbuf"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
 
+// todo: double-click on diff region copies over corresponding values from
+// other side!  Not clear how to connect this back to original Buf though,
+// in context of gide.
+
+// DiffView presents two side-by-side TextView windows showing the differences
+// between two files (represented as lines of strings).
 type DiffView struct {
 	gi.Frame
 	FileA string        `desc:"first file name being compared"`
@@ -75,8 +82,16 @@ func (dv *DiffView) TextViews() (*TextView, *TextView) {
 func (dv *DiffView) ConfigTexts() {
 	lay := dv.DiffLay()
 	if dv.BufA == nil {
-		dv.BufA = NewTextBuf()
-		dv.BufB = NewTextBuf()
+		dv.BufA = &TextBuf{}
+		dv.BufA.InitName(dv.BufA, "diff-buf-a")
+		dv.BufA.Filename = gi.FileName(dv.FileA)
+		dv.BufA.Opts.LineNos = true
+		dv.BufA.Stat() // update markup
+		dv.BufB = &TextBuf{}
+		dv.BufB.InitName(dv.BufB, "diff-buf-b")
+		dv.BufB.Filename = gi.FileName(dv.FileB)
+		dv.BufB.Opts.LineNos = true
+		dv.BufB.Stat() // update markup
 	}
 	lay.Lay = gi.LayoutHoriz
 	lay.SetStretchMax()
@@ -97,10 +112,20 @@ func (dv *DiffView) ConfigTexts() {
 
 		av := AddNewTextView(al, "text-a")
 		bv := AddNewTextView(bl, "text-b")
+		av.SetProp("font-family", gi.Prefs.MonoFont)
+		bv.SetProp("font-family", gi.Prefs.MonoFont)
 		av.SetInactive()
 		bv.SetInactive()
 		av.SetBuf(dv.BufA)
 		bv.SetBuf(dv.BufB)
+
+		// sync scrolling
+		al.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			bl.ScrollToPos(mat32.Dims(sig), data.(float32))
+		})
+		bl.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			al.ScrollToPos(mat32.Dims(sig), data.(float32))
+		})
 	}
 	lay.UpdateEnd(updt)
 }
@@ -189,6 +214,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	}
 	dv.BufA.SetTextLines(ab, false) // don't copy
 	dv.BufB.SetTextLines(bb, false) // don't copy
+	dv.BufA.ReMarkup()
+	dv.BufB.ReMarkup()
 	av.UpdateEnd(aupdt)
 	bv.UpdateEnd(bupdt)
 }
@@ -208,8 +235,8 @@ func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile string
 	_, prIdx := dlg.PromptWidget(frame)
 
 	dv := frame.InsertNewChild(KiT_DiffView, prIdx+1, "diff-view").(*DiffView)
-	dv.SetProp("width", units.NewEm(20))
-	dv.SetProp("height", units.NewEm(10))
+	// dv.SetProp("width", units.NewEm(20))
+	// dv.SetProp("height", units.NewEm(10))
 	dv.SetStretchMax()
 	dv.FileA = afile
 	dv.FileB = bfile

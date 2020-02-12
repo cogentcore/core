@@ -49,7 +49,6 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb := &TextBuf{}
 	tb.InitName(tb, "text-view-dialog-buf")
 	tb.Filename = gi.FileName(opts.Filename)
-	tb.Hi.Style = "emacs"
 	tb.Opts.LineNos = opts.LineNos
 	tb.Stat() // update markup
 	tb.SetText(text)
@@ -61,7 +60,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	tv.SetInactive()
-	tv.SetProp("font-family", "Go Mono")
+	tv.SetProp("font-family", gi.Prefs.MonoFont)
 	tv.SetBuf(tb)
 
 	bbox, _ := dlg.ButtonBox(frame)

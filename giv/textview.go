@@ -97,7 +97,6 @@ func (tv *TextView) Disconnect() {
 var TextViewProps = ki.Props{
 	"EnumType:Flag":    KiT_TextViewFlags,
 	"white-space":      gi.WhiteSpacePreWrap,
-	"font-family":      "Go Mono",
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.NewPx(3),
 	"border-color":     &gi.Prefs.Colors.Border,

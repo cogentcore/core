@@ -61,7 +61,7 @@ func mainrun() {
 	// these are all inherited so we can put them at the top "editor panel" level
 	splt.SetProp("white-space", gi.WhiteSpacePreWrap)
 	splt.SetProp("tab-size", 4)
-	splt.SetProp("font-family", "Go Mono")
+	splt.SetProp("font-family", gi.Prefs.MonoFont)
 	splt.SetProp("line-height", 1.1)
 
 	// generally need to put text view within its own layout for scrolling

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/Masterminds/vcs"
@@ -179,4 +180,25 @@ func (gr *GitRepo) RevertFile(fname string) error {
 		return err
 	}
 	return nil
+}
+
+// FileContents returns the contents of given file, as a []byte array
+// at given revision specifier (if empty, defaults to current HEAD).
+// -1, -2 etc also work as universal ways of specifying prior revisions.
+func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
+	if rev == "" {
+		rev = "HEAD:"
+	} else if rev[0] == '-' {
+		rsp, err := strconv.Atoi(rev)
+		if err == nil && rsp < 0 {
+			rev = fmt.Sprintf("HEAD~%d:", -rsp)
+		}
+	}
+	fspec := rev + RelPath(gr, fname)
+	out, err := gr.RunFromDir("git", "show", fspec)
+	if err != nil {
+		log.Println(string(out))
+		return nil, err
+	}
+	return out, nil
 }

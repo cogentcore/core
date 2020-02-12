@@ -122,6 +122,7 @@ type Layout struct {
 	FocusNameTime time.Time           `copy:"-" json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
 	FocusNameLast ki.Ki               `copy:"-" json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
 	ScrollsOff    bool                `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
+	ScrollSig     ki.Signal           `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
 var KiT_Layout = kit.Types.AddType(&Layout{}, LayoutProps)
@@ -1090,6 +1091,27 @@ func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
 	}
 }
 
+// ScrollActionDelta moves the scrollbar in given dimension by given delta
+// and emits a ScrollSig signal.
+func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
+	nval := ly.Scrolls[dim].Value + delta
+	ly.Scrolls[dim].SetValueAction(nval)
+	ly.ScrollSig.Emit(ly.This(), int64(dim), nval)
+}
+
+// ScrollActionPos moves the scrollbar in given dimension to given
+// position and emits a ScrollSig signal.
+func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
+	ly.Scrolls[dim].SetValueAction(pos)
+	ly.ScrollSig.Emit(ly.This(), int64(dim), pos)
+}
+
+// ScrollToPos moves the scrollbar in given dimension to given
+// position and DOES NOT emit a ScrollSig signal.
+func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
+	ly.Scrolls[dim].SetValueAction(pos)
+}
+
 // ScrollDelta processes a scroll event.  If only one dimension is processed,
 // and there is a non-zero in other, then the consumed dimension is reset to 0
 // and the event is left unprocessed, so a higher level can consume the
@@ -1098,12 +1120,12 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	del := me.Delta
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
-		ly.Scrolls[mat32.Y].SetValueAction(ly.Scrolls[mat32.Y].Value + float32(del.Y))
-		ly.Scrolls[mat32.X].SetValueAction(ly.Scrolls[mat32.X].Value + float32(del.X))
+		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
+		ly.ScrollActionDelta(mat32.X, float32(del.X))
 		me.SetProcessed()
 	} else if ly.HasScroll[mat32.Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
-		ly.Scrolls[mat32.Y].SetValueAction(ly.Scrolls[mat32.Y].Value + float32(del.Y))
+		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
 		if del.X != 0 {
 			me.Delta.Y = 0
 		} else {
@@ -1112,14 +1134,14 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	} else if ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
 		if del.X != 0 {
-			ly.Scrolls[mat32.X].SetValueAction(ly.Scrolls[mat32.X].Value + float32(del.X))
+			ly.ScrollActionDelta(mat32.X, float32(del.X))
 			if del.Y != 0 {
 				me.Delta.X = 0
 			} else {
 				me.SetProcessed()
 			}
 		} else { // use Y instead as mouse wheels typically on have this
-			ly.Scrolls[mat32.X].SetValueAction(ly.Scrolls[mat32.X].Value + float32(del.Y))
+			ly.ScrollActionDelta(mat32.X, float32(del.Y))
 			me.SetProcessed()
 		}
 	}
@@ -1195,7 +1217,7 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 		pct := float32(maxd) / float32(vissz)
 		if pct < .1 && sc.Value < scrange {
 			dst = mat32.Min(dst, (scrange - sc.Value))
-			sc.SetValueAction(sc.Value + dst)
+			ly.ScrollActionDelta(dim, dst)
 			return true
 		}
 	}
