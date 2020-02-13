@@ -472,7 +472,8 @@ func (tv *TableView) LayoutHeader() {
 			sumwd += wd + spc
 		}
 		if !tv.IsInactive() {
-			for fli := nfld; fli < nfld+2; fli++ {
+			mx := len(sgf.GridData[gi.Col])
+			for fli := nfld; fli < mx; fli++ {
 				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
 				wd := sgf.GridData[gi.Col][fli].AllocSize
 				lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))

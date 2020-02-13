@@ -299,6 +299,9 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, st
 	sv.NoDelete = opts.NoDelete
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
+	if opts.Inactive {
+		sv.SetInactive()
+	}
 	sv.SetSlice(slcOfStru)
 
 	if recv != nil && dlgFunc != nil {

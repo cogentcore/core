@@ -1488,6 +1488,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 }
 
 // LayoutPageSteps is the number of steps to take in PageUp / Down events
+// in terms of number of items.
 var LayoutPageSteps = 10
 
 // LayoutKeys is key processing for layouts -- focus name and arrow keys

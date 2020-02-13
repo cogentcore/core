@@ -193,9 +193,72 @@ func (gr *GitRepo) FileContents(fname string, rev string) ([]byte, error) {
 		if err == nil && rsp < 0 {
 			rev = fmt.Sprintf("HEAD~%d:", -rsp)
 		}
+	} else {
+		rev += ":"
 	}
 	fspec := rev + RelPath(gr, fname)
 	out, err := gr.RunFromDir("git", "show", fspec)
+	if err != nil {
+		log.Println(string(out))
+		return nil, err
+	}
+	return out, nil
+}
+
+// FieldsThroughDelim gets the concatenated byte through to point where
+// field ends with given delimiter, starting at given index
+func FieldsThroughDelim(flds [][]byte, delim byte, idx int) (int, string) {
+	ln := len(flds)
+	for i := idx; i < ln; i++ {
+		fld := flds[i]
+		fsz := len(fld)
+		if fld[fsz-1] == delim {
+			str := string(bytes.Join(flds[idx:i+1], []byte(" ")))
+			return i + 1, str[:len(str)-1]
+		}
+	}
+	return ln, string(bytes.Join(flds[idx:ln], []byte(" ")))
+}
+
+// Log returns the log history of commits for given filename
+// (or all files if empty).  If since is non-empty, it should be
+// a date-like expression that the VCS will understand, such as
+// 1/1/2020, yesterday, last year, etc
+func (gr *GitRepo) Log(fname string, since string) (Log, error) {
+	args := []string{"log", "--all"}
+	if since != "" {
+		args = append(args, `--since="`+since+`"`)
+	}
+	args = append(args, `--pretty=format:%h %ad} %an} %ae} %s`)
+	if fname != "" {
+		args = append(args, fname)
+	}
+	out, err := gr.RunFromDir("git", args...)
+	if err != nil {
+		return nil, err
+	}
+	var lg Log
+	scan := bufio.NewScanner(bytes.NewReader(out))
+	for scan.Scan() {
+		ln := scan.Bytes()
+		flds := bytes.Fields(ln)
+		if len(flds) < 4 {
+			continue
+		}
+		rev := string(flds[0])
+		ni, date := FieldsThroughDelim(flds, '}', 1)
+		ni, author := FieldsThroughDelim(flds, '}', ni)
+		ni, email := FieldsThroughDelim(flds, '}', ni)
+		msg := string(bytes.Join(flds[ni:], []byte(" ")))
+		lg.Add(rev, date, author, email, msg)
+	}
+	return lg, nil
+}
+
+// Blame returns an annotated report about the file, showing which revision last
+// modified each line.
+func (gr *GitRepo) Blame(fname string) ([]byte, error) {
+	out, err := gr.RunFromDir("git", "blame", fname)
 	if err != nil {
 		log.Println(string(out))
 		return nil, err

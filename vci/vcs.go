@@ -58,6 +58,16 @@ type Repo interface {
 	// at given revision specifier (if empty, defaults to current HEAD).
 	// -1, -2 etc also work as universal ways of specifying prior revisions.
 	FileContents(fname string, rev string) ([]byte, error)
+
+	// Log returns the log history of commits for given filename
+	// (or all files if empty).  If since is non-empty, it should be
+	// a date-like expression that the VCS will understand, such as
+	// 1/1/2020, yesterday, last year, etc
+	Log(fname string, since string) (Log, error)
+
+	// Blame returns an annotated report about the file, showing which revision last
+	// modified each line.
+	Blame(fname string) ([]byte, error)
 }
 
 func NewRepo(remote, local string) (Repo, error) {

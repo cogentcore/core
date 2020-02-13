@@ -143,6 +143,17 @@ func (ft *FileTree) AddExtFile(fpath string) (*FileNode, error) {
 	return ft.ExtFileNodeByPath(pth)
 }
 
+// RemoveExtFile removes external file from maintained list,  returns true if removed
+func (ft *FileTree) RemoveExtFile(fpath string) bool {
+	for i, ef := range ft.ExtFiles {
+		if ef == fpath {
+			ft.ExtFiles = append(ft.ExtFiles[:i], ft.ExtFiles[i+1:]...)
+			return true
+		}
+	}
+	return false
+}
+
 // HasExtFile returns true and index if given abs path exists on ExtFiles list.
 // false and -1 if not.
 func (ft *FileTree) HasExtFile(fpath string) (bool, int) {
@@ -937,11 +948,11 @@ func (fn *FileNode) RevertVcs() (err error) {
 	return err
 }
 
-// DiffVcs shows the diffs between the current version of this file and the version
-// given by the revision specifier -- if empty, defaults to current HEAD.
+// DiffVcs shows the diffs between two versions of this file, given by the
+// revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-// Diffs are shown in a DiffViewDialog
-func (fn *FileNode) DiffVcs(rev string) error {
+// Diffs are shown in a DiffViewDialog.
+func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 	repo, _ := fn.Repo()
 	if repo == nil {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
@@ -949,27 +960,94 @@ func (fn *FileNode) DiffVcs(rev string) error {
 	if fn.Info.Vcs == vci.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	head, err := repo.FileContents(string(fn.FPath), rev)
-	if err != nil {
-		return err
-	}
-	hstr := textbuf.BytesToLineStrings(head, false) // don't add new lines
-	var cstr []string
-	if fn.Buf != nil {
-		cstr = fn.Buf.Strings(false)
+	var astr, bstr []string
+	var afn, bfn string
+	if rev_b == "" { // default to current file
+		bfn = string(fn.FPath)
+		if fn.Buf != nil {
+			bstr = fn.Buf.Strings(false)
+		} else {
+			fb, err := textbuf.FileBytes(string(fn.FPath))
+			if err != nil {
+				return err
+			}
+			bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		}
 	} else {
-		fb, err := textbuf.FileBytes(string(fn.FPath))
+		fb, err := repo.FileContents(string(fn.FPath), rev_b)
 		if err != nil {
 			return err
 		}
-		cstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		bfn = rev_b + ":" + fn.MyRelPath()
 	}
-	rstr := rev
-	if rstr == "" {
-		rstr = "HEAD"
+	fb, err := repo.FileContents(string(fn.FPath), rev_a)
+	if err != nil {
+		return err
 	}
-	DiffViewDialog(nil, hstr, cstr, rstr+":"+fn.Nm, string(fn.FPath), DlgOpts{Title: "DiffVcs: " + fn.Nm})
+	astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+	if rev_a == "" {
+		rev_a = "HEAD"
+	}
+	afn = rev_a + ":" + fn.MyRelPath()
+	DiffViewDialog(nil, astr, bstr, afn, bfn, DlgOpts{Title: "DiffVcs: " + fn.Nm})
 	return nil
+}
+
+// LogVcs shows the VCS log of commits for this file, optionally with a
+// since date qualifier: If since is non-empty, it should be
+// a date-like expression that the VCS will understand, such as
+// 1/1/2020, yesterday, last year, etc.
+// If allFiles is true, then the log will show revisions for all files, not just
+// this one.
+// Returns the Log and also shows it in a TableViewDialog.
+func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
+	repo, _ := fn.Repo()
+	if repo == nil {
+		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	if fn.Info.Vcs == vci.Untracked {
+		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	fnm := string(fn.FPath)
+	if allFiles {
+		fnm = ""
+	}
+	lg, err := repo.Log(fnm, since)
+	if err != nil {
+		return lg, err
+	}
+	title := "VCS Log: "
+	if fnm == "" {
+		title += "All files"
+	} else {
+		title += fn.MyRelPath()
+	}
+	if since != "" {
+		title += " since: " + since
+	}
+	TableViewDialog(nil, &lg, DlgOpts{Title: title, Inactive: true}, nil, nil, nil)
+	return lg, nil
+}
+
+// BlameVcs shows the VCS blame report for this file, reporting for each line
+// the revision and author of the last change.
+func (fn *FileNode) BlameVcs() ([]byte, error) {
+	repo, _ := fn.Repo()
+	if repo == nil {
+		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	if fn.Info.Vcs == vci.Untracked {
+		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
+	}
+	fnm := string(fn.FPath)
+	blm, err := repo.Blame(fnm)
+	if err != nil {
+		return blm, err
+	}
+	title := "VCS Blame: " + fn.MyRelPath()
+	TextViewDialog(nil, blm, DlgOpts{Title: title, Inactive: true, Filename: fnm, LineNos: true})
+	return blm, nil
 }
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
@@ -1461,11 +1539,11 @@ func (ftv *FileTreeView) RevertVcs() {
 	}
 }
 
-// DiffVcs shows the diffs between the current version of this file and the version
-// given by the revision specifier -- if empty, defaults to current HEAD.
+// DiffVcs shows the diffs between two versions of this file, given by the
+// revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-// Diffs are shown in a DiffViewDialog
-func (ftv *FileTreeView) DiffVcs(rev string) {
+// Diffs are shown in a DiffViewDialog.
+func (ftv *FileTreeView) DiffVcs(rev_a, rev_b string) {
 	sels := ftv.SelectedViews()
 	sz := len(sels)
 	if sz == 0 { // shouldn't happen
@@ -1476,7 +1554,48 @@ func (ftv *FileTreeView) DiffVcs(rev string) {
 		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := ftvv.FileNode()
 		if fn != nil {
-			fn.DiffVcs(rev)
+			fn.DiffVcs(rev_a, rev_b)
+		}
+	}
+}
+
+// LogVcs shows the VCS log of commits for this file, optionally with a
+// since date qualifier: If since is non-empty, it should be
+// a date-like expression that the VCS will understand, such as
+// 1/1/2020, yesterday, last year, etc.
+// If allFiles is true, then the log will show revisions for all files, not just
+// this one.
+// Returns the Log and also shows it in a TableViewDialog.
+func (ftv *FileTreeView) LogVcs(allFiles bool, since string) {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.LogVcs(allFiles, since)
+		}
+	}
+}
+
+// BlameVcs shows the VCS blame report for this file, reporting for each line
+// the revision and author of the last change.
+func (ftv *FileTreeView) BlameVcs() {
+	sels := ftv.SelectedViews()
+	sz := len(sels)
+	if sz == 0 { // shouldn't happen
+		return
+	}
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.BlameVcs()
 		}
 	}
 }
@@ -1489,6 +1608,7 @@ func (ftv *FileTreeView) RemoveFromExterns() {
 		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := ftvv.FileNode()
 		if fn != nil && fn.IsExternal() {
+			fn.FRoot.RemoveExtFile(string(fn.FPath))
 			fn.CloseBuf()
 			fn.Delete(true)
 		}
@@ -1961,13 +2081,29 @@ var FileTreeViewProps = ki.Props{
 			"updtfunc":   FileTreeActiveInVcsModifiedFunc,
 			"label-func": VcsLabelFunc,
 		}},
+		{"sep-vcs-log", ki.BlankProp{}},
 		{"DiffVcs", ki.Props{
-			"desc":       "show the differences between this file and HEAD (default for empty revision) or other VCS revision -- use -1, -2 etc for prior revisions.",
+			"desc":       "shows the diffs between two versions of this file, given by the revision specifiers -- if empty, defaults to A = current HEAD, B = current WC file.   -1, -2 etc also work as universal ways of specifying prior revisions.",
 			"updtfunc":   FileTreeActiveInVcsFunc,
 			"label-func": VcsLabelFunc,
 			"Args": ki.PropSlice{
-				{"VCS Revision", ki.Props{}},
+				{"Revision A", ki.Props{}},
+				{"Revision B", ki.Props{}},
 			},
+		}},
+		{"LogVcs", ki.Props{
+			"desc":       "shows the VCS log of commits for this file, optionally with a since date qualifier: If since is non-empty, it should be a date-like expression that the VCS will understand, such as 1/1/2020, yesterday, last year, etc.  If allFiles is true, then the log will show revisions for all files, not just this one.",
+			"updtfunc":   FileTreeActiveInVcsFunc,
+			"label-func": VcsLabelFunc,
+			"Args": ki.PropSlice{
+				{"All Files", ki.Props{}},
+				{"Since Date", ki.Props{}},
+			},
+		}},
+		{"BlameVcs", ki.Props{
+			"desc":       "shows the VCS blame report for this file, reporting for each line the revision and author of the last change.",
+			"updtfunc":   FileTreeActiveInVcsFunc,
+			"label-func": VcsLabelFunc,
 		}},
 		{"sep-extrn", ki.BlankProp{}},
 		{"RemoveFromExterns", ki.Props{

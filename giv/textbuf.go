@@ -32,8 +32,8 @@ import (
 	"github.com/goki/pi/token"
 )
 
-// MaxScopeLines	 is the maximum lines to search for a scope marker, e.g. '}'
-var MaxScopeLines = 100
+// TextBufMaxScopeLines is the maximum lines to search for a scope marker, e.g. '}'
+var TextBufMaxScopeLines = 100
 
 // TextBufDiffRevertLines is max number of lines to use the
 // diff-based revert, which results in faster reverts but only
@@ -972,7 +972,7 @@ func (tb *TextBuf) Search(find []byte, ignoreCase, lexItems bool) (int, []textbu
 func (tb *TextBuf) BraceMatch(r rune, st textbuf.Pos) (en textbuf.Pos, found bool) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return textbuf.BraceMatch(tb.Lines, r, st, MaxScopeLines)
+	return textbuf.BraceMatch(tb.Lines, r, st, TextBufMaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////

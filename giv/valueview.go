@@ -973,18 +973,24 @@ func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
 
 func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
 	pf.TextViewClipHistMax = TextViewClipHistMax
+	pf.TextBufMaxScopeLines = TextBufMaxScopeLines
+	pf.TextBufDiffRevertLines = TextBufDiffRevertLines
+	pf.TextBufDiffRevertDiffs = TextBufDiffRevertDiffs
+	pf.TextBufMarkupDelayMSec = TextBufMarkupDelayMSec
 	pf.MapInlineLen = MapInlineLen
 	pf.StructInlineLen = StructInlineLen
 	pf.SliceInlineLen = SliceInlineLen
-	pf.MaxScopeLines = MaxScopeLines
 }
 
 func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 	TextViewClipHistMax = pf.TextViewClipHistMax
+	TextBufMaxScopeLines = pf.TextBufMaxScopeLines
+	TextBufDiffRevertLines = pf.TextBufDiffRevertLines
+	TextBufDiffRevertDiffs = pf.TextBufDiffRevertDiffs
+	TextBufMarkupDelayMSec = pf.TextBufMarkupDelayMSec
 	MapInlineLen = pf.MapInlineLen
 	StructInlineLen = pf.StructInlineLen
 	SliceInlineLen = pf.SliceInlineLen
-	MaxScopeLines = pf.MaxScopeLines
 }
 
 func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {

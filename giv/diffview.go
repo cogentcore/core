@@ -242,20 +242,6 @@ func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile string
 	dv.FileB = bfile
 	dv.DiffStrings(astr, bstr)
 
-	// bbox, _ := dlg.ButtonBox(frame)
-	// if bbox == nil {
-	// 	bbox = dlg.AddButtonBox(frame)
-	// }
-	// cpb := gi.AddNewButton(bbox, "copy-to-clip")
-	// cpb.SetText("Copy To Clipboard")
-	// cpb.SetIcon("copy")
-	// cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		ddlg := recv.Embed(gi.KiT_Dialog).(*gi.Dialog)
-	// 		oswin.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
-	// 	}
-	// })
-
 	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)
 	return dv

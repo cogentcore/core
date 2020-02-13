@@ -171,3 +171,23 @@ func (gr *SvnRepo) FileContents(fname string, rev string) ([]byte, error) {
 	}
 	return out, nil
 }
+
+// Log returns the log history of commits for given filename
+// (or all files if empty).  If since is non-empty, it should be
+// a date-like expression that the VCS will understand, such as
+// 1/1/2020, yesterday, last year, etc
+func (gr *SvnRepo) Log(fname string, since string) (Log, error) {
+	// todo: parse -- requires parsing over multiple lines..
+	return nil, nil
+}
+
+// Blame returns an annotated report about the file, showing which revision last
+// modified each line.
+func (gr *SvnRepo) Blame(fname string) ([]byte, error) {
+	out, err := gr.RunFromDir("svn", "blame", fname)
+	if err != nil {
+		log.Println(string(out))
+		return nil, err
+	}
+	return out, nil
+}
