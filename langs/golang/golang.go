@@ -468,6 +468,7 @@ func (gl *GoLang) AddPkgToExts(fs *pi.FileState, pkg *syms.Symbol) bool {
 	psy, has := fs.ExtSyms[pkg.Name]
 	if has {
 		psy.Children.CopyFrom(pkg.Children)
+		psy.Types.CopyFrom(pkg.Types)
 		pkg = psy
 	} else {
 		if fs.ExtSyms == nil {
