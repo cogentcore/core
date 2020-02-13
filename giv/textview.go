@@ -436,6 +436,8 @@ func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
 		}
 	case TextBufMarkUpdt:
 		tv.SetNeedsRefresh() // comes from another goroutine
+	case TextBufClosed:
+		tv.SetBuf(nil)
 	}
 }
 

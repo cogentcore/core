@@ -140,6 +140,9 @@ const (
 	// with a mutex
 	TextBufMarkUpdt
 
+	// TextBufClosed signals that the textbuf was closed
+	TextBufClosed
+
 	TextBufSignalsN
 )
 
@@ -610,9 +613,10 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 		}
 		return false // awaiting decisions..
 	}
-	for _, tve := range tb.Views {
-		tve.SetBuf(nil) // automatically disconnects signals, views
-	}
+	tb.TextBufSig.Emit(tb.This(), int64(TextBufClosed), nil)
+	// for _, tve := range tb.Views {
+	// 	tve.SetBuf(nil) // automatically disconnects signals, views
+	// }
 	tb.New(1)
 	tb.Filename = ""
 	tb.ClearChanged()

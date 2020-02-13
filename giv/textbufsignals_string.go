@@ -18,12 +18,13 @@ func _() {
 	_ = x[TextBufInsert-2]
 	_ = x[TextBufDelete-3]
 	_ = x[TextBufMarkUpdt-4]
-	_ = x[TextBufSignalsN-5]
+	_ = x[TextBufClosed-5]
+	_ = x[TextBufSignalsN-6]
 }
 
-const _TextBufSignals_name = "TextBufDoneTextBufNewTextBufInsertTextBufDeleteTextBufMarkUpdtTextBufSignalsN"
+const _TextBufSignals_name = "TextBufDoneTextBufNewTextBufInsertTextBufDeleteTextBufMarkUpdtTextBufClosedTextBufSignalsN"
 
-var _TextBufSignals_index = [...]uint8{0, 11, 21, 34, 47, 62, 77}
+var _TextBufSignals_index = [...]uint8{0, 11, 21, 34, 47, 62, 75, 90}
 
 func (i TextBufSignals) String() string {
 	if i < 0 || i >= TextBufSignals(len(_TextBufSignals_index)-1) {

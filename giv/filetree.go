@@ -536,12 +536,15 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 }
 
 // CloseBuf closes the file in its buffer if it is open -- returns true if closed
+// Connect to the fn.Buf.TextBufSig and look for the TextBufClosed signal to be
+// notified when the buffer is closed.
 func (fn *FileNode) CloseBuf() bool {
 	if fn.Buf == nil {
 		return false
 	}
 	fn.Buf.Close(nil)
 	fn.Buf = nil
+	fn.SetClosed()
 	return true
 }
 
