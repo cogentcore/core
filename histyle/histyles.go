@@ -14,7 +14,6 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
-	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/pi"
@@ -137,18 +136,27 @@ func (hs *Styles) SaveAll(dir gi.FileName) {
 }
 
 // OpenDefaults opens the default highlighting styles (from chroma originally)
+// These are encoded as an asset from defaults.histys
 func (hs *Styles) OpenDefaults() error {
-	path, err := dirs.GoSrcDir("github.com/goki/gi/histyle")
+	// path, err := dirs.GoSrcDir("github.com/goki/gi/histyle")
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+	// dfnm := filepath.Join(path, "defaults.histys")
+	// rval := hs.OpenJSON(gi.FileName(dfnm))
+
+	defb, err := Asset("defaults.histys")
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	dfnm := filepath.Join(path, "defaults.histys")
-	// fmt.Printf("loading default icons: %v\n", path)
-	rval := hs.OpenJSON(gi.FileName(dfnm))
-	// tstpath := filepath.Join(gopath, "src/github.com/goki/gi/icons_svg_test")
-	// rval = iset.OpenIconsFromPath(tstpath)
-	return rval
+	err = json.Unmarshal(defb, hs)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return err
 }
 
 // Names outputs names of styles in collection

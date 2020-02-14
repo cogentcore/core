@@ -12,16 +12,14 @@ require (
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/chewxy/math32 v1.0.4
 	github.com/fatih/camelcase v1.0.0
-	github.com/gabriel-vasile/mimetype v1.0.2 // indirect
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/goki/ki v0.9.11-0.20200208080425-11bf9ec4476c
-	github.com/goki/pi v0.5.11-0.20200214073514-ae83aa813623
+	github.com/goki/ki v0.9.11-0.20200214083929-08ce041b6328
+	github.com/goki/pi v0.5.11-0.20200214100443-e61f3eb4282d
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/h2non/filetype v1.0.12 // indirect
 	github.com/ianbruene/go-difflib v1.1.2
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/mitchellh/go-homedir v1.1.0
@@ -32,7 +30,6 @@ require (
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
-	golang.org/x/tools v0.0.0-20200213224642-88e652f7a869 // indirect
 )
 
 go 1.13

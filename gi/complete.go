@@ -75,7 +75,7 @@ var CompleteWaitMSec = 500
 var CompleteMaxItems = 25
 
 // IsAboutToShow returns true if the DelayTimer is started for
-// preparing to show a completion
+// preparing to show a completion.  note: don't really need to lock
 func (c *Complete) IsAboutToShow() bool {
 	c.DelayMu.Lock()
 	defer c.DelayMu.Unlock()

@@ -47,8 +47,10 @@ func InitSpell() error {
 	}
 	err := LoadSpellModel()
 	if err != nil {
-		// oh well, try creating a new model from corpus
-		NewSpellModelFromText()
+		err = spell.LoadDefault()
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	notWordChar, err = regexp.Compile(`[^0-9A-Za-z]`)

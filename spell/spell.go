@@ -9,6 +9,7 @@ package spell
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"log"
 	"os"
@@ -38,11 +39,23 @@ func Initialized() bool {
 }
 
 // Load loads the saved model stored in json format
-func Load(path string) (err error) {
+func Load(path string) error {
+	var err error
 	model, err = fuzzy.Load(path)
 	if err == nil {
 		inited = true
 	}
+	return err
+}
+
+// LoadDefault loads the default spelling file.
+// Todo: need different languages obviously!
+func LoadDefault() error {
+	defb, err := Asset("spell_en_us_plain.json")
+	if err != nil {
+		return err
+	}
+	model, err = fuzzy.FromReader(bytes.NewBuffer(defb))
 	return err
 }
 

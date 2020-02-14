@@ -17,9 +17,9 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/pi/filecat"
-	_ "github.com/goki/pi/langs"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
+	_ "github.com/goki/pi/suplangs"
 	"github.com/goki/pi/token"
 )
 

@@ -11,10 +11,13 @@ all: build
 
 build: 
 	$(GOBUILD) -v
+
 test: 
 	$(GOTEST) -v ./...
+
 clean: 
 	$(GOCLEAN)
+
 bindata:
 	go-bindata -pkg svg ../icons/*.svg
 	

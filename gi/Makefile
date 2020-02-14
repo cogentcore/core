@@ -11,11 +11,13 @@ all: build
 
 build: 
 	$(GOBUILD) -v
+
 test: 
 	$(GOTEST) -v ./...
+
 clean: 
 	$(GOCLEAN)
-	
+
 # NOTE: MUST update version number here prior to running 'make release'
 VERS=v0.9.10
 PACKAGE=gi
