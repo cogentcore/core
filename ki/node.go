@@ -67,7 +67,7 @@ var KiT_Node = kit.Types.AddType(&Node{}, Props{"EnumType:Flag": KiT_Flags})
 //  fmt.Stringer
 
 // String implements the fmt.stringer interface -- returns the PathUnique of the node
-func (n Node) String() string {
+func (n *Node) String() string {
 	return n.This().PathUnique()
 }
 
