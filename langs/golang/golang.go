@@ -20,6 +20,7 @@ import (
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
 	"github.com/goki/pi/token"
+	"golang.org/x/tools/go/packages"
 )
 
 // GoLang implements the Lang interface for the Go language
@@ -185,39 +186,40 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	return TheParseDirs.ParseDir(gl, path, opts)
 }
 
-// ParseDirImpl does the actual work of parsing a directory
+// ParseDirImpl does the actual work of parsing a directory.
+// Path is assumed to be a package import path or a local file name
 func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		path, err = dirs.GoSrcDir(path)
-		if err != nil {
-			if TraceTypes {
-				log.Println(err)
-			}
-			return nil
-		}
-	} else if err != nil {
-		log.Println(err.Error())
+	// packages automatically deals with GOPATH vs. modules, etc.
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
+	if err != nil {
+		log.Println(err)
 		return nil
 	}
-	path, _ = filepath.Abs(path)
-	// fmt.Printf("Parsing, loading path: %v\n", path)
+	if len(pkgs) != 1 {
+		fmt.Printf("More than one package for path: %v\n", path)
+		return nil
+	}
+	pkg := pkgs[0]
 
-	fls := dirs.ExtFileNames(path, []string{".go"})
-	if len(fls) == 0 {
-		// fmt.Printf("No go files, bailing\n")
+	if len(pkg.GoFiles) == 0 {
+		fmt.Printf("No Go files found in package: %v\n", path)
 		return nil
 	}
+	fgo := pkg.GoFiles[0]
+	pkgPathAbs := filepath.Dir(fgo)
+
+	// gm := os.Getenv("GO111MODULE")
+	// fmt.Printf("GO111MODULE: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
 
 	if !opts.Rebuild {
-		csy, cts, err := syms.OpenSymCache(filecat.Go, path)
+		csy, cts, err := syms.OpenSymCache(filecat.Go, pkgPathAbs)
 		if err == nil && csy != nil {
 			if !gl.Pr.ModTime.IsZero() && cts.Before(gl.Pr.ModTime) {
 				// fmt.Printf("rebuilding %v because parser: %v is newer than cache: %v\n", path, gl.Pr.ModTime, cts)
 			} else {
-				lstmod := dirs.LatestMod(path, []string{".go"})
+				lstmod := dirs.LatestMod(pkgPathAbs, []string{".go"})
 				if lstmod.Before(cts) {
-					// fmt.Printf("loaded cache for: %v from: %v\n", path, cts)
+					// fmt.Printf("loaded cache for: %v from: %v\n", pkgPathAbs, cts)
 					return csy
 				}
 			}
@@ -227,12 +229,11 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 	pr := gl.Parser()
 	var pkgsym *syms.Symbol
 	var fss []*pi.FileState // file states for each file
-	for i := range fls {
-		fnm := fls[i]
+	for _, fpath := range pkg.GoFiles {
+		fnm := filepath.Base(fpath)
 		if strings.HasSuffix(fnm, "_test.go") {
 			continue
 		}
-		fpath := filepath.Join(path, fnm)
 		// avoid processing long slow files that aren't needed anyway:
 		excl := false
 		for _, ex := range ParseDirExcludes {
@@ -273,8 +274,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 			if pkgsym == nil {
 				pkgsym = pkg
 			} else {
-				pkgsym.Children.CopyFrom(pkg.Children)
-				pkgsym.Types.CopyFrom(pkg.Types)
+				pkgsym.CopyFromScope(pkg)
 				if TraceTypes {
 					pkgsym.Types.PrintUnknowns()
 				}
@@ -290,7 +290,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 	gl.ResolveTypes(pfs, pkgsym, false) // false = don't include function-internal scope items
 	gl.DeleteExternalTypes(pkgsym)
 	if !opts.Nocache {
-		syms.SaveSymCache(pkgsym, filecat.Go, path)
+		syms.SaveSymCache(pkgsym, filecat.Go, pkgPathAbs)
 	}
 	return pkgsym
 }
@@ -439,8 +439,7 @@ func (gl *GoLang) AddPkgToSyms(fs *pi.FileState, pkg *syms.Symbol) bool {
 	psy, has := fs.Syms[pkg.Name]
 	if has {
 		// fmt.Printf("AddPkgToSyms: importing pkg types: %v\n", pkg.Name)
-		psy.Children.CopyFrom(pkg.Children)
-		psy.Types.CopyFrom(pkg.Types)
+		psy.CopyFromScope(pkg)
 		if TraceTypes {
 			psy.Types.PrintUnknowns()
 		}
@@ -467,8 +466,7 @@ func (gl *GoLang) AddPathToExts(fs *pi.FileState, path string) {
 func (gl *GoLang) AddPkgToExts(fs *pi.FileState, pkg *syms.Symbol) bool {
 	psy, has := fs.ExtSyms[pkg.Name]
 	if has {
-		psy.Children.CopyFrom(pkg.Children)
-		psy.Types.CopyFrom(pkg.Types)
+		psy.CopyFromScope(pkg)
 		pkg = psy
 	} else {
 		if fs.ExtSyms == nil {

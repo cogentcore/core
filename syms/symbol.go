@@ -188,6 +188,13 @@ func (sy *Symbol) NonPtrTypeName() string {
 	return strings.TrimPrefix(strings.TrimPrefix(sy.Type, "&"), "*")
 }
 
+// CopyFromScope copies the Children and Types from given other symbol
+// for scopes (e.g., Go package), to merge with existing.
+func (sy *Symbol) CopyFromScope(src *Symbol) {
+	sy.Children.CopyFrom(src.Children)
+	sy.Types.CopyFrom(src.Types)
+}
+
 // OpenJSON opens from a JSON-formatted file.
 func (sy *Symbol) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
