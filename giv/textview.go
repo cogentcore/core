@@ -4030,11 +4030,6 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.QReplaceCancel()
 		tv.CancelComplete()
 		tv.ISearchStart()
-	case gi.KeyFunReplace:
-		kt.SetProcessed()
-		tv.CancelComplete()
-		tv.ISearchCancel()
-		tv.QReplacePrompt()
 	case gi.KeyFunAbort:
 		cancelAll()
 		kt.SetProcessed()
@@ -4064,6 +4059,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		case kf == gi.KeyFunFocusPrev: // tab
 			kt.SetProcessed()
 			tv.CursorPrevLink(true)
+		case kf == gi.KeyFunNil && tv.ISearch.On:
+			if unicode.IsPrint(kt.Rune) && !kt.HasAnyModifier(key.Control, key.Meta) {
+				tv.ISearchKeyInput(kt)
+			}
 		case kt.Rune == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
 			kt.SetProcessed()
 			tv.CursorPos.Ch--
@@ -4077,6 +4076,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		return
 	}
 	switch kf {
+	case gi.KeyFunReplace:
+		kt.SetProcessed()
+		tv.CancelComplete()
+		tv.ISearchCancel()
+		tv.QReplacePrompt()
 	// case gi.KeyFunAccept: // ctrl+enter
 	// 	tv.ISearchCancel()
 	// 	tv.QReplaceCancel()
@@ -4193,10 +4197,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 // KeyInputInsertRune handles the insertion of a typed character
 func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 	kt.SetProcessed()
-	if tv.ISearch.On { // todo: need this in inactive mode
+	if tv.ISearch.On {
 		tv.CancelComplete()
 		tv.ISearchKeyInput(kt)
-	} else if tv.QReplace.On { // todo: need this in inactive mode
+	} else if tv.QReplace.On {
 		tv.CancelComplete()
 		tv.QReplaceKeyInput(kt)
 	} else {

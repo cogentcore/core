@@ -74,6 +74,14 @@ var CompleteWaitMSec = 500
 // CompleteMaxItems is the max number of items to display in completer popup
 var CompleteMaxItems = 25
 
+// IsAboutToShow returns true if the DelayTimer is started for
+// preparing to show a completion
+func (c *Complete) IsAboutToShow() bool {
+	c.DelayMu.Lock()
+	defer c.DelayMu.Unlock()
+	return c.DelayTimer != nil
+}
+
 // Show is the main call for listing completions.
 // Has a builtin delay timer so completions are only shown after
 // a delay, which resets every time it is called.

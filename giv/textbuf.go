@@ -1390,6 +1390,9 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 			return
 		}
 	}
+	if tb.Complete != nil && tb.Complete.IsAboutToShow() {
+		return
+	}
 	tb.MarkupDelayTimer = time.AfterFunc(time.Duration(TextBufMarkupDelayMSec)*time.Millisecond,
 		func() {
 			// fmt.Printf("delayed remarkup\n")
