@@ -62,6 +62,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tv.SetInactive()
 	tv.SetProp("font-family", gi.Prefs.MonoFont)
 	tv.SetBuf(tb)
+	tb.ReMarkup()
 
 	bbox, _ := dlg.ButtonBox(frame)
 	if bbox == nil {

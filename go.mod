@@ -7,29 +7,32 @@ require (
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/Masterminds/vcs v1.13.1
-	github.com/alecthomas/chroma v0.7.0
+	github.com/alecthomas/chroma v0.7.1
 	github.com/aymerick/douceur v0.2.0
-	github.com/c2h5oh/datasize v0.0.0-20171227191756-4eba002a5eae
+	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/chewxy/math32 v1.0.4
 	github.com/fatih/camelcase v1.0.0
+	github.com/gabriel-vasile/mimetype v1.0.2 // indirect
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
-	github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
-	github.com/go-python/gopy v0.3.1
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/goki/ki v0.9.10
-	github.com/goki/pi v0.5.10
+	github.com/goki/ki v0.9.11-0.20200208080425-11bf9ec4476c
+	github.com/goki/pi v0.5.11-0.20200214073514-ae83aa813623
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
+	github.com/h2non/filetype v1.0.12 // indirect
+	github.com/ianbruene/go-difflib v1.1.2
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/pmezard/go-difflib v1.0.0
 	github.com/sajari/fuzzy v1.0.0
-	github.com/srwiley/rasterx v0.0.0-20181219215540-696f7edb7a7e
+	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e // indirect
+	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
+	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	golang.org/x/image v0.0.0-20191214001246-9130b4cfad52
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
+	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+	golang.org/x/tools v0.0.0-20200213224642-88e652f7a869 // indirect
 )
 
 go 1.13

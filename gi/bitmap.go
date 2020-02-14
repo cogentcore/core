@@ -33,7 +33,7 @@ type Bitmap struct {
 	WidgetBase
 	Filename FileName    `desc:"file name of image loaded -- set by OpenImage"`
 	Size     image.Point `desc:"size of the image"`
-	Pixels   *image.RGBA `copy:"-", view:"-", xml:"-" json:"-" desc:"the bitmap image"`
+	Pixels   *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
 }
 
 var KiT_Bitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)

@@ -25,3 +25,5 @@ install-exe:
 	# install executable into /usr/local/bin
 	cp gi/pygi /usr/local/bin/
 
+clean:
+	rm -rf gi dist build */*.egg-info *.egg-info
