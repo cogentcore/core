@@ -202,7 +202,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 	pkg := pkgs[0]
 
 	if len(pkg.GoFiles) == 0 {
-		fmt.Printf("No Go files found in package: %v\n", path)
+		// fmt.Printf("No Go files found in package: %v\n", path)
 		return nil
 	}
 	fgo := pkg.GoFiles[0]
