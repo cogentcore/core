@@ -270,18 +270,23 @@ func (pr *Parser) ParseString(str string, fname string, sup filecat.Supported) *
 	return lfs
 }
 
+// ReadJSON opens lexer and parser rules from Bytes, in a standard JSON-formatted file
+func (pr *Parser) ReadJSON(b []byte) error {
+	err := json.Unmarshal(b, pr)
+	if err == nil {
+		pr.Lexer.UnmarshalPost()
+		pr.Parser.UnmarshalPost()
+	}
+	return err
+}
+
 // OpenJSON opens lexer and parser rules to current filename, in a standard JSON-formatted file
 func (pr *Parser) OpenJSON(filename string) error {
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(b, pr)
-	if err == nil {
-		pr.Lexer.UnmarshalPost()
-		pr.Parser.UnmarshalPost()
-	}
-	return err
+	return pr.ReadJSON(b)
 }
 
 // SaveJSON saves lexer and parser rules, in a standard JSON-formatted file

@@ -7,13 +7,12 @@ package pi
 import (
 	"fmt"
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/ki/dirs"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/langs"
 	"github.com/goki/pi/lex"
 )
 
@@ -101,29 +100,30 @@ var LangSupport = LangSupporter{}
 func (ll *LangSupporter) OpenStd() error {
 	lex.TheLangLexer = &LangSupport
 
-	path, err := dirs.GoSrcDir("github.com/goki/pi/langs")
-	if err != nil {
-		log.Println(err)
-		return err
-	}
+	// path, err := dirs.GoSrcDir("github.com/goki/pi/langs")
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
 	for sl, lp := range StdLangProps {
 		ln := strings.ToLower(sl.String())
 		lndir := ln
 		if lndir == "go" {
 			lndir = "golang" // can't name a package "go"..
 		}
-		fd := filepath.Join(path, lndir)
-		fn := filepath.Join(fd, ln+".pi")
-		pinfo, err := os.Stat(fn)
-		if os.IsNotExist(err) {
-			continue
-		}
+		fn := filepath.Join(lndir, ln+".pi")
+		pib, err := langs.Asset(fn)
 		if err != nil {
 			continue
 		}
 		pr := NewParser()
-		pr.OpenJSON(fn)
+		err = pr.ReadJSON(pib)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 		lp.Parser = pr
+		pinfo, _ := langs.AssetInfo(fn)
 		pr.ModTime = pinfo.ModTime()
 		lp.Parser.InitAll()
 		StdLangProps[sl] = lp
