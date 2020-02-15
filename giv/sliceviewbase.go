@@ -814,6 +814,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if HasToolBarView(sv.Slice) {
 		ToolBarView(sv.Slice, sv.Viewport, tb)
+		tb.SetFullReRender()
 	}
 	sv.ToolbarSlice = sv.Slice
 }

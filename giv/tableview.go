@@ -808,6 +808,7 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if HasToolBarView(tv.Slice) {
 		ToolBarView(tv.Slice, tv.Viewport, tb)
+		tb.SetFullReRender()
 	}
 	tv.ToolbarSlice = tv.Slice
 }

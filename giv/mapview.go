@@ -366,6 +366,7 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if HasToolBarView(mv.Map) {
 		ToolBarView(mv.Map, mv.Viewport, tb)
+		tb.SetFullReRender()
 	}
 	mv.ToolbarMap = mv.Map
 }
