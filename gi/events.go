@@ -1060,7 +1060,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 			return true
 		}
 		if ni.HasFocus() {
-			if true || EventTrace {
+			if EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", ni.PathUnique())
 			}
 			if !updated {

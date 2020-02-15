@@ -126,7 +126,10 @@ func ToolBarView(val interface{}, vp *gi.Viewport2D, tb *gi.ToolBar) bool {
 	}
 
 	if vp == nil {
-		MethViewErr(vtyp, "Viewport is nil in ToolBarView config -- must set viewport in widget prior to calling this method!")
+		vp = tb.ParentViewport()
+		if vp == nil {
+			MethViewErr(vtyp, "Viewport is nil in ToolBarView config -- must set viewport in widget prior to calling this method!")
+		}
 		return false
 	}
 

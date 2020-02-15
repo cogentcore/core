@@ -61,6 +61,11 @@ func (sv *StructView) SetStruct(st interface{}) {
 	if sv.Struct != st {
 		sv.Changed = false
 		updt = sv.UpdateStart()
+		if sv.Struct != nil {
+			if k, ok := sv.Struct.(ki.Ki); ok {
+				k.NodeSignal().Disconnect(sv.This())
+			}
+		}
 		sv.Struct = st
 		tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
 		if tp != nil {
@@ -174,6 +179,7 @@ func (sv *StructView) ConfigToolbar() {
 	}
 	if HasToolBarView(sv.Struct) {
 		ToolBarView(sv.Struct, sv.Viewport, tb)
+		tb.SetFullReRender()
 	}
 	sv.ToolbarStru = sv.Struct
 }
