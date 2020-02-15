@@ -456,6 +456,10 @@ func ToString(it interface{}) string {
 		return strconv.FormatFloat(float64(it), 'G', -1, 32)
 	case *float32:
 		return strconv.FormatFloat(float64(*it), 'G', -1, 32)
+	case uintptr:
+		return fmt.Sprintf("%#x", uintptr(it))
+	case *uintptr:
+		return fmt.Sprintf("%#x", uintptr(*it))
 	}
 
 	if stringer, ok := it.(fmt.Stringer); ok {
