@@ -36,6 +36,8 @@ func (un *Undo) NewGroup() {
 
 // Reset clears all undo records
 func (un *Undo) Reset() {
+	un.Pos = 0
+	un.Group = 0
 	un.Stack = nil
 	un.UndoStack = nil
 }

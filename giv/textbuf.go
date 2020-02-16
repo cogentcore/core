@@ -1301,7 +1301,7 @@ func (tb *TextBuf) LinesInserted(tbe *textbuf.Edit) {
 	}
 	tb.MarkupLines(st, ed)
 	tb.MarkupMu.Unlock()
-	tb.ReMarkup() // redo full
+	tb.StartDelayedReMarkup()
 }
 
 // LinesDeleted deletes lines in Markup corresponding to lines
@@ -1331,7 +1331,7 @@ func (tb *TextBuf) LinesDeleted(tbe *textbuf.Edit) {
 	tb.Markup[st] = HTMLEscapeRunes(tb.Lines[st])
 	tb.MarkupLines(st, st)
 	tb.MarkupMu.Unlock()
-	tb.ReMarkup() // redo full
+	tb.StartDelayedReMarkup()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

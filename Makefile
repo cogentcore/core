@@ -49,6 +49,7 @@ old:
 update:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go get -u ./...
+	go mod tidy
 
 # gopath-update is for GOPATH to get most things updated.
 # need to call it in a target executable directory
