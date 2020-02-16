@@ -189,27 +189,66 @@ func (gl *GoLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 // ParseDirImpl does the actual work of parsing a directory.
 // Path is assumed to be a package import path or a local file name
 func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
-	// packages automatically deals with GOPATH vs. modules, etc.
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	if len(pkgs) != 1 {
-		fmt.Printf("More than one package for path: %v\n", path)
-		return nil
-	}
-	pkg := pkgs[0]
+	var files []string
+	var pkgPathAbs string
+	gm := os.Getenv("GO111MODULE")
+	if filepath.IsAbs(path) {
+		pkgPathAbs = path
+		files = dirs.ExtFileNames(pkgPathAbs, []string{".go"})
+		if len(files) == 0 {
+			// fmt.Printf("No go files, bailing\n")
+			return nil
+		}
+		for i, pt := range files {
+			files[i] = filepath.Join(pkgPathAbs, pt)
+		}
+	} else if gm == "off" { // note: using GOPATH manual mechanism as packages.Load is somehow very slow
+		_, err := os.Stat(path)
+		if os.IsNotExist(err) {
+			path, err = dirs.GoSrcDir(path)
+			if err != nil {
+				if TraceTypes {
+					log.Println(err)
+				}
+				return nil
+			}
+		} else if err != nil {
+			log.Println(err.Error())
+			return nil
+		}
+		pkgPathAbs, _ = filepath.Abs(path)
+		// fmt.Printf("Parsing, loading path: %v\n", path)
 
-	if len(pkg.GoFiles) == 0 {
-		// fmt.Printf("No Go files found in package: %v\n", path)
-		return nil
-	}
-	fgo := pkg.GoFiles[0]
-	pkgPathAbs := filepath.Dir(fgo)
+		files = dirs.ExtFileNames(path, []string{".go"})
+		if len(files) == 0 {
+			// fmt.Printf("No go files, bailing\n")
+			return nil
+		}
+		for i, pt := range files {
+			files[i] = filepath.Join(pkgPathAbs, pt)
+		}
+	} else {
+		// packages automatically deals with GOPATH vs. modules, etc.
+		pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		if len(pkgs) != 1 {
+			fmt.Printf("More than one package for path: %v\n", path)
+			return nil
+		}
+		pkg := pkgs[0]
 
-	// gm := os.Getenv("GO111MODULE")
-	// fmt.Printf("GO111MODULE: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
+		if len(pkg.GoFiles) == 0 {
+			// fmt.Printf("No Go files found in package: %v\n", path)
+			return nil
+		}
+		files = pkg.GoFiles
+		fgo := files[0]
+		pkgPathAbs = filepath.Dir(fgo)
+		// fmt.Printf("GO111MODULE: %v  package: %v PkgPath: %s\n", gm, path, pkgPathAbs)
+	}
 
 	if !opts.Rebuild {
 		csy, cts, err := syms.OpenSymCache(filecat.Go, pkgPathAbs)
@@ -229,7 +268,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 	pr := gl.Parser()
 	var pkgsym *syms.Symbol
 	var fss []*pi.FileState // file states for each file
-	for _, fpath := range pkg.GoFiles {
+	for _, fpath := range files {
 		fnm := filepath.Base(fpath)
 		if strings.HasSuffix(fnm, "_test.go") {
 			continue
@@ -254,7 +293,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 		// fs.ParseState.Trace.Run = true
 		// fs.ParseState.Trace.RunAct = true
 		// fs.ParseState.Trace.StdOut()
-		err = fs.Src.OpenFile(fpath)
+		err := fs.Src.OpenFile(fpath)
 		if err != nil {
 			continue
 		}
