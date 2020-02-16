@@ -2524,10 +2524,27 @@ func (tv *TextView) Lookup() {
 		return
 	}
 
-	tv.Buf.Complete.SrcLn = tv.CursorPos.Ln
-	tv.Buf.Complete.SrcCh = tv.CursorPos.Ch
+	var ln int
+	var ch int
+	if tv.HasSelection() {
+		ln = tv.SelectReg.Start.Ln
+		if tv.SelectReg.End.Ln != ln {
+			return // no multiline selections for lookup
+		}
+		ch = tv.SelectReg.End.Ch
+	} else {
+		ln = tv.CursorPos.Ln
+		if tv.IsWordEnd(tv.CursorPos) {
+			ch = tv.CursorPos.Ch
+		} else {
+			ch = tv.WordAt().End.Ch
+		}
+	}
+	tv.Buf.Complete.SrcLn = ln
+	tv.Buf.Complete.SrcCh = ch
 	st := textbuf.Pos{tv.CursorPos.Ln, 0}
-	en := textbuf.Pos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	en := textbuf.Pos{tv.CursorPos.Ln, ch}
+
 	tbe := tv.Buf.Region(st, en)
 	var s string
 	if tbe != nil {
