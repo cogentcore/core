@@ -342,6 +342,9 @@ func (lb *Label) StyleLabel() {
 			lb.StateStyles[i].SaveTemplate()
 		}
 	}
+	if !lb.Sty.Font.BgColor.Color.IsNil() {
+		lb.CurBgColor = lb.Sty.Font.BgColor.Color
+	}
 }
 
 func (lb *Label) LayoutLabel() {

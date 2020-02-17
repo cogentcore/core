@@ -2509,6 +2509,9 @@ func (tv *TextView) OfferComplete() {
 // have moved beyond any prior completion scenario
 func (tv *TextView) CancelComplete() {
 	tv.ForceComplete = false
+	if tv.Buf == nil {
+		return
+	}
 	if tv.Buf.Complete == nil {
 		return
 	}
