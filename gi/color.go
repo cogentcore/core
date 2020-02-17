@@ -231,10 +231,12 @@ func (c *Color) IsBlack() bool {
 	return false
 }
 
-// IsDark checks if HSL lightness value is < .5
+// IsDark checks if HSL lightness value is < .6, which is a good
+// value for distinguishing when white vs. black text should be used
+// as a contrast color.
 func (c *Color) IsDark() bool {
 	hsl := HSLAModel.Convert(*c).(HSLA)
-	return hsl.L < .5
+	return hsl.L <= .6
 }
 
 // String returns a human-readable R,G,B,A output
