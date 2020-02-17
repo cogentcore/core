@@ -222,9 +222,11 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 
 // DiffViewProps are style properties for DiffView
 var DiffViewProps = ki.Props{
-	"EnumType:Flag": gi.KiT_NodeFlags,
-	"max-width":     -1,
-	"max-height":    -1,
+	"EnumType:Flag":    gi.KiT_NodeFlags,
+	"max-width":        -1,
+	"max-height":       -1,
+	"background-color": &gi.Prefs.Colors.Background,
+	"color":            &gi.Prefs.Colors.Font,
 }
 
 // DiffViewDialog opens a dialog for displaying diff between two strings
