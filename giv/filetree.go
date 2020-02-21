@@ -338,24 +338,38 @@ func (fn *FileNode) ReadDir(path string) error {
 	return nil
 }
 
+// DetectVcsRepo detects and configures DirRepo if this directory is root of
+// a VCS repository.  if updateFiles is true, gets the files in the dir.
+// returns true if a repository was newly found here.
+func (fn *FileNode) DetectVcsRepo(updateFiles bool) bool {
+	repo, _ := fn.Repo()
+	if repo != nil {
+		return false
+	}
+	path := string(fn.FPath)
+	rtyp := vci.DetectRepo(path)
+	if rtyp == vcs.NoVCS {
+		return false
+	}
+	var err error
+	repo, err = vci.NewRepo("origin", path)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	fn.DirRepo = repo
+	if updateFiles {
+		fn.UpdateRepoFiles()
+	}
+	return true
+}
+
 // UpdateDir updates the directory and all the nodes under it
 func (fn *FileNode) UpdateDir() {
+	fn.DetectVcsRepo(true) // update files
 	path := string(fn.FPath)
 	// fmt.Printf("path: %v  node: %v\n", path, fn.PathUnique())
-	var err error
 	repo, rnode := fn.Repo()
-	if repo == nil {
-		rtyp := vci.DetectRepo(path)
-		if rtyp != vcs.NoVCS {
-			repo, err = vci.NewRepo("origin", path)
-			if err == nil {
-				fn.DirRepo = repo
-				fn.UpdateRepoFiles()
-				rnode = fn
-			}
-		}
-	}
-
 	fn.SetOpen()
 	config := fn.ConfigOfFiles(path)
 	hasExtFiles := false
@@ -1051,6 +1065,28 @@ func (fn *FileNode) BlameVcs() ([]byte, error) {
 	title := "VCS Blame: " + fn.MyRelPath()
 	TextViewDialog(nil, blm, DlgOpts{Title: title, Inactive: true, Filename: fnm, LineNos: true})
 	return blm, nil
+}
+
+// UpdateAllVcs does an update on any repositories below this one in file tree
+func (fn *FileNode) UpdateAllVcs() {
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		if !sfn.IsDir() {
+			return true
+		}
+		if sfn.DirRepo == nil {
+			if !sfn.DetectVcsRepo(false) {
+				return true
+			}
+		}
+		repo := sfn.DirRepo
+		fmt.Printf("Updating %v repository: %s from: %s\n", repo.Vcs(), sfn.MyRelPath(), repo.Remote())
+		err := repo.Update()
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+		}
+		return false
+	})
 }
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
