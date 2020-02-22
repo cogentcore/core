@@ -301,7 +301,8 @@ func (dv *DiffView) TagWordDiffs() {
 			flb := lnb.RuneStrings(rb)
 			nab := ints.MaxInt(len(fla), len(flb))
 			ldif := textbuf.DiffLines(fla, flb)
-			if len(ldif) > nab/2 { // more than half diff -- skip
+			ndif := len(ldif)
+			if nab > 25 && ndif > nab/2 { // more than half of big diff -- skip
 				continue
 			}
 			for _, ld := range ldif {
