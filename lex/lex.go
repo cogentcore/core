@@ -11,6 +11,7 @@ package lex
 import (
 	"fmt"
 	"sort"
+	"unicode"
 
 	"github.com/goki/ki/nptime"
 	"github.com/goki/pi/token"
@@ -122,6 +123,16 @@ func (ll *Line) Sort() {
 	})
 }
 
+// RuneStrings returns array of strings for Lex regions defined in Line, for
+// given rune source string
+func (ll *Line) RuneStrings(rstr []rune) []string {
+	regs := make([]string, len(*ll))
+	for i, t := range *ll {
+		regs[i] = string(rstr[t.St:t.Ed])
+	}
+	return regs
+}
+
 // MergeLines merges the two lines of lex regions into a combined list
 // properly ordered by sequence of tags within the line.
 func MergeLines(t1, t2 Line) Line {
@@ -161,4 +172,35 @@ func (ll *Line) TagSrc(src []rune) string {
 		str += t.String() + `"` + string(s) + `"` + " "
 	}
 	return str
+}
+
+// RuneFields returns a Line of Lex's defining the non-white-space "fields"
+// in the given rune string
+func RuneFields(rstr []rune) Line {
+	if len(rstr) == 0 {
+		return nil
+	}
+	var ln Line
+	cur := Lex{}
+	pspc := unicode.IsSpace(rstr[0])
+	cspc := pspc
+	for i, r := range rstr {
+		cspc = unicode.IsSpace(r)
+		if pspc {
+			if !cspc {
+				cur.St = i
+			}
+		} else {
+			if cspc {
+				cur.Ed = i
+				ln.Add(cur)
+			}
+		}
+		pspc = cspc
+	}
+	if !pspc {
+		cur.Ed = len(rstr)
+		ln.Add(cur)
+	}
+	return ln
 }
