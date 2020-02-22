@@ -54,7 +54,7 @@ Controlling the layout involves the following style properties:
       you can set that to achieve different proportional spacing.  By default
       the Stretch is just the minimum 1em in preferred size.
 
-	* align-horiz / align-vert: for the other dimension in a Layout (e.g., for
+	* horizontal-align / vertical-align: for the other dimension in a Layout (e.g., for
       LayoutHoriz, the vertical dimension) this specifies how the items are
       aligned within the available space (e.g., tops, bottoms, centers).  In
       the dimension of the Layout (horiz for LayoutHoriz) it determines how

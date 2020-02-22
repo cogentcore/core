@@ -20,6 +20,17 @@ import (
 // (insert) or 'e' (equal).
 type Diffs []difflib.OpCode
 
+// DiffForLine returns the diff record applying to given line, and its index in slice
+
+func (di Diffs) DiffForLine(line int) (int, difflib.OpCode) {
+	for i, df := range di {
+		if line >= df.I1 && (line < df.I2 || line < df.J2) {
+			return i, df
+		}
+	}
+	return -1, difflib.OpCode{}
+}
+
 // String satisfies the Stringer interface
 func (di Diffs) String() string {
 	var b strings.Builder

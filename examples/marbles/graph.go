@@ -385,10 +385,9 @@ func ResetMarbles() {
 }
 
 func UpdateMarbles() {
-	if SvgGraph.Win != nil {
-		wupdt := SvgGraph.Win.UpdateStart()
-		defer SvgGraph.Win.UpdateEnd(wupdt)
-	}
+	wupdt := SvgGraph.TopUpdateStart()
+	defer SvgGraph.TopUpdateEnd(wupdt)
+
 	updt := SvgGraph.UpdateStart()
 	defer SvgGraph.UpdateEnd(updt)
 

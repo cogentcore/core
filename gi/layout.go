@@ -103,7 +103,7 @@ var LayoutFocusNameTabMSec = 2000
 // generally be contained within a layout -- otherwise the parent widget must
 // take over responsibility for positioning.  The alignment is NOT inherited
 // by default so must be specified per child, except that the parent alignment
-// is used within the relevant dimension (e.g., align-horiz for a LayoutHoriz
+// is used within the relevant dimension (e.g., horizontal-align for a LayoutHoriz
 // layout, to determine left, right, center, justified).  Layouts
 // can automatically add scrollbars depending on the Overflow layout style.
 type Layout struct {

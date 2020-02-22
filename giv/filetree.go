@@ -978,9 +978,7 @@ func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	var astr, bstr []string
-	var afn, bfn string
 	if rev_b == "" { // default to current file
-		bfn = string(fn.FPath)
 		if fn.Buf != nil {
 			bstr = fn.Buf.Strings(false)
 		} else {
@@ -996,7 +994,6 @@ func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 			return err
 		}
 		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
-		bfn = rev_b + ":" + fn.MyRelPath()
 	}
 	fb, err := repo.FileContents(string(fn.FPath), rev_a)
 	if err != nil {
@@ -1006,8 +1003,8 @@ func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
-	afn = rev_a + ":" + fn.MyRelPath()
-	DiffViewDialog(nil, astr, bstr, afn, bfn, DlgOpts{Title: "DiffVcs: " + fn.Nm})
+	fnm := string(fn.FPath)
+	DiffViewDialog(nil, astr, bstr, fnm, fnm, rev_a, rev_b, DlgOpts{Title: "DiffVcs: " + fn.Nm})
 	return nil
 }
 
