@@ -39,6 +39,7 @@ master: export GO111MODULE = on
 master:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go get -u github.com/goki/ki@master
+	go list -m all | grep goki
 	go mod tidy
 	
 old:
@@ -58,4 +59,8 @@ gopath-update:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	cd cmd/pi; go get -u ./...
 
+mod-update: export GO111MODULE = on
+release:
+	@echo "GO111MODULE = $(value GO111MODULE)"
+	$(MAKE) -C pi release
 
