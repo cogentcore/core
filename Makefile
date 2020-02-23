@@ -41,12 +41,14 @@ master:
 	go get -u github.com/goki/ki@master
 	go get -u github.com/goki/pi@master
 	go list -m all | grep goki
+	go mod tidy
 	
 old:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go list -u -m all | grep '\['
 	
-update:
+mod-update: export GO111MODULE = on
+mod-update:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go get -u ./...
 	go mod tidy
