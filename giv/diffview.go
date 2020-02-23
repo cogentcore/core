@@ -138,12 +138,13 @@ func (dv *DiffView) RemoveAlignsA() {
 			dv.BufA.DeleteText(spos, epos, true)
 		}
 	}
-	dv.ResetDiffs()
 }
 
 // SaveFileA saves the current state of file A to given filename
 func (dv *DiffView) SaveFileA(fname gi.FileName) {
 	dv.RemoveAlignsA()
+	dv.RemoveAlignsB()
+	dv.ResetDiffs()
 	dv.BufA.SaveAs(fname)
 	dv.UpdateToolBar()
 }
@@ -166,12 +167,13 @@ func (dv *DiffView) RemoveAlignsB() {
 			dv.BufB.DeleteText(spos, epos, true)
 		}
 	}
-	dv.ResetDiffs()
 }
 
 // SaveFileB saves the current state of file B to given filename
 func (dv *DiffView) SaveFileB(fname gi.FileName) {
+	dv.RemoveAlignsA()
 	dv.RemoveAlignsB()
+	dv.ResetDiffs()
 	dv.BufB.SaveAs(fname)
 	dv.UpdateToolBar()
 }
