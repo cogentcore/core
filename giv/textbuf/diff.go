@@ -42,6 +42,8 @@ func (di Diffs) String() string {
 			fmt.Fprintf(&b, "delete lines: %v - %v\n", df.I1, df.I2)
 		case 'i':
 			fmt.Fprintf(&b, "insert lines at %v: %v - %v\n", df.I1, df.J1, df.J2)
+		case 'e':
+			fmt.Fprintf(&b, "same lines %v - %v == %v - %v\n", df.I1, df.I2, df.J1, df.J2)
 		}
 	}
 	return b.String()

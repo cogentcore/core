@@ -39,6 +39,8 @@ type DiffView struct {
 	AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`
 	EditA  textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
 	EditB  textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
+	UndoA  textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
+	UndoB  textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
 }
 
 var KiT_DiffView = kit.Types.AddType(&DiffView{}, DiffViewProps)
@@ -61,11 +63,16 @@ func (dv *DiffView) NextDiff(ab int) bool {
 	if di < 0 {
 		return false
 	}
-	di++
-	if di >= nd {
-		return false
+	for {
+		di++
+		if di >= nd {
+			return false
+		}
+		df = dv.AlignD[di]
+		if df.Tag != 'e' {
+			break
+		}
 	}
-	df = dv.AlignD[di]
 	tva.SetCursorShow(textbuf.Pos{Ln: df.I1})
 	tvb.SetCursorShow(textbuf.Pos{Ln: df.I1})
 	return true
@@ -83,23 +90,19 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 	if di < 0 {
 		return false
 	}
-	di--
-	if di < 0 {
-		return false
+	for {
+		di--
+		if di < 0 {
+			return false
+		}
+		df = dv.AlignD[di]
+		if df.Tag != 'e' {
+			break
+		}
 	}
-	df = dv.AlignD[di]
 	tva.SetCursorShow(textbuf.Pos{Ln: df.I1})
 	tvb.SetCursorShow(textbuf.Pos{Ln: df.I1})
 	return true
-}
-
-func (dv *DiffView) Undo(ab int) {
-	tva, tvb := dv.TextViews()
-	tv := tva
-	if ab == 1 {
-		tv = tvb
-	}
-	tv.Buf.Undo()
 }
 
 // RemoveAlignsA removes extra blank text lines added to align with B
@@ -328,7 +331,7 @@ func (dv *DiffView) TagWordDiffs() {
 	}
 }
 
-// ApplyDiff copies the text from the other buffer to the buffer for given file
+// ApplyDiff applies change from the other buffer to the buffer for given file
 // name, from diff that includes given line.
 func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 	tva, tvb := dv.TextViews()
@@ -350,13 +353,15 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 		epos := textbuf.Pos{Ln: df.J2, Ch: 0}
 		src := dv.BufB.Region(spos, epos)
 		dv.BufA.DeleteText(spos, epos, true)
-		dv.BufA.InsertText(spos, src.ToBytes(), true)
-		for ln := df.I1; ln < df.I2; ln++ {
-			dv.BufA.DeleteLineColor(ln)
-		}
+		dv.BufA.InsertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
 		ei, _ := dv.EditA.DiffForLine(df.J1)
 		if ei >= 0 {
-			dv.EditA = append(dv.EditA[:ei], dv.EditA[ei+1:]...)
+			dv.UndoA = append(dv.UndoA, dv.EditA[ei])
+			if df.Tag == 'd' {
+				dv.EditA[ei].Tag = 'i' // switch to insert which means that it will delete at end
+			} else {
+				dv.EditA = append(dv.EditA[:ei], dv.EditA[ei+1:]...)
+			}
 		}
 	} else {
 		dv.BufB.Undos.Off = false
@@ -365,15 +370,83 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 		src := dv.BufA.Region(spos, epos)
 		dv.BufB.DeleteText(spos, epos, true)
 		dv.BufB.InsertText(spos, src.ToBytes(), true)
-		for ln := df.I1; ln < df.I2; ln++ {
-			dv.BufB.DeleteLineColor(ln)
-		}
 		ei, _ := dv.EditB.DiffForLine(df.I1)
 		if ei >= 0 {
-			dv.EditB = append(dv.EditB[:ei], dv.EditB[ei+1:]...)
+			dv.UndoB = append(dv.UndoB, dv.EditB[ei])
+			if df.Tag == 'i' {
+				dv.EditB[ei].Tag = 'd' // switch to delete..
+			} else {
+				dv.EditB = append(dv.EditB[:ei], dv.EditB[ei+1:]...)
+			}
 		}
 	}
 	return true
+}
+
+// UndoDiff undoes last applied change, if any -- just does Undo in buffer and
+// updates the list of edits applied.
+func (dv *DiffView) UndoDiff(ab int) {
+	tva, tvb := dv.TextViews()
+	tv := tva
+	if ab == 1 {
+		tv = tvb
+	}
+	if ab == 0 {
+		dv.BufA.Undos.Off = false
+		nd := len(dv.UndoA)
+		if nd == 0 {
+			return
+		}
+		df := dv.UndoA[nd-1]
+		dv.UndoA = dv.UndoA[:nd-1]
+		if df.Tag == 'd' {
+			ei, _ := dv.EditA.DiffForLine(df.J1) // existing record
+			if ei >= 0 {
+				dv.EditA[ei].Tag = 'd' // restore
+			}
+		} else {
+			ei, _ := dv.EditA.DiffForLine(df.J1 - 1) // place to insert
+			oi, od := dv.AlignD.DiffForLine(df.J1)
+			if oi >= 0 {
+				df.Tag = od.Tag // restore
+			}
+			if ei < 0 {
+				dv.EditA = append(textbuf.Diffs{df}, dv.EditA...)
+			} else {
+				tmp := append(dv.EditA[:ei+1], df)
+				tmp = append(tmp, dv.EditA[ei+1:]...)
+				dv.EditA = tmp
+			}
+		}
+	} else {
+		dv.BufB.Undos.Off = false
+		nd := len(dv.UndoB)
+		if nd == 0 {
+			return
+		}
+		df := dv.UndoB[nd-1]
+		dv.UndoB = dv.UndoB[:nd-1]
+		if df.Tag == 'i' {
+			ei, _ := dv.EditB.DiffForLine(df.J1) // existing record
+			if ei >= 0 {
+				dv.EditB[ei].Tag = 'i' // restore
+			}
+		} else {
+			ei, _ := dv.EditB.DiffForLine(df.J1 - 1) // place to insert
+			oi, od := dv.AlignD.DiffForLine(df.J1)
+			if oi >= 0 {
+				df.Tag = od.Tag // restore
+			}
+			if ei < 0 {
+				dv.EditB = append(textbuf.Diffs{df}, dv.EditB...)
+			} else {
+				tmp := append(dv.EditB[:ei+1], df)
+				tmp = append(tmp, dv.EditB[ei+1:]...)
+				dv.EditB = tmp
+			}
+		}
+	}
+	tv.Undo()
 }
 
 func (dv *DiffView) Config() {
@@ -423,11 +496,12 @@ func (dv *DiffView) ConfigToolBar() {
 		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.ApplyDiff(0, -1)
+			dvv.NextDiff(0)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Undo", Icon: "undo", Tooltip: "undo any edits made by applying diffs through double-clicking on difference regions", UpdateFunc: dv.FileModifiedUpdateA},
 		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
-			dvv.Undo(0)
+			dvv.UndoDiff(0)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Save", Icon: "file-save", Tooltip: "save edited version of file -- prompts for filename", UpdateFunc: dv.FileModifiedUpdateA},
 		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -455,11 +529,12 @@ func (dv *DiffView) ConfigToolBar() {
 		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
 			dvv.ApplyDiff(1, -1)
+			dvv.NextDiff(1)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Undo", Icon: "undo", Tooltip: "undo any edits made by applying diffs through double-clicking on difference regions", UpdateFunc: dv.FileModifiedUpdateB},
 		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			dvv := recv.Embed(KiT_DiffView).(*DiffView)
-			dvv.Undo(1)
+			dvv.UndoDiff(1)
 		})
 	tb.AddAction(gi.ActOpts{Label: "Save", Icon: "file-save", Tooltip: "save edited version of file -- prompts for filename", UpdateFunc: dv.FileModifiedUpdateB},
 		dv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
