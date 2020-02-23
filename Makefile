@@ -37,9 +37,11 @@ old:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go list -u -m all 
 	
-update:
+mod-update: export GO111MODULE = on
+mod-update:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go get -u ./...
+	go mod tidy
 
 # gopath-update is for GOPATH to get most things updated.
 # need to call it in a target executable directory
@@ -48,6 +50,8 @@ gopath-update:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	go get -u ./...
 
+mod-update: export GO111MODULE = on
 release:
+	@echo "GO111MODULE = $(value GO111MODULE)"
 	$(MAKE) -C ki release
 
