@@ -20,7 +20,7 @@ func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md
 	if lfld[0] == '\\' && lfld[1:] == str { // use the /
 		str = lfld
 	}
-	if strings.HasPrefix(origStr, `\cite`) || strings.HasPrefix(origStr, `\incite`) || strings.HasPrefix(origStr, `\shortcite`) {
+	if strings.HasPrefix(lfld, `\cite`) || strings.HasPrefix(lfld, `\incite`) || strings.HasPrefix(lfld, `\shortcite`) {
 		return tl.CompleteCite(fss, origStr, str, pos)
 	}
 	md.Seed = str
@@ -36,8 +36,9 @@ func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
 func (tl *TexLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
 	origStr := str
+	lfld := lex.LastField(str)
 	str = lex.LastScopedString(str)
-	if strings.HasPrefix(origStr, `\cite`) || strings.HasPrefix(origStr, `\incite`) || strings.HasPrefix(origStr, `\shortcite`) {
+	if strings.HasPrefix(lfld, `\cite`) || strings.HasPrefix(lfld, `\incite`) || strings.HasPrefix(lfld, `\shortcite`) {
 		return tl.LookupCite(fss, origStr, str, pos)
 	}
 	return

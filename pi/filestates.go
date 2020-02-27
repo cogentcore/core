@@ -23,6 +23,7 @@ type FileStates struct {
 	FsB      FileState         `desc:"one filestate"`
 	SwitchMu sync.Mutex        `desc:"mutex locking the switching of Done vs. Proc states"`
 	ProcMu   sync.Mutex        `desc:"mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching"`
+	Meta     map[string]string `desc:"extra meta data associated with this FileStates"`
 }
 
 // NewFileStates returns a new FileStates for given filename, basepath,
@@ -129,4 +130,30 @@ func (fs *FileStates) Switch() {
 	fs.DoneIdx++
 	fs.DoneIdx = fs.DoneIdx % 2
 	// fmt.Printf("switched: %v  %v\n", fs.DoneIdx, fs.Filename)
+}
+
+// MetaData returns given meta data string for given key,
+// returns true if present, false if not
+func (fs *FileStates) MetaData(key string) (string, bool) {
+	if fs.Meta == nil {
+		return "", false
+	}
+	md, ok := fs.Meta[key]
+	return md, ok
+}
+
+// SetMetaData sets given meta data record
+func (fs *FileStates) SetMetaData(key, value string) {
+	if fs.Meta == nil {
+		fs.Meta = make(map[string]string)
+	}
+	fs.Meta[key] = value
+}
+
+// DeleteMetaData deletes given meta data record
+func (fs *FileStates) DeleteMetaData(key string) {
+	if fs.Meta == nil {
+		return
+	}
+	delete(fs.Meta, key)
 }

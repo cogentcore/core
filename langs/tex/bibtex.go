@@ -19,11 +19,16 @@ import (
 
 // CompleteCite does completion on citation
 func (tl *TexLang) CompleteCite(fss *pi.FileStates, origStr, str string, pos lex.Pos) (md complete.Matches) {
-	if tl.BibFile == nil {
+	bfile, has := fss.MetaData("bibfile")
+	if !has {
+		return
+	}
+	bd := tl.BibData(bfile)
+	if bd == nil {
 		return
 	}
 	md.Seed = str
-	for _, be := range tl.BibFile.Entries {
+	for _, be := range bd.BibTex.Entries {
 		if strings.HasPrefix(be.CiteName, str) {
 			c := complete.Completion{Text: be.CiteName, Label: be.CiteName, Icon: "field"}
 			md.Matches = append(md.Matches, c)
@@ -34,11 +39,16 @@ func (tl *TexLang) CompleteCite(fss *pi.FileStates, origStr, str string, pos lex
 
 // LookupCite does lookup on citation
 func (tl *TexLang) LookupCite(fss *pi.FileStates, origStr, str string, pos lex.Pos) (ld complete.Lookup) {
-	if tl.BibFile == nil {
+	bfile, has := fss.MetaData("bibfile")
+	if !has {
+		return
+	}
+	bd := tl.BibData(bfile)
+	if bd == nil {
 		return
 	}
 	lkbib := bibtex.NewBibTex()
-	for _, be := range tl.BibFile.Entries {
+	for _, be := range bd.BibTex.Entries {
 		if strings.HasPrefix(be.CiteName, str) {
 			lkbib.Entries = append(lkbib.Entries, be)
 		}
@@ -50,11 +60,26 @@ func (tl *TexLang) LookupCite(fss *pi.FileStates, origStr, str string, pos lex.P
 	return ld
 }
 
+// BibData returns the bib data for given bibfile, non-nil if exists
+func (tl *TexLang) BibData(fname string) *BibData {
+	if tl.Bibs == nil {
+		tl.Bibs = make(map[string]*BibData)
+	}
+	bd, has := tl.Bibs[fname]
+	if !has {
+		return nil
+	}
+	return bd
+}
+
 // FindBibfile attempts to find the /bibliography file, and load it
-func (tl *TexLang) FindBibfile(pfs *pi.FileState) {
+// Returns full path to bib file if found and loaded, else "" and false.
+// Sets meta data "bibfile" to resulting file if found, and deletes it if not
+func (tl *TexLang) FindBibfile(fss *pi.FileStates, pfs *pi.FileState) (string, bool) {
 	bfile := tl.FindBibliography(pfs)
 	if bfile == "" {
-		return
+		fss.DeleteMetaData("bibfile")
+		return "", false
 	}
 	// fmt.Printf("bfile: %s\n", bfile)
 	st, err := os.Stat(bfile)
@@ -65,7 +90,7 @@ func (tl *TexLang) FindBibfile(pfs *pi.FileState) {
 		}
 		if bin == "" {
 			fmt.Printf("bibtex file not found and no BIBINPUTS or TEXINPUTS set: %s\n", bfile)
-			return
+			return "", false
 		}
 		pth := filepath.SplitList(bin)
 		got := false
@@ -79,27 +104,40 @@ func (tl *TexLang) FindBibfile(pfs *pi.FileState) {
 			}
 		}
 		if !got {
-			return
+			return "", false
 		}
 	}
-	if tl.BibFile != nil && tl.BibFileMod == st.ModTime() {
-		return // already up-to-date
+	bfile, err = filepath.Abs(bfile)
+	if err != nil {
+		log.Println(err)
+		return "", false
+	}
+	fss.SetMetaData("bibfile", bfile)
+	bd := tl.BibData(bfile)
+	if bd != nil && bd.BibTex != nil && bd.Mod == st.ModTime() {
+		return bfile, true
 	}
 	f, err := os.Open(bfile)
 	if err != nil {
 		log.Println(err)
-		return
+		return "", false
 	}
 	defer f.Close()
 	parsed, err := bibtex.Parse(f)
 	if err != nil {
 		fmt.Printf("Bibtex bibliography: %s not loaded due to error(s):\n", bfile)
 		log.Println(err)
-		return
+		return "", false
 	}
-	tl.BibFile = parsed
-	tl.BibFileMod = st.ModTime()
+	if bd == nil {
+		bd = &BibData{}
+		tl.Bibs[bfile] = bd
+	}
+	bd.File = bfile
+	bd.BibTex = parsed
+	bd.Mod = st.ModTime()
 	fmt.Printf("(re)loaded bibtex bibliography: %s\n", bfile)
+	return bfile, true
 }
 
 func (tl *TexLang) FindBibliography(pfs *pi.FileState) string {

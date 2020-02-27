@@ -14,11 +14,17 @@ import (
 	"github.com/nickng/bibtex"
 )
 
+// BibData contains the bibliography data
+type BibData struct {
+	File   string         `desc:"file name -- full path"`
+	BibTex *bibtex.BibTex `desc:"bibtex data loaded from file"`
+	Mod    time.Time      `desc:"mod time for loaded bibfile -- to detect updates"`
+}
+
 // TexLang implements the Lang interface for the Tex / LaTeX language
 type TexLang struct {
-	Pr         *pi.Parser
-	BibFile    *bibtex.BibTex
-	BibFileMod time.Time `desc:"mod time for loaded bibfile -- detect updates"`
+	Pr   *pi.Parser
+	Bibs map[string]*BibData `desc:"bibliography data that has been loaded, keyed by abs file path"`
 }
 
 // TheTexLang is the instance variable providing support for the Go language
@@ -50,7 +56,7 @@ func (tl *TexLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	}
 	pfs := fss.StartProc(txt) // current processing one
 	pr.LexAll(pfs)
-	tl.FindBibfile(pfs)
+	tl.FindBibfile(fss, pfs)
 	fss.EndProc() // now done
 	// no parser
 }
