@@ -60,6 +60,9 @@ func (lx *Lex) Region(ln int) Reg {
 	return Reg{St: Pos{Ln: ln, Ch: lx.St}, Ed: Pos{Ln: ln, Ch: lx.Ed}}
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//  Line
+
 // Line is one line of Lex'd text
 type Line []Lex
 
@@ -84,6 +87,17 @@ func (ll *Line) Insert(idx int, lx Lex) {
 		copy((*ll)[idx+1:], (*ll)[idx:sz])
 		(*ll)[idx] = lx
 	}
+}
+
+// AtPos returns the Lex in place for given position, or nil if none
+func (ll *Line) AtPos(pos int) *Lex {
+	for i := range *ll {
+		lx := &((*ll)[i])
+		if lx.ContainsPos(pos) {
+			return lx
+		}
+	}
+	return nil
 }
 
 // Clone returns a new copy of the line
