@@ -22,70 +22,13 @@ import (
 
 var CompleteTrace = false
 
-// InnerBracketScope returns the inner-scope for given bracket type
-// if it is imbalanced -- it is important to do completion based
-// just on that inner scope if that is where the user is at.
-func InnerBracketScope(str string, brl, brr string) string {
-	nlb := strings.Count(str, brl)
-	nrb := strings.Count(str, brr)
-	if nlb == nrb {
-		return str
-	}
-	if nlb > nrb {
-		li := strings.LastIndex(str, brl)
-		if li == len(str)-1 {
-			return InnerBracketScope(str[:li], brl, brr) // get rid of open ending and try again
-		}
-		str = str[li+1:]
-		ri := strings.Index(str, brr)
-		if ri < 0 {
-			return str
-		}
-		return str[:ri]
-	}
-	// nrb > nlb -- we're missing the left guys -- go to first rb
-	ri := strings.Index(str, brr)
-	if ri == 0 {
-		return InnerBracketScope(str[1:], brl, brr) // get rid of opening and try again
-	}
-	str = str[:ri]
-	li := strings.Index(str, brl)
-	if li < 0 {
-		return str
-	}
-	return str[li+1:]
-}
-
-// TargetString returns the target string for lookup and parsing, removing
-// extra irrelevant aspects and scoping appropriately.
-func TargetString(str string) string {
-	flds := strings.Fields(str)
-	str = flds[len(flds)-1] // just use last one
-	bstr := str
-	str = InnerBracketScope(str, "{", "}")
-	str = InnerBracketScope(str, "(", ")")
-	str = InnerBracketScope(str, "[", "]")
-	if str == "" {
-		return bstr
-	}
-	str = TrimLeftToAlpha(str)
-	if str == "" {
-		str = TrimLeftToAlpha(bstr)
-		if str == "" {
-			return bstr
-		}
-	}
-	flds = strings.Split(str, ",")
-	return flds[len(flds)-1]
-}
-
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
 func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
 	if str == "" {
 		return
 	}
 	origStr := str
-	str = TargetString(str)
+	str = lex.LastScopedString(str)
 	fs := fss.Done()
 	if len(fs.ParseState.Scopes) == 0 {
 		return // need a package
@@ -187,7 +130,7 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 		return
 	}
 	origStr := str
-	str = TargetString(str)
+	str = lex.LastScopedString(str)
 
 	fs := fss.Done()
 	if len(fs.ParseState.Scopes) == 0 {
@@ -352,12 +295,12 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed stri
 // LookupString attempts to lookup a string, which could be a type name,
 // (with package qualifier), could be partial, etc
 func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, str string) (ld complete.Lookup) {
-	str = TrimLeftToAlpha(str)
+	str = lex.TrimLeftToAlpha(str)
 	pnm, tnm := SplitType(str)
 	if pnm != "" && tnm != "" {
 		psym, has := gl.PkgSyms(fs, pkg.Children, pnm)
 		if has {
-			tnm = TrimLeftToAlpha(tnm)
+			tnm = lex.TrimLeftToAlpha(tnm)
 			var matches syms.SymMap
 			psym.Children.FindNamePrefixScoped(tnm, &matches)
 			if len(matches) == 1 {

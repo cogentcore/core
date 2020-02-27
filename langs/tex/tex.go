@@ -2,23 +2,31 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package pi
+package tex
 
 import (
-	"github.com/goki/pi/complete"
+	"time"
+
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
+	"github.com/nickng/bibtex"
 )
 
 // TexLang implements the Lang interface for the Tex / LaTeX language
 type TexLang struct {
-	Pr *pi.Parser
+	Pr         *pi.Parser
+	BibFile    *bibtex.BibTex
+	BibFileMod time.Time `desc:"mod time for loaded bibfile -- detect updates"`
 }
 
 // TheTexLang is the instance variable providing support for the Go language
 var TheTexLang = TexLang{}
+
+func init() {
+	pi.StdLangProps[filecat.TeX].Lang = &TheTexLang
+}
 
 func (tl *TexLang) Parser() *pi.Parser {
 	if tl.Pr != nil {
@@ -42,6 +50,7 @@ func (tl *TexLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	}
 	pfs := fss.StartProc(txt) // current processing one
 	pr.LexAll(pfs)
+	tl.FindBibfile(pfs)
 	fss.EndProc() // now done
 	// no parser
 }
@@ -62,21 +71,6 @@ func (tl *TexLang) ParseLine(fs *pi.FileState, line int) *pi.FileState {
 func (tl *TexLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 	fs := fss.Done()
 	return tl.LexLine(fs, line, txt)
-}
-
-func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
-	// n/a
-	return md
-}
-
-// Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (gl *TexLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
-	return
-}
-
-func (tl *TexLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
-	// n/a
-	return ed
 }
 
 func (tl *TexLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {

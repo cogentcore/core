@@ -7,7 +7,6 @@ package golang
 import (
 	"fmt"
 	"strings"
-	"unicode"
 
 	"github.com/goki/pi/parse"
 	"github.com/goki/pi/pi"
@@ -55,13 +54,6 @@ func SplitType(nm string) (pkgnm, tnm string) {
 func PrefixType(pfx, nm string) string {
 	pkgnm, tnm := SplitType(nm)
 	return QualifyType(pkgnm, pfx+tnm)
-}
-
-// TrimLeftToAlpha returns string without any leading non-alpha runes
-func TrimLeftToAlpha(nm string) string {
-	return strings.TrimLeftFunc(nm, func(r rune) bool {
-		return !unicode.IsLetter(r)
-	})
 }
 
 // FindTypeName finds given type name in pkg and in broader context
