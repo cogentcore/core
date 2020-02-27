@@ -1764,6 +1764,29 @@ func (tb *TextBuf) RemoveTag(pos textbuf.Pos, tag token.Tokens) (reg lex.Lex, ok
 	return
 }
 
+// HiTagAtPos returns the highlighting (markup) lexical tag at given position
+// using current Markup tags -- could be nil if none or out of range
+func (tb *TextBuf) HiTagAtPos(pos textbuf.Pos) *lex.Lex {
+	tb.MarkupMu.Lock()
+	defer tb.MarkupMu.Unlock()
+	if !tb.IsValidLine(pos.Ln) {
+		return nil
+	}
+	return tb.HiTags[pos.Ln].AtPos(pos.Ch)
+}
+
+// InTokenSubCat returns true if the given text position is marked with lexical
+// type in given SubCat sub-category
+func (tb *TextBuf) InTokenSubCat(pos textbuf.Pos, subCat token.Tokens) bool {
+	lx := tb.HiTagAtPos(pos)
+	return lx != nil && lx.Tok.Tok.InSubCat(subCat)
+}
+
+// InLitString returns true if position is in a string literal
+func (tb *TextBuf) InLitString(pos textbuf.Pos) bool {
+	return tb.InTokenSubCat(pos, token.LitStr)
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //   LineIcons / Colors
 
@@ -1997,6 +2020,9 @@ func (tb *TextBuf) CommentStart(ln int) int {
 
 // InComment returns true if the given text position is within a commented region
 func (tb *TextBuf) InComment(pos textbuf.Pos) bool {
+	if tb.InTokenSubCat(pos, token.Comment) {
+		return true
+	}
 	cs := tb.CommentStart(pos.Ln)
 	if cs < 0 {
 		return false
@@ -2174,7 +2200,7 @@ func (tb *TextBuf) IsSpellCorrectEnabled(pos textbuf.Pos) bool {
 	case filecat.Doc: // always
 		return true
 	case filecat.Code:
-		return tb.InComment(pos)
+		return tb.InComment(pos) || tb.InLitString(pos)
 	default:
 		return false
 	}

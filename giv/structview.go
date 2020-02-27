@@ -162,13 +162,17 @@ func (sv *StructView) ConfigToolbar() {
 	}
 	tb := sv.ToolBar()
 	tb.SetStretchMaxWidth()
+	svtp := kit.NonPtrType(reflect.TypeOf(sv.Struct))
+	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		svtp := kit.NonPtrType(reflect.TypeOf(sv.Struct))
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of struct of type: " + svtp.String()},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: ttip},
 			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv := recv.Embed(KiT_StructView).(*StructView)
 				svv.UpdateFields()
 			})
+	} else {
+		act := tb.Child(0).(*gi.Action)
+		act.Tooltip = ttip
 	}
 	ndef := 1 // number of default actions
 	sz := len(*tb.Children())

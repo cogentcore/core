@@ -2481,7 +2481,7 @@ func (tv *TextView) OfferComplete() {
 	if !tv.Buf.Opts.Completion && !tv.ForceComplete {
 		return
 	}
-	if tv.Buf.InComment(tv.CursorPos) {
+	if tv.Buf.InComment(tv.CursorPos) || tv.Buf.InLitString(tv.CursorPos) {
 		return
 	}
 
@@ -4160,7 +4160,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		} else {
 			tv.ForceComplete = true
 			tv.OfferComplete()
-			tv.ForceComplete = false // ROR: I definitely don't like this option!  want it just when I want it!
+			tv.ForceComplete = false
 		}
 	case gi.KeyFunEnter:
 		cancelAll()

@@ -285,6 +285,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
 	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
 	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt.SetProp("text-align", gi.AlignLeft) // gi.AlignCenter)
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
 

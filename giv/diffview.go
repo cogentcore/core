@@ -494,7 +494,7 @@ func (dv *DiffView) FileModifiedUpdateB(act *gi.Action) {
 }
 
 func (dv *DiffView) HasDiffsUpdate(act *gi.Action) {
-	act.SetActiveStateUpdt(len(dv.AlignD) > 0)
+	act.SetActiveStateUpdt(len(dv.AlignD) > 1) // always has at least 1
 }
 
 func (dv *DiffView) ConfigToolBar() {
