@@ -155,11 +155,19 @@ func mainrun() {
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	trx.SetValue(svge.Trans.X)
 	TheTransX = trx
+	trx.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		SetTrans(trx.Value, svge.Trans.Y)
+		win.FullReRender()
+	})
 
 	try := gi.AddNewSpinBox(tbar, "try")
 	// zoom.SetMinPrefWidth(units.NewEm(10))
 	try.SetValue(svge.Trans.Y)
 	TheTransY = try
+	try.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		SetTrans(svge.Trans.X, try.Value)
+		win.FullReRender()
+	})
 
 	fnm.TextFieldSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.TextFieldDone) {

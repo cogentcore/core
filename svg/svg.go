@@ -19,7 +19,9 @@ import (
 // see io.go for IO input / output methods
 
 // SVG is a viewport for containing SVG drawing objects, corresponding to the
-// svg tag in html -- it provides its own bitmap for drawing into
+// svg tag in html -- it provides its own bitmap for drawing into.
+// To trigger a full re-render of SVG, do SetNeedsFullRender()
+// in UpdateStart / End loop.
 type SVG struct {
 	gi.Viewport2D
 	ViewBox ViewBox  `desc:"viewbox defines the coordinate system for the drawing"`

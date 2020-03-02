@@ -510,6 +510,9 @@ func (tv *TableView) UpdateSliceGrid() {
 		tv.LayoutSliceGrid()
 		nWidg = nWidgPerRow * tv.DispRows
 	}
+	if sg.NumChildren() != nWidg || sg.NumChildren() == 0 {
+		return
+	}
 
 	if sz > tv.DispRows {
 		sb := tv.ScrollBar()

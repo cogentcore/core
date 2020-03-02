@@ -422,6 +422,7 @@ func (vp *Viewport2D) Init2D() {
 	vp.Init2DWidget()
 	vp.SetCurWin()
 	// note: used to have a NodeSig update here but was redundant -- already handled.
+	// also note that SVG viewports require SetNeedsFullRender to repaint!
 }
 
 func (vp *Viewport2D) Style2D() {

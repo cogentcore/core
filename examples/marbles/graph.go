@@ -390,6 +390,7 @@ func UpdateMarbles() {
 
 	updt := SvgGraph.UpdateStart()
 	defer SvgGraph.UpdateEnd(updt)
+	SvgGraph.SetNeedsFullRender()
 
 	for i, m := range Marbles {
 
