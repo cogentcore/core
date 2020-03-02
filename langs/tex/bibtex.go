@@ -12,9 +12,9 @@ import (
 	"strings"
 
 	"github.com/goki/pi/complete"
+	"github.com/goki/pi/langs/bibtex"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
-	"github.com/nickng/bibtex"
 )
 
 // CompleteCite does completion on citation

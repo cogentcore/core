@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/langs/bibtex"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
-	"github.com/nickng/bibtex"
 )
 
 // BibData contains the bibliography data
