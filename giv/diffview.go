@@ -14,6 +14,7 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
+	"github.com/goki/gi/vci"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -21,9 +22,64 @@ import (
 	"github.com/goki/pi/token"
 )
 
-// todo: double-click on diff region copies over corresponding values from
-// other side!  Not clear how to connect this back to original Buf though,
-// in context of gide.
+// DiffViewDialogFromRevs opens a dialog for displaying diff between file
+// at two different revisions from given repository
+// if empty, defaults to: A = current HEAD, B = current WC file.
+// -1, -2 etc also work as universal ways of specifying prior revisions.
+func DiffViewDialogFromRevs(avp *gi.Viewport2D, repo vci.Repo, file string, fbuf *TextBuf, rev_a, rev_b string) (*DiffView, error) {
+	var astr, bstr []string
+	if rev_b == "" { // default to current file
+		if fbuf != nil {
+			bstr = fbuf.Strings(false)
+		} else {
+			fb, err := textbuf.FileBytes(file)
+			if err != nil {
+				return nil, err
+			}
+			bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		}
+	} else {
+		fb, err := repo.FileContents(file, rev_b)
+		if err != nil {
+			return nil, err
+		}
+		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+	}
+	fb, err := repo.FileContents(file, rev_a)
+	if err != nil {
+		return nil, err
+	}
+	astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+	if rev_a == "" {
+		rev_a = "HEAD"
+	}
+	return DiffViewDialog(nil, astr, bstr, file, file, rev_a, rev_b, DlgOpts{Title: "DiffVcs: " + DirAndFile(file)}), nil
+}
+
+// DiffViewDialog opens a dialog for displaying diff between two files as line-strings
+func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
+	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	dv := frame.InsertNewChild(KiT_DiffView, prIdx+1, "diff-view").(*DiffView)
+	// dv.SetProp("width", units.NewEm(20))
+	// dv.SetProp("height", units.NewEm(10))
+	dv.SetStretchMax()
+	dv.FileA = afile
+	dv.FileB = bfile
+	dv.RevA = arev
+	dv.RevB = brev
+	dv.DiffStrings(astr, bstr)
+
+	dlg.UpdateEndNoSig(true) // going to be shown
+	dlg.Open(0, 0, avp, nil)
+	return dv
+}
+
+///////////////////////////////////////////////////////////////////
+// DiffView
 
 // DiffView presents two side-by-side TextView windows showing the differences
 // between two files (represented as lines of strings).
@@ -692,28 +748,6 @@ var DiffViewProps = ki.Props{
 			},
 		}},
 	},
-}
-
-// DiffViewDialog opens a dialog for displaying diff between two strings
-func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
-
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
-
-	dv := frame.InsertNewChild(KiT_DiffView, prIdx+1, "diff-view").(*DiffView)
-	// dv.SetProp("width", units.NewEm(20))
-	// dv.SetProp("height", units.NewEm(10))
-	dv.SetStretchMax()
-	dv.FileA = afile
-	dv.FileB = bfile
-	dv.RevA = arev
-	dv.RevB = brev
-	dv.DiffStrings(astr, bstr)
-
-	dlg.UpdateEndNoSig(true) // going to be shown
-	dlg.Open(0, 0, avp, nil)
-	return dv
 }
 
 ////////////////////////////////////////////////////////////////////////////////

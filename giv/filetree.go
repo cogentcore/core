@@ -18,7 +18,6 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -977,35 +976,8 @@ func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 	if fn.Info.Vcs == vci.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	var astr, bstr []string
-	if rev_b == "" { // default to current file
-		if fn.Buf != nil {
-			bstr = fn.Buf.Strings(false)
-		} else {
-			fb, err := textbuf.FileBytes(string(fn.FPath))
-			if err != nil {
-				return err
-			}
-			bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
-		}
-	} else {
-		fb, err := repo.FileContents(string(fn.FPath), rev_b)
-		if err != nil {
-			return err
-		}
-		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
-	}
-	fb, err := repo.FileContents(string(fn.FPath), rev_a)
-	if err != nil {
-		return err
-	}
-	astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
-	if rev_a == "" {
-		rev_a = "HEAD"
-	}
-	fnm := string(fn.FPath)
-	DiffViewDialog(nil, astr, bstr, fnm, fnm, rev_a, rev_b, DlgOpts{Title: "DiffVcs: " + fn.Nm})
-	return nil
+	_, err := DiffViewDialogFromRevs(nil, repo, string(fn.FPath), fn.Buf, rev_a, rev_b)
+	return err
 }
 
 // LogVcs shows the VCS log of commits for this file, optionally with a
@@ -1031,16 +1003,7 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	if err != nil {
 		return lg, err
 	}
-	title := "VCS Log: "
-	if fnm == "" {
-		title += "All files"
-	} else {
-		title += fn.MyRelPath()
-	}
-	if since != "" {
-		title += " since: " + since
-	}
-	TableViewDialog(nil, &lg, DlgOpts{Title: title, Inactive: true}, nil, nil, nil)
+	VCSLogViewDialog(repo, lg, fnm, since)
 	return lg, nil
 }
 
