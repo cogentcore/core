@@ -4504,6 +4504,13 @@ func (tv *TextView) Init2D() {
 
 // StyleTextView sets the style of widget
 func (tv *TextView) StyleTextView() {
+	if _, has := tv.Props["white-space"]; !has {
+		if gi.Prefs.Editor.WordWrap {
+			tv.SetProp("white-space", gi.WhiteSpacePreWrap)
+		} else {
+			tv.SetProp("white-space", gi.WhiteSpacePre)
+		}
+	}
 	if gi.RebuildDefaultStyles {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)

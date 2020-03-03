@@ -7,9 +7,9 @@ package giv
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
-	"github.com/goki/gi/vci"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/pi/vci"
 )
 
 // VCSLogView is a view of the variables

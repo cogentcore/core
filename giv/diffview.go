@@ -14,12 +14,12 @@ import (
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
-	"github.com/goki/gi/vci"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
+	"github.com/goki/pi/vci"
 )
 
 // DiffViewDialogFromRevs opens a dialog for displaying diff between file

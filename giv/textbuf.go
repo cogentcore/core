@@ -18,7 +18,6 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
-	"github.com/goki/gi/spell"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/indent"
 	"github.com/goki/ki/ints"
@@ -29,6 +28,7 @@ import (
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
+	"github.com/goki/pi/spell"
 	"github.com/goki/pi/token"
 )
 
@@ -398,9 +398,9 @@ func (tb *TextBuf) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.ViewportFromView()
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
-			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
-			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Ignore and Proceed"},
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + DirAndFile(string(tb.Filename)),
+			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
+			[]string{"Save As to different File", "Revert from Disk, Losing any Edits", "Ignore and Proceed (subsequent Save would overwrite Disk!)"},
 			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:

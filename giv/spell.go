@@ -1,7 +1,7 @@
 package giv
 
 import (
-	"github.com/goki/gi/spell"
+	"github.com/goki/pi/spell"
 )
 
 // SpellCorrectEdit uses the selected correction to edit the text

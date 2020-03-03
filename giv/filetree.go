@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"image/color"
@@ -18,6 +19,7 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
@@ -25,10 +27,11 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
-	"github.com/goki/gi/vci"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/vci"
 )
 
 // DirAndFile returns the final dir and file name.
@@ -983,10 +986,11 @@ func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 // LogVcs shows the VCS log of commits for this file, optionally with a
 // since date qualifier: If since is non-empty, it should be
 // a date-like expression that the VCS will understand, such as
-// 1/1/2020, yesterday, last year, etc.
+// 1/1/2020, yesterday, last year, etc.  SVN only understands a
+// number as a maximum number of items to return.
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
-// Returns the Log and also shows it in a TableViewDialog.
+// Returns the Log and also shows it in a VCSLogView which supports further actions.
 func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	repo, _ := fn.Repo()
 	if repo == nil {
@@ -1007,6 +1011,51 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	return lg, nil
 }
 
+// BlameDialog opens a dialog for displaying VCS blame data using TwinTextViews.
+// blame is the annotated blame code, while fbytes is the original file contents.
+func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTextViews {
+	title := "VCS Blame: " + DirAndFile(fname)
+	dlg := gi.NewStdDialog(gi.DlgOpts{Title: title}, gi.AddOk, gi.NoCancel)
+
+	frame := dlg.Frame()
+	_, prIdx := dlg.PromptWidget(frame)
+
+	tv := frame.InsertNewChild(KiT_TwinTextViews, prIdx+1, "twin-view").(*TwinTextViews)
+	tv.SetStretchMax()
+	tv.SetFiles(fname, fname, true)
+
+	flns := bytes.Split(fbytes, []byte("\n"))
+	lns := bytes.Split(blame, []byte("\n"))
+	nln := ints.MinInt(len(lns), len(flns))
+	blns := make([][]byte, nln)
+	stidx := 0
+	for i := 0; i < nln; i++ {
+		fln := flns[i]
+		bln := lns[i]
+		if stidx == 0 {
+			if len(fln) == 0 {
+				stidx = len(bln)
+			} else {
+				stidx = bytes.LastIndex(bln, fln)
+			}
+		}
+		blns[i] = bln[:stidx]
+	}
+	btxt := bytes.Join(blns, []byte("\n")) // makes a copy, so blame is disposable now
+	tv.BufA.SetText(btxt)
+	tv.BufB.SetText(fbytes)
+	tv.ConfigTexts()
+	tv.SetSplits(.2, .8)
+
+	tva, tvb := tv.TextViews()
+	tva.SetProp("white-space", gi.WhiteSpacePre)
+	tvb.SetProp("white-space", gi.WhiteSpacePre)
+
+	dlg.UpdateEndNoSig(true) // going to be shown
+	dlg.Open(0, 0, avp, nil)
+	return tv
+}
+
 // BlameVcs shows the VCS blame report for this file, reporting for each line
 // the revision and author of the last change.
 func (fn *FileNode) BlameVcs() ([]byte, error) {
@@ -1018,12 +1067,15 @@ func (fn *FileNode) BlameVcs() ([]byte, error) {
 		return nil, errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
 	fnm := string(fn.FPath)
+	fb, err := textbuf.FileBytes(fnm)
+	if err != nil {
+		return nil, err
+	}
 	blm, err := repo.Blame(fnm)
 	if err != nil {
 		return blm, err
 	}
-	title := "VCS Blame: " + fn.MyRelPath()
-	TextViewDialog(nil, blm, DlgOpts{Title: title, Inactive: true, Filename: fnm, LineNos: true})
+	BlameDialog(nil, fnm, blm, fb)
 	return blm, nil
 }
 
@@ -1561,10 +1613,11 @@ func (ftv *FileTreeView) DiffVcs(rev_a, rev_b string) {
 // LogVcs shows the VCS log of commits for this file, optionally with a
 // since date qualifier: If since is non-empty, it should be
 // a date-like expression that the VCS will understand, such as
-// 1/1/2020, yesterday, last year, etc.
+// 1/1/2020, yesterday, last year, etc.  SVN only understands a
+// number as a maximum number of items to return.
 // If allFiles is true, then the log will show revisions for all files, not just
 // this one.
-// Returns the Log and also shows it in a TableViewDialog.
+// Returns the Log and also shows it in a VCSLogView which supports further actions.
 func (ftv *FileTreeView) LogVcs(allFiles bool, since string) {
 	sels := ftv.SelectedViews()
 	sz := len(sels)
@@ -2091,7 +2144,7 @@ var FileTreeViewProps = ki.Props{
 			},
 		}},
 		{"LogVcs", ki.Props{
-			"desc":       "shows the VCS log of commits for this file, optionally with a since date qualifier: If since is non-empty, it should be a date-like expression that the VCS will understand, such as 1/1/2020, yesterday, last year, etc.  If allFiles is true, then the log will show revisions for all files, not just this one.",
+			"desc":       "shows the VCS log of commits for this file, optionally with a since date qualifier: If since is non-empty, it should be a date-like expression that the VCS will understand, such as 1/1/2020, yesterday, last year, etc (SVN only supports a max number of entries).  If allFiles is true, then the log will show revisions for all files, not just this one.",
 			"updtfunc":   FileTreeActiveInVcsFunc,
 			"label-func": VcsLabelFunc,
 			"Args": ki.PropSlice{

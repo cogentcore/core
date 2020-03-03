@@ -1094,22 +1094,28 @@ func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
 // ScrollActionDelta moves the scrollbar in given dimension by given delta
 // and emits a ScrollSig signal.
 func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
-	nval := ly.Scrolls[dim].Value + delta
-	ly.Scrolls[dim].SetValueAction(nval)
-	ly.ScrollSig.Emit(ly.This(), int64(dim), nval)
+	if ly.HasScroll[dim] {
+		nval := ly.Scrolls[dim].Value + delta
+		ly.Scrolls[dim].SetValueAction(nval)
+		ly.ScrollSig.Emit(ly.This(), int64(dim), nval)
+	}
 }
 
 // ScrollActionPos moves the scrollbar in given dimension to given
 // position and emits a ScrollSig signal.
 func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
-	ly.Scrolls[dim].SetValueAction(pos)
-	ly.ScrollSig.Emit(ly.This(), int64(dim), pos)
+	if ly.HasScroll[dim] {
+		ly.Scrolls[dim].SetValueAction(pos)
+		ly.ScrollSig.Emit(ly.This(), int64(dim), pos)
+	}
 }
 
 // ScrollToPos moves the scrollbar in given dimension to given
 // position and DOES NOT emit a ScrollSig signal.
 func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
-	ly.Scrolls[dim].SetValueAction(pos)
+	if ly.HasScroll[dim] {
+		ly.Scrolls[dim].SetValueAction(pos)
+	}
 }
 
 // ScrollDelta processes a scroll event.  If only one dimension is processed,
@@ -1196,6 +1202,9 @@ var AutoScrollRate = float32(1.0)
 
 // AutoScrollDim auto-scrolls along one dimension
 func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
+	if !ly.HasScroll[dim] {
+		return false
+	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
