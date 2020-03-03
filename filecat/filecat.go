@@ -17,7 +17,7 @@
 // that we really care about and also provide a broader category-level organization
 // that is useful for functionally organizing / operating on files.
 //
-// As fallback, we are using both of the main go packages developed by others:
+// As fallback, we are using both of the go packages developed by others:
 // github.com/gabriel-vasile/mimetype
 // github.com/h2non/filetype
 // (which constrained our package name to not be either of those two)

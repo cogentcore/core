@@ -2,7 +2,7 @@
 
 GoPi is part of the GoKi Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese).
 
-The `pi` package supports a simple and robust form of lexing and parsing based on top-down recursive descent, and allows users to create parsers using the GoGi graphical interface system.  It is used for syntax highlighting, completion, and more advanced language-structure specific functionality in GoGi and in the [Gide](https://github.com/goki/gide) IDE / editor (where we need to support multiple different languages, and can't just rely on the excellent builtin Go parser).
+The `pi` package supports a simple and robust form of lexing and parsing based on top-down recursive descent, and allows users to create parsers using the [GoGi](https://github.com/goki/gi) graphical interface system.  It is used for syntax highlighting, completion, and more advanced language-structure specific functionality in GoGi and in the [Gide](https://github.com/goki/gide) IDE / editor (where we need to support multiple different languages, and can't just rely on the excellent builtin Go parser).
 
 We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also because it makes parsing as easy as pi!  You can think of it as a French acronym, which are typically the reverse of English ones -- "parseur interactif".  Also, it matches GoKi and GoGi. 
 
@@ -11,6 +11,20 @@ We call it `Pi` (or `GoPi`) because Ip is not as easy to pronounce, and also bec
 [![Travis](https://travis-ci.com/goki/pi.svg?branch=master)](https://travis-ci.com/goki/pi)
 
 See the [Wiki](https://github.com/goki/pi/wiki) for more detailed docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
+
+The `pi` repository is also home to various other basic file-level packages including:
+
+* `filecat` -- categorizes file types based on suffix and magic cookies, etc.  Uses both [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) and [h2non/filetype](https://github.com/h2non/filetype) packages.
+
+* `vci` -- provides a version control system (VCS, e.g., git) interface, building on core provided by [Masterminds/vcs](https://github.com/Masterminds/vcs).
+
+* `spell` -- spell-checking based on [sajari/fuzzy]("https://github.com/sajari/fuzzy").
+
+* `complete` -- basic completion / lookup infrastructure.
+
+* `lsp` -- language server protocol interface (incomplete).
+
+# Parsing Strategy
 
 Pi uses a robust, top-down __Recursive Descent (RD)__ parsing technique (see [WikiPedia](https://en.wikipedia.org/wiki/Recursive_descent_parser)), which is the approach used by most hand-coded parsers, which are by far the most widely used in practice (e.g., for **gcc**, **clang**, and **Go**) for [various reasons](http://blog.reverberate.org/2013/09/ll-and-lr-in-context-why-parsing-tools.html) -- see this [stack overflow](https://stackoverflow.com/questions/6319086/are-gcc-and-clang-parsers-really-handwritten) thread too.  As far as we can tell (e.g., from this list on [WikiPedia](https://en.wikipedia.org/wiki/Comparison_of_parser_generators) ) there are not many recursive-descent *parser generators*, and none that use the same robust, simple techniques that we employ in GoPi.
 

@@ -4,7 +4,7 @@
 
 // Package suplangs includes all the supported languages for GoPi -- need to
 // import this package to get those all included in a given target
-package langs
+package suplangs
 
 import (
 	_ "github.com/goki/pi/langs/golang"

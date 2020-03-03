@@ -75,7 +75,9 @@ func (gl *GoLang) ParseFile(fss *pi.FileStates, txt []byte) {
 		go gl.AddPathToSyms(pfs, path)
 		go gl.AddImportsToExts(fss, pfs, pkg) // will do ResolveTypes when it finishes
 	} else {
-		fmt.Printf("not importing scope for: %v\n", path)
+		if TraceTypes {
+			fmt.Printf("not importing scope for: %v\n", path)
+		}
 	}
 }
 
