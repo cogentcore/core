@@ -59,7 +59,7 @@ gopath-update:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	cd cmd/pi; go get -u ./...
 
-mod-update: export GO111MODULE = on
+release: export GO111MODULE = on
 release:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	$(MAKE) -C pi release
