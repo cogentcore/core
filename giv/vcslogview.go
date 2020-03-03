@@ -113,16 +113,26 @@ func (lv *VCSLogView) ConfigToolBar() {
 		cba.SetText("A Rev: ")
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
 		cba.SetChecked(true)
-		tf := gi.AddNewTextField(tb, "a-tf")
-		tf.SetProp("width", "12em")
-		tf.SetText(lv.RevA)
+		tfa := gi.AddNewTextField(tb, "a-tf")
+		tfa.SetProp("width", "12em")
+		tfa.SetText(lv.RevA)
+		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
+				lv.RevA = tfa.Text()
+			}
+		})
 		tb.AddSeparator("absep")
 		cbb := gi.AddNewCheckBox(tb, "b-rev")
 		cbb.SetText("B Rev: ")
 		cbb.Tooltip = "If selected, double-clicking in log will set this B Revision to use for Diff"
-		tf = gi.AddNewTextField(tb, "b-tf")
-		tf.SetProp("width", "12em")
-		tf.SetText(lv.RevB)
+		tfb := gi.AddNewTextField(tb, "b-tf")
+		tfb.SetProp("width", "12em")
+		tfb.SetText(lv.RevB)
+		tfb.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
+				lv.RevB = tfb.Text()
+			}
+		})
 		tb.AddSeparator("dsep")
 		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: "file-sheet", Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
 			func(recv, send ki.Ki, sig int64, data interface{}) {

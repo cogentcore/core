@@ -196,6 +196,7 @@ func (tb *TextBuf) SetText(txt []byte) {
 	tb.BytesToLines()
 	tb.InitialMarkup()
 	tb.Refresh()
+	tb.ReMarkup()
 }
 
 // SetTextLines sets the text to given lines of bytes
