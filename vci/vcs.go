@@ -65,6 +65,13 @@ type Repo interface {
 	// 1/1/2020, yesterday, last year, etc
 	Log(fname string, since string) (Log, error)
 
+	// CommitDesc returns the full textual description of the given commit,
+	// if rev is empty, defaults to current HEAD, -1, -2 etc also work as universal
+	// ways of specifying prior revisions.
+	// Optionally includes diffs for the changes (otherwise just a list of files
+	// with modification status).
+	CommitDesc(rev string, diffs bool) ([]byte, error)
+
 	// Blame returns an annotated report about the file, showing which revision last
 	// modified each line.
 	Blame(fname string) ([]byte, error)

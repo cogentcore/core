@@ -55,7 +55,10 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 							lv.SetRevB(cmt.Rev)
 						}
 					}
-					// show commit details in textview
+					cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
+					if err == nil {
+						TextViewDialog(lv.Viewport, cinfo, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true})
+					}
 				}
 			}
 		})

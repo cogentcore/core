@@ -7,9 +7,11 @@ package vci
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/Masterminds/vcs"
@@ -179,6 +181,25 @@ func (gr *SvnRepo) FileContents(fname string, rev string) ([]byte, error) {
 func (gr *SvnRepo) Log(fname string, since string) (Log, error) {
 	// todo: parse -- requires parsing over multiple lines..
 	return nil, nil
+}
+
+// CommitDesc returns the full textual description of the given commit,
+// if rev is empty, defaults to current HEAD, -1, -2 etc also work as universal
+// ways of specifying prior revisions.
+// Optionally includes diffs for the changes (otherwise just a list of files
+// with modification status).
+func (gr *SvnRepo) CommitDesc(rev string, diffs bool) ([]byte, error) {
+	if rev == "" {
+		rev = "HEAD"
+	} else if rev[0] == '-' {
+		rsp, err := strconv.Atoi(rev)
+		if err == nil && rsp < 0 {
+			rev = fmt.Sprintf("HEAD~%d", -rsp)
+		}
+	}
+	var out []byte
+	var err error
+	return out, err
 }
 
 // Blame returns an annotated report about the file, showing which revision last
