@@ -17,19 +17,18 @@ require (
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v0.9.12-0.20200223093637-40d12ff3ad0d
-	github.com/goki/pi v0.9.13-0.20200302103636-f330dfe2ac5b
+	github.com/goki/pi v0.9.13
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/ianbruene/go-difflib v1.1.2
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/sajari/fuzzy v1.0.0
 	github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e // indirect
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
-	golang.org/x/net v0.0.0-20200222125558-5a598a2470a0
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 )
 
 go 1.13
