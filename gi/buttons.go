@@ -698,6 +698,12 @@ func (bb *ButtonBase) FocusChanged2D(change FocusChanges) {
 	}
 }
 
+func (bb *ButtonBase) Destroy() {
+	if bb.Menu != nil {
+		bb.Menu.DeleteShortcuts(bb.ParentWindow())
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // Button
 

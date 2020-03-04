@@ -115,6 +115,40 @@ func (mb *MenuBar) UpdateActions() {
 	}
 }
 
+// SetShortcuts sets the shortcuts to window associated with Toolbar
+// Called in ConnectEvents2D()
+func (mb *MenuBar) SetShortcuts() {
+	if mb.Viewport == nil || mb.Viewport.Win == nil {
+		return
+	}
+	win := mb.Viewport.Win
+	for _, k := range mb.Kids {
+		if k.TypeEmbeds(KiT_Action) {
+			ac := k.Embed(KiT_Action).(*Action)
+			win.AddShortcut(ac.Shortcut, ac)
+		}
+	}
+}
+
+func (mb *MenuBar) Destroy() {
+	mb.DeleteShortcuts()
+	mb.Layout.Destroy()
+}
+
+// DeleteShortcuts deletes the shortcuts -- called when destroyed
+func (mb *MenuBar) DeleteShortcuts() {
+	if mb.Viewport == nil || mb.Viewport.Win == nil {
+		return
+	}
+	win := mb.Viewport.Win
+	for _, k := range mb.Kids {
+		if k.TypeEmbeds(KiT_Action) {
+			ac := k.Embed(KiT_Action).(*Action)
+			win.DeleteShortcut(ac.Shortcut, ac)
+		}
+	}
+}
+
 // FindActionByName finds an action on the menu, or any sub-menu, with given
 // name (exact match) -- this is not the Text label but the Name of the
 // element (for AddAction items, this is the same as Label or Icon (if Label
@@ -383,6 +417,41 @@ func (tb *ToolBar) MouseFocusEvent() {
 func (tb *ToolBar) ConnectEvents2D() {
 	tb.Layout.ConnectEvents2D()
 	tb.MouseFocusEvent()
+	tb.SetShortcuts()
+}
+
+// SetShortcuts sets the shortcuts to window associated with Toolbar
+// Called in ConnectEvents2D()
+func (tb *ToolBar) SetShortcuts() {
+	if tb.Viewport == nil || tb.Viewport.Win == nil {
+		return
+	}
+	win := tb.Viewport.Win
+	for _, k := range tb.Kids {
+		if k.TypeEmbeds(KiT_Action) {
+			ac := k.Embed(KiT_Action).(*Action)
+			win.AddShortcut(ac.Shortcut, ac)
+		}
+	}
+}
+
+func (tb *ToolBar) Destroy() {
+	tb.DeleteShortcuts()
+	tb.Layout.Destroy()
+}
+
+// DeleteShortcuts deletes the shortcuts -- called when destroyed
+func (tb *ToolBar) DeleteShortcuts() {
+	if tb.Viewport == nil || tb.Viewport.Win == nil {
+		return
+	}
+	win := tb.Viewport.Win
+	for _, k := range tb.Kids {
+		if k.TypeEmbeds(KiT_Action) {
+			ac := k.Embed(KiT_Action).(*Action)
+			win.DeleteShortcut(ac.Shortcut, ac)
+		}
+	}
 }
 
 // UpdateActions calls UpdateFunc on all actions in toolbar -- individual

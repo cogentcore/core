@@ -1518,6 +1518,14 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	////////////////////////////////////////////////////////////////////////////
 	// Low priority windows events
 
+	if !evi.IsProcessed() && et == oswin.KeyChordEvent {
+		ke := evi.(*key.ChordEvent)
+		kc := ke.Chord()
+		if w.TriggerShortcut(kc) {
+			evi.SetProcessed()
+		}
+	}
+
 	if !evi.IsProcessed() {
 		switch e := evi.(type) {
 		case *key.ChordEvent:
@@ -1555,15 +1563,6 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 				}
 			}
 		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////
-	// Shortcuts come last as lowest priority relative to more specific cases
-
-	if !evi.IsProcessed() && et == oswin.KeyChordEvent {
-		ke := evi.(*key.ChordEvent)
-		kc := ke.Chord()
-		w.TriggerShortcut(kc)
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -1784,8 +1783,7 @@ func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 	return !popup
 }
 
-// AddShortcut adds given shortcut -- will issue warning about conflicting
-// shortcuts and use the most recent.
+// AddShortcut adds given shortcut to given action.
 func (w *Window) AddShortcut(chord key.Chord, act *Action) {
 	if chord == "" {
 		return
@@ -1795,9 +1793,25 @@ func (w *Window) AddShortcut(chord key.Chord, act *Action) {
 	}
 	sa, exists := w.Shortcuts[chord]
 	if exists && sa != act && sa.Text != act.Text {
-		log.Printf("gi.Window shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
+		if KeyEventTrace {
+			log.Printf("gi.Window shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
+		}
 	}
 	w.Shortcuts[chord] = act
+}
+
+// DeleteShortcut deletes given shortcut
+func (w *Window) DeleteShortcut(chord key.Chord, act *Action) {
+	if chord == "" {
+		return
+	}
+	if w.Shortcuts == nil {
+		return
+	}
+	sa, exists := w.Shortcuts[chord]
+	if exists && sa == act {
+		delete(w.Shortcuts, chord)
+	}
 }
 
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was

@@ -173,6 +173,19 @@ func (m *Menu) SetShortcuts(win *Window) {
 	}
 }
 
+// DeleteShortcuts deletes the shortcuts in given window
+func (m *Menu) DeleteShortcuts(win *Window) {
+	if win == nil {
+		return
+	}
+	for _, mi := range *m {
+		if mi.TypeEmbeds(KiT_Action) {
+			ac := mi.Embed(KiT_Action).(*Action)
+			win.DeleteShortcut(ac.Shortcut, ac)
+		}
+	}
+}
+
 // UpdateActions calls update function on all the actions in the menu, and any
 // of their sub-actions
 func (m *Menu) UpdateActions() {

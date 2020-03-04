@@ -860,6 +860,9 @@ func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
 	if fn.IsExternal() {
 		return nil, nil
 	}
+	if fn.DirRepo != nil {
+		return fn.DirRepo, fn
+	}
 	var repo vci.Repo
 	var rnode *FileNode
 	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {

@@ -1776,6 +1776,17 @@ func (tb *TextBuf) HiTagAtPos(pos textbuf.Pos) *lex.Lex {
 	return tb.HiTags[pos.Ln].AtPos(pos.Ch)
 }
 
+// LexString returns the string associated with given Lex (Tag) at given line
+func (tb *TextBuf) LexString(ln int, lx *lex.Lex) string {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	if !tb.IsValidLine(ln) {
+		return ""
+	}
+	rns := tb.Lines[ln][lx.St:lx.Ed]
+	return string(rns)
+}
+
 // InTokenSubCat returns true if the given text position is marked with lexical
 // type in given SubCat sub-category
 func (tb *TextBuf) InTokenSubCat(pos textbuf.Pos, subCat token.Tokens) bool {
