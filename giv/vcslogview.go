@@ -54,6 +54,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 						} else {
 							lv.SetRevB(cmt.Rev)
 						}
+						lv.ToggleRev()
 					}
 					cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 					if err == nil {
@@ -91,6 +92,18 @@ func (lv *VCSLogView) SetRevB(rev string) {
 		return
 	}
 	tfi.(*gi.TextField).SetText(rev)
+}
+
+// ToggleRev switches the active revision to set
+func (lv *VCSLogView) ToggleRev() {
+	tb := lv.ToolBar()
+	updt := tb.UpdateStart()
+	cba := tb.ChildByName("a-rev", 2).(*gi.CheckBox)
+	cbb := tb.ChildByName("b-rev", 2).(*gi.CheckBox)
+	lv.SetA = !lv.SetA
+	cba.SetChecked(lv.SetA)
+	cbb.SetChecked(!lv.SetA)
+	tb.UpdateEnd(updt)
 }
 
 // ToolBar returns the toolbar

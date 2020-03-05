@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -719,6 +720,44 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 //////////////////////////////////////////////////////////////////////////////
 //    File ops
 
+// OSOpenCommand returns the generic file 'open' command to open file with default app
+// open on Mac, xdg-open on Linux, and start on Windows
+func OSOpenCommand() string {
+	switch oswin.TheApp.Platform() {
+	case oswin.MacOS:
+		return "open"
+	case oswin.LinuxX11:
+		return "xdg-open"
+	case oswin.Windows:
+		return "start"
+	}
+	return "open"
+}
+
+// OpenFileDefault opens file with default app for that file type (os defined)
+// runs open on Mac, xdg-open on Linux, and start on Windows
+func (fn *FileNode) OpenFileDefault() error {
+	cstr := OSOpenCommand()
+	cmd := exec.Command(cstr, string(fn.FPath))
+	out, err := cmd.CombinedOutput()
+	fmt.Printf("%s\n", out)
+	return err
+}
+
+// OpenFileWith opens file with given command.
+// does not wait for command to finish in this routine (separate routine Waits)
+func (fn *FileNode) OpenFileWith(command string) error {
+	cmd := exec.Command(command, string(fn.FPath))
+	err := cmd.Start()
+	go func() {
+		err := cmd.Wait()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+	return err
+}
+
 // Duplicate creates a copy of given file -- only works for regular files, not
 // directories
 func (fn *FileNode) DuplicateFile() error {
@@ -1138,6 +1177,15 @@ var FileNodeProps = ki.Props{
 				}},
 			},
 		}},
+		{"OpenFileWith", ki.Props{
+			"label": "Open With...",
+			"desc":  "Open the file with given command...",
+			"Args": ki.PropSlice{
+				{"Command", ki.Props{
+					"width": 60,
+				}},
+			},
+		}},
 		{"NewFile", ki.Props{
 			"label": "New File...",
 			"desc":  "Create a new file in this folder",
@@ -1398,6 +1446,33 @@ func (ftv *FileTreeView) ShowFileInfo() {
 		fn := fftv.FileNode()
 		if fn != nil {
 			StructViewDialog(ftv.Viewport, &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
+		}
+	}
+}
+
+// OpenFileDefault opens file with default app for that file type (os defined)
+// runs open on Mac, xdg-open on Linux, and start on Windows
+func (ftv *FileTreeView) OpenFileDefault() {
+	sels := ftv.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		fftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := fftv.FileNode()
+		if fn != nil {
+			fn.OpenFileDefault()
+		}
+	}
+}
+
+// OpenFileWith opens file with user-specified command.
+func (ftv *FileTreeView) OpenFileWith() {
+	sels := ftv.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		fftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := fftv.FileNode()
+		if fn != nil {
+			CallMethod(fn, "OpenFileWith", ftv.Viewport)
 		}
 	}
 }
@@ -2070,6 +2145,10 @@ var FileTreeViewProps = ki.Props{
 		{"ShowFileInfo", ki.Props{
 			"label": "File Info",
 		}},
+		{"OpenFileDefault", ki.Props{
+			"label": "Open (w/default app)",
+		}},
+		{"sep-act", ki.BlankProp{}},
 		{"DuplicateFiles", ki.Props{
 			"label":    "Duplicate",
 			"updtfunc": FileTreeInactiveDirFunc,

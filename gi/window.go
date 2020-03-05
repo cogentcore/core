@@ -11,6 +11,7 @@ import (
 	"image/draw"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"runtime/debug"
@@ -2112,7 +2113,9 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	switch kf {
 	case KeyFunWinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-		SaveImage("GrabOf_"+w.Nm+"_"+dstr+".png", w.Viewport.Pixels)
+		fnm, _ := filepath.Abs("./GrabOf_" + w.Nm + "_" + dstr + ".png")
+		SaveImage(fnm, w.Viewport.Pixels)
+		fmt.Printf("Saved Window Image to: %s\n", fnm)
 		e.SetProcessed()
 	case KeyFunZoomIn:
 		w.ZoomDPI(1)
