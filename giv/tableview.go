@@ -693,6 +693,9 @@ func (tv *TableView) SliceNewAt(idx int) {
 	defer tv.UpdateEnd(updt)
 
 	kit.SliceNewAt(tv.Slice, idx)
+	if idx < 0 {
+		idx = tv.SliceSize
+	}
 
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
@@ -702,6 +705,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 	tv.This().(SliceViewer).LayoutSliceGrid()
 	tv.This().(SliceViewer).UpdateSliceGrid()
 	tv.ViewSig.Emit(tv.This(), 0, nil)
+	tv.SliceViewSig.Emit(tv.This(), int64(SliceViewInserted), idx)
 }
 
 // SliceDeleteAt deletes element at given index from slice -- doupdt means
@@ -728,6 +732,7 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 		tv.This().(SliceViewer).UpdateSliceGrid()
 	}
 	tv.ViewSig.Emit(tv.This(), 0, nil)
+	tv.SliceViewSig.Emit(tv.This(), int64(SliceViewDeleted), idx)
 }
 
 // SortSlice sorts the slice according to current settings
@@ -789,20 +794,25 @@ func (tv *TableView) ConfigToolbar() {
 		return
 	}
 	tb := tv.ToolBar()
-	if len(*tb.Children()) == 0 {
+	ndef := 2 // number of default actions
+	if tv.isArray || tv.IsInactive() || tv.NoAdd {
+		ndef = 1
+	}
+	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of table"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				tvv := recv.Embed(KiT_TableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the table"},
-			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				tvv := recv.Embed(KiT_TableView).(*TableView)
-				tvv.SliceNewAt(-1)
-			})
+		if ndef > 1 {
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the table"},
+				tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					tvv := recv.Embed(KiT_TableView).(*TableView)
+					tvv.SliceNewAt(-1)
+				})
+		}
 	}
-	ndef := 2 // number of default actions
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {

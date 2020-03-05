@@ -216,14 +216,18 @@ func (sv *SliceViewBase) Update() {
 // SliceViewSignals are signals that sliceview can send, mostly for editing
 // mode.  Selection events are sent on WidgetSig WidgetSelected signals in
 // both modes.
-type SliceViewSignals int64
+type SliceViewSignals int
 
 const (
 	// SliceViewDoubleClicked emitted during inactive mode when item
 	// double-clicked -- can be used for accepting dialog.
 	SliceViewDoubleClicked SliceViewSignals = iota
 
-	// todo: add more signals as needed
+	// SliceViewInserted emitted when a new item is inserted -- data is index of new item
+	SliceViewInserted
+
+	// SliceViewDeleted emitted when an item is deleted -- data is index of item deleted
+	SliceViewDeleted
 
 	SliceViewSignalsN
 )
@@ -734,6 +738,9 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		}
 		svl.Elem().Set(svnp)
 	}
+	if idx < 0 {
+		idx = sz
+	}
 
 	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
@@ -745,6 +752,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.This().(SliceViewer).LayoutSliceGrid()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.ViewSig.Emit(sv.This(), 0, nil)
+	sv.SliceViewSig.Emit(sv.This(), int64(SliceViewInserted), idx)
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -775,6 +783,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 		sv.This().(SliceViewer).UpdateSliceGrid()
 	}
 	sv.ViewSig.Emit(sv.This(), 0, nil)
+	sv.SliceViewSig.Emit(sv.This(), int64(SliceViewDeleted), idx)
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -792,7 +801,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of slice"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update this SliceView to reflect current state of slice"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
@@ -1945,6 +1954,24 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
+	sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		me := d.(*mouse.Event)
+		svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
+		// if !svv.HasFocus() {
+		// 	svv.GrabFocus()
+		// }
+		if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
+			si := svv.SelectedIdx
+			svv.UnselectAllIdxs()
+			svv.SelectIdx(si)
+			svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), si)
+			me.SetProcessed()
+		}
+		if me.Button == mouse.Right && me.Action == mouse.Release {
+			svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
+			me.SetProcessed()
+		}
+	})
 	if sv.IsInactive() {
 		if sv.InactKeyNav {
 			sv.ConnectEvent(oswin.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
@@ -1953,33 +1980,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 				svv.KeyInputInactive(kt)
 			})
 		}
-		sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.Event)
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
-			// if !svv.HasFocus() {
-			// 	svv.GrabFocus()
-			// }
-			if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-				si := svv.SelectedIdx
-				svv.UnselectAllIdxs()
-				svv.SelectIdx(si)
-				svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), si)
-				me.SetProcessed()
-			}
-			if me.Button == mouse.Right && me.Action == mouse.Release {
-				svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
-				me.SetProcessed()
-			}
-		})
 	} else {
-		sv.ConnectEvent(oswin.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-			me := d.(*mouse.Event)
-			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
-			if me.Button == mouse.Right && me.Action == mouse.Release {
-				svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
-				me.SetProcessed()
-			}
-		})
 		sv.ConnectEvent(oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 			svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)
 			kt := d.(*key.ChordEvent)

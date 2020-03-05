@@ -2,12 +2,7 @@
 
 package giv
 
-import (
-	"errors"
-	"strconv"
-)
-
-var _ = errors.New("dummy error")
+import "strconv"
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -30,14 +25,4 @@ func (i TextViewSignals) String() string {
 		return "TextViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _TextViewSignals_name[_TextViewSignals_index[i]:_TextViewSignals_index[i+1]]
-}
-
-func (i *TextViewSignals) FromString(s string) error {
-	for j := 0; j < len(_TextViewSignals_index)-1; j++ {
-		if s == _TextViewSignals_name[_TextViewSignals_index[j]:_TextViewSignals_index[j+1]] {
-			*i = TextViewSignals(j)
-			return nil
-		}
-	}
-	return errors.New("String: " + s + " is not a valid option for type: TextViewSignals")
 }

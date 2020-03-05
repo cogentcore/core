@@ -2,38 +2,25 @@
 
 package giv
 
-import (
-	"errors"
-	"strconv"
-)
-
-var _ = errors.New("dummy error")
+import "strconv"
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[SliceViewDoubleClicked-0]
-	_ = x[SliceViewSignalsN-1]
+	_ = x[SliceViewInserted-1]
+	_ = x[SliceViewDeleted-2]
+	_ = x[SliceViewSignalsN-3]
 }
 
-const _SliceViewSignals_name = "SliceViewDoubleClickedSliceViewSignalsN"
+const _SliceViewSignals_name = "SliceViewDoubleClickedSliceViewInsertedSliceViewDeletedSliceViewSignalsN"
 
-var _SliceViewSignals_index = [...]uint8{0, 22, 39}
+var _SliceViewSignals_index = [...]uint8{0, 22, 39, 55, 72}
 
 func (i SliceViewSignals) String() string {
 	if i < 0 || i >= SliceViewSignals(len(_SliceViewSignals_index)-1) {
 		return "SliceViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _SliceViewSignals_name[_SliceViewSignals_index[i]:_SliceViewSignals_index[i+1]]
-}
-
-func (i *SliceViewSignals) FromString(s string) error {
-	for j := 0; j < len(_SliceViewSignals_index)-1; j++ {
-		if s == _SliceViewSignals_name[_SliceViewSignals_index[j]:_SliceViewSignals_index[j+1]] {
-			*i = SliceViewSignals(j)
-			return nil
-		}
-	}
-	return errors.New("String: " + s + " is not a valid option for type: SliceViewSignals")
 }

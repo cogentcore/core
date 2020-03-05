@@ -2,12 +2,7 @@
 
 package giv
 
-import (
-	"errors"
-	"strconv"
-)
-
-var _ = errors.New("dummy error")
+import "strconv"
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -32,14 +27,4 @@ func (i TreeViewSignals) String() string {
 		return "TreeViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _TreeViewSignals_name[_TreeViewSignals_index[i]:_TreeViewSignals_index[i+1]]
-}
-
-func (i *TreeViewSignals) FromString(s string) error {
-	for j := 0; j < len(_TreeViewSignals_index)-1; j++ {
-		if s == _TreeViewSignals_name[_TreeViewSignals_index[j]:_TreeViewSignals_index[j+1]] {
-			*i = TreeViewSignals(j)
-			return nil
-		}
-	}
-	return errors.New("String: " + s + " is not a valid option for type: TreeViewSignals")
 }

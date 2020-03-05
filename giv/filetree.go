@@ -17,6 +17,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
@@ -715,6 +716,27 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 		return ecs[i].Count > ecs[j].Count
 	})
 	return ecs
+}
+
+// LatestFileMod returns the most recent mod time of files in the tree.
+// If cat is != filecat.Unknown then it only uses files of that type
+// (e.g., filecat.Code to find any code files)
+func (fn *FileNode) LatestFileMod(cat filecat.Cat) time.Time {
+	tmod := time.Time{}
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		if cat != filecat.Unknown {
+			if sfn.Info.Cat != cat {
+				return true
+			}
+		}
+		ft := (time.Time)(sfn.Info.ModTime)
+		if ft.After(tmod) {
+			tmod = ft
+		}
+		return true
+	})
+	return tmod
 }
 
 //////////////////////////////////////////////////////////////////////////////

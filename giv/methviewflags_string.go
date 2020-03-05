@@ -2,12 +2,7 @@
 
 package giv
 
-import (
-	"errors"
-	"strconv"
-)
-
-var _ = errors.New("dummy error")
+import "strconv"
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -31,14 +26,4 @@ func (i MethViewFlags) String() string {
 		return "MethViewFlags(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _MethViewFlags_name[_MethViewFlags_index[i]:_MethViewFlags_index[i+1]]
-}
-
-func (i *MethViewFlags) FromString(s string) error {
-	for j := 0; j < len(_MethViewFlags_index)-1; j++ {
-		if s == _MethViewFlags_name[_MethViewFlags_index[j]:_MethViewFlags_index[j+1]] {
-			*i = MethViewFlags(j)
-			return nil
-		}
-	}
-	return errors.New("String: " + s + " is not a valid option for type: MethViewFlags")
 }
