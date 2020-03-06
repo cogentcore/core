@@ -27,6 +27,7 @@ type MapView struct {
 	SortVals   bool        `desc:"sort by values instead of keys"`
 	TmpSave    ValueView   `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 	ViewSig    ki.Signal   `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	MapViewSig ki.Signal   `copy:"-" json:"-" xml:"-" desc:"map view specific signals: add, delete, double-click"`
 	ViewPath   string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 	ToolbarMap interface{} `desc:"the map that we successfully set a toolbar for"`
 }
@@ -40,6 +41,7 @@ func AddNewMapView(parent ki.Ki, name string) *MapView {
 
 func (mv *MapView) Disconnect() {
 	mv.Frame.Disconnect()
+	mv.MapViewSig.DisconnectAll()
 	mv.ViewSig.DisconnectAll()
 }
 
@@ -58,6 +60,27 @@ var MapViewProps = ki.Props{
 	"max-width":        -1,
 	"max-height":       -1,
 }
+
+// MapViewSignals are signals that mapview can send, mostly for editing
+// mode.  Selection events are sent on WidgetSig WidgetSelected signals in
+// both modes.
+type MapViewSignals int
+
+const (
+	// MapViewDoubleClicked emitted during inactive mode when item
+	// double-clicked -- can be used for accepting dialog.
+	MapViewDoubleClicked MapViewSignals = iota
+
+	// MapViewAdded emitted when a new blank item is added -- no data is sent.
+	MapViewAdded
+
+	// MapViewDeleted emitted when an item is deleted -- data is key of item deleted
+	MapViewDeleted
+
+	MapViewSignalsN
+)
+
+//go:generate stringer -type=MapViewSignals
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (mv *MapView) UpdateValues() {
@@ -250,7 +273,7 @@ func (mv *MapView) ConfigMapGrid() {
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
-// SliceView, indicating that some kind of edit / change has taken place to
+// MapView, indicating that some kind of edit / change has taken place to
 // the table data.  It isn't really practical to record all the different
 // types of changes, so this is just generic.
 func (mv *MapView) SetChanged() {
@@ -311,6 +334,7 @@ func (mv *MapView) MapAdd() {
 	}
 	mv.ConfigMapGrid()
 	mv.SetChanged()
+	mv.MapViewSig.Emit(mv.This(), int64(MapViewAdded), nil)
 }
 
 // MapDelete deletes a key-value from the map
@@ -321,6 +345,8 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
+	kvi := kit.NonPtrValue(key).Interface()
+
 	kit.MapDeleteValue(mv.Map, kit.NonPtrValue(key))
 
 	if mv.TmpSave != nil {
@@ -328,6 +354,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	mv.ConfigMapGrid()
 	mv.SetChanged()
+	mv.MapViewSig.Emit(mv.This(), int64(MapViewDeleted), kvi)
 }
 
 // ConfigToolbar configures the toolbar actions

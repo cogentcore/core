@@ -83,6 +83,7 @@ type TextBuf struct {
 	LinesMu          sync.RWMutex        `json:"-" xml:"-" desc:"mutex for updating lines"`
 	MarkupMu         sync.RWMutex        `json:"-" xml:"-" desc:"mutex for updating markup"`
 	MarkupDelayTimer *time.Timer         `json:"-" xml:"-" desc:"markup delay timer"`
+	MarkupEchoTimer  *time.Timer         `json:"-" xml:"-" desc:"markup echo timer -- one more markup.."`
 	MarkupDelayMu    sync.Mutex          `json:"-" xml:"-" desc:"mutex for updating markup delay timer"`
 	TextBufSig       ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views            []*TextView         `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
@@ -196,7 +197,7 @@ func (tb *TextBuf) SetText(txt []byte) {
 	tb.BytesToLines()
 	tb.InitialMarkup()
 	tb.Refresh()
-	tb.ReMarkup()
+	tb.ReMarkup(false) // not an echo
 }
 
 // SetTextLines sets the text to given lines of bytes
@@ -400,8 +401,8 @@ func (tb *TextBuf) FileModCheck() bool {
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.ViewportFromView()
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + DirAndFile(string(tb.Filename)),
-			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
-			[]string{"Save As to different File", "Revert from Disk, Losing any Edits", "Ignore and Proceed (subsequent Save would overwrite Disk!)"},
+			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)},
+			[]string{"Save As to diff File", "Revert from Disk", "Ignore and Proceed"},
 			tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
@@ -434,7 +435,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	// update views
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
 
-	tb.ReMarkup() // redo full
+	tb.ReMarkup(false) // redo full
 	return nil
 }
 
@@ -489,7 +490,7 @@ func (tb *TextBuf) Revert() bool {
 	}
 	tb.ClearChanged()
 	tb.AutoSaveDelete()
-	tb.ReMarkup()
+	tb.ReMarkup(false)
 	return true
 }
 
@@ -1380,9 +1381,11 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 	}
 	if tb.MarkupDelayTimer != nil {
 		tb.MarkupDelayTimer.Stop()
+		tb.MarkupDelayTimer = nil
 	}
-	if tb.IsMarkingUp() {
-		return
+	if tb.MarkupEchoTimer != nil {
+		tb.MarkupEchoTimer.Stop()
+		tb.MarkupEchoTimer = nil
 	}
 	vp := tb.ViewportFromView()
 	if vp != nil {
@@ -1397,7 +1400,8 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 	tb.MarkupDelayTimer = time.AfterFunc(time.Duration(TextBufMarkupDelayMSec)*time.Millisecond,
 		func() {
 			// fmt.Printf("delayed remarkup\n")
-			tb.ReMarkup() // this will stop existing timer
+			tb.MarkupDelayTimer = nil
+			tb.ReMarkup(false) // not an echo
 		})
 }
 
@@ -1409,18 +1413,22 @@ func (tb *TextBuf) StopDelayedReMarkup() {
 		tb.MarkupDelayTimer.Stop()
 		tb.MarkupDelayTimer = nil
 	}
+	if tb.MarkupEchoTimer != nil {
+		tb.MarkupEchoTimer.Stop()
+		tb.MarkupEchoTimer = nil
+	}
 }
 
 // ReMarkup runs re-markup on text in background
-func (tb *TextBuf) ReMarkup() {
+// if fromEcho is true, this was an echo remarkup -- don't echo again
+func (tb *TextBuf) ReMarkup(fromEcho bool) {
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
 	if tb.IsMarkingUp() {
 		return
 	}
-	tb.StopDelayedReMarkup()
-	go tb.MarkupAllLines()
+	go tb.MarkupAllLines(fromEcho)
 }
 
 // AdjustedTags updates tag positions for edits
@@ -1445,8 +1453,9 @@ func (tb *TextBuf) AdjustedTags(ln int) lex.Line {
 
 // MarkupAllLines does syntax highlighting markup for all lines in buffer,
 // calling MarkupMu mutex when setting the marked-up lines with the result --
-// designed to be called in a separate goroutine
-func (tb *TextBuf) MarkupAllLines() {
+// designed to be called in a separate goroutine.
+// if fromEcho is true, this was called from the delayed echo markup -- don't echo again!
+func (tb *TextBuf) MarkupAllLines(fromEcho bool) {
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
@@ -1526,6 +1535,14 @@ func (tb *TextBuf) MarkupAllLines() {
 	tb.LinesMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
+	if !fromEcho {
+		tb.MarkupEchoTimer = time.AfterFunc(time.Duration(TextBufMarkupDelayMSec)*time.Millisecond,
+			func() {
+				tb.MarkupEchoTimer = nil
+				// fmt.Printf("echo remarkup\n")
+				tb.ReMarkup(true) // this is now an echo
+			})
+	}
 }
 
 // MarkupFromTags does syntax highlighting markup using existing HiTags without
@@ -1848,8 +1865,21 @@ func (tb *TextBuf) SetLineColor(ln int, color string) {
 	tb.LineColors[ln] = clr
 }
 
-// DeleteLineColor deletes any color at given line (0 starting).
-// if ln = -1 then delete all line colors.
+// HasLineColor checks if given line has a line color set
+func (tb *TextBuf) HasLineColor(ln int) bool {
+	tb.LinesMu.Lock()
+	defer tb.LinesMu.Unlock()
+	if ln < 0 {
+		return false
+	}
+	if tb.LineColors == nil {
+		return false
+	}
+	_, has := tb.LineColors[ln]
+	return has
+}
+
+// HasLineColor
 func (tb *TextBuf) DeleteLineColor(ln int) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()

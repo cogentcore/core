@@ -350,8 +350,8 @@ func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	dv.BufA.SetTextLines(ab, false) // don't copy
 	dv.BufB.SetTextLines(bb, false) // don't copy
 	dv.TagWordDiffs()
-	dv.BufA.ReMarkup()
-	dv.BufB.ReMarkup()
+	dv.BufA.ReMarkup(false)
+	dv.BufB.ReMarkup(false)
 	av.UpdateEnd(aupdt)
 	bv.UpdateEnd(bupdt)
 }

@@ -115,7 +115,7 @@ func (hm *HiMarkup) MarkupTagsAll(txt []byte) ([]lex.Line, error) {
 	}
 	if hm.PiLang != nil {
 		hm.PiLang.ParseFile(hm.PiState, txt)   // processes in Proc(), does Switch()
-		return hm.PiState.Done().Src.Lexs, nil // Done() is always current
+		return hm.PiState.Done().Src.Lexs, nil // Done() is previous Proc() -- still has type info coming in later, but lexs are good
 	} else if hm.lexer != nil {
 		return hm.ChromaTagsAll(txt)
 	}

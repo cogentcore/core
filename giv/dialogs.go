@@ -51,7 +51,6 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Filename = gi.FileName(opts.Filename)
 	tb.Opts.LineNos = opts.LineNos
 	tb.Stat() // update markup
-	tb.SetText(text)
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
 	tlv.SetProp("width", units.NewEm(5))
@@ -62,7 +61,8 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tv.SetInactive()
 	tv.SetProp("font-family", gi.Prefs.MonoFont)
 	tv.SetBuf(tb)
-	tb.ReMarkup()
+
+	tb.SetText(text) // triggers remarkup
 
 	bbox, _ := dlg.ButtonBox(frame)
 	if bbox == nil {
