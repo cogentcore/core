@@ -29,13 +29,20 @@ func (tm *TypeMap) Add(ty *Type) {
 
 // CopyFrom copies all the types from given source map into this one.
 // Types that have Kind != Unknown are retained over unknown ones.
-func (tm *TypeMap) CopyFrom(src TypeMap) {
+// srcIsNewer means that the src type is newer and should be used for
+// other data like source
+func (tm *TypeMap) CopyFrom(src TypeMap, srcIsNewer bool) {
 	tm.Alloc()
 	for nm, sty := range src {
 		ety, has := (*tm)[nm]
 		if !has {
 			(*tm)[nm] = sty
 			continue
+		}
+		if srcIsNewer {
+			ety.CopyFromSrc(sty)
+		} else {
+			sty.CopyFromSrc(ety)
 		}
 		if ety.Kind != Unknown {
 			// if len(sty.Els) > 0 && len(sty.Els) != len(ety.Els) {

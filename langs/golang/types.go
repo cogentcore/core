@@ -511,7 +511,7 @@ func (gl *GoLang) StructInheritEls(fs *pi.FileState, pkg *syms.Symbol, ty *syms.
 		}
 	} else {
 		ty.Els.CopyFrom(ety.Els)
-		ty.Meths.CopyFrom(ety.Meths)
+		ty.Meths.CopyFrom(ety.Meths, false) // dest is newer
 	}
 	ty.Size[0] += len(ety.Els)
 	// if TraceTypes {

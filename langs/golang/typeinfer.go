@@ -159,6 +159,8 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			ftyp := gl.FuncTypeFromAst(fs, pkg, ast, nil)
 			if ftyp != nil {
 				ftyp.Name = "func " + sy.Name
+				ftyp.Filename = sy.Filename
+				ftyp.Region = sy.Region
 				sy.Type = ftyp.Name
 				pkg.Types.Add(ftyp)
 				sy.Detail = "(" + ftyp.ArgString() + ") " + ftyp.ReturnString()

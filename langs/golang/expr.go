@@ -21,8 +21,8 @@ import (
 func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, tyast *parse.Ast) (*syms.Type, *parse.Ast, bool) {
 	pos := tyast.SrcReg.St
 	fpath, _ := filepath.Abs(fs.Src.Filename)
-	var conts syms.SymMap // containers of given region -- local scoping
-	fs.Syms.FindContainsRegion(fpath, pos, 0, token.NameFunction, &conts)
+	var conts syms.SymMap                                                 // containers of given region -- local scoping
+	fs.Syms.FindContainsRegion(fpath, pos, 2, token.NameFunction, &conts) // 2 extra lines always!
 	// if TraceTypes && len(conts) == 0 {
 	// 	fmt.Printf("TExpr: no conts for fpath: %v  pos: %v\n", fpath, pos)
 	// }

@@ -151,7 +151,7 @@
           }
         ],
         "Off": false,
-        "Desc": "all CurState must be at top -- any multi-line requires state",
+        "Desc": "all CurState must be at top -- any multiline requires state",
         "Token": "CommentMultiline",
         "Match": "CurState",
         "Pos": "AnyPos",

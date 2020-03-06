@@ -66,7 +66,7 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 			fmt.Printf("start = nil\n")
 			return
 		}
-		fmt.Printf("\n####################\ncompletion start in scope: %v\n", scope)
+		fmt.Printf("\n####################\nlookup start in scope: %v\n", scope)
 		lfs.ParseState.Ast.WriteTree(os.Stdout, 0)
 		fmt.Printf("Start tree:\n")
 		start.WriteTree(os.Stdout, 0)
@@ -78,9 +78,9 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 	if start == last { // single-item
 		seed := start.Src
 		if seed != "" {
-			return gl.LookupString(fs, pkg, seed)
+			return gl.LookupString(fs, pkg, scopes, seed)
 		}
-		return gl.LookupString(fs, pkg, str)
+		return gl.LookupString(fs, pkg, scopes, str)
 	}
 
 	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
@@ -101,7 +101,7 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 				}
 			}
 		}
-		// fmt.Printf("got completion type: %v, last str: %v\n", typ.String(), lststr)
+		// fmt.Printf("got lookup type: %v, last str: %v\n", typ.String(), lststr)
 		ld.SetFile(typ.Filename, typ.Region.St.Ln, typ.Region.Ed.Ln)
 		return
 	}
@@ -111,15 +111,15 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 	if snxt != nil && snxt.Src != "" {
 		ststr := snxt.Src
 		if lststr != "" && lststr != ststr {
-			ld = gl.LookupString(fs, pkg, ststr+"."+lststr)
+			ld = gl.LookupString(fs, pkg, nil, ststr+"."+lststr)
 		} else {
-			ld = gl.LookupString(fs, pkg, ststr)
+			ld = gl.LookupString(fs, pkg, nil, ststr)
 		}
 	} else {
-		ld = gl.LookupString(fs, pkg, lststr)
+		ld = gl.LookupString(fs, pkg, scopes, lststr)
 	}
 	if ld.Filename == "" { // didn't work
-		ld = gl.LookupString(fs, pkg, str)
+		ld = gl.LookupString(fs, pkg, scopes, str)
 	}
 	return
 }
@@ -246,6 +246,9 @@ func (gl *GoLang) CompletePosScope(fs *pi.FileState, pos lex.Pos, fpath string, 
 	}
 	if len(*scopes) == 1 {
 		for _, sy := range *scopes {
+			if CompleteTrace {
+				fmt.Printf("scope: %v  reg: %v  pos: %v\n", sy.Name, sy.Region, pos)
+			}
 			return sy.Kind
 		}
 	}
@@ -294,7 +297,7 @@ func (gl *GoLang) CompleteTypeName(fs *pi.FileState, pkg *syms.Symbol, seed stri
 
 // LookupString attempts to lookup a string, which could be a type name,
 // (with package qualifier), could be partial, etc
-func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, str string) (ld complete.Lookup) {
+func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, scopes syms.SymMap, str string) (ld complete.Lookup) {
 	str = lex.TrimLeftToAlpha(str)
 	pnm, tnm := SplitType(str)
 	if pnm != "" && tnm != "" {
@@ -330,16 +333,23 @@ func (gl *GoLang) LookupString(fs *pi.FileState, pkg *syms.Symbol, str string) (
 		ld.SetFile(tym.Filename, tym.Region.St.Ln, tym.Region.Ed.Ln)
 		return
 	}
-	// then try any symbol
 	var matches syms.SymMap
-	pkg.Children.FindNamePrefixScoped(str, &matches)
-	if len(matches) == 1 {
-		var psy *syms.Symbol
-		for _, sy := range matches {
-			psy = sy
+	if len(scopes) > 0 {
+		scopes.FindNamePrefixRecursive(str, &matches)
+		if len(matches) > 0 {
+			for _, sy := range matches {
+				ld.SetFile(sy.Filename, sy.Region.St.Ln, sy.Region.Ed.Ln) // take first
+				return
+			}
 		}
-		ld.SetFile(psy.Filename, psy.Region.St.Ln, psy.Region.Ed.Ln)
-		return
+	}
+
+	pkg.Children.FindNamePrefixScoped(str, &matches)
+	if len(matches) > 0 {
+		for _, sy := range matches {
+			ld.SetFile(sy.Filename, sy.Region.St.Ln, sy.Region.Ed.Ln) // take first
+			return
+		}
 	}
 	if CompleteTrace {
 		fmt.Printf("Lookup: string not found: %v\n", str)

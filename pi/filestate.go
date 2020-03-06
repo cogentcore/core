@@ -195,7 +195,7 @@ func (fs *FileState) FindChildren(sym *syms.Symbol, seed string, scope syms.SymM
 	if seed != "" {
 		sym.Children.FindNamePrefix(seed, kids)
 	} else {
-		kids.CopyFrom(sym.Children)
+		kids.CopyFrom(sym.Children, true) // src is newer
 	}
 	return len(*kids) > 0
 }
@@ -218,7 +218,7 @@ func (fs *FileState) FindAnyChildren(sym *syms.Symbol, seed string, scope syms.S
 	if seed != "" {
 		sym.Children.FindNamePrefixRecursive(seed, kids)
 	} else {
-		kids.CopyFrom(sym.Children)
+		kids.CopyFrom(sym.Children, true) // src is newer
 	}
 	return len(*kids) > 0
 }

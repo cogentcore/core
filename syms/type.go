@@ -47,6 +47,15 @@ func (ty *Type) AllocScopes() {
 	}
 }
 
+// CopyFromSrc copies source-level data from given other type
+func (ty *Type) CopyFromSrc(cp *Type) {
+	ty.Filename = cp.Filename
+	ty.Region = cp.Region
+	if cp.Ast != nil {
+		ty.Ast = cp.Ast
+	}
+}
+
 // Clone returns a deep copy of this type, cloning / copying all sub-elements
 // except the Ast, and Inited
 func (ty *Type) Clone() *Type {

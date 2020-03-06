@@ -69,6 +69,20 @@ func NewSymbol(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbo
 	return sy
 }
 
+// CopyFromSrc copies all the source-related fields from other symbol
+// (no Type, Types, or Children).  Ast is only copied if non-nil.
+func (sy *Symbol) CopyFromSrc(cp *Symbol) {
+	sy.Detail = cp.Detail
+	sy.Kind = cp.Kind
+	sy.Index = cp.Index
+	sy.Filename = cp.Filename
+	sy.Region = cp.Region
+	sy.SelectReg = cp.SelectReg
+	if cp.Ast != nil {
+		sy.Ast = cp.Ast
+	}
+}
+
 // IsTemp returns true if this is temporary symbol that is used for scoping but is not
 // otherwise permanently added to list of symbols.  Indicated by Zero Region.
 func (sy *Symbol) IsTemp() bool {
@@ -177,7 +191,7 @@ func (sy *Symbol) FindAnyChildren(seed string, scope1, scope2 SymMap, kids *SymM
 	if seed != "" {
 		sym.Children.FindNamePrefixRecursive(seed, kids)
 	} else {
-		kids.CopyFrom(sym.Children)
+		kids.CopyFrom(sym.Children, true) // srcIsNewer
 	}
 	return len(*kids) > 0
 
@@ -191,8 +205,8 @@ func (sy *Symbol) NonPtrTypeName() string {
 // CopyFromScope copies the Children and Types from given other symbol
 // for scopes (e.g., Go package), to merge with existing.
 func (sy *Symbol) CopyFromScope(src *Symbol) {
-	sy.Children.CopyFrom(src.Children)
-	sy.Types.CopyFrom(src.Types)
+	sy.Children.CopyFrom(src.Children, false) // src is NOT newer
+	sy.Types.CopyFrom(src.Types, false)       // src is NOT newer
 }
 
 // OpenJSON opens from a JSON-formatted file.

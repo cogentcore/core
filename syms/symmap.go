@@ -55,7 +55,9 @@ func (sm *SymMap) Reset() {
 // CopyFrom copies all the symbols from given source map into this one,
 // including merging everything from common elements.
 // Symbols with Type resolved are retained when there are duplicates.
-func (sm *SymMap) CopyFrom(src SymMap) {
+// srcIsNewer means that the src map has the newer information to grab for
+// updating the symbol region info during the merge.
+func (sm *SymMap) CopyFrom(src SymMap, srcIsNewer bool) {
 	sm.Alloc()
 	for nm, ssy := range src {
 		dsy, has := (*sm)[nm]
@@ -63,16 +65,22 @@ func (sm *SymMap) CopyFrom(src SymMap) {
 			(*sm)[nm] = ssy
 			continue
 		}
+		if srcIsNewer {
+			dsy.CopyFromSrc(ssy)
+		} else {
+			ssy.CopyFromSrc(dsy)
+		}
 		if dsy.Type != "" {
 			// fmt.Printf("dupe sym: %v, using existing with type: %v\n", nm, dsy.Type)
-			dsy.Children.CopyFrom(ssy.Children)
+			// fmt.Printf("\texisting region: %v  new source region: %v\n", dsy.Region, ssy.Region)
+			dsy.Children.CopyFrom(ssy.Children, srcIsNewer)
 		} else if ssy.Type != "" {
 			// fmt.Printf("dupe sym: %v, using new with type: %v\n", nm, ssy.Type)
-			ssy.Children.CopyFrom(dsy.Children)
+			// fmt.Printf("\texisting region: %v  new source region: %v\n", dsy.Region, ssy.Region)
+			ssy.Children.CopyFrom(dsy.Children, !srcIsNewer)
 			(*sm)[nm] = ssy
 		} else {
-			// fmt.Printf("dupe sym: %v neither has type\n", nm)
-			dsy.Children.CopyFrom(ssy.Children)
+			dsy.Children.CopyFrom(ssy.Children, srcIsNewer)
 		}
 	}
 }
