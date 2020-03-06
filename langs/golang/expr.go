@@ -247,6 +247,11 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 		return ttp, tyast, true
 	}
 
+	if tyast.Nm == "QualType" && tnm != tyast.Src {
+		// tyast.Src is new type name
+		return gl.TypeFromAstType(fs, origPkg, pkg, tyast, last, tyast.Src)
+	}
+
 	nxt := tyast
 	for {
 		nxt = nxt.NextAst()
@@ -297,6 +302,7 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			} else {
 				if TraceTypes {
 					fmt.Printf("TExpr: FuncCall: could not find method: %v in type: %v\n", funm, ttp.Name)
+					tyast.WriteTree(os.Stdout, 0)
 				}
 				return nil, fun, false
 			}
