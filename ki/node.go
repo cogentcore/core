@@ -1908,7 +1908,7 @@ func (n *Node) UpdateEnd(updt bool) {
 	} else {
 		// pr := prof.Start("ki.Node.UpdateEnd")
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			k.ClearFlag(int(Updating)) // note: could check first and break here but good to ensure all clear
 			return true
 		})
 		// pr.End()
@@ -1934,7 +1934,7 @@ func (n *Node) UpdateEndNoSig(updt bool) {
 		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
 	} else {
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.ClearFlag(int(Updating)) // todo: could check first and break here but good to ensure all clear
+			k.ClearFlag(int(Updating)) // note: could check first and break here but good to ensure all clear
 			return true
 		})
 		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
@@ -2157,7 +2157,7 @@ func GenCopyFieldsFrom(to interface{}, frm interface{}) {
 				if tfk != nil && sfk != nil {
 					tfk.CopyFrom(sfk)
 				}
-			case f.Type == KiT_Signal: // todo: don't copy signals by default
+			case f.Type == KiT_Signal: // note: don't copy signals by default
 			case sf.Type().AssignableTo(tf.Type()):
 				tf.Set(sf)
 				// kit.PtrValue(tf).Set(sf)

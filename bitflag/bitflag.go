@@ -11,10 +11,6 @@ package bitflag
 
 import "sync/atomic"
 
-// todo: can add a global debug level setting and test for overflow in bits --
-// or maybe better in the enum type registry constructor?
-// see also https://github.com/sirupsen/logrus
-
 // we assume 64bit bitflags by default -- 32 bit methods specifically marked
 
 ////////////////////////////////////////////////////////////////////////

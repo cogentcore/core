@@ -135,14 +135,21 @@ func (tr *EnumRegistry) AddEnum(en interface{}, bitFlag bool, props map[string]i
 	if bitFlag {
 		tp := tr.Properties(snm)
 		tp["BitFlag"] = true
-		if n >= 64 {
-			log.Printf("kit.AddEnum ERROR: enum: %v is a bitflag with more than 64 bits defined -- will likely not work: n: %v\n", snm, n)
-			// } else { // if debug:
-			// 	fmt.Printf("kit.AddEnum added bitflag enum: %v with n: %v\n", snm, n)
-		}
+		EnumBitDepthCheck(typ, n)
 	}
 	// fmt.Printf("added enum: %v with n: %v\n", tn, n)
 	return typ
+}
+
+// EnumBitDepthCheck checks if given type can handle given number of bit flags
+func EnumBitDepthCheck(typ reflect.Type, n int64) error {
+	cp := typ.Size() * 8
+	if n > int64(cp) {
+		err := fmt.Errorf("kit.EnumBitDepthCheck ERROR: enum: %v is a bitflag of kind: %v with capacity of: %d bits, but more flags were defined: %d", ShortTypeName(typ), typ.Kind(), cp, n)
+		log.Println(err)
+		return err
+	}
+	return nil
 }
 
 // AddEnumAltLower adds a given type to the registry -- requires the N value
