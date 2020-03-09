@@ -486,7 +486,9 @@ func RecycleStdDialog(data interface{}, opts DlgOpts, ok, cancel bool) (*Dialog,
 		dlg := ew.Child(0).Embed(KiT_Dialog).(*Dialog)
 		return dlg, true
 	}
-	return NewStdDialog(opts, ok, cancel), false
+	dlg := NewStdDialog(opts, ok, cancel)
+	dlg.Data = data
+	return dlg, false
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -50,8 +50,8 @@ github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff h1:W71vTCKoxtdXgnm1E
 github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff/go.mod h1:wfqRWLHRBsRgkp5dmbG56SA0DmVtwrF5N3oPdI8t+Aw=
 github.com/goki/ki v0.9.11 h1:LOsRjJUuWTj8kgo30qyDoJPhk3Da6kVvclNfAz8nJMU=
 github.com/goki/ki v0.9.11/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
-github.com/goki/ki v0.9.12-0.20200223093637-40d12ff3ad0d h1:sboJ4bObavAk4Nh4bNf2WVMgpRlwexSltnBQB3axtXU=
-github.com/goki/ki v0.9.12-0.20200223093637-40d12ff3ad0d/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
+github.com/goki/ki v0.9.12-0.20200309063305-3102412f93be h1:dLFbi7ohTbYjzyVLB17MlH7+5v7odKobmjfQpzzD4dU=
+github.com/goki/ki v0.9.12-0.20200309063305-3102412f93be/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
 github.com/goki/pi v0.9.14-0.20200306123125-091efb5735ab h1:RwvyXRdo+2o9WoQZsUyoASdet3PM1bVueGvx7PvwAD8=
 github.com/goki/pi v0.9.14-0.20200306123125-091efb5735ab/go.mod h1:tCtHVpqbgg10H1kuXWtC9d2Ndtga/QPI0LwPU0Bozcc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=

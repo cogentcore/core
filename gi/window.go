@@ -2475,6 +2475,7 @@ func (wl *WindowList) FindName(name string) (*Window, bool) {
 
 // FindData finds window with given Data on list -- returns
 // window and true if found, nil, false otherwise.
+// data of type string works fine -- does equality comparison on string contents.
 func (wl *WindowList) FindData(data interface{}) (*Window, bool) {
 	WindowGlobalMu.Lock()
 	defer WindowGlobalMu.Unlock()

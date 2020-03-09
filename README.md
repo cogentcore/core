@@ -7,6 +7,7 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/gi)](https://goreportcard.com/report/github.com/goki/gi)
 [![GoDoc](https://godoc.org/github.com/goki/gi?status.svg)](https://godoc.org/github.com/goki/gi)
 [![Travis](https://travis-ci.com/goki/gi.svg?branch=master)](https://travis-ci.com/goki/gi)
+[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/goki/gi)](https://www.tickgit.com/browse?repo=github.com/goki/gi)
 
 NOTE: Requires Go version `1.11+` due to use of `math.Round` and `os.UserCacheDir`.
 

@@ -5,7 +5,9 @@
 package textbuf
 
 import (
+	"bufio"
 	"bytes"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -125,4 +127,35 @@ func PreCommentStart(lns [][]byte, stLn int, comLn, comSt, comEd string, lnBack 
 		}
 	}
 	return stLn
+}
+
+// CountWordsLinesRegion counts the number of words (aka Fields, space-separated strings)
+// and lines in given region of source (lines = 1 + End.Ln - Start.Ln)
+func CountWordsLinesRegion(src [][]rune, reg Region) (words, lines int) {
+	lns := len(src)
+	mx := ints.MinInt(lns-1, reg.End.Ln)
+	for ln := reg.Start.Ln; ln <= mx; ln++ {
+		sln := src[ln]
+		if ln == reg.Start.Ln {
+			sln = sln[reg.Start.Ch:]
+		} else if ln == reg.End.Ln {
+			sln = sln[:reg.End.Ch]
+		}
+		flds := strings.Fields(string(sln))
+		words += len(flds)
+	}
+	lines = 1 + (reg.End.Ln - reg.Start.Ln)
+	return
+}
+
+// CountWordsLines counts the number of words (aka Fields, space-separated strings)
+// and lines given io.Reader input
+func CountWordsLines(reader io.Reader) (words, lines int) {
+	scan := bufio.NewScanner(reader)
+	for scan.Scan() {
+		flds := bytes.Fields(scan.Bytes())
+		words += len(flds)
+		lines++
+	}
+	return
 }

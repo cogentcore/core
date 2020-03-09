@@ -18,18 +18,19 @@ import (
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
 // provides a named, optional way to specify these args
 type DlgOpts struct {
-	Title    string    `desc:"generally should be provided -- used for setting name of dialog and associated window"`
-	Prompt   string    `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
-	CSS      ki.Props  `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
-	TmpSave  ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-	Ok       bool      `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
-	Cancel   bool      `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
-	NoAdd    bool      `desc:"if true, user cannot add elements of the slice"`
-	NoDelete bool      `desc:"if true, user cannot delete elements of the slice"`
-	Inactive bool      `desc:"if true all fields will be inactive"`
-	Filename string    `desc:"filename, e.g., for TextView, to get highlighting"`
-	LineNos  bool      `desc:"include line numbers for TextView"`
+	Title    string      `desc:"generally should be provided -- used for setting name of dialog and associated window"`
+	Prompt   string      `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
+	CSS      ki.Props    `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+	TmpSave  ValueView   `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewPath string      `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Ok       bool        `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	Cancel   bool        `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+	NoAdd    bool        `desc:"if true, user cannot add elements of the slice"`
+	NoDelete bool        `desc:"if true, user cannot delete elements of the slice"`
+	Inactive bool        `desc:"if true all fields will be inactive"`
+	Data     interface{} `desc:"if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one"`
+	Filename string      `desc:"filename, e.g., for TextView, to get highlighting"`
+	LineNos  bool        `desc:"include line numbers for TextView"`
 }
 
 // ToGiOpts converts giv opts to gi opts
@@ -41,7 +42,16 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
 func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	var dlg *gi.Dialog
+	if opts.Data != nil {
+		recyc := false
+		dlg, recyc = gi.RecycleStdDialog(opts.Data, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+		if recyc {
+			return TextViewDialogTextView(dlg)
+		}
+	} else {
+		dlg = gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	}
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -83,6 +93,14 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	return tv
 }
 
+// TextViewDialogTextView returns the text view from a TextViewDialog
+func TextViewDialogTextView(dlg *gi.Dialog) *TextView {
+	frame := dlg.Frame()
+	tlv := frame.ChildByName("text-lay", 2)
+	tv := tlv.ChildByName("text-view", 0)
+	return tv.(*TextView)
+}
+
 //gopy:interface=handle StructViewDialog is for editing fields of a structure using a StructView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
@@ -91,7 +109,6 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 	if recyc {
 		return dlg
 	}
-	dlg.Data = stru
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -126,7 +143,6 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 	if recyc {
 		return dlg
 	}
-	dlg.Data = mptr
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -158,7 +174,6 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 	if recyc {
 		return dlg
 	}
-	dlg.Data = slice
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -193,7 +208,6 @@ func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts,
 	if recyc {
 		return dlg
 	}
-	dlg.Data = slice
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -237,7 +251,6 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 	if recyc {
 		return dlg
 	}
-	dlg.Data = slice
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -287,7 +300,6 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, st
 	if recyc {
 		return dlg
 	}
-	dlg.Data = slcOfStru
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -336,7 +348,6 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 	if recyc {
 		return dlg
 	}
-	dlg.Data = slcOfStru
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
@@ -438,7 +449,6 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki,
 	if recyc {
 		return dlg
 	}
-	dlg.Data = clr
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)

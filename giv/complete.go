@@ -86,7 +86,7 @@ func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Look
 	if ld.Filename != "" {
 		txt := textbuf.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
-		TextViewDialog(nil, txt, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true})
+		TextViewDialog(nil, txt, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt})
 		return ld
 	}
 
