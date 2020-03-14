@@ -90,7 +90,7 @@ type TextBuf struct {
 	Undos            textbuf.Undo        `json:"-" xml:"-" desc:"undo manager"`
 	PosHistory       []textbuf.Pos       `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 	Complete         *gi.Complete        `json:"-" xml:"-" desc:"functions and data for text completion"`
-	SpellCorrect     *gi.SpellCorrect    `json:"-" xml:"-" desc:"functions and data for spelling correction"`
+	Spell            *gi.Spell           `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 	CurView          *TextView           `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
@@ -99,6 +99,8 @@ var KiT_TextBuf = kit.Types.AddType(&TextBuf{}, TextBufProps)
 func (tb *TextBuf) Disconnect() {
 	tb.Node.Disconnect()
 	tb.TextBufSig.DisconnectAll()
+	tb.DeleteSpell()
+	tb.DeleteCompleter()
 }
 
 var TextBufProps = ki.Props{
@@ -376,8 +378,8 @@ func (tb *TextBuf) Stat() error {
 // returns true if supported
 func (tb *TextBuf) ConfigSupported() bool {
 	if tb.Info.Sup != filecat.NoSupport {
-		if tb.SpellCorrect == nil {
-			tb.SetSpellCorrect(tb, SpellCorrectEdit)
+		if tb.Spell == nil {
+			tb.SetSpell()
 		}
 		if tb.Complete == nil {
 			tb.SetCompleter(&tb.PiState, CompletePi, CompleteEditPi, LookupPi)
@@ -1432,13 +1434,19 @@ func (tb *TextBuf) ReMarkup(fromEcho bool) {
 }
 
 // AdjustedTags updates tag positions for edits
+// must be called under MarkupMu lock
 func (tb *TextBuf) AdjustedTags(ln int) lex.Line {
-	sz := len(tb.Tags[ln])
+	return tb.AdjustedTagsImpl(tb.Tags[ln], ln)
+}
+
+// AdjustedTagsImpl updates tag positions for edits, for given list of tags
+func (tb *TextBuf) AdjustedTagsImpl(tags lex.Line, ln int) lex.Line {
+	sz := len(tags)
 	if sz == 0 {
-		return tb.Tags[ln]
+		return nil
 	}
 	ntags := make(lex.Line, 0, sz)
-	for _, tg := range tb.Tags[ln] {
+	for _, tg := range tags {
 		reg := textbuf.Region{Start: textbuf.Pos{Ln: ln, Ch: tg.St}, End: textbuf.Pos{Ln: ln, Ch: tg.Ed}}
 		reg.Time = tg.Time
 		reg = tb.Undos.AdjustReg(reg)
@@ -1728,6 +1736,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 	if !tb.IsValidLine(ln) {
 		return
 	}
+	tb.MarkupMu.Lock()
 	tr := lex.NewLex(token.KeyToken{Tok: tag}, st, ed)
 	tr.Time.Now()
 	if len(tb.Tags[ln]) == 0 {
@@ -1736,6 +1745,7 @@ func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
 		tb.Tags[ln] = tb.AdjustedTags(ln) // must re-adjust before adding new ones!
 		tb.Tags[ln].AddSort(tr)
 	}
+	tb.MarkupMu.Unlock()
 	tb.MarkupLinesLock(ln, ln)
 }
 
@@ -1746,6 +1756,8 @@ func (tb *TextBuf) AddTagEdit(tbe *textbuf.Edit, tag token.Tokens) {
 
 // TagAt returns tag at given text position, if one exists -- returns false if not
 func (tb *TextBuf) TagAt(pos textbuf.Pos) (reg lex.Lex, ok bool) {
+	tb.MarkupMu.Lock()
+	defer tb.MarkupMu.Unlock()
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
@@ -1764,18 +1776,20 @@ func (tb *TextBuf) RemoveTag(pos textbuf.Pos, tag token.Tokens) (reg lex.Lex, ok
 	if !tb.IsValidLine(pos.Ln) {
 		return
 	}
+	tb.MarkupMu.Lock()
 	tb.Tags[pos.Ln] = tb.AdjustedTags(pos.Ln) // re-adjust for current info
 	for i, t := range tb.Tags[pos.Ln] {
 		if t.ContainsPos(pos.Ch) {
 			if tag > 0 && t.Tok.Tok != tag {
 				continue
 			}
-			tb.Tags[pos.Ln] = append(tb.Tags[pos.Ln][:i], tb.Tags[pos.Ln][i+1:]...)
+			tb.Tags[pos.Ln].DeleteIdx(i)
 			reg = t
 			ok = true
 			break
 		}
 	}
+	tb.MarkupMu.Unlock()
 	if ok {
 		tb.MarkupLinesLock(pos.Ln, pos.Ln)
 	}
@@ -1814,6 +1828,16 @@ func (tb *TextBuf) InTokenSubCat(pos textbuf.Pos, subCat token.Tokens) bool {
 // InLitString returns true if position is in a string literal
 func (tb *TextBuf) InLitString(pos textbuf.Pos) bool {
 	return tb.InTokenSubCat(pos, token.LitStr)
+}
+
+// InTokenCode returns true if position is in a Keyword, Name, Operator, or Punctuation.
+// This is useful for turning off spell checking in docs
+func (tb *TextBuf) InTokenCode(pos textbuf.Pos) bool {
+	lx := tb.HiTagAtPos(pos)
+	if lx == nil {
+		return false
+	}
+	return lx.Tok.Tok.IsCode()
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2146,14 +2170,6 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 // automatically be offered as the user types
 func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, editFun complete.EditFunc,
 	lookupFun complete.LookupFunc) {
-	if matchFun == nil || editFun == nil {
-		if tb.Complete != nil {
-			tb.Complete.CompleteSig.Disconnect(tb.This())
-		}
-		tb.Complete.Destroy()
-		tb.Complete = nil
-		return
-	}
 	if tb.Complete != nil {
 		if tb.Complete.Context == data {
 			tb.Complete.MatchFunc = matchFun
@@ -2161,6 +2177,7 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 			tb.Complete.LookupFunc = lookupFun
 			return
 		}
+		tb.DeleteCompleter()
 	}
 	tb.Complete = &gi.Complete{}
 	tb.Complete.InitName(tb.Complete, "tb-completion") // needed for standalone Ki's
@@ -2177,6 +2194,15 @@ func (tb *TextBuf) SetCompleter(data interface{}, matchFun complete.MatchFunc, e
 			tbf.CompleteExtend(data.(string)) // always use data
 		}
 	})
+}
+
+func (tb *TextBuf) DeleteCompleter() {
+	if tb.Complete == nil {
+		return
+	}
+	tb.Complete.CompleteSig.Disconnect(tb.This())
+	tb.Complete.Destroy()
+	tb.Complete = nil
 }
 
 // CompleteText edits the text using the string chosen from the completion menu
@@ -2231,16 +2257,16 @@ func (tb *TextBuf) CompleteExtend(s string) {
 	}
 }
 
-// IsSpellCorrectEnabled returns true if spelling correction is enabled,
+// IsSpellEnabled returns true if spelling correction is enabled,
 // taking into account given position in text if it is relevant for cases
 // where it is only conditionally enabled
-func (tb *TextBuf) IsSpellCorrectEnabled(pos textbuf.Pos) bool {
-	if tb.SpellCorrect == nil || !tb.Opts.SpellCorrect {
+func (tb *TextBuf) IsSpellEnabled(pos textbuf.Pos) bool {
+	if tb.Spell == nil || !tb.Opts.SpellCorrect {
 		return false
 	}
 	switch tb.Info.Cat {
-	case filecat.Doc: // always
-		return true
+	case filecat.Doc: // not in code!
+		return !tb.InTokenCode(pos)
 	case filecat.Code:
 		return tb.InComment(pos) || tb.InLitString(pos)
 	default:
@@ -2248,30 +2274,17 @@ func (tb *TextBuf) IsSpellCorrectEnabled(pos textbuf.Pos) bool {
 	}
 }
 
-// SetSpellCorrect sets spell correct functions so that spell correct will
+// SetSpell sets spell correct functions so that spell correct will
 // automatically be offered as the user types
-func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
-	if editFun == nil {
-		if tb.SpellCorrect != nil {
-			tb.SpellCorrect.SpellSig.Disconnect(tb.This())
-		}
-		tb.SpellCorrect.Destroy()
-		tb.SpellCorrect = nil
+func (tb *TextBuf) SetSpell() {
+	if tb.Spell != nil {
 		return
 	}
-	if tb.SpellCorrect != nil {
-		if tb.SpellCorrect.Context == data {
-			tb.SpellCorrect.EditFunc = editFun
-			return
-		}
-	}
 	gi.InitSpell()
-	tb.SpellCorrect = &gi.SpellCorrect{}
-	tb.SpellCorrect.InitName(tb.SpellCorrect, "tb-spellcorrect") // needed for standalone Ki's
-	tb.SpellCorrect.Context = data
-	tb.SpellCorrect.EditFunc = editFun
+	tb.Spell = &gi.Spell{}
+	tb.Spell.InitName(tb.Spell, "tb-spellcorrect") // needed for standalone Ki's
 	// note: only need to connect once..
-	tb.SpellCorrect.SpellSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	tb.Spell.SpellSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SpellSelect) {
 			tbf, _ := recv.Embed(KiT_TextBuf).(*TextBuf)
 			tbf.CorrectText(data.(string)) // always use data
@@ -2282,13 +2295,23 @@ func (tb *TextBuf) SetSpellCorrect(data interface{}, editFun spell.EditFunc) {
 	})
 }
 
+// DeleteSpell deletes any existing spell object
+func (tb *TextBuf) DeleteSpell() {
+	if tb.Spell == nil {
+		return
+	}
+	tb.Spell.SpellSig.Disconnect(tb.This())
+	tb.Spell.Destroy()
+	tb.Spell = nil
+}
+
 // CorrectText edits the text using the string chosen from the correction menu
 func (tb *TextBuf) CorrectText(s string) {
-	st := textbuf.Pos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
+	st := textbuf.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
-	oend.Ch += len(tb.SpellCorrect.Word)
-	ed := tb.SpellCorrect.EditFunc(tb.SpellCorrect.Context, s, tb.SpellCorrect.Word)
+	oend.Ch += len(tb.Spell.Word)
+	ed := spell.CorrectText(tb.Spell.Word, s)
 	tb.DeleteText(st, oend, EditSignal)
 	tb.InsertText(st, []byte(ed.NewText), EditSignal)
 	if tb.CurView != nil {
@@ -2299,10 +2322,43 @@ func (tb *TextBuf) CorrectText(s string) {
 	}
 }
 
+// CorrectClear clears the TextSpellErr tag for given word
 func (tb *TextBuf) CorrectClear(s string) {
-	st := textbuf.Pos{tb.SpellCorrect.SrcLn, tb.SpellCorrect.SrcCh} // start of word
+	st := textbuf.Pos{tb.Spell.SrcLn, tb.Spell.SrcCh} // start of word
 	tb.RemoveTag(st, token.TextSpellErr)
 }
+
+// SpellCheckLineErrs runs spell check on given line, and returns Lex tags
+// with token.TextSpellErr for any misspelled words
+func (tb *TextBuf) SpellCheckLineErrs(ln int) lex.Line {
+	if !tb.IsValidLine(ln) {
+		return nil
+	}
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return spell.CheckLexLine(tb.Lines[ln], tb.HiTags[ln])
+}
+
+// SpellCheckLineTag runs spell check on given line, and sets Tags for any
+// misspelled words and updates markup for that line.
+func (tb *TextBuf) SpellCheckLineTag(ln int) {
+	if !tb.IsValidLine(ln) {
+		return
+	}
+	ser := tb.SpellCheckLineErrs(ln)
+	tb.MarkupMu.Lock()
+	ntgs := tb.AdjustedTags(ln)
+	ntgs.DeleteToken(token.TextSpellErr)
+	for _, t := range ser {
+		ntgs.AddSort(t)
+	}
+	tb.Tags[ln] = ntgs
+	tb.MarkupMu.Unlock()
+	tb.MarkupLinesLock(ln, ln)
+}
+
+///////////////////////////////////////////////////////////////////
+//  Diff
 
 // DiffBufs computes the diff between this buffer and the other buffer,
 // reporting a sequence of operations that would convert this buffer (a) into

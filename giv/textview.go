@@ -31,6 +31,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/spell"
 	"github.com/goki/pi/token"
 )
 
@@ -2420,8 +2421,8 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 
 // ContextMenu displays the context menu with options dependent on situation
 func (tv *TextView) ContextMenu() {
-	if !tv.HasSelection() && tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
-		if tv.Buf.SpellCorrect != nil {
+	if !tv.HasSelection() && tv.Buf.IsSpellEnabled(tv.CursorPos) {
+		if tv.Buf.Spell != nil {
 			if tv.OfferCorrect() {
 				return
 			}
@@ -2567,14 +2568,24 @@ func (tv *TextView) Lookup() {
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
 func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
-	if !tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
+	if !tv.Buf.IsSpellEnabled(tv.CursorPos) {
 		return
 	}
 
+	isDoc := tv.Buf.Info.Cat == filecat.Doc
+	tp := tv.CursorPos
+
 	kf := gi.KeyFun(kt.Chord())
 	switch kf {
+	case gi.KeyFunMoveUp:
+		if isDoc {
+			tv.Buf.SpellCheckLineTag(tp.Ln)
+		}
+	case gi.KeyFunMoveDown:
+		if isDoc {
+			tv.Buf.SpellCheckLineTag(tp.Ln)
+		}
 	case gi.KeyFunMoveRight:
-		tp := tv.CursorPos
 		if tv.IsWordEnd(tp) {
 			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
@@ -2582,6 +2593,9 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		}
 		if tp.Ch == 0 { // end of line
 			tp.Ln--
+			if isDoc {
+				tv.Buf.SpellCheckLineTag(tp.Ln) // redo prior line
+			}
 			tp.Ch = tv.Buf.LineLen(tp.Ln)
 			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
@@ -2601,21 +2615,21 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 			tv.SpellCheck(region)
 		}
 	case gi.KeyFunEnter:
-		cp := tv.CursorPos
-		cp.Ln--
-		cp.Ch = tv.Buf.LineLen(cp.Ln)
-		region := tv.WordBefore(cp)
+		tp.Ln--
+		if isDoc {
+			tv.Buf.SpellCheckLineTag(tp.Ln) // redo prior line
+		}
+		tp.Ch = tv.Buf.LineLen(tp.Ln)
+		region := tv.WordBefore(tp)
 		tv.SpellCheck(region)
 	case gi.KeyFunFocusNext:
-		cp := tv.CursorPos
-		cp.Ch-- // we are one past the end of word
-		region := tv.WordBefore(cp)
+		tp.Ch-- // we are one past the end of word
+		region := tv.WordBefore(tp)
 		tv.SpellCheck(region)
 	case gi.KeyFunNil:
 		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) && kt.Rune != '\'' { // contractions!
-			cp := tv.CursorPos
-			cp.Ch-- // we are one past the end of word
-			region := tv.WordBefore(cp)
+			tp.Ch-- // we are one past the end of word
+			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
 		} else {
 			if tv.IsWordMiddle(tv.CursorPos) {
@@ -2629,23 +2643,23 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 // SpellCheck offers spelling corrections if we are at a word break or other word termination
 // and the word before the break is unknown -- returns true if misspelled word found
 func (tv *TextView) SpellCheck(region *textbuf.Edit) bool {
-	if tv.Buf.SpellCorrect == nil {
+	if tv.Buf.Spell == nil {
 		return false
 	}
 	wb := string(region.ToBytes())
-	if len(wb) <= 2 || !gi.IsWord(wb) {
+	if len(wb) <= 2 || !spell.IsWord(wb) {
 		return false
 	}
-	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
-	if knwn || err != nil {
+	sugs, knwn := tv.Buf.Spell.CheckWordInline(wb)
+	if knwn {
 		tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
 		ln := region.Reg.Start.Ln
 		tv.LayoutLines(ln, ln, false)
 		tv.RenderLines(ln, ln)
 		return false
 	}
-	tv.Buf.SpellCorrect.Suggestions = sugs
-	tv.Buf.SpellCorrect.Word = wb
+	tv.Buf.Spell.Suggest = sugs
+	tv.Buf.Spell.Word = wb
 	tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
 	tv.Buf.AddTagEdit(region, token.TextSpellErr)
 	ln := region.Reg.Start.Ln
@@ -2658,7 +2672,7 @@ func (tv *TextView) SpellCheck(region *textbuf.Edit) bool {
 // current CursorPos -- if no misspelling there or not in spellcorrect mode
 // returns false
 func (tv *TextView) OfferCorrect() bool {
-	if tv.Buf.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
+	if tv.Buf.Spell == nil || tv.ISearch.On || tv.QReplace.On || tv.IsInactive() {
 		return false
 	}
 	sel := tv.SelectReg
@@ -2677,34 +2691,34 @@ func (tv *TextView) OfferCorrect() bool {
 	if len(wb) != len(wbn) {
 		return false // SelectWord captures leading whitespace - don't offer if there is leading whitespace
 	}
-	sugs, knwn, err := tv.Buf.SpellCorrect.CheckWordInline(wb)
-	if knwn || err != nil {
+	sugs, knwn := tv.Buf.Spell.CheckWordInline(wb)
+	if knwn {
 		return false
 	}
-	tv.Buf.SpellCorrect.Suggestions = sugs
-	tv.Buf.SpellCorrect.Word = wb
-	tv.Buf.SpellCorrect.SrcLn = tbe.Reg.Start.Ln
-	tv.Buf.SpellCorrect.SrcCh = tbe.Reg.Start.Ch
+	tv.Buf.Spell.Suggest = sugs
+	tv.Buf.Spell.Word = wb
+	tv.Buf.Spell.SrcLn = tbe.Reg.Start.Ln
+	tv.Buf.Spell.SrcCh = tbe.Reg.Start.Ch
 
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5
 	cpos.Y += 10
 	tv.Buf.CurView = tv
-	tv.Buf.SpellCorrect.Show(wb, tv.Viewport, cpos)
+	tv.Buf.Spell.Show(wb, tv.Viewport, cpos)
 	return true
 }
 
 // CancelCorrect cancels any pending spell correction -- call this when new events
 // have moved beyond any prior correction scenario
 func (tv *TextView) CancelCorrect() {
-	if tv.Buf.SpellCorrect == nil || tv.ISearch.On || tv.QReplace.On {
+	if tv.Buf.Spell == nil || tv.ISearch.On || tv.QReplace.On {
 		return
 	}
 	if !tv.Buf.Opts.SpellCorrect {
 		return
 	}
 	tv.Buf.CurView = nil
-	tv.Buf.SpellCorrect.Cancel()
+	tv.Buf.Spell.Cancel()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3916,7 +3930,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	}
 
 	if gi.PopupIsCorrector(cpop) {
-		setprocessed := tv.Buf.SpellCorrect.KeyInput(kf)
+		setprocessed := tv.Buf.Spell.KeyInput(kf)
 		if setprocessed {
 			kt.SetProcessed()
 		}
@@ -3982,12 +3996,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		tv.ShiftSelect(kt)
 		tv.CursorUp(1)
 		tv.ShiftSelectExtend(kt)
+		tv.ISpellKeyInput(kt)
 	case gi.KeyFunMoveDown:
 		cancelAll()
 		kt.SetProcessed()
 		tv.ShiftSelect(kt)
 		tv.CursorDown(1)
 		tv.ShiftSelectExtend(kt)
+		tv.ISpellKeyInput(kt)
 	case gi.KeyFunPageUp:
 		cancelAll()
 		kt.SetProcessed()
@@ -4155,7 +4171,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunComplete:
 		tv.ISearchCancel()
 		kt.SetProcessed()
-		if tv.Buf.IsSpellCorrectEnabled(tv.CursorPos) {
+		if tv.Buf.IsSpellEnabled(tv.CursorPos) {
 			tv.OfferCorrect()
 		} else {
 			tv.ForceComplete = true

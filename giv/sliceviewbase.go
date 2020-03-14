@@ -480,6 +480,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 
 	nWidgPerRow, _ := sv.RowWidgetNs()
 	sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
+	sv.RowHeight = math32.Max(sv.RowHeight, sv.Sty.Font.Face.Metrics.Height)
 	sv.VisRows = int(math32.Floor(sgHt / sv.RowHeight))
 	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
 

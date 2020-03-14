@@ -200,7 +200,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 	if sz == 0 {
 		return nil
 	}
-	ttags := lex.MergeLines(hitags, tags)
+	ttags := lex.MergeLines(hitags, tags) // ensures that inner-tags are *after* outer tags
 	nt := len(ttags)
 	if nt == 0 {
 		return HTMLEscapeRunes(txt)
