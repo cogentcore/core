@@ -3,7 +3,8 @@
 // license that can be found in the LICENSE file.
 
 /*
-	Package spell provides functions for spell check and correction
+Package spell provides functions for spell check and correction.
+It wraps https://github.com/sajari/fuzzy as the core spelling engine.
 */
 package spell
 
@@ -31,7 +32,7 @@ type EditFunc func(data interface{}, new string, old string) Edit
 
 var inited bool
 var model *fuzzy.Model
-var Ignore []string
+var Ignore = map[string]struct{}{}
 
 // Initialized returns true if the model has been loaded or created anew
 func Initialized() bool {
@@ -100,28 +101,35 @@ func Train(file os.File, new bool) (err error) {
 
 // CheckWord checks a single word and returns suggestions if word is unknown
 // Programs should call gi.CheckWord - all program calls should be done through that single API
-func CheckWord(w string) (suggests []string, known bool, err error) {
+func CheckWord(w string) ([]string, bool) {
 	if model == nil {
-		err = errors.New("Model not initialized")
-		return suggests, false, err
+		log.Println("spell.CheckWord: programmer error -- Spelling not initialized!")
+		LoadDefault() // backup
 	}
-
-	known = false
+	known := false
 	w = strings.Trim(w, "`'*.,?[]():;")
 	w = strings.ToLower(w)
-	suggests = model.SpellCheckSuggestions(w, 10)
-	if suggests == nil {
-		return nil, known, err // known is false
+	ignore := CheckIgnore(w)
+	if ignore {
+		return nil, true
+	}
+	suggests := model.SpellCheckSuggestions(w, 10)
+	if suggests == nil { // no sug and not known
+		return nil, false
 	}
 	if len(suggests) > 0 && suggests[0] == w {
 		known = true
 	}
-	return suggests, known, err
+	return suggests, known
 }
 
-// LearnWord adds a single word to the corpus
+// LearnWord adds a single word to the corpus: this is deterministic
+// and we set the threshold to 1 to make it learn it immediately.
 func LearnWord(word string) {
+	mthr := model.Threshold
+	model.Threshold = 1
 	model.TrainWord(strings.ToLower(word))
+	model.Threshold = mthr
 }
 
 // Complete finds possible completions based on the prefix s
@@ -159,15 +167,11 @@ func CorrectText(old string, new string) (ed Edit) {
 
 // IgnoreWord adds the word to the Ignore list
 func IgnoreWord(word string) {
-	Ignore = append(Ignore, word)
+	Ignore[word] = struct{}{}
 }
 
-// DoIgnore returns true if the word is found in the Ignore list
-func DoIgnore(word string) bool {
-	for _, w := range Ignore {
-		if w == word {
-			return true
-		}
-	}
-	return false
+// CheckIgnore returns true if the word is found in the Ignore list
+func CheckIgnore(word string) bool {
+	_, has := Ignore[word]
+	return has
 }

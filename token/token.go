@@ -68,12 +68,21 @@ func (tk Tokens) IsSubCat() bool {
 	return tk.SubCat() == tk
 }
 
+// InCat returns true if this is in same category as given token
 func (tk Tokens) InCat(other Tokens) bool {
 	return tk.Cat() == other.Cat()
 }
 
+// InCat returns true if this is in same sub-category as given token
 func (tk Tokens) InSubCat(other Tokens) bool {
 	return tk.SubCat() == other.SubCat()
+}
+
+// IsCode returns true if this token is in Keyword, Name, Operator, or Punctuation categs.
+// these are recognized code (program) elements that can usefully be distinguished from
+// other forms of raw text (e.g., for spell checking)
+func (tk Tokens) IsCode() bool {
+	return tk.InCat(Keyword) || tk.InCat(Name) || tk.InCat(Operator) || tk.InCat(Punctuation)
 }
 
 // IsKeyword returns true if this in the Keyword category

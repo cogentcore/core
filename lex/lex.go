@@ -26,8 +26,18 @@ func NewLex(tok token.KeyToken, st, ed int) Lex {
 	return lx
 }
 
+// Src returns the rune source for given lex item (does no validity checking)
+func (lx *Lex) Src(src []rune) []rune {
+	return src[lx.St:lx.Ed]
+}
+
+// Now sets the time stamp to now
+func (lx *Lex) Now() {
+	lx.Time.Now()
+}
+
 // String satisfies the fmt.Stringer interface
-func (lx Lex) String() string {
+func (lx *Lex) String() string {
 	return fmt.Sprintf("[+%d:%v:%v:%v]", lx.Tok.Depth, lx.St, lx.Ed, lx.Tok.String())
 }
 

@@ -8,6 +8,7 @@ import (
 	"sort"
 	"unicode"
 
+	"github.com/goki/ki/sliceclone"
 	"github.com/goki/pi/token"
 )
 
@@ -87,6 +88,22 @@ func (ll *Line) Sort() {
 	})
 }
 
+// DeleteIdx deletes at given index
+func (ll *Line) DeleteIdx(idx int) {
+	*ll = append((*ll)[:idx], (*ll)[idx+1:]...)
+}
+
+// DeleteToken deletes a specific token type from list
+func (ll *Line) DeleteToken(tok token.Tokens) {
+	nt := len(*ll)
+	for i := nt - 1; i >= 0; i-- { // remove
+		t := (*ll)[i]
+		if t.Tok.Tok == tok {
+			ll.DeleteIdx(i)
+		}
+	}
+}
+
 // RuneStrings returns array of strings for Lex regions defined in Line, for
 // given rune source string
 func (ll *Line) RuneStrings(rstr []rune) []string {
@@ -130,23 +147,53 @@ func (ll *Line) String() string {
 func (ll *Line) TagSrc(src []rune) string {
 	str := ""
 	for _, t := range *ll {
-		s := src[t.St:t.Ed]
+		s := t.Src(src)
 		str += t.String() + `"` + string(s) + `"` + " "
 	}
 	return str
 }
 
+// Strings returns a slice of strings for each of the Lex items in given rune src
+// split by Line Lex's.  Returns nil if Line empty.
+func (ll *Line) Strings(src []rune) []string {
+	nl := len(*ll)
+	if nl == 0 {
+		return nil
+	}
+	sa := make([]string, nl)
+	for i, t := range *ll {
+		sa[i] = string(t.Src(src))
+	}
+	return sa
+}
+
+// NonCodeWords returns a Line of white-space separated word tokens in given tagged source
+// that ignores token.IsCode token regions -- i.e., the "regular" words
+// present in the source line -- this is useful for things like spell checking
+// or manual parsing.
+func (ll *Line) NonCodeWords(src []rune) Line {
+	wsrc := sliceclone.Rune(src)
+	for _, t := range *ll { // blank out code parts first
+		if t.Tok.Tok.IsCode() {
+			for i := t.St; i < t.Ed; i++ {
+				wsrc[i] = ' '
+			}
+		}
+	}
+	return RuneFields(wsrc)
+}
+
 // RuneFields returns a Line of Lex's defining the non-white-space "fields"
 // in the given rune string
-func RuneFields(rstr []rune) Line {
-	if len(rstr) == 0 {
+func RuneFields(src []rune) Line {
+	if len(src) == 0 {
 		return nil
 	}
 	var ln Line
 	cur := Lex{}
-	pspc := unicode.IsSpace(rstr[0])
+	pspc := unicode.IsSpace(src[0])
 	cspc := pspc
-	for i, r := range rstr {
+	for i, r := range src {
 		cspc = unicode.IsSpace(r)
 		if pspc {
 			if !cspc {
@@ -161,7 +208,8 @@ func RuneFields(rstr []rune) Line {
 		pspc = cspc
 	}
 	if !pspc {
-		cur.Ed = len(rstr)
+		cur.Ed = len(src)
+		cur.Now()
 		ln.Add(cur)
 	}
 	return ln
