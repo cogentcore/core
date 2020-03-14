@@ -22,8 +22,8 @@ func TestLineMerge(t *testing.T) {
 	}
 
 	ml := MergeLines(l1, l2)
-	fmt.Printf("l1:\n%v\nl2:\n%s\nml:\n%s\n", l1, l2, ml)
+	fmt.Printf("l1:\n%v\nl2:\n%v\nml:\n%v\n", l1, l2, ml)
 
 	mlr := MergeLines(l2, l1)
-	fmt.Printf("l1:\n%v\nl2:\n%s\nml:\n%s\n", l2, l1, mlr)
+	fmt.Printf("l1:\n%v\nl2:\n%v\nml:\n%v\n", l2, l1, mlr)
 }
