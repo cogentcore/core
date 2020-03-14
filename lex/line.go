@@ -1,0 +1,168 @@
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package lex
+
+import (
+	"sort"
+	"unicode"
+
+	"github.com/goki/pi/token"
+)
+
+// Line is one line of Lex'd text
+type Line []Lex
+
+// Add adds one element to the lex line (just append)
+func (ll *Line) Add(lx Lex) {
+	*ll = append(*ll, lx)
+}
+
+// Add adds one element to the lex line with given params, returns pointer to that new lex
+func (ll *Line) AddLex(tok token.KeyToken, st, ed int) *Lex {
+	lx := NewLex(tok, st, ed)
+	li := len(*ll)
+	ll.Add(lx)
+	return &(*ll)[li]
+}
+
+// Insert inserts one element to the lex line at given point
+func (ll *Line) Insert(idx int, lx Lex) {
+	sz := len(*ll)
+	*ll = append(*ll, lx)
+	if idx < sz {
+		copy((*ll)[idx+1:], (*ll)[idx:sz])
+		(*ll)[idx] = lx
+	}
+}
+
+// AtPos returns the Lex in place for given position, or nil if none
+func (ll *Line) AtPos(pos int) *Lex {
+	for i := range *ll {
+		lx := &((*ll)[i])
+		if lx.ContainsPos(pos) {
+			return lx
+		}
+	}
+	return nil
+}
+
+// Clone returns a new copy of the line
+func (ll *Line) Clone() Line {
+	if len(*ll) == 0 {
+		return nil
+	}
+	cp := make(Line, len(*ll))
+	for i := range *ll {
+		cp[i] = (*ll)[i]
+	}
+	return cp
+}
+
+// AddSort adds a new lex element in sorted order to list, sorted by start
+// position, and if at the same start position, then sorted *decreasing*
+// by end position -- this allows outer tags to be processed before inner tags
+// which fits a stack-based tag markup logic.
+func (ll *Line) AddSort(lx Lex) {
+	for i, t := range *ll {
+		if t.St < lx.St {
+			continue
+		}
+		if t.St == lx.St && t.Ed >= lx.Ed {
+			continue
+		}
+		*ll = append(*ll, lx)
+		copy((*ll)[i+1:], (*ll)[i:])
+		(*ll)[i] = lx
+		return
+	}
+	*ll = append(*ll, lx)
+}
+
+// Sort sorts the lex elements by starting pos, and ending pos *decreasing* if a tie
+func (ll *Line) Sort() {
+	sort.Slice((*ll), func(i, j int) bool {
+		return (*ll)[i].St < (*ll)[j].St || ((*ll)[i].St == (*ll)[j].St && (*ll)[i].Ed > (*ll)[j].Ed)
+	})
+}
+
+// RuneStrings returns array of strings for Lex regions defined in Line, for
+// given rune source string
+func (ll *Line) RuneStrings(rstr []rune) []string {
+	regs := make([]string, len(*ll))
+	for i, t := range *ll {
+		regs[i] = string(rstr[t.St:t.Ed])
+	}
+	return regs
+}
+
+// MergeLines merges the two lines of lex regions into a combined list
+// properly ordered by sequence of tags within the line.
+func MergeLines(t1, t2 Line) Line {
+	sz1 := len(t1)
+	sz2 := len(t2)
+	if sz1 == 0 {
+		return t2
+	}
+	if sz2 == 0 {
+		return t1
+	}
+	tsz := sz1 + sz2
+	tl := make(Line, sz1, tsz)
+	copy(tl, t1)
+	for i := 0; i < sz2; i++ {
+		tl.AddSort(t2[i])
+	}
+	return tl
+}
+
+// String satisfies the fmt.Stringer interface
+func (ll *Line) String() string {
+	str := ""
+	for _, t := range *ll {
+		str += t.String() + " "
+	}
+	return str
+}
+
+// TagSrc returns the token-tagged source
+func (ll *Line) TagSrc(src []rune) string {
+	str := ""
+	for _, t := range *ll {
+		s := src[t.St:t.Ed]
+		str += t.String() + `"` + string(s) + `"` + " "
+	}
+	return str
+}
+
+// RuneFields returns a Line of Lex's defining the non-white-space "fields"
+// in the given rune string
+func RuneFields(rstr []rune) Line {
+	if len(rstr) == 0 {
+		return nil
+	}
+	var ln Line
+	cur := Lex{}
+	pspc := unicode.IsSpace(rstr[0])
+	cspc := pspc
+	for i, r := range rstr {
+		cspc = unicode.IsSpace(r)
+		if pspc {
+			if !cspc {
+				cur.St = i
+			}
+		} else {
+			if cspc {
+				cur.Ed = i
+				ln.Add(cur)
+			}
+		}
+		pspc = cspc
+	}
+	if !pspc {
+		cur.Ed = len(rstr)
+		ln.Add(cur)
+	}
+	return ln
+}
