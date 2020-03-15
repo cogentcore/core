@@ -17,7 +17,7 @@ require (
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v0.9.12-0.20200309063305-3102412f93be
-	github.com/goki/pi v0.9.14-0.20200315112201-46676dde2fdd
+	github.com/goki/pi v0.9.14-0.20200315215741-869c691ee16e
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/ianbruene/go-difflib v1.1.2

@@ -2331,11 +2331,10 @@ func (tb *TextBuf) CorrectText(s string) {
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Ch += len(tb.Spell.Word)
-	repl := spell.CorrectText(tb.Spell.Word, s) // this already does MatchCase
-	tb.ReplaceText(st, oend, st, repl, EditSignal, ReplaceNoMatchCase)
+	tb.ReplaceText(st, oend, st, s, EditSignal, ReplaceNoMatchCase)
 	if tb.CurView != nil {
 		ep := st
-		ep.Ch += len(repl)
+		ep.Ch += len(s)
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
 	}

@@ -5,8 +5,6 @@
 package main
 
 import (
-	"github.com/goki/pi/spell"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
@@ -112,10 +110,4 @@ func mainrun() {
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
-}
-
-// SpellCorrectEdit uses the selected correction to edit the text
-func SpellCorrectEdit(data interface{}, new string, old string) (ed spell.Edit) {
-	ed = spell.CorrectText(old, new)
-	return ed
 }
