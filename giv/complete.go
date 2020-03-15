@@ -105,11 +105,7 @@ func CompleteText(data interface{}, text string, posLn, posCh int) (md complete.
 	if md.Seed == "" {
 		return md
 	}
-	result, err := gi.CompleteText(md.Seed)
-	if err != nil {
-		fmt.Printf("Error completing text: %v", err)
-		return md
-	}
+	result := gi.CompleteText(md.Seed)
 	possibles := complete.MatchSeedString(result, md.Seed)
 	for _, p := range possibles {
 		m := complete.Completion{Text: p, Icon: ""}

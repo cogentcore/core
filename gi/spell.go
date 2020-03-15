@@ -23,22 +23,21 @@ func InitSpell() error {
 	if spell.Initialized() {
 		return nil
 	}
-	err := LoadSpellModel()
+	err := OpenSpellModel()
 	if err != nil {
-		err = spell.LoadDefault()
+		err = spell.OpenDefault()
 		if err != nil {
 			log.Println(err)
 		}
 	}
-
 	return nil
 }
 
-// LoadSpellModel loads a saved spelling model
-func LoadSpellModel() error {
+// OpenSpellModel loads a saved spelling model
+func OpenSpellModel() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
 	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
-	err := spell.Load(openpath)
+	err := spell.Open(openpath)
 	return err
 }
 
@@ -126,7 +125,7 @@ const (
 	// SpellSelect means the user chose one of the possible corrections
 	SpellSelect SpellSignals = iota
 
-	// SpellClear signals the user chose learn or ignore so clear the tag
+	// SpellIgnore signals the user chose ignore so clear the tag
 	SpellIgnore
 )
 

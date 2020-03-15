@@ -248,9 +248,8 @@ func (c *Complete) GetCompletion(s string) complete.Completion {
 }
 
 // CompleteText is the function for completing text files
-func CompleteText(s string) (result []string, err error) {
-	result, err = spell.Complete(s)
-	return result, err
+func CompleteText(s string) []string {
+	return spell.Complete(s)
 }
 
 // CompleteEditText is a chance to modify the completion selection before it is inserted

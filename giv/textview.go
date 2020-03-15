@@ -31,7 +31,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/spell"
+	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
 
@@ -56,7 +56,6 @@ type TextView struct {
 	RenderSz               mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
 	CursorPos              textbuf.Pos               `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol              int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	CorrectPos             textbuf.Pos               `json:"_" xml:"-" desc:"cursor position for spelling corrections that are at the end of a line when the real cursor position is now at start of next line"`
 	ScrollToCursorOnRender bool                      `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
 	PosHistIdx             int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
 	SelectStart            textbuf.Pos               `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
@@ -897,7 +896,7 @@ func (tv *TextView) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if tv.IsWordBreak(r1, r2) {
+				if lex.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -910,7 +909,7 @@ func (tv *TextView) CursorForwardWord(steps int) {
 				if ch < sz-1 {
 					r2 = txt[ch+1]
 				}
-				if !tv.IsWordBreak(r1, r2) {
+				if !lex.IsWordBreak(r1, r2) {
 					ch++
 				} else {
 					done = true
@@ -1038,7 +1037,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if tv.IsWordBreak(r1, r2) {
+				if lex.IsWordBreak(r1, r2) {
 					ch--
 					if ch == -1 {
 						done = true
@@ -1054,7 +1053,7 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 				if ch > 0 {
 					r2 = txt[ch-1]
 				}
-				if !tv.IsWordBreak(r1, r2) {
+				if !lex.IsWordBreak(r1, r2) {
 					ch--
 				} else {
 					done = true
@@ -1917,10 +1916,11 @@ func (tv *TextView) QReplaceReplace(midx int) {
 		return
 	}
 	m := tv.QReplace.Matches[midx]
+	rep := tv.QReplace.Replace
 	reg := tv.Buf.AdjustReg(m.Reg)
 	pos := reg.Start
-	tv.Buf.DeleteText(reg.Start, reg.End, EditSignal)
-	tv.Buf.InsertText(pos, []byte(tv.QReplace.Replace), EditSignal)
+	// last arg is matchCase, only if not using case to match
+	tv.Buf.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, !tv.QReplace.UseCase)
 	tv.Highlights[midx] = textbuf.RegionNil
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -2046,31 +2046,6 @@ func (tv *TextView) SelectAll() {
 	tv.RenderAllLines()
 }
 
-// IsWordBreak defines what counts as a word break for the purposes of selecting words
-// r1 is the rune in question, r2 is the rune past r1 in the direction you are moving
-// Pass rune(-1) for r2 if there is no rune past r1
-func (tv *TextView) IsWordBreak(r1, r2 rune) bool {
-	if r2 == rune(-1) {
-		if unicode.IsSpace(r1) || unicode.IsSymbol(r1) || unicode.IsPunct(r1) {
-			return true
-		}
-		return false
-	}
-	if unicode.IsSpace(r1) || unicode.IsSymbol(r1) {
-		return true
-	}
-	if unicode.IsPunct(r1) && r1 != rune('\'') {
-		return true
-	}
-	if unicode.IsPunct(r1) && r1 == rune('\'') {
-		if unicode.IsSpace(r2) || unicode.IsSymbol(r2) || unicode.IsPunct(r2) {
-			return true
-		}
-		return false
-	}
-	return false
-}
-
 // WordBefore returns the word before the textbuf.Pos
 // uses IsWordBreak to determine the bounds of the word
 func (tv *TextView) WordBefore(tp textbuf.Pos) *textbuf.Edit {
@@ -2085,7 +2060,7 @@ func (tv *TextView) WordBefore(tp textbuf.Pos) *textbuf.Edit {
 		}
 		r1 := txt[i]
 		r2 := txt[i-1]
-		if tv.IsWordBreak(r1, r2) {
+		if lex.IsWordBreak(r1, r2) {
 			st = i + 1
 			break
 		}
@@ -2109,14 +2084,14 @@ func (tv *TextView) IsWordStart(tp textbuf.Pos) bool {
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if tv.IsWordBreak(r, rune(-1)) {
+		if lex.IsWordBreak(r, rune(-1)) {
 			return false
 		}
 		return true
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if tv.IsWordBreak(r1, rune(-1)) && !tv.IsWordBreak(r2, rune(-1)) {
+	if lex.IsWordBreak(r1, rune(-1)) && !lex.IsWordBreak(r2, rune(-1)) {
 		return true
 	}
 	return false
@@ -2132,21 +2107,21 @@ func (tv *TextView) IsWordEnd(tp textbuf.Pos) bool {
 	}
 	if tp.Ch >= len(txt) { // end of line
 		r := txt[len(txt)-1]
-		if tv.IsWordBreak(r, rune(-1)) {
+		if lex.IsWordBreak(r, rune(-1)) {
 			return true
 		}
 		return false
 	}
 	if tp.Ch == 0 { // start of line
 		r := txt[0]
-		if tv.IsWordBreak(r, rune(-1)) {
+		if lex.IsWordBreak(r, rune(-1)) {
 			return false
 		}
 		return true
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if !tv.IsWordBreak(r1, rune(-1)) && tv.IsWordBreak(r2, rune(-1)) {
+	if !lex.IsWordBreak(r1, rune(-1)) && lex.IsWordBreak(r2, rune(-1)) {
 		return true
 	}
 	return false
@@ -2169,7 +2144,7 @@ func (tv *TextView) IsWordMiddle(tp textbuf.Pos) bool {
 	}
 	r1 := txt[tp.Ch-1]
 	r2 := txt[tp.Ch]
-	if !tv.IsWordBreak(r1, rune(-1)) && !tv.IsWordBreak(r2, rune(-1)) {
+	if !lex.IsWordBreak(r1, rune(-1)) && !lex.IsWordBreak(r2, rune(-1)) {
 		return true
 	}
 	return false
@@ -2199,13 +2174,13 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 		return region
 	}
 	sch := ints.MinInt(tv.CursorPos.Ch, sz-1)
-	if !tv.IsWordBreak(txt[sch], rune(-1)) {
+	if !lex.IsWordBreak(txt[sch], rune(-1)) {
 		for sch > 0 {
 			r2 := rune(-1)
 			if sch-2 >= 0 {
 				r2 = txt[sch-2]
 			}
-			if tv.IsWordBreak(txt[sch-1], r2) {
+			if lex.IsWordBreak(txt[sch-1], r2) {
 				break
 			}
 			sch--
@@ -2217,7 +2192,7 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 			if ech < sz-1 {
 				r2 = rune(txt[ech+1])
 			}
-			if tv.IsWordBreak(txt[ech], r2) {
+			if lex.IsWordBreak(txt[ech], r2) {
 				break
 			}
 			ech++
@@ -2226,7 +2201,7 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 	} else { // keep the space start -- go to next space..
 		ech := tv.CursorPos.Ch + 1
 		for ech < sz {
-			if !tv.IsWordBreak(txt[ech], rune(-1)) {
+			if !lex.IsWordBreak(txt[ech], rune(-1)) {
 				break
 			}
 			ech++
@@ -2236,7 +2211,7 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 			if ech < sz-1 {
 				r2 = rune(txt[ech+1])
 			}
-			if tv.IsWordBreak(txt[ech], r2) {
+			if lex.IsWordBreak(txt[ech], r2) {
 				break
 			}
 			ech++
@@ -2606,10 +2581,11 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		atend := false
 		if tp.Ch >= len(txt) {
 			atend = true
+			tp.Ch++
 		} else {
 			r = txt[tp.Ch]
 		}
-		if atend || tv.IsWordBreak(r, rune(-1)) {
+		if atend || lex.IsWordBreak(r, rune(-1)) {
 			tp.Ch-- // we are one past the end of word
 			region := tv.WordBefore(tp)
 			tv.SpellCheck(region)
@@ -2647,10 +2623,16 @@ func (tv *TextView) SpellCheck(region *textbuf.Edit) bool {
 		return false
 	}
 	wb := string(region.ToBytes())
-	if len(wb) <= 2 || !spell.IsWord(wb) {
+	lwb := lex.FirstWordApostrophe(wb) // only lookup words
+	if len(lwb) <= 2 {
 		return false
 	}
-	sugs, knwn := tv.Buf.Spell.CheckWordInline(wb)
+	widx := strings.Index(wb, lwb) // adjust region for actual part looking up
+	ld := len(wb) - len(lwb)
+	region.Reg.Start.Ch += widx
+	region.Reg.End.Ch += widx - ld
+
+	sugs, knwn := tv.Buf.Spell.CheckWordInline(lwb)
 	if knwn {
 		tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
 		ln := region.Reg.Start.Ln
@@ -2658,6 +2640,7 @@ func (tv *TextView) SpellCheck(region *textbuf.Edit) bool {
 		tv.RenderLines(ln, ln)
 		return false
 	}
+	// fmt.Printf("spell err: %s\n", wb)
 	tv.Buf.Spell.Suggest = sugs
 	tv.Buf.Spell.Word = wb
 	tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
@@ -2768,7 +2751,7 @@ func (tv *TextView) ScrollCursorToCenterIfHidden() bool {
 	if curBBox.Max.X < tv.VpBBox.Min.X || curBBox.Min.X > tv.VpBBox.Max.X {
 		did = did || tv.ScrollCursorToHorizCenter()
 	}
-	return false
+	return did
 }
 
 ///////////////////////////////////////////////////////////////////////////////

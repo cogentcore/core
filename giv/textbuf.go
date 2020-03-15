@@ -1014,6 +1014,12 @@ const (
 	// EditNoSignal is used as an arg for edit methods with a signal arg, indicating
 	// that a signal should NOT be emitted.
 	EditNoSignal = false
+
+	// ReplaceMatchCase is used for MatchCase arg in ReplaceText method
+	ReplaceMatchCase = true
+
+	// ReplaceNoMatchCase is used for MatchCase arg in ReplaceText method
+	ReplaceNoMatchCase = false
 )
 
 // InsertText is the primary method for inserting text into the buffer.
@@ -1208,6 +1214,22 @@ func (tb *TextBuf) RegionImpl(st, ed textbuf.Pos) *textbuf.Edit {
 			copy(tbe.Text[ti], tb.Lines[ln])
 		}
 	}
+	return tbe
+}
+
+// ReplaceText does DeleteText for given region, and then InsertText at given position
+// (typically same as delSt but not necessarily), optionally emitting a signal after the insert.
+// if matchCase is true, then the lex.MatchCase function is called to match the
+// case (upper / lower) of the new inserted text to that of the text being replaced.
+// returns the textbuf.Edit for the inserted text.
+func (tb *TextBuf) ReplaceText(delSt, delEd, insPos textbuf.Pos, insTxt string, signal, matchCase bool) *textbuf.Edit {
+	if matchCase {
+		red := tb.Region(delSt, delEd)
+		cur := string(red.ToBytes())
+		insTxt = lex.MatchCase(cur, insTxt)
+	}
+	tb.DeleteText(delSt, delEd, EditNoSignal)
+	tbe := tb.InsertText(insPos, []byte(insTxt), signal)
 	return tbe
 }
 
@@ -2229,8 +2251,7 @@ func (tb *TextBuf) CompleteText(s string) {
 	// now the normal completion insertion
 	st = pos
 	st.Ch -= len(tb.Complete.Seed)
-	tb.DeleteText(st, pos, EditNoSignal)
-	tb.InsertText(st, []byte(ed.NewText), EditSignal)
+	tb.ReplaceText(st, pos, st, ed.NewText, EditSignal, ReplaceNoMatchCase)
 	if tb.CurView != nil {
 		ep := st
 		ep.Ch += len(ed.NewText) + ed.CursorAdjust
@@ -2247,8 +2268,7 @@ func (tb *TextBuf) CompleteExtend(s string) {
 	pos := textbuf.Pos{tb.Complete.SrcLn, tb.Complete.SrcCh}
 	st := pos
 	st.Ch -= len(tb.Complete.Seed)
-	tb.DeleteText(st, pos, EditNoSignal)
-	tb.InsertText(st, []byte(s), EditSignal)
+	tb.ReplaceText(st, pos, st, s, EditSignal, ReplaceNoMatchCase)
 	if tb.CurView != nil {
 		ep := st
 		ep.Ch += len(s)
@@ -2311,12 +2331,11 @@ func (tb *TextBuf) CorrectText(s string) {
 	tb.RemoveTag(st, token.TextSpellErr)
 	oend := st
 	oend.Ch += len(tb.Spell.Word)
-	ed := spell.CorrectText(tb.Spell.Word, s)
-	tb.DeleteText(st, oend, EditSignal)
-	tb.InsertText(st, []byte(ed.NewText), EditSignal)
+	repl := spell.CorrectText(tb.Spell.Word, s) // this already does MatchCase
+	tb.ReplaceText(st, oend, st, repl, EditSignal, ReplaceNoMatchCase)
 	if tb.CurView != nil {
 		ep := st
-		ep.Ch += len(ed.NewText)
+		ep.Ch += len(repl)
 		tb.CurView.SetCursorShow(ep)
 		tb.CurView = nil
 	}
@@ -2355,6 +2374,7 @@ func (tb *TextBuf) SpellCheckLineTag(ln int) {
 	tb.Tags[ln] = ntgs
 	tb.MarkupMu.Unlock()
 	tb.MarkupLinesLock(ln, ln)
+	tb.StartDelayedReMarkup()
 }
 
 ///////////////////////////////////////////////////////////////////
