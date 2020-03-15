@@ -5,28 +5,11 @@
 package spell
 
 import (
-	"log"
-	"regexp"
 	"strings"
 
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/token"
 )
-
-var isLetter *regexp.Regexp
-
-func init() {
-	var err error
-	isLetter, err = regexp.Compile(`^[a-zA-Z\']+$`)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-// IsWord returns true if the string follows rules to accept as word
-func IsWord(word string) bool {
-	return isLetter.MatchString(word)
-}
 
 // CheckLexLine returns the Lex regions for any words that are misspelled
 // within given line of text with existing Lex tags -- automatically
@@ -37,7 +20,7 @@ func CheckLexLine(src []rune, tags lex.Line) lex.Line {
 	var ser lex.Line
 	for _, t := range wrds {
 		wrd := string(t.Src(src))
-		lwrd := isLetter.FindString(wrd)
+		lwrd := lex.FirstWordApostrophe(wrd)
 		if len(lwrd) <= 2 {
 			continue
 		}
@@ -45,8 +28,9 @@ func CheckLexLine(src []rune, tags lex.Line) lex.Line {
 		if !known {
 			t.Tok.Tok = token.TextSpellErr
 			widx := strings.Index(wrd, lwrd)
+			ld := len(wrd) - len(lwrd)
 			t.St += widx
-			t.Ed = t.St + len(lwrd) // fix!
+			t.Ed += widx - ld
 			t.Now()
 			ser = append(ser, t)
 		}
