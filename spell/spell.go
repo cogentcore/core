@@ -247,13 +247,6 @@ func Complete(s string) []string {
 	return result
 }
 
-// CorrectText returns the text to use for correcting spelling -- matches the
-// case for the existing old string.
-func CorrectText(old string, nw string) string {
-	mc := lex.MatchCase(old, nw)
-	return mc
-}
-
 // IgnoreWord adds the word to the Ignore list
 func IgnoreWord(word string) {
 	word = strings.ToLower(word)
