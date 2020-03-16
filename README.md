@@ -41,7 +41,7 @@ func Normal(a, b, c Vec3) Vec3 {
    ...
 ```
 
-There may be a small performance cost for the value-based approach, but comparative benchmarks have not yet been run, but the overall simplicity advantages are significant.
+There may be a small performance cost for the value-based approach (comparative benchmarks have not yet been run), but the overall simplicity advantages are significant.
 
 The matrix types still do use pointer-based logic because they are significantly larger and thus the performance issues are likely to be more important.
 
