@@ -389,7 +389,7 @@ func (tv *TextView) LinesDeleted(tbe *textbuf.Edit) {
 }
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
-func TextViewBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data interface{}) {
+func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data interface{}) {
 	tv := rvwki.Embed(KiT_TextView).(*TextView)
 	if !tv.This().(gi.Node2D).IsVisible() {
 		return
@@ -2158,20 +2158,20 @@ func (tv *TextView) SelectWord() bool {
 	if sz == 0 {
 		return false
 	}
-	region := tv.WordAt()
-	tv.SelectReg = region
+	reg := tv.WordAt()
+	tv.SelectReg = reg
 	tv.SelectStart = tv.SelectReg.Start
 	return true
 }
 
 // WordAt finds the region of the word at the current cursor position
-func (tv *TextView) WordAt() (region textbuf.Region) {
-	region.Start = tv.CursorPos
-	region.End = tv.CursorPos
+func (tv *TextView) WordAt() (reg textbuf.Region) {
+	reg.Start = tv.CursorPos
+	reg.End = tv.CursorPos
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
-		return region
+		return reg
 	}
 	sch := ints.MinInt(tv.CursorPos.Ch, sz-1)
 	if !lex.IsWordBreak(txt[sch], rune(-1)) {
@@ -2185,7 +2185,7 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 			}
 			sch--
 		}
-		region.Start.Ch = sch
+		reg.Start.Ch = sch
 		ech := tv.CursorPos.Ch + 1
 		for ech < sz {
 			r2 := rune(-1)
@@ -2197,7 +2197,7 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 			}
 			ech++
 		}
-		region.End.Ch = ech
+		reg.End.Ch = ech
 	} else { // keep the space start -- go to next space..
 		ech := tv.CursorPos.Ch + 1
 		for ech < sz {
@@ -2216,9 +2216,9 @@ func (tv *TextView) WordAt() (region textbuf.Region) {
 			}
 			ech++
 		}
-		region.End.Ch = ech
+		reg.End.Ch = ech
 	}
-	return region
+	return reg
 }
 
 // SelectReset resets the selection
@@ -2562,8 +2562,8 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		}
 	case gi.KeyFunMoveRight:
 		if tv.IsWordEnd(tp) {
-			region := tv.WordBefore(tp)
-			tv.SpellCheck(region)
+			reg := tv.WordBefore(tp)
+			tv.SpellCheck(reg)
 			break
 		}
 		if tp.Ch == 0 { // end of line
@@ -2572,8 +2572,8 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 				tv.Buf.SpellCheckLineTag(tp.Ln) // redo prior line
 			}
 			tp.Ch = tv.Buf.LineLen(tp.Ln)
-			region := tv.WordBefore(tp)
-			tv.SpellCheck(region)
+			reg := tv.WordBefore(tp)
+			tv.SpellCheck(reg)
 			break
 		}
 		txt := tv.Buf.Line(tp.Ln)
@@ -2587,8 +2587,8 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 		}
 		if atend || lex.IsWordBreak(r, rune(-1)) {
 			tp.Ch-- // we are one past the end of word
-			region := tv.WordBefore(tp)
-			tv.SpellCheck(region)
+			reg := tv.WordBefore(tp)
+			tv.SpellCheck(reg)
 		}
 	case gi.KeyFunEnter:
 		tp.Ln--
@@ -2596,21 +2596,29 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 			tv.Buf.SpellCheckLineTag(tp.Ln) // redo prior line
 		}
 		tp.Ch = tv.Buf.LineLen(tp.Ln)
-		region := tv.WordBefore(tp)
-		tv.SpellCheck(region)
+		reg := tv.WordBefore(tp)
+		tv.SpellCheck(reg)
 	case gi.KeyFunFocusNext:
 		tp.Ch-- // we are one past the end of word
-		region := tv.WordBefore(tp)
-		tv.SpellCheck(region)
+		reg := tv.WordBefore(tp)
+		tv.SpellCheck(reg)
+	case gi.KeyFunBackspace, gi.KeyFunDelete:
+		if tv.IsWordMiddle(tv.CursorPos) {
+			reg := tv.WordAt()
+			tv.SpellCheck(tv.Buf.Region(reg.Start, reg.End))
+		} else {
+			reg := tv.WordBefore(tp)
+			tv.SpellCheck(reg)
+		}
 	case gi.KeyFunNil:
 		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) && kt.Rune != '\'' { // contractions!
 			tp.Ch-- // we are one past the end of word
-			region := tv.WordBefore(tp)
-			tv.SpellCheck(region)
+			reg := tv.WordBefore(tp)
+			tv.SpellCheck(reg)
 		} else {
 			if tv.IsWordMiddle(tv.CursorPos) {
-				region := tv.WordAt()
-				tv.SpellCheck(tv.Buf.Region(region.Start, region.End))
+				reg := tv.WordAt()
+				tv.SpellCheck(tv.Buf.Region(reg.Start, reg.End))
 			}
 		}
 	}
@@ -2618,24 +2626,24 @@ func (tv *TextView) ISpellKeyInput(kt *key.ChordEvent) {
 
 // SpellCheck offers spelling corrections if we are at a word break or other word termination
 // and the word before the break is unknown -- returns true if misspelled word found
-func (tv *TextView) SpellCheck(region *textbuf.Edit) bool {
+func (tv *TextView) SpellCheck(reg *textbuf.Edit) bool {
 	if tv.Buf.Spell == nil {
 		return false
 	}
-	wb := string(region.ToBytes())
+	wb := string(reg.ToBytes())
 	lwb := lex.FirstWordApostrophe(wb) // only lookup words
 	if len(lwb) <= 2 {
 		return false
 	}
 	widx := strings.Index(wb, lwb) // adjust region for actual part looking up
 	ld := len(wb) - len(lwb)
-	region.Reg.Start.Ch += widx
-	region.Reg.End.Ch += widx - ld
+	reg.Reg.Start.Ch += widx
+	reg.Reg.End.Ch += widx - ld
 
 	sugs, knwn := tv.Buf.Spell.CheckWordInline(lwb)
 	if knwn {
-		tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
-		ln := region.Reg.Start.Ln
+		tv.Buf.RemoveTag(reg.Reg.Start, token.TextSpellErr)
+		ln := reg.Reg.Start.Ln
 		tv.LayoutLines(ln, ln, false)
 		tv.RenderLines(ln, ln)
 		return false
@@ -2643,9 +2651,9 @@ func (tv *TextView) SpellCheck(region *textbuf.Edit) bool {
 	// fmt.Printf("spell err: %s\n", wb)
 	tv.Buf.Spell.Suggest = sugs
 	tv.Buf.Spell.Word = wb
-	tv.Buf.RemoveTag(region.Reg.Start, token.TextSpellErr)
-	tv.Buf.AddTagEdit(region, token.TextSpellErr)
-	ln := region.Reg.Start.Ln
+	tv.Buf.RemoveTag(reg.Reg.Start, token.TextSpellErr)
+	tv.Buf.AddTagEdit(reg, token.TextSpellErr)
+	ln := reg.Reg.Start.Ln
 	tv.LayoutLines(ln, ln, false)
 	tv.RenderLines(ln, ln)
 	return true
@@ -4112,6 +4120,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		} else {
 			kt.SetProcessed()
 			tv.CursorBackspace(1)
+			tv.ISpellKeyInput(kt)
 			tv.OfferComplete()
 		}
 	case gi.KeyFunKill:
@@ -4122,6 +4131,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.CursorDelete(1)
+		tv.ISpellKeyInput(kt)
 	case gi.KeyFunBackspaceWord:
 		cancelAll()
 		kt.SetProcessed()
