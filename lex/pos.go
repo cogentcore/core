@@ -6,6 +6,7 @@ package lex
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/goki/pi/token"
 )
@@ -45,6 +46,31 @@ func (ps *Pos) IsLess(cmp Pos) bool {
 	default:
 		return false
 	}
+}
+
+// FromString decodes text position from a string representation of form:
+// [#]LxxCxx -- used in e.g., URL links -- returns true if successful
+func (ps *Pos) FromString(link string) bool {
+	link = strings.TrimPrefix(link, "#")
+	lidx := strings.Index(link, "L")
+	cidx := strings.Index(link, "C")
+
+	switch {
+	case lidx >= 0 && cidx >= 0:
+		fmt.Sscanf(link, "L%dC%d", &ps.Ln, &ps.Ch)
+		ps.Ln-- // link is 1-based, we use 0-based
+		ps.Ch-- // ditto
+	case lidx >= 0:
+		fmt.Sscanf(link, "L%d", &ps.Ln)
+		ps.Ln-- // link is 1-based, we use 0-based
+	case cidx >= 0:
+		fmt.Sscanf(link, "C%d", &ps.Ch)
+		ps.Ch--
+	default:
+		// todo: could support other formats
+		return false
+	}
+	return true
 }
 
 ////////////////////////////////////////////////////////////////////

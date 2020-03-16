@@ -12,7 +12,7 @@ import (
 	"github.com/goki/ki/ints"
 )
 
-// the ManuaLex functions provide "manual" lexing support for specific cases
+// these functions provide "manual" lexing support for specific cases
 // such as completion where a string must be processed further.
 
 // FirstWord returns the first contiguous sequence of purely unicode.IsLetter runes
@@ -100,6 +100,31 @@ func TrimLeftToAlpha(nm string) string {
 	})
 }
 
+// FirstNonSpaceRune returns the index of first non-space rune, -1 if not found
+func FirstNonSpaceRune(src []rune) int {
+	for i, s := range src {
+		if !unicode.IsSpace(s) {
+			return i
+		}
+	}
+	return -1
+}
+
+// LastNonSpaceRune returns the index of last non-space rune, -1 if not found
+func LastNonSpaceRune(src []rune) int {
+	sz := len(src)
+	if sz == 0 {
+		return -1
+	}
+	for i := sz - 1; i >= 0; i-- {
+		s := src[i]
+		if !unicode.IsSpace(s) {
+			return i
+		}
+	}
+	return -1
+}
+
 // InnerBracketScope returns the inner-scope for given bracket type
 // if it is imbalanced -- it is important to do completion based
 // just on that inner scope if that is where the user is at.
@@ -163,6 +188,16 @@ func LastScopedString(str string) string {
 	}
 	flds := strings.Split(str, ",")
 	return flds[len(flds)-1]
+}
+
+// HasUpperCase returns true if string has an upper-case letter
+func HasUpperCase(str string) bool {
+	for _, r := range str {
+		if unicode.IsUpper(r) {
+			return true
+		}
+	}
+	return false
 }
 
 // MatchCase uses the source string case (upper / lower) to set corresponding
