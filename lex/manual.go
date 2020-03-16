@@ -5,6 +5,7 @@
 package lex
 
 import (
+	"fmt"
 	"strings"
 	"unicode"
 
@@ -183,4 +184,44 @@ func MatchCase(src, trg string) string {
 		}
 	}
 	return string(rtg)
+}
+
+// MarkupPathsAsLinks checks for strings that look like file paths / urls and returns
+// the original fields as a byte slice along with a marked-up version of that
+// with html link markups for the files (as <a href="file:///...").
+// Input is field-parsed already, and maxFlds is the maximum number of fields
+// to look for file paths in (e.g., 2 is a reasonable default, to avoid getting
+// other false-alarm info later in the text).
+// This is mainly used for marking up output from commands, for example.
+func MarkupPathsAsLinks(flds []string, maxFlds int) (orig, link []byte) {
+	mx := ints.MinInt(len(flds), maxFlds)
+	for i := 0; i < mx; i++ {
+		ff := flds[i]
+		if !(strings.Contains(ff, ".") || strings.Contains(ff, "/")) { // extension or path
+			continue
+		}
+		fnflds := strings.Split(ff, ":")
+		fn := string(fnflds[0])
+		pos := ""
+		col := ""
+		if len(fnflds) > 1 {
+			pos = string(fnflds[1])
+			col = ""
+			if len(fnflds) > 2 {
+				col = string(fnflds[2])
+			}
+		}
+		lstr := ""
+		if col != "" {
+			lstr = fmt.Sprintf(`<a href="file:///%v#L%vC%v">%v</a>`, fn, pos, col, string(ff))
+		} else if pos != "" {
+			lstr = fmt.Sprintf(`<a href="file:///%v#L%v">%v</a>`, fn, pos, string(ff))
+		} else {
+			lstr = fmt.Sprintf(`<a href="file:///%v">%v</a>`, fn, string(ff))
+		}
+		orig = []byte(ff)
+		link = []byte(lstr)
+		break
+	}
+	return
 }
