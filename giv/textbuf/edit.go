@@ -4,7 +4,11 @@
 
 package textbuf
 
-import "time"
+import (
+	"time"
+
+	"github.com/goki/pi/lex"
+)
 
 // Edit describes an edit action to a buffer -- this is the data passed
 // via signals to viewers of the buffer.  Actions are only deletions and
@@ -63,7 +67,7 @@ const (
 // AdjustPos adjusts the given text position as a function of the edit.
 // if the position was within a deleted region of text, del determines
 // what is returned
-func (te *Edit) AdjustPos(pos Pos, del AdjustPosDel) Pos {
+func (te *Edit) AdjustPos(pos lex.Pos, del AdjustPosDel) lex.Pos {
 	if te == nil {
 		return pos
 	}
@@ -87,7 +91,7 @@ func (te *Edit) AdjustPos(pos Pos, del AdjustPosDel) Pos {
 			case AdjustPosDelEnd:
 				return te.Reg.End
 			case AdjustPosDelErr:
-				return PosErr
+				return lex.PosErr
 			}
 		}
 		// this means pos.Ln == te.Reg.End.Ln, Ch >= end
@@ -110,7 +114,7 @@ func (te *Edit) AdjustPos(pos Pos, del AdjustPosDel) Pos {
 // it adjusts the given text position as a function of the edit
 // del determines what to do with positions within a deleted region
 // either move to start or end of the region, or return an error.
-func (te *Edit) AdjustPosIfAfterTime(pos Pos, t time.Time, del AdjustPosDel) Pos {
+func (te *Edit) AdjustPosIfAfterTime(pos lex.Pos, t time.Time, del AdjustPosDel) lex.Pos {
 	if te == nil {
 		return pos
 	}

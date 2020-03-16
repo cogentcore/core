@@ -129,9 +129,9 @@ func (dv *DiffView) NextDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorShow(textbuf.Pos{Ln: df.I1})
+	tva.SetCursorShow(lex.Pos{Ln: df.I1})
 	tva.ScrollCursorToVertCenter()
-	tvb.SetCursorShow(textbuf.Pos{Ln: df.I1})
+	tvb.SetCursorShow(lex.Pos{Ln: df.I1})
 	tvb.ScrollCursorToVertCenter()
 	return true
 }
@@ -158,9 +158,9 @@ func (dv *DiffView) PrevDiff(ab int) bool {
 			break
 		}
 	}
-	tva.SetCursorShow(textbuf.Pos{Ln: df.I1})
+	tva.SetCursorShow(lex.Pos{Ln: df.I1})
 	tva.ScrollCursorToVertCenter()
-	tvb.SetCursorShow(textbuf.Pos{Ln: df.I1})
+	tvb.SetCursorShow(lex.Pos{Ln: df.I1})
 	tvb.ScrollCursorToVertCenter()
 	return true
 }
@@ -184,13 +184,13 @@ func (dv *DiffView) RemoveAlignsA() {
 		switch df.Tag {
 		case 'r':
 			if df.J2 > df.I2 {
-				spos := textbuf.Pos{Ln: df.I2, Ch: 0}
-				epos := textbuf.Pos{Ln: df.J2, Ch: 0}
+				spos := lex.Pos{Ln: df.I2, Ch: 0}
+				epos := lex.Pos{Ln: df.J2, Ch: 0}
 				dv.BufA.DeleteText(spos, epos, true)
 			}
 		case 'i':
-			spos := textbuf.Pos{Ln: df.J1, Ch: 0}
-			epos := textbuf.Pos{Ln: df.J2, Ch: 0}
+			spos := lex.Pos{Ln: df.J1, Ch: 0}
+			epos := lex.Pos{Ln: df.J2, Ch: 0}
 			dv.BufA.DeleteText(spos, epos, true)
 		}
 	}
@@ -213,13 +213,13 @@ func (dv *DiffView) RemoveAlignsB() {
 		switch df.Tag {
 		case 'r':
 			if df.I2 > df.J2 {
-				spos := textbuf.Pos{Ln: df.J2, Ch: 0}
-				epos := textbuf.Pos{Ln: df.I2, Ch: 0}
+				spos := lex.Pos{Ln: df.J2, Ch: 0}
+				epos := lex.Pos{Ln: df.I2, Ch: 0}
 				dv.BufB.DeleteText(spos, epos, true)
 			}
 		case 'd':
-			spos := textbuf.Pos{Ln: df.I1, Ch: 0}
-			epos := textbuf.Pos{Ln: df.I2, Ch: 0}
+			spos := lex.Pos{Ln: df.I1, Ch: 0}
+			epos := lex.Pos{Ln: df.I2, Ch: 0}
 			dv.BufB.DeleteText(spos, epos, true)
 		}
 	}
@@ -422,8 +422,8 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 	if ab == 0 {
 		dv.BufA.Undos.Off = false
 		// srcLen := len(dv.BufB.Lines[df.J2])
-		spos := textbuf.Pos{Ln: df.J1, Ch: 0}
-		epos := textbuf.Pos{Ln: df.J2, Ch: 0}
+		spos := lex.Pos{Ln: df.J1, Ch: 0}
+		epos := lex.Pos{Ln: df.J2, Ch: 0}
 		src := dv.BufB.Region(spos, epos)
 		dv.BufA.DeleteText(spos, epos, true)
 		dv.BufA.InsertText(spos, src.ToBytes(), true) // we always just copy, is blank for delete..
@@ -438,8 +438,8 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 		}
 	} else {
 		dv.BufB.Undos.Off = false
-		spos := textbuf.Pos{Ln: df.I1, Ch: 0}
-		epos := textbuf.Pos{Ln: df.I2, Ch: 0}
+		spos := lex.Pos{Ln: df.I1, Ch: 0}
+		epos := lex.Pos{Ln: df.I2, Ch: 0}
 		src := dv.BufA.Region(spos, epos)
 		dv.BufB.DeleteText(spos, epos, true)
 		dv.BufB.InsertText(spos, src.ToBytes(), true)

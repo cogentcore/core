@@ -10,58 +10,8 @@ import (
 	"time"
 
 	"github.com/goki/ki/nptime"
+	"github.com/goki/pi/lex"
 )
-
-// Pos represents line, character positions within the TextBuf and TextView
-// the Ch character position is in *runes* not bytes!
-type Pos struct {
-	Ln, Ch int
-}
-
-// PosZero is the uninitialized zero text position (which is
-// still a valid position)
-var PosZero = Pos{}
-
-// PosErr represents an error text position (-1 for both line and char)
-// used as a return value for cases where error positions are possible
-var PosErr = Pos{-1, -1}
-
-// IsLess returns true if receiver position is less than given comparison
-func (tp *Pos) IsLess(cmp Pos) bool {
-	switch {
-	case tp.Ln < cmp.Ln:
-		return true
-	case tp.Ln == cmp.Ln:
-		return tp.Ch < cmp.Ch
-	default:
-		return false
-	}
-}
-
-// FromString decodes text position from a string representation of form:
-// [#]LxxCxx -- used in e.g., URL links -- returns true if successful
-func (tp *Pos) FromString(link string) bool {
-	link = strings.TrimPrefix(link, "#")
-	lidx := strings.Index(link, "L")
-	cidx := strings.Index(link, "C")
-
-	switch {
-	case lidx >= 0 && cidx >= 0:
-		fmt.Sscanf(link, "L%dC%d", &tp.Ln, &tp.Ch)
-		tp.Ln-- // link is 1-based, we use 0-based
-		tp.Ch-- // ditto
-	case lidx >= 0:
-		fmt.Sscanf(link, "L%d", &tp.Ln)
-		tp.Ln-- // link is 1-based, we use 0-based
-	case cidx >= 0:
-		fmt.Sscanf(link, "C%d", &tp.Ch)
-		tp.Ch--
-	default:
-		// todo: could support other formats
-		return false
-	}
-	return true
-}
 
 // Region represents a text region as a start / end position, and includes
 // a Time stamp for when the region was created as valid positions into the TextBuf.
@@ -69,8 +19,8 @@ func (tp *Pos) FromString(link string) bool {
 // the character just prior to that character) but the lines are always *inclusive*
 // (i.e., it is the actual line, not the next line).
 type Region struct {
-	Start Pos         `desc:"starting position"`
-	End   Pos         `desc:"ending position: line number is *inclusive* but character position is *exclusive* (-1)"`
+	Start lex.Pos     `desc:"starting position"`
+	End   lex.Pos     `desc:"ending position: line number is *inclusive* but character position is *exclusive* (-1)"`
 	Time  nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
 }
 
@@ -103,14 +53,14 @@ func (tr *Region) TimeNow() {
 // NewRegion creates a new text region using separate line and char
 // values for start and end, and also sets the time stamp to now
 func NewRegion(stLn, stCh, edLn, edCh int) Region {
-	tr := Region{Start: Pos{Ln: stLn, Ch: stCh}, End: Pos{Ln: edLn, Ch: edCh}}
+	tr := Region{Start: lex.Pos{Ln: stLn, Ch: stCh}, End: lex.Pos{Ln: edLn, Ch: edCh}}
 	tr.TimeNow()
 	return tr
 }
 
 // NewRegionPos creates a new text region using position values
 // and also sets the time stamp to now
-func NewRegionPos(st, ed Pos) Region {
+func NewRegionPos(st, ed lex.Pos) Region {
 	tr := Region{Start: st, End: ed}
 	tr.TimeNow()
 	return tr
@@ -156,7 +106,7 @@ func (tr *Region) FromString(link string) bool {
 
 // NewRegionLen makes a new Region from a starting point and a length
 // along same line
-func NewRegionLen(start Pos, len int) Region {
+func NewRegionLen(start lex.Pos, len int) Region {
 	reg := Region{}
 	reg.Start = start
 	reg.End = start

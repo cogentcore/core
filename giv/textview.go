@@ -54,11 +54,11 @@ type TextView struct {
 	LineNoRender           gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
 	LinesSize              image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
 	RenderSz               mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos              textbuf.Pos               `json:"-" xml:"-" desc:"current cursor position"`
+	CursorPos              lex.Pos                   `json:"-" xml:"-" desc:"current cursor position"`
 	CursorCol              int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
 	ScrollToCursorOnRender bool                      `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
 	PosHistIdx             int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
-	SelectStart            textbuf.Pos               `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+	SelectStart            lex.Pos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
 	SelectReg              textbuf.Region            `json:"-" xml:"-" desc:"current selection region"`
 	PrevSelectReg          textbuf.Region            `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
 	Highlights             []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
@@ -312,7 +312,7 @@ func (tv *TextView) ResetState() {
 	tv.ISearch.On = false
 	tv.QReplace.On = false
 	if tv.Buf == nil || tv.lastFilename != tv.Buf.Filename { // don't reset if reopening..
-		tv.CursorPos = textbuf.Pos{}
+		tv.CursorPos = lex.Pos{}
 	}
 	if tv.Buf != nil {
 		tv.Buf.SetInactive(tv.IsInactive())
@@ -690,7 +690,7 @@ func (tv *TextView) ValidateCursor() {
 	if tv.Buf != nil {
 		tv.CursorPos = tv.Buf.ValidPos(tv.CursorPos)
 	} else {
-		tv.CursorPos = textbuf.PosZero
+		tv.CursorPos = lex.PosZero
 	}
 }
 
@@ -705,7 +705,7 @@ func (tv *TextView) WrappedLines(ln int) int {
 // WrappedLineNo returns the wrapped line number (span index) and rune index
 // within that span of the given character position within line in position,
 // and false if out of range (last valid position returned in that case -- still usable).
-func (tv *TextView) WrappedLineNo(pos textbuf.Pos) (si, ri int, ok bool) {
+func (tv *TextView) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
 	if pos.Ln >= len(tv.Renders) {
 		return 0, 0, false
 	}
@@ -713,9 +713,9 @@ func (tv *TextView) WrappedLineNo(pos textbuf.Pos) (si, ri int, ok bool) {
 }
 
 // SetCursor sets a new cursor position, enforcing it in range
-func (tv *TextView) SetCursor(pos textbuf.Pos) {
+func (tv *TextView) SetCursor(pos lex.Pos) {
 	if tv.NLines == 0 || tv.Buf == nil {
-		tv.CursorPos = textbuf.PosZero
+		tv.CursorPos = lex.PosZero
 		return
 	}
 	wupdt := tv.TopUpdateStart()
@@ -741,8 +741,8 @@ func (tv *TextView) SetCursor(pos textbuf.Pos) {
 		if r == '{' || r == '}' || r == '(' || r == ')' || r == '[' || r == ']' {
 			tp, found := tv.Buf.BraceMatch(txt[ch], tv.CursorPos)
 			if found {
-				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tv.CursorPos, textbuf.Pos{tv.CursorPos.Ln, tv.CursorPos.Ch + 1}))
-				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, textbuf.Pos{tp.Ln, tp.Ch + 1}))
+				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tv.CursorPos, lex.Pos{tv.CursorPos.Ln, tv.CursorPos.Ch + 1}))
+				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
 				if tv.CursorPos.Ln < tp.Ln {
 					tv.RenderLines(tv.CursorPos.Ln, tp.Ln)
 				} else {
@@ -755,7 +755,7 @@ func (tv *TextView) SetCursor(pos textbuf.Pos) {
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
 // the cursor (scroll to if hidden, render)
-func (tv *TextView) SetCursorShow(pos textbuf.Pos) {
+func (tv *TextView) SetCursorShow(pos lex.Pos) {
 	tv.SetCursor(pos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
@@ -763,7 +763,7 @@ func (tv *TextView) SetCursorShow(pos textbuf.Pos) {
 
 // SetCursorCol sets the current target cursor column (CursorCol) to that
 // of the given position
-func (tv *TextView) SetCursorCol(pos textbuf.Pos) {
+func (tv *TextView) SetCursorCol(pos lex.Pos) {
 	if wln := tv.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, ok := tv.WrappedLineNo(pos)
 		if ok && si > 0 {
@@ -777,7 +777,7 @@ func (tv *TextView) SetCursorCol(pos textbuf.Pos) {
 }
 
 // SavePosHistory saves the cursor position in history stack of cursor positions
-func (tv *TextView) SavePosHistory(pos textbuf.Pos) {
+func (tv *TextView) SavePosHistory(pos lex.Pos) {
 	if tv.Buf == nil {
 		return
 	}
@@ -789,7 +789,7 @@ func (tv *TextView) SavePosHistory(pos textbuf.Pos) {
 // returns true if moved
 func (tv *TextView) CursorToHistPrev() bool {
 	if tv.NLines == 0 || tv.Buf == nil {
-		tv.CursorPos = textbuf.PosZero
+		tv.CursorPos = lex.PosZero
 		return false
 	}
 	sz := len(tv.Buf.PosHistory)
@@ -814,7 +814,7 @@ func (tv *TextView) CursorToHistPrev() bool {
 // returns true if moved
 func (tv *TextView) CursorToHistNext() bool {
 	if tv.NLines == 0 || tv.Buf == nil {
-		tv.CursorPos = textbuf.PosZero
+		tv.CursorPos = lex.PosZero
 		return false
 	}
 	sz := len(tv.Buf.PosHistory)
@@ -836,7 +836,7 @@ func (tv *TextView) CursorToHistNext() bool {
 
 // SelectRegUpdate updates current select region based on given cursor position
 // relative to SelectStart position
-func (tv *TextView) SelectRegUpdate(pos textbuf.Pos) {
+func (tv *TextView) SelectRegUpdate(pos lex.Pos) {
 	if pos.IsLess(tv.SelectStart) {
 		tv.SelectReg.Start = pos
 		tv.SelectReg.End = tv.SelectStart
@@ -848,7 +848,7 @@ func (tv *TextView) SelectRegUpdate(pos textbuf.Pos) {
 
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and tv.CursorPos is current
-func (tv *TextView) CursorSelect(org textbuf.Pos) {
+func (tv *TextView) CursorSelect(org lex.Pos) {
 	if !tv.SelectMode {
 		return
 	}
@@ -1374,13 +1374,13 @@ func (tv *TextView) JumpToLinePrompt() {
 // JumpToLine jumps to given line number (minus 1)
 func (tv *TextView) JumpToLine(ln int) {
 	wupdt := tv.TopUpdateStart()
-	tv.SetCursorShow(textbuf.Pos{Ln: ln - 1})
+	tv.SetCursorShow(lex.Pos{Ln: ln - 1})
 	tv.SavePosHistory(tv.CursorPos)
 	tv.TopUpdateEnd(wupdt)
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
-func (tv *TextView) FindNextLink(pos textbuf.Pos) (textbuf.Pos, textbuf.Region, bool) {
+func (tv *TextView) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln; ln < tv.NLines; ln++ {
 		if len(tv.Renders[ln].Links) == 0 {
 			pos.Ch = 0
@@ -1406,7 +1406,7 @@ func (tv *TextView) FindNextLink(pos textbuf.Pos) (textbuf.Pos, textbuf.Region, 
 }
 
 // FindPrevLink finds previous link before given position, returns false if no such links
-func (tv *TextView) FindPrevLink(pos textbuf.Pos) (textbuf.Pos, textbuf.Region, bool) {
+func (tv *TextView) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(tv.Renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
@@ -1455,7 +1455,7 @@ func (tv *TextView) CursorNextLink(wraparound bool) bool {
 		if !wraparound {
 			return false
 		}
-		npos, reg, has = tv.FindNextLink(textbuf.Pos{}) // wraparound
+		npos, reg, has = tv.FindNextLink(lex.Pos{}) // wraparound
 		if !has {
 			return false
 		}
@@ -1480,7 +1480,7 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 		if !wraparound {
 			return false
 		}
-		npos, reg, has = tv.FindPrevLink(textbuf.Pos{}) // wraparound
+		npos, reg, has = tv.FindPrevLink(lex.Pos{}) // wraparound
 		if !has {
 			return false
 		}
@@ -1562,7 +1562,7 @@ func (tv *TextView) FindMatches(find string, useCase, lexItems bool) ([]textbuf.
 }
 
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (tv *TextView) MatchFromPos(matches []textbuf.Match, cpos textbuf.Pos) (int, bool) {
+func (tv *TextView) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
 	for i, m := range matches {
 		reg := tv.Buf.AdjustReg(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
@@ -1580,7 +1580,7 @@ type ISearch struct {
 	Matches  []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
 	Pos      int             `json:"-" xml:"-" desc:"position within isearch matches"`
 	PrevPos  int             `json:"-" xml:"-" desc:"position in search list from previous search"`
-	StartPos textbuf.Pos     `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	StartPos lex.Pos         `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // TextViewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -1588,16 +1588,6 @@ var TextViewMaxFindHighlights = 1000
 
 // PrevISearchString is the previous ISearch string
 var PrevISearchString string
-
-// HasUpperCase returns true if string has an upper-case letter
-func HasUpperCase(str string) bool {
-	for _, r := range str {
-		if unicode.IsUpper(r) {
-			return true
-		}
-	}
-	return false
-}
 
 // ISearchMatches finds ISearch matches -- returns true if there are any
 func (tv *TextView) ISearchMatches() bool {
@@ -1608,7 +1598,7 @@ func (tv *TextView) ISearchMatches() bool {
 
 // ISearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
-func (tv *TextView) ISearchNextMatch(cpos textbuf.Pos) bool {
+func (tv *TextView) ISearchNextMatch(cpos lex.Pos) bool {
 	if len(tv.ISearch.Matches) == 0 {
 		tv.ISearchSig()
 		return false
@@ -1660,7 +1650,7 @@ func (tv *TextView) ISearchStart() {
 		} else { // restore prev
 			if PrevISearchString != "" {
 				tv.ISearch.Find = PrevISearchString
-				tv.ISearch.UseCase = HasUpperCase(tv.ISearch.Find)
+				tv.ISearch.UseCase = lex.HasUpperCase(tv.ISearch.Find)
 				tv.ISearchMatches()
 				tv.ISearchNextMatch(tv.CursorPos)
 				tv.ISearch.StartPos = tv.CursorPos
@@ -1768,7 +1758,7 @@ type QReplace struct {
 	Matches  []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
 	Pos      int             `json:"-" xml:"-" desc:"position within isearch matches"`
 	PrevPos  int             `json:"-" xml:"-" desc:"position in search list from previous search"`
-	StartPos textbuf.Pos     `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	StartPos lex.Pos         `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
 }
 
 // PrevQReplaceFinds are the previous QReplace strings
@@ -1858,7 +1848,7 @@ func (tv *TextView) QReplaceStart(find, repl string, lexItems bool) {
 	tv.QReplace.Replace = repl
 	tv.QReplace.LexItems = lexItems
 	tv.QReplace.StartPos = tv.CursorPos
-	tv.QReplace.UseCase = HasUpperCase(find)
+	tv.QReplace.UseCase = lex.HasUpperCase(find)
 	tv.QReplace.Matches = nil
 	tv.QReplace.Pos = -1
 
@@ -1919,8 +1909,9 @@ func (tv *TextView) QReplaceReplace(midx int) {
 	rep := tv.QReplace.Replace
 	reg := tv.Buf.AdjustReg(m.Reg)
 	pos := reg.Start
-	// last arg is matchCase, only if not using case to match
-	tv.Buf.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, !tv.QReplace.UseCase)
+	// last arg is matchCase, only if not using case to match and rep is also lower case
+	matchCase := !tv.QReplace.UseCase && !lex.HasUpperCase(rep)
+	tv.Buf.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
 	tv.Highlights[midx] = textbuf.RegionNil
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -2041,14 +2032,14 @@ func (tv *TextView) SelectModeToggle() {
 func (tv *TextView) SelectAll() {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	tv.SelectReg.Start = textbuf.PosZero
+	tv.SelectReg.Start = lex.PosZero
 	tv.SelectReg.End = tv.Buf.EndPos()
 	tv.RenderAllLines()
 }
 
-// WordBefore returns the word before the textbuf.Pos
+// WordBefore returns the word before the lex.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (tv *TextView) WordBefore(tp textbuf.Pos) *textbuf.Edit {
+func (tv *TextView) WordBefore(tp lex.Pos) *textbuf.Edit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
 	ch = ints.MinInt(ch, len(txt))
@@ -2066,14 +2057,14 @@ func (tv *TextView) WordBefore(tp textbuf.Pos) *textbuf.Edit {
 		}
 	}
 	if st != ch {
-		return tv.Buf.Region(textbuf.Pos{Ln: tp.Ln, Ch: st}, tp)
+		return tv.Buf.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
 	}
 	return nil
 }
 
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *TextView) IsWordStart(tp textbuf.Pos) bool {
+func (tv *TextView) IsWordStart(tp lex.Pos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -2099,7 +2090,7 @@ func (tv *TextView) IsWordStart(tp textbuf.Pos) bool {
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *TextView) IsWordEnd(tp textbuf.Pos) bool {
+func (tv *TextView) IsWordEnd(tp lex.Pos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -2130,7 +2121,7 @@ func (tv *TextView) IsWordEnd(tp textbuf.Pos) bool {
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (tv *TextView) IsWordMiddle(tp textbuf.Pos) bool {
+func (tv *TextView) IsWordMiddle(tp lex.Pos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
@@ -2463,8 +2454,8 @@ func (tv *TextView) OfferComplete() {
 
 	tv.Buf.Complete.SrcLn = tv.CursorPos.Ln
 	tv.Buf.Complete.SrcCh = tv.CursorPos.Ch
-	st := textbuf.Pos{tv.CursorPos.Ln, 0}
-	en := textbuf.Pos{tv.CursorPos.Ln, tv.CursorPos.Ch}
+	st := lex.Pos{tv.CursorPos.Ln, 0}
+	en := lex.Pos{tv.CursorPos.Ln, tv.CursorPos.Ch}
 	tbe := tv.Buf.Region(st, en)
 	var s string
 	if tbe != nil {
@@ -2521,8 +2512,8 @@ func (tv *TextView) Lookup() {
 	}
 	tv.Buf.Complete.SrcLn = ln
 	tv.Buf.Complete.SrcCh = ch
-	st := textbuf.Pos{tv.CursorPos.Ln, 0}
-	en := textbuf.Pos{tv.CursorPos.Ln, ch}
+	st := lex.Pos{tv.CursorPos.Ln, 0}
+	en := lex.Pos{tv.CursorPos.Ln, ch}
 
 	tbe := tv.Buf.Region(st, en)
 	var s string
@@ -2889,7 +2880,7 @@ func (tv *TextView) ScrollCursorToHorizCenter() bool {
 // CharStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (tv *TextView) CharStartPos(pos textbuf.Pos) mat32.Vec2 {
+func (tv *TextView) CharStartPos(pos lex.Pos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
 	spos.X += tv.LineNoOff
 	if pos.Ln >= len(tv.Offs) {
@@ -2913,7 +2904,7 @@ func (tv *TextView) CharStartPos(pos textbuf.Pos) mat32.Vec2 {
 // CharEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (tv *TextView) CharEndPos(pos textbuf.Pos) mat32.Vec2 {
+func (tv *TextView) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
 	pos.Ln = ints.MinInt(pos.Ln, tv.NLines-1)
 	if pos.Ln < 0 {
@@ -3036,7 +3027,7 @@ func (tv *TextView) StopCursor() {
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
-func (tv *TextView) CursorBBox(pos textbuf.Pos) image.Rectangle {
+func (tv *TextView) CursorBBox(pos lex.Pos) image.Rectangle {
 	cpos := tv.CharStartPos(pos)
 	cbmin := cpos.SubScalar(tv.CursorWidth.Dots)
 	cbmax := cpos.AddScalar(tv.CursorWidth.Dots)
@@ -3130,7 +3121,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	nclrs := len(TextViewDepthColors)
 	lstdp := 0
 	for ln := stln; ln <= edln; ln++ {
-		lst := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y // note: charstart pos includes descent
+		lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
 			continue
@@ -3154,14 +3145,14 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 					cspec.Color.Sub(TextViewDepthColors[lx.Tok.Depth%nclrs])
 				}
 				st := ints.MinInt(lsted, lx.St)
-				reg := textbuf.Region{Start: textbuf.Pos{Ln: ln, Ch: st}, End: textbuf.Pos{Ln: ln, Ch: lx.Ed}}
+				reg := textbuf.Region{Start: lex.Pos{Ln: ln, Ch: st}, End: lex.Pos{Ln: ln, Ch: lx.Ed}}
 				lsted = lx.Ed
 				lstdp = lx.Tok.Depth
 				tv.RenderRegionBoxSty(reg, sty, &cspec)
 			}
 		}
 		if lstdp > 0 {
-			tv.RenderRegionToEnd(textbuf.Pos{Ln: ln, Ch: lsted}, sty, &cspec)
+			tv.RenderRegionToEnd(lex.Pos{Ln: ln, Ch: lsted}, sty, &cspec)
 		}
 	}
 }
@@ -3294,7 +3285,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gi.Style, bgclr 
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (tv *TextView) RenderRegionToEnd(st textbuf.Pos, sty *gi.Style, bgclr *gi.ColorSpec) {
+func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gi.Style, bgclr *gi.ColorSpec) {
 	spos := tv.CharStartPos(st)
 	epos := spos
 	epos.Y += tv.LineHeight
@@ -3457,9 +3448,9 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
 	clr := sty.Font.BgColor.Color.Highlight(10)
-	spos := tv.CharStartPos(textbuf.Pos{Ln: st})
+	spos := tv.CharStartPos(lex.Pos{Ln: st})
 	spos.X = float32(tv.VpBBox.Min.X)
-	epos := tv.CharEndPos(textbuf.Pos{Ln: ed + 1})
+	epos := tv.CharEndPos(lex.Pos{Ln: ed + 1})
 	epos.Y -= tv.LineHeight
 	epos.X = spos.X + tv.LineNoOff - spc
 	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
@@ -3483,9 +3474,9 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	pc := &rs.Paint
 
 	// render fillbox
-	sbox := tv.CharStartPos(textbuf.Pos{Ln: ln})
+	sbox := tv.CharStartPos(lex.Pos{Ln: ln})
 	sbox.X = float32(tv.VpBBox.Min.X)
-	ebox := tv.CharEndPos(textbuf.Pos{Ln: ln + 1})
+	ebox := tv.CharEndPos(lex.Pos{Ln: ln + 1})
 	if ln < tv.NLines-1 {
 		ebox.Y -= tv.LineHeight
 	}
@@ -3516,7 +3507,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	lnstr := fmt.Sprintf(lfmt, ln+1)
 	tv.LineNoRender.SetString(lnstr, &fst, &sty.UnContext, &sty.Text, true, 0, 0)
 	pos := mat32.Vec2{}
-	lst := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y // note: charstart pos includes descent
+	lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - +mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
 	pos.X = float32(tv.VpBBox.Min.X) + spc
 
@@ -3589,7 +3580,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	visSt := -1
 	visEd := -1
 	for ln := st; ln <= ed; ln++ {
-		lst := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y // note: charstart pos includes descent
+		lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 		led := lst + math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 		if int(math32.Ceil(led)) < tv.VpBBox.Min.Y {
 			continue
@@ -3668,7 +3659,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 			stln = 0
 		}
 		for ln := stln; ln < tv.NLines; ln++ {
-			cpos := tv.CharStartPos(textbuf.Pos{Ln: ln})
+			cpos := tv.CharStartPos(lex.Pos{Ln: ln})
 			if int(math32.Floor(cpos.Y)) >= tv.VpBBox.Min.Y { // top definitely on screen
 				stln = ln
 				break
@@ -3677,7 +3668,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 	}
 	lastln := stln
 	for ln := stln - 1; ln >= 0; ln-- {
-		cpos := tv.CharStartPos(textbuf.Pos{Ln: ln})
+		cpos := tv.CharStartPos(lex.Pos{Ln: ln})
 		if int(math32.Ceil(cpos.Y)) < tv.VpBBox.Min.Y { // top just offscreen
 			break
 		}
@@ -3691,7 +3682,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 func (tv *TextView) LastVisibleLine(stln int) int {
 	lastln := stln
 	for ln := stln + 1; ln < tv.NLines; ln++ {
-		pos := textbuf.Pos{Ln: ln}
+		pos := lex.Pos{Ln: ln}
 		cpos := tv.CharStartPos(pos)
 		if int(math32.Floor(cpos.Y)) > tv.VpBBox.Max.Y { // just offscreen
 			break
@@ -3704,15 +3695,15 @@ func (tv *TextView) LastVisibleLine(stln int) int {
 // PixelToCursor finds the cursor position that corresponds to the given pixel
 // location (e.g., from mouse click) which has had WinBBox.Min subtracted from
 // it (i.e, relative to upper left of text area)
-func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
+func (tv *TextView) PixelToCursor(pt image.Point) lex.Pos {
 	if tv.NLines == 0 {
-		return textbuf.PosZero
+		return lex.PosZero
 	}
 	sty := &tv.Sty
 	yoff := float32(tv.WinBBox.Min.Y)
 	stln := tv.FirstVisibleLine(0)
 	cln := stln
-	fls := tv.CharStartPos(textbuf.Pos{Ln: stln}).Y - yoff
+	fls := tv.CharStartPos(lex.Pos{Ln: stln}).Y - yoff
 	if pt.Y < int(math32.Floor(fls)) {
 		cln = stln
 	} else if pt.Y > tv.WinBBox.Max.Y {
@@ -3720,7 +3711,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 	} else {
 		got := false
 		for ln := stln; ln < tv.NLines; ln++ {
-			ls := tv.CharStartPos(textbuf.Pos{Ln: ln}).Y - yoff
+			ls := tv.CharStartPos(lex.Pos{Ln: ln}).Y - yoff
 			es := ls
 			es += math32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
 			if pt.Y >= int(math32.Floor(ls)) && pt.Y < int(math32.Ceil(es)) {
@@ -3736,7 +3727,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 	// fmt.Printf("cln: %v  pt: %v\n", cln, pt)
 	lnsz := tv.Buf.LineLen(cln)
 	if lnsz == 0 {
-		return textbuf.Pos{Ln: cln, Ch: 0}
+		return lex.Pos{Ln: cln, Ch: 0}
 	}
 	xoff := float32(tv.WinBBox.Min.X)
 	scrl := tv.WinBBox.Min.X - tv.ObjBBox.Min.X
@@ -3749,7 +3740,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 	si := 0
 	spoff := 0
 	nspan := len(tv.Renders[cln].Spans)
-	lstY := tv.CharStartPos(textbuf.Pos{Ln: cln}).Y - yoff
+	lstY := tv.CharStartPos(lex.Pos{Ln: cln}).Y - yoff
 	if nspan > 1 {
 		si = int((float32(pt.Y) - lstY) / tv.LineHeight)
 		si = ints.MinInt(si, nspan-1)
@@ -3763,18 +3754,18 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 	ri := sc
 	rsz := len(tv.Renders[cln].Spans[si].Text)
 	if rsz == 0 {
-		return textbuf.Pos{Ln: cln, Ch: spoff}
+		return lex.Pos{Ln: cln, Ch: spoff}
 	}
 	// fmt.Printf("sc: %v  rsz: %v\n", sc, rsz)
 
 	c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rsz-1) // end
-	rsp := math32.Floor(tv.CharStartPos(textbuf.Pos{Ln: cln, Ch: c}).X - xoff)
-	rep := math32.Ceil(tv.CharEndPos(textbuf.Pos{Ln: cln, Ch: c}).X - xoff)
+	rsp := math32.Floor(tv.CharStartPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
+	rep := math32.Ceil(tv.CharEndPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
 	if int(rep) < pt.X { // end of line
 		if si == nspan-1 {
 			c++
 		}
-		return textbuf.Pos{Ln: cln, Ch: c}
+		return lex.Pos{Ln: cln, Ch: c}
 	}
 
 	tooBig := false
@@ -3782,8 +3773,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 	if ri < rsz {
 		for rii := ri; rii < rsz; rii++ {
 			c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
-			rsp = math32.Floor(tv.CharStartPos(textbuf.Pos{Ln: cln, Ch: c}).X - xoff)
-			rep = math32.Ceil(tv.CharEndPos(textbuf.Pos{Ln: cln, Ch: c}).X - xoff)
+			rsp = math32.Floor(tv.CharStartPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
+			rep = math32.Ceil(tv.CharEndPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
 			// fmt.Printf("trying c: %v for pt: %v xoff: %v rsp: %v, rep: %v\n", c, pt, xoff, rsp, rep)
 			if pt.X >= int(rsp) && pt.X < int(rep) {
 				cch = c
@@ -3804,8 +3795,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 		// fmt.Printf("too big: %v\n", ri)
 		for rii := ri; rii >= 0; rii-- {
 			c, _ := tv.Renders[cln].SpanPosToRuneIdx(si, rii)
-			rsp := math32.Floor(tv.CharStartPos(textbuf.Pos{Ln: cln, Ch: c}).X - xoff)
-			rep := math32.Ceil(tv.CharEndPos(textbuf.Pos{Ln: cln, Ch: c}).X - xoff)
+			rsp := math32.Floor(tv.CharStartPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
+			rep := math32.Ceil(tv.CharEndPos(lex.Pos{Ln: cln, Ch: c}).X - xoff)
 			// fmt.Printf("too big: trying c: %v for pt: %v rsp: %v, rep: %v\n", c, pt, rsp, rep)
 			if pt.X >= int(rsp) && pt.X < int(rep) {
 				got = true
@@ -3815,12 +3806,12 @@ func (tv *TextView) PixelToCursor(pt image.Point) textbuf.Pos {
 			}
 		}
 	}
-	return textbuf.Pos{Ln: cln, Ch: cch}
+	return lex.Pos{Ln: cln, Ch: cch}
 }
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.
-func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos textbuf.Pos, selMode mouse.SelectModes) {
+func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode mouse.SelectModes) {
 	oldPos := tv.CursorPos
 	if newPos == oldPos {
 		return
@@ -3874,9 +3865,6 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos textbuf.Pos, selMo
 
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
-
-var DefaultIndentStrings = []string{"{"}
-var DefaultUnindentStrings = []string{"}"}
 
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
@@ -4178,10 +4166,10 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if tv.Buf.Opts.AutoIndent {
 				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 				tv.InsertAtCursor([]byte("\n"))
-				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
+				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				if tbe != nil {
 					tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln+1)
-					tv.SetCursorShow(textbuf.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+					tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 				tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 			} else {
@@ -4197,7 +4185,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			wupdt := tv.TopUpdateStart()
 			lasttab := tv.HasFlag(int(TextViewLastWasTabAI))
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
-				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
+				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				tv.CursorPos.Ch = cpos
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.RenderCursor(true)
@@ -4242,7 +4230,7 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			}
 			pos.Ch++
 			if close {
-				match, _ := textbuf.BracePair(kt.Rune)
+				match, _ := lex.BracePair(kt.Rune)
 				tv.InsertAtCursor([]byte(string(kt.Rune) + string(match)))
 				tv.lastAutoInsert = match
 			} else {
@@ -4256,10 +4244,10 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			tv.lastAutoInsert = 0
 			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 			tv.InsertAtCursor([]byte(string(kt.Rune)))
-			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln, DefaultIndentStrings, DefaultUnindentStrings)
+			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 			if tbe != nil {
 				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
-				tv.SetCursorShow(textbuf.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+				tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
 			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 		} else if tv.lastAutoInsert == kt.Rune { // if we type what we just inserted, just move past
@@ -4281,8 +4269,8 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			np.Ch--
 			tp, found := tv.Buf.BraceMatch(kt.Rune, np)
 			if found {
-				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, textbuf.Pos{tp.Ln, tp.Ch + 1}))
-				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(np, textbuf.Pos{cp.Ln, cp.Ch}))
+				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
+				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
 				if tv.CursorPos.Ln < tp.Ln {
 					tv.RenderLines(cp.Ln, tp.Ln)
 				} else {
@@ -4316,14 +4304,14 @@ func (tv *TextView) OpenLink(tl *gi.TextLink) {
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (tv *TextView) LinkAt(pos textbuf.Pos) (*gi.TextLink, bool) {
+func (tv *TextView) LinkAt(pos lex.Pos) (*gi.TextLink, bool) {
 	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
 	cpos := tv.CharStartPos(pos).ToPointCeil()
 	cpos.Y += 2
 	cpos.X += 2
-	lpos := tv.CharStartPos(textbuf.Pos{Ln: pos.Ln})
+	lpos := tv.CharStartPos(lex.Pos{Ln: pos.Ln})
 	rend := &tv.Renders[pos.Ln]
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
@@ -4337,7 +4325,7 @@ func (tv *TextView) LinkAt(pos textbuf.Pos) (*gi.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (tv *TextView) OpenLinkAt(pos textbuf.Pos) (*gi.TextLink, bool) {
+func (tv *TextView) OpenLinkAt(pos lex.Pos) (*gi.TextLink, bool) {
 	tl, ok := tv.LinkAt(pos)
 	if ok {
 		rend := &tv.Renders[pos.Ln]

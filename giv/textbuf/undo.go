@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/goki/pi/lex"
 )
 
 // UndoTrace -- set to true to get a report of undo actions
@@ -185,7 +187,7 @@ func (un *Undo) RedoNextIfGroup(gp int) *Edit {
 // for any edits that have taken place since that time (using the Undo stack).
 // del determines what to do with positions within a deleted region -- either move
 // to start or end of the region, or return an error
-func (un *Undo) AdjustPos(pos Pos, t time.Time, del AdjustPosDel) Pos {
+func (un *Undo) AdjustPos(pos lex.Pos, t time.Time, del AdjustPosDel) lex.Pos {
 	if un.Off {
 		return pos
 	}
@@ -193,7 +195,7 @@ func (un *Undo) AdjustPos(pos Pos, t time.Time, del AdjustPosDel) Pos {
 	defer un.Mu.Unlock()
 	for _, utbe := range un.Stack {
 		pos = utbe.AdjustPosIfAfterTime(pos, t, del)
-		if pos == PosErr {
+		if pos == lex.PosErr {
 			return pos
 		}
 	}
