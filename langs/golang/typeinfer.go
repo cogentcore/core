@@ -72,26 +72,28 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 			var astyp *parse.Ast
 			if ast.HasChildren() {
 				if strings.HasPrefix(ast.Nm, "ForRange") {
-					// vars are in first child, type is in second child, rest of code is on last node
-					astyp = ast.ChildAst(1)
+					gl.InferForRangeSymbolType(sy, fs, pkg)
 				} else {
 					astyp = ast.ChildAst(len(ast.Kids) - 1)
-				}
-				vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
-				if ok {
-					sy.Type = SymTypeNameForPkg(vty, pkg)
-					// if TraceTypes {
-					// 	fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
-					// }
-				} else {
-					sy.Type = TypeErr // actively mark as err so not re-processed
-					if TraceTypes {
-						fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
-						astyp.WriteTree(os.Stdout, 0)
+					vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+					if ok {
+						sy.Type = SymTypeNameForPkg(vty, pkg)
+						// if TraceTypes {
+						// 	fmt.Printf("namevar: %v  type: %v from ast\n", sy.Name, sy.Type)
+						// }
+					} else {
+						sy.Type = TypeErr // actively mark as err so not re-processed
+						if TraceTypes {
+							fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ast: %v\n", sy.Name, astyp.PathUnique())
+							astyp.WriteTree(os.Stdout, 0)
+						}
 					}
 				}
 			} else {
 				sy.Type = TypeErr
+				if TraceTypes {
+					fmt.Printf("InferSymbolType: NameVar: %v has no children\n", sy.Name)
+				}
 			}
 		case sy.Kind == token.NameConstant:
 			if !strings.HasPrefix(ast.Nm, "ConstSpec") {
@@ -174,12 +176,89 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 		sy.Children = nil // nuke!
 	} else {
 		for _, ss := range sy.Children {
-			if ss != sy {
-				// if TraceTypes {
-				// 	fmt.Printf("InferSymbolType: processing child: %v\n", ss)
-				// }
+			if TraceTypes {
+				fmt.Printf("InferSymbolType: processing child: %v\n", ss)
 				gl.InferSymbolType(ss, fs, pkg, funInternal)
 			}
+		}
+	}
+}
+
+// InferForRangeSymbolType infers the type of a ForRange expr
+// gets the container type properly
+func (gl *GoLang) InferForRangeSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.Symbol) {
+	ast := sy.Ast.(*parse.Ast)
+	if ast.NumChildren() < 2 {
+		sy.Type = TypeErr // actively mark as err so not re-processed
+		if TraceTypes {
+			fmt.Printf("InferSymbolType: ForRange NameVar: %v does not have expected 2+ children\n", sy.Name)
+			ast.WriteTree(os.Stdout, 0)
+		}
+		return
+	}
+	// vars are in first child, type is in second child, rest of code is on last node
+	astyp := ast.ChildAst(1)
+	vty, ok := gl.TypeFromAst(fs, pkg, nil, astyp)
+	if !ok {
+		sy.Type = TypeErr // actively mark as err so not re-processed
+		if TraceTypes {
+			fmt.Printf("InferSymbolType: NameVar: %v NOT resolved from ForRange ast: %v\n", sy.Name, astyp.PathUnique())
+			astyp.WriteTree(os.Stdout, 0)
+		}
+		return
+	}
+
+	varidx := 1 // which variable are we: first or second?
+	vast := ast.ChildAst(0)
+	if vast.NumChildren() <= 1 {
+		varidx = 0
+	} else if vast.ChildAst(0).Src == sy.Name {
+		varidx = 0
+	}
+	// vty is the container -- first el should be the type of element
+	switch vty.Kind {
+	case syms.Map: // need to know if we are the key or el
+		if len(vty.Els) > 1 {
+			tn := vty.Els[varidx].Type
+			if IsQualifiedType(vty.Name) && !IsQualifiedType(tn) {
+				pnm, _ := SplitType(vty.Name)
+				sy.Type = QualifyType(pnm, tn)
+			} else {
+				sy.Type = tn
+			}
+		} else {
+			sy.Type = TypeErr
+			if TraceTypes {
+				fmt.Printf("InferSymbolType: %s has ForRange over Map on type without an el type: %v\n", sy.Name, vty.Name)
+			}
+		}
+	case syms.Array, syms.List:
+		if varidx == 0 {
+			sy.Type = "int"
+		} else if len(vty.Els) > 0 {
+			tn := vty.Els[0].Type
+			if IsQualifiedType(vty.Name) && !IsQualifiedType(tn) {
+				pnm, _ := SplitType(vty.Name)
+				sy.Type = QualifyType(pnm, tn)
+			} else {
+				sy.Type = tn
+			}
+		} else {
+			sy.Type = TypeErr
+			if TraceTypes {
+				fmt.Printf("InferSymbolType: %s has ForRange over Array, List on type without an el type: %v\n", sy.Name, vty.Name)
+			}
+		}
+	case syms.String:
+		if varidx == 0 {
+			sy.Type = "int"
+		} else {
+			sy.Type = "rune"
+		}
+	default:
+		sy.Type = TypeErr
+		if TraceTypes {
+			fmt.Printf("InferSymbolType: %s has ForRange over non-container type: %v kind: %v\n", sy.Name, vty.Name, vty.Kind)
 		}
 	}
 }

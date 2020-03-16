@@ -308,8 +308,8 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		keyty, kok := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		valty, vok := gl.SubTypeFromAst(fs, pkg, tyast, 1)
 		if kok && vok {
-			ty.Els.Add("key", keyty.Name)
-			ty.Els.Add("val", valty.Name)
+			ty.Els.Add("key", SymTypeNameForPkg(keyty, pkg))
+			ty.Els.Add("val", SymTypeNameForPkg(valty, pkg))
 			if newTy {
 				ty.Name = "map[" + keyty.Name + "]" + valty.Name
 			}
@@ -320,7 +320,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		ty.Kind = syms.List
 		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 0)
 		if ok {
-			ty.Els.Add("val", valty.Name)
+			ty.Els.Add("val", SymTypeNameForPkg(valty, pkg))
 			if newTy {
 				ty.Name = "[]" + valty.Name
 			}
@@ -331,7 +331,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 		ty.Kind = syms.Array
 		valty, ok := gl.SubTypeFromAst(fs, pkg, tyast, 1)
 		if ok {
-			ty.Els.Add("val", valty.Name)
+			ty.Els.Add("val", SymTypeNameForPkg(valty, pkg))
 			if newTy {
 				ty.Name = "[]" + valty.Name // todo: get size from child0, set to Size
 			}
@@ -359,7 +359,7 @@ func (gl *GoLang) TypeFromAstComp(fs *pi.FileState, pkg *syms.Symbol, ty *syms.T
 				if ok {
 					nms := gl.NamesFromAst(fs, pkg, fld, 0)
 					for _, nm := range nms {
-						ty.Els.Add(nm, fldty.Name)
+						ty.Els.Add(nm, SymTypeNameForPkg(fldty, pkg))
 					}
 				}
 			case "AnonQualField":

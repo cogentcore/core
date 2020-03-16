@@ -162,6 +162,9 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			tyast.WriteTree(os.Stdout, 0)
 		}
 		return nil, tyast, false
+	case tnm == "DePtrExpr":
+		sty, got := gl.SubTypeFromAst(fs, pkg, tyast, 0) // first child
+		return sty, nil, got
 	case strings.HasSuffix(tnm, "Expr"):
 		// note: could figure out actual numerical type, but in practice we don't care
 		// for lookup / completion, so ignoring for now.
@@ -269,7 +272,7 @@ func (gl *GoLang) TypeFromAstType(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			sty, got := gl.TypeFromAstLit(fs, pkg, nil, nxt)
 			return sty, nil, got
 		case nxt.Nm == "TypeAssert":
-			sty, got := gl.SubTypeFromAst(fs, pkg, nxt, 1) // type is second child
+			sty, got := gl.SubTypeFromAst(fs, origPkg, nxt, 1) // type is second child, switch back to orig pkg
 			return sty, nil, got
 		case nxt.Nm == "Slice":
 			continue
