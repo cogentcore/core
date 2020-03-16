@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // see io.go for IO input / output methods

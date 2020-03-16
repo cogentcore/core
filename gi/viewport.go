@@ -13,10 +13,10 @@ import (
 	"log"
 	"sync"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)

@@ -8,11 +8,11 @@ import (
 	"image"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Text renders SVG text-- it handles both text and tspan elements (a tspan is

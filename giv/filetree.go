@@ -33,7 +33,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/vci"
+	"github.com/goki/vci"
 )
 
 // DirAndFile returns the final dir and file name.

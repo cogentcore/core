@@ -9,9 +9,9 @@ import (
 	"log"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/mat32"
 )
 
 // https://learnopengl.com/Lighting/Basic-Lighting

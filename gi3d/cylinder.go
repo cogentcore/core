@@ -12,8 +12,8 @@ package gi3d
 
 import (
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Cylinder is a generalized cylinder shape, including a cone

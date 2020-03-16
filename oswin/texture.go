@@ -14,7 +14,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/goki/gi/mat32"
+	"github.com/goki/mat32"
 )
 
 // Texture is a pixel buffer on the GPU, and is synonymous with the

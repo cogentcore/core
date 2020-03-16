@@ -9,8 +9,8 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
+	"github.com/goki/mat32"
 )
 
 func main() {

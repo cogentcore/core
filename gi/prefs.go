@@ -14,11 +14,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"github.com/goki/pi/langs/golang"
 )
 

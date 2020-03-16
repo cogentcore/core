@@ -9,9 +9,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 )
 
 // style implements CSS-based styling using ki.Props to hold name / vals

@@ -13,9 +13,9 @@ import (
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 )
 
 func main() {
@@ -139,7 +139,7 @@ func mainrun() {
 	trow.SetStretchMaxWidth()
 
 	title := gi.AddNewLabel(trow, "title", `This is a demonstration of the
-<a href="https://github.com/goki/gi/gi">GoGi</a> <i>3D</i> Framework<br>
+<a href="https://github.com/goki/gi">GoGi</a> <i>3D</i> Framework<br>
 See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
 	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 	title.SetProp("text-align", gi.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..

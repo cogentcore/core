@@ -11,9 +11,9 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Note: Raw line rendering via OpenGL is not very effective

@@ -15,9 +15,9 @@ import (
 	"image/draw"
 	"log"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/mat32"
 )
 
 func (app *appImpl) initDrawProgs() error {

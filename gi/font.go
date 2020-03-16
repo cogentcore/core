@@ -16,7 +16,8 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/freetype/truetype"
-	"github.com/goki/gi/mat32"
+	"github.com/goki/mat32"
+
 	// "github.com/golang/freetype/truetype"
 
 	"golang.org/x/image/font"

@@ -8,10 +8,10 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // GiEditor represents a struct, creating a property editor of the fields --

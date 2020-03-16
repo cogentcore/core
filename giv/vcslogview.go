@@ -9,7 +9,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	"github.com/goki/pi/vci"
+	"github.com/goki/vci"
 )
 
 // VCSLogView is a view of the variables

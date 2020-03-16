@@ -8,8 +8,8 @@ import (
 	"math"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the

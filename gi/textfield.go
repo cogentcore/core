@@ -14,7 +14,6 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -24,6 +23,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
 )

@@ -8,10 +8,10 @@ import (
 	"image"
 	"log"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Frame is a Layout that renders a background according to the

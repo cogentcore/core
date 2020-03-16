@@ -5,7 +5,7 @@
 package gi3d
 
 import (
-	"github.com/goki/gi/mat32"
+	"github.com/goki/mat32"
 )
 
 // BBox contains bounding box and other gross solid properties

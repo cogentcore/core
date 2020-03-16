@@ -19,8 +19,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
+
 	// "github.com/rcoreilly/rasterx"
 	"github.com/srwiley/rasterx"
 	"golang.org/x/net/html/charset"

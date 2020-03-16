@@ -17,13 +17,13 @@ import (
 	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/driver/internal/event"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/gi/oswin/window"
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/mat32"
 )
 
 type windowImpl struct {

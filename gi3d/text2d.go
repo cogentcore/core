@@ -9,11 +9,11 @@ import (
 	"image/draw"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Text2D presents 2D rendered text on a vertically-oriented plane, using a texture.

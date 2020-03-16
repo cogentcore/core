@@ -8,8 +8,8 @@ import (
 	"log"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/mat32"
 )
 
 // Vectors manages arrays of vectors that are processed as inputs to a shader program

@@ -18,10 +18,10 @@ import (
 	"os"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/driver/internal/drawer"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/mat32"
 )
 
 // note: use a different interface for different formats of "textures" such as a

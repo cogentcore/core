@@ -1474,7 +1474,9 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 			if dpop == cpop {
 				w.ClosePopup(dpop)
 			} else {
-				fmt.Printf("zombie popup: %v  cur: %v\n", dpop.Name(), cpop.Name())
+				if WinEventTrace {
+					fmt.Printf("zombie popup: %v  cur: %v\n", dpop.Name(), cpop.Name())
+				}
 			}
 		}
 	}

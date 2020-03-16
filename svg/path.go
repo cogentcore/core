@@ -13,9 +13,9 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Path renders SVG data sequences that can render just about anything

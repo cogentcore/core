@@ -11,10 +11,10 @@ import (
 	"sort"
 
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 	"golang.org/x/image/colornames"
 )
 

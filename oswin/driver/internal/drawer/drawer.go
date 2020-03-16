@@ -14,8 +14,8 @@ import (
 	"image"
 	"image/draw"
 
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
+	"github.com/goki/mat32"
 )
 
 // Copy implements the Copy method of the oswin.Drawer interface by calling

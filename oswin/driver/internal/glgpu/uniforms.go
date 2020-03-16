@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/gpu"
+	"github.com/goki/mat32"
 )
 
 // Uniform represents a single uniform variable, which can be contained within a

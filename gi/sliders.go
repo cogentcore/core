@@ -9,13 +9,13 @@ import (
 	"image"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // SliderMinThumbSize is the minimum thumb size, even if computed value would make it smaller

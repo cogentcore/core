@@ -13,7 +13,6 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -22,6 +21,7 @@ import (
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // LayoutData contains all the data needed to specify the layout of an item

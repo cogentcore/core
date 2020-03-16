@@ -20,7 +20,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
-	"github.com/goki/pi/vci"
+	"github.com/goki/vci"
 )
 
 // FileInfo represents the information about a given file / directory,

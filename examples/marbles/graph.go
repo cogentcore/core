@@ -16,10 +16,10 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 var colors = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}

@@ -16,8 +16,8 @@ import (
 
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin/cursor"
+	"github.com/goki/mat32"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"

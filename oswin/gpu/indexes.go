@@ -4,7 +4,7 @@
 
 package gpu
 
-import "github.com/goki/gi/mat32"
+import "github.com/goki/mat32"
 
 // IndexesBuffer manages a buffer of indexes for index-based rendering
 // (i.e., GL_ELEMENT_ARRAY_BUFFER for glDrawElements calls in OpenGL).

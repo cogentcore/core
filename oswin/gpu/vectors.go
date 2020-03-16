@@ -5,8 +5,8 @@
 package gpu
 
 import (
-	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Vectors manages arrays of vectors that are processed as inputs to a shader program

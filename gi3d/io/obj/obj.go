@@ -25,7 +25,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
-	"github.com/goki/gi/mat32"
+	"github.com/goki/mat32"
 )
 
 // note: gimain imports "github.com/goki/gi/gi3d/io/obj" to get this code
