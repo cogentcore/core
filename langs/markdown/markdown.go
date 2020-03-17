@@ -5,6 +5,7 @@
 package markdown
 
 import (
+	"github.com/goki/ki/indent"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
@@ -86,4 +87,23 @@ func (ml *MarkdownLang) CompleteEdit(fs *pi.FileStates, text string, cp int, com
 func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	// n/a
 	return nil
+}
+
+// IndentLine returns the indentation level for given line based on
+// previous line's indentation level, and any delta change based on
+// e.g., brackets starting or ending the previous or current line, or
+// other language-specific keywords.  See lex.BracketIndentLine for example.
+// Indent level is in increments of tabSz for spaces, and tabs for tabs.
+// Operates on rune source with markup lex tags per line.
+func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+	pInd, pLn, ichr = lex.PrevLineIndent(src, tags, ln, tabSz)
+	delInd = 0
+	return
+}
+
+// AutoBracket returns what to do when a user types a starting bracket character
+// (bracket, brace, paren) at end of current line (i.e., while typing).
+// match = insert the matching ket, and newLine = insert a new line.
+func (ml *MarkdownLang) AutoBracket(fs *pi.FileStates, bra rune) (match, newLine bool) {
+	return true, false
 }

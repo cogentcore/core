@@ -5,6 +5,7 @@
 package pi
 
 import (
+	"github.com/goki/ki/indent"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/syms"
@@ -66,6 +67,21 @@ type Lang interface {
 	// within the file.  This can either be a file and position in file to
 	// open and view, or direct text to show.
 	Lookup(fs *FileStates, text string, pos lex.Pos) complete.Lookup
+
+	// IndentLine returns the indentation level for given line based on
+	// previous line's indentation level, and any delta change based on
+	// e.g., brackets starting or ending the previous or current line, or
+	// other language-specific keywords.  See lex.BracketIndentLine for example.
+	// Indent level is in increments of tabSz for spaces, and tabs for tabs.
+	// Operates on rune source with markup lex tags per line.
+	IndentLine(fs *FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char)
+
+	// AutoBracket returns what to do when a user types a starting bracket character
+	// (bracket, brace, paren) at end of current line (i.e., while typing).
+	// match = insert the matching ket, and newLine = insert a new line.
+	AutoBracket(fs *FileStates, bra rune) (match, newLine bool)
+
+	// below are more implementational methods not called externally typically
 
 	// ParseDir does the complete processing of a given directory, optionally including
 	// subdirectories, and optionally forcing the re-processing of the directory(s),

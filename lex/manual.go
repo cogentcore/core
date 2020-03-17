@@ -62,6 +62,9 @@ func FirstWordApostrophe(str string) string {
 			}
 			break
 		}
+		if len(rstr) == 0 && s == '\'' { // can't start with '
+			continue
+		}
 		rstr += string(s)
 	}
 	rstr = strings.TrimRight(rstr, "'") // get rid of any trailing ones!

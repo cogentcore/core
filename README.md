@@ -16,13 +16,21 @@ The `pi` repository is also home to various other basic file-level packages incl
 
 * `filecat` -- categorizes file types based on suffix and magic cookies, etc.  Uses both [gabriel-vasile/mimetype](https://github.com/gabriel-vasile/mimetype) and [h2non/filetype](https://github.com/h2non/filetype) packages.
 
-* `vci` -- provides a version control system (VCS, e.g., git) interface, building on core provided by [Masterminds/vcs](https://github.com/Masterminds/vcs).
-
 * `spell` -- spell-checking based on [sajari/fuzzy]("https://github.com/sajari/fuzzy").
 
 * `complete` -- basic completion / lookup infrastructure.
 
 * `lsp` -- language server protocol interface (incomplete).
+
+# Overview of language support
+
+`pi/lang.go` defines the `Lang` interface, which each supported language implements (at least a nil stub) -- at a minimum the `Parser`, `ParseFile`(which includes just lexing if that is all that is needed), and `HiLine` methods should be implemented, to drive syntax highlighting / coloring / tagging.  Optionally, completion, lookup, etc can be implemented.  See `langs/golang` for a full implementation, and `langs/tex` for a more minimal lex-only case.
+
+`pi/langsup.go` has tables of supported languages and their properties, in `LangProps`.
+
+`pi` in general has overall management methods for coordinating the `lex` (lexing) and `parse` parsing steps.
+
+`lex` also has a variety of random `manual` and `indent` functions that are useful for special-case manual parsing cases.
 
 # Parsing Strategy
 

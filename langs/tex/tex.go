@@ -5,8 +5,10 @@
 package tex
 
 import (
+	"strings"
 	"time"
 
+	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/langs/bibtex"
 	"github.com/goki/pi/lex"
@@ -82,4 +84,67 @@ func (tl *TexLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Line {
 func (tl *TexLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol {
 	// n/a
 	return nil
+}
+
+// IndentLine returns the indentation level for given line based on
+// previous line's indentation level, and any delta change based on
+// e.g., brackets starting or ending the previous or current line, or
+// other language-specific keywords.  See lex.BracketIndentLine for example.
+// Indent level is in increments of tabSz for spaces, and tabs for tabs.
+// Operates on rune source with markup lex tags per line.
+func (tl *TexLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
+	pInd, pLn, ichr = lex.PrevLineIndent(src, tags, ln, tabSz)
+
+	curUnd, _ := lex.LineStartEndBracket(src[ln], tags[ln])
+	_, prvInd := lex.LineStartEndBracket(src[pLn], tags[pLn])
+
+	delInd = 0
+	switch {
+	case prvInd && curUnd:
+		delInd = 0 // offset
+	case prvInd:
+		delInd = 1 // indent
+	case curUnd:
+		delInd = -1 // undent
+	}
+
+	pst := lex.FirstNonSpaceRune(src[pLn])
+	cst := lex.FirstNonSpaceRune(src[ln])
+
+	pbeg := false
+	if pst >= 0 {
+		sts := string(src[pLn][pst:])
+		if strings.HasPrefix(sts, "\\begin{") {
+			pbeg = true
+		}
+	}
+
+	cend := false
+	if cst >= 0 {
+		sts := string(src[ln][cst:])
+		if strings.HasPrefix(sts, "\\end{") {
+			cend = true
+		}
+	}
+
+	switch {
+	case pbeg && cend:
+		delInd = 0
+	case pbeg:
+		delInd = 1
+	case cend:
+		delInd = -1
+	}
+
+	if pInd == 0 && delInd < 0 { // error..
+		delInd = 0
+	}
+	return
+}
+
+// AutoBracket returns what to do when a user types a starting bracket character
+// (bracket, brace, paren) at end of current line (i.e., while typing).
+// match = insert the matching ket, and newLine = insert a new line.
+func (tl *TexLang) AutoBracket(fs *pi.FileStates, bra rune) (match, newLine bool) {
+	return true, false
 }
