@@ -4659,6 +4659,7 @@ func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
 	case gi.FocusLost:
 		tv.ClearFlag(int(TextViewFocusActive))
 		// tv.EditDone()
+		tv.StopCursor() // make sure no cursor
 		tv.UpdateSig()
 		// fmt.Printf("lost focus: %v\n", tv.Nm)
 	case gi.FocusGot:
