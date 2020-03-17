@@ -1977,9 +1977,14 @@ func (tb *TextBuf) IndentLine(ln, ind int) *textbuf.Edit {
 func (tb *TextBuf) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 	tabSz := tb.Opts.TabSize
 
-	// todo: replace with language-specific call now!
 	tb.LinesMu.RLock()
-	pInd, delInd, _, _ := lex.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
+	lp, _ := pi.LangSupport.Props(tb.PiState.Sup)
+	var pInd, delInd int
+	if lp != nil && lp.Lang != nil {
+		pInd, delInd, _, _ = lp.Lang.IndentLine(&tb.PiState, tb.Lines, tb.HiTags, ln, tabSz)
+	} else {
+		pInd, delInd, _, _ = lex.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
+	}
 	tb.LinesMu.RUnlock()
 	ichr := tb.Opts.IndentChar()
 

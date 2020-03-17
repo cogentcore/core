@@ -32,6 +32,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
+	"github.com/goki/pi/pi"
 	"github.com/goki/pi/token"
 )
 
@@ -4165,10 +4166,11 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			kt.SetProcessed()
 			if tv.Buf.Opts.AutoIndent {
 				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
+				tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
 				tv.InsertAtCursor([]byte("\n"))
 				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				if tbe != nil {
-					tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln+1)
+					// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln+1)
 					tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 				tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
@@ -4187,12 +4189,12 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				tv.CursorPos.Ch = cpos
-				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+				// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.RenderCursor(true)
 				gotTabAI = true
 			} else {
 				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Sty.Text.TabSize))
-				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+				// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
 			tv.TopUpdateEnd(wupdt)
 			tv.ISpellKeyInput(kt)
@@ -4230,9 +4232,28 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			}
 			pos.Ch++
 			if close {
-				match, _ := lex.BracePair(kt.Rune)
-				tv.InsertAtCursor([]byte(string(kt.Rune) + string(match)))
-				tv.lastAutoInsert = match
+				match := true
+				newLine := false
+				lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
+				if lp != nil && lp.Lang != nil {
+					match, newLine = lp.Lang.AutoBracket(&tv.Buf.PiState, kt.Rune)
+				}
+				if match {
+					ket, _ := lex.BracePair(kt.Rune)
+					if newLine && tv.Buf.Opts.AutoIndent {
+						tv.InsertAtCursor([]byte(string(kt.Rune) + "\n"))
+						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
+						if tbe != nil {
+							pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
+							tv.SetCursorShow(pos)
+						}
+						tv.InsertAtCursor([]byte("\n" + string(ket)))
+						tv.Buf.AutoIndent(tv.CursorPos.Ln)
+					} else {
+						tv.InsertAtCursor([]byte(string(kt.Rune) + string(ket)))
+					}
+					tv.lastAutoInsert = ket
+				}
 			} else {
 				tv.InsertAtCursor([]byte(string(kt.Rune)))
 			}
@@ -4246,7 +4267,7 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			tv.InsertAtCursor([]byte(string(kt.Rune)))
 			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 			if tbe != nil {
-				tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+				// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
 			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
