@@ -29,6 +29,7 @@ import (
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
+	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -64,8 +65,9 @@ const (
 type FileTree struct {
 	FileNode
 	ExtFiles  []string     `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`
-	OpenDirs  OpenDirMap   `desc:"records which directories within the tree (encoded using paths relative to root) are open (i.e., have been opened by the user) -- can persist this to restore prior view of a tree"`
-	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is alpha sorted"`
+	Dirs      DirFlagMap   `desc:"records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"`
+	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`
+	inOpenAll bool         `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
 	NodeType  reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
 }
 
@@ -84,21 +86,22 @@ func (ft *FileTree) CopyFieldsFrom(frm interface{}) {
 
 // OpenPath opens a filetree at given directory path -- reads all the files at
 // given path into this tree -- uses config children to preserve extra info
-// already stored about files.  Only paths listed in OpenDirs will be opened.
+// already stored about files.  Only paths listed in Dirs will be opened.
 func (ft *FileTree) OpenPath(path string) {
 	ft.FRoot = ft // we are our own root..
 	if ft.NodeType == nil {
 		ft.NodeType = KiT_FileNode
 	}
-	ft.OpenDirs.ClearFlags()
+	ft.Dirs.ClearMarks()
 	ft.ReadDir(path)
+	// ft.Dirs.DeleteStale()
 }
 
 // UpdateNewFile should be called with path to a new file that has just been
 // created -- will update view to show that file, and if that file doesn't
 // exist, it updates the directory containing that file
 func (ft *FileTree) UpdateNewFile(filename string) {
-	ft.OpenDirsTo(filename)
+	ft.DirsTo(filename)
 	fpath, _ := filepath.Split(filename)
 	fpath = filepath.Clean(fpath)
 	if fn, ok := ft.FindFile(filename); ok {
@@ -118,17 +121,32 @@ func (ft *FileTree) IsDirOpen(fpath gi.FileName) bool {
 	if fpath == ft.FPath { // we are always open
 		return true
 	}
-	return ft.OpenDirs.IsOpen(ft.RelPath(fpath))
+	return ft.Dirs.IsOpen(ft.RelPath(fpath))
 }
 
 // SetDirOpen sets the given directory path to be open
 func (ft *FileTree) SetDirOpen(fpath gi.FileName) {
-	ft.OpenDirs.SetOpen(ft.RelPath(fpath))
+	ft.Dirs.SetOpen(ft.RelPath(fpath), true)
 }
 
 // SetDirClosed sets the given directory path to be closed
 func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
-	ft.OpenDirs.SetClosed(ft.RelPath(fpath))
+	ft.Dirs.SetOpen(ft.RelPath(fpath), false)
+}
+
+// SetDirSortBy sets the given directory path sort by option
+func (ft *FileTree) SetDirSortBy(fpath gi.FileName, modTime bool) {
+	ft.Dirs.SetSortBy(ft.RelPath(fpath), modTime)
+}
+
+// DirSortByName returns true if dir is sorted by name
+func (ft *FileTree) DirSortByName(fpath gi.FileName) bool {
+	return ft.Dirs.SortByName(ft.RelPath(fpath))
+}
+
+// DirSortByModTime returns true if dir is sorted by mod time
+func (ft *FileTree) DirSortByModTime(fpath gi.FileName) bool {
+	return ft.Dirs.SortByModTime(ft.RelPath(fpath))
 }
 
 // AddExtFile adds an external file outside of root of file tree
@@ -375,6 +393,7 @@ func (fn *FileNode) UpdateDir() {
 	// fmt.Printf("path: %v  node: %v\n", path, fn.PathUnique())
 	repo, rnode := fn.Repo()
 	fn.SetOpen()
+	fn.FRoot.SetDirOpen(fn.FPath)
 	config := fn.ConfigOfFiles(path)
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
@@ -385,6 +404,7 @@ func (fn *FileNode) UpdateDir() {
 	}
 	mods, updt := fn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
 	if mods {
+		fn.SetFlag(int(ki.ChildAdded)) // ensure it does full update
 		// fmt.Printf("got mods: %v\n", path)
 	}
 	// always go through kids, regardless of mods
@@ -444,12 +464,29 @@ func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 		}
 		return nil
 	})
+	modSort := fn.FRoot.DirSortByModTime(gi.FileName(path))
 	if fn.FRoot.DirsOnTop {
+		if modSort {
+			fn.SortConfigByModTime(config2) // just sort files, not dirs
+		}
 		for _, tn := range config2 {
 			config1 = append(config1, tn)
 		}
+	} else {
+		if modSort {
+			fn.SortConfigByModTime(config1) // all
+		}
 	}
 	return config1
+}
+
+// SortConfigByModTime sorts given config list by mod time
+func (fn *FileNode) SortConfigByModTime(confg kit.TypeAndNameList) {
+	sort.Slice(confg, func(i, j int) bool {
+		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
+		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
+		return ifn.ModTime().After(jfn.ModTime()) // descending
+	})
 }
 
 // SetNodePath sets the path for given node and updates it based on associated file
@@ -464,7 +501,7 @@ func (fn *FileNode) SetNodePath(path string) error {
 		return err
 	}
 	if fn.IsDir() && !fn.IsIrregular() {
-		if fn.FRoot.IsDirOpen(fn.FPath) {
+		if fn.FRoot.inOpenAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
 	}
@@ -500,7 +537,9 @@ func (fn *FileNode) UpdateNode() error {
 		return nil
 	}
 	if fn.IsDir() {
-		if fn.FRoot.IsDirOpen(fn.FPath) {
+		if fn.FRoot.inOpenAll || fn.FRoot.IsDirOpen(fn.FPath) {
+			fn.SetOpen()
+			fn.FRoot.SetDirOpen(fn.FPath)
 			repo, rnode := fn.Repo()
 			if repo != nil {
 				rnode.UpdateRepoFiles()
@@ -529,7 +568,40 @@ func (fn *FileNode) OpenDir() {
 func (fn *FileNode) CloseDir() {
 	fn.SetClosed()
 	fn.FRoot.SetDirClosed(fn.FPath)
-	// todo: do anything with open files within directory??
+	// note: not doing anything with open files within directory..
+}
+
+// SortBy determines how to sort the files in the directory -- default is alpha by name,
+// optionally can be sorted by modification time.
+func (fn *FileNode) SortBy(modTime bool) {
+	fn.FRoot.SetDirSortBy(fn.FPath, modTime)
+	fn.UpdateNode()
+	fn.UpdateSig() // make sure
+}
+
+// OpenAll opens all directories under this one
+func (fn *FileNode) OpenAll() {
+	fn.FRoot.inOpenAll = true
+	fn.SetOpen()
+	fn.FRoot.SetDirOpen(fn.FPath)
+	fn.UpdateNode()
+	fn.FRoot.inOpenAll = false
+	// note: FileTreeView must actually do the open all too!
+}
+
+// CloseAll closes all directories under this one, this included
+func (fn *FileNode) CloseAll() {
+	fn.SetClosed()
+	fn.FRoot.SetDirClosed(fn.FPath)
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		if sfn.IsDir() {
+			sfn.SetClosed()
+			sfn.FRoot.SetDirClosed(sfn.FPath)
+		}
+		return true
+	})
+	// note: FileTreeView must actually do the close all too!
 }
 
 // OpenBuf opens the file in its buffer if it is not already open.
@@ -571,12 +643,12 @@ func (fn *FileNode) RelPath(fpath gi.FileName) string {
 	return RelFilePath(string(fpath), string(fn.FPath))
 }
 
-// OpenDirsTo opens all the directories above the given filename, and returns the node
+// DirsTo opens all the directories above the given filename, and returns the node
 // for element at given path (can be a file or directory itself -- not opened -- just returned)
-func (fn *FileNode) OpenDirsTo(path string) (*FileNode, error) {
+func (fn *FileNode) DirsTo(path string) (*FileNode, error) {
 	pth, err := filepath.Abs(path)
 	if err != nil {
-		log.Printf("giv.FileNode OpenDirsTo path %v could not be turned into an absolute path: %v\n", path, err)
+		log.Printf("giv.FileNode DirsTo path %v could not be turned into an absolute path: %v\n", path, err)
 		return nil, err
 	}
 	rpath := fn.RelPath(gi.FileName(pth))
@@ -640,7 +712,7 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 	}
 
 	if strings.HasPrefix(fneff, string(fn.FPath)) { // full path
-		ffn, err := fn.OpenDirsTo(fneff)
+		ffn, err := fn.DirsTo(fneff)
 		if err == nil {
 			return ffn, true
 		}
@@ -1165,27 +1237,6 @@ func (fn *FileNode) UpdateAllVcs() {
 	})
 }
 
-// FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
-// and storage is an int64
-type FileNodeFlags int64
-
-//go:generate stringer -type=FileNodeFlags
-
-var KiT_FileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, kit.BitFlag, nil)
-
-const (
-	// FileNodeOpen means file is open -- for directories, this means that
-	// sub-files should be / have been loaded -- for files, means that they
-	// have been opened e.g., for editing
-	FileNodeOpen FileNodeFlags = FileNodeFlags(ki.FlagsN) + iota
-
-	// FileNodeSymLink indicates that file is a symbolic link -- file info is
-	// all for the target of the symlink
-	FileNodeSymLink
-
-	FileNodeFlagsN
-)
-
 var FileNodeProps = ki.Props{
 	"EnumType:Flag": KiT_FileNodeFlags,
 	"CallMethods": ki.PropSlice{
@@ -1240,57 +1291,142 @@ var FileNodeProps = ki.Props{
 }
 
 //////////////////////////////////////////////////////////////////////////////
-//    OpenDirMap
+//    FileNodeFlags
 
-// OpenDirMap is a map for encoding directories that are open in the file
+// FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
+// and storage is an int64
+type FileNodeFlags int64
+
+//go:generate stringer -type=FileNodeFlags
+
+var KiT_FileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, kit.BitFlag, nil)
+
+const (
+	// FileNodeOpen means file is open -- for directories, this means that
+	// sub-files should be / have been loaded -- for files, means that they
+	// have been opened e.g., for editing
+	FileNodeOpen FileNodeFlags = FileNodeFlags(ki.FlagsN) + iota
+
+	// FileNodeSymLink indicates that file is a symbolic link -- file info is
+	// all for the target of the symlink
+	FileNodeSymLink
+
+	FileNodeFlagsN
+)
+
+//////////////////////////////////////////////////////////////////////////////
+//    DirFlagMap
+
+// DirFlags are flags on directories: Open, SortBy etc
+// These flags are stored in the DirFlagMap for persistence.
+type DirFlags int32
+
+//go:generate stringer -type=DirFlags
+
+var KiT_DirFlags = kit.Enums.AddEnum(DirFlagsN, kit.BitFlag, nil)
+
+const (
+	// DirMark means directory is marked -- unmarked entries are deleted post-update
+	DirMark DirFlags = iota
+
+	// DirIsOpen means directory is open -- else closed
+	DirIsOpen
+
+	// DirSortByName means sort the directory entries by name.
+	// this is mutex with other sorts -- keeping option open for non-binary sort choices.
+	DirSortByName
+
+	// DirSortByModTime means sort the directory entries by modification time
+	DirSortByModTime
+
+	DirFlagsN
+)
+
+// DirFlagMap is a map for encoding directories that are open in the file
 // tree.  The strings are typically relative paths.  The bool value is used to
 // mark active paths and inactive (unmarked) ones can be removed.
-type OpenDirMap map[string]bool
+type DirFlagMap map[string]DirFlags
 
 // Init initializes the map
-func (dm *OpenDirMap) Init() {
+func (dm *DirFlagMap) Init() {
 	if *dm == nil {
-		*dm = make(OpenDirMap, 1000)
+		*dm = make(DirFlagMap, 1000)
 	}
 }
 
-// IsOpen returns true if path is listed on the open map
-func (dm *OpenDirMap) IsOpen(path string) bool {
+// IsOpen returns true if path has IsOpen bit flag set
+func (dm *DirFlagMap) IsOpen(path string) bool {
 	dm.Init()
-	if _, ok := (*dm)[path]; ok {
-		(*dm)[path] = true // mark
-		return true
+	if df, ok := (*dm)[path]; ok {
+		return bitflag.Has32(int32(df), int(DirIsOpen))
 	}
 	return false
 }
 
-// SetOpen adds the given path to the open map
-func (dm *OpenDirMap) SetOpen(path string) {
+// SetOpenState sets the given directory's open flag
+func (dm *DirFlagMap) SetOpen(path string, open bool) {
 	dm.Init()
-	(*dm)[path] = true
+	df, _ := (*dm)[path] // 2nd arg makes it ok to fail
+	bitflag.SetState32((*int32)(&df), open, int(DirIsOpen))
+	(*dm)[path] = df
 }
 
-// SetClosed removes given path from the open map
-func (dm *OpenDirMap) SetClosed(path string) {
+// SortByName returns true if path is sorted by name (default if not in map)
+func (dm *DirFlagMap) SortByName(path string) bool {
 	dm.Init()
-	delete(*dm, path)
+	if df, ok := (*dm)[path]; ok {
+		return bitflag.Has32(int32(df), int(DirSortByName))
+	}
+	return true
 }
 
-// ClearFlags sets all the bool flags to false -- do this prior to traversing
-// full set of active paths -- can then call DeleteStale to get rid of unused paths
-func (dm *OpenDirMap) ClearFlags() {
+// SortByModTime returns true if path is sorted by mod time
+func (dm *DirFlagMap) SortByModTime(path string) bool {
 	dm.Init()
-	for key, _ := range *dm {
-		(*dm)[key] = false
+	if df, ok := (*dm)[path]; ok {
+		return bitflag.Has32(int32(df), int(DirSortByModTime))
+	}
+	return false
+}
+
+// SetSortBy sets the given directory's sort by option
+func (dm *DirFlagMap) SetSortBy(path string, modTime bool) {
+	dm.Init()
+	df, _ := (*dm)[path] // 2nd arg makes it ok to fail
+	mask := bitflag.Mask32(int(DirSortByName), int(DirSortByModTime))
+	bitflag.ClearMask32((*int32)(&df), mask)
+	if modTime {
+		bitflag.Set32((*int32)(&df), int(DirSortByModTime))
+	} else {
+		bitflag.Set32((*int32)(&df), int(DirSortByName))
+	}
+	(*dm)[path] = df
+}
+
+// SetMark sets the mark flag indicating we visited file
+func (dm *DirFlagMap) SetMark(path string) {
+	dm.Init()
+	df, _ := (*dm)[path] // 2nd arg makes it ok to fail
+	bitflag.Set32((*int32)(&df), int(DirMark))
+	(*dm)[path] = df
+}
+
+// ClearMarks clears all the marks -- do this prior to traversing
+// full set of active paths -- can then call DeleteStale to get rid of unused paths.
+func (dm *DirFlagMap) ClearMarks() {
+	dm.Init()
+	for key, df := range *dm {
+		bitflag.Clear32((*int32)(&df), int(DirMark))
+		(*dm)[key] = df
 	}
 }
 
 // DeleteStale removes all entries with a bool = false value indicating that
 // they have not been accessed since ClearFlags was called.
-func (dm *OpenDirMap) DeleteStale() {
+func (dm *DirFlagMap) DeleteStale() {
 	dm.Init()
-	for key, val := range *dm {
-		if !val {
+	for key, df := range *dm {
+		if !bitflag.Has32(int32(df), int(DirMark)) {
 			delete(*dm, key)
 		}
 	}
@@ -1581,8 +1717,8 @@ func (ftv *FileTreeView) RenameFiles() {
 	}
 }
 
-// OpenDirs
-func (ftv *FileTreeView) OpenDirs() {
+// OpenDir opens given directory
+func (ftv *FileTreeView) OpenDir() {
 	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
 		sn := sels[i]
@@ -1590,6 +1726,38 @@ func (ftv *FileTreeView) OpenDirs() {
 		fn := ftvv.FileNode()
 		if fn != nil {
 			fn.OpenDir()
+		}
+	}
+}
+
+// OpenAll opens all directories under this one
+func (ftv *FileTreeView) OpenAll() {
+	fn := ftv.FileNode()
+	if fn != nil {
+		fn.OpenAll()
+		ftv.TreeView.OpenAll() // view has to do it too
+	}
+}
+
+// CloseAll closes all directories under this one
+func (ftv *FileTreeView) CloseAll() {
+	fn := ftv.FileNode()
+	if fn != nil {
+		fn.CloseAll()
+		ftv.TreeView.CloseAll() // view has to do it too
+	}
+}
+
+// SortBy determines how to sort the files in the directory -- default is alpha by name,
+// optionally can be sorted by modification time.
+func (ftv *FileTreeView) SortBy(modTime bool) {
+	sels := ftv.SelectedViews()
+	for i := len(sels) - 1; i >= 0; i-- {
+		sn := sels[i]
+		ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
+		fn := ftvv.FileNode()
+		if fn != nil {
+			fn.SortBy(modTime)
 		}
 	}
 }
@@ -2226,11 +2394,20 @@ var FileTreeViewProps = ki.Props{
 			"updtfunc": FileTreeInactiveExternFunc,
 		}},
 		{"sep-open", ki.BlankProp{}},
-		{"OpenDirs", ki.Props{
-			"label":    "Open Dir",
-			"desc":     "open given folder to see files within",
+		{"OpenAll", ki.Props{
 			"updtfunc": FileTreeActiveDirFunc,
 		}},
+		{"CloseAll", ki.Props{
+			"updtfunc": FileTreeActiveDirFunc,
+		}},
+		{"SortBy", ki.Props{
+			"desc":     "Choose how to sort files in the directory -- default by Name, optionally can use Modification Time",
+			"updtfunc": FileTreeActiveDirFunc,
+			"Args": ki.PropSlice{
+				{"Modification Time", ki.Props{}},
+			},
+		}},
+		{"sep-new", ki.BlankProp{}},
 		{"NewFile", ki.Props{
 			"label":    "New File...",
 			"desc":     "make a new file in this folder",
