@@ -441,12 +441,7 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, up
 			kidx, ok = sl.IndexByName(tn.Name, i)
 		}
 		if !ok {
-			if !mods {
-				mods = true
-				if n != nil {
-					updt = n.UpdateStart()
-				}
-			}
+			setMods(n, &mods, &updt)
 			nkid := NewOfType(tn.Type)
 			nkid.Init(nkid)
 			sl.Insert(nkid, i)
@@ -462,18 +457,22 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, up
 			}
 		} else {
 			if kidx != i {
-				if !mods {
-					mods = true
-					if n != nil {
-						updt = n.UpdateStart()
-					}
-				}
+				setMods(n, &mods, &updt)
 				sl.Move(kidx, i)
 			}
 		}
 	}
 	DelMgr.DestroyDeleted()
 	return
+}
+
+func setMods(n Ki, mods *bool, updt *bool) {
+	if !*mods {
+		*mods = true
+		if n != nil {
+			*updt = n.UpdateStart()
+		}
+	}
 }
 
 func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
