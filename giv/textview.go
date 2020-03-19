@@ -3328,7 +3328,14 @@ func (tv *TextView) VisSizes() {
 		tv.VisSize.X = int(math32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
 	}
 	tv.LineNoDigs = ints.MaxInt(1+int(math32.Log10(float32(tv.NLines))), 3)
-	if tv.Buf != nil && tv.Buf.Opts.LineNos {
+	lno := true
+	if tv.Buf != nil {
+		lno = tv.Buf.Opts.LineNos
+	}
+	if lp, has := tv.Props["line-nos"]; has {
+		lno, _ = kit.ToBool(lp)
+	}
+	if lno {
 		tv.SetFlag(int(TextViewHasLineNos))
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc // space for icon
 	} else {

@@ -94,6 +94,7 @@ func (ft *FileTree) OpenPath(path string) {
 	}
 	ft.Dirs.ClearMarks()
 	ft.ReadDir(path)
+	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 }
 
@@ -126,12 +127,16 @@ func (ft *FileTree) IsDirOpen(fpath gi.FileName) bool {
 
 // SetDirOpen sets the given directory path to be open
 func (ft *FileTree) SetDirOpen(fpath gi.FileName) {
-	ft.Dirs.SetOpen(ft.RelPath(fpath), true)
+	rp := ft.RelPath(fpath)
+	ft.Dirs.SetOpen(rp, true)
+	ft.Dirs.SetMark(rp)
 }
 
 // SetDirClosed sets the given directory path to be closed
 func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
-	ft.Dirs.SetOpen(ft.RelPath(fpath), false)
+	rp := ft.RelPath(fpath)
+	ft.Dirs.SetOpen(rp, false)
+	ft.Dirs.SetMark(rp)
 }
 
 // SetDirSortBy sets the given directory path sort by option
