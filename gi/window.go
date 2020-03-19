@@ -2089,6 +2089,8 @@ func (w *Window) KeyChordEventHiPri(e *key.ChordEvent) bool {
 		if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
 			delPop = true
 			e.SetProcessed()
+		} else if w.EventMgr.DNDStage > DNDNotStarted {
+			w.ClearDragNDrop()
 		}
 	case KeyFunAccept:
 		if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
@@ -2252,7 +2254,10 @@ func (w *Window) DNDMoveEvent(e *mouse.DragEvent) {
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).
 func (w *Window) DNDDropEvent(e *mouse.Event) {
-	w.EventMgr.SendDNDDropEvent(e)
+	proc := w.EventMgr.SendDNDDropEvent(e)
+	if !proc {
+		w.ClearDragNDrop()
+	}
 }
 
 // FinalizeDragNDrop is called by a node to finalize the drag-n-drop

@@ -717,8 +717,9 @@ func (em *EventMgr) SendDNDMoveEvent(e *mouse.DragEvent) *dnd.MoveEvent {
 	return de
 }
 
-// SendDNDDropEvent sends DND drop event
-func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) {
+// SendDNDDropEvent sends DND drop event -- returns false if drop event was not processed
+// in which case the event should be cleared (by the Window)
+func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) bool {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.Processed = false
 	de.DefaultMod()
@@ -733,8 +734,9 @@ func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) {
 	if DNDTrace {
 		fmt.Printf("DNDDropped\n")
 	}
-	em.SendEventSignal(&de, NoPopups)
 	e.SetProcessed()
+	em.SendEventSignal(&de, NoPopups)
+	return de.IsProcessed()
 }
 
 // ClearDND clears DND state

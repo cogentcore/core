@@ -1146,9 +1146,12 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 			} else {
 				me.SetProcessed()
 			}
-		} else { // use Y instead as mouse wheels typically on have this
-			ly.ScrollActionDelta(mat32.X, float32(del.Y))
-			me.SetProcessed()
+		} else { // use Y instead as mouse wheels typically only have this
+			hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
+			if hasShift {
+				ly.ScrollActionDelta(mat32.X, float32(del.Y))
+				me.SetProcessed()
+			}
 		}
 	}
 }
