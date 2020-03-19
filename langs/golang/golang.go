@@ -141,7 +141,7 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 	pwrd := lex.FirstWord(string(src[pLn]))
 	cwrd := lex.FirstWord(string(src[ln]))
 
-	if cwrd == "case" {
+	if cwrd == "case" || cwrd == "default" {
 		if pwrd == "switch" {
 			delInd = 0
 		} else if pwrd == "case" {
@@ -149,7 +149,7 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 		} else {
 			delInd = -1
 		}
-	} else if pwrd == "case" {
+	} else if pwrd == "case" || pwrd == "default" {
 		delInd = 1
 	}
 

@@ -45,6 +45,7 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 					fldel := stty.Els.ByName(sy.Name)
 					if fldel != nil {
 						sy.Type = fldel.Type
+						// fmt.Printf("set field type: %s\n", sy.Label())
 					} else {
 						if TraceTypes {
 							fmt.Printf("InferSymbolType: field named: %v not found in struct type: %v\n", sy.Name, stty.Name)
@@ -176,8 +177,10 @@ func (gl *GoLang) InferSymbolType(sy *syms.Symbol, fs *pi.FileState, pkg *syms.S
 		sy.Children = nil // nuke!
 	} else {
 		for _, ss := range sy.Children {
-			if TraceTypes {
-				fmt.Printf("InferSymbolType: processing child: %v\n", ss)
+			if sy != ss {
+				if false && TraceTypes {
+					fmt.Printf("InferSymbolType: processing child: %v\n", ss)
+				}
 				gl.InferSymbolType(ss, fs, pkg, funInternal)
 			}
 		}

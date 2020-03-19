@@ -94,9 +94,28 @@ func (sy *Symbol) HasChildren() bool {
 	return len(sy.Children) > 0
 }
 
-// String satisfied fmt.Stringer interface
+// String satisfies fmt.Stringer interface
 func (sy *Symbol) String() string {
 	return fmt.Sprintf("%v: %v (%v)", sy.Name, sy.Kind, sy.Region)
+}
+
+// Label satisfies gi.Labeler interface -- nicer presentation label
+func (sy *Symbol) Label() string {
+	lbl := sy.Name
+	switch {
+	case sy.Kind.SubCat() == token.NameFunction:
+		pi := strings.Index(sy.Detail, "(")
+		if pi >= 0 {
+			lbl += sy.Detail[pi:]
+		} else {
+			lbl += "()"
+		}
+	default:
+		if sy.Type != "" {
+			lbl += " (" + sy.Type + ")"
+		}
+	}
+	return lbl
 }
 
 // Clone returns a clone copy of this symbol.
