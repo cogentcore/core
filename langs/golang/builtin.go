@@ -53,6 +53,12 @@ func (gl *GoLang) CompleteBuiltins(fs *pi.FileState, seed string, md *complete.M
 			md.Matches = append(md.Matches, c)
 		}
 	}
+	for _, bs := range BuiltinKeywords {
+		if strings.HasPrefix(bs, seed) {
+			c := complete.Completion{Text: bs, Label: bs, Icon: "const"}
+			md.Matches = append(md.Matches, c)
+		}
+	}
 }
 
 // BuiltinTypeKind are the type names and kinds for builtin Go primitive types
@@ -111,6 +117,35 @@ var BuiltinFuncs = []string{
 	"close",
 	"panic",
 	"recover",
+}
+
+// BuiltinKeywords are keywords built into Go -- for, range, etc
+var BuiltinKeywords = []string{
+	"break",
+	"case",
+	"chan",
+	"const",
+	"continue",
+	"default",
+	"defer",
+	"else",
+	"fallthrough",
+	"for",
+	"func",
+	"go",
+	"goto",
+	"if",
+	"import",
+	"interface",
+	"map",
+	"package",
+	"range",
+	"return",
+	"select",
+	"struct",
+	"switch",
+	"type",
+	"var",
 }
 
 // BuiltinPackages are the standard library packages
