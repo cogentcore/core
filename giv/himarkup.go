@@ -253,7 +253,7 @@ func (hm *HiMarkup) MarkupLine(txt []rune, hitags, tags lex.Line) []byte {
 					for si := len(tstack) - 1; si >= 0; si-- {
 						ts := ttags[tstack[si]]
 						if tr.Ed <= ts.Ed {
-							ni := si + 1 // new index in stack -- right after current
+							ni := si // + 1 // new index in stack -- right *before* current
 							tstack = append(tstack, i)
 							copy(tstack[ni+1:], tstack[ni:])
 							tstack[ni] = i

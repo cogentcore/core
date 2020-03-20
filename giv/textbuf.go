@@ -2000,6 +2000,8 @@ func (tb *TextBuf) AutoIndentRegion(st, ed int) {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
 	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
+	fmt.Printf("autoindent winupdt: %v\n", winUpdt)
+
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break

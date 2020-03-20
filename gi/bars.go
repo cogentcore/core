@@ -353,6 +353,9 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	ac.Icon = IconName(opts.Icon)
 	ac.Tooltip = opts.Tooltip
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
+	if opts.ShortcutKey != KeyFunNil {
+		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)
+	}
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	if sigTo != nil && fun != nil {

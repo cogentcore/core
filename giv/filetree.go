@@ -772,12 +772,42 @@ type FileNodeNameCount struct {
 	Count int
 }
 
+func FileNodeNameCountSort(ecs []FileNodeNameCount) {
+	sort.Slice(ecs, func(i, j int) bool {
+		return ecs[i].Count > ecs[j].Count
+	})
+}
+
+// FirstVCS returns the first VCS repository starting from this node and going down.
+// also returns the node having that repository
+func (fn *FileNode) FirstVCS() (vci.Repo, *FileNode) {
+	var repo vci.Repo
+	var rnode *FileNode
+	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		if sfn.DirRepo != nil {
+			repo = sfn.DirRepo
+			rnode = sfn
+			return false
+		}
+		return true
+	})
+	return repo, rnode
+}
+
 // FileExtCounts returns a count of all the different file extensions, sorted
-// from highest to lowest
-func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
+// from highest to lowest.
+// If cat is != filecat.Unknown then it only uses files of that type
+// (e.g., filecat.Code to find any code files)
+func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 	cmap := make(map[string]int, 20)
 	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
+		if cat != filecat.Unknown {
+			if sfn.Info.Cat != cat {
+				return true
+			}
+		}
 		ext := strings.ToLower(filepath.Ext(sfn.Nm))
 		if ec, has := cmap[ext]; has {
 			cmap[ext] = ec + 1
@@ -792,9 +822,7 @@ func (fn *FileNode) FileExtCounts() []FileNodeNameCount {
 		ecs[idx] = FileNodeNameCount{Name: key, Count: val}
 		idx++
 	}
-	sort.Slice(ecs, func(i, j int) bool {
-		return ecs[i].Count > ecs[j].Count
-	})
+	FileNodeNameCountSort(ecs)
 	return ecs
 }
 

@@ -203,7 +203,7 @@ func (fv *FileView) Config() {
 	config.Add(gi.KiT_Layout, "sel-row")
 	mods, updt := fv.ConfigChildren(config, ki.UniqueNames)
 	if mods {
-		fv.ConfigPathRow()
+		fv.ConfigPathBar()
 		fv.ConfigFilesRow()
 		fv.ConfigSelRow()
 		fv.UpdateFiles()
@@ -211,10 +211,14 @@ func (fv *FileView) Config() {
 	}
 }
 
-func (fv *FileView) ConfigPathRow() {
+func (fv *FileView) ConfigPathBar() {
 	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
+	if pr.HasChildren() {
+		return
+	}
 	pr.Lay = gi.LayoutHoriz
 	pr.SetStretchMaxWidth()
+
 	config := kit.TypeAndNameList{}
 	config.Add(gi.KiT_Label, "path-lbl")
 	config.Add(gi.KiT_ComboBox, "path")
@@ -222,80 +226,65 @@ func (fv *FileView) ConfigPathRow() {
 	config.Add(gi.KiT_Action, "path-ref")
 	config.Add(gi.KiT_Action, "path-fav")
 	config.Add(gi.KiT_Action, "new-folder")
-	mods, updt := pr.ConfigChildren(config, ki.UniqueNames) // already covered by parent update
-	if mods {
-		pl := pr.ChildByName("path-lbl", 0).(*gi.Label)
-		pl.Text = "Path:"
-		pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
-		pf := fv.PathField()
-		pf.Editable = true
-		pf.SetMinPrefWidth(units.NewCh(60))
-		pf.SetStretchMaxWidth()
-		pf.ConfigParts()
-		pft, found := pf.TextField()
-		if found {
-			pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-			pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.TextFieldDone) {
-					fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-					pff, _ := send.(*gi.TextField)
-					fvv.DirPath = pff.Text()
-					fvv.UpdateFilesAction()
-				}
-			})
-		}
-		pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-			pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
-			sp := data.(string)
-			if sp == gi.FileViewResetPaths {
-				gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.Params.SavedPathsMax)
-				gi.SavedPaths[0] = fvv.DirPath
-				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
-				gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
-				fv.UpdateFiles()
-			} else if sp == gi.FileViewEditPaths {
-				fv.EditPaths()
-				pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
-			} else {
-				fvv.DirPath = sp
+
+	pl := gi.AddNewLabel(pr, "path-lbl", "Path:")
+	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
+	pf := gi.AddNewComboBox(pr, "path")
+	pf.Editable = true
+	pf.SetMinPrefWidth(units.NewCh(60))
+	pf.SetStretchMaxWidth()
+	pf.ConfigParts()
+	pft, found := pf.TextField()
+	if found {
+		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
+		pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.TextFieldDone) {
+				fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+				pff, _ := send.(*gi.TextField)
+				fvv.DirPath = pff.Text()
 				fvv.UpdateFilesAction()
 			}
 		})
-
-		pu := pr.ChildByName("path-up", 0).(*gi.Action)
-		pu.Icon = gi.IconName("wedge-up")
-		pu.Tooltip = "go up one level into the parent folder"
-		pu.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-			fvv.DirPathUp()
-		})
-
-		prf := pr.ChildByName("path-ref", 0).(*gi.Action)
-		prf.Icon = gi.IconName("update")
-		prf.Tooltip = "Update directory view -- in case files might have changed"
-		prf.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+	}
+	pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		pff := send.Embed(gi.KiT_ComboBox).(*gi.ComboBox)
+		sp := data.(string)
+		if sp == gi.FileViewResetPaths {
+			gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.Params.SavedPathsMax)
+			gi.SavedPaths[0] = fvv.DirPath
+			pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
+			fv.UpdateFiles()
+		} else if sp == gi.FileViewEditPaths {
+			fv.EditPaths()
+			pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+		} else {
+			fvv.DirPath = sp
 			fvv.UpdateFilesAction()
-		})
+		}
+	})
 
-		pfv := pr.ChildByName("path-fav", 0).(*gi.Action)
-		pfv.Icon = gi.IconName("heart")
-		pfv.Tooltip = "save this path to the favorites list -- saves current Prefs"
-		pfv.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
-			fvv.AddPathToFavs()
-		})
+	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: "wedge-up", Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv.DirPathUp()
+	})
 
-		nf := pr.ChildByName("new-folder", 0).(*gi.Action)
-		nf.Icon = gi.IconName("folder-plus")
-		nf.Tooltip = "Create a new folder in this folder"
-		nf.ActionSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: "update", Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv.UpdateFilesAction()
+	})
+
+	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: "heart", Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		fvv, _ := recv.Embed(KiT_FileView).(*FileView)
+		fvv.AddPathToFavs()
+	})
+
+	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: "folder-plus", Tooltip: "Create a new folder in this folder"},
+		fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			fvv, _ := recv.Embed(KiT_FileView).(*FileView)
 			fvv.NewFolder()
 		})
-		pr.UpdateEnd(updt)
-	}
 }
 
 func (fv *FileView) ConfigFilesRow() {
@@ -377,7 +366,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v to go up to parent folder; %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v / %v for prev / next history item", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext))
+	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetMinPrefWidth(units.NewCh(60))
 	sf.SetStretchMaxWidth()
@@ -389,6 +378,7 @@ func (fv *FileView) ConfigSelRow() {
 			fvv.SetSelFileAction(pff.Text())
 		}
 	})
+	sf.StartFocus()
 
 	el := sr.ChildByName("ext-lbl", 0).(*gi.Label)
 	el.Text = "Ext(s):"
@@ -725,22 +715,23 @@ func (fv *FileView) KeyInput(kt *key.ChordEvent) {
 		fmt.Printf("FileView KeyInput: %v\n", fv.PathUnique())
 	}
 	kf := gi.KeyFun(kt.Chord())
-	switch {
-	case kf == gi.KeyFunWordLeft:
+	switch kf {
+	case gi.KeyFunJump, gi.KeyFunWordLeft:
 		kt.SetProcessed()
 		fv.DirPathUp()
-	case kf == gi.KeyFunHistPrev:
+	case gi.KeyFunHistPrev:
 		kt.SetProcessed()
 		fv.PathFieldHistPrev()
-	case kf == gi.KeyFunHistNext:
+	case gi.KeyFunHistNext:
 		kt.SetProcessed()
 		fv.PathFieldHistNext()
-	case kf == gi.KeyFunInsert:
+	case gi.KeyFunInsert, gi.KeyFunInsertAfter, gi.KeyFunMenuOpen:
 		kt.SetProcessed()
 		fv.SelectFile()
-	case kf == gi.KeyFunMenuOpen:
+	case gi.KeyFunSearch:
 		kt.SetProcessed()
-		fv.SelectFile()
+		sf := fv.SelField()
+		sf.GrabFocus()
 	}
 }
 
