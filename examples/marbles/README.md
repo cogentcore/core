@@ -28,6 +28,8 @@ Pay attention to the tooltip for the equation field for special constraints -- m
 
 Extra points to anyone who can figure out what is causing the balls to occasionally quantum tunnel their way out of things!  Not sure we want to fix it, but would be good to at least know why it is happening :)
 
+ *News:* we finally figured out how to separate the marbles, using a random X initial starting component -- see the     `Width` parameter -- works great.
+
 ## Implementational notes
 
 All drawing is done using SVG nodes -- look in `graph.go` for details, e.g., `UpdateMarbles` is the main update for the marbles -- just wraps the SvgGraph in `UpdateStart` and `UpdateEnd` calls and updates the positions of the marble `svg.Circle` nodes.
