@@ -235,7 +235,7 @@ func MarkupPathsAsLinks(flds []string, maxFlds int) (orig, link []byte) {
 	mx := ints.MinInt(len(flds), maxFlds)
 	for i := 0; i < mx; i++ {
 		ff := flds[i]
-		if !(strings.Contains(ff, ".") || strings.Contains(ff, "/")) { // extension or path
+		if !strings.HasPrefix(ff, "./") && !strings.HasPrefix(ff, "/") {
 			continue
 		}
 		fnflds := strings.Split(ff, ":")
