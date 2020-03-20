@@ -22,7 +22,7 @@ Start by loading some of the existing setups, using the Open button.  Just hit R
 
 Play with the parameters at the top -- they take effect immediately.  The bounce level for each line can be set separately.  Bounce = 1 means it is perfectly elastic, and watch out if you set it greater than 1!
 
-The graph area is -10..+10 in both axes.
+The graph area is -10..+10 in both axes. 
 
 Pay attention to the tooltip for the equation field for special constraints -- must start numbers with a 0 for example.
 
