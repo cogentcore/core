@@ -118,7 +118,7 @@ func LineStartEndBracket(src []rune, tags Line) (start, end bool) {
 		ltok := token.None
 		for i := nt - 1; i >= 0; i-- {
 			ltok = tags[i].Tok.Tok
-			if ltok >= token.Keyword {
+			if ltok >= token.Keyword && ltok.Cat() != token.Comment {
 				break
 			}
 		}
