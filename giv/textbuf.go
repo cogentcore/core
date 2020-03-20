@@ -968,6 +968,8 @@ func (tb *TextBuf) Search(find []byte, ignoreCase, lexItems bool) (int, []textbu
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
 	if lexItems {
+		tb.MarkupMu.RLock()
+		defer tb.MarkupMu.RUnlock()
 		return textbuf.SearchLexItems(tb.Lines, tb.HiTags, find, ignoreCase)
 	} else {
 		return textbuf.SearchRuneLines(tb.Lines, find, ignoreCase)
@@ -979,7 +981,9 @@ func (tb *TextBuf) Search(find []byte, ignoreCase, lexItems bool) (int, []textbu
 func (tb *TextBuf) BraceMatch(r rune, st lex.Pos) (en lex.Pos, found bool) {
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
-	return lex.BraceMatch(tb.Lines, r, st, TextBufMaxScopeLines)
+	tb.MarkupMu.RLock()
+	defer tb.MarkupMu.RUnlock()
+	return lex.BraceMatch(tb.Lines, tb.HiTags, r, st, TextBufMaxScopeLines)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1978,6 +1982,7 @@ func (tb *TextBuf) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 	tabSz := tb.Opts.TabSize
 
 	tb.LinesMu.RLock()
+	tb.MarkupMu.RLock()
 	lp, _ := pi.LangSupport.Props(tb.PiState.Sup)
 	var pInd, delInd int
 	if lp != nil && lp.Lang != nil {
@@ -1985,6 +1990,7 @@ func (tb *TextBuf) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 	} else {
 		pInd, delInd, _, _ = lex.BracketIndentLine(tb.Lines, tb.HiTags, ln, tabSz)
 	}
+	tb.MarkupMu.RUnlock()
 	tb.LinesMu.RUnlock()
 	ichr := tb.Opts.IndentChar()
 
@@ -2035,8 +2041,8 @@ func (tb *TextBuf) InComment(pos lex.Pos) bool {
 
 // LineCommented returns true if the given line is a full-comment line (i.e., starts with a comment)
 func (tb *TextBuf) LineCommented(ln int) bool {
-	tb.LinesMu.RLock()
-	defer tb.LinesMu.RUnlock()
+	tb.MarkupMu.RLock()
+	defer tb.MarkupMu.RUnlock()
 	tags := tb.HiTags[ln]
 	if len(tags) == 0 {
 		return false
@@ -2278,6 +2284,8 @@ func (tb *TextBuf) SpellCheckLineErrs(ln int) lex.Line {
 	}
 	tb.LinesMu.RLock()
 	defer tb.LinesMu.RUnlock()
+	tb.MarkupMu.RLock()
+	defer tb.MarkupMu.RUnlock()
 	return spell.CheckLexLine(tb.Lines[ln], tb.HiTags[ln])
 }
 

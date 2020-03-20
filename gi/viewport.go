@@ -714,7 +714,8 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anch
 		full = true
 	}
 	if ni.IsReRenderAnchor() { // only anchors check for any kids that need full rerender
-		if ni.NeedsFullReRender2DTree() {
+		// so far this just makes things a bit more unpredictable, while fixing *one* case in SymbolsView
+		if ni.NeedsFullReRender() { // 2DTree() {
 			full = true
 		}
 	} else if ni.NeedsFullReRender() {

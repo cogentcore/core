@@ -4234,7 +4234,7 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 			pos := tv.CursorPos
 			var close = true
-			if pos.Ch < tv.Buf.LineLen(pos.Ln) && !unicode.IsSpace(tv.Buf.Line(pos.Ln)[pos.Ch]) {
+			if pos.Ch < tv.Buf.LineLen(pos.Ln) && (kt.Rune == '{' || !unicode.IsSpace(tv.Buf.Line(pos.Ln)[pos.Ch])) {
 				close = false
 			}
 			pos.Ch++
