@@ -687,6 +687,28 @@ func (nb *Node2DBase) FullRender2DTree() {
 	nb.UpdateEndNoSig(updt)
 }
 
+// NeedsFullReRender2DTree checks the entire tree below this node for any that have
+// NeedsFullReRender flag set.
+func (nb *Node2DBase) NeedsFullReRender2DTree() bool {
+	if nb.This() == nil {
+		return false
+	}
+	full := false
+	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
+		_, ni := KiToNode2D(k)
+		if ni == nil {
+			return false
+		}
+		if ni.NeedsFullReRender() {
+			full = true
+			ni.ClearFullReRender()
+			return false // done
+		}
+		return true
+	})
+	return full
+}
+
 // Init2DTree initializes scene graph tree from node it is called on -- only
 // needs to be done once but must be robust to repeated calls -- use a flag if
 // necessary -- needed after structural updates to ensure all nodes are

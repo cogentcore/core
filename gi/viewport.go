@@ -713,11 +713,15 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anch
 	} else {
 		full = true
 	}
-	if ni.NeedsFullReRender() {
-		ni.ClearFullReRender()
+	if ni.IsReRenderAnchor() { // only anchors check for any kids that need full rerender
+		if ni.NeedsFullReRender2DTree() {
+			full = true
+		}
+	} else if ni.NeedsFullReRender() {
 		full = true
 	}
 	if full {
+		ni.ClearFullReRender()
 		if Update2DTrace {
 			fmt.Printf("Update: Viewport2D: %v FullRender2DTree (structural changes) for node: %v\n", vp.PathUnique(), nii.PathUnique())
 		}
@@ -748,12 +752,12 @@ func (vp *Viewport2D) SetNeedsFullRender() {
 // middle of the construction process and thus attempting to render garbage.
 // Must call UnblockUpdates after construction is done.
 func (vp *Viewport2D) BlockUpdates() {
-	// vp.UpdtMu.Lock()
+	vp.UpdtMu.Lock()
 }
 
 // UnblockUpdates unblocks updating of this viewport -- see BlockUpdates()
 func (vp *Viewport2D) UnblockUpdates() {
-	// vp.UpdtMu.Unlock()
+	vp.UpdtMu.Unlock()
 }
 
 // UpdateNodes processes the current update signals and actually does the relevant updating

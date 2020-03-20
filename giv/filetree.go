@@ -162,6 +162,9 @@ func (ft *FileTree) AddExtFile(fpath string) (*FileNode, error) {
 	if err != nil {
 		return nil, err
 	}
+	if _, err := os.Stat(pth); err != nil {
+		return nil, err
+	}
 	if has, _ := ft.HasExtFile(pth); has {
 		return ft.ExtFileNodeByPath(pth)
 	}
