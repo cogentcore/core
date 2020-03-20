@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Originally written by https://github.com/kplat1/marbles with some help from his dad..
+// Originally written by https://github.com/kplat1/marbles with some help..
 
 package main
 
@@ -347,7 +347,7 @@ type Params struct {
 
 func (pr *Params) Defaults() {
 	pr.NMarbles = 10
-	pr.NSteps = 1000
+	pr.NSteps = 10000
 	pr.StartSpeed = 0
 	pr.UpdtRate = .02
 	pr.Gravity = 0.1

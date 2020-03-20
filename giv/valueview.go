@@ -1000,10 +1000,10 @@ func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  VersCtrlValueView
 
-// VersCtrlSystems is a list of supported Version Control Systems -- use these
-// names in commands to select commands for the current VCS for this project
-// (i.e., use shortest version of name, typically three letters)
-var VersCtrlSystems = []string{"Git", "SVN"}
+// VersCtrlSystems is a list of supported Version Control Systems.
+// These must match the VCS Types from goki/pi/vci which in turn
+// is based on masterminds/vcs
+var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
 
 // VersCtrlName is the name of a version control system
 type VersCtrlName string
