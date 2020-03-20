@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Originally written by Kai O'Reilly (https://github.com/kplat1) with some help from his dad..
+// Originally written by https://github.com/kplat1/marbles with some help from his dad..
 
 package main
 
@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+
+	"math/rand"
 
 	"github.com/Knetic/govaluate"
 	"github.com/chewxy/math32"
@@ -60,8 +62,8 @@ var GraphProps = ki.Props{
 		}},
 		{"sep-ctrl", ki.BlankProp{}},
 		{"Graph", ki.Props{
-			"desc": "updates graph for current equations, and resets marbles too",
-			"icon": "update",
+			"desc": "updates graph for current equations",
+			"icon": "file-image",
 		}},
 		{"Run", ki.Props{
 			"desc":            "runs the marbles for NSteps",
@@ -79,9 +81,8 @@ var GraphProps = ki.Props{
 			"no-update-after": true,
 		}},
 		{"Reset", ki.Props{
-			"desc":            "resets marbles to their initial starting positions",
-			"icon":            "update",
-			"no-update-after": true,
+			"desc": "resets marbles to their initial starting positions",
+			"icon": "update",
 		}},
 	},
 }
@@ -98,7 +99,7 @@ func (gr *Graph) OpenJSON(filename gi.FileName) error {
 		return err
 	}
 	err = json.Unmarshal(b, gr)
-	gr.Graph()
+	gr.Reset()
 	return err
 }
 
@@ -118,7 +119,7 @@ func (gr *Graph) SaveJSON(filename gi.FileName) error {
 
 // Graph updates graph for current equations, and resets marbles too
 func (gr *Graph) Graph() {
-	ResetMarbles()
+	// ResetMarbles()
 	gr.Lines.Graph()
 }
 
@@ -140,6 +141,7 @@ func (gr *Graph) Step() {
 // Reset resets the marbles to their initial starting positions
 func (gr *Graph) Reset() {
 	ResetMarbles()
+	gr.Lines.Graph()
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -321,7 +323,9 @@ type Marble struct {
 }
 
 func (mb *Marble) Init(diff float32) {
-	mb.Pos = mat32.Vec2{0, 10 - diff}
+	randNum := (rand.Float32() * 2) - 1
+	xPos := randNum * Gr.Params.Width
+	mb.Pos = mat32.Vec2{xPos, 10 - diff}
 	mb.Vel = mat32.Vec2{0, float32(-Gr.Params.StartSpeed)}
 	mb.PrvPos = mb.Pos
 }
@@ -333,11 +337,12 @@ var Marbles []*Marble
 
 // Params holds our parameters
 type Params struct {
-	NMarbles   int     `desc:"number of marbles"`
+	NMarbles   int     `min:"1" max:"10000" step:"10" desc:"number of marbles"`
 	NSteps     int     `min:"100" max:"10000" step:"10" desc:"number of steps to take when running"`
 	StartSpeed float32 `min:"0" max:"2" step:".05" desc:"Coordinates per unit of time"`
 	UpdtRate   float32 `min:"0.001" max:"1" step:".01" desc:"how fast to move along velocity vector -- lower = smoother, more slow-mo"`
 	Gravity    float32 `min:"0" max:"2" step:".01" desc:"how fast it accelerates down"`
+	Width      float32 `length of spawning zone for marbles, set to 0 for all spawn in a column`
 }
 
 func (pr *Params) Defaults() {

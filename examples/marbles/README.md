@@ -4,16 +4,16 @@ This is a fun interactive app, based on the marble version of [desmos](https://w
 
 ## Installation
 
-This example has an additional dependency beyond those of GoGi: 	[govaluate](https://github.com/Knetic/govaluate) -- easiest to use the following procedure to get it:
+This example has an additional dependency beyond those of GoGi: [govaluate](https://github.com/Knetic/govaluate) -- easiest to use the following procedure to get it:
 
 The usual Go install procedure will work -- this is the easiest way to install GoGi and get all of its various dependencies:
 
 ``` bash
-> go get github.com/goki/gi
-> cd ~/go/src/github.com/goki/gi/examples/marbles
-> go get ...
-> go build
-> ./marbles
+$ go get github.com/goki/gi
+$ cd ~/go/src/github.com/goki/gi/examples/marbles
+$ go get ./...
+$ go build
+$ ./marbles
 ```
 
 ## Tips

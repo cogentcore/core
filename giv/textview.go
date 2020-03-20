@@ -3561,7 +3561,7 @@ func (tv *TextView) RenderScrolls() {
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *TextView) RenderLines(st, ed int) bool {
-	if tv == nil || tv.This() == nil {
+	if tv == nil || tv.This() == nil || tv.Buf == nil {
 		return false
 	}
 	if !tv.This().(gi.Node2D).IsVisible() {

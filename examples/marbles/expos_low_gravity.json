@@ -4,7 +4,8 @@
     "NSteps": 1000,
     "StartSpeed": 0,
     "UpdtRate": 0.1,
-    "Gravity": 0.02
+    "Gravity": 0.02,
+    "Width": 0.1
   },
   "Lines": [
     {

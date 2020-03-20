@@ -1,10 +1,11 @@
 {
   "Params": {
-    "NMarbles": 10,
+    "NMarbles": 1000,
     "NSteps": 1000,
     "StartSpeed": 0,
     "UpdtRate": 0.02,
-    "Gravity": 0.1
+    "Gravity": 0.1,
+    "Width": 5
   },
   "Lines": [
     {
