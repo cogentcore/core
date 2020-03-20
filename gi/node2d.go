@@ -532,6 +532,10 @@ func (nb *Node2DBase) EventMgr2D() *EventMgr {
 // properly batch everything and prevent redundant updates.
 func (nb *Node2DBase) TopUpdateStart() bool {
 	if nb.Viewport == nil || nb.Viewport.This() == nil {
+		vp := nb.This().(Node2D).AsViewport2D()
+		if vp != nil && vp.This() != nil {
+			return vp.This().(Viewport).VpTopUpdateStart()
+		}
 		return false
 	}
 	return nb.Viewport.This().(Viewport).VpTopUpdateStart()
@@ -545,6 +549,10 @@ func (nb *Node2DBase) TopUpdateEnd(updt bool) {
 		return
 	}
 	if nb.Viewport == nil || nb.Viewport.This() == nil {
+		vp := nb.This().(Node2D).AsViewport2D()
+		if vp != nil && vp.This() != nil {
+			vp.This().(Viewport).VpTopUpdateEnd(updt)
+		}
 		return
 	}
 	nb.Viewport.This().(Viewport).VpTopUpdateEnd(updt)
