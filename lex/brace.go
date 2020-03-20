@@ -33,6 +33,8 @@ func BracePair(r rune) (match rune, right bool) {
 	return
 }
 
+// todo: rewrite to use lex
+
 // BraceMatch finds the brace, bracket, or paren that is the partner
 // of the one passed to function, within maxLns lines of start.
 func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
