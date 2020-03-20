@@ -6,6 +6,7 @@ package lex
 
 import (
 	"github.com/goki/ki/ints"
+	"github.com/goki/pi/token"
 )
 
 // BracePair returns the matching brace-like punctuation for given rune,
@@ -33,11 +34,10 @@ func BracePair(r rune) (match rune, right bool) {
 	return
 }
 
-// todo: rewrite to use lex
-
 // BraceMatch finds the brace, bracket, or paren that is the partner
 // of the one passed to function, within maxLns lines of start.
-func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
+// Operates on rune source with markup lex tags per line (tags exclude comments).
+func BraceMatch(src [][]rune, tags []Line, r rune, st Pos, maxLns int) (en Pos, found bool) {
 	en.Ln = -1
 	found = false
 	match, rt := BracePair(r)
@@ -54,19 +54,26 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 	max := ints.MinInt(nln-ln, maxLns)
 	min := ints.MinInt(ln, maxLns)
 	txt := src[ln]
+	tln := tags[ln]
 	if left > right {
 		for l := ln + 1; l < ln+max; l++ {
 			for i := ch + 1; i < len(txt); i++ {
 				if txt[i] == r {
-					left++
-					continue
+					lx := tln.AtPos(i)
+					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+						left++
+						continue
+					}
 				}
 				if txt[i] == match {
-					right++
-					if left == right {
-						en.Ln = l - 1
-						en.Ch = i
-						break
+					lx := tln.AtPos(i)
+					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+						right++
+						if left == right {
+							en.Ln = l - 1
+							en.Ch = i
+							break
+						}
 					}
 				}
 			}
@@ -75,6 +82,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 				break
 			}
 			txt = src[l]
+			tln = tags[l]
 			ch = -1
 		}
 	} else {
@@ -82,15 +90,21 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 			ch = ints.MinInt(ch, len(txt))
 			for i := ch - 1; i >= 0; i-- {
 				if txt[i] == r {
-					right++
-					continue
+					lx := tln.AtPos(i)
+					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+						right++
+						continue
+					}
 				}
 				if txt[i] == match {
-					left++
-					if left == right {
-						en.Ln = l + 1
-						en.Ch = i
-						break
+					lx := tln.AtPos(i)
+					if lx == nil || lx.Tok.Tok.Cat() != token.Comment {
+						left++
+						if left == right {
+							en.Ln = l + 1
+							en.Ch = i
+							break
+						}
 					}
 				}
 			}
@@ -99,6 +113,7 @@ func BraceMatch(src [][]rune, r rune, st Pos, maxLns int) (en Pos, found bool) {
 				break
 			}
 			txt = src[l]
+			tln = tags[l]
 			ch = len(txt)
 		}
 	}
