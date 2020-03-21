@@ -1991,6 +1991,18 @@ func (tv *TextView) EscPressed() {
 	}
 }
 
+// ReCaseSelection changes the case of the currently-selected text.
+// Returns the new text -- empty if nothing selected.
+func (tv *TextView) ReCaseSelection(c textbuf.Cases) string {
+	if !tv.HasSelection() {
+		return ""
+	}
+	sel := tv.Selection()
+	nstr := textbuf.ReCaseString(string(sel.ToBytes()), c)
+	tv.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
+	return nstr
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //    Selection
 
