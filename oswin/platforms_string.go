@@ -3,9 +3,21 @@
 package oswin
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[MacOS-0]
+	_ = x[LinuxX11-1]
+	_ = x[Windows-2]
+	_ = x[PlatformsN-3]
+}
 
 const _Platforms_name = "MacOSLinuxX11WindowsPlatformsN"
 
@@ -25,5 +37,5 @@ func (i *Platforms) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Platforms", s)
+	return errors.New("String: " + s + " is not a valid option for type: Platforms")
 }

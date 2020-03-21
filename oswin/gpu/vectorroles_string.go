@@ -9,6 +9,22 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[UndefRole-0]
+	_ = x[VertexPosition-1]
+	_ = x[VertexNormal-2]
+	_ = x[VertexTangent-3]
+	_ = x[VertexColor-4]
+	_ = x[VertexTexcoord-5]
+	_ = x[VertexTexcoord2-6]
+	_ = x[SkinWeight-7]
+	_ = x[SkinIndex-8]
+	_ = x[VectorRolesN-9]
+}
+
 const _VectorRoles_name = "UndefRoleVertexPositionVertexNormalVertexTangentVertexColorVertexTexcoordVertexTexcoord2SkinWeightSkinIndexVectorRolesN"
 
 var _VectorRoles_index = [...]uint8{0, 9, 23, 35, 48, 59, 73, 88, 98, 107, 119}

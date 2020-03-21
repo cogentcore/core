@@ -150,14 +150,29 @@ func IsAlignEnd(a Align) bool {
 type Overflow int32
 
 const (
-	// automatically add scrollbars as needed -- this is pretty much the only sensible option, and is the default here, but Visible is default in html
+	// OverflowAuto automatically determines if scrollbars should be added to show
+	// the overflow.  Scrollbars are added only if the actual content size is greater
+	// than the currently available size.  Typically, an outer-most Layout will scale
+	// up and add scrollbars to accommodate the Min needs of its child elements,
+	// so if you want to have scrollbars show up on inner elements, they need to
+	// have a style setting that restricts their Min size, but also allows them to
+	// stretch so they use whatever space they are allocated.
 	OverflowAuto Overflow = iota
-	// pretty much the same as auto -- we treat it as such
+
+	// OverflowScroll means add scrollbars when necessary, and is essentially
+	// identical to Auto.  However, only during Viewport PrefSize call,
+	// the actual content size is used -- otherwise it behaves just like Auto.
 	OverflowScroll
-	// make the overflow visible -- this is generally unsafe and not very feasible and will be ignored as long as possible -- currently falls back on auto, but could go to Hidden if that works better overall
+
+	// OverflowVisible makes the overflow visible -- this is generally unsafe
+	// and not very feasible and will be ignored as long as possible.
+	// Currently it falls back on Auto, but could go to Hidden if that works
+	// better overall.
 	OverflowVisible
-	// hide the overflow and don't present scrollbars (supported)
+
+	// OverflowHidden hides the overflow and doesn't present scrollbars (supported).
 	OverflowHidden
+
 	OverflowN
 )
 

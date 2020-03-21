@@ -127,30 +127,14 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		cfgFunc()
 	}
 
-	if dlg.DefSize == image.ZP {
-		dlg.Init2DTree()
-		dlg.Style2DTree()                                      // sufficient to get sizes
-		dlg.LayData.AllocSize = win.Viewport.LayData.AllocSize // give it the whole vp initially
-		dlg.Size2DTree(0)                                      // collect sizes
-	}
-	dlg.Win = nil
-
-	frame := dlg.ChildByName("frame", 0).(*Frame)
 	vpsz := dlg.DefSize
-
 	if dlg.DefSize == image.ZP {
-		if DialogsSepWindow {
-			vpsz = frame.LayData.Size.Pref.ToPoint()
-		} else {
-			vpsz = frame.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize.MulScalar(.9)).ToPoint()
+		vpsz = dlg.PrefSize(win.OSWin.Screen().PixSize)
+		if !DialogsSepWindow {
+			vpsz = dlg.LayData.Size.Pref.Min(win.Viewport.LayData.AllocSize.MulScalar(.9)).ToPoint()
 		}
 	}
-
-	stw := int(dlg.Sty.Layout.MinWidth.Dots)
-	sth := int(dlg.Sty.Layout.MinHeight.Dots)
-	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
-	vpsz.X = ints.MaxInt(vpsz.X, stw)
-	vpsz.Y = ints.MaxInt(vpsz.Y, sth)
+	dlg.Win = nil
 
 	// note: LowPri allows all other events to be processed before dialog
 	win.EventMgr.ConnectEvent(dlg.This(), oswin.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d interface{}) {

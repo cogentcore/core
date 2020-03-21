@@ -9,6 +9,17 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Shift-0]
+	_ = x[Control-1]
+	_ = x[Alt-2]
+	_ = x[Meta-3]
+	_ = x[ModifiersN-4]
+}
+
 const _Modifiers_name = "ShiftControlAltMetaModifiersN"
 
 var _Modifiers_index = [...]uint8{0, 5, 12, 15, 19, 29}

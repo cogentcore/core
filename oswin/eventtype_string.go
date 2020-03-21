@@ -3,9 +3,38 @@
 package oswin
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[MouseEvent-0]
+	_ = x[MouseMoveEvent-1]
+	_ = x[MouseDragEvent-2]
+	_ = x[MouseScrollEvent-3]
+	_ = x[MouseFocusEvent-4]
+	_ = x[MouseHoverEvent-5]
+	_ = x[KeyEvent-6]
+	_ = x[KeyChordEvent-7]
+	_ = x[TouchEvent-8]
+	_ = x[MagnifyEvent-9]
+	_ = x[RotateEvent-10]
+	_ = x[WindowEvent-11]
+	_ = x[WindowResizeEvent-12]
+	_ = x[WindowPaintEvent-13]
+	_ = x[WindowShowEvent-14]
+	_ = x[WindowFocusEvent-15]
+	_ = x[DNDEvent-16]
+	_ = x[DNDMoveEvent-17]
+	_ = x[DNDFocusEvent-18]
+	_ = x[CustomEventType-19]
+	_ = x[EventTypeN-20]
+}
 
 const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventMouseHoverEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventWindowResizeEventWindowPaintEventWindowShowEventWindowFocusEventDNDEventDNDMoveEventDNDFocusEventCustomEventTypeEventTypeN"
 
@@ -25,5 +54,5 @@ func (i *EventType) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type EventType", s)
+	return errors.New("String: " + s + " is not a valid option for type: EventType")
 }

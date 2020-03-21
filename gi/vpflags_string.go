@@ -23,12 +23,13 @@ func _() {
 	_ = x[VpFlagUpdatingNode-36]
 	_ = x[VpFlagNeedsFullRender-37]
 	_ = x[VpFlagDoingFullRender-38]
-	_ = x[VpFlagsN-39]
+	_ = x[VpFlagPrefSizing-39]
+	_ = x[VpFlagsN-40]
 }
 
-const _VpFlags_name = "VpFlagPopupVpFlagMenuVpFlagCompleterVpFlagCorrectorVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagUpdatingNodeVpFlagNeedsFullRenderVpFlagDoingFullRenderVpFlagsN"
+const _VpFlags_name = "VpFlagPopupVpFlagMenuVpFlagCompleterVpFlagCorrectorVpFlagTooltipVpFlagPopupDestroyAllVpFlagSVGVpFlagUpdatingNodeVpFlagNeedsFullRenderVpFlagDoingFullRenderVpFlagPrefSizingVpFlagsN"
 
-var _VpFlags_index = [...]uint8{0, 11, 21, 36, 51, 64, 85, 94, 112, 133, 154, 162}
+var _VpFlags_index = [...]uint8{0, 11, 21, 36, 51, 64, 85, 94, 112, 133, 154, 170, 178}
 
 func (i VpFlags) String() string {
 	i -= 29

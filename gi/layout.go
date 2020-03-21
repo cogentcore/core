@@ -438,13 +438,18 @@ func (ly *Layout) GatherSizesGrid() {
 		sumPref.SetAddDim(mat32.X, gd.SizePref)
 	}
 
-	if ly.LayData.Size.Pref.X == 0 {
+	prefSizing := false
+	if ly.Viewport != nil && ly.Viewport.HasFlag(int(VpFlagPrefSizing)) {
+		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
+	}
+
+	if ly.LayData.Size.Pref.X == 0 || prefSizing {
 		ly.LayData.Size.Need.X = mat32.Max(ly.LayData.Size.Need.X, sumNeed.X)
 		ly.LayData.Size.Pref.X = mat32.Max(ly.LayData.Size.Pref.X, sumPref.X)
 	} else { // use target size from style otherwise
 		ly.LayData.Size.Need.X = ly.LayData.Size.Pref.X
 	}
-	if ly.LayData.Size.Pref.Y == 0 {
+	if ly.LayData.Size.Pref.Y == 0 || prefSizing {
 		ly.LayData.Size.Need.Y = mat32.Max(ly.LayData.Size.Need.Y, sumNeed.Y)
 		ly.LayData.Size.Pref.Y = mat32.Max(ly.LayData.Size.Pref.Y, sumPref.Y)
 	} else { // use target size from style otherwise

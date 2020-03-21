@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"github.com/goki/ki/bitflag"
+	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -188,6 +189,12 @@ const (
 	// full render -- can be used by elements to drive deep rebuild in case
 	// underlying data has changed.
 	VpFlagDoingFullRender
+
+	// VpFlagPrefSizing means that this viewport is currently doing a
+	// PrefSize computation to compute the size of the viewport
+	// (for sizing window for example) -- affects layout size computation
+	// only for Over
+	VpFlagPrefSizing
 
 	VpFlagsN
 )
@@ -615,6 +622,27 @@ func (vp *Viewport2D) Render2D() {
 		vp.RenderViewport2D() // update our parent image
 		vp.PopBounds()
 	}
+}
+
+// PrefSize computes the preferred size of the viewport based on current contents.
+// initSz is the initial size -- e.g., size of screen.
+// Used for auto-sizing windows.
+func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
+	vp.SetFlag(int(VpFlagPrefSizing))
+	vp.Init2DTree()
+	vp.Style2DTree() // sufficient to get sizes
+	vp.LayData.AllocSize.SetPoint(initSz)
+	vp.Size2DTree(0) // collect sizes
+	vp.ClearFlag(int(VpFlagPrefSizing))
+	ch := vp.ChildByType(KiT_Layout, ki.Embeds, 0).Embed(KiT_Layout).(*Layout)
+	vpsz := ch.LayData.Size.Pref.ToPoint()
+	// also take into account min size pref
+	stw := int(vp.Sty.Layout.MinWidth.Dots)
+	sth := int(vp.Sty.Layout.MinHeight.Dots)
+	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
+	vpsz.X = ints.MaxInt(vpsz.X, stw)
+	vpsz.Y = ints.MaxInt(vpsz.Y, sth)
+	return vpsz
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

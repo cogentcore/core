@@ -63,8 +63,8 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.SetProp("width", units.NewEm(5))
-	tlv.SetProp("height", units.NewEm(5))
+	tlv.SetProp("width", units.NewEm(10))
+	tlv.SetProp("height", units.NewEm(10))
 	tlv.SetStretchMax()
 	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)

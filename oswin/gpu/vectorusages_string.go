@@ -9,6 +9,22 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[StreamDraw-0]
+	_ = x[StreamRead-1]
+	_ = x[StreamCopy-2]
+	_ = x[StaticDraw-3]
+	_ = x[StaticRead-4]
+	_ = x[StaticCopy-5]
+	_ = x[DynamicDraw-6]
+	_ = x[DynamicRead-7]
+	_ = x[DynamicCopy-8]
+	_ = x[VectorUsagesN-9]
+}
+
 const _VectorUsages_name = "StreamDrawStreamReadStreamCopyStaticDrawStaticReadStaticCopyDynamicDrawDynamicReadDynamicCopyVectorUsagesN"
 
 var _VectorUsages_index = [...]uint8{0, 10, 20, 30, 40, 50, 60, 71, 82, 93, 106}

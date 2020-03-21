@@ -2,7 +2,12 @@
 
 package giv
 
-import "strconv"
+import (
+	"errors"
+	"strconv"
+)
+
+var _ = errors.New("dummy error")
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -23,4 +28,14 @@ func (i SliceViewSignals) String() string {
 		return "SliceViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _SliceViewSignals_name[_SliceViewSignals_index[i]:_SliceViewSignals_index[i+1]]
+}
+
+func (i *SliceViewSignals) FromString(s string) error {
+	for j := 0; j < len(_SliceViewSignals_index)-1; j++ {
+		if s == _SliceViewSignals_name[_SliceViewSignals_index[j]:_SliceViewSignals_index[j+1]] {
+			*i = SliceViewSignals(j)
+			return nil
+		}
+	}
+	return errors.New("String: " + s + " is not a valid option for type: SliceViewSignals")
 }

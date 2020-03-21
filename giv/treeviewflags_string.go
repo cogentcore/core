@@ -2,7 +2,12 @@
 
 package giv
 
-import "strconv"
+import (
+	"errors"
+	"strconv"
+)
+
+var _ = errors.New("dummy error")
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -23,4 +28,13 @@ func (i TreeViewFlags) String() string {
 		return "TreeViewFlags(" + strconv.FormatInt(int64(i+29), 10) + ")"
 	}
 	return _TreeViewFlags_name[_TreeViewFlags_index[i]:_TreeViewFlags_index[i+1]]
+}
+
+func StringToTreeViewFlags(s string) (TreeViewFlags, error) {
+	for i := 0; i < len(_TreeViewFlags_index)-1; i++ {
+		if s == _TreeViewFlags_name[_TreeViewFlags_index[i]:_TreeViewFlags_index[i+1]] {
+			return TreeViewFlags(i + 29), nil
+		}
+	}
+	return 0, errors.New("String: " + s + " is not a valid option for type: TreeViewFlags")
 }

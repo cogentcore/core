@@ -2,7 +2,12 @@
 
 package giv
 
-import "strconv"
+import (
+	"errors"
+	"strconv"
+)
+
+var _ = errors.New("dummy error")
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -23,4 +28,14 @@ func (i MapViewSignals) String() string {
 		return "MapViewSignals(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
 	return _MapViewSignals_name[_MapViewSignals_index[i]:_MapViewSignals_index[i+1]]
+}
+
+func (i *MapViewSignals) FromString(s string) error {
+	for j := 0; j < len(_MapViewSignals_index)-1; j++ {
+		if s == _MapViewSignals_name[_MapViewSignals_index[j]:_MapViewSignals_index[j+1]] {
+			*i = MapViewSignals(j)
+			return nil
+		}
+	}
+	return errors.New("String: " + s + " is not a valid option for type: MapViewSignals")
 }

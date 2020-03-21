@@ -15,8 +15,8 @@ import (
 // PrefsView opens a view of user preferences
 func PrefsView(pf *gi.Preferences) *gi.Window {
 	winm := "gogi-prefs"
-	width := 800
-	height := 800
+	width := 400
+	height := 400
 	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Preferences", width, height)
 	if recyc {
 		return win
@@ -66,6 +66,10 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 	})
 
 	win.MainMenuUpdated()
+
+	vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+	win.SetSize(vpsz)
+	fmt.Printf("vpsize: %v\n", vpsz)
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()

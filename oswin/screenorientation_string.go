@@ -3,9 +3,21 @@
 package oswin
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[OrientationUnknown-0]
+	_ = x[Portrait-1]
+	_ = x[Landscape-2]
+	_ = x[ScreenOrientationN-3]
+}
 
 const _ScreenOrientation_name = "OrientationUnknownPortraitLandscapeScreenOrientationN"
 
@@ -25,5 +37,5 @@ func (i *ScreenOrientation) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type ScreenOrientation", s)
+	return errors.New("String: " + s + " is not a valid option for type: ScreenOrientation")
 }

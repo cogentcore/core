@@ -9,6 +9,19 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[VertexShader-0]
+	_ = x[FragmentShader-1]
+	_ = x[ComputeShader-2]
+	_ = x[GeometryShader-3]
+	_ = x[TessCtrlShader-4]
+	_ = x[TessEvalShader-5]
+	_ = x[ShaderTypesN-6]
+}
+
 const _ShaderTypes_name = "VertexShaderFragmentShaderComputeShaderGeometryShaderTessCtrlShaderTessEvalShaderShaderTypesN"
 
 var _ShaderTypes_index = [...]uint8{0, 12, 26, 39, 53, 67, 81, 93}

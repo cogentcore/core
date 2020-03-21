@@ -3,9 +3,24 @@
 package oswin
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Dialog-0]
+	_ = x[Modal-1]
+	_ = x[Tool-2]
+	_ = x[Fullscreen-3]
+	_ = x[Minimized-4]
+	_ = x[Focus-5]
+	_ = x[WindowFlagsN-6]
+}
 
 const _WindowFlags_name = "DialogModalToolFullscreenMinimizedFocusWindowFlagsN"
 
@@ -25,5 +40,5 @@ func (i *WindowFlags) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type WindowFlags", s)
+	return errors.New("String: " + s + " is not a valid option for type: WindowFlags")
 }

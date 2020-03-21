@@ -3,9 +3,35 @@
 package cursor
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
+
+var _ = errors.New("dummy error")
+
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Arrow-0]
+	_ = x[Cross-1]
+	_ = x[DragCopy-2]
+	_ = x[DragMove-3]
+	_ = x[DragLink-4]
+	_ = x[HandPointing-5]
+	_ = x[HandOpen-6]
+	_ = x[HandClosed-7]
+	_ = x[Help-8]
+	_ = x[IBeam-9]
+	_ = x[Not-10]
+	_ = x[UpDown-11]
+	_ = x[LeftRight-12]
+	_ = x[UpRight-13]
+	_ = x[UpLeft-14]
+	_ = x[AllArrows-15]
+	_ = x[Wait-16]
+	_ = x[ShapesN-17]
+}
 
 const _Shapes_name = "ArrowCrossDragCopyDragMoveDragLinkHandPointingHandOpenHandClosedHelpIBeamNotUpDownLeftRightUpRightUpLeftAllArrowsWaitShapesN"
 
@@ -25,5 +51,5 @@ func (i *Shapes) FromString(s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("String %v is not a valid option for type Shapes", s)
+	return errors.New("String: " + s + " is not a valid option for type: Shapes")
 }

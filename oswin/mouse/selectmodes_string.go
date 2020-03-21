@@ -9,6 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[SelectOne-0]
+	_ = x[ExtendContinuous-1]
+	_ = x[ExtendOne-2]
+	_ = x[NoSelect-3]
+	_ = x[Unselect-4]
+	_ = x[SelectQuiet-5]
+	_ = x[UnselectQuiet-6]
+	_ = x[SelectModesN-7]
+}
+
 const _SelectModes_name = "SelectOneExtendContinuousExtendOneNoSelectUnselectSelectQuietUnselectQuietSelectModesN"
 
 var _SelectModes_index = [...]uint8{0, 9, 25, 34, 42, 50, 61, 74, 86}

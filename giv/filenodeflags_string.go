@@ -2,7 +2,12 @@
 
 package giv
 
-import "strconv"
+import (
+	"errors"
+	"strconv"
+)
+
+var _ = errors.New("dummy error")
 
 func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
@@ -23,4 +28,13 @@ func (i FileNodeFlags) String() string {
 		return "FileNodeFlags(" + strconv.FormatInt(int64(i+16), 10) + ")"
 	}
 	return _FileNodeFlags_name[_FileNodeFlags_index[i]:_FileNodeFlags_index[i+1]]
+}
+
+func StringToFileNodeFlags(s string) (FileNodeFlags, error) {
+	for i := 0; i < len(_FileNodeFlags_index)-1; i++ {
+		if s == _FileNodeFlags_name[_FileNodeFlags_index[i]:_FileNodeFlags_index[i+1]] {
+			return FileNodeFlags(i + 16), nil
+		}
+	}
+	return 0, errors.New("String: " + s + " is not a valid option for type: FileNodeFlags")
 }

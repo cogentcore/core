@@ -9,6 +9,19 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[UndefType-0]
+	_ = x[Bool-1]
+	_ = x[Int-2]
+	_ = x[UInt-3]
+	_ = x[Float32-4]
+	_ = x[Float64-5]
+	_ = x[TypesN-6]
+}
+
 const _Types_name = "UndefTypeBoolIntUIntFloat32Float64TypesN"
 
 var _Types_index = [...]uint8{0, 9, 13, 16, 20, 27, 34, 40}
