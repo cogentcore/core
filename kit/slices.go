@@ -21,10 +21,10 @@ import (
 
 // SliceElType returns the type of the elements for the given slice (which can be
 // a pointer to a slice or a direct slice) -- just Elem() of slice type, but using
-// this function makes it more explicit what is going on.
+// this function makes it more explicit what is going on.  And it uses
+// OnePtrUnderlyingValue to get past any interface wrapping.
 func SliceElType(sl interface{}) reflect.Type {
-	// todo: use OnePtrUnderlyingValue to get past an interface..
-	return NonPtrType(reflect.TypeOf(sl)).Elem()
+	return NonPtrValue(OnePtrUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
