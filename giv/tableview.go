@@ -469,32 +469,33 @@ func (tv *TableView) LayoutHeader() {
 	nfld := tv.NVisFields + idxOff
 	sgh := tv.SliceHeader()
 	sgf := tv.SliceGrid()
-	spc := sgf.Spacing.Dots
+	spc := sgh.Spacing.Dots
 	gd := sgf.GridData[gi.Col]
 	if gd == nil {
 		return
 	}
-	if len(sgf.Kids) >= nfld {
-		sumwd := float32(0)
-		for fli := 0; fli < nfld; fli++ {
-			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
-			wd := gd[fli].AllocSize
-			lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))
-			lbl.SetProp("max-width", units.NewValue(wd+spc, units.Dot))
-			sumwd += wd + spc
+	sumwd := float32(0)
+	for fli := 0; fli < nfld; fli++ {
+		lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+		wd := gd[fli].AllocSize - spc
+		if fli == 0 {
+			wd += spc
 		}
-		if !tv.IsInactive() {
-			mx := len(sgf.GridData[gi.Col])
-			for fli := nfld; fli < mx; fli++ {
-				lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
-				wd := sgf.GridData[gi.Col][fli].AllocSize
-				lbl.SetMinPrefWidth(units.NewValue(wd+spc, units.Dot))
-				lbl.SetProp("max-width", units.NewValue(wd+spc, units.Dot))
-				sumwd += wd + spc
-			}
-		}
-		sgh.SetMinPrefWidth(units.NewValue(sumwd, units.Dot))
+		lbl.SetMinPrefWidth(units.NewValue(wd, units.Dot))
+		lbl.SetProp("max-width", units.NewValue(wd, units.Dot))
+		sumwd += wd
 	}
+	if !tv.IsInactive() {
+		mx := len(sgf.GridData[gi.Col])
+		for fli := nfld; fli < mx; fli++ {
+			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+			wd := gd[fli].AllocSize - spc
+			lbl.SetMinPrefWidth(units.NewValue(wd, units.Dot))
+			lbl.SetProp("max-width", units.NewValue(wd, units.Dot))
+			sumwd += wd
+		}
+	}
+	sgh.SetMinPrefWidth(units.NewValue(sumwd+spc, units.Dot))
 }
 
 // UpdateSliceGrid updates grid display -- robust to any time calling

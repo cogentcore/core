@@ -841,6 +841,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 }
 
 func (sv *SliceViewBase) Style2D() {
+	sv.Frame.Style2D()
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
@@ -854,7 +855,6 @@ func (sv *SliceViewBase) Style2D() {
 	}
 	sg := sv.This().(SliceViewer).SliceGrid()
 	sg.StartFocus() // need to call this when window is actually active
-	sv.Frame.Style2D()
 }
 
 func (sv *SliceViewBase) Render2D() {
