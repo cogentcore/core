@@ -176,7 +176,8 @@ type WinFlags int
 var KiT_WinFlags = kit.Enums.AddEnumExt(KiT_NodeFlags, WinFlagsN, kit.BitFlag, nil)
 
 const (
-	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied
+	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
+	// sized it -- affects whether other default geom should be applied.
 	WinFlagHasGeomPrefs WinFlags = WinFlags(NodeFlagsN) + iota
 
 	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
@@ -337,7 +338,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
 		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
-		if _, found := AllWindows.FindName(name); found {
+		if _, found := AllWindows.FindName(name); found { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
