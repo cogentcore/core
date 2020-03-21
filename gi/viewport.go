@@ -781,12 +781,16 @@ func (vp *Viewport2D) SetNeedsFullRender() {
 // middle of the construction process and thus attempting to render garbage.
 // Must call UnblockUpdates after construction is done.
 func (vp *Viewport2D) BlockUpdates() {
-	// vp.UpdtMu.Lock()
+	vp.UpdtMu.Lock()
+	vp.SetFlag(int(VpFlagUpdatingNode))
+	vp.UpdtMu.Unlock()
 }
 
 // UnblockUpdates unblocks updating of this viewport -- see BlockUpdates()
 func (vp *Viewport2D) UnblockUpdates() {
-	// vp.UpdtMu.Unlock()
+	vp.UpdtMu.Lock()
+	vp.ClearFlag(int(VpFlagUpdatingNode))
+	vp.UpdtMu.Unlock()
 }
 
 // UpdateNodes processes the current update signals and actually does the relevant updating

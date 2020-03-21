@@ -131,6 +131,11 @@ func (fi *FileInfo) IsSymlink() bool {
 	return fi.Mode&os.ModeSymlink != 0
 }
 
+// IsHidden returns true if file name starts with . or _ which are typically hidden
+func (fi *FileInfo) IsHidden() bool {
+	return fi.Name == "" || fi.Name[0] == '.' || fi.Name[0] == '_'
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    File ops
 

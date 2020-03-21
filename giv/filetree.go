@@ -509,7 +509,8 @@ func (fn *FileNode) SetNodePath(path string) error {
 		return err
 	}
 	if fn.IsDir() && !fn.IsIrregular() {
-		if fn.FRoot.inOpenAll || fn.FRoot.IsDirOpen(fn.FPath) {
+		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
+		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
 	}
@@ -545,7 +546,8 @@ func (fn *FileNode) UpdateNode() error {
 		return nil
 	}
 	if fn.IsDir() {
-		if fn.FRoot.inOpenAll || fn.FRoot.IsDirOpen(fn.FPath) {
+		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
+		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.SetOpen()
 			fn.FRoot.SetDirOpen(fn.FPath)
 			repo, rnode := fn.Repo()
