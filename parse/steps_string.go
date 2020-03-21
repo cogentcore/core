@@ -9,6 +9,18 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Match-0]
+	_ = x[SubMatch-1]
+	_ = x[NoMatch-2]
+	_ = x[Run-3]
+	_ = x[RunAct-4]
+	_ = x[StepsN-5]
+}
+
 const _Steps_name = "MatchSubMatchNoMatchRunRunActStepsN"
 
 var _Steps_index = [...]uint8{0, 5, 13, 20, 23, 29, 35}

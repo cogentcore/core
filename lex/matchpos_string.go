@@ -9,6 +9,20 @@ import (
 
 var _ = errors.New("dummy error")
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[AnyPos-0]
+	_ = x[StartOfLine-1]
+	_ = x[EndOfLine-2]
+	_ = x[MiddleOfLine-3]
+	_ = x[StartOfWord-4]
+	_ = x[EndOfWord-5]
+	_ = x[MiddleOfWord-6]
+	_ = x[MatchPosN-7]
+}
+
 const _MatchPos_name = "AnyPosStartOfLineEndOfLineMiddleOfLineStartOfWordEndOfWordMiddleOfWordMatchPosN"
 
 var _MatchPos_index = [...]uint8{0, 6, 17, 26, 38, 49, 58, 70, 79}
