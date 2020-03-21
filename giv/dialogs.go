@@ -190,9 +190,6 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
 
-	dlg.SetProp("min-width", units.NewEm(60))
-	dlg.SetProp("min-height", units.NewEm(30))
-
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)

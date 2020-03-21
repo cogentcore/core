@@ -407,7 +407,9 @@ func (mv *MapView) Style2D() {
 }
 
 func (mv *MapView) Render2D() {
-	mv.ToolBar().UpdateActions() // nil safe..
+	if mv.IsConfiged() {
+		mv.ToolBar().UpdateActions() // nil safe..
+	}
 	if win := mv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()

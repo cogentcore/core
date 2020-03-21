@@ -137,7 +137,7 @@ var WindowOpenTimer time.Time
 type Window struct {
 	NodeBase
 	Title             string            `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
-	Data              interface{}       `desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	Data              interface{}       `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 	OSWin             oswin.Window      `json:"-" xml:"-" view:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 	EventMgr          EventMgr          `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
 	Viewport          *Viewport2D       `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`

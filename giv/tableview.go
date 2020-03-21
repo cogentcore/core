@@ -42,8 +42,8 @@ type TableView struct {
 	SortIdx    int                   `desc:"current sort index"`
 	SortDesc   bool                  `desc:"whether current sort order is descending"`
 	StruType   reflect.Type          `copy:"-" view:"-" json:"-" xml:"-" desc:"struct type for each row"`
-	NVisFields int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
 	VisFields  []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-" desc:"the visible fields"`
+	NVisFields int                   `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
 }
 
 var KiT_TableView = kit.Types.AddType(&TableView{}, TableViewProps)
@@ -271,8 +271,9 @@ func (tv *TableView) ConfigSliceGrid() {
 	defer sg.UpdateEnd(updt)
 
 	sg.Lay = gi.LayoutVert
-	sg.SetMinPrefWidth(units.NewCh(80))
-	sg.SetStretchMax() // for this to work, ALL layers above need it too
+	sg.SetMinPrefWidth(units.NewCh(20))
+	sg.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
+	sg.SetStretchMax()                        // for this to work, ALL layers above need it too
 
 	sgcfg := kit.TypeAndNameList{}
 	sgcfg.Add(gi.KiT_ToolBar, "header")
@@ -296,10 +297,10 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf := tv.SliceGrid()
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
-	sgf.SetMinPrefHeight(units.NewEm(20))
+	sgf.SetMinPrefHeight(units.NewEm(6))
 	sgf.SetStretchMax() // for this to work, ALL layers above need it too
 	sgf.SetProp("columns", nWidgPerRow)
-	// sgf.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
+	sgf.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
 	// this causes everything to get off, especially resizing: not taking it into account presumably:
 	// sgf.SetProp("spacing", gi.StdDialogVSpaceUnits)
 
@@ -403,7 +404,6 @@ func (tv *TableView) ConfigSliceGrid() {
 	if tv.SortIdx >= 0 {
 		tv.SortSlice()
 	}
-
 	tv.ConfigScroll()
 }
 
@@ -426,16 +426,26 @@ func (tv *TableView) LayoutSliceGrid() bool {
 		return false
 	}
 
-	sgHt := tv.AvailHeight()
-	tv.LayoutHeight = sgHt
-	if sgHt == 0 {
-		return false
-	}
 	nWidgPerRow, _ := tv.RowWidgetNs()
-	tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
+	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
+		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
+	}
+	if tv.Sty.Font.Face == nil {
+		tv.Sty.Font.OpenFont(&tv.Sty.UnContext)
+	}
 	tv.RowHeight = math32.Max(tv.RowHeight, tv.Sty.Font.Face.Metrics.Height)
 
-	tv.VisRows = int(math32.Floor(sgHt / tv.RowHeight))
+	if tv.Viewport != nil && tv.Viewport.HasFlag(int(gi.VpFlagPrefSizing)) {
+		tv.VisRows = ints.MinInt(gi.LayoutPrefMaxRows, tv.SliceSize)
+		tv.LayoutHeight = float32(tv.VisRows) * tv.RowHeight
+	} else {
+		sgHt := tv.AvailHeight()
+		tv.LayoutHeight = sgHt
+		if sgHt == 0 {
+			return false
+		}
+		tv.VisRows = int(math32.Floor(sgHt / tv.RowHeight))
+	}
 	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
 
 	nWidg := nWidgPerRow * tv.DispRows

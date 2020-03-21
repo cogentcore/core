@@ -341,7 +341,9 @@ func (sv *StructView) UpdateDefaults() {
 }
 
 func (sv *StructView) Render2D() {
-	sv.ToolBar().UpdateActions()
+	if sv.IsConfiged() {
+		sv.ToolBar().UpdateActions()
+	}
 	if win := sv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()

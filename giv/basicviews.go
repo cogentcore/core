@@ -184,8 +184,10 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	slci := vv.Value.Interface()
 	vv.IsArray = kit.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
-	vv.ElType = kit.SliceElType(slci)
-	vv.ElIsStruct = (kit.NonPtrType(vv.ElType).Kind() == reflect.Struct)
+	if slci != nil && !kit.IfaceIsNil(slci) {
+		vv.ElType = kit.SliceElType(slci)
+		vv.ElIsStruct = (kit.NonPtrType(vv.ElType).Kind() == reflect.Struct)
+	}
 	ac := vv.Widget.(*gi.Action)
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.SetProp("padding", units.NewPx(2))

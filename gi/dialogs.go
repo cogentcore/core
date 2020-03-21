@@ -65,7 +65,7 @@ type Dialog struct {
 	State     DialogState `desc:"state of the dialog"`
 	SigVal    int64       `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
 	DialogSig ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
-	Data      interface{} `desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
+	Data      interface{} `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
 
 var KiT_Dialog = kit.Types.AddType(&Dialog{}, DialogProps)

@@ -275,8 +275,13 @@ func (ly *Layout) GatherSizes() {
 		}
 	}
 
+	prefSizing := false
+	if ly.Viewport != nil && ly.Viewport.HasFlag(int(VpFlagPrefSizing)) {
+		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
+	}
+
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if ly.LayData.Size.Pref.Dim(d) == 0 {
+		if prefSizing || ly.LayData.Size.Pref.Dim(d) == 0 {
 			if ly.SumDim(d) { // our layout now updated to sum
 				ly.LayData.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
 				ly.LayData.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
