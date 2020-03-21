@@ -155,7 +155,12 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 	if !opts.Rebuild {
 		csy, cts, err := syms.OpenSymCache(filecat.Go, pkgPathAbs)
 		if err == nil && csy != nil {
-			if !gl.Pr.ModTime.IsZero() && cts.Before(gl.Pr.ModTime) {
+			sydir := filepath.Dir(csy.Filename)
+			diffPath := sydir != pkgPathAbs
+			// if diffPath {
+			// 	fmt.Printf("rebuilding %v because path: %v != cur path: %v\n", path, sydir, pkgPathAbs)
+			// }
+			if diffPath || (!gl.Pr.ModTime.IsZero() && cts.Before(gl.Pr.ModTime)) {
 				// fmt.Printf("rebuilding %v because parser: %v is newer than cache: %v\n", path, gl.Pr.ModTime, cts)
 			} else {
 				lstmod := dirs.LatestMod(pkgPathAbs, []string{".go"})
