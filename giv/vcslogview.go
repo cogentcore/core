@@ -6,7 +6,6 @@ package giv
 
 import (
 	"github.com/goki/gi/gi"
-	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/vci"
@@ -196,8 +195,7 @@ func VCSLogViewDialog(repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog 
 	lv := frame.InsertNewChild(KiT_VCSLogView, prIdx+1, "vcslog").(*VCSLogView)
 	lv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
 	lv.Config(repo, lg, file, since)
-	dlg.SetProp("min-width", units.NewEm(50))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, nil, nil)
 	return dlg

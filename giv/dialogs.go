@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"image"
 	"reflect"
 
 	"github.com/goki/gi/gi"
@@ -63,8 +62,9 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.KiT_Layout, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.SetProp("width", units.NewEm(10))
-	tlv.SetProp("height", units.NewEm(10))
+	tlv.SetProp("width", units.NewCh(80))
+	tlv.SetProp("height", units.NewEm(40))
+	tlv.SetProp("line-nos", opts.LineNos)
 	tlv.SetStretchMax()
 	tv := AddNewTextView(tlv, "text-view")
 	tv.Viewport = dlg.Embed(gi.KiT_Viewport2D).(*gi.Viewport2D)
@@ -124,8 +124,7 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(60))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(stru, dlg.Win, dlg.Win.MainMenu)
@@ -156,8 +155,7 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(60))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(mp, dlg.Win, dlg.Win.MainMenu)
@@ -191,8 +189,10 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(50))
+
+	dlg.SetProp("min-width", units.NewEm(60))
 	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
@@ -224,8 +224,7 @@ func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts,
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(50))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
@@ -273,8 +272,7 @@ func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts D
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(50))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
@@ -320,8 +318,7 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, st
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(50))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, func() {
 		MainMenuView(slcOfStru, dlg.Win, dlg.Win.MainMenu)
@@ -370,8 +367,7 @@ func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOp
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(50))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
@@ -462,6 +458,7 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki,
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
@@ -507,9 +504,7 @@ func FileViewDialog(avp *gi.Viewport2D, filename, ext string, opts DlgOpts, filt
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(60))
-	dlg.SetProp("min-height", units.NewEm(35))
-	dlg.DefSize = image.Point{600, 400} // avoids expensive computation
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
@@ -542,8 +537,7 @@ func ArgViewDialog(avp *gi.Viewport2D, args []ArgData, opts DlgOpts, recv ki.Ki,
 	if recv != nil && dlgFunc != nil {
 		dlg.DialogSig.Connect(recv, dlgFunc)
 	}
-	dlg.SetProp("min-width", units.NewEm(60))
-	dlg.SetProp("min-height", units.NewEm(30))
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg

@@ -24,6 +24,14 @@ import (
 	"github.com/goki/mat32"
 )
 
+// LayoutPrefMaxRows is maximum number of rows to use in a grid layout
+// when computing the preferred size (VpFlagPrefSizing)
+var LayoutPrefMaxRows = 20
+
+// LayoutPrefMaxCols is maximum number of columns to use in a grid layout
+// when computing the preferred size (VpFlagPrefSizing)
+var LayoutPrefMaxCols = 20
+
 // LayoutData contains all the data needed to specify the layout of an item
 // within a layout -- includes computed values of style prefs -- everything is
 // concrete and specified here, whereas style may not be fully resolved
@@ -426,34 +434,56 @@ func (ly *Layout) GatherSizesGrid() {
 		}
 	}
 
-	// Y = sum across rows which have max's
-	var sumPref, sumNeed mat32.Vec2
-	for _, gd := range ly.GridData[Row] {
-		sumNeed.SetAddDim(mat32.Y, gd.SizeNeed)
-		sumPref.SetAddDim(mat32.Y, gd.SizePref)
-	}
-	// X = sum across cols which have max's
-	for _, gd := range ly.GridData[Col] {
-		sumNeed.SetAddDim(mat32.X, gd.SizeNeed)
-		sumPref.SetAddDim(mat32.X, gd.SizePref)
-	}
-
 	prefSizing := false
 	if ly.Viewport != nil && ly.Viewport.HasFlag(int(VpFlagPrefSizing)) {
 		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
 	}
 
-	if ly.LayData.Size.Pref.X == 0 || prefSizing {
-		ly.LayData.Size.Need.X = mat32.Max(ly.LayData.Size.Need.X, sumNeed.X)
-		ly.LayData.Size.Pref.X = mat32.Max(ly.LayData.Size.Pref.X, sumPref.X)
-	} else { // use target size from style otherwise
-		ly.LayData.Size.Need.X = ly.LayData.Size.Pref.X
-	}
-	if ly.LayData.Size.Pref.Y == 0 || prefSizing {
-		ly.LayData.Size.Need.Y = mat32.Max(ly.LayData.Size.Need.Y, sumNeed.Y)
-		ly.LayData.Size.Pref.Y = mat32.Max(ly.LayData.Size.Pref.Y, sumPref.Y)
-	} else { // use target size from style otherwise
-		ly.LayData.Size.Need.Y = ly.LayData.Size.Pref.Y
+	// if there aren't existing prefs, we need to compute size
+	if prefSizing || ly.LayData.Size.Pref.X == 0 || ly.LayData.Size.Pref.Y == 0 {
+		sbw := ly.Sty.Layout.ScrollBarWidth.Dots
+		maxRow := len(ly.GridData[Row])
+		maxCol := len(ly.GridData[Col])
+		if prefSizing {
+			maxRow = ints.MinInt(LayoutPrefMaxRows, maxRow)
+			maxCol = ints.MinInt(LayoutPrefMaxCols, maxCol)
+		}
+
+		// Y = sum across rows which have max's
+		var sumPref, sumNeed mat32.Vec2
+		for i := 0; i < maxRow; i++ {
+			gd := ly.GridData[Row][i]
+			sumNeed.SetAddDim(mat32.Y, gd.SizeNeed)
+			sumPref.SetAddDim(mat32.Y, gd.SizePref)
+		}
+		// X = sum across cols which have max's
+		for i := 0; i < maxCol; i++ {
+			gd := ly.GridData[Col][i]
+			sumNeed.SetAddDim(mat32.X, gd.SizeNeed)
+			sumPref.SetAddDim(mat32.X, gd.SizePref)
+		}
+
+		if prefSizing {
+			sumNeed.X += sbw
+			sumNeed.Y += sbw
+			sumPref.X += sbw
+			sumPref.Y += sbw
+		}
+
+		if ly.LayData.Size.Pref.X == 0 || prefSizing {
+			ly.LayData.Size.Need.X = mat32.Max(ly.LayData.Size.Need.X, sumNeed.X)
+			ly.LayData.Size.Pref.X = mat32.Max(ly.LayData.Size.Pref.X, sumPref.X)
+		} else { // use target size from style otherwise
+			ly.LayData.Size.Need.X = ly.LayData.Size.Pref.X
+		}
+		if ly.LayData.Size.Pref.Y == 0 || prefSizing {
+			ly.LayData.Size.Need.Y = mat32.Max(ly.LayData.Size.Need.Y, sumNeed.Y)
+			ly.LayData.Size.Pref.Y = mat32.Max(ly.LayData.Size.Pref.Y, sumPref.Y)
+		} else { // use target size from style otherwise
+			ly.LayData.Size.Need.Y = ly.LayData.Size.Pref.Y
+		}
+	} else { // neither are zero so we use those directly
+		ly.LayData.Size.Need = ly.LayData.Size.Pref
 	}
 
 	spc := ly.Sty.BoxSpace()

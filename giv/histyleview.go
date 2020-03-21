@@ -87,7 +87,7 @@ func (vv *HiStyleValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc k
 // HiStylesView opens a view of highlighting styles
 func HiStylesView(st *histyle.Styles) {
 	winm := "hi-styles"
-	width := 800
+	width := 1280
 	height := 800
 	win, recyc := gi.RecycleMainWindow(st, winm, "Syntax Hilighting Styles", width, height)
 	if recyc {
@@ -149,6 +149,11 @@ func HiStylesView(st *histyle.Styles) {
 	})
 
 	win.MainMenuUpdated()
+
+	if !win.HasGeomPrefs() { // resize to contents
+		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		win.SetSize(vpsz)
+	}
 
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop()

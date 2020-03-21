@@ -1805,6 +1805,7 @@ func QReplaceDialog(avp *gi.Viewport2D, find string, lexitems bool, opts gi.DlgO
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
+
 	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg

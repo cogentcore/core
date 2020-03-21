@@ -340,9 +340,11 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg.Stripes = gi.RowStripes
 	sg.SetProp("columns", nWidgPerRow)
 	// setting a pref here is key for giving it a scrollbar in larger context
-	sg.SetMinPrefHeight(units.NewEm(1.5))
-	sg.SetMinPrefWidth(units.NewEm(10))
+	sg.SetMinPrefHeight(units.NewEm(6))
+	sg.SetMinPrefWidth(units.NewCh(40))
 	sg.SetStretchMax() // for this to work, ALL layers above need it too
+	// this doesn't work b/c not allocated initially
+	// sg.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
 
 	if kit.IfaceIsNil(sv.Slice) {
 		return
@@ -481,6 +483,12 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	nWidgPerRow, _ := sv.RowWidgetNs()
 	sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	sv.RowHeight = math32.Max(sv.RowHeight, sv.Sty.Font.Face.Metrics.Height)
+
+	//	note: this is never called because layout doesn't happen until render b/c
+	// it is dependent on the allocated size -- catch-22 problem.
+	// if sv.Viewport != nil && sv.Viewport.HasFlag(int(gi.VpFlagPrefSizing)) {
+	// 	sv.VisRows = gi.LayoutPrefMaxRows
+
 	sv.VisRows = int(math32.Floor(sgHt / sv.RowHeight))
 	sv.DispRows = ints.MinInt(sv.SliceSize, sv.VisRows)
 

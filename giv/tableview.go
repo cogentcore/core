@@ -271,7 +271,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	defer sg.UpdateEnd(updt)
 
 	sg.Lay = gi.LayoutVert
-	sg.SetMinPrefWidth(units.NewEm(10))
+	sg.SetMinPrefWidth(units.NewCh(80))
 	sg.SetStretchMax() // for this to work, ALL layers above need it too
 
 	sgcfg := kit.TypeAndNameList{}
@@ -296,9 +296,10 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf := tv.SliceGrid()
 	sgf.Lay = gi.LayoutGrid
 	sgf.Stripes = gi.RowStripes
-	sgf.SetMinPrefHeight(units.NewEm(10))
+	sgf.SetMinPrefHeight(units.NewEm(20))
 	sgf.SetStretchMax() // for this to work, ALL layers above need it too
 	sgf.SetProp("columns", nWidgPerRow)
+	// sgf.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
 	// this causes everything to get off, especially resizing: not taking it into account presumably:
 	// sgf.SetProp("spacing", gi.StdDialogVSpaceUnits)
 
@@ -433,6 +434,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	nWidgPerRow, _ := tv.RowWidgetNs()
 	tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	tv.RowHeight = math32.Max(tv.RowHeight, tv.Sty.Font.Face.Metrics.Height)
+
 	tv.VisRows = int(math32.Floor(sgHt / tv.RowHeight))
 	tv.DispRows = ints.MinInt(tv.SliceSize, tv.VisRows)
 
