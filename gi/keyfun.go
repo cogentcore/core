@@ -64,6 +64,8 @@ const (
 	KeyFunDeleteWord
 	KeyFunKill
 	KeyFunDuplicate
+	KeyFunTranspose
+	KeyFunTransposeWord
 	KeyFunUndo
 	KeyFunRedo
 	KeyFunInsert
@@ -561,6 +563,8 @@ var StdKeyMaps = KeyMaps{
 		"Meta+V":                  KeyFunPaste,
 		"Shift+Meta+V":            KeyFunPasteHist,
 		"Alt+D":                   KeyFunDuplicate,
+		"Control+T":               KeyFunTranspose,
+		"Alt+T":                   KeyFunTransposeWord,
 		"Control+Z":               KeyFunUndo,
 		"Meta+Z":                  KeyFunUndo,
 		"Shift+Control+Z":         KeyFunRedo,
@@ -691,6 +695,8 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Meta+V":            KeyFunPasteHist,
 		"Shift+Control+Y":         KeyFunPasteHist,
 		"Alt+∂":                   KeyFunDuplicate,
+		"Control+T":               KeyFunTranspose,
+		"Alt+T":                   KeyFunTransposeWord,
 		"Control+Z":               KeyFunUndo,
 		"Meta+Z":                  KeyFunUndo,
 		"Control+/":               KeyFunUndo,
@@ -817,6 +823,8 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Alt+V":             KeyFunPasteHist,
 		"Shift+Control+Y":         KeyFunPasteHist,
 		"Alt+D":                   KeyFunDuplicate,
+		"Control+T":               KeyFunTranspose,
+		"Alt+T":                   KeyFunTransposeWord,
 		"Control+Z":               KeyFunUndo,
 		"Control+/":               KeyFunUndo,
 		"Shift+Control+Z":         KeyFunRedo,
@@ -902,6 +910,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+V":               KeyFunPaste,
 		"Shift+Control+V":         KeyFunPasteHist,
 		"Alt+D":                   KeyFunDuplicate,
+		"Control+T":               KeyFunTranspose,
+		"Alt+T":                   KeyFunTransposeWord,
 		"Control+Z":               KeyFunUndo,
 		"Control+Y":               KeyFunRedo,
 		"Shift+Control+Z":         KeyFunRedo,
@@ -988,6 +998,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+V":               KeyFunPaste,
 		"Shift+Control+V":         KeyFunPasteHist,
 		"Alt+D":                   KeyFunDuplicate,
+		"Control+T":               KeyFunTranspose,
+		"Alt+T":                   KeyFunTransposeWord,
 		"Control+Z":               KeyFunUndo,
 		"Control+Y":               KeyFunRedo,
 		"Shift+Control+Z":         KeyFunRedo,
@@ -1074,6 +1086,8 @@ var StdKeyMaps = KeyMaps{
 		"Control+V":               KeyFunPaste,
 		"Shift+Control+V":         KeyFunPasteHist,
 		"Alt+D":                   KeyFunDuplicate,
+		"Control+T":               KeyFunTranspose,
+		"Alt+T":                   KeyFunTransposeWord,
 		"Control+Z":               KeyFunUndo,
 		"Control+Y":               KeyFunRedo,
 		"Shift+Control+Z":         KeyFunRedo,

@@ -938,9 +938,11 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 		}
 	}
 	repo, _ := fn.Repo()
-	if fn.Kids == nil || len(fn.Kids) == 0 {
+	stored := false
+	if fn.IsDir() && len(fn.Kids) == 0 {
 		err = os.Rename(string(orgpath), newpath)
 	} else if repo != nil && fn.Info.Vcs >= vci.Stored {
+		stored = true
 		err = repo.Move(string(orgpath), newpath)
 	} else {
 		err = os.Rename(string(orgpath), newpath)
@@ -952,8 +954,12 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 		fn.FPath = gi.FileName(fn.Info.Path)
 		fn.SetName(fn.Info.Name)
 	}
-	fn.UpdateSig()
-	fn.FRoot.UpdateDir() // need full update
+	if stored {
+		fn.AddToVcs()
+	} else {
+		fn.UpdateSig()
+		fn.FRoot.UpdateDir() // need full update
+	}
 	return err
 }
 
@@ -1197,7 +1203,6 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tv := frame.InsertNewChild(KiT_TwinTextViews, prIdx+1, "twin-view").(*TwinTextViews)
 	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
-
 	flns := bytes.Split(fbytes, []byte("\n"))
 	lns := bytes.Split(blame, []byte("\n"))
 	nln := ints.MinInt(len(lns), len(flns))
@@ -1224,6 +1229,10 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tva, tvb := tv.TextViews()
 	tva.SetProp("white-space", gi.WhiteSpacePre)
 	tvb.SetProp("white-space", gi.WhiteSpacePre)
+	tva.SetProp("width", units.NewCh(30))
+	tva.SetProp("height", units.NewEm(40))
+	tvb.SetProp("width", units.NewCh(80))
+	tvb.SetProp("height", units.NewEm(40))
 
 	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)

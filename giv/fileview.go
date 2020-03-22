@@ -366,7 +366,7 @@ func (fv *FileView) ConfigSelRow() {
 	sl.Text = "File:"
 	sl.Tooltip = "enter file name here (or select from above list)"
 	sf := fv.SelField()
-	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
+	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunSelectMode), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetMinPrefWidth(units.NewCh(60))
 	sf.SetStretchMaxWidth()
@@ -725,7 +725,7 @@ func (fv *FileView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunHistNext:
 		kt.SetProcessed()
 		fv.PathFieldHistNext()
-	case gi.KeyFunInsert, gi.KeyFunInsertAfter, gi.KeyFunMenuOpen:
+	case gi.KeyFunInsert, gi.KeyFunInsertAfter, gi.KeyFunMenuOpen, gi.KeyFunSelectMode:
 		kt.SetProcessed()
 		fv.SelectFile()
 	case gi.KeyFunSearch:

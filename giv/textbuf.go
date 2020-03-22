@@ -429,7 +429,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 		log.Println(err)
 		return err
 	}
-	tb.SetName(string(filename)) // todo: modify in any way?
+	tb.SetName(string(filename))
 
 	tb.InitialMarkup()
 
@@ -540,7 +540,7 @@ func (tb *TextBuf) SaveFile(filename gi.FileName) error {
 		log.Println(err)
 	} else {
 		tb.Filename = filename
-		tb.SetName(string(filename)) // todo: modify in any way?
+		tb.SetName(string(filename))
 		tb.Stat()
 	}
 	return err
@@ -1025,33 +1025,6 @@ const (
 	ReplaceNoMatchCase = false
 )
 
-// InsertText is the primary method for inserting text into the buffer.
-// It inserts new text at given starting position, optionally signaling
-// views after text has been inserted.  Sets the timestamp on resulting Edit to now.
-// An Undo record is automatically saved depending on Undo.Off setting.
-func (tb *TextBuf) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edit {
-	if len(text) == 0 {
-		return nil
-	}
-	st = tb.ValidPos(st) // todo: this might be causing some issues?
-	tb.FileModCheck()    // will just revert changes if shouldn't have changed
-	tb.SetChanged()
-	if len(tb.Lines) == 0 {
-		tb.New(1)
-	}
-	tb.LinesMu.Lock()
-	tbe := tb.InsertTextImpl(st, text)
-	tb.SaveUndo(tbe)
-	tb.LinesMu.Unlock()
-	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
-	}
-	if tb.Autosave {
-		go tb.AutoSave()
-	}
-	return tbe
-}
-
 // DeleteText is the primary method for deleting text from the buffer.
 // It deletes region of text between start and end positions,
 // optionally signaling views after text lines have been updated.
@@ -1087,6 +1060,9 @@ func (tb *TextBuf) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
 // LinesMu.Lock.
 func (tb *TextBuf) DeleteTextImpl(st, ed lex.Pos) *textbuf.Edit {
 	tbe := tb.RegionImpl(st, ed)
+	if tbe == nil {
+		return nil
+	}
 	tbe.Delete = true
 	if ed.Ln == st.Ln {
 		tb.Lines[st.Ln] = append(tb.Lines[st.Ln][:st.Ch], tb.Lines[st.Ln][ed.Ch:]...)
@@ -1108,6 +1084,82 @@ func (tb *TextBuf) DeleteTextImpl(st, ed lex.Pos) *textbuf.Edit {
 		}
 		tb.NLines = len(tb.Lines)
 		tb.LinesDeleted(tbe)
+	}
+	return tbe
+}
+
+// DeleteTextRect deletes rectangular region of text between start, end
+// defining the upper-left and lower-right corners of a rectangle.
+// Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting textbuf.Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
+func (tb *TextBuf) DeleteTextRect(st, ed lex.Pos, signal bool) *textbuf.Edit {
+	st = tb.ValidPos(st)
+	ed = tb.ValidPos(ed)
+	if st == ed {
+		return nil
+	}
+	if !st.IsLess(ed) {
+		log.Printf("giv.TextBuf DeleteTextRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		return nil
+	}
+	tb.FileModCheck()
+	tb.SetChanged()
+	tb.LinesMu.Lock()
+	tbe := tb.DeleteTextRectImpl(st, ed)
+	tb.SaveUndo(tbe)
+	tb.LinesMu.Unlock()
+	if signal {
+		tb.Refresh()
+	}
+	if tb.Autosave {
+		go tb.AutoSave()
+	}
+	return tbe
+}
+
+// DeleteTextRectImpl deletes rectangular region of text between start, end
+// defining the upper-left and lower-right corners of a rectangle.
+// Fails if st.Ch >= ed.Ch. Sets the timestamp on resulting textbuf.Edit to now.
+// Must be called under LinesMu.Lock.
+func (tb *TextBuf) DeleteTextRectImpl(st, ed lex.Pos) *textbuf.Edit {
+	tbe := tb.RegionRectImpl(st, ed)
+	if tbe == nil {
+		return nil
+	}
+	tbe.Delete = true
+	for ln := st.Ln; ln <= ed.Ln; ln++ {
+		ls := tb.Lines[ln]
+		if len(ls) > st.Ch {
+			tb.Lines[ln] = append(ls[:st.Ch], ls[ed.Ch:]...) // should be ok even if shorter?
+		}
+	}
+	tb.LinesEdited(tbe)
+	return tbe
+}
+
+// InsertText is the primary method for inserting text into the buffer.
+// It inserts new text at given starting position, optionally signaling
+// views after text has been inserted.  Sets the timestamp on resulting Edit to now.
+// An Undo record is automatically saved depending on Undo.Off setting.
+func (tb *TextBuf) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edit {
+	if len(text) == 0 {
+		return nil
+	}
+	st = tb.ValidPos(st)
+	tb.FileModCheck() // will just revert changes if shouldn't have changed
+	tb.SetChanged()
+	if len(tb.Lines) == 0 {
+		tb.New(1)
+	}
+	tb.LinesMu.Lock()
+	tbe := tb.InsertTextImpl(st, text)
+	tb.SaveUndo(tbe)
+	tb.LinesMu.Unlock()
+	if signal {
+		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+	}
+	if tb.Autosave {
+		go tb.AutoSave()
 	}
 	return tbe
 }
@@ -1162,6 +1214,82 @@ func (tb *TextBuf) InsertTextImpl(st lex.Pos, text []byte) *textbuf.Edit {
 	return tbe
 }
 
+// InsertTextRect inserts a rectangle of text defined in given textbuf.Edit record,
+// (e.g., from RegionRect or DeleteRect), optionally signaling
+// views after text has been inserted.
+// Returns a copy of the Edit record with an updated timestamp.
+// An Undo record is automatically saved depending on Undo.Off setting.
+func (tb *TextBuf) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
+	if tbe == nil {
+		return nil
+	}
+	tb.FileModCheck() // will just revert changes if shouldn't have changed
+	tb.SetChanged()
+	tb.LinesMu.Lock()
+	nln := tb.NLines
+	re := tb.InsertTextRectImpl(tbe)
+	tb.SaveUndo(re)
+	tb.LinesMu.Unlock()
+	if signal {
+		if re.Reg.End.Ln >= nln {
+			ie := &textbuf.Edit{}
+			ie.Reg.Start.Ln = nln - 1
+			ie.Reg.End.Ln = re.Reg.End.Ln
+			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), ie)
+		} else {
+			tb.Refresh()
+		}
+	}
+	if tb.Autosave {
+		go tb.AutoSave()
+	}
+	return re
+}
+
+// InsertTextRectImpl does the raw insert of new text at given starting position,
+// using a Rect textbuf.Edit  (e.g., from RegionRect or DeleteRect).
+// Returns a copy of the Edit record with an updated timestamp.
+func (tb *TextBuf) InsertTextRectImpl(tbe *textbuf.Edit) *textbuf.Edit {
+	st := tbe.Reg.Start
+	ed := tbe.Reg.End
+	nlns := (ed.Ln - st.Ln) + 1
+	if nlns <= 0 {
+		return nil
+	}
+	// make sure there are enough lines -- add as needed
+	cln := len(tb.Lines)
+	if cln == 0 {
+		tb.New(nlns)
+	} else if cln <= ed.Ln {
+		nln := (1 + ed.Ln) - cln
+		tmp := make([][]rune, nln)
+		tb.Lines = append(tb.Lines, tmp...) // first append to end to extend capacity
+		tb.NLines = len(tb.Lines)
+		ie := &textbuf.Edit{}
+		ie.Reg.Start.Ln = cln - 1
+		ie.Reg.End.Ln = ed.Ln
+		tb.LinesInserted(ie)
+	}
+	nch := (ed.Ch - st.Ch)
+	for i := 0; i < nlns; i++ {
+		ln := st.Ln + i
+		lr := tb.Lines[ln]
+		ir := tbe.Text[i]
+		if len(lr) < st.Ch {
+			lr = append(lr, runes.Repeat([]rune(" "), st.Ch-len(lr))...)
+		}
+		nt := append(lr, ir...)          // first append to end to extend capacity
+		copy(nt[st.Ch+nch:], nt[st.Ch:]) // move stuff to end
+		copy(nt[st.Ch:], ir)             // copy into position
+		tb.Lines[ln] = nt
+	}
+	re := tbe.Clone()
+	re.Delete = false
+	re.Reg.TimeNow()
+	tb.LinesEdited(re)
+	return re
+}
+
 // Region returns a textbuf.Edit representation of text between start and end positions
 // returns nil if not a valid region.  sets the timestamp on the textbuf.Edit to now
 func (tb *TextBuf) Region(st, ed lex.Pos) *textbuf.Edit {
@@ -1181,7 +1309,7 @@ func (tb *TextBuf) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
 		return nil
 	}
 	if !st.IsLess(ed) {
-		log.Printf("giv.TextBuf: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		log.Printf("giv.TextBuf.Region: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
 		return nil
 	}
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
@@ -1216,6 +1344,56 @@ func (tb *TextBuf) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
 			tbe.Text[ti] = make([]rune, sz)
 			copy(tbe.Text[ti], tb.Lines[ln])
 		}
+	}
+	return tbe
+}
+
+// RegionRect returns a textbuf.Edit representation of text between start and end positions
+// as a rectangle,
+// returns nil if not a valid region.  sets the timestamp on the textbuf.Edit to now
+func (tb *TextBuf) RegionRect(st, ed lex.Pos) *textbuf.Edit {
+	st = tb.ValidPos(st)
+	ed = tb.ValidPos(ed)
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return tb.RegionRectImpl(st, ed)
+}
+
+// RegionRectImpl returns a textbuf.Edit representation of rectangle of
+// text between start (upper left) and end (bottom right) positions.
+// Returns nil if not a valid region.
+// All lines in Text are guaranteed to be of the same size,
+// even if line had fewer chars.
+// Sets the timestamp on the textbuf.Edit to now.
+// Impl version must be called under LinesMu.RLock or Lock
+func (tb *TextBuf) RegionRectImpl(st, ed lex.Pos) *textbuf.Edit {
+	if st == ed {
+		return nil
+	}
+	if !st.IsLess(ed) || st.Ch >= ed.Ch {
+		log.Printf("giv.TextBuf.RegionRect: starting position must be less than ending!: st: %v, ed: %v\n", st, ed)
+		return nil
+	}
+	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
+	tbe.Rect = true
+	// first get chars on start and end
+	nlns := (ed.Ln - st.Ln) + 1
+	nch := (ed.Ch - st.Ch)
+	tbe.Text = make([][]rune, nlns)
+	for i := 0; i < nlns; i++ {
+		ln := st.Ln + i
+		lr := tb.Lines[ln]
+		ll := len(lr)
+		var txt []rune
+		if ll > st.Ch {
+			sz := ints.MinInt(ll-st.Ch, nch)
+			txt = make([]rune, sz, nch)
+			copy(txt, lr[st.Ch:ed.Ch])
+		}
+		if len(txt) < nch { // rect
+			txt = append(txt, runes.Repeat([]rune(" "), nch-len(txt))...)
+		}
+		tbe.Text[i] = txt
 	}
 	return tbe
 }
@@ -1661,22 +1839,42 @@ func (tb *TextBuf) Undo() *textbuf.Edit {
 	stgp := tbe.Group
 	last := tbe
 	for {
-		if tbe.Delete {
-			utbe := tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
-			utbe.Group = stgp + tbe.Group
-			if tb.Opts.EmacsUndo {
-				tb.Undos.SaveUndo(utbe)
+		if tbe.Rect {
+			if tbe.Delete {
+				utbe := tb.InsertTextRectImpl(tbe)
+				utbe.Group = stgp + tbe.Group
+				if tb.Opts.EmacsUndo {
+					tb.Undos.SaveUndo(utbe)
+				}
+				tb.LinesMu.Unlock()
+				tb.Refresh()
+			} else {
+				utbe := tb.DeleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
+				utbe.Group = stgp + tbe.Group
+				if tb.Opts.EmacsUndo {
+					tb.Undos.SaveUndo(utbe)
+				}
+				tb.LinesMu.Unlock()
+				tb.Refresh()
 			}
-			tb.LinesMu.Unlock()
-			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), utbe)
 		} else {
-			utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
-			utbe.Group = stgp + tbe.Group
-			if tb.Opts.EmacsUndo {
-				tb.Undos.SaveUndo(utbe)
+			if tbe.Delete {
+				utbe := tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+				utbe.Group = stgp + tbe.Group
+				if tb.Opts.EmacsUndo {
+					tb.Undos.SaveUndo(utbe)
+				}
+				tb.LinesMu.Unlock()
+				tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), utbe)
+			} else {
+				utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+				utbe.Group = stgp + tbe.Group
+				if tb.Opts.EmacsUndo {
+					tb.Undos.SaveUndo(utbe)
+				}
+				tb.LinesMu.Unlock()
+				tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), utbe)
 			}
-			tb.LinesMu.Unlock()
-			tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), utbe)
 		}
 		tb.LinesMu.Lock()
 		tbe = tb.Undos.UndoPopIfGroup(stgp)
@@ -1717,14 +1915,26 @@ func (tb *TextBuf) Redo() *textbuf.Edit {
 	stgp := tbe.Group
 	last := tbe
 	for {
-		if tbe.Delete {
-			tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
-			tb.LinesMu.Unlock()
-			tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
+		if tbe.Rect {
+			if tbe.Delete {
+				tb.DeleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
+				tb.LinesMu.Unlock()
+				tb.Refresh()
+			} else {
+				tb.InsertTextRectImpl(tbe)
+				tb.LinesMu.Unlock()
+				tb.Refresh()
+			}
 		} else {
-			tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
-			tb.LinesMu.Unlock()
-			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+			if tbe.Delete {
+				tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
+				tb.LinesMu.Unlock()
+				tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
+			} else {
+				tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
+				tb.LinesMu.Unlock()
+				tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+			}
 		}
 		tb.LinesMu.Lock()
 		tbe = tb.Undos.RedoNextIfGroup(stgp)
@@ -1997,7 +2207,6 @@ func (tb *TextBuf) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 	indLev = pInd + delInd
 	chPos = indent.Len(ichr, indLev, tabSz)
 	tbe = tb.IndentLine(ln, indLev)
-	// todo: set tbe = nil for delete!?
 	return
 }
 

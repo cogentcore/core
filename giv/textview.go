@@ -1355,6 +1355,40 @@ func (tv *TextView) CursorKill() {
 	tv.SetCursorShow(org)
 }
 
+// CursorTranspose swaps the character at the cursor with the one before it
+func (tv *TextView) CursorTranspose() {
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
+	tv.ValidateCursor()
+	pos := tv.CursorPos
+	if pos.Ch == 0 {
+		return
+	}
+	ppos := pos
+	ppos.Ch--
+	tv.Buf.LinesMu.Lock()
+	lln := len(tv.Buf.Lines[pos.Ln])
+	end := false
+	if pos.Ch >= lln {
+		end = true
+		pos.Ch = lln - 1
+		ppos.Ch = lln - 2
+	}
+	chr := tv.Buf.Lines[pos.Ln][pos.Ch]
+	pchr := tv.Buf.Lines[pos.Ln][ppos.Ch]
+	tv.Buf.LinesMu.Unlock()
+	repl := string([]rune{chr, pchr})
+	pos.Ch++
+	tv.Buf.ReplaceText(ppos, pos, ppos, repl, EditSignal, ReplaceMatchCase)
+	if !end {
+		tv.SetCursorShow(pos)
+	}
+}
+
+// CursorTranspose swaps the word at the cursor with the one before it
+func (tv *TextView) CursorTransposeWord() {
+}
+
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (tv *TextView) JumpToLinePrompt() {
 	gi.StringPromptDialog(tv.Viewport, "", "Line no..",
@@ -2398,6 +2432,78 @@ func (tv *TextView) InsertAtCursor(txt []byte) {
 	tv.SetCursorShow(pos)
 	tv.SetCursorCol(tv.CursorPos)
 }
+
+///////////////////////////////////////////////////////////
+//  Rectangular regions
+
+// TextViewClipRect is the internal clipboard for Rect rectangle-based
+// regions -- the raw text is posted on the system clipboard but the
+// rect information is in a special format.
+var TextViewClipRect *textbuf.Edit
+
+// CutRect cuts rectangle defined by selected text (upper left to lower right)
+// and adds it to the clipboard, also returns cut text.
+func (tv *TextView) CutRect() *textbuf.Edit {
+	if !tv.HasSelection() {
+		return nil
+	}
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
+	org := tv.SelectReg.Start
+	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
+	if cut != nil {
+		cb := cut.ToBytes()
+		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+		TextViewClipRect = cut
+	}
+	tv.SetCursorShow(org)
+	tv.SavePosHistory(tv.CursorPos)
+	return cut
+}
+
+// CopyRect copies any selected text to the clipboard, and returns that text,
+// optionally resetting the current selection
+func (tv *TextView) CopyRect(reset bool) *textbuf.Edit {
+	tbe := tv.Buf.RegionRect(tv.SelectReg.Start, tv.SelectReg.End)
+	if tbe == nil {
+		return nil
+	}
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
+	cb := tbe.ToBytes()
+	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+	TextViewClipRect = tbe
+	if reset {
+		tv.SelectReset()
+	}
+	tv.SavePosHistory(tv.CursorPos)
+	return tbe
+}
+
+// PasteRect inserts text from the clipboard at current cursor position
+func (tv *TextView) PasteRect() {
+	if TextViewClipRect == nil {
+		return
+	}
+	wupdt := tv.TopUpdateStart()
+	defer tv.TopUpdateEnd(wupdt)
+	ce := TextViewClipRect.Clone()
+	nl := ce.Reg.End.Ln - ce.Reg.Start.Ln
+	nch := ce.Reg.End.Ch - ce.Reg.Start.Ch
+	ce.Reg.Start.Ln = tv.CursorPos.Ln
+	ce.Reg.End.Ln = tv.CursorPos.Ln + nl
+	ce.Reg.Start.Ch = tv.CursorPos.Ch
+	ce.Reg.End.Ch = tv.CursorPos.Ch + nch
+	tbe := tv.Buf.InsertTextRect(ce, EditSignal)
+
+	pos := tbe.Reg.End
+	tv.SetCursorShow(pos)
+	tv.SetCursorCol(tv.CursorPos)
+	tv.SavePosHistory(tv.CursorPos)
+}
+
+///////////////////////////////////////////////////////////
+//  Context Menu
 
 // ContextMenu displays the context menu with options dependent on situation
 func (tv *TextView) ContextMenu() {
@@ -4157,6 +4263,14 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		cancelAll()
 		kt.SetProcessed()
 		tv.Paste()
+	case gi.KeyFunTranspose:
+		cancelAll()
+		kt.SetProcessed()
+		tv.CursorTranspose()
+	case gi.KeyFunTransposeWord:
+		cancelAll()
+		kt.SetProcessed()
+		tv.CursorTransposeWord()
 	case gi.KeyFunPasteHist:
 		cancelAll()
 		kt.SetProcessed()
@@ -4233,6 +4347,56 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
 }
 
+// KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
+func (tv *TextView) KeyInputInsertBra(kt *key.ChordEvent) {
+	bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
+	defer tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+	pos := tv.CursorPos
+	match := true
+	newLine := false
+	curLn := tv.Buf.Line(pos.Ln)
+	lnLen := len(curLn)
+	lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
+	if lp != nil && lp.Lang != nil {
+		match, newLine = lp.Lang.AutoBracket(&tv.Buf.PiState, kt.Rune, pos, curLn)
+	} else {
+		if kt.Rune == '{' {
+			if pos.Ch == lnLen {
+				if lnLen == 0 || unicode.IsSpace(curLn[pos.Ch-1]) {
+					newLine = true
+				}
+				match = true
+			} else {
+				match = unicode.IsSpace(curLn[pos.Ch])
+			}
+		} else {
+			match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
+		}
+	}
+	if match {
+		ket, _ := lex.BracePair(kt.Rune)
+		if newLine && tv.Buf.Opts.AutoIndent {
+			tv.InsertAtCursor([]byte(string(kt.Rune) + "\n"))
+			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
+			if tbe != nil {
+				pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
+				tv.SetCursorShow(pos)
+			}
+			tv.InsertAtCursor([]byte("\n" + string(ket)))
+			tv.Buf.AutoIndent(tv.CursorPos.Ln)
+		} else {
+			tv.InsertAtCursor([]byte(string(kt.Rune) + string(ket)))
+			pos.Ch++
+		}
+		tv.lastAutoInsert = ket
+	} else {
+		tv.InsertAtCursor([]byte(string(kt.Rune)))
+		pos.Ch++
+	}
+	tv.SetCursorShow(pos)
+	tv.SetCursorCol(tv.CursorPos)
+}
+
 // KeyInputInsertRune handles the insertion of a typed character
 func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 	kt.SetProcessed()
@@ -4244,42 +4408,7 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 		tv.QReplaceKeyInput(kt)
 	} else {
 		if kt.Rune == '{' || kt.Rune == '(' || kt.Rune == '[' {
-			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
-			pos := tv.CursorPos
-			var close = true
-			if pos.Ch < tv.Buf.LineLen(pos.Ln) && (kt.Rune == '{' || !unicode.IsSpace(tv.Buf.Line(pos.Ln)[pos.Ch])) {
-				close = false
-			}
-			pos.Ch++
-			if close {
-				match := true
-				newLine := false
-				lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
-				if lp != nil && lp.Lang != nil {
-					match, newLine = lp.Lang.AutoBracket(&tv.Buf.PiState, kt.Rune)
-				}
-				if match {
-					ket, _ := lex.BracePair(kt.Rune)
-					if newLine && tv.Buf.Opts.AutoIndent {
-						tv.InsertAtCursor([]byte(string(kt.Rune) + "\n"))
-						tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
-						if tbe != nil {
-							pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
-							tv.SetCursorShow(pos)
-						}
-						tv.InsertAtCursor([]byte("\n" + string(ket)))
-						tv.Buf.AutoIndent(tv.CursorPos.Ln)
-					} else {
-						tv.InsertAtCursor([]byte(string(kt.Rune) + string(ket)))
-					}
-					tv.lastAutoInsert = ket
-				}
-			} else {
-				tv.InsertAtCursor([]byte(string(kt.Rune)))
-			}
-			tv.SetCursorShow(pos)
-			tv.SetCursorCol(tv.CursorPos)
-			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+			tv.KeyInputInsertBra(kt)
 		} else if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
 			tv.CancelComplete()
 			tv.lastAutoInsert = 0

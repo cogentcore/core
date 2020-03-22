@@ -7,6 +7,7 @@ package textbuf
 import (
 	"time"
 
+	"github.com/goki/ki/sliceclone"
 	"github.com/goki/pi/lex"
 )
 
@@ -64,6 +65,29 @@ const (
 	// AdjustPosDelEnd means return end of deleted region
 	AdjustPosDelEnd
 )
+
+// Clone returns a clone of the edit record.
+func (te *Edit) Clone() *Edit {
+	rc := &Edit{}
+	rc.CopyFrom(te)
+	return rc
+}
+
+// Copy copies from other Edit
+func (te *Edit) CopyFrom(cp *Edit) {
+	te.Reg = cp.Reg
+	te.Group = cp.Group
+	te.Delete = cp.Delete
+	te.Rect = cp.Rect
+	nln := len(cp.Text)
+	if nln == 0 {
+		te.Text = nil
+	}
+	te.Text = make([][]rune, nln)
+	for i, r := range cp.Text {
+		te.Text[i] = sliceclone.Rune(r)
+	}
+}
 
 // AdjustPos adjusts the given text position as a function of the edit.
 // if the position was within a deleted region of text, del determines
