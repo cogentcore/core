@@ -106,3 +106,30 @@ func IndexFold(txt, find []rune) int {
 	}
 	return -1
 }
+
+// Repeat returns a new rune slice consisting of count copies of b.
+//
+// It panics if count is negative or if
+// the result of (len(b) * count) overflows.
+func Repeat(r []rune, count int) []rune {
+	if count == 0 {
+		return []rune{}
+	}
+	// Since we cannot return an error on overflow,
+	// we should panic if the repeat will generate
+	// an overflow.
+	// See Issue golang.org/issue/16237.
+	if count < 0 {
+		panic("runes: negative Repeat count")
+	} else if len(r)*count/count != len(r) {
+		panic("runes: Repeat count causes overflow")
+	}
+
+	nb := make([]rune, len(r)*count)
+	bp := copy(nb, r)
+	for bp < len(nb) {
+		copy(nb[bp:], nb[:bp])
+		bp *= 2
+	}
+	return nb
+}
