@@ -7,6 +7,7 @@ package tex
 import (
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
@@ -143,8 +144,12 @@ func (tl *TexLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, 
 }
 
 // AutoBracket returns what to do when a user types a starting bracket character
-// (bracket, brace, paren) at end of current line (i.e., while typing).
+// (bracket, brace, paren) while typing.
+// pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (tl *TexLang) AutoBracket(fs *pi.FileStates, bra rune) (match, newLine bool) {
-	return true, false
+func (tl *TexLang) AutoBracket(fs *pi.FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool) {
+	lnLen := len(curLn)
+	match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
+	newLine = false
+	return
 }

@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/filecat"
@@ -160,11 +161,22 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 }
 
 // AutoBracket returns what to do when a user types a starting bracket character
-// (bracket, brace, paren) at end of current line (i.e., while typing).
+// (bracket, brace, paren) while typing.
+// pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (gl *GoLang) AutoBracket(fs *pi.FileStates, bra rune) (match, newLine bool) {
+func (gl *GoLang) AutoBracket(fs *pi.FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool) {
+	lnLen := len(curLn)
 	if bra == '{' {
-		return true, true
+		if pos.Ch == lnLen {
+			if lnLen == 0 || unicode.IsSpace(curLn[pos.Ch-1]) {
+				newLine = true
+			}
+			match = true
+		} else {
+			match = unicode.IsSpace(curLn[pos.Ch])
+		}
+	} else {
+		match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
 	}
-	return true, false
+	return
 }

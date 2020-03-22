@@ -77,9 +77,10 @@ type Lang interface {
 	IndentLine(fs *FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char)
 
 	// AutoBracket returns what to do when a user types a starting bracket character
-	// (bracket, brace, paren) at end of current line (i.e., while typing).
+	// (bracket, brace, paren) while typing.
+	// pos = position where bra will be inserted, and curLn is the current line
 	// match = insert the matching ket, and newLine = insert a new line.
-	AutoBracket(fs *FileStates, bra rune) (match, newLine bool)
+	AutoBracket(fs *FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool)
 
 	// below are more implementational methods not called externally typically
 

@@ -5,6 +5,8 @@
 package markdown
 
 import (
+	"unicode"
+
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
@@ -102,8 +104,12 @@ func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.L
 }
 
 // AutoBracket returns what to do when a user types a starting bracket character
-// (bracket, brace, paren) at end of current line (i.e., while typing).
+// (bracket, brace, paren) while typing.
+// pos = position where bra will be inserted, and curLn is the current line
 // match = insert the matching ket, and newLine = insert a new line.
-func (ml *MarkdownLang) AutoBracket(fs *pi.FileStates, bra rune) (match, newLine bool) {
-	return true, false
+func (ml *MarkdownLang) AutoBracket(fs *pi.FileStates, bra rune, pos lex.Pos, curLn []rune) (match, newLine bool) {
+	lnLen := len(curLn)
+	match = pos.Ch == lnLen || unicode.IsSpace(curLn[pos.Ch]) // at end or if space after
+	newLine = false
+	return
 }
