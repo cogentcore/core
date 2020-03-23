@@ -134,9 +134,9 @@ func (sy *Symbol) Clone() *Symbol {
 // If parent symbol is of the NameType subcategory, then index of child is set
 // to the size of this child map before adding.
 func (sy *Symbol) AddChild(child *Symbol) bool {
-	if sy.IsTemp() {
-		return false
-	}
+	// if sy.IsTemp() {
+	// 	return false
+	// }
 	sy.Children.Alloc()
 	_, on := sy.Children[child.Name]
 	idx := len(sy.Children)

@@ -6,6 +6,7 @@ package syms
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -65,6 +66,11 @@ func (sm *SymMap) CopyFrom(src SymMap, srcIsNewer bool) {
 			(*sm)[nm] = ssy
 			continue
 		}
+		if ssy.Name == "tv" {
+			if _, has := ssy.Scopes[token.NameMethod]; has {
+				fmt.Printf("tv SetSlice: %v\n", ssy.String())
+			}
+		}
 		if srcIsNewer {
 			dsy.CopyFromSrc(ssy)
 		} else {
@@ -81,6 +87,16 @@ func (sm *SymMap) CopyFrom(src SymMap, srcIsNewer bool) {
 			(*sm)[nm] = ssy
 		} else {
 			dsy.Children.CopyFrom(ssy.Children, srcIsNewer)
+		}
+	}
+	for nm, dsy := range *sm {
+		_, has := src[nm]
+		if !has {
+			if dsy.Name == "tv" {
+				if _, has := dsy.Scopes[token.NameMethod]; has {
+					fmt.Printf("was not on other list: tv SetSlice: %v\n", dsy.String())
+				}
+			}
 		}
 	}
 }

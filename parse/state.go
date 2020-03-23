@@ -381,3 +381,15 @@ func (ps *State) FindNameScoped(nm string) (*syms.Symbol, bool) {
 	}
 	return ps.Syms.FindNameScoped(nm)
 }
+
+// FindNameTopScope searches only in top of current scope for something
+//  with the given name in symbols
+// also looks in ps.Syms if not found in Scope stack.
+func (ps *State) FindNameTopScope(nm string) (*syms.Symbol, bool) {
+	sy := ps.Scopes.Top()
+	if sy == nil {
+		return nil, false
+	}
+	chs, has := sy.Children[nm]
+	return chs, has
+}

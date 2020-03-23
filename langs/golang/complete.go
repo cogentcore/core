@@ -83,7 +83,7 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 		return gl.LookupString(fs, pkg, scopes, str)
 	}
 
-	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
+	typ, nxt, got := gl.TypeFromAstExprStart(fs, pkg, pkg, start)
 	lststr := ""
 	if nxt != nil {
 		lststr = nxt.Src
@@ -196,7 +196,7 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 		return
 	}
 
-	typ, nxt, got := gl.TypeFromAstExpr(fs, pkg, pkg, start)
+	typ, nxt, got := gl.TypeFromAstExprStart(fs, pkg, pkg, start)
 	lststr := ""
 	if nxt != nil {
 		lststr = nxt.Src

@@ -207,7 +207,7 @@ func (gl *GoLang) TypeFromAst(fs *pi.FileState, pkg *syms.Symbol, ty *syms.Type,
 	tnm := gl.AstTypeName(tyast)
 	bkind, ok := TypeToKindMap[tnm]
 	if !ok { // must be some kind of expression
-		sty, _, got := gl.TypeFromAstExpr(fs, pkg, pkg, tyast)
+		sty, _, got := gl.TypeFromAstExprStart(fs, pkg, pkg, tyast)
 		return sty, got
 	}
 	switch bkind {

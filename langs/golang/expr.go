@@ -16,23 +16,30 @@ import (
 	"github.com/goki/pi/token"
 )
 
-// TypeFromAstExpr starts walking the ast expression to find the type.
+// TypeFromAstExprStart starts walking the ast expression to find the type.
+// This computes the last ast point as the stopping point for processing
+// and then calls TypeFromAstExpr.
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
-func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, tyast *parse.Ast) (*syms.Type, *parse.Ast, bool) {
+func (gl *GoLang) TypeFromAstExprStart(fs *pi.FileState, origPkg, pkg *syms.Symbol, tyast *parse.Ast) (*syms.Type, *parse.Ast, bool) {
+	last := tyast.NextSiblingAst()
+	// fmt.Printf("last: %v \n", last.PathUnique())
+	return gl.TypeFromAstExpr(fs, origPkg, pkg, tyast, last)
+}
+
+// TypeFromAstExpr walks the ast expression to find the type.
+// It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
+func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, tyast, last *parse.Ast) (*syms.Type, *parse.Ast, bool) {
 	pos := tyast.SrcReg.St
 	fpath, _ := filepath.Abs(fs.Src.Filename)
-	var conts syms.SymMap                                                 // containers of given region -- local scoping
+	// containers of given region -- local scoping
+	var conts syms.SymMap
 	fs.Syms.FindContainsRegion(fpath, pos, 2, token.NameFunction, &conts) // 2 extra lines always!
 	// if TraceTypes && len(conts) == 0 {
 	// 	fmt.Printf("TExpr: no conts for fpath: %v  pos: %v\n", fpath, pos)
 	// }
-
 	// if TraceTypes {
 	// 	tyast.WriteTree(os.Stdout, 0)
 	// }
-
-	last := tyast.NextSiblingAst()
-	// fmt.Printf("last: %v \n", last.PathUnique())
 
 	tnm := tyast.Nm
 
@@ -69,7 +76,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			}
 			if funm == "append" {
 				farg := fun.NextAst().NextAst()
-				return gl.TypeFromAstExpr(fs, origPkg, pkg, farg)
+				return gl.TypeFromAstExpr(fs, origPkg, pkg, farg, last)
 			}
 			ctyp, _ := gl.FindTypeName(funm, fs, pkg) // conversion
 			if ctyp != nil {
@@ -394,7 +401,7 @@ func (gl *GoLang) TypeFromAstName(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 			if nxt.Nm == "Selector" {
 				nxt = nxt.NextAst()
 			}
-			return gl.TypeFromAstExpr(fs, origPkg, psym, nxt)
+			return gl.TypeFromAstExpr(fs, origPkg, psym, nxt, last)
 		}
 		if TraceTypes {
 			fmt.Printf("TExpr: package alone not useful\n")

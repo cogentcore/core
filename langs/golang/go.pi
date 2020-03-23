@@ -6749,7 +6749,7 @@
                     "RunIdx": -1,
                     "Act": "ChgToken",
                     "Path": "Name",
-                    "Tok": "NameVarParam",
+                    "Tok": "NameVarClass",
                     "FmTok": "None"
                   }
                 ],

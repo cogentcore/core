@@ -1,6 +1,6 @@
 // /Users/oreilly/goki/pi/langs/golang/go.pig Lexer
 
-// InCommentMulti all CurState must be at top -- any multi-line requires state 
+// InCommentMulti all CurState must be at top -- multiline requires state 
 InCommentMulti:		 CommentMultiline		 if CurState == "CommentMulti" {
     EndMulti:                CommentMultiline       if String == "*/"   do: PopState; Next; 
     StartEmbededMulti:       CommentMultiline       if String == "/*"   do: PushState: CommentMulti; Next; 
@@ -8,7 +8,7 @@ InCommentMulti:		 CommentMultiline		 if CurState == "CommentMulti" {
 }
 // InStrBacktick curstate at start -- multiline requires state 
 InStrBacktick:		 LitStrBacktick		 if CurState == "StrBacktick" {
-    // QuotedStrBacktick backtick actually has NO escape! 
+    // QuotedStrBacktick backtick actually has NO escape 
     QuotedStrBacktick:       LitStrBacktick       if String == "\`"   do: Next; 
     EndStrBacktick:          LitStrBacktick       if String == "`"    do: PopState; Next; 
     StrBacktick:             LitStrBacktick       if AnyRune          do: Next; 
@@ -202,7 +202,7 @@ File {
     // Vars same as VarDecl 
     Vars:   'key:var' VarDeclN 'EOS'  >Ast
     Funcs:  @FunDecl 'EOS'            
-    // Stmts this allows direct parsing of anything -- for one-line parsing 
+    // Stmts this allows direct parsing of anything, for one-line parsing 
     Stmts:  Stmt 'EOS'  
 }
 // ExprRules many different rules here that go into expressions etc 
@@ -460,7 +460,7 @@ FuncRules {
     }
     MethRecv {
         MethRecvName:  @Name @Type  >Ast
-        --->Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; -1:ChgToken:"Name":NameVarParam; }
+        --->Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; -1:ChgToken:"Name":NameVarClass; }
         MethRecvNoNm:  Type  >Ast
         --->Acts:{ -1:PushScope:"TypeNm|PointerType/TypeNm":NameStruct; }
     }

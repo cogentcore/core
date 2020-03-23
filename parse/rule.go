@@ -1595,10 +1595,11 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			if n == "" || n == "_" { // go special case..
 				continue
 			}
-			sy, has := ps.FindNameScoped(n)
+			sy, has := ps.FindNameTopScope(n) // only look in top scope
 			added := false
 			if has {
 				sy.Region = ast.SrcReg
+				sy.Kind = useTok
 				if ps.Trace.On {
 					ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Add sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, n, apath))
 				}
@@ -1616,7 +1617,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 			}
 		}
 	case PushScope:
-		sy, has := ps.FindNameScoped(nm)
+		sy, has := ps.FindNameTopScope(nm) // Scoped(nm)
 		if !has {
 			sy = syms.NewSymbol(nm, useTok, ps.Src.Filename, ast.SrcReg) // lex.RegZero) // zero = tmp
 			added := sy.AddScopesStack(ps.Scopes)
@@ -1631,7 +1632,7 @@ func (pr *Rule) DoAct(ps *State, act *Act, par *Rule, ourAst, parAst *Ast) bool 
 		}
 	case PushNewScope:
 		// add plus push
-		sy, has := ps.FindNameScoped(nm)
+		sy, has := ps.FindNameTopScope(nm) // Scoped(nm)
 		if has {
 			if ps.Trace.On {
 				ps.Trace.Out(ps, pr, RunAct, ast.TokReg.St, ast.TokReg, ast, fmt.Sprintf("Act: Push New sym already exists: %v from path: %v = %v in node: %v", sy.String(), act.Path, nm, apath))
