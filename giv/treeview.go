@@ -263,6 +263,9 @@ func (tv *TreeView) HasClosedParent() bool {
 
 // Label returns the display label for this node, satisfying the Labeler interface
 func (tv *TreeView) Label() string {
+	if lbl, has := gi.ToLabeler(tv.SrcNode); has {
+		return lbl
+	}
 	return tv.SrcNode.Name()
 }
 

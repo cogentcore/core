@@ -781,7 +781,7 @@ func (vv *ValueViewBase) OwnerLabel() string {
 	if vv.Owner == nil {
 		return ""
 	}
-	olbl := gi.ToLabeler(vv.Owner)
+	olbl, _ := gi.ToLabeler(vv.Owner)
 	switch vv.OwnKind {
 	case reflect.Struct:
 		if olbl != "" {

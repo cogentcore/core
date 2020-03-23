@@ -38,12 +38,12 @@ func ToLabel(it interface{}) string {
 	return lbler.Label()
 }
 
-// ToLabeler returns the Labeler label ONLY if it was defined, else ""
-func ToLabeler(it interface{}) string {
+// ToLabeler returns the Labeler label, true if it was defined, else "", false
+func ToLabeler(it interface{}) (string, bool) {
 	if lbler, ok := it.(Labeler); ok {
-		return lbler.Label()
+		return lbler.Label(), true
 	}
-	return ""
+	return "", false
 }
 
 // SliceLabeler interface provides a GUI-appropriate label
