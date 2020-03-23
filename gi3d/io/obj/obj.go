@@ -178,16 +178,16 @@ func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
 }
 
 // SetObject sets the object as a group with each gi3d.Solid as a mesh with unique material
-func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, obj *Object) {
+func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, ob *Object) {
 	matName := ""
 	var sld *gi3d.Solid
 	var ms *gi3d.GenMesh
 	sldidx := 0
 	idxs := make([]int, 0, 4)
-	for fi := range obj.Faces {
-		face := &obj.Faces[fi]
+	for fi := range ob.Faces {
+		face := &ob.Faces[fi]
 		if face.Material != matName || sld == nil {
-			sldnm := fmt.Sprintf("%s_%d", obj.Name, sldidx)
+			sldnm := fmt.Sprintf("%s_%d", ob.Name, sldidx)
 			ms = &gi3d.GenMesh{}
 			ms.Nm = sldnm
 			sc.AddMeshUnique(ms)

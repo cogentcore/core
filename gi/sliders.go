@@ -43,7 +43,8 @@ type SliderBase struct {
 	Step        float32              `xml:"step" desc:"smallest step size to increment"`
 	PageStep    float32              `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 	Size        float32              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-	ThSize      float32              `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value"`
+	ThSize      float32              `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize"`
+	ThSizeReal  float32              `xml:"-" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
 	ThumbSize   units.Value          `xml:"thumb-size" desc:"styled fixed size of the thumb"`
 	Prec        int                  `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 	Icon        IconName             `view:"show-name" desc:"optional icon for the dragging knob"`
@@ -79,6 +80,7 @@ func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
 	nb.PageStep = fr.PageStep
 	nb.Size = fr.Size
 	nb.ThSize = fr.ThSize
+	nb.ThSizeReal = fr.ThSizeReal
 	nb.ThumbSize = fr.ThumbSize
 	nb.Prec = fr.Prec
 	nb.Icon = fr.Icon
@@ -238,7 +240,7 @@ func (sb *SliderBase) SizeFromAlloc() {
 		return
 	}
 	if !sb.ValThumb {
-		sb.Size -= sb.ThSize // half on each side
+		sb.Size -= sb.ThSizeReal // half on each side
 	}
 	sb.UpdatePosFromValue()
 	sb.DragPos = sb.Pos
@@ -252,7 +254,7 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 	sb.Pos = mat32.Min(sb.Size, sb.Pos)
 	if sb.ValThumb {
 		sb.UpdateThumbValSize()
-		sb.Pos = mat32.Min(sb.Size-sb.ThSize, sb.Pos)
+		sb.Pos = mat32.Min(sb.Size-sb.ThSizeReal, sb.Pos)
 	}
 	sb.Pos = mat32.Max(0, sb.Pos)
 	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/sb.Size), sb.Prec)
@@ -274,6 +276,7 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 func (sb *SliderBase) SliderMove(start, end float32) {
 	del := end - start
 	sb.SetSliderPos(sb.DragPos + del)
+	sb.SliderSig.Emit(sb.This(), int64(SliderMoved), sb.Value)
 }
 
 // UpdatePosFromValue updates the slider position based on the current Value
@@ -327,11 +330,11 @@ func (sb *SliderBase) SetThumbValue(val float32) {
 // UpdateThumbValSize sets thumb size as proportion of min / max (e.sb., amount
 // visible in scrollbar) -- max's out to full size
 func (sb *SliderBase) UpdateThumbValSize() {
-	sb.ThSize = ((sb.ThumbVal - sb.Min) / (sb.Max - sb.Min))
-	sb.ThSize = mat32.Min(sb.ThSize, 1.0)
-	sb.ThSize = mat32.Max(sb.ThSize, 0.0)
-	sb.ThSize *= sb.Size
-	sb.ThSize = mat32.Max(sb.ThSize, SliderMinThumbSize)
+	sb.ThSizeReal = ((sb.ThumbVal - sb.Min) / (sb.Max - sb.Min))
+	sb.ThSizeReal = mat32.Min(sb.ThSizeReal, 1.0)
+	sb.ThSizeReal = mat32.Max(sb.ThSizeReal, 0.0)
+	sb.ThSizeReal *= sb.Size
+	sb.ThSize = mat32.Max(sb.ThSizeReal, SliderMinThumbSize)
 }
 
 func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
@@ -412,7 +415,7 @@ func (sb *SliderBase) MouseEvent() {
 				if me.Action == mouse.Press {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &sbb.Sty
-					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSize
+					spc := st.Layout.Margin.Dots + 0.5*sbb.ThSizeReal
 					if sbb.Dim == mat32.X {
 						sbb.SliderPress(float32(ed.X) - spc)
 					} else {
@@ -676,6 +679,7 @@ var SliderProps = ki.Props{
 func (sr *Slider) Defaults() {
 	sr.ThumbSize = units.NewEm(1.5)
 	sr.ThSize = 25.0
+	sr.ThSizeReal = sr.ThSize
 	sr.Step = 0.1
 	sr.PageStep = 0.2
 	sr.Max = 1.0
