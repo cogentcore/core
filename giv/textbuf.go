@@ -2032,12 +2032,12 @@ func (tb *TextBuf) RemoveTag(pos lex.Pos, tag token.Tokens) (reg lex.Lex, ok boo
 }
 
 // HiTagAtPos returns the highlighting (markup) lexical tag at given position
-// using current Markup tags -- could be nil if none or out of range
-func (tb *TextBuf) HiTagAtPos(pos lex.Pos) *lex.Lex {
+// using current Markup tags, and index, -- could be nil if none or out of range
+func (tb *TextBuf) HiTagAtPos(pos lex.Pos) (*lex.Lex, int) {
 	tb.MarkupMu.Lock()
 	defer tb.MarkupMu.Unlock()
 	if !tb.IsValidLine(pos.Ln) {
-		return nil
+		return nil, -1
 	}
 	return tb.HiTags[pos.Ln].AtPos(pos.Ch)
 }
@@ -2053,10 +2053,37 @@ func (tb *TextBuf) LexString(ln int, lx *lex.Lex) string {
 	return string(rns)
 }
 
+// LexObjPathString returns the string at given lex, and including prior
+// lex-tagged regions that include sequences of PunctSepPeriod and NameTag
+// which are used for object paths -- used for e.g., debugger to pull out
+// variable expressions that can be evaluated.
+func (tb *TextBuf) LexObjPathString(ln int, lx *lex.Lex) string {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	if !tb.IsValidLine(ln) {
+		return ""
+	}
+	stlx := lx
+	if lx.St > 1 {
+		lxln := tb.HiTags[ln]
+		_, lxidx := lxln.AtPos(lx.St - 1)
+		for i := lxidx; i >= 0; i-- {
+			clx := &lxln[i]
+			if clx.Tok.Tok == token.PunctSepPeriod || clx.Tok.Tok.InCat(token.Name) {
+				stlx = clx
+			} else {
+				break
+			}
+		}
+	}
+	rns := tb.Lines[ln][stlx.St:lx.Ed]
+	return string(rns)
+}
+
 // InTokenSubCat returns true if the given text position is marked with lexical
 // type in given SubCat sub-category
 func (tb *TextBuf) InTokenSubCat(pos lex.Pos, subCat token.Tokens) bool {
-	lx := tb.HiTagAtPos(pos)
+	lx, _ := tb.HiTagAtPos(pos)
 	return lx != nil && lx.Tok.Tok.InSubCat(subCat)
 }
 
@@ -2068,7 +2095,7 @@ func (tb *TextBuf) InLitString(pos lex.Pos) bool {
 // InTokenCode returns true if position is in a Keyword, Name, Operator, or Punctuation.
 // This is useful for turning off spell checking in docs
 func (tb *TextBuf) InTokenCode(pos lex.Pos) bool {
-	lx := tb.HiTagAtPos(pos)
+	lx, _ := tb.HiTagAtPos(pos)
 	if lx == nil {
 		return false
 	}

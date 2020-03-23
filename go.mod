@@ -18,7 +18,7 @@ require (
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v0.9.13-0.20200322120506-1a45079ce979
 	github.com/goki/mat32 v1.0.0
-	github.com/goki/pi v0.9.15-0.20200323074008-d40b902bbfb3
+	github.com/goki/pi v0.9.15-0.20200323095844-d38a65567821
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v0.90.1
 	github.com/gorilla/css v1.0.0 // indirect
