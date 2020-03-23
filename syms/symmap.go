@@ -89,16 +89,6 @@ func (sm *SymMap) CopyFrom(src SymMap, srcIsNewer bool) {
 			dsy.Children.CopyFrom(ssy.Children, srcIsNewer)
 		}
 	}
-	for nm, dsy := range *sm {
-		_, has := src[nm]
-		if !has {
-			if dsy.Name == "tv" {
-				if _, has := dsy.Scopes[token.NameMethod]; has {
-					fmt.Printf("was not on other list: tv SetSlice: %v\n", dsy.String())
-				}
-			}
-		}
-	}
 }
 
 // First returns the first symbol in the map -- only sensible when there

@@ -38,15 +38,15 @@ func (ll *Line) Insert(idx int, lx Lex) {
 	}
 }
 
-// AtPos returns the Lex in place for given position, or nil if none
-func (ll *Line) AtPos(pos int) *Lex {
+// AtPos returns the Lex in place for given position, and index, or nil, -1 if none
+func (ll *Line) AtPos(pos int) (*Lex, int) {
 	for i := range *ll {
 		lx := &((*ll)[i])
 		if lx.ContainsPos(pos) {
-			return lx
+			return lx, i
 		}
 	}
-	return nil
+	return nil, -1
 }
 
 // Clone returns a new copy of the line
