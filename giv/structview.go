@@ -61,6 +61,7 @@ func (sv *StructView) SetStruct(st interface{}) {
 	if sv.Struct != st {
 		sv.Changed = false
 		updt = sv.UpdateStart()
+		sv.SetFullReRender()
 		if sv.Struct != nil {
 			if k, ok := sv.Struct.(ki.Ki); ok {
 				k.NodeSignal().Disconnect(sv.This())

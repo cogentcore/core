@@ -939,7 +939,7 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 	}
 	repo, _ := fn.Repo()
 	stored := false
-	if fn.IsDir() && len(fn.Kids) == 0 {
+	if fn.IsDir() && !fn.HasChildren() {
 		err = os.Rename(string(orgpath), newpath)
 	} else if repo != nil && fn.Info.Vcs >= vci.Stored {
 		stored = true
