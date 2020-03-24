@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"github.com/goki/ki/ints"
+	"github.com/goki/pi/token"
 )
 
 // these functions provide "manual" lexing support for specific cases
@@ -169,6 +170,25 @@ func LastField(str string) string {
 	}
 	flds := strings.Fields(str)
 	return flds[len(flds)-1]
+}
+
+// ObjPathAt returns the starting Lex, before given lex,
+// that include sequences of PunctSepPeriod and NameTag
+// which are used for object paths (e.g., field.field.field)
+func ObjPathAt(line Line, lx *Lex) *Lex {
+	stlx := lx
+	if lx.St > 1 {
+		_, lxidx := line.AtPos(lx.St - 1)
+		for i := lxidx; i >= 0; i-- {
+			clx := &line[i]
+			if clx.Tok.Tok == token.PunctSepPeriod || clx.Tok.Tok.InCat(token.Name) {
+				stlx = clx
+			} else {
+				break
+			}
+		}
+	}
+	return stlx
 }
 
 // LastScopedString returns the last white-space separated, and bracket
