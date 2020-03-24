@@ -52,7 +52,6 @@ type SliderBase struct {
 	ThumbVal    float32              `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
 	Pos         float32              `xml:"-" desc:"logical position of the slider relative to Size"`
 	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
-	VisPos      float32              `xml:"vispos" desc:"visual position of the slider -- can be different from pos in a RTL environment"`
 	Dim         mat32.Dims           `desc:"dimension along which the slider slides"`
 	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
 	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
@@ -87,7 +86,6 @@ func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
 	nb.ValThumb = fr.ValThumb
 	nb.Pos = fr.Pos
 	nb.DragPos = fr.DragPos
-	nb.VisPos = fr.VisPos
 	nb.Tracking = fr.Tracking
 	nb.TrackThr = fr.TrackThr
 	nb.Snap = fr.Snap
@@ -240,7 +238,7 @@ func (sb *SliderBase) SizeFromAlloc() {
 		return
 	}
 	if !sb.ValThumb {
-		sb.Size -= sb.ThSizeReal // half on each side
+		sb.Size -= sb.ThSize // half on each side
 	}
 	sb.UpdatePosFromValue()
 	sb.DragPos = sb.Pos
@@ -252,12 +250,21 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 	updt := sb.UpdateStart()
 	sb.Pos = pos
 	sb.Pos = mat32.Min(sb.Size, sb.Pos)
+	effSz := sb.Size
 	if sb.ValThumb {
 		sb.UpdateThumbValSize()
-		sb.Pos = mat32.Min(sb.Size-sb.ThSizeReal, sb.Pos)
+		sb.Pos = mat32.Min(sb.Size-sb.ThSize, sb.Pos)
+		if sb.ThSize != sb.ThSizeReal {
+			effSz -= sb.ThSize - sb.ThSizeReal
+			effSz -= .5 // rounding errors
+		}
 	}
 	sb.Pos = mat32.Max(0, sb.Pos)
-	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/sb.Size), sb.Prec)
+	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
+	sb.Value = mat32.Clamp(sb.Value, sb.Min, sb.Max)
+	if sb.ValThumb {
+		sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal)
+	}
 	sb.DragPos = sb.Pos
 	if sb.Snap {
 		sb.SnapValue()
@@ -284,10 +291,15 @@ func (sb *SliderBase) UpdatePosFromValue() {
 	if sb.Size == 0.0 {
 		return
 	}
+	effSz := sb.Size
 	if sb.ValThumb {
 		sb.UpdateThumbValSize()
+		if sb.ThSize != sb.ThSizeReal {
+			effSz -= sb.ThSize - sb.ThSizeReal
+			effSz -= 0.5 // rounding errors
+		}
 	}
-	sb.Pos = sb.Size * (sb.Value - sb.Min) / (sb.Max - sb.Min)
+	sb.Pos = effSz * (sb.Value - sb.Min) / (sb.Max - sb.Min)
 }
 
 // SetValue sets the value and updates the slider position, but does not
@@ -562,10 +574,6 @@ func (sr *SliderBase) StyleFromProps(props ki.Props, vp *Viewport2D) {
 		case "track-thr":
 			if iv, ok := kit.ToFloat32(val); ok {
 				sr.TrackThr = iv
-			}
-		case "vispos":
-			if iv, ok := kit.ToFloat32(val); ok {
-				sr.VisPos = iv
 			}
 		case "prec":
 			if iv, ok := kit.ToInt(val); ok {

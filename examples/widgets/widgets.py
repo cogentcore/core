@@ -62,7 +62,7 @@ def combocb(recv, send, sig, data):
 def winclosecb(recv, send, sig, data):
     sa = gi.Action(handle=send)
     print("Received menu action from menu action", sa.Name())
-    sa.Win.CloseReq()
+    sa.Viewport.Win.CloseReq()
 
 def mainrun():
     width = 1024
@@ -163,17 +163,14 @@ def mainrun():
     # # note: receiver for menu items with shortcuts must be a Node2D or Window
     mb1 = gi.AddNewMenuButton(brow, "menubutton1")
     mb1.SetText("Menu Button")
-    # todo: fix
-#    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1), win.This(), menu1cb)
-    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Data=1), win.This(), menu1cb)
+    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 1", Shortcut="Shift+Control+1", Data=1), win.This(), menu1cb)
     mi2 = mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 2", Data=2), go.nil, go.nil)
 
     mi2.Menu.AddAction(gi.ActOpts(Label="Sub Menu Item 2", Data=2.1), win.This(), menu1cb)
 
     mb1.Menu.AddSeparator("sep1")
 
-#    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 3", Shortcut="Control+3", Data=3),
-    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 3", Data=3), win.This(), menu1cb)
+    mb1.Menu.AddAction(gi.ActOpts(Label="Menu Item 3", Shortcut="Control+3", Data=3), win.This(), menu1cb)
 
     # //////////////////////////////////////////
     #       Sliders
@@ -188,8 +185,7 @@ def mainrun():
     srow.SetStretchMaxWidth()
 
     slider1 = gi.AddNewSlider(srow, "slider1")
-    # todo: fix
-    # slider1.Dim = mat32.X
+    slider1.Dim = mat32.X
     slider1.Class = "hslides"
     slider1.Defaults()
     slider1.SetMinPrefWidth(units.NewEm(20))
@@ -197,12 +193,10 @@ def mainrun():
     slider1.SetValue(0.5)
     slider1.Snap = True
     slider1.Tracking = True
-    # todo: fix
-    # slider1.Icon = "widget-circlebutton-on"
+    slider1.Icon = "widget-circlebutton-on"
 
     slider2 = gi.AddNewSlider(srow, "slider2")
-    # todo: fix
-    # slider2.Dim = mat32.Y
+    slider2.Dim = mat32.Y
     slider2.Defaults()
     slider2.SetMinPrefHeight(units.NewEm(10))
     slider2.SetMinPrefWidth(units.NewEm(1))
@@ -213,7 +207,7 @@ def mainrun():
     slider2.SliderSig.Connect(win.This(), slidercb)
 
     scrollbar1 = gi.AddNewScrollBar(srow, "scrollbar1")
-    # scrollbar1.Dim = mat32.X
+    scrollbar1.Dim = mat32.X
     scrollbar1.Class = "hslides"
     scrollbar1.Defaults()
     scrollbar1.SetMinPrefWidth(units.NewEm(20))
@@ -225,7 +219,7 @@ def mainrun():
     scrollbar1.SliderSig.Connect(win.This(), scrollcb)
 
     scrollbar2 = gi.AddNewScrollBar(srow, "scrollbar2")
-    # scrollbar2.Dim = mat32.Y
+    scrollbar2.Dim = mat32.Y
     scrollbar2.Defaults()
     scrollbar2.SetMinPrefHeight(units.NewEm(10))
     scrollbar2.SetMinPrefWidth(units.NewEm(1))
@@ -279,13 +273,12 @@ def mainrun():
     # Command in shortcuts is automatically translated into Control for
     # Linux, Windows or Meta for MacOS
     fmen = gi.Action(win.MainMenu.ChildByName("File", 0))
-    # todo: fix
-    # fmen.Menu.AddAction(gi.ActOpts(Label="New", ShortcutKey=gi.KeyFunMenuNew), win.This(), menu1cb)
-    # fmen.Menu.AddAction(gi.ActOpts(Label="Open", ShortcutKey=gi.KeyFunMenuOpen), win.This(), menu1cb)
-    # fmen.Menu.AddAction(gi.ActOpts(Label="Save", ShortcutKey=gi.KeyFunMenuSave), win.This(), menu1cb)
-    # fmen.Menu.AddAction(gi.ActOpts(Label="Save As..", ShortcutKey=gi.KeyFunMenuSaveAs), win.This(), menu1cb)
-    # fmen.Menu.AddSeparator("csep")
-    # fmen.Menu.AddAction(gi.ActOpts(Label="Close Window", ShortcutKey=gi.KeyFunMenuClose), win.This(), winclosecb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="New", ShortcutKey=gi.KeyFunMenuNew), win.This(), menu1cb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="Open", ShortcutKey=gi.KeyFunMenuOpen), win.This(), menu1cb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="Save", ShortcutKey=gi.KeyFunMenuSave), win.This(), menu1cb)
+    fmen.Menu.AddAction(gi.ActOpts(Label="Save As..", ShortcutKey=gi.KeyFunMenuSaveAs), win.This(), menu1cb)
+    fmen.Menu.AddSeparator("csep")
+    fmen.Menu.AddAction(gi.ActOpts(Label="Close Window", ShortcutKey=gi.KeyFunWinClose), win.This(), winclosecb)
 
     emen = gi.Action(win.MainMenu.ChildByName("Edit", 1))
     emen.Menu.AddCopyCutPaste(win)

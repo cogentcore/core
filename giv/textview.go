@@ -218,11 +218,6 @@ func (tv *TextView) IsFocusActive() bool {
 	return tv.HasFlag(int(TextViewFocusActive))
 }
 
-// Label returns the display label for this node, satisfying the Labeler interface
-func (tv *TextView) Label() string {
-	return tv.Nm
-}
-
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
 func (tv *TextView) EditDone() {

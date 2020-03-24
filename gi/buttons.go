@@ -206,14 +206,6 @@ func (bb *ButtonBase) SetText(txt string) {
 	bb.UpdateEnd(updt)
 }
 
-// Label returns the display label for this node, satisfying the Labeler interface
-func (bb *ButtonBase) Label() string {
-	if bb.Text != "" {
-		return bb.Text
-	}
-	return bb.Nm
-}
-
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button
 func (bb *ButtonBase) SetIcon(iconName string) {

@@ -240,10 +240,12 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 	scrollbar2.SetMinPrefHeight(units.NewEm(10))
 	scrollbar2.SetMinPrefWidth(units.NewEm(1))
 	scrollbar2.SetStretchMaxHeight()
-	scrollbar2.SetThumbValue(1)
+	scrollbar2.SetThumbValue(10)
 	scrollbar2.SetValue(0)
 	scrollbar2.Max = 3000
 	scrollbar2.Tracking = true
+	scrollbar2.Step = 1
+	scrollbar2.PageStep = 10
 	scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.SliderValueChanged) { // typically this is the one you care about
 			fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)

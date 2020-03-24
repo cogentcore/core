@@ -216,14 +216,6 @@ func (tf *TextField) SetText(txt string) {
 	tf.Revert()
 }
 
-// Label returns the display label for this node, satisfying the Labeler interface
-func (tf *TextField) Label() string {
-	if tf.Txt != "" {
-		return tf.Txt
-	}
-	return tf.Nm
-}
-
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
 func (tf *TextField) EditDone() {

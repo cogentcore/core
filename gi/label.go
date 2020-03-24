@@ -139,14 +139,6 @@ func (lb *Label) SetText(txt string) {
 	lb.UpdateEnd(updt)
 }
 
-// Label returns the display label for this node, satisfying the Labeler interface
-func (lb *Label) Label() string {
-	if lb.Text != "" {
-		return lb.Text
-	}
-	return lb.Nm
-}
-
 // SetStateStyle sets the style based on the inactive, selected flags
 func (lb *Label) SetStateStyle() {
 	if lb.IsInactive() {
