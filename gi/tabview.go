@@ -413,7 +413,7 @@ func (tv *TabView) InitTabView() {
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()
 
-	tabs := AddNewFrame(tv, "tabs", LayoutHoriz)
+	tabs := AddNewFrame(tv, "tabs", LayoutHoriz) // Flow -- todo:
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
 	// tabs.SetMinPrefWidth(units.NewEm(10))

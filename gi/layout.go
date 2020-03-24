@@ -125,6 +125,7 @@ type Layout struct {
 	Scrolls       [2]*ScrollBar       `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
 	GridSize      image.Point         `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
 	GridData      [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+	FlowBreaks    []int               `copy:"-" json:"-" xml:"-" desc:"line breaks for flow layout"`
 	NeedsRedo     bool                `copy:"-" json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
 	FocusName     string              `copy:"-" json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
 	FocusNameTime time.Time           `copy:"-" json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
@@ -176,11 +177,13 @@ const (
 	// the basic grid for fully regular cases -- need high performance for large grids
 
 	// LayoutHorizFlow arranges items horizontally across a row, overflowing
-	// vertically as needed
+	// vertically as needed.  Ballpark target width or height props should be set
+	// to generate initial first-pass sizing estimates.
 	LayoutHorizFlow
 
 	// LayoutVertFlow arranges items vertically within a column, overflowing
-	// horizontally as needed
+	// horizontally as needed.  Ballpark target width or height props should be set
+	// to generate initial first-pass sizing estimates.
 	LayoutVertFlow
 
 	// LayoutStacked arranges items stacked on top of each other -- Top index
@@ -224,7 +227,7 @@ var LayoutDefault Layout
 // SumDim returns whether we sum up elements along given dimension?  else use
 // max for shared dimension.
 func (ly *Layout) SumDim(d mat32.Dims) bool {
-	if (d == mat32.X && ly.Lay == LayoutHoriz) || (d == mat32.Y && ly.Lay == LayoutVert) {
+	if (d == mat32.X && (ly.Lay == LayoutHoriz || ly.Lay == LayoutHorizFlow)) || (d == mat32.Y && (ly.Lay == LayoutVert || ly.Lay == LayoutVertFlow)) {
 		return true
 	}
 	return false
@@ -232,7 +235,7 @@ func (ly *Layout) SumDim(d mat32.Dims) bool {
 
 // SummedDim returns the dimension along which layout is summing.
 func (ly *Layout) SummedDim() mat32.Dims {
-	if ly.Lay == LayoutHoriz {
+	if ly.Lay == LayoutHoriz || ly.Lay == LayoutHorizFlow {
 		return mat32.X
 	}
 	return mat32.Y
@@ -248,14 +251,12 @@ func (ly *Layout) SummedDim() mat32.Dims {
 // second me-first Layout2D pass: each layout allocates AllocSize for its
 // children based on aggregated size data, and so on down the tree
 
-// GatherSizes is size first pass: gather the size information from the children
-func (ly *Layout) GatherSizes() {
+// GatherSizesSumMax gets basic sum and max data across all kiddos
+func (ly *Layout) GatherSizesSumMax() (sumPref, sumNeed, maxPref, maxNeed mat32.Vec2) {
 	sz := len(ly.Kids)
 	if sz == 0 {
 		return
 	}
-
-	var sumPref, sumNeed, maxPref, maxNeed mat32.Vec2
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -274,6 +275,17 @@ func (ly *Layout) GatherSizes() {
 			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, ni.LayData.Size.Need.Dim(ly.SummedDim()), ni.LayData.Size.Pref.Dim(ly.SummedDim()))
 		}
 	}
+	return
+}
+
+// GatherSizes is size first pass: gather the size information from the children
+func (ly *Layout) GatherSizes() {
+	sz := len(ly.Kids)
+	if sz == 0 {
+		return
+	}
+
+	sumPref, sumNeed, maxPref, maxNeed := ly.GatherSizesSumMax()
 
 	prefSizing := false
 	if ly.Viewport != nil && ly.Viewport.HasFlag(int(VpFlagPrefSizing)) {
@@ -293,6 +305,81 @@ func (ly *Layout) GatherSizes() {
 			ly.LayData.Size.Need.SetDim(d, ly.LayData.Size.Pref.Dim(d))
 		}
 	}
+
+	spc := ly.Sty.BoxSpace()
+	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
+	ly.LayData.Size.Pref.SetAddScalar(2.0 * spc)
+
+	elspc := float32(0.0)
+	if sz >= 2 {
+		elspc = float32(sz-1) * ly.Spacing.Dots
+	}
+	if ly.SumDim(mat32.X) {
+		ly.LayData.Size.Need.X += elspc
+		ly.LayData.Size.Pref.X += elspc
+	}
+	if ly.SumDim(mat32.Y) {
+		ly.LayData.Size.Need.Y += elspc
+		ly.LayData.Size.Pref.Y += elspc
+	}
+
+	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+	if Layout2DTrace {
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref, elspc)
+	}
+}
+
+// GatherSizesFlow is size first pass: gather the size information from the children
+func (ly *Layout) GatherSizesFlow() {
+	sz := len(ly.Kids)
+	if sz == 0 {
+		return
+	}
+
+	sumPref, sumNeed, maxPref, maxNeed := ly.GatherSizesSumMax()
+
+	// for flow, the need is always *maxNeed* (i.e., a single item)
+	// and the pref is based on styled pref estimate
+
+	sdim := ly.SummedDim()
+	odim := mat32.OtherDim(sdim)
+	pref := ly.LayData.Size.Pref.Dim(sdim)
+	// opref := ly.LayData.Size.Pref.Dim(odim) // not using
+
+	if pref == 0 {
+		pref = 6 * maxNeed.Dim(sdim) // 6 items preferred backup default
+	}
+	if pref == 0 {
+		pref = 200 // final backstop
+	}
+	sNeed := sumNeed.Dim(sdim)
+	nNeed := float32(1)
+	tNeed := sNeed
+	oNeed := maxNeed.Dim(odim)
+	if sNeed > pref {
+		tNeed = pref
+		nNeed = mat32.Ceil(sNeed / tNeed)
+		oNeed *= nNeed
+	}
+
+	sPref := sumPref.Dim(sdim)
+	nPref := float32(1)
+	tPref := sPref
+	oPref := maxPref.Dim(odim)
+	if sPref > pref {
+		if sNeed > pref {
+			tPref = pref
+			nPref = mat32.Ceil(sPref / tPref)
+			oPref *= nPref
+		} else {
+			tPref = sNeed // go with need
+		}
+	}
+
+	ly.LayData.Size.Need.SetMaxDim(sdim, maxNeed.Dim(sdim)) // Need min = max of single item
+	ly.LayData.Size.Pref.SetMaxDim(sdim, tPref)
+	ly.LayData.Size.Need.SetMaxDim(odim, oNeed)
+	ly.LayData.Size.Pref.SetMaxDim(odim, oPref)
 
 	spc := ly.Sty.BoxSpace()
 	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
@@ -734,6 +821,84 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 		}
 		pos += size + ly.Spacing.Dots
 	}
+}
+
+// LayoutFlow manages the flow layout along given dimension
+// returns true if needs another iteration (only if iter == 0)
+func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
+	ly.FlowBreaks = nil
+	sz := len(ly.Kids)
+	if sz == 0 {
+		return false
+	}
+
+	elspc := float32(sz-1) * ly.Spacing.Dots
+	spc := ly.Sty.BoxSpace()
+	exspc := 2.0*spc + elspc
+
+	avail := ly.LayData.AllocSize.Dim(dim) - exspc
+	odim := mat32.OtherDim(dim)
+
+	pos := spc
+	for i, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
+			continue
+		}
+		size := ni.LayData.Size.Need.Dim(dim)
+		if pos+size > avail {
+			ly.FlowBreaks = append(ly.FlowBreaks, i)
+			pos = spc
+		}
+		ni.LayData.AllocSize.SetDim(dim, size)
+		ni.LayData.AllocPosRel.SetDim(dim, pos)
+		if Layout2DTrace {
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayData.Size.Need.Dim(dim), ni.LayData.Size.Pref.Dim(dim))
+		}
+		pos += size + ly.Spacing.Dots
+	}
+	ly.FlowBreaks = append(ly.FlowBreaks, len(ly.Kids))
+
+	nrows := len(ly.FlowBreaks)
+	oavail := ly.LayData.AllocSize.Dim(odim) - exspc
+	oavPerRow := oavail / float32(nrows)
+	ci := 0
+	rpos := float32(0)
+	var nsz mat32.Vec2
+	for _, bi := range ly.FlowBreaks {
+		rmax := float32(0)
+		for i := ci; i < bi; i++ {
+			c := ly.Kids[i]
+			if c == nil {
+				continue
+			}
+			ni := c.(Node2D).AsWidget()
+			if ni == nil {
+				continue
+			}
+			al := ni.Sty.Layout.AlignDim(odim)
+			pref := ni.LayData.Size.Pref.Dim(odim)
+			need := ni.LayData.Size.Need.Dim(odim)
+			max := ni.LayData.Size.Max.Dim(odim)
+			pos, size := ly.LayoutSharedDimImpl(oavPerRow, need, pref, max, spc, al)
+			ni.LayData.AllocSize.SetDim(odim, size)
+			ni.LayData.AllocPosRel.SetDim(odim, rpos+pos)
+			rmax = mat32.Max(rmax, size)
+			nsz.X = mat32.Max(nsz.X, ni.LayData.AllocPosRel.X+ni.LayData.AllocSize.X)
+			nsz.Y = mat32.Max(nsz.Y, ni.LayData.AllocPosRel.Y+ni.LayData.AllocSize.Y)
+		}
+		rpos += rmax + ly.Spacing.Dots
+		ci = bi
+	}
+	ly.LayData.Size.Need = nsz
+	ly.LayData.Size.Pref = nsz
+	// if nrows == 1 {
+	// 	return false
+	// }
+	return true
 }
 
 // LayoutGridDim lays out grid data along each dimension (row, Y; col, X),
@@ -1779,9 +1944,12 @@ func (ly *Layout) Style2D() {
 
 func (ly *Layout) Size2D(iter int) {
 	ly.InitLayout2D()
-	if ly.Lay == LayoutGrid {
+	switch ly.Lay {
+	case LayoutHorizFlow, LayoutVertFlow:
+		ly.GatherSizesFlow()
+	case LayoutGrid:
 		ly.GatherSizesGrid()
-	} else {
+	default:
 		ly.GatherSizes()
 	}
 }
@@ -1794,6 +1962,7 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	//}
 	ly.AllocFromParent()                 // in case we didn't get anything
 	ly.Layout2DBase(parBBox, true, iter) // init style
+	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:
 		ly.LayoutAlongDim(mat32.X)
@@ -1806,8 +1975,16 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	case LayoutStacked:
 		ly.LayoutSharedDim(mat32.X)
 		ly.LayoutSharedDim(mat32.Y)
+	case LayoutHorizFlow:
+		redo = ly.LayoutFlow(mat32.X, iter)
+	case LayoutVertFlow:
+		redo = ly.LayoutFlow(mat32.Y, iter)
 	case LayoutNil:
 		// nothing
+	}
+	if redo && iter == 0 {
+		ly.NeedsRedo = true
+		return true
 	}
 	ly.FinalizeLayout()
 	ly.ManageOverflow()
