@@ -244,8 +244,8 @@ func (sb *SliderBase) SizeFromAlloc() {
 	sb.DragPos = sb.Pos
 }
 
-// SetSliderPos sets the position of the slider at the given position in
-// pixels -- updates the corresponding Value
+// SetSliderPos sets the position of the slider at the given position in pixels,
+// and updates the corresponding Value based on that position.
 func (sb *SliderBase) SetSliderPos(pos float32) {
 	updt := sb.UpdateStart()
 	sb.Pos = pos
