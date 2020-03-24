@@ -2063,19 +2063,7 @@ func (tb *TextBuf) LexObjPathString(ln int, lx *lex.Lex) string {
 	if !tb.IsValidLine(ln) {
 		return ""
 	}
-	stlx := lx
-	if lx.St > 1 {
-		lxln := tb.HiTags[ln]
-		_, lxidx := lxln.AtPos(lx.St - 1)
-		for i := lxidx; i >= 0; i-- {
-			clx := &lxln[i]
-			if clx.Tok.Tok == token.PunctSepPeriod || clx.Tok.Tok.InCat(token.Name) {
-				stlx = clx
-			} else {
-				break
-			}
-		}
-	}
+	stlx := lex.ObjPathAt(tb.HiTags[ln], lx)
 	rns := tb.Lines[ln][stlx.St:lx.Ed]
 	return string(rns)
 }

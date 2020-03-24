@@ -54,8 +54,8 @@ github.com/goki/ki v0.9.13-0.20200322120506-1a45079ce979 h1:s9ZUhvS6DosH2q1INDU6
 github.com/goki/ki v0.9.13-0.20200322120506-1a45079ce979/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
 github.com/goki/mat32 v1.0.0 h1:KLQHIg6ufFRhTK4dL6G/LMVKovaw+yv+1hLleRE3hkY=
 github.com/goki/mat32 v1.0.0/go.mod h1:SCqUsgLhG48i7wu/Kce9OF62abYJnxCX7YL5TOxZ0K4=
-github.com/goki/pi v0.9.15-0.20200323095844-d38a65567821 h1:/9kgZXwsMey7aW2OqoDePl8aNijyJ9s0ycdTGeCvKA8=
-github.com/goki/pi v0.9.15-0.20200323095844-d38a65567821/go.mod h1:wryLG8gvVXnQ/q3liHUSzUYKY4p/6+ds1em+x+fMITU=
+github.com/goki/pi v0.9.15-0.20200324005947-43dfc07e7099 h1:caeEDlm5DOlXMTdmWGyKCZkLuPJJtYoxk2T+7p3Rxpc=
+github.com/goki/pi v0.9.15-0.20200324005947-43dfc07e7099/go.mod h1:wryLG8gvVXnQ/q3liHUSzUYKY4p/6+ds1em+x+fMITU=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/goki/vci v0.90.1 h1:50BIleTIDzkk0QM3BE36a3fBkEbZEkVqvCuSOyOghbk=
