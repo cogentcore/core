@@ -45,3 +45,17 @@ There may be a small performance cost for the value-based approach (comparative 
 
 The matrix types still do use pointer-based logic because they are significantly larger and thus the performance issues are likely to be more important.
 
+# Struct vs. Array Performance: Struct is much faster
+
+This is a benchmark from Egon Elbre, showing that small arrays can be significantly slower than 
+a struct: https://github.com/egonelbre/exp/blob/master/bench/vector_fusing/vector_test.go
+
+```
+# array
+BenchmarkAddMul-32                      70589480                17.3 ns/op
+# struct
+BenchmarkStructAddMul-32                1000000000               0.740 ns/op
+```
+
+Discussion: https://github.com/golang/go/issues/15925
+
