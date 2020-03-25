@@ -805,11 +805,14 @@ func (nb *Node2DBase) Layout2DTree() {
 	nbi := nb.This().(Node2D)
 	redo := nbi.Layout2D(parBBox, 0) // important to use interface version to get interface!
 	if redo {
+		if Layout2DTrace {
+			fmt.Printf("Layout: ----------  Redo: %v ----------- \n", nbi.PathUnique())
+		}
 		wb := nbi.AsWidget()
 		if wb != nil {
 			ld := wb.LayData
 			wb.Size2DTree(1)
-			wb.LayData = ld
+			wb.LayData.CopyAllocFrom(&ld)
 		} else {
 			nb.Size2DTree(1)
 		}

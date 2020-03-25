@@ -60,8 +60,6 @@ var TabViewProps = ki.Props{
 	"color":            &Prefs.Colors.Font,
 	"max-width":        -1,
 	"max-height":       -1,
-	"width":            units.NewEm(10),
-	"height":           units.NewEm(10),
 }
 
 // NTabs returns number of tabs
@@ -413,7 +411,7 @@ func (tv *TabView) InitTabView() {
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()
 
-	tabs := AddNewFrame(tv, "tabs", LayoutHoriz) // Flow -- todo:
+	tabs := AddNewFrame(tv, "tabs", LayoutHorizFlow)
 	tabs.SetStretchMaxWidth()
 	// tabs.SetStretchMaxHeight()
 	// tabs.SetMinPrefWidth(units.NewEm(10))

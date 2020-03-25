@@ -85,6 +85,15 @@ func (ld *LayoutData) UpdateSizes() {
 	ld.Size.Pref.SetMinPos(ld.Size.Max) // pref cannot be > max
 }
 
+// CopyAllocFrom only copies the Alloc data, but not the size data
+func (ld *LayoutData) CopyAllocFrom(cp *LayoutData) {
+	ld.AllocSize = cp.AllocSize
+	ld.AllocPos = cp.AllocPos
+	ld.AllocPosRel = cp.AllocPosRel
+	ld.AllocSizeOrig = cp.AllocSizeOrig
+	ld.AllocPosOrig = cp.AllocPosOrig
+}
+
 // GridData contains data for grid layout -- only one value needed for relevant dim
 type GridData struct {
 	SizeNeed    float32
@@ -293,7 +302,8 @@ func (ly *Layout) GatherSizes() {
 	}
 
 	for d := mat32.X; d <= mat32.Y; d++ {
-		if prefSizing || ly.LayData.Size.Pref.Dim(d) == 0 {
+		pref := ly.LayData.Size.Pref.Dim(d)
+		if prefSizing || pref == 0 {
 			if ly.SumDim(d) { // our layout now updated to sum
 				ly.LayData.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
 				ly.LayData.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
@@ -302,7 +312,10 @@ func (ly *Layout) GatherSizes() {
 				ly.LayData.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
 			}
 		} else { // use target size from style
-			ly.LayData.Size.Need.SetDim(d, ly.LayData.Size.Pref.Dim(d))
+			if Layout2DTrace {
+				fmt.Printf("Size:   %v pref nonzero, setting as need: %v\n", ly.PathUnique(), pref)
+			}
+			ly.LayData.Size.Need.SetDim(d, pref)
 		}
 	}
 
@@ -329,10 +342,37 @@ func (ly *Layout) GatherSizes() {
 	}
 }
 
+// ChildrenUpdateSizes calls UpdateSizes on all children -- layout must at least call this
+func (ly *Layout) ChildrenUpdateSizes() {
+	for _, c := range ly.Kids {
+		if c == nil {
+			continue
+		}
+		ni := c.(Node2D).AsWidget()
+		if ni == nil {
+			continue
+		}
+		ni.LayData.UpdateSizes()
+	}
+}
+
 // GatherSizesFlow is size first pass: gather the size information from the children
-func (ly *Layout) GatherSizesFlow() {
+func (ly *Layout) GatherSizesFlow(iter int) {
 	sz := len(ly.Kids)
 	if sz == 0 {
+		return
+	}
+
+	if iter > 0 {
+		ly.ChildrenUpdateSizes() // essential to call this
+		prv := ly.ChildSize
+		ly.LayData.Size.Need = prv
+		ly.LayData.Size.Pref = prv
+		ly.LayData.AllocSize = prv
+		ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+		if Layout2DTrace {
+			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.PathUnique(), prv)
+		}
 		return
 	}
 
@@ -352,6 +392,11 @@ func (ly *Layout) GatherSizesFlow() {
 	if pref == 0 {
 		pref = 200 // final backstop
 	}
+
+	if Layout2DTrace {
+		fmt.Printf("Size:   %v flow pref start: %v\n", ly.PathUnique(), pref)
+	}
+
 	sNeed := sumNeed.Dim(sdim)
 	nNeed := float32(1)
 	tNeed := sNeed
@@ -895,6 +940,9 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 	}
 	ly.LayData.Size.Need = nsz
 	ly.LayData.Size.Pref = nsz
+	if Layout2DTrace {
+		fmt.Printf("Layout: %v Flow final size: %v\n", ly.PathUnique(), nsz)
+	}
 	// if nrows == 1 {
 	// 	return false
 	// }
@@ -1946,7 +1994,7 @@ func (ly *Layout) Size2D(iter int) {
 	ly.InitLayout2D()
 	switch ly.Lay {
 	case LayoutHorizFlow, LayoutVertFlow:
-		ly.GatherSizesFlow()
+		ly.GatherSizesFlow(iter)
 	case LayoutGrid:
 		ly.GatherSizesGrid()
 	default:
@@ -1982,11 +2030,12 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	case LayoutNil:
 		// nothing
 	}
+	ly.FinalizeLayout()
 	if redo && iter == 0 {
 		ly.NeedsRedo = true
+		ly.LayData.AllocSize = ly.ChildSize // this is what we actually need.
 		return true
 	}
-	ly.FinalizeLayout()
 	ly.ManageOverflow()
 	ly.NeedsRedo = ly.Layout2DChildren(iter) // layout done with canonical positions
 
