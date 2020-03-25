@@ -54,8 +54,8 @@ func (mb *MenuBar) MenuBarStdRender() {
 	rs := &mb.Viewport.Render
 	rs.Lock()
 	pc := &rs.Paint
-	pos := mb.LayData.AllocPos
-	sz := mb.LayData.AllocSize
+	pos := mb.LayState.Alloc.Pos
+	sz := mb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 	rs.Unlock()
 }
@@ -382,8 +382,8 @@ func (tb *ToolBar) ToolBarStdRender() {
 	rs := &tb.Viewport.Render
 	rs.Lock()
 	pc := &rs.Paint
-	pos := tb.LayData.AllocPos
-	sz := tb.LayData.AllocSize
+	pos := tb.LayState.Alloc.Pos
+	sz := tb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 	rs.Unlock()
 }

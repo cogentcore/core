@@ -462,16 +462,16 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 		return mat32.Vec2Zero
 	}
 	parw.SetReRenderAnchor()
-	paloc := parw.LayData.AllocSizeOrig
+	paloc := parw.LayState.Alloc.SizeOrig
 	if !paloc.IsNil() {
 		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).SubScalar(spc * 2)
 		tv.RenderSz.X -= spc // extra space
 		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
 	} else {
-		sz := tv.LayData.AllocSizeOrig
+		sz := tv.LayState.Alloc.SizeOrig
 		if sz.IsNil() {
-			sz = tv.LayData.SizePrefOrMax()
+			sz = tv.LayState.SizePrefOrMax()
 		}
 		if !sz.IsNil() {
 			sz.SetSubScalar(2 * spc)
@@ -574,20 +574,20 @@ func (tv *TextView) SetSize() bool {
 	rndsz := tv.RenderSz
 	rndsz.X += tv.LineNoOff
 	netsz := mat32.Vec2{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
-	cursz := tv.LayData.AllocSize.SubScalar(2 * spc)
+	cursz := tv.LayState.Alloc.Size.SubScalar(2 * spc)
 	if cursz.X < 10 || cursz.Y < 10 {
 		nwsz := netsz.Max(rndsz)
 		tv.Size2DFromWH(nwsz.X, nwsz.Y)
-		tv.LayData.Size.Need = tv.LayData.AllocSize
-		tv.LayData.Size.Pref = tv.LayData.AllocSize
+		tv.LayState.Size.Need = tv.LayState.Alloc.Size
+		tv.LayState.Size.Pref = tv.LayState.Alloc.Size
 		return true
 	}
 	nwsz := netsz.Max(rndsz)
-	alloc := tv.LayData.AllocSize
+	alloc := tv.LayState.Alloc.Size
 	tv.Size2DFromWH(nwsz.X, nwsz.Y)
-	if alloc != tv.LayData.AllocSize {
-		tv.LayData.Size.Need = tv.LayData.AllocSize
-		tv.LayData.Size.Pref = tv.LayData.AllocSize
+	if alloc != tv.LayState.Alloc.Size {
+		tv.LayState.Size.Need = tv.LayState.Alloc.Size
+		tv.LayState.Size.Pref = tv.LayState.Alloc.Size
 		return true
 	}
 	// fmt.Printf("NO resize: netsz: %v  cursz: %v rndsz: %v\n", netsz, cursz, rndsz)
@@ -614,7 +614,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 		ly.Layout2DTree()
 		tv.SetFlag(int(TextViewRenderScrolls))
 		tv.ClearFlag(int(TextViewInReLayout))
-		// fmt.Printf("resized: %v\n", tv.LayData.AllocSize)
+		// fmt.Printf("resized: %v\n", tv.LayState.Alloc.Size)
 	}
 	return true
 }
@@ -3419,7 +3419,7 @@ func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gi.Style, bgclr *gi.Color
 func (tv *TextView) RenderStartPos() mat32.Vec2 {
 	st := &tv.Sty
 	spc := st.BoxSpace()
-	pos := tv.LayData.AllocPos.AddScalar(spc)
+	pos := tv.LayState.Alloc.Pos.AddScalar(spc)
 	return pos
 }
 
@@ -4701,7 +4701,7 @@ func (tv *TextView) StyleTextView() {
 func (tv *TextView) Style2D() {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
-	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
+	tv.LayState.SetFromStyle(&tv.Sty.Layout) // also does reset
 }
 
 // Size2D

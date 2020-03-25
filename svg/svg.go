@@ -109,7 +109,7 @@ func (svg *SVG) Init2D() {
 func (svg *SVG) Size2D(iter int) {
 	svg.InitLayout2D()
 	if svg.ViewBox.Size != mat32.Vec2Zero {
-		svg.LayData.AllocSize = svg.ViewBox.Size
+		svg.LayState.Alloc.Size = svg.ViewBox.Size
 	}
 	svg.Size2DAddSpace()
 }
@@ -129,7 +129,7 @@ func (svg *SVG) StyleSVG() {
 
 func (svg *SVG) Style2D() {
 	svg.StyleSVG()
-	svg.LayData.SetFromStyle(&svg.Sty.Layout) // also does reset
+	svg.LayState.SetFromStyle(&svg.Sty.Layout) // also does reset
 	if nv, err := svg.PropTry("norm"); err == nil {
 		svg.Norm, _ = kit.ToBool(nv)
 	}

@@ -404,7 +404,7 @@ func (sb *SpinBox) StyleSpinBox() {
 
 func (sb *SpinBox) Style2D() {
 	sb.StyleSpinBox()
-	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
 	sb.ConfigParts()
 }
 

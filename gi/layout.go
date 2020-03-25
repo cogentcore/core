@@ -32,16 +32,28 @@ var LayoutPrefMaxRows = 20
 // when computing the preferred size (VpFlagPrefSizing)
 var LayoutPrefMaxCols = 20
 
-// LayoutData contains all the data needed to specify the layout of an item
-// within a layout -- includes computed values of style prefs -- everything is
-// concrete and specified here, whereas style may not be fully resolved
-type LayoutData struct {
-	Size          SizePrefs  `desc:"size constraints for this item -- from layout style"`
-	AllocSize     mat32.Vec2 `desc:"allocated size of this item, by the parent layout"`
-	AllocPos      mat32.Vec2 `desc:"position of this item, computed by adding in the AllocPosRel to parent position"`
-	AllocPosRel   mat32.Vec2 `desc:"allocated relative position of this item, computed by the parent layout"`
-	AllocSizeOrig mat32.Vec2 `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
-	AllocPosOrig  mat32.Vec2 `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
+// LayoutAllocs contains all the the layout allocations: size, position.
+// These are set by the parent Layout during the Layout process.
+type LayoutAllocs struct {
+	Size     mat32.Vec2 `desc:"allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes"`
+	Pos      mat32.Vec2 `desc:"position of this item, computed by adding in the PosRel to parent position"`
+	PosRel   mat32.Vec2 `desc:"allocated relative position of this item, computed by the parent layout"`
+	SizeOrig mat32.Vec2 `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
+	PosOrig  mat32.Vec2 `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
+}
+
+// Reset is called at start of layout process -- resets all values back to 0
+func (la *LayoutAllocs) Reset() {
+	la.Size = mat32.Vec2Zero
+	la.Pos = mat32.Vec2Zero
+	la.PosRel = mat32.Vec2Zero
+}
+
+// LayoutState contains all the state needed to specify the layout of an item
+// within a Layout.  Is initialized with computed values of style prefs.
+type LayoutState struct {
+	Size  SizePrefs    `desc:"size constraints for this item -- from layout style and "`
+	Alloc LayoutAllocs `desc:"allocated size and position -- set by parent Layout"`
 }
 
 // todo: not using yet:
@@ -49,10 +61,10 @@ type LayoutData struct {
 // GridPos      image.Point `desc:"position within a grid"`
 // GridSpan     image.Point `desc:"number of grid elements that we take up in each direction"`
 
-func (ld *LayoutData) Defaults() {
+func (ld *LayoutState) Defaults() {
 }
 
-func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
+func (ld *LayoutState) SetFromStyle(ls *LayoutStyle) {
 	ld.Reset()
 	// these are layout hints:
 	ld.Size.Need = ls.MinSizeDots()
@@ -60,38 +72,27 @@ func (ld *LayoutData) SetFromStyle(ls *LayoutStyle) {
 	ld.Size.Max = ls.MaxSizeDots()
 
 	// this is an actual initial desired setting
-	ld.AllocPos = ls.PosDots()
+	ld.Alloc.Pos = ls.PosDots()
 	// not setting size, so we can keep that as a separate constraint
 }
 
 // SizePrefOrMax returns the pref size if non-zero, else the max-size -- use
 // for style-based constraints during initial sizing (e.g., word wrapping)
-func (ld *LayoutData) SizePrefOrMax() mat32.Vec2 {
+func (ld *LayoutState) SizePrefOrMax() mat32.Vec2 {
 	return ld.Size.Pref.MinPos(ld.Size.Max)
 }
 
 // Reset is called at start of layout process -- resets all values back to 0
-func (ld *LayoutData) Reset() {
-	ld.AllocSize = mat32.Vec2Zero
-	ld.AllocPos = mat32.Vec2Zero
-	ld.AllocPosRel = mat32.Vec2Zero
+func (ld *LayoutState) Reset() {
+	ld.Alloc.Reset()
 }
 
 // UpdateSizes updates our sizes based on AllocSize and Max constraints, etc
-func (ld *LayoutData) UpdateSizes() {
-	ld.Size.Need.SetMax(ld.AllocSize)   // min cannot be < alloc -- bare min
+func (ld *LayoutState) UpdateSizes() {
+	ld.Size.Need.SetMax(ld.Alloc.Size)  // min cannot be < alloc -- bare min
 	ld.Size.Pref.SetMax(ld.Size.Need)   // pref cannot be < min
 	ld.Size.Need.SetMinPos(ld.Size.Max) // min cannot be > max
 	ld.Size.Pref.SetMinPos(ld.Size.Max) // pref cannot be > max
-}
-
-// CopyAllocFrom only copies the Alloc data, but not the size data
-func (ld *LayoutData) CopyAllocFrom(cp *LayoutData) {
-	ld.AllocSize = cp.AllocSize
-	ld.AllocPos = cp.AllocPos
-	ld.AllocPosRel = cp.AllocPosRel
-	ld.AllocSizeOrig = cp.AllocSizeOrig
-	ld.AllocPosOrig = cp.AllocPosOrig
 }
 
 // GridData contains data for grid layout -- only one value needed for relevant dim
@@ -274,14 +275,14 @@ func (ly *Layout) GatherSizesSumMax() (sumPref, sumNeed, maxPref, maxNeed mat32.
 		if ni == nil {
 			continue
 		}
-		ni.LayData.UpdateSizes()
-		sumNeed = sumNeed.Add(ni.LayData.Size.Need)
-		sumPref = sumPref.Add(ni.LayData.Size.Pref)
-		maxNeed = maxNeed.Max(ni.LayData.Size.Need)
-		maxPref = maxPref.Max(ni.LayData.Size.Pref)
+		ni.LayState.UpdateSizes()
+		sumNeed = sumNeed.Add(ni.LayState.Size.Need)
+		sumPref = sumPref.Add(ni.LayState.Size.Pref)
+		maxNeed = maxNeed.Max(ni.LayState.Size.Need)
+		maxPref = maxPref.Max(ni.LayState.Size.Pref)
 
 		if Layout2DTrace {
-			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, ni.LayData.Size.Need.Dim(ly.SummedDim()), ni.LayData.Size.Pref.Dim(ly.SummedDim()))
+			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, ni.LayState.Size.Need.Dim(ly.SummedDim()), ni.LayState.Size.Pref.Dim(ly.SummedDim()))
 		}
 	}
 	return
@@ -302,43 +303,43 @@ func (ly *Layout) GatherSizes() {
 	}
 
 	for d := mat32.X; d <= mat32.Y; d++ {
-		pref := ly.LayData.Size.Pref.Dim(d)
+		pref := ly.LayState.Size.Pref.Dim(d)
 		if prefSizing || pref == 0 {
 			if ly.SumDim(d) { // our layout now updated to sum
-				ly.LayData.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
-				ly.LayData.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
+				ly.LayState.Size.Need.SetMaxDim(d, sumNeed.Dim(d))
+				ly.LayState.Size.Pref.SetMaxDim(d, sumPref.Dim(d))
 			} else { // use max for other dir
-				ly.LayData.Size.Need.SetMaxDim(d, maxNeed.Dim(d))
-				ly.LayData.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
+				ly.LayState.Size.Need.SetMaxDim(d, maxNeed.Dim(d))
+				ly.LayState.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
 			}
 		} else { // use target size from style
 			if Layout2DTrace {
 				fmt.Printf("Size:   %v pref nonzero, setting as need: %v\n", ly.PathUnique(), pref)
 			}
-			ly.LayData.Size.Need.SetDim(d, pref)
+			ly.LayState.Size.Need.SetDim(d, pref)
 		}
 	}
 
 	spc := ly.Sty.BoxSpace()
-	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
-	ly.LayData.Size.Pref.SetAddScalar(2.0 * spc)
+	ly.LayState.Size.Need.SetAddScalar(2.0 * spc)
+	ly.LayState.Size.Pref.SetAddScalar(2.0 * spc)
 
 	elspc := float32(0.0)
 	if sz >= 2 {
 		elspc = float32(sz-1) * ly.Spacing.Dots
 	}
 	if ly.SumDim(mat32.X) {
-		ly.LayData.Size.Need.X += elspc
-		ly.LayData.Size.Pref.X += elspc
+		ly.LayState.Size.Need.X += elspc
+		ly.LayState.Size.Pref.X += elspc
 	}
 	if ly.SumDim(mat32.Y) {
-		ly.LayData.Size.Need.Y += elspc
-		ly.LayData.Size.Pref.Y += elspc
+		ly.LayState.Size.Need.Y += elspc
+		ly.LayState.Size.Pref.Y += elspc
 	}
 
-	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref, elspc)
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
 	}
 }
 
@@ -352,7 +353,7 @@ func (ly *Layout) ChildrenUpdateSizes() {
 		if ni == nil {
 			continue
 		}
-		ni.LayData.UpdateSizes()
+		ni.LayState.UpdateSizes()
 	}
 }
 
@@ -366,10 +367,10 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 	if iter > 0 {
 		ly.ChildrenUpdateSizes() // essential to call this
 		prv := ly.ChildSize
-		ly.LayData.Size.Need = prv
-		ly.LayData.Size.Pref = prv
-		ly.LayData.AllocSize = prv
-		ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+		ly.LayState.Size.Need = prv
+		ly.LayState.Size.Pref = prv
+		ly.LayState.Alloc.Size = prv
+		ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 		if Layout2DTrace {
 			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.PathUnique(), prv)
 		}
@@ -383,8 +384,8 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 
 	sdim := ly.SummedDim()
 	odim := mat32.OtherDim(sdim)
-	pref := ly.LayData.Size.Pref.Dim(sdim)
-	// opref := ly.LayData.Size.Pref.Dim(odim) // not using
+	pref := ly.LayState.Size.Pref.Dim(sdim)
+	// opref := ly.LayState.Size.Pref.Dim(odim) // not using
 
 	if pref == 0 {
 		pref = 6 * maxNeed.Dim(sdim) // 6 items preferred backup default
@@ -421,31 +422,31 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 		}
 	}
 
-	ly.LayData.Size.Need.SetMaxDim(sdim, maxNeed.Dim(sdim)) // Need min = max of single item
-	ly.LayData.Size.Pref.SetMaxDim(sdim, tPref)
-	ly.LayData.Size.Need.SetMaxDim(odim, oNeed)
-	ly.LayData.Size.Pref.SetMaxDim(odim, oPref)
+	ly.LayState.Size.Need.SetMaxDim(sdim, maxNeed.Dim(sdim)) // Need min = max of single item
+	ly.LayState.Size.Pref.SetMaxDim(sdim, tPref)
+	ly.LayState.Size.Need.SetMaxDim(odim, oNeed)
+	ly.LayState.Size.Pref.SetMaxDim(odim, oPref)
 
 	spc := ly.Sty.BoxSpace()
-	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
-	ly.LayData.Size.Pref.SetAddScalar(2.0 * spc)
+	ly.LayState.Size.Need.SetAddScalar(2.0 * spc)
+	ly.LayState.Size.Pref.SetAddScalar(2.0 * spc)
 
 	elspc := float32(0.0)
 	if sz >= 2 {
 		elspc = float32(sz-1) * ly.Spacing.Dots
 	}
 	if ly.SumDim(mat32.X) {
-		ly.LayData.Size.Need.X += elspc
-		ly.LayData.Size.Pref.X += elspc
+		ly.LayState.Size.Need.X += elspc
+		ly.LayState.Size.Pref.X += elspc
 	}
 	if ly.SumDim(mat32.Y) {
-		ly.LayData.Size.Need.Y += elspc
-		ly.LayData.Size.Pref.Y += elspc
+		ly.LayState.Size.Need.Y += elspc
+		ly.LayState.Size.Pref.Y += elspc
 	}
 
-	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref, elspc)
+		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.PathUnique(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
 	}
 }
 
@@ -521,7 +522,7 @@ func (ly *Layout) GatherSizesGrid() {
 		if ni == nil {
 			continue
 		}
-		ni.LayData.UpdateSizes()
+		ni.LayState.UpdateSizes()
 		lst := ni.Sty.Layout
 		if lst.Col > 0 {
 			col = lst.Col
@@ -540,24 +541,24 @@ func (ly *Layout) GatherSizesGrid() {
 		cgd := &(ly.GridData[Col][col])
 
 		// todo: need to deal with span in sums..
-		mat32.SetMax(&(rgd.SizeNeed), ni.LayData.Size.Need.Y)
-		mat32.SetMax(&(rgd.SizePref), ni.LayData.Size.Pref.Y)
-		mat32.SetMax(&(cgd.SizeNeed), ni.LayData.Size.Need.X)
-		mat32.SetMax(&(cgd.SizePref), ni.LayData.Size.Pref.X)
+		mat32.SetMax(&(rgd.SizeNeed), ni.LayState.Size.Need.Y)
+		mat32.SetMax(&(rgd.SizePref), ni.LayState.Size.Pref.Y)
+		mat32.SetMax(&(cgd.SizeNeed), ni.LayState.Size.Need.X)
+		mat32.SetMax(&(cgd.SizePref), ni.LayState.Size.Pref.X)
 
 		// for max: any -1 stretch dominates, else accumulate any max
 		if rgd.SizeMax >= 0 {
-			if ni.LayData.Size.Max.Y < 0 { // stretch
+			if ni.LayState.Size.Max.Y < 0 { // stretch
 				rgd.SizeMax = -1
 			} else {
-				mat32.SetMax(&(rgd.SizeMax), ni.LayData.Size.Max.Y)
+				mat32.SetMax(&(rgd.SizeMax), ni.LayState.Size.Max.Y)
 			}
 		}
 		if cgd.SizeMax >= 0 {
-			if ni.LayData.Size.Max.Y < 0 { // stretch
+			if ni.LayState.Size.Max.Y < 0 { // stretch
 				cgd.SizeMax = -1
 			} else {
-				mat32.SetMax(&(cgd.SizeMax), ni.LayData.Size.Max.X)
+				mat32.SetMax(&(cgd.SizeMax), ni.LayState.Size.Max.X)
 			}
 		}
 
@@ -577,7 +578,7 @@ func (ly *Layout) GatherSizesGrid() {
 	}
 
 	// if there aren't existing prefs, we need to compute size
-	if prefSizing || ly.LayData.Size.Pref.X == 0 || ly.LayData.Size.Pref.Y == 0 {
+	if prefSizing || ly.LayState.Size.Pref.X == 0 || ly.LayState.Size.Pref.Y == 0 {
 		sbw := ly.Sty.Layout.ScrollBarWidth.Dots
 		maxRow := len(ly.GridData[Row])
 		maxCol := len(ly.GridData[Col])
@@ -607,46 +608,46 @@ func (ly *Layout) GatherSizesGrid() {
 			sumPref.Y += sbw
 		}
 
-		if ly.LayData.Size.Pref.X == 0 || prefSizing {
-			ly.LayData.Size.Need.X = mat32.Max(ly.LayData.Size.Need.X, sumNeed.X)
-			ly.LayData.Size.Pref.X = mat32.Max(ly.LayData.Size.Pref.X, sumPref.X)
+		if ly.LayState.Size.Pref.X == 0 || prefSizing {
+			ly.LayState.Size.Need.X = mat32.Max(ly.LayState.Size.Need.X, sumNeed.X)
+			ly.LayState.Size.Pref.X = mat32.Max(ly.LayState.Size.Pref.X, sumPref.X)
 		} else { // use target size from style otherwise
-			ly.LayData.Size.Need.X = ly.LayData.Size.Pref.X
+			ly.LayState.Size.Need.X = ly.LayState.Size.Pref.X
 		}
-		if ly.LayData.Size.Pref.Y == 0 || prefSizing {
-			ly.LayData.Size.Need.Y = mat32.Max(ly.LayData.Size.Need.Y, sumNeed.Y)
-			ly.LayData.Size.Pref.Y = mat32.Max(ly.LayData.Size.Pref.Y, sumPref.Y)
+		if ly.LayState.Size.Pref.Y == 0 || prefSizing {
+			ly.LayState.Size.Need.Y = mat32.Max(ly.LayState.Size.Need.Y, sumNeed.Y)
+			ly.LayState.Size.Pref.Y = mat32.Max(ly.LayState.Size.Pref.Y, sumPref.Y)
 		} else { // use target size from style otherwise
-			ly.LayData.Size.Need.Y = ly.LayData.Size.Pref.Y
+			ly.LayState.Size.Need.Y = ly.LayState.Size.Pref.Y
 		}
 	} else { // neither are zero so we use those directly
-		ly.LayData.Size.Need = ly.LayData.Size.Pref
+		ly.LayState.Size.Need = ly.LayState.Size.Pref
 	}
 
 	spc := ly.Sty.BoxSpace()
-	ly.LayData.Size.Need.SetAddScalar(2.0 * spc)
-	ly.LayData.Size.Pref.SetAddScalar(2.0 * spc)
+	ly.LayState.Size.Need.SetAddScalar(2.0 * spc)
+	ly.LayState.Size.Pref.SetAddScalar(2.0 * spc)
 
-	ly.LayData.Size.Need.X += float32(cols-1) * ly.Spacing.Dots
-	ly.LayData.Size.Pref.X += float32(cols-1) * ly.Spacing.Dots
-	ly.LayData.Size.Need.Y += float32(rows-1) * ly.Spacing.Dots
-	ly.LayData.Size.Pref.Y += float32(rows-1) * ly.Spacing.Dots
+	ly.LayState.Size.Need.X += float32(cols-1) * ly.Spacing.Dots
+	ly.LayState.Size.Pref.X += float32(cols-1) * ly.Spacing.Dots
+	ly.LayState.Size.Need.Y += float32(rows-1) * ly.Spacing.Dots
+	ly.LayState.Size.Pref.Y += float32(rows-1) * ly.Spacing.Dots
 
-	ly.LayData.UpdateSizes() // enforce max and normal ordering, etc
+	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.PathUnique(), ly.LayData.Size.Need, ly.LayData.Size.Pref)
+		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.PathUnique(), ly.LayState.Size.Need, ly.LayState.Size.Pref)
 	}
 }
 
 // AllocFromParent: if we are not a child of a layout, then get allocation
 // from a parent obj that has a layout size
 func (ly *Layout) AllocFromParent() {
-	if ly.Par == nil || ly.Viewport == nil || !ly.LayData.AllocSize.IsNil() {
+	if ly.Par == nil || ly.Viewport == nil || !ly.LayState.Alloc.Size.IsNil() {
 		return
 	}
 	if ly.Par != ly.Viewport.This() {
 		// note: zero alloc size happens all the time with non-visible tabs!
-		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayData)
+		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayState)
 		return
 	}
 	pni, _ := KiToNode2D(ly.Par)
@@ -661,10 +662,10 @@ func (ly *Layout) AllocFromParent() {
 			if pg == nil {
 				return false
 			}
-			if !pg.LayData.AllocSize.IsNil() {
-				ly.LayData.AllocSize = pg.LayData.AllocSize
+			if !pg.LayState.Alloc.Size.IsNil() {
+				ly.LayState.Alloc.Size = pg.LayState.Alloc.Size
 				if Layout2DTrace {
-					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.PathUnique(), ly.LayData.AllocSize, pg.PathUnique())
+					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.PathUnique(), ly.LayState.Alloc.Size, pg.PathUnique())
 				}
 				return false
 			}
@@ -728,7 +729,7 @@ func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Al
 // share the same space, e.g., Horiz for a Vert layout, and vice-versa.
 func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
 	spc := ly.Sty.BoxSpace()
-	avail := ly.LayData.AllocSize.Dim(dim) - 2.0*spc
+	avail := ly.LayState.Alloc.Size.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
 		if c == nil {
 			continue
@@ -738,12 +739,12 @@ func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
 			continue
 		}
 		al := ni.Sty.Layout.AlignDim(dim)
-		pref := ni.LayData.Size.Pref.Dim(dim)
-		need := ni.LayData.Size.Need.Dim(dim)
-		max := ni.LayData.Size.Max.Dim(dim)
+		pref := ni.LayState.Size.Pref.Dim(dim)
+		need := ni.LayState.Size.Need.Dim(dim)
+		max := ni.LayState.Size.Max.Dim(dim)
 		pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, spc, al)
-		ni.LayData.AllocSize.SetDim(dim, size)
-		ni.LayData.AllocPosRel.SetDim(dim, pos)
+		ni.LayState.Alloc.Size.SetDim(dim, size)
+		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
 	}
 }
 
@@ -759,9 +760,9 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.Sty.BoxSpace()
 	exspc := 2.0*spc + elspc
-	avail := ly.LayData.AllocSize.Dim(dim) - exspc
-	pref := ly.LayData.Size.Pref.Dim(dim) - exspc
-	need := ly.LayData.Size.Need.Dim(dim) - exspc
+	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
+	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
+	need := ly.LayState.Size.Need.Dim(dim) - exspc
 
 	targ := pref
 	usePref := true
@@ -787,9 +788,9 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 			if ni == nil {
 				continue
 			}
-			if ni.LayData.Size.HasMaxStretch(dim) { // negative = stretch
+			if ni.LayState.Size.HasMaxStretch(dim) { // negative = stretch
 				nstretch++
-				stretchTot += ni.LayData.Size.Pref.Dim(dim)
+				stretchTot += ni.LayState.Size.Pref.Dim(dim)
 			}
 		}
 		if nstretch > 0 {
@@ -804,9 +805,9 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 			if ni == nil {
 				continue
 			}
-			if ni.LayData.Size.HasMaxStretch(dim) || ni.LayData.Size.CanStretchNeed(dim) {
+			if ni.LayState.Size.HasMaxStretch(dim) || ni.LayState.Size.CanStretchNeed(dim) {
 				nstretch++
-				stretchTot += ni.LayData.Size.Pref.Dim(dim)
+				stretchTot += ni.LayState.Size.Pref.Dim(dim)
 			}
 		}
 		if nstretch > 0 {
@@ -841,17 +842,17 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 		if ni == nil {
 			continue
 		}
-		size := ni.LayData.Size.Need.Dim(dim)
+		size := ni.LayState.Size.Need.Dim(dim)
 		if usePref {
-			size = ni.LayData.Size.Pref.Dim(dim)
+			size = ni.LayState.Size.Pref.Dim(dim)
 		}
 		if stretchMax { // negative = stretch
-			if ni.LayData.Size.HasMaxStretch(dim) { // in proportion to pref
-				size += extra * (ni.LayData.Size.Pref.Dim(dim) / stretchTot)
+			if ni.LayState.Size.HasMaxStretch(dim) { // in proportion to pref
+				size += extra * (ni.LayState.Size.Pref.Dim(dim) / stretchTot)
 			}
 		} else if stretchNeed {
-			if ni.LayData.Size.HasMaxStretch(dim) || ni.LayData.Size.CanStretchNeed(dim) {
-				size += extra * (ni.LayData.Size.Pref.Dim(dim) / stretchTot)
+			if ni.LayState.Size.HasMaxStretch(dim) || ni.LayState.Size.CanStretchNeed(dim) {
+				size += extra * (ni.LayState.Size.Pref.Dim(dim) / stretchTot)
 			}
 		} else if addSpace { // implies align justify
 			if i > 0 {
@@ -859,10 +860,10 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 			}
 		}
 
-		ni.LayData.AllocSize.SetDim(dim, size)
-		ni.LayData.AllocPosRel.SetDim(dim, pos)
+		ni.LayState.Alloc.Size.SetDim(dim, size)
+		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayData.Size.Need.Dim(dim), ni.LayData.Size.Pref.Dim(dim))
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
 	}
@@ -881,7 +882,7 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 	spc := ly.Sty.BoxSpace()
 	exspc := 2.0*spc + elspc
 
-	avail := ly.LayData.AllocSize.Dim(dim) - exspc
+	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	odim := mat32.OtherDim(dim)
 
 	pos := spc
@@ -893,22 +894,22 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 		if ni == nil {
 			continue
 		}
-		size := ni.LayData.Size.Need.Dim(dim)
+		size := ni.LayState.Size.Need.Dim(dim)
 		if pos+size > avail {
 			ly.FlowBreaks = append(ly.FlowBreaks, i)
 			pos = spc
 		}
-		ni.LayData.AllocSize.SetDim(dim, size)
-		ni.LayData.AllocPosRel.SetDim(dim, pos)
+		ni.LayState.Alloc.Size.SetDim(dim, size)
+		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayData.Size.Need.Dim(dim), ni.LayData.Size.Pref.Dim(dim))
+			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.PathUnique(), ni.UniqueNm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
 	}
 	ly.FlowBreaks = append(ly.FlowBreaks, len(ly.Kids))
 
 	nrows := len(ly.FlowBreaks)
-	oavail := ly.LayData.AllocSize.Dim(odim) - exspc
+	oavail := ly.LayState.Alloc.Size.Dim(odim) - exspc
 	oavPerRow := oavail / float32(nrows)
 	ci := 0
 	rpos := float32(0)
@@ -925,21 +926,21 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 				continue
 			}
 			al := ni.Sty.Layout.AlignDim(odim)
-			pref := ni.LayData.Size.Pref.Dim(odim)
-			need := ni.LayData.Size.Need.Dim(odim)
-			max := ni.LayData.Size.Max.Dim(odim)
+			pref := ni.LayState.Size.Pref.Dim(odim)
+			need := ni.LayState.Size.Need.Dim(odim)
+			max := ni.LayState.Size.Max.Dim(odim)
 			pos, size := ly.LayoutSharedDimImpl(oavPerRow, need, pref, max, spc, al)
-			ni.LayData.AllocSize.SetDim(odim, size)
-			ni.LayData.AllocPosRel.SetDim(odim, rpos+pos)
+			ni.LayState.Alloc.Size.SetDim(odim, size)
+			ni.LayState.Alloc.PosRel.SetDim(odim, rpos+pos)
 			rmax = mat32.Max(rmax, size)
-			nsz.X = mat32.Max(nsz.X, ni.LayData.AllocPosRel.X+ni.LayData.AllocSize.X)
-			nsz.Y = mat32.Max(nsz.Y, ni.LayData.AllocPosRel.Y+ni.LayData.AllocSize.Y)
+			nsz.X = mat32.Max(nsz.X, ni.LayState.Alloc.PosRel.X+ni.LayState.Alloc.Size.X)
+			nsz.Y = mat32.Max(nsz.Y, ni.LayState.Alloc.PosRel.Y+ni.LayState.Alloc.Size.Y)
 		}
 		rpos += rmax + ly.Spacing.Dots
 		ci = bi
 	}
-	ly.LayData.Size.Need = nsz
-	ly.LayData.Size.Pref = nsz
+	ly.LayState.Size.Need = nsz
+	ly.LayState.Size.Pref = nsz
 	if Layout2DTrace {
 		fmt.Printf("Layout: %v Flow final size: %v\n", ly.PathUnique(), nsz)
 	}
@@ -962,9 +963,9 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim mat32.Dims) {
 	al := ly.Sty.Layout.AlignDim(dim)
 	spc := ly.Sty.BoxSpace()
 	exspc := 2.0*spc + elspc
-	avail := ly.LayData.AllocSize.Dim(dim) - exspc
-	pref := ly.LayData.Size.Pref.Dim(dim) - exspc
-	need := ly.LayData.Size.Need.Dim(dim) - exspc
+	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
+	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
+	need := ly.LayState.Size.Need.Dim(dim) - exspc
 
 	targ := pref
 	usePref := true
@@ -1092,12 +1093,12 @@ func (ly *Layout) LayoutGrid() {
 			gd := ly.GridData[Col][col]
 			avail := gd.AllocSize
 			al := lst.AlignDim(dim)
-			pref := ni.LayData.Size.Pref.Dim(dim)
-			need := ni.LayData.Size.Need.Dim(dim)
-			max := ni.LayData.Size.Max.Dim(dim)
+			pref := ni.LayState.Size.Pref.Dim(dim)
+			need := ni.LayState.Size.Need.Dim(dim)
+			max := ni.LayState.Size.Max.Dim(dim)
 			pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, 0, al)
-			ni.LayData.AllocSize.SetDim(dim, size)
-			ni.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
+			ni.LayState.Alloc.Size.SetDim(dim, size)
+			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 
 		}
 		{ // row, Y dim
@@ -1105,16 +1106,16 @@ func (ly *Layout) LayoutGrid() {
 			gd := ly.GridData[Row][row]
 			avail := gd.AllocSize
 			al := lst.AlignDim(dim)
-			pref := ni.LayData.Size.Pref.Dim(dim)
-			need := ni.LayData.Size.Need.Dim(dim)
-			max := ni.LayData.Size.Max.Dim(dim)
+			pref := ni.LayState.Size.Pref.Dim(dim)
+			need := ni.LayState.Size.Need.Dim(dim)
+			max := ni.LayState.Size.Max.Dim(dim)
 			pos, size := ly.LayoutSharedDimImpl(avail, need, pref, max, 0, al)
-			ni.LayData.AllocSize.SetDim(dim, size)
-			ni.LayData.AllocPosRel.SetDim(dim, pos+gd.AllocPosRel)
+			ni.LayState.Alloc.Size.SetDim(dim, size)
+			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}
 
 		if Layout2DTrace {
-			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, ni.LayData.AllocPosRel, ni.LayData.AllocSize)
+			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.PathUnique(), col, row, ni.LayState.Alloc.PosRel, ni.LayState.Alloc.Size)
 		}
 
 		col++
@@ -1140,8 +1141,8 @@ func (ly *Layout) FinalizeLayout() {
 		if ni == nil {
 			continue
 		}
-		ly.ChildSize.SetMax(ni.LayData.AllocPosRel.Add(ni.LayData.AllocSize))
-		ni.LayData.AllocSizeOrig = ni.LayData.AllocSize
+		ly.ChildSize.SetMax(ni.LayState.Alloc.PosRel.Add(ni.LayState.Alloc.Size))
+		ni.LayState.Alloc.SizeOrig = ni.LayState.Alloc.Size
 	}
 }
 
@@ -1150,7 +1151,7 @@ func (ly *Layout) FinalizeLayout() {
 // avail
 func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.Sty.BoxSpace()
-	avail := ly.LayData.AllocSize.SubScalar(spc) // spc is for right size space
+	avail := ly.LayState.Alloc.Size.SubScalar(spc) // spc is for right size space
 	parni, _ := KiToNode2D(ly.Par)
 	if parni != nil {
 		vp := parni.AsViewport2D()
@@ -1269,8 +1270,8 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 
 // DeactivateScroll turns off given scrollbar, without deleting, so it can be easily re-used
 func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
-	sc.LayData.AllocPos = mat32.Vec2Zero
-	sc.LayData.AllocSize = mat32.Vec2Zero
+	sc.LayState.Alloc.Pos = mat32.Vec2Zero
+	sc.LayState.Alloc.Size = mat32.Vec2Zero
 	sc.VpBBox = image.ZR
 	sc.WinBBox = image.ZR
 }
@@ -1286,13 +1287,13 @@ func (ly *Layout) LayoutScrolls() {
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
 			sc.Size2D(0)
-			sc.LayData.AllocPosRel.SetDim(d, spc)
-			sc.LayData.AllocPosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
-			sc.LayData.AllocSize.SetDim(d, avail.Dim(d)-spc)
+			sc.LayState.Alloc.PosRel.SetDim(d, spc)
+			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
+			sc.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc)
 			if ly.HasScroll[odim] { // make room for other
-				sc.LayData.AllocSize.SetSubDim(d, sbw)
+				sc.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}
-			sc.LayData.AllocSize.SetDim(odim, sbw)
+			sc.LayState.Alloc.Size.SetDim(odim, sbw)
 			sc.Layout2D(ly.VpBBox, 0) // this will add parent position to above rel pos
 		} else {
 			if ly.Scrolls[d] != nil {
@@ -1987,7 +1988,7 @@ func (ly *Layout) StyleLayout() {
 
 func (ly *Layout) Style2D() {
 	ly.StyleLayout()
-	ly.LayData.SetFromStyle(&ly.Sty.Layout) // also does reset
+	ly.LayState.SetFromStyle(&ly.Sty.Layout) // also does reset
 }
 
 func (ly *Layout) Size2D(iter int) {
@@ -2033,7 +2034,7 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 	ly.FinalizeLayout()
 	if redo && iter == 0 {
 		ly.NeedsRedo = true
-		ly.LayData.AllocSize = ly.ChildSize // this is what we actually need.
+		ly.LayState.Alloc.Size = ly.ChildSize // this is what we actually need.
 		return true
 	}
 	ly.ManageOverflow()
@@ -2137,7 +2138,7 @@ func (st *Stretch) Style2D() {
 	if hasTempl && saveTempl {
 		st.Sty.SaveTemplate()
 	}
-	st.LayData.SetFromStyle(&st.Sty.Layout) // also does reset
+	st.LayState.SetFromStyle(&st.Sty.Layout) // also does reset
 }
 
 func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -2177,7 +2178,7 @@ func (sp *Space) Style2D() {
 	if hasTempl && saveTempl {
 		sp.Sty.SaveTemplate()
 	}
-	sp.LayData.SetFromStyle(&sp.Sty.Layout) // also does reset
+	sp.LayState.SetFromStyle(&sp.Sty.Layout) // also does reset
 }
 
 func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {

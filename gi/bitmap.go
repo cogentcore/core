@@ -127,7 +127,7 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
 	if bm.Pixels == nil {
 		return
 	}
-	pos := bm.LayData.AllocPos.ToPointCeil()
+	pos := bm.LayState.Alloc.Pos.ToPointCeil()
 	max := pos.Add(bm.Size)
 	r := image.Rectangle{Min: pos, Max: max}
 	sp := image.ZP

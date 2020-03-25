@@ -5,9 +5,7 @@
 package gi3d
 
 import (
-	"errors"
 	"image"
-	"log"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
@@ -86,26 +84,11 @@ func (em *Embed2D) Disconnect() {
 
 // ResizeToFit resizes viewport and texture to fit the content
 func (em *Embed2D) ResizeToFit() error {
-	if em.Viewport.NumChildren() != 1 {
-		err := errors.New("Embed2D: ResizeToFit requires 1 child of Viewport")
-		log.Println(err)
-		return err
-	}
-	layi := em.Viewport.Child(0).Embed(gi.KiT_Layout)
-	if layi == nil {
-		err := errors.New("Embed2D: ResizeToFit requires 1 Viewport child to be a gi.Layout type")
-		log.Println(err)
-		return err
-	}
-	lay := layi.(*gi.Layout)
-	lay.Init2DTree()
-	lay.Style2DTree()
-	lay.LayData.AllocSize = em.Viewport.Scene.Viewport.LayData.AllocSize // give it the whole vp initially
-	lay.Size2DTree(0)
-	sz := lay.LayData.Size.Pref.ToPoint()
-	sz.X = ints.MaxInt(em.DPISize.X, sz.X)
-	sz.Y = ints.MaxInt(em.DPISize.Y, sz.Y)
-	em.Viewport.Resize(sz)
+	initSz := em.Viewport.Scene.Viewport.LayState.Alloc.Size.ToPoint()
+	vpsz := em.Viewport.PrefSize(initSz)
+	vpsz.X = ints.MaxInt(em.DPISize.X, vpsz.X)
+	vpsz.Y = ints.MaxInt(em.DPISize.Y, vpsz.Y)
+	em.Viewport.Resize(vpsz)
 	em.Viewport.FullRender2DTree()
 	em.UploadViewTex(em.Viewport.Scene)
 	return nil

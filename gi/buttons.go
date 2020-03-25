@@ -634,7 +634,7 @@ func (bb *ButtonBase) StyleButton() {
 
 func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
-	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
 	bb.This().(ButtonWidget).ConfigParts()
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())

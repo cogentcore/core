@@ -77,8 +77,8 @@ func (fr *Frame) FrameStdRender() {
 	pc := &rs.Paint
 	// first draw a background rectangle in our full area
 
-	pos := fr.LayData.AllocPos
-	sz := fr.LayData.AllocSize
+	pos := fr.LayState.Alloc.Pos
+	sz := fr.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
 
 	rad := st.Border.Radius.Dots
@@ -119,8 +119,8 @@ func (fr *Frame) RenderStripes() {
 	rs := &fr.Viewport.Render
 	pc := &rs.Paint
 
-	pos := fr.LayData.AllocPos
-	sz := fr.LayData.AllocSize
+	pos := fr.LayState.Alloc.Pos
+	sz := fr.LayState.Alloc.Size
 
 	delta := fr.Move2DDelta(image.ZP)
 

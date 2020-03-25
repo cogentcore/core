@@ -1962,7 +1962,7 @@ func (tv *TreeView) Init2D() {
 	}
 	tv.Sty.Defaults()
 	tv.Sty.Template = "giv.TreeView." + tv.Type().Name()
-	tv.LayData.Defaults() // doesn't overwrite
+	tv.LayState.Defaults() // doesn't overwrite
 	tv.ConfigParts()
 	// tv.ConnectToViewport()
 }
@@ -2023,7 +2023,7 @@ func (tv *TreeView) StyleTreeView() {
 
 func (tv *TreeView) Style2D() {
 	tv.StyleTreeView()
-	tv.LayData.SetFromStyle(&tv.Sty.Layout) // also does reset
+	tv.LayState.SetFromStyle(&tv.Sty.Layout) // also does reset
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
@@ -2035,7 +2035,7 @@ func (tv *TreeView) Size2D(iter int) {
 		return // nothing
 	}
 	tv.SizeFromParts(iter) // get our size from parts
-	tv.WidgetSize = tv.LayData.AllocSize
+	tv.WidgetSize = tv.LayState.Alloc.Size
 	h := math32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X
 
@@ -2046,25 +2046,25 @@ func (tv *TreeView) Size2D(iter int) {
 			if gis == nil || gis.This() == nil {
 				continue
 			}
-			h += math32.Ceil(gis.LayData.AllocSize.Y)
-			w = mat32.Max(w, tv.Indent.Dots+gis.LayData.AllocSize.X)
+			h += math32.Ceil(gis.LayState.Alloc.Size.Y)
+			w = mat32.Max(w, tv.Indent.Dots+gis.LayState.Alloc.Size.X)
 		}
 	}
-	tv.LayData.AllocSize = mat32.Vec2{w, h}
+	tv.LayState.Alloc.Size = mat32.Vec2{w, h}
 	tv.WidgetSize.X = w // stretch
 }
 
 func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := tv.Sty.BoxSpace()
-	tv.Parts.LayData.AllocPos = tv.LayData.AllocPos.AddScalar(spc)
-	tv.Parts.LayData.AllocPosOrig = tv.Parts.LayData.AllocPos
-	tv.Parts.LayData.AllocSize = tv.WidgetSize.AddScalar(-2.0 * spc)
+	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.AddScalar(spc)
+	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
+	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.AddScalar(-2.0 * spc)
 	tv.Parts.Layout2D(parBBox, iter)
 }
 
 func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
-		tv.LayData.AllocPosRel.X = -1000000 // put it very far off screen..
+		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
 	}
 	tv.ConfigPartsIfNeeded()
 
@@ -2072,10 +2072,10 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 	rn := tv.RootView
 	// our alloc size is root's size minus our total indentation
-	tv.LayData.AllocSize.X = rn.LayData.AllocSize.X - (tv.LayData.AllocPos.X - rn.LayData.AllocPos.X)
-	tv.WidgetSize.X = tv.LayData.AllocSize.X
+	tv.LayState.Alloc.Size.X = rn.LayState.Alloc.Size.X - (tv.LayState.Alloc.Pos.X - rn.LayState.Alloc.Pos.X)
+	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
-	tv.LayData.AllocPosOrig = tv.LayData.AllocPos
+	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
 	tv.Sty.SetUnitContext(tv.Viewport, psize) // update units with final layout
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
@@ -2084,8 +2084,8 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.ZP)
 
 	if gi.Layout2DTrace {
-		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.PathUnique(), tv.WidgetSize.X, rn.LayData.AllocSize.X, tv.LayData.AllocPos.X, rn.LayData.AllocPos.X)
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.PathUnique(), tv.LayData.AllocPos, tv.LayData.AllocSize, tv.VpBBox, tv.WinBBox)
+		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.PathUnique(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.PathUnique(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.VpBBox, tv.WinBBox)
 	}
 
 	tv.Layout2DParts(parBBox, iter) // use OUR version
@@ -2099,9 +2099,9 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 			if ni == nil {
 				continue
 			}
-			ni.LayData.AllocPosRel.Y = h
-			ni.LayData.AllocPosRel.X = tv.Indent.Dots
-			h += math32.Ceil(ni.LayData.AllocSize.Y)
+			ni.LayState.Alloc.PosRel.Y = h
+			ni.LayState.Alloc.PosRel.X = tv.Indent.Dots
+			h += math32.Ceil(ni.LayState.Alloc.Size.Y)
 		}
 	}
 	return tv.Layout2DChildren(iter)
@@ -2109,7 +2109,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 func (tv *TreeView) BBox2D() image.Rectangle {
 	// we have unusual situation of bbox != alloc
-	tp := tv.LayData.AllocPosOrig.ToPointFloor()
+	tp := tv.LayState.Alloc.PosOrig.ToPointFloor()
 	ts := tv.WidgetSize.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
@@ -2196,7 +2196,7 @@ func (tv *TreeView) Render2D() {
 			pc.StrokeStyle.Width = st.Border.Width
 			pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 			// tv.RenderStdBox()
-			pos := tv.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
+			pos := tv.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
 			sz := tv.WidgetSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
 			tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 			rs.Unlock()

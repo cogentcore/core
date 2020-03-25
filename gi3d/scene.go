@@ -440,7 +440,7 @@ func (sc *Scene) Style2D() {
 	sc.SetCanFocusIfActive() // we get all key events
 	sc.SetCurWin()
 	sc.Style2DWidget()
-	sc.LayData.SetFromStyle(&sc.Sty.Layout) // also does reset
+	sc.LayState.SetFromStyle(&sc.Sty.Layout) // also does reset
 	// note: we do Style3D in Init3D
 }
 
@@ -473,7 +473,7 @@ func (sc *Scene) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 	if sc.Viewport != nil {
 		sc.ComputeBBox2DBase(parBBox, delta)
 	}
-	sc.Geom.Pos = sc.LayData.AllocPos.ToPointFloor()
+	sc.Geom.Pos = sc.LayState.Alloc.Pos.ToPointFloor()
 }
 
 func (sc *Scene) ChildrenBBox2D() image.Rectangle {

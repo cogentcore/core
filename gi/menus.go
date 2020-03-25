@@ -381,13 +381,13 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 		}
 	}
 	frame.Init2DTree()
-	frame.Style2DTree()                                // sufficient to get sizes
-	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
-	frame.Size2DTree(0)                                // collect sizes
+	frame.Style2DTree()                                    // sufficient to get sizes
+	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
+	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
 	scextra := frame.Sty.Layout.ScrollBarWidth.Dots
-	frame.LayData.Size.Pref.X += scextra // make room for scrollbar..
-	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize.MulScalar(.9)).ToPoint()
+	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
+	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
 	maxht := int(32 * frame.Sty.Font.Face.Metrics.Height)
 	vpsz.Y = ints.MinInt(maxht, vpsz.Y)
 	x = ints.MaxInt(0, x)
@@ -668,8 +668,8 @@ func (sp *Separator) Render2D() {
 		pc := &rs.Paint
 		st := &sp.Sty
 
-		pos := sp.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
-		sz := sp.LayData.AllocSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
+		pos := sp.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
+		sz := sp.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
 
 		if !st.Font.BgColor.IsNil() {
 			pc.FillBox(rs, pos, sz, &st.Font.BgColor)

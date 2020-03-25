@@ -435,7 +435,7 @@ func (vp *Viewport2D) Init2D() {
 func (vp *Viewport2D) Style2D() {
 	vp.SetCurWin()
 	vp.Style2DWidget()
-	vp.LayData.SetFromStyle(&vp.Sty.Layout) // also does reset
+	vp.LayState.SetFromStyle(&vp.Sty.Layout) // also does reset
 }
 
 func (vp *Viewport2D) Size2D(iter int) {
@@ -446,7 +446,7 @@ func (vp *Viewport2D) Size2D(iter int) {
 		vp.Geom.Pos = pos
 	}
 	if !vp.IsSVG() && vp.Geom.Size != image.ZP {
-		vp.LayData.AllocSize.SetPoint(vp.Geom.Size)
+		vp.LayState.Alloc.Size.SetPoint(vp.Geom.Size)
 	}
 }
 
@@ -459,8 +459,8 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	if vp.Viewport == nil || vp.IsPopup() { // top level viewport
 		// viewport ignores any parent parent bbox info!
 		if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
-			if !vp.LayData.AllocSize.IsNil() {
-				asz := vp.LayData.AllocSize.ToPointCeil()
+			if !vp.LayState.Alloc.Size.IsNil() {
+				asz := vp.LayState.Alloc.Size.ToPointCeil()
 				vp.Resize(asz)
 			} else if vp.Pixels == nil {
 				vp.Resize(image.Point{64, 64}) // gotta have something..
@@ -492,7 +492,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 		vp.SetWinBBox() // should be same as VpBBox
 	}
 	if !vp.IsPopup() { // non-popups use allocated positions
-		vp.Geom.Pos = vp.LayData.AllocPos.ToPointFloor()
+		vp.Geom.Pos = vp.LayState.Alloc.Pos.ToPointFloor()
 	}
 	if vp.Viewport == nil {
 		vp.WinBBox = vp.WinBBox.Add(vp.Geom.Pos)
@@ -631,11 +631,11 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 	vp.SetFlag(int(VpFlagPrefSizing))
 	vp.Init2DTree()
 	vp.Style2DTree() // sufficient to get sizes
-	vp.LayData.AllocSize.SetPoint(initSz)
+	vp.LayState.Alloc.Size.SetPoint(initSz)
 	vp.Size2DTree(0) // collect sizes
 	vp.ClearFlag(int(VpFlagPrefSizing))
 	ch := vp.ChildByType(KiT_Layout, ki.Embeds, 0).Embed(KiT_Layout).(*Layout)
-	vpsz := ch.LayData.Size.Pref.ToPoint()
+	vpsz := ch.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
 	stw := int(vp.Sty.Layout.MinWidth.Dots)
 	sth := int(vp.Sty.Layout.MinHeight.Dots)

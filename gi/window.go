@@ -2230,7 +2230,7 @@ func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.EventMgr.DNDStart(src, data)
 	if _, sni := KiToNode2D(src); sni != nil { // 2d case
 		if sw := sni.AsWidget(); sw != nil {
-			sp.SetBottomPos(sw.LayData.AllocPos.ToPoint())
+			sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPoint())
 		}
 	}
 	w.DeleteSprite(DNDSpriteName)

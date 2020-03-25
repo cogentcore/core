@@ -451,7 +451,7 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sgHt := sg.LayData.AllocSize.Y
+	sgHt := sg.LayState.Alloc.Size.Y
 	if sgHt == 0 {
 		return 0
 	}

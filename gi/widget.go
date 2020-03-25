@@ -30,7 +30,7 @@ type WidgetBase struct {
 	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
 	Sty          Style        `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
 	DefStyle     *Style       `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
-	LayData      LayoutData   `copy:"-" json:"-" xml:"-" desc:"all the layout information for this item"`
+	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 }
@@ -72,7 +72,7 @@ func (wb *WidgetBase) Style() *Style {
 func (wb *WidgetBase) Init2DWidget() {
 	wb.Viewport = wb.ParentViewport()
 	wb.Sty.Defaults()
-	wb.LayData.Defaults() // doesn't overwrite
+	wb.LayState.Defaults() // doesn't overwrite
 	wb.ConnectToViewport()
 }
 
@@ -250,11 +250,11 @@ func (wb *WidgetBase) Style2D() {
 	if hasTempl && saveTempl {
 		wb.Sty.SaveTemplate()
 	}
-	wb.LayData.SetFromStyle(&wb.Sty.Layout) // also does reset
+	wb.LayState.SetFromStyle(&wb.Sty.Layout) // also does reset
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
-	wb.LayData.SetFromStyle(&wb.Sty.Layout)
+	wb.LayState.SetFromStyle(&wb.Sty.Layout)
 	return false
 }
 
@@ -274,9 +274,9 @@ func (wb *WidgetBase) AddParentPos() mat32.Vec2 {
 	if pni, _ := KiToNode2D(wb.Par); pni != nil {
 		if pw := pni.AsWidget(); pw != nil {
 			if !wb.IsField() {
-				wb.LayData.AllocPos = pw.LayData.AllocPosOrig.Add(wb.LayData.AllocPosRel)
+				wb.LayState.Alloc.Pos = pw.LayState.Alloc.PosOrig.Add(wb.LayState.Alloc.PosRel)
 			}
-			return pw.LayData.AllocSize
+			return pw.LayState.Alloc.Size
 		}
 	}
 	return mat32.Vec2Zero
@@ -284,7 +284,7 @@ func (wb *WidgetBase) AddParentPos() mat32.Vec2 {
 
 // BBoxFromAlloc gets our bbox from Layout allocation.
 func (wb *WidgetBase) BBoxFromAlloc() image.Rectangle {
-	return mat32.RectFromPosSizeMax(wb.LayData.AllocPos, wb.LayData.AllocSize)
+	return mat32.RectFromPosSizeMax(wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size)
 }
 
 func (wb *WidgetBase) BBox2D() image.Rectangle {
@@ -306,7 +306,7 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 		}
 	}
 	psize := wb.AddParentPos()
-	wb.LayData.AllocPosOrig = wb.LayData.AllocPos
+	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
 		wb.Sty.SetUnitContext(wb.Viewport, psize) // update units with final layout
 	}
@@ -314,7 +314,7 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	// note: if other styles are maintained, they also need to be updated!
 	nii.ComputeBBox2D(parBBox, image.ZP) // other bboxes from BBox
 	if Layout2DTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.PathUnique(), wb.LayData.AllocPos, wb.LayData.AllocSize, wb.VpBBox, wb.WinBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.PathUnique(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
 	// typically Layout2DChildren must be called after this!
 }
@@ -411,14 +411,14 @@ func (wb *WidgetBase) ReRender2DTree() {
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
 	}
-	delta := wb.LayData.AllocPos.Sub(wb.LayData.AllocPosOrig)
-	wb.LayData.AllocPos = wb.LayData.AllocPosOrig
-	ld := wb.LayData // save our current layout data
+	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig)
+	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig
+	ld := wb.LayState // save our current layout data
 	updt := wb.UpdateStart()
 	wb.Init2DTree()
 	wb.Style2DTree()
 	wb.Size2DTree(0)
-	wb.LayData = ld // restore
+	wb.LayState = ld // restore
 	wb.Layout2DTree()
 	if !delta.IsNil() {
 		wb.Move2D(delta.ToPointFloor(), parBBox)
@@ -429,7 +429,7 @@ func (wb *WidgetBase) ReRender2DTree() {
 
 // Move2DBase does the basic move on this node
 func (wb *WidgetBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
-	wb.LayData.AllocPos = wb.LayData.AllocPosOrig.Add(mat32.NewVec2FmPoint(delta))
+	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig.Add(mat32.NewVec2FmPoint(delta))
 	wb.This().(Node2D).ComputeBBox2D(parBBox, delta)
 }
 
@@ -450,7 +450,7 @@ func (wb *WidgetBase) Move2DTree() {
 	if pn != nil {
 		parBBox = pnii.ChildrenBBox2D()
 	}
-	delta := wb.LayData.AllocPos.Sub(wb.LayData.AllocPosOrig).ToPoint()
+	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig).ToPoint()
 	wb.This().(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
 }
 
@@ -522,11 +522,11 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	lbl.SetProp("max-width", units.NewValue(mwdots, units.Dot))
 	lbl.Text = tooltip
 	frame.Init2DTree()
-	frame.Style2DTree()                                // sufficient to get sizes
-	frame.LayData.AllocSize = mainVp.LayData.AllocSize // give it the whole vp initially
-	frame.Size2DTree(0)                                // collect sizes
+	frame.Style2DTree()                                    // sufficient to get sizes
+	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
+	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
-	vpsz := frame.LayData.Size.Pref.Min(mainVp.LayData.AllocSize).ToPoint()
+	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size).ToPoint()
 	x = ints.MinInt(x, mainVp.Geom.Size.X-vpsz.X) // fit
 	y = ints.MinInt(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
@@ -649,8 +649,8 @@ func (wb *WidgetBase) RenderStdBox(st *Style) {
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
-	pos := wb.LayData.AllocPos.AddScalar(st.Layout.Margin.Dots)
-	sz := wb.LayData.AllocSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
+	pos := wb.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
+	sz := wb.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
 	rad := st.Border.Radius.Dots
 
 	// first do any shadow
@@ -684,7 +684,7 @@ func (wb *WidgetBase) RenderStdBox(st *Style) {
 	wb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
 }
 
-// set our LayData.AllocSize from constraints
+// set our LayState.Alloc.Size from constraints
 func (wb *WidgetBase) Size2DFromWH(w, h float32) {
 	st := &wb.Sty
 	if st.Layout.Width.Dots > 0 {
@@ -696,19 +696,19 @@ func (wb *WidgetBase) Size2DFromWH(w, h float32) {
 	spc := st.BoxSpace()
 	w += 2.0 * spc
 	h += 2.0 * spc
-	wb.LayData.AllocSize = mat32.Vec2{w, h}
+	wb.LayState.Alloc.Size = mat32.Vec2{w, h}
 }
 
 // Size2DAddSpace adds space to existing AllocSize
 func (wb *WidgetBase) Size2DAddSpace() {
 	spc := wb.Sty.BoxSpace()
-	wb.LayData.AllocSize.SetAddScalar(2 * spc)
+	wb.LayState.Alloc.Size.SetAddScalar(2 * spc)
 }
 
 // Size2DSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
 func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 	spc := wb.Sty.BoxSpace()
-	return wb.LayData.AllocSize.SubScalar(2 * spc)
+	return wb.LayState.Alloc.Size.SubScalar(2 * spc)
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -745,10 +745,10 @@ func (wb *PartsWidgetBase) CopyFieldsFrom(frm interface{}) {
 
 // SizeFromParts sets our size from those of our parts -- default..
 func (wb *PartsWidgetBase) SizeFromParts(iter int) {
-	wb.LayData.AllocSize = wb.Parts.LayData.Size.Pref // get from parts
+	wb.LayState.Alloc.Size = wb.Parts.LayState.Size.Pref // get from parts
 	wb.Size2DAddSpace()
 	if Layout2DTrace {
-		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.PathUnique(), wb.LayData.AllocSize, wb.Parts.LayData.Size.Pref)
+		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.PathUnique(), wb.LayState.Alloc.Size, wb.Parts.LayState.Size.Pref)
 	}
 }
 
@@ -772,8 +772,8 @@ func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Po
 
 func (wb *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
 	spc := wb.Sty.BoxSpace()
-	wb.Parts.LayData.AllocPos = wb.LayData.AllocPos.AddScalar(spc)
-	wb.Parts.LayData.AllocSize = wb.LayData.AllocSize.AddScalar(-2.0 * spc)
+	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.AddScalar(spc)
+	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.AddScalar(-2.0 * spc)
 	wb.Parts.Layout2D(parBBox, iter)
 }
 

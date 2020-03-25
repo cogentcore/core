@@ -192,8 +192,8 @@ func (cv *ColorMapView) RenderColorMap() {
 	rs.Lock()
 	pc := &rs.Paint
 
-	pos := cv.LayData.AllocPos
-	sz := cv.LayData.AllocSize
+	pos := cv.LayState.Alloc.Pos
+	sz := cv.LayState.Alloc.Size
 
 	lsz := sz.Dim(cv.Orient)
 	inc := math32.Ceil(lsz / 100)

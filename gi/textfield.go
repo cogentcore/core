@@ -754,7 +754,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	st := &tf.Sty
 	spc := st.BoxSpace()
-	pos := tf.LayData.AllocPos.AddScalar(spc)
+	pos := tf.LayState.Alloc.Pos.AddScalar(spc)
 	if wincoords {
 		pos = pos.Add(mat32.NewVec2FmPoint(tf.Viewport.WinBBox.Min))
 	}
@@ -959,7 +959,7 @@ func (tf *TextField) AutoScroll() {
 
 	sz := len(tf.EditTxt)
 
-	if sz == 0 || tf.LayData.AllocSize.X <= 0 {
+	if sz == 0 || tf.LayState.Alloc.Size.X <= 0 {
 		tf.CursorPos = 0
 		tf.EndPos = 0
 		tf.StartPos = 0
@@ -1411,7 +1411,7 @@ func (tf *TextField) StyleTextField() {
 
 func (tf *TextField) Style2D() {
 	tf.StyleTextField()
-	tf.LayData.SetFromStyle(&tf.Sty.Layout) // also does reset
+	tf.LayState.SetFromStyle(&tf.Sty.Layout) // also does reset
 }
 
 func (tf *TextField) UpdateRenderAll() bool {
@@ -1451,10 +1451,10 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 	}
 	redo := tf.Layout2DChildren(iter)
-	sz := tf.LayData.AllocSize
+	sz := tf.LayState.Alloc.Size
 	if tf.ClearAct && len(*tf.Parts.Children()) == 2 {
 		clr := tf.Parts.Child(1).(*Action)
-		sz.X -= clr.LayData.AllocSize.X
+		sz.X -= clr.LayState.Alloc.Size.X
 	}
 	tf.EffSize = sz
 	return redo
@@ -1494,7 +1494,7 @@ func (tf *TextField) Render2D() {
 		tf.RenderStdBox(st)
 		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 		tf.RenderSelect()
-		pos := tf.LayData.AllocPos.AddScalar(st.BoxSpace())
+		pos := tf.LayState.Alloc.Pos.AddScalar(st.BoxSpace())
 		if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 			st.Font.Color = st.Font.Color.Highlight(50)
 			tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)

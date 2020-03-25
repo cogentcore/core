@@ -200,7 +200,7 @@ func (bb *ButtonBox) Init2D() {
 func (bb *ButtonBox) Style2D() {
 	bb.Style2DWidget()
 	bb.ConfigParts()
-	bb.LayData.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
 }
 
 func (bb *ButtonBox) Layout2D(parBBox image.Rectangle, iter int) bool {

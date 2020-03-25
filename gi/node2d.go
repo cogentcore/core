@@ -810,9 +810,9 @@ func (nb *Node2DBase) Layout2DTree() {
 		}
 		wb := nbi.AsWidget()
 		if wb != nil {
-			ld := wb.LayData
+			la := wb.LayState.Alloc
 			wb.Size2DTree(1)
-			wb.LayData.CopyAllocFrom(&ld)
+			wb.LayState.Alloc = la
 		} else {
 			nb.Size2DTree(1)
 		}

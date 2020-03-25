@@ -2578,7 +2578,7 @@ func (ft *FileTreeView) Style2D() {
 			}
 		}
 		ft.StyleTreeView()
-		ft.LayData.SetFromStyle(&ft.Sty.Layout) // also does reset
+		ft.LayState.SetFromStyle(&ft.Sty.Layout) // also does reset
 	}
 }
 

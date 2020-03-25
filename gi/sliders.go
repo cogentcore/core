@@ -226,14 +226,14 @@ func (sb *SliderBase) SliderExitHover() {
 
 // SizeFromAlloc gets size from allocation
 func (sb *SliderBase) SizeFromAlloc() {
-	if sb.LayData.AllocSize.IsNil() {
+	if sb.LayState.Alloc.Size.IsNil() {
 		return
 	}
 	if sb.Min == 0 && sb.Max == 0 { // uninit
 		sb.Defaults()
 	}
 	spc := sb.Sty.BoxSpace()
-	sb.Size = sb.LayData.AllocSize.Dim(sb.Dim) - 2.0*spc
+	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - 2.0*spc
 	if sb.Size <= 0 {
 		return
 	}
@@ -519,10 +519,10 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 			pad := sb.Sty.Layout.Padding.Dots
 			spc := mrg + pad
 			odim := mat32.OtherDim(sb.Dim)
-			ic.LayData.AllocPosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
-			ic.LayData.AllocPosRel.SetDim(odim, -pad)
-			ic.LayData.AllocSize.X = sb.ThSize
-			ic.LayData.AllocSize.Y = sb.ThSize
+			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
+			ic.LayState.Alloc.PosRel.SetDim(odim, -pad)
+			ic.LayState.Alloc.Size.X = sb.ThSize
+			ic.LayState.Alloc.Size.Y = sb.ThSize
 			if render {
 				ic.Layout2DTree()
 			}
@@ -702,7 +702,7 @@ func (sr *Slider) Init2D() {
 func (sr *Slider) Style2D() {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider()
-	sr.LayData.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
 	sr.ConfigParts()
 }
 
@@ -714,7 +714,7 @@ func (sr *Slider) Size2D(iter int) {
 	st := &sr.Sty
 	// get at least thumbsize + margin + border.size
 	sz := sr.ThSize + 2.0*(st.Layout.Margin.Dots+st.Border.Width.Dots)
-	sr.LayData.AllocSize.SetDim(mat32.OtherDim(sr.Dim), sz)
+	sr.LayState.Alloc.Size.SetDim(mat32.OtherDim(sr.Dim), sz)
 }
 
 func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -771,8 +771,8 @@ func (sr *Slider) Render2DDefaultStyle() {
 	// for length: | spc | ht | <-start of slider
 
 	spc := st.BoxSpace()
-	pos := sr.LayData.AllocPos
-	sz := sr.LayData.AllocSize
+	pos := sr.LayState.Alloc.Pos
+	sz := sr.LayState.Alloc.Size
 	bpos := pos // box pos
 	bsz := sz
 	tpos := pos // thumb pos
@@ -895,7 +895,7 @@ func (sb *ScrollBar) Init2D() {
 func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider()
-	sb.LayData.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
 	sb.ConfigParts()
 }
 
@@ -947,8 +947,8 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
-	pos := sb.LayData.AllocPos.AddScalar(spc)
-	sz := sb.LayData.AllocSize.SubScalar(2.0 * spc)
+	pos := sb.LayState.Alloc.Pos.AddScalar(spc)
+	sz := sb.LayState.Alloc.Size.SubScalar(2.0 * spc)
 
 	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots) // surround box
 	pos.SetAddDim(sb.Dim, sb.Pos)                    // start of thumb

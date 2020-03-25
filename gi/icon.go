@@ -106,7 +106,7 @@ func (ic *Icon) Size2D(iter int) {
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm
-		ic.LayData.AllocSize = sic.LayData.AllocSize
+		ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
 	}
 }
 
@@ -118,7 +118,7 @@ func (ic *Icon) Style2D() {
 	if hasTempl && saveTempl {
 		ic.Sty.SaveTemplate()
 	}
-	ic.LayData.SetFromStyle(&ic.Sty.Layout) // also does reset
+	ic.LayState.SetFromStyle(&ic.Sty.Layout) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {
 		sic.Nm = ic.Nm
@@ -136,8 +136,8 @@ func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sic := ic.SVGIcon()
 	ic.Layout2DBase(parBBox, true, iter)
 	if sic != nil {
-		sic.LayData = ic.LayData
-		sic.LayData.AllocPosRel = mat32.Vec2Zero
+		sic.LayState = ic.LayState
+		sic.LayState.Alloc.PosRel = mat32.Vec2Zero
 	}
 	return ic.Layout2DChildren(iter)
 }

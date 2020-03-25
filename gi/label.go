@@ -128,9 +128,9 @@ func (lb *Label) SetText(txt string) {
 		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	}
 	spc := lb.Sty.BoxSpace()
-	sz := lb.LayData.AllocSize
+	sz := lb.LayState.Alloc.Size
 	if sz.IsNil() {
-		sz = lb.LayData.SizePrefOrMax()
+		sz = lb.LayState.SizePrefOrMax()
 	}
 	if !sz.IsNil() {
 		sz.SetSubScalar(2 * spc)
@@ -282,20 +282,20 @@ func (lb *Label) GrabCurBgColor() {
 
 func (lb *Label) TextPos() mat32.Vec2 {
 	sty := &lb.Sty
-	pos := lb.LayData.AllocPos.AddScalar(sty.BoxSpace())
+	pos := lb.LayState.Alloc.Pos.AddScalar(sty.BoxSpace())
 	if !sty.Text.HasWordWrap() { // word-wrap case already deals with this b/c it has final alloc size -- otherwise it lays out "blind" and can't do this.
-		if lb.LayData.AllocSize.X > lb.Render.Size.X {
+		if lb.LayState.Alloc.Size.X > lb.Render.Size.X {
 			if IsAlignMiddle(sty.Layout.AlignH) {
-				pos.X += 0.5 * (lb.LayData.AllocSize.X - lb.Render.Size.X)
+				pos.X += 0.5 * (lb.LayState.Alloc.Size.X - lb.Render.Size.X)
 			} else if IsAlignEnd(sty.Layout.AlignH) {
-				pos.X += (lb.LayData.AllocSize.X - lb.Render.Size.X)
+				pos.X += (lb.LayState.Alloc.Size.X - lb.Render.Size.X)
 			}
 		}
-		if lb.LayData.AllocSize.Y > lb.Render.Size.Y {
+		if lb.LayState.Alloc.Size.Y > lb.Render.Size.Y {
 			if IsAlignMiddle(sty.Layout.AlignV) {
-				pos.Y += 0.5 * (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
+				pos.Y += 0.5 * (lb.LayState.Alloc.Size.Y - lb.Render.Size.Y)
 			} else if IsAlignEnd(sty.Layout.AlignV) {
-				pos.Y += (lb.LayData.AllocSize.Y - lb.Render.Size.Y)
+				pos.Y += (lb.LayState.Alloc.Size.Y - lb.Render.Size.Y)
 			}
 		}
 	}
@@ -343,7 +343,7 @@ func (lb *Label) LayoutLabel() {
 	lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	spc := lb.Sty.BoxSpace()
-	sz := lb.LayData.SizePrefOrMax()
+	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
 		sz.SetSubScalar(2 * spc)
 	}
@@ -352,7 +352,7 @@ func (lb *Label) LayoutLabel() {
 
 func (lb *Label) Style2D() {
 	lb.StyleLabel()
-	lb.LayData.SetFromStyle(&lb.Sty.Layout) // also does reset
+	lb.LayState.SetFromStyle(&lb.Sty.Layout) // also does reset
 	lb.LayoutLabel()
 }
 
@@ -378,7 +378,7 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 		lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
 			// fmt.Printf("label layout less vert: %v  new: %v  prev: %v\n", lb.Nm, lb.Render.Size.Y, sz.Y)
-			lb.LayData.SetFromStyle(&lb.Sty.Layout)
+			lb.LayState.SetFromStyle(&lb.Sty.Layout)
 			lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
 			return true // needs a redo!
 		}

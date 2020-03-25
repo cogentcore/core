@@ -250,9 +250,9 @@ func (sv *SplitView) ConfigSplitters() {
 	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.Sty.BoxSpace()
-	size := sv.LayData.AllocSize.Dim(sv.Dim) - 2*spc
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
 	handsz := sv.HandleSize.Dots
-	mid := 0.5 * (sv.LayData.AllocSize.Dim(odim) - 2*spc)
+	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - 2*spc)
 	spicon := IconName("")
 	if sv.Dim == mat32.X {
 		spicon = IconName("handle-circles-vert")
@@ -265,12 +265,12 @@ func (sv *SplitView) ConfigSplitters() {
 		sp.SplitterNo = i
 		sp.Icon = spicon
 		sp.Dim = sv.Dim
-		sp.LayData.AllocSize.SetDim(sv.Dim, size)
-		sp.LayData.AllocSize.SetDim(odim, handsz*2)
-		sp.LayData.AllocSizeOrig = sp.LayData.AllocSize
-		sp.LayData.AllocPosRel.SetDim(sv.Dim, 0)
-		sp.LayData.AllocPosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
-		sp.LayData.AllocPosOrig = sp.LayData.AllocPosRel
+		sp.LayState.Alloc.Size.SetDim(sv.Dim, size)
+		sp.LayState.Alloc.Size.SetDim(odim, handsz*2)
+		sp.LayState.Alloc.SizeOrig = sp.LayState.Alloc.Size
+		sp.LayState.Alloc.PosRel.SetDim(sv.Dim, 0)
+		sp.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
+		sp.LayState.Alloc.PosOrig = sp.LayState.Alloc.PosRel
 		sp.Min = 0.0
 		sp.Max = 1.0
 		sp.Snap = false
@@ -337,14 +337,14 @@ func (sv *SplitView) SplitViewEvents() {
 
 func (sv *SplitView) StyleSplitView() {
 	sv.Style2DWidget()
-	sv.LayData.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
 	sv.HandleSize.ToDots(&sv.Sty.UnContext)
 }
 
 func (sv *SplitView) Style2D() {
 	sv.StyleSplitView()
-	sv.LayData.SetFromStyle(&sv.Sty.Layout) // also does reset
+	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
 	sv.UpdateSplits()
 	sv.ConfigSplitters()
 }
@@ -360,10 +360,10 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sz := len(sv.Kids)
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.Sty.BoxSpace()
-	size := sv.LayData.AllocSize.Dim(sv.Dim) - 2*spc
+	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sv.LayData.AllocSize.Dim(odim) - 2*spc
+	osz := sv.LayState.Alloc.Size.Dim(odim) - 2*spc
 	pos := float32(0.0)
 
 	spsum := float32(0)
@@ -376,12 +376,12 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 			gis.SetReRenderAnchor()
 		}
 		isz := sp * avail
-		gis.LayData.AllocSize.SetDim(sv.Dim, isz)
-		gis.LayData.AllocSize.SetDim(odim, osz)
-		gis.LayData.AllocSizeOrig = gis.LayData.AllocSize
-		gis.LayData.AllocPosRel.SetDim(sv.Dim, pos)
-		gis.LayData.AllocPosRel.SetDim(odim, spc)
-		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayData.AllocSizeOrig, gis.LayData.AllocPosRel)
+		gis.LayState.Alloc.Size.SetDim(sv.Dim, isz)
+		gis.LayState.Alloc.Size.SetDim(odim, osz)
+		gis.LayState.Alloc.SizeOrig = gis.LayState.Alloc.Size
+		gis.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
+		gis.LayState.Alloc.PosRel.SetDim(odim, spc)
+		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayState.Alloc.SizeOrig, gis.LayState.Alloc.PosRel)
 
 		pos += isz + handsz
 
@@ -513,13 +513,13 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	handsz := sr.ThumbSize.Dots
 	spc := sr.Sty.BoxSpace()
 	odim := mat32.OtherDim(sr.Dim)
-	sr.LayData.AllocSize.SetDim(odim, 2*(handsz+2*spc))
-	sr.LayData.AllocSizeOrig = sr.LayData.AllocSize
+	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+2*spc))
+	sr.LayState.Alloc.SizeOrig = sr.LayState.Alloc.Size
 
-	ic.LayData.AllocSize.SetDim(odim, 2*handsz)
-	ic.LayData.AllocSize.SetDim(sr.Dim, handsz)
-	ic.LayData.AllocPosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc)))
-	ic.LayData.AllocPosRel.SetDim(odim, 0)
+	ic.LayState.Alloc.Size.SetDim(odim, 2*handsz)
+	ic.LayState.Alloc.Size.SetDim(sr.Dim, handsz)
+	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc)))
+	ic.LayState.Alloc.PosRel.SetDim(odim, 0)
 	if render {
 		ic.Layout2DTree()
 	}
@@ -528,7 +528,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 func (sr *Splitter) Style2D() {
 	sr.ClearFlag(int(CanFocus))
 	sr.StyleSlider()
-	sr.LayData.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
 	sr.ConfigParts()
 }
 
@@ -544,7 +544,7 @@ func (sr *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sr.Layout2DBase(parBBox, true, iter) // init style
 	sr.Layout2DParts(parBBox, iter)
 	// sr.SizeFromAlloc()
-	sr.Size = sr.LayData.AllocSize.Dim(sr.Dim)
+	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
 	sr.UpdatePosFromValue()
 	sr.DragPos = sr.Pos
 	sr.OrigWinBBox = sr.WinBBox
