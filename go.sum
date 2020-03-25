@@ -50,12 +50,12 @@ github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff h1:W71vTCKoxtdXgnm1E
 github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff/go.mod h1:wfqRWLHRBsRgkp5dmbG56SA0DmVtwrF5N3oPdI8t+Aw=
 github.com/goki/ki v0.9.11 h1:LOsRjJUuWTj8kgo30qyDoJPhk3Da6kVvclNfAz8nJMU=
 github.com/goki/ki v0.9.11/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
-github.com/goki/ki v0.9.13-0.20200322120506-1a45079ce979 h1:s9ZUhvS6DosH2q1INDU6th/Uv1JrGJAMqco64zLyY7E=
-github.com/goki/ki v0.9.13-0.20200322120506-1a45079ce979/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
+github.com/goki/ki v0.9.13 h1:f/NQYTC0E+nMnS130K3oRxXGkAMdV9PhTZ/kkdAYR3o=
+github.com/goki/ki v0.9.13/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
 github.com/goki/mat32 v1.0.0 h1:KLQHIg6ufFRhTK4dL6G/LMVKovaw+yv+1hLleRE3hkY=
 github.com/goki/mat32 v1.0.0/go.mod h1:SCqUsgLhG48i7wu/Kce9OF62abYJnxCX7YL5TOxZ0K4=
-github.com/goki/pi v0.9.15-0.20200324005947-43dfc07e7099 h1:caeEDlm5DOlXMTdmWGyKCZkLuPJJtYoxk2T+7p3Rxpc=
-github.com/goki/pi v0.9.15-0.20200324005947-43dfc07e7099/go.mod h1:wryLG8gvVXnQ/q3liHUSzUYKY4p/6+ds1em+x+fMITU=
+github.com/goki/pi v0.9.15 h1:0X1oOhuJVeR5fW/QIJtRTvCLVIubeWScwivVohJqgLg=
+github.com/goki/pi v0.9.15/go.mod h1:I1v+twrG2JHtQo8c1aYx14EeBXStEqyJXLrIX1wX4Rc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/goki/vci v0.90.1 h1:50BIleTIDzkk0QM3BE36a3fBkEbZEkVqvCuSOyOghbk=

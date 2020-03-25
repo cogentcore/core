@@ -4,7 +4,7 @@ package gi
 
 const (
 	Version = "v0.9.14"
-	GitCommit = "1d43523" // the commit JUST BEFORE the release
-	VersionDate = "2020-03-16 01:39" // UTC
+	GitCommit = "4588d43" // the commit JUST BEFORE the release
+	VersionDate = "2020-03-25 12:19" // UTC
 )
 
