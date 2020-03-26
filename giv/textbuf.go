@@ -2339,6 +2339,34 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 	}
 }
 
+// JoinParaLines merges a sequence of lines separated by blank lines into a single line
+// within the given line regions -- edLn is *inclusive*
+func (tb *TextBuf) JoinParaLines(stLn, edLn int) {
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+
+	curEd := edLn                      // current end of region being joined == last blank line
+	for ln := edLn; ln >= stLn; ln-- { // reverse order
+		lb := tb.LineBytes[ln]
+		lbt := bytes.TrimSpace(lb)
+		if len(lbt) == 0 || ln == stLn {
+			if ln < curEd-1 {
+				stp := lex.Pos{Ln: ln + 1}
+				if ln == stLn {
+					stp.Ln--
+				}
+				ep := lex.Pos{Ln: curEd - 1}
+				if curEd == edLn {
+					ep.Ln = curEd
+				}
+				tlb := bytes.Join(tb.LineBytes[stp.Ln:ep.Ln+1], []byte(" "))
+				tb.ReplaceText(stp, ep, stp, string(tlb), EditSignal, ReplaceNoMatchCase)
+			}
+			curEd = ln
+		}
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //    Complete and Spell
 

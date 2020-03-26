@@ -411,7 +411,7 @@ func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data interface{}) 
 				// fmt.Printf("tv %v line insert rerend %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
 				tv.RenderAllLines()
 			} else {
-				// fmt.Printf("tv %v line insert no rerend %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
+				// fmt.Printf("tv %v line insert no rerend %v - %v.  markup: %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End, len(tv.Buf.HiTags[tbe.Reg.Start.Ln]))
 				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
 			}
 		}

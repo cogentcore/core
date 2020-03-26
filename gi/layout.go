@@ -52,7 +52,7 @@ func (la *LayoutAllocs) Reset() {
 // LayoutState contains all the state needed to specify the layout of an item
 // within a Layout.  Is initialized with computed values of style prefs.
 type LayoutState struct {
-	Size  SizePrefs    `desc:"size constraints for this item -- from layout style and "`
+	Size  SizePrefs    `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
 	Alloc LayoutAllocs `desc:"allocated size and position -- set by parent Layout"`
 }
 
