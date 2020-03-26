@@ -6,7 +6,6 @@ package filecat
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/goki/ki/kit"
@@ -28,7 +27,7 @@ var SupportedMimes map[Supported]MimeType
 func MimeString(sup Supported) string {
 	mt, has := SupportedMimes[sup]
 	if !has {
-		log.Printf("filecat.MimeString called with unrecognized 'Supported' type: %v\n", sup)
+		// log.Printf("filecat.MimeString called with unrecognized 'Supported' type: %v\n", sup)
 		return ""
 	}
 	return mt.Mime
@@ -41,7 +40,7 @@ func SupportedCat(sup Supported) Cat {
 	}
 	mt, has := SupportedMimes[sup]
 	if !has {
-		log.Printf("filecat.SupportedCat called with unrecognized 'Supported' type: %v\n", sup)
+		// log.Printf("filecat.SupportedCat called with unrecognized 'Supported' type: %v\n", sup)
 		return Unknown
 	}
 	return mt.Cat

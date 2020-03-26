@@ -1,7 +1,7 @@
 {
   "ProjFile": "/Users/oreilly/go/src/github.com/goki/pi/langs/golang/go.pip",
   "ParserFile": "/Users/oreilly/goki/pi/langs/golang/go.pi",
-  "TestFile": "/Users/oreilly/go/src/github.com/goki/pi/langs/golang/testdata/textview.go",
+  "TestFile": "/Users/oreilly/go/src/github.com/goki/pi/langs/golang/testdata/gotypes/tmptest.go",
   "TraceOpts": {
     "On": false,
     "Rules": "",

@@ -1,6 +1,6 @@
 // /Users/oreilly/goki/pi/langs/golang/go.pig Lexer
 
-// InCommentMulti all CurState must be at top -- multiline requires state 
+// InCommentMulti all CurState must be at the top -- multiline requires state 
 InCommentMulti:		 CommentMultiline		 if CurState == "CommentMulti" {
     EndMulti:                CommentMultiline       if String == "*/"   do: PopState; Next; 
     StartEmbededMulti:       CommentMultiline       if String == "/*"   do: PushState: CommentMulti; Next; 
