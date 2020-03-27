@@ -2359,6 +2359,8 @@ func (tb *TextBuf) JoinParaLines(stLn, edLn int) {
 				if curEd == edLn {
 					ep.Ln = curEd
 				}
+				eln := tb.Lines[ep.Ln]
+				ep.Ch = len(eln)
 				tlb := bytes.Join(tb.LineBytes[stp.Ln:ep.Ln+1], []byte(" "))
 				tb.ReplaceText(stp, ep, stp, string(tlb), EditSignal, ReplaceNoMatchCase)
 			}
