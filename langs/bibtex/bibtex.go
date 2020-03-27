@@ -127,9 +127,10 @@ func (entry *BibEntry) AddField(name string, value BibString) {
 
 // BibTex is a list of BibTeX entries.
 type BibTex struct {
-	Preambles []BibString        // List of Preambles
-	Entries   []*BibEntry        // Items in a bibliography.
-	StringVar map[string]*BibVar // Map from string variable to string.
+	Preambles []BibString          // List of Preambles
+	Entries   []*BibEntry          // Items in a bibliography.
+	KeyMap    map[string]*BibEntry // fast key lookup map -- made on demand in Lookup
+	StringVar map[string]*BibVar   // Map from string variable to string.
 }
 
 // NewBibTex creates a new BibTex data structure.
@@ -161,8 +162,9 @@ func (bib *BibTex) GetStringVar(key string) *BibVar {
 	if bv, ok := bib.StringVar[key]; ok {
 		return bv
 	}
-	// log.Fatalf("%s: %s", ErrUnknownStringVar, key)
-	return nil
+	// at this point, key is usually a month -- just pass through
+	bib.AddStringVar(key, NewBibConst(key))
+	return bib.StringVar[key]
 }
 
 // String returns a BibTex data structure as a simplified BibTex string.
@@ -258,4 +260,22 @@ func stringformat(v string) string {
 
 	// Default to quoted string.
 	return "%q"
+}
+
+// MakeKeyMap creates the KeyMap from CiteName to entry
+func (bib *BibTex) MakeKeyMap() {
+	bib.KeyMap = make(map[string]*BibEntry, len(bib.Entries))
+	for _, be := range bib.Entries {
+		bib.KeyMap[be.CiteName] = be
+	}
+}
+
+// Lookup finds CiteName in entries, using fast KeyMap (made on demand)
+// returns nil, false if not found
+func (bib *BibTex) Lookup(cite string) (*BibEntry, bool) {
+	if bib.KeyMap == nil {
+		bib.MakeKeyMap()
+	}
+	be, has := bib.KeyMap[cite]
+	return be, has
 }

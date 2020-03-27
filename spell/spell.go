@@ -152,14 +152,12 @@ func Train(file os.File, new bool) (err error) {
 
 	var out []string
 
-	reader := bufio.NewReader(&file)
-	scanner := bufio.NewScanner(reader)
-	scanner.Split(bufio.ScanLines)
+	scanner := bufio.NewScanner(&file)
 	// Count the words.
 	count := 0
+	exp, _ := regexp.Compile("[a-zA-Z]+")
 	for scanner.Scan() {
-		exp, _ := regexp.Compile("[a-zA-Z]+")
-		words := exp.FindAll([]byte(scanner.Text()), -1)
+		words := exp.FindAll(scanner.Bytes(), -1)
 		for _, word := range words {
 			if len(word) > 1 {
 				out = append(out, strings.ToLower(string(word)))
