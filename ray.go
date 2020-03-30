@@ -245,8 +245,8 @@ func (ray *Ray) IntersectPlane(plane Plane) (Vec3, bool) {
 	return ray.At(t), true
 }
 
-// IsIntersectionBox returns if this ray intersects the specified box.
-func (ray *Ray) IsIntersectionBox(box Box3) bool {
+// IntersectsBox returns if this ray intersects the specified box.
+func (ray *Ray) IntersectsBox(box Box3) bool {
 	_, yes := ray.IntersectBox(box)
 	return yes
 }

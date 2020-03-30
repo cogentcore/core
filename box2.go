@@ -82,6 +82,12 @@ func (b *Box2) ExpandByScalar(scalar float32) {
 	b.Max.SetAddScalar(scalar)
 }
 
+// ExpandByBox may expand this bounding box to include the specified box
+func (b *Box2) ExpandByBox(box Box2) {
+	b.ExpandByPoint(box.Min)
+	b.ExpandByPoint(box.Max)
+}
+
 // SetFromCenterAndSize set this bounding box from a center point and size.
 // Size is a vector from the minimum point to the maximum point.
 func (b *Box2) SetFromCenterAndSize(center, size Vec2) {
@@ -91,18 +97,18 @@ func (b *Box2) SetFromCenterAndSize(center, size Vec2) {
 }
 
 // Center calculates the center point of this bounding box.
-func (b *Box2) Center() Vec2 {
+func (b Box2) Center() Vec2 {
 	return b.Min.Add(b.Max).MulScalar(0.5)
 }
 
 // Size calculates the size of this bounding box: the vector from
 // its minimum point to its maximum point.
-func (b *Box2) Size() Vec2 {
+func (b Box2) Size() Vec2 {
 	return b.Max.Sub(b.Min)
 }
 
 // ContainsPoint returns if this bounding box contains the specified point.
-func (b *Box2) ContainsPoint(point Vec2) bool {
+func (b Box2) ContainsPoint(point Vec2) bool {
 	if point.X < b.Min.X || point.X > b.Max.X ||
 		point.Y < b.Min.Y || point.Y > b.Max.Y {
 		return false
@@ -111,7 +117,7 @@ func (b *Box2) ContainsPoint(point Vec2) bool {
 }
 
 // ContainsBox returns if this bounding box contains other box.
-func (b *Box2) ContainsBox(box Box2) bool {
+func (b Box2) ContainsBox(box Box2) bool {
 	if (b.Min.X <= box.Min.X) && (box.Max.X <= b.Max.X) &&
 		(b.Min.Y <= box.Min.Y) && (box.Max.Y <= b.Max.Y) {
 		return true
@@ -119,9 +125,8 @@ func (b *Box2) ContainsBox(box Box2) bool {
 	return false
 }
 
-// IsIntersectionBox returns if other box intersects this one.
-func (b *Box2) IsIntersectionBox(other Box2) bool {
-	// using 6 splitting planes to rule out intersections.
+// IntersectsBox returns if other box intersects this one.
+func (b Box2) IntersectsBox(other Box2) bool {
 	if other.Max.X < b.Min.X || other.Min.X > b.Max.X ||
 		other.Max.Y < b.Min.Y || other.Min.Y > b.Max.Y {
 		return false
@@ -130,28 +135,28 @@ func (b *Box2) IsIntersectionBox(other Box2) bool {
 }
 
 // ClampPoint calculates a new point which is the specified point clamped inside this box.
-func (b *Box2) ClampPoint(point Vec2) Vec2 {
+func (b Box2) ClampPoint(point Vec2) Vec2 {
 	point.Clamp(b.Min, b.Max)
 	return point
 }
 
 // DistToPoint returns the distance from this box to the specified point.
-func (b *Box2) DistToPoint(point Vec2) float32 {
+func (b Box2) DistToPoint(point Vec2) float32 {
 	clamp := b.ClampPoint(point)
 	return clamp.Sub(point).Length()
 }
 
 // Intersect returns the intersection with other box.
-func (b *Box2) Intersect(other Box2) Box2 {
-	other.Min.Max(b.Min)
-	other.Max.Min(b.Max)
+func (b Box2) Intersect(other Box2) Box2 {
+	other.Min.SetMax(b.Min)
+	other.Max.SetMin(b.Max)
 	return other
 }
 
 // Union returns the union with other box.
 func (b *Box2) Union(other Box2) Box2 {
-	other.Min.Min(b.Min)
-	other.Max.Max(b.Max)
+	other.Min.SetMin(b.Min)
+	other.Max.SetMax(b.Max)
 	return other
 }
 

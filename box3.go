@@ -37,7 +37,7 @@ func (b *Box3) SetEmpty() {
 }
 
 // IsEmpty returns true if this bounding box is empty (max < min on any coord).
-func (b *Box3) IsEmpty() bool {
+func (b Box3) IsEmpty() bool {
 	return (b.Max.X < b.Min.X) || (b.Max.Y < b.Min.Y) || (b.Max.Z < b.Min.Z)
 }
 
@@ -75,8 +75,8 @@ func (b *Box3) ExpandByPoint(point Vec3) {
 	b.Max.SetMax(point)
 }
 
-// Expand may expand this bounding box to include the specified box
-func (b *Box3) Expand(box Box3) {
+// ExpandByBox may expand this bounding box to include the specified box
+func (b *Box3) ExpandByBox(box Box3) {
 	b.ExpandByPoint(box.Min)
 	b.ExpandByPoint(box.Max)
 }
@@ -104,18 +104,18 @@ func (b *Box3) SetFromCenterAndSize(center, size Vec3) {
 }
 
 // Center returns the center of the bounding box.
-func (b *Box3) Center() Vec3 {
+func (b Box3) Center() Vec3 {
 	return b.Min.Add(b.Max).MulScalar(0.5)
 }
 
 // Size calculates the size of this bounding box: the vector from
 // its minimum point to its maximum point.
-func (b *Box3) Size() Vec3 {
+func (b Box3) Size() Vec3 {
 	return b.Max.Sub(b.Min)
 }
 
 // ContainsPoint returns if this bounding box contains the specified point.
-func (b *Box3) ContainsPoint(point Vec3) bool {
+func (b Box3) ContainsPoint(point Vec3) bool {
 	if point.X < b.Min.X || point.X > b.Max.X ||
 		point.Y < b.Min.Y || point.Y > b.Max.Y ||
 		point.Z < b.Min.Z || point.Z > b.Max.Z {
@@ -125,7 +125,7 @@ func (b *Box3) ContainsPoint(point Vec3) bool {
 }
 
 // ContainsBox returns if this bounding box contains other box.
-func (b *Box3) ContainsBox(box Box3) bool {
+func (b Box3) ContainsBox(box Box3) bool {
 	if (b.Min.X <= box.Max.X) && (box.Max.X <= b.Max.X) &&
 		(b.Min.Y <= box.Min.Y) && (box.Max.Y <= b.Max.Y) &&
 		(b.Min.Z <= box.Min.Z) && (box.Max.Z <= b.Max.Z) {
@@ -134,8 +134,8 @@ func (b *Box3) ContainsBox(box Box3) bool {
 	return false
 }
 
-// IsIntersectionBox returns if other box intersects this one.
-func (b *Box3) IsIntersectionBox(other Box3) bool {
+// IntersectsBox returns if other box intersects this one.
+func (b Box3) IntersectsBox(other Box3) bool {
 	// using 6 splitting planes to rule out intersections.
 	if other.Max.X < b.Min.X || other.Min.X > b.Max.X ||
 		other.Max.Y < b.Min.Y || other.Min.Y > b.Max.Y ||
@@ -146,39 +146,39 @@ func (b *Box3) IsIntersectionBox(other Box3) bool {
 }
 
 // ClampPoint returns a new point which is the specified point clamped inside this box.
-func (b *Box3) ClampPoint(point Vec3) Vec3 {
+func (b Box3) ClampPoint(point Vec3) Vec3 {
 	point.Clamp(b.Min, b.Max)
 	return point
 }
 
 // DistToPoint returns the distance from this box to the specified point.
-func (b *Box3) DistToPoint(point Vec3) float32 {
+func (b Box3) DistToPoint(point Vec3) float32 {
 	clamp := b.ClampPoint(point)
 	return clamp.Sub(point).Length()
 }
 
 // GetBoundingSphere returns a bounding sphere to this bounding box.
-func (b *Box3) GetBoundingSphere() Sphere {
+func (b Box3) GetBoundingSphere() Sphere {
 	return Sphere{b.Center(), b.Size().Length() * 0.5}
 }
 
 // Intersect returns the intersection with other box.
-func (b *Box3) Intersect(other Box3) Box3 {
-	other.Min.Max(b.Min)
-	other.Max.Min(b.Max)
+func (b Box3) Intersect(other Box3) Box3 {
+	other.Min.SetMax(b.Min)
+	other.Max.SetMin(b.Max)
 	return other
 }
 
 // Union returns the union with other box.
-func (b *Box3) Union(other Box3) Box3 {
-	other.Min.Min(b.Min)
-	other.Max.Max(b.Max)
+func (b Box3) Union(other Box3) Box3 {
+	other.Min.SetMin(b.Min)
+	other.Max.SetMax(b.Max)
 	return other
 }
 
 // MulMat4 multiplies the specified matrix to the vertices of this bounding box
 // and computes the resulting spanning Box3 of the transformed points
-func (b *Box3) MulMat4(m *Mat4) Box3 {
+func (b Box3) MulMat4(m *Mat4) Box3 {
 	xax := m[0] * b.Min.X
 	xay := m[1] * b.Min.X
 	xaz := m[2] * b.Min.X
@@ -210,7 +210,7 @@ func (b *Box3) MulMat4(m *Mat4) Box3 {
 
 // MulQuat multiplies the specified quaternion to the vertices of this bounding box
 // and computes the resulting spanning Box3 of the transformed points
-func (b *Box3) MulQuat(q Quat) Box3 {
+func (b Box3) MulQuat(q Quat) Box3 {
 	var cs [8]Vec3
 	cs[0] = Vec3{b.Min.X, b.Min.Y, b.Min.Z}.MulQuat(q)
 	cs[1] = Vec3{b.Min.X, b.Min.Y, b.Max.Z}.MulQuat(q)
@@ -230,7 +230,7 @@ func (b *Box3) MulQuat(q Quat) Box3 {
 }
 
 // Translate returns translated position of this box by offset.
-func (b *Box3) Translate(offset Vec3) Box3 {
+func (b Box3) Translate(offset Vec3) Box3 {
 	nb := Box3{}
 	nb.Min = b.Min.Add(offset)
 	nb.Max = b.Max.Add(offset)
@@ -238,13 +238,13 @@ func (b *Box3) Translate(offset Vec3) Box3 {
 }
 
 // IsEqual returns if this box is equal to other
-func (b *Box3) IsEqual(other Box3) bool {
+func (b Box3) IsEqual(other Box3) bool {
 	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
 }
 
 // MVProjToNDC projects bounding box through given MVP model-view-projection Mat4
 // with perspective divide to return normalized display coordinates (NDC).
-func (b *Box3) MVProjToNDC(m *Mat4) Box3 {
+func (b Box3) MVProjToNDC(m *Mat4) Box3 {
 	// all corners: i = min, a = max
 	var cs [8]Vec3
 	cs[0] = Vec4{b.Min.X, b.Min.Y, b.Min.Z, 1}.MulMat4(m).PerspDiv()
