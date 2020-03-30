@@ -154,14 +154,14 @@ func (b Box2) Intersect(other Box2) Box2 {
 }
 
 // Union returns the union with other box.
-func (b *Box2) Union(other Box2) Box2 {
+func (b Box2) Union(other Box2) Box2 {
 	other.Min.SetMin(b.Min)
 	other.Max.SetMax(b.Max)
 	return other
 }
 
 // Translate returns translated position of this box by offset.
-func (b *Box2) Translate(offset Vec2) Box2 {
+func (b Box2) Translate(offset Vec2) Box2 {
 	nb := Box2{}
 	nb.Min = b.Min.Add(offset)
 	nb.Max = b.Max.Add(offset)
@@ -169,6 +169,6 @@ func (b *Box2) Translate(offset Vec2) Box2 {
 }
 
 // IsEqual returns if this box is equal to other.
-func (b *Box2) IsEqual(other Box2) bool {
+func (b Box2) IsEqual(other Box2) bool {
 	return other.Min.IsEqual(b.Min) && other.Max.IsEqual(b.Max)
 }
