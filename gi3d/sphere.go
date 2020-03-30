@@ -119,7 +119,7 @@ func (ms *MeshBase) AddSphereSector(radius float32, widthSegs, heightSegs int, a
 	ms.Norm = append(ms.Norm, norms...)
 	ms.Tex = append(ms.Tex, uvs...)
 
-	ms.BBox.BBox.Expand(bb)
+	ms.BBox.BBox.ExpandByBox(bb)
 }
 
 // AddDiskSector creates a disk (filled circle) or disk sector mesh
@@ -183,5 +183,5 @@ func (ms *MeshBase) AddDiskSector(radius float32, segs int, angStart, angLen flo
 	ms.Norm = append(ms.Norm, norms...)
 	ms.Tex = append(ms.Tex, uvs...)
 
-	ms.BBox.BBox.Expand(bb)
+	ms.BBox.BBox.ExpandByBox(bb)
 }

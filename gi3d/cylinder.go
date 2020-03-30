@@ -352,5 +352,5 @@ func (ms *MeshBase) AddCylinderSector(height, topRad, botRad float32, radialSegs
 	ms.Norm = append(ms.Norm, norms...)
 	ms.Tex = append(ms.Tex, uvs...)
 
-	ms.BBox.BBox.Expand(bb)
+	ms.BBox.BBox.ExpandByBox(bb)
 }

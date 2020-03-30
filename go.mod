@@ -15,10 +15,11 @@ require (
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
+	github.com/go-python/gopy v0.3.1
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v0.9.13
-	github.com/goki/mat32 v1.0.0
-	github.com/goki/pi v0.9.15
+	github.com/goki/mat32 v1.0.1
+	github.com/goki/pi v0.9.16-0.20200327120350-557dd2a804bb
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v0.90.1
 	github.com/gorilla/css v1.0.0 // indirect

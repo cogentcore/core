@@ -100,5 +100,5 @@ func (ms *MeshBase) AddTorusSector(radius, tubeRadius float32, radialSegs, tubeS
 	ms.Norm = append(ms.Norm, norms...)
 	ms.Tex = append(ms.Tex, uvs...)
 
-	ms.BBox.BBox.Expand(bb)
+	ms.BBox.BBox.ExpandByBox(bb)
 }

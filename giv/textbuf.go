@@ -2339,7 +2339,8 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 	}
 }
 
-// JoinParaLines merges a sequence of lines separated by blank lines into a single line
+// JoinParaLines merges sequences of lines with hard returns forming paragraphs,
+// separated by blank lines, into a single line per paragraph,
 // within the given line regions -- edLn is *inclusive*
 func (tb *TextBuf) JoinParaLines(stLn, edLn int) {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
