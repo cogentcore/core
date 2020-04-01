@@ -189,7 +189,8 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	slider1 := gi.AddNewSlider(srow, "slider1")
 	slider1.Dim = mat32.X
-	slider1.Class = "hslides"
+	// slider1.Class = "hslides"
+	slider1.SetProp(":value", ki.Props{"background-color": "red"})
 	slider1.Defaults()
 	slider1.SetMinPrefWidth(units.NewEm(20))
 	slider1.SetMinPrefHeight(units.NewEm(2))

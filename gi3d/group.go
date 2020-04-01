@@ -8,6 +8,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of
@@ -53,6 +54,35 @@ func (gp *Group) Defaults() {
 
 func (gp *Group) RenderClass() RenderClasses {
 	return RClassNone
+}
+
+// SolidPoint contains a Solid and a Point on that solid
+type SolidPoint struct {
+	Solid *Solid
+	Point mat32.Vec3
+}
+
+// RaySolidIntersections returns a list of solids whose bounding box intersects
+// with the given ray, with the point of intersection
+func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
+	var sp []*SolidPoint
+	gp.FuncDownMeFirst(0, gp.This(), func(k ki.Ki, level int, d interface{}) bool {
+		nii, ni := KiToNode3D(k)
+		if nii == nil {
+			return false // going into a different type of thing, bail
+		}
+		pt, has := ray.IntersectBox(ni.WorldBBox.BBox)
+		if !has {
+			return false
+		}
+		if !nii.IsSolid() {
+			return true
+		}
+		sd := nii.AsSolid()
+		sp = append(sp, &SolidPoint{sd, pt})
+		return false
+	})
+	return sp
 }
 
 // test for impl
