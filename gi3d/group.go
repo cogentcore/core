@@ -5,6 +5,8 @@
 package gi3d
 
 import (
+	"sort"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -63,7 +65,8 @@ type SolidPoint struct {
 }
 
 // RaySolidIntersections returns a list of solids whose bounding box intersects
-// with the given ray, with the point of intersection
+// with the given ray, with the point of intersection.  Results are sorted
+// from closest to furthest.
 func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
 	gp.FuncDownMeFirst(0, gp.This(), func(k ki.Ki, level int, d interface{}) bool {
@@ -82,6 +85,13 @@ func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 		sp = append(sp, &SolidPoint{sd, pt})
 		return false
 	})
+
+	sort.Slice(sp, func(i, j int) bool {
+		di := sp[i].Point.DistTo(ray.Origin)
+		dj := sp[j].Point.DistTo(ray.Origin)
+		return di < dj
+	})
+
 	return sp
 }
 
