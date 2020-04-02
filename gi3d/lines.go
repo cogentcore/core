@@ -90,15 +90,22 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 func AddNewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gi.Color) *Solid {
 	lm := UnitLineMesh(sc)
 	ln := AddNewSolid(sc, parent, name, lm.Name())
+	ln.Pose.Scale.Set(1, width, width)
+	SetLineStartEnd(ln, st, ed)
+	ln.Mat.Color = clr
+	return ln
+}
+
+// SetLineStartEnd sets line Pose such that it starts / ends at given poitns.
+func SetLineStartEnd(ln *Solid, st, ed mat32.Vec3) {
+	wd := ln.Pose.Scale.Y
 	d := ed.Sub(st)
 	midp := st.Add(d.DivScalar(2))
 	ln.Pose.Pos = midp
 	dst := st.DistTo(ed)
-	ln.Pose.Scale.Set(dst, width, width)
+	ln.Pose.Scale.Set(dst, wd, wd)
 	dn := d.Normal()
 	ln.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
-	ln.Mat.Color = clr
-	return ln
 }
 
 const (
