@@ -2444,14 +2444,14 @@ func (tv *TextView) CutRect() *textbuf.Edit {
 	}
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	org := tv.SelectReg.Start
+	npos := lex.Pos{Ln: tv.SelectReg.End.Ln, Ch: tv.SelectReg.Start.Ch}
 	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
 		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipRect = cut
 	}
-	tv.SetCursorShow(org)
+	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
 	return cut
 }

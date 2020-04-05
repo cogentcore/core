@@ -352,6 +352,10 @@ const (
 	// Also emits a TreeViewChanged signal on the root node.
 	TreeViewFlagChanged
 
+	// TreeViewFlagNoTemplate -- this node is not using a style template -- should
+	// be restyled on any full re-render change
+	TreeViewFlagNoTemplate
+
 	TreeViewFlagsN
 )
 
@@ -1788,6 +1792,9 @@ func (tv *TreeView) ConfigParts() {
 		// this does not work! even with redraws
 		// lbl.Sty.Template = "giv.TreeView.Label"
 		lbl.Props = nil
+		// if tv.HasFlag(int(TreeViewFlagNoTemplate)) {
+		// 	lbl.Redrawable = true // this prevents select highlight from rendering properly
+		// }
 		tv.Sty.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
 		if mods {
@@ -1978,7 +1985,9 @@ func (tv *TreeView) StyleTreeView() {
 	}
 	tv.SetCanFocusIfActive()
 	hasTempl, saveTempl := false, false
-	if _, has := tv.PropInherit("no-templates", ki.NoInherit, ki.TypeProps); !has {
+	_, noTempl := tv.PropInherit("no-templates", ki.NoInherit, ki.TypeProps)
+	tv.SetFlagState(noTempl, int(TreeViewFlagNoTemplate))
+	if !noTempl {
 		hasTempl, saveTempl = tv.Sty.FromTemplate()
 	}
 	if !hasTempl || saveTempl {
@@ -2167,8 +2176,11 @@ func (tv *TreeView) Render2D() {
 		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing
 	}
-	// if tv.FullReRenderIfNeeded() { // nn
-	// 	return
+	// restyle on re-render -- this is not actually necessary
+	// if tv.HasFlag(int(TreeViewFlagNoTemplate)) && (tv.NeedsFullReRender() || tv.RootView.NeedsFullReRender()) {
+	// 	fmt.Printf("restyle: %v\n", tv.Nm)
+	// 	tv.StyleTreeView()
+	// 	tv.ConfigParts()
 	// }
 	// fmt.Printf("tv rend: %v\n", tv.Nm)
 	if tv.PushBounds() {
@@ -2208,6 +2220,7 @@ func (tv *TreeView) Render2D() {
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
 	tv.Render2DChildren()
+	tv.ClearFullReRender()
 }
 
 func (tv *TreeView) ConnectEvents2D() {

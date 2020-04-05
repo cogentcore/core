@@ -67,8 +67,8 @@ type FileTree struct {
 	ExtFiles  []string     `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`
 	Dirs      DirFlagMap   `desc:"records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"`
 	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`
-	inOpenAll bool         `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
 	NodeType  reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
+	InOpenAll bool         `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
 }
 
 var KiT_FileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
@@ -92,8 +92,14 @@ func (ft *FileTree) OpenPath(path string) {
 	if ft.NodeType == nil {
 		ft.NodeType = KiT_FileNode
 	}
+	ft.FPath = gi.FileName(path)
+	ft.UpdateAll()
+}
+
+// UpdateAll does a full update of the tree -- calls ReadDir on current path
+func (ft *FileTree) UpdateAll() {
 	ft.Dirs.ClearMarks()
-	ft.ReadDir(path)
+	ft.ReadDir(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
 }
@@ -297,6 +303,24 @@ func (fn *FileNode) IsExternal() bool {
 	return isExt
 }
 
+// HasClosedParent returns true if has a parent node with !IsOpen flag set
+func (fn *FileNode) HasClosedParent() bool {
+	isExt := false
+	fn.FuncUp(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+		sfni := k.Embed(KiT_FileNode)
+		if sfni == nil {
+			return false
+		}
+		sfn := sfni.(*FileNode)
+		if sfn.IsIrregular() {
+			isExt = true
+			return false
+		}
+		return true
+	})
+	return isExt
+}
+
 // IsSymLink returns true if file is a symlink
 func (fn *FileNode) IsSymLink() bool {
 	return fn.HasFlag(int(FileNodeSymLink))
@@ -374,6 +398,9 @@ func (fn *FileNode) ReadDir(path string) error {
 func (fn *FileNode) DetectVcsRepo(updateFiles bool) bool {
 	repo, _ := fn.Repo()
 	if repo != nil {
+		if updateFiles {
+			fn.UpdateRepoFiles()
+		}
 		return false
 	}
 	path := string(fn.FPath)
@@ -412,7 +439,6 @@ func (fn *FileNode) UpdateDir() {
 	}
 	mods, updt := fn.ConfigChildren(config, ki.NonUniqueNames) // NOT unique names
 	if mods {
-		fn.SetFlag(int(ki.ChildAdded)) // ensure it does full update
 		// fmt.Printf("got mods: %v\n", path)
 	}
 	// always go through kids, regardless of mods
@@ -509,7 +535,7 @@ func (fn *FileNode) SetNodePath(path string) error {
 		return err
 	}
 	if fn.IsDir() && !fn.IsIrregular() {
-		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
+		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.ReadDir(string(fn.FPath)) // keep going down..
 		}
@@ -546,7 +572,7 @@ func (fn *FileNode) UpdateNode() error {
 		return nil
 	}
 	if fn.IsDir() {
-		openAll := fn.FRoot.inOpenAll && !fn.Info.IsHidden()
+		openAll := fn.FRoot.InOpenAll && !fn.Info.IsHidden()
 		if openAll || fn.FRoot.IsDirOpen(fn.FPath) {
 			fn.SetOpen()
 			fn.FRoot.SetDirOpen(fn.FPath)
@@ -591,11 +617,11 @@ func (fn *FileNode) SortBy(modTime bool) {
 
 // OpenAll opens all directories under this one
 func (fn *FileNode) OpenAll() {
-	fn.FRoot.inOpenAll = true
+	fn.FRoot.InOpenAll = true
 	fn.SetOpen()
 	fn.FRoot.SetDirOpen(fn.FPath)
 	fn.UpdateNode()
-	fn.FRoot.inOpenAll = false
+	fn.FRoot.InOpenAll = false
 	// note: FileTreeView must actually do the open all too!
 }
 
@@ -1515,7 +1541,7 @@ func (ftv *FileTreeView) FileNode() *FileNode {
 func (ftv *FileTreeView) UpdateAllFiles() {
 	fn := ftv.FileNode()
 	if fn != nil {
-		fn.FRoot.UpdateDir()
+		fn.FRoot.UpdateAll()
 	}
 }
 
