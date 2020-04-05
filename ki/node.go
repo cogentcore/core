@@ -1673,6 +1673,9 @@ outer:
 					continue
 				}
 			}
+		} else {
+			cur.SetTravState(cur.NumKiFields(), cur.NumChildren())
+			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {

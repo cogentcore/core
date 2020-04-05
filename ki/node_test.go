@@ -450,11 +450,25 @@ func TestNodeCallFun(t *testing.T) {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
 		return true
 	})
-	// fmt.Printf("result: %v\n", res)
 
 	trg := []string{"[par1, fun_down, lev 0]", "[child1, fun_down, lev 1]", "[child1_001, fun_down, lev 1]", "[subchild1, fun_down, lev 2]", "[child1_002, fun_down, lev 1]"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("FuncDown error -- results:\n%v\n != target:\n%v\n", res, trg)
+	}
+	res = res[:0]
+
+	// test return = false case
+	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
+		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
+		if k.UniqueName() == "child1_001" {
+			return false
+		}
+		return true
+	})
+
+	trg = []string{"[par1, fun_down, lev 0]", "[child1, fun_down, lev 1]", "[child1_001, fun_down, lev 1]", "[child1_002, fun_down, lev 1]"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("FuncDown return false error -- results:\n%v\n != target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
