@@ -303,22 +303,22 @@ func (fn *FileNode) IsExternal() bool {
 	return isExt
 }
 
-// HasClosedParent returns true if has a parent node with !IsOpen flag set
+// HasClosedParent returns true if node has a parent node with !IsOpen flag set
 func (fn *FileNode) HasClosedParent() bool {
-	isExt := false
-	fn.FuncUp(0, fn, func(k ki.Ki, level int, d interface{}) bool {
+	hasClosed := false
+	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
 			return false
 		}
 		sfn := sfni.(*FileNode)
-		if sfn.IsIrregular() {
-			isExt = true
+		if !sfn.IsOpen() {
+			hasClosed = true
 			return false
 		}
 		return true
 	})
-	return isExt
+	return hasClosed
 }
 
 // IsSymLink returns true if file is a symlink
