@@ -1784,14 +1784,6 @@ func (tb *TextBuf) MarkupLines(st, ed int) bool {
 		ed = tb.NLines - 1
 	}
 
-	// if tb.Hi.UsingPi() {
-	// 	maxln := tb.NLines
-	// 	pfs := tb.PiState.Done()
-	// 	if maxln > 1 && len(pfs.Src.Lexs)-1 != maxln {
-	// 		fmt.Printf("error: markup out of sync: %v != %v len(Lexs)\n", maxln, len(pfs.Src.Lexs)-1)
-	// 	}
-	// }
-
 	allgood := true
 	for ln := st; ln <= ed; ln++ {
 		ltxt := tb.Lines[ln]

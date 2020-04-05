@@ -4295,11 +4295,15 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			kt.SetProcessed()
 			if tv.Buf.Opts.AutoIndent {
 				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
-				tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
-				tv.InsertAtCursor([]byte("\n"))
-				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
+				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
 				if tbe != nil {
-					// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln+1)
+					// go back to end of line!
+					npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: tv.Buf.LineLen(tv.CursorPos.Ln)}
+					tv.SetCursor(npos)
+				}
+				tv.InsertAtCursor([]byte("\n"))
+				tbe, _, cpos = tv.Buf.AutoIndent(tv.CursorPos.Ln)
+				if tbe != nil {
 					tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 				tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
