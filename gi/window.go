@@ -2485,6 +2485,13 @@ func (wl *WindowList) FindName(name string) (*Window, bool) {
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
 func (wl *WindowList) FindData(data interface{}) (*Window, bool) {
+	if kit.IfaceIsNil(data) {
+		return nil, false
+	}
+	typ := reflect.TypeOf(data)
+	if !typ.Comparable() {
+		return nil, false
+	}
 	WindowGlobalMu.Lock()
 	defer WindowGlobalMu.Unlock()
 	for _, wi := range *wl {
