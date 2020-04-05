@@ -4295,14 +4295,17 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			kt.SetProcessed()
 			if tv.Buf.Opts.AutoIndent {
 				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
-				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
-				if tbe != nil {
-					// go back to end of line!
-					npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: tv.Buf.LineLen(tv.CursorPos.Ln)}
-					tv.SetCursor(npos)
+				lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
+				if lp != nil && lp.Lang != nil { // only re-indent current line for supported types
+					tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
+					if tbe != nil {
+						// go back to end of line!
+						npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: tv.Buf.LineLen(tv.CursorPos.Ln)}
+						tv.SetCursor(npos)
+					}
 				}
 				tv.InsertAtCursor([]byte("\n"))
-				tbe, _, cpos = tv.Buf.AutoIndent(tv.CursorPos.Ln)
+				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				if tbe != nil {
 					tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
