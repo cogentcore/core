@@ -4296,7 +4296,8 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			if tv.Buf.Opts.AutoIndent {
 				bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 				lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
-				if lp != nil && lp.Lang != nil { // only re-indent current line for supported types
+				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
+					// only re-indent current line for supported types
 					tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
 					if tbe != nil {
 						// go back to end of line!
@@ -4322,17 +4323,30 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 			kt.SetProcessed()
 			wupdt := tv.TopUpdateStart()
 			lasttab := tv.HasFlag(int(TextViewLastWasTabAI))
-			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent { // todo: only at 1st pos now
+			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent {
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				tv.CursorPos.Ch = cpos
-				// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.RenderCursor(true)
 				gotTabAI = true
 			} else {
 				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Sty.Text.TabSize))
-				// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 			}
 			tv.TopUpdateEnd(wupdt)
+			tv.ISpellKeyInput(kt)
+		}
+	case gi.KeyFunFocusPrev: // shift-tab
+		cancelAll()
+		if !kt.HasAnyModifier(key.Control, key.Meta) {
+			kt.SetProcessed()
+			if tv.CursorPos.Ch > 0 {
+				ind, _ := lex.LineIndent(tv.Buf.Line(tv.CursorPos.Ln), tv.Sty.Text.TabSize)
+				if ind > 0 {
+					tv.Buf.IndentLine(tv.CursorPos.Ln, ind-1)
+					intxt := indent.Bytes(tv.Buf.Opts.IndentChar(), ind-1, tv.Sty.Text.TabSize)
+					npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: len(intxt)}
+					tv.SetCursorShow(npos)
+				}
+			}
 			tv.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunNil:
@@ -4418,7 +4432,6 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 			tv.InsertAtCursor([]byte(string(kt.Rune)))
 			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 			if tbe != nil {
-				// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 				tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
 			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
