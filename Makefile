@@ -6,7 +6,7 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
-# exclude python from std builds
+# exclude python from std builds -- not relevant
 DIRS=`go list ./... | grep -v python`
 
 all: build
