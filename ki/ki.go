@@ -620,14 +620,14 @@ type Ki interface {
 
 	// FuncUp calls function on given node and all the way up to its parents,
 	// and so on -- sequentially all in current go routine (generally
-	// necessary for going up, which is typicaly quite fast anyway) -- level
+	// necessary for going up, which is typically quite fast anyway) -- level
 	// is incremented after each step (starts at 0, goes up), and passed to
 	// function -- returns false if fun aborts with false, else true.
 	FuncUp(level int, data interface{}, fun Func) bool
 
 	// FuncUpParent calls function on parent of node and all the way up to its
 	// parents, and so on -- sequentially all in current go routine (generally
-	// necessary for going up, which is typicaly quite fast anyway) -- level
+	// necessary for going up, which is typically quite fast anyway) -- level
 	// is incremented after each step (starts at 0, goes up), and passed to
 	// function -- returns false if fun aborts with false, else true.
 	FuncUpParent(level int, data interface{}, fun Func) bool

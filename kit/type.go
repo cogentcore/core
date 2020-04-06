@@ -23,7 +23,7 @@ func (k Type) ShortTypeName() string {
 	return Types.TypeName(k.T)
 }
 
-// stringer interface
+// String satisfies the stringer interface
 func String(k Type) string {
 	if k.T == nil {
 		return "nil"

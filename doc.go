@@ -13,7 +13,7 @@ The sub-packages contain all the relevant code:
 
 * kit: is a type registry that ki uses in various ways and provides
 useful type-level properties that are used in the GoGi GUI.  It also
-is a powerful 'kit for dealing with Go's reflect sytem.
+is a powerful 'kit for dealing with Go's reflect system.
 
 * ints, floats, dirs, bitflag, atomctr, indent all provide basic
 Go infrastructure that one could argue should have been in the

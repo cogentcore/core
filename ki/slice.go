@@ -179,9 +179,8 @@ func (sl *Slice) IndexByUniqueName(name string, startIdx int) (int, bool) {
 func SliceIndexByType(sl *[]Ki, t reflect.Type, embeds bool, startIdx int) (int, bool) {
 	if embeds {
 		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
-	} else {
-		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.Type() == t })
 	}
+	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.Type() == t })
 }
 
 // IndexByType returns index of element that either is that type or embeds
@@ -189,9 +188,8 @@ func SliceIndexByType(sl *[]Ki, t reflect.Type, embeds bool, startIdx int) (int,
 func (sl *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) (int, bool) {
 	if embeds {
 		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
-	} else {
-		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
 	}
+	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
 }
 
 // ElemByName returns first element that has given name, nil if not found.

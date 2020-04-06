@@ -3,9 +3,9 @@
 // license that can be found in the LICENSE file.
 
 /*
-package walki provides basic tree walking functions for iterative traversal
+Package walki provides basic tree walking functions for iterative traversal
 of the tree in up / down directions.  As compared to the core Func methods
-defined in ki package, these are for more dynamic, piecemeal proccessing.
+defined in ki package, these are for more dynamic, piecemeal processing.
 */
 package walki
 

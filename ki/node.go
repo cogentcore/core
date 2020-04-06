@@ -339,11 +339,10 @@ func (n *Node) FieldRoot() Ki {
 				gotField = true
 			}
 			return true
-		} else {
-			if !k.IsField() {
-				root = k
-				return false
-			}
+		}
+		if !k.IsField() {
+			root = k
+			return false
 		}
 		return true
 	})
@@ -653,9 +652,8 @@ func (n *Node) Path() string {
 	if n.Par != nil {
 		if n.IsField() {
 			return n.Par.Path() + "." + n.Nm
-		} else {
-			return n.Par.Path() + "/" + n.Nm
 		}
+		return n.Par.Path() + "/" + n.Nm
 	}
 	return "/" + n.Nm
 }
@@ -667,9 +665,8 @@ func (n *Node) PathUnique() string {
 	if n.Par != nil {
 		if n.IsField() {
 			return n.Par.PathUnique() + "." + n.UniqueNm
-		} else {
-			return n.Par.PathUnique() + "/" + n.UniqueNm
 		}
+		return n.Par.PathUnique() + "/" + n.UniqueNm
 	}
 	return "/" + n.UniqueNm
 }
@@ -681,9 +678,8 @@ func (n *Node) PathFrom(par Ki) string {
 	if n.Par != nil && n.Par != par {
 		if n.IsField() {
 			return n.Par.PathFrom(par) + "." + n.Nm
-		} else {
-			return n.Par.PathFrom(par) + "/" + n.Nm
 		}
+		return n.Par.PathFrom(par) + "/" + n.Nm
 	}
 	return "/" + n.Nm
 }
@@ -695,9 +691,8 @@ func (n *Node) PathFromUnique(par Ki) string {
 	if n.Par != nil && n.Par != par {
 		if n.IsField() {
 			return n.Par.PathFromUnique(par) + "." + n.UniqueNm
-		} else {
-			return n.Par.PathFromUnique(par) + "/" + n.UniqueNm
 		}
+		return n.Par.PathFromUnique(par) + "/" + n.UniqueNm
 	}
 	return "/" + n.UniqueNm
 }
@@ -1220,7 +1215,7 @@ func (n *Node) Destroy() {
 //////////////////////////////////////////////////////////////////////////
 //  Flags
 
-// Flag returns an atomically safe copy of the bit flags for this node --
+// Flags returns an atomically safe copy of the bit flags for this node --
 // can use bitflag package to check lags.
 // See Flags type for standard values used in Ki Node --
 // can be extended from FlagsN up to 64 bit capacity.
@@ -1496,12 +1491,11 @@ func (n *Node) CopyPropsFrom(frm Ki, deep bool) error {
 			return err
 		}
 		return nil
-	} else {
-		for k, v := range fmP {
-			n.Props[k] = v
-		}
 	}
-	return nil
+	for k, v := range fmP {
+		n.Props[k] = v
+	}
+
 }
 
 // PropTag returns the name to look for in type properties, for types
@@ -1588,7 +1582,7 @@ func (n *Node) FuncFields(level int, data interface{}, fun Func) {
 
 // FuncUp calls function on given node and all the way up to its parents,
 // and so on -- sequentially all in current go routine (generally
-// necessary for going up, which is typicaly quite fast anyway) -- level
+// necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
 func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
@@ -1609,7 +1603,7 @@ func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
 
 // FuncUpParent calls function on parent of node and all the way up to its
 // parents, and so on -- sequentially all in current go routine (generally
-// necessary for going up, which is typicaly quite fast anyway) -- level
+// necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
 func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
@@ -2416,6 +2410,7 @@ func (dm *Deleted) Add(kis ...Ki) {
 	dm.Mu.Unlock()
 }
 
+// DestroyDeleted destroys any deleted items in list
 func (dm *Deleted) DestroyDeleted() {
 	// pr := prof.Start("ki.DestroyDeleted")
 	// defer pr.End()
