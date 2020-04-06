@@ -5,6 +5,7 @@
 package markdown
 
 import (
+	"strings"
 	"unicode"
 
 	"github.com/goki/ki/indent"
@@ -141,7 +142,7 @@ func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol 
 }
 
 // List keywords (for indent)
-var ListKeys = map[string]struct{}{"* ": struct{}{}, "+ ": struct{}{}, "- ": struct{}{}}
+var ListKeys = map[string]struct{}{"*": struct{}{}, "+": struct{}{}, "-": struct{}{}}
 
 // IndentLine returns the indentation level for given line based on
 // previous line's indentation level, and any delta change based on
@@ -154,15 +155,34 @@ func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.L
 	delInd = 0
 	ptg := tags[pLn]
 	ctg := tags[ln]
-	if len(ptg) > 0 && len(ctg) > 0 {
-		fptg := ptg[0]
-		fctg := ctg[0]
-		if fptg.Tok.Tok == token.Keyword && fctg.Tok.Tok == token.Keyword {
-			_, pky := ListKeys[fptg.Tok.Key]
-			_, cky := ListKeys[fctg.Tok.Key]
-			if pky && cky && fptg.Tok.Key != fctg.Tok.Key {
+	if len(ptg) == 0 || len(ctg) == 0 {
+		return
+	}
+	fpt := ptg[0]
+	fct := ctg[0]
+	if fpt.Tok.Tok != token.Keyword || fct.Tok.Tok != token.Keyword {
+		return
+	}
+	pk := strings.TrimSpace(string(fpt.Src(src[pLn])))
+	ck := strings.TrimSpace(string(fct.Src(src[ln])))
+	// fmt.Printf("pk: %v  ck: %v\n", string(pk), string(ck))
+	if len(pk) >= 1 && len(ck) >= 1 {
+		_, pky := ListKeys[pk]
+		_, cky := ListKeys[ck]
+		if unicode.IsDigit(rune(pk[0])) {
+			pk = "1"
+			pky = true
+		}
+		if unicode.IsDigit(rune(ck[0])) {
+			ck = "1"
+			cky = true
+		}
+		if pky && cky {
+			if pk != ck {
 				delInd = 1
+				return
 			}
+			return
 		}
 	}
 	return

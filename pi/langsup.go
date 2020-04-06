@@ -37,6 +37,12 @@ const (
 	// IndentTab means that tabs must be used for this language
 	IndentTab
 
+	// ReAutoIndent causes current line to be re-indented during AutoIndent for Enter
+	// (newline) -- this should only be set for strongly indented languages where
+	// the previous + current line can tell you exactly what indent the current line
+	// should be at.
+	ReAutoIndent
+
 	LangFlagsN
 )
 
@@ -47,9 +53,19 @@ type LangProps struct {
 	CommentLn string            `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
 	CommentSt string            `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
 	CommentEd string            `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
-	Flags     []LangFlags       `desc:"special properties for this language"`
+	Flags     []LangFlags       `desc:"special properties for this language -- as an explicit list of options to make them easier to see and set in defaults"`
 	Lang      Lang              `json:"-" xml:"-" desc:"Lang interface for this language"`
 	Parser    *Parser           `json:"-" xml:"-" desc:"parser for this language -- initialized in OpenStd"`
+}
+
+// HasFlag returns true if given flag is set in Flags
+func (lp *LangProps) HasFlag(flg LangFlags) bool {
+	for _, f := range lp.Flags {
+		if f == flg {
+			return true
+		}
+	}
+	return false
 }
 
 // StdLangProps is the standard compiled-in set of langauge properties
@@ -61,7 +77,7 @@ var StdLangProps = map[filecat.Supported]*LangProps{
 	filecat.CSharp:     {filecat.CSharp, "// ", "/* ", " */", nil, nil, nil},
 	filecat.D:          {filecat.D, "// ", "/* ", " */", nil, nil, nil},
 	filecat.ObjC:       {filecat.ObjC, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
+	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab, ReAutoIndent}, nil, nil},
 	filecat.Java:       {filecat.Java, "// ", "/* ", " */", nil, nil, nil},
 	filecat.JavaScript: {filecat.JavaScript, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Eiffel:     {filecat.Eiffel, "--", "", "", nil, nil, nil},
