@@ -214,7 +214,7 @@ func FileNames(d os.File, names *[]string) (err error) {
 	return nil
 }
 
-// FileNames retuns a slice of file names from the starting directory and its subdirectories
+// FileNames returns a slice of file names from the starting directory and its subdirectories
 func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	if !fi.IsDir() {
 		err = errors.New("Not a directory: FileNames returns a list of files within a directory")

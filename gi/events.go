@@ -1135,7 +1135,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	return true
 }
 
-// InitialFocus estabishes the initial focus for the window if no focus
+// InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (em *EventMgr) InitialFocus() {
 	if em.CurFocus() == nil {

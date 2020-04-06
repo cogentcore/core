@@ -761,7 +761,7 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data interface{}) (anch
 }
 
 // SetNeedsFullRender sets the flag indicating that a full render of the viewport is needed
-// it will do this immediately pending aquisition of the lock and through the standard
+// it will do this immediately pending acquisition of the lock and through the standard
 // updating channels, unless already updating.
 func (vp *Viewport2D) SetNeedsFullRender() {
 	if !vp.NeedsFullRender() {

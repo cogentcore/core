@@ -147,8 +147,9 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 	}
 	lastMouseButton = but
 	lastMouseAction = act
+	where := w.curMousePosPoint(gw)
 	event := &mouse.Event{
-		Where:     lastMousePos,
+		Where:     where,
 		Button:    but,
 		Action:    act,
 		Modifiers: mods,
@@ -170,9 +171,10 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 		xoff *= 4 * float64(mouse.ScrollWheelSpeed)
 		yoff *= 4 * float64(mouse.ScrollWheelSpeed)
 	}
+	where := w.curMousePosPoint(gw)
 	event := &mouse.ScrollEvent{
 		Event: mouse.Event{
-			Where:     lastMousePos,
+			Where:     where,
 			Action:    mouse.Scroll,
 			Modifiers: mods,
 		},
@@ -183,17 +185,27 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	glfw.PostEmptyEvent()
 }
 
-func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
-	if w.resettingPos {
-		return
-	}
+func (w *windowImpl) curMousePosPoint(gw *glfw.Window) image.Point {
+	xp, yp := gw.GetCursorPos()
+	return w.mousePosToPoint(xp, yp)
+}
+
+func (w *windowImpl) mousePosToPoint(x, y float64) image.Point {
 	var where image.Point
 	if theApp.Platform() == oswin.MacOS {
 		where = image.Point{int(w.DevPixRatio * float32(x)), int(w.DevPixRatio * float32(y))}
 	} else {
 		where = image.Point{int(x), int(y)}
 	}
+	return where
+}
+
+func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
+	if w.resettingPos {
+		return
+	}
 	from := lastMousePos
+	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
 		w.resettingPos = true
 		w.glw.SetCursorPos(float64(lastMousePos.X), float64(lastMousePos.Y))
@@ -244,9 +256,10 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 	for i, s := range names {
 		md[i] = mimedata.NewTextData(s)
 	}
+	where := w.curMousePosPoint(gw)
 	event := &dnd.Event{
 		Action:    dnd.External,
-		Where:     lastMousePos,
+		Where:     where,
 		Modifiers: lastMods,
 		Data:      md,
 	}

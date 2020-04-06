@@ -247,7 +247,7 @@ func (tv *TextView) ReMarkup() {
 	if tv.Buf == nil {
 		return
 	}
-	tv.Buf.ReMarkup(false)
+	tv.Buf.ReMarkup()
 }
 
 // NeedsRefresh checks if a refresh is required -- atomically safe for other

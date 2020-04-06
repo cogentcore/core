@@ -924,7 +924,7 @@ func (w *Window) FullReRender() {
 	w.InitialFocus()
 }
 
-// InitialFocus estabishes the initial focus for the window if no focus
+// InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (w *Window) InitialFocus() {
 	w.EventMgr.InitialFocus()
@@ -1508,7 +1508,15 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	////////////////////////////////////////////////////////////////////////////
 	// Send Events to Widgets
 
-	if !evi.IsProcessed() && w.HasFlag(int(WinFlagGotFocus)) {
+	hasFocus := w.HasFlag(int(WinFlagGotFocus))
+	if _, ok := evi.(*mouse.ScrollEvent); ok {
+		if !hasFocus {
+			w.EventMgr.Scrolling = nil // not valid
+		}
+		hasFocus = true // doesn't need focus!
+	}
+
+	if hasFocus && !evi.IsProcessed() {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 		w.EventMgr.SendEventSignal(evi, evToPopup)
 		if !w.delPop && et == oswin.MouseMoveEvent && !evi.IsProcessed() {

@@ -138,7 +138,7 @@ type Mesh interface {
 	Render3D(sc *Scene)
 
 	// SetVtxData sets the (updated) Vtx data into the overall vector that
-	// will be transfered using the next TransferVectors call.
+	// will be transferred using the next TransferVectors call.
 	// It is essential that the length has not changed -- if length is changing
 	// then you must update everything and call MakeVectors.
 	// Use this for dynamically updating vertex data.
@@ -146,7 +146,7 @@ type Mesh interface {
 	SetVtxData(sc *Scene)
 
 	// SetNormData sets the (updated) Norm data into the overall vector that
-	// will be transfered using the next TransferVectors call.
+	// will be transferred using the next TransferVectors call.
 	// It is essential that the length has not changed -- if length is changing
 	// then you must update everything and call MakeVectors.
 	// Use this for dynamically updating vertex data.
@@ -154,7 +154,7 @@ type Mesh interface {
 	SetNormData(sc *Scene)
 
 	// SetColorData sets the (updated) Color data into the overall vector that
-	// will be transfered using the next TransferVectors call.
+	// will be transferred using the next TransferVectors call.
 	// It is essential that the length has not changed -- if length is changing
 	// then you must update everything and call MakeVectors.
 	// Use this for dynamically updating color data (only use if vertex color in use!)
@@ -327,7 +327,7 @@ func (ms *MeshBase) MakeVectors(sc *Scene) error {
 }
 
 // SetVtxData sets the (updated) Vtx data into the overall vector that
-// will be transfered using the next TransferVectors call.
+// will be transferred using the next TransferVectors call.
 // It is essential that the length has not changed -- if length is changing
 // then you must update everything and call MakeVectors.
 // Use this for dynamically updating vertex data.
@@ -339,7 +339,7 @@ func (ms *MeshBase) SetVtxData(sc *Scene) {
 }
 
 // SetNormData sets the (updated) Norm data into the overall vector that
-// will be transfered using the next TransferVectors call.
+// will be transferred using the next TransferVectors call.
 // It is essential that the length has not changed -- if length is changing
 // then you must update everything and call MakeVectors.
 // Use this for dynamically updating vertex data.
@@ -351,7 +351,7 @@ func (ms *MeshBase) SetNormData(sc *Scene) {
 }
 
 // SetColorData sets the (updated) Color data into the overall vector that
-// will be transfered using the next TransferVectors call.
+// will be transferred using the next TransferVectors call.
 // It is essential that the length has not changed -- if length is changing
 // then you must update everything and call MakeVectors.
 // Use this for dynamically updating color data (only use if vertex color in use!)

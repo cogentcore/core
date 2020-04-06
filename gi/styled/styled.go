@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package styled implements styling via generic walking of relfect type info.
+Package styled implements styling via generic walking of reflect type info.
 It is somewhat slower than the explicit manual code which is after
 all not that hard to write -- maintenance may be more of an issue,
 but given how time-critical styling is, it is worth it overall.

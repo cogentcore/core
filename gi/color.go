@@ -247,7 +247,7 @@ func (c *Color) String() string {
 	return fmt.Sprintf("R: %v G: %v B: %v A: %v", c.R, c.G, c.B, c.A)
 }
 
-// HexString returns colors using standard 2-hexidecimal-digits-per-component string
+// HexString returns colors using standard 2-hexadecimal-digits-per-component string
 func (c *Color) HexString() string {
 	if c == nil {
 		return "nil"

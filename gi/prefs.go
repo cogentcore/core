@@ -86,7 +86,7 @@ func (pf *Preferences) Open() error {
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
-		// log.Println(err) // ok to be non-existant
+		// log.Println(err) // ok to be non-existent
 		return err
 	}
 	err = json.Unmarshal(b, pf)
@@ -870,7 +870,7 @@ func (pf *PrefsDetailed) Open() error {
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	b, err := ioutil.ReadFile(pnm)
 	if err != nil {
-		// log.Println(err) // ok to be non-existant
+		// log.Println(err) // ok to be non-existent
 		return err
 	}
 	err = json.Unmarshal(b, pf)

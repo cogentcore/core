@@ -49,7 +49,7 @@ type windowImpl struct {
 
 // Handle returns the driver-specific handle for this window.
 // Currently, for all platforms, this is *glfw.Window, but that
-// cannot always be assumed.  Only provided for unforseen emergency use --
+// cannot always be assumed.  Only provided for unforeseen emergency use --
 // please file an Issue for anything that should be added to Window
 // interface.
 func (w *windowImpl) Handle() interface{} {

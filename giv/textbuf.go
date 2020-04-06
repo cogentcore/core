@@ -82,7 +82,6 @@ type TextBuf struct {
 	LinesMu          sync.RWMutex        `json:"-" xml:"-" desc:"mutex for updating lines"`
 	MarkupMu         sync.RWMutex        `json:"-" xml:"-" desc:"mutex for updating markup"`
 	MarkupDelayTimer *time.Timer         `json:"-" xml:"-" desc:"markup delay timer"`
-	MarkupEchoTimer  *time.Timer         `json:"-" xml:"-" desc:"markup echo timer -- one more markup.."`
 	MarkupDelayMu    sync.Mutex          `json:"-" xml:"-" desc:"mutex for updating markup delay timer"`
 	TextBufSig       ki.Signal           `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
 	Views            []*TextView         `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
@@ -198,7 +197,7 @@ func (tb *TextBuf) SetText(txt []byte) {
 	tb.BytesToLines()
 	tb.InitialMarkup()
 	tb.Refresh()
-	tb.ReMarkup(false) // not an echo
+	tb.ReMarkup()
 }
 
 // SetTextLines sets the text to given lines of bytes
@@ -228,6 +227,7 @@ func (tb *TextBuf) SetTextLines(lns [][]byte, cpy bool) {
 	tb.LinesToBytes()
 	tb.InitialMarkup()
 	tb.Refresh()
+	tb.ReMarkup()
 }
 
 // EditDone finalizes any current editing, sends signal
@@ -432,11 +432,8 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	tb.SetName(string(filename))
 
 	tb.InitialMarkup()
-
-	// update views
-	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
-
-	tb.ReMarkup(false) // redo full
+	tb.Refresh()
+	tb.ReMarkup()
 	return nil
 }
 
@@ -491,7 +488,7 @@ func (tb *TextBuf) Revert() bool {
 	}
 	tb.ClearChanged()
 	tb.AutoSaveDelete()
-	tb.ReMarkup(false)
+	tb.ReMarkup()
 	return true
 }
 
@@ -1000,6 +997,11 @@ func (tb *TextBuf) ValidPos(pos lex.Pos) lex.Pos {
 	if pos.Ln < 0 {
 		pos.Ln = 0
 	}
+	if pos.Ln >= len(tb.Lines) {
+		pos.Ln = len(tb.Lines) - 1
+		pos.Ch = len(tb.Lines[pos.Ln])
+		return pos
+	}
 	pos.Ln = ints.MinInt(pos.Ln, len(tb.Lines)-1)
 	llen := len(tb.Lines[pos.Ln])
 	pos.Ch = ints.MinInt(pos.Ch, llen)
@@ -1320,6 +1322,10 @@ func (tb *TextBuf) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
 		copy(tbe.Text[0][:sz], tb.Lines[st.Ln][st.Ch:ed.Ch])
 	} else {
 		// first get chars on start and end
+		if ed.Ln >= len(tb.Lines) {
+			ed.Ln = len(tb.Lines) - 1
+			ed.Ch = len(tb.Lines[ed.Ln])
+		}
 		nlns := (ed.Ln - st.Ln) + 1
 		tbe.Text = make([][]rune, nlns)
 		stln := st.Ln
@@ -1565,16 +1571,12 @@ func (tb *TextBuf) IsMarkingUp() bool {
 
 // InitialMarkup does the first-pass markup on the file
 func (tb *TextBuf) InitialMarkup() {
-	tb.LinesMu.Lock()
-	tb.MarkupMu.Lock()
 	if tb.Hi.UsingPi() {
 		fs := tb.PiState.Done() // initialize
 		fs.Src.SetBytes(tb.Txt)
 	}
 	mxhi := ints.MinInt(100, tb.NLines-1)
-	tb.MarkupLines(0, mxhi) // this will triger a full re-markup too
-	tb.MarkupMu.Unlock()
-	tb.LinesMu.Unlock()
+	tb.MarkupAllLines(mxhi)
 }
 
 // StartDelayedReMarkup starts a timer for doing markup after an interval
@@ -1587,10 +1589,6 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 	if tb.MarkupDelayTimer != nil {
 		tb.MarkupDelayTimer.Stop()
 		tb.MarkupDelayTimer = nil
-	}
-	if tb.MarkupEchoTimer != nil {
-		tb.MarkupEchoTimer.Stop()
-		tb.MarkupEchoTimer = nil
 	}
 	vp := tb.ViewportFromView()
 	if vp != nil {
@@ -1606,7 +1604,7 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 		func() {
 			// fmt.Printf("delayed remarkup\n")
 			tb.MarkupDelayTimer = nil
-			tb.ReMarkup(false) // not an echo
+			tb.ReMarkup()
 		})
 }
 
@@ -1618,22 +1616,17 @@ func (tb *TextBuf) StopDelayedReMarkup() {
 		tb.MarkupDelayTimer.Stop()
 		tb.MarkupDelayTimer = nil
 	}
-	if tb.MarkupEchoTimer != nil {
-		tb.MarkupEchoTimer.Stop()
-		tb.MarkupEchoTimer = nil
-	}
 }
 
 // ReMarkup runs re-markup on text in background
-// if fromEcho is true, this was an echo remarkup -- don't echo again
-func (tb *TextBuf) ReMarkup(fromEcho bool) {
+func (tb *TextBuf) ReMarkup() {
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
 	if tb.IsMarkingUp() {
 		return
 	}
-	go tb.MarkupAllLines(fromEcho)
+	go tb.MarkupAllLines(-1)
 }
 
 // AdjustedTags updates tag positions for edits
@@ -1665,8 +1658,8 @@ func (tb *TextBuf) AdjustedTagsImpl(tags lex.Line, ln int) lex.Line {
 // MarkupAllLines does syntax highlighting markup for all lines in buffer,
 // calling MarkupMu mutex when setting the marked-up lines with the result --
 // designed to be called in a separate goroutine.
-// if fromEcho is true, this was called from the delayed echo markup -- don't echo again!
-func (tb *TextBuf) MarkupAllLines(fromEcho bool) {
+// if maxLines > 0 then it specifies a maximum number of lines (for InitialMarkup)
+func (tb *TextBuf) MarkupAllLines(maxLines int) {
 	if !tb.Hi.HasHi() || tb.NLines == 0 {
 		return
 	}
@@ -1679,18 +1672,30 @@ func (tb *TextBuf) MarkupAllLines(fromEcho bool) {
 	tb.MarkupEdits = nil
 	tb.MarkupMu.Unlock()
 
-	txt := tb.LinesToBytesCopy()
+	var txt []byte
+	if maxLines > 0 {
+		tb.LinesMu.RLock()
+		mln := ints.MinInt(maxLines, len(tb.LineBytes))
+		txt = bytes.Join(tb.LineBytes[:mln], []byte("\n"))
+		txt = append(txt, '\n')
+		tb.LinesMu.RUnlock()
+	} else {
+		txt = tb.LinesToBytesCopy()
+	}
 	mtags, err := tb.Hi.MarkupTagsAll(txt) // does full parse, outside of markup lock
 	if err != nil {
 		tb.ClearFlag(int(TextBufMarkingUp))
 		return
 	}
 
-	// by this point mtags could be out of sync with deletes that have happend
+	// by this point mtags could be out of sync with deletes that have happened
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()
 
 	maxln := ints.MinInt(len(tb.Markup), tb.NLines)
+	if maxLines > 0 {
+		maxln = ints.MinInt(maxln, maxLines)
+	}
 
 	if tb.Hi.UsingPi() {
 		pfs := tb.PiState.Done()
@@ -1746,14 +1751,6 @@ func (tb *TextBuf) MarkupAllLines(fromEcho bool) {
 	tb.LinesMu.Unlock()
 	tb.ClearFlag(int(TextBufMarkingUp))
 	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
-	if !fromEcho {
-		tb.MarkupEchoTimer = time.AfterFunc(time.Duration(TextBufMarkupDelayMSec)*time.Millisecond,
-			func() {
-				tb.MarkupEchoTimer = nil
-				// fmt.Printf("echo remarkup\n")
-				tb.ReMarkup(true) // this is now an echo
-			})
-	}
 }
 
 // MarkupFromTags does syntax highlighting markup using existing HiTags without

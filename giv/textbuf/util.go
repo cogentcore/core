@@ -85,7 +85,7 @@ func FileRegionBytes(fpath string, stLn, edLn int, preComments bool, lnBack int)
 }
 
 // PreCommentStart returns the starting line for comment line(s) that just
-// preceed the given stLn line number within the given lines of bytes,
+// precede the given stLn line number within the given lines of bytes,
 // using the given line-level and block start / end comment chars.
 // returns stLn if nothing found.  Only looks back a total of lnBack lines.
 func PreCommentStart(lns [][]byte, stLn int, comLn, comSt, comEd string, lnBack int) int {
