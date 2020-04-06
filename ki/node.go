@@ -1495,7 +1495,7 @@ func (n *Node) CopyPropsFrom(frm Ki, deep bool) error {
 	for k, v := range fmP {
 		n.Props[k] = v
 	}
-
+	return nil
 }
 
 // PropTag returns the name to look for in type properties, for types
