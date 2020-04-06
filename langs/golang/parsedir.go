@@ -294,7 +294,7 @@ func (gl *GoLang) DeleteExternalTypes(sy *syms.Symbol) {
 // from import path string -- removes any quotes around path first.
 func (gl *GoLang) ImportPathPkg(im string) (path, base, pkg string) {
 	sz := len(im)
-	if sz == 0 {
+	if sz < 3 {
 		return
 	}
 	path = im
