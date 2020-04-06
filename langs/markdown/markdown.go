@@ -10,14 +10,17 @@ import (
 	"github.com/goki/ki/indent"
 	"github.com/goki/pi/complete"
 	"github.com/goki/pi/filecat"
+	"github.com/goki/pi/langs/bibtex"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
 	"github.com/goki/pi/syms"
+	"github.com/goki/pi/token"
 )
 
 // MarkdownLang implements the Lang interface for the Markdown language
 type MarkdownLang struct {
-	Pr *pi.Parser
+	Pr   *pi.Parser
+	Bibs bibtex.Files `desc:"bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate"`
 }
 
 // TheMarkdownLang is the instance variable providing support for the Markdown language
@@ -49,6 +52,7 @@ func (ml *MarkdownLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	}
 	pfs := fss.StartProc(txt) // current processing one
 	pr.LexAll(pfs)
+	ml.OpenBibfile(fss, pfs)
 	fss.EndProc() // now done
 	// no parser
 }
@@ -72,17 +76,62 @@ func (ml *MarkdownLang) HiLine(fss *pi.FileStates, line int, txt []rune) lex.Lin
 }
 
 func (ml *MarkdownLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md complete.Matches) {
+	origStr := str
+	lfld := lex.LastField(str)
+	str = lex.InnerBracketScope(lfld, "[", "]")
+	if len(str) > 1 {
+		if str[0] == '@' {
+			return ml.CompleteCite(fss, origStr, str[1:], pos)
+		}
+	}
 	// n/a
 	return md
 }
 
 // Lookup is the main api called by completion code in giv/complete.go to lookup item
-func (gl *MarkdownLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
+func (ml *MarkdownLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld complete.Lookup) {
+	origStr := str
+	lfld := lex.LastField(str)
+	str = lex.InnerBracketScope(lfld, "[", "]")
+	if len(str) > 1 {
+		if str[0] == '@' {
+			return ml.LookupCite(fss, origStr, str[1:], pos)
+		}
+	}
 	return
 }
 
 func (ml *MarkdownLang) CompleteEdit(fs *pi.FileStates, text string, cp int, comp complete.Completion, seed string) (ed complete.Edit) {
-	// n/a
+	// if the original is ChildByName() and the cursor is between d and B and the comp is Children,
+	// then delete the portion after "Child" and return the new comp and the number or runes past
+	// the cursor to delete
+	s2 := text[cp:]
+	// gotParen := false
+	if len(s2) > 0 && lex.IsLetterOrDigit(rune(s2[0])) {
+		for i, c := range s2 {
+			if c == '{' {
+				// gotParen = true
+				s2 = s2[:i]
+				break
+			}
+			isalnum := c == '_' || unicode.IsLetter(c) || unicode.IsDigit(c)
+			if !isalnum {
+				s2 = s2[:i]
+				break
+			}
+		}
+	} else {
+		s2 = ""
+	}
+
+	var nw = comp.Text
+	// if gotParen && strings.HasSuffix(nw, "()") {
+	// 	nw = nw[:len(nw)-2]
+	// }
+
+	// fmt.Printf("text: %v|%v  comp: %v  s2: %v\n", text[:cp], text[cp:], nw, s2)
+	ed.NewText = nw
+	ed.ForwardDelete = len(s2)
 	return ed
 }
 
@@ -90,6 +139,9 @@ func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol 
 	// n/a
 	return nil
 }
+
+// List keywords (for indent)
+var ListKeys = map[string]struct{}{"* ": struct{}{}, "+ ": struct{}{}, "- ": struct{}{}}
 
 // IndentLine returns the indentation level for given line based on
 // previous line's indentation level, and any delta change based on
@@ -100,6 +152,19 @@ func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol 
 func (ml *MarkdownLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, ln int, tabSz int) (pInd, delInd, pLn int, ichr indent.Char) {
 	pInd, pLn, ichr = lex.PrevLineIndent(src, tags, ln, tabSz)
 	delInd = 0
+	ptg := tags[pLn]
+	ctg := tags[ln]
+	if len(ptg) > 0 && len(ctg) > 0 {
+		fptg := ptg[0]
+		fctg := ctg[0]
+		if fptg.Tok.Tok == token.Keyword && fctg.Tok.Tok == token.Keyword {
+			_, pky := ListKeys[fptg.Tok.Key]
+			_, cky := ListKeys[fctg.Tok.Key]
+			if pky && cky && fptg.Tok.Key != fctg.Tok.Key {
+				delInd = 1
+			}
+		}
+	}
 	return
 }
 

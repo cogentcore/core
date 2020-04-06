@@ -6,7 +6,6 @@ package tex
 
 import (
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/goki/ki/indent"
@@ -17,17 +16,10 @@ import (
 	"github.com/goki/pi/syms"
 )
 
-// BibData contains the bibliography data
-type BibData struct {
-	File   string         `desc:"file name -- full path"`
-	BibTex *bibtex.BibTex `desc:"bibtex data loaded from file"`
-	Mod    time.Time      `desc:"mod time for loaded bibfile -- to detect updates"`
-}
-
 // TexLang implements the Lang interface for the Tex / LaTeX language
 type TexLang struct {
 	Pr   *pi.Parser
-	Bibs map[string]*BibData `desc:"bibliography data that has been loaded, keyed by abs file path"`
+	Bibs bibtex.Files `desc:"bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate"`
 }
 
 // TheTexLang is the instance variable providing support for the Go language
@@ -59,7 +51,7 @@ func (tl *TexLang) ParseFile(fss *pi.FileStates, txt []byte) {
 	}
 	pfs := fss.StartProc(txt) // current processing one
 	pr.LexAll(pfs)
-	tl.FindBibfile(fss, pfs)
+	tl.OpenBibfile(fss, pfs)
 	fss.EndProc() // now done
 	// no parser
 }
