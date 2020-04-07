@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-package sliceclone provides those basic slice cloning methods that I finally got tired of
+Package sliceclone provides those basic slice cloning methods that I finally got tired of
 rewriting all the time.
 */
 package sliceclone

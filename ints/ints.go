@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-/* Package ints provides a standard Inter interface and basic functions
+/*
+Package ints provides a standard Inter interface and basic functions
 defined on Inter types that support core things like Max, Min, Abs.
 Furthermore, fully generic slice sort and conversion methods in the kit type
 kit package attempt to use this interface, before falling back on reflection.

@@ -214,9 +214,8 @@ func FieldByPath(typ reflect.Type, path string) (reflect.StructField, bool) {
 		}
 		if i == plen-1 {
 			return fld, true
-		} else {
-			ctyp = fld.Type
 		}
+		ctyp = fld.Type
 	}
 	return reflect.StructField{}, false
 }
@@ -240,10 +239,9 @@ func FieldValueByPath(stru interface{}, path string) (reflect.Value, bool) {
 		fval := cval.FieldByName(pe)
 		if i == plen-1 {
 			return fval, true
-		} else {
-			cval = fval
-			ctyp = fval.Type()
 		}
+		cval = fval
+		ctyp = fval.Type()
 	}
 	return reflect.Value{}, false
 }

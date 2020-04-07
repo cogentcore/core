@@ -303,9 +303,8 @@ func (tr *EnumRegistry) NVals(eval interface{}) int64 {
 	n := tr.Prop(nm, "N")
 	if n != nil {
 		return n.(int64)
-	} else {
-		log.Printf("kit.EnumRegistry: no N registered for type: %v\n", nm)
 	}
+	log.Printf("kit.EnumRegistry: no N registered for type: %v\n", nm)
 	return 0
 }
 
@@ -597,9 +596,8 @@ func (tr *EnumRegistry) SetAnyEnumValueFromString(eval reflect.Value, str string
 			return err
 		}
 		return SetEnumValueFromInt64(eval, bf)
-	} else {
-		return tr.SetEnumValueFromStringAltFirst(eval, str)
 	}
+	return tr.SetEnumValueFromStringAltFirst(eval, str)
 }
 
 // SetAnyEnumIfaceFromString looks up enum type on registry, and if it is
@@ -711,9 +709,8 @@ func EnumUnmarshalJSON(eval interface{}, b []byte) error {
 			return SetEnumIfaceFromInt64(eval, bf, et)
 		}
 		return err
-	} else {
-		return SetEnumIfaceFromString(eval, noq)
 	}
+	return SetEnumIfaceFromString(eval, noq)
 }
 
 func EnumMarshalText(eval interface{}) ([]byte, error) {
@@ -737,15 +734,14 @@ func EnumUnmarshalText(eval interface{}, b []byte) error {
 			return SetEnumIfaceFromInt64(eval, bf, et)
 		}
 		return err
-	} else {
-		return SetEnumIfaceFromString(eval, noq)
 	}
+	return SetEnumIfaceFromString(eval, noq)
 }
 
 /////////////////////////////////////////////////////////////
 // Following is for testing..
 
-// testing
+// TestFlags are for testing -- need the generated string code, so putting in here
 type TestFlags int32
 
 const (

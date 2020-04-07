@@ -129,7 +129,7 @@ func Dirs(path string) []string {
 }
 
 // LatestMod returns the latest (most recent) modification time for any of the
-// files in the directory (optinally filtered by extension(s) if exts != nil)
+// files in the directory (optionally filtered by extension(s) if exts != nil)
 // if no files or error, returns zero time value
 func LatestMod(path string, exts []string) time.Time {
 	tm := time.Time{}

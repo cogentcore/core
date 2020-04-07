@@ -257,9 +257,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(floats.Floater).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case ints.Inter:
@@ -268,9 +267,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(ints.Inter).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -284,9 +282,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
@@ -295,9 +292,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Uint()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
@@ -306,9 +302,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
@@ -317,9 +312,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
-			} else {
-				return jv.Before(iv)
 			}
+			return jv.Before(iv)
 		})
 	}
 
@@ -331,9 +325,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -346,9 +339,8 @@ func MapValueSort(mpvnp reflect.Value, keys []reflect.Value, ascending bool) err
 			jv := NonPtrValue(mpvnp.MapIndex(keys[j])).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
-			} else {
-				return strings.ToLower(iv) > strings.ToLower(jv)
 			}
+			return strings.ToLower(iv) > strings.ToLower(jv)
 		})
 		return nil
 	}

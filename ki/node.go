@@ -1751,6 +1751,9 @@ outer:
 					continue
 				}
 			}
+		} else {
+			cur.SetTravState(cur.NumKiFields(), cur.NumChildren())
+			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
@@ -1876,9 +1879,8 @@ func (n *Node) UpdateStart() bool {
 				k.ClearFlagMask(int64(UpdateFlagsMask))
 				k.SetFlag(int(Updating))
 				return true // keep going down
-			} else {
-				return false // bail -- already updating
 			}
+			return false // bail -- already updating
 		})
 		// pr.End()
 	}
@@ -2304,9 +2306,8 @@ func ReadNewJSON(reader io.Reader) (Ki, error) {
 		root.SetFlag(int(ChildAdded)) // this might not be set..
 		root.UpdateEnd(updt)
 		return root, nil
-	} else {
-		return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 	}
+	return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
 }
 
 // OpenNewJSON opens a new Ki tree from a JSON-encoded file, using type

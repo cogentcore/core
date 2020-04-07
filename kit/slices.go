@@ -85,9 +85,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Interface().(floats.Floater).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case ints.Inter:
@@ -96,9 +95,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Interface().(ints.Inter).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -112,9 +110,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
@@ -123,9 +120,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Uint()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
@@ -134,9 +130,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
@@ -145,9 +140,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
-			} else {
-				return jv.Before(iv)
 			}
+			return jv.Before(iv)
 		})
 	}
 
@@ -159,9 +153,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -174,9 +167,8 @@ func SliceSort(sl interface{}, ascending bool) error {
 			jv := NonPtrValue(svnp.Index(j)).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
-			} else {
-				return strings.ToLower(iv) > strings.ToLower(jv)
 			}
+			return strings.ToLower(iv) > strings.ToLower(jv)
 		})
 		return nil
 	}
@@ -215,9 +207,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(floats.Floater).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case ints.Inter:
@@ -228,9 +219,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(ints.Inter).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -246,9 +236,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
@@ -259,9 +248,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Uint()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
@@ -272,9 +260,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk == reflect.Struct && ShortTypeName(fld.Type) == "time.Time":
@@ -285,9 +272,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
-			} else {
-				return jv.Before(iv)
 			}
+			return jv.Before(iv)
 		})
 	}
 
@@ -301,9 +287,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -318,9 +303,8 @@ func StructSliceSort(struSlice interface{}, fldIdx []int, ascending bool) error 
 			jv := jval.Elem().FieldByIndex(fldIdx).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
-			} else {
-				return strings.ToLower(iv) > strings.ToLower(jv)
 			}
+			return strings.ToLower(iv) > strings.ToLower(jv)
 		})
 		return nil
 	}
@@ -349,9 +333,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Interface().(floats.Floater).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case ints.Inter:
@@ -360,9 +343,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Interface().(ints.Inter).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -376,9 +358,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Int()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
@@ -387,9 +368,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Uint()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
@@ -398,9 +378,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Float()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	case vk == reflect.Struct && ShortTypeName(elnptyp) == "time.Time":
@@ -409,9 +388,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Interface().(time.Time)
 			if ascending {
 				return iv.Before(jv)
-			} else {
-				return jv.Before(iv)
 			}
+			return jv.Before(iv)
 		})
 	}
 
@@ -423,9 +401,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).Interface().(fmt.Stringer).String()
 			if ascending {
 				return iv < jv
-			} else {
-				return iv > jv
 			}
+			return iv > jv
 		})
 		return nil
 	}
@@ -438,9 +415,8 @@ func ValueSliceSort(sl []reflect.Value, ascending bool) error {
 			jv := NonPtrValue(sl[j]).String()
 			if ascending {
 				return strings.ToLower(iv) < strings.ToLower(jv)
-			} else {
-				return strings.ToLower(iv) > strings.ToLower(jv)
 			}
+			return strings.ToLower(iv) > strings.ToLower(jv)
 		})
 		return nil
 	}

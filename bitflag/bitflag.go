@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// package bitflag provides simple bit flag setting, checking, and clearing
-// methods that take bit position args as ints (from const int eunum iota's)
-// and do the bit shifting from there -- although a tiny bit slower, the
-// convenience of maintaining ordinal lists of bit positions greatly outweighs
-// that cost -- see kit type registry for further enum management functions
+/*
+Package bitflag provides simple bit flag setting, checking, and clearing
+methods that take bit position args as ints (from const int eunum iota's)
+and do the bit shifting from there -- although a tiny bit slower, the
+convenience of maintaining ordinal lists of bit positions greatly outweighs
+that cost -- see kit type registry for further enum management functions
+*/
 package bitflag
 
 import "sync/atomic"

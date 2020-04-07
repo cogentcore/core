@@ -498,12 +498,48 @@ func TestNodeCallFun(t *testing.T) {
 	}
 	res = res[:0]
 
+	// test for return = false working
+	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
+		if k.UniqueName() == "child1_001" {
+			return false
+		}
+		return true
+	},
+		func(k Ki, level int, d interface{}) bool {
+			if k.UniqueName() == "child1_001" {
+				return false
+			}
+			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
+			return true
+		})
+	// fmt.Printf("node field fun result: %v\n", res)
+	trg = []string{"[child1, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("NodeField FuncDownDepthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+	}
+	res = res[:0]
+
 	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
 		return true
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[par1, fun_breadth, lev 0]", "[child1, fun_breadth, lev 1]", "[child1_001, fun_breadth, lev 1]", "[child1_002, fun_breadth, lev 1]", "[subchild1, fun_breadth, lev 2]"}
+	if !reflect.DeepEqual(res, trg) {
+		t.Errorf("NodeField FuncDownBreadthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+	}
+	res = res[:0]
+
+	// test for return false
+	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d interface{}) bool {
+		if k.UniqueName() == "child1_001" {
+			return false
+		}
+		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
+		return true
+	})
+	// fmt.Printf("node field fun result: %v\n", res)
+	trg = []string{"[par1, fun_breadth, lev 0]", "[child1, fun_breadth, lev 1]", "[child1_002, fun_breadth, lev 1]"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("NodeField FuncDownBreadthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
