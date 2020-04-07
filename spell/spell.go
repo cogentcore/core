@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/goki/pi/lex"
-	"github.com/sajari/fuzzy"
 )
 
 // SaveAfterLearnIntervalSecs is number of seconds since file has been opened / saved
@@ -24,8 +23,8 @@ const SaveAfterLearnIntervalSecs = 20
 
 var (
 	inited    bool
-	spellMu   sync.Mutex // we need our own mutex in case of loading a new model
-	model     *fuzzy.Model
+	spellMu   sync.RWMutex // we need our own mutex in case of loading a new model
+	model     *Model
 	openTime  time.Time // ModTime() on file
 	learnTime time.Time // last time when a Learn function was called -- last mod to model -- zero if not mod
 	openFPath string
@@ -61,7 +60,7 @@ func Open(path string) error {
 	if err != nil {
 		return err
 	}
-	model, err = fuzzy.Load(path)
+	model, err = Load(path)
 	if err == nil {
 		openFPath = path
 		inited = true
@@ -82,7 +81,7 @@ func OpenCheck() error {
 		return err
 	}
 	if tm.After(openTime) {
-		model, err = fuzzy.Load(openFPath)
+		model, err = Load(openFPath)
 		openTime = tm
 		ResetLearnTime()
 		// log.Printf("opened newer spell file: %s\n", openTime.String())
@@ -93,7 +92,7 @@ func OpenCheck() error {
 // OpenDefault loads the default spelling file.
 // TODO: need different languages obviously!
 func OpenDefault() error {
-	fn := "spell_en_us_plain.json"
+	fn := "spell_en_us.json"
 	return OpenAsset(fn)
 }
 
@@ -110,7 +109,7 @@ func OpenAsset(fname string) error {
 	pinfo, _ := AssetInfo(fname)
 	openTime = pinfo.ModTime()
 	inited = true
-	model, err = fuzzy.FromReader(bytes.NewBuffer(defb))
+	model, err = FromReader(bytes.NewBuffer(defb))
 	return err
 }
 
@@ -118,8 +117,8 @@ func OpenAsset(fname string) error {
 // note: this will overwrite any existing file -- be sure to have opened
 // the current file before making any changes.
 func Save(filename string) error {
-	spellMu.Lock()
-	defer spellMu.Unlock()
+	spellMu.RLock()
+	defer spellMu.RUnlock()
 
 	if model == nil {
 		return nil
@@ -142,7 +141,8 @@ func SaveIfLearn() error {
 	if learnTime.IsZero() {
 		return OpenCheck()
 	}
-	return Save(openFPath)
+	go Save(openFPath)
+	return nil
 }
 
 // Train trains the model based on a text file
@@ -171,7 +171,7 @@ func Train(file os.File, new bool) (err error) {
 		return err
 	}
 	if new {
-		model = fuzzy.NewModel()
+		model = NewModel()
 	}
 	model.Train(out)
 	inited = true
@@ -191,8 +191,8 @@ func CheckWord(word string) ([]string, bool) {
 	orig := w
 	w = strings.ToLower(w)
 
-	spellMu.Lock()
-	defer spellMu.Unlock()
+	spellMu.RLock()
+	defer spellMu.RUnlock()
 	ignore := CheckIgnore(w)
 	if ignore {
 		return nil, true
@@ -227,7 +227,7 @@ func LearnWord(word string) {
 	spellMu.Unlock()
 
 	if openFPath != "" && sint > SaveAfterLearnIntervalSecs {
-		Save(openFPath)
+		go Save(openFPath)
 		// log.Printf("spell.LearnWord: saved updated model after %d seconds\n", sint)
 	}
 }
@@ -238,8 +238,8 @@ func Complete(s string) []string {
 		log.Println("spell.Complete: programmer error -- Spelling not initialized!")
 		OpenDefault() // backup
 	}
-	spellMu.Lock()
-	defer spellMu.Unlock()
+	spellMu.RLock()
+	defer spellMu.RUnlock()
 
 	result, _ := model.Autocomplete(s)
 	return result
