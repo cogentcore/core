@@ -12,9 +12,7 @@ See the [Wiki](https://github.com/goki/ki/wiki) for more docs, and [Google Group
 
 The **Tree** is the most powerful data structure in programming, and it underlies all the best tech, such as the WWW (the DOM is a tree structure), scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  GoKi provides a powerful tree container type, that can support all of these things just by embedding and extending the `Node` struct type that implements the `Ki` (Ki = Tree in Japanese) interface.
 
-Much like LISP (a programming language built around the list data type), the key idea here is to create a comprehensive ecosystem for Go built around Trees (GoKi) -- an awesome, simple programming language with an awesome infrastructure for doing everything you typically need to do with Trees.
-
-The goal of GoKi is to create a minimalist, elegant, and powerful environment (like Go itself) where the tree-based primitives are used to simplify otherwise complex operations.  Similar to MATLAB and matricies, you can perform major computational functions using just a few lines of GoKi code.  As is always the case in programming, using the right data structure that captures the underlying structure of the problem is essential, and in many cases, that structure is a tree.  Of necessity, much existing code incorporates tree structures, but the goal of GoKi is to provide a set of carefully thought-out primitive operations that effectively form a new mental basis set for programming.
+The goal of GoKi is to create a minimalist, elegant, and powerful environment (like Go itself) where the tree-based primitives are used to simplify otherwise complex operations.  Similar to MATLAB and matricies, you can perform major computational functions using just a few lines of GoKi code.  As is always the case in programming, using the right data structure that captures the underlying structure of the problem is essential, and in many cases, that structure is a tree.
 
 For example, GoKi provides functions that traverse the tree in the usual relevant ways ("natural" me-first depth-first, me-last depth-first, and breadth-first) and take a `func` function argument, so you can easily apply a common operation across the whole tree in a transparent and self-contained manner, like this:
 
@@ -22,7 +20,7 @@ For example, GoKi provides functions that traverse the tree in the usual relevan
 func (n *MyNode) DoSomethingOnMyTree() {
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 		mn := KiToMyNode(k)
-	    mn.DoSomething()
+		mn.DoSomething()
 		...
 		return true // return value determines whether tree traversal continues or not
 	})
@@ -47,13 +45,13 @@ The first and most important application of GoKi is the [GoGi](https://github.co
 
 # Code Map
 
-* `kit` package: `kit.Types` `TypeRegistry` provides name-to-type map for looking up types by name, and types can have default properties. `kit.Enums` `EnumRegistry` provides enum (const int) <-> string conversion, including `bitflag` enums.  Also has robust generic `ki.ToInt` `ki.ToFloat` etc converters from `interface{}` to specific type, for processing properties, and several utilties in `embeds.go` for managing embedded structure types (e.g., `TypeEmbeds` checks if one type embeds another, and `EmbeddedStruct` returns the embedded struct from a given struct, providing flexible access to elements of an embedded type hierarchy -- there are also methods for navigating the flattened list of all embedded fields within a struct).  Also has a `kit.Type` struct that supports saving / loading of type information using type names.
+* `kit` package: `kit.Types` `TypeRegistry` provides name-to-type map for looking up types by name, and types can have default properties. `kit.Enums` `EnumRegistry` provides enum (const int) <-> string conversion, including `bitflag` enums.  Also has robust generic `kit.ToInt` `kit.ToFloat` etc converters from `interface{}` to specific type, for processing properties, and several utilties in `embeds.go` for managing embedded structure types (e.g., `TypeEmbeds` checks if one type embeds another, and `EmbeddedStruct` returns the embedded struct from a given struct, providing flexible access to elements of an embedded type hierarchy -- there are also methods for navigating the flattened list of all embedded fields within a struct).  Also has a `kit.Type` struct that supports saving / loading of type information using type names.
 
 * `bitflag` package: simple bit flag setting, checking, and clearing methods that take bit position args as ints (from const int eunum iota's) and do the bit shifting from there
 
 * `ki.go` = `Ki` interface for all major tree node functionality.
 
-* `slice.go` = `ki.Slice []Ki` supports saving / loading of Ki objects in a slice, by recording the size and types of elements in the slice -- requires `ki.Types` type registry to lookup types by name.
+* `slice.go` = `ki.Slice []Ki` supports saving / loading of Ki objects in a slice, by recording the size and types of elements in the slice -- requires `kit.Types` type registry to lookup types by name.
 
 * `props.go` = `ki.Props map[string]interface{}` supports saving / loading of property values using actual `struct` types and named const int enums, using the `kit` type registries.  Used for CSS styling in `GoGi`.
 
@@ -61,8 +59,7 @@ The first and most important application of GoKi is the [GoGi](https://github.co
 
 # Status and TODO
 
-Status: as of 11/2018, it is stable and feature-complete, supporting the full Gide app!
+* April, 2020: version 1.0.0 release -- all stable and well tested.
 
-* 6/2019 release 0.9.8 has many performance enhancements and removal of Ptr support (just don't use pointers!)
 
 
