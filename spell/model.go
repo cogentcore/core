@@ -241,7 +241,7 @@ func (md *Model) Save(filename string) error {
 }
 
 // Save a spelling model to disk, but discard all
-// entries less than the threshold number of occurences
+// entries less than the threshold number of occurrences
 // Much smaller and all that is used when generated
 // as a once off, but not useful for incremental usage
 func (md *Model) SaveLight(filename string) error {

@@ -68,7 +68,7 @@ func (lp *LangProps) HasFlag(flg LangFlags) bool {
 	return false
 }
 
-// StdLangProps is the standard compiled-in set of langauge properties
+// StdLangProps is the standard compiled-in set of language properties
 var StdLangProps = map[filecat.Supported]*LangProps{
 	filecat.Ada:        {filecat.Ada, "--", "", "", nil, nil, nil},
 	filecat.Bash:       {filecat.Bash, "# ", "", "", nil, nil, nil},

@@ -812,7 +812,7 @@ func (pr *Rule) Match(ps *State, parAst *Ast, scope lex.Reg, depth int, optMap l
 		ktpos := mpos[pr.ExclKeyIdx]
 		if pr.MatchExclude(ps, scope, ktpos, depth, optMap) {
 			if ps.Trace.On {
-				ps.Trace.Out(ps, pr, NoMatch, ktpos.St, scope, parAst, "Exclude critera matched")
+				ps.Trace.Out(ps, pr, NoMatch, ktpos.St, scope, parAst, "Exclude criteria matched")
 			}
 			ps.AddNonMatch(scope, pr)
 			return false, scope, nil
@@ -1279,7 +1279,7 @@ func (pr *Rule) DoRules(ps *State, par *Rule, parAst *Ast, scope lex.Reg, mpos M
 			} else if ri == nr-1 && rr.Tok.Tok == token.EOS {
 				ps.ResetNonMatches() // passed this chunk of inputs -- don't need those nonmatches
 			} else {
-				ps.Error(mp, fmt.Sprintf("token: %v (at rule index: %v) has extra preceeding input inconsistent with grammar", rr.Tok, ri), pr)
+				ps.Error(mp, fmt.Sprintf("token: %v (at rule index: %v) has extra preceding input inconsistent with grammar", rr.Tok, ri), pr)
 				ps.Pos, _ = ps.Src.NextTokenPos(mp) // move to token for more robustness
 			}
 			if ourAst != nil {

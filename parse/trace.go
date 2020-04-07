@@ -20,7 +20,7 @@ type TraceOpts struct {
 	Match        bool     `desc:"trace full rule matches -- when a rule fully matches"`
 	SubMatch     bool     `desc:"trace sub-rule matches -- when the parts of each rule match"`
 	NoMatch      bool     `desc:"trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)"`
-	Run          bool     `desc:"trace progress runing through each of the sub-rules when a rule has matched and is 'running'"`
+	Run          bool     `desc:"trace progress running through each of the sub-rules when a rule has matched and is 'running'"`
 	RunAct       bool     `desc:"trace actions performed by running rules"`
 	ScopeSrc     bool     `desc:"if true, shows the full scope source for every trace statement"`
 	FullStackOut bool     `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`

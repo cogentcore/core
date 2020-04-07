@@ -195,7 +195,7 @@ func (gl *GoLang) TypeFromAstExpr(fs *pi.FileState, origPkg, pkg *syms.Symbol, t
 	return nil, tyast, false
 }
 
-// TypeFromAstSym attemts to get the type from given symbol as part of expression.
+// TypeFromAstSym attempts to get the type from given symbol as part of expression.
 // It returns the type, any Ast node that remained unprocessed at the end, and bool if found.
 func (gl *GoLang) TypeFromAstSym(fs *pi.FileState, origPkg, pkg *syms.Symbol, tyast, last *parse.Ast, sym *syms.Symbol) (*syms.Type, *parse.Ast, bool) {
 	// if TraceTypes {

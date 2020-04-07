@@ -29,6 +29,9 @@ func (gl *GoLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld comple
 	}
 	origStr := str
 	str = lex.LastScopedString(str)
+	if len(str) == 0 {
+		return
+	}
 	fs := fss.Done()
 	if len(fs.ParseState.Scopes) == 0 {
 		return // need a package
@@ -131,6 +134,13 @@ func (gl *GoLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md 
 	}
 	origStr := str
 	str = lex.LastScopedString(str)
+	if len(str) > 0 {
+		lstchr := str[len(str)-1]
+		mbrace, right := lex.BracePair(rune(lstchr))
+		if mbrace != 0 && right { // don't try to match after closing expr
+			return
+		}
+	}
 
 	fs := fss.Done()
 	if len(fs.ParseState.Scopes) == 0 {
