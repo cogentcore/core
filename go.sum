@@ -52,12 +52,12 @@ github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff h1:W71vTCKoxtdXgnm1E
 github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff/go.mod h1:wfqRWLHRBsRgkp5dmbG56SA0DmVtwrF5N3oPdI8t+Aw=
 github.com/goki/ki v0.9.11 h1:LOsRjJUuWTj8kgo30qyDoJPhk3Da6kVvclNfAz8nJMU=
 github.com/goki/ki v0.9.11/go.mod h1:/nsdYEYyX152+uLTOaHGxFBLoe1qcbkCpNVwAj5W1HU=
-github.com/goki/ki v0.9.14-0.20200406131018-f60b194c07d7 h1:Hozeyf7dKyocFTl+c0SvRMJ97gM1IBz80lQ6+nSD+dA=
-github.com/goki/ki v0.9.14-0.20200406131018-f60b194c07d7/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
+github.com/goki/ki v1.0.0 h1:tsg8UII9T9vbEI55tNoJe+Y9MMdsE3b9mMrRWGZBZ4Y=
+github.com/goki/ki v1.0.0/go.mod h1:X+gmVeAym3JDSbbiA7iF1qkgAlTVWl1JV9sRsGDzxOA=
 github.com/goki/mat32 v1.0.1 h1:S65NwaGnEN8usd8NjKQ2gFcGulu6PhHGIksF4LSeyYA=
 github.com/goki/mat32 v1.0.1/go.mod h1:SCqUsgLhG48i7wu/Kce9OF62abYJnxCX7YL5TOxZ0K4=
-github.com/goki/pi v0.9.16-0.20200406131204-f61ded3b0e1b h1:BAPlB/ofQskd+c3/DOwiA/RnXtjEMuZvYiiTzKDizjA=
-github.com/goki/pi v0.9.16-0.20200406131204-f61ded3b0e1b/go.mod h1:AnakYXOwXSsDZybdpD/FRtoeUx5KfUR7lXm8KA6Aey8=
+github.com/goki/pi v1.0.0 h1:R+97nloz0BeJJDs0IAvc2cD1tOIySI/SWV3A8VpUV4Y=
+github.com/goki/pi v1.0.0/go.mod h1:KFpqWw06mlJiVZGbRwdNhBxzEO8umcFAFEqLq3qfObQ=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b h1:3zU6niF8uvEaNtRBhOkmgbE/Fx7D6xuALotArTpycNc=
 github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b/go.mod h1:pgRizZOb3eUJr+ByZnXnPvt+a0fVOTn0Ujc2TqVZpW4=
 github.com/goki/vci v0.90.1 h1:50BIleTIDzkk0QM3BE36a3fBkEbZEkVqvCuSOyOghbk=
@@ -83,8 +83,6 @@ github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/sajari/fuzzy v1.0.0 h1:+FmwVvJErsd0d0hAPlj4CxqxUtQY/fOoY0DwX4ykpRY=
-github.com/sajari/fuzzy v1.0.0/go.mod h1:OjYR6KxoWOe9+dOlXeiCJd4dIbED4Oo8wpS89o0pwOo=
 github.com/sergi/go-diff v1.0.0 h1:Kpca3qRNrduNnOQeazBd0ysaKrUJiIuISHxogkT9RPQ=
 github.com/sergi/go-diff v1.0.0/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
 github.com/srwiley/oksvg v0.0.0-20190829233741-58e08c8fe40e h1:LJUrNHytcMXWKxnULIHPe5SCb1jDpO9o672VB1x2EuQ=

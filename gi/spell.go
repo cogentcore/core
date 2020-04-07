@@ -36,7 +36,7 @@ func InitSpell() error {
 // OpenSpellModel loads a saved spelling model
 func OpenSpellModel() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	openpath := filepath.Join(pdir, "spell_en_us_plain.json")
+	openpath := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Open(openpath)
 	return err
 }
@@ -88,7 +88,7 @@ func AddToSpellModel(filepath string) error {
 // SaveSpellModel saves the spelling model which includes the data and parameters
 func SaveSpellModel() error {
 	pdir := oswin.TheApp.GoGiPrefsDir()
-	path := filepath.Join(pdir, "spell_en_us_plain.json")
+	path := filepath.Join(pdir, "spell_en_us.json")
 	err := spell.Save(path)
 	if err != nil {
 		log.Printf("Could not save spelling model to file: %v.\n", err)

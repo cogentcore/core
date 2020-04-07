@@ -17,9 +17,9 @@ require (
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/go-python/gopy v0.3.1
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/goki/ki v0.9.14-0.20200406131018-f60b194c07d7
+	github.com/goki/ki v1.0.0
 	github.com/goki/mat32 v1.0.1
-	github.com/goki/pi v0.9.16-0.20200406131204-f61ded3b0e1b
+	github.com/goki/pi v1.0.0
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v0.90.1
 	github.com/gorilla/css v1.0.0 // indirect
