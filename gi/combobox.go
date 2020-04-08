@@ -37,15 +37,15 @@ func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
 	return parent.AddNewChild(KiT_ComboBox, name).(*ComboBox)
 }
 
-func (nb *ComboBox) CopyFieldsFrom(frm interface{}) {
+func (cb *ComboBox) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*ComboBox)
-	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-	nb.Editable = fr.Editable
-	nb.CurVal = fr.CurVal
-	nb.CurIndex = fr.CurIndex
-	nb.Items = fr.Items
-	nb.ItemsMenu.CopyFrom(&fr.ItemsMenu)
-	nb.MaxLength = fr.MaxLength
+	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	cb.Editable = fr.Editable
+	cb.CurVal = fr.CurVal
+	cb.CurIndex = fr.CurIndex
+	cb.Items = fr.Items
+	cb.ItemsMenu.CopyFrom(&fr.ItemsMenu)
+	cb.MaxLength = fr.MaxLength
 }
 
 func (cb *ComboBox) Disconnect() {

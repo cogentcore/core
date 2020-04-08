@@ -43,11 +43,11 @@ func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
 	return parent.AddNewChild(KiT_Bitmap, name).(*Bitmap)
 }
 
-func (nb *Bitmap) CopyFieldsFrom(frm interface{}) {
+func (bm *Bitmap) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Bitmap)
-	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	nb.Size = fr.Size
-	nb.Filename = fr.Filename
+	bm.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	bm.Size = fr.Size
+	bm.Filename = fr.Filename
 }
 
 // Resize resizes bitmap to given size

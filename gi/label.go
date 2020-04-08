@@ -46,12 +46,12 @@ func AddNewLabel(parent ki.Ki, name string, text string) *Label {
 	return lb
 }
 
-func (nb *Label) CopyFieldsFrom(frm interface{}) {
+func (lb *Label) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Label)
-	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	nb.Text = fr.Text
-	nb.Selectable = fr.Selectable
-	nb.Redrawable = fr.Redrawable
+	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	lb.Text = fr.Text
+	lb.Selectable = fr.Selectable
+	lb.Redrawable = fr.Redrawable
 }
 
 func (lb *Label) Disconnect() {

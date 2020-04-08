@@ -35,10 +35,10 @@ func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
 	return parent.AddNewChild(KiT_ButtonBox, name).(*ButtonBox)
 }
 
-func (nb *ButtonBox) CopyFieldsFrom(frm interface{}) {
+func (bb *ButtonBox) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*ButtonBox)
-	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.Items = sliceclone.String(fr.Items)
+	bb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	bb.Items = sliceclone.String(fr.Items)
 }
 
 func (bb *ButtonBox) Disconnect() {

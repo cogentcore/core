@@ -11,6 +11,7 @@ import (
 	"log"
 	"reflect"
 	"sort"
+	"sync"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
@@ -114,6 +115,7 @@ type SliceViewer interface {
 type SliceViewBase struct {
 	gi.Frame
 	Slice            interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
+	ViewMu           *sync.Mutex      `copy:"-" view:"-" json:"-" xml:"-" desc:"optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex"`
 	SliceNPVal       reflect.Value    `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
 	SliceValView     ValueView        `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
 	isArray          bool             `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
@@ -327,6 +329,22 @@ func (sv *SliceViewBase) UpdtSliceSize() int {
 	return sz
 }
 
+// ViewMuLock locks the ViewMu if non-nil
+func (sv *SliceViewBase) ViewMuLock() {
+	if sv.ViewMu == nil {
+		return
+	}
+	sv.ViewMu.Lock()
+}
+
+// ViewMuUnlock Unlocks the ViewMu if non-nil
+func (sv *SliceViewBase) ViewMuUnlock() {
+	if sv.ViewMu == nil {
+		return
+	}
+	sv.ViewMu.Unlock()
+}
+
 // ConfigSliceGrid configures the SliceGrid for the current slice
 // it is only called once at start, under overall Config
 func (sv *SliceViewBase) ConfigSliceGrid() {
@@ -462,6 +480,9 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 // LayoutSliceGrid does the proper layout of slice grid depending on allocated size
 // returns true if UpdateSliceGrid should be called after this
 func (sv *SliceViewBase) LayoutSliceGrid() bool {
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
+
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if kit.IfaceIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -522,6 +543,9 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
+
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
 	if sz == 0 {
 		return
@@ -539,7 +563,9 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	defer sg.UpdateEnd(updt)
 
 	if sv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
+		sv.ViewMuUnlock()
 		sv.LayoutSliceGrid()
+		sv.ViewMuLock()
 		nWidg = nWidgPerRow * sv.DispRows
 	}
 
@@ -704,6 +730,8 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		return
 	}
 
+	sv.ViewMuLock() // no return!  must unlock before return below
+
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
@@ -761,6 +789,9 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	}
 	sv.SetChanged()
 	sv.ScrollBar().SetFullReRender()
+
+	sv.ViewMuUnlock()
+
 	sv.This().(SliceViewer).LayoutSliceGrid()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.ViewSig.Emit(sv.This(), 0, nil)
@@ -780,6 +811,8 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 		return
 	}
 
+	sv.ViewMuLock()
+
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
@@ -788,6 +821,9 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
+
+	sv.ViewMuUnlock()
+
 	sv.SetChanged()
 	if doupdt {
 		sv.ScrollBar().SetFullReRender()
@@ -916,6 +952,7 @@ func (sv *SliceViewBase) HasFocus2D() bool {
 //  NOTE: row = physical GUI display row, idx = slice index -- not the same!
 
 // SliceVal returns value interface at given slice index
+// must be protected by mutex
 func (sv *SliceViewBase) SliceVal(idx int) interface{} {
 	if idx < 0 || idx >= sv.SliceSize {
 		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
@@ -1042,7 +1079,9 @@ func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
 func (sv *SliceViewBase) SelectVal(val string) bool {
 	sv.SelVal = val
 	if sv.SelVal != nil {
+		sv.ViewMuLock()
 		idx, _ := SliceIdxByValue(sv.Slice, sv.SelVal)
+		sv.ViewMuUnlock()
 		if idx >= 0 {
 			sv.ScrollToIdx(idx)
 			sv.UpdateSelectIdx(idx, true)
@@ -1399,6 +1438,7 @@ func (sv *SliceViewBase) UnselectIdxAction(idx int) {
 
 // MimeDataIdx adds mimedata for given idx: an application/json of the struct
 func (sv *SliceViewBase) MimeDataIdx(md *mimedata.Mimes, idx int) {
+	sv.ViewMuLock()
 	val := sv.SliceVal(idx)
 	b, err := json.MarshalIndent(val, "", "  ")
 	if err == nil {
@@ -1406,6 +1446,7 @@ func (sv *SliceViewBase) MimeDataIdx(md *mimedata.Mimes, idx int) {
 	} else {
 		log.Printf("gi.SliceViewBase MimeData JSON Marshall error: %v\n", err)
 	}
+	sv.ViewMuUnlock()
 }
 
 // FromMimeData creates a slice of structs from mime data

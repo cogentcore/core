@@ -69,27 +69,27 @@ var SliderBaseProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 }
 
-func (nb *SliderBase) CopyFieldsFrom(frm interface{}) {
+func (sb *SliderBase) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*SliderBase)
-	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.Value = fr.Value
-	nb.Min = fr.Min
-	nb.Max = fr.Max
-	nb.Step = fr.Step
-	nb.PageStep = fr.PageStep
-	nb.Size = fr.Size
-	nb.ThSize = fr.ThSize
-	nb.ThSizeReal = fr.ThSizeReal
-	nb.ThumbSize = fr.ThumbSize
-	nb.Prec = fr.Prec
-	nb.Icon = fr.Icon
-	nb.ValThumb = fr.ValThumb
-	nb.Pos = fr.Pos
-	nb.DragPos = fr.DragPos
-	nb.Tracking = fr.Tracking
-	nb.TrackThr = fr.TrackThr
-	nb.Snap = fr.Snap
-	nb.Off = fr.Off
+	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	sb.Value = fr.Value
+	sb.Min = fr.Min
+	sb.Max = fr.Max
+	sb.Step = fr.Step
+	sb.PageStep = fr.PageStep
+	sb.Size = fr.Size
+	sb.ThSize = fr.ThSize
+	sb.ThSizeReal = fr.ThSizeReal
+	sb.ThumbSize = fr.ThumbSize
+	sb.Prec = fr.Prec
+	sb.Icon = fr.Icon
+	sb.ValThumb = fr.ValThumb
+	sb.Pos = fr.Pos
+	sb.DragPos = fr.DragPos
+	sb.Tracking = fr.Tracking
+	sb.TrackThr = fr.TrackThr
+	sb.Snap = fr.Snap
+	sb.Off = fr.Off
 }
 
 func (sb *SliderBase) Disconnect() {
@@ -635,9 +635,9 @@ func AddNewSlider(parent ki.Ki, name string) *Slider {
 	return parent.AddNewChild(KiT_Slider, name).(*Slider)
 }
 
-func (nb *Slider) CopyFieldsFrom(frm interface{}) {
+func (sr *Slider) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Slider)
-	nb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
 var SliderProps = ki.Props{
@@ -838,9 +838,9 @@ func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
 	return parent.AddNewChild(KiT_ScrollBar, name).(*ScrollBar)
 }
 
-func (nb *ScrollBar) CopyFieldsFrom(frm interface{}) {
+func (sb *ScrollBar) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*ScrollBar)
-	nb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
 var ScrollBarProps = ki.Props{

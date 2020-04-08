@@ -535,9 +535,9 @@ func AddNewMenuButton(parent ki.Ki, name string) *MenuButton {
 	return parent.AddNewChild(KiT_MenuButton, name).(*MenuButton)
 }
 
-func (nb *MenuButton) CopyFieldsFrom(frm interface{}) {
+func (mb *MenuButton) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*MenuButton)
-	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	mb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
 var MenuButtonProps = ki.Props{
@@ -632,10 +632,10 @@ func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
 	return sp
 }
 
-func (nb *Separator) CopyFieldsFrom(frm interface{}) {
+func (sp *Separator) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Separator)
-	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	nb.Horiz = fr.Horiz
+	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sp.Horiz = fr.Horiz
 }
 
 var SeparatorProps = ki.Props{

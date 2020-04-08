@@ -39,12 +39,12 @@ func AddNewTabView(parent ki.Ki, name string) *TabView {
 	return parent.AddNewChild(KiT_TabView, name).(*TabView)
 }
 
-func (nb *TabView) CopyFieldsFrom(frm interface{}) {
+func (tv *TabView) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*TabView)
-	nb.Layout.CopyFieldsFrom(&fr.Layout)
-	nb.MaxChars = fr.MaxChars
-	nb.NewTabButton = fr.NewTabButton
-	nb.NewTabType = fr.NewTabType
+	tv.Layout.CopyFieldsFrom(&fr.Layout)
+	tv.MaxChars = fr.MaxChars
+	tv.NewTabButton = fr.NewTabButton
+	tv.NewTabType = fr.NewTabType
 }
 
 func (tv *TabView) Disconnect() {

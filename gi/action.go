@@ -32,10 +32,10 @@ func AddNewAction(parent ki.Ki, name string) *Action {
 	return parent.AddNewChild(KiT_Action, name).(*Action)
 }
 
-func (nb *Action) CopyFieldsFrom(frm interface{}) {
+func (ac *Action) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Action)
-	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-	nb.Data = fr.Data
+	ac.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	ac.Data = fr.Data
 }
 
 func (ac *Action) Disconnect() {

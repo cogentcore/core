@@ -1023,8 +1023,8 @@ func AddNewGradient(parent ki.Ki, name string) *Gradient {
 	return parent.AddNewChild(KiT_Gradient, name).(*Gradient)
 }
 
-func (nb *Gradient) CopyFieldsFrom(frm interface{}) {
+func (gr *Gradient) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Gradient)
-	nb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
-	nb.Grad = fr.Grad
+	gr.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	gr.Grad = fr.Grad
 }

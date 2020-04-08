@@ -43,19 +43,19 @@ var ButtonBaseProps = ki.Props{
 	"EnumType:Flag": KiT_ButtonFlags,
 }
 
-func (nb *ButtonBase) CopyFieldsFrom(frm interface{}) {
+func (bb *ButtonBase) CopyFieldsFrom(frm interface{}) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", nb.Type().Name())
-		ki.GenCopyFieldsFrom(nb.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", bb.Type().Name())
+		ki.GenCopyFieldsFrom(bb.This(), frm)
 		return
 	}
-	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.Text = fr.Text
-	nb.Icon = fr.Icon
-	nb.Indicator = fr.Indicator
-	nb.Shortcut = fr.Shortcut
-	nb.Menu = fr.Menu
+	bb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	bb.Text = fr.Text
+	bb.Icon = fr.Icon
+	bb.Indicator = fr.Indicator
+	bb.Shortcut = fr.Shortcut
+	bb.Menu = fr.Menu
 }
 
 func (bb *ButtonBase) Disconnect() {
@@ -713,9 +713,9 @@ func AddNewButton(parent ki.Ki, name string) *Button {
 	return parent.AddNewChild(KiT_Button, name).(*Button)
 }
 
-func (nb *Button) CopyFieldsFrom(frm interface{}) {
+func (bt *Button) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Button)
-	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
 var ButtonProps = ki.Props{
@@ -798,10 +798,10 @@ func AddNewCheckBox(parent ki.Ki, name string) *CheckBox {
 	return parent.AddNewChild(KiT_CheckBox, name).(*CheckBox)
 }
 
-func (nb *CheckBox) CopyFieldsFrom(frm interface{}) {
+func (cb *CheckBox) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*CheckBox)
-	nb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-	nb.IconOff = fr.IconOff
+	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	cb.IconOff = fr.IconOff
 }
 
 var CheckBoxProps = ki.Props{

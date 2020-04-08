@@ -33,10 +33,10 @@ func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
 	return parent.AddNewChild(KiT_MenuBar, name).(*MenuBar)
 }
 
-func (nb *MenuBar) CopyFieldsFrom(frm interface{}) {
+func (mb *MenuBar) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*MenuBar)
-	nb.Layout.CopyFieldsFrom(&fr.Layout)
-	nb.MainMenu = fr.MainMenu
+	mb.Layout.CopyFieldsFrom(&fr.Layout)
+	mb.MainMenu = fr.MainMenu
 }
 
 var MenuBarProps = ki.Props{
@@ -321,9 +321,9 @@ func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
 	return parent.AddNewChild(KiT_ToolBar, name).(*ToolBar)
 }
 
-func (nb *ToolBar) CopyFieldsFrom(frm interface{}) {
+func (tb *ToolBar) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*ToolBar)
-	nb.Layout.CopyFieldsFrom(&fr.Layout)
+	tb.Layout.CopyFieldsFrom(&fr.Layout)
 }
 
 var ToolBarProps = ki.Props{

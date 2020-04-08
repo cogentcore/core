@@ -30,15 +30,15 @@ func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
 	return fr
 }
 
-func (nb *Frame) CopyFieldsFrom(frm interface{}) {
-	fr, ok := frm.(*Frame)
+func (fr *Frame) CopyFieldsFrom(frm interface{}) {
+	cp, ok := frm.(*Frame)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", nb.Type().Name())
-		ki.GenCopyFieldsFrom(nb.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", fr.Type().Name())
+		ki.GenCopyFieldsFrom(fr.This(), frm)
 		return
 	}
-	nb.Layout.CopyFieldsFrom(&fr.Layout)
-	nb.Stripes = fr.Stripes
+	fr.Layout.CopyFieldsFrom(&cp.Layout)
+	fr.Stripes = cp.Stripes
 }
 
 var FrameProps = ki.Props{

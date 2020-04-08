@@ -157,17 +157,17 @@ func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
 	return ly
 }
 
-func (nb *Layout) CopyFieldsFrom(frm interface{}) {
+func (ly *Layout) CopyFieldsFrom(frm interface{}) {
 	fr, ok := frm.(*Layout)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", nb.Type().Name())
-		ki.GenCopyFieldsFrom(nb.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ly.Type().Name())
+		ki.GenCopyFieldsFrom(ly.This(), frm)
 		return
 	}
-	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	nb.Lay = fr.Lay
-	nb.Spacing = fr.Spacing
-	nb.StackTop = fr.StackTop
+	ly.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	ly.Lay = fr.Lay
+	ly.Spacing = fr.Spacing
+	ly.StackTop = fr.StackTop
 }
 
 // Layouts are the different types of layouts
@@ -2119,9 +2119,9 @@ func AddNewStretch(parent ki.Ki, name string) *Stretch {
 	return parent.AddNewChild(KiT_Stretch, name).(*Stretch)
 }
 
-func (nb *Stretch) CopyFieldsFrom(frm interface{}) {
+func (st *Stretch) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Stretch)
-	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
 var StretchProps = ki.Props{
@@ -2159,9 +2159,9 @@ func AddNewSpace(parent ki.Ki, name string) *Space {
 	return parent.AddNewChild(KiT_Space, name).(*Space)
 }
 
-func (nb *Space) CopyFieldsFrom(frm interface{}) {
+func (sp *Space) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*Space)
-	nb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
 var SpaceProps = ki.Props{

@@ -47,13 +47,13 @@ func AddNewSplitView(parent ki.Ki, name string) *SplitView {
 	return parent.AddNewChild(KiT_SplitView, name).(*SplitView)
 }
 
-func (nb *SplitView) CopyFieldsFrom(frm interface{}) {
+func (sv *SplitView) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*SplitView)
-	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.HandleSize = fr.HandleSize
-	mat32.CopyFloat32s(&nb.Splits, fr.Splits)
-	mat32.CopyFloat32s(&nb.SavedSplits, fr.SavedSplits)
-	nb.Dim = fr.Dim
+	sv.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	sv.HandleSize = fr.HandleSize
+	mat32.CopyFloat32s(&sv.Splits, fr.Splits)
+	mat32.CopyFloat32s(&sv.SavedSplits, fr.SavedSplits)
+	sv.Dim = fr.Dim
 }
 
 var SplitViewProps = ki.Props{
@@ -639,6 +639,24 @@ func (sr *Splitter) MouseEvent() {
 			}
 		}
 	})
+}
+
+func (sr *Splitter) MouseScrollEvent() {
+	// todo: just disabling at this point to prevent bad side-effects
+	// sr.ConnectEvent(oswin.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// 	srr := recv.Embed(KiT_SliderBase).(*SliderBase)
+	// 	if srr.IsInactive() {
+	// 		return
+	// 	}
+	// 	me := d.(*mouse.ScrollEvent)
+	// 	me.SetProcessed()
+	// 	cur := float32(srr.Pos)
+	// 	if srr.Dim == mat32.X {
+	// 		srr.SliderMove(cur, cur+float32(me.NonZeroDelta(true))) // preferX
+	// 	} else {
+	// 		srr.SliderMove(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+	// 	}
+	// })
 }
 
 func (sr *Splitter) SplitterEvents() {

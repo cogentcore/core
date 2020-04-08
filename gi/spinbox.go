@@ -46,19 +46,19 @@ func AddNewSpinBox(parent ki.Ki, name string) *SpinBox {
 	return parent.AddNewChild(KiT_SpinBox, name).(*SpinBox)
 }
 
-func (nb *SpinBox) CopyFieldsFrom(frm interface{}) {
+func (sb *SpinBox) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*SpinBox)
-	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.Value = fr.Value
-	nb.HasMin = fr.HasMin
-	nb.Min = fr.Min
-	nb.HasMax = fr.HasMax
-	nb.Max = fr.Max
-	nb.Step = fr.Step
-	nb.PageStep = fr.PageStep
-	nb.Prec = fr.Prec
-	nb.UpIcon = fr.UpIcon
-	nb.DownIcon = fr.DownIcon
+	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	sb.Value = fr.Value
+	sb.HasMin = fr.HasMin
+	sb.Min = fr.Min
+	sb.HasMax = fr.HasMax
+	sb.Max = fr.Max
+	sb.Step = fr.Step
+	sb.PageStep = fr.PageStep
+	sb.Prec = fr.Prec
+	sb.UpIcon = fr.UpIcon
+	sb.DownIcon = fr.DownIcon
 }
 
 func (sb *SpinBox) Disconnect() {

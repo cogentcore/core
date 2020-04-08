@@ -74,15 +74,15 @@ func AddNewTextField(parent ki.Ki, name string) *TextField {
 	return parent.AddNewChild(KiT_TextField, name).(*TextField)
 }
 
-func (nb *TextField) CopyFieldsFrom(frm interface{}) {
+func (tf *TextField) CopyFieldsFrom(frm interface{}) {
 	fr := frm.(*TextField)
-	nb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	nb.Txt = fr.Txt
-	nb.Placeholder = fr.Placeholder
-	nb.ClearAct = fr.ClearAct
-	nb.CursorWidth = fr.CursorWidth
-	nb.Edited = fr.Edited
-	nb.MaxWidthReq = fr.MaxWidthReq
+	tf.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	tf.Txt = fr.Txt
+	tf.Placeholder = fr.Placeholder
+	tf.ClearAct = fr.ClearAct
+	tf.CursorWidth = fr.CursorWidth
+	tf.Edited = fr.Edited
+	tf.MaxWidthReq = fr.MaxWidthReq
 }
 
 func (tf *TextField) Disconnect() {
