@@ -19,9 +19,9 @@ require (
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v1.0.0
 	github.com/goki/mat32 v1.0.1
-	github.com/goki/pi v1.0.0
+	github.com/goki/pi v1.0.1
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
-	github.com/goki/vci v0.90.1
+	github.com/goki/vci v1.0.0
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/ianbruene/go-difflib v1.1.2
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
