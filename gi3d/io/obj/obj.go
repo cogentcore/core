@@ -52,16 +52,16 @@ type Decoder struct {
 	smoothCurrent bool                 // current smooth state
 }
 
-func (di *Decoder) New() gi3d.Decoder {
-	dec := new(Decoder)
-	dec.Objects = make([]Object, 0)
-	dec.Warnings = make([]string, 0)
-	dec.Materials = make(map[string]*Material)
-	dec.Vertices = mat32.NewArrayF32(0, 0)
-	dec.Normals = mat32.NewArrayF32(0, 0)
-	dec.Uvs = mat32.NewArrayF32(0, 0)
-	dec.line = 1
-	return dec
+func (dec *Decoder) New() gi3d.Decoder {
+	di := new(Decoder)
+	di.Objects = make([]Object, 0)
+	di.Warnings = make([]string, 0)
+	di.Materials = make(map[string]*Material)
+	di.Vertices = mat32.NewArrayF32(0, 0)
+	di.Normals = mat32.NewArrayF32(0, 0)
+	di.Uvs = mat32.NewArrayF32(0, 0)
+	di.line = 1
+	return di
 }
 
 func (dec *Decoder) Desc() string {
