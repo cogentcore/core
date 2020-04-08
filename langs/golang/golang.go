@@ -16,6 +16,7 @@ import (
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
+	"github.com/goki/pi/token"
 )
 
 // GoLang implements the Lang interface for the Go language
@@ -129,14 +130,27 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 	curUnd, _ := lex.LineStartEndBracket(src[ln], tags[ln])
 	_, prvInd := lex.LineStartEndBracket(src[pLn], tags[pLn])
 
+	brackParen := false // true if line ends with bracket and paren -- outdent current
+	ll, li := lex.LastLexIgnoreComment(tags[pLn])
+	if ll != nil {
+		if ll.Tok.Tok == token.PunctGpRParen && li > 0 {
+			pl := tags[pLn][li-1]
+			if pl.Tok.Tok == token.PunctGpRBrace {
+				brackParen = true
+			}
+		}
+	}
+
 	delInd = 0
+	if brackParen {
+		delInd-- // outdent
+	}
 	switch {
 	case prvInd && curUnd:
-		delInd = 0 // offset
 	case prvInd:
-		delInd = 1 // indent
+		delInd++
 	case curUnd:
-		delInd = -1 // undent
+		delInd--
 	}
 
 	pwrd := lex.FirstWord(string(src[pLn]))

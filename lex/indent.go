@@ -100,6 +100,24 @@ func BracketIndentLine(src [][]rune, tags []Line, ln int, tabSz int) (pInd, delI
 	return
 }
 
+// LastTokenIgnoreComment returns the last token of the tags, ignoring
+// any final comment at end
+func LastLexIgnoreComment(tags Line) (*Lex, int) {
+	var ll *Lex
+	li := -1
+	nt := len(tags)
+	for i := nt - 1; i >= 0; i-- {
+		l := &tags[i]
+		if l.Tok.Tok.Cat() == token.Comment || l.Tok.Tok < token.Keyword {
+			continue
+		}
+		ll = l
+		li = i
+		break
+	}
+	return ll, li
+}
+
 // LineStartEndBracket checks if line starts with a closing bracket
 // or ends with an opening bracket. This is used for auto-indent for example.
 // Bracket is Paren, Bracket, or Brace.
@@ -115,16 +133,13 @@ func LineStartEndBracket(src []rune, tags Line) (start, end bool) {
 				start = true
 			}
 		}
-		ltok := token.None
-		for i := nt - 1; i >= 0; i-- {
-			ltok = tags[i].Tok.Tok
-			if ltok >= token.Keyword && ltok.Cat() != token.Comment {
-				break
-			}
-		}
-		if ltok.InSubCat(token.PunctGp) {
-			if ltok.IsPunctGpLeft() {
-				end = true
+		ll, _ := LastLexIgnoreComment(tags)
+		if ll != nil {
+			ltok := ll.Tok.Tok
+			if ltok.InSubCat(token.PunctGp) {
+				if ltok.IsPunctGpLeft() {
+					end = true
+				}
 			}
 		}
 		return
