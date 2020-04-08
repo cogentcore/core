@@ -36,7 +36,9 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 ![Screenshot of Widgets demo](screenshot.png?raw=true "Screenshot of Widgets demo")
 
-![Screenshot of Widgets demo, Darker](screenshot_dark.png?raw=true "Screenshot of Widgets demo, Darker Colors")
+![Screenshot of Gi3D demo](screenshot_gi3d.png?raw=true "Screenshot of Gi3D demo")
+
+![Screenshot of GiEditor, Dark mode](screenshot_dark.png?raw=true "Screenshot of GiEditor, Dark Mode")
 
 # Code Overview
 
@@ -65,7 +67,7 @@ All of the main "front end" code just deals with `image.RGBA` through the `Paint
 
 # Status
 
-* As of 12/13/2020 the 3D `gi3d` component of the framework is very near to completion, and the code has been widely tested by students and researchers, and can be considered "production ready".  A 1.0 version release is imminent, along with API stability.
+* Version 1.0 release April, 2020!  The 3D `gi3d` component is ready for use, and the code has been widely tested by students and researchers, including extensive testing under `gide`.  The API will remain stable at this point.
 
 * Active users should join [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list to receive more detailed status updates.
 
