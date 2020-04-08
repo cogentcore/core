@@ -10,7 +10,7 @@ type Commit struct {
 	Date    string `desc:"date (author's time) when comitted"`
 	Author  string `desc:"author's name"`
 	Email   string `desc:"author's email"`
-	Message string `desc:"message / subject line for commit"`
+	Message string `width:"100" desc:"message / subject line for commit"`
 }
 
 // Log is the listing of commits
