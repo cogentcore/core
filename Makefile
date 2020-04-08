@@ -11,6 +11,9 @@ DIRS=`go list ./... | grep -v python`
 
 all: build
 
+install:
+	cd examples/widgets; pwd; go get ./...; go build
+
 build: 
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	$(GOBUILD) -v $(DIRS)
