@@ -77,7 +77,7 @@ var StdLangProps = map[filecat.Supported]*LangProps{
 	filecat.CSharp:     {filecat.CSharp, "// ", "/* ", " */", nil, nil, nil},
 	filecat.D:          {filecat.D, "// ", "/* ", " */", nil, nil, nil},
 	filecat.ObjC:       {filecat.ObjC, "// ", "/* ", " */", nil, nil, nil},
-	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab, ReAutoIndent}, nil, nil},
+	filecat.Go:         {filecat.Go, "// ", "/* ", " */", []LangFlags{IndentTab}, nil, nil},
 	filecat.Java:       {filecat.Java, "// ", "/* ", " */", nil, nil, nil},
 	filecat.JavaScript: {filecat.JavaScript, "// ", "/* ", " */", nil, nil, nil},
 	filecat.Eiffel:     {filecat.Eiffel, "--", "", "", nil, nil, nil},

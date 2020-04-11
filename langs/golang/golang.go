@@ -29,6 +29,8 @@ var TheGoLang = GoLang{}
 
 func init() {
 	pi.StdLangProps[filecat.Go].Lang = &TheGoLang
+	if pi.StdLangProps[filecat.Go].Lang == nil {
+	}
 }
 
 func (gl *GoLang) Parser() *pi.Parser {
@@ -130,14 +132,12 @@ func (gl *GoLang) IndentLine(fs *pi.FileStates, src [][]rune, tags []lex.Line, l
 	curUnd, _ := lex.LineStartEndBracket(src[ln], tags[ln])
 	_, prvInd := lex.LineStartEndBracket(src[pLn], tags[pLn])
 
-	brackParen := false // true if line ends with bracket and paren -- outdent current
-	ll, li := lex.LastLexIgnoreComment(tags[pLn])
-	if ll != nil {
-		if ll.Tok.Tok == token.PunctGpRParen && li > 0 {
-			pl := tags[pLn][li-1]
-			if pl.Tok.Tok == token.PunctGpRBrace {
-				brackParen = true
-			}
+	brackParen := false      // true if line only has bracket and paren -- outdent current
+	if len(tags[pLn]) >= 2 { // allow for comments
+		pl := tags[pLn][0]
+		ll := tags[pLn][1]
+		if ll.Tok.Tok == token.PunctGpRParen && pl.Tok.Tok == token.PunctGpRBrace {
+			brackParen = true
 		}
 	}
 

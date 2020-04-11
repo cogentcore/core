@@ -105,6 +105,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 			files[i] = filepath.Join(pkgPathAbs, pt)
 		}
 	} else if gm == "off" { // note: using GOPATH manual mechanism as packages.Load is somehow very slow
+		// fmt.Printf("nomod\n")
 		_, err := os.Stat(path)
 		if os.IsNotExist(err) {
 			path, err = dirs.GoSrcDir(path)
@@ -130,6 +131,7 @@ func (gl *GoLang) ParseDirImpl(path string, opts pi.LangDirOpts) *syms.Symbol {
 			files[i] = filepath.Join(pkgPathAbs, pt)
 		}
 	} else {
+		// fmt.Printf("mod\n")
 		// packages automatically deals with GOPATH vs. modules, etc.
 		pkgs, err := packages.Load(&packages.Config{Mode: packages.NeedName | packages.NeedFiles}, path)
 		if err != nil {
