@@ -5,7 +5,7 @@
     "Props": null,
     "Kids": [
       {
-        "n": 12,
+        "n": 13,
         "type": "lex.Rule",
         "name": "Comment",
         "type": "lex.Rule",
@@ -24,6 +24,8 @@
         "name": "RBrace",
         "type": "lex.Rule",
         "name": "DollarSign",
+        "type": "lex.Rule",
+        "name": "Ampersand",
         "type": "lex.Rule",
         "name": "Number",
         "type": "lex.Rule",
@@ -77,7 +79,7 @@
         "Props": null,
         "Kids": [
           {
-            "n": 9,
+            "n": 14,
             "type": "lex.Rule",
             "name": "Section",
             "type": "lex.Rule",
@@ -94,6 +96,16 @@
             "name": "VerbSlash",
             "type": "lex.Rule",
             "name": "VerbPipe",
+            "type": "lex.Rule",
+            "name": "Percent",
+            "type": "lex.Rule",
+            "name": "DollarSign",
+            "type": "lex.Rule",
+            "name": "Ampersand",
+            "type": "lex.Rule",
+            "name": "LBrace",
+            "type": "lex.Rule",
+            "name": "RBrace",
             "type": "lex.Rule",
             "name": "AnyCmd"
           },
@@ -466,6 +478,106 @@
             "NameMap": false
           },
           {
+            "Nm": "Percent",
+            "UniqueNm": "Percent",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitNum",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "%",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "DollarSign",
+            "UniqueNm": "DollarSign",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "LitNum",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "$",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "Ampersand",
+            "UniqueNm": "Ampersand",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "\u0026",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "LBrace",
+            "UniqueNm": "LBrace",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "{",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
+            "Nm": "RBrace",
+            "UniqueNm": "RBrace",
+            "Props": null,
+            "Kids": null,
+            "Off": false,
+            "Desc": "",
+            "Token": "None",
+            "Match": "String",
+            "Pos": "AnyPos",
+            "String": "}",
+            "Offset": 0,
+            "SizeAdj": 0,
+            "Acts": [
+              "Next"
+            ],
+            "Until": "",
+            "PushState": "",
+            "NameMap": false
+          },
+          {
             "Nm": "AnyCmd",
             "UniqueNm": "AnyCmd",
             "Props": null,
@@ -618,6 +730,26 @@
           "ReadUntil"
         ],
         "Until": "$",
+        "PushState": "",
+        "NameMap": false
+      },
+      {
+        "Nm": "Ampersand",
+        "UniqueNm": "Ampersand",
+        "Props": null,
+        "Kids": null,
+        "Off": false,
+        "Desc": "",
+        "Token": "PunctSep",
+        "Match": "String",
+        "Pos": "AnyPos",
+        "String": "\u0026",
+        "Offset": 0,
+        "SizeAdj": 0,
+        "Acts": [
+          "Next"
+        ],
+        "Until": "",
         "PushState": "",
         "NameMap": false
       },

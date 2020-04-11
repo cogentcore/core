@@ -1765,6 +1765,7 @@ func (pr *Rule) WriteGrammar(writer io.Writer, depth int) {
 }
 
 var RuleProps = ki.Props{
+	"EnumType:Flag": ki.KiT_Flags,
 	// "CallMethods": ki.PropSlice{
 	// 	{"SaveAs", ki.Props{
 	// 		"Args": ki.PropSlice{

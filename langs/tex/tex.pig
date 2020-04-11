@@ -29,7 +29,12 @@ Backslash:		 NameBuiltin		 if String == "\"	 do: Next;  {
     VerbPipe:       NameBuiltin       if String == "verb|"   do: Next;  {
         VerbText:       TextStyleOutput       if AnyRune   do: ReadUntil: ""; 
     }
-    AnyCmd:       NameBuiltin       if AnyRune   do: Name; 
+    Percent:          LitNum            if String == "%"   do: Next; 
+    DollarSign:       LitNum            if String == "$"   do: Next; 
+    Ampersand:        None              if String == "&"   do: Next; 
+    LBrace:           None              if String == "{"   do: Next; 
+    RBrace:           None              if String == "}"   do: Next; 
+    AnyCmd:           NameBuiltin       if AnyRune         do: Name; 
 }
 // LBraceBf old school.. 
 LBraceBf:		 TextStyleStrong		 if String == "{\bf"	 do: ReadUntil: "}"; 
@@ -40,6 +45,7 @@ LBrack:		 NameAttribute		 if String == "["	 do: ReadUntil: "]";
 // RBrace straggler from prior special case 
 RBrace:		 NameBuiltin		 if String == "}"	 do: Next; 
 DollarSign:		 LitStr		 if String == "$"	 do: ReadUntil: "$"; 
+Ampersand:		 PunctSep		 if String == "&"	 do: Next; 
 Number:		 LitNum		 if @StartOfWord:Digit	 do: Number; 
 Quotes:		 LitStrDouble		 if String == "``"	 do: ReadUntil: "''"; 
 AnyText:		 Text		 if AnyRune	 do: Next; 
