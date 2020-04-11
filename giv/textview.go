@@ -4425,7 +4425,7 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 	} else {
 		if kt.Rune == '{' || kt.Rune == '(' || kt.Rune == '[' {
 			tv.KeyInputInsertBra(kt)
-		} else if kt.Rune == '}' && tv.Buf.Opts.AutoIndent {
+		} else if kt.Rune == '}' && tv.Buf.Opts.AutoIndent && tv.CursorPos.Ch == tv.Buf.LineLen(tv.CursorPos.Ln) {
 			tv.CancelComplete()
 			tv.lastAutoInsert = 0
 			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
