@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"time"
 
@@ -971,6 +972,15 @@ func (tb *TextBuf) Search(find []byte, ignoreCase, lexItems bool) (int, []textbu
 	} else {
 		return textbuf.SearchRuneLines(tb.Lines, find, ignoreCase)
 	}
+}
+
+// SearchRegexp looks for a string (regexp) within buffer,
+// returning number of occurrences and specific match position list.
+// Column positions are in runes.
+func (tb *TextBuf) SearchRegexp(re *regexp.Regexp) (int, []textbuf.Match) {
+	tb.LinesMu.RLock()
+	defer tb.LinesMu.RUnlock()
+	return textbuf.SearchByteLinesRegexp(tb.LineBytes, re)
 }
 
 // BraceMatch finds the brace, bracket, or parens that is the partner

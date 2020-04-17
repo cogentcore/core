@@ -583,6 +583,9 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
 //  Window Callbacks
 
 func (w *windowImpl) getScreen() *oswin.Screen {
+	if w == nil || w.glw == nil {
+		return theApp.screens[0]
+	}
 	w.mu.Lock()
 	var sc *oswin.Screen
 	mon := w.glw.GetMonitor() // this returns nil for windowed windows -- i.e., most windows

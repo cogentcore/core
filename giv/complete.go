@@ -2,7 +2,6 @@ package giv
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv/textbuf"
@@ -18,12 +17,12 @@ import (
 func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Matches) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
+		// log.Printf("CompletePi: data is nil not FileStates or is nil - can't complete\n")
 		return md
 	}
 	lp, err := pi.LangSupport.Props(sfs.Sup)
 	if err != nil {
-		log.Printf("CompletePi: %v\n", err)
+		// log.Printf("CompletePi: %v\n", err)
 		return md
 	}
 	if lp.Lang == nil {
@@ -42,12 +41,12 @@ func CompletePi(data interface{}, text string, posLn, posCh int) (md complete.Ma
 func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.Completion, seed string) (ed complete.Edit) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
+		// log.Printf("CompleteEditPi: data is nil not FileStates or is nil - can't complete\n")
 		return ed
 	}
 	lp, err := pi.LangSupport.Props(sfs.Sup)
 	if err != nil {
-		log.Printf("CompleteEditPi: %v\n", err)
+		// log.Printf("CompleteEditPi: %v\n", err)
 		return ed
 	}
 	if lp.Lang == nil {
@@ -62,12 +61,12 @@ func CompleteEditPi(data interface{}, text string, cursorPos int, comp complete.
 func LookupPi(data interface{}, text string, posLn, posCh int) (ld complete.Lookup) {
 	sfs := data.(*pi.FileStates)
 	if sfs == nil {
-		log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
+		// log.Printf("LookupPi: data is nil not FileStates or is nil - can't lookup\n")
 		return ld
 	}
 	lp, err := pi.LangSupport.Props(sfs.Sup)
 	if err != nil {
-		log.Printf("LookupPi: %v\n", err)
+		// log.Printf("LookupPi: %v\n", err)
 		return ld
 	}
 	if lp.Lang == nil {
