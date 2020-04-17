@@ -1438,8 +1438,8 @@ func (ly *Layout) Render2DChildren() {
 func (ly *Layout) Move2DChildren(delta image.Point) {
 	cbb := ly.This().(Node2D).ChildrenBBox2D()
 	if ly.Lay == LayoutStacked {
-		sn := ly.Child(ly.StackTop)
-		if sn == nil {
+		sn, err := ly.ChildTry(ly.StackTop)
+		if err != nil {
 			return
 		}
 		nii, _ := KiToNode2D(sn)
