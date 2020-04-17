@@ -3,8 +3,8 @@
 package pi
 
 const (
-	Version = "v1.0.2"
-	GitCommit = "1818939" // the commit JUST BEFORE the release
-	VersionDate = "2020-04-08 08:14" // UTC
+	Version = "v1.0.3"
+	GitCommit = "2023470" // the commit JUST BEFORE the release
+	VersionDate = "2020-04-17 07:38" // UTC
 )
 
