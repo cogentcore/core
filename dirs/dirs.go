@@ -146,6 +146,8 @@ func LatestMod(path string, exts []string) time.Time {
 }
 
 // AllFiles returns a slice of all the files, recursively, within a given directory
+// Due to the nature of the filepath.Walk function, the first entry will be the
+// directory itself, for reference -- just skip past that if you don't need it.
 func AllFiles(path string) ([]string, error) {
 	var fnms []string
 	er := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
@@ -170,4 +172,14 @@ func HasFile(path, file string) bool {
 		}
 	}
 	return false
+}
+
+// note: rejected from std lib, but often need: https://github.com/golang/go/issues/25012
+// https://github.com/golang/go/issues/5366
+
+// SplitExt returns the base of the file name without extension, and the extension
+func SplitExt(fname string) (fbase, ext string) {
+	ext = filepath.Ext(fname)
+	fbase = strings.TrimSuffix(fname, ext)
+	return
 }
