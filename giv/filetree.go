@@ -2176,10 +2176,12 @@ func (ftv *FileTreeView) PasteMimeCopyFilesCheck(tdir *FileNode, md mimedata.Mim
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	if len(md) == 0 {
+		ftv.DropCancel()
 		return
 	}
 	tfn := ftv.FileNode()
 	if tfn == nil || tfn.IsExternal() {
+		ftv.DropCancel()
 		return
 	}
 	tupdt := ftv.RootView.UpdateStart()

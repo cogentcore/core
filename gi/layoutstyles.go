@@ -31,6 +31,9 @@ import (
 
 // IMPORTANT: any changes here must be updated in stylefuncs.go StyleLayoutFuncs
 
+// ScrollBarWidthDefault is the default width of a scrollbar in pixels
+var ScrollBarWidthDefault = float32(16)
+
 // LayoutStyle contains style preferences on the layout of the element.
 type LayoutStyle struct {
 	ZIndex         int         `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
@@ -59,7 +62,7 @@ func (ls *LayoutStyle) Defaults() {
 	ls.AlignV = AlignMiddle
 	ls.MinWidth.Set(2.0, units.Px)
 	ls.MinHeight.Set(2.0, units.Px)
-	ls.ScrollBarWidth.Set(16.0, units.Px)
+	ls.ScrollBarWidth.Set(ScrollBarWidthDefault, units.Px)
 }
 
 func (ls *LayoutStyle) SetStylePost(props ki.Props) {

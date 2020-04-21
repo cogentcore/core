@@ -1247,7 +1247,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 	sv.UpdateSelectIdx(idx, sel)
 }
 
-// UpdateSelectRow updates the selection for the given index
+// UpdateSelectIdx updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 	if sv.IsInactive() {
 		if sv.SelectedIdx == idx { // never unselect

@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/anthonynsimon/bild/transform"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -252,6 +253,29 @@ func ImageClearer(im *image.RGBA, pct float32) {
 			im.Set(x, y, f32)
 		}
 	}
+}
+
+// ImageSizeMax computes the size of image where the largest size (X or Y) is set to maxSz
+func ImageSizeMax(sz image.Point, maxSz int) image.Point {
+	tsz := sz
+	if sz.X > sz.Y {
+		tsz.X = maxSz
+		tsz.Y = int(float32(sz.Y) * (float32(tsz.X) / float32(sz.X)))
+	} else {
+		tsz.Y = maxSz
+		tsz.X = int(float32(sz.X) * (float32(tsz.Y) / float32(sz.Y)))
+	}
+	return tsz
+}
+
+// ImageResizeMax resizes image so that the largest size (X or Y) is set to maxSz
+func ImageResizeMax(img image.Image, maxSz int) image.Image {
+	sz := img.Bounds().Size()
+	tsz := ImageSizeMax(sz, maxSz)
+	if tsz != sz {
+		img = transform.Resize(img, tsz.X, tsz.Y, transform.Linear)
+	}
+	return img
 }
 
 //////////////////////////////////////////////////////////////////////////////////

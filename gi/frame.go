@@ -171,6 +171,7 @@ func (fr *Frame) Render2D() {
 		fr.Render2DChildren()
 		fr.PopBounds()
 	} else {
+		fr.SetScrollsOff()
 		fr.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }
