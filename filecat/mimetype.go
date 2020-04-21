@@ -481,6 +481,7 @@ var StdMimes = []MimeType{
 	{"image/jpx", []string{".jpx", ".jpf"}, Image, NoSupport},
 	{"image/pcx", []string{".pcx"}, Image, NoSupport},
 	{"image/png", []string{".png"}, Image, Png},
+	{"image/heic", []string{".heic"}, Image, Heic},
 	{"image/svg+xml", []string{".svg", ".svgz"}, Image, Svg},
 	{"image/tiff", []string{".tiff", ".tif"}, Image, Tiff},
 	{"image/vnd.djvu", []string{".djvu", ".djv"}, Image, NoSupport},

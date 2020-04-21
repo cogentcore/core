@@ -33,8 +33,8 @@ func MimeString(sup Supported) string {
 	return mt.Mime
 }
 
-// SupportedCat returns the Cat category for given supported file type
-func SupportedCat(sup Supported) Cat {
+// Cat returns the Cat category for given supported file type
+func (sup Supported) Cat() Cat {
 	if sup == NoSupport {
 		return Unknown
 	}
@@ -58,7 +58,7 @@ func IsMatch(targ, typ Supported) bool {
 	if targ == typ {
 		return true
 	}
-	cat := SupportedCat(typ)
+	cat := typ.Cat()
 	switch targ {
 	case AnyFolder:
 		return cat == Folder
@@ -262,6 +262,7 @@ const (
 	Ppm
 	Xbm
 	Xpm
+	Heic
 
 	// Model is a 3D model
 	AnyModel
