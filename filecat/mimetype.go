@@ -50,7 +50,7 @@ func MimeSub(mime string) string {
 // set CustomExtMimeMap to your own map or call AddCustomExtMime for
 // extension-based ones.
 func MimeFromFile(fname string) (mtype, ext string, err error) {
-	ext = filepath.Ext(fname)
+	ext = strings.ToLower(filepath.Ext(fname))
 	if mtyp, has := ExtMimeMap[ext]; has { // use our map first: very fast!
 		return mtyp, ext, nil
 	}
@@ -482,6 +482,7 @@ var StdMimes = []MimeType{
 	{"image/pcx", []string{".pcx"}, Image, NoSupport},
 	{"image/png", []string{".png"}, Image, Png},
 	{"image/heic", []string{".heic"}, Image, Heic},
+	{"image/heif", []string{".heif"}, Image, Heif},
 	{"image/svg+xml", []string{".svg", ".svgz"}, Image, Svg},
 	{"image/tiff", []string{".tiff", ".tif"}, Image, Tiff},
 	{"image/vnd.djvu", []string{".djvu", ".djv"}, Image, NoSupport},
@@ -497,7 +498,7 @@ var StdMimes = []MimeType{
 	{"image/x-epson-erf", []string{".erf"}, Image, NoSupport},
 	{"image/x-jg", []string{".art"}, Image, NoSupport},
 	{"image/x-jng", []string{".jng"}, Image, NoSupport},
-	{"image/x-ms-bmp", []string{".bmp"}, Image, NoSupport},
+	{"image/x-ms-bmp", []string{".bmp"}, Image, Bmp},
 	{"image/x-nikon-nef", []string{".nef"}, Image, NoSupport},
 	{"image/x-olympus-orf", []string{".orf"}, Image, NoSupport},
 	{"image/x-photoshop", []string{".psd"}, Image, NoSupport},

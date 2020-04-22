@@ -262,7 +262,9 @@ const (
 	Ppm
 	Xbm
 	Xpm
+	Bmp
 	Heic
+	Heif
 
 	// Model is a 3D model
 	AnyModel
