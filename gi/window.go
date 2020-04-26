@@ -953,7 +953,10 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 	if Render2DTrace || WinEventTrace {
 		fmt.Printf("Win: %v uploading region Vp %v, vpbbox: %v, wintex bounds: %v\n", w.PathUnique(), vp.PathUnique(), vpBBox, w.OSWin.WinTex().Bounds())
 	}
-	w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
+	err := w.OSWin.SetWinTexSubImage(winBBox.Min, vp.Pixels, vpBBox)
+	if err != nil {
+		log.Println(err)
+	}
 	// pr.End()
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
@@ -1126,6 +1129,9 @@ func (w *Window) Publish() {
 			w.OSWin.Copy(image.ZP, w.OverTex, w.OverTex.Bounds(), oswin.Over, nil)
 		}
 		w.OSWin.Publish()
+		if Render2DTrace {
+			fmt.Printf("Win %v did publish\n", w.Nm)
+		}
 	}
 	// pr.End()
 	w.ClearWinUpdating()
@@ -1140,7 +1146,9 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data interface{}) {
 		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.PathUnique(), ki.NodeSignals(sig), node.PathUnique())
 	}
 	if !win.IsVisible() || win.IsWinUpdating() { // win.IsResizing() ||
-		// fmt.Printf("not updating as invisible or already updating\n")
+		if WinEventTrace || Render2DTrace {
+			fmt.Printf("not updating as invisible or already updating\n")
+		}
 		return
 	}
 	win.Publish()

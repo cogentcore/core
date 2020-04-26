@@ -323,6 +323,11 @@ func NewDp(val float32) Value {
 	return Value{val, Dp, 0.0}
 }
 
+// NewDot creates a new Dot value
+func NewDot(val float32) Value {
+	return Value{val, Dot, 0.0}
+}
+
 // Set sets value and units of an existing value
 func (v *Value) Set(val float32, un Unit) {
 	v.Val = val

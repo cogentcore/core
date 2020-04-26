@@ -1354,6 +1354,8 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 	}
 	// row := idx - sv.StartIdx // note: could be out of bounds
 	wupdt := sv.TopUpdateStart()
+	defer sv.TopUpdateEnd(wupdt)
+
 	switch mode {
 	case mouse.SelectOne:
 		if sv.IdxIsSelected(idx) {
@@ -1423,7 +1425,6 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 		sv.SelectedIdx = idx
 		sv.UnselectIdx(idx)
 	}
-	sv.TopUpdateEnd(wupdt)
 }
 
 // UnselectIdxAction unselects this idx (if selected) -- and emits a signal

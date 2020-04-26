@@ -57,12 +57,12 @@ func init() {
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(time.Time{})), func() ValueView {
-		vv := &ValueViewBase{} // todo: could do better..
+		vv := &TimeValueView{}
 		vv.Init(vv)
 		return vv
 	})
 	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(FileTime{})), func() ValueView {
-		vv := &ValueViewBase{} // todo: could do better..
+		vv := &TimeValueView{}
 		vv.Init(vv)
 		return vv
 	})

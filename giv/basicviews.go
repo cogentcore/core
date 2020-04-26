@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"time"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/units"
@@ -1027,5 +1028,58 @@ func (vv *NilValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Label)
 	sb.Tooltip, _ = vv.Tag("desc")
+	vv.UpdateWidget()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  TimeValueView
+
+var DefaultTimeFormat = "2006-01-02 15:04:05 MST"
+
+// TimeValueView presents a checkbox for a boolean
+type TimeValueView struct {
+	ValueViewBase
+}
+
+var KiT_TimeValueView = kit.Types.AddType(&TimeValueView{}, nil)
+
+func (vv *TimeValueView) WidgetType() reflect.Type {
+	vv.WidgetTyp = gi.KiT_TextField
+	return vv.WidgetTyp
+}
+
+func (vv *TimeValueView) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	tf := vv.Widget.(*gi.TextField)
+	npv := kit.NonPtrValue(vv.Value)
+	tm := npv.Interface().(time.Time)
+	tf.SetText(tm.Format(DefaultTimeFormat))
+}
+
+func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
+	tf := vv.Widget.(*gi.TextField)
+	tf.SetStretchMaxWidth()
+	tf.Tooltip, _ = vv.Tag("desc")
+	tf.SetInactiveState(vv.This().(ValueView).IsInactive())
+	tf.SetProp("min-width", units.NewCh(float32(len(DefaultTimeFormat)+2)))
+	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
+			vvv, _ := recv.Embed(KiT_TimeValueView).(*TimeValueView)
+			tf := send.(*gi.TextField)
+			nt, err := time.Parse(DefaultTimeFormat, tf.Text())
+			if err != nil {
+				log.Println(err)
+			} else {
+				tptr := kit.PtrValue(vvv.Value).Interface().(*time.Time)
+				*tptr = nt
+				vvv.ViewSig.Emit(vvv.This(), 0, nil)
+				vvv.UpdateWidget()
+			}
+		}
+	})
 	vv.UpdateWidget()
 }

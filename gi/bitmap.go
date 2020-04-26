@@ -147,9 +147,15 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
 }
 
 func (bm *Bitmap) Render2D() {
+	if bm.FullReRenderIfNeeded() {
+		return
+	}
 	if bm.PushBounds() {
+		bm.This().(Node2D).ConnectEvents2D()
 		bm.DrawIntoViewport(bm.Viewport)
 		bm.PopBounds()
+	} else {
+		bm.DisconnectAllEvents(AllPris)
 	}
 }
 
