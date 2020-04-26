@@ -8,6 +8,7 @@ require (
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/Masterminds/vcs v1.13.1
 	github.com/alecthomas/chroma v0.7.2
+	github.com/anthonynsimon/bild v0.11.1
 	github.com/aymerick/douceur v0.2.0
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/chewxy/math32 v1.0.4
@@ -17,9 +18,9 @@ require (
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
 	github.com/go-python/gopy v0.3.1
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/goki/ki v1.0.0
+	github.com/goki/ki v1.0.1
 	github.com/goki/mat32 v1.0.1
-	github.com/goki/pi v1.0.3
+	github.com/goki/pi v1.0.5
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v1.0.0
 	github.com/gorilla/css v1.0.0 // indirect
