@@ -1048,13 +1048,24 @@ func (vv *TimeValueView) WidgetType() reflect.Type {
 	return vv.WidgetTyp
 }
 
+// TimeVal decodes Value into a *time.Time value -- also handles FileTime case
+func (vv *TimeValueView) TimeVal() *time.Time {
+	tmi := kit.PtrValue(vv.Value).Interface()
+	switch v := tmi.(type) {
+	case *time.Time:
+		return v
+	case *FileTime:
+		return (*time.Time)(v)
+	}
+	return nil
+}
+
 func (vv *TimeValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
 	tf := vv.Widget.(*gi.TextField)
-	npv := kit.NonPtrValue(vv.Value)
-	tm := npv.Interface().(time.Time)
+	tm := vv.TimeVal()
 	tf.SetText(tm.Format(DefaultTimeFormat))
 }
 
@@ -1074,8 +1085,8 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 			if err != nil {
 				log.Println(err)
 			} else {
-				tptr := kit.PtrValue(vvv.Value).Interface().(*time.Time)
-				*tptr = nt
+				tm := vvv.TimeVal()
+				*tm = nt
 				vvv.ViewSig.Emit(vvv.This(), 0, nil)
 				vvv.UpdateWidget()
 			}
