@@ -91,7 +91,7 @@ type Ki interface {
 	// kit.Embed for a generic interface{} version.
 	Embed(t reflect.Type) Ki
 
-	// BaseIface returns the 	base interface type for all elements
+	// BaseIface returns the base interface type for all elements
 	// within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
 	// Used e.g., for determining what types of children
 	// can be created (see kit.EmbedImplements for test method)
@@ -597,15 +597,7 @@ type Ki interface {
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Tree walking and Paths
-	//   note: always put functions last -- looks better for inline functions
-
-	// TravState returns the current tree traversal state variables:
-	// current field and child indexes -- used for efficient non-recursive
-	// traversal of the tree.
-	TravState() (curField, curChild int)
-
-	// SetTravState sets the new traversal state variables
-	SetTravState(curField, curChild int)
+	//   note: always put function args last -- looks better for inline functions
 
 	// Depth returns the current depth of the node.
 	// This is only valid in a given context, not a stable

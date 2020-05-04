@@ -40,17 +40,14 @@ import (
 // for other such tags controlling a wide range of GUI and other functionality
 // -- Ki makes extensive use of such tags.
 type Node struct {
-	Nm       string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm string `tableview:"-" copy:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
-	Flag     int64  `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state"`
-	Props    Props  `tableview:"-" xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
-	Par      Ki     `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
-	Kids     Slice  `tableview:"-" copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
-	NodeSig  Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-	Ths      Ki     `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
-
-	travField int       `copy:"-" json:"-" xml:"-" view:"-" desc:"current field index for tree traversal process -- see TravState and SetTravState methods"`
-	travChild int       `copy:"-" json:"-" xml:"-" view:"-" desc:"current child index for tree traversal process -- see TravState and SetTravState methods"`
+	Nm        string    `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	UniqueNm  string    `tableview:"-" copy:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
+	Flag      int64     `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state"`
+	Props     Props     `tableview:"-" xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	Par       Ki        `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	Kids      Slice     `tableview:"-" copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	NodeSig   Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
+	Ths       Ki        `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
 	index     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use Index() method"`
 	depth     int       `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function"`
 	fieldOffs []uintptr `copy:"-" json:"-" xml:"-" view:"-" desc:"cached version of the field offsets relative to base Node address -- used in generic field access."`
@@ -1509,18 +1506,6 @@ func (n *Node) PropTag() string {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
-// TravState returns the current tree traversal state variables:
-// current field and child indexes -- used for efficient non-recursive
-// traversal of the tree.
-func (n *Node) TravState() (curField, curChild int) {
-	return n.travField, n.travChild
-}
-
-// SetTravState sets the new traversal state variables
-func (n *Node) SetTravState(curField, curChild int) {
-	n.travField, n.travChild = curField, curChild
-}
-
 // Depth returns the current depth of the node.
 // This is only valid in a given context, not a stable
 // property of the node (e.g., used in FuncDownBreadthFirst).
@@ -1624,15 +1609,47 @@ func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////
+// FuncDown -- Traversal records
+
+// TravIdxs are tree traversal indexes
+type TravIdxs struct {
+	Field int `desc:"current index of field: -1 for start"`
+	Child int `desc:"current index of children: -1 for start"`
+}
+
+// TravMap is a map for recording the traversal of nodes
+type TravMap map[Ki]TravIdxs
+
+// Start is called at start of traversal
+func (tm TravMap) Start(k Ki) {
+	tm[k] = TravIdxs{-1, -1}
+}
+
+// End deletes node once done at end of traversal
+func (tm TravMap) End(k Ki) {
+	delete(tm, k)
+}
+
+// Set updates traversal state
+func (tm TravMap) Set(k Ki, curField, curChild int) {
+	tm[k] = TravIdxs{curField, curChild}
+}
+
+// Get retrieves current traversal state
+func (tm TravMap) Get(k Ki) (curField, curChild int) {
+	tr := tm[k]
+	return tr.Field, tr.Child
+}
+
 // strategy -- same as used in TreeView:
 // https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
 // FuncDownMeFirst calls function on this node (MeFirst) and then iterates
 // in a depth-first manner over all the children, including Ki Node fields,
 // which are processed first before children.
-// This uses node state information to manage the traversal and is very fast,
-// but can only be called by one thread at a time -- use a Mutex if there is
-// a chance of multiple threads running at the same time.
+// The node traversal is non-recursive and uses locally-allocated state -- safe
+// for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
 // If fun returns false then any further traversal of that branch of the tree is
@@ -1642,46 +1659,47 @@ func (n *Node) FuncDownMeFirst(level int, data interface{}, fun Func) {
 	if n.This() == nil {
 		return
 	}
+	tm := TravMap{} // not significantly faster to pre-allocate larger size
 	start := n.This()
 	cur := start
-	cur.SetTravState(-1, -1)
+	tm.Start(cur)
 outer:
 	for {
 		if cur.This() != nil && fun(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
-				cur.SetTravState(0, -1)
+				tm.Set(cur, 0, -1)
 				nxt := cur.KiField(0).This()
 				if nxt != nil {
 					cur = nxt
-					cur.SetTravState(-1, -1)
+					tm.Start(cur)
 					continue
 				}
 			}
 			if cur.HasChildren() {
-				cur.SetTravState(0, 0) // 0 for no fields
+				tm.Set(cur, 0, 0) // 0 for no fields
 				nxt := cur.Child(0)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					cur.SetTravState(-1, -1)
+					tm.Start(cur)
 					continue
 				}
 			}
 		} else {
-			cur.SetTravState(cur.NumKiFields(), cur.NumChildren())
+			tm.Set(cur, n.NumKiFields(), n.NumChildren())
 			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
-			curField, curChild := cur.TravState()
+			curField, curChild := tm.Get(cur)
 			if cur.HasKiFields() {
 				if (curField + 1) < cur.NumKiFields() {
 					curField++
-					cur.SetTravState(curField, curChild)
+					tm.Set(cur, curField, curChild)
 					nxt := cur.KiField(curField).This()
 					if nxt != nil {
 						cur = nxt
-						cur.SetTravState(-1, -1)
+						tm.Start(cur)
 						continue outer
 					}
 					continue
@@ -1689,22 +1707,24 @@ outer:
 			}
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
-				cur.SetTravState(curField, curChild)
+				tm.Set(cur, curField, curChild)
 				nxt := cur.Child(curChild)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					cur.SetTravState(-1, -1)
+					tm.Start(cur)
 					continue outer
 				}
 				continue
 			}
+			tm.End(cur)
 			// couldn't go right, move up..
 			if cur == start {
 				break outer // done!
 			}
 			level--
 			par := cur.Parent()
-			if par == nil || par == cur { // shouldn't happen
+			if par == nil || par == cur { // shouldn't happen, but does..
+				// fmt.Printf("nil / cur parent %v\n", par)
 				break outer
 			}
 			cur = par
@@ -1717,55 +1737,55 @@ outer:
 // false then that branch of the tree is not further processed), and then
 // calls given fun function after all of a node's children (including fields)
 // have been iterated over ("Me Last").
-// This uses node state information to manage the traversal and is very fast,
-// but can only be called by one thread at a time -- use a Mutex if there is
-// a chance of multiple threads running at the same time.
+// The node traversal is non-recursive and uses locally-allocated state -- safe
+// for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
 func (n *Node) FuncDownMeLast(level int, data interface{}, doChildTestFunc Func, fun Func) {
 	if n.This() == nil {
 		return
 	}
+	tm := TravMap{} // not significantly faster to pre-allocate larger size
 	start := n.This()
 	cur := start
-	cur.SetTravState(-1, -1)
+	tm.Start(cur)
 outer:
 	for {
 		if cur.This() != nil && doChildTestFunc(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasKiFields() {
-				cur.SetTravState(0, -1)
+				tm.Set(cur, 0, -1)
 				nxt := cur.KiField(0).This()
 				if nxt != nil {
 					cur = nxt
-					cur.SetTravState(-1, -1)
+					tm.Set(cur, -1, -1)
 					continue
 				}
 			}
 			if cur.HasChildren() {
-				cur.SetTravState(0, 0) // 0 for no fields
+				tm.Set(cur, 0, 0) // 0 for no fields
 				nxt := cur.Child(0)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					cur.SetTravState(-1, -1)
+					tm.Set(cur, -1, -1)
 					continue
 				}
 			}
 		} else {
-			cur.SetTravState(cur.NumKiFields(), cur.NumChildren())
+			tm.Set(cur, cur.NumKiFields(), cur.NumChildren())
 			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
-			curField, curChild := cur.TravState()
+			curField, curChild := tm.Get(cur)
 			if cur.HasKiFields() {
 				if (curField + 1) < cur.NumKiFields() {
 					curField++
-					cur.SetTravState(curField, curChild)
+					tm.Set(cur, curField, curChild)
 					nxt := cur.KiField(curField).This()
 					if nxt != nil {
 						cur = nxt
-						cur.SetTravState(-1, -1)
+						tm.Set(cur, -1, -1)
 						continue outer
 					}
 					continue
@@ -1773,11 +1793,11 @@ outer:
 			}
 			if (curChild + 1) < cur.NumChildren() {
 				curChild++
-				cur.SetTravState(curField, curChild)
+				tm.Set(cur, curField, curChild)
 				nxt := cur.Child(curChild)
 				if nxt != nil && nxt.This() != nil {
 					cur = nxt.This()
-					cur.SetTravState(-1, -1)
+					tm.Start(cur)
 					continue outer
 				}
 				continue
@@ -1785,6 +1805,7 @@ outer:
 			level--
 			fun(cur, level, data) // now we call the function, last..
 			// couldn't go right, move up..
+			tm.End(cur)
 			if cur == start {
 				break outer // done!
 			}
@@ -2366,6 +2387,7 @@ func (n *Node) ReadXML(reader io.Reader) error {
 	if err == nil {
 		n.UnmarshalPost()
 	}
+	n.SetFlag(int(ChildAdded)) // this might not be set..
 	n.UpdateEnd(updt)
 	return nil
 }
@@ -2373,16 +2395,12 @@ func (n *Node) ReadXML(reader io.Reader) error {
 // ParentAllChildren walks the tree down from current node and call
 // SetParent on all children -- needed after an Unmarshal.
 func (n *Node) ParentAllChildren() {
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-		for _, child := range *k.Children() {
-			if child != nil {
-				child.SetParent(k)
-			} else {
-				return false
-			}
+	for _, child := range *n.Children() {
+		if child != nil {
+			child.AsNode().Par = n.This()
+			child.ParentAllChildren()
 		}
-		return true
-	})
+	}
 }
 
 // UnmarshalPost must be called after an Unmarshal -- calls

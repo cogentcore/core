@@ -11,10 +11,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/goki/ki/kit"
-	"github.com/goki/prof"
 )
 
 type NodeEmbed struct {
@@ -974,87 +972,75 @@ var NWidgets = 10000
 var NParts = 5
 
 func BenchmarkBuildGuiTree_NodeEmbed(b *testing.B) {
-	prof.Reset()
-	prof.Profiling = true
 	for n := 0; n < b.N; n++ {
 		wt := BuildGuiTree(NWidgets, NParts, KiT_NodeEmbed)
 		TestGUITree_NodeEmbed = wt
 	}
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
 }
 
 func BenchmarkBuildGuiTree_NodeField(b *testing.B) {
-	prof.Reset()
-	prof.Profiling = true
 	for n := 0; n < b.N; n++ {
 		wt := BuildGuiTree(NWidgets, NParts, KiT_NodeField)
 		TestGUITree_NodeField = wt
 	}
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
 }
 
 func BenchmarkBuildGuiTree_NodeField2(b *testing.B) {
-	prof.Reset()
-	prof.Profiling = true
 	for n := 0; n < b.N; n++ {
 		wt := BuildGuiTree(NWidgets, NParts, KiT_NodeField2)
 		TestGUITree_NodeField2 = wt
 	}
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
 }
 
 func BenchmarkBuildGuiTreeSlow_NodeEmbed(b *testing.B) {
-	prof.Reset()
-	prof.Profiling = true
+	// prof.Reset()
+	// prof.Profiling = true
 	for n := 0; n < b.N; n++ {
 		wt := BuildGuiTreeSlow(NWidgets, NParts, KiT_NodeEmbed)
 		TestGUITree_NodeEmbed = wt
 	}
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
+	// prof.Report(time.Millisecond)
+	// prof.Profiling = false
 }
 
 func BenchmarkFuncDownMeFirst_NodeEmbed(b *testing.B) {
 	wt := TestGUITree_NodeEmbed
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		nnodes = 0
 		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating))
+			nnodes++
 			return true
 		})
 	}
 	TotNodes = nnodes
-	fmt.Printf("tot nodes: %d\n", TotNodes)
+	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
 
 func BenchmarkFuncDownMeFirst_NodeField(b *testing.B) {
 	wt := TestGUITree_NodeField
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		nnodes = 0
 		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating))
+			nnodes++
 			return true
 		})
 	}
 	TotNodes = nnodes
-	fmt.Printf("tot nodes: %d\n", TotNodes)
+	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
 
 func BenchmarkFuncDownMeFirst_NodeField2(b *testing.B) {
 	wt := TestGUITree_NodeField2
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		nnodes = 0
 		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating))
+			nnodes++
 			return true
 		})
 	}
 	TotNodes = nnodes
-	fmt.Printf("tot nodes: %d\n", TotNodes)
+	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
