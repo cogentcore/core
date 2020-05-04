@@ -1516,15 +1516,16 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 		return false
 	}
 	ly.BBoxMu.RLock()
-	defer ly.BBoxMu.RUnlock()
+	wbb := ly.WinBBox
+	ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
-		did = ly.AutoScrollDim(mat32.Y, ly.WinBBox.Min.Y, pos.Y)
-		did = did || ly.AutoScrollDim(mat32.X, ly.WinBBox.Min.X, pos.X)
+		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
+		did = did || ly.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
 	} else if ly.HasScroll[mat32.Y] {
-		did = ly.AutoScrollDim(mat32.Y, ly.WinBBox.Min.Y, pos.Y)
+		did = ly.AutoScrollDim(mat32.Y, wbb.Min.Y, pos.Y)
 	} else if ly.HasScroll[mat32.X] {
-		did = ly.AutoScrollDim(mat32.X, ly.WinBBox.Min.X, pos.X)
+		did = ly.AutoScrollDim(mat32.X, wbb.Min.X, pos.X)
 	}
 	if did {
 		LayoutLastAutoScroll = time.Now()
