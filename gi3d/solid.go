@@ -158,7 +158,9 @@ func (sld *Solid) IsTransparent() bool {
 // groups aggregate over elements
 func (sld *Solid) UpdateMeshBBox() {
 	if sld.MeshPtr != nil {
+		sld.BBoxMu.Lock()
 		sld.MeshBBox = sld.MeshPtr.AsMeshBase().BBox
+		sld.BBoxMu.Unlock()
 	}
 }
 

@@ -135,6 +135,7 @@ func (cb *ComboBox) ButtonRelease() {
 		cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
 	}
 	cb.UpdateEnd(updt)
+	cb.BBoxMu.RLock()
 	pos := cb.WinBBox.Max
 	if pos.X == 0 && pos.Y == 0 { // offscreen
 		pos = cb.ObjBBox.Max
@@ -149,6 +150,7 @@ func (cb *ComboBox) ButtonRelease() {
 		pos.Y -= 10
 		pos.X -= 10
 	}
+	cb.BBoxMu.RUnlock()
 	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Viewport, cb.Text)
 }
 

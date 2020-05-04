@@ -37,17 +37,21 @@ func (gp *Group) CopyFieldsFrom(frm interface{}) {
 // groups aggregate over elements
 func (gp *Group) UpdateMeshBBox() {
 	// todo: radial, etc
+	gp.BBoxMu.Lock()
 	gp.MeshBBox.BBox.SetEmpty()
 	for _, kid := range gp.Kids {
 		nii, ni := KiToNode3D(kid)
 		if nii == nil {
 			continue
 		}
+		ni.PoseMu.RLock()
 		nbb := ni.MeshBBox.BBox.MulMat4(&ni.Pose.Matrix)
+		ni.PoseMu.RUnlock()
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Min)
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Max)
 	}
 	// fmt.Printf("gp: %v  bbox: %v\n", gp.Nm, gp.MeshBBox.BBox)
+	gp.BBoxMu.Unlock()
 }
 
 func (gp *Group) Defaults() {

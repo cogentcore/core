@@ -272,3 +272,64 @@ Time for 50 Re-Renders:         3.57 s
      Node2D.Layout2DTree:	Tot:	        0.39	Avg:	        0.01	N:	    50	Pct:	 0.01
       StyleFields.ToDots:	Tot:	        0.14	Avg:	        0.00	N:	   100	Pct:	 0.00
 ```
+
+# Ki Benchmarks
+
+Laptop = fast macbook pro as of 5/2020:
+
+Baseline with no locking:
+
+```
+oreilly@shadow:~/goki/ki/ki/ > go test -bench .
+goos: darwin
+goarch: amd64
+BenchmarkBuildGuiTree_NodeEmbed-16        	      30	  38502502 ns/op
+BenchmarkBuildGuiTree_NodeField-16        	      14	  82690320 ns/op
+BenchmarkBuildGuiTree_NodeField2-16       	       7	 159047111 ns/op
+BenchmarkBuildGuiTreeSlow_NodeEmbed-16    	       1	9799964786 ns/op
+BenchmarkFuncDownMeFirst_NodeEmbed-16     	     264	   4633235 ns/op
+BenchmarkFuncDownMeFirst_NodeField-16     	     129	   9027565 ns/op
+BenchmarkFuncDownMeFirst_NodeField2-16    	      85	  14319531 ns/op
+```
+
+With mutex locking at start / end:
+
+```
+BenchmarkBuildGuiTree_NodeEmbed-16        	      30	  39641040 ns/op
+BenchmarkBuildGuiTree_NodeField-16        	      14	  85435516 ns/op
+BenchmarkBuildGuiTree_NodeField2-16       	       7	 162794630 ns/op
+BenchmarkBuildGuiTreeSlow_NodeEmbed-16    	       1	10012321622 ns/op
+BenchmarkFuncDownMeFirst_NodeEmbed-16     	     242	   4786027 ns/op
+BenchmarkFuncDownMeFirst_NodeField-16     	     123	   9662095 ns/op
+BenchmarkFuncDownMeFirst_NodeField2-16    	      78	  15406549 ns/op
+```
+
+= roughly 7% slower
+
+With full separate trav state map (fully safe):
+
+```
+BenchmarkBuildGuiTree_NodeEmbed-16        	      20	  56353512 ns/op
+BenchmarkBuildGuiTree_NodeField-16        	       9	 126170202 ns/op
+BenchmarkBuildGuiTree_NodeField2-16       	       5	 216370147 ns/op
+BenchmarkBuildGuiTreeSlow_NodeEmbed-16    	       1	9857690075 ns/op
+BenchmarkFuncDownMeFirst_NodeEmbed-16     	      64	  19818276 ns/op
+BenchmarkFuncDownMeFirst_NodeField-16     	      30	  39991628 ns/op
+BenchmarkFuncDownMeFirst_NodeField2-16    	      19	  59633855 ns/op
+```
+
+= 400% slower!
+
+Deleting nodes when done -- 2x slower and probably worth it -- this is now the new current impl:
+
+```
+BenchmarkBuildGuiTree_NodeEmbed-16        	      20	  50797676 ns/op
+BenchmarkBuildGuiTree_NodeField-16        	       9	 119290295 ns/op
+BenchmarkBuildGuiTree_NodeField2-16       	       5	 207227280 ns/op
+BenchmarkBuildGuiTreeSlow_NodeEmbed-16    	       1	10072070259 ns/op
+BenchmarkFuncDownMeFirst_NodeEmbed-16     	     100	  11784102 ns/op
+BenchmarkFuncDownMeFirst_NodeField-16     	      54	  22724071 ns/op
+BenchmarkFuncDownMeFirst_NodeField2-16    	      32	  36481851 ns/op
+```
+
+

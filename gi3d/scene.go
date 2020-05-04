@@ -437,6 +437,9 @@ func (sc *Scene) Init2D() {
 }
 
 func (sc *Scene) Style2D() {
+	sc.StyMu.Lock()
+	defer sc.StyMu.Unlock()
+
 	sc.SetCanFocusIfActive() // we get all key events
 	sc.SetCurWin()
 	sc.Style2DWidget()
@@ -490,7 +493,9 @@ func (sc *Scene) PushBounds() bool {
 	}
 	// if we are completely invisible, no point in rendering..
 	if sc.Viewport != nil {
+		sc.BBoxMu.RLock()
 		wbi := sc.WinBBox.Intersect(sc.Viewport.WinBBox)
+		sc.BBoxMu.RUnlock()
 		if wbi.Empty() {
 			return false
 		}
@@ -974,7 +979,9 @@ func (sc *Scene) UpdateWorldMatrix() {
 // UpdateMVPMatrix updates the Model-View-Projection matrix for all scene elements
 // and BBox2D
 func (sc *Scene) UpdateMVPMatrix() {
+	sc.Camera.CamMu.Lock()
 	sc.Camera.Pose.UpdateMatrix()
+	sc.Camera.CamMu.Unlock()
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 
@@ -1129,7 +1136,9 @@ func (sc *Scene) DirectWinUpload() bool {
 			fb := tb
 			fb.Min.Y = sz.Y - tb.Max.Y // flip Y
 			fb.Max.Y = sz.Y - tb.Min.Y
+			sc.BBoxMu.RLock()
 			wt.Copy(sc.WinBBox.Min, sc.Tex, fb, draw.Src, nil)
+			sc.BBoxMu.RUnlock()
 		})
 	}
 	if !sc.Win.IsUpdating() {
@@ -1173,11 +1182,11 @@ func (sc *Scene) Render3D() {
 		}
 		if rc >= RClassTransTexture { // sort back-to-front for transparent
 			sort.Slice(objs, func(i, j int) bool {
-				return objs[i].AsNode3D().NDCBBox.Max.Z > objs[j].AsNode3D().NDCBBox.Max.Z
+				return objs[i].NormDCBBox().Max.Z > objs[j].NormDCBBox().Max.Z
 			})
 		} else { // sort front-to-back for opaque to allow "early z rejection"
 			sort.Slice(objs, func(i, j int) bool {
-				return objs[i].AsNode3D().NDCBBox.Min.Z < objs[j].AsNode3D().NDCBBox.Min.Z
+				return objs[i].NormDCBBox().Min.Z < objs[j].NormDCBBox().Min.Z
 			})
 		}
 		// fmt.Printf("\nRender class: %v\n", rc)
@@ -1252,7 +1261,7 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 			if !nii.IsSolid() {
 				return true
 			}
-			if pos.In(ni.WinBBox) {
+			if ni.PosInWinBBox(pos) {
 				objs = append(objs, nii)
 			}
 			return true

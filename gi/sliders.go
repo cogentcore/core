@@ -232,7 +232,7 @@ func (sb *SliderBase) SizeFromAlloc() {
 	if sb.Min == 0 && sb.Max == 0 { // uninit
 		sb.Defaults()
 	}
-	spc := sb.Sty.BoxSpace()
+	spc := sb.BoxSpace()
 	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - 2.0*spc
 	if sb.Size <= 0 {
 		return
@@ -391,6 +391,8 @@ func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
 // PointToRelPos translates a point in global pixel coords into relative
 // position within node.  This satisfies the SliderPositioner interface.
 func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
+	sb.BBoxMu.RLock()
+	defer sb.BBoxMu.RUnlock()
 	return pt.Sub(sb.WinBBox.Min)
 }
 
@@ -601,6 +603,9 @@ func (sr *SliderBase) StyleToDots(uc *units.Context) {
 }
 
 func (sr *SliderBase) StyleSlider() {
+	sr.StyMu.Lock()
+	defer sr.StyMu.Unlock()
+
 	sr.Style2DWidget()
 	pst := &(sr.Par.(Node2D).AsWidget().Sty)
 	for i := 0; i < int(SliderStatesN); i++ {
@@ -702,7 +707,9 @@ func (sr *Slider) Init2D() {
 func (sr *Slider) Style2D() {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider()
+	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
 
@@ -748,10 +755,7 @@ func (sr *Slider) Render2D() {
 
 // render using a default style if not otherwise styled
 func (sr *Slider) Render2DDefaultStyle() {
-	st := &sr.Sty
-	rs := &sr.Viewport.Render
-	rs.Lock()
-	pc := &rs.Paint
+	rs, pc, st := sr.RenderLock()
 
 	sr.ConfigPartsIfNeeded(true)
 
@@ -795,12 +799,12 @@ func (sr *Slider) Render2DDefaultStyle() {
 	pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
 	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
-		rs.Unlock()
+		sr.RenderUnlock(rs)
 		sr.Parts.Render2DTree()
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
-		rs.Unlock()
+		sr.RenderUnlock(rs)
 	}
 }
 
@@ -895,7 +899,9 @@ func (sb *ScrollBar) Init2D() {
 func (sb *ScrollBar) Style2D() {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider()
+	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }
 
@@ -933,10 +939,8 @@ func (sb *ScrollBar) Render2D() {
 
 // render using a default style if not otherwise styled
 func (sb *ScrollBar) Render2DDefaultStyle() {
-	st := &sb.Sty
-	rs := &sb.Viewport.Render
-	rs.Lock()
-	pc := &rs.Paint
+	rs, pc, st := sb.RenderLock()
+	defer sb.RenderUnlock(rs)
 
 	// overall fill box
 	sb.RenderStdBox(&sb.StateStyles[SliderBox])
@@ -955,7 +959,6 @@ func (sb *ScrollBar) Render2DDefaultStyle() {
 	sz.SetDim(sb.Dim, sb.ThSize)
 	pc.FillStyle.SetColorSpec(&sb.StateStyles[SliderValue].Font.BgColor)
 	sb.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-	rs.Unlock()
 }
 
 func (sb *ScrollBar) ConnectEvents2D() {

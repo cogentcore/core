@@ -1983,6 +1983,7 @@ func (tv *TreeView) StyleTreeView() {
 		tv.ClearFlag(int(gi.CanFocus))
 		return
 	}
+	tv.StyMu.Lock()
 	tv.SetCanFocusIfActive()
 	hasTempl, saveTempl := false, false
 	_, noTempl := tv.PropInherit("no-templates", ki.NoInherit, ki.TypeProps)
@@ -2027,6 +2028,7 @@ func (tv *TreeView) StyleTreeView() {
 	if spc, ok := tv.PropInherit("spacing", ki.NoInherit, ki.TypeProps); ok {
 		tv.Parts.SetProp("spacing", spc) // parts is otherwise not typically styled
 	}
+	tv.StyMu.Unlock()
 	tv.ConfigParts()
 }
 

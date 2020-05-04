@@ -428,8 +428,10 @@ func (nb *Node2DBase) MakeContextMenu(m *Menu) {
 }
 
 func (nb *Node2DBase) ContextMenuPos() (pos image.Point) {
+	nb.BBoxMu.RLock()
 	pos.X = (nb.WinBBox.Min.X + nb.WinBBox.Max.X) / 2
 	pos.Y = (nb.WinBBox.Min.Y + nb.WinBBox.Max.Y) / 2
+	nb.BBoxMu.RUnlock()
 	return
 }
 
@@ -650,8 +652,12 @@ func (nb *Node2DBase) DisconnectViewport() {
 
 // set our window-level BBox from vp and our bbox
 func (nb *Node2DBase) SetWinBBox() {
+	nb.BBoxMu.Lock()
+	defer nb.BBoxMu.Unlock()
 	if nb.Viewport != nil {
+		nb.Viewport.BBoxMu.RLock()
 		nb.WinBBox = nb.VpBBox.Add(nb.Viewport.WinBBox.Min)
+		nb.Viewport.BBoxMu.RUnlock()
 	} else {
 		nb.WinBBox = nb.VpBBox
 	}
@@ -660,9 +666,11 @@ func (nb *Node2DBase) SetWinBBox() {
 // ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with
 // whatever delta may be in effect
 func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Point) {
+	nb.BBoxMu.Lock()
 	nb.ObjBBox = nb.BBox.Add(delta)
 	nb.VpBBox = parBBox.Intersect(nb.ObjBBox)
 	nb.SetInvisibleState(nb.VpBBox == image.ZR)
+	nb.BBoxMu.Unlock()
 	nb.SetWinBBox()
 }
 
@@ -891,15 +899,28 @@ func (nb *Node2DBase) BBoxReport() string {
 	return rpt
 }
 
-// ParentStyle returns parent's style or nil if not avail
+// ParentStyle returns parent's style or nil if not avail.
+// Calls StyleRLock so must call ParentStyleRUnlock when done.
 func (nb *Node2DBase) ParentStyle() *Style {
 	if nb.Par == nil {
 		return nil
 	}
 	if ps, ok := nb.Par.(Styler); ok {
-		return ps.Style()
+		st := ps.Style()
+		ps.StyleRLock()
+		return st
 	}
 	return nil
+}
+
+// ParentStyleRUnlock unlocks the parent's style
+func (nb *Node2DBase) ParentStyleRUnlock() {
+	if nb.Par == nil {
+		return
+	}
+	if ps, ok := nb.Par.(Styler); ok {
+		ps.StyleRUnlock()
+	}
 }
 
 // ParentPaint returns the Paint from parent, if available

@@ -2185,14 +2185,14 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 	}
 	nii, ni := KiToNode2D(cfoc)
 	if ni != nil && ni.This() != nil {
-		if e.Pos().In(ni.WinBBox) {
+		if ni.PosInWinBBox(e.Pos()) {
 			if !w.HasFlag(int(WinFlagFocusActive)) {
 				w.SetFlag(int(WinFlagFocusActive))
 				nii.FocusChanged2D(FocusActive)
 			}
 		} else {
 			if w.MainMenu != nil {
-				if e.Pos().In(w.MainMenu.WinBBox) { // main menu is not inactivating!
+				if w.MainMenu.PosInWinBBox(e.Pos()) { // main menu is not inactivating!
 					return
 				}
 			}
@@ -2290,7 +2290,7 @@ func (w *Window) FinalizeDragNDrop(action dnd.DropMods) {
 		return
 	}
 	de := w.EventMgr.DNDFinalEvent
-	de.Processed = false
+	de.ClearProcessed()
 	de.Mod = action
 	if de.Source != nil {
 		de.Action = dnd.DropFmSource

@@ -305,7 +305,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 					return true
 				}
 			} else {
-				if pos.In(gn.WinBBox) {
+				if gn.PosInWinBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
 					return false
 				}
@@ -322,7 +322,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 					return true
 				}
 			} else {
-				if pos.In(gn.WinBBox) {
+				if gn.PosInWinBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
 					return false
 				}
@@ -336,7 +336,7 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
 				return false
 			}
-			if !pos.In(gn.WinBBox) {
+			if !gn.PosInWinBBox(pos) {
 				return true
 			}
 		}
@@ -559,7 +559,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 				if !em.Master.IsInScope(ni, popup) {
 					return false
 				}
-				in := pos.In(ni.WinBBox)
+				in := ni.PosInWinBBox(pos)
 				if in {
 					if !ni.HasFlag(int(MouseHasEntered)) {
 						fe.Action = mouse.Enter
@@ -617,7 +617,7 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 					continue
 				}
 				pos := me.Pos()
-				if pos.In(ni.WinBBox) {
+				if ni.PosInWinBBox(pos) {
 					if ni.IsInstaDrag() {
 						em.Dragging = ni.This()
 						ni.SetFlag(int(NodeDragging))
@@ -633,7 +633,7 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 // SendHoverEvent sends mouse hover event, based on last mouse move event
 func (em *EventMgr) SendHoverEvent(e *mouse.MoveEvent) {
 	he := mouse.HoverEvent{Event: e.Event}
-	he.Processed = false
+	he.ClearProcessed()
 	he.Action = mouse.Hover
 	em.SendEventSignal(&he, Popups)
 }
@@ -669,7 +669,7 @@ var DNDTrace = false
 // DNDStartEvent handles drag-n-drop start events.
 func (em *EventMgr) DNDStartEvent(e *mouse.DragEvent) {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
-	de.Processed = false
+	de.ClearProcessed()
 	de.Action = dnd.Start
 	de.DefaultMod() // based on current key modifiers
 	em.DNDStage = DNDStartSent
@@ -699,7 +699,7 @@ func (em *EventMgr) DNDIsInternalSrc() bool {
 // SendDNDHoverEvent sends DND hover event, based on last mouse move event
 func (em *EventMgr) SendDNDHoverEvent(e *mouse.DragEvent) {
 	he := dnd.FocusEvent{Event: dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}}
-	he.Processed = false
+	he.ClearProcessed()
 	he.Action = dnd.Hover
 	em.SendEventSignal(&he, NoPopups)
 }
@@ -709,7 +709,7 @@ func (em *EventMgr) SendDNDMoveEvent(e *mouse.DragEvent) *dnd.MoveEvent {
 	// todo: when e.Where goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening
 	de := &dnd.MoveEvent{Event: dnd.Event{EventBase: e.Event.EventBase, Where: e.Event.Where, Modifiers: e.Event.Modifiers}, From: e.From, LastTime: e.LastTime}
-	de.Processed = false
+	de.ClearProcessed()
 	de.DefaultMod() // based on current key modifiers
 	de.Action = dnd.Move
 	em.SendEventSignal(de, NoPopups)
@@ -721,7 +721,7 @@ func (em *EventMgr) SendDNDMoveEvent(e *mouse.DragEvent) *dnd.MoveEvent {
 // in which case the event should be cleared (by the Window)
 func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) bool {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
-	de.Processed = false
+	de.ClearProcessed()
 	de.DefaultMod()
 	de.Action = dnd.DropOnTarget
 	de.Data = em.DNDData
@@ -776,7 +776,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 				if !em.Master.IsInScope(ni, popup) {
 					continue
 				}
-				in := pos.In(ni.WinBBox)
+				in := ni.PosInWinBBox(pos)
 				if in {
 					if !ni.HasFlag(int(DNDHasEntered)) {
 						ni.SetFlag(int(DNDHasEntered))

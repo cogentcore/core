@@ -93,7 +93,7 @@ func (an *Anim) Animate() {
 			tp := an.TorusPosOrig
 			tp.X += tdx
 			tp.Z += tdz
-			an.Torus.Pose.Pos = tp
+			an.Torus.SetPosePos(tp)
 		}
 
 		if an.DoGopher {
@@ -102,7 +102,7 @@ func (an *Anim) Animate() {
 			gp := an.GopherPosOrig
 			gp.X += gdx
 			gp.Z += gdz
-			an.Gopher.Pose.Pos = gp
+			an.Gopher.SetPosePos(gp)
 		}
 
 		an.Scene.UpdateEnd(updt) // triggers re-render -- don't need a full Update() which updates meshes

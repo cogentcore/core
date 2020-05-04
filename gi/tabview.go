@@ -407,6 +407,7 @@ func (tv *TabView) InitTabView() {
 	if tv.Sty.Font.Size.Val == 0 { // not yet styled
 		tv.StyleLayout()
 	}
+
 	updt := tv.UpdateStart()
 	tv.Lay = LayoutVert
 	tv.SetReRenderAnchor()

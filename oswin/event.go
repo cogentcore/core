@@ -7,6 +7,7 @@ package oswin
 import (
 	"fmt"
 	"image"
+	"sync/atomic"
 	"time"
 
 	"github.com/goki/ki/kit"
@@ -173,8 +174,9 @@ type EventBase struct {
 	GenTime nptime.Time
 
 	// Processed indicates if the event has been processed by an end receiver,
-	// and thus should no longer be processed by other possible receivers
-	Processed bool
+	// and thus should no longer be processed by other possible receivers.
+	// Atomic operations are used to encode a 0 or 1, so it is an int32.
+	Processed int32
 }
 
 // SetTime sets the event time to Now
@@ -191,11 +193,15 @@ func (ev EventBase) Time() time.Time {
 }
 
 func (ev EventBase) IsProcessed() bool {
-	return ev.Processed
+	return atomic.LoadInt32(&ev.Processed) != 0
 }
 
 func (ev *EventBase) SetProcessed() {
-	ev.Processed = true
+	atomic.StoreInt32(&ev.Processed, int32(1))
+}
+
+func (ev *EventBase) ClearProcessed() {
+	atomic.StoreInt32(&ev.Processed, int32(0))
 }
 
 func (ev EventBase) String() string {

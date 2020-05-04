@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 	"log"
+	"sync"
 
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -34,6 +35,7 @@ type NodeBase struct {
 	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
 	VpBBox  image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
 	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
+	BBoxMu  sync.RWMutex    `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread"`
 }
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
@@ -299,9 +301,18 @@ func (nb *NodeBase) SetReRenderAnchor() {
 	nb.SetFlag(int(ReRenderAnchor))
 }
 
-// translate a point in global pixel coords into relative position within node
+// PointToRelPos translates a point in global pixel coords into relative position within node
 func (nb *NodeBase) PointToRelPos(pt image.Point) image.Point {
+	nb.BBoxMu.RLock()
+	defer nb.BBoxMu.RUnlock()
 	return pt.Sub(nb.WinBBox.Min)
+}
+
+// PosInWinBBox returns true if given position is within this node's win bbox (under read lock)
+func (nb *NodeBase) PosInWinBBox(pos image.Point) bool {
+	nb.BBoxMu.RLock()
+	defer nb.BBoxMu.RUnlock()
+	return pos.In(nb.WinBBox)
 }
 
 // AddClass adds a CSS class name -- does proper space separation
@@ -383,7 +394,7 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 			// todo: 3D
 			return false
 		}
-		if pt.In(ni.WinBBox) {
+		if ni.PosInWinBBox(pt) {
 			rval = ni.This()
 			return false
 		}

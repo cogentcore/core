@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"sync"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
@@ -59,8 +60,12 @@ type Node3D interface {
 	// to a given plane of interest, for example (see Ray methods for intersections).
 	RayPick(pos image.Point, sc *Scene) mat32.Ray
 
-	// WorldMatrix returns the world matrix for this node
+	// WorldMatrix returns the world matrix for this node, under read-lock protection.
 	WorldMatrix() *mat32.Mat4
+
+	// NormDCBBox returns the normalized display coordinates bounding box
+	// which is used for clipping.  This is read-lock protected.
+	NormDCBBox() mat32.Box3
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
@@ -102,6 +107,17 @@ type Node3D interface {
 	// different event types that can then be mix-and-matched in any more
 	// specialized types.
 	ConnectEvents3D(sc *Scene)
+
+	// Convenience methods for external setting of Pose values with appropriate locking
+
+	// SetPosePos sets Pose.Pos position to given value, under write lock protection
+	SetPosePos(pos mat32.Vec3)
+
+	// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
+	SetPoseScale(scale mat32.Vec3)
+
+	// SetPoseQuat sets Pose.Quat to given value, under write lock protection
+	SetPoseQuat(quat mat32.Quat)
 }
 
 // Node3DBase is the basic 3D scenegraph node, which has the full transform information
@@ -109,10 +125,11 @@ type Node3D interface {
 // There are only two different kinds of Nodes: Group and Solid
 type Node3DBase struct {
 	gi.NodeBase
-	Pose      Pose       `desc:"complete specification of position and orientation"`
-	MeshBBox  BBox       `desc:"mesh-based local bounding box (aggregated for groups)"`
-	WorldBBox BBox       `desc:"world coordinates bounding box"`
-	NDCBBox   mat32.Box3 `desc:"normalized display coordinates bounding box"`
+	Pose      Pose         `desc:"complete specification of position and orientation"`
+	PoseMu    sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on pose access -- needed for parallel updating"`
+	MeshBBox  BBox         `desc:"mesh-based local bounding box (aggregated for groups)"`
+	WorldBBox BBox         `desc:"world coordinates bounding box"`
+	NDCBBox   mat32.Box3   `desc:"normalized display coordinates bounding box, used for frustrum clipping"`
 }
 
 var KiT_Node3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)
@@ -212,6 +229,8 @@ func (nb *Node3DBase) WorldMatrixUpdated() bool {
 // This sets the WorldMatrixUpdated flag but does not check that flag -- calling
 // routine can optionally do so.
 func (nb *Node3DBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
+	nb.PoseMu.Lock()
+	defer nb.PoseMu.Unlock()
 	nb.Pose.UpdateMatrix() // note: can do this in special ways to bake in other
 	// automatic transforms as needed
 	nb.Pose.UpdateWorldMatrix(parWorld)
@@ -221,15 +240,21 @@ func (nb *Node3DBase) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 // UpdateMVPMatrix updates this node's MVP matrix based on given view, prjn matricies from camera.
 // Called during rendering.
 func (nb *Node3DBase) UpdateMVPMatrix(viewMat, prjnMat *mat32.Mat4) {
+	nb.PoseMu.Lock()
 	nb.Pose.UpdateMVPMatrix(viewMat, prjnMat)
+	nb.PoseMu.Unlock()
 }
 
 // UpdateBBox2D updates this node's 2D bounding-box information based on scene
 // size and min offset position.
 func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
+	nb.BBoxMu.Lock()
+	defer nb.BBoxMu.Unlock()
 	off := mat32.Vec2{}
+	nb.PoseMu.RLock()
 	nb.WorldBBox.BBox = nb.MeshBBox.BBox.MulMat4(&nb.Pose.WorldMatrix)
 	nb.NDCBBox = nb.MeshBBox.BBox.MVProjToNDC(&nb.Pose.MVPMatrix)
+	nb.PoseMu.RUnlock()
 	Wmin := nb.NDCBBox.Min.NDCToWindow(size, off, 0, 1, true) // true = flipY
 	Wmax := nb.NDCBBox.Max.NDCToWindow(size, off, 0, 1, true) // true = filpY
 	// BBox is always relative to scene
@@ -263,6 +288,8 @@ func (nb *Node3DBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 // To convert mouse window-relative coords into scene-relative coords
 // subtract the sc.ObjBBox.Min which includes any scrolling effects
 func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
+	nb.PoseMu.RLock()
+	sc.Camera.CamMu.RLock()
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 	fpos := mat32.Vec2{float32(pos.X), float32(pos.Y)}
@@ -275,7 +302,9 @@ func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
 	// get world position / transform of camera: matrix is inverse of ViewMatrix
 	wdir := cdir.MulMat4(&sc.Camera.Pose.Matrix)
 	wpos := sc.Camera.Pose.Matrix.Pos()
+	sc.Camera.CamMu.RUnlock()
 	invM, err := nb.Pose.WorldMatrix.Inverse()
+	nb.PoseMu.RUnlock()
 	if err != nil {
 		log.Println(err)
 	}
@@ -286,9 +315,19 @@ func (nb *Node3DBase) RayPick(pos image.Point, sc *Scene) mat32.Ray {
 	return *ray
 }
 
-// WorldMatrix returns the world matrix for this node
+// WorldMatrix returns the world matrix for this node, under read lock protection
 func (nb *Node3DBase) WorldMatrix() *mat32.Mat4 {
+	nb.PoseMu.RLock()
+	defer nb.PoseMu.RUnlock()
 	return &nb.Pose.WorldMatrix
+}
+
+// NormDCBBox returns the normalized display coordinates bounding box
+// which is used for clipping.  This is read-lock protected.
+func (nb *Node3DBase) NormDCBBox() mat32.Box3 {
+	nb.BBoxMu.RLock()
+	defer nb.BBoxMu.RUnlock()
+	return nb.NDCBBox
 }
 
 func (nb *Node3DBase) Init3D(sc *Scene) {
@@ -310,6 +349,27 @@ func (nb *Node3DBase) UpdateNode3D(sc *Scene) {
 
 func (nb *Node3DBase) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 	// nop
+}
+
+// SetPosePos sets Pose.Pos position to given value, under write lock protection
+func (nb *Node3DBase) SetPosePos(pos mat32.Vec3) {
+	nb.PoseMu.Lock()
+	nb.Pose.Pos = pos
+	nb.PoseMu.Unlock()
+}
+
+// SetPoseScale sets Pose.Scale scale to given value, under write lock protection
+func (nb *Node3DBase) SetPoseScale(scale mat32.Vec3) {
+	nb.PoseMu.Lock()
+	nb.Pose.Scale = scale
+	nb.PoseMu.Unlock()
+}
+
+// SetPoseQuat sets Pose.Quat to given value, under write lock protection
+func (nb *Node3DBase) SetPoseQuat(quat mat32.Quat) {
+	nb.PoseMu.Lock()
+	nb.Pose.Quat = quat
+	nb.PoseMu.Unlock()
 }
 
 /////////////////////////////////////////////////////////////////
@@ -366,13 +426,19 @@ func (nb *Node3DBase) DisconnectAllEvents(win *gi.Window, pri gi.EventPris) {
 
 // TrackCamera moves this node to pose of camera
 func (nb *Node3DBase) TrackCamera(sc *Scene) {
+	nb.PoseMu.Lock()
+	sc.Camera.CamMu.RLock()
 	nb.Pose.CopyFrom(&sc.Camera.Pose)
+	sc.Camera.CamMu.RUnlock()
+	nb.PoseMu.Unlock()
 }
 
 // TrackLight moves node to position of light of given name.
 // For SpotLight, copies entire Pose. Does not work for Ambient light
 // which has no position information.
 func (nb *Node3DBase) TrackLight(sc *Scene, lightName string) error {
+	nb.PoseMu.Lock()
+	defer nb.PoseMu.Unlock()
 	lt, ok := sc.Lights[lightName]
 	if !ok {
 		return fmt.Errorf("gi3d Node: %v TrackLight named: %v not found", nb.PathUnique(), lightName)

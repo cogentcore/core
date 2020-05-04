@@ -249,7 +249,7 @@ func (sv *SplitView) ConfigSplitters() {
 	sz := len(sv.Kids)
 	mods, updt := sv.Parts.SetNChildren(sz-1, KiT_Splitter, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
-	spc := sv.Sty.BoxSpace()
+	spc := sv.BoxSpace()
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
 	handsz := sv.HandleSize.Dots
 	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - 2*spc)
@@ -343,9 +343,13 @@ func (sv *SplitView) StyleSplitView() {
 }
 
 func (sv *SplitView) Style2D() {
+	sv.StyMu.Lock()
+
 	sv.StyleSplitView()
 	sv.LayState.SetFromStyle(&sv.Sty.Layout) // also does reset
 	sv.UpdateSplits()
+	sv.StyMu.Unlock()
+
 	sv.ConfigSplitters()
 }
 
@@ -359,7 +363,7 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	// fmt.Printf("handsz: %v\n", handsz)
 	sz := len(sv.Kids)
 	odim := mat32.OtherDim(sv.Dim)
-	spc := sv.Sty.BoxSpace()
+	spc := sv.BoxSpace()
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - 2*spc
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
@@ -511,7 +515,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	}
 	ic := ick.(*Icon)
 	handsz := sr.ThumbSize.Dots
-	spc := sr.Sty.BoxSpace()
+	spc := sr.BoxSpace()
 	odim := mat32.OtherDim(sr.Dim)
 	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+2*spc))
 	sr.LayState.Alloc.SizeOrig = sr.LayState.Alloc.Size
@@ -528,7 +532,9 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 func (sr *Splitter) Style2D() {
 	sr.ClearFlag(int(CanFocus))
 	sr.StyleSlider()
+	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Sty.Layout) // also does reset
+	sr.StyMu.Unlock()
 	sr.ConfigParts()
 }
 
@@ -547,7 +553,9 @@ func (sr *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
 	sr.UpdatePosFromValue()
 	sr.DragPos = sr.Pos
+	sr.BBoxMu.RLock()
 	sr.OrigWinBBox = sr.WinBBox
+	sr.BBoxMu.RUnlock()
 	return sr.Layout2DChildren(iter)
 }
 
@@ -557,7 +565,7 @@ func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
 }
 
 func (sr *Splitter) UpdateSplitterPos() {
-	spc := sr.Sty.BoxSpace()
+	spc := sr.BoxSpace()
 	ispc := int(spc)
 	handsz := sr.ThumbSize.Dots
 	off := 0
@@ -581,6 +589,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + ispc}
 		}
 	} else {
+		sr.BBoxMu.Lock()
 		if sr.Dim == mat32.X {
 			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
 			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+ispc, mxpos, sr.ObjBBox.Max.Y+ispc)
@@ -588,6 +597,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
 			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+ispc, pos, sr.ObjBBox.Max.X+ispc, mxpos)
 		}
+		sr.BBoxMu.Unlock()
 	}
 }
 

@@ -317,7 +317,9 @@ func (vp *Viewport2D) VpUploadVp() {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
+	vp.BBoxMu.RLock()
 	vp.Win.UploadVp(vp, vp.WinBBox.Min)
+	vp.BBoxMu.RUnlock()
 }
 
 // VpUploadRegion uploads node region of our viewport image
@@ -373,7 +375,10 @@ func (vp *Viewport2D) ReRender2DNode(gni Node2D) {
 	// pr := prof.Start("vp.ReRender2DNode")
 	gn.Render2DTree()
 	// pr.End()
-	vp.This().(Viewport).VpUploadRegion(gn.VpBBox, gn.WinBBox)
+	gn.BBoxMu.RLock()
+	wbb := gn.WinBBox
+	gn.BBoxMu.RUnlock()
+	vp.This().(Viewport).VpUploadRegion(gn.VpBBox, wbb)
 }
 
 // ReRender2DAnchor re-renders an anchor node -- the KEY diff from
@@ -395,7 +400,10 @@ func (vp *Viewport2D) ReRender2DAnchor(gni Node2D) {
 	// pr := prof.Start("vp.ReRender2DNode")
 	pw.ReRender2DTree()
 	// pr.End()
-	vp.This().(Viewport).VpUploadRegion(pw.VpBBox, pw.WinBBox)
+	pw.BBoxMu.RLock()
+	wbb := pw.WinBBox
+	pw.BBoxMu.RUnlock()
+	vp.This().(Viewport).VpUploadRegion(pw.VpBBox, wbb)
 }
 
 // Delete this popup viewport -- has already been disconnected from window
@@ -433,6 +441,9 @@ func (vp *Viewport2D) Init2D() {
 }
 
 func (vp *Viewport2D) Style2D() {
+	vp.StyMu.Lock()
+	defer vp.StyMu.Unlock()
+
 	vp.SetCurWin()
 	vp.Style2DWidget()
 	vp.LayState.SetFromStyle(&vp.Sty.Layout) // also does reset
@@ -495,7 +506,9 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 		vp.Geom.Pos = vp.LayState.Alloc.Pos.ToPointFloor()
 	}
 	if vp.Viewport == nil {
+		vp.BBoxMu.Lock()
 		vp.WinBBox = vp.WinBBox.Add(vp.Geom.Pos)
+		vp.BBoxMu.Unlock()
 	}
 	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.PathUnique(), vp.BBox, vp.VpBBox, vp.WinBBox)
 }
@@ -559,7 +572,11 @@ func (vp *Viewport2D) PushBounds() bool {
 	}
 	// if we are completely invisible, no point in rendering..
 	if vp.Viewport != nil {
+		vp.BBoxMu.RLock()
+		vp.Viewport.BBoxMu.RLock()
 		wbi := vp.WinBBox.Intersect(vp.Viewport.WinBBox)
+		vp.Viewport.BBoxMu.RUnlock()
+		vp.BBoxMu.RUnlock()
 		if wbi.Empty() {
 			// fmt.Printf("not rendering vp %v bc empty winbox -- ours: %v par: %v\n", vp.Nm, vp.WinBBox, vp.Viewport.WinBBox)
 			return false
@@ -588,10 +605,13 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 func (vp *Viewport2D) FillViewport() {
+	vp.StyMu.RLock()
+	st := &vp.Sty
 	rs := &vp.Render
 	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &vp.Sty.Font.BgColor)
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &st.Font.BgColor)
 	rs.Unlock()
+	vp.StyMu.RUnlock()
 }
 
 func (vp *Viewport2D) FullReRenderIfNeeded() bool {
@@ -668,7 +688,9 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data interface{}) {
 		return
 	}
 	if ni.IsUpdating() {
-		log.Printf("ERROR SignalViewport2D updating node %v with Updating flag set\n", ni.PathUnique())
+		if Update2DTrace { // this can happen during concurrent update situations
+			log.Printf("Update: SignalViewport2D updating node %v with Updating flag set\n", ni.PathUnique())
+		}
 		return
 	}
 

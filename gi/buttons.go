@@ -10,6 +10,7 @@ import (
 	"image/color"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -34,6 +35,7 @@ type ButtonBase struct {
 	ButtonSig    ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
 	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 	MakeMenuFunc MakeMenuFunc         `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+	ButStateMu   sync.Mutex           `copy:"-" json:"-" xml:"-" view:"-" desc:"button state mutex"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -227,6 +229,8 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 
 // SetButtonState sets the button state -- returns true if state changed
 func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
+	bb.ButStateMu.Lock()
+	defer bb.ButStateMu.Unlock()
 	prev := bb.State
 	if bb.IsInactive() {
 		if bb.IsSelected() {
@@ -242,7 +246,9 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 		}
 	}
 	bb.State = state
+	bb.StyMu.Lock()
 	bb.Sty = bb.StateStyles[state]
+	bb.StyMu.Unlock()
 	if prev != bb.State {
 		bb.SetFullReRenderIconLabel() // needs full rerender to update text, icon
 		return true
@@ -253,6 +259,8 @@ func (bb *ButtonBase) SetButtonState(state ButtonStates) bool {
 // UpdateButtonStyle sets the button style based on current state info --
 // returns true if changed -- restyles parts if so
 func (bb *ButtonBase) UpdateButtonStyle() bool {
+	bb.ButStateMu.Lock()
+	defer bb.ButStateMu.Unlock()
 	prev := bb.State
 	if bb.IsInactive() {
 		if bb.IsSelected() {
@@ -342,6 +350,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 	if bb.MakeMenuFunc != nil {
 		bb.MakeMenuFunc(bb.This(), &bb.Menu)
 	}
+	bb.BBoxMu.RLock()
 	pos := bb.WinBBox.Max
 	if pos.X == 0 && pos.Y == 0 { // offscreen
 		pos = bb.ObjBBox.Max
@@ -358,6 +367,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 			pos.X = bb.ObjBBox.Min.X
 		}
 	}
+	bb.BBoxMu.RUnlock()
 	if bb.Viewport != nil {
 		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Viewport, bb.Text)
 		return true
@@ -498,7 +508,9 @@ func (bb *ButtonBase) HoverTooltipEvent() {
 		}
 		if tt != "" {
 			me.SetProcessed()
+			bb.BBoxMu.RLock()
 			pos := wbb.WinBBox.Max
+			bb.BBoxMu.RUnlock()
 			pos.X -= 20
 			PopupTooltip(tt, pos.X, pos.Y, wbb.Viewport, wbb.Nm)
 		}
@@ -587,7 +599,11 @@ func (bb *ButtonBase) ConfigPartsIfNeeded() {
 	bb.This().(ButtonWidget).ConfigParts()
 }
 
+// StyleButton does button styling -- it sets the StyMu Lock
 func (bb *ButtonBase) StyleButton() {
+	bb.StyMu.Lock()
+	defer bb.StyMu.Unlock()
+
 	hasTempl, saveTempl := bb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		bb.Style2DWidget()
@@ -598,7 +614,7 @@ func (bb *ButtonBase) StyleButton() {
 	} else {
 		bb.SetFlagState(!bb.IsInactive(), int(CanFocus))
 	}
-	pst := bb.ParentStyle()
+	parSty := bb.ParentStyle()
 	clsty := "." + bb.Class
 	var clsp ki.Props
 	if clspi, ok := bb.PropInherit(clsty, ki.NoInherit, ki.TypeProps); ok {
@@ -615,10 +631,10 @@ func (bb *ButtonBase) StyleButton() {
 	} else {
 		for i := 0; i < int(ButtonStatesN); i++ {
 			bb.StateStyles[i].CopyFrom(&bb.Sty)
-			bb.StateStyles[i].SetStyleProps(pst, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
+			bb.StateStyles[i].SetStyleProps(parSty, bb.StyleProps(ButtonSelectors[i]), bb.Viewport)
 			if clsp != nil {
 				if stclsp, ok := ki.SubProps(clsp, ButtonSelectors[i]); ok {
-					bb.StateStyles[i].SetStyleProps(pst, stclsp, bb.Viewport)
+					bb.StateStyles[i].SetStyleProps(parSty, stclsp, bb.Viewport)
 				}
 			}
 			bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
@@ -630,11 +646,15 @@ func (bb *ButtonBase) StyleButton() {
 			bb.StateStyles[i].SaveTemplate()
 		}
 	}
+	bb.ParentStyleRUnlock()
 }
 
 func (bb *ButtonBase) Style2D() {
 	bb.StyleButton()
+
+	bb.StyMu.Lock()
 	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.StyMu.Unlock()
 	bb.This().(ButtonWidget).ConfigParts()
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())
@@ -651,6 +671,12 @@ func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return bb.Layout2DChildren(iter)
 }
 
+func (bb *ButtonBase) RenderButton() {
+	rs, _, st := bb.RenderLock()
+	bb.RenderStdBox(st)
+	bb.RenderUnlock(rs)
+}
+
 func (bb *ButtonBase) Render2D() {
 	if bb.FullReRenderIfNeeded() {
 		return
@@ -658,11 +684,7 @@ func (bb *ButtonBase) Render2D() {
 	if bb.PushBounds() {
 		bb.This().(Node2D).ConnectEvents2D()
 		bb.UpdateButtonStyle()
-		st := &bb.Sty
-		rs := &bb.Viewport.Render
-		rs.Lock()
-		bb.RenderStdBox(st)
-		rs.Unlock()
+		bb.RenderButton()
 		bb.Render2DParts()
 		bb.Render2DChildren()
 		bb.PopBounds()

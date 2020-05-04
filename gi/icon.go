@@ -111,6 +111,9 @@ func (ic *Icon) Size2D(iter int) {
 }
 
 func (ic *Icon) Style2D() {
+	ic.StyMu.Lock()
+	defer ic.StyMu.Unlock()
+
 	hasTempl, saveTempl := ic.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		ic.Style2DWidget()

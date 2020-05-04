@@ -198,9 +198,11 @@ func (bb *ButtonBox) Init2D() {
 }
 
 func (bb *ButtonBox) Style2D() {
+	bb.StyMu.Lock()
 	bb.Style2DWidget()
-	bb.ConfigParts()
 	bb.LayState.SetFromStyle(&bb.Sty.Layout) // also does reset
+	bb.StyMu.Unlock()
+	bb.ConfigParts()
 }
 
 func (bb *ButtonBox) Layout2D(parBBox image.Rectangle, iter int) bool {
@@ -210,17 +212,19 @@ func (bb *ButtonBox) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return bb.Layout2DChildren(iter)
 }
 
+func (bb *ButtonBox) RenderButtonBox() {
+	rs, _, st := bb.RenderLock()
+	bb.RenderStdBox(st)
+	bb.RenderUnlock(rs)
+}
+
 func (bb *ButtonBox) Render2D() {
 	if bb.FullReRenderIfNeeded() {
 		return
 	}
 	if bb.PushBounds() {
 		bb.This().(Node2D).ConnectEvents2D()
-		st := &bb.Sty
-		rs := &bb.Viewport.Render
-		rs.Lock()
-		bb.RenderStdBox(st)
-		rs.Unlock()
+		bb.RenderButtonBox()
 		bb.Render2DParts()
 		bb.Render2DChildren()
 		bb.PopBounds()

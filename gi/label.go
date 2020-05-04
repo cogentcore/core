@@ -115,10 +115,12 @@ func (lb *Label) SetText(txt string) {
 	// if lb.Text != "" { // not good to automate this -- better to use docs -- bg can be bad
 	// 	lb.Redrawable = true
 	// }
+
 	if lb.Sty.Font.Size.Val == 0 { // not yet styled
 		lb.StyleLabel()
 	}
 	lb.SetStateStyle()
+	lb.StyMu.RLock()
 	lb.Text = txt
 	lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
@@ -127,7 +129,7 @@ func (lb *Label) SetText(txt string) {
 	} else {
 		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
 	}
-	spc := lb.Sty.BoxSpace()
+	spc := lb.BoxSpace()
 	sz := lb.LayState.Alloc.Size
 	if sz.IsNil() {
 		sz = lb.LayState.SizePrefOrMax()
@@ -136,11 +138,13 @@ func (lb *Label) SetText(txt string) {
 		sz.SetSubScalar(2 * spc)
 	}
 	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
+	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
 }
 
 // SetStateStyle sets the style based on the inactive, selected flags
 func (lb *Label) SetStateStyle() {
+	lb.StyMu.Lock()
 	if lb.IsInactive() {
 		lb.Sty = lb.StateStyles[LabelInactive]
 		if lb.Redrawable && !lb.CurBgColor.IsNil() {
@@ -154,6 +158,7 @@ func (lb *Label) SetStateStyle() {
 			lb.Sty.Font.BgColor.SetColor(lb.CurBgColor)
 		}
 	}
+	lb.StyMu.Unlock()
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
@@ -195,7 +200,9 @@ func (lb *Label) HoverEvent() {
 		}
 		if llb.Tooltip != "" {
 			me.SetProcessed()
+			llb.BBoxMu.RLock()
 			pos := llb.WinBBox.Max
+			llb.BBoxMu.RUnlock()
 			pos.X -= 20
 			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Viewport, llb.Nm)
 		}
@@ -281,6 +288,7 @@ func (lb *Label) GrabCurBgColor() {
 }
 
 func (lb *Label) TextPos() mat32.Vec2 {
+	lb.StyMu.RLock()
 	sty := &lb.Sty
 	pos := lb.LayState.Alloc.Pos.AddScalar(sty.BoxSpace())
 	if !sty.Text.HasWordWrap() { // word-wrap case already deals with this b/c it has final alloc size -- otherwise it lays out "blind" and can't do this.
@@ -299,10 +307,15 @@ func (lb *Label) TextPos() mat32.Vec2 {
 			}
 		}
 	}
+	lb.StyMu.RUnlock()
 	return pos
 }
 
+// StyleLabel does label styling -- it sets the StyMu Lock
 func (lb *Label) StyleLabel() {
+	lb.StyMu.Lock()
+	defer lb.StyMu.Unlock()
+
 	hasTempl, saveTempl := lb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		lb.Style2DWidget()
@@ -315,7 +328,7 @@ func (lb *Label) StyleLabel() {
 	if hasTempl && saveTempl {
 		lb.Sty.SaveTemplate()
 	}
-	pst := lb.ParentStyle()
+	parSty := lb.ParentStyle()
 	if hasTempl && !saveTempl {
 		for i := 0; i < int(LabelStatesN); i++ {
 			lb.StateStyles[i].Template = lb.Sty.Template + LabelSelectors[i]
@@ -324,7 +337,7 @@ func (lb *Label) StyleLabel() {
 	} else {
 		for i := 0; i < int(LabelStatesN); i++ {
 			lb.StateStyles[i].CopyFrom(&lb.Sty)
-			lb.StateStyles[i].SetStyleProps(pst, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
+			lb.StateStyles[i].SetStyleProps(parSty, lb.StyleProps(LabelSelectors[i]), lb.Viewport)
 			lb.StateStyles[i].CopyUnitContext(&lb.Sty.UnContext)
 		}
 	}
@@ -337,12 +350,16 @@ func (lb *Label) StyleLabel() {
 	if !lb.Sty.Font.BgColor.Color.IsNil() {
 		lb.CurBgColor = lb.Sty.Font.BgColor.Color
 	}
+	lb.ParentStyleRUnlock()
 }
 
 func (lb *Label) LayoutLabel() {
+	lb.StyMu.RLock()
+	defer lb.StyMu.RUnlock()
+
 	lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
-	spc := lb.Sty.BoxSpace()
+	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
 		sz.SetSubScalar(2 * spc)
@@ -352,7 +369,9 @@ func (lb *Label) LayoutLabel() {
 
 func (lb *Label) Style2D() {
 	lb.StyleLabel()
+	lb.StyMu.Lock()
 	lb.LayState.SetFromStyle(&lb.Sty.Layout) // also does reset
+	lb.StyMu.Unlock()
 	lb.LayoutLabel()
 }
 
@@ -386,21 +405,23 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return false
 }
 
+func (lb *Label) RenderLabel() {
+	lb.GrabCurBgColor()
+	lb.SetStateStyle()
+	rs, _, st := lb.RenderLock()
+	defer lb.RenderUnlock(rs)
+	lb.RenderPos = lb.TextPos()
+	lb.RenderStdBox(st)
+	lb.Render.Render(rs, lb.RenderPos)
+}
+
 func (lb *Label) Render2D() {
 	if lb.FullReRenderIfNeeded() {
 		return
 	}
 	if lb.PushBounds() {
 		lb.This().(Node2D).ConnectEvents2D()
-		rs := &lb.Viewport.Render
-		rs.Lock()
-		lb.GrabCurBgColor()
-		lb.SetStateStyle()
-		st := &lb.Sty
-		lb.RenderPos = lb.TextPos()
-		lb.RenderStdBox(st)
-		lb.Render.Render(rs, lb.RenderPos)
-		rs.Unlock()
+		lb.RenderLabel()
 		lb.Render2DChildren()
 		lb.PopBounds()
 	} else {

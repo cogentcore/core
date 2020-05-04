@@ -6,6 +6,7 @@ package glgpu
 
 import (
 	"log"
+	"unsafe"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/goki/gi/oswin/gpu"
@@ -357,7 +358,8 @@ func (vb *VectorsBuffer) Activate() {
 			}
 			off := vb.offs[i]
 			gl.EnableVertexAttribArray(uint32(v.handle))
-			gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
+			//			gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), gl.PtrOffset(off*4))
+			gl.VertexAttribPointer(uint32(v.handle), int32(v.typ.Vec), gpu.TheGPU.Type(v.typ.Type), false, int32(str*4), unsafe.Pointer(uintptr(off*4)))
 			// fmt.Printf("vec: %v str: %v off: %v\n", v.name, str*4, off*4)
 		}
 	}

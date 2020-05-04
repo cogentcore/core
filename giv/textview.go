@@ -4686,6 +4686,9 @@ func (tv *TextView) Init2D() {
 
 // StyleTextView sets the style of widget
 func (tv *TextView) StyleTextView() {
+	tv.StyMu.Lock()
+	defer tv.StyMu.Unlock()
+
 	if _, has := tv.Props["white-space"]; !has {
 		if gi.Prefs.Editor.WordWrap {
 			tv.SetProp("white-space", gi.WhiteSpacePreWrap)
@@ -4721,7 +4724,9 @@ func (tv *TextView) StyleTextView() {
 func (tv *TextView) Style2D() {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
+	tv.StyMu.Lock()
 	tv.LayState.SetFromStyle(&tv.Sty.Layout) // also does reset
+	tv.StyMu.Unlock()
 }
 
 // Size2D

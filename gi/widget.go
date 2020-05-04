@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"strings"
+	"sync"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
@@ -33,6 +34,7 @@ type WidgetBase struct {
 	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
+	StyMu        sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
 }
 
 var KiT_WidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
@@ -68,10 +70,32 @@ func (wb *WidgetBase) Style() *Style {
 	return &wb.Sty
 }
 
+// StyleRLock does a read-lock for reading the style
+func (wb *WidgetBase) StyleRLock() {
+	wb.StyMu.RLock()
+}
+
+// StyleRUnlock unlocks the read-lock
+func (wb *WidgetBase) StyleRUnlock() {
+	wb.StyMu.RUnlock()
+}
+
+// BoxSpace returns the style BoxSpace value under read lock
+func (wb *WidgetBase) BoxSpace() float32 {
+	wb.StyMu.RLock()
+	bs := wb.Sty.BoxSpace()
+	wb.StyMu.RUnlock()
+	return bs
+}
+
 // Init2DWidget handles basic node initialization -- Init2D can then do special things
 func (wb *WidgetBase) Init2DWidget() {
+	wb.BBoxMu.Lock()
+	defer wb.BBoxMu.Unlock()
 	wb.Viewport = wb.ParentViewport()
+	// wb.StyMu.Lock()
 	wb.Sty.Defaults()
+	// wb.StyMu.Unlock()
 	wb.LayState.Defaults() // doesn't overwrite
 	wb.ConnectToViewport()
 }
@@ -140,11 +164,13 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 	} else {
 		dsty, _ = dstyi.(*Style)
 	}
+	wb.ParentStyleRUnlock()
 	return dsty
 }
 
 // Style2DWidget styles the Style values from node properties and optional
-// base-level defaults -- for Widget-style nodes
+// base-level defaults -- for Widget-style nodes.
+// must be called under a StyMu Lock
 func (wb *WidgetBase) Style2DWidget() {
 	// pr := prof.Start("Style2DWidget")
 	// defer pr.End()
@@ -160,7 +186,9 @@ func (wb *WidgetBase) Style2DWidget() {
 	}
 	wb.Sty.IsSet = false    // this is always first call, restart
 	if wb.Viewport == nil { // robust
+		wb.StyMu.Unlock()
 		gii.Init2D()
+		wb.StyMu.Lock()
 	}
 	styprops := *wb.Properties()
 	parSty := wb.ParentStyle()
@@ -178,6 +206,7 @@ func (wb *WidgetBase) Style2DWidget() {
 		}
 	}
 	kit.TypesMu.RUnlock()
+	wb.ParentStyleRUnlock()
 
 	pagg := wb.ParentCSSAgg()
 	if pagg != nil {
@@ -243,6 +272,9 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 }
 
 func (wb *WidgetBase) Style2D() {
+	wb.StyMu.Lock()
+	defer wb.StyMu.Unlock()
+
 	hasTempl, saveTempl := wb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		wb.Style2DWidget()
@@ -328,7 +360,7 @@ func (wb *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (wb *WidgetBase) ChildrenBBox2DWidget() image.Rectangle {
 	nb := wb.VpBBox
-	spc := int(wb.Sty.BoxSpace())
+	spc := int(wb.BoxSpace())
 	nb.Min.X += spc
 	nb.Min.Y += spc
 	nb.Max.X -= spc
@@ -631,6 +663,21 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard rendering
 
+// RenderLock returns the locked RenderState, Paint, and Style with StyMu locked.
+// This should be called at start of widget-level rendering.
+func (wb *WidgetBase) RenderLock() (*RenderState, *Paint, *Style) {
+	wb.StyMu.RLock()
+	rs := &wb.Viewport.Render
+	rs.Lock()
+	return rs, &rs.Paint, &wb.Sty
+}
+
+// RenderUnlock unlocks RenderState and style
+func (wb *WidgetBase) RenderUnlock(rs *RenderState) {
+	rs.Unlock()
+	wb.StyMu.RUnlock()
+}
+
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
 func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) {
@@ -644,8 +691,12 @@ func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) 
 	pc.FillStrokeClear(rs)
 }
 
-// RenderStdBox draws standard box using given style
+// RenderStdBox draws standard box using given style.
+// RenderState and Style must already be locked at this point (RenderLock)
 func (wb *WidgetBase) RenderStdBox(st *Style) {
+	wb.StyMu.RLock()
+	defer wb.StyMu.RUnlock()
+
 	rs := &wb.Viewport.Render
 	pc := &rs.Paint
 
@@ -701,13 +752,13 @@ func (wb *WidgetBase) Size2DFromWH(w, h float32) {
 
 // Size2DAddSpace adds space to existing AllocSize
 func (wb *WidgetBase) Size2DAddSpace() {
-	spc := wb.Sty.BoxSpace()
+	spc := wb.BoxSpace()
 	wb.LayState.Alloc.Size.SetAddScalar(2 * spc)
 }
 
 // Size2DSubSpace returns AllocSize minus 2 * BoxSpace -- the amount avail to the internal elements
 func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
-	spc := wb.Sty.BoxSpace()
+	spc := wb.BoxSpace()
 	return wb.LayState.Alloc.Size.SubScalar(2 * spc)
 }
 
@@ -771,7 +822,7 @@ func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Po
 }
 
 func (wb *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
-	spc := wb.Sty.BoxSpace()
+	spc := wb.BoxSpace()
 	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.AddScalar(spc)
 	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.AddScalar(-2.0 * spc)
 	wb.Parts.Layout2D(parBBox, iter)
@@ -893,5 +944,7 @@ func (wb *PartsWidgetBase) SetFullReRenderIconLabel() {
 		lbl := lblk.(*Label)
 		lbl.SetFullReRender()
 	}
+	wb.Parts.StyMu.Lock()
 	wb.Parts.Style2DWidget() // restyle parent so parts inherit
+	wb.Parts.StyMu.Unlock()
 }

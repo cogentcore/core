@@ -115,6 +115,9 @@ func (svg *SVG) Size2D(iter int) {
 }
 
 func (svg *SVG) StyleSVG() {
+	svg.StyMu.Lock()
+	defer svg.StyMu.Unlock()
+
 	hasTempl, saveTempl := svg.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		svg.Style2DWidget()
@@ -129,7 +132,9 @@ func (svg *SVG) StyleSVG() {
 
 func (svg *SVG) Style2D() {
 	svg.StyleSVG()
+	svg.StyMu.Lock()
 	svg.LayState.SetFromStyle(&svg.Sty.Layout) // also does reset
+	svg.StyMu.Unlock()
 	if nv, err := svg.PropTry("norm"); err == nil {
 		svg.Norm, _ = kit.ToBool(nv)
 	}

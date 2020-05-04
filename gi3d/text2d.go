@@ -199,6 +199,8 @@ func (txt *Text2D) Validate(sc *Scene) error {
 }
 
 func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
+	txt.PoseMu.Lock()
+	defer txt.PoseMu.Unlock()
 	sz, ok := txt.TextSize()
 	if ok {
 		sc := mat32.Vec3{sz.X, sz.Y, txt.Pose.Scale.Z}

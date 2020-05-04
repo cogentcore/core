@@ -50,14 +50,11 @@ var MenuBarProps = ki.Props{
 
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender() {
-	st := &mb.Sty
-	rs := &mb.Viewport.Render
-	rs.Lock()
-	pc := &rs.Paint
+	rs, pc, st := mb.RenderLock()
 	pos := mb.LayState.Alloc.Pos
 	sz := mb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
-	rs.Unlock()
+	mb.RenderUnlock(rs)
 }
 
 func (mb *MenuBar) ShowMenuBar() bool {
@@ -378,14 +375,11 @@ func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
 
 // ToolBarStdRender does the standard rendering of the bar
 func (tb *ToolBar) ToolBarStdRender() {
-	st := &tb.Sty
-	rs := &tb.Viewport.Render
-	rs.Lock()
-	pc := &rs.Paint
+	rs, pc, st := tb.RenderLock()
 	pos := tb.LayState.Alloc.Pos
 	sz := tb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.Font.BgColor)
-	rs.Unlock()
+	tb.RenderUnlock(rs)
 }
 
 func (tb *ToolBar) Render2D() {

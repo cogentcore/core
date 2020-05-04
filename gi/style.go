@@ -101,6 +101,12 @@ var StylePropProps = ki.Props{
 // Styler defines an interface for anything that has a Style on it
 type Styler interface {
 	Style() *Style
+
+	// StyleRLock does a read-lock for reading the style
+	StyleRLock()
+
+	// StyleRUnlock unlocks the read-lock
+	StyleRUnlock()
 }
 
 // SetStylePropsXML sets style props from XML style string, which contains ';'
@@ -292,6 +298,7 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, vp *Vi
 	}
 	parSty := node.AsNode2D().ParentStyle()
 	s.SetStyleProps(parSty, pmap, vp)
+	node.AsNode2D().ParentStyleRUnlock()
 	return true
 }
 

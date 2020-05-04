@@ -5,6 +5,8 @@
 package gi3d
 
 import (
+	"sync"
+
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -13,6 +15,7 @@ import (
 // Camera defines the properties of the camera
 type Camera struct {
 	Pose          Pose           `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`
+	CamMu         sync.RWMutex   `desc:"mutex protecting camera data"`
 	Target        mat32.Vec3     `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`
 	UpDir         mat32.Vec3     `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`
 	Ortho         bool           `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."`
@@ -51,6 +54,9 @@ func (cm *Camera) GenGoSet(path string) string {
 
 // UpdateMatrix updates the view and prjn matricies
 func (cm *Camera) UpdateMatrix() {
+	cm.CamMu.Lock()
+	defer cm.CamMu.Unlock()
+
 	cm.Pose.UpdateMatrix()
 	cm.ViewMatrix.SetInverse(&cm.Pose.Matrix)
 	if cm.Ortho {
@@ -69,12 +75,14 @@ func (cm *Camera) UpdateMatrix() {
 // LookAt points the camera at given target location, using given up direction,
 // and sets the Target, UpDir fields for future camera movements.
 func (cm *Camera) LookAt(target, upDir mat32.Vec3) {
+	cm.CamMu.Lock()
 	cm.Target = target
 	if upDir.IsNil() {
 		upDir = mat32.Vec3Y
 	}
 	cm.UpDir = upDir
 	cm.Pose.LookAt(target, upDir)
+	cm.CamMu.Unlock()
 	cm.UpdateMatrix()
 }
 
@@ -90,6 +98,8 @@ func (cm *Camera) LookAtTarget() {
 
 // ViewVector is the vector between the camera position and target
 func (cm *Camera) ViewVector() mat32.Vec3 {
+	cm.CamMu.RLock()
+	defer cm.CamMu.RUnlock()
 	return cm.Pose.Pos.Sub(cm.Target)
 }
 
@@ -121,6 +131,7 @@ func (cm *Camera) Orbit(delX, delY float32) {
 	}
 	dir := ctdir.Normal()
 
+	cm.CamMu.Lock()
 	up := cm.UpDir
 	right := cm.UpDir.Cross(dir).Normal()
 	// up := dir.Cross(right).Normal() // ensure ortho -- not needed
@@ -134,6 +145,7 @@ func (cm *Camera) Orbit(delX, delY float32) {
 
 	cm.Pose.Pos = cm.Pose.Pos.Add(dx).Add(dy)
 	cm.UpDir.SetMulQuat(dyq) // this is only one that affects up
+	cm.CamMu.Unlock()
 
 	cm.LookAtTarget()
 }
@@ -143,18 +155,22 @@ func (cm *Camera) Orbit(delX, delY float32) {
 // current window view)
 // and it moves the target by the same increment, changing the target position.
 func (cm *Camera) Pan(delX, delY float32) {
+	cm.CamMu.Lock()
 	dx := mat32.Vec3{-delX, 0, 0}.MulQuat(cm.Pose.Quat)
 	dy := mat32.Vec3{0, -delY, 0}.MulQuat(cm.Pose.Quat)
 	td := dx.Add(dy)
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
+	cm.CamMu.Unlock()
 }
 
 // PanAxis moves the camera and target along world X,Y axes
 func (cm *Camera) PanAxis(delX, delY float32) {
+	cm.CamMu.Lock()
 	td := mat32.Vec3{-delX, -delY, 0}
 	cm.Pose.Pos.SetAdd(td)
 	cm.Target.SetAdd(td)
+	cm.CamMu.Unlock()
 }
 
 // PanTarget moves the target along world X,Y,Z axes and does LookAt
@@ -164,9 +180,11 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 	td := mat32.Vec3{-delX, -delY, delZ}
 	cm.Target.SetAdd(td)
 	dist := cm.ViewVector().Length()
+	cm.CamMu.Lock()
 	if dist == 0 {
 		cm.Target.SetAdd(td)
 	}
+	cm.CamMu.Unlock()
 	cm.LookAtTarget()
 }
 
@@ -174,6 +192,7 @@ func (cm *Camera) PanTarget(delX, delY, delZ float32) {
 // it always moves the target back also if it distance is < 1
 func (cm *Camera) Zoom(zoomPct float32) {
 	ctaxis := cm.ViewVector()
+	cm.CamMu.Lock()
 	if ctaxis.IsNil() {
 		ctaxis.Set(0, 0, 1)
 	}
@@ -183,6 +202,7 @@ func (cm *Camera) Zoom(zoomPct float32) {
 	if zoomPct < 0 && dist < 1 {
 		cm.Target.SetAdd(del)
 	}
+	cm.CamMu.Unlock()
 }
 
 // CameraProps define the ToolBar and MenuBar for StructView

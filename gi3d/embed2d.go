@@ -167,6 +167,8 @@ func (em *Embed2D) Validate(sc *Scene) error {
 }
 
 func (em *Embed2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
+	em.PoseMu.Lock()
+	defer em.PoseMu.Unlock()
 	if em.Viewport != nil {
 		sz := em.Viewport.Geom.Size
 		sc := mat32.Vec3{.006 * em.Zoom * float32(sz.X), .006 * em.Zoom * float32(sz.Y), em.Pose.Scale.Z}
@@ -180,9 +182,13 @@ func (em *Embed2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 
 func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	em.Solid.UpdateBBox2D(size, sc)
+	em.Viewport.BBoxMu.Lock()
+	em.BBoxMu.Lock()
 	em.Viewport.Geom.Pos = em.WinBBox.Min
 	em.Viewport.WinBBox.Min = em.WinBBox.Min
 	em.Viewport.WinBBox.Max = em.WinBBox.Min.Add(em.Viewport.Geom.Size)
+	em.BBoxMu.Unlock()
+	em.Viewport.BBoxMu.Unlock()
 	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == em.Viewport.This() {
 			return true
@@ -190,6 +196,9 @@ func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 		_, ni := gi.KiToNode2D(k)
 		if ni == nil {
 			return false // going into a different type of thing, bail
+		}
+		if ni.IsUpdating() {
+			return false
 		}
 		ni.SetWinBBox()
 		return true
@@ -206,9 +215,15 @@ var Embed2DProps = ki.Props{
 
 func (em *Embed2D) Project2D(sc *Scene, pt image.Point) (image.Point, bool) {
 	var ppt image.Point
-	if em.Viewport == nil || em.Viewport.Pixels == nil {
+	if em.Viewport == nil || em.Viewport.Pixels == nil || em.IsUpdating() {
 		return ppt, false
 	}
+	em.Viewport.BBoxMu.RLock()
+	em.BBoxMu.RLock()
+	defer func() {
+		em.BBoxMu.RUnlock()
+		em.Viewport.BBoxMu.RUnlock()
+	}()
 	sz := em.Viewport.Geom.Size
 	relpos := pt.Sub(sc.ObjBBox.Min)
 	ray := em.RayPick(relpos, sc)
@@ -392,8 +407,7 @@ func (vp *EmbedViewport) VpTopUpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
-	vp.EmbedPar.UploadViewTex(vp.Scene)
-	vp.Scene.UpdateSig() // todo: maybe go up to its viewport?
+	vp.VpUploadAll()
 	vp.TopUpdated = false
 }
 
@@ -413,29 +427,22 @@ func (vp *EmbedViewport) VpUploadAll() {
 		return
 	}
 	// fmt.Printf("embed vp upload all\n")
-	vp.EmbedPar.UploadViewTex(vp.Scene)
-	vp.Scene.UpdateSig() // todo: maybe go up to its viewport?
+	updt := vp.Scene.UpdateStart()
+	if updt {
+		vp.EmbedPar.UploadViewTex(vp.Scene)
+	}
+	vp.Scene.UpdateEnd(updt)
 }
 
 // VpUploadVp uploads our viewport image into the parent window -- e.g., called
 // by popups when updating separately
 func (vp *EmbedViewport) VpUploadVp() {
-	if !vp.This().(gi.Viewport).VpIsVisible() {
-		return
-	}
-	// fmt.Printf("embed vp upload vp\n")
-	vp.EmbedPar.UploadViewTex(vp.Scene)
-	vp.Scene.UpdateSig()
+	vp.VpUploadAll()
 }
 
 // VpUploadRegion uploads node region of our viewport image
 func (vp *EmbedViewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
-	if !vp.This().(gi.Viewport).VpIsVisible() {
-		return
-	}
-	// fmt.Printf("embed vp upload region\n")
-	vp.EmbedPar.UploadViewTex(vp.Scene)
-	vp.Scene.UpdateSig()
+	vp.VpUploadAll()
 }
 
 ///////////////////////////////////////

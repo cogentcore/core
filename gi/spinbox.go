@@ -386,7 +386,11 @@ func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport2D) {
 	}
 }
 
+// StyleSpinBox does spinbox styling -- sets StyMu Lock
 func (sb *SpinBox) StyleSpinBox() {
+	sb.StyMu.Lock()
+	defer sb.StyMu.Unlock()
+
 	if sb.Step == 0 {
 		sb.Defaults()
 	}
@@ -404,7 +408,9 @@ func (sb *SpinBox) StyleSpinBox() {
 
 func (sb *SpinBox) Style2D() {
 	sb.StyleSpinBox()
+	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Sty.Layout) // also does reset
+	sb.StyMu.Unlock()
 	sb.ConfigParts()
 }
 

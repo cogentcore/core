@@ -651,6 +651,7 @@ var SeparatorProps = ki.Props{
 }
 
 func (sp *Separator) Style2D() {
+	sp.StyMu.Lock()
 	if sp.Horiz {
 		sp.SetProp("max-width", -1)
 		sp.SetProp("min-height", units.NewEx(0.5))
@@ -658,32 +659,34 @@ func (sp *Separator) Style2D() {
 		sp.SetProp("max-height", -1)
 		sp.SetProp("min-width", units.NewCh(0.5))
 	}
+	sp.StyMu.Unlock()
 	sp.WidgetBase.Style2D()
+}
+
+func (sp *Separator) RenderSeparator() {
+	rs, pc, st := sp.RenderLock()
+	defer sp.RenderUnlock(rs)
+
+	pos := sp.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
+	sz := sp.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
+
+	if !st.Font.BgColor.IsNil() {
+		pc.FillBox(rs, pos, sz, &st.Font.BgColor)
+	}
+
+	pc.StrokeStyle.Width = st.Border.Width
+	pc.StrokeStyle.SetColor(&st.Border.Color)
+	if sp.Horiz {
+		pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
+	} else {
+		pc.DrawLine(rs, pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
+	}
+	pc.FillStrokeClear(rs)
 }
 
 func (sp *Separator) Render2D() {
 	if sp.PushBounds() {
-		rs := &sp.Viewport.Render
-		rs.Lock()
-		pc := &rs.Paint
-		st := &sp.Sty
-
-		pos := sp.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
-		sz := sp.LayState.Alloc.Size.AddScalar(-2.0 * st.Layout.Margin.Dots)
-
-		if !st.Font.BgColor.IsNil() {
-			pc.FillBox(rs, pos, sz, &st.Font.BgColor)
-		}
-
-		pc.StrokeStyle.Width = st.Border.Width
-		pc.StrokeStyle.SetColor(&st.Border.Color)
-		if sp.Horiz {
-			pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
-		} else {
-			pc.DrawLine(rs, pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
-		}
-		pc.FillStrokeClear(rs)
-		rs.Unlock()
+		sp.RenderSeparator()
 		sp.Render2DChildren()
 		sp.PopBounds()
 	}

@@ -71,11 +71,8 @@ func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // FrameStdRender does the standard rendering of the frame itself
 func (fr *Frame) FrameStdRender() {
-	st := &fr.Sty
-	rs := &fr.Viewport.Render
-	rs.Lock()
-	pc := &rs.Paint
-	// first draw a background rectangle in our full area
+	rs, pc, st := fr.RenderLock()
+	defer fr.RenderUnlock(rs)
 
 	pos := fr.LayState.Alloc.Pos
 	sz := fr.LayState.Alloc.Size
@@ -111,7 +108,6 @@ func (fr *Frame) FrameStdRender() {
 		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
 	}
 	pc.FillStrokeClear(rs)
-	rs.Unlock()
 }
 
 func (fr *Frame) RenderStripes() {

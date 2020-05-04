@@ -184,10 +184,12 @@ func (g *NodeBase) ComputeBBoxSVG() {
 	if g.This() == nil {
 		return
 	}
+	g.BBoxMu.Lock()
 	g.BBox = g.This().(gi.Node2D).BBox2D()
 	g.ObjBBox = g.BBox // no diff
 	pbbox := g.Viewport.This().(gi.Node2D).ChildrenBBox2D()
 	g.VpBBox = pbbox.Intersect(g.ObjBBox)
+	g.BBoxMu.Unlock()
 	g.SetWinBBox()
 
 	if gi.Render2DTrace {

@@ -358,10 +358,14 @@ func (w *windowImpl) Screen() *oswin.Screen {
 }
 
 func (w *windowImpl) Size() image.Point {
+	// w.mu.Lock() // this prevents race conditions but also locks up
+	// defer w.mu.Unlock()
 	return w.PxSize
 }
 
 func (w *windowImpl) WinSize() image.Point {
+	// w.mu.Lock()
+	// defer w.mu.Unlock()
 	return w.WnSize
 }
 

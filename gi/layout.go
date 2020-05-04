@@ -320,7 +320,7 @@ func (ly *Layout) GatherSizes() {
 		}
 	}
 
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	ly.LayState.Size.Need.SetAddScalar(2.0 * spc)
 	ly.LayState.Size.Pref.SetAddScalar(2.0 * spc)
 
@@ -427,7 +427,7 @@ func (ly *Layout) GatherSizesFlow(iter int) {
 	ly.LayState.Size.Need.SetMaxDim(odim, oNeed)
 	ly.LayState.Size.Pref.SetMaxDim(odim, oPref)
 
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	ly.LayState.Size.Need.SetAddScalar(2.0 * spc)
 	ly.LayState.Size.Pref.SetAddScalar(2.0 * spc)
 
@@ -472,7 +472,9 @@ func (ly *Layout) GatherSizesGrid() {
 		if ni == nil {
 			continue
 		}
+		ni.StyMu.RLock()
 		lst := ni.Sty.Layout
+		ni.StyMu.RUnlock()
 		if lst.Col > 0 {
 			cols = ints.MaxInt(cols, lst.Col+lst.ColSpan)
 		}
@@ -523,7 +525,9 @@ func (ly *Layout) GatherSizesGrid() {
 			continue
 		}
 		ni.LayState.UpdateSizes()
+		ni.StyMu.RLock()
 		lst := ni.Sty.Layout
+		ni.StyMu.RUnlock()
 		if lst.Col > 0 {
 			col = lst.Col
 		}
@@ -624,7 +628,7 @@ func (ly *Layout) GatherSizesGrid() {
 		ly.LayState.Size.Need = ly.LayState.Size.Pref
 	}
 
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	ly.LayState.Size.Need.SetAddScalar(2.0 * spc)
 	ly.LayState.Size.Pref.SetAddScalar(2.0 * spc)
 
@@ -728,7 +732,7 @@ func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Al
 // LayoutSharedDim lays out items along a shared dimension, where all elements
 // share the same space, e.g., Horiz for a Vert layout, and vice-versa.
 func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	avail := ly.LayState.Alloc.Size.Dim(dim) - 2.0*spc
 	for _, c := range ly.Kids {
 		if c == nil {
@@ -738,7 +742,9 @@ func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
 		if ni == nil {
 			continue
 		}
+		ni.StyMu.RLock()
 		al := ni.Sty.Layout.AlignDim(dim)
+		ni.StyMu.RUnlock()
 		pref := ni.LayState.Size.Pref.Dim(dim)
 		need := ni.LayState.Size.Need.Dim(dim)
 		max := ni.LayState.Size.Max.Dim(dim)
@@ -758,7 +764,7 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 
 	elspc := float32(sz-1) * ly.Spacing.Dots
 	al := ly.Sty.Layout.AlignDim(dim)
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	exspc := 2.0*spc + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
@@ -879,7 +885,7 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 	}
 
 	elspc := float32(sz-1) * ly.Spacing.Dots
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	exspc := 2.0*spc + elspc
 
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
@@ -925,7 +931,9 @@ func (ly *Layout) LayoutFlow(dim mat32.Dims, iter int) bool {
 			if ni == nil {
 				continue
 			}
+			ni.StyMu.RLock()
 			al := ni.Sty.Layout.AlignDim(odim)
+			ni.StyMu.RUnlock()
 			pref := ni.LayState.Size.Pref.Dim(odim)
 			need := ni.LayState.Size.Need.Dim(odim)
 			max := ni.LayState.Size.Max.Dim(odim)
@@ -961,7 +969,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim mat32.Dims) {
 	}
 	elspc := float32(sz-1) * ly.Spacing.Dots
 	al := ly.Sty.Layout.AlignDim(dim)
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	exspc := 2.0*spc + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
 	pref := ly.LayState.Size.Pref.Dim(dim) - exspc
@@ -1080,7 +1088,9 @@ func (ly *Layout) LayoutGrid() {
 			continue
 		}
 
+		ni.StyMu.RLock()
 		lst := ni.Sty.Layout
+		ni.StyMu.RUnlock()
 		if lst.Col > 0 {
 			col = lst.Col
 		}
@@ -1150,7 +1160,7 @@ func (ly *Layout) FinalizeLayout() {
 // AllocSize except for top-level layout which uses VpBBox in case less is
 // avail
 func (ly *Layout) AvailSize() mat32.Vec2 {
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	avail := ly.LayState.Alloc.Size.SubScalar(spc) // spc is for right size space
 	parni, _ := KiToNode2D(ly.Par)
 	if parni != nil {
@@ -1221,7 +1231,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		sc.Tracking = true
 		sc.Min = 0.0
 	}
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	avail := ly.AvailSize().SubScalar(spc * 2.0)
 	sc := ly.Scrolls[d]
 	if d == mat32.X {
@@ -1270,6 +1280,8 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 
 // DeactivateScroll turns off given scrollbar, without deleting, so it can be easily re-used
 func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
+	sc.BBoxMu.Lock()
+	defer sc.BBoxMu.Unlock()
 	sc.LayState.Alloc.Pos = mat32.Vec2Zero
 	sc.LayState.Alloc.Size = mat32.Vec2Zero
 	sc.VpBBox = image.ZR
@@ -1280,7 +1292,7 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 func (ly *Layout) LayoutScrolls() {
 	sbw := ly.Sty.Layout.ScrollBarWidth.Dots
 
-	spc := ly.Sty.BoxSpace()
+	spc := ly.BoxSpace()
 	avail := ly.AvailSize()
 	for d := mat32.X; d <= mat32.Y; d++ {
 		odim := mat32.OtherDim(d)
@@ -1503,6 +1515,8 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 	if lagMs < LayoutAutoScrollDelayMSec {
 		return false
 	}
+	ly.BBoxMu.RLock()
+	defer ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		did = ly.AutoScrollDim(mat32.Y, ly.WinBBox.Min.Y, pos.Y)
@@ -1966,9 +1980,14 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 	return nb
 }
 
+// StyleLayout does layout styling -- it sets the StyMu Lock
 func (ly *Layout) StyleLayout() {
+	ly.StyMu.Lock()
+	defer ly.StyMu.Unlock()
+
 	// pr := prof.Start("StyleLayout")
 	// defer pr.End()
+
 	hasTempl, saveTempl := ly.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
@@ -1988,7 +2007,9 @@ func (ly *Layout) StyleLayout() {
 
 func (ly *Layout) Style2D() {
 	ly.StyleLayout()
+	ly.StyMu.Lock()
 	ly.LayState.SetFromStyle(&ly.Sty.Layout) // also does reset
+	ly.StyMu.Unlock()
 }
 
 func (ly *Layout) Size2D(iter int) {
@@ -2131,6 +2152,9 @@ var StretchProps = ki.Props{
 }
 
 func (st *Stretch) Style2D() {
+	st.StyMu.Lock()
+	defer st.StyMu.Unlock()
+
 	hasTempl, saveTempl := st.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		st.Style2DWidget()
@@ -2171,6 +2195,9 @@ var SpaceProps = ki.Props{
 }
 
 func (sp *Space) Style2D() {
+	sp.StyMu.Lock()
+	defer sp.StyMu.Unlock()
+
 	hasTempl, saveTempl := sp.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		sp.Style2DWidget()

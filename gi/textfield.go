@@ -756,7 +756,9 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	spc := st.BoxSpace()
 	pos := tf.LayState.Alloc.Pos.AddScalar(spc)
 	if wincoords {
+		tf.Viewport.BBoxMu.RLock()
 		pos = pos.Add(mat32.NewVec2FmPoint(tf.Viewport.WinBBox.Min))
+		tf.Viewport.BBoxMu.RUnlock()
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
 	return mat32.Vec2{pos.X + cpos, pos.Y}
@@ -1372,7 +1374,10 @@ func (tf *TextField) Init2D() {
 	tf.ConfigParts()
 }
 
+// StyleTextField does text field styling -- sets StyMu Lock
 func (tf *TextField) StyleTextField() {
+	tf.StyMu.Lock()
+
 	tf.SetCanFocusIfActive()
 	hasTempl, saveTempl := tf.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
@@ -1406,12 +1411,15 @@ func (tf *TextField) StyleTextField() {
 	if pv, ok := tf.PropInherit("clear-act", ki.Inherit, ki.TypeProps); ok {
 		tf.ClearAct, _ = kit.ToBool(pv)
 	}
+	tf.StyMu.Unlock()
 	tf.ConfigParts()
 }
 
 func (tf *TextField) Style2D() {
 	tf.StyleTextField()
+	tf.StyMu.Lock()
 	tf.LayState.SetFromStyle(&tf.Sty.Layout) // also does reset
+	tf.StyMu.Unlock()
 }
 
 func (tf *TextField) UpdateRenderAll() bool {
@@ -1460,6 +1468,45 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 	return redo
 }
 
+func (tf *TextField) RenderTextField() {
+	rs, _, st := tf.RenderLock()
+	tf.RenderUnlock(rs)
+
+	tf.AutoScroll() // inits paint with our style
+	if tf.IsInactive() {
+		if tf.IsSelected() {
+			tf.Sty = tf.StateStyles[TextFieldSel]
+		} else {
+			tf.Sty = tf.StateStyles[TextFieldInactive]
+		}
+	} else if tf.HasFocus() {
+		if tf.IsFocusActive() {
+			tf.Sty = tf.StateStyles[TextFieldFocus]
+		} else {
+			tf.Sty = tf.StateStyles[TextFieldActive]
+		}
+	} else if tf.IsSelected() {
+		tf.Sty = tf.StateStyles[TextFieldSel]
+	} else {
+		tf.Sty = tf.StateStyles[TextFieldActive]
+	}
+	st = &tf.Sty
+	st.Font.OpenFont(&st.UnContext)
+	tf.RenderStdBox(st)
+	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
+	tf.RenderSelect()
+	pos := tf.LayState.Alloc.Pos.AddScalar(st.BoxSpace())
+	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
+		st.Font.Color = st.Font.Color.Highlight(50)
+		tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+		tf.RenderVis.RenderTopPos(rs, pos)
+
+	} else {
+		tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+		tf.RenderVis.RenderTopPos(rs, pos)
+	}
+}
+
 func (tf *TextField) Render2D() {
 	if tf.HasFocus() && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
@@ -1469,42 +1516,7 @@ func (tf *TextField) Render2D() {
 	}
 	if tf.PushBounds() {
 		tf.This().(Node2D).ConnectEvents2D()
-		rs := &tf.Viewport.Render
-		rs.Lock()
-		tf.AutoScroll() // inits paint with our style
-		if tf.IsInactive() {
-			if tf.IsSelected() {
-				tf.Sty = tf.StateStyles[TextFieldSel]
-			} else {
-				tf.Sty = tf.StateStyles[TextFieldInactive]
-			}
-		} else if tf.HasFocus() {
-			if tf.IsFocusActive() {
-				tf.Sty = tf.StateStyles[TextFieldFocus]
-			} else {
-				tf.Sty = tf.StateStyles[TextFieldActive]
-			}
-		} else if tf.IsSelected() {
-			tf.Sty = tf.StateStyles[TextFieldSel]
-		} else {
-			tf.Sty = tf.StateStyles[TextFieldActive]
-		}
-		st := &tf.Sty
-		st.Font.OpenFont(&st.UnContext)
-		tf.RenderStdBox(st)
-		cur := tf.EditTxt[tf.StartPos:tf.EndPos]
-		tf.RenderSelect()
-		pos := tf.LayState.Alloc.Pos.AddScalar(st.BoxSpace())
-		if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
-			st.Font.Color = st.Font.Color.Highlight(50)
-			tf.RenderVis.SetString(tf.Placeholder, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
-			tf.RenderVis.RenderTopPos(rs, pos)
-
-		} else {
-			tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
-			tf.RenderVis.RenderTopPos(rs, pos)
-		}
-		rs.Unlock()
+		tf.RenderTextField()
 		if tf.IsActive() {
 			if tf.HasFocus() && tf.IsFocusActive() {
 				tf.StartCursor()
