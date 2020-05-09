@@ -585,7 +585,11 @@ func (tv *TableView) UpdateSliceGrid() {
 			vvi := i*tv.NVisFields + fli
 			var vv ValueView
 			if tv.Values[vvi] == nil {
-				vv = ToValueView(fval.Interface(), "")
+				tags := ""
+				if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
+					tags = `view:"no-inline"`
+				}
+				vv = ToValueView(fval.Interface(), tags)
 				tv.Values[vvi] = vv
 			} else {
 				vv = tv.Values[vvi]
