@@ -2007,12 +2007,12 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	w.PopupStack = append(w.PopupStack, w.Popup)
 	w.Popup = pop
 	_, ni := KiToNode2D(pop)
-	if ni != nil {
-		ni.FullRender2DTree()
-	}
 	pfoc := w.PopupFocus
 	w.PopupFocus = nil
 	w.PopMu.Unlock()
+	if ni != nil {
+		ni.FullRender2DTree() // this locks viewport -- do it after unlocking popup
+	}
 	if pfoc != nil {
 		w.EventMgr.PushFocus(pfoc)
 	} else {

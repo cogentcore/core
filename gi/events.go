@@ -508,7 +508,9 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			em.curHover = nil
 			em.hoverTimer = nil
 			em.TimerMu.Unlock()
-			em.SendHoverEvent(hoe)
+			if hoe != nil {
+				em.SendHoverEvent(hoe)
+			}
 		})
 	} else {
 		dst := int(math32.Hypot(float32(em.startHover.Where.X-me.Pos().X), float32(em.startHover.Where.Y-me.Pos().Y)))
