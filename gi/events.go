@@ -84,7 +84,7 @@ type EventMgr struct {
 	startDND        *mouse.DragEvent
 	dndStarted      bool
 	startHover      *mouse.MoveEvent
-	curHover        *mouse.MoveEvent
+	curHover        *mouse.HoverEvent
 	hoverStarted    bool
 	hoverTimer      *time.Timer
 	startDNDHover   *mouse.DragEvent
@@ -197,25 +197,13 @@ func (em *EventMgr) SendEventSignal(evi oswin.Event, popup bool) {
 		rvs := make(WinEventRecvList, 0, 10)
 
 		esig := &em.EventSigs[et][pri]
-
-		esig.Mu.RLock()
-		for recv, fun := range esig.Cons {
-			if recv.IsDestroyed() {
-				// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
-				delete(esig.Cons, recv)
-				continue
-			}
+		esig.ConsFunc(func(recv ki.Ki, fun ki.RecvFunc) bool {
 			if recv.IsDeleted() {
-				continue
+				return ki.Continue
 			}
-			esig.Mu.RUnlock()
 			cont := em.SendEventSignalFunc(evi, popup, &rvs, recv, fun)
-			esig.Mu.RLock()
-			if !cont {
-				break
-			}
-		}
-		esig.Mu.RUnlock()
+			return cont // false = break
+		})
 
 		if len(rvs) == 0 {
 			continue
@@ -499,7 +487,7 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 	if !em.hoverStarted {
 		em.hoverStarted = true
 		em.startHover = me
-		em.curHover = em.startHover
+		em.curHover = &mouse.HoverEvent{Event: me.Event}
 		em.hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 			em.TimerMu.Lock()
 			hoe := em.curHover
@@ -521,7 +509,7 @@ func (em *EventMgr) MouseMoveEvents(evi oswin.Event) {
 			em.hoverTimer = nil
 			em.Master.DeleteTooltip()
 		} else {
-			em.curHover = me
+			em.curHover = &mouse.HoverEvent{Event: me.Event}
 		}
 	}
 	em.TimerMu.Unlock()
@@ -588,7 +576,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 					}
 				}
 			} else {
-				// todo: 3D
+				// 3D
 				return false
 			}
 		})
@@ -605,39 +593,40 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 	et := me.Type()
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		esig := &em.EventSigs[et][pri]
-		for recv, _ := range esig.Cons {
-			if recv.IsDestroyed() {
-				delete(esig.Cons, recv)
-				continue
-			}
+		gotOne := false
+		esig.ConsFunc(func(recv ki.Ki, fun ki.RecvFunc) bool {
 			if recv.IsDeleted() {
-				continue
+				return ki.Continue
 			}
 			_, ni := KiToNode2D(recv)
 			if ni != nil {
 				if !em.Master.IsInScope(ni, popup) {
-					continue
+					return ki.Continue
 				}
 				pos := me.Pos()
 				if ni.PosInWinBBox(pos) {
 					if ni.IsInstaDrag() {
 						em.Dragging = ni.This()
 						ni.SetFlag(int(NodeDragging))
-						return true
+						gotOne = true
+						return ki.Break
 					}
 				}
 			}
+			return ki.Continue
+		})
+		if gotOne {
+			return true
 		}
 	}
 	return false
 }
 
 // SendHoverEvent sends mouse hover event, based on last mouse move event
-func (em *EventMgr) SendHoverEvent(e *mouse.MoveEvent) {
-	he := mouse.HoverEvent{Event: e.Event}
+func (em *EventMgr) SendHoverEvent(he *mouse.HoverEvent) {
 	he.ClearProcessed()
 	he.Action = mouse.Hover
-	em.SendEventSignal(&he, Popups)
+	em.SendEventSignal(he, Popups)
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -769,14 +758,14 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 	send := em.Master.EventTopNode()
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		esig := &em.EventSigs[ftyp][pri]
-		for recv, fun := range esig.Cons {
-			if recv.IsDeleted() { // destroyed is filtered upstream
-				continue
+		esig.ConsFunc(func(recv ki.Ki, fun ki.RecvFunc) bool {
+			if recv.IsDeleted() {
+				return ki.Continue
 			}
 			_, ni := KiToNode2D(recv)
 			if ni != nil {
 				if !em.Master.IsInScope(ni, popup) {
-					continue
+					return ki.Continue
 				}
 				in := ni.PosInWinBBox(pos)
 				if in {
@@ -791,9 +780,10 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 					}
 				}
 			} else {
-				// todo: 3D
+				// 3D
 			}
-		}
+			return ki.Continue
+		})
 	}
 	if len(outs)+len(ins) > 0 {
 		updt := em.Master.EventTopUpdateStart()
@@ -918,25 +908,25 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 	for i := 0; i < 2; i++ {
 		focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
 			if gotFocus {
-				return false
+				return ki.Break
 			}
 			_, ni := KiToNode2D(k)
 			if ni == nil || ni.This() == nil {
-				return true
+				return ki.Continue
 			}
 			if foc == k { // current focus can be a non-can-focus item
 				focusNext = true
-				return true
+				return ki.Continue
 			}
 			if !focusNext {
-				return true
+				return ki.Continue
 			}
 			if !ni.CanFocus() {
-				return true
+				return ki.Continue
 			}
 			em.SetFocus(k)
 			gotFocus = true
-			return false // done
+			return ki.Break // done
 		})
 		if gotFocus {
 			return true
@@ -996,21 +986,21 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
 		if gotFocus {
-			return false
+			return ki.Break
 		}
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
-			return true
+			return ki.Continue
 		}
 		if foc == k {
 			gotFocus = true
-			return false
+			return ki.Break
 		}
 		if !ni.CanFocus() {
-			return true
+			return ki.Continue
 		}
 		prevItem = k
-		return true
+		return ki.Continue
 	})
 	if gotFocus && prevItem != nil {
 		em.SetFocus(prevItem)
@@ -1030,13 +1020,13 @@ func (em *EventMgr) FocusLast() bool {
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
-			return true
+			return ki.Continue
 		}
 		if !ni.CanFocus() {
-			return true
+			return ki.Continue
 		}
 		lastItem = k
-		return true
+		return ki.Continue
 	})
 	em.SetFocus(lastItem)
 	if lastItem == nil {
@@ -1054,14 +1044,14 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d interface{}) bool {
 		if k == focRoot { // skip top-level
-			return true
+			return ki.Continue
 		}
 		nii, ni := KiToNode2D(k)
 		if ni == nil || ni.This() == nil {
-			return true
+			return ki.Continue
 		}
 		if foc == k {
-			return true
+			return ki.Continue
 		}
 		if ni.HasFocus() {
 			if EventTrace {
@@ -1074,7 +1064,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 			ni.ClearFlag(int(HasFocus))
 			nii.FocusChanged2D(FocusLost)
 		}
-		return true
+		return ki.Continue
 	})
 	if updated {
 		em.Master.EventTopUpdateEnd(updt)

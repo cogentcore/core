@@ -49,7 +49,7 @@ func (vv *HiStyleValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_HiStyleValueView).(*HiStyleValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
 	vv.UpdateWidget()
 }

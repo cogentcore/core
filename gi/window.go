@@ -1794,10 +1794,11 @@ func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
 	if ni.This() == cpop {
 		return popup
 	}
-	if ni.Viewport == nil {
+	mvp := ni.ViewportSafe()
+	if mvp == nil {
 		return false
 	}
-	if ni.Viewport.This() == cpop {
+	if mvp.This() == cpop {
 		return popup
 	}
 	return !popup
@@ -2411,7 +2412,7 @@ func (w *Window) ReportWinNodes() {
 	nn := 0
 	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 		nn++
-		return true
+		return ki.Continue
 	})
 	fmt.Printf("Win: %v has: %v nodes\n", w.Nm, nn)
 }

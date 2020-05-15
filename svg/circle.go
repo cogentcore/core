@@ -40,7 +40,7 @@ func (g *Circle) Render2D() {
 		g.This().(gi.Node2D).Init2D()
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	pc.DrawCircle(rs, g.Pos.X, g.Pos.Y, g.Radius)

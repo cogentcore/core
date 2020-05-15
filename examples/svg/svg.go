@@ -49,7 +49,7 @@ func OpenSVG(fnm string) {
 	TheSVG.SetFullReRender()
 	fmt.Printf("Opening: %v\n", CurFilename)
 	TheSVG.OpenXML(CurFilename)
-	SetZoom(TheSVG.Viewport.Win.LogicalDPI() / 96.0)
+	SetZoom(TheSVG.ParentWindow().LogicalDPI() / 96.0)
 	SetTrans(0, 0)
 	TheSVG.UpdateEnd(updt)
 }

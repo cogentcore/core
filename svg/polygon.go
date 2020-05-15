@@ -43,7 +43,7 @@ func (g *Polygon) Render2D() {
 		return
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.PushXForm(pc.XForm)
 	pc.DrawPolygon(rs, g.Points)
 	pc.FillStrokeClear(rs)

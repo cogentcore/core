@@ -41,7 +41,7 @@ func (g *Line) Render2D() {
 		g.This().(gi.Node2D).Init2D()
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	pc.DrawLine(rs, g.Start.X, g.Start.Y, g.End.X, g.End.Y)

@@ -417,10 +417,10 @@ func (nb *Node3DBase) DisconnectAllEvents(win *gi.Window, pri gi.EventPris) {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode3D(k)
 		if ni == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		win.EventMgr.DisconnectAllEvents(ni.This(), pri)
-		return true
+		return ki.Continue
 	})
 }
 

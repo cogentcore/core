@@ -148,7 +148,7 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 			kt := d.(*key.ChordEvent)
 			kt.SetProcessed()
 			kcc.SetText(string(kt.Chord())) // that's easy!
-			oswin.TheApp.ClipBoard(kc.Viewport.Win.OSWin).Write(mimedata.NewText(string(kt.Chord())))
+			oswin.TheApp.ClipBoard(kc.ParentWindow().OSWin).Write(mimedata.NewText(string(kt.Chord())))
 			kcc.ChordUpdated()
 		}
 	})

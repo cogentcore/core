@@ -40,7 +40,7 @@ func (g *Ellipse) Render2D() {
 		g.This().(gi.Node2D).Init2D()
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.Lock()
 	rs.PushXForm(pc.XForm)
 	pc.DrawEllipse(rs, g.Pos.X, g.Pos.Y, g.Radii.X, g.Radii.Y)

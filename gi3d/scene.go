@@ -326,20 +326,20 @@ func (sc *Scene) Validate() error {
 	hasError := false
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
-			return true
+			return ki.Continue
 		}
 		nii, ni := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		if ni.IsInvisible() {
-			return false
+			return ki.Break
 		}
 		err := nii.Validate(sc)
 		if err != nil {
 			hasError = true
 		}
-		return true
+		return ki.Continue
 	})
 	if hasError {
 		return fmt.Errorf("gi3d.Scene: %v Validate found at least one error (see log)", sc.PathUnique())
@@ -551,7 +551,7 @@ func (sc *Scene) NavEvents() {
 			orbDel := float32(.2)
 			panDel := float32(.01)
 			if !ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
+				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Push(cursor.HandOpen)
 				ssc.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
@@ -575,7 +575,7 @@ func (sc *Scene) NavEvents() {
 			ssc.UpdateSig()
 		} else {
 			if ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
 				ssc.SetDragCursor = false
 			}
 		}
@@ -614,7 +614,7 @@ func (sc *Scene) NavEvents() {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
 			ssc.SetDragCursor = false
 		}
 		zoom := float32(me.NonZeroDelta(false))
@@ -635,7 +635,7 @@ func (sc *Scene) NavEvents() {
 		}
 		me := d.(*mouse.Event)
 		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
 			ssc.SetDragCursor = false
 		}
 		if me.Action != mouse.Press {
@@ -933,17 +933,17 @@ func (sc *Scene) UpdateMeshBBox() {
 			func(k ki.Ki, level int, d interface{}) bool {
 				nii, _ := KiToNode3D(k)
 				if nii == nil {
-					return false // going into a different type of thing, bail
+					return ki.Break // going into a different type of thing, bail
 				}
-				return true
+				return ki.Continue
 			},
 			func(k ki.Ki, level int, d interface{}) bool {
 				nii, _ := KiToNode3D(k)
 				if nii == nil {
-					return false // going into a different type of thing, bail
+					return ki.Break // going into a different type of thing, bail
 				}
 				nii.UpdateMeshBBox()
-				return true
+				return ki.Continue
 			})
 	}
 }
@@ -960,18 +960,18 @@ func (sc *Scene) UpdateWorldMatrix() {
 		kii.UpdateWorldMatrix(idmtx)
 		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d interface{}) bool {
 			if k == kid {
-				return true // skip, already did
+				return ki.Continue // skip, already did
 			}
 			nii, _ := KiToNode3D(k)
 			if nii == nil {
-				return false // going into a different type of thing, bail
+				return ki.Break // going into a different type of thing, bail
 			}
 			pii, pi := KiToNode3D(k.Parent())
 			if pii == nil {
-				return false
+				return ki.Break
 			}
 			nii.UpdateWorldMatrix(&pi.Pose.WorldMatrix)
-			return true
+			return ki.Continue
 		})
 	}
 }
@@ -987,15 +987,15 @@ func (sc *Scene) UpdateMVPMatrix() {
 
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
-			return true
+			return ki.Continue
 		}
 		nii, _ := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		nii.UpdateMVPMatrix(&sc.Camera.ViewMatrix, &sc.Camera.PrjnMatrix)
 		nii.UpdateBBox2D(size, sc)
-		return true
+		return ki.Continue
 	})
 }
 
@@ -1017,14 +1017,14 @@ func (sc *Scene) Init3D() {
 	})
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
-			return true
+			return ki.Continue
 		}
 		nii, _ := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		nii.Init3D(sc)
-		return true
+		return ki.Continue
 	})
 	sc.Style3D()
 }
@@ -1032,28 +1032,28 @@ func (sc *Scene) Init3D() {
 func (sc *Scene) Style3D() {
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
-			return true
+			return ki.Continue
 		}
 		nii, _ := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		nii.Style3D(sc)
-		return true
+		return ki.Continue
 	})
 }
 
 func (sc *Scene) UpdateNodes3D() {
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
-			return true
+			return ki.Continue
 		}
 		nii, _ := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		nii.UpdateNode3D(sc)
-		return true
+		return ki.Continue
 	})
 }
 
@@ -1153,26 +1153,26 @@ func (sc *Scene) Render3D() {
 	var rcs [RenderClassesN][]Node3D
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
-			return true
+			return ki.Continue
 		}
 		nii, ni := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
 			ni.DisconnectAllEvents(sc.Win, gi.AllPris)
-			return false
+			return ki.Break
 		}
 		nii.ConnectEvents3D(sc) // only connect visible
 		if !nii.IsSolid() {
-			return true
+			return ki.Continue
 		}
 		rc := nii.RenderClass()
 		if rc > RClassTransTexture { // all in one group b/c z-sorting is key
 			rc = RClassTransTexture
 		}
 		rcs[rc] = append(rcs[rc], nii)
-		return true
+		return ki.Continue
 	})
 
 	for rci, objs := range rcs {
@@ -1256,15 +1256,15 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d interface{}) bool {
 			nii, ni := KiToNode3D(k)
 			if nii == nil {
-				return false // going into a different type of thing, bail
+				return ki.Break // going into a different type of thing, bail
 			}
 			if !nii.IsSolid() {
-				return true
+				return ki.Continue
 			}
 			if ni.PosInWinBBox(pos) {
 				objs = append(objs, nii)
 			}
-			return true
+			return ki.Continue
 		})
 	}
 	return objs

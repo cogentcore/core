@@ -56,7 +56,7 @@ func (g *Group) Render2D() {
 		g.This().(gi.Node2D).Init2D()
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.PushXFormLock(pc.XForm)
 
 	g.Render2DChildren()

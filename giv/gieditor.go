@@ -97,7 +97,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // 				gee.Changed = true
 // 			}
 // 		})
-// 		return true
+// 		return ki.Continue
 // 	})
 // }
 

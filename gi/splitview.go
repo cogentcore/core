@@ -131,7 +131,7 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
 	sv.SetSplits(splits...)
 	// sv.WinFullReRender() // tell window to do a full redraw
-	sv.Viewport.SetNeedsFullRender()
+	sv.ViewportSafe().SetNeedsFullRender()
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -169,7 +169,7 @@ func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
-	sv.Viewport.SetNeedsFullRender() // splits typically require full rebuild
+	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
 	sv.UpdateEnd(updt)
 }
 
@@ -183,7 +183,7 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
-	sv.Viewport.SetNeedsFullRender() // splits typically require full rebuild
+	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
 	sv.UpdateEnd(updt)
 }
 
@@ -235,7 +235,7 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sv.Splits)
 	sv.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sv.Splits)
-	sv.Viewport.SetNeedsFullRender() // splits typically require full rebuild
+	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
 }
 
 func (sv *SplitView) Init2D() {
@@ -582,7 +582,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	mxpos := off + int(sr.Pos+0.5*sz)
 
 	if sr.IsDragging() {
-		win := sr.Viewport.Win
+		win := sr.ParentWindow()
 		spnm := "gi.Splitter:" + sr.UniqueName()
 		spr, ok := win.SpriteByName(spnm)
 		if ok {
@@ -682,7 +682,7 @@ func (sr *Splitter) ConnectEvents2D() {
 }
 
 func (sr *Splitter) Render2D() {
-	win := sr.Viewport.Win
+	win := sr.ParentWindow()
 	sr.This().(Node2D).ConnectEvents2D()
 	spnm := "gi.Splitter:" + sr.UniqueName()
 	if sr.IsDragging() {
@@ -712,25 +712,23 @@ func (sr *Splitter) Render2D() {
 			return
 		}
 		if sr.PushBounds() {
-			sr.Render2DDefaultStyle()
+			sr.RenderSplitter()
 			sr.Render2DChildren()
 			sr.PopBounds()
 		}
 	}
 }
 
-// render using a default style if not otherwise styled
-func (sr *Splitter) Render2DDefaultStyle() {
-	st := &sr.Sty
-	rs := &sr.Viewport.Render
-	pc := &rs.Paint
-
+// RenderSplitter does the default splitter rendering
+func (sr *Splitter) RenderSplitter() {
 	sr.UpdateSplitterPos()
 	sr.ConfigPartsIfNeeded(true)
 
 	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 		sr.Parts.Render2DTree()
 	} else {
+		rs, pc, st := sr.RenderLock()
+
 		pc.StrokeStyle.SetColor(nil)
 		pc.FillStyle.SetColorSpec(&st.Font.BgColor)
 
@@ -738,6 +736,8 @@ func (sr *Splitter) Render2DDefaultStyle() {
 		pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
 		sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
 		sr.RenderBoxImpl(pos, sz, 0)
+
+		sr.RenderUnlock(rs)
 	}
 }
 

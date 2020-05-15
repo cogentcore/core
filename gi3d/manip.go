@@ -195,13 +195,13 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		sn := ssc.CurSel.AsNode3D()
 		if !mpt.IsDragging() {
 			if ssc.SetDragCursor {
-				oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+				oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Pop()
 				ssc.SetDragCursor = false
 			}
 			return
 		}
 		if !ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Push(cursor.HandOpen)
+			oswin.TheApp.Cursor(ssc.ParentWindow().OSWin).Push(cursor.HandOpen)
 			ssc.SetDragCursor = true
 		}
 		del := me.Where.Sub(me.From)

@@ -429,7 +429,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		edac.Tooltip = "color selection dialog"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			svv, _ := recv.Embed(KiT_StructViewInline).(*StructViewInline)
-			vv.Activate(svv.Viewport, nil, nil)
+			vv.Activate(svv.ViewportSafe(), nil, nil)
 		})
 	}
 	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -507,7 +507,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_ColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
 	vv.UpdateWidget()
 }

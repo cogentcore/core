@@ -95,7 +95,7 @@ func (svg *SVG) SetNormXForm() {
 // rendering is done within a 96 DPI context
 func (svg *SVG) SetDPIXForm() {
 	pc := &svg.Pnt
-	dpisc := svg.Viewport.Win.LogicalDPI() / 96.0
+	dpisc := svg.ParentWindow().LogicalDPI() / 96.0
 	pc.XForm = mat32.Scale2D(dpisc, dpisc)
 }
 

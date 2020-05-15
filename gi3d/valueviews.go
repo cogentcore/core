@@ -58,7 +58,7 @@ func (vv *MeshValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_MeshValueView).(*MeshValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -152,7 +152,7 @@ func (vv *TexValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		vvv, _ := recv.Embed(KiT_TexValueView).(*TexValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
 	vv.UpdateWidget()
 }

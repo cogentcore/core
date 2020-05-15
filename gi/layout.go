@@ -298,7 +298,8 @@ func (ly *Layout) GatherSizes() {
 	sumPref, sumNeed, maxPref, maxNeed := ly.GatherSizesSumMax()
 
 	prefSizing := false
-	if ly.Viewport != nil && ly.Viewport.HasFlag(int(VpFlagPrefSizing)) {
+	mvp := ly.ViewportSafe()
+	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
 		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
 	}
 
@@ -577,7 +578,8 @@ func (ly *Layout) GatherSizesGrid() {
 	}
 
 	prefSizing := false
-	if ly.Viewport != nil && ly.Viewport.HasFlag(int(VpFlagPrefSizing)) {
+	mvp := ly.ViewportSafe()
+	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
 		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
 	}
 
@@ -646,10 +648,11 @@ func (ly *Layout) GatherSizesGrid() {
 // AllocFromParent: if we are not a child of a layout, then get allocation
 // from a parent obj that has a layout size
 func (ly *Layout) AllocFromParent() {
-	if ly.Par == nil || ly.Viewport == nil || !ly.LayState.Alloc.Size.IsNil() {
+	mvp := ly.ViewportSafe()
+	if ly.Par == nil || mvp == nil || !ly.LayState.Alloc.Size.IsNil() {
 		return
 	}
-	if ly.Par != ly.Viewport.This() {
+	if ly.Par != mvp.This() {
 		// note: zero alloc size happens all the time with non-visible tabs!
 		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.PathUnique(), ly.LayState)
 		return
@@ -1166,7 +1169,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 	if parni != nil {
 		vp := parni.AsViewport2D()
 		if vp != nil {
-			if vp.Viewport == nil {
+			if vp.ViewportSafe() == nil {
 				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc)
 				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.PathUnique(), vp.PathUnique(), avail)
 			}
@@ -1258,7 +1261,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		if !ls.IsUpdating() {
 			wupdt := ls.TopUpdateStart()
 			ls.Move2DTree()
-			ls.Viewport.ReRender2DNode(li)
+			ls.ViewportSafe().ReRender2DNode(li)
 			ls.TopUpdateEnd(wupdt)
 			// } else {
 			// 	fmt.Printf("not ready to update\n")
@@ -1896,22 +1899,22 @@ func (ly *Layout) ChildByLabelStartsCanFocus(name string, after ki.Ki) (ki.Ki, b
 	gotAfter := false
 	ly.FuncDownBreadthFirst(0, nil, func(k ki.Ki, level int, data interface{}) bool {
 		if k == ly.This() { // skip us
-			return true
+			return ki.Continue
 		}
 		_, ni := KiToNode2D(k)
 		if ni != nil && !ni.CanFocus() { // don't go any further
-			return false
+			return ki.Break
 		}
 		if after != nil && !gotAfter {
 			if k == after {
 				gotAfter = true
 			}
-			return true // skip to next
+			return ki.Continue // skip to next
 		}
 		kn := strings.ToLower(ToLabel(k))
 		if rki == nil && strings.HasPrefix(kn, lcnm) {
 			rki = k
-			return false
+			return ki.Break
 		}
 		return rki == nil // only continue if haven't found yet
 	})
@@ -1939,7 +1942,7 @@ func (ly *Layout) LayoutScrollEvents() {
 	ly.ConnectEvent(oswin.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.MoveEvent)
 		li := recv.Embed(KiT_Layout).(*Layout)
-		if li.Viewport.IsMenu() {
+		if li.ViewportSafe().IsMenu() {
 			li.AutoScroll(me.Pos())
 		}
 	})

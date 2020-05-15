@@ -115,10 +115,10 @@ func (mb *MenuBar) UpdateActions() {
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 // Called in ConnectEvents2D()
 func (mb *MenuBar) SetShortcuts() {
-	if mb.Viewport == nil || mb.Viewport.Win == nil {
+	win := mb.ParentWindow()
+	if win == nil {
 		return
 	}
-	win := mb.Viewport.Win
 	for _, k := range mb.Kids {
 		if k.TypeEmbeds(KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
@@ -134,10 +134,10 @@ func (mb *MenuBar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (mb *MenuBar) DeleteShortcuts() {
-	if mb.Viewport == nil || mb.Viewport.Win == nil {
+	win := mb.ParentWindow()
+	if win == nil {
 		return
 	}
-	win := mb.Viewport.Win
 	for _, k := range mb.Kids {
 		if k.TypeEmbeds(KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
@@ -420,10 +420,10 @@ func (tb *ToolBar) ConnectEvents2D() {
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 // Called in ConnectEvents2D()
 func (tb *ToolBar) SetShortcuts() {
-	if tb.Viewport == nil || tb.Viewport.Win == nil {
+	win := tb.ParentWindow()
+	if win == nil {
 		return
 	}
-	win := tb.Viewport.Win
 	for _, k := range tb.Kids {
 		if k.TypeEmbeds(KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
@@ -439,10 +439,10 @@ func (tb *ToolBar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (tb *ToolBar) DeleteShortcuts() {
-	if tb.Viewport == nil || tb.Viewport.Win == nil {
+	win := tb.ParentWindow()
+	if win == nil {
 		return
 	}
-	win := tb.Viewport.Win
 	for _, k := range tb.Kids {
 		if k.TypeEmbeds(KiT_Action) {
 			ac := k.Embed(KiT_Action).(*Action)
@@ -457,7 +457,7 @@ func (tb *ToolBar) UpdateActions() {
 	if tb == nil {
 		return
 	}
-	if tb.Viewport != nil && tb.Viewport.Win != nil {
+	if tb.ParentWindow() != nil {
 		wupdt := tb.TopUpdateStart()
 		defer tb.TopUpdateEnd(wupdt)
 	}

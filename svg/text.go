@@ -22,7 +22,7 @@ type Text struct {
 	Pos          mat32.Vec2    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
 	Width        float32       `xml:"width" desc:"width of text to render if using word-wrapping"`
 	Text         string        `xml:"text" desc:"text string to render"`
-	Render       gi.TextRender `xml:"-" json:"-" desc:"render version of text"`
+	TextRender   gi.TextRender `xml:"-" json:"-" desc:"render version of text"`
 	CharPosX     []float32     `desc:"character positions along X axis, if specified"`
 	CharPosY     []float32     `desc:"character positions along Y axis, if specified"`
 	CharPosDX    []float32     `desc:"character delta-positions along X axis, if specified"`
@@ -60,7 +60,7 @@ func (g *Text) CopyFieldsFrom(frm interface{}) {
 func (g *Text) BBox2D() image.Rectangle {
 	rs := &g.Viewport.Render
 	// todo: could be much more accurate..
-	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.Render.Size.X, g.Pos.Y+g.Render.Size.Y)
+	return g.Pnt.BoundingBox(rs, g.Pos.X, g.Pos.Y, g.Pos.X+g.TextRender.Size.X, g.Pos.Y+g.TextRender.Size.Y)
 }
 
 func (g *Text) Render2D() {
@@ -68,7 +68,7 @@ func (g *Text) Render2D() {
 		g.This().(gi.Node2D).Init2D()
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.PushXForm(pc.XForm)
 	if len(g.Text) > 0 {
 		orgsz := pc.FontStyle.Size
@@ -83,16 +83,16 @@ func (g *Text) Render2D() {
 		if !pc.FillStyle.Color.IsNil() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
-		g.Render.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
-		g.Render.Size = g.Render.Size.Mul(mat32.Vec2{scx, scy})
+		g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
+		g.TextRender.Size = g.TextRender.Size.Mul(mat32.Vec2{scx, scy})
 		if gi.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorMiddle {
-			pos.X -= g.Render.Size.X * .5
+			pos.X -= g.TextRender.Size.X * .5
 		} else if gi.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorEnd {
-			pos.X -= g.Render.Size.X
+			pos.X -= g.TextRender.Size.X
 		}
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
 		pc.FontStyle.OpenFont(&pc.UnContext)
-		sr := &(g.Render.Spans[0])
+		sr := &(g.TextRender.Spans[0])
 		sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 		for i := range sr.Render {
 			sr.Render[i].RelPos = rs.XForm.MulVec2AsVec(sr.Render[i].RelPos)
@@ -138,7 +138,7 @@ func (g *Text) Render2D() {
 			}
 		}
 		// todo: TextLength, AdjustGlyphs -- also svg2 at least supports word wrapping!
-		g.Render.Render(rs, pos)
+		g.TextRender.Render(rs, pos)
 		g.ComputeBBoxSVG()
 	}
 	g.Render2DChildren()

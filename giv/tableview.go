@@ -435,7 +435,8 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	}
 	tv.RowHeight = math32.Max(tv.RowHeight, tv.Sty.Font.Face.Metrics.Height)
 
-	if tv.Viewport != nil && tv.Viewport.HasFlag(int(gi.VpFlagPrefSizing)) {
+	mvp := tv.ViewportSafe()
+	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
 		tv.VisRows = ints.MinInt(gi.LayoutPrefMaxRows, tv.SliceSize)
 		tv.LayoutHeight = float32(tv.VisRows) * tv.RowHeight
 	} else {
@@ -764,8 +765,8 @@ func (tv *TableView) SortSlice() {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Push(cursor.Wait)
-	defer oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).Pop()
+	oswin.TheApp.Cursor(tv.ParentWindow().OSWin).Push(cursor.Wait)
+	defer oswin.TheApp.Cursor(tv.ParentWindow().OSWin).Pop()
 
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
@@ -837,7 +838,7 @@ func (tv *TableView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(tv.Slice) {
-		ToolBarView(tv.Slice, tv.Viewport, tb)
+		ToolBarView(tv.Slice, tv.ViewportSafe(), tb)
 		tb.SetFullReRender()
 	}
 	tv.ToolbarSlice = tv.Slice

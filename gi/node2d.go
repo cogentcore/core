@@ -64,7 +64,7 @@ For Widget / Layout nodes, rendering is done in 5 separate passes:
 */
 type Node2DBase struct {
 	NodeBase
-	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter"`
+	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock"`
 }
 
 var KiT_Node2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
@@ -348,13 +348,13 @@ func (nb *Node2DBase) GrabFocus() {
 		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 			_, ni := KiToNode2D(k)
 			if ni == nil || ni.This() == nil {
-				return true
+				return ki.Continue
 			}
 			if !ni.CanFocus() {
-				return true
+				return ki.Continue
 			}
 			foc = k
-			return false // done
+			return ki.Break // done
 		})
 	}
 	em := nb.EventMgr2D()
@@ -442,11 +442,16 @@ func (nb *Node2DBase) ContextMenu() {
 		return
 	}
 	pos := nb.This().(Node2D).ContextMenuPos()
-	PopupMenu(men, pos.X, pos.Y, nb.Viewport, nb.Nm+"-menu")
+	mvp := nb.ViewportSafe()
+	PopupMenu(men, pos.X, pos.Y, mvp, nb.Nm+"-menu")
 }
 
 func (nb *Node2DBase) IsVisible() bool {
-	if nb == nil || nb.This() == nil || nb.IsInvisible() || nb.Viewport == nil || nb.Viewport.This() == nil {
+	if nb == nil || nb.This() == nil || nb.IsInvisible() {
+		return false
+	}
+	mvp := nb.ViewportSafe()
+	if mvp == nil || mvp.This() == nil {
 		return false
 	}
 	if nb.Par == nil || nb.Par.This() == nil {
@@ -476,6 +481,20 @@ func (nb *Node2DBase) WinFullReRender() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 
+// ViewportSafe returns the viewport under BBoxMu read lock -- use this for
+// random access to Viewport field when not otherwise protected.
+func (nb *Node2DBase) ViewportSafe() *Viewport2D {
+	nb.BBoxMu.RLock()
+	defer nb.BBoxMu.RUnlock()
+	return nb.Viewport
+}
+
+// Render returns the RenderState from this node's Viewport, using safe lock access
+func (nb *Node2DBase) Render() *RenderState {
+	mvp := nb.ViewportSafe()
+	return &mvp.Render
+}
+
 // KiToNode2D converts Ki to a Node2D interface and a Node2DBase obj -- nil if not.
 func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
 	if k == nil || k.This() == nil { // this also checks for destroyed
@@ -499,7 +518,8 @@ func KiToNode2DBase(k ki.Ki) *Node2DBase {
 // for UpdateStart / End around multiple dispersed updates to
 // properly batch everything and prevent redundant updates.
 func (nb *Node2DBase) TopNode2D() Node {
-	if nb.Viewport == nil || nb.Viewport.This() == nil {
+	mvp := nb.ViewportSafe()
+	if mvp == nil || mvp.This() == nil {
 		vp := nb.This().(Node2D).AsViewport2D()
 		if vp != nil {
 			top := vp.This().(Viewport).VpTop()
@@ -509,7 +529,7 @@ func (nb *Node2DBase) TopNode2D() Node {
 		}
 		return nil
 	}
-	top := nb.Viewport.This().(Viewport).VpTop()
+	top := mvp.This().(Viewport).VpTop()
 	if top != nil {
 		return top.VpTopNode()
 	}
@@ -519,10 +539,11 @@ func (nb *Node2DBase) TopNode2D() Node {
 // EventMgr2D() returns the event manager for this node.
 // Can be nil.
 func (nb *Node2DBase) EventMgr2D() *EventMgr {
-	if nb.Viewport == nil || nb.Viewport.This() == nil {
+	mvp := nb.ViewportSafe()
+	if mvp == nil || mvp.This() == nil {
 		return nil
 	}
-	top := nb.Viewport.This().(Viewport).VpTop()
+	top := mvp.This().(Viewport).VpTop()
 	if top == nil {
 		return nil
 	}
@@ -533,14 +554,15 @@ func (nb *Node2DBase) EventMgr2D() *EventMgr {
 // for TopUpdateStart / End around multiple dispersed updates to
 // properly batch everything and prevent redundant updates.
 func (nb *Node2DBase) TopUpdateStart() bool {
-	if nb.Viewport == nil || nb.Viewport.This() == nil {
+	mvp := nb.ViewportSafe()
+	if mvp == nil || mvp.This() == nil {
 		vp := nb.This().(Node2D).AsViewport2D()
 		if vp != nil && vp.This() != nil {
 			return vp.This().(Viewport).VpTopUpdateStart()
 		}
 		return false
 	}
-	return nb.Viewport.This().(Viewport).VpTopUpdateStart()
+	return mvp.This().(Viewport).VpTopUpdateStart()
 }
 
 // TopUpdateEnd calls UpdateEnd on TopNode2D().  Use this
@@ -550,20 +572,22 @@ func (nb *Node2DBase) TopUpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
-	if nb.Viewport == nil || nb.Viewport.This() == nil {
+	mvp := nb.ViewportSafe()
+	if mvp == nil || mvp.This() == nil {
 		vp := nb.This().(Node2D).AsViewport2D()
 		if vp != nil && vp.This() != nil {
 			vp.This().(Viewport).VpTopUpdateEnd(updt)
 		}
 		return
 	}
-	nb.Viewport.This().(Viewport).VpTopUpdateEnd(updt)
+	mvp.This().(Viewport).VpTopUpdateEnd(updt)
 }
 
 // ParentWindow returns the parent window for this node
 func (nb *Node2DBase) ParentWindow() *Window {
-	if nb.Viewport != nil && nb.Viewport.Win != nil {
-		return nb.Viewport.Win
+	mvp := nb.ViewportSafe()
+	if mvp != nil && mvp.Win != nil {
+		return mvp.Win
 	}
 	wini, err := nb.ParentByTypeTry(KiT_Window, ki.Embeds)
 	if err != nil {
@@ -624,11 +648,11 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		ni.DisconnectViewport()
 		em.DisconnectAllEvents(ni.This(), pri)
-		return true
+		return ki.Continue
 	})
 }
 
@@ -637,16 +661,18 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 // re-render it -- this is automatically called in PushBounds, and
 // disconnected with DisconnectAllEvents, so it only occurs for rendered nodes.
 func (nb *Node2DBase) ConnectToViewport() {
-	if nb.Viewport != nil && nb.Viewport.This() != nil {
-		nb.NodeSig.Connect(nb.Viewport.This(), SignalViewport2D)
+	mvp := nb.ViewportSafe()
+	if mvp != nil && mvp.This() != nil {
+		nb.NodeSig.Connect(mvp.This(), SignalViewport2D)
 	}
 }
 
 // DisconnectViewport disconnects the node's update signal to the viewport as
 // a receiver
 func (nb *Node2DBase) DisconnectViewport() {
-	if nb.Viewport != nil && nb.Viewport.This() != nil {
-		nb.NodeSig.Disconnect(nb.Viewport.This())
+	mvp := nb.ViewportSafe()
+	if mvp != nil && mvp.This() != nil {
+		nb.NodeSig.Disconnect(mvp.This())
 	}
 }
 
@@ -713,14 +739,14 @@ func (nb *Node2DBase) NeedsFullReRender2DTree() bool {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
 		if ni == nil {
-			return false
+			return ki.Break
 		}
 		if ni.NeedsFullReRender() {
 			full = true
 			ni.ClearFullReRender()
-			return false // done
+			return ki.Break // done
 		}
-		return true
+		return ki.Continue
 	})
 	return full
 }
@@ -737,12 +763,12 @@ func (nb *Node2DBase) Init2DTree() {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
-			return false
+			return ki.Break
 		}
 		// ppr := prof.Start("Init2DTree:" + nii.Type().Name())
 		nii.Init2D()
 		// ppr.End()
-		return true
+		return ki.Continue
 	})
 	pr.End()
 }
@@ -758,12 +784,12 @@ func (nb *Node2DBase) Style2DTree() {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, _ := KiToNode2D(k)
 		if nii == nil {
-			return false
+			return ki.Break
 		}
 		// ppr := prof.Start("Style2DTree:" + nii.Type().Name())
 		nii.Style2D()
 		// ppr.End()
-		return true
+		return ki.Continue
 	})
 	pr.End()
 }
@@ -779,20 +805,20 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 			nii, ni := KiToNode2D(k)
 			if nii == nil {
 				// fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", k, k.PathUnique())
-				return false
+				return ki.Break
 			}
 			if ni.HasNoLayout() {
-				return false
+				return ki.Break
 			}
-			return true
+			return ki.Continue
 		},
 		func(k ki.Ki, level int, d interface{}) bool { // this one does the work
 			nii, ni := KiToNode2D(k)
 			if ni == nil {
-				return false
+				return ki.Break
 			}
 			nii.Size2D(iter)
-			return true
+			return ki.Continue
 		})
 	pr.End()
 }
@@ -891,10 +917,10 @@ func (nb *Node2DBase) BBoxReport() string {
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil {
-			return false
+			return ki.Break
 		}
 		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", ni.Nm, ni.VpBBox, ni.WinBBox)
-		return true
+		return ki.Continue
 	})
 	return rpt
 }

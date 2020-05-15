@@ -453,11 +453,12 @@ func (fv *FileView) UpdateFilesAction() {
 func (fv *FileView) UpdateFiles() {
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
-	var win oswin.Window
-	if fv.Viewport != nil && fv.Viewport.Win != nil && fv.Viewport.Win.OSWin != nil {
-		win = fv.Viewport.Win.OSWin
+	var owin oswin.Window
+	win := fv.ParentWindow()
+	if win != nil {
+		owin = fv.Viewport.Win.OSWin
 	} else {
-		win = oswin.TheApp.WindowInFocus()
+		owin = oswin.TheApp.WindowInFocus()
 	}
 
 	fv.UpdatePath()
@@ -472,8 +473,8 @@ func (fv *FileView) UpdateFiles() {
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	oswin.TheApp.Cursor(win).Push(cursor.Wait)
-	defer oswin.TheApp.Cursor(win).Pop()
+	oswin.TheApp.Cursor(owin).Push(cursor.Wait)
+	defer oswin.TheApp.Cursor(owin).Pop()
 
 	effpath, err := filepath.EvalSymlinks(fv.DirPath)
 	if err != nil {

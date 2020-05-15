@@ -881,7 +881,7 @@ func (tv *TreeView) OpenAll() {
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(false)
 		}
-		return true
+		return ki.Continue
 	})
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewOpened), tv.This())
 	tv.UpdateEnd(updt)
@@ -898,7 +898,7 @@ func (tv *TreeView) CloseAll() {
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(true)
 		}
-		return true
+		return ki.Continue
 	})
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewClosed), tv.This())
 	tv.UpdateEnd(updt)
@@ -1175,7 +1175,7 @@ func (tv *TreeView) Copy(reset bool) {
 			}
 		}
 	}
-	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(md)
+	oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -1199,7 +1199,7 @@ func (tv *TreeView) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.DataJson})
+	md := oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1363,7 +1363,7 @@ func (tv *TreeView) DragNDropStart() {
 	sp := &gi.Sprite{}
 	sp.GrabRenderFrom(tv) // todo: show number of items?
 	gi.ImageClearer(sp.Pixels, 50.0)
-	tv.Viewport.Win.StartDragNDrop(tv.This(), md, sp)
+	tv.ParentWindow().StartDragNDrop(tv.This(), md, sp)
 }
 
 // DragNDropTarget handles a drag-n-drop onto this node
@@ -1394,17 +1394,18 @@ func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
 		return
 	}
 	tv.UnselectAll()
-	tv.Viewport.Win.FinalizeDragNDrop(mod)
+	tv.ParentWindow().FinalizeDragNDrop(mod)
 }
 
 // DragNDropFinalizeDefMod is called to finalize actions on the Source node prior to
 // performing target actions -- uses default drop mod in place when event was dropped.
 func (tv *TreeView) DragNDropFinalizeDefMod() {
-	if tv.Viewport == nil || tv.Viewport.Win == nil {
+	win := tv.ParentWindow()
+	if win == nil {
 		return
 	}
 	tv.UnselectAll()
-	tv.Viewport.Win.FinalizeDragNDrop(tv.Viewport.Win.EventMgr.DNDDropMod)
+	win.FinalizeDragNDrop(win.EventMgr.DNDDropMod)
 }
 
 // Dragged is called after target accepts the drop -- we just remove
@@ -1654,9 +1655,9 @@ func (tv *TreeView) TreeViewEvents() {
 		tvv := recv.Embed(KiT_TreeView).(*TreeView)
 		switch de.Action {
 		case dnd.Enter:
-			tvv.Viewport.Win.DNDSetCursor(de.Mod)
+			tvv.ParentWindow().DNDSetCursor(de.Mod)
 		case dnd.Exit:
-			tvv.Viewport.Win.DNDNotCursor()
+			tvv.ParentWindow().DNDNotCursor()
 		case dnd.Hover:
 			tvv.Open()
 		}
@@ -2164,7 +2165,7 @@ func (tv *TreeView) PushBounds() bool {
 		tv.ClearFullReRender()
 		return false
 	}
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	rs.PushBounds(tv.VpBBox)
 	tv.ConnectToViewport()
 	if gi.Render2DTrace {
@@ -2201,10 +2202,7 @@ func (tv *TreeView) Render2D() {
 			tv.This().(gi.Node2D).ConnectEvents2D()
 
 			// note: this is std except using WidgetSize instead of AllocSize
-			rs := &tv.Viewport.Render
-			rs.Lock()
-			pc := &rs.Paint
-			st := &tv.Sty
+			rs, pc, st := tv.RenderLock()
 			pc.FontStyle = st.Font
 			pc.StrokeStyle.SetColor(&st.Border.Color)
 			pc.StrokeStyle.Width = st.Border.Width
@@ -2213,7 +2211,7 @@ func (tv *TreeView) Render2D() {
 			pos := tv.LayState.Alloc.Pos.AddScalar(st.Layout.Margin.Dots)
 			sz := tv.WidgetSize.AddScalar(-2.0 * st.Layout.Margin.Dots)
 			tv.RenderBoxImpl(pos, sz, st.Border.Radius.Dots)
-			rs.Unlock()
+			tv.RenderUnlock(rs)
 			tv.Render2DParts()
 		}
 		tv.PopBounds()

@@ -46,8 +46,10 @@ func (g *NodeBase) Paint() *gi.Paint {
 
 // Init2DBase handles basic node initialization -- Init2D can then do special things
 func (g *NodeBase) Init2DBase() {
+	g.BBoxMu.Lock()
 	g.Viewport = g.ParentViewport()
 	g.Pnt.Defaults()
+	g.BBoxMu.Unlock()
 	g.ConnectToViewport()
 }
 
@@ -61,7 +63,8 @@ func (g *NodeBase) Init2D() {
 // needed
 func StyleSVG(gii gi.Node2D) {
 	g := gii.AsNode2D()
-	if g.Viewport == nil { // robust
+	mvp := g.ViewportSafe()
+	if mvp == nil { // robust
 		gii.Init2D()
 	}
 
@@ -71,8 +74,11 @@ func StyleSVG(gii gi.Node2D) {
 	}
 	pc := pntr.Paint()
 
-	g.Viewport.SetCurStyleNode(gii)
-	defer g.Viewport.SetCurStyleNode(nil)
+	// todo: do StyleMu for SVG nodes, then can access viewport directly
+	mvp = g.ViewportSafe()
+
+	mvp.SetCurStyleNode(gii)
+	defer mvp.SetCurStyleNode(nil)
 
 	pc.StyleSet = false // this is always first call, restart
 
@@ -202,7 +208,7 @@ func (g *NodeBase) Render2D() {
 		g.This().(gi.Node2D).Init2D()
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.PushXFormLock(pc.XForm)
 	// render path elements, then compute bbox, then fill / stroke
 	g.ComputeBBoxSVG()

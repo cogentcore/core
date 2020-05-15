@@ -57,7 +57,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 					}
 					cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 					if err == nil {
-						TextViewDialog(lv.Viewport, cinfo, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true})
+						TextViewDialog(lv.ViewportSafe(), cinfo, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true})
 					}
 				}
 			}
@@ -149,7 +149,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: "file-sheet", Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
 			func(recv, send ki.Ki, sig int64, data interface{}) {
 				lvv := recv.Embed(KiT_VCSLogView).(*VCSLogView)
-				DiffViewDialogFromRevs(lvv.Viewport, lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)
+				DiffViewDialogFromRevs(lvv.ViewportSafe(), lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)
 			})
 
 		cba.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

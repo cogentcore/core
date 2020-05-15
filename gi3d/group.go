@@ -76,18 +76,18 @@ func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	gp.FuncDownMeFirst(0, gp.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode3D(k)
 		if nii == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		pt, has := ray.IntersectBox(ni.WorldBBox.BBox)
 		if !has {
-			return false
+			return ki.Break
 		}
 		if !nii.IsSolid() {
-			return true
+			return ki.Continue
 		}
 		sd := nii.AsSolid()
 		sp = append(sp, &SolidPoint{sd, pt})
-		return false
+		return ki.Break
 	})
 
 	sort.Slice(sp, func(i, j int) bool {

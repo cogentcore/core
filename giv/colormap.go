@@ -188,7 +188,7 @@ func (cv *ColorMapView) RenderColorMap() {
 	if cv.Map == nil {
 		cv.Map = StdColorMaps["ColdHot"]
 	}
-	rs := &cv.Viewport.Render
+	rs := cv.Render()
 	rs.Lock()
 	pc := &rs.Paint
 

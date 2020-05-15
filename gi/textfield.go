@@ -536,7 +536,7 @@ func (tf *TextField) Cut() {
 	defer tf.TopUpdateEnd(wupdt)
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(mimedata.NewText(cut))
+		oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).Write(mimedata.NewText(cut))
 	}
 }
 
@@ -582,7 +582,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 	md := mimedata.NewMimes(0, 1)
 	tf.This().(Clipper).MimeData(&md)
-	oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Write(md)
+	oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -594,7 +594,7 @@ func (tf *TextField) Copy(reset bool) {
 func (tf *TextField) Paste() {
 	wupdt := tf.TopUpdateStart()
 	defer tf.TopUpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
+	data := oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
@@ -646,7 +646,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 				tff := recv.Embed(KiT_TextField).(*TextField)
 				tff.This().(Clipper).Paste()
 			})
-		ac.SetInactiveState(oswin.TheApp.ClipBoard(tf.Viewport.Win.OSWin).IsEmpty())
+		ac.SetInactiveState(oswin.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
 	}
 }
 
@@ -689,7 +689,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos := tf.CharStartPos(tf.CursorPos, true).ToPoint()
 	cpos.X += 5
 	cpos.Y += 10
-	tf.Complete.Show(s, 0, tf.CursorPos, tf.Viewport, cpos, forceComplete)
+	tf.Complete.Show(s, 0, tf.CursorPos, tf.ViewportSafe(), cpos, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -756,9 +756,10 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	spc := st.BoxSpace()
 	pos := tf.LayState.Alloc.Pos.AddScalar(spc)
 	if wincoords {
-		tf.Viewport.BBoxMu.RLock()
-		pos = pos.Add(mat32.NewVec2FmPoint(tf.Viewport.WinBBox.Min))
-		tf.Viewport.BBoxMu.RUnlock()
+		mvp := tf.ViewportSafe()
+		mvp.BBoxMu.RLock()
+		pos = pos.Add(mat32.NewVec2FmPoint(mvp.WinBBox.Min))
+		mvp.BBoxMu.RUnlock()
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
 	return mat32.Vec2{pos.X + cpos, pos.Y}
@@ -881,7 +882,7 @@ func (tf *TextField) RenderCursor(on bool) {
 	tf.CursorMu.Lock()
 	defer tf.CursorMu.Unlock()
 
-	win := tf.Viewport.Win
+	win := tf.ParentWindow()
 	sp := tf.CursorSprite()
 	if on {
 		win.ActivateSprite(sp.Name)
@@ -909,7 +910,7 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status)
 func (tf *TextField) CursorSprite() *Sprite {
-	win := tf.Viewport.Win
+	win := tf.ParentWindow()
 	if win == nil {
 		return nil
 	}
@@ -1088,7 +1089,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 // WinBBox of text field, and sets current cursor to it, updating selection as
 // well
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
-	if tf.Viewport == nil || tf.Viewport.Win == nil {
+	if tf.ParentWindow() == nil {
 		return
 	}
 	updt := tf.UpdateStart()
@@ -1232,7 +1233,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 
 // HandleMouseEvent handles the mouse.Event
 func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
-	if tf.Viewport == nil || tf.Viewport.Win == nil {
+	if tf.ParentWindow() == nil {
 		return
 	}
 	if !tf.IsInactive() && !tf.HasFocus() {
@@ -1308,9 +1309,9 @@ func (tf *TextField) MouseFocusEvent() {
 		me := d.(*mouse.FocusEvent)
 		me.SetProcessed()
 		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor(tf.Viewport.Win.OSWin).PushIfNot(cursor.IBeam)
+			oswin.TheApp.Cursor(tf.ParentWindow().OSWin).PushIfNot(cursor.IBeam)
 		} else {
-			oswin.TheApp.Cursor(tf.Viewport.Win.OSWin).PopIf(cursor.IBeam)
+			oswin.TheApp.Cursor(tf.ParentWindow().OSWin).PopIf(cursor.IBeam)
 		}
 	})
 }
@@ -1470,7 +1471,7 @@ func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
 
 func (tf *TextField) RenderTextField() {
 	rs, _, st := tf.RenderLock()
-	tf.RenderUnlock(rs)
+	defer tf.RenderUnlock(rs)
 
 	tf.AutoScroll() // inits paint with our style
 	if tf.IsInactive() {
@@ -1490,7 +1491,7 @@ func (tf *TextField) RenderTextField() {
 	} else {
 		tf.Sty = tf.StateStyles[TextFieldActive]
 	}
-	st = &tf.Sty
+	st = &tf.Sty // update
 	st.Font.OpenFont(&st.UnContext)
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]

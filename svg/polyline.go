@@ -43,7 +43,7 @@ func (g *Polyline) Render2D() {
 		return
 	}
 	pc := &g.Pnt
-	rs := &g.Viewport.Render
+	rs := g.Render()
 	rs.PushXForm(pc.XForm)
 	pc.DrawPolyline(rs, g.Points)
 	pc.FillStrokeClear(rs)

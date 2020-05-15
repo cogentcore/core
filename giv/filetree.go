@@ -291,12 +291,12 @@ func (fn *FileNode) IsExternal() bool {
 	fn.FuncUp(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
-			return false
+			return ki.Break
 		}
 		sfn := sfni.(*FileNode)
 		if sfn.IsIrregular() {
 			isExt = true
-			return false
+			return ki.Break
 		}
 		return true
 	})
@@ -309,12 +309,12 @@ func (fn *FileNode) HasClosedParent() bool {
 	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
-			return false
+			return ki.Break
 		}
 		sfn := sfni.(*FileNode)
 		if !sfn.IsOpen() {
 			hasClosed = true
-			return false
+			return ki.Break
 		}
 		return true
 	})
@@ -635,7 +635,7 @@ func (fn *FileNode) CloseAll() {
 			sfn.SetClosed()
 			sfn.FRoot.SetDirClosed(sfn.FPath)
 		}
-		return true
+		return ki.Continue
 	})
 	// note: FileTreeView must actually do the close all too!
 }
@@ -762,9 +762,9 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
 			found = true
-			return false
+			return ki.Break
 		}
-		return true
+		return ki.Continue
 	})
 	return ffn, found
 }
@@ -788,7 +788,7 @@ func (fn *FileNode) FilesMatching(match string, ignoreCase bool) []*FileNode {
 				mls = append(mls, sfn)
 			}
 		}
-		return true
+		return ki.Continue
 	})
 	return mls
 }
@@ -816,9 +816,9 @@ func (fn *FileNode) FirstVCS() (vci.Repo, *FileNode) {
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return false
+			return ki.Break
 		}
-		return true
+		return ki.Continue
 	})
 	return repo, rnode
 }
@@ -833,7 +833,7 @@ func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
-				return true
+				return ki.Continue
 			}
 		}
 		ext := strings.ToLower(filepath.Ext(sfn.Nm))
@@ -842,7 +842,7 @@ func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 		} else {
 			cmap[ext] = 1
 		}
-		return true
+		return ki.Continue
 	})
 	ecs := make([]FileNodeNameCount, len(cmap))
 	idx := 0
@@ -863,14 +863,14 @@ func (fn *FileNode) LatestFileMod(cat filecat.Cat) time.Time {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
-				return true
+				return ki.Continue
 			}
 		}
 		ft := (time.Time)(sfn.Info.ModTime)
 		if ft.After(tmod) {
 			tmod = ft
 		}
-		return true
+		return ki.Continue
 	})
 	return tmod
 }
@@ -1071,18 +1071,18 @@ func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
 	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfni := k.Embed(KiT_FileNode)
 		if sfni == nil {
-			return false
+			return ki.Break
 		}
 		sfn := sfni.(*FileNode)
 		if sfn.IsIrregular() {
-			return false
+			return ki.Break
 		}
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
 			rnode = sfn
-			return false
+			return ki.Break
 		}
-		return true
+		return ki.Continue
 	})
 	return repo, rnode
 }
@@ -1293,11 +1293,11 @@ func (fn *FileNode) UpdateAllVcs() {
 	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d interface{}) bool {
 		sfn := k.Embed(KiT_FileNode).(*FileNode)
 		if !sfn.IsDir() {
-			return true
+			return ki.Continue
 		}
 		if sfn.DirRepo == nil {
 			if !sfn.DetectVcsRepo(false) {
-				return true
+				return ki.Continue
 			}
 		}
 		repo := sfn.DirRepo
@@ -1306,7 +1306,7 @@ func (fn *FileNode) UpdateAllVcs() {
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 		}
-		return false
+		return ki.Break
 	})
 }
 
@@ -1582,9 +1582,9 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 		tvv := tvvi.(*FileTreeView)
 		switch de.Action {
 		case dnd.Enter:
-			tvv.Viewport.Win.DNDSetCursor(de.Mod)
+			tvv.ParentWindow().DNDSetCursor(de.Mod)
 		case dnd.Exit:
-			tvv.Viewport.Win.DNDNotCursor()
+			tvv.ParentWindow().DNDNotCursor()
 		case dnd.Hover:
 			tvv.Open()
 		}
@@ -1656,10 +1656,10 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 			ftv.DuplicateFiles()
 			kt.SetProcessed()
 		case gi.KeyFunInsert: // New File
-			CallMethod(ftv, "NewFile", ftv.Viewport)
+			CallMethod(ftv, "NewFile", ftv.ViewportSafe())
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter: // New Folder
-			CallMethod(ftv, "NewFolder", ftv.Viewport)
+			CallMethod(ftv, "NewFolder", ftv.ViewportSafe())
 			kt.SetProcessed()
 		}
 	}
@@ -1676,7 +1676,7 @@ func (ftv *FileTreeView) ShowFileInfo() {
 		fftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			StructViewDialog(ftv.Viewport, &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
+			StructViewDialog(ftv.ViewportSafe(), &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
 		}
 	}
 }
@@ -1703,7 +1703,7 @@ func (ftv *FileTreeView) OpenFileWith() {
 		fftv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			CallMethod(fn, "OpenFileWith", ftv.Viewport)
+			CallMethod(fn, "OpenFileWith", ftv.ViewportSafe())
 		}
 	}
 }
@@ -1761,7 +1761,7 @@ func (ftv *FileTreeView) DeleteFilesImpl() {
 // DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
 // all files and subdirectories are also deleted.
 func (ftv *FileTreeView) DeleteFiles() {
-	gi.ChoiceDialog(ftv.Viewport, gi.DlgOpts{Title: "Delete Files?",
+	gi.ChoiceDialog(ftv.ViewportSafe(), gi.DlgOpts{Title: "Delete Files?",
 		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
 		[]string{"Delete Files", "Cancel"},
 		ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -1785,7 +1785,7 @@ func (ftv *FileTreeView) RenameFiles() {
 			if fn.IsExternal() {
 				continue
 			}
-			CallMethod(fn, "RenameFile", ftv.Viewport)
+			CallMethod(fn, "RenameFile", ftv.ViewportSafe())
 		}
 	}
 }
@@ -1910,7 +1910,7 @@ func (ftv *FileTreeView) CommitToVcs() {
 	ftvv := sn.Embed(KiT_FileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		CallMethod(fn, "CommitToVcs", ftv.Viewport)
+		CallMethod(fn, "CommitToVcs", ftv.ViewportSafe())
 	}
 }
 
@@ -2045,13 +2045,13 @@ func (ftv *FileTreeView) Cut() {
 	}
 	ftv.Copy(false)
 	// todo: in the future, move files somewhere temporary, then use those temps for paste..
-	gi.PromptDialog(ftv.Viewport, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
+	gi.PromptDialog(ftv.ViewportSafe(), gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
 }
 
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Paste() {
-	md := oswin.TheApp.ClipBoard(ftv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
+	md := oswin.TheApp.ClipBoard(ftv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
 	if md != nil {
 		ftv.PasteMime(md)
 	}
@@ -2077,7 +2077,7 @@ func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([
 	if tfn != nil {
 		tpath = string(tfn.FPath)
 	}
-	intl := ftv.Viewport.Win.EventMgr.DNDIsInternalSrc()
+	intl := ftv.ParentWindow().EventMgr.DNDIsInternalSrc()
 	nf := len(md)
 	if intl {
 		nf /= 3
@@ -2117,7 +2117,7 @@ func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([
 // PasteCopyFiles copies files in given data into given target directory
 func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
 	sroot := ftv.RootView.SrcNode
-	intl := ftv.Viewport.Win.EventMgr.DNDIsInternalSrc()
+	intl := ftv.ParentWindow().EventMgr.DNDIsInternalSrc()
 	nf := len(md)
 	if intl {
 		nf /= 3
@@ -2199,7 +2199,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	}
 	// single file dropped onto a single target file
 	srcpath := ""
-	intl := ftv.Viewport.Win.EventMgr.DNDIsInternalSrc()
+	intl := ftv.ParentWindow().EventMgr.DNDIsInternalSrc()
 	if intl {
 		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
 	} else {

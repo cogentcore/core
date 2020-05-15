@@ -91,12 +91,12 @@ func (wb *WidgetBase) BoxSpace() float32 {
 // Init2DWidget handles basic node initialization -- Init2D can then do special things
 func (wb *WidgetBase) Init2DWidget() {
 	wb.BBoxMu.Lock()
-	defer wb.BBoxMu.Unlock()
 	wb.Viewport = wb.ParentViewport()
 	// wb.StyMu.Lock()
 	wb.Sty.Defaults()
 	// wb.StyMu.Unlock()
 	wb.LayState.Defaults() // doesn't overwrite
+	wb.BBoxMu.Unlock()
 	wb.ConnectToViewport()
 }
 
@@ -286,6 +286,8 @@ func (wb *WidgetBase) Style2D() {
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
+	wb.StyMu.Lock()
+	defer wb.StyMu.Unlock()
 	wb.LayState.SetFromStyle(&wb.Sty.Layout)
 	return false
 }
@@ -330,7 +332,8 @@ func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 // Layout2DBase provides basic Layout2D functions -- good for most cases
 func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter int) {
 	nii, _ := wb.This().(Node2D)
-	if wb.Viewport == nil { // robust
+	mvp := wb.ViewportSafe()
+	if mvp == nil { // robust
 		if nii.AsViewport2D() == nil {
 			nii.Init2D()
 			nii.Style2D()
@@ -340,7 +343,8 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	psize := wb.AddParentPos()
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
-		wb.Sty.SetUnitContext(wb.Viewport, psize) // update units with final layout
+		mvp := wb.ViewportSafe()
+		wb.Sty.SetUnitContext(mvp, psize) // update units with final layout
 	}
 	wb.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
@@ -376,7 +380,8 @@ func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
 // so, calls ReRender2DTree and returns true -- call this at start of each
 // Render2D
 func (wb *WidgetBase) FullReRenderIfNeeded() bool {
-	if wb.This().(Node2D).IsVisible() && wb.NeedsFullReRender() && !wb.Viewport.IsDoingFullRender() {
+	mvp := wb.ViewportSafe()
+	if wb.This().(Node2D).IsVisible() && wb.NeedsFullReRender() && !mvp.IsDoingFullRender() {
 		if Render2DTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.PathUnique(), wb.VpBBox)
 		}
@@ -402,7 +407,8 @@ func (wb *WidgetBase) PushBounds() bool {
 		wb.ClearFullReRender()
 		return false
 	}
-	rs := &wb.Viewport.Render
+	mvp := wb.ViewportSafe()
+	rs := &mvp.Render
 	rs.PushBounds(wb.VpBBox)
 	wb.ConnectToViewport()
 	if Render2DTrace {
@@ -415,10 +421,14 @@ func (wb *WidgetBase) PushBounds() bool {
 // rendering children
 func (wb *WidgetBase) PopBounds() {
 	wb.ClearFullReRender()
-	if wb.This() == nil || wb.Viewport == nil {
+	if wb.This() == nil {
 		return
 	}
-	rs := &wb.Viewport.Render
+	mvp := wb.ViewportSafe()
+	if mvp == nil {
+		return
+	}
+	rs := &mvp.Render
 	rs.PopBounds()
 }
 
@@ -512,7 +522,8 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	if wb.CtxtMenuFunc != nil {
 		wb.CtxtMenuFunc(wb.This().(Node2D), m)
 	}
-	TheViewIFace.CtxtMenuView(wb.This(), wb.IsInactive(), wb.Viewport, m)
+	mvp := wb.ViewportSafe()
+	TheViewIFace.CtxtMenuView(wb.This(), wb.IsInactive(), mvp, m)
 }
 
 var TooltipFrameProps = ki.Props{
@@ -619,7 +630,8 @@ func (wb *WidgetBase) HoverTooltipEvent() {
 			me.SetProcessed()
 			pos := wbb.WinBBox.Max
 			pos.X -= 20
-			PopupTooltip(wbb.Tooltip, pos.X, pos.Y, wbb.Viewport, wbb.Nm)
+			mvp := wbb.ViewportSafe()
+			PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
 		}
 	})
 }

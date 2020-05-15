@@ -384,21 +384,21 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 	var rval ki.Ki
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == nb.This() {
-			return true
+			return ki.Continue
 		}
 		if leavesOnly && k.HasChildren() {
-			return true
+			return ki.Continue
 		}
 		_, ni := KiToNode2D(k)
 		if ni == nil {
 			// todo: 3D
-			return false
+			return ki.Break
 		}
 		if ni.PosInWinBBox(pt) {
 			rval = ni.This()
-			return false
+			return ki.Break
 		}
-		return true
+		return ki.Continue
 	})
 	return rval
 }

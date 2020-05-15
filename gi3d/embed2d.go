@@ -191,17 +191,17 @@ func (em *Embed2D) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	em.Viewport.BBoxMu.Unlock()
 	em.Viewport.FuncDownMeFirst(0, em.Viewport.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == em.Viewport.This() {
-			return true
+			return ki.Continue
 		}
 		_, ni := gi.KiToNode2D(k)
 		if ni == nil {
-			return false // going into a different type of thing, bail
+			return ki.Break // going into a different type of thing, bail
 		}
 		if ni.IsUpdating() {
-			return false
+			return ki.Break
 		}
 		ni.SetWinBBox()
-		return true
+		return ki.Continue
 	})
 }
 

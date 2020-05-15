@@ -478,9 +478,9 @@ func (tv *TabView) Style2D() {
 
 // RenderTabSeps renders the separators between tabs
 func (tv *TabView) RenderTabSeps() {
-	rs := &tv.Viewport.Render
-	pc := &rs.Paint
-	st := &tv.Sty
+	rs, pc, st := tv.RenderLock()
+	defer tv.RenderUnlock(rs)
+
 	pc.StrokeStyle.Width = st.Border.Width
 	pc.StrokeStyle.SetColor(&st.Border.Color)
 	bw := st.Border.Width.Dots

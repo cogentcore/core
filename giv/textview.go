@@ -720,7 +720,7 @@ func (tv *TextView) SetCursor(pos lex.Pos) {
 	tv.ClearScopelights()
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	if cpln != tv.CursorPos.Ln && tv.HasLineNos() { // update cursor position highlight
-		rs := &tv.Viewport.Render
+		rs := tv.Render()
 		rs.PushBounds(tv.VpBBox)
 		rs.Lock()
 		tv.RenderLineNo(cpln, true, true) // render bg, and do vpupload
@@ -2344,7 +2344,7 @@ func (tv *TextView) PasteHist() {
 		if clip != nil {
 			wupdt := tv.TopUpdateStart()
 			defer tv.TopUpdateEnd(wupdt)
-			oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(clip))
+			oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
 		}
@@ -2362,7 +2362,7 @@ func (tv *TextView) Cut() *textbuf.Edit {
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+		oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
@@ -2389,7 +2389,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
-	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+	oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -2401,7 +2401,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 func (tv *TextView) Paste() {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	data := oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Read([]string{filecat.TextPlain})
+	data := oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
@@ -2448,7 +2448,7 @@ func (tv *TextView) CutRect() *textbuf.Edit {
 	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+		oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipRect = cut
 	}
 	tv.SetCursorShow(npos)
@@ -2466,7 +2466,7 @@ func (tv *TextView) CopyRect(reset bool) *textbuf.Edit {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
-	oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).Write(mimedata.NewTextBytes(cb))
+	oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
 	TextViewClipRect = tbe
 	if reset {
 		tv.SelectReset()
@@ -2541,7 +2541,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 				txf := recv.Embed(KiT_TextView).(*TextView)
 				txf.Paste()
 			})
-		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.Viewport.Win.OSWin).IsEmpty())
+		ac.SetInactiveState(oswin.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -3165,7 +3165,7 @@ func (tv *TextView) RenderCursor(on bool) {
 	tv.CursorMu.Lock()
 	defer tv.CursorMu.Unlock()
 
-	win := tv.Viewport.Win
+	win := tv.ParentWindow()
 	sp := tv.CursorSprite()
 	if on {
 		win.ActivateSprite(sp.Name)
@@ -3187,7 +3187,7 @@ func (tv *TextView) CursorSpriteName() string {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
 func (tv *TextView) CursorSprite() *gi.Sprite {
-	win := tv.Viewport.Win
+	win := tv.ParentWindow()
 	if win == nil {
 		return nil
 	}
@@ -3364,7 +3364,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gi.Style, bgclr 
 		return
 	}
 
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	pc := &rs.Paint
 	spc := sty.BoxSpace()
 
@@ -3409,7 +3409,7 @@ func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gi.Style, bgclr *gi.Color
 		return
 	}
 
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	pc := &rs.Paint
 
 	pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
@@ -3468,7 +3468,7 @@ func (tv *TextView) RenderAllLines() {
 	if !tv.This().(gi.Node2D).IsVisible() {
 		return
 	}
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	rs.PushBounds(tv.VpBBox)
 	wupdt := tv.TopUpdateStart()
 	tv.RenderAllLinesInBounds()
@@ -3482,7 +3482,7 @@ func (tv *TextView) RenderAllLines() {
 // after PushBounds has already been called
 func (tv *TextView) RenderAllLinesInBounds() {
 	// fmt.Printf("render all: %v\n", tv.Nm)
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	rs.Lock()
 	pc := &rs.Paint
 	sty := &tv.Sty
@@ -3549,7 +3549,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	if !tv.HasLineNos() {
 		return
 	}
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	pc := &rs.Paint
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
@@ -3565,7 +3565,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	if !tv.HasLineNos() {
 		return
 	}
-	rs := &tv.Viewport.Render
+	rs := tv.Render()
 	pc := &rs.Paint
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
@@ -4611,9 +4611,9 @@ func (tv *TextView) MouseMoveEvent() {
 			}
 		}
 		if inLink {
-			oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).PushIfNot(cursor.HandPointing)
+			oswin.TheApp.Cursor(tv.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
 		} else {
-			oswin.TheApp.Cursor(tv.Viewport.Win.OSWin).PopIf(cursor.HandPointing)
+			oswin.TheApp.Cursor(tv.ParentWindow().OSWin).PopIf(cursor.HandPointing)
 		}
 
 	})
@@ -4643,9 +4643,9 @@ func (tv *TextView) MouseFocusEvent() {
 		me.SetProcessed()
 		txf.RefreshIfNeeded()
 		if me.Action == mouse.Enter {
-			oswin.TheApp.Cursor(txf.Viewport.Win.OSWin).PushIfNot(cursor.IBeam)
+			oswin.TheApp.Cursor(txf.ParentWindow().OSWin).PushIfNot(cursor.IBeam)
 		} else {
-			oswin.TheApp.Cursor(txf.Viewport.Win.OSWin).PopIf(cursor.IBeam)
+			oswin.TheApp.Cursor(txf.ParentWindow().OSWin).PopIf(cursor.IBeam)
 		}
 	})
 }
@@ -4700,9 +4700,10 @@ func (tv *TextView) StyleTextView() {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
-		if tv.Viewport != nil && tv.Viewport.Win != nil {
+		win := tv.ParentWindow()
+		if win != nil {
 			spnm := tv.CursorSpriteName()
-			tv.Viewport.Win.DeleteSprite(spnm)
+			win.DeleteSprite(spnm)
 		}
 	}
 	tv.Style2DWidget()
@@ -4749,7 +4750,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.Layout2DChildren(iter)
-	if tv.Viewport.Win != nil &&
+	if tv.ParentWindow() != nil &&
 		(tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..

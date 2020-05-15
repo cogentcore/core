@@ -400,7 +400,8 @@ func (mv *MapView) ConfigToolbar() {
 }
 
 func (mv *MapView) Style2D() {
-	if mv.Viewport != nil && mv.Viewport.IsDoingFullRender() {
+	mvp := mv.ViewportSafe()
+	if mvp != nil && mvp.IsDoingFullRender() {
 		mv.Config()
 	}
 	mv.Frame.Style2D()

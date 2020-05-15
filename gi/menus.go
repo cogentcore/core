@@ -415,7 +415,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvF
 	}
 	nb := recv.AsNode2D()
 	pos := recv.ContextMenuPos()
-	vp := nb.Viewport
+	vp := nb.ViewportSafe()
 	if vp == nil {
 		vp = recv.AsViewport2D()
 	}

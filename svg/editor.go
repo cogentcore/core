@@ -52,7 +52,7 @@ func (svg *Editor) EditorEvents() {
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.IsDragging() {
 			if !ssvg.SetDragCursor {
-				oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Push(cursor.HandOpen)
+				oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Push(cursor.HandOpen)
 				ssvg.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
@@ -63,7 +63,7 @@ func (svg *Editor) EditorEvents() {
 			ssvg.UpdateSig()
 		} else {
 			if ssvg.SetDragCursor {
-				oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Pop()
+				oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 				ssvg.SetDragCursor = false
 			}
 		}
@@ -74,7 +74,7 @@ func (svg *Editor) EditorEvents() {
 		me.SetProcessed()
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
-			oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Pop()
+			oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		ssvg.InitScale()
@@ -90,7 +90,7 @@ func (svg *Editor) EditorEvents() {
 		me := d.(*mouse.Event)
 		ssvg := recv.Embed(KiT_Editor).(*Editor)
 		if ssvg.SetDragCursor {
-			oswin.TheApp.Cursor(ssvg.Viewport.Win.OSWin).Pop()
+			oswin.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		obj := ssvg.FirstContainingPoint(me.Where, true)
@@ -109,7 +109,7 @@ func (svg *Editor) EditorEvents() {
 		if obj != nil {
 			pos := me.Where
 			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
-			gi.PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Viewport, ttxt)
+			gi.PopupTooltip(obj.Name(), pos.X, pos.Y, svg.ViewportSafe(), ttxt)
 		}
 	})
 }
@@ -121,8 +121,9 @@ func (svg *Editor) ConnectEvents2D() {
 // InitScale ensures that Scale is initialized and non-zero
 func (svg *Editor) InitScale() {
 	if svg.Scale == 0 {
-		if svg.Viewport != nil {
-			svg.Scale = svg.Viewport.Win.LogicalDPI() / 96.0
+		mvp := svg.ViewportSafe()
+		if mvp != nil {
+			svg.Scale = svg.ParentWindow().LogicalDPI() / 96.0
 		} else {
 			svg.Scale = 1
 		}
