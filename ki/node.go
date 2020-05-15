@@ -335,13 +335,13 @@ func (n *Node) FieldRoot() Ki {
 			if k.IsField() {
 				gotField = true
 			}
-			return true
+			return Continue
 		}
 		if !k.IsField() {
 			root = k
-			return false
+			return Break
 		}
-		return true
+		return Continue
 	})
 	return root
 }
@@ -366,9 +366,9 @@ func (n *Node) ParentLevel(par Ki) int {
 	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
 		if k == par {
 			parLev = level
-			return false
+			return Break
 		}
-		return true
+		return Continue
 	})
 	return parLev
 }
@@ -815,9 +815,9 @@ func (n *Node) AddChildCheck(kid Ki) error {
 		if k == kid {
 			err = fmt.Errorf("ki.Node Attempt to add child to node %v that is my own parent -- no cycles permitted", (d.(Ki)).PathUnique())
 			log.Println(err)
-			return false
+			return Break
 		}
-		return true
+		return Continue
 	})
 	return err
 }
@@ -1899,9 +1899,9 @@ func (n *Node) UpdateStart() bool {
 			if !k.IsUpdating() {
 				k.ClearFlagMask(int64(UpdateFlagsMask))
 				k.SetFlag(int(Updating))
-				return true // keep going down
+				return Continue
 			}
-			return false // bail -- already updating
+			return Break // bail -- already updating
 		})
 		// pr.End()
 	}

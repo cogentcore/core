@@ -18,7 +18,7 @@ func Last(nd ki.Ki) ki.Ki {
 	var last ki.Ki
 	nd.FuncDownMeFirst(0, nd, func(k ki.Ki, level int, d interface{}) bool {
 		last = k
-		return true
+		return ki.Continue
 	})
 	return last
 }

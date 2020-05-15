@@ -126,6 +126,19 @@ func (s *Signal) Disconnect(recv Ki) {
 	s.Mu.Unlock()
 }
 
+// DisconnectDestroyed disconnects (deletes) the connection for a given receiver,
+// if receiver is destroyed, assumed to be under an RLock (unlocks, relocks read lock).
+// Returns true if was disconnected.
+func (s *Signal) DisconnectDestroyed(recv Ki) bool {
+	if recv.IsDestroyed() {
+		s.Mu.RUnlock()
+		s.Disconnect(recv)
+		s.Mu.RLock()
+		return true
+	}
+	return false
+}
+
 // DisconnectAll removes all connections
 func (s *Signal) DisconnectAll() {
 	s.Mu.Lock()
@@ -153,9 +166,7 @@ func (s *Signal) Emit(sender Ki, sig int64, data interface{}) {
 	}
 	s.Mu.RLock()
 	for recv, fun := range s.Cons {
-		if recv.IsDestroyed() {
-			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
-			delete(s.Cons, recv)
+		if s.DisconnectDestroyed(recv) {
 			continue
 		}
 		s.Mu.RUnlock()
@@ -176,9 +187,7 @@ func (s *Signal) EmitGo(sender Ki, sig int64, data interface{}) {
 	}
 	s.Mu.RLock()
 	for recv, fun := range s.Cons {
-		if recv.IsDestroyed() {
-			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
-			delete(s.Cons, recv)
+		if s.DisconnectDestroyed(recv) {
 			continue
 		}
 		s.Mu.RUnlock()
@@ -197,9 +206,7 @@ type SignalFilterFunc func(recv Ki) bool
 func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
 	s.Mu.RLock()
 	for recv, fun := range s.Cons {
-		if recv.IsDestroyed() {
-			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
-			delete(s.Cons, recv)
+		if s.DisconnectDestroyed(recv) {
 			continue
 		}
 		s.Mu.RUnlock()
@@ -217,14 +224,32 @@ func (s *Signal) EmitFiltered(sender Ki, sig int64, data interface{}, filtFun Si
 func (s *Signal) EmitGoFiltered(sender Ki, sig int64, data interface{}, filtFun SignalFilterFunc) {
 	s.Mu.RLock()
 	for recv, fun := range s.Cons {
-		if recv.IsDestroyed() {
-			// fmt.Printf("ki.Signal deleting destroyed receiver: %v type %T\n", recv.Name(), recv)
-			delete(s.Cons, recv)
+		if s.DisconnectDestroyed(recv) {
 			continue
 		}
 		s.Mu.RUnlock()
 		if filtFun(recv) {
 			go fun(recv, sender, sig, data)
+		}
+		s.Mu.RLock()
+	}
+	s.Mu.RUnlock()
+}
+
+// ConsFunc iterates over the connections with read lock and deletion of
+// destroyed objects, calling given function on each connection -- if
+// it returns false, then iteration is stopped, else continues.
+// function is called with no lock in place.
+func (s *Signal) ConsFunc(consFun func(recv Ki, fun RecvFunc) bool) {
+	s.Mu.RLock()
+	for recv, fun := range s.Cons {
+		if s.DisconnectDestroyed(recv) {
+			continue
+		}
+		s.Mu.RUnlock()
+		if !consFun(recv, fun) {
+			s.Mu.RLock()
+			break
 		}
 		s.Mu.RLock()
 	}

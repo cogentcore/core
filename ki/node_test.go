@@ -459,9 +459,9 @@ func TestNodeCallFun(t *testing.T) {
 	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
 		if k.UniqueName() == "child1_001" {
-			return false
+			return Break
 		}
-		return true
+		return Continue
 	})
 
 	trg = []string{"[par1, fun_down, lev 0]", "[child1, fun_down, lev 1]", "[child1_001, fun_down, lev 1]", "[child1_002, fun_down, lev 1]"}
@@ -472,7 +472,7 @@ func TestNodeCallFun(t *testing.T) {
 
 	schild2.FuncUp(0, "fun_up", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v, %v", k.UniqueName(), d))
-		return true
+		return Continue
 	})
 	//	fmt.Printf("result: %v\n", res)
 
@@ -483,11 +483,11 @@ func TestNodeCallFun(t *testing.T) {
 	res = res[:0]
 
 	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
-		return true
+		return Continue
 	},
 		func(k Ki, level int, d interface{}) bool {
 			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-			return true
+			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[child1, fun_down_me_last, lev 1]", "[subchild1, fun_down_me_last, lev 2]", "[child1_001, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
@@ -499,16 +499,16 @@ func TestNodeCallFun(t *testing.T) {
 	// test for return = false working
 	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
 		if k.UniqueName() == "child1_001" {
-			return false
+			return Break
 		}
-		return true
+		return Continue
 	},
 		func(k Ki, level int, d interface{}) bool {
 			if k.UniqueName() == "child1_001" {
-				return false
+				return Break
 			}
 			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-			return true
+			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[child1, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
@@ -519,7 +519,7 @@ func TestNodeCallFun(t *testing.T) {
 
 	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-		return true
+		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[par1, fun_breadth, lev 0]", "[child1, fun_breadth, lev 1]", "[child1_001, fun_breadth, lev 1]", "[child1_002, fun_breadth, lev 1]", "[subchild1, fun_breadth, lev 2]"}
@@ -531,10 +531,10 @@ func TestNodeCallFun(t *testing.T) {
 	// test for return false
 	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d interface{}) bool {
 		if k.UniqueName() == "child1_001" {
-			return false
+			return Break
 		}
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-		return true
+		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[par1, fun_breadth, lev 0]", "[child1, fun_breadth, lev 1]", "[child1_002, fun_breadth, lev 1]"}
@@ -596,7 +596,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.UniqueName(), n.IsUpdating()))
-		return true
+		return Continue
 	})
 	// fmt.Printf("res: %v\n", res)
 
@@ -756,7 +756,7 @@ func TestNodeFieldFunc(t *testing.T) {
 	res := make([]string, 0, 10)
 	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-		return true
+		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 
@@ -770,7 +770,7 @@ func TestNodeFieldFunc(t *testing.T) {
 	par2.InitName(&par2, "par2")
 	par2.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-		return true
+		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[par2, fun_down, lev 0]", "[Field1, fun_down, lev 1]", "[Field2, fun_down, lev 1]"}
@@ -780,11 +780,11 @@ func TestNodeFieldFunc(t *testing.T) {
 	res = res[:0]
 
 	par2.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d interface{}) bool {
-		return true
+		return Continue
 	},
 		func(k Ki, level int, d interface{}) bool {
 			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.UniqueName(), d, level))
-			return true
+			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
 	trg = []string{"[Field1, fun_down_me_last, lev 1]", "[Field2, fun_down_me_last, lev 1]", "[par2, fun_down_me_last, lev 0]"}
@@ -1010,7 +1010,7 @@ func BenchmarkFuncDownMeFirst_NodeEmbed(b *testing.B) {
 		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating))
 			nnodes++
-			return true
+			return Continue
 		})
 	}
 	TotNodes = nnodes
@@ -1024,7 +1024,7 @@ func BenchmarkFuncDownMeFirst_NodeField(b *testing.B) {
 		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating))
 			nnodes++
-			return true
+			return Continue
 		})
 	}
 	TotNodes = nnodes
@@ -1038,7 +1038,7 @@ func BenchmarkFuncDownMeFirst_NodeField2(b *testing.B) {
 		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
 			k.ClearFlag(int(Updating))
 			nnodes++
-			return true
+			return Continue
 		})
 	}
 	TotNodes = nnodes

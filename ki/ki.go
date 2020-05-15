@@ -827,10 +827,20 @@ type Ki interface {
 //
 // var KiT_TypeName = kit.Types.AddType(&TypeName{})
 
-// Func is a function to call on ki objects walking the tree -- return bool
+// Func is a function to call on ki objects walking the tree -- return Break
 // = false means don't continue processing this branch of the tree, but other
-// branches can continue.
+// branches can continue.  return Continue = true continues down the tree.
 type Func func(k Ki, level int, data interface{}) bool
+
+const (
+	// Continue = true can be returned from tree iteration functions to continue
+	// processing down the tree, as compared to Break = false which stops this branch.
+	Continue = true
+
+	// Break = false can be returned from tree iteration functions to stop processing
+	// this branch of the tree.
+	Break = false
+)
 
 // KiType is a Ki reflect.Type, suitable for checking for Type.Implements.
 var KiType = reflect.TypeOf((*Ki)(nil)).Elem()
