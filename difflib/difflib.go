@@ -791,7 +791,7 @@ func formatRangeUnified(start, stop int) string {
 }
 
 // Unified diff parameters
-type UnifiedDiff struct {
+type LineDiffParams struct {
 	A        []string // First sequence lines
 	FromFile string   // First file name
 	FromDate string   // First file time
@@ -821,7 +821,7 @@ type UnifiedDiff struct {
 // times.  Any or all of these may be specified using strings for
 // 'fromfile', 'tofile', 'fromfiledate', and 'tofiledate'.
 // The modification times are normally expressed in the ISO 8601 format.
-func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
+func WriteUnifiedDiff(writer io.Writer, diff LineDiffParams) error {
 	//buf := bufio.NewWriter(writer)
 	//defer buf.Flush()
 	var bld strings.Builder
@@ -902,7 +902,7 @@ func WriteUnifiedDiff(writer io.Writer, diff UnifiedDiff) error {
 }
 
 // Like WriteUnifiedDiff but returns the diff a string.
-func GetUnifiedDiffString(diff UnifiedDiff) (string, error) {
+func GetUnifiedDiffString(diff LineDiffParams) (string, error) {
 	w := &bytes.Buffer{}
 	err := WriteUnifiedDiff(w, diff)
 	return string(w.Bytes()), err
@@ -922,7 +922,9 @@ func formatRangeContext(start, stop int) string {
 	return fmt.Sprintf("%d,%d", beginning, beginning+length-1)
 }
 
-type ContextDiff UnifiedDiff
+// For backward compatibility. Ugh.
+type ContextDiff = LineDiffParams
+type UnifiedDiff = LineDiffParams
 
 // Compare two sequences of lines; generate the delta as a context diff.
 //
@@ -1034,7 +1036,7 @@ func GetContextDiffString(diff ContextDiff) (string, error) {
 }
 
 // Split a string on "\n" while preserving them. The output can be used
-// as input for UnifiedDiff and ContextDiff structures.
+// as input for LineDiffParams.
 func SplitLines(s string) []string {
 	lines := strings.SplitAfter(s, "\n")
 	lines[len(lines)-1] += "\n"

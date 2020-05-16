@@ -121,7 +121,7 @@ fmt.Printf("%s,%T",a,b)`
 one
 three
 four`
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -274,7 +274,7 @@ func TestSFBugsRatioForNullSeqn(t *testing.T) {
 func TestSFBugsComparingEmptyLists(t *testing.T) {
 	groups := NewMatcher(nil, nil).GetGroupedOpCodes(-1)
 	assertEqual(t, len(groups), 0)
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		FromFile: "Original",
 		ToFile:   "Current",
 		Context:  3,
@@ -326,7 +326,7 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 }
 
 func TestOutputFormatTabDelimiter(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
@@ -350,7 +350,7 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 }
 
 func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
@@ -367,7 +367,7 @@ func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
 }
 
 func TestOmitFilenames(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := LineDiffParams{
 		A:   SplitLines("o\nn\ne\n"),
 		B:   SplitLines("t\nw\no\n"),
 		Eol: "\n",
@@ -600,7 +600,7 @@ func TestGetUnifiedDiffString(t *testing.T) {
 	A := "one\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\n"
 	B := "one\ntwo\nthr33\nfour\nfive\nsix\nseven\neight\nnine\nten\n"
 	// Build diff
-	diff := UnifiedDiff{A: SplitLines(A),
+	diff := LineDiffParams{A: SplitLines(A),
 		FromFile: "file", FromDate: "then",
 		B: SplitLines(B),
 		ToFile: "tile", ToDate: "now", Eol: "", Context: 1}
