@@ -7,20 +7,19 @@ require (
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/Masterminds/vcs v1.13.1
-	github.com/alecthomas/chroma v0.7.2
-	github.com/anthonynsimon/bild v0.11.1
+	github.com/alecthomas/chroma v0.7.3
+	github.com/anthonynsimon/bild v0.12.0
 	github.com/aymerick/douceur v0.2.0
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
-	github.com/chewxy/math32 v1.0.4
+	github.com/chewxy/math32 v1.0.5
 	github.com/fatih/camelcase v1.0.0
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
-	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4
+	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200420212212-258d9bec320e
 	github.com/go-gl/mathgl v0.0.0-20190713194549-592312d8590a
-	github.com/go-python/gopy v0.3.1
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
-	github.com/goki/ki v1.0.2-0.20200515092909-e0e7d6753db5
-	github.com/goki/mat32 v1.0.1
-	github.com/goki/pi v1.0.5
+	github.com/goki/ki v1.0.2
+	github.com/goki/mat32 v1.0.2
+	github.com/goki/pi v1.0.6
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v1.0.0
 	github.com/gorilla/css v1.0.0 // indirect
@@ -31,8 +30,8 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	golang.org/x/image v0.0.0-20200119044424-58c23975cae1
-	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
+	golang.org/x/image v0.0.0-20200430140353-33d19683fad8
+	golang.org/x/net v0.0.0-20200513185701-a91f0712d120
 )
 
 go 1.13
