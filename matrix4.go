@@ -83,6 +83,12 @@ func (m *Mat4) SetZero() {
 	)
 }
 
+// CopyFrom copies from source matrix into this matrix
+// (a regular = assign does not copy data, just the pointer!)
+func (m *Mat4) CopyFrom(src *Mat4) {
+	copy(m[:], src[:])
+}
+
 // CopyPos copies the position elements of the src matrix into this one.
 func (m *Mat4) CopyPos(src *Mat4) {
 	m[12] = src[12]

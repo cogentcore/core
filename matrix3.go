@@ -73,6 +73,12 @@ func (m *Mat3) SetZero() {
 	)
 }
 
+// CopyFrom copies from source matrix into this matrix
+// (a regular = assign does not copy data, just the pointer!)
+func (m *Mat3) CopyFrom(src *Mat3) {
+	copy(m[:], src[:])
+}
+
 // MulMatrices sets ths matrix as matrix multiplication a by b (i.e., b*a).
 func (m *Mat3) MulMatrices(a, b *Mat3) {
 	a11 := a[0]
