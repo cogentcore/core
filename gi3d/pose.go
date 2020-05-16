@@ -71,7 +71,7 @@ func (ps *Pose) MulMatrix(mat *mat32.Mat4) {
 // Does NOT call UpdateMatrix so that can include other factors as needed.
 func (ps *Pose) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 	if parWorld != nil {
-		ps.ParMatrix = *parWorld
+		ps.ParMatrix.CopyFrom(parWorld)
 	}
 	ps.WorldMatrix.MulMatrices(&ps.ParMatrix, &ps.Matrix)
 }

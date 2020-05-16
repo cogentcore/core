@@ -347,8 +347,8 @@ func (nb *Node2DBase) GrabFocus() {
 	if !nb.CanFocus() {
 		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d interface{}) bool {
 			_, ni := KiToNode2D(k)
-			if ni == nil || ni.This() == nil {
-				return ki.Continue
+			if ni == nil || ni.This() == nil || ni.IsDeleted() || ni.IsDestroyed() {
+				return ki.Break
 			}
 			if !ni.CanFocus() {
 				return ki.Continue
@@ -647,7 +647,7 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 	}
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
-		if ni == nil {
+		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break // going into a different type of thing, bail
 		}
 		ni.DisconnectViewport()
@@ -738,7 +738,7 @@ func (nb *Node2DBase) NeedsFullReRender2DTree() bool {
 	full := false
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		_, ni := KiToNode2D(k)
-		if ni == nil {
+		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
 		if ni.NeedsFullReRender() {
@@ -761,8 +761,8 @@ func (nb *Node2DBase) Init2DTree() {
 	}
 	pr := prof.Start("Node2D.Init2DTree." + nb.Type().Name())
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
-		nii, _ := KiToNode2D(k)
-		if nii == nil {
+		nii, ni := KiToNode2D(k)
+		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
 		// ppr := prof.Start("Init2DTree:" + nii.Type().Name())
@@ -782,8 +782,8 @@ func (nb *Node2DBase) Style2DTree() {
 	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
 	pr := prof.Start("Node2D.Style2DTree." + nb.Type().Name())
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
-		nii, _ := KiToNode2D(k)
-		if nii == nil {
+		nii, ni := KiToNode2D(k)
+		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
 		// ppr := prof.Start("Style2DTree:" + nii.Type().Name())
@@ -803,8 +803,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 	nb.FuncDownMeLast(0, nb.This(),
 		func(k ki.Ki, level int, d interface{}) bool { // tests whether to process node
 			nii, ni := KiToNode2D(k)
-			if nii == nil {
-				// fmt.Printf("Encountered a non-Node2D -- might have forgotten to define AsNode2D method: %T, %v \n", k, k.PathUnique())
+			if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
 			}
 			if ni.HasNoLayout() {
@@ -814,7 +813,7 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 		},
 		func(k ki.Ki, level int, d interface{}) bool { // this one does the work
 			nii, ni := KiToNode2D(k)
-			if ni == nil {
+			if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
 			}
 			nii.Size2D(iter)
@@ -916,7 +915,7 @@ func (nb *Node2DBase) BBoxReport() string {
 	rpt := ""
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d interface{}) bool {
 		nii, ni := KiToNode2D(k)
-		if nii == nil {
+		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
 		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", ni.Nm, ni.VpBBox, ni.WinBBox)

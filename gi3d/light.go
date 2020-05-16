@@ -203,6 +203,7 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 	var dirs []mat32.Vec3
 	var points []mat32.Vec3
 	var spots []mat32.Vec3
+	sc.Camera.CamMu.RLock()
 	for _, lt := range sc.Lights {
 		clr := ColorToVec3f(lt.Color()).MulScalar(lt.Lumens())
 		switch l := lt.(type) {
@@ -223,7 +224,7 @@ func (rn *Renderers) SetLightsUnis(sc *Scene) {
 			spots = append(spots, mat32.Vec3{l.QuadDecay, 0, 0})
 		}
 	}
-
+	sc.Camera.CamMu.RUnlock()
 	// set new lengths first
 	ambu := lu.UniformByName("AmbLights")
 	ambu.SetLen(len(ambs))

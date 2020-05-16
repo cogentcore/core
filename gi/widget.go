@@ -91,10 +91,10 @@ func (wb *WidgetBase) BoxSpace() float32 {
 // Init2DWidget handles basic node initialization -- Init2D can then do special things
 func (wb *WidgetBase) Init2DWidget() {
 	wb.BBoxMu.Lock()
+	wb.StyMu.Lock()
 	wb.Viewport = wb.ParentViewport()
-	// wb.StyMu.Lock()
 	wb.Sty.Defaults()
-	// wb.StyMu.Unlock()
+	wb.StyMu.Unlock()
 	wb.LayState.Defaults() // doesn't overwrite
 	wb.BBoxMu.Unlock()
 	wb.ConnectToViewport()

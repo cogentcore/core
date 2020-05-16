@@ -404,7 +404,10 @@ func (tv *TabView) InitTabView() {
 	if len(tv.Kids) != 0 {
 		return
 	}
-	if tv.Sty.Font.Size.Val == 0 { // not yet styled
+	tv.StyMu.RLock()
+	needSty := tv.Sty.Font.Size.Val == 0
+	tv.StyMu.RUnlock()
+	if needSty {
 		tv.StyleLayout()
 	}
 

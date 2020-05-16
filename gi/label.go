@@ -116,7 +116,10 @@ func (lb *Label) SetText(txt string) {
 	// 	lb.Redrawable = true
 	// }
 
-	if lb.Sty.Font.Size.Val == 0 { // not yet styled
+	lb.StyMu.RLock()
+	needSty := lb.Sty.Font.Size.Val == 0
+	lb.StyMu.RUnlock()
+	if needSty {
 		lb.StyleLabel()
 	}
 	lb.SetStateStyle()

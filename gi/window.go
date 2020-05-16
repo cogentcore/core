@@ -1497,10 +1497,15 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	w.EventMgr.LagLastSkipped = false
 	w.lastEt = et
 
-	if w.skippedResize != nil || w.Viewport.Geom.Size != w.OSWin.Size() {
-		w.SetFlag(int(WinFlagIsResizing))
-		w.Resized(w.OSWin.Size())
-		w.skippedResize = nil
+	if w.skippedResize != nil {
+		w.Viewport.BBoxMu.RLock()
+		vpsz := w.Viewport.Geom.Size
+		w.Viewport.BBoxMu.RUnlock()
+		if vpsz != w.OSWin.Size() {
+			w.SetFlag(int(WinFlagIsResizing))
+			w.Resized(w.OSWin.Size())
+			w.skippedResize = nil
+		}
 	}
 
 	if et != oswin.WindowResizeEvent && et != oswin.WindowPaintEvent {

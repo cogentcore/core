@@ -390,8 +390,8 @@ func (nb *NodeBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki 
 			return ki.Continue
 		}
 		_, ni := KiToNode2D(k)
-		if ni == nil {
-			// todo: 3D
+		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
+			// 3D?
 			return ki.Break
 		}
 		if ni.PosInWinBBox(pt) {

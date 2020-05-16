@@ -508,7 +508,10 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 		tv.NLines = 0
 		return tv.ResizeIfNeeded(image.ZP)
 	}
-	if tv.Sty.Font.Size.Val == 0 { // not yet styled
+	tv.StyMu.RLock()
+	needSty := tv.Sty.Font.Size.Val == 0
+	tv.StyMu.RUnlock()
+	if needSty {
 		// fmt.Print("textview: no style\n")
 		return false
 		// tv.StyleTextView() // this fails on mac
@@ -3425,7 +3428,7 @@ func (tv *TextView) RenderStartPos() mat32.Vec2 {
 
 // VisSizes computes the visible size of view given current parameters
 func (tv *TextView) VisSizes() {
-	if tv.Sty.Font.Size.Val == 0 { // not yet styled
+	if tv.Sty.Font.Size.Val == 0 { // called under lock
 		tv.StyleTextView()
 	}
 	sty := &tv.Sty

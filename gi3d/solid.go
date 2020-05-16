@@ -159,7 +159,10 @@ func (sld *Solid) IsTransparent() bool {
 func (sld *Solid) UpdateMeshBBox() {
 	if sld.MeshPtr != nil {
 		sld.BBoxMu.Lock()
-		sld.MeshBBox = sld.MeshPtr.AsMeshBase().BBox
+		mesh := sld.MeshPtr.AsMeshBase()
+		mesh.BBoxMu.RLock()
+		sld.MeshBBox = mesh.BBox
+		mesh.BBoxMu.RUnlock()
 		sld.BBoxMu.Unlock()
 	}
 }
@@ -199,7 +202,9 @@ func (sld *Solid) Render3D(sc *Scene, rc RenderClasses, rnd Render) {
 		rndt := rnd.(*RenderTexture)
 		rndt.SetMat(&sld.Mat, sc)
 	}
+	sld.PoseMu.RLock()
 	sc.Renders.SetMatrix(&sld.Pose)
+	sld.PoseMu.RUnlock()
 	sld.MeshPtr.Render3D(sc)
 	gpu.TheGPU.ErrCheck("sld render")
 }

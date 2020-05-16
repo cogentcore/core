@@ -209,7 +209,10 @@ func (tf *TextField) SetText(txt string) {
 	if tf.Txt == txt && !tf.Edited {
 		return
 	}
-	if tf.Sty.Font.Size.Val == 0 { // not yet styled
+	tf.StyMu.RLock()
+	needSty := tf.Sty.Font.Size.Val == 0
+	tf.StyMu.RUnlock()
+	if needSty {
 		tf.StyleTextField()
 	}
 	tf.Txt = txt

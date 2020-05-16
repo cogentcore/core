@@ -44,9 +44,11 @@ func (gp *Group) UpdateMeshBBox() {
 		if nii == nil {
 			continue
 		}
+		ni.BBoxMu.Lock()
 		ni.PoseMu.RLock()
 		nbb := ni.MeshBBox.BBox.MulMat4(&ni.Pose.Matrix)
 		ni.PoseMu.RUnlock()
+		ni.BBoxMu.Unlock()
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Min)
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Max)
 	}

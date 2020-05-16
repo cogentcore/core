@@ -788,7 +788,9 @@ func (sc *Scene) ActivateFrame() bool {
 			sc.Frame = gpu.TheGPU.NewFramebuffer(sc.Nm+"-frame", sc.Geom.Size, msamp)
 		}
 		sc.Frame.SetSize(sc.Geom.Size) // nop if same
+		sc.Camera.CamMu.Lock()
 		sc.Camera.Aspect = float32(sc.Geom.Size.X) / float32(sc.Geom.Size.Y)
+		sc.Camera.CamMu.Unlock()
 		// fmt.Printf("aspect ratio: %v\n", sc.Camera.Aspect)
 		sc.Frame.Activate()
 		sc.Renders.DrawState()
@@ -811,7 +813,9 @@ func (sc *Scene) ActivateOffFrame(frame *gpu.Framebuffer, name string, size imag
 		}
 		fr := *frame
 		fr.SetSize(size) // nop if same
+		sc.Camera.CamMu.Lock()
 		sc.Camera.Aspect = float32(size.X) / float32(size.Y)
+		sc.Camera.CamMu.Unlock()
 		fr.Activate()
 		sc.Renders.DrawState()
 		clr := ColorToVec3f(sc.BgColor)
@@ -970,7 +974,9 @@ func (sc *Scene) UpdateWorldMatrix() {
 			if pii == nil {
 				return ki.Break
 			}
+			pi.PoseMu.RLock()
 			nii.UpdateWorldMatrix(&pi.Pose.WorldMatrix)
+			pi.PoseMu.RUnlock()
 			return ki.Continue
 		})
 	}
@@ -980,8 +986,9 @@ func (sc *Scene) UpdateWorldMatrix() {
 // and BBox2D
 func (sc *Scene) UpdateMVPMatrix() {
 	sc.Camera.CamMu.Lock()
+	defer sc.Camera.CamMu.Unlock()
+
 	sc.Camera.Pose.UpdateMatrix()
-	sc.Camera.CamMu.Unlock()
 	sz := sc.Geom.Size
 	size := mat32.Vec2{float32(sz.X), float32(sz.Y)}
 
@@ -1159,10 +1166,13 @@ func (sc *Scene) Render3D() {
 		if nii == nil {
 			return ki.Break // going into a different type of thing, bail
 		}
+		ni.BBoxMu.RLock()
 		if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
+			ni.BBoxMu.RUnlock()
 			ni.DisconnectAllEvents(sc.Win, gi.AllPris)
 			return ki.Break
 		}
+		ni.BBoxMu.RUnlock()
 		nii.ConnectEvents3D(sc) // only connect visible
 		if !nii.IsSolid() {
 			return ki.Continue

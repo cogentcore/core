@@ -197,7 +197,10 @@ func (bb *ButtonBase) SetText(txt string) {
 		return
 	}
 	updt := bb.UpdateStart()
-	if bb.Sty.Font.Size.Val == 0 { // not yet styled
+	bb.StyMu.RLock()
+	needSty := bb.Sty.Font.Size.Val == 0
+	bb.StyMu.RUnlock()
+	if needSty {
 		bb.StyleButton()
 	}
 	if bb.Text != txt {
@@ -217,7 +220,10 @@ func (bb *ButtonBase) SetIcon(iconName string) {
 		bb.Icon = IconName(iconName)
 		return
 	}
-	if bb.Sty.Font.Size.Val == 0 { // not yet styled
+	bb.StyMu.RLock()
+	needSty := bb.Sty.Font.Size.Val == 0
+	bb.StyMu.RUnlock()
+	if needSty {
 		bb.StyleButton()
 	}
 	if bb.Icon != IconName(iconName) {
@@ -665,9 +671,11 @@ func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	bb.Layout2DBase(parBBox, true, iter) // init style
 	bb.Layout2DParts(parBBox, iter)
+	bb.StyMu.Lock()
 	for i := 0; i < int(ButtonStatesN); i++ {
 		bb.StateStyles[i].CopyUnitContext(&bb.Sty.UnContext)
 	}
+	bb.StyMu.Unlock()
 	return bb.Layout2DChildren(iter)
 }
 

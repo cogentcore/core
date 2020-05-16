@@ -7,6 +7,7 @@ package gi3d
 import (
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin/gpu"
@@ -174,6 +175,7 @@ type MeshBase struct {
 	Color   mat32.ArrayF32 `desc:"if per-vertex color material type is used for this mesh, then these are the per-vertex colors -- may not be defined in which case per-vertex materials are not possible for such meshes"`
 	BBox    BBox           `desc:"computed bounding-box and other gross solid properties"`
 	Buff    gpu.BufferMgr  `view:"-" desc:"buffer holding computed verticies, normals, indices, etc for rendering"`
+	BBoxMu  sync.RWMutex   `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on bbox access"`
 }
 
 var KiT_MeshBase = kit.Types.AddType(&MeshBase{}, nil)
@@ -230,7 +232,9 @@ func (ms *MeshBase) Reset() {
 	ms.Tex = nil
 	ms.Idx = nil
 	ms.Color = nil
+	ms.BBoxMu.Lock()
 	ms.BBox.BBox.SetEmpty()
+	ms.BBoxMu.Unlock()
 }
 
 // Validate checks if all the vertex data is valid
@@ -501,7 +505,9 @@ func (ms *MeshBase) SetTriangle(stVtxIdx, stIdxIdx int, setIdx bool, a, b, c mat
 		ms.Idx.Set(sidx, uint32(stVtxIdx), uint32(stVtxIdx+1), uint32(stVtxIdx+2))
 	}
 
+	ms.BBoxMu.Lock()
 	ms.BBox.BBox.ExpandByPoints([]mat32.Vec3{a, b, c})
+	ms.BBoxMu.Unlock()
 }
 
 ////////////////////////////////////////////////////////////////
@@ -566,7 +572,9 @@ func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Ve
 		ms.Idx.Set(sidx, uint32(stVtxIdx), uint32(stVtxIdx+1), uint32(stVtxIdx+2),
 			uint32(stVtxIdx), uint32(stVtxIdx+2), uint32(stVtxIdx+3))
 	}
+	ms.BBoxMu.Lock()
 	ms.BBox.BBox.ExpandByPoints(vtxs)
+	ms.BBoxMu.Unlock()
 }
 
 ////////////////////////////////////////////////////////////////
@@ -725,7 +733,9 @@ func (ms *GenMesh) Make(sc *Scene) {
 		ms.Vtx.GetVec3(3*i, &vec3)
 		bb.ExpandByPoint(vec3)
 	}
+	ms.BBoxMu.Lock()
 	ms.BBox.SetBounds(bb.Min, bb.Max)
+	ms.BBoxMu.Unlock()
 }
 
 var KiT_GenMesh = kit.Types.AddType(&GenMesh{}, nil)

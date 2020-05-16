@@ -125,8 +125,10 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 	if vp.Pixels != nil {
 		ib := vp.Pixels.Bounds().Size()
 		if ib == nwsz {
+			vp.BBoxMu.Lock()
 			vp.Geom.Size = nwsz // make sure
-			return              // already good
+			vp.BBoxMu.Unlock()
+			return // already good
 		}
 	}
 	if vp.Pixels != nil {
