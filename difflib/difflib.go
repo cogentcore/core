@@ -792,14 +792,16 @@ func formatRangeUnified(start, stop int) string {
 
 // Unified diff parameters
 type LineDiffParams struct {
-	A        []string // First sequence lines
-	FromFile string   // First file name
-	FromDate string   // First file time
-	B        []string // Second sequence lines
-	ToFile   string   // Second file name
-	ToDate   string   // Second file time
-	Eol      string   // Headers end of line, defaults to LF
-	Context  int      // Number of context lines
+	A        []string             // First sequence lines
+	FromFile string               // First file name
+	FromDate string               // First file time
+	B        []string             // Second sequence lines
+	ToFile   string               // Second file name
+	ToDate   string               // Second file time
+	Eol      string               // Headers end of line, defaults to LF
+	Context  int                  // Number of context lines
+	AutoJunk bool                 // If true, use autojunking
+	IsJunkLine func(string)bool   // How to spot junk lines
 }
 
 // Compare two sequences of lines; generate the delta as a unified diff.
@@ -841,6 +843,9 @@ func WriteUnifiedDiff(writer io.Writer, diff LineDiffParams) error {
 
 	started := false
 	m := NewMatcher(diff.A, diff.B)
+	if diff.AutoJunk || diff.IsJunkLine != nil {
+		m = NewMatcherWithJunk(diff.A, diff.B, diff.AutoJunk, diff.IsJunkLine)
+	}
 	for _, g := range m.GetGroupedOpCodes(diff.Context) {
 		if !started {
 			started = true
@@ -973,6 +978,9 @@ func WriteContextDiff(writer io.Writer, diff LineDiffParams) error {
 
 	started := false
 	m := NewMatcher(diff.A, diff.B)
+	if diff.AutoJunk || diff.IsJunkLine != nil {
+		m = NewMatcherWithJunk(diff.A, diff.B, diff.AutoJunk, diff.IsJunkLine)
+	}
 	for _, g := range m.GetGroupedOpCodes(diff.Context) {
 		if !started {
 			started = true
