@@ -943,7 +943,7 @@ type UnifiedDiff = LineDiffParams
 // strings for diff.FromFile, diff.ToFile, diff.FromDate, diff.ToDate.
 // The modification times are normally expressed in the ISO 8601 format.
 // If not specified, the strings default to blanks.
-func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
+func WriteContextDiff(writer io.Writer, diff LineDiffParams) error {
 	buf := bufio.NewWriter(writer)
 	defer buf.Flush()
 	var diffErr error
@@ -1028,8 +1028,8 @@ func WriteContextDiff(writer io.Writer, diff ContextDiff) error {
 	return diffErr
 }
 
-// Like WriteContextDiff but returns the diff a string.
-func GetContextDiffString(diff ContextDiff) (string, error) {
+// Like WriteContextDiff but returns the diff as a string.
+func GetContextDiffString(diff LineDiffParams) (string, error) {
 	w := &bytes.Buffer{}
 	err := WriteContextDiff(w, diff)
 	return string(w.Bytes()), err
