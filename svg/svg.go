@@ -116,7 +116,6 @@ func (svg *SVG) Size2D(iter int) {
 
 func (svg *SVG) StyleSVG() {
 	svg.StyMu.Lock()
-	defer svg.StyMu.Unlock()
 
 	hasTempl, saveTempl := svg.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
@@ -126,6 +125,7 @@ func (svg *SVG) StyleSVG() {
 		svg.Sty.SaveTemplate()
 	}
 	svg.Pnt.Defaults()
+	svg.StyMu.Unlock()
 	StyleSVG(svg.This().(gi.Node2D))
 	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
 }
