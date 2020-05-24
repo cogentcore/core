@@ -13,7 +13,6 @@ import (
 	"bufio"
 	"bytes"
 	"io"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -164,8 +163,8 @@ func (s *Scanner) scanBraced() (Token, string) {
 		} else if ch == '@' {
 			if macro {
 				_, _ = buf.WriteRune(ch)
-			} else {
-				log.Printf("%s: %s", ErrUnexpectedAtsign, buf.String())
+				// } else {
+				// 	log.Printf("%s: %s", ErrUnexpectedAtsign, buf.String())
 			}
 		} else if isWhitespace(ch) {
 			_, _ = buf.WriteRune(ch)
