@@ -20,11 +20,14 @@ func (tl *TexLang) CompleteLine(fss *pi.FileStates, str string, pos lex.Pos) (md
 	if lfld[0] == '\\' && lfld[1:] == str { // use the /
 		str = lfld
 	}
-	if strings.HasPrefix(lfld, `\cite`) || strings.HasPrefix(lfld, `\incite`) || strings.HasPrefix(lfld, `\shortcite`) {
+	if HasCite(lfld) {
 		return tl.CompleteCite(fss, origStr, str, pos)
 	}
 	md.Seed = str
-	for _, ls := range LaTeXCmds {
+	if len(LaTeXCmdsAll) == 0 {
+		LaTeXCmdsAll = append(LaTeXCmds, CiteCmds...)
+	}
+	for _, ls := range LaTeXCmdsAll {
 		if strings.HasPrefix(ls, str) {
 			c := complete.Completion{Text: ls, Label: ls, Icon: "function"}
 			md.Matches = append(md.Matches, c)
@@ -38,7 +41,7 @@ func (tl *TexLang) Lookup(fss *pi.FileStates, str string, pos lex.Pos) (ld compl
 	origStr := str
 	lfld := lex.LastField(str)
 	str = lex.LastScopedString(str)
-	if strings.HasPrefix(lfld, `\cite`) || strings.HasPrefix(lfld, `\incite`) || strings.HasPrefix(lfld, `\shortcite`) {
+	if HasCite(lfld) {
 		return tl.LookupCite(fss, origStr, str, pos)
 	}
 	return
@@ -78,6 +81,22 @@ func (tl *TexLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp co
 	return ed
 }
 
+// CiteCmds is a list of latex citation commands (APA style requires many variations)
+var CiteCmds = []string{`\cite`, `\parencite`, `\textcite`, `\nptextcite`, `\incite`, `\nopcite`, `\yrcite`, `\yrnopcite`, `\abbrevcite`, `\abbrevincite`}
+
+// HasCite returns true if string has Prefix in CiteCmds
+func HasCite(str string) bool {
+	for _, cc := range CiteCmds {
+		if strings.HasPrefix(str, cc) {
+			return true
+		}
+	}
+	return false
+}
+
+// LaTeXCmdsAll concatenates LaTeXCmds and CiteCmds
+var LaTeXCmdsAll []string
+
 // LaTeXCmds is a big list of standard commands
 var LaTeXCmds = []string{
 	`\em`,
@@ -87,9 +106,6 @@ var LaTeXCmds = []string{
 	`\texttt`,
 	`\textsf`,
 	`\textrm`,
-	`\cite`,
-	`\incite`,
-	`\shortcite`,
 	`\tiny`,
 	`\scriptsize`,
 	`\footnotesize`,
