@@ -81,8 +81,9 @@ func (tl *TexLang) CompleteEdit(fss *pi.FileStates, text string, cp int, comp co
 	return ed
 }
 
-// CiteCmds is a list of latex citation commands (APA style requires many variations)
-var CiteCmds = []string{`\cite`, `\parencite`, `\textcite`, `\nptextcite`, `\incite`, `\nopcite`, `\yrcite`, `\yrnopcite`, `\abbrevcite`, `\abbrevincite`}
+// CiteCmds is a list of latex citation commands (APA style requires many variations).
+// We include all the variations so they show up in completion.
+var CiteCmds = []string{`\cite`, `\citep`, `\citet`, `\citeNP`, `\citeyearpar`, `\citeyear`, `\citeauthor`, `\citeA`, `\citealp`, `\citeyearNP`, `\parencite`, `\textcite`, `\nptextcite`, `\incite`, `\nopcite`, `\yrcite`, `\yrnopcite`, `\abbrevcite`, `\abbrevincite`}
 
 // HasCite returns true if string has Prefix in CiteCmds
 func HasCite(str string) bool {
