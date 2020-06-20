@@ -569,8 +569,8 @@ func (tv *TableView) UpdateSliceGrid() {
 				})
 			}
 			idxlab.CurBgColor = gi.Prefs.Colors.Background
-			idxlab.SetText(sitxt)
 			idxlab.SetSelectedState(issel)
+			idxlab.SetText(sitxt)
 		}
 
 		vpath := tv.ViewPath + "[" + sitxt + "]"

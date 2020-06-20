@@ -199,9 +199,8 @@ func (sb *SliderBase) SliderRelease() {
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderActive)
 	sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
-	if wasPressed && sb.Value != sb.EmitValue {
-		sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
-		sb.EmitValue = sb.Value
+	if wasPressed {
+		sb.EmitNewValue()
 	}
 	sb.UpdateEnd(updt)
 }
@@ -244,6 +243,18 @@ func (sb *SliderBase) SizeFromAlloc() {
 	sb.DragPos = sb.Pos
 }
 
+// EmitNewValue emits new Value, if it has not already been emitted.
+// Compares Value to EmitValue and only emits if different, sets EmitValue.
+// Returns true if value emitted, false otherwise.
+func (sb *SliderBase) EmitNewValue() bool {
+	if sb.Value == sb.EmitValue {
+		return false
+	}
+	sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
+	sb.EmitValue = sb.Value
+	return true
+}
+
 // SetSliderPos sets the position of the slider at the given position in pixels,
 // and updates the corresponding Value based on that position.
 func (sb *SliderBase) SetSliderPos(pos float32) {
@@ -270,11 +281,8 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 		sb.SnapValue()
 		sb.UpdatePosFromValue()
 	}
-	if sb.Tracking && sb.Value != sb.EmitValue {
-		if math32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
-			sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
-			sb.EmitValue = sb.Value
-		}
+	if sb.Tracking && math32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
+		sb.EmitNewValue()
 	}
 	sb.UpdateEnd(updt)
 }
@@ -326,7 +334,7 @@ func (sb *SliderBase) SetValueAction(val float32) {
 		return
 	}
 	sb.SetValue(val)
-	sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
+	sb.EmitNewValue()
 }
 
 // SetThumbValue sets the thumb value to given value and updates the thumb size

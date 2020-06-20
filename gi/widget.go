@@ -335,8 +335,11 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	mvp := wb.ViewportSafe()
 	if mvp == nil { // robust
 		if nii.AsViewport2D() == nil {
+			// todo: not so clear that this will do anything useful at this point
+			// but at least it gets the viewport
 			nii.Init2D()
 			nii.Style2D()
+			nii.Size2D(0)
 			// fmt.Printf("node not init in Layout2DBase: %v\n", wb.PathUnique())
 		}
 	}

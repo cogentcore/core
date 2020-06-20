@@ -522,11 +522,10 @@ func (fv *FileView) UpdateFiles() {
 	sv.ResetSelectedIdxs()
 	sv.SelField = "Name"
 	sv.SelVal = fv.SelFile
+	sv.SortSlice()
 	if !sv.IsConfiged() {
 		sv.Config()
 		sv.LayoutSliceGrid()
-	} else {
-		sv.SortSlice()
 	}
 	sv.UpdateSliceGrid()
 	sv.LayoutHeader()

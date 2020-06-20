@@ -1258,14 +1258,13 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		}
 		li, _ := KiToNode2D(recv)
 		ls := li.AsLayout2D()
-		if !ls.IsUpdating() {
-			wupdt := ls.TopUpdateStart()
-			ls.Move2DTree()
-			ls.ViewportSafe().ReRender2DNode(li)
-			ls.TopUpdateEnd(wupdt)
-			// } else {
-			// 	fmt.Printf("not ready to update\n")
-		}
+		// if ls.IsUpdating() {
+		// 	fmt.Printf("Layout: %v scroll signal while still in update\n", ly.PathUnique())
+		// }
+		wupdt := ls.TopUpdateStart()
+		ls.Move2DTree()
+		ls.ViewportSafe().ReRender2DNode(li)
+		ls.TopUpdateEnd(wupdt)
 	})
 }
 

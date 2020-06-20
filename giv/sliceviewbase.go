@@ -915,13 +915,13 @@ func (sv *SliceViewBase) Render2D() {
 			// rebuild as needed.
 			sv.RenderedRows = sv.DispRows
 			sv.This().(SliceViewer).LayoutSliceGrid()
-			// sv.This().(SliceViewer).UpdateSliceGrid() // not updating
+			if sv.SelectedIdx > -1 {
+				sv.ScrollToIdxNoUpdt(sv.SelectedIdx)
+			}
+			sv.This().(SliceViewer).UpdateSliceGrid() // enabling this is key for index, +/- rendering, as they are created here and need to be in place before the rerender tree
 			sv.InFullRebuild = true
 			sv.ReRender2DTree()
 			sv.InFullRebuild = false
-			if sv.SelectedIdx > -1 {
-				sv.ScrollToIdx(sv.SelectedIdx)
-			}
 			sv.PopBounds()
 			return
 		}
@@ -1057,22 +1057,33 @@ func (sv *SliceViewBase) IdxFromPos(posY int) (int, bool) {
 	return row + sv.StartIdx, true
 }
 
-// ScrollToIdx ensures that given slice idx is visible by scrolling display as needed
-func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
+// ScrollToIdxNoUpdt ensures that given slice idx is visible by scrolling display as needed
+// This version does not update the slicegrid -- just computes the StartIdx and updates the scrollbar
+func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
+	if sv.DispRows == 0 {
+		return false
+	}
 	if idx < sv.StartIdx {
 		sv.StartIdx = idx
 		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
 		sv.UpdateScroll()
-		sv.This().(SliceViewer).UpdateSliceGrid()
 		return true
 	} else if idx >= sv.StartIdx+sv.DispRows {
 		sv.StartIdx = idx - (sv.DispRows - 1)
 		sv.StartIdx = ints.MaxInt(0, sv.StartIdx)
 		sv.UpdateScroll()
-		sv.This().(SliceViewer).UpdateSliceGrid()
 		return true
 	}
 	return false
+}
+
+// ScrollToIdx ensures that given slice idx is visible by scrolling display as needed
+func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
+	updt := sv.ScrollToIdxNoUpdt(idx)
+	if updt {
+		sv.This().(SliceViewer).UpdateSliceGrid()
+	}
+	return updt
 }
 
 // SelectVal sets SelVal and attempts to find corresponding row, setting
