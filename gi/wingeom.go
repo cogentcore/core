@@ -51,6 +51,12 @@ func (wg *WindowGeom) ScaleSize(fact float32) {
 }
 
 func (wg *WindowGeom) Pos() image.Point {
+	if wg.PX < -1000 {
+		wg.PX = 20
+	}
+	if wg.PY < -1000 {
+		wg.PY = 50
+	}
 	return image.Point{wg.PX, wg.PY}
 }
 
