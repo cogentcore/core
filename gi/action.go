@@ -287,8 +287,6 @@ func (ac *Action) ConfigPartsMenuItem() {
 		log.Printf("gi.Action shortcut cannot be used on a sub-menu for action: %v\n", ac.Text)
 	}
 	mods, updt := ac.Parts.ConfigChildren(config, ki.NonUniqueNames)
-	if mods {
-	}
 	ac.ConfigPartsSetIconLabel(string(ac.Icon), ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	ac.ConfigPartsShortcut(scIdx)

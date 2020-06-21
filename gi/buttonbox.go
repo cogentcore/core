@@ -179,7 +179,7 @@ func (bb *ButtonBox) ConfigParts() {
 		config.Add(KiT_CheckBox, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config, ki.NonUniqueNames)
-	if mods {
+	if mods || RebuildDefaultStyles {
 		bb.ConfigItems()
 		bb.UpdateEnd(updt)
 	}

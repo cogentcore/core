@@ -1353,7 +1353,7 @@ func (tf *TextField) ConfigParts() {
 	config.Add(KiT_Stretch, "clr-str")
 	config.Add(KiT_Action, "clear")
 	mods, updt := tf.Parts.ConfigChildren(config, ki.NonUniqueNames)
-	if mods {
+	if mods || RebuildDefaultStyles {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
 		clr.SetIcon("close")

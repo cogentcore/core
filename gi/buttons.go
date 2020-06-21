@@ -956,7 +956,7 @@ func (cb *CheckBox) ConfigParts() {
 	}
 	mods, updt := cb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	ist := cb.Parts.Child(icIdx).(*Layout)
-	if mods {
+	if mods || RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
