@@ -474,6 +474,15 @@ func (o *NewWindowOptions) Fixup() {
 		o.Size.Y = scsz.Y
 	}
 
+	// these are windows-specific special numbers for minimized windows
+	// can be sent here for WinGeom saved geom.
+	if o.Pos.X == -32000 {
+		o.Pos.X = 0
+	}
+	if o.Pos.Y == -32000 {
+		o.Pos.Y = 50
+	}
+
 	if o.Pos.X == 0 && o.Pos.Y == 0 {
 		nw := TheApp.NWindows()
 		if nw > 0 {
