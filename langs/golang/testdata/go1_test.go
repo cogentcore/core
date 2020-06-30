@@ -2,8 +2,6 @@
 /* Use of this source code is governed by a BSD-style
 license that can be found in the LICENSE file. */
 
-/* This has /* embedded */ comments which is /* a bit  */ tricky */ 
-
 package gotest
 
 func sldff() {
@@ -913,7 +911,7 @@ func main() {
 		p := a * i
 	}
 
-	for a, i, j, k := range names {
+	for a, i := range names {
 		for i < 100 {
 			for {
 				fmt.Printf("%v %v", a, i)

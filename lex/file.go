@@ -173,11 +173,11 @@ func (fl *File) InitFromLine(sfl *File, ln int) bool {
 	if ln >= nlines || ln < 0 {
 		return false
 	}
-	src := [][]rune{sfl.Lines[ln], []rune{}} // need extra blank
+	src := [][]rune{sfl.Lines[ln], {}} // need extra blank
 	fl.SetSrc(src, sfl.Filename, sfl.BasePath, sfl.Sup)
-	fl.Lexs = []Line{sfl.Lexs[ln], Line{}}
-	fl.Comments = []Line{sfl.Comments[ln], Line{}}
-	fl.EosPos = []EosPos{sfl.EosPos[ln], EosPos{}}
+	fl.Lexs = []Line{sfl.Lexs[ln], {}}
+	fl.Comments = []Line{sfl.Comments[ln], {}}
+	fl.EosPos = []EosPos{sfl.EosPos[ln], {}}
 	return true
 }
 

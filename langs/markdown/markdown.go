@@ -142,7 +142,7 @@ func (ml *MarkdownLang) ParseDir(path string, opts pi.LangDirOpts) *syms.Symbol 
 }
 
 // List keywords (for indent)
-var ListKeys = map[string]struct{}{"*": struct{}{}, "+": struct{}{}, "-": struct{}{}}
+var ListKeys = map[string]struct{}{"*": {}, "+": {}, "-": {}}
 
 // IndentLine returns the indentation level for given line based on
 // previous line's indentation level, and any delta change based on
