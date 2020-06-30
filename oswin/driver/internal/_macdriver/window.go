@@ -499,7 +499,7 @@ func (w *windowImpl) Close() {
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
 	sendWindowEvent(w, window.Close)
 	if w.textures != nil {
-		for t, _ := range w.textures {
+		for t := range w.textures {
 			t.Release() // deletes from map
 		}
 	}

@@ -626,7 +626,7 @@ func (sr *SpanRender) ZeroPosLR() {
 	if sx == 0 {
 		return
 	}
-	for i, _ := range sr.Render {
+	for i := range sr.Render {
 		sr.Render[i].RelPos.X -= sx
 	}
 	sr.LastPos.X -= sx

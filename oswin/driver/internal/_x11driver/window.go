@@ -497,7 +497,7 @@ func (w *windowImpl) closeRelease() {
 	render.FreePicture(w.app.xc, w.xp)
 	xproto.FreeGC(w.app.xc, w.xg)
 	if w.textures != nil {
-		for t, _ := range w.textures {
+		for t := range w.textures {
 			t.Release() // deletes from map
 		}
 	}

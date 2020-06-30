@@ -27,19 +27,21 @@ type stub struct {
 	err error
 }
 
-func (s stub) NewImage(size image.Point) (oswin.Image, error)                       { return nil, s.err }
-func (s stub) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) { return nil, s.err }
-func (s stub) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error)         { return nil, s.err }
-func (s stub) NScreens() int                                                        { return 0 }
-func (s stub) Screen(scrN int) *oswin.Screen                                        { return nil }
-func (s stub) ScreenByName(name string) *oswin.Screen                               { return nil }
-func (s stub) NWindows() int                                                        { return 0 }
-func (s stub) Window(win int) oswin.Window                                          { return nil }
-func (s stub) WindowByName(name string) oswin.Window                                { return nil }
-func (s stub) WindowInFocus() oswin.Window                                          { return nil }
-func (s stub) ContextWindow() oswin.Window                                          { return nil }
-func (s stub) ClipBoard(win oswin.Window) clip.Board                                { return nil }
-func (s stub) Cursor(win oswin.Window) cursor.Cursor                                { return nil }
+func (s stub) NewImage(size image.Point) (oswin.Image, error) { return nil, s.err }
+func (s stub) NewTexture(win oswin.Window, size image.Point) (oswin.Texture, error) {
+	return nil, s.err
+}
+func (s stub) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error) { return nil, s.err }
+func (s stub) NScreens() int                                                { return 0 }
+func (s stub) Screen(scrN int) *oswin.Screen                                { return nil }
+func (s stub) ScreenByName(name string) *oswin.Screen                       { return nil }
+func (s stub) NWindows() int                                                { return 0 }
+func (s stub) Window(win int) oswin.Window                                  { return nil }
+func (s stub) WindowByName(name string) oswin.Window                        { return nil }
+func (s stub) WindowInFocus() oswin.Window                                  { return nil }
+func (s stub) ContextWindow() oswin.Window                                  { return nil }
+func (s stub) ClipBoard(win oswin.Window) clip.Board                        { return nil }
+func (s stub) Cursor(win oswin.Window) cursor.Cursor                        { return nil }
 
 func (s stub) Platform() oswin.Platforms   { return oswin.PlatformsN }
 func (s stub) Name() string                { return "" }

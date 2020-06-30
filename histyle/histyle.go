@@ -270,7 +270,7 @@ func (hs Style) Tag(tag token.Tokens) StyleEntry {
 // ToCSS generates a CSS style sheet for this style, by token.Tokens tag
 func (hs Style) ToCSS() map[token.Tokens]string {
 	css := map[token.Tokens]string{}
-	for ht, _ := range token.Names {
+	for ht := range token.Names {
 		entry := hs.Tag(ht)
 		if entry.IsZero() {
 			continue
@@ -325,7 +325,7 @@ func (hs Style) SaveJSON(filename gi.FileName) error {
 // TagsProps are default properties for custom tags (tokens) -- if set in style then used
 // there but otherwise we use these as a fallback -- typically not overridden
 var Props = map[token.Tokens]ki.Props{
-	token.TextSpellErr: ki.Props{
+	token.TextSpellErr: {
 		"text-decoration": 1 << uint32(gi.DecoDottedUnderline), // bitflag!
 	},
 }

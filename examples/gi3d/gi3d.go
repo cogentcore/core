@@ -210,7 +210,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	gcb.Mat.Color.SetUInt8(0, 255, 0, 128) // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	gcb.Class = "cube"
 
-	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{mat32.Vec3{-3, -1, 0}, mat32.Vec3{-2, 1, 0}, mat32.Vec3{2, 1, 0}, mat32.Vec3{3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
+	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
 	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
 	lns.Pose.Pos.Set(0, 0, 1)
 	lns.Mat.Color.SetUInt8(255, 255, 0, 128) // alpha = .5

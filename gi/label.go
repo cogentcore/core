@@ -191,7 +191,7 @@ func (lb *Label) HoverEvent() {
 		hasLinks := len(lb.Render.Links) > 0
 		if hasLinks {
 			pos := llb.RenderPos
-			for ti, _ := range llb.Render.Links {
+			for ti := range llb.Render.Links {
 				tl := &llb.Render.Links[ti]
 				tlb := tl.Bounds(&llb.Render, pos)
 				if me.Where.In(tlb) {
@@ -221,7 +221,7 @@ func (lb *Label) MouseEvent() {
 		if llb.Selectable || hasLinks {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				if hasLinks {
-					for ti, _ := range llb.Render.Links {
+					for ti := range llb.Render.Links {
 						tl := &llb.Render.Links[ti]
 						tlb := tl.Bounds(&llb.Render, pos)
 						if me.Where.In(tlb) {

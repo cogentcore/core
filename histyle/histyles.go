@@ -163,7 +163,7 @@ func (hs *Styles) OpenDefaults() error {
 func (hs *Styles) Names() []string {
 	nms := make([]string, len(*hs))
 	idx := 0
-	for nm, _ := range *hs {
+	for nm := range *hs {
 		nms[idx] = nm
 		idx++
 	}

@@ -83,9 +83,9 @@ var KiT_Shapes = kit.Enums.AddEnum(ShapesN, kit.NotBitFlag, nil)
 
 // Drags is a map-set of cursors used for signaling dragging events.
 var Drags = map[Shapes]struct{}{
-	DragCopy: struct{}{},
-	DragMove: struct{}{},
-	DragLink: struct{}{},
+	DragCopy: {},
+	DragMove: {},
+	DragLink: {},
 }
 
 // Cursor manages the mouse cursor / pointer appearance.  Currently only a

@@ -433,7 +433,7 @@ func (fn *FileNode) UpdateDir() {
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append([]kit.TypeAndName{kit.TypeAndName{Type: fn.FRoot.NodeType, Name: FileTreeExtFilesName}}, config...)
+			config = append([]kit.TypeAndName{{Type: fn.FRoot.NodeType, Name: FileTreeExtFilesName}}, config...)
 			hasExtFiles = true
 		}
 	}

@@ -1301,7 +1301,7 @@ func (sv *SliceViewBase) ResetSelectedIdxs() {
 func (sv *SliceViewBase) SelectedIdxsList(descendingSort bool) []int {
 	rws := make([]int, len(sv.SelectedIdxs))
 	i := 0
-	for r, _ := range sv.SelectedIdxs {
+	for r := range sv.SelectedIdxs {
 		rws[i] = r
 		i++
 	}
@@ -1335,7 +1335,7 @@ func (sv *SliceViewBase) UnselectIdx(idx int) {
 // UnselectAllIdxs unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIdxs() {
 	wupdt := sv.TopUpdateStart()
-	for r, _ := range sv.SelectedIdxs {
+	for r := range sv.SelectedIdxs {
 		sv.SelectIdxWidgets(r, false)
 	}
 	sv.ResetSelectedIdxs()
@@ -1394,7 +1394,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 		} else {
 			minIdx := -1
 			maxIdx := 0
-			for r, _ := range sv.SelectedIdxs {
+			for r := range sv.SelectedIdxs {
 				if minIdx < 0 {
 					minIdx = r
 				} else {

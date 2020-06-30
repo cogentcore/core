@@ -366,8 +366,8 @@ func FontNameFromMods(basenm string, str FontStretch, wt FontWeights, sty FontSt
 }
 
 var FontExts = map[string]struct{}{
-	".ttf": struct{}{},
-	".ttc": struct{}{}, // note: unpack to raw .ttf to use -- otherwise only getting first font
+	".ttf": {},
+	".ttc": {}, // note: unpack to raw .ttf to use -- otherwise only getting first font
 	//	".otf": struct{}{},  // not yet supported
 }
 

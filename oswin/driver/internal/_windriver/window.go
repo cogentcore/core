@@ -676,7 +676,7 @@ func sendClose(hwnd syscall.Handle, uMsg uint32, wParam, lParam uintptr) (lResul
 	w.CloseClean()
 	sendWindowEvent(w, window.Close)
 	if w.textures != nil {
-		for t, _ := range w.textures {
+		for t := range w.textures {
 			t.Release() // deletes from map
 		}
 	}

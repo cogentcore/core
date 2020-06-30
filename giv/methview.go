@@ -22,7 +22,7 @@ import (
 
 // these are special menus that we ignore
 var specialMenus = map[string]struct{}{
-	"AppMenu": struct{}{}, "Copy Cut Paste": struct{}{}, "Copy Cut Paste Dupe": struct{}{}, "Windows": struct{}{},
+	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "Windows": {},
 }
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
@@ -430,7 +430,7 @@ func ActionView(val interface{}, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Ac
 
 	// other special cases based on props
 	nometh := false // set to true if doesn't have an actual method to call, e.g., keyfun
-	for pk, _ := range props {
+	for pk := range props {
 		switch pk {
 		case "keyfun":
 			nometh = true
