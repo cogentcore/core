@@ -26,6 +26,9 @@ clean:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	$(GOCLEAN) ./...
 
+fmts:
+	gofmt -s -w .
+	
 vet:
 	@echo "GO111MODULE = $(value GO111MODULE)"
 	$(GOCMD) vet $(DIRS) | grep -v unkeyed
