@@ -280,6 +280,7 @@ func (dec *Decoder) SetMat(sc *gi3d.Scene, sld *gi3d.Solid, matnm string) {
 		dec.appendWarn(objType, msg)
 	}
 	sld.Mat.Defaults()
+	sld.Mat.CullBack = false // obj files do not reliably work with this on!
 	sld.Mat.Color = mat.Diffuse
 	if mat.Opacity > 0 {
 		sld.Mat.Color.A = uint8(mat.Opacity * float32(0xFF))
