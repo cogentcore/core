@@ -128,7 +128,7 @@ func StructTags(tags reflect.StructTag) map[string]string {
 	smap := make(map[string]string, len(flds))
 	for _, fld := range flds {
 		cli := strings.Index(fld, ":")
-		if cli < 0 {
+		if cli < 0 || len(fld) < cli+3 {
 			continue
 		}
 		vl := strings.TrimSuffix(fld[cli+2:], `"`)
