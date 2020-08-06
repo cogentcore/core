@@ -567,7 +567,11 @@ func (w *windowImpl) SetMousePos(x, y float64) {
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	w.glw.SetCursorPos(x, y)
+	if theApp.Platform() == oswin.MacOS {
+		w.glw.SetCursorPos(x/float64(w.DevPixRatio), y/float64(w.DevPixRatio))
+	} else {
+		w.glw.SetCursorPos(x, y)
+	}
 }
 
 func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
