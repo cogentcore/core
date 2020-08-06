@@ -1425,8 +1425,10 @@ func (tb *TextBuf) ReplaceText(delSt, delEd, insPos lex.Pos, insTxt string, sign
 		cur := string(red.ToBytes())
 		insTxt = lex.MatchCase(cur, insTxt)
 	}
-	tb.DeleteText(delSt, delEd, EditNoSignal)
-	tbe := tb.InsertText(insPos, []byte(insTxt), signal)
+	tbe := tb.DeleteText(delSt, delEd, EditNoSignal)
+	if len(insTxt) > 0 {
+		tbe = tb.InsertText(insPos, []byte(insTxt), signal)
+	}
 	return tbe
 }
 

@@ -208,7 +208,11 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
 		w.resettingPos = true
-		w.glw.SetCursorPos(float64(lastMousePos.X), float64(lastMousePos.Y))
+		if theApp.Platform() == oswin.MacOS {
+			w.glw.SetCursorPos(float64(lastMousePos.X)/float64(w.DevPixRatio), float64(lastMousePos.Y)/float64(w.DevPixRatio))
+		} else {
+			w.glw.SetCursorPos(float64(lastMousePos.X), float64(lastMousePos.Y))
+		}
 		w.resettingPos = false
 	} else {
 		lastMousePos = where
