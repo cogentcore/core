@@ -1080,7 +1080,7 @@ func (sc *Scene) Render() bool {
 	sc.UpdateMVPMatrix()
 	oswin.TheApp.RunOnMain(func() {
 		sc.Renders.SetLightsUnis(sc)
-		sc.Render3D()
+		sc.Render3D(false) // not offscreen
 		gpu.Draw.Flush()
 		gpu.Draw.Wireframe(false)
 		sc.Frame.Rendered()
@@ -1100,7 +1100,7 @@ func (sc *Scene) RenderOffFrame() bool {
 	sc.UpdateMVPMatrix()
 	oswin.TheApp.RunOnMain(func() {
 		sc.Renders.SetLightsUnis(sc)
-		sc.Render3D()
+		sc.Render3D(true) //  yes offscreen
 		gpu.Draw.Flush()
 	})
 	return true
@@ -1156,7 +1156,7 @@ func (sc *Scene) DirectWinUpload() bool {
 
 // Render3D renders the scene to the framebuffer
 // all scene-level resources must be initialized and activated at this point
-func (sc *Scene) Render3D() {
+func (sc *Scene) Render3D(offscreen bool) {
 	var rcs [RenderClassesN][]Node3D
 	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d interface{}) bool {
 		if k == sc.This() {
@@ -1166,14 +1166,16 @@ func (sc *Scene) Render3D() {
 		if nii == nil {
 			return ki.Break // going into a different type of thing, bail
 		}
-		ni.BBoxMu.RLock()
-		if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
+		if !offscreen {
+			ni.BBoxMu.RLock()
+			if ni.IsInvisible() || ni.ObjBBox == image.ZR { // objbbox is intersection of scene and obj
+				ni.BBoxMu.RUnlock()
+				ni.DisconnectAllEvents(sc.Win, gi.AllPris)
+				return ki.Break
+			}
 			ni.BBoxMu.RUnlock()
-			ni.DisconnectAllEvents(sc.Win, gi.AllPris)
-			return ki.Break
+			nii.ConnectEvents3D(sc) // only connect visible
 		}
-		ni.BBoxMu.RUnlock()
-		nii.ConnectEvents3D(sc) // only connect visible
 		if !nii.IsSolid() {
 			return ki.Continue
 		}
