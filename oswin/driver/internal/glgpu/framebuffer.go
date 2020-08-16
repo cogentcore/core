@@ -7,6 +7,7 @@ package glgpu
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/goki/gi/oswin/gpu"
@@ -197,7 +198,7 @@ func (fb *Framebuffer) DepthAll() []float32 {
 // framebuffer and all other associated buffers etc (if not already done).
 // It then sets this as the current rendering target for subsequent
 // gpu drawing commands.
-func (fb *Framebuffer) Activate() {
+func (fb *Framebuffer) Activate() error {
 	if !fb.init {
 		fb.texOld = true
 		fb.depthOld = true
@@ -249,9 +250,12 @@ func (fb *Framebuffer) Activate() {
 		gl.BindFramebuffer(gl.FRAMEBUFFER, fb.handle)
 	}
 	if gl.CheckFramebufferStatus(gl.FRAMEBUFFER) != gl.FRAMEBUFFER_COMPLETE {
-		fmt.Printf("glgpu gpu.Framebuffer: %s not complete -- this usually means you need to set your GoGi prefs to Smooth3D = off, and restart\n", fb.name)
+		err := fmt.Errorf("glgpu gpu.Framebuffer: %s not complete -- this usually means you need to set your GoGi prefs to Smooth3D = off, and restart", fb.name)
+		log.Println(err)
+		return err
 	}
 	gl.Viewport(0, 0, int32(fb.size.X), int32(fb.size.Y))
+	return nil
 }
 
 // Handle returns the GPU handle for the framebuffer -- only

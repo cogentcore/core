@@ -465,7 +465,7 @@ func (sc *Scene) BBox2D() image.Rectangle {
 	bb := sc.BBoxFromAlloc()
 	sz := bb.Size()
 	if sz != image.ZP {
-		sc.Resize(sz)
+		sc.Geom.Size = sz
 	} else {
 		bb.Max = bb.Min.Add(image.Point{64, 64}) // min size for zero case
 	}
@@ -805,8 +805,8 @@ func (sc *Scene) ActivateFrame() bool {
 // ActivateOffFrame creates (if necc) and activates given offscreen framebuffer
 // for GPU rendering context, of given size, and multisampling number (4 = default
 // for good antialiasing, 0 if not hardware accelerated).
-// returns false if not possible
-func (sc *Scene) ActivateOffFrame(frame *gpu.Framebuffer, name string, size image.Point, msamp int) bool {
+func (sc *Scene) ActivateOffFrame(frame *gpu.Framebuffer, name string, size image.Point, msamp int) error {
+	var err error
 	oswin.TheApp.RunOnMain(func() {
 		if *frame == nil {
 			*frame = gpu.TheGPU.NewFramebuffer(name, size, msamp)
@@ -816,13 +816,15 @@ func (sc *Scene) ActivateOffFrame(frame *gpu.Framebuffer, name string, size imag
 		sc.Camera.CamMu.Lock()
 		sc.Camera.Aspect = float32(size.X) / float32(size.Y)
 		sc.Camera.CamMu.Unlock()
-		fr.Activate()
-		sc.Renders.DrawState()
-		clr := ColorToVec3f(sc.BgColor)
-		gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
-		gpu.Draw.Clear(true, true) // clear color and depth
+		err = fr.Activate()
+		if err == nil {
+			sc.Renders.DrawState()
+			clr := ColorToVec3f(sc.BgColor)
+			gpu.Draw.ClearColor(clr.X, clr.Y, clr.Z)
+			gpu.Draw.Clear(true, true) // clear color and depth
+		}
 	})
-	return true
+	return err
 }
 
 // InitTexturesInCtxt opens all the textures if not already opened, and establishes

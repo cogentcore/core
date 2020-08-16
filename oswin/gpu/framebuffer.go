@@ -76,7 +76,7 @@ type Framebuffer interface {
 	// framebuffer and all other associated buffers etc (if not already done).
 	// It then sets this as the current rendering target for subsequent
 	// gpu drawing commands.
-	Activate()
+	Activate() error
 
 	// Rendered should be called after rendering to the framebuffer,
 	// to ensure the update of data transferred from the framebuffer
