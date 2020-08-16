@@ -101,4 +101,8 @@ func (bm *BufferMgr) Delete() {
 	if bm.vecs != nil {
 		bm.vecs.Delete()
 	}
+	if bm.init {
+		gl.DeleteVertexArrays(1, &bm.handle)
+	}
+	bm.init = false
 }
