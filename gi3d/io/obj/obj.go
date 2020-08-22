@@ -64,6 +64,22 @@ func (dec *Decoder) New() gi3d.Decoder {
 	return di
 }
 
+// Destroy deletes data created during loading
+func (dec *Decoder) Destroy() {
+	for oi := range dec.Objects {
+		ob := &dec.Objects[oi]
+		ob.Destroy()
+	}
+	dec.Objects = nil
+	dec.Warnings = nil
+	dec.Materials = nil
+	dec.Vertices = nil
+	dec.Normals = nil
+	dec.Uvs = nil
+	dec.objCurrent = nil
+	dec.matCurrent = nil
+}
+
 func (dec *Decoder) Desc() string {
 	return ".obj = Wavefront OBJ format, including associated materials (.mtl) which can be specified as second file name -- otherwise auto-searched based on .obj filename, or a default material is used.  Only supports Object-level data, not full Scene (camera, lights etc)."
 }
@@ -119,6 +135,15 @@ type Object struct {
 	materials []string // Materials used in this object
 }
 
+func (ob *Object) Destroy() {
+	ob.materials = nil
+	for fi := range ob.Faces {
+		fc := &ob.Faces[fi]
+		fc.Destroy()
+	}
+	ob.Faces = nil
+}
+
 // Face contains all information about an object face
 type Face struct {
 	Vertices []int  // Indices to the face vertices
@@ -126,6 +151,12 @@ type Face struct {
 	Normals  []int  // Indices to the face normals
 	Material string // Material name
 	Smooth   bool   // Smooth face
+}
+
+func (fc *Face) Destroy() {
+	fc.Vertices = nil
+	fc.Uvs = nil
+	fc.Normals = nil
 }
 
 // Material contains all information about an object material
@@ -166,6 +197,7 @@ func (dec *Decoder) SetScene(sc *gi3d.Scene) {
 }
 
 // SetGroup sets group with with all the decoded objects.
+// calls Destroy after to free memory
 func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
 	for i := range dec.Objects {
 		obj := &dec.Objects[i]
@@ -175,6 +207,7 @@ func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
 		objgp := gi3d.AddNewGroup(sc, gp, obj.Name)
 		dec.SetObject(sc, objgp, obj)
 	}
+	dec.Destroy()
 }
 
 // SetObject sets the object as a group with each gi3d.Solid as a mesh with unique material
@@ -305,7 +338,10 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *
 		texPath = filepath.Join(dec.Objdir, texfn)
 	}
 	_, tfn := filepath.Split(texPath)
-	tf := gi3d.AddNewTextureFile(sc, tfn, texPath)
+	tf, err := sc.TextureByNameTry(tfn)
+	if err != nil {
+		tf = gi3d.AddNewTextureFile(sc, tfn, texPath)
+	}
 	sld.Mat.SetTexture(sc, tf)
 	if mat.Tiling.Repeat.X > 0 {
 		sld.Mat.Tiling.Repeat = mat.Tiling.Repeat

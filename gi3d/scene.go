@@ -247,6 +247,30 @@ func (sc *Scene) AddTexture(tx Texture) {
 	sc.Textures[tx.Name()] = tx
 }
 
+// TextureByName looks for texture by name -- returns nil if not found
+func (sc *Scene) TextureByName(nm string) Texture {
+	if sc.Textures == nil {
+		sc.Textures = make(map[string]Texture)
+	}
+	tx, ok := sc.Textures[nm]
+	if ok {
+		return tx
+	}
+	return nil
+}
+
+// TextureByNameTry looks for texture by name -- returns error if not found
+func (sc *Scene) TextureByNameTry(nm string) (Texture, error) {
+	if sc.Textures == nil {
+		sc.Textures = make(map[string]Texture)
+	}
+	tx, ok := sc.Textures[nm]
+	if ok {
+		return tx, nil
+	}
+	return nil, fmt.Errorf("Texture named: %v not found in Scene: %v", nm, sc.Nm)
+}
+
 // TextureList returns a list of available textures (e.g., for chooser)
 func (sc *Scene) TextureList() []string {
 	sz := len(sc.Textures)

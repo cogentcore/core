@@ -95,14 +95,14 @@ func (bm *BufferMgr) TransferIndexes() {
 // Should be called prior to Go object being deleted
 // (ref counting can be done externally).
 func (bm *BufferMgr) Delete() {
+	if bm.init {
+		gl.DeleteVertexArrays(1, &bm.handle)
+	}
 	if bm.idxs != nil {
 		bm.idxs.Delete()
 	}
 	if bm.vecs != nil {
 		bm.vecs.Delete()
-	}
-	if bm.init {
-		gl.DeleteVertexArrays(1, &bm.handle)
 	}
 	bm.init = false
 }

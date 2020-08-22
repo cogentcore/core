@@ -70,9 +70,9 @@ func DecodeFile(fname string) (Decoder, error) {
 	fs := make([]*os.File, nf)
 	rs := make([]io.Reader, nf)
 	defer func() {
-		for _, r := range fs {
-			if r != nil {
-				r.Close()
+		for _, fi := range fs {
+			if fi != nil {
+				fi.Close()
 			}
 		}
 	}()

@@ -55,6 +55,11 @@ func (mt *Material) Defaults() {
 	mt.CullBack = true
 }
 
+// Disconnect resets pointers etc
+func (mt *Material) Disconnect() {
+	mt.TexPtr = nil
+}
+
 // IsTransparent returns true if texture says it is, or if color has alpha < 255
 func (mt *Material) IsTransparent() bool {
 	if mt.TexPtr != nil {

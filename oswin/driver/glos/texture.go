@@ -340,6 +340,8 @@ func (tx *textureImpl) Delete() {
 	}
 	tx.DeleteFramebuffer()
 	gl.DeleteTextures(1, &tx.handle)
+	tx.img = nil
+	tx.imgTmp = nil
 	tx.init = false
 }
 

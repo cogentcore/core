@@ -119,9 +119,10 @@ func (tx *TextureBase) Activate(sc *Scene, texNo int) {
 
 // Delete deletes the texture GPU resources -- must be called in context on main thread
 func (tx *TextureBase) Delete(sc *Scene) {
-	if tx.Tex != nil && tx.Tex.IsActive() {
+	if tx.Tex != nil {
 		tx.Tex.Delete()
 	}
+	tx.Tex = nil
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

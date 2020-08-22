@@ -52,6 +52,12 @@ func (sld *Solid) AsSolid() *Solid {
 	return sld
 }
 
+func (sld *Solid) Disconnect() {
+	sld.Node3DBase.Disconnect()
+	sld.MeshPtr = nil
+	sld.Mat.Disconnect()
+}
+
 // Defaults sets default initial settings for solid params -- important
 // to call this before setting specific values, as the initial zero
 // values for some parameters are degenerate
