@@ -129,6 +129,7 @@ type SliceViewBase struct {
 	SelVal           interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection value -- initially select this value if set"`
 	SelectedIdx      int              `copy:"-" json:"-" xml:"-" desc:"index of currently-selected item, in Inactive mode only"`
 	SelectMode       bool             `copy:"-" desc:"editing-mode select rows mode"`
+	InactMultiSel    bool             `desc:"if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported"`
 	SelectedIdxs     map[int]struct{} `copy:"-" desc:"list of currently-selected slice indexes"`
 	DraggedIdxs      []int            `copy:"-" desc:"list of currently-dragged indexes"`
 	SliceViewSig     ki.Signal        `copy:"-" json:"-" xml:"-" desc:"slice view specific signals: insert, delete, double-click"`
@@ -1258,22 +1259,17 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 	idx := row + sv.StartIdx
 	sv.UpdateSelectIdx(idx, sel)
-	// fmt.Printf("sel: %v  row: %d  idx: %d  selidx: %d  sels: %v\n", sel, row, idx, sv.SelectedIdx, sv.SelectedIdxs)
 }
 
 // UpdateSelectIdx updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
-	if sv.IsInactive() {
-		if sv.SelectedIdx == idx { // never unselect
-			sv.SelectIdxWidgets(sv.SelectedIdx, true)
-			return
-		}
-		if sv.SelectedIdx >= 0 { // unselect current
-			sv.SelectIdxWidgets(sv.SelectedIdx, false)
-		}
-		if sel {
+	if sv.IsInactive() && !sv.InactMultiSel {
+		wupdt := sv.TopUpdateStart()
+		defer sv.TopUpdateEnd(wupdt)
+		sv.UnselectAllIdxs()
+		if sel || sv.SelectedIdx == idx {
 			sv.SelectedIdx = idx
-			sv.SelectIdxWidgets(sv.SelectedIdx, true)
+			sv.SelectIdx(idx)
 		}
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {
