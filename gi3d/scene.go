@@ -244,7 +244,11 @@ func (sc *Scene) AddTexture(tx Texture) {
 	if sc.Textures == nil {
 		sc.Textures = make(map[string]Texture)
 	}
-	sc.Textures[tx.Name()] = tx
+	nm := tx.Name()
+	if _, has := sc.Textures[nm]; has {
+		sc.DeleteTexture(nm) // prevent memory leak from not deleting
+	}
+	sc.Textures[nm] = tx
 }
 
 // TextureByName looks for texture by name -- returns nil if not found

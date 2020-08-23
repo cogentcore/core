@@ -1258,6 +1258,7 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 	idx := row + sv.StartIdx
 	sv.UpdateSelectIdx(idx, sel)
+	// fmt.Printf("sel: %v  row: %d  idx: %d  selidx: %d  sels: %v\n", sel, row, idx, sv.SelectedIdx, sv.SelectedIdxs)
 }
 
 // UpdateSelectIdx updates the selection for the given index

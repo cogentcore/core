@@ -84,6 +84,7 @@ func mainrun() {
 					objgp.DeleteChildren(true)
 					sc.DeleteMeshes()
 					sc.DeleteTextures()
+					ki.DelMgr.DestroyDeleted() // this is actually essential to prevent leaking memory!
 					_, err := sc.OpenNewObj(fn, objgp)
 					if err != nil {
 						log.Println(err)
