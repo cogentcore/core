@@ -2423,7 +2423,7 @@ var DelMgr = Deleted{}
 func (dm *Deleted) Add(kis ...Ki) {
 	dm.Mu.Lock()
 	if dm.Dels == nil {
-		dm.Dels = make([]Ki, 0, 1000)
+		dm.Dels = make([]Ki, 0)
 	}
 	dm.Dels = append(dm.Dels, kis...)
 	dm.Mu.Unlock()
@@ -2434,9 +2434,8 @@ func (dm *Deleted) DestroyDeleted() {
 	// pr := prof.Start("ki.DestroyDeleted")
 	// defer pr.End()
 	dm.Mu.Lock()
-	curdels := make([]Ki, len(dm.Dels))
-	copy(curdels, dm.Dels)
-	dm.Dels = dm.Dels[:0]
+	curdels := dm.Dels
+	dm.Dels = make([]Ki, 0)
 	dm.Mu.Unlock()
 	for _, k := range curdels {
 		if k == nil {
