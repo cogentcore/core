@@ -1419,6 +1419,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 	case mouse.ExtendOne:
 		if sv.IdxIsSelected(idx) {
 			sv.UnselectIdxAction(idx)
+			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), -1) // -1 = unselected
 		} else {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)

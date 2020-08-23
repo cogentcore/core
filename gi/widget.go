@@ -590,7 +590,9 @@ type WidgetSignals int64
 const (
 	// WidgetSelected is triggered when a widget is selected, typically via
 	// left mouse button click (see EmitSelectedSignal) -- is NOT contingent
-	// on actual IsSelected status -- just reports the click event
+	// on actual IsSelected status -- just reports the click event.
+	// The data is the index of the selected item for multi-item widgets
+	// (-1 = none / unselected)
 	WidgetSelected WidgetSignals = iota
 
 	// WidgetFocused is triggered when a widget receives keyboard focus (see
