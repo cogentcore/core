@@ -838,7 +838,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 
 // ConfigToolbar configures the toolbar actions
 func (sv *SliceViewBase) ConfigToolbar() {
-	if kit.IfaceIsNil(sv.Slice) || sv.IsInactive() {
+	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
 	if sv.ToolbarSlice == sv.Slice {

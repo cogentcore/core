@@ -360,13 +360,17 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 
 // ConfigToolbar configures the toolbar actions
 func (mv *MapView) ConfigToolbar() {
-	if kit.IfaceIsNil(mv.Map) || mv.IsInactive() {
+	if kit.IfaceIsNil(mv.Map) {
 		return
 	}
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
 	}
 	tb := mv.ToolBar()
+	ndef := 3 // number of default actions
+	if mv.IsInactive() {
+		ndef = 2
+	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: "update", Tooltip: "update the view to reflect current state of map"},
@@ -374,18 +378,19 @@ func (mv *MapView) ConfigToolbar() {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.UpdateValues()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the map"},
-			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				mvv := recv.Embed(KiT_MapView).(*MapView)
-				mvv.MapAdd()
-			})
 		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: "update", Tooltip: "Switch between sorting by the keys vs. the values"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				mvv := recv.Embed(KiT_MapView).(*MapView)
 				mvv.ToggleSort()
 			})
+		if ndef > 2 {
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: "plus", Tooltip: "add a new element to the map"},
+				mv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					mvv := recv.Embed(KiT_MapView).(*MapView)
+					mvv.MapAdd()
+				})
+		}
 	}
-	ndef := 3 // number of default actions
 	sz := len(*tb.Children())
 	if sz > ndef {
 		for i := sz - 1; i >= ndef; i-- {

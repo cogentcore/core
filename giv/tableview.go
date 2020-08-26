@@ -805,7 +805,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 // ConfigToolbar configures the toolbar actions
 func (tv *TableView) ConfigToolbar() {
-	if kit.IfaceIsNil(tv.Slice) || tv.IsInactive() {
+	if kit.IfaceIsNil(tv.Slice) {
 		return
 	}
 	if tv.ToolbarSlice == tv.Slice {

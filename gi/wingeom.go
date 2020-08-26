@@ -229,6 +229,9 @@ func (wg *WindowGeomPrefs) Save() error {
 
 // RecordPref records current state of window as preference
 func (wg *WindowGeomPrefs) RecordPref(win *Window) {
+	if !win.IsVisible() {
+		return
+	}
 	wsz := win.OSWin.WinSize()
 	if wsz == image.ZP {
 		if WinGeomTrace {
