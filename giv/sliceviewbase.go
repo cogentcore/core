@@ -647,7 +647,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					wb.SetProp("slv-row", i)
 					wb.ClearSelected()
 					wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-						if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
+						if sig == int64(gi.WidgetSelected) {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("slv-row").(int)
 							svv := recv.Embed(KiT_SliceViewBase).(*SliceViewBase)

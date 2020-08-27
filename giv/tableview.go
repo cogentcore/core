@@ -623,13 +623,13 @@ func (tv *TableView) UpdateSliceGrid() {
 					wb.SetProp("tv-row", i)
 					wb.ClearSelected()
 					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-						if sig == int64(gi.WidgetSelected) || sig == int64(gi.WidgetFocused) {
+						if sig == int64(gi.WidgetSelected) { // || sig == int64(gi.WidgetFocused) {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("tv-row").(int)
 							tvv := recv.Embed(KiT_TableView).(*TableView)
-							if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
-								tvv.UpdateSelectRow(row, wbb.IsSelected())
-							}
+							// if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
+							tvv.UpdateSelectRow(row, wbb.IsSelected())
+							// }
 						}
 					})
 				}
