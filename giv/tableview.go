@@ -274,6 +274,9 @@ func (tv *TableView) ConfigSliceGrid() {
 	sg.SetMinPrefWidth(units.NewCh(20))
 	sg.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
 	sg.SetStretchMax()                        // for this to work, ALL layers above need it too
+	sg.SetProp("border-width", 0)
+	sg.SetProp("margin", 0)
+	sg.SetProp("padding", 0)
 
 	sgcfg := kit.TypeAndNameList{}
 	sgcfg.Add(gi.KiT_ToolBar, "header")
