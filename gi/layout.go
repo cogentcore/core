@@ -737,12 +737,15 @@ func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Al
 func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
 	spc := ly.BoxSpace()
 	avail := ly.LayState.Alloc.Size.Dim(dim) - 2.0*spc
-	for _, c := range ly.Kids {
+	for i, c := range ly.Kids {
 		if c == nil {
 			continue
 		}
 		ni := c.(Node2D).AsWidget()
 		if ni == nil {
+			continue
+		}
+		if ly.Lay == LayoutStacked && i != ly.StackTop {
 			continue
 		}
 		ni.StyMu.RLock()
