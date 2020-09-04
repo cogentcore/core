@@ -429,6 +429,7 @@ func (tv *TabView) InitTabView() {
 	frame := AddNewFrame(tv, "frame", LayoutStacked)
 	frame.SetMinPrefWidth(units.NewEm(10))
 	frame.SetMinPrefHeight(units.NewEm(7))
+	frame.StackTopOnly = true // key for allowing each tab to have its own size
 	frame.SetStretchMax()
 	frame.SetReRenderAnchor()
 

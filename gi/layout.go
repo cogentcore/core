@@ -129,6 +129,7 @@ type Layout struct {
 	Lay           Layouts             `xml:"lay" desc:"type of layout to use"`
 	Spacing       units.Value         `xml:"spacing" desc:"extra space to add between elements in the layout"`
 	StackTop      int                 `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
+	StackTopOnly  bool                `desc:"for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't"`
 	ChildSize     mat32.Vec2          `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`
 	ExtraSize     mat32.Vec2          `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
 	HasScroll     [2]bool             `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
@@ -745,7 +746,7 @@ func (ly *Layout) LayoutSharedDim(dim mat32.Dims) {
 		if ni == nil {
 			continue
 		}
-		if ly.Lay == LayoutStacked && i != ly.StackTop {
+		if ly.Lay == LayoutStacked && ly.StackTopOnly && i != ly.StackTop {
 			continue
 		}
 		ni.StyMu.RLock()
