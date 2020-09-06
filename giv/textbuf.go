@@ -489,6 +489,7 @@ func (tb *TextBuf) Revert() bool {
 	}
 	tb.ClearChanged()
 	tb.AutoSaveDelete()
+	tb.Refresh()
 	tb.ReMarkup()
 	return true
 }
