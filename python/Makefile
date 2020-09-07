@@ -5,7 +5,20 @@
 PYTHON=python3
 PIP=$(PYTHON) -m pip
 
-all: gen
+PBGV=`$(PIP) list | grep PyBindGen`
+
+all: prereq gen
+
+.PHONY: prereq gen all build install install-pkg install-exe clean
+
+prereq:
+	@echo "Installing python prerequisites -- ignore err if already installed:"
+	- $(PIP) install --upgrade pybindgen setuptools wheel
+	@echo
+	@echo "if this fails, you may see errors like this:"
+	@echo "    Undefined symbols for architecture x86_64:"
+	@echo "    _PyInit__gi, referenced from:..."
+	@echo
 
 install: install-pkg install-exe
 

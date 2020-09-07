@@ -2346,7 +2346,6 @@ func (tb *TextBuf) CommentRegion(st, ed int) {
 // within the given line regions -- edLn is *inclusive*
 func (tb *TextBuf) JoinParaLines(stLn, edLn int) {
 	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 
 	curEd := edLn                      // current end of region being joined == last blank line
 	for ln := edLn; ln >= stLn; ln-- { // reverse order
@@ -2370,6 +2369,48 @@ func (tb *TextBuf) JoinParaLines(stLn, edLn int) {
 			curEd = ln
 		}
 	}
+	tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+	tb.Refresh()
+}
+
+// TabsToSpaces replaces tabs with spaces in given line.
+func (tb *TextBuf) TabsToSpaces(ln int) {
+	tabSz := tb.Opts.TabSize
+
+	lr := tb.Lines[ln]
+	st := lex.Pos{Ln: ln}
+	ed := lex.Pos{Ln: ln}
+	i := 0
+	for {
+		if i >= len(lr) {
+			break
+		}
+		r := lr[i]
+		if r == '\t' {
+			po := i % tabSz
+			nspc := tabSz - po
+			st.Ch = i
+			ed.Ch = i + 1
+			tb.ReplaceText(st, ed, st, indent.Spaces(1, nspc), EditNoSignal, ReplaceNoMatchCase)
+			i += nspc
+			lr = tb.Lines[ln]
+		} else {
+			i++
+		}
+	}
+}
+
+// TabsToSpacesRegion replaces tabs with spaces over given region -- end is *exclusive*
+func (tb *TextBuf) TabsToSpacesRegion(st, ed int) {
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	for ln := st; ln < ed; ln++ {
+		if ln >= tb.NLines {
+			break
+		}
+		tb.TabsToSpaces(ln)
+	}
+	tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+	tb.Refresh()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
