@@ -101,9 +101,10 @@ func TextViewDialogTextView(dlg *gi.Dialog) *TextView {
 	return tv.(*TextView)
 }
 
-//gopy:interface=handle StructViewDialog is for editing fields of a structure using a StructView --
+// StructViewDialog is for editing fields of a structure using a StructView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
+// gopy:interface=handle
 func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(stru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
@@ -132,9 +133,10 @@ func StructViewDialog(avp *gi.Viewport2D, stru interface{}, opts DlgOpts, recv k
 	return dlg
 }
 
-//gopy:interface=handle MapViewDialog is for editing elements of a map using a MapView -- optionally
+// MapViewDialog is for editing elements of a map using a MapView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
+// gopy:interface=handle
 func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	// note: map is not directly comparable, so we have to use the pointer here..
 	mptr := reflect.ValueOf(mp).Pointer()
@@ -163,10 +165,11 @@ func MapViewDialog(avp *gi.Viewport2D, mp interface{}, opts DlgOpts, recv ki.Ki,
 	return dlg
 }
 
-//gopy:interface=handle SliceViewDialog for editing elements of a slice using a SliceView --
+// SliceViewDialog for editing elements of a slice using a SliceView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
+// gopy:interface=handle
 func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
@@ -197,9 +200,10 @@ func SliceViewDialog(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, styleF
 	return dlg
 }
 
-//gopy:interface=handle SliceViewDialogNoStyle for editing elements of a slice using a SliceView --
+// SliceViewDialogNoStyle for editing elements of a slice using a SliceView --
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).  This version does not have the style function.
+// gopy:interface=handle
 func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
@@ -229,10 +233,11 @@ func SliceViewDialogNoStyle(avp *gi.Viewport2D, slice interface{}, opts DlgOpts,
 	return dlg
 }
 
-//gopy:interface=handle SliceViewSelectDialog for selecting one row from given slice -- connections
+// SliceViewSelectDialog for selecting one row from given slice -- connections
 // functions available for both the widget signal reporting selection events,
 // and the overall dialog signal.  Also has an optional styling function for
 // styling elements of the table.
+// gopy:interface=handle
 func SliceViewSelectDialog(avp *gi.Viewport2D, slice, curVal interface{}, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
@@ -286,10 +291,11 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 	return -1
 }
 
-//gopy:interface=handle TableViewDialog is for editing fields of a slice-of-struct using a
+// TableViewDialog is for editing fields of a slice-of-struct using a
 // TableView -- optionally connects to given signal receiving object and
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
+// gopy:interface=handle
 func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(slcOfStru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
 	if recyc {
@@ -323,11 +329,12 @@ func TableViewDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, st
 	return dlg
 }
 
-//gopy:interface=handle TableViewSelectDialog is for selecting a row from a slice-of-struct using a
+// TableViewSelectDialog is for selecting a row from a slice-of-struct using a
 // TableView -- optionally connects to given signal receiving object and
 // functions for signals (nil to ignore): selFunc for the widget signal
 // reporting selection events, and dlgFunc for the overall dialog signals.
 // Also has an optional styling function for styling elements of the table.
+// gopy:interface=handle
 func TableViewSelectDialog(avp *gi.Viewport2D, slcOfStru interface{}, opts DlgOpts, initRow int, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
