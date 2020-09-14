@@ -153,6 +153,7 @@ func StructTagVal(key, tags string) string {
 // for details on supported tags -- these are NOT set for the view element, only
 // used for options that affect what kind of view to create.
 // See FieldToValueView for version that takes into account the properties of the owner.
+// gopy:interface=handle
 func ToValueView(it interface{}, tags string) ValueView {
 	if it == nil {
 		vv := ValueViewBase{}
@@ -340,6 +341,7 @@ func ToValueView(it interface{}, tags string) ValueView {
 // FieldToValueView returns the appropriate ValueView for given field on a
 // struct -- attempts to get the FieldValueViewer interface, and falls back on
 // ToValueView otherwise, using field value (fval)
+// gopy:interface=handle
 func FieldToValueView(it interface{}, field string, fval interface{}) ValueView {
 	if it == nil || field == "" {
 		return ToValueView(fval, "")
@@ -586,9 +588,21 @@ func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner interface{}, idx
 	vv.SetName(idxstr)
 }
 
+// SetSoloValue sets the value for a singleton standalone value
+// (e.g., for arg values).
 func (vv *ValueViewBase) SetSoloValue(val reflect.Value) {
 	vv.OwnKind = reflect.Invalid
 	vv.Value = val
+}
+
+// SetSoloValueIface sets the value for a singleton standalone value
+// using an interface for the value -- you must pass a pointer.
+// for now, this cannot be a method because gopy doesn't find the
+// key comment below that tells it what to do with the interface
+// gopy:interface=handle
+func SetSoloValueIface(vv *ValueViewBase, val interface{}) {
+	vv.OwnKind = reflect.Invalid
+	vv.Value = reflect.ValueOf(val)
 }
 
 // we have this one accessor b/c it is more useful for outside consumers vs. internal usage
