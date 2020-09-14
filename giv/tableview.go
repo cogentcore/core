@@ -35,6 +35,8 @@ import (
 // used for closing dialogs).  If !Inactive, it is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop, reporting each action
 // taken using the TableViewSig signals
+// Automatically has a toolbar with Slice ToolBar props if defined
+// set prop toolbar = false to turn off
 type TableView struct {
 	SliceViewBase
 	StyleFunc  TableViewStyleFunc    `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
@@ -813,6 +815,13 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if tv.ToolbarSlice == tv.Slice {
 		return
+	}
+	if pv, ok := tv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
+		pvb, _ := kit.ToBool(pv)
+		if !pvb {
+			tv.ToolbarSlice = tv.Slice
+			return
+		}
 	}
 	tb := tv.ToolBar()
 	ndef := 2 // number of default actions

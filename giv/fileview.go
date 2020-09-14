@@ -308,7 +308,8 @@ func (fv *FileView) ConfigFilesRow() {
 	sv.SetProp("max-width", 0) // no stretch
 	sv.SetProp("index", false)
 	sv.SetProp("inact-key-nav", false) // can only have one active -- files..
-	sv.SetInactive()                   // select only
+	sv.SetProp("toolbar", false)
+	sv.SetInactive() // select only
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -328,6 +329,7 @@ func (fv *FileView) ConfigFilesRow() {
 		},
 	}
 	sv.SetProp("index", false) // no index
+	sv.SetProp("toolbar", false)
 	sv.SetStretchMax()
 	sv.SetInactive() // select only
 	sv.StyleFunc = FileViewStyleFunc

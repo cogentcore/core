@@ -31,6 +31,7 @@ var specialMenus = map[string]struct{}{
 // details on formats and options for configuring the menu.  Returns false if
 // there is no main menu defined for this type, or on errors (which are
 // programmer errors sent to log).
+// gopy:interface=handle
 func MainMenuView(val interface{}, win *gi.Window, mbar *gi.MenuBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
@@ -212,6 +213,7 @@ func CtxtMenuView(val interface{}, inactive bool, vp *gi.Viewport2D, menu *gi.Me
 // either on the CallMethods list or any of the ToolBar, MainMenu, or CtxtMenu
 // lists (in that order).  List of available methods is cached in type
 // properties after first call.
+// gopy:interface=handle
 func CallMethod(val interface{}, method string, vp *gi.Viewport2D) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {

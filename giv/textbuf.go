@@ -1752,6 +1752,7 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 		// if maxln > 0 && len(mtags) != maxln {
 		// 	fmt.Printf("error: markup out of sync: %v != %v len(mtags)\n", maxln, len(mtags))
 		// }
+		maxln = ints.MinInt(maxln, len(mtags))
 		for ln := 0; ln < maxln; ln++ {
 			tb.HiTags[ln] = mtags[ln] // chroma tags are freshly allocated
 		}

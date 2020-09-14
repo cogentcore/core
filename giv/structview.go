@@ -19,6 +19,8 @@ import (
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
+// Automatically has a toolbar with Struct ToolBar props if defined
+// set prop toolbar = false to turn off
 type StructView struct {
 	gi.Frame
 	Struct        interface{}       `desc:"the struct that we are a view onto"`
@@ -160,6 +162,13 @@ func (sv *StructView) ConfigToolbar() {
 	}
 	if sv.ToolbarStru == sv.Struct {
 		return
+	}
+	if pv, ok := sv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
+		pvb, _ := kit.ToBool(pv)
+		if !pvb {
+			sv.ToolbarStru = sv.Struct
+			return
+		}
 	}
 	tb := sv.ToolBar()
 	tb.SetStretchMaxWidth()

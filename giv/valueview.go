@@ -137,6 +137,15 @@ func ValueViewMapAdd(typeNm string, fun ValueViewFunc) {
 	ValueViewMap[typeNm] = fun
 }
 
+// StructTagVal returns the value for given key in given struct tag string
+// uses reflect.StructTag Lookup method -- just a wrapper for external
+// use (e.g., in Python code)
+func StructTagVal(key, tags string) string {
+	stag := reflect.StructTag(tags)
+	val, _ := stag.Lookup(key)
+	return val
+}
+
 // ToValueView returns the appropriate ValueView for given item, based only on
 // its type -- attempts to get the ValueViewer interface and failing that,
 // falls back on default Kind-based options.  tags are optional tags, e.g.,

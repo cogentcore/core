@@ -17,6 +17,8 @@ import (
 // MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
+// Automatically has a toolbar with Map ToolBar props if defined
+// set prop toolbar = false to turn off
 type MapView struct {
 	gi.Frame
 	Map        interface{} `desc:"the map that we are a view onto"`
@@ -365,6 +367,13 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
+	}
+	if pv, ok := mv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
+		pvb, _ := kit.ToBool(pv)
+		if !pvb {
+			mv.ToolbarMap = mv.Map
+			return
+		}
 	}
 	tb := mv.ToolBar()
 	ndef := 3 // number of default actions

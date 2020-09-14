@@ -112,6 +112,8 @@ type SliceViewer interface {
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Set to Inactive for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
+// Automatically has a toolbar with Slice ToolBar props if defined
+// set prop toolbar = false to turn off
 type SliceViewBase struct {
 	gi.Frame
 	Slice            interface{}      `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we are a view onto -- must be a pointer to that slice"`
@@ -843,6 +845,13 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if sv.ToolbarSlice == sv.Slice {
 		return
+	}
+	if pv, ok := sv.PropInherit("toolbar", ki.NoInherit, ki.TypeProps); ok {
+		pvb, _ := kit.ToBool(pv)
+		if !pvb {
+			sv.ToolbarSlice = sv.Slice
+			return
+		}
 	}
 	tb := sv.ToolBar()
 	ndef := 2 // number of default actions

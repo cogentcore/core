@@ -321,7 +321,7 @@ func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
 	return nil
 }
 
-// Prompt returns the prompt label widget, and its index, within frame -- if
+// PromptWidget returns the prompt label widget, and its index, within frame -- if
 // nil returns the title widget (flexible if prompt is nil)
 func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 	idx, ok := frame.Children().IndexByName("prompt", 0)
@@ -329,6 +329,13 @@ func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
 		return dlg.TitleWidget(frame)
 	}
 	return frame.Child(idx).(*Label), idx
+}
+
+// PromptWidgetIdx returns the prompt label widget index only
+// for use in Python with only one return value.
+func (dlg *Dialog) PromptWidgetIdx(frame *Frame) int {
+	_, idx := dlg.PromptWidget(frame)
+	return idx
 }
 
 // AddButtonBox adds a button box (Row Layout) named "buttons" to given frame,
