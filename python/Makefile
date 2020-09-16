@@ -32,6 +32,7 @@ build:
 
 install-pkg:
 	# this does a local install of the package, building the sdist and then directly installing it
+	cp pygiv/pygiv.py gi/
 	rm -rf dist build */*.egg-info *.egg-info
 	$(PYTHON) setup.py sdist
 	$(PIP) install dist/*.tar.gz

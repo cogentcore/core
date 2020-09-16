@@ -24,14 +24,16 @@ def strdlgcb(recv, send, sig, data):
 def button1cb(recv, send, sig, data):
     """ callback for button1 press -- lambda functions in python are only 1 line.. """
     sb = gi.Button(handle=send)  # send is a raw int64 handle -- use it to initialize
-    print("Received button signal:", sig, "from button:", sb.Name())
+    bsig = gi.ButtonSignals(sig)
+    print("Received button signal:", bsig.name, "from button:", sb.Name())
     if sig == gi.ButtonClicked: # note: 3 diff ButtonSig sig's possible -- important to check
         gi.StringPromptDialog(sb.Viewport, "", "Enter value here..",
              gi.DlgOpts(Title="Button1 Dialog", Prompt="This is a string prompt dialog!  Various specific types of dialogs are available."), sb, strdlgcb)
 
 def button2cb(recv, send, sig, data):
     sb = gi.Button(handle=send)
-    print("Received button signal:", sig, "from button:", sb.Name())
+    bsig = gi.ButtonSignals(sig)
+    print("Received button signal:", bsig.name, "from button:", sb.Name())
     if sig == gi.ButtonClicked:
         giv.GoGiEditorDialog(sb.Viewport)
 
@@ -41,15 +43,21 @@ def menu1cb(recv, send, sig, data):
 
 def slidercb(recv, send, sig, data):
     sa = gi.Slider(handle=send)
-    print("Received slider signal:", sig, "from slider:", sa.Name(), "val:", sa.Value)
+    ssig = gi.SliderSignals(sig)
+    print("Received slider signal:", ssig.name, "from slider:", sa.Name(), "val:", sa.Value)
 
 def scrollcb(recv, send, sig, data):
     sa = gi.ScrollBar(handle=send)
-    print("Received scroll signal:", sig, "from scrollbar:", sa.Name(), "val:", sa.Value)
+    ssig = gi.SliderSignals(sig)
+    print("Received scroll signal:", ssig.name, "from scrollbar:", sa.Name(), "val:", sa.Value)
 
 def textcb(recv, send, sig, data):
     sa = gi.TextField(handle=send)
-    print("Received text signal:", sig, "from field:", sa.Name(), "val:", data)
+    tsig = gi.TextFieldSignals(sig)
+    if tsig == gi.TextFieldSignals.TextFieldDone:
+        print("Received text signal:", tsig.name, "from field:", sa.Name(), "val:", data)
+    else:
+        print("Received text signal:", tsig.name, "from field:", sa.Name())
 
 def spinboxcb(recv, send, sig, data):
     sa = gi.SpinBox(handle=send)
@@ -101,7 +109,7 @@ def mainrun():
     vp.CSS = css
 
     mfr = win.SetMainFrame()
-    mfr.SetPropStr("spacing", "1ex")
+    mfr.SetProp("spacing", "1ex")
     # mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
     # mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
     # mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
@@ -117,11 +125,11 @@ def mainrun():
     prsc = "Alt+P"
     
     title = gi.AddNewLabel(trow, "title", 'This is a <b>demonstration</b> of the <span style="color:red">various</span> <a href="https://github.com/goki/gi/gi">GoGi</a> <i>Widgets</i><br> <large>Shortcuts: <kbd>' + prsc + '</kbd> = Preferences, <kbd>' + giedsc + '</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br> See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.')
-    title.SetPropStr("white-space", "normal") # wrap
-    title.SetPropStr("text-align", "center")       # note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
-    title.SetPropStr("vertical-align", "center")
-    title.SetPropStr("font-family", "Times New Roman, serif")
-    title.SetPropStr("font-size", "x-large")
+    title.SetProp("white-space", "normal") # wrap
+    title.SetProp("text-align", "center")       # note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+    title.SetProp("vertical-align", "center")
+    title.SetProp("font-family", "Times New Roman, serif")
+    title.SetProp("font-size", "x-large")
     # # title.SetProp("letter-spacing", 2)
     # title.SetProp("line-height", 1.5)
     title.SetStretchMaxWidth()
@@ -135,9 +143,9 @@ def mainrun():
     blab.Selectable = True
 
     brow = gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
-    brow.SetPropStr("spacing", "2ex")
+    brow.SetProp("spacing", "2ex")
 
-    brow.SetPropStr("horizontal-align", "left")
+    brow.SetProp("horizontal-align", "left")
     # brow.SetProp("horizontal-align", gi.AlignJustify)
     brow.SetStretchMaxWidth()
 
@@ -180,8 +188,8 @@ def mainrun():
     slab = gi.AddNewLabel(slrow, "slab", "Sliders:")
 
     srow = gi.AddNewLayout(mfr, "srow", gi.LayoutHoriz)
-    srow.SetPropStr("spacing", "2ex")
-    srow.SetPropStr("horizontal-align", "left")
+    srow.SetProp("spacing", "2ex")
+    srow.SetProp("horizontal-align", "left")
     srow.SetStretchMaxWidth()
 
     slider1 = gi.AddNewSlider(srow, "slider1")
@@ -235,14 +243,14 @@ def mainrun():
     txlrow = gi.AddNewLayout(mfr, "txlrow", gi.LayoutHoriz)
     txlab = gi.AddNewLabel(txlrow, "txlab", "Text Widgets:")
     txrow = gi.AddNewLayout(mfr, "txrow", gi.LayoutHoriz)
-    txrow.SetPropStr("spacing", "2ex")
+    txrow.SetProp("spacing", "2ex")
     # # txrow.SetProp("horizontal-align", gi.AlignJustify)
     txrow.SetStretchMaxWidth()
 
     edit1 = gi.AddNewTextField(txrow, "edit1")
     edit1.Placeholder = "Enter text here..."
     # edit1.SetText("Edit this text")
-    edit1.SetPropStr("min-width", "20em")
+    edit1.SetProp("min-width", "20em")
     # edit1.SetCompleter(edit1, Complete, CompleteEdit) # gets us word demo completion
     edit1.TextFieldSig.Connect(win.This(), textcb)
     # edit1.SetProp("inactive", True)

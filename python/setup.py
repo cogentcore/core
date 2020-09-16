@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gi",
-    version="0.9.7",
+    version="1.1.0",
     author="gopy",
-    author_email="randy.oreilly@colorado.edu",
+    author_email="oreilly@ucdavis.edu",
     description="Python wrapper around GoGi GUI framework in Go (golang)",
     long_description=long_description,
     long_description_content_type="text/markdown",
