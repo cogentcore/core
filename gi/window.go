@@ -693,6 +693,19 @@ func (w *Window) Resized(sz image.Point) {
 	w.FullReRender()
 }
 
+// Raise requests that the window be at the top of the stack of windows,
+// and receive focus.  If it is iconified, it will be de-iconified.  This
+// is the only supported mechanism for de-iconifying.
+func (w *Window) Raise() {
+	w.OSWin.Raise()
+}
+
+// Minimize requests that the window be iconified, making it no longer
+// visible or active -- rendering should not occur for minimized windows.
+func (w *Window) Minimize() {
+	w.OSWin.Minimize()
+}
+
 // Close closes the window -- this is not a request -- it means:
 // definitely close it -- flags window as such -- check IsClosing()
 func (w *Window) Close() {
