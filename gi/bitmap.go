@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -196,6 +197,14 @@ func OpenImage(path string) (image.Image, error) {
 	defer file.Close()
 	im, _, err := image.Decode(file)
 	return im, err
+}
+
+// ImageToRGBA returns given image as an image.RGBA (no conversion if it is already)
+func ImageToRGBA(img image.Image) *image.RGBA {
+	if rg, ok := img.(*image.RGBA); ok {
+		return rg
+	}
+	return clone.AsRGBA(img)
 }
 
 // SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
