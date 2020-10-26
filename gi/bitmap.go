@@ -283,6 +283,12 @@ func ImageSizeMax(sz image.Point, maxSz int) image.Point {
 	return tsz
 }
 
+// ImageResize returns new image that has been resized to given size
+// uses sensible default level of smoothing (Linear interpolation)
+func ImageResize(img image.Image, szX, szY int) image.Image {
+	return transform.Resize(img, szX, szY, transform.Linear)
+}
+
 // ImageResizeMax resizes image so that the largest size (X or Y) is set to maxSz
 func ImageResizeMax(img image.Image, maxSz int) image.Image {
 	sz := img.Bounds().Size()
