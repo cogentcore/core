@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-from gi import go, gi, giv
+from gi import go, gi, giv, kit
 from enum import Enum
 
 class ClassViewObj(object):
@@ -95,6 +95,9 @@ class ClassViewInline(object):
                 lbl.Tooltip = dsc
             if isinstance(val, go.GoClass):
                 fnm = self.Name + ":" + nm
+                if kit.IfaceIsNil(val):
+                    print("Field %s is Nil in ClassView for obj: %s" % (fnm, str(self.Class)))
+                    continue
                 vv = giv.ToValueView(val, tags)
                 giv.SetSoloValueIface(vv, val)
                 vw = self.Lay.AddNewChild(vv.WidgetType(), fnm)
@@ -174,6 +177,9 @@ class ClassView(object):
                 lbl.Tooltip = dsc
             if isinstance(val, go.GoClass):
                 fnm = self.Name + ":" + nm
+                if kit.IfaceIsNil(val):
+                    print("Field %s is Nil in ClassView for obj: %s" % (fnm, str(self.Class)))
+                    continue
                 vv = giv.ToValueView(val, tags)
                 giv.SetSoloValueIface(vv, val)
                 vw = self.Frame.AddNewChild(vv.WidgetType(), fnm)
