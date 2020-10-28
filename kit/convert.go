@@ -28,6 +28,7 @@ func Sel(a ...interface{}) []interface{} {
 // IfaceIsNil checks if an interface value is nil -- the interface itself could be
 // nil, or the value pointed to by the interface could be nil -- this checks
 // both, safely
+// gopy:interface=handle
 func IfaceIsNil(it interface{}) bool {
 	if it == nil {
 		return true
@@ -84,6 +85,7 @@ func ValueIsZero(v reflect.Value) bool {
 // etc.  nil values return !ok
 
 // ToBool robustly converts anything to a bool
+// gopy:interface=handle
 func ToBool(it interface{}) (bool, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch bt := it.(type) {
@@ -153,6 +155,7 @@ func ToBool(it interface{}) (bool, bool) {
 
 // ToInt robustly converts anything to an int64 -- uses the ints.Inter ToInt
 // interface first if available
+// gopy:interface=handle
 func ToInt(it interface{}) (int64, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
@@ -240,6 +243,7 @@ func ToInt(it interface{}) (int64, bool) {
 
 // ToFloat robustly converts anything to a Float64 -- uses the floats.Floater Float()
 // interface first if available
+// gopy:interface=handle
 func ToFloat(it interface{}) (float64, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
@@ -327,6 +331,7 @@ func ToFloat(it interface{}) (float64, bool) {
 
 // ToFloat32 robustly converts anything to a Float32 -- uses the floats.Floater Float()
 // interface first if available
+// gopy:interface=handle
 func ToFloat32(it interface{}) (float32, bool) {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
@@ -415,6 +420,7 @@ func ToFloat32(it interface{}) (float32, bool) {
 // ToString robustly converts anything to a String -- because Stringer is so
 // ubiquitous, and we fall back to fmt.Sprintf(%v) in worst case, this should
 // definitely work in all cases, so there is no bool return value
+// gopy:interface=handle
 func ToString(it interface{}) string {
 	// first check for most likely cases for greatest efficiency
 	switch it := it.(type) {
@@ -501,6 +507,7 @@ func ToString(it interface{}) string {
 // nuisance random imprecision of actual floating point values due to the
 // fact that they are represented with binary bits.  See ToString
 // for more info.
+// gopy:interface=handle
 func ToStringPrec(it interface{}, prec int) string {
 	if IfaceIsNil(it) {
 		return "nil"
@@ -539,6 +546,7 @@ func ToStringPrec(it interface{}, prec int) string {
 // SetRobust robustly sets the to value from the from value -- to must be a
 // pointer-to -- only for basic field values -- use copier package for more
 // complex cases
+// gopy:interface=handle
 func SetRobust(to, frm interface{}) bool {
 	if IfaceIsNil(to) {
 		return false
