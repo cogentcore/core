@@ -257,7 +257,7 @@ def PyObjView(val, nm, frame, ctxt, tags):
         vw.ComboSig.Connect(frame, SetEnumCB)
     elif isinstance(val, ClassViewObj):
         if HasTagValue(tags, "view", "inline"):
-            sv = val.NewClassViewInline(fnm)
+            sv = val.NewClassViewInline(ctxt + "_" + nm)  # new full name
             sv.Config()
             frame.AddChild(sv.Lay)
             vw = sv.Lay
