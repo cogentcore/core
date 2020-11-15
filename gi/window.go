@@ -1826,7 +1826,6 @@ func (w *Window) IsInScope(k ki.Ki, popup bool) bool {
 		return false
 	}
 	if mvp.This() == cpop {
-		fmt.Printf("pop matches: node: %s  cpop: %s\n", ni.PathUnique(), cpop.PathUnique())
 		return popup
 	}
 	return !popup
