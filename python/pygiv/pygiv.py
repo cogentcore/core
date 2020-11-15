@@ -116,6 +116,7 @@ class ClassViewInline(object):
         for nm, val in flds.items():
             if nm in self.Views:
                 vv = self.Views[nm]
+                giv.SetSoloValueIface(vv, val) # always update in case it might have changed
                 vv.UpdateWidget()
             elif nm in self.Widgets:
                 vw = self.Widgets[nm]
@@ -198,6 +199,7 @@ class ClassView(object):
         for nm, val in flds.items():
             if nm in self.Views:
                 vv = self.Views[nm]
+                giv.SetSoloValueIface(vv, val) # always update in case it might have changed
                 vv.UpdateWidget()
             elif nm in self.Widgets:
                 vw = self.Widgets[nm]

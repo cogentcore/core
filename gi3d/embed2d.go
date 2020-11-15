@@ -465,7 +465,7 @@ func (vp *EmbedViewport) EventTopUpdateEnd(updt bool) {
 }
 
 // IsInScope returns whether given node is in scope for receiving events
-func (vp *EmbedViewport) IsInScope(node *gi.Node2DBase, popup bool) bool {
+func (vp *EmbedViewport) IsInScope(node ki.Ki, popup bool) bool {
 	return true // no popups for embedded
 }
 

@@ -253,14 +253,14 @@ func (em *EventMgr) SendEventSignal(evi oswin.Event, popup bool) {
 // SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
 // map iterator locking logic in a cleaner way.  Returns true to continue, false to break
 func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEventRecvList, recv ki.Ki, fun ki.RecvFunc) bool {
+	if !em.Master.IsInScope(recv, popup) {
+		return ki.Continue
+	}
 	nii, ni := KiToNode2D(recv)
 	if ni != nil {
-		if !em.Master.IsInScope(ni, popup) {
-			return true
-		}
 		if evi.OnFocus() {
 			if !nii.HasFocus2D() { // note: HasFocus2D is a separate interface method, containers also set to true
-				return true
+				return ki.Continue
 			}
 			if EventTrace && recv == em.CurFocus() {
 				fmt.Printf("Event: cur focus: %v\n", recv.PathUnique())
@@ -288,16 +288,16 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 						fmt.Printf("Event: dragging top pri: %v\n", recv.PathUnique())
 					}
 					rvs.Add(recv, fun, 10000)
-					return false
+					return ki.Break
 				} else {
-					return true
+					return ki.Continue
 				}
 			} else {
 				if gn.PosInWinBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
-					return false
+					return ki.Break
 				}
-				return true
+				return ki.Continue
 			}
 		case *mouse.ScrollEvent:
 			if em.Scrolling != nil {
@@ -307,14 +307,14 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 					}
 					rvs.Add(recv, fun, 10000)
 				} else {
-					return true
+					return ki.Continue
 				}
 			} else {
 				if gn.PosInWinBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
-					return false
+					return ki.Break
 				}
-				return true
+				return ki.Continue
 			}
 		default:
 			if em.Dragging == gn.This() { // dragger always gets it
@@ -322,15 +322,15 @@ func (em *EventMgr) SendEventSignalFunc(evi oswin.Event, popup bool, rvs *WinEve
 					fmt.Printf("Event: dragging, non drag top pri: %v\n", recv.PathUnique())
 				}
 				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
-				return false
+				return ki.Break
 			}
 			if !gn.PosInWinBBox(pos) {
-				return true
+				return ki.Continue
 			}
 		}
 	}
 	rvs.AddDepth(recv, fun, top)
-	return true
+	return ki.Continue
 }
 
 // SendSig directly calls SendSig from given recv, sender for given event
@@ -542,13 +542,13 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		em.EventSigs[ftyp][pri].EmitFiltered(send, int64(ftyp), &fe, func(k ki.Ki) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
-				return false
+				return ki.Break
+			}
+			if !em.Master.IsInScope(k, popup) {
+				return ki.Break
 			}
 			_, ni := KiToNode2D(k)
 			if ni != nil {
-				if !em.Master.IsInScope(ni, popup) {
-					return false
-				}
 				in := ni.PosInWinBBox(pos)
 				if in {
 					if !ni.HasFlag(int(MouseHasEntered)) {
@@ -558,9 +558,9 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 							updt = em.Master.EventTopUpdateStart()
 							updated = true
 						}
-						return true // send event
+						return ki.Continue // send event
 					} else {
-						return false // already in
+						return ki.Break // already in
 					}
 				} else { // mouse not in object
 					if ni.HasFlag(int(MouseHasEntered)) {
@@ -570,14 +570,14 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 							updt = em.Master.EventTopUpdateStart()
 							updated = true
 						}
-						return true // send event
+						return ki.Continue // send event
 					} else {
-						return false // already out
+						return ki.Break // already out
 					}
 				}
 			} else {
 				// 3D
-				return false
+				return ki.Break
 			}
 		})
 	}
@@ -598,11 +598,11 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 			if recv.IsDeleted() {
 				return ki.Continue
 			}
+			if !em.Master.IsInScope(recv, popup) {
+				return ki.Continue
+			}
 			_, ni := KiToNode2D(recv)
 			if ni != nil {
-				if !em.Master.IsInScope(ni, popup) {
-					return ki.Continue
-				}
 				pos := me.Pos()
 				if ni.PosInWinBBox(pos) {
 					if ni.IsInstaDrag() {
@@ -616,10 +616,10 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 			return ki.Continue
 		})
 		if gotOne {
-			return true
+			return ki.Continue
 		}
 	}
-	return false
+	return ki.Break
 }
 
 // SendHoverEvent sends mouse hover event, based on last mouse move event
@@ -762,11 +762,11 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 			if recv.IsDeleted() {
 				return ki.Continue
 			}
+			if !em.Master.IsInScope(recv, popup) {
+				return ki.Continue
+			}
 			_, ni := KiToNode2D(recv)
 			if ni != nil {
-				if !em.Master.IsInScope(ni, popup) {
-					return ki.Continue
-				}
 				in := ni.PosInWinBBox(pos)
 				if in {
 					if !ni.HasFlag(int(DNDHasEntered)) {
@@ -797,9 +797,9 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 			ins[i].Call(send, int64(ftyp), &fe)
 		}
 		em.Master.EventTopUpdateEnd(updt)
-		return true
+		return ki.Continue
 	}
-	return false
+	return ki.Break
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1263,7 +1263,7 @@ type EventMaster interface {
 	EventTopUpdateEnd(updt bool)
 
 	// IsInScope returns whether given node is in scope for receiving events
-	IsInScope(node *Node2DBase, popup bool) bool
+	IsInScope(node ki.Ki, popup bool) bool
 
 	// CurPopupIsTooltip returns true if current popup is a tooltip
 	CurPopupIsTooltip() bool

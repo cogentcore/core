@@ -1804,19 +1804,29 @@ func (w *Window) EventTopUpdateEnd(updt bool) {
 // IsInScope returns true if the given object is in scope for receiving events.
 // If popup is true, then only items on popup are in scope, otherwise
 // items NOT on popup are in scope (if no popup, everything is in scope).
-func (w *Window) IsInScope(ni *Node2DBase, popup bool) bool {
+func (w *Window) IsInScope(k ki.Ki, popup bool) bool {
 	cpop := w.CurPopup()
 	if cpop == nil {
 		return true
 	}
-	if ni.This() == cpop {
+	if k.This() == cpop {
 		return popup
+	}
+	_, ni := KiToNode2D(k)
+	if ni == nil {
+		np := k.ParentByType(KiT_Node2DBase, ki.Embeds)
+		if np != nil {
+			ni = np.Embed(KiT_Node2DBase).(*Node2DBase)
+		} else {
+			return false
+		}
 	}
 	mvp := ni.ViewportSafe()
 	if mvp == nil {
 		return false
 	}
 	if mvp.This() == cpop {
+		fmt.Printf("pop matches: node: %s  cpop: %s\n", ni.PathUnique(), cpop.PathUnique())
 		return popup
 	}
 	return !popup
