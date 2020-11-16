@@ -13,7 +13,7 @@ all: prereq gen
 
 prereq:
 	@echo "Installing python prerequisites -- ignore err if already installed:"
-	- $(PIP) install --upgrade pybindgen setuptools wheel
+	- $(PIP) install -r requirements.txt
 	@echo
 	@echo "if this fails, you may see errors like this:"
 	@echo "    Undefined symbols for architecture x86_64:"
