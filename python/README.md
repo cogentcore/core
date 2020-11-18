@@ -8,7 +8,7 @@ Go incorporates many features found in Python, and provides a really natural "ba
 
 *Note: Windows is completely untested and very unlikely to work* -- there is nothing in principle preventing it from working, but it just requires a bunch of special stuff and we haven't had a chance to get to it.
 
-Python version 3 (3.6 has been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
+Python version 3 (3.6, 3.8 have been well tested) is recommended, and the instructions assume that version (you can probably get version 2 to work but it has not been tested).  Also pip must be installed, as is typical.  This assumes you have already installed GoGi per the [Wiki Install](https://github.com/goki/gi/wiki/Install) instructions, including installing [Go itself](https://golang.org/doc/install), and adding `~/go/bin` to your `PATH`.  *be double-sure* that `goki/examples/widgets` runs properly per wiki install before proceeding -- if that doesn't work, nothing else will.
 
 On linux, you must ensure that the linker `ld` will look in the current directory for library files -- add this to your `.bashrc` file (and `source` that file after editing, or enter command locally):
 
@@ -16,15 +16,12 @@ On linux, you must ensure that the linker `ld` will look in the current director
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 ```
 
-**NOTE:** as of 8/28/2019, these instructions *no longer* include extra steps to update gopy as it has been updated in the go-python repository.
+This assumes that you are using go modules, as discussed in the wiki install page, and *that you are in the `gi` directory where you installed gi* (e.g., `git clone https://github.com/goki/gi` and then `cd gi`)
 
 ```sh
-$ python3 -m pip install --upgrade pybindgen setuptools wheel
-$ go get golang.org/x/tools/cmd/goimports
+$ go get golang.org/x/tools/cmd/goimports  # this installs into ~/go/bin
 $ go get github.com/go-python/gopy 
-$ cd ~/go/src/github.com/go-python/gopy  # use $GOPATH instead of ~/go if somewhere else
-$ go install    # do go get -u ./... if this fails and try again -- installs gopy exe in ~go/bin
-$ cd ~/go/src/github.com/goki/gi/python   # again, $GOPATH etc..
+$ cd python  # should be in gi/python now -- i.e., the dir where this README.md is..
 $ make  # if you get an error about not finding gopy, make sure ~/go/bin is on your path
 $ make install  # may need to do: sudo make install -- installs into /usr/local/bin and python site-packages
 $ cd ../examples/widgets
