@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style
 # license that can be found in the LICENSE file.
 
-from gi import go, gi, giv, kit
+from gi import go, gi, giv, kit, units
 from enum import Enum
 
 class ClassViewObj(object):
@@ -301,7 +301,7 @@ def PyObjView(val, nm, frame, ctxt, tags):
         vw.TextFieldSig.Connect(frame, SetStrValCB)
         mv = TagValue(tags, "width")
         if mv != "":
-            vw.SetProp("width", units.NewCh(float(width)))
+            vw.SetProp("width", mv + "ch")
     if HasTagValue(tags, "inactive", "+"):
         vw.SetInactive()
     return vw
