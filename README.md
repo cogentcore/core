@@ -23,7 +23,7 @@ See [Gide](https://github.com/goki/gide) for a complete, complex application wri
 
 * Powerful `Layout` logic auto-sizes everything -- very easy to configure interfaces that "just work" across different scales, resolutions, platforms.  Automatically remembers and reinstates window positions and sizes across sessions, and supports standard `Ctrl+` and `Ctrl-` zooming of display scale.
 
-* CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc), and even include links.
+* CSS-based styling allows easy customization of everything -- native style properties are fully HTML compatible (with all standard `em`, `px`, `pct` etc units), including full HTML "rich text" styling for all text rendering (e.g., in `Label` widget) -- can decorate any text with inline tags (`<strong>`, `<em>` etc), and even include links.  Styling is now separated out into `gist` package, for easier navigation.
 
 * Compiles in seconds, compared to many minutes to hours for comparable alternatives such as Qt, and with minimal cgo dependency.  As of April 2019 we now depend on the [glfw](https://github.com/go-gl/glfw) cross-platform GUI infrastructure system, and the [go-gl/gl](https://github.com/go-gl/gl) OpenGL bindings, to support the 3D (`gi3d`) aspect of the framework.
 
@@ -52,7 +52,7 @@ There are three main types of 2D nodes:
 
 * `Widget` nodes that use the full CSS-based styling (e.g., the Box model etc), are typically placed within a `Layout` -- they use `units` system with arbitrary DPI to transform sizes into actual rendered `dots` (term for actual raw resolution-dependent pixels -- "pixel" has been effectively co-opted as a 96dpi display-independent unit at this point).  Widgets have non-overlapping bounding boxes (`BBox` -- cached for all relevant reference frames).
 
-* `SVG` rendering nodes that directly set properties on the `Paint` object and typically have their own geometry etc -- they should be within a parent `SVG` viewport, and their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float values.
+* `SVG` rendering nodes that directly set properties on the `girl.Paint` object and typically have their own geometry etc -- they should be within a parent `SVG` viewport, and their geom units are determined entirely by the transforms etc and we do not support any further unit specification -- just raw float values.
 
 General Widget method conventions:
 * `SetValue` kinds of methods are wrapped in `UpdateStart` / `End`, but do NOT emit a signal.
@@ -65,11 +65,13 @@ The best way to see how the system works are in the `examples` directory, and by
 
 The `oswin` and `gpu` packages provide interface abstractions for hardware-level implementations.  Currently the gpu implementation is OpenGL, but Vulkan is planned, hopefully with not too many changes to the `gpu` interface.  The basic platform-specific details are handled by [glfw](https://github.com/go-gl/glfw) (version 3.3), along with a few other bits of platform-specific code.
 
-All of the main "front end" code just deals with `image.RGBA` through the `Paint` methods, which was adapted from https://github.com/fogleman/gg, and we use https://github.com/srwiley/rasterx for CPU-based rasterization to the image, which is very fast and SVG performant.   The `Viewport2D` image is uploaded to a GPU-backed `oswin.Texture` and composited with sprite overlays up to the window.
+All of the main "front end" code just deals with `image.RGBA` through the `girl` renderling library, using `girl.Paint` methods, which was adapted from https://github.com/fogleman/gg, and we use https://github.com/srwiley/rasterx for CPU-based rasterization to the image, which is very fast and SVG performant.   The `Viewport2D` image is uploaded to a GPU-backed `oswin.Texture` and composited with sprite overlays up to the window.
 
 # Status
 
-* Version 1.0 release April, 2020!  The 3D `gi3d` component is ready for use, and the code has been widely tested by students and researchers, including extensive testing under `gide`.  The API will remain stable at this point.
+* Version 1.1 released Nov, 2020, has the styling parameters and code broken out in the [gist](https://github.com/goki/gi/tree/master/gist) style package, and basic rendering code, including a complete text layout and rendering system, in the [girl](https://github.com/goki/gi/tree/master/girl) render library.
+
+* Version 1.0 released April, 2020!  The 3D `gi3d` component is ready for use, and the code has been widely tested by students and researchers, including extensive testing under `gide`.  The API will remain stable at this point.
 
 * Active users should join [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list to receive more detailed status updates.
 

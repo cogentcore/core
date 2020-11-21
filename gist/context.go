@@ -15,7 +15,4 @@ type Context interface {
 	// used in color specifications: url(#name) is typical, where name
 	// is the name of a node with a ColorSpec in it.
 	ContextColorSpecByURL(url string) *ColorSpec
-
-	// ContextDPI returns the DPI for rendering
-
 }
