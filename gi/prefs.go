@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
@@ -63,6 +64,10 @@ var KiT_Preferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 
 // Prefs are the overall preferences
 var Prefs = Preferences{}
+
+func init() {
+	gist.ThePrefs = &Prefs
+}
 
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
@@ -340,6 +345,20 @@ func (pf *Preferences) UpdateUser() {
 	}
 }
 
+/////////////////////////////////////////////////////////
+// Following are gist.Prefs interface
+
+// PrefColor returns preference color of given name (case insensitive)
+// std names are: font, background, shadow, border, control, icon, select, highlight, link
+func (pf *Preferences) PrefColor(clrName string) *Color {
+	return pf.Colors.PrefColor(clrName)
+}
+
+// PrefFontFamily returns the default FontFamily
+func (pf *Preferences) PrefFontFamily() string {
+	return pf.FontFamily
+}
+
 // PreferencesProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
 var PreferencesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
@@ -502,6 +521,7 @@ func DefaultColorSchemes() map[string]*ColorPrefs {
 }
 
 // PrefColor returns preference color of given name (case insensitive)
+// std names are: font, background, shadow, border, control, icon, select, highlight, link
 func (pf *ColorPrefs) PrefColor(clrName string) *Color {
 	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
 	switch lc {

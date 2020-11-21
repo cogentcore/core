@@ -11,8 +11,10 @@ import (
 	"image/png"
 	"io"
 	"log"
+	"strings"
 	"sync"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -892,22 +894,6 @@ func (vp *Viewport2D) SetCurStyleNode(node Node2D) {
 	vp.StyleMu.Unlock()
 }
 
-// CurStyleNodeNamedEl finds element of given name (using FindNamedElement method)
-// in current style node, if set -- returns nil if not set or not found.
-func (vp *Viewport2D) CurStyleNodeNamedEl(name string) Node2D {
-	if vp == nil {
-		return nil
-	}
-	vp.StyleMu.RLock()
-	defer vp.StyleMu.RUnlock()
-
-	if vp.CurStyleNode == nil {
-		return nil
-	}
-	ne := vp.CurStyleNode.FindNamedElement(name)
-	return ne
-}
-
 // SetCurrentColor sets the current color in concurrent-safe way
 func (vp *Viewport2D) SetCurrentColor(clr Color) {
 	if vp == nil {
@@ -918,8 +904,9 @@ func (vp *Viewport2D) SetCurrentColor(clr Color) {
 	vp.StyleMu.Unlock()
 }
 
-// CurrentColor gets the current color in concurrent-safe way
-func (vp *Viewport2D) CurrentColor() Color {
+// ContextColor gets the current color in concurrent-safe way.
+// Implements the gist.Context interface
+func (vp *Viewport2D) ContextColor() Color {
 	if vp == nil {
 		return Color{}
 	}
@@ -927,6 +914,28 @@ func (vp *Viewport2D) CurrentColor() Color {
 	clr := vp.CurColor
 	vp.StyleMu.RUnlock()
 	return clr
+}
+
+// ContextColorSpecByURL finds a Node by an element name (URL-like path), and
+// attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
+// Used for colorspec styling based on url() value.
+func (vp *Viewport2D) ContextColorSpecByURL(url string) *gist.ColorSpec {
+	if vp == nil {
+		return nil
+	}
+	vp.StyleMu.RLock()
+	defer vp.StyleMu.RUnlock()
+
+	if vp.CurStyleNode == nil {
+		return nil
+	}
+	val := url[4:]
+	val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
+	ne := vp.CurStyleNode.FindNamedElement(val)
+	if grad, ok := ne.(*Gradient); ok {
+		return &grad.ColorSpec
+	}
+	return nil
 }
 
 //////////////////////////////////////////////////////////////////////////////////

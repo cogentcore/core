@@ -1987,6 +1987,40 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 	return nb
 }
 
+// StyleFromProps styles Layout-specific fields from ki.Prop properties
+// doesn't support inherit or default
+func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport2D) {
+	keys := []string{"lay", "spacing"}
+	for _, key := range keys {
+		val, has := props[key]
+		if !has {
+			continue
+		}
+		switch key {
+		case "lay":
+			switch vt := val.(type) {
+			case string:
+				ly.Lay.FromString(vt)
+			case Layouts:
+				ly.Lay = vt
+			default:
+				if iv, ok := kit.ToInt(val); ok {
+					ly.Lay = Layouts(iv)
+				} else {
+					StyleSetError(key, val)
+				}
+			}
+		case "spacing":
+			ly.Spacing.SetIFace(val, key)
+		}
+	}
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (ly *Layout) StyleToDots(uc *units.Context) {
+	ly.Spacing.ToDots(uc)
+}
+
 // StyleLayout does layout styling -- it sets the StyMu Lock
 func (ly *Layout) StyleLayout() {
 	ly.StyMu.Lock()

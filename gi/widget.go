@@ -222,7 +222,7 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.SetInactive()
 	}
 
-	wb.Sty.Use(wb.Viewport) // activates currentColor etc
+	wb.SetCurrentColor(wb.Sty.Font.Color)
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -271,6 +271,45 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 	}
 }
 
+// ApplyCSS applies css styles for given node, using key to select sub-props
+// from overall properties list, and optional selector to select a further
+// :name selector within that key
+func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, ctxt Context) bool {
+	pp, got := css[key]
+	if !got {
+		return false
+	}
+	pmap, ok := pp.(ki.Props) // must be a props map
+	if !ok {
+		return false
+	}
+	if selector != "" {
+		pmap, ok = SubProps(pmap, selector)
+		if !ok {
+			return false
+		}
+	}
+	parSty := node.AsNode2D().ParentStyle()
+	s.SetStyleProps(parSty, pmap, vp)
+	node.AsNode2D().ParentStyleRUnlock()
+	return true
+}
+
+// StyleCSS applies css style properties to given Widget node, parsing out
+// type, .class, and #name selectors, along with optional sub-selector
+// (:hover, :active etc)
+func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string, ctxt Context) {
+	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
+	s.ApplyCSS(node, css, tyn, selector, vp)
+	classes := strings.Split(strings.ToLower(node.AsNode2D().Class), " ")
+	for _, cl := range classes {
+		cln := "." + strings.TrimSpace(cl)
+		s.ApplyCSS(node, css, cln, selector, vp)
+	}
+	idnm := "#" + strings.ToLower(node.Name()) // then name
+	s.ApplyCSS(node, css, idnm, selector, vp)
+}
+
 func (wb *WidgetBase) Style2D() {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
@@ -283,6 +322,23 @@ func (wb *WidgetBase) Style2D() {
 		wb.Sty.SaveTemplate()
 	}
 	wb.LayState.SetFromStyle(&wb.Sty.Layout) // also does reset
+}
+
+// SetUnitContext sets the unit context based on size of viewport and parent
+// element (from bbox) and then cache everything out in terms of raw pixel
+// dots for rendering -- call at start of render
+func (wb *WidgetBase) SetUnitContext(vp *Viewport3D, el mat32.Vec2) {
+	if vp != nil {
+		if vp.Win != nil {
+			wb.Sty.UnContext.DPI = vp.Win.LogicalDPI()
+		}
+		if vp.Render.Image != nil {
+			sz := vp.Render.Image.Bounds().Size()
+			wb.Sty.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
+		}
+	}
+	wb.Sty.Font.OpenFont(&wb.Sty.UnContext) // calls SetUnContext after updating metrics
+	wb.Sty.ToDots()
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
