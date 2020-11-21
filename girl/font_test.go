@@ -7,29 +7,31 @@ package girl
 import (
 	"fmt"
 	"testing"
+
+	"github.com/goki/gi/gist"
 )
 
 type testFontSpec struct {
 	fn  string
 	cor string
-	str FontStretch
-	wt  FontWeights
-	sty FontStyles
+	str gist.FontStretch
+	wt  gist.FontWeights
+	sty gist.FontStyles
 }
 
 var testFontNames = []testFontSpec{
-	{"NotoSansBlack", "NotoSans Black", FontStrNormal, WeightBlack, FontNormal},
-	{"NotoSansBlackItalic", "NotoSans Black Italic", FontStrNormal, WeightBlack, FontItalic},
-	{"NotoSansBold", "NotoSans Bold", FontStrNormal, WeightBold, FontNormal},
-	{"NotoSansCondensed", "NotoSans Condensed", FontStrCondensed, WeightNormal, FontNormal},
-	{"NotoSansCondensedBlack", "NotoSans Condensed Black", FontStrCondensed, WeightBlack, FontNormal},
-	{"NotoSansCondensedBlackItalic", "NotoSans Condensed Black Italic", FontStrCondensed, WeightBlack, FontItalic},
-	{"NotoSansCondensedExtraBold", "NotoSans Condensed ExtraBold", FontStrCondensed, WeightExtraBold, FontNormal},
-	{"NotoSansCondensedExtraBoldItalic", "NotoSans Condensed ExtraBold Italic", FontStrCondensed, WeightExtraBold, FontItalic},
-	{"NotoSansExtraBold", "NotoSans ExtraBold", FontStrNormal, WeightExtraBold, FontNormal},
-	{"NotoSansExtraBoldItalic", "NotoSans ExtraBold Italic", FontStrNormal, WeightExtraBold, FontItalic},
-	{"NotoSansRegular", "NotoSans", FontStrNormal, WeightNormal, FontNormal},
-	{"NotoSansNormal", "NotoSans", FontStrNormal, WeightNormal, FontNormal},
+	{"NotoSansBlack", "NotoSans Black", gist.FontStrNormal, gist.WeightBlack, gist.FontNormal},
+	{"NotoSansBlackItalic", "NotoSans Black Italic", gist.FontStrNormal, gist.WeightBlack, gist.FontItalic},
+	{"NotoSansBold", "NotoSans Bold", gist.FontStrNormal, gist.WeightBold, gist.FontNormal},
+	{"NotoSansCondensed", "NotoSans Condensed", gist.FontStrCondensed, gist.WeightNormal, gist.FontNormal},
+	{"NotoSansCondensedBlack", "NotoSans Condensed Black", gist.FontStrCondensed, gist.WeightBlack, gist.FontNormal},
+	{"NotoSansCondensedBlackItalic", "NotoSans Condensed Black Italic", gist.FontStrCondensed, gist.WeightBlack, gist.FontItalic},
+	{"NotoSansCondensedExtraBold", "NotoSans Condensed ExtraBold", gist.FontStrCondensed, gist.WeightExtraBold, gist.FontNormal},
+	{"NotoSansCondensedExtraBoldItalic", "NotoSans Condensed ExtraBold Italic", gist.FontStrCondensed, gist.WeightExtraBold, gist.FontItalic},
+	{"NotoSansExtraBold", "NotoSans ExtraBold", gist.FontStrNormal, gist.WeightExtraBold, gist.FontNormal},
+	{"NotoSansExtraBoldItalic", "NotoSans ExtraBold Italic", gist.FontStrNormal, gist.WeightExtraBold, gist.FontItalic},
+	{"NotoSansRegular", "NotoSans", gist.FontStrNormal, gist.WeightNormal, gist.FontNormal},
+	{"NotoSansNormal", "NotoSans", gist.FontStrNormal, gist.WeightNormal, gist.FontNormal},
 }
 
 func TestFontMods(t *testing.T) {
@@ -39,7 +41,7 @@ func TestFontMods(t *testing.T) {
 			t.Errorf("FixFontMods output: %v != correct: %v for font: %v\n", fo, ft.cor, ft.fn)
 		}
 
-		base, str, wt, sty := FontNameToMods(fo)
+		base, str, wt, sty := gist.FontNameToMods(fo)
 		if base != "NotoSans" {
 			t.Errorf("FontNameToMods base: %v != correct: %v for font: %v\n", base, "NotoSans", fo)
 		}
@@ -53,7 +55,7 @@ func TestFontMods(t *testing.T) {
 			t.Errorf("FontNameToMods style: %v != correct: %v for font: %v\n", sty, ft.sty, fo)
 		}
 
-		frc := FontNameFromMods(base, str, wt, sty)
+		frc := gist.FontNameFromMods(base, str, wt, sty)
 		if frc != fo {
 			t.Errorf("FontNameFromMods reconstructed font name: %v != correct: %v\n", frc, fo)
 		}
@@ -79,9 +81,9 @@ func TestFontAlts(t *testing.T) {
 	fmt.Printf("FontAlts: fantasy: %v  serif: %v, mono: %v\n", fa, serif, mono)
 }
 
-var testStrs = []FontStretch{FontStrNormal, FontStrCondensed, FontStrExpanded}
-var testWts = []FontWeights{WeightNormal, WeightLight, WeightBold, WeightBlack}
-var testStys = []FontStyles{FontNormal, FontItalic, FontOblique}
+var testStrs = []gist.FontStretch{gist.FontStrNormal, gist.FontStrCondensed, gist.FontStrExpanded}
+var testWts = []gist.FontWeights{gist.WeightNormal, gist.WeightLight, gist.WeightBold, gist.WeightBlack}
+var testStys = []gist.FontStyles{gist.FontNormal, gist.FontItalic, gist.FontOblique}
 var testNms = []string{"serif", "sans-serif", "monospace", "courier", "cursive", "fantasy"}
 
 // func TestFontFaceName(t *testing.T) {

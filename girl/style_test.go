@@ -9,6 +9,7 @@ import (
 	// "reflect"
 	"testing"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -24,7 +25,7 @@ func TestStyle(t *testing.T) {
 	props["border-style"] = "groove"
 	props["border-width"] = "2px"
 	props["height"] = "inherit"
-	var s, p, d Style
+	var s, p, d gist.Style
 	s.Defaults()
 	p.Defaults()
 	d.Defaults()
