@@ -21,6 +21,7 @@ import (
 	"unsafe"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -258,10 +259,10 @@ func (sf *Field) FieldIface(objptr uintptr) interface{} {
 	npt := kit.NonPtrType(sf.Field.Type)
 	npk := npt.Kind()
 	switch {
-	case npt == gi.KiT_Color:
-		return (*gi.Color)(unsafe.Pointer(objptr + sf.NetOff))
-	case npt == gi.KiT_ColorSpec:
-		return (*gi.ColorSpec)(unsafe.Pointer(objptr + sf.NetOff))
+	case npt == gist.KiT_Color:
+		return (*gist.Color)(unsafe.Pointer(objptr + sf.NetOff))
+	case npt == gist.KiT_ColorSpec:
+		return (*gist.ColorSpec)(unsafe.Pointer(objptr + sf.NetOff))
 	// case npt == mat32.KiT_Mat2:
 	// 	return (*mat32.Mat2)(unsafe.Pointer(objptr + sf.NetOff))
 	case npt.Name() == "Value":
@@ -320,9 +321,9 @@ func (fld *Field) FromProps(fields map[string]*Field, objptr, parptr uintptr, va
 	npk := npt.Kind()
 
 	switch fiv := fi.(type) {
-	case *gi.ColorSpec:
+	case *gist.ColorSpec:
 		fiv.SetIFace(val, vp, fld.Field.Name)
-	case *gi.Color:
+	case *gist.Color:
 		fiv.SetIFace(val, vp, fld.Field.Name)
 	case *units.Value:
 		fiv.SetIFace(val, fld.Field.Name)
@@ -336,7 +337,7 @@ func (fld *Field) FromProps(fields map[string]*Field, objptr, parptr uintptr, va
 	case *[]float64:
 		switch valv := val.(type) {
 		case string:
-			*fiv = gi.ParseDashesString(valv)
+			*fiv = gist.ParseDashesString(valv)
 		case *[]float64:
 			*fiv = *valv
 		}
@@ -374,9 +375,9 @@ type WalkStyleFieldFunc func(struf reflect.StructField, vf reflect.Value, tag st
 
 // StyleValueTypes is a map of types that are used as value types in style structures
 var StyleValueTypes = map[reflect.Type]struct{}{
-	units.KiT_Value:  {},
-	gi.KiT_Color:     {},
-	gi.KiT_ColorSpec: {},
+	units.KiT_Value:    {},
+	gist.KiT_Color:     {},
+	gist.KiT_ColorSpec: {},
 }
 
 // WalkStyleStruct walks through a struct, calling a function on fields with
