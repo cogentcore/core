@@ -8,6 +8,7 @@ import (
 	"image"
 	"log"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -64,7 +65,7 @@ const (
 
 //go:generate stringer -type=Stripes
 
-var KiT_Stripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, StylePropProps, "Stripes")
+var KiT_Stripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, gist.StylePropProps, "Stripes")
 
 func (ev Stripes) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
@@ -80,7 +81,7 @@ type Viewport2D struct {
 	WidgetBase
 	Fill         bool         `desc:"fill the viewport with background-color from style"`
 	Geom         Geom2DInt    `desc:"Viewport-level viewbox within any parent Viewport2D"`
-	Render       RenderState  `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	Render       girl.State   `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 	Pixels       *image.RGBA  `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 	Win          *Window      `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 	CurStyleNode Node2D       `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
@@ -933,7 +934,7 @@ func (vp *Viewport2D) ContextColorSpecByURL(url string) *gist.ColorSpec {
 	val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
 	ne := vp.CurStyleNode.FindNamedElement(val)
 	if grad, ok := ne.(*Gradient); ok {
-		return &grad.ColorSpec
+		return &grad.Grad
 	}
 	return nil
 }

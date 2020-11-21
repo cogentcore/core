@@ -9,6 +9,7 @@ import (
 	"image"
 	"reflect"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
 	"github.com/goki/ki/ints"
@@ -53,7 +54,7 @@ var ButtonBoxProps = ki.Props{
 	"border-color":     &Prefs.Colors.Border,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),
-	"text-align":       AlignCenter,
+	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 }
@@ -179,7 +180,7 @@ func (bb *ButtonBox) ConfigParts() {
 		config.Add(KiT_CheckBox, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config, ki.NonUniqueNames)
-	if mods || RebuildDefaultStyles {
+	if mods || gist.RebuildDefaultStyles {
 		bb.ConfigItems()
 		bb.UpdateEnd(updt)
 	}

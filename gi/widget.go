@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -29,8 +31,8 @@ import (
 type WidgetBase struct {
 	Node2DBase
 	Tooltip      string       `desc:"text for tooltip for this widget -- can use HTML formatting"`
-	Sty          Style        `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
-	DefStyle     *Style       `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
+	Sty          gist.Style   `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes"`
+	DefStyle     *gist.Style  `copy:"-" view:"-" json:"-" xml:"-" desc:"default style values computed by a parent widget for us -- if set, we are a part of a parent widget and should use these as our starting styles instead of type-based defaults"`
 	LayState     LayoutState  `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
 	WidgetSig    ki.Signal    `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
@@ -66,7 +68,7 @@ func (wb *WidgetBase) AsWidget() *WidgetBase {
 }
 
 // Style satisfies the Styler interface
-func (wb *WidgetBase) Style() *Style {
+func (wb *WidgetBase) Style() *gist.Style {
 	return &wb.Sty
 }
 
@@ -120,7 +122,7 @@ var WidgetDefPropsKey = "__DefProps"
 // the default style starting point when creating a new style.  Also stores a
 // "__DefProps"+selector type property of the props used for styling here, for
 // accessing properties that are not compiled into standard Style object.
-func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *Style {
+func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *gist.Style {
 	tprops := *kit.Types.Properties(wb.Type(), true) // true = makeNew
 	styprops := tprops
 	if selector != "" {
@@ -139,15 +141,15 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 
 	parSty := wb.ParentStyle()
 
-	var dsty *Style
+	var dsty *gist.Style
 	stKey := WidgetDefStyleKey + selector
 	prKey := WidgetDefPropsKey + selector
 	dstyi, ok := kit.TypeProp(tprops, stKey)
-	if !ok || RebuildDefaultStyles {
-		dsty = &Style{}
+	if !ok || gist.RebuildDefaultStyles {
+		dsty = &gist.Style{}
 		dsty.Defaults()
 		if selector != "" {
-			var baseStyle *Style
+			var baseStyle *gist.Style
 			if part != nil {
 				baseStyle = part.DefaultStyle2DWidget("", nil)
 			} else {
@@ -162,7 +164,7 @@ func (wb *WidgetBase) DefaultStyle2DWidget(selector string, part *WidgetBase) *S
 		tprops[prKey] = styprops
 		kit.TypesMu.Unlock()
 	} else {
-		dsty, _ = dstyi.(*Style)
+		dsty, _ = dstyi.(*gist.Style)
 	}
 	wb.ParentStyleRUnlock()
 	return dsty
@@ -179,7 +181,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	wb.Viewport.SetCurStyleNode(gii)
 	defer wb.Viewport.SetCurStyleNode(nil)
 
-	if !RebuildDefaultStyles && wb.DefStyle != nil {
+	if !gist.RebuildDefaultStyles && wb.DefStyle != nil {
 		wb.Sty.CopyFrom(wb.DefStyle)
 	} else {
 		wb.Sty.CopyFrom(wb.DefaultStyle2DWidget("", nil))
@@ -215,14 +217,14 @@ func (wb *WidgetBase) Style2DWidget() {
 		wb.CSSAgg = nil // restart
 	}
 	AggCSS(&wb.CSSAgg, wb.CSS)
-	wb.Sty.StyleCSS(gii, wb.CSSAgg, "", wb.Viewport)
+	StyleCSS(gii, wb.Viewport, &wb.Sty, wb.CSSAgg, "")
 
-	wb.Sty.SetUnitContext(wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
-	if wb.Sty.Inactive {                               // inactive can only set, not clear
+	wb.SetUnitContext(wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
+	if wb.Sty.Inactive {                           // inactive can only set, not clear
 		wb.SetInactive()
 	}
 
-	wb.SetCurrentColor(wb.Sty.Font.Color)
+	wb.Viewport.SetCurrentColor(wb.Sty.Font.Color)
 }
 
 // StylePart sets the style properties for a child in parts (or any other
@@ -274,7 +276,7 @@ func (wb *WidgetBase) StylePart(pk Node2D) {
 // ApplyCSS applies css styles for given node, using key to select sub-props
 // from overall properties list, and optional selector to select a further
 // :name selector within that key
-func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, ctxt Context) bool {
+func ApplyCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, key, selector string) bool {
 	pp, got := css[key]
 	if !got {
 		return false
@@ -284,13 +286,13 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, ctxt C
 		return false
 	}
 	if selector != "" {
-		pmap, ok = SubProps(pmap, selector)
+		pmap, ok = gist.SubProps(pmap, selector)
 		if !ok {
 			return false
 		}
 	}
 	parSty := node.AsNode2D().ParentStyle()
-	s.SetStyleProps(parSty, pmap, vp)
+	st.SetStyleProps(parSty, pmap, vp)
 	node.AsNode2D().ParentStyleRUnlock()
 	return true
 }
@@ -298,16 +300,16 @@ func (s *Style) ApplyCSS(node Node2D, css ki.Props, key, selector string, ctxt C
 // StyleCSS applies css style properties to given Widget node, parsing out
 // type, .class, and #name selectors, along with optional sub-selector
 // (:hover, :active etc)
-func (s *Style) StyleCSS(node Node2D, css ki.Props, selector string, ctxt Context) {
+func StyleCSS(node Node2D, vp *Viewport2D, st *gist.Style, css ki.Props, selector string) {
 	tyn := strings.ToLower(node.Type().Name()) // type is most general, first
-	s.ApplyCSS(node, css, tyn, selector, vp)
+	ApplyCSS(node, vp, st, css, tyn, selector)
 	classes := strings.Split(strings.ToLower(node.AsNode2D().Class), " ")
 	for _, cl := range classes {
 		cln := "." + strings.TrimSpace(cl)
-		s.ApplyCSS(node, css, cln, selector, vp)
+		ApplyCSS(node, vp, st, css, cln, selector)
 	}
 	idnm := "#" + strings.ToLower(node.Name()) // then name
-	s.ApplyCSS(node, css, idnm, selector, vp)
+	ApplyCSS(node, vp, st, css, idnm, selector)
 }
 
 func (wb *WidgetBase) Style2D() {
@@ -327,7 +329,7 @@ func (wb *WidgetBase) Style2D() {
 // SetUnitContext sets the unit context based on size of viewport and parent
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (wb *WidgetBase) SetUnitContext(vp *Viewport3D, el mat32.Vec2) {
+func (wb *WidgetBase) SetUnitContext(vp *Viewport2D, el mat32.Vec2) {
 	if vp != nil {
 		if vp.Win != nil {
 			wb.Sty.UnContext.DPI = vp.Win.LogicalDPI()
@@ -337,7 +339,7 @@ func (wb *WidgetBase) SetUnitContext(vp *Viewport3D, el mat32.Vec2) {
 			wb.Sty.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	wb.Sty.Font.OpenFont(&wb.Sty.UnContext) // calls SetUnContext after updating metrics
+	girl.OpenFont(&wb.Sty.Font, &wb.Sty.UnContext) // calls SetUnContext after updating metrics
 	wb.Sty.ToDots()
 }
 
@@ -403,7 +405,7 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
 		mvp := wb.ViewportSafe()
-		wb.Sty.SetUnitContext(mvp, psize) // update units with final layout
+		wb.SetUnitContext(mvp, psize) // update units with final layout
 	}
 	wb.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
@@ -616,7 +618,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 	frame.Lay = LayoutVert
 	frame.SetProps(TooltipFrameProps, ki.NoUpdate)
 	lbl := frame.AddNewChild(KiT_Label, "ttlbl").(*Label)
-	lbl.SetProp("white-space", WhiteSpaceNormal) // wrap
+	lbl.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	mwdots := parVp.Sty.UnContext.ToDots(40, units.Em)
 	mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
@@ -736,17 +738,17 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard rendering
 
-// RenderLock returns the locked RenderState, Paint, and Style with StyMu locked.
+// RenderLock returns the locked girl.State, Paint, and Style with StyMu locked.
 // This should be called at start of widget-level rendering.
-func (wb *WidgetBase) RenderLock() (*RenderState, *Paint, *Style) {
+func (wb *WidgetBase) RenderLock() (*girl.State, *girl.Paint, *gist.Style) {
 	wb.StyMu.RLock()
 	rs := &wb.Viewport.Render
 	rs.Lock()
 	return rs, &rs.Paint, &wb.Sty
 }
 
-// RenderUnlock unlocks RenderState and style
-func (wb *WidgetBase) RenderUnlock(rs *RenderState) {
+// RenderUnlock unlocks girl.State and style
+func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
 	rs.Unlock()
 	wb.StyMu.RUnlock()
 }
@@ -765,8 +767,8 @@ func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, rad float32) 
 }
 
 // RenderStdBox draws standard box using given style.
-// RenderState and Style must already be locked at this point (RenderLock)
-func (wb *WidgetBase) RenderStdBox(st *Style) {
+// girl.State and Style must already be locked at this point (RenderLock)
+func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
@@ -923,7 +925,7 @@ func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
 func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm string, txt string) (icIdx, lbIdx int) {
-	wb.Parts.SetProp("overflow", OverflowHidden) // no scrollbars!
+	wb.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	if wb.Sty.Template != "" {
 		wb.Parts.Sty.Template = wb.Sty.Template + ".Parts"
 	}

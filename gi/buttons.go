@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -26,16 +27,16 @@ import (
 // Button, Action, MenuButton, CheckBox, etc
 type ButtonBase struct {
 	PartsWidgetBase
-	Text         string               `xml:"text" desc:"label for the button -- if blank then no label is presented"`
-	Icon         IconName             `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
-	Indicator    IconName             `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
-	Shortcut     key.Chord            `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
-	StateStyles  [ButtonStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	State        ButtonStates         `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
-	ButtonSig    ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
-	Menu         Menu                 `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
-	MakeMenuFunc MakeMenuFunc         `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
-	ButStateMu   sync.Mutex           `copy:"-" json:"-" xml:"-" view:"-" desc:"button state mutex"`
+	Text         string                    `xml:"text" desc:"label for the button -- if blank then no label is presented"`
+	Icon         IconName                  `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Indicator    IconName                  `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Shortcut     key.Chord                 `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
+	StateStyles  [ButtonStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the button, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	State        ButtonStates              `copy:"-" json:"-" xml:"-" desc:"current state of the button based on gui interaction"`
+	ButtonSig    ki.Signal                 `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	Menu         Menu                      `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	MakeMenuFunc MakeMenuFunc              `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+	ButStateMu   sync.Mutex                `copy:"-" json:"-" xml:"-" view:"-" desc:"button state mutex"`
 }
 
 var KiT_ButtonBase = kit.Types.AddType(&ButtonBase{}, ButtonBaseProps)
@@ -116,7 +117,7 @@ type ButtonStates int32
 
 //go:generate stringer -type=ButtonStates
 
-var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, StylePropProps, "Button")
+var KiT_ButtonStates = kit.Enums.AddEnumAltLower(ButtonStatesN, kit.NotBitFlag, gist.StylePropProps, "Button")
 
 func (ev ButtonStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *ButtonStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -757,7 +758,7 @@ var ButtonProps = ki.Props{
 	"margin":           units.NewPx(2),
 	"min-width":        units.NewEm(1),
 	"min-height":       units.NewEm(1),
-	"text-align":       AlignCenter,
+	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#space": ki.Props{
@@ -782,7 +783,7 @@ var ButtonProps = ki.Props{
 		"height":         units.NewEx(1.5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignBottom,
+		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
@@ -838,7 +839,7 @@ var CheckBoxProps = ki.Props{
 	"EnumType:Flag":    KiT_ButtonFlags,
 	"icon":             "checked-box",
 	"icon-off":         "unchecked-box",
-	"text-align":       AlignLeft,
+	"text-align":       gist.AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
 	"margin":           units.NewPx(1),
@@ -956,7 +957,7 @@ func (cb *CheckBox) ConfigParts() {
 	}
 	mods, updt := cb.Parts.ConfigChildren(config, ki.NonUniqueNames)
 	ist := cb.Parts.Child(icIdx).(*Layout)
-	if mods || RebuildDefaultStyles {
+	if mods || gist.RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, KiT_Icon, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)

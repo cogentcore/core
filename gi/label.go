@@ -8,6 +8,8 @@ import (
 	"image"
 	"image/color"
 
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/mouse"
@@ -27,14 +29,14 @@ import (
 // other options to get word-wrapping etc.
 type Label struct {
 	WidgetBase
-	Text        string              `xml:"text" desc:"label to display"`
-	Selectable  bool                `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
-	Redrawable  bool                `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
-	LinkSig     ki.Signal           `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles [LabelStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
-	Render      TextRender          `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
-	RenderPos   mat32.Vec2          `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
-	CurBgColor  Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
+	Text        string                   `xml:"text" desc:"label to display"`
+	Selectable  bool                     `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
+	Redrawable  bool                     `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
+	LinkSig     ki.Signal                `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	StateStyles [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
+	Render      girl.TextRender          `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
+	RenderPos   mat32.Vec2               `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
+	CurBgColor  Color                    `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)
@@ -61,10 +63,10 @@ func (lb *Label) Disconnect() {
 
 var LabelProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
-	"white-space":      WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
+	"white-space":      gist.WhiteSpacePre, // no wrap, use spaces unless otherwise specified!
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),
-	"vertical-align":   AlignTop,
+	"vertical-align":   gist.AlignTop,
 	"color":            &Prefs.Colors.Font,
 	"background-color": color.Transparent,
 	LabelSelectors[LabelActive]: ki.Props{
@@ -97,7 +99,7 @@ const (
 
 //go:generate stringer -type=LabelStates
 
-var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, StylePropProps, "Label")
+var KiT_LabelStates = kit.Enums.AddEnumAltLower(LabelStatesN, kit.NotBitFlag, gist.StylePropProps, "Label")
 
 func (ev LabelStates) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *LabelStates) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -168,16 +170,16 @@ func (lb *Label) SetStateStyle() {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
-func (lb *Label) OpenLink(tl *TextLink) {
-	tl.Widget = lb.This().(Node2D)
+func (lb *Label) OpenLink(tl *girl.TextLink) {
+	tl.Widget = lb.This()
 	if len(lb.LinkSig.Cons) == 0 {
-		if TextLinkHandler != nil {
-			if TextLinkHandler(*tl) {
+		if girl.TextLinkHandler != nil {
+			if girl.TextLinkHandler(*tl) {
 				return
 			}
 		}
-		if URLHandler != nil {
-			URLHandler(tl.URL)
+		if girl.URLHandler != nil {
+			girl.URLHandler(tl.URL)
 		}
 		return
 	}
@@ -282,7 +284,7 @@ func (lb *Label) GrabCurBgColor() {
 	if lb.Viewport == nil || lb.IsSelected() {
 		return
 	}
-	if !RebuildDefaultStyles && !lb.CurBgColor.IsNil() {
+	if !gist.RebuildDefaultStyles && !lb.CurBgColor.IsNil() {
 		return
 	}
 	pos := lb.ContextMenuPos()
@@ -296,16 +298,16 @@ func (lb *Label) TextPos() mat32.Vec2 {
 	pos := lb.LayState.Alloc.Pos.AddScalar(sty.BoxSpace())
 	if !sty.Text.HasWordWrap() { // word-wrap case already deals with this b/c it has final alloc size -- otherwise it lays out "blind" and can't do this.
 		if lb.LayState.Alloc.Size.X > lb.Render.Size.X {
-			if IsAlignMiddle(sty.Layout.AlignH) {
+			if gist.IsAlignMiddle(sty.Layout.AlignH) {
 				pos.X += 0.5 * (lb.LayState.Alloc.Size.X - lb.Render.Size.X)
-			} else if IsAlignEnd(sty.Layout.AlignH) {
+			} else if gist.IsAlignEnd(sty.Layout.AlignH) {
 				pos.X += (lb.LayState.Alloc.Size.X - lb.Render.Size.X)
 			}
 		}
 		if lb.LayState.Alloc.Size.Y > lb.Render.Size.Y {
-			if IsAlignMiddle(sty.Layout.AlignV) {
+			if gist.IsAlignMiddle(sty.Layout.AlignV) {
 				pos.Y += 0.5 * (lb.LayState.Alloc.Size.Y - lb.Render.Size.Y)
-			} else if IsAlignEnd(sty.Layout.AlignV) {
+			} else if gist.IsAlignEnd(sty.Layout.AlignV) {
 				pos.Y += (lb.LayState.Alloc.Size.Y - lb.Render.Size.Y)
 			}
 		}
@@ -322,9 +324,9 @@ func (lb *Label) StyleLabel() {
 	hasTempl, saveTempl := lb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		lb.Style2DWidget()
-		if lb.Sty.Text.Align != AlignLeft && lb.Sty.Layout.AlignH == AlignLeft {
+		if lb.Sty.Text.Align != gist.AlignLeft && lb.Sty.Layout.AlignH == gist.AlignLeft {
 			lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
-		} else if lb.Sty.Layout.AlignH != AlignLeft && lb.Sty.Text.Align == AlignLeft {
+		} else if lb.Sty.Layout.AlignH != gist.AlignLeft && lb.Sty.Text.Align == gist.AlignLeft {
 			lb.Sty.Text.Align = lb.Sty.Layout.AlignH // keep them consistent -- this is what people expect
 		}
 	}

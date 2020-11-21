@@ -23,12 +23,12 @@ import (
 //   on objects that can be directly used during rendering
 // * good for basic rendering -- lots of additional things that could be extended later..
 
-// styleTemplates are cached styles used for styling large numbers of identical
+// StyleTemplates are cached styles used for styling large numbers of identical
 // elements in views
-var styleTemplates map[string]*Style
+var StyleTemplates map[string]*Style
 
-// styleTemplatesMu is a mutex protecting updates to styleTemplates
-var styleTemplatesMu sync.RWMutex
+// StyleTemplatesMu is a mutex protecting updates to StyleTemplates
+var StyleTemplatesMu sync.RWMutex
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
@@ -156,9 +156,9 @@ func (s *Style) FromTemplate() (hasTemplate bool, saveTemplate bool) {
 	if RebuildDefaultStyles {
 		return false, true
 	}
-	styleTemplatesMu.RLock()
-	defer styleTemplatesMu.RUnlock()
-	if ts, has := styleTemplates[s.Template]; has {
+	StyleTemplatesMu.RLock()
+	defer StyleTemplatesMu.RUnlock()
+	if ts, has := StyleTemplates[s.Template]; has {
 		s.CopyFrom(ts)
 		s.IsSet = true
 		s.dotsSet = true
@@ -175,12 +175,12 @@ func (s *Style) SaveTemplate() {
 	ts.CopyFrom(s)
 	ts.lastUnCtxt = s.lastUnCtxt
 	ts.PropsNil = s.PropsNil
-	styleTemplatesMu.Lock()
-	if styleTemplates == nil {
-		styleTemplates = make(map[string]*Style)
+	StyleTemplatesMu.Lock()
+	if StyleTemplates == nil {
+		StyleTemplates = make(map[string]*Style)
 	}
-	styleTemplates[s.Template] = ts
-	styleTemplatesMu.Unlock()
+	StyleTemplates[s.Template] = ts
+	StyleTemplatesMu.Unlock()
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than

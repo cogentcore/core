@@ -8,6 +8,7 @@ import (
 	"image"
 	"log"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -545,11 +546,11 @@ var MenuButtonProps = ki.Props{
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &Prefs.Colors.Border,
-	"border-style":     BorderSolid,
+	"border-style":     gist.BorderSolid,
 	"padding":          units.NewPx(4),
 	"margin":           units.NewPx(4),
 	"box-shadow.color": &Prefs.Colors.Shadow,
-	"text-align":       AlignCenter,
+	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
@@ -569,7 +570,7 @@ var MenuButtonProps = ki.Props{
 		"height":         units.NewEx(1.5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignBottom,
+		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},
@@ -642,8 +643,8 @@ var SeparatorProps = ki.Props{
 	"EnumType:Flag":    KiT_NodeFlags,
 	"padding":          units.NewPx(0),
 	"margin":           units.NewPx(0),
-	"vertical-align":   AlignCenter,
-	"horizontal-align": AlignCenter,
+	"vertical-align":   gist.AlignCenter,
+	"horizontal-align": gist.AlignCenter,
 	"border-color":     &Prefs.Colors.Border,
 	"border-width":     units.NewPx(2),
 	"background-color": &Prefs.Colors.Control,

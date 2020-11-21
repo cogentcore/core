@@ -42,13 +42,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Painter defines an interface for anything that has a Paint on it
-type Painter interface {
-	Paint() *Paint
-}
-
 // Paint provides the styling parameters and methods for rendering on to an
-// RGBA image -- all dynamic rendering state is maintained in the RenderState.
+// RGBA image -- all dynamic rendering state is maintained in the State.
 // Text rendering is handled separately in TextRender, but it depends
 // minimally on styling parameters in FontStyle
 type Paint struct {
@@ -80,7 +75,7 @@ func (pc *Paint) HasNoStrokeOrFill() bool {
 }
 
 // convenience for final draw for shapes when done
-func (pc *Paint) FillStrokeClear(rs *RenderState) {
+func (pc *Paint) FillStrokeClear(rs *State) {
 	if pc.HasFill() {
 		pc.FillPreserve(rs)
 	}
@@ -95,13 +90,13 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 
 // TransformPoint multiplies the specified point by the current transform matrix,
 // returning a transformed position.
-func (pc *Paint) TransformPoint(rs *RenderState, x, y float32) mat32.Vec2 {
+func (pc *Paint) TransformPoint(rs *State, x, y float32) mat32.Vec2 {
 	return rs.XForm.MulVec2AsPt(mat32.Vec2{x, y})
 }
 
 // BoundingBox computes the bounding box for an element in pixel int
 // coordinates, applying current transform
-func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) image.Rectangle {
+func (pc *Paint) BoundingBox(rs *State, minX, minY, maxX, maxY float32) image.Rectangle {
 	sw := float32(0.0)
 	if pc.HasStroke() {
 		sw = 0.5 * pc.StrokeWidth(rs)
@@ -114,7 +109,7 @@ func (pc *Paint) BoundingBox(rs *RenderState, minX, minY, maxX, maxY float32) im
 }
 
 // BoundingBoxFromPoints computes the bounding box for a slice of points
-func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []mat32.Vec2) image.Rectangle {
+func (pc *Paint) BoundingBoxFromPoints(rs *State, points []mat32.Vec2) image.Rectangle {
 	sz := len(points)
 	if sz == 0 {
 		return image.Rectangle{}
@@ -130,7 +125,7 @@ func (pc *Paint) BoundingBoxFromPoints(rs *RenderState, points []mat32.Vec2) ima
 
 // MoveTo starts a new subpath within the current path starting at the
 // specified point.
-func (pc *Paint) MoveTo(rs *RenderState, x, y float32) {
+func (pc *Paint) MoveTo(rs *State, x, y float32) {
 	if rs.HasCurrent {
 		rs.Path.Stop(false) // note: used to add a point to separate FillPath..
 	}
@@ -143,7 +138,7 @@ func (pc *Paint) MoveTo(rs *RenderState, x, y float32) {
 
 // LineTo adds a line segment to the current path starting at the current
 // point. If there is no current point, it is equivalent to MoveTo(x, y)
-func (pc *Paint) LineTo(rs *RenderState, x, y float32) {
+func (pc *Paint) LineTo(rs *State, x, y float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x, y)
 	} else {
@@ -156,7 +151,7 @@ func (pc *Paint) LineTo(rs *RenderState, x, y float32) {
 // QuadraticTo adds a quadratic bezier curve to the current path starting at
 // the current point. If there is no current point, it first performs
 // MoveTo(x1, y1)
-func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float32) {
+func (pc *Paint) QuadraticTo(rs *State, x1, y1, x2, y2 float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x1, y1)
 	}
@@ -169,7 +164,7 @@ func (pc *Paint) QuadraticTo(rs *RenderState, x1, y1, x2, y2 float32) {
 // CubicTo adds a cubic bezier curve to the current path starting at the
 // current point. If there is no current point, it first performs
 // MoveTo(x1, y1).
-func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float32) {
+func (pc *Paint) CubicTo(rs *State, x1, y1, x2, y2, x3, y3 float32) {
 	if !rs.HasCurrent {
 		pc.MoveTo(rs, x1, y1)
 	}
@@ -184,7 +179,7 @@ func (pc *Paint) CubicTo(rs *RenderState, x1, y1, x2, y2, x3, y3 float32) {
 
 // ClosePath adds a line segment from the current point to the beginning
 // of the current subpath. If there is no current point, this is a no-op.
-func (pc *Paint) ClosePath(rs *RenderState) {
+func (pc *Paint) ClosePath(rs *State) {
 	if rs.HasCurrent {
 		rs.Path.Stop(true)
 		rs.Current = rs.Start
@@ -193,14 +188,14 @@ func (pc *Paint) ClosePath(rs *RenderState) {
 
 // ClearPath clears the current path. There is no current point after this
 // operation.
-func (pc *Paint) ClearPath(rs *RenderState) {
+func (pc *Paint) ClearPath(rs *State) {
 	rs.Path.Clear()
 	rs.HasCurrent = false
 }
 
 // NewSubPath starts a new subpath within the current path. There is no current
 // point after this operation.
-func (pc *Paint) NewSubPath(rs *RenderState) {
+func (pc *Paint) NewSubPath(rs *State) {
 	// if rs.HasCurrent {
 	// 	rs.FillPath.Add1(rs.Start.Fixed())
 	// }
@@ -245,7 +240,7 @@ func (pc *Paint) joinmode() rasterx.JoinMode {
 
 // StrokeWidth obtains the current stoke width subject to transform (or not
 // depending on VecEffNonScalingStroke)
-func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
+func (pc *Paint) StrokeWidth(rs *State) float32 {
 	dw := pc.StrokeStyle.Width.Dots
 	if dw == 0 {
 		return dw
@@ -259,7 +254,7 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 	return lw
 }
 
-func (pc *Paint) stroke(rs *RenderState) {
+func (pc *Paint) stroke(rs *State) {
 	if rs.Raster == nil {
 		return
 	}
@@ -308,7 +303,7 @@ func (pc *Paint) stroke(rs *RenderState) {
 
 }
 
-func (pc *Paint) fill(rs *RenderState) {
+func (pc *Paint) fill(rs *State) {
 	if rs.Raster == nil {
 		return
 	}
@@ -344,34 +339,34 @@ func (pc *Paint) fill(rs *RenderState) {
 // StrokePreserve strokes the current path with the current color, line width,
 // line cap, line join and dash settings. The path is preserved after this
 // operation.
-func (pc *Paint) StrokePreserve(rs *RenderState) {
+func (pc *Paint) StrokePreserve(rs *State) {
 	pc.stroke(rs)
 }
 
 // Stroke strokes the current path with the current color, line width,
 // line cap, line join and dash settings. The path is cleared after this
 // operation.
-func (pc *Paint) Stroke(rs *RenderState) {
+func (pc *Paint) Stroke(rs *State) {
 	pc.StrokePreserve(rs)
 	pc.ClearPath(rs)
 }
 
 // FillPreserve fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is preserved after this operation.
-func (pc *Paint) FillPreserve(rs *RenderState) {
+func (pc *Paint) FillPreserve(rs *State) {
 	pc.fill(rs)
 }
 
 // Fill fills the current path with the current color. Open subpaths
 // are implicitly closed. The path is cleared after this operation.
-func (pc *Paint) Fill(rs *RenderState) {
+func (pc *Paint) Fill(rs *State) {
 	pc.FillPreserve(rs)
 	pc.ClearPath(rs)
 }
 
 // FillBox is an optimized fill of a square region with a uniform color if
 // the given color spec is a solid color
-func (pc *Paint) FillBox(rs *RenderState, pos, size mat32.Vec2, clr *gist.ColorSpec) {
+func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
 	if clr.Source == gist.SolidColor {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
@@ -383,7 +378,7 @@ func (pc *Paint) FillBox(rs *RenderState, pos, size mat32.Vec2, clr *gist.ColorS
 }
 
 // FillBoxColor is an optimized fill of a square region with given uniform color
-func (pc *Paint) FillBoxColor(rs *RenderState, pos, size mat32.Vec2, clr color.Color) {
+func (pc *Paint) FillBoxColor(rs *State, pos, size mat32.Vec2, clr color.Color) {
 	b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 	draw.Draw(rs.Image, b, &image.Uniform{clr}, image.ZP, draw.Src)
 }
@@ -391,7 +386,7 @@ func (pc *Paint) FillBoxColor(rs *RenderState, pos, size mat32.Vec2, clr color.C
 // ClipPreserve updates the clipping region by intersecting the current
 // clipping region with the current path as it would be filled by pc.Fill().
 // The path is preserved after this operation.
-func (pc *Paint) ClipPreserve(rs *RenderState) {
+func (pc *Paint) ClipPreserve(rs *State) {
 	clip := image.NewAlpha(rs.Image.Bounds())
 	// painter := raster.NewAlphaOverPainter(clip) // todo!
 	pc.fill(rs)
@@ -407,7 +402,7 @@ func (pc *Paint) ClipPreserve(rs *RenderState) {
 // SetMask allows you to directly set the *image.Alpha to be used as a clipping
 // mask. It must be the same size as the context, else an error is returned
 // and the mask is unchanged.
-func (pc *Paint) SetMask(rs *RenderState, mask *image.Alpha) error {
+func (pc *Paint) SetMask(rs *State, mask *image.Alpha) error {
 	if mask.Bounds() != rs.Image.Bounds() {
 		return errors.New("mask size must match context size")
 	}
@@ -418,7 +413,7 @@ func (pc *Paint) SetMask(rs *RenderState, mask *image.Alpha) error {
 // AsMask returns an *image.Alpha representing the alpha channel of this
 // context. This can be useful for advanced clipping operations where you first
 // render the mask geometry and then use it as a mask.
-func (pc *Paint) AsMask(rs *RenderState) *image.Alpha {
+func (pc *Paint) AsMask(rs *State) *image.Alpha {
 	b := rs.Image.Bounds()
 	mask := image.NewAlpha(b)
 	draw.Draw(mask, b, rs.Image, image.ZP, draw.Src)
@@ -428,13 +423,13 @@ func (pc *Paint) AsMask(rs *RenderState) *image.Alpha {
 // Clip updates the clipping region by intersecting the current
 // clipping region with the current path as it would be filled by pc.Fill().
 // The path is cleared after this operation.
-func (pc *Paint) Clip(rs *RenderState) {
+func (pc *Paint) Clip(rs *State) {
 	pc.ClipPreserve(rs)
 	pc.ClearPath(rs)
 }
 
 // ResetClip clears the clipping region.
-func (pc *Paint) ResetClip(rs *RenderState) {
+func (pc *Paint) ResetClip(rs *State) {
 	rs.Mask = nil
 }
 
@@ -442,22 +437,22 @@ func (pc *Paint) ResetClip(rs *RenderState) {
 // Convenient Drawing Functions
 
 // Clear fills the entire image with the current fill color.
-func (pc *Paint) Clear(rs *RenderState) {
+func (pc *Paint) Clear(rs *State) {
 	src := image.NewUniform(&pc.FillStyle.Color.Color)
 	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.ZP, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
-func (pc *Paint) SetPixel(rs *RenderState, x, y int) {
+func (pc *Paint) SetPixel(rs *State, x, y int) {
 	rs.Image.Set(x, y, &pc.StrokeStyle.Color.Color)
 }
 
-func (pc *Paint) DrawLine(rs *RenderState, x1, y1, x2, y2 float32) {
+func (pc *Paint) DrawLine(rs *State, x1, y1, x2, y2 float32) {
 	pc.MoveTo(rs, x1, y1)
 	pc.LineTo(rs, x2, y2)
 }
 
-func (pc *Paint) DrawPolyline(rs *RenderState, points []mat32.Vec2) {
+func (pc *Paint) DrawPolyline(rs *State, points []mat32.Vec2) {
 	sz := len(points)
 	if sz < 2 {
 		return
@@ -468,7 +463,7 @@ func (pc *Paint) DrawPolyline(rs *RenderState, points []mat32.Vec2) {
 	}
 }
 
-func (pc *Paint) DrawPolylinePxToDots(rs *RenderState, points []mat32.Vec2) {
+func (pc *Paint) DrawPolylinePxToDots(rs *State, points []mat32.Vec2) {
 	pu := &pc.UnContext
 	sz := len(points)
 	if sz < 2 {
@@ -480,17 +475,17 @@ func (pc *Paint) DrawPolylinePxToDots(rs *RenderState, points []mat32.Vec2) {
 	}
 }
 
-func (pc *Paint) DrawPolygon(rs *RenderState, points []mat32.Vec2) {
+func (pc *Paint) DrawPolygon(rs *State, points []mat32.Vec2) {
 	pc.DrawPolyline(rs, points)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawPolygonPxToDots(rs *RenderState, points []mat32.Vec2) {
+func (pc *Paint) DrawPolygonPxToDots(rs *State, points []mat32.Vec2) {
 	pc.DrawPolylinePxToDots(rs, points)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRectangle(rs *RenderState, x, y, w, h float32) {
+func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 	pc.NewSubPath(rs)
 	pc.MoveTo(rs, x, y)
 	pc.LineTo(rs, x+w, y)
@@ -499,7 +494,7 @@ func (pc *Paint) DrawRectangle(rs *RenderState, x, y, w, h float32) {
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float32) {
+func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h, r float32) {
 	x0, x1, x2, x3 := x, x+r, x+w-r, x+w
 	y0, y1, y2, y3 := y, y+r, y+h-r, y+h
 	pc.NewSubPath(rs)
@@ -519,7 +514,7 @@ func (pc *Paint) DrawRoundedRectangle(rs *RenderState, x, y, w, h, r float32) {
 // using quadratic bezier curves -- centers of ellipse are at cx, cy with
 // radii rx, ry -- see DrawEllipticalArcPath for a version compatible with SVG
 // A/a path drawing, which uses previous position instead of two angles
-func (pc *Paint) DrawEllipticalArc(rs *RenderState, cx, cy, rx, ry, angle1, angle2 float32) {
+func (pc *Paint) DrawEllipticalArc(rs *State, cx, cy, rx, ry, angle1, angle2 float32) {
 	const n = 16
 	for i := 0; i < n; i++ {
 		p1 := float32(i+0) / n
@@ -622,7 +617,7 @@ func FindEllipseCenter(rx, ry *float32, rotX, startX, startY, endX, endY float32
 // given angle, either via the smaller or larger arc, depending on largeArc --
 // returns in lx, ly the last points which are then set to the current cx, cy
 // for the path drawer
-func (pc *Paint) DrawEllipticalArcPath(rs *RenderState, cx, cy, ocx, ocy, pcx, pcy, rx, ry, angle float32, largeArc, sweep bool) (lx, ly float32) {
+func (pc *Paint) DrawEllipticalArcPath(rs *State, cx, cy, ocx, ocy, pcx, pcy, rx, ry, angle float32, largeArc, sweep bool) (lx, ly float32) {
 	rotX := angle * math.Pi / 180 // Convert degrees to radians
 	startAngle := math32.Atan2(pcy-cy, pcx-cx) - rotX
 	endAngle := math32.Atan2(ocy-cy, ocx-cx) - rotX
@@ -676,23 +671,23 @@ func (pc *Paint) DrawEllipticalArcPath(rs *RenderState, cx, cy, ocx, ocy, pcx, p
 	return lx, ly
 }
 
-func (pc *Paint) DrawEllipse(rs *RenderState, x, y, rx, ry float32) {
+func (pc *Paint) DrawEllipse(rs *State, x, y, rx, ry float32) {
 	pc.NewSubPath(rs)
 	pc.DrawEllipticalArc(rs, x, y, rx, ry, 0, 2*math32.Pi)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawArc(rs *RenderState, x, y, r, angle1, angle2 float32) {
+func (pc *Paint) DrawArc(rs *State, x, y, r, angle1, angle2 float32) {
 	pc.DrawEllipticalArc(rs, x, y, r, r, angle1, angle2)
 }
 
-func (pc *Paint) DrawCircle(rs *RenderState, x, y, r float32) {
+func (pc *Paint) DrawCircle(rs *State, x, y, r float32) {
 	pc.NewSubPath(rs)
 	pc.DrawEllipticalArc(rs, x, y, r, r, 0, 2*math32.Pi)
 	pc.ClosePath(rs)
 }
 
-func (pc *Paint) DrawRegularPolygon(rs *RenderState, n int, x, y, r, rotation float32) {
+func (pc *Paint) DrawRegularPolygon(rs *State, n int, x, y, r, rotation float32) {
 	angle := 2 * math32.Pi / float32(n)
 	rotation -= math32.Pi / 2
 	if n%2 == 0 {
@@ -707,14 +702,14 @@ func (pc *Paint) DrawRegularPolygon(rs *RenderState, n int, x, y, r, rotation fl
 }
 
 // DrawImage draws the specified image at the specified point.
-func (pc *Paint) DrawImage(rs *RenderState, fmIm image.Image, x, y int) {
+func (pc *Paint) DrawImage(rs *State, fmIm image.Image, x, y int) {
 	pc.DrawImageAnchored(rs, fmIm, x, y, 0, 0)
 }
 
 // DrawImageAnchored draws the specified image at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // image. Use ax=0.5, ay=0.5 to center the image at the specified point.
-func (pc *Paint) DrawImageAnchored(rs *RenderState, fmIm image.Image, x, y int, ax, ay float32) {
+func (pc *Paint) DrawImageAnchored(rs *State, fmIm image.Image, x, y int, ax, ay float32) {
 	s := rs.Image.Bounds().Size()
 	x -= int(ax * float32(s.X))
 	y -= int(ay * float32(s.Y))
@@ -790,7 +785,7 @@ func (pc *Paint) ShearAbout(sx, sy, x, y float32) {
 
 // InvertY flips the Y axis so that Y grows from bottom to top and Y=0 is at
 // the bottom of the image.
-func (pc *Paint) InvertY(rs *RenderState) {
+func (pc *Paint) InvertY(rs *State) {
 	pc.Translate(0, float32(rs.Image.Bounds().Size().Y))
 	pc.Scale(1, -1)
 }

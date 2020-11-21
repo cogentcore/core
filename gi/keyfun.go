@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/ki/ki"
@@ -106,7 +107,7 @@ const (
 
 //go:generate stringer -type=KeyFuns
 
-var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, StylePropProps, "KeyFun")
+var KiT_KeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, gist.StylePropProps, "KeyFun")
 
 func (kf KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
 func (kf *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }

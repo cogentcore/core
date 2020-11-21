@@ -10,6 +10,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -69,7 +70,7 @@ func (sb *SpinBox) Disconnect() {
 var SpinBoxProps = ki.Props{
 	"EnumType:Flag": KiT_NodeFlags,
 	"#buttons": ki.Props{
-		"vertical-align": AlignMiddle,
+		"vertical-align": gist.AlignMiddle,
 	},
 	"#up": ki.Props{
 		"max-width":  units.NewEx(1.5),
@@ -169,7 +170,7 @@ func (sb *SpinBox) ConfigParts() {
 		sb.DownIcon = IconName("wedge-down")
 	}
 	sb.Parts.Lay = LayoutHoriz
-	sb.Parts.SetProp("vertical-align", AlignMiddle)
+	sb.Parts.SetProp("vertical-align", gist.AlignMiddle)
 	if sb.Sty.Template != "" {
 		sb.Parts.Sty.Template = sb.Sty.Template + ".Parts"
 	}
@@ -180,7 +181,7 @@ func (sb *SpinBox) ConfigParts() {
 		config.Add(KiT_Layout, "buttons")
 	}
 	mods, updt := sb.Parts.ConfigChildren(config, ki.NonUniqueNames)
-	if mods || RebuildDefaultStyles {
+	if mods || gist.RebuildDefaultStyles {
 		if !sb.IsInactive() {
 			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)
 			buts.Lay = LayoutVert
@@ -398,7 +399,7 @@ func (sb *SpinBox) StyleSpinBox() {
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		sb.Sty.SetUnitContext(sb.Viewport, mat32.Vec2Zero)
+		sb.SetUnitContext(sb.Viewport, mat32.Vec2Zero)
 	}
 	if hasTempl && saveTempl {
 		sb.Sty.SaveTemplate()

@@ -9,6 +9,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -371,7 +372,7 @@ func (nb *NodeBase) SetStdXMLAttr(name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		SetStylePropsXML(val, &nb.Props)
+		gist.SetStylePropsXML(val, &nb.Props)
 		return true
 	}
 	return false

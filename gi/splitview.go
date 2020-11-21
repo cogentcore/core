@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -458,7 +459,7 @@ var SplitterProps = ki.Props{
 		"min-height":     units.NewEm(5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignMiddle,
+		"vertical-align": gist.AlignMiddle,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},

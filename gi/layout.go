@@ -13,6 +13,7 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -52,8 +53,8 @@ func (la *LayoutAllocs) Reset() {
 // LayoutState contains all the state needed to specify the layout of an item
 // within a Layout.  Is initialized with computed values of style prefs.
 type LayoutState struct {
-	Size  SizePrefs    `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
-	Alloc LayoutAllocs `desc:"allocated size and position -- set by parent Layout"`
+	Size  gist.SizePrefs `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
+	Alloc LayoutAllocs   `desc:"allocated size and position -- set by parent Layout"`
 }
 
 // todo: not using yet:
@@ -64,7 +65,7 @@ type LayoutState struct {
 func (ld *LayoutState) Defaults() {
 }
 
-func (ld *LayoutState) SetFromStyle(ls *LayoutStyle) {
+func (ld *LayoutState) SetFromStyle(ls *gist.Layout) {
 	ld.Reset()
 	// these are layout hints:
 	ld.Size.Need = ls.MinSizeDots()
@@ -211,7 +212,7 @@ const (
 
 //go:generate stringer -type=Layouts
 
-var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, StylePropProps, "Layout")
+var KiT_Layouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, gist.StylePropProps, "Layout")
 
 func (ev Layouts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *Layouts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -225,7 +226,7 @@ const (
 	RowColN
 )
 
-var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, StylePropProps, "")
+var KiT_RowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, gist.StylePropProps, "")
 
 func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
@@ -301,7 +302,7 @@ func (ly *Layout) GatherSizes() {
 	prefSizing := false
 	mvp := ly.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
-		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
+		prefSizing = ly.Sty.Layout.Overflow == gist.OverflowScroll // special case
 	}
 
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -581,7 +582,7 @@ func (ly *Layout) GatherSizesGrid() {
 	prefSizing := false
 	mvp := ly.ViewportSafe()
 	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
-		prefSizing = ly.Sty.Layout.Overflow == OverflowScroll // special case
+		prefSizing = ly.Sty.Layout.Overflow == gist.OverflowScroll // special case
 	}
 
 	// if there aren't existing prefs, we need to compute size
@@ -687,7 +688,7 @@ func (ly *Layout) AllocFromParent() {
 
 // LayoutSharedDim implements calculations to layout for the shared dimension
 // (i.e., Vertical for Horizontal layout). Returns pos and size.
-func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Align) (pos, size float32) {
+func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al gist.Align) (pos, size float32) {
 	usePref := true
 	targ := pref
 	extra := avail - targ
@@ -717,11 +718,11 @@ func (ly *Layout) LayoutSharedDimImpl(avail, need, pref, max, spc float32, al Al
 	if stretchMax || stretchNeed {
 		size += extra
 	} else {
-		if IsAlignMiddle(al) {
+		if gist.IsAlignMiddle(al) {
 			pos += 0.5 * extra
-		} else if IsAlignEnd(al) {
+		} else if gist.IsAlignEnd(al) {
 			pos += extra
-		} else if al == AlignJustify { // treat justify as stretch
+		} else if al == gist.AlignJustify { // treat justify as stretch
 			size += extra
 		}
 	}
@@ -829,7 +830,7 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 	}
 
 	extraSpace := float32(0.0)
-	if sz > 1 && extra > 0.0 && al == AlignJustify && !stretchNeed && !stretchMax {
+	if sz > 1 && extra > 0.0 && al == gist.AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
 		extraSpace = extra / float32(sz-1)
@@ -839,7 +840,7 @@ func (ly *Layout) LayoutAlongDim(dim mat32.Dims) {
 	pos := spc
 
 	// todo: need a direction setting too
-	if IsAlignEnd(al) && !stretchNeed && !stretchMax {
+	if gist.IsAlignEnd(al) && !stretchNeed && !stretchMax {
 		pos += extra
 	}
 
@@ -1020,7 +1021,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim mat32.Dims) {
 	}
 
 	extraSpace := float32(0.0)
-	if sz > 1 && extra > 0.0 && al == AlignJustify && !stretchNeed && !stretchMax {
+	if sz > 1 && extra > 0.0 && al == gist.AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
 		extraSpace = extra / float32(sz-1)
@@ -1030,7 +1031,7 @@ func (ly *Layout) LayoutGridDim(rowcol RowCol, dim mat32.Dims) {
 	pos := spc
 
 	// todo: need a direction setting too
-	if IsAlignEnd(al) && !stretchNeed && !stretchMax {
+	if gist.IsAlignEnd(al) && !stretchNeed && !stretchMax {
 		pos += extra
 	}
 
@@ -1199,7 +1200,7 @@ func (ly *Layout) ManageOverflow() {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.Sty.Layout.Overflow != OverflowHidden {
+	if ly.Sty.Layout.Overflow != gist.OverflowHidden {
 		sbw := ly.Sty.Layout.ScrollBarWidth.Dots
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
@@ -2007,7 +2008,7 @@ func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport2D) {
 				if iv, ok := kit.ToInt(val); ok {
 					ly.Lay = Layouts(iv)
 				} else {
-					StyleSetError(key, val)
+					gist.StyleSetError(key, val)
 				}
 			}
 		case "spacing":

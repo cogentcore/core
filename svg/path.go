@@ -212,7 +212,7 @@ func reflectPt(px, py, rx, ry float32) (x, y float32) {
 
 // PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *gi.Paint, rs *gi.RenderState) {
+func PathDataRender(data []PathData, pc *gi.Paint, rs *gi.girl.State) {
 	sz := len(data)
 	if sz == 0 {
 		return

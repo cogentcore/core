@@ -14,9 +14,9 @@ import (
 	"github.com/srwiley/scanx"
 )
 
-// The RenderState holds all the current rendering state information used
+// The State holds all the current rendering state information used
 // while painting -- a viewport just has one of these
-type RenderState struct {
+type State struct {
 	Paint  Paint           `desc:"communal painter -- for widgets -- SVG have their own"`
 	XForm  mat32.Mat2      `desc:"current transform"`
 	Path   rasterx.Path    `desc:"current path"`
@@ -40,8 +40,8 @@ type RenderState struct {
 	RasterMu       sync.Mutex        `desc:"mutex for final rasterx rendering -- only one at a time"`
 }
 
-// Init initializes RenderState -- must be called whenever image size changes
-func (rs *RenderState) Init(width, height int, img *image.RGBA) {
+// Init initializes State -- must be called whenever image size changes
+func (rs *State) Init(width, height int, img *image.RGBA) {
 	rs.Paint.Defaults()
 	rs.XForm = mat32.Identity2D()
 	rs.Image = img
@@ -64,7 +64,7 @@ func (rs *RenderState) Init(width, height int, img *image.RGBA) {
 
 // PushXForm pushes current xform onto stack and apply new xform on top of it
 // must protect within render mutex lock (see Lock version)
-func (rs *RenderState) PushXForm(xf mat32.Mat2) {
+func (rs *State) PushXForm(xf mat32.Mat2) {
 	if rs.XFormStack == nil {
 		rs.XFormStack = make([]mat32.Mat2, 0, 100)
 	}
@@ -74,7 +74,7 @@ func (rs *RenderState) PushXForm(xf mat32.Mat2) {
 
 // PushXFormLock pushes current xform onto stack and apply new xform on top of it
 // protects within render mutex lock
-func (rs *RenderState) PushXFormLock(xf mat32.Mat2) {
+func (rs *State) PushXFormLock(xf mat32.Mat2) {
 	rs.RenderMu.Lock()
 	rs.PushXForm(xf)
 	rs.RenderMu.Unlock()
@@ -82,10 +82,10 @@ func (rs *RenderState) PushXFormLock(xf mat32.Mat2) {
 
 // PopXForm pops xform off the stack and set to current xform
 // must protect within render mutex lock (see Lock version)
-func (rs *RenderState) PopXForm() {
+func (rs *State) PopXForm() {
 	sz := len(rs.XFormStack)
 	if sz == 0 {
-		log.Printf("gi.RenderState PopXForm: stack is empty -- programmer error\n")
+		log.Printf("gi.State PopXForm: stack is empty -- programmer error\n")
 		rs.XForm = mat32.Identity2D()
 		return
 	}
@@ -95,7 +95,7 @@ func (rs *RenderState) PopXForm() {
 
 // PopXFormLock pops xform off the stack and set to current xform
 // protects within render mutex lock (see Lock version)
-func (rs *RenderState) PopXFormLock() {
+func (rs *State) PopXFormLock() {
 	rs.RenderMu.Lock()
 	rs.PopXForm()
 	rs.RenderMu.Unlock()
@@ -105,7 +105,7 @@ func (rs *RenderState) PopXFormLock() {
 // this is the essential first step in rendering!
 // any further actual rendering should always be surrounded
 // by Lock() / Unlock() calls
-func (rs *RenderState) PushBounds(b image.Rectangle) {
+func (rs *State) PushBounds(b image.Rectangle) {
 	rs.RenderMu.Lock()
 	defer rs.RenderMu.Unlock()
 
@@ -122,25 +122,25 @@ func (rs *RenderState) PushBounds(b image.Rectangle) {
 }
 
 // Lock locks the render mutex -- must lock prior to rendering!
-func (rs *RenderState) Lock() {
+func (rs *State) Lock() {
 	rs.RenderMu.Lock()
 }
 
 // Unlock unlocks the render mutex, locked with PushBounds --
 // call this prior to children rendering etc.
-func (rs *RenderState) Unlock() {
+func (rs *State) Unlock() {
 	rs.RenderMu.Unlock()
 }
 
 // PopBounds pops bounds off the stack and set to current bounds
 // must be equally balanced with corresponding PushBounds
-func (rs *RenderState) PopBounds() {
+func (rs *State) PopBounds() {
 	rs.RenderMu.Lock()
 	defer rs.RenderMu.Unlock()
 
 	sz := len(rs.BoundsStack)
 	if sz == 0 {
-		log.Printf("gi.RenderState PopBounds: stack is empty -- programmer error\n")
+		log.Printf("gi.State PopBounds: stack is empty -- programmer error\n")
 		rs.Bounds = rs.Image.Bounds()
 		return
 	}
@@ -149,7 +149,7 @@ func (rs *RenderState) PopBounds() {
 }
 
 // PushClip pushes current Mask onto the clip stack
-func (rs *RenderState) PushClip() {
+func (rs *State) PushClip() {
 	if rs.Mask == nil {
 		return
 	}
@@ -160,10 +160,10 @@ func (rs *RenderState) PushClip() {
 }
 
 // PopClip pops Mask off the clip stack and set to current mask
-func (rs *RenderState) PopClip() {
+func (rs *State) PopClip() {
 	sz := len(rs.ClipStack)
 	if sz == 0 {
-		log.Printf("gi.RenderState PopClip: stack is empty -- programmer error\n")
+		log.Printf("gi.State PopClip: stack is empty -- programmer error\n")
 		rs.Mask = nil // implied
 		return
 	}
@@ -173,11 +173,11 @@ func (rs *RenderState) PopClip() {
 }
 
 // BackupPaint copies style settings from Paint to PaintBack
-func (rs *RenderState) BackupPaint() {
+func (rs *State) BackupPaint() {
 	rs.PaintBack.CopyStyleFrom(&rs.Paint.Paint)
 }
 
 // RestorePaint restores style settings from PaintBack to Paint
-func (rs *RenderState) RestorePaint() {
+func (rs *State) RestorePaint() {
 	rs.Paint.CopyStyleFrom(&rs.PaintBack.Paint)
 }

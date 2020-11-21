@@ -12,6 +12,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -261,17 +262,17 @@ var DialogProps = ki.Props{
 	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":        units.NewPx(-1),
-		"text-align":       AlignCenter,
-		"vertical-align":   AlignTop,
+		"text-align":       gist.AlignCenter,
+		"vertical-align":   gist.AlignTop,
 		"background-color": "none",
 		"font-size":        "large",
 	},
 	"#prompt": ki.Props{
-		"white-space":      WhiteSpaceNormal, // wrap etc
+		"white-space":      gist.WhiteSpaceNormal, // wrap etc
 		"max-width":        -1,
 		"width":            units.NewCh(30),
-		"text-align":       AlignLeft,
-		"vertical-align":   AlignTop,
+		"text-align":       gist.AlignLeft,
+		"vertical-align":   gist.AlignTop,
 		"background-color": "none",
 	},
 }

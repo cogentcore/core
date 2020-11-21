@@ -7,6 +7,7 @@ package gi
 import (
 	"log"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -48,7 +49,7 @@ var ActionProps = ki.Props{
 	"border-width":     units.NewPx(0), // todo: should be default
 	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,
-	"text-align":       AlignCenter,
+	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"padding":          units.NewPx(2),
@@ -76,7 +77,7 @@ var ActionProps = ki.Props{
 		"height":         units.NewEx(1.5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignBottom,
+		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},

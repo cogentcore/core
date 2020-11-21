@@ -9,6 +9,7 @@ import (
 	"image"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -36,30 +37,30 @@ type SliderPositioner interface {
 // - thumbsize
 type SliderBase struct {
 	PartsWidgetBase
-	Value       float32              `xml:"value" desc:"current value"`
-	EmitValue   float32              `copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
-	Min         float32              `xml:"min" desc:"minimum value in range"`
-	Max         float32              `xml:"max" desc:"maximum value in range"`
-	Step        float32              `xml:"step" desc:"smallest step size to increment"`
-	PageStep    float32              `xml:"pagestep" desc:"larger PageUp / Dn step size"`
-	Size        float32              `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-	ThSize      float32              `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize"`
-	ThSizeReal  float32              `xml:"-" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
-	ThumbSize   units.Value          `xml:"thumb-size" desc:"styled fixed size of the thumb"`
-	Prec        int                  `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-	Icon        IconName             `view:"show-name" desc:"optional icon for the dragging knob"`
-	ValThumb    bool                 `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
-	ThumbVal    float32              `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
-	Pos         float32              `xml:"-" desc:"logical position of the slider relative to Size"`
-	DragPos     float32              `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
-	Dim         mat32.Dims           `desc:"dimension along which the slider slides"`
-	Tracking    bool                 `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
-	TrackThr    float32              `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
-	Snap        bool                 `xml:"snap" desc:"snap the values to Step size increments"`
-	Off         bool                 `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
-	State       SliderStates         `json:"-" xml:"-" desc:"state of slider"`
-	StateStyles [SliderStatesN]Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	SliderSig   ki.Signal            `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
+	Value       float32                   `xml:"value" desc:"current value"`
+	EmitValue   float32                   `copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+	Min         float32                   `xml:"min" desc:"minimum value in range"`
+	Max         float32                   `xml:"max" desc:"maximum value in range"`
+	Step        float32                   `xml:"step" desc:"smallest step size to increment"`
+	PageStep    float32                   `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	Size        float32                   `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
+	ThSize      float32                   `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize"`
+	ThSizeReal  float32                   `xml:"-" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
+	ThumbSize   units.Value               `xml:"thumb-size" desc:"styled fixed size of the thumb"`
+	Prec        int                       `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	Icon        IconName                  `view:"show-name" desc:"optional icon for the dragging knob"`
+	ValThumb    bool                      `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
+	ThumbVal    float32                   `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
+	Pos         float32                   `xml:"-" desc:"logical position of the slider relative to Size"`
+	DragPos     float32                   `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
+	Dim         mat32.Dims                `desc:"dimension along which the slider slides"`
+	Tracking    bool                      `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
+	TrackThr    float32                   `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
+	Snap        bool                      `xml:"snap" desc:"snap the values to Step size increments"`
+	Off         bool                      `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
+	State       SliderStates              `json:"-" xml:"-" desc:"state of slider"`
+	StateStyles [SliderStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	SliderSig   ki.Signal                 `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
 }
 
 var KiT_SliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)

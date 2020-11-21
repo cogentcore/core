@@ -10,6 +10,8 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -22,7 +24,7 @@ import (
 
 /*
 Base struct node for 2D rendering tree -- renders to a bitmap using Paint
-rendering functions operating on the RenderState in the parent Viewport
+rendering functions operating on the girl.State in the parent Viewport
 
 For Widget / Layout nodes, rendering is done in 5 separate passes:
 
@@ -489,8 +491,8 @@ func (nb *Node2DBase) ViewportSafe() *Viewport2D {
 	return nb.Viewport
 }
 
-// Render returns the RenderState from this node's Viewport, using safe lock access
-func (nb *Node2DBase) Render() *RenderState {
+// Render returns the girl.State from this node's Viewport, using safe lock access
+func (nb *Node2DBase) Render() *girl.State {
 	mvp := nb.ViewportSafe()
 	return &mvp.Render
 }
@@ -926,11 +928,11 @@ func (nb *Node2DBase) BBoxReport() string {
 
 // ParentStyle returns parent's style or nil if not avail.
 // Calls StyleRLock so must call ParentStyleRUnlock when done.
-func (nb *Node2DBase) ParentStyle() *Style {
+func (nb *Node2DBase) ParentStyle() *gist.Style {
 	if nb.Par == nil {
 		return nil
 	}
-	if ps, ok := nb.Par.(Styler); ok {
+	if ps, ok := nb.Par.(gist.Styler); ok {
 		st := ps.Style()
 		ps.StyleRLock()
 		return st
@@ -943,17 +945,17 @@ func (nb *Node2DBase) ParentStyleRUnlock() {
 	if nb.Par == nil {
 		return
 	}
-	if ps, ok := nb.Par.(Styler); ok {
+	if ps, ok := nb.Par.(gist.Styler); ok {
 		ps.StyleRUnlock()
 	}
 }
 
 // ParentPaint returns the Paint from parent, if available
-func (nb *Node2DBase) ParentPaint() *Paint {
+func (nb *Node2DBase) ParentPaint() *gist.Paint {
 	if nb.Par == nil {
 		return nil
 	}
-	if pp, ok := nb.Par.(Painter); ok {
+	if pp, ok := nb.Par.(gist.Painter); ok {
 		return pp.Paint()
 	}
 	return nil

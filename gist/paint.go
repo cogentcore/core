@@ -14,6 +14,11 @@ import (
 	"github.com/goki/mat32"
 )
 
+// Painter defines an interface for anything that has a Paint style on it
+type Painter interface {
+	Paint() *Paint
+}
+
 // Paint provides the styling parameters for rendering
 type Paint struct {
 	Off         bool          `desc:"node and everything below it are off, non-rendering"`

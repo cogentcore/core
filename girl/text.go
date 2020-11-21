@@ -825,7 +825,7 @@ func (tr *TextRender) InsertSpan(at int, ns *SpanRender) {
 // runes, and the overall font size, etc.  todo: does not currently support
 // stroking, only filling of text -- probably need to grab path from font and
 // use paint rendering for stroking
-func (tr *TextRender) Render(rs *RenderState, pos mat32.Vec2) {
+func (tr *TextRender) Render(rs *State, pos mat32.Vec2) {
 	// pr := prof.Start("RenderText")
 	// defer pr.End()
 
@@ -927,7 +927,7 @@ func (tr *TextRender) Render(rs *RenderState, pos mat32.Vec2) {
 }
 
 // RenderBg renders the background behind chars
-func (sr *SpanRender) RenderBg(rs *RenderState, tpos mat32.Vec2) {
+func (sr *SpanRender) RenderBg(rs *State, tpos mat32.Vec2) {
 	curFace := sr.Render[0].Face
 	didLast := false
 	// first := true
@@ -974,7 +974,7 @@ func (sr *SpanRender) RenderBg(rs *RenderState, tpos mat32.Vec2) {
 }
 
 // RenderUnderline renders the underline for span -- ensures continuity to do it all at once
-func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos mat32.Vec2) {
+func (sr *SpanRender) RenderUnderline(rs *State, tpos mat32.Vec2) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
@@ -1039,7 +1039,7 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos mat32.Vec2) {
 }
 
 // RenderLine renders overline or line-through -- anything that is a function of ascent
-func (sr *SpanRender) RenderLine(rs *RenderState, tpos mat32.Vec2, deco gist.TextDecorations, ascPct float32) {
+func (sr *SpanRender) RenderLine(rs *State, tpos mat32.Vec2, deco gist.TextDecorations, ascPct float32) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
@@ -1104,7 +1104,7 @@ func (sr *SpanRender) RenderLine(rs *RenderState, tpos mat32.Vec2, deco gist.Tex
 // RenderTopPos renders at given top position -- uses first font info to
 // compute baseline offset and calls overall Render -- convenience for simple
 // widget rendering without layouts
-func (tr *TextRender) RenderTopPos(rs *RenderState, tpos mat32.Vec2) {
+func (tr *TextRender) RenderTopPos(rs *State, tpos mat32.Vec2) {
 	if len(tr.Spans) == 0 {
 		return
 	}

@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goki/gi/girl"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
@@ -214,9 +215,9 @@ func (pf *Preferences) Apply() {
 	}
 	if pf.FontPaths != nil {
 		paths := append(pf.FontPaths, oswin.TheApp.FontPaths()...)
-		FontLibrary.InitFontPaths(paths...)
+		girl.FontLibrary.InitFontPaths(paths...)
 	} else {
-		FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
+		girl.FontLibrary.InitFontPaths(oswin.TheApp.FontPaths()...)
 	}
 	pf.ApplyDPI()
 }
@@ -247,9 +248,9 @@ func (pf *Preferences) UpdateAll() {
 	ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 
-	RebuildDefaultStyles = true
-	ColorSpecCache = nil
-	styleTemplates = nil
+	gist.RebuildDefaultStyles = true
+	gist.ColorSpecCache = nil
+	gist.StyleTemplates = nil
 	// for _, w := range AllWindows {  // no need and just messes stuff up!
 	// 	w.SetSize(w.OSWin.Size())
 	// }
@@ -257,7 +258,7 @@ func (pf *Preferences) UpdateAll() {
 	for _, w := range AllWindows {
 		w.FullReRender()
 	}
-	RebuildDefaultStyles = false
+	gist.RebuildDefaultStyles = false
 	// and another without rebuilding?  yep all are required
 	for _, w := range AllWindows {
 		w.FullReRender()
@@ -356,7 +357,7 @@ func (pf *Preferences) PrefColor(clrName string) *Color {
 
 // PrefFontFamily returns the default FontFamily
 func (pf *Preferences) PrefFontFamily() string {
-	return pf.FontFamily
+	return string(pf.FontFamily)
 }
 
 // PreferencesProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView

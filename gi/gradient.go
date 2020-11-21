@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -16,7 +17,7 @@ import (
 // name is id for lookup in url
 type Gradient struct {
 	Node2DBase
-	Grad ColorSpec `desc:"the color gradient"`
+	Grad gist.ColorSpec `desc:"the color gradient"`
 }
 
 var KiT_Gradient = kit.Types.AddType(&Gradient{}, nil)

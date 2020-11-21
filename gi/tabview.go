@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -420,7 +421,7 @@ func (tv *TabView) InitTabView() {
 	// tabs.SetStretchMaxHeight()
 	// tabs.SetMinPrefWidth(units.NewEm(10))
 	tabs.SetProp("height", units.NewEm(1.8))
-	tabs.SetProp("overflow", OverflowHidden) // no scrollbars!
+	tabs.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	tabs.SetProp("padding", units.NewPx(0))
 	tabs.SetProp("margin", units.NewPx(0))
 	tabs.SetProp("spacing", units.NewPx(4))
@@ -539,7 +540,7 @@ var TabButtonProps = ki.Props{
 	"border-width":     units.NewPx(0),
 	"border-radius":    units.NewPx(0),
 	"border-color":     &Prefs.Colors.Border,
-	"text-align":       AlignCenter,
+	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"padding":          units.NewPx(4), // we go to edge of bar
@@ -565,7 +566,7 @@ var TabButtonProps = ki.Props{
 		"height":         units.NewEx(0.5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignBottom,
+		"vertical-align": gist.AlignBottom,
 	},
 	"#shortcut": ki.Props{
 		"margin":  units.NewPx(0),
@@ -606,7 +607,7 @@ func (tb *TabButton) TabView() *TabView {
 }
 
 func (tb *TabButton) ConfigParts() {
-	tb.Parts.SetProp("overflow", OverflowHidden) // no scrollbars!
+	tb.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	if !tb.NoDelete {
 		tb.ConfigPartsDeleteButton()
 		return

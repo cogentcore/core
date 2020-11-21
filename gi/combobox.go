@@ -10,6 +10,7 @@ import (
 	"sort"
 	"unicode/utf8"
 
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -60,7 +61,7 @@ var ComboBoxProps = ki.Props{
 	"border-color":     &Prefs.Colors.Border,
 	"padding":          units.NewPx(4),
 	"margin":           units.NewPx(4),
-	"text-align":       AlignCenter,
+	"text-align":       gist.AlignCenter,
 	"background-color": &Prefs.Colors.Control,
 	"color":            &Prefs.Colors.Font,
 	"#icon": ki.Props{
@@ -86,7 +87,7 @@ var ComboBoxProps = ki.Props{
 		"height":         units.NewEx(1.5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignBottom,
+		"vertical-align": gist.AlignBottom,
 		"fill":           &Prefs.Colors.Icon,
 		"stroke":         &Prefs.Colors.Font,
 	},

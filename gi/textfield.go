@@ -14,6 +14,8 @@ import (
 	"unicode"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -41,30 +43,30 @@ var CursorBlinkMSec = 500
 // TextField is a widget for editing a line of text
 type TextField struct {
 	PartsWidgetBase
-	Txt          string                  `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
-	Placeholder  string                  `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	ClearAct     bool                    `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
-	CursorWidth  units.Value             `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	Edited       bool                    `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
-	EditTxt      []rune                  `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
-	MaxWidthReq  int                     `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
-	EffSize      mat32.Vec2              `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
-	StartPos     int                     `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
-	EndPos       int                     `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`
-	CursorPos    int                     `copy:"-" json:"-" xml:"-" desc:"current cursor position"`
-	CharWidth    int                     `copy:"-" json:"-" xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
-	SelectStart  int                     `copy:"-" json:"-" xml:"-" desc:"starting position of selection in the string"`
-	SelectEnd    int                     `copy:"-" json:"-" xml:"-" desc:"ending position of selection in the string"`
-	SelectInit   int                     `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`
-	SelectMode   bool                    `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-	TextFieldSig ki.Signal               `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll    TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis    TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
-	StateStyles  [TextFieldStatesN]Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight   float32                 `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
-	BlinkOn      bool                    `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
-	CursorMu     sync.Mutex              `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
-	Complete     *Complete               `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Txt          string                       `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Placeholder  string                       `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	ClearAct     bool                         `xml:"clear-act" desc:"add a clear action x at right side of edit, set from clear-act property (inherited) -- on by default"`
+	CursorWidth  units.Value                  `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	Edited       bool                         `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	EditTxt      []rune                       `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	MaxWidthReq  int                          `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	EffSize      mat32.Vec2                   `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting the close widget"`
+	StartPos     int                          `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
+	EndPos       int                          `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`
+	CursorPos    int                          `copy:"-" json:"-" xml:"-" desc:"current cursor position"`
+	CharWidth    int                          `copy:"-" json:"-" xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	SelectStart  int                          `copy:"-" json:"-" xml:"-" desc:"starting position of selection in the string"`
+	SelectEnd    int                          `copy:"-" json:"-" xml:"-" desc:"ending position of selection in the string"`
+	SelectInit   int                          `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`
+	SelectMode   bool                         `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	TextFieldSig ki.Signal                    `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	RenderAll    girl.TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    girl.TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
+	StateStyles  [TextFieldStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight   float32                      `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
+	BlinkOn      bool                         `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+	CursorMu     sync.Mutex                   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
+	Complete     *Complete                    `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -97,7 +99,7 @@ var TextFieldProps = ki.Props{
 	"border-color":     &Prefs.Colors.Border,
 	"padding":          units.NewPx(4),
 	"margin":           units.NewPx(1),
-	"text-align":       AlignLeft,
+	"text-align":       gist.AlignLeft,
 	"color":            &Prefs.Colors.Font,
 	"background-color": &Prefs.Colors.Control,
 	"clear-act":        true,
@@ -106,7 +108,7 @@ var TextFieldProps = ki.Props{
 		"height":         units.NewEx(0.5),
 		"margin":         units.NewPx(0),
 		"padding":        units.NewPx(0),
-		"vertical-align": AlignMiddle,
+		"vertical-align": gist.AlignMiddle,
 	},
 	TextFieldSelectors[TextFieldActive]: ki.Props{
 		"background-color": "lighter-0",
@@ -1353,7 +1355,7 @@ func (tf *TextField) ConfigParts() {
 	config.Add(KiT_Stretch, "clr-str")
 	config.Add(KiT_Action, "clear")
 	mods, updt := tf.Parts.ConfigChildren(config, ki.NonUniqueNames)
-	if mods || RebuildDefaultStyles {
+	if mods || gist.RebuildDefaultStyles {
 		clr := tf.Parts.Child(1).(*Action)
 		tf.StylePart(Node2D(clr))
 		clr.SetIcon("close")
@@ -1400,7 +1402,7 @@ func (tf *TextField) StyleTextField() {
 		for i := 0; i < int(TextFieldStatesN); i++ {
 			tf.StateStyles[i].CopyFrom(&tf.Sty)
 			tf.StateStyles[i].SetStyleProps(pst, tf.StyleProps(TextFieldSelectors[i]), tf.Viewport)
-			tf.StateStyles[i].StyleCSS(tf.This().(Node2D), tf.CSSAgg, TextFieldSelectors[i], tf.Viewport)
+			StyleCSS(tf.This().(Node2D), tf.Viewport, &tf.StateStyles[i], tf.CSSAgg, TextFieldSelectors[i])
 			tf.StateStyles[i].CopyUnitContext(&tf.Sty.UnContext)
 		}
 	}
@@ -1428,7 +1430,7 @@ func (tf *TextField) Style2D() {
 
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Sty
-	st.Font.OpenFont(&st.UnContext)
+	girl.OpenFont(&st.Font, &st.UnContext)
 	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
@@ -1495,7 +1497,7 @@ func (tf *TextField) RenderTextField() {
 		tf.Sty = tf.StateStyles[TextFieldActive]
 	}
 	st = &tf.Sty // update
-	st.Font.OpenFont(&st.UnContext)
+	girl.OpenFont(&st.Font, &st.UnContext)
 	tf.RenderStdBox(st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect()
