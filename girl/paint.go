@@ -2,28 +2,24 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package girl
 
 import (
 	"errors"
 	"image"
 	"image/color"
-	"log"
 	"math"
-	"sync"
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gist"
-	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	"github.com/srwiley/rasterx"
-	"github.com/srwiley/scanx"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )
 
 /*
-This borrows very heavily from: https://github.com/fogleman/gg
+This borrows heavily from: https://github.com/fogleman/gg
 
 Copyright (C) 2016 Michael Fogleman
 
@@ -65,51 +61,6 @@ func NewPaint() Paint {
 	return p
 }
 
-// InheritFields from parent: Manual inheriting of values is much faster than
-// automatic version!
-func (pc *Paint) InheritFields(par *Paint) {
-	pc.FontStyle.InheritFields(&par.FontStyle)
-	pc.TextStyle.InheritFields(&par.TextStyle)
-}
-
-// SetStyleProps sets paint values based on given property map (name: value
-// pairs), inheriting elements as appropriate from parent, and also having a
-// default style for the "initial" setting
-func (pc *Paint) SetStyleProps(par *Paint, props ki.Props, vp *Viewport2D) {
-	if !pc.StyleSet && par != nil { // first time
-		pc.InheritFields(par)
-	}
-	pc.StyleFromProps(par, props, vp)
-
-	pc.StrokeStyle.SetStylePost(props)
-	pc.FillStyle.SetStylePost(props)
-	pc.FontStyle.SetStylePost(props)
-	pc.TextStyle.SetStylePost(props)
-	pc.PropsNil = (len(props) == 0)
-	pc.StyleSet = true
-}
-
-// SetUnitContext sets the unit context based on size of viewport and parent
-// element (from bbox) and then cache everything out in terms of raw pixel
-// dots for rendering -- call at start of render
-func (pc *Paint) SetUnitContext(vp *Viewport2D, el mat32.Vec2) {
-	pc.UnContext.Defaults()
-	if vp != nil {
-		pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
-		// if vp.Win != nil {
-		// 	pc.UnContext.DPI = vp.Win.LogicalDPI()
-		// }
-		if vp.Render.Image != nil {
-			sz := vp.Render.Image.Bounds().Size()
-			pc.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
-		} else {
-			pc.UnContext.SetSizes(0, 0, el.X, el.Y)
-		}
-	}
-	pc.FontStyle.SetUnitContext(&pc.UnContext)
-	pc.ToDots()
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 // State query
 
@@ -137,177 +88,6 @@ func (pc *Paint) FillStrokeClear(rs *RenderState) {
 		pc.StrokePreserve(rs)
 	}
 	pc.ClearPath(rs)
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-// RenderState
-
-// The RenderState holds all the current rendering state information used
-// while painting -- a viewport just has one of these
-type RenderState struct {
-	Paint  Paint           `desc:"communal painter -- for widgets -- SVG have their own"`
-	XForm  mat32.Mat2      `desc:"current transform"`
-	Path   rasterx.Path    `desc:"current path"`
-	Raster *rasterx.Dasher `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
-	//	Scanner        *scanFT.ScannerFT `desc:"scanner for freetype-based rasterx"`
-	// CompSpanner    *scanx.CompressSpanner `desc:"spanner for scanx"`
-	Scanner        *scanx.Scanner    `desc:"scanner for scanx"`
-	ImgSpanner     *scanx.ImgSpanner `desc:"spanner for scanx"`
-	Start          mat32.Vec2        `desc:"starting point, for close path"`
-	Current        mat32.Vec2        `desc:"current point"`
-	HasCurrent     bool              `desc:"is current point current?"`
-	Image          *image.RGBA       `desc:"pointer to image to render into"`
-	Mask           *image.Alpha      `desc:"current mask"`
-	Bounds         image.Rectangle   `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
-	LastRenderBBox image.Rectangle   `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`
-	XFormStack     []mat32.Mat2      `desc:"stack of transforms"`
-	BoundsStack    []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
-	ClipStack      []*image.Alpha    `desc:"stack of clips, if needed"`
-	PaintBack      Paint             `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
-	RenderMu       sync.Mutex        `desc:"mutex for overall rendering"`
-	RasterMu       sync.Mutex        `desc:"mutex for final rasterx rendering -- only one at a time"`
-}
-
-// Init initializes RenderState -- must be called whenever image size changes
-func (rs *RenderState) Init(width, height int, img *image.RGBA) {
-	rs.Paint.Defaults()
-	rs.XForm = mat32.Identity2D()
-	rs.Image = img
-	// to use the golang.org/x/image/vector scanner, do this:
-	// rs.Scanner = rasterx.NewScannerGV(width, height, img, img.Bounds())
-	// and cut out painter:
-	/*
-		painter := scanFT.NewRGBAPainter(img)
-		rs.Scanner = scanFT.NewScannerFT(width, height, painter)
-	*/
-	/*
-		rs.CompSpanner = &scanx.CompressSpanner{}
-		rs.CompSpanner.SetBounds(img.Bounds())
-	*/
-	rs.ImgSpanner = scanx.NewImgSpanner(img)
-	rs.Scanner = scanx.NewScanner(rs.ImgSpanner, width, height)
-	// rs.Scanner = scanx.NewScanner(rs.CompSpanner, width, height)
-	rs.Raster = rasterx.NewDasher(width, height, rs.Scanner)
-}
-
-// PushXForm pushes current xform onto stack and apply new xform on top of it
-// must protect within render mutex lock (see Lock version)
-func (rs *RenderState) PushXForm(xf mat32.Mat2) {
-	if rs.XFormStack == nil {
-		rs.XFormStack = make([]mat32.Mat2, 0, 100)
-	}
-	rs.XFormStack = append(rs.XFormStack, rs.XForm)
-	rs.XForm = xf.Mul(rs.XForm)
-}
-
-// PushXFormLock pushes current xform onto stack and apply new xform on top of it
-// protects within render mutex lock
-func (rs *RenderState) PushXFormLock(xf mat32.Mat2) {
-	rs.RenderMu.Lock()
-	rs.PushXForm(xf)
-	rs.RenderMu.Unlock()
-}
-
-// PopXForm pops xform off the stack and set to current xform
-// must protect within render mutex lock (see Lock version)
-func (rs *RenderState) PopXForm() {
-	sz := len(rs.XFormStack)
-	if sz == 0 {
-		log.Printf("gi.RenderState PopXForm: stack is empty -- programmer error\n")
-		rs.XForm = mat32.Identity2D()
-		return
-	}
-	rs.XForm = rs.XFormStack[sz-1]
-	rs.XFormStack = rs.XFormStack[:sz-1]
-}
-
-// PopXFormLock pops xform off the stack and set to current xform
-// protects within render mutex lock (see Lock version)
-func (rs *RenderState) PopXFormLock() {
-	rs.RenderMu.Lock()
-	rs.PopXForm()
-	rs.RenderMu.Unlock()
-}
-
-// PushBounds pushes current bounds onto stack and set new bounds
-// this is the essential first step in rendering!
-// any further actual rendering should always be surrounded
-// by Lock() / Unlock() calls
-func (rs *RenderState) PushBounds(b image.Rectangle) {
-	rs.RenderMu.Lock()
-	defer rs.RenderMu.Unlock()
-
-	if rs.BoundsStack == nil {
-		rs.BoundsStack = make([]image.Rectangle, 0, 100)
-	}
-	if rs.Bounds.Empty() { // note: method name should be IsEmpty!
-		rs.Bounds = rs.Image.Bounds()
-	}
-	rs.BoundsStack = append(rs.BoundsStack, rs.Bounds)
-	// note: this does not fix the ghost trace from rendering..
-	// bp1 := image.Rectangle{Min: image.Point{X: b.Min.X - 1, Y: b.Min.Y - 1}, Max: image.Point{X: b.Max.X + 1, Y: b.Max.Y + 1}}
-	rs.Bounds = b
-}
-
-// Lock locks the render mutex -- must lock prior to rendering!
-func (rs *RenderState) Lock() {
-	rs.RenderMu.Lock()
-}
-
-// Unlock unlocks the render mutex, locked with PushBounds --
-// call this prior to children rendering etc.
-func (rs *RenderState) Unlock() {
-	rs.RenderMu.Unlock()
-}
-
-// PopBounds pops bounds off the stack and set to current bounds
-// must be equally balanced with corresponding PushBounds
-func (rs *RenderState) PopBounds() {
-	rs.RenderMu.Lock()
-	defer rs.RenderMu.Unlock()
-
-	sz := len(rs.BoundsStack)
-	if sz == 0 {
-		log.Printf("gi.RenderState PopBounds: stack is empty -- programmer error\n")
-		rs.Bounds = rs.Image.Bounds()
-		return
-	}
-	rs.Bounds = rs.BoundsStack[sz-1]
-	rs.BoundsStack = rs.BoundsStack[:sz-1]
-}
-
-// PushClip pushes current Mask onto the clip stack
-func (rs *RenderState) PushClip() {
-	if rs.Mask == nil {
-		return
-	}
-	if rs.ClipStack == nil {
-		rs.ClipStack = make([]*image.Alpha, 0, 10)
-	}
-	rs.ClipStack = append(rs.ClipStack, rs.Mask)
-}
-
-// PopClip pops Mask off the clip stack and set to current mask
-func (rs *RenderState) PopClip() {
-	sz := len(rs.ClipStack)
-	if sz == 0 {
-		log.Printf("gi.RenderState PopClip: stack is empty -- programmer error\n")
-		rs.Mask = nil // implied
-		return
-	}
-	rs.Mask = rs.ClipStack[sz-1]
-	rs.ClipStack[sz-1] = nil
-	rs.ClipStack = rs.ClipStack[:sz-1]
-}
-
-// BackupPaint copies style settings from Paint to PaintBack
-func (rs *RenderState) BackupPaint() {
-	rs.PaintBack.CopyStyleFrom(&rs.Paint)
-}
-
-// RestorePaint restores style settings from PaintBack to Paint
-func (rs *RenderState) RestorePaint() {
-	rs.Paint.CopyStyleFrom(&rs.PaintBack)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -431,15 +211,15 @@ func (pc *Paint) NewSubPath(rs *RenderState) {
 
 func (pc *Paint) capfunc() rasterx.CapFunc {
 	switch pc.StrokeStyle.Cap {
-	case LineCapButt:
+	case gist.LineCapButt:
 		return rasterx.ButtCap
-	case LineCapRound:
+	case gist.LineCapRound:
 		return rasterx.RoundCap
-	case LineCapSquare:
+	case gist.LineCapSquare:
 		return rasterx.SquareCap
-	case LineCapCubic:
+	case gist.LineCapCubic:
 		return rasterx.CubicCap
-	case LineCapQuadratic:
+	case gist.LineCapQuadratic:
 		return rasterx.QuadraticCap
 	}
 	return nil
@@ -447,17 +227,17 @@ func (pc *Paint) capfunc() rasterx.CapFunc {
 
 func (pc *Paint) joinmode() rasterx.JoinMode {
 	switch pc.StrokeStyle.Join {
-	case LineJoinMiter:
+	case gist.LineJoinMiter:
 		return rasterx.Miter
-	case LineJoinMiterClip:
+	case gist.LineJoinMiterClip:
 		return rasterx.MiterClip
-	case LineJoinRound:
+	case gist.LineJoinRound:
 		return rasterx.Round
-	case LineJoinBevel:
+	case gist.LineJoinBevel:
 		return rasterx.Bevel
-	case LineJoinArcs:
+	case gist.LineJoinArcs:
 		return rasterx.Arc
-	case LineJoinArcsClip:
+	case gist.LineJoinArcsClip:
 		return rasterx.ArcClip
 	}
 	return rasterx.Arc
@@ -470,7 +250,7 @@ func (pc *Paint) StrokeWidth(rs *RenderState) float32 {
 	if dw == 0 {
 		return dw
 	}
-	if pc.VecEff == VecEffNonScalingStroke {
+	if pc.VecEff == gist.VecEffNonScalingStroke {
 		return dw
 	}
 	scx, scy := rs.XForm.ExtractScale()
@@ -539,14 +319,14 @@ func (pc *Paint) fill(rs *RenderState) {
 	defer rs.RasterMu.Unlock()
 
 	rf := &rs.Raster.Filler
-	rf.SetWinding(pc.FillStyle.Rule == FillRuleNonZero)
+	rf.SetWinding(pc.FillStyle.Rule == gist.FillRuleNonZero)
 	rs.Scanner.SetClip(rs.Bounds)
 	rs.Path.AddTo(rf)
 	fbox := rs.Scanner.GetPathExtent()
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if pc.FillStyle.Color.Source == RadialGradient {
+	if pc.FillStyle.Color.Source == gist.RadialGradient {
 		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	} else {
 		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
@@ -591,8 +371,8 @@ func (pc *Paint) Fill(rs *RenderState) {
 
 // FillBox is an optimized fill of a square region with a uniform color if
 // the given color spec is a solid color
-func (pc *Paint) FillBox(rs *RenderState, pos, size mat32.Vec2, clr *ColorSpec) {
-	if clr.Source == SolidColor {
+func (pc *Paint) FillBox(rs *RenderState, pos, size mat32.Vec2, clr *gist.ColorSpec) {
+	if clr.Source == gist.SolidColor {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.ZP, draw.Src)
 	} else {

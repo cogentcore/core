@@ -6,6 +6,7 @@ package gist
 
 import (
 	"image/color"
+	"strings"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
@@ -364,3 +365,50 @@ var KiT_FontVariants = kit.Enums.AddEnumAltLower(FontVariantsN, kit.NotBitFlag, 
 
 func (ev FontVariants) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
 func (ev *FontVariants) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+
+// FontNameToMods parses the regularized font name and returns the appropriate
+// base name and associated font mods.
+func FontNameToMods(fn string) (basenm string, str FontStretch, wt FontWeights, sty FontStyles) {
+	basenm = fn
+	for mi, mod := range FontStretchNames {
+		spmod := " " + mod
+		if strings.Contains(fn, spmod) {
+			str = FontStretch(mi)
+			basenm = strings.Replace(basenm, spmod, "", 1)
+			break
+		}
+	}
+	for mi, mod := range FontWeightNames {
+		spmod := " " + mod
+		if strings.Contains(fn, spmod) {
+			wt = FontWeightNameVals[mi]
+			basenm = strings.Replace(basenm, spmod, "", 1)
+			break
+		}
+	}
+	for mi, mod := range FontStyleNames {
+		spmod := " " + mod
+		if strings.Contains(fn, spmod) {
+			sty = FontStyles(mi)
+			basenm = strings.Replace(basenm, spmod, "", 1)
+			break
+		}
+	}
+	return
+}
+
+// FontNameFromMods generates the appropriate regularized file name based on
+// base name and modifiers
+func FontNameFromMods(basenm string, str FontStretch, wt FontWeights, sty FontStyles) string {
+	fn := basenm
+	if str != FontStrNormal {
+		fn += " " + FontStretchNames[str]
+	}
+	if wt != WeightNormal && wt != Weight400 {
+		fn += " " + FontWeightToNameMap[wt]
+	}
+	if sty != FontNormal {
+		fn += " " + FontStyleNames[sty]
+	}
+	return fn
+}

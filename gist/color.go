@@ -21,9 +21,6 @@ import (
 // Color defines a standard color object for GUI use, with RGBA values, and
 // all the usual necessary conversion functions to / from names, strings, etc
 
-// ColorName provides a value-view GUI lookup of valid color names
-type ColorName string
-
 // Color extends image/color.RGBA with more methods for converting to / from
 // strings etc -- it has standard uint8 0..255 color values
 type Color struct {

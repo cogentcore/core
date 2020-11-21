@@ -11,7 +11,7 @@ a 2D Viewport can in turn be embedded within the 3D scene.
 
 The 2D scenegraph supports:
 
-	* Widget nodes for GUI actions (Buttons, Menus etc) -- render directly via Paint
+	* Widget nodes for GUI actions (Buttons, Menus etc) -- render directly via GiRl
 	* Layouts for placing widgets, which are also container nodes
 	* CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
 	* svg sub-package with SVG Viewport and shapes, paths, etc -- full SVG support

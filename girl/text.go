@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package girl
 
 import (
 	"bytes"
@@ -21,6 +21,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/chewxy/math32"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/bitflag"
@@ -50,14 +51,14 @@ import (
 // those pointers -- float32 values used to support better accuracy when
 // transforming points
 type RuneRender struct {
-	Face    font.Face       `json:"-" xml:"-" desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
-	Color   color.Color     `json:"-" xml:"-" desc:"color to draw characters in"`
-	BgColor color.Color     `json:"-" xml:"-" desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
-	Deco    TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)"`
-	RelPos  mat32.Vec2      `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
-	Size    mat32.Vec2      `desc:"size of the rune itself, exclusive of spacing that might surround it"`
-	RotRad  float32         `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
-	ScaleX  float32         `desc:"scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling"`
+	Face    font.Face            `json:"-" xml:"-" desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
+	Color   color.Color          `json:"-" xml:"-" desc:"color to draw characters in"`
+	BgColor color.Color          `json:"-" xml:"-" desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
+	Deco    gist.TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)"`
+	RelPos  mat32.Vec2           `desc:"relative position from start of TextRender for the lower-left baseline rendering position of the font character"`
+	Size    mat32.Vec2           `desc:"size of the rune itself, exclusive of spacing that might surround it"`
+	RotRad  float32              `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
+	ScaleX  float32              `desc:"scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling"`
 }
 
 // HasNil returns error if any of the key info (face, color) is nil -- only
@@ -120,12 +121,12 @@ func (rr *RuneRender) RelPosAfterTB() float32 {
 // span-as-line.  The first RuneRender RelPos for LR text should be at X=0
 // (LastPos = 0 for RL) -- i.e., relpos positions are minimal for given span.
 type SpanRender struct {
-	Text    []rune          `desc:"text as runes"`
-	Render  []RuneRender    `desc:"render info for each rune in one-to-one correspondence"`
-	RelPos  mat32.Vec2      `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
-	LastPos mat32.Vec2      `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same TextRender relative coordinates"`
-	Dir     TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`
-	HasDeco TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
+	Text    []rune               `desc:"text as runes"`
+	Render  []RuneRender         `desc:"render info for each rune in one-to-one correspondence"`
+	RelPos  mat32.Vec2           `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
+	LastPos mat32.Vec2           `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same TextRender relative coordinates"`
+	Dir     gist.TextDirections  `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	HasDeco gist.TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
 }
 
 // Init initializes a new span with given capacity
@@ -188,10 +189,10 @@ func (sr *SpanRender) RuneEndPos(idx int) mat32.Vec2 {
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *SpanRender) HasDecoUpdate(bg color.Color, deco TextDecorations) {
+func (sr *SpanRender) HasDecoUpdate(bg color.Color, deco gist.TextDecorations) {
 	sr.HasDeco |= deco
 	if bg != nil {
-		bitflag.Set32((*int32)(&sr.HasDeco), int(DecoBgColor))
+		bitflag.Set32((*int32)(&sr.HasDeco), int(gist.DecoBgColor))
 	}
 }
 
@@ -200,18 +201,18 @@ func (sr *SpanRender) IsNewPara() bool {
 	if len(sr.Render) == 0 {
 		return false
 	}
-	return bitflag.Has32(int32(sr.Render[0].Deco), int(DecoParaStart))
+	return bitflag.Has32(int32(sr.Render[0].Deco), int(gist.DecoParaStart))
 }
 
 // SetNewPara sets this as starting a new paragraph
 func (sr *SpanRender) SetNewPara() {
 	if len(sr.Render) > 0 {
-		bitflag.Set32((*int32)(&sr.Render[0].Deco), int(DecoParaStart))
+		bitflag.Set32((*int32)(&sr.Render[0].Deco), int(gist.DecoParaStart))
 	}
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *SpanRender) AppendRune(r rune, face font.Face, clr, bg color.Color, deco TextDecorations) {
+func (sr *SpanRender) AppendRune(r rune, face font.Face, clr, bg color.Color, deco gist.TextDecorations) {
 	sr.Text = append(sr.Text, r)
 	rr := RuneRender{Face: face, Color: clr, BgColor: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
@@ -220,18 +221,18 @@ func (sr *SpanRender) AppendRune(r rune, face font.Face, clr, bg color.Color, de
 
 // AppendString adds string and associated formatting info, optimized with
 // only first rune having non-nil face and color settings
-func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Color, deco TextDecorations, sty *FontStyle, ctxt *units.Context) {
+func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Color, deco gist.TextDecorations, sty *gist.Font, ctxt *units.Context) {
 	if len(str) == 0 {
 		return
 	}
-	ucfont := FontStyle{}
+	ucfont := &gist.Font{}
 	if oswin.TheApp.Platform() == oswin.MacOS {
 		ucfont.Family = "Arial Unicode"
 	} else {
 		ucfont.Family = "Arial"
 	}
 	ucfont.Size = sty.Size
-	ucfont.OpenFont(ctxt)
+	OpenFont(ucfont, ctxt)
 
 	nwr := []rune(str)
 	sz := len(nwr)
@@ -266,7 +267,7 @@ func (sr *SpanRender) AppendString(str string, face font.Face, clr, bg color.Col
 }
 
 // SetRenders sets rendering parameters based on style
-func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *SpanRender) SetRenders(sty *gist.Font, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
@@ -277,10 +278,10 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 		bgc = nil
 	}
 
-	ucfont := FontStyle{}
+	ucfont := &gist.Font{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
-	ucfont.OpenFont(ctxt)
+	OpenFont(ucfont, ctxt)
 
 	sr.HasDecoUpdate(bgc, sty.Deco)
 	sr.Render = make([]RuneRender, sz)
@@ -304,7 +305,7 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 			sr.Render[i].ScaleX = scalex
 		}
 	}
-	if sty.Deco != DecoNone {
+	if sty.Deco != gist.DecoNone {
 		for i := range sr.Text {
 			sr.Render[i].Deco = sty.Deco
 		}
@@ -329,7 +330,7 @@ func (sr *SpanRender) SetRenders(sty *FontStyle, ctxt *units.Context, noBG bool,
 // SetString initializes to given plain text string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *SpanRender) SetString(str string, sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *SpanRender) SetString(str string, sty *gist.Font, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = []rune(str)
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
@@ -337,7 +338,7 @@ func (sr *SpanRender) SetString(str string, sty *FontStyle, ctxt *units.Context,
 // SetRunes initializes to given plain rune string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *SpanRender) SetRunes(str []rune, sty *FontStyle, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *SpanRender) SetRunes(str []rune, sty *gist.Font, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = str
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
@@ -356,7 +357,7 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 		// log.Println(err)
 		return
 	}
-	sr.Dir = LRTB
+	sr.Dir = gist.LRTB
 	sz := len(sr.Text)
 	prevR := rune(-1)
 	lspc := letterSpace
@@ -379,10 +380,10 @@ func (sr *SpanRender) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize
 		rr.RelPos.X = fpos
 		rr.RelPos.Y = 0
 
-		if bitflag.Has32(int32(rr.Deco), int(DecoSuper)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoSuper)) {
 			rr.RelPos.Y = -0.45 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
-		if bitflag.Has32(int32(rr.Deco), int(DecoSub)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoSub)) {
 			rr.RelPos.Y = 0.15 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
 
@@ -426,7 +427,7 @@ func (sr *SpanRender) SetRunePosTB(letterSpace, wordSpace, chsz float32, tabSize
 		// log.Println(err)
 		return
 	}
-	sr.Dir = TB
+	sr.Dir = gist.TB
 	sz := len(sr.Text)
 	lspc := letterSpace
 	wspc := wordSpace
@@ -446,10 +447,10 @@ func (sr *SpanRender) SetRunePosTB(letterSpace, wordSpace, chsz float32, tabSize
 		rr.RelPos.X = 0
 		rr.RelPos.Y = fpos
 
-		if bitflag.Has32(int32(rr.Deco), int(DecoSuper)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoSuper)) {
 			rr.RelPos.Y = -0.45 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
-		if bitflag.Has32(int32(rr.Deco), int(DecoSub)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoSub)) {
 			rr.RelPos.Y = 0.15 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
 
@@ -493,7 +494,7 @@ func (sr *SpanRender) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabS
 		// log.Println(err)
 		return
 	}
-	sr.Dir = TB
+	sr.Dir = gist.TB
 	sz := len(sr.Text)
 	prevR := rune(-1)
 	lspc := letterSpace
@@ -518,10 +519,10 @@ func (sr *SpanRender) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabS
 		rr.RelPos.Y = fpos
 		rr.RelPos.X = 0
 
-		if bitflag.Has32(int32(rr.Deco), int(DecoSuper)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoSuper)) {
 			rr.RelPos.X = -0.45 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
-		if bitflag.Has32(int32(rr.Deco), int(DecoSub)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoSub)) {
 			rr.RelPos.X = 0.15 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
 
@@ -744,7 +745,7 @@ type TextLink struct {
 	StartIdx  int      `desc:"index in StartSpan where link starts"`
 	EndSpan   int      `desc:"span index where link ends (can be same as EndSpan)"`
 	EndIdx    int      `desc:"index in EndSpan where link ends (index of last rune in label)"`
-	Widget    Node2D   `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
+	Widget    ki.Ki    `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`
 }
 
 // Bounds returns the bounds of the link
@@ -800,9 +801,9 @@ var URLHandler = func(url string) bool {
 // representing a separate line of text (but they can be anything).
 type TextRender struct {
 	Spans []SpanRender
-	Size  mat32.Vec2     `desc:"last size of overall rendered text"`
-	Dir   TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
-	Links []TextLink     `desc:"hyperlinks within rendered text"`
+	Size  mat32.Vec2          `desc:"last size of overall rendered text"`
+	Dir   gist.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Links []TextLink          `desc:"hyperlinks within rendered text"`
 }
 
 // InsertSpan inserts a new span at given index
@@ -853,14 +854,14 @@ func (tr *TextRender) Render(rs *RenderState, pos mat32.Vec2) {
 		}
 
 		// todo: cache flags if these are actually needed
-		if bitflag.Has32(int32(sr.HasDeco), int(DecoBgColor)) {
+		if bitflag.Has32(int32(sr.HasDeco), int(gist.DecoBgColor)) {
 			sr.RenderBg(rs, tpos)
 		}
-		if bitflag.HasAny32(int32(sr.HasDeco), int(DecoUnderline), int(DecoDottedUnderline)) {
+		if bitflag.HasAny32(int32(sr.HasDeco), int(gist.DecoUnderline), int(gist.DecoDottedUnderline)) {
 			sr.RenderUnderline(rs, tpos)
 		}
-		if bitflag.Has32(int32(sr.HasDeco), int(DecoOverline)) {
-			sr.RenderLine(rs, tpos, DecoOverline, 1.1)
+		if bitflag.Has32(int32(sr.HasDeco), int(gist.DecoOverline)) {
+			sr.RenderLine(rs, tpos, gist.DecoOverline, 1.1)
 		}
 
 		for i, r := range sr.Text {
@@ -919,8 +920,8 @@ func (tr *TextRender) Render(rs *RenderState, pos mat32.Vec2) {
 				})
 			}
 		}
-		if bitflag.Has32(int32(sr.HasDeco), int(DecoLineThrough)) {
-			sr.RenderLine(rs, tpos, DecoLineThrough, 0.25)
+		if bitflag.Has32(int32(sr.HasDeco), int(gist.DecoLineThrough)) {
+			sr.RenderLine(rs, tpos, gist.DecoLineThrough, 0.25)
 		}
 	}
 }
@@ -984,7 +985,7 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos mat32.Vec2) {
 			continue
 		}
 		rr := &(sr.Render[i])
-		if !bitflag.HasAny32(int32(rr.Deco), int(DecoUnderline), int(DecoDottedUnderline)) {
+		if !bitflag.HasAny32(int32(rr.Deco), int(gist.DecoUnderline), int(gist.DecoDottedUnderline)) {
 			if didLast {
 				pc.Stroke(rs)
 			}
@@ -1016,7 +1017,7 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos mat32.Vec2) {
 			pc.StrokeStyle.Width.Dots = dw
 			pc.StrokeStyle.Color.SetColor(curColor)
 		}
-		if bitflag.Has32(int32(rr.Deco), int(DecoDottedUnderline)) {
+		if bitflag.Has32(int32(rr.Deco), int(gist.DecoDottedUnderline)) {
 			pc.StrokeStyle.Dashes = []float64{2, 2}
 		}
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, 2 * dw}))
@@ -1038,7 +1039,7 @@ func (sr *SpanRender) RenderUnderline(rs *RenderState, tpos mat32.Vec2) {
 }
 
 // RenderLine renders overline or line-through -- anything that is a function of ascent
-func (sr *SpanRender) RenderLine(rs *RenderState, tpos mat32.Vec2, deco TextDecorations, ascPct float32) {
+func (sr *SpanRender) RenderLine(rs *RenderState, tpos mat32.Vec2, deco gist.TextDecorations, ascPct float32) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false
@@ -1124,7 +1125,7 @@ func (tr *TextRender) RenderTopPos(rs *RenderState, tpos mat32.Vec2) {
 // apply these per character after.  Be sure that OpenFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
-func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, rot, scalex float32) {
+func (tr *TextRender) SetString(str string, fontSty *gist.Font, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
@@ -1143,7 +1144,7 @@ func (tr *TextRender) SetString(str string, fontSty *FontStyle, ctxt *units.Cont
 // entire string, and does TB rotated layout (-90 deg).
 // Be sure that OpenFont has been run so a valid Face is available.
 // noBG ignores any BgColor in font style, and never renders background color
-func (tr *TextRender) SetStringRot90(str string, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, scalex float32) {
+func (tr *TextRender) SetStringRot90(str string, fontSty *gist.Font, ctxt *units.Context, txtSty *gist.Text, noBG bool, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
@@ -1164,7 +1165,7 @@ func (tr *TextRender) SetStringRot90(str string, fontSty *FontStyle, ctxt *units
 // apply these per character after Be sure that OpenFont has been run so a
 // valid Face is available.  noBG ignores any BgColor in font style, and never
 // renders background color
-func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Context, txtSty *TextStyle, noBG bool, rot, scalex float32) {
+func (tr *TextRender) SetRunes(str []rune, fontSty *gist.Font, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]SpanRender, 1)
 	}
@@ -1180,64 +1181,64 @@ func (tr *TextRender) SetRunes(str []rune, fontSty *FontStyle, ctxt *units.Conte
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags
 // that only require updating the given font spec values -- returns true if handled
 // https://www.w3schools.com/cssref/css_default_values.asp
-func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.Props) bool {
+func SetHTMLSimpleTag(tag string, fs *gist.Font, ctxt *units.Context, cssAgg ki.Props) bool {
 	did := false
 	switch tag {
 	case "b", "strong":
-		fs.Weight = WeightBold
-		fs.OpenFont(ctxt)
+		fs.Weight = gist.WeightBold
+		OpenFont(fs, ctxt)
 		did = true
 	case "i", "em", "var", "cite":
-		fs.Style = FontItalic
-		fs.OpenFont(ctxt)
+		fs.Style = gist.FontItalic
+		OpenFont(fs, ctxt)
 		did = true
 	case "ins":
 		fallthrough
 	case "u":
-		fs.SetDeco(DecoUnderline)
+		fs.SetDeco(gist.DecoUnderline)
 		did = true
 	case "s", "del", "strike":
-		fs.SetDeco(DecoLineThrough)
+		fs.SetDeco(gist.DecoLineThrough)
 		did = true
 	case "sup":
-		fs.SetDeco(DecoSuper)
+		fs.SetDeco(gist.DecoSuper)
 		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 		curpts -= 2
 		fs.Size = units.NewPt(float32(curpts))
 		fs.Size.ToDots(ctxt)
-		fs.OpenFont(ctxt)
+		OpenFont(fs, ctxt)
 		did = true
 	case "sub":
-		fs.SetDeco(DecoSub)
+		fs.SetDeco(gist.DecoSub)
 		fallthrough
 	case "small":
 		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 		curpts -= 2
 		fs.Size = units.NewPt(float32(curpts))
 		fs.Size.ToDots(ctxt)
-		fs.OpenFont(ctxt)
+		OpenFont(fs, ctxt)
 		did = true
 	case "big":
 		curpts := math.Round(float64(fs.Size.Convert(units.Pt, ctxt).Val))
 		curpts += 2
 		fs.Size = units.NewPt(float32(curpts))
 		fs.Size.ToDots(ctxt)
-		fs.OpenFont(ctxt)
+		OpenFont(fs, ctxt)
 		did = true
 	case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
-		fs.Size = units.NewPt(FontSizePoints[tag])
+		fs.Size = units.NewPt(gist.FontSizePoints[tag])
 		fs.Size.ToDots(ctxt)
-		fs.OpenFont(ctxt)
+		OpenFont(fs, ctxt)
 		did = true
 	case "mark":
-		fs.BgColor.SetColor(Prefs.Colors.Highlight)
+		fs.BgColor.SetColor(gist.ThePrefs.PrefColor("highlight"))
 		did = true
 	case "abbr", "acronym":
-		fs.SetDeco(DecoDottedUnderline)
+		fs.SetDeco(gist.DecoDottedUnderline)
 		did = true
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
-		fs.OpenFont(ctxt)
+		OpenFont(fs, ctxt)
 		did = true
 	}
 	return did
@@ -1253,7 +1254,7 @@ func SetHTMLSimpleTag(tag string, fs *FontStyle, ctxt *units.Context, cssAgg ki.
 // -- result can then be processed by different layout algorithms as needed.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
 // special css styling of each element.
-func (tr *TextRender) SetHTML(str string, font *FontStyle, txtSty *TextStyle, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *TextRender) SetHTML(str string, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre([]byte(str), font, txtSty, ctxt, cssAgg)
 	} else {
@@ -1263,7 +1264,7 @@ func (tr *TextRender) SetHTML(str string, font *FontStyle, txtSty *TextStyle, ct
 
 // SetHTMLBytes does SetHTML with bytes as input -- more efficient -- use this
 // if already in bytes
-func (tr *TextRender) SetHTMLBytes(str []byte, font *FontStyle, txtSty *TextStyle, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *TextRender) SetHTMLBytes(str []byte, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre(str, font, txtSty, ctxt, cssAgg)
 	} else {
@@ -1273,7 +1274,7 @@ func (tr *TextRender) SetHTMLBytes(str []byte, font *FontStyle, txtSty *TextStyl
 
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
-func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyle, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *TextRender) SetHTMLNoPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	//	errstr := "gi.TextRender SetHTML"
 	sz := len(str)
 	if sz == 0 {
@@ -1294,13 +1295,13 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 	decoder.Entity = xml.HTMLEntity
 	decoder.CharsetReader = charset.NewReaderLabel
 
-	font.OpenFont(ctxt)
+	OpenFont(font, ctxt)
 
 	// set when a </p> is encountered
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
 
-	fstack := make([]*FontStyle, 1, 10)
+	fstack := make([]*gist.Font, 1, 10)
 	fstack[0] = font
 	for {
 		t, err := decoder.Token()
@@ -1320,8 +1321,8 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 			if !SetHTMLSimpleTag(nm, &fs, ctxt, cssAgg) {
 				switch nm {
 				case "a":
-					fs.Color.SetColor(Prefs.Colors.Link)
-					fs.SetDeco(DecoUnderline)
+					fs.Color.SetColor(gist.ThePrefs.PrefColor("link"))
+					fs.SetDeco(gist.DecoUnderline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 					sprop := make(ki.Props, len(se.Attr))
@@ -1364,13 +1365,13 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
-						SetStylePropsXML(attr.Value, &sprop)
+						gist.SetStylePropsXML(attr.Value, &sprop)
 					case "class":
 						if cssAgg != nil {
 							clnm := "." + attr.Value
 							if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
 								fs.SetStyleProps(nil, aggp, nil)
-								fs.OpenFont(ctxt)
+								OpenFont(&fs, ctxt)
 							}
 						}
 					default:
@@ -1378,10 +1379,10 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 					}
 				}
 				fs.SetStyleProps(nil, sprop, nil)
-				fs.OpenFont(ctxt)
+				OpenFont(&fs, ctxt)
 			}
 			if cssAgg != nil {
-				fs.StyleCSS(nm, cssAgg, ctxt, nil)
+				FontStyleCSS(&fs, nm, cssAgg, ctxt, nil)
 			}
 			fstack = append(fstack, &fs)
 		case xml.EndElement:
@@ -1438,7 +1439,7 @@ func (tr *TextRender) SetHTMLNoPre(str []byte, font *FontStyle, txtSty *TextStyl
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle, ctxt *units.Context, cssAgg ki.Props) {
+func (tr *TextRender) SetHTMLPre(str []byte, font *gist.Font, txtSty *gist.Text, ctxt *units.Context, cssAgg ki.Props) {
 	// errstr := "gi.TextRender SetHTMLPre"
 
 	sz := len(str)
@@ -1451,12 +1452,12 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 	initsz := ints.MinInt(sz, 1020)
 	curSp.Init(initsz)
 
-	font.OpenFont(ctxt)
+	OpenFont(font, ctxt)
 
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
 
-	fstack := make([]*FontStyle, 1, 10)
+	fstack := make([]*gist.Font, 1, 10)
 	fstack[0] = font
 
 	tagstack := make([]string, 0, 10)
@@ -1532,8 +1533,8 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 				if !SetHTMLSimpleTag(stag, &fs, ctxt, cssAgg) {
 					switch stag {
 					case "a":
-						fs.Color.SetColor(Prefs.Colors.Link)
-						fs.SetDeco(DecoUnderline)
+						fs.Color.SetColor(gist.ThePrefs.PrefColor("link"))
+						fs.SetDeco(gist.DecoUnderline)
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 						if nattr > 0 {
@@ -1587,13 +1588,13 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 						// fmt.Printf("nm: %v  val: %v\n", nm, vl)
 						switch nm {
 						case "style":
-							SetStylePropsXML(vl, &sprop)
+							gist.SetStylePropsXML(vl, &sprop)
 						case "class":
 							if cssAgg != nil {
 								clnm := "." + vl
 								if aggp, ok := ki.SubProps(cssAgg, clnm); ok {
 									fs.SetStyleProps(nil, aggp, nil)
-									fs.OpenFont(ctxt)
+									OpenFont(&fs, ctxt)
 								}
 							}
 						default:
@@ -1601,10 +1602,10 @@ func (tr *TextRender) SetHTMLPre(str []byte, font *FontStyle, txtSty *TextStyle,
 						}
 					}
 					fs.SetStyleProps(nil, sprop, nil)
-					fs.OpenFont(ctxt)
+					OpenFont(&fs, ctxt)
 				}
 				if cssAgg != nil {
-					fs.StyleCSS(stag, cssAgg, ctxt, nil)
+					FontStyleCSS(&fs, stag, cssAgg, ctxt, nil)
 				}
 				fstack = append(fstack, &fs)
 				curTag = stag
@@ -1745,10 +1746,10 @@ func (tx *TextRender) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) 
 // LayoutStdLR does basic standard layout of text in LR direction, assigning
 // relative positions to spans and runes according to given styles, and given
 // size overall box (nonzero values used to constrain). Returns total
-// resulting size box for text.  Font face in FontStyle is used for
+// resulting size box for text.  Font face in gist.Font is used for
 // determining line spacing here -- other versions can do more expensive
 // calculations of variable line spacing as needed.
-func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
+func (tr *TextRender) LayoutStdLR(txtSty *gist.Text, fontSty *gist.Font, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
 	if len(tr.Spans) == 0 {
 		return mat32.Vec2Zero
 	}
@@ -1756,8 +1757,8 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	// pr := prof.Start("TextRenderLayout")
 	// defer pr.End()
 	//
-	tr.Dir = LRTB
-	fontSty.OpenFont(ctxt)
+	tr.Dir = gist.LRTB
+	OpenFont(fontSty, ctxt)
 	fht := fontSty.Face.Metrics.Height
 	dsc := mat32.FromFixed(fontSty.Face.Face.Metrics().Descent)
 	lspc := fht * txtSty.EffLineHeight()
@@ -1881,9 +1882,9 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 	vextra := size.Y - vht
 	if vextra > 0 {
 		switch {
-		case IsAlignMiddle(txtSty.AlignV):
+		case gist.IsAlignMiddle(txtSty.AlignV):
 			vpad = vextra / 2
-		case IsAlignEnd(txtSty.AlignV):
+		case gist.IsAlignEnd(txtSty.AlignV):
 			vpad = vextra
 		}
 	}
@@ -1903,9 +1904,9 @@ func (tr *TextRender) LayoutStdLR(txtSty *TextStyle, fontSty *FontStyle, ctxt *u
 		hextra := size.X - ssz.X
 		if hextra > 0 {
 			switch {
-			case IsAlignMiddle(txtSty.Align):
+			case gist.IsAlignMiddle(txtSty.Align):
 				sr.RelPos.X += hextra / 2
-			case IsAlignEnd(txtSty.Align):
+			case gist.IsAlignEnd(txtSty.Align):
 				sr.RelPos.X += hextra
 			}
 		}
