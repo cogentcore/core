@@ -13,11 +13,6 @@ import (
 	"github.com/goki/mat32"
 )
 
-// IconName is used to specify an icon -- currently just the unique name of
-// the icon -- automatically provides a chooser menu for icons using ValueView
-// system
-type IconName string
-
 // SetIcon sets the icon by name into given Icon wrapper, returning error
 // message if not found etc, and returning true if a new icon was actually set
 // -- does nothing if UniqueNm is already == icon name and has children, and deletes

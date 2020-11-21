@@ -219,8 +219,8 @@ func (wb *WidgetBase) Style2DWidget() {
 	AggCSS(&wb.CSSAgg, wb.CSS)
 	StyleCSS(gii, wb.Viewport, &wb.Sty, wb.CSSAgg, "")
 
-	wb.SetUnitContext(wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
-	if wb.Sty.Inactive {                           // inactive can only set, not clear
+	SetUnitContext(&wb.Sty, wb.Viewport, mat32.Vec2Zero) // todo: test for use of el-relative
+	if wb.Sty.Inactive {                                 // inactive can only set, not clear
 		wb.SetInactive()
 	}
 
@@ -329,18 +329,18 @@ func (wb *WidgetBase) Style2D() {
 // SetUnitContext sets the unit context based on size of viewport and parent
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (wb *WidgetBase) SetUnitContext(vp *Viewport2D, el mat32.Vec2) {
+func SetUnitContext(st *gist.Style, vp *Viewport2D, el mat32.Vec2) {
 	if vp != nil {
 		if vp.Win != nil {
-			wb.Sty.UnContext.DPI = vp.Win.LogicalDPI()
+			st.UnContext.DPI = vp.Win.LogicalDPI()
 		}
 		if vp.Render.Image != nil {
 			sz := vp.Render.Image.Bounds().Size()
-			wb.Sty.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
+			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y)
 		}
 	}
-	girl.OpenFont(&wb.Sty.Font, &wb.Sty.UnContext) // calls SetUnContext after updating metrics
-	wb.Sty.ToDots()
+	girl.OpenFont(&st.Font, &st.UnContext) // calls SetUnContext after updating metrics
+	st.ToDots()
 }
 
 func (wb *WidgetBase) InitLayout2D() bool {
@@ -405,7 +405,7 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
 		mvp := wb.ViewportSafe()
-		wb.SetUnitContext(mvp, psize) // update units with final layout
+		SetUnitContext(&wb.Sty, mvp, psize) // update units with final layout
 	}
 	wb.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!

@@ -399,7 +399,7 @@ func (sb *SpinBox) StyleSpinBox() {
 	if !hasTempl || saveTempl {
 		sb.Style2DWidget()
 	} else {
-		sb.SetUnitContext(sb.Viewport, mat32.Vec2Zero)
+		SetUnitContext(&sb.Sty, sb.Viewport, mat32.Vec2Zero)
 	}
 	if hasTempl && saveTempl {
 		sb.Sty.SaveTemplate()

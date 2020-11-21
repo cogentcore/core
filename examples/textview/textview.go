@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 )
@@ -50,14 +51,14 @@ func mainrun() {
 	title := trow.AddNewChild(gi.KiT_Label, "title").(*gi.Label)
 	hdrText := `This is a <b>test</b> of the TextView`
 	title.Text = hdrText
-	title.SetProp("text-align", gi.AlignCenter)
-	title.SetProp("vertical-align", gi.AlignTop)
+	title.SetProp("text-align", gist.AlignCenter)
+	title.SetProp("vertical-align", gist.AlignTop)
 	title.SetProp("font-size", "x-large")
 
 	splt := mfr.AddNewChild(gi.KiT_SplitView, "split-view").(*gi.SplitView)
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
-	splt.SetProp("white-space", gi.WhiteSpacePreWrap)
+	splt.SetProp("white-space", gist.WhiteSpacePreWrap)
 	splt.SetProp("tab-size", 4)
 	splt.SetProp("font-family", gi.Prefs.MonoFont)
 	splt.SetProp("line-height", 1.1)

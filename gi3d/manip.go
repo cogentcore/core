@@ -6,6 +6,7 @@ package gi3d
 
 import (
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
@@ -98,7 +99,7 @@ func (sc *Scene) SelectBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
-	clr, _ := gi.ColorFromName(string(sc.SelParams.Color))
+	clr, _ := gist.ColorFromName(string(sc.SelParams.Color))
 	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 	sc.InitMesh(SelBoxName + "-front")
 	sc.InitMesh(SelBoxName + "-side")
@@ -116,7 +117,7 @@ func (sc *Scene) ManipBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
-	clr, _ := gi.ColorFromName(string(sc.SelParams.Color))
+	clr, _ := gist.ColorFromName(string(sc.SelParams.Color))
 
 	bbox := nb.WorldBBox.BBox
 	mb := AddNewLineBox(sc, sc, nm, nm, bbox, sc.SelParams.Width, clr, Inactive)

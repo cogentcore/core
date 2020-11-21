@@ -24,12 +24,6 @@ import (
 	"github.com/goki/pi/langs/golang"
 )
 
-// FileName is used to specify an filename (including path) -- automatically
-// opens the FileView dialog using ValueView system.  Use this for any method
-// args that are filenames to trigger use of FileViewDialog under MethView
-// automatic method calling.
-type FileName string
-
 // ZoomFactor is a temporary multiplier on LogicalDPI used for per-session
 // display zooming without changing prefs -- see SaveZoom to save prefs
 // with this current factor.
@@ -463,9 +457,6 @@ var PreferencesProps = ki.Props{
 
 /////////////////////////////////////////////////////////////////////////////////
 //   ColorPrefs
-
-// HiStyleName is a highlighting style name
-type HiStyleName string
 
 // ColorPrefs specify colors for all major categories of GUI elements, and are
 // used in the default styles.

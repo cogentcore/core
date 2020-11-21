@@ -12,6 +12,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -141,9 +142,9 @@ func mainrun() {
 	title := gi.AddNewLabel(trow, "title", `This is a demonstration of the
 <a href="https://github.com/goki/gi">GoGi</a> <i>3D</i> Framework<br>
 See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
-	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
-	title.SetProp("text-align", gi.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
-	title.SetProp("vertical-align", gi.AlignCenter)
+	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+	title.SetProp("text-align", gist.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+	title.SetProp("vertical-align", gist.AlignCenter)
 	title.SetProp("font-size", "x-large")
 	title.SetProp("line-height", 1.5)
 	title.SetStretchMax()
@@ -285,7 +286,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
 	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
 	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
-	txt.SetProp("text-align", gi.AlignLeft) // gi.AlignCenter)
+	txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
 

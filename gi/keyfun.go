@@ -265,10 +265,6 @@ type Shortcuts map[key.Chord]*Action
 /////////////////////////////////////////////////////////////////////////////////
 // KeyMaps -- list of KeyMap's
 
-// KeyMapName has an associated ValueView for selecting from the list of
-// available key map names, for use in preferences etc.
-type KeyMapName string
-
 // DefaultKeyMap is the overall default keymap -- reinitialized in gimain init()
 // depending on platform
 var DefaultKeyMap = KeyMapName("MacEmacs")

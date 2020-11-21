@@ -13,6 +13,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -322,7 +323,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 	split.Dim = mat32.X
 	//	split.Dim = mat32.Y
 
-	split.SetProp("white-space", gi.WhiteSpacePreWrap)
+	split.SetProp("white-space", gist.WhiteSpacePreWrap)
 	split.SetProp("tab-size", 4)
 	split.SetProp("font-family", "Go Mono")
 
@@ -407,8 +408,8 @@ var FileBrowseProps = ki.Props{
 	"max-height":       -1,
 	"#title": ki.Props{
 		"max-width":        -1,
-		"horizontal-align": gi.AlignCenter,
-		"vertical-align":   gi.AlignTop,
+		"horizontal-align": gist.AlignCenter,
+		"vertical-align":   gist.AlignTop,
 	},
 	"ToolBar": ki.PropSlice{
 		{"UpdateFiles", ki.Props{

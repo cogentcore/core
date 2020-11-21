@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -43,7 +44,7 @@ func (mt *Material) ApplyCSS(node Node3D, css ki.Props, key, selector string, vp
 		return false
 	}
 	if selector != "" {
-		pmap, ok = gi.SubProps(pmap, selector)
+		pmap, ok = gist.SubProps(pmap, selector)
 		if !ok {
 			return false
 		}
@@ -68,10 +69,10 @@ func (mt *Material) StyleCSS(node Node3D, css ki.Props, selector string, vp *gi.
 }
 
 // StyleMatFuncs are functions for styling the Material
-var StyleMatFuncs = map[string]gi.StyleFunc{
-	"color": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+var StyleMatFuncs = map[string]gist.StyleFunc{
+	"color": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.Color = par.(*Material).Color
 			} else if init {
@@ -79,11 +80,11 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 			}
 			return
 		}
-		mt.Color.SetIFace(val, vp, key)
+		mt.Color.SetIFace(val, ctxt, key)
 	},
-	"emissive": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"emissive": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.Emissive = par.(*Material).Emissive
 			} else if init {
@@ -91,11 +92,11 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 			}
 			return
 		}
-		mt.Emissive.SetIFace(val, vp, key)
+		mt.Emissive.SetIFace(val, ctxt, key)
 	},
-	"specular": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"specular": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.Specular = par.(*Material).Specular
 			} else if init {
@@ -103,11 +104,11 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 			}
 			return
 		}
-		mt.Specular.SetIFace(val, vp, key)
+		mt.Specular.SetIFace(val, ctxt, key)
 	},
-	"shiny": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"shiny": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.Shiny = par.(*Material).Shiny
 			} else if init {
@@ -119,9 +120,9 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 			mt.Shiny = iv
 		}
 	},
-	"bright": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"bright": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.Bright = par.(*Material).Bright
 			} else if init {
@@ -133,9 +134,9 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 			mt.Bright = iv
 		}
 	},
-	"texture": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"texture": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.Texture = par.(*Material).Texture
 			} else if init {
@@ -145,9 +146,9 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 		}
 		mt.Texture = TexName(kit.ToString(val))
 	},
-	"cull-back": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"cull-back": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.CullBack = par.(*Material).CullBack
 			} else if init {
@@ -159,9 +160,9 @@ var StyleMatFuncs = map[string]gi.StyleFunc{
 			mt.CullBack = bv
 		}
 	},
-	"cull-front": func(obj interface{}, key string, val interface{}, par interface{}, vp *gi.Viewport2D) {
+	"cull-front": func(obj interface{}, key string, val interface{}, par interface{}, ctxt gist.Context) {
 		mt := obj.(*Material)
-		if inh, init := gi.StyleInhInit(val, par); inh || init {
+		if inh, init := gist.StyleInhInit(val, par); inh || init {
 			if inh {
 				mt.CullFront = par.(*Material).CullFront
 			} else if init {

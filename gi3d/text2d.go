@@ -9,6 +9,8 @@ import (
 	"image/draw"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -31,12 +33,12 @@ import (
 // but can be set to any color.
 type Text2D struct {
 	Solid
-	Text        string         `desc:"the text string to display"`
-	Sty         gi.Style       `json:"-" xml:"-" desc:"styling settings for the text"`
-	TxtPos      mat32.Vec2     `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
-	TxtRender   gi.TextRender  `view:"-" xml:"-" json:"-" desc:"render data for text label"`
-	TxtTex      *TextureBase   `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
-	RenderState gi.RenderState `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
+	Text        string       `desc:"the text string to display"`
+	Sty         gist.Style   `json:"-" xml:"-" desc:"styling settings for the text"`
+	TxtPos      mat32.Vec2   `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+	TxtRender   girl.Text    `view:"-" xml:"-" json:"-" desc:"render data for text label"`
+	TxtTex      *TextureBase `view:"-" xml:"-" json:"-" desc:"texture object for the text -- this is used directly instead of pointing to the Scene Texture resources"`
+	RenderState girl.State   `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
 }
 
 var KiT_Text2D = kit.Types.AddType(&Text2D{}, Text2DProps)
@@ -122,7 +124,7 @@ func (txt *Text2D) StyleText(sc *Scene) {
 	// css stuff only works for node2d
 	// gi.AggCSS(&txt.CSSAgg, txt.CSS)
 	// txt.Sty.StyleCSS(txt.This().(gi.Node2D), txt.CSSAgg, "", sc.Viewport)
-	txt.Sty.SetUnitContext(sc.Viewport, mat32.Vec2Zero)
+	gi.SetUnitContext(&txt.Sty, sc.Viewport, mat32.Vec2Zero)
 }
 
 func (txt *Text2D) RenderText(sc *Scene) {
@@ -207,11 +209,11 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 		ax, ay := txt.Sty.Text.AlignFactors()
 		al := txt.Sty.Text.AlignV
 		switch {
-		case gi.IsAlignStart(al):
+		case gist.IsAlignStart(al):
 			ay = -0.5
-		case gi.IsAlignMiddle(al):
+		case gist.IsAlignMiddle(al):
 			ay = 0
-		case gi.IsAlignEnd(al):
+		case gist.IsAlignEnd(al):
 			ay = 0.5
 		}
 		ps := txt.Pose.Pos

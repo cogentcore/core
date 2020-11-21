@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 )
 
@@ -31,7 +32,7 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	row1 := gi.AddNewLayout(mfr, "row1", gi.LayoutHoriz)
-	row1.SetProp("vertical-align", gi.AlignMiddle)
+	row1.SetProp("vertical-align", gist.AlignMiddle)
 	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()
@@ -60,7 +61,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 1.0})
+			fr.SetProp("background-color", gist.HSLA{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -69,7 +70,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for lt := float32(0.0); lt <= 1.01; lt += 0.1 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 0.5})
+			fr.SetProp("background-color", gist.HSLA{hu, sat, lt, 0.5})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}
@@ -79,7 +80,7 @@ func mainrun() {
 	for _, hu := range hues {
 		for sat := float32(0.0); sat <= 1.01; sat += 0.1 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)
-			fr.SetProp("background-color", gi.HSLA{hu, sat, lt, 1.0})
+			fr.SetProp("background-color", gist.HSLA{hu, sat, lt, 1.0})
 			fr.SetProp("max-width", -1)
 			fr.SetProp("max-height", -1)
 		}

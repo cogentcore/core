@@ -10,6 +10,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -90,9 +91,9 @@ func mainrun() {
 <kbd>`+string(giedsc)+`</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`)
 	// title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
-	title.SetProp("white-space", "normal")      // wrap
-	title.SetProp("text-align", gi.AlignCenter) // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
-	title.SetProp("vertical-align", gi.AlignCenter)
+	title.SetProp("white-space", "normal")        // wrap
+	title.SetProp("text-align", gist.AlignCenter) // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+	title.SetProp("vertical-align", gist.AlignCenter)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
 	// title.SetProp("font-size", "24pt")
@@ -110,7 +111,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">
 
 	brow := gi.AddNewLayout(mfr, "brow", gi.LayoutHoriz)
 	brow.SetProp("spacing", units.NewEx(2))
-	brow.SetProp("horizontal-align", gi.AlignLeft)
+	brow.SetProp("horizontal-align", gist.AlignLeft)
 	// brow.SetProp("horizontal-align", gi.AlignJustify)
 	brow.SetStretchMaxWidth()
 

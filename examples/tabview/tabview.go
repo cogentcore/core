@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 )
 
 func main() {
@@ -31,11 +32,11 @@ func mainrun() {
 
 	lbl1 := tv.AddNewTab(gi.KiT_Label, "This is Label1").(*gi.Label)
 	lbl1.SetText("this is the contents of the first tab")
-	lbl1.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
+	lbl1.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	lbl2 := tv.AddNewTab(gi.KiT_Label, "And this Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
-	lbl2.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
+	lbl2.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	tv.SelectTabIndex(0)
 
