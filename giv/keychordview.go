@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
@@ -83,13 +84,13 @@ var KeyChordEditProps = ki.Props{
 	"EnumType:Flag":    gi.KiT_NodeFlags,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),
-	"vertical-align":   gi.AlignTop,
+	"vertical-align":   gist.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Control,
 	"border-width":     units.NewPx(1),
 	"border-radius":    units.NewPx(4),
 	"border-color":     &gi.Prefs.Colors.Border,
-	"border-style":     gi.BorderSolid,
+	"border-style":     gist.BorderSolid,
 	"height":           units.NewEm(1),
 	"width":            units.NewCh(20),
 	"max-width":        -1,

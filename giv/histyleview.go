@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
@@ -104,7 +105,7 @@ func HiStylesView(st *histyle.Styles) {
 	title.SetText("Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
 	title.SetProp("width", units.NewCh(30)) // need for wrap
 	title.SetStretchMaxWidth()
-	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
+	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	tv := mfr.AddNewChild(KiT_MapView, "tv").(*MapView)
 	tv.Viewport = vp

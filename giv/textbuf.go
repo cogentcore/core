@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/units"
@@ -2138,7 +2139,7 @@ func (tb *TextBuf) SetLineColor(ln int, color string) {
 	if tb.LineColors == nil {
 		tb.LineColors = make(map[int]gi.Color)
 	}
-	clr, _ := gi.ColorFromString(color, nil)
+	clr, _ := gist.ColorFromString(color, nil)
 	tb.LineColors[ln] = clr
 }
 

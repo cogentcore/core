@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -103,7 +104,7 @@ func (sv *StructViewInline) ConfigParts() {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewPath = sv.ViewPath
 		lbl.Redrawable = true
-		lbl.SetProp("horizontal-align", gi.AlignLeft)
+		lbl.SetProp("horizontal-align", gist.AlignLeft)
 		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsInactive()) // in structview.go
 		if hasDef {

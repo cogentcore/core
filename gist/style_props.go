@@ -33,7 +33,7 @@ func StyleInhInit(val, par interface{}) (inh, init bool) {
 
 // StyleSetError reports that cannot set property of given key with given value
 func StyleSetError(key string, val interface{}) {
-	log.Printf("gi.Style error: cannot set key: %s from value: %v\n", key, val)
+	log.Printf("gist.Style error: cannot set key: %s from value: %v\n", key, val)
 }
 
 type StyleFunc func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context)

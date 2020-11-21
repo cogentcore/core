@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
@@ -552,7 +553,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				mrk.RefPos.Set(rx, ry)
 				mrk.Size.Set(szx, szy)
 			case nm == "use":
-				link := gi.XMLAttr("href", se.Attr)
+				link := gist.XMLAttr("href", se.Attr)
 				itm := curPar.FindNamedElement(link)
 				if itm != nil {
 					cln := itm.Clone().(gi.Node2D)

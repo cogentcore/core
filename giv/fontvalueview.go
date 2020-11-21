@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -68,7 +69,7 @@ func (vv *FontValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 				ddlg := send.Embed(gi.KiT_Dialog).(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)
 				if si >= 0 {
-					fi := gi.FontLibrary.FontInfo[si]
+					fi := girl.FontLibrary.FontInfo[si]
 					vv.SetValue(fi.Name)
 					vv.UpdateWidget()
 				}

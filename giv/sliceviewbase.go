@@ -15,6 +15,8 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -363,8 +365,8 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(6))
 	sg.SetMinPrefWidth(units.NewCh(20))
-	sg.SetStretchMax()                        // for this to work, ALL layers above need it too
-	sg.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
+	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
+	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 
 	if kit.IfaceIsNil(sv.Slice) {
 		return
@@ -502,7 +504,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
 	if sv.Sty.Font.Face == nil {
-		sv.Sty.Font.OpenFont(&sv.Sty.UnContext)
+		girl.OpenFont(&sv.Sty.Font, &sv.Sty.UnContext)
 	}
 	sv.RowHeight = math32.Max(sv.RowHeight, sv.Sty.Font.Face.Metrics.Height)
 

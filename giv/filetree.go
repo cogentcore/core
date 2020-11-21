@@ -21,6 +21,7 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin"
@@ -1253,8 +1254,8 @@ func BlameDialog(avp *gi.Viewport2D, fname string, blame, fbytes []byte) *TwinTe
 	tv.SetSplits(.2, .8)
 
 	tva, tvb := tv.TextViews()
-	tva.SetProp("white-space", gi.WhiteSpacePre)
-	tvb.SetProp("white-space", gi.WhiteSpacePre)
+	tva.SetProp("white-space", gist.WhiteSpacePre)
+	tvb.SetProp("white-space", gist.WhiteSpacePre)
 	tva.SetProp("width", units.NewCh(30))
 	tva.SetProp("height", units.NewEm(40))
 	tvb.SetProp("width", units.NewCh(80))
@@ -2380,16 +2381,16 @@ var FileTreeViewProps = ki.Props{
 	"border-radius":    units.NewPx(0),
 	"padding":          units.NewPx(0),
 	"margin":           units.NewPx(1),
-	"text-align":       gi.AlignLeft,
-	"vertical-align":   gi.AlignTop,
+	"text-align":       gist.AlignLeft,
+	"vertical-align":   gist.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": "inherit",
 	"no-templates":     true,
 	".exec": ki.Props{
-		"font-weight": gi.WeightBold,
+		"font-weight": gist.WeightBold,
 	},
 	".open": ki.Props{
-		"font-style": gi.FontItalic,
+		"font-style": gist.FontItalic,
 	},
 	".untracked": ki.Props{
 		"color": "#808080",

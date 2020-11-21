@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/units"
@@ -306,7 +307,7 @@ func ToValueView(it interface{}, tags string) ValueView {
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == gi.KiT_Color {
+		if nptyp == gist.KiT_Color {
 			vv := &ColorValueView{}
 			vv.Init(vv)
 			return vv

@@ -56,24 +56,6 @@ func NewPaint() Paint {
 	return p
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-// State query
-
-// does the current Paint have an active stroke to render?
-func (pc *Paint) HasStroke() bool {
-	return pc.StrokeStyle.On
-}
-
-// does the current Paint have an active fill to render?
-func (pc *Paint) HasFill() bool {
-	return pc.FillStyle.On
-}
-
-// does the current Paint not have either a stroke or fill?  in which case, often we just skip it
-func (pc *Paint) HasNoStrokeOrFill() bool {
-	return (!pc.StrokeStyle.On && !pc.FillStyle.On)
-}
-
 // convenience for final draw for shapes when done
 func (pc *Paint) FillStrokeClear(rs *State) {
 	if pc.HasFill() {

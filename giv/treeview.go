@@ -13,6 +13,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/dnd"
 	"github.com/goki/gi/oswin/key"
@@ -41,16 +42,16 @@ import (
 //   styling applied differentially to individual nodes (e.g., FileNode).
 type TreeView struct {
 	gi.PartsWidgetBase
-	SrcNode          ki.Ki                     `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
-	ShowViewCtxtMenu bool                      `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
-	ViewIdx          int                       `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
-	Indent           units.Value               `xml:"indent" desc:"styled amount to indent children relative to this node"`
-	OpenDepth        int                       `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`
-	TreeViewSig      ki.Signal                 `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
-	StateStyles      [TreeViewStatesN]gi.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-	WidgetSize       mat32.Vec2                `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
-	Icon             gi.IconName               `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
-	RootView         *TreeView                 `json:"-" xml:"-" desc:"cached root of the view"`
+	SrcNode          ki.Ki                       `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	ShowViewCtxtMenu bool                        `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
+	ViewIdx          int                         `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
+	Indent           units.Value                 `xml:"indent" desc:"styled amount to indent children relative to this node"`
+	OpenDepth        int                         `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`
+	TreeViewSig      ki.Signal                   `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
+	StateStyles      [TreeViewStatesN]gist.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	WidgetSize       mat32.Vec2                  `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	Icon             gi.IconName                 `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
+	RootView         *TreeView                   `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
 var KiT_TreeView = kit.Types.AddType(&TreeView{}, nil)
@@ -1835,8 +1836,8 @@ var TreeViewProps = ki.Props{
 	"border-radius":    units.NewPx(0),
 	"padding":          units.NewPx(0),
 	"margin":           units.NewPx(1),
-	"text-align":       gi.AlignLeft,
-	"vertical-align":   gi.AlignTop,
+	"text-align":       gist.AlignLeft,
+	"vertical-align":   gist.AlignTop,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": "inherit",
 	"#icon": ki.Props{
@@ -2088,7 +2089,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	tv.Sty.SetUnitContext(tv.Viewport, psize) // update units with final layout
+	tv.SetUnitContext(tv.Viewport, psize) // update units with final layout
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}

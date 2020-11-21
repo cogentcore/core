@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -66,7 +67,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		return
 	}
 	sv.Parts.Lay = gi.LayoutHoriz
-	sv.Parts.SetProp("overflow", gi.OverflowHidden) // no scrollbars!
+	sv.Parts.SetProp("overflow", gist.OverflowHidden) // no scrollbars!
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)

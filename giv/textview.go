@@ -14,6 +14,8 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
 	"github.com/goki/gi/histyle"
 	"github.com/goki/gi/oswin/cursor"
@@ -44,39 +46,39 @@ import (
 // require extensive protections throughout code otherwise.
 type TextView struct {
 	gi.WidgetBase
-	Buf                    *TextBuf                  `json:"-" xml:"-" desc:"the text buffer that we're editing"`
-	Placeholder            string                    `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
-	CursorWidth            units.Value               `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
-	NLines                 int                       `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
-	Renders                []gi.TextRender           `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
-	Offs                   []float32                 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
-	LineNoDigs             int                       `json:"-" xml:"-" desc:"number of line number digits needed"`
-	LineNoOff              float32                   `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
-	LineNoRender           gi.TextRender             `json:"-" xml:"-" desc:"render for line numbers"`
-	LinesSize              image.Point               `json:"-" xml:"-" desc:"total size of all lines as rendered"`
-	RenderSz               mat32.Vec2                `json:"-" xml:"-" desc:"size params to use in render call"`
-	CursorPos              lex.Pos                   `json:"-" xml:"-" desc:"current cursor position"`
-	CursorCol              int                       `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
-	ScrollToCursorOnRender bool                      `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
-	PosHistIdx             int                       `json:"-" xml:"-" desc:"current index within PosHistory"`
-	SelectStart            lex.Pos                   `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
-	SelectReg              textbuf.Region            `json:"-" xml:"-" desc:"current selection region"`
-	PrevSelectReg          textbuf.Region            `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
-	Highlights             []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
-	Scopelights            []textbuf.Region          `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
-	SelectMode             bool                      `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-	ForceComplete          bool                      `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
-	ISearch                ISearch                   `json:"-" xml:"-" desc:"interactive search data"`
-	QReplace               QReplace                  `json:"-" xml:"-" desc:"query replace data"`
-	TextViewSig            ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
-	LinkSig                ki.Signal                 `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-	StateStyles            [TextViewStatesN]gi.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-	FontHeight             float32                   `json:"-" xml:"-" desc:"font height, cached during styling"`
-	LineHeight             float32                   `json:"-" xml:"-" desc:"line height, cached during styling"`
-	VisSize                image.Point               `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
-	BlinkOn                bool                      `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
-	CursorMu               sync.Mutex                `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
-	HasLinks               bool                      `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+	Buf                    *TextBuf                    `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Placeholder            string                      `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	CursorWidth            units.Value                 `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	NLines                 int                         `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	Renders                []girl.Text                 `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Offs                   []float32                   `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	LineNoDigs             int                         `json:"-" xml:"-" desc:"number of line number digits needed"`
+	LineNoOff              float32                     `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoRender           girl.Text                   `json:"-" xml:"-" desc:"render for line numbers"`
+	LinesSize              image.Point                 `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	RenderSz               mat32.Vec2                  `json:"-" xml:"-" desc:"size params to use in render call"`
+	CursorPos              lex.Pos                     `json:"-" xml:"-" desc:"current cursor position"`
+	CursorCol              int                         `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	ScrollToCursorOnRender bool                        `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
+	PosHistIdx             int                         `json:"-" xml:"-" desc:"current index within PosHistory"`
+	SelectStart            lex.Pos                     `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+	SelectReg              textbuf.Region              `json:"-" xml:"-" desc:"current selection region"`
+	PrevSelectReg          textbuf.Region              `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	Highlights             []textbuf.Region            `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
+	Scopelights            []textbuf.Region            `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
+	SelectMode             bool                        `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	ForceComplete          bool                        `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
+	ISearch                ISearch                     `json:"-" xml:"-" desc:"interactive search data"`
+	QReplace               QReplace                    `json:"-" xml:"-" desc:"query replace data"`
+	TextViewSig            ki.Signal                   `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
+	LinkSig                ki.Signal                   `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	StateStyles            [TextViewStatesN]gist.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	FontHeight             float32                     `json:"-" xml:"-" desc:"font height, cached during styling"`
+	LineHeight             float32                     `json:"-" xml:"-" desc:"line height, cached during styling"`
+	VisSize                image.Point                 `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	BlinkOn                bool                        `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+	CursorMu               sync.Mutex                  `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
+	HasLinks               bool                        `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
 	lastRecenter           int
 	lastAutoInsert         rune
 	lastFilename           gi.FileName
@@ -97,15 +99,15 @@ func (tv *TextView) Disconnect() {
 
 var TextViewProps = ki.Props{
 	"EnumType:Flag":    KiT_TextViewFlags,
-	"white-space":      gi.WhiteSpacePreWrap,
+	"white-space":      gist.WhiteSpacePreWrap,
 	"border-width":     0, // don't render our own border
 	"cursor-width":     units.NewPx(3),
 	"border-color":     &gi.Prefs.Colors.Border,
-	"border-style":     gi.BorderSolid,
+	"border-style":     gist.BorderSolid,
 	"padding":          units.NewPx(2),
 	"margin":           units.NewPx(2),
-	"vertical-align":   gi.AlignTop,
-	"text-align":       gi.AlignLeft,
+	"vertical-align":   gist.AlignTop,
+	"text-align":       gist.AlignLeft,
 	"tab-size":         4,
 	"color":            &gi.Prefs.Colors.Font,
 	"background-color": &gi.Prefs.Colors.Background,
@@ -350,7 +352,7 @@ func (tv *TextView) LinesInserted(tbe *textbuf.Edit) {
 	}
 
 	// Renders
-	tmprn := make([]gi.TextRender, nsz)
+	tmprn := make([]girl.Text, nsz)
 	nrn := append(tv.Renders, tmprn...)
 	copy(nrn[stln+nsz:], nrn[stln:])
 	copy(nrn[stln:], tmprn)
@@ -527,7 +529,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if cap(tv.Renders) >= nln {
 		tv.Renders = tv.Renders[:nln]
 	} else {
-		tv.Renders = make([]gi.TextRender, nln)
+		tv.Renders = make([]girl.Text, nln)
 	}
 	if cap(tv.Offs) >= nln {
 		tv.Offs = tv.Offs[:nln]
@@ -3357,7 +3359,7 @@ func (tv *TextView) RenderRegionBox(reg textbuf.Region, state TextViewStates) {
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
-func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gi.Style, bgclr *gi.ColorSpec) {
+func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgclr *gist.ColorSpec) {
 	st := reg.Start
 	ed := reg.End
 	spos := tv.CharStartPos(st)
@@ -3403,7 +3405,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gi.Style, bgclr 
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gi.Style, bgclr *gi.ColorSpec) {
+func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gist.Style, bgclr *gist.ColorSpec) {
 	spos := tv.CharStartPos(st)
 	epos := spos
 	epos.Y += tv.LineHeight
@@ -3433,7 +3435,7 @@ func (tv *TextView) VisSizes() {
 	}
 	sty := &tv.Sty
 	spc := sty.BoxSpace()
-	sty.Font.OpenFont(&sty.UnContext)
+	girl.OpenFont(&sty.Font, &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = tv.FontHeight * sty.Text.EffLineHeight()
 	sz := tv.VpBBox.Size()
@@ -4473,16 +4475,16 @@ func (tv *TextView) KeyInputInsertRune(kt *key.ChordEvent) {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
-func (tv *TextView) OpenLink(tl *gi.TextLink) {
+func (tv *TextView) OpenLink(tl *girl.TextLink) {
 	tl.Widget = tv.This().(gi.Node2D)
 	// fmt.Printf("opening link: %v\n", tl.URL)
 	if len(tv.LinkSig.Cons) == 0 {
-		if gi.TextLinkHandler != nil {
-			if gi.TextLinkHandler(*tl) {
+		if girl.TextLinkHandler != nil {
+			if girl.TextLinkHandler(*tl) {
 				return
 			}
-			if gi.URLHandler != nil {
-				gi.URLHandler(tl.URL)
+			if girl.URLHandler != nil {
+				girl.URLHandler(tl.URL)
 			}
 		}
 		return
@@ -4492,7 +4494,7 @@ func (tv *TextView) OpenLink(tl *gi.TextLink) {
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (tv *TextView) LinkAt(pos lex.Pos) (*gi.TextLink, bool) {
+func (tv *TextView) LinkAt(pos lex.Pos) (*girl.TextLink, bool) {
 	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
@@ -4513,7 +4515,7 @@ func (tv *TextView) LinkAt(pos lex.Pos) (*gi.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (tv *TextView) OpenLinkAt(pos lex.Pos) (*gi.TextLink, bool) {
+func (tv *TextView) OpenLinkAt(pos lex.Pos) (*girl.TextLink, bool) {
 	tl, ok := tv.LinkAt(pos)
 	if ok {
 		rend := &tv.Renders[pos.Ln]
@@ -4694,12 +4696,12 @@ func (tv *TextView) StyleTextView() {
 
 	if _, has := tv.Props["white-space"]; !has {
 		if gi.Prefs.Editor.WordWrap {
-			tv.SetProp("white-space", gi.WhiteSpacePreWrap)
+			tv.SetProp("white-space", gist.WhiteSpacePreWrap)
 		} else {
-			tv.SetProp("white-space", gi.WhiteSpacePre)
+			tv.SetProp("white-space", gist.WhiteSpacePre)
 		}
 	}
-	if gi.RebuildDefaultStyles {
+	if gist.RebuildDefaultStyles {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
@@ -4714,7 +4716,7 @@ func (tv *TextView) StyleTextView() {
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyFrom(&tv.Sty)
 		tv.StateStyles[i].SetStyleProps(pst, tv.StyleProps(TextViewSelectors[i]), tv.Viewport)
-		tv.StateStyles[i].StyleCSS(tv.This().(gi.Node2D), tv.CSSAgg, TextViewSelectors[i], tv.Viewport)
+		gi.StyleCSS(tv.This().(gi.Node2D), tv.Viewport, &tv.StateStyles[i], tv.CSSAgg, TextViewSelectors[i])
 		tv.StateStyles[i].CopyUnitContext(&tv.Sty.UnContext)
 	}
 	tv.CursorWidth.SetFmInheritProp("cursor-width", tv.This(), ki.Inherit, ki.TypeProps)
@@ -4754,7 +4756,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	tv.Layout2DChildren(iter)
 	if tv.ParentWindow() != nil &&
-		(tv.LinesSize == image.ZP || gi.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() ||
+		(tv.LinesSize == image.ZP || gist.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo

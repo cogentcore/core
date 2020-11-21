@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -35,7 +36,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	title.SetText("Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
 	title.SetProp("width", units.NewCh(30)) // need for wrap
 	title.SetStretchMaxWidth()
-	title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
+	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	tv := mfr.AddNewChild(KiT_TableView, "tv").(*TableView)
 	tv.Viewport = vp

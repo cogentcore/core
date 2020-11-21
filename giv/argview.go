@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -40,8 +41,8 @@ var ArgViewProps = ki.Props{
 	"max-height":       -1,
 	"#title": ki.Props{
 		"max-width":      -1,
-		"text-align":     gi.AlignCenter,
-		"vertical-align": gi.AlignTop,
+		"text-align":     gist.AlignCenter,
+		"vertical-align": gist.AlignTop,
 	},
 }
 
@@ -102,8 +103,8 @@ func (av *ArgView) ConfigArgsGrid() {
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(1.5))
 	sg.SetMinPrefWidth(units.NewEm(10))
-	sg.SetStretchMax()                        // for this to work, ALL layers above need it too
-	sg.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
+	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
+	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	sg.SetProp("columns", 2)
 	config := kit.TypeAndNameList{}
 	for i := range av.Args {
@@ -139,7 +140,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
 		widg := sg.Child((i * 2) + 1).(gi.Node2D)
-		widg.SetProp("horizontal-align", gi.AlignLeft)
+		widg.SetProp("horizontal-align", gist.AlignLeft)
 		ad.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)

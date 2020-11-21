@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -151,8 +152,8 @@ func (mv *MapView) ConfigMapGrid() {
 	// setting a pref here is key for giving it a scrollbar in larger context
 	sg.SetMinPrefHeight(units.NewEm(1.5))
 	sg.SetMinPrefWidth(units.NewEm(10))
-	sg.SetStretchMax()                        // for this to work, ALL layers above need it too
-	sg.SetProp("overflow", gi.OverflowScroll) // this still gives it true size during PrefSize
+	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
+	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 	config := kit.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)

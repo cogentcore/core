@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
@@ -398,14 +399,14 @@ var FontChooserSizeDots = 18
 // so they are updated with that
 func FontChooserDialog(avp *gi.Viewport2D, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	FontChooserSizeDots = int(avp.Sty.UnContext.ToDots(float32(FontChooserSize), units.Pt))
-	gi.FontLibrary.OpenAllFonts(FontChooserSizeDots)
-	dlg := TableViewSelectDialog(avp, &gi.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
+	girl.FontLibrary.OpenAllFonts(FontChooserSizeDots)
+	dlg := TableViewSelectDialog(avp, &girl.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
 	return dlg
 }
 
 func FontInfoStyleFunc(tv *TableView, slice interface{}, widg gi.Node2D, row, col int, vv ValueView) {
 	if col == 4 {
-		finf, ok := slice.([]gi.FontInfo)
+		finf, ok := slice.([]girl.FontInfo)
 		if ok {
 			widg.SetProp("font-family", (finf)[row].Name)
 			widg.SetProp("font-stretch", (finf)[row].Stretch)

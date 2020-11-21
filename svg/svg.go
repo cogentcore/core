@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -24,13 +26,13 @@ import (
 // in UpdateStart / End loop.
 type SVG struct {
 	gi.Viewport2D
-	ViewBox ViewBox  `desc:"viewbox defines the coordinate system for the drawing"`
-	Norm    bool     `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
-	InvertY bool     `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
-	Pnt     gi.Paint `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
-	Defs    Group    `desc:"all defs defined elements go here (gradients, symbols, etc)"`
-	Title   string   `xml:"title" desc:"the title of the svg"`
-	Desc    string   `xml:"desc" desc:"the description of the svg"`
+	ViewBox ViewBox    `desc:"viewbox defines the coordinate system for the drawing"`
+	Norm    bool       `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
+	InvertY bool       `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
+	Pnt     girl.Paint `json:"-" xml:"-" desc:"paint styles -- inherited by nodes"`
+	Defs    Group      `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Title   string     `xml:"title" desc:"the title of the svg"`
+	Desc    string     `xml:"desc" desc:"the description of the svg"`
 }
 
 var KiT_SVG = kit.Types.AddType(&SVG{}, SVGProps)
@@ -57,8 +59,8 @@ func (svg *SVG) CopyFieldsFrom(frm interface{}) {
 }
 
 // Paint satisfies the painter interface
-func (svg *SVG) Paint() *gi.Paint {
-	return &svg.Pnt
+func (svg *SVG) Paint() *gist.Paint {
+	return &svg.Pnt.Paint
 }
 
 // DeleteAll deletes any existing elements in this svg
@@ -117,7 +119,7 @@ func (svg *SVG) Size2D(iter int) {
 // SetUnitContext sets the unit context based on size of viewport and parent
 // element (from bbox) and then cache everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (pc *Paint) SetUnitContext(vp *Viewport2D, el mat32.Vec2) {
+func SetUnitContext(pc *gist.Paint, vp *gi.Viewport2D, el mat32.Vec2) {
 	pc.UnContext.Defaults()
 	if vp != nil {
 		pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
@@ -148,7 +150,7 @@ func (svg *SVG) StyleSVG() {
 	svg.Pnt.Defaults()
 	svg.StyMu.Unlock()
 	StyleSVG(svg.This().(gi.Node2D))
-	svg.Pnt.SetUnitContext(svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
+	SetUnitContext(&svg.Pnt.Paint, svg.AsViewport2D(), svg.ViewBox.Size) // context is viewbox
 }
 
 func (svg *SVG) Style2D() {

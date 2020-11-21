@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -19,7 +21,7 @@ import (
 // layout logic -- just renders into parent SVG viewport
 type NodeBase struct {
 	gi.Node2DBase
-	Pnt gi.Paint `json:"-" xml:"-" desc:"full paint information for this node"`
+	Pnt girl.Paint `json:"-" xml:"-" desc:"full paint information for this node"`
 }
 
 var KiT_NodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
@@ -40,8 +42,8 @@ func (g *NodeBase) AsSVGNode() *NodeBase {
 }
 
 // Paint satisfies the painter interface
-func (g *NodeBase) Paint() *gi.Paint {
-	return &g.Pnt
+func (g *NodeBase) Paint() *gist.Paint {
+	return &g.Pnt.Paint
 }
 
 // Init2DBase handles basic node initialization -- Init2D can then do special things
@@ -68,7 +70,7 @@ func StyleSVG(gii gi.Node2D) {
 		gii.Init2D()
 	}
 
-	pntr, ok := gii.(gi.Painter)
+	pntr, ok := gii.(gist.Painter)
 	if !ok {
 		return
 	}
@@ -90,7 +92,7 @@ func StyleSVG(gii gi.Node2D) {
 		pc.SetStyleProps(nil, *gii.Properties(), g.Viewport)
 	}
 	// pc.SetUnitContext(g.Viewport, mat32.Vec2Zero)
-	pc.ToDots(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
+	pc.ToDotsImpl(&pc.UnContext) // we always inherit parent's unit context -- SVG sets it once-and-for-all
 
 	pagg := g.ParentCSSAgg()
 	if pagg != nil {
@@ -110,7 +112,7 @@ func StyleSVG(gii gi.Node2D) {
 // ApplyCSSSVG applies css styles to given node, using key to select sub-props
 // from overall properties list
 func ApplyCSSSVG(node gi.Node2D, key string, css ki.Props) bool {
-	pntr, ok := node.(gi.Painter)
+	pntr, ok := node.(gist.Painter)
 	if !ok {
 		return false
 	}
@@ -126,7 +128,7 @@ func ApplyCSSSVG(node gi.Node2D, key string, css ki.Props) bool {
 	pc := pntr.Paint()
 
 	if pgi, _ := gi.KiToNode2D(node.Parent()); pgi != nil {
-		if pp, ok := pgi.(gi.Painter); ok {
+		if pp, ok := pgi.(gist.Painter); ok {
 			pc.SetStyleProps(pp.Paint(), pmap, nb.Viewport)
 		} else {
 			pc.SetStyleProps(nil, pmap, nb.Viewport)

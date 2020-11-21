@@ -8,6 +8,8 @@ import (
 	"image"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/ki"
@@ -19,17 +21,17 @@ import (
 // just nested under a parent text)
 type Text struct {
 	NodeBase
-	Pos          mat32.Vec2    `xml:"{x,y}" desc:"position of the left, baseline of the text"`
-	Width        float32       `xml:"width" desc:"width of text to render if using word-wrapping"`
-	Text         string        `xml:"text" desc:"text string to render"`
-	TextRender   gi.TextRender `xml:"-" json:"-" desc:"render version of text"`
-	CharPosX     []float32     `desc:"character positions along X axis, if specified"`
-	CharPosY     []float32     `desc:"character positions along Y axis, if specified"`
-	CharPosDX    []float32     `desc:"character delta-positions along X axis, if specified"`
-	CharPosDY    []float32     `desc:"character delta-positions along Y axis, if specified"`
-	CharRots     []float32     `desc:"character rotations, if specified"`
-	TextLength   float32       `desc:"author's computed text length, if specified -- we attempt to match"`
-	AdjustGlyphs bool          `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
+	Pos          mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Width        float32    `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Text         string     `xml:"text" desc:"text string to render"`
+	TextRender   girl.Text  `xml:"-" json:"-" desc:"render version of text"`
+	CharPosX     []float32  `desc:"character positions along X axis, if specified"`
+	CharPosY     []float32  `desc:"character positions along Y axis, if specified"`
+	CharPosDX    []float32  `desc:"character delta-positions along X axis, if specified"`
+	CharPosDY    []float32  `desc:"character delta-positions along Y axis, if specified"`
+	CharRots     []float32  `desc:"character rotations, if specified"`
+	TextLength   float32    `desc:"author's computed text length, if specified -- we attempt to match"`
+	AdjustGlyphs bool       `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
 }
 
 var KiT_Text = kit.Types.AddType(&Text{}, ki.Props{"EnumType:Flag": gi.KiT_NodeFlags})
@@ -79,19 +81,19 @@ func (g *Text) Render2D() {
 		if scalex == 1 {
 			scalex = 0
 		}
-		pc.FontStyle.OpenFont(&pc.UnContext) // use original size font
+		girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 		if !pc.FillStyle.Color.IsNil() {
 			pc.FontStyle.Color = pc.FillStyle.Color.Color
 		}
 		g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 		g.TextRender.Size = g.TextRender.Size.Mul(mat32.Vec2{scx, scy})
-		if gi.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorMiddle {
+		if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
 			pos.X -= g.TextRender.Size.X * .5
-		} else if gi.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gi.AnchorEnd {
+		} else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
 			pos.X -= g.TextRender.Size.X
 		}
 		pc.FontStyle.Size = units.Value{orgsz.Val * scy, orgsz.Un, orgsz.Dots * scy} // rescale by y
-		pc.FontStyle.OpenFont(&pc.UnContext)
+		girl.OpenFont(&pc.FontStyle, &pc.UnContext)
 		sr := &(g.TextRender.Spans[0])
 		sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 		for i := range sr.Render {

@@ -60,8 +60,8 @@ type TextField struct {
 	SelectInit   int                          `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`
 	SelectMode   bool                         `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
 	TextFieldSig ki.Signal                    `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
-	RenderAll    girl.TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
-	RenderVis    girl.TextRender              `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
+	RenderAll    girl.Text                    `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderVis    girl.Text                    `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
 	StateStyles  [TextFieldStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"normal style and focus style"`
 	FontHeight   float32                      `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
 	BlinkOn      bool                         `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`

@@ -13,6 +13,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/girl"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -212,7 +213,7 @@ func reflectPt(px, py, rx, ry float32) (x, y float32) {
 
 // PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *gi.Paint, rs *gi.girl.State) {
+func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -378,7 +379,7 @@ func PathDataRender(data []PathData, pc *gi.Paint, rs *gi.girl.State) {
 					cx = PathDataNext(data, &i)
 					cy = PathDataNext(data, &i)
 				}
-				ncx, ncy := gi.FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
+				ncx, ncy := girl.FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
 				cx, cy = pc.DrawEllipticalArcPath(rs, ncx, ncy, cx, cy, pcx, pcy, rx, ry, ang, largeArc, sweep)
 			}
 		case PcZ:
@@ -659,7 +660,7 @@ var PathCmdNMap = map[PathCmds]int{
 }
 
 // PathDataValidate validates the path data and emits error messages on log
-func PathDataValidate(pc *gi.Paint, data *[]PathData, errstr string) error {
+func PathDataValidate(pc *girl.Paint, data *[]PathData, errstr string) error {
 	sz := len(*data)
 	if sz == 0 {
 		return nil
