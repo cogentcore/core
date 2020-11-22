@@ -55,16 +55,16 @@ func mainrun() {
 	// style sheet
 	var css = ki.Props{
 		"button": ki.Props{
-			"background-color": gi.Prefs.Colors.Control, // gi.Color{255, 240, 240, 255},
+			"background-color": gi.Prefs.Colors.Control, // gist.Color{255, 240, 240, 255},
 		},
 		// "#label": ki.Props{ // affects all button labels
 		// 	"font-size": "x-large",
 		// },
 		"#combo": ki.Props{
-			"background-color": gi.Color{240, 255, 240, 255},
+			"background-color": gist.Color{240, 255, 240, 255},
 		},
 		".hslides": ki.Props{
-			"background-color": gi.Color{240, 225, 255, 255},
+			"background-color": gist.Color{240, 225, 255, 255},
 		},
 		"kbd": ki.Props{
 			"color": "blue",

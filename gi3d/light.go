@@ -5,7 +5,7 @@
 package gi3d
 
 import (
-	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )
@@ -17,7 +17,7 @@ type Light interface {
 	Name() string
 
 	// Color returns color of light
-	Color() gi.Color
+	Color() gist.Color
 
 	// Lumens returns brightness of light
 	Lumens() float32
@@ -25,10 +25,10 @@ type Light interface {
 
 // LightBase provides the base implementation for Light interface
 type LightBase struct {
-	Nm    string   `desc:"name of light -- lights accessed by name so it matters"`
-	On    bool     `desc:"whether light is on or off"`
-	Lumns float32  `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
-	Clr   gi.Color `desc:"color of light a full intensity"`
+	Nm    string     `desc:"name of light -- lights accessed by name so it matters"`
+	On    bool       `desc:"whether light is on or off"`
+	Lumns float32    `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
+	Clr   gist.Color `desc:"color of light a full intensity"`
 }
 
 var KiT_LightBase = kit.Types.AddType(&LightBase{}, nil)
@@ -38,7 +38,7 @@ func (lb *LightBase) Name() string {
 	return lb.Nm
 }
 
-func (lb *LightBase) Color() gi.Color {
+func (lb *LightBase) Color() gist.Color {
 	return lb.Clr
 }
 
@@ -283,7 +283,7 @@ const (
 var KiT_LightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
 
 // LightColorMap provides a map of named light colors
-var LightColorMap = map[LightColors]gi.Color{
+var LightColorMap = map[LightColors]gist.Color{
 	DirectSun:    {255, 255, 255, 255},
 	CarbonArc:    {255, 250, 244, 255},
 	Halogen:      {255, 241, 224, 255},

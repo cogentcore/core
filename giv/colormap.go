@@ -11,6 +11,7 @@ import (
 
 	"github.com/chewxy/math32"
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
@@ -23,16 +24,16 @@ import (
 // defining a spectrum
 type ColorMap struct {
 	Name    string
-	NoColor gi.Color   `desc:"color to display for invalid numbers (e.g., NaN)"`
-	Colors  []gi.Color `desc:"list of colors to interpolate between"`
+	NoColor gist.Color   `desc:"color to display for invalid numbers (e.g., NaN)"`
+	Colors  []gist.Color `desc:"list of colors to interpolate between"`
 }
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor
 // which can be used to indicate missing values.
-func (cm *ColorMap) Map(val float64) gi.Color {
+func (cm *ColorMap) Map(val float64) gist.Color {
 	nc := len(cm.Colors)
 	if nc < 2 {
-		return gi.Color{}
+		return gist.Color{}
 	}
 	if math.IsNaN(val) {
 		return cm.NoColor
@@ -59,21 +60,21 @@ func (cm *ColorMap) Map(val float64) gi.Color {
 
 // StdColorMaps is a list of standard color maps
 var StdColorMaps = map[string]*ColorMap{
-	"ColdHot":        {"ColdHot", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 255, 255, 255}, {0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}, {255, 255, 0, 255}}},
-	"Jet":            {"Jet", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 127, 255}, {0, 0, 255, 255}, {0, 127, 255, 255}, {0, 255, 255, 255}, {127, 255, 127, 255}, {255, 255, 0, 255}, {255, 127, 0, 255}, {255, 0, 0, 255}, {127, 0, 0, 255}}},
-	"JetMuted":       {"JetMuted", gi.Color{200, 200, 200, 255}, []gi.Color{{25, 25, 153, 255}, {25, 102, 230, 255}, {0, 230, 230, 255}, {0, 179, 0, 255}, {230, 230, 0, 255}, {230, 102, 25, 255}, {153, 25, 25, 255}}},
-	"Viridis":        {"Viridis", gi.Color{200, 200, 200, 255}, []gi.Color{{72, 33, 114, 255}, {67, 62, 133, 255}, {56, 87, 140, 255}, {45, 111, 142, 255}, {36, 133, 142, 255}, {30, 155, 138, 255}, {42, 176, 127, 255}, {81, 197, 105, 255}, {134, 212, 73, 255}, {194, 223, 35, 255}, {253, 231, 37, 255}}},
-	"Plasma":         {"Plasma", gi.Color{200, 200, 200, 255}, []gi.Color{{61, 4, 155, 255}, {99, 0, 167, 255}, {133, 6, 166, 255}, {166, 32, 152, 255}, {192, 58, 131, 255}, {213, 84, 110, 255}, {231, 111, 90, 255}, {246, 141, 69, 255}, {253, 174, 50, 255}, {252, 210, 36, 255}, {240, 248, 33, 255}}},
-	"Inferno":        {"Inferno", gi.Color{200, 200, 200, 255}, []gi.Color{{37, 12, 3, 255}, {19, 11, 52, 255}, {57, 9, 99, 255}, {95, 19, 110, 255}, {133, 33, 107, 255}, {169, 46, 94, 255}, {203, 65, 73, 255}, {230, 93, 47, 255}, {247, 131, 17, 255}, {252, 174, 19, 255}, {245, 219, 76, 255}, {252, 254, 164, 255}}},
-	"BlueBlackRed":   {"BlueBlackRed", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 255, 255}, {76, 76, 76, 255}, {255, 0, 0, 255}}},
-	"BlueGreyRed":    {"BlueGreyRed", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}}},
-	"BlueWhiteRed":   {"BlueWhiteRed", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 255, 255}, {230, 230, 230, 255}, {255, 0, 0, 255}}},
-	"BlueGreenRed":   {"BlueGreenRed", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 255, 255}, {0, 230, 0, 255}, {255, 0, 0, 255}}},
-	"Rainbow":        {"Rainbow", gi.Color{200, 200, 200, 255}, []gi.Color{{255, 0, 255, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}},
-	"ROYGBIV":        {"ROYGBIV", gi.Color{200, 200, 200, 255}, []gi.Color{{255, 0, 255, 255}, {0, 0, 127, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}},
-	"DarkLight":      {"DarkLight", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 0, 255}, {250, 250, 250, 255}}},
-	"DarkLightDark":  {"DarkLightDark", gi.Color{200, 200, 200, 255}, []gi.Color{{0, 0, 0, 255}, {250, 250, 250, 255}, {0, 0, 0, 255}}},
-	"LightDarkLight": {"DarkLightDark", gi.Color{200, 200, 200, 255}, []gi.Color{{250, 250, 250, 255}, {0, 0, 0, 255}, {250, 250, 250, 255}}},
+	"ColdHot":        {"ColdHot", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 255, 255, 255}, {0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}, {255, 255, 0, 255}}},
+	"Jet":            {"Jet", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 127, 255}, {0, 0, 255, 255}, {0, 127, 255, 255}, {0, 255, 255, 255}, {127, 255, 127, 255}, {255, 255, 0, 255}, {255, 127, 0, 255}, {255, 0, 0, 255}, {127, 0, 0, 255}}},
+	"JetMuted":       {"JetMuted", gist.Color{200, 200, 200, 255}, []gist.Color{{25, 25, 153, 255}, {25, 102, 230, 255}, {0, 230, 230, 255}, {0, 179, 0, 255}, {230, 230, 0, 255}, {230, 102, 25, 255}, {153, 25, 25, 255}}},
+	"Viridis":        {"Viridis", gist.Color{200, 200, 200, 255}, []gist.Color{{72, 33, 114, 255}, {67, 62, 133, 255}, {56, 87, 140, 255}, {45, 111, 142, 255}, {36, 133, 142, 255}, {30, 155, 138, 255}, {42, 176, 127, 255}, {81, 197, 105, 255}, {134, 212, 73, 255}, {194, 223, 35, 255}, {253, 231, 37, 255}}},
+	"Plasma":         {"Plasma", gist.Color{200, 200, 200, 255}, []gist.Color{{61, 4, 155, 255}, {99, 0, 167, 255}, {133, 6, 166, 255}, {166, 32, 152, 255}, {192, 58, 131, 255}, {213, 84, 110, 255}, {231, 111, 90, 255}, {246, 141, 69, 255}, {253, 174, 50, 255}, {252, 210, 36, 255}, {240, 248, 33, 255}}},
+	"Inferno":        {"Inferno", gist.Color{200, 200, 200, 255}, []gist.Color{{37, 12, 3, 255}, {19, 11, 52, 255}, {57, 9, 99, 255}, {95, 19, 110, 255}, {133, 33, 107, 255}, {169, 46, 94, 255}, {203, 65, 73, 255}, {230, 93, 47, 255}, {247, 131, 17, 255}, {252, 174, 19, 255}, {245, 219, 76, 255}, {252, 254, 164, 255}}},
+	"BlueBlackRed":   {"BlueBlackRed", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 255, 255}, {76, 76, 76, 255}, {255, 0, 0, 255}}},
+	"BlueGreyRed":    {"BlueGreyRed", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 255, 255}, {127, 127, 127, 255}, {255, 0, 0, 255}}},
+	"BlueWhiteRed":   {"BlueWhiteRed", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 255, 255}, {230, 230, 230, 255}, {255, 0, 0, 255}}},
+	"BlueGreenRed":   {"BlueGreenRed", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 255, 255}, {0, 230, 0, 255}, {255, 0, 0, 255}}},
+	"Rainbow":        {"Rainbow", gist.Color{200, 200, 200, 255}, []gist.Color{{255, 0, 255, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}},
+	"ROYGBIV":        {"ROYGBIV", gist.Color{200, 200, 200, 255}, []gist.Color{{255, 0, 255, 255}, {0, 0, 127, 255}, {0, 0, 255, 255}, {0, 255, 0, 255}, {255, 255, 0, 255}, {255, 0, 0, 255}}},
+	"DarkLight":      {"DarkLight", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 0, 255}, {250, 250, 250, 255}}},
+	"DarkLightDark":  {"DarkLightDark", gist.Color{200, 200, 200, 255}, []gist.Color{{0, 0, 0, 255}, {250, 250, 250, 255}, {0, 0, 0, 255}}},
+	"LightDarkLight": {"DarkLightDark", gist.Color{200, 200, 200, 255}, []gist.Color{{250, 250, 250, 255}, {0, 0, 0, 255}, {250, 250, 250, 255}}},
 }
 
 // AvailColorMaps is the list of all available color maps

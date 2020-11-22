@@ -9,6 +9,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/girl"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/mimedata"
 	"github.com/goki/gi/units"
@@ -445,7 +446,7 @@ func IconChooserStyleFunc(sv *SliceView, slice interface{}, widg gi.Node2D, row 
 // ColorViewDialog for editing a color using a ColorView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func ColorViewDialog(avp *gi.Viewport2D, clr gist.Color, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(clr, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
 	if recyc {
 		return dlg
@@ -470,14 +471,14 @@ func ColorViewDialog(avp *gi.Viewport2D, clr gi.Color, opts DlgOpts, recv ki.Ki,
 }
 
 // ColorViewDialogValue gets the color from the dialog
-func ColorViewDialogValue(dlg *gi.Dialog) gi.Color {
+func ColorViewDialogValue(dlg *gi.Dialog) gist.Color {
 	frame := dlg.Frame()
 	cvvvk := frame.ChildByType(KiT_ColorView, ki.Embeds, 2)
 	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
 		return cvvv.Color
 	}
-	return gi.Color{}
+	return gist.Color{}
 }
 
 // FileViewDialog is for selecting / manipulating files -- ext is one or more

@@ -71,7 +71,7 @@ type TextBuf struct {
 	Hi               HiMarkup            `desc:"syntax highlighting markup parameters (language, style, etc)"`
 	NLines           int                 `json:"-" xml:"-" desc:"number of lines"`
 	LineIcons        map[int]string      `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`
-	LineColors       map[int]gi.Color    `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
+	LineColors       map[int]gist.Color  `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
 	Icons            map[string]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
 	Lines            [][]rune            `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
 	LineBytes        [][]byte            `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes"`
@@ -2137,7 +2137,7 @@ func (tb *TextBuf) SetLineColor(ln int, color string) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
 	if tb.LineColors == nil {
-		tb.LineColors = make(map[int]gi.Color)
+		tb.LineColors = make(map[int]gist.Color)
 	}
 	clr, _ := gist.ColorFromString(color, nil)
 	tb.LineColors[ln] = clr

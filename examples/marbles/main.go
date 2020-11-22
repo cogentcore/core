@@ -9,6 +9,7 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv"
 	"github.com/goki/gi/svg"
 	"github.com/goki/ki/ki"
@@ -52,13 +53,13 @@ func mainrun() {
 	// style sheet
 	var css = ki.Props{
 		"Action": ki.Props{
-			"background-color": gi.Prefs.Colors.Control, // gi.Color{255, 240, 240, 255},
+			"background-color": gi.Prefs.Colors.Control, // gist.Color{255, 240, 240, 255},
 		},
 		"#combo": ki.Props{
-			"background-color": gi.Color{240, 255, 240, 255},
+			"background-color": gist.Color{240, 255, 240, 255},
 		},
 		".hslides": ki.Props{
-			"background-color": gi.Color{240, 225, 255, 255},
+			"background-color": gist.Color{240, 225, 255, 255},
 		},
 		"kbd": ki.Props{
 			"color": "blue",

@@ -11,6 +11,7 @@ import (
 	"sort"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
@@ -24,11 +25,11 @@ import (
 // ColorView shows a color, using sliders to set values,
 type ColorView struct {
 	gi.Frame
-	Color    gi.Color  `desc:"the color that we view"`
-	NumView  ValueView `desc:"inline struct view of the numbers"`
-	TmpSave  ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
-	ViewSig  ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-	ViewPath string    `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	Color    gist.Color `desc:"the color that we view"`
+	NumView  ValueView  `desc:"inline struct view of the numbers"`
+	TmpSave  ValueView  `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	ViewSig  ki.Signal  `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	ViewPath string     `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
 var KiT_ColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
@@ -334,23 +335,23 @@ func (cv *ColorView) Render2D() {
 // ColorValueView presents a StructViewInline for a struct plus a ColorView button..
 type ColorValueView struct {
 	ValueViewBase
-	TmpColor gi.Color
+	TmpColor gist.Color
 }
 
 var KiT_ColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
 
 // Color returns a standardized color value from whatever value is represented
 // internally
-func (vv *ColorValueView) Color() (*gi.Color, bool) {
+func (vv *ColorValueView) Color() (*gist.Color, bool) {
 	ok := true
 	clri := vv.Value.Interface()
 	clr := &vv.TmpColor
 	switch c := clri.(type) {
-	case gi.Color:
+	case gist.Color:
 		vv.TmpColor = c
-	case *gi.Color:
+	case *gist.Color:
 		clr = c
-	case **gi.Color:
+	case **gist.Color:
 		if c != nil {
 			// todo: not clear this ever works
 			clr = *c
@@ -370,14 +371,14 @@ func (vv *ColorValueView) Color() (*gi.Color, bool) {
 
 // SetColor sets color value from a standard color value -- more robust than
 // plain SetValue
-func (vv *ColorValueView) SetColor(clr gi.Color) {
+func (vv *ColorValueView) SetColor(clr gist.Color) {
 	clri := vv.Value.Interface()
 	switch c := clri.(type) {
-	case gi.Color:
+	case gist.Color:
 		vv.SetValue(clr)
-	case *gi.Color:
+	case *gist.Color:
 		vv.SetValue(clr)
-	case **gi.Color:
+	case **gist.Color:
 		vv.SetValue(clr)
 	case color.Color:
 		vv.SetValue((color.Color)(clr))
@@ -452,7 +453,7 @@ func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.
 		return
 	}
 	desc, _ := vv.Tag("desc")
-	dclr := gi.Color{}
+	dclr := gist.Color{}
 	clr, ok := vv.Color()
 	if ok && clr != nil {
 		dclr = *clr
@@ -523,7 +524,7 @@ func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc
 	cur := kit.ToString(vv.Value.Interface())
 	sl := make([]struct {
 		Name  string
-		Color gi.Color
+		Color gist.Color
 	}, len(colornames.Map))
 	ctr := 0
 	for k, v := range colornames.Map {

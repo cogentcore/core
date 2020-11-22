@@ -36,7 +36,7 @@ type Label struct {
 	StateStyles [LabelStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of label"`
 	Render      girl.Text                `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
 	RenderPos   mat32.Vec2               `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
-	CurBgColor  Color                    `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
+	CurBgColor  gist.Color               `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 var KiT_Label = kit.Types.AddType(&Label{}, LabelProps)

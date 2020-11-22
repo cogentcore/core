@@ -218,11 +218,11 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	// sc.Wireframe = true                      // debugging
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
-	cyan := gi.Color{}
+	cyan := gist.Color{}
 	cyan.SetUInt8(0, 255, 255, 255)
 	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
 
-	// bbclr := gi.Color{}
+	// bbclr := gist.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
 	// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
 
@@ -281,7 +281,7 @@ See <a href="https://github.com/goki/gi/blob/master/examples/gi3d/README.md">REA
 	floor.SetInactive() // not selectable
 
 	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default
+	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
 	// txt.SetProp("background-color", "white")
 	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
 	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px

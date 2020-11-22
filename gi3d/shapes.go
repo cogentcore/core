@@ -5,7 +5,7 @@
 package gi3d
 
 import (
-	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 )
@@ -49,7 +49,7 @@ func (pl *Plane) Make(sc *Scene) {
 
 	hSz := pl.Size.DivScalar(2)
 
-	clr := gi.Color{}
+	clr := gist.Color{}
 
 	thin := float32(.0000001)
 	sz := mat32.Vec3{}
@@ -108,7 +108,7 @@ func (bx *Box) Make(sc *Scene) {
 
 	hSz := bx.Size.DivScalar(2)
 
-	clr := gi.Color{}
+	clr := gist.Color{}
 
 	// start with neg z as typically back
 	bx.AddPlane(mat32.X, mat32.Y, -1, -1, bx.Size.X, bx.Size.Y, -hSz.X, -hSz.Y, -hSz.Z, int(bx.Segs.X), int(bx.Segs.Y), clr) // nz

@@ -156,7 +156,7 @@ type ManipPt struct {
 var KiT_ManipPt = kit.Types.AddType(&ManipPt{}, ManipPtProps)
 
 // AddNewManipPt adds a new manipulation point
-func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr gi.Color, pos mat32.Vec3) *ManipPt {
+func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr gist.Color, pos mat32.Vec3) *ManipPt {
 	mpt := parent.AddNewChild(KiT_ManipPt, name).(*ManipPt)
 	mpt.SetMeshName(sc, meshName)
 	mpt.Defaults()

@@ -3212,7 +3212,7 @@ func (tv *TextView) CursorSprite() *gi.Sprite {
 
 // TextViewDepthOffsets are changes in color values from default background for different
 // depths.  For dark mode, these are increments, for light mode they are decrements.
-var TextViewDepthColors = []gi.Color{
+var TextViewDepthColors = []gist.Color{
 	{0, 0, 0, 0},
 	{5, 5, 0, 0},
 	{15, 15, 0, 0},

@@ -4,14 +4,8 @@
 
 package gi
 
-import "github.com/goki/gi/gist"
-
 // This file contains all the Name types that drive chooser menus when they
 // show up as fields or args, using the giv ValueView system.
-
-// Color is the GoGi version of RGBA color with special methods.
-// This is an alias for the version defined in the gist styles.
-type Color = gist.Color
 
 // ColorName provides a value-view GUI lookup of valid color names
 type ColorName string

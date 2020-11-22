@@ -8,7 +8,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/mat32"
@@ -180,15 +180,15 @@ func (rn *Renderers) Delete() {
 	// note: Vectors, Unis don't have deletable resources beyond programs?
 }
 
-// ColorToVec4f converts given gi.Color to mat32.Vec4 float32's
-func ColorToVec4f(clr gi.Color) mat32.Vec4 {
+// ColorToVec4f converts given gist.Color to mat32.Vec4 float32's
+func ColorToVec4f(clr gist.Color) mat32.Vec4 {
 	v := mat32.Vec4{}
 	v.X, v.Y, v.Z, v.W = clr.ToFloat32()
 	return v
 }
 
-// ColorToVec3f converts given gi.Color to mat32.Vec3 float32's
-func ColorToVec3f(clr gi.Color) mat32.Vec3 {
+// ColorToVec3f converts given gist.Color to mat32.Vec3 float32's
+func ColorToVec3f(clr gist.Color) mat32.Vec3 {
 	v := mat32.Vec3{}
 	v.X, v.Y, v.Z, _ = clr.ToFloat32()
 	return v

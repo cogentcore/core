@@ -23,8 +23,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
+	"github.com/goki/gi/gist"
 	"github.com/goki/mat32"
 )
 
@@ -166,19 +166,19 @@ type Material struct {
 	Opacity    float32     // Opacity factor
 	Refraction float32     // Refraction factor
 	Shininess  float32     // Shininess (specular exponent)
-	Ambient    gi.Color    // Ambient color reflectivity
-	Diffuse    gi.Color    // Diffuse color reflectivity
-	Specular   gi.Color    // Specular color reflectivity
-	Emissive   gi.Color    // Emissive color
+	Ambient    gist.Color  // Ambient color reflectivity
+	Diffuse    gist.Color  // Diffuse color reflectivity
+	Specular   gist.Color  // Specular color reflectivity
+	Emissive   gist.Color  // Emissive color
 	MapKd      string      // Texture file linked to diffuse color
 	Tiling     gi3d.Tiling // Tiling parameters: repeat and offset
 }
 
 // Light gray default material used as when other materials cannot be loaded.
 var defaultMat = &Material{
-	Diffuse:   gi.Color{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
-	Ambient:   gi.Color{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
-	Specular:  gi.Color{R: 0x80, G: 0x80, B: 0x80, A: 0xFF},
+	Diffuse:   gist.Color{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
+	Ambient:   gist.Color{R: 0xA0, G: 0xA0, B: 0xA0, A: 0xFF},
+	Specular:  gist.Color{R: 0x80, G: 0x80, B: 0x80, A: 0xFF},
 	Shininess: 30.0,
 }
 

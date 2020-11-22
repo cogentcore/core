@@ -52,13 +52,13 @@ func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(
 
 // StyleEntry is one value in the map of highlight style values
 type StyleEntry struct {
-	Color      gi.Color `desc:"text color"`
-	Background gi.Color `desc:"background color"`
-	Border     gi.Color `view:"-" desc:"border color? not sure what this is -- not really used"`
-	Bold       Trilean  `desc:"bold font"`
-	Italic     Trilean  `desc:"italic font"`
-	Underline  Trilean  `desc:"underline"`
-	NoInherit  bool     `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
+	Color      gist.Color `desc:"text color"`
+	Background gist.Color `desc:"background color"`
+	Border     gist.Color `view:"-" desc:"border color? not sure what this is -- not really used"`
+	Bold       Trilean    `desc:"bold font"`
+	Italic     Trilean    `desc:"italic font"`
+	Underline  Trilean    `desc:"underline"`
+	NoInherit  bool       `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
 }
 
 var KiT_StyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)

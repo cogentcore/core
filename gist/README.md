@@ -8,9 +8,7 @@ The `xml` struct tags provide the (lowercase) keyword for each tag -- tags can b
 
 This was factored out from the `gi` package for version 1.1.0, making it easier to navigate the code and keeping `gi` smaller and consisting mostly of `gi.Node2D` widgets.
 
-Minor updates are required to rename gi. -> gist. for style properties that are set literally and not using string names (which translate directly).
-
-gi also defines `gi.Color` as a type alias for `gist.Color`, so that does not need to be updated.
+Minor updates are required to rename `gi.` -> `gist.` for style properties that are set literally and not using string names (which translate directly), and any references to `gi.Color` -> `gist.Color`
 
 # TODO
 

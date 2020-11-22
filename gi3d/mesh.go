@@ -9,7 +9,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin/gpu"
 	"github.com/goki/ki/ints"
 	"github.com/goki/ki/kit"
@@ -69,7 +69,7 @@ type Mesh interface {
 	// and texture rendering (minimum of 1 will be enforced).
 	// offset is the distance to place the plane along the orthogonal axis.
 	// if clr is non-Nil then it will be added
-	AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color)
+	AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gist.Color)
 
 	// SetPlane sets plane vertex data (optionally norm, texUV, color, and indexes)
 	// at given starting *vertex* index (i.e., multiply this *3 to get actual float
@@ -83,7 +83,7 @@ type Mesh interface {
 	// and texture rendering (minimum of 1 will be enforced).
 	// offset is the distance to place the plane along the orthogonal axis.
 	// if clr is non-Nil then it will be added
-	SetPlane(stVtxIdx, stIdxIdx int, setNorm, setTex, setIdx bool, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color)
+	SetPlane(stVtxIdx, stIdxIdx int, setNorm, setTex, setIdx bool, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gist.Color)
 
 	// PlaneSize returns the size of a single plane's worth of vertex and index data
 	// with given number of segments.
@@ -446,7 +446,7 @@ func (ms *MeshBase) Alloc(vtxs, idxs int, color bool) {
 
 // AddTriangle adds one triangle of vertex data (optionally texUV, color) to mesh.
 // norm is auto-computed, and bounds expanded.  Must have 3 texs if not nil.
-func (ms *MeshBase) AddTriangle(a, b, c mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+func (ms *MeshBase) AddTriangle(a, b, c mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
 	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
 	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
 	ms.SetTriangle(stVtxIdx, stIdxIdx, true, a, b, c, texs, clr)
@@ -456,7 +456,7 @@ func (ms *MeshBase) AddTriangle(a, b, c mat32.Vec3, texs []mat32.Vec2, clr gi.Co
 // and indexes) at given starting *vertex* index (i.e., multiply this *3
 // to get actual float offset in Vtx array), and starting Idx index.
 // Norm is auto-computed, and bounds expanded.
-func (ms *MeshBase) SetTriangle(stVtxIdx, stIdxIdx int, setIdx bool, a, b, c mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+func (ms *MeshBase) SetTriangle(stVtxIdx, stIdxIdx int, setIdx bool, a, b, c mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
 	hasTex := texs != nil
 	hasColor := !clr.IsNil()
 	sz := len(ms.Vtx) / 3
@@ -516,7 +516,7 @@ func (ms *MeshBase) SetTriangle(stVtxIdx, stIdxIdx int, setIdx bool, a, b, c mat
 // AddQuad adds quad vertex data (optionally texUV, color) to mesh.
 // Must have 4 vtxs, 4 texs if !nil.
 // Norm is auto-computed, and bbox expanded by points.
-func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
 	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
 	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
 	ms.SetQuad(stVtxIdx, stIdxIdx, true, vtxs, texs, clr)
@@ -526,7 +526,7 @@ func (ms *MeshBase) AddQuad(vtxs []mat32.Vec3, texs []mat32.Vec2, clr gi.Color) 
 // at given starting *vertex* index (i.e., multiply this *3 to get actual float
 // offset in Vtx array), and starting Idx index.
 // Norm is auto-computed, and bbox expanded by points.
-func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Vec3, texs []mat32.Vec2, clr gi.Color) {
+func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Vec3, texs []mat32.Vec2, clr gist.Color) {
 	hasTex := texs != nil
 	hasColor := !clr.IsNil()
 	sz := len(ms.Vtx) / 3
@@ -588,7 +588,7 @@ func (ms *MeshBase) SetQuad(stVtxIdx, stIdxIdx int, setIdx bool, vtxs []mat32.Ve
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // if clr is non-Nil then it will be added
-func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color) {
+func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gist.Color) {
 	stVtxIdx := ms.Vtx.Len() / 3 // starting index based on what's there already
 	stIdxIdx := ms.Idx.Len()     // starting index based on what's there already
 
@@ -607,7 +607,7 @@ func (ms *MeshBase) AddPlane(waxis, haxis mat32.Dims, wdir, hdir int, width, hei
 // and texture rendering (minimum of 1 will be enforced).
 // offset is the distance to place the plane along the orthogonal axis.
 // if clr is non-Nil then it will be added
-func (ms *MeshBase) SetPlane(stVtxIdx, stIdxIdx int, setNorm, setTex, setIdx bool, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gi.Color) {
+func (ms *MeshBase) SetPlane(stVtxIdx, stIdxIdx int, setNorm, setTex, setIdx bool, waxis, haxis mat32.Dims, wdir, hdir int, width, height, woff, hoff, zoff float32, wsegs, hsegs int, clr gist.Color) {
 	w := mat32.Z
 	if (waxis == mat32.X && haxis == mat32.Y) || (waxis == mat32.Y && haxis == mat32.X) {
 		w = mat32.Z

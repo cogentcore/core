@@ -87,7 +87,7 @@ func mainrun() {
 	}
 	// then doing it with colors -- tests the "there and back again" round trip..
 	for _, hu := range hues {
-		clr := gi.Color{}
+		clr := gist.Color{}
 		clr.SetHSLA(hu, 1.0, 0.2, 1)
 		for lt := float32(0.0); lt <= 100.01; lt += 10 {
 			fr := gi.AddNewFrame(grid, "fr", gi.LayoutHoriz)

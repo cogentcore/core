@@ -13,7 +13,7 @@
 # * cd back here, and run 'pygi' which was installed into /usr/local/bin
 # * then type 'import widgets' and this should run
 
-from gi import go, gi, giv, units, ki, mat32, gimain
+from gi import go, gi, gist, giv, units, ki, mat32, gimain
 
 def strdlgcb(recv, send, sig, data):
     dlg = gi.Dialog(handle=send)  # send is a raw int64 handle -- use it to initialize
@@ -146,7 +146,7 @@ def mainrun():
     brow.SetProp("spacing", "2ex")
 
     brow.SetProp("horizontal-align", "left")
-    # brow.SetProp("horizontal-align", gi.AlignJustify)
+    # brow.SetProp("horizontal-align", gist.AlignJustify)
     brow.SetStretchMaxWidth()
 
     button1 = gi.AddNewButton(brow, "button1")
@@ -244,7 +244,7 @@ def mainrun():
     txlab = gi.AddNewLabel(txlrow, "txlab", "Text Widgets:")
     txrow = gi.AddNewLayout(mfr, "txrow", gi.LayoutHoriz)
     txrow.SetProp("spacing", "2ex")
-    # # txrow.SetProp("horizontal-align", gi.AlignJustify)
+    # # txrow.SetProp("horizontal-align", gist.AlignJustify)
     txrow.SetStretchMaxWidth()
 
     edit1 = gi.AddNewTextField(txrow, "edit1")

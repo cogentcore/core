@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/gpu"
@@ -70,7 +71,7 @@ type Scene struct {
 	gi.WidgetBase
 	Geom          gi.Geom2DInt       `desc:"Viewport-level viewbox within any parent Viewport2D"`
 	Camera        Camera             `desc:"camera determines view onto scene"`
-	BgColor       gi.Color           `desc:"background color"`
+	BgColor       gist.Color         `desc:"background color"`
 	Wireframe     bool               `desc:"if true, render as wireframe instead of filled"`
 	Lights        map[string]Light   `desc:"all lights used in the scene"`
 	Meshes        map[string]Mesh    `desc:"all meshes used in the scene"`

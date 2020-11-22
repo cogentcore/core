@@ -10,7 +10,7 @@ import (
 	"math"
 
 	"github.com/chewxy/math32"
-	"github.com/goki/gi/gi"
+	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
@@ -31,7 +31,7 @@ type Lines struct {
 	MeshBase
 	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`
 	Width  mat32.Vec2   `desc:"line width, Y = height perpendicular to line direction, and X = depth"`
-	Colors []gi.Color   `desc:"optional colors for each point -- actual color interpolates between"`
+	Colors []gist.Color `desc:"optional colors for each point -- actual color interpolates between"`
 	Closed bool         `desc:"if true, connect the first and last points to form a closed shape"`
 }
 
@@ -87,7 +87,7 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 
 // AddNewLine adds a new line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned to go between the designated points.
-func AddNewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gi.Color) *Solid {
+func AddNewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gist.Color) *Solid {
 	lm := UnitLineMesh(sc)
 	ln := AddNewSolid(sc, parent, name, lm.Name())
 	ln.Pose.Scale.Set(1, width, width)
@@ -127,7 +127,7 @@ const (
 // The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
 // providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
-func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gi.Color, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
+func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr gist.Color, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
 	cm := UnitConeMesh(sc, arrowSegs)
 	gp := AddNewGroup(sc, parent, name)
 
@@ -203,7 +203,7 @@ const (
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr gi.Color, inactive bool) *Group {
+func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr gist.Color, inactive bool) *Group {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 
@@ -279,7 +279,7 @@ func (ms *MeshBase) AddLines(points []mat32.Vec3, width mat32.Vec2, closed bool,
 		np++
 	}
 
-	clr := gi.Color{}
+	clr := gist.Color{}
 
 	wdy := width.Y / 2
 	wdz := width.X / 2

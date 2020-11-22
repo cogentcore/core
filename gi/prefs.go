@@ -345,7 +345,7 @@ func (pf *Preferences) UpdateUser() {
 
 // PrefColor returns preference color of given name (case insensitive)
 // std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *Preferences) PrefColor(clrName string) *Color {
+func (pf *Preferences) PrefColor(clrName string) *gist.Color {
 	return pf.Colors.PrefColor(clrName)
 }
 
@@ -462,15 +462,15 @@ var PreferencesProps = ki.Props{
 // used in the default styles.
 type ColorPrefs struct {
 	HiStyle    HiStyleName `desc:"text highilighting style / theme"`
-	Font       Color       `desc:"default font / pen color"`
-	Background Color       `desc:"default background color"`
-	Shadow     Color       `desc:"color for shadows -- should generally be a darker shade of the background color"`
-	Border     Color       `desc:"default border color, for button, frame borders, etc"`
-	Control    Color       `desc:"default main color for controls: buttons, etc"`
-	Icon       Color       `desc:"color for icons or other solidly-colored, small elements"`
-	Select     Color       `desc:"color for selected elements"`
-	Highlight  Color       `desc:"color for highlight background"`
-	Link       Color       `desc:"color for links in text etc"`
+	Font       gist.Color  `desc:"default font / pen color"`
+	Background gist.Color  `desc:"default background color"`
+	Shadow     gist.Color  `desc:"color for shadows -- should generally be a darker shade of the background color"`
+	Border     gist.Color  `desc:"default border color, for button, frame borders, etc"`
+	Control    gist.Color  `desc:"default main color for controls: buttons, etc"`
+	Icon       gist.Color  `desc:"color for icons or other solidly-colored, small elements"`
+	Select     gist.Color  `desc:"color for selected elements"`
+	Highlight  gist.Color  `desc:"color for highlight background"`
+	Link       gist.Color  `desc:"color for links in text etc"`
 }
 
 var KiT_ColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
@@ -514,7 +514,7 @@ func DefaultColorSchemes() map[string]*ColorPrefs {
 
 // PrefColor returns preference color of given name (case insensitive)
 // std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *ColorPrefs) PrefColor(clrName string) *Color {
+func (pf *ColorPrefs) PrefColor(clrName string) *gist.Color {
 	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
 	switch lc {
 	case "font":
