@@ -66,6 +66,9 @@ type URLHandlerFunc func(url string) bool
 // nil will prevent any links from being open that way, and your own function
 // will have full responsibility for links if set (i.e., the return value is ignored)
 var URLHandler = func(url string) bool {
-	oswin.TheApp.OpenURL(url)
-	return true
+	if oswin.TheApp != nil {
+		oswin.TheApp.OpenURL(url)
+		return true
+	}
+	return false
 }

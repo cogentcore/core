@@ -138,7 +138,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 		return
 	}
 	ucfont := &gist.Font{}
-	if oswin.TheApp.Platform() == oswin.MacOS {
+	if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 		ucfont.Family = "Arial Unicode"
 	} else {
 		ucfont.Family = "Arial"
@@ -161,7 +161,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 	for i := 1; i < sz; i++ { // optimize by setting rest to nil for same
 		rp := Rune{Deco: deco, BgColor: bg}
 		r := nwr[i]
-		if oswin.TheApp.Platform() == oswin.MacOS {
+		if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 			if r > 0xFF && unicode.IsSymbol(r) {
 				if !lastUc {
 					rp.Face = ucfont.Face.Face

@@ -412,3 +412,46 @@ func FontNameFromMods(basenm string, str FontStretch, wt FontWeights, sty FontSt
 	}
 	return fn
 }
+
+// FixFontMods ensures that standard font modifiers have a space in front of
+// them, and that the default is not in the name -- used for regularizing font
+// names.
+func FixFontMods(fn string) string {
+	for mi, mod := range FontStretchNames {
+		if bi := strings.Index(fn, mod); bi > 0 {
+			if fn[bi-1] != ' ' {
+				fn = strings.Replace(fn, mod, " "+mod, 1)
+			}
+			if mi == 0 { // default, remove
+				fn = strings.Replace(fn, " "+mod, "", 1)
+			}
+			break // critical to break to prevent subsets from matching
+		}
+	}
+	for mi, mod := range FontWeightNames {
+		if bi := strings.Index(fn, mod); bi > 0 {
+			if fn[bi-1] != ' ' {
+				fn = strings.Replace(fn, mod, " "+mod, 1)
+			}
+			if mi == 0 { // default, remove
+				fn = strings.Replace(fn, " "+mod, "", 1)
+			}
+			break // critical to break to prevent subsets from matching
+		}
+	}
+	for mi, mod := range FontStyleNames {
+		if bi := strings.Index(fn, mod); bi > 0 {
+			if fn[bi-1] != ' ' {
+				fn = strings.Replace(fn, mod, " "+mod, 1)
+			}
+			if mi == 0 { // default, remove
+				fn = strings.Replace(fn, " "+mod, "", 1)
+			}
+			break // critical to break to prevent subsets from matching
+		}
+	}
+	// also get rid of Regular!
+	fn = strings.TrimSuffix(fn, " Regular")
+	fn = strings.TrimSuffix(fn, "Regular")
+	return fn
+}

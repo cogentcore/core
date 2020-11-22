@@ -376,6 +376,13 @@ func (v *Value) SetDp(val float32) {
 	v.Un = Px
 }
 
+// SetDot sets value in Dots directly
+func (v *Value) SetDot(val float32) {
+	v.Val = val
+	v.Un = Dot
+	v.Dots = val
+}
+
 // ToDots converts value to raw display pixels (dots as in DPI), setting also
 // the Dots field
 func (v *Value) ToDots(ctxt *Context) float32 {

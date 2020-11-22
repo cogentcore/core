@@ -65,7 +65,7 @@ The best way to see how the system works are in the `examples` directory, and by
 
 The `oswin` and `gpu` packages provide interface abstractions for hardware-level implementations.  Currently the gpu implementation is OpenGL, but Vulkan is planned, hopefully with not too many changes to the `gpu` interface.  The basic platform-specific details are handled by [glfw](https://github.com/go-gl/glfw) (version 3.3), along with a few other bits of platform-specific code.
 
-All of the main "front end" code just deals with `image.RGBA` through the `girl` renderling library, using `girl.Paint` methods, which was adapted from https://github.com/fogleman/gg, and we use https://github.com/srwiley/rasterx for CPU-based rasterization to the image, which is very fast and SVG performant.   The `Viewport2D` image is uploaded to a GPU-backed `oswin.Texture` and composited with sprite overlays up to the window.
+All of the main "front end" code just deals with `image.RGBA` through the [girl](https://github.com/goki/gi/tree/master/girl) rendering library, using `girl.Paint` methods, which was adapted from https://github.com/fogleman/gg, and we use https://github.com/srwiley/rasterx for CPU-based rasterization to the image, which is fast and SVG performant.   The `Viewport2D` image is uploaded to a GPU-backed `oswin.Texture` and composited with sprite overlays up to the window.
 
 # Status
 

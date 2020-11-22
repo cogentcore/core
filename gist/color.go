@@ -33,6 +33,21 @@ var ColorProps = ki.Props{
 	"style-prop": true,
 }
 
+// ColorFromString returns a new color set from given string and optional base
+// color for transforms -- see SetString
+func ColorFromString(str string, base color.Color) (Color, error) {
+	var c Color
+	err := c.SetString(str, base)
+	return c, err
+}
+
+// ColorFromName returns a new color set from given name.
+func ColorFromName(name string) (Color, error) {
+	var c Color
+	err := c.SetName(name)
+	return c, err
+}
+
 // implements color.Color interface -- returns values in range 0x0000 - 0xffff
 func (c Color) RGBA() (r, g, b, a uint32) {
 	r = uint32(c.R)
@@ -465,21 +480,6 @@ func (c *Color) SetStringStyle(str string, base color.Color, ctxt Context) error
 	default:
 		return c.SetString(str, base)
 	}
-}
-
-// ColorFromString returns a new color set from given string and optional base
-// color for transforms -- see SetString
-func ColorFromString(str string, base color.Color) (Color, error) {
-	var c Color
-	err := c.SetString(str, base)
-	return c, err
-}
-
-// ColorFromName returns a new color set from given name.
-func ColorFromName(name string) (Color, error) {
-	var c Color
-	err := c.SetName(name)
-	return c, err
 }
 
 // parse Hex color -- this is from fogleman/gg I think..

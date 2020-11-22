@@ -249,7 +249,7 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 				}
 			}
 		}
-		fn = FixFontMods(fn)
+		fn = gist.FixFontMods(fn)
 		basefn := strings.ToLower(fn)
 		if _, ok := fl.FontsAvail[basefn]; !ok {
 			fl.FontsAvail[basefn] = path

@@ -2,19 +2,16 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package gist
 
 import (
 	"fmt"
 	// "reflect"
 	"testing"
 
-	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
-
-var fp = FontLibrary.AddFontPaths("/Library/Fonts")
 
 func TestStyle(t *testing.T) {
 	props := make(ki.Props)
@@ -25,7 +22,7 @@ func TestStyle(t *testing.T) {
 	props["border-style"] = "groove"
 	props["border-width"] = "2px"
 	props["height"] = "inherit"
-	var s, p, d gist.Style
+	var s, p, d Style
 	s.Defaults()
 	p.Defaults()
 	d.Defaults()
