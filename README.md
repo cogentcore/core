@@ -10,7 +10,9 @@ Go language (golang) full strength tree structures (ki = 木 = tree in Japanese)
 
 See the [Wiki](https://github.com/goki/ki/wiki) for more docs, and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
 
-The **Tree** is the most powerful data structure in programming, and it underlies all the best tech, such as the WWW (the DOM is a tree structure), scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  GoKi provides a powerful tree container type, that can support all of these things just by embedding and extending the `Node` struct type that implements the `Ki` (Ki = Tree in Japanese) interface.
+The **Tree** is the most powerful data structure in programming, and it underlies all the best tech, such as the WWW (the DOM is a tree structure), scene graphs for 3D and 2D graphics systems, JSON, XML, SVG, filesystems, programs themselves, etc.  This is because trees can capture most relevant forms of *structure* (groupings, categories, relationships, etc) and are most powerful when they are fully *generative* -- arbitrary new types can be inserted flexibly.
+
+GoKi provides a powerful tree container type, that can support all of these things just by embedding and extending the `Node` struct type that implements the `Ki` (Ki = Tree in Japanese) `interface`.
 
 The goal of GoKi is to create a minimalist, elegant, and powerful environment (like Go itself) where the tree-based primitives are used to simplify otherwise complex operations.  Similar to MATLAB and matricies, you can perform major computational functions using just a few lines of GoKi code.  As is always the case in programming, using the right data structure that captures the underlying structure of the problem is essential, and in many cases, that structure is a tree.
 
@@ -22,7 +24,7 @@ func (n *MyNode) DoSomethingOnMyTree() {
 		mn := KiToMyNode(k)
 		mn.DoSomething()
 		...
-		return true // return value determines whether tree traversal continues or not
+		return ki.Continue // return value determines whether tree traversal continues or not
 	})
 }
 ```
@@ -41,7 +43,7 @@ Ki Nodes can be used as fields in a struct -- they function much like pre-define
 
 ## GoGi Graphical Interface and Gide IDE App
 
-The first and most important application of GoKi is the [GoGi](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of GoGi.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in perhaps the fewest lines of code of any such system.  Part of this is the natural elegance of Go, but GoKi enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight, transparent, good-enough-for-many-apps native web browser (someday!)
+The first and most important application of GoKi is the [GoGi](https://github.com/goki/gi) graphical interface system, in the `gi` package, and the [Gide](https://github.com/goki/gide) IDE built on top of GoGi.  The scene graph of Ki elements automatically drives minimal refresh updates, and the signaling framework supports gui event delivery and e.g., the "onclick" event signaling from the `Button` widget, etc.  In short, GoGi provides a complete interactive 2D and 3D GUI environment in native Go, in a very compact codebase.  Part of this is the natural elegance of Go, but GoKi enhances that by providing the robust natural primitives needed to express all the GUI functionality.  Because GoGi is based around standard CSS styles, SVG rendering, and supports all the major HTML elements, it could even provide a lightweight, transparent, good-enough-for-many-apps native web browser (someday!)
 
 # Code Map
 
@@ -57,7 +59,7 @@ The first and most important application of GoKi is the [GoGi](https://github.co
 
 * `signal.go` = `Signal` that calls function on a receiver Ki objects that have been previously `Connect`ed to the signal -- also supports signal type so the same signal sender can send different types of signals over the same connection -- used for signaling changes in tree structure, and more general tree updating signals.
 
-# Status and TODO
+# Status
 
 * April, 2020: version 1.0.0 release -- all stable and well tested.
 
