@@ -19,16 +19,18 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
 This assumes that you are using go modules, as discussed in the wiki install page, and *that you are in the `gi` directory where you installed gi* (e.g., `git clone https://github.com/goki/gi` and then `cd gi`)
 
 ```sh
-$ go get golang.org/x/tools/cmd/goimports  # this installs into ~/go/bin
-$ go get github.com/go-python/gopy 
 $ cd python  # should be in gi/python now -- i.e., the dir where this README.md is..
 $ make  # if you get an error about not finding gopy, make sure ~/go/bin is on your path
 $ make install  # may need to do: sudo make install -- installs into /usr/local/bin and python site-packages
 $ cd ../examples/widgets
+$ ./widgets.py        # start using #! comment magic code
+```
+
+Alternatively, you can run things more manually in the widgets directory:
+```sh
 $ pygi   # this was installed during make install into /usr/local/bin
 $ import widgets  # this loads and runs widgets.py -- view that and compare with widgets.go
 $ pygi -i widgets.py  # another way to start it
-$ ./widgets.py        # yet another way to start it, using #! comment magic at start
 ```
 
 If you get something like this error:
