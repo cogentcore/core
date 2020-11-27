@@ -67,6 +67,7 @@ type TextField struct {
 	BlinkOn      bool                         `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
 	CursorMu     sync.Mutex                   `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
 	Complete     *Complete                    `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	NoEcho       bool                         `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
 }
 
 var KiT_TextField = kit.Types.AddType(&TextField{}, TextFieldProps)
@@ -1431,7 +1432,11 @@ func (tf *TextField) Style2D() {
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Sty
 	girl.OpenFont(&st.Font, &st.UnContext)
-	tf.RenderAll.SetRunes(tf.EditTxt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
+	txt := tf.EditTxt
+	if tf.NoEcho {
+		txt = concealDots(len(tf.EditTxt))
+	}
+	tf.RenderAll.SetRunes(txt, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 	return true
 }
 
@@ -1508,6 +1513,9 @@ func (tf *TextField) RenderTextField() {
 		tf.RenderVis.RenderTopPos(rs, pos)
 
 	} else {
+		if tf.NoEcho {
+			cur = concealDots(len(cur))
+		}
 		tf.RenderVis.SetRunes(cur, &st.Font, &st.UnContext, &st.Text, true, 0, 0)
 		tf.RenderVis.RenderTopPos(rs, pos)
 	}
@@ -1564,4 +1572,13 @@ func (tf *TextField) FocusChanged2D(change FocusChanges) {
 		// tf.UpdateSig()
 		// todo: see about cursor
 	}
+}
+
+// concealDots creates an n-length []rune of bullet characters.
+func concealDots(n int) []rune {
+	dots := make([]rune, n)
+	for i := range dots {
+		dots[i] = 0x2022 // bullet character •
+	}
+	return dots
 }
