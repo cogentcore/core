@@ -1542,7 +1542,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 		hasFocus = true // doesn't need focus!
 	}
 
-	if hasFocus && !evi.IsProcessed() {
+	if (hasFocus || !evi.OnWinFocus()) && !evi.IsProcessed() {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 		w.EventMgr.SendEventSignal(evi, evToPopup)
 		if !w.delPop && et == oswin.MouseMoveEvent && !evi.IsProcessed() {
