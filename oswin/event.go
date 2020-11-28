@@ -147,6 +147,9 @@ type Event interface {
 	// OnFocus returns true if the event operates only on focus item (e.g., keyboard events)
 	OnFocus() bool
 
+	// OnWinFocus returns true if the event operates only when the window has focus
+	OnWinFocus() bool
+
 	// Time returns the time at which the event was generated, in UnixNano nanosecond units
 	Time() time.Time
 
@@ -208,6 +211,10 @@ func (ev EventBase) String() string {
 	return fmt.Sprintf("Event at Time: %v", ev.Time())
 }
 
+func (ev EventBase) OnWinFocus() bool {
+	return true
+}
+
 //////////////////////////////////////////////////////////////////////
 // CustomEvent
 
@@ -240,6 +247,10 @@ func (ce CustomEvent) Pos() image.Point {
 
 func (ce CustomEvent) OnFocus() bool {
 	return ce.Focus
+}
+
+func (ce CustomEvent) OnWinFocus() bool {
+	return false
 }
 
 // SendCustomEvent sends a new custom event to given window, with
