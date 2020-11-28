@@ -155,6 +155,7 @@ type Window struct {
 	PopupFocus        ki.Ki             `json:"-" xml:"-" desc:"node to focus on when next popup is activated -- use SetNextPopup"`
 	DelPopup          ki.Ki             `json:"-" xml:"-" desc:"this popup will be popped at the end of the current event cycle -- use SetDelPopup"`
 	PopMu             sync.RWMutex      `json:"-" xml:"-" view:"-" desc:"read-write mutex that protects popup updating and access"`
+	BlurEvents        bool              `json:"-" xml:"-" view:"-" desc:"propagate events when the window doesn't have focus"`
 	lastWinMenuUpdate time.Time
 	// below are internal vars used during the event loop
 	delPop        bool
@@ -1542,7 +1543,7 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 		hasFocus = true // doesn't need focus!
 	}
 
-	if hasFocus && !evi.IsProcessed() {
+	if (hasFocus || w.BlurEvents) && !evi.IsProcessed() {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 		w.EventMgr.SendEventSignal(evi, evToPopup)
 		if !w.delPop && et == oswin.MouseMoveEvent && !evi.IsProcessed() {
