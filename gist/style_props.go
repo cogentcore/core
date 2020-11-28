@@ -5,7 +5,6 @@
 package gist
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
@@ -697,9 +696,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 		}
 		switch vt := val.(type) {
 		case string:
-			fmt.Printf("ts.Align: %v = %s\n", ts.Align, vt)
 			kit.Enums.SetAnyEnumIfaceFromString(&ts.Align, vt)
-			fmt.Printf("ts.Align: %v = %s\n", ts.Align, vt)
 		case Align:
 			ts.Align = vt
 		default:

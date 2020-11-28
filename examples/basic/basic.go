@@ -26,8 +26,11 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	rlay := gi.AddNewLayout(mfr, "rowlay", gi.LayoutHoriz)
-	rlay.SetProp("text-align", "center")
-	gi.AddNewLabel(rlay, "label1", "This is test text")
+	rlay.SetStretchMaxWidth()
+	lbl := gi.AddNewLabel(rlay, "label1", "This is test text")
+	lbl.SetProp("text-align", "center")
+	lbl.SetProp("width", 500)
+	lbl.SetProp("border-width", 1)
 	// edit1 := gi.AddNewTextField(rlay, "edit1")
 	// button1 := gi.AddNewButton(rlay, "button1")
 	// button2 := gi.AddNewButton(rlay, "button2")
