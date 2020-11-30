@@ -292,30 +292,6 @@ func (lb *Label) GrabCurBgColor() {
 	lb.CurBgColor.SetColor(clr)
 }
 
-func (lb *Label) TextPos() mat32.Vec2 {
-	lb.StyMu.RLock()
-	sty := &lb.Sty
-	pos := lb.LayState.Alloc.Pos.AddScalar(sty.BoxSpace())
-	if !sty.Text.HasWordWrap() { // word-wrap case already deals with this b/c it has final alloc size -- otherwise it lays out "blind" and can't do this.
-		if lb.LayState.Alloc.Size.X > lb.Render.Size.X {
-			if gist.IsAlignMiddle(sty.Layout.AlignH) {
-				pos.X += 0.5 * (lb.LayState.Alloc.Size.X - lb.Render.Size.X)
-			} else if gist.IsAlignEnd(sty.Layout.AlignH) {
-				pos.X += (lb.LayState.Alloc.Size.X - lb.Render.Size.X)
-			}
-		}
-		if lb.LayState.Alloc.Size.Y > lb.Render.Size.Y {
-			if gist.IsAlignMiddle(sty.Layout.AlignV) {
-				pos.Y += 0.5 * (lb.LayState.Alloc.Size.Y - lb.Render.Size.Y)
-			} else if gist.IsAlignEnd(sty.Layout.AlignV) {
-				pos.Y += (lb.LayState.Alloc.Size.Y - lb.Render.Size.Y)
-			}
-		}
-	}
-	lb.StyMu.RUnlock()
-	return pos
-}
-
 // StyleLabel does label styling -- it sets the StyMu Lock
 func (lb *Label) StyleLabel() {
 	lb.StyMu.Lock()
@@ -324,11 +300,6 @@ func (lb *Label) StyleLabel() {
 	hasTempl, saveTempl := lb.Sty.FromTemplate()
 	if !hasTempl || saveTempl {
 		lb.Style2DWidget()
-		if lb.Sty.Text.Align != gist.AlignLeft && lb.Sty.Layout.AlignH == gist.AlignLeft {
-			lb.Sty.Layout.AlignH = lb.Sty.Text.Align // keep them consistent -- this is what people expect
-		} else if lb.Sty.Layout.AlignH != gist.AlignLeft && lb.Sty.Text.Align == gist.AlignLeft {
-			lb.Sty.Text.Align = lb.Sty.Layout.AlignH // keep them consistent -- this is what people expect
-		}
 	}
 	if hasTempl && saveTempl {
 		lb.Sty.SaveTemplate()
@@ -385,7 +356,9 @@ func (lb *Label) Size2D(iter int) {
 		return // already updated in previous iter, don't redo!
 	} else {
 		lb.InitLayout2D()
-		lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
+		sz := lb.LayState.SizePrefOrMax()
+		sz = sz.Max(lb.Render.Size)
+		lb.Size2DFromWH(sz.X, sz.Y)
 	}
 }
 
@@ -396,18 +369,25 @@ func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
 	}
 	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
+	lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
+	lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
+	lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 	if lb.Sty.Text.HasWordWrap() {
-		lb.Sty.Font.BgColor.Color.SetToNil() // always use transparent bg for actual text
-		lb.Render.SetHTML(lb.Text, &lb.Sty.Font, &lb.Sty.Text, &lb.Sty.UnContext, lb.CSSAgg)
-		lb.Render.LayoutStdLR(&lb.Sty.Text, &lb.Sty.Font, &lb.Sty.UnContext, sz)
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			// fmt.Printf("label layout less vert: %v  new: %v  prev: %v\n", lb.Nm, lb.Render.Size.Y, sz.Y)
 			lb.LayState.SetFromStyle(&lb.Sty.Layout)
 			lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
 			return true // needs a redo!
 		}
 	}
 	return false
+}
+
+func (lb *Label) TextPos() mat32.Vec2 {
+	lb.StyMu.RLock()
+	sty := &lb.Sty
+	pos := lb.LayState.Alloc.Pos.AddScalar(sty.BoxSpace())
+	lb.StyMu.RUnlock()
+	return pos
 }
 
 func (lb *Label) RenderLabel() {

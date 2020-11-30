@@ -197,7 +197,6 @@ func (s *Style) SetStyleProps(par *Style, props ki.Props, ctxt Context) {
 		s.InheritFields(par)
 	}
 	s.StyleFromProps(par, props, ctxt)
-	s.Text.AlignV = s.Layout.AlignV
 	if s.Layout.Margin.Val > 0 && s.Text.ParaSpacing.Val == 0 {
 		s.Text.ParaSpacing = s.Layout.Margin
 	}

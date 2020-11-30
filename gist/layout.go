@@ -37,8 +37,8 @@ var ScrollBarWidthDefault = float32(16)
 // Layout contains style preferences on the layout of the element.
 type Layout struct {
 	ZIndex         int         `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
-	AlignH         Align       `xml:"horizontal-align" desc:"prop: horizontal-align = horizontal alignment -- for widget layouts -- not a standard css property"`
-	AlignV         Align       `xml:"vertical-align" desc:"prop: vertical-align = vertical alignment -- for widget layouts -- not a standard css property"`
+	AlignH         Align       `xml:"horizontal-align" desc:"prop: horizontal-align specifies the horizontal alignment of widget elements within a *vertical* layout container (has no effect within horizontal layouts -- use space / stretch elements instead).  For text layout, use text-align. This is not a standard css property."`
+	AlignV         Align       `xml:"vertical-align" desc:"prop: vertical-align specifies the vertical alignment of widget elements within a *horizontal* layout container (has no effect within vertical layouts -- use space / stretch elements instead).  For text layout, use text-vertical-align.  This is not a standard css property"`
 	PosX           units.Value `xml:"x" desc:"prop: x = horizontal position -- often superseded by layout but otherwise used"`
 	PosY           units.Value `xml:"y" desc:"prop: y = vertical position -- often superseded by layout but otherwise used"`
 	Width          units.Value `xml:"width" desc:"prop: width = specified size of element -- 0 if not specified"`

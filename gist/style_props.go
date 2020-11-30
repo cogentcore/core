@@ -707,6 +707,29 @@ var StyleTextFuncs = map[string]StyleFunc{
 			}
 		}
 	},
+	"text-vertical-align": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+		ts := obj.(*Text)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				ts.AlignV = par.(*Text).Align
+			} else if init {
+				ts.AlignV = AlignTop
+			}
+			return
+		}
+		switch vt := val.(type) {
+		case string:
+			kit.Enums.SetAnyEnumIfaceFromString(&ts.AlignV, vt)
+		case Align:
+			ts.AlignV = vt
+		default:
+			if iv, ok := kit.ToInt(val); ok {
+				ts.AlignV = Align(iv)
+			} else {
+				StyleSetError(key, val)
+			}
+		}
+	},
 	"text-anchor": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
 		ts := obj.(*Text)
 		if inh, init := StyleInhInit(val, par); inh || init {
