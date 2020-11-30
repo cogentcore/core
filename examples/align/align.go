@@ -92,6 +92,40 @@ func mainrun() {
 	lbl = gi.AddNewLabel(vlay, "tjm", "text-align=justify\nnow it\nhas effect\nbecause of multi-line\n(not yet impl)")
 	lbl.SetProp("text-align", "justify")
 
+	//	vertical alignment only works within a horizontallayout!!
+	hlay := gi.AddNewFrame(mfr, "hlay", gi.LayoutHoriz)
+	// hlay.SetStretchMaxWidth()
+
+	lbl = gi.AddNewLabel(hlay, "t", "top aligned (default)") // nothing interesting about top..
+
+	// middle
+
+	lbl = gi.AddNewLabel(hlay, "c", "vertical-align=middle")
+	lbl.SetProp("vertical-align", "middle")
+
+	lbl = gi.AddNewLabel(hlay, "tcs", "text-vertical-align=middle, StretchMaxHeight")
+	lbl.SetProp("text-vertical-align", "middle")
+	lbl.SetStretchMaxHeight()
+
+	lbl = gi.AddNewLabel(hlay, "tcf", "text-vertical-align=middle, height=20em")
+	lbl.SetProp("text-vertical-align", "middle")
+	lbl.SetProp("height", "20em")
+	lbl.SetProp("border-height", 1)
+
+	// bottom
+
+	lbl = gi.AddNewLabel(hlay, "r", "vertical-align=bottom")
+	lbl.SetProp("vertical-align", "bottom")
+
+	lbl = gi.AddNewLabel(hlay, "trs", "text-vertical-align=bottom, StretchMaxHeight")
+	lbl.SetProp("text-vertical-align", "bottom")
+	lbl.SetStretchMaxHeight()
+
+	lbl = gi.AddNewLabel(hlay, "trf", "text-vertical-align=bottom, height=20em")
+	lbl.SetProp("text-vertical-align", "bottom")
+	lbl.SetProp("height", "20em")
+	lbl.SetProp("border-width", 1)
+
 	// main menu
 	appnm := gi.AppName()
 	mmen := win.MainMenu
