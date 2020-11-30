@@ -92,7 +92,7 @@ func mainrun() {
 See <a href="https://github.com/goki/gi/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`)
 	// title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
 	title.SetProp("white-space", "normal")        // wrap
-	title.SetProp("text-align", gist.AlignCenter) // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+	title.SetProp("text-align", gist.AlignCenter) // see align example for more details on how to use aligns
 	title.SetProp("vertical-align", gist.AlignCenter)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")

@@ -262,7 +262,7 @@ var DialogProps = ki.Props{
 	"#title": ki.Props{
 		// todo: add "bigger" font
 		"max-width":        units.NewPx(-1),
-		"text-align":       gist.AlignCenter,
+		"horizontal-align": gist.AlignCenter,
 		"vertical-align":   gist.AlignTop,
 		"background-color": "none",
 		"font-size":        "large",
