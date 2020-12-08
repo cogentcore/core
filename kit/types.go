@@ -445,7 +445,7 @@ func (tr *TypeRegistry) Init() {
 		var StringProps = map[string]interface{}{
 			"basic-type": true,
 		}
-		ob := string(0)
+		ob := ""
 		tr.AddType(&ob, StringProps)
 	}
 }
