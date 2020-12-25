@@ -722,10 +722,13 @@ func (tv *TableView) SliceNewAt(idx int) {
 		idx = tv.SliceSize
 	}
 
+	tv.This().(SliceViewer).UpdtSliceSize()
+
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
+	tv.SetFullReRender()
 	tv.ScrollBar().SetFullReRender()
 	tv.This().(SliceViewer).LayoutSliceGrid()
 	tv.This().(SliceViewer).UpdateSliceGrid()
@@ -736,7 +739,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 // SliceDeleteAt deletes element at given index from slice -- doupdt means
 // call UpdateSliceGrid to update display
 func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
-	if idx < 0 {
+	if idx < 0 || idx >= tv.SliceSize {
 		return
 	}
 	wupdt := tv.TopUpdateStart()
@@ -745,13 +748,18 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEnd(updt)
 
+	delete(tv.SelectedIdxs, idx)
+
 	kit.SliceDeleteAt(tv.Slice, idx)
+
+	tv.This().(SliceViewer).UpdtSliceSize()
 
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
 	if doupdt {
+		tv.SetFullReRender()
 		tv.ScrollBar().SetFullReRender()
 		tv.This().(SliceViewer).LayoutSliceGrid()
 		tv.This().(SliceViewer).UpdateSliceGrid()

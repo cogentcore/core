@@ -215,6 +215,7 @@ func (sv *SliceViewBase) Update() {
 	defer sv.TopUpdateEnd(wupdt)
 
 	updt := sv.UpdateStart()
+	sv.SetFullReRender()
 	sv.This().(SliceViewer).LayoutSliceGrid()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
@@ -368,6 +369,8 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg.SetStretchMax()                          // for this to work, ALL layers above need it too
 	sg.SetProp("overflow", gist.OverflowScroll) // this still gives it true size during PrefSize
 
+	sg.DeleteChildren(ki.DestroyKids)
+
 	if kit.IfaceIsNil(sv.Slice) {
 		return
 	}
@@ -376,7 +379,6 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 		return
 	}
 
-	sg.DeleteChildren(ki.DestroyKids)
 	sg.Kids = make(ki.Slice, nWidgPerRow)
 
 	// at this point, we make one dummy row to get size of widgets
@@ -790,11 +792,14 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
+	sv.This().(SliceViewer).UpdtSliceSize()
+
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
 	sv.ScrollBar().SetFullReRender()
+	sv.SetFullReRender()
 
 	sv.ViewMuUnlock()
 
@@ -817,12 +822,20 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 		return
 	}
 
+	if idx < 0 || idx >= sv.SliceSize {
+		return
+	}
+
 	sv.ViewMuLock()
 
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
+	delete(sv.SelectedIdxs, idx)
+
 	kit.SliceDeleteAt(sv.Slice, idx)
+
+	sv.This().(SliceViewer).UpdtSliceSize()
 
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
@@ -832,6 +845,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 
 	sv.SetChanged()
 	if doupdt {
+		sv.SetFullReRender()
 		sv.ScrollBar().SetFullReRender()
 		sv.This().(SliceViewer).LayoutSliceGrid()
 		sv.This().(SliceViewer).UpdateSliceGrid()
@@ -1310,6 +1324,11 @@ func (sv *SliceViewBase) SelectedIdxsList(descendingSort bool) []int {
 	rws := make([]int, len(sv.SelectedIdxs))
 	i := 0
 	for r := range sv.SelectedIdxs {
+		if r >= sv.SliceSize { // double safety check at this point
+			delete(sv.SelectedIdxs, r)
+			rws = rws[:len(rws)-1]
+			continue
+		}
 		rws[i] = r
 		i++
 	}
@@ -1371,7 +1390,8 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 	}
 	idx = ints.MinInt(idx, sv.SliceSize-1)
 	if idx < 0 {
-		idx = 0
+		sv.ResetSelectedIdxs()
+		return
 	}
 	// row := idx - sv.StartIdx // note: could be out of bounds
 	wupdt := sv.TopUpdateStart()
@@ -1571,6 +1591,7 @@ func (sv *SliceViewBase) Cut() {
 		sv.This().(SliceViewer).SliceDeleteAt(i, false)
 	}
 	sv.SetChanged()
+	sv.SetFullReRender()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
 	sv.SelectIdxAction(idx, mouse.SelectOne)
@@ -1682,6 +1703,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
+	sv.SetFullReRender()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
 	sv.SelectIdxAction(idx, mouse.SelectOne)
