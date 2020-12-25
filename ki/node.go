@@ -685,11 +685,17 @@ func (n *Node) PathFrom(par Ki) string {
 // unique names, with nodes separated by / and fields by . -- suitable for
 // reliably finding this node.
 func (n *Node) PathFromUnique(par Ki) string {
-	if n.Par != nil && n.Par != par {
-		if n.IsField() {
-			return n.Par.PathFromUnique(par) + "." + n.UniqueNm
+	if n.Par != nil {
+		ppath := ""
+		if n.Par == par {
+			ppath = "/" + par.UniqueName()
+		} else {
+			ppath = n.Par.PathFromUnique(par)
 		}
-		return n.Par.PathFromUnique(par) + "/" + n.UniqueNm
+		if n.IsField() {
+			return ppath + "." + n.UniqueNm
+		}
+		return ppath + "/" + n.UniqueNm
 	}
 	return "/" + n.UniqueNm
 }
