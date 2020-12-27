@@ -104,6 +104,12 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int, init bool, depth int) {
 	tv.UpdateEnd(updt)
 }
 
+// ReSync resynchronizes the view relative to the underlying nodes
+func (tv *TreeView) ReSync() {
+	tvIdx := tv.ViewIdx
+	tv.SyncToSrc(&tvIdx, false, 0)
+}
+
 // SyncToSrc updates the view tree to match the source tree, using
 // ConfigChildren to maximally preserve existing tree elements.
 // init means we are doing initial build, and depth tracks depth

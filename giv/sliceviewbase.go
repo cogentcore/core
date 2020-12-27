@@ -1927,6 +1927,12 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	if len(men) > 0 {
 		pos := sv.IdxPos(idx)
+		if pos == image.ZP {
+			em := sv.EventMgr2D()
+			if em != nil {
+				pos = em.LastMousePos
+			}
+		}
 		gi.PopupMenu(men, pos.X, pos.Y, sv.ViewportSafe(), sv.Nm+"-menu")
 	}
 }

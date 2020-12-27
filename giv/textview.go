@@ -35,6 +35,7 @@ import (
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
+	"github.com/goki/pi/spell"
 	"github.com/goki/pi/token"
 )
 
@@ -2751,7 +2752,7 @@ func (tv *TextView) SpellCheck(reg *textbuf.Edit) bool {
 	reg.Reg.Start.Ch += widx
 	reg.Reg.End.Ch += widx - ld
 
-	sugs, knwn := tv.Buf.Spell.CheckWordInline(lwb)
+	sugs, knwn := tv.Buf.Spell.CheckWord(lwb)
 	if knwn {
 		tv.Buf.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 		ln := reg.Reg.Start.Ln
@@ -2760,8 +2761,7 @@ func (tv *TextView) SpellCheck(reg *textbuf.Edit) bool {
 		return false
 	}
 	// fmt.Printf("spell err: %s\n", wb)
-	tv.Buf.Spell.Suggest = sugs
-	tv.Buf.Spell.Word = wb
+	tv.Buf.Spell.SetWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
 	tv.Buf.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 	tv.Buf.AddTagEdit(reg, token.TextSpellErr)
 	ln := reg.Reg.Start.Ln
@@ -2793,14 +2793,11 @@ func (tv *TextView) OfferCorrect() bool {
 	if len(wb) != len(wbn) {
 		return false // SelectWord captures leading whitespace - don't offer if there is leading whitespace
 	}
-	sugs, knwn := tv.Buf.Spell.CheckWordInline(wb)
-	if knwn {
+	sugs, knwn := tv.Buf.Spell.CheckWord(wb)
+	if knwn && !spell.IsLastLearned(wb) {
 		return false
 	}
-	tv.Buf.Spell.Suggest = sugs
-	tv.Buf.Spell.Word = wb
-	tv.Buf.Spell.SrcLn = tbe.Reg.Start.Ln
-	tv.Buf.Spell.SrcCh = tbe.Reg.Start.Ch
+	tv.Buf.Spell.SetWord(wb, sugs, tbe.Reg.Start.Ln, tbe.Reg.Start.Ch)
 
 	cpos := tv.CharStartPos(tv.CursorPos).ToPoint() // physical location
 	cpos.X += 5

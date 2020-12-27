@@ -504,9 +504,7 @@ func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 		if modSort {
 			fn.SortConfigByModTime(config2) // just sort files, not dirs
 		}
-		for _, tn := range config2 {
-			config1 = append(config1, tn)
-		}
+		config1 = append(config1, config2...)
 	} else {
 		if modSort {
 			fn.SortConfigByModTime(config1) // all
@@ -1543,6 +1541,7 @@ func (ftv *FileTreeView) UpdateAllFiles() {
 	fn := ftv.FileNode()
 	if fn != nil {
 		fn.FRoot.UpdateAll()
+		ftv.RootView.ReSync() // manual resync
 	}
 }
 
@@ -1834,6 +1833,8 @@ func (ftv *FileTreeView) SortBy(modTime bool) {
 			fn.SortBy(modTime)
 		}
 	}
+	// ftv.UpdateAllFiles()
+	ftv.ReSync()
 }
 
 // NewFile makes a new file in given selected directory node
@@ -2018,7 +2019,8 @@ func (ftv *FileTreeView) MimeData(md *mimedata.Mimes) {
 	sroot := ftv.RootView.SrcNode
 	fn := ftv.SrcNode.Embed(KiT_FileNode).(*FileNode)
 	path := string(fn.FPath)
-	*md = append(*md, mimedata.NewTextData(fn.PathFromUnique(sroot)))
+	punq := fn.PathFromUnique(sroot)
+	*md = append(*md, mimedata.NewTextData(punq))
 	*md = append(*md, mimedata.NewTextData(path))
 	if int(fn.Info.Size) < gi.Prefs.Params.BigFileSize {
 		in, err := os.Open(path)
@@ -2213,7 +2215,20 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	if sfn != nil {
 		mode = sfn.Info.Mode
 	}
-	if len(existing) > 0 {
+	if len(existing) == 1 && existing[0] == tfn.Nm {
+		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
+			Prompt: fmt.Sprintf("Overwrite target file: %s with source file, overwrite other existing file with same name as source file (%s), or cancel?", tfn.Nm, fname)},
+			[]string{"Overwrite Target", "Cancel"},
+			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				switch sig {
+				case 0:
+					CopyFile(tpath, srcpath, mode)
+					ftv.DragNDropFinalizeDefMod()
+				case 1:
+					ftv.DropCancel()
+				}
+			})
+	} else if len(existing) > 0 {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file, overwrite other existing file with same name as source file (%s), or cancel?", tfn.Nm, fname)},
 			[]string{"Overwrite Target", "Overwrite Existing", "Cancel"},

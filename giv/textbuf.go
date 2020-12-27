@@ -1319,7 +1319,7 @@ func (tb *TextBuf) Region(st, ed lex.Pos) *textbuf.Edit {
 // Sets the timestamp on the textbuf.Edit to now.
 // Impl version must be called under LinesMu.RLock or Lock
 func (tb *TextBuf) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
-	if st == ed {
+	if st == ed || ed.IsLess(st) {
 		return nil
 	}
 	if !st.IsLess(ed) {
@@ -1329,6 +1329,9 @@ func (tb *TextBuf) RegionImpl(st, ed lex.Pos) *textbuf.Edit {
 	tbe := &textbuf.Edit{Reg: textbuf.NewRegionPos(st, ed)}
 	if ed.Ln == st.Ln {
 		sz := ed.Ch - st.Ch
+		if sz <= 0 {
+			return nil
+		}
 		tbe.Text = make([][]rune, 1)
 		tbe.Text[0] = make([]rune, sz)
 		copy(tbe.Text[0][:sz], tb.Lines[st.Ln][st.Ch:ed.Ch])
@@ -1427,11 +1430,11 @@ func (tb *TextBuf) ReplaceText(delSt, delEd, insPos lex.Pos, insTxt string, sign
 		cur := string(red.ToBytes())
 		insTxt = lex.MatchCase(cur, insTxt)
 	}
-	tbe := tb.DeleteText(delSt, delEd, EditNoSignal)
 	if len(insTxt) > 0 {
-		tbe = tb.InsertText(insPos, []byte(insTxt), signal)
+		tb.DeleteText(delSt, delEd, EditNoSignal)
+		return tb.InsertText(insPos, []byte(insTxt), signal)
 	}
-	return tbe
+	return tb.DeleteText(delSt, delEd, signal)
 }
 
 // SavePosHistory saves the cursor position in history stack of cursor positions --

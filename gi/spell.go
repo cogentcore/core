@@ -131,10 +131,18 @@ const (
 
 //go:generate stringer -type=SpellSignals
 
-// CheckWordInLine checks the model to determine if the word is known.
+// CheckWord checks the model to determine if the word is known.
 // automatically checks the Ignore list first.
-func (sc *Spell) CheckWordInline(word string) ([]string, bool) {
+func (sc *Spell) CheckWord(word string) ([]string, bool) {
 	return spell.CheckWord(word)
+}
+
+// SetWord sets the word to spell and other associated info
+func (sc *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
+	sc.Word = word
+	sc.Suggest = sugs
+	sc.SrcLn = srcLn
+	sc.SrcCh = srcCh
 }
 
 // Show is the main call for listing spelling corrections.
@@ -168,34 +176,43 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 	if count == 1 && sc.Suggest[0] == word {
 		return
 	}
-	if count == 0 {
-		text = "no suggestion"
+	if spell.IsLastLearned(word) {
+		text = "unlearn"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+				scf := recv.Embed(KiT_Spell).(*Spell)
+				scf.UnLearnLast()
 			})
 	} else {
-		for i := 0; i < count; i++ {
-			text = sc.Suggest[i]
+		if count == 0 {
+			text = "no suggestion"
 			m.AddAction(ActOpts{Label: text, Data: text},
 				sc, func(recv, send ki.Ki, sig int64, data interface{}) {
-					scf := recv.Embed(KiT_Spell).(*Spell)
-					scf.Spell(data.(string))
 				})
+		} else {
+			for i := 0; i < count; i++ {
+				text = sc.Suggest[i]
+				m.AddAction(ActOpts{Label: text, Data: text},
+					sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+						scf := recv.Embed(KiT_Spell).(*Spell)
+						scf.Spell(data.(string))
+					})
+			}
 		}
+		m.AddSeparator("")
+		text = "learn"
+		m.AddAction(ActOpts{Label: text, Data: text},
+			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+				scf := recv.Embed(KiT_Spell).(*Spell)
+				scf.LearnWord()
+			})
+		text = "ignore"
+		m.AddAction(ActOpts{Label: text, Data: text},
+			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
+				scf := recv.Embed(KiT_Spell).(*Spell)
+				scf.IgnoreWord()
+			})
 	}
-	m.AddSeparator("")
-	text = "learn"
-	m.AddAction(ActOpts{Label: text, Data: text},
-		sc, func(recv, send ki.Ki, sig int64, data interface{}) {
-			scf := recv.Embed(KiT_Spell).(*Spell)
-			scf.LearnWordInline()
-		})
-	text = "ignore"
-	m.AddAction(ActOpts{Label: text, Data: text},
-		sc, func(recv, send ki.Ki, sig int64, data interface{}) {
-			scf := recv.Embed(KiT_Spell).(*Spell)
-			scf.IgnoreAllInline()
-		})
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
 	pvp.SetFlag(int(VpFlagCorrector))
 	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
@@ -220,16 +237,21 @@ func (sc *Spell) KeyInput(kf KeyFuns) bool { // true - caller should set key pro
 	return false
 }
 
-// LearnWordInline gets the misspelled/unknown word and passes to LearnWord
-func (sc *Spell) LearnWordInline() {
+// LearnWord gets the misspelled/unknown word and passes to LearnWord
+func (sc *Spell) LearnWord() {
 	spell.LearnWord(sc.Word)
 	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), sc.Word)
 }
 
-// IgnoreAllInline adds the word to the ignore list
-func (sc *Spell) IgnoreAllInline() {
+// UnLearnWord gets the misspelled/unknown word and passes to LearnWord
+func (sc *Spell) UnLearnLast() {
+	spell.UnLearnLast()
+}
+
+// IgnoreWord adds the word to the ignore list
+func (sc *Spell) IgnoreWord() {
 	spell.IgnoreWord(sc.Word)
-	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), sc.Word)
+	sc.SpellSig.Emit(sc.This(), int64(SpellIgnore), sc.Word)
 }
 
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction

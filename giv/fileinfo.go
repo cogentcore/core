@@ -231,8 +231,9 @@ func (fi *FileInfo) FileNames(names *[]string) (err error) {
 	return err
 }
 
-// Rename returns the proposed path or the new full path
-func (fi *FileInfo) Rename(path string) (newpath string, err error) {
+// RenamePath returns the proposed path or the new full path.
+// Does not actually do the renaming -- see Rename method.
+func (fi *FileInfo) RenamePath(path string) (newpath string, err error) {
 	if path == "" {
 		err = fmt.Errorf("giv.Rename: new name is empty")
 		log.Println(err)
@@ -250,6 +251,23 @@ func (fi *FileInfo) Rename(path string) (newpath string, err error) {
 		newpath = filepath.Join(dir, np)
 	}
 	return newpath, nil
+}
+
+// Rename renames (moves) this file to given new path name
+// Updates the FileInfo setting to the new name, although it might
+// be out of scope if it moved into a new path
+func (fi *FileInfo) Rename(path string) (newpath string, err error) {
+	orgpath := fi.Path
+	newpath, err = fi.RenamePath(path)
+	if err != nil {
+		return
+	}
+	err = os.Rename(string(orgpath), newpath)
+	if err == nil {
+		fi.Path = newpath
+		_, fi.Name = filepath.Split(newpath)
+	}
+	return
 }
 
 // FindIcon uses file info to find an appropriate icon for this file -- uses
