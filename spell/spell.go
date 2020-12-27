@@ -18,7 +18,7 @@ import (
 )
 
 // SaveAfterLearnIntervalSecs is number of seconds since file has been opened / saved
-// above which model is saved after learning.
+// above which model is saved after learning.  learnring
 const SaveAfterLearnIntervalSecs = 20
 
 var (
@@ -180,7 +180,6 @@ func Train(file os.File, new bool) (err error) {
 }
 
 // CheckWord checks a single word and returns suggestions if word is unknown
-// Programs should call gi.CheckWord - all program calls should be done through that single API
 func CheckWord(word string) ([]string, bool) {
 	if model == nil {
 		log.Println("spell.CheckWord: programmer error -- Spelling not initialized!")
@@ -210,6 +209,14 @@ func CheckWord(word string) ([]string, bool) {
 	return suggests, known
 }
 
+// LastLearned is the last word learned -- can be undone (only depth 1)
+var LastLearned string
+
+func IsLastLearned(wrd string) bool {
+	lword := strings.ToLower(wrd)
+	return lword == LastLearned
+}
+
 // LearnWord adds a single word to the corpus: this is deterministic
 // and we set the threshold to 1 to make it learn it immediately.
 func LearnWord(word string) {
@@ -218,9 +225,11 @@ func LearnWord(word string) {
 	}
 
 	spellMu.Lock()
+	lword := strings.ToLower(word)
+	LastLearned = lword
 	mthr := model.Threshold
 	model.Threshold = 1
-	model.TrainWord(strings.ToLower(word))
+	model.TrainWord(lword)
 	model.Threshold = mthr
 	learnTime = time.Now()
 	sint := learnTime.Sub(openTime) / time.Second
@@ -230,6 +239,32 @@ func LearnWord(word string) {
 		go Save(openFPath)
 		// log.Printf("spell.LearnWord: saved updated model after %d seconds\n", sint)
 	}
+}
+
+// UnLearnLast removes last learned word from dictionary -- in case accidental
+func UnLearnLast() {
+	if learnTime.IsZero() {
+		OpenCheck() // be sure we have latest before learning!
+	}
+
+	spellMu.Lock()
+	if LastLearned == "" {
+		spellMu.Unlock()
+		log.Println("spell.UnLearnLast: no last learned word")
+		return
+	}
+	lword := LastLearned
+	LastLearned = ""
+	model.Delete(lword)
+	learnTime = time.Now()
+	sint := learnTime.Sub(openTime) / time.Second
+	spellMu.Unlock()
+
+	if openFPath != "" && sint > SaveAfterLearnIntervalSecs {
+		go Save(openFPath)
+		// log.Printf("spell.LearnWord: saved updated model after %d seconds\n", sint)
+	}
+	log.Printf("spell.UnLearnLast: unlearned: %s\n", lword)
 }
 
 // Complete finds possible completions based on the prefix s

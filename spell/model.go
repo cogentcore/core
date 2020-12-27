@@ -395,7 +395,7 @@ func (md *Model) TrainWord(term string) {
 	md.Unlock()
 }
 
-// Train using a search query term. This builds a second popularity
+// TrainQuery using a search query term. This builds a second popularity
 // index of terms used to search, as opposed to generally occurring
 // in corpus text
 func (md *Model) TrainQuery(term string) {
@@ -411,6 +411,29 @@ func (md *Model) TrainQuery(term string) {
 	if update {
 		md.updateSuffixArr()
 	}
+}
+
+// Delete removes given word from dictionary -- undoes learning
+func (md *Model) Delete(term string) {
+	md.Lock()
+	edits := md.EditsMulti(term, md.Depth)
+	for _, edit := range edits {
+		sug := md.Suggest[edit]
+		ns := len(sug)
+		for i := ns - 1; i >= 0; i-- {
+			hit := sug[i]
+			if hit == term {
+				sug = append(sug[:i], sug[i+1:]...)
+			}
+		}
+		if len(sug) == 0 {
+			delete(md.Suggest, edit)
+		} else {
+			md.Suggest[edit] = sug
+		}
+	}
+	delete(md.Data, term)
+	md.Unlock()
 }
 
 // For a given term, create the partially deleted lookup keys
