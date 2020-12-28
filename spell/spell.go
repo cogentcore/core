@@ -209,14 +209,6 @@ func CheckWord(word string) ([]string, bool) {
 	return suggests, known
 }
 
-// LastLearned is the last word learned -- can be undone (only depth 1)
-var LastLearned string
-
-func IsLastLearned(wrd string) bool {
-	lword := strings.ToLower(wrd)
-	return lword == LastLearned
-}
-
 // LearnWord adds a single word to the corpus: this is deterministic
 // and we set the threshold to 1 to make it learn it immediately.
 func LearnWord(word string) {
@@ -226,7 +218,6 @@ func LearnWord(word string) {
 
 	spellMu.Lock()
 	lword := strings.ToLower(word)
-	LastLearned = lword
 	mthr := model.Threshold
 	model.Threshold = 1
 	model.TrainWord(lword)
@@ -241,20 +232,14 @@ func LearnWord(word string) {
 	}
 }
 
-// UnLearnLast removes last learned word from dictionary -- in case accidental
-func UnLearnLast() {
+// UnLearnWord removes word from dictionary -- in case accidentally added
+func UnLearnWord(word string) {
 	if learnTime.IsZero() {
 		OpenCheck() // be sure we have latest before learning!
 	}
 
 	spellMu.Lock()
-	if LastLearned == "" {
-		spellMu.Unlock()
-		log.Println("spell.UnLearnLast: no last learned word")
-		return
-	}
-	lword := LastLearned
-	LastLearned = ""
+	lword := strings.ToLower(word)
 	model.Delete(lword)
 	learnTime = time.Now()
 	sint := learnTime.Sub(openTime) / time.Second
@@ -262,7 +247,6 @@ func UnLearnLast() {
 
 	if openFPath != "" && sint > SaveAfterLearnIntervalSecs {
 		go Save(openFPath)
-		// log.Printf("spell.LearnWord: saved updated model after %d seconds\n", sint)
 	}
 	log.Printf("spell.UnLearnLast: unlearned: %s\n", lword)
 }
