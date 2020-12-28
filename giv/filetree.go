@@ -17,9 +17,11 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Masterminds/vcs"
+	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/giv/textbuf"
@@ -65,11 +67,17 @@ const (
 // interface into it.
 type FileTree struct {
 	FileNode
-	ExtFiles  []string     `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`
-	Dirs      DirFlagMap   `desc:"records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"`
-	DirsOnTop bool         `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`
-	NodeType  reflect.Type `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
-	InOpenAll bool         `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
+	ExtFiles      []string          `desc:"external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update"`
+	Dirs          DirFlagMap        `desc:"records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree"`
+	DirsOnTop     bool              `desc:"if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed"`
+	NodeType      reflect.Type      `view:"-" json:"-" xml:"-" desc:"type of node to create -- defaults to giv.FileNode but can use custom node types"`
+	InOpenAll     bool              `desc:"if true, we are in midst of an OpenAll call -- nodes should open all dirs"`
+	Watcher       *fsnotify.Watcher `view:"-" desc:"change notify for all dirs"`
+	DoneWatcher   chan bool         `view:"-" desc:"channel to close watcher watcher"`
+	WatchedPaths  map[string]bool   `view:"-" desc:"map of paths that have been added to watcher -- only active if bool = true"`
+	LastWatchUpdt string            `view:"-" desc:"last path updated by watcher"`
+	LastWatchTime time.Time         `view:"-" desc:"timestamp of last update"`
+	UpdtMu        sync.Mutex        `view:"-" desc:"Update mutex"`
 }
 
 var KiT_FileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
@@ -83,6 +91,19 @@ func (ft *FileTree) CopyFieldsFrom(frm interface{}) {
 	ft.FileNode.CopyFieldsFrom(&fr.FileNode)
 	ft.DirsOnTop = fr.DirsOnTop
 	ft.NodeType = fr.NodeType
+}
+
+func (fv *FileTree) Disconnect() {
+	if fv.Watcher != nil {
+		fv.Watcher.Close()
+		fv.Watcher = nil
+	}
+	if fv.DoneWatcher != nil {
+		fv.DoneWatcher <- true
+		close(fv.DoneWatcher)
+		fv.DoneWatcher = nil
+	}
+	fv.FileNode.Disconnect()
 }
 
 // OpenPath opens a filetree at given directory path -- reads all the files at
@@ -99,11 +120,22 @@ func (ft *FileTree) OpenPath(path string) {
 
 // UpdateAll does a full update of the tree -- calls ReadDir on current path
 func (ft *FileTree) UpdateAll() {
+	ft.UpdtMu.Lock()
 	ft.Dirs.ClearMarks()
 	ft.ReadDir(string(ft.FPath))
 	// the problem here is that closed dirs are not visited but we want to keep their settings:
 	// ft.Dirs.DeleteStale()
+	ft.UpdtMu.Unlock()
 }
+
+// UpdatePath updates the tree at the directory level for given path
+// and everything below it
+func (ft *FileTree) UpdatePath(path string) {
+	ft.UpdtMu.Lock()
+	ft.UpdtMu.Unlock()
+}
+
+// todo: rewrite below to use UpdatePath
 
 // UpdateNewFile should be called with path to a new file that has just been
 // created -- will update view to show that file, and if that file doesn't
@@ -123,6 +155,114 @@ func (ft *FileTree) UpdateNewFile(filename string) {
 	}
 }
 
+// ConfigWatcher configures a new watcher for tree
+func (ft *FileTree) ConfigWatcher() error {
+	if ft.Watcher != nil {
+		return nil
+	}
+	ft.WatchedPaths = make(map[string]bool)
+	var err error
+	ft.Watcher, err = fsnotify.NewWatcher()
+	return err
+}
+
+// WatchWatcher monitors the watcher channel for update events.
+// It must be called once some paths have been added to watcher --
+// safe to call multiple times.
+func (ft *FileTree) WatchWatcher() {
+	if ft.Watcher == nil || ft.Watcher.Events == nil {
+		return
+	}
+	if ft.DoneWatcher != nil {
+		return
+	}
+	ft.DoneWatcher = make(chan bool)
+	go func() {
+		watch := ft.Watcher
+		done := ft.DoneWatcher
+		for {
+			select {
+			case <-done:
+				return
+			case event := <-watch.Events:
+				switch {
+				case event.Op&fsnotify.Create == fsnotify.Create ||
+					event.Op&fsnotify.Remove == fsnotify.Remove ||
+					event.Op&fsnotify.Rename == fsnotify.Rename:
+					ft.WatchUpdt(event.Name)
+				}
+			case err := <-watch.Errors:
+				_ = err
+			}
+		}
+	}()
+}
+
+// WatchUpdt does the update for given path
+func (ft *FileTree) WatchUpdt(path string) {
+	ft.UpdtMu.Lock()
+	defer ft.UpdtMu.Unlock()
+	// fmt.Println(path)
+
+	dir, _ := filepath.Split(path)
+	rp := ft.RelPath(gi.FileName(dir))
+	if rp == ft.LastWatchUpdt {
+		now := time.Now()
+		lagMs := int(now.Sub(ft.LastWatchTime) / time.Millisecond)
+		if lagMs < 100 {
+			// fmt.Printf("skipping update to: %s  due to lag: %v\n", rp, lagMs)
+			return // no update
+		}
+	}
+	fn, err := ft.FindDirNode(rp)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	ft.LastWatchUpdt = rp
+	ft.LastWatchTime = time.Now()
+	if !fn.IsOpen() {
+		// fmt.Printf("warning: watcher updating closed node: %s\n", rp)
+		return // shouldn't happen
+	}
+	// update node
+	fn.UpdateNode()
+}
+
+// WatchPath adds given path to those watched
+func (ft *FileTree) WatchPath(path gi.FileName) error {
+	if oswin.TheApp.Platform() == oswin.MacOS {
+		return nil // mac is not supported in a high-capacity fashion at this point
+	}
+	rp := ft.RelPath(path)
+	on, has := ft.WatchedPaths[rp]
+	if on || has {
+		return nil
+	}
+	ft.ConfigWatcher()
+	fmt.Printf("watching path: %s\n", path)
+	err := ft.Watcher.Add(string(path))
+	if err == nil {
+		ft.WatchedPaths[rp] = true
+		ft.WatchWatcher()
+	} else {
+		log.Println(err)
+	}
+	return err
+}
+
+// UnWatchPath removes given path from those watched
+func (ft *FileTree) UnWatchPath(path gi.FileName) {
+	rp := ft.RelPath(path)
+	on, has := ft.WatchedPaths[rp]
+	if !on || !has {
+		return
+	}
+	ft.ConfigWatcher()
+	ft.Watcher.Remove(string(path))
+	ft.WatchedPaths[rp] = false
+}
+
 // IsDirOpen returns true if given directory path is open (i.e., has been
 // opened in the view)
 func (ft *FileTree) IsDirOpen(fpath gi.FileName) bool {
@@ -137,6 +277,7 @@ func (ft *FileTree) SetDirOpen(fpath gi.FileName) {
 	rp := ft.RelPath(fpath)
 	ft.Dirs.SetOpen(rp, true)
 	ft.Dirs.SetMark(rp)
+	ft.WatchPath(fpath)
 }
 
 // SetDirClosed sets the given directory path to be closed
@@ -144,6 +285,7 @@ func (ft *FileTree) SetDirClosed(fpath gi.FileName) {
 	rp := ft.RelPath(fpath)
 	ft.Dirs.SetOpen(rp, false)
 	ft.Dirs.SetMark(rp)
+	ft.UnWatchPath(fpath)
 }
 
 // SetDirSortBy sets the given directory path sort by option
@@ -671,6 +813,32 @@ func (fn *FileNode) CloseBuf() bool {
 	fn.Buf = nil
 	fn.SetClosed()
 	return true
+}
+
+// FindDirNode finds directory node by given path -- must be a relative
+// path already rooted at tree, or absolute path within tree
+func (fn *FileNode) FindDirNode(path string) (*FileNode, error) {
+	rp := fn.RelPath(gi.FileName(path))
+	if rp == "" {
+		return nil, fmt.Errorf("FindDirNode: path: %s is not relative to this node's path: %s", path, fn.FPath)
+	}
+	if rp == "." {
+		return fn, nil
+	}
+	dirs := filepath.SplitList(rp)
+	dir := dirs[0]
+	dni, err := fn.ChildByNameTry(dir, 0)
+	if err != nil {
+		return nil, err
+	}
+	dn := dni.Embed(KiT_FileNode).(*FileNode)
+	if len(dirs) == 1 {
+		if dn.IsDir() {
+			return dn, nil
+		}
+		return nil, fmt.Errorf("FindDirNode: item at path: %s is not a Directory", path)
+	}
+	return dn.FindDirNode(filepath.Join(dirs[1:]...))
 }
 
 // RelPath returns the relative path from node for given full path

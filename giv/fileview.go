@@ -422,7 +422,7 @@ func (fv *FileView) ConfigWatcher() error {
 }
 
 func (fv *FileView) WatchWatcher() {
-	if fv.Watcher == nil {
+	if fv.Watcher == nil || fv.Watcher.Events == nil {
 		return
 	}
 	if fv.DoneWatcher != nil {
@@ -593,14 +593,17 @@ func (fv *FileView) UpdateFiles() {
 	}
 
 	if fv.PrevPath != fv.DirPath {
-		if fv.PrevPath == "" {
-			fv.ConfigWatcher()
-		} else {
-			fv.Watcher.Remove(fv.PrevPath)
-		}
-		fv.Watcher.Add(fv.DirPath)
-		if fv.PrevPath == "" {
-			fv.WatchWatcher()
+		if oswin.TheApp.Platform() != oswin.MacOS {
+			// mac is not supported in a high-capacity fashion at this point
+			if fv.PrevPath == "" {
+				fv.ConfigWatcher()
+			} else {
+				fv.Watcher.Remove(fv.PrevPath)
+			}
+			fv.Watcher.Add(fv.DirPath)
+			if fv.PrevPath == "" {
+				fv.WatchWatcher()
+			}
 		}
 		fv.PrevPath = fv.DirPath
 	}
