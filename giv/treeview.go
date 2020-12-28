@@ -105,7 +105,9 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int, init bool, depth int) {
 }
 
 // ReSync resynchronizes the view relative to the underlying nodes
+// and forces a full rerender
 func (tv *TreeView) ReSync() {
+	tv.SetFullReRender() //
 	tvIdx := tv.ViewIdx
 	tv.SyncToSrc(&tvIdx, false, 0)
 }

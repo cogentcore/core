@@ -35,7 +35,6 @@ import (
 	"github.com/goki/pi/filecat"
 	"github.com/goki/pi/lex"
 	"github.com/goki/pi/pi"
-	"github.com/goki/pi/spell"
 	"github.com/goki/pi/token"
 )
 
@@ -2794,7 +2793,7 @@ func (tv *TextView) OfferCorrect() bool {
 		return false // SelectWord captures leading whitespace - don't offer if there is leading whitespace
 	}
 	sugs, knwn := tv.Buf.Spell.CheckWord(wb)
-	if knwn && !spell.IsLastLearned(wb) {
+	if knwn && !tv.Buf.Spell.IsLastLearned(wb) {
 		return false
 	}
 	tv.Buf.Spell.SetWord(wb, sugs, tbe.Reg.Start.Ln, tbe.Reg.Start.Ch)

@@ -2418,6 +2418,52 @@ func (tb *TextBuf) TabsToSpacesRegion(st, ed int) {
 	tb.Refresh()
 }
 
+// SpacesToTabs replaces spaces with tabs in given line.
+func (tb *TextBuf) SpacesToTabs(ln int) {
+	tabSz := tb.Opts.TabSize
+
+	lr := tb.Lines[ln]
+	st := lex.Pos{Ln: ln}
+	ed := lex.Pos{Ln: ln}
+	i := 0
+	nspc := 0
+	for {
+		if i >= len(lr) {
+			break
+		}
+		r := lr[i]
+		if r == ' ' {
+			nspc++
+			if nspc == tabSz {
+				st.Ch = i - (tabSz - 1)
+				ed.Ch = i + 1
+				tb.ReplaceText(st, ed, st, "\t", EditNoSignal, ReplaceNoMatchCase)
+				i -= tabSz - 1
+				lr = tb.Lines[ln]
+				nspc = 0
+			} else {
+				i++
+			}
+		} else {
+			nspc = 0
+			i++
+		}
+	}
+}
+
+// SpacesToTabsRegion replaces tabs with spaces over given region -- end is *exclusive*
+func (tb *TextBuf) SpacesToTabsRegion(st, ed int) {
+	bufUpdt, winUpdt, autoSave := tb.BatchUpdateStart()
+	for ln := st; ln < ed; ln++ {
+		if ln >= tb.NLines {
+			break
+		}
+		tb.SpacesToTabs(ln)
+	}
+	tb.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
+	tb.Refresh()
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //    Complete and Spell
 

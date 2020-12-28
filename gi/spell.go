@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/dirs"
@@ -102,13 +103,14 @@ func SaveSpellModel() error {
 // Spell
 type Spell struct {
 	ki.Node
-	SrcLn      int         `desc:"line number in source that spelling is operating on, if relevant"`
-	SrcCh      int         `desc:"character position in source that spelling is operating on (start of word to be corrected)"`
-	Suggest    []string    `desc:"list of suggested corrections"`
-	Word       string      `desc:"word being checked"`
-	SpellSig   ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
-	Correction string      `desc:"the user's correction selection'"`
-	Vp         *Viewport2D `desc:"the viewport where the current popup menu is presented"`
+	SrcLn       int         `desc:"line number in source that spelling is operating on, if relevant"`
+	SrcCh       int         `desc:"character position in source that spelling is operating on (start of word to be corrected)"`
+	Suggest     []string    `desc:"list of suggested corrections"`
+	Word        string      `desc:"word being checked"`
+	LastLearned string      `desc:"last word learned -- can be undone -- stored in lowercase format"`
+	SpellSig    ki.Signal   `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
+	Correction  string      `desc:"the user's correction selection'"`
+	Vp          *Viewport2D `desc:"the viewport where the current popup menu is presented"`
 }
 
 var KiT_Spell = kit.Types.AddType(&Spell{}, nil)
@@ -172,11 +174,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 
 	var m Menu
 	var text string
-	count := len(sc.Suggest)
-	if count == 1 && sc.Suggest[0] == word {
-		return
-	}
-	if spell.IsLastLearned(word) {
+	if sc.IsLastLearned(word) {
 		text = "unlearn"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -184,6 +182,10 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 				scf.UnLearnLast()
 			})
 	} else {
+		count := len(sc.Suggest)
+		if count == 1 && sc.Suggest[0] == word {
+			return
+		}
 		if count == 0 {
 			text = "no suggestion"
 			m.AddAction(ActOpts{Label: text, Data: text},
@@ -213,6 +215,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
 				scf.IgnoreWord()
 			})
 	}
+	sc.Vp = vp
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
 	pvp.SetFlag(int(VpFlagCorrector))
 	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
@@ -239,13 +242,26 @@ func (sc *Spell) KeyInput(kf KeyFuns) bool { // true - caller should set key pro
 
 // LearnWord gets the misspelled/unknown word and passes to LearnWord
 func (sc *Spell) LearnWord() {
+	sc.LastLearned = strings.ToLower(sc.Word)
 	spell.LearnWord(sc.Word)
 	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), sc.Word)
 }
 
-// UnLearnWord gets the misspelled/unknown word and passes to LearnWord
+// IsLastLearned returns true if given word was the last one learned
+func (sc *Spell) IsLastLearned(wrd string) bool {
+	lword := strings.ToLower(wrd)
+	return lword == sc.LastLearned
+}
+
+// UnLearnLast unlearns the last learned word -- in case accidental
 func (sc *Spell) UnLearnLast() {
-	spell.UnLearnLast()
+	if sc.LastLearned == "" {
+		log.Println("spell.UnLearnLast: no last learned word")
+		return
+	}
+	lword := sc.LastLearned
+	sc.LastLearned = ""
+	spell.UnLearnWord(lword)
 }
 
 // IgnoreWord adds the word to the ignore list
