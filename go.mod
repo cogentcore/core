@@ -14,6 +14,7 @@ require (
 	github.com/chewxy/math32 v1.0.6
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/fatih/camelcase v1.0.0
+	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gabriel-vasile/mimetype v1.1.2 // indirect
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20201108214237-06ea97f0c265

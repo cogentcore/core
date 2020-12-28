@@ -315,18 +315,12 @@ func (fi *FileInfo) FindIcon() (gi.IconName, bool) {
 var FileInfoProps = ki.Props{
 	"CtxtMenu": ki.PropSlice{
 		{"Duplicate", ki.Props{
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Action) {
-				fi := fii.(*FileInfo)
-				act.SetInactiveState(fi.IsDir())
-			}),
+			"desc":    "Duplicate this file or folder",
+			"confirm": true,
 		}},
 		{"Delete", ki.Props{
-			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
+			"desc":    "Ok to delete this file or folder?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Action) {
-				fi := fii.(*FileInfo)
-				act.SetInactiveState(fi.IsDir())
-			}),
 		}},
 		{"Rename", ki.Props{
 			"desc": "Rename file to new file name",

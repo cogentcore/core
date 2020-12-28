@@ -11,9 +11,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"unicode"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/cursor"
@@ -45,11 +47,24 @@ type FileView struct {
 	Files       []*FileInfo        `desc:"files for current directory"`
 	SelectedIdx int                `desc:"index of currently-selected file in Files list (-1 if none)"`
 	FileSig     ki.Signal          `desc:"signal for file actions"`
+	Watcher     *fsnotify.Watcher  `view:"-" desc:"change notify for current dir"`
+	DoneWatcher chan bool          `view:"-" desc:"channel to close watcher watcher"`
+	UpdtMu      sync.Mutex         `view:"-" desc:"UpdateFiles mutex"`
+	PrevPath    string             `view:"-" desc:"Previous path that was processed via UpdateFiles"`
 }
 
 var KiT_FileView = kit.Types.AddType(&FileView{}, FileViewProps)
 
 func (fv *FileView) Disconnect() {
+	if fv.Watcher != nil {
+		fv.Watcher.Close()
+		fv.Watcher = nil
+	}
+	if fv.DoneWatcher != nil {
+		fv.DoneWatcher <- true
+		close(fv.DoneWatcher)
+		fv.DoneWatcher = nil
+	}
 	fv.Frame.Disconnect()
 	fv.FileSig.DisconnectAll()
 }
@@ -397,6 +412,44 @@ func (fv *FileView) ConfigSelRow() {
 	})
 }
 
+func (fv *FileView) ConfigWatcher() error {
+	if fv.Watcher != nil {
+		return nil
+	}
+	var err error
+	fv.Watcher, err = fsnotify.NewWatcher()
+	return err
+}
+
+func (fv *FileView) WatchWatcher() {
+	if fv.Watcher == nil {
+		return
+	}
+	if fv.DoneWatcher != nil {
+		return
+	}
+	fv.DoneWatcher = make(chan bool)
+	go func() {
+		watch := fv.Watcher
+		done := fv.DoneWatcher
+		for {
+			select {
+			case <-done:
+				return
+			case event := <-watch.Events:
+				switch {
+				case event.Op&fsnotify.Create == fsnotify.Create ||
+					event.Op&fsnotify.Remove == fsnotify.Remove ||
+					event.Op&fsnotify.Rename == fsnotify.Rename:
+					fv.UpdateFiles()
+				}
+			case err := <-watch.Errors:
+				_ = err
+			}
+		}
+	}()
+}
+
 // PathField returns the ComboBox of the path
 func (fv *FileView) PathField() *gi.ComboBox {
 	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
@@ -453,6 +506,9 @@ func (fv *FileView) UpdateFilesAction() {
 
 // UpdateFiles updates list of files and other views for current path
 func (fv *FileView) UpdateFiles() {
+	fv.UpdtMu.Lock()
+	defer fv.UpdtMu.Unlock()
+
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
 	var owin oswin.Window
@@ -534,6 +590,19 @@ func (fv *FileView) UpdateFiles() {
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
 		sv.ScrollToIdx(sv.SelectedIdx)
+	}
+
+	if fv.PrevPath != fv.DirPath {
+		if fv.PrevPath == "" {
+			fv.ConfigWatcher()
+		} else {
+			fv.Watcher.Remove(fv.PrevPath)
+		}
+		fv.Watcher.Add(fv.DirPath)
+		if fv.PrevPath == "" {
+			fv.WatchWatcher()
+		}
+		fv.PrevPath = fv.DirPath
 	}
 }
 
