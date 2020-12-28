@@ -110,6 +110,7 @@ func (tv *TreeView) ReSync() {
 	tv.SetFullReRender() //
 	tvIdx := tv.ViewIdx
 	tv.SyncToSrc(&tvIdx, false, 0)
+	tv.UpdateSig()
 }
 
 // SyncToSrc updates the view tree to match the source tree, using

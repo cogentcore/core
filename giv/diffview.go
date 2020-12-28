@@ -6,6 +6,9 @@ package giv
 
 import (
 	"bytes"
+	"io/ioutil"
+	"log"
+	"strings"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/giv/textbuf"
@@ -21,6 +24,25 @@ import (
 	"github.com/goki/pi/token"
 	"github.com/goki/vci"
 )
+
+// DiffFiles shows the diffs between this file as the A file, and other file as B file,
+// in a DiffViewDialog
+func DiffFiles(afile, bfile string) (*DiffView, error) {
+	ab, err := ioutil.ReadFile(afile)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	bb, err := ioutil.ReadFile(bfile)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	astr := strings.Split(strings.Replace(string(ab), "\r\n", "\n", -1), "\n") // windows safe
+	bstr := strings.Split(strings.Replace(string(bb), "\r\n", "\n", -1), "\n")
+	dlg := DiffViewDialog(nil, astr, bstr, afile, bfile, "", "", DlgOpts{Title: "Diff File View:"})
+	return dlg, nil
+}
 
 // DiffViewDialogFromRevs opens a dialog for displaying diff between file
 // at two different revisions from given repository

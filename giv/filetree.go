@@ -2215,23 +2215,26 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	if sfn != nil {
 		mode = sfn.Info.Mode
 	}
-	if len(existing) == 1 && existing[0] == tfn.Nm {
+	if len(existing) == 1 && fname == tfn.Nm {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
-			Prompt: fmt.Sprintf("Overwrite target file: %s with source file, overwrite other existing file with same name as source file (%s), or cancel?", tfn.Nm, fname)},
-			[]string{"Overwrite Target", "Cancel"},
+			Prompt: fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files, or cancel?", tfn.Nm)},
+			[]string{"Overwrite Target", "Diff Files", "Cancel"},
 			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
 					ftv.DragNDropFinalizeDefMod()
 				case 1:
+					DiffFiles(tpath, srcpath)
+					ftv.DropCancel()
+				case 2:
 					ftv.DropCancel()
 				}
 			})
 	} else if len(existing) > 0 {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
-			Prompt: fmt.Sprintf("Overwrite target file: %s with source file, overwrite other existing file with same name as source file (%s), or cancel?", tfn.Nm, fname)},
-			[]string{"Overwrite Target", "Overwrite Existing", "Cancel"},
+			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files, or cancel?", tfn.Nm, fname, fname)},
+			[]string{"Overwrite Target", "Overwrite Existing", "Diff to Target", "Diff to Existing", "Cancel"},
 			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
@@ -2242,13 +2245,20 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 					CopyFile(npath, srcpath, mode)
 					ftv.DragNDropFinalizeDefMod()
 				case 2:
+					DiffFiles(tpath, srcpath)
+					ftv.DropCancel()
+				case 3:
+					npath := filepath.Join(string(tdir.FPath), fname)
+					DiffFiles(npath, srcpath)
+					ftv.DropCancel()
+				case 4:
 					ftv.DropCancel()
 				}
 			})
 	} else {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
-			Prompt: fmt.Sprintf("Overwrite target file: %s with source file, copy to: %s in current folder (which doesn't yet exist), or cancel?", tfn.Nm, fname)},
-			[]string{"Overwrite Target", "Copy New File", "Cancel"},
+			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files, or cancel?", tfn.Nm, fname, fname)},
+			[]string{"Overwrite Target", "Copy New File", "Diff Files", "Cancel"},
 			ftv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				switch sig {
 				case 0:
@@ -2258,6 +2268,9 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 					tdir.CopyFileToDir(srcpath, mode) // does updating, vcs stuff
 					ftv.DragNDropFinalizeDefMod()
 				case 2:
+					DiffFiles(tpath, srcpath)
+					ftv.DropCancel()
+				case 3:
 					ftv.DropCancel()
 				}
 			})
