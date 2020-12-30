@@ -240,7 +240,7 @@ func (ft *FileTree) WatchPath(path gi.FileName) error {
 		return nil
 	}
 	ft.ConfigWatcher()
-	fmt.Printf("watching path: %s\n", path)
+	// fmt.Printf("watching path: %s\n", path)
 	err := ft.Watcher.Add(string(path))
 	if err == nil {
 		ft.WatchedPaths[rp] = true
