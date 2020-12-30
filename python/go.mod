@@ -7,10 +7,10 @@ require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/go-gl/mathgl v1.0.0
 	github.com/go-python/gopy v0.3.4
-	github.com/goki/gi v1.1.1
-	github.com/goki/ki v1.0.5
+	github.com/goki/gi v1.1.3
+	github.com/goki/ki v1.0.7
 	github.com/goki/mat32 v1.0.2
-	github.com/goki/pi v1.0.7
+	github.com/goki/pi v1.0.9
 	github.com/goki/vci v1.0.0
 	github.com/ianbruene/go-difflib v1.2.0
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9

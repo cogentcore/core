@@ -2,7 +2,7 @@
 
 GoGi is part of the GoKi Go language (golang) full strength tree structure system (ki = 木 = tree in Japanese)
 
-`package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go.
+`package gi` is a scenegraph-based 2D and 3D GUI / graphics interface (Gi) in Go, that functions similar to HTML / CSS / SVG  and Qt.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/goki/gi)](https://goreportcard.com/report/github.com/goki/gi)
 [![GoDoc](https://godoc.org/github.com/goki/gi?status.svg)](https://godoc.org/github.com/goki/gi)
@@ -11,9 +11,11 @@ GoGi is part of the GoKi Go language (golang) full strength tree structure syste
 
 NOTE: Requires Go version `1.13+` due to use of `math.Round`, `os.UserCacheDir`, and `reflect.Value.IsZero()`.
 
-See the [Wiki](https://github.com/goki/gi/wiki) for more docs (increasingly extensive), [Install](https://github.com/goki/gi/wiki/Install) instructions (mostly basic `go build` procedure, but does now depend on `cgo` on all platforms due to `glfw` so see details for each platform), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list.
+See the [Wiki](https://github.com/goki/gi/wiki) for more docs (increasingly extensive), [Install](https://github.com/goki/gi/wiki/Install) instructions (mostly basic `go build` procedure, but does now depend on `cgo` on all platforms due to `glfw`, so see details for each platform), and [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) email list, and the new github [Discussions](https://github.com/goki/gi/discussions) tool.
 
-GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a scenegraph-based GUI framework in full native idiomatic Go, with minimal OS-specific backend interfaces based originally on the [Shiny](https://github.com/golang/exp/tree/master/shiny) drivers, now using [go-gl/glfw](https://github.com/go-gl/glfw), and supporting MacOS, Linux, and Windows.  The overall design integrates existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  The core `Layout` object automates most of the complexity associated with GUI construction (including scrolling), so the programmer mainly just needs to add the elements, and set their style properties -- similar to HTML.  The main 2D framework also integrates with a 3D scenegraph, supporting interesting combinations of these frameworks (see `gi3d` package and [examples/gi3d](https://github.com/goki/gi/tree/master/examples/gi3d)).  Currently GoGi is focused on desktop systems, but nothing should prevent adaptation to mobile. 
+GoGi uses the [GoKi](https://github.com/goki/ki) tree infrastructure to implement a scenegraph-based GUI framework in full native idiomatic Go, with minimal OS-specific backend interfaces based originally on the [Shiny](https://github.com/golang/exp/tree/master/shiny) drivers, now using [go-gl/glfw](https://github.com/go-gl/glfw), and supporting MacOS, Linux, and Windows.
+
+The overall design integrates existing standards and conventions from widely-used frameworks, including Qt (overall widget design), HTML / CSS (styling), and SVG (rendering).  The core `Layout` object automates most of the complexity associated with GUI construction (including scrolling), so the programmer mainly just needs to add the elements, and set their style properties -- similar to HTML.  The main 2D framework also integrates with a 3D scenegraph, supporting interesting combinations of these frameworks (see `gi3d` package and [examples/gi3d](https://github.com/goki/gi/tree/master/examples/gi3d)).  Currently GoGi is focused on desktop systems, but nothing should prevent adaptation to mobile. 
 
 See [Gide](https://github.com/goki/gide) for a complete, complex application written in GoGi (an IDE), and likewise the [Emergent](https://github.com/emer/emergent) neural network simulation environment (the prime motivator for the whole project), along with the various examples in this repository for lots of useful demonstrations -- start with the  [Widgets](https://github.com/goki/gi/tree/master/examples/widgets) example which has a bit of a tutorial introduction.
 
