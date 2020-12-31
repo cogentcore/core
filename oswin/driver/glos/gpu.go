@@ -110,7 +110,7 @@ func (gp *gpuImpl) ErrCheck(ctxt string) error {
 		}
 		errstr, _ := glErrStrings[glerr]
 		err = fmt.Errorf("glos gl error in context: %s:\n\t%x = %s", ctxt, glerr, errstr)
-		log.Println(err)
+		// log.Println(err)
 	}
 	gp.lastErr = err
 	return err

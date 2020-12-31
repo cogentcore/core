@@ -3080,6 +3080,7 @@ func TextViewBlink() {
 		}
 		tv := BlinkingTextView
 		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
+			tv.RenderCursor(false)
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
 			continue
@@ -3135,6 +3136,7 @@ func (tv *TextView) StopCursor() {
 	// if !tv.This().(gi.Node2D).IsVisible() {
 	// 	return
 	// }
+	tv.RenderCursor(false)
 	TextViewBlinkMu.Lock()
 	if BlinkingTextView == tv {
 		BlinkingTextView = nil

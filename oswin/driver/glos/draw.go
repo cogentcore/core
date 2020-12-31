@@ -179,7 +179,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 
 	err := app.drawProg.UniformByName("mvp").SetValue(matMVP)
 	if err != nil {
-		log.Println(err)
+		return
 	}
 	// OpenGL's fragment shaders' UV coordinates run from (0,0)-(1,1),
 	// unlike vertex shaders' XY coordinates running from (-1,+1)-(+1,-1).
@@ -227,7 +227,7 @@ func (app *appImpl) draw(dstSz image.Point, src2dst mat32.Mat3, src oswin.Textur
 	}
 	err = app.drawProg.UniformByName("uvp").SetValue(matUVP)
 	if err != nil {
-		log.Println(err)
+		return
 	}
 	// fmt.Printf("matUVP: %v\n", matUVP)
 

@@ -100,9 +100,9 @@ func (un *Uniform) Handle() int32 {
 // elemental or mat32.Vector or mat32.Matrix type.  Proper context must be bound, etc.
 func (un *Uniform) SetValue(val interface{}) error {
 	err := un.SetValueImpl(val)
-	if err != nil {
-		log.Println(err)
-	}
+	// if err != nil {
+	// 	log.Println(err)
+	// }
 	return err
 }
 
@@ -440,8 +440,7 @@ func (un *Uniform) SetValueImpl(val interface{}) error {
 			}
 		}
 	}
-	gpu.TheGPU.ErrCheck(fmt.Sprintf("Uniform SetValue: %v type: %v", un.name, un.typ))
-	return nil
+	return gpu.TheGPU.ErrCheck(fmt.Sprintf("Uniform SetValue: %v type: %v", un.name, un.typ))
 }
 
 // LenDefine returns the #define NAME_LEN source code for this Uniform, empty if not an array
