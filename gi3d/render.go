@@ -124,8 +124,11 @@ func (rn *Renderers) InitUnis() error {
 	camera.AddUniform("MVPMatrix", gpu.Mat4fUniType, false, 0)
 	camera.AddUniform("NormMatrix", gpu.Mat3fUniType, false, 0)
 	camera.Activate()
-	gpu.TheGPU.ErrCheck("camera unis activate")
+	err := gpu.TheGPU.ErrCheck("camera unis activate")
 	rn.Unis[camera.Name()] = camera
+	if err != nil {
+		return err
+	}
 
 	lights := gpu.TheGPU.NewUniforms("Lights")
 	lights.AddUniform("AmbLights", gpu.Vec3fUniType, true, 0)   // 1 per
@@ -133,9 +136,9 @@ func (rn *Renderers) InitUnis() error {
 	lights.AddUniform("PointLights", gpu.Vec3fUniType, true, 0) // 3 per
 	lights.AddUniform("SpotLights", gpu.Vec3fUniType, true, 0)  // 5 per
 	lights.Activate()
-	gpu.TheGPU.ErrCheck("lights unis activate")
+	err = gpu.TheGPU.ErrCheck("lights unis activate")
 	rn.Unis[lights.Name()] = lights
-	return nil
+	return err
 }
 
 func (rn *Renderers) InitRenders() error {
