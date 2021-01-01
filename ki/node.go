@@ -1692,7 +1692,7 @@ outer:
 				}
 			}
 		} else {
-			tm.Set(cur, n.NumKiFields(), n.NumChildren())
+			tm.Set(cur, cur.NumKiFields(), cur.NumChildren())
 			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
@@ -1847,7 +1847,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 		depth := cur.Depth()
 		queue = queue[1:]
 
-		if n.This() != nil && fun(cur, depth, data) { // false return means don't proceed
+		if cur.This() != nil && fun(cur, depth, data) { // false return means don't proceed
 			if cur.HasKiFields() {
 				cur.FuncFields(depth+1, data, func(k Ki, level int, d interface{}) bool {
 					k.SetDepth(level)
