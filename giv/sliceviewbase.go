@@ -1937,10 +1937,8 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
-	if gi.KeyEventTrace {
-		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.PathUnique())
-	}
+// KeyInputNav supports multiple selection navigation keys
+func (sv *SliceViewBase) KeyInputNav(kt *key.ChordEvent) {
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 	if selMode == mouse.SelectOne {
@@ -1948,7 +1946,6 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
 			selMode = mouse.ExtendContinuous
 		}
 	}
-	idx := sv.SelectedIdx
 	switch kf {
 	case gi.KeyFunCancelSelect:
 		sv.UnselectAllIdxs()
@@ -1973,6 +1970,20 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
 		sv.SelectAllIdxs()
 		sv.SelectMode = false
 		kt.SetProcessed()
+	}
+}
+
+func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
+	if gi.KeyEventTrace {
+		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.PathUnique())
+	}
+	sv.KeyInputNav(kt)
+	if kt.IsProcessed() {
+		return
+	}
+	idx := sv.SelectedIdx
+	kf := gi.KeyFun(kt.Chord())
+	switch kf {
 	// case gi.KeyFunDelete: // too dangerous
 	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx, true)
 	// 	sv.SelectMode = false
@@ -2014,6 +2025,12 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
 func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.PathUnique())
+	}
+	if sv.InactMultiSel {
+		sv.KeyInputNav(kt)
+		if kt.IsProcessed() {
+			return
+		}
 	}
 	kf := gi.KeyFun(kt.Chord())
 	idx := sv.SelectedIdx
