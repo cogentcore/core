@@ -83,7 +83,7 @@ var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 /////////////////////////////
 // oswin.Event interface
 
-func (ev Event) Type() oswin.EventType {
+func (ev *Event) Type() oswin.EventType {
 	if ev.Action == Resize {
 		return oswin.WindowResizeEvent
 	} else if ev.Action == Paint {
@@ -93,19 +93,19 @@ func (ev Event) Type() oswin.EventType {
 	}
 }
 
-func (ev Event) HasPos() bool {
+func (ev *Event) HasPos() bool {
 	return false
 }
 
-func (ev Event) Pos() image.Point {
+func (ev *Event) Pos() image.Point {
 	return image.ZP
 }
 
-func (ev Event) OnFocus() bool {
+func (ev *Event) OnFocus() bool {
 	return false
 }
 
-func (ev Event) String() string {
+func (ev *Event) String() string {
 	return fmt.Sprintf("Type: %v Action: %v  Time: %v", ev.Type(), ev.Action, ev.Time())
 }
 
@@ -116,7 +116,7 @@ type ShowEvent struct {
 	Event
 }
 
-func (ev ShowEvent) Type() oswin.EventType {
+func (ev *ShowEvent) Type() oswin.EventType {
 	return oswin.WindowShowEvent
 }
 
@@ -127,6 +127,6 @@ type FocusEvent struct {
 	Event
 }
 
-func (ev FocusEvent) Type() oswin.EventType {
+func (ev *FocusEvent) Type() oswin.EventType {
 	return oswin.WindowFocusEvent
 }

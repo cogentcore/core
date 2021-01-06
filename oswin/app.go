@@ -113,6 +113,9 @@ type App interface {
 	// xdg-open command.
 	OpenURL(url string)
 
+	// OpenFiles returns file names that have been set to be open at startup.
+	OpenFiles() []string
+
 	// SetQuitReqFunc sets the function that is called whenever there is a
 	// request to quit the app (via a OS or a call to QuitReq() method).  That
 	// function can then adjudicate whether and when to actually call Quit.

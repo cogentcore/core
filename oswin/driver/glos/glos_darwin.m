@@ -15,7 +15,9 @@
 #include <stdio.h>
 
 #import <Cocoa/Cocoa.h>
-//#import <Foundation/Foundation.h>
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
+#import <objc/runtime.h>
 //#import <IOKit/graphics/IOGraphicsLib.h>
 
 ///////////////////////////////////////////////////////////////////////
@@ -398,4 +400,68 @@ void doSetMenuItemActive(uintptr_t mitmID, bool active) {
     mi.enabled = active;
 }
 
+/////////////////////////////////////////////////////////////////
+// OpenFiles event delegate
+// https://github.com/glfw/glfw/issues/1024
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface GLFWCustomDelegate : NSObject
++ (void)load; // load is called before even main() is run (as part of objc class registration)
+@end
+
+NS_ASSUME_NONNULL_END
+
+@implementation GLFWCustomDelegate
+
++ (void)load{
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		Class class = objc_getClass("GLFWApplicationDelegate");
+	
+		[GLFWCustomDelegate swizzle:class src:@selector(application:openFile:) tgt:@selector(swz_application:openFile:)];
+		[GLFWCustomDelegate swizzle:class src:@selector(application:openFiles:) tgt:@selector(swz_application:openFiles:)];
+	});
+}
+
++ (void) swizzle:(Class) original_c src:(SEL)original_s tgt:(SEL)target_s{
+	Class target_c = [GLFWCustomDelegate class];
+	Method originalMethod = class_getInstanceMethod(original_c, original_s);
+	Method swizzledMethod = class_getInstanceMethod(target_c, target_s);
+
+	BOOL didAddMethod =
+	class_addMethod(original_c,
+					original_s,
+					method_getImplementation(swizzledMethod),
+					method_getTypeEncoding(swizzledMethod));
+
+	if (didAddMethod) {
+		class_replaceMethod(original_c,
+							target_s,
+							method_getImplementation(originalMethod),
+							method_getTypeEncoding(originalMethod));
+	} else {
+		method_exchangeImplementations(originalMethod, swizzledMethod);
+	}
+}
+
+- (BOOL)swz_application:(NSApplication *)sender openFile:(NSString *)filename{
+	const char* utf_fn = filename.UTF8String;
+   int flen = (int)strlen(utf_fn);
+	macOpenFile((char*)utf_fn, flen);
+	return true;
+}
+
+- (void)swz_application:(NSApplication *)sender openFiles:(NSArray<NSString *> *)filenames{
+	int n = [filenames count];
+	int i;
+	for (i=0; i<n; i++) {
+  		NSString* fnm = [filenames objectAtIndex: i];
+		const char* utf_fn = fnm.UTF8String;
+		int flen = (int)strlen(utf_fn);
+		macOpenFile((char*)utf_fn, flen);
+	}
+}
+
+@end
 

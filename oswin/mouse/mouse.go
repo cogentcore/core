@@ -99,7 +99,7 @@ func (e *Event) SelectMode() SelectModes {
 	return SelectModeBits(e.Modifiers)
 }
 
-func (ev Event) String() string {
+func (ev *Event) String() string {
 	return fmt.Sprintf("Type: %v Button: %v Action: %v  Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Action, ev.Where, key.ModsString(ev.Modifiers), ev.Time())
 }
 
@@ -255,38 +255,38 @@ var KiT_SelectModes = kit.Enums.AddEnum(SelectModesN, kit.NotBitFlag, nil)
 /////////////////////////////
 // oswin.Event interface
 
-func (ev Event) Type() oswin.EventType {
+func (ev *Event) Type() oswin.EventType {
 	return oswin.MouseEvent
 }
 
-func (ev Event) HasPos() bool {
+func (ev *Event) HasPos() bool {
 	return true
 }
 
-func (ev Event) Pos() image.Point {
+func (ev *Event) Pos() image.Point {
 	return ev.Where
 }
 
-func (ev Event) OnFocus() bool {
+func (ev *Event) OnFocus() bool {
 	return false
 }
 
-func (ev MoveEvent) Type() oswin.EventType {
+func (ev *MoveEvent) Type() oswin.EventType {
 	return oswin.MouseMoveEvent
 }
 
-func (ev DragEvent) Type() oswin.EventType {
+func (ev *DragEvent) Type() oswin.EventType {
 	return oswin.MouseDragEvent
 }
 
-func (ev ScrollEvent) Type() oswin.EventType {
+func (ev *ScrollEvent) Type() oswin.EventType {
 	return oswin.MouseScrollEvent
 }
 
-func (ev FocusEvent) Type() oswin.EventType {
+func (ev *FocusEvent) Type() oswin.EventType {
 	return oswin.MouseFocusEvent
 }
 
-func (ev HoverEvent) Type() oswin.EventType {
+func (ev *HoverEvent) Type() oswin.EventType {
 	return oswin.MouseHoverEvent
 }

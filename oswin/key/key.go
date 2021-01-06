@@ -74,7 +74,7 @@ type ChordEvent struct {
 	Event
 }
 
-func (ev Event) String() string {
+func (ev *Event) String() string {
 	if ev.Rune >= 0 {
 		return fmt.Sprintf("Type: %v  Action: %v  Chord: %v  Rune: %d hex: %X  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Chord(), ev.Rune, ev.Rune, ModsString(ev.Modifiers), ev.Time())
 	}
@@ -417,26 +417,26 @@ const (
 // key.Event with %v gives not very readable output like:
 //	{100 7 key.Modifiers() Press}
 
-func (ev Event) Type() oswin.EventType {
+func (ev *Event) Type() oswin.EventType {
 	return oswin.KeyEvent
 }
 
-func (ev Event) HasPos() bool {
+func (ev *Event) HasPos() bool {
 	return false
 }
 
-func (ev Event) Pos() image.Point {
+func (ev *Event) Pos() image.Point {
 	return image.ZP
 }
 
-func (ev Event) OnFocus() bool {
+func (ev *Event) OnFocus() bool {
 	return true
 }
 
 // check for interface implementation
 var _ oswin.Event = &Event{}
 
-func (ev ChordEvent) Type() oswin.EventType {
+func (ev *ChordEvent) Type() oswin.EventType {
 	return oswin.KeyChordEvent
 }
 

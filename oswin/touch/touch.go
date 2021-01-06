@@ -77,19 +77,19 @@ var KiT_Actions = kit.Enums.AddEnum(ActionsN, kit.NotBitFlag, nil)
 /////////////////////////////
 // oswin.Event interface
 
-func (ev Event) Type() oswin.EventType {
+func (ev *Event) Type() oswin.EventType {
 	return oswin.TouchEvent
 }
 
-func (ev Event) HasPos() bool {
+func (ev *Event) HasPos() bool {
 	return true
 }
 
-func (ev Event) Pos() image.Point {
+func (ev *Event) Pos() image.Point {
 	return ev.Where
 }
 
-func (ev Event) OnFocus() bool {
+func (ev *Event) OnFocus() bool {
 	return false
 }
 
@@ -104,7 +104,7 @@ var _ oswin.Event = &Event{}
 // 	Magnification float64 // the multiplicative scale factor
 // }
 
-// func (ev MagnifyEvent) EventType() EventType {
+// func (ev *MagnifyEvent) EventType() EventType {
 // 	return MagnifyEventType
 // }
 
@@ -119,7 +119,7 @@ var _ oswin.Event = &Event{}
 // 	Rotation float64 // measured in degrees; positive == clockwise
 // }
 
-// func (ev RotateEvent) EventType() EventType {
+// func (ev *RotateEvent) EventType() EventType {
 // 	return RotateEventType
 // }
 
@@ -132,7 +132,7 @@ var _ oswin.Event = &Event{}
 // 	Delta image.Point
 // }
 
-// func (ev ScrollEvent) EventType() EventType {
+// func (ev *ScrollEvent) EventType() EventType {
 // 	return ScrollEventType
 // }
 

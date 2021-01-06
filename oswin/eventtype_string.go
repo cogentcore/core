@@ -32,13 +32,15 @@ func _() {
 	_ = x[DNDEvent-16]
 	_ = x[DNDMoveEvent-17]
 	_ = x[DNDFocusEvent-18]
-	_ = x[CustomEventType-19]
-	_ = x[EventTypeN-20]
+	_ = x[OSEvent-19]
+	_ = x[OSOpenFilesEvent-20]
+	_ = x[CustomEventType-21]
+	_ = x[EventTypeN-22]
 }
 
-const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventMouseHoverEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventWindowResizeEventWindowPaintEventWindowShowEventWindowFocusEventDNDEventDNDMoveEventDNDFocusEventCustomEventTypeEventTypeN"
+const _EventType_name = "MouseEventMouseMoveEventMouseDragEventMouseScrollEventMouseFocusEventMouseHoverEventKeyEventKeyChordEventTouchEventMagnifyEventRotateEventWindowEventWindowResizeEventWindowPaintEventWindowShowEventWindowFocusEventDNDEventDNDMoveEventDNDFocusEventOSEventOSOpenFilesEventCustomEventTypeEventTypeN"
 
-var _EventType_index = [...]uint16{0, 10, 24, 38, 54, 69, 84, 92, 105, 115, 127, 138, 149, 166, 182, 197, 213, 221, 233, 246, 261, 271}
+var _EventType_index = [...]uint16{0, 10, 24, 38, 54, 69, 84, 92, 105, 115, 127, 138, 149, 166, 182, 197, 213, 221, 233, 246, 253, 269, 284, 294}
 
 func (i EventType) String() string {
 	if i < 0 || i >= EventType(len(_EventType_index)-1) {

@@ -52,6 +52,7 @@ import (
 	"github.com/goki/gi/oswin/cursor"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mimedata"
+	"github.com/goki/gi/oswin/osevent"
 	"github.com/goki/pi/filecat"
 )
 
@@ -404,4 +405,20 @@ func menuFired(id uintptr, title *C.char, tilen C.int, tag C.int) {
 		return
 	}
 	go osmm.Triggered(w, tit, int(tag))
+}
+
+//export macOpenFile
+func macOpenFile(fname *C.char, flen C.int) {
+	ofn := C.GoString(fname)
+	// fmt.Printf("open file: %s\n", ofn)
+	if theApp.NWindows() == 0 {
+		theApp.openFiles = append(theApp.openFiles, ofn)
+	} else {
+		win := theApp.Window(0)
+		osev := &osevent.OpenFilesEvent{
+			Files: []string{ofn},
+		}
+		osev.Action = osevent.OpenFiles
+		win.Send(osev)
+	}
 }

@@ -188,26 +188,26 @@ var KiT_DropMods = kit.Enums.AddEnum(DropModsN, kit.NotBitFlag, nil)
 /////////////////////////////
 // oswin.Event interface
 
-func (ev Event) Type() oswin.EventType {
+func (ev *Event) Type() oswin.EventType {
 	return oswin.DNDEvent
 }
 
-func (ev Event) HasPos() bool {
+func (ev *Event) HasPos() bool {
 	return true
 }
 
-func (ev Event) Pos() image.Point {
+func (ev *Event) Pos() image.Point {
 	return ev.Where
 }
 
-func (ev Event) OnFocus() bool {
+func (ev *Event) OnFocus() bool {
 	return false
 }
 
-func (ev MoveEvent) Type() oswin.EventType {
+func (ev *MoveEvent) Type() oswin.EventType {
 	return oswin.DNDMoveEvent
 }
 
-func (ev FocusEvent) Type() oswin.EventType {
+func (ev *FocusEvent) Type() oswin.EventType {
 	return oswin.DNDFocusEvent
 }

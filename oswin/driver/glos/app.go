@@ -64,6 +64,7 @@ type appImpl struct {
 	ctxtwin       *windowImpl // context window, dynamically set, for e.g., pointer and other methods
 	name          string
 	about         string
+	openFiles     []string
 	quitting      bool          // set to true when quitting and closing windows
 	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
@@ -417,6 +418,10 @@ func (app *appImpl) About() string {
 
 func (app *appImpl) SetAbout(about string) {
 	app.about = about
+}
+
+func (app *appImpl) OpenFiles() []string {
+	return app.openFiles
 }
 
 func (app *appImpl) GoGiPrefsDir() string {

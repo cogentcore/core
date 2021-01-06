@@ -119,6 +119,11 @@ const (
 	// DNDFocusEvent is for Enter / Exit events of the DND into / out of a given widget
 	DNDFocusEvent
 
+	// OSEvent is an operating system generated event (app level typically)
+	OSEvent
+	// OSOpenFilesEvent is an event telling app to open given files
+	OSOpenFilesEvent
+
 	// CustomEventType is a user-defined event with a data interface{} field
 	CustomEventType
 
