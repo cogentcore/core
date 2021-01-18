@@ -9,7 +9,5 @@ require (
 	github.com/goki/ki v1.0.8
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/h2non/filetype v1.1.0
-	golang.org/x/mod v0.3.0 // indirect
-	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20200619210111-0f592d2728bb
+	golang.org/x/tools v0.0.0-20210115202250-e0d201561e39
 )

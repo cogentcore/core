@@ -61,7 +61,7 @@ func FullPath(fname string) (string, error) {
 func (fl *File) Open(fname string) error {
 	path := fname
 	var err error
-	if fl.File == "" || filepath.Base(fname) != fname {
+	if fl.File == "" {
 		path, err = FullPath(fname)
 		if err != nil {
 			return err
@@ -69,12 +69,14 @@ func (fl *File) Open(fname string) error {
 		fl.File = path
 		fl.BibTex = nil
 		fl.Mod = time.Time{}
+		// fmt.Printf("first open file: %s path: %s\n", fname, fl.File)
 	}
 	st, err := os.Stat(fl.File)
 	if err != nil {
 		return err
 	}
-	if fl.BibTex != nil && fl.Mod.After(st.ModTime()) {
+	if fl.BibTex != nil && !fl.Mod.Before(st.ModTime()) {
+		// fmt.Printf("existing file: %v is fine: file mod: %v  last mod: %v\n", fl.File, st.ModTime(), fl.Mod)
 		return nil
 	}
 	f, err := os.Open(fl.File)
