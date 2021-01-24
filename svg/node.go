@@ -15,7 +15,29 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
+
+// NodeSVG is the interface for all SVG nodes, based on gi.Node2D
+type NodeSVG interface {
+	gi.Node2D
+
+	// AsSVGNode returns a generic svg.NodeBase for our node -- gives generic
+	// access to all the base-level data structures without requiring
+	// interface methods.
+	AsSVGNode() *NodeBase
+
+	// MyXForm returns the 2D transform matrix for this node, compounded through parents
+	MyXForm() mat32.Mat2
+
+	// ApplyXForm applies the given 2D transform to the geometry of this node
+	ApplyXForm(xf mat32.Mat2)
+
+	// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+	// Changes position according to translation components ONLY
+	// and changes size according to scale components ONLY
+	ApplyDeltaXForm(xf mat32.Mat2)
+}
 
 // svg.NodeBase is an element within the SVG sub-scenegraph -- does not use
 // layout logic -- just renders into parent SVG viewport
@@ -44,6 +66,43 @@ func (g *NodeBase) AsSVGNode() *NodeBase {
 // Paint satisfies the painter interface
 func (g *NodeBase) Paint() *gist.Paint {
 	return &g.Pnt.Paint
+}
+
+func (g *NodeBase) MyXForm() mat32.Mat2 {
+	pars := []NodeSVG{}
+	xf := mat32.Identity2D()
+	nb := g
+	for {
+		if nb.Par == nil {
+			break
+		}
+		if nb.Par.TypeEmbeds(KiT_SVG) {
+			top := nb.Par.Embed(KiT_SVG).(*SVG)
+			xf = top.Pnt.XForm
+			break
+		}
+		psvg := nb.Par.(NodeSVG)
+		pars = append(pars, psvg)
+		nb = psvg.AsSVGNode()
+	}
+	np := len(pars)
+	for i := np - 1; i >= 0; i-- {
+		n := pars[i]
+		xf = n.AsSVGNode().Pnt.XForm.Mul(xf)
+	}
+	return xf
+}
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *NodeBase) ApplyXForm(xf mat32.Mat2) {
+}
+
+// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+// Changes position according to translation components ONLY
+// and changes size according to scale components ONLY
+// each node must define this for itself
+func (g *NodeBase) ApplyDeltaXForm(xf mat32.Mat2) {
 }
 
 // Init2DBase handles basic node initialization -- Init2D can then do special things

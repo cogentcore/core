@@ -66,7 +66,7 @@ func (rs *State) Init(width, height int, img *image.RGBA) {
 // must protect within render mutex lock (see Lock version)
 func (rs *State) PushXForm(xf mat32.Mat2) {
 	if rs.XFormStack == nil {
-		rs.XFormStack = make([]mat32.Mat2, 0, 100)
+		rs.XFormStack = make([]mat32.Mat2, 0)
 	}
 	rs.XFormStack = append(rs.XFormStack, rs.XForm)
 	rs.XForm = xf.Mul(rs.XForm)

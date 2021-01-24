@@ -55,3 +55,25 @@ func (g *Rect) Render2D() {
 	g.Render2DChildren()
 	rs.PopXForm()
 }
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *Rect) ApplyXForm(xf mat32.Mat2) {
+	xf = g.MyXForm().Mul(xf)
+	g.Pos = xf.MulVec2AsPt(g.Pos)
+	g.Size = xf.MulVec2AsVec(g.Size)
+}
+
+// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+// Changes position according to translation components ONLY
+// and changes size according to scale components ONLY
+func (g *Rect) ApplyDeltaXForm(xf mat32.Mat2) {
+	mxf := g.MyXForm()
+	scx, scy := mxf.ExtractScale()
+	xf.X0 /= scx
+	xf.Y0 /= scy
+	g.Pos.X += xf.X0
+	g.Pos.Y += xf.Y0
+	g.Size.X *= xf.XX
+	g.Size.Y *= xf.YY
+}
