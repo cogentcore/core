@@ -175,6 +175,7 @@ func (ge *GiEditor) ConfigSplitView() {
 
 	if len(split.Kids) == 0 {
 		tvfr := gi.AddNewFrame(split, "tvfr", gi.LayoutHoriz)
+		tvfr.SetReRenderAnchor()
 		tv := AddNewTreeView(tvfr, "tv")
 		sv := AddNewStructView(split, "sv")
 		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

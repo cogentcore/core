@@ -146,6 +146,7 @@ type Window struct {
 	OverTex           oswin.Texture     `json:"-" xml:"-" view:"-" desc:"overlay texture that is updated from Sprites"`
 	Sprites           Sprites           `json:"-" xml:"-" desc:"sprites are named images that are rendered into the overtex."`
 	ActiveSprites     int               `json:"-" xml:"-" desc:"number of currently active sprites -- must use ActivateSprite to keep track of whether there are active sprites."`
+	SpriteDragging    string            `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
 	DirectUps         map[Node2D]Node2D `json:"-" xml:"-" view:"-" desc:"list of objects that do direct upload rendering to window (e.g., gi3d.Scene)"`
 	UpMu              sync.Mutex        `json:"-" xml:"-" view:"-" desc:"mutex that protects all updating / uploading of Textures"`
 	Shortcuts         Shortcuts         `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
@@ -1362,6 +1363,35 @@ func (w *Window) RenderSprite(sp *Sprite) {
 	})
 }
 
+// SpriteEvent processes given event for any active sprites
+func (w *Window) SpriteEvent(evi oswin.Event) {
+	// w.UpMu.Lock()
+	// defer w.UpMu.Unlock()
+
+	et := evi.Type()
+
+	for _, sp := range w.Sprites {
+		if !sp.On {
+			continue
+		}
+		if sp.Events == nil {
+			continue
+		}
+		sig, ok := sp.Events[et]
+		if !ok {
+			continue
+		}
+		ep := evi.Pos()
+		if et == oswin.MouseDragEvent {
+			if sp.Name == w.SpriteDragging {
+				sig.Emit(w.This(), int64(et), evi)
+			}
+		} else if ep.In(sp.Geom.Bounds()) {
+			sig.Emit(w.This(), int64(et), evi)
+		}
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //                   MainMenu Updating
 
@@ -1575,6 +1605,12 @@ func (w *Window) ProcessEvent(evi oswin.Event) {
 	}
 
 	w.EventMgr.MouseEventReset(evi)
+	if evi.Type() == oswin.MouseEvent {
+		me := evi.(*mouse.Event)
+		if me.Action == mouse.Release {
+			w.SpriteDragging = ""
+		}
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	// Delete popup?
@@ -1732,6 +1768,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 		if w.EventMgr.DNDStage == DNDStarted {
 			w.DNDMoveEvent(e)
 		} else {
+			w.SpriteEvent(evi)
 			if !w.EventMgr.dragStarted {
 				e.SetProcessed() // ignore
 			}
@@ -1741,6 +1778,7 @@ func (w *Window) HiPriorityEvents(evi oswin.Event) bool {
 			w.DNDDropEvent(e)
 		}
 		w.FocusActiveClick(e)
+		w.SpriteEvent(evi)
 	case *mouse.MoveEvent:
 		if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 			if w.HasFlag(int(WinFlagDoFullRender)) {
