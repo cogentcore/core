@@ -41,11 +41,11 @@ const (
 	PcPerInch = 6.0
 )
 
-type Unit int32
+type Units int32
 
 const (
 	// Px = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
-	Px Unit = iota
+	Px Units = iota
 
 	// Dp = density-independent pixels -- 1dp = 1/160th of 1in
 	Dp
@@ -98,15 +98,15 @@ const (
 	// Dot = actual real display pixels -- generally only use internally
 	Dot
 
-	UnitN
+	UnitsN
 )
 
-//go:generate stringer -type=Unit
+//go:generate stringer -type=Units
 
-var KiT_Unit = kit.Enums.AddEnumAltLower(UnitN, kit.NotBitFlag, nil, "")
+var KiT_Units = kit.Enums.AddEnumAltLower(UnitsN, kit.NotBitFlag, nil, "")
 
-func (ev Unit) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Unit) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
+func (ev Units) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
+func (ev *Units) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 var UnitNames = [...]string{
 	Px:   "px",
@@ -206,7 +206,7 @@ func (uc *Context) SetFont(em, ex, ch, rem float32) {
 }
 
 // ToDotsFact returns factor needed to convert given unit into raw pixels (dots in DPI)
-func (uc *Context) ToDotsFactor(un Unit) float32 {
+func (uc *Context) ToDotsFactor(un Units) float32 {
 	if uc.DPI == 0 {
 		// log.Printf("gi/units Context was not initialized -- falling back on defaults\n")
 		uc.Defaults()
@@ -253,7 +253,7 @@ func (uc *Context) ToDotsFactor(un Unit) float32 {
 }
 
 // ToDots converts value in given units into raw display pixels (dots in DPI)
-func (uc *Context) ToDots(val float32, un Unit) float32 {
+func (uc *Context) ToDots(val float32, un Units) float32 {
 	return val * uc.ToDotsFactor(un)
 }
 
@@ -273,7 +273,7 @@ func (uc *Context) DotsToPx(val float32) float32 {
 // Value and units, and converted value into raw pixels (dots in DPI)
 type Value struct {
 	Val  float32
-	Un   Unit
+	Un   Units
 	Dots float32
 }
 
@@ -284,7 +284,7 @@ var ValueProps = ki.Props{
 }
 
 // NewValue creates a new value with given units
-func NewValue(val float32, un Unit) Value {
+func NewValue(val float32, un Units) Value {
 	return Value{val, un, 0.0}
 }
 
@@ -329,7 +329,7 @@ func NewDot(val float32) Value {
 }
 
 // Set sets value and units of an existing value
-func (v *Value) Set(val float32, un Unit) {
+func (v *Value) Set(val float32, un Units) {
 	v.Val = val
 	v.Un = un
 }
@@ -397,7 +397,7 @@ func (v *Value) ToDotsFixed(ctxt *Context) fixed.Int26_6 {
 }
 
 // Convert converts value to the given units, given unit context
-func (v *Value) Convert(to Unit, ctxt *Context) Value {
+func (v *Value) Convert(to Units, ctxt *Context) Value {
 	dots := v.ToDots(ctxt)
 	return Value{dots / ctxt.ToDotsFactor(to), to, dots}
 }
@@ -428,12 +428,12 @@ func (v *Value) SetString(str string) {
 	}
 
 	var numstr string
-	var un Unit = Px // default to pixels
+	var un Units = Px // default to pixels
 	for i, nm := range UnitNames {
 		unsz := len(nm)
 		if ends[unsz-1] == nm {
 			numstr = trstr[:sz-unsz]
-			un = Unit(i)
+			un = Units(i)
 			break
 		}
 	}
