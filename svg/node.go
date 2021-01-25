@@ -37,6 +37,15 @@ type NodeSVG interface {
 	// Changes position according to translation components ONLY
 	// and changes size according to scale components ONLY
 	ApplyDeltaXForm(xf mat32.Mat2)
+
+	// WriteGeom writes the geometry of the node to a slice of floating point numbers
+	// the length and ordering of which is specific to each node type.
+	// Slice must be passed and will be resized if not the correct length.
+	WriteGeom(dat *[]float32)
+
+	// ReadGeom reads the geometry of the node from a slice of floating point numbers
+	// the length and ordering of which is specific to each node type.
+	ReadGeom(dat []float32)
 }
 
 // svg.NodeBase is an element within the SVG sub-scenegraph -- does not use
@@ -103,6 +112,36 @@ func (g *NodeBase) ApplyXForm(xf mat32.Mat2) {
 // and changes size according to scale components ONLY
 // each node must define this for itself
 func (g *NodeBase) ApplyDeltaXForm(xf mat32.Mat2) {
+}
+
+// SetFloat32SliceLen is a utility function to set given slice of float32 values
+// to given length, reusing existing where possible and making a new one as needed.
+// For use in WriteGeom routines.
+func SetFloat32SliceLen(dat *[]float32, sz int) {
+	switch {
+	case len(*dat) == sz:
+	case len(*dat) < sz:
+		if cap(*dat) >= sz {
+			*dat = (*dat)[0:sz]
+		} else {
+			*dat = make([]float32, sz)
+		}
+	default:
+		*dat = (*dat)[0:sz]
+	}
+}
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *NodeBase) WriteGeom(dat *[]float32) {
+
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *NodeBase) ReadGeom(dat []float32) {
+
 }
 
 // Init2DBase handles basic node initialization -- Init2D can then do special things

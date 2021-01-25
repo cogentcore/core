@@ -77,3 +77,27 @@ func (g *Rect) ApplyDeltaXForm(xf mat32.Mat2) {
 	g.Size.X *= xf.XX
 	g.Size.Y *= xf.YY
 }
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *Rect) WriteGeom(dat *[]float32) {
+	SetFloat32SliceLen(dat, 6)
+	(*dat)[0] = g.Pos.X
+	(*dat)[1] = g.Pos.Y
+	(*dat)[2] = g.Size.X
+	(*dat)[3] = g.Size.Y
+	(*dat)[4] = g.Radius.X
+	(*dat)[5] = g.Radius.Y
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *Rect) ReadGeom(dat []float32) {
+	g.Pos.X = dat[0]
+	g.Pos.Y = dat[1]
+	g.Size.X = dat[2]
+	g.Size.Y = dat[3]
+	g.Radius.X = dat[4]
+	g.Radius.Y = dat[5]
+}

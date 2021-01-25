@@ -74,3 +74,56 @@ func (g *Polygon) Render2D() {
 	g.Render2DChildren()
 	rs.PopXForm()
 }
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *Polygon) ApplyXForm(xf mat32.Mat2) {
+	xf = g.MyXForm().Mul(xf)
+	for i, p := range g.Points {
+		p = xf.MulVec2AsPt(p)
+		g.Points[i] = p
+	}
+}
+
+// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+// Changes position according to translation components ONLY
+// and changes size according to scale components ONLY
+func (g *Polygon) ApplyDeltaXForm(xf mat32.Mat2) {
+	mxf := g.MyXForm()
+	scx, scy := mxf.ExtractScale()
+	off := mat32.Vec2{xf.X0 / scx, xf.Y0 / scy}
+	sc := mat32.Vec2{xf.XX, xf.YY}
+	ost := mat32.Vec2{}
+	nst := mat32.Vec2{}
+	for i, p := range g.Points {
+		if i == 0 {
+			ost = p
+			p.SetAdd(off)
+			nst = p
+		} else {
+			p = nst.Add(p.Sub(ost).Mul(sc))
+		}
+		g.Points[i] = p
+	}
+}
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *Polygon) WriteGeom(dat *[]float32) {
+	SetFloat32SliceLen(dat, len(g.Points)*2)
+	for i, p := range g.Points {
+		(*dat)[i*2] = p.X
+		(*dat)[i*2+1] = p.Y
+	}
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *Polygon) ReadGeom(dat []float32) {
+	for i, p := range g.Points {
+		p.X = dat[i*2]
+		p.Y = dat[i*2+1]
+		g.Points[i] = p
+	}
+}

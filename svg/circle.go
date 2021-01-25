@@ -52,3 +52,43 @@ func (g *Circle) Render2D() {
 
 	rs.PopXFormLock()
 }
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *Circle) ApplyXForm(xf mat32.Mat2) {
+	xf = g.MyXForm().Mul(xf)
+	g.Pos = xf.MulVec2AsPt(g.Pos)
+	scx, scy := xf.ExtractScale()
+	g.Radius *= 0.5 * (scx + scy)
+}
+
+// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+// Changes position according to translation components ONLY
+// and changes size according to scale components ONLY
+func (g *Circle) ApplyDeltaXForm(xf mat32.Mat2) {
+	mxf := g.MyXForm()
+	scx, scy := mxf.ExtractScale()
+	xf.X0 /= scx
+	xf.Y0 /= scy
+	g.Pos.X += xf.X0
+	g.Pos.Y += xf.Y0
+	g.Radius *= 1 + 0.5*(0.5*(xf.XX+xf.YY)-1)
+}
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *Circle) WriteGeom(dat *[]float32) {
+	SetFloat32SliceLen(dat, 3)
+	(*dat)[0] = g.Pos.X
+	(*dat)[1] = g.Pos.Y
+	(*dat)[2] = g.Radius
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *Circle) ReadGeom(dat []float32) {
+	g.Pos.X = dat[0]
+	g.Pos.Y = dat[1]
+	g.Radius = dat[2]
+}

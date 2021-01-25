@@ -808,3 +808,281 @@ func PathDataParse(d string) ([]PathData, error) {
 	return pd, nil
 	// todo: add some error checking..
 }
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *Path) ApplyXForm(xf mat32.Mat2) {
+	// xf = g.MyXForm().Mul(xf)
+	// g.Pos = xf.MulVec2AsPt(g.Pos)
+	// g.Size = xf.MulVec2AsVec(g.Size)
+}
+
+// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+// Changes position according to translation components ONLY
+// and changes size according to scale components ONLY
+func (g *Path) ApplyDeltaXForm(xf mat32.Mat2) {
+	mxf := g.MyXForm()
+	scx, scy := mxf.ExtractScale()
+	off := mat32.Vec2{xf.X0 / scx, xf.Y0 / scy}
+	sc := mat32.Vec2{xf.XX, xf.YY}
+
+	// note: technically might need to do scaling on internal abs points?
+
+	sz := len(g.Data)
+	data := g.Data
+	lastCmd := PcErr
+	var stx, sty, cx, cy, x1, y1, ctrlx, ctrly, nx, ny float32
+	for i := 0; i < sz; {
+		cmd, n := PathDataNextCmd(data, &i)
+		rel := false
+		switch cmd {
+		case PcM:
+			cx = PathDataNext(data, &i) + off.X
+			cy = PathDataNext(data, &i) + off.Y
+			data[i-2] = PathData(cx)
+			data[i-1] = PathData(cy)
+			stx, sty = cx, cy
+			for np := 1; np < n/2; np++ {
+				cx = PathDataNext(data, &i)
+				cy = PathDataNext(data, &i)
+				cx = stx + sc.X*(cx-stx)
+				cy = sty + sc.Y*(cy-sty)
+				data[i-2] = PathData(cx)
+				data[i-1] = PathData(cy)
+			}
+		case Pcm:
+			nx = PathDataNext(data, &i)
+			ny = PathDataNext(data, &i)
+			if i == 3 { // starting
+				nx += off.X
+				ny += off.Y
+			} else {
+				nx *= sc.X
+				ny *= sc.Y
+			}
+			data[i-2] = PathData(nx)
+			data[i-1] = PathData(ny)
+			cx += nx
+			cy += ny
+			stx, sty = cx, cy
+			for np := 1; np < n/2; np++ {
+				nx = sc.X * PathDataNext(data, &i)
+				ny = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(nx)
+				data[i-1] = PathData(ny)
+				cx += nx
+				cy += ny
+			}
+		case PcL:
+			for np := 0; np < n/2; np++ {
+				cx = PathDataNext(data, &i) + off.X
+				cy = PathDataNext(data, &i) + off.Y
+				data[i-2] = PathData(cx)
+				data[i-1] = PathData(cy)
+			}
+		case Pcl:
+			for np := 0; np < n/2; np++ {
+				nx = sc.X * PathDataNext(data, &i)
+				ny = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(nx)
+				data[i-1] = PathData(ny)
+				cx += nx
+				cy += ny
+			}
+		case PcH:
+			for np := 0; np < n; np++ {
+				cx = PathDataNext(data, &i) + off.X
+				data[i-1] = PathData(cx)
+			}
+		case Pch:
+			for np := 0; np < n; np++ {
+				nx = sc.X * PathDataNext(data, &i)
+				data[i-1] = PathData(nx)
+				cx += nx
+			}
+		case PcV:
+			for np := 0; np < n; np++ {
+				cy = PathDataNext(data, &i) + off.Y
+				data[i-1] = PathData(cy)
+			}
+		case Pcv:
+			for np := 0; np < n; np++ {
+				ny = sc.Y * PathDataNext(data, &i)
+				data[i-1] = PathData(ny)
+				cy += ny
+			}
+		case PcC:
+			for np := 0; np < n/6; np++ {
+				x1 = PathDataNext(data, &i) + off.X
+				y1 = PathDataNext(data, &i) + off.Y
+				data[i-2] = PathData(x1)
+				data[i-1] = PathData(y1)
+				ctrlx = PathDataNext(data, &i) + off.X
+				ctrly = PathDataNext(data, &i) + off.Y
+				data[i-2] = PathData(ctrlx)
+				data[i-1] = PathData(ctrly)
+				cx = PathDataNext(data, &i) + off.X
+				cy = PathDataNext(data, &i) + off.Y
+				data[i-2] = PathData(cx)
+				data[i-1] = PathData(cy)
+			}
+		case Pcc:
+			for np := 0; np < n/6; np++ {
+				x1 = sc.X * PathDataNext(data, &i)
+				y1 = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(x1)
+				data[i-1] = PathData(y1)
+				ctrlx = sc.X * PathDataNext(data, &i)
+				ctrly = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(ctrlx)
+				data[i-1] = PathData(ctrly)
+				nx = sc.X * PathDataNext(data, &i)
+				ny = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(nx)
+				data[i-1] = PathData(ny)
+				cx += nx
+				cy += ny
+			}
+		case Pcs:
+			rel = true
+			fallthrough
+		case PcS:
+			for np := 0; np < n/4; np++ {
+				switch lastCmd {
+				case Pcc, PcC, Pcs, PcS:
+					ctrlx, ctrly = reflectPt(cx, cy, ctrlx, ctrly)
+				default:
+					ctrlx, ctrly = cx, cy
+				}
+				if rel {
+					x1 = sc.X * PathDataNext(data, &i)
+					y1 = sc.Y * PathDataNext(data, &i)
+					data[i-2] = PathData(x1)
+					data[i-1] = PathData(y1)
+					nx = sc.X * PathDataNext(data, &i)
+					ny = sc.Y * PathDataNext(data, &i)
+					data[i-2] = PathData(nx)
+					data[i-1] = PathData(ny)
+					cx += nx
+					cy += ny
+				} else {
+					x1 = PathDataNext(data, &i) + off.X
+					y1 = PathDataNext(data, &i) + off.Y
+					data[i-2] = PathData(x1)
+					data[i-1] = PathData(y1)
+					cx = PathDataNext(data, &i) + off.X
+					cy = PathDataNext(data, &i) + off.Y
+					data[i-2] = PathData(cx)
+					data[i-1] = PathData(cy)
+				}
+				lastCmd = cmd
+				ctrlx = x1
+				ctrly = y1
+			}
+		case PcQ:
+			for np := 0; np < n/4; np++ {
+				ctrlx = PathDataNext(data, &i) + off.X
+				ctrly = PathDataNext(data, &i) + off.Y
+				data[i-2] = PathData(ctrlx)
+				data[i-1] = PathData(ctrly)
+				cx = PathDataNext(data, &i) + off.X
+				cy = PathDataNext(data, &i) + off.Y
+				data[i-2] = PathData(cx)
+				data[i-1] = PathData(cy)
+			}
+		case Pcq:
+			for np := 0; np < n/4; np++ {
+				ctrlx = sc.X * PathDataNext(data, &i)
+				ctrly = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(ctrlx)
+				data[i-1] = PathData(ctrly)
+				nx = sc.X * PathDataNext(data, &i)
+				ny = sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(nx)
+				data[i-1] = PathData(ny)
+				cx += nx
+				cy += ny
+			}
+		case Pct:
+			rel = true
+			fallthrough
+		case PcT:
+			for np := 0; np < n/2; np++ {
+				switch lastCmd {
+				case Pcq, PcQ, PcT, Pct:
+					ctrlx, ctrly = reflectPt(cx, cy, ctrlx, ctrly)
+				default:
+					ctrlx, ctrly = cx, cy
+				}
+				if rel {
+					nx = sc.X * PathDataNext(data, &i)
+					ny = sc.Y * PathDataNext(data, &i)
+					data[i-2] = PathData(nx)
+					data[i-1] = PathData(ny)
+					cx += nx
+					cy += ny
+				} else {
+					cx = PathDataNext(data, &i) + off.X
+					cy = PathDataNext(data, &i) + off.Y
+					data[i-2] = PathData(cx)
+					data[i-1] = PathData(cy)
+				}
+				lastCmd = cmd
+			}
+		case Pca:
+			rel = true
+			fallthrough
+		case PcA:
+			for np := 0; np < n/7; np++ {
+				rx := sc.X * PathDataNext(data, &i)
+				ry := sc.Y * PathDataNext(data, &i)
+				data[i-2] = PathData(rx)
+				data[i-1] = PathData(ry)
+				ang := PathDataNext(data, &i)
+				largeArc := (PathDataNext(data, &i) != 0)
+				sweep := (PathDataNext(data, &i) != 0)
+				pcx := cx
+				pcy := cy
+				if rel {
+					nx = sc.X * PathDataNext(data, &i)
+					ny = sc.Y * PathDataNext(data, &i)
+					data[i-2] = PathData(nx)
+					data[i-1] = PathData(ny)
+					cx += nx
+					cy += ny
+				} else {
+					cx = PathDataNext(data, &i) + off.X
+					cy = PathDataNext(data, &i) + off.Y
+					data[i-2] = PathData(cx)
+					data[i-1] = PathData(cy)
+				}
+				ncx, ncy := girl.FindEllipseCenter(&rx, &ry, ang*math.Pi/180, pcx, pcy, cx, cy, sweep, largeArc)
+				_ = ncx
+				_ = ncy
+			}
+		case PcZ:
+			fallthrough
+		case Pcz:
+			cx, cy = stx, sty
+		}
+		lastCmd = cmd
+	}
+}
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *Path) WriteGeom(dat *[]float32) {
+	SetFloat32SliceLen(dat, len(g.Data))
+	for i := range g.Data {
+		(*dat)[i] = float32(g.Data[i])
+	}
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *Path) ReadGeom(dat []float32) {
+	for i := range g.Data {
+		g.Data[i] = PathData(dat[i])
+	}
+}

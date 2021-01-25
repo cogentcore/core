@@ -52,3 +52,45 @@ func (g *Ellipse) Render2D() {
 
 	rs.PopXFormLock()
 }
+
+// ApplyXForm applies the given 2D transform to the geometry of this node
+// each node must define this for itself
+func (g *Ellipse) ApplyXForm(xf mat32.Mat2) {
+	xf = g.MyXForm().Mul(xf)
+	g.Pos = xf.MulVec2AsPt(g.Pos)
+	g.Radii = xf.MulVec2AsVec(g.Radii)
+}
+
+// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
+// Changes position according to translation components ONLY
+// and changes size according to scale components ONLY
+func (g *Ellipse) ApplyDeltaXForm(xf mat32.Mat2) {
+	mxf := g.MyXForm()
+	scx, scy := mxf.ExtractScale()
+	xf.X0 /= scx
+	xf.Y0 /= scy
+	g.Pos.X += xf.X0
+	g.Pos.Y += xf.Y0
+	g.Radii.X *= 1 + 0.8*(xf.XX-1)
+	g.Radii.Y *= 1 + 0.8*(xf.YY-1)
+}
+
+// WriteGeom writes the geometry of the node to a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+// Slice must be passed and will be resized if not the correct length.
+func (g *Ellipse) WriteGeom(dat *[]float32) {
+	SetFloat32SliceLen(dat, 4)
+	(*dat)[0] = g.Pos.X
+	(*dat)[1] = g.Pos.Y
+	(*dat)[2] = g.Radii.X
+	(*dat)[3] = g.Radii.Y
+}
+
+// ReadGeom reads the geometry of the node from a slice of floating point numbers
+// the length and ordering of which is specific to each node type.
+func (g *Ellipse) ReadGeom(dat []float32) {
+	g.Pos.X = dat[0]
+	g.Pos.Y = dat[1]
+	g.Radii.X = dat[2]
+	g.Radii.Y = dat[3]
+}
