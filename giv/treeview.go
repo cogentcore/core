@@ -199,13 +199,17 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data interface{}) {
 		if gi.Update2DTrace {
 			fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.PathUnique(), ki.NodeSignals(sig), send.PathUnique(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(send.Flags(), ki.FlagsN))
 		}
-		if tv.This() == tv.RootView.This() {
-			// fmt.Printf("root full rerender\n")
+		if tv.This() == tv.RootView.This() && tv.HasFlag(int(TreeViewFlagUpdtRoot)) {
 			tv.SetFullReRender() // re-render for any updates on root node
 		}
 		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
+			if tv.This() == tv.RootView.This() {
+				tv.SetFullReRender() // re-render for struct updates on root node
+			}
 			tvIdx := tv.ViewIdx
-			// fmt.Printf("full sync, idx: %v  %v", tvIdx, tv.PathUnique())
+			if gi.Update2DTrace {
+				fmt.Printf("treeview: structupdate for node, idx: %v  %v", tvIdx, tv.PathUnique())
+			}
 			tv.SyncToSrc(&tvIdx, false, 0)
 		} else {
 			tv.UpdateSig()
@@ -365,6 +369,12 @@ const (
 	// TreeViewFlagNoTemplate -- this node is not using a style template -- should
 	// be restyled on any full re-render change
 	TreeViewFlagNoTemplate
+
+	// TreeViewFlagUpdtRoot -- for any update signal that comes from the source
+	// root node, do a full update of the treeview.  This increases responsiveness
+	// of the updating and makes it easy to trigger a full update by updating the root
+	// node, but can be slower when not needed
+	TreeViewFlagUpdtRoot
 
 	TreeViewFlagsN
 )

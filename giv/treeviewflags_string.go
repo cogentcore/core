@@ -16,12 +16,13 @@ func _() {
 	_ = x[TreeViewFlagClosed-29]
 	_ = x[TreeViewFlagChanged-30]
 	_ = x[TreeViewFlagNoTemplate-31]
-	_ = x[TreeViewFlagsN-32]
+	_ = x[TreeViewFlagUpdtRoot-32]
+	_ = x[TreeViewFlagsN-33]
 }
 
-const _TreeViewFlags_name = "TreeViewFlagClosedTreeViewFlagChangedTreeViewFlagNoTemplateTreeViewFlagsN"
+const _TreeViewFlags_name = "TreeViewFlagClosedTreeViewFlagChangedTreeViewFlagNoTemplateTreeViewFlagUpdtRootTreeViewFlagsN"
 
-var _TreeViewFlags_index = [...]uint8{0, 18, 37, 59, 73}
+var _TreeViewFlags_index = [...]uint8{0, 18, 37, 59, 79, 93}
 
 func (i TreeViewFlags) String() string {
 	i -= 29

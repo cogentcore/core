@@ -109,7 +109,7 @@ func (c *Color) HexString() string {
 	if c == nil {
 		return "nil"
 	}
-	return fmt.Sprintf("#%X%X%X%X", c.R, c.G, c.B, c.A)
+	return fmt.Sprintf("#%02X%02X%02X%02X", c.R, c.G, c.B, c.A)
 }
 
 // SetToNil sets to initial all-zero state

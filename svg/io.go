@@ -11,6 +11,7 @@
 package svg
 
 import (
+	"bufio"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -23,6 +24,7 @@ import (
 	"github.com/goki/gi/gist"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"golang.org/x/net/html/charset"
 )
@@ -57,7 +59,7 @@ func (svg *SVG) OpenXML(filename string) error {
 		log.Println(err)
 		return err
 	}
-	return svg.ReadXML(fp)
+	return svg.ReadXML(bufio.NewReader(fp))
 }
 
 // ReadXML reads XML-formatted SVG input from io.Reader, and uses
@@ -89,6 +91,9 @@ func (svg *SVG) ReadXML(reader io.Reader) error {
 			break
 			// todo: ignore rest?
 		}
+	}
+	if err == io.EOF {
+		return nil
 	}
 	return err
 }
@@ -709,5 +714,102 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 			}
 		}
 	}
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+//   Writing
+
+// SaveXML saves the svg to a XML-encoded file, using WriteXML
+func (svg *SVG) SaveXML(filename string) error {
+	fp, err := os.Create(filename)
+	defer fp.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	err = svg.WriteXML(bufio.NewWriter(fp), true)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+// WriteXML writes XML-formatted SVG output to io.Writer, and uses
+// xml.Encoder
+func (svg *SVG) WriteXML(wr io.Writer, indent bool) error {
+	enc := xml.NewEncoder(wr)
+	if indent {
+		enc.Indent("", "  ")
+	}
+	svg.MarshalXML(enc, xml.StartElement{})
+	enc.Flush()
+	return nil
+}
+
+func SVGNodeTypeName(itm ki.Ki) string {
+	switch itm.(type) {
+	case *Path:
+		return "path"
+	case *Group:
+		return "g"
+	case *Rect:
+		return "rect"
+	case *Circle:
+		return "circle"
+	case *Ellipse:
+		return "ellipse"
+	case *Line:
+		return "line"
+	case *Polygon:
+		return "polygon"
+	case *Polyline:
+		return "polyline"
+	case *gi.MetaData2D:
+		return itm.Name()
+	}
+	return "unk"
+}
+
+func SVGNodeMarshalXML(itm ki.Ki, enc *xml.Encoder) error {
+	_, g := gi.KiToNode2D(itm)
+	me := xml.StartElement{}
+	me.Name.Local = SVGNodeTypeName(itm)
+	at := xml.Attr{Value: g.Name()}
+	at.Name.Local = "id"
+	me.Attr = append(me.Attr, at)
+	for k, v := range g.Props {
+		sv := kit.ToString(v)
+		at := xml.Attr{Value: sv}
+		at.Name.Local = k
+		me.Attr = append(me.Attr, at)
+	}
+	enc.EncodeToken(me)
+	for _, k := range g.Kids {
+		SVGNodeMarshalXML(k, enc)
+	}
+	ed := xml.EndElement{}
+	ed.Name = me.Name
+	enc.EncodeToken(ed)
+	return nil
+}
+
+// MarshalXML marshals the svg using xml.Encoder
+func (svg *SVG) MarshalXML(enc *xml.Encoder, se xml.StartElement) error {
+	me := xml.StartElement{}
+	me.Name.Local = "svg"
+	for k, v := range svg.Props {
+		sv := kit.ToString(v)
+		at := xml.Attr{Value: sv}
+		at.Name.Local = k
+		me.Attr = append(me.Attr, at)
+	}
+	enc.EncodeToken(me)
+	for _, k := range svg.Kids {
+		SVGNodeMarshalXML(k, enc)
+	}
+	ed := xml.EndElement{}
+	ed.Name = me.Name
+	enc.EncodeToken(ed)
 	return nil
 }
