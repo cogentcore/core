@@ -78,31 +78,21 @@ func (g *Polygon) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Polygon) ApplyXForm(xf mat32.Mat2) {
-	xf = g.MyXForm().Mul(xf)
 	for i, p := range g.Points {
 		p = xf.MulVec2AsPt(p)
 		g.Points[i] = p
 	}
 }
 
-// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
-// Changes position according to translation components ONLY
-// and changes size according to scale components ONLY
-func (g *Polygon) ApplyDeltaXForm(xf mat32.Mat2) {
-	mxf := g.MyXForm()
-	scx, scy := mxf.ExtractScale()
-	off := mat32.Vec2{xf.X0 / scx, xf.Y0 / scy}
-	sc := mat32.Vec2{xf.XX, xf.YY}
-	ost := mat32.Vec2{}
-	nst := mat32.Vec2{}
+// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// relative to given point.  Trans translation and point are in top-level coordinates,
+// so must be transformed into local coords first.
+// Point is upper left corner of selection box that anchors the translation and scaling,
+// and for rotation it is the center point around which to rotate
+func (g *Polygon) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
 	for i, p := range g.Points {
-		if i == 0 {
-			ost = p
-			p.SetAdd(off)
-			nst = p
-		} else {
-			p = nst.Add(p.Sub(ost).Mul(sc))
-		}
+		p = xf.MulVec2AsPtCtr(p, lpt)
 		g.Points[i] = p
 	}
 }

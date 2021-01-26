@@ -65,22 +65,19 @@ func (g *Line) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Line) ApplyXForm(xf mat32.Mat2) {
-	xf = g.MyXForm().Mul(xf)
 	g.Start = xf.MulVec2AsPt(g.Start)
 	g.End = xf.MulVec2AsPt(g.End)
 }
 
-// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
-// Changes position according to translation components ONLY
-// and changes size according to scale components ONLY
-func (g *Line) ApplyDeltaXForm(xf mat32.Mat2) {
-	mxf := g.MyXForm()
-	scx, scy := mxf.ExtractScale()
-	off := mat32.Vec2{xf.X0 / scx, xf.Y0 / scy}
-	sc := mat32.Vec2{xf.XX, xf.YY}
-	ost := g.Start
-	g.Start.SetAdd(off)
-	g.End = g.Start.Add(g.End.Sub(ost).Mul(sc))
+// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// relative to given point.  Trans translation and point are in top-level coordinates,
+// so must be transformed into local coords first.
+// Point is upper left corner of selection box that anchors the translation and scaling,
+// and for rotation it is the center point around which to rotate
+func (g *Line) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
+	g.Start = xf.MulVec2AsPtCtr(g.Start, lpt)
+	g.End = xf.MulVec2AsPtCtr(g.End, lpt)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers

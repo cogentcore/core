@@ -31,12 +31,15 @@ type NodeSVG interface {
 	MyXForm() mat32.Mat2
 
 	// ApplyXForm applies the given 2D transform to the geometry of this node
+	// this just does a direct transform multiplication on coordinates.
 	ApplyXForm(xf mat32.Mat2)
 
-	// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
-	// Changes position according to translation components ONLY
-	// and changes size according to scale components ONLY
-	ApplyDeltaXForm(xf mat32.Mat2)
+	// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+	// relative to given point.  Trans translation and point are in top-level coordinates,
+	// so must be transformed into local coords first.
+	// Point is upper left corner of selection box that anchors the translation and scaling,
+	// and for rotation it is the center point around which to rotate
+	ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2)
 
 	// WriteGeom writes the geometry of the node to a slice of floating point numbers
 	// the length and ordering of which is specific to each node type.
@@ -103,15 +106,28 @@ func (g *NodeBase) MyXForm() mat32.Mat2 {
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node
-// each node must define this for itself
+// this just does a direct transform multiplication on coordinates.
 func (g *NodeBase) ApplyXForm(xf mat32.Mat2) {
 }
 
-// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
-// Changes position according to translation components ONLY
-// and changes size according to scale components ONLY
-// each node must define this for itself
-func (g *NodeBase) ApplyDeltaXForm(xf mat32.Mat2) {
+// DeltaXForm computes the net transform matrix for given delta xform parameters
+// and the transformed version of the reference point.
+func (g *NodeBase) DeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) (mat32.Mat2, mat32.Vec2) {
+	mxi := g.MyXForm().Inverse()
+	lpt := mxi.MulVec2AsPt(pt)
+	ldel := mxi.MulVec2AsVec(trans)
+	xf := mat32.Scale2D(scale.X, scale.Y).Rotate(rot)
+	xf.X0 = ldel.X
+	xf.Y0 = ldel.Y
+	return xf, lpt
+}
+
+// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// relative to given point.  Trans translation and point are in top-level coordinates,
+// so must be transformed into local coords first.
+// Point is upper left corner of selection box that anchors the translation and scaling,
+// and for rotation it is the center point around which to rotate
+func (g *NodeBase) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
 }
 
 // SetFloat32SliceLen is a utility function to set given slice of float32 values

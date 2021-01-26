@@ -56,23 +56,21 @@ func (g *Circle) Render2D() {
 // ApplyXForm applies the given 2D transform to the geometry of this node
 // each node must define this for itself
 func (g *Circle) ApplyXForm(xf mat32.Mat2) {
-	xf = g.MyXForm().Mul(xf)
 	g.Pos = xf.MulVec2AsPt(g.Pos)
 	scx, scy := xf.ExtractScale()
 	g.Radius *= 0.5 * (scx + scy)
 }
 
-// ApplyDeltaXForm applies the given 2D delta transform to the geometry of this node
-// Changes position according to translation components ONLY
-// and changes size according to scale components ONLY
-func (g *Circle) ApplyDeltaXForm(xf mat32.Mat2) {
-	mxf := g.MyXForm()
-	scx, scy := mxf.ExtractScale()
-	xf.X0 /= scx
-	xf.Y0 /= scy
-	g.Pos.X += xf.X0
-	g.Pos.Y += xf.Y0
-	g.Radius *= 1 + 0.5*(0.5*(xf.XX+xf.YY)-1)
+// ApplyDeltaXForm applies the given 2D delta transforms to the geometry of this node
+// relative to given point.  Trans translation and point are in top-level coordinates,
+// so must be transformed into local coords first.
+// Point is upper left corner of selection box that anchors the translation and scaling,
+// and for rotation it is the center point around which to rotate
+func (g *Circle) ApplyDeltaXForm(trans mat32.Vec2, scale mat32.Vec2, rot float32, pt mat32.Vec2) {
+	xf, lpt := g.DeltaXForm(trans, scale, rot, pt)
+	g.Pos = xf.MulVec2AsPtCtr(g.Pos, lpt)
+	scx, scy := xf.ExtractScale()
+	g.Radius *= 0.5 * (scx + scy)
 }
 
 // WriteGeom writes the geometry of the node to a slice of floating point numbers
