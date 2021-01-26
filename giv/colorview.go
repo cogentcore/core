@@ -59,48 +59,77 @@ func (cv *ColorView) SetColor(clr color.Color) {
 
 // Config configures a standard setup of entire view
 func (cv *ColorView) Config() {
+	if cv.HasChildren() {
+		return
+	}
+	updt := cv.UpdateStart()
 	cv.Lay = gi.LayoutVert
 	cv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Layout, "slider-lay")
-	config.Add(gi.KiT_Layout, "num-lay")
-	mods, updt := cv.ConfigChildren(config, ki.UniqueNames)
-	if mods {
-		cv.SliderLayConfig()
-		cv.NumLayConfig()
-	} else {
-		updt = cv.UpdateStart()
-	}
-	cv.UpdateEnd(updt)
-}
+	vl := gi.AddNewLayout(cv, "slider-lay", gi.LayoutHoriz)
+	nl := gi.AddNewLayout(cv, "num-lay", gi.LayoutHoriz)
 
-// SliderLayConfig configures the sliders layout
-func (cv *ColorView) SliderLayConfig() {
-	vl := cv.SliderLay()
-	vl.Lay = gi.LayoutHoriz
+	cv.NumView = ToValueView(&cv.Color, "")
+	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
+	vtyp := cv.NumView.WidgetType()
+	widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
+	cv.NumView.ConfigWidget(widg)
+	vvb := cv.NumView.AsValueViewBase()
+	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
+		cvv.UpdateSliderGrid()
+		cvv.ViewSig.Emit(cvv.This(), 0, nil)
+	})
+
+	// slider layer
 	vl.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Frame, "value")
-	config.Add(gi.KiT_Layout, "slider-grid")
-	mods, updt := vl.ConfigChildren(config, ki.UniqueNames)
-	v := cv.Value()
-	if mods {
-		cv.ConfigSliderGrid()
-		v.SetProp("min-width", units.NewEm(6))
-		v.SetProp("min-height", units.NewEm(6))
-	} else {
-		updt = vl.UpdateStart()
-	}
-	vl.UpdateEnd(updt)
+	v := gi.AddNewFrame(vl, "value", gi.LayoutHoriz)
+	sg := gi.AddNewLayout(vl, "slider-grid", gi.LayoutGrid)
+
+	v.SetProp("min-width", units.NewEm(6))
+	v.SetProp("min-height", units.NewEm(6))
+
+	sg.SetProp("columns", 4)
+	rl := gi.AddNewLabel(sg, "rlab", "Red:")
+	rs := gi.AddNewSlider(sg, "red")
+	hl := gi.AddNewLabel(sg, "hlab", "Hue:")
+	hs := gi.AddNewSlider(sg, "hue")
+	gl := gi.AddNewLabel(sg, "glab", "Green:")
+	gs := gi.AddNewSlider(sg, "green")
+	sl := gi.AddNewLabel(sg, "slab", "Sat:")
+	ss := gi.AddNewSlider(sg, "sat")
+	bl := gi.AddNewLabel(sg, "blab", "Blue:")
+	bs := gi.AddNewSlider(sg, "blue")
+	ll := gi.AddNewLabel(sg, "llab", "Light:")
+	ls := gi.AddNewSlider(sg, "light")
+	al := gi.AddNewLabel(sg, "alab", "Alpha:")
+	as := gi.AddNewSlider(sg, "alpha")
+
+	rl.Redrawable = true
+	gl.Redrawable = true
+	bl.Redrawable = true
+	hl.Redrawable = true
+	sl.Redrawable = true
+	ll.Redrawable = true
+	al.Redrawable = true
+
+	cv.ConfigRGBSlider(rs, 0)
+	cv.ConfigRGBSlider(gs, 1)
+	cv.ConfigRGBSlider(bs, 2)
+	cv.ConfigRGBSlider(as, 3)
+	cv.ConfigHSLSlider(hs, 0)
+	cv.ConfigHSLSlider(ss, 1)
+	cv.ConfigHSLSlider(ls, 2)
+
+	cv.UpdateEnd(updt)
 }
 
 // IsConfiged returns true if widget is fully configured
 func (cv *ColorView) IsConfiged() bool {
-	if len(cv.Kids) == 0 {
+	if !cv.HasChildren() {
 		return false
 	}
 	sl := cv.SliderLay()
-	if len(sl.Kids) == 0 {
+	if !sl.HasChildren() {
 		return false
 	}
 	return true
@@ -228,83 +257,17 @@ func (cv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
 	}
 }
 
-func (cv *ColorView) ConfigLabel(lab *gi.Label, txt string) {
-	lab.Text = txt
-	lab.Redrawable = true
-}
-
-// ConfigSliderGrid configures the SliderGrid
-func (cv *ColorView) ConfigSliderGrid() {
-	sg := cv.SliderGrid()
-	sg.Lay = gi.LayoutGrid
-	sg.SetProp("columns", 4)
-	config := kit.TypeAndNameList{}
-	config.Add(gi.KiT_Label, "rlab")
-	config.Add(gi.KiT_Slider, "red")
-	config.Add(gi.KiT_Label, "hlab")
-	config.Add(gi.KiT_Slider, "hue")
-	config.Add(gi.KiT_Label, "glab")
-	config.Add(gi.KiT_Slider, "green")
-	config.Add(gi.KiT_Label, "slab")
-	config.Add(gi.KiT_Slider, "sat")
-	config.Add(gi.KiT_Label, "blab")
-	config.Add(gi.KiT_Slider, "blue")
-	config.Add(gi.KiT_Label, "llab")
-	config.Add(gi.KiT_Slider, "light")
-	config.Add(gi.KiT_Label, "alab")
-	config.Add(gi.KiT_Slider, "alpha")
-	mods, updt := sg.ConfigChildren(config, ki.UniqueNames)
-	if mods {
-		cv.ConfigLabel(sg.ChildByName("rlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Red:")
-		cv.ConfigLabel(sg.ChildByName("blab", 0).Embed(gi.KiT_Label).(*gi.Label), "Blue")
-		cv.ConfigLabel(sg.ChildByName("glab", 0).Embed(gi.KiT_Label).(*gi.Label), "Green:")
-		cv.ConfigLabel(sg.ChildByName("hlab", 0).Embed(gi.KiT_Label).(*gi.Label), "Hue:")
-		cv.ConfigLabel(sg.ChildByName("slab", 0).Embed(gi.KiT_Label).(*gi.Label), "Sat:")
-		cv.ConfigLabel(sg.ChildByName("llab", 0).Embed(gi.KiT_Label).(*gi.Label), "Light:")
-		cv.ConfigLabel(sg.ChildByName("alab", 0).Embed(gi.KiT_Label).(*gi.Label), "Alpha:")
-
-		cv.ConfigRGBSlider(sg.ChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
-		cv.ConfigRGBSlider(sg.ChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
-		cv.ConfigRGBSlider(sg.ChildByName("blue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
-		cv.ConfigRGBSlider(sg.ChildByName("alpha", 0).Embed(gi.KiT_Slider).(*gi.Slider), 3)
-		cv.ConfigHSLSlider(sg.ChildByName("hue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
-		cv.ConfigHSLSlider(sg.ChildByName("sat", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
-		cv.ConfigHSLSlider(sg.ChildByName("light", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
-	} else {
-		updt = sg.UpdateStart()
-	}
-	sg.UpdateEnd(updt)
-}
-
 func (cv *ColorView) UpdateSliderGrid() {
 	sg := cv.SliderGrid()
 	updt := sg.UpdateStart()
-	cv.UpdateRGBSlider(sg.ChildByName("red", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
-	cv.UpdateRGBSlider(sg.ChildByName("green", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
-	cv.UpdateRGBSlider(sg.ChildByName("blue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
-	cv.UpdateRGBSlider(sg.ChildByName("alpha", 0).Embed(gi.KiT_Slider).(*gi.Slider), 3)
-	cv.UpdateHSLSlider(sg.ChildByName("hue", 0).Embed(gi.KiT_Slider).(*gi.Slider), 0)
-	cv.UpdateHSLSlider(sg.ChildByName("sat", 0).Embed(gi.KiT_Slider).(*gi.Slider), 1)
-	cv.UpdateHSLSlider(sg.ChildByName("light", 0).Embed(gi.KiT_Slider).(*gi.Slider), 2)
+	cv.UpdateRGBSlider(sg.ChildByName("red", 0).(*gi.Slider), 0)
+	cv.UpdateRGBSlider(sg.ChildByName("green", 0).(*gi.Slider), 1)
+	cv.UpdateRGBSlider(sg.ChildByName("blue", 0).(*gi.Slider), 2)
+	cv.UpdateRGBSlider(sg.ChildByName("alpha", 0).(*gi.Slider), 3)
+	cv.UpdateHSLSlider(sg.ChildByName("hue", 0).(*gi.Slider), 0)
+	cv.UpdateHSLSlider(sg.ChildByName("sat", 0).(*gi.Slider), 1)
+	cv.UpdateHSLSlider(sg.ChildByName("light", 0).(*gi.Slider), 2)
 	sg.UpdateEnd(updt)
-}
-
-// NumLayConfig configures the numerical layout
-func (cv *ColorView) NumLayConfig() {
-	nl := cv.NumLay()
-	updt := nl.UpdateStart()
-	cv.NumView = ToValueView(&cv.Color, "")
-	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
-	vtyp := cv.NumView.WidgetType()
-	widg := nl.AddNewChild(vtyp, "nums").(gi.Node2D)
-	cv.NumView.ConfigWidget(widg)
-	vvb := cv.NumView.AsValueViewBase()
-	vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		cvv, _ := recv.Embed(KiT_ColorView).(*ColorView)
-		cvv.UpdateSliderGrid()
-		cvv.ViewSig.Emit(cvv.This(), 0, nil)
-	})
-	nl.UpdateEnd(updt)
 }
 
 func (cv *ColorView) Update() {
