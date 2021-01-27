@@ -9,6 +9,7 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"strings"
 	"unicode"
 
 	"github.com/chewxy/math32"
@@ -676,8 +677,8 @@ func PathDataValidate(pc *girl.Paint, data *[]PathData, errstr string) error {
 	return nil
 }
 
-// PathCmdMap maps rune to path command
-var PathCmdMap = map[rune]PathCmds{
+// PathRuneToCmd maps rune to path command
+var PathRuneToCmd = map[rune]PathCmds{
 	'M': PcM,
 	'm': Pcm,
 	'L': PcL,
@@ -700,9 +701,18 @@ var PathCmdMap = map[rune]PathCmds{
 	'z': Pcz,
 }
 
+// PathCmdToRune maps command to rune
+var PathCmdToRune = map[PathCmds]rune{}
+
+func init() {
+	for k, v := range PathRuneToCmd {
+		PathCmdToRune[v] = k
+	}
+}
+
 // PathDecodeCmd decodes rune into corresponding command
 func PathDecodeCmd(r rune) PathCmds {
-	cmd, ok := PathCmdMap[r]
+	cmd, ok := PathRuneToCmd[r]
 	if ok {
 		return cmd
 	} else {
@@ -786,6 +796,80 @@ func PathDataParse(d string) ([]PathData, error) {
 	}
 	return pd, nil
 	// todo: add some error checking..
+}
+
+// PathDataString returns the string representation of the path data
+func PathDataString(data []PathData) string {
+	sz := len(data)
+	if sz == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	var rp, cp, xp, ctrl mat32.Vec2
+	for i := 0; i < sz; {
+		cmd, n := PathDataNextCmd(data, &i)
+		sb.WriteString(fmt.Sprintf("%c ", PathCmdToRune[cmd]))
+		switch cmd {
+		case PcM, Pcm:
+			cp = PathDataNextVec(data, &i)
+			sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			for np := 1; np < n/2; np++ {
+				cp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			}
+		case PcL, Pcl:
+			for np := 0; np < n/2; np++ {
+				rp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", rp.X, rp.Y))
+			}
+		case PcH, Pch, PcV, Pcv:
+			for np := 0; np < n; np++ {
+				cp.Y = PathDataNext(data, &i)
+				sb.WriteString(fmt.Sprintf("%g ", cp.Y))
+			}
+		case PcC, Pcc:
+			for np := 0; np < n/6; np++ {
+				xp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", xp.X, xp.Y))
+				ctrl = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", ctrl.X, ctrl.Y))
+				cp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			}
+		case Pcs, PcS:
+			for np := 0; np < n/4; np++ {
+				xp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", xp.X, xp.Y))
+				cp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			}
+		case PcQ, Pcq:
+			for np := 0; np < n/4; np++ {
+				ctrl = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", ctrl.X, ctrl.Y))
+				cp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			}
+		case PcT, Pct:
+			for np := 0; np < n/2; np++ {
+				cp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			}
+		case PcA, Pca:
+			for np := 0; np < n/7; np++ {
+				rad := PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", rad.X, rad.Y))
+				ang := PathDataNext(data, &i)
+				largeArc := PathDataNext(data, &i)
+				sweep := PathDataNext(data, &i)
+				sb.WriteString(fmt.Sprintf("%g %g %g", ang, largeArc, sweep))
+				cp = PathDataNextVec(data, &i)
+				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
+			}
+		case PcZ, Pcz:
+		}
+	}
+	return sb.String()
 }
 
 // ApplyXForm applies the given 2D transform to the geometry of this node

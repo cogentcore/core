@@ -5,12 +5,14 @@
 package gist
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"sync"
 
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/ki/kit"
 )
 
 // style implements CSS-based styling using ki.Props to hold name / vals
@@ -118,6 +120,16 @@ func SetStylePropsXML(style string, props *ki.Props) {
 			(*props)[k] = v
 		}
 	}
+}
+
+// StylePropsXML returns style props for XML style string, which contains ';'
+// separated name: value pairs
+func StylePropsXML(props ki.Props) string {
+	var sb strings.Builder
+	for k, v := range props {
+		sb.WriteString(fmt.Sprintf("%s:%s;", k, kit.ToString(v)))
+	}
+	return sb.String()
 }
 
 func NewStyle() Style {
