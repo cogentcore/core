@@ -127,6 +127,9 @@ func SetStylePropsXML(style string, props *ki.Props) {
 func StylePropsXML(props ki.Props) string {
 	var sb strings.Builder
 	for k, v := range props {
+		if k == "transform" {
+			continue
+		}
 		sb.WriteString(fmt.Sprintf("%s:%s;", k, kit.ToString(v)))
 	}
 	return sb.String()

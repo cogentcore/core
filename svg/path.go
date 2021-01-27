@@ -862,7 +862,7 @@ func PathDataString(data []PathData) string {
 				ang := PathDataNext(data, &i)
 				largeArc := PathDataNext(data, &i)
 				sweep := PathDataNext(data, &i)
-				sb.WriteString(fmt.Sprintf("%g %g %g", ang, largeArc, sweep))
+				sb.WriteString(fmt.Sprintf("%g %g %g ", ang, largeArc, sweep))
 				cp = PathDataNextVec(data, &i)
 				sb.WriteString(fmt.Sprintf("%g,%g ", cp.X, cp.Y))
 			}

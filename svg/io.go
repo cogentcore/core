@@ -12,7 +12,6 @@ package svg
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -20,7 +19,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gist"
@@ -28,6 +26,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"github.com/srwiley/rasterx"
 	"golang.org/x/net/html/charset"
 )
 
@@ -725,175 +724,6 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 ////////////////////////////////////////////////////////////////////////////////////
 //   Writing
 
-// Using our own XML encoder to split out attr on separate line
-type XMLEncoder struct {
-	Writer    io.Writer
-	DoIndent  bool
-	IndBytes  []byte
-	PreBytes  []byte
-	CurIndent int
-	CurStart  string
-}
-
-func NewXMLEncoder(wr io.Writer) *XMLEncoder {
-	return &XMLEncoder{Writer: wr}
-}
-
-func (xe *XMLEncoder) Indent(prefix, indent string) {
-	if len(indent) > 0 {
-		xe.DoIndent = true
-	}
-	xe.IndBytes = []byte(indent)
-	xe.PreBytes = []byte(prefix)
-}
-
-func (xe *XMLEncoder) EncodeToken(t xml.Token) error {
-	switch t := t.(type) {
-	case xml.StartElement:
-		if err := xe.WriteStart(&t); err != nil {
-			return err
-		}
-	case xml.EndElement:
-		if err := xe.WriteEnd(t.Name.Local); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (xe *XMLEncoder) WriteString(str string) {
-	xe.Writer.Write([]byte(str))
-}
-
-func (xe *XMLEncoder) WriteIndent() {
-	xe.Writer.Write(xe.PreBytes)
-	xe.Writer.Write(bytes.Repeat(xe.IndBytes, xe.CurIndent))
-}
-
-func (xe *XMLEncoder) WriteEOL() {
-	xe.Writer.Write([]byte("\n"))
-}
-
-// Decide whether the given rune is in the XML Character Range, per
-// the Char production of https://www.xml.com/axml/testaxml.htm,
-// Section 2.2 Characters.
-func isInCharacterRange(r rune) (inrange bool) {
-	return r == 0x09 ||
-		r == 0x0A ||
-		r == 0x0D ||
-		r >= 0x20 && r <= 0xD7FF ||
-		r >= 0xE000 && r <= 0xFFFD ||
-		r >= 0x10000 && r <= 0x10FFFF
-}
-
-var (
-	escQuot = []byte("&#34;") // shorter than "&quot;"
-	escApos = []byte("&#39;") // shorter than "&apos;"
-	escAmp  = []byte("&amp;")
-	escLT   = []byte("&lt;")
-	escGT   = []byte("&gt;")
-	escTab  = []byte("&#x9;")
-	escNL   = []byte("&#xA;")
-	escCR   = []byte("&#xD;")
-	escFFFD = []byte("\uFFFD") // Unicode replacement character
-)
-
-// EscapeString writes to p the properly escaped XML equivalent
-// of the plain text data s.
-func (xe *XMLEncoder) EscapeString(s string) {
-	var esc []byte
-	last := 0
-	for i := 0; i < len(s); {
-		r, width := utf8.DecodeRuneInString(s[i:])
-		i += width
-		switch r {
-		case '"':
-			esc = escQuot
-		case '\'':
-			esc = escApos
-		case '&':
-			esc = escAmp
-		case '<':
-			esc = escLT
-		case '>':
-			esc = escGT
-		case '\t':
-			esc = escTab
-		case '\n':
-			esc = escNL
-		case '\r':
-			esc = escCR
-		default:
-			if !isInCharacterRange(r) || (r == 0xFFFD && width == 1) {
-				esc = escFFFD
-				break
-			}
-			continue
-		}
-		xe.WriteString(s[last : i-width])
-		xe.Writer.Write(esc)
-		last = i
-	}
-	xe.WriteString(s[last:])
-}
-
-func (xe *XMLEncoder) WriteStart(start *xml.StartElement) error {
-	if start.Name.Local == "" {
-		return fmt.Errorf("xml: start tag with no name")
-	}
-	if xe.CurStart != "" {
-		xe.WriteString(">")
-		xe.WriteEOL()
-	}
-	xe.WriteIndent()
-	xe.WriteString("<")
-	xe.WriteString(start.Name.Local)
-	xe.CurIndent++
-
-	xe.CurStart = start.Name.Local
-
-	// Attributes
-	for _, attr := range start.Attr {
-		name := attr.Name
-		if name.Local == "" {
-			continue
-		}
-		xe.WriteEOL()
-		xe.WriteIndent()
-		xe.WriteString(name.Local)
-		xe.WriteString(`="`)
-		xe.EscapeString(attr.Value)
-		xe.WriteString(`"`)
-	}
-	return nil
-}
-
-func (xe *XMLEncoder) WriteEnd(name string) error {
-	xe.CurIndent--
-	if name == "" {
-		return fmt.Errorf("xml: end tag with no name")
-	}
-	if xe.CurStart == name {
-		xe.WriteString(" />")
-		xe.WriteEOL()
-	} else {
-		xe.WriteIndent()
-		xe.WriteString("</")
-		xe.WriteString(name)
-		xe.WriteString(">")
-		xe.WriteEOL()
-	}
-	xe.CurStart = ""
-	xe.Flush()
-	return nil
-}
-
-func (xe *XMLEncoder) Flush() {
-	if bw, isb := xe.Writer.(*bufio.Writer); isb {
-		bw.Flush()
-	}
-}
-
 ////////////////////////////////////////////////
 
 // SaveXML saves the svg to a XML-encoded file, using WriteXML
@@ -930,22 +760,43 @@ func XMLAddAttr(attr *[]xml.Attr, name, val string) {
 	*attr = append(*attr, at)
 }
 
-func SVGNodeXMLProps(itm ki.Ki, se *xml.StartElement) {
+// InkscapeProps are property keys that should be prefixed with "inkscape:"
+var InkscapeProps = map[string]bool{
+	"isstock": true,
+	"stockid": true,
+}
+
+// SVGNodeMarshalXML encodes just the given node under SVG to XML.
+// returns name of node, for end tag -- if empty, then children will not be
+// output.
+func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
+	se := xml.StartElement{}
 	props := *itm.Properties()
 	if itm.Name() != "" {
 		XMLAddAttr(&se.Attr, "id", itm.Name())
 	}
+	text := "" // if non-empty, contains text to render
 	_, issvg := itm.(NodeSVG)
 	_, isgp := itm.(*Group)
+	_, ismark := itm.(*Marker)
 	if !isgp {
-		if issvg {
+		if issvg && !ismark {
 			sp := gist.StylePropsXML(props)
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
+			if txp, has := props["transform"]; has {
+				XMLAddAttr(&se.Attr, "transform", kit.ToString(txp))
+			}
 		} else {
 			for k, v := range props {
 				sv := kit.ToString(v)
+				if _, has := InkscapeProps[k]; has {
+					k = "inkscape:" + k
+				} else if k == "overflow" {
+					k = "style"
+					sv = "overflow:" + sv
+				}
 				XMLAddAttr(&se.Attr, k, sv)
 			}
 		}
@@ -960,7 +811,16 @@ func SVGNodeXMLProps(itm ki.Ki, se *xml.StartElement) {
 	case *Group:
 		nm = "g"
 		if strings.HasPrefix(strings.ToLower(itm.Name()), "layer") {
-			XMLAddAttr(&se.Attr, "inkscape:groupmode", "layer")
+		}
+		for k, v := range props {
+			sv := kit.ToString(v)
+			switch k {
+			case "opacity", "transform":
+				XMLAddAttr(&se.Attr, k, sv)
+			case "groupmode":
+				XMLAddAttr(&se.Attr, "inkscape:groupmode", sv)
+				XMLAddAttr(&se.Attr, "style", "display:inline") // todo: not sure what this means
+			}
 		}
 	case *Rect:
 		nm = "rect"
@@ -998,32 +858,105 @@ func SVGNodeXMLProps(itm ki.Ki, se *xml.StartElement) {
 		}
 		XMLAddAttr(&se.Attr, "points", sb.String())
 	case *Text:
-		nm = "text"
+		if nd.Text == "" {
+			nm = "text"
+		} else {
+			nm = "tspan"
+		}
+		XMLAddAttr(&se.Attr, "x", fmt.Sprintf("%g", nd.Pos.X))
+		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
+		text = nd.Text
 	case *gi.MetaData2D:
-		nm = "" // exclude
+		return "" // not useful
+	case *gi.Gradient:
+		SVGNodeXMLGrad(&nd.Grad, nd.Nm, enc)
+		return "" // exclude -- already written
+	case *Marker:
+		nm = "marker"
+		XMLAddAttr(&se.Attr, "refX", fmt.Sprintf("%g", nd.RefPos.X))
+		XMLAddAttr(&se.Attr, "refY", fmt.Sprintf("%g", nd.RefPos.Y))
+		XMLAddAttr(&se.Attr, "orient", nd.Orient)
+	case *Filter:
+		return "" // not yet supported
 	default:
 		nm = itm.Type().String()
 	}
 	se.Name.Local = nm
+	if setName != "" {
+		se.Name.Local = setName
+	}
+	enc.EncodeToken(se)
+	if text != "" {
+		cd := xml.CharData([]byte(text))
+		enc.EncodeToken(cd)
+	}
+	return se.Name.Local
 }
 
-func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) error {
-	_, g := gi.KiToNode2D(itm)
-	me := xml.StartElement{}
-	SVGNodeXMLProps(itm, &me)
-	if setName != "" {
-		me.Name.Local = setName
+func SVGNodeXMLGrad(cs *gist.ColorSpec, name string, enc *XMLEncoder) {
+	if cs.Gradient == nil {
+		return
 	}
-	if me.Name.Local == "" { // bail organa
+	gr := cs.Gradient
+	me := xml.StartElement{}
+	XMLAddAttr(&me.Attr, "id", name)
+	if cs.Source == gist.LinearGradient {
+		me.Name.Local = "linearGradient"
+	} else {
+		me.Name.Local = "radialGradient"
+	}
+
+	nilpts := gr.Points[0] == 0 && gr.Points[1] == 0 && gr.Points[2] == 1 && gr.Points[3] == 0 && gr.Points[4] == 0
+	if !nilpts {
+		XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", gr.Points[0]))
+		XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", gr.Points[1]))
+		XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", gr.Points[2]))
+		XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", gr.Points[3]))
+		XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", gr.Points[4]))
+		if gr.Units == rasterx.ObjectBoundingBox {
+			XMLAddAttr(&me.Attr, "gradientUnits", "objectBoundingBox")
+		} else {
+			XMLAddAttr(&me.Attr, "gradientUnits", "userSpaceOnUse")
+		}
+	}
+	switch gr.Spread {
+	case rasterx.ReflectSpread:
+		XMLAddAttr(&me.Attr, "spreadMethod", "reflect")
+	case rasterx.RepeatSpread:
+		XMLAddAttr(&me.Attr, "spreadMethod", "repeat")
+	}
+
+	nilxf := gr.Matrix.A == 1 && gr.Matrix.D == 1 && gr.Matrix.B == 0 && gr.Matrix.C == 0 && gr.Matrix.E == 0 && gr.Matrix.F == 0
+	if !nilxf {
+		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gr.Matrix.A, gr.Matrix.B, gr.Matrix.C, gr.Matrix.D, gr.Matrix.E, gr.Matrix.F))
+	}
+
+	enc.EncodeToken(me)
+	for _, gs := range gr.Stops {
+		se := xml.StartElement{}
+		se.Name.Local = "stop"
+		clr := gist.Color{}
+		clr.SetColor(gs.StopColor)
+		hs := clr.HexString()[:7]
+		XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
+		XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))
+		enc.EncodeToken(se)
+		enc.WriteEnd(se.Name.Local)
+	}
+	enc.WriteEnd(me.Name.Local)
+}
+
+// SVGNodeTreeMarshalXML encodes item and any children to XML
+func SVGNodeTreeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) error {
+	_, g := gi.KiToNode2D(itm)
+	name := SVGNodeMarshalXML(itm, enc, setName)
+	if name == "" {
 		return nil
 	}
-	enc.EncodeToken(me)
 	for _, k := range g.Kids {
-		SVGNodeMarshalXML(k, enc, "")
+		SVGNodeTreeMarshalXML(k, enc, "")
 	}
-	ed := xml.EndElement{}
-	ed.Name = me.Name
-	enc.EncodeToken(ed)
+	enc.WriteEnd(name)
 	return nil
 }
 
@@ -1036,9 +969,9 @@ func (svg *SVG) MarshalXMLx(enc *XMLEncoder, se xml.StartElement) error {
 	XMLAddAttr(&me.Attr, "height", fmt.Sprintf("%gmm", svg.ViewBox.Size.Y))
 	XMLAddAttr(&me.Attr, "viewBox", fmt.Sprintf("%g %g %g %g", svg.ViewBox.Min.X, svg.ViewBox.Min.Y, svg.ViewBox.Size.X, svg.ViewBox.Size.Y))
 	enc.EncodeToken(me)
-	SVGNodeMarshalXML(&svg.Defs, enc, "defs")
+	SVGNodeTreeMarshalXML(&svg.Defs, enc, "defs")
 	for _, k := range svg.Kids {
-		SVGNodeMarshalXML(k, enc, "")
+		SVGNodeTreeMarshalXML(k, enc, "")
 	}
 	ed := xml.EndElement{}
 	ed.Name = me.Name
