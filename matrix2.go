@@ -54,6 +54,10 @@ func Identity2D() Mat2 {
 	}
 }
 
+func (m Mat2) IsIdentity() bool {
+	return m.XX == 1 && m.YX == 0 && m.XY == 0 && m.YY == 1 && m.X0 == 0 && m.Y0 == 0
+}
+
 func Translate2D(x, y float32) Mat2 {
 	return Mat2{
 		1, 0,
@@ -122,6 +126,15 @@ func (a Mat2) MulVec2AsPt(v Vec2) Vec2 {
 	return Vec2{tx, ty}
 }
 
+// MulVec2AsPtCtr multiplies the Vec2 as a point relative to given center-point
+// including adding translations.
+func (a Mat2) MulVec2AsPtCtr(v, ctr Vec2) Vec2 {
+	rel := v.Sub(ctr)
+	tx := ctr.X + a.XX*rel.X + a.XY*rel.Y + a.X0
+	ty := ctr.Y + a.YX*rel.X + a.YY*rel.Y + a.Y0
+	return Vec2{tx, ty}
+}
+
 func (a Mat2) Translate(x, y float32) Mat2 {
 	return Translate2D(x, y).Mul(a)
 }
@@ -155,6 +168,29 @@ func (a Mat2) ExtractScale() (scx, scy float32) {
 	scxv := tx.MulVec2AsVec(Vec2{1, 0})
 	scyv := tx.MulVec2AsVec(Vec2{0, 1})
 	return scxv.X, scyv.Y
+}
+
+// Inverse returns inverse of matrix, for inverting transforms
+func (a Mat2) Inverse() Mat2 {
+	// homogenous rep, rc indexes, mapping into Mat3 code
+	// XX YX X0   n11 n12 n13    a b x
+	// XY YY Y0   n21 n22 n23    c d y
+	// 0  0  1    n31 n32 n33    0 0 1
+
+	// t11 := a.YY
+	// t12 := -a.YX
+	// t13 := a.Y0*a.YX - a.YY*a.X0
+	det := a.XX*a.YY - a.XY*a.YX // ad - bc
+	detInv := 1 / det
+
+	b := Mat2{}
+	b.XX = a.YY * detInv  // a = d
+	b.XY = -a.XY * detInv // c = -c
+	b.YX = -a.YX * detInv // b = -b
+	b.YY = a.XX * detInv  // d = a
+	b.X0 = (a.Y0*a.YX - a.YY*a.X0) * detInv
+	b.Y0 = (a.X0*a.XY - a.XX*a.Y0) * detInv
+	return b
 }
 
 // ParseFloat32 logs any strconv.ParseFloat errors
