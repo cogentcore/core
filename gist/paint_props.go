@@ -123,7 +123,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		}
 		fs.MinWidth.SetIFace(val, key)
 	},
-	"stroke-dashes": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
+	"stroke-dasharray": func(obj interface{}, key string, val interface{}, par interface{}, ctxt Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {

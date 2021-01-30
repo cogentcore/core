@@ -374,6 +374,54 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
+			case nm == "image":
+				img := AddNewImage(curPar, "image", 0, 0)
+				var x, y, w, h float32
+				b := false
+				for _, attr := range se.Attr {
+					if img.SetStdXMLAttr(attr.Name.Local, attr.Value) {
+						continue
+					}
+					switch attr.Name.Local {
+					case "x":
+						x, err = mat32.ParseFloat32(attr.Value)
+					case "y":
+						y, err = mat32.ParseFloat32(attr.Value)
+					case "width":
+						w, err = mat32.ParseFloat32(attr.Value)
+					case "height":
+						h, err = mat32.ParseFloat32(attr.Value)
+					case "preserveAspectRatio":
+						b, _ = kit.ToBool(attr.Value)
+						img.PreserveAspectRatio = b
+					case "href":
+						if len(attr.Value) > 11 && attr.Value[:11] == "data:image/" {
+							es := attr.Value[11:]
+							fmti := strings.Index(es, ";")
+							fm := es[:fmti]
+							bs64 := es[fmti+1 : fmti+8]
+							if bs64 != "base64," {
+								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
+							}
+							eb := []byte(es[fmti+8:])
+							im, err := gi.ImageFmBase64(fm, eb)
+							if err != nil {
+								log.Println(err)
+							} else {
+								img.SetImage(im, 0, 0)
+							}
+						} else { // url
+
+						}
+					default:
+						img.SetProp(attr.Name.Local, attr.Value)
+					}
+					if err != nil {
+						return err
+					}
+				}
+				img.Pos.Set(x, y)
+				img.Size.Set(w, h)
 			case nm == "tspan":
 				fallthrough
 			case nm == "text":

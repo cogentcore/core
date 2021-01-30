@@ -5,6 +5,9 @@
 package gi
 
 import (
+	"bytes"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -53,8 +56,10 @@ func (bm *Bitmap) CopyFieldsFrom(frm interface{}) {
 	bm.Filename = fr.Filename
 }
 
-// Resize resizes bitmap to given size
-func (bm *Bitmap) Resize(nwsz image.Point) {
+// SetSize sets size of the bitmap image.
+// This does not resize any existing image, just makes a new image
+// if the size is different
+func (bm *Bitmap) SetSize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
@@ -95,7 +100,7 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
-		bm.Resize(sz)
+		bm.SetSize(sz)
 		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.ZP, draw.Src)
 	} else {
 		tsz := sz
@@ -110,7 +115,7 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 			scy = height / float32(sz.Y)
 			tsz.Y = int(height)
 		}
-		bm.Resize(tsz)
+		bm.SetSize(tsz)
 		m := mat32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
 		transformer.Transform(bm.Pixels, s2d, img, img.Bounds(), draw.Over, nil)
@@ -244,6 +249,70 @@ func SavePNG(path string, im image.Image) error {
 	}
 	defer file.Close()
 	return png.Encode(file, im)
+}
+
+// ImageToBase64PNG returns bytes of image encoded as a PNG in Base64 format
+// with "image/png" mimetype returned
+func ImageToBase64PNG(img image.Image) ([]byte, string) {
+	ibuf := &bytes.Buffer{}
+	png.Encode(ibuf, img)
+	ib := ibuf.Bytes()
+	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
+	base64.StdEncoding.Encode(eb, ib)
+	return eb, "image/png"
+}
+
+// ImageToBase64JPG returns bytes image encoded as a JPG in Base64 format
+// with "image/jpeg" mimetype returned
+func ImageToBase64JPG(img image.Image) ([]byte, string) {
+	ibuf := &bytes.Buffer{}
+	jpeg.Encode(ibuf, img, &jpeg.Options{Quality: 90})
+	ib := ibuf.Bytes()
+	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
+	base64.StdEncoding.Encode(eb, ib)
+	return eb, "image/jpeg"
+}
+
+// ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
+func ImageFmBase64PNG(eb []byte) (image.Image, error) {
+	if eb[76] == ' ' {
+		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
+	}
+	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
+	_, err := base64.StdEncoding.Decode(db, eb)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	rb := bytes.NewReader(db)
+	return png.Decode(rb)
+}
+
+// ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
+func ImageFmBase64JPG(eb []byte) (image.Image, error) {
+	if eb[76] == ' ' {
+		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
+	}
+	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
+	_, err := base64.StdEncoding.Decode(db, eb)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	rb := bytes.NewReader(db)
+	return jpeg.Decode(rb)
+}
+
+// ImageFmBase64 returns image from Base64-encoded bytes in either PNG or JPEG format
+// based on fmt which must end in either png or jpeg
+func ImageFmBase64(fmt string, eb []byte) (image.Image, error) {
+	if strings.HasSuffix(fmt, "png") {
+		return ImageFmBase64PNG(eb)
+	}
+	if strings.HasSuffix(fmt, "jpeg") {
+		return ImageFmBase64JPG(eb)
+	}
+	return nil, errors.New("image format must be either png or jpeg")
 }
 
 //////////////////////////////////////////////////////////////////////////////////
