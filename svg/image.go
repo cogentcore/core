@@ -112,16 +112,8 @@ func (g *Image) DrawImage() {
 	}
 
 	rs := g.Render()
-
-	pos := rs.XForm.MulVec2AsPt(g.Pos)
-	isz := mat32.NewVec2FmPoint(g.Pixels.Bounds().Size())
-	isc := g.Size.Div(isz)
-
-	srect := g.Pixels.Bounds()
-	transformer := draw.BiLinear
-	xf := rs.XForm
-	s2d := f64.Aff3{float64(xf.XX * isc.X), float64(xf.XY), float64(xf.X0 + pos.X), float64(xf.YX), float64(xf.YY * isc.Y), float64(xf.Y0 + pos.Y)}
-	transformer.Transform(rs.Image, s2d, g.Pixels, srect, draw.Over, nil)
+	pc := &g.Pnt
+	pc.DrawImageScaled(rs, g.Pixels, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)
 }
 
 func (g *Image) BBox2D() image.Rectangle {

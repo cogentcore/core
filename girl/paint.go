@@ -684,21 +684,41 @@ func (pc *Paint) DrawRegularPolygon(rs *State, n int, x, y, r, rotation float32)
 }
 
 // DrawImage draws the specified image at the specified point.
-func (pc *Paint) DrawImage(rs *State, fmIm image.Image, x, y int) {
+func (pc *Paint) DrawImage(rs *State, fmIm image.Image, x, y float32) {
 	pc.DrawImageAnchored(rs, fmIm, x, y, 0, 0)
 }
 
 // DrawImageAnchored draws the specified image at the specified anchor point.
 // The anchor point is x - w * ax, y - h * ay, where w, h is the size of the
 // image. Use ax=0.5, ay=0.5 to center the image at the specified point.
-func (pc *Paint) DrawImageAnchored(rs *State, fmIm image.Image, x, y int, ax, ay float32) {
-	s := rs.Image.Bounds().Size()
-	x -= int(ax * float32(s.X))
-	y -= int(ay * float32(s.Y))
+func (pc *Paint) DrawImageAnchored(rs *State, fmIm image.Image, x, y, ax, ay float32) {
+	s := fmIm.Bounds().Size()
+	x -= ax * float32(s.X)
+	y -= ay * float32(s.Y)
 	transformer := draw.BiLinear
-	fx, fy := float32(x), float32(y)
-	m := rs.XForm.Translate(fx, fy)
+	m := rs.XForm.Translate(x, y)
 	s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
+	if rs.Mask == nil {
+		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
+	} else {
+		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, &draw.Options{
+			DstMask:  rs.Mask,
+			DstMaskP: image.ZP,
+		})
+	}
+}
+
+// DrawImageScaled draws the specified image starting at given upper-left point,
+// such that the size of the image is rendered as specified by w, h parameters
+// (an additional scaling is applied to the transform matrix used in rendering)
+func (pc *Paint) DrawImageScaled(rs *State, fmIm image.Image, x, y, w, h float32) {
+	s := fmIm.Bounds().Size()
+	isz := mat32.NewVec2FmPoint(s)
+	isc := mat32.Vec2{w, h}.Div(isz)
+
+	transformer := draw.BiLinear
+	m := rs.XForm.Translate(x, y)
+	s2d := f64.Aff3{float64(m.XX * isc.X), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY * isc.Y), float64(m.Y0)}
 	if rs.Mask == nil {
 		transformer.Transform(rs.Image, s2d, fmIm, fmIm.Bounds(), draw.Over, nil)
 	} else {
