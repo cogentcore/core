@@ -20,7 +20,7 @@ require (
 	github.com/go-gl/mathgl v1.0.0
 	github.com/goki/freetype v0.0.0-20181231101311-fa8a33aabaff
 	github.com/goki/ki v1.0.8
-	github.com/goki/mat32 v1.0.2
+	github.com/goki/mat32 v1.0.3
 	github.com/goki/pi v1.0.10
 	github.com/goki/prof v0.0.0-20180502205428-54bc71b5d09b
 	github.com/goki/vci v1.0.0
@@ -33,7 +33,7 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20200120212402-85cb7272f5e9
 	github.com/srwiley/scanFT v0.0.0-20190309001647-3267585b8d6d // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5
+	golang.org/x/image v0.0.0-20201208152932-35266b937fa6
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20201121010211-780cb80bd7fb // indirect
