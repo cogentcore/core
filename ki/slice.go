@@ -5,15 +5,8 @@
 package ki
 
 import (
-	"bytes"
-	"encoding/json"
-	"encoding/xml"
-	"errors"
 	"fmt"
-	"log"
 	"reflect"
-	"strconv"
-	"strings"
 
 	"github.com/goki/ki/kit"
 )
@@ -162,34 +155,22 @@ func (sl *Slice) IndexByName(name string, startIdx int) (int, bool) {
 	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Name() == name })
 }
 
-// SliceIndexByUniqueName returns index of first element that has given unique
-// name, false if not found. See IndexOf for info on startIdx.
-func SliceIndexByUniqueName(sl *[]Ki, name string, startIdx int) (int, bool) {
-	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
-}
-
-// IndexByUniqueName returns index of first element that has given unique
-// name, false if not found. See IndexOf for info on startIdx.
-func (sl *Slice) IndexByUniqueName(name string, startIdx int) (int, bool) {
-	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.UniqueName() == name })
-}
-
 // SliceIndexByType returns index of element that either is that type or embeds
 // that type, false if not found. See IndexOf for info on startIdx.
 func SliceIndexByType(sl *[]Ki, t reflect.Type, embeds bool, startIdx int) (int, bool) {
 	if embeds {
-		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
+		return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
 	}
-	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return ch.Type() == t })
+	return SliceIndexByFunc(sl, startIdx, func(ch Ki) bool { return Type(ch) == t })
 }
 
 // IndexByType returns index of element that either is that type or embeds
 // that type, false if not found. See IndexOf for info on startIdx.
 func (sl *Slice) IndexByType(t reflect.Type, embeds bool, startIdx int) (int, bool) {
 	if embeds {
-		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.TypeEmbeds(t) })
+		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return TypeEmbeds(ch, t) })
 	}
-	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
+	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return Type(ch) == t })
 }
 
 // ElemByName returns first element that has given name, nil if not found.
@@ -208,26 +189,6 @@ func (sl *Slice) ElemByNameTry(name string, startIdx int) (Ki, error) {
 	idx, ok := sl.IndexByName(name, startIdx)
 	if !ok {
 		return nil, fmt.Errorf("ki.Slice: element named: %v not found", name)
-	}
-	return (*sl)[idx], nil
-}
-
-// ElemByUniqueName returns index of first element that has given unique
-// name, nil if not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByUniqueName(name string, startIdx int) Ki {
-	idx, ok := sl.IndexByUniqueName(name, startIdx)
-	if !ok {
-		return nil
-	}
-	return (*sl)[idx]
-}
-
-// ElemByUniqueNameTry returns index of first element that has given unique
-// name, error if not found. See IndexOf for info on startIdx.
-func (sl *Slice) ElemByUniqueNameTry(name string, startIdx int) (Ki, error) {
-	idx, ok := sl.IndexByUniqueName(name, startIdx)
-	if !ok {
-		return nil, fmt.Errorf("ki.Slice: element with unique name: %v not found", name)
 	}
 	return (*sl)[idx], nil
 }
@@ -353,20 +314,7 @@ func (sl *Slice) TypeAndNames() kit.TypeAndNameList {
 	}
 	tn := make(kit.TypeAndNameList, len(*sl))
 	for _, kid := range *sl {
-		tn.Add(kid.Type(), kid.Name())
-	}
-	return tn
-}
-
-// TypeAndUniqueNames returns a kit.TypeAndNameList of elements in the slice
-// using UniqueNames -- useful for Ki ConfigChildren.
-func (sl *Slice) TypeAndUniqueNames() kit.TypeAndNameList {
-	if len(*sl) == 0 {
-		return nil
-	}
-	tn := make(kit.TypeAndNameList, len(*sl))
-	for _, kid := range *sl {
-		tn.Add(kid.Type(), kid.UniqueName())
+		tn.Add(Type(kid), kid.Name())
 	}
 	return tn
 }
@@ -384,19 +332,6 @@ func (sl *Slice) NameToIndexMap() map[string]int {
 	return nim
 }
 
-// UniqueNameToIndexMap returns a UniqueName to Index map for faster lookup
-// when needing to do a lot of name lookups on same fixed slice.
-func (sl *Slice) UniqueNameToIndexMap() map[string]int {
-	if len(*sl) == 0 {
-		return nil
-	}
-	nim := make(map[string]int, len(*sl))
-	for i, kid := range *sl {
-		nim[kid.UniqueName()] = i
-	}
-	return nim
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // Config
 
@@ -405,7 +340,7 @@ func (sl *Slice) UniqueNameToIndexMap() map[string]int {
 // type-and-name list.  If the node is != nil, then it has UpdateStart / End
 // logic applied to it, only if necessary, as indicated by mods, updt return
 // values.
-func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
+func (sl *Slice) Config(n Ki, config kit.TypeAndNameList) (mods, updt bool) {
 	mods, updt = false, false
 	// first make a map for looking up the indexes of the names
 	nm := make(map[string]int)
@@ -416,43 +351,27 @@ func (sl *Slice) Config(n Ki, config kit.TypeAndNameList, uniqNm bool) (mods, up
 	sz := len(*sl)
 	for i := sz - 1; i >= 0; i-- {
 		kid := (*sl)[i]
-		var knm string
-		if uniqNm {
-			knm = kid.UniqueName()
-		} else {
-			knm = kid.Name()
-		}
+		knm := kid.Name()
 		ti, ok := nm[knm]
 		if !ok {
 			sl.configDeleteKid(kid, i, n, &mods, &updt)
-		} else if kid.Type() != config[ti].Type {
+		} else if Type(kid) != config[ti].Type {
 			sl.configDeleteKid(kid, i, n, &mods, &updt)
 		}
 	}
 	// next add and move items as needed -- in order so guaranteed
 	for i, tn := range config {
-		var kidx int
-		var ok bool
-		if uniqNm {
-			kidx, ok = sl.IndexByUniqueName(tn.Name, i)
-		} else {
-			kidx, ok = sl.IndexByName(tn.Name, i)
-		}
+		kidx, ok := sl.IndexByName(tn.Name, i)
 		if !ok {
 			setMods(n, &mods, &updt)
 			nkid := NewOfType(tn.Type)
-			nkid.Init(nkid)
+			InitNode(nkid)
 			sl.Insert(nkid, i)
 			if n != nil {
-				nkid.SetParent(n)
+				SetParent(nkid, n)
 				n.SetFlag(int(ChildAdded))
 			}
-			if uniqNm {
-				nkid.SetNameRaw(tn.Name)
-				nkid.SetUniqueName(tn.Name)
-			} else {
-				nkid.SetName(tn.Name) // triggers uniquify -- slow!
-			}
+			nkid.SetName(tn.Name)
 		} else {
 			if kidx != i {
 				setMods(n, &mods, &updt)
@@ -483,7 +402,7 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 	}
 	kid.SetFlag(int(NodeDeleted))
 	kid.NodeSignal().Emit(kid, int64(NodeSignalDeleting), nil)
-	kid.SetParent(nil)
+	SetParent(kid, nil)
 	DelMgr.Add(kid)
 	sl.DeleteAtIndex(i)
 	kid.UpdateReset() // it won't get the UpdateEnd from us anymore -- init fresh in any case
@@ -493,6 +412,7 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 // which attempts to preserve any existing nodes in the destination
 // if they have the same name and type -- so a copy from a source to
 // a target that only differ minimally will be minimally destructive.
+// it is essential that child names are unique.
 func (sl *Slice) CopyFrom(frm Slice) {
 	sl.ConfigCopy(nil, frm)
 	for i, kid := range *sl {
@@ -503,349 +423,20 @@ func (sl *Slice) CopyFrom(frm Slice) {
 
 // ConfigCopy uses Config method to copy name / type config of Slice from source
 // If n is != nil then Update etc is called properly.
+// it is essential that child names are unique.
 func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
 	sz := len(frm)
 	if sz > 0 || n == nil {
 		cfg := make(kit.TypeAndNameList, sz)
 		for i, kid := range frm {
-			cfg[i].Type = kid.Type()
-			cfg[i].Name = kid.UniqueName() // use unique so guaranteed to have something
+			cfg[i].Type = Type(kid)
+			cfg[i].Name = kid.Name()
 		}
-		mods, updt := sl.Config(n, cfg, true) // use unique names -- this means name = uniquname
-		for i, kid := range frm {
-			mkid := (*sl)[i]
-			mkid.SetNameRaw(kid.Name()) // restore orig user-names
-		}
+		mods, updt := sl.Config(n, cfg)
 		if mods && n != nil {
 			n.UpdateEnd(updt)
 		}
 	} else {
 		n.DeleteChildren(true)
 	}
-}
-
-// MarshalJSON saves the length and type, name information for each object in a
-// slice, as a separate struct-like record at the start, followed by the
-// structs for each element in the slice -- this allows the Unmarshal to first
-// create all the elements and then load them
-func (sl Slice) MarshalJSON() ([]byte, error) {
-	nk := len(sl)
-	b := make([]byte, 0, nk*100+20)
-	if nk == 0 {
-		b = append(b, []byte("null")...)
-		return b, nil
-	}
-	nstr := fmt.Sprintf("[{\"n\":%d,", nk)
-	b = append(b, []byte(nstr)...)
-	for i, kid := range sl {
-		// fmt.Printf("json out of %v\n", kid.PathUnique())
-		knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
-		tstr := fmt.Sprintf("\"type\":\"%v\", \"name\": \"%v\"", knm, kid.UniqueName()) // todo: escape names!
-		b = append(b, []byte(tstr)...)
-		if i < nk-1 {
-			b = append(b, []byte(",")...)
-		}
-	}
-	b = append(b, []byte("},")...)
-	for i, kid := range sl {
-		var err error
-		var kb []byte
-		kb, err = json.Marshal(kid)
-		if err == nil {
-			b = append(b, []byte("{")...)
-			b = append(b, kb[1:len(kb)-1]...)
-			b = append(b, []byte("}")...)
-			if i < nk-1 {
-				b = append(b, []byte(",")...)
-			}
-		} else {
-			fmt.Printf("error doing json.Marshall from kid: %v\n", kid.PathUnique())
-			log.Println(err)
-			fmt.Printf("output to point of error: %v\n", string(b))
-		}
-	}
-	b = append(b, []byte("]")...)
-	// fmt.Printf("json out: %v\n", string(b))
-	return b, nil
-}
-
-///////////////////////////////////////////////////////////////////////////
-// JSON
-
-// UnmarshalJSON parses the length and type information for each object in the
-// slice, creates the new slice with those elements, and then loads based on
-// the remaining bytes which represent each element
-func (sl *Slice) UnmarshalJSON(b []byte) error {
-	// fmt.Printf("json in: %v\n", string(b))
-	if bytes.Equal(b, []byte("null")) {
-		*sl = nil
-		return nil
-	}
-	lb := bytes.IndexRune(b, '{')
-	rb := bytes.IndexRune(b, '}')
-	if lb < 0 || rb < 0 { // probably null
-		return nil
-	}
-	// todo: if name contains "," this won't work..
-	flds := bytes.Split(b[lb+1:rb], []byte(","))
-	if len(flds) == 0 {
-		return errors.New("Slice UnmarshalJSON: no child data found")
-	}
-	// fmt.Printf("flds[0]:\n%v\n", string(flds[0]))
-	ns := bytes.Index(flds[0], []byte("\"n\":"))
-	bn := bytes.TrimSpace(flds[0][ns+4:])
-
-	n64, err := strconv.ParseInt(string(bn), 10, 64)
-	if err != nil {
-		return err
-	}
-	n := int(n64)
-	if n == 0 {
-		return nil
-	}
-	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
-
-	tnl := make(kit.TypeAndNameList, n)
-
-	for i := 0; i < n; i++ {
-		fld := flds[2*i+1]
-		// fmt.Printf("fld:\n%v\n", string(fld))
-		ti := bytes.Index(fld, []byte("\"type\":"))
-		tn := string(bytes.Trim(bytes.TrimSpace(fld[ti+7:]), "\""))
-		fld = flds[2*i+2]
-		ni := bytes.Index(fld, []byte("\"name\":"))
-		nm := string(bytes.Trim(bytes.TrimSpace(fld[ni+7:]), "\""))
-		// fmt.Printf("making type: %v", tn)
-		typ := kit.Types.Type(tn)
-		if typ == nil {
-			return fmt.Errorf("ki.Slice UnmarshalJSON: kit.Types type name not found: %v", tn)
-		}
-		tnl[i].Type = typ
-		tnl[i].Name = nm
-	}
-
-	sl.Config(nil, tnl, true) // true = uniq names
-
-	nwk := make([]Ki, n) // allocate new slice containing *pointers* to kids
-
-	for i, kid := range *sl {
-		nwk[i] = kid
-	}
-
-	cb := make([]byte, 0, 1+len(b)-rb)
-	cb = append(cb, []byte("[")...)
-	cb = append(cb, b[rb+2:]...)
-
-	// fmt.Printf("loading:\n%v", string(cb))
-
-	err = json.Unmarshal(cb, &nwk)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// todo: save N as an attr instead of a full element
-
-// MarshalXML saves the length and type information for each object in a
-// slice, as a separate struct-like record at the start, followed by the
-// structs for each element in the slice -- this allows the Unmarshal to first
-// create all the elements and then load them
-func (sl Slice) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	tokens := []xml.Token{start}
-	nk := len(sl)
-	nt := xml.StartElement{Name: xml.Name{Space: "", Local: "N"}}
-	tokens = append(tokens, nt, xml.CharData(fmt.Sprintf("%d", nk)), xml.EndElement{Name: nt.Name})
-	for _, kid := range sl {
-		knm := kit.Types.TypeName(reflect.TypeOf(kid).Elem())
-		t := xml.StartElement{Name: xml.Name{Space: "", Local: "Type"}}
-		tokens = append(tokens, t, xml.CharData(knm), xml.EndElement{Name: t.Name})
-	}
-	for _, t := range tokens {
-		err := e.EncodeToken(t)
-		if err != nil {
-			return err
-		}
-	}
-	err := e.Flush()
-	if err != nil {
-		return err
-	}
-	for _, kid := range sl {
-		knm := reflect.TypeOf(kid).Elem().Name()
-		ct := xml.StartElement{Name: xml.Name{Space: "", Local: knm}}
-		err := e.EncodeElement(kid, ct)
-		if err != nil {
-			return err
-		}
-	}
-	err = e.EncodeToken(xml.EndElement{Name: start.Name})
-	if err != nil {
-		return err
-	}
-	err = e.Flush()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DecodeXMLStartEl reads a start element token
-func DecodeXMLStartEl(d *xml.Decoder) (start xml.StartElement, err error) {
-	for {
-		var t xml.Token
-		t, err = d.Token()
-		if err != nil {
-			log.Printf("ki.DecodeXMLStartEl err %v\n", err)
-			return
-		}
-		switch tv := t.(type) {
-		case xml.StartElement:
-			start = tv
-			return
-		case xml.CharData: // actually passes the spaces and everything through here
-			continue
-		case xml.EndElement:
-			err = fmt.Errorf("ki.DecodeXMLStartEl: got unexpected EndElement")
-			log.Println(err)
-			return
-		default:
-			continue
-		}
-	}
-}
-
-// DecodeXMLEndEl reads an end element
-func DecodeXMLEndEl(d *xml.Decoder, start xml.StartElement) error {
-	for {
-		t, err := d.Token()
-		if err != nil {
-			log.Printf("ki.DecodeXMLEndEl err %v\n", err)
-			return err
-		}
-		switch tv := t.(type) {
-		case xml.EndElement:
-			if tv.Name != start.Name {
-				err = fmt.Errorf("ki.DecodeXMLEndEl: EndElement: %v does not match StartElement: %v", tv.Name, start.Name)
-				log.Println(err)
-				return err
-			}
-			return nil
-		case xml.CharData: // actually passes the spaces and everything through here
-			continue
-		case xml.StartElement:
-			err = fmt.Errorf("ki.DecodeXMLEndEl: got unexpected StartElement: %v", tv.Name)
-			log.Println(err)
-			return err
-		default:
-			continue
-		}
-	}
-}
-
-// DecodeXMLCharData reads char data..
-func DecodeXMLCharData(d *xml.Decoder) (val string, err error) {
-	for {
-		var t xml.Token
-		t, err = d.Token()
-		if err != nil {
-			log.Printf("ki.DecodeXMLCharData err %v\n", err)
-			return
-		}
-		switch tv := t.(type) {
-		case xml.CharData:
-			val = string([]byte(tv))
-			return
-		case xml.StartElement:
-			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected StartElement: %v", tv.Name)
-			log.Println(err)
-			return
-		case xml.EndElement:
-			err = fmt.Errorf("ki.DecodeXMLCharData: got unexpected EndElement: %v", tv.Name)
-			log.Println(err)
-			return
-		}
-	}
-}
-
-// DecodeXMLCharEl reads a start / chardata / end sequence of 3 elements, returning name, val
-func DecodeXMLCharEl(d *xml.Decoder) (name, val string, err error) {
-	var st xml.StartElement
-	st, err = DecodeXMLStartEl(d)
-	if err != nil {
-		return
-	}
-	name = st.Name.Local
-	val, err = DecodeXMLCharData(d)
-	if err != nil {
-		return
-	}
-	err = DecodeXMLEndEl(d, st)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// UnmarshalXML parses the length and type information for each object in the
-// slice, creates the new slice with those elements, and then loads based on
-// the remaining bytes which represent each element
-func (sl *Slice) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	// for _, attr := range start.Attr {
-	// 	// todo: need to set the props from name / value -- don't have parent though!
-	// }
-	name, val, err := DecodeXMLCharEl(d)
-	if err != nil {
-		return err
-	}
-	if name == "N" {
-		n64, err := strconv.ParseInt(string(val), 10, 64)
-		if err != nil {
-			return err
-		}
-		n := int(n64)
-		if n == 0 {
-			return DecodeXMLEndEl(d, start)
-		}
-		// fmt.Printf("n parsed: %d from %v\n", n, string(val))
-		nwk := make([]Ki, 0, n) // allocate new slice
-
-		for i := 0; i < n; i++ {
-			name, val, err = DecodeXMLCharEl(d)
-			if name == "Type" {
-				tn := strings.TrimSpace(val)
-				// fmt.Printf("making type: %v\n", tn)
-				typ := kit.Types.Type(tn)
-				if typ == nil {
-					return fmt.Errorf("ki.Slice UnmarshalXML: kit.Types type name not found: %v", tn)
-				}
-				nkid := reflect.New(typ).Interface()
-				// fmt.Printf("nkid is new obj of type %T val: %+v\n", nkid, nkid)
-				kid, ok := nkid.(Ki)
-				if !ok {
-					return fmt.Errorf("ki.Slice UnmarshalXML: New child of type %v cannot convert to Ki", tn)
-				}
-				kid.Init(kid)
-				nwk = append(nwk, kid)
-			}
-		}
-
-		for i := 0; i < n; i++ {
-			st, err := DecodeXMLStartEl(d)
-			if err != nil {
-				return err
-			}
-			// todo: could double-check st
-			err = d.DecodeElement(nwk[i], &st)
-			if err != nil {
-				log.Printf("%v", err)
-				return err
-			}
-		}
-		*sl = append(*sl, nwk...)
-		// } else {
-	}
-	// todo: in theory we could just parse a list of type names as tags, but for the "dump" format
-	// this is more robust.
-	return DecodeXMLEndEl(d, start) // final end
 }

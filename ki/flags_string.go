@@ -9,9 +9,28 @@ import (
 
 var _ = errors.New("dummy error")
 
-const _Flags_name = "IsFieldHasKiFieldsHasNoKiFieldsUpdatingOnlySelfUpdateNodeAddedNodeCopiedNodeMovedNodeDeletedNodeDestroyedChildAddedChildMovedChildDeletedChildrenDeletedFieldUpdatedPropUpdatedFlagsN"
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[IsField-0]
+	_ = x[HasKiFields-1]
+	_ = x[HasNoKiFields-2]
+	_ = x[Updating-3]
+	_ = x[OnlySelfUpdate-4]
+	_ = x[NodeDeleted-5]
+	_ = x[NodeDestroyed-6]
+	_ = x[ChildAdded-7]
+	_ = x[ChildDeleted-8]
+	_ = x[ChildrenDeleted-9]
+	_ = x[FieldUpdated-10]
+	_ = x[PropUpdated-11]
+	_ = x[FlagsN-12]
+}
 
-var _Flags_index = [...]uint8{0, 7, 18, 31, 39, 53, 62, 72, 81, 92, 105, 115, 125, 137, 152, 164, 175, 181}
+const _Flags_name = "IsFieldHasKiFieldsHasNoKiFieldsUpdatingOnlySelfUpdateNodeDeletedNodeDestroyedChildAddedChildDeletedChildrenDeletedFieldUpdatedPropUpdatedFlagsN"
+
+var _Flags_index = [...]uint8{0, 7, 18, 31, 39, 53, 64, 77, 87, 99, 114, 126, 137, 143}
 
 func (i Flags) String() string {
 	if i < 0 || i >= Flags(len(_Flags_index)-1) {

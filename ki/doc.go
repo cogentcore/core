@@ -42,5 +42,27 @@ functionality, including:
 	* Properties (as a string-keyed map) with property inheritance, including
       type-level properties via kit type registry.
 
+In general, the names of the children of a given node should all be unique.
+The following functions defined in ki package can be used:
+
+* UniqueNameCheck(node) to check for unique names on node if uncertain.
+* UniqueNameCheckAll(node) to check entire tree under given node.
+* UniquifyNames(node) to add a suffix to name to ensure uniqueness.
+* UniquifyNamesAll(node) to to uniquify all names in entire tree.
+
+The Ki interface is designed to support virtual method calling in Go
+and is only intended to be implemented once, by the ki.Node type
+(as opposed to interfaces that are used for hiding multiple different
+implementations of a common concept).  Thus, all of the fields in ki.Node
+are exported (have captital names), to be accessed directly in types
+that embed and extend the ki.Node. The Ki interface has the "formal" name
+(e.g., Children) while the Node has the "nickname" (e.g., Kids).  See the
+Naming Conventions on the GoKi Wiki for more details.
+
+Each Node stores the Ki interface version of itself, as This() / Ths
+which enables full virtual function calling by calling the method
+on that interface instead of directly on the receiver Node itself.
+This requires proper initialization via Init method of the Ki interface.
+
 */
 package ki

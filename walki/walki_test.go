@@ -31,7 +31,7 @@ func init() {
 func TestDown(t *testing.T) {
 	cur := testTree
 	for {
-		fmt.Println(cur.PathUnique())
+		fmt.Println(cur.Path())
 		curi := Next(cur)
 		if curi == nil {
 			break
@@ -43,7 +43,7 @@ func TestDown(t *testing.T) {
 func TestUp(t *testing.T) {
 	cur := Last(testTree)
 	for {
-		fmt.Println(cur.PathUnique())
+		fmt.Println(cur.Path())
 		curi := Prev(cur)
 		if curi == nil {
 			break

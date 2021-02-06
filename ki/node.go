@@ -2,23 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Ki is the base element of GoKi Trees
-// Ki = Tree in Japanese, and "Key" in English
-
 package ki
 
 import (
 	"bytes"
 	"encoding/gob"
-	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"unsafe"
 
@@ -41,7 +32,6 @@ import (
 // -- Ki makes extensive use of such tags.
 type Node struct {
 	Nm        string    `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
-	UniqueNm  string    `tableview:"-" copy:"-" label:"UniqueName" desc:"Ki.UniqueName() automatically-updated version of Name that is guaranteed to be unique within the slice of Children within one Node -- used e.g., for saving Unique Paths in Ptr pointers"`
 	Flag      int64     `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state"`
 	Props     Props     `tableview:"-" xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
 	Par       Ki        `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
@@ -63,9 +53,9 @@ var KiT_Node = kit.Types.AddType(&Node{}, Props{"EnumType:Flag": KiT_Flags})
 //////////////////////////////////////////////////////////////////////////
 //  fmt.Stringer
 
-// String implements the fmt.stringer interface -- returns the PathUnique of the node
+// String implements the fmt.stringer interface -- returns the Path of the node
 func (n *Node) String() string {
-	return n.This().PathUnique()
+	return n.This().Path()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -87,66 +77,17 @@ func (n *Node) AsNode() *Node {
 	return n
 }
 
-// Init initializes the node -- automatically called during Add/Insert
-// Child -- sets the This pointer for this node as a Ki interface (pass
-// pointer to node as this arg) -- Go cannot always access the true
-// underlying type for structs using embedded Ki objects (when these objs
-// are receivers to methods) so we need a This interface pointer that
-// guarantees access to the Ki interface in a way that always reveals the
-// underlying type (e.g., in reflect calls).  Calls Init on Ki fields
-// within struct, sets their names to the field name, and sets us as their
-// parent.
-func (n *Node) Init(this Ki) {
-	n.ClearFlagMask(int64(UpdateFlagsMask))
-	if n.Ths != this {
-		n.Ths = this
-		if !n.HasKiFields() {
-			return
-		}
-		fnms := n.KiFieldNames()
-		val := reflect.ValueOf(this).Elem()
-		for _, fnm := range fnms {
-			fldval := val.FieldByName(fnm)
-			fk := kit.PtrValue(fldval).Interface().(Ki)
-			fk.SetFlag(int(IsField))
-			fk.InitName(fk, fnm)
-			fk.SetParent(this)
-		}
-	}
-}
-
-// InitName initializes this node and set its name -- used for root nodes
-// which don't otherwise have their This pointer set (otherwise typically
-// happens in Add, Insert Child).
+// InitName initializes this node to given actual object as a Ki interface
+// and sets its name.  The names should be unique among children of a node.
+// This is needed for root nodes -- automatically done for other nodes
+// when they are added to the Ki tree.
+// Even though this is a method and gets the method receiver, it needs
+// an "external" version of itself passed as the first arg, from which
+// the proper Ki interface pointer will be obtained.  This is the only
+// way to get virtual functional calling to work within the Go framework.
 func (n *Node) InitName(k Ki, name string) {
-	n.Init(k)
-	n.SetNameRaw(name)
-	n.SetUniqueName(name)
-}
-
-// ThisCheck checks that the This pointer is set and issues a warning to
-// log if not -- returns error if not set -- called when nodes are added
-// and inserted.
-func (n *Node) ThisCheck() error {
-	if n.This() == nil {
-		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", n.Nm)
-		log.Print(err)
-		return err
-	}
-	return nil
-}
-
-// Type returns the underlying struct type of this node
-// (reflect.TypeOf(This).Elem()).
-func (n *Node) Type() reflect.Type {
-	return reflect.TypeOf(n.This()).Elem()
-}
-
-// TypeEmbeds tests whether this node is of the given type, or it embeds
-// that type at any level of anonymous embedding -- use Embed to get the
-// embedded struct of that type from this node.
-func (n *Node) TypeEmbeds(t reflect.Type) bool {
-	return kit.TypeEmbeds(n.Type(), t)
+	InitNode(k)
+	n.SetName(name)
 }
 
 // Embed returns the embedded struct of given type from this node (or nil
@@ -162,13 +103,13 @@ func (n *Node) Embed(t reflect.Type) Ki {
 		if ok {
 			return k
 		}
-		log.Printf("ki.Embed on: %v embedded struct is not a Ki type -- use kit.Embed for a more general version\n", n.PathUnique())
+		log.Printf("ki.Embed on: %v embedded struct is not a Ki type -- use kit.Embed for a more general version\n", n.Path())
 		return nil
 	}
 	return nil
 }
 
-// BaseIface returns the 	base interface type for all elements
+// BaseIface returns the base interface type for all elements
 // within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
 // Used e.g., for determining what types of children
 // can be created (see kit.EmbedImplements for test method)
@@ -176,112 +117,19 @@ func (n *Node) BaseIface() reflect.Type {
 	return KiType
 }
 
-// Name returns the user-defined name of the object (Node.Nm), for finding
-// elements, generating paths, IO, etc -- allows generic GUI / Text / Path
-// / etc representation of Trees.
+// Name returns the user-defined name of the object (Node.Nm),
+// for finding elements, generating paths, IO, etc.
 func (n *Node) Name() string {
 	return n.Nm
 }
 
-// UniqueName returns a name that is guaranteed to be non-empty and unique
-// within the children of this node (Node.UniqueNm), but starts with Name
-// or parents name if Name is empty -- important for generating unique
-// paths to definitively locate a given node in the tree (see PathUnique,
-// FindPathUnique).
-func (n *Node) UniqueName() string {
-	return n.UniqueNm
-}
-
-// SetName sets the name of this node, and its unique name based on this
-// name, such that all names are unique within list of siblings of this
-// node (somewhat expensive but important, unless you definitely know that
-// the names are unique -- see SetNameRaw).  Does nothing if name is
-// already set to that value -- returns false in that case.  Does NOT
-// wrap in UpdateStart / End.
-func (n *Node) SetName(name string) bool {
-	if n.Nm == name {
-		return false
-	}
+// SetName sets the name of this node.
+// Names should generally be unique across children of each node.
+// See Unique* functions to check / fix.
+// If node requires non-unique names, add a separate Label field.
+// Does NOT wrap in UpdateStart / End.
+func (n *Node) SetName(name string) {
 	n.Nm = name
-	n.SetUniqueName(SafeUniqueName(name))
-	if n.Par != nil {
-		n.Par.UniquifyNames()
-	}
-	return true
-}
-
-// SetNameRaw just sets the name and doesn't update the unique name --
-// only use if also/ setting unique names in some other way that is
-// guaranteed to be unique.
-func (n *Node) SetNameRaw(name string) {
-	n.Nm = name
-}
-
-// SetUniqueName sets the unique name of this node based on given name
-// string -- does not do any further testing that the name is indeed
-// unique -- should generally only be used by UniquifyNames.
-func (n *Node) SetUniqueName(name string) {
-	n.UniqueNm = name
-}
-
-// SafeUniqueName returns a name that replaces any path delimiter symbols
-// . or / with underbars.
-func SafeUniqueName(name string) string {
-	return strings.Replace(strings.Replace(name, ".", "_", -1), "/", "_", -1)
-}
-
-// UniquifyPreserveNameLimit is the number of children below which a more
-// expensive approach is taken to uniquify the names to guarantee unique
-// paths, which preserves the original name wherever possible -- formatting of
-// index assumes this limit is less than 1000
-var UniquifyPreserveNameLimit = 100
-
-// UniquifyNames makes sure that the names are unique -- the "deluxe" version
-// preserves the regular User-given name but is relatively expensive (creates
-// a map), so is only used below a certain size (UniquifyPreserveNameLimit =
-// 100), above which the index is appended, guaranteeing uniqueness at the
-// cost of making paths longer and less user-friendly
-func (n *Node) UniquifyNames() {
-	// pr := prof.Start("ki.Node.UniquifyNames")
-	// defer pr.End()
-
-	sz := len(n.Kids)
-	if sz > UniquifyPreserveNameLimit {
-		sfmt := "%v_%05d"
-		switch {
-		case sz > 9999999:
-			sfmt = "%v_%10d"
-		case sz > 999999:
-			sfmt = "%v_%07d"
-		case sz > 99999:
-			sfmt = "%v_%06d"
-		}
-		for i, child := range n.Kids {
-			if child == nil {
-				continue
-			}
-			child.SetUniqueName(fmt.Sprintf(sfmt, child.Name(), i))
-		}
-		return
-	}
-	nmap := make(map[string]int, sz)
-	for i, child := range n.Kids {
-		if child == nil {
-			continue
-		}
-		if len(child.UniqueName()) == 0 {
-			if n.Par != nil {
-				child.SetUniqueName(fmt.Sprintf("%v_%03d", n.Par.UniqueName(), i))
-			} else {
-				child.SetUniqueName(fmt.Sprintf("c%03d", i))
-			}
-		}
-		if _, taken := nmap[child.UniqueName()]; taken {
-			child.SetUniqueName(fmt.Sprintf("%v_%03d", child.UniqueName(), i))
-		} else {
-			nmap[child.UniqueName()] = i
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -293,59 +141,6 @@ func (n *Node) Parent() Ki {
 	return n.Par
 }
 
-// SetParent just sets parent of node (and inherits update count from
-// parent, to keep consistent) -- does NOT remove from existing parent --
-// use Add / Insert / Delete Child functions properly move or delete nodes.
-func (n *Node) SetParent(parent Ki) {
-	n.Par = parent
-	if parent != nil && !parent.OnlySelfUpdate() {
-		parup := parent.IsUpdating()
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d interface{}) bool {
-			k.SetFlagState(parup, int(Updating))
-			return true
-		})
-	}
-}
-
-// IsRoot tests if this node is the root node -- checks Parent = nil.
-func (n *Node) IsRoot() bool {
-	if n.This() == nil || n.Par == nil || n.Par.This() == nil {
-		return true
-	}
-	return false
-}
-
-// Root returns the root object of this tree (the node with a nil parent).
-func (n *Node) Root() Ki {
-	if n.IsRoot() {
-		return n.This()
-	}
-	return n.Par.Root()
-}
-
-// FieldRoot returns the field root object for this node -- the node that
-// owns the branch of the tree rooted in one of its fields -- i.e., the
-// first non-Field parent node after the first Field parent node -- can be
-// nil if no such thing exists for this node.
-func (n *Node) FieldRoot() Ki {
-	var root Ki
-	gotField := false
-	n.FuncUpParent(0, n, func(k Ki, level int, d interface{}) bool {
-		if !gotField {
-			if k.IsField() {
-				gotField = true
-			}
-			return Continue
-		}
-		if !k.IsField() {
-			root = k
-			return Break
-		}
-		return Continue
-	})
-	return root
-}
-
 // IndexInParent returns our index within our parent object -- caches the
 // last value and uses that for an optimized search so subsequent calls
 // are typically quite fast.  Returns false if we don't have a parent.
@@ -353,9 +148,11 @@ func (n *Node) IndexInParent() (int, bool) {
 	if n.Par == nil {
 		return -1, false
 	}
-	var ok bool
-	n.index, ok = n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
-	return n.index, ok
+	idx, ok := n.Par.Children().IndexOf(n.This(), n.index) // very fast if index is close..
+	if idx >= 0 {
+		n.index = idx
+	}
+	return idx, ok
 }
 
 // ParentLevel finds a given potential parent node recursively up the
@@ -373,16 +170,10 @@ func (n *Node) ParentLevel(par Ki) int {
 	return parLev
 }
 
-// HasParent checks if given node is a parent of this one (i.e.,
-// ParentLevel(par) != -1).
-func (n *Node) HasParent(par Ki) bool {
-	return n.ParentLevel(par) != -1
-}
-
 // ParentByName finds first parent recursively up hierarchy that matches
 // given name -- returns nil if not found.
 func (n *Node) ParentByName(name string) Ki {
-	if n.IsRoot() {
+	if IsRoot(n) {
 		return nil
 	}
 	if n.Par.Name() == name {
@@ -405,15 +196,15 @@ func (n *Node) ParentByNameTry(name string) (Ki, error) {
 // returns nil if not found. If embeds is true, then it looks for any
 // type that embeds the given type at any level of anonymous embedding.
 func (n *Node) ParentByType(t reflect.Type, embeds bool) Ki {
-	if n.IsRoot() {
+	if IsRoot(n) {
 		return nil
 	}
 	if embeds {
-		if n.Par.TypeEmbeds(t) {
+		if TypeEmbeds(n.Par, t) {
 			return n.Par
 		}
 	} else {
-		if n.Par.Type() == t {
+		if Type(n.Par) == t {
 			return n.Par
 		}
 	}
@@ -429,123 +220,6 @@ func (n *Node) ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error) {
 		return par, nil
 	}
 	return nil, fmt.Errorf("ki %v: Parent of type: %v not found", n.Nm, t)
-}
-
-// HasKiFields returns true if this node has Ki Node fields that are
-// included in recursive descent traversal of the tree.  This is very
-// efficient compared to accessing the field information on the type
-// so it should be checked first -- caches the info on the node in flags.
-func (n *Node) HasKiFields() bool {
-	if n.HasFlag(int(HasKiFields)) {
-		return true
-	}
-	if n.HasFlag(int(HasNoKiFields)) {
-		return false
-	}
-	foffs := n.KiFieldOffs()
-	if len(foffs) == 0 {
-		n.SetFlag(int(HasNoKiFields))
-		return false
-	}
-	n.SetFlag(int(HasKiFields))
-	return true
-}
-
-// NumKiFields returns the number of Ki Node fields on this node.
-// This calls HasKiFields first so it is also efficient.
-func (n *Node) NumKiFields() int {
-	if !n.HasKiFields() {
-		return 0
-	}
-	foffs := n.KiFieldOffs()
-	return len(foffs)
-}
-
-// KiField returns the Ki Node field at given index, from KiFieldOffs list.
-// Returns nil if index is out of range.  This is generally used for
-// generic traversal methods and thus does not have a Try version.
-func (n *Node) KiField(idx int) Ki {
-	if !n.HasKiFields() {
-		return nil
-	}
-	foffs := n.KiFieldOffs()
-	if idx >= len(foffs) || idx < 0 {
-		return nil
-	}
-	fn := (*Node)(unsafe.Pointer(uintptr(unsafe.Pointer(n)) + foffs[idx]))
-	return fn.This()
-}
-
-// KiFieldByName returns field Ki element by name -- returns false if not found.
-func (n *Node) KiFieldByName(name string) Ki {
-	if !n.HasKiFields() {
-		return nil
-	}
-	foffs := n.KiFieldOffs()
-	op := uintptr(unsafe.Pointer(n))
-	for _, fo := range foffs {
-		fn := (*Node)(unsafe.Pointer(op + fo))
-		if fn.Nm == name {
-			return fn.This()
-		}
-	}
-	return nil
-}
-
-// KiFieldByNameTry returns field Ki element by name -- returns error if not found.
-func (n *Node) KiFieldByNameTry(name string) (Ki, error) {
-	fld := n.KiFieldByName(name)
-	if fld != nil {
-		return fld, nil
-	}
-	return nil, fmt.Errorf("ki %v: Ki Field named: %v not found", n.Nm, name)
-}
-
-// KiFieldOffs returns the uintptr offsets for Ki fields of this Node.
-// Cached for fast access, but use HasKiFields for even faster checking.
-func (n *Node) KiFieldOffs() []uintptr {
-	if n.fieldOffs != nil {
-		return n.fieldOffs
-	}
-	// we store the offsets for the fields in type properties
-	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
-	if foff, ok := kit.TypeProp(tprops, "__FieldOffs"); ok {
-		n.fieldOffs = foff.([]uintptr)
-		return n.fieldOffs
-	}
-	foff, _ := n.KiFieldsInit()
-	return foff
-}
-
-// KiFieldNames returns the field names for Ki fields of this Node. Cached for fast access.
-func (n *Node) KiFieldNames() []string {
-	// we store the offsets for the fields in type properties
-	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
-	if fnms, ok := kit.TypeProp(tprops, "__FieldNames"); ok {
-		return fnms.([]string)
-	}
-	_, fnm := n.KiFieldsInit()
-	return fnm
-}
-
-// KiFieldsInit initializes cached data about the KiFields in this node
-// offsets and names -- returns them
-func (n *Node) KiFieldsInit() (foff []uintptr, fnm []string) {
-	foff = make([]uintptr, 0)
-	fnm = make([]string, 0)
-	kitype := KiType
-	FlatFieldsValueFunc(n.This(), func(stru interface{}, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
-		if fieldVal.Kind() == reflect.Struct && kit.EmbedImplements(field.Type, kitype) {
-			foff = append(foff, field.Offset)
-			fnm = append(fnm, field.Name)
-		}
-		return true
-	})
-	tprops := *kit.Types.Properties(n.Type(), true) // true = makeNew
-	kit.SetTypeProp(tprops, "__FieldOffs", foff)
-	n.fieldOffs = foff
-	kit.SetTypeProp(tprops, "__FieldNames", fnm)
-	return
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -642,62 +316,48 @@ func (n *Node) ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, er
 //////////////////////////////////////////////////////////////////////////
 //  Paths
 
-// Path returns path to this node from Root(), using regular user-given
-// Name's (may be empty or non-unique), with nodes separated by / and
-// fields by . -- only use for informational purposes.
+// EscapePathName returns a name that replaces any path delimiter symbols
+// . or / with \, and \: escaped versions.
+func EscapePathName(name string) string {
+	return strings.Replace(strings.Replace(name, ".", `\,`, -1), "/", `\:`, -1)
+}
+
+// UnescapePathName returns a name that replaces any escaped path delimiter symbols
+// \, or \; with . and / unescaped versions.
+func UnescapePathName(name string) string {
+	return strings.Replace(strings.Replace(name, `\,`, ".", -1), `\:`, "/", -1)
+}
+
+// Path returns path to this node from the tree root, using node Names
+// separated by / and fields by .
+// Path is only valid when child names are unique (see Unique* functions)
 func (n *Node) Path() string {
 	if n.Par != nil {
 		if n.IsField() {
-			return n.Par.Path() + "." + n.Nm
+			return n.Par.Path() + "." + EscapePathName(n.Nm)
 		}
-		return n.Par.Path() + "/" + n.Nm
+		return n.Par.Path() + "/" + EscapePathName(n.Nm)
 	}
-	return "/" + n.Nm
-}
-
-// PathUnique returns path to this node from Root(), using unique names,
-// with nodes separated by / and fields by . -- suitable for reliably
-// finding this node.
-func (n *Node) PathUnique() string {
-	if n.Par != nil {
-		if n.IsField() {
-			return n.Par.PathUnique() + "." + n.UniqueNm
-		}
-		return n.Par.PathUnique() + "/" + n.UniqueNm
-	}
-	return "/" + n.UniqueNm
+	return "/" + EscapePathName(n.Nm)
 }
 
 // PathFrom returns path to this node from given parent node, using
-// regular user-given Name's (may be empty or non-unique), with nodes
-// separated by / and fields by . -- only use for informational purposes.
+// node Names separated by / and fields by .
+// Path is only valid when child names are unique (see Unique* functions)
 func (n *Node) PathFrom(par Ki) string {
-	if n.Par != nil && n.Par != par {
-		if n.IsField() {
-			return n.Par.PathFrom(par) + "." + n.Nm
-		}
-		return n.Par.PathFrom(par) + "/" + n.Nm
-	}
-	return "/" + n.Nm
-}
-
-// PathFromUnique returns path to this node from given parent node, using
-// unique names, with nodes separated by / and fields by . -- suitable for
-// reliably finding this node.
-func (n *Node) PathFromUnique(par Ki) string {
 	if n.Par != nil {
 		ppath := ""
 		if n.Par == par {
-			ppath = "/" + par.UniqueName()
+			ppath = "/" + EscapePathName(par.Name())
 		} else {
-			ppath = n.Par.PathFromUnique(par)
+			ppath = n.Par.PathFrom(par)
 		}
 		if n.IsField() {
-			return ppath + "." + n.UniqueNm
+			return ppath + "." + EscapePathName(n.Nm)
 		}
-		return ppath + "/" + n.UniqueNm
+		return ppath + "/" + EscapePathName(n.Nm)
 	}
-	return "/" + n.UniqueNm
+	return "/" + n.Nm
 }
 
 // find the child on the path
@@ -715,18 +375,18 @@ func findPathChild(k Ki, child string) (int, bool) {
 		}
 		return idx, true
 	}
-	return k.Children().IndexByUniqueName(child, 0)
+	return k.Children().IndexByName(child, 0)
 }
 
-// FindPathUnique returns Ki object at given unique path, starting from
-// this node (e.g., Root()) -- if this node is not the root, then the path
+// FindPath returns Ki object at given path, starting from this node
+// (e.g., the root).  If this node is not the root, then the path
 // to this node is subtracted from the start of the path if present there.
 // There is also support for [idx] index-based access for any given path
 // element, for cases when indexes are more useful than names.
 // Returns nil if not found.
-func (n *Node) FindPathUnique(path string) Ki {
+func (n *Node) FindPath(path string) Ki {
 	if n.Par != nil { // we are not root..
-		myp := n.PathUnique()
+		myp := n.Path()
 		path = strings.TrimPrefix(path, myp)
 	}
 	curn := Ki(n)
@@ -735,27 +395,27 @@ func (n *Node) FindPathUnique(path string) Ki {
 		if len(pe) == 0 {
 			continue
 		}
-		if i <= 1 && curn.UniqueName() == pe {
+		if i <= 1 && curn.Name() == UnescapePathName(pe) {
 			continue
 		}
 		if strings.Contains(pe, ".") { // has fields
 			fels := strings.Split(pe, ".")
 			// find the child first, then the fields
-			idx, ok := findPathChild(curn, fels[0])
+			idx, ok := findPathChild(curn, UnescapePathName(fels[0]))
 			if !ok {
 				return nil
 			}
 			curn = (*(curn.Children()))[idx]
 			for i := 1; i < len(fels); i++ {
-				fe := fels[i]
-				fk := curn.KiFieldByName(fe)
+				fe := UnescapePathName(fels[i])
+				fk := KiFieldByName(curn.AsNode(), fe)
 				if fk == nil {
 					return nil
 				}
 				curn = fk
 			}
 		} else {
-			idx, ok := findPathChild(curn, pe)
+			idx, ok := findPathChild(curn, UnescapePathName(pe))
 			if !ok {
 				return nil
 			}
@@ -765,14 +425,14 @@ func (n *Node) FindPathUnique(path string) Ki {
 	return curn
 }
 
-// FindPathUniqueTry returns Ki object at given unique path, starting from
-// this node (e.g., Root()) -- if this node is not the root, then the path
+// FindPathTry returns Ki object at given path, starting from
+// this node (e.g., the root) -- if this node is not the root, then the path
 // to this node is subtracted from the start of the path if present there.
 // There is also support for [idx] index-based access for any given path
 // element, for cases when indexes are more useful than names.
 // Returns error if not found.
-func (n *Node) FindPathUniqueTry(path string) (Ki, error) {
-	fk := n.This().FindPathUnique(path)
+func (n *Node) FindPathTry(path string) (Ki, error) {
+	fk := n.This().FindPath(path)
 	if fk != nil {
 		return fk, nil
 	}
@@ -782,225 +442,44 @@ func (n *Node) FindPathUniqueTry(path string) (Ki, error) {
 //////////////////////////////////////////////////////////////////////////
 //  Adding, Inserting Children
 
-// SetChildType sets the ChildType used as a default type for creating new
-// children -- as a property called ChildType --ensures that the type is a
-// Ki type, and errors if not.
-func (n *Node) SetChildType(t reflect.Type) error {
-	if !reflect.PtrTo(t).Implements(reflect.TypeOf((*Ki)(nil)).Elem()) {
-		err := fmt.Errorf("Ki Node %v SetChildType: type does not implement the Ki interface -- must -- type passed is: %v", n.PathUnique(), t.Name())
-		log.Print(err)
-		return err
-	}
-	n.SetProp("ChildType", t)
-	return nil
-}
-
-// NewOfType creates a new child of given type -- if nil, uses ChildType,
-// else uses the same type as this struct.
-func (n *Node) NewOfType(typ reflect.Type) Ki {
-	if typ == nil {
-		ct, ok := n.PropInherit("ChildType", false, true) // no inherit but yes from type
-		if ok {
-			if ctt, ok := ct.(reflect.Type); ok {
-				typ = ctt
-			}
-		}
-	}
-	if typ == nil {
-		typ = n.Type() // make us by default
-	}
-	nkid := reflect.New(typ).Interface()
-	kid, _ := nkid.(Ki)
-	return kid
-}
-
-// AddChildCheck checks if it is safe to add child -- it cannot be a parent of us -- prevent loops!
-func (n *Node) AddChildCheck(kid Ki) error {
-	var err error
-	n.FuncUp(0, n, func(k Ki, level int, d interface{}) bool {
-		if k == kid {
-			err = fmt.Errorf("ki.Node Attempt to add child to node %v that is my own parent -- no cycles permitted", (d.(Ki)).PathUnique())
-			log.Println(err)
-			return Break
-		}
-		return Continue
-	})
-	return err
-}
-
-// AddChild adds given child at end of children list -- if child is in an
-// existing tree, it is removed from that parent, and a NodeMoved signal
-// is emitted for the child -- UniquifyNames is called after adding to
-// ensure name is unique (assumed to already have a name).
-// See Fast version if adding many children -- UniquifyNames can get
-// very expensive if called repeatedly on many nodes.
+// AddChild adds given child at end of children list.
+// The kid node is assumed to not be on another tree (see MoveToParent)
+// and the existing name should be unique among children.
+// No UpdateStart / End wrapping is done: do that externally as needed.
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) AddChild(kid Ki) error {
-	if err := n.ThisCheck(); err != nil {
+	if err := ThisCheck(n); err != nil {
 		return err
 	}
-	if err := n.AddChildCheck(kid); err != nil {
-		return err
-	}
-	updt := n.UpdateStart()
-	kid.Init(kid)
+	InitNode(kid)
 	n.Kids = append(n.Kids, kid)
-	oldPar := kid.Parent()
-	kid.SetParent(n.This()) // key to set new parent before deleting: indicates move instead of delete
-	if oldPar != nil {
-		oldPar.DeleteChild(kid, false)
-		kid.SetFlag(int(ChildMoved))
-	} else {
-		kid.SetFlag(int(ChildAdded))
-	}
-	n.SetFlag(int(ChildAdded))
-	if kid.UniqueName() == "" {
-		kid.SetUniqueName(SafeUniqueName(kid.Name()))
-	}
-	n.UniquifyNames()
-	n.UpdateEnd(updt)
+	SetParent(kid, n.This()) // key to set new parent before deleting: indicates move instead of delete
 	return nil
 }
 
-// AddNewChild creates a new child of given type -- if nil, uses
-// ChildType, else type of this struct -- and add at end of children list
-// -- assigns name (can be empty) and enforces UniqueName.
+// AddNewChild creates a new child of given type and
+// add at end of children list.
+// The name should be unique among children.
+// No UpdateStart / End wrapping is done: do that externally as needed.
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) AddNewChild(typ reflect.Type, name string) Ki {
-	if err := n.ThisCheck(); err != nil {
+	if err := ThisCheck(n); err != nil {
 		return nil
 	}
-	updt := n.UpdateStart()
-	kid := n.NewOfType(typ)
-	kid.Init(kid)
+	kid := NewOfType(typ)
+	InitNode(kid)
 	n.Kids = append(n.Kids, kid)
-	kid.SetNameRaw(name)
-	kid.SetParent(n.This())
-	kid.SetFlag(int(ChildAdded))
-	n.SetFlag(int(ChildAdded))
-	kid.SetUniqueName(SafeUniqueName(name))
-	n.UniquifyNames() // this is the killer time-sync for large node-count
-	n.UpdateEnd(updt)
-	return kid
-}
-
-// AddChildFast adds a new child at end of children list in the fastest
-// way possible -- assumes InitName has already been run, and doesn't
-// ensure names are unique, or run other checks, including if child
-// already has a parent.
-func (n *Node) AddChildFast(kid Ki) {
-	if err := n.ThisCheck(); err != nil {
-		return
-	}
-	updt := n.UpdateStart()
-	n.Kids = append(n.Kids, kid)
-	kid.SetParent(n.This())
-	kid.SetFlag(int(ChildAdded))
-	n.SetFlag(int(ChildAdded))
-	n.UpdateEnd(updt)
-}
-
-// AddNewChildFast creates a new child of given type -- if nil, uses
-// ChildType, else type of this struct -- and add at end of children list
-// in the fastest way possible.  Name must non-empty and already unique.
-// Many functions depend on names being unique, so you must either ensure
-// that all the names are indeed unique when added, or call UniquifyNames
-// after adding all the nodes.
-func (n *Node) AddNewChildFast(typ reflect.Type, name string) Ki {
-	if err := n.ThisCheck(); err != nil {
-		return nil
-	}
-	updt := n.UpdateStart()
-	kid := n.NewOfType(typ)
-	kid.Init(kid)
-	kid.SetNameRaw(name)
-	n.Kids = append(n.Kids, kid)
-	kid.SetParent(n.This())
-	kid.SetFlag(int(ChildAdded))
-	n.SetFlag(int(ChildAdded))
-	kid.SetUniqueName(name)
-	n.UpdateEnd(updt)
-	return kid
-}
-
-// InsertChild adds a new child at given position in children list -- if
-// child is in an existing tree, it is removed from that parent, and a
-// NodeMoved signal is emitted for the child -- UniquifyNames is called
-// after adding to ensure name is unique (assumed to already have a name).
-func (n *Node) InsertChild(kid Ki, at int) error {
-	if err := n.ThisCheck(); err != nil {
-		return err
-	}
-	if err := n.AddChildCheck(kid); err != nil {
-		return err
-	}
-	updt := n.UpdateStart()
-	kid.Init(kid)
-	n.Kids.Insert(kid, at)
-	oldPar := kid.Parent()
-	kid.SetParent(n.This()) // key to set new parent before deleting: indicates move instead of delete
-	if oldPar != nil {
-		oldPar.DeleteChild(kid, false)
-		kid.SetFlag(int(ChildMoved))
-	} else {
-		kid.SetFlag(int(ChildAdded))
-	}
-	n.SetFlag(int(ChildAdded))
-	if kid.UniqueName() == "" {
-		kid.SetUniqueName(SafeUniqueName(kid.Name()))
-	}
-	n.UniquifyNames()
-	n.UpdateEnd(updt)
-	return nil
-}
-
-// InsertNewChild creates a new child of given type -- if nil, uses
-// ChildType, else type of this struct -- and add at given position in
-// children list -- assigns name (can be empty) and enforces UniqueName.
-func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
-	if err := n.ThisCheck(); err != nil {
-		return nil
-	}
-	updt := n.UpdateStart()
-	kid := n.NewOfType(typ)
-	kid.Init(kid)
-	n.Kids.Insert(kid, at)
-	kid.SetNameRaw(name)
-	kid.SetParent(n.This())
-	kid.SetFlag(int(ChildAdded))
-	n.SetFlag(int(ChildAdded))
-	kid.SetUniqueName(SafeUniqueName(name))
-	n.UniquifyNames() // this is the killer time-sync for large node-count
-	n.UpdateEnd(updt)
-	return kid
-}
-
-// InsertNewChildFast creates a new child of given type -- if nil, uses
-// ChildType, else type of this struct -- and insert at given position
-// in the fastest way possible.  Name must non-empty and already unique.
-// Many functions depend on names being unique, so you must either ensure
-// that all the names are indeed unique when added, or call UniquifyNames
-// after adding all the nodes.
-func (n *Node) InsertNewChildFast(typ reflect.Type, at int, name string) Ki {
-	if err := n.ThisCheck(); err != nil {
-		return nil
-	}
-	updt := n.UpdateStart()
-	kid := n.NewOfType(typ)
-	kid.Init(kid)
-	kid.SetNameRaw(name)
-	n.Kids.Insert(kid, at)
-	kid.SetParent(n.This())
-	kid.SetFlag(int(ChildAdded))
-	n.SetFlag(int(ChildAdded))
-	kid.SetUniqueName(name)
-	n.UpdateEnd(updt)
+	kid.SetName(name)
+	SetParent(kid, n.This())
 	return kid
 }
 
 // SetChild sets child at given index to be the given item -- if name is
 // non-empty then it sets the name of the child as well -- just calls Init
-// (or InitName) on the child, and SetParent -- does NOT uniquify the
-// names -- this is for high-volume child creation -- call UniquifyNames
-// afterward if needed, but better to ensure that names are unique up front.
+// (or InitName) on the child, and SetParent.
+// Names should be unique among children.
+// No UpdateStart / End wrapping is done: do that externally as needed.
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 func (n *Node) SetChild(kid Ki, idx int, name string) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
@@ -1008,37 +487,43 @@ func (n *Node) SetChild(kid Ki, idx int, name string) error {
 	if name != "" {
 		kid.InitName(kid, name)
 	} else {
-		kid.Init(kid)
+		InitNode(kid)
 	}
 	n.Kids[idx] = kid
-	kid.SetParent(n.This())
+	SetParent(kid, n.This())
 	return nil
 }
 
-// MoveChild moves child from one position to another in the list of
-// children (see also corresponding Slice method, which does not
-// signal, like this one does).  Returns error if either index is invalid.
-func (n *Node) MoveChild(frm, to int) error {
-	updt := n.UpdateStart()
-	err := n.Kids.Move(frm, to)
-	if err == nil {
-		n.SetFlag(int(ChildMoved))
+// InsertChild adds given child at position in children list.
+// The kid node is assumed to not be on another tree (see MoveToParent)
+// and the existing name should be unique among children.
+// No UpdateStart / End wrapping is done: do that externally as needed.
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+func (n *Node) InsertChild(kid Ki, at int) error {
+	if err := ThisCheck(n); err != nil {
+		return err
 	}
-	n.UpdateEnd(updt)
-	return err
+	InitNode(kid)
+	n.Kids.Insert(kid, at)
+	SetParent(kid, n.This())
+	return nil
 }
 
-// SwapChildren swaps children between positions (see also corresponding
-// Slice method which does not signal like this one does).  Returns error if
-// either index is invalid.
-func (n *Node) SwapChildren(i, j int) error {
-	updt := n.UpdateStart()
-	err := n.Kids.Swap(i, j)
-	if err == nil {
-		n.SetFlag(int(ChildMoved))
+// InsertNewChild creates a new child of given type and
+// add at position in children list.
+// The name should be unique among children.
+// No UpdateStart / End wrapping is done: do that externally as needed.
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+func (n *Node) InsertNewChild(typ reflect.Type, at int, name string) Ki {
+	if err := ThisCheck(n); err != nil {
+		return nil
 	}
-	n.UpdateEnd(updt)
-	return err
+	kid := NewOfType(typ)
+	InitNode(kid)
+	n.Kids.Insert(kid, at)
+	kid.SetName(name)
+	SetParent(kid, n.This())
+	return kid
 }
 
 // SetNChildren ensures that there are exactly n children, deleting any
@@ -1051,9 +536,9 @@ func (n *Node) SwapChildren(i, j int) error {
 // you call UpdateEnd(updt)
 //
 // Note that this does not ensure existing children are of given type, or
-// change their names, or call UniquifyNames -- use ConfigChildren for
-// those cases -- this function is for simpler cases where a parent uses
-// this function consistently to manage children all of the same type.
+// change their names -- use ConfigChildren for those cases.
+// This function is for simpler cases where a parent uses this function
+// consistently to manage children all of the same type.
 func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, updt bool) {
 	mods, updt = false, false
 	sz := len(n.Kids)
@@ -1073,8 +558,8 @@ func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, 
 			mods = true
 			updt = n.UpdateStart()
 		}
-		nm := fmt.Sprintf("%v%v", nameStub, sz)
-		n.InsertNewChildFast(typ, sz, nm)
+		nm := fmt.Sprintf("%s%d", nameStub, sz)
+		n.InsertNewChild(typ, sz, nm)
 		sz++
 	}
 	return
@@ -1092,19 +577,16 @@ func (n *Node) SetNChildren(trgn int, typ reflect.Type, nameStub string) (mods, 
 // that is true, the result from the corresponding UpdateStart call --
 // UpdateEnd is NOT called, allowing for further subsequent updates before
 // you call UpdateEnd(updt).
-func (n *Node) ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, updt bool) {
-	return n.Kids.Config(n.This(), config, uniqNm)
+func (n *Node) ConfigChildren(config kit.TypeAndNameList) (mods, updt bool) {
+	return n.Kids.Config(n.This(), config)
 }
 
 //////////////////////////////////////////////////////////////////////////
 //  Deleting Children
 
 // DeleteChildAtIndex deletes child at given index (returns error for
-// invalid index) -- if child's parent = this node, then will call
-// SetParent(nil), so to transfer to another list, set new parent first --
-// destroy will add removed child to deleted list, to be destroyed later
-// -- otherwise child remains intact but parent is nil -- could be
-// inserted elsewhere.
+// invalid index).
+// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
 func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 	child, err := n.ChildTry(idx)
 	if err != nil {
@@ -1113,14 +595,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 	updt := n.UpdateStart()
 	n.SetFlag(int(ChildDeleted))
 	if child.Parent() == n.This() {
-		// only deleting if we are still parent -- change parent first to
-		// signal move delete is always sent live to affected node without
-		// update blocking note: children of child etc will not send a signal
-		// at this point -- only later at destroy -- up to this parent to
-		// manage all that
-		child.SetFlag(int(NodeDeleted))
-		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
-		child.SetParent(nil)
+		SetParent(child, nil)
 	}
 	n.Kids.DeleteAtIndex(idx)
 	if destroy {
@@ -1132,24 +607,22 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 }
 
 // DeleteChild deletes child node, returning error if not found in
-// Children.  If child's parent = this node, then will call
-// SetParent(nil), so to transfer to another list, set new parent
-// first. See DeleteChildAtIndex for destroy info.
+// Children.
+// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
 func (n *Node) DeleteChild(child Ki, destroy bool) error {
 	if child == nil {
 		return errors.New("ki DeleteChild: child is nil")
 	}
 	idx, ok := n.Kids.IndexOf(child, 0)
 	if !ok {
-		return fmt.Errorf("ki %v: child: %v not found", n.Nm, child.PathUnique())
+		return fmt.Errorf("ki %v: child: %v not found", n.Nm, child.Path())
 	}
 	return n.DeleteChildAtIndex(idx, destroy)
 }
 
 // DeleteChildByName deletes child node by name -- returns child, error
-// if not found -- if child's parent = this node, then will call
-// SetParent(nil), so to transfer to another list, set new parent first.
-// See DeleteChildAtIndex for destroy info.
+// if not found.
+// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
 func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
 	idx, ok := n.Kids.IndexByName(name, 0)
 	if !ok {
@@ -1172,7 +645,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 		}
 		child.SetFlag(int(NodeDeleted))
 		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
-		child.SetParent(nil)
+		SetParent(child, nil)
 		child.UpdateReset()
 	}
 	if destroy {
@@ -1434,7 +907,7 @@ func (n *Node) PropInherit(key string, inherit, typ bool) (interface{}, bool) {
 		}
 	}
 	if typ {
-		return kit.Types.Prop(n.Type(), key)
+		return kit.Types.Prop(Type(n.This()), key)
 	}
 	return nil, false
 }
@@ -1564,7 +1037,7 @@ func (n *Node) FuncFields(level int, data interface{}, fun Func) {
 		return
 	}
 	op := uintptr(unsafe.Pointer(n))
-	foffs := n.KiFieldOffs()
+	foffs := KiFieldOffs(n)
 	for _, fo := range foffs {
 		fn := (*Node)(unsafe.Pointer(op + fo))
 		fun(fn.This(), level, data)
@@ -1598,7 +1071,7 @@ func (n *Node) FuncUp(level int, data interface{}, fun Func) bool {
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
 func (n *Node) FuncUpParent(level int, data interface{}, fun Func) bool {
-	if n.IsRoot() {
+	if IsRoot(n) {
 		return true
 	}
 	cur := n.Parent()
@@ -1673,9 +1146,9 @@ outer:
 	for {
 		if cur.This() != nil && fun(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
-			if cur.HasKiFields() {
+			if KiHasKiFields(cur.AsNode()) {
 				tm.Set(cur, 0, -1)
-				nxt := cur.KiField(0).This()
+				nxt := KiField(cur.AsNode(), 0).This()
 				if nxt != nil {
 					cur = nxt
 					tm.Start(cur)
@@ -1692,17 +1165,17 @@ outer:
 				}
 			}
 		} else {
-			tm.Set(cur, cur.NumKiFields(), cur.NumChildren())
+			tm.Set(cur, NumKiFields(cur.AsNode()), cur.NumChildren())
 			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			curField, curChild := tm.Get(cur)
-			if cur.HasKiFields() {
-				if (curField + 1) < cur.NumKiFields() {
+			if KiHasKiFields(cur.AsNode()) {
+				if (curField + 1) < NumKiFields(cur.AsNode()) {
 					curField++
 					tm.Set(cur, curField, curChild)
-					nxt := cur.KiField(curField).This()
+					nxt := KiField(cur.AsNode(), curField).This()
 					if nxt != nil {
 						cur = nxt
 						tm.Start(cur)
@@ -1759,9 +1232,9 @@ outer:
 	for {
 		if cur.This() != nil && doChildTestFunc(cur, level, data) { // false return means stop
 			level++ // this is the descent branch
-			if cur.HasKiFields() {
+			if KiHasKiFields(cur.AsNode()) {
 				tm.Set(cur, 0, -1)
-				nxt := cur.KiField(0).This()
+				nxt := KiField(cur.AsNode(), 0).This()
 				if nxt != nil {
 					cur = nxt
 					tm.Set(cur, -1, -1)
@@ -1778,17 +1251,17 @@ outer:
 				}
 			}
 		} else {
-			tm.Set(cur, cur.NumKiFields(), cur.NumChildren())
+			tm.Set(cur, NumKiFields(cur.AsNode()), cur.NumChildren())
 			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
 			curField, curChild := tm.Get(cur)
-			if cur.HasKiFields() {
-				if (curField + 1) < cur.NumKiFields() {
+			if KiHasKiFields(cur.AsNode()) {
+				if (curField + 1) < NumKiFields(cur.AsNode()) {
 					curField++
 					tm.Set(cur, curField, curChild)
-					nxt := cur.KiField(curField).This()
+					nxt := KiField(cur.AsNode(), curField).This()
 					if nxt != nil {
 						cur = nxt
 						tm.Set(cur, -1, -1)
@@ -1848,7 +1321,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data interface{}, fun Func) {
 		queue = queue[1:]
 
 		if cur.This() != nil && fun(cur, depth, data) { // false return means don't proceed
-			if cur.HasKiFields() {
+			if KiHasKiFields(cur.AsNode()) {
 				cur.FuncFields(depth+1, data, func(k Ki, level int, d interface{}) bool {
 					k.SetDepth(level)
 					queue = append(queue, k)
@@ -2079,7 +1552,7 @@ func (n *Node) FieldByNameTry(field string) (interface{}, error) {
 // FieldTag returns given field tag for that field, or empty string if not
 // set.
 func (n *Node) FieldTag(field, tag string) string {
-	return kit.FlatFieldTag(n.Type(), field, tag)
+	return kit.FlatFieldTag(Type(n.This()), field, tag)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2099,18 +1572,17 @@ func (n *Node) FieldTag(field, tag string) string {
 // should not be copied (unexported, lower-case fields are not copyable).
 func (n *Node) CopyFrom(frm Ki) error {
 	if frm == nil {
-		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.PathUnique())
+		err := fmt.Errorf("ki.Node CopyFrom into %v -- null 'from' source", n.Path())
 		log.Println(err)
 		return err
 	}
-	if n.Type() != frm.Type() {
-		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", n.PathUnique(), frm.PathUnique(), n.Type().Name(), frm.Type().Name())
+	if Type(n.This()) != Type(frm.This()) {
+		err := fmt.Errorf("ki.Node Copy to %v from %v -- must have same types, but %v != %v", n.Path(), frm.Path(), Type(n.This()).Name(), Type(frm.This()).Name())
 		log.Println(err)
 		return err
 	}
 	updt := n.UpdateStart()
 	defer n.UpdateEnd(updt)
-	n.SetFlag(int(NodeCopied))
 	err := n.CopyFromRaw(frm)
 	return err
 }
@@ -2119,7 +1591,7 @@ func (n *Node) CopyFrom(frm Ki) error {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see Copy info).
 func (n *Node) Clone() Ki {
-	nki := n.NewOfType(n.Type())
+	nki := NewOfType(Type(n.This()))
 	nki.InitName(nki, n.Nm)
 	nki.CopyFrom(n.This())
 	return nki
@@ -2195,258 +1667,5 @@ func GenCopyFieldsFrom(to interface{}, frm interface{}) {
 			}
 		}
 
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-//  IO Marshal / Unmarshal support -- mostly in Slice
-
-// see https://github.com/goki/ki/wiki/Naming for IO naming conventions
-
-// TODO: switch to using Decode / Encode instead of
-// [Un]MarshalJSON which uses byte[] instead of io.Reader / Writer..
-
-// JSONTypePrefix is the first thing output in a ki tree JSON output file,
-// specifying the type of the root node of the ki tree -- this info appears
-// all on one { } bracketed line at the start of the file, and can also be
-// used to identify the file as a ki tree JSON file
-var JSONTypePrefix = []byte("{\"ki.RootType\": ")
-
-// JSONTypeSuffix is just the } and \n at the end of the prefix line
-var JSONTypeSuffix = []byte("}\n")
-
-// WriteJSON writes the tree to an io.Writer, using MarshalJSON -- also
-// saves a critical starting record that allows file to be loaded de-novo
-// and recreate the proper root type for the tree.
-func (n *Node) WriteJSON(writer io.Writer, indent bool) error {
-	err := n.ThisCheck()
-	if err != nil {
-		return err
-	}
-	var b []byte
-	if indent {
-		b, err = json.MarshalIndent(n.This(), "", "  ")
-	} else {
-		b, err = json.Marshal(n.This())
-	}
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	knm := kit.Types.TypeName(n.Type())
-	tstr := string(JSONTypePrefix) + fmt.Sprintf("\"%v\"}\n", knm)
-	nwb := make([]byte, len(b)+len(tstr))
-	copy(nwb, []byte(tstr))
-	copy(nwb[len(tstr):], b) // is there a way to avoid this?
-	_, err = writer.Write(nwb)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	return nil
-}
-
-// SaveJSON saves the tree to a JSON-encoded file, using WriteJSON.
-func (n *Node) SaveJSON(filename string) error {
-	fp, err := os.Create(filename)
-	defer fp.Close()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	err = n.WriteJSON(fp, Indent) // use indent by default
-	if err != nil {
-		log.Println(err)
-	}
-	return err
-}
-
-// ReadJSON reads and unmarshals tree starting at this node, from a
-// JSON-encoded byte stream via io.Reader.  First element in the stream
-// must be of same type as this node -- see ReadNewJSON function to
-// construct a new tree.  Uses ConfigureChildren to minimize changes from
-// current tree relative to loading one -- wraps UnmarshalJSON and calls
-// UnmarshalPost to recover pointers from paths.
-func (n *Node) ReadJSON(reader io.Reader) error {
-	err := n.ThisCheck()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	b, err := ioutil.ReadAll(reader)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	updt := n.UpdateStart()
-	stidx := 0
-	if bytes.HasPrefix(b, JSONTypePrefix) { // skip type
-		stidx = bytes.Index(b, JSONTypeSuffix) + len(JSONTypeSuffix)
-	}
-	// todo: use json.NewDecoder, Decode instead -- need to deal with TypePrefix etc above
-	err = json.Unmarshal(b[stidx:], n.This()) // key use of this!
-	if err == nil {
-		n.UnmarshalPost()
-	}
-	n.SetFlag(int(ChildAdded)) // this might not be set..
-	n.UpdateEnd(updt)
-	return err
-}
-
-// OpenJSON opens file over this tree from a JSON-encoded file -- see
-// ReadJSON for details, and OpenNewJSON for opening an entirely new tree.
-func (n *Node) OpenJSON(filename string) error {
-	fp, err := os.Open(filename)
-	defer fp.Close()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	return n.ReadJSON(fp)
-}
-
-// ReadNewJSON reads a new Ki tree from a JSON-encoded byte string, using type
-// information at start of file to create an object of the proper type
-func ReadNewJSON(reader io.Reader) (Ki, error) {
-	b, err := ioutil.ReadAll(reader)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	if bytes.HasPrefix(b, JSONTypePrefix) {
-		stidx := len(JSONTypePrefix) + 1
-		eidx := bytes.Index(b, JSONTypeSuffix)
-		bodyidx := eidx + len(JSONTypeSuffix)
-		tn := string(bytes.Trim(bytes.TrimSpace(b[stidx:eidx]), "\""))
-		typ := kit.Types.Type(tn)
-		if typ == nil {
-			return nil, fmt.Errorf("ki.OpenNewJSON: kit.Types type name not found: %v", tn)
-		}
-		root := NewOfType(typ)
-		root.Init(root)
-
-		updt := root.UpdateStart()
-		err = json.Unmarshal(b[bodyidx:], root)
-		if err == nil {
-			root.UnmarshalPost()
-		}
-		root.SetFlag(int(ChildAdded)) // this might not be set..
-		root.UpdateEnd(updt)
-		return root, nil
-	}
-	return nil, fmt.Errorf("ki.OpenNewJSON -- type prefix not found at start of file -- must be there to identify type of root node of tree")
-}
-
-// OpenNewJSON opens a new Ki tree from a JSON-encoded file, using type
-// information at start of file to create an object of the proper type
-func OpenNewJSON(filename string) (Ki, error) {
-	fp, err := os.Open(filename)
-	defer fp.Close()
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	return ReadNewJSON(fp)
-}
-
-// WriteXML writes the tree to an XML-encoded byte string over io.Writer
-// using MarshalXML.
-func (n *Node) WriteXML(writer io.Writer, indent bool) error {
-	err := n.ThisCheck()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	var b []byte
-	if indent {
-		b, err = xml.MarshalIndent(n.This(), "", "  ")
-	} else {
-		b, err = xml.Marshal(n.This())
-	}
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	_, err = writer.Write(b)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	return nil
-}
-
-// ReadXML reads the tree from an XML-encoded byte string over io.Reader, calls
-// UnmarshalPost to recover pointers from paths.
-func (n *Node) ReadXML(reader io.Reader) error {
-	var err error
-	if err = n.ThisCheck(); err != nil {
-		log.Println(err)
-		return err
-	}
-	b, err := ioutil.ReadAll(reader)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	updt := n.UpdateStart()
-	err = xml.Unmarshal(b, n.This()) // key use of this!
-	if err == nil {
-		n.UnmarshalPost()
-	}
-	n.SetFlag(int(ChildAdded)) // this might not be set..
-	n.UpdateEnd(updt)
-	return nil
-}
-
-// ParentAllChildren walks the tree down from current node and call
-// SetParent on all children -- needed after an Unmarshal.
-func (n *Node) ParentAllChildren() {
-	for _, child := range *n.Children() {
-		if child != nil {
-			child.AsNode().Par = n.This()
-			child.ParentAllChildren()
-		}
-	}
-}
-
-// UnmarshalPost must be called after an Unmarshal -- calls
-// ParentAllChildren.
-func (n *Node) UnmarshalPost() {
-	n.ParentAllChildren()
-}
-
-// Deleted manages all the deleted Ki elements, that are destined to then be
-// destroyed, without having an additional pointer on the Ki object
-type Deleted struct {
-	Dels []Ki
-	Mu   sync.Mutex
-}
-
-// DelMgr is the manager of all deleted items
-var DelMgr = Deleted{}
-
-// Add the Ki elements to the deleted list
-func (dm *Deleted) Add(kis ...Ki) {
-	dm.Mu.Lock()
-	if dm.Dels == nil {
-		dm.Dels = make([]Ki, 0)
-	}
-	dm.Dels = append(dm.Dels, kis...)
-	dm.Mu.Unlock()
-}
-
-// DestroyDeleted destroys any deleted items in list
-func (dm *Deleted) DestroyDeleted() {
-	// pr := prof.Start("ki.DestroyDeleted")
-	// defer pr.End()
-	dm.Mu.Lock()
-	curdels := dm.Dels
-	dm.Dels = make([]Ki, 0)
-	dm.Mu.Unlock()
-	for _, k := range curdels {
-		if k == nil {
-			continue
-		}
-		k.Destroy() // destroy will add to the dels so we need to do this outside of lock
 	}
 }

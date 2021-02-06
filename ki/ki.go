@@ -21,6 +21,16 @@ import (
 // are included in all the automatic tree traversal methods -- they are
 // effectively named fixed children that are automatically present.
 //
+// In general, the names of the children of a given node should all be unique.
+// The following functions defined in ki package can be used:
+// UniqueNameCheck(node) to check for unique names on node if uncertain.
+// UniqueNameCheckAll(node) to check entire tree under given node.
+// UniquifyNames(node) to add a suffix to name to ensure uniqueness.
+// UniquifyNamesAll(node) to to uniquify all names in entire tree.
+//
+// Use function MoveChild to move a node between trees or within a tree --
+// otherwise nodes are typically created and deleted but not moved.
+//
 // The Ki interface is designed to support virtual method calling in Go
 // and is only intended to be implemented once, by the ki.Node type
 // (as opposed to interfaces that are used for hiding multiple different
@@ -47,20 +57,14 @@ import (
 // * Automatic JSON I/O of entire tree including type information.
 //
 type Ki interface {
-	// Init initializes the node -- automatically called during Add/Insert
-	// Child -- sets the This pointer for this node as a Ki interface (pass
-	// pointer to node as this arg) -- Go cannot always access the true
-	// underlying type for structs using embedded Ki objects (when these objs
-	// are receivers to methods) so we need a This interface pointer that
-	// guarantees access to the Ki interface in a way that always reveals the
-	// underlying type (e.g., in reflect calls).  Calls Init on Ki fields
-	// within struct, sets their names to the field name, and sets us as their
-	// parent.
-	Init(this Ki)
-
-	// InitName initializes this node and set its name -- used for root nodes
-	// which don't otherwise have their This pointer set (otherwise typically
-	// happens in Add, Insert Child).
+	// InitName initializes this node to given actual object as a Ki interface
+	// and sets its name.  The names should be unique among children of a node.
+	// This is needed for root nodes -- automatically done for other nodes
+	// when they are added to the Ki tree.
+	// Even though this is a method and gets the method receiver, it needs
+	// an "external" version of itself passed as the first arg, from which
+	// the proper Ki interface pointer will be obtained.  This is the only
+	// way to get virtual functional calling to work within the Go framework.
 	InitName(this Ki, name string)
 
 	// This returns the Ki interface that guarantees access to the Ki
@@ -71,20 +75,6 @@ type Ki interface {
 
 	// AsNode returns the *ki.Node base type for this node.
 	AsNode() *Node
-
-	// ThisCheck checks that the This pointer is set and issues a warning to
-	// log if not -- returns error if not set -- called when nodes are added
-	// and inserted.
-	ThisCheck() error
-
-	// Type returns the underlying struct type of this node
-	// (reflect.TypeOf(This).Elem()).
-	Type() reflect.Type
-
-	// TypeEmbeds tests whether this node is of the given type, or it embeds
-	// that type at any level of anonymous embedding -- use Embed to get the
-	// embedded struct of that type from this node.
-	TypeEmbeds(t reflect.Type) bool
 
 	// Embed returns the embedded struct of given type from this node (or nil
 	// if it does not embed that type, or the type is not a Ki type -- see
@@ -97,40 +87,16 @@ type Ki interface {
 	// can be created (see kit.EmbedImplements for test method)
 	BaseIface() reflect.Type
 
-	// Name returns the user-defined name of the object (Node.Nm), for finding
-	// elements, generating paths, IO, etc -- allows generic GUI / Text / Path
-	// / etc representation of Trees.
+	// Name returns the user-defined name of the object (Node.Nm),
+	// for finding elements, generating paths, IO, etc.
 	Name() string
 
-	// UniqueName returns a name that is guaranteed to be non-empty and unique
-	// within the children of this node (Node.UniqueNm), but starts with Name
-	// or parents name if Name is empty -- important for generating unique
-	// paths to definitively locate a given node in the tree (see PathUnique,
-	// FindPathUnique).
-	UniqueName() string
-
-	// SetName sets the name of this node, and its unique name based on this
-	// name, such that all names are unique within list of siblings of this
-	// node (somewhat expensive but important, unless you definitely know that
-	// the names are unique -- see SetNameRaw).  Does nothing if name is
-	// already set to that value -- returns false in that case.  Does NOT
-	// wrap in UpdateStart / End.
-	SetName(name string) bool
-
-	// SetNameRaw just sets the name and doesn't update the unique name --
-	// only use if also/ setting unique names in some other way that is
-	// guaranteed to be unique.
-	SetNameRaw(name string)
-
-	// SetUniqueName sets the unique name of this node based on given name
-	// string -- does not do any further testing that the name is indeed
-	// unique -- should generally only be used by UniquifyNames.
-	SetUniqueName(name string)
-
-	// UniquifyNames ensures all of my children have unique, non-empty names
-	// -- duplicates are named sequentially _1, _2 etc, and empty names get a
-	// name based on my name or my type name.
-	UniquifyNames()
+	// SetName sets the name of this node.
+	// Names should generally be unique across children of each node.
+	// See Unique* functions to check / fix.
+	// If node requires non-unique names, add a separate Label field.
+	// Does NOT wrap in UpdateStart / End.
+	SetName(name string)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Parents
@@ -138,23 +104,6 @@ type Ki interface {
 	// Parent returns the parent of this Ki (Node.Par) -- Ki has strict
 	// one-parent, no-cycles structure -- see SetParent.
 	Parent() Ki
-
-	// SetParent just sets parent of node (and inherits update count from
-	// parent, to keep consistent) -- does NOT remove from existing parent --
-	// use Add / Insert / Delete Child functions properly move or delete nodes.
-	SetParent(parent Ki)
-
-	// IsRoot tests if this node is the root node -- checks Parent = nil.
-	IsRoot() bool
-
-	// Root returns the root object of this tree (the node with a nil parent).
-	Root() Ki
-
-	// FieldRoot returns the field root object for this node -- the node that
-	// owns the branch of the tree rooted in one of its fields -- i.e., the
-	// first non-Field parent node after the first Field parent node -- can be
-	// nil if no such thing exists for this node.
-	FieldRoot() Ki
 
 	// IndexInParent returns our index within our parent object -- caches the
 	// last value and uses that for an optimized search so subsequent calls
@@ -165,10 +114,6 @@ type Ki interface {
 	// hierarchy, returning level above current node that the parent was
 	// found, and -1 if not found.
 	ParentLevel(par Ki) int
-
-	// HasParent checks if given node is a parent of this one (i.e.,
-	// ParentLevel(par) != -1).
-	HasParent(par Ki) bool
 
 	// ParentByName finds first parent recursively up hierarchy that matches
 	// given name.  Returns nil if not found.
@@ -188,31 +133,6 @@ type Ki interface {
 	// type that embeds the given type at any level of anonymous embedding.
 	ParentByTypeTry(t reflect.Type, embeds bool) (Ki, error)
 
-	// HasKiFields returns true if this node has Ki Node fields that are
-	// included in recursive descent traversal of the tree.  This is very
-	// efficient compared to accessing the field information on the type
-	// so it should be checked first -- caches the info on the node in flags.
-	HasKiFields() bool
-
-	// NumKiFields returns the number of Ki Node fields on this node.
-	// This calls HasKiFields first so it is also efficient.
-	NumKiFields() int
-
-	// KiField returns the Ki Node field at given index, from KiFieldOffs list.
-	// Returns nil if index is out of range.  This is generally used for
-	// generic traversal methods and thus does not have a Try version.
-	KiField(idx int) Ki
-
-	// KiFieldByName returns field Ki element by name -- returns nil if not found.
-	KiFieldByName(name string) Ki
-
-	// KiFieldByNameTry returns field Ki element by name -- returns error if not found.
-	KiFieldByNameTry(name string) (Ki, error)
-
-	// KiFieldOffs returns the uintptr offsets for Ki fields of this Node.
-	// Cached for fast access, but use HasKiFields for even faster checking.
-	KiFieldOffs() []uintptr
-
 	//////////////////////////////////////////////////////////////////////////
 	//  Children
 
@@ -224,8 +144,8 @@ type Ki interface {
 
 	// Children returns a pointer to the slice of children (Node.Kids) -- use
 	// methods on ki.Slice for further ways to access (ByName, ByType, etc).
-	// Slice can be modified directly (e.g., sort, reorder) but Add* / Delete*
-	// methods on parent node should be used to ensure proper tracking.
+	// Slice can be modified, deleted directly (e.g., sort, reorder) but Add
+	// method on parent node should be used to ensure proper init.
 	Children() *Slice
 
 	// Child returns the child at given index -- will panic if index is invalid.
@@ -270,122 +190,70 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Paths
 
-	// Path returns path to this node from Root(), using regular user-given
-	// Name's (may be empty or non-unique), with nodes separated by / and
-	// fields by . -- only use for informational purposes.
+	// Path returns path to this node from the tree root, using node Names
+	// separated by / and fields by .
+	// Path is only valid when child names are unique (see Unique* functions)
 	Path() string
 
-	// PathUnique returns path to this node from Root(), using unique names,
-	// with nodes separated by / and fields by . -- suitable for reliably
-	// finding this node.
-	PathUnique() string
-
 	// PathFrom returns path to this node from given parent node, using
-	// regular user-given Name's (may be empty or non-unique), with nodes
-	// separated by / and fields by . -- only use for informational purposes.
+	// node Names separated by / and fields by .
+	// Path is only valid when child names are unique (see Unique* functions)
 	PathFrom(par Ki) string
 
-	// PathFromUnique returns path to this node from given parent node, using
-	// unique names, with nodes separated by / and fields by . -- suitable for
-	// reliably finding this node.
-	PathFromUnique(par Ki) string
-
-	// FindPathUnique returns Ki object at given unique path, starting from
-	// this node (e.g., Root()) -- if this node is not the root, then the path
+	// FindPath returns Ki object at given path, starting from this node
+	// (e.g., the root).  If this node is not the root, then the path
 	// to this node is subtracted from the start of the path if present there.
 	// There is also support for [idx] index-based access for any given path
 	// element, for cases when indexes are more useful than names.
 	// Returns nil if not found.
-	FindPathUnique(path string) Ki
+	FindPath(path string) Ki
 
-	// FindPathUniqueTry returns Ki object at given unique path, starting from
-	// this node (e.g., Root()) -- if this node is not the root, then the path
+	// FindPathTry returns Ki object at given path, starting from
+	// this node (e.g., the root) -- if this node is not the root, then the path
 	// to this node is subtracted from the start of the path if present there.
 	// There is also support for [idx] index-based access for any given path
 	// element, for cases when indexes are more useful than names.
 	// Returns error if not found.
-	FindPathUniqueTry(path string) (Ki, error)
+	FindPathTry(path string) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Adding, Inserting Children
 
-	// SetChildType sets the ChildType used as a default type for creating new
-	// children -- as a property called ChildType --ensures that the type is a
-	// Ki type, and errors if not.
-	SetChildType(t reflect.Type) error
-
-	// NewOfType creates a new child of given type -- if nil, uses ChildType,
-	// else uses the same type as this struct.
-	NewOfType(typ reflect.Type) Ki
-
-	// AddChild adds given child at end of children list -- if child is in an
-	// existing tree, it is removed from that parent, and a NodeMoved signal
-	// is emitted for the child -- UniquifyNames is called after adding to
-	// ensure name is unique (assumed to already have a name).
-	// See Fast version if adding many children -- UniquifyNames can get
-	// very expensive if called repeatedly on many nodes.
+	// AddChild adds given child at end of children list.
+	// The kid node is assumed to not be on another tree (see MoveToParent)
+	// and the existing name should be unique among children.
+	// No UpdateStart / End wrapping is done: do that externally as needed.
+	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddChild(kid Ki) error
 
-	// AddChildFast adds given child at end of children list in the fastest
-	// way possible -- essential for nodes with large numbers of children!
-	// Assumes InitName has already been run, and doesn't ensure names are
-	// unique, or run other checks, including if child already has a parent.
-	// Many functions depend on names being unique, so you must either ensure
-	// that all the names are indeed unique when added, or call UniquifyNames
-	// after adding all the nodes.
-	AddChildFast(kid Ki)
-
-	// AddNewChild creates a new child of given type -- if nil, uses
-	// ChildType, else type of this struct -- and add at end of children list
-	// -- assigns name (can be empty) and enforces UniqueName.
-	// See Fast version if adding many nodes -- UniquifyNames is very expensive
-	// if being called repeatedly as many nodes are added.
+	// AddNewChild creates a new child of given type and
+	// add at end of children list.
+	// The name should be unique among children.
+	// No UpdateStart / End wrapping is done: do that externally as needed.
+	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddNewChild(typ reflect.Type, name string) Ki
-
-	// AddNewChildFast creates a new child of given type -- if nil, uses
-	// ChildType, else type of this struct -- and add at end of children list
-	// in the fastest way possible.  Name must non-empty and already unique.
-	// Many functions depend on names being unique, so you must either ensure
-	// that all the names are indeed unique when added, or call UniquifyNames
-	// after adding all the nodes.
-	AddNewChildFast(typ reflect.Type, name string) Ki
 
 	// SetChild sets child at given index to be the given item -- if name is
 	// non-empty then it sets the name of the child as well -- just calls Init
-	// (or InitName) on the child, and SetParent -- does NOT uniquify the
-	// names -- this is for high-volume pre-allocated child creation.
-	// Call UniquifyNames afterward if needed, but better to ensure that names
-	// are unique up front.
+	// (or InitName) on the child, and SetParent.
+	// Names should be unique among children.
+	// No UpdateStart / End wrapping is done: do that externally as needed.
+	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	SetChild(kid Ki, idx int, name string) error
 
-	// InsertChild adds a new child at given position in children list -- if
-	// child is in an existing tree, it is removed from that parent, and a
-	// NodeMoved signal is emitted for the child -- UniquifyNames is called
-	// after adding to ensure name is unique (assumed to already have a name).
+	// InsertChild adds given child at position in children list.
+	// The kid node is assumed to not be on another tree (see MoveToParent)
+	// and the existing name should be unique among children.
+	// No UpdateStart / End wrapping is done: do that externally as needed.
+	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	InsertChild(kid Ki, at int) error
 
-	// InsertNewChild creates a new child of given type -- if nil, uses
-	// ChildType, else type of this struct -- and add at given position in
-	// children list -- assigns name (can be empty) and enforces UniqueName.
+	// InsertNewChild creates a new child of given type and
+	// add at position in children list.
+	// The name should be unique among children.
+	// No UpdateStart / End wrapping is done: do that externally as needed.
+	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	InsertNewChild(typ reflect.Type, at int, name string) Ki
-
-	// InsertNewChildFast creates a new child of given type -- if nil, uses
-	// ChildType, else type of this struct -- and insert at given position
-	// in the fastest way possible.  Name must non-empty and already unique.
-	// Many functions depend on names being unique, so you must either ensure
-	// that all the names are indeed unique when added, or call UniquifyNames
-	// after adding all the nodes.
-	InsertNewChildFast(typ reflect.Type, at int, name string) Ki
-
-	// MoveChild moves child from one position to another in the list of
-	// children (see also corresponding Slice method, which does not
-	// signal, like this one does).  Returns error if either index is invalid.
-	MoveChild(frm, to int) error
-
-	// SwapChildren swaps children between positions (see also corresponding
-	// Slice method which does not signal like this one does).  Returns error if
-	// either index is invalid.
-	SwapChildren(i, j int) error
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using AddNewChild with given type and
@@ -406,37 +274,31 @@ type Ki interface {
 	// type-and-name's -- attempts to have minimal impact relative to existing
 	// items that fit the type and name constraints (they are moved into the
 	// corresponding positions), and any extra children are removed, and new
-	// ones added, to match the specified config.  If uniqNm, then names
-	// represent UniqueNames (this results in Name == UniqueName for created
-	// children).
+	// ones added, to match the specified config.
+	// It is important that names are unique!
 	//
 	// IMPORTANT: returns whether any modifications were made (mods) AND if
 	// that is true, the result from the corresponding UpdateStart call --
 	// UpdateEnd is NOT called, allowing for further subsequent updates before
 	// you call UpdateEnd(updt).
-	ConfigChildren(config kit.TypeAndNameList, uniqNm bool) (mods, updt bool)
+	ConfigChildren(config kit.TypeAndNameList) (mods, updt bool)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deleting Children
 
 	// DeleteChildAtIndex deletes child at given index (returns error for
-	// invalid index) -- if child's parent = this node, then will call
-	// SetParent(nil), so to transfer to another list, set new parent first --
-	// destroy will add removed child to deleted list, to be destroyed later
-	// -- otherwise child remains intact but parent is nil -- could be
-	// inserted elsewhere.
+	// invalid index).
+	// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
 	DeleteChildAtIndex(idx int, destroy bool) error
 
 	// DeleteChild deletes child node, returning error if not found in
-	// Children.  If child's parent = this node, then will call
-	// SetParent(nil), so to transfer to another list, set new parent
-	// first. See DeleteChildAtIndex for destroy info.
+	// Children.
+	// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
 	DeleteChild(child Ki, destroy bool) error
 
 	// DeleteChildByName deletes child node by name -- returns child, error
-	// if not found -- if child's parent = this node, then will call
-	// SetParent(nil), so to transfer to another list, set new parent first.
-	// See DeleteChildAtIndex for destroy info.
+	// if not found.
+	// Wraps delete in UpdateStart / End and sets ChildDeleted flag.
 	DeleteChildByName(name string, destroy bool) (Ki, error)
 
 	// DeleteChildren deletes all children nodes -- destroy will add removed
@@ -823,24 +685,14 @@ type Ki interface {
 
 // see node.go for struct implementing this interface
 
-// IMPORTANT: all types must initialize entry in package kit Types Registry
-//
+// IMPORTANT: all types should initialize entry in package kit Types Registry
+
 // var KiT_TypeName = kit.Types.AddType(&TypeName{})
 
 // Func is a function to call on ki objects walking the tree -- return Break
 // = false means don't continue processing this branch of the tree, but other
 // branches can continue.  return Continue = true continues down the tree.
 type Func func(k Ki, level int, data interface{}) bool
-
-const (
-	// Continue = true can be returned from tree iteration functions to continue
-	// processing down the tree, as compared to Break = false which stops this branch.
-	Continue = true
-
-	// Break = false can be returned from tree iteration functions to stop processing
-	// this branch of the tree.
-	Break = false
-)
 
 // KiType is a Ki reflect.Type, suitable for checking for Type.Implements.
 var KiType = reflect.TypeOf((*Ki)(nil)).Elem()
@@ -866,158 +718,14 @@ func NewOfType(typ reflect.Type) Ki {
 	return kid
 }
 
-// Named consts for bool args
-const (
-	// Embeds is used for methods that look for children or parents of different types.
-	// Passing this argument means to look for embedded types for matches.
-	Embeds = true
+// Type returns the underlying struct type of given node
+func Type(k Ki) reflect.Type {
+	return reflect.TypeOf(k.This()).Elem()
+}
 
-	// NoEmbeds is used for methods that look for children or parents of different types.
-	// Passing this argument means to NOT look for embedded types for matches.
-	NoEmbeds = false
-
-	// UniqueNames is used for ConfigChildren to indicate that names on TypeAndNameList
-	// are unique and can be used to directly (faster).
-	UniqueNames = true
-
-	// NonUniqueNames is used for ConfigChildren to indicate that names on
-	// TypeAndNameList are not guaranteed to be unique, and unique names
-	// should be created.
-	NonUniqueNames = false
-
-	// DestroyKids is used for Delete methods to indicate that deleted children
-	// should be destroyed (else can be re-used somewhere else).
-	DestroyKids = true
-
-	// NoDestroyKids is used for Delete methods to indicate that deleted children
-	// should NOT be destroyed, so they can be re-used somewhere else.
-	NoDestroyKids = false
-
-	// Update is used for SetProps to indicate updating should occur
-	// after setting properties.
-	Update = true
-
-	// NoUpdate is used for SetProps to indicate updating should NOT occur
-	// after setting properties.
-	NoUpdate = false
-
-	// Inherit is used for PropInherit to indicate that inherited properties
-	// from parent objects should be checked as well.  Otherwise not.
-	Inherit = true
-
-	// NoInherit is used for PropInherit to indicate that inherited properties
-	// from parent objects should NOT be checked.
-	NoInherit = false
-
-	// TypeProps is used for PropInherit to indicate that properties
-	// set on the type should be checked.
-	TypeProps = true
-
-	// NoTypeProps is used for PropInherit to indicate that properties
-	// set on the type should NOT be checked.
-	NoTypeProps = false
-
-	// DeepCopy is used for CopyPropsFrom to indicate that a deep copy should
-	// be performed.
-	DeepCopy = true
-
-	// NoDeepCopy is used for CopyPropsFrom to indicate that a deep copy should
-	// NOT be performed.
-	NoDeepCopy = false
-
-	// Indent is used for Write methods to indicate that indenting should be done.
-	Indent = true
-
-	// NoIndent is used for Write methods to indicate that indenting should NOT be done.
-	NoIndent = false
-)
-
-// Flags are bit flags for efficient core state of nodes -- see bitflag
-// package for using these ordinal values to manipulate bit flag field.
-type Flags int32
-
-//go:generate stringer -type=Flags
-
-var KiT_Flags = kit.Enums.AddEnum(FlagsN, kit.BitFlag, nil)
-
-const (
-	// IsField indicates a node is a field in its parent node, not a child in children.
-	IsField Flags = iota
-
-	// HasKiFields indicates a node has Ki Node fields that will be processed in recursive descent.
-	// Use the HasFields() method to check as it will establish validity of flags on first call.
-	// If neither HasFields nor HasNoFields are set, then it knows to update flags.
-	HasKiFields
-
-	// HasNoKiFields indicates a node has NO Ki Node fields that will be processed in recursive descent.
-	// Use the HasFields() method to check as it will establish validity of flags on first call.
-	// If neither HasFields nor HasNoFields are set, then it knows to update flags.
-	HasNoKiFields
-
-	// Updating flag is set at UpdateStart and cleared if we were the first
-	// updater at UpdateEnd.
-	Updating
-
-	// OnlySelfUpdate means that the UpdateStart / End logic only applies to
-	// this node in isolation, not to its children -- useful for a parent node
-	// that has a different functional role than its children.
-	OnlySelfUpdate
-
-	// following flags record what happened to a given node since the last
-	// Update signal -- they are cleared at first UpdateStart and valid after
-	// UpdateEnd
-
-	// NodeAdded means a node was added to new parent.
-	NodeAdded
-
-	// NodeCopied means node was copied from other node.
-	NodeCopied
-
-	// NodeMoved means node was moved in the tree, or to a new tree.
-	NodeMoved
-
-	// NodeDeleted means this node has been deleted.
-	NodeDeleted
-
-	// NodeDestroyed means this node has been destroyed -- do not trigger any
-	// more update signals on it.
-	NodeDestroyed
-
-	// ChildAdded means one or more new children were added to the node.
-	ChildAdded
-
-	// ChildMoved means one or more children were moved within the node.
-	ChildMoved
-
-	// ChildDeleted means one or more children were deleted from the node.
-	ChildDeleted
-
-	// ChildrenDeleted means all children were deleted.
-	ChildrenDeleted
-
-	// FieldUpdated means a field was updated.
-	FieldUpdated
-
-	// PropUpdated means a property was set.
-	PropUpdated
-
-	// FlagsN is total number of flags used by base Ki Node -- can extend from
-	// here up to 64 bits.
-	FlagsN
-
-	// NodeUpdateFlagsMask is a mask for all node updates.
-	NodeUpdateFlagsMask = (1 << uint32(NodeAdded)) | (1 << uint32(NodeCopied)) | (1 << uint32(NodeMoved))
-
-	// ChildUpdateFlagsMask is a mask for all child updates.
-	ChildUpdateFlagsMask = (1 << uint32(ChildAdded)) | (1 << uint32(ChildMoved)) | (1 << uint32(ChildDeleted)) | (1 << uint32(ChildrenDeleted))
-
-	// StruUpdateFlagsMask is a mask for all structural changes update flags.
-	StruUpdateFlagsMask = NodeUpdateFlagsMask | ChildUpdateFlagsMask | (1 << uint32(NodeDeleted))
-
-	// ValUpdateFlagsMask is a mask for all non-structural, value-only changes update flags.
-	ValUpdateFlagsMask = (1 << uint32(FieldUpdated)) | (1 << uint32(PropUpdated))
-
-	// UpdateFlagsMask is a Mask for all the update flags -- destroyed is
-	// excluded b/c otherwise it would get cleared.
-	UpdateFlagsMask = StruUpdateFlagsMask | ValUpdateFlagsMask
-)
+// TypeEmbeds tests whether this node is of the given type, or it embeds
+// that type at any level of anonymous embedding -- use Embed to get the
+// embedded struct of that type from this node.
+func TypeEmbeds(k Ki, t reflect.Type) bool {
+	return kit.TypeEmbeds(Type(k), t)
+}

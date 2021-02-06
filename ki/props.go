@@ -268,7 +268,7 @@ func (p *Props) UnmarshalJSON(b []byte) error {
 			}
 			if IsKi(typ) { // note: not really a good idea to store ki's in maps, but..
 				kival := NewOfType(typ)
-				kival.Init(kival)
+				InitNode(kival)
 				if kival != nil {
 					// fmt.Printf("stored new ki of type %v in key: %v\n", typ.String(), pkey)
 					tmpb, _ := json.Marshal(rval) // string rep of this

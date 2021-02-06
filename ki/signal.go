@@ -151,7 +151,7 @@ func (s *Signal) EmitTrace(sender Ki, sig int64, data interface{}) {
 	if SignalTraceString != nil {
 		*SignalTraceString += fmt.Sprintf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Name(), NodeSignals(sig), data)
 	} else {
-		fmt.Printf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.PathUnique(), NodeSignals(sig), data)
+		fmt.Printf("ki.Signal Emit from: %v sig: %v data: %v\n", sender.Path(), NodeSignals(sig), data)
 	}
 }
 

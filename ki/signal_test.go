@@ -23,7 +23,8 @@ var KiTTestNode = kit.Types.AddType(&TestNode{}, nil)
 func TestSignalConnect(t *testing.T) {
 	parent := TestNode{}
 	parent.InitName(&parent, "par1")
-	child1 := parent.AddNewChild(nil, "child1")
+	typ := reflect.TypeOf(parent)
+	child1 := parent.AddNewChild(typ, "child1")
 	// child2 := parent.AddNewChild(nil, "child2")
 
 	// note: now that signal is a map, cannot test reliably due to ordering
