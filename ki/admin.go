@@ -78,6 +78,7 @@ func SetParent(kid Ki, parent Ki) {
 func MoveToParent(kid Ki, parent Ki) {
 	oldPar := kid.Parent()
 	if oldPar != nil {
+		SetParent(kid, nil)
 		oldPar.DeleteChild(kid, false)
 	}
 	parent.AddChild(kid)

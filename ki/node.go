@@ -317,15 +317,15 @@ func (n *Node) ChildByTypeTry(t reflect.Type, embeds bool, startIdx int) (Ki, er
 //  Paths
 
 // EscapePathName returns a name that replaces any path delimiter symbols
-// . or / with \, and \: escaped versions.
+// . or / with \, and \\ escaped versions.
 func EscapePathName(name string) string {
-	return strings.Replace(strings.Replace(name, ".", `\,`, -1), "/", `\:`, -1)
+	return strings.Replace(strings.Replace(name, ".", `\,`, -1), "/", `\\`, -1)
 }
 
 // UnescapePathName returns a name that replaces any escaped path delimiter symbols
-// \, or \; with . and / unescaped versions.
+// \, or \\ with . and / unescaped versions.
 func UnescapePathName(name string) string {
-	return strings.Replace(strings.Replace(name, `\,`, ".", -1), `\:`, "/", -1)
+	return strings.Replace(strings.Replace(name, `\,`, ".", -1), `\\`, "/", -1)
 }
 
 // Path returns path to this node from the tree root, using node Names
@@ -343,7 +343,9 @@ func (n *Node) Path() string {
 
 // PathFrom returns path to this node from given parent node, using
 // node Names separated by / and fields by .
-// Path is only valid when child names are unique (see Unique* functions)
+// Node names escape any existing / and . characters to \\ and \,
+// Path is only valid for finding items when child names are unique
+// (see Unique* functions)
 func (n *Node) PathFrom(par Ki) string {
 	if n.Par != nil {
 		ppath := ""
@@ -381,6 +383,9 @@ func findPathChild(k Ki, child string) (int, bool) {
 // FindPath returns Ki object at given path, starting from this node
 // (e.g., the root).  If this node is not the root, then the path
 // to this node is subtracted from the start of the path if present there.
+// FindPath only works correctly when names are unique.
+// Path has node Names separated by / and fields by .
+// Node names escape any existing / and . characters to \\ and \,
 // There is also support for [idx] index-based access for any given path
 // element, for cases when indexes are more useful than names.
 // Returns nil if not found.
@@ -595,6 +600,13 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 	updt := n.UpdateStart()
 	n.SetFlag(int(ChildDeleted))
 	if child.Parent() == n.This() {
+		// only deleting if we are still parent -- change parent first to
+		// signal move delete is always sent live to affected node without
+		// update blocking note: children of child etc will not send a signal
+		// at this point -- only later at destroy -- up to this parent to
+		// manage all that
+		child.SetFlag(int(NodeDeleted))
+		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
 		SetParent(child, nil)
 	}
 	n.Kids.DeleteAtIndex(idx)

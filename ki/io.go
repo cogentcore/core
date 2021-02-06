@@ -39,11 +39,14 @@ var JSONTypeSuffix = []byte("}\n")
 // WriteJSON writes the tree to an io.Writer, using MarshalJSON -- also
 // saves a critical starting record that allows file to be loaded de-novo
 // and recreate the proper root type for the tree.
+// This calls UniquifyNamesAll because it is essential that names be unique
+// at this point.
 func (n *Node) WriteJSON(writer io.Writer, indent bool) error {
 	err := ThisCheck(n)
 	if err != nil {
 		return err
 	}
+	UniquifyNamesAll(n.This())
 	var b []byte
 	if indent {
 		b, err = json.MarshalIndent(n.This(), "", "  ")

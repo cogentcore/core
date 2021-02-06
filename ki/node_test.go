@@ -121,6 +121,48 @@ func TestNodeUniqueNames(t *testing.T) {
 
 }
 
+func TestNodeEscapePaths(t *testing.T) {
+	parent := NodeEmbed{}
+	parent.InitName(&parent, "par1")
+	typ := reflect.TypeOf(parent)
+	child := parent.AddNewChild(typ, "child1.go")
+	child2 := parent.AddNewChild(typ, "child1/child1")
+	child3 := parent.AddNewChild(typ, "child1/child1.go")
+	schild2 := child2.AddNewChild(typ, "subchild1")
+	if len(parent.Kids) != 3 {
+		t.Errorf("Children length != 3, was %d", len(parent.Kids))
+	}
+	if pth := child.Path(); pth != `/par1/child1\,go` {
+		t.Errorf("child path != correct, was %v", pth)
+	}
+	if pth := child2.Path(); pth != `/par1/child1\\child1` {
+		t.Errorf("child2 path != correct, was %v", pth)
+	}
+	if pth := child3.Path(); pth != `/par1/child1\\child1\,go` {
+		t.Errorf("child3 path != correct, was %v", pth)
+	}
+	ch := parent.FindPath(child.Path())
+	if ch != child {
+		t.Errorf("child path not found in parent")
+	}
+	ch = parent.FindPath(child3.Path())
+	if ch != child3 {
+		t.Errorf("child3 path not found in parent")
+	}
+	ch = parent.FindPath(child3.Path())
+	if ch != child3 {
+		t.Errorf("child3 path not found in parent")
+	}
+	ch = parent.FindPath(schild2.Path())
+	if ch != schild2 {
+		t.Errorf("schild2 path not found in parent")
+	}
+	ch = child2.FindPath(schild2.Path())
+	if ch != schild2 {
+		t.Errorf("schild2 path not found in child2")
+	}
+}
+
 func TestNodeDeleteChild(t *testing.T) {
 	parent := NodeEmbed{}
 	parent.InitName(&parent, "par1")
@@ -613,6 +655,8 @@ func TestNodeUpdate(t *testing.T) {
 	}
 	res = res[:0]
 
+	UniquifyNamesAll(parent.This())
+
 	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d interface{}) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.Name(), n.IsUpdating()))
 		return Continue
@@ -735,14 +779,14 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
 	updt := tree2.UpdateStart()
 	tree2.SetFlag(int(ChildAdded))
-	tree2.AddChild(child12)
+	MoveToParent(child12.This(), tree2.This())
 	tree2.UpdateEnd(updt)
 
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 4100
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 1028
+	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: 260
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 132
 `
 
 	_ = mvsigs
@@ -760,9 +804,9 @@ ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 1028
 
 	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
 ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: subchild12 sig: NodeSignalUpdated data: 8196
-ki.Signal Emit from: child12 sig: NodeSignalUpdated data: 8196
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 4100
+ki.Signal Emit from: subchild12 sig: NodeSignalUpdated data: 516
+ki.Signal Emit from: child12 sig: NodeSignalUpdated data: 516
+ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: 260
 `
 
 	_ = delsigs
