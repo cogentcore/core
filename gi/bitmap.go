@@ -273,6 +273,27 @@ func ImageToBase64JPG(img image.Image) ([]byte, string) {
 	return eb, "image/jpeg"
 }
 
+// Base64SplitLines splits the encoded Base64 bytes into standard lines of 76
+// chars each.  The last line also ends in a newline
+func Base64SplitLines(b []byte) []byte {
+	ll := 76
+	sz := len(b)
+	nl := (sz / ll)
+	rb := make([]byte, sz+nl+1)
+	for i := 0; i < nl; i++ {
+		st := ll * i
+		rst := ll*i + i
+		copy(rb[rst:rst+ll], b[st:st+ll])
+		rb[rst+ll] = '\n'
+	}
+	st := ll * nl
+	rst := ll*nl + nl
+	ln := sz - st
+	copy(rb[rst:rst+ln], b[st:st+ln])
+	rb[rst+ln] = '\n'
+	return rb
+}
+
 // ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
 func ImageFmBase64PNG(eb []byte) (image.Image, error) {
 	if eb[76] == ' ' {

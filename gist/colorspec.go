@@ -102,6 +102,22 @@ func (cs *ColorSpec) CopyFrom(cp *ColorSpec) {
 	}
 }
 
+// CopyStopsFrom copies gradient stops from other color spec, if both
+// have gradient stops
+func (cs *ColorSpec) CopyStopsFrom(cp *ColorSpec) {
+	if cp.Gradient == nil || cs.Gradient == nil {
+		return
+	}
+	sn := len(cp.Gradient.Stops)
+	if sn == 0 {
+		return
+	}
+	if len(cs.Gradient.Stops) != sn {
+		cs.Gradient.Stops = make([]rasterx.GradStop, sn)
+	}
+	copy(cs.Gradient.Stops, cp.Gradient.Stops)
+}
+
 // SetShadowGradient sets a linear gradient starting at given color and going
 // down to transparent based on given color and direction spec (defaults to
 // "to down")

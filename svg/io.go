@@ -507,6 +507,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*gi.Gradient); ok {
+								grad.StopsName = nm
 								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
@@ -532,6 +533,7 @@ func (svg *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						hr := curPar.ChildByName(nm, 0)
 						if hr != nil {
 							if hrg, ok := hr.(*gi.Gradient); ok {
+								grad.StopsName = nm
 								grad.Grad.CopyFrom(&hrg.Grad)
 								// fmt.Printf("successful href: %v\n", nm)
 							}
@@ -914,10 +916,19 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "x", fmt.Sprintf("%g", nd.Pos.X))
 		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
 		text = nd.Text
+	case *Image:
+		nm = "image"
+		XMLAddAttr(&se.Attr, "x", fmt.Sprintf("%g", nd.Pos.X))
+		XMLAddAttr(&se.Attr, "y", fmt.Sprintf("%g", nd.Pos.Y))
+		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
+		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
+		XMLAddAttr(&se.Attr, "preserveAspectRatio", fmt.Sprintf("%v", nd.PreserveAspectRatio))
+		ib, fmt := gi.ImageToBase64PNG(nd.Pixels)
+		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(gi.Base64SplitLines(ib)))
 	case *gi.MetaData2D:
 		return "" // not useful
 	case *gi.Gradient:
-		SVGNodeXMLGrad(&nd.Grad, nd.Nm, enc)
+		SVGNodeXMLGrad(nd, nd.Nm, enc)
 		return "" // exclude -- already written
 	case *Marker:
 		nm = "marker"
@@ -941,7 +952,8 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	return se.Name.Local
 }
 
-func SVGNodeXMLGrad(cs *gist.ColorSpec, name string, enc *XMLEncoder) {
+func SVGNodeXMLGrad(nd *gi.Gradient, name string, enc *XMLEncoder) {
+	cs := &nd.Grad
 	if cs.Gradient == nil {
 		return
 	}
@@ -989,17 +1001,23 @@ func SVGNodeXMLGrad(cs *gist.ColorSpec, name string, enc *XMLEncoder) {
 		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gr.Matrix.A, gr.Matrix.B, gr.Matrix.C, gr.Matrix.D, gr.Matrix.E, gr.Matrix.F))
 	}
 
+	if nd.StopsName != "" {
+		XMLAddAttr(&me.Attr, "xlink:href", "#"+nd.StopsName)
+	}
+
 	enc.EncodeToken(me)
-	for _, gs := range gr.Stops {
-		se := xml.StartElement{}
-		se.Name.Local = "stop"
-		clr := gist.Color{}
-		clr.SetColor(gs.StopColor)
-		hs := clr.HexString()[:7]
-		XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
-		XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))
-		enc.EncodeToken(se)
-		enc.WriteEnd(se.Name.Local)
+	if nd.StopsName == "" {
+		for _, gs := range gr.Stops {
+			se := xml.StartElement{}
+			se.Name.Local = "stop"
+			clr := gist.Color{}
+			clr.SetColor(gs.StopColor)
+			hs := clr.HexString()[:7]
+			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
+			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))
+			enc.EncodeToken(se)
+			enc.WriteEnd(se.Name.Local)
+		}
 	}
 	enc.WriteEnd(me.Name.Local)
 }

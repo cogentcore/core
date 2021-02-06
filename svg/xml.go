@@ -145,7 +145,7 @@ func EscapeText(w io.Writer, s []byte, escapeNewline bool) error {
 
 // EscapeString writes to p the properly escaped XML equivalent
 // of the plain text data s.
-func (xe *XMLEncoder) EscapeString(s string) {
+func (xe *XMLEncoder) EscapeString(s string, escapeNewline bool) {
 	var esc []byte
 	last := 0
 	for i := 0; i < len(s); {
@@ -165,6 +165,9 @@ func (xe *XMLEncoder) EscapeString(s string) {
 		case '\t':
 			esc = escTab
 		case '\n':
+			if !escapeNewline {
+				continue
+			}
 			esc = escNL
 		case '\r':
 			esc = escCR
@@ -207,7 +210,7 @@ func (xe *XMLEncoder) WriteStart(start *xml.StartElement) error {
 		xe.WriteIndent()
 		xe.WriteString(name.Local)
 		xe.WriteString(`="`)
-		xe.EscapeString(attr.Value)
+		xe.EscapeString(attr.Value, false)
 		xe.WriteString(`"`)
 	}
 	return nil
