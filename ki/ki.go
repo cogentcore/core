@@ -192,25 +192,33 @@ type Ki interface {
 
 	// Path returns path to this node from the tree root, using node Names
 	// separated by / and fields by .
+	// Node names escape any existing / and . characters to \\ and \,
 	// Path is only valid when child names are unique (see Unique* functions)
 	Path() string
 
 	// PathFrom returns path to this node from given parent node, using
 	// node Names separated by / and fields by .
+	// Node names escape any existing / and . characters to \\ and \,
 	// Path is only valid when child names are unique (see Unique* functions)
 	PathFrom(par Ki) string
 
 	// FindPath returns Ki object at given path, starting from this node
 	// (e.g., the root).  If this node is not the root, then the path
 	// to this node is subtracted from the start of the path if present there.
+	// FindPath only works correctly when names are unique.
+	// Path has node Names separated by / and fields by .
+	// Node names escape any existing / and . characters to \\ and \,
 	// There is also support for [idx] index-based access for any given path
 	// element, for cases when indexes are more useful than names.
 	// Returns nil if not found.
 	FindPath(path string) Ki
 
-	// FindPathTry returns Ki object at given path, starting from
-	// this node (e.g., the root) -- if this node is not the root, then the path
+	// FindPathTry returns Ki object at given path, starting from this node
+	// (e.g., the root).  If this node is not the root, then the path
 	// to this node is subtracted from the start of the path if present there.
+	// FindPath only works correctly when names are unique.
+	// Path has node Names separated by / and fields by .
+	// Node names escape any existing / and . characters to \\ and \,
 	// There is also support for [idx] index-based access for any given path
 	// element, for cases when indexes are more useful than names.
 	// Returns error if not found.
@@ -643,7 +651,7 @@ type Ki interface {
 	CopyFieldsFrom(frm interface{})
 
 	//////////////////////////////////////////////////////////////////////////
-	//  IO: for JSON and XML formats -- see also Slice, Ptr
+	//  IO: for JSON and XML formats -- see also Slice
 	//  see https://github.com/goki/ki/wiki/Naming for IO naming conventions
 
 	// WriteJSON writes the tree to an io.Writer, using MarshalJSON -- also
@@ -678,8 +686,7 @@ type Ki interface {
 	// SetParent on all children -- needed after an Unmarshal.
 	ParentAllChildren()
 
-	// UnmarshalPost must be called after an Unmarshal -- calls
-	// SetPtrsFmPaths and ParentAllChildren.
+	// UnmarshalPost must be called after an Unmarshal -- calls ParentAllChildren.
 	UnmarshalPost()
 }
 

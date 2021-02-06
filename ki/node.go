@@ -330,6 +330,7 @@ func UnescapePathName(name string) string {
 
 // Path returns path to this node from the tree root, using node Names
 // separated by / and fields by .
+// Node names escape any existing / and . characters to \\ and \,
 // Path is only valid when child names are unique (see Unique* functions)
 func (n *Node) Path() string {
 	if n.Par != nil {
@@ -430,9 +431,12 @@ func (n *Node) FindPath(path string) Ki {
 	return curn
 }
 
-// FindPathTry returns Ki object at given path, starting from
-// this node (e.g., the root) -- if this node is not the root, then the path
+// FindPathTry returns Ki object at given path, starting from this node
+// (e.g., the root).  If this node is not the root, then the path
 // to this node is subtracted from the start of the path if present there.
+// FindPath only works correctly when names are unique.
+// Path has node Names separated by / and fields by .
+// Node names escape any existing / and . characters to \\ and \,
 // There is also support for [idx] index-based access for any given path
 // element, for cases when indexes are more useful than names.
 // Returns error if not found.
@@ -1573,8 +1577,9 @@ func (n *Node) FieldTag(field, tag string) string {
 // note: we use the copy from direction as the receiver is modifed whereas the
 // from is not and assignment is typically in same direction
 
-// CopyFrom another Ki node.  The Ki copy function recreates the entire
-// tree in the copy, duplicating children etc.  It is very efficient by
+// CopyFrom another Ki node.  It is essential that source has Unique names!
+// The Ki copy function recreates the entire tree in the copy, duplicating
+// children etc.  It is very efficient by
 // using the ConfigChildren method which attempts to preserve any existing
 // nodes in the destination if they have the same name and type -- so a
 // copy from a source to a target that only differ minimally will be
